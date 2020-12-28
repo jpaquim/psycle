@@ -106,7 +106,7 @@ static psy_Property* psy_property_create_font(const char* key,
 static psy_Property* psy_property_create_int(const char* key, intptr_t value,
 	intptr_t min, intptr_t max);
 static psy_Property* psy_property_create_bool(const char* key, bool value);
-static psy_Property* psy_property_create_choice(const char* key, int value);
+static psy_Property* psy_property_create_choice(const char* key, intptr_t value);
 
 // Implementation
 static const char* searchkey;
@@ -234,7 +234,7 @@ psy_Property* psy_property_sync(psy_Property* self, const psy_Property* source)
 							psy_property_item_int(p));
 				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_BOOL) {
 					psy_property_set_bool(self, psy_property_key(p),
-						psy_property_item_int(p));
+						psy_property_item_bool(p));
 				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_FONT) {
 					psy_property_set_font(self, psy_property_key(p),
 						psy_property_item_str(p));
@@ -1207,7 +1207,7 @@ psy_Property* psy_property_setid(psy_Property* self, intptr_t id)
 	return self;
 }
 
-int psy_property_id(const psy_Property* self)
+intptr_t psy_property_id(const psy_Property* self)
 {
 	assert(self);
 

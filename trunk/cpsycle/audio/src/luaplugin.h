@@ -38,7 +38,7 @@ INLINE void luamachine_setnumparameters(psy_audio_LuaMachine* self, uintptr_t nu
 	self->numparameters_ = num;
 }
 
-INLINE int luamachine_numparameters(psy_audio_LuaMachine* self)
+INLINE uintptr_t luamachine_numparameters(psy_audio_LuaMachine* self)
 {
 	return self->numparameters_;
 }

@@ -34,12 +34,12 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	psy_ui_Size bmpsize;
 	psy_ui_TextMetric tm;
-	int x;
-	int y;
-	int width;
-	int height;
-	int bmpwidth;
-	int bmpheight;
+	intptr_t x;
+	intptr_t y;
+	intptr_t width;
+	intptr_t height;
+	intptr_t bmpwidth;
+	intptr_t bmpheight;
 
 	size = psy_ui_component_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);

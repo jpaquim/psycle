@@ -46,7 +46,7 @@ void eventdriverconfig_makeeventinput(EventDriverConfig*);
 void eventdriverconfig_makeeventdriverlist(EventDriverConfig*);
 void eventdriverconfig_registereventdrivers(EventDriverConfig*);
 void eventdriverconfig_makeeventdriverconfigurations(EventDriverConfig*);
-void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig*, int deviceid);
+void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig*, intptr_t deviceid);
 void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig*);
 void eventdriverconfig_configeventdrivers(EventDriverConfig*);
 psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig*);

@@ -117,7 +117,7 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 				} else {
 					realevent.cmd = 0xFC;
 				}
-				realevent.parameter = ev->inst;
+				realevent.parameter = (uint8_t)ev->inst;
 			}
 			psy_audio_machine_seqtick(sampler, channel, &realevent);
 		}

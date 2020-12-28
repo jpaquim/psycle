@@ -56,6 +56,7 @@ bool psy_translator_test(const psy_Translator*, const char* path, char* id);
 // translate("help.load")
 //   returns: load (not found in help, return key without section prefix)
 const char* psy_translator_translate(psy_Translator*, const char* key);
+const char* psy_translator_langid(const psy_Translator*);
 
 #ifdef __cplusplus
 }

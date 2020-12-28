@@ -13,7 +13,7 @@ extern "C" {
 typedef struct {
 	psy_ui_Component component;
 	int resize;
-	int dragoffset;
+	intptr_t dragoffset;
 	int hover;
 	psy_ui_Size restoresize;
 	bool hasrestore;

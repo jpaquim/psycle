@@ -39,7 +39,7 @@ static void psy_ui_editor_styleclearall(psy_ui_Editor*);
 static void psy_ui_editor_setcaretcolour(psy_ui_Editor*, psy_ui_Colour colour);
 static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam);
-static void psy_ui_editor_getrange(psy_ui_Editor*, int start, int end, char* text);
+static void psy_ui_editor_getrange(psy_ui_Editor*, intptr_t start, intptr_t end, char* text);
 static void setstyle(psy_ui_Editor*, int style, COLORREF fore, COLORREF back,
 	int size, const char* face);
 
@@ -142,7 +142,7 @@ intptr_t sci(psy_ui_Editor* self, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam)
 {
 	return SendMessage((HWND) psy_ui_win_component_details(&self->component)->hwnd,
-		msg, (WPARAM) wparam, (LPARAM) lparam);
+		(UINT)msg, (WPARAM)wparam, (LPARAM)lparam);
 }
 
 void setstyle(psy_ui_Editor* self, int style, COLORREF fore, COLORREF back,
@@ -165,7 +165,7 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 	fp = fopen(path, "rb");
 	if (fp) {
 		char data[BLOCKSIZE];
-		int lenfile;
+		uintptr_t lenfile;
 		
 		lenfile = fread(data, 1, sizeof(data), fp);
 		while (lenfile > 0) {
@@ -187,12 +187,12 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 	fp = fopen(path, "wb");
 	if (fp) {
 		char data[BLOCKSIZE + 1];
-		int lengthdoc;
-		int i;
+		intptr_t lengthdoc;
+		intptr_t i;
 
 		lengthdoc = sci(self, SCI_GETLENGTH, 0, 0);
 		for (i = 0; i < lengthdoc; i += BLOCKSIZE) {
-			int grabsize;
+			intptr_t grabsize;
 			
 			grabsize = lengthdoc - i;
 			if (grabsize > BLOCKSIZE)
@@ -205,12 +205,12 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 	}
 }
 
-void psy_ui_editor_getrange(psy_ui_Editor* self, int start, int end, char* text)
+void psy_ui_editor_getrange(psy_ui_Editor* self, intptr_t start, intptr_t end, char* text)
 {
 	struct TextRange tr;
 
-	tr.chrg.cpMin = start;
-	tr.chrg.cpMax = end;
+	tr.chrg.cpMin = (int32_t)start;
+	tr.chrg.cpMax = (int32_t)end;
 	tr.lpstrText = text;
 	sci(self, SCI_GETTEXTRANGE, 0, (LPARAM)(&tr));
 }

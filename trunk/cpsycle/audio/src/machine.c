@@ -142,10 +142,13 @@ static int machinecallback_numplaybacks(psy_audio_MachineCallback* self) {
 		? psy_audiodriver_numplaybacks(self->player->driver)
 		: 0;	
 }
+static const char* machinecallback_language(psy_audio_MachineCallback* self) {
+	return "en";
+}
 
 // MachineCallback VTable
 static psy_audio_MachineCallbackVtable psy_audio_machinecallbackvtable_vtable;
-static int psy_audio_machinecallbackvtable_initialized = 0;
+static bool psy_audio_machinecallbackvtable_initialized = FALSE;
 
 static void psy_audio_machinecallbackvtable_init(void)
 {
@@ -192,7 +195,9 @@ static void psy_audio_machinecallbackvtable_init(void)
 			machinecallback_playbackname;
 		psy_audio_machinecallbackvtable_vtable.numplaybacks = (fp_mcb_numplaybacks)
 			machinecallback_numplaybacks;
-		psy_audio_machinecallbackvtable_initialized = 1;
+		psy_audio_machinecallbackvtable_vtable.language = (fp_mcb_language)
+			machinecallback_language;
+		psy_audio_machinecallbackvtable_initialized = TRUE;
 	}
 }
 void psy_audio_machinecallback_init(psy_audio_MachineCallback* self,
@@ -363,29 +368,21 @@ static void putdata(psy_audio_Machine* self, uint8_t* data) { }
 static uint8_t* data(psy_audio_Machine* self) { return NULL; }
 static uintptr_t datasize(psy_audio_Machine* self) { return 0; }
 // programs
-static void programname(psy_audio_Machine* self, int bnkidx, int prgIdx, char* val)
+static void programname(psy_audio_Machine* self, uintptr_t bnkidx,
+	uintptr_t prgidx, char* val)
 {
 	psy_snprintf(val, 256, "%s", "Program 0");
 }
-static int numprograms(psy_audio_Machine* self)
-{
-	return 0;
-}
-static void setcurrprogram(psy_audio_Machine* self, int prgIdx) { }
-static int currprogram(psy_audio_Machine* self)
-{
-	return 0;
-}
-static void bankname(psy_audio_Machine* self, int bnkidx, char* val)
+static int numprograms(psy_audio_Machine* self) { return 0; }
+static void setcurrprogram(psy_audio_Machine* self, uintptr_t prgidx) { }
+static uintptr_t currprogram(psy_audio_Machine* self) { return 0; }
+static void bankname(psy_audio_Machine* self, uintptr_t bnkidx, char* val)
 {
 	psy_snprintf(val, 256, "%s", "Internal");
 }
-static int numbanks(psy_audio_Machine* self) { return 1; }
-static void setcurrbank(psy_audio_Machine* self, int prgIdx) { }
-static int currbank(psy_audio_Machine* self)
-{
-	return 0;
-}
+static uintptr_t numbanks(psy_audio_Machine* self) { return 1; }
+static void setcurrbank(psy_audio_Machine* self, uintptr_t prgidx) { }
+static uintptr_t currbank(psy_audio_Machine* self) { return 0; }
 static void currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset) {}
 static void setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets) {}
 static struct psy_audio_Presets* presets(psy_audio_Machine* self) { return NULL; }
@@ -515,6 +512,13 @@ static int numplaybacks(psy_audio_Machine* self)
 		: 0;
 }
 
+static const char* language(psy_audio_Machine* self)
+{
+	return (self->callback)
+		? self->callback->vtable->language(self->callback)
+		: 0;
+}
+
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
@@ -577,6 +581,7 @@ static void vtable_init(void)
 		vtable.numcaptures = numcaptures;
 		vtable.playbackname = playbackname;
 		vtable.numplaybacks = numplaybacks;
+		vtable.language = language;
 		vtable.slot = slot;
 		vtable.setslot = setslot;		
 		vtable.haseditor = haseditor;

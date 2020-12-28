@@ -196,8 +196,8 @@ INLINE psy_ui_Point psy_ui_point_zero(void)
 }
 
 typedef struct { 
-	int x;
-	int y;
+	intptr_t x;
+	intptr_t y;
 } psy_ui_IntPoint;
 
 INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
@@ -216,10 +216,10 @@ INLINE psy_ui_IntPoint psy_ui_intpoint_make(int x, int y)
 }
 
 typedef struct {
-	int left;
-	int top;
-	int right;
-	int bottom;
+	intptr_t left;
+	intptr_t top;
+	intptr_t right;
+	intptr_t bottom;
 } psy_ui_Rectangle;
 
 
@@ -229,7 +229,7 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_zero(void)
 	return rv;
 }
 
-INLINE psy_ui_Rectangle psy_ui_rectangle_make(int left, int top, int width, int height)
+INLINE psy_ui_Rectangle psy_ui_rectangle_make(intptr_t left, intptr_t top, intptr_t width, intptr_t height)
 {
 	psy_ui_Rectangle rv;
 
@@ -249,15 +249,15 @@ INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
 	return rv;
 }
 
-void psy_ui_setrectangle(psy_ui_Rectangle*, int left, int top, int width, int height);
-int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, int x, int y);
+void psy_ui_setrectangle(psy_ui_Rectangle*, intptr_t left, intptr_t top, intptr_t width, intptr_t height);
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, intptr_t x, intptr_t y);
 bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle*,
-	int x1, int y1, int x2, int y2);
+	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2);
 int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 	const psy_ui_Rectangle* other);
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
-void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
-void psy_ui_rectangle_move(psy_ui_Rectangle*, int dx, int dy);
+void psy_ui_rectangle_expand(psy_ui_Rectangle*, intptr_t top, intptr_t right, intptr_t bottom, intptr_t left);
+void psy_ui_rectangle_move(psy_ui_Rectangle*, intptr_t dx, intptr_t dy);
 
 void psy_ui_error(const char* err, const char* shorterr);
 
@@ -267,8 +267,8 @@ INLINE bool psy_ui_rectangle_equal(psy_ui_Rectangle* self, psy_ui_Rectangle* oth
 }
 
 typedef struct {
-	int width;
-	int height;
+	intptr_t width;
+	intptr_t height;
 } psy_ui_IntSize;
 
 INLINE psy_ui_IntSize psy_ui_intsize_make(int width, int height)

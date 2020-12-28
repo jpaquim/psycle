@@ -129,7 +129,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 			psy_ui_component_hide(&self->exportpresets.component);
 			psy_ui_component_hide(&self->savepresets.component);
 			psy_ui_component_hide(&self->savename.component);
-			presetsbar_setprogram(self, 0);
+			presetsbar_showprogram(self);
 		}
 	}		
 }
@@ -324,6 +324,20 @@ void presetsbar_setprogram(PresetsBar* self, uintptr_t prog)
 		psy_audio_machine_setcurrprogram(self->machine, prog);
 		presetsbar_buildprograms(self);
 		presetsbar_buildbanks(self);		
+		psy_ui_combobox_setcursel(&self->bankselector,
+			psy_audio_machine_currbank(self->machine));
+		psy_ui_combobox_setcursel(&self->programbox,
+			psy_audio_machine_currprogram(self->machine));
+		presetsbar_updatesavename(self);
+	}
+}
+
+void presetsbar_showprogram(PresetsBar* self)
+{
+	psy_ui_combobox_clear(&self->programbox);
+	if (self->machine) {		
+		presetsbar_buildprograms(self);
+		presetsbar_buildbanks(self);
 		psy_ui_combobox_setcursel(&self->bankselector,
 			psy_audio_machine_currbank(self->machine));
 		psy_ui_combobox_setcursel(&self->programbox,

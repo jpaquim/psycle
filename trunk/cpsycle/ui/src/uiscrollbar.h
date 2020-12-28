@@ -26,7 +26,7 @@ typedef struct psy_ui_ScrollBarPane {
     intptr_t screenpos;
     intptr_t scrollmax;
     intptr_t scrollmin;
-    int dragoffset;
+    intptr_t dragoffset;
     int drag;
     psy_ui_Orientation orientation;
     psy_Signal signal_changed;

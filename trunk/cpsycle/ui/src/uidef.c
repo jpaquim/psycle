@@ -17,8 +17,8 @@
 
 extern psy_ui_App app;
 
-void psy_ui_setrectangle(psy_ui_Rectangle* self, int left, int top, int width,
-	int height)
+void psy_ui_setrectangle(psy_ui_Rectangle* self, intptr_t left, intptr_t top, intptr_t width,
+	intptr_t height)
 {
    self->left = left;
    self->top = top;
@@ -35,7 +35,7 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle* self,
 		other->bottom < self->top);
 }
 
-int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, int x, int y)
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, intptr_t x, intptr_t y)
 {
 	return (x >= self->left && x < self->right && 
 			y >= self->top && y < self->bottom);
@@ -44,35 +44,35 @@ int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, int x, int y)
 // from stackoverflow by metamal
 // todo: use liang-barsky algorithm
 bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
-	int a_p1x, int a_p1y, int a_p2x, int a_p2y)
+	intptr_t a_p1x, intptr_t a_p1y, intptr_t a_p2x, intptr_t a_p2y)
 {
 	// Find min and max X for the segment
-	int a_rectangleMinX = self->left;
-	int a_rectangleMinY = self->top;
-	int a_rectangleMaxX = self->right;
-	int a_rectangleMaxY = self->bottom;
-	double minX = a_p1x;
+	intptr_t a_rectangleMinX = self->left;
+	intptr_t a_rectangleMinY = self->top;
+	intptr_t a_rectangleMaxX = self->right;
+	intptr_t a_rectangleMaxY = self->bottom;
+	double minX = (double)a_p1x;
 	double minY;
-	double maxX = a_p2x;
+	double maxX = (double)a_p2x;
 	double maxY;
 	double dx;
 
 	if (a_p1x > a_p2x)
 	{
-		minX = a_p2x;
-		maxX = a_p1x;
+		minX = (double)a_p2x;
+		maxX = (double)a_p1x;
 	}
 
 	// Find the intersection of the segment's and rectangle's x-projections
 
-	if (maxX > a_rectangleMaxX)
+	if (maxX > (double)a_rectangleMaxX)
 	{
-		maxX = a_rectangleMaxX;
+		maxX = (double)a_rectangleMaxX;
 	}
 
-	if (minX < a_rectangleMinX)
+	if (minX < (double)a_rectangleMinX)
 	{
-		minX = a_rectangleMinX;
+		minX = (double)a_rectangleMinX;
 	}
 
 	if (minX > maxX) // If their projections do not intersect return false
@@ -82,10 +82,10 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 
 	// Find corresponding min and max Y for min and max X we found before
 
-	minY = a_p1y;
-	maxY = a_p2y;
+	minY = (double)a_p1y;
+	maxY = (double)a_p2y;
 
-	dx = a_p2x - a_p1x;
+	dx = (double)a_p2x - (double)a_p1x;
 
 	if (fabs(dx) > 0.0000001)
 	{
@@ -104,14 +104,14 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 
 	// Find the intersection of the segment's and rectangle's y-projections
 
-	if (maxY > a_rectangleMaxY)
+	if (maxY > (double)a_rectangleMaxY)
 	{
-		maxY = a_rectangleMaxY;
+		maxY = (double)a_rectangleMaxY;
 	}
 
-	if (minY < a_rectangleMinY)
+	if (minY < (double)a_rectangleMinY)
 	{
-		minY = a_rectangleMinY;
+		minY = (double)a_rectangleMinY;
 	}
 
 	if (minY > maxY) // If Y-projections do not intersect return false
@@ -131,7 +131,7 @@ void psy_ui_rectangle_union(psy_ui_Rectangle* self,
 	self->bottom = self->bottom > other->bottom ? self->bottom : other->bottom;
 }
 
-void psy_ui_rectangle_expand(psy_ui_Rectangle* self, int top, int right, int bottom, int left)
+void psy_ui_rectangle_expand(psy_ui_Rectangle* self, intptr_t top, intptr_t right, intptr_t bottom, intptr_t left)
 {
 	self->top -= top;
 	self->right += right;
@@ -139,7 +139,7 @@ void psy_ui_rectangle_expand(psy_ui_Rectangle* self, int top, int right, int bot
 	self->left -= left;	
 }
 
-void psy_ui_rectangle_move(psy_ui_Rectangle* self, int dx, int dy)
+void psy_ui_rectangle_move(psy_ui_Rectangle* self, intptr_t dx, intptr_t dy)
 {
 	self->top += dy;
 	self->right += dx;
@@ -295,7 +295,7 @@ int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 		return 1;
 	} else if ((self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX) ||
 			(self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX)) {
-		int diff;
+		intptr_t diff;
 
 		diff = self->quantity.integer - other->quantity.integer;
 		if (diff == 0) {
@@ -306,7 +306,7 @@ int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 		}
 		return 1;
 	} else {
-		int diff;
+		intptr_t diff;
 
 		diff = psy_ui_value_px(self, tm)  - psy_ui_value_px(other, tm);
 		if (diff == 0) {

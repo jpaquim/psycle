@@ -75,6 +75,7 @@ typedef int (*fp_mcb_numplaybacks)(void*);
 typedef int (*fp_mcb_onerror)(void*);
 typedef int (*fp_mcb_onwarning)(void*);
 typedef int (*fp_mcb_onmessage)(void*);
+typedef const char* (*fp_mcb_language)(void*);
 
 typedef struct  {
 	fp_mcb_samplerate samplerate;
@@ -98,6 +99,7 @@ typedef struct  {
 	fp_mcb_numcaptures numcaptures;
 	fp_mcb_playbackname playbackname;
 	fp_mcb_numplaybacks numplaybacks;	
+	fp_mcb_language language;
 } psy_audio_MachineCallbackVtable;
 
 struct psy_audio_Player;
@@ -222,17 +224,19 @@ typedef	psy_dsp_amp_range_t (*fp_machine_amprange)(struct psy_audio_Machine*);
 typedef void (*fp_machine_putdata)(struct psy_audio_Machine*, uint8_t* data);
 typedef uint8_t* (*fp_machine_data)(struct psy_audio_Machine*);
 typedef uintptr_t (*fp_machine_datasize)(struct psy_audio_Machine*);
-typedef void (*fp_machine_programname)(struct psy_audio_Machine*, int bnkidx,
-	int prgIdx, char* val);
-typedef int (*fp_machine_numprograms)(struct psy_audio_Machine*);
+// program
+typedef void (*fp_machine_programname)(struct psy_audio_Machine*, uintptr_t bnkidx,
+	uintptr_t prgidx, char* val);
+typedef uintptr_t (*fp_machine_numprograms)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrprogram)(struct psy_audio_Machine*,
-	int prgIdx);
+	uintptr_t prgidx);
 typedef int (*fp_machine_currprogram)(struct psy_audio_Machine*);
-typedef void (*fp_machine_bankname)(struct psy_audio_Machine*, int bnkidx,
-	char* val);
-typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
-typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
-typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
+// bank
+typedef void (*fp_machine_bankname)(struct psy_audio_Machine*,
+	uintptr_t bnkidx, char* val);
+typedef uintptr_t (*fp_machine_numbanks)(struct psy_audio_Machine*);
+typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, uintptr_t bnkidx);
+typedef uintptr_t (*fp_machine_currbank)(struct psy_audio_Machine*);
 typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*,
 	struct psy_audio_Preset*);
 typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*,
@@ -270,6 +274,7 @@ typedef int (*fp_machine_numcaptures)(struct psy_audio_Machine*);
 typedef const char* (*fp_machine_playbackname)(struct psy_audio_Machine*,
 	int index);
 typedef int (*fp_machine_numplaybacks)(struct psy_audio_Machine*);
+typedef const char* (*fp_machine_language)(struct psy_audio_Machine*);
 
 typedef struct {
 ///\name the life cycle of a machine
@@ -318,7 +323,7 @@ typedef struct {
 	fp_machine_editname editname;
 	fp_machine_mode mode;
 	fp_machine_modulepath modulepath;
-	fp_machine_shellidx shellidx;	
+	fp_machine_shellidx shellidx;
 ///\}
 ///\name parameters
 ///\{
@@ -401,6 +406,7 @@ typedef struct {
 	fp_machine_numcaptures numcaptures;
 	fp_machine_playbackname playbackname;
 	fp_machine_numplaybacks numplaybacks;
+	fp_machine_language language;
 ///\}
 } MachineVtable;
 
@@ -773,39 +779,39 @@ INLINE void psy_audio_machine_programname(psy_audio_Machine* self, int bnkidx,
 	self->vtable->programname(self, bnkidx, prgIdx, val);
 }
 
-INLINE int psy_audio_machine_numprograms(psy_audio_Machine* self)
+INLINE intptr_t psy_audio_machine_numprograms(psy_audio_Machine* self)
 {
 	return self->vtable->numprograms(self);
 }
 
 INLINE void psy_audio_machine_setcurrprogram(psy_audio_Machine* self,
-	int prgIdx)
+	intptr_t prgidx)
 {
-	self->vtable->setcurrprogram(self, prgIdx);
+	self->vtable->setcurrprogram(self, prgidx);
 }
 
-INLINE int psy_audio_machine_currprogram(psy_audio_Machine* self)
+INLINE intptr_t psy_audio_machine_currprogram(psy_audio_Machine* self)
 {
 	return self->vtable->currprogram(self);
 }
 
-INLINE void psy_audio_machine_bankname(psy_audio_Machine* self, int bnkidx,
+INLINE void psy_audio_machine_bankname(psy_audio_Machine* self, intptr_t bnkidx,
 	char* val)
 {
 	self->vtable->bankname(self, bnkidx, val);
 }
 
-INLINE int psy_audio_machine_numbanks(psy_audio_Machine* self)
+INLINE intptr_t psy_audio_machine_numbanks(psy_audio_Machine* self)
 {
 	return self->vtable->numbanks(self);
 }
 
-INLINE void psy_audio_machine_setcurrbank(psy_audio_Machine* self, int prgIdx)
+INLINE void psy_audio_machine_setcurrbank(psy_audio_Machine* self, intptr_t prgidx)
 {
-	self->vtable->setcurrbank(self, prgIdx);
+	self->vtable->setcurrbank(self, prgidx);
 }
 
-INLINE int psy_audio_machine_currbank(psy_audio_Machine* self)
+INLINE intptr_t psy_audio_machine_currbank(psy_audio_Machine* self)
 {
 	return self->vtable->currbank(self);
 }
@@ -1043,6 +1049,11 @@ INLINE const char* psy_audio_machine_playbackname(psy_audio_Machine* self, int
 INLINE int psy_audio_machine_numplaybacks(psy_audio_Machine* self)
 {
 	return self->vtable->numplaybacks(self);
+}
+
+INLINE const char* psy_audio_machine_language(psy_audio_Machine* self)
+{
+	return self->vtable->language(self);
 }
 
 INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)

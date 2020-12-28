@@ -570,11 +570,13 @@ void psy_audio_player_start(psy_audio_Player* self)
 }
 
 void psy_audio_player_stop(psy_audio_Player* self)
-{
+{	
 	assert(self);
-	
+
+	psy_audio_exclusivelock_enter();
 	psy_audio_sequencer_stop(&self->sequencer);
 	psy_audio_player_dostop(self);
+	psy_audio_exclusivelock_leave();
 }
 
 void psy_audio_player_dostop(psy_audio_Player* self)
@@ -747,7 +749,7 @@ psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player* self, const 
 	return psy_audio_eventdrivers_load(&self->eventdrivers, path);
 }
 
-void psy_audio_player_restarteventdriver(psy_audio_Player* self, int id,
+void psy_audio_player_restarteventdriver(psy_audio_Player* self, intptr_t id,
 	psy_Property* configuration)
 {
 	assert(self);
@@ -755,7 +757,7 @@ void psy_audio_player_restarteventdriver(psy_audio_Player* self, int id,
 	psy_audio_eventdrivers_restart(&self->eventdrivers, id, configuration);
 }
 
-void psy_audio_player_removeeventdriver(psy_audio_Player * self, int id)
+void psy_audio_player_removeeventdriver(psy_audio_Player * self, intptr_t id)
 {
 	assert(self);
 
@@ -769,7 +771,7 @@ psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player* self)
 	return self->eventdrivers.kbddriver;
 }
 
-psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, int id)
+psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, intptr_t id)
 {
 	assert(self);
 

@@ -27,7 +27,7 @@ static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
-static void adjustcoordinates(psy_ui_Component*, int* x, int* y);
+static void adjustcoordinates(psy_ui_Component*, intptr_t* x, intptr_t* y);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -467,18 +467,18 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 									clipsize.x, clipsize.y);
 							}*/
 							SetWindowOrgEx(win_g->hdc,
-								dblbuffer_offset.x + imp->component->scroll.x -
-								psy_ui_value_px(&imp->component->spacing.left,
+								(int)dblbuffer_offset.x + (int)imp->component->scroll.x -
+								(int)psy_ui_value_px(&imp->component->spacing.left,
 									&tm),
-								dblbuffer_offset.y + imp->component->scroll.y
-								- psy_ui_value_px(&imp->component->spacing.top,
+								(int)dblbuffer_offset.y + (int)imp->component->scroll.y
+								- (int)psy_ui_value_px(&imp->component->spacing.top,
 									&tm),
 								NULL);
 							
 						} else {
 							SetWindowOrgEx(win_g->hdc,
-								dblbuffer_offset.x + imp->component->scroll.x,
-								dblbuffer_offset.y + imp->component->scroll.y,
+								(int)dblbuffer_offset.x + (int)imp->component->scroll.x,
+								(int)dblbuffer_offset.y + (int)imp->component->scroll.y,
 								NULL);
 						}
 						// update graphics font with component font 
@@ -835,9 +835,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						imp->component->accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
 						while (imp->component->accumwheeldelta >= iDeltaPerLine)
 						{
-							int iPos;
-							int scrollmin;
-							int scrollmax;
+							intptr_t iPos;
+							intptr_t scrollmin;
+							intptr_t scrollmax;
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);							
@@ -854,9 +854,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						}
 						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
 						{
-							int iPos;
-							int scrollmin;
-							int scrollmax;
+							intptr_t iPos;
+							intptr_t scrollmin;
+							intptr_t scrollmax;
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);							
@@ -940,7 +940,7 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 			(uintptr_t)GetParent(imp->hwnd))) {
 		psy_list_append(&winapp->targetids, imp->hwnd);
 		winapp->eventretarget = imp->component;
-		SendMessage(GetParent(imp->hwnd), message, wparam, lparam);
+		SendMessage(GetParent(imp->hwnd), (UINT)message, wparam, lparam);
 	} else {
 		psy_list_free(winapp->targetids);
 		winapp->targetids = NULL;
@@ -948,7 +948,7 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 	winapp->eventretarget = 0;
 }
 
-void adjustcoordinates(psy_ui_Component* component, int* x, int* y)
+void adjustcoordinates(psy_ui_Component* component, intptr_t* x, intptr_t* y)
 {		
 	*x += component->scroll.x;
 	*y += component->scroll.y;

@@ -104,7 +104,7 @@ static void oncommand(psy_ui_ListBox*, psy_ui_Component* sender, WPARAM wParam,
 
 // ListBoxImp VTable
 
-static int dev_addtext(psy_ui_win_ListBoxImp*, const char* text);
+static intptr_t dev_addtext(psy_ui_win_ListBoxImp*, const char* text);
 static void dev_settext(psy_ui_win_ListBoxImp*, const char* text, intptr_t index);
 static void dev_text(psy_ui_win_ListBoxImp*, char* text, intptr_t index);
 static void dev_setstyle(psy_ui_win_ListBoxImp*, int style);
@@ -204,7 +204,7 @@ psy_ui_win_ListBoxImp* psy_ui_win_listboximp_multiselect_allocinit(
 	return rv;
 }
 
-int dev_addtext(psy_ui_win_ListBoxImp* self, const char* text)
+intptr_t dev_addtext(psy_ui_win_ListBoxImp* self, const char* text)
 {
 	return SendMessage(self->win_component_imp.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
@@ -213,7 +213,7 @@ void dev_settext(psy_ui_win_ListBoxImp* self, const char* text, intptr_t index)
 {
 	intptr_t sel;
 	char* currtext;
-	int numchars;
+	intptr_t numchars;
 
 	numchars = SendMessage(self->win_component_imp.hwnd, LB_GETTEXTLEN, (WPARAM)index, (LPARAM)0);
 	currtext = malloc(sizeof(char) * (numchars + 1));
@@ -309,7 +309,7 @@ int windowstyle(HWND hwnd)
 {
 	int rv;
 #if defined(_WIN64)		
-	rv = (int)GetWindowLongPtr(hwnd, GWLP_STYLE);
+	rv = (int)GetWindowLongPtr(hwnd, GWL_STYLE);
 #else
 	rv = (int)GetWindowLong(hwnd, GWL_STYLE);
 #endif

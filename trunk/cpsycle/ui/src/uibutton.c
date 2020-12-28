@@ -19,7 +19,7 @@ static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
 static void drawarrow(psy_ui_Button*, psy_ui_IntPoint* arrow, psy_ui_Graphics*);
-static void makearrow(psy_ui_IntPoint*, psy_ui_ButtonIcon icon, int x, int y);
+static void makearrow(psy_ui_IntPoint*, psy_ui_ButtonIcon icon, intptr_t x, intptr_t y);
 static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseup(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Button*);
@@ -122,8 +122,8 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_Size textsize;
 	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;
-	int centerx = 0;
-	int centery = 0;
+	intptr_t centerx = 0;
+	intptr_t centery = 0;
 	char* text;
 
 	if (self->translate && self->translation) {
@@ -174,8 +174,8 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_IntSize size;	
 	psy_ui_IntPoint arrow[4];
-	int centerx = 4;
-	int centery = 0;
+	intptr_t centerx = 4;
+	intptr_t centery = 0;
 	
 	size = psy_ui_component_intsize(psy_ui_button_base(self));
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
@@ -212,7 +212,7 @@ void drawarrow(psy_ui_Button* self, psy_ui_IntPoint* arrow, psy_ui_Graphics* g)
 	}		
 }
 
-void makearrow(psy_ui_IntPoint* arrow, psy_ui_ButtonIcon icon, int x, int y)
+void makearrow(psy_ui_IntPoint* arrow, psy_ui_ButtonIcon icon, intptr_t x, intptr_t y)
 {
 	switch (icon) {
 		case psy_ui_ICON_LESS:		
@@ -311,7 +311,7 @@ void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {		
 	psy_ui_component_releasecapture(psy_ui_button_base(self));
-	self->buttonstate = ev->button;
+	self->buttonstate = ev->button != 0;
 	if (self->enabled && (ev->button == 1) || self->allowrightclick) {
 		psy_ui_Rectangle client_position;
 		psy_ui_IntSize size;

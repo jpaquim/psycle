@@ -286,7 +286,7 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		if (self->numchannels > 1) {
 			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
 				self->samples[1],
-				numsamples);
+				(int)numsamples); ///\todo int cast?
 		}
 	}
 }
@@ -340,7 +340,7 @@ void psy_audio_buffer_writesamples(psy_audio_Buffer* self,
 		if (self->numchannels > 1) {
 			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
 				self->samples[1],
-				numsamples);
+				(int)numsamples); ///\todo int cast?
 		}
 	}
 }

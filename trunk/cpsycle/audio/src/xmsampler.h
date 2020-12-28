@@ -19,6 +19,10 @@
 extern "C" {
 #endif
 
+#define XM_SAMPLER_TWK_AMIGASLIDES 24
+#define XM_SAMPLER_TWK_GLOBALVOLUME 0x4E
+
+
 typedef struct psy_audio_XMSampler {
 	psy_audio_CustomMachine custommachine;		
 	psy_List* voices;

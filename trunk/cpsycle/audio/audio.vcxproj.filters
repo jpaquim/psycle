@@ -289,6 +289,15 @@
     <ClCompile Include="src\itmodule2.c">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="src\vstplugininterface.c">
+      <Filter>machine\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vstpluginparam.c">
+      <Filter>machine\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vstevents.c">
+      <Filter>machine\plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -554,6 +563,15 @@
     </ClInclude>
     <ClInclude Include="src\itmodule2.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vstplugininterface.h">
+      <Filter>machine\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vstpluginparam.h">
+      <Filter>machine\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vstevents.h">
+      <Filter>machine\plugins</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

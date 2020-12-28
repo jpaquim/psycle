@@ -15,19 +15,19 @@ extern "C" {
 struct psy_ui_Component;
 
 typedef struct {
-	int keycode;
-	int keydata;
-	int shift;
-	int ctrl;
-	int alt;
+	intptr_t keycode;
+	intptr_t keydata;
+	bool shift;
+	bool ctrl;
+	bool alt;
 	int repeat;
 	bool bubble;
 	bool preventdefault;
 	struct psy_ui_Component* target;
 } psy_ui_KeyEvent;
 
-void psy_ui_keyevent_init(psy_ui_KeyEvent*, int keycode, int keydata,
-	int shift, int ctrl, int alt, int repeat);
+void psy_ui_keyevent_init(psy_ui_KeyEvent*, intptr_t keycode, intptr_t keydata,
+	bool shift, bool ctrl, bool alt, int repeat);
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent*);
 void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent*);
 
@@ -37,19 +37,19 @@ INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Compo
 }
 
 typedef struct {	
-	int x;
-	int y;
-	int button;
-	int delta;
-	int shift;
-	int ctrl;
+	intptr_t x;
+	intptr_t y;
+	intptr_t button;
+	intptr_t delta;
+	bool shift;
+	bool ctrl;
 	bool bubble;
 	bool preventdefault;
 	struct psy_ui_Component* target;
 } psy_ui_MouseEvent;
 
-void psy_ui_mouseevent_init(psy_ui_MouseEvent*, int x, int y, int button,
-	int delta, int shift, int ctrl);
+void psy_ui_mouseevent_init(psy_ui_MouseEvent*, intptr_t x, intptr_t y, intptr_t button,
+	intptr_t delta, bool shift, bool ctrl);
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
 struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent*);
 void psy_ui_mouseevent_settarget(psy_ui_MouseEvent*, struct psy_ui_Component* target);

@@ -845,7 +845,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			break; }
 		case CMD_IMM_LOADSONG:
 			if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-					workspace_songmodified(&self->workspace)) {
+					workspace_songmodified(&self->workspace)) {				
 				workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
 			} else {
 				workspace_loadsong_fileselect(&self->workspace);				
@@ -1318,7 +1318,7 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			}
 			break; }
 		case CHECKUNSAVE_CONTINUE:
-			workspace_updatecurrview(&self->workspace);
+			workspace_restoreview(&self->workspace);
 			break;
 		default:		
 			break;

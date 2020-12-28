@@ -325,7 +325,7 @@ const char* eventdriverconfig_eventdriverpath(EventDriverConfig* self)
 	return NULL;
 }
 
-void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig* self, int driverid)
+void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig* self, intptr_t driverid)
 {
 	psy_EventDriver* eventdriver;
 

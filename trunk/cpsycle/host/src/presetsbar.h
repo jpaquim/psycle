@@ -39,6 +39,7 @@ typedef struct PresetsBar {
 
 void presetsbar_init(PresetsBar*, psy_ui_Component* parent, Workspace*);
 void presetsbar_setmachine(PresetsBar*, psy_audio_Machine* machine);
+void presetsbar_showprogram(PresetsBar*);
 
 #ifdef __cplusplus
 }

@@ -242,7 +242,7 @@ psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* l
 	dev_text(self, text);	
 	tm = dev_textmetric(self);
 	rect.left = 0;
-	rect.right = psy_ui_value_px(&limits->width, &tm) - 40;
+	rect.right = (int)psy_ui_value_px(&limits->width, &tm) - 40;
 	DrawText(hdc, text, -1, &rect, DT_LEFT | DT_WORDBREAK | DT_CALCRECT);	
 	psy_ui_graphics_dispose(&g);	
 	ReleaseDC(NULL, hdc);

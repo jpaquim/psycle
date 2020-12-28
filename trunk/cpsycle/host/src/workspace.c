@@ -63,6 +63,7 @@ static bool onmachinefileselectsave(Workspace*, char filter[], char inoutName[])
 static void onmachinefileselectdirectory(Workspace*);
 static void onmachineterminaloutput(Workspace*, const char* text);
 static bool onmachineeditresize(Workspace*, psy_audio_Machine* sender, intptr_t w, intptr_t h);
+static const char* onmachinelanguage(Workspace*);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
@@ -126,6 +127,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->machines_undosavepoint = 0;
 	self->navigating = FALSE;
 	self->sequencepaste = NULL;
+	self->restoreview = VIEW_ID_MACHINEVIEW;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -201,7 +203,7 @@ void workspace_dispose(Workspace* self)
 	self->filename = NULL;
 	plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
-	psy_undoredo_dispose(&self->undoredo);	
+	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->viewhistory);
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
@@ -670,6 +672,7 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 			}
 			psy_audio_songfile_dispose(&songfile);
 		}
+		workspace_clearundo(self);
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
 		if (play) {
@@ -867,7 +870,7 @@ void workspace_setoctave(Workspace* self, int octave)
 	psy_signal_emit(&self->signal_octavechanged, self, 1, octave);
 }
 
-int workspace_octave(Workspace* self)
+uintptr_t workspace_octave(Workspace* self)
 {
 	assert(self);
 
@@ -913,11 +916,23 @@ bool workspace_currview_hasredo(Workspace* self)
 	assert(self);
 
 	if (workspace_currview(self) == VIEW_ID_PATTERNVIEW) {
-		return psy_list_size(self->undoredo.redo) != 0;
+		return psy_list_size(self->undoredo.redo) != self->undosavepoint;
 	} else if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
-		return psy_list_size(self->song->machines.undoredo.redo) != 0;
+		return psy_list_size(self->song->machines.undoredo.redo) != self->machines_undosavepoint;
 	}
 	return FALSE;
+}
+
+void workspace_clearundo(Workspace* self)
+{
+	psy_undoredo_dispose(&self->undoredo);
+	psy_undoredo_init(&self->undoredo);
+	self->undosavepoint = 0;
+	if (self->song) {
+		psy_undoredo_dispose(&self->song->machines.undoredo);
+		psy_undoredo_init(&self->song->machines.undoredo);
+	}	
+	self->machines_undosavepoint = 0;	
 }
 
 void workspace_setpatterncursor(Workspace* self,
@@ -1112,11 +1127,29 @@ void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
 }
 
+void workspace_saveview(Workspace* self)
+{
+	assert(self);
+
+	self->restoreview = workspace_currview(self);
+}
+
+void workspace_restoreview(Workspace* self)
+{
+	assert(self);
+
+	workspace_selectview(self, self->restoreview, 0, 0);
+}
+
 void workspace_selectview(Workspace* self, int view, uintptr_t section,
 	int option)
 {
 	assert(self);
-	
+
+	if (view == VIEW_ID_CHECKUNSAVED && workspace_currview(self) !=
+			VIEW_ID_CHECKUNSAVED) {
+		workspace_saveview(self);
+	}	
 	psy_signal_emit(&self->signal_viewselected, self, 3, view, section, option);
 }
 
@@ -1483,6 +1516,11 @@ static bool onmachineeditresize(Workspace* self, psy_audio_Machine* sender, intp
 {
 	psy_signal_emit(&self->signal_machineeditresize, self, 3, sender, w, h);
 	return TRUE;
+}
+
+static const char* onmachinelanguage(Workspace* self)
+{
+	return psy_translator_langid(psy_ui_translator());
 }
 
 bool onmachinefileselectload(Workspace* self, char filter[], char inoutname[])

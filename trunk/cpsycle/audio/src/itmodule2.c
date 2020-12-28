@@ -17,8 +17,6 @@
 #include <operations.h>
 // std
 #include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -120,9 +118,9 @@ static bool itmodule2_parseeffect(ITModule2*, psy_audio_PatternEvent*,
 	psy_audio_PatternNode**, psy_audio_Pattern*, int patIdx,
 	int row, int command, int param, int channel);
 static bool itmodule2_loads3mpatternx(ITModule2*, uint16_t patidx);
-static bool itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curH,
+static bool itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curh,
 	psy_audio_Instrument*);
-static bool itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curH,
+static bool itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curh,
 	psy_audio_Instrument*);
 static bool itmodule2_loaditsample(ITModule2*, psy_audio_Sample*);
 static bool itmodule2_loaditsampledata(ITModule2*, psy_audio_Sample*,
@@ -189,11 +187,12 @@ bool itmodule2_load(ITModule2* self)
 	free(comments);
 	comments = NULL;
 	psy_audio_song_setproperties(self->songfile->song, &songproperties);
-
 	// build sampler
 	self->sampler = psy_audio_machinefactory_makemachine(
 		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", UINTPTR_MAX);
 	if (self->sampler) {
+		psy_audio_MachineParam* param;
+
 		psy_audio_machine_setposition(self->sampler, rand() / 64,
 			rand() / 80);	
 		psy_audio_machines_insert(&self->songfile->song->machines, 0,
@@ -205,20 +204,21 @@ bool itmodule2_load(ITModule2* self)
 			psy_audio_wire_make(0, psy_audio_MASTER_INDEX),
 			psy_dsp_map_128_1((self->fileheader.mVol > 128)
 				? 128
-				: self->fileheader.mVol));
-		{ // IsAmigaSlides
-			psy_audio_MachineParam* param;
-
-			param = psy_audio_machine_tweakparameter(self->sampler, 24);
-			if (param) {
-				psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
-					(self->fileheader.flags & IT2_FLAGS_LINEARSLIDES)
-						? FALSE
-						: TRUE);
-			}
-		}
-		// sampler->GlobalVolume(itFileH.gVol);
-
+				: self->fileheader.mVol));		
+		param = psy_audio_machine_tweakparameter(self->sampler,
+			XM_SAMPLER_TWK_AMIGASLIDES);
+		if (param) {
+			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
+				(self->fileheader.flags & IT2_FLAGS_LINEARSLIDES)
+					? FALSE
+					: TRUE);			
+		}			
+		param = psy_audio_machine_tweakparameter(self->sampler,
+			XM_SAMPLER_TWK_GLOBALVOLUME);
+		if (param) {
+			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
+				self->fileheader.gVol);
+		}		
 		// Flags:   Bit 0: On = Stereo, Off = Mono
 		// 			Bit 1: Vol0MixOptimizations - If on, no mixing occurs if
 		// 			the volume at mixing time is 0 (redundant v1.04+)
@@ -329,25 +329,23 @@ bool itmodule2_load(ITModule2* self)
 			psy_audio_Instrument* instrument;
 
 			instrument = psy_audio_instrument_allocinit();
-			psy_audio_instruments_insert(&self->songfile->song->instruments, instrument,
-				psy_audio_instrumentindex_make(0, i));
+			psy_audio_instruments_insert(&self->songfile->song->instruments,
+				instrument, psy_audio_instrumentindex_make(0, i));
 			if (self->fileheader.ffv < 0x200) {
-				itInsHeader1x curH;
-				psyfile_read(fp, &curH, sizeof(curH));				
-				itmodule2_loadolditinst(self, &curH, instrument);
+				itInsHeader1x curh;
+
+				psyfile_read(fp, &curh, sizeof(curh));
+				itmodule2_loadolditinst(self, &curh, instrument);
 			} else {
-				itInsHeader2x curH;
-				psyfile_read(fp, &curH, sizeof(curH));
-				itmodule2_loaditinst(self, &curH, instrument);
+				itInsHeader2x curh;
+
+				psyfile_read(fp, &curh, sizeof(curh));
+				itmodule2_loaditinst(self, &curh, instrument);
 			}
-			psy_table_insert(&self->xmtovirtual, i, (void*)(uintptr_t)virtualInst);			
+			psy_table_insert(&self->xmtovirtual, i,
+				(void*)(uintptr_t)virtualInst);
 			psy_audio_song_insertvirtualgenerator(self->songfile->song,
-				virtualInst++, 0, i);
-			// song.xminstruments.SetInst(instr, i);
-			//if (song.xminstruments.IsEnabled(i)) {
-				// ittovirtual[i] = virtualInst;
-				//song.SetVirtualInstrument(virtualInst++, 0, i);
-			//}
+				virtualInst++, 0, i);			
 		}
 		for (i = 0; i < self->fileheader.sampNum; i++)
 		{
@@ -388,7 +386,14 @@ bool itmodule2_load(ITModule2* self)
 		{
 			if (pointersp[i] == 0)
 			{
-				// song.AllocNewPattern(i, "unnamed", 64, false);
+				psy_audio_Pattern* pattern;
+
+				pattern = psy_audio_pattern_allocinit();
+				psy_audio_pattern_setname(pattern, "unnamed");
+				psy_audio_patterns_insert(&self->songfile->song->patterns,
+					i, pattern);
+				psy_audio_pattern_setlength(pattern,
+					64 * 1.0 / self->songfile->song->properties.lpb);				
 			} else {
 				psyfile_seek(fp, pointersp[i]);
 				itmodule2_loaditpattern(self, i, &numchans);				
@@ -404,14 +409,14 @@ bool itmodule2_load(ITModule2* self)
 	return TRUE;
 }
 
-bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curH, psy_audio_Instrument* xins)
+bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audio_Instrument* xins)
 {	
-	psy_audio_instrument_setname(xins, curH->sName);	
+	psy_audio_instrument_setname(xins, curh->sName);	
 
-	xins->volumefadespeed = curH->fadeout / 512.0f;
+	xins->volumefadespeed = curh->fadeout / 512.0f;
 
-	xins->nna = (psy_audio_NewNoteAction)curH->NNA;
-	if (curH->DNC)
+	xins->nna = (psy_audio_NewNoteAction)curh->NNA;
+	if (curh->DNC)
 	{
 		xins->dct = psy_audio_DUPECHECK_NOTE;
 		xins->dca = psy_audio_NNA_STOP;
@@ -420,26 +425,26 @@ bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curH, psy_aud
 	XMInstrument::NotePair npair;
 	int i;
 	for (i = 0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
-		npair.first = curH.notes[i].first;
-		npair.second = curH.notes[i].second - 1;
+		npair.first = curh.notes[i].first;
+		npair.second = curh.notes[i].second - 1;
 		xins.NoteToSample(i, npair);
 	}
 	xins.AmpEnvelope().Init();
-	if (curH.flg & EnvFlags::USE_ENVELOPE) {// enable volume envelope
+	if (curh.flg & EnvFlags::USE_ENVELOPE) {// enable volume envelope
 		xins.AmpEnvelope().IsEnabled(true);
 
-		if (curH.flg & EnvFlags::USE_SUSTAIN) {
-			xins.AmpEnvelope().SustainBegin(curH.sustainS);
-			xins.AmpEnvelope().SustainEnd(curH.sustainE);
+		if (curh.flg & EnvFlags::USE_SUSTAIN) {
+			xins.AmpEnvelope().SustainBegin(curh.sustainS);
+			xins.AmpEnvelope().SustainEnd(curh.sustainE);
 		}
 
-		if (curH.flg & EnvFlags::USE_LOOP) {
-			xins.AmpEnvelope().LoopStart(curH.loopS);
-			xins.AmpEnvelope().LoopEnd(curH.loopE);
+		if (curh.flg & EnvFlags::USE_LOOP) {
+			xins.AmpEnvelope().LoopStart(curh.loopS);
+			xins.AmpEnvelope().LoopEnd(curh.loopE);
 		}
 		for (int i = 0; i < 25; i++) {
-			uint8_t tick = curH.nodepair[i].first;
-			uint8_t value = curH.nodepair[i].second;
+			uint8_t tick = curh.nodepair[i].first;
+			uint8_t value = curh.nodepair[i].second;
 			if (value == 0xFF || tick == 0xFF) break;
 
 			xins.AmpEnvelope().Append(tick, (float)value / 64.0f);
@@ -452,14 +457,14 @@ bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curH, psy_aud
 	return TRUE;
 }
 
-bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curH, psy_audio_Instrument* xins)
+bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_Instrument* xins)
 {
-	/*std::string itname(curH.sName);
+	/*std::string itname(curh.sName);
 	xins.Name(itname);
 
-	xins.NNA((XMInstrument::NewNoteAction::Type)curH.NNA);
-	xins.DCT((XMInstrument::DupeCheck::Type)curH.DCT);
-	switch (curH.DCA)
+	xins.NNA((XMInstrument::NewNoteAction::Type)curh.NNA);
+	xins.DCT((XMInstrument::DupeCheck::Type)curh.DCT);
+	switch (curh.DCA)
 	{
 	case DCAction::NOTEOFF:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF); break;
 	case DCAction::FADEOUT:xins.DCA(XMInstrument::NewNoteAction::FADEOUT); break;
@@ -467,82 +472,82 @@ bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curH, psy_audio_
 	default:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF); break;
 	}
 
-	xins.Pan((curH.defPan & 0x7F) / 64.0f);
-	xins.PanEnabled((curH.defPan & 0x80) ? false : true);
-	xins.NoteModPanCenter(curH.pPanCenter);
-	xins.NoteModPanSep(curH.pPanSep);
-	xins.GlobVol(curH.gVol / 127.0f);
-	xins.VolumeFadeSpeed(curH.fadeout / 1024.0f);
-	xins.RandomVolume(curH.randVol / 100.f);
-	xins.RandomPanning(curH.randPan / 64.f);
-	if ((curH.inFC & 0x80) != 0)
+	xins.Pan((curh.defPan & 0x7F) / 64.0f);
+	xins.PanEnabled((curh.defPan & 0x80) ? false : true);
+	xins.NoteModPanCenter(curh.pPanCenter);
+	xins.NoteModPanSep(curh.pPanSep);
+	xins.GlobVol(curh.gVol / 127.0f);
+	xins.VolumeFadeSpeed(curh.fadeout / 1024.0f);
+	xins.RandomVolume(curh.randVol / 100.f);
+	xins.RandomPanning(curh.randPan / 64.f);
+	if ((curh.inFC & 0x80) != 0)
 	{
 		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterCutoff(curH.inFC & 0x7F);
+		xins.FilterCutoff(curh.inFC & 0x7F);
 	}
-	if ((curH.inFR & 0x80) != 0)
+	if ((curh.inFR & 0x80) != 0)
 	{
 		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterResonance(curH.inFR & 0x7F);
+		xins.FilterResonance(curh.inFR & 0x7F);
 	}
 
 
 	XMInstrument::NotePair npair;
 	int i;
 	for (i = 0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
-		npair.first = curH.notes[i].first;
-		npair.second = curH.notes[i].second - 1;
+		npair.first = curh.notes[i].first;
+		npair.second = curh.notes[i].second - 1;
 		xins.NoteToSample(i, npair);
 	}
 
 	// volume envelope
 	xins.AmpEnvelope().Init();
 	xins.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	xins.AmpEnvelope().IsEnabled(curH.volEnv.flg & EnvFlags::USE_ENVELOPE);
-	if (curH.volEnv.flg & EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
-	if (curH.volEnv.flg & EnvFlags::USE_SUSTAIN) {
-		xins.AmpEnvelope().SustainBegin(curH.volEnv.sustainS);
-		xins.AmpEnvelope().SustainEnd(curH.volEnv.sustainE);
+	xins.AmpEnvelope().IsEnabled(curh.volEnv.flg & EnvFlags::USE_ENVELOPE);
+	if (curh.volEnv.flg & EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
+	if (curh.volEnv.flg & EnvFlags::USE_SUSTAIN) {
+		xins.AmpEnvelope().SustainBegin(curh.volEnv.sustainS);
+		xins.AmpEnvelope().SustainEnd(curh.volEnv.sustainE);
 	}
 
-	if (curH.volEnv.flg & EnvFlags::USE_LOOP) {
-		xins.AmpEnvelope().LoopStart(curH.volEnv.loopS);
-		xins.AmpEnvelope().LoopEnd(curH.volEnv.loopE);
+	if (curh.volEnv.flg & EnvFlags::USE_LOOP) {
+		xins.AmpEnvelope().LoopStart(curh.volEnv.loopS);
+		xins.AmpEnvelope().LoopEnd(curh.volEnv.loopE);
 	}
 
-	int envelope_point_num = curH.volEnv.numP;
+	int envelope_point_num = curh.volEnv.numP;
 	if (envelope_point_num > 25) {
 		envelope_point_num = 25;
 	}
 
 	for (int i = 0; i < envelope_point_num; i++) {
-		short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi << 8);
-		xins.AmpEnvelope().Append(envtmp, (float)curH.volEnv.nodes[i].first / 64.0f);
+		short envtmp = curh.volEnv.nodes[i].secondlo | (curh.volEnv.nodes[i].secondhi << 8);
+		xins.AmpEnvelope().Append(envtmp, (float)curh.volEnv.nodes[i].first / 64.0f);
 	}
 
 	// Pan envelope
 	xins.PanEnvelope().Init();
 	xins.PanEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	xins.PanEnvelope().IsEnabled(curH.panEnv.flg & EnvFlags::USE_ENVELOPE);
-	if (curH.panEnv.flg & EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
-	if (curH.panEnv.flg & EnvFlags::USE_SUSTAIN) {
-		xins.PanEnvelope().SustainBegin(curH.panEnv.sustainS);
-		xins.PanEnvelope().SustainEnd(curH.panEnv.sustainE);
+	xins.PanEnvelope().IsEnabled(curh.panEnv.flg & EnvFlags::USE_ENVELOPE);
+	if (curh.panEnv.flg & EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
+	if (curh.panEnv.flg & EnvFlags::USE_SUSTAIN) {
+		xins.PanEnvelope().SustainBegin(curh.panEnv.sustainS);
+		xins.PanEnvelope().SustainEnd(curh.panEnv.sustainE);
 	}
 
-	if (curH.panEnv.flg & EnvFlags::USE_LOOP) {
-		xins.PanEnvelope().LoopStart(curH.panEnv.loopS);
-		xins.PanEnvelope().LoopEnd(curH.panEnv.loopE);
+	if (curh.panEnv.flg & EnvFlags::USE_LOOP) {
+		xins.PanEnvelope().LoopStart(curh.panEnv.loopS);
+		xins.PanEnvelope().LoopEnd(curh.panEnv.loopE);
 	}
 
-	envelope_point_num = curH.panEnv.numP;
+	envelope_point_num = curh.panEnv.numP;
 	if (envelope_point_num > 25) { // Max number of envelope points in Impulse format is 25.
 		envelope_point_num = 25;
 	}
 
 	for (int i = 0; i < envelope_point_num; i++) {
-		short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi << 8);
-		xins.PanEnvelope().Append(pantmp, (float)(curH.panEnv.nodes[i].first) / 32.0f);
+		short pantmp = curh.panEnv.nodes[i].secondlo | (curh.panEnv.nodes[i].secondhi << 8);
+		xins.PanEnvelope().Append(pantmp, (float)(curh.panEnv.nodes[i].first) / 32.0f);
 	}
 
 	// Pitch/Filter envelope
@@ -551,48 +556,48 @@ bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curH, psy_audio_
 	xins.FilterEnvelope().Init();
 	xins.FilterEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 
-	envelope_point_num = curH.pitchEnv.numP;
+	envelope_point_num = curh.pitchEnv.numP;
 	if (envelope_point_num > 25) { // Max number of envelope points in Impulse format is 25.
 		envelope_point_num = 25;
 	}
 
-	if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
+	if (curh.pitchEnv.flg & EnvFlags::ISFILTER)
 	{
 		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterEnvelope().IsEnabled(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
+		xins.FilterEnvelope().IsEnabled(curh.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
 		xins.PitchEnvelope().IsEnabled(false);
-		if (curH.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
-		if (curH.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
-			xins.FilterEnvelope().SustainBegin(curH.pitchEnv.sustainS);
-			xins.FilterEnvelope().SustainEnd(curH.pitchEnv.sustainE);
+		if (curh.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
+		if (curh.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
+			xins.FilterEnvelope().SustainBegin(curh.pitchEnv.sustainS);
+			xins.FilterEnvelope().SustainEnd(curh.pitchEnv.sustainE);
 		}
 
-		if (curH.pitchEnv.flg & EnvFlags::USE_LOOP) {
-			xins.FilterEnvelope().LoopStart(curH.pitchEnv.loopS);
-			xins.FilterEnvelope().LoopEnd(curH.pitchEnv.loopE);
+		if (curh.pitchEnv.flg & EnvFlags::USE_LOOP) {
+			xins.FilterEnvelope().LoopStart(curh.pitchEnv.loopS);
+			xins.FilterEnvelope().LoopEnd(curh.pitchEnv.loopE);
 		}
 
 		for (int i = 0; i < envelope_point_num; i++) {
-			short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi << 8);
-			xins.FilterEnvelope().Append(pitchtmp, (float)(curH.pitchEnv.nodes[i].first + 32) / 64.0f);
+			short pitchtmp = curh.pitchEnv.nodes[i].secondlo | (curh.pitchEnv.nodes[i].secondhi << 8);
+			xins.FilterEnvelope().Append(pitchtmp, (float)(curh.pitchEnv.nodes[i].first + 32) / 64.0f);
 		}
 	} else {
-		xins.PitchEnvelope().IsEnabled(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
+		xins.PitchEnvelope().IsEnabled(curh.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
 		xins.FilterEnvelope().IsEnabled(false);
-		if (curH.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
-		if (curH.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
-			xins.PitchEnvelope().SustainBegin(curH.pitchEnv.sustainS);
-			xins.PitchEnvelope().SustainEnd(curH.pitchEnv.sustainE);
+		if (curh.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
+		if (curh.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
+			xins.PitchEnvelope().SustainBegin(curh.pitchEnv.sustainS);
+			xins.PitchEnvelope().SustainEnd(curh.pitchEnv.sustainE);
 		}
 
-		if (curH.pitchEnv.flg & EnvFlags::USE_LOOP) {
-			xins.PitchEnvelope().LoopStart(curH.pitchEnv.loopS);
-			xins.PitchEnvelope().LoopEnd(curH.pitchEnv.loopE);
+		if (curh.pitchEnv.flg & EnvFlags::USE_LOOP) {
+			xins.PitchEnvelope().LoopStart(curh.pitchEnv.loopS);
+			xins.PitchEnvelope().LoopEnd(curh.pitchEnv.loopE);
 		}
 
 		for (int i = 0; i < envelope_point_num; i++) {
-			short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi << 8);
-			xins.PitchEnvelope().Append(pitchtmp, (float)(curH.pitchEnv.nodes[i].first) / 32.0f);
+			short pitchtmp = curh.pitchEnv.nodes[i].secondlo | (curh.pitchEnv.nodes[i].secondhi << 8);
+			xins.PitchEnvelope().Append(pitchtmp, (float)(curh.pitchEnv.nodes[i].first) / 32.0f);
 		}
 	}
 
@@ -623,18 +628,18 @@ void itmodule2_makesequence(ITModule2* self)
 
 bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 {
-	itSampleHeader curH;
+	itSampleHeader curh;
 	psy_audio_Song* song;
 	PsyFile* fp;
 
 	song = self->songfile->song;
 	fp = self->songfile->file;
 
-	psyfile_read(fp, &curH, sizeof(curH));
+	psyfile_read(fp, &curh, sizeof(curh));
 	char renamed[26];
 	for (int i = 0; i < 25; i++) {
-		if (curH.sName[i] == '\0') renamed[i] = ' ';
-		else renamed[i] = curH.sName[i];
+		if (curh.sName[i] == '\0') renamed[i] = ' ';
+		else renamed[i] = curh.sName[i];
 	}
 	renamed[25] = '\0';	
 
@@ -647,35 +652,35 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 	//      Bit 6. On = Ping Pong loop, Off = Forwards loop
 	//      Bit 7. On = Ping Pong Sustain loop, Off = Forwards Sustain loop
 	
-	bool bstereo = curH.flg & IT2_SAMPLE_FLAGS_ISSTEREO;
-	bool b16Bit = curH.flg & IT2_SAMPLE_FLAGS_IS16BIT;
-	bool bcompressed = curH.flg & IT2_SAMPLE_FLAGS_ISCOMPRESSED;
-	bool bLoop = curH.flg & IT2_SAMPLE_FLAGS_USELOOP;
-	bool bsustainloop = curH.flg & IT2_SAMPLE_FLAGS_USESUSTAIN;
+	bool bstereo = curh.flg & IT2_SAMPLE_FLAGS_ISSTEREO;
+	bool b16Bit = curh.flg & IT2_SAMPLE_FLAGS_IS16BIT;
+	bool bcompressed = curh.flg & IT2_SAMPLE_FLAGS_ISCOMPRESSED;
+	bool bLoop = curh.flg & IT2_SAMPLE_FLAGS_USELOOP;
+	bool bsustainloop = curh.flg & IT2_SAMPLE_FLAGS_USESUSTAIN;
 
-	if (curH.flg & IT2_SAMPLE_FLAGS_HAS_SAMPLE)
+	if (curh.flg & IT2_SAMPLE_FLAGS_HAS_SAMPLE)
 	{		
-		_wave->numframes = curH.length;
+		_wave->numframes = curh.length;
 		if (bstereo) {
 			psy_audio_sample_resize(_wave, 2);
 		}
 		psy_audio_sample_allocwavedata(_wave);		
 
-		_wave->loop.start = curH.loopB;
-		_wave->loop.end = curH.loopE;
+		_wave->loop.start = curh.loopB;
+		_wave->loop.end = curh.loopE;
 		if (bLoop) {
-			if (curH.flg & IT2_SAMPLE_FLAGS_ISLOOPPINPONG)
+			if (curh.flg & IT2_SAMPLE_FLAGS_ISLOOPPINPONG)
 			{
 				_wave->loop.type = psy_audio_SAMPLE_LOOP_BIDI;
 			} else _wave->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;
 		} else {
 			_wave->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
 		}
-		_wave->sustainloop.start = curH.sustainB;
-		_wave->sustainloop.end = curH.sustainE;
+		_wave->sustainloop.start = curh.sustainB;
+		_wave->sustainloop.end = curh.sustainE;
 		if (bsustainloop)
 		{
-			if (curH.flg & IT2_SAMPLE_FLAGS_ISLOOPPINPONG)
+			if (curh.flg & IT2_SAMPLE_FLAGS_ISLOOPPINPONG)
 			{
 				_wave->sustainloop.type = psy_audio_SAMPLE_LOOP_BIDI;
 			} else _wave->sustainloop.type = psy_audio_SAMPLE_LOOP_NORMAL;
@@ -683,12 +688,12 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 			_wave->sustainloop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
 		}
 
-		_wave->defaultvolume = curH.vol * 2;
-		_wave->globalvolume = (curH.gVol / 64.0f);
+		_wave->defaultvolume = curh.vol * 2;
+		_wave->globalvolume = (curh.gVol / 64.0f);
 
 
 		//				Older method. conversion from speed to tune. Replaced by using the samplerate directly
-		//				double tune = log10(double(curH.c5Speed)/8363.0f)/log10(2.0);
+		//				double tune = log10(double(curh.c5Speed)/8363.0f)/log10(2.0);
 		//				double maintune = floor(tune*12);
 		//				double finetune = floor(((tune*12)-maintune)*100);
 
@@ -700,21 +705,21 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 		};
 		//				_wave.WaveTune(maintune);
 		//				_wave.WaveFineTune(finetune);
-		_wave->samplerate = curH.c5Speed;
+		_wave->samplerate = curh.c5Speed;
 		psy_audio_sample_setname(_wave, renamed);
-		_wave->panenabled = (curH.dfp & 0x80);
-		_wave->panfactor = (curH.dfp & 0x7F) / 64.0f;
-		_wave->vibrato.attack = (curH.vibR == 0 ? 1 : curH.vibR);
-		_wave->vibrato.speed = (curH.vibS);
-		_wave->vibrato.depth = (curH.vibD);
-		_wave->vibrato.type = (exchwave[curH.vibT & 3]);
+		_wave->panenabled = (curh.dfp & 0x80);
+		_wave->panfactor = (curh.dfp & 0x7F) / 64.0f;
+		_wave->vibrato.attack = (curh.vibR == 0 ? 1 : curh.vibR);
+		_wave->vibrato.speed = (curh.vibS);
+		_wave->vibrato.depth = (curh.vibD);
+		_wave->vibrato.type = (exchwave[curh.vibT & 3]);
 
-		if (curH.length > 0) {
-			psyfile_seek(fp, curH.smpData);
+		if (curh.length > 0) {
+			psyfile_seek(fp, curh.smpData);
 			if (bcompressed) {				
-				itmodule2_loaditcompresseddata(self, _wave->channels.samples[0], curH.length, b16Bit, curH.cvt);
-				if (bstereo) itmodule2_loaditcompresseddata(self, _wave->channels.samples[1], curH.length, b16Bit, curH.cvt);
-			} else itmodule2_loaditsampledata(self, _wave, curH.length, bstereo, b16Bit, curH.cvt);
+				itmodule2_loaditcompresseddata(self, _wave->channels.samples[0], curh.length, b16Bit, curh.cvt);
+				if (bstereo) itmodule2_loaditcompresseddata(self, _wave->channels.samples[1], curh.length, b16Bit, curh.cvt);
+			} else itmodule2_loaditsampledata(self, _wave, curh.length, bstereo, b16Bit, curh.cvt);
 		}
 		return TRUE;
 	}
@@ -1363,7 +1368,7 @@ static const uint32_t SCRI_ID = 0x53435249;
 bool itmodule2_loads3minstx(ITModule2* self, uint16_t iSampleIdx)
 {
 	bool result = FALSE;
-	s3mInstHeader curH;	
+	s3mInstHeader curh;	
 	psy_audio_Instrument* instr;
 	PsyFile* fp;
 	psy_audio_Song* song;
@@ -1371,30 +1376,30 @@ bool itmodule2_loads3minstx(ITModule2* self, uint16_t iSampleIdx)
 	fp = self->songfile->file;
 	song = self->songfile->song;
 
-	psyfile_read(fp, &curH, sizeof(curH));
+	psyfile_read(fp, &curh, sizeof(curh));
 	
 	instr = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setindex(instr, iSampleIdx);
 	psy_audio_instruments_insert(&song->instruments, instr,
 		psy_audio_instrumentindex_make(0, iSampleIdx));
 		
-	psy_audio_instrument_setname(instr, curH.sName);	
+	psy_audio_instrument_setname(instr, curh.sName);	
 
-	if (curH.tag == SCRS_ID && curH.type == 1)
+	if (curh.tag == SCRS_ID && curh.type == 1)
 	{
 		psy_audio_Sample* wave;
 
 		wave = psy_audio_sample_allocinit(1);
 		psy_audio_samples_insert(&song->samples, wave,
 			sampleindex_make(iSampleIdx, 0));
-		result = itmodule2_loads3msamplex(self, wave, (s3mSampleHeader*)(&curH));		
+		result = itmodule2_loads3msamplex(self, wave, (s3mSampleHeader*)(&curh));		
 		if (result) {
 			// instr.SetDefaultNoteMap(iSampleIdx);
 			// instr.ValidateEnabled();
 		}
-	} else if (curH.tag == SCRI_ID && curH.type != 0)
+	} else if (curh.tag == SCRI_ID && curh.type != 0)
 	{
-		//reinterpret_cast<s3madlibheader*>(&curH)
+		//reinterpret_cast<s3madlibheader*>(&curh)
 	}
 	//song.xminstruments.SetInst(instr, iSampleIdx);
 	return result;

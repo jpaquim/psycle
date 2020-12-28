@@ -136,8 +136,8 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
 	psy_ui_IntSize size;
 	psy_ui_TextMetric tm;	
-	int centerx = 0;
-	int centery = 0;
+	intptr_t centerx = 0;
+	intptr_t centery = 0;
 	uintptr_t count;
 	char seps[] = "\n";
 	char* token;

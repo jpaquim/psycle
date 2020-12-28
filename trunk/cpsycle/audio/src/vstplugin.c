@@ -27,6 +27,16 @@
 static const VstInt32 kBlockSize = 512;
 static const VstInt32 kNumProcessCycles = 5;
 
+#define MIDI_CC_NOTEOFF_ALL 0x7B
+#define MIDI_CC_SOUNDOFF_ALL 0x78
+
+// VstNote
+typedef struct {
+	unsigned char key;
+	unsigned char midichan;
+} VstNote;
+
+// VstTimeInfo
 static void vsttimeinfo_init_default(struct VstTimeInfo* rv)
 {	
 	rv->samplePos = 0.0;
@@ -45,105 +55,14 @@ static void vsttimeinfo_init_default(struct VstTimeInfo* rv)
 	rv->flags = 0;
 }
 
-// Parameter
-static int vstpluginparam_name(psy_audio_VstPluginMachineParam*, char* text);
-static int vstpluginparam_label(psy_audio_VstPluginMachineParam*, char* text);
-static void vstpluginparam_tweak(psy_audio_VstPluginMachineParam*, float val);
-static int vstpluginparam_describe(psy_audio_VstPluginMachineParam*, char* text);
-static float vstpluginparam_normvalue(psy_audio_VstPluginMachineParam*);
-static void vstpluginparam_range(psy_audio_VstPluginMachineParam*, intptr_t* minval,
-	intptr_t* maxval);
-
-static MachineParamVtable vstpluginparam_vtable;
-static int vstpluginparam_vtable_initialized = 0;
-
-static void vstpluginparam_vtable_init(psy_audio_VstPluginMachineParam* self)
+static struct VstTimeInfo* vsttimeinfo_alloc(void)
 {
-	if (!vstpluginparam_vtable_initialized) {
-		vstpluginparam_vtable = *(self->custommachineparam.machineparam.vtable);
-		vstpluginparam_vtable.name = (fp_machineparam_name) vstpluginparam_name;
-		vstpluginparam_vtable.label = (fp_machineparam_label) vstpluginparam_label;
-		vstpluginparam_vtable.tweak = (fp_machineparam_tweak)vstpluginparam_tweak;
-		vstpluginparam_vtable.normvalue = (fp_machineparam_normvalue)vstpluginparam_normvalue;
-		vstpluginparam_vtable.range = (fp_machineparam_range)vstpluginparam_range;
-		vstpluginparam_vtable.describe = (fp_machineparam_describe)vstpluginparam_describe;
-	}
+	return (struct VstTimeInfo*)malloc(sizeof(struct VstTimeInfo));
 }
 
-void psy_audio_vstpluginmachineparam_init(psy_audio_VstPluginMachineParam* self,
-	struct AEffect* effect,
-	uintptr_t index)
+static void vsttimeinfo_deallocate(struct VstTimeInfo* self)
 {
-	psy_audio_custommachineparam_init(&self->custommachineparam,
-		"",
-		"",
-		MPF_STATE,
-		0,
-		0xFFFF);
-	vstpluginparam_vtable_init(self);
-	self->custommachineparam.machineparam.vtable = &vstpluginparam_vtable;
-	self->effect = effect;
-	self->index = index;
-}
-
-void psy_audio_vstpluginmachineparam_dispose(psy_audio_VstPluginMachineParam* self)
-{
-	psy_audio_custommachineparam_dispose(&self->custommachineparam);
-}
-
-psy_audio_VstPluginMachineParam* psy_audio_vstpluginmachineparam_alloc(void)
-{
-	return (psy_audio_VstPluginMachineParam*)malloc(sizeof(psy_audio_VstPluginMachineParam));
-}
-
-psy_audio_VstPluginMachineParam* psy_audio_vstpluginmachineparam_allocinit(struct AEffect* effect,
-	uintptr_t index)
-{
-	psy_audio_VstPluginMachineParam* rv;
-
-	rv = psy_audio_vstpluginmachineparam_alloc();
-	if (rv) {
-		psy_audio_vstpluginmachineparam_init(rv, effect, index);
-	}
-	return rv;
-}
-
-int vstpluginparam_label(psy_audio_VstPluginMachineParam* self, char* text)
-{
-	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamLabel, self->index, 0, text, 0);
-	return *text != '\0';
-}
-
-int vstpluginparam_name(psy_audio_VstPluginMachineParam* self, char* text)
-{
-	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamName, self->index, 0, text, 0);
-	return *text != '\0';
-}
-
-void vstpluginparam_tweak(psy_audio_VstPluginMachineParam* self, float value)
-{
-	self->effect->setParameter(self->effect, self->index, value);
-}
-
-int vstpluginparam_describe(psy_audio_VstPluginMachineParam* self, char* text)
-{
-	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamDisplay, self->index, 0, text, 0);
-	return *text != '\0';
-}
-
-float vstpluginparam_normvalue(psy_audio_VstPluginMachineParam* self)
-{
-	return self->effect->getParameter(self->effect, self->index);
-}
-
-void vstpluginparam_range(psy_audio_VstPluginMachineParam* self, intptr_t* minval,
-	intptr_t* maxval)
-{
-	*minval = 0;
-	*maxval = 0xFFFF;
+	free(self);	
 }
 
 // vtable prototypes
@@ -151,7 +70,8 @@ static int mode(psy_audio_VstPlugin*);
 static void work(psy_audio_VstPlugin* self, psy_audio_BufferContext*);
 static const psy_audio_MachineInfo* info(psy_audio_VstPlugin*);
 // Parameter
-static psy_audio_MachineParam* parameter(psy_audio_VstPlugin*, uintptr_t param);
+static psy_audio_MachineParam* parameter(psy_audio_VstPlugin*,
+	uintptr_t param);
 static uintptr_t numparameters(psy_audio_VstPlugin*);
 static unsigned int numparametercols(psy_audio_VstPlugin*);
 static void dispose(psy_audio_VstPlugin* self);
@@ -165,10 +85,7 @@ static int haseditor(psy_audio_VstPlugin*);
 static void seteditorhandle(psy_audio_VstPlugin*, void* handle);
 static void editorsize(psy_audio_VstPlugin*, int* width, int* height);
 static void editoridle(psy_audio_VstPlugin*);
-// private
-static void checkEffectProperties (AEffect* effect);
-static void checkEffectProcessing (AEffect* effect);
-static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info,
+static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo*,
 	const char* path, int shellidx);
 typedef AEffect* (*PluginEntryProc)(audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
@@ -176,192 +93,176 @@ static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
 static PluginEntryProc getmainentry(psy_Library* library);
 static void processevents(psy_audio_VstPlugin*, psy_audio_BufferContext*);
 static void generateaudio(psy_audio_VstPlugin*, psy_audio_BufferContext*);
-struct VstMidiEvent* allocinitmidievent(psy_audio_VstPlugin*,
-	const psy_audio_PatternEntry*);
+static void stop(psy_audio_VstPlugin*);
 
-struct VstMidiEvent* allocmidi(psy_audio_VstPlugin*, unsigned char data0,
-	unsigned char data1, unsigned char data2);
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*,
-	const psy_audio_PatternEntry*, int channel);
-struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin*, int note, int channel);
-struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
-	const psy_audio_PatternEntry*);
 static psy_dsp_amp_range_t amprange(psy_audio_VstPlugin* self)
 {
 	return PSY_DSP_AMP_RANGE_VST;
 }
+
 // programs
-static void programname(psy_audio_VstPlugin*, int bnkidx, int prgIdx, char* val);
-static int numprograms(psy_audio_VstPlugin*);
-static void setcurrprogram(psy_audio_VstPlugin*, int prgIdx);
-static int currprogram(psy_audio_VstPlugin*);
-static void bankname(psy_audio_VstPlugin*, int bnkidx, char* val);
-static int numbanks(psy_audio_VstPlugin*);
-static void setcurrbank(psy_audio_VstPlugin*, int bnkIdx);
-static int currbank(psy_audio_VstPlugin*);
+static void programname(psy_audio_VstPlugin*, uintptr_t bnkidx,
+	uintptr_t prgidx, char* val);
+static uintptr_t numprograms(psy_audio_VstPlugin*);
+static void setcurrprogram(psy_audio_VstPlugin*, uintptr_t prgidx);
+static uintptr_t currprogram(psy_audio_VstPlugin*);
+static void bankname(psy_audio_VstPlugin*, uintptr_t bnkidx, char* val);
+static uintptr_t numbanks(psy_audio_VstPlugin*);
+static void setcurrbank(psy_audio_VstPlugin*, uintptr_t bnkidx);
+static uintptr_t currbank(psy_audio_VstPlugin*);
 static void currentpreset(psy_audio_VstPlugin*, psy_audio_Preset*);
-
-static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
-
+static void vstplugin_onfileselect(psy_audio_VstPlugin*,
+	struct VstFileSelect*);
 static void initparameters(psy_audio_VstPlugin*);
 static void disposeparameters(psy_audio_VstPlugin*);
-
 static void update_vsttimeinfo(psy_audio_VstPlugin*);
 
 // init vstplugin class vtable
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static int vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_VstPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(psy_audio_vstplugin_base(self)->vtable);
-		vtable.mode = (fp_machine_mode) mode;
-		vtable.work = (fp_machine_work) work;
-		vtable.info = (fp_machine_info) info;
+		vtable.mode = (fp_machine_mode)mode;
+		vtable.work = (fp_machine_work)work;
+		vtable.info = (fp_machine_info)info;
 		vtable.parameter = (fp_machine_parameter)parameter;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.dispose = (fp_machine_dispose) dispose;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
-		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;
-		vtable.haseditor = (fp_machine_haseditor) haseditor;
-		vtable.seteditorhandle = (fp_machine_seteditorhandle) seteditorhandle;
-		vtable.editorsize = (fp_machine_editorsize) editorsize;
-		vtable.editoridle = (fp_machine_editoridle) editoridle;
-		vtable.amprange = (fp_machine_amprange) amprange;
-		vtable.programname = (fp_machine_programname) programname;
-		vtable.numprograms = (fp_machine_numprograms) numprograms;
-		vtable.setcurrprogram = (fp_machine_setcurrprogram) setcurrprogram;
-		vtable.currprogram = (fp_machine_currprogram) currprogram;
-		vtable.bankname = (fp_machine_bankname) bankname;
-		vtable.numbanks = (fp_machine_numbanks) numbanks;
-		vtable.setcurrbank = (fp_machine_setcurrbank) setcurrbank;
-		vtable.currbank = (fp_machine_currbank) currbank;
+		vtable.dispose = (fp_machine_dispose)dispose;
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
+		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
+		vtable.savespecific = (fp_machine_savespecific)savespecific;
+		vtable.haseditor = (fp_machine_haseditor)haseditor;
+		vtable.seteditorhandle = (fp_machine_seteditorhandle)seteditorhandle;
+		vtable.editorsize = (fp_machine_editorsize)editorsize;
+		vtable.editoridle = (fp_machine_editoridle)editoridle;
+		vtable.amprange = (fp_machine_amprange)amprange;
+		vtable.programname = (fp_machine_programname)programname;
+		vtable.numprograms = (fp_machine_numprograms)numprograms;
+		vtable.setcurrprogram = (fp_machine_setcurrprogram)setcurrprogram;
+		vtable.currprogram = (fp_machine_currprogram)currprogram;
+		vtable.bankname = (fp_machine_bankname)bankname;
+		vtable.numbanks = (fp_machine_numbanks)numbanks;
+		vtable.setcurrbank = (fp_machine_setcurrbank)setcurrbank;
+		vtable.currbank = (fp_machine_currbank)currbank;
 		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
-		vtable_initialized = 1;
+		vtable.stop = (fp_machine_stop)stop;
+		vtable_initialized = TRUE;
 	}
 }
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallback* callback,
-	const char* path)
+void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
+	psy_audio_MachineCallback* callback, const char* path)
 {		
 	PluginEntryProc mainproc;
 	
-	psy_audio_custommachine_init(&self->custommachine, callback);	
+	assert(self);
+
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_vstplugin_base(self)->vtable = &vtable;
 	psy_audio_machine_setcallback(psy_audio_vstplugin_base(self), callback);
-	psy_table_init(&self->parameters);
-	self->info = 0;
-	self->editorhandle = 0;
-	self->events = 0;
-	self->plugininfo = 0;
-	self->vsttimeinfo = (struct VstTimeInfo*)malloc(sizeof(struct VstTimeInfo));	
+	psy_table_init(&self->parameters);	
+	self->editorhandle = NULL;
+	self->plugininfo = NULL;
+	psy_audio_vstevents_init(&self->vstevents, 0);	
+	self->vsttimeinfo = vsttimeinfo_alloc();
 	vsttimeinfo_init_default(self->vsttimeinfo);
+	psy_audio_vstinterface_init(&self->mi, NULL, NULL);
 	psy_table_init(&self->tracknote);
 	psy_library_init(&self->library);
-	psy_library_load(&self->library, path);		
+	psy_library_load(&self->library, path);	
 	mainproc = getmainentry(&self->library);
 	if (mainproc) {
 		self->effect = mainproc(hostcallback);
 		if (self->effect) {			
-			VstInt32 numInputs;
-			VstInt32 numOutputs;
-			unsigned int size;
-
-			self->effect->user = self;
-			self->eventcap = 1024;
-			size = sizeof(struct VstEvents) + 
-				sizeof(VstEvent*) * self->eventcap;
-			self->events = (struct VstEvents*) malloc(size);			
-			numInputs = self->effect->numInputs;
-			numOutputs = self->effect->numOutputs;			
-			self->effect->user = self;
-			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
-			self->effect->dispatcher (self->effect, effSetSampleRate, 0, 0, 0,
-				(float) psy_audio_machine_samplerate(psy_audio_vstplugin_base(self)));
-			self->effect->dispatcher (self->effect, effSetProcessPrecision, 0,
-				kVstProcessPrecision32, 0, 0);
-			self->effect->dispatcher (self->effect, effSetBlockSize, 0, kBlockSize, 0, 0);
-			self->effect->dispatcher (self->effect, effMainsChanged, 0, 1, 0, 0);
-			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
+			psy_audio_vstevents_dispose(&self->vstevents);
+			psy_audio_vstevents_init(&self->vstevents, 1024);
+			psy_audio_vstinterface_init(&self->mi, self->effect, self);			
+			psy_audio_vstinterface_open(&self->mi);
+			psy_audio_vstinterface_setsamplerate(&self->mi,	(float)
+				psy_audio_machine_samplerate(psy_audio_vstplugin_base(self)));
+			psy_audio_vstinterface_setprocessprecision32(&self->mi);			
+			psy_audio_vstinterface_setblocksize(&self->mi, kBlockSize);
+			psy_audio_vstinterface_mainschanged(&self->mi);			
+			psy_audio_vstinterface_startprocess(&self->mi);			
 			self->plugininfo = machineinfo_allocinit();
-			makemachineinfo(self->effect, self->plugininfo, self->library.path, 0);
+			makemachineinfo(self->effect, self->plugininfo, self->library.path,
+				0);
 			psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
 				self->plugininfo->ShortName);
 			initparameters(self);
 		}
 	}
 	if (!psy_audio_machine_editname(psy_audio_vstplugin_base(self))) {
-		psy_audio_machine_seteditname(psy_audio_vstplugin_base(self), "VstPlugin");
+		psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
+			"VstPlugin");
 	}
 } 
 
 void dispose(psy_audio_VstPlugin* self)
-{		
+{
+	assert(self);
+
 	if (self->library.module) {
 		if (self->effect) {
-			self->effect->dispatcher (self->effect, effClose, 0, 0, 0, 0);
-			self->effect = 0;			
+			psy_audio_vstinterface_close(&self->mi);			
+			self->effect = NULL;			
 		}
 		psy_library_dispose(&self->library);		
-		if (self->info) {
-			free((char*) self->info->Author);
-			free((char*) self->info->Name);
-			free((char*) self->info->ShortName);
-			free((char*) self->info->Command);
-		}
-		self->info = 0;
-		free(self->events);		
+		psy_audio_vstevents_dispose(&self->vstevents);
 	}	
 	if (self->plugininfo) {
 		machineinfo_dispose(self->plugininfo);
 		free(self->plugininfo);
-		self->plugininfo = 0;
+		self->plugininfo = NULL;
 	}
 	psy_table_dispose(&self->tracknote);
 	disposeparameters(self);
-	free(self->vsttimeinfo);
+	vsttimeinfo_deallocate(self->vsttimeinfo);	
 	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 void initparameters(psy_audio_VstPlugin* self)
 {
-	int gbp;
+	uintptr_t gbp;
 
-	for (gbp = 0; gbp < self->effect->numParams; gbp++) {
-		psy_audio_VstPluginMachineParam* param;
+	assert(self);
 
-		param = psy_audio_vstpluginmachineparam_allocinit(self->effect, gbp);
-		//mi_parametertweak(self->mi, gbp, info->Parameters[gbp]->DefValue);
-		psy_table_insert(&self->parameters, gbp, (void*)param);
+	for (gbp = 0; gbp < numparameters(self); ++gbp) {
+		psy_table_insert(&self->parameters, gbp, (void*)
+			psy_audio_vstpluginparam_allocinit(self->effect, gbp));
 	}
 }
 
 void disposeparameters(psy_audio_VstPlugin* self)
 {
+	assert(self);
+
 	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
-		psy_audio_vstpluginmachineparam_dispose);	
+		psy_audio_vstpluginparam_dispose);	
 }
 
 PluginEntryProc getmainentry(psy_Library* library)
 {
-	PluginEntryProc rv = 0;
+	PluginEntryProc rv;
 
-	rv = (PluginEntryProc)psy_library_functionpointer(library, "VSTPluginMain");
+	rv = (PluginEntryProc)psy_library_functionpointer(library,
+		"VSTPluginMain");
 	if(!rv) {
-		rv = (PluginEntryProc)psy_library_functionpointer(library,"main");
+		rv = (PluginEntryProc)psy_library_functionpointer(library, "main");
 	}
 	return rv;
 }
 
-int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
+bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 {
-	int vst = 0;
+	bool success = FALSE;
 	
 	if (path && strcmp(path, "") != 0) {
 		psy_Library library;
@@ -376,59 +277,64 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 								
 				effect = mainentry(hostcallback);
 				if (effect) {
-					effect->user = NULL;
-					effect->dispatcher(effect, effOpen, 0, 0, 0, 0);
-					vst = effect && makemachineinfo(effect, rv, path, 0) == 0;
-					effect->dispatcher(effect, effClose, 0, 0, 0, 0);
+					psy_audio_VstInterface mi;
+					
+					psy_audio_vstinterface_init(&mi, effect, NULL);
+					psy_audio_vstinterface_open(&mi);					
+					success = (makemachineinfo(effect, rv, path, 0) == PSY_OK);
+					psy_audio_vstinterface_close(&mi);					
 				} else {
-					vst = 0;
+					success = FALSE;
 				}
 			}	
 		}
 		psy_library_dispose(&library);	
 	}
-	return vst;
+	return success;
 }
 
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {	
+	assert(self);
+
 	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {		
 		processevents(self, bc);		
 	}
 }
 
 void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
-{	
-	psy_List* p = 0;
-	int count = 0;
-	int i;
+{		
+	psy_List* p = 0;		
 	uintptr_t amount = bc->numsamples;
 	uintptr_t pos = 0;
+
+	assert(self);
 		
-	for (p = bc->events; p != NULL && count < self->eventcap; psy_list_next(&p)) {
+	for (p = bc->events; p != NULL; psy_list_next(&p)) {		
+		psy_audio_PatternEntry* entry;		
+		psy_audio_PatternEvent* ev;
 		int numworksamples;
 		int midichannel;
-		psy_audio_PatternEntry* entry = psy_audio_patternnode_entry(p);
-		psy_audio_PatternEvent* ev = psy_audio_patternentry_front(entry);
 
+		entry = psy_audio_patternnode_entry(p);
+		ev = psy_audio_patternentry_front(entry);
 		numworksamples = (unsigned int)entry->delta - pos;
-		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
+		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY &&
+				ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
 			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_BYPASS) {
 				if ((ev->parameter & 0x0F) == 0) {
 					psy_audio_machine_unbypass(psy_audio_vstplugin_base(self));
 				} else {
 					psy_audio_machine_bypass(psy_audio_vstplugin_base(self));
 				}
-			} else
-				if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_MUTE) {
-					if ((ev->parameter & 0x0F) == 0) {
-						psy_audio_machine_unmute(psy_audio_vstplugin_base(self));
-					} else {
-						psy_audio_machine_mute(psy_audio_vstplugin_base(self));
-					}
+			} else if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_MUTE) {
+				if ((ev->parameter & 0x0F) == 0) {
+					psy_audio_machine_unmute(psy_audio_vstplugin_base(self));
+				} else {
+					psy_audio_machine_mute(psy_audio_vstplugin_base(self));
 				}
-		} else
-		if (psy_audio_patternentry_front(entry)->inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
+			}
+		} else if (psy_audio_patternentry_front(entry)->inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			midichannel = 0;
 		} else {
 			midichannel = psy_audio_patternentry_front(entry)->inst & 0x0F;
@@ -437,34 +343,29 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			// todo split work
 			psy_audio_machine_setpanning(psy_audio_vstplugin_base(self),
 				psy_audio_patternentry_front(entry)->parameter / 255.f);
-		} else
-		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_MIDICC) {
+		} else if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_MIDICC) {
 			if (psy_audio_patternentry_front(entry)->inst >= 0x80 &&
 				psy_audio_patternentry_front(entry)->inst < 0xFF) {
-					self->events->events[count] = (VstEvent*)
-					allocmidientry(self, entry);
-				++count;
+				psy_audio_vstevents_append_midi(&self->vstevents,
+					(char)psy_audio_patternentry_front_const(entry)->inst,
+					(char)psy_audio_patternentry_front_const(entry)->cmd,
+					(char)psy_audio_patternentry_front_const(entry)->parameter);
 			} else {						
 				// Panning
 				if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {
-					self->events->events[count] = (VstEvent*) allocmidi(self,
-						(unsigned char)(0xB0 | midichannel), 0x0A,
-						(unsigned char)(
-							psy_audio_patternentry_front(entry)->parameter >> 1));
-					++count;	
+					psy_audio_vstevents_append_midi_control(&self->vstevents,						
+						midichannel, 0x0A, (unsigned char)
+						(psy_audio_patternentry_front(entry)->parameter >> 1));
 				}
 			}
-		} else
-		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
+		} else if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
 			psy_audio_MachineParam* param;
 						
 			if (numworksamples > 0) {				
 				int restorenumsamples = bc->numsamples;
 		
 				psy_audio_buffercontext_setoffset(bc, pos);				
-				bc->numsamples = numworksamples;
-				self->events->numEvents = count;
-				self->events->reserved = 0;
+				bc->numsamples = numworksamples;				
 				generateaudio(self, bc);				
 				amount -= numworksamples;
 				pos = (unsigned int)entry->delta;
@@ -490,169 +391,102 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					psy_audio_machine_parameter_tweak_pattern(psy_audio_vstplugin_base(self), param, v);
 				}
 			}			
-			for (i = 0; i < count; ++i) {		
-				free(self->events->events[i]);
-			}
-			self->events->numEvents = 0;
-			count = 0;
-		} else 
-		if (psy_audio_patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
+			psy_audio_vstevents_clear(&self->vstevents);			
+		} else if (psy_audio_patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
 			VstNote* note = 0;
 
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				note = (VstNote*) psy_table_at(&self->tracknote, entry->track);
-				self->events->events[count] = (VstEvent*)
-					allocnoteoff(self, note->key, entry->track);
-				++count;
+				psy_audio_vstevents_append_noteoff(&self->vstevents,
+					entry->track, note->key);
 			}
 			// Panning
-			if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {
-				self->events->events[count] = (VstEvent*) allocmidi(self,
-					(unsigned char)(0xB0 | midichannel), 0x0A,
-					(unsigned char)(psy_audio_patternentry_front(entry)->parameter >> 1));
-				++count;	
-			}
-			self->events->events[count] = (VstEvent*)
-				allocnoteon(self, entry, midichannel);
+			if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {				
+				psy_audio_vstevents_append_midi_control(&self->vstevents,
+					0x0A, midichannel, (unsigned char)
+					(psy_audio_patternentry_front(entry)->parameter >> 1));
+			}			
+			psy_audio_vstevents_append_noteon(&self->vstevents,
+				midichannel, psy_audio_patternentry_front(entry)->note);
 			if (!note) {
 				note = malloc(sizeof(VstNote));
 				psy_table_insert(&self->tracknote, entry->track, (void*) note);
 			}
 			note->key = psy_audio_patternentry_front(entry)->note;
-			note->midichan = midichannel;
-			++count;			
-		} else
-		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
+			note->midichan = midichannel;			
+		} else if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				VstNote* note;
 				
 				note = psy_table_at(&self->tracknote, entry->track);
-				self->events->events[count] = (VstEvent*)
-					allocnoteoff(self, note->key, note->midichan);
-				++count;
+				psy_audio_vstevents_append_noteoff(&self->vstevents,
+					note->midichan, note->key);
 				psy_table_remove(&self->tracknote, entry->track);				
 			}
 		}
 	}	
-	self->events->numEvents = count;
-	self->events->reserved = 0;
 	if (amount > 0) {
 		int restorenumsamples = bc->numsamples;
 		psy_audio_buffercontext_setoffset(bc, pos);		
-		bc->numsamples = amount;
-		self->events->numEvents = count;
-		self->events->reserved = 0;
+		bc->numsamples = amount;		
 		generateaudio(self, bc);		
 		bc->numsamples = restorenumsamples;
 	}
-	psy_audio_buffercontext_setoffset(bc, 0);	
-	for (i = 0; i < count; ++i) {		
-		free(self->events->events[i]);
-	}
-	self->events->numEvents = 0;
+	psy_audio_buffercontext_setoffset(bc, 0);
+	psy_audio_vstevents_clear(&self->vstevents);
 }
 
 void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {
+	assert(self);
+
 	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self)) &&
 			!psy_audio_machine_muted(psy_audio_vstplugin_base(self))) {
 		uintptr_t c;				
 				
 		if (bc->output->offset > 0) {
 			for (c = 0; c < bc->output->numchannels; ++c) {
-				bc->output->samples[c] = bc->output->samples[c] + bc->output->offset;
+				bc->output->samples[c] = bc->output->samples[c] +
+					bc->output->offset;
 			}
 		}		
-		self->effect->dispatcher(self->effect, effProcessEvents, 0, 0,
-			self->events, 0);
+		psy_audio_vstinterface_tick(&self->mi, self->vstevents.events);		
 		if (bc->output->numchannels > 0) {
-			self->effect->processReplacing(self->effect,
-				bc->output->samples, bc->output->samples,			
-				bc->numsamples);
+			psy_audio_vstinterface_work(&self->mi, bc);
 		}
 		if (bc->output->offset > 0) {
 			for (c = 0; c < bc->output->numchannels; ++c) {
-				bc->output->samples[c] = bc->output->samples[c] - bc->output->offset;
+				bc->output->samples[c] = bc->output->samples[c] -
+					bc->output->offset;
 			}
 		}
 	}
 }
 
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self,
-	const psy_audio_PatternEntry* entry, int channel)
-{
-	struct VstMidiEvent* rv;	
+void stop(psy_audio_VstPlugin* self)
+{	
+	psy_TableIterator it;		
+	uint8_t midichannel;
 
-	rv = malloc(sizeof(struct VstMidiEvent));
-	if (rv) {
-		char note;
+	assert(self);
 
-		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) psy_audio_patternentry_front_const(entry)->note;
-		rv->type = kVstMidiType;
-		rv->byteSize = sizeof(struct VstMidiEvent);
-		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char)(channel + 0x90);
-		rv->midiData[1] = (char)note;
-		rv->midiData[2] = (char)(127);
+	psy_audio_vstevents_clear(&self->vstevents);
+	// send note off to all tracknotes	
+	for (it = psy_table_begin(&self->tracknote);			
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_vstevents_append_noteoff(&self->vstevents,
+			((VstNote*)psy_tableiterator_value(&it))->midichan,
+			((VstNote*)psy_tableiterator_value(&it))->key);
 	}
-	return rv;
-}
-
-struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin* self, int note, int channel)
-{
-	struct VstMidiEvent* rv;	
-
-	rv = malloc(sizeof(struct VstMidiEvent));
-	if (rv) {
-		memset(rv, 0, sizeof(struct VstMidiEvent));
-		rv->type = kVstMidiType;
-		rv->byteSize = sizeof(struct VstMidiEvent);
-		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char)(channel | 0x80);
-		rv->midiData[1] = (char) note;
-		rv->midiData[2] = (char) 0;
-	}
-	return rv;
-}
-
-struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
-	const psy_audio_PatternEntry* entry)
-{
-	struct VstMidiEvent* rv;	
-
-	rv = malloc(sizeof(struct VstMidiEvent));
-	if (rv) {
-		char note;
-
-		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) psy_audio_patternentry_front_const(entry)->note;
-		rv->type = kVstMidiType;
-		rv->byteSize = sizeof(struct VstMidiEvent);
-		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char) psy_audio_patternentry_front_const(entry)->inst;
-		rv->midiData[1] = (char) psy_audio_patternentry_front_const(entry)->cmd;
-		rv->midiData[2] = (char) psy_audio_patternentry_front_const(entry)->parameter;
-	}
-	return rv;
-}
-
-struct VstMidiEvent* allocmidi(psy_audio_VstPlugin* self,
-	unsigned char data0, unsigned char data1, unsigned char data2)
-{
-	struct VstMidiEvent* rv;	
-
-	rv = malloc(sizeof(struct VstMidiEvent));
-	if (rv) {
-		memset(rv, 0, sizeof(struct VstMidiEvent));		
-		rv->type = kVstMidiType;
-		rv->byteSize = sizeof(struct VstMidiEvent);
-		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char) data0;
-		rv->midiData[1] = (char) data1;
-		rv->midiData[2] = (char) data2;
-	}
-	return rv;
+	for (midichannel = 0; midichannel < 16; ++midichannel) {		
+		psy_audio_vstevents_append_midi_control(&self->vstevents,
+			midichannel, MIDI_CC_NOTEOFF_ALL, 0);
+		psy_audio_vstevents_append_midi_control(&self->vstevents,		
+			midichannel, MIDI_CC_SOUNDOFF_ALL, 0);
+	}	
+	psy_audio_vstinterface_tick(&self->mi, self->vstevents.events);
+	psy_audio_vstevents_clear(&self->vstevents);
 }
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -741,31 +575,43 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 
 const psy_audio_MachineInfo* info(psy_audio_VstPlugin* self)
 {	
+	assert(self);
+
 	return self->plugininfo;
 }
 
 uintptr_t numinputs(psy_audio_VstPlugin* self)
 {
-	return (uintptr_t) self->effect->numInputs;
+	assert(self);
+
+	return psy_audio_vstinterface_numinputs(&self->mi);
 }
 
 uintptr_t numoutputs(psy_audio_VstPlugin* self)
 {
-	return (uintptr_t) self->effect->numOutputs;
+	assert(self);
+
+	return psy_audio_vstinterface_numoutputs(&self->mi);
 }
 
 psy_audio_MachineParam* parameter(psy_audio_VstPlugin* self, uintptr_t param)
 {
+	assert(self);
+
 	return (psy_audio_MachineParam*)psy_table_at(&self->parameters, param);
 }
 
 uintptr_t numparameters(psy_audio_VstPlugin* self)
 {
-	return self->effect->numParams;	
+	assert(self);
+
+	return psy_audio_vstinterface_numparameters(&self->mi);	
 }
 
 unsigned int numparametercols(psy_audio_VstPlugin* self)
 {
+	assert(self);
+
 	return 6;
 }
 
@@ -775,6 +621,8 @@ void loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	uint32_t size;
 	unsigned char program;
 
+	assert(self);
+
 	psyfile_read(songfile->file, &size, sizeof(size));
 	if(size) {
 		uint32_t count;
@@ -783,40 +631,32 @@ void loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 		psyfile_read(songfile->file, &count, sizeof count);
 		size -= sizeof(program) + sizeof(count) + sizeof(float) * count;
 		if(!size) {
-			if (program < self->effect->numPrograms) {
+			if (program < psy_audio_vstinterface_numprograms(&self->mi)) {
 				uint32_t i;				
-
-				self->effect->dispatcher(self->effect,
-					effBeginSetProgram, 0, 0, 0, 0);
-				self->effect->dispatcher(self->effect,
-					effSetProgram, 0, (VstIntPtr) program, 0, 0);
+				
+				psy_audio_vstinterface_beginprogram(&self->mi);
+				psy_audio_vstinterface_setprogram(&self->mi, program);
 				for(i = 0; i < count; ++i) {
 					float temp;
 				
 					psyfile_read(songfile->file, &temp, sizeof(temp));
-					self->effect->setParameter(self->effect, (VstInt32) i,
-						temp);
+					psy_audio_vstinterface_setparametervalue(&self->mi, i,
+						temp);					
 				}
-				self->effect->dispatcher(self->effect,
-					effEndSetProgram, 0, 0, 0, 0);
+				psy_audio_vstinterface_endprogram(&self->mi);				
 			}
-		} else {
-			self->effect->dispatcher(self->effect,
-				effBeginSetProgram, 0, 0, 0, 0);
-			self->effect->dispatcher(self->effect,
-					effSetProgram, 0, (VstIntPtr) program, 0, 0);
-			self->effect->dispatcher(self->effect,
-				effEndSetProgram, 0, 0, 0, 0);
+		} else {			
+			psy_audio_vstinterface_beginprogram(&self->mi);
+			psy_audio_vstinterface_setprogram(&self->mi, program);
+			psy_audio_vstinterface_endprogram(&self->mi);
 			psyfile_skip(songfile->file, sizeof(float) * count);
-			if(self->effect->flags & effFlagsProgramChunks) {
+			if (psy_audio_vstinterface_hasprogramchunk(&self->mi)) {
 				char * data;
 				
-				data = (char*) malloc(size);
+				data = (char*)malloc(size);
 				psyfile_read(songfile->file, data, size); // Number of parameters
-				self->effect->dispatcher(self->effect,
-					effSetChunk, 0, size, data, 0);					
-				free(data);
-				data = 0;					
+				psy_audio_vstinterface_setchunkdata(&self->mi, FALSE, data, size);
+				free(data);				
 			} else {
 				// there is a data chunk, but this machine does not want one.
 				psyfile_skip(songfile->file, size);
@@ -833,36 +673,38 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {	
 	uint32_t count;
-	unsigned char program=0;
+	uint8_t program;
 	uint32_t size;
-	uint32_t chunksize = 0;
-	char * data = 0;
+	uintptr_t chunksize;
+	char* data;
 
-	count = self->effect->numParams;
+	assert(self);
+
+	program = 0;
+	chunksize = 0;	
+	count = numparameters(self);
 	size = sizeof(program) + sizeof(count);
-	if(self->effect->flags & effFlagsProgramChunks) {
-		count = 0;
-		chunksize = self->effect->dispatcher(self->effect,
-				effGetChunk, 0, 0, &data, 0);				
-		size += chunksize;
+	data = psy_audio_vstinterface_chunkdata(&self->mi, FALSE, &chunksize);
+	if (data) {
+		count = 0;		
+		size += (uint32_t)chunksize;
 	} else {
-		size += (sizeof(float) * count);
+		size += sizeof(float) * count;
 	}
-	psyfile_write(songfile->file, &size, sizeof(size));
-	program = (unsigned char) self->effect->dispatcher(self->effect,
-		effGetProgram, 0, 0, 0, 0);	
+	psyfile_write(songfile->file, &size, sizeof(size));	
+	program = psy_audio_vstinterface_program(&self->mi);
 	psyfile_write(songfile->file, &program, sizeof(program));
 	psyfile_write(songfile->file, &count, sizeof count);
 
-	if(self->effect->flags & effFlagsProgramChunks) {
-		psyfile_write(songfile->file, data, chunksize);
+	if (data) {
+		psyfile_write(songfile->file, data, (uint32_t)chunksize);
 	} else {
 		uint32_t i;
 
 		for (i = 0; i < count; ++i) {
 			float temp;
 			
-			temp = self->effect->getParameter(self->effect, (VstInt32) i);								
+			temp = psy_audio_vstinterface_parametervalue(&self->mi, i);
 			psyfile_write(songfile->file, &temp, sizeof(temp));
 		}
 	}
@@ -870,23 +712,29 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 
 int haseditor(psy_audio_VstPlugin* self)
 {
-	return (self->effect->flags & effFlagsHasEditor) == effFlagsHasEditor;
+	assert(self);
+
+	return psy_audio_vstinterface_haseditor(&self->mi);	
 }
 
 void seteditorhandle(psy_audio_VstPlugin* self, void* handle)
 {		
-	if (self->editorhandle && handle == 0) {
-		self->editorhandle = 0;
-		self->effect->dispatcher(self->effect, effEditClose, 0, 0, handle, 0);
+	assert(self);
+
+	if (self->editorhandle && handle == NULL) {
+		self->editorhandle = NULL;
+		psy_audio_vstinterface_closeeditor(&self->mi, handle);		
 	} else {
 		self->editorhandle = handle;
-		self->effect->dispatcher(self->effect, effEditOpen, 0, 0, handle, 0);
+		psy_audio_vstinterface_openeditor(&self->mi, handle);		
 	}
 }
 
 void editorsize(psy_audio_VstPlugin* self, int* width, int* height)
 {
 	struct ERect* r = 0;
+
+	assert(self);
 
 	self->effect->dispatcher(self->effect, effEditGetRect, 0, 0,  &r, 0);
 	if (r != 0) {
@@ -900,145 +748,53 @@ void editorsize(psy_audio_VstPlugin* self, int* width, int* height)
 
 void editoridle(psy_audio_VstPlugin* self)
 {
+	assert(self);
+
 	if(self->editorhandle) {
-		self->effect->dispatcher(self->effect, effEditIdle, 0, 0, 0, 0);
+		psy_audio_vstinterface_editoridle(&self->mi);		
 	}
 }
 
 int mode(psy_audio_VstPlugin* self)
 { 
-	return (self->effect->flags & effFlagsIsSynth) == effFlagsIsSynth
-		? MACHMODE_GENERATOR
-		: MACHMODE_FX;
+	assert(self);
+
+	return psy_audio_vstinterface_mode(&self->mi);	
 }
 
-VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+void programname(psy_audio_VstPlugin* self, uintptr_t bnkidx, uintptr_t prgidx, char* val)
 {
-	VstIntPtr result = 0;
-	psy_audio_VstPlugin* self;	
-	
-	if (opcode != 7) {
-		TRACE("vst-opcode: ");
-		TRACE_INT(opcode);
-		TRACE("\n");
-	}
+	assert(self);
 
-	if (effect) {
-		self = (psy_audio_VstPlugin*) effect->user;
-	} else
-	if (opcode == audioMasterVersion) {
-		return kVstVersion;
-	} else {
-		return 0;
-	}	
-	switch(opcode)
-	{
-		case audioMasterVersion :
-			result = kVstVersion;
-			break;		
-		case audioMasterIdle:            
-			break;
-		case audioMasterGetCurrentProcessLevel:
-			result = kVstProcessLevelUnknown;
-			break;
-		case audioMasterGetVendorString:
-			psy_snprintf((char*)(ptr), kVstMaxVendorStrLen, "Psycledelics");
-			result = TRUE;
-			break;
-		case audioMasterGetProductString:
-			psy_snprintf((char*)(ptr), kVstMaxProductStrLen, "Psycle VSTHost");
-			result = TRUE;
-			break;
-		case audioMasterGetSampleRate:
-			if (self) {
-				result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
-					self));
-			} else {
-				result = 44100;
-			}
-			break;
-		case audioMasterGetTime:
-			if (self && self->vsttimeinfo) {
-				update_vsttimeinfo(self);
-				result = (VstIntPtr)self->vsttimeinfo;
-			}			
-			break;
-		case audioMasterOpenFileSelector :
-			if (self) {
-				vstplugin_onfileselect(self, (struct VstFileSelect*)ptr);
-			}
-		case audioMasterSizeWindow:
-			if (self) {
-				result = psy_audio_machine_editresize(
-					psy_audio_vstplugin_base(self),
-					(intptr_t)index, (intptr_t)value);
-			}			
-			break;
-		case audioMasterCanDo: {
-			char* str;
-
-			str = (char*)ptr;
-			if (strcmp(str, "sizeWindow") == 0) {
-				result = TRUE;
-			} else {
-				result = FALSE;
-			}
-			self = self;
-			break; }
-		break;		
-		default:
-		break;
-	}
-
-	return result;
+	self->effect->dispatcher(self->effect, effGetProgramNameIndexed,
+		(VstIntPtr)(bnkidx * 128 + prgidx), -1, val, 0);
 }
 
-void vstplugin_onfileselect(psy_audio_VstPlugin* self,
-	struct VstFileSelect* select)
+uintptr_t numprograms(psy_audio_VstPlugin* self)
 {
-	if (!self->custommachine.machine.callback) {
-		return;
-	}
-	switch (select->command) {
-		case kVstFileLoad:
-			self->custommachine.machine.callback->vtable->fileselect_load(
-				self->custommachine.machine.callback, NULL, NULL);
-		break;
-		case kVstFileSave:
-			self->custommachine.machine.callback->vtable->fileselect_save(
-				self->custommachine.machine.callback, NULL, NULL);
-		break;
-		case kVstDirectorySelect:
-			self->custommachine.machine.callback->vtable->fileselect_directory(
-				self->custommachine.machine.callback);
-		break;
-		default:
-		break;
-	}
+	assert(self);
+
+	return psy_audio_vstinterface_numprograms(&self->mi);	
 }
 
-void programname(psy_audio_VstPlugin* self, int bnkidx, int prgIdx, char* val)
+void setcurrprogram(psy_audio_VstPlugin* self, uintptr_t prgidx)
 {
-	self->effect->dispatcher(self->effect, effGetProgramNameIndexed, bnkidx * 128 + prgIdx, -1, val, 0);
+	assert(self);
+
+	psy_audio_vstinterface_setprogram(&self->mi, prgidx);	
 }
 
-int numprograms(psy_audio_VstPlugin* self)
+uintptr_t currprogram(psy_audio_VstPlugin* self)
 {
-	return self->effect->numPrograms;
+	assert(self);
+
+	return psy_audio_vstinterface_program(&self->mi);	
 }
 
-void setcurrprogram(psy_audio_VstPlugin* self, int prgIdx)
+void bankname(psy_audio_VstPlugin* self, uintptr_t bnkidx, char* val)
 {
-	self->effect->dispatcher(self->effect, effSetProgram, 0, prgIdx, 0, 0);
-}
+	assert(self);
 
-int currprogram(psy_audio_VstPlugin* self)
-{
-	return self->effect->dispatcher(self->effect, effGetProgram, 0, 0, 0, 0);
-}
-
-void bankname(psy_audio_VstPlugin* self, int bnkidx, char* val)
-{
 	if (bnkidx < numbanks(self)) {
 		psy_snprintf(val, 256, "Internal %d", bnkidx + 1);
 	} else {
@@ -1046,24 +802,34 @@ void bankname(psy_audio_VstPlugin* self, int bnkidx, char* val)
 	}
 }
 
-int numbanks(psy_audio_VstPlugin* self)
+uintptr_t numbanks(psy_audio_VstPlugin* self)
 {
+	assert(self);
+
 	return (numprograms(self) / 128) + 1;
 }
 
-void setcurrbank(psy_audio_VstPlugin* self, int bnkIdx)
+void setcurrbank(psy_audio_VstPlugin* self, uintptr_t bnkidx)
 {
-	setcurrprogram(self, bnkIdx * 128 + currprogram(self));
+	assert(self);
+
+	setcurrprogram(self, bnkidx * 128 + currprogram(self));
 }
 
-int currbank(psy_audio_VstPlugin* self)
+uintptr_t currbank(psy_audio_VstPlugin* self)
 {
+	assert(self);
+
 	return currprogram(self) / 128;
 }
 
 void currentpreset(psy_audio_VstPlugin* self, psy_audio_Preset* preset)
 {	
 	uintptr_t gbp;
+	uintptr_t chunksize;
+	void* ptr;
+
+	assert(self);
 
 	for (gbp = 0; gbp < numparameters(self); ++gbp) {
 		psy_audio_MachineParam* param;
@@ -1077,23 +843,145 @@ void currentpreset(psy_audio_VstPlugin* self, psy_audio_Preset* preset)
 			preset->isfloat = TRUE;
 		}		
 	}
-	if (self->effect->flags & effFlagsProgramChunks) {
-		VstInt32 size;
-		bool onlyCurrentProgram;
-		void* ptr;		
-
-		ptr = 0;
-		onlyCurrentProgram = TRUE;		
-		size = self->effect->dispatcher(self->effect, effGetChunk, onlyCurrentProgram, 0, &ptr, 0);		
-		psy_audio_preset_putdata(preset, size, ptr);		
+	ptr = psy_audio_vstinterface_chunkdata(&self->mi, TRUE, &chunksize);
+	if (ptr) {
+		psy_audio_preset_putdata(preset, (int)chunksize, ptr);
 	}
 	preset->id = self->effect->uniqueID;
 	preset->magic = self->effect->magic;
 	preset->version = self->effect->version;
 }
 
+void vstplugin_onfileselect(psy_audio_VstPlugin* self,
+	struct VstFileSelect* select)
+{
+	assert(self);
+
+	if (!self->custommachine.machine.callback) {
+		return;
+	}
+	switch (select->command) {
+	case kVstFileLoad:
+		self->custommachine.machine.callback->vtable->fileselect_load(
+			self->custommachine.machine.callback, NULL, NULL);
+		break;
+	case kVstFileSave:
+		self->custommachine.machine.callback->vtable->fileselect_save(
+			self->custommachine.machine.callback, NULL, NULL);
+		break;
+	case kVstDirectorySelect:
+		self->custommachine.machine.callback->vtable->fileselect_directory(
+			self->custommachine.machine.callback);
+		break;
+	default:
+		break;
+	}
+}
+
 void update_vsttimeinfo(psy_audio_VstPlugin* self)
 {	
-	self->vsttimeinfo->sampleRate = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
-		self));	
+	assert(self);
+
+	self->vsttimeinfo->sampleRate = psy_audio_machine_samplerate(
+		psy_audio_vstplugin_base(self));
+}
+
+// VSTCALLBACK
+VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index,
+	VstIntPtr value, void* ptr, float opt)
+{
+	VstIntPtr result = 0;
+	psy_audio_VstPlugin* self;
+
+	// if (opcode != audioMasterGetTime) {
+	//	TRACE("vst-opcode: ");
+	//	TRACE_INT(opcode);
+	//	TRACE("\n");
+	// }
+	if (effect) {
+		self = (psy_audio_VstPlugin*)effect->user;
+	} else
+		if (opcode == audioMasterVersion) {
+			return kVstVersion;
+		} else {
+			return 0;
+		}
+	switch (opcode)
+	{
+	case audioMasterVersion:
+		result = kVstVersion;
+		break;
+	case audioMasterIdle:
+		break;
+	case audioMasterGetCurrentProcessLevel:
+		result = kVstProcessLevelUnknown;
+		break;
+	case audioMasterGetVendorString:
+		psy_snprintf((char*)(ptr), kVstMaxVendorStrLen, "Psycledelics");
+		result = TRUE;
+		break;
+	case audioMasterGetProductString:
+		psy_snprintf((char*)(ptr), kVstMaxProductStrLen, "Psycle VSTHost");
+		result = TRUE;
+		break;
+	case audioMasterGetSampleRate:
+		if (self) {
+			result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
+				self));
+		} else {
+			result = 44100;
+		}
+		break;
+	case audioMasterGetTime:
+		if (self && self->vsttimeinfo) {
+			update_vsttimeinfo(self);
+			result = (VstIntPtr)self->vsttimeinfo;
+		}
+		break;
+	case audioMasterOpenFileSelector:
+		if (self) {
+			vstplugin_onfileselect(self, (struct VstFileSelect*)ptr);
+		}
+	case audioMasterSizeWindow:
+		if (self) {
+			result = psy_audio_machine_editresize(
+				psy_audio_vstplugin_base(self),
+				(intptr_t)index, (intptr_t)value);
+		}
+		break;
+	case audioMasterCanDo:
+		result = (strcmp((char*)ptr, "sizeWindow") == 0);
+		break;
+	case audioMasterGetAutomationState:		
+		/// difference kVstAutomationOff and kVstAutomationUnsupported?
+		result = kVstAutomationUnsupported;
+		break;
+	case audioMasterGetLanguage: {
+		if (self) {
+			const char* lang;
+
+			lang = psy_audio_machine_language(psy_audio_vstplugin_base(self));
+			if (strcmp(lang, "de") == 0) {
+				result = kVstLangGerman;
+			} else if (strcmp(lang, "en") == 0) {
+				result = kVstLangEnglish;				
+			} else if (strcmp(lang, "es") == 0) {
+				result = kVstLangSpanish;
+			} else if (strcmp(lang, "fr") == 0) {
+				result = kVstLangItalian;
+			} else if (strcmp(lang, "it") == 0) {
+				result = kVstLangItalian;
+			} else if (strcmp(lang, "jp") == 0) {
+				result = kVstLangJapanese;
+			} else {
+				result = kVstLangSpanish;
+			}
+		} else {
+			result = kVstLangSpanish;
+		}
+		break; }
+	default:
+		break;
+	}
+	return result;
 }

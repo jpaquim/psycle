@@ -188,17 +188,17 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 				self->valuedescription, strlen(self->valuedescription));
 		}
 	} else {
-		int sliderheight = 8;
+		intptr_t sliderheight = 8;
 		psy_ui_Size size;
 		psy_ui_Size slidersize;
-		int centerx = 0;
+		intptr_t centerx = 0;
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_size(&self->component);
 		if (self->charnumber != 0) {
 			
-			slidersize.width = psy_ui_value_makeew(self->charnumber);
+			slidersize.width = psy_ui_value_makeew((double)self->charnumber);
 			slidersize.height = size.height;
 			centerx = (psy_ui_value_px(&size.width, &tm) -
 				psy_ui_value_px(&slidersize.width, &tm)) / 2;
@@ -241,8 +241,8 @@ void psy_ui_slider_onmousedown(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_TextMetric tm;
 	psy_ui_Size size;
-	int width;
-	int height;
+	intptr_t width;
+	intptr_t height;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
@@ -429,8 +429,8 @@ void psy_ui_slider_onpreferredsize(psy_ui_Slider* self, psy_ui_Size* limit,
 		rv->width = psy_ui_value_makeew(20);
 		rv->height = psy_ui_value_makeeh(1.3);
 	} else {
-		rv->width = psy_ui_value_makeew(self->charnumber);
-		rv->height = psy_ui_value_makeeh(20);
+		rv->width = psy_ui_value_makeew((double)self->charnumber);
+		rv->height = psy_ui_value_makeeh(20.0);
 	}
 }
 
