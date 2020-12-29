@@ -21,7 +21,7 @@ typedef struct {
 
 void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*);
 void parameterlistbox_setmachine(ParameterListBox*, psy_audio_Machine*);
-int parameterlistbox_selected(ParameterListBox*);
+intptr_t parameterlistbox_selected(ParameterListBox*);
 
 #ifdef __cplusplus
 }

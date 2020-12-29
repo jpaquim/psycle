@@ -54,7 +54,7 @@ INLINE void psy_audiodriversettings_setchannelmode(
 	self->channelmode_ = mode;
 }
 
-INLINE unsigned int psy_audiodriversettings_samplespersec(
+INLINE uintptr_t psy_audiodriversettings_samplespersec(
 	psy_AudioDriverSettings* self)
 {
 	return self->samplespersec_;
@@ -78,14 +78,14 @@ INLINE void psy_audiodriversettings_setsamplespersec(
 // validbitdepth is the actual number of bits used.
 // Valid values (bitdepth/validbitdepth)
 // 8/8, 16/16 , 32/24 (int) and 32/32 (float)
-INLINE unsigned int psy_audiodriversettings_validbitdepth(
+INLINE uintptr_t psy_audiodriversettings_validbitdepth(
 	psy_AudioDriverSettings* self)
 {
 	return self->validbitdepth_;
 }
 
 // bitdepth is the container size. (e.g. valid 24 bits, size 32 bits)
-INLINE unsigned int psy_audiodriversettings_bitdepth(
+INLINE uintptr_t psy_audiodriversettings_bitdepth(
 	psy_AudioDriverSettings* self)
 {
 	return self->bitdepth_;
@@ -105,7 +105,7 @@ INLINE void psy_audiodriversettings_setvalidbitdepth(
 		: (self->bitdepth_ >> 3);
 }
 
-INLINE unsigned int psy_audiodriversettings_blockcount(
+INLINE uintptr_t psy_audiodriversettings_blockcount(
 	psy_AudioDriverSettings* self)
 {
 	return self->blockcount_;
@@ -118,7 +118,7 @@ INLINE void psy_audiodriversettings_setblockcount(
 }
 
 ///\name getter/setter for the audio block size (in samples comprising all channels)	
-INLINE unsigned int psy_audiodriversettings_blockframes(
+INLINE uintptr_t psy_audiodriversettings_blockframes(
 	psy_AudioDriverSettings* self)
 {
 	return self->blockframes_;
@@ -132,20 +132,20 @@ INLINE void psy_audiodriversettings_setblockframes(
 }
 
 ///\name getter for the audio block size (in bytes)
-INLINE unsigned int psy_audiodriversettings_blockbytes(
+INLINE uintptr_t psy_audiodriversettings_blockbytes(
 	psy_AudioDriverSettings* self)
 {
 	return self->blockframes_ * self->framebytes_;
 }
 
 /// getter for the whole buffer size (in bytes).
-INLINE unsigned int psy_audiodriversettings_totalbufferbytes(
+INLINE uintptr_t psy_audiodriversettings_totalbufferbytes(
 	psy_AudioDriverSettings* self)
 {
 	return self->blockframes_ * self->framebytes_ * self->blockcount_;
 }
 
-INLINE unsigned int psy_audiodriversettings_framebytes(
+INLINE uintptr_t psy_audiodriversettings_framebytes(
 	psy_AudioDriverSettings* self)
 {
 	return self->framebytes_;

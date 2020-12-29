@@ -41,9 +41,9 @@ typedef struct TabBar {
 	psy_ui_Component component;
 	// data members
 	psy_List* tabs;	
-	int selected;		
+	intptr_t selected;
 	int hover;
-	int hoverindex;
+	intptr_t hoverindex;
 	int tabalignment;
 	psy_ui_Margin defaulttabmargin;
 	// Signals
@@ -55,9 +55,9 @@ Tab* tabbar_append(TabBar*, const char* label);
 void tabbar_append_tabs(TabBar*, const char* label, ...);
 void tabbar_clear(TabBar*);
 void tabbar_rename_tabs(TabBar*, const char* label, ...);
-void tabbar_select(TabBar*, int tabindex);
+void tabbar_select(TabBar*, intptr_t tabindex);
 
-INLINE int tabbar_selected(const TabBar* self)
+INLINE intptr_t tabbar_selected(const TabBar* self)
 {	
 	assert(self);
 
@@ -67,8 +67,8 @@ INLINE int tabbar_selected(const TabBar* self)
 void tabbar_settabmargin(TabBar*, int tab, const psy_ui_Margin*);
 void tabbar_settabmode(TabBar*, int tab, TabMode);
 void tabbar_setdefaulttabmargin(TabBar*, const psy_ui_Margin*);
-Tab* tabbar_tab(TabBar*, int tabindex);
-int tabbar_checkstate(TabBar*, int tabindex);
+Tab* tabbar_tab(TabBar*, intptr_t tabindex);
+int tabbar_checkstate(TabBar*, intptr_t tabindex);
 int tabbar_numchecked(TabBar*);
 
 INLINE psy_ui_Component* tabbar_base(TabBar* self)

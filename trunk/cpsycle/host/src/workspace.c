@@ -407,7 +407,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		break; }
 	case PROPERTY_ID_REMOVECONTROLLERMAP: {
 		psy_Property* group;
-		int id;
+		intptr_t id;
 
 		group = psy_property_parent(property);
 		if (group) {
@@ -548,44 +548,33 @@ void workspace_onaddeventdriver(Workspace* self)
 }
 
 void workspace_onremoveeventdriver(Workspace* self)
-{
-	psy_Property* activedrivers;
-
-	activedrivers = psy_property_at(self->config.input.eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_CHOICE);
-	if (activedrivers) {
-		psy_audio_player_removeeventdriver(&self->player,
-			psy_property_item_int(activedrivers));
-		eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
-		if (psy_property_item_int(activedrivers) > 0) {
-			psy_property_setitem_int(activedrivers,
-				psy_property_item_int(activedrivers) - 1);
-		}
-		eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
-			psy_property_item_int(activedrivers));
+{	
+	psy_audio_player_removeeventdriver(&self->player,
+		psy_property_item_int(self->config.input.activedrivers));
+	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
+	if (psy_property_item_int(self->config.input.activedrivers) > 0) {
+		psy_property_setitem_int(self->config.input.activedrivers,
+			psy_property_item_int(self->config.input.activedrivers) - 1);
 	}
+	eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
+		psy_property_item_int(self->config.input.activedrivers));	
 }
 
 void workspace_onediteventdriverconfiguration(Workspace* self)
-{
-	psy_Property* activedrivers;
+{		
+	psy_Property* driversection;
+	psy_EventDriver* driver;
 
-	activedrivers = psy_property_at(self->config.input.eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_CHOICE);
-	if (activedrivers) {
-		psy_Property* driversection;
-		psy_EventDriver* driver;
-
-		driver = psy_audio_player_eventdriver(&self->player,
-			psy_property_item_int(activedrivers));
-		driversection = psy_property_find(self->config.input.eventdriverconfigure,
-			psy_property_key(psy_eventdriver_configuration(driver)),
-			PSY_PROPERTY_TYPE_NONE);
-		if (driversection) {
-			psy_audio_player_restarteventdriver(&self->player,
-				psy_property_item_int(activedrivers),
-				driversection);
-		}
+	driver = psy_audio_player_eventdriver(&self->player,
+	psy_property_item_int(self->config.input.activedrivers));
+	driversection = psy_property_find(
+		self->config.input.eventdriverconfigure,
+		psy_property_key(psy_eventdriver_configuration(driver)),
+		PSY_PROPERTY_TYPE_NONE);
+	if (driversection) {
+		psy_audio_player_restarteventdriver(&self->player,
+			psy_property_item_int(self->config.input.activedrivers),
+			driversection);
 	}
 }
 
@@ -681,14 +670,16 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 	}	
 }
 
-void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender, int progress)
+void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender,
+	int progress)
 {
 	assert(self);
 
 	psy_signal_emit(&self->signal_loadprogress, self, 1, progress);
 }
 
-void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audio_SongFile* songfile)
+void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
+	psy_audio_SongFile* songfile)
 {		
 	assert(self);
 
@@ -968,7 +959,7 @@ void workspace_setsequenceselection(Workspace* self,
 	}
 }
 
-int workspace_currview(Workspace* self)
+uintptr_t workspace_currview(Workspace* self)
 {
 	assert(self);
 
@@ -1141,7 +1132,7 @@ void workspace_restoreview(Workspace* self)
 	workspace_selectview(self, self->restoreview, 0, 0);
 }
 
-void workspace_selectview(Workspace* self, int view, uintptr_t section,
+void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
 	int option)
 {
 	assert(self);
@@ -1183,7 +1174,7 @@ int workspace_recordingtweaks(Workspace* self)
 	return self->recordtweaks;
 }
 
-void workspace_onviewchanged(Workspace* self, int viewid)
+void workspace_onviewchanged(Workspace* self, uintptr_t viewid)
 {
 	ViewHistoryEntry view;
 

@@ -53,9 +53,9 @@ INLINE psy_ui_Component* sequencebuttons_base(SequenceButtons* self)
 
 typedef struct SequenceListViewState {
 	// public data
-	int margin;
-	int trackwidth;
-	int selectedtrack;
+	intptr_t margin;
+	intptr_t trackwidth;
+	uintptr_t selectedtrack;
 	// references
 	psy_audio_Sequence* sequence;
 } SequenceListViewState;
@@ -70,13 +70,13 @@ typedef struct SequenceListView {
 	// ui elements	
 	psy_ui_Edit rename;
 	// internal data
-	int selected;	
+	uintptr_t selected;	
 	int foundselected;
-	int lineheight;
-	int textoffsety;
-	int textheight;	
-	int identwidth;   
-	int avgcharwidth;	
+	intptr_t lineheight;
+	intptr_t textoffsety;
+	intptr_t textheight;
+	intptr_t identwidth;
+	intptr_t avgcharwidth;
 	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;	
 	int refreshcount;

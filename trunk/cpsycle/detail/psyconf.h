@@ -28,15 +28,20 @@
 
 #if defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
+#define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
+#define PSYCLE_USER64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #else
 #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
+#define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
+#define PSYCLE_USER64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #endif
 
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"
-#define PSYCLE_PLUGINS_DEFAULT_DIR PSYCLE_USER_DIR "\\PsyclePlugins"
+#define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_USER_DIR "\\PsyclePlugins"
+#define PSYCLE_PLUGINS64_DEFAULT_DIR PSYCLE_USER64_DIR "\\PsyclePlugins"
 #define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_USER_DIR "\\LuaScripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR PSYCLE_USER_DIR "\\VstPlugins"
 #define PSYCLE_VSTS64_DEFAULT_DIR PSYCLE_USER_DIR "\\Vst64Plugins"

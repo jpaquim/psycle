@@ -43,13 +43,13 @@ void midiactivechannelbox_init(MidiActiveChannelBox* self,
 void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	psy_ui_Graphics* g)
 {
-	int ch;
-	int cpx;
+	uintptr_t ch;
+	intptr_t cpx;
 	psy_ui_TextMetric tm;
 	psy_ui_Value colew;
-	int headercolw_px;
-	int colw_px;
-	int lineheight;
+	intptr_t headercolw_px;
+	intptr_t colw_px;
+	intptr_t lineheight;
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(4);
@@ -114,9 +114,9 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 {	
 	psy_ui_TextMetric tm;
 	psy_ui_Value colew;
-	int headercolw_px;
-	int colw_px;
-	int lineheight;
+	intptr_t headercolw_px;
+	intptr_t colw_px;
+	intptr_t lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(20);
@@ -165,7 +165,7 @@ void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
 // prototypes
 static void midichannelmappingview_ondraw(MidiChannelMappingView*, psy_ui_Graphics*);
 static void midichannelmappingview_drawheader(MidiChannelMappingView*,
-	psy_ui_Graphics*, int colx_px[4], int y);
+	psy_ui_Graphics*, intptr_t colx_px[4], intptr_t y);
 static void midichannelmappingview_onpreferredsize(MidiChannelMappingView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 // vtable
@@ -200,12 +200,12 @@ void midichannelmappingview_init(MidiChannelMappingView* self,
 void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics* g)
 {
 	psy_audio_MidiInput* midiinput;
-	int ch;
-	int cpy;
-	int colx_px[4];
+	intptr_t ch;
+	intptr_t cpy;
+	intptr_t colx_px[4];
 	psy_ui_TextMetric tm;
-	int i;
-	int lineheight;
+	intptr_t i;
+	intptr_t lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	for (i = 0; i < 4; ++i) {
@@ -296,7 +296,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 }
 
 void midichannelmappingview_drawheader(MidiChannelMappingView* self,
-	psy_ui_Graphics* g, int colx_px[4], int y)
+	psy_ui_Graphics* g, intptr_t colx_px[4], intptr_t y)
 {
 	psy_ui_textout(g, colx_px[0], y, "Channel", strlen("Channel"));
 	psy_ui_textout(g, colx_px[1], y, "Generator/Effect", strlen("Generator/Effect"));

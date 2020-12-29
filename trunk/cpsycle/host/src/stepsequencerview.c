@@ -154,14 +154,14 @@ void stepsequencerbar_drawbackground(StepsequencerBar* self, psy_ui_Graphics* g)
 void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	int step, int mode)
 {
-	int cpx;
+	intptr_t cpx;
 	psy_ui_Rectangle r;
 	psy_ui_Size corner;
 
 	corner.width = psy_ui_value_makepx(5);
 	corner.height = psy_ui_value_makepx(5);
 	cpx = step * self->stepwidth;
-	psy_ui_setrectangle(&r, cpx, 0, (int)(self->stepwidth * 0.8),
+	psy_ui_setrectangle(&r, cpx, 0, (intptr_t)(self->stepwidth * 0.8),
 		self->stepheight);	
 	psy_ui_drawsolidroundrectangle(g, r, corner,
 		stepsequencerbar_stepcolour(self, mode));
@@ -191,7 +191,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->pattern && workspace_song(self->workspace)) {
-		int step;
+		intptr_t step;
 		psy_audio_PatternEvent event;
 		psy_audio_PatternNode* node;
 		psy_audio_PatternNode* prev;
@@ -472,8 +472,8 @@ void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui
 void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 	psy_ui_MouseEvent* ev)
 {	
-	int row;
-	int steprow;
+	intptr_t row;
+	intptr_t steprow;
 
 	row = ev->y / self->lineheight;
 	steprow = row * 4 + (ev->x / self->colwidth);

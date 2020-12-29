@@ -17,8 +17,8 @@ extern "C" {
 //      The Left StepBar component selects the current pattern bar.
 
 typedef struct {
-	int line;
-	int steprow;	
+	intptr_t line;
+	intptr_t steprow;
 } StepSequencerPosition;
 
 typedef struct {
@@ -58,8 +58,8 @@ typedef struct {
 	psy_ui_Component component;
 	Workspace* workspace;
 	psy_audio_Pattern* pattern;		
-	int stepwidth;	
-	int stepheight;
+	intptr_t stepwidth;
+	intptr_t stepheight;
 	StepTimer* steptimer;
 	StepSequencerPosition position;	
 } StepsequencerBar;

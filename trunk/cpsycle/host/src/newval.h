@@ -28,11 +28,11 @@ typedef struct NewValView {
 	psy_ui_Button apply;
 	psy_ui_Button cancel;
 	// internal data;
-	int value;
-	int v_min;
-	int v_max;
-	int macindex;
-	int paramindex;
+	intptr_t value;
+	intptr_t v_min;
+	intptr_t v_max;
+	uintptr_t macindex;
+	uintptr_t paramindex;
 	char dlgtitle[256];
 	bool doapply;
 	bool docancel;	
@@ -41,10 +41,10 @@ typedef struct NewValView {
 } NewValView;
 	
 void newvalview_init(NewValView*, psy_ui_Component* parent,
-	int mindex, int pindex, int vval, int vmin, int vmax, char* title,
+	uintptr_t mindex, uintptr_t pindex, intptr_t vval, intptr_t vmin, intptr_t vmax, char* title,
 	Workspace*);
-void newvalview_reset(NewValView*, int mindex, int pindex, int vval, int vmin,
-	int vmax, char* title);
+void newvalview_reset(NewValView*, uintptr_t mindex, uintptr_t pindex, intptr_t vval, intptr_t vmin,
+	intptr_t vmax, char* title);
 
 INLINE psy_ui_Component* newvalview_base(NewValView* self)
 {

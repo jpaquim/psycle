@@ -140,7 +140,7 @@ INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self, uintptr_t t
 
 INLINE psy_dsp_big_beat_t psy_audio_player_ticksperbeat(psy_audio_Player* self)
 {
-	return self->sequencer.tpb;
+	return (psy_dsp_big_beat_t)self->sequencer.tpb;
 }
 
 INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self, uintptr_t ticks)
@@ -153,7 +153,7 @@ INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self, uintpt
 
 INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(psy_audio_Player* self)
 {
-	return self->sequencer.extraticks;
+	return (psy_dsp_big_beat_t)self->sequencer.extraticks;
 }
 
 ///\returns lines per beat

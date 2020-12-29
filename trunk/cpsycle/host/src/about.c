@@ -213,17 +213,17 @@ void about_onalign(About* self)
 	psy_ui_Size size;
 	psy_ui_Size bitmapsize;
 	psy_ui_TextMetric tm;
-	int centerx;
-	int centery;
+	intptr_t centerx;
+	intptr_t centery;
 	psy_ui_Size contribbuttonsize;
 	psy_ui_Size versionbuttonsize;
 	psy_ui_Size licencebuttonsize;
 	psy_ui_Size okbuttonsize;
-	int charmargin = 25;
-	int width = 0;
-	int margin;
-	int cpx;
-
+	intptr_t charmargin = 25;
+	intptr_t width = 0;
+	intptr_t margin;
+	intptr_t cpx;
+	
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);

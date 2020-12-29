@@ -230,7 +230,7 @@ typedef void (*fp_machine_programname)(struct psy_audio_Machine*, uintptr_t bnki
 typedef uintptr_t (*fp_machine_numprograms)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrprogram)(struct psy_audio_Machine*,
 	uintptr_t prgidx);
-typedef int (*fp_machine_currprogram)(struct psy_audio_Machine*);
+typedef uintptr_t(*fp_machine_currprogram)(struct psy_audio_Machine*);
 // bank
 typedef void (*fp_machine_bankname)(struct psy_audio_Machine*,
 	uintptr_t bnkidx, char* val);
@@ -773,13 +773,13 @@ INLINE psy_dsp_amp_range_t psy_audio_machine_amprange(psy_audio_Machine* self)
 	return self->vtable->amprange(self);
 }
 
-INLINE void psy_audio_machine_programname(psy_audio_Machine* self, int bnkidx,
-	int prgIdx, char* val)
+INLINE void psy_audio_machine_programname(psy_audio_Machine* self, uintptr_t bnkidx,
+	uintptr_t prgidx, char* val)
 {
-	self->vtable->programname(self, bnkidx, prgIdx, val);
+	self->vtable->programname(self, bnkidx, prgidx, val);
 }
 
-INLINE intptr_t psy_audio_machine_numprograms(psy_audio_Machine* self)
+INLINE uintptr_t psy_audio_machine_numprograms(psy_audio_Machine* self)
 {
 	return self->vtable->numprograms(self);
 }

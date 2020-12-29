@@ -84,13 +84,13 @@ void instrumentsbox_buildgroup(InstrumentsBox* self)
 void instrumentsbox_buildlist(InstrumentsBox* self)
 {
 	psy_audio_Instrument* instrument;
-	int groupslot;
-	int slot = 0;
+	uintptr_t groupslot;
+	uintptr_t slot = 0;
 	char buffer[FT2_INSTRUMENTNAME_LEN + 4];
 
 	psy_ui_listbox_clear(&self->instrumentlist);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
-	if (groupslot == -1) {
+	if (groupslot == UINTPTR_MAX) {
 		groupslot = 0;
 	}
 	for ( ; slot < 256; ++slot) {		
@@ -125,12 +125,12 @@ void instrumentsbox_ongrouplistchanged(InstrumentsBox* self, psy_ui_Component*
 void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
 	sender, int slot)
 {
-	int groupslot;
+	uintptr_t groupslot;
 
 	psy_signal_disconnect(&self->instruments->signal_slotchange, self,
 		instrumentsbox_oninstrumentslotchanged);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
-	if (groupslot == -1) {
+	if (groupslot == UINTPTR_MAX) {
 		groupslot = 0;
 	}
 	psy_audio_instruments_select(self->instruments,

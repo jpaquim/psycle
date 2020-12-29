@@ -53,7 +53,7 @@ psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig*);
 void eventdriverconfig_reseteventdriverconfiguration(EventDriverConfig*);
 void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig*);
 void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig*);
-int eventdriverconfig_curreventdriverconfiguration(EventDriverConfig*);
+intptr_t eventdriverconfig_curreventdriverconfiguration(EventDriverConfig*);
 const char* eventdriverconfig_eventdriverpath(EventDriverConfig*);
 void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig*);
 psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig*);

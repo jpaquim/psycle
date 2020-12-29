@@ -57,17 +57,17 @@ void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
 
 typedef struct {
    psy_ui_Component component;
-   int count;
-   int lineheight;
-   int columnwidth;
-   int identwidth;
-   int numparametercols;
-   int avgcharwidth;
-   int pluginpos;
+   intptr_t count;
+   intptr_t lineheight;
+   intptr_t columnwidth;
+   intptr_t identwidth;
+   intptr_t numparametercols;
+   intptr_t avgcharwidth;
+   intptr_t pluginpos;
    psy_Property* plugins;
    psy_Property* selectedplugin;   
    Workspace* workspace;
-   int calledby;
+   intptr_t calledby;
    bool onlyfavorites;
    // Signals
    psy_Signal signal_selected;

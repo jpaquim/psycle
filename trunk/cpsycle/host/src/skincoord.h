@@ -11,30 +11,30 @@ extern "C" {
 #endif
 
 typedef struct {
-	int srcx;
-	int srcy;
-	int srcwidth;
-	int srcheight;
-	int destx;
-	int desty;
-	int destwidth;
-	int destheight;	
-	int range;
+	intptr_t srcx;
+	intptr_t srcy;
+	intptr_t srcwidth;
+	intptr_t srcheight;
+	intptr_t destx;
+	intptr_t desty;
+	intptr_t destwidth;
+	intptr_t destheight;
+	intptr_t range;
 } SkinCoord;
 
 void skincoord_setall(SkinCoord*,
-	int srcx,
-	int srcy,
-	int srcwidth,
-	int srcheight,
-	int destx,
-	int desty,
-	int destwidth,
-	int destheight,
-	int range);
+	intptr_t srcx,
+	intptr_t srcy,
+	intptr_t srcwidth,
+	intptr_t srcheight,
+	intptr_t destx,
+	intptr_t desty,
+	intptr_t destwidth,
+	intptr_t destheight,
+	intptr_t range);
 
-void skincoord_setsource(SkinCoord* coord, int vals[4]);
-void skincoord_setdest(SkinCoord* coord, int vals[4]);
+void skincoord_setsource(SkinCoord* coord, intptr_t vals[4]);
+void skincoord_setdest(SkinCoord* coord, intptr_t vals[4]);
 
 INLINE psy_ui_Rectangle skincoord_destposition(SkinCoord* self)
 {

@@ -89,7 +89,7 @@ void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
 
 	for (p = psy_property_children(self->installeddriver); p != NULL; psy_list_next(&p)) {
 		psy_Property* property;
-		int guid;
+		intptr_t guid;
 
 		property = (psy_Property*)psy_list_entry(p);
 		if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
@@ -204,8 +204,7 @@ void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig* self)
 	uintptr_t i;
 
 	assert(self && self->activedrivers);
-			
-		
+				
 
 	psy_property_clear(self->activedrivers);
 	numdrivers = psy_audio_player_numeventdrivers(self->player);
@@ -232,8 +231,8 @@ void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig* self)
 
 void eventdriverconfig_makeeventdriverconfigurations(EventDriverConfig* self)
 {
-	int numdrivers;
-	int i;
+	uintptr_t numdrivers;
+	uintptr_t i;
 
 	assert(self);
 
@@ -282,7 +281,7 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 			configuration = (psy_Property*)psy_list_entry(
 				psy_property_children(configuration));
 			if (!psy_property_empty(configuration)) {
-				int guid;
+				intptr_t guid;
 
 				guid = psy_property_at_int(configuration, "guid", -1);
 				if (guid != -1) {
@@ -305,7 +304,7 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 	}
 }
 
-int eventdriverconfig_curreventdriverconfiguration(EventDriverConfig* self)
+intptr_t eventdriverconfig_curreventdriverconfiguration(EventDriverConfig* self)
 {
 	assert(self && self->activedrivers);
 	

@@ -256,7 +256,7 @@ void transformpatternview_onsearchonmousedown(TransformPatternView* self,
 	psy_List* q;
 
 	q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE);
-	transformpatternview_applyto(self, psy_list_entry_index(q, ev->target));
+	transformpatternview_applyto(self, (int)psy_list_entry_index(q, ev->target));
 	free(q);
 }
 
@@ -296,11 +296,11 @@ void transformpatternview_onsearch(TransformPatternView* self)
 	psy_audio_PatternSearchReplaceMode searchreplacemode;
 	
 	searchreplacemode = setupsearchreplacemode(
-		psy_ui_combobox_itemdata(&self->searchnote,
+		(int)psy_ui_combobox_itemdata(&self->searchnote,
 			psy_ui_combobox_cursel(&self->searchnote)),
-		psy_ui_combobox_itemdata(&self->searchinst,
+		(int)psy_ui_combobox_itemdata(&self->searchinst,
 			psy_ui_combobox_cursel(&self->searchinst)),
-		psy_ui_combobox_itemdata(&self->searchmach,
+		(int)psy_ui_combobox_itemdata(&self->searchmach,
 			psy_ui_combobox_cursel(&self->searchmach)),
 		-1, -1, -1, FALSE);
 	switch (self->applyto) {

@@ -85,16 +85,16 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 	const char* machine_skin_name;
 
 	if (p) {
-		self->colour = psy_ui_colour_make(psy_property_at_int(p, "mv_colour", 0x00232323));
-		self->wirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_wirecolour", 0x005F5F5F));
-		self->selwirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_selwirecolour", 0x007F7F7F));
-		self->hoverwirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_hoverwirecolour", 0x007F7F7F));
-		self->polycolour = psy_ui_colour_make(psy_property_at_int(p, "mv_wireaacolour2", 0x005F5F5F));
-		self->polycolour = psy_ui_colour_make(psy_property_at_int(p, "mv_polycolour", 0x00B1C8B0));
+		self->colour = psy_ui_colour_make(psy_property_at_colour(p, "mv_colour", 0x00232323));
+		self->wirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_wirecolour", 0x005F5F5F));
+		self->selwirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_selwirecolour", 0x007F7F7F));
+		self->hoverwirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_hoverwirecolour", 0x007F7F7F));
+		self->polycolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_wireaacolour2", 0x005F5F5F));
+		self->polycolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_polycolour", 0x00B1C8B0));
 		self->generator_fontcolour =
-			psy_ui_colour_make(psy_property_at_int(p, "mv_generator_fontcolour", 0x00B1C8B0));
+			psy_ui_colour_make(psy_property_at_colour(p, "mv_generator_fontcolour", 0x00B1C8B0));
 		self->effect_fontcolour =
-			psy_ui_colour_make(psy_property_at_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
+			psy_ui_colour_make(psy_property_at_colour(p, "mv_effect_fontcolour", 0x00D1C5B6));
 		self->triangle_size = psy_property_at_int(p, "mv_triangle_size", 10);
 		machine_skin_name = psy_property_at_str(p, "machine_skin", 0);
 	} else {
@@ -162,7 +162,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 {
 	const char* s;
-	int vals[4];
+	intptr_t vals[4];
 
 	// master
 	if (s = psy_property_at_str(p, "master_source", 0)) {

@@ -146,6 +146,7 @@ psy_Property* psy_property_set_bool(psy_Property*, const char* key, bool value);
 bool psy_property_at_bool(const psy_Property*, const char* key, bool defaultvalue);
 psy_Property* psy_property_set_int(psy_Property*, const char* key, intptr_t value);
 intptr_t psy_property_at_int(const psy_Property*, const char* key, intptr_t defaultvalue);
+uint32_t psy_property_at_colour(const psy_Property*, const char* key, uint32_t defaultvalue);
 psy_Property* psy_property_set_double(psy_Property*, const char* key, double value);
 double psy_property_at_real(const psy_Property*, const char* key, double defaultvalue);
 psy_Property* psy_property_set_str(psy_Property*, const char* key, const char* value);
@@ -197,6 +198,7 @@ psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);
 psy_Property* psy_property_item_choice_parent(psy_Property*);
 bool psy_property_haskey(const psy_Property*, const char* key);
+uint32_t psy_property_item_colour(const psy_Property*);
 
 // Description
 psy_Property* psy_property_setid(psy_Property*, intptr_t id);

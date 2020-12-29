@@ -250,7 +250,7 @@ void psy_audio_midiconfig_addcontroller(psy_audio_MidiConfig* self,
 	}
 }
 
-void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, int id)
+void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, intptr_t id)
 {
 	assert(self);
 

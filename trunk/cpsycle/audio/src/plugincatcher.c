@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../detail/portable.h"
+#include "../../detail/cpu.h"
 
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -64,10 +65,18 @@ void plugincatcher_init(psy_audio_PluginCatcher* self)
 	"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	plugincatcher_makeinternals(self);	
 	strcpy(inipath, psy_dir_config());
-	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+	strcat(inipath, "\\psycle-plugin-scanner-cache32.ini");
+#else
+	strcat(inipath, "\\psycle-plugin-scanner-cache64.ini");
+#endif
 	self->inipath = strdup(inipath);
 	self->directories = NULL;
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 	self->nativeroot = psy_strdup(PSYCLE_APP_DIR);
+#else
+	self->nativeroot = psy_strdup(PSYCLE_APP64_DIR);
+#endif
 	self->saveafterscan = TRUE;
 	self->hasplugincache = FALSE;
 	psy_signal_init(&self->signal_changed);
@@ -184,7 +193,12 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 	if (self->directories) {
 		const char* path;
 
-		path = psy_property_at_str(self->directories, "plugins", NULL);
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+		path = psy_property_at_str(self->directories, "plugins32", NULL);
+#else
+		path = psy_property_at_str(self->directories, "plugins64", NULL);
+#endif
+
 		if (path) {			
 			psy_dir_enumerate_recursive(self, path, "*"MODULEEXT, MACH_PLUGIN,
 				(psy_fp_findfile)onenumdir);
@@ -194,7 +208,11 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 			psy_dir_enumerate(self, path, "*.lua", MACH_LUA,
 				(psy_fp_findfile)onenumdir);
 		}
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 		path = psy_property_at_str(self->directories, "vsts32", NULL);
+#else
+		path = psy_property_at_str(self->directories, "vsts64", NULL);
+#endif
 		if (path) {
 			plugincatcher_scan_multipath(self, path, "*"MODULEEXT, MACH_VST);
 		}
@@ -242,10 +260,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 			}
 			break;
-		case MACH_VST:
-			if (strstr(path, "VK-1")) {
-				self = self;
-			}
+		case MACH_VST:			
 			if (psy_audio_plugin_vst_test(path, &macinfo)) {
 				plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,

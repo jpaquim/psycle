@@ -20,15 +20,15 @@ extern "C" {
 typedef struct TrackerLineState {	
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
-	int lineheightpx;
-	int flatsize;
+	intptr_t lineheightpx;
+	intptr_t flatsize;
 	uintptr_t lpb;
 	psy_dsp_big_beat_t bpl;
-	int drawcursor;
+	bool drawcursor;
 	psy_dsp_big_beat_t lastplayposition;
 	psy_dsp_big_beat_t sequenceentryoffset;	
 	// precomputed
-	int visilines;
+	intptr_t visilines;
 	bool cursorchanging;
 	// references
 	psy_audio_Pattern* pattern;
@@ -85,7 +85,7 @@ INLINE psy_dsp_big_beat_t trackerlinestate_quantize(const TrackerLineState*
 }
 
 // quantized
-INLINE int trackerlinestate_beattopx(TrackerLineState* self,
+INLINE intptr_t trackerlinestate_beattopx(TrackerLineState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
@@ -93,7 +93,7 @@ INLINE int trackerlinestate_beattopx(TrackerLineState* self,
 	return self->lineheightpx * trackerlinestate_beattoline(self, position);
 }
 
-INLINE int trackerlinestate_linetopx(TrackerLineState* self,
+INLINE intptr_t trackerlinestate_linetopx(TrackerLineState* self,
 	uintptr_t line)
 {
 	assert(self);
@@ -101,7 +101,7 @@ INLINE int trackerlinestate_linetopx(TrackerLineState* self,
 	return self->lineheightpx * line;
 }
 
-INLINE int trackerlinestate_lineheight(TrackerLineState* self)
+INLINE intptr_t trackerlinestate_lineheight(TrackerLineState* self)
 {
 	assert(self);
 
@@ -110,7 +110,7 @@ INLINE int trackerlinestate_lineheight(TrackerLineState* self)
 
 // quantized
 INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(TrackerLineState* self,
-	int px)
+	intptr_t px)
 {
 	assert(self);
 
@@ -118,7 +118,7 @@ INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(TrackerLineState* self,
 		(px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl);
 }
 
-INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeatnotquantized(TrackerLineState* self, int px)
+INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeatnotquantized(TrackerLineState* self, intptr_t px)
 {
 	assert(self);
 

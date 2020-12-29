@@ -485,11 +485,11 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 	uintptr_t line;
 	psy_audio_PatternNode* prev = 0;
 	psy_audio_PatternNode* node;
-	int val0 = 0;
-	int val1 = 0;
-	int val2 = 0;
-	int val3 = 0;
-	int distance;
+	intptr_t val0 = 0;
+	intptr_t val1 = 0;
+	intptr_t val2 = 0;
+	intptr_t val3 = 0;
+	intptr_t distance;
 
 	assert(self);
 
@@ -578,7 +578,7 @@ void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
 
 void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
 	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int machine)
+	psy_audio_PatternCursor end, uintptr_t machine)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
@@ -604,7 +604,7 @@ void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
 
 void psy_audio_pattern_changeinstrument(psy_audio_Pattern* self,
 	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int instrument)
+	psy_audio_PatternCursor end, uintptr_t instrument)
 {
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* q;
@@ -761,9 +761,9 @@ bool psy_audio_patterncursornavigator_prevlines(
 }
 
 bool psy_audio_patterncursornavigator_advancekeys(psy_audio_PatternCursorNavigator*
-	self, uintptr_t lines)
+	self, uint8_t lines)
 {
-	uintptr_t maxkey;
+	uint8_t maxkey;
 
 	assert(self);
 	assert(self->cursor);
@@ -788,9 +788,9 @@ bool psy_audio_patterncursornavigator_advancekeys(psy_audio_PatternCursorNavigat
 }
 
 bool psy_audio_patterncursornavigator_prevkeys(
-	psy_audio_PatternCursorNavigator* self, uintptr_t lines)
+	psy_audio_PatternCursorNavigator* self, uint8_t lines)
 {
-	uintptr_t maxkey;
+	uint8_t maxkey;
 
 	assert(self);
 	assert(self->cursor);
@@ -854,8 +854,8 @@ void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 	psy_audio_PatternNode* q;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t offset;
-	int trackoffset;
-	int restore_opcount;
+	intptr_t trackoffset;
+	uintptr_t restore_opcount;
 
 	assert(self);
 
@@ -901,7 +901,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 	psy_audio_PatternNode* p;
 	psy_audio_PatternNode* prev = 0;
 	psy_dsp_big_beat_t offset;
-	int trackoffset;
+	intptr_t trackoffset;
 	psy_audio_PatternCursor begin;
 	psy_audio_PatternCursor end;
 

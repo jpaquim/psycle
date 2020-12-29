@@ -167,11 +167,12 @@
       <AdditionalDependencies>container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ProgramDatabaseFile>$(IntDir)asiodriver.pdb</ProgramDatabaseFile>
       <ImportLibrary>$(IntDir)asiodriver.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -179,6 +180,8 @@
       <PreprocessorDefinitions>NDEBUG;ASIODRIVER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)container\src;$(SolutionDir)dsp\src;asio-2\common;asio-2\host;asio-2\host\pc</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,6 +193,7 @@
       <ProgramDatabaseFile>$(IntDir)asiodriver.pdb</ProgramDatabaseFile>
       <ImportLibrary>$(IntDir)asiodriver.lib</ImportLibrary>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalLibraryDirectories>$(SolutionDir)container\Release;$(SolutionDir)dsp\Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

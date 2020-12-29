@@ -9,12 +9,12 @@
 
 // prototypes
 static void sequencetrackbox_drawtext(SequenceTrackBox*,
-	psy_ui_Graphics*, int x, int y, const char* text);
+	psy_ui_Graphics*, intptr_t x, intptr_t y, const char* text);
 // implementation
 void sequencetrackbox_init(SequenceTrackBox* self,
 	psy_ui_Rectangle position, psy_ui_TextMetric tm,
 	psy_audio_SequenceTrack* track,
-	int trackindex, bool selected)
+	uintptr_t trackindex, bool selected)
 {
 	self->position = position;
 	self->tm = tm;
@@ -44,9 +44,9 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 		psy_ui_drawrectangle(g, r);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
 		sequencetrackbox_drawtext(self, g, r.left +
-			(int)(self->tm.tmAveCharWidth * 0.2), r.top, text);
+			(intptr_t)(self->tm.tmAveCharWidth * 0.2), r.top, text);
 		sequencetrackbox_drawtext(self, g, r.left +
-			(int)(self->tm.tmAveCharWidth * 5), r.top, "S");
+			(intptr_t)(self->tm.tmAveCharWidth * 5), r.top, "S");
 		if (self->trackindex != 0) {
 			sequencetrackbox_drawtext(self, g, self->position.right -
 				(int)(self->tm.tmAveCharWidth * 3.5), r.top, "X");
@@ -71,13 +71,13 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 }
 
 void sequencetrackbox_drawtext(SequenceTrackBox* self,
-	psy_ui_Graphics* g, int x, int y, const char* text)
+	psy_ui_Graphics* g, intptr_t x, intptr_t y, const char* text)
 {
 	psy_ui_textout(g, x + 3, y, text, psy_strlen(text));
 }
 
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox* self,
-	int x, int y)
+	intptr_t x, intptr_t y)
 {		
 	if (self->trackindex != 0 && x >= self->position.right -
 			(int)(self->tm.tmAveCharWidth * 3.5)) {

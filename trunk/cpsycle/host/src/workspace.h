@@ -129,7 +129,7 @@ typedef struct {
 	psy_Playlist playlist;	
 	psy_ui_Component* mainhandle;	
 	ViewHistory viewhistory;
-	int restoreview;
+	uintptr_t restoreview;
 	psy_audio_PatternCursor patterneditposition;
 	psy_audio_SequenceSelection sequenceselection;
 	int cursorstep;	
@@ -203,7 +203,7 @@ void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_selectview(Workspace*, int view, uintptr_t section, int option);
+void workspace_selectview(Workspace*, uintptr_t view, uintptr_t section, int option);
 void workspace_saveview(Workspace*);
 void workspace_restoreview(Workspace*);
 void workspace_floatsection(Workspace*, int view, uintptr_t section);
@@ -212,11 +212,11 @@ void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
 int workspace_recordingtweaks(Workspace*);
-void workspace_onviewchanged(Workspace*, int view);
+void workspace_onviewchanged(Workspace*, uintptr_t view);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
 void workspace_updatecurrview(Workspace*);
-int workspace_currview(Workspace*);
+uintptr_t workspace_currview(Workspace*);
 void workspace_addhistory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
 // unzoomed font height

@@ -69,14 +69,14 @@ void inputdefiner_ondestroy(InputDefiner* self, psy_ui_Component* sender)
 	keynames_release();
 }
 
-void inputdefiner_setinput(InputDefiner* self, unsigned int input)
+void inputdefiner_setinput(InputDefiner* self, uint32_t input)
 {
 	self->input = input;
 }
 
 void inputdefiner_text(InputDefiner* self, char* text)
 {	
-	uintptr_t keycode;
+	uint32_t keycode;
 	bool shift;
 	bool ctrl;
 	bool alt;
@@ -104,8 +104,8 @@ void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 
 void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
-	int shift;
-	int ctrl;	
+	bool shift;
+	bool ctrl;	
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
@@ -133,7 +133,7 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
 	bool shift;
 	bool ctrl;
-	uintptr_t inputkeycode;
+	uint32_t inputkeycode;
 	bool inputshift;
 	bool inputctrl;
 	bool inputalt;

@@ -76,7 +76,7 @@ typedef struct {
 	psy_audio_Instrument* instrument;
 	uintptr_t selected;
 	int dragmode;
-	int currkey;
+	uint8_t currkey;
 	InstrumentParameterView* parameterview;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentEntryView;

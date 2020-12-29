@@ -237,12 +237,12 @@ static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void wavebox_onmousedoubleclick(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static int wavebox_hittest(WaveBox*, uintptr_t frame, int x, int epsilon);
+static int wavebox_hittest(WaveBox*, uintptr_t frame, intptr_t x, int epsilon);
 static psy_ui_Rectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
 	uintptr_t frameend);
 static int wavebox_hittest_range(WaveBox*, uintptr_t framemin, uintptr_t framemax, 
-	int x);
-static uintptr_t wavebox_screentoframe(WaveBox*, int x);
+	intptr_t x);
+static uintptr_t wavebox_screentoframe(WaveBox*, intptr_t x);
 static int wavebox_frametoscreen(WaveBox*, uintptr_t frame);
 static void  wavebox_onsize(WaveBox*, psy_ui_Size*);
 static psy_dsp_amp_t wavebox_amp(WaveBox*, float frame);
@@ -358,8 +358,8 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			self->nowavetext, strlen(self->nowavetext));
 	} else {
 		psy_dsp_amp_t scaley;		
-		int x;
-		int centery = size.height / 2;
+		intptr_t x;
+		intptr_t centery = size.height / 2;
 		psy_ui_Rectangle cont_loop_rc;
 		psy_ui_Rectangle cont_doubleloop_rc;
 		psy_ui_Rectangle sustain_loop_rc;		
@@ -464,7 +464,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				lastframevalue = framevalue;
 			} else {
 				if (r.top > r.bottom) {
-					int temp;
+					intptr_t temp;
 					temp = r.top;
 					r.top = r.bottom;
 					r.bottom = temp;
@@ -771,20 +771,20 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 	}
 }
 
-int wavebox_hittest(WaveBox* self, uintptr_t frame, int x, int epsilon)
+int wavebox_hittest(WaveBox* self, uintptr_t frame, intptr_t x, int epsilon)
 {		
 	return frame >= wavebox_screentoframe(self, x - epsilon) &&
 		   frame <= wavebox_screentoframe(self, x + epsilon);
 }
 
 int wavebox_hittest_range(WaveBox* self, uintptr_t framemin,
-	uintptr_t framemax, int x)
+	uintptr_t framemax, intptr_t x)
 {	
 	uintptr_t frame = wavebox_screentoframe(self, x);
 	return frame >= framemin && frame <= framemax;
 }
 
-uintptr_t wavebox_screentoframe(WaveBox* self, int x)
+uintptr_t wavebox_screentoframe(WaveBox* self, intptr_t x)
 {
 	uintptr_t rv = 0;
 	intptr_t frame;

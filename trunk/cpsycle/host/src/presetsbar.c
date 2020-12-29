@@ -113,7 +113,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 				presets,
 				psy_audio_machine_numtweakparameters(self->machine),
 				psy_audio_machine_datasize(self->machine),
-				dirconfig_plugins(&self->workspace->config.directories));
+				dirconfig_pluginscurrplatform(&self->workspace->config.directories));
 			if (status != psy_audio_PRESETIO_OK) {
 				psy_audio_machine_setpresets(self->machine, NULL);
 				psy_audio_presets_dispose(presets);
@@ -176,7 +176,7 @@ void presetsbar_onimport(PresetsBar* self, psy_ui_Component* sender)
 			presets,
 			psy_audio_machine_numtweakparameters(self->machine),
 			psy_audio_machine_datasize(self->machine),
-			dirconfig_plugins(&self->workspace->config.directories));
+			dirconfig_pluginscurrplatform(&self->workspace->config.directories));
 		if (status) {
 			workspace_outputerror(self->workspace,
 				psy_audio_presetsio_statusstr(status));
@@ -277,7 +277,7 @@ void presetsbar_onsavenameeditkeydown(PresetsBar* self,
 	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN) {
-		int index;
+		intptr_t index;
 
 		presetsbar_onsavepresets(self, &self->component);
 		index = psy_ui_combobox_cursel(&self->programbox);

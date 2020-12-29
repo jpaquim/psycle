@@ -75,8 +75,8 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 {
 	psy_ui_TextMetric tm;
 	psy_ui_IntSize size;
-	int baseline;
-	int linewidth;
+	intptr_t baseline;
+	intptr_t linewidth;
 	psy_dsp_big_beat_t duration;
 	psy_dsp_big_beat_t clipstart;
 	psy_dsp_big_beat_t clipend;
@@ -89,16 +89,16 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 	duration = (size.width + psy_ui_component_scrollleft(&self->component)) /
 		(psy_dsp_big_beat_t)self->trackstate->pxperbeat;
 	//psy_audio_sequence_duration(&workspace_song(self->workspace)->sequence);
-	linewidth = (int)(duration * self->trackstate->pxperbeat);
+	linewidth = (intptr_t)(duration * self->trackstate->pxperbeat);
 	psy_ui_setcolour(g, self->rulerbaselinecolour);
 	psy_ui_drawline(g, 0, baseline, linewidth, baseline);
 	clipstart = 0;
 	clipend = duration;
 	for (currbeat = clipstart; currbeat <= clipend; currbeat += 16.0) {
-		int cpx;
+		intptr_t cpx;
 		char txt[40];
 
-		cpx = (int)(currbeat * self->trackstate->pxperbeat);
+		cpx = (intptr_t)(currbeat * self->trackstate->pxperbeat);
 		psy_ui_drawline(g, cpx, baseline, cpx, baseline - tm.tmHeight / 3);
 		psy_snprintf(txt, 40, "%d", (int)(currbeat));
 		psy_ui_textout(g, (int)cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
@@ -116,13 +116,13 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 	if (workspace_song(self->workspace)) {
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
-		int linewidth;
+		intptr_t linewidth;
 		psy_dsp_big_beat_t duration;
 
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		duration = psy_audio_sequence_duration(&workspace_song(self->workspace)->sequence);
-		linewidth = (int)(duration * self->trackstate->pxperbeat);
+		linewidth = (intptr_t)(duration * self->trackstate->pxperbeat);
 		rv->width = psy_ui_value_makepx(linewidth);
 	} else {
 		rv->width = psy_ui_value_makepx(0);
@@ -132,7 +132,7 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 
 // SeqEditorTrack
 // prototypes
-static void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int x, int y);
+static void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, intptr_t x, intptr_t y);
 static void seqeditortrack_onpreferredsize_virtual(SeqEditorTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static bool seqeditortrack_onmousedown_virtual(SeqEditorTrack*,
@@ -204,14 +204,14 @@ void seqeditortrack_updatetrack(SeqEditorTrack* self, psy_audio_SequenceTrack*
 	self->trackindex = trackindex;
 }
 
-void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int x, int y)
+void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, intptr_t x, intptr_t y)
 {
 	psy_List* p;
-	int c;
+	intptr_t c;
 	psy_dsp_big_beat_t clipstart;
 	psy_dsp_big_beat_t clipend;
 	psy_ui_TextMetric tm;
-	int lineheight;
+	intptr_t lineheight;
 
 	if (!workspace_song(self->workspace)) {
 		return;
@@ -233,7 +233,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 			psy_audio_sequenceentry_patternslot(sequenceentry));
 		if (pattern) {
 			psy_ui_Rectangle r;
-			int patternwidth;
+			intptr_t patternwidth;
 			bool selected;
 			char text[256];
 
@@ -242,8 +242,8 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 				continue;
 			}
 			
-			patternwidth = (int)(psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);
-			r = psy_ui_rectangle_make((int)(sequenceentry->offset * self->trackstate->pxperbeat), y,
+			patternwidth = (intptr_t)(psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);
+			r = psy_ui_rectangle_make((intptr_t)(sequenceentry->offset * self->trackstate->pxperbeat), y,
 				patternwidth, lineheight);
 			selected = FALSE;
 			if (self->workspace->sequenceselection.editposition.tracknode) {
@@ -293,14 +293,14 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 		psy_ui_TextMetric tm;
 		psy_ui_IntSize size;
 		psy_audio_SequenceEntry* sequenceentry;
-		int cpx;
+		intptr_t cpx;
 
 		sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(
 			self->drag_sequenceitem_node);
 		tm = psy_ui_component_textmetric(&self->parent->component);
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->parent->component), &tm);
-		cpx = (int)(self->itemdragposition * self->trackstate->pxperbeat);			
+		cpx = (intptr_t)(self->itemdragposition * self->trackstate->pxperbeat);
 		r = psy_ui_rectangle_make(cpx, y, 2, lineheight);
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));		
 	}
@@ -340,14 +340,14 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 			entry->patternslot);
 		if (pattern) {
 			psy_ui_Rectangle r;
-			int patternwidth;
+			intptr_t patternwidth;
 			psy_ui_TextMetric tm;
-			int lineheight;
+			intptr_t lineheight;
 			
 			tm = psy_ui_component_textmetric(&self->parent->component);
 			lineheight = psy_ui_value_px(&self->trackstate->lineheight, &tm);
-			patternwidth = (int)(psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);
-			r = psy_ui_rectangle_make((int)(entry->offset * self->trackstate->pxperbeat), 0,
+			patternwidth = (intptr_t)(psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);
+			r = psy_ui_rectangle_make((intptr_t)(entry->offset * self->trackstate->pxperbeat), 0,
 				patternwidth, lineheight);
 			if (psy_ui_rectangle_intersect(&r, ev->x, ev->y)) {
 				if (self->currtrack) {
@@ -382,7 +382,7 @@ bool seqeditortrack_onmousemove_virtual(SeqEditorTrack* self,
 		psy_dsp_big_beat_t dragposition;
 
 		sequenceentry = (psy_audio_SequenceEntry*)self->drag_sequenceitem_node->entry;
-		dragposition = ev->x / self->trackstate->pxperbeat;
+		dragposition = (psy_dsp_big_beat_t)(ev->x / self->trackstate->pxperbeat);
 		if (dragposition - (sequenceentry->offset - sequenceentry->repositionoffset) >= 0) {
 			self->itemdragposition = dragposition;
 		}
@@ -414,7 +414,7 @@ bool seqeditortrack_onmouseup_virtual(SeqEditorTrack* self,
 
 // SeqEditorTrackHeader
 // prototypes
-static void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self, psy_ui_Graphics* g, int x, int y);
+static void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self, psy_ui_Graphics* g, intptr_t x, intptr_t y);
 static void seqeditortrackheader_onpreferredsize(SeqEditorTrackHeader*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader*,
@@ -471,7 +471,7 @@ SeqEditorTrackHeader* seqeditortrackheader_allocinit(SeqEditorTracks* parent,
 }
 
 void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
-	psy_ui_Graphics* g, int x, int y)
+	psy_ui_Graphics* g, intptr_t x, intptr_t y)
 {	
 	psy_audio_SequenceTrack* edittrack;
 	SequenceTrackBox trackbox;
@@ -716,11 +716,11 @@ void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
 	if (sequence) {
 		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
-		int cpx, cpy;
+		intptr_t cpx, cpy;
 		uintptr_t c;
 		psy_ui_TextMetric tm;
-		int linemargin;
-		int lineheight;
+		intptr_t linemargin;
+		intptr_t lineheight;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
@@ -757,12 +757,12 @@ void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		psy_ui_TextMetric tm;
 		psy_ui_IntSize size;
-		int cpx;
+		intptr_t cpx;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->component), &tm);
-		cpx = (int)(psy_audio_player_position(workspace_player(self->workspace)) *
+		cpx = (intptr_t)(psy_audio_player_position(workspace_player(self->workspace)) *
 			self->trackstate->pxperbeat);
 		psy_ui_drawline(g, cpx, 0, cpx, size.height);
 		self->lastplaylinepx = cpx;
@@ -773,12 +773,12 @@ bool seqeditortracks_playlinechanged(SeqEditorTracks* self)
 {
 	psy_ui_TextMetric tm;
 	psy_ui_IntSize size;
-	int cpx;
+	intptr_t cpx;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
-	cpx = (int)(psy_audio_player_position(workspace_player(self->workspace)) *
+	cpx = (intptr_t)(psy_audio_player_position(workspace_player(self->workspace)) *
 		self->trackstate->pxperbeat);
 	return cpx != self->lastplaylinepx;
 }
@@ -797,10 +797,10 @@ void seqeditortracks_onpreferredsize(SeqEditorTracks* self, psy_ui_Size* limit,
 	if (workspace_song(self->workspace)) {
 		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
-		int cpxmax, cpymax;
+		intptr_t cpxmax, cpymax;
 		psy_ui_TextMetric tm;
 		uintptr_t c;
-		int linemargin;
+		intptr_t linemargin;
 
 		cpxmax = 0;
 		cpymax = 0;
@@ -864,11 +864,11 @@ bool seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 	if (sequence) {
 		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
-		int cpy;
-		int c;
+		intptr_t cpy;
+		intptr_t c;
 		psy_ui_TextMetric tm;
-		int linemargin;
-		int lineheight;
+		intptr_t linemargin;
+		intptr_t lineheight;
 
 		cpy = 0;
 		tm = psy_ui_component_textmetric(&self->component);
@@ -936,7 +936,7 @@ void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
 			psy_ui_component_invalidaterect(&self->component, r);
 		}
 		r = psy_ui_rectangle_make(
-			(int)(psy_audio_player_position(workspace_player(self->workspace)) *
+			(intptr_t)(psy_audio_player_position(workspace_player(self->workspace)) *
 				self->trackstate->pxperbeat),
 			psy_ui_component_scrolltop(&self->component),
 			2, size.height);
@@ -1081,7 +1081,7 @@ void seqeditor_onconfigure(SeqEditor* self, GeneralConfig* sender,
 
 void seqeditor_onzoomboxbeatchanged(SeqEditor* self, ZoomBox* sender)
 {
-	self->trackstate.pxperbeat = (int)(sender->zoomrate * DEFAULT_PXPERBEAT);
+	self->trackstate.pxperbeat = (intptr_t)(sender->zoomrate * DEFAULT_PXPERBEAT);
 	psy_ui_component_updateoverflow(&self->tracks.component);
 	psy_ui_component_invalidate(&self->tracks.component);
 	psy_ui_component_invalidate(&self->ruler.component);

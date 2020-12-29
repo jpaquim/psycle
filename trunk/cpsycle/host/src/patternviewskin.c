@@ -232,7 +232,7 @@ psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_
 		rv = patternviewskin_calculatetrackcolour(track, numtracks, source1, source2);
 		psy_table_insert(table, track, (void*)(uintptr_t)rv.value);
 	} else {
-		rv = psy_ui_colour_make((uintptr_t)psy_table_at(table, track));
+		rv = psy_ui_colour_make((uint32_t)(uintptr_t)psy_table_at(table, track));
 	}
 	return rv;
 }
@@ -249,7 +249,7 @@ psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t nu
 	float d1 = (float)((source2.value >> 8) & 0xff);
 	float d2 = (float)(source2.value & 0xff);
 
-	int len = numtracks + 1;
+	uintptr_t len = numtracks + 1;
 
 	float a0 = (d0 - p0) / (len);
 	float a1 = (d1 - p1) / (len);
@@ -293,31 +293,31 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	const char* pattern_header_skin_name;	
 
 	patternviewskin_clearcache(self);
-	self->separator = psy_ui_colour_make(psy_property_at_int(p, "pvc_separator", 0x00292929));
-	self->separator2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_separator2", 0x00292929));
-	self->background = psy_ui_colour_make(psy_property_at_int(p, "pvc_background", 0x00292929));
-	self->background2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_background2", 0x00292929));
-	self->row4beat = psy_ui_colour_make(psy_property_at_int(p, "pvc_row4beat", 0x00595959));
-	self->row4beat2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_row4beat2", 0x00595959));
-	self->rowbeat = psy_ui_colour_make(psy_property_at_int(p, "pvc_rowbeat", 0x00363636));
-	self->rowbeat2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_rowbeat2", 0x00363636));
-	self->row = psy_ui_colour_make(psy_property_at_int(p, "pvc_row", 0x003E3E3E));
-	self->row2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_row2", 0x003E3E3E));
-	self->font = psy_ui_colour_make(psy_property_at_int(p, "pvc_font", 0x00CACACA));
-	self->font2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_font2", 0x00CACACA));
-	self->fontplay = psy_ui_colour_make(psy_property_at_int(p, "pvc_fontplay", 0x00ffffff));
-	self->fontcur = psy_ui_colour_make(psy_property_at_int(p, "pvc_fontcur", 0x00ffffff));
-	self->fontcur2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_fontcur2", 0x00ffffff));
-	self->fontsel = psy_ui_colour_make(psy_property_at_int(p, "pvc_fontsel", 0x00ffffff));
-	self->fontsel2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_fontsel2", 0x00ffffff));
-	self->selection = psy_ui_colour_make(psy_property_at_int(p, "pvc_selection", 0x009B7800));
-	self->selection2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_selection2", 0x009B7800));
-	self->playbar = psy_ui_colour_make(psy_property_at_int(p, "pvc_playbar", 0x009F7B00));
-	self->playbar2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_playbar2", 0x009F7B00));
-	self->cursor = psy_ui_colour_make(psy_property_at_int(p, "pvc_cursor", 0x009F7B00));
-	self->cursor2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_cursor2", 0x009F7B00));
-	self->midline = psy_ui_colour_make(psy_property_at_int(p, "pvc_midline", 0x007D6100));
-	self->midline2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_midline2", 0x007D6100));
+	self->separator = psy_ui_colour_make(psy_property_at_colour(p, "pvc_separator", 0x00292929));
+	self->separator2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_separator2", 0x00292929));
+	self->background = psy_ui_colour_make(psy_property_at_colour(p, "pvc_background", 0x00292929));
+	self->background2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_background2", 0x00292929));
+	self->row4beat = psy_ui_colour_make(psy_property_at_colour(p, "pvc_row4beat", 0x00595959));
+	self->row4beat2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_row4beat2", 0x00595959));
+	self->rowbeat = psy_ui_colour_make(psy_property_at_colour(p, "pvc_rowbeat", 0x00363636));
+	self->rowbeat2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_rowbeat2", 0x00363636));
+	self->row = psy_ui_colour_make(psy_property_at_colour(p, "pvc_row", 0x003E3E3E));
+	self->row2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_row2", 0x003E3E3E));
+	self->font = psy_ui_colour_make(psy_property_at_colour(p, "pvc_font", 0x00CACACA));
+	self->font2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_font2", 0x00CACACA));
+	self->fontplay = psy_ui_colour_make(psy_property_at_colour(p, "pvc_fontplay", 0x00ffffff));
+	self->fontcur = psy_ui_colour_make(psy_property_at_colour(p, "pvc_fontcur", 0x00ffffff));
+	self->fontcur2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_fontcur2", 0x00ffffff));
+	self->fontsel = psy_ui_colour_make(psy_property_at_colour(p, "pvc_fontsel", 0x00ffffff));
+	self->fontsel2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_fontsel2", 0x00ffffff));
+	self->selection = psy_ui_colour_make(psy_property_at_colour(p, "pvc_selection", 0x009B7800));
+	self->selection2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_selection2", 0x009B7800));
+	self->playbar = psy_ui_colour_make(psy_property_at_colour(p, "pvc_playbar", 0x009F7B00));
+	self->playbar2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_playbar2", 0x009F7B00));
+	self->cursor = psy_ui_colour_make(psy_property_at_colour(p, "pvc_cursor", 0x009F7B00));
+	self->cursor2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_cursor2", 0x009F7B00));
+	self->midline = psy_ui_colour_make(psy_property_at_colour(p, "pvc_midline", 0x007D6100));
+	self->midline2 = psy_ui_colour_make(psy_property_at_colour(p, "pvc_midline2", 0x007D6100));
 	// selection
 	self->selectionbeat = psy_ui_diffadd_colours(self->row, self->rowbeat, self->selection);
 	self->selectionbeat2 = psy_ui_diffadd_colours(self->row2, self->rowbeat2, self->selection2);
@@ -427,7 +427,7 @@ void patternviewskin_setheadertextcoords(PatternViewSkin* self)
 void patternviewskin_setcoords(PatternViewSkin* self, psy_Property* p)
 {
 	const char* s;
-	int vals[4];
+	intptr_t vals[4];
 
 	if (s = psy_property_at_str(p, "background_source", 0)) {
 		skin_psh_values(s, 4, vals);

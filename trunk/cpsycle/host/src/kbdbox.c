@@ -149,8 +149,8 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_rectangle_intersect(&key->position, ev->x, ev->y)) {
 			psy_EventDriver* kbd;
 			psy_EventDriverInput input;
-			int rowheight;
-			int pos;
+			intptr_t rowheight;
+			intptr_t pos;
 			bool shift = FALSE;
 			bool ctrl = FALSE;
 			
@@ -172,8 +172,8 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 			}			
 			input.message = psy_EVENTDRIVER_KEYDOWN;
 			kbd = workspace_kbddriver(self->workspace);
-			input.param1 = psy_audio_encodeinput(psy_tableiterator_key(&it),
-				shift, ctrl, 0);
+			input.param1 = psy_audio_encodeinput(
+				(uint32_t)psy_tableiterator_key(&it), shift, ctrl, 0);
 			input.param2 = workspace_octave(self->workspace) * 12;
 			psy_eventdriver_write(kbd, input);
 			break;
@@ -184,8 +184,8 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 {
 	psy_ui_TextMetric tm;
-	int cpx;
-	int cpy;
+	intptr_t cpx;
+	intptr_t cpy;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolour(g, key->colour);
@@ -220,14 +220,14 @@ void kbdbox_makekeys(KbdBox* self)
 			for (p = psy_property_children(mainsection); p != NULL;
 					psy_list_next(&p)) {
 				psy_Property* property;
-				int keycode;
+				intptr_t keycode;
 
 				property = (psy_Property*)p->entry;				
 				keycode = psy_property_at_int(property, "keycode", -1);
 				if (keycode != -1) {
 					const char* label;
-					int size;
-					int cr;
+					intptr_t size;
+					intptr_t cr;
 
 					label = psy_property_at_str(property, "label", "");
 					size = psy_property_at_int(property, "size", 0);

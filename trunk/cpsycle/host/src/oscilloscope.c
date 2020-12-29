@@ -118,7 +118,7 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 	if (self->running) {
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
-		int centery;
+		intptr_t centery;
 		psy_audio_Buffer* buffer;
 		uintptr_t numsamples;
 		bool active = FALSE;

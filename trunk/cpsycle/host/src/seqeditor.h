@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 typedef struct SeqEditorTrackState {
-	int pxperbeat;
+	intptr_t pxperbeat;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
 	psy_ui_Value linemargin;
@@ -41,7 +41,7 @@ INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 struct SeqEditorTrack;
 struct SeqEditorTracks;
 
-typedef void (*seqeditortrack_fp_ondraw)(struct SeqEditorTrack*, psy_ui_Graphics*, int x, int y);
+typedef void (*seqeditortrack_fp_ondraw)(struct SeqEditorTrack*, psy_ui_Graphics*, intptr_t x, intptr_t y);
 typedef void (*seqeditortrack_fp_onpreferredsize)(struct SeqEditorTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef bool (*seqeditortrack_fp_onmousedown)(struct SeqEditorTrack*,
@@ -89,7 +89,7 @@ INLINE SeqEditorTrack* seqeditortrack_base(SeqEditorTrack* self)
 	return self;
 }
 
-INLINE void seqeditortrack_ondraw(SeqEditorTrack* self, psy_ui_Graphics* g, int x, int y)
+INLINE void seqeditortrack_ondraw(SeqEditorTrack* self, psy_ui_Graphics* g, intptr_t x, intptr_t y)
 {
 	assert(self);
 
@@ -155,7 +155,7 @@ typedef struct SeqEditorTracks {
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
 	psy_List* tracks;
-	int lastplaylinepx;
+	intptr_t lastplaylinepx;
 	SeqEditorTrack* capture;
 	int mode;
 } SeqEditorTracks;

@@ -16,7 +16,7 @@ static void oneditkeyup(NewValView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 
 void newvalview_init(NewValView* self, psy_ui_Component* parent,
-	int mindex, int pindex, int vval, int vmin, int vmax, char* title,
+	uintptr_t mindex, uintptr_t pindex, intptr_t vval, intptr_t vmin, intptr_t vmax, char* title,
 	Workspace* workspace)
 {
 	char buf[32];
@@ -71,8 +71,8 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	newvalview_updateedit(self);
 }
 
-void newvalview_reset(NewValView* self, int mindex, int pindex, int vval, int vmin,
-	int vmax, char* title)
+void newvalview_reset(NewValView* self, uintptr_t mindex, uintptr_t pindex, intptr_t vval, intptr_t vmin,
+	intptr_t vmax, char* title)
 {
 	char buf[32];
 

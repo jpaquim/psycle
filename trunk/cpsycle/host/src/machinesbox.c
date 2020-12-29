@@ -12,12 +12,12 @@
 static void machinesbox_ondestroy(MachinesBox*, psy_ui_Component*);
 static void machinesbox_clearmachinebox(MachinesBox*);
 static void machinesbox_buildmachineslist(MachinesBox*);
-static void machinesbox_insertslot(MachinesBox*, int slot, psy_audio_Machine* machine);
-static void machinesbox_insertmachine(MachinesBox*, int slot, psy_audio_Machine* machine);
+static void machinesbox_insertslot(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
+static void machinesbox_insertmachine(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
 static int machinesbox_checkmachinemode(MachinesBox*, psy_audio_Machine*);
-static void machinesbox_onmachineslotchanged(MachinesBox*, psy_audio_Machines* sender, int slot);
-static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sender, int slot);
-static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, int slot);
+static void machinesbox_onmachineslotchanged(MachinesBox*, psy_audio_Machines* sender, uintptr_t slot);
+static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sender, uintptr_t slot);
+static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, uintptr_t slot);
 static void machinesbox_onmachineslistchanged(MachinesBox*, psy_ui_Component* sender,
 	int slot);
 
@@ -73,9 +73,9 @@ void machinesbox_buildmachineslist(MachinesBox* self)
 	}
 }
 
-void machinesbox_insertslot(MachinesBox* self, int slot, psy_audio_Machine* machine)
+void machinesbox_insertslot(MachinesBox* self, uintptr_t slot, psy_audio_Machine* machine)
 {
-		int listboxindex;
+		uintptr_t listboxindex;
 
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X:", slot);
@@ -89,7 +89,7 @@ void machinesbox_insertslot(MachinesBox* self, int slot, psy_audio_Machine* mach
 		psy_table_insert(&self->slotslistbox, slot, (void*) listboxindex);
 }
 
-void machinesbox_insertmachine(MachinesBox* self, int slot, psy_audio_Machine* machine)
+void machinesbox_insertmachine(MachinesBox* self, uintptr_t slot, psy_audio_Machine* machine)
 {	
 	if (machinesbox_checkmachinemode(self, machine) && psy_audio_machine_info(machine) &&
 			psy_audio_machine_info(machine)->ShortName) {
@@ -127,27 +127,27 @@ void machinesbox_clearmachinebox(MachinesBox* self)
 
 void machinesbox_onmachineslistchanged(MachinesBox* self, psy_ui_Component* sender, int sel)
 {
-	int slot;
+	uintptr_t slot;
 
 	psy_List* slots = self->listbox.signal_selchanged.slots;
 	self->listbox.signal_selchanged.slots = 0;
-	slot = (int)psy_table_at(&self->listboxslots, sel);
-	psy_audio_machines_changeslot(self->machines, slot);	
+	slot = (uintptr_t)psy_table_at(&self->listboxslots, sel);
+	psy_audio_machines_changeslot(self->machines, slot);
 	self->listbox.signal_selchanged.slots = slots;
 }
 
-void machinesbox_onmachinesinsert(MachinesBox* self, psy_audio_Machines* machines, int slot)
+void machinesbox_onmachinesinsert(MachinesBox* self, psy_audio_Machines* machines, uintptr_t slot)
 {	
 	if (machinesbox_checkmachinemode(self, psy_audio_machines_at(self->machines, slot))) {
-		int boxindex;
+		uintptr_t boxindex;
 
 		machinesbox_buildmachineslist(self);
-		boxindex = (int)psy_table_at(&self->slotslistbox, slot);
+		boxindex = (uintptr_t)psy_table_at(&self->slotslistbox, slot);
 		psy_ui_listbox_setcursel(&self->listbox, boxindex);
 	}
 }
 
-void machinesbox_onmachineslotchanged(MachinesBox* self, psy_audio_Machines* sender, int slot)
+void machinesbox_onmachineslotchanged(MachinesBox* self, psy_audio_Machines* sender, uintptr_t slot)
 {
 	if (psy_table_exists(&self->slotslistbox, slot)) {
 		psy_ui_listbox_setcursel(&self->listbox, slot);
@@ -155,7 +155,7 @@ void machinesbox_onmachineslotchanged(MachinesBox* self, psy_audio_Machines* sen
 	}
 }
 
-void machinesbox_onmachinesremoved(MachinesBox* self, psy_audio_Machines* machines, int slot)
+void machinesbox_onmachinesremoved(MachinesBox* self, psy_audio_Machines* machines, uintptr_t slot)
 {	
 	if (psy_table_exists(&self->slotslistbox, slot)) {
 		machinesbox_buildmachineslist(self);
@@ -165,7 +165,7 @@ void machinesbox_onmachinesremoved(MachinesBox* self, psy_audio_Machines* machin
 
 void machinesbox_clone(MachinesBox* self)
 {
-	int selcount;
+	intptr_t selcount;
 	
 	selcount = psy_ui_listbox_selcount(&self->listbox);
 	if (selcount) {
@@ -173,13 +173,13 @@ void machinesbox_clone(MachinesBox* self)
 		int i;
 		psy_audio_Machine* srcmachine = 0;
 
-		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
+		psy_ui_listbox_selitems(&self->listbox, selection, (int)selcount);
 		for (i = 0; i < selcount; ++i) {				
 			if (psy_table_exists(&self->listboxslots, selection[i])) {
-				int slot;
+				uintptr_t slot;
 				psy_audio_Machine* machine;
 				
-				slot = (int) psy_table_at(&self->listboxslots,
+				slot = (uintptr_t)psy_table_at(&self->listboxslots,
 					selection[i]);
 				machine = psy_audio_machines_at(self->machines, slot);
 				if (machine && srcmachine == 0) {
@@ -192,10 +192,10 @@ void machinesbox_clone(MachinesBox* self)
 			for (i = 0; i < selcount; ++i) {				
 				if (psy_table_exists(&self->listboxslots,
 						selection[i])) {
-					int slot;
+					uintptr_t slot;
 					psy_audio_Machine* machine;
 					
-					slot = (int) psy_table_at(&self->listboxslots,
+					slot = (uintptr_t)psy_table_at(&self->listboxslots,
 						selection[i]);
 					machine = psy_audio_machines_at(self->machines, slot);
 					if (machine != srcmachine) {
@@ -216,7 +216,7 @@ void machinesbox_remove(MachinesBox* self)
 {	
 	int selcount;	
 	
-	selcount = psy_ui_listbox_selcount(&self->listbox);
+	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
 		int* selection;
 		int i;
@@ -225,9 +225,9 @@ void machinesbox_remove(MachinesBox* self)
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
 			if (psy_table_exists(&self->listboxslots, selection[i])) {
-				int slot;			
+				uintptr_t slot;
 				
-				slot = (int) psy_table_at(&self->listboxslots,
+				slot = (uintptr_t)psy_table_at(&self->listboxslots,
 					selection[i]);
 				psy_audio_machines_remove(self->machines, slot);			
 			}
@@ -240,26 +240,26 @@ void machinesbox_exchange(MachinesBox* self)
 {
 	int selcount;	
 
-	selcount = psy_ui_listbox_selcount(&self->listbox);
+	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
 		int selection[256];	
 		int i;
-		int srcslot = -1;
+		uintptr_t srcslot = UINTPTR_MAX;
 
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
 			if (psy_table_exists(&self->listboxslots, selection[i])) {			
-				srcslot = (int) psy_table_at(&self->listboxslots,
+				srcslot = (uintptr_t)psy_table_at(&self->listboxslots,
 					selection[i]);			
 				break;			
 			}
 		}
-		if (srcslot != -1) {
+		if (srcslot != UINTPTR_MAX) {
 			for (i = 0; i < selcount; ++i) {				
 				if (psy_table_exists(&self->listboxslots, selection[i])) {
-					int slot;				
+					uintptr_t slot;
 					
-					slot = (int) psy_table_at(&self->listboxslots,
+					slot = (uintptr_t)psy_table_at(&self->listboxslots,
 						selection[i]);				
 					if (slot != srcslot) {		
 						psy_audio_machines_exchange(self->machines, srcslot,
@@ -276,7 +276,7 @@ void machinesbox_showparameters(MachinesBox* self)
 {	
 	int selcount;	
 	
-	selcount = psy_ui_listbox_selcount(&self->listbox);
+	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
 		int selection[256];
 		int i;
@@ -284,10 +284,10 @@ void machinesbox_showparameters(MachinesBox* self)
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
 			if (psy_table_exists(&self->listboxslots, selection[i])) {
-				int slot;
+				uintptr_t slot;
 				psy_audio_Machine* machine;
 				
-				slot = (int) psy_table_at(&self->listboxslots, selection[i]);
+				slot = (uintptr_t)psy_table_at(&self->listboxslots, selection[i]);
 				machine = psy_audio_machines_at(self->machines, slot);
 				if (machine) {					
 					workspace_showparameters(self->workspace, slot);

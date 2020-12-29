@@ -206,7 +206,7 @@ INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
 	self->y = 0;
 }
 
-INLINE psy_ui_IntPoint psy_ui_intpoint_make(int x, int y)
+INLINE psy_ui_IntPoint psy_ui_intpoint_make(intptr_t x, intptr_t y)
 {
 	psy_ui_IntPoint rv;
 
@@ -271,7 +271,7 @@ typedef struct {
 	intptr_t height;
 } psy_ui_IntSize;
 
-INLINE psy_ui_IntSize psy_ui_intsize_make(int width, int height)
+INLINE psy_ui_IntSize psy_ui_intsize_make(intptr_t width, intptr_t height)
 {
 	psy_ui_IntSize rv;
 

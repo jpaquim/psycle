@@ -15,7 +15,7 @@ extern "C" {
 struct psy_ui_Component;
 
 typedef struct {
-	intptr_t keycode;
+	uint32_t keycode;
 	intptr_t keydata;
 	bool shift;
 	bool ctrl;

@@ -373,7 +373,7 @@ static void programname(psy_audio_Machine* self, uintptr_t bnkidx,
 {
 	psy_snprintf(val, 256, "%s", "Program 0");
 }
-static int numprograms(psy_audio_Machine* self) { return 0; }
+static uintptr_t numprograms(psy_audio_Machine* self) { return 0; }
 static void setcurrprogram(psy_audio_Machine* self, uintptr_t prgidx) { }
 static uintptr_t currprogram(psy_audio_Machine* self) { return 0; }
 static void bankname(psy_audio_Machine* self, uintptr_t bnkidx, char* val)
@@ -698,9 +698,9 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 
 					v = psy_audio_patternevent_tweakvalue(ev);
 					if (ev->vol > 0) {
-						int32_t curr;
-						int32_t step;
-						int32_t nv;
+						intptr_t curr;
+						intptr_t step;
+						intptr_t nv;
 
 						curr = psy_audio_machine_parameter_patternvalue(self, param);
 						step = (v - curr) / ev->vol;
@@ -914,7 +914,7 @@ void savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 
 		param = psy_audio_machine_tweakparameter(self, i);
 		if (param) {
-			scaled = psy_audio_machine_parameter_scaledvalue(self, param);
+			scaled = (int32_t)psy_audio_machine_parameter_scaledvalue(self, param);
 		}		
 		psyfile_write_int32(songfile->file, scaled);
 	}
@@ -940,7 +940,7 @@ void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			uint32_t numPairs;
 
 			input_socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);							
-			numPairs = psy_list_size(input_socket->mapping.container);
+			numPairs = (uint32_t)psy_list_size(input_socket->mapping.container);
 			i = psy_tableiterator_key(&it);
 
 			if (i <= INT32_MAX) {
@@ -1019,7 +1019,8 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			&& slot != wire->_inputMachine && inputmachine)
 		{
 			// Do not create the hidden wire from mixer send to the send machine.
-			int outWire = psy_audio_legacywires_findlegacyoutput(songfile->legacywires, wire->_inputMachine, slot);
+			int outWire = psy_audio_legacywires_findlegacyoutput(songfile->legacywires, wire->_inputMachine,
+				slot);
 			if (outWire != -1) {
 				psy_audio_Wire newwire;
 

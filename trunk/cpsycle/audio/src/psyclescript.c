@@ -291,11 +291,13 @@ void psyclescript_require(psy_audio_PsycleScript* self, const char* name,
 void psyclescript_setsearchpath(psy_audio_PsycleScript* self, const char* modulepath)
 {    
 	psy_Path path;  
-	char luapath[_MAX_PATH];
+	char luapath[_MAX_PATH];	
 
 	psy_path_init(&path, modulepath);	
 	psy_snprintf(luapath, _MAX_PATH, "%s/?.lua;%s/%s/?.lua;%s/psycle/?.lua",
-		psy_path_prefix(&path), psy_path_name(&path), psy_path_prefix(&path));
+		psy_path_prefix(&path),
+		psy_path_prefix(&path), psy_path_name(&path),
+		psy_path_prefix(&path));
 	psy_replacechar(luapath, '/', '\\');
 	lua_getglobal(self->L, "package");
 	lua_pushstring(self->L, luapath);

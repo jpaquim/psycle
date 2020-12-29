@@ -81,7 +81,7 @@ void parameterlistbox_setmachine(ParameterListBox* self,
 	parameterlistbox_build(self);	
 }
 
-int parameterlistbox_selected(ParameterListBox* self)
+intptr_t parameterlistbox_selected(ParameterListBox* self)
 {
 	return psy_ui_listbox_cursel(&self->listbox);
 }

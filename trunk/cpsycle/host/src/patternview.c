@@ -715,7 +715,7 @@ void patternview_computemetrics(PatternView* self)
 	psy_ui_Size gridsize;
 	psy_ui_TextMetric tm;
 	psy_ui_TextMetric gridtm;
-	int trackwidth;
+	intptr_t trackwidth;
 
 	gridsize = psy_ui_component_size(trackergrid_base(&self->tracker));
 	tm = psy_ui_component_textmetric(patternview_base(self));
@@ -1152,7 +1152,7 @@ void patternview_onparametertweak(PatternView* self, Workspace* sender,
 
 void patternview_updatescrollstep(PatternView* self)
 {
-	int scrollstepx;
+	intptr_t scrollstepx;
 
 	scrollstepx = trackergridstate_trackwidth(&self->gridstate,
 			trackergridstate_pxtotrack(&self->gridstate,

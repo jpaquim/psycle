@@ -6,6 +6,8 @@
 #include "dirconfig.h"
 // file
 #include <dir.h>
+// platform
+#include "../../detail/cpu.h"
 
 static void dirconfig_make(DirConfig*);
 static void dirconfig_makedefaultuserpresets(DirConfig*);
@@ -30,22 +32,27 @@ void dirconfig_dispose(DirConfig* self)
 
 void dirconfig_make(DirConfig* self)
 {
-	const char* home;
 #if defined(DIVERSALIS__OS__MICROSOFT)		
 #else
 	char path[4096];
 #endif
 
 	assert(self);
-
-	home = psy_dir_home();
+	
 	self->directories = psy_property_settext(
 		psy_property_append_section(self->parent, "directories"),
 		"settingsview.directories");
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
 	psy_property_sethint(
 		psy_property_settext(
-			psy_property_append_string(self->directories, "app", PSYCLE_APP_DIR),
-			"App directory"),
+			psy_property_append_string(self->directories,
+				"app", PSYCLE_APP_DIR), "App directory"),
+#else
+	psy_property_sethint(
+		psy_property_settext(
+			psy_property_append_string(self->directories,
+				"app", PSYCLE_APP64_DIR), "App directory"),
+#endif
 		PSY_PROPERTY_HINT_HIDE);
 #if defined(DIVERSALIS__OS__MICROSOFT)		
 	dirconfig_append(self, "songs", "settingsview.song-directory",
@@ -58,8 +65,10 @@ void dirconfig_make(DirConfig* self)
 #endif		
 	dirconfig_append(self, "samples", "settingsview.samples-directory",
 		PSYCLE_SAMPLES_DEFAULT_DIR);
-	dirconfig_append(self, "plugins", "settingsview.plug-in-directory",
-		PSYCLE_PLUGINS_DEFAULT_DIR);
+	dirconfig_append(self, "plugins32", "settingsview.plug-in32-directory",
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+	dirconfig_append(self, "plugins64", "settingsview.plug-in64-directory",
+		PSYCLE_PLUGINS64_DEFAULT_DIR);
 	dirconfig_append(self, "luascripts", "settingsview.lua-scripts-directory",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
 	dirconfig_append(self, "vsts32", "settingsview.vst-directories",
@@ -114,12 +123,33 @@ const char* dirconfig_samples(const DirConfig* self)
 		PSYCLE_SAMPLES_DEFAULT_DIR);
 }
 
-const char* dirconfig_plugins(const DirConfig* self)
+const char* dirconfig_plugins32(const DirConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_str(self->directories, "plugins",
-		PSYCLE_PLUGINS_DEFAULT_DIR);
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+}
+
+const char* dirconfig_plugins64(const DirConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_str(self->directories, "plugins",
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+}
+
+const char* dirconfig_pluginscurrplatform(const DirConfig* self)
+{
+	assert(self);
+
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+	return psy_property_at_str(self->directories, "plugins32",
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+#else
+	return psy_property_at_str(self->directories, "plugins64",
+		PSYCLE_PLUGINS32_DEFAULT_DIR);
+#endif
 }
 
 const char* dirconfig_luascripts(const DirConfig* self)

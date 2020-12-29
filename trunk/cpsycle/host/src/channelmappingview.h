@@ -38,10 +38,10 @@ typedef struct PinEdit {
 	// internal data
 	psy_audio_Wire wire;
 	PinEditDragMode dragmode;
-	int drag_src;
-	int drag_dst;
-	int mx;
-	int my;
+	uintptr_t drag_src;
+	uintptr_t drag_dst;
+	intptr_t mx;
+	intptr_t my;
 	psy_ui_Colour pincolour;
 	psy_ui_Colour wirecolour;
 	// references

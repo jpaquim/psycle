@@ -4,15 +4,15 @@
 #include "skincoord.h"
 
 void skincoord_setall(SkinCoord* self,
-	int srcx,
-	int srcy,
-	int srcwidth,
-	int srcheight,
-	int destx,
-	int desty,
-	int destwidth,
-	int destheight,
-	int range)
+	intptr_t srcx,
+	intptr_t srcy,
+	intptr_t srcwidth,
+	intptr_t srcheight,
+	intptr_t destx,
+	intptr_t desty,
+	intptr_t destwidth,
+	intptr_t destheight,
+	intptr_t range)
 {
 	self->srcx = srcx;
 	self->srcy = srcy;
@@ -25,7 +25,7 @@ void skincoord_setall(SkinCoord* self,
 	self->range = range;
 }
 
-void skincoord_setsource(SkinCoord* coord, int vals[4])
+void skincoord_setsource(SkinCoord* coord, intptr_t vals[4])
 {
 	coord->srcx = vals[0];
 	coord->srcy = vals[1];
@@ -35,7 +35,7 @@ void skincoord_setsource(SkinCoord* coord, int vals[4])
 	coord->destheight = vals[3];
 }
 
-void skincoord_setdest(SkinCoord* coord, int vals[4])
+void skincoord_setdest(SkinCoord* coord, intptr_t vals[4])
 {
 	coord->destx = vals[0];
 	coord->desty = vals[1];
