@@ -127,13 +127,13 @@ typedef struct psy_EventDriver {
 #define psy_ALT_ON		TRUE
 #define psy_ALT_OFF		FALSE
 
-INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool
+INLINE uint32_t psy_audio_encodeinput(uint32_t keycode, bool shift, bool
 	ctrl, bool alt)
 {
 	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9) | ((uintptr_t)alt << 10);
 }
 
-INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode,
+INLINE void psy_audio_decodeinput(uint32_t input, uint32_t* keycode,
 	bool* shift, bool* ctrl, bool* alt)
 {
 	*keycode = input & 0xFF;

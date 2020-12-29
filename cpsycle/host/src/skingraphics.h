@@ -11,11 +11,11 @@
 extern "C" {
 #endif
 
-void skin_blitpart(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, SkinCoord*);
-void skin_blitpartstretched(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y,
+void skin_blitpart(psy_ui_Graphics*, psy_ui_Bitmap*, intptr_t x, intptr_t y, SkinCoord*);
+void skin_blitpartstretched(psy_ui_Graphics*, psy_ui_Bitmap*, intptr_t x, intptr_t y,
 	double ratiowidth, double ratioheight,
 	SkinCoord*);
-void skin_stretchratio(SkinCoord*, int width, int height,
+void skin_stretchratio(SkinCoord*, intptr_t width, intptr_t height,
 	double* ratiowidth, double* ratioheight);
 
 #ifdef __cplusplus

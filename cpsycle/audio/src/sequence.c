@@ -616,7 +616,7 @@ psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence* s
 	return rv;
 }
 
-psy_audio_SequencePosition psy_audio_sequence_positionfromid(psy_audio_Sequence* self, int id)
+psy_audio_SequencePosition psy_audio_sequence_positionfromid(psy_audio_Sequence* self, uintptr_t id)
 {
 	psy_audio_SequencePosition rv;	
 	psy_audio_SequenceTrackNode* t;	

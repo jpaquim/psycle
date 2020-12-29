@@ -327,12 +327,12 @@ void writetext(const char* path, const char* text)
 
 	fp = fopen(path, "wb");
 	if (fp) {		
-		int lengthdoc;
-		int i;
+		uintptr_t lengthdoc;
+		uintptr_t i;
 
 		lengthdoc = strlen(text);
 		for (i = 0; i < lengthdoc; i += BLOCKSIZE) {
-			int grabsize;
+			uintptr_t grabsize;
 
 			grabsize = lengthdoc - i;
 			if (grabsize > BLOCKSIZE) {

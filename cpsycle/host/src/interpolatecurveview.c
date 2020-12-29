@@ -18,14 +18,14 @@ static void interpolatecurvebox_drawgrid(InterpolateCurveBox*,
 static void interpolatecurvebox_drawkeyframes(InterpolateCurveBox*,
 	psy_ui_Graphics*);
 static void interpolatecurvebox_drawselector(InterpolateCurveBox*,
-	psy_ui_Graphics*, int x, int y, psy_List* kf);
+	psy_ui_Graphics*, intptr_t x, intptr_t y, psy_List* kf);
 static void interpolatecurvebox_buildkeyframes(InterpolateCurveBox*);
 static void interpolatecurvebox_onmousedown(InterpolateCurveBox*, psy_ui_MouseEvent*);
 static void interpolatecurvebox_onmousemove(InterpolateCurveBox*, psy_ui_MouseEvent*);
 static void interpolatecurvebox_onmouseup(InterpolateCurveBox*, psy_ui_MouseEvent*);
-static psy_List* interpolatecurvebox_hittest(InterpolateCurveBox*, int x, int y);
+static psy_List* interpolatecurvebox_hittest(InterpolateCurveBox*, intptr_t x, intptr_t y);
 static void interpolatecurvebox_clear(InterpolateCurveBox*);
-static void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y);
+static void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, intptr_t x, intptr_t y);
 
 static void interpolatecurveview_ondestroy(InterpolateCurveView*,
 	psy_ui_Component* sender);
@@ -39,15 +39,15 @@ static void interpolatecurveview_oncurvetypechanged(InterpolateCurveView*, psy_u
 static void interpolatecurveview_setallcurvelinear(InterpolateCurveView*);
 static void interpolatecurveview_setallcurvehermite(InterpolateCurveView*);
 
-static double hermitecurveinterpolate(int kf0, int kf1, int kf2,
-	int kf3, int curposition, int maxposition, double tangmult, bool interpolation);
+static double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
+	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult, bool interpolation);
 
 KeyFrame* keyframe_alloc(void)
 {
 	return (KeyFrame*) malloc(sizeof(KeyFrame));
 }
 
-KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, int value,
+KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, intptr_t value,
 	InterpolateCurveType curve)
 {
 	KeyFrame* rv;
@@ -88,7 +88,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 }
 
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;
-static int interpolatecurvebox_vtable_initialized = 0;
+static bool interpolatecurvebox_vtable_initialized = FALSE;
 
 static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 {
@@ -102,7 +102,7 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 			interpolatecurvebox_onmousemove;
 		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
 			interpolatecurvebox_onmouseup;		
-		interpolatecurvebox_vtable_initialized = 1;
+		interpolatecurvebox_vtable_initialized = TRUE;
 	}
 }
 
@@ -168,9 +168,9 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 		for (i = 0; i < lines; ++i) {
-			int x;
+			intptr_t x;
 
-			x = (int)(i * self->bpl * scalex);
+			x = (intptr_t)(i * self->bpl * scalex);
 			psy_ui_drawline(g, x, 0, x, psy_ui_value_px(&size.height, &tm));
 		}
 	}
@@ -181,15 +181,15 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 {
 	psy_List* kf;
 	psy_dsp_big_beat_t lastoffset = 0;
-	int step = 100;
+	intptr_t step = 100;
 	uintptr_t lines;
 	psy_ui_Size size;
 	double scalex;
 	double scaley;
-	int val0 = 0;
-	int val1 = 0;
-	int val2 = 0;
-	int val3 = 0;
+	intptr_t val0 = 0;
+	intptr_t val1 = 0;
+	intptr_t val2 = 0;
+	intptr_t val3 = 0;
 	double lastcurveval = 0;
 	InterpolateCurveType curve;
 	KeyFrame* entry;
@@ -204,55 +204,55 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	val1 = entry->value;
 	val2 = entry->value;
 	val3 = entry->value;
-	lastcurveval = (int) entry->value;
+	lastcurveval = (double)entry->value;
 	lastoffset = entry->offset;
 	size = psy_ui_component_size(&self->component);
 	lines = (uintptr_t)(self->range / self->bpl);
 	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, &tm) / (double) 0xFF;
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-	interpolatecurvebox_drawselector(self, g, (int)(lastoffset * scalex),
-		(int)(psy_ui_value_px(&size.height, &tm) - (int)(lastcurveval * scaley)), self->keyframes);
+	interpolatecurvebox_drawselector(self, g, (intptr_t)(lastoffset * scalex),
+		(intptr_t)(psy_ui_value_px(&size.height, &tm) - (intptr_t)(lastcurveval * scaley)), self->keyframes);
 	curve = entry->curve;
 	for (kf = self->keyframes->next; kf != 0; kf = kf->next) {
 		KeyFrame* entry;
-		int distance;
-		int x;
+		intptr_t distance;
+		intptr_t x;
 
 		entry = (KeyFrame*)kf->entry;				
 		val0 = val1;
 		val1 = val2;
 		val2 = entry->value;
 		val3 = entry->value;
-		x = (int)(lastoffset * scalex);
-		distance = (int)(entry->offset * scalex) - (int)(lastoffset * scalex);
+		x = (intptr_t)(lastoffset * scalex);
+		distance = (intptr_t)(entry->offset * scalex) - (intptr_t)(lastoffset * scalex);
 		if (curve == INTERPOLATECURVETYPE_LINEAR) {
 			psy_ui_drawline(g,
 				x,
-				(int)(psy_ui_value_px(&size.height, &tm) - lastcurveval * scaley),
+				(intptr_t)(psy_ui_value_px(&size.height, &tm) - lastcurveval * scaley),
 				x + distance,
-				(int)(psy_ui_value_px(&size.height, &tm) - entry->value * scaley));
+				(intptr_t)(psy_ui_value_px(&size.height, &tm) - entry->value * scaley));
 		} else
 		if (curve == INTERPOLATECURVETYPE_HERMITE) {
-			int i;
+			intptr_t i;
 
 			for (i = 1; i < distance; i++) {
 				double curveval = hermitecurveinterpolate(val0, val1, val2, val3, i, distance, 0, TRUE);
-				psy_ui_drawline(g, x + i - 1, (int)(psy_ui_value_px(&size.height, &tm) - lastcurveval * scaley),
-					x + i, (int)(psy_ui_value_px(&size.height, &tm) - curveval * scaley));
+				psy_ui_drawline(g, x + i - 1, (intptr_t)(psy_ui_value_px(&size.height, &tm) - lastcurveval * scaley),
+					x + i, (intptr_t)(psy_ui_value_px(&size.height, &tm) - curveval * scaley));
 				lastcurveval = curveval;
 			}
 		}
-		lastcurveval = val2;
+		lastcurveval = (double)val2;
 		lastoffset = entry->offset;
 		curve = entry->curve;
-		interpolatecurvebox_drawselector(self, g, (int)(lastoffset * scalex),
-			(int)(psy_ui_value_px(&size.height, &tm) - (int)(lastcurveval * scaley)), kf);
+		interpolatecurvebox_drawselector(self, g, (intptr_t)(lastoffset * scalex),
+			(intptr_t)(psy_ui_value_px(&size.height, &tm) - (intptr_t)(lastcurveval * scaley)), kf);
 	 }
 }
 
-double hermitecurveinterpolate(int kf0, int kf1, int kf2,
-	int kf3, int curposition, int maxposition, double tangmult, bool interpolation)
+double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
+	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult, bool interpolation)
 {
 	if (interpolation == TRUE)
 	{
@@ -272,15 +272,15 @@ double hermitecurveinterpolate(int kf0, int kf1, int kf2,
 	}
 	else
 	{
-		return kf1;
+		return (double)kf1;
 	}
 }
 
 void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
-	psy_ui_Graphics* g, int x, int y, psy_List* keyframe)
+	psy_ui_Graphics* g, intptr_t x, intptr_t y, psy_List* keyframe)
 {
 	psy_ui_Rectangle r;
-	int half = 2;
+	intptr_t half = 2;
 	psy_ui_Colour colour;
 
 	psy_ui_setrectangle(&r, x - half, y - half, half * 2, half * 2);
@@ -320,7 +320,7 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 	}
 }
 
-void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)
+void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, intptr_t x, intptr_t y)
 {
 	psy_ui_Size size;
 	double scalex;
@@ -337,7 +337,7 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)
 	scaley = psy_ui_value_px(&size.height, &tm) / (double)0xFF;
 
 	offset = x / scalex;
-	offset = (int)(offset / 0.25) * 0.25;
+	offset = (intptr_t)(offset / 0.25) * 0.25;
 	value = (psy_dsp_big_amp_t)(psy_ui_value_px(&size.height, &tm) - y) / scaley;
 	
 	kf = self->keyframes;
@@ -349,14 +349,14 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)
 			break;
 		}
 		if (entry->offset == offset) {
-			entry->value = (int) value;
+			entry->value = (intptr_t) value;
 			return;
 		}
 		kf = kf->next;
 	}
 	keyframe = keyframe_allocinit(
 		offset,
-		(int) value,
+		(intptr_t) value,
 		INTERPOLATECURVETYPE_LINEAR);
 	if (kf) {
 		psy_list_insert(&self->keyframes, kf->prev, keyframe);
@@ -410,14 +410,14 @@ void interpolatecurvebox_onmouseup(InterpolateCurveBox* self, psy_ui_MouseEvent*
 	self->dragkeyframe = 0;
 }
 
-psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, int x, int y)
+psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, intptr_t x, intptr_t y)
 {
 	psy_List* kf;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 	double scalex;
 	double scaley;
-	int half = 4;
+	intptr_t half = 4;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
@@ -428,7 +428,7 @@ psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, int x, int y)
 		KeyFrame* entry;
 
 		entry = (KeyFrame*)kf->entry;
-		if ((int)(entry->offset * scalex) >= x - half && (int)(entry->offset * scalex) < x + half) {
+		if ((intptr_t)(entry->offset * scalex) >= x - half && (intptr_t)(entry->offset * scalex) < x + half) {
 			break;
 		}
 		kf = kf->next;
@@ -453,7 +453,7 @@ void interpolatecurvebox_clear(InterpolateCurveBox* self)
 // InterpolateCurveView
 // implementation
 void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
-	parent, int startsel, int endsel, int lpb, Workspace* workspace)
+	parent, intptr_t startsel, intptr_t endsel, uintptr_t lpb, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);	
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
@@ -510,7 +510,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 	if (self->pattern) {
 		psy_audio_PatternNode* p;
 		psy_audio_PatternNode* q;
-		int insertlast = 1;
+		intptr_t insertlast = 1;
 
 		p = psy_audio_pattern_greaterequal(self->pattern,
 			(psy_dsp_beat_t)self->selection.topleft.offset);

@@ -14,8 +14,8 @@ extern "C" {
 #endif
 
 typedef struct ViewHistoryEntry {
-	int id;
-	int seqpos;
+	uintptr_t id;
+	uintptr_t seqpos;
 } ViewHistoryEntry;
 
 typedef struct {

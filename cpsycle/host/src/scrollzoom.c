@@ -87,8 +87,8 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	int zoomleftx;
-	int zoomrightx;
+	intptr_t zoomleftx;
+	intptr_t zoomrightx;
 	
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);

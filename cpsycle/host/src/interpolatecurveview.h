@@ -49,11 +49,11 @@ void interpolatecurvebar_init(InterpolateCurveBar*, psy_ui_Component* parent,
 
 typedef struct KeyFrame {
 	psy_dsp_big_beat_t offset;
-	int value;
+	intptr_t value;
 	InterpolateCurveType curve;
 } KeyFrame;
 
-INLINE void keyframe_init(KeyFrame* self, psy_dsp_big_beat_t offset, int value,
+INLINE void keyframe_init(KeyFrame* self, psy_dsp_big_beat_t offset, intptr_t value,
 	InterpolateCurveType curve)
 {
 	self->offset = offset;
@@ -62,7 +62,7 @@ INLINE void keyframe_init(KeyFrame* self, psy_dsp_big_beat_t offset, int value,
 }
 
 KeyFrame* keyframe_alloc(void);
-KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, int value,
+KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, intptr_t value,
 	InterpolateCurveType curve);
 
 struct InterpolateCurveView;
@@ -95,7 +95,7 @@ typedef struct InterpolateCurveView {
 } InterpolateCurveView;
 
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
-	int startsel, int endsel, int lpb, Workspace*);
+	intptr_t startsel, intptr_t endsel, uintptr_t lpb, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
 	const psy_audio_PatternSelection*);
 void interpolatecurveview_setpattern(InterpolateCurveView*,

@@ -408,22 +408,23 @@ static psy_ui_Rectangle machinewireview_bounds(MachineWireView*);
 static void machinewireview_connectmachinessignals(MachineWireView*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
-static void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y);
+static void drawmachineline(psy_ui_Graphics* g, intptr_t xdir, intptr_t ydir,
+	intptr_t x, intptr_t y);
 static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawwires(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawwire(MachineWireView*, psy_ui_Graphics*,
 	uintptr_t slot, MachineUi*);
 static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
-	int x1, int y1, int x2, int y2);
+	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2);
 static psy_ui_IntPoint rotate_point(psy_ui_IntPoint, double phi);
 static psy_ui_IntPoint move_point(psy_ui_IntPoint pt, psy_ui_IntPoint d);
 static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmouseup(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmousemove(MachineWireView*, psy_ui_MouseEvent*);
 static bool machinewireview_movemachine(MachineWireView*, uintptr_t slot,
-	int dx, int dy);
+	intptr_t dx, intptr_t dy);
 static bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
-	int x, int y);
+	intptr_t x, intptr_t y);
 static void machinewireview_onmousedoubleclick(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onkeydown(MachineWireView*, psy_ui_KeyEvent*);
 static uintptr_t machinewireview_machineleft(MachineWireView*, uintptr_t src);
@@ -431,15 +432,15 @@ static uintptr_t machinewireview_machineright(MachineWireView* self, uintptr_t s
 static uintptr_t machinewireview_machineup(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src);
 static void machinewireview_hittest(MachineWireView*);
-static int machinewireview_hittestpan(MachineWireView*, int x, int y,
-	uintptr_t slot, int* dx);
-static bool machinewireview_hittestcoord(MachineWireView*, int x, int y,
+static int machinewireview_hittestpan(MachineWireView*, intptr_t x, intptr_t y,
+	uintptr_t slot, intptr_t* dx);
+static bool machinewireview_hittestcoord(MachineWireView*, intptr_t x, intptr_t y,
 	int mode, SkinCoord*);
-static psy_audio_Wire machinewireview_hittestwire(MachineWireView*, int x,
-	int y);
-static int machinewireview_hittesteditname(MachineWireView*, int x, int y,
+static psy_audio_Wire machinewireview_hittestwire(MachineWireView*, intptr_t x,
+	intptr_t y);
+static int machinewireview_hittesteditname(MachineWireView*, intptr_t x, intptr_t y,
 	uintptr_t slot);
-static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y,
+static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, intptr_t x, intptr_t y,
 	uintptr_t slot);
 static bool machinewireview_dragging_machine(const MachineWireView*);
 static bool machinewireview_dragging_connection(const MachineWireView*);
@@ -661,12 +662,12 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 }
 
 void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
-	int x1, int y1, int x2, int y2)
+	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2)
 {			
 	psy_ui_IntPoint center;
 	psy_ui_IntPoint a, b, c;	
 	psy_ui_IntPoint tri[4];
-	int polysize;
+	intptr_t polysize;
 	float deltaColR = ((self->skin.polycolour.value     & 0xFF) / 510.0f) + .45f;
 	float deltaColG = ((self->skin.polycolour.value >>8  & 0xFF) / 510.0f) + .45f;
 	float deltaColB = ((self->skin.polycolour.value>>16 & 0xFF) / 510.0f) + .45f;	
@@ -687,7 +688,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	c.x = 0;
 	c.y = -polysize/2;
 
-	phi = atan2(x2 - x1, y1 - y2);
+	phi = atan2((double)(x2 - x1), (double)(y1 - y2));
 	
 	tri[0] = move_point(rotate_point(a, phi), center);
 	tri[1] = move_point(rotate_point(b, phi), center);
@@ -701,8 +702,8 @@ psy_ui_IntPoint rotate_point(psy_ui_IntPoint pt, double phi)
 {
 	psy_ui_IntPoint rv;
 	
-	rv.x = (int) (cos(phi) * pt.x - sin(phi) * pt.y);
-	rv.y = (int) (sin(phi) * pt.x + cos(phi) * pt.y);
+	rv.x = (intptr_t) (cos(phi) * pt.x - sin(phi) * pt.y);
+	rv.y = (intptr_t) (sin(phi) * pt.x + cos(phi) * pt.y);
 	return rv;
 }
 
@@ -761,7 +762,7 @@ void machineui_drawhighlight(MachineUi* self, psy_ui_Graphics* g,
 	MachineWireView* wireview)
 {	
 	psy_ui_Rectangle r;
-	static int d = 5; // the distance of the highlight from the machine
+	static intptr_t d = 5; // the distance of the highlight from the machine
 
 	r = machineui_position(self);	
 	psy_ui_setcolour(g, wireview->skin.wirecolour);
@@ -775,9 +776,9 @@ void machineui_drawhighlight(MachineUi* self, psy_ui_Graphics* g,
 	drawmachineline(g, 0, -1, r.left - d, r.bottom + d);	
 }
 
-void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y)
+void drawmachineline(psy_ui_Graphics* g, intptr_t xdir, intptr_t ydir, intptr_t x, intptr_t y)
 {
-	int hlength = 9; // the length of the selected machine highlight	
+	intptr_t hlength = 9; // the length of the selected machine highlight	
 
 	psy_ui_drawline(g, x, y, x + xdir * hlength, y + ydir * hlength);
 }
@@ -940,8 +941,8 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-int machinewireview_hittestpan(MachineWireView* self, int x, int y,
-	uintptr_t slot, int* dx)
+int machinewireview_hittestpan(MachineWireView* self, intptr_t x, intptr_t y,
+	uintptr_t slot, intptr_t* dx)
 {	
 	MachineUi* machineui;
 
@@ -950,10 +951,10 @@ int machinewireview_hittestpan(MachineWireView* self, int x, int y,
 		intptr_t mx;
 		intptr_t my;		
 		psy_ui_Rectangle r;
-		int offset;
+		intptr_t offset;
 
 		psy_audio_machine_position(machineui->machine, &mx, &my);
-		offset = (int) (psy_audio_machine_panning(machineui->machine) *
+		offset = (intptr_t) (psy_audio_machine_panning(machineui->machine) *
 			machineui->coords->pan.range);
 		r = skincoord_destposition(&machineui->coords->pan);
 		psy_ui_rectangle_move(&r, offset, 0);		
@@ -963,7 +964,7 @@ int machinewireview_hittestpan(MachineWireView* self, int x, int y,
 	return FALSE;
 }
 
-int machinewireview_hittesteditname(MachineWireView* self, int x, int y,
+int machinewireview_hittesteditname(MachineWireView* self, intptr_t x, intptr_t y,
 	uintptr_t slot)
 {	
 	MachineUi* machineui;
@@ -981,7 +982,7 @@ int machinewireview_hittesteditname(MachineWireView* self, int x, int y,
 	return FALSE;
 }
 
-bool machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode,
+bool machinewireview_hittestcoord(MachineWireView* self, intptr_t x, intptr_t y, int mode,
 	SkinCoord* coord)
 {
 	MachineUi* machineui;
@@ -999,7 +1000,7 @@ bool machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode,
 	return FALSE;
 }
 
-psy_dsp_amp_t machinewireview_panvalue(MachineWireView* self, int x, int y,
+psy_dsp_amp_t machinewireview_panvalue(MachineWireView* self, intptr_t x, intptr_t y,
 	uintptr_t slot)
 {
 	psy_dsp_amp_t rv = 0.f;	
@@ -1122,7 +1123,7 @@ bool machinewireview_dragging_newconnection(const MachineWireView* self)
 }
 
 bool machinewireview_movemachine(MachineWireView* self, uintptr_t slot,
-	int dx, int dy)
+	intptr_t dx, intptr_t dy)
 {
 	MachineUi* machineui;
 
@@ -1136,7 +1137,7 @@ bool machinewireview_movemachine(MachineWireView* self, uintptr_t slot,
 }
 
 bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
-	int x, int y)
+	intptr_t x, intptr_t y)
 {
 	MachineUi* machineui;
 	psy_ui_Rectangle r_old;
@@ -1413,7 +1414,7 @@ uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src)
 	return rv;
 }
 
-psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
+psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, intptr_t x, intptr_t y)
 {		
 	psy_audio_Wire rv;
 	psy_TableIterator it;
@@ -1446,7 +1447,7 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 						psy_ui_Rectangle r;
 						psy_ui_IntSize out;
 						psy_ui_IntSize in;
-						int d = 4;
+						intptr_t d = 4;
 						intptr_t mxout;
 						intptr_t myout;
 						intptr_t mxin;
@@ -1494,8 +1495,8 @@ void machinewireview_onmachinesinsert(MachineWireView* self,
 
 		machineui = machineuis_insert(self, slot);
 		if (machineui && !self->randominsert) {
-			int width;
-			int height;
+			intptr_t width;
+			intptr_t height;
 
 			width = machineui_position(machineui).right -
 				machineui_position(machineui).left;
@@ -1826,7 +1827,7 @@ void machinewireview_onnewmachineselected(MachineView* self,
 		psy_property_at_int(plugininfo, "shellidx", 0),
 		UINTPTR_MAX);
 	if (machine) {
-		int favorite;
+		intptr_t favorite;
 
 		favorite = psy_property_at_int(plugininfo, "favorite", 0);
 		psy_property_set_int(plugininfo, "favorite", ++favorite);
@@ -1834,7 +1835,8 @@ void machinewireview_onnewmachineselected(MachineView* self,
 			uintptr_t slot;
 
 			slot = psy_audio_machines_append(self->wireview.machines, machine);
-			psy_audio_machines_disconnect(self->wireview.machines, self->wireview.selectedwire);
+			psy_audio_machines_disconnect(self->wireview.machines,
+				self->wireview.selectedwire);
 			psy_audio_machines_connect(self->wireview.machines,
 				psy_audio_wire_make(self->wireview.selectedwire.src, slot));
 			psy_audio_machines_connect(self->wireview.machines,

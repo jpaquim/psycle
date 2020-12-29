@@ -74,8 +74,8 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle left;
 	psy_ui_Rectangle right;	
 	psy_ui_IntSize size;	
-	int vuprevL;
-	int vuprevR;
+	intptr_t vuprevL;
+	intptr_t vuprevR;
 	
 	size = psy_ui_component_intsize(&self->component);
 	psy_ui_setrectangle(&left, 0, 5, size.width, 5);	

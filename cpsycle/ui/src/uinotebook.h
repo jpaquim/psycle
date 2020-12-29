@@ -17,13 +17,13 @@ typedef struct psy_ui_Notebook {
 	// ui elements
 	psy_ui_SplitBar splitbar;
 	// internal data;
-	int pageindex;
+	uintptr_t pageindex;
 	int split;
 } psy_ui_Notebook;
 
 void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
-void psy_ui_notebook_select(psy_ui_Notebook*, int page);
-int psy_ui_notebook_pageindex(psy_ui_Notebook*);
+void psy_ui_notebook_select(psy_ui_Notebook*, uintptr_t page);
+uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);
 void psy_ui_notebook_split(psy_ui_Notebook*, psy_ui_Orientation);
 int psy_ui_notebook_splitactivated(psy_ui_Notebook*);

@@ -97,7 +97,7 @@ typedef struct {
 	psy_ui_Component component;	
 	WaveBoxDragMode dragmode;
 	bool dragstarted;
-	int dragoffset;
+	intptr_t dragoffset;
 	psy_Signal selectionchanged;
 	char* nowavetext;
 	bool preventdrawonselect;	

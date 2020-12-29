@@ -19,7 +19,7 @@ typedef struct {
 	float start;
 	float end;	
 	int dragmode;
-	int dragoffset;
+	intptr_t dragoffset;
 	psy_Signal signal_zoom;
 	psy_Signal signal_customdraw;
 } ScrollZoom;

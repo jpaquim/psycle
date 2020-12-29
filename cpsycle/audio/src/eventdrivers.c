@@ -120,7 +120,7 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 	return eventdriver;
 }
 
-int psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
+intptr_t psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
 	const char* path)
 {
 	if (strcmp("kbd", path) == 0) {
@@ -150,14 +150,14 @@ int psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
 }
 
 void psy_audio_eventdrivers_register(psy_audio_EventDrivers* self,
-	int guid, const char* path)
+	intptr_t guid, const char* path)
 {
 	if (path) {
 		psy_table_insert(&self->guids, (uintptr_t)guid, (void*)(uintptr_t)strdup(path));
 	}
 }
 
-psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers* self, int guid)
+psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers* self, intptr_t guid)
 {
 	const char* path;
 
@@ -168,7 +168,7 @@ psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers* self,
 	return NULL;
 }
 
-void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, int id,
+void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, intptr_t id,
 	psy_Property* configuration)
 {	
 	psy_EventDriver* eventdriver;
@@ -203,7 +203,7 @@ void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers* self)
 	}
 }
 
-void psy_audio_eventdrivers_remove(psy_audio_EventDrivers* self, int id)
+void psy_audio_eventdrivers_remove(psy_audio_EventDrivers* self, intptr_t id)
 {
 	psy_EventDriver* eventdriver;
 
@@ -247,20 +247,20 @@ uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers* self)
 	return rv;
 }
 
-psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers* self, int id)
+psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers* self, intptr_t id)
 {
 	psy_List* p;
-	int c = 0;
+	intptr_t c = 0;
 
 	for (p = self->eventdrivers; p != NULL && id != c; psy_list_next(&p), ++c);
 	
 	return p ? ((psy_audio_EventDriverEntry*) (p->entry)) : 0;
 }
 
-psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers* self, int id) 
+psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers* self, intptr_t id)
 {
 	psy_List* p;
-	int c = 0;
+	intptr_t c = 0;
 
 	for (p = self->eventdrivers; p != NULL && id != c; psy_list_next(&p), ++c);
 	

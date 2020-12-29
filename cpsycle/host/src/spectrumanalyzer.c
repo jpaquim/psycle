@@ -172,12 +172,12 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 {	
 	const float multleft = 1/32768.f * self->invol * self->mult; // *srcMachine._lVol;
 	const float multright = 1 / 32768.f * self->invol * self->mult; // *srcMachine._rVol;
-	unsigned int scopesamples;
+	uintptr_t scopesamples;
 	psy_audio_Buffer* buffer;
 	int DCBar;
 	psy_ui_Rectangle rect;
 	char buf[64];
-	int writepos;
+	uintptr_t writepos;
 	float temp[SCOPE_BUF_SIZE];
 	float tempout[SCOPE_BUF_SIZE >> 1];	
 	int i;

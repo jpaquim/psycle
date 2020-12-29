@@ -12,7 +12,7 @@ extern "C" {
 
 typedef unsigned char psy_dsp_note_t;
 
-static bool psy_dsp_isblack(int key)
+static bool psy_dsp_isblack(uint8_t key)
 {
 	intptr_t offset = key % 12;
 	// 0 1 2 3 4 5 6 7 8 9 10 11

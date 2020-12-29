@@ -93,15 +93,14 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		char buffer[20];
-		int cpy = 0;
-		int line;
+		intptr_t cpy;
+		intptr_t line;
 		double offset;
 		double topoffset;
 		double bottomoffset;
-		int topline;
-		int bottomline;
+		intptr_t topline;
+		intptr_t bottomline;
 		bool drawbeat;
-
 		psy_audio_PatternCursor cursor;
 		char* linecountformat;		
 				
@@ -135,12 +134,12 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			offset < self->linestate->pattern->length) {
 			psy_ui_Rectangle r;
 			TrackerColumnFlags columnflags;
-			int ystart;			
+			intptr_t ystart;
 			uintptr_t c;
 			uintptr_t numdigits;		
 			uintptr_t maxdigits;
 			uintptr_t startdigit;
-			int blankspace;
+			intptr_t blankspace;
 			char digit[2];
 						
 			columnflags.playbar = psy_audio_player_playing(workspace_player(self->workspace)) && 
@@ -398,7 +397,7 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {	
-	int height;
+	intptr_t height;
 	
 	height = self->headerheight;	
 	if (self->showdefaultline) {		
@@ -406,7 +405,7 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	}	
 	rv->height = psy_ui_value_makepx(height);
 	rv->width = (self->showbeatoffset)
-		? psy_ui_value_makeew(10)
+		? psy_ui_value_makeew(10.0)
 		: psy_ui_value_makepx(0);
 }
 

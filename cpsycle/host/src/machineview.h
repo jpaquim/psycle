@@ -64,15 +64,15 @@ typedef struct MachineWireView {
 	// internal data
 	psy_Table machineuis;
 	psy_List* wireframes;	
-	int mx;
-	int my;
+	intptr_t mx;
+	intptr_t my;
 	uintptr_t dragslot;
 	int dragmode;
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire selectedwire;
 	psy_audio_Wire hoverwire;
-	int drawvumeters;	
+	bool drawvumeters;	
 	psy_audio_PluginCatcher plugincatcher;
 	MachineViewSkin skin;	
 	psy_ui_Edit editname;

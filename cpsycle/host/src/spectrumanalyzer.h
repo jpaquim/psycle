@@ -33,8 +33,8 @@ typedef struct {
 	float db_right[SCOPE_SPEC_BANDS];
 	FFTClass fftSpec;
 	Workspace* workspace;
-	int lastprocessed;
-	int lastwritepos;
+	uintptr_t lastprocessed;
+	uintptr_t lastwritepos;
 } SpectrumAnalyzer;
 
 void spectrumanalyzer_init(SpectrumAnalyzer*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);

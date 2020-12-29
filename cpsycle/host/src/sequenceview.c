@@ -77,15 +77,15 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 
 void sequencebuttons_onalign(SequenceButtons* self)
 {
-	int numparametercols = 3;
-	int numrows = 0;
-	int colwidth = 0;
-	int rowheight = 0;
-	int cpx = 0;
-	int cpy = 0;
-	int c = 0;
-	int margin = 5;
-	int ident;
+	uintptr_t numparametercols = 3;
+	uintptr_t numrows = 0;
+	intptr_t colwidth = 0;
+	intptr_t rowheight = 0;
+	intptr_t cpx = 0;
+	intptr_t cpy = 0;
+	uintptr_t c = 0;
+	intptr_t margin = 5;
+	intptr_t ident;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 	psy_List* p;
@@ -124,15 +124,15 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	if (rv) {
-		int numparametercols = 3;
-		int margin = 5;
-		int ident = 0;
-		int c = 0;
-		int cpx = 0;
-		int cpy = 0;
-		int cpxmax = 0;
-		int cpymax = 0;
-		int colmax = 0;
+		uintptr_t numparametercols = 3;
+		intptr_t margin = 5;
+		intptr_t ident = 0;
+		uintptr_t c = 0;
+		intptr_t cpx = 0;
+		intptr_t cpy = 0;
+		intptr_t cpxmax = 0;
+		intptr_t cpymax = 0;
+		intptr_t colmax = 0;
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		psy_List* p;
@@ -237,8 +237,8 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 {
 	if (self->state->sequence) {
 		psy_audio_SequenceTrackNode* p;
-		int t;
-		int cpx;
+		uintptr_t t;
+		intptr_t cpx;
 		psy_ui_IntSize size;
 		psy_ui_TextMetric tm;
 		SequenceTrackBox trackheader;	
@@ -271,7 +271,7 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 	selectedtrack = ev->x / self->state->trackwidth;
 	if (selectedtrack >= psy_audio_sequence_sizetracks(self->state->sequence)) {
 		psy_signal_emit(&self->signal_newtrack, self, 1,
-			(int)psy_audio_sequence_sizetracks(self->state->sequence));
+			(uintptr_t)psy_audio_sequence_sizetracks(self->state->sequence));
 	} else {				
 		psy_ui_TextMetric tm;
 		psy_ui_IntSize size;
@@ -290,18 +290,18 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 			self->state->selectedtrack == selectedtrack);
 		switch (sequencetrackbox_hittest(&trackbox, ev->x, ev->y)) {		
 			case SEQUENCETRACKBOXEVENT_MUTE:
-				psy_signal_emit(&self->signal_mutetrack, self, 1, (int)selectedtrack);
+				psy_signal_emit(&self->signal_mutetrack, self, 1, selectedtrack);
 				break;
 			case SEQUENCETRACKBOXEVENT_SOLO:
-				psy_signal_emit(&self->signal_solotrack, self, 1, (int)selectedtrack);
+				psy_signal_emit(&self->signal_solotrack, self, 1, selectedtrack);
 				break;
 			case SEQUENCETRACKBOXEVENT_DEL:
-				psy_signal_emit(&self->signal_deltrack, self, 1, (int)selectedtrack);
+				psy_signal_emit(&self->signal_deltrack, self, 1, selectedtrack);
 				break;
 			// fallthrough
 			case SEQUENCETRACKBOXEVENT_SELECT:				
 			default:
-				psy_signal_emit(&self->signal_trackselected, self, 1, (int)selectedtrack);
+				psy_signal_emit(&self->signal_trackselected, self, 1, selectedtrack);
 				break;
 		}		
 	}
@@ -314,9 +314,9 @@ static void sequencelistview_onpreferredsize(SequenceListView*, psy_ui_Size* lim
 	psy_ui_Size* rv);
 static void sequencelistview_ondraw(SequenceListView*, psy_ui_Graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, psy_ui_Graphics*,
-	psy_audio_SequenceTrack*, int trackindex, int x);
+	psy_audio_SequenceTrack*, uintptr_t trackindex, intptr_t x);
 static void sequencelistview_drawprogressbar(SequenceListView*,
-	psy_ui_Graphics*, int x, int y,
+	psy_ui_Graphics*, intptr_t x, intptr_t y,
 	psy_audio_SequenceEntry*);
 static void sequencelistview_onmousedown(SequenceListView*,
 	psy_ui_MouseEvent*);
@@ -391,8 +391,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
 	psy_audio_SequenceTrackNode* p;
-	int cpx = 0;
-	int trackindex = 0;
+	intptr_t cpx = 0;
+	uintptr_t trackindex = 0;
 	self->foundselected = 0;
 
 	sequencelistview_computetextsizes(self);
@@ -402,7 +402,7 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 			psy_list_entry(p), trackindex, cpx);
 	}
 	if (!self->foundselected) {
-		int cpy;
+		intptr_t cpy;
 		psy_ui_Rectangle r;
 
 		cpx = self->state->selectedtrack * self->state->trackwidth + self->state->margin + 5;
@@ -435,7 +435,7 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm.tmAveCharWidth;
-	self->lineheight = (int)(tm.tmHeight * 1.2);
+	self->lineheight = (intptr_t)(tm.tmHeight * 1.2);
 	self->textoffsety = (self->lineheight - tm.tmHeight) / 2;
 	self->textheight = tm.tmHeight;
 	self->state->trackwidth = tm.tmAveCharWidth * 16;
@@ -444,19 +444,19 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 	self->component.scrollstepx = self->state->trackwidth;
 }
 
-void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_audio_SequenceTrack* track, int trackindex, int x)
+void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_audio_SequenceTrack* track, uintptr_t trackindex, intptr_t x)
 {
 	psy_List* p;
 	uintptr_t c = 0;
-	int cpy = 0;
+	intptr_t cpy = 0;
 	char text[20];
 	psy_ui_Rectangle r;
 	psy_ui_IntSize size;
-	int startrow;
-	int endrow;
+	intptr_t startrow;
+	intptr_t endrow;
 
 	startrow = max(0, (g->clip.top - self->state->margin) / self->lineheight);
-	endrow = (int)((g->clip.bottom - self->state->margin) / (double)self->lineheight);
+	endrow = (intptr_t)((g->clip.bottom - self->state->margin) / (double)self->lineheight);
 	size = psy_ui_component_intsize(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->state->trackwidth - 5, size.height);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0));
@@ -466,9 +466,9 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 		bool rowplaying = FALSE;
 
 		sequenceentry = (psy_audio_SequenceEntry*)p->entry;
-		if ((int)c < startrow) {
+		if ((intptr_t)c < startrow) {
 			continue;
-		} else if ((int)c > endrow) {
+		} else if ((intptr_t)c > endrow) {
 			// todo: should be >=, but that produces at scroll artifacts
 			break;
 		}
@@ -520,13 +520,13 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 }
 
 void sequencelistview_drawprogressbar(SequenceListView* self,
-	psy_ui_Graphics* g, int x, int y,
+	psy_ui_Graphics* g, intptr_t x, intptr_t y,
 	psy_audio_SequenceEntry* sequenceentry)
 {
 	psy_ui_Rectangle r;
 
 	r = psy_ui_rectangle_make(x + 5, y + self->state->margin,
-		(int)((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
+		(intptr_t)((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
 			(self->state->trackwidth - 5)), self->lineheight);
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
@@ -980,8 +980,9 @@ void sequenceview_onnewentry(SequenceView* self)
 	newpattern = psy_audio_pattern_allocinit();
 	// change length to default lines
 	psy_audio_pattern_setlength(newpattern,
-		psy_audio_pattern_defaultlines() /
-		(psy_audio_player_lpb(workspace_player(self->workspace))));
+		(psy_dsp_big_beat_t)
+		(psy_audio_pattern_defaultlines() /
+		(psy_audio_player_lpb(workspace_player(self->workspace)))));
 	tracknode = psy_audio_sequence_insert(self->state.sequence,
 		self->selection->editposition,
 		psy_audio_patterns_append(self->patterns,
@@ -1339,9 +1340,9 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	psy_audio_SequencePosition position;
 	psy_audio_SequenceTrackNode* p;
 	psy_List* q;
-	int c = 0;
-	int visilines;
-	int listviewtop;
+	uintptr_t c = 0;
+	intptr_t visilines;
+	intptr_t listviewtop;
 	psy_ui_IntSize listviewsize;
 
 	position = sender->sequenceselection.editposition;
@@ -1369,9 +1370,9 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	listviewsize = psy_ui_component_intsize(&self->listview.component);
 	visilines = (listviewsize.height - self->state.margin) / self->listview.lineheight;
 	listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
-	if (c < listviewtop) {
+	if ((intptr_t)c < listviewtop) {
 		psy_ui_component_setscrolltop(&self->listview.component, c * self->listview.lineheight);
-	} else if (c > listviewtop + visilines - 1) {
+	} else if ((intptr_t)c > listviewtop + visilines - 1) {
 		psy_ui_component_setscrolltop(&self->listview.component, (c - visilines + 1) * self->listview.lineheight);
 	}
 	psy_ui_component_invalidate(&self->listview.component);

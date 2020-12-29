@@ -200,7 +200,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	free(string);
 }
 
-void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
+void psy_ui_label_setcharnumber(psy_ui_Label* self, intptr_t number)
 {
 	self->charnumber = number;
 }

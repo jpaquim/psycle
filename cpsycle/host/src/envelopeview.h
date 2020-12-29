@@ -26,8 +26,8 @@ typedef struct {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_tweaked;
-	int cx;
-	int cy;
+	intptr_t cx;
+	intptr_t cy;
 	psy_dsp_EnvelopeSettings* settings;
 	psy_List* dragpoint;
 	uintptr_t dragpointindex;

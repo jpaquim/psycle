@@ -13,7 +13,7 @@ extern "C" {
 
 int skin_load(psy_Property*, const char* path);
 int skin_loadpsh(psy_Property*, const char* path);
-void skin_psh_values(const char* str, int maxcount, int* values);
+void skin_psh_values(const char* str, intptr_t maxcount, intptr_t* values);
 int skin_loadpsc(psy_Property*, const char* path);
 
 #ifdef __cplusplus

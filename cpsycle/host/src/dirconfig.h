@@ -28,7 +28,9 @@ void dirconfig_dispose(DirConfig*);
 
 const char* dirconfig_songs(const DirConfig*);
 const char* dirconfig_samples(const DirConfig*);
-const char* dirconfig_plugins(const DirConfig*);
+const char* dirconfig_plugins32(const DirConfig*);
+const char* dirconfig_plugins64(const DirConfig*);
+const char* dirconfig_pluginscurrplatform(const DirConfig*);
 const char* dirconfig_luascripts(const DirConfig*);
 const char* dirconfig_vsts32(const DirConfig*);
 const char* dirconfig_vsts64(const DirConfig*);

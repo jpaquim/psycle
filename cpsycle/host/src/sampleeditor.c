@@ -439,7 +439,7 @@ void sampleeditorheader_onpreferredsize(SampleEditorHeader* self,
 void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;	
-	int baseline;		
+	intptr_t baseline;
 	psy_ui_TextMetric tm;
 	uintptr_t frame;
 	uintptr_t step;
@@ -493,8 +493,8 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 			psy_ui_textout(g, (psy_ui_value_px(&size.width, &tm) - tm.tmAveCharWidth * strlen(txt)) / 2,
 				(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, txt, strlen(txt));
 		} else {
-			int x;
-			int centery = psy_ui_value_px(&size.height, &tm) / 2;
+			intptr_t x;
+			intptr_t centery = psy_ui_value_px(&size.height, &tm) / 2;
 			float offsetstep;
 			psy_dsp_amp_t scaley;
 
@@ -857,7 +857,7 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 {
 	psy_TableIterator it;
 
-	int selected;
+	intptr_t selected;
 
 	selected = psy_ui_listbox_cursel(&self->processview.processors);
 	for (it = psy_table_begin(&self->samplebox.waveboxes);

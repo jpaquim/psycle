@@ -649,7 +649,7 @@ int skin_loadpsh(psy_Property* properties, const char* path)
 		{
 			char key[512];
 			char* value;
-			int length;
+			uintptr_t length;
 
 			equal[0]='\0';
 			//Skip the double quotes containing strings			
@@ -689,7 +689,7 @@ int skin_loadpsh(psy_Property* properties, const char* path)
 	return PSY_OK;
 }
 
-void skin_psh_values(const char* str, int maxcount, int* values)
+void skin_psh_values(const char* str, intptr_t maxcount, intptr_t* values)
 {
 	char s[512];
 	char* token;
@@ -747,6 +747,9 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 		char* equal = strchr(buf, '=');
 		if (equal != NULL)
 		{
+			char* value;
+			uintptr_t length;
+
 			equal[0] = '\0';
 			//Skip the double quotes containing strings
 			char* key;
@@ -758,8 +761,8 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 				key = tmp;
 			} else { key = buf; }
 
-			char* value = &equal[1];
-			int length = strlen(value);
+			value = &equal[1];
+			length = strlen(value);
 			if (value[0] == '"')
 			{
 				length -= 2;

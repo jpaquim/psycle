@@ -420,7 +420,7 @@ psy_ui_Component* wireview_scope(WireView* self, int index)
 
 void wireview_ontogglevu(WireView* self, psy_ui_Component* sender)
 {
-	int oldtabindex;
+	intptr_t oldtabindex;
 
 	oldtabindex = tabbar_selected(&self->tabbar);
 	tabbar_clear(&self->tabbar);

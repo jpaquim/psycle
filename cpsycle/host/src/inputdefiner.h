@@ -20,12 +20,12 @@ typedef struct InputDefiner {
 	// inherits 
 	psy_ui_Component component;
 	// internal data
-	unsigned int input;
+	uint32_t input;
 	int regularkey;   
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
-void inputdefiner_setinput(InputDefiner*, unsigned int input);
+void inputdefiner_setinput(InputDefiner*, uint32_t input);
 
 INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 {

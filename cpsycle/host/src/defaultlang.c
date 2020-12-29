@@ -184,8 +184,10 @@ void make_translator_default(psy_Property* lang)
 		"Song directory");
 	psy_property_set_str(section, "samples-directory",
 		"Samples directory");
-	psy_property_set_str(section, "plug-in-directory",
-		"Plug-in directory");
+	psy_property_set_str(section, "plug-in32-directory",
+		"Plug-in32 directory");
+	psy_property_set_str(section, "plug-in64-directory",
+		"Plug-in64 directory");
 	psy_property_set_str(section, "lua-scripts-directory",
 		"Lua-scripts directory");
 	psy_property_set_str(section, "vst-directories",

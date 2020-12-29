@@ -27,10 +27,10 @@ extern "C" {
 #define PROPERTIESRENDERER_NUMCOLS 3
 
 typedef struct PropertiesRenderLineState {
-	int cpy;
-	int cpx;
-	int level;
-	int numlines;
+	intptr_t cpy;
+	intptr_t cpx;
+	intptr_t level;
+	intptr_t numlines;
 	psy_Property* properties;
 } PropertiesRenderLineState;
 
@@ -46,19 +46,19 @@ typedef struct PropertiesRenderer {
 	int lastlevel;	
 	int keyselected;
 	int button;	
-	int mx;
-	int my;
-	int cpy;
-	int cpx;
-	int lineheight;
-	int textheight;
-	int centery;
-	int numblocklines;	
-	int identwidth;
+	intptr_t mx;
+	intptr_t my;
+	intptr_t cpy;
+	intptr_t cpx;
+	intptr_t lineheight;
+	intptr_t textheight;
+	intptr_t centery;
+	intptr_t numblocklines;
+	intptr_t identwidth;
 	bool showkeyselection;
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
-	int col_width[PROPERTIESRENDERER_NUMCOLS];	
-	int col_start[PROPERTIESRENDERER_NUMCOLS];	
+	intptr_t col_width[PROPERTIESRENDERER_NUMCOLS];
+	intptr_t col_start[PROPERTIESRENDERER_NUMCOLS];
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
@@ -115,8 +115,8 @@ void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 
 // float to side bar (see helpview, too)
 // todo make it more general
-void propertiesview_float(PropertiesView*, int section, psy_ui_Component* dest);
-void propertiesview_dock(PropertiesView*, int section, psy_ui_Component* src);
+void propertiesview_float(PropertiesView*, uintptr_t section, psy_ui_Component* dest);
+void propertiesview_dock(PropertiesView*, uintptr_t section, psy_ui_Component* src);
 
 INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	float col0_perc, float col1_perc, float col2_perc)

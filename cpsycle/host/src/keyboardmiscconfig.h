@@ -38,12 +38,12 @@ bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig*);
 bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig*);
-bool keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig*);
+intptr_t keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_allowmultipleinstances(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig*);
-int keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
-int keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
+uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
+intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
 
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);

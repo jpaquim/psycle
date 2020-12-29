@@ -230,7 +230,7 @@ psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);
 psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);
 psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,
 	psy_audio_SequenceTrackNode*, psy_List* entries);
-psy_audio_SequencePosition psy_audio_sequence_positionfromid(psy_audio_Sequence*, int id);
+psy_audio_SequencePosition psy_audio_sequence_positionfromid(psy_audio_Sequence*, uintptr_t id);
 void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);

@@ -112,14 +112,16 @@ void psy_audio_psy3loader_readversion(psy_audio_PSY3Loader* self)
 	if (self->fp->fileversion >= 8) {
 		char trackername[256];
 		char trackervers[256];
-		int32_t bytesread;
+		uintptr_t bytesread;
 
 		psyfile_readstring(self->fp, trackername, 256);
 		psyfile_readstring(self->fp, trackervers, 256);
 		bytesread = 4 + strlen(trackername) + strlen(trackervers) + 2;
 		// Size of the current Header DATA
 		// This ensures that any extra data is skipped.
-		psyfile_skip(self->fp, self->fp->filesize - bytesread);
+		if (self->fp->filesize > bytesread) {
+			psyfile_skip(self->fp, self->fp->filesize - (uint32_t)bytesread);
+		}
 	}
 }
 
@@ -408,7 +410,7 @@ void psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 	int32_t songtracks;
 	// index
 
-	lpb = self->song->properties.lpb;
+	lpb = (int32_t)self->song->properties.lpb;
 	bpl = 1 / (psy_dsp_big_beat_t) lpb;
 	psyfile_read(self->fp, &index, sizeof index);
 	if (index < MAX_PATTERNS)
@@ -758,7 +760,7 @@ void psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 	// Legacy for sampulse previous to Psycle 1.12	
 	// Version zero was the development version (1.7 alphas, psycle-core).
 	// Version one is the published one (1.8.5 onwards).
-	size_t filepos = psyfile_getpos(self->fp);
+	uint32_t filepos = psyfile_getpos(self->fp);
 	uint32_t  numSamples;
 	uint32_t i;	
 	char temp[8];
@@ -1244,7 +1246,7 @@ void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 	char temp[8];
 	uint32_t version=0;
 	uint32_t size=0;
-	size_t filepos=0;
+	uint32_t filepos=0;
 	/// Envelope is enabled or disabled
 	bool m_Enabled;
 	/// if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel*

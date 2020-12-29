@@ -147,7 +147,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float* pSamplesR;
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
-	int scopesamples;
+	intptr_t scopesamples;
 	int index = 0;
 	float maxval;
 	float quarterpi;

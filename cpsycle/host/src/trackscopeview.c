@@ -17,11 +17,11 @@
 static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
 static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
 static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
-	int x, int y, int track);
+	intptr_t x, intptr_t y, intptr_t track);
 void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
-	int x, int y, int track);
-void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
-	int y, int track);
+	intptr_t x, intptr_t y, intptr_t track);
+void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, intptr_t x,
+	intptr_t y, intptr_t track);
 static void trackscopeview_ontimer(TrackScopeView*, uintptr_t timerid);
 static void trackscopeview_onalign(TrackScopeView*);
 static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
@@ -63,12 +63,12 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (workspace_song(self->workspace)) {
-		int numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));
-		int c;				
-		int rows = 1;
+		uintptr_t numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));
+		uintptr_t c;
+		intptr_t rows = 1;
 		uintptr_t currtrack;
-		int cpx;
-		int cpy;		
+		intptr_t cpx;
+		intptr_t cpy;
 				
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
@@ -95,7 +95,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 }
 
 void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
-	int x, int y, int track)
+	intptr_t x, intptr_t y, intptr_t track)
 {
 	char text[40];
 		
@@ -105,11 +105,11 @@ void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
 
 
 void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
-	int x, int y, int track)
+	intptr_t x, intptr_t y, intptr_t track)
 {
 	uintptr_t lastmachine;
-	int width;
-	int height;
+	intptr_t width;
+	intptr_t height;
 
 	width = self->trackwidth;
 	height = self->trackheight;
@@ -128,7 +128,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	}	
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* machine;
-		int centery;
+		intptr_t centery;
 		bool active = FALSE;
 		
 		centery = height / 2 + y;
@@ -201,15 +201,16 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	}	
 }
 
-void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int x,
-	int y, int track)
+void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, intptr_t x,
+	intptr_t y, intptr_t track)
 {	
-	int width;
-	int height;
+	intptr_t width;
+	intptr_t height;
+	intptr_t ident;
 
 	width = self->trackwidth;
 	height = self->trackheight;
-	int ident = (int)(width * 0.25);
+	ident = (intptr_t)(width * 0.25);
 	psy_ui_setcolour(g, app.defaults.style_common.colour);
 	psy_ui_moveto(g, psy_ui_intpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
@@ -255,11 +256,11 @@ void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 {
 	if (workspace_song(self->workspace)) {
-		int columns;
+		intptr_t columns;
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
-		int track;
-		int trackwidth;
+		intptr_t track;
+		intptr_t trackwidth;
 		uintptr_t numtracks;
 		
 		numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));

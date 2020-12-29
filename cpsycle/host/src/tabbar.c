@@ -19,13 +19,13 @@ static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmouseenter(TabBar*);
 static void tabbar_onmouseleave(TabBar*);
-static int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab);
+static intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y, Tab** rvtab);
 static void tabbar_onalign(TabBar*);
 static void tabbar_onpreferredsize(TabBar*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void tabbar_resettabcheckstates(TabBar*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(TabBar* self)
 {
@@ -41,7 +41,7 @@ static void vtable_init(TabBar* self)
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) tabbar_onmouseleave;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			tabbar_onlanguagechanged;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -112,16 +112,16 @@ void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
 void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 {	
 	psy_List* tabs;
-	int c = 0;
-	int cpx = 0;
-	int cpy = 0;
-	int cpxsel = 0;
-	int selwidth = 0;	
-	int cpxhover = 0;
-	int hoverwidth = 0;
+	intptr_t c = 0;
+	intptr_t cpx = 0;
+	intptr_t cpy = 0;
+	intptr_t cpxsel = 0;
+	intptr_t selwidth = 0;
+	intptr_t cpxhover = 0;
+	intptr_t hoverwidth = 0;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	int tabheight;
+	intptr_t tabheight;
 		
 	size = psy_ui_component_size(tabbar_base(self));
 	tm = psy_ui_component_textmetric(tabbar_base(self));
@@ -240,7 +240,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 
 void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 {	
-	int tabindex;
+	intptr_t tabindex;
 	Tab* tab = 0;
 
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
@@ -260,13 +260,13 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 
 }
 
-int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
+intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y, Tab** rvtab)
 {
 	psy_List* tabs;
-	int rv = -1;
-	int c = 0;
-	int cpx = 0;
-	int cpy = 0;
+	intptr_t rv = -1;
+	intptr_t c = 0;
+	intptr_t cpx = 0;
+	intptr_t cpy = 0;
 	psy_ui_TextMetric tm;
 
 	*rvtab = NULL;
@@ -322,7 +322,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
 
 void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 {	
-	int tabindex;
+	intptr_t tabindex;
 	Tab* tab = 0;
 
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
@@ -350,7 +350,7 @@ void tabbar_onmouseleave(TabBar* self)
 	psy_ui_component_invalidate(tabbar_base(self));
 }
 
-void tabbar_select(TabBar* self, int tabindex)
+void tabbar_select(TabBar* self, intptr_t tabindex)
 {
 	Tab* tab;
 
@@ -481,10 +481,10 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		psy_List* tabs;	
-		int cpx = 0;
-		int cpy = 0;
-		int cpxmax = 0;
-		int cpymax = 0;
+		intptr_t cpx = 0;
+		intptr_t cpy = 0;
+		intptr_t cpxmax = 0;
+		intptr_t cpymax = 0;
 		
 		size = psy_ui_component_size(tabbar_base(self));
 		tm = psy_ui_component_textmetric(tabbar_base(self));
@@ -552,7 +552,7 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	}
 }
 
-Tab* tabbar_tab(TabBar* self, int tabindex)
+Tab* tabbar_tab(TabBar* self, intptr_t tabindex)
 {
 	Tab* rv = 0;
 	psy_List* p;
@@ -583,7 +583,7 @@ void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
 	}
 }
 
-int tabbar_checkstate(TabBar* self, int tabindex)
+int tabbar_checkstate(TabBar* self, intptr_t tabindex)
 {	
 	Tab* tab;
 

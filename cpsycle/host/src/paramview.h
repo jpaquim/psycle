@@ -43,11 +43,11 @@ typedef struct {
 typedef struct ParamView {
    psy_ui_Component component;
    psy_audio_Machine* machine;
-   int cx;
-   int cy;      
+   intptr_t cx;
+   intptr_t cy;
    uintptr_t tweak;
    uintptr_t lasttweak;
-   int tweakbase;   
+   intptr_t tweakbase;
    float tweakval;   
    Workspace* workspace;
    ParamSkin* skin;

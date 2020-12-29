@@ -274,10 +274,10 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern*,
 	int tempo, int width, float variance, float phase, bool offset);
 /// changes the machine column of all entries of the block with the offset
 void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int machine);
+	psy_audio_PatternCursor end, uintptr_t machine);
 /// changes the instrument column of all entries of the block with the offset
 void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, int machine);
+	psy_audio_PatternCursor end, uintptr_t machine);
 /// sets the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
 void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
@@ -317,9 +317,9 @@ bool psy_audio_patterncursornavigator_advancelines(
 bool psy_audio_patterncursornavigator_prevlines(
 	psy_audio_PatternCursorNavigator*, uintptr_t lines);
 bool psy_audio_patterncursornavigator_advancekeys(
-	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+	psy_audio_PatternCursorNavigator*, uint8_t lines);
 bool psy_audio_patterncursornavigator_prevkeys(
-	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+	psy_audio_PatternCursorNavigator*, uint8_t lines);
 bool psy_audio_patterncursornavigator_prevtrack(
 	psy_audio_PatternCursorNavigator*,
 	uintptr_t numsongtracks);

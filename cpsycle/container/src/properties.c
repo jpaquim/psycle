@@ -682,6 +682,20 @@ intptr_t psy_property_at_int(const psy_Property* self, const char* key, intptr_t
 	return defaultvalue;
 }
 
+uint32_t psy_property_at_colour(const psy_Property* self, const char* key, uint32_t defaultvalue)
+{
+	const psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at_const(self, key, PSY_PROPERTY_TYPE_NONE);
+	if (property && (property->item.typ == PSY_PROPERTY_TYPE_INTEGER ||
+			property->item.typ == PSY_PROPERTY_TYPE_CHOICE)) {
+		return (uint32_t)property->item.value.i;
+	}
+	return defaultvalue;
+}
+
 bool psy_property_int_valid(const psy_Property* self, intptr_t value)
 {
 	assert(self);
@@ -1124,6 +1138,13 @@ intptr_t psy_property_item_int(const psy_Property* self)
 	assert(self);
 
 	return self->item.value.i;
+}
+
+uint32_t psy_property_item_colour(const psy_Property* self)
+{
+	assert(self);
+
+	return (uint32_t)self->item.value.i;
 }
 
 psy_Property* psy_property_setitem_double(psy_Property* self, double value)

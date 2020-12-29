@@ -39,20 +39,20 @@ void psy_audio_eventdrivers_init(psy_audio_EventDrivers*, void* systemhandle);
 void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_register(psy_audio_EventDrivers*,
-	int guid, const char* path);
+	intptr_t guid, const char* path);
 psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers*,
-	int guid);
+	intptr_t guid);
 psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers*, const char* path);
-int psy_audio_eventdrivers_guid(psy_audio_EventDrivers*,
+intptr_t psy_audio_eventdrivers_guid(psy_audio_EventDrivers*,
 	const char* path);
-void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, int id,
+void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, intptr_t id,
 	psy_Property* configuration);
 void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers*);
-void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, int id);
+void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, intptr_t id);
 void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Property* self);
 uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
-psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, int id); 
-psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, int id);
+psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, intptr_t id);
+psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, intptr_t id);
 void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_setcallback(psy_audio_EventDrivers* self,
 	EVENTDRIVERWORKFN callback, void* context);

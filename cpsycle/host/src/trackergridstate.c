@@ -63,7 +63,8 @@ void trackergridstate_dispose(TrackerGridState* self)
 	psy_signal_dispose(&self->signal_cursorchanged);
 }
 
-uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track, int x)
+uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
+	intptr_t x)
 {
 	uintptr_t rv;
 	uintptr_t trackx;
@@ -110,7 +111,7 @@ void trackdef_init(TrackDef* self)
 }
 
 
-int trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
+intptr_t trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 {
 	TrackDef* trackdef;
 	
@@ -125,9 +126,9 @@ int trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 }
 
 
-int trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
+intptr_t trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 {
-	int rv = 0;
+	intptr_t rv = 0;
 	uintptr_t t;
 
 	for (t = 0; t < track; ++t) {
@@ -136,9 +137,9 @@ int trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 	return rv;
 }
 
-uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, int x, uintptr_t numsongtracks)
+uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, intptr_t x, uintptr_t numsongtracks)
 {
-	int currx = 0;
+	intptr_t currx = 0;
 	uintptr_t rv = 0;
 
 	while (rv < numsongtracks) {
@@ -192,7 +193,7 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 	if (column < TRACKER_COLUMN_CMD) {
 		switch (column) {
 		case TRACKER_COLUMN_NOTE:
-			psy_audio_patternentry_front(entry)->note = value;
+			psy_audio_patternentry_front(entry)->note = (uint8_t)value;
 			break;
 		case TRACKER_COLUMN_INST:
 			if ((self->inst.numchars == 2) && value == 0xFF) {
@@ -201,21 +202,21 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 				// (settings wideinstrumentcolum: off)
 				psy_audio_patternentry_front(entry)->inst = 0xFFFF;
 			} else {
-				psy_audio_patternentry_front(entry)->inst = value;
+				psy_audio_patternentry_front(entry)->inst = (uint16_t)value;
 			}
 			break;
 		case TRACKER_COLUMN_MACH:
-			psy_audio_patternentry_front(entry)->mach = value;
+			psy_audio_patternentry_front(entry)->mach = (uint8_t)value;
 			break;
 		case TRACKER_COLUMN_VOL:
-			psy_audio_patternentry_front(entry)->vol = value;
+			psy_audio_patternentry_front(entry)->vol = (uint16_t)value;
 			break;
 		default:
 			break;
 		}
 	} else {
-		int c;
-		int num;
+		uintptr_t c;
+		uintptr_t num;
 		psy_List* p;
 
 		column = column - 4;
@@ -246,9 +247,9 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 			event = (psy_audio_PatternEvent*)p->entry;
 			assert(event);
 			if ((column % 2) == 0) {
-				event->cmd = value;
+				event->cmd = (uint8_t)value;
 			} else {
-				event->parameter = value;
+				event->parameter = (uint8_t)value;
 			}
 		}
 	}
@@ -278,8 +279,8 @@ uintptr_t trackdef_value(TrackDef* self, uintptr_t column,
 			break;
 		}
 	} else {
-		int c;
-		int num;
+		uintptr_t c;
+		uintptr_t num;
 		psy_List* p;
 
 		column = column - 4;
@@ -315,9 +316,9 @@ uintptr_t trackdef_emptyvalue(TrackDef* self, uintptr_t column)
 	return coldef ? coldef->emptyvalue : 0;
 }
 
-int trackdef_basewidth(TrackDef* self, int textwidth)
+intptr_t trackdef_basewidth(TrackDef* self, intptr_t textwidth)
 {
-	int rv = 0;
+	intptr_t rv = 0;
 	uintptr_t column;
 
 	for (column = 0; column < 4; ++column) {
@@ -326,9 +327,9 @@ int trackdef_basewidth(TrackDef* self, int textwidth)
 	return rv;
 }
 
-int trackdef_width(TrackDef* self, int textwidth)
+intptr_t trackdef_width(TrackDef* self, intptr_t textwidth)
 {
-	int rv = 0;
+	intptr_t rv = 0;
 	uintptr_t column;
 
 	for (column = 0; column < trackdef_numcolumns(self); ++column) {
@@ -337,7 +338,7 @@ int trackdef_width(TrackDef* self, int textwidth)
 	return rv;
 }
 
-int trackdef_columnwidth(TrackDef* self, int column, int textwidth)
+intptr_t trackdef_columnwidth(TrackDef* self, intptr_t column, intptr_t textwidth)
 {
 	TrackColumnDef* coldef;
 
@@ -345,7 +346,7 @@ int trackdef_columnwidth(TrackDef* self, int column, int textwidth)
 	return coldef ? coldef->numchars * textwidth + coldef->marginright : 0;
 }
 
-TrackColumnDef* trackdef_columndef(TrackDef* self, int column)
+TrackColumnDef* trackdef_columndef(TrackDef* self, intptr_t column)
 {
 	TrackColumnDef* rv;
 

@@ -140,7 +140,7 @@ bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig* self)
 	return  psy_property_at_bool(self->keyboard_misc, "savereminder", TRUE);
 }
 
-bool keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig* self)
+intptr_t keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
@@ -169,7 +169,7 @@ bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig* self)
 		"advancelineonrecordtweak", 0);
 }
 
-int keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig* self)
+uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig* self)
 {
 	psy_Property* p;
 
@@ -177,12 +177,12 @@ int keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig* self)
 
 	p = psy_property_at(self->keyboard, "pgupdowntype", PSY_PROPERTY_TYPE_CHOICE);
 	if (p) {
-		return psy_property_item_int(p);
+		return (uintptr_t)psy_property_item_int(p);
 	}
 	return 0;
 }
 
-int keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
+intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
 {
 	assert(self);
 

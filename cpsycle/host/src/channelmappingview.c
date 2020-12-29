@@ -24,14 +24,14 @@ static psy_ui_Rectangle pinedit_pinposition_input(PinEdit*, uintptr_t pin);
 static void pinedit_onmousedown(PinEdit*, psy_ui_MouseEvent*);
 static void pinedit_onmousemove(PinEdit*, psy_ui_MouseEvent*);
 static void pinedit_onmouseup(PinEdit*, psy_ui_MouseEvent*);
-static psy_List* pinedit_hittest_wire(PinEdit*, int x, int y);
-static bool pinedit_screentopin(PinEdit*, int x, int y, uintptr_t* pin, bool* isout);
+static psy_List* pinedit_hittest_wire(PinEdit*, intptr_t x, intptr_t y);
+static bool pinedit_screentopin(PinEdit*, intptr_t x, intptr_t y, uintptr_t* pin, bool* isout);
 static psy_audio_PinMapping* pinedit_mapping(PinEdit*);
 static uintptr_t pinedit_numinputs(PinEdit*);
 static uintptr_t pinedit_numoutputs(PinEdit*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(PinEdit* self)
 {
@@ -41,7 +41,7 @@ static void vtable_init(PinEdit* self)
 		vtable.onmousedown = (psy_ui_fp_component_onmousedown)pinedit_onmousedown;
 		vtable.onmousemove = (psy_ui_fp_component_onmousedown)pinedit_onmousemove;
 		vtable.onmouseup = (psy_ui_fp_component_onmousedown)pinedit_onmouseup;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -318,7 +318,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-psy_List* pinedit_hittest_wire(PinEdit* self, int x, int y)
+psy_List* pinedit_hittest_wire(PinEdit* self, intptr_t x, intptr_t y)
 {
 	psy_audio_Connections* connections;
 	psy_audio_WireSocket* input;
@@ -348,7 +348,7 @@ psy_List* pinedit_hittest_wire(PinEdit* self, int x, int y)
 	return NULL;
 }
 
-bool pinedit_screentopin(PinEdit* self, int x, int y, uintptr_t* pin, bool* isout)
+bool pinedit_screentopin(PinEdit* self, intptr_t x, intptr_t y, uintptr_t* pin, bool* isout)
 {
 	psy_ui_Rectangle r;
 	uintptr_t row;
@@ -356,8 +356,8 @@ bool pinedit_screentopin(PinEdit* self, int x, int y, uintptr_t* pin, bool* isou
 	uintptr_t cpy;
 	psy_ui_TextMetric tm;
 
-	tm = psy_ui_component_textmetric(&self->component);
-	rowheight = tm.tmHeight * 2;
+	tm = psy_ui_component_textmetric(&self->component);	
+	rowheight = (uintptr_t)(tm.tmHeight) * 2;
 	row = y / rowheight;
 	cpy = row * rowheight;
 	r = pinedit_pinposition_output(self, 0);

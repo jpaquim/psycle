@@ -21,7 +21,7 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 	self->split = 0;
 }
 
-void psy_ui_notebook_select(psy_ui_Notebook* self, int pageindex)
+void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 {	
 	psy_List* p;
 	psy_List* q;
@@ -61,7 +61,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, int pageindex)
 	}
 }
 
-int psy_ui_notebook_pageindex(psy_ui_Notebook* self)
+uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook* self)
 {
 	return self->pageindex;
 }

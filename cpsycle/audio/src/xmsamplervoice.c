@@ -510,29 +510,33 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		uintptr_t i;		
 		
 		env = malloc(amount * sizeof(psy_dsp_amp_t));
-		for (i = 0; i < amount; ++i) {
-			if (psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope)) {
-				psy_dsp_envelopecontroller_updatespeed(&self->amplitudeenvelope,
-					psy_audio_machine_ticksperbeat(self->sampler),
-					psy_audio_machine_bpm(self->sampler));
-				psy_dsp_envelopecontroller_tick(&self->amplitudeenvelope);
-				env[i] = self->amplitudeenvelope.value;
-			} else {
-				env[i] = 1.f;
+		if (env) {
+			for (i = 0; i < amount; ++i) {
+				if (psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope)) {
+					psy_dsp_envelopecontroller_updatespeed(&self->amplitudeenvelope,
+						psy_audio_machine_ticksperbeat(psy_audio_xmsampler_base(self->sampler)),
+						psy_audio_machine_bpm(psy_audio_xmsampler_base(self->sampler)));
+					psy_dsp_envelopecontroller_tick(&self->amplitudeenvelope);
+					env[i] = self->amplitudeenvelope.value;
+				} else {
+					env[i] = 1.f;
+				}
 			}
 		}
 		filterenv = NULL;
 		if (filter_type(&self->_filter) != F_NONE) {
 			filterenv = malloc(amount * sizeof(psy_dsp_amp_t));
-			for (i = 0; i < amount; ++i) {
-				if (psy_dsp_envelopecontroller_playing(&self->filterenvelope)) {
-					psy_dsp_envelopecontroller_updatespeed(&self->filterenvelope,
-						psy_audio_machine_ticksperbeat(self->sampler),
-						psy_audio_machine_bpm(self->sampler));
-					psy_dsp_envelopecontroller_tick(&self->filterenvelope);
-					filterenv[i] = self->filterenvelope.value;
-				} else {
-					filterenv[i] = 1.f;
+			if (filterenv) {
+				for (i = 0; i < amount; ++i) {
+					if (psy_dsp_envelopecontroller_playing(&self->filterenvelope)) {
+						psy_dsp_envelopecontroller_updatespeed(&self->filterenvelope,
+							psy_audio_machine_ticksperbeat(psy_audio_xmsampler_base(self->sampler)),
+							psy_audio_machine_bpm(psy_audio_xmsampler_base(self->sampler)));
+						psy_dsp_envelopecontroller_tick(&self->filterenvelope);
+						filterenv[i] = self->filterenvelope.value;
+					} else {
+						filterenv[i] = 1.f;
+					}
 				}
 			}
 		}
@@ -562,12 +566,16 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 				numsamples -= nextsamples;
 				while (nextsamples)
 				{
+					float volume;
+					float lVolDest;
+					float rVolDest;
+
 					//////////////////////////////////////////////////////////////////////////
 					//  Step 0 : Process Volume.
 
 					// Amplitude Envelope 
 					// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-					float volume = psy_audio_xmsamplervoice_realvolume(self, position->sample) *
+					volume = psy_audio_xmsamplervoice_realvolume(self, position->sample) *
 						((self->channel)
 							? self->channel->volume
 							: 1.0f);
@@ -592,8 +600,8 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 						}
 						volume *= self->volumefadeamount;
 					}
-					float lVolDest = 0.f;
-					float rVolDest = 0.f;
+					lVolDest = 0.f;
+					rVolDest = 0.f;
 					if (self->surround) {
 						if (self->sampler->panningmode == psy_audio_PANNING_LINEAR) {
 							lVolDest = 0.5f * volume;
