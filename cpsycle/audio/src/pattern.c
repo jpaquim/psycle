@@ -9,8 +9,8 @@
 // platform
 #include "../../detail/portable.h"
 
-static double hermitecurveinterpolate(int kf0, int kf1, int kf2,
-	int kf3, int curposition, int maxposition, double tangmult,
+static double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
+	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult,
 	bool interpolation);
 
 // psy_audio_PatternCursor
@@ -504,22 +504,25 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 		offset = line * bpl;
 		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
 		if (node) {
-			double curveval = hermitecurveinterpolate(val0, val1, val2, val3, line - begin.line, distance, 0, TRUE);
-			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(node->entry), (intptr_t)curveval);
+			double curveval;
+			
+			curveval = hermitecurveinterpolate(val0, val1, val2, val3, line - begin.line, distance, 0, TRUE);
+			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(node->entry),
+				(uint16_t)curveval);
 			++self->opcount;
 		} else {
 			psy_audio_PatternEvent ev;
 			double curveval = hermitecurveinterpolate(val0, val1, val2, val3, line - begin.line, distance, 0, TRUE);
 
 			psy_audio_patternevent_clear(&ev);
-			psy_audio_patternevent_settweakvalue(&ev, (intptr_t)curveval);
+			psy_audio_patternevent_settweakvalue(&ev, (uint16_t)curveval);
 			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
 		}
 	}
 }
 
-double hermitecurveinterpolate(int kf0, int kf1, int kf2,
-	int kf3, int curposition, int maxposition, double tangmult, bool interpolation)
+double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
+	intptr_t kf3, intptr_t curposition, intptr_t maxposition, double tangmult, bool interpolation)
 {
 	if (interpolation == TRUE) {
 		double s = (double)curposition / (double)maxposition;
@@ -536,7 +539,7 @@ double hermitecurveinterpolate(int kf0, int kf1, int kf2,
 
 		return (h1 * kf1 + h2 * kf2 + h3 * t1 + h4 * t2);
 	} else {
-		return kf1;
+		return (double)kf1;
 	}
 }
 
@@ -593,7 +596,7 @@ void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				psy_audio_patternentry_front(entry)->mach = machine;
+				psy_audio_patternentry_front(entry)->mach = (uint8_t)machine;
 			}
 		} else {
 			break;
@@ -619,7 +622,7 @@ void psy_audio_pattern_changeinstrument(psy_audio_Pattern* self,
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				psy_audio_patternentry_front(entry)->inst = instrument;
+				psy_audio_patternentry_front(entry)->inst = (uint16_t)instrument;
 			}
 		} else {
 			break;

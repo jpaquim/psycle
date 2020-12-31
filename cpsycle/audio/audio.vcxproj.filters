@@ -298,6 +298,9 @@
     <ClCompile Include="src\vstevents.c">
       <Filter>machine\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="src\sampulse.c">
+      <Filter>machine\internal\sampler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -572,6 +575,9 @@
     </ClInclude>
     <ClInclude Include="src\vstevents.h">
       <Filter>machine\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sampulse.h">
+      <Filter>machine\internal\sampler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

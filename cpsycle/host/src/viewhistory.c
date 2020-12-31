@@ -48,7 +48,7 @@ void viewhistory_add(ViewHistory* self, ViewHistoryEntry view)
 	}
 }
 
-void viewhistory_addseqpos(ViewHistory* self, int seqpos)
+void viewhistory_addseqpos(ViewHistory* self, uintptr_t seqpos)
 {
 	ViewHistoryEntry view;
 
@@ -70,7 +70,7 @@ ViewHistoryEntry viewhistory_currview(const ViewHistory* self)
 		assert(entry);
 		rv = *entry;
 	} else {
-		rv.seqpos = -1;
+		rv.seqpos = UINTPTR_MAX;
 		rv.id = 0;
 	}
 	return rv;
@@ -101,6 +101,8 @@ bool viewhistory_forward(ViewHistory* self)
 bool viewhistory_equal(const ViewHistory* self, ViewHistoryEntry view)
 {
 	ViewHistoryEntry curr;
+
+	assert(self);
 
 	curr = viewhistory_currview(self);
 	return (view.seqpos == curr.seqpos) && (view.id == curr.id);

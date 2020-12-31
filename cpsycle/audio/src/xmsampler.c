@@ -123,19 +123,37 @@ static int psy_audio_xmsampler_getdelta(psy_audio_WaveForms wavetype,
 	}
 }
 
+static void dispose(psy_audio_XMSampler*);
+static const psy_audio_MachineInfo* info(psy_audio_XMSampler*);
+static uintptr_t psy_audio_xmsampler_numinputs(psy_audio_XMSampler* self) { return 0; }
+static uintptr_t psy_audio_xmsampler_numoutputs(psy_audio_XMSampler* self) { return 2; }
+static void psy_audio_xmsampler_newline(psy_audio_XMSampler*);
+static void psy_audio_xmsampler_postnewline(psy_audio_XMSampler*);
+static void psy_audio_xmsampler_tick(psy_audio_XMSampler*,
+	uintptr_t channelNum, const psy_audio_PatternEvent*);
+static void loadspecific(psy_audio_XMSampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+static void savespecific(psy_audio_XMSampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+
+static void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler*);
+static void psy_audio_xmsampler_ontimerwork(psy_audio_XMSampler*,
+	psy_audio_BufferContext*);
 static void generateaudio(psy_audio_XMSampler*, psy_audio_BufferContext*);
+
+/*
 static void seqtick(psy_audio_XMSampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void newline(psy_audio_XMSampler*);
 static psy_List* sequencerinsert(psy_audio_XMSampler*, psy_List* events);
 static void psy_audio_xmsampler_stop(psy_audio_XMSampler*);
-static const psy_audio_MachineInfo* info(psy_audio_XMSampler*);
+
 static uintptr_t numparametercols(psy_audio_XMSampler*);
 static uintptr_t numparameters(psy_audio_XMSampler*);
 static psy_audio_MachineParam* parameter(psy_audio_XMSampler*,
-	uintptr_t param);
-static void dispose(psy_audio_XMSampler*);
-static void disposevoices(psy_audio_XMSampler*);
+	uintptr_t param);*/
+
+/*static void disposevoices(psy_audio_XMSampler*);
 static void disposechannels(psy_audio_XMSampler*);
 static void disposeparameters(psy_audio_XMSampler*);
 static int alloc_voice(psy_audio_XMSampler*);
@@ -146,16 +164,11 @@ static void releasevoices(psy_audio_XMSampler*, uintptr_t channel);
 static void releaseinst(psy_audio_XMSampler*, uintptr_t channel, uintptr_t inst);
 static void nnavoices(psy_audio_XMSampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_XMSampler* self);
-static uintptr_t numinputs(psy_audio_XMSampler*);
-static uintptr_t numoutputs(psy_audio_XMSampler*);
-static void loadspecific(psy_audio_XMSampler*, psy_audio_SongFile*,
-	uintptr_t slot);
-static void savespecific(psy_audio_XMSampler*, psy_audio_SongFile*,
-	uintptr_t slot);
+
 static psy_audio_XMSamplerChannel* sampler_channel(psy_audio_XMSampler*,
 	uintptr_t channelnum);
 static psy_audio_InstrumentIndex currslot(psy_audio_XMSampler*,
-	uintptr_t channel, const psy_audio_PatternEvent*);
+	uintptr_t channel, const psy_audio_PatternEvent*);*/
 
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
@@ -181,48 +194,78 @@ const psy_audio_MachineInfo* psy_audio_xmsampler_info(void)
 	return &macinfo;
 }
 
-static void psy_audio_xmsampler_initparameters(psy_audio_XMSampler*);
+/*static void psy_audio_xmsampler_initparameters(psy_audio_XMSampler*);
 static void resamplingmethod_tweak(psy_audio_XMSampler*,
 	psy_audio_ChoiceMachineParam* sender, float value);
-static void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler*);
-static void psy_audio_xmsampler_ontimerwork(psy_audio_XMSampler*,
-	psy_audio_BufferContext*);
+*/
 
 static MachineVtable sampler_vtable;
-static int sampler_vtable_initialized = 0;
+static bool sampler_vtable_initialized = FALSE;
 
 static void sampler_vtable_init(psy_audio_XMSampler* self)
 {
 	if (!sampler_vtable_initialized) {
 		sampler_vtable = *(psy_audio_xmsampler_base(self)->vtable);
+		sampler_vtable.dispose = (fp_machine_dispose)dispose;
+		sampler_vtable.numinputs = (fp_machine_numinputs)psy_audio_xmsampler_numinputs;
+		sampler_vtable.numoutputs = (fp_machine_numoutputs)psy_audio_xmsampler_numoutputs;
+		sampler_vtable.info = (fp_machine_info)info;
+		sampler_vtable.newline = (fp_machine_newline)psy_audio_xmsampler_newline;
+		sampler_vtable.seqtick = (fp_machine_seqtick)psy_audio_xmsampler_tick;
+		sampler_vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
+		sampler_vtable.savespecific = (fp_machine_savespecific)savespecific;
 		sampler_vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
-		sampler_vtable.seqtick = (fp_machine_seqtick)seqtick;
-		sampler_vtable.newline = (fp_machine_newline)newline;
+	/*	sampler_vtable.seqtick = (fp_machine_seqtick)seqtick;
+		
 		sampler_vtable.sequencerinsert = (fp_machine_sequencerinsert)
 			sequencerinsert;
 		sampler_vtable.stop = (fp_machine_stop)psy_audio_xmsampler_stop;
-		sampler_vtable.info = (fp_machine_info)info;
-		sampler_vtable.dispose = (fp_machine_dispose)dispose;
-		sampler_vtable.numinputs = (fp_machine_numinputs)numinputs;
-		sampler_vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
-		sampler_vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
-		sampler_vtable.savespecific = (fp_machine_savespecific)savespecific;
+		
+		
+		/*
 		sampler_vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
 		sampler_vtable.numparameters = (fp_machine_numparameters)numparameters;
-		sampler_vtable.parameter = (fp_machine_parameter)parameter;
-		sampler_vtable_initialized = 1;
+		sampler_vtable.parameter = (fp_machine_parameter)parameter;*/
+		sampler_vtable_initialized = TRUE;
 	}
 }
 
 void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	psy_audio_MachineCallback* callback)
 {
+	int i;
+
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_xmsampler_base(self)->vtable = &sampler_vtable;
 	psy_audio_machine_seteditname(psy_audio_xmsampler_base(self), "XMSampler");
-	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;
+
+	self->_numVoices = XM_SAMPLER_MAX_POLYPHONY;
+	self->multicmdMem = NULL;	
+	self->m_sampleRate = (int)
+		psy_audio_machine_samplerate(psy_audio_xmsampler_base(self));	
+	for (i = 0; i < self->_numVoices; i++)
+	{
+		psy_audio_xmsamplervoice_init(&self->m_Voices[i]);
+		psy_audio_xmsamplervoice_setpsampler(&self->m_Voices[i], self);		
+		psy_audio_xmsamplervoice_reset(&self->m_Voices[i]);
+	}
+
+	for (i = 0; i < MAX_TRACKS; i++)
+	{
+		// mfc-psycle (implicit constructor call)
+		psy_audio_xmsamplerchannel_init(&self->m_Channel[i]);
+		psy_audio_xmsamplerchannel_setpsampler(&self->m_Voices[i], self);
+		psy_audio_xmsamplerchannel_setindex(&self->m_Voices[i], i);		
+	}
+
+	psy_audio_ticktimer_init(&self->ticktimer,
+		self, // callback context (sampler)
+		(fp_samplerticktimer_ontick)psy_audio_xmsampler_ontimertick,
+		(fp_samplerticktimer_onwork)psy_audio_xmsampler_ontimerwork);
+
+/*	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;
 	self->voices = 0;
 	self->resamplerquality = psy_dsp_RESAMPLERQUALITY_LINEAR;
 	self->defaultspeed = 1;
@@ -249,9 +292,466 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	psy_audio_ticktimer_init(&self->ticktimer,
 		self, // callback context (sampler)
 		(fp_samplerticktimer_ontick)psy_audio_xmsampler_ontimertick,
-		(fp_samplerticktimer_onwork)psy_audio_xmsampler_ontimerwork);
+		(fp_samplerticktimer_onwork)psy_audio_xmsampler_ontimerwork);*/
 }
 
+void psy_audio_xmsampler_setsamplerate(psy_audio_XMSampler* self,
+	int sr)
+{	
+	self->m_sampleRate = sr;
+	for (int i = 0; i < self->_numVoices; i++)
+	{
+		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[i])) {
+			//\todo
+			//update envelopes
+			//
+		}
+	}
+}
+
+void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler* self)
+{
+
+}
+
+void generateaudio(psy_audio_XMSampler* self, psy_audio_BufferContext* bc)
+{
+	self->samplerowcounter += bc->numsamples;
+	psy_audio_ticktimer_update(&self->ticktimer, bc->numsamples, bc);
+	// removeunusedvoices(self);
+	// psy_audio_xmsamplerchannel_work(&self->masterchannel, bc);
+}
+
+void psy_audio_xmsampler_ontimerwork(psy_audio_XMSampler* self,
+	psy_audio_BufferContext* bc)
+{
+	psy_audio_xmsampler_workvoices(self, bc);
+}
+
+void psy_audio_xmsampler_workvoices(psy_audio_XMSampler* self,
+	psy_audio_BufferContext* bc)
+{
+	int voice;
+
+	// psy_audio_buffer_clearsamples(bc->output, bc->numsamples);
+	for (voice = 0; voice < self->_numVoices; voice++)
+	{
+		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[voice])) {
+			psy_audio_xmsamplervoice_work(&self->m_Voices[voice],
+				bc->numsamples,
+				bc->output->samples[0],
+				bc->output->samples[1]);			
+		}
+	}
+}
+
+void psy_audio_xmsampler_newline(psy_audio_XMSampler* self)
+{
+	int channel;
+	int voice;
+
+	// SampleCounter(0);
+	self->m_TickCount = 0;
+
+	//NextSampleTick(Global::player().SamplesPerTick());	
+	for (channel = 0; channel < MAX_TRACKS; channel++)
+	{
+		psy_audio_xmsamplerchannel_seteffectflags(
+			psy_audio_xmsampler_rchannel(self, channel), 0);
+	}
+
+	for (voice = 0; voice < self->_numVoices; voice++)
+	{
+		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[voice])) {
+			psy_audio_xmsamplervoice_newline(&self->m_Voices[voice]);
+		}		
+	}
+}
+
+void psy_audio_xmsampler_postnewline(psy_audio_XMSampler* self)
+{
+	psy_list_deallocate(&self->multicmdMem, NULL);	
+}
+
+void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
+	uintptr_t channelNum, const psy_audio_PatternEvent* pData)
+{
+	bool bInstrumentSet;
+	bool bPortaEffect;
+	psy_List* ite;
+	bool bPorta2Note;
+	bool bNoteOn;
+	psy_audio_XMSamplerVoice* currentVoice;
+	psy_audio_XMSamplerVoice* newVoice;
+	psy_audio_XMSamplerChannel* thisChannel;	
+
+	if (pData->note == psy_audio_NOTECOMMANDS_MIDICC && pData->inst < MAX_TRACKS)
+	{
+		//TODO: This has one problem, it requires a non-mcm command to trigger the memory.				
+		psy_audio_PatternEvent* cmdmem;
+
+		cmdmem = psy_audio_patternevent_clone(pData);
+		cmdmem->inst = (uint16_t)channelNum;
+		psy_list_append(&self->multicmdMem, cmdmem);
+		return;
+	}	
+	// don't process twk , twf of Mcm Commands
+	else if (pData->note > psy_audio_NOTECOMMANDS_RELEASE && pData->note != psy_audio_NOTECOMMANDS_EMPTY) {
+		return;
+	}
+
+	// define some variables to ease the case checking.
+	bInstrumentSet =  (pData->inst < psy_audio_NOTECOMMANDS_INST_EMPTY);
+	bPortaEffect = FALSE;
+	for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
+		psy_audio_PatternEvent* ite_ev;
+
+		ite_ev = (psy_audio_PatternEvent*)psy_list_entry(ite);
+		if (ite_ev->inst == (uint16_t)channelNum) {
+			bPortaEffect |= (ite_ev->cmd == XM_SAMPLER_CMD_PORTA2NOTE)
+				|| (ite_ev->cmd == XM_SAMPLER_CMD_SENDTOVOLUME && (ite_ev->parameter & 0xF0) == XM_SAMPLER_CMD_VOL_TONEPORTAMENTO);
+		}
+	}
+	bPortaEffect |= (pData->cmd == XM_SAMPLER_CMD_PORTA2NOTE) || (pData->cmd == XM_SAMPLER_CMD_SENDTOVOLUME && (pData->parameter & 0xF0) == XM_SAMPLER_CMD_VOL_TONEPORTAMENTO);
+	bPorta2Note = (pData->note <= psy_audio_NOTECOMMANDS_B9) && bPortaEffect;
+	bNoteOn = (pData->note <= psy_audio_NOTECOMMANDS_B9) && !bPorta2Note;
+
+	currentVoice = NULL;
+	newVoice = NULL;
+	thisChannel = psy_audio_xmsampler_rchannel(self, channelNum);
+	// STEP A: Look for an existing (foreground) playing voice in the current channel.
+	currentVoice = psy_audio_xmsampler_getcurrentvoice(self, channelNum);
+	if (currentVoice)
+	{		
+		//This forces Last volume/pan/envelope values to be up-to-date.
+		psy_audio_xmsamplerchannel_setforegroundvoice(thisChannel,
+			currentVoice);
+		if (bPorta2Note)
+		{
+			//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed and the position reset to 0.
+			psy_audio_xmsamplerchannel_setnote(thisChannel,
+				pData->note);
+			// If there current voice is stopping, the porta makes the note active again and restarts the envelope, without restarting the sample.
+			if (psy_audio_xmsamplervoice_isstopping(currentVoice)) {
+				psy_audio_xmsamplervoice_setisstopping(currentVoice, FALSE);				
+				//currentVoice->AmplitudeEnvelope().NoteOn();
+				//currentVoice->PanEnvelope().NoteOn();
+				//currentVoice->FilterEnvelope().NoteOn();
+				//currentVoice->PitchEnvelope().NoteOn();
+			}
+		} else {
+			if (bInstrumentSet)
+			{
+				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, differently/buggy in ST2/ST3 
+				// (in st2, note is triggered always, and in st3 it changes the instrument but continues from where it was) and not by FT2/XMPlay.
+				//Concretely if an instrument comes without a note, it is different than the one that is playing, and is not stopping (no noteoff received),
+				//then, the new instrument is triggered with the last note played.
+				//Note that if the instrument is the same, it is only retriggered if it has stopped (See below).
+				if (!bNoteOn && pData->note != psy_audio_NOTECOMMANDS_RELEASE && psy_audio_xmsamplerchannel_instrumentno(thisChannel) != pData->inst && psy_audio_xmsamplerchannel_note(thisChannel) != psy_audio_NOTECOMMANDS_RELEASE) {
+					bNoteOn = TRUE;
+				}
+			}
+			// Is a new note coming? Then apply the NNA to the playing one.
+			if (bNoteOn)
+			{
+				/*switch (currentVoice->rInstrument().DCT())
+				{
+				case XMInstrument::DupeCheck::INSTRUMENT:
+					//todo: if no instrument specified... should we consider the previous instrument?
+					if (pData->_inst == thisChannel.InstrumentNo())
+					{
+						if (currentVoice->rInstrument().DCA() < currentVoice->NNA()) currentVoice->NNA(currentVoice->rInstrument().DCA());
+					}
+					break;
+				case XMInstrument::DupeCheck::SAMPLE:
+				{
+					//todo: if no instrument specified... should we consider the previous instrument?
+					const XMInstrument& _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
+					int _layer = _inst.NoteToSample(thisChannel.Note()).second;
+					if (_layer == thisChannel.ForegroundVoice()->rWave().Layer())
+					{
+						if (currentVoice->rInstrument().DCA() < currentVoice->NNA()) currentVoice->NNA(currentVoice->rInstrument().DCA());
+					}
+				}
+				break;
+				case XMInstrument::DupeCheck::NOTE:
+					if (pData->_note == thisChannel.Note() && pData->_inst == thisChannel.InstrumentNo())
+					{
+						if (currentVoice->rInstrument().DCA() < currentVoice->NNA()) currentVoice->NNA(currentVoice->rInstrument().DCA());
+					}
+					break;
+				default:
+					break;
+				}
+				*/
+				switch (psy_audio_xmsamplervoice_nna(currentVoice))
+				{
+				case psy_audio_NNA_STOP:
+					psy_audio_xmsamplervoice_noteofffast(currentVoice);
+					break;
+				case psy_audio_NNA_NOTEOFF:
+					psy_audio_xmsamplervoice_noteoff(currentVoice);					
+					break;
+				case psy_audio_NNA_FADEOUT:
+					psy_audio_xmsamplervoice_notefadeout(currentVoice);
+					break;
+				default:
+					break;
+				}
+				
+				//This is necessary for the notedelay command (Because it will enter twice in this method).
+				//Else, the call to channel->ForegroundVoice() below would be enough.
+				// currentVoice->IsBackground(true);
+			} else if (pData->note == psy_audio_NOTECOMMANDS_RELEASE) {
+				//currentVoice->NoteOff();
+				//thisChannel.StopBackgroundNotes(XMInstrument::NewNoteAction::NOTEOFF);
+				//thisChannel.Note(pData->_note);
+			}
+		}
+	} else if (bPorta2Note)
+	{
+		// If there is a Porta2Note command, but there is no voice playing, this is converted to a noteOn.
+		bPorta2Note = FALSE; bNoteOn = TRUE;
+	} else {
+		//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, but not in ST3/FT2/XMPlay
+		//Concretely if a sample has been played, has stopped (by reaching the end, not by noteoff/notecut), and an instrument 
+		// comes again without a note (be it the same or another), the (new) instrument is played with the previous note of the channel.
+		if (bInstrumentSet && !bNoteOn && psy_audio_xmsamplerchannel_note(thisChannel) != psy_audio_NOTECOMMANDS_RELEASE && pData->note == psy_audio_NOTECOMMANDS_EMPTY)
+		{
+			bNoteOn = TRUE;
+		}
+	}
+	
+	if (bInstrumentSet && pData->note != psy_audio_NOTECOMMANDS_RELEASE) {
+		// Instrument is always set, even if no new note comes, or no voice playing.
+		//\todo: Fix: Set the wave and instrument to the one in the entry. Only if not portatonote.
+		psy_audio_xmsamplerchannel_setinstrumentno(thisChannel, pData->inst);		
+		if (currentVoice != NULL && !bNoteOn && pData->note != psy_audio_NOTECOMMANDS_RELEASE) {
+			//Whenever an instrument appears alone in a channel, the values are reset.
+			//todo: It should be reset to the values of the instrument set.
+			/*currentVoice->ResetVolAndPan(-1, true);
+
+			//Restart also the envelopes
+			//This is an FT2 feature (and compatibles, like Modplug in ft2 mode, cubic player,...),
+			//but it is not done in Impulse tracker (and compatibles, like schismtracker).
+			currentVoice->AmplitudeEnvelope().NoteOn();
+			currentVoice->PanEnvelope().NoteOn();
+			currentVoice->PitchEnvelope().NoteOn();
+			currentVoice->FilterEnvelope().NoteOn();*/
+		}
+	}
+	// STEP B: Get a new Voice to work with, and initialize it if needed.
+	if (bNoteOn)
+	{		
+		bool delayed = FALSE;
+		for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
+			psy_audio_PatternEvent* ite_ev;
+
+			ite_ev = (psy_audio_PatternEvent*)psy_list_entry(ite);		
+			if (ite_ev->inst == channelNum) {
+				if (ite_ev->cmd == XM_SAMPLER_CMD_EXTENDED && (ite_ev->parameter & 0xf0) == XM_SAMPLER_CMD_E_NOTE_DELAY) {
+					delayed = TRUE;
+				}
+			}
+		}
+		if (pData->cmd == XM_SAMPLER_CMD_EXTENDED && (pData->parameter & 0xf0) == XM_SAMPLER_CMD_E_NOTE_DELAY)
+		{
+			delayed = TRUE;
+		}
+		if (delayed) {
+			for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
+				psy_audio_PatternEvent* ite_ev;
+
+				ite_ev = (psy_audio_PatternEvent*)psy_list_entry(ite);			
+				if (ite_ev->inst == channelNum) {
+					//Include also the mcm commands to the delay.					
+					psy_audio_xmsamplerchannel_delayednote(thisChannel,
+						*ite_ev);
+				}
+			}
+			psy_audio_xmsamplerchannel_delayednote(thisChannel,
+				*pData);			
+		} else
+		{
+			psy_audio_Instrument* _inst;
+			psy_audio_InstrumentIndex index;
+			
+			if (pData->note != psy_audio_NOTECOMMANDS_EMPTY) {
+				// If instrument set and no note, we don't want to reset the note.
+				psy_audio_xmsamplerchannel_setnote(thisChannel, pData->note);
+			}
+			newVoice = psy_audio_xmsampler_getfreevoice(self,
+				psy_audio_xmsamplerchannel_index(thisChannel));
+			index = psy_audio_instrumentindex_make(0,
+				psy_audio_xmsamplerchannel_instrumentno(thisChannel));
+			_inst = psy_audio_instruments_at(psy_audio_machine_instruments(
+				psy_audio_xmsampler_base(self)),
+				index);
+			if (newVoice && psy_audio_xmsamplerchannel_instrumentno(thisChannel) != psy_audio_NOTECOMMANDS_INST_EMPTY
+					&& _inst) {
+				// && Global::song().xminstruments.IsEnabled(thisChannel.InstrumentNo())) {
+				psy_List* _layer;
+				psy_audio_Sample* wave;
+				
+				_layer = psy_audio_instrument_entriesintersect(_inst,
+					psy_audio_xmsamplerchannel_note(thisChannel), 127, 0);					
+				// int _layer = _inst.NoteToSample(thisChannel.Note()).second;
+				// if (Global::song().samples.IsEnabled(_layer))
+				wave = NULL;
+				if (_layer)
+				{
+					psy_audio_InstrumentEntry* entry;
+					psy_audio_Samples* samples;
+
+					samples = psy_audio_machine_samples(psy_audio_xmsampler_base(self));
+					entry = (psy_audio_InstrumentEntry*)_layer->entry;
+					wave = psy_audio_samples_at(samples, entry->sampleindex);
+				}
+				if (wave) {
+					int vol = -1;
+					int offset = 0;
+					int twlength = psy_audio_sample_numframes(wave);
+					psy_audio_xmsamplervoice_voiceinit(newVoice, 
+						_inst, channelNum, psy_audio_xmsamplerchannel_instrumentno(thisChannel));
+					psy_audio_xmsamplerchannel_setforegroundvoice(thisChannel, newVoice);			
+					
+					// for (std::vector<PatternEntry>::const_iterator ite = multicmdMem.begin(); ite != multicmdMem.end(); ++ite) {
+					// 	if (ite->_inst == channelNum) {
+					// 		if (ite->_cmd == CMD::SENDTOVOLUME && (ite->_parameter & 0xF0) <= CMD_VOL::VOL_VOLUME3) {
+					// 			vol = ite->_parameter << 1;
+					// 		} else if ((ite->_cmd & 0xF0) == CMD::OFFSET) {
+					// 			offset = ((ite->_cmd & 0x0F) << 16) + ite->_parameter << 8;
+					// 			if (offset == 0) offset = thisChannel.OffsetMem();
+					// 		}
+					// 	}
+					// }
+
+					// if (pData->_cmd == CMD::VOLUME) vol = pData->_parameter;
+					// else if (pData->_cmd == CMD::SENDTOVOLUME && (pData->_parameter & 0xF0) <= CMD_VOL::VOL_VOLUME3) vol = pData->_parameter << 1;
+					psy_audio_xmsamplervoice_noteon(newVoice,
+						psy_audio_xmsamplerchannel_note(thisChannel),
+						vol, bInstrumentSet);
+					//this forces a recalc of the m_Period.
+					psy_audio_xmsamplerchannel_setnote(thisChannel,
+						psy_audio_xmsamplerchannel_note(thisChannel));
+					// Add Here any command that is limited to the scope of the new note.
+					// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
+					/* if ((pData->_cmd & 0xF0) == CMD::OFFSET)
+					{
+						offset = ((pData->_cmd & 0x0F) << 16) + pData->_parameter << 8;
+						if (offset == 0) offset = thisChannel.OffsetMem();
+					}
+					if (offset != 0) {
+						thisChannel.OffsetMem(offset);
+						if (offset < twlength) { newVoice->rWave().Position(offset); } else { newVoice->rWave().Position(twlength - 1); }
+					} else { newVoice->rWave().Position(0); }*/
+				} else
+				{
+					bNoteOn = FALSE;
+					newVoice = NULL;
+					///\TODO: multicommand
+					if (pData->cmd == 0) return;
+				}
+			} else
+			{
+				// This is a noteon command, but we are out of voices. We will try to process the effect.
+				bNoteOn = FALSE;
+				newVoice = NULL;
+				///\TODO: multicommand
+				if (pData->cmd == 0) return;
+			}
+		}
+	}
+	if (newVoice == NULL) newVoice = currentVoice;
+	// Effect Command
+	for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
+		psy_audio_PatternEvent* ite_ev;
+
+		ite_ev = (psy_audio_PatternEvent*)psy_list_entry(ite);
+		if (ite_ev->inst == channelNum) {
+			if (ite_ev->cmd == XM_SAMPLER_CMD_SENDTOVOLUME) {
+				psy_audio_xmsamplerchannel_seteffect(thisChannel,
+					newVoice, ite_ev->parameter, 0, 0);
+			} else {
+				psy_audio_xmsamplerchannel_seteffect(thisChannel,
+					newVoice, 255, ite_ev->cmd, ite_ev->parameter);
+			}
+		}
+	}
+	if (pData->cmd == XM_SAMPLER_CMD_SENDTOVOLUME) {
+		psy_audio_xmsamplerchannel_seteffect(thisChannel,
+			newVoice, pData->parameter, 0, 0);
+	} else {
+		psy_audio_xmsamplerchannel_seteffect(thisChannel,
+			newVoice, 255, pData->cmd, pData->parameter);
+	}
+}
+
+psy_audio_XMSamplerVoice* psy_audio_xmsampler_getcurrentvoice(
+	psy_audio_XMSampler* self, int channelNum)
+{
+	int current;
+
+	for (current = 0; current < self->_numVoices; current++)
+	{		
+		if ((psy_audio_xmsamplervoice_channelnum(&self->m_Voices[current]) == channelNum)  // Is this one an active note in this channel?
+			&& psy_audio_xmsamplervoice_isplaying(&self->m_Voices[current]) &&
+			!psy_audio_xmsamplervoice_isbackground(&self->m_Voices[current]))
+		{
+			//There can be only one foreground active voice for each channel, so we go out of the loop.
+			return &self->m_Voices[current];
+		}
+	}
+	return NULL;
+}
+
+psy_audio_XMSamplerVoice* psy_audio_xmsampler_getfreevoice(
+	psy_audio_XMSampler* self, int channelNum)
+{
+	int voice;
+
+	//First, see if there's a free voice
+	for (voice = 0; voice < self->_numVoices; voice++)
+	{
+		if (!psy_audio_xmsamplervoice_isplaying(&self->m_Voices[voice])) {
+			return  (&self->m_Voices[voice]);
+		}
+	}
+	//If there isn't, See if there are background voices in this channel
+	int background = -1;
+	for (int voice = 0; voice < self->_numVoices; voice++)
+	{
+		if (psy_audio_xmsamplervoice_isbackground(&self->m_Voices[voice])) {
+			background = voice;
+			if (psy_audio_xmsamplervoice_channelnum(&self->m_Voices[voice]) == channelNum) {
+				return  &(self->m_Voices[voice]);
+			}
+		}
+	}
+	//If still there isn't, See if there are background voices on other channels.
+	//This could be improved in some sort of "older-first".
+	if (background != -1) {
+		return  &(self->m_Voices[background]);
+	}
+	return NULL;
+}
+
+int psy_audio_xmsampler_getplayingvoices(const psy_audio_XMSampler* self)
+{
+	int c = 0;
+	int i = 0;
+
+	for (i = 0; i < XM_SAMPLER_MAX_POLYPHONY; i++)
+	{
+		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[i])) c++;		
+	}
+	return c;
+}
+
+
+
+
+/*
 void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 {
 	uintptr_t i;
@@ -355,15 +855,15 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-",
 		MPF_IGNORE | MPF_SMALL, 0, 0);
 }
-
+*/
 void dispose(psy_audio_XMSampler* self)
 {		
-	disposeparameters(self);
-	disposevoices(self);
-	disposechannels(self);
+	//disposeparameters(self);
+	//disposevoices(self);
+	//disposechannels(self);
 	psy_audio_custommachine_dispose(&self->custommachine);		
 }
-
+/*
 void disposeparameters(psy_audio_XMSampler* self)
 {
 	psy_audio_custommachineparam_dispose(&self->param_general);
@@ -398,21 +898,6 @@ void disposechannels(psy_audio_XMSampler* self)
 	psy_audio_xmsamplerchannel_dispose(&self->masterchannel);
 }
 
-psy_audio_XMSampler* psy_audio_xmsampler_alloc(void)
-{
-	return (psy_audio_XMSampler*)malloc(sizeof(psy_audio_XMSampler));
-}
-
-psy_audio_XMSampler* psy_audio_xmsampler_allocinit(psy_audio_MachineCallback* callback)
-{
-	psy_audio_XMSampler* rv;
-
-	rv = psy_audio_xmsampler_alloc();
-	if (rv) {
-		psy_audio_xmsampler_init(rv, callback);
-	}
-	return rv;
-}
 
 psy_audio_XMSamplerChannel* sampler_channel(psy_audio_XMSampler* self, uintptr_t track)
 {
@@ -427,13 +912,7 @@ psy_audio_XMSamplerChannel* sampler_channel(psy_audio_XMSampler* self, uintptr_t
 	return rv;
 }
 
-void generateaudio(psy_audio_XMSampler* self, psy_audio_BufferContext* bc)
-{	
-	self->samplerowcounter += bc->numsamples;
-	psy_audio_ticktimer_update(&self->ticktimer, bc->numsamples, bc);		
-	removeunusedvoices(self);	
-	psy_audio_xmsamplerchannel_work(&self->masterchannel, bc);
-}
+
 
 void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler* self)
 {
@@ -692,12 +1171,12 @@ void removeunusedvoices(psy_audio_XMSampler* self)
 		}			
 	}
 }
-
+*/
 const psy_audio_MachineInfo* info(psy_audio_XMSampler* self)
 {	
 	return &macinfo;
 }
-
+/*
 uintptr_t numparameters(psy_audio_XMSampler* self)
 {
 	return numparametercols(self) * 8;
@@ -808,16 +1287,6 @@ void resamplingmethod_tweak(psy_audio_XMSampler* self,
 			sender->minval);	
 }
 
-uintptr_t numinputs(psy_audio_XMSampler* self)
-{
-	return 0;
-}
-
-uintptr_t numoutputs(psy_audio_XMSampler* self)
-{
-	return 2;
-}
-
 static int alteRand(int x) { return (x * rand()) / 32768; }
 
 psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
@@ -840,7 +1309,8 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 				noteoff = psy_audio_patternentry_allocinit();
 				psy_audio_patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
 				psy_audio_patternentry_front(noteoff)->mach = psy_audio_patternentry_front(entry)->mach;
-				noteoff->delta += /*entry->offset*/ + (event->parameter & 0x0f) / 6.f *
+				//  entry->offset
+				noteoff->delta += + (event->parameter & 0x0f) / 6.f *
 					psy_audio_machine_currbeatsperline(
 						psy_audio_xmsampler_base(self));
 				psy_list_append(&insert, noteoff);
@@ -863,135 +1333,80 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 	}
 	return insert;
 }
-
+*/
 // fileio
 void loadspecific(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
-{
-	if (self->xmsamplerload) {
-		int32_t temp;
-		bool wrongState = FALSE;
-		uint32_t filevers;
-		size_t filepos;
-		uint32_t size=0;
+{	
+	int32_t temp;
+	bool wrongState = FALSE;
+	uint32_t filevers;
+	size_t filepos;
+	uint32_t size=0;
 
-		psy_audio_xmsampler_defaultC4(self, TRUE);
-		self->instrumentbank = 1;
-		psyfile_read(songfile->file, &size,sizeof(size));
-		filepos = psyfile_getpos(songfile->file);
-		psyfile_read(songfile->file, &filevers, sizeof(filevers));
+	// psy_audio_xmsampler_defaultC4(self, TRUE);
+	// self->instrumentbank = 1;
+	psyfile_read(songfile->file, &size,sizeof(size));
+	filepos = psyfile_getpos(songfile->file);
+	psyfile_read(songfile->file, &filevers, sizeof(filevers));
 			
-		// Check higher bits of version (AAAABBBB). 
-		// different A, incompatible, different B, compatible
- 		if ( (filevers&0xFFFF0000) == XMSAMPLER_VERSION_ONE )
-		{
-			ZxxMacro zxxMap[128];
-			int i;
-			uint8_t m_bAmigaSlides;// Using Linear or Amiga Slides.
-			uint8_t m_UseFilters;
-			int32_t m_GlobalVolume;
-			int32_t m_PanningMode;
-			psy_dsp_ResamplerQuality resamplertype;
+	// Check higher bits of version (AAAABBBB). 
+	// different A, incompatible, different B, compatible
+ 	if ( (filevers&0xFFFF0000) == XMSAMPLER_VERSION_ONE )
+	{
+		ZxxMacro zxxMap[128];
+		int i;
+		uint8_t m_bAmigaSlides;// Using Linear or Amiga Slides.
+		uint8_t m_UseFilters;
+		int32_t m_GlobalVolume;
+		int32_t m_PanningMode;
+		psy_dsp_ResamplerQuality resamplertype;
 
-			// numSubtracks
-			psyfile_read(songfile->file, &temp, sizeof(temp));
-			self->numvoices = temp;
-			// quality
-			psyfile_read(songfile->file, &temp, sizeof(temp));			
-			switch (temp) {
-				case 2: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break;
-				case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SINC; break;
-				case 0:	resamplertype = psy_dsp_RESAMPLERQUALITY_ZERO_ORDER; break;
-				case 1:
-				default:
-					resamplertype = psy_dsp_RESAMPLERQUALITY_LINEAR;
-					break;
-			}
-			psy_audio_xmsampler_setresamplerquality(self, resamplertype);
-			for (i = 0; i < 128; ++i) {
-				psyfile_read(songfile->file, &zxxMap[i].mode, sizeof(zxxMap[i].mode));
-				psyfile_read(songfile->file, &zxxMap[i].value, sizeof(zxxMap[i].value));
-			}
-
-			psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides));
-			self->amigaslides = m_bAmigaSlides;
-			psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters));
-			self->usefilters = m_UseFilters;
-			psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume));
-			psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
-			self->masterchannel.volume = m_GlobalVolume / 127.f;
-			for (i = 0; i < MAX_TRACKS; ++i) {				
-				psy_audio_xmsamplerchannel_load(sampler_channel(self, i),
-					songfile);
-			}
-
-			if ((filevers & XMSAMPLER_VERSION & 0x0000FFFF) >= 0x02) {
-				uint32_t temp32;
-
-				psyfile_read(songfile->file, &temp32, sizeof(temp32));
-				self->instrumentbank = temp32;
-			}
-		} else {
-			wrongState = TRUE;
+		// numSubtracks
+		psyfile_read(songfile->file, &temp, sizeof(temp));
+		self->_numVoices = temp;
+		// quality
+		psyfile_read(songfile->file, &temp, sizeof(temp));			
+		switch (temp) {
+			case 2: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break;
+			case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SINC; break;
+			case 0:	resamplertype = psy_dsp_RESAMPLERQUALITY_ZERO_ORDER; break;
+			case 1:
+			default:
+				resamplertype = psy_dsp_RESAMPLERQUALITY_LINEAR;
+				break;
 		}
-		if (!wrongState) {
-			return;
-		} else {
-			psyfile_seek(songfile->file, filepos + size);
-			return; // FALSE;
+		// psy_audio_xmsampler_setresamplerquality(self, resamplertype);
+		for (i = 0; i < 128; ++i) {
+			psyfile_read(songfile->file, &zxxMap[i].mode, sizeof(zxxMap[i].mode));
+			psyfile_read(songfile->file, &zxxMap[i].value, sizeof(zxxMap[i].value));
+		}
+
+		psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides));
+		self->m_bAmigaSlides = m_bAmigaSlides;
+		psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters));
+		self->m_UseFilters = m_UseFilters;
+		psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume));
+		psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
+		// self->masterchannel.volume = m_GlobalVolume / 127.f;
+		for (i = 0; i < MAX_TRACKS; ++i) {				
+			psy_audio_xmsamplerchannel_load(&self->m_Channel[i], songfile);
+		}
+
+		if ((filevers & XMSAMPLER_VERSION & 0x0000FFFF) >= 0x02) {
+			uint32_t temp32;
+
+			psyfile_read(songfile->file, &temp32, sizeof(temp32));
+			// self->instrumentbank = temp32;
 		}
 	} else {
-		uint32_t size;
-		int resamplertype;
-		
-		self->instrumentbank = 0;
-		psy_audio_xmsampler_defaultC4(self, FALSE);
-		// LinearSlide(false);
-		size = 0;
-		psyfile_read(songfile->file, &size, sizeof(size));
-		if (size)
-		{
-			/// Version 0
-			int32_t temp;
-			psyfile_read(songfile->file, &temp, sizeof(temp)); // numSubtracks
-			self->numvoices = temp;
-			psyfile_read(songfile->file, &temp, sizeof(temp)); // quality		
-			switch (temp) {
-				case 2: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break;
-				case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SINC; break;
-				case 0:	resamplertype = psy_dsp_RESAMPLERQUALITY_ZERO_ORDER; break;
-				case 1:
-				default:
-					resamplertype = psy_dsp_RESAMPLERQUALITY_LINEAR;
-					break;
-			}
-			psy_audio_xmsampler_setresamplerquality(self, resamplertype);			
-			if (size > 3 * sizeof(unsigned int))
-			{
-				unsigned int internalversion;
-				psyfile_read(songfile->file, &internalversion,
-					sizeof(internalversion));
-				if (internalversion >= 1) {
-					uint8_t defaultC4;
-
-					// correct A4 frequency.
-					psyfile_read(songfile->file, &defaultC4, sizeof(defaultC4));
-					psy_audio_xmsampler_defaultC4(self, defaultC4 != 0);
-				}
-				if (internalversion >= 2) {
-					unsigned char slidemode;
-					// correct slide.
-					psyfile_read(songfile->file, &slidemode, sizeof(slidemode));
-					// LinearSlide(slidemode);
-				}
-				if (internalversion >= 3) {
-					uint32_t instrbank;
-					// instrument bank.
-					psyfile_read(songfile->file, &instrbank, sizeof(instrbank));
-					self->instrumentbank = instrbank;
-				}
-			}
-		}
+		wrongState = TRUE;
+	}
+	if (!wrongState) {
+		return;
+	} else {
+		psyfile_seek(songfile->file, filepos + size);
+		return; // FALSE;
 	}
 }
 
@@ -1001,6 +1416,7 @@ void savespecific(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 	int32_t temp;
 	int i;
 	size_t endpos;
+	int resamplerquality;
 
 	// we cannot calculate the size previous to save, so we write a placeholder
 	// and seek back to write the correct value.
@@ -1008,8 +1424,9 @@ void savespecific(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 	size_t filepos = psyfile_getpos(songfile->file);
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write_uint32(songfile->file, XMSAMPLER_VERSION);
-	psyfile_write_uint32(songfile->file, self->numvoices);
-	switch (self->resamplerquality)
+	psyfile_write_uint32(songfile->file, self->_numVoices);
+	resamplerquality = psy_dsp_RESAMPLERQUALITY_LINEAR;
+	switch (resamplerquality) // (self->resamplerquality)
 	{
 	case psy_dsp_RESAMPLERQUALITY_ZERO_ORDER: temp = 0; break;
 	case psy_dsp_RESAMPLERQUALITY_SPLINE: temp = 2; break;
@@ -1023,22 +1440,21 @@ void savespecific(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].mode);
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].value);
 	}
-	psyfile_write_uint8(songfile->file, (uint8_t)(self->amigaslides != 0));
-	psyfile_write_uint8(songfile->file, (uint8_t) self->usefilters);
-	psyfile_write_int32(songfile->file, 128);
-	psyfile_write_int32(songfile->file, psy_audio_PANNING_LINEAR);
+	psyfile_write_uint8(songfile->file, (uint8_t)(self->m_bAmigaSlides != 0));
+	psyfile_write_uint8(songfile->file, (uint8_t) self->m_UseFilters);
+	psyfile_write_int32(songfile->file, self->m_GlobalVolume);
+	psyfile_write_int32(songfile->file, self->m_PanningMode);
 	for (i = 0; i < MAX_TRACKS; i++) {		
-		psy_audio_xmsamplerchannel_save(sampler_channel(self, i),
-			songfile);
+		psy_audio_xmsamplerchannel_save(&self->m_Channel[i], songfile);
 	}
-	psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank);
+	psyfile_write_uint32(songfile->file, (uint32_t)1); // self->instrumentbank);
 	endpos = psyfile_getpos(songfile->file);
 	psyfile_seek(songfile->file, filepos);
 	size = (uint32_t)(endpos - filepos - sizeof(size));
 	psyfile_write_uint32(songfile->file, size);
 	psyfile_seek(songfile->file, endpos);
 }
-
+/*
 void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,
 	psy_dsp_ResamplerQuality quality)
 {
@@ -1051,3 +1467,4 @@ void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,
 		psy_audio_xmsamplervoice_setresamplerquality(voice, quality);
 	}
 }
+*/

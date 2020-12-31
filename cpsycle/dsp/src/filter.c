@@ -340,12 +340,12 @@ void filter_init(Filter* self)
 	filter_init_samplerate(self, 44100);
 }
 
-void filter_init_samplerate(Filter* self, int sampleRate)
+void filter_init_samplerate(Filter* self, uintptr_t samplerate)
 {
 	filtervtable_init(self);
 	self->vtable = &filtervtable;
 	filtercoeff_init(&filtercoeff);
-	filtercoeff_setsamplerate(&filtercoeff, (float)sampleRate);
+	filtercoeff_setsamplerate(&filtercoeff, (float)samplerate);
 	filter_reset(self);
 }
 

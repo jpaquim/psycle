@@ -69,7 +69,7 @@ int psyfile_read(PsyFile* self,
 				   void* pData,
 				   uint32_t numBytes)
 {
-	uint32_t bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
+	uint32_t bytesRead = (uint32_t)fread(pData, sizeof(char), numBytes, self->_file);
 	return (bytesRead == numBytes);	
 }
 

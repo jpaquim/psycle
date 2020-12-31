@@ -44,8 +44,8 @@ static psy_audio_MachineParam* tweakparameter(psy_audio_Master*,
 	uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
 static uintptr_t numtweakparameters(psy_audio_Master*);
-static unsigned int numparametercols(psy_audio_Master*);
-static unsigned int numinputwires(psy_audio_Master*);
+static uintptr_t numparametercols(psy_audio_Master*);
+static uintptr_t numinputwires(psy_audio_Master*);
 static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
 
 static void master_title_name(psy_audio_Master*,
@@ -408,12 +408,12 @@ uintptr_t numparameters(psy_audio_Master* self)
 	return numparametercols(self) * NUMROWS;
 }
 
-unsigned int numparametercols(psy_audio_Master* self)
+uintptr_t numparametercols(psy_audio_Master* self)
 {	
 	return psy_max(numinputwires(self) + 1, psy_audio_MASTER_MINCOLS);	
 }
 
-unsigned int numinputwires(psy_audio_Master* self)
+uintptr_t numinputwires(psy_audio_Master* self)
 {
 	psy_audio_MachineSockets* sockets;
 	psy_audio_Machines* machines;

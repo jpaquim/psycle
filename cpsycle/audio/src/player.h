@@ -49,7 +49,7 @@ typedef struct psy_audio_Player {
 	psy_audio_Pattern patterndefaults;
 	psy_dsp_Dither dither;
 	bool dodither;
-	int octave;
+	uint8_t octave;
 	uint32_t resyncplayposinsamples;
 	psy_dsp_big_beat_t resyncplayposinbeats;
 	psy_audio_MidiInput midiinput;
@@ -80,7 +80,7 @@ INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)
 
 
 
-void psy_audio_player_setoctave(psy_audio_Player*, uintptr_t octave);
+void psy_audio_player_setoctave(psy_audio_Player*, uint8_t octave);
 
 INLINE uintptr_t psy_audio_player_octave(psy_audio_Player* self)
 {

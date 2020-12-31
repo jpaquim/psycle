@@ -23,7 +23,7 @@ typedef struct psy_audio_Array {
 
 void psy_audio_array_init(psy_audio_Array*);
 void psy_audio_array_init_len(psy_audio_Array*, uintptr_t len, float value);
-void psy_audio_array_init_shared(psy_audio_Array*, float* ptr, int len);
+void psy_audio_array_init_shared(psy_audio_Array*, float* ptr, uintptr_t len);
 void psy_audio_array_init_arange(psy_audio_Array*, float start, float stop,
 	float step);
 void psy_audio_array_dispose(psy_audio_Array*);

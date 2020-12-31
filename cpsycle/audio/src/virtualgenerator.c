@@ -34,6 +34,7 @@ static const psy_audio_MachineInfo* info(psy_audio_VirtualGenerator* self) {
 	return psy_audio_virtualgenerator_info();
 }
 
+static void dispose(psy_audio_VirtualGenerator*);
 static int mode(psy_audio_VirtualGenerator* self) { return MACHMODE_GENERATOR; }
 static void seqtick(psy_audio_VirtualGenerator*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
@@ -51,6 +52,7 @@ static void vtable_init(psy_audio_VirtualGenerator* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
+		vtable.dispose = (fp_machine_dispose)dispose;
 		vtable.info = (fp_machine_info)info;
 		vtable.mode = (fp_machine_mode)mode;
 		vtable.seqtick = (fp_machine_seqtick)seqtick;
@@ -76,8 +78,16 @@ void psy_audio_virtualgenerator_init(psy_audio_VirtualGenerator* self,
 	psy_audio_uintptrmachineparam_init(&self->param_inst,
 		"Instrument", "Inst", MPF_STATE, &self->instrument_index.subslot,
 		0, 0xFF);
-	psy_audio_intmachineparam_init(&self->param_sampler,
+	psy_audio_uintptrmachineparam_init(&self->param_sampler,
 		"Sampler", "Sampler", MPF_STATE, &self->machine_index, 0, 0xFF);
+}
+
+void dispose(psy_audio_VirtualGenerator* self)
+{
+	assert(self);
+
+	psy_audio_uintptrmachineparam_dispose(&self->param_inst);
+	psy_audio_uintptrmachineparam_dispose(&self->param_sampler);
 }
 
 void psy_audio_virtualgenerator_setinstrument(psy_audio_VirtualGenerator* self,
@@ -110,7 +120,7 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 			psy_audio_PatternEvent realevent;
 									
 			realevent = *ev;
-			realevent.inst = self->instrument_index.subslot;
+			realevent.inst = (uint16_t)self->instrument_index.subslot;
 			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {				
 				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
 					realevent.cmd = 0x1E;

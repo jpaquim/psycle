@@ -116,6 +116,11 @@ INLINE bool psy_audio_sampleiterator_playing(psy_audio_SampleIterator* self)
 	return self->playing;
 }
 
+INLINE void psy_audio_sampleiterator_setplaying(psy_audio_SampleIterator* self, bool value)
+{
+	self->playing = value;
+}
+
 INLINE void psy_audio_sampleiterator_play(psy_audio_SampleIterator* self)
 {
 	self->playing = TRUE;

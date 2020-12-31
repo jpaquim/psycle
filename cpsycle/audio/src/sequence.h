@@ -187,7 +187,7 @@ void psy_audio_sequenceselection_setsequence(psy_audio_SequenceSelection*,
 	struct psy_audio_Sequence*);
 psy_dsp_big_beat_t psy_audio_sequenceselection_editposition_offset(
 	const psy_audio_SequenceSelection*);
-int psy_audio_sequenceselection_editposition_entry_id(
+uintptr_t psy_audio_sequenceselection_editposition_entry_id(
 	const psy_audio_SequenceSelection* self);
 
 // psy_audio_Sequence

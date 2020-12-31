@@ -116,10 +116,10 @@ psy_dsp_big_beat_t psy_audio_sequenceselection_editposition_offset(
 		: (psy_dsp_big_beat_t)0.0;
 }
 
-int psy_audio_sequenceselection_editposition_entry_id(
+uintptr_t psy_audio_sequenceselection_editposition_entry_id(
 	const psy_audio_SequenceSelection* self)
 {
-	int rv;
+	uintptr_t rv;
 	assert(self);
 	
 	if (self->editposition.trackposition.sequencentrynode) {
@@ -129,7 +129,7 @@ int psy_audio_sequenceselection_editposition_entry_id(
 			self->editposition.trackposition.sequencentrynode->entry;
 		rv = entry->id;
 	} else {
-		rv = -1;
+		rv = UINTPTR_MAX;
 	}
 	return rv;
 }
@@ -327,7 +327,7 @@ psy_audio_SequenceEntryNode* psy_audio_sequence_remove(psy_audio_Sequence* self,
 		track = (psy_audio_SequenceTrack*)position.tracknode->entry;
 		if (position.trackposition.sequencentrynode) {
 			psy_audio_SequenceEntry* sequenceentry;
-			int patternslot;
+			uintptr_t patternslot;
 
 			sequenceentry = (psy_audio_SequenceEntry*)
 				position.trackposition.sequencentrynode->entry;

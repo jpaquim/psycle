@@ -314,6 +314,8 @@ typedef struct psy_dsp_EnvelopeController {
 } psy_dsp_EnvelopeController;
 
 void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_init_envelope(psy_dsp_EnvelopeController*,
+	const psy_dsp_EnvelopeSettings*);
 void psy_dsp_envelopecontroller_init_adsr(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_dispose(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_reset(psy_dsp_EnvelopeController*);
@@ -327,7 +329,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const psy_dsp_EnvelopeContro
 	uintptr_t pointindex);
 psy_List*  psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController*, uintptr_t samplerate);
-void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*, int tpb, int bpm);
+void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*, uintptr_t tpb, double bpm);
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController*);
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick_ps1(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_start(psy_dsp_EnvelopeController*);

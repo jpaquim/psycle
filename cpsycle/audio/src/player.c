@@ -512,8 +512,7 @@ void psy_audio_player_setnumsongtracks(psy_audio_Player* self,
 	}
 }
 
-void psy_audio_player_setoctave(psy_audio_Player* self,
-	uintptr_t octave)
+void psy_audio_player_setoctave(psy_audio_Player* self, uint8_t octave)
 {
 	assert(self);
 

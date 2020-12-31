@@ -34,7 +34,7 @@ void psy_audio_array_init_len(psy_audio_Array* self, uintptr_t len, float value)
 	dsp.clear(self->ptr_, len);	
 }
 
-void psy_audio_array_init_shared(psy_audio_Array* self, float* ptr, int len)
+void psy_audio_array_init_shared(psy_audio_Array* self, float* ptr, uintptr_t len)
 {
 	self->ptr_ = ptr;
 	self->base_ = ptr;
