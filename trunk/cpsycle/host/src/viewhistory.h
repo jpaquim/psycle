@@ -29,7 +29,7 @@ void viewhistory_init(ViewHistory*);
 void viewhistory_dispose(ViewHistory*);
 void viewhistory_clear(ViewHistory*);
 void viewhistory_add(ViewHistory*, ViewHistoryEntry view);
-void viewhistory_addseqpos(ViewHistory*, int seqpos);
+void viewhistory_addseqpos(ViewHistory*, uintptr_t seqpos);
 bool viewhistory_back(ViewHistory*);
 bool viewhistory_forward(ViewHistory*);
 ViewHistoryEntry viewhistory_currview(const ViewHistory*);
@@ -37,21 +37,29 @@ bool viewhistory_equal(const ViewHistory*, ViewHistoryEntry);
 
 INLINE bool viewhistory_hascurrview(const ViewHistory* self)
 {
+	assert(self);
+
 	return self->currnavigation != NULL;
 }
 
 INLINE void viewhistory_prevent(ViewHistory* self)
 {
+	assert(self);
+
 	self->prevented = TRUE;
 }
 
 INLINE void viewhistory_enable(ViewHistory* self)
 {
+	assert(self);
+
 	self->prevented = FALSE;
 }
 
 INLINE bool viewhistory_prevented(const ViewHistory* self)
 {
+	assert(self);
+
 	return self->prevented;
 }
 

@@ -107,7 +107,7 @@ void psy_audio_wave_save(psy_audio_Sample* sample, const char* path)
 {
 	PsyFile file;
 	psy_audio_WaveFormatChunk format;
-	int bitspersample = 16;
+	uint16_t bitspersample = 16;
 	uint8_t temp8 = 0;
 	uint16_t temp16 = 0;
 	uint32_t temp32 = 0;	
@@ -126,11 +126,11 @@ void psy_audio_wave_save(psy_audio_Sample* sample, const char* path)
 	psyfile_write(&file, &temp32, sizeof(temp32));
 	// Write Format Chunk
 	format.wFormatTag = psy_audio_WAVE_FORMAT_PCM;
-	format.nChannels = sample->channels.numchannels;
-	format.nSamplesPerSec = sample->samplerate;
-	format.nAvgBytesPerSec = sample->channels.numchannels *
-		sample->samplerate * bitspersample / 8;
-	format.nBlockAlign = sample->channels.numchannels *
+	format.nChannels = (uint16_t)sample->channels.numchannels;
+	format.nSamplesPerSec = (uint32_t)sample->samplerate;
+	format.nAvgBytesPerSec = (uint32_t)sample->channels.numchannels *
+		(uint32_t)sample->samplerate * bitspersample / 8;
+	format.nBlockAlign = (uint32_t)sample->channels.numchannels *
 		bitspersample / 8;
 	format.wBitsPerSample = bitspersample;	
 	format.cbSize = 0;
@@ -162,7 +162,7 @@ void psy_audio_wave_save(psy_audio_Sample* sample, const char* path)
 	}
 	// Write Data Chunk
 	psyfile_write(&file, "data", 4);
-	numsamples = sample->numframes * sample->channels.numchannels * (bitspersample / 8);
+	numsamples = (uint32_t)sample->numframes * (uint32_t)sample->channels.numchannels * (bitspersample / 8);
 	temp32 = numsamples;
 	psyfile_write(&file, &temp32, sizeof(temp32));
 	

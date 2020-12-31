@@ -30,7 +30,7 @@ class PluginFxCallback : public CFxCallback
 	}
 	inline virtual int GetSamplingRate() const {
 		return callback
-			? callback->vtable->samplerate(callback)
+			? (int)callback->vtable->samplerate(callback)
 			: 44100;
 	}
 	inline virtual int GetBPM() const {

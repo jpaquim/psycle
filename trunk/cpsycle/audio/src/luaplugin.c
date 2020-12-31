@@ -28,7 +28,7 @@
 #include <string.h>
 #include "../../detail/portable.h"
 
-static void getparam(psy_LuaImport* import, int idx, const char* method);
+static void getparam(psy_LuaImport* import, uintptr_t idx, const char* method);
 static const char* luaplugin_id(psy_audio_LuaPlugin* self, int index);
 
 // Parameter
@@ -835,7 +835,7 @@ int luamachine_setbuffer(lua_State* L)
 		psy_List* arrays = 0;
 		psy_List* p;
 		int c;
-		int numsamples;
+		uintptr_t numsamples;
 
 		self = psyclescript_checkself(L, 1, luamachine_meta);
 		luaL_checktype(L, 2, LUA_TTABLE);
@@ -1001,7 +1001,7 @@ int luamachine_getparam(lua_State* L)
 	return 0;
 }
 
-void getparam(psy_LuaImport* import, int idx, const char* method)
+void getparam(psy_LuaImport* import, uintptr_t idx, const char* method)
 {   
 	lua_State* L = import->L_;     
 	if (idx < 0) {       
@@ -1101,6 +1101,7 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 {
 	uint32_t size;
 	uint32_t numparams;
+	uintptr_t num;
 	uint32_t i;
 	psy_Table ids;
 	psy_Table vals;
@@ -1123,7 +1124,7 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		psyfile_readstring(songfile->file, id, 1024);
 		psy_table_insert_strhash(&ids, id, (void*)(uintptr_t)i);
 	}
-	int num = self->client->numparameters_;
+	num = self->client->numparameters_;
 	for (int i = 0; i < num; ++i) {		
 		const char* id = luaplugin_id(self, i);		
 		if (psy_table_at_strhash(&ids, id)) {
@@ -1156,7 +1157,7 @@ void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	//if (proxy_.prsmode() == MachinePresetType::NATIVE) {
-		uint32_t count = self->client->numparameters_;
+		uint32_t count = (uint32_t)self->client->numparameters_;
 		uint32_t size2 = 0;
 		//unsigned char* pData = 0;
 		//try
@@ -1172,7 +1173,7 @@ void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 
 		for (i = 0; i < count; i++) {
 			const char* id = luaplugin_id(self, i);
-			size += strlen(id) + 1;
+			size += (uint32_t)strlen(id) + 1;
 		}
 		psyfile_write(songfile->file, &size, sizeof(size));
 		psyfile_write(songfile->file, &count, sizeof(count));

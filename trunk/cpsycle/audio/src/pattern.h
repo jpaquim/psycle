@@ -298,12 +298,12 @@ typedef struct {
 	psy_audio_Pattern* pattern;	
 	psy_dsp_big_beat_t bpl;
 	bool wrap;
-	uintptr_t maxkeys;
+	uint8_t maxkeys;
 } psy_audio_PatternCursorNavigator;
 
 INLINE void psy_audio_patterncursornavigator_init(psy_audio_PatternCursorNavigator* self,
 	psy_audio_PatternCursor* cursor, psy_audio_Pattern* pattern,
-	psy_dsp_big_beat_t bpl, bool wrap, uintptr_t maxkeys)
+	psy_dsp_big_beat_t bpl, bool wrap, uint8_t maxkeys)
 {
 	self->cursor = cursor;
 	self->pattern = pattern;

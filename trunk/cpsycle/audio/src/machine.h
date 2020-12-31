@@ -978,9 +978,9 @@ INLINE psy_dsp_beat_t psy_audio_machine_currlinesperbeat(psy_audio_Machine*
 	return 1.f / self->vtable->currbeatsperline(self);
 }
 
-INLINE uintptr_t psy_audio_machine_samplerate(psy_audio_Machine* self)
+INLINE double psy_audio_machine_samplerate(psy_audio_Machine* self)
 {
-	return self->vtable->samplerate(self);
+	return (double)self->vtable->samplerate(self);
 }
 
 INLINE struct psy_audio_Samples* psy_audio_machine_samples(psy_audio_Machine*

@@ -16,13 +16,13 @@ typedef struct psy_audio_VirtualGenerator {
 	// inherits
 	psy_audio_CustomMachine custommachine;	
 	// internal data
-	int32_t machine_index;
+	uintptr_t machine_index;
 	// index subslot used as instrument index
 	// instrument group is not used, because the sammpler defines it
 	psy_audio_InstrumentIndex instrument_index;
 	// parameters
 	psy_audio_UIntPtrMachineParam param_inst;
-	psy_audio_IntMachineParam param_sampler;
+	psy_audio_UIntPtrMachineParam param_sampler;
 } psy_audio_VirtualGenerator;
 
 void psy_audio_virtualgenerator_init(psy_audio_VirtualGenerator*,

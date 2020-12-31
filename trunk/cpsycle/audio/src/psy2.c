@@ -1126,9 +1126,9 @@ void psy2loader_plugin_load(PSY2Loader* self, psy_audio_Machine* machine, uintpt
 	}
 	
 	{
-		uintptr_t size;
+		uint32_t size;
 		
-		size = psy_audio_machine_datasize(machine);
+		size = (uint32_t)psy_audio_machine_datasize(machine);
 		//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
 		if (size)
 		{

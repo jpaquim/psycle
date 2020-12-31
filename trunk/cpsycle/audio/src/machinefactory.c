@@ -178,7 +178,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			
 			sampler = psy_audio_xmsampler_allocinit(self->machinecallback);
 			if (sampler) {
-				sampler->xmsamplerload = 1;
+				//sampler->xmsamplerload = 1;
 				rv = psy_audio_xmsampler_base(sampler);
 			} else {
 				rv = 0;

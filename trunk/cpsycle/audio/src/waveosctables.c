@@ -25,11 +25,11 @@ static void constructtable(psy_audio_WaveOscTables*,
     double f_lo,
     double f_hi,
     void (*func)(float*, int, int),
-    int sr);
+    uintptr_t sr);
 
 static void constructwave(double fh, psy_audio_Sample* wave,
     void (*func)(float*, int, int),
-    int sr);
+    uintptr_t sr);
 
 void psy_audio_waveosctables_init(psy_audio_WaveOscTables* self)
 {
@@ -88,7 +88,7 @@ void constructtable(psy_audio_WaveOscTables* self,
     double f_lo,
     double f_hi,
     void (*func)(float*, int, int),
-    int sr)
+    uintptr_t sr)
 {
     psy_audio_SampleIndex index;
     psy_audio_Sample* w;
@@ -109,7 +109,7 @@ void constructtable(psy_audio_WaveOscTables* self,
 
 void constructwave(double fh, psy_audio_Sample* wave,
     void (*func)(float*, int, int),
-    int sr)
+    uintptr_t sr)
 {
     uintptr_t c;
     double f = 261.6255653005986346778499935233; // C4

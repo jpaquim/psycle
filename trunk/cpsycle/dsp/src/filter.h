@@ -42,7 +42,12 @@ void filtercoeff_dispose(FilterCoeff*);
 float filtercoeff_cutoff(psy_dsp_FilterType ft, int v);
 float filtercoeff_resonance(psy_dsp_FilterType ft, int freq, int r);
 void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate);
-INLINE float filtercoeff_getsamplerate(FilterCoeff* self) { return self->samplerate; };
+
+INLINE float filtercoeff_getsamplerate(FilterCoeff* self)
+{
+	return self->samplerate;
+};
+
 void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq, int r);
 float filtercoeff_cutoffinternal(int v);
 float filtercoeff_resonanceinternal(float v);
@@ -89,7 +94,7 @@ typedef struct Filter {
 } Filter;
 
 void filter_init(Filter*);
-void filter_init_samplerate(Filter*, int sampleRate);
+void filter_init_samplerate(Filter*, uintptr_t samplerate);
 void filter_reset(Filter*);//Same as init, without samplerate
 void filter_dispose(Filter*);
 void filter_update(Filter*);
@@ -104,7 +109,7 @@ INLINE void filter_setcutoff(Filter* self, int iCutoff)
 	}
 }
 
-INLINE int filter_cutoff(Filter* self)
+INLINE int filter_cutoff(const Filter* self)
 {
 	return self->cutoff;
 }
@@ -117,7 +122,7 @@ INLINE void filter_setressonance(Filter* self, int iRes)
 	}
 }
 
-INLINE int filter_ressonance(Filter* self)
+INLINE int filter_ressonance(const Filter* self)
 {
 	return self->_q;
 }
@@ -138,7 +143,7 @@ INLINE void filter_settype(Filter* self, psy_dsp_FilterType newftype)
 	}
 }
 
-INLINE psy_dsp_FilterType filter_type(Filter* self)
+INLINE psy_dsp_FilterType filter_type(const Filter* self)
 {
 	return self->_type;
 }
@@ -149,6 +154,12 @@ typedef struct ITFilter {
 
 
 void itfilter_init(ITFilter* self);
+
+
+INLINE void filter_workstereo_virtual(Filter* self, float* l, float* r)
+{
+	self->vtable->workstereo(self, l, r);
+}
 
 #ifdef __cplusplus
 }

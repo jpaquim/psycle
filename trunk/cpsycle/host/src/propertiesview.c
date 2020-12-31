@@ -48,24 +48,24 @@ static void propertiesrenderer_oninputdefinerchange(PropertiesRenderer*,
 static void propertiesrenderer_ondestroy(PropertiesRenderer*, psy_ui_Component* sender);
 static void propertiesrenderer_onalign(PropertiesRenderer*, psy_ui_Component* sender);
 static void propertiesrenderer_setlinebackground(PropertiesRenderer*,psy_Property*);
-static void propertiesrenderer_drawkey(PropertiesRenderer*, psy_Property*, int column);
-static void propertiesrenderer_drawvalue(PropertiesRenderer*, psy_Property*, int column);
+static void propertiesrenderer_drawkey(PropertiesRenderer*, psy_Property*, uintptr_t column);
+static void propertiesrenderer_drawvalue(PropertiesRenderer*, psy_Property*, uintptr_t column);
 static void propertiesrenderer_drawstring(PropertiesRenderer*, psy_Property*,
-	int column);
+	uintptr_t column);
 static void propertiesrenderer_drawinteger(PropertiesRenderer*, psy_Property*,
-	int column);
+	uintptr_t column);
 static void propertiesrenderer_drawbutton(PropertiesRenderer*, psy_Property*,
-	int column);
+	uintptr_t column);
 static void propertiesrenderer_drawcheckbox(PropertiesRenderer*, psy_Property*,
-	int column);
+	uintptr_t column);
 static void propertiesrenderer_advanceline(PropertiesRenderer*);
 static void propertiesrenderer_countblocklines(PropertiesRenderer*,
-	psy_Property*, int column);
+	psy_Property*, uintptr_t column);
 static void propertiesrenderer_addremoveident(PropertiesRenderer*, int level);
 static void propertiesrenderer_addident(PropertiesRenderer*);
 static void propertiesrenderer_removeident(PropertiesRenderer*);
-static int propertiesrenderer_intersectsvalue(PropertiesRenderer*, psy_Property*,
-	int column);
+static bool propertiesrenderer_intersectsvalue(PropertiesRenderer*, psy_Property*,
+	uintptr_t column);
 static int propertiesrenderer_intersectskey(PropertiesRenderer*, psy_Property*,
 	int column);
 static intptr_t propertiesrenderer_columnwidth(PropertiesRenderer*, intptr_t column);
@@ -321,7 +321,7 @@ void propertiesrenderer_setlinebackground(PropertiesRenderer* self,
 }
 
 void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {		
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		propertiesrenderer_drawbutton(self, property, column + 1);
@@ -400,7 +400,7 @@ char* strrchrpos(char* str, char c, uintptr_t pos)
 }
 
 void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {
 	if (self->selected == property) {
 		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
@@ -436,7 +436,7 @@ void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Property* proper
 }
 
 void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {
 	psy_ui_Rectangle r;
 	
@@ -453,7 +453,7 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* prope
 }
 
 void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {	
 	char text[256];
 	
@@ -500,7 +500,7 @@ void propertiesrenderer_advanceline(PropertiesRenderer* self)
 }
 
 void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
@@ -550,7 +550,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 }
 
 void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* property,
-	int column)
+	uintptr_t column)
 {
 	psy_ui_Rectangle r;
 	int checked = 0;
@@ -753,7 +753,7 @@ int propertiesrenderer_onenumpropertyposition(PropertiesRenderer* self,
 }
 
 void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
-	property, int column)
+	property, uintptr_t column)
 {
 	uintptr_t count;
 	uintptr_t numcolumnavgchars;
@@ -793,11 +793,12 @@ void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
 	}
 }
 
-int propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
-	property, int column)
+bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
+	property, uintptr_t column)
 {
-	int rv = 0;	
+	bool rv;
 
+	rv = FALSE;
 	self->button = 0;
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_BOOL) {					
 		psy_ui_Rectangle r;
@@ -810,8 +811,7 @@ int propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 		r.left = propertiesrenderer_columnstart(self, column);
 		r.top = self->cpy;
 		r.right = r.left + tm.tmAveCharWidth * 4;;
-		r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;
-	
+		r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;	
 		rv = psy_ui_rectangle_intersect(&r, self->mx, self->my);
 	} else if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER ||
 			psy_property_type(property) == PSY_PROPERTY_TYPE_STRING ||
@@ -977,12 +977,12 @@ void propertiesrenderer_onalign(PropertiesRenderer* self, psy_ui_Component*
 void propertiesrenderer_computecolumns(PropertiesRenderer* self,
 	const psy_ui_Size* size)
 {
-	int column;
+	uintptr_t column;
 	psy_ui_TextMetric tm;
 	tm = psy_ui_component_textmetric(&self->component);
 
 	for (column = 0; column < PROPERTIESRENDERER_NUMCOLS; ++column) {
-		self->col_width[column] = (int)(self->col_perc[column] *
+		self->col_width[column] = (intptr_t)(self->col_perc[column] *
 			psy_ui_value_px(&size->width, &tm));
 		if (column == 0) {
 			self->col_start[column] = 0;
@@ -1011,14 +1011,14 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];
-	int col_width[PROPERTIESRENDERER_NUMCOLS];
-	int col_start[PROPERTIESRENDERER_NUMCOLS];
+	intptr_t col_width[PROPERTIESRENDERER_NUMCOLS];
+	intptr_t col_start[PROPERTIESRENDERER_NUMCOLS];
 
 	memcpy(col_perc, self->col_perc, sizeof(col_perc));
 	memcpy(col_width, self->col_width, sizeof(col_width));
 	memcpy(col_start, self->col_start, sizeof(col_start));
 	if (self->floated) {
-		rv->width = psy_ui_value_makeew(140);
+		rv->width = psy_ui_value_makeew(140.0);
 		propertiesrenderer_computecolumns(self, rv);		
 	} else
 	if (!self->usefixedwidth) {
@@ -1052,7 +1052,7 @@ static void propertiesview_selectsection(PropertiesView*, psy_ui_Component* send
 	uintptr_t section);
 static void propertiesview_updatetabbarsections(PropertiesView*);
 static void propertiesview_ontabbarchange(PropertiesView*, psy_ui_Component* sender,
-	int tabindex);
+	uintptr_t tabindex);
 static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
 static void propertiesview_onpropertiesrendererselected(PropertiesView*,
@@ -1169,7 +1169,7 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 }
 
 void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sender,
-	int tabindex)
+	uintptr_t tabindex)
 {	
 	Tab* tab;
 
@@ -1219,8 +1219,7 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
 	PropertiesRenderer* sender, psy_Property* selected)
 {		
-	psy_signal_emit(&self->signal_changed, self, 1,
-		selected);
+	psy_signal_emit(&self->signal_changed, self, 1, selected);
 	psy_ui_component_align(propertiesrenderer_base(&self->renderer));
 	psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
 }

@@ -33,7 +33,7 @@ void psy_audio_ticktimer_reset(psy_audio_TickTimer*, uintptr_t samplesprotick);
 void psy_audio_ticktimer_update(psy_audio_TickTimer*, uintptr_t amount,
 	struct psy_audio_BufferContext*);
 
-INLINE uintptr_t psy_audio_ticktimer_tickcount(psy_audio_TickTimer* self)
+INLINE uintptr_t psy_audio_ticktimer_tickcount(const psy_audio_TickTimer* self)
 {
 	return self->tickcount;
 }

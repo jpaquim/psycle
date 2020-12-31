@@ -203,7 +203,7 @@ int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires* self,
 		if (legacywire && legacywire->_connection &&
 			legacywire->_outputMachine == macindex)
 		{			
-			return psy_tableiterator_key(&it);
+			return (int)(intptr_t)psy_tableiterator_key(&it);
 		}
 	}
 	return -1;

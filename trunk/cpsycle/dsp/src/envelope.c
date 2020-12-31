@@ -324,6 +324,14 @@ void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController* self)
 	psy_dsp_envelopecontroller_reset(self);
 }
 
+void psy_dsp_envelopecontroller_init_envelope(psy_dsp_EnvelopeController* self,
+	const psy_dsp_EnvelopeSettings* envelope)
+{
+	psy_dsp_envelopesettings_init(&self->settings);
+	psy_dsp_envelopecontroller_reset(self);
+	psy_dsp_envelopecontroller_set_settings(self, envelope);
+}
+
 void psy_dsp_envelopecontroller_init_adsr(psy_dsp_EnvelopeController* self)
 {	
 	psy_dsp_envelopesettings_init_adsr(&self->settings);
@@ -394,10 +402,10 @@ void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController* self,
 	self->samplerate = samplerate;
 }
 
-void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController* self, int tpb, int bpm)
+void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController* self, uintptr_t tpb, double bpm)
 {
-	self->tpb = tpb;
-	self->bpm = (float)bpm;
+	self->tpb = (int)tpb;
+	self->bpm = bpm;
 }
 
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController* self)
