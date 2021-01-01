@@ -23,6 +23,11 @@ typedef enum {
 	TABMODE_LABEL,
 } TabMode;
 
+typedef enum {
+	TABCHECKSTATE_OFF = 0,
+	TABCHECKSTATE_ON = 1
+} TabCheckState;
+
 typedef struct Tab {
 	char* text;
 	char* translation;
@@ -30,7 +35,8 @@ typedef struct Tab {
 	psy_ui_Size size;
 	psy_ui_Margin margin;
 	bool istoggle;	
-	int checkstate;	
+	TabCheckState checkstate;
+	psy_ui_IntPoint position;
 } Tab;
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
@@ -41,10 +47,10 @@ typedef struct TabBar {
 	psy_ui_Component component;
 	// data members
 	psy_List* tabs;	
-	intptr_t selected;
-	int hover;
-	intptr_t hoverindex;
-	int tabalignment;
+	uintptr_t selected;
+	bool hover;
+	uintptr_t hoverindex;
+	uintptr_t tabalignment;
 	psy_ui_Margin defaulttabmargin;
 	// Signals
 	psy_Signal signal_change;
@@ -55,21 +61,22 @@ Tab* tabbar_append(TabBar*, const char* label);
 void tabbar_append_tabs(TabBar*, const char* label, ...);
 void tabbar_clear(TabBar*);
 void tabbar_rename_tabs(TabBar*, const char* label, ...);
-void tabbar_select(TabBar*, intptr_t tabindex);
+void tabbar_select(TabBar*, uintptr_t tabindex);
 
-INLINE intptr_t tabbar_selected(const TabBar* self)
+INLINE uintptr_t tabbar_selected(const TabBar* self)
 {	
 	assert(self);
 
 	return self->selected;	
 }
 
-void tabbar_settabmargin(TabBar*, int tab, const psy_ui_Margin*);
-void tabbar_settabmode(TabBar*, int tab, TabMode);
+void tabbar_settabmargin(TabBar*, uintptr_t tab, const psy_ui_Margin*);
+void tabbar_settabmode(TabBar*, uintptr_t tab, TabMode);
 void tabbar_setdefaulttabmargin(TabBar*, const psy_ui_Margin*);
-Tab* tabbar_tab(TabBar*, intptr_t tabindex);
-int tabbar_checkstate(TabBar*, intptr_t tabindex);
-int tabbar_numchecked(TabBar*);
+Tab* tabbar_tab(TabBar*, uintptr_t tabindex);
+const Tab* tabbar_tab_const(const TabBar*, uintptr_t tabindex);
+TabCheckState tabbar_checkstate(const TabBar*, uintptr_t tabindex);
+uintptr_t tabbar_numchecked(const TabBar*);
 
 INLINE psy_ui_Component* tabbar_base(TabBar* self)
 {

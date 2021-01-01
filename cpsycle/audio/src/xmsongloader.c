@@ -243,16 +243,19 @@ bool xmsongloader_isvalid(XMSongLoader* self)
 {			
 	PsyFile* fp;
 	bool bIsValid = FALSE;
-		
+	char * pID;
+	char * pTrackerName;
+	char * pTrackerVer;
+
 	fp = self->songfile->file;
 	// get header
-	char * pID = AllocReadStrStart(fp, 17, 0);
+	pID = AllocReadStrStart(fp, 17, 0);
 
 	// tracker name	
-	char * pTrackerName = AllocReadStrStart(fp, 20,38);
+	pTrackerName = AllocReadStrStart(fp, 20,38);
 		
 	// get tracker version
-	char * pTrackerVer = AllocReadStrStart(fp, 2,58);	
+	pTrackerVer = AllocReadStrStart(fp, 2,58);	
 
 	// process
 	// TRACE(_T("Header: %s\n"),pID);
@@ -276,6 +279,9 @@ uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>&
 	PsyFile* fp;
 	int xmidx;
 	int i;
+	int extraticks;
+	uintptr_t nextPatStart;
+	int j;
 
 	fp = self->songfile->file;
 	// get data
@@ -307,7 +313,7 @@ uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>&
 	//song.BeatsPerMin(header.tempo);
 	self->songfile->song->properties.tpb = 24;
 	//song.TicksPerBeat(24);
-	int extraticks=0;
+	extraticks=0;
 	self->songfile->song->properties.lpb = calclpbfromspeed(
 		self->header.speed, &extraticks);
 	if (extraticks != 0) {
@@ -339,8 +345,8 @@ uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>&
 	}
 
 	// get pattern data
-	uintptr_t nextPatStart = self->header.size + 60;
-	for(int j = 0;j < self->header.patterns && nextPatStart > 0;j++){
+	nextPatStart = self->header.size + 60;
+	for(j = 0;j < self->header.patterns && nextPatStart > 0;j++){
 		nextPatStart = xmsongloader_loadsinglepattern(self, nextPatStart, j, self->header.channels); // , xmtovirtual);
 	}
 	self->songfile->song->properties.tracks = self->maxextracolumn;
@@ -415,6 +421,11 @@ uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 				uint8_t type;
 				uint8_t param;
 				uint8_t volume;
+				int exchwave[3] = {
+					psy_audio_WAVEFORMS_SINUS,		
+					psy_audio_WAVEFORMS_SAWDOWN,
+					psy_audio_WAVEFORMS_SQUARE
+				};
 
 				note = 255;
 				instr = 255;
@@ -500,11 +511,6 @@ uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 					}
 				}
 				e.parameter = param;				
-				int exchwave[3] = {
-					psy_audio_WAVEFORMS_SINUS,		
-					psy_audio_WAVEFORMS_SAWDOWN,
-					psy_audio_WAVEFORMS_SQUARE
-				};
 				switch(type){
 					case XMCMD_ARPEGGIO:
 						if(param != 0){
@@ -652,8 +658,10 @@ uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 					case XMCMD_SETSPEED:
 						if ( param < 32)
 						{
+							int extraticks;
+
 							e.cmd= psy_audio_PATTERNCMD_EXTENDED;
-							int extraticks=0;
+							extraticks=0;
 							e.parameter = calclpbfromspeed(param, &extraticks);
 							if (extraticks != 0) {
 								psy_audio_PatternEvent entry;
@@ -1155,7 +1163,7 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
 		// volumefadespeed in this case, so that a check during playback time is not needed.		
 		// inst.VolumeFadeSpeed(value_mapper::map_32768_1(sampleHeader.volfade));
-
+		int i;
 		int envelope_point_num = sampleHeader->vnum;
 		if (envelope_point_num > 12) { // Max number of envelope points in Fasttracker format is 12.
 			envelope_point_num = 12;
@@ -1166,7 +1174,7 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		psy_dsp_envelopesettings_append(&ampenvelope, psy_dsp_envelopepoint_make(
 			(int)sampleHeader->venv[0] * 512 / 8363.f, (float)sampleHeader->venv[1] / 64.0f));
 		//inst.AmpEnvelope().Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
-		for (int i = 1; i < envelope_point_num; i++) {
+		for (i = 1; i < envelope_point_num; i++) {
 			if (sampleHeader->venv[i * 2] > sampleHeader->venv[(i - 1) * 2])// Some rare modules have erroneous points. This tries to solve that.
 				psy_dsp_envelopesettings_append(&ampenvelope, psy_dsp_envelopepoint_make(
 					(int)sampleHeader->venv[i * 2] * 512 / 8363.f, (float)sampleHeader->venv[i * 2 + 1] / 64.0f));
@@ -1298,6 +1306,7 @@ bool modsongloader_load(MODSongLoader* self)
 	psy_audio_Song* song;
 	int i;
 	int virtidx;
+	char pID[5];
 
 	assert(self);
 
@@ -1348,7 +1357,7 @@ bool modsongloader_load(MODSongLoader* self)
 
 	// get data
 	psyfile_seek(fp, 20);
-	for (int i=0;i<31;i++) {
+	for (i=0;i<31;i++) {
 		psy_audio_Sample* wave;
 
 		wave = psy_audio_sample_allocinit(1);	
@@ -1358,8 +1367,7 @@ bool modsongloader_load(MODSongLoader* self)
 	}
 	psyfile_seek(fp, 950);
 	psyfile_read(fp, &self->header,sizeof(self->header));
-		
-	char pID[5];
+			
 	pID[0]=self->header.pID[0];pID[1]=self->header.pID[1];pID[2]= self->header.pID[2];pID[3]= self->header.pID[3];pID[4]=0;
 	{ // AmigaSlides
 		psy_audio_MachineParam* param;
@@ -1396,7 +1404,7 @@ bool modsongloader_load(MODSongLoader* self)
 		//}
 	}	
 	virtidx = MAX_MACHINES;
-	for (int i=0; i < 31;i++) {
+	for (i=0; i < 31;i++) {
 		if (self->samples[i].sampleLength > 0 ) {
 			psy_table_insert(&self->xmtovirtual, i, (void*)(uintptr_t)virtidx);			
 			virtidx++;
@@ -1430,10 +1438,11 @@ bool modsongloader_isvalid(MODSongLoader* self)
 void modsongloader_loadpatterns(MODSongLoader* self)
 {
 	int npatterns=0;
+	int j;
 	
 	// get pattern data
 	psyfile_seek(self->songfile->file, 1084);
-	for(int j = 0;j < self->header.songlength ;j++){
+	for(j = 0;j < self->header.songlength ;j++){
 		modsongloader_loadsinglepattern(self, j, self->songfile->song->properties.tracks);
 	}
 	if(self->speedpatch) {
@@ -1494,6 +1503,12 @@ void modsongloader_loadsinglepattern(MODSongLoader* self, int patidx,int tracks)
 			unsigned char type=0;
 			unsigned char param=0;
 			unsigned short period=428;
+			int exchwave[3] = {
+				psy_audio_WAVEFORMS_SINUS,
+				psy_audio_WAVEFORMS_SAWDOWN,
+				psy_audio_WAVEFORMS_SQUARE
+			};
+
 
 			// read note
 			mentry[0] = psyfile_read_uint8(fp); mentry[1] = psyfile_read_uint8(fp); mentry[2] = psyfile_read_uint8(fp); mentry[3] = psyfile_read_uint8(fp);
@@ -1505,12 +1520,6 @@ void modsongloader_loadsinglepattern(MODSongLoader* self, int patidx,int tracks)
 
 			// translate
 			e.parameter = param;
-
-			int exchwave[3] = {
-					psy_audio_WAVEFORMS_SINUS,
-					psy_audio_WAVEFORMS_SAWDOWN,
-					psy_audio_WAVEFORMS_SQUARE
-			};
 
 			switch(type){
 				case XMCMD_ARPEGGIO:
@@ -1624,13 +1633,15 @@ void modsongloader_loadsinglepattern(MODSongLoader* self, int patidx,int tracks)
 				case XMCMD_SETSPEED:
 					if ( param < 32)
 					{
+						int extraticks;
+
 						e.cmd=psy_audio_PATTERNCMD_EXTENDED;
-						int extraticks=0;
+						extraticks=0;
 						e.parameter = calclpbfromspeed(param,&extraticks);
 						if (extraticks != 0) {
-							self->speedpatch=TRUE;
 							psy_audio_PatternEvent entry;
-							
+
+							self->speedpatch=TRUE;
 							psy_audio_patternevent_clear(&entry);								
 							entry.cmd =psy_audio_PATTERNCMD_EXTENDED;
 							entry.parameter =psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;
@@ -1778,6 +1789,7 @@ void modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 {
 	PsyFile* fp;
 	BOOL bLoop;
+	char tmpfine;
 
 	fp = self->songfile->file;
 	psyfile_read(fp, self->samples[instridx].sampleName,22);
@@ -1812,7 +1824,7 @@ void modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 
 	wave->defaultvolume = self->samples[instridx].volume * 2;
 	wave->samplerate = 8363;
-	char tmpfine = (char)self->samples[instridx].finetune;
+	tmpfine = (char)self->samples[instridx].finetune;
 	if (tmpfine > 7 ) tmpfine -= 16;
 	// finetune has +-100 range in Psycle
 	wave->finetune = (int16_t)(tmpfine * 12.5);

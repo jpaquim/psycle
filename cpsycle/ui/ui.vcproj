@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\container\src"
+				AdditionalIncludeDirectories="..\container\src;..\file\src;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\container\src"
+				AdditionalIncludeDirectories="..\container\src;..\file\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -718,6 +718,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\uiscrollbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiscroller.c"
+				>
+			</File>
+			<File
 				RelativePath="src\uislider.c"
 				>
 				<FileConfiguration
@@ -891,70 +899,6 @@
 				RelativePath=".\src\uiwinsavedialogimp.c"
 				>
 			</File>
-			<File
-				RelativePath=".\src\uixtapp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtbitmapimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtcheckboximp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtcolordialogimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtcomboboximp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtcomponentimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixteditimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtfolderdialogimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtfontdialogimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtfontimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtgraphicsimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtimpfactory.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtlabelimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtlistboximp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtopendialogimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uixtsavedialogimp.c"
-				>
-			</File>
 			<Filter
 				Name="Header Files"
 				Filter="h;hpp;hxx;hm;inl"
@@ -1085,6 +1029,14 @@
 				</File>
 				<File
 					RelativePath="src\uisavedialog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiscrollbar.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiscroller.h"
 					>
 				</File>
 				<File

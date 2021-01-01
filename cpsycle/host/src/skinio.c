@@ -739,20 +739,23 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 	bool loaded = FALSE;
 	while (fgets(buf, sizeof buf, hfile))
 	{
+		char* equal;
+
 		if (buf[0] == '#' || (buf[0] == '/' && buf[1] == '/') || buf[0] == '\n')
 		{
 			// Skip comments
 			continue;
 		}
-		char* equal = strchr(buf, '=');
+		equal = strchr(buf, '=');
 		if (equal != NULL)
 		{
 			char* value;
+			char* strvalue;
+			char* key;
 			uintptr_t length;
 
 			equal[0] = '\0';
-			//Skip the double quotes containing strings
-			char* key;
+			//Skip the double quotes containing strings			
 			if (buf[0] == '"')
 			{
 				char* tmp = equal - 1;
@@ -775,7 +778,7 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 					value = &twodots[1];
 				}
 			}
-			char* strvalue = value;
+			strvalue = value;
 			psy_property_set_str(props, key, strvalue);			
 			loaded = TRUE;
 		}

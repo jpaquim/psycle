@@ -127,33 +127,9 @@ INLINE void wiresockets_append(psy_audio_WireSockets* self, psy_audio_WireSocket
 	}
 }
 
-INLINE void wiresockets_insert(psy_audio_WireSockets* self, uintptr_t id,
-	psy_audio_WireSocket* socket)
-{
-	if (id == UINTPTR_MAX) {
-		wiresockets_append(self, socket);
-	} else {
-		if (psy_table_exists(&self->sockets, id)) {
-			psy_table_remove(&self->sockets, id);
-		}
-		psy_table_insert(&self->sockets, id, socket);
-	}
-}
-
-
-INLINE void wiresockets_remove(psy_audio_WireSockets* self, psy_audio_WireSocket* socket)
-{
-	psy_TableIterator it;
-
-	for (it = psy_audio_wiresockets_begin(self);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		if ((psy_audio_WireSocket*)psy_tableiterator_value(&it) == socket) {
-			psy_table_remove(&self->sockets, psy_tableiterator_key(&it));
-			break;
-		}
-	}
-}
+void wiresockets_insert(psy_audio_WireSockets* self, uintptr_t id,
+	psy_audio_WireSocket* socket);
+void wiresockets_remove(psy_audio_WireSockets* self, psy_audio_WireSocket* socket);
 
 typedef struct {	
 	psy_audio_WireSockets inputs;
@@ -184,16 +160,8 @@ INLINE void psy_audio_wire_init_all(psy_audio_Wire* self, uintptr_t src,
 	self->dst = dst;
 }
 
-INLINE psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst)
-{
-	psy_audio_Wire rv;
+psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst);
 
-	rv.src = src;
-	rv.src_id = UINTPTR_MAX;
-	rv.dst = dst;	
-	rv.dst_id = UINTPTR_MAX;
-	return rv;
-}
 
 INLINE psy_audio_Wire psy_audio_wire_makeall(uintptr_t src, uintptr_t src_id,
  uintptr_t dst, uintptr_t dst_id)

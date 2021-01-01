@@ -5,55 +5,23 @@
 
 #include "tabbar.h"
 
-// std
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 
-static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
-static void tabbar_onlanguagechanged(TabBar*);
-static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
-static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
-static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
-static void tabbar_onmouseenter(TabBar*);
-static void tabbar_onmouseleave(TabBar*);
-static intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y, Tab** rvtab);
-static void tabbar_onalign(TabBar*);
-static void tabbar_onpreferredsize(TabBar*, psy_ui_Size* limit, psy_ui_Size* rv);
-static void tabbar_resettabcheckstates(TabBar*);
-
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
-
-static void vtable_init(TabBar* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onalign = (psy_ui_fp_component_onalign) tabbar_onalign;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
-			tabbar_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_component_ondraw) tabbar_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown) tabbar_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove) tabbar_onmousemove;
-		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter) tabbar_onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) tabbar_onmouseleave;
-		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
-			tabbar_onlanguagechanged;
-		vtable_initialized = TRUE;
-	}
-}
-
+// Tab
+// implementation
 void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 	const psy_ui_Margin* margin)
 {
+	assert(self);
+
 	self->text = strdup(text);
 	self->translation = NULL;
 	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = TABMODE_SINGLESEL;
 	self->checkstate = 0;
+	self->position = psy_ui_intpoint_make(0, 0);
 	if (size) {
 		self->size = *size;
 	}
@@ -68,266 +36,273 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 
 void tab_dispose(Tab* self)
 {
+	assert(self);
+
 	free(self->text);
+	self->text = NULL;
 	free(self->translation);
+	self->translation = NULL;
 }
 
 void tab_settext(Tab* self, const char* text)
 {
+	assert(self);
+
 	psy_strreset(&self->text, text);	
 	psy_strreset(&self->translation, psy_ui_translate(text));
 }
 
+// TabBar
+// prototypes
+static void tabbar_ondestroy(TabBar*);
+static void tabbar_onlanguagechanged(TabBar*);
+static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
+static void tabbar_drawtab(TabBar*, psy_ui_Graphics*,
+	Tab* tab, bool hover, bool selected, bool drawselline);
+static void tabbar_calctabpositions(TabBar*);
+static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
+static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
+static void tabbar_onmouseenter(TabBar*);
+static void tabbar_onmouseleave(TabBar*);
+static intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y,
+	Tab** rvtab);
+static void tabbar_onalign(TabBar*);
+static void tabbar_onpreferredsize(TabBar*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void tabbar_resettabcheckstates(TabBar*);
+
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+// vtable
+static void vtable_init(TabBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);		
+		vtable.ondestroy = (psy_ui_fp_component_ondestroy)tabbar_ondestroy;
+		vtable.onalign = (psy_ui_fp_component_onalign)tabbar_onalign;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			tabbar_onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)tabbar_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)tabbar_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove)tabbar_onmousemove;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)tabbar_onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)tabbar_onmouseleave;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			tabbar_onlanguagechanged;
+		vtable_initialized = TRUE;
+	}
+}
+// implementation
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
+	assert(self);
+
 	psy_ui_component_init(tabbar_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(tabbar_base(self));
-	self->tabs = 0;
+	psy_signal_init(&self->signal_change);
+	self->tabs = NULL;
 	self->selected = 0;
-	self->hover = 0;
-	self->hoverindex = -1;
-	psy_signal_init(&self->signal_change);	
-	psy_signal_connect(&tabbar_base(self)->signal_destroy, self,
-		tabbar_ondestroy);
+	self->hover = FALSE;
+	self->hoverindex = UINTPTR_MAX;
 	self->tabalignment = psy_ui_ALIGN_TOP;
-	psy_ui_margin_init_all(&self->defaulttabmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1.5),
+	psy_ui_margin_init_all(&self->defaulttabmargin,
+		psy_ui_value_makepx(0), psy_ui_value_makeew(1.5),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));	
 }
 
-void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
+void tabbar_ondestroy(TabBar* self)
 {	
-	psy_List* p;	
+	assert(self);
 
-	for (p = self->tabs; p != NULL; p = p->next) {	
-		tab_dispose((Tab*)(p->entry));
-		free(p->entry);
-	}
-	psy_list_free(self->tabs);
+	psy_list_deallocate(&self->tabs, (psy_fp_disposefunc)tab_dispose);	
 	psy_signal_dispose(&self->signal_change);
 }
 
 void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 {	
 	psy_List* tabs;
+	intptr_t c = 0;	
+			
+	assert(self);
+
+	tabbar_calctabpositions(self);
+	for (tabs = self->tabs; tabs != 0; psy_list_next(&tabs), ++c) {
+		Tab* tab;		
+
+		tab = (Tab*)psy_list_entry(tabs);		
+		tabbar_drawtab(self, g, tab,
+			self->hover && self->hoverindex == c &&
+			self->hoverindex != self->selected,
+			self->selected == c,
+			self->tabalignment == psy_ui_ALIGN_TOP ||
+			self->tabalignment == psy_ui_ALIGN_BOTTOM);
+	}
+}
+
+void tabbar_calctabpositions(TabBar* self)
+{
+	psy_List* tabs;
 	intptr_t c = 0;
-	intptr_t cpx = 0;
+	psy_ui_IntPoint currpos;
 	intptr_t cpy = 0;
-	intptr_t cpxsel = 0;
-	intptr_t selwidth = 0;
-	intptr_t cpxhover = 0;
-	intptr_t hoverwidth = 0;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	intptr_t tabheight;
-		
+
+	assert(self);
+
 	size = psy_ui_component_size(tabbar_base(self));
-	tm = psy_ui_component_textmetric(tabbar_base(self));
-	tabheight = psy_ui_value_px(&size.height, &tm);
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
+	tm = psy_ui_component_textmetric(tabbar_base(self));	
+	currpos = psy_ui_intpoint_make(0, 0);
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
-		cpx = 0;
-	} else 
-	if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
-		cpy = 5;
-		cpx = 10;
-	} else
-	if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
-		cpy = 5;
+		currpos.x = 0;
+	} else if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
+		currpos.y = 5;
+		currpos.x = 10;
+	} else if (self->tabalignment == psy_ui_ALIGN_LEFT) {
+		currpos.y = 5;
 	}
-	for (tabs = self->tabs; tabs != 0; tabs = tabs->next, ++c) {
+	for (tabs = self->tabs; tabs != 0; psy_list_next(&tabs), ++c) {
 		Tab* tab;
-		char* text;	
+		psy_ui_IntPoint position;
 
 		tab = (Tab*)psy_list_entry(tabs);
-		if (tab->translation) {
-			text = tab->translation;
-		} else {
-			text = tab->text;
-		}
-		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
+		if (self->tabalignment == psy_ui_ALIGN_TOP) {
+			currpos.x += psy_ui_value_px(&tab->margin.left, &tm);
+			position = currpos;			
+			currpos.x += psy_ui_value_px(&tab->size.width, &tm) +
+				psy_ui_value_px(&tab->margin.right, &tm);
+		} else if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			cpx = psy_ui_value_px(&tab->margin.left, &tm);
+			currpos.x = psy_ui_value_px(&tab->margin.left, &tm);
+			currpos.y += psy_ui_value_px(&tab->margin.top, &tm);
+			position = currpos;
+			currpos.y += psy_ui_value_px(&tab->size.height, &tm) +
+				psy_ui_value_px(&tab->margin.bottom, &tm);
+		} else {
+			position = currpos;
 		}
-		if (self->selected == c) {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
-			cpxsel = cpx + psy_ui_value_px(&tab->margin.left, &tm);
-			selwidth = psy_ui_value_px(&tab->size.width, &tm);
-		}
-		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00EAEAEA));
-			cpxhover = cpx + psy_ui_value_px(&tab->margin.left, &tm);
-			hoverwidth = psy_ui_value_px(&tab->size.width, &tm);
-		} else
-		if (tab->istoggle) {
-			if (tab->checkstate) {
-				psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
-			} else {
-				psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			}
-		} else		
-		if (self->selected == c) {			
+		tab->position = position;		
+	}
+}
+
+void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
+	Tab* tab, bool hover, bool selected, bool drawselline)
+{
+	char* text;
+	psy_ui_TextMetric tm;
+	psy_ui_IntPoint position;
+
+	assert(self);
+	assert(tab);
+
+	position = tab->position;
+	tm = psy_ui_component_textmetric(tabbar_base(self));
+	if (tab->translation) {
+		text = tab->translation;
+	} else {
+		text = tab->text;
+	}
+	if (tab->mode == TABMODE_LABEL) {
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
+	} else if (tab->istoggle) {
+		if (tab->checkstate) {
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		} else {
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-		}		
-		if (self->tabalignment == psy_ui_ALIGN_TOP) {			
-			cpx += psy_ui_value_px(&tab->margin.left, &tm);
-			if (tab->mode == TABMODE_LABEL) {
-				psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1A596));
-			}
-			if (self->selected == c && self->tabalignment == psy_ui_ALIGN_TOP) {
-				int y;
-				// psy_ui_Rectangle r;
-
-				psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-				y = tm.tmHeight + 2;
-
-				// psy_ui_setrectangle(&r, cpxsel, 0, selwidth, y + 1);
-				// psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x002F3E25));				
-
-				// psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);
-				if (self->hover && self->hoverindex != self->selected) {
-					psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
-					psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
-				}
-			}
-			psy_ui_textout(g, cpx, cpy, text, strlen(text));
-			cpx += psy_ui_value_px(&tab->size.width, &tm) + psy_ui_value_px(&tab->margin.right, &tm);
-		} else
-		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
-				self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			cpx = psy_ui_value_px(&tab->margin.left, &tm);
-			if (self->hover && self->hoverindex == c) {
+		}
+	} else if (selected) {
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
+	} else if (hover) {
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00EAEAEA));
+	} else {
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+	}
+	psy_ui_textout(g, position.x, position.y, text, psy_strlen(text));
+	if (hover) {		
+		intptr_t width;
 				
-				// psy_ui_setcolour(g, 0x00383838);
-				// psy_ui_drawrectangle(g, r);
-				psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
-				psy_ui_drawline(g,
-					cpx,
-					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm),
-					cpx + hoverwidth,
-					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm));
-			}			
-			cpy += psy_ui_value_px(&tab->margin.top, &tm);
-			if (tab->mode == TABMODE_LABEL) {
-				psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
-			}			
-			psy_ui_textout(g, cpx, cpy, text, strlen(text));			
-			cpy += psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.bottom, &tm);
-		}
+		width = psy_ui_value_px(&tab->size.width, &tm);
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
+		psy_ui_drawline(g, position.x, position.y + tm.tmHeight + 2,
+			position.x + width, position.y + tm.tmHeight + 2);
 	}
-	psy_ui_setcolour(g, psy_ui_colour_make(0x005F5F5F));
-	if (self->tabalignment == psy_ui_ALIGN_TOP) {
-		int y;		
+	if (selected && drawselline) {
+		intptr_t width;
 
-		psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-		y = tm.tmHeight + 2;				
-		psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
-		if (self->hover && self->hoverindex != self->selected) {		
-			psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
-			psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
-		}
-	} else
-	if (self->tabalignment == psy_ui_ALIGN_LEFT) {
-		psy_ui_drawline(g, psy_ui_value_px(&size.width, &tm) - 2, cpx,
-			psy_ui_value_px(&size.width, &tm) - 2, cpy);
+		width = psy_ui_value_px(&tab->size.width, &tm);
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));		
+		psy_ui_drawline(g, position.x, position.y + tm.tmHeight + 2,
+			position.x + width, position.y + tm.tmHeight + 2);
 	}
-	
 }
 
 void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 {	
 	intptr_t tabindex;
-	Tab* tab = 0;
+	Tab* tab;
 
+	assert(self);
+
+	tab = NULL;
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
 	if (tab && tab->mode == TABMODE_LABEL) {
 		return;
 	}
-	if (tab && tabindex != -1 && (tabindex != self->selected || tab->istoggle)) {
+	if (tab && tabindex != UINTPTR_MAX && (tabindex != self->selected || tab->istoggle)) {
 		if (!tab->istoggle) {
 			self->selected = tabindex;
 		} else {
-			tab->checkstate = !tab->checkstate;
+			if (tab->checkstate != TABCHECKSTATE_OFF) {
+				tab->checkstate = TABCHECKSTATE_OFF;
+			} else {
+				tab->checkstate = TABCHECKSTATE_ON;
+			}
 		}
 		psy_ui_component_invalidate(tabbar_base(self));
 		psy_ui_component_update(tabbar_base(self));
 		psy_signal_emit(&self->signal_change, self, 1, tabindex);
 	}
-
 }
 
 intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y, Tab** rvtab)
 {
 	psy_List* tabs;
-	intptr_t rv = -1;
-	intptr_t c = 0;
-	intptr_t cpx = 0;
-	intptr_t cpy = 0;
+	intptr_t rv;
+	intptr_t c;
 	psy_ui_TextMetric tm;
 
-	*rvtab = NULL;
-	tm = psy_ui_component_textmetric(tabbar_base(self));
-	if (self->tabalignment == psy_ui_ALIGN_TOP) {
-		cpx = 0;
-	} else 
-	if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
-		cpy = 5;
-		cpx = 10;
-	} else
-	if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
-		cpy = 5;
-	}	
-	tabs = self->tabs;
-	while (tabs) {
+	assert(self);
+
+	rv = UINTPTR_MAX;
+	tabbar_calctabpositions(self);
+	tm = psy_ui_component_textmetric(tabbar_base(self));	
+	for (c = 0, tabs = self->tabs; tabs != NULL; psy_list_next(&tabs), ++c) {
 		Tab* tab;
 
 		tab = (Tab*)tabs->entry;
-		if (self->tabalignment == psy_ui_ALIGN_TOP && x >= cpx &&
-			x < cpx + psy_ui_value_px(&tab->size.width, &tm) +
-				psy_ui_value_px(&tab->margin.left, &tm) +
-				psy_ui_value_px(&tab->margin.right, &tm)) {
-			*rvtab = tab;
+		if (x >= tab->position.x && x < tab->position.x + psy_ui_value_px(&tab->size.width, &tm) &&
+			y >= tab->position.y && y < tab->position.y + tm.tmHeight + 2) {
 			rv = c;
-			break;
-		} else
-		if ((self->tabalignment == psy_ui_ALIGN_LEFT ||
-				self->tabalignment == psy_ui_ALIGN_RIGHT) &&
-			y >= cpy && y < cpy + psy_ui_value_px(&tab->size.height, &tm) +
-				psy_ui_value_px(&tab->margin.top, &tm) +
-				psy_ui_value_px(&tab->margin.bottom, &tm)) {
 			*rvtab = tab;
-			rv = c;
 			break;
 		}
-		if (self->tabalignment == psy_ui_ALIGN_TOP) {
-			cpx += psy_ui_value_px(&tab->size.width, &tm) +
-				psy_ui_value_px(&tab->margin.left, &tm) +
-				psy_ui_value_px(&tab->margin.right, &tm);
-		} else
-		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
-			self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			cpy += psy_ui_value_px(&tab->size.height, &tm) +
-				psy_ui_value_px(&tab->margin.top, &tm) +
-				psy_ui_value_px(&tab->margin.bottom, &tm);
-		}
-		tabs = tabs->next;
-		++c;
 	}
 	return rv;
 }
 
 void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 {	
-	intptr_t tabindex;
-	Tab* tab = 0;
+	uintptr_t tabindex;
+	Tab* tab;
 
+	assert(self);
+
+	tab = NULL;
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
 	if (tab && tab->mode == TABMODE_LABEL) {
-		self->hoverindex = -1;
+		self->hoverindex = UINTPTR_MAX;
 		psy_ui_component_invalidate(tabbar_base(self));
 		return;
 	} else
@@ -340,19 +315,25 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 
 void tabbar_onmouseenter(TabBar* self)
 {
-	self->hover = 1;
+	assert(self);
+
+	self->hover = TRUE;
 	psy_ui_component_invalidate(tabbar_base(self));
 }
 
 void tabbar_onmouseleave(TabBar* self)
-{		
-	self->hover = 0;
+{
+	assert(self);
+
+	self->hover = FALSE;
 	psy_ui_component_invalidate(tabbar_base(self));
 }
 
-void tabbar_select(TabBar* self, intptr_t tabindex)
+void tabbar_select(TabBar* self, uintptr_t tabindex)
 {
 	Tab* tab;
+
+	assert(self);
 
 	self->selected = tabindex;
 	tab = tabbar_tab(self, tabindex);
@@ -366,7 +347,9 @@ void tabbar_select(TabBar* self, intptr_t tabindex)
 
 Tab* tabbar_append(TabBar* self, const char* label)
 {
-	Tab* tab;	
+	Tab* tab;
+
+	assert(self);
 
 	tab = (Tab*) malloc(sizeof(Tab));
 	if (tab) {
@@ -396,6 +379,8 @@ void tabbar_append_tabs(TabBar* self, const char* label, ...)
 {
 	const char* currlabel;
 	va_list ap;
+
+	assert(self);
 	
 	va_start(ap, label);
 	for (currlabel = label; currlabel != NULL; currlabel = va_arg(ap, const char*)) {
@@ -431,10 +416,12 @@ void tabbar_rename_tabs(TabBar* self, const char* label, ...)
 	va_end(ap);
 }
 
-void tabbar_settabmargin(TabBar* self, int tabindex,
+void tabbar_settabmargin(TabBar* self, uintptr_t tabindex,
 	const psy_ui_Margin* margin)
 {
 	Tab* tab;
+
+	assert(self);
 
 	tab = tabbar_tab(self, tabindex);
 	if (tab) {
@@ -446,9 +433,11 @@ void tabbar_settabmargin(TabBar* self, int tabindex,
 	}		
 }
 
-void tabbar_settabmode(TabBar* self, int tabindex, TabMode mode)
+void tabbar_settabmode(TabBar* self, uintptr_t tabindex, TabMode mode)
 {
 	Tab* tab;
+
+	assert(self);
 
 	tab = tabbar_tab(self, tabindex);
 	if (tab) {
@@ -460,6 +449,8 @@ void tabbar_settabmode(TabBar* self, int tabindex, TabMode mode)
 void tabbar_onalign(TabBar* self)
 {
 	psy_List* p;
+
+	assert(self);
 	
 	for (p = self->tabs; p != NULL; p = p->next) {
 		Tab* tab;
@@ -477,92 +468,96 @@ void tabbar_onalign(TabBar* self)
 
 void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	if (rv) {
-		psy_ui_Size size;
-		psy_ui_TextMetric tm;
-		psy_List* tabs;	
-		intptr_t cpx = 0;
-		intptr_t cpy = 0;
-		intptr_t cpxmax = 0;
-		intptr_t cpymax = 0;
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
+	psy_List* tabs;	
+	intptr_t cpx = 0;
+	intptr_t cpy = 0;
+	intptr_t cpxmax = 0;
+	intptr_t cpymax = 0;
+
+	assert(self);
 		
-		size = psy_ui_component_size(tabbar_base(self));
-		tm = psy_ui_component_textmetric(tabbar_base(self));
-		if (self->tabalignment == psy_ui_ALIGN_TOP) {
-			cpx = 0;
-		} else 
-		if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			cpy = 5;
-			cpx = 10;
-		} else
-		if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
-			cpy = 5;
-		}
-		for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
-			Tab* tab;
-			psy_ui_Size tabsize;
-			char* text;			
-
-			tab = (Tab*)psy_list_entry(tabs);
-			if (tab->translation) {
-				text = tab->translation;
-			} else {
-				text = tab->text;
-			}
-			tabsize = psy_ui_component_textsize(tabbar_base(self), text);
-			tabsize.height = psy_ui_value_makeeh(1.5);
-			if (self->tabalignment == psy_ui_ALIGN_TOP) {								
-				cpx += psy_ui_value_px(&tabsize.width, &tm);
-				cpx += psy_ui_value_px(&tab->margin.left, &tm) +
-						psy_ui_value_px(&tab->margin.right, &tm);
-				if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
-						psy_ui_value_px(&tab->margin.top, &tm) +
-						psy_ui_value_px(&tab->margin.bottom, &tm)) {
-					cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
-						psy_ui_value_px(&tab->margin.top, &tm) +
-						psy_ui_value_px(&tab->margin.bottom, &tm);
-				}
-				if (cpxmax < cpx) {
-					cpxmax = cpx;
-				}
-			} else 
-			if (self->tabalignment == psy_ui_ALIGN_LEFT ||
-				self->tabalignment == psy_ui_ALIGN_RIGHT) {
-										
-				cpy += psy_ui_value_px(&tabsize.height, &tm);
-				if (cpxmax < cpx + psy_ui_value_px(&tabsize.width, &tm) +
-						psy_ui_value_px(&tab->margin.left, &tm) +
-						psy_ui_value_px(&tab->margin.right, &tm)) {
-					cpxmax = cpx + psy_ui_value_px(&tabsize.width, &tm) +
-						psy_ui_value_px(&tab->margin.left, &tm) +
-						psy_ui_value_px(&tab->margin.right, &tm);
-				}
-				if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
-						psy_ui_value_px(&tab->margin.top, &tm) +
-						psy_ui_value_px(&tab->margin.bottom, &tm)) {
-					cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
-						psy_ui_value_px(&tab->margin.top, &tm) +
-						psy_ui_value_px(&tab->margin.bottom, &tm);
-				}
-			}
-		}
-
-		rv->width = psy_ui_value_makepx(cpxmax);
-		rv->height = psy_ui_value_makepx(cpymax);
+	size = psy_ui_component_size(tabbar_base(self));
+	tm = psy_ui_component_textmetric(tabbar_base(self));
+	if (self->tabalignment == psy_ui_ALIGN_TOP) {
+		cpx = 0;
+	} else 
+	if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
+		cpy = 5;
+		cpx = 10;
+	} else
+	if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
+		cpy = 5;
 	}
+	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
+		Tab* tab;
+		psy_ui_Size tabsize;
+		char* text;			
+
+		tab = (Tab*)psy_list_entry(tabs);
+		if (tab->translation) {
+			text = tab->translation;
+		} else {
+			text = tab->text;
+		}
+		tabsize = psy_ui_component_textsize(tabbar_base(self), text);
+		tabsize.height = psy_ui_value_makeeh(1.5);
+		if (self->tabalignment == psy_ui_ALIGN_TOP) {								
+			cpx += psy_ui_value_px(&tabsize.width, &tm);
+			cpx += psy_ui_value_px(&tab->margin.left, &tm) +
+					psy_ui_value_px(&tab->margin.right, &tm);
+			if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
+					psy_ui_value_px(&tab->margin.top, &tm) +
+					psy_ui_value_px(&tab->margin.bottom, &tm)) {
+				cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
+					psy_ui_value_px(&tab->margin.top, &tm) +
+					psy_ui_value_px(&tab->margin.bottom, &tm);
+			}
+			if (cpxmax < cpx) {
+				cpxmax = cpx;
+			}
+		} else  if (self->tabalignment == psy_ui_ALIGN_LEFT ||
+			self->tabalignment == psy_ui_ALIGN_RIGHT) {
+										
+			cpy += psy_ui_value_px(&tabsize.height, &tm);
+			if (cpxmax < cpx + psy_ui_value_px(&tabsize.width, &tm) +
+					psy_ui_value_px(&tab->margin.left, &tm) +
+					psy_ui_value_px(&tab->margin.right, &tm)) {
+				cpxmax = cpx + psy_ui_value_px(&tabsize.width, &tm) +
+					psy_ui_value_px(&tab->margin.left, &tm) +
+					psy_ui_value_px(&tab->margin.right, &tm);
+			}
+			if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
+					psy_ui_value_px(&tab->margin.top, &tm) +
+					psy_ui_value_px(&tab->margin.bottom, &tm)) {
+				cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
+					psy_ui_value_px(&tab->margin.top, &tm) +
+					psy_ui_value_px(&tab->margin.bottom, &tm);
+			}
+		}
+	}
+	rv->width = psy_ui_value_makepx(cpxmax);
+	rv->height = psy_ui_value_makepx(cpymax);	
 }
 
-Tab* tabbar_tab(TabBar* self, intptr_t tabindex)
+Tab* tabbar_tab(TabBar* self, uintptr_t tabindex)
 {
 	Tab* rv = 0;
-	psy_List* p;
-	int c = 0;
+	psy_List* p;	
 	
-	for (p = self->tabs; p != NULL && c < tabindex; p = p->next, ++c);
+	assert(self);
+
+	p = psy_list_at(self->tabs, tabindex);
 	if (p) {		
 		rv = (Tab*)psy_list_entry(p);
 	}
 	return rv;
+}
+
+const Tab* tabbar_tab_const(const TabBar* self, uintptr_t tabindex)
+{
+	return tabbar_tab((TabBar*)self, tabindex);
 }
 
 void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
@@ -571,8 +566,7 @@ void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
 
 	assert(self);
 
-	self->defaulttabmargin = *margin;
-	
+	self->defaulttabmargin = *margin;	
 	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
 		Tab* tab;
 
@@ -583,27 +577,31 @@ void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
 	}
 }
 
-int tabbar_checkstate(TabBar* self, intptr_t tabindex)
+TabCheckState tabbar_checkstate(const TabBar* self, uintptr_t tabindex)
 {	
-	Tab* tab;
+	const Tab* tab;
 
-	tab = tabbar_tab(self, tabindex);
+	assert(self);
+
+	tab = tabbar_tab_const(self, tabindex);
 	if (tab) {
 		return tab->checkstate;		
 	}
-	return 0;
+	return TABCHECKSTATE_OFF;
 }
 
-int tabbar_numchecked(TabBar* self)
+uintptr_t tabbar_numchecked(const TabBar* self)
 {
-	int rv;
-	psy_List* tabs;
+	uintptr_t rv;
+	const psy_List* tabs;
 	
-	for (rv = 0, tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
-		Tab* tab;
+	assert(self);
 
-		tab = (Tab*)psy_list_entry(tabs);
-		if (tab != NULL && tab->checkstate != 0) {
+	for (rv = 0, tabs = self->tabs; tabs != NULL; psy_list_next_const(&tabs)) {
+		const Tab* tab;
+
+		tab = (Tab*)psy_list_entry_const(tabs);
+		if (tab != NULL && tab->checkstate != TABCHECKSTATE_OFF) {
 			++rv;
 		}		
 	}
@@ -614,12 +612,14 @@ void tabbar_resettabcheckstates(TabBar* self)
 {
 	psy_List* tabs;
 
+	assert(self);
+
 	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
 		Tab* tab;
 
 		tab = (Tab*)psy_list_entry(tabs);
 		if (tab != NULL) {
-			tab->checkstate = 0;
+			tab->checkstate = TABCHECKSTATE_OFF;
 		}
 	}
 }

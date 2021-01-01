@@ -176,28 +176,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="src\adsr.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="src\alignedalloc.c"
 				>
 				<FileConfiguration
@@ -220,6 +198,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\convert.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\dither.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\dspslide.c"
+				>
+			</File>
+			<File
 				RelativePath="src\envelope.c"
 				>
 				<FileConfiguration
@@ -240,6 +230,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\fft.c"
+				>
 			</File>
 			<File
 				RelativePath="src\filter.c"
@@ -308,48 +302,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\lowpass12e.c"
+				RelativePath=".\src\mersennetwister.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\multifilter.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\multiresampler.c"
@@ -372,6 +326,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\noteperiods.c"
+				>
 			</File>
 			<File
 				RelativePath="src\notestab.c"
@@ -509,17 +467,49 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\src\scale.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sinc-sse2.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sinc.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\spline-sse2.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\spline.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\valuemapper.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="src\adsr.h"
+				RelativePath="src\alignedalloc.h"
 				>
 			</File>
 			<File
-				RelativePath="src\alignedalloc.h"
+				RelativePath=".\src\convert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\dither.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\dspslide.h"
 				>
 			</File>
 			<File
@@ -528,6 +518,10 @@
 			</File>
 			<File
 				RelativePath="src\envelope.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\fft.h"
 				>
 			</File>
 			<File
@@ -543,15 +537,15 @@
 				>
 			</File>
 			<File
-				RelativePath="src\lowpass12e.h"
-				>
-			</File>
-			<File
-				RelativePath="src\multifilter.h"
+				RelativePath=".\src\mersennetwister.h"
 				>
 			</File>
 			<File
 				RelativePath="src\multiresampler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\noteperiods.h"
 				>
 			</File>
 			<File
@@ -571,7 +565,43 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\rint.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\rintclip.h"
+				>
+			</File>
+			<File
 				RelativePath="src\rms.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\scale.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sinc-sse2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sinc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\spline-sse2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\spline.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sse_mathfun.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\valuemapper.h"
 				>
 			</File>
 		</Filter>

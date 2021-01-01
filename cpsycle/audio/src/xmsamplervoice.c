@@ -317,17 +317,20 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 		self->m_ModulationAmount =
 			psy_dsp_envelopesettings_value(self->m_pEnvelope, i);
 	} else {
+		float time;
+		int samplesThisIndex;
+
 		i--;
 		if (self->m_PositionIndex != i) {
 			self->m_PositionIndex = i;
 			xmenvelopecontroller_newstep(self);
 		}
 		self->m_Samples = samplePos;		
-		float time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
+		time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
 		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 			time *= 1000;
 		}
-		int samplesThisIndex = self->m_Samples - (int)
+		samplesThisIndex = self->m_Samples - (int)
 			(time - xmenvelopecontroller_sratedeviation(self));		
 		self->m_ModulationAmount += self->m_Step * samplesThisIndex;
 	}
@@ -977,6 +980,7 @@ void psy_audio_xmsamplervoice_doautovibrato(psy_audio_XMSamplerVoice* self)
 {
 	int targetDepth;
 	psy_audio_Vibrato vibrato;
+	int vdelta;
 	
 	vibrato = psy_audio_sample_vibrato(self->m_WaveDataController.sample);
 	targetDepth = vibrato.depth << 8;
@@ -991,7 +995,7 @@ void psy_audio_xmsamplervoice_doautovibrato(psy_audio_XMSamplerVoice* self)
 		self->m_AutoVibratoDepth = targetDepth;
 	}
 
-	int vdelta = psy_audio_xmsamplervoice_getdelta(
+	vdelta = psy_audio_xmsamplervoice_getdelta(
 		self, vibrato.type, self->m_AutoVibratoPos);
 	vdelta = vdelta * (self->m_AutoVibratoDepth >> 8);
 	self->m_AutoVibratoAmount = (double)vdelta / 64.0;
@@ -1171,10 +1175,10 @@ double psy_audio_xmsamplervoice_notetoperiod(const psy_audio_XMSamplerVoice* sel
 	int noteIn, bool correctNote)
 {
 	psy_audio_Sample* wave;
+	int note;
 
 	wave = self->m_WaveDataController.sample;	
-	int note; // (correctNote) ? rInstrument().NoteToSample(noteIn).first : noteIn;
-
+	// (correctNote) ? rInstrument().NoteToSample(noteIn).first : noteIn;
 	note = noteIn;
 	if (psy_audio_xmsampler_isamigaslides(self->m_pSampler))
 	{				

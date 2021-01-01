@@ -256,7 +256,9 @@ void dispose(psy_audio_XMSampler* self)
 
 void disposevoices(psy_audio_XMSampler* self)
 {
-	for (int i = 0; i < XM_SAMPLER_MAX_POLYPHONY; i++)
+	int i;
+
+	for (i = 0; i < XM_SAMPLER_MAX_POLYPHONY; i++)
 	{
 		psy_audio_xmsamplervoice_dispose(&self->m_Voices[i]);
 	}
@@ -264,7 +266,9 @@ void disposevoices(psy_audio_XMSampler* self)
 
 void disposechannels(psy_audio_XMSampler* self)
 {
-	for (int i = 0; i < MAX_TRACKS; i++)
+	int i;
+
+	for (i = 0; i < MAX_TRACKS; i++)
 	{
 		psy_audio_xmsamplerchannel_dispose(&self->m_Channel[i]);
 	}
@@ -274,8 +278,10 @@ void disposechannels(psy_audio_XMSampler* self)
 void psy_audio_xmsampler_setsamplerate(psy_audio_XMSampler* self,
 	int sr)
 {	
+	int i;
+
 	self->m_sampleRate = sr;
-	for (int i = 0; i < self->_numVoices; i++)
+	for (i = 0; i < self->_numVoices; i++)
 	{
 		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[i])) {
 			//\todo
@@ -740,6 +746,7 @@ psy_audio_XMSamplerVoice* psy_audio_xmsampler_getfreevoice(
 	psy_audio_XMSampler* self, int channelNum)
 {
 	int voice;
+	int background;
 
 	//First, see if there's a free voice
 	for (voice = 0; voice < self->_numVoices; voice++)
@@ -749,8 +756,8 @@ psy_audio_XMSamplerVoice* psy_audio_xmsampler_getfreevoice(
 		}
 	}
 	//If there isn't, See if there are background voices in this channel
-	int background = -1;
-	for (int voice = 0; voice < self->_numVoices; voice++)
+	background = -1;
+	for (voice = 0; voice < self->_numVoices; voice++)
 	{
 		if (psy_audio_xmsamplervoice_isbackground(&self->m_Voices[voice])) {
 			background = voice;

@@ -45,8 +45,10 @@ int midinotes_notename(lua_State* L)
 
 int midinotes_gmpercussionnames(lua_State* L)
 {
+	int i;
+
 	lua_createtable(L, 127, 0);
-	for (int i = 1; i < 128; ++i) {
+	for (i = 1; i < 128; ++i) {
 		lua_pushstring(L, (i > 34 && i < 82)
 			? psy_dsp_notetostr(i , psy_dsp_NOTESTAB_GMPERCUSSION)
 			: "");

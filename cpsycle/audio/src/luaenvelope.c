@@ -74,10 +74,12 @@ int luaenvelope_create(lua_State* L)
 	psy_dsp_envelopecontroller_init(env);
 	if (lua_istable(L, 2)) {
 		psy_dsp_EnvelopeSettings* settings;
-
+		lua_Unsigned len;
+		size_t i;
+			
 		settings = &env->settings;
-		lua_Unsigned len = lua_rawlen(L, 2);
-		for (size_t i = 1; i <= len; ++i) {
+		len = lua_rawlen(L, 2);
+		for (i = 1; i <= len; ++i) {
 			double t;
 			double peak;
 			lua_Unsigned argnum;
@@ -132,10 +134,12 @@ int work(lua_State* L)
 	if (n == 2) {		
 		psy_dsp_EnvelopeController* self;
 		uintptr_t i;
+		uintptr_t num;
+		psy_audio_Array** rv;
 
 		self = psyclescript_checkself(L, 1, luaenvelope_meta);
-		uintptr_t num = (uintptr_t)luaL_checkinteger(L, 2);
-		psy_audio_Array** rv = (psy_audio_Array**)lua_newuserdata(L, sizeof(psy_audio_Array*));
+		num = (uintptr_t)luaL_checkinteger(L, 2);
+		rv = (psy_audio_Array**)lua_newuserdata(L, sizeof(psy_audio_Array*));
 		*rv = malloc(sizeof(psy_audio_Array));
 		psy_audio_array_init_len(*rv, num, 0.0);
 		for (i = 0; i < num; ++i) {

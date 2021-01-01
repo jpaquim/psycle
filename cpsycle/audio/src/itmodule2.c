@@ -325,8 +325,8 @@ bool itmodule2_load(ITModule2* self)
 		virtualInst = MAX_MACHINES;
 		for (i = 0; i < self->fileheader.insNum; i++)
 		{			
-			psyfile_seek(fp, pointersi[i]);		
 			psy_audio_Instrument* instrument;
+			psyfile_seek(fp, pointersi[i]);		
 
 			instrument = psy_audio_instrument_allocinit();
 			psy_audio_instruments_insert(&self->songfile->song->instruments,
@@ -349,14 +349,15 @@ bool itmodule2_load(ITModule2* self)
 		}
 		for (i = 0; i < self->fileheader.sampNum; i++)
 		{
-			psyfile_seek(fp, pointerss[i]);
 			psy_audio_Sample* wave;
+			bool created;
 
+			psyfile_seek(fp, pointerss[i]);
 			wave = psy_audio_sample_allocinit(1);
 			psy_audio_samples_insert(&self->songfile->song->samples, wave,
 				sampleindex_make(i, 0));
 			
-			bool created = itmodule2_loaditsample(self, wave);
+			created = itmodule2_loaditsample(self, wave);
 			// If this IT file doesn't use Instruments, we need to map the notes manually.
 			//if (created && !(itFileH.flags & Flags::USEINSTR))
 			//{
@@ -631,13 +632,20 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 	itSampleHeader curh;
 	psy_audio_Song* song;
 	PsyFile* fp;
+	char renamed[26];
+	int i;
+	bool bstereo;
+	bool b16Bit;
+	bool bcompressed;
+	bool bLoop;
+	bool bsustainloop;
 
 	song = self->songfile->song;
 	fp = self->songfile->file;
 
 	psyfile_read(fp, &curh, sizeof(curh));
-	char renamed[26];
-	for (int i = 0; i < 25; i++) {
+	renamed[26];
+	for (i = 0; i < 25; i++) {
 		if (curh.sName[i] == '\0') renamed[i] = ' ';
 		else renamed[i] = curh.sName[i];
 	}
@@ -652,14 +660,21 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 	//      Bit 6. On = Ping Pong loop, Off = Forwards loop
 	//      Bit 7. On = Ping Pong Sustain loop, Off = Forwards Sustain loop
 	
-	bool bstereo = curh.flg & IT2_SAMPLE_FLAGS_ISSTEREO;
-	bool b16Bit = curh.flg & IT2_SAMPLE_FLAGS_IS16BIT;
-	bool bcompressed = curh.flg & IT2_SAMPLE_FLAGS_ISCOMPRESSED;
-	bool bLoop = curh.flg & IT2_SAMPLE_FLAGS_USELOOP;
-	bool bsustainloop = curh.flg & IT2_SAMPLE_FLAGS_USESUSTAIN;
+	bstereo = curh.flg & IT2_SAMPLE_FLAGS_ISSTEREO;
+	b16Bit = curh.flg & IT2_SAMPLE_FLAGS_IS16BIT;
+	bcompressed = curh.flg & IT2_SAMPLE_FLAGS_ISCOMPRESSED;
+	bLoop = curh.flg & IT2_SAMPLE_FLAGS_USELOOP;
+	bsustainloop = curh.flg & IT2_SAMPLE_FLAGS_USESUSTAIN;
 
 	if (curh.flg & IT2_SAMPLE_FLAGS_HAS_SAMPLE)
-	{		
+	{
+		int exchwave[4] = {
+			psy_audio_WAVEFORMS_SINUS,
+			psy_audio_WAVEFORMS_SAWDOWN,
+			psy_audio_WAVEFORMS_SQUARE,
+			psy_audio_WAVEFORMS_RANDOM
+		};
+
 		_wave->numframes = curh.length;
 		if (bstereo) {
 			psy_audio_sample_resize(_wave, 2);
@@ -697,12 +712,6 @@ bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)
 		//				double maintune = floor(tune*12);
 		//				double finetune = floor(((tune*12)-maintune)*100);
 
-		int exchwave[4] = {
-			psy_audio_WAVEFORMS_SINUS,
-			psy_audio_WAVEFORMS_SAWDOWN,
-			psy_audio_WAVEFORMS_SQUARE,
-			psy_audio_WAVEFORMS_RANDOM
-		};
 		//				_wave.WaveTune(maintune);
 		//				_wave.WaveFineTune(finetune);
 		_wave->samplerate = curh.c5Speed;
@@ -735,13 +744,14 @@ bool itmodule2_loaditsampledata(ITModule2* self, psy_audio_Sample* _wave, uint32
 	int hibit = 8 - lobit;
 	uint32_t j, out;
 	psy_audio_Song* song;
-	PsyFile* fp;	
+	PsyFile* fp;
+	unsigned char* smpbuf;
 
 	song = self->songfile->song;
 	fp = self->songfile->file;
 
 	if (b16Bit) iLen *= 2;
-	unsigned char* smpbuf = malloc(iLen);
+	smpbuf = malloc(iLen);
 	psyfile_read(fp, smpbuf, iLen);
 
 	out = 0; wNew = 0;
@@ -787,11 +797,12 @@ bool itmodule2_loaditcompresseddata(ITModule2* self, psy_dsp_amp_t* pWavedata, u
 	char d18, d28;
 	psy_audio_Song* song;
 	PsyFile* fp;
+	bool deltapack;
 
 	song = self->songfile->song;
 	fp = self->songfile->file;
 
-	bool deltapack = (self->fileheader.ffv >= 0x215 && convert & IT2_SAMPLE_CONVERTIS_DELTA); // Impulse Tracker 2.15 added a delta packed compressed sample format
+	deltapack = (self->fileheader.ffv >= 0x215 && convert & IT2_SAMPLE_CONVERTIS_DELTA); // Impulse Tracker 2.15 added a delta packed compressed sample format
 
 	if (b16Bit) {
 		topsize = 0x4000;		packsize = 4;	maxbitsize = 16;
@@ -803,6 +814,8 @@ bool itmodule2_loaditcompresseddata(ITModule2* self, psy_dsp_amp_t* pWavedata, u
 	while (j < iLen) // While we haven't decompressed the whole sample
 	{
 		BitsBlock block;
+		uint32_t blocksize;
+		uint32_t blockpos;
 
 		bitsblock_init(&block);
 		if (!bitsblock_readblock(&block, fp)) {
@@ -811,8 +824,8 @@ bool itmodule2_loaditcompresseddata(ITModule2* self, psy_dsp_amp_t* pWavedata, u
 		}
 
 		// Size of the block of data to process, in blocks of max size=0x8000bytes ( 0x4000 samples if 16bits)
-		uint32_t blocksize = (iLen - j < topsize) ? iLen - j : topsize;
-		uint32_t blockpos = 0;
+		blocksize = (iLen - j < topsize) ? iLen - j : topsize;
+		blockpos = 0;
 
 		bitwidth = maxbitsize + 1;
 		d1 = d2 = 0;
@@ -909,6 +922,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	PsyFile* fp;
 	psy_audio_Song* song;
 	bool append;
+	int row;
 	
 	fp = self->songfile->file;
 	song = self->songfile->song;
@@ -944,7 +958,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	//char* packedpattern = new char[packedSize];
 	//Read(packedpattern, packedSize);
 	node = NULL;	
-	for (int row = 0; row < rowCount; row++)
+	for (row = 0; row < rowCount; row++)
 	{
 		self->extracolumn = *numchans + 1;
 		psyfile_read(fp, &newEntry, 1);
@@ -1412,6 +1426,7 @@ bool itmodule2_loads3msamplex(ITModule2* self, psy_audio_Sample* _wave, s3mSampl
 	bool b16Bit = currHeader->flags & S3M_SAMPLE_FLAGS_IS16BIT;
 	PsyFile* fp;
 	psy_audio_Song* song;
+	int newpos;
 
 	fp = self->songfile->file;
 	song = self->songfile->song;
@@ -1432,7 +1447,7 @@ bool itmodule2_loads3msamplex(ITModule2* self, psy_audio_Sample* _wave, s3mSampl
 	
 	psy_audio_sample_setname(_wave, currHeader->filename);
 
-	int newpos = ((currHeader->hiMemSeg << 16) + currHeader->lomemSeg) << 4;
+	newpos = ((currHeader->hiMemSeg << 16) + currHeader->lomemSeg) << 4;
 	psyfile_seek(fp, newpos);
 	return itmodule2_loads3msampledatax(self, _wave, currHeader->length, bstereo, b16Bit, currHeader->packed);
 }
@@ -1448,7 +1463,9 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 	if (!packed) // Looks like the packed format never existed.
 	{
 		char* smpbuf;
-
+		int16_t wNew;
+		int16_t offset;
+		
 		if (b16Bit)
 		{
 			smpbuf = malloc(iLen * 2);
@@ -1457,8 +1474,7 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 			smpbuf = malloc(iLen);
 			psyfile_read(fp, smpbuf, iLen);
 		}
-		int16_t wNew;
-		int16_t offset;
+		
 		if (self->s3mFileH.trackerInf == 1) offset = 0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 		else offset = -32768;
 
@@ -1471,7 +1487,9 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 		psy_audio_sample_allocwavedata(wave);
 		if (b16Bit) {
 			int out = 0;
-			for (unsigned int j = 0; j < iLen * 2; j += 2, out++)
+			unsigned int j;
+
+			for (j = 0; j < iLen * 2; j += 2, out++)
 			{
 				wNew = (0xFF & smpbuf[j] | smpbuf[j + 1] << 8) + offset;
 				wave->channels.samples[0][out] = (psy_dsp_amp_t)wNew;				
@@ -1479,21 +1497,23 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 			if (bstereo) {
 				out = 0;
 				psyfile_read(fp, smpbuf, iLen * 2);
-				for (unsigned int j = 0; j < iLen * 2; j += 2, out++)
+				for (j = 0; j < iLen * 2; j += 2, out++)
 				{
 					wNew = (0xFF & smpbuf[j] | smpbuf[j + 1] << 8) + offset;
 					wave->channels.samples[1][out] = (psy_dsp_amp_t)wNew;					
 				}
 			}
 		} else {// 8 bit sample
-			for (unsigned int j = 0; j < iLen; j++)
+			unsigned int j;
+
+			for (j = 0; j < iLen; j++)
 			{
 				wNew = (smpbuf[j] << 8) + offset;				
 				wave->channels.samples[0][j] = (psy_dsp_amp_t)wNew;
 			}
 			if (bstereo) {
 				psyfile_read(fp, smpbuf, iLen);
-				for (unsigned int j = 0; j < iLen; j++)
+				for (j = 0; j < iLen; j++)
 				{
 					wNew = (smpbuf[j] << 8) + offset;
 					wave->channels.samples[0][j] = (psy_dsp_amp_t)wNew;					
@@ -1519,6 +1539,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	bool append;
 	PsyFile* fp;
 	psy_audio_Song* song;
+	int row;
 
 	fp = self->songfile->file;
 	song = self->songfile->song;
@@ -1543,7 +1564,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 	node = NULL;
-	for (int row = 0; row < 64; row++)
+	for (row = 0; row < 64; row++)
 	{
 		self->extracolumn = (int16_t)song->properties.tracks;
 		psyfile_read(fp, &newEntry, 1);

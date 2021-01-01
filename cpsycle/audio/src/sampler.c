@@ -450,15 +450,15 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 // mfc-psycle: Sampler::Tick(int channel, PatternEntry* pData)
 void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* pData)
-{
-	assert(self);
-		
+{		
 	psy_audio_PatternEvent data = *pData;
 	psy_audio_Samples* samples;
 	psy_List* ite;
 	uintptr_t usevoice = UINTPTR_MAX;
 	uintptr_t voice;
 	bool doporta = FALSE;
+
+	assert(self);
 
 	// machine work already does this
 	// if (_mute) return; // Avoid new note entering when muted.
@@ -645,10 +645,12 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			case PS1_SAMPLER_CMD_RETRIG: {
 				if ((ev->parameter & 0x0f) > 0)
 				{
+					int volmod;
+
 					self->effretticks = (ev->parameter & 0x0f); // number of Ticks.
 					self->effval = (psy_audio_machine_currsamplesperrow(psy_audio_sampler_base(self->sampler)) / (self->effretticks + 1));
 
-					int volmod = (ev->parameter & 0xf0) >> 4; // Volume modifier.
+					volmod = (ev->parameter & 0xf0) >> 4; // Volume modifier.
 					switch (volmod)
 					{
 					case 0:  //fallthrough
@@ -960,10 +962,11 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 		dstpos = 0;
 		while (numsamples)
 		{
+			intptr_t nextsamples;
+
 			left_output = 0;
 			right_output = 0;
-
-			intptr_t nextsamples = psy_min(psy_audio_sampleiterator_prework(&self->controller,
+			nextsamples = psy_min(psy_audio_sampleiterator_prework(&self->controller,
 				numsamples, FALSE), numsamples);
 			numsamples -= nextsamples;
 			while (nextsamples)
@@ -1071,11 +1074,12 @@ void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 // mfc-psycle: Voice::PerformFxOld(dsp::resampler& resampler)
 void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 {
-	assert(self);
 	// 4294967 stands for (2^30/250), meaning that
 	//value 250 = (inc)decreases the speed in 1/4th of the original (wave) speed each PerformFx call.
 	int64_t shift;
 	int64_t speed;
+
+	assert(self);
 	switch (self->effcmd)
 	{
 		// 0x01 : Pitch Up

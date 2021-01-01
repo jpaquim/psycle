@@ -280,10 +280,10 @@ void workspace_initaudio(Workspace* self)
 
 void workspace_configvisual(Workspace* self)
 {
-	assert(self);
-
 	psy_ui_Font font;
 	psy_ui_FontInfo fontinfo;
+
+	assert(self);
 		
 	psy_ui_fontinfo_init_string(&fontinfo, 
 		psycleconfig_defaultfontstr(&self->config));
@@ -296,10 +296,10 @@ void workspace_configvisual(Workspace* self)
 
 void workspace_changedefaultfontsize(Workspace* self, int size)
 {
-	assert(self);
-
 	psy_ui_FontInfo fontinfo;
 	psy_ui_Font font;
+
+	assert(self);
 
 	psy_ui_fontinfo_init_string(&fontinfo,
 		psycleconfig_defaultfontstr(&self->config));	
@@ -1187,8 +1187,9 @@ void workspace_onviewchanged(Workspace* self, uintptr_t viewid)
 
 void workspace_back(Workspace* self)
 {
-	assert(self);
 	ViewHistoryEntry view;
+
+	assert(self);
 
 	view = viewhistory_currview(&self->viewhistory);
 	if (viewhistory_back(&self->viewhistory)) {
@@ -1213,11 +1214,11 @@ void workspace_forward(Workspace* self)
 }
 
 void workspace_updatecurrview(Workspace* self)
-{
-	assert(self);
-	
+{	
 	ViewHistoryEntry view;
 	int prevented;
+
+	assert(self);
 			
 	view = viewhistory_currview(&self->viewhistory);
 	prevented = viewhistory_prevented(&self->viewhistory);

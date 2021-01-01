@@ -54,11 +54,14 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	uintptr_t i;
 	psy_List* t;
 	psy_audio_SequenceTrack* track;
+	bool hasSampler;
+	int samInstruments;
+	uint16_t temp;
 
 	self->macInstruments = 0;
-	bool hasSampler = FALSE;
-	for (int i = 0; i < 256; i++) { self->isBlitzorVst[i] = FALSE; }
-	for (int i = 0; i < MAX_BUSES; i++) {
+	hasSampler = FALSE;
+	for (i = 0; i < 256; i++) { self->isBlitzorVst[i] = FALSE; }
+	for (i = 0; i < MAX_BUSES; i++) {
 		if (psy_audio_machines_at(&songfile->song->machines, i)  != NULL) {
 			self->isSampler[i] = hasSampler = (psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) == MACH_SAMPLER);
 			self->isSampulse[i] = (psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) == MACH_XMSAMPLER);
@@ -83,7 +86,7 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	self->xmInstruments = psy_audio_instruments_size(&songfile->song->instruments, 1); // song.GetHighestXMInstrumentIndex() + 1;
 	if (self->xmInstruments > 1 && self->correctionIndex == 0) self->xmInstruments--;
 	//If there is a sampler machine, we have to take the samples into account.
-	int samInstruments = psy_audio_instruments_size(&songfile->song->instruments, 0); //0; // (hasSampler) ? song.GetHighestInstrumentIndex() + 1 : 0;
+	samInstruments = psy_audio_instruments_size(&songfile->song->instruments, 0); //0; // (hasSampler) ? song.GetHighestInstrumentIndex() + 1 : 0;
 
 	psyfile_write(songfile->file, XM_HEADER, 17);//ID text
 	// Module name
@@ -97,7 +100,7 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	}	
 	psyfile_write(songfile->file, modulename, sizeof(modulename));
 	// The hex  value  0x1A  in  a  normal  XM  file or 0x00  in  a  Stripped  on
-	uint16_t temp = 0x1A;
+	temp = 0x1A;
 	psyfile_write_uint16(songfile->file, temp);
 	// Tracker name
 	psyfile_write(songfile->file, "FastTracker v2.00   ", 20);
@@ -143,8 +146,12 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 {
 	//Temp entries for volume on virtual generators.
 	// psy_audio_PatternEvent volumeEntries[32];
-
 	struct XMPATTERNHEADER ptHeader;
+	size_t currentpos;
+	int maxtracks;
+	int i;
+	int j;
+
 	memset(&ptHeader, 0, sizeof(ptHeader));
 	ptHeader.size = sizeof(ptHeader);
 	//ptHeader.packingtype = 0; implicit from memset.
@@ -152,21 +159,21 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 	//ptHeader.packedsize = 0; implicit from memset.
 
 	psyfile_write(songfile->file, &ptHeader, sizeof(ptHeader));
-	size_t currentpos = psyfile_getpos(songfile->file);
+	currentpos = psyfile_getpos(songfile->file);
 
-	int maxtracks = 0; // min(song.SONGTRACKS, 32);
+	maxtracks = 0; // min(song.SONGTRACKS, 32);
 	// check every pattern for validity
 	//if (song.IsPatternUsed(patIdx))
 	{
-		for (int i = 0; i < maxtracks; i++) {
+		for (i = 0; i < maxtracks; i++) {
 			self->lastInstr[i] = -1;
 		}
 		self->addTicks = 0;
-		for (int j = 0; j < ptHeader.rows; j++) {
-			for (int i = 0; i < maxtracks; i++) {
+		for (j = 0; j < ptHeader.rows; j++) {
+			for (i = 0; i < maxtracks; i++) {
 				//// self->extraEntry[i] = NULL;
 			}
-			for (int i = 0; i < songfile->song->properties.tracks; i++) {
+			for (i = 0; i < songfile->song->properties.tracks; i++) {
 				/*const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx, i, j));
 				if (pData->note == psy_audio_NOTECOMMANDS_MIDICC) {
 					if (pData->inst < maxtracks) {
@@ -178,7 +185,20 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 					}
 				}*/
 			}
-			for (int i = 0; i < maxtracks; i++) {
+			for (i = 0; i < maxtracks; i++) {
+				unsigned char note;
+				psy_audio_Machine* mac = NULL;
+				unsigned char instr = 0;
+				int instrint = 0xFF;
+				unsigned char vol;
+				unsigned char type;
+				unsigned char param;
+				unsigned char bWriteNote;
+				unsigned char bWriteInstr;
+				unsigned char bWriteVol;
+				unsigned char bWriteType;
+				unsigned char bWriteParam;
+				char compressed;
 
 				/*const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx, i, j));
 				if (pData->_note == notecommands::tweak || pData->_note == notecommands::tweakslide) {
@@ -200,10 +220,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 					continue;
 				}
 				*/
-				psy_audio_Machine* mac = NULL;
-				unsigned char instr = 0;
-				int instrint = 0xFF;
-				/*
+								/*
 				if (pData->_mach < MAX_BUSES) {
 					mac = song._pMachine[pData->_mach];
 					instrint = pData->_inst;
@@ -230,7 +247,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 					if (instr != 0) lastInstr[i] = instr;
 				}
 				*/
-				unsigned char note;
+				
 				/*if (pData->_note >= 12 && pData->_note < 108) {
 					if (mac != NULL && mac->_type == MACH_SAMPLER && ((Sampler*)mac)->isDefaultC4() == false)
 					{
@@ -244,20 +261,20 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 					note = 0x00;
 				//}
 
-				unsigned char vol = 0;
-				unsigned char type = 0;
-				unsigned char param = 0;
+				vol = 0;
+				type = 0;
+				param = 0;
 
 				// xmsongexport_getcommand(self, songfile, i, pData, vol, type, param);
 				//if (extraEntry[i] != NULL) GetCommand(song, i, extraEntry[i], vol, type, param);
 
-				unsigned char bWriteNote = note != 0;
-				unsigned char bWriteInstr = instr != 0;
-				unsigned char bWriteVol = vol != 0;
-				unsigned char bWriteType = type != 0;
-				unsigned char bWriteParam = param != 0;
+				bWriteNote = note != 0;
+				bWriteInstr = instr != 0;
+				bWriteVol = vol != 0;
+				bWriteType = type != 0;
+				bWriteParam = param != 0;
 
-				char compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
+				compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
 					+ (bWriteType << 3) + (bWriteParam << 4);
 
 				if (compressed != 0x9F) psyfile_write_int8(songfile->file, compressed); // 0x9F means to write everything.
@@ -536,7 +553,11 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 
 void xmsongexport_saveinstruments(XMSongExport* self, psy_audio_SongFile* songfile)
 {
-	for (int i = 0; i < MAX_BUSES; i++) {
+	int i;
+	int j;
+	int remaining;
+
+	for (i = 0; i < MAX_BUSES; i++) {
 		if (psy_audio_machines_at(&songfile->song->machines, i) != NULL && 
 			psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) != MACH_SAMPLER &&
 			psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) != MACH_XMSAMPLER) {
@@ -544,8 +565,8 @@ void xmsongexport_saveinstruments(XMSongExport* self, psy_audio_SongFile* songfi
 				psy_audio_machine_editname(psy_audio_machines_at(&songfile->song->machines, i)));
 		}
 	}
-	int remaining = self->m_Header.instruments - self->macInstruments;
-	for (int j = 0, i = (self->correctionIndex == 0) ? 1 : 0; j < self->xmInstruments && j < remaining; j++, i++) {
+	remaining = self->m_Header.instruments - self->macInstruments;
+	for (j = 0, i = (self->correctionIndex == 0) ? 1 : 0; j < self->xmInstruments && j < remaining; j++, i++) {
 		//if (song.xminstruments.IsEnabled(i)) {
 			//SaveSampulseInstrument(song, i);
 		//} else {
@@ -553,7 +574,7 @@ void xmsongexport_saveinstruments(XMSongExport* self, psy_audio_SongFile* songfi
 		//}
 	}
 	remaining = self->m_Header.instruments - self->macInstruments - self->xmInstruments;
-	for (int i = 0; i < remaining; i++) {
+	for (i = 0; i < remaining; i++) {
 		//if (song.samples.IsEnabled(i)) {
 			//SaveSamplerInstrument(song, i);
 		//} else {
@@ -660,18 +681,20 @@ void xmsongexport_savesampleheader(XMSongExport* self, psy_audio_SongFile* songf
 {
 	psy_audio_Sample* wave;
 	psy_audio_SampleIndex index;
+	XMSAMPLESTRUCT stheader;
+	int tune;
+	int finetune;
+	uint8_t type;
 
 	index = sampleindex_make(instIdx, 0);
 	wave = psy_audio_samples_at(&songfile->song->samples,
 		index);
-
-	XMSAMPLESTRUCT stheader;
 	memset(&stheader, 0, sizeof(stheader));
 	strncpy(stheader.name, psy_audio_sample_name(wave), 22); //Names are not null terminated
 	// stheader.res Implicitely set at zero by memset
 
-	int tune = wave->tune;
-	int finetune = (int)((float)wave->finetune * 1.28);
+	tune = wave->tune;
+	finetune = (int)((float)wave->finetune * 1.28);
 	if (wave->samplerate != 8363) {
 		//correct the tuning
 		double newtune = log10((double)(wave->samplerate) / 8363.0) / log10(2.0);
@@ -689,7 +712,7 @@ void xmsongexport_savesampleheader(XMSongExport* self, psy_audio_SongFile* songf
 	stheader.relnote = tune;
 	stheader.finetune = finetune;
 
-	uint8_t type = 0;
+	type = 0;
 	if (wave->loop.type == psy_audio_SAMPLE_LOOP_NORMAL) type = 1;
 	else if (wave->loop.type == psy_audio_SAMPLE_LOOP_BIDI) type = 2;
 	type |= 0x10; // 0x10 -> 16bits

@@ -436,8 +436,9 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_Pa
 void trackergrid_updatecolumnflags_line(TrackerGrid* self, uintptr_t line,
 	intptr_t cpy, intptr_t halfy, TrackerColumnFlags* rv)
 {
-	assert(self && rv);
 	uintptr_t lpb;
+
+	assert(self && rv);
 
 	lpb = trackerlinestate_lpb(self->linestate);
 	if (self->editmode == TRACKERGRID_EDITMODE_SONG) {
@@ -455,10 +456,10 @@ void trackergrid_updatecolumnflags_line(TrackerGrid* self, uintptr_t line,
 void trackergrid_updatecolumnflags_track(TrackerGrid* self, uintptr_t track,
 	psy_dsp_big_beat_t offset, TrackerColumnFlags* rv)
 {
-	assert(self && rv);
-
 	int currline;
 	int cursorline;
+
+	assert(self && rv);
 
 	currline = trackerlinestate_beattoline(self->linestate, offset);
 	cursorline = trackerlinestate_beattoline(self->linestate, self->gridstate->cursor.offset);
@@ -1456,9 +1457,9 @@ void trackergrid_clearmidline(TrackerGrid* self)
 
 void trackergrid_centeroncursor(TrackerGrid* self)
 {
-	assert(self);
-
 	int line;
+
+	assert(self);
 
 	line = trackerlinestate_beattoline(self->linestate,
 		self->gridstate->cursor.offset);
@@ -1595,9 +1596,10 @@ void trackergrid_startdragselection(TrackerGrid* self, psy_audio_PatternCursor c
 
 void trackergrid_dragselection(TrackerGrid* self, psy_audio_PatternCursor cursor)
 {
+	int restoremidline = self->midline;
+
 	assert(self);
 
-	int restoremidline = self->midline;
 	if (cursor.track >= self->dragselectionbase.track) {
 		self->selection.topleft.track = self->dragselectionbase.track;
 		self->selection.bottomright.track = cursor.track + 1;

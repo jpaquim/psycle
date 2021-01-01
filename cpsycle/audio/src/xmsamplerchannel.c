@@ -255,6 +255,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 {
 	int realSet;
 	int	realValue;
+	int slidval;
 
 	// 1st check: Channel ( They can appear without an existing playing note
 	// and are persistent when a new one comes)
@@ -458,7 +459,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 	}
 
 	// 2nd Check. Commands that require a voice.
-	int slidval = 0;
+	slidval = 0;
 	if (voice)
 	{
 		switch (volcmd & 0xF0)

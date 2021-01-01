@@ -84,9 +84,9 @@ void dirconfig_make(DirConfig* self)
 
 void dirconfig_makedefaultuserpresets(DirConfig* self)
 {
-	assert(self);
-
 	psy_Path defaultuserpresetpath;
+
+	assert(self);
 
 	psy_path_init(&defaultuserpresetpath, psy_dir_home());
 	psy_path_setname(&defaultuserpresetpath, "Presets");

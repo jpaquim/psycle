@@ -242,6 +242,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\playlist.c"
+				>
+			</File>
+			<File
 				RelativePath="src\propertiesio.c"
 				>
 				<FileConfiguration
@@ -263,6 +267,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\src\translator.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -281,7 +289,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\playlist.h"
+				>
+			</File>
+			<File
 				RelativePath="src\propertiesio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\translator.h"
 				>
 			</File>
 		</Filter>

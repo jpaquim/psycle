@@ -30,6 +30,7 @@
 */
 
 #include <xmmintrin.h>
+#include "../../detail/cpu.h"
 
 #define USE_SSE2
 
@@ -46,7 +47,7 @@
 /* __m128 is ugly to write */
 typedef __m128 v4sf;  // vector of 4 float (sse1)
 
-#ifdef USE_SSE2
+#if defined USE_SSE2
 # include <emmintrin.h>
 typedef __m128i v4si; // vector of 4 int (sse2)
 #else

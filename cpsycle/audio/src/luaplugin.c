@@ -1125,7 +1125,7 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		psy_table_insert_strhash(&ids, id, (void*)(uintptr_t)i);
 	}
 	num = self->client->numparameters_;
-	for (int i = 0; i < num; ++i) {		
+	for (i = 0; i < num; ++i) {		
 		const char* id = luaplugin_id(self, i);		
 		if (psy_table_at_strhash(&ids, id)) {
 			int idx = (int)(intptr_t)psy_table_at_strhash(&ids, id);

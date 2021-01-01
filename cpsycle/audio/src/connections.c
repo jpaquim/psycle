@@ -219,6 +219,34 @@ void psy_audio_wiresocket_copy(psy_audio_WireSocket* self,
 	psy_audio_pinmapping_copy(&self->mapping, &src->mapping);
 }
 
+void wiresockets_insert(psy_audio_WireSockets* self, uintptr_t id,
+	psy_audio_WireSocket* socket)
+{
+	if (id == UINTPTR_MAX) {
+		wiresockets_append(self, socket);
+	} else {
+		if (psy_table_exists(&self->sockets, id)) {
+			psy_table_remove(&self->sockets, id);
+		}
+		psy_table_insert(&self->sockets, id, socket);
+	}
+}
+
+void wiresockets_remove(psy_audio_WireSockets* self, psy_audio_WireSocket* socket)
+{
+	psy_TableIterator it;
+
+	for (it = psy_audio_wiresockets_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		if ((psy_audio_WireSocket*)psy_tableiterator_value(&it) == socket) {
+			psy_table_remove(&self->sockets, psy_tableiterator_key(&it));
+			break;
+		}
+	}
+}
+
+
 psy_audio_WireSocket* psy_audio_connection_at(psy_audio_WireSockets* sockets, uintptr_t slot)
 {	
 	psy_TableIterator it;
@@ -255,6 +283,18 @@ uintptr_t psy_audio_connection_id(psy_audio_WireSockets* sockets, uintptr_t slot
 	}	
 	return UINTPTR_MAX;
 }
+
+psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst)
+{
+	psy_audio_Wire rv;
+
+	rv.src = src;
+	rv.src_id = UINTPTR_MAX;
+	rv.dst = dst;	
+	rv.dst_id = UINTPTR_MAX;
+	return rv;
+}
+
 
 psy_audio_WireSocket* psy_audio_connections_input(psy_audio_Connections* self, psy_audio_Wire wire)
 {	

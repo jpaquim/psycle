@@ -411,9 +411,9 @@ static void init_properties(psy_AudioDriver* driver)
 void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 {
 	DXDriver* self;
-	self = (DXDriver*)driver;
 	psy_Property* property;
 
+	self = (DXDriver*)driver;
 	if (self->configuration && config) {
 		psy_property_sync(self->configuration, config);
 	}

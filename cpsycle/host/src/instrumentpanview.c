@@ -168,14 +168,15 @@ void instrumentpanview_ondescribe(InstrumentPanView* self,
 	} else if (slider == &self->notemodcenternote) {
 		char tmp[40];
 		int pos;
+		char notes[12][3] = { "C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-" };
+		int offset;
 
 		if (self->instrument) {
 			pos = self->instrument->notemodpancenter;
 		} else {
 			pos = psy_audio_NOTECOMMANDS_MIDDLEC;
 		}
-		char notes[12][3] = { "C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-" };
-		int offset = (workspace_notetabmode(self->workspace) == psy_dsp_NOTESTAB_A440)  ? -1 : 0;
+		offset = (workspace_notetabmode(self->workspace) == psy_dsp_NOTESTAB_A440)  ? -1 : 0;
 		psy_snprintf(tmp, 40, "%s", notes[pos % 12]);
 		psy_snprintf(txt, 64, "%s%d", tmp, offset + (pos / 12));
 	} else if (slider == &self->notemodamount) {

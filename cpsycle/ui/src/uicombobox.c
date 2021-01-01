@@ -225,8 +225,10 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	if (ev->x >= psy_ui_value_px(&size.width, &tm) - 40 && ev->x < psy_ui_value_px(&size.width, &tm) - 25) {
+		intptr_t index;
+
 		printf("combobox mousedown 1\n");
-		intptr_t index = psy_ui_combobox_cursel(self);
+		index = psy_ui_combobox_cursel(self);
 		if (index > 0) {
 			psy_ui_combobox_setcursel(self, index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);

@@ -926,12 +926,14 @@ void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
 	psy_ui_Colour colour;
 	psy_audio_PatternCursor cursor;
 	psy_ui_Size corner;
+	intptr_t left;
+	intptr_t width;
 
 	assert(self);
 
 	cursor = workspace_patterncursor(self->workspace);
-	intptr_t left = (intptr_t)((ev->offset) * self->gridstate->pxperbeat);
-	intptr_t width = (intptr_t)(length * self->gridstate->pxperbeat);
+	left = (intptr_t)((ev->offset) * self->gridstate->pxperbeat);
+	width = (intptr_t)(length * self->gridstate->pxperbeat);
 	corner = psy_ui_size_makepx(2, 2);
 	psy_ui_setrectangle(&r, left,
 		(self->keyboardstate->keymax - ev->note - 1) *
@@ -987,9 +989,9 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	assert(self);
-
 	psy_audio_PatternCursor cursor;
+
+	assert(self);
 
 	if (pianogridstate_pattern(self->gridstate)) {
 		psy_audio_PatternEntry* oldhover;
