@@ -177,6 +177,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\src\activechannels.c"
+				>
+			</File>
+			<File
 				RelativePath="src\array.c"
 				>
 				<FileConfiguration
@@ -249,6 +253,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\cmddriver.c"
+				>
+			</File>
+			<File
 				RelativePath="src\connections.c"
 				>
 				<FileConfiguration
@@ -269,6 +277,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\cputimeclock.c"
+				>
 			</File>
 			<File
 				RelativePath="src\custommachine.c"
@@ -448,28 +460,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\inputmap.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="src\instrument.c"
 				>
 				<FileConfiguration
@@ -514,6 +504,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\itmodule2.c"
+				>
 			</File>
 			<File
 				RelativePath="src\kbddriver.c"
@@ -569,6 +563,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\logicalchannels.c"
+				>
+			</File>
+			<File
 				RelativePath="src\luaarray.c"
 				>
 				<FileConfiguration
@@ -589,6 +587,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\luadspmath.c"
+				>
 			</File>
 			<File
 				RelativePath="src\luaenvelope.c"
@@ -613,6 +615,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\luafilter.c"
+				>
+			</File>
+			<File
 				RelativePath="src\luaimport.c"
 				>
 				<FileConfiguration
@@ -633,6 +639,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\luamidinotes.c"
+				>
 			</File>
 			<File
 				RelativePath="src\luaplugin.c"
@@ -818,6 +828,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\midiconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midiinput.c"
+				>
 			</File>
 			<File
 				RelativePath="src\mixer.c"
@@ -1166,26 +1184,12 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\psy3.c"
+				RelativePath=".\src\psy3loader.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\psy3saver.c"
+				>
 			</File>
 			<File
 				RelativePath="src\psyclescript.c"
@@ -1233,6 +1237,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\sampleiterator.c"
+				>
+			</File>
+			<File
 				RelativePath="src\sampler.c"
 				>
 				<FileConfiguration
@@ -1254,6 +1262,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\samplerdefs.c"
+				>
 			</File>
 			<File
 				RelativePath="src\samples.c"
@@ -1393,6 +1405,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\ticktimer.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\virtualgenerator.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vstevents.c"
+				>
+			</File>
+			<File
 				RelativePath="src\vstplugin.c"
 				>
 				<FileConfiguration
@@ -1414,6 +1438,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\vstplugininterface.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vstpluginparam.c"
+				>
 			</File>
 			<File
 				RelativePath="src\waveio.c"
@@ -1469,6 +1501,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\wire.c"
+				>
+			</File>
+			<File
 				RelativePath="src\xm.c"
 				>
 				<FileConfiguration
@@ -1490,11 +1526,47 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\src\xmsampler.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsamplerchannel.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsamplervoice.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsongexport.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsongloader.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\src\activechannels.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\aeffect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\aeffectx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AEffEditor.h"
+				>
+			</File>
 			<File
 				RelativePath="src\array.h"
 				>
@@ -1512,11 +1584,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\cmddriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\cmdsnotes.h"
+				>
+			</File>
+			<File
 				RelativePath="src\connections.h"
 				>
 			</File>
 			<File
 				RelativePath="src\constants.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\cputimeclock.h"
 				>
 			</File>
 			<File
@@ -1564,7 +1648,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\itmodule2.h"
+				>
+			</File>
+			<File
 				RelativePath="src\kbddriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ladspa.h"
 				>
 			</File>
 			<File
@@ -1580,7 +1672,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\logicalchannels.h"
+				>
+			</File>
+			<File
 				RelativePath="src\luaarray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\luadspmath.h"
 				>
 			</File>
 			<File
@@ -1588,7 +1688,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\luafilter.h"
+				>
+			</File>
+			<File
 				RelativePath="src\luaimport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\luamidinotes.h"
 				>
 			</File>
 			<File
@@ -1629,6 +1737,14 @@
 			</File>
 			<File
 				RelativePath="src\master.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midiconfig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midiinput.h"
 				>
 			</File>
 			<File
@@ -1696,7 +1812,11 @@
 				>
 			</File>
 			<File
-				RelativePath="src\psy3.h"
+				RelativePath=".\src\psy3loader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\psy3saver.h"
 				>
 			</File>
 			<File
@@ -1708,7 +1828,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\sampleiterator.h"
+				>
+			</File>
+			<File
 				RelativePath="src\sampler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\samplerdefs.h"
 				>
 			</File>
 			<File
@@ -1736,7 +1864,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ticktimer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\virtualgenerator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vstevents.h"
+				>
+			</File>
+			<File
 				RelativePath="src\vstplugin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vstplugininterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vstpluginparam.h"
 				>
 			</File>
 			<File
@@ -1756,11 +1904,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\wire.h"
+				>
+			</File>
+			<File
 				RelativePath="src\xm.h"
 				>
 			</File>
 			<File
 				RelativePath="src\xmdefs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsampler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsamplerchannel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsamplervoice.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsongexport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xmsongloader.h"
 				>
 			</File>
 		</Filter>

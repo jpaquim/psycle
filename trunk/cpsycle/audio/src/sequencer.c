@@ -373,11 +373,13 @@ psy_dsp_big_beat_t psy_audio_sequencer_skiptrackiterators(psy_audio_Sequencer*
 	self, psy_dsp_big_beat_t offset)
 {
 	psy_List* p;
+	int first;
+	psy_dsp_big_beat_t newplayposition;
 
 	assert(self);
 		
-	int first = 1;
-	psy_dsp_big_beat_t newplayposition = offset;
+	first = 1;
+	newplayposition = offset;
 	for (p = self->currtracks; p != NULL; psy_list_next(&p)) {
 		psy_audio_SequencerTrack* track;
 		psy_audio_SequenceTrackIterator* it;

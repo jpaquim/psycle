@@ -132,9 +132,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				xmsongloader_load(&loader);
 				xmsongloader_dispose(&loader);
 			} else {
-				psyfile_seek(self->file, 0);
 				MODSongLoader loader;
 
+				psyfile_seek(self->file, 0);
 				modsongloader_init(&loader, self);
 				if (!modsongloader_load(&loader)) {
 					self->err = 2;

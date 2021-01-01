@@ -396,12 +396,13 @@ INLINE uint16_t psy_audio_xmsamplervoice_volume(const psy_audio_XMSamplerVoice* 
 
 INLINE void psy_audio_xmsamplervoice_setvolume(psy_audio_XMSamplerVoice* self, const uint16_t vol)
 {
+	float tmp_rand;
+
 	self->m_Volume = vol;
 	//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
 	//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
-	float tmp_rand = 
-		psy_audio_instrument_volume(psy_audio_xmsamplervoice_rinstrument(self)) *
-			 self->m_CurrRandVol * self->m_WaveDataController.sample->globalvolume;
+	tmp_rand = psy_audio_instrument_volume(psy_audio_xmsamplervoice_rinstrument(self)) *
+		self->m_CurrRandVol * self->m_WaveDataController.sample->globalvolume;
 	if (tmp_rand > self->m_WaveDataController.sample->globalvolume) tmp_rand = self->m_WaveDataController.sample->globalvolume;
 	self->m_RealVolume = psy_dsp_map_128_1(vol) * tmp_rand;
 }

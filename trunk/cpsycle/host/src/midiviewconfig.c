@@ -95,10 +95,10 @@ void midiviewconfig_makecontrollers(MidiViewConfig* self)
 	controllers = psy_property_find(self->controllers, "controllers",
 		PSY_PROPERTY_TYPE_SECTION);
 	if (controllers) {
-		psy_property_clear(controllers);
 		psy_List* i;
 		int c;
 
+		psy_property_clear(controllers);
 		for (c = 0, i = self->player->midiinput.midiconfig.groups; i != NULL;
 			psy_list_next(&i), ++c)
 		{

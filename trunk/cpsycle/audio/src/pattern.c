@@ -1037,11 +1037,12 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 	// now fill the pattern
 	for (line = begin.line; line < end.line; ++line) {
 		psy_dsp_big_beat_t offset;
+		int val;
 		
 		offset = line * bpl;
 		// -0x20; // ***** proposed change to ffxx command to allow
 		// moreuseable range since the tempo bar only uses this range anyway...
-		int val = (int)((((sinf(index) * var * tempo) + tempo) + dcoffs) + 0.5f);
+		val = (int)((((sinf(index) * var * tempo) + tempo) + dcoffs) + 0.5f);
 		if (val < 1) {
 			val = 1;
 		} else if (val > 255) {

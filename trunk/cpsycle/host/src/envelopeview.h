@@ -6,6 +6,7 @@
 
 // host
 #include "scrollzoom.h"
+#include "workspace.h"
 // ui
 #include <uibutton.h>
 #include <uicheckbox.h>

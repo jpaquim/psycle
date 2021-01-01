@@ -355,11 +355,11 @@ void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
 	if (ev->button == 2 && self->paramview && ev->target ==
 			&self->paramview->component && self->machine &&
 			self->paramview->lasttweak != UINTPTR_MAX) {
+		psy_audio_MachineParam* tweakpar;
 		intptr_t min_v = 1;
 		intptr_t max_v = 1;
 		char name[64], title[128];
 		memset(name, 0, 64);
-		psy_audio_MachineParam* tweakpar;
 
 		tweakpar = psy_audio_machine_parameter(self->machine, self->paramview->lasttweak);
 		if (tweakpar) {

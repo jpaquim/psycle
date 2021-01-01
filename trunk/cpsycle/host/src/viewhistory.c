@@ -59,9 +59,9 @@ void viewhistory_addseqpos(ViewHistory* self, uintptr_t seqpos)
 
 ViewHistoryEntry viewhistory_currview(const ViewHistory* self)
 {
-	assert(self);
-
 	ViewHistoryEntry rv;
+
+	assert(self);
 
 	if (viewhistory_hascurrview(self)) {
 		ViewHistoryEntry* entry;

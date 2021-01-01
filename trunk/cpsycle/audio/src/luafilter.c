@@ -95,6 +95,9 @@ int luafilter_work(lua_State* L)
 		float* vcfr = 0;
 		Filter* filter;
 		psy_audio_Array* x_input;
+		int num;
+		float* data;
+		int i;
 
 		filter = psyclescript_checkself(L, 1, luafilter_meta);
 		x_input = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
@@ -106,9 +109,9 @@ int luafilter_work(lua_State* L)
 			psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 3, luaarraybind_meta);
 			vcfr = psy_audio_array_data(arr);
 		}
-		int num = psy_audio_array_len(x_input);
-		float* data = psy_audio_array_data(x_input);
-		for (int i = 0; i < num; ++i) {
+		num = psy_audio_array_len(x_input);
+		data = psy_audio_array_data(x_input);
+		for (i = 0; i < num; ++i) {
 			if (vcfc) {
 				filter_setcutoff(filter, (int)psy_min(psy_max(0.0f, vcfc[i]), 127.0f));
 			}

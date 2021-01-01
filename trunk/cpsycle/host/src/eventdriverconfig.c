@@ -312,10 +312,10 @@ intptr_t eventdriverconfig_curreventdriverconfiguration(EventDriverConfig* self)
 }
 
 const char* eventdriverconfig_eventdriverpath(EventDriverConfig* self)
-{
-	assert(self && self->activedrivers);
-		
+{			
 	psy_Property* choice;
+
+	assert(self && self->activedrivers);
 
 	choice = psy_property_at_choice(self->activedrivers);
 	if (choice) {

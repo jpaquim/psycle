@@ -418,12 +418,12 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		}
 		for (x = g->clip.left; x < g->clip.right; ++x) {
 			float frame;
-			frame = ((float)self->context.offsetstep * x +
-				((float)(waveboxcontext_numframes(&self->context)) * self->context.zoomleft));
 			uintptr_t realframe;
 			psy_dsp_amp_t framevalue;
 			psy_ui_Rectangle r;
-			
+
+			frame = ((float)self->context.offsetstep * x +
+				((float)(waveboxcontext_numframes(&self->context)) * self->context.zoomleft));			
 			r.left = x;
 			r.right = x+1;
 			realframe = waveboxcontext_realframe(&self->context, (uintptr_t)frame);

@@ -150,13 +150,12 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 void init_properties(psy_EventDriver* context)
 {		
 	psy_MmeMidiDriver* self;
-
-	self = (psy_MmeMidiDriver*)context;
 	psy_Property* devices;
 	char key[256];
 	int i;
-	int n;	
+	int n;
 
+	self = (psy_MmeMidiDriver*)context;
 	psy_snprintf(key, 256, "mmemidi-guid-%d", PSY_EVENTDRIVER_MMEMIDI_GUID);
 	self->configuration = psy_property_preventtranslate(
 		psy_property_allocinit_key(key));
@@ -181,9 +180,9 @@ void init_properties(psy_EventDriver* context)
 void driver_configure(psy_EventDriver* driver, psy_Property* config)
 {
 	psy_MmeMidiDriver* self;
-	self = (psy_MmeMidiDriver*)driver;
 	psy_Property* p;
 
+	self = (psy_MmeMidiDriver*)driver;
 	if (self->configuration && config) {
 		psy_property_sync(self->configuration, config);
 	}

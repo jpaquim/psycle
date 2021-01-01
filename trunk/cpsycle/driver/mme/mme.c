@@ -965,9 +965,10 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 
 uint32_t playposinsamples(psy_AudioDriver* driver)
 {
-	MmeDriver* self = (MmeDriver*)driver;
+	uint32_t retval;
 	MMTIME time;
 
+	MmeDriver* self = (MmeDriver*)driver;
 	// WARNING! waveOutGetPosition in TIME_SAMPLES has max of 0x7FFFFF for 16bit stereo signals.
 	if (self->_stopPolling) {
 		return 0;
@@ -982,7 +983,7 @@ uint32_t playposinsamples(psy_AudioDriver* driver)
 		onerror(0, "waveOutGetPosition() doesn't support TIME_SAMPLES");
 	}
 
-	uint32_t retval = time.u.sample;
+	retval = time.u.sample;
 	// sample counter wrap around?
 	if (self->m_lastPlayPos > retval)
 	{

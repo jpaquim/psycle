@@ -4,24 +4,26 @@
 #if !defined(SCROLLZOOM_H)
 #define SCROLLZOOM_H
 
-#include "workspace.h"
-
+//ui
 #include <uicomponent.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: a scrollbar with zoom
+// Scrollbar with zoom
 
-typedef struct {
+typedef struct ScrollZoom {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_zoom;
+	psy_Signal signal_customdraw;
+	// internal data
 	float start;
 	float end;	
 	int dragmode;
-	intptr_t dragoffset;
-	psy_Signal signal_zoom;
-	psy_Signal signal_customdraw;
+	intptr_t dragoffset;	
 } ScrollZoom;
 
 void scrollzoom_init(ScrollZoom*, psy_ui_Component* parent);
@@ -45,4 +47,4 @@ INLINE psy_ui_Component* scrollzoom_base(ScrollZoom* self)
 }
 #endif
 
-#endif
+#endif /* SCROLLZOOM_H */

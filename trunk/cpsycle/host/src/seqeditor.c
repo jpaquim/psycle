@@ -858,9 +858,10 @@ bool seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 	bool (*fp_notify)(SeqEditorTrack*, psy_ui_MouseEvent*))
 {
 	bool rv;
+	psy_audio_Sequence* sequence;
 	
 	rv = TRUE;
-	psy_audio_Sequence* sequence = seqeditortracks_sequence(self);
+	sequence = seqeditortracks_sequence(self);
 	if (sequence) {
 		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;

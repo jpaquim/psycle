@@ -48,7 +48,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settingsview.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_setid(psy_property_settext(
-		psy_property_append_bool(self->general, "showplaylist", TRUE),
+		psy_property_append_bool(self->general, "showplaylist", FALSE),
 		"settingsview.show-playlist"),
 		PROPERTY_ID_SHOWPLAYLIST);
 	psy_property_settext(

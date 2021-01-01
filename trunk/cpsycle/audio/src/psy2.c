@@ -555,12 +555,14 @@ void psy2loader_readvsts(PSY2Loader* self)
 		psyfile_read(self->songfile->file, &self->vstL[i].valid,
 			sizeof(self->vstL[i].valid));
 		if (self->vstL[i].valid) {
+			int32_t c;
+
 			psyfile_read(self->songfile->file, self->vstL[i].dllName,
 				sizeof(self->vstL[i].dllName));
 			psy_strlwr(self->vstL[i].dllName);
 			psyfile_read(self->songfile->file, &(self->vstL[i].numpars), sizeof(int32_t));
 			self->vstL[i].pars = malloc(sizeof(float) * self->vstL[i].numpars);
-			for (int32_t c=0; c< self->vstL[i].numpars; c++) {
+			for (c=0; c< self->vstL[i].numpars; c++) {
 				psyfile_read(self->songfile->file,
 					&(self->vstL[i].pars[c]), sizeof(float));
 			}
@@ -672,10 +674,11 @@ void psy2loader_readmachines(PSY2Loader* self)
 						pVstPlugin = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, UINTPTR_MAX);
 						if (pVstPlugin) {
 							int c;
+							int numpars;
 
 							psy_audio_machine_setcurrprogram(pVstPlugin, program);
 							psy_audio_machine_setslot(pVstPlugin, i);
-							const int numpars = self->vstL[instance].numpars;
+							numpars = self->vstL[instance].numpars;
 							for (c = 0; c < numpars; ++c) {
 								psy_audio_MachineParam* param;
 

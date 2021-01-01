@@ -84,9 +84,10 @@ void psy_ui_scroller_onsize(psy_ui_Scroller* self, psy_ui_Component* sender, psy
 
 void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
 {
-	assert(self->client);
 	intptr_t iPos;
 	intptr_t nPos;
+
+	assert(self->client);
 
 	iPos = self->client->scroll.x / self->client->scrollstepx;
 	nPos = psy_ui_scrollbar_position(sender);
@@ -97,9 +98,10 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 
 void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
 {
-	assert(self->client);
 	intptr_t iPos;
 	intptr_t nPos;
+
+	assert(self->client);
 
 	iPos = self->client->scroll.y / self->client->scrollstepy;
 	nPos = psy_ui_scrollbar_position(sender);

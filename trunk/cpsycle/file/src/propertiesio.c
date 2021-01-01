@@ -285,9 +285,9 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;				
 				case PSY_PROPERTY_TYPE_CHOICE: {
-					choicelevel = level + 1;
 					char_dyn_t* sections;
 
+					choicelevel = level + 1;
 					psy_snprintf(text, 40, "%d", psy_property_item_int(
 						property));
 					text[39] = '\0';
