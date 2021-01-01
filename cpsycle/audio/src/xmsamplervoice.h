@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_XMSAMPLERVOICE_H
 #define psy_audio_XMSAMPLERVOICE_H
@@ -43,6 +43,11 @@ typedef struct XMEnvelopeController {
 	XMEnvelopeValueType m_Step;
 	struct psy_audio_XMSamplerVoice* voice;
 } XMEnvelopeController;
+
+void xmenvelopecontroller_init(XMEnvelopeController*,
+	struct psy_audio_XMSamplerVoice* invoice,
+	XMEnvelopeValueType defValue);
+void xmenvelopecontroller_dispose(XMEnvelopeController*);
 
 void xmenvelopecontroller_initcontroller(XMEnvelopeController*);
 void xmenvelopecontroller_initcontroller_envelope(XMEnvelopeController*,
@@ -108,14 +113,6 @@ INLINE float xmenvelopecontroller_sratedeviation(const XMEnvelopeController* sel
 }
 
 void xmenvelopecontroller_recalcdeviation(XMEnvelopeController*);
-
-
-
-
-void xmenvelopecontroller_init(XMEnvelopeController*,
-	struct psy_audio_XMSamplerVoice* invoice,
-	XMEnvelopeValueType defValue);
-void xmenvelopecontroller_dispose(XMEnvelopeController*);
 
 
 typedef struct psy_audio_XMSamplerVoice {
@@ -208,14 +205,14 @@ void psy_audio_xmsamplervoice_reset(psy_audio_XMSamplerVoice*);
 void psy_audio_xmsamplervoice_reseteffects(psy_audio_XMSamplerVoice*);
 
 void psy_audio_xmsamplervoice_voiceinit(psy_audio_XMSamplerVoice* self,
-	struct psy_audio_Instrument* xins,
+	struct psy_audio_Instrument*,
 	int channelNum,
 	int instrumentNum);
 void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice*,
 	int numSamples, float* pSamplesL, float* pSamplesR);
 
 // This one is Tracker Tick (Mod-tick)
-// void Tick();
+void psy_audio_xmsamplervoice_tick(psy_audio_XMSamplerVoice*);
 // This one is Psycle's "NewLine"
 void psy_audio_xmsamplervoice_newline(psy_audio_XMSamplerVoice*);
 
@@ -251,24 +248,23 @@ INLINE void psy_audio_xmsamplervoice_pitchslide(psy_audio_XMSamplerVoice* self)
 }
 
 void psy_audio_xmsamplervoice_slide2note(psy_audio_XMSamplerVoice*);
-void psy_audio_samplervoice_vibrato(psy_audio_XMSamplerVoice*);
-void psy_audio_samplervoice_tremolo(psy_audio_XMSamplerVoice*);
-void psy_audio_samplervoice_panbrello(psy_audio_XMSamplerVoice*);
-void psy_audio_samplervoice_tremor(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_vibrato(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_tremolo(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_panbrello(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_tremor(psy_audio_XMSamplerVoice*);
 void psy_audio_xmsamplervoice_volumeslide(psy_audio_XMSamplerVoice*);
 void psy_audio_xmsamplervoice_volumedown(psy_audio_XMSamplerVoice*,
 	int value);
 void psy_audio_xmsamplervoice_volumeup(psy_audio_XMSamplerVoice*,
 	int value);
-void psy_audio_samplervoice_retrig(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_retrig(psy_audio_XMSamplerVoice*);
 
 // Do Auto Vibrato
-void psy_audio_xmsamplervoice_autovibrato(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_doautovibrato(psy_audio_XMSamplerVoice*);
 
 INLINE bool psy_audio_xmsamplervoice_isautovibrato(const psy_audio_XMSamplerVoice* self)
 {
-	// return rwave().wave().isautovibrato();
-	return FALSE;
+	return psy_audio_sample_autovibrato(self->m_WaveDataController.sample);	
 }
 
 // Get Auto Vibrato Amount
@@ -403,9 +399,11 @@ INLINE void psy_audio_xmsamplervoice_setvolume(psy_audio_XMSamplerVoice* self, c
 	self->m_Volume = vol;
 	//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
 	//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
-	// float tmp_rand = rInstrument().GlobVol() * m_CurrRandVol * rWave().Wave().WaveGlobVolume();
-	// if (tmp_rand > rWave().Wave().WaveGlobVolume()) tmp_rand = rWave().Wave().WaveGlobVolume();
-	// m_RealVolume = value_mapper::map_128_1(vol) * tmp_rand;
+	float tmp_rand = 
+		psy_audio_instrument_volume(psy_audio_xmsamplervoice_rinstrument(self)) *
+			 self->m_CurrRandVol * self->m_WaveDataController.sample->globalvolume;
+	if (tmp_rand > self->m_WaveDataController.sample->globalvolume) tmp_rand = self->m_WaveDataController.sample->globalvolume;
+	self->m_RealVolume = psy_dsp_map_128_1(vol) * tmp_rand;
 }
 
 // Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
@@ -534,7 +532,7 @@ INLINE double psy_audio_xmsamplervoice_vibratoamount(psy_audio_XMSamplerVoice* s
 int psy_audio_xmsamplervoice_samplerate(const psy_audio_XMSamplerVoice* self);
 
 // protected:
-int psy_audio_samplervoice_getdelta(const psy_audio_XMSamplerVoice*,
+int psy_audio_xmsamplervoice_getdelta(const psy_audio_XMSamplerVoice*,
 	psy_audio_WaveForms wavetype, int wavepos);
 
 

@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_INSTRUMENT_H
 #define psy_audio_INSTRUMENT_H
@@ -59,8 +59,9 @@ typedef enum psy_audio_DupeCheck {
 	psy_audio_DUPECHECK_INSTRUMENT	
 } psy_audio_DupeCheck;
 
-typedef struct {
+typedef struct {	
 	psy_audio_SampleIndex sampleindex;
+	uint8_t fixedkey;
 	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
 	psy_audio_ParameterRange velocityrange;	
@@ -173,7 +174,7 @@ void psy_audio_instrument_removeentry(psy_audio_Instrument*,
 psy_audio_InstrumentEntry* psy_audio_instrument_entryat(psy_audio_Instrument*,
 	uintptr_t numentry);
 const psy_List* psy_audio_instrument_entries(psy_audio_Instrument*);
-
+/// [0..1.0f] Global volume affecting all samples of the instrument.
 INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
 {
 	return self->globalvolume;
@@ -320,6 +321,55 @@ INLINE void psy_audio_instrument_setdca(psy_audio_Instrument* self,
 	psy_audio_NewNoteAction value)
 {
 	self->dca = value;
+}
+
+INLINE float psy_audio_instrument_pan(const psy_audio_Instrument* self)
+{
+	return self->initpan;
+}
+
+INLINE void psy_audio_instrument_setpan(psy_audio_Instrument* self, float value)
+{
+	self->initpan = value;
+}
+
+INLINE bool psy_audio_instrument_panenabled(const psy_audio_Instrument* self)
+{
+	return self->panenabled;
+}
+
+INLINE void psy_audio_instrument_enablepan(psy_audio_Instrument* self)
+{
+	self->panenabled = TRUE;
+}
+
+INLINE void psy_audio_instrument_preventpan(psy_audio_Instrument* self)
+{
+	self->panenabled = FALSE;
+}
+
+///\return note number for center pan position
+INLINE uint8_t psy_audio_instrument_notemodpancenter(const psy_audio_Instrument* self)
+{
+	return self->notemodpancenter;
+}
+
+/// sets note number for center pan position
+INLINE void psy_audio_instrument_setnotemodpancenter(psy_audio_Instrument* self, uint8_t value)
+{
+	self->notemodpancenter = value;
+}
+
+///\return -32..32. 1/256th of panFactor change per seminote.
+INLINE int8_t psy_audio_instrument_notemodpansep(const psy_audio_Instrument* self)
+{
+	return self->notemodpansep;
+}
+
+/// sets -32..32. 1/256th of panFactor change per seminote.
+INLINE void psy_audio_instrument_setnotemodpansep(psy_audio_Instrument* self, int8_t value)
+{
+	self->notemodpansep = value;
 }
 
 #ifdef __cplusplus

@@ -1,18 +1,18 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
 #include "xmsamplervoice.h"
 
 // audio
+#include "constants.h"
 #include "xmsampler.h"
 #include "samples.h"
 #include "songio.h"
-#include "constants.h"
 // dsp
-#include <noteperiods.h>
 #include <linear.h>
+#include <noteperiods.h>
 // std
 #include <assert.h>
 #include <math.h>
@@ -208,7 +208,7 @@ void xmenvelopecontroller_recalcdeviation(XMEnvelopeController* self)
 			(psy_audio_machine_bpm(psy_audio_xmsampler_base(self->voice->m_pSampler)) *
 			psy_audio_machine_ticksperbeat(psy_audio_xmsampler_base(self->voice->m_pSampler)));			
 	} else if (psy_dsp_envelopesettings_mode(self->m_pEnvelope) == psy_dsp_ENVELOPETIME_SECONDS) {
-		self->m_sRateDeviation = psy_audio_xmsamplervoice_samplerate(self->voice) / 1000.f;		
+		self->m_sRateDeviation = psy_audio_xmsamplervoice_samplerate(self->voice) / 1000.f;
 	}
 }
 
@@ -266,11 +266,26 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 
 void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int end)
 {
-	const XMEnvelopeValueType ystep = (psy_dsp_envelopesettings_value(self->m_pEnvelope, end) - psy_dsp_envelopesettings_value(self->m_pEnvelope, start));
-	const XMEnvelopeValueType xstep = (psy_dsp_envelopesettings_time(self->m_pEnvelope, end) - psy_dsp_envelopesettings_time(self->m_pEnvelope, start));
+	XMEnvelopeValueType ystep;
+	XMEnvelopeValueType xstep;
+	float time;
+	
+	ystep = (psy_dsp_envelopesettings_value(self->m_pEnvelope, end) - psy_dsp_envelopesettings_value(self->m_pEnvelope, start));
+	xstep = (psy_dsp_envelopesettings_time(self->m_pEnvelope, end) - psy_dsp_envelopesettings_time(self->m_pEnvelope, start));	
+	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+		xstep *= 1000.f; // to ms
+	}
 	xmenvelopecontroller_recalcdeviation(self);
-	self->m_Samples = psy_dsp_envelopesettings_time(self->m_pEnvelope, start) * xmenvelopecontroller_sratedeviation(self);
-	self->m_NextEventSample = psy_dsp_envelopesettings_time(self->m_pEnvelope, end) * xmenvelopecontroller_sratedeviation(self);
+	time = psy_dsp_envelopesettings_time(self->m_pEnvelope, start);
+	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+		time *= 1000;
+	}
+	self->m_Samples = time * xmenvelopecontroller_sratedeviation(self);	
+	time = psy_dsp_envelopesettings_time(self->m_pEnvelope, end);
+	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+		time *= 1000;
+	}
+	self->m_NextEventSample = time * xmenvelopecontroller_sratedeviation(self);	
 	self->m_ModulationAmount = psy_dsp_envelopesettings_value(self->m_pEnvelope, start);
 	if (xstep != 0) self->m_Step = ystep / (xstep * xmenvelopecontroller_sratedeviation(self));
 	else self->m_Step = 0;
@@ -281,12 +296,17 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 	int i = 0;
 	while (psy_dsp_envelopesettings_time(self->m_pEnvelope, i) != psy_dsp_ENVELOPEPOINT_INVALID)
 	{
-		if ((int)(psy_dsp_envelopesettings_time(self->m_pEnvelope, i) *
-				xmenvelopecontroller_sratedeviation(self)) > samplePos) {
+		float time;
+
+		time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
+		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+			time *= 1000;
+		}
+		if ((int)(time * xmenvelopecontroller_sratedeviation(self)) > samplePos) {
 			break;
 		}
 		i++;
-	}
+	}	
 	if (i == 0) return; //Invalid Envelope. either GetTime(0) is INVALID, or samplePos is negative.
 	else if (psy_dsp_envelopesettings_time(self->m_pEnvelope, i) == psy_dsp_ENVELOPEPOINT_INVALID) {
 		//Destination point is invalid or is exactly the last one.
@@ -302,10 +322,13 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 			self->m_PositionIndex = i;
 			xmenvelopecontroller_newstep(self);
 		}
-		self->m_Samples = samplePos;
+		self->m_Samples = samplePos;		
+		float time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
+		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+			time *= 1000;
+		}
 		int samplesThisIndex = self->m_Samples - (int)
-			(psy_dsp_envelopesettings_time(self->m_pEnvelope, i) *
-				xmenvelopecontroller_sratedeviation(self));
+			(time - xmenvelopecontroller_sratedeviation(self));		
 		self->m_ModulationAmount += self->m_Step * samplesThisIndex;
 	}
 }
@@ -315,8 +338,6 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self)
 {
 	// :m_AmplitudeEnvelope(*this, 1.0f), m_PanEnvelope(*this, 0.0f), m_PtchEnvelope(*this, 0.0f), m_FilterEnvelope(*this, 1.0f) {
 	// Reset
-	psy_dsp_slider_init(&self->rampl);
-	psy_dsp_slider_init(&self->rampr);
 	xmenvelopecontroller_init(&self->m_AmplitudeEnvelope, self, 1.0f);
 	xmenvelopecontroller_init(&self->m_PanEnvelope, self, 0.0f);
 	xmenvelopecontroller_init(&self->m_PitchEnvelope, self, 0.0f);
@@ -509,19 +530,21 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 		{
 			float volume;
 			float lVolDest;
-			float rVolDest;			
+			float rVolDest;					
+
+			intptr_t diff;
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
-			left_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 0);
-			right_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 1);
+			left_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 0);			
+			right_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 1);			
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 2 : Process the Envelopes.
 
-				// Amplitude Envelope 
-				// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
+			// Amplitude Envelope 
+			// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 			volume = psy_audio_xmsamplervoice_realvolume(self) *
 				psy_audio_xmsamplerchannel_volume(psy_audio_xmsamplervoice_rchannel(self));				
 			if (xmenvelopecontroller_stage(&self->m_AmplitudeEnvelope) & XMENVELOPESTAGE_DOSTEP)
@@ -597,10 +620,10 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 			//Volume Ramping.
 			psy_dsp_slider_settarget(&self->rampl, lVolDest);
 			psy_dsp_slider_settarget(&self->rampr, rVolDest);
-			// if (!psy_audio_sampleiterator_stereo(&self->m_WaveDataController)) {
+			if (self->m_WaveDataController.sample->channels.numchannels == 1) {
 				// Monoaural output‚ copy left to right output.
 				right_output = left_output;
-			//}
+			}
 
 			// Filter section
 			if (filter_type(&self->m_Filter) != F_NONE)
@@ -618,10 +641,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 				}
 			}
 			//Volume after the filter, like schism/IT.
-			//If placed before the filter, 303.IT sounds bad (uncontrolled ressonance, replicable in schism if removing the volume changes).
-			// left_output *= m_rampL.GetNext();
-			// right_output *= m_rampR.GetNext();
-			
+			//If placed before the filter, 303.IT sounds bad (uncontrolled ressonance, replicable in schism if removing the volume changes).			
 			left_output *= psy_dsp_slider_getnext(&self->rampl);
 			right_output *= psy_dsp_slider_getnext(&self->rampr);
 			// Pitch Envelope. Currently, the pitch envelope Amount is only updated on NewLine().
@@ -642,6 +662,11 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 			}
 
 			nextsamples--;
+			diff = psy_audio_sampleiterator_inc(&self->m_WaveDataController);
+			self->m_WaveDataController.left += diff;
+			if (psy_audio_buffer_numchannels(&self->m_WaveDataController.sample->channels) > 1) {
+				self->m_WaveDataController.right += diff;
+			}
 		}
 		psy_audio_sampleiterator_postwork(&self->m_WaveDataController);
 		if (!psy_audio_sampleiterator_playing(&self->m_WaveDataController)) {
@@ -661,7 +686,7 @@ void psy_audio_xmsamplervoice_newline(psy_audio_XMSamplerVoice* self)
 	self->m_bTremorMute = FALSE;
 	self->m_VibratoAmount = 0;
 	if (psy_audio_xmsamplervoice_isautovibrato(self)) {
-		psy_audio_xmsamplervoice_autovibrato(self);
+		psy_audio_xmsamplervoice_doautovibrato(self);
 	}
 	psy_audio_xmsamplervoice_updatespeed(self);
 	xmenvelopecontroller_recalcdeviation(&self->m_AmplitudeEnvelope);
@@ -737,12 +762,12 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 						psy_audio_xmsamplervoice_rchannel(self)));
 			}
 		}
-		// if (rWave().Wave().IsAutoVibrato())
-		// {
-		//	m_AutoVibratoPos = 0;
-		//	m_AutoVibratoDepth = 0;
-		//	AutoVibrato();
-		//}
+		if (psy_audio_sample_autovibrato(self->m_WaveDataController.sample))
+		{
+			self->m_AutoVibratoPos = 0;
+			self->m_AutoVibratoDepth = 0;
+			psy_audio_xmsamplervoice_doautovibrato(self);			
+		}
 		//Important, put it after m_PitchEnvelope.NoteOn();	
 		psy_audio_xmsamplervoice_updatespeed(self);
 
@@ -754,14 +779,15 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 void psy_audio_xmsamplervoice_resetvolandpan(psy_audio_XMSamplerVoice* self,
 	int16_t playvol, bool reset)
 {
-	float fpan = 0.5f;
+	float fpan;
+
+	fpan = 0.5f;
 	if (reset)
 	{
 		int therand = rand();
 		self->m_CurrRandVol = 1.0f + (1.f - 2.f * ((float)therand / (float)RAND_MAX)) *
 			psy_audio_instrument_randomvolume(psy_audio_xmsamplervoice_rinstrument(self));
-		if (playvol != -1)
-		{
+		if (playvol != -1) {
 			psy_audio_xmsamplervoice_setvolume(self, playvol);
 		} else {
 			psy_audio_xmsamplervoice_setvolume(self,
@@ -771,23 +797,30 @@ void psy_audio_xmsamplervoice_resetvolandpan(psy_audio_XMSamplerVoice* self,
 		// a panning command is explicitely put in a channel.
 		// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
 		// in its absence, the pan position of the channel.
-		if (psy_audio_sample_surround(self->m_WaveDataController.sample) || 
-				psy_audio_xmsamplerchannel_issurround(psy_audio_xmsamplervoice_rchannel(self))) {
+		if (psy_audio_sample_surround(self->m_WaveDataController.sample) ||
+			psy_audio_xmsamplerchannel_issurround(psy_audio_xmsamplervoice_rchannel(self))) {
 			psy_audio_xmsamplervoice_setissurround(self, TRUE);
 		} else {
 			psy_audio_xmsamplervoice_setissurround(self, FALSE);
 		}
-		//\todo :
-//				In a related note, check range of Panbrello.
-		// if (rWave().Wave().PanEnabled()) fpan = rWave().Wave().PanFactor();
-		// else if (rInstrument().PanEnabled()) fpan = rInstrument().Pan();
-		// else fpan = m_pChannel->PanFactor();
-		//NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
-		// fpan += (m_Note - rInstrument().NoteModPanCenter()) * rInstrument().NoteModPanSep() / 512.0f;
+		// \todo :
+		// In a related note, check range of Panbrello.
+		if (psy_audio_sample_panenabled(&self->m_WaveDataController.sample)) {
+			fpan = psy_audio_sample_panfactor(&self->m_WaveDataController.sample);
+		} else if (psy_audio_instrument_panenabled(psy_audio_xmsamplervoice_rinstrument(self))) {
+			fpan = psy_audio_instrument_pan(psy_audio_xmsamplervoice_rinstrument(self));
+		} else {
+			fpan = psy_audio_xmsamplerchannel_panfactor(&self->m_pChannel);			
+		}
+		// NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
+		fpan += (self->m_Note - psy_audio_instrument_notemodpancenter(psy_audio_xmsamplervoice_rinstrument(self))) *
+			psy_audio_instrument_notemodpansep(psy_audio_xmsamplervoice_rinstrument(self)) / 512.0f;			
 		// fpan += (float)(rand() - 16384.0f) * rInstrument().RandomPanning() / 16384.0f;
-
-		if (fpan > 1.0f) fpan = 1.0f;
-		else if (fpan < 0.0f) fpan = 0.0f;
+		if (fpan > 1.0f) {
+			fpan = 1.0f;
+		} else if (fpan < 0.0f) {
+			fpan = 0.0f;
+		}
 	} else
 	{
 		self->m_CurrRandVol =
@@ -838,7 +871,7 @@ void psy_audio_xmsamplervoice_noteoff(psy_audio_XMSamplerVoice* self)
 	xmenvelopecontroller_noteoff(&self->m_PanEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_FilterEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_PitchEnvelope);
-	// m_WaveDataController.NoteOff();
+	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
@@ -864,7 +897,7 @@ void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
 	xmenvelopecontroller_noteoff(&self->m_PanEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_FilterEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_PitchEnvelope);
-	// m_WaveDataController.NoteOff();
+	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_notefadeout(psy_audio_XMSamplerVoice* self)
@@ -882,7 +915,7 @@ void psy_audio_xmsamplervoice_notefadeout(psy_audio_XMSamplerVoice* self)
 	//else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
 
 	//This might not be correct, but since we are saying "IsStopping(true"), then the controller needs to recalculate the buffers.
-	// m_WaveDataController.NoteOff();*/
+	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_updatefadeout(psy_audio_XMSamplerVoice* self)
@@ -940,51 +973,64 @@ void psy_audio_xmsamplervoice_volumeup(psy_audio_XMSamplerVoice* self,
 	psy_audio_xmsamplervoice_setvolume(self, vol);
 }
 
-void psy_audio_xmsamplervoice_autovibrato(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_doautovibrato(psy_audio_XMSamplerVoice* self)
 {
-/*	int targetDepth = rWave().Wave().VibratoDepth() << 8;
-	if (rWave().Wave().VibratoAttack() && m_AutoVibratoDepth < targetDepth)
+	int targetDepth;
+	psy_audio_Vibrato vibrato;
+	
+	vibrato = psy_audio_sample_vibrato(self->m_WaveDataController.sample);
+	targetDepth = vibrato.depth << 8;
+	if (vibrato.attack && self->m_AutoVibratoDepth < targetDepth)
 	{
-		m_AutoVibratoDepth += rWave().Wave().VibratoAttack();
-		if (m_AutoVibratoDepth > targetDepth)
+		self->m_AutoVibratoDepth += vibrato.attack;
+		if (self->m_AutoVibratoDepth > targetDepth)
 		{
-			m_AutoVibratoDepth = targetDepth;
+			self->m_AutoVibratoDepth = targetDepth;
 		}
 	} else {
-		m_AutoVibratoDepth = targetDepth;
+		self->m_AutoVibratoDepth = targetDepth;
 	}
 
-	int vdelta = GetDelta(rWave().Wave().VibratoType(), m_AutoVibratoPos);
-	vdelta = vdelta * (m_AutoVibratoDepth >> 8);
-	m_AutoVibratoAmount = (double)vdelta / 64.0;
-	m_AutoVibratoPos = (m_AutoVibratoPos - (rWave().Wave().VibratoSpeed())) & 0xFF;
-	UpdateSpeed();*/
-
+	int vdelta = psy_audio_xmsamplervoice_getdelta(
+		self, vibrato.type, self->m_AutoVibratoPos);
+	vdelta = vdelta * (self->m_AutoVibratoDepth >> 8);
+	self->m_AutoVibratoAmount = (double)vdelta / 64.0;
+	self->m_AutoVibratoPos = (self->m_AutoVibratoPos - (vibrato.speed)) & 0xFF;
+	psy_audio_xmsamplervoice_updatespeed(self);	
 }
 
-void psy_audio_samplervoice_vibrato(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_vibrato(psy_audio_XMSamplerVoice* self)
 {	
-	/*int vdelta = GetDelta(rChannel().VibratoType(), m_VibratoPos);
-
-	vdelta = vdelta * m_VibratoDepth;
-	m_VibratoAmount = (double)vdelta / 32.0;
-	m_VibratoPos = (m_VibratoPos - m_VibratoSpeed) & 0xFF;
-	UpdateSpeed();*/
+	int vdelta;
+	
+	vdelta = psy_audio_xmsamplervoice_getdelta(self,
+		psy_audio_xmsamplerchannel_vibratotype(
+			psy_audio_xmsamplervoice_rchannel_const(self)),
+		self->m_VibratoPos);
+	vdelta = vdelta * self->m_VibratoDepth;
+	self->m_VibratoAmount = (double)vdelta / 32.0;
+	self->m_VibratoPos = (self->m_VibratoPos - self->m_VibratoSpeed) & 0xFF;
+	psy_audio_xmsamplervoice_updatespeed(self);
 }// Vibrato() -------------------------------------
 
-void psy_audio_samplervoice_tremolo(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_tremolo(psy_audio_XMSamplerVoice* self)
 {
 	//\todo: verify that final volume doesn't go out of range (Redo RealVolume() ?)
-	/*int vdelta = GetDelta(rChannel().TremoloType(), m_TremoloPos);
+	int vdelta;
+	
+	vdelta = psy_audio_xmsamplervoice_getdelta(self,
+		psy_audio_xmsamplerchannel_tremolotype(
+			psy_audio_xmsamplervoice_rchannel_const(self)),
+		self->m_TremoloPos);
 
-	vdelta = (vdelta * m_TremoloDepth);
-	m_TremoloAmount = (double)vdelta / 2048.0;
-	m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;*/
+	vdelta = (vdelta * self->m_TremoloDepth);
+	self->m_TremoloAmount = (double)vdelta / 2048.0;
+	self->m_TremoloPos = (self->m_TremoloPos + self->m_TremoloSpeed) & 0xFF;
 
 
 }// Tremolo() -------------------------------------------
 
-void psy_audio_samplervoice_panbrello(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_panbrello(psy_audio_XMSamplerVoice* self)
 {
 	//Yxy   Panbrello with speed x, depth y.
 	//The random pan position can be achieved by setting the
@@ -994,25 +1040,27 @@ void psy_audio_samplervoice_panbrello(psy_audio_XMSamplerVoice* self)
 	//panbrello, and Y44 will be a slower panbrello.
 
 		//\todo: verify that final pan doesn't go out of range (make a RealPan() similar to RealVolume() ?)
-	int vdelta = 0; // psy_audio_samplervoice_getdelta(self,
-		//psy_audio_xmsamplerchannel_panbrellotype(
-			//psy_audio_samplervoice_rchannel(self)),
-			//self->m_PanbrelloPos);
+	int vdelta;
+
+	vdelta = psy_audio_xmsamplervoice_getdelta(self,
+		psy_audio_xmsamplerchannel_panbrellotype(
+			psy_audio_xmsamplervoice_rchannel_const(self)),
+		self->m_PanbrelloPos);
+
 
 	vdelta = vdelta * self->m_PanbrelloDepth;
 	self->m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
-	// if (rChannel().PanbrelloType() != XMInstrument::WaveData<>::WaveForms::RANDOM)
-	// {
-	// 	m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
-	// } else if (++m_PanbrelloRandomCounter >= m_PanbrelloSpeed)
-	// {
-	// 	m_PanbrelloPos++;
-	// 	m_PanbrelloRandomCounter = 0;
-	// }
-
+	if (psy_audio_xmsamplerchannel_panbrellotype(psy_audio_xmsamplervoice_rchannel(self)) !=
+		psy_audio_WAVEFORMS_RANDOM) {
+	 	self->m_PanbrelloPos = (self->m_PanbrelloPos + self->m_PanbrelloSpeed) & 0xFF;
+	} else if (++self->m_PanbrelloRandomCounter >= self->m_PanbrelloSpeed)
+	{
+	 	self->m_PanbrelloPos++;
+		self->m_PanbrelloRandomCounter = 0;
+	}
 }// Panbrello() -------------------------------------------
 
-void psy_audio_samplervoice_tremor(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_tremor(psy_audio_XMSamplerVoice* self)
 {
 	//\todo: according to Impulse Tracker, this command uses its own counter, so with
 	// speed 3, we can specify the command I41 ( x/y > speed), which, with the current implementation, doesn't work,
@@ -1030,7 +1078,7 @@ void psy_audio_samplervoice_tremor(psy_audio_XMSamplerVoice* self)
 	}
 }
 
-void psy_audio_samplervoice_retrig(psy_audio_XMSamplerVoice* self)
+void psy_audio_xmsamplervoice_retrig(psy_audio_XMSamplerVoice* self)
 {
 	if ((psy_audio_xmsampler_currenttick(self->m_pSampler) % self->m_RetrigTicks) == 0)
 	{
@@ -1043,7 +1091,7 @@ int psy_audio_xmsamplervoice_samplerate(const psy_audio_XMSamplerVoice* self)
 	return (int)psy_audio_machine_samplerate(psy_audio_xmsampler_base(self->m_pSampler));
 }
 
-int psy_audio_samplervoice_getdelta(const psy_audio_XMSamplerVoice* self,
+int psy_audio_xmsamplervoice_getdelta(const psy_audio_XMSamplerVoice* self,
 	psy_audio_WaveForms wavetype, int wavepos)	
 {
 	switch (wavetype)
@@ -1087,8 +1135,7 @@ void psy_audio_xmsamplervoice_updatespeed(psy_audio_XMSamplerVoice* self)
 		double speed = psy_audio_xmsamplervoice_periodtospeed(self, (int)_period);
 		//\todo: Attention, AutoVibrato always use linear slides with IT, but in FT2 it depends on amigaslides switch.
 		speed *= pow(2.0, ((-psy_audio_xmsamplervoice_autovibratoamount(self)) / 768.0));
-		psy_audio_sampleiterator_setspeed(&self->m_WaveDataController, speed);
-		//// rWave().Speed(m_pSampler->Resampler(), speed);
+		psy_audio_sampleiterator_setspeed(&self->m_WaveDataController, speed);		
 	}	
 }
 
@@ -1135,11 +1182,9 @@ double psy_audio_xmsamplervoice_notetoperiod(const psy_audio_XMSamplerVoice* sel
 			(double)wave->samplerate,
 			psy_audio_sample_tune(wave),
 			psy_audio_sample_finetune(wave));
-	} else {
-		return psy_dsp_notetoperiod(note, psy_audio_sample_tune(wave),
-			psy_audio_sample_finetune(wave));		
 	}
-	return 0;
+	return psy_dsp_notetoperiod(note, psy_audio_sample_tune(wave),
+		psy_audio_sample_finetune(wave));		
 }
 
 int psy_audio_xmsamplervoice_periodtonote(psy_audio_XMSamplerVoice* self, double period)
@@ -1150,8 +1195,6 @@ int psy_audio_xmsamplervoice_periodtonote(psy_audio_XMSamplerVoice* self, double
 	if (psy_audio_xmsampler_isamigaslides(self->m_pSampler)) {		
 		return psy_dsp_amigaperiodtonote(period, (double)wave->samplerate, wave->tune,
 			wave->finetune);
-	} else {		
-		return psy_dsp_periodtonote(period, wave->tune, wave->finetune);		
-	}
-	return 0;
+	}		
+	return psy_dsp_periodtonote(period, wave->tune, wave->finetune);		
 }

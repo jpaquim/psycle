@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -47,6 +47,10 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
 		"settingsview.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
+	psy_property_setid(psy_property_settext(
+		psy_property_append_bool(self->general, "showplaylist", TRUE),
+		"settingsview.show-playlist"),
+		PROPERTY_ID_SHOWPLAYLIST);
 	psy_property_settext(
 		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
 		"settingsview.save-recent-songs");
@@ -105,6 +109,20 @@ bool generalconfig_showstepsequencer(const GeneralConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->general, "showstepsequencer", FALSE);
+}
+
+bool generalconfig_showplaylist(const GeneralConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->general, "showplaylist", TRUE);
+}
+
+void generalconfig_setplaylistshowstate(GeneralConfig* self, bool state)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showplaylist", state);
 }
 
 void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)

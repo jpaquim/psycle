@@ -1,17 +1,20 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_XMSAMPLERCHANNEL_H
 #define psy_audio_XMSAMPLERCHANNEL_H
 
+// local
 #include "custommachine.h"
 #include "instrument.h"
 #include "sample.h"
-#include "multiresampler.h"
-#include <filter.h>
-#include <hashtbl.h>
-#include <valuemapper.h>
 #include "samplerdefs.h"
+// dsp
+#include <filter.h>
+#include "multiresampler.h"
+#include <valuemapper.h>
+// container
+#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -112,6 +115,13 @@ typedef struct psy_audio_XMSamplerChannel {
 	int m_DefaultCutoff;
 	int m_DefaultRessonance;
 	psy_dsp_FilterType m_DefaultFilterType;
+	// paramview
+	psy_audio_InfoMachineParam param_channel;
+	psy_audio_IntMachineParam filter_cutoff;
+	psy_audio_IntMachineParam filter_res;
+	psy_audio_IntMachineParam pan;
+	psy_audio_VolumeMachineParam slider_param;
+	psy_audio_IntMachineParam level_param;
 } psy_audio_XMSamplerChannel;
 
 // mfc-psycle: constructor
@@ -119,17 +129,20 @@ void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel*);
 void psy_audio_xmsamplerchannel_dispose(psy_audio_XMSamplerChannel*);
 
 bool  psy_audio_xmsamplerchannel_load(psy_audio_XMSamplerChannel*,
-	struct psy_audio_SongFile* songfile);
+	struct psy_audio_SongFile*);
 void psy_audio_xmsamplerchannel_save(psy_audio_XMSamplerChannel*,
-	struct psy_audio_SongFile* songfile);
+	struct psy_audio_SongFile*);
+
+void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel*);
 // mfc-psycle: init
 void psy_audio_xmsamplerchannel_initchannel(psy_audio_XMSamplerChannel*);
 void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel*);
 void psy_audio_xmsamplerchannel_restore(psy_audio_XMSamplerChannel*);
 
-// Prepare the channel for the new effect (or execute if it's a one-shot one). This is executed on TrackerTick==0
+// Prepare the channel for the new effect (or execute if it's a one-shot one).
+// This is executed on TrackerTick==0
 void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel*,
-	struct psy_audio_XMSamplerVoice* voice, int volcmd, int cmd, int parameter);
+	struct psy_audio_XMSamplerVoice*, int volcmd, int cmd, int parameter);
 
 // Executes the slide/change effects. This is executed on TrackerTick!=0
 void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel*);
@@ -151,12 +164,17 @@ void psy_audio_xmsamplerchannel_globalvolslide(psy_audio_XMSamplerChannel*,
 	int speed);
 void psy_audio_xmsamplerchannel_panningslidespeed(psy_audio_XMSamplerChannel*,
 	int speed);
+void psy_audio_xmsamplerchannel_channelvolumeslidespeed(
+	psy_audio_XMSamplerChannel*, int speed);
+void psy_audio_xmsamplerchannel_panningslide(psy_audio_XMSamplerChannel*);
+// default: int note = notecommands::empty
 void psy_audio_xmsamplerchannel_pitchslide(psy_audio_XMSamplerChannel*,
 	bool bUp, int speed, int note);
 void psy_audio_xmsamplerchannel_volumeslide(psy_audio_XMSamplerChannel*,
 	int speed);
 void psy_audio_xmsamplerchannel_tremorparam(psy_audio_XMSamplerChannel*,
 	int parameter);
+// default: int depth = 0
 void psy_audio_xmsamplerchannel_vibrato(psy_audio_XMSamplerChannel*,
 	int speed, int depth);
 void psy_audio_xmsamplerchannel_tremolo(psy_audio_XMSamplerChannel*,
@@ -167,13 +185,13 @@ void psy_audio_xmsamplerchannel_arpeggio(psy_audio_XMSamplerChannel*,
 	int param);
 void psy_audio_xmsamplerchannel_retrigger(psy_audio_XMSamplerChannel*,
 	int parameter);
-void psy_audio_xmsamplerchannel_notecuttick(psy_audio_XMSamplerChannel*, int ntick);
 void psy_audio_xmsamplerchannel_delayednote(psy_audio_XMSamplerChannel*,
 	psy_audio_PatternEvent data);
 
 // Tick n commands.
 void psy_audio_xmsamplerchannel_channelvolumeslide(psy_audio_XMSamplerChannel*);
 void psy_audio_xmsamplerchannel_notecut(psy_audio_XMSamplerChannel*);
+void psy_audio_xmsamplerchannel_notecuttick(psy_audio_XMSamplerChannel*, int ntick);
 void psy_audio_xmsamplerchannel_stopbackgroundnotes(psy_audio_XMSamplerChannel*,
 	psy_audio_NewNoteAction action);
 double psy_audio_xmsamplerchannel_arpeggioperiod(const psy_audio_XMSamplerChannel*);
@@ -384,6 +402,11 @@ INLINE int psy_audio_xmsamplerchannel_offsetmem(const psy_audio_XMSamplerChannel
 	return self->m_OffsetMem;
 }
 
+INLINE void psy_audio_xmsamplerchannel_setoffsetmem(psy_audio_XMSamplerChannel* self, int value)
+{
+	self->m_OffsetMem = value;
+}
+
 INLINE bool psy_audio_xmsamplerchannel_issurround(const psy_audio_XMSamplerChannel* self)
 {
 	return self->m_bSurround;
@@ -437,6 +460,37 @@ INLINE bool psy_audio_xmsamplerchannel_isgrissando(const psy_audio_XMSamplerChan
 INLINE void psy_audio_xmsamplerchannel_setisgrissando(psy_audio_XMSamplerChannel* self, bool value)
 {
 	self->m_bGrissando = value;
+}
+
+INLINE void psy_audio_xmsamplerchannel_setvibratotype(psy_audio_XMSamplerChannel* self,
+	psy_audio_WaveForms value)
+{
+	self->m_VibratoType = value;
+}
+
+INLINE psy_audio_WaveForms psy_audio_xmsamplerchannel_vibratotype(const psy_audio_XMSamplerChannel* self)
+{
+	return self->m_VibratoType;
+}
+
+INLINE void psy_audio_xmsamplerchannel_settremolotype(psy_audio_XMSamplerChannel* self, 
+	psy_audio_WaveForms type)
+{
+	self->m_TremoloType = type;
+}
+
+INLINE psy_audio_WaveForms psy_audio_xmsamplerchannel_tremolotype(const psy_audio_XMSamplerChannel* self)
+{
+	return self->m_TremoloType;
+}
+
+INLINE void psy_audio_xmsamplerchannel_setpanbrellotype(psy_audio_XMSamplerChannel* self, psy_audio_WaveForms type) {
+	self->m_PanbrelloType = type;
+}
+
+INLINE psy_audio_WaveForms psy_audio_xmsamplerchannel_panbrellotype(const psy_audio_XMSamplerChannel* self)
+{
+	return self->m_PanbrelloType;
 }
 
 INLINE bool psy_audio_xmsamplerchannel_isarpeggio(const psy_audio_XMSamplerChannel* self)

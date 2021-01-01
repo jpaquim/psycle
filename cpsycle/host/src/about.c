@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -86,7 +86,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_editor_init(&self->licenceinfo, &self->component);
 	psy_ui_editor_settext(&self->licenceinfo,
 		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version."
-		"copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
+		"copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net\r\n\r\n"
 		"GNU GENERAL PUBLIC LICENSE\r\n"
 		"Version 2, June 1991\r\n"
 		"Copyright(C) 1989, 1991 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.\r\n"
