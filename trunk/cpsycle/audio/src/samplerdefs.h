@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_SAMPLERDEFS_H
 #define psy_audio_SAMPLERDEFS_H
@@ -152,6 +152,20 @@ extern "C" {
 #define	XM_SAMPLER_CMD_E9_PLAY_FORWARD      0x0E // Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
 #define	XM_SAMPLER_CMD_E9_PLAY_BACKWARD     0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
 
+#define	XM_SAMPLER_CMD_EE_BACKGROUNDNOTECUT  0x00
+#define	XM_SAMPLER_CMD_EE_BACKGROUNDNOTEOFF  0x01
+#define	XM_SAMPLER_CMD_EE_BACKGROUNDNOTEFADE 0x02
+#define	XM_SAMPLER_CMD_EE_SETNOTECUT         0x03
+#define	XM_SAMPLER_CMD_EE_SETNOTECONTINUE    0x04
+#define	XM_SAMPLER_CMD_EE_SETNOTEOFF         0x05
+#define	XM_SAMPLER_CMD_EE_SETNOTEFADE        0x06
+#define	XM_SAMPLER_CMD_EE_VOLENVOFF          0x07
+#define	XM_SAMPLER_CMD_EE_VOLENVON           0x08
+#define	XM_SAMPLER_CMD_EE_PANENVOFF          0x09
+#define	XM_SAMPLER_CMD_EE_PANENVON           0x0A
+#define	XM_SAMPLER_CMD_EE_PITCHENVOFF        0x0B
+#define	XM_SAMPLER_CMD_EE_PITCHENVON         0x0C
+
 
 #define	XM_SAMPLER_CMD_VOL_VOLUME0			0x00  // 0x00..0x0F (63)  ||
 #define	XM_SAMPLER_CMD_VOL_VOLUME1			0x10  // 0x10..0x1F (63)  || All are the same command.
@@ -193,52 +207,6 @@ extern "C" {
 #define XM_SAMPLER_EFFECT_NOTEDELAY  0x00001000
 #define XM_SAMPLER_EFFECT_GLOBALVOLSLIDE  0x00002000
 #define XM_SAMPLER_EFFECT_PORTAMENTO  0x00004000
-
-typedef enum psy_audio_XMSamplerCmdMode {
-	// *= remembers its last value when called with param 00.
-	psy_audio_SAMPLERCMDMODE_MEM0 = 1,
-	// t = slides / changes each tick. (or is applied in a specific tick != 0)
-	psy_audio_SAMPLERCMDMODE_TICK = 2,
-	// p = persistent(a new note doesn't reset it )	
-	psy_audio_SAMPLERCMDMODE_PERS = 4,
-	// n = they need to appear next to a note.
-	psy_audio_SAMPLERCMDMODE_NEXT = 8  
-} psy_audio_XMSamplerCmdMode;
-
-typedef struct SamplerCmd {
-	int id;
-	int patternslot;
-	int mode;
-} psy_audio_XMSamplerCmd;
-
-void psy_audio_xmsamplercmd_init_all(psy_audio_XMSamplerCmd*,
-	int id, int patternslot, int mask);
-void psy_audio_xmsamplercmd_dispose(psy_audio_XMSamplerCmd*);
-
-INLINE psy_audio_XMSamplerCmd psy_audio_xmsamplercmd_make(int id, int patternslot, int mask)
-{
-	psy_audio_XMSamplerCmd rv;
-
-	rv.id = id;
-	rv.patternslot = patternslot;
-	rv.mode = mask;
-	return rv;
-}
-
-INLINE int psy_audio_xmsamplercmd_id(psy_audio_XMSamplerCmd* self)
-{
-	return self->id;
-}
-
-INLINE bool psy_audio_xmsamplercmd_hasticktime(const psy_audio_XMSamplerCmd* self)
-{
-	return ((self->mode & psy_audio_SAMPLERCMDMODE_TICK)
-		== psy_audio_SAMPLERCMDMODE_TICK);
-}
-
-psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_alloc(void);
-psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_allocinit_all(int id,
-	int patternslot, int mask);
 
 typedef enum {
 	INTERPOL_NONE = 0,

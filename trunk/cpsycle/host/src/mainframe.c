@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -574,15 +574,17 @@ void mainframe_initseqeditor(MainFrame* self)
 
 void mainframe_initrecentview(MainFrame* self)
 {
-	// recent song view
+	// recent song view/playlist
 	recentview_init(&self->recentview, mainframe_base(self),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace);
 	psy_ui_component_setalign(recentview_base(&self->recentview),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(recentview_base(&self->recentview));
+	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
+		psy_ui_component_hide(recentview_base(&self->recentview));
+	}
 	psy_signal_connect(&self->filebar.recentbutton.signal_clicked, self,
-		mainframe_onrecentsongs);
+		mainframe_onrecentsongs);	
 }
 
 void mainframe_initfileview(MainFrame* self)
@@ -1012,6 +1014,8 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 		? psy_ui_ICON_MORE
 		: psy_ui_ICON_LESS);
 	psy_ui_component_togglevisibility(recentview_base(&self->recentview));
+	generalconfig_setplaylistshowstate(&self->workspace.config.general,
+		psy_ui_component_visible(recentview_base(&self->recentview)));	
 }
 
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
@@ -1056,6 +1060,13 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 				psy_ui_component_togglevisibility(
 					stepsequencerview_base(&self->stepsequencerview));
 			}			
+			break;
+		case PROPERTY_ID_SHOWPLAYLIST:
+			if (psy_property_item_bool(property) != psy_ui_component_visible(
+				recentview_base(&self->recentview))) {
+				psy_ui_component_togglevisibility(
+					recentview_base(&self->recentview));
+			}
 			break;
 		case PROPERTY_ID_TRACKSCOPES:
 			if (psy_property_item_bool(property) != psy_ui_component_visible(

@@ -79,12 +79,6 @@
     <ClCompile Include="src\sample.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="src\sampleiterator.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\samplerdefs.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="src\samples.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
@@ -241,9 +235,6 @@
     <ClCompile Include="src\xmsamplervoice.c">
       <Filter>machine\internal\sampler</Filter>
     </ClCompile>
-    <ClCompile Include="src\xmsongexport.c">
-      <Filter>machine\internal\sampler</Filter>
-    </ClCompile>
     <ClCompile Include="src\sampler.c">
       <Filter>machine\internal\sampler</Filter>
     </ClCompile>
@@ -298,8 +289,14 @@
     <ClCompile Include="src\vstevents.c">
       <Filter>machine\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="src\sampulse.c">
+    <ClCompile Include="src\samplerdefs.c">
       <Filter>machine\internal\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sampleiterator.c">
+      <Filter>machine\internal\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\xmsongexport.c">
+      <Filter>file</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -361,12 +358,6 @@
       <Filter>machine\instrument</Filter>
     </ClInclude>
     <ClInclude Include="src\samples.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sampleiterator.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\samplerdefs.h">
       <Filter>machine\instrument</Filter>
     </ClInclude>
     <ClInclude Include="src\sample.h">
@@ -576,7 +567,10 @@
     <ClInclude Include="src\vstevents.h">
       <Filter>machine\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="src\sampulse.h">
+    <ClInclude Include="src\samplerdefs.h">
+      <Filter>machine\internal\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sampleiterator.h">
       <Filter>machine\internal\sampler</Filter>
     </ClInclude>
   </ItemGroup>

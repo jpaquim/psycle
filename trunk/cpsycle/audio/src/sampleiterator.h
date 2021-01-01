@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_SAMPLEITERATOR_H
 #define psy_audio_SAMPLEITERATOR_H
@@ -79,6 +79,7 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 	bool released);
 psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator*, uintptr_t channel);
 void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator*);
+void psy_audio_sampleiterator_noteoff(psy_audio_SampleIterator*);
 
 INLINE int psy_audio_sampleiterator_currentloopdirection(psy_audio_SampleIterator* self)
 {
@@ -100,7 +101,7 @@ INLINE int64_t psy_audio_sampleiterator_speed(psy_audio_SampleIterator* self)
 }
 // Sets Current sample Speed
 INLINE void psy_audio_sampleiterator_setspeed(psy_audio_SampleIterator* self, double value)
-{
+{	
 	// 4294967296 is a left shift of 32bits
 	self->speed = (int64_t)(value * 4294967296.0);
 	self->speedinternal =

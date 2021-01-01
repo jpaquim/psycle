@@ -1,76 +1,61 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef psy_audio_XMSAMPLER_H
 #define psy_audio_XMSAMPLER_H
 
+// local
 #include "custommachine.h"
-#include "samplerdefs.h"
+#include "ticktimer.h"
 #include "xmsamplerchannel.h"
 #include "xmsamplervoice.h"
-#include "ticktimer.h"
-
-// Internal Psycle Sampulse Sampler
-
-// XMSampler (Sampulse)
-// status:	currently not working, under construction
-//			transforming code from xmsampler
-// proposed changes:
-//			- intrumententries instead notepairs allowing wavelayers
-//			- use psy_dsp_EnvelopeSettings instead an own instrumentclass
-//			- use of standard paramview instead own view
-// problems: Save intrumententries instead notepairs and maintain psy3
-//			 compatibility
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define XM_SAMPLER_TWK_AMIGASLIDES 24
-#define XM_SAMPLER_TWK_GLOBALVOLUME 0x4E
+// Internal Psycle Sampulse Sampler
+
+// XMSampler (Sampulse)
+//
+// todo: nodeoff doesn't set play voice to false if sample has continuous loop
+//       SampleIterator(Wavedatacontroller)?, xmenvelopecontroller?,
+//       samplervoice_work?
+
+#define XM_SAMPLER_TWK_AMIGASLIDES 0x18
+#define XM_SAMPLER_TWK_GLOBALVOLUME 0x28
 
 #define XM_SAMPLER_MAX_POLYPHONY 64///< max polyphony
 #define XM_SAMPLER_MAX_TRACKS 64
 
-
 typedef struct psy_audio_XMSampler {
-	psy_audio_CustomMachine custommachine;	
+	// inherits
+	psy_audio_CustomMachine custommachine;
+	// internal data
 	int _numVoices;
 
 	psy_audio_XMSamplerVoice m_Voices[XM_SAMPLER_MAX_POLYPHONY];
-	psy_audio_XMSamplerChannel m_Channel[XM_SAMPLER_MAX_TRACKS];
-	//psycle::helpers::dsp::cubic_resampler _resampler;
+	psy_audio_XMSamplerChannel m_Channel[XM_SAMPLER_MAX_TRACKS];	
 	ZxxMacro zxxMap[128];	
 
-	bool m_bAmigaSlides;// Using Linear or Amiga Slides.
-	bool m_UseFilters;
+	int32_t m_bAmigaSlides; // Using Linear or Amiga Slides.
+	int32_t m_UseFilters;
 	int m_GlobalVolume;
-	int m_PanningMode;
-	int m_TickCount;	// Current Tick number.
-	int m_NextSampleTick;// The sample position of the next Tracker Tick
-	int _sampleCounter;	// Number of Samples since note start
+	int m_PanningMode;	
 	int m_sampleRate;
-	psy_List* multicmdMem; // std::vector<PatternEntry>
-	// ticktimer
-	psy_audio_TickTimer ticktimer;
-	uintptr_t samplerowcounter;
-
-/*	psy_List* voices;
-	uintptr_t numvoices;
-	int defaultspeed;	
-	psy_Table lastinst;
-	// psycle 0CFF, xm 0C80
-	int maxvolume;
-	// ps1 FALSE, sampulse TRUE
-	int panpersistent;
-	int xmsamplerload;
+	psy_List* multicmdMem; // entry: PatternEvent*
+	// ticktimer: current tick number, sample position of the next tracker tick
+	//            functionpointers to buffer work and timer tick
+	psy_audio_TickTimer ticktimer;	
+	psy_dsp_ResamplerQuality resamplerquality;
+	int32_t instrumentbank;
+	// Parameters shown in the paramview
+	// channelbank used as scrollbar
+	// channelbank 0: [0..7] 1 : [8..15] 2 : [16..31] ..
 	int channelbank;
 	psy_audio_CustomMachineParam param_general;
 	psy_audio_IntMachineParam param_numvoices;	
 	psy_audio_ChoiceMachineParam param_resamplingmethod;
-	psy_audio_ChoiceMachineParam param_defaultspeed;
-	psy_audio_IntMachineParam param_maxvolume;
-	psy_audio_ChoiceMachineParam param_panpersistent;
 	psy_audio_IntMachineParam param_instrumentbank;
 	psy_audio_CustomMachineParam param_blank;
 	psy_audio_InfoMachineParam param_filter_cutoff;
@@ -83,17 +68,6 @@ typedef struct psy_audio_XMSampler {
 	psy_audio_ChoiceMachineParam param_panningmode;
 	psy_audio_CustomMachineParam param_channels;
 	psy_audio_ChoiceMachineParam param_channelview;	
-	psy_Table channels;
-	uint8_t basec;
-	// Sampler PS1 with max amp = 0.5.
-	psy_dsp_amp_t clipmax;
-	// Instrument Bank 0: PS1 1: Sampulse
-	int32_t instrumentbank;	
-	psy_dsp_ResamplerQuality resamplerquality;
-
-	int32_t amigaslides; // using linear or amiga slides.
-	int32_t usefilters;
-	int32_t panningmode;*/
 } psy_audio_XMSampler;
 
 void psy_audio_xmsampler_init(psy_audio_XMSampler*, psy_audio_MachineCallback*);
@@ -116,6 +90,9 @@ INLINE psy_audio_XMSampler* psy_audio_xmsampler_allocinit(psy_audio_MachineCallb
 
 const psy_audio_MachineInfo* psy_audio_xmsampler_info(void);
 
+void psy_audio_xmsampler_tick(psy_audio_XMSampler*,
+	uintptr_t channelNum, const psy_audio_PatternEvent*);
+
 void psy_audio_xmsampler_setsamplerate(psy_audio_XMSampler*, int sr);
 
 
@@ -126,6 +103,18 @@ psy_audio_XMSamplerVoice* psy_audio_xmsampler_getfreevoice(
 int psy_audio_xmsampler_getplayingvoices(const psy_audio_XMSampler*);
 
 /// properties
+
+INLINE void psy_audio_xmsampler_setzxxmacro(psy_audio_XMSampler* self, int index, int mode, int val)
+{
+	self->zxxMap[index].mode = mode;
+	self->zxxMap[index].value = val;
+}
+
+INLINE ZxxMacro psy_audio_xmsampler_getmap(const psy_audio_XMSampler* self, int index)
+{
+	return self->zxxMap[index];
+}
+
 INLINE psy_audio_XMSamplerChannel* psy_audio_xmsampler_rchannel(psy_audio_XMSampler* self, int index)
 {
 	return &self->m_Channel[index];
@@ -177,19 +166,6 @@ INLINE void psy_audio_xmsampler_setslidevolume(psy_audio_XMSampler* self, int va
 	self->m_GlobalVolume += value;
 	if (self->m_GlobalVolume > 128) self->m_GlobalVolume = 128;
 	else if (self->m_GlobalVolume < 0) self->m_GlobalVolume = 0;
-}
-
-/// set resampler quality 
-INLINE void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,
-		psy_dsp_ResamplerQuality value)
-{
-//	for (int i = 0; i < MAX_POLYPHONY; i++) {
-//		rVoice(i).DisposeResampleData(_resampler);
-//	}
-//	_resampler.quality(value);
-//	for (int i = 0; i < MAX_POLYPHONY; i++) {
-//		rVoice(i).RecreateResampleData(_resampler);
-//	}
 }
 
 INLINE bool psy_audio_xmsampler_usefilters(const psy_audio_XMSampler* self)

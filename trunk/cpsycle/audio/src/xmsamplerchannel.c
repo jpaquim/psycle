@@ -1,27 +1,33 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
 #include "xmsamplerchannel.h"
 
+// local
+#include "constants.h"
+#include "machineparam.h"
+#include "plugin_interface.h"
+#include "samplerdefs.h"
+#include "songio.h"
 #include "xmsamplervoice.h"
 #include "xmsampler.h"
-
-#include "samplerdefs.h"
-#include "machineparam.h"
-#include "songio.h"
-#include "plugin_interface.h"
-
+// std
 #include <assert.h>
 #include <math.h>
-#include <string.h>
-#include <stdlib.h>
-
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
-#include "constants.h"
 
+const char E8VolMap[16] = { 0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64 };
+
+// prototypes
+static void psy_audio_xmsamplerchannel_level_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel*);
+
+// implementation
 void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel* self)
 {
 	self->m_Index = 0;
@@ -53,7 +59,43 @@ void psy_audio_xmsamplerchannel_initchannel(psy_audio_XMSamplerChannel* self)
 
 void psy_audio_xmsamplerchannel_dispose(psy_audio_XMSamplerChannel* self)
 {
+	psy_audio_xmsamplerchannel_disposeparamview(self);
+	psy_list_deallocate(&self->m_DelayedNote, NULL);
+}
 
+void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel* self)
+{
+	char text[127];
+	int index;
+	
+	index = self->m_Index;
+	psy_snprintf(text, 127, "Channel %d", (int)index);
+	//}
+	psy_audio_infomachineparam_init(&self->param_channel, text, "", MPF_SMALL);
+	psy_audio_intmachineparam_init(&self->filter_cutoff,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultCutoff, 0, 200);
+	psy_audio_intmachineparam_init(&self->filter_res,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_Ressonance, 0, 200);
+	psy_audio_intmachineparam_init(&self->pan,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);
+	psy_audio_volumemachineparam_init(&self->slider_param,
+		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->m_ChannelDefVolume);
+	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);
+	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 200);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_level_normvalue);
+}
+
+void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel* self)
+{
+	psy_audio_infomachineparam_dispose(&self->param_channel);
+	psy_audio_intmachineparam_dispose(&self->filter_cutoff);
+	psy_audio_intmachineparam_dispose(&self->filter_res);
+	psy_audio_intmachineparam_dispose(&self->pan);
+	psy_audio_volumemachineparam_dispose(&self->slider_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);	
 }
 
 void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel* self)
@@ -111,7 +153,6 @@ void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel* self)
 	self->m_RetrigMem = 0;
 	self->m_OffsetMem = 0;
 	self->m_GlobalVolSlideMem = 0;
-
 }
 
 void psy_audio_xmsamplerchannel_restore(psy_audio_XMSamplerChannel* self)
@@ -198,7 +239,8 @@ void psy_audio_xmsamplerchannel_setnote(psy_audio_XMSamplerChannel* self, int no
 	}
 }
 
-void psy_audio_xmsamplerchannel_setpanfactor(psy_audio_XMSamplerChannel* self, float value)
+void psy_audio_xmsamplerchannel_setpanfactor(psy_audio_XMSamplerChannel* self,
+	float value)
 {
 	self->m_PanFactor = value;
 	if (psy_audio_xmsamplerchannel_foregroundvoice(self)) {
@@ -211,10 +253,13 @@ void psy_audio_xmsamplerchannel_setpanfactor(psy_audio_XMSamplerChannel* self, f
 void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 	psy_audio_XMSamplerVoice* voice, int volcmd, int cmd, int parameter)
 {
-	int realSet = 0;
-	int	realValue = 0;
+	int realSet;
+	int	realValue;
 
-	//1st check: Channel ( They can appear without an existing playing note and are persistent when a new one comes)
+	// 1st check: Channel ( They can appear without an existing playing note
+	// and are persistent when a new one comes)
+	realSet = 0;
+	realValue = 0;
 	switch (volcmd & 0xF0)
 	{
 	case XM_SAMPLER_CMD_VOL_PANNING:
@@ -222,12 +267,12 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			(volcmd & 0x0F) / 15.0f);
 		break;
 	case XM_SAMPLER_CMD_VOL_PANSLIDELEFT:
-		//this command is actually fine pan slide
+		// this command is actually fine pan slide
 		psy_audio_xmsamplerchannel_panningslidespeed(self,
 			(volcmd & 0x0F) << 4);
 		break;
 	case XM_SAMPLER_CMD_VOL_PANSLIDERIGHT:
-		//this command is actually fine pan slide
+		// this command is actually fine pan slide
 		psy_audio_xmsamplerchannel_panningslidespeed(self,
 			volcmd & 0x0F);
 		break;
@@ -251,7 +296,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 		psy_audio_xmsamplerchannel_panningslidespeed(self, parameter);
 		break;
 	case XM_SAMPLER_CMD_CHANNEL_VOLUMESLIDE:
-		// psy_audio_xmsamplerchannel_channelvolumeslide(self, parameter);
+		psy_audio_xmsamplerchannel_channelvolumeslidespeed(self, parameter);		
 		break;
 	case XM_SAMPLER_CMD_SET_GLOBAL_VOLUME:
 		psy_audio_xmsampler_setglobalvolume(self->m_pSampler,
@@ -290,7 +335,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			}
 			break;
 		case XM_SAMPLER_CMD_E_SET_PAN:
-			// psy_audio_xmsamplerchannel_setpanfactor(XMSampler::E8VolMap[(parameter & 0xf)] / 64.0f);
+			psy_audio_xmsamplerchannel_setpanfactor(self, E8VolMap[(parameter & 0xf)] / 64.0f);
 			break;
 		case XM_SAMPLER_CMD_E_SET_MIDI_MACRO:
 			//\todo : implement. For now, it maps directly to internal Filter commands
@@ -302,24 +347,30 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			break;
 		case XM_SAMPLER_CMD_E_VIBRATO_WAVE:
 			if (parameter <= psy_audio_WAVEFORMS_RANDOM) {
-			// 	VibratoType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));				
+				psy_audio_xmsamplerchannel_setvibratotype(self,
+					(psy_audio_WaveForms)parameter);			
 			} else {
-				// psy_audio_xmsamplerchannel_setvibratotype(self, psy_audio_WAVEFORMS_SINUS);
+				psy_audio_xmsamplerchannel_setvibratotype(self,
+					psy_audio_WAVEFORMS_SINUS);				
 			}
 			break;
 		case XM_SAMPLER_CMD_E_PANBRELLO_WAVE:
 			if (parameter <= psy_audio_WAVEFORMS_RANDOM) {
-			// 	PanbrelloType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));
+				psy_audio_xmsamplerchannel_setpanbrellotype(self,
+					(psy_audio_WaveForms)parameter);
 			} else {
-				// PanbrelloType(XMInstrument::WaveData<>::WaveForms::SINUS);
+				psy_audio_xmsamplerchannel_setpanbrellotype(self,
+					psy_audio_WAVEFORMS_SINUS);				
 			}
 			break;
 		case XM_SAMPLER_CMD_E_TREMOLO_WAVE:
 			if (parameter <= psy_audio_WAVEFORMS_RANDOM) {
-			// 	TremoloType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));
+				psy_audio_xmsamplerchannel_settremolotype(self,
+					(psy_audio_WaveForms)parameter);
 			} else {
-				// TremoloType(XMInstrument::WaveData<>::WaveForms::SINUS);
-			}
+				psy_audio_xmsamplerchannel_settremolotype(self,
+					psy_audio_WAVEFORMS_SINUS);
+			}			
 			break;
 		default:
 			break;
@@ -332,8 +383,8 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			realValue = parameter;
 		} else
 		{
-			//realSet = m_pSampler->GetMap(parameter - 0x80).mode;
-			//srealValue = m_pSampler->GetMap(parameter - 0x80).value;
+			realSet = psy_audio_xmsampler_getmap(self->m_pSampler, parameter - 0x80).mode;
+			realValue = psy_audio_xmsampler_getmap(self->m_pSampler, parameter - 0x80).value;			
 		}
 		switch (realSet)
 		{
@@ -341,7 +392,10 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			self->m_Cutoff = realValue;
 			if (voice)
 			{
-			//	if (voice->psy_dsp_FilterType() == dsp::F_NONE) voice->psy_dsp_FilterType(m_DefaultFilterType);				
+				if (psy_audio_xmsamplervoice_filtertype(voice) == F_NONE) {
+					psy_audio_xmsamplervoice_setfiltertype(voice,
+						self->m_DefaultFilterType);
+				}
 				psy_audio_xmsamplervoice_setcutoff(voice,
 					self->m_Cutoff);
 			}
@@ -350,7 +404,10 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			self->m_Ressonance = realValue;
 			if (voice)
 			{
-				//if (voice->psy_dsp_FilterType() == dsp::F_NONE) voice->psy_dsp_FilterType(m_DefaultFilterType);
+				if (psy_audio_xmsamplervoice_filtertype(voice) == F_NONE) {
+					psy_audio_xmsamplervoice_setfiltertype(voice,
+						self->m_DefaultFilterType);
+				}				
 				psy_audio_xmsamplervoice_setressonance(voice,
 					self->m_Ressonance);
 			}
@@ -410,31 +467,31 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 		case XM_SAMPLER_CMD_VOL_VOLUME1:
 		case XM_SAMPLER_CMD_VOL_VOLUME2:
 		case XM_SAMPLER_CMD_VOL_VOLUME3:
-			// voice->Volume(volcmd << 1);
+			psy_audio_xmsamplervoice_setvolume(voice, volcmd << 1);
 			break;
 		case XM_SAMPLER_CMD_VOL_VOLSLIDEUP:
-			// VolumeSlide((volcmd & 0x0F) << 4);
+			psy_audio_xmsamplerchannel_volumeslide(self, (volcmd & 0x0F) << 4);
 			break;
 		case XM_SAMPLER_CMD_VOL_VOLSLIDEDOWN:
-			// VolumeSlide(volcmd & 0x0F);
+			psy_audio_xmsamplerchannel_volumeslide(self, volcmd & 0x0F);			
 			break;
 		case XM_SAMPLER_CMD_VOL_FINEVOLSLIDEUP:
-			// voice->m_VolumeSlideSpeed = (volcmd & 0x0F) << 1;
-			// voice->VolumeSlide();
+			voice->m_VolumeSlideSpeed = (volcmd & 0x0F) << 1;
+			psy_audio_xmsamplervoice_volumeslide(voice);
 			break;
 		case XM_SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN:
-			// voice->m_VolumeSlideSpeed = -((volcmd & 0x0F) << 1);
-			// voice->VolumeSlide();
+			voice->m_VolumeSlideSpeed = -((volcmd & 0x0F) << 1);
+			psy_audio_xmsamplervoice_volumeslide(voice);
 			break;
 		//	/*				case CMD_VOL::VOL_VIBRATO_SPEED:
 		//						Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
 		//						break;
 		//	*/
-/*
-		case CMD_VOL::VOL_VIBRATO:
-			Vibrato(0, (volcmd & 0x0F) << 2);
+
+		case XM_SAMPLER_CMD_VOL_VIBRATO:
+			psy_audio_xmsamplerchannel_vibrato(self, 0, (volcmd & 0x0F) << 2);
 			break;
-		case CMD_VOL::VOL_TONEPORTAMENTO:
+		case XM_SAMPLER_CMD_VOL_TONEPORTAMENTO:
 			// Portamento to (Gx) affects the memory for Gxx and has the equivalent
 			// slide given by this table:
 			// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
@@ -442,15 +499,27 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			else if ((volcmd & 0x0F) == 1)  slidval = 1;
 			else if ((volcmd & 0x0F) < 9) slidval = powf(2.0f, volcmd & 0x0F);
 			else slidval = 255;
-			PitchSlide(voice->Period() > voice->NoteToPeriod(Note()), slidval, Note());
+			psy_audio_xmsamplerchannel_pitchslide(self,
+				// up ?
+				psy_audio_xmsamplervoice_period(voice) >
+				psy_audio_xmsamplervoice_notetoperiod(voice, 
+					psy_audio_xmsamplerchannel_note(self), TRUE),
+				// speed
+				slidval,
+				// note
+				psy_audio_xmsamplerchannel_note(self));
 			break;
-		case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
+		case XM_SAMPLER_CMD_VOL_PITCH_SLIDE_DOWN:
 			// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
 			// up/down of x is equivalent to a normal slide by x*4
-			PitchSlide(false, (volcmd & 0x0F) << 2);
+			psy_audio_xmsamplerchannel_pitchslide(self,
+				FALSE, (volcmd & 0x0F) << 2,
+				psy_audio_NOTECOMMANDS_EMPTY);
 			break;
-		case CMD_VOL::VOL_PITCH_SLIDE_UP:
-			PitchSlide(true, (volcmd & 0x0F) << 2);
+		case XM_SAMPLER_CMD_VOL_PITCH_SLIDE_UP:
+			psy_audio_xmsamplerchannel_pitchslide(self,
+				TRUE, (volcmd & 0x0F) << 2,
+				psy_audio_NOTECOMMANDS_EMPTY);
 			break;
 		default:
 			break;
@@ -459,141 +528,175 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 		switch (cmd)
 		{
 			// Class A: Voice ( They can apply to an already playing voice, or a new coming one).
-		case CMD::VOLUME:
-			voice->Volume(parameter);
+		case XM_SAMPLER_CMD_VOLUME:
+			psy_audio_xmsamplervoice_setvolume(voice, parameter);
 			break;
-		case CMD::SET_ENV_POSITION:
-			if (voice->AmplitudeEnvelope().Envelope().IsEnabled())
-				voice->AmplitudeEnvelope().SetPositionInSamples(parameter * Global::player().SamplesPerTick());
-			if (voice->PanEnvelope().Envelope().IsEnabled())
-				voice->PanEnvelope().SetPositionInSamples(parameter * Global::player().SamplesPerTick());
-			if (voice->PitchEnvelope().Envelope().IsEnabled())
-				voice->PitchEnvelope().SetPositionInSamples(parameter * Global::player().SamplesPerTick());
-			if (voice->FilterEnvelope().Envelope().IsEnabled())
-				voice->FilterEnvelope().SetPositionInSamples(parameter * Global::player().SamplesPerTick());
-			break;
-		case CMD::EXTENDED:
+		case XM_SAMPLER_CMD_SET_ENV_POSITION: {
+			const psy_dsp_EnvelopeSettings* env;
+
+			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_amplitudeenvelope(voice));
+			if (psy_dsp_envelopesettings_isenabled(env)) {
+				xmenvelopecontroller_setpositioninsamples(
+					psy_audio_xmsamplervoice_amplitudeenvelope(voice),
+					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+			}
+			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_panenvelope(voice));
+			if (psy_dsp_envelopesettings_isenabled(env)) {
+				xmenvelopecontroller_setpositioninsamples(
+					psy_audio_xmsamplervoice_panenvelope(voice),
+					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+			}
+			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_pitchenvelope(voice));
+			if (psy_dsp_envelopesettings_isenabled(env)) {
+				xmenvelopecontroller_setpositioninsamples(
+					psy_audio_xmsamplervoice_pitchenvelope(voice),
+					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+			}
+			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_filterenvelope(voice));
+			if (psy_dsp_envelopesettings_isenabled(env)) {
+				xmenvelopecontroller_setpositioninsamples(
+					psy_audio_xmsamplervoice_filterenvelope(voice),
+					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+			}			
+			break; }
+		case XM_SAMPLER_CMD_EXTENDED:
 			switch (parameter & 0xF0)
 			{
-			case CMD_E::E9:
+			case XM_SAMPLER_CMD_E9:
 				switch (parameter & 0x0F)
 				{
-				case CMD_E9::E9_PLAY_FORWARD:
-					voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
+				case XM_SAMPLER_CMD_E9_PLAY_FORWARD:					
+					//voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
 					break;
-				case CMD_E9::E9_PLAY_BACKWARD:
-					if (voice->rWave().Position() == 0)
-					{
-						voice->rWave().Position(voice->rWave().Length() - 1);
-					}
-					voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
+				case XM_SAMPLER_CMD_E9_PLAY_BACKWARD:
+					//if (voice->rWave().Position() == 0)
+					//{
+						//voice->rWave().Position(voice->rWave().Length() - 1);
+					//}
+					//voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
 					break;
 				}
 				break;
-			case CMD_E::EE:
+			case XM_SAMPLER_CMD_EE:
 				switch (parameter & 0x0F)
 				{
-				case CMD_EE::EE_SETNOTECUT:
-					voice->NNA(XMInstrument::NewNoteAction::STOP);
-					break;
-				case CMD_EE::EE_SETNOTECONTINUE:
-					voice->NNA(XMInstrument::NewNoteAction::CONTINUE);
-					break;
-				case CMD_EE::EE_SETNOTEOFF:
-					voice->NNA(XMInstrument::NewNoteAction::NOTEOFF);
-					break;
-				case CMD_EE::EE_SETNOTEFADE:
-					voice->NNA(XMInstrument::NewNoteAction::FADEOUT);
-					break;
-				case CMD_EE::EE_VOLENVOFF:
-					voice->AmplitudeEnvelope().Stop();
-					break;
-				case CMD_EE::EE_VOLENVON:
-					voice->AmplitudeEnvelope().Start();
-					break;
-				case CMD_EE::EE_PANENVOFF:
-					voice->PanEnvelope().Stop();
-					break;
-				case CMD_EE::EE_PANENVON:
-					voice->PanEnvelope().Start();
-					break;
-				case CMD_EE::EE_PITCHENVON:
-					voice->PitchEnvelope().Stop();
-					break;
-				case CMD_EE::EE_PITCHENVOFF:
-					voice->PitchEnvelope().Start();
-					break;
+					case XM_SAMPLER_CMD_EE_SETNOTECUT:
+						psy_audio_xmsamplervoice_setnna(voice,
+							psy_audio_NNA_STOP);
+						break;
+					case XM_SAMPLER_CMD_EE_SETNOTECONTINUE:
+						psy_audio_xmsamplervoice_setnna(voice,
+							psy_audio_NNA_CONTINUE);
+						break;
+					case XM_SAMPLER_CMD_EE_SETNOTEOFF:
+						psy_audio_xmsamplervoice_setnna(voice,
+							psy_audio_NNA_NOTEOFF);
+						break;
+					case XM_SAMPLER_CMD_EE_SETNOTEFADE:
+						psy_audio_xmsamplervoice_setnna(voice,
+							psy_audio_NNA_FADEOUT);
+						break;
+					case XM_SAMPLER_CMD_EE_VOLENVOFF:
+						xmenvelopecontroller_stop(
+							psy_audio_xmsamplervoice_amplitudeenvelope(voice));					
+						break;
+					case XM_SAMPLER_CMD_EE_VOLENVON:
+						xmenvelopecontroller_start(
+							psy_audio_xmsamplervoice_amplitudeenvelope(voice));					
+						break;
+					case XM_SAMPLER_CMD_EE_PANENVOFF:
+						xmenvelopecontroller_stop(
+							psy_audio_xmsamplervoice_panenvelope(voice));
+						break;
+					case XM_SAMPLER_CMD_EE_PANENVON:
+						xmenvelopecontroller_start(
+							psy_audio_xmsamplervoice_panenvelope(voice));					
+						break;
+					case XM_SAMPLER_CMD_EE_PITCHENVON:
+						xmenvelopecontroller_stop(
+							psy_audio_xmsamplervoice_pitchenvelope(voice));					
+						break;
+					case XM_SAMPLER_CMD_EE_PITCHENVOFF:
+						xmenvelopecontroller_start(
+							psy_audio_xmsamplervoice_pitchenvelope(voice));
+						break;
 				}
 				break;
-			case CMD_E::E_DELAYED_NOTECUT:
-				NoteCut(parameter & 0x0F);
+			case XM_SAMPLER_CMD_E_DELAYED_NOTECUT:
+				psy_audio_xmsamplerchannel_notecuttick(self, parameter & 0x0F);
 				break;
 			}
 			break;
 
 			// Class B Channel ( Just like Class A, but remember its old value if it is called again with  00 as parameter  )
 
-		case CMD::PORTAMENTO_UP:
-			PitchSlide(true, parameter);
+		case XM_SAMPLER_CMD_PORTAMENTO_UP:
+			psy_audio_xmsamplerchannel_pitchslide(self, TRUE, parameter, psy_audio_NOTECOMMANDS_EMPTY);
 			break;
-		case CMD::PORTAMENTO_DOWN:
-			PitchSlide(false, parameter);
+		case XM_SAMPLER_CMD_PORTAMENTO_DOWN:
+			psy_audio_xmsamplerchannel_pitchslide(self, FALSE, parameter, psy_audio_NOTECOMMANDS_EMPTY);
 			break;
-		case CMD::PORTA2NOTE:
-			PitchSlide(voice->Period() > voice->NoteToPeriod(Note()), parameter, Note());
+		case XM_SAMPLER_CMD_PORTA2NOTE:
+			psy_audio_xmsamplerchannel_pitchslide(self,
+				psy_audio_xmsamplervoice_period(voice) > psy_audio_xmsamplervoice_notetoperiod(voice,
+					psy_audio_xmsamplerchannel_note(self), TRUE), parameter, psy_audio_xmsamplerchannel_note(self));
 			break;
-		case CMD::VOLUMESLIDE:
-			VolumeSlide(parameter);
+		case XM_SAMPLER_CMD_VOLUMESLIDE:
+			psy_audio_xmsamplerchannel_volumeslide(self, parameter);
 			break;
-		case CMD::TONEPORTAVOL:
-			VolumeSlide(parameter);
-			PitchSlide(voice->Period() > voice->NoteToPeriod(Note()), 0, Note());
+		case XM_SAMPLER_CMD_TONEPORTAVOL:
+			psy_audio_xmsamplerchannel_volumeslide(self, parameter);			
+			psy_audio_xmsamplerchannel_pitchslide(self,
+				psy_audio_xmsamplervoice_period(voice) > psy_audio_xmsamplervoice_notetoperiod(voice,
+					psy_audio_xmsamplerchannel_note(self), TRUE), 0, psy_audio_xmsamplerchannel_note(self));
 			break;
-		case CMD::VIBRATOVOL:
-			VolumeSlide(parameter);
-			Vibrato(0);
+		case XM_SAMPLER_CMD_VIBRATOVOL:
+			psy_audio_xmsamplerchannel_volumeslide(self, parameter);
+			psy_audio_xmsamplerchannel_vibrato(self, 0, 0);
 			break;
-		case CMD::VIBRATO:
-			Vibrato(((parameter >> 4) & 0x0F), (parameter & 0x0F) << 2);
+		case XM_SAMPLER_CMD_VIBRATO:
+			psy_audio_xmsamplerchannel_vibrato(self, ((parameter >> 4) & 0x0f), (parameter & 0x0f) << 2);
 			break;
-		case CMD::FINE_VIBRATO:
-			Vibrato(((parameter >> 4) & 0x0F), (parameter & 0x0F));
+		case XM_SAMPLER_CMD_FINE_VIBRATO:
+			psy_audio_xmsamplerchannel_vibrato(self, ((parameter >> 4) & 0x0f), (parameter & 0x0f));
 			break;
-		case CMD::TREMOR:
-			Tremor(parameter);
+		case XM_SAMPLER_CMD_TREMOR:
+			psy_audio_xmsamplerchannel_tremorparam(self, parameter);
 			break;
-		case CMD::TREMOLO:
-			Tremolo((parameter >> 4) & 0x0F, (parameter & 0x0F));
+		case XM_SAMPLER_CMD_TREMOLO:
+			psy_audio_xmsamplerchannel_tremolo(self, (parameter >> 4) & 0x0F, (parameter & 0x0F));
 			break;
-		case CMD::RETRIG:
-			Retrigger(parameter);
+		case XM_SAMPLER_CMD_RETRIG:
+			psy_audio_xmsamplerchannel_retrigger(self, parameter);
 			break;
-		case CMD::PANBRELLO:
-			Panbrello((parameter >> 4) & 0x0F, (parameter & 0x0F));
+		case XM_SAMPLER_CMD_PANBRELLO:
+			psy_audio_xmsamplerchannel_panbrello(self, (parameter >> 4) & 0x0F, (parameter & 0x0F));
 			break;
-		case CMD::ARPEGGIO:
-			Arpeggio(parameter);
-			break;
-			*/
+		case XM_SAMPLER_CMD_ARPEGGIO:
+			psy_audio_xmsamplerchannel_arpeggio(self, parameter);
+			break;			
 		}
-	}
+	}	
 	//3rd check: It is not needed that the voice is playing, but it applies to the last instrument.
-	/*if (InstrumentNo() != 255 && cmd == CMD::EXTENDED && (parameter & 0xF0) == CMD_E::EE)
+	if (psy_audio_xmsamplerchannel_instrumentno(self) != psy_audio_NOTECOMMANDS_INST_EMPTY &&
+			cmd == XM_SAMPLER_CMD_EXTENDED && (parameter & 0xF0) == XM_SAMPLER_CMD_EE)
 	{
 		switch (parameter & 0x0F)
 		{
-		case CMD_EE::EE_BACKGROUNDNOTECUT:
-			StopBackgroundNotes(XMInstrument::NewNoteAction::STOP);
+		case XM_SAMPLER_CMD_EE_BACKGROUNDNOTECUT:
+			psy_audio_xmsamplerchannel_stopbackgroundnotes(
+				self, psy_audio_NNA_STOP);
 			break;
-		case CMD_EE::EE_BACKGROUNDNOTEOFF:
-			StopBackgroundNotes(XMInstrument::NewNoteAction::NOTEOFF);
+		case XM_SAMPLER_CMD_EE_BACKGROUNDNOTEOFF:
+			psy_audio_xmsamplerchannel_stopbackgroundnotes(
+				self, psy_audio_NNA_NOTEOFF);			
 			break;
-		case CMD_EE::EE_BACKGROUNDNOTEFADE:
-			StopBackgroundNotes(XMInstrument::NewNoteAction::FADEOUT);
+		case XM_SAMPLER_CMD_EE_BACKGROUNDNOTEFADE:
+			psy_audio_xmsamplerchannel_stopbackgroundnotes(
+				self, psy_audio_NNA_FADEOUT);			
 			break;
 		}
 	}
-	*/
 }
 
 // Add Here those commands that have an effect each tracker tick ( 1 and onwards) .
@@ -601,106 +704,148 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 {
 	int i;
-
-	/*
+	
 	for (i = 0; i < psy_audio_xmsampler_numvoices(self->m_pSampler); i++)
 	{
-		if (m_pSampler->rVoice(i).ChannelNum() == m_Index && m_pSampler->rVoice(i).IsPlaying())  m_pSampler->rVoice(i).Tick();
+		if (psy_audio_xmsamplervoice_channelnum(psy_audio_xmsampler_rvoice(self->m_pSampler, i)) == self->m_Index &&
+				psy_audio_xmsamplervoice_isplaying(psy_audio_xmsampler_rvoice(self->m_pSampler, i))) {			
+			psy_audio_xmsamplervoice_tick(psy_audio_xmsampler_rvoice(self->m_pSampler, i));
+		}
 	}
-	if (ForegroundVoice()) // Effects that need a voice to be active.
+	if (psy_audio_xmsamplerchannel_foregroundvoice(self)) // Effects that need a voice to be active.
 	{
-		if (ForegroundVoice()->IsAutoVibrato())
+		if (psy_audio_xmsamplervoice_isautovibrato(psy_audio_xmsamplerchannel_foregroundvoice(self)))
 		{
-			ForegroundVoice()->AutoVibrato();
+			psy_audio_xmsamplervoice_doautovibrato(psy_audio_xmsamplerchannel_foregroundvoice(self));			
 		}
-		if (EffectFlags() & EffectFlag::PITCHSLIDE)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_PITCHSLIDE)
 		{
-			ForegroundVoice()->PitchSlide();
+			psy_audio_xmsamplervoice_pitchslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
-		if (EffectFlags() & EffectFlag::SLIDE2NOTE)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_SLIDE2NOTE)
 		{
-			ForegroundVoice()->Slide2Note();
+			psy_audio_xmsamplervoice_slide2note(psy_audio_xmsamplerchannel_foregroundvoice(self));			
 		}
-		if (EffectFlags() & EffectFlag::VIBRATO)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_VIBRATO)
 		{
-			ForegroundVoice()->Vibrato();
+			psy_audio_xmsamplervoice_vibrato(psy_audio_xmsamplerchannel_foregroundvoice(self));			
 		}
-		if (EffectFlags() & EffectFlag::TREMOLO)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_TREMOLO)
 		{
-			ForegroundVoice()->Tremolo();
+			psy_audio_xmsamplervoice_tremolo(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
-		if (EffectFlags() & EffectFlag::PANBRELLO)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_PANBRELLO)
 		{
-			ForegroundVoice()->Panbrello();
+			psy_audio_xmsamplervoice_panbrello(psy_audio_xmsamplerchannel_foregroundvoice(self));			
 		}
-		if (EffectFlags() & EffectFlag::TREMOR)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_TREMOR)
 		{
-			ForegroundVoice()->Tremor();
+			psy_audio_xmsamplervoice_tremor(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
-		if (EffectFlags() & EffectFlag::VOLUMESLIDE)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_VOLUMESLIDE)
 		{
-			ForegroundVoice()->VolumeSlide();
+			psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
-		if (EffectFlags() & EffectFlag::NOTECUT)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_NOTECUT)
 		{
-			NoteCut();
+			psy_audio_xmsamplerchannel_notecut(self);
 		}
-		if (EffectFlags() & EffectFlag::ARPEGGIO)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_ARPEGGIO)
 		{
-			ForegroundVoice()->UpdateSpeed();
+			psy_audio_xmsamplervoice_updatespeed(psy_audio_xmsamplerchannel_foregroundvoice(self));			
 		}
-		if (EffectFlags() & EffectFlag::RETRIG)
+		if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_RETRIG)
 		{
-			LastVoicePanFactor(ForegroundVoice()->PanFactor());
-
-			if (m_RetrigOperation == 1)
+			psy_audio_xmsamplerchannel_setlastvoicepanfactor(self,
+				psy_audio_xmsamplervoice_panfactor(
+					psy_audio_xmsamplerchannel_foregroundvoice(self)));
+			if (self->m_RetrigOperation == 1)
 			{
-				int tmp = ForegroundVoice()->Volume() + m_RetrigVol;
+				int tmp;				
+
+				tmp = psy_audio_xmsamplervoice_volume(
+					psy_audio_xmsamplerchannel_foregroundvoice(self)) +
+					self->m_RetrigVol;
 				if (tmp < 0) tmp = 0;
 				else if (tmp > 128) tmp = 128;
-				LastVoiceVolume(tmp);
-			} else if (m_RetrigOperation == 2)
+				psy_audio_xmsamplerchannel_setlastvoicevolume(self, tmp);
+			} else if (self->m_RetrigOperation == 2)
 			{
-				int tmp = ForegroundVoice()->Volume() * m_RetrigVol;
+				int tmp;
+				
+				tmp = psy_audio_xmsamplervoice_volume(
+					psy_audio_xmsamplerchannel_foregroundvoice(self)) *
+					self->m_RetrigVol;
 				if (tmp < 0) tmp = 0;
 				else if (tmp > 128) tmp = 128;
-				LastVoiceVolume(tmp);
+				psy_audio_xmsamplerchannel_setlastvoicevolume(self, tmp);
 			}
 
-			if (ForegroundVoice()->AmplitudeEnvelope().Envelope().IsEnabled())
-				LastAmpEnvelopePosInSamples(ForegroundVoice()->AmplitudeEnvelope().GetPositionInSamples());
-			if (ForegroundVoice()->PanEnvelope().Envelope().IsEnabled())
-				LastPanEnvelopePosInSamples(ForegroundVoice()->PanEnvelope().GetPositionInSamples());
-			if (ForegroundVoice()->FilterEnvelope().Envelope().IsEnabled())
-				LastFilterEnvelopePosInSamples(ForegroundVoice()->FilterEnvelope().GetPositionInSamples());
-			if (ForegroundVoice()->PitchEnvelope().Envelope().IsEnabled())
-				LastPitchEnvelopePosInSamples(ForegroundVoice()->PitchEnvelope().GetPositionInSamples());
-			ForegroundVoice()->Retrig();
-		}
-	}
-	if (EffectFlags() & EffectFlag::CHANNELVOLSLIDE)
-	{
-		ChannelVolumeSlide();
-	}
-	if (EffectFlags() & EffectFlag::PANSLIDE)
-	{
-		PanningSlide();
-	}
-	if (EffectFlags() & EffectFlag::NOTEDELAY)
-	{
-		if (m_pSampler->CurrentTick() == m_NoteCutTick)
-		{
-			for (std::vector<PatternEntry>::iterator ite = m_DelayedNote.begin(); ite != m_DelayedNote.end(); ++ite) {
-				m_pSampler->Tick(m_Index, &(*ite));
+			if (psy_dsp_envelopesettings_isenabled(
+				xmenvelopecontroller_envelope(
+					psy_audio_xmsamplervoice_amplitudeenvelope(
+						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
+				psy_audio_xmsamplerchannel_setlastampenvelopeposinsamples(
+					self, xmenvelopecontroller_getpositioninsamples(
+						psy_audio_xmsamplervoice_amplitudeenvelope(
+							psy_audio_xmsamplerchannel_foregroundvoice(self))));				
 			}
-			m_DelayedNote.clear();
+			if (psy_dsp_envelopesettings_isenabled(
+				xmenvelopecontroller_envelope(
+					psy_audio_xmsamplervoice_panenvelope(
+						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
+				psy_audio_xmsamplerchannel_setlastpanenvelopeposinsamples(
+					self, xmenvelopecontroller_getpositioninsamples(
+						psy_audio_xmsamplervoice_panenvelope(
+							psy_audio_xmsamplerchannel_foregroundvoice(self))));
+			}
+			if (psy_dsp_envelopesettings_isenabled(
+				xmenvelopecontroller_envelope(
+					psy_audio_xmsamplervoice_filterenvelope(
+						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
+				psy_audio_xmsamplerchannel_setlastfilterenvelopeposinsamples(
+					self, xmenvelopecontroller_getpositioninsamples(
+						psy_audio_xmsamplervoice_filterenvelope(
+							psy_audio_xmsamplerchannel_foregroundvoice(self))));
+			}
+			if (psy_dsp_envelopesettings_isenabled(
+				xmenvelopecontroller_envelope(
+					psy_audio_xmsamplervoice_pitchenvelope(
+						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
+				psy_audio_xmsamplerchannel_setlastpitchenvelopeposinsamples(
+					self, xmenvelopecontroller_getpositioninsamples(
+						psy_audio_xmsamplervoice_pitchenvelope(
+							psy_audio_xmsamplerchannel_foregroundvoice(self))));
+			}
+			psy_audio_xmsamplervoice_retrig(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
 	}
-	if (EffectFlags() & EffectFlag::GLOBALVOLSLIDE)
+	if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_CHANNELVOLSLIDE)
 	{
-		m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+		psy_audio_xmsamplerchannel_channelvolumeslide(self);
 	}
-	*/
+	if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_PANSLIDE)
+	{
+		psy_audio_xmsamplerchannel_panningslide(self);
+	}
+	if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_NOTEDELAY)
+	{
+		if (psy_audio_xmsampler_currenttick(self->m_pSampler) == self->m_NoteCutTick)
+		{
+			psy_List* ite;
+
+			for (ite = self->m_DelayedNote; ite != NULL; psy_list_next(&ite)) {
+				psy_audio_xmsampler_tick(self->m_pSampler, self->m_Index,
+					ite->entry);				
+			}
+			psy_list_deallocate(&self->m_DelayedNote, NULL);			
+		}
+	}
+	if (psy_audio_xmsamplerchannel_effectflags(self) & XM_SAMPLER_EFFECT_GLOBALVOLSLIDE)
+	{
+		psy_audio_xmsampler_setslidevolume(self->m_pSampler,
+			self->m_GlobalVolSlideSpeed);		
+	}	
 }
 
 void psy_audio_xmsamplerchannel_globalvolslide(psy_audio_XMSamplerChannel* self,
@@ -716,26 +861,30 @@ void psy_audio_xmsamplerchannel_globalvolslide(psy_audio_XMSamplerChannel* self,
 		self->m_EffectFlags |= XM_SAMPLER_EFFECT_GLOBALVOLSLIDE;
 		self->m_GlobalVolSlideSpeed = speed;
 		if (speed == 0xF) {
-			//self->m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			psy_audio_xmsampler_setslidevolume(self->m_pSampler,
+				self->m_GlobalVolSlideSpeed);
 		}
 	} else if (ISSLIDEDOWN(speed)) { // Slide down
 		speed = GETSLIDEDOWNVAL(speed);
 		self->m_EffectFlags |= XM_SAMPLER_EFFECT_GLOBALVOLSLIDE;
 		self->m_GlobalVolSlideSpeed = -speed;
 		if (speed == 0xF) {
-			// m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			psy_audio_xmsampler_setslidevolume(self->m_pSampler,
+				self->m_GlobalVolSlideSpeed);			
 		}
 	} else if (ISFINESLIDEUP(speed)) { // FineSlide up
 		self->m_GlobalVolSlideSpeed = GETSLIDEUPVAL(speed);
-		// self->m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+		psy_audio_xmsampler_setslidevolume(self->m_pSampler,
+			self->m_GlobalVolSlideSpeed);		
 	} else if ((speed & 0xF0) == 0xF0) { // FineSlide down
 		self->m_GlobalVolSlideSpeed = -GETSLIDEDOWNVAL(speed);
-		// self->m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+		psy_audio_xmsampler_setslidevolume(self->m_pSampler,
+			self->m_GlobalVolSlideSpeed);
 	}
 }
 
-void psy_audio_xmsamplerchannel_panningslidespeed(psy_audio_XMSamplerChannel* self,
-	int speed)
+void psy_audio_xmsamplerchannel_panningslidespeed(
+	psy_audio_XMSamplerChannel* self, int speed)
 {
 	if (speed == 0) {
 		if (self->m_PanSlideMem == 0) return;
@@ -747,21 +896,48 @@ void psy_audio_xmsamplerchannel_panningslidespeed(psy_audio_XMSamplerChannel* se
 		self->m_EffectFlags |= XM_SAMPLER_EFFECT_PANSLIDE;
 		self->m_PanSlideSpeed = -speed / 64.0f;
 		if (speed == 0xF) {
-		//	PanningSlide();
+			psy_audio_xmsamplerchannel_panningslide(self);		
 		}
 	} else if (ISSLIDEDOWN(speed)) { // Slide Right
 		speed = GETSLIDEDOWNVAL(speed);
 		self->m_EffectFlags |= XM_SAMPLER_EFFECT_PANSLIDE;
 		self->m_PanSlideSpeed = speed / 64.0f;
 		if (speed == 0xF) {
-		//	PanningSlide();
+			psy_audio_xmsamplerchannel_panningslide(self);
 		}
 	} else if (ISFINESLIDEUP(speed)) { // FineSlide left
 		self->m_PanSlideSpeed = -(GETSLIDEUPVAL(speed)) / 64.0f;
-		// PanningSlide();
+		psy_audio_xmsamplerchannel_panningslide(self);
 	} else if (ISFINESLIDEDOWN(speed)) { // FineSlide right
 		self->m_PanSlideSpeed = GETSLIDEDOWNVAL(speed) / 64.0f;
-		// PanningSlide();
+		psy_audio_xmsamplerchannel_panningslide(self);
+	}
+}
+
+void psy_audio_xmsamplerchannel_channelvolumeslidespeed(
+	psy_audio_XMSamplerChannel* self, int speed)
+{
+	if (speed == 0) {
+		if (self->m_ChanVolSlideMem == 0) return;
+		speed = self->m_ChanVolSlideMem;
+	} else self->m_ChanVolSlideMem = speed;
+
+	if (ISSLIDEUP(speed)) { // Slide up
+		speed = GETSLIDEUPVAL(speed);
+		self->m_EffectFlags |= XM_SAMPLER_EFFECT_CHANNELVOLSLIDE;
+		self->m_ChanVolSlideSpeed = speed / 64.0f;
+		if (speed == 0xF) psy_audio_xmsamplerchannel_channelvolumeslide(self);
+	} else if (ISSLIDEDOWN(speed)) { // Slide down
+		speed = GETSLIDEDOWNVAL(speed);
+		self->m_EffectFlags |= XM_SAMPLER_EFFECT_CHANNELVOLSLIDE;
+		self->m_ChanVolSlideSpeed = -speed / 64.0f;
+		if (speed == 0xF) psy_audio_xmsamplerchannel_channelvolumeslide(self);
+	} else if (ISFINESLIDEUP(speed)) { // FineSlide up
+		self->m_ChanVolSlideSpeed = (GETSLIDEUPVAL(speed)) / 64.0f;
+		psy_audio_xmsamplerchannel_channelvolumeslide(self);
+	} else if (ISFINESLIDEDOWN(speed)) { // FineSlide down
+		self->m_ChanVolSlideSpeed = -GETSLIDEDOWNVAL(speed) / 64.0f;
+		psy_audio_xmsamplerchannel_channelvolumeslide(self);
 	}
 }
 
@@ -773,13 +949,18 @@ void psy_audio_xmsamplerchannel_pitchslide(psy_audio_XMSamplerChannel* self,
 		speed = self->m_PitchSlideMem;
 	} else self->m_PitchSlideMem = speed & 0xff;
 	if (speed < 0xE0 || note != psy_audio_NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
-	{									// Porta to note does not have Fine.
+	{															// Porta to note does not have Fine.
 		speed <<= 2;
-		//if (psy_audio_xmsamplerchannel_foregroundvoice(self)) { psy_audio_xmsamplerchannel_foregroundvoice(self)->m_PitchSlideSpeed = bUp ? -speed : speed; }
+		if (psy_audio_xmsamplerchannel_foregroundvoice(self)) {
+				psy_audio_xmsamplerchannel_foregroundvoice(self)->m_PitchSlideSpeed = bUp ? -speed : speed;
+		}
 		if (note != psy_audio_NOTECOMMANDS_EMPTY)
 		{
 			if (note != psy_audio_NOTECOMMANDS_RELEASE) {
-// 				if (psy_audio_xmsamplerchannel_foregroundvoice(self)) { psy_audio_xmsamplerchannel_foregroundvoice(self)->m_Slide2NoteDestPeriod = psy_audio_xmsamplerchannel_foregroundvoice(self)->NoteToPeriod(note); }
+ 				if (psy_audio_xmsamplerchannel_foregroundvoice(self)) {
+					psy_audio_xmsamplerchannel_foregroundvoice(self)->m_Slide2NoteDestPeriod =
+						psy_audio_xmsamplervoice_notetoperiod(psy_audio_xmsamplerchannel_foregroundvoice(self), note, TRUE);
+				}
 				self->m_EffectFlags |= XM_SAMPLER_EFFECT_SLIDE2NOTE;
 			}
 		} else self->m_EffectFlags |= XM_SAMPLER_EFFECT_PITCHSLIDE;
@@ -788,14 +969,14 @@ void psy_audio_xmsamplerchannel_pitchslide(psy_audio_XMSamplerChannel* self,
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_PitchSlideSpeed = bUp ? -speed : speed;
-			// psy_audio_xmsamplerchannel_foregroundvoice(self)->PitchSlide();
+			psy_audio_xmsamplervoice_pitchslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
 	} else {
 		speed = (speed & 0xf) << 2;
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_PitchSlideSpeed = bUp ? -speed : speed;
-			//psy_audio_xmsamplerchannel_foregroundvoice(self)->PitchSlide();
+			psy_audio_xmsamplervoice_pitchslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
 	}
 }
@@ -815,8 +996,7 @@ void psy_audio_xmsamplerchannel_volumeslide(psy_audio_XMSamplerChannel* self,
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_VolumeSlideSpeed = speed << 1;
 			if (speed == 0xF) {
-				// psy_audio_xmsamplervoice_volumeslide(
-					//	psy_audio_xmsamplerchannel_foregroundvoice(self));
+				psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));				
 			}
 		}
 	} else if (ISSLIDEDOWN(speed)) { // Slide Down
@@ -826,23 +1006,20 @@ void psy_audio_xmsamplerchannel_volumeslide(psy_audio_XMSamplerChannel* self,
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_VolumeSlideSpeed = -(speed << 1);
 				if (speed == 0xF) {
-					// psy_audio_xmsamplervoice_volumeslide(
-					//	psy_audio_xmsamplerchannel_foregroundvoice(self));
+					psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 				}
 		}
 	} else if (ISFINESLIDEUP(speed)) { // FineSlide Up
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_VolumeSlideSpeed = GETSLIDEUPVAL(speed) << 1;
-			// psy_audio_xmsamplervoice_volumeslide(
-					//	psy_audio_xmsamplerchannel_foregroundvoice(self));
+			psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
 	} else if (ISFINESLIDEDOWN(speed)) { // FineSlide Down
 		if (psy_audio_xmsamplerchannel_foregroundvoice(self))
 		{
 			psy_audio_xmsamplerchannel_foregroundvoice(self)->m_VolumeSlideSpeed = -(GETSLIDEDOWNVAL(speed) << 1);
-			// psy_audio_xmsamplervoice_volumeslide(
-					//	psy_audio_xmsamplerchannel_foregroundvoice(self));
+			psy_audio_xmsamplervoice_volumeslide(psy_audio_xmsamplerchannel_foregroundvoice(self));
 		}
 	}
 }
@@ -933,9 +1110,17 @@ void psy_audio_xmsamplerchannel_arpeggio(psy_audio_XMSamplerChannel* self,
 		self->m_ArpeggioMem = param;
 	} else param = self->m_ArpeggioMem;
 	if (psy_audio_xmsamplerchannel_foregroundvoice(self))
-	{
-		// self->m_ArpeggioPeriod[0] = ForegroundVoice()->NoteToPeriod(Note() + ((param & 0xf0) >> 4));
-		// self->m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(Note() + (param & 0xf));
+	{		
+		self->m_ArpeggioPeriod[0] =
+			psy_audio_xmsamplervoice_notetoperiod(
+				psy_audio_xmsamplerchannel_foregroundvoice(self),
+				psy_audio_xmsamplerchannel_note(self) + ((param & 0xf0) >> 4),
+				TRUE);
+		self->m_ArpeggioPeriod[1] = 
+			psy_audio_xmsamplervoice_notetoperiod(
+				psy_audio_xmsamplerchannel_foregroundvoice(self),
+				psy_audio_xmsamplerchannel_note(self) + (param & 0xf),
+				TRUE);			
 	}
 	self->m_EffectFlags |= XM_SAMPLER_EFFECT_ARPEGGIO;
 }
@@ -1130,4 +1315,24 @@ void psy_audio_xmsamplerchannel_save(psy_audio_XMSamplerChannel* self,
 	psyfile_write_int32(songfile->file, self->m_DefaultCutoff);
 	psyfile_write_int32(songfile->file, self->m_DefaultRessonance);		
 	psyfile_write_uint32(songfile->file, (uint32_t)self->m_DefaultFilterType);
+}
+
+// paramview
+void psy_audio_xmsamplerchannel_level_normvalue(psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	/*if (self->index == UINTPTR_MAX) {
+		psy_audio_Buffer* memory;
+
+		memory = psy_audio_machine_buffermemory(
+			psy_audio_xmsampler_base(self->sampler));
+		if (memory) {
+			*rv = psy_audio_buffer_rmsdisplay(memory);
+		} else {
+			*rv = 0.f;
+		}
+	} else {
+		*rv = 0.f;
+	}*/
+	* rv = 0;
 }

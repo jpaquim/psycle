@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -67,12 +67,13 @@ void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
 	psy_audio_Sample* sample, psy_dsp_ResamplerQuality quality)
 {
 	self->sample = sample;
-	self->looped = FALSE;
+	self->pos.QuadPart = 0;	
+	self->speed = (int64_t)4294967296.0f;
+	self->speedinternal = self->speed;
 	self->playing = FALSE;
+	self->looped = FALSE;	
 	self->forward = 1;
-	self->pos.QuadPart = 0;
-	self->speed = (int64_t) 4294967296.0f;
-	self->speedinternal = self->speed;	
+		
 	psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(self, sample);
 	//psy_audio_buffer_init(&self->buffer, 2);
 	psy_audio_sampleiterator_initbuffer(self);
@@ -120,20 +121,19 @@ void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
 				psy_audio_sampleiterator_sustainloopstart(self);
 			self->currentloopend = psy_audio_sampleiterator_sustainloopend(self);
 
-		} else
-			if (psy_audio_sampleiterator_looptype(self)
-				!= psy_audio_SAMPLE_LOOP_DO_NOT) {
-				self->currentlooptype = psy_audio_sampleiterator_looptype(self);
-				self->currentloopstart = psy_audio_sampleiterator_loopstart(self);
-				self->currentloopend = psy_audio_sampleiterator_loopend(self);
-			} else {
-				// No loop is considered a loop that stops at the end.
-				// This way, it is not needed to check if a loop is enabled when
-				// checking if end loop is reached.
-				self->currentlooptype = psy_audio_SAMPLE_LOOP_DO_NOT;
-				self->currentloopstart = 0;
-				self->currentloopend = psy_audio_sampleiterator_length(self);
-			}
+		} else if (psy_audio_sampleiterator_looptype(self)
+			!= psy_audio_SAMPLE_LOOP_DO_NOT) {
+			self->currentlooptype = psy_audio_sampleiterator_looptype(self);
+			self->currentloopstart = psy_audio_sampleiterator_loopstart(self);
+			self->currentloopend = psy_audio_sampleiterator_loopend(self);
+		} else {
+			// No loop is considered a loop that stops at the end.
+			// This way, it is not needed to check if a loop is enabled when
+			// checking if end loop is reached.
+			self->currentlooptype = psy_audio_SAMPLE_LOOP_DO_NOT;
+			self->currentloopstart = 0;
+			self->currentloopend = psy_audio_sampleiterator_length(self);
+		}
 		if (self->currentloopstart >= self->currentloopend) {
 			self->currentloopstart = self->currentloopend - 1;
 		}		
@@ -180,11 +180,14 @@ psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator* self, uint
 {
 	psy_dsp_amp_t* src;
 
-	src = psy_audio_buffer_at(&self->sample->channels, channel);
-	return psy_dsp_resampler_work_float_unchecked(
-		psy_dsp_multiresampler_base(&self->resampler),
-		(channel == 0) ? self->left : self->right,
-		self->pos.LowPart);
+	if (channel < self->sample->channels.numchannels) {
+		src = psy_audio_buffer_at(&self->sample->channels, channel);
+		return psy_dsp_resampler_work_float_unchecked(
+			psy_dsp_multiresampler_base(&self->resampler),
+			(channel == 0) ? self->left : self->right,
+			self->pos.LowPart);
+	}
+	return 0.f;
 }
 
 void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
@@ -238,7 +241,7 @@ void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
 			break;
 		case psy_audio_SAMPLE_LOOP_DO_NOT://fallthrough
 		default:
-			// Playing(false);
+			psy_audio_sampleiterator_stop(self);
 			break;
 		}
 	}
@@ -520,4 +523,24 @@ void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uintpt
 		self->pos.HighPart = val;
 	} else if (value < self->sample->numframes) self->pos.HighPart = value;
 	else self->pos.HighPart = psy_audio_sampleiterator_length(self) - 1;
+}
+
+void psy_audio_sampleiterator_noteoff(psy_audio_SampleIterator* self)
+{
+	if (psy_audio_sampleiterator_sustainlooptype(self) != psy_audio_SAMPLE_LOOP_DO_NOT)
+	{
+		if (psy_audio_sampleiterator_looptype(self) != psy_audio_SAMPLE_LOOP_DO_NOT) {
+			self->currentlooptype = psy_audio_sampleiterator_looptype(self);
+			self->currentloopstart = psy_audio_sampleiterator_loopstart(self);
+			self->currentloopend = psy_audio_sampleiterator_loopend(self);
+		} else {
+			self->currentlooptype = psy_audio_SAMPLE_LOOP_DO_NOT;
+			self->currentloopstart = 0;
+			self->currentloopend = psy_audio_sampleiterator_length(self) - 1;
+		}
+		if (self->currentloopstart >= self->currentloopend) {
+			self->currentloopstart = self->currentloopend - 1;
+		}
+		psy_audio_sampleiterator_refillbuffers(self, TRUE);
+	}
 }

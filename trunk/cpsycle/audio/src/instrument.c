@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -34,6 +34,7 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 	assert(self);
 
 	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
+	self->fixedkey = psy_audio_NOTECOMMANDS_EMPTY; // disabled
 	psy_audio_parameterrange_init(&self->keyrange,
 		0, psy_audio_NOTECOMMANDS_RELEASE - 1,
 		0, psy_audio_NOTECOMMANDS_RELEASE - 1);
