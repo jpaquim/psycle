@@ -118,8 +118,7 @@ void psycleconfig_makevisual(PsycleConfig* self)
 }
 
 // settings
-
-void psycleconfig_loadskin(PsycleConfig* self, const char* path)
+void psycleconfig_loadskin(PsycleConfig* self, const psy_Path* path)
 {
 	psy_Property skin;
 	const char* machine_gui_bitmap;

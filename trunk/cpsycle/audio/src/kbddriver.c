@@ -36,6 +36,8 @@ typedef struct {
 	psy_EventDriver driver;
 	int (*error)(int, const char*);
 	psy_EventDriverInput lastinput;
+	psy_EventDriverCmd lastcmd;
+	const char* lastcmdsection;
 	psy_Property* cmddef;
 	psy_Property* configuration;
 	bool shift;
@@ -162,6 +164,8 @@ int driver_open(psy_EventDriver* driver)
 	self->lastinput.message = 0;
 	self->chordmode = 0;
 	self->shift = 0;
+	self->lastcmd.id = -1;
+	self->lastcmdsection = NULL;
 	return 0;
 }
 
@@ -178,7 +182,7 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 {	
 	KbdDriver* self;
-	uintptr_t keycode;	
+	uint32_t keycode;	
 	bool ctrl;
 	bool alt;
 
@@ -186,8 +190,9 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 	self = (KbdDriver*)(driver);
 
+	self->lastcmd.id = -1;
 	// patternview chordmode
-	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
+	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
 		return;
 	}
@@ -196,9 +201,11 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	}
 	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
 		bool noteedit;
+		bool patternedit;
 
-		noteedit = psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_PATTERNEDIT, 0, 0)
-			&& psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_NOTECOLUMN, 0, 0);
+		patternedit = psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_PATTERNEDIT, 0, 0);
+		noteedit = patternedit &&
+			psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_NOTECOLUMN, 0, 0);
 		if (noteedit && self->shift && !self->chordmode && keycode != 16 /* Shift Key*/) {
 			psy_EventDriverCmd cmd;
 			psy_EventDriverInput testnote;
@@ -222,6 +229,16 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 			if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
 				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_INSERTNOTEOFF, 1, 0);
 				return;
+			}
+		} else if (patternedit) {
+			psy_EventDriverCmd cmd;
+			static const char* trackersection = "tracker";
+
+			cmd.id = -1;
+			driver_cmd(driver, "tracker", input, &cmd);
+			if (cmd.id != -1) {
+				self->lastcmd = cmd;
+				self->lastcmdsection = trackersection;
 			}
 		}
 	}
@@ -258,7 +275,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		psy_List* p;
 		psy_Property* property = NULL;
 
-		for (p = psy_property_children(section); p != NULL;
+		for (p = psy_property_begin(section); p != NULL;
 				psy_list_next(&p)) {			
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_item_int(property) == input.param1) {
@@ -274,7 +291,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		psy_List* p;
 		psy_Property* property = NULL;
 
-		for (p = psy_property_children(section); p != NULL;
+		for (p = psy_property_begin(section); p != NULL;
 				psy_list_next(&p)) {
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_item_int(property) == input.param1) {				
@@ -297,7 +314,13 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 	psy_EventDriverCmd cmd;	
 		
 	self = (KbdDriver*)(driver);
-	driver_cmd(driver, section, self->lastinput, &cmd);	
+	if (self->lastcmd.id == -1) {
+		driver_cmd(driver, section, self->lastinput, &cmd);
+	} else if (self->lastcmdsection && strcmp(section, self->lastcmdsection) == 0) {
+		cmd = self->lastcmd;
+	} else {
+		cmd.id = -1;
+	}
 	return cmd;
 }
 

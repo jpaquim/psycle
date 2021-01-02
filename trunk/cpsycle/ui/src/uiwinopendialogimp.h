@@ -7,7 +7,10 @@
 #ifndef psy_ui_win_OPENDIALOGIMP_H
 #define psy_ui_win_OPENDIALOGIMP_H
 
+// local
 #include "uiopendialog.h"
+// file
+#include <dir.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -24,8 +27,8 @@ typedef struct psy_ui_win_OpenDialogImp {
 	char* title;
 	char* filter;
 	char* defaultextension;
-	char* initialdir;
-	char* filename;
+	char* initialdir;	
+	psy_Path path;
 } psy_ui_win_OpenDialogImp;
 
 void psy_ui_win_opendialogimp_init(psy_ui_win_OpenDialogImp*, struct psy_ui_Component* parent);

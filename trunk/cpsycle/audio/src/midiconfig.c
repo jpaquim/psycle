@@ -191,7 +191,7 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig* self,
 			if (!controllers) {
 				return;
 			}
-			for (i = psy_property_children_const(controllers), c = 0; i != NULL;
+			for (i = psy_property_begin_const(controllers), c = 0; i != NULL;
 					psy_list_next_const(&i), ++c) {
 				const psy_Property* controller;
 

@@ -15,7 +15,7 @@ void machineparamconfig_init(MachineParamConfig* self, psy_Property* parent)
 	self->parent = parent;
 	machineparamconfig_makeview(self, parent);
 	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_themechanged);
+	psy_signal_init(&self->signal_themechanged);	
 }
 
 void machineparamconfig_dispose(MachineParamConfig* self)
@@ -23,7 +23,7 @@ void machineparamconfig_dispose(MachineParamConfig* self)
 	assert(self);
 
 	psy_signal_dispose(&self->signal_changed);
-	psy_signal_dispose(&self->signal_themechanged);
+	psy_signal_dispose(&self->signal_themechanged);	
 }
 
 void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
@@ -155,15 +155,16 @@ bool machineparamconfig_showfloated(const MachineParamConfig* self)
 const char* machineparamconfig_dialbpm(const MachineParamConfig* self)
 {
 	assert(self);
-
+	
 	return psy_property_at_str(self->theme, "machinedialbmp", "");
 }
 
-void machineparamconfig_setdialbpm(MachineParamConfig* self, const char* path)
+void machineparamconfig_setdialbpm(MachineParamConfig* self,
+	const char* filename)
 {
 	assert(self);
 
-	psy_property_set_str(self->theme, "machinedialbmp", path);
+	psy_property_set_str(self->theme, "machinedialbmp", filename);
 }
 
 // events

@@ -34,7 +34,7 @@ typedef struct {
 	LPDIRECTINPUTDEVICE8 joystick;
 	int count;
 	psy_Table inputs;	
-	int deviceid;
+	uint32_t deviceid;
 	bool active;
 	int (*error)(int, const char*);
 	psy_EventDriverInput lastinput;	
@@ -224,7 +224,7 @@ void driver_configure(psy_EventDriver* context, psy_Property* configuration)
 
 		p = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
-			self->deviceid = psy_property_item_int(p);
+			self->deviceid = (uint32_t)psy_property_item_int(p);
 		}
 	}
 }
@@ -362,7 +362,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		psy_Property* property = NULL;
 		psy_List* p;
 
-		for (p = psy_property_children(section); p != NULL;
+		for (p = psy_property_begin(section); p != NULL;
 				psy_list_next(&p)) {			
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_item_int(property) == input.param1) {

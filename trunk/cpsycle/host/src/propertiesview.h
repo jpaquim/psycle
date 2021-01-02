@@ -87,6 +87,12 @@ void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
 
 void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
 
+INLINE const psy_Property* propertiesrenderer_properties(const
+	PropertiesRenderer* self)
+{
+	return self->properties;
+}
+
 INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 {
 	return &self->component;

@@ -1207,12 +1207,12 @@ void psy_ui_component_focus_prev(psy_ui_Component* self)
 int psy_ui_component_level(const psy_ui_Component* self)
 {
 	int rv;
-	psy_ui_Component* component;
+	const psy_ui_Component* component;
 
 	rv = 0;
 	component = self;
-	while (psy_ui_component_parent(component)) {
-		component = psy_ui_component_parent(component);
+	while (psy_ui_component_parent_const(component)) {
+		component = psy_ui_component_parent_const(component);
 		++rv;
 	}
 	return rv;

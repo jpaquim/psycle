@@ -41,6 +41,18 @@ typedef struct Tab {
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
 void tab_settext(Tab*, const char* text);
+psy_ui_Rectangle tab_position(const Tab*, const psy_ui_TextMetric*);
+
+typedef struct TabBarSkin {
+	psy_ui_Colour text;
+	psy_ui_Colour textsel;
+	psy_ui_Colour texthover;
+	psy_ui_Colour textlabel;
+	psy_ui_Colour linesel;
+	psy_ui_Colour linehover;
+} TabBarSkin;
+
+void tabbarskin_init(TabBarSkin*);
 
 typedef struct TabBar {
 	// inherits
@@ -50,8 +62,9 @@ typedef struct TabBar {
 	uintptr_t selected;
 	bool hover;
 	uintptr_t hoverindex;
-	uintptr_t tabalignment;
+	psy_ui_AlignType tabalignment;
 	psy_ui_Margin defaulttabmargin;
+	TabBarSkin skin;
 	// Signals
 	psy_Signal signal_change;
 } TabBar;
@@ -70,6 +83,7 @@ INLINE uintptr_t tabbar_selected(const TabBar* self)
 	return self->selected;	
 }
 
+void tabbar_settabalignment(TabBar*, psy_ui_AlignType);
 void tabbar_settabmargin(TabBar*, uintptr_t tab, const psy_ui_Margin*);
 void tabbar_settabmode(TabBar*, uintptr_t tab, TabMode);
 void tabbar_setdefaulttabmargin(TabBar*, const psy_ui_Margin*);

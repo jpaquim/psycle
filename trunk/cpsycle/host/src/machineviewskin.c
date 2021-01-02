@@ -132,13 +132,12 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 		strcat(filename, ".bmp");
 		psy_dir_findfile(skindir, filename, path);
 		if (path[0] != '\0') {
-			psy_ui_Bitmap bmp;
+			psy_ui_Bitmap bmp;			
 
-			psy_ui_bitmap_init(&bmp);
-			if (psy_ui_bitmap_load(&bmp, path) == 0) {
-				psy_ui_bitmap_dispose(&self->skinbmp);
+			psy_ui_bitmap_init(&bmp);			
+			if (psy_ui_bitmap_load(&bmp, path) == PSY_OK) {
 				self->skinbmp = bmp;
-			}
+			}			
 		}
 		strcpy(filename, machine_skin_name);
 		strcat(filename, ".psm");

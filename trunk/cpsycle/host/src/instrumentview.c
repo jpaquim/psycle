@@ -13,7 +13,6 @@
 #include <songio.h>
 #include <machinefactory.h>
 #include <virtualgenerator.h>
-#include <xm.h>
 // dsp
 #include <valuemapper.h>
 // std
@@ -397,10 +396,6 @@ static void instrumentview_onloadinstrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_ondeleteinstrument(InstrumentView*,
 	psy_ui_Component* sender);
-static void instrumentview_onaddentry(InstrumentView*,
-	psy_ui_Component* sender);
-static void instrumentview_onremoveentry(InstrumentView*,
-	psy_ui_Component* sender);
 static void instrumentview_oninstrumentinsert(InstrumentView*,
 	psy_audio_Instruments* sender,
 	const psy_audio_InstrumentIndex* index);
@@ -521,11 +516,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
 		instrumentview_onloadinstrument);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self,
-		instrumentview_ondeleteinstrument);
-	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
-		instrumentview_onaddentry);
-	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
-		instrumentview_onremoveentry);	
+		instrumentview_ondeleteinstrument);	
 	psy_signal_connect(&self->volume.signal_status, self,
 		instrumentview_onstatuschanged);
 	psy_signal_connect(&self->pan.signal_status, self,
@@ -666,40 +657,15 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			psy_audio_songfile_init(&songfile);
 			songfile.song = workspace_song(self->workspace);
 			songfile.file = &file;
-			if (psyfile_open(&file, psy_ui_opendialog_filename(&dialog))) {
-				psy_audio_xi_load(&songfile, psy_audio_instruments_selected(
-					&workspace_song(self->workspace)->instruments).subslot);
+			if (psyfile_open(&file, psy_path_full(psy_ui_opendialog_path(&dialog)))) {
+				// psy_audio_xi_load(&songfile, psy_audio_instruments_selected(
+				// &workspace_song(self->workspace)->instruments).subslot);
 			}
 			psyfile_close(&file);
 			psy_audio_songfile_dispose(&songfile);
 			instrumentsbox_rebuild(&self->instrumentsbox);
 		}
 		psy_ui_opendialog_dispose(&dialog);
-	}
-}
-
-void instrumentview_onaddentry(InstrumentView* self, psy_ui_Component* sender)
-{
-	// todo: move to notemapview
-	if (self->general.instrument) {
-		psy_audio_InstrumentEntry entry;
-
-		psy_audio_instrumententry_init(&entry);
-		entry.sampleindex = samplesbox_selected(&self->general.notemapview.samplesbox);
-		psy_audio_instrument_addentry(self->general.instrument, &entry);
-		instrumentnotemapview_update(&self->general.notemapview);
-	}
-}
-
-void instrumentview_onremoveentry(InstrumentView* self, psy_ui_Component* sender)
-{	
-	// todo: move to notemapview
-	if (self->general.instrument) {
-		psy_audio_instrument_removeentry(
-			self->general.instrument,
-			self->general.notemapview.entryview.selected);
-		self->general.notemapview.entryview.selected = UINTPTR_MAX;
-		instrumentnotemapview_update(&self->general.notemapview);
 	}
 }
 

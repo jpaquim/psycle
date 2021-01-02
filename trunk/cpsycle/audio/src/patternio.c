@@ -14,11 +14,11 @@
 static void loadblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl);
 static void saveblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl, uintptr_t songtracks);
 
-void psy_audio_patternio_load(psy_audio_Pattern* pattern, const char* path, psy_dsp_big_beat_t bpl)
+void psy_audio_patternio_load(psy_audio_Pattern* pattern, const psy_Path* path, psy_dsp_big_beat_t bpl)
 {
 	FILE* fp;
 
-	if (fp = fopen(path, "rb")) {
+	if (fp = fopen(psy_path_full(path), "rb")) {
 		loadblock(fp, pattern, bpl);
 	}
 	fclose(fp);
@@ -80,11 +80,11 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_big_beat_t bpl)
 	}
 }
 
-void psy_audio_patternio_save(psy_audio_Pattern* pattern, const char* path, psy_dsp_big_beat_t bpl, uintptr_t songtracks)
+void psy_audio_patternio_save(psy_audio_Pattern* pattern, const psy_Path* path, psy_dsp_big_beat_t bpl, uintptr_t songtracks)
 {
 	FILE* fp;
 	
-	if (fp = fopen(path, "wb")) {
+	if (fp = fopen(psy_path_full(path), "wb")) {
 		saveblock(fp, pattern, bpl, songtracks);
 		fflush(fp);
 		fclose(fp);

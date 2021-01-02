@@ -11,6 +11,7 @@
 #include <plugincatcher.h>
 #include <songio.h>
 #include <exclusivelock.h>
+#include <dir.h>
 #ifdef _WIN32
 #include <windows.h>
 #include <conio.h>
@@ -43,7 +44,7 @@ static void cmdplayer_makedirectories(CmdPlayer*);
 static void cmdplayer_makeinputoutput(CmdPlayer*);
 static const char* cmdplayer_driverpath(CmdPlayer*);
 static void cmdplayer_setdriverlist(CmdPlayer*);
-static void cmdplayer_loadsong(CmdPlayer*, const char* path);
+static void cmdplayer_loadsong(CmdPlayer*, const char*);
 static void cmdplayer_applysongproperties(CmdPlayer*);
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(void);
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
     
 	if (argc == 1) {
 		usage();		
-	} else {
+	} else {				
 		cmdplayer_init(&cmdplayer);		
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
 		printf("psycle: player: press q to stop.\n");
@@ -214,11 +215,11 @@ void cmdplayer_initenv(CmdPlayer* self)
 
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
-	plugincatcher_init(&self->plugincatcher);
-	plugincatcher_setdirectories(&self->plugincatcher, self->directories);
+	psy_audio_plugincatcher_init(&self->plugincatcher);
+	psy_audio_plugincatcher_setdirectories(&self->plugincatcher, self->directories);
 	// psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 	//	workspace_onscanprogress);
-	if (!plugincatcher_load(&self->plugincatcher)) {
+	if (!psy_audio_plugincatcher_load(&self->plugincatcher)) {
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
 	}
@@ -228,8 +229,8 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 
 void cmdplayer_scanplugins(CmdPlayer* self)
 {		
-	plugincatcher_scan(&self->plugincatcher);	
-	plugincatcher_save(&self->plugincatcher);
+	psy_audio_plugincatcher_scan(&self->plugincatcher);	
+	psy_audio_plugincatcher_save(&self->plugincatcher);
 }
 
 void cmdplayer_makedirectories(CmdPlayer* self)
@@ -294,7 +295,7 @@ void cmdplayer_dispose(CmdPlayer* self)
 	self->song = 0;	
 	psy_property_deallocate(self->config);
 	self->config = 0;	
-	plugincatcher_dispose(&self->plugincatcher);
+	psy_audio_plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);	
 	psy_audio_exclusivelock_dispose();
 }

@@ -28,17 +28,17 @@ uint32_t FourCC(char *psName)
 	return retbuf;
 }
 
-int psyfile_open(PsyFile* self, const char* psFileName)
+int psyfile_open(PsyFile* self, const char* filename)
 {
-	strcpy(self->szName,psFileName);
-	self->_file = fopen(psFileName, "rb");	
+	strcpy(self->szName, filename);
+	self->_file = fopen(filename, "rb");
 	return (self->_file != NULL);
 }
 
-int psyfile_create(PsyFile* self, const char* psFileName, int overwrite)
+int psyfile_create(PsyFile* self, const char* filename, bool overwrite)
 {	
-	strcpy(self->szName,psFileName);
-	self->_file = fopen(psFileName, "rb");	
+	strcpy(self->szName, filename);
+	self->_file = fopen(filename, "rb");
 	if (self->_file != NULL)
 	{
 		fclose(self->_file);
@@ -46,9 +46,8 @@ int psyfile_create(PsyFile* self, const char* psFileName, int overwrite)
 		{
 			return 0;
 		}
-	}
-	
-	self->_file = fopen(psFileName, "wb");
+	}	
+	self->_file = fopen(filename, "wb");
 	return (self->_file != NULL);
 }
 

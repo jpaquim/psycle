@@ -75,10 +75,10 @@ psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory
 		return 0;
 	}
 	return psy_audio_machinefactory_makemachinefrompath(self, type,
-		plugincatcher_modulepath(self->catcher, type,
+		psy_audio_plugincatcher_modulepath(self->catcher, type,
 		self->loadnewgamefxblitz,
 		plugincatchername, fullpath),
-		plugincatcher_extractshellidx(plugincatchername),
+		psy_audio_plugincatcher_extractshellidx(plugincatchername),
 		instindex);
 }
 

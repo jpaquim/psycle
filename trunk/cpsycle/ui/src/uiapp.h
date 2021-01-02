@@ -35,6 +35,11 @@ typedef struct {
 
 extern psy_ui_App app;
 
+INLINE psy_ui_App* psy_ui_app(void)
+{
+	return &app;
+}
+
 void psy_ui_app_init(psy_ui_App*, uintptr_t instance);
 void psy_ui_app_dispose(psy_ui_App*);
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);

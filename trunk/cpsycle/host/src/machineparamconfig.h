@@ -41,7 +41,7 @@ bool machineparamconfig_hasproperty(const MachineParamConfig*, psy_Property*);
 
 bool machineparamconfig_showfloated(const MachineParamConfig*);
 const char* machineparamconfig_dialbpm(const MachineParamConfig*);
-void machineparamconfig_setdialbpm(MachineParamConfig*, const char*);
+void machineparamconfig_setdialbpm(MachineParamConfig*, const char* filename);
 
 bool machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
 bool machineparamconfig_onthemechanged(MachineParamConfig*, psy_Property*);

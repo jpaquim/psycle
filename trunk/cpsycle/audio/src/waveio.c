@@ -16,11 +16,11 @@
 void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 {
 	char header[9];
-	PsyFile file;
-
-	if (!psyfile_open(&file, path)) {
+	PsyFile file;	
+	
+	if (!psyfile_open(&file, path)) {		
 		return;
-	}
+	}	
 	psyfile_read(&file, header, 4);
 	header[4] = 0;		
 	if (strcmp(&header[0],"RIFF") == 0) {

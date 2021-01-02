@@ -4,6 +4,8 @@
 #ifndef psy_FILEIO_H
 #define psy_FILEIO_H
 
+#include "dir.h"
+
 #include <stdio.h>
 #include "../../detail/stdint.h"
 #include "../../detail/psydef.h"
@@ -36,8 +38,8 @@ typedef struct PsyFile {
 	int flip16;
 } PsyFile; 
 
-int psyfile_open(PsyFile*, const char* path);
-int psyfile_create(PsyFile*, const char* path, int overwrite);
+int psyfile_open(PsyFile*, const char* filename);
+int psyfile_create(PsyFile*, const char* filename, bool overwrite);
 int psyfile_close(PsyFile*);
 int psyfile_read(PsyFile*, void* data, uint32_t numbytes);
 int8_t psyfile_read_int8(PsyFile*);

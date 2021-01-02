@@ -109,7 +109,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 			psy_audio_Presets* presets;
 
 			presets = psy_audio_presets_allocinit();
-			status = psy_audio_presetsio_load(psy_path_full(&self->presetpath),
+			status = psy_audio_presetsio_load(&self->presetpath,
 				presets,
 				psy_audio_machine_numtweakparameters(self->machine),
 				psy_audio_machine_datasize(self->machine),
@@ -172,7 +172,7 @@ void presetsbar_onimport(PresetsBar* self, psy_ui_Component* sender)
 		psy_audio_Presets* presets;
 		
 		presets = psy_audio_presets_allocinit();
-		status = psy_audio_presetsio_load(psy_ui_opendialog_filename(&dialog),
+		status = psy_audio_presetsio_load(psy_ui_opendialog_path(&dialog),
 			presets,
 			psy_audio_machine_numtweakparameters(self->machine),
 			psy_audio_machine_datasize(self->machine),
@@ -201,7 +201,7 @@ void presetsbar_onexport(PresetsBar* self, psy_ui_Component* sender)
 			int status;
 
 			status = psy_audio_presetsio_save(
-				psy_ui_savedialog_filename(&dialog),
+				psy_ui_savedialog_path(&dialog),
 				psy_audio_machine_presets(self->machine));
 			if (status) {
 				workspace_outputerror(self->workspace,
@@ -228,16 +228,14 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 				"Vst Preset (*.fxp)|*.fxp", "FXP",
 				dirconfig_songs(&self->workspace->config.directories));
 			if (psy_ui_savedialog_execute(&dialog)) {
-				int status;
-				psy_Path path;
-
-				psy_path_init(&path, psy_ui_savedialog_filename(&dialog));
+				int status;				
+				
 				preset = psy_audio_preset_allocinit();
 				psy_audio_machine_currentpreset(self->machine, preset);
-				psy_audio_preset_setname(preset, psy_path_name(&path));
-				psy_path_dispose(&path);
+				psy_audio_preset_setname(preset,
+					psy_path_name(psy_ui_savedialog_path(&dialog)));				
 				status = psy_audio_presetio_savefxp(
-					psy_ui_savedialog_filename(&dialog),
+					psy_ui_savedialog_path(&dialog),
 					preset);
 				if (status) {
 					workspace_outputerror(self->workspace,
@@ -262,8 +260,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 				}
 				self->userpreset = TRUE;
 			}
-			status = psy_audio_presetsio_save(psy_path_full(&self->presetpath),
-				presets);
+			status = psy_audio_presetsio_save(&self->presetpath, presets);
 			if (status) {
 				workspace_outputerror(self->workspace,
 					psy_audio_presetsio_statusstr(status));

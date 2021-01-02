@@ -271,7 +271,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		psy_List* p;
 		psy_Property* property = NULL;
 
-		for (p = psy_property_children(section); p != NULL;
+		for (p = psy_property_begin(section); p != NULL;
 				psy_list_next(&p)) {			
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_item_int(property) == input.param1) {
@@ -287,7 +287,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		psy_List* p;
 		psy_Property* property = NULL;
 
-		for (p = psy_property_children(section); p != NULL;
+		for (p = psy_property_begin(section); p != NULL;
 				psy_list_next(&p)) {
 			property = (psy_Property*)psy_list_entry(p);
 			if (psy_property_item_int(property) == input.param1) {				

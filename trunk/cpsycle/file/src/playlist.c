@@ -74,19 +74,26 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 
 void psy_playlist_clear(psy_Playlist* self)
 {	
-	assert(self);
+	psy_Path path;
 	
+	assert(self);
+
+	psy_path_init(&path, self->path);
 	psy_property_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, self->path);	
+	propertiesio_save(self->recentsongs, &path);
+	psy_path_dispose(&path);
 }
 
 void psy_playlist_load(psy_Playlist* self)
 {
 	psy_List* p;
-	
-	propertiesio_load(self->recentsongs, self->path, 1);	
+	psy_Path path;
+
+	psy_path_init(&path, self->path);
+	propertiesio_load(self->recentsongs, &path, 1);
+	psy_path_dispose(&path);
 	if (self->recentfiles) {
-		for (p = psy_property_children(self->recentfiles); p != NULL;
+		for (p = psy_property_begin(self->recentfiles); p != NULL;
 			psy_list_next(&p)) {
 			psy_Property* property;
 			psy_Path path;
@@ -102,10 +109,14 @@ void psy_playlist_load(psy_Playlist* self)
 }
 
 void psy_playlist_save(psy_Playlist* self)
-{	
+{		
+	psy_Path path;
+
 	assert(self);
 
-	propertiesio_save(self->recentsongs, self->path);
+	psy_path_init(&path, self->path);
+	propertiesio_save(self->recentsongs, &path);
+	psy_path_dispose(&path);
 }
 
 void psy_playlist_setpath(psy_Playlist* self, const char* path)

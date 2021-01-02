@@ -1034,7 +1034,7 @@ void luaplugin_initmachine(psy_audio_LuaPlugin* self)
 
 	psy_luaimport_init(&in, self->script.L, self->client);
 	if (psy_luaimport_open(&in, "init")) {
-		lua_pushinteger(self->script.L,
+		lua_pushinteger(self->script.L, (lua_Integer)
 			psy_audio_machine_samplerate(psy_audio_luaplugin_base(self)));
 		psy_luaimport_pcall(&in, 0);
 		if (in.lasterr == 0) {

@@ -211,7 +211,7 @@ psy_Property* psy_property_sync(psy_Property* self, const psy_Property* source)
 	if (self != source) {
 		psy_List* i;
 
-		for (i = psy_property_children((psy_Property*)source); i != NULL;
+		for (i = psy_property_begin((psy_Property*)source); i != NULL;
 			psy_list_next(&i)) {
 			psy_Property* q;
 			const psy_Property* p;
@@ -262,14 +262,14 @@ bool psy_property_empty(const psy_Property* self)
 	return self->children == NULL;
 }
 
-psy_List* psy_property_children(psy_Property* self)
+psy_List* psy_property_begin(psy_Property* self)
 {
 	assert(self);
 
 	return self->children;
 }
 
-const psy_List* psy_property_children_const(const psy_Property* self)
+const psy_List* psy_property_begin_const(const psy_Property* self)
 {
 	assert(self);
 
@@ -1218,6 +1218,13 @@ bool psy_property_haskey(const psy_Property* self, const char* key)
 	assert(self);
 
 	return strcmp(self->item.key, key) == 0;
+}
+
+bool psy_property_hastype(const psy_Property* self, psy_PropertyType type)
+{
+	assert(self);
+
+	return self->item.typ == type;
 }
 
 psy_Property* psy_property_setid(psy_Property* self, intptr_t id)

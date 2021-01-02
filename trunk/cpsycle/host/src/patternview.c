@@ -1030,7 +1030,7 @@ void patternview_onpatternimport(PatternView* self)
 			dirconfig_songs(&self->workspace->config.directories));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			psy_audio_patternio_load(trackergridstate_pattern(&self->gridstate),
-				psy_ui_opendialog_filename(&dialog),
+				psy_ui_opendialog_path(&dialog),
 				psy_audio_player_bpl(workspace_player(self->workspace)));
 		}
 		psy_ui_opendialog_dispose(&dialog);
@@ -1048,7 +1048,7 @@ void patternview_onpatternexport(PatternView* self)
 				self->workspace))));
 		if (psy_ui_savedialog_execute(&dialog)) {
 			psy_audio_patternio_save(trackergridstate_pattern(&self->gridstate),
-				psy_ui_savedialog_filename(&dialog),
+				psy_ui_savedialog_path(&dialog),
 				psy_audio_player_bpl(workspace_player(self->workspace)),
 				psy_audio_player_numsongtracks(workspace_player(self->workspace)));
 		}

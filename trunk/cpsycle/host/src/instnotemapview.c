@@ -5,11 +5,10 @@
 
 #include "instnotemapview.h"
 
+// std
 #include <math.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
-#include "../../detail/os.h"
 
 static int isblack(int key)
 {
@@ -596,6 +595,8 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 // InstrumentNoteMapView
 static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 	InstrumentNoteMapMetrics);
+static void instrumentnotemapview_onaddentry(InstrumentNoteMapView*, psy_ui_Component* sender);
+static void instrumentnotemapview_onremoveentry(InstrumentNoteMapView*, psy_ui_Component* sender);
 
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_Component* parent, Workspace* workspace)
@@ -641,10 +642,14 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->keyboard.component, &margin);
 	psy_ui_margin_init_all(&margin,
-		psy_ui_value_makepx(0), psy_ui_value_makeew(2),
+		psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->keyboard.component, &margin);
 	instrumentnotemapview_setmetrics(self, self->metrics);
+	psy_signal_connect(&self->buttons.add.signal_clicked, self,
+		instrumentnotemapview_onaddentry);
+	psy_signal_connect(&self->buttons.remove.signal_clicked, self,
+		instrumentnotemapview_onremoveentry);
 }
 
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
@@ -668,6 +673,31 @@ void instrumentnotemapview_update(InstrumentNoteMapView* self)
 {
 	instrumentkeyboardview_updatemetrics(&self->keyboard);
 	instrumententryview_updatemetrics(&self->entryview);
-	psy_ui_component_updateoverflow(&self->entryview.component);
-	psy_ui_component_invalidate(&self->component);	
+	psy_ui_component_updateoverflow(instrumententryview_base(
+		&self->entryview));
+	psy_ui_component_invalidate(instrumentnotemapview_base(self));
+}
+
+void instrumentnotemapview_onaddentry(InstrumentNoteMapView* self,
+	psy_ui_Component* sender)
+{	
+	if (self->instrument) {
+		psy_audio_InstrumentEntry entry;
+
+		psy_audio_instrumententry_init(&entry);
+		entry.sampleindex = samplesbox_selected(&self->samplesbox);
+		psy_audio_instrument_addentry(self->instrument, &entry);
+		instrumentnotemapview_update(self);
+	}
+}
+
+void instrumentnotemapview_onremoveentry(InstrumentNoteMapView* self,
+	psy_ui_Component* sender)
+{
+	if (self->instrument) {
+		psy_audio_instrument_removeentry(self->instrument,
+			self->entryview.selected);
+		self->entryview.selected = UINTPTR_MAX;
+		instrumentnotemapview_update(self);
+	}
 }

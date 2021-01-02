@@ -87,7 +87,7 @@ void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
 
 	assert(self && self->installeddriver);	
 
-	for (p = psy_property_children(self->installeddriver); p != NULL; psy_list_next(&p)) {
+	for (p = psy_property_begin(self->installeddriver); p != NULL; psy_list_next(&p)) {
 		psy_Property* property;
 		intptr_t guid;
 
@@ -109,7 +109,7 @@ void eventdriverconfig_configeventdrivers(EventDriverConfig* self)
 
 	assert(self && self->activedrivers);
 		
-	for (p = psy_property_children(self->activedrivers); p != NULL;
+	for (p = psy_property_begin(self->activedrivers); p != NULL;
 			psy_list_next(&p)) {
 		psy_Property* property;
 
@@ -161,7 +161,7 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 			psy_Property* local;
 
 			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));
-			propertiesio_load(local, psy_ui_opendialog_filename(&opendialog), FALSE);
+			propertiesio_load(local, psy_ui_opendialog_path(&opendialog), FALSE);
 			psy_eventdriver_configure(eventdriver, local);			
 			if (self->activedrivers) {
 				eventdriverconfig_showactiveeventdriverconfig(self,
@@ -192,7 +192,7 @@ void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
 		success = psy_ui_savedialog_execute(&dialog);
 		if (success) {
 			propertiesio_save(psy_eventdriver_configuration(eventdriver),
-				psy_ui_savedialog_filename(&dialog));
+				psy_ui_savedialog_path(&dialog));
 		}
 		psy_ui_savedialog_dispose(&dialog);
 	}
@@ -270,7 +270,7 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 		uintptr_t i;
 
 		numdrivers = psy_audio_eventdrivers_size(&self->player->eventdrivers);
-		for (p = psy_property_children(self->eventdriverconfigurations), i = 0;
+		for (p = psy_property_begin(self->eventdriverconfigurations), i = 0;
 			p != NULL && i != numdrivers; psy_list_next(&p), ++i) {
 			psy_Property* configuration;
 
@@ -279,7 +279,7 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 				continue;
 			}
 			configuration = (psy_Property*)psy_list_entry(
-				psy_property_children(configuration));
+				psy_property_begin(configuration));
 			if (!psy_property_empty(configuration)) {
 				intptr_t guid;
 
