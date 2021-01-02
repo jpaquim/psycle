@@ -33,6 +33,8 @@ typedef struct ZoomBox {
 } ZoomBox;
 
 void zoombox_init(ZoomBox*, psy_ui_Component* parent);
+void zoombox_init_connect(ZoomBox*, psy_ui_Component* parent,
+	void* context, void* fp);
 
 void zoombox_setrate(ZoomBox*, double);
 

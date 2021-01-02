@@ -116,8 +116,8 @@ psy_Property* psy_property_sync(psy_Property*, const psy_Property* source);
 //
 uintptr_t psy_property_size(const psy_Property*);
 bool psy_property_empty(const psy_Property*);
-psy_List* psy_property_children(psy_Property*);
-const psy_List* psy_property_children_const(const psy_Property*);
+psy_List* psy_property_begin(psy_Property*);
+const psy_List* psy_property_begin_const(const psy_Property*);
 psy_Property* psy_property_first(psy_Property*);
 psy_Property* psy_property_parent(const psy_Property*);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
@@ -198,6 +198,7 @@ psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);
 psy_Property* psy_property_item_choice_parent(psy_Property*);
 bool psy_property_haskey(const psy_Property*, const char* key);
+bool psy_property_hastype(const psy_Property*, psy_PropertyType);
 uint32_t psy_property_item_colour(const psy_Property*);
 
 // Description

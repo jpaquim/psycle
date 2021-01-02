@@ -152,7 +152,7 @@ INLINE void trackergrid_setpgupdownstep(TrackerGrid* self, intptr_t step)
 	self->pgupdownstep = step;
 }
 
-bool trackergrid_handlecommand(TrackerGrid*, int cmd);
+bool trackergrid_handlecommand(TrackerGrid*, intptr_t cmd);
 // block menu
 void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);

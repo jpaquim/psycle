@@ -26,11 +26,11 @@ typedef enum {
 static int reallocstr(char** str, size_t size, size_t* cap);
 static int OnSaveIniEnum(FILE* file, psy_Property*, int level);
 
-int propertiesio_load(psy_Property* self, const char* path, int allowappend)
+int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 {
 	FILE* fp;
 				
-	fp = fopen(path, "rb");
+	fp = fopen(psy_path_full(path), "rb");
 	if (fp) {
 		int c;
 		uintptr_t cp = 0;
@@ -196,11 +196,11 @@ static int skiplevel;
 static int choicelevel;
 static char* lastsection;
 
-void propertiesio_save(const psy_Property* self, const char* path)
+void propertiesio_save(const psy_Property* self, const psy_Path* path)
 {
 	FILE* fp;
 
-	fp = fopen(path, "wb");
+	fp = fopen(psy_path_full(path), "wb");
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;

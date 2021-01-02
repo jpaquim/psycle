@@ -40,15 +40,25 @@ int psy_ui_opendialog_execute(psy_ui_OpenDialog* self)
 	return self->imp->vtable->dev_execute(self->imp);
 }
 
-const char* psy_ui_opendialog_filename(psy_ui_OpenDialog* self)
+const psy_Path* psy_ui_opendialog_path(const psy_ui_OpenDialog* self)
 {
-	return self->imp->vtable->dev_filename(self->imp);
+	return self->imp->vtable->dev_path(self->imp);
 }
 
 // psy_ui_OpenImp
+static psy_Path path;
+static bool path_initialized = FALSE;
+
 static void dev_dispose(psy_ui_OpenDialogImp* self) { }
 static int dev_execute(psy_ui_OpenDialogImp* self) { return 0; }
-static const char* dev_filename(psy_ui_OpenDialogImp* self) { return 0; }
+static const psy_Path* dev_path(const psy_ui_OpenDialogImp* self)
+{
+	if (!path_initialized) {
+		psy_path_init(&path, NULL);
+		path_initialized = TRUE;
+	}
+	return &path;
+}
 
 static psy_ui_OpenDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -58,7 +68,7 @@ static void imp_vtable_init(void)
 	if (!imp_vtable_initialized) {
 		imp_vtable.dev_dispose = dev_dispose;
 		imp_vtable.dev_execute = dev_execute;
-		imp_vtable.dev_filename = dev_filename;
+		imp_vtable.dev_path = dev_path;
 		imp_vtable_initialized = 1;
 	}
 }

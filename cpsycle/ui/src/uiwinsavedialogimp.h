@@ -9,6 +9,8 @@
 #define psy_ui_win_SAVEDIALOGIMP_H
 
 #include "uisavedialog.h"
+// file
+#include <dir.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -26,7 +28,7 @@ typedef struct psy_ui_win_SaveDialogImp {
 	char* filter;
 	char* defaultextension;
 	char* initialdir;
-	char* filename;
+	psy_Path path;
 } psy_ui_win_SaveDialogImp;
 
 void psy_ui_win_savedialogimp_init(psy_ui_win_SaveDialogImp*, struct psy_ui_Component* parent);

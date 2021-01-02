@@ -162,7 +162,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 		
 		psy_snprintf(catchername, 256, "%s:0",
 			psy_audio_machine_info(machine)->Name);		
-		path = plugincatcher_searchpath(&self->workspace->plugincatcher, catchername,
+		path = psy_audio_plugincatcher_searchpath(&self->workspace->plugincatcher, catchername,
 			MACH_LUA);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
@@ -226,7 +226,7 @@ void plugineditor_buildpluginlist(PluginEditor* self)
 		psy_List* p;
 		int c;
 
-		for (p = psy_property_children(workspace_pluginlist(self->workspace)), c = 0;
+		for (p = psy_property_begin(workspace_pluginlist(self->workspace)), c = 0;
 				p != NULL; psy_list_next(&p)) {
 			psy_Property* property;
 

@@ -1724,7 +1724,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 	catchername[0] = '\0';
 	psyfile_read(self->fp, &type, sizeof(type));
 	psyfile_readstring(self->fp, modulename, 256);
-	plugincatcher_catchername(self->song->machinefactory->catcher,
+	psy_audio_plugincatcher_catchername(self->song->machinefactory->catcher,
 		modulename, catchername, 0);
 	// todo shellidx;
 	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,

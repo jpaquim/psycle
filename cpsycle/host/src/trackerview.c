@@ -2078,7 +2078,7 @@ void trackergrid_enterdigitcolumn(TrackerGrid* self, psy_audio_PatternEntry* ent
 	}
 }
 
-bool trackergrid_handlecommand(TrackerGrid* self, int cmd)
+bool trackergrid_handlecommand(TrackerGrid* self, intptr_t cmd)
 {
 	bool handled = TRUE;
 
@@ -2201,7 +2201,7 @@ bool trackergrid_handlecommand(TrackerGrid* self, int cmd)
 		case CMD_DIGITE:
 		case CMD_DIGITF:
 			if (self->gridstate->cursor.column != TRACKER_COLUMN_NOTE) {
-				int digit = cmd - CMD_DIGIT0;
+				int digit = (int)cmd - CMD_DIGIT0;
 				if (digit != -1) {
 					trackergrid_inputvalue(self, digit, 1);
 				}

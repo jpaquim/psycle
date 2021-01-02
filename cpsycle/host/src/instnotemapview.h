@@ -21,16 +21,17 @@
 extern "C" {
 #endif
 
-// aim: InstrumentNoteMapView plays the rule of the Sampulse Note mapping
-//      editor. Sampulse instruments can use more than one sample at a time,
-//      and to do so, they use the note mapping, which means that each of the
-//      possible notes, will trigger a specific note and sample number. PS1 had
-//      no possiblity to define different samples for different note keys.
-//      Sampulse introduced a ft2 mapping, where each note can have its own
-//      sample, making it easier to import xm files. The new combined Sampler
-//      (Sampulse PS1) uses the zone concept of soundfonts, that use a list of
-//      zones, each with a keyrange define. This allows additionaly sample
-//      layering for one note.
+// InstrumentNoteMapView
+//
+// plays the rule of the Sampulse Note mapping editor. Sampulse instruments
+// can use more than one sample at a time, and to do so, they use the note
+// mapping, which means that each of the possible notes, will trigger a
+// specific note and sample number. PS1 had no possiblity to define different
+// samples for different note keys. Sampulse introduced a ft2 mapping, where
+// each note can have its own sample, making it easier to import xm files.
+// The new combined Sampler (Sampulse PS1) uses the zone concept of
+// soundfonts, that use a list of zones, each with a keyrange define. This
+// allows additionaly sample layering for one note.
 
 typedef struct {
 	double keysize;
@@ -85,10 +86,16 @@ void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,
 	InstrumentParameterView*);
 void instrumententryview_setinstrument(InstrumentEntryView*,
 	psy_audio_Instrument*);
-void instrumententryview_adjustscroll(InstrumentEntryView*);
 
-typedef struct {	
+INLINE psy_ui_Component* instrumententryview_base(InstrumentEntryView* self)
+{
+	return &self->component;
+}
+
+typedef struct InstrumentNoteMapView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label label;
 	InstrumentNoteMapButtons buttons;
 	InstrumentKeyboardView keyboard;
@@ -106,8 +113,13 @@ void instrumentnotemapview_init(InstrumentNoteMapView*,
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
 
+INLINE psy_ui_Component* instrumentnotemapview_base(InstrumentNoteMapView* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* INSTNOTEMAPVIEW_H */

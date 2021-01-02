@@ -57,7 +57,7 @@ void audioconfig_makedriverconfigurations(AudioConfig* self)
 	if (drivers) {
 		psy_List* p;
 
-		for (p = psy_property_children(drivers); p != NULL; psy_list_next(&p)) {
+		for (p = psy_property_begin(drivers); p != NULL; psy_list_next(&p)) {
 			psy_Property* property;
 
 			property = (psy_Property*)psy_list_entry(p);

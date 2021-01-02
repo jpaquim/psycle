@@ -56,7 +56,7 @@ static const char* searchname;
 static int searchtype;
 static psy_Property* searchresult;
 
-void plugincatcher_init(psy_audio_PluginCatcher* self)
+void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 {
 	char inipath[_MAX_PATH];	
 
@@ -83,7 +83,7 @@ void plugincatcher_init(psy_audio_PluginCatcher* self)
 	psy_signal_init(&self->signal_scanprogress);
 }
 
-void plugincatcher_dispose(psy_audio_PluginCatcher* self)
+void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 {
 	psy_property_deallocate(self->plugins);
 	self->plugins = 0;
@@ -95,7 +95,7 @@ void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	psy_signal_dispose(&self->signal_scanprogress);
 }
 
-void plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
+void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
 	directories)
 {
 	psy_Property* p;
@@ -109,7 +109,7 @@ void plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
 	}
 }
 
-void plugincatcher_clear(psy_audio_PluginCatcher* self)
+void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher* self)
 {
 	psy_property_deallocate(self->plugins);
 	self->plugins = psy_property_setcomment(
@@ -187,9 +187,9 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 	}
 }
 
-void plugincatcher_scan(psy_audio_PluginCatcher* self)
+void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 {
-	plugincatcher_clear(self);
+	psy_audio_plugincatcher_clear(self);
 	if (self->directories) {
 		const char* path;
 
@@ -223,7 +223,7 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 		}
 	}
 	if (self->saveafterscan) {
-		plugincatcher_save(self);
+		psy_audio_plugincatcher_save(self);
 	}
 	psy_signal_emit(&self->signal_changed, self, 0);
 	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
@@ -246,7 +246,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	switch (type) {
 		case MACH_PLUGIN:
 			if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {
-				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				psy_audio_plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 					&macinfo);
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
@@ -254,7 +254,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 			break;
 		case MACH_LUA:
 			if (psy_audio_plugin_luascript_test(path, &macinfo)) {
-				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				psy_audio_plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 					&macinfo);
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
@@ -262,7 +262,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 			break;
 		case MACH_VST:			
 			if (psy_audio_plugin_vst_test(path, &macinfo)) {
-				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				psy_audio_plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 					&macinfo);
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
@@ -272,7 +272,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 			uintptr_t shellidx;
 
 			for (shellidx = 0; psy_audio_plugin_ladspa_test(path, &macinfo, shellidx) != 0; ++shellidx) {
-				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				psy_audio_plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 					&macinfo);
 				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
@@ -285,7 +285,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	return 1;
 }
 
-void plugincatcher_catchername(psy_audio_PluginCatcher* self,
+void psy_audio_plugincatcher_catchername(psy_audio_PluginCatcher* self,
 	const char* filename, char* rv, uintptr_t shellidx)
 {	
 	psy_Path path;	
@@ -299,23 +299,30 @@ void plugincatcher_catchername(psy_audio_PluginCatcher* self,
 	psy_path_dispose(&path);
 }
 
-int plugincatcher_load(psy_audio_PluginCatcher* self)
+int psy_audio_plugincatcher_load(psy_audio_PluginCatcher* self)
 {
 	int rv;
+	psy_Path path;
 
-	plugincatcher_clear(self);	
-	rv = propertiesio_load(self->plugins, self->inipath, 1);
+	psy_path_init(&path, self->inipath);
+	psy_audio_plugincatcher_clear(self);	
+	rv = propertiesio_load(self->plugins, &path, 1);
+	psy_path_dispose(&path);
 	self->hasplugincache = rv;
 	psy_signal_emit(&self->signal_changed, self, 0);
 	return rv;
 }
 
-void plugincatcher_save(psy_audio_PluginCatcher* self)
+void psy_audio_plugincatcher_save(psy_audio_PluginCatcher* self)
 {	
-	propertiesio_save(self->plugins, self->inipath);
+	psy_Path path;
+
+	psy_path_init(&path, self->inipath);
+	propertiesio_save(self->plugins, &path);
+	psy_path_dispose(&path);
 }
 
-uintptr_t plugincatcher_extractshellidx(const char* path)
+uintptr_t psy_audio_plugincatcher_extractshellidx(const char* path)
 {	
 	if (path) {
 		char* str;
@@ -328,7 +335,7 @@ uintptr_t plugincatcher_extractshellidx(const char* path)
 	return 0;
 }
 
-char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
+char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 	MachineType machtype,
 	int newgamefxblitzifversionunknown,
 	const char* path, char* fullpath)
@@ -462,7 +469,7 @@ int pathhasextension(const char* path)
 	return strrchr(path, '.') != 0;
 }
 
-const char* plugincatcher_searchpath(psy_audio_PluginCatcher* self, const char* name,
+const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, const char* name,
 	int machtype)
 {	
 	searchname = name;

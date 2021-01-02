@@ -23,6 +23,8 @@
 #include <errno.h>
 #endif
 
+#include "../../detail/portable.h"
+
 static char load_filters[] =
 "All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
 "Songs (*.psy)"				        "|*.psy|"
@@ -44,15 +46,18 @@ void psy_audio_songfile_init(psy_audio_SongFile* self)
 	psy_signal_init(&self->signal_warning);
 	self->machinesoloed = -1;
 	self->legacywires = NULL;
+	self->path = NULL;
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
+	free(self->path);
+	self->path = NULL;
 	psy_signal_dispose(&self->signal_output);
 	psy_signal_dispose(&self->signal_warning);		
 }
 
-int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
+int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 {		
 	PsyFile file;
 	int status;
@@ -61,18 +66,18 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 	self->serr = 0;
 	self->err = 0;
 	self->warnings = 0;
-	self->file = &file;
-	self->path = path;	
+	self->file = &file;	
+	psy_strreset(&self->path, filename);
 	self->machinesoloed = -1;	
 	psy_audio_songfile_message(self, "searching for ");
-	psy_audio_songfile_message(self, path);
+	psy_audio_songfile_message(self, self->path);
 	psy_audio_songfile_message(self, "\n");
-	if (psyfile_open(self->file, path)) {
+	if (psyfile_open(self->file, filename)) {
 		char header[20];
 		char riff[5];
 		
 		psy_audio_songfile_message(self, "loading ");
-		psy_audio_songfile_message(self, path);
+		psy_audio_songfile_message(self, self->path);
 		psy_audio_songfile_message(self, "\n");
 		psy_audio_song_clear(self->song);		
 		psy_audio_machines_startfilemode(&self->song->machines);
@@ -159,7 +164,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 	return status;
 }
 
-int psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
+int psy_audio_songfile_save(psy_audio_SongFile* self, const char* filename)
 {		
 	int status;
 	PsyFile file;
@@ -168,8 +173,8 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
 	self->file = &file;
 	self->err = 0;
 	self->warnings = 0;
-	self->path = path;
-	if (psyfile_create(self->file, path, 1)) {	
+	psy_strreset(&self->path, filename);
+	if (psyfile_create(self->file, self->path, 1)) {
 		psy_audio_PSY3Saver psy3saver;
 
 		psy_audio_psy3saver_init(&psy3saver, self);

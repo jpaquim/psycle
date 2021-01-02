@@ -408,6 +408,14 @@ INLINE psy_ui_Margin psy_ui_margin_make(psy_ui_Value top, psy_ui_Value right,
 	return rv;
 }
 
+INLINE psy_ui_Margin psy_ui_margin_zero(void)
+{
+	psy_ui_Margin rv;
+
+	psy_ui_margin_init(&rv);
+	return rv;
+}
+
 typedef enum {
 	psy_ui_OVERFLOW_HIDDEN = 0,
 	psy_ui_OVERFLOW_VSCROLL = 1,

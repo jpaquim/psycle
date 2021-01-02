@@ -6,6 +6,7 @@
 #include "xmdefs.h"
 #include <string.h>
 #include <math.h>
+#include "psy3saver.h"
 
 #include "../../detail/portable.h"
 
@@ -68,10 +69,15 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 			if (!(self->isSampler[i] || self->isSampulse[i])) {
 				self->macInstruments++;
 				if (psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) == MACH_PLUGIN) {
-					//const char* str = reinterpret_cast<Plugin*>(song._pMachine[i])->GetDllName();
-					//if (str.find("blitz") != std::string::npos) {
-					//	isBlitzorVst[i + 1] = true;
-					//}
+					const psy_audio_MachineInfo* info;
+
+					info = psy_audio_machine_info(psy_audio_machines_at(&songfile->song->machines, i));
+					if (info && info->Name) {
+						const char* str = info->Name;
+						if (strstr(str, "blitz")) {						
+							self->isBlitzorVst[i + 1] = TRUE;
+						}
+					}
 				} else if (psy_audio_machine_type(psy_audio_machines_at(&songfile->song->machines, i)) == MACH_VST) {
 					self->isBlitzorVst[i + 1] = TRUE;
 				}
@@ -151,39 +157,50 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 	int maxtracks;
 	int i;
 	int j;
+	psy_audio_Pattern* pattern;
+	int32_t lines;
 
+	pattern = psy_audio_patterns_at(&songfile->song->patterns, patIdx);
 	memset(&ptHeader, 0, sizeof(ptHeader));
 	ptHeader.size = sizeof(ptHeader);
-	//ptHeader.packingtype = 0; implicit from memset.
-	//// ptHeader.rows = min(256, song.patternLines[patIdx]);
+	//ptHeader.packingtype = 0; implicit from memset.	
+	lines = (uint16_t)(psy_audio_pattern_length(pattern) *
+		songfile->song->properties.lpb);
+	ptHeader.rows = psy_min(256, lines);
 	//ptHeader.packedsize = 0; implicit from memset.
 
 	psyfile_write(songfile->file, &ptHeader, sizeof(ptHeader));
 	currentpos = psyfile_getpos(songfile->file);
 
-	maxtracks = 0; // min(song.SONGTRACKS, 32);
+	maxtracks = psy_min(songfile->song->properties.tracks, 32);
 	// check every pattern for validity
-	//if (song.IsPatternUsed(patIdx))
+	if (psy_audio_sequence_patternused(&songfile->song->sequence, patIdx))
 	{
+		unsigned char* ppattern;
+
+		ppattern = psy_audio_allocoldpattern(pattern, songfile->song->properties.lpb,
+			songfile->song->patterns.songtracks, &lines);
 		for (i = 0; i < maxtracks; i++) {
 			self->lastInstr[i] = -1;
 		}
 		self->addTicks = 0;
 		for (j = 0; j < ptHeader.rows; j++) {
 			for (i = 0; i < maxtracks; i++) {
-				//// self->extraEntry[i] = NULL;
+				self->extraEntry[i] = NULL;
 			}
 			for (i = 0; i < songfile->song->properties.tracks; i++) {
-				/*const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx, i, j));
-				if (pData->note == psy_audio_NOTECOMMANDS_MIDICC) {
-					if (pData->inst < maxtracks) {
-						extraEntry[pData->_inst] = pData;
+				const unsigned char* pData = ppattern + j * songfile->song->patterns.songtracks * EVENT_SIZE + i * EVENT_SIZE;
+				if (pData[0] == psy_audio_NOTECOMMANDS_MIDICC) {
+					if (pData[1] < maxtracks) {
+						self->extraEntry[pData[1]] = pData;
 					}
-				} else if (pData->note != notecommands::tweak && pData->_note != notecommands::tweakslide) {
-					if (pData->cmd == psy_audio_PatternCmd::psy_audio_PATTERNCMD_EXTENDED && (pData->_parameter & 0xF0) == psy_audio_PatternCmd::psy_audio_PATTERNCMD_ROW_EXTRATICKS) {
-						addTicks = pData->_parameter & 0x0F;
+				} else if (pData[0] != psy_audio_NOTECOMMANDS_TWEAK &&
+						pData[0] != psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
+					if (pData[3] == psy_audio_PATTERNCMD_EXTENDED &&
+							(pData[5] & 0xF0) == psy_audio_PATTERNCMD_ROW_EXTRATICKS) {
+						self->addTicks = pData[4] & 0x0F;
 					}
-				}*/
+				}
 			}
 			for (i = 0; i < maxtracks; i++) {
 				unsigned char note;

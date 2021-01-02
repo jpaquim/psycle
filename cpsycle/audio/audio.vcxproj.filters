@@ -184,9 +184,6 @@
     <ClCompile Include="src\sequencer.c">
       <Filter>player</Filter>
     </ClCompile>
-    <ClCompile Include="src\xm.c">
-      <Filter>file</Filter>
-    </ClCompile>
     <ClCompile Include="src\buffer.c">
       <Filter>machine</Filter>
     </ClCompile>
@@ -386,9 +383,6 @@
     </ClInclude>
     <ClInclude Include="src\preset.h">
       <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\xm.h">
-      <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="src\xmdefs.h">
       <Filter>file</Filter>

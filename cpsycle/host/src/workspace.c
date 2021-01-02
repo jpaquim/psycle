@@ -133,9 +133,9 @@ void workspace_init(Workspace* self, void* mainhandle)
 	workspace_initplugincatcherandmachinefactory(self);
 	psycleconfig_init(&self->config, &self->player,
 		&self->machinefactory);	
-	plugincatcher_setdirectories(&self->plugincatcher,
+	psy_audio_plugincatcher_setdirectories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
-	plugincatcher_load(&self->plugincatcher);
+	psy_audio_plugincatcher_load(&self->plugincatcher);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
 	psy_audio_sequenceselection_init(&self->sequenceselection, &self->song->sequence);
@@ -154,7 +154,7 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 {
 	assert(self);
 
-	plugincatcher_init(&self->plugincatcher); 	
+	psy_audio_plugincatcher_init(&self->plugincatcher); 	
 	psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 		workspace_onscanprogress);	
 	psy_audio_machinefactory_init(&self->machinefactory,
@@ -201,7 +201,7 @@ void workspace_dispose(Workspace* self)
 	psycleconfig_dispose(&self->config);	
 	free(self->filename);
 	self->filename = NULL;
-	plugincatcher_dispose(&self->plugincatcher);
+	psy_audio_plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->viewhistory);
@@ -321,7 +321,7 @@ static void pluginscanthread(void* context)
 	Workspace* self;
 
 	self = context;
-	plugincatcher_scan(&self->plugincatcher);
+	psy_audio_plugincatcher_scan(&self->plugincatcher);
 }
 #endif
 
@@ -331,7 +331,7 @@ void workspace_scanplugins(Workspace* self)
 #ifdef DIVERSALIS__OS__MICROSOFT
 	_beginthread(pluginscanthread, 0, self);	
 #else
-	plugincatcher_scan(&self->plugincatcher);
+	psy_audio_plugincatcher_scan(&self->plugincatcher);
 #endif
 }
 
@@ -478,7 +478,7 @@ void workspace_onloadskin(Workspace* self)
 		dirconfig_skins(&self->config.directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
 		psycleconfig_loadskin(&self->config,
-			psy_ui_opendialog_filename(&opendialog));	
+			psy_ui_opendialog_path(&opendialog));	
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }
@@ -498,9 +498,9 @@ void workspace_onloadcontrolskin(Workspace* self)
 		dirconfig_skins(&self->config.directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
 		machineparamconfig_setdialbpm(psycleconfig_macparam(&self->config),
-			psy_ui_opendialog_filename(&opendialog));		
+			psy_path_full(psy_ui_opendialog_path(&opendialog)));
 		psy_signal_emit(&self->signal_changecontrolskin, self, 1,
-			psy_ui_opendialog_filename(&opendialog));
+			psy_path_full(psy_ui_opendialog_path(&opendialog)));
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }
@@ -514,8 +514,8 @@ void workspace_onaddeventdriver(Workspace* self)
 {
 	psy_Property* installeddriver;
 
-	installeddriver = psy_property_at(self->config.input.eventinputs, "installeddriver",
-		PSY_PROPERTY_TYPE_CHOICE);
+	installeddriver = psy_property_at(self->config.input.eventinputs,
+		"installeddriver", PSY_PROPERTY_TYPE_CHOICE);
 	if (installeddriver) {
 		psy_Property* choice;
 
@@ -615,14 +615,15 @@ void workspace_loadsong_fileselect(Workspace* self)
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (psy_ui_opendialog_execute(&dialog)) {
-		workspace_loadsong(self, psy_ui_opendialog_filename(&dialog),
+		workspace_loadsong(self,
+			psy_path_full(psy_ui_opendialog_path(&dialog)),
 			generalconfig_playsongafterload(psycleconfig_general(
 				workspace_conf(self))));
 	}
 	psy_ui_opendialog_dispose(&dialog);
 }
 
-void workspace_loadsong(Workspace* self, const char* path, bool play)
+void workspace_loadsong(Workspace* self, const char* filename, bool play)
 {	
 	psy_audio_Song* song;		
 
@@ -644,20 +645,19 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 		songfile.file = 0;
 		psy_audio_player_setemptysong(&self->player);
 		psy_audio_machinecallback_setsong(&self->machinecallback, song);
-		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
+		if (psy_audio_songfile_load(&songfile, filename) != PSY_OK) {
 			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
 			play = FALSE;
-		} else {
-			free(self->filename);
-			self->filename = strdup(path);
+		} else {			
+			psy_strreset(&self->filename, filename);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
 			if (generalconfig_saverecentsongs(psycleconfig_general(
 					workspace_conf(self)))) {
-				psy_playlist_add(&self->playlist, path);
+				psy_playlist_add(&self->playlist, filename);
 			}
 			psy_audio_songfile_dispose(&songfile);
 		}
@@ -720,7 +720,8 @@ bool workspace_savesong_fileselect(Workspace* self)
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (success = psy_ui_savedialog_execute(&dialog)) {
-		workspace_savesong(self, psy_ui_savedialog_filename(&dialog));		
+		workspace_savesong(self,
+			psy_path_full(psy_ui_savedialog_path(&dialog)));
 	}
 	psy_ui_savedialog_dispose(&dialog);
 	return success;
@@ -764,7 +765,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);		
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0);
+	propertiesio_load(&self->config.config, &path, 0);
 	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
 		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
@@ -793,7 +794,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
-	propertiesio_load(&self->config.config, psy_path_full(&path), 0);
+	propertiesio_load(&self->config.config, &path, 0);
 	eventdriverconfig_readeventdriverconfigurations(&self->config.input);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
@@ -827,7 +828,7 @@ void workspace_save_configuration(Workspace* self)
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
 	midiviewconfig_makecontrollersave(
 		psycleconfig_midi(&self->config));
-	propertiesio_save(&self->config.config, psy_path_full(&path));
+	propertiesio_save(&self->config.config, &path);
 	psy_path_dispose(&path);
 }
 
@@ -1528,7 +1529,7 @@ bool onmachinefileselectload(Workspace* self, char filter[], char inoutname[])
 			psycleconfig_directories(&self->config)));
 	success = psy_ui_opendialog_execute(&dialog);
 	psy_snprintf(inoutname, _MAX_PATH, "%s",
-		psy_ui_opendialog_filename(&dialog));
+		psy_path_full(psy_ui_opendialog_path(&dialog)));
 	psy_ui_opendialog_dispose(&dialog);
 	return success;
 }
@@ -1547,7 +1548,7 @@ bool onmachinefileselectsave(Workspace* self, char filter[],
 			psycleconfig_directories(&self->config)));
 	success = psy_ui_savedialog_execute(&dialog);
 	psy_snprintf(inoutname, _MAX_PATH, "%s",
-		psy_ui_savedialog_filename(&dialog));
+		psy_path_full(psy_ui_savedialog_path(&dialog)));
 	psy_ui_savedialog_dispose(&dialog);
 	return success;
 }

@@ -250,7 +250,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		for (p = psy_property_children(self->plugins), cpx = 0, cpy = 0;
+		for (p = psy_property_begin(self->plugins), cpx = 0, cpy = 0;
 				p != NULL; psy_list_next(&p)) {
 			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
 				cpx, cpy);
@@ -391,7 +391,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 					} else {						
 						psy_property_set_int(p, "favorite", 0);
 					}
-					plugincatcher_save(&self->workspace->plugincatcher);
+					psy_audio_plugincatcher_save(&self->workspace->plugincatcher);
 					psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
 						&self->workspace->plugincatcher, 0);
 				}
@@ -502,7 +502,7 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 	if (plugin && self->plugins) {
 		psy_List* p;
 		
-		for (p = psy_property_children(self->plugins); p != NULL;
+		for (p = psy_property_begin(self->plugins); p != NULL;
 				psy_list_next(&p)) {	
 			if (p->entry == plugin) {
 				break;
@@ -530,7 +530,7 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col
 		currrow = 0;
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);
-		for (p = psy_property_children(self->plugins); p != NULL;
+		for (p = psy_property_begin(self->plugins); p != NULL;
 				psy_list_next(&p)) {			
 			if (currcol == col && currrow == row) {
 				rv = (psy_Property*)p->entry;
@@ -570,7 +570,7 @@ void pluginsview_hittest(PluginsView* self, intptr_t x, intptr_t y)
 
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);
-		for (p = psy_property_children(self->plugins), cpx = 0, cpy = 0;
+		for (p = psy_property_begin(self->plugins), cpx = 0, cpy = 0;
 				p != NULL; psy_list_next(&p)) {
 			psy_ui_Rectangle r;
 
@@ -783,7 +783,7 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	self->detail.empty = FALSE;
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 	psy_property_sync(workspace_pluginlist(self->pluginsview.workspace), self->pluginsview.plugins);
-	plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
+	psy_audio_plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
 	pluginsview_onplugincachechanged(&self->favoriteview,
 		&self->favoriteview.workspace->plugincatcher);
 	if (self->favoriteview.plugins) {
@@ -905,7 +905,7 @@ psy_Property* newmachine_favorites(psy_Property* source)
 		psy_List* p;
 
 		rv = psy_property_allocinit_key(NULL);
-		for (p = psy_property_children(source); p != NULL; psy_list_next(&p)) {
+		for (p = psy_property_begin(source); p != NULL; psy_list_next(&p)) {
 			psy_Property* property;
 
 			property = (psy_Property*)psy_list_entry(p);
@@ -931,7 +931,7 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 		num = psy_property_size(source);
 		propertiesptr = malloc(sizeof(psy_Property*) * num);
 		if (propertiesptr) {
-			p = psy_property_children(source);
+			p = psy_property_begin(source);
 			for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
 				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
 			}

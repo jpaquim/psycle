@@ -19,7 +19,7 @@
 typedef struct {
 	psy_EventDriver driver;	
 	HMIDIIN hMidiIn;
-	int deviceid;		
+	uint32_t deviceid;		
 	int (*error)(int, const char*);
 	psy_EventDriverCmd lastinput;
 	HANDLE hEvent;
@@ -152,8 +152,8 @@ void init_properties(psy_EventDriver* context)
 	psy_MmeMidiDriver* self;
 	psy_Property* devices;
 	char key[256];
-	int i;
-	int n;
+	uint32_t i;
+	uint32_t n;
 
 	self = (psy_MmeMidiDriver*)context;
 	psy_snprintf(key, 256, "mmemidi-guid-%d", PSY_EVENTDRIVER_MMEMIDI_GUID);
@@ -189,7 +189,7 @@ void driver_configure(psy_EventDriver* driver, psy_Property* config)
 	p = psy_property_at(self->configuration, "device",
 		PSY_PROPERTY_TYPE_NONE);
 	if (p) {
-		self->deviceid = psy_property_item_int(p);
+		self->deviceid = (uint32_t)psy_property_item_int(p);
 	}
 }
 
@@ -270,7 +270,7 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* sectionnam
 	if (!section) {
 		self->lastinput;
 	}
-	for (p = psy_property_children(section); p != NULL;
+	for (p = psy_property_begin(section); p != NULL;
 			psy_list_next(&p)) {
 		unsigned char byte0;
 		unsigned char byte1;

@@ -60,7 +60,7 @@ typedef struct XMSongExport {
 	bool isSampulse[MAX_BUSES];
 	bool isBlitzorVst[256];
 	int lastInstr[32];
-	// const PatternEntry* extraEntry[32];
+	const unsigned char* extraEntry[32];	
 	int addTicks;
 } XMSongExport;
 

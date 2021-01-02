@@ -36,11 +36,18 @@
 
 #endif			/* } */
 
+
+
+
+
 INLINE char* psy_strdup(const char* str)
 {
+#pragma warning(push )
+#pragma warning(disable : 4996)  /* avoid warnings about ISO C functions */
 	return (str)
 		? strdup(str)
 		: NULL;
+#pragma warning(pop)
 }
 
 INLINE intptr_t psy_strlen(const char* str)

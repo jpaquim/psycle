@@ -5,13 +5,14 @@
 #define psy_PROPERTIESIO_H
 
 #include "properties.h"
+#include "dir.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int propertiesio_load(psy_Property*, const char* path, int allowappend);
-void propertiesio_save(const psy_Property*, const char* path);
+int propertiesio_load(psy_Property*, const psy_Path*, int allowappend);
+void propertiesio_save(const psy_Property*, const psy_Path*);
 
 #ifdef __cplusplus
 }

@@ -97,11 +97,10 @@ void recentview_onselected(RecentView* self, PropertiesView* sender,
 {
 	if (psy_property_insection(property, self->workspace->playlist.recentfiles)) {
 		if (!self->workspace->filename || strcmp(self->workspace->filename,
-				psy_property_item_str(property)) != 0) {
-			workspace_loadsong(self->workspace,
-				psy_property_item_str(property),
+				psy_property_item_str(property)) != 0) {						
+			workspace_loadsong(self->workspace, psy_property_item_str(property),
 				generalconfig_playsongafterload(psycleconfig_general(
-					workspace_conf(self->workspace))));
+					workspace_conf(self->workspace))));			
 			psy_ui_component_invalidate(&self->view.renderer.component);
 		}
 	}
@@ -148,9 +147,9 @@ void recentview_ontimer(RecentView* self, uintptr_t timerid)
 		psy_Property* next;
 		
 		next = recentview_next(self);
-		if (next) {
+		if (next) {						
 			self->view.renderer.selected = next;
-			workspace_loadsong(self->workspace, psy_property_item_str(next), FALSE);
+			workspace_loadsong(self->workspace, psy_property_item_str(next), FALSE);			
 			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
 			psy_audio_player_setposition(workspace_player(self->workspace), 0);
 			psy_audio_player_start(workspace_player(self->workspace));

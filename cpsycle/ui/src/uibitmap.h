@@ -5,7 +5,10 @@
 #define psy_ui_BITMAP_H
 
 #include "../../detail/psydef.h"
+// local
 #include "uidef.h"
+// std
+#include <assert.h>
 
 // Graphics Bitmap Interface
 // Pattern: Bridge
@@ -56,6 +59,8 @@ INLINE void psy_ui_bitmap_dispose(psy_ui_Bitmap* self)
 
 INLINE int psy_ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 {
+	assert(path);
+
 	return self->vtable->load(self, path);
 }
 

@@ -312,7 +312,7 @@ void cmdproperties_setinput(psy_Property* properties)
 	if (properties) {
 		psy_List* p;
 
-		for (p = psy_property_children(properties); p != NULL; psy_list_next(&p)) {
+		for (p = psy_property_begin(properties); p != NULL; psy_list_next(&p)) {
 			psy_property_sethint((psy_Property*)psy_list_entry(p),
 				PSY_PROPERTY_HINT_SHORTCUT);
 		}

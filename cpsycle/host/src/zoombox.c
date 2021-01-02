@@ -67,6 +67,15 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_changed);
 }
 
+void zoombox_init_connect(ZoomBox* self, psy_ui_Component* parent,
+	void* context, void* fp)
+{
+	assert(self);
+
+	zoombox_init(self, parent);
+	psy_signal_connect(&self->signal_changed, context, fp);
+}
+
 void zoombox_ondestroy(ZoomBox* self)
 {
 	assert(self);

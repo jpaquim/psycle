@@ -4,7 +4,10 @@
 #ifndef psy_ui_SAVEDIALOG_H
 #define psy_ui_SAVEDIALOG_H
 
+// local
 #include "uicomponent.h"
+// file
+#include <dir.h>
 
 // SaveDialog Device Interface
 // Bridge
@@ -38,18 +41,18 @@ void psy_ui_savedialog_init_all(psy_ui_SaveDialog*,
 void psy_ui_savedialog_dispose(psy_ui_SaveDialog*);
 
 int psy_ui_savedialog_execute(psy_ui_SaveDialog*);
-const char* psy_ui_savedialog_filename(psy_ui_SaveDialog*);
+const psy_Path* psy_ui_savedialog_path(const psy_ui_SaveDialog*);
 
 // psy_ui_SaveImp
 
 typedef void (*psy_ui_fp_savedialogimp_dev_dispose)(struct psy_ui_SaveDialogImp*);
 typedef int (*psy_ui_fp_savedialogimp_dev_execute)(struct psy_ui_SaveDialogImp*);
-typedef const char* (*psy_ui_fp_savedialogimp_dev_filename)(struct psy_ui_SaveDialogImp*);
+typedef const psy_Path* (*psy_ui_fp_savedialogimp_dev_path)(const struct psy_ui_SaveDialogImp*);
 
 typedef struct psy_ui_SaveDialogImpVTable {
 	psy_ui_fp_savedialogimp_dev_dispose dev_dispose;
 	psy_ui_fp_savedialogimp_dev_execute dev_execute;
-	psy_ui_fp_savedialogimp_dev_filename dev_filename;
+	psy_ui_fp_savedialogimp_dev_path dev_path;
 } psy_ui_SaveDialogImpVTable;
 
 typedef struct psy_ui_SaveDialogImp {
@@ -58,9 +61,8 @@ typedef struct psy_ui_SaveDialogImp {
 
 void psy_ui_savedialogimp_init(psy_ui_SaveDialogImp*);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* psy_ui_SAVEDIALOG_H */

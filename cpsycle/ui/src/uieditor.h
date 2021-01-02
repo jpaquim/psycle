@@ -4,13 +4,17 @@
 #ifndef psy_ui_EDITOR_H
 #define psy_ui_EDITOR_H
 
+// local
 #include "uicomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
+// Editor component (implementaion scintilla based)
+
+typedef struct psy_ui_Editor {
+	// inherits
 	psy_ui_Component component;
 } psy_ui_Editor;
 
@@ -22,8 +26,8 @@ void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
 char* psy_ui_editor_text(psy_ui_Editor*, uintptr_t maxlength, char* text);
 uintptr_t psy_ui_editor_length(psy_ui_Editor*);
 void psy_ui_editor_clear(psy_ui_Editor*);
-void psy_ui_editor_setcolour(psy_ui_Editor*, psy_ui_Colour colour);
-void psy_ui_editor_setbackgroundcolour(psy_ui_Editor*, psy_ui_Colour colour);
+void psy_ui_editor_setcolour(psy_ui_Editor*, psy_ui_Colour);
+void psy_ui_editor_setbackgroundcolour(psy_ui_Editor*, psy_ui_Colour);
 void psy_ui_editor_enableedit(psy_ui_Editor*);
 void psy_ui_editor_preventedit(psy_ui_Editor*);
 void psy_ui_editor_enablewrap(psy_ui_Editor*);

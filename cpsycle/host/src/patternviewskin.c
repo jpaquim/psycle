@@ -348,10 +348,9 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 			psy_ui_Bitmap bmp;
 
 			psy_ui_bitmap_init(&bmp);
-			if (psy_ui_bitmap_load(&bmp, path) == 0) {
-				psy_ui_bitmap_dispose(&self->bitmap);
+			if (psy_ui_bitmap_load(&bmp, path) == 0) {				
 				self->bitmap = bmp;
-			}
+			}			
 		}
 		strcpy(filename, pattern_header_skin_name);
 		strcat(filename, ".psh");

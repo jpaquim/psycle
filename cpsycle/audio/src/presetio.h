@@ -5,6 +5,7 @@
 #define psy_audio_PRESETIO_H
 
 #include "presets.h"
+#include <dir.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,12 +20,12 @@ extern "C" {
 #define psy_audio_PRESETIO_ERROR_WRITE 6
 
 
-int psy_audio_presetsio_load(const char* path, psy_audio_Presets*,
+int psy_audio_presetsio_load(const psy_Path*, psy_audio_Presets*,
 	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot);
-int psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
+int psy_audio_presetsio_save(const psy_Path*, psy_audio_Presets*);
 const char* psy_audio_presetsio_statusstr(int status);
 
-int psy_audio_presetio_savefxp(const char* path, psy_audio_Preset*);
+int psy_audio_presetio_savefxp(const psy_Path*, psy_audio_Preset*);
 
 #ifdef __cplusplus
 }

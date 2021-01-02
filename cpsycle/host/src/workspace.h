@@ -158,9 +158,9 @@ void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong_fileselect(Workspace*);
-void workspace_loadsong(Workspace*, const char* path, bool play);
+void workspace_loadsong(Workspace*, const char*, bool play);
 bool workspace_savesong_fileselect(Workspace*);
-void workspace_savesong(Workspace*, const char* path);
+void workspace_savesong(Workspace*, const char*);
 void workspace_scanplugins(Workspace*);
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }

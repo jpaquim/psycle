@@ -4,6 +4,8 @@
 #ifndef psy_audio_PSY3SAVER_H
 #define psy_audio_PSY3SAVER_H
 
+#include "pattern.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,6 +18,9 @@ typedef struct psy_audio_PSY3Saver {
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver*, struct psy_audio_SongFile*);
 int psy_audio_psy3saver_save(psy_audio_PSY3Saver*);
+
+unsigned char* psy_audio_allocoldpattern(psy_audio_Pattern* pattern, uintptr_t lpb,
+	uintptr_t songtracks, int* rv_patternlines);
 
 #ifdef __cplusplus
 }

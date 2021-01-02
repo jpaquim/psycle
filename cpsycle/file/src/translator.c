@@ -60,8 +60,13 @@ bool psy_translator_load(psy_Translator* self, const char* path)
 
 	if (self->dictionary) {
 		int success;
+		psy_Path dicpath;
 
-		success = propertiesio_load(self->dictionary, path, FALSE);
+		assert(self);
+
+		psy_path_init(&dicpath, path);
+		success = propertiesio_load(self->dictionary, &dicpath, FALSE);
+		psy_path_dispose(&dicpath);
 		psy_signal_emit(&self->signal_languagechanged, self, 0);
 		return success;
 	}
@@ -71,20 +76,27 @@ bool psy_translator_load(psy_Translator* self, const char* path)
 bool psy_translator_test(const psy_Translator* self, const char* path, char* id)
 {
 	psy_Property* lang;
+	psy_Path dicpath;
 
 	assert(self);
 
-	lang = psy_property_allocinit_key(NULL);
-	if (propertiesio_load(lang, path, 1)) {
-		psy_Property* p;
+	lang = psy_property_allocinit_key(NULL);	
 
+	assert(self);
+
+	psy_path_init(&dicpath, path);
+	if (propertiesio_load(lang, &dicpath, 1)) {
+		psy_Property* p;
+		
 		p = psy_property_at(lang, "lang", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
 			psy_snprintf(id, 256, "%s", psy_property_item_str(p));
 			psy_property_deallocate(lang);
+			psy_path_dispose(&dicpath);
 			return TRUE;
 		}
 	}
+	psy_path_dispose(&dicpath);
 	psy_property_deallocate(lang);
 	return FALSE;
 }

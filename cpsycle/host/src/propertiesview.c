@@ -681,7 +681,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 
 			self->choiceproperty = psy_property_parent(self->selected);
 			choicecount = 0;
-			p = psy_property_children(self->choiceproperty);
+			p = psy_property_begin(self->choiceproperty);
 			while (p != NULL) {
 				if (psy_list_entry(p) == self->selected) {
 					break;
@@ -1078,6 +1078,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_init(&self->notebook, propertiesview_base(self));
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_changed);
@@ -1086,10 +1087,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_ondestroy);
 	psy_signal_connect(&self->component.signal_focus,
 		self, propertiesview_onfocus);	
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
-	psy_ui_component_init(&self->client, &self->notebook.component);
+	psy_ui_component_init(&self->client,
+		psy_ui_notebook_base(&self->notebook));
 	psy_signal_connect(&self->client.signal_mousedown,
 		self, propertiesview_onmousedown);
 	psy_signal_connect(&self->client.signal_mouseup,
@@ -1105,11 +1105,10 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	propertiesview_translate(self);
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
-	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1),
-		psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(2));
+	tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
+	psy_ui_margin_init_all(&tabmargin,
+		psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
+		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(2.0));
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	propertiesview_updatetabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
@@ -1121,7 +1120,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace_player(self->workspace)->eventdrivers.signal_input,
 		self, propertiesview_oneventdriverinput);
 	propertiesview_initsectionfloated(self);
-	psy_ui_notebook_select(&self->notebook, 0);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		propertiesview_ontabbarchange);
+	psy_ui_notebook_select(&self->notebook, 0);	
 }
 
 void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
@@ -1144,28 +1145,26 @@ void propertiesview_initsectionfloated(PropertiesView* self)
 void propertiesview_selectsection(PropertiesView* self,
 	psy_ui_Component* sender, uintptr_t section)
 {
-	tabbar_select(&self->tabbar, (int)section);
+	tabbar_select(&self->tabbar, section);
 }
 
 void propertiesview_updatetabbarsections(PropertiesView* self)
 {	
 	tabbar_clear(&self->tabbar);
-	if (self->renderer.properties) {
-		psy_List* p;
-
-		for (p = psy_property_children(self->renderer.properties); p != NULL;
-				psy_list_next(&p)) {
+	if (propertiesrenderer_properties(&self->renderer)) {
+		const psy_List* p;
+		
+		for (p = psy_property_begin_const(propertiesrenderer_properties(
+				&self->renderer)); p != NULL; psy_list_next_const(&p)) {
 			psy_Property* property;
 
-			property = (psy_Property*)p->entry;
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
+			property = (psy_Property*)psy_list_entry_const(p);
+			if (psy_property_hastype(property, PSY_PROPERTY_TYPE_SECTION)) {
 				tabbar_append(&self->tabbar, psy_property_text(property));
 			}
 		}
 	}
-	tabbar_select(&self->tabbar, 0);
-	psy_signal_connect(&self->tabbar.signal_change, self,
-			propertiesview_ontabbarchange);
+	tabbar_select(&self->tabbar, 0);	
 }
 
 void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sender,
@@ -1181,7 +1180,7 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 		if (tab) {
 			psy_List* p;
 
-			p = psy_property_children(self->renderer.properties);
+			p = psy_property_begin(self->renderer.properties);
 			while (p) {
 				property = (psy_Property*)p->entry;
 				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {

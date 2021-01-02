@@ -808,12 +808,12 @@ void psy_audio_xmsamplervoice_resetvolandpan(psy_audio_XMSamplerVoice* self,
 		}
 		// \todo :
 		// In a related note, check range of Panbrello.
-		if (psy_audio_sample_panenabled(&self->m_WaveDataController.sample)) {
-			fpan = psy_audio_sample_panfactor(&self->m_WaveDataController.sample);
+		if (psy_audio_sample_panenabled(self->m_WaveDataController.sample)) {
+			fpan = psy_audio_sample_panfactor(self->m_WaveDataController.sample);
 		} else if (psy_audio_instrument_panenabled(psy_audio_xmsamplervoice_rinstrument(self))) {
 			fpan = psy_audio_instrument_pan(psy_audio_xmsamplervoice_rinstrument(self));
 		} else {
-			fpan = psy_audio_xmsamplerchannel_panfactor(&self->m_pChannel);			
+			fpan = psy_audio_xmsamplerchannel_panfactor(self->m_pChannel);			
 		}
 		// NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
 		fpan += (self->m_Note - psy_audio_instrument_notemodpancenter(psy_audio_xmsamplervoice_rinstrument(self))) *

@@ -217,7 +217,7 @@ void kbdbox_makekeys(KbdBox* self)
 			psy_List* p;
 			int currrow = 0;
 
-			for (p = psy_property_children(mainsection); p != NULL;
+			for (p = psy_property_begin(mainsection); p != NULL;
 					psy_list_next(&p)) {
 				psy_Property* property;
 				intptr_t keycode;

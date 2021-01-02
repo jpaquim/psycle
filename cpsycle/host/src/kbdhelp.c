@@ -51,7 +51,7 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 		if (section) {
 			const psy_List* p;
 
-			for (p = psy_property_children_const(section); p != NULL;
+			for (p = psy_property_begin_const(section); p != NULL;
 					psy_list_next_const(&p)) {
 				const psy_Property* property;
 				uint32_t keycode;
@@ -83,7 +83,7 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 		if (cmds) {
 			const psy_List* p;
 
-			for (p = psy_property_children_const(cmds); p != NULL;
+			for (p = psy_property_begin_const(cmds); p != NULL;
 					psy_list_next_const(&p)) {
 				const psy_Property* property;
 
@@ -119,7 +119,7 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 		if (cmds && tab) {				
 			const psy_List* p = 0;
 
-			p = psy_property_children_const(cmds);
+			p = psy_property_begin_const(cmds);
 			while (p) {
 				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {

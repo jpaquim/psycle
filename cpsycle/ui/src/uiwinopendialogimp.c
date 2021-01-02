@@ -21,20 +21,20 @@ extern psy_ui_App app;
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_OpenDialogImp*);
 static int dev_execute(psy_ui_win_OpenDialogImp*);
-static const char* dev_filename(psy_ui_win_OpenDialogImp*);
+static const psy_Path* dev_path(const psy_ui_win_OpenDialogImp*);
 
 // VTable init
 static psy_ui_OpenDialogImpVTable imp_vtable;
-static int imp_vtable_initialized = 0;
+static bool imp_vtable_initialized = FALSE;
 
 static void imp_vtable_init(psy_ui_win_OpenDialogImp* self)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_opendialogimp_dev_dispose) dev_dispose;
-		imp_vtable.dev_execute = (psy_ui_fp_opendialogimp_dev_execute) dev_execute;
-		imp_vtable.dev_filename = (psy_ui_fp_opendialogimp_dev_filename) dev_filename;
-		imp_vtable_initialized = 1;
+		imp_vtable.dev_dispose = (psy_ui_fp_opendialogimp_dev_dispose)dev_dispose;
+		imp_vtable.dev_execute = (psy_ui_fp_opendialogimp_dev_execute)dev_execute;
+		imp_vtable.dev_path = (psy_ui_fp_opendialogimp_dev_path)dev_path;
+		imp_vtable_initialized = TRUE;
 	}
 }
 
@@ -47,8 +47,8 @@ void psy_ui_win_opendialogimp_init(psy_ui_win_OpenDialogImp* self, psy_ui_Compon
 	self->title = strdup("");
 	self->filter = strdup("");
 	self->defaultextension = strdup("");
-	self->initialdir = strdup("");
-	self->filename = strdup("");
+	self->initialdir = strdup("");	
+	psy_path_init(&self->path, NULL);
 }
 
 void psy_ui_win_opendialogimp_init_all(psy_ui_win_OpenDialogImp* self,
@@ -66,7 +66,7 @@ void psy_ui_win_opendialogimp_init_all(psy_ui_win_OpenDialogImp* self,
 	self->filter = strdup(filter);
 	self->defaultextension = strdup(defaultextension);
 	self->initialdir = strdup(initialdir);
-	self->filename = strdup("");
+	psy_path_init(&self->path, NULL);
 }
 
 // win32 implementation method for psy_ui_OpenDialog
@@ -76,7 +76,7 @@ void dev_dispose(psy_ui_win_OpenDialogImp* self)
 	free(self->filter);
 	free(self->defaultextension);
 	free(self->initialdir);
-	free(self->filename);
+	psy_path_dispose(&self->path);
 }
 
 int dev_execute(psy_ui_win_OpenDialogImp* self)
@@ -123,15 +123,14 @@ int dev_execute(psy_ui_win_OpenDialogImp* self)
 		//UpdateWindow((HWND)psy_ui_win_component_details(app.main)->hwnd);
 	}
 	if (rv) {
-		free(self->filename);
-		self->filename = strdup(filename);
+		psy_path_setpath(&self->path, filename);		
 	}
 	return rv;
 }
 
-const char* dev_filename(psy_ui_win_OpenDialogImp* self)
+const psy_Path* dev_path(const psy_ui_win_OpenDialogImp* self)
 {
-	return self->filename;
+	return &self->path;
 }
 
 #endif

@@ -16,12 +16,12 @@ int _httoi(const char *value)
 	return (int)strtol(value, 0, 16);
 }
 
-int skin_load(psy_Property* properties, const char* path)
+int skin_load(psy_Property* properties, const psy_Path* path)
 {
 	FILE* fp;
 	char buf[512];
 
-	if ((fp = fopen(path, "rb")) == NULL )
+	if ((fp = fopen(psy_path_full(path), "rb")) == NULL )
 	{
 //		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 		return PSY_ERRFILE;
