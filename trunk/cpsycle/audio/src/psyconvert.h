@@ -32,7 +32,7 @@ typedef unsigned char* psy_audio_LegacyPattern;
 
 // legacy pattern
 psy_audio_LegacyPattern psy_audio_allocoldpattern(psy_audio_Pattern* pattern, uintptr_t lpb,
-	uintptr_t songtracks, int* rv_patternlines);
+	int* rv_patternlines);
 
 const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
 	psy_audio_LegacyPattern, int track, int line);

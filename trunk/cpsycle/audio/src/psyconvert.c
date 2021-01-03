@@ -7,64 +7,53 @@
 #include "constants.h"
 
 psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,
-	uintptr_t songtracks, int* rv_patternlines)
+	int* rv_lines)
 {
 	unsigned char* rv;
-	int32_t patternLines;
-	int32_t y;
-	uint32_t t;
-	psy_audio_PatternNode* node;
+	int32_t lines;
 	size_t patsize;
-
-	patternLines = (int32_t)(pattern->length * lpb + 0.5);
-	*rv_patternlines = patternLines;
-	patsize = MAX_TRACKS * patternLines * EVENT_SIZE;
+	int32_t row;
+	uint32_t track;
+	psy_audio_PatternNode* node;
+	
+	// alloc pattern data
+	lines = (int32_t)(pattern->length * lpb + 0.5);
+	*rv_lines = lines;
+	patsize = MAX_TRACKS * lines * EVENT_SIZE;
 	// clear source
 	rv = malloc(patsize);
-	for (y = 0; y < patternLines; ++y) {
-		for (t = 0; t < songtracks; ++t) {
-			unsigned char* data;
+	// init pattern data
+	for (row = 0; row < lines; ++row) {
+		for (track = 0; track < MAX_TRACKS; ++track) {
+			psy_audio_LegacyPatternEntry* data;
 
-			data = psy_audio_ptrackline(rv, t, y);
-			// Psy3 PatternEntry format
-			// type				offset
-			// uint8_t note;		0
-			// uint8_t inst;		1
-			// uint8_t mach;		2
-			// uint8_t cmd;			3
-			// uint8_t parameter;	4
-
+			data = psy_audio_ptrackline(rv, track, row);			
 			// empty entry					
-			data[0] = 255;
-			data[1] = 255;
-			data[2] = 255;
-			data[3] = 0;
-			data[4] = 0;
+			data->_note = 255; // 255 = empty note
+			data->_inst = 255; // 255 = empty inst
+			data->_mach = 255; // 255 = empry mach
+			data->_cmd = 0;
+			data->_parameter = 0;
 		}
 	}
-
+	// write pattern data
 	for (node = pattern->events; node != 0; node = node->next) {
-		unsigned char* data;
+		psy_audio_LegacyPatternEntry* data;
 		psy_audio_PatternEntry* entry;
-		int32_t y;
-		int32_t t;
+		int32_t row;
+		int32_t track;
 
 		entry = (psy_audio_PatternEntry*)node->entry;
-		y = (int32_t)(entry->offset * lpb);
-		t = entry->track;
-		data = psy_audio_ptrackline(rv, t, y);
-		// Psy3 PatternEntry format
-		// type				offset
-		// uint8_t note;		0
-		// uint8_t inst;		1
-		// uint8_t mach;		2
-		// uint8_t cmd;			3
-		// uint8_t parameter;	4
-		data[0] = psy_audio_patternentry_front(entry)->note;
-		data[1] = (uint8_t)(psy_audio_patternentry_front(entry)->inst & 0xFF);
-		data[2] = psy_audio_patternentry_front(entry)->mach;
-		data[3] = psy_audio_patternentry_front(entry)->cmd;
-		data[4] = psy_audio_patternentry_front(entry)->parameter;
+		row = (int32_t)(entry->offset * lpb);
+		track = entry->track;
+		if (track < MAX_TRACKS) {
+			data = psy_audio_ptrackline(rv, track, row);
+			data->_note = psy_audio_patternentry_front(entry)->note;
+			data->_inst = (uint8_t)(psy_audio_patternentry_front(entry)->inst & 0xFF);
+			data->_mach = psy_audio_patternentry_front(entry)->mach;
+			data->_cmd = psy_audio_patternentry_front(entry)->cmd;
+			data->_parameter = psy_audio_patternentry_front(entry)->parameter;
+		}
 	}
 	return rv;
 }
