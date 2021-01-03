@@ -93,10 +93,10 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	}
 	//If the xminstrument 0 is not used, do not increase the instrument number (the loader does this so exporting a loaded song adds a new empty slot)
 	self->correctionIndex = 1; // (song.xminstruments.IsEnabled(0)) ? 1 : 0;
-	self->xmInstruments = psy_audio_instruments_size(&songfile->song->instruments, 1); // song.GetHighestXMInstrumentIndex() + 1;
+	self->xmInstruments = (int32_t)psy_audio_instruments_size(&songfile->song->instruments, 1); // song.GetHighestXMInstrumentIndex() + 1;
 	if (self->xmInstruments > 1 && self->correctionIndex == 0) self->xmInstruments--;
 	//If there is a sampler machine, we have to take the samples into account.
-	samInstruments = psy_audio_instruments_size(&songfile->song->instruments, 0); //0; // (hasSampler) ? song.GetHighestInstrumentIndex() + 1 : 0;
+	samInstruments = (int32_t)psy_audio_instruments_size(&songfile->song->instruments, 0); //0; // (hasSampler) ? song.GetHighestInstrumentIndex() + 1 : 0;
 
 	psyfile_write(songfile->file, XM_HEADER, 17);//ID text
 	// Module name
@@ -121,16 +121,17 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 
 	memset(&self->m_Header, 0, sizeof(self->m_Header));
 	self->m_Header.size = sizeof(self->m_Header);
-	self->m_Header.norder = psy_audio_sequence_maxtracksize(&songfile->song->sequence);
+	self->m_Header.norder = (uint16_t)psy_audio_sequence_maxtracksize(&songfile->song->sequence);
 	self->m_Header.restartpos = 0;	
-	self->m_Header.channels = psy_min(songfile->song->properties.tracks, 32);
+	self->m_Header.channels = (uint16_t)psy_min(psy_audio_song_numtracks(songfile->song), 32);
 	// Number of patterns stored in file. There should be at least 1 pattern
 	// if you expect to hear anything out of the speakers. The maximum value is
 	// 256. Don’t confuse this with[Song length]!
-	self->m_Header.patterns = psy_min(psy_audio_patterns_size(&songfile->song->patterns), 256);
+	self->m_Header.patterns = (uint16_t)psy_min(psy_audio_patterns_size(&songfile->song->patterns), 256);
 	self->m_Header.instruments = psy_min(128, self->macInstruments + self->xmInstruments + samInstruments);
 	self->m_Header.flags = 0x0001; //Linear frequency.	
-	self->m_Header.speed = (int)floor(24.f / songfile->song->properties.lpb) + songfile->song->properties.extraticksperbeat;
+	self->m_Header.speed = (uint16_t)(floor(24.f / songfile->song->properties.lpb)) +
+		(uint16_t)songfile->song->properties.extraticksperbeat;
 	self->m_Header.tempo = (int)songfile->song->properties.bpm;
 	// Pattern order table
 	track = (psy_audio_SequenceTrack*)songfile->song->sequence.tracks->entry;
@@ -138,7 +139,7 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 		psy_audio_SequenceEntry* entry;
 
 		entry = (psy_audio_SequenceEntry*)t->entry;
-		self->m_Header.order[i] = entry->patternslot;
+		self->m_Header.order[i] = (uint8_t)entry->patternslot;
 	}	
 	psyfile_write(songfile->file, &self->m_Header, sizeof(self->m_Header));
 }
@@ -159,9 +160,9 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 	psy_audio_LegacyPatternEntry volumeEntries[32];
 	struct XMPATTERNHEADER ptHeader;
 	size_t currentpos;
-	int maxtracks;
-	int i;
-	int j;
+	int32_t maxtracks;
+	int32_t i;
+	int32_t j;
 	psy_audio_Pattern* pattern;
 	int32_t lines;
 	PsyFile* fp;
@@ -179,15 +180,15 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 	psyfile_write(songfile->file, &ptHeader, sizeof(ptHeader));
 	currentpos = psyfile_getpos(songfile->file);
 
-	maxtracks = psy_min(songfile->song->properties.tracks, 32);
+	maxtracks = (int32_t)psy_min(psy_audio_song_numtracks(songfile->song), 32);
 	// check every pattern for validity
 	if (psy_audio_sequence_patternused(&songfile->song->sequence, patIdx))
 	{
 		// convert pattern to legacy pattern
 		psy_audio_LegacyPattern ppattern;
 
-		ppattern = psy_audio_allocoldpattern(pattern, songfile->song->properties.lpb,
-			songfile->song->patterns.songtracks, &lines);		
+		ppattern = psy_audio_allocoldpattern(pattern,
+			psy_audio_song_lpb(songfile->song), &lines);
 		for (i = 0; i < maxtracks; i++) {
 			self->lastInstr[i] = -1;
 		}
@@ -196,7 +197,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 			for (i = 0; i < maxtracks; i++) {
 				self->extraEntry[i] = NULL;
 			}
-			for (i = 0; i < (int)songfile->song->properties.tracks; i++) {
+			for (i = 0; i < (int32_t)psy_audio_song_numtracks(songfile->song); i++) {
 				const psy_audio_LegacyPatternEntry* pData;
 
 				pData = psy_audio_ptrackline_const(ppattern, i, j);
@@ -321,7 +322,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 			}
 		}
 		ptHeader.packedsize = (uint16_t)((psyfile_getpos(songfile->file) - currentpos) & 0xFFFF);
-		psyfile_seek(songfile->file, currentpos - sizeof(ptHeader));
+		psyfile_seek(songfile->file, (uint32_t)(currentpos - sizeof(ptHeader)));
 		psyfile_write(songfile->file, &ptHeader, sizeof(ptHeader));
 		psyfile_skip(songfile->file, ptHeader.packedsize);
 		free(ppattern);
@@ -348,7 +349,7 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 			case psy_audio_PATTERNCMD_SET_LINESPERBEAT0:
 			case psy_audio_PATTERNCMD_SET_LINESPERBEAT1:
 				*type = XMCMD_SETSPEED;
-				*param = floor(24.f / pData->_parameter) + self->addTicks;
+				*param = (uint8_t)(floor(24.f / pData->_parameter) + self->addTicks);
 				self->addTicks = 0;
 				break;
 			case psy_audio_PATTERNCMD_PATTERN_LOOP:
@@ -379,7 +380,7 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 			break;
 		case psy_audio_PATTERNCMD_NOTE_DELAY:
 			*type = XMCMD_EXTENDED;
-			*param = XMCMD_E_NOTE_DELAY | (pData->_parameter * songfile->song->properties.tpb / 256);
+			*param = XMCMD_E_NOTE_DELAY | ((uint8_t)(pData->_parameter * songfile->song->properties.tpb / 256));
 			break;
 		case psy_audio_PATTERNCMD_ARPEGGIO:
 			*type = XMCMD_ARPEGGIO;
@@ -566,11 +567,11 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 			switch (pData->_parameter & 0xF0) {
 			case 0xC0:
 				*type = XMCMD_E_DELAYED_NOTECUT;
-				*param = (pData->_parameter * songfile->song->properties.lpb) >> 2;
+				*param = (uint8_t)((pData->_parameter * songfile->song->properties.lpb) >> 2);
 				break;
 			case 0xD0:
 				*type = XMCMD_E_NOTE_DELAY;
-				*param = (pData->_parameter * songfile->song->properties.lpb) >> 2;
+				*param = (uint8_t)((pData->_parameter * songfile->song->properties.lpb) >> 2);
 				break;
 			default:
 				break;
@@ -795,9 +796,9 @@ void xmsongexport_savesampleheader(XMSongExport* self, psy_audio_SongFile* songf
 	}
 
 	//All samples are 16bits in Psycle.
-	stheader.samplen = wave->numframes * 2;
-	stheader.loopstart = wave->loop.start * 2;
-	stheader.looplen = (wave->loop.end - wave->loop.start) * 2;
+	stheader.samplen = (uint32_t)(wave->numframes * 2);
+	stheader.loopstart = (uint32_t)(wave->loop.start * 2);
+	stheader.looplen = (uint32_t)((wave->loop.end - wave->loop.start) * 2);
 	stheader.vol = (int)(wave->globalvolume * 255) >> 1;
 	stheader.relnote = tune;
 	stheader.finetune = finetune;
@@ -818,8 +819,8 @@ void xmsongexport_savesampledata(XMSongExport* self, psy_audio_SongFile* songfil
 	psy_audio_Sample* wave;
 	psy_audio_SampleIndex index;
 	psy_dsp_amp_t* samples;
-	int length;
-	short prev;
+	int32_t length;
+	int16_t prev;
 	int j;
 
 	index = sampleindex_make(instrIdx, 0);
@@ -827,7 +828,7 @@ void xmsongexport_savesampledata(XMSongExport* self, psy_audio_SongFile* songfil
 		index);
 	// pack sample data
 	samples = wave->channels.samples[0];
-	length = wave->numframes;
+	length = (int32_t)wave->numframes;
 	prev = 0;
 	for (j = 0; j < length; ++j) {
 		short delta = (short)samples[j] - prev;
@@ -857,7 +858,7 @@ void xmsongexport_setsampulseenvelopes(XMSongExport* self, psy_audio_SongFile* s
 		float convert = 1.f;
 
 		// Max number of envelope points in Fasttracker format is 12.
-		sampleHeader->vnum = psy_min(12u, psy_dsp_envelope_numofpoints(env));		
+		sampleHeader->vnum = (uint8_t)(psy_min(12u, psy_dsp_envelope_numofpoints(env)));
 		if (psy_dsp_envelope_mode(env) == psy_dsp_ENVELOPETIME_SECONDS) {
 			convert = (24.f * (float)(songfile->song->properties.bpm)) / 60000.f * 1000.f;
 		}
@@ -885,7 +886,7 @@ void xmsongexport_setsampulseenvelopes(XMSongExport* self, psy_audio_SongFile* s
 		const psy_dsp_Envelope* env = &inst->panenvelope;		
 
 		// Max number of envelope points in Fasttracker format is 12.
-		sampleHeader->pnum = psy_min(12u, psy_dsp_envelope_numofpoints(env));
+		sampleHeader->pnum = (uint8_t)(psy_min(12u, psy_dsp_envelope_numofpoints(env)));
 		float convert = 1.f;
 		if (psy_dsp_envelope_mode(env) == psy_dsp_ENVELOPETIME_SECONDS) {
 			convert = (24.f * (float)(songfile->song->properties.bpm)) / 60000.f * 1000.f;

@@ -354,6 +354,7 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 		if (psy_audio_sequence_patternused(&self->songfile->song->sequence, i)) {			
 			// ok save it
 			psy_audio_Pattern* pattern;
+			psy_audio_LegacyPattern pat;
 			int32_t patternLines;
 			int32_t lpb;
 			unsigned char* source;
@@ -361,16 +362,25 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 			int32_t index;			
 			int32_t size77;			
 			uint32_t sizepos;
+			int32_t songtracks;
 			
 			pattern = psy_audio_patterns_at(&self->songfile->song->patterns, i);									
-			lpb = self->songfile->song->properties.lpb;
-			copy = source = psy_audio_allocoldpattern(pattern, lpb,
-				self->songfile->song->patterns.songtracks, &patternLines);									
-			size77 = beerz77comp2(source, 
-				&copy, self->songfile->song->patterns.songtracks * patternLines *
-				EVENT_SIZE);
+			lpb = (int32_t)self->songfile->song->properties.lpb;
+			pat = psy_audio_allocoldpattern(pattern, lpb, &patternLines);
+			// ok save it
+			songtracks = (int32_t)self->songfile->song->properties.tracks;
+			source = malloc(songtracks * patternLines * EVENT_SIZE);
+			copy = source;
+			for (int y = 0; y < patternLines; y++)
+			{
+				unsigned char* pData = pat + (y * MULTIPLY);
+				memcpy(copy, pData, EVENT_SIZE * songtracks);
+				copy += EVENT_SIZE * songtracks;
+			}
+			size77 = beerz77comp2(source, &copy,
+				songtracks * patternLines * EVENT_SIZE);			
 			free(source);
-			source = 0;			
+			source = NULL;			
 			if (status = psyfile_writeheader(self->songfile->file, "PATD",
 				CURRENT_FILE_VERSION_PATD, 0, &sizepos)) {
 				return status;
@@ -379,7 +389,7 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 			psyfile_write(self->songfile->file, &index, sizeof(index));
 			temp = patternLines;
 			psyfile_write(self->songfile->file, &temp, sizeof(temp));
-			temp = self->songfile->song->patterns.songtracks; // eventually this may be variable per pattern
+			temp = songtracks; // eventually this may be variable per pattern
 			psyfile_write(self->songfile->file, &temp, sizeof(temp));
 
 			psyfile_writestring(self->songfile->file, psy_audio_pattern_name(pattern));
@@ -387,7 +397,9 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 			psyfile_write(self->songfile->file, &size77, sizeof(size77));
 			psyfile_write(self->songfile->file, copy, size77);
 			free(copy);
-			copy = 0;			
+			copy = NULL;
+			free(pat);
+			pat = NULL;
 			
 			shareTrackNames = 0;
 			if( !shareTrackNames) {
@@ -440,7 +452,7 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
 		
 			// ok save it
 			pattern = (psy_audio_Pattern*) psy_tableiterator_value(&it);
-			index = psy_tableiterator_key(&it);			
+			index = (int32_t)psy_tableiterator_key(&it);
 			if (status = psyfile_write_int32(self->songfile->file, index)) {
 				return status;
 			}
@@ -457,7 +469,7 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
 			psyfile_writestring(self->songfile->file, psy_audio_pattern_name(pattern));
 			// num pattern entries
 			if (status = psyfile_write_int32(self->songfile->file,
-					psy_list_size(pattern->events))) {
+					(int32_t)psy_list_size(pattern->events))) {
 				return status;
 			}			
 			// Write Events
@@ -466,7 +478,7 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
 				psy_List* p;
 				
 				entry = (psy_audio_PatternEntry*) node->entry;
-				if (status = psyfile_write_int32(self->songfile->file, entry->track)) {
+				if (status = psyfile_write_int32(self->songfile->file, (int32_t)entry->track)) {
 					return status;
 				}
 				if (status = psyfile_write_float(self->songfile->file, (float)entry->offset)) {
@@ -474,7 +486,7 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
 				}				
 				// num events
 				if (status = psyfile_write_int32(self->songfile->file,
-						psy_list_size(entry->events))) {
+						(int32_t)psy_list_size(entry->events))) {
 					return status;
 				}				
 				entry = (psy_audio_PatternEntry*) node->entry;				
@@ -693,7 +705,7 @@ void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver* self, const ch
 			psy_path_ext(&path), idxtext);
 		psy_path_dispose(&path);
 	}
-	psyfile_write(self->songfile->file, str, strlen(str) + 1);
+	psyfile_write(self->songfile->file, str, ((uint32_t)(strlen(str) + 1)));
 }
 
 //	===================
@@ -1007,7 +1019,7 @@ int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
 			uint8_t key;
 
 			entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
-			for (key = entry->keyrange.low; key <= entry->keyrange.high; ++key) {
+			for (key = (uint8_t)entry->keyrange.low; key <= (uint8_t)entry->keyrange.high; ++key) {
 				psy_table_insert(&notemap, key, (void*)(uintptr_t)entry->sampleindex.slot);
 			}
 		}
@@ -1139,7 +1151,7 @@ int psy_audio_psy3saver_write_smsb(psy_audio_PSY3Saver* self)
 			return status;
 		}
 		if (status = psyfile_write_int32(self->songfile->file,
-				psy_tableiterator_key(&it))) {
+				(int32_t)psy_tableiterator_key(&it))) {
 			return status;
 		}
 		sample = psy_audio_samples_at(&self->songfile->song->samples,
@@ -1181,10 +1193,10 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 			return PSY_ERRFILE;
 		}
 	}		
-	size1 = (uint32_t)soundsquash(wavedata_left, &data1, sample->numframes);
+	size1 = (uint32_t)soundsquash(wavedata_left, &data1, (uint32_t)sample->numframes);
 	if (sample->stereo) {		
 		size2 = (uint32_t)soundsquash(wavedata_right, &data2,
-			sample->numframes);
+			(uint32_t)sample->numframes);
 	}
 	if (status = psyfile_writestring(self->songfile->file, sample->name)) {
 		free(data1);
@@ -1192,7 +1204,7 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->songfile->file, (uint32_t)
-			sample->numframes)) {
+			(uint32_t)sample->numframes)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
@@ -1244,7 +1256,8 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 		free(wavedata_left);
 		return status;
 	}
-	if (status = psyfile_write_uint32(self->songfile->file, sample->samplerate)) {
+	if (status = psyfile_write_uint32(self->songfile->file,
+			(uint32_t)sample->samplerate)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
@@ -1375,11 +1388,11 @@ int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver* self)
 			
 			param = psy_audio_machine_parameter(machine, 0);
 			if (param) {				
-				inst_idx = psy_audio_machine_parameter_scaledvalue(machine, param);
+				inst_idx = (int32_t)psy_audio_machine_parameter_scaledvalue(machine, param);
 			}
 			param = psy_audio_machine_parameter(machine, 1);
 			if (param) {
-				mac_idx = psy_audio_machine_parameter_scaledvalue(machine, param);
+				mac_idx = (int32_t)psy_audio_machine_parameter_scaledvalue(machine, param);
 			}						
 			if (inst_idx != -1 && mac_idx != -1) {
 				if (status = psyfile_writeheader(self->songfile->file, "VIRG",
