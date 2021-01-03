@@ -31,8 +31,8 @@ typedef struct PredefsConfig {
 void predefsconfig_init(PredefsConfig*, psy_Property* parent);
 void predefsconfig_dispose(PredefsConfig*);
 
-void predefsconfig_predef(PredefsConfig*, int index, psy_dsp_EnvelopeSettings* rv);
-void predefsconfig_storepredef(PredefsConfig*, int index, psy_dsp_EnvelopeSettings* rv);
+void predefsconfig_predef(PredefsConfig*, int index, psy_dsp_Envelope* rv);
+void predefsconfig_storepredef(PredefsConfig*, int index, psy_dsp_Envelope* rv);
 
 // Will be called if settingview was changed
 bool predefsconfig_onchanged(PredefsConfig*, psy_Property*);

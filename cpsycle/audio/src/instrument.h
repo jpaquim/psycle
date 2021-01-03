@@ -84,13 +84,13 @@ typedef struct psy_audio_Instrument {
 	uintptr_t lines;	
 	
 	/// envelope range = [0.0f..1.0f]
-	psy_dsp_EnvelopeSettings volumeenvelope;
+	psy_dsp_Envelope volumeenvelope;
 	/// envelope range = [-1.0f..1.0f]
-	psy_dsp_EnvelopeSettings panenvelope;
+	psy_dsp_Envelope panenvelope;
 	/// envelope range = [-1.0f..1.0f]
-	psy_dsp_EnvelopeSettings pitchenvelope;
+	psy_dsp_Envelope pitchenvelope;
 	/// envelope range = [0.0f..1.0f]
-	psy_dsp_EnvelopeSettings filterenvelope;
+	psy_dsp_Envelope filterenvelope;
 
 	/// [0..1.0f] Global volume affecting all samples of the instrument.
 	psy_dsp_amp_t globalvolume;

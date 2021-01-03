@@ -92,6 +92,7 @@ static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 static void mainframe_onviewselected(MainFrame*, Workspace*, int view,
 	uintptr_t section, int option);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
@@ -220,8 +221,8 @@ void mainframe_initworkspace(MainFrame* self)
 
 void mainframe_initemptystatusbar(MainFrame* self)
 {
-	psy_ui_component_init(&self->statusbar, mainframe_base(self));
-	psy_ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
@@ -230,8 +231,8 @@ void mainframe_initemptystatusbar(MainFrame* self)
 
 void mainframe_inittoparea(MainFrame* self)
 {	
-	psy_ui_component_init(&self->top, mainframe_base(self));
-	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->top, mainframe_base(self),
+		psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
@@ -487,6 +488,10 @@ void mainframe_initmainviews(MainFrame* self)
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
+	exportview_init(&self->exportview, psy_ui_notebook_base(&self->notebook),
+		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
+	psy_signal_connect(&self->filebar.exportbutton.signal_clicked, self,
+		mainframe_onexport);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
 	checkunsavedbox_init(&self->checkunsavedbox,
@@ -1073,6 +1078,11 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
 	workspace_selectview(&self->workspace, VIEW_ID_RENDERVIEW, 0, 0);
+}
+
+void mainframe_onexport(MainFrame* self, psy_ui_Component* sender)
+{
+	workspace_selectview(&self->workspace, VIEW_ID_EXPORTVIEW, 0, 0);
 }
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)

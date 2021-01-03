@@ -501,24 +501,24 @@ void psy2loader_readinstruments(PSY2Loader* self)
 							instrument, psy_audio_instrumentindex_make(0, i));
 						// read envelopes
 												// ENV_AT
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							1, ENV_AT[i] *1.f / 44100, 1.f);
 						// ENV_DT, ENV_SL
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 100.f);
 						// ENV_RT
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
 
 						// ENV_F_AT			
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							1, ENV_AT[i] * 1.f / 44100, 1.f);
 						// ENV_DT, ENV_SL
 						// note: SL map range(128) differs from volume envelope(100)
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 128.f);
 						// ENV_RT
-						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
 
 						instrument->filtercutoff = ENV_F_CO[i] / 127.f;

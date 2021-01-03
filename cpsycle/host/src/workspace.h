@@ -54,7 +54,8 @@ enum {
 	VIEW_ID_SETTINGSVIEW		= 5,
 	VIEW_ID_HELPVIEW			= 6,
 	VIEW_ID_RENDERVIEW			= 7,
-	VIEW_ID_CHECKUNSAVED		= 8,
+	VIEW_ID_EXPORTVIEW			= 8,
+	VIEW_ID_CHECKUNSAVED		= 9,
 	VIEW_NUM
 };
 
@@ -161,6 +162,8 @@ void workspace_loadsong_fileselect(Workspace*);
 void workspace_loadsong(Workspace*, const char*, bool play);
 bool workspace_savesong_fileselect(Workspace*);
 void workspace_savesong(Workspace*, const char*);
+bool workspace_exportsong(Workspace*);
+void workspace_exportmodule(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }

@@ -370,6 +370,9 @@
     <ClCompile Include="src\sequencetrackbox.c">
       <Filter>sequence</Filter>
     </ClCompile>
+    <ClCompile Include="src\exportview.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -715,6 +718,9 @@
     </ClInclude>
     <ClInclude Include="src\sequencetrackbox.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exportview.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

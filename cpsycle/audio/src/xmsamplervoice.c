@@ -126,7 +126,7 @@ void xmenvelopecontroller_initcontroller(XMEnvelopeController* self)
 }
 
 void xmenvelopecontroller_initcontroller_envelope(XMEnvelopeController* self,
-		const psy_dsp_EnvelopeSettings* envelope) {
+		const psy_dsp_Envelope* envelope) {
 	self->m_pEnvelope = envelope;
 	xmenvelopecontroller_initcontroller(self);
 }
@@ -140,7 +140,7 @@ void xmenvelopecontroller_noteon(XMEnvelopeController* self)
 	xmenvelopecontroller_recalcdeviation(self);
 	self->m_ModulationAmount = self->defaultValue;
 	// if there are no points, there is nothing to do.
-	if (psy_dsp_envelopesettings_numofpoints(self->m_pEnvelope) > 0)
+	if (psy_dsp_envelope_numofpoints(self->m_pEnvelope) > 0)
 	{
 		//if (m_pEnvelope->IsEnabled() && m_pEnvelope->GetTime(1) != XMInstrument::Envelope::INVALID)
 		{
@@ -159,9 +159,9 @@ void xmenvelopecontroller_noteoff(XMEnvelopeController* self)
 	self->m_Stage = (XMEnvelopeStage)(self->m_Stage | XMENVELOPESTAGE_RELEASED);
 	// If we are paused, check why
 	if ((self->m_Stage & XMENVELOPESTAGE_PAUSED) &&
-			psy_dsp_envelopesettings_sustainbegin(self->m_pEnvelope) == self->m_PositionIndex
-		&& !(psy_dsp_envelopesettings_loopstart(self->m_pEnvelope) ==
-			self->m_PositionIndex && psy_dsp_envelopesettings_loopend(self->m_pEnvelope) == self->m_PositionIndex))
+			psy_dsp_envelope_sustainbegin(self->m_pEnvelope) == self->m_PositionIndex
+		&& !(psy_dsp_envelope_loopstart(self->m_pEnvelope) ==
+			self->m_PositionIndex && psy_dsp_envelope_loopend(self->m_pEnvelope) == self->m_PositionIndex))
 	{
 		xmenvelopecontroller_continue(self);		
 	}
@@ -174,7 +174,7 @@ void xmenvelopecontroller_stop(XMEnvelopeController* self)
 
 void xmenvelopecontroller_start(XMEnvelopeController* self)
 {
-	if (self->m_PositionIndex < psy_dsp_envelopesettings_numofpoints(self->m_pEnvelope)) {
+	if (self->m_PositionIndex < psy_dsp_envelope_numofpoints(self->m_pEnvelope)) {
 		self->m_Stage = (XMEnvelopeStage)(self->m_Stage | XMENVELOPESTAGE_DOSTEP);
 		if (self->m_Samples == 0) {
 			//envelope is stopped. Le'ts do the first calc.
@@ -202,12 +202,12 @@ void xmenvelopecontroller_setposition(XMEnvelopeController* self, int posi)
 
 void xmenvelopecontroller_recalcdeviation(XMEnvelopeController* self)
 {
-	if (psy_dsp_envelopesettings_mode(self->m_pEnvelope) == psy_dsp_ENVELOPETIME_TICK) {
+	if (psy_dsp_envelope_mode(self->m_pEnvelope) == psy_dsp_ENVELOPETIME_TICK) {
 		self->m_sRateDeviation =
 			(psy_audio_xmsamplervoice_samplerate(self->voice) * 60) /
 			(psy_audio_machine_bpm(psy_audio_xmsampler_base(self->voice->m_pSampler)) *
 			psy_audio_machine_ticksperbeat(psy_audio_xmsampler_base(self->voice->m_pSampler)));			
-	} else if (psy_dsp_envelopesettings_mode(self->m_pEnvelope) == psy_dsp_ENVELOPETIME_SECONDS) {
+	} else if (psy_dsp_envelope_mode(self->m_pEnvelope) == psy_dsp_ENVELOPETIME_SECONDS) {
 		self->m_sRateDeviation = psy_audio_xmsamplervoice_samplerate(self->voice) / 1000.f;
 	}
 }
@@ -229,37 +229,37 @@ void xmenvelopecontroller_work(XMEnvelopeController* self)
 
 void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 {
-	if (psy_dsp_envelopesettings_sustainbegin(self->m_pEnvelope) != psy_dsp_ENVELOPEPOINT_INVALID
+	if (psy_dsp_envelope_sustainbegin(self->m_pEnvelope) != psy_INDEX_INVALID
 		&& !(self->m_Stage & XMENVELOPESTAGE_RELEASED))
 	{
-		if (self->m_PositionIndex == psy_dsp_envelopesettings_sustainend(self->m_pEnvelope))
+		if (self->m_PositionIndex == psy_dsp_envelope_sustainend(self->m_pEnvelope))
 		{
 			// if begin==end, pause the envelope.
-			if (psy_dsp_envelopesettings_sustainbegin(self->m_pEnvelope) ==
-				psy_dsp_envelopesettings_sustainend(self->m_pEnvelope))
+			if (psy_dsp_envelope_sustainbegin(self->m_pEnvelope) ==
+				psy_dsp_envelope_sustainend(self->m_pEnvelope))
 			{
 				xmenvelopecontroller_pause(self);
-			} else { self->m_PositionIndex = (int)psy_dsp_envelopesettings_sustainbegin(self->m_pEnvelope); }
+			} else { self->m_PositionIndex = (int)psy_dsp_envelope_sustainbegin(self->m_pEnvelope); }
 		}
-	} else if (psy_dsp_envelopesettings_loopstart(self->m_pEnvelope) != psy_dsp_ENVELOPEPOINT_INVALID)
+	} else if (psy_dsp_envelope_loopstart(self->m_pEnvelope) != psy_INDEX_INVALID)
 	{
-		if (self->m_PositionIndex >= psy_dsp_envelopesettings_loopend(self->m_pEnvelope))
+		if (self->m_PositionIndex >= psy_dsp_envelope_loopend(self->m_pEnvelope))
 		{
 			// if begin==end, pause the envelope.
-			if (psy_dsp_envelopesettings_loopstart(self->m_pEnvelope) == psy_dsp_envelopesettings_loopend(self->m_pEnvelope))
+			if (psy_dsp_envelope_loopstart(self->m_pEnvelope) == psy_dsp_envelope_loopend(self->m_pEnvelope))
 			{
 				xmenvelopecontroller_pause(self);
-			} else { self->m_PositionIndex = psy_dsp_envelopesettings_loopstart(self->m_pEnvelope); }
+			} else { self->m_PositionIndex = psy_dsp_envelope_loopstart(self->m_pEnvelope); }
 		}
 	}
-	if (psy_dsp_envelopesettings_time(self->m_pEnvelope, self->m_PositionIndex + 1) == psy_dsp_ENVELOPEPOINT_INVALID)
+	if (psy_dsp_envelope_time(self->m_pEnvelope, self->m_PositionIndex + 1) == psy_INDEX_INVALID)
 	{
 		if (self->m_Stage & XMENVELOPESTAGE_PAUSED) {
 			xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex);
 		} else {
 			self->m_Stage = XMENVELOPESTAGE_OFF;
-			self->m_PositionIndex = psy_dsp_envelopesettings_numofpoints(self->m_pEnvelope);
-			self->m_ModulationAmount = psy_dsp_envelopesettings_value(self->m_pEnvelope, self->m_PositionIndex - 1);
+			self->m_PositionIndex = psy_dsp_envelope_numofpoints(self->m_pEnvelope);
+			self->m_ModulationAmount = psy_dsp_envelope_value(self->m_pEnvelope, self->m_PositionIndex - 1);
 		}
 	} else xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex + 1);
 }
@@ -270,23 +270,23 @@ void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int en
 	XMEnvelopeValueType xstep;
 	float time;
 	
-	ystep = (psy_dsp_envelopesettings_value(self->m_pEnvelope, end) - psy_dsp_envelopesettings_value(self->m_pEnvelope, start));
-	xstep = (psy_dsp_envelopesettings_time(self->m_pEnvelope, end) - psy_dsp_envelopesettings_time(self->m_pEnvelope, start));	
+	ystep = (psy_dsp_envelope_value(self->m_pEnvelope, end) - psy_dsp_envelope_value(self->m_pEnvelope, start));
+	xstep = (psy_dsp_envelope_time(self->m_pEnvelope, end) - psy_dsp_envelope_time(self->m_pEnvelope, start));	
 	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 		xstep *= 1000.f; // to ms
 	}
 	xmenvelopecontroller_recalcdeviation(self);
-	time = psy_dsp_envelopesettings_time(self->m_pEnvelope, start);
+	time = psy_dsp_envelope_time(self->m_pEnvelope, start);
 	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 		time *= 1000;
 	}
 	self->m_Samples = time * xmenvelopecontroller_sratedeviation(self);	
-	time = psy_dsp_envelopesettings_time(self->m_pEnvelope, end);
+	time = psy_dsp_envelope_time(self->m_pEnvelope, end);
 	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 		time *= 1000;
 	}
 	self->m_NextEventSample = time * xmenvelopecontroller_sratedeviation(self);	
-	self->m_ModulationAmount = psy_dsp_envelopesettings_value(self->m_pEnvelope, start);
+	self->m_ModulationAmount = psy_dsp_envelope_value(self->m_pEnvelope, start);
 	if (xstep != 0) self->m_Step = ystep / (xstep * xmenvelopecontroller_sratedeviation(self));
 	else self->m_Step = 0;
 }
@@ -294,11 +294,11 @@ void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int en
 void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int samplePos)
 {
 	int i = 0;
-	while (psy_dsp_envelopesettings_time(self->m_pEnvelope, i) != psy_dsp_ENVELOPEPOINT_INVALID)
+	while (psy_dsp_envelope_time(self->m_pEnvelope, i) != psy_INDEX_INVALID)
 	{
 		float time;
 
-		time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
+		time = psy_dsp_envelope_time(self->m_pEnvelope, i);
 		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 			time *= 1000;
 		}
@@ -308,14 +308,14 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 		i++;
 	}	
 	if (i == 0) return; //Invalid Envelope. either GetTime(0) is INVALID, or samplePos is negative.
-	else if (psy_dsp_envelopesettings_time(self->m_pEnvelope, i) == psy_dsp_ENVELOPEPOINT_INVALID) {
+	else if (psy_dsp_envelope_time(self->m_pEnvelope, i) == psy_INDEX_INVALID) {
 		//Destination point is invalid or is exactly the last one.
 		i--;
 		self->m_Stage = XMENVELOPESTAGE_OFF;
-		self->m_PositionIndex = psy_dsp_envelopesettings_numofpoints(
+		self->m_PositionIndex = psy_dsp_envelope_numofpoints(
 			self->m_pEnvelope);
 		self->m_ModulationAmount =
-			psy_dsp_envelopesettings_value(self->m_pEnvelope, i);
+			psy_dsp_envelope_value(self->m_pEnvelope, i);
 	} else {
 		float time;
 		int samplesThisIndex;
@@ -326,7 +326,7 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 			xmenvelopecontroller_newstep(self);
 		}
 		self->m_Samples = samplePos;		
-		time = psy_dsp_envelopesettings_time(self->m_pEnvelope, i);
+		time = psy_dsp_envelope_time(self->m_pEnvelope, i);
 		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 			time *= 1000;
 		}
@@ -731,7 +731,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		//A new note does not necessarily mean an envelope reset
 		if (xmenvelopecontroller_stage(&self->m_AmplitudeEnvelope) == XMENVELOPESTAGE_OFF) {
 			xmenvelopecontroller_noteon(&self->m_AmplitudeEnvelope);
-			if (psy_dsp_envelopesettings_iscarry(self->m_AmplitudeEnvelope.m_pEnvelope)) {
+			if (psy_dsp_envelope_iscarry(self->m_AmplitudeEnvelope.m_pEnvelope)) {
 				xmenvelopecontroller_setpositioninsamples(
 					&self->m_AmplitudeEnvelope,
 					psy_audio_xmsamplerchannel_lastampenvelopeposinsamples(
@@ -740,7 +740,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		}
 		if (xmenvelopecontroller_stage(&self->m_PanEnvelope) == XMENVELOPESTAGE_OFF) {
 			xmenvelopecontroller_noteon(&self->m_PanEnvelope);
-			if (psy_dsp_envelopesettings_iscarry(self->m_PanEnvelope.m_pEnvelope)) {
+			if (psy_dsp_envelope_iscarry(self->m_PanEnvelope.m_pEnvelope)) {
 				xmenvelopecontroller_setpositioninsamples(
 					&self->m_PanEnvelope,
 					psy_audio_xmsamplerchannel_lastpanenvelopeposinsamples(
@@ -749,7 +749,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		}
 		if (xmenvelopecontroller_stage(&self->m_FilterEnvelope) == XMENVELOPESTAGE_OFF) {
 			xmenvelopecontroller_noteon(&self->m_FilterEnvelope);
-			if (psy_dsp_envelopesettings_iscarry(self->m_FilterEnvelope.m_pEnvelope)) {
+			if (psy_dsp_envelope_iscarry(self->m_FilterEnvelope.m_pEnvelope)) {
 				xmenvelopecontroller_setpositioninsamples(
 					&self->m_FilterEnvelope,
 					psy_audio_xmsamplerchannel_lastfilterenvelopeposinsamples(
@@ -758,7 +758,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		}
 		if (xmenvelopecontroller_stage(&self->m_PitchEnvelope) == XMENVELOPESTAGE_OFF) {
 			xmenvelopecontroller_noteon(&self->m_PitchEnvelope);
-			if (psy_dsp_envelopesettings_iscarry(self->m_PitchEnvelope.m_pEnvelope)) {
+			if (psy_dsp_envelope_iscarry(self->m_PitchEnvelope.m_pEnvelope)) {
 				xmenvelopecontroller_setpositioninsamples(
 					&self->m_PitchEnvelope,
 					psy_audio_xmsamplerchannel_lastpitchenvelopeposinsamples(
@@ -857,8 +857,8 @@ void psy_audio_xmsamplervoice_noteoff(psy_audio_XMSamplerVoice* self)
 	{
 		xmenvelopecontroller_noteoff(&self->m_AmplitudeEnvelope);		
 		// IT Type envelopes only do a fadeout() when it reaches the end of the envelope, except if it is looped.
-		if (psy_dsp_envelopesettings_loopstart(self->m_AmplitudeEnvelope.m_pEnvelope)
-			!= psy_dsp_ENVELOPEPOINT_INVALID)
+		if (psy_dsp_envelope_loopstart(self->m_AmplitudeEnvelope.m_pEnvelope)
+			!= psy_INDEX_INVALID)
 		{
 			psy_audio_xmsamplervoice_notefadeout(self);
 		}
@@ -889,7 +889,7 @@ void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
 	}
 	
 	psy_audio_xmsamplervoice_setisstopping(self, TRUE);
-	if (psy_dsp_envelopesettings_isenabled(self->m_AmplitudeEnvelope.m_pEnvelope)) {
+	if (psy_dsp_envelope_isenabled(self->m_AmplitudeEnvelope.m_pEnvelope)) {
 		xmenvelopecontroller_noteoff(&self->m_AmplitudeEnvelope);		
 	}
 	// Fade Out Volume

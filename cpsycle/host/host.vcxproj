@@ -298,6 +298,7 @@
     <ClCompile Include="src\dirconfig.c" />
     <ClCompile Include="src\envelopeview.c" />
     <ClCompile Include="src\eventdriverconfig.c" />
+    <ClCompile Include="src\exportview.c" />
     <ClCompile Include="src\filebar.c" />
     <ClCompile Include="src\fileview.c" />
     <ClCompile Include="src\gear.c" />
@@ -421,6 +422,7 @@
     <ClInclude Include="src\dirconfig.h" />
     <ClInclude Include="src\envelopeview.h" />
     <ClInclude Include="src\eventdriverconfig.h" />
+    <ClInclude Include="src\exportview.h" />
     <ClInclude Include="src\filebar.h" />
     <ClInclude Include="src\fileview.h" />
     <ClInclude Include="src\gear.h" />

@@ -295,6 +295,9 @@
     <ClCompile Include="src\xmsongexport.c">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="src\psyconvert.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -566,6 +569,9 @@
     </ClInclude>
     <ClInclude Include="src\sampleiterator.h">
       <Filter>machine\internal\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psyconvert.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

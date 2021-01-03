@@ -6,6 +6,8 @@
 
 #include "../../detail/stdint.h"
 
+#pragma pack(push, 1)
+
 static const char XM_HEADER[] = "Extended Module: ";
 static const char XI_HEADER [] = "Extended Instrument: ";
 static const int XM_TRACKERNAME_FOLLOWS = 0x1a;
@@ -116,6 +118,7 @@ typedef struct XMFILEHEADER
 	uint8_t order[256];
 } XMFILEHEADER;
 
+
 typedef struct XMINSTRUMENTFILEHEADER
 {
 	char extxi[21];		// Extended Instrument:
@@ -182,5 +185,7 @@ typedef struct XMSAMPLESTRUCT
 	uint8_t res;
 	char name[22];
 } XMSAMPLESTRUCT;
+
+#pragma pack(pop)
 
 #endif /* psy_audio_XMDEFS_H */

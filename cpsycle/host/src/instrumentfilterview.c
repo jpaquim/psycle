@@ -253,7 +253,7 @@ void instrumentfilterview_ontweaked(InstrumentFilterView* self,
 		envelopeview_setmodamount(&self->envelopeview,
 			self->instrument->filtermodamount);
 		envelopeview_update(&self->envelopeview);
-		pt = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, pointindex);
+		pt = psy_dsp_envelope_at(&self->instrument->filterenvelope, pointindex);
 		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
 			(float)pt.time, (float)pt.value);
 		psy_signal_emit(&self->signal_status, self, 1, statustext);

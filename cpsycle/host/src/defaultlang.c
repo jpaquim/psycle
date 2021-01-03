@@ -17,6 +17,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "song", "Song");
 	psy_property_set_str(section, "load", "Load");
 	psy_property_set_str(section, "save", "Save");
+	psy_property_set_str(section, "export", "Export");
 	psy_property_set_str(section, "new", "New");
 	psy_property_set_str(section, "render", "Render");
 	psy_property_set_str(section, "loadsong", "Load Song");
@@ -116,6 +117,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "output-path", "Output path");
 	psy_property_set_str(section,
 		"save-each-unmuted", "Save each unmuted");	
+	section = psy_property_append_section(lang, "export");
+	psy_property_set_str(section, "export-module", "Export Module");
 	// gear
 	section = psy_property_append_section(lang, "gear");
 	psy_property_set_str(section, "clone", "Clone");

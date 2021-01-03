@@ -4,31 +4,35 @@
 #if !defined(RENDERVIEW_H)
 #define RENDERVIEW_H
 
+// host
 #include "propertiesview.h"
-
-#include <uicomponent.h>
-#include <uilabel.h>
-#include <uiedit.h>
+#include "workspace.h"
+// ui
 #include <uibutton.h>
 #include <uicheckbox.h>
-#include "workspace.h"
+#include <uiedit.h>
+#include <uilabel.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: View for saving a song as a Windows PCM Wav.
+// View for saving a song as a Windows PCM Wav.
 
-typedef struct {
+typedef struct RenderView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	PropertiesView view;
-	psy_Property* properties;
-	Workspace* workspace;
-	psy_AudioDriver* fileoutdriver;
-	psy_AudioDriver* curraudiodriver;	
+	// internal data
+	psy_Property* properties;	
+	psy_AudioDriver* fileoutdriver;		
 	int restoreloopmode;
 	psy_dsp_DitherSettings restoredither;
 	bool restoredodither;
+	// references
+	psy_AudioDriver* curraudiodriver;
+	Workspace* workspace;
 } RenderView;
 
 void renderview_init(RenderView*, psy_ui_Component* parent,

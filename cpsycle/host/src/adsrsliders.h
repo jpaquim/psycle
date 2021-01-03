@@ -27,12 +27,12 @@ typedef struct AdsrSliders {
 	psy_ui_Slider sustain;
 	psy_ui_Slider release;
 	// references
-	psy_dsp_EnvelopeSettings* envelope;
+	psy_dsp_Envelope* envelope;
 } AdsrSliders;
 
 void adsrsliders_init(AdsrSliders*, psy_ui_Component* parent);
 void adsrsliders_setenvelope(AdsrSliders*,
-	psy_dsp_EnvelopeSettings*);
+	psy_dsp_Envelope*);
 
 INLINE psy_ui_Component* adsrsliders_base(AdsrSliders* self)
 {

@@ -60,7 +60,7 @@ void adsrsliders_ondestroy(AdsrSliders* self, psy_ui_Component* sender)
 }
 
 void adsrsliders_setenvelope(AdsrSliders* self,
-	psy_dsp_EnvelopeSettings* envelope)
+	psy_dsp_Envelope* envelope)
 {	
 	self->envelope = envelope;
 }
@@ -71,21 +71,21 @@ void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
 	if (slider == &self->attack) {
 		if (self->envelope) {			
 			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelopesettings_attacktime(self->envelope) * 1000);
+				psy_dsp_envelope_attacktime(self->envelope) * 1000);
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
 	} else if (slider == &self->decay) {
 		if (self->envelope) {			
 			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelopesettings_decaytime(self->envelope) * 1000);
+				psy_dsp_envelope_decaytime(self->envelope) * 1000);
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
 	} else if (slider == &self->sustain) {
 		if (self->envelope) {
 			psy_snprintf(txt, 20, "%d%%", (int)(
-				psy_dsp_envelopesettings_sustainvalue(self->envelope) * 100));	
+				psy_dsp_envelope_sustainvalue(self->envelope) * 100));	
 		} else {			
 			psy_snprintf(txt, 10, "0%%");
 		}		
@@ -93,7 +93,7 @@ void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
 	if (slider == &self->release) {
 		if (self->envelope) {			
 			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelopesettings_releasetime(self->envelope) * 1000);
+				psy_dsp_envelope_releasetime(self->envelope) * 1000);
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
@@ -107,16 +107,16 @@ void adsrsliders_onvolumeviewtweak(AdsrSliders* self,
 		return;
 	}
 	if (slider == &self->attack) {
-		psy_dsp_envelopesettings_setattacktime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setattacktime(self->envelope, value * 5.f);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 1);
 	} else if (slider == &self->decay) {
-		psy_dsp_envelopesettings_setdecaytime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setdecaytime(self->envelope, value * 5.f);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->sustain) {
-		psy_dsp_envelopesettings_setsustainvalue(self->envelope, value);
+		psy_dsp_envelope_setsustainvalue(self->envelope, value);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->release) {
-		psy_dsp_envelopesettings_setreleasetime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setreleasetime(self->envelope, value * 5.f);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 3);
 	}	
 }
@@ -126,25 +126,25 @@ void adsrsliders_onvolumeviewvalue(AdsrSliders* self,
 {
 	if (slider == &self->attack) {
 		if (self->envelope) {
-			*value = psy_dsp_envelopesettings_attacktime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_attacktime(self->envelope) / 5.f;
 		} else {
 			*value = 0.f;
 		}
 	} else if (slider == &self->decay) {
 		if (self->envelope) {
-			*value = psy_dsp_envelopesettings_decaytime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_decaytime(self->envelope) / 5.f;
 		} else {
 			*value = 0.f;
 		}	
 	} else if (slider == &self->sustain) {
 		if (self->envelope) {
-			*value = psy_dsp_envelopesettings_sustainvalue(self->envelope);
+			*value = psy_dsp_envelope_sustainvalue(self->envelope);
 		} else {
 			*value = 0.5f;
 		}	
 	} else if (slider == &self->release) {
 		if (self->envelope) {
-			*value = psy_dsp_envelopesettings_releasetime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_releasetime(self->envelope) / 5.f;
 		} else {
 			*value = 0.5f;
 		}	

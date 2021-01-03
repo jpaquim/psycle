@@ -29,7 +29,7 @@ typedef struct {
 	psy_Signal signal_tweaked;
 	intptr_t cx;
 	intptr_t cy;
-	psy_dsp_EnvelopeSettings* settings;
+	psy_dsp_Envelope* settings;
 	psy_List* dragpoint;
 	uintptr_t dragpointindex;
 	int sustainstage;
@@ -41,7 +41,7 @@ typedef struct {
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
-void envelopebox_setenvelope(EnvelopeBox* self, psy_dsp_EnvelopeSettings*);
+void envelopebox_setenvelope(EnvelopeBox* self, psy_dsp_Envelope*);
 
 INLINE void envelopebox_setmodamount(EnvelopeBox* self, psy_dsp_amp_t amount)
 {
@@ -84,7 +84,7 @@ typedef struct EnvelopeView {
 } EnvelopeView;
 
 void envelopeview_init(EnvelopeView*, psy_ui_Component* parent, Workspace*);
-void envelopeview_setenvelope(EnvelopeView*, psy_dsp_EnvelopeSettings* settings);
+void envelopeview_setenvelope(EnvelopeView*, psy_dsp_Envelope* settings);
 
 INLINE void envelopeview_setmodamount(EnvelopeView* self, psy_dsp_amp_t amount)
 {	

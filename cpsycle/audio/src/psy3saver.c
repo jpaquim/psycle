@@ -7,6 +7,7 @@
 // local
 #include "constants.h"
 #include "plugin_interface.h"
+#include "psyconvert.h"
 #include "song.h"
 #include "songio.h"
 #include "machinefactory.h"
@@ -47,7 +48,7 @@ static int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver*, uintptr_t
 static int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver*, psy_audio_Instrument*);
 static int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver*, psy_audio_Instrument*, int version);
 static int psy_audio_psy3saver_write_smie(psy_audio_PSY3Saver*,
-	psy_dsp_EnvelopeSettings*, uint32_t version);
+	psy_dsp_Envelope*, uint32_t version);
 static int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver*, psy_audio_Sample*);
 static short* psy_audio_psy3saver_floatbuffertoshort(float* buffer, uintptr_t numframes);
 
@@ -746,53 +747,53 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 		return status;
 	}
 	// env_at
-	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 1);
+	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 1);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		(pt_start.time * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_dt	
-	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 1);
-	pt_end = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
+	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 1);
+	pt_end = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_sl
-	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
+	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 			(pt_start.value * 100))) {
 		return status;
 	}
 	// env_rt
-	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
-	pt_end = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 3);
+	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
+	pt_end = psy_dsp_envelope_at(&instrument->volumeenvelope, 3);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_f_at
-	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 1);	
+	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 1);	
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		(pt_start.time * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_f_dt
-	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 1);
-	pt_end = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);
+	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 1);
+	pt_end = psy_dsp_envelope_at(&instrument->filterenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_f_sl
-	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);	
+	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 2);	
 	if (status = psyfile_write_int32(self->songfile->file,
 		(int32_t)(pt_start.value * 128))) {
 		return status;
 	}
 	// env_f_rt
-	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);
-	pt_end = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 3);
+	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 2);
+	pt_end = psy_dsp_envelope_at(&instrument->filterenvelope, 3);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
 		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
@@ -1045,7 +1046,7 @@ int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
 //	===================
 //	id = "SMIE";
 int psy_audio_psy3saver_write_smie(psy_audio_PSY3Saver* self,
-	psy_dsp_EnvelopeSettings* envelope, uint32_t version)
+	psy_dsp_Envelope* envelope, uint32_t version)
 {
 	int status;
 	uint32_t sizepos;
@@ -1088,25 +1089,25 @@ int psy_audio_psy3saver_write_smie(psy_audio_PSY3Saver* self,
 	}
 	// envelope num points
 	if (status = psyfile_write_uint32(self->songfile->file,
-		(uint32_t)psy_dsp_envelopesettings_numofpoints(envelope))) {
+		(uint32_t)psy_dsp_envelope_numofpoints(envelope))) {
 		return status;
 	}
-	for (i = 0; i < psy_dsp_envelopesettings_numofpoints(envelope); i++)
+	for (i = 0; i < psy_dsp_envelope_numofpoints(envelope); i++)
 	{
 		// time in ms (int)
 		if (status = psyfile_write_int32(self->songfile->file,
-			(int32_t)psy_dsp_envelopesettings_time(envelope, i) * 1000)) {
+			(int32_t)psy_dsp_envelope_time(envelope, i) * 1000)) {
 			return status;
 		}
 		// value
 		if (status = psyfile_write_float(self->songfile->file,
-			(float)psy_dsp_envelopesettings_value(envelope, i))) {
+			(float)psy_dsp_envelope_value(envelope, i))) {
 			return status;
 		}		
 	}
 	// envelope num points
 	if (status = psyfile_write_uint32(self->songfile->file,
-		(uint32_t)psy_dsp_envelopesettings_mode(envelope))) {
+		(uint32_t)psy_dsp_envelope_mode(envelope))) {
 		return status;
 	}
 	// adsr
@@ -1398,68 +1399,4 @@ int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver* self)
 		}
 	}
 	return PSY_OK;
-}
-
-
-unsigned char* psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,
-	uintptr_t songtracks, int* rv_patternlines)
-{
-	unsigned char* rv;	
-	int32_t patternLines;	
-	int32_t y;
-	uint32_t t;	
-	psy_audio_PatternNode* node;	
-	size_t patsize;	
-		
-	patternLines = (int32_t)(pattern->length * lpb + 0.5);
-	*rv_patternlines = patternLines;
-	patsize = songtracks * patternLines * EVENT_SIZE;
-	// clear source
-	rv = malloc(patsize);	
-	for (y = 0; y < patternLines; ++y) {
-		for (t = 0; t < songtracks; ++t) {
-			unsigned char* data;
-
-			data = rv + y * songtracks * EVENT_SIZE + t * EVENT_SIZE;
-			// Psy3 PatternEntry format
-			// type				offset
-			// uint8_t note;		0
-			// uint8_t inst;		1
-			// uint8_t mach;		2
-			// uint8_t cmd;			3
-			// uint8_t parameter;	4
-
-			// empty entry					
-			data[0] = 255;
-			data[1] = 255;
-			data[2] = 255;
-			data[3] = 0;
-			data[4] = 0;
-		}
-	}
-
-	for (node = pattern->events; node != 0; node = node->next) {
-		unsigned char* data;
-		psy_audio_PatternEntry* entry;
-		int32_t y;
-		int32_t t;
-
-		entry = (psy_audio_PatternEntry*)node->entry;
-		y = (int32_t)(entry->offset * lpb);
-		t = entry->track;
-		data = rv + y * songtracks * EVENT_SIZE + t * EVENT_SIZE;
-		// Psy3 PatternEntry format
-		// type				offset
-		// uint8_t note;		0
-		// uint8_t inst;		1
-		// uint8_t mach;		2
-		// uint8_t cmd;			3
-		// uint8_t parameter;	4
-		data[0] = psy_audio_patternentry_front(entry)->note;
-		data[1] = (uint8_t)(psy_audio_patternentry_front(entry)->inst & 0xFF);
-		data[2] = psy_audio_patternentry_front(entry)->mach;
-		data[3] = psy_audio_patternentry_front(entry)->cmd;
-		data[4] = psy_audio_patternentry_front(entry)->parameter;
-	}
-	return rv;
 }

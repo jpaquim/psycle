@@ -1,45 +1,40 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(FILEBAR_H)
-#define FILEBAR_H
+#if !defined(EXPORTVIEW_H)
+#define EXPORTVIEW_H
 
 // host
+#include "propertiesview.h"
 #include "workspace.h"
 // ui
 #include <uibutton.h>
+#include <uicheckbox.h>
+#include <uiedit.h>
 #include <uilabel.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: button panel to create, load, save and render a song
+// View for Module export
 
-typedef struct FileBar {
+typedef struct ExportView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_Label header;
-	psy_ui_Button recentbutton;
-	psy_ui_Button newbutton;
-	psy_ui_Button loadbutton;
-	psy_ui_Button savebutton;
-	psy_ui_Button exportbutton;
-	psy_ui_Button renderbutton;
+	PropertiesView view;
+	// internal data
+	psy_Property* properties;
 	// references
 	Workspace* workspace;	
-} FileBar;
+} ExportView;
 
-void filebar_init(FileBar*, psy_ui_Component* parent, Workspace*);
-
-INLINE psy_ui_Component* filebar_base(FileBar* self)
-{
-	return &self->component;
-}
+void exportview_init(ExportView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* FILEBAR_H */
+#endif /* EXPORTVIEW_H */

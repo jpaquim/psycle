@@ -40,7 +40,7 @@ void predefsconfig_make(PredefsConfig* self)
 	psy_property_append_string(self->predefs, "def6", "");
 }
 
-void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettings* rv)
+void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_Envelope* rv)
 {
 	char key[10];
 	const char* values;	
@@ -57,8 +57,8 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 	if (!values || values[0] == '\0') {
 		return;
 	}
-	psy_dsp_envelopesettings_dispose(rv);
-	psy_dsp_envelopesettings_init(rv);
+	psy_dsp_envelope_init_dispose(rv);
+	psy_dsp_envelope_init(rv);
 	if (values) {
 		char* text;
 		char* token;
@@ -81,11 +81,11 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 				} else {
 					value = (psy_dsp_amp_t)atof(token);
 					if (c == 2) { // first point
-						psy_dsp_envelopesettings_append(rv,
+						psy_dsp_envelope_append(rv,
 							psy_dsp_envelopepoint_make_all(
 								time, value, 0.f, 0.f, 0.f, 0.f));
 					} else {
-						psy_dsp_envelopesettings_append(rv,
+						psy_dsp_envelope_append(rv,
 							psy_dsp_envelopepoint_make_all(
 								time, value, 0.f, 5.f, 0.f, 1.f));
 					}
@@ -99,7 +99,7 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 }
 
 void predefsconfig_storepredef(PredefsConfig* self, int index,
-	psy_dsp_EnvelopeSettings* env)
+	psy_dsp_Envelope* env)
 {
 	char key[10];	
 
@@ -110,11 +110,11 @@ void predefsconfig_storepredef(PredefsConfig* self, int index,
 	} else {
 		psy_snprintf(key, 10, "adsr");
 	}
-	if (psy_dsp_envelopesettings_empty(env)) {
+	if (psy_dsp_envelope_empty(env)) {
 		psy_property_set_str(self->predefs, key, "");
 		return;
 	}	
-	psy_property_set_str(self->predefs, key, psy_dsp_envelopesettings_tostring(env));	
+	psy_property_set_str(self->predefs, key, psy_dsp_envelope_tostring(env));	
 }
 
 bool predefsconfig_onchanged(PredefsConfig* self, psy_Property*

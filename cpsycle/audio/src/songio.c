@@ -13,6 +13,7 @@
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
+#include "xmsongexport.h"
 #include "xmsongloader.h"
 #include "itmodule2.h"
 
@@ -181,6 +182,31 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* filename)
 		if (status = psy_audio_psy3saver_save(&psy3saver)) {
 			psy_audio_songfile_errfile(self);
 		}
+		psyfile_close(self->file);
+	} else {
+		return psy_audio_songfile_errfile(self);
+	}
+	return status;
+}
+
+int psy_audio_songfile_exportmodule(psy_audio_SongFile* self, const char* filename)
+{
+	int status;
+	PsyFile file;
+
+	status = PSY_OK;
+	self->file = &file;
+	self->err = 0;
+	self->warnings = 0;
+	psy_strreset(&self->path, filename);
+	if (psyfile_create(self->file, self->path, 1)) {
+		XMSongExport moduleexport;
+
+		xmsongexport_init(&moduleexport);
+		xmsongexport_exportsong(&moduleexport, self);
+			//psy_audio_songfile_errfile(self);
+		//}
+		xmsongexport_dispose(&moduleexport);
 		psyfile_close(self->file);
 	} else {
 		return psy_audio_songfile_errfile(self);

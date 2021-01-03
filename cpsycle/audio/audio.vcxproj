@@ -340,6 +340,7 @@
     <ClCompile Include="src\psy3loader.c" />
     <ClCompile Include="src\psy3saver.c" />
     <ClCompile Include="src\psyclescript.c" />
+    <ClCompile Include="src\psyconvert.c" />
     <ClCompile Include="src\sample.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -458,6 +459,7 @@
     <ClInclude Include="src\psy3loader.h" />
     <ClInclude Include="src\psy3saver.h" />
     <ClInclude Include="src\psyclescript.h" />
+    <ClInclude Include="src\psyconvert.h" />
     <ClInclude Include="src\sample.h" />
     <ClInclude Include="src\sampleiterator.h" />
     <ClInclude Include="src\sampler.h" />

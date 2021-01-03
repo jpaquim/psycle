@@ -23,6 +23,9 @@
 
 typedef bool BOOL;
 
+// default sampulse group
+#define INSTRUMENTGROUP 1 
+
 #define ASSERT assert
 
 static unsigned char ReadUInt1Start(PsyFile* fp, const int32_t start)
@@ -957,7 +960,7 @@ uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t st
 	instrument = psy_audio_instrument_allocinit();			
 	psy_audio_instrument_setindex(instrument, slot + 1);
 	psy_audio_instruments_insert(&song->instruments, instrument,
-		psy_audio_instrumentindex_make(0, slot));
+		psy_audio_instrumentindex_make(INSTRUMENTGROUP, slot));
 	//if (!xi) {
 		instrumentheader.size = psyfile_read_uint32(fp);
 	//} else {
@@ -1153,9 +1156,9 @@ uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t st
 void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER* sampleHeader)
 {
 	// volume envelope
-	psy_dsp_EnvelopeSettings ampenvelope;
+	psy_dsp_Envelope ampenvelope;
 
-	psy_dsp_envelopesettings_init(&ampenvelope);
+	psy_dsp_envelope_init(&ampenvelope);
 	//inst.AmpEnvelope().Init();
 	//inst.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 	if (sampleHeader->vtype & 1) {// enable volume envelope
@@ -1171,22 +1174,22 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		// Format of FastTracker points is :
 		// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 		// Value : 0..64. , divide by 64 to use it as a multiplier.
-		psy_dsp_envelopesettings_append(&ampenvelope, psy_dsp_envelopepoint_make(
+		psy_dsp_envelope_append(&ampenvelope, psy_dsp_envelopepoint_make(
 			(int)sampleHeader->venv[0] * 512 / 8363.f, (float)sampleHeader->venv[1] / 64.0f));
 		//inst.AmpEnvelope().Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
 		for (i = 1; i < envelope_point_num; i++) {
 			if (sampleHeader->venv[i * 2] > sampleHeader->venv[(i - 1) * 2])// Some rare modules have erroneous points. This tries to solve that.
-				psy_dsp_envelopesettings_append(&ampenvelope, psy_dsp_envelopepoint_make(
+				psy_dsp_envelope_append(&ampenvelope, psy_dsp_envelopepoint_make(
 					(int)sampleHeader->venv[i * 2] * 512 / 8363.f, (float)sampleHeader->venv[i * 2 + 1] / 64.0f));
 		}
-		psy_dsp_envelopesettings_copy(&inst->volumeenvelope, &ampenvelope);
-		psy_dsp_envelopesettings_dispose(&ampenvelope);
+		psy_dsp_envelope_init_copy(&inst->volumeenvelope, &ampenvelope);
+		psy_dsp_envelope_init_dispose(&ampenvelope);
 	}
 	
 		
 		if(sampleHeader->vtype & 2) {
-			psy_dsp_envelopesettings_setsustainbegin(&inst->volumeenvelope, sampleHeader->vsustain);
-			psy_dsp_envelopesettings_setsustainend(&inst->volumeenvelope, sampleHeader->vsustain);			
+			psy_dsp_envelope_setsustainbegin(&inst->volumeenvelope, sampleHeader->vsustain);
+			psy_dsp_envelope_setsustainend(&inst->volumeenvelope, sampleHeader->vsustain);			
 		}
 		else
 		{
@@ -1766,7 +1769,7 @@ void modsongloader_loadinstrument(MODSongLoader* self, int idx)
 	instrument = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setindex(instrument, idx);
 	psy_audio_instruments_insert(&song->instruments, instrument,
-		psy_audio_instrumentindex_make(0, idx));
+		psy_audio_instrumentindex_make(INSTRUMENTGROUP, idx));
 	psy_audio_instrument_setname(instrument, self->samples[idx].sampleName);	
 	if (self->samples[idx].sampleLength > 0 ) 
 	{

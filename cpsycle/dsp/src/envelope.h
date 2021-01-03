@@ -11,10 +11,6 @@
 extern "C" {
 #endif
 
-/// Invalid point. Used to indicate that sustain/normal loop is disabled, or an out of range point.
-/// BEWARE!!! UINTPTR_T, not minus one.
-#define psy_dsp_ENVELOPEPOINT_INVALID UINTPTR_MAX
-
 typedef struct {
 	/// time at which to set the value. Unit can be different things depending on the context.
 	psy_dsp_beat_t time;
@@ -61,10 +57,13 @@ typedef enum {
 /// The envelope is made of a list of pointvalues.
 typedef psy_List* psy_dsp_EnvelopePoints;
 
-typedef struct psy_dsp_EnvelopeSettings {
+// psy_dsp_Envelope
+// defines an envelope and used by all internal machines (sampler, sampulse)
+typedef struct psy_dsp_Envelope {
 	/// Envelope is enabled or disabled
 	bool enabled;
-	/// if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel*
+	/// if m_Carry and a new note enters, the envelope position is set to that
+	/// of the previous note *on the same channel*
 	bool carry;
 	/// Array of Points of the envelope.
 	psy_dsp_EnvelopePoints points;
@@ -80,224 +79,228 @@ typedef struct psy_dsp_EnvelopeSettings {
 	psy_dsp_EnvelopeTimeMode timemode;
 	/// tostring return string
 	char* str;
-} psy_dsp_EnvelopeSettings;
+} psy_dsp_Envelope;
 
-void psy_dsp_envelopesettings_init(psy_dsp_EnvelopeSettings*);
-void psy_dsp_envelopesettings_init_adsr(psy_dsp_EnvelopeSettings*);
-void psy_dsp_envelopesettings_dispose(psy_dsp_EnvelopeSettings*);
-void psy_dsp_envelopesettings_copy(psy_dsp_EnvelopeSettings* self,
-	const psy_dsp_EnvelopeSettings* source);
+void psy_dsp_envelope_init(psy_dsp_Envelope*);
+void psy_dsp_envelope_init_adsr(psy_dsp_Envelope*);
+void psy_dsp_envelope_init_dispose(psy_dsp_Envelope*);
+void psy_dsp_envelope_init_copy(psy_dsp_Envelope* self,
+	const psy_dsp_Envelope* source);
 /// Appends a new point at the end of the list.
 /// note: be sure that the pointtime is the highest of the points
-void psy_dsp_envelopesettings_append(psy_dsp_EnvelopeSettings*,
+void psy_dsp_envelope_append(psy_dsp_Envelope*,
 	psy_dsp_EnvelopePoint);
 /// Removes a point from the points Array.
-void psy_dsp_envelopesettings_delete(psy_dsp_EnvelopeSettings*, 
+void psy_dsp_envelope_delete(psy_dsp_Envelope*, 
 	uintptr_t pointindex);
 /// Clears the points Array
-void psy_dsp_envelopesettings_clear(psy_dsp_EnvelopeSettings* self);
+void psy_dsp_envelope_clear(psy_dsp_Envelope* self);
 
-psy_dsp_EnvelopePoint psy_dsp_envelopesettings_at(const psy_dsp_EnvelopeSettings*,
+psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope*,
 	uintptr_t pointindex);
-void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings*,
+void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
-void psy_dsp_envelopesettings_settime(psy_dsp_EnvelopeSettings*,
+void psy_dsp_envelope_settime(psy_dsp_Envelope*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime);
 
-INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_time(
-	const psy_dsp_EnvelopeSettings* self, uintptr_t pointindex)
+INLINE psy_dsp_seconds_t psy_dsp_envelope_time(
+	const psy_dsp_Envelope* self, uintptr_t pointindex)
 {
 	psy_dsp_EnvelopePoint rv;
 
-	rv = psy_dsp_envelopesettings_at(self, pointindex);
+	rv = psy_dsp_envelope_at(self, pointindex);
 	return rv.time;
 }
 
-void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings*,
+void psy_dsp_envelope_setvalue(psy_dsp_Envelope*,
 	uintptr_t pointindex, psy_dsp_amp_t pointval);
 
-INLINE psy_dsp_amp_t psy_dsp_envelopesettings_value(
-	const psy_dsp_EnvelopeSettings* self, uintptr_t pointindex)
+INLINE psy_dsp_amp_t psy_dsp_envelope_value(
+	const psy_dsp_Envelope* self, uintptr_t pointindex)
 {
 	psy_dsp_EnvelopePoint rv;
 
-	rv = psy_dsp_envelopesettings_at(self, pointindex);
+	rv = psy_dsp_envelope_at(self, pointindex);
 	return rv.value;
 }
 
-const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings*);
+const char* psy_dsp_envelope_tostring(const psy_dsp_Envelope*);
 
-INLINE bool psy_dsp_envelopesettings_empty(const psy_dsp_EnvelopeSettings* self)
+INLINE bool psy_dsp_envelope_empty(const psy_dsp_Envelope* self)
 {
 	return self->points == NULL;
 }
 
 // Properties
 /// Set or Get the point Index for Sustain and Loop.
-INLINE uintptr_t psy_dsp_envelopesettings_sustainbegin(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE uintptr_t psy_dsp_envelope_sustainbegin(
+	const psy_dsp_Envelope* self)
 {
 	return self->sustainbegin;
 }
 /// value has to be an existing point!
-INLINE void psy_dsp_envelopesettings_setsustainbegin(
-	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+INLINE void psy_dsp_envelope_setsustainbegin(
+	psy_dsp_Envelope* self, const uintptr_t value)
 {
 	self->sustainbegin = value;
 }
 
-INLINE uintptr_t psy_dsp_envelopesettings_sustainend(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE uintptr_t psy_dsp_envelope_sustainend(
+	const psy_dsp_Envelope* self)
 {
 	return self->sustainend;
 }
 /// value has to be an existing point!
-INLINE void psy_dsp_envelopesettings_setsustainend(
-	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+INLINE void psy_dsp_envelope_setsustainend(
+	psy_dsp_Envelope* self, const uintptr_t value)
 {
 	self->sustainend = value;
 }
-INLINE uintptr_t psy_dsp_envelopesettings_loopstart(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE uintptr_t psy_dsp_envelope_loopstart(
+	const psy_dsp_Envelope* self)
 {
 	return self->loopstart;
 }
 /// value has to be an existing point!
-INLINE void psy_dsp_envelopesettings_setloopstart(
-	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+INLINE void psy_dsp_envelope_setloopstart(
+	psy_dsp_Envelope* self, const uintptr_t value)
 {
 	self->loopstart = value;
 }
 
-INLINE uintptr_t psy_dsp_envelopesettings_loopend(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE uintptr_t psy_dsp_envelope_loopend(
+	const psy_dsp_Envelope* self)
 {
 	return self->loopend;
 }
 /// value has to be an existing point!
-INLINE void psy_dsp_envelopesettings_setloopend(
-	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+INLINE void psy_dsp_envelope_setloopend(
+	psy_dsp_Envelope* self, const uintptr_t value)
 {
 	self->loopend = value;
 }
 
-INLINE uintptr_t psy_dsp_envelopesettings_numofpoints(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE uintptr_t psy_dsp_envelope_numofpoints(
+	const psy_dsp_Envelope* self)
 {
 	return psy_list_size(self->points);	
 }
 
 //// If the envelope IsEnabled, it is used and triggered. Else, it is not.
-INLINE bool psy_dsp_envelopesettings_isenabled(
-	const psy_dsp_EnvelopeSettings* self)
+INLINE bool psy_dsp_envelope_isenabled(
+	const psy_dsp_Envelope* self)
 {
 	return self->enabled;
 }
 
-INLINE void psy_dsp_envelopesettings_setenabled(
-	psy_dsp_EnvelopeSettings* self, const bool value)
+INLINE void psy_dsp_envelope_setenabled(
+	psy_dsp_Envelope* self, const bool value)
 {
 	self->enabled = value;
 }
 
-/// if IsCarry() and a new note enters, the envelope position is set to that of the previous note *on the same channel*
-INLINE bool psy_dsp_envelopesettings_iscarry(
-	const psy_dsp_EnvelopeSettings* self)
+// if IsCarry() and a new note enters, the envelope position is set to that
+// of the previous note *on the same channel*
+INLINE bool psy_dsp_envelope_iscarry(
+	const psy_dsp_Envelope* self)
 {
 	return self->carry;
 }
 
-INLINE void psy_dsp_envelopesettings_setcarry(
-	psy_dsp_EnvelopeSettings* self, const bool value)
+INLINE void psy_dsp_envelope_setcarry(
+	psy_dsp_Envelope* self, const bool value)
 {
 	self->carry = value;
 }
 
-INLINE psy_dsp_EnvelopeTimeMode psy_dsp_envelopesettings_mode(
-	const psy_dsp_EnvelopeSettings* self) 
+INLINE psy_dsp_EnvelopeTimeMode psy_dsp_envelope_mode(
+	const psy_dsp_Envelope* self) 
 {
 	return self->timemode;
 }
-//The extra parameters are used to convert the existing points from one unit to the other.
-//void psy_dsp_envelopesettings_mode(psy_dsp_EnvelopeSettings* self,
+// The extra parameters are used to convert the existing points from one unit
+// to the other.
+// void psy_dsp_envelope_mode(psy_dsp_Envelope* self,
 //	const Mode::Type _mode, const int bpm = 125, const int tpb = 24, const int onemilli = 1);
 
-
 // Only meaningful when used as adsr 
-// INLINE void psy_dsp_envelopesettings_AttackTime(int time, bool rezoom = true);
-INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_attacktime(const
-	psy_dsp_EnvelopeSettings* self)
+// INLINE void psy_dsp_envelope_AttackTime(int time, bool rezoom = true);
+INLINE psy_dsp_seconds_t psy_dsp_envelope_attacktime(const
+	psy_dsp_Envelope* self)
 {
 	assert(self);
 
-	return psy_dsp_envelopesettings_time(self, 1);	
+	return psy_dsp_envelope_time(self, 1);	
 }
 
-INLINE void psy_dsp_envelopesettings_setattacktime(
-	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+INLINE void psy_dsp_envelope_setattacktime(
+	psy_dsp_Envelope* self, psy_dsp_seconds_t time)
 {
 	assert(self);
 
-	psy_dsp_envelopesettings_settime(self, 1, time);
+	psy_dsp_envelope_settime(self, 1, time);
 }
 
-INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_decaytime(const
-	psy_dsp_EnvelopeSettings* self)
+INLINE psy_dsp_seconds_t psy_dsp_envelope_decaytime(const
+	psy_dsp_Envelope* self)
 {
 	assert(self);
 
-	return psy_dsp_envelopesettings_time(self, 2) -
-		psy_dsp_envelopesettings_time(self, 1);	
+	return psy_dsp_envelope_time(self, 2) -
+		psy_dsp_envelope_time(self, 1);	
 }
 
-INLINE void psy_dsp_envelopesettings_setdecaytime(
-	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+INLINE void psy_dsp_envelope_setdecaytime(
+	psy_dsp_Envelope* self, psy_dsp_seconds_t time)
 {
 	assert(self);
 
-	psy_dsp_envelopesettings_settime(self, 2,
-		psy_dsp_envelopesettings_attacktime(self) + time);
+	psy_dsp_envelope_settime(self, 2,
+		psy_dsp_envelope_attacktime(self) + time);
 }
 
-INLINE void psy_dsp_envelopesettings_setsustainvalue(
-	psy_dsp_EnvelopeSettings* self, psy_dsp_amp_t sustain)
+INLINE void psy_dsp_envelope_setsustainvalue(
+	psy_dsp_Envelope* self, psy_dsp_amp_t sustain)
 {
 	assert(self);
 
-	psy_dsp_envelopesettings_setvalue(self, 2, sustain);
+	psy_dsp_envelope_setvalue(self, 2, sustain);
 }
 
-INLINE psy_dsp_amp_t psy_dsp_envelopesettings_sustainvalue(const
-	psy_dsp_EnvelopeSettings* self)
+INLINE psy_dsp_amp_t psy_dsp_envelope_sustainvalue(const
+	psy_dsp_Envelope* self)
 {
 	assert(self);
 
-	return psy_dsp_envelopesettings_value(self, 2);
+	return psy_dsp_envelope_value(self, 2);
 }
 
-INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_releasetime(const
-	psy_dsp_EnvelopeSettings* self)
+INLINE psy_dsp_seconds_t psy_dsp_envelope_releasetime(const
+	psy_dsp_Envelope* self)
 {
 	assert(self);
 
-	return psy_dsp_envelopesettings_time(self, 3) -
-		psy_dsp_envelopesettings_time(self, 2);
+	return psy_dsp_envelope_time(self, 3) -
+		psy_dsp_envelope_time(self, 2);
 }
 
-INLINE void psy_dsp_envelopesettings_setreleasetime(
-	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+INLINE void psy_dsp_envelope_setreleasetime(
+	psy_dsp_Envelope* self, psy_dsp_seconds_t time)
 {
 	assert(self);
 
-	psy_dsp_envelopesettings_settime(self, 3,
-		psy_dsp_envelopesettings_attacktime(self) +
-		psy_dsp_envelopesettings_decaytime(self) +
+	psy_dsp_envelope_settime(self, 3,
+		psy_dsp_envelope_attacktime(self) +
+		psy_dsp_envelope_decaytime(self) +
 		time);
 }
 
+// psy_dsp_EnvelopeController
+// used by lua plugins and sampler ps1
+// (sampulse has an own controller: xmenvelope_controller)
 typedef struct psy_dsp_EnvelopeController {
 	int rsvd;
-	psy_dsp_EnvelopeSettings settings;	
+	psy_dsp_Envelope settings;	
 	uintptr_t samplerate;
 	float bpm;
 	int tpb;
@@ -315,21 +318,23 @@ typedef struct psy_dsp_EnvelopeController {
 
 void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_init_envelope(psy_dsp_EnvelopeController*,
-	const psy_dsp_EnvelopeSettings*);
+	const psy_dsp_Envelope*);
 void psy_dsp_envelopecontroller_init_adsr(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_dispose(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_reset(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_set_settings(psy_dsp_EnvelopeController*,
-	const psy_dsp_EnvelopeSettings*);
-void psy_dsp_envelopecontroller_settimeandvalue(psy_dsp_EnvelopeController*, uintptr_t pointindex,
-	psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
-void psy_dsp_envelopecontroller_setvalue(psy_dsp_EnvelopeController*, uintptr_t pointindex,
-	psy_dsp_amp_t pointval);
-psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const psy_dsp_EnvelopeController*,
-	uintptr_t pointindex);
+	const psy_dsp_Envelope*);
+void psy_dsp_envelopecontroller_settimeandvalue(psy_dsp_EnvelopeController*,
+	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
+void psy_dsp_envelopecontroller_setvalue(psy_dsp_EnvelopeController*,
+	uintptr_t pointindex, psy_dsp_amp_t pointval);
+psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const
+	psy_dsp_EnvelopeController*, uintptr_t pointindex);
 psy_List*  psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController*);
-void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController*, uintptr_t samplerate);
-void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*, uintptr_t tpb, double bpm);
+void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController*,
+	uintptr_t samplerate);
+void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*,
+	uintptr_t tpb, double bpm);
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController*);
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick_ps1(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_start(psy_dsp_EnvelopeController*);
