@@ -238,7 +238,7 @@ void instrumentpanview_ontweaked(InstrumentPanView* self,
 		psy_dsp_EnvelopePoint pt;
 
 		envelopeview_update(&self->envelopeview);
-		pt = psy_dsp_envelopesettings_at(&self->instrument->panenvelope, pointindex);
+		pt = psy_dsp_envelope_at(&self->instrument->panenvelope, pointindex);
 		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
 			(float)pt.time, (float)pt.value);
 		psy_signal_emit(&self->signal_status, self, 1, statustext);

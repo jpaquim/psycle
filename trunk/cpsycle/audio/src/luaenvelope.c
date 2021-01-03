@@ -73,7 +73,7 @@ int luaenvelope_create(lua_State* L)
 	}
 	psy_dsp_envelopecontroller_init(env);
 	if (lua_istable(L, 2)) {
-		psy_dsp_EnvelopeSettings* settings;
+		psy_dsp_Envelope* settings;
 		lua_Unsigned len;
 		size_t i;
 			
@@ -102,7 +102,7 @@ int luaenvelope_create(lua_State* L)
 				}
 				lua_pop(L, 1);
 			}
-			psy_dsp_envelopesettings_append(settings,
+			psy_dsp_envelope_append(settings,
 				psy_dsp_envelopepoint_make_all((psy_dsp_seconds_t)t,
 					(psy_dsp_amp_t)peak, 0, 0, 0, 1));
 			lua_pop(L, 1);

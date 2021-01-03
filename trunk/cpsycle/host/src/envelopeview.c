@@ -78,7 +78,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 }
 
 void envelopebox_setenvelope(EnvelopeBox* self,
-	psy_dsp_EnvelopeSettings* settings)
+	psy_dsp_Envelope* settings)
 {	
 	self->settings = settings;
 	self->modamount = 1.f;
@@ -563,15 +563,15 @@ void envelopeview_settext(EnvelopeView* self, const char* text)
 }
 
 void envelopeview_setenvelope(EnvelopeView* self,
-	psy_dsp_EnvelopeSettings* settings)
+	psy_dsp_Envelope* settings)
 {
 	envelopebox_setenvelope(&self->envelopebox, settings);
-	if (settings && psy_dsp_envelopesettings_isenabled(settings)) {
+	if (settings && psy_dsp_envelope_isenabled(settings)) {
 		psy_ui_checkbox_check(&self->bar.enabled);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->bar.enabled);
 	}
-	if (settings && psy_dsp_envelopesettings_iscarry(settings)) {
+	if (settings && psy_dsp_envelope_iscarry(settings)) {
 		psy_ui_checkbox_check(&self->bar.carry);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->bar.carry);
@@ -602,7 +602,7 @@ void envelopeview_onzoom(EnvelopeView* self, ScrollZoom* sender)
 void envelopeview_onenable(EnvelopeView* self, psy_ui_CheckBox* sender)
 {
 	if (self->envelopebox.settings) {
-		psy_dsp_envelopesettings_setenabled(self->envelopebox.settings,
+		psy_dsp_envelope_setenabled(self->envelopebox.settings,
 			psy_ui_checkbox_checked(sender));
 	}
 }
@@ -610,7 +610,7 @@ void envelopeview_onenable(EnvelopeView* self, psy_ui_CheckBox* sender)
 void envelopeview_oncarry(EnvelopeView* self, psy_ui_CheckBox* sender)
 {
 	if (self->envelopebox.settings) {
-		psy_dsp_envelopesettings_setcarry(self->envelopebox.settings,
+		psy_dsp_envelope_setcarry(self->envelopebox.settings,
 			psy_ui_checkbox_checked(sender));
 	}
 }

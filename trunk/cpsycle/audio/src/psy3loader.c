@@ -49,7 +49,7 @@ static void psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader*,
 	psy_audio_Instrument*, bool islegacy, uint32_t legacyversion);
 static void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader*,
-	psy_dsp_EnvelopeSettings* envelope,
+	psy_dsp_Envelope* envelope,
 	bool legacy, uint32_t legacyversion);
 static psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader*, int32_t instrIdx,
@@ -682,13 +682,13 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		ENV_DT = (ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
 		if (ENV_RT == 16) ENV_RT = 220;
 		// ENV_AT
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 			1, ENV_AT * 1.f / 44100, 1.f);
 		// ENV_DT, ENV_SL
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 			2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 100.f);			
 		// ENV_RT
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 			3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);
 						
 		// ENV_F
@@ -700,14 +700,14 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		ENV_F_DT = (ENV_F_DT / 220) * 220; if (ENV_F_DT <= 0) ENV_F_DT = 1;
 		ENV_F_RT = (ENV_F_RT / 220) * 220; if (ENV_F_RT <= 0) ENV_F_RT = 1;
 		// ENV_F_AT			
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			1, ENV_F_AT * 1.f / 44100, 1.f);
 		// ENV_DT, ENV_SL
 		// note: SL map range(128) differs from volume envelope(100)
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			2, (ENV_F_AT + ENV_F_DT) * 1.f / 44100, ENV_F_SL / 128.f);
 		// ENV_RT
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			3, (ENV_F_AT + ENV_F_DT + ENV_F_RT) * 1.f / 44100, 0.f);
 			
 		psyfile_read(self->fp, &ENV_F_CO, sizeof(ENV_F_CO));
@@ -1240,7 +1240,7 @@ typedef struct {
 } PointValue;
 
 void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
-	psy_dsp_EnvelopeSettings* envelope,
+	psy_dsp_Envelope* envelope,
 	bool legacy, uint32_t legacyversion)
 {
 	char temp[8];
@@ -1268,7 +1268,7 @@ void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 	/// Indicates that this envelope is operated as an ADSR (it is an option for the visual component).
 	bool m_Adsr;	
 
-	psy_dsp_envelopesettings_clear(envelope);
+	psy_dsp_envelope_clear(envelope);
 	if (!legacy) {
 		psyfile_read(self->fp, &temp, 4);
 		temp[4]='\0';
@@ -1316,7 +1316,7 @@ void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 			// 1.0
 			psyfile_read(self->fp, &value.second, sizeof(value.second));
 			// todo range
-			psy_dsp_envelopesettings_append(envelope,
+			psy_dsp_envelope_append(envelope,
 				psy_dsp_envelopepoint_make_all(
 					(psy_dsp_seconds_t)value.first,
 					value.second, 0.f,

@@ -183,7 +183,7 @@ void psy_audio_xmsamplerchannel_setforegroundvoice(psy_audio_XMSamplerChannel* s
 {
 	if (self->m_pForegroundVoice)
 	{
-		const psy_dsp_EnvelopeSettings* env;
+		const psy_dsp_Envelope* env;
 
 		psy_audio_xmsamplerchannel_setlastvoicepanfactor(
 			self, psy_audio_xmsamplervoice_panfactor(self->m_pForegroundVoice));
@@ -193,25 +193,25 @@ void psy_audio_xmsamplerchannel_setforegroundvoice(psy_audio_XMSamplerChannel* s
 			self, psy_audio_xmsamplervoice_currrandvol(self->m_pForegroundVoice));
 
 		env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_amplitudeenvelope(self->m_pForegroundVoice));
-		if (psy_dsp_envelopesettings_isenabled(env) && psy_dsp_envelopesettings_iscarry(env))
+		if (psy_dsp_envelope_isenabled(env) && psy_dsp_envelope_iscarry(env))
 			psy_audio_xmsamplerchannel_setlastampenvelopeposinsamples(self,
 				xmenvelopecontroller_getpositioninsamples(
 					psy_audio_xmsamplervoice_amplitudeenvelope(self->m_pForegroundVoice)));
 		else psy_audio_xmsamplerchannel_setlastampenvelopeposinsamples(self, 0);
 		env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_panenvelope(self->m_pForegroundVoice));
-		if (psy_dsp_envelopesettings_isenabled(env) && psy_dsp_envelopesettings_iscarry(env))
+		if (psy_dsp_envelope_isenabled(env) && psy_dsp_envelope_iscarry(env))
 			psy_audio_xmsamplerchannel_setlastpanenvelopeposinsamples(self,
 				xmenvelopecontroller_getpositioninsamples(
 					psy_audio_xmsamplervoice_panenvelope(self->m_pForegroundVoice)));
 		else psy_audio_xmsamplerchannel_setlastpanenvelopeposinsamples(self, 0);
 		env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_filterenvelope(self->m_pForegroundVoice));
-		if (psy_dsp_envelopesettings_isenabled(env) && psy_dsp_envelopesettings_iscarry(env))
+		if (psy_dsp_envelope_isenabled(env) && psy_dsp_envelope_iscarry(env))
 			psy_audio_xmsamplerchannel_setlastfilterenvelopeposinsamples(self,
 				xmenvelopecontroller_getpositioninsamples(
 					psy_audio_xmsamplervoice_filterenvelope(self->m_pForegroundVoice)));
 		else psy_audio_xmsamplerchannel_setlastfilterenvelopeposinsamples(self, 0);
 		env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_pitchenvelope(self->m_pForegroundVoice));
-		if (psy_dsp_envelopesettings_isenabled(env) && psy_dsp_envelopesettings_iscarry(env))
+		if (psy_dsp_envelope_isenabled(env) && psy_dsp_envelope_iscarry(env))
 			psy_audio_xmsamplerchannel_setlastpitchenvelopeposinsamples(self,
 				xmenvelopecontroller_getpositioninsamples(
 					psy_audio_xmsamplervoice_pitchenvelope(self->m_pForegroundVoice)));
@@ -533,28 +533,28 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			psy_audio_xmsamplervoice_setvolume(voice, parameter);
 			break;
 		case XM_SAMPLER_CMD_SET_ENV_POSITION: {
-			const psy_dsp_EnvelopeSettings* env;
+			const psy_dsp_Envelope* env;
 
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_amplitudeenvelope(voice));
-			if (psy_dsp_envelopesettings_isenabled(env)) {
+			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_amplitudeenvelope(voice),
 					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_panenvelope(voice));
-			if (psy_dsp_envelopesettings_isenabled(env)) {
+			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_panenvelope(voice),
 					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_pitchenvelope(voice));
-			if (psy_dsp_envelopesettings_isenabled(env)) {
+			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_pitchenvelope(voice),
 					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_filterenvelope(voice));
-			if (psy_dsp_envelopesettings_isenabled(env)) {
+			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_filterenvelope(voice),
 					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
@@ -782,7 +782,7 @@ void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 				psy_audio_xmsamplerchannel_setlastvoicevolume(self, tmp);
 			}
 
-			if (psy_dsp_envelopesettings_isenabled(
+			if (psy_dsp_envelope_isenabled(
 				xmenvelopecontroller_envelope(
 					psy_audio_xmsamplervoice_amplitudeenvelope(
 						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
@@ -791,7 +791,7 @@ void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 						psy_audio_xmsamplervoice_amplitudeenvelope(
 							psy_audio_xmsamplerchannel_foregroundvoice(self))));				
 			}
-			if (psy_dsp_envelopesettings_isenabled(
+			if (psy_dsp_envelope_isenabled(
 				xmenvelopecontroller_envelope(
 					psy_audio_xmsamplervoice_panenvelope(
 						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
@@ -800,7 +800,7 @@ void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 						psy_audio_xmsamplervoice_panenvelope(
 							psy_audio_xmsamplerchannel_foregroundvoice(self))));
 			}
-			if (psy_dsp_envelopesettings_isenabled(
+			if (psy_dsp_envelope_isenabled(
 				xmenvelopecontroller_envelope(
 					psy_audio_xmsamplervoice_filterenvelope(
 						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {
@@ -809,7 +809,7 @@ void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 						psy_audio_xmsamplervoice_filterenvelope(
 							psy_audio_xmsamplerchannel_foregroundvoice(self))));
 			}
-			if (psy_dsp_envelopesettings_isenabled(
+			if (psy_dsp_envelope_isenabled(
 				xmenvelopecontroller_envelope(
 					psy_audio_xmsamplervoice_pitchenvelope(
 						psy_audio_xmsamplerchannel_foregroundvoice(self))))) {

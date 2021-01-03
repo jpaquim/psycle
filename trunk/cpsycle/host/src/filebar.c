@@ -14,6 +14,7 @@
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
+// static void filebar_onexportsong(FileBar*, psy_ui_Component* sender);
 // implementation
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
@@ -36,11 +37,12 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 #endif
-	psy_ui_button_init_connect(&self->savebutton, filebar_base(self),
-		self, filebar_onsavesong);
-	psy_ui_button_settext(&self->savebutton, "file.save");
-	psy_ui_button_init(&self->renderbutton, filebar_base(self));
-	psy_ui_button_settext(&self->renderbutton, "file.render");	
+	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self),
+		"file.save", self, filebar_onsavesong);
+	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
+		"file.export");
+	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
+		"file.render");	
 }
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
@@ -67,3 +69,9 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 {		
 	workspace_savesong_fileselect(self->workspace);
 }
+
+// void filebar_onexportsong(FileBar* self, psy_ui_Component* sender)
+// {
+// 	workspace_exportsong(self->workspace);
+// }
+

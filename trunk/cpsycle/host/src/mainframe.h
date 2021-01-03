@@ -15,6 +15,7 @@
 #endif
 #include "gear.h"
 #include "helpview.h"
+#include "exportview.h"
 #include "interpreter.h"
 #include "instrumentview.h"
 #include "kbdhelp.h"
@@ -107,7 +108,8 @@ typedef struct MainFrame {
 	SamplesView samplesview;
 	InstrumentView instrumentsview;
 	SongPropertiesView songpropertiesview;
-	RenderView renderview;
+	ExportView exportview;
+	RenderView renderview;	
 	PropertiesView settingsview;
 	HelpView helpview;	
 	KbdHelp kbdhelp;

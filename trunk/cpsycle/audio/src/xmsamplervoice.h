@@ -38,7 +38,7 @@ typedef struct XMEnvelopeController {
 	XMEnvelopeStage m_Stage;
 	XMEnvelopeValueType defaultValue;
 
-	const psy_dsp_EnvelopeSettings* m_pEnvelope;
+	const psy_dsp_Envelope* m_pEnvelope;
 	XMEnvelopeValueType m_ModulationAmount;
 	XMEnvelopeValueType m_Step;
 	struct psy_audio_XMSamplerVoice* voice;
@@ -51,7 +51,7 @@ void xmenvelopecontroller_dispose(XMEnvelopeController*);
 
 void xmenvelopecontroller_initcontroller(XMEnvelopeController*);
 void xmenvelopecontroller_initcontroller_envelope(XMEnvelopeController*,
-	const psy_dsp_EnvelopeSettings*);
+	const psy_dsp_Envelope*);
 /// NoteOn EnvelopeStage
 // Explanation:
 //	First, the stage is set to off. Then, if the envelope has points, we check if it has 
@@ -84,7 +84,7 @@ INLINE XMEnvelopeValueType xmenvelopecontroller_modulationamount(const XMEnvelop
 	return self->m_ModulationAmount;
 }
 
-INLINE const psy_dsp_EnvelopeSettings* xmenvelopecontroller_envelope(const XMEnvelopeController* self)
+INLINE const psy_dsp_Envelope* xmenvelopecontroller_envelope(const XMEnvelopeController* self)
 {
 	return self->m_pEnvelope;
 }

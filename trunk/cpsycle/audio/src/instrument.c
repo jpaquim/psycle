@@ -105,20 +105,20 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	self->dct = psy_audio_DUPECHECK_NONE;
 	self->dca = psy_audio_NNA_STOP;
 
-	psy_dsp_envelopesettings_init_adsr(&self->volumeenvelope);	
-	psy_dsp_envelopesettings_init_adsr(&self->filterenvelope);
-	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope, 		
+	psy_dsp_envelope_init_adsr(&self->volumeenvelope);	
+	psy_dsp_envelope_init_adsr(&self->filterenvelope);
+	psy_dsp_envelope_settimeandvalue(&self->filterenvelope, 		
 		1, 0.005f, 1.f);
-	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope,
+	psy_dsp_envelope_settimeandvalue(&self->filterenvelope,
 		2, 0.005f + 0.370f, 0.5f);
-	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope,
+	psy_dsp_envelope_settimeandvalue(&self->filterenvelope,
 		3, 0.005f + 0.370f + 0.370f, 0.0f);
 	self->filtermodamount = 1.0f;
 	self->filtercutoff = 1.f;	
 	self->filterres = 0.f;
 	self->_RRES = 0;
-	psy_dsp_envelopesettings_init_adsr(&self->panenvelope);
-	psy_dsp_envelopesettings_init_adsr(&self->pitchenvelope);
+	psy_dsp_envelope_init_adsr(&self->panenvelope);
+	psy_dsp_envelope_init_adsr(&self->pitchenvelope);
 	psy_signal_init(&self->signal_namechanged);
 }
 
@@ -126,10 +126,10 @@ void psy_audio_instrument_dispose(psy_audio_Instrument* self)
 {	
 	assert(self);
 
-	psy_dsp_envelopesettings_dispose(&self->volumeenvelope);
-	psy_dsp_envelopesettings_dispose(&self->panenvelope);
-	psy_dsp_envelopesettings_dispose(&self->pitchenvelope);
-	psy_dsp_envelopesettings_dispose(&self->filterenvelope);	
+	psy_dsp_envelope_init_dispose(&self->volumeenvelope);
+	psy_dsp_envelope_init_dispose(&self->panenvelope);
+	psy_dsp_envelope_init_dispose(&self->pitchenvelope);
+	psy_dsp_envelope_init_dispose(&self->filterenvelope);	
 	psy_audio_instrument_disposeentries(self);
 	psy_signal_dispose(&self->signal_namechanged);
 	free(self->name);

@@ -167,7 +167,7 @@ void psy_audio_xmsamplerchannel_panningslidespeed(psy_audio_XMSamplerChannel*,
 void psy_audio_xmsamplerchannel_channelvolumeslidespeed(
 	psy_audio_XMSamplerChannel*, int speed);
 void psy_audio_xmsamplerchannel_panningslide(psy_audio_XMSamplerChannel*);
-// default: int note = notecommands::empty
+// default: int note = psy_audio_NOTECOMMANDS_empty
 void psy_audio_xmsamplerchannel_pitchslide(psy_audio_XMSamplerChannel*,
 	bool bUp, int speed, int note);
 void psy_audio_xmsamplerchannel_volumeslide(psy_audio_XMSamplerChannel*,
