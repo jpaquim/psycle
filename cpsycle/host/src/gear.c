@@ -14,20 +14,22 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 	psy_ui_component_init(gearbuttons_base(self), parent);	
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->createreplace, gearbuttons_base(self));
-	psy_ui_button_settext(&self->createreplace, "gear.create-replace");
-	psy_ui_button_init(&self->del, gearbuttons_base(self));
-	psy_ui_button_settext(&self->del, "gear.delete");
-	psy_ui_button_init(&self->parameters, gearbuttons_base(self));
-	psy_ui_button_settext(&self->parameters, "gear.parameters");
-	psy_ui_button_init(&self->properties, gearbuttons_base(self));
-	psy_ui_button_settext(&self->properties, "gear.properties");
-	psy_ui_button_init(&self->exchange, gearbuttons_base(self));
-	psy_ui_button_settext(&self->exchange, "gear.exchange");
-	psy_ui_button_init(&self->clone, gearbuttons_base(self));
-	psy_ui_button_settext(&self->clone, "gear.clone");
-	psy_ui_button_init(&self->showmaster, gearbuttons_base(self));
-	psy_ui_button_settext(&self->showmaster, "gear.show-master");		
+	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self),
+		"gear.create-replace");
+	psy_ui_button_init_text(&self->del, gearbuttons_base(self),
+		"gear.delete");
+	psy_ui_button_init_text(&self->parameters, gearbuttons_base(self),
+		"gear.parameters");
+	psy_ui_button_init_text(&self->properties, gearbuttons_base(self),
+		"gear.properties");
+	psy_ui_button_init_text(&self->exchange, gearbuttons_base(self),
+		"gear.exchange");
+	psy_ui_button_init_text(&self->clone, gearbuttons_base(self),
+		"gear.clone");
+	psy_ui_button_init_text(&self->showmaster, gearbuttons_base(self),
+		"gear.show-master");
+	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self),
+		"gear.connecttomaster");
 }
 
 // Gear
@@ -38,6 +40,7 @@ static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
 static void gear_onmaster(Gear*, psy_ui_Component* sender);
+static void gear_onconnecttomaster(Gear*, psy_ui_Component* sender);
 static void gear_onhide(Gear*);
 // implementation
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
@@ -103,6 +106,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		gear_onparameters);
 	psy_signal_connect(&self->buttons.showmaster.signal_clicked, self,
 		gear_onmaster);
+	psy_signal_connect(&self->buttons.connecttomaster.signal_clicked, self,
+		gear_onconnecttomaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
 		gear_onexchange);
 }
@@ -175,4 +180,16 @@ void gear_onhide(Gear* self)
 {	
 	psy_ui_component_hide(&self->component);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
+}
+
+void gear_onconnecttomaster(Gear* self, psy_ui_Component* sender)
+{
+	switch (tabbar_selected(&self->tabbar)) {
+		case 0: machinesbox_connecttomaster(&self->machinesboxgen);
+			break;
+		case 1: machinesbox_connecttomaster(&self->machinesboxfx);
+			break;
+		default:
+			break;
+	}	
 }

@@ -119,6 +119,7 @@ void make_translator_default(psy_Property* lang)
 		"save-each-unmuted", "Save each unmuted");	
 	section = psy_property_append_section(lang, "export");
 	psy_property_set_str(section, "export-module", "Export Module");
+	psy_property_set_str(section, "export-midifile", "Export Midi File");
 	// gear
 	section = psy_property_append_section(lang, "gear");
 	psy_property_set_str(section, "clone", "Clone");
@@ -126,7 +127,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "properties", "Properties");
 	psy_property_set_str(section, "parameters", "Parameters");
 	psy_property_set_str(section, "exchange", "Exchange");
-	psy_property_set_str(section, "show-master", "Show Master");
+	psy_property_set_str(section, "show-master", "Show Master");	
+	psy_property_set_str(section, "connecttomaster", "Connect To Master");
 	psy_property_set_str(section, "create-replace", "Create/Replace");
 	psy_property_set_str(section, "effects", "Effects");
 	psy_property_set_str(section, "instruments", "Instruments");

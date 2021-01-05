@@ -41,6 +41,7 @@ void machinesbox_clone(MachinesBox*);
 void machinesbox_remove(MachinesBox*);
 void machinesbox_exchange(MachinesBox*);
 void machinesbox_showparameters(MachinesBox*);
+void machinesbox_connecttomaster(MachinesBox*);
 void machinesbox_setmachines(MachinesBox*, psy_audio_Machines*);
 
 #ifdef __cplusplus

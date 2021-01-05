@@ -84,7 +84,7 @@ int dev_execute(psy_ui_win_OpenDialogImp* self)
 	int rv;
 	OPENFILENAME ofn;
 	char filename[MAX_PATH];
-	char filter[MAX_PATH];
+	char filter[1024];
 	char title[MAX_PATH];
 	char initialdir[MAX_PATH];
 	char defextension[MAX_PATH];
@@ -94,7 +94,7 @@ int dev_execute(psy_ui_win_OpenDialogImp* self)
 	psy_snprintf(title, MAX_PATH, "%s", self->title);
 	psy_snprintf(initialdir, MAX_PATH, "%s", self->initialdir);
 	psy_snprintf(defextension, MAX_PATH, "%s", self->defaultextension);
-	psy_snprintf(filter, MAX_PATH - 1, "%s", self->filter);
+	psy_snprintf(filter, sizeof(filter) - 1, "%s", self->filter);
 	filter[strlen(filter) + 1] = '\0';
 	filtertoken = strtok(filter, "|");
 	while (filtertoken != 0) {

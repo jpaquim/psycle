@@ -90,10 +90,22 @@ void psy_audio_songproperties_copy(psy_audio_SongProperties* self, const psy_aud
 }
 
 // Properties
+void psy_audio_songproperties_settitle(psy_audio_SongProperties* self,
+	const char* title)
+{
+	psy_strreset(&self->title, title);
+}
+
 void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
 	const char* comments)
 {
 	psy_strreset(&self->comments, comments);
+}
+
+void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
+	const char* credits)
+{
+	psy_strreset(&self->credits, credits);
 }
 
 // psy_audio_Song

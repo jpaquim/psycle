@@ -92,6 +92,12 @@ INLINE const char* psy_audio_songproperties_title(const
 	return self->title;
 }
 
+void psy_audio_songproperties_settitle(psy_audio_SongProperties* self,
+	const char* title);
+
+void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
+	const char* credits);
+
 void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
 	const char* comments);
 
@@ -177,6 +183,17 @@ INLINE psy_audio_Instruments* psy_audio_song_instruments(psy_audio_Song* self)
 
 /// set song properties
 void psy_audio_song_setproperties(psy_audio_Song*, const psy_audio_SongProperties*);
+
+/// set song title
+INLINE void psy_audio_song_settitle(psy_audio_Song* self,
+	const char* title)
+{
+	assert(self);
+
+	psy_audio_songproperties_settitle(&self->properties, title);
+}
+
+
 /// return song title
 INLINE const char* psy_audio_song_title(const psy_audio_Song* self)
 {
@@ -198,6 +215,14 @@ INLINE void psy_audio_song_setcomments(psy_audio_Song* self,
 INLINE const char* psy_audio_song_comments(const psy_audio_Song* self)
 {
 	return psy_audio_songproperties_comments(&self->properties);
+}
+
+INLINE void psy_audio_song_setcredits(psy_audio_Song* self,
+	const char* credits)
+{
+	assert(self);
+
+	psy_audio_songproperties_setcredits(&self->properties, credits);
 }
 
 /// set song properties bpm

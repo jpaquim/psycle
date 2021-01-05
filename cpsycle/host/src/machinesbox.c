@@ -203,6 +203,8 @@ void machinesbox_clone(MachinesBox* self)
 
 						clone = psy_audio_machine_clone(srcmachine);
 						if (clone) {
+							psy_audio_machine_setposition(clone,
+								rand() / 64, rand() / 80);
 							psy_audio_machines_insert(self->machines, slot, clone);
 						}
 					}
@@ -296,6 +298,33 @@ void machinesbox_showparameters(MachinesBox* self)
 		}
 	}
 }
+
+void machinesbox_connecttomaster(MachinesBox* self)
+{
+	int selcount;
+
+	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
+	if (selcount > 0) {
+		int selection[256];
+		int i;
+
+		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
+		for (i = 0; i < selcount; ++i) {
+			if (psy_table_exists(&self->listboxslots, selection[i])) {
+				uintptr_t slot;
+				psy_audio_Machine* machine;
+
+				slot = (uintptr_t)psy_table_at(&self->listboxslots, selection[i]);
+				machine = psy_audio_machines_at(self->machines, slot);
+				if (machine) {
+					psy_audio_machines_connect(self->machines,
+						psy_audio_wire_make(slot, psy_audio_MASTER_INDEX));					
+				}
+			}
+		}
+	}
+}
+
 
 void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 {

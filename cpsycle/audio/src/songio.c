@@ -5,11 +5,13 @@
 
 #include "songio.h"
 
+#include "midiloader.h"
 #include "psy3loader.h"
 #include "psy3saver.h"
 #include "psy2.h"
 #include "song.h"
 #include "machinefactory.h"
+#include "midisongexport.h"
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
@@ -27,13 +29,14 @@
 #include "../../detail/portable.h"
 
 static char load_filters[] =
-"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav *.mid)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav;*.mid|"
 "Songs (*.psy)"				        "|*.psy|"
 "FastTracker II Songs (*.xm)"       "|*.xm|"
 "Impulse Tracker Songs (*.it)"      "|*.it|"
 "Scream Tracker Songs (*.s3m)"      "|*.s3m|"
 "Original Mod Format Songs (*.mod)" "|*.mod|"
-"Wav Format Songs (*.wav)"			"|*.wav";
+"Wav Format Songs (*.wav)"			"|*.wav|"
+"Midi Standard Songs (*.mid)"	    "|*.mid|";
 
 static char save_filters[] =
 "Songs (*.psy)|*.psy";
@@ -127,9 +130,19 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			itmodule2_load(&itmodule);
 			itmodule2_dispose(&itmodule);
 			psyfile_close(self->file);
+		} else if (strcmp(riff, "MThd") == 0) {
+			MidiLoader midifile;
+
+			psyfile_seek(self->file, 0);
+			midiloader_init(&midifile, self);			
+			if (status = midiloader_load(&midifile)) {			
+				psy_audio_songfile_errfile(self);
+			}
+			midiloader_dispose(&midifile);
+			psyfile_close(self->file);
 		} else {
 #ifdef PSYCLE_USE_XM
-			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
+			psyfile_read(self->file, header + 8, (uint32_t)(strlen(XM_HEADER) - 8));
 			header[strlen(XM_HEADER)] = '\0';
 			if (strcmp(header, XM_HEADER) == 0) {
 				XMSongLoader loader;
@@ -168,13 +181,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 int psy_audio_songfile_save(psy_audio_SongFile* self, const char* filename)
 {		
 	int status;
-	PsyFile file;
+	PsyFile file;	
 
 	status = PSY_OK;
 	self->file = &file;
 	self->err = 0;
 	self->warnings = 0;
-	psy_strreset(&self->path, filename);
+	psy_strreset(&self->path, filename);	
 	if (psyfile_create(self->file, self->path, 1)) {
 		psy_audio_PSY3Saver psy3saver;
 
@@ -207,6 +220,31 @@ int psy_audio_songfile_exportmodule(psy_audio_SongFile* self, const char* filena
 			//psy_audio_songfile_errfile(self);
 		//}
 		xmsongexport_dispose(&moduleexport);
+		psyfile_close(self->file);
+	} else {
+		return psy_audio_songfile_errfile(self);
+	}
+	return status;
+}
+
+int psy_audio_songfile_exportmidifile(psy_audio_SongFile* self, const char* filename)
+{
+	int status;
+	PsyFile file;
+
+	status = PSY_OK;
+	self->file = &file;
+	self->err = 0;
+	self->warnings = 0;
+	psy_strreset(&self->path, filename);
+	if (psyfile_create(self->file, self->path, 1)) {
+		psy_audio_MidiSongExport moduleexport;
+
+		psy_audio_midisongexport_init(&moduleexport, self);
+		psy_audio_midisongexport_save(&moduleexport);
+		//psy_audio_songfile_errfile(self);
+	//}
+		psy_audio_midisongexport_dispose(&moduleexport);
 		psyfile_close(self->file);
 	} else {
 		return psy_audio_songfile_errfile(self);
