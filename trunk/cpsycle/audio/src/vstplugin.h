@@ -30,7 +30,7 @@ typedef struct VstPlugin {
 	struct VstTimeInfo* vsttimeinfo;	
 	psy_audio_MachineInfo* plugininfo;
 	psy_Table tracknote;
-	psy_Table parameters;	
+	psy_Table parameters;
 } psy_audio_VstPlugin;
 
 void psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback*,

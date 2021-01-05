@@ -300,6 +300,8 @@
     </ClCompile>
     <ClCompile Include="src\midiconfig.c" />
     <ClCompile Include="src\midiinput.c" />
+    <ClCompile Include="src\midiloader.c" />
+    <ClCompile Include="src\midisongexport.c" />
     <ClCompile Include="src\mixer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -440,6 +442,8 @@
     <ClInclude Include="src\master.h" />
     <ClInclude Include="src\midiconfig.h" />
     <ClInclude Include="src\midiinput.h" />
+    <ClInclude Include="src\midiloader.h" />
+    <ClInclude Include="src\midisongexport.h" />
     <ClInclude Include="src\mixer.h" />
     <ClInclude Include="src\pattern.h" />
     <ClInclude Include="src\patternentry.h" />

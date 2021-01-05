@@ -41,6 +41,7 @@ void psy_audio_songfile_dispose(psy_audio_SongFile*);
 int psy_audio_songfile_load(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_save(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmodule(psy_audio_SongFile*, const char* filename);
+int psy_audio_songfile_exportmidifile(psy_audio_SongFile*, const char* filename);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 const char* psy_audio_songfile_loadfilter(void);

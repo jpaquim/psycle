@@ -1904,6 +1904,10 @@ static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
 	int flag, psy_audio_SongFile*);
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
+static void machineviewbar_onmachinesinsert(MachineViewBar*,
+	psy_audio_Machines*, uintptr_t slot);
+static void machineviewbar_onmachinesremoved(MachineViewBar*,
+	psy_audio_Machines*, uintptr_t slot);
 
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -1918,6 +1922,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_check(&self->mixersend);
 	psy_ui_checkbox_settext(&self->mixersend,
 		"machineview.connect-to-mixer-send-return-input");
+	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);		
 	psy_ui_label_init(&self->status, machineviewbar_base(self));
@@ -1925,7 +1930,13 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->status, 44);
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		machineviewbar_onsongchanged);	
+		machineviewbar_onsongchanged);
+	if (workspace->song) {
+		psy_signal_connect(&workspace->song->machines.signal_insert, self,
+			machineviewbar_onmachinesinsert);
+		psy_signal_connect(&workspace->song->machines.signal_removed, self,
+			machineviewbar_onmachinesremoved);
+	}
 }
 
 void machineviewbar_settext(MachineViewBar* self, const char* text)
@@ -1953,6 +1964,42 @@ void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 	} else {
 		psy_ui_checkbox_disablecheck(&self->mixersend);		
 	}
+	if (workspace->song) {
+		psy_signal_connect(&workspace->song->machines.signal_insert, self,
+			machineviewbar_onmachinesinsert);
+		psy_signal_connect(&workspace->song->machines.signal_removed, self,
+			machineviewbar_onmachinesremoved);
+	}
+}
+
+void machineviewbar_onmachinesinsert(MachineViewBar* self,
+	psy_audio_Machines* sender, uintptr_t slot)
+{
+	if (psy_audio_machine_type(psy_audio_machines_at(sender, slot)) == MACH_MIXER) {
+		psy_ui_component_show_align(psy_ui_checkbox_base(&self->mixersend));
+	}
+}
+
+void machineviewbar_onmachinesremoved(MachineViewBar* self,
+	psy_audio_Machines* sender, uintptr_t slot)
+{
+	bool hidemixersend;
+	psy_TableIterator it;
+
+	hidemixersend = TRUE;		
+	for (it = psy_audio_machines_begin(sender);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_Machine* machine;
+
+		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+		if (psy_audio_machine_type(machine) == MACH_MIXER) {
+			hidemixersend = FALSE;
+		}			
+	}
+	if (hidemixersend) {
+		psy_ui_component_hide_align(psy_ui_checkbox_base(&self->mixersend));
+	}	
 }
 
 // MachineView

@@ -298,6 +298,12 @@
     <ClCompile Include="src\psyconvert.c">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="src\midiloader.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\midisongexport.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -571,6 +577,12 @@
       <Filter>machine\internal\sampler</Filter>
     </ClInclude>
     <ClInclude Include="src\psyconvert.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midiloader.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midisongexport.h">
       <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>

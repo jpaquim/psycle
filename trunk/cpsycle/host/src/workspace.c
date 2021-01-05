@@ -771,6 +771,50 @@ void workspace_exportmodule(Workspace* self, const char* path)
 		"ready\n");
 }
 
+bool workspace_exportmidifile_fileselect(Workspace* self)
+{
+	psy_ui_SaveDialog dialog;
+	int success;
+	static char export_filters[] =
+		"All Songs (*.mid)" "|*.mid|"
+		"Midi File Songs (*.mid)"       "|*.mid";
+	psy_ui_savedialog_init_all(&dialog, NULL,
+		psy_ui_translate("file.savesong"),
+		export_filters,
+		psy_audio_songfile_defaultsaveextension(),
+		dirconfig_songs(psycleconfig_directories(
+			workspace_conf(self))));
+	if (success = psy_ui_savedialog_execute(&dialog)) {
+		workspace_exportmidifile(self,
+			psy_path_full(psy_ui_savedialog_path(&dialog)));
+	}
+	psy_ui_savedialog_dispose(&dialog);
+	return success;
+}
+
+void workspace_exportmidifile(Workspace* self, const char* path)
+{
+	psy_audio_SongFile songfile;
+
+	assert(self);
+
+	psy_audio_songfile_init(&songfile);
+	songfile.file = 0;
+	songfile.song = self->song;
+	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
+
+	if (psy_audio_songfile_exportmidifile(&songfile, path)) {
+		psy_signal_emit(&self->signal_terminal_error, self, 1,
+			songfile.serr);
+	} else {
+		self->undosavepoint = psy_list_size(self->undoredo.undo);
+		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
+	}
+	psy_audio_songfile_dispose(&songfile);
+	psy_signal_emit(&self->signal_terminal_out, self, 1,
+		"ready\n");
+}
+
 void workspace_savesong(Workspace* self, const char* path)
 {
 	psy_audio_SongFile songfile;

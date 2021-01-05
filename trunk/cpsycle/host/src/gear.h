@@ -35,6 +35,7 @@ typedef struct GearButtons {
 	psy_ui_Button exchange;
 	psy_ui_Button clone;
 	psy_ui_Button showmaster;
+	psy_ui_Button connecttomaster;
 } GearButtons;
 
 void gearbuttons_init(GearButtons*, psy_ui_Component* parent, Workspace*);

@@ -164,6 +164,8 @@ bool workspace_savesong_fileselect(Workspace*);
 void workspace_savesong(Workspace*, const char*);
 bool workspace_exportsong(Workspace*);
 void workspace_exportmodule(Workspace*, const char* path);
+bool workspace_exportmidifile_fileselect(Workspace* self);
+void workspace_exportmidifile(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
