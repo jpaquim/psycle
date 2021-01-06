@@ -22,7 +22,7 @@ extern "C" {
 
 typedef struct {
     psy_ui_Component component;
-    int charnumber;
+    intptr_t charnumber;
     double linespacing;
     psy_ui_Alignment textalignment;
     char* text;

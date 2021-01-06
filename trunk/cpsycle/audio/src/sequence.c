@@ -139,8 +139,7 @@ uintptr_t psy_audio_sequenceselection_editposition_entry_id(
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack* self)
 {
 	self->entries = NULL;
-	self->name = psy_strdup("seq");
-	self->mute = FALSE;
+	self->name = psy_strdup("seq");	
 }
 
 void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack* self)
@@ -269,6 +268,7 @@ void psy_audio_sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patte
 {
 	self->tracks = 0;
 	self->patterns = patterns;
+	patternstrackstate_init(&self->trackstate);
 	psy_signal_init(&self->sequencechanged);
 }
 
@@ -276,6 +276,7 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 {
 	psy_list_deallocate(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
+	patternstrackstate_dispose(&self->trackstate);
 	psy_signal_dispose(&self->sequencechanged);
 }
 
@@ -919,4 +920,48 @@ void sequence_onpatternnamechanged(psy_audio_Sequence* self,
 	psy_audio_Pattern* sender)
 {
 	psy_signal_emit(&self->sequencechanged, self, 0);
+}
+
+// TrackState
+void psy_audio_sequence_activatesolotrack(psy_audio_Sequence* self,
+	uintptr_t track)
+{
+	assert(self);
+
+	patternstrackstate_activatesolotrack(&self->trackstate, track);
+}
+
+void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence* self)
+{
+	assert(self);
+
+	patternstrackstate_deactivatesolotrack(&self->trackstate);
+}
+
+void psy_audio_sequence_mutetrack(psy_audio_Sequence* self, uintptr_t track)
+{
+	assert(self);
+
+	patternstrackstate_mutetrack(&self->trackstate, track);
+}
+
+void psy_audio_sequence_unmutetrack(psy_audio_Sequence* self, uintptr_t track)
+{
+	assert(self);
+
+	patternstrackstate_unmutetrack(&self->trackstate, track);
+}
+
+int psy_audio_sequence_istrackmuted(const psy_audio_Sequence* self, uintptr_t track)
+{
+	assert(self);
+
+	return patternstrackstate_istrackmuted(&self->trackstate, track);
+}
+
+int psy_audio_sequence_istracksoloed(const psy_audio_Sequence* self, uintptr_t track)
+{
+	assert(self);
+
+	return patternstrackstate_istracksoloed(&self->trackstate, track);
 }

@@ -112,6 +112,8 @@ void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
 void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*);
 void psy_ui_value_mul_real(psy_ui_Value*, double factor);
+int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm);
 
 INLINE psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm)
@@ -143,8 +145,14 @@ INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
 	return rv;
 }
 
-int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
-	const psy_ui_TextMetric* tm);
+INLINE psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm)
+{	
+	if (psy_ui_value_comp(&lhs, &rhs, tm) > 0) {
+		return lhs;
+	}	
+	return rhs;
+}
 
 INLINE psy_ui_Value psy_ui_value_zero(void)
 {
@@ -167,6 +175,18 @@ typedef struct {
 	psy_ui_Value x;
 	psy_ui_Value y;
 } psy_ui_Point;
+
+INLINE void psy_ui_point_init(psy_ui_Point* self)
+{
+	self->x = psy_ui_value_zero();
+	self->y = psy_ui_value_zero();
+}
+
+INLINE void psy_ui_point_init_all(psy_ui_Point* self, psy_ui_Value x, psy_ui_Value y)
+{	
+	self->x = x;
+	self->y = y;	
+}
 
 INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
 {

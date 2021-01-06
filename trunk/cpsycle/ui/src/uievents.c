@@ -5,7 +5,7 @@
 
 #include "uievents.h"
 
-void psy_ui_keyevent_init(psy_ui_KeyEvent* self, intptr_t keycode, intptr_t keydata,
+void psy_ui_keyevent_init(psy_ui_KeyEvent* self, uint32_t keycode, intptr_t keydata,
 	bool shift, bool ctrl, bool alt, int repeat)
 {
 	self->keycode = keycode;

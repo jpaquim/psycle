@@ -43,13 +43,14 @@ typedef struct MidiTrackState
 	uintptr_t trackidx;
 	uintptr_t automationchannel;
 	psy_dsp_big_beat_t position;
+	psy_dsp_big_beat_t patternoffset;
 	psy_audio_PatternNode* patternnode;
 	psy_audio_Pattern* pattern;
 	psy_audio_SequenceTrackNode* tracknode;	
 	MidiChannel channels[MAX_MIDIFILE_POLYPHONY];	
 	uint8_t runningstatus;
 	uint8_t byte1;
-	bool hasrunningstatus;	
+	bool hasrunningstatus;
 } MidiTrackState;
 
 void miditrackstate_init(MidiTrackState*);

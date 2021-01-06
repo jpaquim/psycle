@@ -206,14 +206,14 @@ void psy_audio_patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track)
 	patternstrackstate_unmutetrack(&self->trackstate, track);
 }
 
-int psy_audio_patterns_istrackmuted(psy_audio_Patterns* self, uintptr_t track)
+int psy_audio_patterns_istrackmuted(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
 	return patternstrackstate_istrackmuted(&self->trackstate, track);
 }
 
-int psy_audio_patterns_istracksoloed(psy_audio_Patterns* self, uintptr_t track)
+int psy_audio_patterns_istracksoloed(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 

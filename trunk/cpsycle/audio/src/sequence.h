@@ -79,7 +79,6 @@ typedef psy_List psy_audio_SequenceEntryNode;
 typedef struct {
 	psy_audio_SequenceEntryNode* entries;	
 	char* name;
-	bool mute;
 } psy_audio_SequenceTrack;
 
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack*);
@@ -196,6 +195,7 @@ typedef struct psy_audio_Sequence {
 	psy_audio_SequenceTrackNode* tracks;
 	psy_audio_Patterns* patterns;
 	psy_Signal sequencechanged;
+	psy_audio_PatternsTrackState trackstate;
 } psy_audio_Sequence;
 
 void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*);
@@ -237,6 +237,14 @@ void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
 void psy_audio_reposition(psy_audio_Sequence*);
 void psy_audio_sequence_reposition_track(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*);
+// TrackState
+void psy_audio_sequence_activatesolotrack(psy_audio_Sequence*, uintptr_t track);
+void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence*);
+void psy_audio_sequence_mutetrack(psy_audio_Sequence*, uintptr_t track);
+void psy_audio_sequence_unmutetrack(psy_audio_Sequence*, uintptr_t track);
+int psy_audio_sequence_istrackmuted(const psy_audio_Sequence*, uintptr_t track);
+int psy_audio_sequence_istracksoloed(const psy_audio_Sequence*, uintptr_t track);
+
 
 #ifdef __cplusplus
 }

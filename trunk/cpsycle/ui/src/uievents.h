@@ -26,7 +26,7 @@ typedef struct {
 	struct psy_ui_Component* target;
 } psy_ui_KeyEvent;
 
-void psy_ui_keyevent_init(psy_ui_KeyEvent*, intptr_t keycode, intptr_t keydata,
+void psy_ui_keyevent_init(psy_ui_KeyEvent*, uint32_t keycode, intptr_t keydata,
 	bool shift, bool ctrl, bool alt, int repeat);
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent*);
 void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent*);

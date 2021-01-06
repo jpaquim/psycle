@@ -531,11 +531,13 @@ void dev_invalidaterect(psy_ui_win_ComponentImp* self,
 	const psy_ui_Rectangle* r)
 {
 	RECT rc;
+	psy_ui_TextMetric tm;
 
-	rc.left = (int)(r->left - self->component->scroll.x);
-	rc.top = (int)(r->top - self->component->scroll.y);
-	rc.right = (int)(r->right - self->component->scroll.x);
-	rc.bottom = (int)(r->bottom - self->component->scroll.y);
+	tm = psy_ui_component_textmetric(self->component);
+	rc.left = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, &tm));
+	rc.top = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, &tm));
+	rc.right = (int)(r->right - psy_ui_value_px(&self->component->scroll.x, &tm));
+	rc.bottom = (int)(r->bottom - psy_ui_value_px(&self->component->scroll.y, &tm));
 	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 

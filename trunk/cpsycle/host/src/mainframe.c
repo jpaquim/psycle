@@ -101,6 +101,8 @@ static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatestepsequencerbuttons(MainFrame*);
 static void mainframe_connectstepsequencerbuttons(MainFrame*);
+static void mainframe_updateseqeditorbuttons(MainFrame*);
+static void mainframe_connectseqeditorbuttons(MainFrame*);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onselectpatterndisplay(MainFrame*, psy_ui_Component* sender, PatternDisplayMode);
@@ -183,8 +185,10 @@ void mainframe_init(MainFrame* self)
 	mainframe_initinterpreter(self);
 	mainframe_updateterminalbutton(self);
 	mainframe_connectworkspace(self);
-	mainframe_updatestepsequencerbuttons(self);
+	mainframe_updatestepsequencerbuttons(self);	
 	mainframe_connectstepsequencerbuttons(self);
+	mainframe_updateseqeditorbuttons(self);
+	mainframe_connectseqeditorbuttons(self);
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -552,12 +556,15 @@ void mainframe_initseqeditor(MainFrame* self)
 {
 	seqeditor_init(&self->seqeditor, &self->client, &self->workspace);
 	psy_ui_component_setalign(seqeditor_base(&self->seqeditor),
-		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_splitbar_init(&self->splitseqeditor, &self->client);
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitseqeditor),
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_hide(psy_ui_splitbar_base(&self->splitseqeditor));
+	if (!generalconfig_showsequenceedit(psycleconfig_general(
+		workspace_conf(&self->workspace)))) {
+		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+		psy_ui_component_hide(psy_ui_splitbar_base(&self->splitseqeditor));
+	}	
 }
 
 void mainframe_initrecentview(MainFrame* self)
@@ -594,13 +601,7 @@ void mainframe_initsequenceview(MainFrame* self)
 {
 	sequenceview_init(&self->sequenceview, mainframe_base(self), &self->workspace);
 	psy_ui_component_setalign(sequenceview_base(&self->sequenceview),
-		psy_ui_ALIGN_LEFT);
-	psy_signal_connect(
-		&self->sequenceview.options.toggleseqediticon.signal_clicked, self,
-		mainframe_ontoggleseqeditor);
-	psy_signal_connect(
-		&self->sequenceview.options.toggleseqedit.signal_clicked, self,
-		mainframe_ontoggleseqeditor);
+		psy_ui_ALIGN_LEFT);	
 	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
 }
 
@@ -950,9 +951,14 @@ void mainframe_updatesongtitle(MainFrame* self)
 void mainframe_ontogglegear(MainFrame* self, psy_ui_Component* sender)
 {
 	if (!psy_ui_component_visible(&self->gear.component)) {
-		psy_ui_button_highlight(&self->machinebar.gear);
+		psy_ui_button_highlight(&self->machinebar.gear);		
 	}
 	psy_ui_component_togglevisibility(&self->gear.component);
+	if (!psy_ui_component_visible(&self->gear.component) &&
+			psy_ui_notebook_activepage(&self->notebook)) {
+		psy_ui_component_setfocus(psy_ui_notebook_activepage(
+			&self->notebook));
+	}
 }
 
 void mainframe_ontogglegearworkspace(MainFrame* self, Workspace* sender)
@@ -1042,6 +1048,13 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 	psy_Property* property)
 {
 	switch (psy_property_id(property)) {
+	case PROPERTY_ID_SHOWSEQUENCEEDIT:
+		if (psy_property_item_bool(property) != psy_ui_component_visible(
+			seqeditor_base(&self->seqeditor))) {
+			psy_ui_component_togglevisibility(
+				seqeditor_base(&self->seqeditor));
+		}
+		break;
 		case PROPERTY_ID_SHOWSTEPSEQUENCER:
 			if (psy_property_item_bool(property) != psy_ui_component_visible(
 					stepsequencerview_base(&self->stepsequencerview))) {
@@ -1123,6 +1136,9 @@ void mainframe_onstartup(MainFrame* self)
 	// the view size to divide a splitted display correctly
 	workspace_selectpatterndisplay(&self->workspace,
 		workspace_patterndisplaytype(&self->workspace));
+	// the preferredsize of the sequenceview was used to size it at start
+	// prevent it from now on and let further set the size by the splitbar
+	self->sequenceview.component.preventpreferredsize = TRUE;
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
@@ -1342,23 +1358,49 @@ bool mainframe_onclose(MainFrame* self)
 
 void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
 {
-	if (psy_ui_component_visible(seqeditor_base(&self->seqeditor))) {
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
-			psy_ui_ICON_MORE);
-		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
-			"Show SequenceEditor");		
-		psy_ui_component_hide(&self->splitseqeditor.component);
-		psy_ui_button_disablehighlight(
-			&self->sequenceview.options.toggleseqedit);
-	} else {
-		psy_ui_component_show(&self->splitseqeditor.component);		
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
-			psy_ui_ICON_LESS);
+	psy_ui_component_togglevisibility(seqeditor_base(
+		&self->seqeditor));
+	psy_ui_component_togglevisibility(psy_ui_splitbar_base(
+		&self->splitseqeditor));
+	generalconfig_setsequenceeditshowstate(psycleconfig_general(
+		workspace_conf(&self->workspace)),
+		psy_ui_component_visible(seqeditor_base(
+			&self->seqeditor)));
+	mainframe_updateseqeditorbuttons(self);
+}
+
+void mainframe_updateseqeditorbuttons(MainFrame* self)
+{
+	if (generalconfig_showsequenceedit(psycleconfig_general(
+		workspace_conf(&self->workspace)))) {
 		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
 			"Hide SequenceEditor");
 		psy_ui_button_highlight(&self->sequenceview.options.toggleseqedit);
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+			psy_ui_ICON_LESS);
+	} else {
+		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
+			"Show SequenceEditor");
+		psy_ui_button_disablehighlight(
+			&self->sequenceview.options.toggleseqedit);
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+			psy_ui_ICON_MORE);
 	}
-	psy_ui_component_togglevisibility(seqeditor_base(&self->seqeditor));
+}
+
+void mainframe_connectseqeditorbuttons(MainFrame* self)
+{
+	psy_signal_connect(
+		&self->sequenceview.options.toggleseqediticon.signal_clicked, self,
+		mainframe_ontoggleseqeditor);
+	psy_signal_connect(
+		&self->sequenceview.options.toggleseqedit.signal_clicked, self,
+		mainframe_ontoggleseqeditor);
+	if (!generalconfig_showsequenceedit(psycleconfig_general(
+		workspace_conf(&self->workspace)))) {
+			psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+			psy_ui_component_hide(psy_ui_splitbar_base(&self->splitseqeditor));
+	}
 }
 
 void mainframe_ontogglestepsequencer(MainFrame* self, psy_ui_Component* sender)
@@ -1401,7 +1443,7 @@ void mainframe_connectstepsequencerbuttons(MainFrame* self)
 		mainframe_ontogglestepsequencer);
 	if (!generalconfig_showstepsequencer(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
-		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+		psy_ui_component_hide(stepsequencerview_base(&self->stepsequencerview));
 	}
 }
 
@@ -1416,7 +1458,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 	} else {
 		psy_ui_component_resize(&self->terminal.component,
 			psy_ui_size_make(psy_ui_value_makepx(0),
-				psy_ui_value_makeeh(10)));		
+				psy_ui_value_makeeh(10.0)));		
 	}
 	psy_ui_component_align(mainframe_base(self));
 }

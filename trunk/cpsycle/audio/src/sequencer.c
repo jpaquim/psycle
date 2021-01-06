@@ -686,8 +686,9 @@ void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
 		psy_audio_PatternEntry* entry;
 
 		entry = psy_audio_sequencetrackiterator_patternentry(track->iterator);
-		if (!track->track->mute && entry && !psy_audio_patterns_istrackmuted(self->sequence->patterns,
-				entry->track)) {
+		if (entry && 
+				!psy_audio_sequence_istrackmuted(self->sequence, entry->track) &&
+				!psy_audio_patterns_istrackmuted(self->sequence->patterns, entry->track)) {
 			psy_audio_sequencer_executeglobalcommands(self,
 				entry, track, offset);
 			psy_list_append(&events, entry);

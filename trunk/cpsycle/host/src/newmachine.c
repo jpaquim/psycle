@@ -299,7 +299,7 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->numparametercols = psy_max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
-	self->component.scrollstepy = self->lineheight;
+	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
 }
 
 void plugindisplayname(psy_Property* property, char* text)
@@ -480,7 +480,12 @@ intptr_t pluginsview_visilines(PluginsView* self)
 
 uintptr_t pluginsview_topline(PluginsView* self)
 {	
-	return psy_ui_component_scrolltop(&self->component) / self->lineheight;
+	psy_ui_TextMetric tm;
+	psy_ui_Value scrolltop;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	scrolltop = psy_ui_component_scrolltop(&self->component);
+	return psy_ui_value_px(&scrolltop, &tm) / self->lineheight;
 }
 
 uintptr_t pluginsview_numlines(const PluginsView* self)
@@ -491,7 +496,9 @@ uintptr_t pluginsview_numlines(const PluginsView* self)
 
 void pluginsview_settopline(PluginsView* self, intptr_t line)
 {
-	psy_ui_component_setscrolltop(&self->component, line * self->lineheight);
+	
+	psy_ui_component_setscrolltop(&self->component,
+		psy_ui_value_makepx(line * self->lineheight));
 }
 
 void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
@@ -602,7 +609,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 void pluginsview_onplugincachechanged(PluginsView* self,
 	psy_audio_PluginCatcher* sender)
 {
-	psy_ui_component_setscrolltop(&self->component, 0);
+	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
 	self->selectedplugin = 0;
 	if (self->plugins) {
 		psy_property_deallocate(self->plugins);
@@ -616,7 +623,7 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 	} else {
 		self->plugins = 0;
 	}
-	psy_ui_component_setscrolltop(&self->component, 0);	
+	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());	
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -792,7 +799,7 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 		psy_property_deallocate(self->favoriteview.plugins);
 		self->favoriteview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_setscrolltop(&self->favoriteview.component, 0);
+		psy_ui_component_setscrolltop(&self->favoriteview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->favoriteview.component);
 		psy_ui_component_invalidate(&self->favoriteview.component);
 	}
@@ -836,7 +843,7 @@ void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
 		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setscrolltop(&self->pluginsview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
@@ -852,7 +859,7 @@ void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setscrolltop(&self->pluginsview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
@@ -868,7 +875,7 @@ void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setscrolltop(&self->pluginsview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
@@ -884,7 +891,7 @@ void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setscrolltop(&self->pluginsview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}

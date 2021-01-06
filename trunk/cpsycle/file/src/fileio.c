@@ -223,8 +223,7 @@ uint32_t psyfile_skip(PsyFile* self,
 
 int psyfile_eof(PsyFile* self)
 {
-	return feof(self->_file);
-	
+	return feof(self->_file);	
 }
 
 uint32_t psyfile_getpos(PsyFile* self)
