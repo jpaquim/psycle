@@ -20,6 +20,8 @@ static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sende
 static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, uintptr_t slot);
 static void machinesbox_onmachineslistchanged(MachinesBox*, psy_ui_Component* sender,
 	int slot);
+static void machinesbox_onkeydown(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
+static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
 
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
@@ -37,6 +39,10 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 		//machinesbox_onmachineslistchanged);
 	psy_signal_connect(&self->listbox.component.signal_destroy, self,
 		machinesbox_ondestroy);
+	psy_signal_connect(&self->listbox.component.signal_keydown, self,
+		machinesbox_onkeydown);
+	psy_signal_connect(&self->listbox.component.signal_keyup, self,
+		machinesbox_onkeyup);
 }
 
 void machinesbox_ondestroy(MachinesBox* self, psy_ui_Component* component)
@@ -336,4 +342,17 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 		machinesbox_onmachinesremoved);
 	psy_signal_connect(&self->machines->signal_slotchange, self,
 		machinesbox_onmachineslotchanged);
+}
+
+void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{
+	psy_ui_keyevent_stoppropagation(ev);
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		workspace_togglegear(self->workspace);		
+	}
+}
+
+void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_KeyEvent* ev)
+{
+	psy_ui_keyevent_stoppropagation(ev);
 }

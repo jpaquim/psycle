@@ -62,7 +62,10 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 			machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				slot);
 			if (machine) {
-				if ((cpy - psy_ui_component_scrolltop(&self->component)) >= 0) {
+				psy_ui_Value scrolltop;
+
+				scrolltop = psy_ui_component_scrolltop(&self->component);
+				if ((cpy - psy_ui_value_px(&scrolltop, &tm)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;					
 
@@ -83,7 +86,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
 							strlen(text));
 					}
-					if ((cpy - psy_ui_component_scrolltop(&self->component)) > size.height) {
+					if ((cpy - psy_ui_value_px(&scrolltop, &tm)) > size.height) {
 						break;
 					}
 				}
@@ -105,7 +108,8 @@ void cpumoduleview_onpreferredsize(CPUModuleView* self, const psy_ui_Size* limit
 		currlines = 0;
 	}
 	size = psy_ui_component_size(&self->component);
-	rv->height = psy_ui_value_makepx(self->component.scrollstepy * currlines);
+	
+	rv->height = psy_ui_mul_value_real(self->component.scrollstepy, (double)currlines);
 	rv->width = size.width;	
 }
 

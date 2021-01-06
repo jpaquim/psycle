@@ -44,6 +44,10 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
 		"settingsview.show-maximized-at-startup");
 	psy_property_setid(psy_property_settext(
+		psy_property_append_bool(self->general, "showsequenceedit", FALSE),
+		"settingsview.show-sequenceedit"),
+		PROPERTY_ID_SHOWSEQUENCEEDIT);
+	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
 		"settingsview.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
@@ -102,6 +106,20 @@ bool generalconfig_showingpatternnames(const GeneralConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->general, "showpatternnames", TRUE);
+}
+
+bool generalconfig_showsequenceedit(const GeneralConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->general, "showsequenceedit", FALSE);
+}
+
+void generalconfig_setsequenceeditshowstate(GeneralConfig* self, bool state)
+{
+	assert(self);
+
+	psy_property_set_bool(self->general, "showsequenceedit", state);
 }
 
 bool generalconfig_showstepsequencer(const GeneralConfig* self)

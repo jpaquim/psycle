@@ -171,7 +171,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstepy = self->metrics.lineheight * 3;
+	self->component.scrollstepy = psy_ui_value_makepx(self->metrics.lineheight * 3);
 }
 
 // entry view
@@ -225,7 +225,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
 	self->selected = UINTPTR_MAX;
-	self->component.scrollstepy = 45;	
+	self->component.scrollstepy = psy_ui_value_makepx(45);
 	instrumententryview_updatemetrics(self);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		instrumententryview_onscroll);	
@@ -236,8 +236,8 @@ void instrumententryview_setinstrument(InstrumentEntryView* self,
 {
 	self->instrument = instrument;
 	self->selected = UINTPTR_MAX;
-	psy_ui_component_setscrolltop(&self->component, 0);
-	psy_ui_component_setscrolltop(&self->parameterview->component, 0);
+	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
+	psy_ui_component_setscrolltop(&self->parameterview->component, psy_ui_value_zero());
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_updateoverflow(&self->parameterview->component);
 	psy_ui_component_invalidate(&self->component);
@@ -272,7 +272,11 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			intptr_t startx;
 			intptr_t endx;
 			psy_ui_Rectangle r;
+			psy_ui_Value scrollleft;
+			psy_ui_Value scrolltop;
 
+			scrollleft = psy_ui_component_scrollleft(&self->component);
+			scrolltop = psy_ui_component_scrolltop(&self->component);
 			entry = (psy_audio_InstrumentEntry*)psy_audio_instrument_entryat(
 				self->instrument, self->selected);
 			if (entry) {
@@ -287,9 +291,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					(int)(isblack((uint8_t)entry->keyrange.low + 1)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r, startx,
-					psy_ui_component_scrolltop(&self->component),
+					psy_ui_value_px(&scrolltop, &tm),
 					endx - startx,
-					psy_ui_component_scrolltop(&self->component) + size.height);
+					psy_ui_value_px(&scrolltop, &tm) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 				startx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.high) /
@@ -303,9 +307,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r,
 					startx,
-					psy_ui_component_scrolltop(&self->component),
+					psy_ui_value_px(&scrolltop, &tm),
 					endx - startx,
-					psy_ui_component_scrolltop(&self->component) + size.height);
+					psy_ui_value_px(&scrolltop, &tm) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 			}
 		}
@@ -393,7 +397,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstepy = self->metrics.lineheight * 3;
+	self->component.scrollstepy = psy_ui_value_makepx(self->metrics.lineheight * 3);
 }
 
 void instrumententryview_onscroll(InstrumentEntryView* self,
@@ -545,7 +549,7 @@ void instrumentparameterview_setinstrument(InstrumentParameterView* self,
 		psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	psy_ui_component_setscrolltop(&self->component, 0);
+	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
 	psy_ui_component_invalidate(&self->component);
 }
 

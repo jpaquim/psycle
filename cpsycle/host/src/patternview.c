@@ -739,15 +739,15 @@ void patternview_computemetrics(PatternView* self)
 
 void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 {
-	if (psy_ui_component_scrollleft(&self->tracker.component) !=
-			psy_ui_component_scrollleft(&self->header.component)) {
+	if (psy_ui_component_scrollleftpx(&self->tracker.component) !=
+		psy_ui_component_scrollleftpx(&self->header.component)) {
 		psy_ui_component_setscrollleft(&self->header.component,
 			psy_ui_component_scrollleft(&self->tracker.component));
 		psy_ui_component_setscrollleft(&self->griddefaults.component,
 			psy_ui_component_scrollleft(&self->tracker.component));
 	}
-	if (psy_ui_component_scrolltop(&self->tracker.component) !=
-			psy_ui_component_scrolltop(&self->left.linenumbers.component)) {
+	if (psy_ui_component_scrolltoppx(&self->tracker.component) !=
+			psy_ui_component_scrolltoppx(&self->left.linenumbers.component)) {
 		psy_ui_component_setscrolltop(&self->left.linenumbers.component,
 			psy_ui_component_scrolltop(&self->tracker.component));
 	}
@@ -1153,19 +1153,24 @@ void patternview_onparametertweak(PatternView* self, Workspace* sender,
 void patternview_updatescrollstep(PatternView* self)
 {
 	intptr_t scrollstepx;
+	psy_ui_Value scrollleft;
+	psy_ui_TextMetric tm;
 
+	tm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
+	scrollleft = psy_ui_component_scrollleft(trackergrid_base(&self->tracker));
 	scrollstepx = trackergridstate_trackwidth(&self->gridstate,
 			trackergridstate_pxtotrack(&self->gridstate,
-				psy_ui_component_scrollleft(trackergrid_base(&self->tracker)),
+				psy_ui_value_px(&scrollleft, &tm),
 				trackergridstate_numsongtracks(&self->gridstate)));
 	psy_ui_component_setscrollstep(trackergrid_base(&self->tracker),
-		scrollstepx, trackerlinestate_lineheight(&self->linestate));
+		psy_ui_value_makepx(scrollstepx),
+		psy_ui_value_makepx(trackerlinestate_lineheight(&self->linestate)));
 	psy_ui_component_setscrollstepx(trackergrid_base(&self->griddefaults),
-		scrollstepx);
+		psy_ui_value_makepx(scrollstepx));
 	psy_ui_component_setscrollstepx(trackerheader_base(&self->header),
-		scrollstepx);
+		psy_ui_value_makepx(scrollstepx));
 	psy_ui_component_setscrollstepy(&self->left.linenumbers.component,
-		trackerlinestate_lineheight(&self->linestate));
+		psy_ui_value_makepx(trackerlinestate_lineheight(&self->linestate)));
 }
 
 intptr_t patternview_currpgupdownstep(const PatternView* self)

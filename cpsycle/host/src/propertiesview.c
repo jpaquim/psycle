@@ -248,7 +248,8 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	psy_Property* property, int level)
 {			
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;		
+	psy_ui_TextMetric tm;
+	psy_ui_Value scrolltop;
 
 	if (self->linestate_clipstart && self->linestate_clipstart->properties != property) {
 		if (self->lastlevel < level) {
@@ -283,8 +284,9 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	}	
 	propertiesrenderer_advanceline(self);
 	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	return (self->cpy - psy_ui_component_scrolltop(&self->component))
+	tm = psy_ui_component_textmetric(&self->component);	
+	scrolltop = psy_ui_component_scrolltop(&self->component);
+	return (self->cpy - psy_ui_value_px(&scrolltop, &tm))
 		< psy_ui_value_px(&size.height, &tm);
 }
 
@@ -893,9 +895,9 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 			psy_ui_component_setposition(edit,
 				psy_ui_point_make(
 					psy_ui_value_makepx(self->selrect.left -
-						psy_ui_component_scrollleft(&self->component)),
+						psy_ui_component_scrollleftpx(&self->component)),
 					psy_ui_value_makepx(self->selrect.top + self->centery -
-						psy_ui_component_scrolltop(&self->component))),
+						psy_ui_component_scrolltoppx(&self->component))),
 				psy_ui_size_make(
 					psy_ui_value_makepx(self->selrect.right - self->selrect.left),
 					psy_ui_value_makepx(self->textheight + 2)));
@@ -1036,7 +1038,7 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_property_enumerate(self->properties, self,
 		(psy_PropertyCallback)propertiesrenderer_onenumpropertyposition);
-	self->component.scrollstepy = self->lineheight;
+	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
 	rv->height = psy_ui_value_makepx(self->cpy);	
 	memcpy(self->col_perc, col_perc, sizeof(col_perc));
 	memcpy(self->col_width, col_width, sizeof(col_width));
@@ -1209,7 +1211,7 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 				scrollposition = scrollmax;
 			}
 			psy_ui_component_setscrolltop(&self->renderer.component,
-				scrollposition * self->renderer.lineheight);			
+				psy_ui_value_makepx(scrollposition * self->renderer.lineheight));	
 		}
 		psy_ui_component_invalidate(&self->renderer.component);
 	}
@@ -1258,43 +1260,58 @@ void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* se
 	if (psy_ui_component_hasfocus(&self->renderer.component)) {
 		psy_EventDriverCmd cmd;
 
+
 		cmd = psy_eventdriver_getcmd(sender, "tracker");
 		if (cmd.id != -1) {
+			intptr_t scrollstepypx;
+			psy_ui_Value scrollstepy;
+			intptr_t scrollstepxpx;
+			psy_ui_Value scrollstepx;
+			psy_ui_TextMetric tm;
+
+			tm = psy_ui_component_textmetric(&self->renderer.component);			
+			scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
+			scrollstepypx = psy_ui_value_px(&scrollstepy, &tm);
+			scrollstepx = psy_ui_component_scrollstepx(&self->renderer.component);
+			scrollstepxpx = psy_ui_value_px(&scrollstepx, &tm);
 			switch (cmd.id) {
 				case CMD_NAVTOP:
-					psy_ui_component_setscrolltop(&self->renderer.component, 0);
+					psy_ui_component_setscrolltop(&self->renderer.component,
+						psy_ui_value_zero());
 					break;
 				case CMD_NAVBOTTOM:
 					psy_ui_component_setscrolltop(&self->renderer.component, 
-						propertiesview_checkrange(self, INT32_MAX));
+						psy_ui_value_makepx(propertiesview_checkrange(self, INT32_MAX)));
 					break;
-				case CMD_NAVUP:
+				case CMD_NAVUP: {					
 					psy_ui_component_setscrolltop(&self->renderer.component,
-						psy_max(0,
-							psy_ui_component_scrolltop(&self->renderer.component) -
-							psy_ui_component_scrollstepy(&self->renderer.component)));
-					break;
+						psy_ui_value_makepx(
+							psy_max(0,
+								psy_ui_component_scrolltoppx(&self->renderer.component) -
+								scrollstepypx)));
+					break; }
 				case CMD_NAVDOWN: {
-					intptr_t position;
-
-					position = psy_ui_component_scrolltop(&self->renderer.component) +
-						psy_ui_component_scrollstepy(&self->renderer.component);
+					intptr_t position;					
+					
+					position = psy_ui_component_scrolltoppx(&self->renderer.component) +						
+						scrollstepypx;
 					psy_ui_component_setscrolltop(&self->renderer.component,
-						propertiesview_checkrange(self, position));
+						psy_ui_value_makepx(propertiesview_checkrange(self, position)));
 					break; }
 				case CMD_NAVPAGEUP:
 					psy_ui_component_setscrolltop(&self->renderer.component,
-						psy_max(0,
-							psy_ui_component_scrolltop(&self->renderer.component) -
-							psy_ui_component_scrollstepy(&self->renderer.component) * 16));
+						psy_ui_value_makepx(
+							psy_max(0,
+								psy_ui_component_scrolltoppx(&self->renderer.component) -
+								scrollstepypx * 16)));
 					break;
 				case CMD_NAVPAGEDOWN: {					
 					intptr_t position;
 									
-					position = psy_ui_component_scrolltop(&self->renderer.component) +
-						psy_ui_component_scrollstepy(&self->renderer.component) * 16;					
+					position = psy_ui_component_scrolltoppx(&self->renderer.component) +
+						scrollstepypx * 16;
 					psy_ui_component_setscrolltop(&self->renderer.component,
-						propertiesview_checkrange(self, position));
+						psy_ui_value_makepx(propertiesview_checkrange(self, position)));
 					break; }
 				default:
 					break;
@@ -1305,15 +1322,21 @@ void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* se
 
 intptr_t propertiesview_checkrange(PropertiesView* self, intptr_t position)
 {
-	intptr_t scrollstep;
+	intptr_t steps;
+	intptr_t scrollstepypx;
+	psy_ui_Value scrollstepy;
 	intptr_t minval;
 	intptr_t maxval;
+	psy_ui_TextMetric tm;
 
+	tm = psy_ui_component_textmetric(&self->renderer.component);
 	psy_ui_component_verticalscrollrange(&self->renderer.component,
 		&minval, &maxval);
-	scrollstep = position / psy_ui_component_scrollstepy(&self->renderer.component);
-	scrollstep = psy_min(maxval, scrollstep);
-	return scrollstep * psy_ui_component_scrollstepy(&self->renderer.component);
+	scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
+	scrollstepypx = psy_ui_value_px(&scrollstepy, &tm);
+	steps = position / scrollstepypx;
+	steps = psy_min(maxval, steps);
+	return steps * scrollstepypx;
 }
 
 void propertiesview_onfocus(PropertiesView* self, psy_ui_Component* sender)

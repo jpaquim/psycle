@@ -29,8 +29,7 @@ typedef enum {
 } SequenceTrackBoxEvent;
 
 typedef struct SequenceTrackBox {
-	psy_ui_Rectangle position;
-	psy_audio_SequenceTrack* track;
+	psy_ui_Rectangle position;	
 	uintptr_t trackindex;
 	bool selected;
 	psy_ui_Colour colour;
@@ -38,12 +37,17 @@ typedef struct SequenceTrackBox {
 	psy_ui_Colour colour_font;
 	psy_ui_Colour colour_fonthighlight;
 	psy_ui_IntSize size;
-	psy_ui_TextMetric tm;	
+	psy_ui_TextMetric tm;
+	bool showname;
+	// references
+	psy_audio_SequenceTrack* track;
+	psy_audio_Sequence* sequence;
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*,
 	psy_ui_Rectangle position, psy_ui_TextMetric,
 	psy_audio_SequenceTrack*,
+	psy_audio_Sequence*,
 	uintptr_t trackindex, bool selected);
 
 void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);

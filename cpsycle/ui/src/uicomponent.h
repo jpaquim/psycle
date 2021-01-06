@@ -177,8 +177,8 @@ typedef struct psy_ui_Component {
 	bool doublebuffered;	
 	bool preventdefault;
 	bool preventpreferredsize;
-	intptr_t scrollstepx;
-	intptr_t scrollstepy;
+	psy_ui_Value scrollstepx;
+	psy_ui_Value scrollstepy;
 	intptr_t debugflag;
 	psy_ui_BackgroundMode backgroundmode;
 	bool visible;	
@@ -192,7 +192,7 @@ typedef struct psy_ui_Component {
 	psy_ui_Size preferredsize;
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;
-	psy_ui_IntPoint scroll;	
+	psy_ui_Point scroll;	
 	psy_ui_IntPoint vscrollrange;
 	psy_ui_IntPoint hscrollrange;
 	psy_ui_Overflow overflow;
@@ -538,24 +538,40 @@ INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t sec
 	psy_signal_emit(&self->signal_selectsection, self, 1, section);
 }
 
-INLINE psy_ui_IntPoint psy_ui_component_scroll(psy_ui_Component* self)
+INLINE psy_ui_Point psy_ui_component_scroll(psy_ui_Component* self)
 {
 	return self->scroll;
 }
 
-void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_IntPoint);
-void psy_ui_component_setscrollleft(psy_ui_Component*, intptr_t left);
+void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_Point);
+void psy_ui_component_setscrollleft(psy_ui_Component*, psy_ui_Value left);
 
-INLINE intptr_t psy_ui_component_scrollleft(psy_ui_Component* self)
+INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 {
 	return self->scroll.x;
 }
 
-void psy_ui_component_setscrolltop(psy_ui_Component*, intptr_t top);
+INLINE intptr_t psy_ui_component_scrollleftpx(psy_ui_Component* self)
+{
+	psy_ui_TextMetric tm;
 
-INLINE intptr_t psy_ui_component_scrolltop(psy_ui_Component* self)
+	tm = psy_ui_component_textmetric(self);
+	return psy_ui_value_px(&self->scroll.x, &tm);
+}
+
+void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
+
+INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
 {
 	return self->scroll.y;
+}
+
+INLINE intptr_t psy_ui_component_scrolltoppx(psy_ui_Component* self)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(self);
+	return psy_ui_value_px(&self->scroll.y, &tm);
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
@@ -581,7 +597,7 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 	return self->overflow;
 }
 
-INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
+INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, psy_ui_Value stepx, psy_ui_Value stepy)
 {
 	assert(self);
 
@@ -589,28 +605,28 @@ INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, intptr_t step
 	self->scrollstepy = stepy;
 }
 
-INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, intptr_t step)
+INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, psy_ui_Value step)
 {
 	assert(self);
 
 	self->scrollstepx = step;
 }
 
-INLINE intptr_t psy_ui_component_scrollstepx(const psy_ui_Component* self)
+INLINE psy_ui_Value psy_ui_component_scrollstepx(const psy_ui_Component* self)
 {
 	assert(self);
 
 	return self->scrollstepx;
 }
 
-INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, intptr_t step)
+INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, psy_ui_Value step)
 {
 	assert(self);
 
 	self->scrollstepy = step;
 }
 
-INLINE intptr_t psy_ui_component_scrollstepy(const psy_ui_Component* self)
+INLINE psy_ui_Value psy_ui_component_scrollstepy(const psy_ui_Component* self)
 {
 	assert(self);
 

@@ -216,6 +216,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"show-playlist", "Show Playlist/Recentsongs");
 	psy_property_set_str(section,
+		"show-sequenceedit", "Show Sequenceeditor");
+	psy_property_set_str(section,
 		"show-sequencestepbar", "Show Sequencestepbar");
 	psy_property_set_str(section,
 		"save-recent-songs", "Save recent songs");

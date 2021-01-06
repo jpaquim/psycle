@@ -86,37 +86,56 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 {
 	intptr_t iPos;
 	intptr_t nPos;
-
+	intptr_t scrollstepx_px;
+	psy_ui_TextMetric tm;
+	psy_ui_Value scrollleft;
+	
 	assert(self->client);
 
-	iPos = self->client->scroll.x / self->client->scrollstepx;
+	tm = psy_ui_component_textmetric(self->client);
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, &tm);
+	iPos = psy_ui_value_px(&self->client->scroll.x, &tm) / scrollstepx_px;
 	nPos = psy_ui_scrollbar_position(sender);
+
+	scrollleft = psy_ui_component_scrollleft(self->client);
 	psy_ui_component_setscrollleft(self->client,
-		psy_ui_component_scrollleft(self->client) -
-		self->client->scrollstepx * (iPos - nPos));
+		psy_ui_value_makepx(psy_ui_value_px(&scrollleft, &tm) -
+			scrollstepx_px * (iPos - nPos)));
 }
 
 void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
 {
 	intptr_t iPos;
 	intptr_t nPos;
+	intptr_t scrollstepy_px;
+	psy_ui_TextMetric tm;
+	psy_ui_Value scrolltop;
 
 	assert(self->client);
 
-	iPos = self->client->scroll.y / self->client->scrollstepy;
+	tm = psy_ui_component_textmetric(self->client);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, &tm);
+	scrolltop = psy_ui_component_scrolltop(self->client);
+	iPos = psy_ui_value_px(&self->client->scroll.y, &tm) / scrollstepy_px;
 	nPos = psy_ui_scrollbar_position(sender);
 	psy_ui_component_setscrolltop(self->client,
-		psy_ui_component_scrolltop(self->client) -
-		self->client->scrollstepy * (iPos - nPos));
+		psy_ui_value_makepx(psy_ui_value_px(&scrolltop, &tm) -
+			scrollstepy_px * (iPos - nPos)));		
 }
 
 void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 {
 	intptr_t nPos;
+	intptr_t scrollstepx_px;
+	intptr_t scrollstepy_px;
+	psy_ui_TextMetric tm;
 
-	nPos = self->client->scroll.y / self->client->scrollstepy;
+	tm = psy_ui_component_textmetric(self->client);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, &tm);	
+	nPos = psy_ui_value_px(&self->client->scroll.y, &tm) / scrollstepy_px;
 	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPos);
-	nPos = self->client->scroll.x / self->client->scrollstepx;
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, &tm);
+	nPos = psy_ui_value_px(&self->client->scroll.x, &tm) / scrollstepx_px;
 	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPos);
 }
 

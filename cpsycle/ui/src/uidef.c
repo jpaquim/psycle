@@ -243,8 +243,12 @@ intptr_t psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)
 void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm)
 {	
-	if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
-		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
+	if ((self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX)) {
+		self->quantity.integer += other->quantity.integer;
+	} else if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EW)) {
 		self->quantity.real += other->quantity.real;
 	} else {
 		self->quantity.integer = psy_ui_value_px(self, tm) +

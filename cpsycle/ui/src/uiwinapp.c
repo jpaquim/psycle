@@ -232,13 +232,15 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				int preventdefault = 0;
 				psy_ui_MouseEvent ev;
 				POINT pt_client;
+				psy_ui_TextMetric tm;
 
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);
 				ScreenToClient(imp->hwnd, &pt_client);				
+				tm = psy_ui_component_textmetric(imp->component);
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x + imp->component->scroll.x,
-					pt_client.y + imp->component->scroll.y,
+					pt_client.x + psy_ui_value_px(&imp->component->scroll.x, &tm),
+					pt_client.y + psy_ui_value_px(&imp->component->scroll.y, &tm),
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
@@ -434,8 +436,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						// prepare a clip rect that can be used by a component
 						// to optimize the draw amount
 						psy_ui_setrectangle(&g.clip,
-							ps.rcPaint.left + imp->component->scroll.x,
-							ps.rcPaint.top + imp->component->scroll.y,
+							ps.rcPaint.left + psy_ui_value_px(&imp->component->scroll.x, &tm),
+							ps.rcPaint.top + psy_ui_value_px(&imp->component->scroll.y, &tm),
 							clipsize.x, clipsize.y);												
 						// translate coordinates 
 						// 1. to fit bufferDC bitmap if used
@@ -467,18 +469,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 									clipsize.x, clipsize.y);
 							}*/
 							SetWindowOrgEx(win_g->hdc,
-								(int)dblbuffer_offset.x + (int)imp->component->scroll.x -
+								(int)dblbuffer_offset.x + (int)
+									psy_ui_value_px(&imp->component->scroll.x, &tm) -
 								(int)psy_ui_value_px(&imp->component->spacing.left,
 									&tm),
-								(int)dblbuffer_offset.y + (int)imp->component->scroll.y
-								- (int)psy_ui_value_px(&imp->component->spacing.top,
+								(int)dblbuffer_offset.y + (int)
+									psy_ui_value_px(&imp->component->scroll.y, &tm) -
+									(int)psy_ui_value_px(&imp->component->spacing.top,
 									&tm),
 								NULL);
 							
 						} else {
 							SetWindowOrgEx(win_g->hdc,
-								(int)dblbuffer_offset.x + (int)imp->component->scroll.x,
-								(int)dblbuffer_offset.y + (int)imp->component->scroll.y,
+								(int)dblbuffer_offset.x +
+									(int)psy_ui_value_px(&imp->component->scroll.x, &tm),
+								(int)dblbuffer_offset.y +
+									(int)psy_ui_value_px(&imp->component->scroll.y, &tm),
 								NULL);
 						}
 						// update graphics font with component font 
@@ -838,17 +844,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							intptr_t iPos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
+							psy_ui_Value scrolltop;
+							psy_ui_TextMetric tm;
 
+							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);							
-							iPos = psy_ui_component_scrolltop(imp->component) / imp->component->scrollstepy -
+							scrolltop = psy_ui_component_scrolltop(imp->component);
+							iPos =  psy_ui_value_px(&scrolltop, &tm) / 
+								psy_ui_value_px(&imp->component->scrollstepy, &tm) -
 								imp->component->wheelscroll;
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
 							if (imp->component->handlevscroll) {
 								psy_ui_component_setscrolltop(imp->component,
-									imp->component->scrollstepy * iPos);
+									psy_ui_mul_value_real(imp->component->scrollstepy, (double)iPos));
 							}							
 							imp->component->accumwheeldelta -= iDeltaPerLine;
 						}
@@ -857,17 +868,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							intptr_t iPos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
+							psy_ui_Value scrolltop;
+							psy_ui_TextMetric tm;
 
+							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);							
-							iPos = psy_ui_component_scrolltop(imp->component) / imp->component->scrollstepy +
+								&scrollmax);		
+							scrolltop = psy_ui_component_scrolltop(imp->component);
+							iPos = psy_ui_value_px(&scrolltop, &tm) /
+								psy_ui_value_px(&imp->component->scrollstepy, &tm) +
 								imp->component->wheelscroll;
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
 							if (imp->component->handlevscroll) {
-								psy_ui_component_setscrolltop(imp->component,									
-									imp->component->scrollstepy * (iPos));
+								psy_ui_component_setscrolltop(imp->component,
+									psy_ui_mul_value_real(imp->component->scrollstepy, (double)iPos));
 							}							
 							imp->component->accumwheeldelta += iDeltaPerLine;
 						}
@@ -950,12 +966,12 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 
 void adjustcoordinates(psy_ui_Component* component, intptr_t* x, intptr_t* y)
 {		
-	*x += component->scroll.x;
-	*y += component->scroll.y;
-	if (!psy_ui_margin_iszero(&component->spacing)) {
-		psy_ui_TextMetric tm;
+	psy_ui_TextMetric tm;
+	tm = psy_ui_component_textmetric(component);
 
-		tm = psy_ui_component_textmetric(component);
+	*x += psy_ui_value_px(&component->scroll.x, &tm);
+	*y += psy_ui_value_px(&component->scroll.y, &tm);
+	if (!psy_ui_margin_iszero(&component->spacing)) {				
 		*x -= psy_ui_value_px(&component->spacing.left, &tm);
 		*y -= psy_ui_value_px(&component->spacing.top, &tm);
 	}
@@ -987,9 +1003,15 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		winapp = (psy_ui_WinApp*) app.platform;
 		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);	
 		if (imp->component->handlevscroll) {
+			psy_ui_TextMetric tm;
+			psy_ui_Value scrolltop;
+
+			psy_ui_component_textmetric(imp->component);
+			scrolltop = psy_ui_component_scrolltop(imp->component);
 			psy_ui_component_setscrolltop(imp->component,
-				psy_ui_component_scrolltop(imp->component) -
-				imp->component->scrollstepy * (iPos - si.nPos));
+				psy_ui_value_makepx(
+					psy_ui_value_px(&scrolltop, &tm) -
+					psy_ui_value_px(&imp->component->scrollstepy, &tm) * (iPos - si.nPos)));
 		}			
 	}
 }
@@ -1018,9 +1040,16 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		winapp = (psy_ui_WinApp*) app.platform;
 		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
 		if (imp->component->handlehscroll) {
+			psy_ui_TextMetric tm;
+			psy_ui_Value scrollleft;
+
+			tm = psy_ui_component_textmetric(imp->component);
+			scrollleft = psy_ui_component_scrollleft(imp->component);
 			psy_ui_component_setscrollleft(imp->component,
-				psy_ui_component_scrollleft(imp->component) -
-				imp->component->scrollstepx * (iPos - si.nPos));
+				psy_ui_value_makepx(
+					psy_ui_value_px(&scrollleft, &tm) -
+					psy_ui_value_px(&imp->component->scrollstepx, &tm) *
+						(iPos - si.nPos)));
 		}		
 	}
 }

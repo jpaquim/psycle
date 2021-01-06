@@ -511,7 +511,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	self->component.vtable = &vtable;
-	self->component.scrollstepy = 10;
+	self->component.scrollstepy = psy_ui_value_makepx(10);
 	self->statusbar = 0;
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
@@ -820,8 +820,16 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, psy_ui_MouseEvent
 		} else
 			if (machinewireview_hittesteditname(self, ev->x, ev->y, self->dragslot)) {
 				if (machineuis_at(self, self->dragslot)) {
+					psy_ui_Point scroll;
+					psy_ui_IntPoint scroll_px;
+					psy_ui_TextMetric tm;
+
+					tm = psy_ui_component_textmetric(&self->component);
+					scroll = psy_ui_component_scroll(&self->component);
+					scroll_px.x = psy_ui_value_px(&scroll.x, &tm);
+					scroll_px.y = psy_ui_value_px(&scroll.y, &tm);						
 					machineui_editname(machineuis_at(self, self->dragslot),
-						&self->editname, psy_ui_component_scroll(&self->component));
+						&self->editname, scroll_px);
 					psy_ui_component_scrolltop(&self->component);
 				}
 			} else
@@ -1561,7 +1569,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace, 
 	self->machines = &workspace->song->machines;	
 	machinewireview_buildmachineuis(self);	
 	machinewireview_connectmachinessignals(self);
-	psy_ui_component_setscroll(&self->component, psy_ui_intpoint_make(0, 0));	
+	psy_ui_component_setscroll(&self->component, psy_ui_point_zero());	
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);	
 }
