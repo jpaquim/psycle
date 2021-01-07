@@ -406,8 +406,8 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	SetWindowPos(self->hwnd, 0,
 		(int)psy_ui_value_px(&topleft.x, &tm),
 		(int)psy_ui_value_px(&topleft.y, &tm),
-		(int)psy_ui_value_px(&size.width, &tm),
-		(int)psy_ui_value_px(&size.height, &tm),
+		(int)(psy_ui_value_px(&size.width, &tm)),
+		(int)(psy_ui_value_px(&size.height, &tm)),
 		SWP_NOZORDER);	
 	dev_updatesize(self);
 }

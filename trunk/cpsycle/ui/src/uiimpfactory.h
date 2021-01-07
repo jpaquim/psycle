@@ -5,6 +5,7 @@
 #define psy_ui_IMPFACTORY_H
 
 #include "../../detail/psydef.h"
+#include "uidef.h"
 
 // AbstractFactory
 // Aim: avoid coupling to one platform (win32, xt/motif, etc)
@@ -33,10 +34,11 @@ extern "C" {
 struct psy_ui_ImpFactory;
 struct psy_ui_Component;
 struct psy_ui_FontInfo;
+struct psy_ui_Bitmap;
 
-
-typedef struct psy_ui_BitmapImp* (*psy_ui_fp_impfactory_allocinit_bitmapimp)(struct psy_ui_ImpFactory*);
+typedef struct psy_ui_BitmapImp* (*psy_ui_fp_impfactory_allocinit_bitmapimp)(struct psy_ui_ImpFactory*, psy_ui_IntSize);
 typedef struct psy_ui_GraphicsImp* (*psy_ui_fp_impfactory_allocinit_graphicsimp)(struct psy_ui_ImpFactory*, uintptr_t* platformdc);
+typedef struct psy_ui_GraphicsImp* (*psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)(struct psy_ui_ImpFactory*, struct psy_ui_Bitmap*);
 typedef struct psy_ui_FontImp* (*psy_ui_fp_impfactory_allocinit_fontimp)(struct psy_ui_ImpFactory*, const struct psy_ui_FontInfo*);
 typedef struct psy_ui_ComponentImp* (*psy_ui_fp_impfactory_allocinit_componentimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_ComponentImp* (*psy_ui_fp_impfactory_allocinit_frameimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
@@ -69,6 +71,7 @@ typedef struct psy_ui_FontDialogImp* (*psy_ui_fp_impfactory_allocinit_fontdialog
 typedef struct psy_ui_ImpFactoryVTable {
 	psy_ui_fp_impfactory_allocinit_bitmapimp allocinit_bitmapimp;
 	psy_ui_fp_impfactory_allocinit_graphicsimp allocinit_graphicsimp;
+	psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap allocinit_graphicsimp_bitmap;
 	psy_ui_fp_impfactory_allocinit_fontimp allocinit_fontimp;
 	psy_ui_fp_impfactory_allocinit_componentimp allocinit_componentimp;
 	psy_ui_fp_impfactory_allocinit_frameimp allocinit_frameimp;
@@ -97,8 +100,9 @@ void psy_ui_impfactory_init(psy_ui_ImpFactory*);
 
 struct psy_ui_FontInfo;
 
-struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory*);
+struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory*, psy_ui_IntSize);
 struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp(psy_ui_ImpFactory*, uintptr_t* platformdc);
+struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_ImpFactory*, struct psy_ui_Bitmap*);
 struct psy_ui_FontImp* psy_ui_impfactory_allocinit_fontimp(psy_ui_ImpFactory*, const struct psy_ui_FontInfo*);
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_componentimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_frameimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);

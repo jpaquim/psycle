@@ -268,7 +268,7 @@ void psy_audio_sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patte
 {
 	self->tracks = 0;
 	self->patterns = patterns;
-	patternstrackstate_init(&self->trackstate);
+	psy_audio_trackstate_init(&self->trackstate);
 	psy_signal_init(&self->sequencechanged);
 }
 
@@ -276,7 +276,7 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 {
 	psy_list_deallocate(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
-	patternstrackstate_dispose(&self->trackstate);
+	psy_audio_trackstate_dispose(&self->trackstate);
 	psy_signal_dispose(&self->sequencechanged);
 }
 
@@ -928,40 +928,40 @@ void psy_audio_sequence_activatesolotrack(psy_audio_Sequence* self,
 {
 	assert(self);
 
-	patternstrackstate_activatesolotrack(&self->trackstate, track);
+	psy_audio_trackstate_activatesolotrack(&self->trackstate, track);
 }
 
 void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence* self)
 {
 	assert(self);
 
-	patternstrackstate_deactivatesolotrack(&self->trackstate);
+	psy_audio_trackstate_deactivatesolotrack(&self->trackstate);
 }
 
 void psy_audio_sequence_mutetrack(psy_audio_Sequence* self, uintptr_t track)
 {
 	assert(self);
 
-	patternstrackstate_mutetrack(&self->trackstate, track);
+	psy_audio_trackstate_mutetrack(&self->trackstate, track);
 }
 
 void psy_audio_sequence_unmutetrack(psy_audio_Sequence* self, uintptr_t track)
 {
 	assert(self);
 
-	patternstrackstate_unmutetrack(&self->trackstate, track);
+	psy_audio_trackstate_unmutetrack(&self->trackstate, track);
 }
 
 int psy_audio_sequence_istrackmuted(const psy_audio_Sequence* self, uintptr_t track)
 {
 	assert(self);
 
-	return patternstrackstate_istrackmuted(&self->trackstate, track);
+	return psy_audio_trackstate_istrackmuted(&self->trackstate, track);
 }
 
 int psy_audio_sequence_istracksoloed(const psy_audio_Sequence* self, uintptr_t track)
 {
 	assert(self);
 
-	return patternstrackstate_istracksoloed(&self->trackstate, track);
+	return psy_audio_trackstate_istracksoloed(&self->trackstate, track);
 }

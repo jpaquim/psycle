@@ -18,7 +18,7 @@ typedef struct {
 	psy_Table slots;
 	uintptr_t songtracks;
 	bool sharetracknames;
-	psy_audio_PatternsTrackState trackstate;
+	psy_audio_TrackState trackstate;
 	psy_Signal signal_namechanged;
 	psy_Signal signal_lengthchanged;
 } psy_audio_Patterns;

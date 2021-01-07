@@ -6,14 +6,19 @@
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
-struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self)
+struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self, psy_ui_IntSize size)
 {
-	return self->vtable->allocinit_bitmapimp(self);
+	return self->vtable->allocinit_bitmapimp(self, size);
 }
 
 struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp(psy_ui_ImpFactory* self, uintptr_t* platformdc)
 {
 	return self->vtable->allocinit_graphicsimp(self, platformdc);
+}
+
+struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_ImpFactory* self, struct psy_ui_Bitmap* bitmap)
+{
+	return self->vtable->allocinit_graphicsimp_bitmap(self, bitmap);
 }
 
 struct psy_ui_FontImp* psy_ui_impfactory_allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo)
@@ -119,21 +124,22 @@ struct psy_ui_FontDialogImp* psy_ui_impfactory_allocinit_fontdialogimp(psy_ui_Im
 	return self->vtable->allocinit_fontdialogimp(self, parent);
 }
 
-static struct psy_ui_BitmapImp* allocinit_bitmapimp(struct psy_ui_ImpFactory* self) { return 0; }
-static struct psy_ui_GraphicsImp* allocinit_graphicsimp(struct psy_ui_ImpFactory* self, uintptr_t* platformdc) { return 0; }
-static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo) { return 0; }
-static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_EditImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_EditImp* allocinit_editimp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
-static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
-struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_BitmapImp* allocinit_bitmapimp(struct psy_ui_ImpFactory* self) { return NULL; }
+static struct psy_ui_GraphicsImp* allocinit_graphicsimp(struct psy_ui_ImpFactory* self, uintptr_t* platformdc) { return NULL; }
+static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(struct psy_ui_ImpFactory* self, struct psy_ui_Bitmap* bitmap) { return NULL; }
+static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_EditImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_EditImp* allocinit_editimp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }
+struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }
 struct psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
 	const char* title,
 	const char* filter,
@@ -169,6 +175,7 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.allocinit_bitmapimp = vtable.allocinit_bitmapimp;
 		vtable.allocinit_graphicsimp = allocinit_graphicsimp;
+		vtable.allocinit_graphicsimp_bitmap = allocinit_graphicsimp_bitmap;
 		vtable.allocinit_fontimp = allocinit_fontimp;
 		vtable.allocinit_componentimp = allocinit_componentimp;
 		vtable.allocinit_frameimp = allocinit_frameimp;

@@ -46,7 +46,7 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_doublebuffer(&self->component);
 	self->component.vtable = &vtable;	
 	self->hover = 0;
 	self->resize = 0;
@@ -57,13 +57,12 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 
 void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 {
-	psy_ui_IntSize size;
-	psy_ui_TextMetric tm;
+	psy_ui_IntSize size;	
 	intptr_t center;
 	intptr_t thumbsize;
 	intptr_t ident;
 	
-	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
+	size = psy_ui_component_intsize(&self->component);
 	thumbsize = 30;
 	if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {

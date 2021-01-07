@@ -39,7 +39,16 @@ void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(&app));
+	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(&app),
+		psy_ui_intsize_make(0, 0));
+}
+
+void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_IntSize size)
+{
+	vtable_init();
+	self->vtable = &vtable;
+	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(&app),
+		size);
 }
 
 // Delegation Methods to psy_ui_BitmapImp

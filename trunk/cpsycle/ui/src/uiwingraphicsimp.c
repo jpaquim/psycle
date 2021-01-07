@@ -46,8 +46,9 @@ static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint
 	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
 	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
-static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, uintptr_t width);
-static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self);
+static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t width);
+static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
+static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 
@@ -83,6 +84,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_drawarc = (psy_ui_fp_graphicsimp_dev_drawarc) psy_ui_win_g_imp_devdrawarc;
 		win_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_win_g_devsetlinewidth;
 		win_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_win_g_devlinewidth;
+		win_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_linewidth)psy_ui_win_g_devsetorigin;
 		win_imp_vtable_initialized = 1;
 	}
 }
@@ -93,13 +95,44 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	win_imp_vtable_init(self);
 	self->imp.vtable = &win_imp_vtable;
 	self->hdc = hdc;
+	self->shareddc = TRUE;
+	self->pen = CreatePen(PS_SOLID, 1, app.defaults.style_common.colour.value);
+	self->brush = 0;
+	self->hBrushPrev = 0;
+	self->oldbmp = 0;
+	self->penprev = SelectObject(self->hdc, self->pen);
+	self->hFontPrev = SelectObject(self->hdc,
+		((psy_ui_win_FontImp*) app.defaults.style_common.font.imp)->hfont);
+	self->orgx = 0;
+	self->orgy = 0;	
+	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
+}
+
+void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap)
+{
+	HDC hdc;
+	psy_ui_win_BitmapImp* imp;
+
+	psy_ui_graphics_imp_init(&self->imp);
+	win_imp_vtable_init(self);
+	self->imp.vtable = &win_imp_vtable;	
+	hdc = GetDC(NULL);
+	SaveDC(hdc);
+	self->hdc = CreateCompatibleDC(hdc);
+	self->shareddc = FALSE;
+	RestoreDC(hdc, -1);
+	ReleaseDC(NULL, hdc);
+	imp = (psy_ui_win_BitmapImp*)bitmap->imp;
+	self->oldbmp = SelectObject(self->hdc, imp->bitmap);		
 	self->pen = CreatePen(PS_SOLID, 1, app.defaults.style_common.colour.value);
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
-		((psy_ui_win_FontImp*) app.defaults.style_common.font.imp)->hfont);
-	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
+		((psy_ui_win_FontImp*)app.defaults.style_common.font.imp)->hfont);
+	self->orgx = 0;
+	self->orgy = 0;
+	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);	
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -109,6 +142,12 @@ void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 	SelectObject(self->hdc, self->hFontPrev);
 	if (self->pen) {
 		DeleteObject(self->pen);
+	}
+	if (self->oldbmp) {
+		SelectObject(self->hdc, self->oldbmp);		
+	}
+	if (!self->shareddc) {
+		DeleteDC(self->hdc);
 	}
 }
 
@@ -416,6 +455,14 @@ psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
 	rv.tmPitchAndFamily = tm->tmPitchAndFamily;
 	rv.tmCharSet = tm->tmCharSet;
 	return rv;
+}
+
+void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y)
+{
+	SetWindowOrgEx(self->hdc,
+		self->orgx + x,
+		self->orgy + y,
+		NULL);
 }
 
 #endif

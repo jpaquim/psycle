@@ -184,7 +184,7 @@ void psy_ui_margin_setleft(psy_ui_Margin* self, psy_ui_Value value)
 	self->left = value;
 }
 
-intptr_t psy_ui_margin_width_px(psy_ui_Margin* self,
+double psy_ui_margin_width_px(psy_ui_Margin* self,
 	const psy_ui_TextMetric* tm)
 {
 	return psy_ui_value_px(&self->left, tm) +
@@ -197,7 +197,7 @@ psy_ui_Value psy_ui_margin_width(psy_ui_Margin* self,
 	return psy_ui_add_values(self->left, self->right, tm);
 }
 
-intptr_t psy_ui_margin_height_px(psy_ui_Margin* self,
+double psy_ui_margin_height_px(psy_ui_Margin* self,
 	const psy_ui_TextMetric* tm)
 {
 	return psy_ui_value_px(&self->top, tm) +
@@ -216,22 +216,22 @@ void psy_ui_value_init(psy_ui_Value* self)
 	*self = psy_ui_value_makepx(0);
 }
 
-intptr_t psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)
+double psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)
 {
-	intptr_t rv = self->quantity.integer;
+	double rv = self->quantity.px;
 
 	switch (self->unit) {
 		case psy_ui_UNIT_PX:
-			rv = self->quantity.integer;
+			rv = self->quantity.px;
 		break;
 		case psy_ui_UNIT_EW:
 			if (tm) {
-				rv = (intptr_t)(self->quantity.real * tm->tmAveCharWidth);
+				rv = self->quantity.real * tm->tmAveCharWidth;
 			}
 		break;
 		case psy_ui_UNIT_EH:
 			if (tm) {
-				rv = (intptr_t)(self->quantity.real * tm->tmHeight);
+				rv = self->quantity.real * tm->tmHeight;
 			}
 		break;
 		default:			
@@ -244,14 +244,14 @@ void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm)
 {	
 	if ((self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX)) {
-		self->quantity.integer += other->quantity.integer;
+		self->quantity.px += other->quantity.px;
 	} else if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
 		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW) ||
 		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EH) ||
 		(self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EW)) {
 		self->quantity.real += other->quantity.real;
 	} else {
-		self->quantity.integer = psy_ui_value_px(self, tm) +
+		self->quantity.px = psy_ui_value_px(self, tm) +
 			psy_ui_value_px(other, tm);
 		self->unit = psy_ui_UNIT_PX;	
 	}
@@ -264,7 +264,7 @@ void psy_ui_value_sub(psy_ui_Value* self, const psy_ui_Value* other,
 		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
 		self->quantity.real -= other->quantity.real;
 	} else {
-		self->quantity.integer = psy_ui_value_px(self, tm) -
+		self->quantity.px = psy_ui_value_px(self, tm) -
 			psy_ui_value_px(other, tm);
 		self->unit = psy_ui_UNIT_PX;
 	}
@@ -276,8 +276,7 @@ void psy_ui_value_mul_real(psy_ui_Value* self, double factor)
 		(self->unit == psy_ui_UNIT_EW)) {
 		self->quantity.real *= factor;
 	} else {
-		self->quantity.integer = (intptr_t)
-			(self->quantity.integer * factor);
+		self->quantity.px *= factor;
 		self->unit = psy_ui_UNIT_PX;
 	}
 }
@@ -299,9 +298,9 @@ int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 		return 1;
 	} else if ((self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX) ||
 			(self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX)) {
-		intptr_t diff;
+		double diff;
 
-		diff = self->quantity.integer - other->quantity.integer;
+		diff = self->quantity.px - other->quantity.px;
 		if (diff == 0) {
 			return 0;
 		}
@@ -310,7 +309,7 @@ int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 		}
 		return 1;
 	} else {
-		intptr_t diff;
+		double diff;
 
 		diff = psy_ui_value_px(self, tm)  - psy_ui_value_px(other, tm);
 		if (diff == 0) {

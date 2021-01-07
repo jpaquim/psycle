@@ -23,7 +23,7 @@ typedef struct psy_ui_win_BitmapImp {
 	HBITMAP bitmap;
 } psy_ui_win_BitmapImp;
 
-void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self);
+void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_IntSize size);
 
 #ifdef __cplusplus
 }

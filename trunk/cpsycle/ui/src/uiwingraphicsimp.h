@@ -20,16 +20,21 @@ extern "C" {
 
 typedef struct psy_ui_win_GraphicsImp {
 	psy_ui_GraphicsImp imp;
-	HDC hdc;  
+	HDC hdc;
 	HFONT hfont;
 	HFONT hFontPrev;	
 	HPEN pen;  
 	HPEN penprev;
 	HBRUSH brush;
 	HBRUSH hBrushPrev;
+	HBITMAP oldbmp;
+	bool shareddc;
+	int orgx;
+	int orgy;
 } psy_ui_win_GraphicsImp;
 
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc);
+void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*);
 
 #ifdef __cplusplus
 }

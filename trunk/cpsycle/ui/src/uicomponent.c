@@ -9,6 +9,7 @@
 #include "uiimpfactory.h"
 
 #include <assert.h>
+#include <math.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -526,16 +527,16 @@ void psy_ui_component_destroy(psy_ui_Component* self)
 	self->vtable->destroy(self);
 }
 
-void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx,
-	intptr_t stepy)
+void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
+	double stepy)
 {
 	if (stepy != 0 || stepx != 0) {
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(self);
 		self->vtable->scrollto(self,
-			psy_ui_value_px(&self->scrollstepx, &tm) * stepx,
-			psy_ui_value_px(&self->scrollstepy, &tm) * stepy);
+			(intptr_t)(psy_ui_value_px(&self->scrollstepx, &tm) * stepx),
+			(intptr_t)(psy_ui_value_px(&self->scrollstepy, &tm) * stepy));
 	}
 }
 
@@ -1001,10 +1002,11 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 {	
 	psy_ui_TextMetric tm;
 
-	tm = psy_ui_component_textmetric(self);
+	tm = psy_ui_component_textmetric(self);	
+	left = psy_ui_value_makepx(floor(psy_ui_value_px(&left, &tm)));
 	if (psy_ui_value_comp(&self->scroll.x, &left, &tm)) {
-		intptr_t oldscrollx;
-		intptr_t scrollstepx_px;
+		double oldscrollx;
+		double scrollstepx_px;
 		
 		scrollstepx_px = psy_ui_value_px(&self->scrollstepx, &tm);
 		oldscrollx = psy_ui_value_px(&self->scroll.x, &tm);
@@ -1020,17 +1022,18 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
+	top = psy_ui_value_makepx(floor(psy_ui_value_px(&top, &tm)));
 	if (psy_ui_value_comp(&self->scroll.y, &top, &tm)) {	
-		intptr_t oldscrolly;		
-		intptr_t scrollstepy_px;
+		double oldscrolly;		
+		double scrollstepy_px;
+		double step;
 
 		scrollstepy_px = psy_ui_value_px(&self->scrollstepy, &tm);
 		oldscrolly = psy_ui_value_px(&self->scroll.y, &tm);
 		self->scroll.y = top;
 		psy_signal_emit(&self->signal_scroll, self, 0);	
-		psy_ui_component_scrollstep(self, 0, (oldscrolly -
-			psy_ui_value_px(&self->scroll.y, &tm)) /
-			scrollstepy_px);
+		step = (oldscrolly - psy_ui_value_px(&self->scroll.y, &tm)) / scrollstepy_px;
+		psy_ui_component_scrollstep(self, 0, step);
 	}
 }
 

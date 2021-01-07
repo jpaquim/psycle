@@ -230,7 +230,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
-			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0)));
+			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0)));	
 }
 
 void mainframe_inittoparea(MainFrame* self)
@@ -269,6 +269,7 @@ void mainframe_initterminal(MainFrame* self)
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
+	self->splitbarterminal.component.debugflag = 1000;
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
 	psy_signal_connect(&self->workspace.signal_terminal_out, self,
@@ -554,7 +555,8 @@ void mainframe_initstepsequencerview(MainFrame* self)
 
 void mainframe_initseqeditor(MainFrame* self)
 {
-	seqeditor_init(&self->seqeditor, &self->client, &self->workspace);
+	seqeditor_init(&self->seqeditor, &self->client, &self->patternview.skin,
+		&self->workspace);
 	psy_ui_component_setalign(seqeditor_base(&self->seqeditor),
 		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_splitbar_init(&self->splitseqeditor, &self->client);

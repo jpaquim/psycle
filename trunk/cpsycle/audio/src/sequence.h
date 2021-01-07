@@ -195,7 +195,7 @@ typedef struct psy_audio_Sequence {
 	psy_audio_SequenceTrackNode* tracks;
 	psy_audio_Patterns* patterns;
 	psy_Signal sequencechanged;
-	psy_audio_PatternsTrackState trackstate;
+	psy_audio_TrackState trackstate;
 } psy_audio_Sequence;
 
 void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*);

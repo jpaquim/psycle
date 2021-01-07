@@ -61,7 +61,7 @@ typedef enum {
 
 typedef struct {
 	union {
-		intptr_t integer;
+		double px;
 		double real;
 	} quantity;
 	psy_ui_Unit unit;
@@ -69,11 +69,11 @@ typedef struct {
 
 void psy_ui_value_init(psy_ui_Value*);
 
-INLINE psy_ui_Value psy_ui_value_makepx(intptr_t px)
+INLINE psy_ui_Value psy_ui_value_makepx(double px)
 {
 	psy_ui_Value rv;
 
-	rv.quantity.integer = px;
+	rv.quantity.px = px;
 	rv.unit = psy_ui_UNIT_PX;
 	return rv;
 }
@@ -105,8 +105,7 @@ INLINE psy_ui_Value psy_ui_value_makepe(double pe)
 	return rv;
 }
 
-intptr_t psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
-
+double psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
 void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*);
 void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
@@ -162,7 +161,7 @@ INLINE psy_ui_Value psy_ui_value_zero(void)
 INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
 {
 	return (self->unit == psy_ui_UNIT_PX)
-		? self->quantity.integer == 0
+		? self->quantity.px == 0
 		: self->quantity.real == 0.0;	
 }
 
@@ -197,7 +196,7 @@ INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
 	return rv;
 }
 
-INLINE psy_ui_Point psy_ui_point_makepx(intptr_t x, intptr_t y)
+INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
 {
 	psy_ui_Point rv;
 
@@ -229,6 +228,26 @@ INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
 INLINE psy_ui_IntPoint psy_ui_intpoint_make(intptr_t x, intptr_t y)
 {
 	psy_ui_IntPoint rv;
+
+	rv.x = x;
+	rv.y = y;
+	return rv;
+}
+
+typedef struct {
+	double x;
+	double y;
+} psy_ui_RealPoint;
+
+INLINE void psy_ui_realpoint_init(psy_ui_RealPoint* self)
+{
+	self->x = 0;
+	self->y = 0;
+}
+
+INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
+{
+	psy_ui_RealPoint rv;
 
 	rv.x = x;
 	rv.y = y;
@@ -326,7 +345,7 @@ INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
 	return rv;
 }
 
-INLINE psy_ui_Size psy_ui_size_makepx(intptr_t width, intptr_t height)
+INLINE psy_ui_Size psy_ui_size_makepx(double width, double height)
 {
 	psy_ui_Size rv;
 
@@ -369,8 +388,8 @@ INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
 {
 	psy_ui_IntSize rv;
 
-	rv.width = psy_ui_value_px(&size.width, tm);
-	rv.height = psy_ui_value_px(&size.height, tm);
+	rv.width = (intptr_t)psy_ui_value_px(&size.width, tm);
+	rv.height = (intptr_t)psy_ui_value_px(&size.height, tm);
 	return rv;
 }
 
@@ -407,9 +426,9 @@ void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
 psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*);
-intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
+double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
-intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
+double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
 INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
 {
