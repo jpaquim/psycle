@@ -38,8 +38,8 @@ typedef struct KeyboardState {
 	psy_dsp_NotesTabMode notemode;
 	bool drawpianokeys;
 	psy_ui_Value keyheight;
-	intptr_t keyheightpx;
-	intptr_t keyboardheightpx;
+	double keyheightpx;
+	double keyboardheightpx;
 	psy_ui_Value defaultkeyheight;
 	// references
 	PatternViewSkin* skin;
@@ -54,12 +54,13 @@ INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
 	return self->keymax - self->keymin;
 }
 
-INLINE intptr_t keyboardstate_height(KeyboardState* self,
+INLINE double keyboardstate_height(KeyboardState* self,
 	psy_ui_TextMetric* tm)
 {
 	assert(self);
 
-	return keyboardstate_numkeys(self) * psy_ui_value_px(&self->keyheight, tm);
+	return keyboardstate_numkeys(self) *
+		psy_ui_value_px(&self->keyheight, tm);
 }
 
 INLINE intptr_t keyboardstate_keytopx(KeyboardState* self, intptr_t key)
@@ -74,7 +75,7 @@ INLINE uint8_t keyboardstate_pxtokey(KeyboardState* self, intptr_t px)
 	assert(self);
 
 	if (self->keymax - 1 >= px / self->keyheightpx) {
-		return (uint8_t)(self->keymax - 1 - px / self->keyheightpx);
+		return (uint8_t)(self->keymax - px / self->keyheightpx);
 	}
 	return 0;
 }
@@ -282,14 +283,45 @@ typedef struct {
 	bool active;
 } PianogridTrackEvent;
 
+typedef struct PianoGridDraw {
+	psy_ui_TextMetric tm;
+	psy_ui_IntSize size;
+	bool cursorchanging;
+	bool cursoronnoterelease;
+	psy_dsp_big_beat_t sequenceentryoffset;	
+	PianoTrackDisplay trackdisplay;
+	psy_ui_Value scrolltop;
+	psy_ui_Value scrollleft;
+	psy_audio_PatternSelection selection;
+	// references
+	KeyboardState* keyboardstate;
+	PianoGridState* gridstate;
+	Workspace* workspace;
+	psy_audio_PatternEntry* hoverpatternentry;
+	bool drawgrid;
+	bool drawentries;
+	bool drawcursor;
+	bool drawplaybar;
+} PianoGridDraw;
+
+void pianogriddraw_init(PianoGridDraw*,
+	psy_ui_Value scrollleft, psy_ui_Value scrolltop,
+	KeyboardState*, PianoGridState*,	
+	psy_dsp_big_beat_t sequenceentryoffset,
+	psy_audio_PatternEntry* hoverpatternentry,	
+	PianoTrackDisplay,
+	bool cursorchanging, bool cursoronnoterelease,
+	psy_audio_PatternSelection selection,
+	psy_ui_IntSize, psy_ui_TextMetric, Workspace*);
+void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
+
 typedef struct Pianogrid {
 	// inherits
    psy_ui_Component component;
    // internal data
    PianoGridState defaultgridstate;   
    KeyboardState defaultkeyboardstate;
-   psy_audio_PatternEntry* hoverpatternentry;
-   psy_Table lasttrackevent;   
+   psy_audio_PatternEntry* hoverpatternentry;   
    psy_dsp_big_beat_t sequenceentryoffset;
    psy_dsp_big_beat_t lastplayposition;
    psy_audio_PatternCursor oldcursor;

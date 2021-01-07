@@ -45,6 +45,7 @@ static void drawarc(psy_ui_Graphics*,
 	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
 static void setlinewidth(psy_ui_Graphics*, uintptr_t width);
 static uintptr_t linewidth(psy_ui_Graphics*);
+static void setorigin(psy_ui_Graphics* self, intptr_t x, intptr_t y);
 
 // VTable init
 static psy_ui_GraphicsVTable vtable;
@@ -77,6 +78,7 @@ static void vtable_init(void)
 		vtable.drawarc = drawarc;
 		vtable.setlinewidth = setlinewidth;
 		vtable.linewidth = linewidth;
+		vtable.setorigin = setorigin;
 		vtable_initialized = TRUE;
 	}
 }
@@ -86,6 +88,13 @@ void psy_ui_graphics_init(psy_ui_Graphics* self, void* hdc)
 	vtable_init();
 	self->vtable = &vtable;
 	self->imp = psy_ui_impfactory_allocinit_graphicsimp(psy_ui_app_impfactory(&app), hdc);
+}
+
+void psy_ui_graphics_init_bitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap)
+{
+	vtable_init();
+	self->vtable = &vtable;
+	self->imp = psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_app_impfactory(&app), bitmap);
 }
 
 // Delegation Methods to GraphicsImp
@@ -217,6 +226,11 @@ static uintptr_t linewidth(psy_ui_Graphics* self)
 	return self->imp->vtable->dev_linewidth(self->imp);
 }
 
+static void setorigin(psy_ui_Graphics* self, intptr_t x, intptr_t y)
+{
+	self->imp->vtable->dev_setorigin(self->imp, x, y);
+}
+
 // psy_ui_GraphicsImp
 static void dev_dispose(psy_ui_GraphicsImp* self) { }
 static void dev_textout(psy_ui_GraphicsImp* self, intptr_t x, intptr_t y, const char* text, uintptr_t len) { }
@@ -256,6 +270,7 @@ static void dev_drawarc(psy_ui_GraphicsImp* self,
 	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4) { }
 static void dev_setlinewidth(psy_ui_GraphicsImp* self, uintptr_t width) { }
 static unsigned int dev_linewidth(psy_ui_GraphicsImp* self) { return 1; }
+static void dev_setorigin(psy_ui_GraphicsImp* self, intptr_t x, intptr_t y) { }
 
 static psy_ui_GraphicsImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -287,6 +302,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_drawarc = dev_drawarc;
 		imp_vtable.dev_setlinewidth = dev_setlinewidth;
 		imp_vtable.dev_linewidth = dev_linewidth;
+		imp_vtable.dev_setorigin = dev_setorigin;
 		imp_vtable_initialized = 1;
 	}
 }

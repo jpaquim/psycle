@@ -25,7 +25,7 @@ void psy_audio_patterns_init(psy_audio_Patterns* self)
 	psy_table_init(&self->slots);
 	self->songtracks = 16;	
 	self->sharetracknames = 0;
-	patternstrackstate_init(&self->trackstate);
+	psy_audio_trackstate_init(&self->trackstate);
 	psy_audio_patterns_init_signals(self);
 }
 
@@ -42,7 +42,7 @@ void psy_audio_patterns_dispose(psy_audio_Patterns* self)
 	assert(self);
 
 	psy_audio_patterns_disposeslots(self);
-	patternstrackstate_dispose(&self->trackstate);
+	psy_audio_trackstate_dispose(&self->trackstate);
 	psy_audio_patterns_dispose_signals(self);
 }
 
@@ -182,42 +182,42 @@ void psy_audio_patterns_activatesolotrack(psy_audio_Patterns* self,
 {
 	assert(self);
 
-	patternstrackstate_activatesolotrack(&self->trackstate, track);
+	psy_audio_trackstate_activatesolotrack(&self->trackstate, track);
 }
 
 void psy_audio_patterns_deactivatesolotrack(psy_audio_Patterns* self)
 {
 	assert(self);
 
-	patternstrackstate_deactivatesolotrack(&self->trackstate);
+	psy_audio_trackstate_deactivatesolotrack(&self->trackstate);
 }
 
 void psy_audio_patterns_mutetrack(psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
-	patternstrackstate_mutetrack(&self->trackstate, track);
+	psy_audio_trackstate_mutetrack(&self->trackstate, track);
 }
 
 void psy_audio_patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
-	patternstrackstate_unmutetrack(&self->trackstate, track);
+	psy_audio_trackstate_unmutetrack(&self->trackstate, track);
 }
 
 int psy_audio_patterns_istrackmuted(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
-	return patternstrackstate_istrackmuted(&self->trackstate, track);
+	return psy_audio_trackstate_istrackmuted(&self->trackstate, track);
 }
 
 int psy_audio_patterns_istracksoloed(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
-	return patternstrackstate_istracksoloed(&self->trackstate, track);
+	return psy_audio_trackstate_istracksoloed(&self->trackstate, track);
 }
 
 void psy_audio_patterns_setsongtracks(psy_audio_Patterns* self,

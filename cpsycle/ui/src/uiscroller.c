@@ -5,6 +5,7 @@
 
 #include "uiscroller.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -99,8 +100,8 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 
 	scrollleft = psy_ui_component_scrollleft(self->client);
 	psy_ui_component_setscrollleft(self->client,
-		psy_ui_value_makepx(psy_ui_value_px(&scrollleft, &tm) -
-			scrollstepx_px * (iPos - nPos)));
+		psy_ui_value_makepx(floor(psy_ui_value_px(&scrollleft, &tm) -
+			scrollstepx_px * (iPos - nPos))));
 }
 
 void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
@@ -119,8 +120,8 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar*
 	iPos = psy_ui_value_px(&self->client->scroll.y, &tm) / scrollstepy_px;
 	nPos = psy_ui_scrollbar_position(sender);
 	psy_ui_component_setscrolltop(self->client,
-		psy_ui_value_makepx(psy_ui_value_px(&scrolltop, &tm) -
-			scrollstepy_px * (iPos - nPos)));		
+		psy_ui_value_makepx(
+			floor(psy_ui_value_px(&scrolltop, &tm) - scrollstepy_px * (iPos - nPos))));		
 }
 
 void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)

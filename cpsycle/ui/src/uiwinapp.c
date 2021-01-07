@@ -389,8 +389,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						POINT dblbuffer_offset;
 						HFONT hfont = 0;
 						HFONT hPrevFont = 0;																		
+						POINT org;
 						psy_ui_TextMetric tm;						
 
+						tm = psy_ui_component_textmetric(imp->component);
 						if (imp->component->doublebuffered) {
 							// create a graphics context with back buffer bitmap
 							// with origin (0; 0) and size of the paint request
@@ -477,15 +479,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 									psy_ui_value_px(&imp->component->scroll.y, &tm) -
 									(int)psy_ui_value_px(&imp->component->spacing.top,
 									&tm),
-								NULL);
-							
+								NULL);							
 						} else {
 							SetWindowOrgEx(win_g->hdc,
 								(int)dblbuffer_offset.x +
 									(int)psy_ui_value_px(&imp->component->scroll.x, &tm),
 								(int)dblbuffer_offset.y +
 									(int)psy_ui_value_px(&imp->component->scroll.y, &tm),
-								NULL);
+								NULL);							
 						}
 						// update graphics font with component font 
 						hfont = ((psy_ui_win_FontImp*)
@@ -499,10 +500,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);						
 						// draw border						
 						psy_ui_component_drawborder(imp->component, &g);
-						// call specialization methods (vtable, then signals)
+						// update graphics origin
+						GetWindowOrgEx(win_g->hdc, &org);
+						win_g->orgx = org.x;
+						win_g->orgy = org.y;
+						// call specialization methods (vtable, then signals)						
 						if (imp->component->vtable->ondraw) {
 							imp->component->vtable->ondraw(imp->component, &g);
-						}
+						}												
 						psy_signal_emit(&imp->component->signal_draw,
 							imp->component, 1, &g);						
 						// clean up font
@@ -841,7 +846,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						imp->component->accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
 						while (imp->component->accumwheeldelta >= iDeltaPerLine)
 						{
-							intptr_t iPos;
+							double iPos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
 							psy_ui_Value scrolltop;
@@ -859,13 +864,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							}
 							if (imp->component->handlevscroll) {
 								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, (double)iPos));
+									psy_ui_mul_value_real(imp->component->scrollstepy, iPos));
 							}							
 							imp->component->accumwheeldelta -= iDeltaPerLine;
 						}
 						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
 						{
-							intptr_t iPos;
+							double iPos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
 							psy_ui_Value scrolltop;
@@ -883,7 +888,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							}
 							if (imp->component->handlevscroll) {
 								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, (double)iPos));
+									psy_ui_mul_value_real(imp->component->scrollstepy, iPos));
 							}							
 							imp->component->accumwheeldelta += iDeltaPerLine;
 						}

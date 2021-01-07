@@ -4,6 +4,7 @@
 #if !defined(SEQEDITOR_H)
 #define SEQEDITOR_H
 
+#include "patternviewskin.h"
 #include "workspace.h"
 #include "zoombox.h"
 
@@ -66,9 +67,11 @@ typedef struct SeqEditorTrack {
 	uintptr_t trackindex;
 	SeqEditorTrackState* trackstate;
 	bool dragstarting;
+	bool bitmapvalid;
 	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
 	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
+	psy_ui_Bitmap bitmap;
 } SeqEditorTrack;
 
 void seqeditortrack_init(SeqEditorTrack*, struct SeqEditorTracks* parent,
@@ -155,9 +158,11 @@ typedef struct SeqEditorTracks {
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
 	psy_List* tracks;
-	intptr_t lastplaylinepx;
+	intptr_t lastplaylinepx;	
 	SeqEditorTrack* capture;
-	int mode;
+	int mode;	
+	bool drawpatternevents;
+	PatternViewSkin* skin;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,
@@ -183,7 +188,7 @@ typedef struct {
 } SeqEditor;
 
 void seqeditor_init(SeqEditor*, psy_ui_Component* parent,
-	Workspace*);
+	PatternViewSkin* skin, Workspace*);
 
 INLINE psy_ui_Component* seqeditor_base(SeqEditor* self)
 {

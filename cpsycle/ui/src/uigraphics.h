@@ -72,6 +72,7 @@ typedef void (*psy_ui_fp_graphics_drawarc)(struct psy_ui_Graphics*,
 	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
 typedef void (*psy_ui_fp_graphics_setlinewidth)(struct psy_ui_Graphics*, uintptr_t width);
 typedef uintptr_t (*psy_ui_fp_graphics_linewidth)(struct psy_ui_Graphics*);
+typedef void (*psy_ui_fp_graphics_dev_setorigin)(struct psy_ui_Graphics*, intptr_t x, intptr_t y);
 
 typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_dispose dispose;
@@ -98,6 +99,7 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_drawarc drawarc;
 	psy_ui_fp_graphics_setlinewidth setlinewidth;
 	psy_ui_fp_graphics_linewidth linewidth;
+	psy_ui_fp_graphics_dev_setorigin setorigin;
 } psy_ui_GraphicsVTable;
 
 struct psy_ui_GraphicsImp;
@@ -109,6 +111,7 @@ typedef struct psy_ui_Graphics {
 } psy_ui_Graphics;
 
 void psy_ui_graphics_init(psy_ui_Graphics*, void* hdc);
+void psy_ui_graphics_init_bitmap(psy_ui_Graphics*, psy_ui_Bitmap*);
 
 // vtable calls
 INLINE void psy_ui_graphics_dispose(psy_ui_Graphics* self)
@@ -238,6 +241,11 @@ INLINE uintptr_t psy_ui_linewidth(psy_ui_Graphics* self)
 	return self->vtable->linewidth(self);
 }
 
+INLINE void psy_ui_setorigin(psy_ui_Graphics* self, intptr_t x, intptr_t y)
+{
+	self->vtable->setorigin(self, x, y);
+}
+
 // psy_ui_GraphicsImp
 
 typedef void (*psy_ui_fp_graphicsimp_dev_dispose)(struct psy_ui_GraphicsImp*);
@@ -273,6 +281,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawarc)(struct psy_ui_GraphicsImp*,
 	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
 typedef void (*psy_ui_fp_graphicsimp_dev_setlinewidth)(struct psy_ui_GraphicsImp*, uintptr_t width);
 typedef unsigned int (*psy_ui_fp_graphicsimp_dev_linewidth)(struct psy_ui_GraphicsImp*);
+typedef void (*psy_ui_fp_graphicsimp_dev_setorigin)(struct psy_ui_GraphicsImp*, intptr_t x, intptr_t y);
 
 typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_dispose dev_dispose;
@@ -299,6 +308,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_drawarc dev_drawarc;
 	psy_ui_fp_graphicsimp_dev_setlinewidth dev_setlinewidth;
 	psy_ui_fp_graphicsimp_dev_linewidth dev_linewidth;
+	psy_ui_fp_graphicsimp_dev_setorigin dev_setorigin;
 } psy_ui_GraphicsImpVTable;
 
 typedef struct psy_ui_GraphicsImp {

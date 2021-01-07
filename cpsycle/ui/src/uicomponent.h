@@ -267,7 +267,7 @@ INLINE void psy_ui_component_verticalscrollrange(psy_ui_Component* self, intptr_
 	*scrollmax = self->vscrollrange.y;
 }
 
-void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
+void psy_ui_component_scrollstep(psy_ui_Component*, double stepx, double stepy);
 void psy_ui_component_move(psy_ui_Component*, psy_ui_Point topleft);
 void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_clientresize(psy_ui_Component*, psy_ui_Size);
@@ -556,7 +556,7 @@ INLINE intptr_t psy_ui_component_scrollleftpx(psy_ui_Component* self)
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
-	return psy_ui_value_px(&self->scroll.x, &tm);
+	return (intptr_t)psy_ui_value_px(&self->scroll.x, &tm);
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
@@ -571,7 +571,7 @@ INLINE intptr_t psy_ui_component_scrolltoppx(psy_ui_Component* self)
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
-	return psy_ui_value_px(&self->scroll.y, &tm);
+	return (intptr_t)psy_ui_value_px(&self->scroll.y, &tm);
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);

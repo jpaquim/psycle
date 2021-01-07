@@ -76,7 +76,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		currtrack = 0;
 		for (c = 0, cpx = cpy = 0; c < numtracks; ++c) {
 			trackscopeview_drawtrackindex(self, g, cpx, cpy, c);
-			if (!patternstrackstate_istrackmuted(
+			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, c)) {
 				trackscopeview_drawtrack(self, g, cpx, cpy, c);
 			} else {
@@ -270,12 +270,12 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		trackwidth = psy_ui_value_px(&size.width, &tm) / columns;		
 		track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
 		if (ev->button == 1) {
-			if (!patternstrackstate_istrackmuted(
+			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, track)) {
-				patternstrackstate_mutetrack(
+				psy_audio_trackstate_mutetrack(
 					&workspace_song(self->workspace)->patterns.trackstate, track);
 			} else {
-				patternstrackstate_unmutetrack(
+				psy_audio_trackstate_unmutetrack(
 					&workspace_song(self->workspace)->patterns.trackstate, track);
 			}
 		} else if (ev->button == 2) {				

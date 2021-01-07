@@ -29,8 +29,9 @@
 
 // psy_ui_win_ImpFactory
 
-static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*);
+static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*, psy_ui_IntSize size);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory*, uintptr_t* platformdc);
+static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(psy_ui_win_ImpFactory*, struct psy_ui_Bitmap*);
 static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_win_ImpFactory*, const psy_ui_FontInfo*);
 static struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
@@ -62,33 +63,34 @@ static struct psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_win_ImpFactor
 
 // VTable init
 static psy_ui_ImpFactoryVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_win_ImpFactory* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
-		vtable.allocinit_bitmapimp = (psy_ui_fp_impfactory_allocinit_bitmapimp) allocinit_bitmapimp;
-		vtable.allocinit_graphicsimp = (psy_ui_fp_impfactory_allocinit_graphicsimp) allocinit_graphicsimp;
-		vtable.allocinit_fontimp = (psy_ui_fp_impfactory_allocinit_fontimp) allocinit_fontimp;
-		vtable.allocinit_componentimp = (psy_ui_fp_impfactory_allocinit_componentimp) allocinit_componentimp;
-		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp) allocinit_frameimp;
-		vtable.allocinit_editimp = (psy_ui_fp_impfactory_allocinit_editimp) allocinit_editimp;
-		vtable.allocinit_editimp_multiline = (psy_ui_fp_impfactory_allocinit_editimp_multiline) allocinit_editimp_multiline;
-		vtable.allocinit_listboximp = (psy_ui_fp_impfactory_allocinit_listboximp) allocinit_listboximp;
-		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect) allocinit_listboximp_multiselect;
-		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp) allocinit_checkboximp;
+		vtable.allocinit_bitmapimp = (psy_ui_fp_impfactory_allocinit_bitmapimp)allocinit_bitmapimp;
+		vtable.allocinit_graphicsimp = (psy_ui_fp_impfactory_allocinit_graphicsimp)allocinit_graphicsimp;
+		vtable.allocinit_graphicsimp_bitmap = (psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)allocinit_graphicsimp_bitmap;
+		vtable.allocinit_fontimp = (psy_ui_fp_impfactory_allocinit_fontimp)allocinit_fontimp;
+		vtable.allocinit_componentimp = (psy_ui_fp_impfactory_allocinit_componentimp)allocinit_componentimp;
+		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_frameimp;
+		vtable.allocinit_editimp = (psy_ui_fp_impfactory_allocinit_editimp)allocinit_editimp;
+		vtable.allocinit_editimp_multiline = (psy_ui_fp_impfactory_allocinit_editimp_multiline)allocinit_editimp_multiline;
+		vtable.allocinit_listboximp = (psy_ui_fp_impfactory_allocinit_listboximp)allocinit_listboximp;
+		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect)allocinit_listboximp_multiselect;
+		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp)allocinit_checkboximp;
 		vtable.allocinit_checkboximp_multiline = (psy_ui_fp_impfactory_allocinit_checkboximp)allocinit_checkboximp_multiline;
-		vtable.allocinit_comboboximp = (psy_ui_fp_impfactory_allocinit_comboboximp) allocinit_comboboximp;
-		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp) allocinit_colourdialogimp;
-		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp) allocinit_opendialogimp;
-		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp) allocinit_all_opendialogimp;
-		vtable.allocinit_savedialogimp = (psy_ui_fp_impfactory_allocinit_savedialogimp) allocinit_savedialogimp;
-		vtable.allocinit_all_savedialogimp = (psy_ui_fp_impfactory_allocinit_all_savedialogimp) allocinit_all_savedialogimp;
-		vtable.allocinit_folderdialogimp = (psy_ui_fp_impfactory_allocinit_folderdialogimp) allocinit_folderdialogimp;
-		vtable.allocinit_all_folderdialogimp = (psy_ui_fp_impfactory_allocinit_all_folderdialogimp) allocinit_all_folderdialogimp;
-		vtable.allocinit_fontdialogimp = (psy_ui_fp_impfactory_allocinit_fontdialogimp) allocinit_fontdialogimp;
-		vtable_initialized = 1;
+		vtable.allocinit_comboboximp = (psy_ui_fp_impfactory_allocinit_comboboximp)allocinit_comboboximp;
+		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp)allocinit_colourdialogimp;
+		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp)allocinit_opendialogimp;
+		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp)allocinit_all_opendialogimp;
+		vtable.allocinit_savedialogimp = (psy_ui_fp_impfactory_allocinit_savedialogimp)allocinit_savedialogimp;
+		vtable.allocinit_all_savedialogimp = (psy_ui_fp_impfactory_allocinit_all_savedialogimp)allocinit_all_savedialogimp;
+		vtable.allocinit_folderdialogimp = (psy_ui_fp_impfactory_allocinit_folderdialogimp)allocinit_folderdialogimp;
+		vtable.allocinit_all_folderdialogimp = (psy_ui_fp_impfactory_allocinit_all_folderdialogimp)allocinit_all_folderdialogimp;
+		vtable.allocinit_fontdialogimp = (psy_ui_fp_impfactory_allocinit_fontdialogimp)allocinit_fontdialogimp;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -115,13 +117,13 @@ psy_ui_win_ImpFactory* psy_ui_win_impfactory_allocinit(void)
 	return rv;
 }
 
-psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self)
+psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self, psy_ui_IntSize size)
 {
 	psy_ui_BitmapImp* rv;
 
 	rv = (psy_ui_BitmapImp*) malloc(sizeof(psy_ui_win_BitmapImp));
 	if (rv) {
-		psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)rv);
+		psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)rv, size);
 	}
 	return rv;
 }
@@ -133,6 +135,17 @@ psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory* self, uintptr_t
 	rv = (psy_ui_GraphicsImp*)malloc(sizeof(psy_ui_win_GraphicsImp));
 	if (rv) {
 		psy_ui_win_graphicsimp_init((psy_ui_win_GraphicsImp*)rv, (HDC)platformdc);
+	}
+	return rv;
+}
+
+psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(psy_ui_win_ImpFactory* self, struct psy_ui_Bitmap* bitmap)
+{
+	psy_ui_GraphicsImp* rv;
+
+	rv = (psy_ui_GraphicsImp*)malloc(sizeof(psy_ui_win_GraphicsImp));
+	if (rv) {
+		psy_ui_win_graphicsimp_init_bitmap((psy_ui_win_GraphicsImp*)rv, bitmap);
 	}
 	return rv;
 }

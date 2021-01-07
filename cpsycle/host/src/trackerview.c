@@ -113,7 +113,6 @@ static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_MouseEvent*);
-static void trackergrid_onmousewheel(TrackerGrid*, psy_ui_MouseEvent*);
 static psy_audio_PatternCursor trackergrid_makecursor(TrackerGrid*, intptr_t x, intptr_t y);
 static psy_audio_PatternCursor trackergrid_checkcursorbounds(TrackerGrid*,
 	psy_audio_PatternCursor);
@@ -210,7 +209,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 4);	
+	psy_ui_component_setwheelscroll(&self->component, 4);
 	trackergrid_init_signals(self);
 	// init internal data	
 	self->opcount = 0;
@@ -373,7 +372,7 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_Pa
 	assert(self);
 
 	psy_audio_patternentry_init(&empty);
-	halfy = trackerlinestate_linetopx(self->linestate, (self->linestate->visilines / 2));
+	halfy = trackerlinestate_linetopx(self->linestate, (self->linestate->visilines / 2))
 		+ psy_ui_component_scrolltoppx(&self->component);
 	offset = clip->topleft.offset;
 	cpy = trackerlinestate_beattopx(self->linestate, offset);

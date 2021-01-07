@@ -564,7 +564,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)vibratoview_ontweak,
 			(ui_slider_fpvalue)vibratoview_onvalue);
 	}	
-	sliders[0]->component.margin.top.quantity.integer = 32;		
+	sliders[0]->component.margin.top.quantity.px = 32;		
 }
 
 void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)
