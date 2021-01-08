@@ -53,14 +53,14 @@ void psy_audio_trackstate_unmutetrack(psy_audio_TrackState* self, uintptr_t trac
 	}
 }
 
-int psy_audio_trackstate_istrackmuted(psy_audio_TrackState* self, uintptr_t track)
+int psy_audio_trackstate_istrackmuted(const psy_audio_TrackState* self, uintptr_t track)
 {
 	return self->soloactive
 		? !psy_table_exists(&self->mute, track)
 		: psy_table_exists(&self->mute, track);
 }
 
-int psy_audio_trackstate_istracksoloed(psy_audio_TrackState* self, uintptr_t track)
+int psy_audio_trackstate_istracksoloed(const psy_audio_TrackState* self, uintptr_t track)
 {
 	return self->soloactive && self->soloedtrack == track;		
 }

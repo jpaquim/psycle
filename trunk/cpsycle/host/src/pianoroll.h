@@ -109,7 +109,7 @@ typedef struct PianoGridState {
 	PatternViewSkin* skin;
 } PianoGridState;
 
-void gridstate_init(PianoGridState*, PatternViewSkin* skin);
+void pianogridstate_init(PianoGridState*, PatternViewSkin* skin);
 
 INLINE void pianogridstate_setpattern(PianoGridState* self, psy_audio_Pattern* pattern)
 {
@@ -302,11 +302,12 @@ typedef struct PianoGridDraw {
 	bool drawentries;
 	bool drawcursor;
 	bool drawplaybar;
+	bool clip;
 } PianoGridDraw;
 
 void pianogriddraw_init(PianoGridDraw*,
-	psy_ui_Value scrollleft, psy_ui_Value scrolltop,
-	KeyboardState*, PianoGridState*,	
+	KeyboardState*, PianoGridState*,
+	psy_ui_Value scrollleft, psy_ui_Value scrolltop,	
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay,
@@ -314,6 +315,31 @@ void pianogriddraw_init(PianoGridDraw*,
 	psy_audio_PatternSelection selection,
 	psy_ui_IntSize, psy_ui_TextMetric, Workspace*);
 void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
+
+INLINE void pianogriddraw_preventclip(PianoGridDraw* self)
+{
+	self->clip = FALSE;
+}
+
+INLINE void pianogriddraw_preventgrid(PianoGridDraw* self)
+{
+	self->drawgrid = FALSE;
+}
+
+INLINE void pianogriddraw_preventplaybar(PianoGridDraw* self)
+{
+	self->drawplaybar = FALSE;
+}
+
+INLINE void pianogriddraw_preventcursor(PianoGridDraw* self)
+{
+	self->drawcursor = FALSE;
+}
+
+INLINE void pianogriddraw_preventeventdraw(PianoGridDraw* self)
+{
+	self->drawentries = FALSE;
+}
 
 typedef struct Pianogrid {
 	// inherits

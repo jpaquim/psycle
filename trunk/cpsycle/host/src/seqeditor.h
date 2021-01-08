@@ -23,6 +23,26 @@ typedef struct SeqEditorTrackState {
 
 void seqeditortrackstate_init(SeqEditorTrackState*);
 
+INLINE intptr_t seqeditortrackstate_beattopx(const SeqEditorTrackState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return (intptr_t)(position * self->pxperbeat);
+}
+
+INLINE psy_dsp_big_beat_t seqeditortrackstate_pxtobeat(const
+	SeqEditorTrackState* self, intptr_t px)
+{
+	assert(self);
+
+	return px / (psy_dsp_big_beat_t)self->pxperbeat;
+}
+typedef enum {
+	SEQEDITORDRAG_MOVE,
+	SEQEDITORDRAG_REORDER
+} SeqEditorDragMode;
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Colour rulerbaselinecolour;
@@ -64,10 +84,12 @@ typedef struct SeqEditorTrack {
 	SeqEditorTrackVTable* vtable;
 	struct SeqEditorTracks* parent;
 	psy_audio_SequenceTrack* currtrack;
+	psy_audio_SequenceTrackNode* currtracknode;
 	uintptr_t trackindex;
 	SeqEditorTrackState* trackstate;
 	bool dragstarting;
 	bool bitmapvalid;
+	intptr_t dragstartpx;
 	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
 	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
@@ -82,7 +104,9 @@ SeqEditorTrack* seqeditortrack_alloc(void);
 SeqEditorTrack* seqeditortrack_allocinit(struct SeqEditorTracks* parent,
 	SeqEditorTrackState*, Workspace*);
 
-void seqeditortrack_updatetrack(SeqEditorTrack*, psy_audio_SequenceTrack*,
+void seqeditortrack_updatetrack(SeqEditorTrack*,
+	psy_audio_SequenceTrackNode*,
+	psy_audio_SequenceTrack*,
 	uintptr_t trackindex);
 
 INLINE SeqEditorTrack* seqeditortrack_base(SeqEditorTrack* self)
@@ -162,6 +186,7 @@ typedef struct SeqEditorTracks {
 	SeqEditorTrack* capture;
 	int mode;	
 	bool drawpatternevents;
+	SeqEditorDragMode dragmode;
 	PatternViewSkin* skin;
 } SeqEditorTracks;
 
@@ -174,12 +199,21 @@ INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 	return &self->component;
 }
 
-typedef struct {
+typedef struct SeqEditorBar {
+	psy_ui_Component component;
+	ZoomBox zoombox_beat;
+	psy_ui_Button move;
+	psy_ui_Button reorder;
+} SeqEditorBar;
+
+void seqeditorbar_init(SeqEditorBar*, psy_ui_Component* parent);
+
+typedef struct SeqEditor {
 	psy_ui_Component component;
 	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
 	psy_ui_Component left;
-	ZoomBox zoombox_beat;
+	SeqEditorBar bar;
 	ZoomBox zoombox_height;
 	SeqEditorTracks trackheaders;
 	SeqEditorTracks tracks;	

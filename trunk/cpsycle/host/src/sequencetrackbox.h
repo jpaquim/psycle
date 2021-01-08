@@ -35,8 +35,7 @@ typedef struct SequenceTrackBox {
 	psy_ui_Colour colour;
 	psy_ui_Colour colour_highlight;
 	psy_ui_Colour colour_font;
-	psy_ui_Colour colour_fonthighlight;
-	psy_ui_IntSize size;
+	psy_ui_Colour colour_fonthighlight;	
 	psy_ui_TextMetric tm;
 	bool showname;
 	// references

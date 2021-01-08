@@ -112,6 +112,8 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
+static void mainframe_onstatus(MainFrame*, Workspace* sender,
+	const char* text);
 static void mainframe_updateterminalbutton(MainFrame*);
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
@@ -276,6 +278,8 @@ void mainframe_initterminal(MainFrame* self)
 		mainframe_onterminaloutput);
 	psy_signal_connect(&self->workspace.signal_terminal_error, self,
 		mainframe_onterminalerror);
+	psy_signal_connect(&self->workspace.signal_status_out, self,
+		mainframe_onstatus);
 }
 
 void mainframe_initkbdhelp(MainFrame* self)
@@ -323,9 +327,11 @@ void mainframe_initviewstatusbars(MainFrame* self)
 void mainframe_initstatusbarlabel(MainFrame* self)
 {
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);
+	psy_ui_component_doublebuffer(psy_ui_label_base(&self->statusbarlabel));
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);	
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
+	self->statusdefaultcounter = 0;
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -696,7 +702,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_start(&self->workspace.player);
 			break;
 		case CMD_IMM_PLAYROWTRACK: {
-			psy_dsp_big_beat_t playposition = 0;
+			/*psy_dsp_big_beat_t playposition = 0;
 			psy_audio_SequenceEntry* entry;
 
 			psy_audio_exclusivelock_enter();
@@ -717,9 +723,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_start(&self->workspace.player);
 			self->playrow = TRUE;
 			psy_audio_exclusivelock_leave();
-			break; }
+			break; */ }
 		case CMD_IMM_PLAYROWPATTERN: {
-			psy_dsp_big_beat_t playposition = 0;
+			/*psy_dsp_big_beat_t playposition = 0;
 			psy_audio_SequenceEntry* entry;
 
 			psy_audio_exclusivelock_enter();
@@ -739,12 +745,12 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_start(&self->workspace.player);
 			self->playrow = TRUE;
 			psy_audio_exclusivelock_leave();
-			break; }
+			break; */ }
 		case CMD_IMM_PLAYSTART:
 			workspace_playstart(&self->workspace);
 			break;
 		case CMD_IMM_PLAYFROMPOS: {
-			psy_dsp_big_beat_t playposition = 0;
+			/*psy_dsp_big_beat_t playposition = 0;
 			psy_audio_SequenceEntry* entry;
 
 			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
@@ -752,7 +758,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
 			psy_audio_player_setposition(&self->workspace.player, playposition);
 			psy_audio_player_start(&self->workspace.player);
-			break; }
+			break; */}
 		case CMD_IMM_PLAYSTOP:
 			psy_audio_player_stop(&self->workspace.player);
 			break;
@@ -1128,6 +1134,28 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 		} else {
 			psy_ui_progressbar_tick(&self->progressbar);
 		}
+	}	
+	if (self->statusdefaultcounter > 0) {
+		psy_ui_Colour colour;
+		float fadeoutstep;
+
+		--self->statusdefaultcounter;
+		if (self->statusdefaultcounter <= 80) {
+			colour = psy_ui_defaults()->style_common.colour;
+			fadeoutstep = self->statusdefaultcounter * 1/80.f;
+			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
+			if (colour.value > psy_ui_component_backgroundcolour(mainframe_base(self)).value) {
+				psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
+					colour);
+			}
+			psy_ui_component_invalidate(psy_ui_label_base(&self->statusbarlabel));			
+		}
+		if (self->statusdefaultcounter == 0) {
+			// reset statusbar label to song title			
+			psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
+				psy_ui_defaults()->style_common.colour);
+			mainframe_updatesongtitle(self);
+		}
 	}
 }
 
@@ -1234,6 +1262,18 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 		: "unknown error\n");
 	self->terminalmsgtype = TERMINALMSGTYPE_ERROR;
 	mainframe_updateterminalbutton(self);
+}
+
+void mainframe_onstatus(MainFrame* self, Workspace* sender,
+	const char* text)
+{
+	// Keep new message 5secs active (Timer interval(50ms) * 100). The counter
+	// is decremented each timer tick (ontimer) and at zero the status is set
+	// set back to the song title
+	self->statusdefaultcounter = 100;
+	psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
+		psy_ui_defaults()->style_common.colour);
+	psy_ui_label_settext(&self->statusbarlabel, text);
 }
 
 void mainframe_updateterminalbutton(MainFrame* self)

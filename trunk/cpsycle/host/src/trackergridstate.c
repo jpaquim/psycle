@@ -45,7 +45,7 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // implementation
-void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
+void trackerpianogridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
 	// init signals
 	psy_signal_init(&self->signal_cursorchanged);

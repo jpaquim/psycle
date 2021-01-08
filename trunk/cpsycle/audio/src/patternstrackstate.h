@@ -23,8 +23,8 @@ void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState*, uintptr_t tra
 void psy_audio_trackstate_deactivatesolotrack(psy_audio_TrackState*);
 void psy_audio_trackstate_mutetrack(psy_audio_TrackState*, uintptr_t track);
 void psy_audio_trackstate_unmutetrack(psy_audio_TrackState*, uintptr_t track);
-int psy_audio_trackstate_istrackmuted(psy_audio_TrackState*, uintptr_t track);
-int psy_audio_trackstate_istracksoloed(psy_audio_TrackState*, uintptr_t track);
+int psy_audio_trackstate_istrackmuted(const psy_audio_TrackState*, uintptr_t track);
+int psy_audio_trackstate_istracksoloed(const psy_audio_TrackState*, uintptr_t track);
 
 #ifdef __cplusplus
 }

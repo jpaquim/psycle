@@ -98,8 +98,10 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 	if (self && (*self) && ptr) {
 		psy_List* rv;
 		psy_List* tail;
+		uintptr_t size;
 
 		tail = (*self)->tail;
+		size = (*self)->size;
 		if (ptr->prev == NULL && ptr->next == NULL) {
 			*self = NULL;
 			free(ptr);
@@ -122,7 +124,7 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 		}
 		rv = ptr->next;
 		free(ptr);
-		--(*self)->size;
+		(*self)->size = size - 1;
 		return rv;
 	}
 	return NULL;

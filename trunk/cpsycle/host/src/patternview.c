@@ -93,12 +93,19 @@ void patternviewbar_updatestatus(PatternViewBar* self)
 {
 	char text[256];
 	psy_audio_PatternCursor cursor;
-	psy_audio_SequencePosition sequenceposition;
-	int patternid;
-
+	uintptr_t patternid;	
+	psy_audio_SequenceEntry* entry;
+	
 	cursor = workspace_patterncursor(self->workspace);
-	sequenceposition = workspace_sequenceselection(self->workspace).editposition;
-	patternid = (int)psy_audio_sequenceposition_patternid(&sequenceposition);
+	patternid = UINTPTR_MAX;
+	if (self->workspace->song) {		
+		entry = psy_audio_sequence_entry(
+			&self->workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition);
+		if (entry) {
+			patternid = entry->patternslot;
+		}
+	}
 	if (patternid == UINTPTR_MAX) {
 		psy_snprintf(text, 256, "Pat --  Ln --  Trk --  Col --:-- Edit");
 	} else {
@@ -258,7 +265,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	trackerlinestate_setlpb(&self->linestate, psy_audio_player_lpb(
 		workspace_player(self->workspace)));
 	self->linestate.skin = &self->skin;
-	trackergridstate_init(&self->gridstate, &self->trackconfig);
+	trackerpianogridstate_init(&self->gridstate, &self->trackconfig);
 	self->gridstate.skin = &self->skin;
 	psy_signal_connect(&self->gridstate.signal_cursorchanged, self,
 		patternview_ontrackercursorchanged);
@@ -441,18 +448,11 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 	psy_audio_SongFile* songfile)
 {
 	psy_audio_Pattern* pattern;
-	psy_audio_SequenceSelection selection;	
-	
-	selection = workspace_sequenceselection(workspace);	
-	if (selection.editposition.trackposition.sequencentrynode) {
-		psy_audio_SequenceEntry* entry;
 
-		entry = (psy_audio_SequenceEntry*)
-			selection.editposition.trackposition.sequencentrynode->entry;
-		pattern = psy_audio_patterns_at(&workspace->song->patterns, entry->patternslot);
-	} else {
-		pattern = 0;
-	}
+	pattern = (workspace->song)
+		? psy_audio_sequence_pattern(&workspace->song->sequence,
+			workspace->newsequenceselection.editposition)
+		: NULL;
 	patternview_setpattern(self, pattern);
 	self->linestate.sequenceentryoffset = 0.f;
 	self->pianoroll.grid.sequenceentryoffset = 0.f;
@@ -466,12 +466,16 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 
 void patternview_onsequenceselectionchanged(PatternView* self,
 	Workspace* workspace)
-{	
-	psy_audio_SequenceSelection selection;
-	psy_audio_SequenceEntry* entry;
-
-	selection = workspace_sequenceselection(workspace);
-	entry = psy_audio_sequenceposition_entry(&selection.editposition);
+{		
+	psy_audio_SequenceEntry* entry;	
+		
+	if (self->workspace->song) {
+		entry = psy_audio_sequence_entry(
+			&self->workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition);
+	} else {
+		entry = NULL;
+	}
 	if (entry) {
 		psy_audio_Pattern* pattern;
 
@@ -812,7 +816,7 @@ void patternview_onpatterncursorchanged(PatternView* self, Workspace* sender)
 	oldcursor = self->gridstate.cursor;	
 	self->gridstate.cursor = workspace_patterncursor(sender);
 	if (!psy_audio_patterncursor_equal(&self->gridstate.cursor, &oldcursor)) {
-		if (psy_audio_player_playing(&sender->player) && workspace_followingsong(sender)) {
+		if (self->gridstate.pattern && psy_audio_player_playing(&sender->player) && workspace_followingsong(sender)) {
 			bool scrolldown;
 
 			scrolldown = self->linestate.lastplayposition <

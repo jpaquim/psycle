@@ -267,7 +267,7 @@ void trackergrid_setsharedgridstate(TrackerGrid* self, TrackerGridState*
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		trackergridstate_init(&self->defaultgridstate, trackconfig);
+		trackerpianogridstate_init(&self->defaultgridstate, trackconfig);
 		self->gridstate = &self->defaultgridstate;
 	}
 }

@@ -182,16 +182,15 @@ void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)
 
 void playbar_startplay(PlayBar* self)
 {
-	psy_audio_Sequence* sequence;
-	psy_audio_SequencePosition editposition;
+	psy_audio_Sequence* sequence;	
 	psy_audio_SequenceEntry* entry;
 	psy_dsp_big_beat_t startposition;
 	psy_dsp_big_beat_t numplaybeats;
 	
 	psy_ui_button_highlight(&self->play);
-	sequence = self->player->sequencer.sequence;
-	editposition = self->workspace->sequenceselection.editposition;
-	entry = psy_audio_sequenceposition_entry(&editposition);
+	sequence = self->player->sequencer.sequence;	
+	entry = psy_audio_sequence_entry(sequence,
+		self->workspace->newsequenceselection.editposition);
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
 		psy_audio_player_stop(self->player);
