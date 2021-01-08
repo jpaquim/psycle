@@ -339,8 +339,8 @@ void psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 }
 
 void psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
-{						
-	psy_audio_SequenceTrackNode* t;		
+{	
+	psy_audio_SequenceTrack* track;
 	int32_t index;
 	uint32_t i;
 	char ptemp[256];
@@ -350,17 +350,14 @@ void psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 	psyfile_read(self->fp, &index, sizeof(index));
 	if (index < 0) {
 		return; // skip
-	}
+	}	
 	// create new tracks (0..index), if not already existing
-	for (i = 0, t = self->song->sequence.tracks; i <= (uint32_t)index; ++i) {
-		if (!t) {
-			t = psy_audio_sequence_appendtrack(&self->song->sequence,
-				psy_audio_sequencetrack_allocinit());
-		} else if (i < (uint32_t)index) {
-			psy_list_next(&t);
-		}
+	for (i = psy_audio_sequence_sizetracks(&self->song->sequence); i <= (uint32_t)index; ++i) {
+		psy_audio_sequence_appendtrack(&self->song->sequence,
+			psy_audio_sequencetrack_allocinit());
 	}
-	assert(t);
+	track = psy_audio_sequence_track_at(&self->song->sequence, index);		
+	assert(track);
 	// play length for this sequence
 	playlength = psyfile_read_int32(self->fp);
 	if (playlength < 0) {
@@ -369,23 +366,16 @@ void psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 	// name, for multipattern, for now unused
 	psyfile_readstring(self->fp, ptemp, sizeof ptemp);
 	for (i = 0; i < (uint32_t)playlength; ++i) {
-		uint8_t patternslot;
-		psy_audio_SequencePosition sequenceposition;
-
-		sequenceposition.tracknode = t;
-		sequenceposition.trackposition =
-			psy_audio_sequence_last(&self->song->sequence, t);
+		uint8_t patternslot;		
 		patternslot = (uint8_t)psyfile_read_uint32(self->fp);
-		psy_audio_sequence_insert(&self->song->sequence, sequenceposition,
-			patternslot);
+		psy_audio_sequence_insert(&self->songfile->song->sequence,
+			psy_audio_orderindex_make(0, i), patternslot);		
 	}
 	if (self->fp->currchunk.version > 0) {
 		// this extends the seqd chunk file format to handle 
 		// beat positions
 		psy_audio_SequenceEntryNode* p;
-		psy_audio_SequenceTrack* track;
-
-		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
+				
 		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
 				++i, psy_list_next(&p)) {
 			float repositionoffset;

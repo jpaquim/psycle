@@ -57,7 +57,7 @@ typedef struct SequenceListViewState {
 	intptr_t trackwidth;	
 	// references
 	psy_audio_Sequence* sequence;
-	psy_audio_NewSequenceSelection* selection;
+	psy_audio_SequenceSelection* selection;
 } SequenceListViewState;
 
 void sequencelistviewstate_init(SequenceListViewState*);
@@ -82,7 +82,6 @@ typedef struct SequenceListView {
 	uintptr_t lastplayrow;
 	// references
 	psy_audio_Player* player;	
-	// psy_audio_SequenceSelection* selection;
 	psy_audio_Patterns* patterns;	
 	// references
 	SequenceListViewState* state;
@@ -193,7 +192,6 @@ typedef struct SequenceView {
 	SequenceListViewState state;
 	// references
 	psy_audio_Patterns* patterns;	
-	psy_audio_SequenceSelection* selection;
 	Workspace* workspace;
 } SequenceView;
 

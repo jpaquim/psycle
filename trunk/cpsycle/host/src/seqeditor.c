@@ -429,7 +429,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 					if (trackindex != UINTPTR_MAX) {
 						workspace_setsequenceeditposition(
 							self->workspace,
-							psy_audio_sequenceorderindex_make(trackindex, selected));						
+							psy_audio_orderindex_make(trackindex, selected));						
 					}
 				}
 				self->drag_sequenceitem_node = sequenceitem_node;
@@ -509,36 +509,15 @@ bool seqeditortrack_onmouseup_virtual(SeqEditorTrack* self,
 				psy_signal_emit(
 					&workspace_song(self->workspace)->sequence.sequencechanged,
 					self, 0);
-			} else {
-				psy_audio_SequencePosition seqpos;
-				psy_audio_Sequence* sequence;
-				psy_audio_SequenceEntryNode* newseqnode;
-				Workspace* workspace;
-
-				sequence = &self->parent->workspace->song->sequence;
-				seqpos.tracknode = self->currtracknode;
-				seqpos.trackposition.patternnode = NULL;
-				seqpos.trackposition.patterns = NULL;
-				seqpos.trackposition.sequencentrynode = self->drag_sequenceitem_node;
+			} else {				
 				self->drag_sequenceitem_node = NULL;
-				self->dragstarting = FALSE;
-				workspace = self->workspace;
-				newseqnode = psy_audio_sequence_reorder_entry(
-					&workspace_song(self->workspace)->sequence,
-					seqpos, self->itemdragposition);				
-				if (newseqnode) {
-					//psy_audio_SequencePosition editposition;
-					//psy_audio_SequenceEntryNode* tracknode;					
-
-					//editposition = psy_audio_sequence_makeposition(sequence,
-					//	seqpos.tracknode,
-					//	newseqnode);
-					//psy_audio_sequenceselection_seteditposition(
-					//	&workspace->sequenceselection,
-					//	editposition);					
-					//workspace_setsequenceselection(workspace,
-					//	workspace->sequenceselection);
-				}
+				self->dragstarting = FALSE;				
+				psy_audio_sequence_reorder(
+					&self->parent->workspace->song->sequence,
+					psy_audio_orderindex_make(
+						self->trackindex,
+						sequenceentry->row),
+					self->itemdragposition);				
 				return FALSE;
 			}			
 		}
@@ -720,7 +699,7 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 				}
 			}
 			workspace_setsequenceeditposition(self->base.workspace,
-				psy_audio_sequenceorderindex_make(track, 0));
+				psy_audio_orderindex_make(track, 0));
 			break; }
 		}
 		psy_ui_component_invalidate(&self->base.parent->component);

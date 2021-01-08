@@ -286,6 +286,7 @@ typedef struct ITModule2 {
 	s3mHeader  s3mFileH;
 	// references
 	psy_audio_SongFile* songfile;
+	PsyFile* fp;
 } ITModule2;
 
 void itmodule2_init(ITModule2*, psy_audio_SongFile*);

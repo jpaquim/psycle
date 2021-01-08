@@ -26,8 +26,8 @@ extern "C" {
 
 // InstrumentIndex
 //
-// aim: Address a instrument inside psy_audio_Instruments
-//      Separate sampulse and ps1 instruments
+// Address a instrument inside psy_audio_Instruments
+// Separate sampulse and ps1 instruments
 //
 // Pair of two indexes (slot; subslot)
 // 1. groupslot: selects a group

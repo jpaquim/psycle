@@ -306,7 +306,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 		}
 		// sequence length
 		if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-				psy_audio_sequence_size(&self->songfile->song->sequence, t))) {
+				psy_audio_sequence_track_size(&self->songfile->song->sequence, t))) {
 			return status;
 		}
 		// sequence name

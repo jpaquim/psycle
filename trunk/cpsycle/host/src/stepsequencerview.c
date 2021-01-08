@@ -574,40 +574,32 @@ void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 
 void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 	Workspace* workspace)
-{
-	//psy_audio_SequenceSelection selection;
-	psy_audio_SequenceEntry* entry;
+{	
 	psy_audio_Pattern* pattern;
+	psy_audio_SequenceEntry* entry;
 
-	entry = NULL;
-	//selection = workspace_sequenceselection(workspace);
-	//entry = psy_audio_sequenceposition_entry(&selection.editposition);	
-	//if (entry) {
-		//pattern = psy_audio_patterns_at(&workspace->song->patterns,
-			//entry->patternslot);
-	//} else {		
-		pattern = 0;
-		//}
+	if (workspace->song) {
+		pattern = psy_audio_sequence_pattern(&workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition);
+		entry = psy_audio_sequence_entry(&workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition);
+	} else {
+		pattern = NULL;
+		entry = NULL;
+	}	
 	stepsequencerview_setpattern(self, pattern);
 	steptimer_reset(&self->steptimer, entry ? entry->offset : 0);	
 }
 
 void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
-{
-	psy_audio_SequenceSelection selection;	
+{	
 	psy_audio_Pattern* pattern;
-
-	//selection = workspace_sequenceselection(workspace);
-	//if (selection.editposition.trackposition.sequencentrynode) {
-	//	psy_audio_SequenceEntry* entry;
-
-	//	entry = (psy_audio_SequenceEntry*)
-	//		selection.editposition.trackposition.sequencentrynode->entry;
-	//	pattern = psy_audio_patterns_at(&workspace->song->patterns, entry->patternslot);
-	//} else {
-		pattern = 0;
-	//}
+	
+	pattern = (workspace->song)
+		? psy_audio_sequence_pattern(&workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition)
+		: NULL;	
 	stepsequencerbar_setpattern(&self->stepsequencerbar, pattern);
 	stepsequencerbarselect_setpattern(&self->stepsequencerbarselect, pattern);		
 	steptimer_reset(&self->steptimer, 0);

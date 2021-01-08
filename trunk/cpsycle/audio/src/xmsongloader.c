@@ -360,18 +360,14 @@ uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>&
 
 void xmsongloader_makesequence(XMSongLoader* self, struct XMFILEHEADER* xmheader)
 {
-	uintptr_t i;
-	psy_audio_SequencePosition sequenceposition;
+	uint16_t i;	
 	psy_audio_Song* song;
 
-	song = self->songfile->song;
-	sequenceposition.tracknode =
-		psy_audio_sequence_appendtrack(&song->sequence, psy_audio_sequencetrack_allocinit());
-	for (i = 0; i < xmheader->norder; ++i) {
-		sequenceposition.trackposition =
-			psy_audio_sequence_last(&song->sequence, sequenceposition.tracknode);
-		psy_audio_sequence_insert(&song->sequence, sequenceposition,
-			xmheader->order[i]);
+	song = self->songfile->song;	
+	psy_audio_sequence_appendtrack(&song->sequence, psy_audio_sequencetrack_allocinit());
+	for (i = 0; i < xmheader->norder; ++i) {		
+		psy_audio_sequence_insert(&self->songfile->song->sequence,
+			psy_audio_orderindex_make(0, i), xmheader->order[i]);
 	}
 }
 
@@ -1455,18 +1451,13 @@ void modsongloader_loadpatterns(MODSongLoader* self)
 
 void modsongloader_makesequence(MODSongLoader* self, struct MODHEADER* modheader)
 {
-	uintptr_t i;
-	psy_audio_SequencePosition sequenceposition;
-	psy_audio_Song* song;
-
-	song = self->songfile->song;
-	sequenceposition.tracknode =
-		psy_audio_sequence_appendtrack(&song->sequence, psy_audio_sequencetrack_allocinit());
-	for (i = 0; i < modheader->songlength; ++i) {
-		sequenceposition.trackposition =
-			psy_audio_sequence_last(&song->sequence, sequenceposition.tracknode);
-		psy_audio_sequence_insert(&song->sequence, sequenceposition,
-			modheader->order[i]);
+	uint8_t i;
+	
+	psy_audio_sequence_appendtrack(&self->songfile->song->sequence,
+		psy_audio_sequencetrack_allocinit());
+	for (i = 0; i < modheader->songlength; ++i) {		
+		psy_audio_sequence_insert(&self->songfile->song->sequence,
+			psy_audio_orderindex_make(0, i), modheader->order[i]);		
 	}
 }
 

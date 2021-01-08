@@ -32,7 +32,7 @@ void miditrackstate_reset(MidiTrackState* self)
     uint16_t v;
 
     self->trackidx = 0;
-    self->tracknode = NULL;
+    self->track = NULL;
     self->pattern = NULL;
     self->patternnode = NULL;    
     self->channel = 0;
@@ -198,8 +198,7 @@ int midiloader_readtrk(MidiLoader* self, MCHUNK chunk, uintptr_t trackidx)
 
 void midiloader_appendtrack(MidiLoader* self, uintptr_t trackidx)
 {
-    psy_audio_Pattern* pattern;
-    psy_audio_SequencePosition sequenceposition;
+    psy_audio_Pattern* pattern;    
     psy_audio_Song* song;
     uintptr_t patidx;
     
@@ -212,14 +211,12 @@ void midiloader_appendtrack(MidiLoader* self, uintptr_t trackidx)
     psy_audio_pattern_setname(pattern, "unnamed");
     patidx = psy_audio_patterns_append(&song->patterns, pattern);
     // append new sequence track 
-    sequenceposition.tracknode = psy_audio_sequence_appendtrack(
-        &song->sequence, psy_audio_sequencetrack_allocinit());
-    sequenceposition.trackposition = psy_audio_sequence_begin(&song->sequence,
-        sequenceposition.tracknode, 0.0);
-    psy_audio_sequence_insert(&song->sequence, sequenceposition, patidx);
+    self->currtrack.track = psy_audio_sequencetrack_allocinit();
+    psy_audio_sequence_appendtrack(&song->sequence, self->currtrack.track);
+    psy_audio_sequence_insert(&self->songfile->song->sequence,
+        psy_audio_orderindex_make(trackidx, 0), patidx);
     // prepare currpattern            
-    self->currtrack.pattern = pattern;
-    self->currtrack.tracknode = sequenceposition.tracknode;
+    self->currtrack.pattern = pattern;    
     // insert pattern    
     self->currtrack.position = 0.0;
     self->currtrack.patternnode = NULL;    
@@ -576,14 +573,12 @@ int midiloader_readmeta_copyright(MidiLoader* self)
 int midiloader_readmeta_sequencetrackname(MidiLoader* self)
 {
     int status;
-    char_dyn_t* text;
-    psy_audio_SequenceTrack* track;
+    char_dyn_t* text;    
 
     if (status = midiloader_readvarlentext(self->fp, &text)) {
         return status;
-    }
-    track = (psy_audio_SequenceTrack*)self->currtrack.tracknode->entry;
-    psy_audio_sequencetrack_setname(track, text);
+    }    
+    psy_audio_sequencetrack_setname(self->currtrack.track, text);
     psy_audio_pattern_setname(self->currtrack.pattern, text);
     free(text);
     return PSY_OK;
