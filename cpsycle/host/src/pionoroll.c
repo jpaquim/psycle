@@ -34,7 +34,7 @@ void keyboardstate_init(KeyboardState* self, PatternViewSkin* skin)
 }
 
 // PianoGridState
-void gridstate_init(PianoGridState* self, PatternViewSkin* skin)
+void pianogridstate_init(PianoGridState* self, PatternViewSkin* skin)
 {
 	assert(self);
 
@@ -94,7 +94,7 @@ void pianoruler_setsharedgridstate(PianoRuler* self, PianoGridState* gridstate)
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		gridstate_init(&self->defaultgridstate, NULL);
+		pianogridstate_init(&self->defaultgridstate, NULL);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -402,8 +402,8 @@ static psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t ste
 bool pianogriddraw_testselection(PianoGridDraw* self, uint8_t key, double offset);
 
 void pianogriddraw_init(PianoGridDraw* self,
-	psy_ui_Value scrollleft, psy_ui_Value scrolltop,
 	KeyboardState* keyboardstate, PianoGridState* gridstate,
+	psy_ui_Value scrollleft, psy_ui_Value scrolltop,	
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay trackdisplay,
@@ -428,6 +428,7 @@ void pianogriddraw_init(PianoGridDraw* self,
 	self->drawentries = TRUE;
 	self->drawcursor = TRUE;
 	self->drawplaybar = TRUE;
+	self->clip = TRUE;
 }
 
 void pianogriddraw_updatekeystate(PianoGridDraw* self)
@@ -447,11 +448,20 @@ psy_audio_PatternSelection pianogriddraw_clipselection(PianoGridDraw* self,
 
 	assert(self);
 
-	pianogridstate_clip(self->gridstate, clip.left, clip.right,
-		&rv.topleft.offset, &rv.bottomright.offset);
-	pianokeyboardstate_clip(self->keyboardstate,
-		clip.top, clip.bottom,
-		&rv.bottomright.key, &rv.topleft.key);
+	if (self->clip) {
+		pianogridstate_clip(self->gridstate, clip.left, clip.right,
+			&rv.topleft.offset, &rv.bottomright.offset);
+		pianokeyboardstate_clip(self->keyboardstate,
+			clip.top, clip.bottom,
+			&rv.bottomright.key, &rv.topleft.key);
+	} else {
+		rv.topleft.offset = 0;
+		rv.bottomright.offset = (pianogridstate_pattern(self->gridstate))
+			? psy_audio_pattern_length(pianogridstate_pattern(self->gridstate))
+			: 0.0;
+		rv.bottomright.key = self->keyboardstate->keymin;
+		rv.topleft.key = self->keyboardstate->keymax;
+	}
 	return rv;
 }
 
@@ -594,7 +604,7 @@ void pianogrid_setsharedgridstate(Pianogrid* self, PianoGridState* gridstate)
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		gridstate_init(&self->defaultgridstate, NULL);
+		pianogridstate_init(&self->defaultgridstate, NULL);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -648,8 +658,8 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 	size = psy_ui_component_intsize(pianogrid_base(self));
 	tm = psy_ui_component_textmetric(&self->component);
 	pianogriddraw_init(&griddraw,
-		self->component.scroll.x, self->component.scroll.y,
 		self->keyboardstate, self->gridstate,
+		self->component.scroll.x, self->component.scroll.y,		
 		self->sequenceentryoffset,
 		self->hoverpatternentry,		
 		self->trackdisplay,
@@ -1397,7 +1407,8 @@ void pianogrid_setcursor(Pianogrid* self, psy_audio_PatternCursor cursor)
 		pianogrid_invalidateline(self, self->gridstate->cursor.offset);
 	}
 	self->cursorchanging = FALSE;
-	if (psy_audio_player_playing(workspace_player(self->workspace)) && workspace_followingsong(self->workspace)) {
+	if (psy_audio_player_playing(workspace_player(self->workspace)) && workspace_followingsong(self->workspace)
+			&& pianogridstate_pattern(self->gridstate)) {
 		bool scrolldown;
 
 		scrolldown = self->lastplayposition <
@@ -1660,8 +1671,9 @@ void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t position)
 {	
 	assert(self);
 	
-	if (position >= 0.0 && position < psy_audio_pattern_length(
-			pianogridstate_pattern(self->gridstate))) {
+	if (pianogridstate_pattern(self->gridstate) && position >= 0.0 &&
+		position < psy_audio_pattern_length(pianogridstate_pattern(
+			self->gridstate))) {
 		psy_ui_IntSize size;
 		psy_ui_TextMetric tm;
 		psy_ui_Value scrolltop;
@@ -1786,7 +1798,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		psy_ui_BACKGROUND_NONE);		
 	// shared states
 	keyboardstate_init(&self->keyboardstate, skin);
-	gridstate_init(&self->gridstate, skin);	
+	pianogridstate_init(&self->gridstate, skin);	
 	// left area (keyboardheader, keyboard)
 	psy_ui_component_init(&self->left, &self->component);	
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);

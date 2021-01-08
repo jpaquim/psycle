@@ -220,8 +220,9 @@ INLINE const char* psy_audio_pattern_name(const psy_audio_Pattern* self)
 void psy_audio_pattern_setlength(psy_audio_Pattern*, psy_dsp_big_beat_t length);
 /// return length of the pattern
 INLINE psy_dsp_big_beat_t psy_audio_pattern_length(const psy_audio_Pattern* self)
-{
+{	
 	assert(self);
+
 	return self->length;
 }
 /// tells if the pattern contains events
@@ -229,6 +230,7 @@ INLINE psy_dsp_big_beat_t psy_audio_pattern_length(const psy_audio_Pattern* self
 INLINE int psy_audio_pattern_empty(const psy_audio_Pattern* self)
 {
 	assert(self);
+
 	return self->events == NULL;
 }
 /// sets the event or an empty event if event is 0

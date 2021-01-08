@@ -143,7 +143,7 @@ typedef struct TrackerGridState {
 	TrackConfig* trackconfig;
 } TrackerGridState;
 
-void trackergridstate_init(TrackerGridState*, TrackConfig*);
+void trackerpianogridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
 intptr_t trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);

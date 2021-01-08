@@ -138,10 +138,11 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_plugincatcher_load(&self->plugincatcher);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
-	psy_audio_sequenceselection_init(&self->sequenceselection, &self->song->sequence);
-	psy_audio_sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
-	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
-		workspace_onsequenceeditpositionchanged);
+	// psy_audio_sequenceselection_init(&self->sequenceselection, &self->song->sequence);
+	psy_audio_newsequenceselection_init(&self->newsequenceselection);
+	// psy_audio_sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
+	//psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
+		//workspace_onsequenceeditpositionchanged);
 	psy_undoredo_init(&self->undoredo);		
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
@@ -181,6 +182,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_error);
 	psy_signal_init(&self->signal_terminal_out);
 	psy_signal_init(&self->signal_terminal_warning);
+	psy_signal_init(&self->signal_status_out);
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
@@ -208,7 +210,7 @@ void workspace_dispose(Workspace* self)
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);	
-	psy_audio_sequenceselection_dispose(&self->sequenceselection);	
+	//psy_audio_sequenceselection_dispose(&self->sequenceselection);	
 	psy_playlist_dispose(&self->playlist);	
 	psy_audio_exclusivelock_dispose();	
 }
@@ -232,6 +234,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_error);
 	psy_signal_dispose(&self->signal_terminal_out);
 	psy_signal_dispose(&self->signal_terminal_warning);
+	psy_signal_dispose(&self->signal_status_out);
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
@@ -691,8 +694,8 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		psy_audio_player_stop(&self->player);
 		psy_audio_player_setemptysong(&self->player);
 		workspace_disposesequencepaste(self);
-		psy_audio_sequenceselection_setsequence(&self->sequenceselection
-			, &song->sequence);
+		self->newsequenceselection.editposition =
+			psy_audio_sequenceorderindex_make(0, 0);
 		view = viewhistory_currview(&self->viewhistory);
 		viewhistory_clear(&self->viewhistory);
 		viewhistory_add(&self->viewhistory, view);
@@ -1033,18 +1036,13 @@ psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
 	return self->patterneditposition;
 }
 
-void workspace_setsequenceselection(Workspace* self,
-	psy_audio_SequenceSelection selection)
-{	
-	assert(self);
-
-	self->sequenceselection = selection;
-	psy_audio_sequence_setplayselection(&self->song->sequence, &selection);
-	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);		
-	if (!self->navigating) {		
+void workspace_setsequenceeditposition(Workspace* self, psy_audio_SequenceOrderIndex index)
+{
+	self->newsequenceselection.editposition = index;
+	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);
+	if (!self->navigating) {
 		viewhistory_addseqpos(&self->viewhistory,
-			psy_audio_sequenceselection_editposition_entry_id(
-				&self->sequenceselection));
+			self->newsequenceselection.editposition.order);			
 	}
 }
 
@@ -1053,13 +1051,6 @@ uintptr_t workspace_currview(Workspace* self)
 	assert(self);
 
 	return viewhistory_currview(&self->viewhistory).id;
-}
-
-psy_audio_SequenceSelection workspace_sequenceselection(Workspace* self)
-{
-	assert(self);
-
-	return self->sequenceselection;
 }
 
 void workspace_setcursorstep(Workspace* self, int step)
@@ -1124,7 +1115,7 @@ void workspace_stopfollowsong(Workspace* self)
 	}
 }
 
-void workspace_onsequenceeditpositionchanged(Workspace* self,
+/*void workspace_onsequenceeditpositionchanged(Workspace* self,
 	psy_audio_SequenceSelection* selection)
 {
 	psy_audio_PatternCursor position;
@@ -1143,7 +1134,7 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 		position.track = 0;
 		workspace_setpatterncursor(self, position);		
 	}
-}
+}*/
 
 void workspace_idle(Workspace* self)
 {
@@ -1152,19 +1143,20 @@ void workspace_idle(Workspace* self)
 	if (self->followsong) {
 		psy_audio_SequenceTrackIterator it;
 		
-		if (psy_audio_player_playing(&self->player)) {
-			int prevented;
-
+		if (psy_audio_player_playing(&self->player)) {			
 			it = psy_audio_sequence_begin(&self->song->sequence, 
 				self->song->sequence.tracks,
 				psy_audio_player_position(&self->player));
 			if (it.sequencentrynode && self->lastentry != it.sequencentrynode->entry) {
-				psy_audio_sequenceselection_seteditposition(&self->sequenceselection, 
-						psy_audio_sequence_makeposition(&self->song->sequence,
-							self->song->sequence.tracks, it.sequencentrynode));
+				psy_audio_SequenceEntry* entry;
+				bool prevented;
+
+				entry = (psy_audio_SequenceEntry*)it.sequencentrynode->entry;
 				prevented = viewhistory_prevented(&self->viewhistory);
 				viewhistory_prevent(&self->viewhistory);
-				workspace_setsequenceselection(self, self->sequenceselection);
+				workspace_setsequenceeditposition(self,
+					psy_audio_sequenceorderindex_make(
+						0, entry->row));				
 				if (!prevented) {
 					viewhistory_enable(&self->viewhistory);
 				}				
@@ -1313,16 +1305,16 @@ void workspace_updatecurrview(Workspace* self)
 	prevented = viewhistory_prevented(&self->viewhistory);
 	viewhistory_prevent(&self->viewhistory);
 	workspace_selectview(self, view.id, 0, 0);	
-	if (view.seqpos != -1 &&
-		self->sequenceselection.editposition.trackposition.sequencentrynode) {
-		psy_audio_SequencePosition position;
+	//if (view.seqpos != -1 &&
+		//self->sequenceselection.editposition.trackposition.sequencentrynode) {
+		//psy_audio_SequencePosition position;
 
-		position = psy_audio_sequence_positionfromid(&self->song->sequence,
-			view.seqpos);
-		psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
-			position);
-		workspace_setsequenceselection(self, self->sequenceselection);
-	}	
+		//position = psy_audio_sequence_positionfromid(&self->song->sequence,
+			//view.seqpos);
+		//psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
+			//position);
+		//workspace_setsequenceselection(self, self->sequenceselection);
+	//}	
 	if (!prevented) {
 		viewhistory_enable(&self->viewhistory);
 	}
@@ -1371,6 +1363,13 @@ void workspace_output(Workspace* self, const char* text)
 	assert(self);
 
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+}
+
+void workspace_outputstatus(Workspace* self, const char* text)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_status_out, self, 1, text);
 }
 
 void workspace_dockview(Workspace* self, psy_ui_Component* view)
@@ -1434,86 +1433,70 @@ psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 void workspace_patterndec(Workspace* self)
 {
 	if (self->song) {
-		psy_audio_SequenceEntry* entry;
-		psy_audio_SequencePosition editposition;
+		uintptr_t patidx;
 
-		editposition = self->sequenceselection.editposition;
-		entry = psy_audio_sequenceposition_entry(&editposition);
-		if (entry && entry->patternslot > 0) {
-			psy_audio_sequence_setpatternslot(&self->song->sequence, editposition,
-				entry->patternslot - 1);
+		patidx = psy_audio_sequence_patternindex(&self->song->sequence,
+			self->newsequenceselection.editposition);
+		if (patidx != UINTPTR_MAX && patidx > 0) {
+			psy_audio_sequence_setpatternindex(&self->song->sequence,
+				self->newsequenceselection.editposition,
+				patidx - 1);
+			workspace_setsequenceeditposition(self,
+				self->newsequenceselection.editposition);
 		}
-		psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
-			psy_audio_sequence_makeposition(&self->song->sequence,
-				self->sequenceselection.editposition.tracknode,
-				editposition.trackposition.sequencentrynode));
-		workspace_setsequenceselection(self,
-			self->sequenceselection);
-		//sequenceview_updateplayposition(self);
-		//sequenceduration_update(&self->duration);
 	}
 }
 
 void workspace_patterninc(Workspace* self)
 {
 	if (self->song) {
-		psy_audio_SequenceEntry* entry;
-		psy_audio_SequencePosition editposition;
+		uintptr_t patidx;
 
-		editposition = self->sequenceselection.editposition;
-		entry = psy_audio_sequenceposition_entry(&editposition);
-		if (entry) {
-			psy_audio_sequence_setpatternslot(&self->song->sequence, editposition,
-				entry->patternslot + 1);
+		patidx = psy_audio_sequence_patternindex(&self->song->sequence,
+			self->newsequenceselection.editposition);
+		if (patidx != UINTPTR_MAX) {
+			psy_audio_sequence_setpatternindex(&self->song->sequence,
+				self->newsequenceselection.editposition,
+				patidx + 1);
+			workspace_setsequenceeditposition(self,
+				self->newsequenceselection.editposition);
 		}
-		psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
-			psy_audio_sequence_makeposition(&self->song->sequence,
-				self->sequenceselection.editposition.tracknode,
-				editposition.trackposition.sequencentrynode));
-		workspace_setsequenceselection(self,
-			self->sequenceselection);
-		//sequenceview_updateplayposition(self);
-		//sequenceduration_update(&self->duration);
 	}
 }
 
 void workspace_songposdec(Workspace* self)
 {
-	if (self->song) {
-		if (self->sequenceselection.editposition.trackposition.sequencentrynode &&
-			self->sequenceselection.editposition.trackposition.sequencentrynode->prev) {
-			psy_audio_sequenceselection_seteditposition(
-				&self->sequenceselection,
-				psy_audio_sequence_makeposition(&self->song->sequence,
-					self->sequenceselection.editposition.tracknode,
-					self->sequenceselection.editposition.trackposition.sequencentrynode->prev));
-			workspace_setsequenceselection(self, self->sequenceselection);
-		}
-	}
+	if (self->song && self->newsequenceselection.editposition.order > 0) {
+		workspace_setsequenceeditposition(self,
+			psy_audio_sequenceorderindex_make(
+				self->newsequenceselection.editposition.track,
+				self->newsequenceselection.editposition.order - 1
+			));
+	}	
 }
 
 void workspace_songposinc(Workspace* self)
 {
-	if (self->song) {
-		if (self->sequenceselection.editposition.trackposition.sequencentrynode &&
-			self->sequenceselection.editposition.trackposition.sequencentrynode->next) {
-			psy_audio_sequenceselection_seteditposition(
-				&self->sequenceselection,
-				psy_audio_sequence_makeposition(&self->song->sequence,
-					self->sequenceselection.editposition.tracknode,
-					self->sequenceselection.editposition.trackposition.sequencentrynode->next));
-			workspace_setsequenceselection(self,
-				self->sequenceselection);
-		}
+	if (self->song && self->newsequenceselection.editposition.order + 1 <
+			psy_audio_sequence_track_size(&self->song->sequence, 
+				self->newsequenceselection.editposition.track)) {
+		workspace_setsequenceeditposition(self,
+			psy_audio_sequenceorderindex_make(
+				self->newsequenceselection.editposition.track,
+				self->newsequenceselection.editposition.order + 1));
 	}
 }
 
 void workspace_playstart(Workspace* self)
 {	
-	psy_audio_player_setposition(&self->player,
-		psy_audio_sequenceselection_editposition_offset(
-			&self->sequenceselection));
-	psy_audio_player_start(&self->player);
+	assert(self);
+
+	if (self->song) {
+		psy_audio_player_setposition(&self->player,
+			psy_audio_sequence_offset(&self->song->sequence,
+				self->newsequenceselection.editposition));
+		psy_audio_player_start(&self->player);
+	}
 }
 
 PatternDisplayMode workspace_patterndisplaytype(Workspace* self)

@@ -84,7 +84,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_drawarc = (psy_ui_fp_graphicsimp_dev_drawarc) psy_ui_win_g_imp_devdrawarc;
 		win_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_win_g_devsetlinewidth;
 		win_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_win_g_devlinewidth;
-		win_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_linewidth)psy_ui_win_g_devsetorigin;
+		win_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_setorigin)psy_ui_win_g_devsetorigin;
 		win_imp_vtable_initialized = 1;
 	}
 }

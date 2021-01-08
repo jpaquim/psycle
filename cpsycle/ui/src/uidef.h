@@ -279,6 +279,55 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make(intptr_t left, intptr_t top, intpt
 	return rv;
 }
 
+INLINE intptr_t psy_ui_rectangle_width(const psy_ui_Rectangle* self)
+{
+	return self->right - self->left;
+}
+
+INLINE void psy_ui_rectangle_setwidth(psy_ui_Rectangle* self, intptr_t width)
+{
+	self->right = self->left + width;
+}
+
+INLINE void psy_ui_rectangle_setleft_resize(psy_ui_Rectangle* self, intptr_t left)
+{
+	intptr_t width;
+
+	width = psy_ui_rectangle_width(self);
+	self->left = left;
+	self->right += width;
+}
+
+INLINE void psy_ui_rectangle_setleft(psy_ui_Rectangle* self, intptr_t left)
+{	
+	self->left = left;	
+}
+
+INLINE intptr_t psy_ui_rectangle_left(const psy_ui_Rectangle* self)
+{
+	return self->left;
+}
+
+INLINE void psy_ui_rectangle_setright_resize(psy_ui_Rectangle* self, intptr_t right)
+{
+	intptr_t width;
+
+	width = psy_ui_rectangle_width(self);
+	self->left = self->right - width;
+	self->right = right;
+}
+
+INLINE void psy_ui_rectangle_setright(psy_ui_Rectangle* self, intptr_t right)
+{
+	self->right = right;
+}
+
+INLINE intptr_t psy_ui_rectangle_right(const psy_ui_Rectangle* self)
+{
+	return self->right;
+}
+
+
 INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
 {
 	psy_ui_IntPoint rv;

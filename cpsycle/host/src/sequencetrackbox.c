@@ -34,8 +34,10 @@ void sequencetrackbox_init(SequenceTrackBox* self,
 void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle r;
-	char text[64];
-
+	char text[64];		
+	intptr_t centery;	
+	
+	centery = (self->position.bottom - self->position.top - self->tm.tmHeight) / 2;
 	psy_ui_settextcolour(g, self->colour_font);
 	if (self->track) {
 		r = self->position;
@@ -46,6 +48,8 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 		}
 		psy_ui_drawrectangle(g, r);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
+		r.top += centery;
+		r.bottom = self->tm.tmHeight;
 		sequencetrackbox_drawtext(self, g, r.left +
 			(intptr_t)(self->tm.tmAveCharWidth * 0.2), r.top, text);
 		if (psy_audio_sequence_istracksoloed(self->sequence, self->trackindex)) {
@@ -79,7 +83,8 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 		sequencetrackbox_drawtext(self, g,
 			self->position.left +
 				(int)(((self->position.right - self->position.left) -
-				self->tm.tmAveCharWidth * 14) / 2), self->position.top,
+				self->tm.tmAveCharWidth * 14) / 2),
+			self->position.top + centery,
 			"+ New Track");
 	}
 }
