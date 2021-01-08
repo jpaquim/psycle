@@ -109,7 +109,7 @@ uint32_t bitsblock_readbits(BitsBlock* self, unsigned char bitwidth)
 // ITModule2
 // prototypes
 static void itmodule2_reset(ITModule2*);
-static void itmodule2_makesequence(ITModule2*);
+static int itmodule2_readsequence(ITModule2*);
 static bool itmodule2_loaditpattern(ITModule2*, int patIdx, int* numchans);
 static bool itmodule_writepatternentry(ITModule2*,
 	psy_audio_PatternNode**, bool append, psy_audio_Pattern*,
@@ -134,6 +134,7 @@ void itmodule2_init(ITModule2* self, psy_audio_SongFile* songfile)
 	assert(self);
 
 	self->songfile = songfile;
+	self->fp = songfile->file;
 	self->embeddeddata = NULL;
 	psy_table_init(&self->xmtovirtual);
 	itmodule2_reset(self);
@@ -288,7 +289,7 @@ bool itmodule2_load(ITModule2* self)
 			self->maxextracolumn = 15;
 		}
 
-		itmodule2_makesequence(self);
+		itmodule2_readsequence(self);
 
 		pointersi = malloc(self->fileheader.insNum * sizeof(uint32_t));
 		psyfile_read(fp, pointersi, self->fileheader.insNum * sizeof(uint32_t));		
@@ -606,25 +607,25 @@ bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_
 	return TRUE;
 }
 
-void itmodule2_makesequence(ITModule2* self)
+int itmodule2_readsequence(ITModule2* self)
 {
-	uintptr_t i;
-	psy_audio_SequencePosition sequenceposition;
-	psy_audio_Song* song;
-	PsyFile* fp;	
-
-	song = self->songfile->song;
-	fp = self->songfile->file;
-	sequenceposition.tracknode =
-		psy_audio_sequence_appendtrack(&song->sequence, psy_audio_sequencetrack_allocinit());
+	int status;
+	uint16_t i;	
+		
+	status = PSY_OK;
+	psy_audio_sequence_appendtrack(&self->songfile->song->sequence,
+		psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < self->fileheader.ordNum; ++i) {
 		uint8_t patidx;
 		
-		patidx = psyfile_read_uint8(fp);
-		sequenceposition.trackposition =
-			psy_audio_sequence_last(&song->sequence, sequenceposition.tracknode);
-		psy_audio_sequence_insert(&song->sequence, sequenceposition, patidx);
+		if (!psyfile_read(self->fp, &patidx, sizeof(uint8_t))) {
+			status = PSY_ERRFILE;
+			break;
+		}			
+		psy_audio_sequence_insert(&self->songfile->song->sequence,
+			psy_audio_orderindex_make(0, i), patidx);
 	}
+	return status;
 }
 
 bool itmodule2_loaditsample(ITModule2* self, psy_audio_Sample* _wave)

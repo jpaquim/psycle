@@ -146,18 +146,13 @@ void song_initpatterns(psy_audio_Song* self)
 
 void song_initsequence(psy_audio_Song* self)
 {
-	psy_audio_SequencePosition sequenceposition;
-
 	assert(self);
 
-	psy_audio_sequence_init(&self->sequence, &self->patterns);	
-	sequenceposition.tracknode =
-		psy_audio_sequence_appendtrack(&self->sequence,
-			psy_audio_sequencetrack_allocinit());
-	sequenceposition.trackposition =
-		psy_audio_sequence_begin(&self->sequence,
-			sequenceposition.tracknode, 0);
-	psy_audio_sequence_insert(&self->sequence, sequenceposition, 0);
+	psy_audio_sequence_init(&self->sequence, &self->patterns);		
+	psy_audio_sequence_appendtrack(&self->sequence,
+		psy_audio_sequencetrack_allocinit());		
+	psy_audio_sequence_insert(&self->sequence,
+		psy_audio_orderindex_make(0, 0), 0);
 }
 
 void song_initsignals(psy_audio_Song* self)

@@ -46,7 +46,7 @@ typedef struct MidiTrackState
 	psy_dsp_big_beat_t patternoffset;
 	psy_audio_PatternNode* patternnode;
 	psy_audio_Pattern* pattern;
-	psy_audio_SequenceTrackNode* tracknode;	
+	psy_audio_SequenceTrack* track;	
 	MidiChannel channels[MAX_MIDIFILE_POLYPHONY];	
 	uint8_t runningstatus;
 	uint8_t byte1;

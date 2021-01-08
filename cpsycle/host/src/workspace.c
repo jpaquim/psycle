@@ -45,8 +45,6 @@ static void workspace_setsong(Workspace*, psy_audio_Song*, int flag,
 	psy_audio_SongFile*);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int progress);
-static void workspace_onsequenceeditpositionchanged(Workspace*,
-	psy_audio_SequenceSelection*);
 // configure actions
 static void workspace_onloadskin(Workspace*);
 static void workspace_ondefaultskin(Workspace*);
@@ -137,12 +135,8 @@ void workspace_init(Workspace* self, void* mainhandle)
 		psycleconfig_directories(&self->config)->directories);
 	psy_audio_plugincatcher_load(&self->plugincatcher);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
-	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
-	// psy_audio_sequenceselection_init(&self->sequenceselection, &self->song->sequence);
-	psy_audio_newsequenceselection_init(&self->newsequenceselection);
-	// psy_audio_sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
-	//psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
-		//workspace_onsequenceeditpositionchanged);
+	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);	
+	psy_audio_sequenceselection_init(&self->newsequenceselection);	
 	psy_undoredo_init(&self->undoredo);		
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
@@ -695,7 +689,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		psy_audio_player_setemptysong(&self->player);
 		workspace_disposesequencepaste(self);
 		self->newsequenceselection.editposition =
-			psy_audio_sequenceorderindex_make(0, 0);
+			psy_audio_orderindex_make(0, 0);
 		view = viewhistory_currview(&self->viewhistory);
 		viewhistory_clear(&self->viewhistory);
 		viewhistory_add(&self->viewhistory, view);
@@ -1036,9 +1030,10 @@ psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
 	return self->patterneditposition;
 }
 
-void workspace_setsequenceeditposition(Workspace* self, psy_audio_SequenceOrderIndex index)
+void workspace_setsequenceeditposition(Workspace* self, psy_audio_OrderIndex index)
 {
-	self->newsequenceselection.editposition = index;
+	psy_audio_sequenceselection_seteditposition(&self->newsequenceselection,
+		index);	
 	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);
 	if (!self->navigating) {
 		viewhistory_addseqpos(&self->viewhistory,
@@ -1115,27 +1110,6 @@ void workspace_stopfollowsong(Workspace* self)
 	}
 }
 
-/*void workspace_onsequenceeditpositionchanged(Workspace* self,
-	psy_audio_SequenceSelection* selection)
-{
-	psy_audio_PatternCursor position;
-	psy_audio_SequenceEntry* entry;
-
-	assert(self);
-
-	if (selection->editposition.trackposition.sequencentrynode) {
-		entry = (psy_audio_SequenceEntry*)
-			selection->editposition.trackposition.sequencentrynode->entry;
-		position.patternid = entry->patternslot;
-		position.column = 0;
-		position.digit = 0;
-		position.line = 0;
-		position.offset = 0;		
-		position.track = 0;
-		workspace_setpatterncursor(self, position);		
-	}
-}*/
-
 void workspace_idle(Workspace* self)
 {
 	assert(self);
@@ -1155,7 +1129,7 @@ void workspace_idle(Workspace* self)
 				prevented = viewhistory_prevented(&self->viewhistory);
 				viewhistory_prevent(&self->viewhistory);
 				workspace_setsequenceeditposition(self,
-					psy_audio_sequenceorderindex_make(
+					psy_audio_orderindex_make(
 						0, entry->row));				
 				if (!prevented) {
 					viewhistory_enable(&self->viewhistory);
@@ -1468,7 +1442,7 @@ void workspace_songposdec(Workspace* self)
 {
 	if (self->song && self->newsequenceselection.editposition.order > 0) {
 		workspace_setsequenceeditposition(self,
-			psy_audio_sequenceorderindex_make(
+			psy_audio_orderindex_make(
 				self->newsequenceselection.editposition.track,
 				self->newsequenceselection.editposition.order - 1
 			));
@@ -1481,7 +1455,7 @@ void workspace_songposinc(Workspace* self)
 			psy_audio_sequence_track_size(&self->song->sequence, 
 				self->newsequenceselection.editposition.track)) {
 		workspace_setsequenceeditposition(self,
-			psy_audio_sequenceorderindex_make(
+			psy_audio_orderindex_make(
 				self->newsequenceselection.editposition.track,
 				self->newsequenceselection.editposition.order + 1));
 	}

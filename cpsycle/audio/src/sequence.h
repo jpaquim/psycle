@@ -23,8 +23,7 @@ extern "C" {
 // psy_audio_SequenceEntry
 //
 // Entry inside a track of a sequence
-typedef struct {
-	uintptr_t id;
+typedef struct psy_audio_SequenceEntry {
 	uintptr_t row;
 	// playorder value (the pattern to be played)
 	uintptr_t patternslot;
@@ -33,7 +32,7 @@ typedef struct {
 	// offset to the playlist index position allowing free positioning
 	// needed to reposition the sequence
 	psy_dsp_big_beat_t repositionoffset;
-	int selplay;
+	bool selplay;
 } psy_audio_SequenceEntry;
 
 void psy_audio_sequenceentry_init(psy_audio_SequenceEntry*, uintptr_t
@@ -72,10 +71,57 @@ INLINE psy_audio_Pattern* psy_audio_sequenceentry_pattern(const
 
 typedef psy_List psy_audio_SequenceEntryNode;
 
+// psy_audio_OrderIndex
+//
+// Addresses a SequenceEntry inside psy_audio_Sequence
+typedef struct psy_audio_OrderIndex {
+	uintptr_t track;
+	uintptr_t order;
+} psy_audio_OrderIndex;
+
+INLINE psy_audio_OrderIndex psy_audio_orderindex_make(
+	uintptr_t trackidx, uintptr_t orderidx)
+{
+	psy_audio_OrderIndex rv;
+
+	rv.track = trackidx;
+	rv.order = orderidx;
+	return rv;
+}
+
+// psy_audio_SequenceSelection
+//
+// Selection of SequenceEntries stored as OrderIndexes
+
+typedef enum {
+	psy_audio_SEQUENCESELECTION_SINGLE,
+	psy_audio_SEQUENCESELECTION_MULTI
+} psy_audio_SequenceSelectionMode;
+
+typedef struct psy_audio_SequenceSelection {
+	psy_audio_OrderIndex editposition;
+	psy_List* entries; // Order Indexes
+	psy_audio_SequenceSelectionMode mode;
+} psy_audio_SequenceSelection;
+
+void psy_audio_sequenceselection_init(psy_audio_SequenceSelection*);
+void psy_audio_sequenceselection_dispose(psy_audio_SequenceSelection*);
+void psy_audio_sequenceselection_clear(psy_audio_SequenceSelection*);
+
+void psy_audio_sequenceselection_seteditposition(psy_audio_SequenceSelection*,
+	psy_audio_OrderIndex);
+void psy_audio_sequenceselection_select(psy_audio_SequenceSelection*,
+	psy_audio_OrderIndex);
+void psy_audio_sequenceselection_deselect(psy_audio_SequenceSelection*,
+	psy_audio_OrderIndex);
+bool psy_audio_sequenceselection_isselected(const psy_audio_SequenceSelection*,
+	psy_audio_OrderIndex);
+void psy_audio_sequenceselection_setmode(psy_audio_SequenceSelection*,
+	psy_audio_SequenceSelectionMode);
+
 // psy_audio_SequenceTrack
 //
 // A list of SequenceEntries sorted according to the playorder
-
 typedef struct {
 	psy_audio_SequenceEntryNode* entries;	
 	char* name;
@@ -102,7 +148,6 @@ INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* s
 // psy_audio_SequenceTrackIterator
 //
 // Iterator the player uses to advance through the track and pattern
-
 typedef struct {
 	psy_audio_Patterns* patterns;	
 	psy_audio_SequenceEntryNode* sequencentrynode;
@@ -149,7 +194,6 @@ typedef psy_List psy_audio_SequenceTrackNode;
 // psy_audio_SequencePosition
 //
 // defines the overall position in a song
-
 typedef struct {
 	psy_audio_SequenceTrackNode* tracknode;
 	psy_audio_SequenceTrackIterator trackposition;	
@@ -159,37 +203,7 @@ void psy_audio_sequenceposition_init(psy_audio_SequencePosition*);
 psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition*);
 
-typedef enum {
-	psy_audio_SEQUENCE_SELECTIONMODE_SINGLE,
-	psy_audio_SEQUENCE_SELECTIONMODE_MULTI
-} psy_audio_SequenceSelectionMode;
-
 struct psy_audio_Sequence;
-
-// this struct will be replaced by NewSequenceSelection
-typedef struct psy_audio_SequenceSelection {
-	struct psy_audio_Sequence* sequence;	
-	psy_audio_SequencePosition editposition;
-	psy_Signal signal_editpositionchanged;
-	psy_List* entries;
-	psy_audio_SequenceSelectionMode selectionmode;
-} psy_audio_SequenceSelection;
-
-void psy_audio_sequenceselection_init(psy_audio_SequenceSelection*,
-	struct psy_audio_Sequence*);
-void psy_audio_sequenceselection_dispose(psy_audio_SequenceSelection*);
-void psy_audio_sequenceselection_seteditposition(psy_audio_SequenceSelection*,
-	psy_audio_SequencePosition);
-psy_audio_SequencePosition psy_audio_sequenceselection_editposition(
-	psy_audio_SequenceSelection*);
-void psy_audio_sequenceselection_setsequence(psy_audio_SequenceSelection*,
-	struct psy_audio_Sequence*);
-psy_dsp_big_beat_t psy_audio_sequenceselection_editposition_offset(
-	const psy_audio_SequenceSelection*);
-uintptr_t psy_audio_sequenceselection_editposition_entry_id(
-	const psy_audio_SequenceSelection* self);
-
-// psy_audio_Sequence
 
 typedef enum {
 	psy_audio_SEQUENCE_CHANGE_NONE = 0,
@@ -198,117 +212,81 @@ typedef enum {
 } psy_audio_SequenceChangeType;
 
 typedef struct psy_audio_Sequence {
-	psy_audio_SequenceTrackNode* tracks;
-	psy_audio_Patterns* patterns;
+	// signals
 	psy_Signal sequencechanged;
-	psy_audio_TrackState trackstate;
+	// internal data
+	psy_audio_SequenceTrackNode* tracks;	
+	psy_audio_TrackState trackstate;	
 	psy_audio_SequenceChangeType lastchange;
 	uintptr_t lastchangedtrack;
+	// references
+	psy_audio_Patterns* patterns;
 } psy_audio_Sequence;
 
 void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*);
 void psy_audio_sequence_dispose(psy_audio_Sequence*);
-psy_audio_SequenceEntryNode* psy_audio_sequence_insert(psy_audio_Sequence*,
-	psy_audio_SequencePosition, uintptr_t patternslot);
-psy_audio_SequenceEntryNode* psy_audio_sequence_remove(psy_audio_Sequence*,
-	psy_audio_SequencePosition);
-psy_audio_SequenceEntryNode* psy_audio_sequence_reorder_entry(psy_audio_Sequence*,
-	psy_audio_SequencePosition position,
-	psy_dsp_big_beat_t newposition);
-uintptr_t psy_audio_sequence_size(psy_audio_Sequence*,
-	psy_audio_SequenceTrackNode* track);
-psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence*,
-	uintptr_t trackindex, uintptr_t position);
-psy_audio_SequenceTrackIterator psy_audio_sequence_begin(psy_audio_Sequence*,
-	psy_List* track, psy_dsp_big_beat_t position);
-psy_audio_SequenceTrackIterator psy_audio_sequence_last(psy_audio_Sequence*,
-	psy_List* track);
+
 void psy_audio_sequence_clear(psy_audio_Sequence*);
-psy_audio_SequenceTrackNode* psy_audio_sequence_appendtrack(
-	psy_audio_Sequence*, psy_audio_SequenceTrack*);
+// sequenceentry methods
+void psy_audio_sequence_insert(psy_audio_Sequence*, psy_audio_OrderIndex,
+	uintptr_t patidx);
+void psy_audio_sequence_remove(psy_audio_Sequence*, psy_audio_OrderIndex);
+psy_audio_SequenceEntry* psy_audio_sequence_entry(psy_audio_Sequence*,
+	psy_audio_OrderIndex);
+const psy_audio_SequenceEntry* psy_audio_sequence_entry_const(const
+	psy_audio_Sequence*, psy_audio_OrderIndex);
+psy_audio_OrderIndex psy_audio_sequence_reorder(psy_audio_Sequence*,
+	psy_audio_OrderIndex, psy_dsp_big_beat_t newposition);
+void psy_audio_reposition(psy_audio_Sequence*);
+uintptr_t psy_audio_sequence_order(psy_audio_Sequence*,
+	uintptr_t trackidx, psy_dsp_big_beat_t position);
+psy_audio_Pattern* psy_audio_sequence_pattern(psy_audio_Sequence*,
+	psy_audio_OrderIndex);
+void psy_audio_sequence_setpatternindex(psy_audio_Sequence*,
+	psy_audio_OrderIndex, uintptr_t patidx);
+uintptr_t psy_audio_sequence_patternindex(const psy_audio_Sequence*,
+	psy_audio_OrderIndex);
+bool psy_audio_sequence_patternused(psy_audio_Sequence*, uintptr_t patidx);
+psy_audio_SequencePosition psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
+	uintptr_t patidx);
+// track methods
+void psy_audio_sequence_appendtrack(psy_audio_Sequence*,
+	psy_audio_SequenceTrack*);
 psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(
 	psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
 uintptr_t psy_audio_sequence_sizetracks(psy_audio_Sequence*);
+psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
+	uintptr_t trackidx);
+const psy_audio_SequenceTrack* psy_audio_sequence_track_at_const(const
+	psy_audio_Sequence*, uintptr_t trackidx);
+uintptr_t psy_audio_sequence_track_size(const psy_audio_Sequence*,
+	uintptr_t trackindex);
 uintptr_t psy_audio_sequence_maxtracksize(psy_audio_Sequence*);
-bool psy_audio_sequence_patternused(psy_audio_Sequence*, uintptr_t patternslot);
-psy_audio_SequencePosition psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
-	uintptr_t patternslot);
-void psy_audio_sequence_setpatternslot(psy_audio_Sequence*, psy_audio_SequencePosition,
-	uintptr_t slot);
-psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);
-psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);
-psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,
-	psy_audio_SequenceTrackNode*, psy_List* entries);
-
+void psy_audio_sequence_reposition_track(psy_audio_Sequence*,
+	psy_audio_SequenceTrack*);
+psy_dsp_big_beat_t psy_audio_sequence_offset(const psy_audio_Sequence*,
+	psy_audio_OrderIndex);
+// play selection
 void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
-void psy_audio_reposition(psy_audio_Sequence*);
-void psy_audio_sequence_reposition_track(psy_audio_Sequence*,
-	psy_audio_SequenceTrack*);
-// TrackState
-void psy_audio_sequence_activatesolotrack(psy_audio_Sequence*, uintptr_t track);
+// methods for the sequencer
+psy_audio_SequenceTrackIterator psy_audio_sequence_begin(psy_audio_Sequence*,
+	psy_List* track, psy_dsp_big_beat_t position);
+psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence*,
+	uintptr_t trackindex, uintptr_t position);
+psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,
+	psy_audio_SequenceTrackNode*, psy_List* entries);
+// duration
+psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);
+psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);
+// trackstate
+void psy_audio_sequence_activatesolotrack(psy_audio_Sequence*, uintptr_t trackidx);
 void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence*);
-void psy_audio_sequence_mutetrack(psy_audio_Sequence*, uintptr_t track);
-void psy_audio_sequence_unmutetrack(psy_audio_Sequence*, uintptr_t track);
-int psy_audio_sequence_istrackmuted(const psy_audio_Sequence*, uintptr_t track);
-int psy_audio_sequence_istracksoloed(const psy_audio_Sequence*, uintptr_t track);
-
-typedef struct psy_audio_SequenceOrderIndex {
-	uintptr_t track;
-	uintptr_t order;	
-} psy_audio_SequenceOrderIndex;
-
-INLINE psy_audio_SequenceOrderIndex psy_audio_sequenceorderindex_make(
-	uintptr_t trackidx, uintptr_t orderidx)
-{
-	psy_audio_SequenceOrderIndex rv;
-
-	rv.track = trackidx;
-	rv.order = orderidx;
-	return rv;
-}
-
-// will replace SequenceSelection
-typedef struct psy_audio_NewSequenceSelection {	
-	psy_audio_SequenceOrderIndex editposition;
-	psy_List* entries;
-	psy_audio_SequenceSelectionMode selectionmode;
-} psy_audio_NewSequenceSelection;
-
-void psy_audio_newsequenceselection_init(psy_audio_NewSequenceSelection*);
-void psy_audio_newsequenceselection_dispose(psy_audio_NewSequenceSelection*);
-
-void psy_audio_newsequenceselection_seteditposition(psy_audio_NewSequenceSelection*,
-	psy_audio_SequenceOrderIndex);
-bool psy_audio_newsequenceselection_exists(const psy_audio_NewSequenceSelection*,
-	psy_audio_SequenceOrderIndex);
-
-void psy_audio_sequence_insert_order(psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex, uintptr_t patternslot);
-void psy_audio_sequence_remove_order(psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex);
-psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
-	uintptr_t index);
-const psy_audio_SequenceTrack* psy_audio_sequence_track_at_const(const
-	psy_audio_Sequence*, uintptr_t index);
-uintptr_t psy_audio_sequence_track_size(const psy_audio_Sequence*,
-	uintptr_t trackindex);
-uintptr_t psy_audio_sequence_order(psy_audio_Sequence*,
-	uintptr_t trackidx, psy_dsp_big_beat_t position);
-psy_audio_SequenceEntry* psy_audio_sequence_entry(psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex);
-const psy_audio_SequenceEntry* psy_audio_sequence_entry_const(const
-	psy_audio_Sequence*, psy_audio_SequenceOrderIndex);
-psy_audio_Pattern* psy_audio_sequence_pattern(psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex);
-void psy_audio_sequence_setpatternindex(psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex, uintptr_t patidx);
-uintptr_t psy_audio_sequence_patternindex(const psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex);
-psy_dsp_big_beat_t psy_audio_sequence_offset(const psy_audio_Sequence*,
-	psy_audio_SequenceOrderIndex);
-
+void psy_audio_sequence_mutetrack(psy_audio_Sequence*, uintptr_t trackidx);
+void psy_audio_sequence_unmutetrack(psy_audio_Sequence*, uintptr_t trackidx);
+int psy_audio_sequence_istrackmuted(const psy_audio_Sequence*, uintptr_t trackidx);
+int psy_audio_sequence_istracksoloed(const psy_audio_Sequence*, uintptr_t trackidx);
 
 #ifdef __cplusplus
 }

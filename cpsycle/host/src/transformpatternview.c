@@ -428,15 +428,12 @@ void transformpatternview_setpatternselection(TransformPatternView* self,
 
 psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView* self)
 {
-	//psy_audio_SequenceSelection selection;
-	//psy_audio_SequenceEntry* entry;
+	psy_audio_Pattern* pattern;	
 
-	//selection = workspace_sequenceselection(self->workspace);
-	//entry = psy_audio_sequenceposition_entry(&selection.editposition);
-	//if (entry) {
-		//return psy_audio_patterns_at(&workspace_song(self->workspace)->patterns,
-			//entry->patternslot);		
-	//}
+	if (self->workspace->song) {
+		return pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
+			self->workspace->newsequenceselection.editposition);		
+	}
 	return NULL;
 }
 
