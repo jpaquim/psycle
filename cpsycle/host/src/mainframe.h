@@ -8,6 +8,7 @@
 #include "../../detail/os.h"
 // host
 #include "checkunsaved.h"
+// #include "confirm.h"
 #include "cpuview.h"
 #include "filebar.h"
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
@@ -135,7 +136,8 @@ typedef struct MainFrame {
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;
-	CheckUnsavedBox checkunsavedbox;
+	ConfirmBox checkunsavedbox;
+	//Confirm confirm;
 	TerminalMsgType terminalmsgtype;
 	Interpreter interpreter;
 	// internal data

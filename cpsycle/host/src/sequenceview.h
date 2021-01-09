@@ -198,6 +198,7 @@ typedef struct SequenceView {
 void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
 void sequenceview_updateplayposition(SequenceView*);
 void sequenceview_changeplayposition(SequenceView*);
+void sequenceview_clear(SequenceView*);
 
 INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
 {

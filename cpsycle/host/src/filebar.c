@@ -49,7 +49,7 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
+		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_NEW);
 	} else {
 		workspace_newsong(self->workspace);
 	}
@@ -59,7 +59,7 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
+		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
 	} else {
 		workspace_loadsong_fileselect(self->workspace);
 	}

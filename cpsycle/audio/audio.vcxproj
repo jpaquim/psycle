@@ -361,6 +361,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\sequencecmds.c" />
     <ClCompile Include="src\sequencer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -470,6 +471,7 @@
     <ClInclude Include="src\samplerdefs.h" />
     <ClInclude Include="src\samples.h" />
     <ClInclude Include="src\sequence.h" />
+    <ClInclude Include="src\sequencecmds.h" />
     <ClInclude Include="src\sequencer.h" />
     <ClInclude Include="src\silentdriver.h" />
     <ClInclude Include="src\song.h" />

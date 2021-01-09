@@ -194,6 +194,8 @@ void playbar_startplay(PlayBar* self)
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
 		psy_audio_player_stop(self->player);
+		psy_audio_sequence_setplayselection(sequence,
+			&self->workspace->newsequenceselection);
 		startposition = entry->offset;
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {

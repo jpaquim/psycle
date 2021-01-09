@@ -84,7 +84,8 @@ void psy_audio_patterns_insert(psy_audio_Patterns* self, uintptr_t slot,
 	psy_audio_Pattern* pattern)
 {
 	assert(self);
-
+	
+	psy_audio_patterns_remove(self, slot);
 	psy_table_insert(&self->slots, slot, pattern);
 	psy_signal_connect(&pattern->signal_namechanged, self,
 		psy_audio_patterns_onpatternnamechanged);
