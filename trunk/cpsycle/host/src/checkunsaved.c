@@ -8,55 +8,53 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void checkunsavedbox_initalign(CheckUnsavedBox*);
-static void checkunsavedbox_onlanguagechanged(CheckUnsavedBox*,
-	psy_Translator* sender);
-static void checkunsavedbox_onsaveandexit(CheckUnsavedBox*, psy_ui_Component* sender);
-static void checkunsavedbox_onjustexit(CheckUnsavedBox*, psy_ui_Component* sender);
-static void checkunsavedbox_oncontinue(CheckUnsavedBox*, psy_ui_Component* sender);
-static void checkunsavedbox_ondestroy(CheckUnsavedBox*, psy_ui_Component* sender);
+static void confirmbox_initalign(ConfirmBox*);
+static void confirmbox_onok(ConfirmBox*, psy_ui_Component* sender);
+static void confirmbox_onno(ConfirmBox*, psy_ui_Component* sender);
+static void confirmbox_oncontinue(ConfirmBox*, psy_ui_Component* sender);
+static void checkunsavedbox_ondestroy(ConfirmBox*, psy_ui_Component* sender);
 
-void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Workspace* workspace)
+void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(checkunsavedbox_base(self), parent);
+	psy_ui_component_init(confirmbox_base(self), parent);
 	self->workspace = workspace;
-	self->mode = CHECKUNSAVE_CLOSE;
+	self->mode = CONFIRM_CLOSE;
 	self->titlestr = strdup("");
-	self->savestr = strdup("");
-	self->nosavestr = strdup("");	
-	psy_ui_component_init_align(&self->view, checkunsavedbox_base(self),
+	self->yesstr = strdup("");
+	self->nostr = strdup("");	
+	psy_ui_component_init_align(&self->view, confirmbox_base(self),
 		psy_ui_ALIGN_CENTER);
 	psy_ui_label_init(&self->title, &self->view);
 	psy_ui_label_init(&self->header, &self->view);
-	psy_ui_button_init_connect(&self->saveandexit, &self->view,
-		self, checkunsavedbox_onsaveandexit);
-	psy_ui_button_init_connect(&self->exit, &self->view, self,
-		checkunsavedbox_onjustexit);
+	psy_ui_button_init_connect(&self->yes, &self->view,
+		self, confirmbox_onok);
+	psy_ui_button_init_connect(&self->no, &self->view, self,
+		confirmbox_onno);
 	psy_ui_button_init_connect(&self->cont, &self->view,
-		self, checkunsavedbox_oncontinue);
-	psy_ui_label_settext(&self->title, self->titlestr); // "Exit Psycle, but your Song is not saved!");
+		self, confirmbox_oncontinue);
+	psy_ui_label_settext(&self->title, self->titlestr); // "no Psycle, but your Song is not saved!");
 	psy_ui_label_preventtranslation(&self->title);
 	//psy_ui_label_setcharnumber(&self->title, 48);
 	psy_ui_label_settext(&self->header, "");
-	psy_ui_button_settext(&self->saveandexit, self->savestr); // "Save and Exit"));
-	psy_ui_button_settext(&self->exit, self->nosavestr); // "Exit (no save)"));
+	psy_ui_button_settext(&self->yes, self->yesstr); // "Save and no"));
+	psy_ui_button_settext(&self->no, self->nostr); // "no (no save)"));
 	psy_ui_button_settext(&self->cont, "continue");
 	psy_ui_component_align(&self->component);
-	checkunsavedbox_initalign(self);
+	confirmbox_initalign(self);
 	psy_signal_init(&self->signal_execute);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		checkunsavedbox_ondestroy);
 }
 
-void checkunsavedbox_ondestroy(CheckUnsavedBox* self, psy_ui_Component* sender)
+void checkunsavedbox_ondestroy(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_execute);
 	free(self->titlestr);
-	free(self->savestr);
-	free(self->nosavestr);
+	free(self->yesstr);
+	free(self->nostr);
 }
 
-void checkunsavedbox_initalign(CheckUnsavedBox* self)
+void confirmbox_initalign(ConfirmBox* self)
 {
 	psy_ui_Margin margin;
 
@@ -73,34 +71,34 @@ void checkunsavedbox_initalign(CheckUnsavedBox* self)
 	psy_ui_component_setmargin(&self->header.component, &margin);
 }
 
-void checkunsavedbox_setlabels(CheckUnsavedBox* self, const char* title,
-	const char* savestr, const char* nosavestr)
+void confirmbox_setlabels(ConfirmBox* self, const char* title,
+	const char* yesstr, const char* nostr)
 {
 	free(self->titlestr);
 	self->titlestr = strdup(title);
-	free(self->savestr);
-	self->savestr = strdup(savestr);
-	free(self->nosavestr);
-	self->nosavestr = strdup(nosavestr);
-	psy_ui_label_settext(&self->title, self->titlestr); // "Exit Psycle, but your Song is not saved!");
+	free(self->yesstr);
+	self->yesstr = strdup(yesstr);
+	free(self->nostr);
+	self->nostr = strdup(nostr);
+	psy_ui_label_settext(&self->title, self->titlestr); // "no Psycle, but your Song is not saved!");
 	psy_ui_label_settext(&self->header, "");
-	psy_ui_button_settext(&self->saveandexit, self->savestr); // "Save and Exit"));
-	psy_ui_button_settext(&self->exit, self->nosavestr); // "Exit (no save)"));
+	psy_ui_button_settext(&self->yes, self->yesstr); // "Save and no"));
+	psy_ui_button_settext(&self->no, self->nostr); // "no (no save)"));
 	psy_ui_button_settext(&self->cont, "Continue");
 	psy_ui_component_align(&self->component);
 }
 
-void checkunsavedbox_onsaveandexit(CheckUnsavedBox* self, psy_ui_Component* sender)
+void confirmbox_onok(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_emit(&self->signal_execute, self, 2, 0, self->mode);
 }
 
-void checkunsavedbox_onjustexit(CheckUnsavedBox* self, psy_ui_Component* sender)
+void confirmbox_onno(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_emit(&self->signal_execute, self, 2, 1, self->mode);
 }
 
-void checkunsavedbox_oncontinue(CheckUnsavedBox* self, psy_ui_Component* sender)
+void confirmbox_oncontinue(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_emit(&self->signal_execute, self, 2, 2, self->mode);
 }

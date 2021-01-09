@@ -166,7 +166,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_configchanged);	
 	psy_signal_init(&self->signal_changecontrolskin);
 	psy_signal_init(&self->signal_patterncursorchanged);
-	psy_signal_init(&self->signal_sequenceselectionchanged);
+	// psy_signal_init(&self->signal_sequenceselectionchanged);
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_scanprogress);
 	psy_signal_init(&self->signal_beforesavesong);
@@ -217,8 +217,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_songchanged);	
 	psy_signal_dispose(&self->signal_configchanged);	
 	psy_signal_dispose(&self->signal_changecontrolskin);
-	psy_signal_dispose(&self->signal_patterncursorchanged);
-	psy_signal_dispose(&self->signal_sequenceselectionchanged);
+	psy_signal_dispose(&self->signal_patterncursorchanged);	
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
 	psy_signal_dispose(&self->signal_beforesavesong);
@@ -957,11 +956,11 @@ uintptr_t workspace_octave(Workspace* self)
 void workspace_undo(Workspace* self)
 {
 	assert(self);
-
-	if (workspace_currview(self) == VIEW_ID_PATTERNVIEW) {
-		psy_undoredo_undo(&self->undoredo);
-	} else if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	
+	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
 		psy_undoredo_undo(&self->song->machines.undoredo);
+	} else {
+		psy_undoredo_undo(&self->undoredo);
 	}
 }
 
@@ -969,10 +968,10 @@ void workspace_redo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_PATTERNVIEW) {
-		psy_undoredo_redo(&self->undoredo);
-	} else if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
 		psy_undoredo_redo(&self->song->machines.undoredo);
+	} else {		
+		psy_undoredo_redo(&self->undoredo);		
 	}
 }
 
@@ -980,24 +979,20 @@ bool workspace_currview_hasundo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_PATTERNVIEW) {
-		return psy_list_size(self->undoredo.undo) != 0;
-	} else if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
 		return psy_list_size(self->song->machines.undoredo.undo) != 0;
 	}
-	return FALSE;
+	return psy_list_size(self->undoredo.undo) != 0;
 }
 
 bool workspace_currview_hasredo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_PATTERNVIEW) {
-		return psy_list_size(self->undoredo.redo) != self->undosavepoint;
-	} else if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
 		return psy_list_size(self->song->machines.undoredo.redo) != self->machines_undosavepoint;
 	}
-	return FALSE;
+	return psy_list_size(self->undoredo.redo) != self->undosavepoint;	
 }
 
 void workspace_clearundo(Workspace* self)
@@ -1034,7 +1029,7 @@ void workspace_setsequenceeditposition(Workspace* self, psy_audio_OrderIndex ind
 {
 	psy_audio_sequenceselection_seteditposition(&self->newsequenceselection,
 		index);	
-	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);
+	psy_audio_sequenceselection_update(&self->newsequenceselection);	
 	if (!self->navigating) {
 		viewhistory_addseqpos(&self->viewhistory,
 			self->newsequenceselection.editposition.order);			
@@ -1192,8 +1187,9 @@ void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
 {
 	assert(self);
 
-	if (view == VIEW_ID_CHECKUNSAVED && workspace_currview(self) !=
-			VIEW_ID_CHECKUNSAVED) {
+	if (view == VIEW_ID_CHECKUNSAVED &&
+			workspace_currview(self) != VIEW_ID_CHECKUNSAVED &&
+			workspace_currview(self) != VIEW_ID_CONFIRM) {
 		workspace_saveview(self);
 	}	
 	psy_signal_emit(&self->signal_viewselected, self, 3, view, section, option);

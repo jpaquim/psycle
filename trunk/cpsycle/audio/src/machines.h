@@ -7,7 +7,6 @@
 #include "machine.h"
 #include "connections.h"
 #include <signal.h>
-#include "../../detail/stdint.h"
 #include <undoredo.h>
 
 #ifdef __cplusplus

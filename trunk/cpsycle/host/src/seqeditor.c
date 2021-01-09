@@ -35,7 +35,7 @@ void seqeditortrackstate_init(SeqEditorTrackState* self)
 // SeqEditorRuler
 static void seqeditorruler_ondraw(SeqEditorRuler*, psy_ui_Graphics*);
 static void seqeditorruler_drawruler(SeqEditorRuler*, psy_ui_Graphics*);
-static void seqeditorruler_onsequenceselectionchanged(SeqEditorRuler*, Workspace*);
+static void seqeditorruler_onsequenceselectionchanged(SeqEditorRuler*, psy_audio_SequenceSelection* sender);
 static void seqeditorruler_onpreferredsize(SeqEditorRuler*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 // vtable
@@ -65,7 +65,7 @@ void seqeditorruler_init(SeqEditorRuler* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->rulerbaselinecolour = psy_ui_colour_make(0x00555555);
 	self->rulermarkcolour = psy_ui_colour_make(0x00666666);
-	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
+	psy_signal_connect(&workspace->newsequenceselection.signal_changed, self,
 		seqeditorruler_onsequenceselectionchanged);
 }
 
@@ -108,7 +108,7 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 	}
 }
 
-void seqeditorruler_onsequenceselectionchanged(SeqEditorRuler* self, Workspace* sender)
+void seqeditorruler_onsequenceselectionchanged(SeqEditorRuler* self, psy_audio_SequenceSelection* sender)
 {
 	psy_ui_component_invalidate(&self->component);
 }
@@ -743,7 +743,7 @@ static bool seqeditortracks_notifymouse(SeqEditorTracks*, psy_ui_MouseEvent*,
 	bool (*fp_notify)(SeqEditorTrack*, psy_ui_MouseEvent*));
 static void seqeditortracks_build(SeqEditorTracks*);
 static psy_audio_Sequence* seqeditortracks_sequence(SeqEditorTracks*);
-static void seqeditortracks_onsequenceselectionchanged(SeqEditorTracks*, Workspace*);
+static void seqeditortracks_onsequenceselectionchanged(SeqEditorTracks*, psy_audio_SequenceSelection*);
 static void seqeditortracks_ontimer(SeqEditorTracks*, uintptr_t timerid);
 // vtable
 static psy_ui_ComponentVtable seqeditortracks_vtable;
@@ -789,7 +789,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		seqeditortracks_ondestroy);
 	seqeditortracks_build(self);
-	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
+	psy_signal_connect(&workspace->newsequenceselection.signal_changed, self,
 		seqeditortracks_onsequenceselectionchanged);
 	if (self->mode == SEQEDITOR_TRACKMODE_ENTRY) {
 		psy_ui_component_starttimer(&self->component, 0, 50);
@@ -1051,7 +1051,7 @@ bool seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 }
 
 void seqeditortracks_onsequenceselectionchanged(SeqEditorTracks* self,
-	Workspace* sender)
+	psy_audio_SequenceSelection* sender)
 {			
 	seqeditortracks_invalidatebitmap(self);
 }

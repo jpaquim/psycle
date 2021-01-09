@@ -15,12 +15,12 @@ extern "C" {
 #endif
 
 typedef enum {
-	CHECKUNSAVE_SAVE,
-	CHECKUNSAVE_NOSAVE,
-	CHECKUNSAVE_CONTINUE
-} CheckUnsaveButton;
+	CONFIRM_YES,
+	CONFIRM_NO,
+	CONFIRM_CONTINUE
+} ConfirmBoxButton;
 
-typedef struct CheckUnsavedBox {
+typedef struct ConfirmBox {
 	// inherits
 	psy_ui_Component component;
 	// signals
@@ -29,25 +29,25 @@ typedef struct CheckUnsavedBox {
 	psy_ui_Component view;
 	psy_ui_Label title;
 	psy_ui_Label header;
-	psy_ui_Button saveandexit;
-	psy_ui_Button exit;
+	psy_ui_Button yes;
+	psy_ui_Button no;
 	psy_ui_Button cont;			
-	CheckUnsaveMode mode;
+	ConfirmBoxAction mode;
 	// internal data
 	char* titlestr;
-	char* savestr;
-	char* nosavestr;	
+	char* yesstr;
+	char* nostr;	
 	// references
 	Workspace* workspace;
-} CheckUnsavedBox;
+} ConfirmBox;
 
-void checkunsavedbox_init(CheckUnsavedBox*, psy_ui_Component* parent, Workspace*);
-void checkunsavedbox_setexitmode(CheckUnsavedBox*);
-void checkunsavedbox_setnewsongmode(CheckUnsavedBox*);
-void checkunsavedbox_setlabels(CheckUnsavedBox* self, const char* title,
-	const char* savestr, const char* nosavestr);
+void confirmbox_init(ConfirmBox*, psy_ui_Component* parent, Workspace*);
+void confirmbox_setexitmode(ConfirmBox*);
+void confirmbox_setnewsongmode(ConfirmBox*);
+void confirmbox_setlabels(ConfirmBox* self, const char* title,
+	const char* yesstr, const char* nostr);
 
-INLINE psy_ui_Component* checkunsavedbox_base(CheckUnsavedBox* self)
+INLINE psy_ui_Component* confirmbox_base(ConfirmBox* self)
 {
 	return &self->component;
 }

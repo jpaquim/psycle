@@ -501,7 +501,7 @@ static void stepsequencerview_onsteprowselected(StepsequencerView*,
 static void stepsequencerview_setpattern(StepsequencerView*,
 	psy_audio_Pattern*);
 static void stepsequencerview_onsequenceselectionchanged(StepsequencerView*,
-	Workspace* sender);
+	psy_audio_SequenceSelection* sender);
 static psy_ui_ComponentVtable stepsequencerview_vtable;
 static int stepsequencerview_vtable_initialized = 0;
 // vtable
@@ -543,7 +543,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 		stepsequencerview_onsongchanged);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		stepsequencerview_oneditpositionchanged);
-	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
+	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
 		self, stepsequencerview_onsequenceselectionchanged);
 	psy_signal_connect(&self->stepsequencerbarselect.signal_selected,
 		self, stepsequencerview_onsteprowselected);		
@@ -573,15 +573,15 @@ void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 }
 
 void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
-	Workspace* workspace)
+	psy_audio_SequenceSelection* sender)
 {	
 	psy_audio_Pattern* pattern;
 	psy_audio_SequenceEntry* entry;
 
-	if (workspace->song) {
-		pattern = psy_audio_sequence_pattern(&workspace->song->sequence,
+	if (self->workspace->song) {
+		pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
 			self->workspace->newsequenceselection.editposition);
-		entry = psy_audio_sequence_entry(&workspace->song->sequence,
+		entry = psy_audio_sequence_entry(&self->workspace->song->sequence,
 			self->workspace->newsequenceselection.editposition);
 	} else {
 		pattern = NULL;

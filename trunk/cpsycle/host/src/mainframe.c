@@ -127,8 +127,10 @@ static void mainframe_onfloatsection(MainFrame*, Workspace* sender,
 static void mainframe_ondocksection(MainFrame*, Workspace* sender,
 	int view, uintptr_t section);
 static bool mainframe_onclose(MainFrame*);
-static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender,
+static void mainframe_oncheckunsaved(MainFrame*, ConfirmBox* sender,
 	int option, int mode);
+//static void mainframe_onconfirm(MainFrame*, Confirm* sender,
+//	int option, int mode);
 static void mainframe_onstartup(MainFrame*);
 // EventDriverCallback
 static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
@@ -505,9 +507,12 @@ void mainframe_initmainviews(MainFrame* self)
 		mainframe_onexport);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
-	checkunsavedbox_init(&self->checkunsavedbox,
+	confirmbox_init(&self->checkunsavedbox,
 		psy_ui_notebook_base(&self->notebook),
 		&self->workspace);
+//	confirm_init(&self->confirm,
+//		psy_ui_notebook_base(&self->notebook),
+//		&self->workspace);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
 }
@@ -642,6 +647,8 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_oncheckunsaved);	
+//	psy_signal_connect(&self->confirm.signal_execute, self,
+//		mainframe_onconfirm);
 	psy_signal_connect(&self->workspace.signal_selectpatterndisplay, self,
 		mainframe_onselectpatterndisplay);
 	psy_signal_connect(&self->workspace.signal_floatsection, self,
@@ -845,7 +852,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		case CMD_IMM_LOADSONG:
 			if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 					workspace_songmodified(&self->workspace)) {				
-				workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
+				workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
 			} else {
 				workspace_loadsong_fileselect(&self->workspace);				
 			}
@@ -1178,25 +1185,31 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 		psy_ui_Component* view;
 
 		if (index == VIEW_ID_CHECKUNSAVED) {			
-			if (option == CHECKUNSAVE_CLOSE) {
+			if (option == CONFIRM_CLOSE) {
 				self->checkunsavedbox.mode = option;
-				checkunsavedbox_setlabels(&self->checkunsavedbox,
+				confirmbox_setlabels(&self->checkunsavedbox,
 					"Exit Psycle Request, but your Song is not saved!",
 					"Save and Exit",
 					"Exit (no save)");
-			} else if (option == CHECKUNSAVE_NEW) {				
+			} else if (option == CONFIRM_NEW) {				
 				self->checkunsavedbox.mode = option;
-				checkunsavedbox_setlabels(&self->checkunsavedbox,
+				confirmbox_setlabels(&self->checkunsavedbox,
 					"New Song Request, but your Song is not saved!",
 					"Save and Create New Song",
 					"Create New Song (no save)");
-			} else if (option == CHECKUNSAVE_LOAD) {
+			} else if (option == CONFIRM_LOAD) {
 				self->checkunsavedbox.mode = option;
-				checkunsavedbox_setlabels(&self->checkunsavedbox,
+				confirmbox_setlabels(&self->checkunsavedbox,
 					"Song Load Request, but your Song is not saved!",
 					"Save and Load Song",
 					"Load Song (no save)");
-			}			
+			} else if (option == CONFIRM_SEQUENCECLEAR) {
+				self->checkunsavedbox.mode = option;
+				confirmbox_setlabels(&self->checkunsavedbox,
+					"Sequence Clear Request, Do you really want clear the sequence and pattern data?",
+					"Yes",
+					"No");
+			}
 		}
 		tabbar_select(&self->tabbar, index);
 		view = psy_ui_notebook_activepage(&self->notebook);
@@ -1349,39 +1362,46 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 // called if a button is clicked in the checkunsavedbox
 // option: which button pressed
 // mode  : source of request(app close, song load, song new)
-void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
+void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 	int option, int mode)
 {	
 	switch (option) {			
-		case CHECKUNSAVE_SAVE:
-			if (workspace_savesong_fileselect(&self->workspace)) {				
-				if (mode == CHECKUNSAVE_CLOSE) {
+		case CONFIRM_YES:
+			if (mode == CONFIRM_SEQUENCECLEAR) {
+				workspace_restoreview(&self->workspace);
+				sequenceview_clear(&self->sequenceview);				
+			} else if (workspace_savesong_fileselect(&self->workspace)) {				
+				if (mode == CONFIRM_CLOSE) {
 					psy_ui_app_close(&app);
-				} else if (mode == CHECKUNSAVE_LOAD) {
+				} else if (mode == CONFIRM_LOAD) {
 					workspace_loadsong_fileselect(&self->workspace);
-				} else if (mode == CHECKUNSAVE_NEW) {										
+				} else if (mode == CONFIRM_NEW) {										
 					workspace_newsong(&self->workspace);					
 				}
 			}			
 			break;
-		case CHECKUNSAVE_NOSAVE: {
+		case CONFIRM_NO: {
 			extern psy_ui_App app;
 
-			self->workspace.undosavepoint = psy_list_size(
-				self->workspace.undoredo.undo);
-			self->workspace.machines_undosavepoint = psy_list_size(
-				self->workspace.song->machines.undoredo.undo);
-			if (mode == CHECKUNSAVE_CLOSE) {
-				psy_ui_app_close(&app);
-			} else if (mode == CHECKUNSAVE_LOAD) {
-				workspace_loadsong_fileselect(&self->workspace);
-			} else if (mode == CHECKUNSAVE_NEW) {
-				workspace_newsong(&self->workspace);
+			if (mode == CONFIRM_SEQUENCECLEAR) {
+				workspace_restoreview(&self->workspace);
+			} else {
+				self->workspace.undosavepoint = psy_list_size(
+					self->workspace.undoredo.undo);
+				self->workspace.machines_undosavepoint = psy_list_size(
+					self->workspace.song->machines.undoredo.undo);
+				if (mode == CONFIRM_CLOSE) {
+					psy_ui_app_close(&app);
+				} else if (mode == CONFIRM_LOAD) {
+					workspace_loadsong_fileselect(&self->workspace);
+				} else if (mode == CONFIRM_NEW) {
+					workspace_newsong(&self->workspace);
+				}
 			}
 			break; }
-		case CHECKUNSAVE_CONTINUE:
+		case CONFIRM_CONTINUE:
 			workspace_restoreview(&self->workspace);
-			break;
+			break;		
 		default:		
 			break;
 	}	
@@ -1392,7 +1412,7 @@ bool mainframe_onclose(MainFrame* self)
 	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_songmodified(&self->workspace)) {
 		workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0,
-			CHECKUNSAVE_CLOSE);		
+			CONFIRM_CLOSE);		
 		return FALSE;
 	}
 	return TRUE;

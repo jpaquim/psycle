@@ -56,6 +56,7 @@ enum {
 	VIEW_ID_RENDERVIEW			= 7,
 	VIEW_ID_EXPORTVIEW			= 8,
 	VIEW_ID_CHECKUNSAVED		= 9,
+	VIEW_ID_CONFIRM				= 10,
 	VIEW_NUM
 };
 
@@ -74,10 +75,11 @@ typedef enum {
 } PatternDisplayMode;
 
 typedef enum {
-	CHECKUNSAVE_CLOSE,
-	CHECKUNSAVE_LOAD,
-	CHECKUNSAVE_NEW
-} CheckUnsaveMode;
+	CONFIRM_CLOSE,
+	CONFIRM_LOAD,
+	CONFIRM_NEW,
+	CONFIRM_SEQUENCECLEAR
+} ConfirmBoxAction;
 
 enum {
 	WORKSPACE_NEWSONG,
@@ -102,7 +104,7 @@ typedef struct {
 	psy_Signal signal_configchanged;	
 	psy_Signal signal_changecontrolskin;
 	psy_Signal signal_patterncursorchanged;
-	psy_Signal signal_sequenceselectionchanged;
+	// psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_beforesavesong;

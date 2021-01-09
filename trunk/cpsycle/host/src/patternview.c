@@ -25,6 +25,8 @@ static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
 static void patternviewbar_onupdatestatus(PatternViewBar*,
 	Workspace* sender);
+static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
+	psy_audio_SequenceSelection* sender);
 static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
 	int flag, psy_audio_SongFile*);
 static void patternviewbar_updatestatus(PatternViewBar*);
@@ -59,8 +61,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		patternviewbar_onconfigure);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		patternviewbar_onupdatestatus);
-	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
-		self, patternviewbar_onupdatestatus);
+	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
+		self, patternviewbar_onsequenceselectionchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternviewbar_onsongchanged);
 	if (patternviewconfig_ismovecursorwhenpaste(psycleconfig_patview(
@@ -85,6 +87,12 @@ void patternviewbar_onsongchanged(PatternViewBar* self, Workspace* sender,
 }
 
 void patternviewbar_onupdatestatus(PatternViewBar* self, Workspace* sender)
+{
+	patternviewbar_updatestatus(self);
+}
+
+void patternviewbar_onsequenceselectionchanged(PatternViewBar* self,
+	psy_audio_SequenceSelection* sender)
 {
 	patternviewbar_updatestatus(self);
 }
@@ -142,7 +150,7 @@ static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 static void patternview_onsongchanged(PatternView*, Workspace* sender,
 	int flag, psy_audio_SongFile*);
 static void patternview_onsequenceselectionchanged(PatternView*,
-	Workspace* sender);
+	psy_audio_SequenceSelection* sender);
 static void patternview_onpatternviewconfigure(PatternView*,
 	PatternViewConfig*, psy_Property*);
 static void patternview_onmiscconfigure(PatternView*, KeyboardMiscConfig*,
@@ -344,7 +352,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);
-	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
+	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
 		self, patternview_onsequenceselectionchanged);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		patternview_onpatterncursorchanged);
@@ -465,7 +473,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 }
 
 void patternview_onsequenceselectionchanged(PatternView* self,
-	Workspace* workspace)
+	psy_audio_SequenceSelection* sender)
 {		
 	psy_audio_SequenceEntry* entry;	
 		
@@ -479,7 +487,7 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 	if (entry) {
 		psy_audio_Pattern* pattern;
 
-		pattern = psy_audio_patterns_at(&workspace->song->patterns, 
+		pattern = psy_audio_patterns_at(&self->workspace->song->patterns, 
 			entry->patternslot);
 		patternview_setpattern(self, pattern);
 		self->linestate.sequenceentryoffset = entry->offset;
