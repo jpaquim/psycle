@@ -22,12 +22,12 @@ static void trackerheader_ondestroy(TrackerHeader*);
 static TrackerHeaderTrackState* trackerheader_trackstate(TrackerHeader*, uintptr_t track);
 static TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader*, uintptr_t track);
 static void trackerheader_ondraw(TrackerHeader*, psy_ui_Graphics*);
-static void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track);
-static void trackerheader_drawtrackbackground(TrackerHeader*, psy_ui_Graphics*, intptr_t x);
-static void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track);
-static void trackerheader_drawtracknumber(TrackerHeader*, psy_ui_Graphics*, intptr_t x, uintptr_t track);
-static void trackerheader_drawtrackleds(TrackerHeader*, psy_ui_Graphics*, intptr_t x, uintptr_t track);
-static void trackerheader_drawtrackselection(TrackerHeader*, psy_ui_Graphics*, intptr_t x, uintptr_t track);
+static void trackerheader_drawtrackseparator(TrackerHeader*, psy_ui_Graphics* g, double x, uintptr_t track);
+static void trackerheader_drawtrackbackground(TrackerHeader*, psy_ui_Graphics*, double x);
+static void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track);
+static void trackerheader_drawtracknumber(TrackerHeader*, psy_ui_Graphics*, double x, uintptr_t track);
+static void trackerheader_drawtrackleds(TrackerHeader*, psy_ui_Graphics*, double x, uintptr_t track);
+static void trackerheader_drawtrackselection(TrackerHeader*, psy_ui_Graphics*, double x, uintptr_t track);
 static void trackerheader_onmousedown(TrackerHeader*, psy_ui_MouseEvent*);
 static void trackerheader_onpreferredsize(TrackerHeader*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void trackerheader_onpatterncursorchanged(TrackerHeader*, Workspace*);
@@ -122,19 +122,18 @@ TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader* self, uin
 
 void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;
+	psy_ui_RealSize size;
 	psy_ui_TextMetric tm;
-	intptr_t cpx;
-	intptr_t centerx;
+	double cpx;
+	double centerx;
 	uintptr_t track;
-	psy_ui_Value scrollleft;
+	double scrollleft;
 
-	size = psy_ui_component_size(&self->component);	
+	size = psy_ui_component_sizepx(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
-	scrollleft = psy_ui_component_scrollleft(&self->component);
+	scrollleft = psy_ui_component_scrollleftpx(&self->component);
 	psy_ui_drawsolidrectangle(g,
-		psy_ui_rectangle_make(psy_ui_value_px(&scrollleft, &tm), 0,
-			psy_ui_value_px(&size.width, &tm), psy_ui_value_px(&size.height, &tm)),
+		psy_ui_rectangle_make(scrollleft, 0, size.width, size.height),
 		self->gridstate->skin->background);
 	for (track = 0, cpx = 0; track < self->gridstate->numtracks; ++track) {
 		centerx = psy_max(0, (trackergridstate_trackwidth(self->gridstate, track) -
@@ -149,27 +148,24 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 	}
 }
 
-void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track)
+void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track)
 {
-	intptr_t trackwidth;
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	double trackwidth;
+	psy_ui_RealSize size;	
 
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_sizepx(&self->component);
 	trackwidth = trackergridstate_trackwidth(self->gridstate, track);
 	psy_ui_setcolour(g, self->gridstate->skin->separator);
-	psy_ui_drawline(g, x + trackwidth - 1, 0, x + trackwidth - 1,
-		psy_ui_value_px(&size.height, &tm));
+	psy_ui_drawline(g, x + trackwidth - 1, 0, x + trackwidth - 1, size.height);
 }
 
-void trackerheader_drawtrackbackground(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x)
+void trackerheader_drawtrackbackground(TrackerHeader* self, psy_ui_Graphics* g, double x)
 {
 	skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
 		&self->gridstate->skin->headercoords.background);
 }
 
-void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track)
+void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track)
 {
 	TrackerHeaderTrackState* trackstate;
 
@@ -180,7 +176,7 @@ void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g, intp
 	}
 }
 
-void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track)
+void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track)
 {
 	intptr_t trackx0 = track / 10;
 	intptr_t track0x = track % 10;
@@ -192,7 +188,7 @@ void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, intp
 	skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0, &digit0x);
 }
 
-void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track)
+void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track)
 {
 	if (workspace_song(self->workspace)) {
 		if (psy_audio_patterns_istrackmuted(&workspace_song(self->workspace)->patterns,
@@ -208,7 +204,7 @@ void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, intptr
 	}
 }
 
-void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g, intptr_t x, uintptr_t track)
+void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g, double x, uintptr_t track)
 {
 	psy_audio_PatternCursor editposition;
 
@@ -226,8 +222,8 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 	if (workspace_song(self->workspace)) {
 		psy_ui_Rectangle r;
 		uintptr_t track;
-		intptr_t track_x;
-		intptr_t centerx;
+		double track_x;
+		double centerx;
 		psy_ui_Value scrollleft;
 		psy_ui_TextMetric tm;
 		

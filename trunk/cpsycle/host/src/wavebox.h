@@ -61,8 +61,8 @@ INLINE uintptr_t waveboxselection_numframes(WaveBoxSelection* self)
 typedef struct {
 	double offsetstep;
 	psy_ui_Size size;
-	psy_dsp_beat_t zoomleft;
-	psy_dsp_beat_t zoomright;
+	double zoomleft;
+	double zoomright;
 	WaveBoxLoopViewMode loopviewmode;	
 	WaveBoxSelection selection;
 	WaveBoxSelection oldselection;
@@ -82,10 +82,10 @@ INLINE psy_audio_Sample* waveboxcontext_sample(WaveBoxContext* self)
 }
 
 void waveboxcontext_setsize(WaveBoxContext*, const psy_ui_Size*);
-void waveboxcontext_setzoom(WaveBoxContext*, float zoomleft,
-	float zoomright);
+void waveboxcontext_setzoom(WaveBoxContext*, double zoomleft,
+	double zoomright);
 uintptr_t waveboxcontext_numframes(WaveBoxContext*);
-int waveboxcontext_frametoscreen(WaveBoxContext*, uintptr_t frame);
+double waveboxcontext_frametoscreen(WaveBoxContext*, uintptr_t frame);
 uintptr_t waveboxcontext_realframe(WaveBoxContext*, uintptr_t frame);
 void waveboxcontext_setselection(WaveBoxContext*, uintptr_t selectionstart,
 	uintptr_t selectionend);
@@ -111,7 +111,7 @@ WaveBox* wavebox_allocinit(psy_ui_Component* parent, Workspace*);
 
 void wavebox_setnowavetext(WaveBox*, const char* text);
 void wavebox_setsample(WaveBox*, psy_audio_Sample*, uintptr_t channel);
-void wavebox_setzoom(WaveBox*, psy_dsp_beat_t left, psy_dsp_beat_t right);
+void wavebox_setzoom(WaveBox*, double left, double right);
 void wavebox_setselection(WaveBox*, uintptr_t selectionstart,
 	uintptr_t selectionend);
 void wavebox_clearselection(WaveBox*);

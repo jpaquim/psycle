@@ -29,7 +29,7 @@ static void dev_show(psy_ui_curses_ComponentImp*);
 static void dev_showstate(psy_ui_curses_ComponentImp*, int state);
 static void dev_hide(psy_ui_curses_ComponentImp*);
 static int dev_visible(psy_ui_curses_ComponentImp*);
-static void dev_move(psy_ui_curses_ComponentImp*, int left, int top);
+static void dev_move(psy_ui_curses_ComponentImp*, double left, double top);
 static void dev_resize(psy_ui_curses_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_curses_ComponentImp*, int width, int height);
 static psy_ui_Rectangle dev_position(psy_ui_curses_ComponentImp*);
@@ -225,7 +225,7 @@ int dev_visible(psy_ui_curses_ComponentImp* self)
 	return 1; 
 }
 
-void dev_move(psy_ui_curses_ComponentImp* self, int left, int top)
+void dev_move(psy_ui_curses_ComponentImp* self, double left, double top)
 {
 	int maxyscr;
 	int maxxscr;

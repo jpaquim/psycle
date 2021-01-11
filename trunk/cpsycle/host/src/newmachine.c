@@ -154,7 +154,7 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
-	intptr_t x, intptr_t y);
+	double x, double y);
 static void pluginsview_onpreferredsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
@@ -164,11 +164,11 @@ static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 	intptr_t col, intptr_t row);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
-static void pluginsview_hittest(PluginsView*, intptr_t x, intptr_t y);
+static void pluginsview_hittest(PluginsView*, double x, double y);
 static void pluginsview_computetextsizes(PluginsView*, const psy_ui_Size*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
-static intptr_t pluginsview_visilines(PluginsView*);
+static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
 static uintptr_t pluginsview_numlines(const PluginsView*);
@@ -244,8 +244,8 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 	if (self->plugins) {
 		psy_ui_Size size;
 		psy_List* p;		
-		intptr_t cpx;
-		intptr_t cpy;
+		double cpx;
+		double cpy;
 		
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);
@@ -264,7 +264,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 }
 
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
-	psy_Property* property, intptr_t x, intptr_t y)
+	psy_Property* property, double x, double y)
 {
 	char text[128];
 
@@ -298,7 +298,8 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->lineheight = (int) (tm.tmHeight * 1.5);
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
-	self->numparametercols = psy_max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
+	self->numparametercols = 
+		(uintptr_t)psy_max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
 	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
 }
 
@@ -470,22 +471,18 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 	}	
 }
 
-intptr_t pluginsview_visilines(PluginsView* self)
+uintptr_t pluginsview_visilines(PluginsView* self)
 {
-	psy_ui_IntSize size;
+	psy_ui_RealSize size;
 
-	size = psy_ui_component_intsize(&self->component);
-	return size.height / self->lineheight;
+	size = psy_ui_component_sizepx(&self->component);
+	return (uintptr_t)(size.height / self->lineheight);
 }
 
 uintptr_t pluginsview_topline(PluginsView* self)
-{	
-	psy_ui_TextMetric tm;
-	psy_ui_Value scrolltop;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	scrolltop = psy_ui_component_scrolltop(&self->component);
-	return psy_ui_value_px(&scrolltop, &tm) / self->lineheight;
+{
+	return (uintptr_t)(psy_ui_component_scrolltoppx(&self->component)
+		/ self->lineheight);
 }
 
 uintptr_t pluginsview_numlines(const PluginsView* self)
@@ -567,13 +564,13 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void pluginsview_hittest(PluginsView* self, intptr_t x, intptr_t y)
+void pluginsview_hittest(PluginsView* self, double x, double y)
 {				
 	if (self->plugins) {
 		psy_ui_Size size;
 		psy_List* p;
-		intptr_t cpx;
-		intptr_t cpy;
+		double cpx;
+		double cpy;
 
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);

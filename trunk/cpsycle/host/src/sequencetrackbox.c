@@ -9,7 +9,7 @@
 
 // prototypes
 static void sequencetrackbox_drawtext(SequenceTrackBox*,
-	psy_ui_Graphics*, intptr_t x, intptr_t y, const char* text);
+	psy_ui_Graphics*, double x, double y, const char* text);
 // implementation
 void sequencetrackbox_init(SequenceTrackBox* self,
 	psy_ui_Rectangle position, psy_ui_TextMetric tm,
@@ -35,7 +35,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle r;
 	char text[64];		
-	intptr_t centery;	
+	double centery;
 	
 	centery = (self->position.bottom - self->position.top - self->tm.tmHeight) / 2;
 	psy_ui_settextcolour(g, self->colour_font);
@@ -90,13 +90,13 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 }
 
 void sequencetrackbox_drawtext(SequenceTrackBox* self,
-	psy_ui_Graphics* g, intptr_t x, intptr_t y, const char* text)
+	psy_ui_Graphics* g, double x, double y, const char* text)
 {
 	psy_ui_textout(g, x + 3, y, text, psy_strlen(text));
 }
 
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox* self,
-	intptr_t x, intptr_t y)
+	double x, double y)
 {		
 	if (self->trackindex != 0 && x >= self->position.right -
 			(int)(self->tm.tmAveCharWidth * 3.5)) {

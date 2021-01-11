@@ -22,9 +22,9 @@ typedef struct TrackScopeView {
 	psy_ui_Component component;
 	// internal data
 	uintptr_t maxcolumns;
-	intptr_t trackwidth;
-	intptr_t trackheight;
-	intptr_t textheight;
+	double trackwidth;
+	double trackheight;
+	double textheight;
 	// references
 	Workspace* workspace;	
 } TrackScopeView;

@@ -37,7 +37,7 @@ typedef struct {
 	psy_ui_Colour polycolour;
 	uintptr_t wirewidth;
 	uintptr_t wireaa;
-	uintptr_t triangle_size;
+	double triangle_size;
 	const char* generator_fontface;
 	int generator_font_point;
 	unsigned int generator_font_flags;

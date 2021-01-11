@@ -714,9 +714,9 @@ void patternview_readfont(PatternView* self)
 
 void patternview_onalign(PatternView* self)
 {
-	psy_ui_IntSize headersize;	
+	psy_ui_RealSize headersize;	
 
-	headersize = psy_ui_component_intsize(&self->header.component);	
+	headersize = psy_ui_component_sizepx(&self->header.component);	
 	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
 		headersize.height);
 	patternview_computemetrics(self);
@@ -727,14 +727,14 @@ void patternview_computemetrics(PatternView* self)
 	psy_ui_Size gridsize;
 	psy_ui_TextMetric tm;
 	psy_ui_TextMetric gridtm;
-	intptr_t trackwidth;
+	double trackwidth;
 
 	gridsize = psy_ui_component_size(trackergrid_base(&self->tracker));
 	tm = psy_ui_component_textmetric(patternview_base(self));
 	gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	self->gridstate.trackconfig->textwidth = (int)(gridtm.tmAveCharWidth * 1.5) + 2;
 	self->linestate.lineheightpx =
-		psy_ui_value_px(&self->linestate.lineheight, &tm);
+		floor(psy_ui_value_px(&self->linestate.lineheight, &tm));
 	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;
 	trackwidth = psy_max(
 		trackergridstate_preferredtrackwidth(&self->gridstate),
@@ -745,8 +745,8 @@ void patternview_computemetrics(PatternView* self)
 		self->trackconfig.patterntrackident = 0;
 	}
 	self->trackconfig.headertrackident = 0;
-	self->linestate.visilines = psy_ui_value_px(&gridsize.height, &tm) /
-		self->linestate.lineheightpx;
+	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, &tm) /
+		self->linestate.lineheightpx);
 }
 
 void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
@@ -1164,7 +1164,7 @@ void patternview_onparametertweak(PatternView* self, Workspace* sender,
 
 void patternview_updatescrollstep(PatternView* self)
 {
-	intptr_t scrollstepx;
+	double scrollstepx;
 	psy_ui_Value scrollleft;
 	psy_ui_TextMetric tm;
 

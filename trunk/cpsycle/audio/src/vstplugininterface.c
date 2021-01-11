@@ -23,12 +23,16 @@ void psy_audio_vstinterface_init(psy_audio_VstInterface* self,
 
 void psy_audio_vstinterface_open(psy_audio_VstInterface* self)
 {
-	self->effect->dispatcher(self->effect, effOpen, 0, 0, 0, 0);
+	if (self->effect) {
+		self->effect->dispatcher(self->effect, effOpen, 0, 0, 0, 0);
+	}
 }
 
 void psy_audio_vstinterface_close(psy_audio_VstInterface* self)
 {
-	self->effect->dispatcher(self->effect, effClose, 0, 0, 0, 0);
+	if (self->effect) {
+		self->effect->dispatcher(self->effect, effClose, 0, 0, 0, 0);
+	}
 }
 
 void psy_audio_vstinterface_setsamplerate(psy_audio_VstInterface* self,

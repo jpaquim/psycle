@@ -21,7 +21,7 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 	self->istoggle = FALSE;
 	self->mode = TABMODE_SINGLESEL;
 	self->checkstate = 0;
-	self->position = psy_ui_intpoint_make(0, 0);
+	self->position = psy_ui_realpoint_make(0.0, 0.0);
 	if (size) {
 		self->size = *size;
 	}
@@ -79,12 +79,12 @@ static void tabbar_onlanguagechanged(TabBar*);
 static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_drawtab(TabBar*, psy_ui_Graphics*,
 	Tab* tab, bool hover, bool selected, bool drawselline);
-static psy_ui_IntSize tabbar_calctabpositions(TabBar*);
+static psy_ui_RealSize tabbar_calctabpositions(TabBar*);
 static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmouseenter(TabBar*);
 static void tabbar_onmouseleave(TabBar*);
-static intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y,
+static uintptr_t tabbar_tabhittest(TabBar* self, double x, double y,
 	Tab** rvtab);
 static void tabbar_onalign(TabBar*);
 static void tabbar_onpreferredsize(TabBar*, const psy_ui_Size* limit,
@@ -162,33 +162,33 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	}
 }
 
-psy_ui_IntSize tabbar_calctabpositions(TabBar* self)
+psy_ui_RealSize tabbar_calctabpositions(TabBar* self)
 {
 	psy_List* tabs;
 	intptr_t c = 0;
-	psy_ui_IntPoint currpos;
-	psy_ui_IntSize maxsize;
-	intptr_t cpy = 0;
-	psy_ui_Size size;
+	psy_ui_RealPoint currpos;
+	psy_ui_RealSize maxsize;
+	double cpy = 0;
+	psy_ui_RealSize size;
 	psy_ui_TextMetric tm;
 
 	assert(self);
 
-	size = psy_ui_component_size(tabbar_base(self));
+	size = psy_ui_component_sizepx(tabbar_base(self));
 	tm = psy_ui_component_textmetric(tabbar_base(self));	
-	currpos = psy_ui_intpoint_make(0, 0);
-	maxsize = psy_ui_intsize_make(0, 0);
+	currpos = psy_ui_realpoint_make(0.0, 0.0);
+	maxsize = psy_ui_realsize_make(0.0, 0.0);
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
-		currpos.x = 0;
+		currpos.x = 0.0;
 	} else if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
-		currpos.y = 5;
-		currpos.x = 10;
+		currpos.y = 5.0;
+		currpos.x = 10.0;
 	} else if (self->tabalignment == psy_ui_ALIGN_LEFT) {
-		currpos.y = 5;
+		currpos.y = 5.0;
 	}
 	for (tabs = self->tabs; tabs != 0; psy_list_next(&tabs), ++c) {
 		Tab* tab;
-		psy_ui_IntPoint position;
+		psy_ui_RealPoint position;
 
 		tab = (Tab*)psy_list_entry(tabs);
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {
@@ -243,7 +243,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 {
 	char* text;
 	psy_ui_TextMetric tm;
-	psy_ui_IntPoint position;
+	psy_ui_RealPoint position;
 
 	assert(self);
 	assert(tab);
@@ -272,7 +272,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 	}
 	psy_ui_textout(g, position.x, position.y, text, psy_strlen(text));
 	if (hover) {		
-		intptr_t width;
+		double width;
 				
 		width = psy_ui_value_px(&tab->size.width, &tm);
 		psy_ui_setcolour(g, self->skin.linehover);
@@ -280,7 +280,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 			position.x + width, position.y + tm.tmHeight + 2);
 	}
 	if (selected && drawselline) {
-		intptr_t width;
+		double width;
 
 		width = psy_ui_value_px(&tab->size.width, &tm);
 		psy_ui_setcolour(g, self->skin.linesel);		
@@ -317,10 +317,10 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-intptr_t tabbar_tabhittest(TabBar* self, intptr_t x, intptr_t y, Tab** rvtab)
+uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 {
 	psy_List* p;
-	intptr_t rv;
+	uintptr_t rv;
 	intptr_t c;
 	psy_ui_TextMetric tm;
 
@@ -527,7 +527,7 @@ void tabbar_onalign(TabBar* self)
 
 void tabbar_onpreferredsize(TabBar* self, const psy_ui_Size* limit, psy_ui_Size* rv)
 {	
-	psy_ui_IntSize maxsize;
+	psy_ui_RealSize maxsize;
 
 	assert(self);
 		

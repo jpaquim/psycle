@@ -47,7 +47,7 @@ typedef struct ParamView {
    intptr_t cy;
    uintptr_t tweak;
    uintptr_t lasttweak;
-   intptr_t tweakbase;
+   float tweakbase;
    float tweakval;   
    Workspace* workspace;
    ParamSkin* skin;

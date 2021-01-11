@@ -36,7 +36,7 @@ typedef struct Tab {
 	psy_ui_Margin margin;
 	bool istoggle;	
 	TabCheckState checkstate;
-	psy_ui_IntPoint position;
+	psy_ui_RealPoint position;
 } Tab;
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);

@@ -73,11 +73,11 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle left;
 	psy_ui_Rectangle right;	
-	psy_ui_IntSize size;	
-	intptr_t vuprevL;
-	intptr_t vuprevR;
+	psy_ui_RealSize size;	
+	double vuprevL;
+	double vuprevR;
 	
-	size = psy_ui_component_intsize(&self->component);
+	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_setrectangle(&left, 0, 5, size.width, 5);	
 	right = left;
 	right.top += 6;
@@ -88,8 +88,8 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	right.right = (int) (self->rightavg * size.width);
 	psy_ui_drawsolidrectangle(g, left, self->skin.rms);
 	psy_ui_drawsolidrectangle(g, right, self->skin.rms);
-	vuprevL = (int)((40.0f + self->l_log) * size.width / 40.f);
-	vuprevR = (int)((40.0f + self->r_log) * size.width / 40.f);
+	vuprevL = (40.0 + self->l_log) * size.width / 40.f;
+	vuprevR = (40.0 + self->r_log) * size.width / 40.f;
 	if (vuprevL > size.width) vuprevL = size.width;
 	if (vuprevR > size.width) vuprevR = size.width;
 	if (vuprevL > left.left) {		
@@ -123,8 +123,8 @@ void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
 		if (master) {
 			memory = psy_audio_machine_buffermemory(master);
 			if (memory && memory->rms) {
-				leftavg = memory->rms->data.previousLeft / 32768;
-				rightavg = memory->rms->data.previousRight / 32768;
+				leftavg = memory->rms->data.previousLeft / 32768.f;
+				rightavg = memory->rms->data.previousRight / 32768.f;
 				if (leftavg != self->leftavg || rightavg != self->rightavg) {					
 					self->leftavg = psy_audio_buffer_rmsscale(memory,
 						memory->rms->data.previousLeft);
@@ -144,10 +144,10 @@ void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
 				}				
 			}
 		} else if (self->leftavg != 0.f || self->rightavg != 0.f) {
-			self->leftavg = 0;
-			self->rightavg = 0;
-			self->l_log = -10000;
-			self->r_log = -10000;
+			self->leftavg = 0.f;
+			self->rightavg = 0.f;
+			self->l_log = -10000.f;
+			self->r_log = -10000.f;
 			psy_ui_component_invalidate(&self->component);
 		}
 	}

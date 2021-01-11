@@ -64,17 +64,17 @@ void trackergridstate_dispose(TrackerGridState* self)
 }
 
 uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
-	intptr_t x)
-{
+	double x)
+{	
 	uintptr_t rv;
-	uintptr_t trackx;
-	uintptr_t maincolumnwidth;
+	double trackx;
+	double maincolumnwidth;
 	TrackDef* trackdef;
 
 	trackdef = trackergridstate_trackdef(self, track);
 	trackx = trackergridstate_tracktopx(self, track);
 	maincolumnwidth = trackergridstate_basewidth(self, track);
-	rv = (x - (trackx + maincolumnwidth)) / (4 * self->trackconfig->textwidth);
+	rv = (uintptr_t)((x - (trackx + maincolumnwidth)) / (4 * self->trackconfig->textwidth));
 	return rv;
 }
 
@@ -111,7 +111,7 @@ void trackdef_init(TrackDef* self)
 }
 
 
-intptr_t trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
+double trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 {
 	TrackDef* trackdef;
 	
@@ -126,9 +126,9 @@ intptr_t trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 }
 
 
-intptr_t trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
+double trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 {
-	intptr_t rv = 0;
+	double rv = 0;
 	uintptr_t t;
 
 	for (t = 0; t < track; ++t) {
@@ -137,9 +137,9 @@ intptr_t trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 	return rv;
 }
 
-uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, intptr_t x, uintptr_t numsongtracks)
+uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, double x, uintptr_t numsongtracks)
 {
-	intptr_t currx = 0;
+	double currx = 0;
 	uintptr_t rv = 0;
 
 	while (rv < numsongtracks) {
@@ -152,7 +152,7 @@ uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, intptr_t x, uintptr
 	return rv;
 }
 
-uintptr_t trackergridstate_basewidth(TrackerGridState* self, uintptr_t track)
+double trackergridstate_basewidth(TrackerGridState* self, uintptr_t track)
 {
 	return trackdef_basewidth(trackergridstate_trackdef(self, track),
 		self->trackconfig->textwidth) + 1;
@@ -316,9 +316,9 @@ uintptr_t trackdef_emptyvalue(TrackDef* self, uintptr_t column)
 	return coldef ? coldef->emptyvalue : 0;
 }
 
-intptr_t trackdef_basewidth(TrackDef* self, intptr_t textwidth)
+double trackdef_basewidth(TrackDef* self, double textwidth)
 {
-	intptr_t rv = 0;
+	double rv = 0;
 	uintptr_t column;
 
 	for (column = 0; column < 4; ++column) {
@@ -327,9 +327,9 @@ intptr_t trackdef_basewidth(TrackDef* self, intptr_t textwidth)
 	return rv;
 }
 
-intptr_t trackdef_width(TrackDef* self, intptr_t textwidth)
+double trackdef_width(TrackDef* self, double textwidth)
 {
-	intptr_t rv = 0;
+	double rv = 0;
 	uintptr_t column;
 
 	for (column = 0; column < trackdef_numcolumns(self); ++column) {
@@ -338,7 +338,7 @@ intptr_t trackdef_width(TrackDef* self, intptr_t textwidth)
 	return rv;
 }
 
-intptr_t trackdef_columnwidth(TrackDef* self, intptr_t column, intptr_t textwidth)
+double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth)
 {
 	TrackColumnDef* coldef;
 

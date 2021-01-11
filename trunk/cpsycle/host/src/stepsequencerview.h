@@ -58,8 +58,8 @@ typedef struct {
 	psy_ui_Component component;
 	Workspace* workspace;
 	psy_audio_Pattern* pattern;		
-	intptr_t stepwidth;
-	intptr_t stepheight;
+	double stepwidth;
+	double stepheight;
 	StepTimer* steptimer;
 	StepSequencerPosition position;	
 } StepsequencerBar;

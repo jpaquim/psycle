@@ -46,9 +46,9 @@ static void psy_ui_curses_g_imp_setbackgroundmode(psy_ui_curses_GraphicsImp*, un
 static void psy_ui_curses_g_imp_settextcolour(psy_ui_curses_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_setcolour(psy_ui_curses_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_setfont(psy_ui_curses_GraphicsImp*, psy_ui_Font* font);
-static void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint pt);
-static void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint control_p1,
-	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
+static void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp*, psy_ui_RealPoint pt);
+static void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp*, psy_ui_RealPoint control_p1,
+	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
 
 // VTable init
 static psy_ui_GraphicsImpVTable win_imp_vtable;
@@ -179,12 +179,12 @@ void psy_ui_curses_g_imp_drawline(psy_ui_curses_GraphicsImp* self, int x1, int y
 {
 }
 
-void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp* self, psy_ui_IntPoint pt)
+void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp* self, psy_ui_RealPoint pt)
 {	
 }
 
-void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp* self, psy_ui_IntPoint control_p1,
-	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
+void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp* self, psy_ui_RealPoint control_p1,
+	psy_ui_RealPoint control_p2, psy_ui_RealPoint p)
 {
 }
 

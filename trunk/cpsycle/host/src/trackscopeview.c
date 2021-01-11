@@ -17,11 +17,11 @@
 static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
 static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
 static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
-	intptr_t x, intptr_t y, intptr_t track);
+	double x, double y, uintptr_t track);
 void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
-	intptr_t x, intptr_t y, intptr_t track);
-void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, intptr_t x,
-	intptr_t y, intptr_t track);
+	double x, double y, uintptr_t track);
+void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, double x,
+	double y, uintptr_t track);
 static void trackscopeview_ontimer(TrackScopeView*, uintptr_t timerid);
 static void trackscopeview_onalign(TrackScopeView*);
 static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
@@ -67,8 +67,8 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		uintptr_t c;
 		intptr_t rows = 1;
 		uintptr_t currtrack;
-		intptr_t cpx;
-		intptr_t cpy;
+		double cpx;
+		double cpy;
 				
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
@@ -95,21 +95,21 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 }
 
 void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
-	intptr_t x, intptr_t y, intptr_t track)
+	double x, double y, uintptr_t track)
 {
 	char text[40];
 		
-	psy_snprintf(text, 40, "%X", track);
+	psy_snprintf(text, 40, "%X", (int)track);
 	psy_ui_textout(g, x + 3, y, text, strlen(text));
 }
 
 
 void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
-	intptr_t x, intptr_t y, intptr_t track)
+	double x, double y, uintptr_t track)
 {
 	uintptr_t lastmachine;
-	intptr_t width;
-	intptr_t height;
+	double width;
+	double height;
 
 	width = self->trackwidth;
 	height = self->trackheight;
@@ -128,7 +128,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	}	
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* machine;
-		intptr_t centery;
+		double centery;
 		bool active = FALSE;
 		
 		centery = height / 2 + y;
@@ -162,8 +162,8 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 						
 						active = TRUE;
 						step = 1;
-						px = width / (float) numsamples;
-						py = height * psy_audio_buffer_rangefactor(memory,
+						px = (float)width / (float)numsamples;
+						py = (float)height * psy_audio_buffer_rangefactor(memory,
 							PSY_DSP_AMP_RANGE_VST) / 3;						
 						writepos = memory->writepos;
 						if (writepos >= numsamples) {
@@ -201,28 +201,28 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	}	
 }
 
-void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, intptr_t x,
-	intptr_t y, intptr_t track)
+void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, double x,
+	double y, uintptr_t track)
 {	
-	intptr_t width;
-	intptr_t height;
-	intptr_t ident;
+	double width;
+	double height;
+	double ident;
 
 	width = self->trackwidth;
 	height = self->trackheight;
-	ident = (intptr_t)(width * 0.25);
+	ident = width * 0.25;
 	psy_ui_setcolour(g, app.defaults.style_common.colour);
-	psy_ui_moveto(g, psy_ui_intpoint_make(x + ident, y + (int)(height * 0.2)));
+	psy_ui_moveto(g, psy_ui_realpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
-		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),
-		psy_ui_intpoint_make(x + width - ident, y + (int)(height * 0.6)),
-		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
+		psy_ui_realpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),
+		psy_ui_realpoint_make(x + width - ident, y + (int)(height * 0.6)),
+		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
 	psy_ui_moveto(g,
-		psy_ui_intpoint_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
+		psy_ui_realpoint_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
 	psy_ui_curveto(g,
-		psy_ui_intpoint_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
-		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.2)),
-		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
+		psy_ui_realpoint_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
+		psy_ui_realpoint_make(x + width - ident * 2, y + (int)(height * 0.2)),
+		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
 void trackscopeview_ontimer(TrackScopeView* self, uintptr_t timerid)
@@ -259,8 +259,8 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		intptr_t columns;
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
-		intptr_t track;
-		intptr_t trackwidth;
+		uintptr_t track;
+		double trackwidth;
 		uintptr_t numtracks;
 		
 		numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));
@@ -268,7 +268,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		trackwidth = psy_ui_value_px(&size.width, &tm) / columns;		
-		track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
+		track = (uintptr_t)((ev->x / trackwidth) + floor(ev->y / self->trackheight) * columns);
 		if (ev->button == 1) {
 			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, track)) {

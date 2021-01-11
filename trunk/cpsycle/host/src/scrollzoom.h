@@ -20,20 +20,20 @@ typedef struct ScrollZoom {
 	psy_Signal signal_zoom;
 	psy_Signal signal_customdraw;
 	// internal data
-	float start;
-	float end;	
+	double start;
+	double end;
 	int dragmode;
-	intptr_t dragoffset;	
+	double dragoffset;	
 } ScrollZoom;
 
 void scrollzoom_init(ScrollZoom*, psy_ui_Component* parent);
 
-INLINE float scrollzoom_start(ScrollZoom* self)
+INLINE double scrollzoom_start(ScrollZoom* self)
 {
 	return self->start;
 }
 
-INLINE float scrollzoom_end(ScrollZoom* self)
+INLINE double scrollzoom_end(ScrollZoom* self)
 {
 	return self->end;
 }

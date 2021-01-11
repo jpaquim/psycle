@@ -347,7 +347,7 @@ int midiloader_readnoteon(MidiLoader* self)
         ev.mach = self->currtrack.channel;
         if (vol != 64) {
             ev.cmd = 0xC;
-            ev.parameter = (vol / (float)0x7F) * 0x80;
+            ev.parameter = (uint8_t)((vol / (float)0x7F) * 0x80);
         }
         midiloader_writepatternevent(self, ev);
     }

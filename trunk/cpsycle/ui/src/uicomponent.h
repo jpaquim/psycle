@@ -14,6 +14,7 @@
 #include <list.h>
 #include <translator.h>
 #include "../../detail/stdint.h"
+#include <math.h>
 
 // psy_ui_Component
 // Bridge
@@ -334,7 +335,7 @@ typedef void (*psy_ui_fp_componentimp_dev_showstate)(struct psy_ui_ComponentImp*
 typedef void (*psy_ui_fp_componentimp_dev_hide)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_visible)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_drawvisible)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_move)(struct psy_ui_ComponentImp*, intptr_t left, intptr_t top);
+typedef void (*psy_ui_fp_componentimp_dev_move)(struct psy_ui_ComponentImp*, double left, double top);
 typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, psy_ui_Size);
 typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentImp*, intptr_t width, intptr_t height);
 typedef psy_ui_Rectangle (*psy_ui_fp_componentimp_dev_position)(struct psy_ui_ComponentImp*);
@@ -551,12 +552,12 @@ INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 	return self->scroll.x;
 }
 
-INLINE intptr_t psy_ui_component_scrollleftpx(psy_ui_Component* self)
+INLINE double psy_ui_component_scrollleftpx(psy_ui_Component* self)
 {
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
-	return (intptr_t)psy_ui_value_px(&self->scroll.x, &tm);
+	return floor(psy_ui_value_px(&self->scroll.x, &tm));
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
@@ -566,12 +567,12 @@ INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
 	return self->scroll.y;
 }
 
-INLINE intptr_t psy_ui_component_scrolltoppx(psy_ui_Component* self)
+INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
 {
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
-	return (intptr_t)psy_ui_value_px(&self->scroll.y, &tm);
+	return floor(psy_ui_value_px(&self->scroll.y, &tm));
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
@@ -656,6 +657,19 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 
 	tm = psy_ui_component_textmetric(self);
 	return psy_ui_intsize_init_size(psy_ui_component_size(self), &tm);
+}
+
+INLINE psy_ui_RealSize psy_ui_component_sizepx(psy_ui_Component* self)
+{
+	psy_ui_TextMetric tm;
+	psy_ui_Size size;
+
+	tm = psy_ui_component_textmetric(self);
+	size = psy_ui_component_size(self);
+	return psy_ui_realsize_make(
+		psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm));
+		
 }
 
 int psy_ui_component_level(const psy_ui_Component* self);

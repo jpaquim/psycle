@@ -40,8 +40,8 @@ typedef struct PinEdit {
 	PinEditDragMode dragmode;
 	uintptr_t drag_src;
 	uintptr_t drag_dst;
-	intptr_t mx;
-	intptr_t my;
+	double mx;
+	double my;
 	psy_ui_Colour pincolour;
 	psy_ui_Colour wirecolour;
 	// references

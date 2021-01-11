@@ -1027,7 +1027,7 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 	// this approximately calculates the offset	
 	if (offset) {
 		float swing = 0;
-		for (l = 0; l < width; l++) {
+		for (l = 0; l < (uintptr_t)width; l++) {
 			float val = ((sinf(index) * var * tempo) + tempo);
 			swing += (val / tempo) * (val / tempo);
 			index += step;

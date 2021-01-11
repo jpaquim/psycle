@@ -234,6 +234,15 @@ INLINE psy_ui_IntPoint psy_ui_intpoint_make(intptr_t x, intptr_t y)
 	return rv;
 }
 
+INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
+{
+	psy_ui_IntPoint rv;
+
+	rv.x = 0;
+	rv.y = 0;
+	return rv;
+}
+
 typedef struct {
 	double x;
 	double y;
@@ -255,20 +264,20 @@ INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
 }
 
 typedef struct {
-	intptr_t left;
-	intptr_t top;
-	intptr_t right;
-	intptr_t bottom;
+	double left;
+	double top;
+	double right;
+	double bottom;
 } psy_ui_Rectangle;
 
 
 INLINE psy_ui_Rectangle psy_ui_rectangle_zero(void)
 {
-	psy_ui_Rectangle rv = { 0, 0, 0, 0 };
+	psy_ui_Rectangle rv = { 0.0, 0.0, 0.0, 0.0 };
 	return rv;
 }
 
-INLINE psy_ui_Rectangle psy_ui_rectangle_make(intptr_t left, intptr_t top, intptr_t width, intptr_t height)
+INLINE psy_ui_Rectangle psy_ui_rectangle_make(double left, double top, double width, double height)
 {
 	psy_ui_Rectangle rv;
 
@@ -279,73 +288,63 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make(intptr_t left, intptr_t top, intpt
 	return rv;
 }
 
-INLINE intptr_t psy_ui_rectangle_width(const psy_ui_Rectangle* self)
+INLINE double psy_ui_rectangle_width(const psy_ui_Rectangle* self)
 {
 	return self->right - self->left;
 }
 
-INLINE void psy_ui_rectangle_setwidth(psy_ui_Rectangle* self, intptr_t width)
+INLINE void psy_ui_rectangle_setwidth(psy_ui_Rectangle* self, double width)
 {
 	self->right = self->left + width;
 }
 
-INLINE void psy_ui_rectangle_setleft_resize(psy_ui_Rectangle* self, intptr_t left)
+INLINE void psy_ui_rectangle_setleft_resize(psy_ui_Rectangle* self, double left)
 {
-	intptr_t width;
+	double width;
 
 	width = psy_ui_rectangle_width(self);
 	self->left = left;
 	self->right += width;
 }
 
-INLINE void psy_ui_rectangle_setleft(psy_ui_Rectangle* self, intptr_t left)
+INLINE void psy_ui_rectangle_setleft(psy_ui_Rectangle* self, double left)
 {	
 	self->left = left;	
 }
 
-INLINE intptr_t psy_ui_rectangle_left(const psy_ui_Rectangle* self)
+INLINE double psy_ui_rectangle_left(const psy_ui_Rectangle* self)
 {
 	return self->left;
 }
 
-INLINE void psy_ui_rectangle_setright_resize(psy_ui_Rectangle* self, intptr_t right)
+INLINE void psy_ui_rectangle_setright_resize(psy_ui_Rectangle* self, double right)
 {
-	intptr_t width;
+	double width;
 
 	width = psy_ui_rectangle_width(self);
 	self->left = self->right - width;
 	self->right = right;
 }
 
-INLINE void psy_ui_rectangle_setright(psy_ui_Rectangle* self, intptr_t right)
+INLINE void psy_ui_rectangle_setright(psy_ui_Rectangle* self, double right)
 {
 	self->right = right;
 }
 
-INLINE intptr_t psy_ui_rectangle_right(const psy_ui_Rectangle* self)
+INLINE double psy_ui_rectangle_right(const psy_ui_Rectangle* self)
 {
 	return self->right;
 }
 
-
-INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
-{
-	psy_ui_IntPoint rv;
-
-	rv.x = 0;
-	rv.y = 0;
-	return rv;
-}
-
-void psy_ui_setrectangle(psy_ui_Rectangle*, intptr_t left, intptr_t top, intptr_t width, intptr_t height);
-int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, intptr_t x, intptr_t y);
+void psy_ui_setrectangle(psy_ui_Rectangle*, double left, double top, double width, double height);
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, double x, double y);
 bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle*,
-	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2);
+	double x1, double y1, double x2, double y2);
 int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 	const psy_ui_Rectangle* other);
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
-void psy_ui_rectangle_expand(psy_ui_Rectangle*, intptr_t top, intptr_t right, intptr_t bottom, intptr_t left);
-void psy_ui_rectangle_move(psy_ui_Rectangle*, intptr_t dx, intptr_t dy);
+void psy_ui_rectangle_expand(psy_ui_Rectangle*, double top, double right, double bottom, double left);
+void psy_ui_rectangle_move(psy_ui_Rectangle*, double dx, double dy);
 
 void psy_ui_error(const char* err, const char* shorterr);
 
@@ -362,6 +361,20 @@ typedef struct {
 INLINE psy_ui_IntSize psy_ui_intsize_make(intptr_t width, intptr_t height)
 {
 	psy_ui_IntSize rv;
+
+	rv.width = width;
+	rv.height = height;
+	return rv;
+}
+
+typedef struct {
+	double width;
+	double height;
+} psy_ui_RealSize;
+
+INLINE psy_ui_RealSize psy_ui_realsize_make(double width, double height)
+{
+	psy_ui_RealSize rv;
 
 	rv.width = width;
 	rv.height = height;

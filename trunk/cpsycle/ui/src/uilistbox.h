@@ -40,7 +40,7 @@ typedef struct {
    psy_ui_Component component;
    struct psy_ui_ListBoxImp* imp;
    psy_Signal signal_selchanged;
-   uintptr_t charnumber;
+   double charnumber;
 } psy_ui_ListBox;
 
 #else
@@ -58,7 +58,7 @@ void psy_ui_listboxclient_clear(psy_ui_ListBoxClient*);
 intptr_t psy_ui_listboxclient_addtext(psy_ui_ListBoxClient*, const char* text);
 void psy_ui_listboxclient_setcursel(psy_ui_ListBoxClient*, intptr_t index);
 intptr_t psy_ui_listboxclient_cursel(psy_ui_ListBoxClient*);
-void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient*, uintptr_t num);
+void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient*, double num);
 
 typedef struct {
     psy_ui_Component component;
@@ -78,7 +78,7 @@ void psy_ui_listbox_setcursel(psy_ui_ListBox*, intptr_t index);
 intptr_t psy_ui_listbox_cursel(psy_ui_ListBox*);
 void psy_ui_listbox_selitems(psy_ui_ListBox*, int* items, int maxitems);
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
-void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, uintptr_t num);
+void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, double num);
 intptr_t psy_ui_listbox_count(psy_ui_ListBox*);
 
 INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)

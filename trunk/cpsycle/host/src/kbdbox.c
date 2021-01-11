@@ -149,8 +149,8 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_rectangle_intersect(&key->position, ev->x, ev->y)) {
 			psy_EventDriver* kbd;
 			psy_EventDriverInput input;
-			intptr_t rowheight;
-			intptr_t pos;
+			double rowheight;
+			double pos;
 			bool shift = FALSE;
 			bool ctrl = FALSE;
 			
@@ -184,8 +184,8 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 {
 	psy_ui_TextMetric tm;
-	intptr_t cpx;
-	intptr_t cpy;
+	double cpx;
+	double cpy;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolour(g, key->colour);

@@ -359,8 +359,8 @@ void clientresize(psy_ui_Component* self, psy_ui_Size size)
 
 	tm = psy_ui_component_textmetric(self);
 	self->imp->vtable->dev_clientresize(self->imp,
-		psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
+		(intptr_t)psy_ui_value_px(&size.width, &tm),
+		(intptr_t)psy_ui_value_px(&size.height, &tm));
 }
 
 void setposition(psy_ui_Component* self, psy_ui_Point topleft,
@@ -858,7 +858,7 @@ static void dev_hide(psy_ui_ComponentImp* self) { }
 static int dev_visible(psy_ui_ComponentImp* self) { return 0; }
 static int dev_drawvisible(psy_ui_ComponentImp* self) { return 0; }
 static psy_ui_Rectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_Rectangle rv = { 0, 0, 0, 0 }; return rv; }
-static void dev_move(psy_ui_ComponentImp* self, intptr_t x, intptr_t y) { }
+static void dev_move(psy_ui_ComponentImp* self, double x, double y) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, intptr_t width, intptr_t height) { }
 static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
@@ -1051,12 +1051,12 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 
 		tm = psy_ui_component_textmetric(self);
 		size = psy_ui_component_size(self);		
-		scrollstepy_px = psy_ui_value_px(&self->scrollstepy, &tm);
+		scrollstepy_px = (intptr_t)psy_ui_value_px(&self->scrollstepy, &tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxlines = (int)(psy_ui_value_px(&preferredsize.height, &tm) / (double)scrollstepy_px);
-		visilines = (psy_ui_value_px(&size.height, &tm) / scrollstepy_px);
+		visilines = (intptr_t)(psy_ui_value_px(&size.height, &tm) / scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);
-		currline = psy_ui_value_px(&scrolltop, &tm) / scrollstepy_px;
+		currline = (intptr_t)(psy_ui_value_px(&scrolltop, &tm) / scrollstepy_px);
 		if ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
 				psy_ui_OVERFLOW_VSCROLLCENTER) {
 			psy_ui_component_setverticalscrollrange(self, -visilines / 2,
@@ -1087,13 +1087,13 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 
 		tm = psy_ui_component_textmetric(self);
 		size = psy_ui_component_size(self);
-		scrollstepx_px = psy_ui_value_px(&self->scrollstepx, &tm);		
+		scrollstepx_px = (intptr_t)psy_ui_value_px(&self->scrollstepx, &tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxrows = (int)(psy_ui_value_px(&preferredsize.width, &tm) /
 			(double)scrollstepx_px + 0.5);
-		visirows = psy_ui_value_px(&size.width, &tm) / scrollstepx_px;
+		visirows = (intptr_t)(psy_ui_value_px(&size.width, &tm) / scrollstepx_px);
 		scrollleft = psy_ui_component_scrollleft(self);
-		currrow = psy_ui_value_px(&scrollleft, &tm) / scrollstepx_px;
+		currrow = (intptr_t)(psy_ui_value_px(&scrollleft, &tm) / scrollstepx_px);
 		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			
 		if (currrow > maxrows - visirows) {
 			currrow = psy_max(0, maxrows - visirows);

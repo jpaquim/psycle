@@ -29,7 +29,7 @@
 
 // psy_ui_win_ImpFactory
 
-static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*, psy_ui_IntSize size);
+static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*, psy_ui_RealSize size);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory*, uintptr_t* platformdc);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(psy_ui_win_ImpFactory*, struct psy_ui_Bitmap*);
 static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_win_ImpFactory*, const psy_ui_FontInfo*);
@@ -117,7 +117,7 @@ psy_ui_win_ImpFactory* psy_ui_win_impfactory_allocinit(void)
 	return rv;
 }
 
-psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self, psy_ui_IntSize size)
+psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self, psy_ui_RealSize size)
 {
 	psy_ui_BitmapImp* rv;
 

@@ -22,11 +22,11 @@ extern "C" {
 
 typedef struct psy_ui_ScrollBarPane {
     psy_ui_Component component;
-    intptr_t pos;
-    intptr_t screenpos;
-    intptr_t scrollmax;
-    intptr_t scrollmin;
-    intptr_t dragoffset;
+    double pos;
+    double screenpos;
+    double scrollmax;
+    double scrollmin;
+    double dragoffset;
     int drag;
     psy_ui_Orientation orientation;
     psy_Signal signal_changed;
@@ -42,17 +42,17 @@ typedef struct {
     psy_ui_Button more;
     psy_ui_ScrollBarPane sliderpane;
     psy_Signal signal_changed;
-    psy_Signal signal_clicked;
+    psy_Signal signal_clicked;    
 } psy_ui_ScrollBar;
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);
 void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar*, psy_ui_Orientation);
-intptr_t psy_ui_scrollbar_position(psy_ui_ScrollBar*);
-void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar*, intptr_t scrollmax,
-    intptr_t scrollmin);
-void psy_ui_scrollbar_scrollrange(psy_ui_ScrollBar* self, intptr_t* scrollmin,
-    intptr_t* scrollmax);
-void psy_ui_scrollbar_setthumbposition(psy_ui_ScrollBar*, intptr_t pos);
+double psy_ui_scrollbar_position(psy_ui_ScrollBar*);
+void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar*, double scrollmax,
+    double scrollmin);
+void psy_ui_scrollbar_scrollrange(psy_ui_ScrollBar* self, double* scrollmin,
+    double* scrollmax);
+void psy_ui_scrollbar_setthumbposition(psy_ui_ScrollBar*, double pos);
 
 INLINE psy_ui_Component* psy_ui_scrollbar_base(psy_ui_ScrollBar* self)
 {

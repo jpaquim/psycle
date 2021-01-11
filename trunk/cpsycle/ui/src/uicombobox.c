@@ -124,15 +124,15 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
-	psy_ui_IntPoint arrow_down[4];
-	psy_ui_IntPoint arrow_left[4];
-	psy_ui_IntPoint arrow_right[4];
-	intptr_t ax;
-	intptr_t ay;
+	psy_ui_RealPoint arrow_down[4];
+	psy_ui_RealPoint arrow_left[4];
+	psy_ui_RealPoint arrow_right[4];
+	double ax;
+	double ay;
 	intptr_t sel;
 	psy_ui_TextMetric tm;
-	intptr_t vcenter;
-	intptr_t varrowcenter;
+	double vcenter;
+	double varrowcenter;
 	uint32_t arrowcolour = 0x00777777;
 	uint32_t arrowhighlightcolour = 0x00FFFFFF;
 

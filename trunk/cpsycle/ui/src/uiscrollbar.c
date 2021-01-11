@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -17,7 +18,7 @@ static void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane*, psy_ui_Mouse
 static void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane*, psy_ui_MouseEvent*);
 static void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane*, psy_ui_MouseEvent*);
 static double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane*);
-static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*, intptr_t pos);
+static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*, double pos);
 
 static psy_ui_ComponentVtable psy_ui_scrollbarpane_vtable;
 static int psy_ui_scrollbarpane_vtable_initialized = 0;
@@ -72,13 +73,10 @@ void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self, psy_ui_Orie
 
 void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self, psy_ui_Graphics* g)
 {
-	psy_ui_TextMetric tm;
-	psy_ui_IntSize size;
+	psy_ui_RealSize size;
 	psy_ui_Rectangle r;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
-		&tm);
+	
+	size = psy_ui_component_sizepx(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		r = psy_ui_rectangle_make(self->screenpos, 2, 20, size.height - 4);		
 	} else {
@@ -113,13 +111,10 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 {
 	if (self->drag) {
 		double step;
-		intptr_t pos;
-		psy_ui_IntSize size;
-		psy_ui_TextMetric tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
-			&tm);
+		double pos;
+		psy_ui_RealSize size;		
+		
+		size = psy_ui_component_sizepx(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->screenpos = max(0, min(ev->x - self->dragoffset, size.width - 20));
 		} else {
@@ -129,7 +124,7 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 		psy_ui_component_update(&self->component);
 		pos = self->scrollmin;
 		step = psy_ui_scrollbarpane_step(self);
-		pos = (intptr_t)((self->screenpos) * step) + self->scrollmin;		
+		pos = ((self->screenpos) * step) + self->scrollmin;		
 		if (pos < self->scrollmin) {
 			pos = self->scrollmin;
 		} else if (pos > self->scrollmax) {
@@ -142,7 +137,7 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 	}
 }
 
-void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self, intptr_t pos)
+void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self, double pos)
 {
 	double step;
 
@@ -153,7 +148,7 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self, intptr_t 
 		pos = self->scrollmax;
 	}
 	step = psy_ui_scrollbarpane_step(self);
-	self->screenpos = (intptr_t)(1.0 / step * (pos - self->scrollmin));
+	self->screenpos = (1.0 / step) * floor(pos - self->scrollmin);
 	self->pos = pos;
 	psy_ui_component_invalidate(&self->component);
 }
@@ -161,21 +156,17 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self, intptr_t 
 double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane* self)
 {
 	double rv;
-	psy_ui_IntSize size;
-	psy_ui_TextMetric tm;
-	psy_ui_IntSize panesize;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	panesize = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
-		&tm);
-
+	psy_ui_RealSize size;	
+	psy_ui_RealSize panesize;
+	
+	panesize = psy_ui_component_sizepx(&self->component);
 	size.width = 20;
 	size.height = 20;
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		rv = (double)(self->scrollmax - self->scrollmin) /
+		rv = (self->scrollmax - self->scrollmin) /
 			(panesize.width - size.width);
 	} else if (self->orientation == psy_ui_VERTICAL) {
-		rv = (double)(self->scrollmax - self->scrollmin) /
+		rv = (self->scrollmax - self->scrollmin) /
 			(panesize.height - size.height);
 	} else {
 		rv = 0.0;
@@ -258,19 +249,19 @@ void psy_ui_scrollbar_onmousewheel(psy_ui_ScrollBar* self, psy_ui_Component* sen
 
 }
 
-intptr_t psy_ui_scrollbar_position(psy_ui_ScrollBar* self)
+double psy_ui_scrollbar_position(psy_ui_ScrollBar* self)
 {	
 	return self->sliderpane.pos;
 }
 
-void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar* self, intptr_t scrollmin, intptr_t scrollmax)
+void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar* self, double scrollmin, double scrollmax)
 {
 	self->sliderpane.scrollmin = scrollmin;
 	self->sliderpane.scrollmax = scrollmax;
 	self->sliderpane.pos = scrollmin;
 }
 
-void psy_ui_scrollbar_scrollrange(psy_ui_ScrollBar* self, intptr_t* scrollmin, intptr_t* scrollmax)
+void psy_ui_scrollbar_scrollrange(psy_ui_ScrollBar* self, double* scrollmin, double* scrollmax)
 {
 	*scrollmin = self->sliderpane.scrollmin;
 	*scrollmax = self->sliderpane.scrollmax;
@@ -300,7 +291,7 @@ void psy_ui_scrollbar_onscrollpaneclicked(psy_ui_ScrollBar* self, psy_ui_ScrollB
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void psy_ui_scrollbar_setthumbposition(psy_ui_ScrollBar* self, intptr_t pos)
+void psy_ui_scrollbar_setthumbposition(psy_ui_ScrollBar* self, double pos)
 {
 	psy_ui_scrollbarpane_setthumbposition(&self->sliderpane, pos);
 }

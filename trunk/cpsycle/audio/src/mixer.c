@@ -1583,8 +1583,11 @@ psy_audio_MachineParam* tweakparameter(psy_audio_Mixer* self, uintptr_t param)
 {
 	psy_audio_MachineParam* rv = NULL;
 
-	int digitx0 = param / 16;
-	int digit0x = param % 16;
+	uintptr_t digitx0;
+	uintptr_t digit0x;
+	
+	digitx0 = param / 16;
+	digit0x = param % 16;
 // [0x]:
 //     0->Master volume
 //     1..C->Input volumes
@@ -2026,7 +2029,8 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 			&& slot != wire->_inputMachine && inputmachine)
 		{
 			//Do not create the hidden wire from mixer send to the send machine.
-			int outWire = psy_audio_legacywires_findlegacyoutput(songfile->legacywires, wire->_inputMachine, slot);
+			int outWire = psy_audio_legacywires_findlegacyoutput(
+				songfile->legacywires, wire->_inputMachine, slot);
 			if (outWire != -1) {	
 				psy_audio_InputChannel* channel;
 

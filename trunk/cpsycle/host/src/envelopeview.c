@@ -18,12 +18,12 @@ static void envelopebox_ondestroy(EnvelopeBox*, psy_ui_Component* sender);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmousemove(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmouseup(EnvelopeBox*, psy_ui_MouseEvent*);
-static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, intptr_t x, intptr_t y);
+static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y);
 static void envelopebox_shiftsuccessors(EnvelopeBox* self, double timeshift);
-static intptr_t envelopebox_pxvalue(EnvelopeBox*, double value);
-static intptr_t envelopebox_pxtime(EnvelopeBox*, psy_dsp_seconds_t t);
-static psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox*, intptr_t px);
-static psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox*, intptr_t x, intptr_t y);
+static double envelopebox_pxvalue(EnvelopeBox*, double value);
+static double envelopebox_pxtime(EnvelopeBox*, psy_dsp_seconds_t t);
+static psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox*, double px);
+static psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox*, double x, double y);
 static psy_dsp_seconds_t envelopebox_displaymaxtime(EnvelopeBox*);
 
 static void checkadjustpointrange(psy_List* pointnode);
@@ -283,7 +283,7 @@ void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 	}	
 }
 
-void envelopebox_setzoom(EnvelopeBox* self, float zoomleft, float zoomright)
+void envelopebox_setzoom(EnvelopeBox* self, double zoomleft, double zoomright)
 {
 	self->zoomleft = zoomleft;
 	self->zoomright = zoomright;
@@ -301,8 +301,8 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 
 		pt = (psy_dsp_EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = (1.f - ((ev->y - self->spacing.top.quantity.px) /
-			(float)self->cy)) / self->modamount;
+		pt->value = (psy_dsp_amp_t)((1.0 - ((ev->y - self->spacing.top.quantity.px) /
+			self->cy)) / (double)(self->modamount));
 		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self, ev->x);
 		checkadjustpointrange(self->dragpoint);
 		envelopebox_shiftsuccessors(self, pt->time - oldtime);		
@@ -358,7 +358,7 @@ void envelopebox_onmouseup(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 	self->dragpoint = NULL;	
 }
 
-psy_List* envelopebox_hittestpoint(EnvelopeBox* self, intptr_t x, intptr_t y)
+psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y)
 {
 	psy_List* p;
 	psy_List* points;
@@ -382,43 +382,44 @@ psy_List* envelopebox_hittestpoint(EnvelopeBox* self, intptr_t x, intptr_t y)
 	return p;
 }
 
-psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox* self, intptr_t x,
-	intptr_t y)
+psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox* self, double x,
+	double y)
 {	
 	return psy_dsp_envelopepoint_make(
 		envelopebox_pxtotime(self, x),
-		1.f - (y - self->spacing.top.quantity.px) / (float)self->cy);
+		(psy_dsp_amp_t)(1.0 - (y - self->spacing.top.quantity.px) / self->cy));
 }
 
-intptr_t envelopebox_pxvalue(EnvelopeBox* self, double value)
+double envelopebox_pxvalue(EnvelopeBox* self, double value)
 {
-	return (int)(self->cy - value * self->cy) +
+	return (self->cy - value * self->cy) +
 		self->spacing.top.quantity.px;
 }
 
-intptr_t envelopebox_pxtime(EnvelopeBox* self, psy_dsp_seconds_t t)
+double envelopebox_pxtime(EnvelopeBox* self, psy_dsp_seconds_t t)
 {
-	float offsetstep = (float)(float)envelopebox_displaymaxtime(self)
+	double offsetstep;
+	
+	offsetstep= envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
-	return (int)((t - (envelopebox_displaymaxtime(self) *
+	return ((t - (envelopebox_displaymaxtime(self) *
 		self->zoomleft)) / offsetstep) + self->spacing.left.quantity.px;
 }
 
-psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox* self, intptr_t px)
+psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
 {
-	psy_dsp_seconds_t t;
+	double t;
 
-	float offsetstep = (float)envelopebox_displaymaxtime(self)
+	double offsetstep = envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
 	t = (offsetstep * (px - self->spacing.left.quantity.px)) +
 		(envelopebox_displaymaxtime(self) * self->zoomleft);
 	if (t < 0) {
 		t = 0;
-	} else
-	if (t > envelopebox_displaymaxtime(self)) {
+	} else if (t > envelopebox_displaymaxtime(self)) {
 		t = envelopebox_displaymaxtime(self);
 	}
-	return t;
+	return (psy_dsp_seconds_t)t;
 }
 
 float envelopebox_displaymaxtime(EnvelopeBox* self)

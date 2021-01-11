@@ -42,7 +42,7 @@ static uint8_t whitekeytokey(uint8_t whitekey)
 	return octave * 12 + numkey[offset];
 }
 
-static uint8_t screentokey(intptr_t x, double keysize)
+static uint8_t screentokey(double x, double keysize)
 {
 	uint8_t rv;
 	uint8_t numwhitekey;	
@@ -52,9 +52,9 @@ static uint8_t screentokey(intptr_t x, double keysize)
 	// 0 1 2 3 4 5 6 7 8 9 10 11
 	// c   d   e f   g   a    h 
 	if ((rv % 12) != 4 && (rv % 12) != 11) {
-		intptr_t delta;
+		double delta;
 
-		delta = x - (intptr_t)(numwhitekey * keysize);
+		delta = x - (numwhitekey * keysize);
 		if (delta > 0.5 * keysize) {
 			++rv;
 		}
@@ -108,13 +108,10 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 	int key;
 	double cp = 0;
 	float top = 0.50;
-	float bottom = 1 - top;
-	psy_ui_TextMetric tm;
-	psy_ui_IntSize size;
-
-	tm = psy_ui_component_textmetric(&self->component);	
-	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
-		&tm);	
+	float bottom = 1 - top;	
+	psy_ui_RealSize size;
+	
+	size = psy_ui_component_sizepx(&self->component);		
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));
@@ -123,8 +120,8 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 			psy_ui_Rectangle r;
 
 			psy_ui_setrectangle(&r,
-				(int)(cp), 0,
-				(int)(self->metrics.keysize + 1), size.height);
+				cp, 0,
+				(self->metrics.keysize + 1), size.height);
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));
 			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
 			cp += self->metrics.keysize;			
@@ -186,7 +183,7 @@ static void instrumententryview_onmousemove(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
 static void instrumententryview_onmouseup(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
-static float instrumententryview_keysize(InstrumentEntryView*);
+static double instrumententryview_keysize(InstrumentEntryView*);
 static void instrumententryview_updatemetrics(InstrumentEntryView*);
 
 static psy_ui_ComponentVtable instrumententryview_vtable;
@@ -251,7 +248,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		psy_List* p;		
 		uintptr_t c = 0;		
 		psy_ui_TextMetric tm;
-		psy_ui_IntSize size;
+		psy_ui_RealSize size;
 		uint8_t keymin = 0;
 		uint8_t keymax = psy_audio_NOTECOMMANDS_RELEASE;
 		uint8_t key;
@@ -264,13 +261,12 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			}
 		}
 		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_intsize_init_size(
-			psy_ui_component_size(&self->component), &tm);
+		size = psy_ui_component_sizepx(&self->component);
 		cpy = 0;
 		if (self->selected != UINTPTR_MAX && self->instrument && self->instrument->entries) {
 			psy_audio_InstrumentEntry* entry;
-			intptr_t startx;
-			intptr_t endx;
+			double startx;
+			double endx;
 			psy_ui_Rectangle r;
 			psy_ui_Value scrollleft;
 			psy_ui_Value scrolltop;
@@ -350,11 +346,11 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		}
 	} else {
 		psy_ui_TextMetric tm;
-		psy_ui_IntSize size;
+		psy_ui_RealSize size;
 		static const char* noinst = "No Instrument";
 
 		tm = psy_ui_component_textmetric(&self->component);
-		size =  psy_ui_component_intsize(&self->component);
+		size =  psy_ui_component_sizepx(&self->component);
 		psy_ui_textout(g,
 			(size.width - tm.tmAveCharWidth * strlen(noinst)) / 2,
 			(size.height - tm.tmHeight) / 2,
@@ -372,7 +368,7 @@ void instrumententryview_onpreferredsize(InstrumentEntryView* self, psy_ui_Size*
 {
 	if (self->instrument && self->instrument->entries) {		
 		rv->height = psy_ui_value_makepx(
-			(self->metrics.lineheight * 3) * psy_list_size(self->instrument->entries));
+			(self->metrics.lineheight * 3) * (double)psy_list_size(self->instrument->entries));
 	} else {
 		*rv = psy_ui_size_zero();
 	}
@@ -417,7 +413,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 		if (self->instrument) {
 			uintptr_t numentry;	
 
-			numentry = ev->y / (self->metrics.lineheight * 3);
+			numentry = (uintptr_t)(ev->y / (self->metrics.lineheight * 3));
 			if (numentry < psy_list_size(
 					psy_audio_instrument_entries(self->instrument))) {
 				self->selected = numentry;
@@ -449,7 +445,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 	}
 }
 
-float instrumententryview_keysize(InstrumentEntryView* self)
+double instrumententryview_keysize(InstrumentEntryView* self)
 {	
 	int key;
 	int keymin = 0;
@@ -466,7 +462,7 @@ float instrumententryview_keysize(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	return psy_ui_value_px(&size.width, &tm) / (float)numwhitekeys;
+	return psy_ui_value_px(&size.width, &tm) / numwhitekeys;
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,

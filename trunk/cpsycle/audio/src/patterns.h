@@ -25,7 +25,8 @@ typedef struct {
 
 void psy_audio_patterns_init(psy_audio_Patterns*);
 void psy_audio_patterns_dispose(psy_audio_Patterns*);
-void psy_audio_patterns_insert(psy_audio_Patterns*,uintptr_t slot, psy_audio_Pattern*);
+psy_audio_Pattern* psy_audio_patterns_insert(psy_audio_Patterns*,
+	uintptr_t slot, psy_audio_Pattern*);
 uintptr_t psy_audio_patterns_append(psy_audio_Patterns*, psy_audio_Pattern*);
 psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns*, uintptr_t slot);
 

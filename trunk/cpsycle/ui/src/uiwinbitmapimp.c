@@ -36,7 +36,7 @@ static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 	}
 }
 
-void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_IntSize size)
+void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 {
 	psy_ui_bitmap_imp_init(&self->imp);
 	imp_vtable_init(self);
@@ -48,7 +48,8 @@ void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_IntSize size)
 
 		hdc = GetDC(NULL);
 		SaveDC(hdc);
-		self->bitmap = CreateCompatibleBitmap(hdc, size.width, size.height);
+		self->bitmap = CreateCompatibleBitmap(hdc,
+			(int)size.width, (int)size.height);
 		RestoreDC(hdc, -1);
 		ReleaseDC(NULL, hdc);
 	}	

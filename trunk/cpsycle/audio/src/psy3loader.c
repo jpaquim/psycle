@@ -1695,7 +1695,9 @@ void psy_audio_psy3loader_machineloadchunk(
 	} else {
 		psy_audio_machine_seteditname(machine, editname);
 	}	
-	psy_audio_machine_loadspecific(machine, self->songfile, index);
+	if (!replaced) {
+		psy_audio_machine_loadspecific(machine, self->songfile, index);
+	}
 	if (psyfile_currchunkversion(self->fp) >= 1) {
 		//TODO: What to do on possibly wrong wire load?
 		psy_audio_machine_loadwiremapping(machine, self->songfile, index);

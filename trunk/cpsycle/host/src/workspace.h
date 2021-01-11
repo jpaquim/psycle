@@ -110,6 +110,7 @@ typedef struct {
 	psy_Signal signal_beforesavesong;
 	psy_Signal signal_showparameters;
 	psy_Signal signal_viewselected;
+	psy_Signal signal_focusview;
 	psy_Signal signal_parametertweak;
 	psy_Signal signal_terminal_error;
 	psy_Signal signal_terminal_warning;
@@ -142,7 +143,7 @@ typedef struct {
 	int recordtweaks;
 	psy_audio_SequenceEntry* lastentry;
 	psy_audio_Pattern patternpaste;
-	psy_List* sequencepaste;	
+	psy_audio_SequencePaste sequencepaste;
 	int navigating;
 	// ui
 	MaximizedView maximizeview;
@@ -157,7 +158,7 @@ typedef struct {
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
-void workspace_disposesequencepaste(Workspace*);
+void workspace_clearsequencepaste(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_newsong(Workspace*);
@@ -211,6 +212,7 @@ void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
 void workspace_selectview(Workspace*, uintptr_t view, uintptr_t section, int option);
+void workspace_focusview(Workspace*);
 void workspace_saveview(Workspace*);
 void workspace_restoreview(Workspace*);
 void workspace_floatsection(Workspace*, int view, uintptr_t section);

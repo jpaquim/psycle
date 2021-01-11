@@ -27,21 +27,22 @@ typedef struct {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_tweaked;
-	intptr_t cx;
-	intptr_t cy;
+	double cx;
+	double cy;
 	psy_dsp_Envelope* settings;
 	psy_List* dragpoint;
 	uintptr_t dragpointindex;
 	int sustainstage;
 	int dragrelative;
 	psy_ui_Margin spacing;	
-	float zoomleft;
-	float zoomright;
+	double zoomleft;
+	double zoomright;
 	psy_dsp_amp_t modamount;
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
-void envelopebox_setenvelope(EnvelopeBox* self, psy_dsp_Envelope*);
+void envelopebox_setenvelope(EnvelopeBox*, psy_dsp_Envelope*);
+void envelopebox_setzoom(EnvelopeBox*, double zoomleft, double zoomright);
 
 INLINE void envelopebox_setmodamount(EnvelopeBox* self, psy_dsp_amp_t amount)
 {

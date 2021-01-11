@@ -14,27 +14,26 @@ typedef struct psy_audio_SequenceInsertCommand {
 	psy_audio_SequenceSelection* selection;
 	psy_audio_OrderIndex index;
 	uintptr_t patidx;
-	psy_audio_SequenceSelection restoreselection;
+	psy_audio_SequenceSelection restoreselection;	
 } psy_audio_SequenceInsertCommand;
 
 psy_audio_SequenceInsertCommand* psy_audio_sequenceinsertcommand_alloc(
 	psy_audio_Sequence*, psy_audio_SequenceSelection* selection,
 	psy_audio_OrderIndex, uintptr_t patidx);
 
+// psy_audio_SequenceRemoveCommand
+//
 typedef struct psy_audio_SequenceRemoveCommand {
 	// inherits
 	psy_Command command;
 	psy_audio_Sequence* sequence;
-	psy_audio_SequenceSelection* selection;
-	psy_audio_OrderIndex index;
-	uintptr_t patidx;
+	psy_audio_SequenceSelection* selection;		
 	psy_audio_SequenceSelection restoreselection;
-	bool success;
+	psy_audio_Sequence restoresequence;	
 } psy_audio_SequenceRemoveCommand;
 
 psy_audio_SequenceRemoveCommand* psy_audio_sequenceremovecommand_alloc(
-	psy_audio_Sequence*, psy_audio_SequenceSelection* selection,
-	psy_audio_OrderIndex);
+	psy_audio_Sequence*, psy_audio_SequenceSelection* selection);
 
 typedef struct psy_audio_SequenceClearCommand {
 	// inherits
@@ -47,6 +46,21 @@ typedef struct psy_audio_SequenceClearCommand {
 
 psy_audio_SequenceClearCommand* psy_audio_sequenceclearcommand_alloc(
 	psy_audio_Sequence*, psy_audio_SequenceSelection* selection);
+
+typedef struct psy_audio_SequenceChangePatternCommand {
+	// inherits
+	psy_Command command;
+	psy_audio_Sequence* sequence;
+	psy_audio_SequenceSelection* selection;
+	psy_audio_SequenceSelection restoreselection;
+	psy_audio_Sequence restoresequence;
+	intptr_t step;
+	bool success;
+} psy_audio_SequenceChangePatternCommand;
+
+psy_audio_SequenceChangePatternCommand* psy_audio_sequencechangepatterncommand_alloc(
+	psy_audio_Sequence*, psy_audio_SequenceSelection* selection,
+	intptr_t step);
 
 
 #ifdef __cplusplus
