@@ -89,8 +89,9 @@ static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*, int view,
+static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, int option);
+static void mainframe_onfocusview(MainFrame*, Workspace*);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
@@ -507,12 +508,11 @@ void mainframe_initmainviews(MainFrame* self)
 		mainframe_onexport);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
+	psy_signal_connect(&self->workspace.signal_focusview, self,
+		mainframe_onfocusview);	
 	confirmbox_init(&self->checkunsavedbox,
 		psy_ui_notebook_base(&self->notebook),
 		&self->workspace);
-//	confirm_init(&self->confirm,
-//		psy_ui_notebook_base(&self->notebook),
-//		&self->workspace);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
 }
@@ -802,8 +802,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 				if (tab) {
 					tab->checkstate = TRUE;
 					psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
-				}
+				}				
 			}
+			psy_ui_component_setfocus(&self->patternview.properties.component);
 			break;
 		case CMD_IMM_MAXPATTERN:
 			mainframe_maximizeorminimizeview(self);
@@ -1178,7 +1179,7 @@ void mainframe_onstartup(MainFrame* self)
 	self->sequenceview.component.preventpreferredsize = TRUE;
 }
 
-void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,
 	uintptr_t section, int option)
 {	
 	if (index != GEARVIEW) {
@@ -1223,6 +1224,13 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 				self->machineview.wireview.addeffect = 1;
 			}
 		}
+	}
+}
+
+void mainframe_onfocusview(MainFrame* self, Workspace* sender)
+{
+	if (psy_ui_notebook_activepage(&self->notebook)) {
+		psy_ui_component_setfocus(psy_ui_notebook_activepage(&self->notebook));
 	}
 }
 

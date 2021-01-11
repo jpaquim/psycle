@@ -86,14 +86,14 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				intptr_t centerx;
 				intptr_t centery;
 
-				centerx = (floor(psy_ui_value_px(&size.width, &tm)) -
+				centerx = (intptr_t)(floor(psy_ui_value_px(&size.width, &tm)) -
 					floor(psy_ui_value_px(&componentsize.width, &tm))) / 2;
-				centery = (floor(psy_ui_value_px(&size.height, &tm)) -
+				centery = (intptr_t)(floor(psy_ui_value_px(&size.height, &tm)) -
 					floor(psy_ui_value_px(&componentsize.height, &tm))) / 2;
 				psy_ui_component_setposition(component,
 					psy_ui_point_make(
-						psy_ui_value_makepx(centerx),
-						psy_ui_value_makepx(centery)),
+						psy_ui_value_makepx((double)centerx),
+						psy_ui_value_makepx((double)centery)),
 					componentsize);
 			} else if (component->align == psy_ui_ALIGN_FILL) {
 				psy_ui_component_setposition(component,
@@ -138,7 +138,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				cp_bottomright.y -= floor(psy_ui_value_px(&componentsize.height,
 					&c_tm));
 			} else if (component->align == psy_ui_ALIGN_RIGHT) {
-				intptr_t requiredcomponentwidth;
+				double requiredcomponentwidth;
 
 				requiredcomponentwidth =
 					floor(psy_ui_value_px(&componentsize.width, &c_tm)) +
@@ -159,11 +159,11 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				if ((self->component->alignexpandmode & psy_ui_HORIZONTALEXPAND)
 						== psy_ui_HORIZONTALEXPAND) {
 				} else {
-					intptr_t requiredcomponentwidth;
+					double requiredcomponentwidth;
 
-					requiredcomponentwidth = psy_ui_value_px(
+					requiredcomponentwidth = floor(psy_ui_value_px(
 						&componentsize.width, &c_tm) +
-						floor(psy_ui_margin_width_px(&component->margin, &tm));
+						floor(psy_ui_margin_width_px(&component->margin, &tm)));
 					if (cp_topleft.x + requiredcomponentwidth >
 						floor(psy_ui_value_px(&size.width, &c_tm))) {
 						psy_List* w;						
@@ -337,10 +337,10 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 					} else
 					if (component->align == psy_ui_ALIGN_TOP ||
 							component->align == psy_ui_ALIGN_BOTTOM) {
-						cp.y += psy_ui_value_px(&componentsize.height, &c_tm) +
-							psy_ui_margin_height_px(&component->margin, &c_tm);
+						cp.y += (intptr_t)psy_ui_value_px(&componentsize.height, &c_tm) +
+							(intptr_t)psy_ui_margin_height_px(&component->margin, &c_tm);
 						if (psy_ui_value_px(&maxsize.height, &c_tm) < cp.y) {
-							maxsize.height = psy_ui_value_makepx(cp.y);
+							maxsize.height = psy_ui_value_makepx((double)cp.y);
 						}
 						if (psy_ui_value_px(&maxsize.width, &tm) <
 								psy_ui_value_px(&componentsize.width, &c_tm) +
@@ -353,13 +353,13 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 						}
 					} else
 					if (component->align == psy_ui_ALIGN_RIGHT) {
-						cp.x += psy_ui_value_px(&componentsize.width, &c_tm) +
-							psy_ui_margin_width_px(&component->margin, &c_tm);
-						cp_bottomright.x += psy_ui_value_px(
+						cp.x += (intptr_t)psy_ui_value_px(&componentsize.width, &c_tm) +
+							(intptr_t)psy_ui_margin_width_px(&component->margin, &c_tm);
+						cp_bottomright.x += (intptr_t)(psy_ui_value_px(
 							&componentsize.width, &c_tm) +
-							psy_ui_margin_width_px(&component->margin, &c_tm);
-						if (psy_ui_value_px(&maxsize.width, &c_tm) < cp.x) {
-							maxsize.width = psy_ui_value_makepx(cp.x);
+							psy_ui_margin_width_px(&component->margin, &c_tm));
+						if ((intptr_t)psy_ui_value_px(&maxsize.width, &c_tm) < cp.x) {
+							maxsize.width = psy_ui_value_makepx((double)cp.x);
 						}
 						if (psy_ui_value_px(&maxsize.height, &c_tm) < cp.y +
 								psy_ui_value_px(&componentsize.height, &c_tm) +
@@ -376,23 +376,23 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 						if (psy_ui_value_px(&size.width, &tm) != 0) {
 							intptr_t requiredcomponentwidth;
 
-							requiredcomponentwidth = psy_ui_value_px(
+							requiredcomponentwidth = (intptr_t)psy_ui_value_px(
 									&componentsize.width, &c_tm) +
-								psy_ui_margin_width_px(&component->margin, &tm);
+								(intptr_t)psy_ui_margin_width_px(&component->margin, &tm);
 							if (cp.x + requiredcomponentwidth >
 									psy_ui_value_px(&size.width, &c_tm)) {
-								cp.y = psy_ui_value_px(&maxsize.height, &tm);
+								cp.y = (intptr_t)psy_ui_value_px(&maxsize.height, &tm);
 								cp.x = 0;
 								cp_topleft.x = 0;
 							}						
 						}						
-						cp.x += psy_ui_value_px(&componentsize.width, &c_tm) +
-							psy_ui_margin_width_px(&component->margin, &c_tm);
-						cp_topleft.x += psy_ui_value_px(&componentsize.width,
+						cp.x += (intptr_t)psy_ui_value_px(&componentsize.width, &c_tm) +
+							(intptr_t)psy_ui_margin_width_px(&component->margin, &c_tm);
+						cp_topleft.x += (intptr_t)psy_ui_value_px(&componentsize.width,
 								&c_tm) +
-							psy_ui_margin_width_px(&component->margin, &c_tm);
+							(intptr_t)psy_ui_margin_width_px(&component->margin, &c_tm);
 						if (psy_ui_value_px(&maxsize.width, &tm) < cp.x) {
-							maxsize.width = psy_ui_value_makepx(cp.x);
+							maxsize.width = psy_ui_value_makepx((double)cp.x);
 						}
 						if (psy_ui_value_px(&maxsize.height, &tm) < cp.y +
 								psy_ui_value_px(&componentsize.height, &c_tm) +

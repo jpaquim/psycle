@@ -45,8 +45,8 @@ void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 	scrollzoomvtable_init(self);
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
-	self->start = 0.f;
-	self->end = 1.f;
+	self->start = 0.0;
+	self->end = 1.0;
 	self->dragmode = SCROLLZOOM_DRAG_NONE;
 	self->dragoffset = 0;	
 	psy_signal_init(&self->signal_customdraw);
@@ -62,51 +62,45 @@ void scrollzoom_ondestroy(ScrollZoom* self, psy_ui_Component* sender)
 }
 
 void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
-{
-	psy_ui_Rectangle r;
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-	int zoomleftx;
-	int zoomrightx;
+{	
+	psy_ui_RealSize size;	
+	double zoomleftpx;
+	double zoomrightpx;
 
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
-	zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
-	if (zoomleftx == zoomrightx) {
-		++zoomrightx;
+	size = psy_ui_component_sizepx(&self->component);	
+	zoomleftpx = size.width * self->start;
+	zoomrightpx = size.width * self->end;
+	if (zoomleftpx == zoomrightpx) {
+		++zoomrightpx;
 	}	
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));
-	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx,
-		psy_ui_value_px(&size.height, &tm));
-	psy_ui_drawrectangle(g, r);
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));	
+	psy_ui_drawrectangle(g, psy_ui_rectangle_make(
+		zoomleftpx, 0, zoomrightpx - zoomleftpx, size.height));
 	psy_signal_emit(&self->signal_customdraw, self, 1, g);
 }
 
 void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-	intptr_t zoomleftx;
-	intptr_t zoomrightx;
+	psy_ui_RealSize size;	
+	double zoomleftpx;
+	double zoomrightpx;
 	
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
-	if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
+	size = psy_ui_component_sizepx(&self->component);	
+	zoomrightpx = size.width * self->end;
+	if (ev->x >= zoomrightpx - 5.0 && ev->x < zoomrightpx + 5.0) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		self->dragmode = SCROLLZOOM_DRAG_RIGHT;
-		self->dragoffset = ev->x - zoomrightx;
+		self->dragoffset = ev->x - zoomrightpx;
 	} else {	
-		zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
-		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
+		zoomleftpx = size.width * self->start;
+		if (ev->x >= zoomleftpx - 5.0 && ev->x < zoomleftpx + 5.0) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			self->dragmode = SCROLLZOOM_DRAG_LEFT;
-			self->dragoffset = ev->x - zoomleftx;
+			self->dragoffset = ev->x - zoomleftpx;
 		} else
-		if (ev->x > zoomleftx && ev->x < zoomrightx) {
+		if (ev->x > zoomleftpx && ev->x < zoomrightpx) {
 			self->dragmode = SCROLLZOOM_DRAG_MOVE;
-			self->dragoffset = ev->x - zoomleftx;
+			self->dragoffset = ev->x - zoomleftpx;
 		}
 	}
 	psy_ui_component_capture(&self->component);
@@ -114,84 +108,72 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 
 void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	psy_ui_RealSize size;
 
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_sizepx(&self->component);	
 	if (self->dragmode == SCROLLZOOM_DRAG_NONE) {
-		int zoomleftx;
-		int zoomrightx;
+		double zoomleftpx;
+		double zoomrightpx;
 
-		zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
-		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
+		zoomleftpx = size.width * self->start;
+		if (ev->x >= zoomleftpx - 5 && ev->x < zoomleftpx + 5) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
-			zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
-			if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
+			zoomrightpx = size.width * self->end;
+			if (ev->x >= zoomrightpx - 5 && ev->x < zoomrightpx + 5) {
 				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}
-	} else 
-	if (self->dragmode == SCROLLZOOM_DRAG_LEFT) {
-		float zoomold;
+	} else if (self->dragmode == SCROLLZOOM_DRAG_LEFT) {
+		double zoomold;
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->start;
-		self->start = (ev->x - self->dragoffset) /
-			(float)psy_ui_value_px(&size.width, &tm);
+		self->start = (ev->x - self->dragoffset) / size.width;
 		if (self->start > self->end) {
 			self->start = self->end;
-		} else
-		if (self->start < 0.f) {
-			self->start = 0.f;
-		} else
-		if (self->start > 1.f) {
-			self->start = 1.f;
+		} else if (self->start < 0.0) {
+			self->start = 0.0;
+		} else if (self->start > 1.0) {
+			self->start = 1.0;
 		}
 		if (zoomold != self->end) {
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
-	} else
-	if (self->dragmode == SCROLLZOOM_DRAG_RIGHT) {
-		float zoomold;
+	} else if (self->dragmode == SCROLLZOOM_DRAG_RIGHT) {
+		double zoomold;
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->end;
-		self->end = (ev->x - self->dragoffset) /
-			(float)psy_ui_value_px(&size.width, &tm);
+		self->end = (ev->x - self->dragoffset) / size.width;
 		if (self->end < self->start) {
 			self->end = self->start;
-		} else
-		if (self->end < 0.f) {
-			self->end = 0.f;
-		} else
-		if (self->end > 1.f) {
-			self->end = 1.f;
+		} else if (self->end < 0.0) {
+			self->end = 0.0;
+		} else if (self->end > 1.0) {
+			self->end = 1.0;
 		}
 		if (zoomold != self->end) {
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
-	} else
-	if (self->dragmode == SCROLLZOOM_DRAG_MOVE) {
-		float zoomold;
-		float length;
+	} else if (self->dragmode == SCROLLZOOM_DRAG_MOVE) {
+		double zoomold;
+		double length;
 		
 		zoomold = self->start;
 		length = self->end - self->start;
-		self->start = (ev->x - self->dragoffset) /
-			(float)psy_ui_value_px(&size.width, &tm);
-		if (self->start < 0.f) {
-			self->start = 0.f;			
+		self->start = (ev->x - self->dragoffset) / size.width;
+		if (self->start < 0.0) {
+			self->start = 0.0;			
 		}
-		if (self->start + length > 1.f) {
-			self->start = 1.f - length;
-			if (self->start < 0.f) {
-				self->start = 0.f;			
+		if (self->start + length > 1.0) {
+			self->start = 1.0 - length;
+			if (self->start < 0.0) {
+				self->start = 0.0;			
 			}
 		}
 		if (self->start != zoomold) {

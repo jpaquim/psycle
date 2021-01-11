@@ -46,9 +46,9 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {		
 	psy_ui_Margin margin;
-	intptr_t charnum;
+	double charnum;
 
-	charnum = 12;
+	charnum = 12.0;
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(1.0),
 		psy_ui_value_makeew(3.0));

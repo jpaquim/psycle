@@ -113,7 +113,7 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 	} else {
 		text = self->text;
 	}
-	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
+	tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
 	if (self->charnumber == 0) {		
 		if (psy_strlen(self->text) == 0) {
 			rv->width = psy_ui_value_makepx(0);
@@ -128,16 +128,16 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 	} else {
 		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linespacing) +
+	rv->height = psy_ui_value_makepx((tm.tmHeight * self->linespacing) +
 		psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));	
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
-	psy_ui_IntSize size;
+	psy_ui_RealSize size;
 	psy_ui_TextMetric tm;	
-	intptr_t centerx = 0;
-	intptr_t centery = 0;
+	double centerx = 0.0;
+	double centery = 0.0;
 	uintptr_t count;
 	char seps[] = "\n";
 	char* token;
@@ -152,15 +152,14 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	}
 	if (psy_strlen(text) == 0) {
 		return;
-	}	
+	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_intsize_init_size(
-		psy_ui_component_size(psy_ui_label_base(self)), &tm);
+	size = psy_ui_component_sizepx(psy_ui_label_base(self));
 		
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
 	if (size.height >= tm.tmHeight * 2) {
-		numcolumnavgchars = (int)(size.width / (int)(tm.tmAveCharWidth));
+		numcolumnavgchars = (int)(size.width / tm.tmAveCharWidth);
 	} else {
 		numcolumnavgchars = UINTPTR_MAX;
 	}
@@ -200,7 +199,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	free(string);
 }
 
-void psy_ui_label_setcharnumber(psy_ui_Label* self, intptr_t number)
+void psy_ui_label_setcharnumber(psy_ui_Label* self, double number)
 {
 	self->charnumber = number;
 }

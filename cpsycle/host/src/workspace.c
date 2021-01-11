@@ -123,8 +123,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->undosavepoint = 0;
 	self->gearvisible = FALSE;
 	self->machines_undosavepoint = 0;
-	self->navigating = FALSE;
-	self->sequencepaste = NULL;
+	self->navigating = FALSE;	
 	self->restoreview = VIEW_ID_MACHINEVIEW;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
@@ -137,6 +136,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);	
 	psy_audio_sequenceselection_init(&self->newsequenceselection);	
+	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);		
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
@@ -172,6 +172,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_beforesavesong);
 	psy_signal_init(&self->signal_showparameters);
 	psy_signal_init(&self->signal_viewselected);
+	psy_signal_init(&self->signal_focusview);
 	psy_signal_init(&self->signal_parametertweak);
 	psy_signal_init(&self->signal_terminal_error);
 	psy_signal_init(&self->signal_terminal_out);
@@ -202,9 +203,9 @@ void workspace_dispose(Workspace* self)
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->viewhistory);
 	workspace_disposesignals(self);
-	psy_audio_pattern_dispose(&self->patternpaste);
-	workspace_disposesequencepaste(self);	
-	//psy_audio_sequenceselection_dispose(&self->sequenceselection);	
+	psy_audio_pattern_dispose(&self->patternpaste);	
+	psy_audio_sequenceselection_dispose(&self->newsequenceselection);	
+	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);	
 	psy_audio_exclusivelock_dispose();	
 }
@@ -223,6 +224,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_beforesavesong);
 	psy_signal_dispose(&self->signal_showparameters);
 	psy_signal_dispose(&self->signal_viewselected);
+	psy_signal_dispose(&self->signal_focusview);
 	psy_signal_dispose(&self->signal_parametertweak);
 	psy_signal_dispose(&self->signal_terminal_error);
 	psy_signal_dispose(&self->signal_terminal_out);
@@ -238,11 +240,11 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_machineeditresize);
 }
 
-void workspace_disposesequencepaste(Workspace* self)
+void workspace_clearsequencepaste(Workspace* self)
 {
 	assert(self);
 
-	psy_list_deallocate(&self->sequencepaste, (psy_fp_disposefunc)NULL);	
+	psy_audio_sequencepaste_clear(&self->sequencepaste);	
 }
 
 void workspace_initplayer(Workspace* self)
@@ -686,7 +688,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		oldsong = self->song;
 		psy_audio_player_stop(&self->player);
 		psy_audio_player_setemptysong(&self->player);
-		workspace_disposesequencepaste(self);
+		workspace_clearsequencepaste(self);	
 		self->newsequenceselection.editposition =
 			psy_audio_orderindex_make(0, 0);
 		view = viewhistory_currview(&self->viewhistory);
@@ -1029,7 +1031,6 @@ void workspace_setsequenceeditposition(Workspace* self, psy_audio_OrderIndex ind
 {
 	psy_audio_sequenceselection_seteditposition(&self->newsequenceselection,
 		index);	
-	psy_audio_sequenceselection_update(&self->newsequenceselection);	
 	if (!self->navigating) {
 		viewhistory_addseqpos(&self->viewhistory,
 			self->newsequenceselection.editposition.order);			
@@ -1193,6 +1194,13 @@ void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
 		workspace_saveview(self);
 	}	
 	psy_signal_emit(&self->signal_viewselected, self, 3, view, section, option);
+}
+
+void workspace_focusview(Workspace* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_focusview, self, 0);
 }
 
 void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak,

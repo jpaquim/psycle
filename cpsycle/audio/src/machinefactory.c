@@ -186,21 +186,21 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_VST:
-		case MACH_VSTFX: {
-			psy_audio_Machine* plugin;			
+		case MACH_VSTFX: {			
+			psy_audio_VstPlugin* plugin;			
 
-			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_VstPlugin));
+			plugin = (psy_audio_VstPlugin*)malloc(sizeof(psy_audio_VstPlugin));
 			if (plugin) {
-				psy_audio_vstplugin_init((psy_audio_VstPlugin*)plugin, self->machinecallback, path);
-				if (psy_audio_machine_info(plugin)) {
-					rv = plugin;
+				psy_audio_vstplugin_init(plugin, self->machinecallback, path);
+				if (psy_audio_machine_info(psy_audio_vstplugin_base(plugin))) {
+					rv = psy_audio_vstplugin_base(plugin);
 				} else {
-					psy_audio_machine_dispose(plugin);
+					psy_audio_machine_dispose(psy_audio_vstplugin_base(plugin));
 					free(plugin);
 				}
 			} else {
-				rv = 0;
-			}		
+				rv = NULL;
+			}
 			break;	
 		}
 		case MACH_PLUGIN: {

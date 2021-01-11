@@ -24,23 +24,23 @@ static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, ui
 static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
 static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
 static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void mpfsize(ParamView*, uintptr_t paramtype, bool small, intptr_t* width, intptr_t* height);
-static void cellsize(ParamView*, uintptr_t row, uintptr_t col, intptr_t* width, intptr_t* height);
-static void cellposition(ParamView*, uintptr_t row, uintptr_t col, intptr_t* x, intptr_t* y);
+static void mpfsize(ParamView*, uintptr_t paramtype, bool small, double* width, double* height);
+static void cellsize(ParamView*, uintptr_t row, uintptr_t col, double* width, double* height);
+static void cellposition(ParamView*, uintptr_t row, uintptr_t col, double* x, double* y);
 static void onmousedown(ParamView*, psy_ui_MouseEvent*);
 static void onmouseup(ParamView*, psy_ui_MouseEvent*);
 static void onmousemove(ParamView*, psy_ui_MouseEvent*);
 static void onmousewheel(ParamView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void onmousedoubleclick(ParamView*, psy_ui_MouseEvent*);
-static uintptr_t hittest(ParamView*, intptr_t x, intptr_t y);
+static uintptr_t hittest(ParamView*, double x, double y);
 static void ontimer(ParamView*, psy_ui_Component* sender, uintptr_t timerid);
 static uintptr_t paramview_numrows(ParamView*);
 static void paramview_computepositions(ParamView*);
 static void paramview_clearpositions(ParamView*);
-static void mixer_vumeterdraw(ParamView*, psy_ui_Graphics*, intptr_t x, intptr_t y,
+static void mixer_vumeterdraw(ParamView*, psy_ui_Graphics*, double x, double y,
 	float value);
-static void drawsliderlevelback(ParamView*, psy_ui_Graphics*, intptr_t x, intptr_t y);
+static void drawsliderlevelback(ParamView*, psy_ui_Graphics*, double x, double y);
 static psy_audio_MachineParam* tweakparam(ParamView*);
 
 static intptr_t paramview_refcount = 0;
@@ -263,14 +263,14 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	psy_ui_Rectangle r;
 	psy_ui_Rectangle r_top;
 	psy_ui_Rectangle r_bottom;	
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
-	intptr_t knob_cx;
-	intptr_t knob_cy;
-	intptr_t w;
-	intptr_t h;
+	double top;
+	double left;
+	double width;
+	double height;
+	double knob_cx;
+	double knob_cy;
+	double w;
+	double h;
 	
 	knob_cx = self->skin->knob.destwidth;
 	knob_cy = self->skin->knob.destheight;	
@@ -314,7 +314,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 			double ratio;
 
 			ratio = h / (double)knob_cy;
-			w = (intptr_t)(ratio * knob_cx);
+			w = ratio * knob_cx;
 			psy_ui_drawstretchedbitmap(g, &self->skin->knobbitmap, r.left, r.top, w,
 				h, knob_frame * knob_cx, 0, knob_cx, knob_cy);
 		} else {
@@ -331,12 +331,12 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
-	intptr_t half;
-	intptr_t quarter;
+	double top;
+	double left;
+	double width;
+	double height;
+	double half;
+	double quarter;
 	psy_ui_Rectangle r;	
 	const char* parValue;
 	char str[128];
@@ -367,11 +367,11 @@ void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
-	intptr_t half;
+	double top;
+	double left;
+	double width;
+	double height;
+	double half;
 	psy_ui_Rectangle r;
 	char str[128];
 			
@@ -404,13 +404,13 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
-	intptr_t xoffset;
-	intptr_t yoffset;
-	float value;
+	double top;
+	double left;
+	double width;
+	double height;
+	double xoffset;
+	double yoffset;
+	double value;
 	
 	psy_ui_Rectangle r;
 	char str[128];
@@ -423,7 +423,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	skin_blitpart(g, &self->skin->mixerbitmap, left, top, &self->skin->slider);
 	xoffset = (self->skin->slider.destwidth - self->skin->knob.destwidth) / 2;
 	value =	psy_audio_machine_parameter_normvalue(self->machine, param);
-	yoffset = (intptr_t)((1 - value) *
+	yoffset = ((1.0 - value) *
 		(self->skin->slider.destheight - self->skin->sliderknob.destheight));
 	skin_blitpart(g, &self->skin->mixerbitmap, left + xoffset, top + yoffset,
 		&self->skin->sliderknob);
@@ -452,10 +452,10 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 void drawsliderlevel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
+	double top;
+	double left;
+	double width;
+	double height;
 		
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
@@ -464,13 +464,13 @@ void drawsliderlevel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 		psy_audio_machineparam_normvalue(param));		
 }
 
-void mixer_vumeterdraw(ParamView* self, psy_ui_Graphics* g, intptr_t x, intptr_t y, float value)
+void mixer_vumeterdraw(ParamView* self, psy_ui_Graphics* g, double x, double y, float value)
 {	
-	intptr_t ypos;
+	double ypos;
 
 	if (value < 0.f) value = 0.f;
 	if (value > 1.f) value = 1.f;
-	ypos = (intptr_t)((1.f - value) * self->skin->vuoff.destheight);
+	ypos = ((1.f - value) * self->skin->vuoff.destheight);
 	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
 		x,
 		y + ypos,
@@ -480,7 +480,7 @@ void mixer_vumeterdraw(ParamView* self, psy_ui_Graphics* g, intptr_t x, intptr_t
 		self->skin->vuon.srcy + ypos);	
 }
 
-void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, intptr_t x, intptr_t y)
+void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, double x, double y)
 {
 	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
 		x,
@@ -494,11 +494,11 @@ void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, intptr_t x, intptr
 void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
-	intptr_t centery;
+	double top;
+	double left;
+	double width;
+	double height;
+	double centery;
 	psy_ui_Rectangle r;
 	char label[512];
 	psy_ui_TextMetric tm;
@@ -529,10 +529,10 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
+	double top;
+	double left;
+	double width;
+	double height;
 	psy_ui_Rectangle r;
 	char label[512];
 
@@ -564,10 +564,10 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
-	intptr_t top;
-	intptr_t left;
-	intptr_t width;
-	intptr_t height;
+	double top;
+	double left;
+	double width;
+	double height;
 	psy_ui_Rectangle r;
 
 	cellposition(self, row, col, &left, &top);
@@ -576,7 +576,7 @@ void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* para
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 }
 
-void mpfsize(ParamView* self, uintptr_t paramtype, bool small, intptr_t* width, intptr_t* height)
+void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, double* height)
 {	
 	psy_ui_TextMetric tm;
 	static float SMALLDIV = 2.f;
@@ -601,7 +601,7 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, intptr_t* width, 
 			*width = tm.tmAveCharWidth * 30;
 		}
 		if (small) {
-			*width = (intptr_t)(*width / SMALLDIV);
+			*width = *width / SMALLDIV;
 		}
 		if (*width < self->skin->vuon.destwidth +
 			self->skin->checkoff.destwidth + 50 +
@@ -615,7 +615,7 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, intptr_t* width, 
 			*height = self->skin->vuon.destheight;
 			*width = self->skin->slider.destwidth;
 			if (small) {
-				*width = (intptr_t)(*width / SMALLDIV);
+				*width = *width / SMALLDIV;
 			}
 		break;		
 		default:
@@ -623,13 +623,13 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, intptr_t* width, 
 			*width = tm.tmAveCharWidth * 30;			
 			*height = tm.tmHeight * 2;			
 			if (small) {
-				*width = (intptr_t)(*width / SMALLDIV);
+				*width = *width / SMALLDIV;
 			}			
 		break;
 	}
 }
 
-void cellsize(ParamView* self, uintptr_t row, uintptr_t col, intptr_t* width, intptr_t* height)
+void cellsize(ParamView* self, uintptr_t row, uintptr_t col, double* width, double* height)
 {
 	psy_ui_Rectangle* position;
 
@@ -644,7 +644,7 @@ void cellsize(ParamView* self, uintptr_t row, uintptr_t col, intptr_t* width, in
 	}	
 }
 
-void cellposition(ParamView* self, uintptr_t row, uintptr_t col, intptr_t* x, intptr_t* y)
+void cellposition(ParamView* self, uintptr_t row, uintptr_t col, double* x, double* y)
 {
 	psy_ui_Rectangle* position;
 
@@ -670,7 +670,7 @@ void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 		if (param) {
 			uintptr_t paramtype;
 
-			self->tweakbase = ev->y;
+			self->tweakbase = (float)ev->y;
 			self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
 			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
 			if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
@@ -695,7 +695,7 @@ psy_audio_MachineParam* tweakparam(ParamView* self)
 	return rv;
 }
 
-uintptr_t hittest(ParamView* self, intptr_t x, intptr_t y)
+uintptr_t hittest(ParamView* self, double x, double y)
 {
 	uintptr_t rv = UINTPTR_MAX;
 
@@ -731,7 +731,7 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 	if (param != NULL) {
 		float val = 0;
 						
-		val = self->tweakval + (self->tweakbase - ev->y) / 200.f;
+		val = self->tweakval + (self->tweakbase - (float)ev->y) / 200.f;
 		if (val > 1.f) {
 			val = 1.f;
 		} else
@@ -832,10 +832,10 @@ void paramview_computepositions(ParamView* self)
 		uintptr_t row = 0;
 		uintptr_t col = 0;
 		uintptr_t paramrowbegin = 0;
-		intptr_t colmax = 0;
-		intptr_t cpx = 0;
-		intptr_t cpy = 0;
-		intptr_t cpy_slidercheck;
+		double colmax = 0;
+		double cpx = 0;
+		double cpy = 0;
+		double cpy_slidercheck;
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
@@ -847,8 +847,8 @@ void paramview_computepositions(ParamView* self)
 			psy_ui_Rectangle* firstrow;
 			uintptr_t paramtype;
 			bool small;
-			intptr_t width;
-			intptr_t height;
+			double width;
+			double height;
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
@@ -916,8 +916,8 @@ void paramview_computepositions(ParamView* self)
 				++param) {
 			psy_ui_Rectangle* position;
 			psy_ui_Rectangle* firstrow;
-			intptr_t w, h;
-			uintptr_t height;
+			double w, h;
+			double height;
 			uintptr_t paramtype;
 			bool small;
 			psy_audio_MachineParam* machineparam;
@@ -941,8 +941,8 @@ void paramview_computepositions(ParamView* self)
 			} else {
 				position->bottom = cpy + height;				
 			}
-			if (psy_ui_value_px(&self->cpmax.height, &tm) < (intptr_t) (cpy + height)) {
-				self->cpmax.height = psy_ui_value_makepx((intptr_t) (cpy + height));
+			if (psy_ui_value_px(&self->cpmax.height, &tm) < cpy + height) {
+				self->cpmax.height = psy_ui_value_makepx(cpy + height);
 			}
 			if (paramtype != MPF_IGNORE && paramtype != MPF_SLIDER &&
 					paramtype != MPF_SLIDERCHECK) {

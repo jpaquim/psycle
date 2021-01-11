@@ -27,8 +27,8 @@ extern "C" {
 #define PROPERTIESRENDERER_NUMCOLS 3
 
 typedef struct PropertiesRenderLineState {
-	intptr_t cpy;
-	intptr_t cpx;
+	double cpy;
+	double cpx;
 	intptr_t level;
 	intptr_t numlines;
 	psy_Property* properties;
@@ -46,19 +46,19 @@ typedef struct PropertiesRenderer {
 	int lastlevel;	
 	int keyselected;
 	int button;	
-	intptr_t mx;
-	intptr_t my;
-	intptr_t cpy;
-	intptr_t cpx;
-	intptr_t lineheight;
-	intptr_t textheight;
-	intptr_t centery;
+	double mx;
+	double my;
+	double cpy;
+	double cpx;
+	double lineheight;
+	double textheight;
+	double centery;
 	intptr_t numblocklines;
-	intptr_t identwidth;
+	double identwidth;
 	bool showkeyselection;
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
-	intptr_t col_width[PROPERTIESRENDERER_NUMCOLS];
-	intptr_t col_start[PROPERTIESRENDERER_NUMCOLS];
+	double col_width[PROPERTIESRENDERER_NUMCOLS];
+	double col_start[PROPERTIESRENDERER_NUMCOLS];
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;

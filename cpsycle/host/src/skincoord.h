@@ -11,40 +11,41 @@ extern "C" {
 #endif
 
 typedef struct {
-	intptr_t srcx;
-	intptr_t srcy;
-	intptr_t srcwidth;
-	intptr_t srcheight;
-	intptr_t destx;
-	intptr_t desty;
-	intptr_t destwidth;
-	intptr_t destheight;
-	intptr_t range;
+	double srcx;
+	double srcy;
+	double srcwidth;
+	double srcheight;
+	double destx;
+	double desty;
+	double destwidth;
+	double destheight;
+	double range;
 } SkinCoord;
 
 void skincoord_setall(SkinCoord*,
-	intptr_t srcx,
-	intptr_t srcy,
-	intptr_t srcwidth,
-	intptr_t srcheight,
-	intptr_t destx,
-	intptr_t desty,
-	intptr_t destwidth,
-	intptr_t destheight,
-	intptr_t range);
+	double srcx,
+	double srcy,
+	double srcwidth,
+	double srcheight,
+	double destx,
+	double desty,
+	double destwidth,
+	double destheight,
+	double range);
 
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4]);
 void skincoord_setdest(SkinCoord* coord, intptr_t vals[4]);
 
 INLINE psy_ui_Rectangle skincoord_destposition(SkinCoord* self)
 {
-	return psy_ui_rectangle_make(self->destx, self->desty, self->destwidth,
-		self->destheight);
+	return psy_ui_rectangle_make(
+		self->destx, self->desty,
+		self->destwidth, self->destheight);
 }
 
-INLINE int skincoord_position(SkinCoord* coord, float value)
+INLINE double skincoord_position(SkinCoord* coord, double value)
 {
-	return (int)(value * coord->range);
+	return value * coord->range;
 }
 
 #ifdef __cplusplus

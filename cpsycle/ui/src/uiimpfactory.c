@@ -6,7 +6,7 @@
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
-struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self, psy_ui_IntSize size)
+struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self, psy_ui_RealSize size)
 {
 	return self->vtable->allocinit_bitmapimp(self, size);
 }

@@ -430,66 +430,66 @@ void patternviewskin_setcoords(PatternViewSkin* self, psy_Property* p)
 
 	if (s = psy_property_at_str(p, "background_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.background.srcx = vals[0];
-		self->headercoords.background.srcy = vals[1];
-		self->headercoords.background.destwidth = vals[2];
-		self->headercoords.background.destheight = vals[3];
+		self->headercoords.background.srcx = (double)vals[0];
+		self->headercoords.background.srcy = (double)vals[1];
+		self->headercoords.background.destwidth = (double)vals[2];
+		self->headercoords.background.destheight = (double)vals[3];
 	}
 	if (s = psy_property_at_str(p, "number_0_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.digitx0.srcx = vals[0];
-		self->headercoords.digitx0.srcy = vals[1];
-		self->headercoords.digit0x.srcx = vals[0];
-		self->headercoords.digit0x.srcy = vals[1];
-		self->headercoords.digitx0.srcwidth = vals[2];
-		self->headercoords.digitx0.srcheight = vals[3];
-		self->headercoords.digit0x.srcwidth = vals[2];
-		self->headercoords.digit0x.srcheight = vals[3];
+		self->headercoords.digitx0.srcx = (double)vals[0];
+		self->headercoords.digitx0.srcy = (double)vals[1];
+		self->headercoords.digit0x.srcx = (double)vals[0];
+		self->headercoords.digit0x.srcy = (double)vals[1];
+		self->headercoords.digitx0.srcwidth = (double)vals[2];
+		self->headercoords.digitx0.srcheight = (double)vals[3];
+		self->headercoords.digit0x.srcwidth = (double)vals[2];
+		self->headercoords.digit0x.srcheight = (double)vals[3];
 	}
 	if (s = psy_property_at_str(p, "record_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.record.srcx = vals[0];
-		self->headercoords.record.srcy = vals[1];
-		self->headercoords.record.destwidth = vals[2];
-		self->headercoords.record.destheight = vals[3];
+		self->headercoords.record.srcx = (double)vals[0];
+		self->headercoords.record.srcy = (double)vals[1];
+		self->headercoords.record.destwidth = (double)vals[2];
+		self->headercoords.record.destheight = (double)vals[3];
 	}
 	if (s = psy_property_at_str(p, "mute_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.mute.srcx = vals[0];
-		self->headercoords.mute.srcy = vals[1];
-		self->headercoords.mute.destwidth = vals[2];
-		self->headercoords.mute.destheight = vals[3];
+		self->headercoords.mute.srcx = (double)vals[0];
+		self->headercoords.mute.srcy = (double)vals[1];
+		self->headercoords.mute.destwidth = (double)vals[2];
+		self->headercoords.mute.destheight = (double)vals[3];
 	}
 	if (s = psy_property_at_str(p, "solo_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.solo.srcx = vals[0];
-		self->headercoords.solo.srcy = vals[1];
-		self->headercoords.solo.destwidth = vals[2];
-		self->headercoords.solo.destheight = vals[3];
+		self->headercoords.solo.srcx = (double)vals[0];
+		self->headercoords.solo.srcy = (double)vals[1];
+		self->headercoords.solo.destwidth = (double)vals[2];
+		self->headercoords.solo.destheight = (double)vals[3];
 	}
 	if (s = psy_property_at_str(p, "digit_x0_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.digitx0.destx = vals[0];
-		self->headercoords.digitx0.desty = vals[1];
+		self->headercoords.digitx0.destx = (double)vals[0];
+		self->headercoords.digitx0.desty = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "digit_0x_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.digit0x.destx = vals[0];
-		self->headercoords.digit0x.desty = vals[1];
+		self->headercoords.digit0x.destx = (double)vals[0];
+		self->headercoords.digit0x.desty = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "record_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.record.destx = vals[0];
-		self->headercoords.record.desty = vals[1];
+		self->headercoords.record.destx = (double)vals[0];
+		self->headercoords.record.desty = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "mute_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.mute.destx = vals[0];
-		self->headercoords.mute.desty = vals[1];
+		self->headercoords.mute.destx = (double)vals[0];
+		self->headercoords.mute.desty = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "solo_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.solo.destx = vals[0];
-		self->headercoords.solo.desty = vals[1];
+		self->headercoords.solo.destx = (double)vals[0];
+		self->headercoords.solo.desty = (double)vals[1];
 	}
 }

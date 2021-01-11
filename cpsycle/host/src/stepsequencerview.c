@@ -154,15 +154,14 @@ void stepsequencerbar_drawbackground(StepsequencerBar* self, psy_ui_Graphics* g)
 void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	int step, int mode)
 {
-	intptr_t cpx;
+	double cpx;
 	psy_ui_Rectangle r;
 	psy_ui_Size corner;
 
 	corner.width = psy_ui_value_makepx(5);
 	corner.height = psy_ui_value_makepx(5);
-	cpx = step * self->stepwidth;
-	psy_ui_setrectangle(&r, cpx, 0, (intptr_t)(self->stepwidth * 0.8),
-		self->stepheight);	
+	cpx = (double)step * self->stepwidth;
+	psy_ui_setrectangle(&r, cpx, 0, self->stepwidth * 0.8, self->stepheight);	
 	psy_ui_drawsolidroundrectangle(g, r, corner,
 		stepsequencerbar_stepcolour(self, mode));
 	if ((step % psy_audio_player_lpb(workspace_player(self->workspace))) == 0) {
@@ -199,7 +198,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		psy_dsp_big_beat_t bpl;
 
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(self->workspace));
-		step = ev->x / self->stepwidth + self->position.steprow * 16;
+		step = (intptr_t)(ev->x / self->stepwidth + self->position.steprow * 16);
 		cursor = workspace_patterncursor(self->workspace);
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
@@ -475,8 +474,8 @@ void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 	intptr_t row;
 	intptr_t steprow;
 
-	row = ev->y / self->lineheight;
-	steprow = row * 4 + (ev->x / self->colwidth);
+	row = (intptr_t)(ev->y / self->lineheight);
+	steprow = (intptr_t)(row * 4 + (ev->x / self->colwidth));
 	self->position.steprow = steprow;
 	psy_ui_component_invalidate(&self->component);
 	psy_signal_emit(&self->signal_selected, self, 0);		

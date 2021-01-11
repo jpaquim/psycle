@@ -15,44 +15,58 @@ extern "C" {
 #endif
 
 typedef struct SeqEditorTrackState {
-	intptr_t pxperbeat;
+	psy_Signal signal_cursorchanged;
+	double pxperbeat;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;
 	psy_ui_Value linemargin;
+	psy_dsp_big_beat_t cursorposition;
+	bool drawcursor;
+	psy_ui_Size trackssize;
 } SeqEditorTrackState;
 
 void seqeditortrackstate_init(SeqEditorTrackState*);
+void seqeditortrackstate_dispose(SeqEditorTrackState*);
 
-INLINE intptr_t seqeditortrackstate_beattopx(const SeqEditorTrackState* self,
+INLINE double seqeditortrackstate_beattopx(const SeqEditorTrackState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	return (intptr_t)(position * self->pxperbeat);
+	return position * self->pxperbeat;
 }
 
 INLINE psy_dsp_big_beat_t seqeditortrackstate_pxtobeat(const
-	SeqEditorTrackState* self, intptr_t px)
+	SeqEditorTrackState* self, double px)
 {
 	assert(self);
 
 	return px / (psy_dsp_big_beat_t)self->pxperbeat;
 }
+
+INLINE void seqeditortrackstate_setcursor(SeqEditorTrackState* self,
+	psy_dsp_big_beat_t cursorposition)
+{
+	assert(self);
+
+	self->cursorposition = cursorposition;
+	psy_signal_emit(&self->signal_cursorchanged, self, 0);
+}
+
 typedef enum {
 	SEQEDITORDRAG_MOVE,
 	SEQEDITORDRAG_REORDER
 } SeqEditorDragMode;
 
 typedef struct {
-	psy_ui_Component component;
-	psy_ui_Colour rulerbaselinecolour;
-	psy_ui_Colour rulermarkcolour;
+	psy_ui_Component component;	
 	SeqEditorTrackState* trackstate;
+	PatternViewSkin* skin;
 	Workspace* workspace;
 } SeqEditorRuler;
 
 void seqeditorruler_init(SeqEditorRuler*, psy_ui_Component* parent,
-	SeqEditorTrackState*, Workspace*);
+	SeqEditorTrackState*, PatternViewSkin* skin, Workspace*);
 
 INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 {
@@ -62,7 +76,7 @@ INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 struct SeqEditorTrack;
 struct SeqEditorTracks;
 
-typedef void (*seqeditortrack_fp_ondraw)(struct SeqEditorTrack*, psy_ui_Graphics*, intptr_t x, intptr_t y);
+typedef void (*seqeditortrack_fp_ondraw)(struct SeqEditorTrack*, psy_ui_Graphics*, double x, double y);
 typedef void (*seqeditortrack_fp_onpreferredsize)(struct SeqEditorTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef bool (*seqeditortrack_fp_onmousedown)(struct SeqEditorTrack*,
@@ -89,7 +103,7 @@ typedef struct SeqEditorTrack {
 	SeqEditorTrackState* trackstate;
 	bool dragstarting;
 	bool bitmapvalid;
-	intptr_t dragstartpx;
+	double dragstartpx;
 	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
 	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
@@ -116,7 +130,7 @@ INLINE SeqEditorTrack* seqeditortrack_base(SeqEditorTrack* self)
 	return self;
 }
 
-INLINE void seqeditortrack_ondraw(SeqEditorTrack* self, psy_ui_Graphics* g, intptr_t x, intptr_t y)
+INLINE void seqeditortrack_ondraw(SeqEditorTrack* self, psy_ui_Graphics* g, double x, double y)
 {
 	assert(self);
 
@@ -182,7 +196,7 @@ typedef struct SeqEditorTracks {
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
 	psy_List* tracks;
-	intptr_t lastplaylinepx;	
+	double lastplaylinepx;
 	SeqEditorTrack* capture;
 	int mode;	
 	bool drawpatternevents;
@@ -193,6 +207,8 @@ typedef struct SeqEditorTracks {
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,
 	SeqEditorTrackState*, int mode, Workspace*);
 bool seqeditortracks_playlinechanged(SeqEditorTracks*);
+
+SeqEditorTrack* seqeditortracks_at(SeqEditorTracks*, uintptr_t trackidx);
 
 INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 {

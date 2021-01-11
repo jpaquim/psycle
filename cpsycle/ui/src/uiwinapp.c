@@ -27,7 +27,7 @@ static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
-static void adjustcoordinates(psy_ui_Component*, intptr_t* x, intptr_t* y);
+static void adjustcoordinates(psy_ui_Component*, double* x, double* y);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -859,8 +859,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							iPos =  psy_ui_value_px(&scrolltop, &tm) / 
 								psy_ui_value_px(&imp->component->scrollstepy, &tm) -
 								imp->component->wheelscroll;
-							if (iPos < scrollmin) {
-								iPos = scrollmin;
+							if (iPos < (double)scrollmin) {
+								iPos = (double)scrollmin;
 							}
 							if (imp->component->handlevscroll) {
 								psy_ui_component_setscrolltop(imp->component,
@@ -883,8 +883,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							iPos = psy_ui_value_px(&scrolltop, &tm) /
 								psy_ui_value_px(&imp->component->scrollstepy, &tm) +
 								imp->component->wheelscroll;
-							if (iPos > scrollmax) {
-								iPos = scrollmax;
+							if (iPos > (double)scrollmax) {
+								iPos = (double)scrollmax;
 							}
 							if (imp->component->handlevscroll) {
 								psy_ui_component_setscrolltop(imp->component,
@@ -969,7 +969,7 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 	winapp->eventretarget = 0;
 }
 
-void adjustcoordinates(psy_ui_Component* component, intptr_t* x, intptr_t* y)
+void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
 {		
 	psy_ui_TextMetric tm;
 	tm = psy_ui_component_textmetric(component);

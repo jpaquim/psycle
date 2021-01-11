@@ -63,14 +63,14 @@ INLINE double keyboardstate_height(KeyboardState* self,
 		psy_ui_value_px(&self->keyheight, tm);
 }
 
-INLINE intptr_t keyboardstate_keytopx(KeyboardState* self, intptr_t key)
+INLINE double keyboardstate_keytopx(KeyboardState* self, intptr_t key)
 {
 	assert(self);
 
-	return (intptr_t)(self->keyboardheightpx - (key + 1) * self->keyheightpx);
+	return self->keyboardheightpx - (key + 1) * self->keyheightpx;
 }
 
-INLINE uint8_t keyboardstate_pxtokey(KeyboardState* self, intptr_t px)
+INLINE uint8_t keyboardstate_pxtokey(KeyboardState* self, double px)
 {
 	assert(self);
 
@@ -81,7 +81,7 @@ INLINE uint8_t keyboardstate_pxtokey(KeyboardState* self, intptr_t px)
 }
 
 INLINE void pianokeyboardstate_clip(KeyboardState* self,
-	intptr_t clip_top_px, intptr_t clip_bottom_px,
+	double clip_top_px, double clip_bottom_px,
 	uint8_t* rv_keymin, uint8_t* rv_keymax)
 {
 	assert(self);
@@ -102,8 +102,8 @@ typedef enum {
 typedef struct PianoGridState {
 	psy_audio_PatternCursor cursor;
 	uintptr_t lpb;	
-	intptr_t pxperbeat;
-	intptr_t defaultbeatwidth;
+	double pxperbeat;
+	double defaultbeatwidth;
 	// references
 	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
@@ -151,7 +151,7 @@ INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate
 {
 	assert(self);
 
-	self->pxperbeat = (intptr_t)(self->defaultbeatwidth * rate);
+	self->pxperbeat = self->defaultbeatwidth * rate;
 }
 
 INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
@@ -171,26 +171,27 @@ INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
 		(1 / (psy_dsp_big_beat_t)self->lpb);
 }
 
-INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, intptr_t px)
+INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, double px)
 {
 	assert(self);
 
-	return px / (psy_dsp_big_beat_t)self->pxperbeat;
+	return (psy_dsp_big_beat_t)(px / self->pxperbeat);
 }
 
-INLINE intptr_t pianogridstate_beattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
+INLINE double pianogridstate_beattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	return (intptr_t)(position * self->pxperbeat);
+	return position * self->pxperbeat;
 }
 
-INLINE intptr_t pianogridstate_quantizebeattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
+INLINE double pianogridstate_quantizebeattopx(const PianoGridState* self,
+	psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	return pianogridstate_beattopx(self,
-		pianogridstate_quantize(self, position));
+	return pianogridstate_beattopx(self, pianogridstate_quantize(self,
+		position));
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
@@ -200,7 +201,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 	return 1 / (psy_dsp_big_beat_t)self->lpb;
 }
 
-INLINE intptr_t pianogridstate_steppx(const PianoGridState* self)
+INLINE double pianogridstate_steppx(const PianoGridState* self)
 {
 	assert(self);
 
@@ -216,7 +217,7 @@ INLINE psy_dsp_big_beat_t pianogridstate_stepstobeat(PianoGridState* self,
 }
 
 INLINE void pianogridstate_clip(PianoGridState* self,
-	intptr_t clip_left_px, intptr_t clip_right_px,
+	double clip_left_px, double clip_right_px,
 	psy_dsp_big_beat_t* rv_left, psy_dsp_big_beat_t* rv_right)
 {
 	assert(self);
@@ -285,7 +286,7 @@ typedef struct {
 
 typedef struct PianoGridDraw {
 	psy_ui_TextMetric tm;
-	psy_ui_IntSize size;
+	psy_ui_RealSize size;
 	bool cursorchanging;
 	bool cursoronnoterelease;
 	psy_dsp_big_beat_t sequenceentryoffset;	
@@ -313,7 +314,7 @@ void pianogriddraw_init(PianoGridDraw*,
 	PianoTrackDisplay,
 	bool cursorchanging, bool cursoronnoterelease,
 	psy_audio_PatternSelection selection,
-	psy_ui_IntSize, psy_ui_TextMetric, Workspace*);
+	psy_ui_RealSize, psy_ui_TextMetric, Workspace*);
 void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
 
 INLINE void pianogriddraw_preventclip(PianoGridDraw* self)

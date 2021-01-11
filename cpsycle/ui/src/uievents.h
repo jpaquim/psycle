@@ -37,8 +37,8 @@ INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Compo
 }
 
 typedef struct {	
-	intptr_t x;
-	intptr_t y;
+	double x;
+	double y;
 	intptr_t button;
 	intptr_t delta;
 	bool shift;
@@ -48,7 +48,7 @@ typedef struct {
 	struct psy_ui_Component* target;
 } psy_ui_MouseEvent;
 
-void psy_ui_mouseevent_init(psy_ui_MouseEvent*, intptr_t x, intptr_t y, intptr_t button,
+void psy_ui_mouseevent_init(psy_ui_MouseEvent*, double x, double y, intptr_t button,
 	intptr_t delta, bool shift, bool ctrl);
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
 struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent*);

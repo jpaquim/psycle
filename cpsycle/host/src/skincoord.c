@@ -4,15 +4,15 @@
 #include "skincoord.h"
 
 void skincoord_setall(SkinCoord* self,
-	intptr_t srcx,
-	intptr_t srcy,
-	intptr_t srcwidth,
-	intptr_t srcheight,
-	intptr_t destx,
-	intptr_t desty,
-	intptr_t destwidth,
-	intptr_t destheight,
-	intptr_t range)
+	double srcx,
+	double srcy,
+	double srcwidth,
+	double srcheight,
+	double destx,
+	double desty,
+	double destwidth,
+	double destheight,
+	double range)
 {
 	self->srcx = srcx;
 	self->srcy = srcy;
@@ -27,17 +27,17 @@ void skincoord_setall(SkinCoord* self,
 
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4])
 {
-	coord->srcx = vals[0];
-	coord->srcy = vals[1];
-	coord->srcwidth = vals[2];
-	coord->srcheight = vals[3];
-	coord->destwidth = vals[2];
-	coord->destheight = vals[3];
+	coord->srcx = (double)vals[0];
+	coord->srcy = (double)vals[1];
+	coord->srcwidth = (double)vals[2];
+	coord->srcheight = (double)vals[3];
+	coord->destwidth = (double)vals[2];
+	coord->destheight = (double)vals[3];
 }
 
 void skincoord_setdest(SkinCoord* coord, intptr_t vals[4])
 {
-	coord->destx = vals[0];
-	coord->desty = vals[1];
-	coord->range = vals[2];
+	coord->destx = (double)vals[0];
+	coord->desty = (double)vals[1];
+	coord->range = (double)vals[2];
 }

@@ -95,7 +95,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 			psy_ui_colour_make(psy_property_at_colour(p, "mv_generator_fontcolour", 0x00B1C8B0));
 		self->effect_fontcolour =
 			psy_ui_colour_make(psy_property_at_colour(p, "mv_effect_fontcolour", 0x00D1C5B6));
-		self->triangle_size = psy_property_at_int(p, "mv_triangle_size", 10);
+		self->triangle_size = (double)psy_property_at_int(p, "mv_triangle_size", 10);
 		machine_skin_name = psy_property_at_str(p, "machine_skin", 0);
 	} else {
 		self->colour = psy_ui_colour_make(0x00232323);
@@ -196,7 +196,7 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	if (s = psy_property_at_str(p, "generator_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->generator.vu0, vals);
-		self->generator.vu0.destwidth = vals[2];
+		self->generator.vu0.destwidth = (double)vals[2];
 	}
 	if (s = psy_property_at_str(p, "generator_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
@@ -242,7 +242,7 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	if (s = psy_property_at_str(p, "effect_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->effect.vu0, vals);
-		self->generator.vu0.destwidth = vals[2];
+		self->generator.vu0.destwidth = (double)vals[2];
 	}
 	if (s = psy_property_at_str(p, "effect_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);

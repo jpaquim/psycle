@@ -64,8 +64,8 @@ typedef struct MachineWireView {
 	// internal data
 	psy_Table machineuis;
 	psy_List* wireframes;	
-	intptr_t mx;
-	intptr_t my;
+	double mx;
+	double my;
 	uintptr_t dragslot;
 	int dragmode;
 	uintptr_t selectedslot;	

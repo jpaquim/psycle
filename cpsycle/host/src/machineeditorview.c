@@ -103,8 +103,8 @@ void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* s
 	if (machine == self->machine) {		
 		psy_ui_component_setpreferredsize(machineeditorview_base(self),
 			psy_ui_size_make(
-				psy_ui_value_makepx(width),
-				psy_ui_value_makepx(height)));
+				psy_ui_value_makepx((double)width),
+				psy_ui_value_makepx((double)height)));
 		psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 	}
 }

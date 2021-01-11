@@ -51,7 +51,7 @@ void sequencetrackbox_init(SequenceTrackBox*,
 
 void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox*,
-	intptr_t x, intptr_t y);
+	double x, double y);
 
 #ifdef __cplusplus
 }

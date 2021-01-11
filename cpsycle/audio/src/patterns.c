@@ -80,8 +80,8 @@ void psy_audio_patterns_clear(psy_audio_Patterns* self)
 	psy_table_init(&self->slots);	
 }
 
-void psy_audio_patterns_insert(psy_audio_Patterns* self, uintptr_t slot,
-	psy_audio_Pattern* pattern)
+psy_audio_Pattern* psy_audio_patterns_insert(psy_audio_Patterns* self,
+	uintptr_t slot, psy_audio_Pattern* pattern)
 {
 	assert(self);
 	
@@ -91,6 +91,7 @@ void psy_audio_patterns_insert(psy_audio_Patterns* self, uintptr_t slot,
 		psy_audio_patterns_onpatternnamechanged);
 	psy_signal_connect(&pattern->signal_lengthchanged, self,
 		psy_audio_patterns_onpatternlengthchanged);
+	return pattern;
 }
 
 uintptr_t psy_audio_patterns_append(psy_audio_Patterns* self, psy_audio_Pattern* pattern)

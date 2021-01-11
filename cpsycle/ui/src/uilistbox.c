@@ -105,7 +105,7 @@ intptr_t psy_ui_listbox_count(psy_ui_ListBox* self)
 	return self->imp->vtable->dev_count(self->imp);
 }
 
-void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, uintptr_t num)
+void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, double num)
 {
 	self->charnumber = num;
 }
@@ -119,7 +119,7 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 	rv->width = (self->charnumber == 0)
 		? psy_ui_value_makepx(tm.tmAveCharWidth * 40) // tm.tmAveCharWidth
 		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber); // 
-	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) *
+	rv->height = psy_ui_value_makepx((tm.tmHeight * 1.2) *
 		psy_ui_listbox_count(self));	
 }
 
@@ -417,7 +417,7 @@ void psy_ui_listbox_onselchanged(psy_ui_ListBox* self, psy_ui_ListBoxClient*
 		psy_ui_listbox_cursel(self));
 }
 
-void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, uintptr_t num)
+void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, double num)
 {
 	psy_ui_listboxclient_setcharnumber(&self->client, num);
 }

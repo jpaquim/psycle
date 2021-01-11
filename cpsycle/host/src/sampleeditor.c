@@ -438,30 +438,30 @@ void sampleeditorheader_onpreferredsize(SampleEditorHeader* self,
 
 void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;	
-	intptr_t baseline;
+	psy_ui_RealSize size;	
+	double baseline;
 	psy_ui_TextMetric tm;
 	uintptr_t frame;
 	uintptr_t step;
 
-	size = psy_ui_component_size(&self->component);
+	size = psy_ui_component_sizepx(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	baseline = psy_ui_value_px(&size.height, &tm) - 1;
+	baseline = size.height - 1;
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));
-	psy_ui_drawline(g, 0, baseline, psy_ui_value_px(&size.width, &tm), baseline);
+	psy_ui_drawline(g, 0, baseline, size.width, baseline);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00999999));
 	if (self->metric) {
 		step = waveboxcontext_numframes(self->metric) / 10;
-		step = (int)(step * (self->metric->zoomright - self->metric->zoomleft));
+		step = (uintptr_t)((double)step * (self->metric->zoomright - self->metric->zoomleft));
 		if (step == 0) {
 			step = 1;
 		}
 		for (frame = 0; frame < waveboxcontext_numframes(self->metric); frame += step) {
-			int cpx;
+			double cpx;
 
 			cpx = waveboxcontext_frametoscreen(self->metric, frame);
-			if (cpx >= 0 && cpx < psy_ui_value_px(&size.width, &tm)) {
+			if (cpx >= 0 && cpx < size.width) {
 				char txt[40];
 
 				psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
@@ -479,38 +479,40 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 	if (self->sample) {
 		psy_ui_Rectangle r;
 		psy_ui_TextMetric tm;
-		psy_ui_Size size = psy_ui_component_size(&sender->component);
-
+		psy_ui_RealSize size;
+		
+		size = psy_ui_component_sizepx(&sender->component);
 		tm = psy_ui_component_textmetric(&sender->component);
-		psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
-			psy_ui_value_px(&size.height, &tm));
+		psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		if (!self->sample) {			
 			static const char* txt = "No wave loaded";
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			psy_ui_textout(g, (psy_ui_value_px(&size.width, &tm) - tm.tmAveCharWidth * strlen(txt)) / 2,
-				(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, txt, strlen(txt));
+			psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
+				(size.height - tm.tmHeight) / 2, txt, strlen(txt));
 		} else {
-			intptr_t x;
-			intptr_t centery = psy_ui_value_px(&size.height, &tm) / 2;
-			float offsetstep;
-			psy_dsp_amp_t scaley;
+			double x;
+			double centery;
+			double offsetstep;
+			double scaley;
 
-			scaley = (psy_ui_value_px(&size.height, &tm) / 2) / (psy_dsp_amp_t) 32768;
-			offsetstep = (float) self->sample->numframes / psy_ui_value_px(&size.width, &tm);
+			centery = size.height / 2;
+			scaley = size.height / 2 / 32768.0;
+			offsetstep = (double)self->sample->numframes / size.width;
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-			for (x = 0; x < psy_ui_value_px(&size.width, &tm); ++x) {
-				uintptr_t frame = (int)(offsetstep * x);
-				float framevalue;
+			for (x = 0; x < size.width; ++x) {
+				uintptr_t frame;
+				double framevalue;
 				
+				frame = (uintptr_t)(offsetstep * x);
 				if (frame >= self->sample->numframes) {
 					break;
 				}
 				framevalue = self->sample->channels.samples[0][frame];							
-				psy_ui_drawline(g, x, centery, x, centery +
-					(int)(framevalue * scaley));
+				psy_ui_drawline(g, x, centery, x,
+					centery + framevalue * scaley);
 			}
 		}
 	}
@@ -588,7 +590,7 @@ void samplebox_buildwaveboxes(SampleBox* self, psy_audio_Sample* sample,
 	psy_ui_component_align(&self->component);
 }
 
-void samplebox_setzoom(SampleBox* self, float zoomleft, float zoomright)
+void samplebox_setzoom(SampleBox* self, double zoomleft, double zoomright)
 {
 	psy_TableIterator it;
 

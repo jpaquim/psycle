@@ -113,18 +113,18 @@ uintptr_t trackdef_value(TrackDef*, uintptr_t column,
 uintptr_t trackdef_emptyvalue(TrackDef*, uintptr_t column);
 void trackdef_setvalue(TrackDef*, uintptr_t column,
 	psy_audio_PatternEntry*, uintptr_t value);
-intptr_t trackdef_width(TrackDef*, intptr_t textwidth);
-intptr_t trackdef_basewidth(TrackDef* self, intptr_t textwidth);
+double trackdef_width(TrackDef*, double textwidth);
+double trackdef_basewidth(TrackDef* self, double textwidth);
 TrackColumnDef* trackdef_columndef(TrackDef* self, intptr_t column);
-intptr_t trackdef_columnwidth(TrackDef* self, intptr_t column, intptr_t textwidth);
+double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth);
 
 typedef struct TrackConfig {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
-	intptr_t textwidth;
-	intptr_t textleftedge;
-	intptr_t patterntrackident;
-	intptr_t headertrackident;
+	double textwidth;
+	double textleftedge;
+	double patterntrackident;
+	double headertrackident;
 } TrackConfig;
 
 void trackconfig_init(TrackConfig*, bool wideinst);
@@ -145,13 +145,13 @@ typedef struct TrackerGridState {
 
 void trackerpianogridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
-intptr_t trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
+double trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
-intptr_t trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_pxtotrack(TrackerGridState*, intptr_t x,
+double trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
+uintptr_t trackergridstate_pxtotrack(TrackerGridState*, double x,
 	uintptr_t numsongtracks);
-uintptr_t trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, intptr_t x);
+double trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
+uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, double x);
 
 INLINE void trackergridstate_setpattern(TrackerGridState* self, psy_audio_Pattern* pattern)
 {
@@ -167,7 +167,7 @@ INLINE psy_audio_Pattern* trackergridstate_pattern(TrackerGridState* self)
 	return self->pattern;
 }
 
-INLINE intptr_t trackergridstate_preferredtrackwidth(TrackerGridState* self)
+INLINE double trackergridstate_preferredtrackwidth(TrackerGridState* self)
 {
 	if (self->skin) {
 		return self->skin->headercoords.background.destwidth;

@@ -36,7 +36,7 @@ static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyComm
 		patternpropertiesapplycommand_vtable.execute = (psy_fp_command)
 			patternpropertiesapplycommand_execute;
 		patternpropertiesapplycommand_vtable.revert = (psy_fp_command)
-			patternpropertiesapplycommand_revert;
+			patternpropertiesapplycommand_revert;		
 		patternpropertiesapplycommand_vtable_initialized = TRUE;
 	}
 }
@@ -101,6 +101,7 @@ static void patternproperties_onapply(PatternProperties*,
 
 static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyEvent*);
+static void patternproperties_onfocus(PatternProperties*);
 
 static psy_ui_ComponentVtable patternproperties_vtable;
 static bool patternproperties_vtable_initialized = FALSE;
@@ -113,6 +114,8 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 			patternproperties_onkeydown;
 		patternproperties_vtable.onkeyup = (psy_ui_fp_component_onkeydown)
 			patternproperties_onkeyup;
+		patternproperties_vtable.onfocus = (psy_ui_fp_component_onfocus)
+			patternproperties_onfocus;
 		patternproperties_vtable_initialized = TRUE;
 	}
 	return &patternproperties_vtable;
@@ -182,6 +185,7 @@ void patternproperties_onapply(PatternProperties* self,
 			self, patternproperties_onpatternnamechanged);
 		psy_signal_enable(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternlengthchanged);
+		workspace_focusview(self->workspace);
 	}
 }
 
@@ -200,6 +204,11 @@ void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyEvent* ev)
 void patternproperties_onkeyup(PatternProperties* self, psy_ui_KeyEvent* ev)
 {
 	psy_ui_keyevent_stoppropagation(ev);
+}
+
+void patternproperties_onfocus(PatternProperties* self)
+{
+	psy_ui_component_setfocus(psy_ui_edit_base(&self->lengthedit));
 }
 
 void patternproperties_onpatternnamechanged(PatternProperties* self,

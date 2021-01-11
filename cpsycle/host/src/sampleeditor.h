@@ -136,7 +136,7 @@ typedef struct SampleBox {
 } SampleBox;
 
 void samplebox_init(SampleBox*, psy_ui_Component* parent, Workspace*);
-void samplebox_setzoom(SampleBox*, float zoomleft, float zoomright);
+void samplebox_setzoom(SampleBox*, double zoomleft, double zoomright);
 void samplebox_setloopviewmode(SampleBox*, WaveBoxLoopViewMode);
 void samplebox_drawlines(SampleBox*);
 void samplebox_drawbars(SampleBox*);

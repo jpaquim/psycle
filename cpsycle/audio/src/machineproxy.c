@@ -943,7 +943,7 @@ uintptr_t machineproxy_samplerate(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = psy_audio_machine_samplerate(self->client);
+			rv = (uintptr_t)psy_audio_machine_samplerate(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "samplerate", GetExceptionCode(),

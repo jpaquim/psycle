@@ -29,7 +29,7 @@ void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
 	self->preventdefault = TRUE;
 }
 
-void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, intptr_t x, intptr_t y, intptr_t button,
+void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y, intptr_t button,
 	intptr_t delta, bool shift, bool ctrl)
 {
 	self->x = x;

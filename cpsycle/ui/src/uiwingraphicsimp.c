@@ -16,8 +16,8 @@ extern psy_ui_App app;
 
 // VTable Prototypes
 static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
-static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y, const char*, uintptr_t len);
-static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y, uintptr_t options,
+static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, double x, double y, const char*, uintptr_t len);
+static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, double x, double y, uintptr_t options,
 	psy_ui_Rectangle r, const char* text, uintptr_t len);
 static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle);
 static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle,
@@ -27,28 +27,28 @@ static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const p
 	psy_ui_Colour colour);
 static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour);
-static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_IntPoint*,
+static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_RealPoint*,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
-static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2);
-static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y);
-static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y, intptr_t width,
-	intptr_t height, intptr_t xsrc, intptr_t ysrc);
-static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y, intptr_t width,
-	intptr_t height, intptr_t xsrc, intptr_t ysrc, intptr_t wsrc, intptr_t hsrc);
+static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, double x1, double y1, double x2, double y2);
+static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, double x, double y);
+static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, double x, double y, double width,
+	double height, double xsrc, double ysrc);
+static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, double x, double y, double width,
+	double height, double xsrc, double ysrc, double wsrc, double hsrc);
 static void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, uintptr_t mode);
 static void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, uintptr_t align);
 static void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
-static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint pt);
-static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint control_p1,
-	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
+static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint pt);
+static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint control_p1,
+	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
 static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
-	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
+	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
-static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y);
+static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 
@@ -151,13 +151,13 @@ void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 	}
 }
 
-void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y,
+void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, double x, double y,
 	const char* str, uintptr_t len)
 {
 	TextOut(self->hdc, (int)x, (int)y, str, (int)len);
 }
 
-void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y, uintptr_t options,
+void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, double x, double y, uintptr_t options,
 	psy_ui_Rectangle r, const char* text, uintptr_t len)
 {
 	RECT rect;
@@ -254,7 +254,7 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	DeleteObject(hPen) ;
 }
 
-void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint* pts,
+void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint* pts,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter)
 {
 	HBRUSH hBrush;     
@@ -281,7 +281,7 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_IntP
 	free(wpts);
 }
 
-void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y)
+void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, double x, double y)
 {
 	HDC hdcmem;
 	psy_ui_Size size;
@@ -301,8 +301,8 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap
 }
 
 void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
-	psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y, intptr_t width,
-	intptr_t height, intptr_t xsrc, intptr_t ysrc)
+	psy_ui_Bitmap* bitmap, double x, double y, double width,
+	double height, double xsrc, double ysrc)
 {
 	HDC hdcmem;
 	HBITMAP wbitmap;
@@ -315,8 +315,8 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 }
 
 void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
-	psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y, intptr_t width,
-	intptr_t height, intptr_t xsrc, intptr_t ysrc, intptr_t wsrc, intptr_t hsrc)
+	psy_ui_Bitmap* bitmap, double x, double y, double width,
+	double height, double xsrc, double ysrc, double wsrc, double hsrc)
 {
 	HDC hdcmem;
 	HBITMAP wbitmap;
@@ -376,19 +376,19 @@ void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 	}
 }
 
-void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2)
+void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, double x1, double y1, double x2, double y2)
 {
 	MoveToEx(self->hdc, (int)x1, (int)y1, NULL) ;
 	LineTo(self->hdc, (int)x2, (int)y2);
 }
 
-void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint pt)
+void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint pt)
 {	
 	MoveToEx(self->hdc, (int)pt.x, (int)pt.y, NULL);
 }
 
-void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint control_p1,
-	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
+void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint control_p1,
+	psy_ui_RealPoint control_p2, psy_ui_RealPoint p)
 {
 	POINT pts[3];
    
@@ -402,7 +402,7 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint c
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
-	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4)
+	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
 {
 	Arc(self->hdc, (int)x1, (int)y1, (int)x2, (int)y2, (int)x3, (int)y3, (int)x4, (int)y4);
 }
@@ -457,11 +457,11 @@ psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
 	return rv;
 }
 
-void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y)
+void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp* self, double x, double y)
 {
 	SetWindowOrgEx(self->hdc,
-		self->orgx + x,
-		self->orgy + y,
+		self->orgx + (int)x,
+		self->orgy + (int)y,
 		NULL);
 }
 

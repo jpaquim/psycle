@@ -5,14 +5,14 @@
 
 #include "skingraphics.h"
 
-void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y,
+void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, double x, double y,
 	SkinCoord* coord)
 {
 	psy_ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
 		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 
-void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y,
+void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, double x, double y,
 	double ratiowidth, double ratioheight,
 	SkinCoord* coord)
 {
@@ -21,7 +21,7 @@ void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, intptr_t 
 		coord->srcx, coord->srcy, coord->destwidth, coord->destheight);
 }
 
-void skin_stretchratio(SkinCoord* coord, intptr_t width, intptr_t height,
+void skin_stretchratio(SkinCoord* coord, double width, double height,
 	double* ratiowidth, double* ratioheight)
 {
 	*ratiowidth = width / (double)coord->destwidth;

@@ -44,12 +44,12 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	psy_ui_Graphics* g)
 {
 	uintptr_t ch;
-	intptr_t cpx;
+	double cpx;
 	psy_ui_TextMetric tm;
 	psy_ui_Value colew;
-	intptr_t headercolw_px;
-	intptr_t colw_px;
-	intptr_t lineheight;
+	double headercolw_px;
+	double colw_px;
+	double lineheight;
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(4);
@@ -114,9 +114,9 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 {	
 	psy_ui_TextMetric tm;
 	psy_ui_Value colew;
-	intptr_t headercolw_px;
-	intptr_t colw_px;
-	intptr_t lineheight;
+	double headercolw_px;
+	double colw_px;
+	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(20);
@@ -165,7 +165,7 @@ void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
 // prototypes
 static void midichannelmappingview_ondraw(MidiChannelMappingView*, psy_ui_Graphics*);
 static void midichannelmappingview_drawheader(MidiChannelMappingView*,
-	psy_ui_Graphics*, intptr_t colx_px[4], intptr_t y);
+	psy_ui_Graphics*, double colx_px[4], double y);
 static void midichannelmappingview_onpreferredsize(MidiChannelMappingView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 // vtable
@@ -201,11 +201,11 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 {
 	psy_audio_MidiInput* midiinput;
 	intptr_t ch;
-	intptr_t cpy;
-	intptr_t colx_px[4];
+	double cpy;
+	double colx_px[4];
 	psy_ui_TextMetric tm;
 	intptr_t i;
-	intptr_t lineheight;
+	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	for (i = 0; i < 4; ++i) {
@@ -296,7 +296,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 }
 
 void midichannelmappingview_drawheader(MidiChannelMappingView* self,
-	psy_ui_Graphics* g, intptr_t colx_px[4], intptr_t y)
+	psy_ui_Graphics* g, double colx_px[4], double y)
 {
 	psy_ui_textout(g, colx_px[0], y, "Channel", strlen("Channel"));
 	psy_ui_textout(g, colx_px[1], y, "Generator/Effect", strlen("Generator/Effect"));

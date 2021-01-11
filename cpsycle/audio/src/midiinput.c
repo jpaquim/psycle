@@ -215,7 +215,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 
 				machine = psy_audio_machines_at(&self->song->machines,
 					psy_audio_machines_slot(&self->song->machines));
-				if (machine && inst < psy_audio_machine_numtweakparameters(machine))
+				if (machine && inst < (int)psy_audio_machine_numtweakparameters(machine))
 				{					
 					psy_audio_MachineParam* param;
 

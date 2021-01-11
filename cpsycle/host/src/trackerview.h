@@ -62,7 +62,7 @@ typedef struct {
 	uintptr_t chordbegin;
 	int columnresize;
 	uintptr_t dragcolumn;
-	intptr_t dragcolumnbase;
+	double dragcolumnbase;
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
 	uintptr_t opcount;

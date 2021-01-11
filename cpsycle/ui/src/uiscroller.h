@@ -12,7 +12,7 @@ typedef struct {
 	psy_ui_Component bottom;
 	psy_ui_ScrollBar hscroll;
 	psy_ui_Component spacer;
-	psy_ui_Component* client;
+	psy_ui_Component* client;	
 } psy_ui_Scroller;
 
 void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,

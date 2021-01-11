@@ -41,7 +41,7 @@ static void dev_showstate(psy_ui_win_ComponentImp*, int state);
 static void dev_hide(psy_ui_win_ComponentImp*);
 static int dev_visible(psy_ui_win_ComponentImp*);
 static int dev_drawvisible(psy_ui_win_ComponentImp*);
-static void dev_move(psy_ui_win_ComponentImp*, intptr_t left, intptr_t top);
+static void dev_move(psy_ui_win_ComponentImp*, double left, double top);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_win_ComponentImp*, intptr_t width, intptr_t height);
 static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
@@ -336,7 +336,7 @@ int dev_drawvisible(psy_ui_win_ComponentImp* self)
 	return IsWindowVisible(self->hwnd);
 }
 
-void dev_move(psy_ui_win_ComponentImp* self, intptr_t left, intptr_t top)
+void dev_move(psy_ui_win_ComponentImp* self, double left, double top)
 {
 	SetWindowPos(self->hwnd, NULL,
 		(int)left, (int)top,

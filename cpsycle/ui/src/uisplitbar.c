@@ -57,23 +57,22 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 
 void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 {
-	psy_ui_IntSize size;	
-	intptr_t center;
-	intptr_t thumbsize;
-	intptr_t ident;
+	psy_ui_RealSize size;	
+	double center;
+	double thumbsize;
+	double ident;
 	
-	size = psy_ui_component_intsize(&self->component);
+	size = psy_ui_component_sizepx(&self->component);
 	thumbsize = 30;
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 	if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 		center = size.height / 2 - thumbsize / 2;
-		ident = size.width / 2;
-		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
+		ident = size.width / 2;		
 		psy_ui_drawline(g, ident, center, ident, center + thumbsize);
 	} else {
 		center = size.width / 2 - thumbsize / 2;
-		ident = size.height / 2;
-		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
+		ident = size.height / 2;		
 		psy_ui_drawline(g, center, ident, center + thumbsize, ident);
 	}
 }

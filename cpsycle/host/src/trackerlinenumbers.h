@@ -26,7 +26,7 @@ typedef struct TrackerLineNumbersLabel {
 	// internal data
 	char_dyn_t* linestr;
 	char_dyn_t* defaultstr;
-	intptr_t headerheight;
+	double headerheight;
 	bool showdefaultline;
 	bool showbeatoffset;
 	// references
@@ -40,7 +40,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
 	psy_ui_Component* parent, TrackerLineState*, Workspace*);
 
 INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
-	intptr_t headerheight)
+	double headerheight)
 {
 	self->headerheight = headerheight;
 }

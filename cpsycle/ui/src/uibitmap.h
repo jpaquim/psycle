@@ -50,7 +50,7 @@ typedef struct psy_ui_Bitmap {
 } psy_ui_Bitmap;
 
 void psy_ui_bitmap_init(psy_ui_Bitmap*);
-void psy_ui_bitmap_init_size(psy_ui_Bitmap*, psy_ui_IntSize);
+void psy_ui_bitmap_init_size(psy_ui_Bitmap*, psy_ui_RealSize);
 
 // vtable calls	
 INLINE void psy_ui_bitmap_dispose(psy_ui_Bitmap* self)

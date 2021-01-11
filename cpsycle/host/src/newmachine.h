@@ -58,11 +58,11 @@ void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
 typedef struct {
    psy_ui_Component component;
    intptr_t count;
-   intptr_t lineheight;
-   intptr_t columnwidth;
-   intptr_t identwidth;
+   double lineheight;
+   double columnwidth;
+   double identwidth;
    intptr_t numparametercols;
-   intptr_t avgcharwidth;
+   double avgcharwidth;
    intptr_t pluginpos;
    psy_Property* plugins;
    psy_Property* selectedplugin;   

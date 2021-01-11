@@ -42,9 +42,9 @@ static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 static psy_dsp_amp_t vuscope_wirevolume(VuScope*);
 static void vuscope_drawlabel(VuScope*, psy_ui_Graphics*, const char* text,
-	intptr_t x, intptr_t y, intptr_t width, intptr_t height);
+	double x, double y, double width, double height);
 static void vuscope_drawlabel_right(VuScope*, psy_ui_Graphics*, const char* text,
-	intptr_t x, intptr_t y, intptr_t width, intptr_t height);
+	double x, double y, double width, double height);
 
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
@@ -89,13 +89,13 @@ void vuscope_ondraw(VuScope* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 {	
 	char buf[128];	
-	intptr_t centerx;
-	intptr_t right;
-	intptr_t step;
+	double centerx;
+	double right;
+	double step;
 	psy_ui_Size size;
 	psy_ui_Rectangle rect;	
 	psy_ui_TextMetric tm;
-	intptr_t charwidth;
+	double charwidth;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	charwidth = tm.tmAveCharWidth * 8;
@@ -161,13 +161,13 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 }
 
 void vuscope_drawlabel(VuScope* self, psy_ui_Graphics* g, const char* text,
-	intptr_t x, intptr_t y, intptr_t width, intptr_t height)
+	double x, double y, double width, double height)
 {	
 	psy_ui_textout(g, x, y - height / 2, text, strlen(text));
 }
 
 void vuscope_drawlabel_right(VuScope* self, psy_ui_Graphics* g, const char* text,
-	intptr_t x, intptr_t y, intptr_t width, intptr_t height)
+	double x, double y, double width, double height)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
@@ -185,9 +185,9 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	const float multright = self->invol * self->mult * 1.0f; // srcMachine._rVol;
 	uintptr_t samplerate = 44100;
 	unsigned int index = 0;
-	intptr_t centerx;
-	intptr_t right;
-	intptr_t step;
+	double centerx;
+	double right;
+	double step;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 	intptr_t scopesamples;

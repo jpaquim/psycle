@@ -22,8 +22,7 @@ typedef struct VstPlugin {
 	// inherits
 	psy_audio_CustomMachine custommachine;
 	// internal data
-	psy_Library library;
-	struct AEffect* effect;	
+	psy_Library library;	
 	void* editorhandle;
 	psy_audio_VstEvents vstevents;
 	psy_audio_VstInterface mi;
