@@ -170,7 +170,7 @@ uintptr_t psy_list_entry_index(const psy_List* self, const void* entry)
 		++rv;
 	}
 	if (!p) {
-		rv = UINTPTR_MAX;
+		rv = psy_INDEX_INVALID;
 	}
 	return rv;
 }

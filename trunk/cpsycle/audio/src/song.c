@@ -131,8 +131,8 @@ void song_initmachines(psy_audio_Song* self)
 
 	psy_audio_machines_init(&self->machines);
 	psy_audio_machines_insertmaster(&self->machines,
-		psy_audio_machinefactory_makemachine(self->machinefactory, MACH_MASTER,
-			0, UINTPTR_MAX));
+		psy_audio_machinefactory_makemachine(self->machinefactory,
+			MACH_MASTER, NULL, psy_INDEX_INVALID));
 }
 
 void song_initpatterns(psy_audio_Song* self)

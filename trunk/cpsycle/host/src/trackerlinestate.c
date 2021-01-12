@@ -38,13 +38,15 @@ void trackerlinestate_init(TrackerLineState* self)
 	self->lpb = 4;
 	self->bpl = 1.0 / self->lpb;
 	self->skin = NULL;
-	self->pattern = NULL;	
+	self->pattern = NULL;
+	self->sequence = NULL;
 	self->lastplayposition = -1.f;
 	self->sequenceentryoffset = 0.f;
 	self->drawcursor = TRUE;
 	self->visilines = 25;
 	self->cursorchanging = FALSE;
 	self->gridfont = NULL;
+	self->singlemode = TRUE;	
 }
 
 void trackerlinestate_dispose(TrackerLineState* self)
@@ -64,7 +66,10 @@ bool trackerlinestate_testplaybar(TrackerLineState* self, psy_dsp_big_beat_t off
 {
 	assert(self);
 
-	return psy_dsp_testrange(self->lastplayposition - self->sequenceentryoffset,
+	return psy_dsp_testrange(
+		self->lastplayposition - ((self->singlemode)
+			? self->sequenceentryoffset
+			: 0.0),
 		offset, self->bpl);
 }
 
@@ -72,9 +77,14 @@ uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 {
 	assert(self);
 
-	if (self->pattern) {
-		return trackerlinestate_beattoline(self, psy_audio_pattern_length(
-			self->pattern));
+	if (self->singlemode) {
+		if (self->pattern) {
+			return trackerlinestate_beattoline(self, psy_audio_pattern_length(
+				self->pattern));
+		}		
+	} else if (self->sequence) {
+		return trackerlinestate_beattoline(self,
+			psy_audio_sequence_duration(self->sequence));		
 	}
 	return 0;
 }

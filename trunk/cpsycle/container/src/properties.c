@@ -618,7 +618,7 @@ uintptr_t psy_property_index(const psy_Property* self)
 	if (psy_property_parent(self)) {
 		return psy_list_entry_index(self->parent->children, self);
 	}
-	return UINTPTR_MAX;
+	return psy_INDEX_INVALID;
 }
 
 psy_Property* psy_property_set_bool(psy_Property* self, const char* key,

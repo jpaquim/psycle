@@ -62,7 +62,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->settings = NULL;
 	self->sustainstage = 2;
 	self->dragrelative = 1;	
-	self->dragpointindex = UINTPTR_MAX;
+	self->dragpointindex = psy_INDEX_INVALID;
 	psy_ui_margin_init_all(&self->spacing,
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
@@ -209,7 +209,7 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
 	self->dragpoint = envelopebox_hittestpoint(self, ev->x, ev->y);
-	self->dragpointindex = UINTPTR_MAX;
+	self->dragpointindex = psy_INDEX_INVALID;
 	if (ev->button == 1) {
 		if (!self->dragpoint && self->settings) {
 			psy_dsp_EnvelopePoint pt_new;

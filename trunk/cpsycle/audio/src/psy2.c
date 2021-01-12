@@ -592,12 +592,12 @@ void psy2loader_readmachines(PSY2Loader* self)
 					self->songfile, &i, type, "");
 			} else switch (type) {
 				case MACH_MASTER:
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_MASTER, "", UINTPTR_MAX);
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_MASTER, "", psy_INDEX_INVALID);
 					// psy_audio_machines_insert(&songfile->song->machines, psy_audio_MASTER_INDEX, pMac[i]);
 					psy2loader_master_load(self, self->pMac[i], i);
 					break;
 				case MACH_SAMPLER: {
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_SAMPLER, "", UINTPTR_MAX);
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_SAMPLER, "", psy_INDEX_INVALID);
 					psy2loader_sampler_load(self, self->pMac[i], i);
 					break; }
 				case MACH_XMSAMPLER:
@@ -619,11 +619,11 @@ void psy2loader_readmachines(PSY2Loader* self)
 					} else {
 						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
 							sDllName, plugincatchername, 0);
-						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, UINTPTR_MAX);
+						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (self->pMac[i]) {
 							psy2loader_plugin_load(self, self->pMac[i], i);
 						} else {
-							self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, UINTPTR_MAX);
+							self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, psy_INDEX_INVALID);
 							psy_audio_machine_setslot(self->pMac[i], i);
 							psy2loader_plugin_skipload(self, self->pMac[i], i);
 							psy_audio_songfile_warn(self->songfile, "replaced missing module ");
@@ -666,7 +666,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 					} else {		
 						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
 							self->vstL[instance].dllName, plugincatchername, shellIdx);
-						pVstPlugin = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, UINTPTR_MAX);
+						pVstPlugin = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (pVstPlugin) {
 							int c;
 							int numpars;
@@ -691,7 +691,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 						}
 					}
 					if (berror) {
-						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, UINTPTR_MAX);
+						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, psy_INDEX_INVALID);
 						psy_audio_machine_setslot(self->pMac[i], i);
 						psy_audio_machine_seteditname(self->pMac[i], plugincatchername);
 						// todo set mode
@@ -703,7 +703,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 				default: {
 					char sError[128];
 					sprintf(sError, "unknown machine type: %i", type);
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, sError, UINTPTR_MAX);
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, sError, psy_INDEX_INVALID);
 					psy_audio_machine_setslot(self->pMac[i], i);
 					psy2loader_plugin_skipload(self, self->pMac[i], i);
 					psy_audio_songfile_warn(self->songfile, sError);

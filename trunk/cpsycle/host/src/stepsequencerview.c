@@ -542,7 +542,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 		stepsequencerview_onsongchanged);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		stepsequencerview_oneditpositionchanged);
-	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
+	psy_signal_connect(&workspace->sequenceselection.signal_changed,
 		self, stepsequencerview_onsequenceselectionchanged);
 	psy_signal_connect(&self->stepsequencerbarselect.signal_selected,
 		self, stepsequencerview_onsteprowselected);		
@@ -579,9 +579,9 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 
 	if (self->workspace->song) {
 		pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition);
+			self->workspace->sequenceselection.editposition);
 		entry = psy_audio_sequence_entry(&self->workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition);
+			self->workspace->sequenceselection.editposition);
 	} else {
 		pattern = NULL;
 		entry = NULL;
@@ -597,7 +597,7 @@ void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspa
 	
 	pattern = (workspace->song)
 		? psy_audio_sequence_pattern(&workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition)
+			self->workspace->sequenceselection.editposition)
 		: NULL;	
 	stepsequencerbar_setpattern(&self->stepsequencerbar, pattern);
 	stepsequencerbarselect_setpattern(&self->stepsequencerbarselect, pattern);		

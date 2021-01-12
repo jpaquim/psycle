@@ -215,7 +215,7 @@ uintptr_t psy_table_maxkey(const psy_Table* self)
 
 	assert(self);
 	if (self->count == 0) {
-		return UINTPTR_MAX;
+		return psy_INDEX_INVALID;
 	}	
 	for (rv = 0, it = psy_table_begin((psy_Table*)self);
 			!psy_tableiterator_equal(&it, psy_table_end());

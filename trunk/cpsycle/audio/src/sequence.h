@@ -197,7 +197,8 @@ INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* s
 typedef struct {
 	psy_audio_Patterns* patterns;	
 	psy_audio_SequenceEntryNode* sequencentrynode;
-	psy_audio_PatternNode* patternnode;	
+	psy_audio_PatternNode* patternnode;
+	psy_audio_Pattern* pattern;
 } psy_audio_SequenceTrackIterator;
 
 void psy_audio_sequencetrackiterator_inc(psy_audio_SequenceTrackIterator*);
@@ -251,7 +252,7 @@ psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 
 typedef struct psy_audio_Sequence {
 	// signals
-	psy_Signal sequencechanged;
+	psy_Signal signal_changed;
 	psy_Signal signal_insert;
 	psy_Signal signal_remove;
 	psy_Signal signal_reorder;
@@ -296,7 +297,7 @@ void psy_audio_sequence_setpatternindex(psy_audio_Sequence*,
 uintptr_t psy_audio_sequence_patternindex(const psy_audio_Sequence*,
 	psy_audio_OrderIndex);
 bool psy_audio_sequence_patternused(psy_audio_Sequence*, uintptr_t patidx);
-psy_audio_SequencePosition psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
+psy_audio_OrderIndex psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
 	uintptr_t patidx);
 // track methods
 void psy_audio_sequence_appendtrack(psy_audio_Sequence*,
@@ -326,6 +327,8 @@ psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence*,
 	uintptr_t trackindex, uintptr_t position);
 psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,
 	psy_audio_SequenceTrackNode*, psy_List* entries);
+psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
+	psy_audio_OrderIndex index, psy_audio_SequenceTrack** rv);
 // duration
 psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);
 psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);

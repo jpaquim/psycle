@@ -31,7 +31,7 @@ void psy_audio_midiinput_init(psy_audio_MidiInput* self, psy_audio_Song* song)
 	psy_audio_midiconfig_init(&self->midiconfig);
 	memset(self->channelsetting, -1, sizeof(int) * psy_audio_MAX_MIDI_CHANNELS);
 	memset(self->channelinstmap, 0, sizeof(uintptr_t) * MAX_INSTRUMENTS);
-	memset(self->channelgeneratormap, UINTPTR_MAX, sizeof(uintptr_t) *
+	memset(self->channelgeneratormap, psy_INDEX_INVALID, sizeof(uintptr_t) *
 		psy_audio_MAX_MIDI_CHANNELS);
 	memset(self->channelnoteoff, TRUE, sizeof(bool) *
 		psy_audio_MAX_MIDI_CHANNELS);
@@ -146,7 +146,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 						data2);
 				} else {
 					// machine not active, can't map!
-					psy_audio_midiinput_setgenmap(self, channel, UINTPTR_MAX);
+					psy_audio_midiinput_setgenmap(self, channel, psy_INDEX_INVALID);
 				}
 				return FALSE;
 			} else if (self->midiconfig.inst_select_with ==
@@ -307,7 +307,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 			} else
 			{
 				// machine not active, can't map!
-				psy_audio_midiinput_setgenmap(self, channel, UINTPTR_MAX);
+				psy_audio_midiinput_setgenmap(self, channel, psy_INDEX_INVALID);
 			}
 			return FALSE;
 		} else if (self->midiconfig.gen_select_with == psy_audio_MIDICONFIG_MS_PROGRAM)
@@ -463,7 +463,7 @@ uintptr_t psy_audio_midiinput_genmap(const psy_audio_MidiInput* self, uintptr_t 
 			}
 			break;
 	}	
-	return UINTPTR_MAX;
+	return psy_INDEX_INVALID;
 }
 
 void psy_audio_setcontrollermap(psy_audio_MidiInput* self, int channel,

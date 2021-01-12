@@ -70,7 +70,7 @@ ViewHistoryEntry viewhistory_currview(const ViewHistory* self)
 		assert(entry);
 		rv = *entry;
 	} else {
-		rv.seqpos = UINTPTR_MAX;
+		rv.seqpos = psy_INDEX_INVALID;
 		rv.id = 0;
 	}
 	return rv;

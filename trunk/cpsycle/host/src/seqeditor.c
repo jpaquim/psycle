@@ -77,7 +77,7 @@ void seqeditorruler_init(SeqEditorRuler* self, psy_ui_Component* parent,
 	self->trackstate = trackstate;
 	self->skin = skin;
 	self->workspace = workspace;	
-	psy_signal_connect(&workspace->newsequenceselection.signal_changed, self,
+	psy_signal_connect(&workspace->sequenceselection.signal_changed, self,
 		seqeditorruler_onsequenceselectionchanged);	
 	psy_signal_connect(&self->trackstate->signal_cursorchanged, self,
 		seqeditorruler_oncursorchanged);
@@ -349,8 +349,8 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 				r = psy_ui_rectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
 					0, patternwidth, lineheight);
 				selected =
-					self->workspace->newsequenceselection.editposition.track == self->trackindex &&
-					self->workspace->newsequenceselection.editposition.order == c;
+					self->workspace->sequenceselection.editposition.track == self->trackindex &&
+					self->workspace->sequenceselection.editposition.order == c;
 				if (selected) {
 					psy_ui_drawsolidrectangle(&gr, r, psy_ui_colour_make(0x00514536));
 					psy_ui_setcolour(&gr, psy_ui_colour_make(0x00555555));
@@ -501,7 +501,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 
 					trackindex = psy_list_entry_index(workspace_song(self->workspace)->sequence.tracks,
 						self->currtrack);
-					if (trackindex != UINTPTR_MAX) {
+					if (trackindex != psy_INDEX_INVALID) {
 						workspace_setsequenceeditposition(
 							self->workspace,
 							psy_audio_orderindex_make(trackindex, selected));						
@@ -689,7 +689,7 @@ void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
 		tm, self->base.currtrack,
 		(self->base.workspace->song) ? &self->base.workspace->song->sequence : NULL,
 		self->base.trackindex,
-		self->base.workspace->newsequenceselection.editposition.track == self->base.trackindex);
+		self->base.workspace->sequenceselection.editposition.track == self->base.trackindex);
 	trackbox.showname = TRUE;
 	sequencetrackbox_draw(&trackbox, g);
 }
@@ -723,7 +723,7 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 			self->base.currtrack,
 			(self->base.workspace->song) ? &self->base.workspace->song->sequence : NULL,
 			self->base.trackindex,
-			self->base.workspace->newsequenceselection.editposition.track == self->base.trackindex);
+			self->base.workspace->sequenceselection.editposition.track == self->base.trackindex);
 		switch (sequencetrackbox_hittest(&trackbox, ev->x, 0)) {
 		case SEQUENCETRACKBOXEVENT_MUTE:
 			if (self->base.currtrack) {
@@ -877,13 +877,13 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		seqeditortracks_ondestroy);
 	seqeditortracks_build(self);
-	psy_signal_connect(&workspace->newsequenceselection.signal_clear, self,
+	psy_signal_connect(&workspace->sequenceselection.signal_clear, self,
 		seqeditortracks_onsequenceselectionclear);
-	psy_signal_connect(&workspace->newsequenceselection.signal_select, self,
+	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
-	psy_signal_connect(&workspace->newsequenceselection.signal_deselect, self,
+	psy_signal_connect(&workspace->sequenceselection.signal_deselect, self,
 		seqeditortracks_onsequenceselectiondeselect);
-	psy_signal_connect(&workspace->newsequenceselection.signal_update, self,
+	psy_signal_connect(&workspace->sequenceselection.signal_update, self,
 		seqeditortracks_onsequenceselectionupdate);
 	if (self->mode == SEQEDITOR_TRACKMODE_ENTRY) {
 		psy_ui_component_starttimer(&self->component, 0, 50);

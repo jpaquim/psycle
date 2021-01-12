@@ -8,6 +8,7 @@
 #include "patternviewskin.h"
 // audio
 #include <pattern.h>
+#include <sequence.h>
 
 // The TrackerView is where you enter notes. It displays a Pattern selected by
 // the SequenceView as a tracker grid.
@@ -139,8 +140,10 @@ typedef struct TrackerGridState {
 	uintptr_t numtracks;	
 	// references
 	psy_audio_Pattern* pattern;
+	psy_audio_Sequence* sequence;
 	PatternViewSkin* skin;
 	TrackConfig* trackconfig;
+	bool singlemode;
 } TrackerGridState;
 
 void trackerpianogridstate_init(TrackerGridState*, TrackConfig*);
@@ -152,6 +155,14 @@ uintptr_t trackergridstate_pxtotrack(TrackerGridState*, double x,
 	uintptr_t numsongtracks);
 double trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, double x);
+
+
+INLINE void trackergridstate_setsequence(TrackerGridState* self, psy_audio_Sequence* sequence)
+{
+	assert(self);
+
+	self->sequence = sequence;
+}
 
 INLINE void trackergridstate_setpattern(TrackerGridState* self, psy_audio_Pattern* pattern)
 {

@@ -249,7 +249,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 			size_t slot;			
 			
 			slot = (size_t)path->entry;			
-			if (slot == UINTPTR_MAX) {
+			if (slot == psy_INDEX_INVALID) {
 				// delimits the machines that could be processed parallel
 				// todo: add thread functions
 				continue;				

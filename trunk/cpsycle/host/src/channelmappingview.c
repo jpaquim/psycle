@@ -380,7 +380,7 @@ bool pinedit_screentopin(PinEdit* self, double x, double y, uintptr_t* pin, bool
 		*pin = row;
 		return TRUE;
 	}
-	*pin = UINTPTR_MAX;
+	*pin = psy_INDEX_INVALID;
 	*isout = FALSE;
 	return FALSE;
 }

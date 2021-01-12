@@ -95,11 +95,14 @@ void psy_audio_vstinterface_beginprogram(psy_audio_VstInterface* self)
 void psy_audio_vstinterface_setprogram(psy_audio_VstInterface* self,
 	uintptr_t prgidx)
 {
-	if (prgidx == UINTPTR_MAX) {
-		prgidx = -1;
+	VstIntPtr prg;
+
+	if (prgidx == psy_INDEX_INVALID) {
+		prg = -1;
+	} else {
+		prg = (VstIntPtr)prgidx;
 	}
-	self->effect->dispatcher(self->effect, effSetProgram, 0, (VstIntPtr)prgidx,
-		0, 0);
+	self->effect->dispatcher(self->effect, effSetProgram, 0, prg, 0, 0);
 }
 
 void psy_audio_vstinterface_endprogram(psy_audio_VstInterface* self)

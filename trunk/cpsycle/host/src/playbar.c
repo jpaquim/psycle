@@ -190,12 +190,12 @@ void playbar_startplay(PlayBar* self)
 	psy_ui_button_highlight(&self->play);
 	sequence = self->player->sequencer.sequence;	
 	entry = psy_audio_sequence_entry(sequence,
-		self->workspace->newsequenceselection.editposition);
+		self->workspace->sequenceselection.editposition);
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
 		psy_audio_player_stop(self->player);
 		psy_audio_sequence_setplayselection(sequence,
-			&self->workspace->newsequenceselection);
+			&self->workspace->sequenceselection);
 		startposition = entry->offset;
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {

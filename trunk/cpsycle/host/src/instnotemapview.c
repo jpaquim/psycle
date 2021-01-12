@@ -221,7 +221,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
-	self->selected = UINTPTR_MAX;
+	self->selected = psy_INDEX_INVALID;
 	self->component.scrollstepy = psy_ui_value_makepx(45);
 	instrumententryview_updatemetrics(self);
 	psy_signal_connect(&self->component.signal_scroll, self,
@@ -232,7 +232,7 @@ void instrumententryview_setinstrument(InstrumentEntryView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	self->selected = UINTPTR_MAX;
+	self->selected = psy_INDEX_INVALID;
 	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
 	psy_ui_component_setscrolltop(&self->parameterview->component, psy_ui_value_zero());
 	psy_ui_component_updateoverflow(&self->component);
@@ -263,7 +263,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_sizepx(&self->component);
 		cpy = 0;
-		if (self->selected != UINTPTR_MAX && self->instrument && self->instrument->entries) {
+		if (self->selected != psy_INDEX_INVALID && self->instrument && self->instrument->entries) {
 			psy_audio_InstrumentEntry* entry;
 			double startx;
 			double endx;
@@ -418,10 +418,10 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 					psy_audio_instrument_entries(self->instrument))) {
 				self->selected = numentry;
 			} else {
-				self->selected = UINTPTR_MAX;
+				self->selected = psy_INDEX_INVALID;
 			}
 		} else {
-			self->selected = UINTPTR_MAX;
+			self->selected = psy_INDEX_INVALID;
 		}
 		self->dragmode = 1;
 		self->currkey = screentokey(ev->x, self->metrics.keysize);
@@ -697,7 +697,7 @@ void instrumentnotemapview_onremoveentry(InstrumentNoteMapView* self,
 	if (self->instrument) {
 		psy_audio_instrument_removeentry(self->instrument,
 			self->entryview.selected);
-		self->entryview.selected = UINTPTR_MAX;
+		self->entryview.selected = psy_INDEX_INVALID;
 		instrumentnotemapview_update(self);
 	}
 }

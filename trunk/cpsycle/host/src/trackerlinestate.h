@@ -8,6 +8,7 @@
 #include "patternviewskin.h"
 // audio
 #include <pattern.h>
+#include <sequence.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,9 +32,11 @@ typedef struct TrackerLineState {
 	intptr_t visilines;
 	bool cursorchanging;
 	// references
+	psy_audio_Sequence* sequence;
 	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
 	psy_ui_Font* gridfont;
+	bool singlemode;
 } TrackerLineState;
 
 void trackerlinestate_init(TrackerLineState*);
@@ -73,6 +76,21 @@ INLINE psy_audio_Pattern* trackerlinestate_pattern(TrackerLineState* self)
 	assert(self);
 
 	return self->pattern;
+}
+
+INLINE void trackerlinestate_setsequence(TrackerLineState* self,
+	psy_audio_Sequence* sequence)
+{
+	assert(self);
+
+	self->sequence = sequence;
+}
+
+INLINE psy_audio_Sequence* trackerlinestate_sequence(TrackerLineState* self)
+{
+	assert(self);
+
+	return self->sequence;
 }
 
 INLINE psy_dsp_big_beat_t trackerlinestate_quantize(const TrackerLineState*

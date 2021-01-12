@@ -57,6 +57,8 @@ bool patternviewconfig_showwideinstcolumn(const PatternViewConfig*);
 psy_dsp_NotesTabMode patternviewconfig_notetabmode(const PatternViewConfig*);
 bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);
 void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig*, bool on);
+void patternviewconfig_setdisplaysinglepattern(PatternViewConfig*, bool on);
+bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig*);
 bool patternviewconfig_showtrackscopes(const PatternViewConfig*);
 void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
 // events

@@ -79,7 +79,7 @@ void languageconfig_setdefaultlanguage(LanguageConfig* self)
 		uintptr_t index;
 
 		index = psy_property_index(defaultlang);
-		if (index != UINTPTR_MAX) {
+		if (index != psy_INDEX_INVALID) {
 			psy_property_setitem_int(self->languagechoice, index);
 		}
 	}

@@ -194,10 +194,10 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->linetickcount = (psy_dsp_big_beat_t)0.0;
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
 	self->calcduration = FALSE;
-	self->currrowposition = UINTPTR_MAX;
+	self->currrowposition = psy_INDEX_INVALID;
 	self->extraticks = 0;
 	self->tpb = 24;
-	self->playtrack = UINTPTR_MAX;
+	self->playtrack = psy_INDEX_INVALID;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -314,7 +314,7 @@ psy_List* psy_audio_sequencer_machinetickevents(psy_audio_Sequencer* self,
 		psy_audio_PatternEntry* entry = psy_audio_patternnode_entry(p);
 		
 		if (psy_audio_patternentry_front(entry)->mach == slot) {
-			if (self->playtrack == UINTPTR_MAX ||
+			if (self->playtrack == psy_INDEX_INVALID ||
 					self->playtrack == entry->track) {
 				psy_list_append(&rv, entry);
 			}

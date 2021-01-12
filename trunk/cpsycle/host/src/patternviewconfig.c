@@ -82,6 +82,9 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(pvc, "movecursorwhenpaste", TRUE),
 		"settingsview.move-cursor-when-paste");
+	psy_property_settext(
+		psy_property_append_bool(pvc, "displaysinglepattern", TRUE),
+		"settingsview.displaysinglepattern");	
 	// pattern display choice
 	choice = psy_property_setid(psy_property_settext(
 		psy_property_append_choice(pvc,
@@ -385,6 +388,26 @@ void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig* self, bool on)
 	assert(self);
 
 	psy_property_set_bool(self->patternview, "movecursorwhenpaste", on);
+}
+
+void patternviewconfig_setdisplaysinglepattern(PatternViewConfig* self, bool on)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_set_bool(self->patternview, "displaysinglepattern",
+		on);
+	if (property) {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}
+
+bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->patternview, "displaysinglepattern", TRUE);
 }
 
 bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)

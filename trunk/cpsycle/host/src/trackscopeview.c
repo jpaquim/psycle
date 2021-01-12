@@ -124,7 +124,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
 			strlen(text));
 	} else {
-		lastmachine = UINTPTR_MAX;
+		lastmachine = psy_INDEX_INVALID;
 	}	
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* machine;

@@ -125,7 +125,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->tabs = NULL;
 	self->selected = 0;
 	self->hover = FALSE;
-	self->hoverindex = UINTPTR_MAX;
+	self->hoverindex = psy_INDEX_INVALID;
 	self->tabalignment = psy_ui_ALIGN_TOP;
 	tabbarskin_init(&self->skin);
 	psy_ui_margin_init_all(&self->defaulttabmargin,
@@ -301,7 +301,7 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 	if (tab && tab->mode == TABMODE_LABEL) {
 		return;
 	}
-	if (tab && tabindex != UINTPTR_MAX && (tabindex != self->selected || tab->istoggle)) {
+	if (tab && tabindex != psy_INDEX_INVALID && (tabindex != self->selected || tab->istoggle)) {
 		if (!tab->istoggle) {
 			self->selected = tabindex;
 		} else {
@@ -326,7 +326,7 @@ uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 
 	assert(self);
 
-	rv = UINTPTR_MAX;
+	rv = psy_INDEX_INVALID;
 	tabbar_calctabpositions(self);
 	tm = psy_ui_component_textmetric(tabbar_base(self));	
 	for (c = 0, p = self->tabs; p != NULL; psy_list_next(&p), ++c) {
@@ -354,7 +354,7 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 	tab = NULL;
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
 	if (tab && tab->mode == TABMODE_LABEL) {
-		self->hoverindex = UINTPTR_MAX;
+		self->hoverindex = psy_INDEX_INVALID;
 		psy_ui_component_invalidate(tabbar_base(self));
 		return;
 	} else
