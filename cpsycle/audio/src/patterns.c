@@ -130,7 +130,7 @@ uintptr_t psy_audio_patterns_slot(psy_audio_Patterns* self, psy_audio_Pattern* p
 
 	assert(self);
 
-	rv = UINTPTR_MAX;
+	rv = psy_INDEX_INVALID;
 	for (it = psy_table_begin(&self->slots);
 		!psy_tableiterator_equal(&it, psy_table_end());
 		psy_tableiterator_inc(&it)) {
@@ -245,7 +245,7 @@ void psy_audio_patterns_onpatternnamechanged(psy_audio_Patterns* self,
 	assert(self);
 
 	slot = psy_audio_patterns_slot(self, sender);
-	if (slot != UINTPTR_MAX) {
+	if (slot != psy_INDEX_INVALID) {
 		psy_signal_emit(&self->signal_namechanged, self, 1, slot);
 	}	
 }
@@ -258,7 +258,7 @@ void psy_audio_patterns_onpatternlengthchanged(psy_audio_Patterns* self,
 	assert(self);
 
 	slot = psy_audio_patterns_slot(self, sender);
-	if (slot != UINTPTR_MAX) {
+	if (slot != psy_INDEX_INVALID) {
 		psy_signal_emit(&self->signal_lengthchanged, self, 1, slot);
 	}
 }

@@ -241,22 +241,18 @@ void psy_signal_emit(psy_Signal* self, void* sender, int num, ...)
 	va_start(ap, num);	
 	if (num == 0) {
 		psy_signal_notify(self, sender);
-	} else 
-	if (num == 1) {
+	} else if (num == 1) {
 		psy_signal_notify1(self, sender, va_arg(ap, void*));
-	} else 
-	if (num == 2) {
+	} else  if (num == 2) {
 		void* arg1 = va_arg(ap, void*);
 		void* arg2 = va_arg(ap, void*);
 		psy_signal_notify2(self, sender, arg1, arg2);
-	} else
-	if (num == 3) {
+	} else if (num == 3) {
 		void* arg1 = va_arg(ap, void*);
 		void* arg2 = va_arg(ap, void*);
 		void* arg3 = va_arg(ap, void*);
 		psy_signal_notify3(self, sender, arg1, arg2, arg3);
-	} else
-	if (num == 4) {
+	} else if (num == 4) {
 		void* arg1 = va_arg(ap, void*);
 		void* arg2 = va_arg(ap, void*);
 		void* arg3 = va_arg(ap, void*);

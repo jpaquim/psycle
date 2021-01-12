@@ -17,12 +17,14 @@
 
 // PatternViewBar
 // prototypes
-static void patternviewbar_ondefaultline(PatternViewBar*,
-	psy_ui_CheckBox* sender);
 static void patternviewbar_onconfigure(PatternViewBar*, PatternViewConfig*,
 	psy_Property*);
 static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
+static void patternviewbar_ondefaultline(PatternViewBar*,
+	psy_ui_CheckBox* sender);
+static void patternviewbar_ondisplaysinglepattern(PatternViewBar*,
+	psy_ui_CheckBox* sender);
 static void patternviewbar_onupdatestatus(PatternViewBar*,
 	Workspace* sender);
 static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
@@ -39,20 +41,32 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(patternviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	patterncursorstepbox_init(&self->cursorstep, &self->component, workspace);
+	// Move cursor when paste
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, patternviewbar_base(self));
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
 		"settingsview.move-cursor-when-paste");	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_onmovecursorwhenpaste);
+	// Default line
 	psy_ui_checkbox_init(&self->defaultentries, patternviewbar_base(self));
 	psy_ui_checkbox_settext(&self->defaultentries,
 		"settingsview.default-line");
-	if (patternviewconfig_defaultline(psycleconfig_patview(workspace_conf(
-			workspace)))) {
+	if (patternviewconfig_defaultline(psycleconfig_patview(
+			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->defaultentries);
 	}
 	psy_signal_connect(&self->defaultentries.signal_clicked, self,
 		patternviewbar_ondefaultline);
+	// Single pattern display mode
+	psy_ui_checkbox_init(&self->displaysinglepattern, patternviewbar_base(self));
+	psy_ui_checkbox_settext(&self->displaysinglepattern,
+		"settingsview.displaysinglepattern");
+	if (patternviewconfig_issinglepatterndisplay(psycleconfig_patview(
+			workspace_conf(workspace)))) {
+		psy_ui_checkbox_check(&self->displaysinglepattern);
+	}
+	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
+		patternviewbar_ondisplaysinglepattern);
 	psy_ui_label_init(&self->status, patternviewbar_base(self));
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 40);
@@ -61,7 +75,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		patternviewbar_onconfigure);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		patternviewbar_onupdatestatus);
-	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
+	psy_signal_connect(&workspace->sequenceselection.signal_changed,
 		self, patternviewbar_onsequenceselectionchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternviewbar_onsongchanged);
@@ -74,10 +88,24 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	patternviewbar_updatestatus(self);	
 }
 
+void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)
+{
+	patternviewconfig_setmovecursorwhenpaste(
+		psycleconfig_patview(workspace_conf(self->workspace)),
+		psy_ui_checkbox_checked(&self->movecursorwhenpaste));
+}
+
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
 {	
-	patternviewconfig_togglepatdefaultline(psycleconfig_patview(workspace_conf(
-		self->workspace)));
+	patternviewconfig_togglepatdefaultline(
+		psycleconfig_patview(workspace_conf(self->workspace)));
+}
+
+void patternviewbar_ondisplaysinglepattern(PatternViewBar* self, psy_ui_CheckBox* sender)
+{
+	patternviewconfig_setdisplaysinglepattern(
+		psycleconfig_patview(workspace_conf(self->workspace)),
+		psy_ui_checkbox_checked(&self->displaysinglepattern));
 }
 
 void patternviewbar_onsongchanged(PatternViewBar* self, Workspace* sender,
@@ -105,29 +133,22 @@ void patternviewbar_updatestatus(PatternViewBar* self)
 	psy_audio_SequenceEntry* entry;
 	
 	cursor = workspace_patterncursor(self->workspace);
-	patternid = UINTPTR_MAX;
+	patternid = psy_INDEX_INVALID;
 	if (self->workspace->song) {		
 		entry = psy_audio_sequence_entry(
 			&self->workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition);
+			self->workspace->sequenceselection.editposition);
 		if (entry) {
 			patternid = entry->patternslot;
 		}
 	}
-	if (patternid == UINTPTR_MAX) {
+	if (patternid == psy_INDEX_INVALID) {
 		psy_snprintf(text, 256, "Pat --  Ln --  Trk --  Col --:-- Edit");
 	} else {
 		psy_snprintf(text, 256, "Pat %d  Ln %d  Trk %d  Col %d:%d Edit",
 			patternid, cursor.line, cursor.track, cursor.column, cursor.digit);
 	}
 	psy_ui_label_settext(&self->status, text);
-}
-
-void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)
-{
-	patternviewconfig_setmovecursorwhenpaste(
-		psycleconfig_patview(workspace_conf(self->workspace)),
-		psy_ui_checkbox_checked(&self->movecursorwhenpaste));
 }
 
 void patternviewbar_onconfigure(PatternViewBar* self, PatternViewConfig* config,
@@ -137,6 +158,11 @@ void patternviewbar_onconfigure(PatternViewBar* self, PatternViewConfig* config,
 		psy_ui_checkbox_check(&self->movecursorwhenpaste);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
+	}
+	if (patternviewconfig_issinglepatterndisplay(config)) {
+		psy_ui_checkbox_check(&self->displaysinglepattern);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->displaysinglepattern);
 	}
 }
 
@@ -198,6 +224,9 @@ static const psy_audio_PatternSelection* patternview_blockselection(const
 static void patternview_swingfill(PatternView*, psy_ui_Component* sender);
 static void patternview_onthemechanged(PatternView*, PatternViewConfig*,
 	psy_Property* theme);
+static void patternview_displaysinglepattern(PatternView*);
+static void patternview_displaysequencepatterns(PatternView*);
+static void patternview_updatestates(PatternView*);
 
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
@@ -352,7 +381,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);
-	psy_signal_connect(&workspace->newsequenceselection.signal_changed,
+	psy_signal_connect(&workspace->sequenceselection.signal_changed,
 		self, patternview_onsequenceselectionchanged);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		patternview_onpatterncursorchanged);
@@ -364,7 +393,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
 		patternview_onparametertweak);
 	if (workspace->song) {
-		psy_signal_connect(&workspace->song->sequence.sequencechanged,
+		psy_signal_connect(&workspace->song->sequence.signal_changed,
 			self, patternview_onsequencechanged);
 	}
 	patternview_connectplayer(self, workspace_player(workspace));
@@ -443,9 +472,9 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 }
 
 void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
-{		
+{	
 	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
-	trackergrid_setpattern(&self->tracker, pattern);
+	trackergrid_setpattern(&self->tracker, pattern);	
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);	
 	psy_ui_component_invalidate(&self->header.component);
@@ -457,17 +486,18 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 {
 	psy_audio_Pattern* pattern;
 
-	pattern = (workspace->song)
-		? psy_audio_sequence_pattern(&workspace->song->sequence,
-			workspace->newsequenceselection.editposition)
-		: NULL;
-	patternview_setpattern(self, pattern);
-	self->linestate.sequenceentryoffset = 0.f;
-	self->pianoroll.grid.sequenceentryoffset = 0.f;
-	pianoroll_setpattern(&self->pianoroll, pattern);
-	if (workspace->song) {
-		psy_signal_connect(&workspace->song->sequence.sequencechanged,
+	patternview_updatestates(self);
+	if (workspace->song) {		
+		pattern = psy_audio_sequence_pattern(
+			&workspace->song->sequence,
+			workspace->sequenceselection.editposition);
+		patternview_setpattern(self, pattern);
+		pianoroll_setpattern(&self->pianoroll, pattern);		
+		psy_signal_connect(&workspace->song->sequence.signal_changed,
 			self, patternview_onsequencechanged);
+	} else {		
+		patternview_setpattern(self, NULL);
+		pianoroll_setpattern(&self->pianoroll, NULL);
 	}
 	psy_ui_component_invalidate(&self->component);
 }
@@ -480,7 +510,7 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 	if (self->workspace->song) {
 		entry = psy_audio_sequence_entry(
 			&self->workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition);
+			self->workspace->sequenceselection.editposition);
 	} else {
 		entry = NULL;
 	}
@@ -489,9 +519,11 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 
 		pattern = psy_audio_patterns_at(&self->workspace->song->patterns, 
 			entry->patternslot);
-		patternview_setpattern(self, pattern);
-		self->linestate.sequenceentryoffset = entry->offset;
-		self->pianoroll.grid.sequenceentryoffset = entry->offset;
+		if (pattern != self->gridstate.pattern) {
+			patternview_setpattern(self, pattern);
+			self->linestate.sequenceentryoffset = entry->offset;
+			self->pianoroll.grid.sequenceentryoffset = entry->offset;
+		}
 	} else {
 		patternview_setpattern(self, NULL);		
 		self->linestate.sequenceentryoffset = 0.f;
@@ -647,6 +679,11 @@ void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* co
 	self->tracker.notestabmode = self->griddefaults.notestabmode =
 		patternviewconfig_notetabmode(config);
 	patternview_updateksin(self);
+	if (patternviewconfig_issinglepatterndisplay(config)) {
+		patternview_displaysinglepattern(self);		
+	} else {
+		patternview_displaysequencepatterns(self);
+	}
 	if (self->tracker.midline) {
 		trackergrid_centeroncursor(&self->tracker);
 	}
@@ -697,7 +734,7 @@ void patternview_readfont(PatternView* self)
 
 	pv = psy_property_findsection(&self->workspace->config.config, "visual.patternview");
 	if (pv) {
-		psy_ui_FontInfo fontinfo;
+		psy_ui_FontInfo fontinfo;		
 		psy_ui_Font font;
 		double factor;
 
@@ -708,7 +745,7 @@ void patternview_readfont(PatternView* self)
 		fontinfo.lfHeight = (int)(-16 * factor);
 		psy_ui_font_init(&font, &fontinfo);
 		patternview_setfont(self, &font);
-		psy_ui_font_dispose(&font);
+		psy_ui_font_dispose(&font);		
 	}
 }
 
@@ -808,10 +845,15 @@ void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 
 void patternview_setfont(PatternView* self, psy_ui_Font* font)
 {	
+	psy_ui_TextMetric tm;
+	tm = psy_ui_component_textmetric(&self->tracker.component);
+
 	psy_ui_component_setfont(trackergrid_base(&self->griddefaults), font);
 	psy_ui_component_setfont(trackergrid_base(&self->tracker), font);
 	psy_ui_component_setfont(trackerlinenumbers_base(&self->left.linenumbers), font);
 	self->linestate.gridfont = psy_ui_component_font(trackergrid_base(&self->tracker));	
+	self->linestate.lineheightpx = psy_ui_value_px(
+		&self->linestate.lineheight, &tm);
 	patternview_computemetrics(self);
 	patternview_updatescrollstep(self);
 	psy_ui_component_align(&self->component);
@@ -851,7 +893,9 @@ void patternview_onpatterncursorchanged(PatternView* self, Workspace* sender)
 		} else {
 			trackergrid_invalidatecursor(&self->tracker);
 		}
-	}
+	}	
+	trackergrid_invalidateinternalcursor(&self->tracker,
+		oldcursor);
 }
 
 void patternview_onlpbchanged(PatternView* self, psy_audio_Player* sender,
@@ -1221,4 +1265,48 @@ void patternview_onthemechanged(PatternView* self, PatternViewConfig* sender,
 			dirconfig_skins(psycleconfig_directories(
 				workspace_conf(self->workspace))));
 		patternview_updateksin(self);
+}
+
+void patternview_displaysinglepattern(PatternView* self)
+{
+	self->linestate.singlemode = TRUE;
+	self->gridstate.singlemode = TRUE;
+	patternview_updatestates(self);
+	psy_ui_component_updateoverflow(&self->tracker.component);
+}
+
+void patternview_displaysequencepatterns(PatternView* self)
+{
+	self->linestate.singlemode = FALSE;
+	self->gridstate.singlemode = FALSE;
+	patternview_updatestates(self);
+	psy_ui_component_updateoverflow(&self->tracker.component);
+}
+
+void patternview_updatestates(PatternView* self)
+{
+	if (self->workspace->song) {
+		psy_audio_Pattern* pattern;
+
+		trackergridstate_setsequence(&self->gridstate,
+			&self->workspace->song->sequence);
+		self->pianoroll.grid.sequenceentryoffset = 0.f;
+		trackerlinestate_setsequence(&self->linestate,
+			&self->workspace->song->sequence);
+		self->linestate.sequenceentryoffset = 0.f;
+		pattern = psy_audio_sequence_pattern(
+			&self->workspace->song->sequence,
+			self->workspace->sequenceselection.editposition);
+		trackergridstate_setpattern(&self->gridstate,
+			pattern);
+		trackerlinestate_setpattern(&self->linestate,
+			pattern);		
+	} else {
+		trackergridstate_setsequence(&self->gridstate, NULL);
+		self->pianoroll.grid.sequenceentryoffset = 0.f;
+		trackerlinestate_setsequence(&self->linestate, NULL);
+		self->linestate.sequenceentryoffset = 0.f;
+		trackergridstate_setpattern(&self->gridstate, NULL);
+		trackerlinestate_setpattern(&self->linestate, NULL);
+	}
 }

@@ -343,17 +343,15 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 						psy_audio_patterncursor_make(MAX_TRACKS,
 							psy_audio_pattern_length(currpattern))),
 					searchreplacemode);
-				if (cursor.line != UINTPTR_MAX) {
-					//psy_audio_SequencePosition position;
-										
-					//position = psy_audio_sequence_patternfirstused(
-					//	&workspace_song(self->workspace)->sequence,
-					//	psy_tableiterator_key(&it));
-					// psy_audio_sequenceselection_seteditposition(
-					//	&self->workspace->sequenceselection,
-					//	position);
-					// workspace_setsequenceselection(self->workspace,
-					//	self->workspace->sequenceselection);
+				if (cursor.line != psy_INDEX_INVALID) {
+					psy_audio_OrderIndex orderindex;
+									
+					orderindex = psy_audio_sequence_patternfirstused(
+						&workspace_song(self->workspace)->sequence,
+						psy_tableiterator_key(&it));
+					psy_audio_sequenceselection_seteditposition(
+						&self->workspace->sequenceselection,
+						orderindex);					
 					workspace_setpatterncursor(self->workspace, cursor);
 					break;
 				}
@@ -379,7 +377,7 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 				psy_audio_patterncursor_make(MAX_TRACKS,
 					psy_audio_pattern_length(currpattern))),
 			searchreplacemode);
-		if (cursor.line != UINTPTR_MAX) {
+		if (cursor.line != psy_INDEX_INVALID) {
 			workspace_setpatterncursor(self->workspace, cursor);
 		}
 	}
@@ -399,7 +397,7 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 		cursor = psy_audio_pattern_searchinpattern(currpattern,
 			self->patternselection,
 			searchreplacemode);
-		if (cursor.line != UINTPTR_MAX) {
+		if (cursor.line != psy_INDEX_INVALID) {
 			workspace_setpatterncursor(self->workspace, cursor);
 		}
 	}	
@@ -432,7 +430,7 @@ psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView* self)
 
 	if (self->workspace->song) {
 		return pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
-			self->workspace->newsequenceselection.editposition);		
+			self->workspace->sequenceselection.editposition);		
 	}
 	return NULL;
 }

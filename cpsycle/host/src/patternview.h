@@ -38,18 +38,20 @@ typedef struct PatternViewBar {
 	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
+	psy_ui_CheckBox displaysinglepattern;
 	psy_ui_Label status;
 	// references
 	Workspace* workspace;
 } PatternViewBar;
+
+void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
+	Workspace*);
 
 INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
 {
 	return &self->component;
 }
 
-void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
-	Workspace*);
 
 // PatternView
 //

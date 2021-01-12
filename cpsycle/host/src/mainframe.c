@@ -1133,7 +1133,7 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 		} else {
 			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
 		}
-		self->workspace.player.sequencer.playtrack = UINTPTR_MAX;
+		self->workspace.player.sequencer.playtrack = psy_INDEX_INVALID;
 	}
 	if (self->pluginscanprogress != -1) {
 		if (self->pluginscanprogress == 0) {

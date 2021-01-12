@@ -10,19 +10,19 @@
 
 void psy_audio_wire_init(psy_audio_Wire* self)
 {
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
+	self->src = psy_INDEX_INVALID;
+	self->dst = psy_INDEX_INVALID;
 }
 
 bool psy_audio_wire_valid(const psy_audio_Wire* self)
 {
-	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
+	return self->src != psy_INDEX_INVALID && self->dst != psy_INDEX_INVALID;
 }
 
 void psy_audio_wire_invalidate(psy_audio_Wire* self)
 {
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
+	self->src = psy_INDEX_INVALID;
+	self->dst = psy_INDEX_INVALID;
 }
 
 static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t src,
@@ -30,8 +30,8 @@ static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t 
 
 void psy_audio_pinconnection_init(psy_audio_PinConnection* self)
 {
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
+	self->src = psy_INDEX_INVALID;
+	self->dst = psy_INDEX_INVALID;
 }
 
 psy_audio_PinConnection* psy_audio_pinconnection_alloc(void)
@@ -222,7 +222,7 @@ void psy_audio_wiresocket_copy(psy_audio_WireSocket* self,
 void wiresockets_insert(psy_audio_WireSockets* self, uintptr_t id,
 	psy_audio_WireSocket* socket)
 {
-	if (id == UINTPTR_MAX) {
+	if (id == psy_INDEX_INVALID) {
 		wiresockets_append(self, socket);
 	} else {
 		if (psy_table_exists(&self->sockets, id)) {
@@ -281,7 +281,7 @@ uintptr_t psy_audio_connection_id(psy_audio_WireSockets* sockets, uintptr_t slot
 			return psy_tableiterator_key(&it);
 		}
 	}	
-	return UINTPTR_MAX;
+	return psy_INDEX_INVALID;
 }
 
 psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst)
@@ -289,9 +289,9 @@ psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst)
 	psy_audio_Wire rv;
 
 	rv.src = src;
-	rv.src_id = UINTPTR_MAX;
+	rv.src_id = psy_INDEX_INVALID;
 	rv.dst = dst;	
-	rv.dst_id = UINTPTR_MAX;
+	rv.dst_id = psy_INDEX_INVALID;
 	return rv;
 }
 
@@ -315,7 +315,7 @@ uintptr_t psy_audio_connections_wireindex(psy_audio_Connections* self, psy_audio
 	if (sockets) {
 		return psy_audio_connection_id(&sockets->outputs, wire.dst);
 	}
-	return UINTPTR_MAX;
+	return psy_INDEX_INVALID;
 }
 
 void psy_audio_connections_init(psy_audio_Connections* self)

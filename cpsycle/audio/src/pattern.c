@@ -20,7 +20,8 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor* self)
 	assert(self);
 	self->key = psy_audio_NOTECOMMANDS_MIDDLEC;
 	self->track = 0;
-	self->offset = 0;
+	self->offset = 0.0;
+	self->seqoffset = 0.0;
 	self->line = 0;
 	self->column = 0;
 	self->digit = 0;
@@ -660,8 +661,10 @@ psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 
 	assert(self);
 
+	psy_audio_patterncursor_init(&cursor);
+	cursor.seqoffset = 0;
 	cursor.offset = -1;
-	cursor.line = UINTPTR_MAX;
+	cursor.line = psy_INDEX_INVALID;
 	p = psy_audio_pattern_greaterequal(self, (psy_dsp_big_beat_t)selection.topleft.offset);
 	while (p != NULL) {
 		psy_audio_PatternEntry* entry;

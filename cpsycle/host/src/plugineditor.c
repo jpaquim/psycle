@@ -85,7 +85,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	self->basepath = 0;	
-	self->instanceidx = UINTPTR_MAX;
+	self->instanceidx = psy_INDEX_INVALID;
 	psy_ui_component_init(&self->bar, &self->component);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar);
@@ -254,7 +254,7 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 				psy_ui_editor_clear(&self->editor);
 				psy_ui_editor_load(&self->editor, path);
 				self->basepath = path;
-				self->instanceidx = UINTPTR_MAX;
+				self->instanceidx = psy_INDEX_INVALID;
 				plugineditor_buildfilelist(self);
 				psy_ui_combobox_setcursel(&self->fileselector, 1);
 				plugineditor_onfileselected(self, &self->fileselector.component, 1);

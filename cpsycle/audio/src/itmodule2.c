@@ -190,7 +190,7 @@ bool itmodule2_load(ITModule2* self)
 	psy_audio_song_setproperties(self->songfile->song, &songproperties);
 	// build sampler
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", UINTPTR_MAX);
+		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_MachineParam* param;
 

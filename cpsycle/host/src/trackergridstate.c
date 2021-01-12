@@ -52,10 +52,12 @@ void trackerpianogridstate_init(TrackerGridState* self, TrackConfig* trackconfig
 	// set references
 	self->trackconfig = trackconfig;
 	self->pattern = NULL;
+	self->sequence = NULL;
 	self->skin = NULL;	
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
-	self->numtracks = 16;	
+	self->numtracks = 16;
+	self->singlemode = TRUE;
 }
 
 void trackergridstate_dispose(TrackerGridState* self)

@@ -222,7 +222,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		psy_audio_Machine* machine;
 				
 		machine = NULL;	
-		if (psy_audio_midiinput_genmap(midiinput, ch) != UINTPTR_MAX) {
+		if (psy_audio_midiinput_genmap(midiinput, ch) != psy_INDEX_INVALID) {
 			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
 		} else {
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
@@ -230,7 +230,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		psy_snprintf(text, 256, "Ch %d", (ch + 1));
 		psy_ui_textout(g, colx_px[0], cpy, text, strlen(text));
 		//Generator/effect selector
-		selidx = UINTPTR_MAX;
+		selidx = psy_INDEX_INVALID;
 		switch (midiinput->midiconfig.gen_select_with) {
 			case psy_audio_MIDICONFIG_MS_USE_SELECTED:
 				if (workspace_song(self->workspace)) {
@@ -245,10 +245,10 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				selidx = ch;
 				break;
 			default:
-				selidx = UINTPTR_MAX;
+				selidx = psy_INDEX_INVALID;
 				break;
 		}
-		if (workspace_song(self->workspace) && selidx != UINTPTR_MAX) {
+		if (workspace_song(self->workspace) && selidx != psy_INDEX_INVALID) {
 			machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				selidx);
 			if (machine) {

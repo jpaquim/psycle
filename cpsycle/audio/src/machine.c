@@ -301,7 +301,7 @@ static void savewiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
 static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
-static uintptr_t slot(psy_audio_Machine* self) { return UINTPTR_MAX; }
+static uintptr_t slot(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
 static int haseditor(psy_audio_Machine* self) { return 0; }
 static void seteditorhandle(psy_audio_Machine* self, void* handle) { }

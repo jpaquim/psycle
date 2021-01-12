@@ -90,7 +90,7 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 
 	psy_ui_listbox_clear(&self->instrumentlist);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
-	if (groupslot == UINTPTR_MAX) {
+	if (groupslot == psy_INDEX_INVALID) {
 		groupslot = 0;
 	}
 	for ( ; slot < 256; ++slot) {		
@@ -130,7 +130,7 @@ void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
 	psy_signal_disconnect(&self->instruments->signal_slotchange, self,
 		instrumentsbox_oninstrumentslotchanged);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
-	if (groupslot == UINTPTR_MAX) {
+	if (groupslot == psy_INDEX_INVALID) {
 		groupslot = 0;
 	}
 	psy_audio_instruments_select(self->instruments,

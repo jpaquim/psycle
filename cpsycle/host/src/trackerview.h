@@ -74,7 +74,8 @@ typedef struct {
 	bool ft2delete;
 	bool effcursoralwaysdown;
 	bool movecursoronestep;
-	intptr_t pgupdownstep;	
+	intptr_t pgupdownstep;
+	bool preventscrolltop;
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
@@ -96,6 +97,8 @@ bool trackergrid_scrollleft(TrackerGrid*, psy_audio_PatternCursor);
 bool trackergrid_scrollright(TrackerGrid*, psy_audio_PatternCursor);
 void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_invalidatecursor(TrackerGrid*);
+void trackergrid_invalidateinternalcursor(TrackerGrid*,
+	psy_audio_PatternCursor);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
 void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,

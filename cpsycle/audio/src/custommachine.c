@@ -82,7 +82,7 @@ void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 	self->ismuted = 0;
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
-	self->slot = UINTPTR_MAX;
+	self->slot = psy_INDEX_INVALID;
 	self->x = 0;
 	self->y = 0;
 	custommachine_init_memory(self, psy_audio_MAX_STREAM_SIZE);

@@ -745,7 +745,7 @@ void psy_audio_plugin_tweakpreset(psy_audio_Plugin* self, psy_audio_Preset* pres
 
 uintptr_t currprogram(psy_audio_Plugin* self)
 {
-	return  (self->currprog != UINTPTR_MAX)
+	return  (self->currprog != psy_INDEX_INVALID)
 		? (int)self->currprog
 		: 0;
 }

@@ -24,6 +24,7 @@ extern "C" {
 typedef struct {	
 	uintptr_t track;
 	psy_dsp_big_beat_t offset;
+	psy_dsp_big_beat_t seqoffset;
 	uintptr_t line;
 	uintptr_t column;
 	uintptr_t digit;
@@ -79,8 +80,8 @@ INLINE bool psy_audio_patternselection_test(psy_audio_PatternSelection* self,
 	return psy_audio_patternselection_valid(self) &&
 		track >= self->topleft.track &&
 		track < self->bottomright.track&&
-		offset >= self->topleft.offset &&
-		offset < self->bottomright.offset;
+		offset >= self->topleft.offset + self->topleft.seqoffset &&
+		offset < self->bottomright.offset + self->bottomright.seqoffset;
 }
 
 typedef bool (*psy_audio_fp_matches)(const uintptr_t test, const uintptr_t reference);

@@ -136,7 +136,7 @@ typedef struct {
 	ViewHistory viewhistory;
 	uintptr_t restoreview;
 	psy_audio_PatternCursor patterneditposition;	
-	psy_audio_SequenceSelection newsequenceselection;
+	psy_audio_SequenceSelection sequenceselection;
 	int cursorstep;	
 	char* filename;
 	int followsong;
@@ -145,6 +145,7 @@ typedef struct {
 	psy_audio_Pattern patternpaste;
 	psy_audio_SequencePaste sequencepaste;
 	int navigating;
+	bool patternsinglemode;
 	// ui
 	MaximizedView maximizeview;
 	int fontheight;	
@@ -196,6 +197,7 @@ void workspace_clearrecentsongs(Workspace*);
 void workspace_setoctave(Workspace*, int octave);
 uintptr_t workspace_octave(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property*);
+void workspace_onconfigurationchanged(Workspace*, psy_Property*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setpatterncursor(Workspace*, psy_audio_PatternCursor);

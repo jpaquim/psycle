@@ -33,7 +33,7 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 {	
 	assert(self);
 
-	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
+	self->sampleindex = sampleindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->fixedkey = psy_audio_NOTECOMMANDS_EMPTY; // disabled
 	psy_audio_parameterrange_init(&self->keyrange,
 		0, psy_audio_NOTECOMMANDS_RELEASE - 1,

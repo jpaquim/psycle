@@ -78,7 +78,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->sampler = sampler;
 	self->inst = NULL;
 	self->instrument = 0xFF;
-	self->channel = UINTPTR_MAX;
+	self->channel = psy_INDEX_INVALID;
 	self->samplecounter = 0;
 	self->cutoff = 0;
 	self->effcmd = PS1_SAMPLER_CMD_NONE;	
@@ -110,7 +110,7 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 		
 	psy_dsp_envelopecontroller_stop(&self->filterenv);
 	psy_dsp_envelopecontroller_stop(&self->envelope);	
-	self->channel = UINTPTR_MAX;
+	self->channel = psy_INDEX_INVALID;
 	self->triggernoteoff = 0;
 	self->triggernotedelay = 0;
 	self->effretticks = 0;
@@ -370,7 +370,7 @@ uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
 			return voice;
 		}
 	}
-	return UINTPTR_MAX;
+	return psy_INDEX_INVALID;
 }
 
 // mfc-psycle: Sampler::NewLine()
@@ -411,7 +411,7 @@ void psy_audio_sampler_clearmulticmdmem(psy_audio_Sampler* self)
 // mfc-psycle: Sampler::GetFreeVoice() const
 uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 {
-	uintptr_t usevoice = UINTPTR_MAX;
+	uintptr_t usevoice = psy_INDEX_INVALID;
 	uintptr_t voice;
 
 	assert(self);
@@ -507,7 +507,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 		if (ev->inst == channel) {
 			if (ev->cmd == PS1_SAMPLER_CMD_PORTA2NOTE &&
 					data.note < psy_audio_NOTECOMMANDS_RELEASE &&
-					voice != UINTPTR_MAX) {
+					voice != psy_INDEX_INVALID) {
 				// if (self->linearslide) {   // isLinearSlide()
 					// EnablePerformFx();
 				// }
@@ -522,7 +522,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 	}	
 	if (data.note < psy_audio_NOTECOMMANDS_RELEASE && !doporta) {	// Handle Note On.	
 		usevoice = psy_audio_sampler_getfreevoice(self); // Find a voice to apply the new note
-		if (voice != UINTPTR_MAX) { // NoteOff previous Notes in this channel.
+		if (voice != psy_INDEX_INVALID) { // NoteOff previous Notes in this channel.
 			switch (self->voices[voice].inst->nna) {
 				case 0:
 					psy_audio_samplervoice_noteofffast(&self->voices[voice]);
@@ -533,24 +533,24 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 				default:
 					break;
 			}
-			if (usevoice == UINTPTR_MAX) {
+			if (usevoice == psy_INDEX_INVALID) {
 				usevoice = voice;
 			}
 		}
-		if (usevoice == UINTPTR_MAX) {	
+		if (usevoice == psy_INDEX_INVALID) {
 			// No free voices. Assign first one.
 			// This algorithm should be replace by a LRU lookup
 			usevoice = 0;
 		}
 		self->voices[usevoice].channel = channel;
 	} else {
-		if (voice != UINTPTR_MAX) {
+		if (voice != psy_INDEX_INVALID) {
 			if (data.note == psy_audio_NOTECOMMANDS_RELEASE) {
 				psy_audio_samplervoice_noteoff(&self->voices[voice]);  //  Handle Note Off
 			}
 			usevoice = voice;
 		}
-		if (usevoice == UINTPTR_MAX) {
+		if (usevoice == psy_INDEX_INVALID) {
 			return; // No playing note on this channel. Just go out.
 					// Change it if you have channel commands.
 		}

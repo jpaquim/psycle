@@ -1720,11 +1720,11 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 		modulename, catchername, 0);
 	// todo shellidx;
 	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,
-		type, catchername, UINTPTR_MAX);
+		type, catchername, psy_INDEX_INVALID);
 	if (!machine) {
 		machine = psy_audio_machinefactory_makemachine(
 			self->song->machinefactory, MACH_DUMMY,
-			catchername, UINTPTR_MAX);
+			catchername, psy_INDEX_INVALID);
 		*replaced = TRUE;
 	}
 	return machine;
