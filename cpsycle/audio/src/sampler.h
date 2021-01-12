@@ -68,7 +68,7 @@ extern "C" {
 	typedef struct psy_audio_SamplerVoice
 	{
 		struct psy_audio_Sampler* sampler;
-		psy_audio_SampleIterator controller;
+		psy_audio_WaveDataController controller;
 		psy_dsp_EnvelopeController envelope;	
 		//psy_dsp_ADSRSettings _envelopesettings;
 		psy_dsp_EnvelopeController filterenv;

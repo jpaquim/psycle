@@ -35,15 +35,16 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape, 
 	self->am = NULL;
 	self->pm = NULL;
 	self->phase = 0;
-	psy_audio_sampleiterator_init(&self->sampleiterator,
+	psy_audio_wavedatacontroller_init(&self->sampleiterator);
+	psy_audio_wavedatacontroller_initcontroller(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, frequency), psy_dsp_RESAMPLERQUALITY_LINEAR);
-	psy_audio_sampleiterator_setspeed(&self->sampleiterator, frequency / self->basefrequency);
-	psy_audio_sampleiterator_play(&self->sampleiterator);
+	psy_audio_wavedatacontroller_setspeed(&self->sampleiterator, frequency / self->basefrequency);
+	psy_audio_wavedatacontroller_play(&self->sampleiterator);
 }
 
 void psy_audio_waveosc_dispose(psy_audio_WaveOsc* self)
 {
-	psy_audio_sampleiterator_dispose(&self->sampleiterator);
+	psy_audio_wavedatacontroller_dispose(&self->sampleiterator);
 	--wavoscrefcounter;
 	if (wavoscrefcounter == 0) {
 		psy_audio_waveosctables_dispose(&waveosctables);
@@ -86,7 +87,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 		while (numsamples) {
 			intptr_t nextsamples;
 			
-			nextsamples = psy_min(psy_audio_sampleiterator_prework(
+			nextsamples = psy_min(psy_audio_wavedatacontroller_prework(
 				&self->sampleiterator, 1, FALSE), 1);
 			numsamples -= nextsamples;
 			while (nextsamples) {
@@ -102,7 +103,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 						double speed;
 
 						speed = f / self->basefrequency;
-						psy_audio_sampleiterator_setspeed(&self->sampleiterator,
+						psy_audio_wavedatacontroller_setspeed(&self->sampleiterator,
 							speed);
 					}
 				}
@@ -114,12 +115,12 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 				data[dstpos] += (float)(output * self->gain);
 				nextsamples--;
 				++dstpos;				
-				diff = psy_audio_sampleiterator_inc(&self->sampleiterator);				
+				diff = psy_audio_wavedatacontroller_inc(&self->sampleiterator);				
 				self->sampleiterator.left += diff;
 				self->sampleiterator.right += diff;				
 				
 			}
-			psy_audio_sampleiterator_postwork(&self->sampleiterator);
+			psy_audio_wavedatacontroller_postwork(&self->sampleiterator);
 		}	
 		psy_audio_buffer_dispose(&output);
 	}
@@ -128,16 +129,16 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 void psy_audio_waveosc_setfrequency(psy_audio_WaveOsc* self, double frequency)
 {	
 	self->frequency = frequency;	
-	psy_audio_sampleiterator_setsample(&self->sampleiterator,
+	psy_audio_wavedatacontroller_setsample(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, frequency));
-	psy_audio_sampleiterator_setspeed(&self->sampleiterator,
+	psy_audio_wavedatacontroller_setspeed(&self->sampleiterator,
 		self->frequency / self->basefrequency);	
 }
 
 void psy_audio_waveosc_start(psy_audio_WaveOsc* self, double phase)
 {
 	if (self->sampleiterator.sample) {
-		psy_audio_sampleiterator_setposition(&self->sampleiterator,
+		psy_audio_wavedatacontroller_setposition(&self->sampleiterator,
 			(uintptr_t)(phase * self->sampleiterator.sample->numframes));
 		self->playing = TRUE;
 	}
@@ -152,7 +153,7 @@ void psy_audio_waveosc_setquality(psy_audio_WaveOsc* self,
 	psy_dsp_ResamplerQuality quality)
 {
 	self->quality = quality;
-	psy_audio_sampleiterator_setquality(&self->sampleiterator, quality);
+	psy_audio_wavedatacontroller_setquality(&self->sampleiterator, quality);
 }
 
 psy_dsp_ResamplerQuality  psy_audio_waveosc_quality(psy_audio_WaveOsc* self)
@@ -164,6 +165,6 @@ void psy_audio_waveosc_setshape(psy_audio_WaveOsc* self,
 	psy_audio_WaveShape shape)
 {
 	self->shape = shape;
-	psy_audio_sampleiterator_setsample(&self->sampleiterator,
+	psy_audio_wavedatacontroller_setsample(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, self->basefrequency));
 }

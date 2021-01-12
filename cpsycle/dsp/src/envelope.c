@@ -207,7 +207,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope* self,
 			return *((psy_dsp_EnvelopePoint*)psy_list_entry_const(node));
 		}
 	}
-	return psy_dsp_envelopepoint_make(0.f, 0.f);
+	return psy_dsp_envelopepoint_make(-1.f, 0.f);
 }
 
 void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope* self,

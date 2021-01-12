@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 typedef struct psy_audio_WaveOsc {
-	psy_audio_SampleIterator sampleiterator;
+	psy_audio_WaveDataController sampleiterator;
 	double basefrequency;
 	double frequency;
 	double gain;

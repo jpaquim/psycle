@@ -132,7 +132,7 @@ psy_audio_Sample* psy_audio_sample_clone(const psy_audio_Sample*);
 void psy_audio_sample_deallocate(psy_audio_Sample*);
 
 /// psycle-mfc: WaveDataController
-psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample*,
+psy_audio_WaveDataController* psy_audio_sample_allociterator(psy_audio_Sample*,
 	psy_dsp_ResamplerQuality);
 /// allocates ALIGNED sample memory for all channels
 /// (psycle-mfc: The memory is NOT aligned.)

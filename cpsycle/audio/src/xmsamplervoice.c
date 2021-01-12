@@ -98,7 +98,7 @@ static const int m_RandomTable[256] = {
 };
 
 // XMSampler::WaveDataController Implementation
-// psy_audio_SampleIterator
+// psy_audio_WaveDataController
 
 // EnvelopeController
 void xmenvelopecontroller_init(XMEnvelopeController* self,
@@ -142,7 +142,8 @@ void xmenvelopecontroller_noteon(XMEnvelopeController* self)
 	// if there are no points, there is nothing to do.
 	if (psy_dsp_envelope_numofpoints(self->m_pEnvelope) > 0)
 	{
-		//if (m_pEnvelope->IsEnabled() && m_pEnvelope->GetTime(1) != XMInstrument::Envelope::INVALID)
+		if (self->m_pEnvelope->enabled &&
+			psy_dsp_envelope_time(self->m_pEnvelope, 1) != -1.f)
 		{
 			xmenvelopecontroller_start(self);
 		}
@@ -239,7 +240,8 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 				psy_dsp_envelope_sustainend(self->m_pEnvelope))
 			{
 				xmenvelopecontroller_pause(self);
-			} else { self->m_PositionIndex = (int)psy_dsp_envelope_sustainbegin(self->m_pEnvelope); }
+			} else {
+				self->m_PositionIndex = (int)psy_dsp_envelope_sustainbegin(self->m_pEnvelope); }
 		}
 	} else if (psy_dsp_envelope_loopstart(self->m_pEnvelope) != psy_INDEX_INVALID)
 	{
@@ -252,7 +254,7 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 			} else { self->m_PositionIndex = psy_dsp_envelope_loopstart(self->m_pEnvelope); }
 		}
 	}
-	if (psy_dsp_envelope_time(self->m_pEnvelope, self->m_PositionIndex + 1) == psy_INDEX_INVALID)
+	if (psy_dsp_envelope_time(self->m_pEnvelope, self->m_PositionIndex + 1) == -1.f)
 	{
 		if (self->m_Stage & XMENVELOPESTAGE_PAUSED) {
 			xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex);
@@ -294,7 +296,7 @@ void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int en
 void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int samplePos)
 {
 	int i = 0;
-	while (psy_dsp_envelope_time(self->m_pEnvelope, i) != psy_INDEX_INVALID)
+	while (psy_dsp_envelope_time(self->m_pEnvelope, i) != -1.f)
 	{
 		float time;
 
@@ -308,7 +310,7 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 		i++;
 	}	
 	if (i == 0) return; //Invalid Envelope. either GetTime(0) is INVALID, or samplePos is negative.
-	else if (psy_dsp_envelope_time(self->m_pEnvelope, i) == psy_INDEX_INVALID) {
+	else if (psy_dsp_envelope_time(self->m_pEnvelope, i) == -1.f) {
 		//Destination point is invalid or is exactly the last one.
 		i--;
 		self->m_Stage = XMENVELOPESTAGE_OFF;
@@ -350,8 +352,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self)
 	psy_dsp_slider_init(&self->rampr);
 	psy_dsp_slider_resetto(&self->rampl, 0.f);
 	psy_dsp_slider_resetto(&self->rampr, 0.f);
-	psy_audio_sampleiterator_init(&self->m_WaveDataController,
-		NULL, psy_dsp_RESAMPLERQUALITY_LINEAR);
+	psy_audio_wavedatacontroller_init(&self->m_WaveDataController);		
 }
 
 void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice* self)
@@ -519,7 +520,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 
 	while (numSamples) {
 		int nextsamples = psy_min(
-			psy_audio_sampleiterator_prework(&self->m_WaveDataController, (int)numSamples,
+			psy_audio_wavedatacontroller_prework(&self->m_WaveDataController, (int)numSamples,
 				psy_audio_xmsamplervoice_isstopping(self)),
 			(int)numSamples);
 
@@ -665,14 +666,14 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 			}
 
 			nextsamples--;
-			diff = psy_audio_sampleiterator_inc(&self->m_WaveDataController);
+			diff = psy_audio_wavedatacontroller_inc(&self->m_WaveDataController);
 			self->m_WaveDataController.left += diff;
 			if (psy_audio_buffer_numchannels(&self->m_WaveDataController.sample->channels) > 1) {
 				self->m_WaveDataController.right += diff;
 			}
 		}
-		psy_audio_sampleiterator_postwork(&self->m_WaveDataController);
-		if (!psy_audio_sampleiterator_playing(&self->m_WaveDataController)) {
+		psy_audio_wavedatacontroller_postwork(&self->m_WaveDataController);
+		if (!psy_audio_wavedatacontroller_playing(&self->m_WaveDataController)) {
 			psy_audio_xmsamplervoice_setisplaying(self, FALSE);
 			return;
 		}
@@ -717,9 +718,8 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 
 		samples = psy_audio_machine_samples(psy_audio_xmsampler_base(self->m_pSampler));
 		entry = (psy_audio_InstrumentEntry*)entries->entry;
-		sample = psy_audio_samples_at(samples, entry->sampleindex);
-		psy_audio_sampleiterator_dispose(&self->m_WaveDataController);
-		psy_audio_sampleiterator_init(&self->m_WaveDataController,
+		sample = psy_audio_samples_at(samples, entry->sampleindex);		
+		psy_audio_wavedatacontroller_initcontroller(&self->m_WaveDataController,
 			sample, psy_dsp_RESAMPLERQUALITY_LINEAR);
 		self->m_Note = note;
 		//\todo : add pInstrument().LinesMode
@@ -774,7 +774,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		//Important, put it after m_PitchEnvelope.NoteOn();	
 		psy_audio_xmsamplervoice_updatespeed(self);
 
-		psy_audio_sampleiterator_setplaying(&self->m_WaveDataController, TRUE);
+		psy_audio_wavedatacontroller_setplaying(&self->m_WaveDataController, TRUE);
 		psy_audio_xmsamplervoice_setisplaying(self, TRUE);
 	}
 }
@@ -874,7 +874,7 @@ void psy_audio_xmsamplervoice_noteoff(psy_audio_XMSamplerVoice* self)
 	xmenvelopecontroller_noteoff(&self->m_PanEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_FilterEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_PitchEnvelope);
-	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
+	psy_audio_wavedatacontroller_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
@@ -900,7 +900,7 @@ void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
 	xmenvelopecontroller_noteoff(&self->m_PanEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_FilterEnvelope);
 	xmenvelopecontroller_noteoff(&self->m_PitchEnvelope);
-	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
+	psy_audio_wavedatacontroller_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_notefadeout(psy_audio_XMSamplerVoice* self)
@@ -918,7 +918,7 @@ void psy_audio_xmsamplervoice_notefadeout(psy_audio_XMSamplerVoice* self)
 	//else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
 
 	//This might not be correct, but since we are saying "IsStopping(true"), then the controller needs to recalculate the buffers.
-	psy_audio_sampleiterator_noteoff(&self->m_WaveDataController);
+	psy_audio_wavedatacontroller_noteoff(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_updatefadeout(psy_audio_XMSamplerVoice* self)
@@ -1139,7 +1139,7 @@ void psy_audio_xmsamplervoice_updatespeed(psy_audio_XMSamplerVoice* self)
 		double speed = psy_audio_xmsamplervoice_periodtospeed(self, (int)_period);
 		//\todo: Attention, AutoVibrato always use linear slides with IT, but in FT2 it depends on amigaslides switch.
 		speed *= pow(2.0, ((-psy_audio_xmsamplervoice_autovibratoamount(self)) / 768.0));
-		psy_audio_sampleiterator_setspeed(&self->m_WaveDataController, speed);		
+		psy_audio_wavedatacontroller_setspeed(&self->m_WaveDataController, speed);		
 	}	
 }
 

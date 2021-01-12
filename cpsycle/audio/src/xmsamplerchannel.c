@@ -557,7 +557,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_filterenvelope(voice),
-					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+					(int)(parameter * psy_audio_machine_samplespertick(self->m_pSampler)));
 			}			
 			break; }
 		case XM_SAMPLER_CMD_EXTENDED:
@@ -566,15 +566,22 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			case XM_SAMPLER_CMD_E9:
 				switch (parameter & 0x0F)
 				{
-				case XM_SAMPLER_CMD_E9_PLAY_FORWARD:					
-					//voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
+				case XM_SAMPLER_CMD_E9_PLAY_FORWARD:
+					psy_audio_wavedatacontroller_changeloopdirection(
+						&voice->m_WaveDataController,
+						psy_audio_LOOPDIRECTION_FORWARD);
 					break;
 				case XM_SAMPLER_CMD_E9_PLAY_BACKWARD:
-					//if (voice->rWave().Position() == 0)
-					//{
-						//voice->rWave().Position(voice->rWave().Length() - 1);
-					//}
-					//voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
+					if (psy_audio_wavedatacontroller_position(&voice->m_WaveDataController) == 0) {
+						psy_audio_wavedatacontroller_setposition(&voice->m_WaveDataController,
+							psy_audio_wavedatacontroller_length(&voice->m_WaveDataController) - 1);								
+					}
+					psy_audio_wavedatacontroller_changeloopdirection(
+						&voice->m_WaveDataController,
+						psy_audio_LOOPDIRECTION_BACKWARD);
+					psy_audio_wavedatacontroller_changeloopdirection(
+						&voice->m_WaveDataController,
+						psy_audio_LOOPDIRECTION_FORWARD);
 					break;
 				}
 				break;
