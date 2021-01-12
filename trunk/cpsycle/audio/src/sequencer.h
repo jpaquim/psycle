@@ -16,6 +16,23 @@
 extern "C" {
 #endif
 
+typedef struct psy_audio_SequencerTime {
+	uintptr_t playcounter;
+	psy_dsp_big_beat_t samplerate;
+	psy_dsp_big_beat_t ppqpos;
+	psy_dsp_big_beat_t bpm;
+	psy_dsp_big_beat_t lastbarpos;
+} psy_audio_SequencerTime;
+
+
+INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
+{
+	self->playcounter = 0;
+	self->samplerate = 44100;
+	self->ppqpos = 0;
+	self->lastbarpos = 0;
+}
+
 typedef enum {
 	psy_audio_SEQUENCERPLAYMODE_PLAYALL,
 	psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS,
@@ -53,9 +70,7 @@ typedef struct {
 
 typedef struct {
 	psy_audio_Sequence* sequence;
-	psy_audio_Machines* machines;
-	psy_dsp_big_beat_t bpm;
-	uintptr_t samplerate;
+	psy_audio_Machines* machines;	
 	uintptr_t numsongtracks;
 	psy_dsp_big_beat_t beatspersample;	
 	uintptr_t lpb; // global
@@ -81,11 +96,10 @@ typedef struct {
 	psy_dsp_big_beat_t playbeatloopstart;
 	psy_dsp_big_beat_t playbeatloopend;
 	psy_dsp_big_beat_t numplaybeats;
-	psy_Signal signal_newline;
-	uintptr_t playcounter;
-	uintptr_t ppqncounter;
+	psy_Signal signal_newline;	
 	bool calcduration;
 	uintptr_t playtrack;
+	psy_audio_SequencerTime seqtime;
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,
@@ -143,15 +157,15 @@ void psy_audio_sequencer_append(psy_audio_Sequencer*, psy_List* events);
 void psy_audio_sequencer_setsamplerate(psy_audio_Sequencer*,
 	uintptr_t samplerate);
 
-INLINE uintptr_t psy_audio_sequencer_samplerate(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_samplerate(psy_audio_Sequencer* self)
 {
-	return self->samplerate;
+	return self->seqtime.samplerate;
 }
 void psy_audio_sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_big_beat_t bpm);
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
 {
-	return self->bpm;
+	return self->seqtime.bpm;
 }
 
 void psy_audio_sequencer_setlpb(psy_audio_Sequencer*, uintptr_t lpb);
@@ -262,7 +276,7 @@ void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 	psy_audio_Sequencer* self)
 {
-	return self->playcounter / (psy_dsp_seconds_t)self->samplerate;
+	return self->seqtime.playcounter / (psy_dsp_seconds_t)self->seqtime.samplerate;
 }
 
 

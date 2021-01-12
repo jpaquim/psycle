@@ -36,6 +36,15 @@ static psy_dsp_beat_t machinecallback_bpm(psy_audio_MachineCallback* self)
 		: 125.f;
 }
 
+static psy_audio_SequencerTime* machinecallback_sequencertime(psy_audio_MachineCallback* self)	 
+{
+	if (self->player) {
+		return psy_audio_player_sequencertime(self->player);
+	} else {
+		return NULL;
+	}
+}
+
 static psy_dsp_beat_t machinecallback_beatspertick(psy_audio_MachineCallback* self)
 {
 	assert(self);
@@ -157,6 +166,8 @@ static void psy_audio_machinecallbackvtable_init(void)
 			machinecallback_samplerate;
 		psy_audio_machinecallbackvtable_vtable.bpm = (fp_mcb_bpm)
 			machinecallback_bpm;
+		psy_audio_machinecallbackvtable_vtable.sequencertime = (fp_mcb_sequencertime)
+			machinecallback_sequencertime;
 		psy_audio_machinecallbackvtable_vtable.beatspertick = (fp_mcb_beatspertick)
 			machinecallback_beatspertick;
 		psy_audio_machinecallbackvtable_vtable.beatspersample = (fp_mcb_beatspersample)
@@ -403,6 +414,13 @@ static psy_dsp_beat_t bpm(psy_audio_Machine* self)
 		: 125.f;
 }
 
+static psy_audio_SequencerTime* sequencertime(psy_audio_Machine* self)
+{
+	return (self->callback)
+		? self->callback->vtable->sequencertime(self->callback)
+		: NULL;
+}
+
 static psy_dsp_beat_t beatspertick(psy_audio_Machine* self) {
 	return (self->callback)
 		? self->callback->vtable->beatspertick(self->callback)
@@ -564,6 +582,7 @@ static void vtable_init(void)
 		vtable.savewiremapping = savewiremapping;
 		vtable.postload = postload;
 		vtable.bpm = bpm;
+		vtable.sequencertime = sequencertime;
 		vtable.beatspertick = beatspertick;
 		vtable.beatspersample = beatspersample;
 		vtable.currbeatsperline = currbeatsperline;
@@ -1020,7 +1039,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		{
 			// Do not create the hidden wire from mixer send to the send machine.
 			int outWire = psy_audio_legacywires_findlegacyoutput(songfile->legacywires, wire->_inputMachine,
-				slot);
+				(int)slot);
 			if (outWire != -1) {
 				psy_audio_Wire newwire;
 

@@ -50,7 +50,10 @@ extern "C" {
 // and saving, plugins can save additional machine information with
 // loadspecific, savespecific, loadwiremapping/savewiremapping in a song.
 
+struct psy_audio_SequencerTime;
+
 typedef uintptr_t (*fp_mcb_samplerate)(void*);
+typedef	struct psy_audio_SequencerTime* (*fp_mcb_sequencertime)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_bpm)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspertick)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspersample)(void*);
@@ -80,6 +83,7 @@ typedef const char* (*fp_mcb_language)(void*);
 typedef struct  {
 	fp_mcb_samplerate samplerate;
 	fp_mcb_bpm bpm;
+	fp_mcb_sequencertime sequencertime;
 	fp_mcb_beatspertick beatspertick;
 	fp_mcb_beatspersample beatspersample;
 	fp_mcb_currbeatsperline currbeatsperline;
@@ -250,6 +254,7 @@ typedef uintptr_t (*fp_machine_shellidx)(struct psy_audio_Machine*);
 // machine callbacks
 typedef	uintptr_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_bpm)(struct psy_audio_Machine*);
+typedef struct psy_audio_SequencerTime* (*fp_machine_sequencertime)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspertick)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspersample)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t(*fp_machine_currbeatsperline)(struct
@@ -391,6 +396,7 @@ typedef struct {
 ///\name machine callbacks
 	fp_machine_samplerate samplerate;
 	fp_machine_bpm bpm;
+	fp_machine_sequencertime sequencertime;
 	fp_machine_beatspertick beatspertick;
 	fp_machine_beatspersample beatspersample;
 	fp_machine_currbeatsperline currbeatsperline;
@@ -937,6 +943,11 @@ void psy_audio_machine_updatememory(psy_audio_Machine*,
 INLINE psy_dsp_beat_t psy_audio_machine_bpm(psy_audio_Machine* self)
 {
 	return self->vtable->bpm(self);
+}
+
+INLINE struct psy_audio_SequencerTime* psy_audio_machine_sequencertime(psy_audio_Machine* self)	 
+{
+	return self->vtable->sequencertime(self);
 }
 
 INLINE psy_dsp_beat_t psy_audio_machine_beatspertick(psy_audio_Machine* self)

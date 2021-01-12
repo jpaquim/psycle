@@ -7,6 +7,8 @@
 #include "../../detail/os.h"
 #include "../../detail/psydef.h"
 
+#include <dsptypes.h>
+
 #include <time.h>
 
 typedef struct psy_audio_CpuTimeClock {
@@ -31,7 +33,8 @@ INLINE void psy_audio_cputimeclock_stop(psy_audio_CpuTimeClock* self)
 	self->end = clock();
 }
 
-INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_t amount, uintptr_t samplerate)
+INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_t amount,
+	psy_dsp_big_beat_t samplerate)
 {
 	if (amount > 0) {
 		double cpu_time_used;
@@ -39,7 +42,7 @@ INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_
 		double currperc;
 
 		cpu_time_used = ((double)(self->end - self->start)) / CLOCKS_PER_SEC;
-		max_time = amount / (double)samplerate;
+		max_time = amount / samplerate;
 		currperc = cpu_time_used / max_time;
 		self->perc = (self->last_perc + currperc) / 2;
 		self->last_perc = self->perc;

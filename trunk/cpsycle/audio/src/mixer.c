@@ -1773,7 +1773,7 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			psy_table_insert(&self->legacyreturn_, i,
 				psy_audio_legacywire_allocinit_all(
 					inputmachine, TRUE, inputconvol,
-					wiremultiplier, slot, TRUE
+					wiremultiplier, (int)slot, TRUE
 			));
 			psy_audio_mixer_insertsend(self, i,
 				psy_audio_mixersend_allocinit(inputmachine));
@@ -1801,7 +1801,7 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			psy_table_insert(&self->legacysend_, i,
 				psy_audio_legacywire_allocinit_all(
 					inputmachine, TRUE, inputconvol,
-					wiremultiplier, slot, TRUE
+					wiremultiplier, (int)slot, TRUE
 			));
 		}
 		for (j = 0; j < numrets; ++j) {

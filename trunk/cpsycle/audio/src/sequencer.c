@@ -12,6 +12,7 @@
 #include <qsort.h>
 // std
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 // platform
 #include "../../detail/portable.h"
@@ -142,10 +143,11 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	self->events = NULL;
 	self->delayedevents = NULL;
 	self->inputevents = NULL;
-	self->currtracks = NULL;
+	self->currtracks = NULL;	
 	psy_table_init(&self->lastmachine);
 	psy_signal_init(&self->signal_newline);	
-	psy_audio_sequencer_reset_common(self, sequence, machines, 44100);	
+	psy_audio_sequencer_reset_common(self, sequence, machines, 44100);
+	psy_audio_sequencertime_init(&self->seqtime);
 }
 
 void psy_audio_sequencer_dispose(psy_audio_Sequencer* self)
@@ -179,17 +181,15 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 
 	self->sequence = sequence;
 	self->machines = machines;
-	self->samplerate = samplerate;
+	self->seqtime.samplerate = samplerate;
 	self->numsongtracks = 16;
-	self->bpm = (psy_dsp_big_beat_t)125;
+	self->seqtime.bpm = (psy_dsp_big_beat_t)125;
 	self->lpb = 4;
 	self->lpbspeed = (psy_dsp_big_beat_t)1.0;
 	self->playing = FALSE;
 	self->looping = TRUE;
 	self->numplaybeats = (psy_dsp_big_beat_t)4.0;
-	self->position = (psy_dsp_big_beat_t)0.0;
-	self->playcounter = 0;
-	self->ppqncounter = 0;
+	self->position = (psy_dsp_big_beat_t)0.0;	
 	self->window = (psy_dsp_big_beat_t)0.0;
 	self->linetickcount = (psy_dsp_big_beat_t)0.0;
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
@@ -217,8 +217,13 @@ void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearcurrtracks(self);
+	self->seqtime.ppqpos = offset;
+	// todo only estimated sample pos on current bpm
+	self->seqtime.playcounter = psy_audio_sequencer_frames(self,
+		offset);
+	self->seqtime.lastbarpos = floor(offset / 4) * 4;
 	self->linetickcount = 0.0;
-	self->position = offset;
+	self->position = offset;	
 	self->window = (psy_dsp_big_beat_t)0.0;
 	psy_audio_sequencer_makecurrtracks(self, offset);
 }
@@ -227,7 +232,6 @@ void psy_audio_sequencer_start(psy_audio_Sequencer* self)
 {	
 	assert(self);
 
-	self->playcounter = 0;
 	psy_audio_sequencerjump_init(&self->jump);
 	psy_audio_sequencerrowdelay_init(&self->rowdelay);
 	psy_audio_sequencerloop_init(&self->loop);
@@ -236,8 +240,7 @@ void psy_audio_sequencer_start(psy_audio_Sequencer* self)
 	self->linetickcount = 0.0;
 	if (self->mode == psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 		psy_audio_sequencer_setbarloop(self);		
-	}
-	self->ppqncounter = 0;
+	}	
 	self->playing = TRUE;
 }
 
@@ -265,7 +268,7 @@ void psy_audio_sequencer_setsamplerate(psy_audio_Sequencer* self,
 {
 	assert(self);
 
-	self->samplerate = samplerate;
+	self->seqtime.samplerate = (double)samplerate;
 	psy_audio_sequencer_compute_beatspersample(self);
 }
 
@@ -273,12 +276,12 @@ void psy_audio_sequencer_setbpm(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t bpm)
 {	
 	if (bpm < 32) {
-		self->bpm = 32;
+		self->seqtime.bpm = 32;
 	} else
 	if (bpm > 999) {
-		self->bpm = 999;
+		self->seqtime.bpm = 999;
 	} else {
-		self->bpm = bpm;
+		self->seqtime.bpm = bpm;
 	}
 	psy_audio_sequencer_compute_beatspersample(self);
 }
@@ -425,9 +428,10 @@ void psy_audio_sequencer_frametick(psy_audio_Sequencer* self, uintptr_t
 {	
 	assert(self);
 
-	if (self->playing) {
-		self->playcounter += numframes;
-	}
+	if (self->playing) {		
+		self->seqtime.playcounter += numframes;
+		self->seqtime.ppqpos = self->position;		
+	}	
 	psy_audio_sequencer_tick(self, psy_audio_sequencer_frametooffset(self,
 		numframes));
 }
@@ -438,6 +442,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	assert(self);
 
 	if (psy_audio_sequencer_playing(self)) {		
+		self->seqtime.lastbarpos = floor(self->position / 4) * 4;
 		psy_audio_sequencer_advanceposition(self, width);		
 	}
 	psy_audio_sequencer_clearevents(self);
@@ -736,7 +741,7 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 					}
 				break;
 				case psy_audio_PATTERNCMD_SET_TEMPO:
-					self->bpm = psy_audio_patternentry_front(patternentry)->parameter;					
+					self->seqtime.bpm = psy_audio_patternentry_front(patternentry)->parameter;
 					psy_audio_sequencer_compute_beatspersample(self);
 					done = TRUE;
 				break;
@@ -923,7 +928,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 				: psy_audio_patternentry_front(entry)->mach;
 			// because master handles all wires volumes
 			psy_audio_patternentry_front(entry)->mach = psy_audio_MASTER_INDEX;
-			psy_audio_patternentry_setbpm(entry, self->bpm);
+			psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 			entry->delta = offset - self->position;
 			psy_list_append(&self->events, entry);				
 		}		
@@ -936,7 +941,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 		psy_audio_PatternEntry* entry;
 
 		entry = psy_audio_patternentry_clone(patternentry);
-		psy_audio_patternentry_setbpm(entry, self->bpm);
+		psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 		entry->delta = offset - self->position;
 		entry->track = psy_audio_patternentry_front(patternentry)->inst;
 		entry->track += track->channeloffset;
@@ -957,7 +962,7 @@ void psy_audio_sequencer_notedelay(psy_audio_Sequencer* self,
 
 	entry = psy_audio_patternentry_clone(patternentry);
 	entry->track += channeloffset;
-	psy_audio_patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 	entry->delta = offset + psy_audio_patternentry_front(entry)->parameter *
 		(psy_audio_sequencer_currbeatsperline(self) / 256.f);
 	psy_list_append(&self->delayedevents, entry);
@@ -973,7 +978,7 @@ void psy_audio_sequencer_retrigger(psy_audio_Sequencer* self,
 
 	entry = psy_audio_patternentry_clone(patternentry);
 	entry->track += track->channeloffset;
-	psy_audio_patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 	entry->delta = offset - self->position;
 	psy_list_append(&self->events, entry);
 	psy_audio_sequencer_makeretriggerevents(self, track, entry, offset);
@@ -989,7 +994,7 @@ void psy_audio_sequencer_retriggercont(psy_audio_Sequencer* self,
 
 	entry = psy_audio_patternentry_clone(patternentry);
 	entry->track += track->channeloffset;
-	psy_audio_patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 	entry->delta = offset + track->state.retriggeroffset;
 	psy_list_append(&self->delayedevents, entry);
 	psy_audio_sequencer_makeretriggercontinueevents(self, track, entry,
@@ -1014,7 +1019,7 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 			patternentry->track);
 		psy_audio_patternentry_front(entry)->mach = (uint8_t)lastmachine;
 	}
-	psy_audio_patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 	entry->delta = offset - self->position;
 	if (psy_audio_patternentry_front(patternentry)->note <
 		psy_audio_NOTECOMMANDS_RELEASE) {
@@ -1035,7 +1040,7 @@ void psy_audio_sequencer_tweak(psy_audio_Sequencer* self,
 
 	entry = psy_audio_patternentry_clone(patternentry);
 	entry->track += channeloffset;
-	psy_audio_patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 	entry->delta = offset - self->position;
 	psy_audio_patternentry_front(entry)->vol = 0;
 	psy_list_append(&self->events, entry);
@@ -1065,8 +1070,10 @@ void psy_audio_addgate(psy_audio_Sequencer* self, psy_audio_PatternEntry*
 		psy_audio_PatternEntry* noteoff;
 
 		noteoff = psy_audio_patternentry_allocinit();
-		psy_audio_patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
-		psy_audio_patternentry_front(noteoff)->mach = psy_audio_patternentry_front(entry)->mach;
+		psy_audio_patternentry_front(noteoff)->note =
+			psy_audio_NOTECOMMANDS_RELEASE;
+		psy_audio_patternentry_front(noteoff)->mach =
+			psy_audio_patternentry_front(entry)->mach;
 		noteoff->delta += entry->offset + gate / 
 			(self->lpb * psy_audio_sequencer_speed(self) * 128.f);
 		psy_list_append(&self->delayedevents, noteoff);
@@ -1089,7 +1096,8 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 	if (!self->machines) {
 		return;
 	}
-	machine = psy_audio_machines_at(self->machines, psy_audio_patternentry_front(entry)->mach);
+	machine = psy_audio_machines_at(self->machines,
+		psy_audio_patternentry_front(entry)->mach);
 	if (!machine) {
 		return;
 	}
@@ -1115,7 +1123,7 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 		slideentry->track += channeloffset;
 		psy_audio_patternentry_front(slideentry)->note = psy_audio_NOTECOMMANDS_TWEAK;
 		psy_audio_patternentry_front(slideentry)->vol = (uint16_t)(numslides - slide);
-		psy_audio_patternentry_setbpm(slideentry, self->bpm);		
+		psy_audio_patternentry_setbpm(slideentry, self->seqtime.bpm);
 		slideentry->delta = offset +
 			psy_audio_sequencer_frametooffset(self, slide * framesperslide);
 		slideentry->priority = 1; // not used right now
@@ -1233,10 +1241,11 @@ void psy_audio_sequencer_insertinputevents(psy_audio_Sequencer* self)
 void psy_audio_sequencer_compute_beatspersample(psy_audio_Sequencer* self)
 {
 	assert(self);
-	assert(self->samplerate != 0);
+	assert(self->seqtime.samplerate != 0);
 	
-	self->beatspersample = (self->bpm * psy_audio_sequencer_speed(self)) /
-		(self->samplerate * 60.0);	
+	self->beatspersample =
+		(self->seqtime.bpm * psy_audio_sequencer_speed(self)) /
+		(self->seqtime.samplerate * 60.0);
 }
 
 psy_List* psy_audio_sequencer_timedevents(psy_audio_Sequencer* self, uintptr_t
@@ -1255,7 +1264,7 @@ psy_List* psy_audio_sequencer_timedevents(psy_audio_Sequencer* self, uintptr_t
 
 		entry = psy_audio_patternnode_entry(p);
 		beatspersample = (entry->bpm * psy_audio_sequencer_speed(self)) /
-			(self->samplerate * 60.0f);
+			(self->seqtime.samplerate * 60.0);
 		deltaframes = (uintptr_t)(entry->delta / self->beatspersample);
 		if (deltaframes >= amount) {
 			deltaframes = amount - 1;
@@ -1272,7 +1281,8 @@ void psy_audio_sequencer_addinputevent(psy_audio_Sequencer* self,
 
 	if (ev) {
 		psy_list_append(&self->inputevents,
-			psy_audio_patternentry_allocinit_all(ev, 0, 0, self->bpm, track));
+			psy_audio_patternentry_allocinit_all(ev, 0, 0,
+				self->seqtime.bpm, track));
 	}
 }
 
