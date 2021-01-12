@@ -171,7 +171,7 @@ INLINE psy_dsp_big_beat_t psy_audio_player_bpl(psy_audio_Player* self)
 		psy_audio_sequencer_lpb(&self->sequencer);
 }
 
-INLINE uintptr_t psy_audio_player_samplerate(psy_audio_Player* self)
+INLINE psy_dsp_big_beat_t psy_audio_player_samplerate(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_samplerate(&self->sequencer);
 }
@@ -222,6 +222,11 @@ INLINE void psy_audio_player_preventrecordnoteoff(psy_audio_Player* self)
 INLINE bool psy_audio_player_recordingnoteoff(const psy_audio_Player* self)
 {
 	return self->recordnoteoff;
+}
+
+INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(psy_audio_Player* self)
+{
+	return &self->sequencer.seqtime;
 }
 
 // event driver

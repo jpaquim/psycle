@@ -420,9 +420,9 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 
 			mac = psy_audio_machines_slot(&self->song->machines);
 			if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
-				note = cmd.id + self->octave * 12;
+				note = (uint8_t)cmd.id + (uint8_t)self->octave * 12;
 			} else {
-				note = cmd.id;
+				note = (uint8_t)cmd.id;
 			}
 			machine = psy_audio_machines_at(&self->song->machines, mac);
 			psy_audio_patternevent_init_all(&ev,
@@ -671,7 +671,7 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 	}	
 	psy_audio_sequencer_setsamplerate(&self->sequencer, psy_audiodriver_samplerate(
 		driver));
-	psy_dsp_rmsvol_setsamplerate(psy_audiodriver_samplerate(driver));
+	psy_dsp_rmsvol_setsamplerate((uint32_t)psy_audiodriver_samplerate(driver));
 	self->driver = driver;
 	if (self->driver) {
 		if (config) {

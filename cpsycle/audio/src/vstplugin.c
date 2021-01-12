@@ -15,6 +15,7 @@
 #endif
 #include <operations.h>
 #include "pattern.h"
+#include "sequencer.h"
 #include "plugin_interface.h"
 #include "songio.h"
 #include "preset.h"
@@ -891,10 +892,20 @@ void vstplugin_onfileselect(psy_audio_VstPlugin* self,
 
 void update_vsttimeinfo(psy_audio_VstPlugin* self)
 {	
+	psy_audio_SequencerTime* sequencertime;
+
 	assert(self);
 
+	sequencertime = psy_audio_machine_sequencertime(
+		psy_audio_vstplugin_base(self));
 	self->vsttimeinfo->sampleRate = psy_audio_machine_samplerate(
 		psy_audio_vstplugin_base(self));
+	self->vsttimeinfo->samplePos = sequencertime->playcounter;
+	self->vsttimeinfo->ppqPos = sequencertime->ppqpos;
+	self->vsttimeinfo->tempo = sequencertime->bpm;
+	self->vsttimeinfo->barStartPos = sequencertime->lastbarpos;
+	self->vsttimeinfo->flags =
+		kVstBarsValid | kVstTempoValid | kVstPpqPosValid;
 }
 
 // VSTCALLBACK
@@ -961,7 +972,18 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 		}
 		break;
 	case audioMasterCanDo:
-		result = (strcmp((char*)ptr, "sizeWindow") == 0);
+		if (result = (strcmp((char*)ptr, "sizeWindow") == 0)) {
+			break;
+		}		
+		if (result = (strcmp((char*)ptr, "sendVstTimeInfo") == 0)) {
+			break;
+		}
+		if (result = (strcmp((char*)ptr, "sendVstMidiEvent") == 0)) {
+			break;
+		}
+		if (result = (strcmp((char*)ptr, "sendVstEvents") == 0)) {
+			break;
+		}
 		break;
 	case audioMasterGetAutomationState:		
 		/// difference kVstAutomationOff and kVstAutomationUnsupported?
