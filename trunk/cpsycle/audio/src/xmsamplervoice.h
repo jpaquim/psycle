@@ -129,7 +129,7 @@ typedef struct psy_audio_XMSamplerVoice {
 	XMEnvelopeController m_PitchEnvelope;
 	XMEnvelopeController m_FilterEnvelope;
 
-	psy_audio_SampleIterator m_WaveDataController;
+	psy_audio_WaveDataController m_WaveDataController;
 
 	psy_dsp_ResamplerQuality resamplertype;
 	// todo

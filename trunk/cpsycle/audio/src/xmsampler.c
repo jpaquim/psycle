@@ -675,12 +675,12 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 					if (offset != 0) {
 						psy_audio_xmsamplerchannel_setoffsetmem(thisChannel, offset);						
 						if (offset < twlength) {
-							psy_audio_sampleiterator_setposition(&newVoice->m_WaveDataController, offset);
+							psy_audio_wavedatacontroller_setposition(&newVoice->m_WaveDataController, offset);
 						} else {
-							psy_audio_sampleiterator_setposition(&newVoice->m_WaveDataController, twlength - 1);
+							psy_audio_wavedatacontroller_setposition(&newVoice->m_WaveDataController, twlength - 1);
 						}
 					} else {
-						psy_audio_sampleiterator_setposition(&newVoice->m_WaveDataController, 0);						
+						psy_audio_wavedatacontroller_setposition(&newVoice->m_WaveDataController, 0);						
 					}
 				} else
 				{

@@ -19,51 +19,61 @@
 
 #define REFILLBUFFERSIZE 64 * 3
 
-INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_looptype(psy_audio_SampleIterator* self)
+INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_looptype(psy_audio_WaveDataController* self)
 {
 	return self->sample->loop.type;
 }
 
-INLINE uint32_t psy_audio_sampleiterator_loopstart(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_loopstart(psy_audio_WaveDataController* self)
 {
 	return self->sample->loop.start;
 }
 
-INLINE uint32_t psy_audio_sampleiterator_loopend(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_loopend(psy_audio_WaveDataController* self)
 {
 	return self->sample->loop.end;
 }
 
-INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_sustainlooptype(psy_audio_SampleIterator* self)
+INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_sustainlooptype(psy_audio_WaveDataController* self)
 {
 	return self->sample->sustainloop.type;
 }
 
-INLINE uint32_t psy_audio_sampleiterator_sustainloopstart(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_sustainloopstart(psy_audio_WaveDataController* self)
 {
 	return self->sample->sustainloop.start;
 }
 
-INLINE uint32_t psy_audio_sampleiterator_sustainloopend(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_sustainloopend(psy_audio_WaveDataController* self)
 {
 	return self->sample->sustainloop.end;
 }
 
-INLINE uint32_t psy_audio_sampleiterator_length(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_length(psy_audio_WaveDataController* self)
 {
 	return self->sample->numframes;
 }
 
 static void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
-	psy_audio_SampleIterator*, psy_audio_Sample*);
-static void psy_audio_sampleiterator_initbuffer(psy_audio_SampleIterator*);
-static void psy_audio_sampleiterator_disposebuffer(psy_audio_SampleIterator*);
-static void psy_audio_sampleiterator_refillbuffers(psy_audio_SampleIterator*,
+	psy_audio_WaveDataController*, psy_audio_Sample*);
+static void psy_audio_sampleiterator_initbuffer(psy_audio_WaveDataController*);
+static void psy_audio_sampleiterator_disposebuffer(psy_audio_WaveDataController*);
+static void psy_audio_sampleiterator_refillbuffers(psy_audio_WaveDataController*,
 	bool released/*=false*/);
-static void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator*,
+static void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController*,
 	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released);
 
-void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
+void psy_audio_wavedatacontroller_init(psy_audio_WaveDataController* self)
+{
+	self->sample = NULL;
+	psy_dsp_multiresampler_init(&self->resampler,
+		psy_dsp_RESAMPLERQUALITY_LINEAR);
+	self->playing = FALSE;
+	self->looped = FALSE;
+	psy_audio_sampleiterator_initbuffer(self);
+}
+
+void psy_audio_wavedatacontroller_initcontroller(psy_audio_WaveDataController* self,
 	psy_audio_Sample* sample, psy_dsp_ResamplerQuality quality)
 {
 	self->sample = sample;
@@ -75,12 +85,10 @@ void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
 	self->forward = 1;
 		
 	psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(self, sample);
-	//psy_audio_buffer_init(&self->buffer, 2);
-	psy_audio_sampleiterator_initbuffer(self);
-	psy_dsp_multiresampler_init(&self->resampler, quality);	
+	psy_audio_sampleiterator_refillbuffers(self, FALSE);
 }
 
-void psy_audio_sampleiterator_initbuffer(psy_audio_SampleIterator* self)
+void psy_audio_sampleiterator_initbuffer(psy_audio_WaveDataController* self)
 {
 	// uintptr_t channel;
 	
@@ -96,7 +104,7 @@ void psy_audio_sampleiterator_initbuffer(psy_audio_SampleIterator* self)
 	}
 }
 
-void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator* self)
+void psy_audio_wavedatacontroller_dispose(psy_audio_WaveDataController* self)
 {
 	//uintptr_t channel;
 	//uintptr_t size;
@@ -111,7 +119,7 @@ void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator* self)
 }
 
 void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
-	psy_audio_SampleIterator* self, psy_audio_Sample* sample)
+	psy_audio_WaveDataController* self, psy_audio_Sample* sample)
 {
 	if (sample) {
 		if (psy_audio_sampleiterator_sustainlooptype(self)
@@ -146,24 +154,26 @@ void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
 	self->speedinternal = self->speed;
 }
 
-psy_audio_SampleIterator* psy_audio_sampleiterator_alloc(void)
+psy_audio_WaveDataController* psy_audio_wavedatacontroller_alloc(void)
 {
-	return malloc(sizeof(psy_audio_SampleIterator));
+	return malloc(sizeof(psy_audio_WaveDataController));
 }
 
-psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(psy_audio_Sample*
+psy_audio_WaveDataController* psy_audio_wavedatacontroller_allocinit(psy_audio_Sample*
 	sample)
 {
-	psy_audio_SampleIterator* rv;
+	psy_audio_WaveDataController* rv;
 
-	rv = psy_audio_sampleiterator_alloc();
+	rv = psy_audio_wavedatacontroller_alloc();
 	if (rv) {		
-		psy_audio_sampleiterator_init(rv, sample, psy_dsp_RESAMPLERQUALITY_LINEAR);
+		psy_audio_wavedatacontroller_init(rv);
+		psy_audio_wavedatacontroller_initcontroller(rv, sample,
+			psy_dsp_RESAMPLERQUALITY_LINEAR);
 	}
 	return rv;
 }
 
-intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator* self)
+intptr_t psy_audio_wavedatacontroller_inc(psy_audio_WaveDataController* self)
 {			
 	intptr_t old;
 	intptr_t diff;
@@ -176,7 +186,7 @@ intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator* self)
 	return diff;
 }
 
-psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator* self, uintptr_t channel)
+psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, uintptr_t channel)
 {
 	psy_dsp_amp_t* src;
 
@@ -190,10 +200,10 @@ psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator* self, uint
 	return 0.f;
 }
 
-void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
+void psy_audio_wavedatacontroller_postwork(psy_audio_WaveDataController* self)
 {
 	int32_t newIntPos = (int32_t)(self->pos.HighPart);
-	if (psy_audio_sampleiterator_currentloopdirection(self) ==
+	if (psy_audio_wavedatacontroller_currentloopdirection(self) ==
 				psy_audio_LOOPDIRECTION_FORWARD &&
 			newIntPos >= self->currentloopend) {
 		self->looped = TRUE;
@@ -218,11 +228,11 @@ void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
 			break;
 		case psy_audio_SAMPLE_LOOP_DO_NOT: // fallthrough
 		default:
-			psy_audio_sampleiterator_stop(self);
+			psy_audio_wavedatacontroller_stop(self);
 			break;
 		}
 	} else
-	if (psy_audio_sampleiterator_currentloopdirection(self) ==
+	if (psy_audio_wavedatacontroller_currentloopdirection(self) ==
 				psy_audio_LOOPDIRECTION_BACKWARD &&
 			newIntPos <= self->currentloopstart) {
 		switch (self->currentlooptype)
@@ -241,7 +251,7 @@ void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
 			break;
 		case psy_audio_SAMPLE_LOOP_DO_NOT://fallthrough
 		default:
-			psy_audio_sampleiterator_stop(self);
+			psy_audio_wavedatacontroller_stop(self);
 			break;
 		}
 	}
@@ -252,7 +262,21 @@ void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)
 #endif
 }
 
-void psy_audio_sampleiterator_dooffset(psy_audio_SampleIterator* self,
+void psy_audio_wavedatacontroller_changeloopdirection(psy_audio_WaveDataController* self,
+	psy_audio_LoopDirection dir)
+{
+	if (dir == self->currentloopdirection) {
+		return;
+	}
+
+	self->currentloopdirection = dir;
+	self->speedinternal = self->speed;
+	if (dir == psy_audio_LOOPDIRECTION_BACKWARD) {
+		self->speedinternal *= -1;
+	}
+}
+
+void psy_audio_wavedatacontroller_dooffset(psy_audio_WaveDataController* self,
 	uint8_t offset)
 {
 	uint64_t w_offset;
@@ -265,7 +289,7 @@ void psy_audio_sampleiterator_dooffset(psy_audio_SampleIterator* self,
 	}
 }
 
-void psy_audio_sampleiterator_refillbuffers(psy_audio_SampleIterator* self,
+void psy_audio_sampleiterator_refillbuffers(psy_audio_WaveDataController* self,
 	bool released/*=false*/)
 {
 	psy_audio_sampleiterator_refillbuffer(self, self->lBuffer, self->sample->channels.samples[0], released);
@@ -274,7 +298,7 @@ void psy_audio_sampleiterator_refillbuffers(psy_audio_SampleIterator* self,
 	}
 }
 
-void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
+void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
 	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released)
 {
 	//These values are for the max size of sinc resampler (which suits the rest).
@@ -369,7 +393,7 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 	}
 }
 
-int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamples, bool released)
+int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController* self, int numSamples, bool released)
 {
 	// WorkFunction* pWork
 	// *pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
@@ -388,7 +412,7 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 	amount.QuadPart = self->pos.QuadPart + self->speedinternal * numSamples;
 	pos = self->pos.HighPart;
 	//TRACE("RealPos %d\n",pos);
-	if (psy_audio_sampleiterator_currentloopdirection(self) == psy_audio_LOOPDIRECTION_FORWARD) {
+	if (psy_audio_wavedatacontroller_currentloopdirection(self) == psy_audio_LOOPDIRECTION_FORWARD) {
 		if (pos < presamples && !self->looped) {
 			self->left = &self->lBuffer[presamples + pos];
 			self->right = &self->rBuffer[presamples + pos];
@@ -433,7 +457,7 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		amount.HighPart = (uint32_t)(max);
 		amount.LowPart = 0;
 		amount.QuadPart -= self->pos.LowPart;
-	} else if (psy_audio_sampleiterator_currentloopdirection(self) == psy_audio_LOOPDIRECTION_BACKWARD) {
+	} else if (psy_audio_wavedatacontroller_currentloopdirection(self) == psy_audio_LOOPDIRECTION_BACKWARD) {
 		if (pos - presamples <= self->currentloopstart) {
 			self->left = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
 			self->right = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
@@ -461,26 +485,26 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		// TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *left, *(m_pWave->pWaveDataL() + pos), (left - lBuffer), pos);
 	// }
 #endif
-	if (psy_audio_sampleiterator_speed(self) != 0) {
-		amount.QuadPart /= psy_audio_sampleiterator_speed(self);
-	} else {
+	//if (psy_audio_wavedatacontroller_speed(self) != 0) {
+		amount.QuadPart /= psy_audio_wavedatacontroller_speed(self);
+	//} else {
 		amount.QuadPart = 0;
-	}
+	//}
 	return amount.LowPart + 1;
 }
 
-void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self,
+void psy_audio_wavedatacontroller_setquality(psy_audio_WaveDataController* self,
 	psy_dsp_ResamplerQuality quality)
 {
 	psy_dsp_multiresampler_setquality(&self->resampler, quality);
 }
 
-psy_dsp_ResamplerQuality psy_audio_sampleiterator_quality(psy_audio_SampleIterator* self)
+psy_dsp_ResamplerQuality psy_audio_sampleiterator_quality(psy_audio_WaveDataController* self)
 {
 	return psy_dsp_multiresampler_quality(&self->resampler);	
 }
 
-void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,
+void psy_audio_wavedatacontroller_setsample(psy_audio_WaveDataController* self,
 	psy_audio_Sample* sample)
 {
 	self->sample = sample;
@@ -491,8 +515,14 @@ void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,
 	}
 }
 
+uintptr_t psy_audio_wavedatacontroller_length(const
+	psy_audio_WaveDataController* self)
+{
+	return psy_audio_sample_numframes(self->sample);
+}
+
 // Set Current sample position 
-void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uintptr_t value)
+void psy_audio_wavedatacontroller_setposition(psy_audio_WaveDataController* self, int value)
 {
 	if (!self->sample) {
 		return;
@@ -500,14 +530,15 @@ void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uintpt
 	self->looped = FALSE;
 	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL) {
 		int val = value;
-		while (val >= psy_audio_sampleiterator_loopend(self) && psy_audio_sampleiterator_loopend(self) != psy_audio_sampleiterator_loopend(self)) {
-			val -= psy_audio_sampleiterator_loopend(self) - psy_audio_sampleiterator_loopend(self);
+		while (val >= psy_audio_sampleiterator_loopend(self) &&
+				psy_audio_sampleiterator_loopend(self) != psy_audio_sampleiterator_loopstart(self)) {
+			val -= psy_audio_sampleiterator_loopend(self) - psy_audio_sampleiterator_loopstart(self);
 			self->looped = TRUE;
 		}
 		self->pos.HighPart = val;
 	} else if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_BIDI) {
 		int loopsize = psy_audio_sampleiterator_loopend(self) -
-			psy_audio_sampleiterator_loopend(self);
+			psy_audio_sampleiterator_loopstart(self);
 		bool forward = FALSE;
 		int val = value;
 		while (val >= psy_audio_sampleiterator_loopend(self) && loopsize != 0) {
@@ -525,7 +556,7 @@ void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uintpt
 	else self->pos.HighPart = psy_audio_sampleiterator_length(self) - 1;
 }
 
-void psy_audio_sampleiterator_noteoff(psy_audio_SampleIterator* self)
+void psy_audio_wavedatacontroller_noteoff(psy_audio_WaveDataController* self)
 {
 	if (psy_audio_sampleiterator_sustainlooptype(self) != psy_audio_SAMPLE_LOOP_DO_NOT)
 	{

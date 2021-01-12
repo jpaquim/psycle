@@ -73,7 +73,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->lvolcurr = 0;
 	self->rvolcurr = 0;
 	// The XMWaveDataController
-	psy_audio_sampleiterator_init(&self->controller, NULL, psy_dsp_RESAMPLERQUALITY_LINEAR);
+	psy_audio_wavedatacontroller_init(&self->controller);	
 	// Voice Constructor
 	self->sampler = sampler;
 	self->inst = NULL;
@@ -99,7 +99,7 @@ void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 
 	psy_dsp_envelopecontroller_dispose(&self->envelope);
 	psy_dsp_envelopecontroller_dispose(&self->filterenv);
-	psy_audio_sampleiterator_dispose(&self->controller);
+	psy_audio_wavedatacontroller_dispose(&self->controller);
 	filter_dispose(&self->filter);
 }
 
@@ -107,7 +107,7 @@ void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 {	
 	assert(self);
-		
+			
 	psy_dsp_envelopecontroller_stop(&self->filterenv);
 	psy_dsp_envelopecontroller_stop(&self->envelope);	
 	self->channel = psy_INDEX_INVALID;
@@ -702,7 +702,9 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		sample = psy_audio_samples_at(
 			psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
 			sampleindex_make(self->instrument, 0));
-		psy_audio_sampleiterator_setsample(&self->controller, sample);
+		psy_audio_wavedatacontroller_initcontroller(&self->controller,
+			sample, self->sampler->resamplerquality);
+		//psy_audio_wavedatacontroller_setsample(&self->controller, sample);
 		if (self->inst->loop)
 		{
 			double const totalsamples = (double)(
@@ -716,8 +718,8 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				((float)sample->samplerate /
 					psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
 		}
-		psy_audio_sampleiterator_setspeed(&self->controller, speeddouble);
-		psy_audio_sampleiterator_play(&self->controller);
+		psy_audio_wavedatacontroller_setspeed(&self->controller, speeddouble);
+		psy_audio_wavedatacontroller_play(&self->controller);
 
 		if (!dooffset) { dooffset = TRUE; w_offset = 0; }
 
@@ -966,7 +968,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 
 			left_output = 0;
 			right_output = 0;
-			nextsamples = psy_min(psy_audio_sampleiterator_prework(&self->controller,
+			nextsamples = psy_min(psy_audio_wavedatacontroller_prework(&self->controller,
 				numsamples, FALSE), numsamples);
 			numsamples -= nextsamples;
 			while (nextsamples)
@@ -1009,12 +1011,12 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 				pSamplesR[dstpos] += right_output;
 				++dstpos;
 				nextsamples--;
-				diff = psy_audio_sampleiterator_inc(&self->controller);
+				diff = psy_audio_wavedatacontroller_inc(&self->controller);
 				self->controller.left += diff;
 				self->controller.right += diff;
 			}
-			psy_audio_sampleiterator_postwork(&self->controller);
-			if (!psy_audio_sampleiterator_playing(&self->controller)) {
+			psy_audio_wavedatacontroller_postwork(&self->controller);
+			if (!psy_audio_wavedatacontroller_playing(&self->controller)) {
 				psy_audio_samplervoice_setup(self);
 				break;
 			}
@@ -1086,7 +1088,7 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 	case PS1_SAMPLER_CMD_PORTAUP:
 		shift = (int64_t)(self->effval) * 4294967ll * (float)(self->controller.sample->numframes) /
 			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler));
-		psy_audio_sampleiterator_setspeed(&self->controller, (self->controller.speed + shift) / 4294967296.0);
+		psy_audio_wavedatacontroller_setspeed(&self->controller, (self->controller.speed + shift) / 4294967296.0);
 		break;
 		// 0x02 : Pitch Down
 	case PS1_SAMPLER_CMD_PORTADOWN:
@@ -1094,7 +1096,7 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler));
 		speed = self->controller.speed - shift;
 		if (speed < 0) speed = 0;
-		psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
+		psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 		break;
 		// 0x03 : Porta to note
 	case PS1_SAMPLER_CMD_PORTA2NOTE:
@@ -1107,7 +1109,7 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 			self->controller.speed = self->effportaspeed;
 			self->effcmd = PS1_SAMPLER_CMD_NONE;
 		}
-		psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
+		psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 		break;
 	default:
 		break;
@@ -1128,13 +1130,13 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 		// 0x01 : Pitch Up
 		case PS1_SAMPLER_CMD_PORTAUP:
 			speed = self->controller.speed * pow(2.0, self->effval * factor);
-			psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
+			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 			break;
 			// 0x02 : Pitch Down
 		case PS1_SAMPLER_CMD_PORTADOWN:
 			speed = self->controller.speed * pow(2.0, -self->effval * factor);
 			if (speed < 0) speed = 0;
-			psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
+			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 			break;
 			// 0x03 : Porta to note
 		case PS1_SAMPLER_CMD_PORTA2NOTE:
@@ -1145,7 +1147,7 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 				speed = self->effportaspeed;
 				self->effcmd = PS1_SAMPLER_CMD_NONE;
 			}
-			psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
+			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 			break;
 		default:
 			break;
@@ -1161,7 +1163,7 @@ void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
 	assert(self);
 
 	for (voice = 0; voice < self->numvoices; ++voice) {
-		psy_audio_sampleiterator_setquality(&self->voices[voice].controller,
+		psy_audio_wavedatacontroller_setquality(&self->voices[voice].controller,
 			quality);
 	}
 }

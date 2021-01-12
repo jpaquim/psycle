@@ -127,14 +127,16 @@ void psy_audio_sample_deallocate(psy_audio_Sample* self)
 	free(self);
 }
 
-psy_audio_SampleIterator* psy_audio_sample_allociterator(
+psy_audio_WaveDataController* psy_audio_sample_allociterator(
 	psy_audio_Sample* self, psy_dsp_ResamplerQuality quality)
 {
-	psy_audio_SampleIterator* rv;
+	psy_audio_WaveDataController* rv;
 
-	rv = psy_audio_sampleiterator_alloc();
+	rv = psy_audio_wavedatacontroller_alloc();
 	if (rv) {
-		psy_audio_sampleiterator_init(rv, self, quality);
+		psy_audio_wavedatacontroller_init(rv);
+		psy_audio_wavedatacontroller_initcontroller(rv, self,
+			quality);
 	}
 	return rv;
 }

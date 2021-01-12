@@ -67,78 +67,102 @@ typedef struct {
 	psy_dsp_amp_t* rBuffer;
 	psy_dsp_amp_t* left;
 	psy_dsp_amp_t* right;
-} psy_audio_SampleIterator;
+} psy_audio_WaveDataController;
 
-void psy_audio_sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*,
+void psy_audio_wavedatacontroller_init(psy_audio_WaveDataController*);
+void psy_audio_wavedatacontroller_initcontroller(psy_audio_WaveDataController*, struct psy_audio_Sample*,
 	psy_dsp_ResamplerQuality);
-void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator*);
-psy_audio_SampleIterator* psy_audio_sampleiterator_alloc(void);
-psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(struct psy_audio_Sample*);
-intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator*);
-int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamples,
-	bool released);
-psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator*, uintptr_t channel);
-void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator*);
-void psy_audio_sampleiterator_noteoff(psy_audio_SampleIterator*);
+void psy_audio_wavedatacontroller_dispose(psy_audio_WaveDataController*);
+psy_audio_WaveDataController* psy_audio_wavedatacontroller_alloc(void);
+psy_audio_WaveDataController* psy_audio_wavedatacontroller_allocinit(
+	struct psy_audio_Sample*);
+intptr_t psy_audio_wavedatacontroller_inc(psy_audio_WaveDataController*);
+void psy_audio_wavedatacontroller_noteoff(psy_audio_WaveDataController*);
+int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController*,
+	int numSamples, bool released);
+psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController*,
+	uintptr_t channel);
+void psy_audio_wavedatacontroller_postwork(psy_audio_WaveDataController*);
+void psy_audio_wavedatacontroller_changeloopdirection(psy_audio_WaveDataController*,
+	psy_audio_LoopDirection dir);
 
-INLINE int psy_audio_sampleiterator_currentloopdirection(psy_audio_SampleIterator* self)
-{
-	return self->currentloopdirection;
-}
-// Current sample position 
-INLINE uint32_t psy_audio_sampleiterator_position(psy_audio_SampleIterator* self)
-{
-	return self->pos.HighPart;
-}
+// Properties
 
-// Set Current sample position 
-void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator*, uintptr_t value);
-
-// Current sample Speed
-INLINE int64_t psy_audio_sampleiterator_speed(psy_audio_SampleIterator* self)
-{
-	return self->speed;
-}
-// Sets Current sample Speed
-INLINE void psy_audio_sampleiterator_setspeed(psy_audio_SampleIterator* self, double value)
-{	
-	// 4294967296 is a left shift of 32bits
-	self->speed = (int64_t)(value * 4294967296.0);
-	self->speedinternal =
-		(!self->sample || psy_audio_sampleiterator_currentloopdirection(self) ==
-				psy_audio_LOOPDIRECTION_FORWARD)
-		? self->speed
-		: -1 * self->speed;
-	psy_dsp_resampler_setspeed(&self->resampler.resampler, value);
-}
-
-INLINE bool psy_audio_sampleiterator_playing(psy_audio_SampleIterator* self)
+INLINE bool psy_audio_wavedatacontroller_playing(psy_audio_WaveDataController* self)
 {
 	return self->playing;
 }
 
-INLINE void psy_audio_sampleiterator_setplaying(psy_audio_SampleIterator* self, bool value)
+INLINE void psy_audio_wavedatacontroller_setplaying(
+	psy_audio_WaveDataController* self, bool value)
 {
 	self->playing = value;
 }
 
-INLINE void psy_audio_sampleiterator_play(psy_audio_SampleIterator* self)
+INLINE void psy_audio_wavedatacontroller_play(
+	psy_audio_WaveDataController* self)
 {
 	self->playing = TRUE;
 }
 
-INLINE void psy_audio_sampleiterator_stop(psy_audio_SampleIterator* self)
+INLINE void psy_audio_wavedatacontroller_stop(
+	psy_audio_WaveDataController* self)
 {
 	self->playing = FALSE;
 }
 
-void psy_audio_sampleiterator_dooffset(psy_audio_SampleIterator*,
+// Current sample position 
+INLINE uint32_t psy_audio_wavedatacontroller_position(
+	psy_audio_WaveDataController* self)
+{
+	return self->pos.HighPart;
+}
+
+void psy_audio_wavedatacontroller_setposition(psy_audio_WaveDataController*,
+	uintptr_t value);
+// Current sample Speed
+INLINE int64_t psy_audio_wavedatacontroller_speed(
+	psy_audio_WaveDataController* self)
+{
+	return self->speed;
+}
+
+INLINE psy_audio_LoopDirection psy_audio_wavedatacontroller_currentloopdirection(
+	psy_audio_WaveDataController* self)
+{
+	return self->currentloopdirection;
+}
+
+// Sets Current sample Speed
+INLINE void psy_audio_wavedatacontroller_setspeed(
+	psy_audio_WaveDataController* self, double value)
+{
+	// 4294967296 is a left shift of 32bits
+	self->speed = (int64_t)(value * 4294967296.0);
+	psy_dsp_resampler_setspeed(&self->resampler.resampler, value);
+	self->speedinternal =
+		(!self->sample ||
+			psy_audio_wavedatacontroller_currentloopdirection(self) ==
+			psy_audio_LOOPDIRECTION_FORWARD)
+		? self->speed
+		: -1 * self->speed;
+}
+
+INLINE psy_audio_LoopDirection psy_audio_wavedatacontroller_setcurrentloopdirection(
+	psy_audio_WaveDataController* self, psy_audio_LoopDirection dir)
+{
+	self->currentloopdirection = dir;
+}
+
+void psy_audio_wavedatacontroller_dooffset(psy_audio_WaveDataController*,
 	uint8_t offset);
 
-void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self, psy_dsp_ResamplerQuality quality);
+void psy_audio_wavedatacontroller_setquality(psy_audio_WaveDataController* self, psy_dsp_ResamplerQuality quality);
 
-void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator*, struct psy_audio_Sample*);
+void psy_audio_wavedatacontroller_setsample(psy_audio_WaveDataController*, struct psy_audio_Sample*);
 
+uintptr_t psy_audio_wavedatacontroller_length(const
+	psy_audio_WaveDataController*);
 
 #ifdef __cplusplus
 }
