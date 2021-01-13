@@ -104,6 +104,7 @@ typedef struct {
 	psy_Signal signal_configchanged;	
 	psy_Signal signal_changecontrolskin;
 	psy_Signal signal_patterncursorchanged;
+	psy_Signal signal_gotocursor;
 	// psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
@@ -203,6 +204,7 @@ void workspace_redo(Workspace*);
 void workspace_setpatterncursor(Workspace*, psy_audio_PatternCursor);
 psy_audio_PatternCursor workspace_patterncursor(Workspace*);
 void workspace_setsequenceeditposition(Workspace*, psy_audio_OrderIndex);
+psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 void workspace_editquantizechange(Workspace*, int diff);
@@ -262,6 +264,7 @@ void workspace_patterndec(Workspace*);
 void workspace_patterninc(Workspace*);
 void workspace_songposdec(Workspace*);
 void workspace_songposinc(Workspace*);
+void workspace_gotocursor(Workspace*, psy_audio_PatternCursor);
 PatternDisplayMode workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
 

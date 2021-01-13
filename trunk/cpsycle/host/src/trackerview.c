@@ -10,7 +10,6 @@
 #include "patterncmds.h"
 #include "skingraphics.h"
 // std
-#include <assert.h>
 #include <math.h>
 // platform
 #include "../../detail/portable.h"
@@ -154,6 +153,7 @@ static void trackergrid_setdefaultevent(TrackerGrid*,
 static void trackergrid_enablepatternsync(TrackerGrid*);
 static void trackergrid_preventpatternsync(TrackerGrid*);
 static void trackergrid_resetpatternsync(TrackerGrid*);
+static void trackergrid_ongotocursor(TrackerGrid*, psy_audio_PatternCursor* cursor);
 static psy_dsp_big_beat_t trackergrid_currseqoffset(TrackerGrid*);
 static psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(
 	TrackerGrid*, psy_audio_PatternCursor* rv);
@@ -235,7 +235,9 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 		trackergrid_onscroll);
 	// receive notecommands from the player
 	psy_signal_connect(&workspace_player(self->workspace)->signal_inputevent, self,
-		trackergrid_oninput);	
+		trackergrid_oninput);
+	psy_signal_connect(&self->workspace->signal_gotocursor, self,
+		trackergrid_ongotocursor);	
 }
 
 void trackergrid_ondestroy(TrackerGrid* self)
@@ -360,8 +362,15 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_Pa
 	length = ite.pattern->length;
 	offset = clip->topleft.offset;
 	if (!self->linestate->singlemode && self->gridstate->sequence) {
-	 	ite = psy_audio_sequence_begin(self->gridstate->sequence,
-	 		self->gridstate->sequence->tracks, offset);
+		psy_audio_SequenceTrackNode* tracknode;
+
+		tracknode = psy_list_at(self->gridstate->sequence->tracks,
+			workspace_sequenceeditposition(self->workspace).track);
+		if (!tracknode) {
+			tracknode = self->gridstate->sequence->tracks;
+		}
+	 	ite = psy_audio_sequence_begin(self->gridstate->sequence,			
+			tracknode, offset);
 	 	if (ite.sequencentrynode) {
 			seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);	 		
 	 		if (ite.pattern) {
@@ -483,7 +492,9 @@ psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 			0, rv->offset + rv->seqoffset);
 		if (order != psy_INDEX_INVALID) {
 			entry = psy_audio_sequence_entry(self->gridstate->sequence,
-				psy_audio_orderindex_make(0, order));
+				psy_audio_orderindex_make(
+					workspace_sequenceeditposition(self->workspace).track,
+					order));
 			if (entry) {
 				psy_dsp_big_beat_t seqdelta;
 
@@ -491,7 +502,9 @@ psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 				rv->offset -= seqdelta;
 				rv->seqoffset = entry->offset;
 			}
-			return psy_audio_orderindex_make(0, order);			
+			return psy_audio_orderindex_make(
+				workspace_sequenceeditposition(self->workspace).track,
+				order);
 		}
 	}
 	return psy_audio_orderindex_make(psy_INDEX_INVALID,
@@ -940,7 +953,8 @@ void trackergrid_advancelines(TrackerGrid* self, uintptr_t lines, bool wrap)
 				self->gridstate->cursor.offset = 0;
 				self->preventscrolltop = TRUE;
 				workspace_setsequenceeditposition(self->workspace,
-					psy_audio_orderindex_make(0, 0));
+					psy_audio_orderindex_make(
+						workspace_sequenceeditposition(self->workspace).track, 0));
 				self->preventscrolltop = FALSE;
 				trackergrid_scrollup(self, self->gridstate->cursor);
 				trackergrid_storecursor(self);
@@ -992,8 +1006,10 @@ void trackergrid_prevlines(TrackerGrid* self, uintptr_t lines, bool wrap)
 			} else if (restorewrap) {				
 				self->preventscrolltop = TRUE;
 				workspace_setsequenceeditposition(self->workspace,
-					psy_audio_orderindex_make(0, psy_audio_sequence_track_size(
-						self->gridstate->sequence, 0) - 1));
+					psy_audio_orderindex_make(
+						workspace_sequenceeditposition(self->workspace).track,
+						psy_audio_sequence_track_size(
+							self->gridstate->sequence, 0) - 1));
 				self->preventscrolltop = FALSE;
 				if (self->linestate->pattern) {
 					self->gridstate->cursor.offset =
@@ -2578,4 +2594,12 @@ void setcmd(psy_Property* cmds, int cmd, uint32_t keycode,
 	assert(cmds);
 
 	setcmdall(cmds, cmd, keycode, psy_SHIFT_OFF, psy_CTRL_OFF, key, shorttext);	
+}
+
+void trackergrid_ongotocursor(TrackerGrid* self, psy_audio_PatternCursor* cursor)
+{	
+	psy_ui_component_setscrolltop(&self->component,
+		psy_ui_value_makepx(trackerlinestate_beattopx(self->linestate,
+			self->gridstate->cursor.offset +
+			self->gridstate->cursor.seqoffset)));
 }

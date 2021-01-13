@@ -473,6 +473,8 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 
 void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 {	
+	self->linestate.trackidx = workspace_sequenceeditposition(
+		self->workspace).track;
 	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
 	trackergrid_setpattern(&self->tracker, pattern);	
 	pianoroll_setpattern(&self->pianoroll, pattern);

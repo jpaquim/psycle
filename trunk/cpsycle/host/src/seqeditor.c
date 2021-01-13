@@ -502,9 +502,25 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 					trackindex = psy_list_entry_index(workspace_song(self->workspace)->sequence.tracks,
 						self->currtrack);
 					if (trackindex != psy_INDEX_INVALID) {
-						workspace_setsequenceeditposition(
-							self->workspace,
-							psy_audio_orderindex_make(trackindex, selected));						
+						psy_audio_OrderIndex seqeditpos;
+						psy_audio_PatternCursor cursor;
+						psy_dsp_big_beat_t position;
+						
+						seqeditpos = workspace_sequenceeditposition(self->workspace);
+						if (trackindex != seqeditpos.track || selected != seqeditpos.order) {
+							workspace_setsequenceeditposition(
+								self->workspace,
+								psy_audio_orderindex_make(trackindex, selected));
+						}						
+						cursor = self->workspace->patterneditposition;
+						position = seqeditortrackstate_pxtobeat(self->trackstate, ev->x);
+						position =
+							(intptr_t)(position * psy_audio_player_lpb(workspace_player(self->workspace))) /
+							(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->workspace));							
+						cursor.offset = position - entry->offset;
+						workspace_setpatterncursor(self->workspace, cursor);
+						cursor = self->workspace->patterneditposition;
+						workspace_gotocursor(self->workspace, cursor);						
 					}
 				}
 				self->drag_sequenceitem_node = sequenceitem_node;

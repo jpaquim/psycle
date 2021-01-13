@@ -46,7 +46,8 @@ void trackerlinestate_init(TrackerLineState* self)
 	self->visilines = 25;
 	self->cursorchanging = FALSE;
 	self->gridfont = NULL;
-	self->singlemode = TRUE;	
+	self->singlemode = TRUE;
+	self->trackidx = 0;
 }
 
 void trackerlinestate_dispose(TrackerLineState* self)
@@ -79,10 +80,18 @@ uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 
 	if (self->singlemode) {
 		if (self->pattern) {
-			return trackerlinestate_beattoline(self, psy_audio_pattern_length(
-				self->pattern));
+			return trackerlinestate_beattoline(self,
+				psy_audio_pattern_length(self->pattern));
 		}		
 	} else if (self->sequence) {
+		psy_audio_SequenceTrack* track;
+
+		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
+		if (track) {
+			return trackerlinestate_beattoline(self, 
+				psy_audio_sequencetrack_duration(track,
+					self->sequence->patterns));
+		}
 		return trackerlinestate_beattoline(self,
 			psy_audio_sequence_duration(self->sequence));		
 	}
