@@ -646,6 +646,11 @@ void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* co
 	} else {
 		patternview_hidelinenumbers(self);
 	}
+	if (patternviewconfig_showbeatoffset(config)) {
+		patternview_showbeatnumbers(self);
+	} else {
+		patternview_hidebeatnumbers(self);
+	}
 	trackerlinenumbers_showlinenumbercursor(&self->left.linenumbers,
 		patternviewconfig_linenumberscursor(config));
 	trackerlinenumbers_showlinenumbersinhex(&self->left.linenumbers,
@@ -812,6 +817,18 @@ void patternview_hidelinenumbers(PatternView* self)
 {	
 	psy_ui_component_hide_align(&self->left.component);
 	self->showlinenumbers = FALSE;	
+}
+
+void patternview_showbeatnumbers(PatternView* self)
+{
+	self->left.linenumbers.showbeat = TRUE;
+	psy_ui_component_align(&self->component);	
+}
+
+void patternview_hidebeatnumbers(PatternView* self)
+{
+	self->left.linenumbers.showbeat = FALSE;
+	psy_ui_component_align(&self->component);	
 }
 
 void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
@@ -1272,6 +1289,7 @@ void patternview_displaysinglepattern(PatternView* self)
 	self->linestate.singlemode = TRUE;
 	self->gridstate.singlemode = TRUE;
 	patternview_updatestates(self);
+	psy_ui_component_align(&self->component);
 	psy_ui_component_updateoverflow(&self->tracker.component);
 }
 
@@ -1280,6 +1298,7 @@ void patternview_displaysequencepatterns(PatternView* self)
 	self->linestate.singlemode = FALSE;
 	self->gridstate.singlemode = FALSE;
 	patternview_updatestates(self);
+	psy_ui_component_align(&self->component);
 	psy_ui_component_updateoverflow(&self->tracker.component);
 }
 

@@ -88,3 +88,18 @@ uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 	}
 	return 0;
 }
+
+void trackerlinestate_clip(TrackerLineState* self, const psy_ui_Rectangle* clip,
+	psy_audio_PatternSelection* rv)
+{
+	assert(self);
+	
+	rv->topleft.column = 0;
+	rv->topleft.digit = 0;
+	rv->topleft.offset = trackerlinestate_pxtobeat(self, clip->top);
+	rv->topleft.line = trackerlinestate_beattoline(self, rv->topleft.offset);
+	rv->bottomright.column = 0;
+	rv->bottomright.digit = 0;
+	rv->bottomright.offset = trackerlinestate_pxtobeatnotquantized(self, clip->bottom);
+	rv->bottomright.line = (uintptr_t)(rv->bottomright.offset * self->lpb + 0.5);
+}

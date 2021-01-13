@@ -949,8 +949,8 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 		break;
 	case audioMasterGetSampleRate:
 		if (self) {
-			result = (VstIntPtr)psy_audio_machine_samplerate(psy_audio_vstplugin_base(
-				self));
+			result = (VstIntPtr)psy_audio_machine_samplerate(
+				psy_audio_vstplugin_base(self));
 		} else {
 			result = 44100;
 		}

@@ -1117,12 +1117,17 @@ uintptr_t psy_audio_sequence_order(psy_audio_Sequence* self,
 
 	assert(self);
 
+	if (position < 0.0) {
+		return psy_INDEX_INVALID;
+	}
 	track = psy_audio_sequence_track_at(self, trackidx);
 	if (track) {
 		psy_dsp_big_beat_t curroffset;
 		psy_List* p;
-		uintptr_t row;		
+		uintptr_t row;
+		bool found;
 		
+		found = FALSE;
 		for (p = track->entries, row = 0, curroffset = 0.0; p != NULL;
 				psy_list_next(&p), ++row) {
 			psy_audio_Pattern* pattern;
@@ -1134,10 +1139,13 @@ uintptr_t psy_audio_sequence_order(psy_audio_Sequence* self,
 				psy_audio_sequenceentry_patternslot(entry));
 			if (pattern && position < entry->offset +
 					psy_audio_pattern_length(pattern)) {
+				found = TRUE;
 				break;				
 			}
 		}
-		return row;
+		if (found) {
+			return row;
+		}
 	}
 	return psy_INDEX_INVALID;
 }

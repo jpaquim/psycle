@@ -98,6 +98,8 @@ void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 void patternview_selectdisplay(PatternView*, PatternDisplayMode);
 void patternview_showlinenumbers(PatternView*);
 void patternview_hidelinenumbers(PatternView*);
+void patternview_showbeatnumbers(PatternView*);
+void patternview_hidebeatnumbers(PatternView*);
 void patternview_toggleblockmenu(PatternView*);
 void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
 void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
