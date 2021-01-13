@@ -212,5 +212,7 @@ INLINE uintptr_t trackergridstate_cursorposition_valid(TrackerGridState* self)
 
 void trackergridstate_synccursor(TrackerGridState*);
 void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor cursor);
+void trackergridstate_clip(TrackerGridState*, const psy_ui_Rectangle* clip,
+	psy_audio_PatternSelection* rv);
 
 #endif /* TRACKERGRIDSTATE */

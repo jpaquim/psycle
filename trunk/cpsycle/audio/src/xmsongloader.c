@@ -202,8 +202,7 @@ bool xmsongloader_load(XMSongLoader* self)
 	char* comments;
 	char* songname;
 	uintptr_t instr_start;
-
-	//CExclusiveLock lock(&song.semaphore, 2, true);
+	
 	// check validity
 	if(!xmsongloader_isvalid(self)){
 		return FALSE;
@@ -211,7 +210,8 @@ bool xmsongloader_load(XMSongLoader* self)
 	xmsongloader_reset(self);
 	// build sampler
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", psy_INDEX_INVALID);
+		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
+		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);	
 		psy_audio_machines_insert(&self->songfile->song->machines, 0,

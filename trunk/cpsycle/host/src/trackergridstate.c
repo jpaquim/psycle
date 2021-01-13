@@ -398,3 +398,19 @@ void trackergridstate_setcursor(TrackerGridState* self,
 	self->cursor = cursor;
 	trackergridstate_synccursor(self);
 }
+
+void trackergridstate_clip(TrackerGridState* self, const psy_ui_Rectangle* clip,
+	psy_audio_PatternSelection* rv)
+{
+	assert(self);
+
+	rv->topleft.track = trackergridstate_pxtotrack(self, clip->left, self->numtracks);
+	rv->topleft.column = 0;
+	rv->topleft.digit = 0;		
+	rv->bottomright.track = trackergridstate_pxtotrack(self, clip->right, self->numtracks) + 1;
+	if (rv->bottomright.track > self->numtracks) {
+		rv->bottomright.track = self->numtracks;
+	}
+	rv->bottomright.column = 0;
+	rv->bottomright.digit = 0;	
+}

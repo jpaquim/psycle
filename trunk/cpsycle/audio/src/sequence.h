@@ -227,14 +227,32 @@ INLINE psy_audio_PatternEntry* psy_audio_sequencetrackiterator_patternentry(
 		: NULL;
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_offset(
+INLINE uintptr_t psy_audio_sequencetrackiterator_patidx(
+	psy_audio_SequenceTrackIterator* self)
+{	
+	return (self->sequencentrynode)
+		? psy_audio_sequencetrackiterator_entry(self)->patternslot		
+		: psy_INDEX_INVALID;
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_seqoffset(
 	psy_audio_SequenceTrackIterator* self)
 {
-	return (psy_audio_sequencetrackiterator_patternentry(self))
-		? psy_audio_sequencetrackiterator_entry(self)->offset +
-		  psy_audio_sequencetrackiterator_patternentry(self)->offset
-		: psy_audio_sequencetrackiterator_entry(self)->offset;
+	return (self->sequencentrynode)
+		? psy_audio_sequencetrackiterator_entry(self)->offset
+		: 0.0;
 }
+
+INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_offset(
+	psy_audio_SequenceTrackIterator* self)
+{		
+	return psy_audio_sequencetrackiterator_seqoffset(self) +
+		((self->patternnode)
+			? psy_audio_sequencetrackiterator_patternentry(self)->offset
+			: 0.0);
+}
+
+
 
 typedef psy_List psy_audio_SequenceTrackNode;
 

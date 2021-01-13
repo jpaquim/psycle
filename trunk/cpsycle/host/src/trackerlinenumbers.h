@@ -87,6 +87,7 @@ typedef struct TrackerLineNumbers {
 	psy_audio_PatternCursor lastcursor;	
 	bool showcursor;
 	bool shownumbersinhex;
+	bool showbeat;
 	// references
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
