@@ -7,6 +7,8 @@
 #include "../../detail/psydef.h"
 // local
 #include "machinedefs.h"
+// dsp
+#include "../../dsp/src/dsptypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +29,7 @@ void psy_audio_vstinterface_init(psy_audio_VstInterface*,
 void psy_audio_vstinterface_open(psy_audio_VstInterface*);
 void psy_audio_vstinterface_close(psy_audio_VstInterface*);
 void psy_audio_vstinterface_setsamplerate(psy_audio_VstInterface*,
-	float samplerate);
+	psy_dsp_big_hz_t samplerate);
 void psy_audio_vstinterface_setprocessprecision32(psy_audio_VstInterface*);
 void psy_audio_vstinterface_setblocksize(psy_audio_VstInterface*,
 	int32_t blocksize);

@@ -49,7 +49,7 @@ INLINE int32_t psy_dsp_rint(float flt)
 INLINE int32_t psy_dsp_fround(float flt)
 {
 #if defined(_WIN64) || defined(DIVERSALIS__OS__UNIX)
-    return flt > 0 ? floor(flt + 0.5) : ceil(flt - 0.5);
+    return (int32_t)(flt > 0 ? floor(flt + 0.5) : ceil(flt - 0.5));
 #else
     int i;
     static const double half = 0.5f;

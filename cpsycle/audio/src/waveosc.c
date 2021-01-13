@@ -71,7 +71,7 @@ psy_audio_Sample* psy_audio_waveosc_sample(psy_audio_WaveOsc* self, double frequ
 	return rv;
 }
 
-void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
+void psy_audio_waveosc_work(psy_audio_WaveOsc* self, uintptr_t amount, float* data)
 {
 	if (self->playing && self->sampleiterator.sample) {
 		psy_audio_Buffer output;

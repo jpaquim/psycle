@@ -140,7 +140,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
 	const float multleft = self->invol * self->mult; //  *self->lsrcMachine._lVol;
 	const float multright = self->invol * self->mult; //* srcMachine._rVol;
-	uintptr_t sr = psy_audio_player_samplerate(workspace_player(self->workspace));
+	uintptr_t sr;
 	char buf[64];
 	int x, y;
 	float* pSamplesL;
@@ -152,6 +152,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float maxval;
 	float quarterpi;
 	
+	sr = (uintptr_t)psy_audio_player_samplerate(workspace_player(self->workspace));
 	mvc = mvpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
 	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 	if (!machine) {

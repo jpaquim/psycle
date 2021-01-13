@@ -103,7 +103,7 @@ typedef struct psy_audio_Sample {
 	uint16_t defaultvolume; // range (0..80 hex)
 	psy_audio_SampleLoop loop;
 	psy_audio_SampleLoop sustainloop;
-	uintptr_t samplerate;
+	psy_dsp_big_hz_t samplerate;
 	/// Tuning for the center note (value that is added to the note received).
 	/// values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed
 	/// with note C-5);

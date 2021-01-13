@@ -77,7 +77,7 @@ void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel* self)
 	psy_audio_intmachineparam_init(&self->filter_res,
 		"", "", MPF_STATE | MPF_SMALL, &self->m_Ressonance, 0, 200);
 	psy_audio_intmachineparam_init(&self->pan,
-		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);	
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->m_ChannelDefVolume);
 	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);

@@ -22,11 +22,11 @@
 #include "../../detail/portable.h"
 
 /// Machinecallback
-static uintptr_t machinecallback_samplerate(psy_audio_MachineCallback* self)
+static psy_dsp_big_hz_t machinecallback_samplerate(psy_audio_MachineCallback* self)
 {
 	return (self->player && self->player->driver)
 		? psy_audiodriver_samplerate(self->player->driver)
-		: 44100;
+		: (psy_dsp_big_hz_t)44100.0;
 }
 
 static psy_dsp_beat_t machinecallback_bpm(psy_audio_MachineCallback* self)
@@ -121,7 +121,7 @@ static bool machinecallback_removecapture(psy_audio_MachineCallback* self, int i
 }
 
 static void machinecallback_readbuffers(psy_audio_MachineCallback* self, int index, float** pleft,
-	float** pright, int numsamples)
+	float** pright, uintptr_t numsamples)
 {
 	if (self->player && self->player->driver) {
 		psy_audiodriver_readbuffers(self->player->driver, index, pleft, pright, numsamples);
@@ -297,7 +297,7 @@ static uintptr_t shellidx(psy_audio_Machine* self) { return 0; }
 static uintptr_t numinputs(psy_audio_Machine* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Machine* self) { return 0; }	
 static void setcallback(psy_audio_Machine* self, psy_audio_MachineCallback* callback) { self->callback = callback; }
-static void updatesamplerate(psy_audio_Machine* self, unsigned int samplerate) { }
+static void updatesamplerate(psy_audio_Machine* self, psy_dsp_big_hz_t samplerate) { }
 static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void loadwiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
@@ -401,10 +401,10 @@ static bool acceptpresets(psy_audio_Machine* self) { return FALSE; }
 static void command(psy_audio_Machine* self) { }
 
 /// machinecallback
-static uintptr_t samplerate(psy_audio_Machine* self) {
+static psy_dsp_big_hz_t samplerate(psy_audio_Machine* self) {
 	return (self->callback)
 		? self->callback->vtable->samplerate(self->callback)
-		: 44100;
+		: (psy_dsp_big_hz_t)44100.0;
 }
 
 static psy_dsp_beat_t bpm(psy_audio_Machine* self)
@@ -495,7 +495,8 @@ static bool removecapture(psy_audio_Machine* self, int index)
 		: FALSE;
 }
 
-static void readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
+static void readbuffers(psy_audio_Machine* self, int index,
+	float** pleft, float** pright, uintptr_t numsamples)
 { 
 	if (self->callback) {
 		self->callback->vtable->readbuffers(self->callback, index, pleft, pright, numsamples);

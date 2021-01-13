@@ -107,10 +107,10 @@ void dispose(psy_audio_Duplicator2* self)
 
 void initparameters(psy_audio_Duplicator2* self)
 {
-	uintptr_t gbp;
+	int gbp;
 
 	psy_table_init(&self->parameters);
-	for (gbp = 0; gbp < psy_audio_duplicatormap_numoutputs(&self->map); ++gbp) {
+	for (gbp = 0; gbp < (int)psy_audio_duplicatormap_numoutputs(&self->map); ++gbp) {
 		char name[128];
 		psy_audio_IntMachineParam* param;
 		psy_audio_DuplicatorOutput* output;
@@ -178,7 +178,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator2* self, psy_audio_PatternNode* ev
 				if (output->machine != -1) {					
 					psy_audio_PatternEntry* patternentry;
 					int note;
-					int mapchannel;
+					uintptr_t mapchannel;
 
 					patternentry = psy_audio_patternnode_entry(p);
 					note = psy_audio_patternentry_front(patternentry)->note;

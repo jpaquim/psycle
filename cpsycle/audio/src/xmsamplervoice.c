@@ -251,7 +251,7 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 			if (psy_dsp_envelope_loopstart(self->m_pEnvelope) == psy_dsp_envelope_loopend(self->m_pEnvelope))
 			{
 				xmenvelopecontroller_pause(self);
-			} else { self->m_PositionIndex = psy_dsp_envelope_loopstart(self->m_pEnvelope); }
+			} else { self->m_PositionIndex = (int)psy_dsp_envelope_loopstart(self->m_pEnvelope); }
 		}
 	}
 	if (psy_dsp_envelope_time(self->m_pEnvelope, self->m_PositionIndex + 1) == -1.f)

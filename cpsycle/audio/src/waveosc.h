@@ -33,7 +33,7 @@ INLINE double psy_audio_waveosc_basefrequency(psy_audio_WaveOsc* self)
 	return self->basefrequency;
 }
 
-void psy_audio_waveosc_work(psy_audio_WaveOsc*, int num, float* data);
+void psy_audio_waveosc_work(psy_audio_WaveOsc*, uintptr_t num, float* data);
 void psy_audio_waveosc_start(psy_audio_WaveOsc*, double phase);
 void psy_audio_waveosc_stop(psy_audio_WaveOsc*, double phase);
 

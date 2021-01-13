@@ -36,10 +36,10 @@ void psy_audio_vstinterface_close(psy_audio_VstInterface* self)
 }
 
 void psy_audio_vstinterface_setsamplerate(psy_audio_VstInterface* self,
-	float samplerate)
+	psy_dsp_big_hz_t samplerate)
 {
 	self->effect->dispatcher(self->effect, effSetSampleRate, 0, 0, 0,
-		samplerate);
+		(float)samplerate);
 }
 
 void psy_audio_vstinterface_setprocessprecision32(psy_audio_VstInterface* self)
@@ -70,7 +70,7 @@ void psy_audio_vstinterface_work(psy_audio_VstInterface* self,
 {
 	self->effect->processReplacing(self->effect,
 		bc->output->samples, bc->output->samples,
-		bc->numsamples);
+		(VstInt32)bc->numsamples);
 }
 
 void psy_audio_vstinterface_tick(psy_audio_VstInterface* self, struct VstEvents* vstevents)
@@ -166,7 +166,7 @@ uintptr_t psy_audio_vstinterface_numparameters(const
 void* psy_audio_vstinterface_chunkdata(psy_audio_VstInterface* self,
 	bool onlycurrprogram, uintptr_t* rv_size)
 {	
-	VstInt32 size;
+	VstIntPtr size;
 
 	assert(self);
 	assert(rv_size);

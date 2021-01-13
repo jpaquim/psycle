@@ -12,9 +12,9 @@
 
 #include "../../detail/portable.h"
 
-static int presetio_loadversion0(FILE*, int numpresets, int numparameters,
+static int presetio_loadversion0(FILE*, uintptr_t numpresets, uintptr_t numparameters,
 	psy_audio_Presets*);
-static int presetio_loadversion1(FILE*, int numParameters,
+static int presetio_loadversion1(FILE*, uintptr_t numParameters,
 	uintptr_t datasizestruct, psy_audio_Presets*);
 static int psy_audio_presetsio_saveversion1(FILE*, psy_audio_Presets*);
 
@@ -115,13 +115,13 @@ int psy_audio_presetsio_load(const psy_Path* path, psy_audio_Presets* presets,
 	return status;
 }
 
-int presetio_loadversion0(FILE* fp, int numpresets, int numparameters,
+int presetio_loadversion0(FILE* fp, uintptr_t numpresets, uintptr_t numparameters,
 	psy_audio_Presets* presets)
 {	
 	int status;
 	char name[32];
 	int* ibuf;
-	int i;
+	uintptr_t i;
 	
 	status = psy_audio_PRESETIO_OK;
 	ibuf = malloc(sizeof(int) * numparameters);
@@ -142,7 +142,7 @@ int presetio_loadversion0(FILE* fp, int numpresets, int numparameters,
 	return status;
 }
 
-int presetio_loadversion1(FILE* fp, int numparameters,
+int presetio_loadversion1(FILE* fp, uintptr_t numparameters,
 	uintptr_t datasizestruct, psy_audio_Presets* presets)
 {
 	int status;
@@ -230,16 +230,16 @@ int psy_audio_presetsio_saveversion1(FILE* fp, psy_audio_Presets* presets)
 		return status;
 	}
 	// preset_iterator = presets->container;
-	numpresets = (psy_table_empty(&presets->container))
+	numpresets = (int32_t)((psy_table_empty(&presets->container))
 		? 0
-		: psy_table_maxkey(&presets->container) + 1;
+		: psy_table_maxkey(&presets->container) + 1);
 
 	if (numpresets != 0) {
 		psy_audio_Preset* preset;
 
 		preset = (psy_audio_Preset*)psy_audio_presets_at(presets, numpresets - 1);
-		numparameters = psy_table_size(&preset->parameters);
-		datasizestruct = preset->datasize;
+		numparameters = (int32_t)psy_table_size(&preset->parameters);
+		datasizestruct = (int32_t)preset->datasize;
 	} else {
 		numparameters = 0;
 		datasizestruct = 0;
@@ -337,7 +337,7 @@ int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
 	if (preset->datasize > 0) {
 		temp32 = 0;
 	} else {
-		temp32 = psy_audio_preset_numparameters(preset);
+		temp32 = (int32_t)psy_audio_preset_numparameters(preset);
 	}
 	fwrite(&temp32, sizeof(temp32), 1, fp);
 	memset(&name, 0, sizeof(name));
@@ -346,7 +346,7 @@ int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
 		return psy_audio_PRESETIO_ERROR_WRITE;
 	}	
 	if (preset->datasize > 0) {
-		temp32 = preset->datasize;
+		temp32 = (int32_t)preset->datasize;
 		fwrite(&temp32, sizeof(temp32), 1, fp);		
 		if (fwrite(&preset->data, 1, preset->datasize, fp) != preset->datasize) {
 			return psy_audio_PRESETIO_ERROR_WRITE;
@@ -364,9 +364,9 @@ int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
 		}
 	}
 	currpos = ftell(fp);
-	fseek(fp, sizepos, SEEK_SET);
-	temp32 = sizepos - currpos;
+	fseek(fp, (int32_t)sizepos, SEEK_SET);
+	temp32 = (int32_t)sizepos - (int32_t)currpos;
 	fwrite(&temp32, sizeof(int32_t), 1, fp);	
-	fseek(fp, currpos, SEEK_SET);
+	fseek(fp, (int32_t)currpos, SEEK_SET);
 	return psy_audio_PRESETIO_OK;
 }

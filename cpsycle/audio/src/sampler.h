@@ -79,7 +79,7 @@ extern "C" {
 		uintptr_t channel;
 
 		// Amount of samples since line Tick on this voice.
-		int samplecounter;
+		uintptr_t samplecounter;
 		// Amount of samples previous to do a delayed noteoff
 		int triggernoteoff;
 		// Amount of samples previous to do a delayed noteon (Also used for
@@ -113,8 +113,8 @@ extern "C" {
 	void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
 	void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice*);
 	void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, int numsamples, float* pSamplesL, float* pSamplesR);
-	int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData, int channelNum, int baseC, psy_List* multicmdMem);
+	void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, uintptr_t numsamples, float* pSamplesL, float* pSamplesR);
+	int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData, uintptr_t channelNum, int baseC, psy_List* multicmdMem);
 	void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
 	void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
 

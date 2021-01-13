@@ -186,7 +186,8 @@ static HRESULT DoBlock(WasapiDriver*, IAudioRenderClient* pRenderClient, int num
 static HRESULT DoBlockRecording(WasapiDriver*, PaWasapiSubStream* port, IAudioCaptureClient* pCaptureClient, int numFramesAvailable);
 static void GetPlaybackPorts(WasapiDriver*, psy_List** ports);
 static void GetCapturePorts(WasapiDriver*, psy_List** ports);
-static void GetReadBuffers(WasapiDriver*, int idx, float** pleft, float** pright, int numsamples);
+static void GetReadBuffers(WasapiDriver*, int idx, float** pleft, float** pright,
+	uintptr_t numsamples);
 static uint32_t GetWritePosInSamples(WasapiDriver*);
 static uint32_t GetPlayPosInSamples(WasapiDriver*);
 static HRESULT GetStreamFormat(WasapiDriver*, PaWasapiSubStream* stream, WAVEFORMATEXTENSIBLE* wfOut);
@@ -209,7 +210,7 @@ static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
-static uintptr_t samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -536,7 +537,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 	}
 }
 
-uintptr_t samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 {
 	return psy_audiodriversettings_samplespersec(&((WasapiDriver*)self)->settings);
 }
@@ -1156,7 +1157,8 @@ void FreePorts(psy_List* ports)
 	psy_list_free(ports);
 }
 
-void GetReadBuffers(WasapiDriver* self, int idx, float** pleft, float** pright, int numsamples)
+void GetReadBuffers(WasapiDriver* self, int idx, float** pleft, float** pright,
+	uintptr_t numsamples)
 {
 	/*if (!self->running || idx >= self->_portMapping.size() || _portMapping[idx] == -1
 		|| _capPorts[_portMapping[idx]].client == NULL)

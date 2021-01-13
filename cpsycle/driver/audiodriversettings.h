@@ -4,6 +4,8 @@
 #include "../detail/os.h"
 #include "../detail/psydef.h"
 
+#include "../dsp/src/dsptypes.h"
+
 #include <assert.h>
 
 #if !defined(PSY_AUDIODRIVERSETTINGS_H)
@@ -26,7 +28,7 @@ typedef enum {
 } psy_AudioDriverChannelMode;
 
 typedef struct {
-	uintptr_t samplespersec_;
+	psy_dsp_big_hz_t samplespersec_;
 	psy_AudioDriverChannelMode channelmode_;
 	bool dither_;
 	uintptr_t validbitdepth_;
@@ -42,7 +44,7 @@ INLINE psy_AudioDriverChannelMode psy_audiodriversettings_channelmode(
 	return self->channelmode_;
 }
 
-INLINE unsigned int psy_audiodriversettings_numchannels(
+INLINE uintptr_t psy_audiodriversettings_numchannels(
 	psy_AudioDriverSettings* self)
 {
 	return (self->channelmode_ == psy_AUDIODRIVERCHANNELMODE_STEREO) ? 2 : 1;
@@ -54,14 +56,14 @@ INLINE void psy_audiodriversettings_setchannelmode(
 	self->channelmode_ = mode;
 }
 
-INLINE uintptr_t psy_audiodriversettings_samplespersec(
+INLINE psy_dsp_big_hz_t psy_audiodriversettings_samplespersec(
 	psy_AudioDriverSettings* self)
 {
 	return self->samplespersec_;
 }
 
 INLINE void psy_audiodriversettings_setsamplespersec(
-	psy_AudioDriverSettings* self, uintptr_t value)
+	psy_AudioDriverSettings* self, psy_dsp_big_hz_t value)
 {
 	if (value <= 22050) {
 		value = 22050;

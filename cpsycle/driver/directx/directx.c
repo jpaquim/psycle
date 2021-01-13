@@ -136,7 +136,7 @@ static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
-static uintptr_t driver_samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -162,7 +162,8 @@ static void clearplayenums(DXDriver*);
 static void clearcapenums(DXDriver*);
 static void clearcapports(DXDriver*);
 static bool createcaptureport(DXDriver*, PortCapt* port);
-static void readbuffers(DXDriver* self, int index, float** pleft, float** pright, int numsamples);
+static void readbuffers(DXDriver* self, int index,
+	float** pleft, float** pright, uintptr_t numsamples);
 static uint32_t playposinsamples(psy_AudioDriver*);
 
 static psy_AudioDriverVTable vtable;
@@ -454,7 +455,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 	}
 }
 
-uintptr_t driver_samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 {
 	return psy_audiodriversettings_samplespersec(&((DXDriver*)self)->settings);
 }
@@ -983,7 +984,8 @@ int removecaptureport(DXDriver* self, int idx)
 	return TRUE;
 }
 
-void readbuffers(DXDriver* self, int idx, float** pleft, float** pright, int numsamples)
+void readbuffers(DXDriver* self, int idx, float** pleft, float** pright,
+	uintptr_t numsamples)
 {
 	PortCapt* portcap;
 	int mpos;

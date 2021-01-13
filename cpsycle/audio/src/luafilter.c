@@ -95,9 +95,9 @@ int luafilter_work(lua_State* L)
 		float* vcfr = 0;
 		Filter* filter;
 		psy_audio_Array* x_input;
-		int num;
+		uintptr_t num;
 		float* data;
-		int i;
+		uintptr_t i;
 
 		filter = psyclescript_checkself(L, 1, luafilter_meta);
 		x_input = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);

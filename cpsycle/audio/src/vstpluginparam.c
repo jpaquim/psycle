@@ -84,33 +84,33 @@ psy_audio_VstPluginParam* psy_audio_vstpluginparam_allocinit(struct AEffect* eff
 int vstpluginparam_label(psy_audio_VstPluginParam* self, char* text)
 {
 	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamLabel, self->index, 0, text, 0);
+	self->effect->dispatcher(self->effect, effGetParamLabel, (VstInt32)self->index, 0, text, 0);
 	return *text != '\0';
 }
 
 int vstpluginparam_name(psy_audio_VstPluginParam* self, char* text)
 {
 	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamName, self->index, 0, text, 0);
+	self->effect->dispatcher(self->effect, effGetParamName, (VstInt32)self->index, 0, text, 0);
 	return *text != '\0';
 }
 
 void vstpluginparam_tweak(psy_audio_VstPluginParam* self, float value)
 {	
-	self->effect->setParameter(self->effect, self->index, value);
+	self->effect->setParameter(self->effect, (VstInt32)self->index, value);
 }
 
 int vstpluginparam_describe(psy_audio_VstPluginParam* self, char* text)
 {
 	text[0] = '\0';
-	self->effect->dispatcher(self->effect, effGetParamDisplay, self->index, 0,
+	self->effect->dispatcher(self->effect, effGetParamDisplay, (VstInt32)self->index, 0,
 		text, 0);
 	return *text != '\0';
 }
 
 float vstpluginparam_normvalue(psy_audio_VstPluginParam* self)
 {
-	return self->effect->getParameter(self->effect, self->index);
+	return self->effect->getParameter(self->effect, (VstInt32)self->index);
 }
 
 void vstpluginparam_range(psy_audio_VstPluginParam* self, intptr_t* minval,

@@ -84,9 +84,8 @@ void psy_audio_duplicatormap_clear(psy_audio_DuplicatorMap* self)
 	psy_table_clear(&self->unavail);
 }
 
-int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self,
-	uintptr_t patternchannel,
-	psy_audio_DuplicatorOutput* output)
+uintptr_t psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self,
+	uintptr_t patternchannel, psy_audio_DuplicatorOutput* output)
 {
 	uintptr_t j;
 	int repeat = 0;

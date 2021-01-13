@@ -394,11 +394,11 @@ void intmachineparam_range(psy_audio_IntMachineParam* self,
 void intmachineparam_tweak(psy_audio_IntMachineParam* self, float value)
 {
 	if (self->data) {
-		int scaled;
+		intptr_t scaled;
 
-		scaled = (int)(value * (self->maxval - self->minval) + 0.5f) +
+		scaled = (intptr_t)(value * (self->maxval - self->minval) + 0.5f) +
 			self->minval;
-		*self->data = scaled;
+		*self->data = (int32_t)scaled;
 	}
 }
 
@@ -806,11 +806,11 @@ void choicemachineparam_range(psy_audio_ChoiceMachineParam* self,
 void choicemachineparam_tweak(psy_audio_ChoiceMachineParam* self, float value)
 {
 	if (self->data) {
-		int scaled;
+		intptr_t scaled;
 
-		scaled = (int)(value * (self->maxval - self->minval) + 0.5f) +
+		scaled = (intptr_t)(value * (self->maxval - self->minval) + 0.5f) +
 			self->minval;
-		*self->data = scaled;
+		*self->data = (int32_t)scaled;
 		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 	}
 }

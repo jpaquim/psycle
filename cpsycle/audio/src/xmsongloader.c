@@ -155,7 +155,7 @@ static int calclpbfromspeed(int trackerspeed, int* outextraticks)
 static void xmsongloader_reset(XMSongLoader*);
 static bool xmsongloader_isvalid(XMSongLoader*);
 static bool xmsongloader_loadinstruments(XMSongLoader*, uintptr_t instr_start);
-static uintptr_t xmsongloader_loadinstrument(XMSongLoader*, int slot,
+static uintptr_t xmsongloader_loadinstrument(XMSongLoader*, uintptr_t slot,
 	uintptr_t instr_start);
 static void xmsongloader_setenvelopes(psy_audio_Instrument*,
 	const XMSAMPLEHEADER*);
@@ -338,7 +338,7 @@ uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>&
 		//song.playLength=header.norder;
 	//}
 
-	self->maxextracolumn = self->songfile->song->properties.tracks; // song.SONGTRACKS;
+	self->maxextracolumn = (int16_t)self->songfile->song->properties.tracks; // song.SONGTRACKS;
 
 	// Since in XM we load first the patterns, we initialize the map linearly. Later, on the instruments,
 	// we will only create the virtual instruments of existing sampled instruments
@@ -386,7 +386,7 @@ uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 
 	fp = self->songfile->file;
 	song = self->songfile->song;
-	headerlen = ReadInt4Start(fp, start);
+	headerlen = ReadInt4Start(fp, (int32_t)start);
 	psyfile_skip(fp, 1); //char iPackingType = psyfile_read_int8();
 	numrows = psyfile_read_int16(fp);
 	packedsize = psyfile_read_int16(fp);
@@ -940,7 +940,7 @@ bool xmsongloader_loadinstruments(XMSongLoader* self, uintptr_t instr_start)
 	return TRUE;
 }
 
-uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t start)
+uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot, uintptr_t start)
 {
 // void xm_readinstrument(psy_audio_SongFile* self, uint32_t slot, uint32_t start, bool xi)
 //{
@@ -951,7 +951,7 @@ uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t st
 
 	fp = self->songfile->file;
 	song = self->songfile->song;
-	psyfile_seek(fp, start);
+	psyfile_seek(fp, (uint32_t)start);
 	
 	instrument = psy_audio_instrument_allocinit();			
 	psy_audio_instrument_setindex(instrument, slot + 1);
@@ -1048,11 +1048,11 @@ uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t st
 		instentry.keyrange.high = 119;
 		psy_audio_instrument_addentry(instrument, &instentry);
 		//if (!xi) {
-			psyfile_seek(fp, start);
+			psyfile_seek(fp, (uint32_t)start);
 		//}
 		for (s = 0; s < instrumentheader.samples; ++s) {
 			//if (!xi) {
-				psyfile_seek(fp, start);
+				psyfile_seek(fp, (uint32_t)start);
 				//}
 			psyfile_read(fp, &xmsamples[s].samplen, 4);
 			psyfile_read(fp, &xmsamples[s].loopstart, 4);
@@ -1104,7 +1104,7 @@ uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, uintptr_t st
 					(is16bit ? 2 : 1);
 			}
 			sample->numframes = xmsamples[s].samplen / (is16bit ? 2 : 1);
-			sample->samplerate = 8363;
+			sample->samplerate = (psy_dsp_big_hz_t)8363.0;
 			sample->defaultvolume = xmsamples[s].vol * 2;
 			sample->tune = xmsamples[s].relnote - 24;
 			// WaveFineTune has +-100 range in Psycle.
@@ -1267,8 +1267,8 @@ static void modsongloader_loadpatterns(MODSongLoader*);
 static void modsongloader_loadsinglepattern(MODSongLoader*, int patidx, int tracks);
 static unsigned char modsongloader_convertperiodtonote(unsigned short period);
 static bool modsongloader_writepatternentry(MODSongLoader*,
-	psy_audio_PatternNode** node, psy_audio_Pattern* pattern,
-	const int row, const int col, const psy_audio_PatternEvent*);
+	psy_audio_PatternNode** node, psy_audio_Pattern*,
+	uintptr_t row, uintptr_t col, const psy_audio_PatternEvent*);
 static void modsongloader_makesequence(MODSongLoader*, struct MODHEADER*);
 static void modsongloader_loadinstrument(MODSongLoader*, int idx);
 static void modsongloader_loadsampleheader(MODSongLoader*, psy_audio_Sample*, int instridx);
@@ -1442,7 +1442,8 @@ void modsongloader_loadpatterns(MODSongLoader* self)
 	// get pattern data
 	psyfile_seek(self->songfile->file, 1084);
 	for(j = 0;j < self->header.songlength ;j++){
-		modsongloader_loadsinglepattern(self, j, self->songfile->song->properties.tracks);
+		modsongloader_loadsinglepattern(self, j,
+			(int)self->songfile->song->properties.tracks);
 	}
 	if(self->speedpatch) {
 		self->songfile->song->properties.tracks++;
@@ -1727,7 +1728,7 @@ unsigned char modsongloader_convertperiodtonote(unsigned short period)
 	
 bool modsongloader_writepatternentry(MODSongLoader* self,
 	psy_audio_PatternNode** node, psy_audio_Pattern* pattern,
-	const int row, const int col, const psy_audio_PatternEvent* e)
+	uintptr_t row, uintptr_t col, const psy_audio_PatternEvent* e)
 {
 	assert(self);
 	assert(pattern && node && e);
@@ -1817,7 +1818,7 @@ void modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 	}
 
 	wave->defaultvolume = self->samples[instridx].volume * 2;
-	wave->samplerate = 8363;
+	wave->samplerate = (psy_dsp_big_hz_t)8363.0;
 	tmpfine = (char)self->samples[instridx].finetune;
 	if (tmpfine > 7 ) tmpfine -= 16;
 	// finetune has +-100 range in Psycle

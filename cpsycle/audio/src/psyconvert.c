@@ -45,7 +45,7 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* patt
 
 		entry = (psy_audio_PatternEntry*)node->entry;
 		row = (int32_t)(entry->offset * lpb);
-		track = entry->track;
+		track = (int32_t)entry->track;
 		if (track < MAX_TRACKS) {
 			data = psy_audio_ptrackline(rv, track, row);
 			data->_note = psy_audio_patternentry_front(entry)->note;
@@ -67,7 +67,7 @@ const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
 psy_audio_LegacyPatternEntry* psy_audio_ptrackline(
 	psy_audio_LegacyPattern pattern, int track, int line)
 {
-	return (const psy_audio_LegacyPatternEntry*)(pattern + (track * EVENT_SIZE) + (line * MULTIPLY));
+	return (psy_audio_LegacyPatternEntry*)(pattern + (track * EVENT_SIZE) + (line * MULTIPLY));
 }
 
 psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument* instrument)
