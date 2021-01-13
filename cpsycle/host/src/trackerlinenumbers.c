@@ -124,8 +124,15 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		patidx = 0;
 		length = ite.pattern->length;
 		if (!self->linestate->singlemode && self->linestate->sequence) {
+			psy_audio_SequenceTrackNode* tracknode;
+
+			tracknode = psy_list_at(self->linestate->sequence->tracks,
+				workspace_sequenceeditposition(self->workspace).track);
+			if (!tracknode) {
+				tracknode = self->linestate->sequence->tracks;
+			}
 			ite = psy_audio_sequence_begin(self->linestate->sequence,
-				self->linestate->sequence->tracks, offset);
+				tracknode, offset);
 			seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);			
 			patidx = psy_audio_sequencetrackiterator_patidx(&ite);
 			if (ite.pattern) {

@@ -27,7 +27,8 @@ typedef struct TrackerLineState {
 	psy_dsp_big_beat_t bpl;
 	bool drawcursor;
 	psy_dsp_big_beat_t lastplayposition;
-	psy_dsp_big_beat_t sequenceentryoffset;	
+	psy_dsp_big_beat_t sequenceentryoffset;
+	uintptr_t trackidx;
 	// precomputed
 	intptr_t visilines;
 	bool cursorchanging;

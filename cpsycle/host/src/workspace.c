@@ -171,6 +171,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_configchanged);	
 	psy_signal_init(&self->signal_changecontrolskin);
 	psy_signal_init(&self->signal_patterncursorchanged);
+	psy_signal_init(&self->signal_gotocursor);
 	// psy_signal_init(&self->signal_sequenceselectionchanged);
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_scanprogress);
@@ -223,7 +224,8 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_songchanged);	
 	psy_signal_dispose(&self->signal_configchanged);	
 	psy_signal_dispose(&self->signal_changecontrolskin);
-	psy_signal_dispose(&self->signal_patterncursorchanged);	
+	psy_signal_dispose(&self->signal_patterncursorchanged);
+	psy_signal_dispose(&self->signal_gotocursor);
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
 	psy_signal_dispose(&self->signal_beforesavesong);
@@ -1060,6 +1062,11 @@ void workspace_setsequenceeditposition(Workspace* self, psy_audio_OrderIndex ind
 	}
 }
 
+psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace* self)
+{
+	return self->sequenceselection.editposition;
+}
+
 uintptr_t workspace_currview(Workspace* self)
 {
 	assert(self);
@@ -1488,6 +1495,11 @@ void workspace_songposinc(Workspace* self)
 				self->sequenceselection.editposition.track,
 				self->sequenceselection.editposition.order + 1));
 	}
+}
+
+void workspace_gotocursor(Workspace* self, psy_audio_PatternCursor cursor)
+{
+	psy_signal_emit(&self->signal_gotocursor, self, 1, &cursor);
 }
 
 void workspace_playstart(Workspace* self)
