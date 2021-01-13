@@ -35,7 +35,8 @@ typedef struct psy_audio_WaveOscTables {
 void psy_audio_waveosctables_init(psy_audio_WaveOscTables*);
 void psy_audio_waveosctables_dispose(psy_audio_WaveOscTables*);
 void psy_audio_waveosctables_clear(psy_audio_WaveOscTables*);
-void psy_audio_waveosctables_makeall(psy_audio_WaveOscTables*, uintptr_t sr);
+void psy_audio_waveosctables_makeall(psy_audio_WaveOscTables*,
+	psy_dsp_big_hz_t sr);
 psy_audio_Instrument* psy_audio_waveosctables_table(psy_audio_WaveOscTables*,
 	psy_audio_WaveShape);
 

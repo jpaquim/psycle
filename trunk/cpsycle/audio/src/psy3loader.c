@@ -352,7 +352,7 @@ void psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		return; // skip
 	}	
 	// create new tracks (0..index), if not already existing
-	for (i = psy_audio_sequence_sizetracks(&self->song->sequence); i <= (uint32_t)index; ++i) {
+	for (i = (uint32_t)psy_audio_sequence_sizetracks(&self->song->sequence); i <= (uint32_t)index; ++i) {
 		psy_audio_sequence_appendtrack(&self->song->sequence,
 			psy_audio_sequencetrack_allocinit());
 	}

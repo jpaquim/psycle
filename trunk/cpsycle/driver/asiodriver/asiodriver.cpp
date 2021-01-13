@@ -1368,7 +1368,7 @@ static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
-static uintptr_t driver_samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -1379,7 +1379,8 @@ static bool start(AsioDriver*);
 static bool stop(AsioDriver*);
 static void driver_deallocate(psy_AudioDriver*);
 static void init_properties(psy_AudioDriver*);
-static void readbuffers(AsioDriver* self, int idx, float** left, float** right, int numsamples);
+static void readbuffers(AsioDriver* self, int idx,
+	float** left, float** right, uintptr_t numsamples);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 static uint32_t playposinsamples(psy_AudioDriver*);
 
@@ -1559,7 +1560,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 	}	
 }
 
-uintptr_t driver_samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 {
 	return psy_audiodriversettings_samplespersec(&ASIOInterface::settings_);
 }
@@ -1582,9 +1583,10 @@ int driver_close(psy_AudioDriver* driver)
 	return status;
 }
 
-void readbuffers(AsioDriver* self, int idx, float** left, float** right, int numsamples)
+void readbuffers(AsioDriver* self, int idx, float** left, float** right,
+	uintptr_t numsamples)
 {
-	self->asioif->GetReadBuffers(idx, left, right, numsamples);
+	self->asioif->GetReadBuffers(idx, left, right, (int)numsamples);
 }
 
 const char* capturename(psy_AudioDriver* driver, int index)

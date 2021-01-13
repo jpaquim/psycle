@@ -314,12 +314,12 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	for (p = bc->events; p != NULL; psy_list_next(&p)) {		
 		psy_audio_PatternEntry* entry;		
 		psy_audio_PatternEvent* ev;
-		int numworksamples;
+		intptr_t numworksamples;
 		int midichannel;
 
 		entry = psy_audio_patternnode_entry(p);
 		ev = psy_audio_patternentry_front(entry);
-		numworksamples = (unsigned int)entry->delta - pos;
+		numworksamples = (intptr_t)entry->delta - pos;
 		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY &&
 				ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
 			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_BYPASS) {
@@ -363,7 +363,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			psy_audio_MachineParam* param;
 						
 			if (numworksamples > 0) {				
-				int restorenumsamples = bc->numsamples;
+				intptr_t restorenumsamples = bc->numsamples;
 		
 				psy_audio_buffercontext_setoffset(bc, pos);				
 				bc->numsamples = numworksamples;				
@@ -384,7 +384,8 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					int32_t step;
 					int32_t nv;
 
-					curr = psy_audio_machine_parameter_patternvalue(psy_audio_vstplugin_base(self), param);
+					curr = (int32_t)psy_audio_machine_parameter_patternvalue(
+						psy_audio_vstplugin_base(self), param);
 					step = (v - curr) / psy_audio_patternentry_front(entry)->vol;
 					nv = curr + step;
 					psy_audio_machine_parameter_tweak_pattern(psy_audio_vstplugin_base(self), param, nv);
@@ -399,7 +400,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				note = (VstNote*) psy_table_at(&self->tracknote, entry->track);
 				psy_audio_vstevents_append_noteoff(&self->vstevents,
-					entry->track, note->key);
+					(uint8_t)entry->track, note->key);
 			}
 			// Panning
 			if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {				
@@ -427,7 +428,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		}
 	}	
 	if (amount > 0) {
-		int restorenumsamples = bc->numsamples;
+		intptr_t restorenumsamples = bc->numsamples;
 		psy_audio_buffercontext_setoffset(bc, pos);		
 		bc->numsamples = amount;		
 		generateaudio(self, bc);		
@@ -683,7 +684,7 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 
 	program = 0;
 	chunksize = 0;	
-	count = numparameters(self);
+	count = (uint32_t)numparameters(self);
 	size = sizeof(program) + sizeof(count);
 	data = psy_audio_vstinterface_chunkdata(&self->mi, FALSE, &chunksize);
 	if (data) {
@@ -773,10 +774,11 @@ void programname(psy_audio_VstPlugin* self, uintptr_t bnkidx, uintptr_t prgidx, 
 {
 	assert(self);
 
-	if (self->mi.effect) {		
-
+	if (prgidx != psy_INDEX_INVALID) {
 		self->mi.effect->dispatcher(self->mi.effect, effGetProgramNameIndexed,
-			(VstIntPtr)(bnkidx * 128 + prgidx), -1, val, 0);
+			(VstInt32)(bnkidx * 128 + prgidx), -1, val, 0);
+	} else {
+		val[0] = '\0';
 	}
 }
 
@@ -898,14 +900,13 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 
 	sequencertime = psy_audio_machine_sequencertime(
 		psy_audio_vstplugin_base(self));
-	self->vsttimeinfo->sampleRate = psy_audio_machine_samplerate(
-		psy_audio_vstplugin_base(self));
-	self->vsttimeinfo->samplePos = sequencertime->playcounter;
-	self->vsttimeinfo->ppqPos = sequencertime->ppqpos;
+	self->vsttimeinfo->sampleRate = sequencertime->samplerate;
+	self->vsttimeinfo->samplePos = (double)sequencertime->playcounter;
+	self->vsttimeinfo->ppqPos = sequencertime->position;
 	self->vsttimeinfo->tempo = sequencertime->bpm;
-	self->vsttimeinfo->barStartPos = sequencertime->lastbarpos;
+	self->vsttimeinfo->barStartPos = sequencertime->lastbarposition;
 	self->vsttimeinfo->flags =
-		kVstBarsValid | kVstTempoValid | kVstPpqPosValid;
+		kVstPpqPosValid | kVstBarsValid | kVstTempoValid;
 }
 
 // VSTCALLBACK

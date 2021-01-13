@@ -67,7 +67,7 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		int16_t plugversion,
 		int type,		
 		const char* modulepath,
-		int shellidx,
+		uintptr_t shellidx,
 		const char* helptext)
 {	
 	self->Author = strdup(author);

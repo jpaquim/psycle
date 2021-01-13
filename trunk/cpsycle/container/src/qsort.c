@@ -4,12 +4,12 @@
 
 #include "qsort.h"
 
-static void psy_qsort_swap(void *v[], int i, int j);
+static void psy_qsort_swap(void *v[], intptr_t i, intptr_t j);
 
-void psy_qsort(void *v[], int left, int right, psy_fp_comp comp)
+void psy_qsort(void *v[], intptr_t left, intptr_t right, psy_fp_comp comp)
 {
-	int i, last;
-	void swap(void *v[], int, int);
+	intptr_t i, last;
+	
 	if (left >= right) {
 		return;
 	}
@@ -19,13 +19,13 @@ void psy_qsort(void *v[], int left, int right, psy_fp_comp comp)
 		if ((*comp)(v[i], v[left]) < 0) {
 			psy_qsort_swap(v, ++last, i);
 		}
-	}
-	psy_qsort_swap(v, left, last);
+	}	
+	psy_qsort_swap(v, left, last);	
 	psy_qsort(v, left, last - 1, comp);
 	psy_qsort(v, last+1, right, comp);
 }
 
-void psy_qsort_swap(void *v[], int i, int j)
+void psy_qsort_swap(void *v[], intptr_t i, intptr_t j)
 {
 	void *temp;
 

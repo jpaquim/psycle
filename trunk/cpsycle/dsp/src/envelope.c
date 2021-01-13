@@ -397,7 +397,7 @@ psy_List* psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController* self)
 }
 
 void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController* self,
-	uintptr_t samplerate)
+	psy_dsp_big_hz_t samplerate)
 {
 	self->samplerate = samplerate;
 }
@@ -540,7 +540,7 @@ void psy_dsp_envelope_startstage(psy_dsp_EnvelopeController* self)
 		}
 		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
 		if (self->settings.timemode == psy_dsp_ENVELOPETIME_TICK) {
-			float srdeviation;
+			psy_dsp_big_hz_t srdeviation;
 
 			srdeviation = (self->samplerate * 60) / (self->bpm * self->tpb);
 			self->nexttime = (uintptr_t)((pt->time - prevtime) * srdeviation);

@@ -68,7 +68,7 @@ static void machineproxy_savewiremapping(psy_audio_MachineProxy*, psy_audio_Song
 	uintptr_t slot);
 static void machineproxy_postload(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
-static uintptr_t machineproxy_samplerate(psy_audio_MachineProxy*);
+static psy_dsp_big_hz_t machineproxy_samplerate(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_bpm(psy_audio_MachineProxy*);
 static psy_audio_SequencerTime* machineproxy_sequencertime(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_beatspertick(psy_audio_MachineProxy*);
@@ -84,7 +84,8 @@ static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
 static bool machineproxy_editresize(psy_audio_MachineProxy*, intptr_t w, intptr_t h);
 static bool machineproxy_addcapture(psy_audio_MachineProxy*, int index);
 static bool machineproxy_removecapture(psy_audio_MachineProxy*, int index);
-static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index, float** pleft, float** pright, int numsamples);
+static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index,
+	float** pleft, float** pright, uintptr_t numsamples);
 static const char* machineproxy_capturename(psy_audio_MachineProxy*, int index);
 static int machineproxy_numcaptures(psy_audio_MachineProxy*);
 static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index);
@@ -937,16 +938,16 @@ void machineproxy_postload(psy_audio_MachineProxy* self,
 	}
 }
 
-uintptr_t machineproxy_samplerate(psy_audio_MachineProxy* self)
+psy_dsp_big_hz_t machineproxy_samplerate(psy_audio_MachineProxy* self)
 {
-	uintptr_t rv = 0;
+	psy_dsp_big_hz_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			rv = (uintptr_t)psy_audio_machine_samplerate(self->client);
+			rv = psy_audio_machine_samplerate(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "samplerate", GetExceptionCode(),
@@ -1210,14 +1211,16 @@ bool machineproxy_removecapture(psy_audio_MachineProxy* self, int index)
 	return rv;
 }
 
-void machineproxy_readbuffers(psy_audio_MachineProxy* self, int index, float**pleft, float** pright, int numsamples)
+void machineproxy_readbuffers(psy_audio_MachineProxy* self, int index,
+	float**pleft, float** pright, uintptr_t numsamples)
 {	
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			self->client->vtable->readbuffers(self->client, index, pleft, pright, numsamples);
+			self->client->vtable->readbuffers(self->client, index,
+				pleft, pright, numsamples);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "readbuffers", GetExceptionCode(),
@@ -1600,7 +1603,7 @@ void machineproxy_programname(psy_audio_MachineProxy* self, uintptr_t bnkidx, ui
 
 uintptr_t machineproxy_numprograms(psy_audio_MachineProxy* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

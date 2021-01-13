@@ -17,20 +17,25 @@ extern "C" {
 #endif
 
 typedef struct psy_audio_SequencerTime {
-	uintptr_t playcounter;
-	psy_dsp_big_beat_t samplerate;
-	psy_dsp_big_beat_t ppqpos;
+	// current play position in frames
+	psy_dsp_frame_t playcounter;
+	// current samplerate in cycle/second (often 44100.0 Hz)
+	psy_dsp_big_hz_t samplerate;
+	// current play position in beats (1.0 bts = 1 quarter note)
+	psy_dsp_big_beat_t position;
+	// tempo in beats per minute
 	psy_dsp_big_beat_t bpm;
-	psy_dsp_big_beat_t lastbarpos;
+	// last bar position in beats
+	psy_dsp_big_beat_t lastbarposition;	
 } psy_audio_SequencerTime;
-
 
 INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
 {
-	self->playcounter = 0;
-	self->samplerate = 44100;
-	self->ppqpos = 0;
-	self->lastbarpos = 0;
+	self->playcounter = (psy_dsp_frame_t)0;
+	self->samplerate = (psy_dsp_big_hz_t)44100.0;
+	self->position = (psy_dsp_big_beat_t)0.0;
+	self->bpm = (psy_dsp_big_beat_t)125.0;
+	self->lastbarposition = (psy_dsp_big_beat_t)0.0;	
 }
 
 typedef enum {
@@ -69,16 +74,17 @@ typedef struct {
 } psy_audio_SequencerRowDelay;
 
 typedef struct {
-	psy_audio_Sequence* sequence;
-	psy_audio_Machines* machines;	
+	// signals
+	psy_Signal signal_newline;
+	// internal data
+	psy_audio_SequencerTime seqtime;
 	uintptr_t numsongtracks;
-	psy_dsp_big_beat_t beatspersample;	
+	psy_dsp_big_beat_t beatspersample;
 	uintptr_t lpb; // global
 	psy_dsp_big_beat_t lpbspeed; // pattern
 	uintptr_t extraticks;
 	uintptr_t tpb;
 	bool playing;
-	psy_dsp_big_beat_t position;
 	psy_dsp_big_beat_t window;
 	uintptr_t currrowposition;
 	psy_List* currtracks;
@@ -86,8 +92,8 @@ typedef struct {
 	psy_audio_PatternNode* globalevents;
 	psy_audio_PatternNode* delayedevents;
 	psy_audio_PatternNode* inputevents;
-	psy_audio_SequencerPlayMode mode;	
-	bool looping;	
+	psy_audio_SequencerPlayMode mode;
+	bool looping;
 	psy_dsp_big_beat_t linetickcount;
 	psy_audio_SequencerJump jump;
 	psy_audio_SequencerRowDelay rowdelay;
@@ -96,17 +102,20 @@ typedef struct {
 	psy_dsp_big_beat_t playbeatloopstart;
 	psy_dsp_big_beat_t playbeatloopend;
 	psy_dsp_big_beat_t numplaybeats;
-	psy_Signal signal_newline;	
 	bool calcduration;
-	uintptr_t playtrack;
-	psy_audio_SequencerTime seqtime;
+	uintptr_t playtrack;	
+	psy_audio_PatternNode** qsortarray;
+	uintptr_t qsortarraysize;
+	// references
+	psy_audio_Sequence* sequence;
+	psy_audio_Machines* machines;
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,
 	psy_audio_Machines*);
 void psy_audio_sequencer_dispose(psy_audio_Sequencer*);
 void psy_audio_sequencer_reset(psy_audio_Sequencer*, psy_audio_Sequence*,
-	psy_audio_Machines*, uintptr_t samplerate);
+	psy_audio_Machines*, psy_dsp_big_hz_t samplerate);
 void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 	uintptr_t numsamples);
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
@@ -122,14 +131,21 @@ void psy_audio_sequencer_clockstop(psy_audio_Sequencer*);
 void psy_audio_sequencer_onnewline(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer*
-	self)
+
+INLINE const psy_audio_SequencerTime* psy_audio_sequencer_time(const
+	psy_audio_Sequencer* self)
 {
-	return self->position;
+	return &self->seqtime;
 }
 
-INLINE uintptr_t psy_audio_sequencer_playlist_position(const psy_audio_Sequencer*
-	self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(const
+	psy_audio_Sequencer* self)
+{
+	return self->seqtime.position;
+}
+
+INLINE uintptr_t psy_audio_sequencer_playlist_position(const
+	psy_audio_Sequencer* self)
 {
 	return self->currrowposition;
 }
@@ -155,9 +171,10 @@ psy_List* psy_audio_sequencer_timedevents(psy_audio_Sequencer*,
 	uintptr_t slot, uintptr_t amount);
 void psy_audio_sequencer_append(psy_audio_Sequencer*, psy_List* events);
 void psy_audio_sequencer_setsamplerate(psy_audio_Sequencer*,
-	uintptr_t samplerate);
+	psy_dsp_big_hz_t samplerate);
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_samplerate(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_hz_t psy_audio_sequencer_samplerate(
+	psy_audio_Sequencer* self)
 {
 	return self->seqtime.samplerate;
 }
@@ -175,8 +192,10 @@ INLINE uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer* self)
 	return self->lpb;
 }
 
-void psy_audio_sequencer_setticksperbeat(psy_audio_Sequencer*, uintptr_t ticks);
-void psy_audio_sequencer_setextraticksperbeat(psy_audio_Sequencer*, uintptr_t ticks);
+void psy_audio_sequencer_setticksperbeat(psy_audio_Sequencer*,
+	uintptr_t ticks);
+void psy_audio_sequencer_setextraticksperbeat(psy_audio_Sequencer*,
+	uintptr_t ticks);
 
 INLINE uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t offset)
@@ -190,7 +209,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_frametooffset(
 	return numsamples * self->beatspersample;
 }
 
-INLINE int psy_audio_sequencer_playing(psy_audio_Sequencer* self)
+INLINE int psy_audio_sequencer_playing(const psy_audio_Sequencer* self)
 {
 	return self->playing;
 }
@@ -276,11 +295,13 @@ void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 	psy_audio_Sequencer* self)
 {
-	return self->seqtime.playcounter / (psy_dsp_seconds_t)self->seqtime.samplerate;
+	return self->seqtime.playcounter /
+		(psy_dsp_seconds_t)self->seqtime.samplerate;
 }
 
 
-psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(psy_audio_Sequencer* self);
+psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(const
+	psy_audio_Sequencer* self);
 
 #ifdef __cplusplus
 }

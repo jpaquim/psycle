@@ -143,7 +143,7 @@ static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
-static uintptr_t samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -165,7 +165,8 @@ int onerror(int err, const char* msg)
 	return 0;
 }
 
-static void readbuffers(MmeDriver*, int idx, float** pleft, float** pright, int numsamples);
+static void readbuffers(MmeDriver*, int idx, float** pleft, float** pright,
+	uintptr_t numsamples);
 static void refreshavailableports(MmeDriver*);
 static void enumerateplaybackports(MmeDriver*);
 static void enumeratecaptureports(MmeDriver*);
@@ -371,7 +372,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 			psy_audiodriversettings_blockframes(&self->settings)));
 }
 
-uintptr_t samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 {
 	return psy_audiodriversettings_samplespersec(&((MmeDriver*)self)->settings);
 }

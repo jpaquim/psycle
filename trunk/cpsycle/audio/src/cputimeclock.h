@@ -34,7 +34,7 @@ INLINE void psy_audio_cputimeclock_stop(psy_audio_CpuTimeClock* self)
 }
 
 INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_t amount,
-	psy_dsp_big_beat_t samplerate)
+	psy_dsp_big_hz_t samplerate)
 {
 	if (amount > 0) {
 		double cpu_time_used;

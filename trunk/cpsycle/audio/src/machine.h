@@ -52,7 +52,7 @@ extern "C" {
 
 struct psy_audio_SequencerTime;
 
-typedef uintptr_t (*fp_mcb_samplerate)(void*);
+typedef psy_dsp_big_hz_t (*fp_mcb_samplerate)(void*);
 typedef	struct psy_audio_SequencerTime* (*fp_mcb_sequencertime)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_bpm)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspertick)(void*);
@@ -70,7 +70,7 @@ typedef	void (*fp_mcb_output)(void*, const char* text);
 typedef	bool (*fp_mcb_addcapture)(void*, int index);
 typedef	bool (*fp_mcb_removecapture)(void*, int index);
 typedef void (*fp_mcb_readbuffers)(void*, int index, float** pleft,
-	float** pright, int numsamples);
+	float** pright, uintptr_t numsamples);
 typedef const char* (*fp_mcb_capturename)(void*, int index);
 typedef int (*fp_mcb_numcaptures)(void*);
 typedef const char* (*fp_mcb_playbackname)(void*, int index);
@@ -166,7 +166,7 @@ typedef	const psy_audio_MachineInfo* (*fp_machine_info)(struct
 	psy_audio_Machine*);
 typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_updatesamplerate)(struct psy_audio_Machine*,
-	unsigned int samplerate);
+	psy_dsp_big_hz_t samplerate);
 typedef	uintptr_t (*fp_machine_numinputs)(struct psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_numoutputs)(struct psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_slot)(struct psy_audio_Machine*);
@@ -252,7 +252,7 @@ typedef	void (*fp_machine_command)(struct psy_audio_Machine*);
 typedef const char* (*fp_machine_modulepath)(struct psy_audio_Machine*);
 typedef uintptr_t (*fp_machine_shellidx)(struct psy_audio_Machine*);
 // machine callbacks
-typedef	uintptr_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
+typedef	psy_dsp_big_hz_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_bpm)(struct psy_audio_Machine*);
 typedef struct psy_audio_SequencerTime* (*fp_machine_sequencertime)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspertick)(struct psy_audio_Machine*);
@@ -272,7 +272,7 @@ typedef	bool(*fp_machine_editresize)(struct psy_audio_Machine*, intptr_t w, intp
 typedef bool (*fp_machine_addcapture)(struct psy_audio_Machine*, int idx);
 typedef bool (*fp_machine_removecapture)(struct psy_audio_Machine*, int idx);
 typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index,
-	float** pleft, float** pright, int numsamples);
+	float** pleft, float** pright, uintptr_t numsamples);
 typedef const char* (*fp_machine_capturename)(struct psy_audio_Machine*,
 	int index);
 typedef int (*fp_machine_numcaptures)(struct psy_audio_Machine*);
@@ -989,9 +989,9 @@ INLINE psy_dsp_beat_t psy_audio_machine_currlinesperbeat(psy_audio_Machine*
 	return 1.f / self->vtable->currbeatsperline(self);
 }
 
-INLINE double psy_audio_machine_samplerate(psy_audio_Machine* self)
+INLINE psy_dsp_big_hz_t psy_audio_machine_samplerate(psy_audio_Machine* self)
 {
-	return (double)self->vtable->samplerate(self);
+	return self->vtable->samplerate(self);
 }
 
 INLINE struct psy_audio_Samples* psy_audio_machine_samples(psy_audio_Machine*
@@ -1035,7 +1035,7 @@ INLINE bool psy_audio_machine_removecapture(psy_audio_Machine* self, int index)
 }
 
 INLINE void psy_audio_machine_readbuffers(psy_audio_Machine* self, int index,
-	float** pleft, float** pright, int numsamples)
+	float** pleft, float** pright, uintptr_t numsamples)
 {
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
 }

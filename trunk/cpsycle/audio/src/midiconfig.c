@@ -199,12 +199,12 @@ void psy_audio_midiconfig_configure(psy_audio_MidiConfig* self,
 				if (controller) {
 					psy_audio_MidiConfigGroup newgroup;
 
-					newgroup.message = psy_property_at_int(controller, "message", 0);
-					newgroup.type = psy_property_at_int(controller, "type", 0);
-					newgroup.command = psy_property_at_int(controller, "cmd", 0);
-					newgroup.record = psy_property_at_bool(controller, "record", 0);
-					newgroup.from = psy_property_at_int(controller, "from", 0);
-					newgroup.to = psy_property_at_int(controller, "to", 0);
+					newgroup.message = (int)psy_property_at_int(controller, "message", 0);
+					newgroup.type = (int)psy_property_at_int(controller, "type", 0);
+					newgroup.command = (int)psy_property_at_int(controller, "cmd", 0);
+					newgroup.record = (int)psy_property_at_bool(controller, "record", 0);
+					newgroup.from = (int)psy_property_at_int(controller, "from", 0);
+					newgroup.to = (int)psy_property_at_int(controller, "to", 0);
 					if (psy_audio_midiconfig_at(self, c)) {
 						psy_audio_MidiConfigGroup* group;
 
@@ -241,7 +241,7 @@ void psy_audio_midiconfig_addcontroller(psy_audio_MidiConfig* self,
 		group.grouptype = psy_audio_MIDICONFIG_GT_PITCHWHEEL;
 		command = 0x01;
 	} else {
-		command = numcontrollers - 2;
+		command = (int)numcontrollers - 2;
 	}
 	newgroup = psy_audio_midiconfiggroup_allocinit(group.grouptype, command);
 	if (newgroup) {

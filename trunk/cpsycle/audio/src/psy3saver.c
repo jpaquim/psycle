@@ -43,7 +43,7 @@ static int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver*, psy_audio_Machine*,
 	uint32_t slot);
 static void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver*, const char* name,
-	int32_t shellindex);
+	uintptr_t shellindex);
 static int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver*, uintptr_t slot);
 static int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver*, psy_audio_Instrument*);
 static int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver*, psy_audio_Instrument*, int version);
@@ -674,7 +674,7 @@ int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver* self, uintptr_t s
 }
 
 void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver* self, const char* filename,
-	int32_t shellindex)
+	uintptr_t shellindex)
 {
 	char str[256];	
 	char idxtext[8];
@@ -689,7 +689,7 @@ void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver* self, const ch
 		if (strcmp(psy_path_ext(&path), "so") == 0) {
 			psy_path_setext(&path, "dll");			
 		}
-		index = shellindex;
+		index = (int32_t)shellindex;
 		if (index != 0) {
 			int32_t divisor = 16777216;
 			int32_t i;

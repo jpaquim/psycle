@@ -65,10 +65,10 @@ int psyfile_close(PsyFile* self)
 }
 // read
 int psyfile_read(PsyFile* self,
-				   void* pData,
-				   uint32_t numBytes)
+				 void* pData,
+				 uintptr_t numBytes)
 {
-	uint32_t bytesRead = (uint32_t)fread(pData, sizeof(char), numBytes, self->_file);
+	uintptr_t bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
 	return (bytesRead == numBytes);	
 }
 
@@ -136,9 +136,9 @@ float psyfile_read_float(PsyFile* self)
 	return temp;
 }
 
-int psyfile_write(PsyFile* self, const void* data, uint32_t numbytes)
+int psyfile_write(PsyFile* self, const void* data, uintptr_t numbytes)
 {		
-	uint32_t byteswritten;
+	uintptr_t byteswritten;
 	int status;
 
 	fflush(self->_file);
@@ -184,7 +184,7 @@ int psyfile_write_float(PsyFile* self, float value)
 
 int psyfile_expect(PsyFile* self,
 					 void* pData,
-					 uint32_t numBytes)
+					 uintptr_t numBytes)
 {
 	unsigned char c;
 	
@@ -206,7 +206,7 @@ int psyfile_expect(PsyFile* self,
 uint32_t psyfile_seek(PsyFile* self,
 				   uint32_t offset)
 {
-	if (fseek(self->_file, (long)offset, SEEK_SET) != 0)
+	if (fseek(self->_file, (int32_t)offset, SEEK_SET) != 0)
 	{
 		return -1;
 	}
@@ -217,7 +217,7 @@ uint32_t psyfile_seek(PsyFile* self,
 uint32_t psyfile_skip(PsyFile* self,
 				   uint32_t numBytes)
 {
-	if (fseek(self->_file, (long)numBytes, SEEK_CUR) != 0) return -1;
+	if (fseek(self->_file, (int32_t)numBytes, SEEK_CUR) != 0) return -1;
 	return ftell(self->_file);
 }
 
@@ -234,8 +234,8 @@ uint32_t psyfile_getpos(PsyFile* self)
 
 uint32_t psyfile_filesize(PsyFile* self)
 {	
-	int init = ftell(self->_file);
-	int end;
+	int32_t init = ftell(self->_file);
+	int32_t end;
 	fseek(self->_file, 0,SEEK_END);
 	end = ftell(self->_file);
 	fseek(self->_file,init,SEEK_SET);

@@ -191,7 +191,7 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 {	
 	CmdDriver* self;
-	uintptr_t keycode;	
+	uint32_t keycode;	
 	bool ctrl;
 	bool alt;
 
@@ -200,7 +200,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	self = (CmdDriver*)(driver);
 
 	// patternview chordmode
-	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
+	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
 		return;
 	}

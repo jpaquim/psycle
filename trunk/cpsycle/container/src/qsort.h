@@ -4,7 +4,7 @@
 #ifndef psy_QSORT_H
 #define psy_QSORT_H
 
-#include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,7 +12,7 @@ extern "C" {
 
 typedef int (*psy_fp_comp)(void *, void *);
 
-void psy_qsort(void *v[], int left, int right, psy_fp_comp);
+void psy_qsort(void *v[], intptr_t left, intptr_t right, psy_fp_comp);
 
 #ifdef __cplusplus
 }

@@ -188,7 +188,7 @@ static void stop(psy_audio_LadspaPlugin*);
 static void newline(psy_audio_LadspaPlugin*);
 static psy_audio_MachineInfo* info(psy_audio_LadspaPlugin*);
 static int parametertype(psy_audio_LadspaPlugin* self, uintptr_t par);
-static unsigned int numparametercols(psy_audio_LadspaPlugin*);
+static uintptr_t numparametercols(psy_audio_LadspaPlugin*);
 static uintptr_t numparameters(psy_audio_LadspaPlugin*);
 static void parameterrange(psy_audio_LadspaPlugin*, uintptr_t param, int* minval,
 	int* maxval);
@@ -265,7 +265,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 	} else {
 		/*Step three: Get the descriptor of the selected plugin (a shared library can have
 		several plugins*/
-		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(shellidx);
+		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction((uint32_t)shellidx);
 		if (psDescriptor) {
 			LADSPA_Handle handle = instantiate(psDescriptor);
 			if (handle) {
@@ -344,7 +344,9 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, 
 		pfDescriptorFunction = (LADSPA_Descriptor_Function)
 			psy_library_functionpointer(&library, "ladspa_descriptor");		
 		if (pfDescriptorFunction != NULL) {
-			const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(shellidx);
+			const LADSPA_Descriptor* psDescriptor;
+			
+			psDescriptor = pfDescriptorFunction((uint32_t)shellidx);
 			if (psDescriptor != NULL) {
 				machineinfo_set(info,
 					psDescriptor->Maker,
@@ -403,7 +405,7 @@ void stop(psy_audio_LadspaPlugin* self)
 void generateaudio(psy_audio_LadspaPlugin* self, psy_audio_BufferContext* bc)
 {
 	preparebuffers(self, bc);
-	self->psDescriptor->run(self->pluginHandle, bc->numsamples);	
+	self->psDescriptor->run(self->pluginHandle, (uint32_t)bc->numsamples);	
 }
 
 void preparebuffers(psy_audio_LadspaPlugin* self, psy_audio_BufferContext* bc)
@@ -551,10 +553,11 @@ void clearparams(psy_audio_LadspaPlugin* self)
 void savespecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
-	uint32_t count = psy_audio_machine_numparameters(psy_audio_ladspaplugin_base(self));	
+	uint32_t count;
 	uint32_t size;
 	uint32_t i;
 	
+	count = (uint32_t)psy_audio_machine_numparameters(psy_audio_ladspaplugin_base(self));
 	size = sizeof(count) + sizeof(uint32_t) * count;
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &count, sizeof(count));
@@ -608,7 +611,7 @@ int parametername(psy_audio_LadspaPlugin* self, char* txt, uintptr_t param)
 	return rv;
 }
 
-unsigned int numparametercols(psy_audio_LadspaPlugin* self)
+uintptr_t numparametercols(psy_audio_LadspaPlugin* self)
 {	
 	return (numparameters(self) / 12) + 1;	
 }

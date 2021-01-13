@@ -633,20 +633,22 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uint32_t size;
 	uint32_t i;
 
-	count = psy_audio_machine_numparameters(psy_audio_plugin_base(self));
+	count = (uint32_t)psy_audio_machine_numparameters(
+		psy_audio_plugin_base(self));
 	size2 = mi_getdatasize(self->mi);
 	size = size2 + sizeof(count) + sizeof(int) * count;
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &count, sizeof(count));
 	for (i = 0; i < count; ++i) {
 		psy_audio_MachineParam* param;
-		int32_t scaled = 0;		
+		intptr_t scaled = 0;		
 
 		param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
 		if (param) {
-			scaled = psy_audio_machine_parameter_scaledvalue(psy_audio_plugin_base(self), param);
+			scaled = psy_audio_machine_parameter_scaledvalue(
+				psy_audio_plugin_base(self), param);			
 		}
-		psyfile_write_int32(songfile->file, scaled);
+		psyfile_write_int32(songfile->file, (int32_t)scaled);
 	}
 	if (size2) {
 		unsigned char* data;

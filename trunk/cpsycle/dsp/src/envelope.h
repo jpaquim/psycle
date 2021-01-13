@@ -301,8 +301,8 @@ INLINE void psy_dsp_envelope_setreleasetime(
 typedef struct psy_dsp_EnvelopeController {
 	int rsvd;
 	psy_dsp_Envelope settings;	
-	uintptr_t samplerate;
-	float bpm;
+	psy_dsp_big_hz_t samplerate;
+	psy_dsp_big_beat_t bpm;
 	int tpb;
 	psy_List* currstage;	
 	psy_List* susbeginstage;
@@ -332,7 +332,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const
 	psy_dsp_EnvelopeController*, uintptr_t pointindex);
 psy_List*  psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController*);
 void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController*,
-	uintptr_t samplerate);
+	psy_dsp_big_hz_t samplerate);
 void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*,
 	uintptr_t tpb, double bpm);
 psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController*);

@@ -1040,7 +1040,7 @@ int array_method_to_table(lua_State* L)
 	psy_audio_Array* rv = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
 	size_t i;
 
-	lua_createtable(L, psy_audio_array_len(rv), 0);
+	lua_createtable(L, (int)psy_audio_array_len(rv), 0);
 	for (i = 0; i < psy_audio_array_len(rv); ++i) {
 		lua_pushnumber(L, psy_audio_array_at(rv, i));
 		lua_rawseti(L, 2, i + 1);

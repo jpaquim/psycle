@@ -12,10 +12,6 @@
 #include "kbddriver.h"
 #include <rms.h>
 #include <operations.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include "../../detail/portable.h"
 #include "fileio.h"

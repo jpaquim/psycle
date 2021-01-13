@@ -48,14 +48,15 @@ typedef int (*psy_audiodriver_fp_close)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_connect)(struct psy_AudioDriver*, void* context,
 	AUDIODRIVERWORKFN callback,
 	void* handle);
-typedef uintptr_t(*psy_audiodriver_fp_samplerate)(struct psy_AudioDriver*);
+typedef psy_dsp_big_hz_t(*psy_audiodriver_fp_samplerate)(struct psy_AudioDriver*);
 typedef const char* (*psy_audiodriver_fp_capturename)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_numcaptures)(struct psy_AudioDriver*);
 typedef const char* (*psy_audiodriver_fp_playbackname)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_numplaybacks)(struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_addcapture)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_removecapture)(struct psy_AudioDriver*, int index);
-typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index, float** pleft, float** pright, int numsamples);
+typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index,
+	float** pleft, float** pright, uintptr_t numsamples);
 typedef const psy_AudioDriverInfo* (*psy_audiodriver_fp_info)(struct psy_AudioDriver*);
 typedef uint32_t (*psy_audiodriver_fp_playposinsamples)(struct psy_AudioDriver*);
 
@@ -140,7 +141,7 @@ INLINE void psy_audiodriver_connect(psy_AudioDriver* self, void* context,
 	self->handle = handle;
 }
 
-INLINE uintptr_t psy_audiodriver_samplerate(psy_AudioDriver* self)
+INLINE psy_dsp_big_hz_t psy_audiodriver_samplerate(psy_AudioDriver* self)
 {
 	return self->vtable->samplerate(self);
 }
@@ -175,7 +176,8 @@ INLINE int psy_audiodriver_removecapture(psy_AudioDriver* self, int index)
 	return self->vtable->removecapture(self, index);
 }
 
-INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index, float** pleft, float** pright, int numsamples)
+INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index,
+	float** pleft, float** pright, uintptr_t numsamples)
 {
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
 }

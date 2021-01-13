@@ -33,7 +33,7 @@ void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 	psy_audio_sampleloop_init(&self->loop);
 	psy_audio_sampleloop_init(&self->sustainloop);
 	psy_audio_buffer_init(&self->channels, numchannels);
-	self->samplerate = 44100;
+	self->samplerate = (psy_dsp_big_hz_t)44100;
 	self->tune = 0;
 	self->finetune = 0;
 	self->stereo = TRUE;

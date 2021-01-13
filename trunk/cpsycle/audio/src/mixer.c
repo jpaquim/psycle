@@ -1852,16 +1852,16 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 
 	size = (sizeof(self->solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +
 		2 * sizeof(uint32_t));
-	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + self->sends.count * sizeof(float)) * self->inputs.count;
-	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * self->returns.count;
-	size += (2 * sizeof(float) + sizeof(uint32_t)) * self->sends.count;
+	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(float)) * (uint32_t)self->inputs.count;
+	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->returns.count;
+	size += (2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->sends.count;
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &self->solocolumn, sizeof(self->solocolumn));
 	psyfile_write(songfile->file, &self->master.volume, sizeof(float));
 	psyfile_write(songfile->file, &self->master.gain, sizeof(float));
 	psyfile_write(songfile->file, &self->master.drymix, sizeof(float));
-	numins = numinputcolumns(self);
-	numrets = numreturncolumns(self);;
+	numins = (uint32_t)numinputcolumns(self);
+	numrets = (uint32_t)numreturncolumns(self);
 	psyfile_write(songfile->file, &numins, sizeof(int32_t));
 	psyfile_write(songfile->file, &numrets, sizeof(int32_t));
 	inputchannel_init(&emptyinput, 0, self, 0);
@@ -1900,16 +1900,19 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		//wMacIdx = (wireRet.Enabled()) ? wireRet.GetSrcMachine()._macIndex : -1;
 		//volume = wireRet.GetVolume();
 		volMultiplier = 1.0f; // wireRet.GetVolMultiplier();
-		psyfile_write(songfile->file, &channel->fxslot, sizeof(int32_t));	// Incoming connections psy_audio_Machine number
-		psyfile_write(songfile->file, &channel->volume, sizeof(float));	// Incoming connections psy_audio_Machine vol
-		psyfile_write(songfile->file, &volMultiplier, sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		// Incoming connections psy_audio_Machine number
+		psyfile_write_int32(songfile->file, (int32_t)channel->fxslot);
+		// Incoming connections psy_audio_Machine vol
+		psyfile_write_float(songfile->file, channel->volume);
+		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		psyfile_write_float(songfile->file, volMultiplier);
 		//Sending machines and values
 		if (psy_table_exists(&channel->sendsto, i)) {
 			psy_audio_ReturnChannel* sendto;
 
 			sendto = psy_audio_mixer_Return(self, i);
 			if (sendto) {
-				wMacIdx = sendto->fxslot;
+				wMacIdx = (uint32_t)sendto->fxslot;
 				volume = sendto->volume;
 			} else {
 				wMacIdx = -1;
@@ -2030,7 +2033,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 		{
 			//Do not create the hidden wire from mixer send to the send machine.
 			int outWire = psy_audio_legacywires_findlegacyoutput(
-				songfile->legacywires, wire->_inputMachine, slot);
+				songfile->legacywires, wire->_inputMachine, (int)slot);
 			if (outWire != -1) {	
 				psy_audio_InputChannel* channel;
 

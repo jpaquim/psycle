@@ -98,8 +98,8 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 		self->stats.channelmap |= (1 << (channel));
 	}
 	// map channel -> generator
-	busmachine = psy_audio_midiinput_genmap(self, channel);
-	inst = psy_audio_midiinput_instmap(self, channel);
+	busmachine = (int)psy_audio_midiinput_genmap(self, channel);
+	inst = (int)psy_audio_midiinput_instmap(self, channel);
 	cmd = 0;
 	parameter = 0;
 	orignote = psy_audio_NOTECOMMANDS_EMPTY;
@@ -226,7 +226,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 
 						psy_audio_machine_parameter_range(machine, param, &minval, &maxval);
 						value = minval + (intptr_t)(data2 * (maxval - minval) / 127.f + 0.5);
-						cmd = value / 256;
+						cmd = (int)value / 256;
 						parameter = value % 256;
 					}									
 				} else {

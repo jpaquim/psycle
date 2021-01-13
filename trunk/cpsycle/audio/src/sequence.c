@@ -966,7 +966,7 @@ void psy_audio_sequencepaste_copy(psy_audio_SequencePaste* self,
 		psy_audio_Order* order;
 
 		order = (psy_audio_Order*)psy_list_entry(p);
-		if (psy_audio_orderindex_valid(order)) {
+		if (psy_audio_orderindex_valid(&order->index)) {
 			order->index.order -= minindex.order;
 			order->index.track -= minindex.track;
 		}
@@ -976,7 +976,7 @@ void psy_audio_sequencepaste_copy(psy_audio_SequencePaste* self,
 
 // Sequence
 void psy_audio_sequence_insert(psy_audio_Sequence* self,
-	psy_audio_OrderIndex index, uintptr_t patternslot)
+	psy_audio_OrderIndex index, uintptr_t patidx)
 {
 	psy_audio_SequenceTrack* track;
 
@@ -991,14 +991,14 @@ void psy_audio_sequence_insert(psy_audio_Sequence* self,
 		if (!p) {
 			p = psy_list_last(track->entries);
 		}
-		entry = psy_audio_sequenceentry_allocinit(patternslot,
+		entry = psy_audio_sequenceentry_allocinit(patidx,
 			(psy_dsp_big_beat_t)0.0);
 		psy_list_insert(&track->entries, p, entry);
 		psy_audio_sequence_reposition_track(self, track);
 		if (self->patterns) {
 			psy_audio_Pattern* pattern;
 
-			pattern = psy_audio_patterns_at(self->patterns, patternslot);
+			pattern = psy_audio_patterns_at(self->patterns, patidx);
 			if (pattern) {
 				psy_signal_connect(&pattern->signal_lengthchanged,
 					self, sequence_onpatternlengthchanged);

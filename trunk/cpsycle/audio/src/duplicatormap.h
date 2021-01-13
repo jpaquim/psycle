@@ -31,7 +31,7 @@ void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap*,
 	uintptr_t numoutputs, uintptr_t maxtracks);
 void psy_audio_duplicatormap_dispose(psy_audio_DuplicatorMap*);
 void psy_audio_duplicatormap_clear(psy_audio_DuplicatorMap*);
-int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap*,
+uintptr_t psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap*,
 	uintptr_t patternchannel, psy_audio_DuplicatorOutput*);
 void psy_audio_duplicatormap_release(psy_audio_DuplicatorMap*,
 	uintptr_t patternchannel, uintptr_t duplicatorchannel,

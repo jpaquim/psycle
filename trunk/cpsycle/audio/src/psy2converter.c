@@ -56,7 +56,7 @@ static ConverterType* convertertype_allocinit(int type, const char* name)
 
 static void pluginnames_insert(PluginNames*, int type, const char* name, const char* convname);
 static void readplugin(InternalMachinesConvert*, psy_audio_Machine* plugin, psy_audio_SongFile* songfile, int* index, int type, const char* name);
-static void retweak_parameter(psy_audio_Song*, double samplerate, int type, const char* name, int* parameter, int* integral_value);
+static void retweak_parameter(psy_audio_Song*, psy_dsp_big_hz_t samplerate, int type, const char* name, int* parameter, int* integral_value);
 static void retweak_parameters(psy_audio_SongFile*, psy_audio_Machine* machine, int type, const char* name,
 	int* parameters, int parameter_count, int parameter_offset);
 
@@ -514,7 +514,7 @@ void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine
 }
 
 void retweak_parameter(psy_audio_Song* song,
-	double samplerate, 
+	psy_dsp_big_hz_t samplerate,
 	int type, const char* name, int* parameter,
 	int* integral_value)
 {

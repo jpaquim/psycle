@@ -65,7 +65,7 @@ static void driver_configure(FileOutDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static unsigned int samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
 static void PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
@@ -178,15 +178,16 @@ void driver_configure(FileOutDriver* self, psy_Property* config)
 	psy_audiodriversettings_setvalidbitdepth(&self->settings,
 		psy_property_at_int(self->configuration, "bitdepth", 16));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
-		psy_property_at_int(self->configuration, "samplerate", 44100));
+		(psy_dsp_big_hz_t)psy_property_at_int(self->configuration,
+			"samplerate", (intptr_t)44100));
 	psy_audiodriversettings_setchannelmode(&self->settings,
 		psy_property_at_int(self->configuration, "channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
-unsigned int samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t samplerate(psy_AudioDriver* self)
 {
-	return 44100;
+	return (psy_dsp_big_hz_t)44100.0;
 }
 
 void init_properties(FileOutDriver* self)
@@ -209,7 +210,7 @@ void init_properties(FileOutDriver* self)
 	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
 	psy_property_append_int(self->configuration, "samplerate",
-		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
+		(intptr_t)psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
 	psy_property_append_choice(self->configuration, "channels",
 		(int)psy_audiodriversettings_channelmode(&self->settings));
 }
@@ -217,7 +218,7 @@ void init_properties(FileOutDriver* self)
 void PollerThread(void* driver)
 {	
 	int n;	
-	uintptr_t blocksize = 4096;
+	uint32_t blocksize = 4096;
 	int hostisplaying = 1;
 
 	FileOutDriver* self = (FileOutDriver*) driver;
@@ -274,9 +275,9 @@ void fileoutdriver_createfile(FileOutDriver* self)
 	psyfile_write(file, &temp32, sizeof(temp32));
 	// Write Format Chunk
 	psy_audio_waveformatchunk_config(&self->format,
-		psy_audiodriversettings_samplespersec(&self->settings),
-		psy_audiodriversettings_validbitdepth(&self->settings),
-		psy_audiodriversettings_numchannels(&self->settings),
+		(uint32_t)psy_audiodriversettings_samplespersec(&self->settings),
+		(uint16_t)psy_audiodriversettings_validbitdepth(&self->settings),
+		(uint16_t)psy_audiodriversettings_numchannels(&self->settings),
 		FALSE /* isfloat */);
 	psyfile_write(file, "WAVEfmt ", 8);
 	temp32 = 0;
@@ -359,7 +360,7 @@ void fileoutdriver_writebuffer(FileOutDriver* self, float* pBuf, uintptr_t amoun
 		}
 		break;
 	}
-	self->filecontext.numsamples += amount;
+	self->filecontext.numsamples += (uint32_t)amount;
 }
 
 void fileoutdriver_closefile(FileOutDriver* self)

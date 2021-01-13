@@ -152,7 +152,8 @@ int luawaveosc_work(lua_State* L)
 		//	lua_pushvalue(L, 1);
 		//	master.reset(new LuaSingleWorker(L));
 		//}
-		psy_audio_waveosc_work(self, psy_audio_array_len(buffer), psy_audio_array_data(buffer));
+		psy_audio_waveosc_work(self, psy_audio_array_len(buffer),
+			psy_audio_array_data(buffer));
 		lua_pushinteger(L, psy_audio_array_len(buffer)); // return processed samples
 		//psy_audio_waveosc_setfm(self, NULL);
 		//psy_audio_waveosc_setam(self, NULL);

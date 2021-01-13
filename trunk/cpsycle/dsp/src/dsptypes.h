@@ -19,12 +19,17 @@ extern "C" {
 typedef float psy_dsp_amp_t;
 typedef float psy_dsp_beat_t;
 typedef float psy_dsp_seconds_t;
+typedef float psy_dsp_hz_t;
 typedef float psy_dsp_percent_t;
 
 typedef double psy_dsp_big_amp_t;
 typedef double psy_dsp_big_beat_t;
 typedef double psy_dsp_big_seconds_t;
+typedef double psy_dsp_big_hz_t;
 typedef double psy_dsp_big_percent_t;
+
+typedef uintptr_t psy_dsp_frame_t;
+typedef double psy_dsp_nanoseconds_t;
 
 typedef enum {
 	PSY_DSP_AMP_RANGE_VST,
