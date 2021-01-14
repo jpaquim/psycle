@@ -203,7 +203,7 @@ int psyfile_expect(PsyFile* self,
 	return 1;	
 }
 
-uint32_t psyfile_seek(PsyFile* self,
+int32_t psyfile_seek(PsyFile* self,
 				   uint32_t offset)
 {
 	if (fseek(self->_file, (int32_t)offset, SEEK_SET) != 0)
@@ -214,10 +214,13 @@ uint32_t psyfile_seek(PsyFile* self,
 	
 }
 
-uint32_t psyfile_skip(PsyFile* self,
+int32_t psyfile_skip(PsyFile* self,
 				   uint32_t numBytes)
 {
-	if (fseek(self->_file, (int32_t)numBytes, SEEK_CUR) != 0) return -1;
+	if (fseek(self->_file, (int32_t)numBytes, SEEK_CUR) != 0)
+	{
+		return -1;
+	}
 	return ftell(self->_file);
 }
 

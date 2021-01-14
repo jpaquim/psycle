@@ -6,6 +6,7 @@
 #include "xmsongloader.h"
 // local
 #include "constants.h"
+#include "psyconvert.h"
 #include "instrument.h"
 #include "instruments.h"
 #include "machinefactory.h"
@@ -154,24 +155,39 @@ static int calclpbfromspeed(int trackerspeed, int* outextraticks)
 // prototypes
 static void xmsongloader_reset(XMSongLoader*);
 static bool xmsongloader_isvalid(XMSongLoader*);
-static bool xmsongloader_loadinstruments(XMSongLoader*, uintptr_t instr_start);
-static uintptr_t xmsongloader_loadinstrument(XMSongLoader*, uintptr_t slot,
-	uintptr_t instr_start);
+static bool xmsongloader_makexmsampler(XMSongLoader*);
+static int xmsongloader_readtitle(XMSongLoader*);
+static void xmsongloader_setsongcomments(XMSongLoader*);
+static int xmsongloader_loadinstruments(XMSongLoader*, uintptr_t instr_start);
+static int xmsongloader_loadinstrument(XMSongLoader*, uintptr_t slot,
+	uintptr_t instr_start, uintptr_t* rv_nextstart);
+static int xmsongloader_loadsampledata(XMSongLoader*, psy_audio_Sample*,
+	int32_t sampleidx, uintptr_t start, uintptr_t* rv_nextstart);
 static void xmsongloader_setenvelopes(psy_audio_Instrument*,
 	const XMSAMPLEHEADER*);
-static uintptr_t xmsongloader_loadpatterns(XMSongLoader*);
+static int xmsongloader_loadsampleheader(XMSongLoader*, psy_audio_Sample*,
+	uintptr_t start, int32_t sampleidx, uintptr_t* rv_nextstart);
+static int xmsongloader_loadpatterns(XMSongLoader*,
+	uintptr_t* rv_nextstart);
+static void xmsongloader_setsamplerslidemode(XMSongLoader*);
+static void xmsongloader_setsamplerpanningmode(XMSongLoader*);
 static void xmsongloader_makesequence(XMSongLoader*, struct XMFILEHEADER*);
-static uintptr_t xmsongloader_loadsinglepattern(XMSongLoader*, uintptr_t start,
-	int patidx, int tracks);
+static int xmsongloader_loadsinglepattern(XMSongLoader*, uintptr_t start,
+	int patidx, int tracks, uintptr_t* rv_nextstart);
 static bool xmsongloader_writepatternentry(XMSongLoader*,
-	psy_audio_PatternNode**, psy_audio_Pattern* pattern,
-	int row, int col, psy_audio_PatternEvent* e);
+	psy_audio_LegacyPattern, int row, int col, psy_audio_LegacyPatternEntry*);
 // implementation
 void xmsongloader_init(XMSongLoader* self, psy_audio_SongFile* songfile)
 {
 	assert(self);
 
-	self->songfile = songfile;	
+	assert(songfile);
+	assert(songfile->file);
+	assert(songfile->song);
+
+	self->songfile = songfile;
+	self->fp = songfile->file;
+	self->song = songfile->song;
 	psy_table_init(&self->xmtovirtual);
 	xmsongloader_reset(self);
 }
@@ -185,6 +201,12 @@ void xmsongloader_dispose(XMSongLoader* self)
 
 void xmsongloader_reset(XMSongLoader* self)
 {
+	assert(self->songfile);
+	assert(self->songfile->file);
+	assert(self->songfile->song);
+
+	self->fp = self->songfile->file;
+	self->song = self->songfile->song;
 	memset(self->highoffset, 0, sizeof(self->highoffset));
 	memset(self->memportaup, 0, sizeof(self->memportaup));
 	memset(self->memportadown, 0, sizeof(self->memportadown));
@@ -192,170 +214,176 @@ void xmsongloader_reset(XMSongLoader* self)
 	memset(self->memportapos, 0, sizeof(self->memportapos));
 	memset(self->smplen, 0, sizeof(self->smplen));
 	memset(self->smpflags, 0, sizeof(self->smpflags));
-	psy_table_clear(&self->xmtovirtual);
+	psy_table_clear(&self->xmtovirtual);	
 }
 
-bool xmsongloader_load(XMSongLoader* self)
-{
-	PsyFile* fp;
-	psy_audio_SongProperties songproperties;
-	char* comments;
-	char* songname;
+int xmsongloader_load(XMSongLoader* self)
+{	
+	int status;
 	uintptr_t instr_start;
 	
-	// check validity
-	if(!xmsongloader_isvalid(self)){
-		return FALSE;
+	status = PSY_OK;	
+	if(!xmsongloader_isvalid(self)) {
+		return PSY_ERRFILE;
 	}
 	xmsongloader_reset(self);
-	// build sampler
+	if (!xmsongloader_makexmsampler(self)) {
+		return PSY_ERRFILE;
+	}
+	if (status = xmsongloader_readtitle(self)) {
+		return status;
+	}
+	xmsongloader_setsongcomments(self);		
+	if (status = xmsongloader_loadpatterns(self, &instr_start)) {
+		return status;
+	}
+	if (status = xmsongloader_loadinstruments(self, instr_start)) {
+		return status;
+	}
+	return status;
+}
+
+bool xmsongloader_isvalid(XMSongLoader* self)
+{
+	char id[18];
+
+	// get header
+	memset(id, 0, 18);
+	if (psyfile_seek(self->fp, 0) == -1) {
+		return FALSE;
+	}
+	if (!psyfile_read(self->fp, id, 17)) {
+		return FALSE;
+	}
+	// check header
+	if (strncmp(id, XM_HEADER, sizeof(XM_HEADER) - 1) != 0) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool xmsongloader_makexmsampler(XMSongLoader* self)
+{
 	self->sampler = psy_audio_machinefactory_makemachine(
 		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
-		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);	
-		psy_audio_machines_insert(&self->songfile->song->machines, 0,
-			self->sampler);
-		psy_audio_machines_connect(&self->songfile->song->machines,
-			psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
-		psy_audio_connections_setwirevolume(&self->songfile->song->machines.connections,
-			psy_audio_wire_make(0, psy_audio_MASTER_INDEX), 0.355f); //-9dB
-	}	
+		psy_audio_Wire wire;
+
+		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+		psy_audio_machines_insert(&self->song->machines, 0, self->sampler);
+		wire = psy_audio_wire_make(0, psy_audio_MASTER_INDEX);
+		psy_audio_machines_connect(&self->song->machines, wire);
+		psy_audio_connections_setwirevolume(&self->song->machines.connections,
+			wire, 0.355f); //-9dB
+	}
+	return self->sampler != NULL;
+}
+
+int xmsongloader_readtitle(XMSongLoader* self)
+{
+	char songname[21];
+
 	// get song name
-	fp = self->songfile->file;
-	songname = AllocReadStrStart(fp, 20,17);
+	memset(songname, 0, 21);
+	if (psyfile_seek(self->fp, 17) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, songname, 20)) {
+		return PSY_ERRFILE;
+	}
+	psy_audio_song_settitle(self->song, songname);
+	return PSY_OK;
+}
 
-	if (songname == NULL)
-		return FALSE;
-
+void xmsongloader_setsongcomments(XMSongLoader* self)
+{
+	char_dyn_t* comments;
+	
 	comments = strdup("Imported from FastTracker II Module: ");
 	comments = psy_strcat_realloc(comments, self->songfile->path);
-	psy_audio_songproperties_init(&songproperties, songname, "", comments);
+	psy_audio_song_setcomments(self->song, comments);
 	free(comments);
-	comments = NULL;
-	psy_audio_song_setproperties(self->songfile->song, &songproperties);
-	free(songname);
-	songname = NULL;
-				
-	instr_start = xmsongloader_loadpatterns(self);
-	xmsongloader_loadinstruments(self, instr_start);
-	return TRUE;
+	comments = NULL;	
 }
 
-bool xmsongloader_isvalid(XMSongLoader* self)
-{			
-	PsyFile* fp;
-	bool bIsValid = FALSE;
-	char * pID;
-	char * pTrackerName;
-	char * pTrackerVer;
-
-	fp = self->songfile->file;
-	// get header
-	pID = AllocReadStrStart(fp, 17, 0);
-
-	// tracker name	
-	pTrackerName = AllocReadStrStart(fp, 20,38);
-		
-	// get tracker version
-	pTrackerVer = AllocReadStrStart(fp, 2,58);	
-
-	// process
-	// TRACE(_T("Header: %s\n"),pID);
-	// TRACE(_T("Tracker: %s\n"),pTrackerName);
-	// TRACE(_T("Fileformat Version %i.%i\n"),int(pTrackerVer[1]),int(pTrackerVer[0]));
-
-	// check header
-	bIsValid = (!strncmp(pID,XM_HEADER,sizeof(XM_HEADER)-1));
-		
-
-	// cleanup
-	free(pID);
-	free(pTrackerName);
-	free(pTrackerVer);
-
-	return bIsValid;
-}
-
-uintptr_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>& xmtovirtual)
-{
-	PsyFile* fp;
+int xmsongloader_loadpatterns(XMSongLoader* self, uintptr_t* rv_nextstart)
+{	
 	int xmidx;
 	int i;
 	int extraticks;
-	uintptr_t nextPatStart;
+	uintptr_t nextpatstart;
 	int j;
 
-	fp = self->songfile->file;
 	// get data
-	psyfile_seek(fp, 60);
-	psyfile_read(fp, &self->header,sizeof(XMFILEHEADER));
-
-	{ // IsAmigaSlides
-		psy_audio_MachineParam* param;
-
-		param = psy_audio_machine_tweakparameter(self->sampler, 24);
-		if (param) {
-			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
-				(self->header.flags & 0x01) ? FALSE : TRUE);
-		}
+	if (psyfile_seek(self->fp, 60) == -1) {
+		return PSY_ERRFILE;
 	}
-	{ // XM_SAMPLER_PanningMode
-		psy_audio_MachineParam* param;
-
-		param = psy_audio_machine_tweakparameter(self->sampler, 40);
-		if (param) {
-			// XM_SAMPLER_PanningMode::TwoWay
-			psy_audio_machine_parameter_tweak_scaled(self->sampler, param, 1);
-		}
+	if (!psyfile_read(self->fp, &self->header, sizeof(XMFILEHEADER))) {
+		return PSY_ERRFILE;
 	}	
-	self->songfile->song->properties.tracks = psy_max((int)self->header.channels, 4);
-	//song.SONGTRACKS = std::max((int)header.channels, 4);
-	self->m_iInstrCnt = self->header.instruments;
-	self->songfile->song->properties.bpm = self->header.tempo;
-	//song.BeatsPerMin(header.tempo);
-	self->songfile->song->properties.tpb = 24;
-	//song.TicksPerBeat(24);
-	extraticks=0;
-	self->songfile->song->properties.lpb = calclpbfromspeed(
-		self->header.speed, &extraticks);
+	xmsongloader_setsamplerslidemode(self);	
+	xmsongloader_setsamplerpanningmode(self);
+	psy_audio_song_setnumsongtracks(self->song,
+		psy_max(self->header.channels, 4));	
+	self->instrcount = self->header.instruments;
+	psy_audio_song_setbpm(self->song, self->header.tempo);
+	psy_audio_song_settpb(self->song, 24);
+	extraticks = 0;
+	psy_audio_song_setlpb(self->song,
+		calclpbfromspeed(self->header.speed, &extraticks));
 	if (extraticks != 0) {
-		self->songfile->song->properties.extraticksperbeat = extraticks;
-	}
-	
-	// for(int i = 0;i < MAX_SONG_POSITIONS && i < header.norder;i++)
-	// {
-	//	if ( header.order[i] < MAX_PATTERNS ){
-	//		song.playOrder[i]=header.order[i];
-	//	} else { 
-	//		song.playOrder[i]=0;
-	//	}
-	//}
-	//
-	//if ( header.norder > MAX_SONG_POSITIONS ){
-		//song.playLength=MAX_SONG_POSITIONS;
-	//} else {
-		//song.playLength=header.norder;
-	//}
-
-	self->maxextracolumn = (int16_t)self->songfile->song->properties.tracks; // song.SONGTRACKS;
-
-	// Since in XM we load first the patterns, we initialize the map linearly. Later, on the instruments,
-	// we will only create the virtual instruments of existing sampled instruments
+		psy_audio_song_setextraticksperbeat(self->song, extraticks);		
+	}		
+	self->maxextracolumn = (int16_t)psy_audio_song_numsongtracks(self->song);
+	// Since in XM we load first the patterns, we initialize the map linearly.
+	// Later, on the instruments, we will only create the virtual instruments
+	// of existing sampled instruments
 	xmidx = 1;
-	for (i = MAX_MACHINES; i < MAX_VIRTUALINSTS && xmidx <= self->header.instruments; i++, xmidx++) {
-		psy_table_insert(&self->xmtovirtual, xmidx, (void*)(uintptr_t)i);		
+	for (i = MAX_MACHINES; i < MAX_VIRTUALINSTS &&
+			xmidx <= self->header.instruments; ++i, ++xmidx) {
+		psy_table_insert(&self->xmtovirtual, xmidx, (void*)(uintptr_t)i);
 	}
-
 	// get pattern data
-	nextPatStart = self->header.size + 60;
-	for(j = 0;j < self->header.patterns && nextPatStart > 0;j++){
-		nextPatStart = xmsongloader_loadsinglepattern(self, nextPatStart, j, self->header.channels); // , xmtovirtual);
+	nextpatstart = ((uintptr_t)self->header.size + 60);
+	for (j = 0; j < self->header.patterns && nextpatstart > 0; ++j) {
+		int status;
+
+		if (status = xmsongloader_loadsinglepattern(self, nextpatstart, j,
+				self->header.channels, &nextpatstart)) {
+			return status;
+		}
 	}
-	self->songfile->song->properties.tracks = self->maxextracolumn;
-	//song.SONGTRACKS = maxextracolumn;
+	psy_audio_song_setnumsongtracks(self->song, self->maxextracolumn);	
 	xmsongloader_makesequence(self, &self->header);
-	return nextPatStart;
+	*rv_nextstart = nextpatstart;
+	return PSY_OK;
+}
+
+void xmsongloader_setsamplerslidemode(XMSongLoader* self)
+{
+	psy_audio_MachineParam* param;
+
+	param = psy_audio_machine_tweakparameter(self->sampler,
+		XM_SAMPLER_TWK_AMIGASLIDES);
+	if (param) {
+		psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
+			(self->header.flags & 0x01)
+			? FALSE
+			: TRUE);
+	}
+}
+
+void xmsongloader_setsamplerpanningmode(XMSongLoader* self)
+{
+	psy_audio_MachineParam* param;
+
+	param = psy_audio_machine_tweakparameter(self->sampler,
+		XM_SAMPLER_TWK_PANNINGMODE);
+	if (param) {
+		// XM_SAMPLER_PanningMode::TwoWay
+		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, 1);
+	}
 }
 
 void xmsongloader_makesequence(XMSongLoader* self, struct XMFILEHEADER* xmheader)
@@ -371,49 +399,62 @@ void xmsongloader_makesequence(XMSongLoader* self, struct XMFILEHEADER* xmheader
 	}
 }
 
-// return address of next pattern, 0 for invalid
-uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
-	int patidx, int tracks)
+// rv_nextstart: returns address of next pattern, 0 for invalid
+int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
+	int patidx, int tracks, uintptr_t* rv_nextstart)
 {
-	PsyFile* fp;
-	psy_audio_Song* song;
 	int32_t headerlen;
 	int16_t numrows;
 	int16_t packedsize;
 	uint16_t lastmach[64];
+	int temp;
+	psy_audio_LegacyPattern ppattern;
 	psy_audio_Pattern* pattern;
-	psy_audio_PatternEvent e;
+	psy_audio_LegacyPatternEntry e;
+	
+	if (start >= 0) {
+		if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
+			return PSY_ERRFILE;
+		}
+	}
+	if (!psyfile_read(self->fp, &headerlen, sizeof(int32_t))) {
+		return PSY_ERRFILE;
+	}
+	//char iPackingType = psyfile_read_int8();
+	if (psyfile_skip(self->fp, 1) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &numrows, sizeof(int16_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &packedsize, sizeof(int16_t))) {
+		return PSY_ERRFILE;
+	}	
+	memset(lastmach, 255, sizeof(char) * 64);
 
-	fp = self->songfile->file;
-	song = self->songfile->song;
-	headerlen = ReadInt4Start(fp, (int32_t)start);
-	psyfile_skip(fp, 1); //char iPackingType = psyfile_read_int8();
-	numrows = psyfile_read_int16(fp);
-	packedsize = psyfile_read_int16(fp);
-	memset(lastmach, 255, sizeof(uint16_t)*64);
-
+	// create new psycle version pattern
 	pattern = psy_audio_pattern_allocinit();
 	psy_audio_pattern_setname(pattern, "unnamed");
-	psy_audio_patterns_insert(&song->patterns, patidx, pattern);
+	psy_audio_patterns_insert(&self->song->patterns, patidx, pattern);
 	psy_audio_pattern_setlength(pattern,
-		numrows * 1.0 / self->songfile->song->properties.lpb);
+		numrows * 1.0 / psy_audio_song_lpb(self->song));
+	// create old mfc-psycle pattern for read
+	ppattern = psy_audio_allocoldpattern(pattern,
+		psy_audio_song_lpb(self->song), &temp);
+	numrows = (int16_t)temp;
 
 	if (packedsize == 0) {
 		//Pattern is emtpy.
-	} else {
-		psy_audio_PatternNode* node;
+	} else {		
 		int col;
 		int row;
+		psy_audio_PatternNode* node;
 
-		node = NULL;
 		// get next values
 		for (row = 0; row < numrows; ++row) {
 			self->extracolumn = tracks;
-			for(col = 0; col < tracks; ++col) {	
-				// reset
-				// during event translation 255 is used for instruments until
-				// writepatternentry will set the empty(255) instruments to
-				// psy_audio_NOTECOMMANDS_INST_EMPTY
+			for (col = 0; col < tracks; ++col) {
+				// reset				
 				uint8_t note;
 				uint8_t instr;
 				uint8_t vol;
@@ -421,842 +462,1007 @@ uintptr_t xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 				uint8_t param;
 				uint8_t volume;
 				int exchwave[3] = {
-					psy_audio_WAVEFORMS_SINUS,		
+					psy_audio_WAVEFORMS_SINUS,
 					psy_audio_WAVEFORMS_SAWDOWN,
 					psy_audio_WAVEFORMS_SQUARE
 				};
 
-				note = 255;
+				note = PSY2_NOTECOMMANDS_EMPTY;
 				instr = 255;
 				vol = 0;
 				type = 0;
 				param = 0;
 				volume = 0;
 
-				psy_audio_patternevent_init(&e);
 				// read note
-				note = psyfile_read_int8(fp);
+				if (!psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+					free(ppattern);
+					return PSY_ERRFILE;
+				}				
 
 				// is compression bit set?
-				if(note & 0x80)
+				if (note & 0x80)
 				{
-					unsigned char bReadNote = note&0x01;
-					unsigned char bReadInstr = note&0x02;
-					unsigned char bReadVol = note&0x04;
-					unsigned char bReadType = note&0x08;
-					unsigned char bReadParam  = note&0x10;
+					unsigned char bReadNote;
+					unsigned char bReadInstr;
+					unsigned char bReadVol;
+					unsigned char bReadType;
+					unsigned char bReadParam;
+
+					bReadNote = note & 0x01;
+					bReadInstr = note & 0x02;
+					bReadVol = note & 0x04;
+					bReadType = note & 0x08;
+					bReadParam = note & 0x10;
 
 					note = 0;
-					if(bReadNote) note = psyfile_read_int8(fp); 
-					if(bReadInstr) instr = psyfile_read_int8(fp);
-					if(bReadVol) vol = psyfile_read_int8(fp);
-					if(bReadType) type = psyfile_read_int8(fp);
-					if(bReadParam) param = psyfile_read_int8(fp);
-				}
-				else
+					if (bReadNote) {						
+						if (!psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+							free(ppattern);
+							return PSY_ERRFILE;
+						}
+					}
+					if (bReadInstr) {
+						if (!psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
+							free(ppattern);
+							return PSY_ERRFILE;
+						}						
+					}
+					if (bReadVol) {
+						if (!psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
+							free(ppattern);
+							return PSY_ERRFILE;
+						}
+					}
+					if (bReadType) {
+						if (!psyfile_read(self->fp, &type, sizeof(uint8_t))) {
+							free(ppattern);
+							return PSY_ERRFILE;
+						}
+					}
+					if (bReadParam) {
+						if (!psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+							free(ppattern);
+							return PSY_ERRFILE;
+						}
+					}
+				} else
 				{
 					// read all values
-					instr = psyfile_read_int8(fp);
-					vol = psyfile_read_int8(fp);
-					type = psyfile_read_int8(fp);
-					param = psyfile_read_int8(fp);
-				}								
+					if (!psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
+						free(ppattern);
+						return PSY_ERRFILE;
+					}
+					if (!psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
+						free(ppattern);
+						return PSY_ERRFILE;
+					}
+					if (!psyfile_read(self->fp, &type, sizeof(uint8_t))) {
+						free(ppattern);
+						return PSY_ERRFILE;
+					}
+					if (!psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+						free(ppattern);
+						return PSY_ERRFILE;
+					}					
+				}
 
 				volume = 255;
 
 				// volume/command
-				if(vol >= 0x10 && vol <= 0x50)
+				if (vol >= 0x10 && vol <= 0x50)
 				{
-					volume=(vol == 0x50)?0x3F:(vol-0x10);
-				}
-				else if(vol >= 0x60){
-					switch(vol&0xF0)
-					{						
-					case XMV_VOLUMESLIDEDOWN:						
-						volume = XM_SAMPLER_CMD_VOL_VOLSLIDEDOWN |(vol&0x0F);
+					volume = (vol == 0x50) ? 0x3F : (vol - 0x10);
+				} else if (vol >= 0x60) {
+					switch (vol & 0xF0)
+					{
+					case XMV_VOLUMESLIDEDOWN:
+						volume = XM_SAMPLER_CMD_VOL_VOLSLIDEDOWN | (vol & 0x0F);
 						break;
 					case XMV_VOLUMESLIDEUP:
-						volume = XM_SAMPLER_CMD_VOL_VOLSLIDEUP|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_VOLSLIDEUP | (vol & 0x0F);
 						break;
 					case XMV_FINEVOLUMESLIDEDOWN:
-						volume = XM_SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN | (vol & 0x0F);
 						break;
 					case XMV_FINEVOLUMESLIDEUP:
-						volume = XM_SAMPLER_CMD_VOL_FINEVOLSLIDEUP|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_FINEVOLSLIDEUP | (vol & 0x0F);
 						break;
 					case XMV_PANNING:
-						volume = XM_SAMPLER_CMD_VOL_PANNING|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_PANNING | (vol & 0x0F);
 						break;
 					case XMV_PANNINGSLIDELEFT:
 						// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-						volume = XM_SAMPLER_CMD_VOL_PANSLIDELEFT|(((vol&0x0F) < 4)?1:(vol&0x0F)>>2);
+						volume = XM_SAMPLER_CMD_VOL_PANSLIDELEFT | (((vol & 0x0F) < 4) ? 1 : (vol & 0x0F) >> 2);
 						break;
 					case XMV_PANNINGSLIDERIGHT:
 						// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-						volume = XM_SAMPLER_CMD_VOL_PANSLIDERIGHT|(((vol&0x0F) < 4)?1:(vol&0x0F)>>2);
+						volume = XM_SAMPLER_CMD_VOL_PANSLIDERIGHT | (((vol & 0x0F) < 4) ? 1 : (vol & 0x0F) >> 2);
 						break;
-// Ignoring this command for now.
-//						case XMVOL_CMD_XMV_VIBRATOSPEED:
-//							volume = XM_SAMPLER_CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
-//							break;
+						// Ignoring this command for now.
+						//					case XMVOL_CMD_XMV_VIBRATOSPEED:
+						//						volume = XM_SAMPLER_CMD_VOL_VIBRATO_SPEED|(vol&0x0F);
+						//						break;
 					case XMV_VIBRATO:
-						volume = XM_SAMPLER_CMD_VOL_VIBRATO|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_VIBRATO | (vol & 0x0F);
 						break;
 					case XMV_PORTA2NOTE:
-						volume = XM_SAMPLER_CMD_VOL_TONEPORTAMENTO|(vol&0x0F);
+						volume = XM_SAMPLER_CMD_VOL_TONEPORTAMENTO | (vol & 0x0F);
 						break;
 					default:
 						break;
 					}
 				}
-				e.parameter = param;				
-				switch(type){
-					case XMCMD_ARPEGGIO:
-						if(param != 0){
-							e.cmd = XM_SAMPLER_CMD_ARPEGGIO;
-						} else {
-							e.cmd = XM_SAMPLER_CMD_NONE;
-						}
-						break;
-					case XMCMD_PORTAUP:
-						e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
-						if ( e.parameter == 0) {
-							if (self->memportapos[col] != 1 )
-							{
-								e.parameter = self->memportaup[col];
-							}
-						}
-						else {
-							if ( e.parameter > 0xDF ) { e.parameter = 0xDF; }
-							self->memportaup[col] = e.parameter;
-						}
-						self->memportapos[col] = 1;
-						break;
-					case XMCMD_PORTADOWN:
-						e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
-						if ( e.parameter == 0) {
-							if ( self->memportapos[col] != 2 )
-							{
-								e.parameter = self->memportadown[col];
-							}
-						}
-						else {
-							if ( e.parameter > 0xDF ) { e.parameter = 0xDF; }
-							self->memportadown[col] = e.parameter;
-						}
-						self->memportapos[col] = 2;
-						break;
-					case XMCMD_PORTA2NOTE:
-						e.cmd = XM_SAMPLER_CMD_PORTA2NOTE;
-						if ( e.parameter == 0) {
-							if (self->memportapos[col] != 3 )
-							{
-								e.parameter = self->memportanote[col];
-							}
-						}
-						else {
-							self->memportanote[col] = e.parameter;
-						}
-						self->memportapos[col] = 3;
-						break;
-					case XMCMD_VIBRATO:
-						e.cmd = XM_SAMPLER_CMD_VIBRATO;
-						break;
-					case XMCMD_TONEPORTAVOL:
-						e.cmd = XM_SAMPLER_CMD_TONEPORTAVOL;
-						break;
-					case XMCMD_VIBRATOVOL:
-						e.cmd = XM_SAMPLER_CMD_VIBRATOVOL;
-						break;
-					case XMCMD_TREMOLO:
-						e.cmd = XM_SAMPLER_CMD_TREMOLO;
-						break;
-					case XMCMD_PANNING:
-						e.cmd = XM_SAMPLER_CMD_PANNING;
-						break;
-					case XMCMD_OFFSET:
-						e.cmd = XM_SAMPLER_CMD_OFFSET | self->highoffset[col]; 
-						break;
-					case XMCMD_VOLUMESLIDE:
-						e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-						break;
-					case XMCMD_POSITION_JUMP:
-						e.cmd = psy_audio_PATTERNCMD_JUMP_TO_ORDER;
-						break;
-					case XMCMD_VOLUME:
-						e.cmd = XM_SAMPLER_CMD_VOLUME;
-						e.parameter = param * 2;
-						break;
-					case XMCMD_PATTERN_BREAK:
-						e.cmd = psy_audio_PATTERNCMD_BREAK_TO_LINE;
-						e.parameter = ((param&0xF0)>>4)*10 + (param&0x0F);
-						break;
-					case XMCMD_EXTENDED:
-						switch(param & 0xf0){
-						case XMCMD_E_FINE_PORTA_UP:
-							e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
-							e.parameter= 0xF0+(param&0x0F);
-							break;
-						case XMCMD_E_FINE_PORTA_DOWN:
-							e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
-							e.parameter= 0xF0+(param&0x0F);
-							break;
-						case XMCMD_E_GLISSANDO_STATUS:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter = XM_SAMPLER_CMD_E_GLISSANDO_TYPE | ((param==0)?0:1);
-							break;
-						case XMCMD_E_VIBRATO_WAVE:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter =XM_SAMPLER_CMD_E_VIBRATO_WAVE | exchwave[param & 0x3];
-							break;
-						case XMCMD_E_FINETUNE:
-							e.cmd = XM_SAMPLER_CMD_NONE;
-							e.parameter = 0;
-							break;
-						case XMCMD_E_PATTERN_LOOP:
-							e.cmd = psy_audio_PATTERNCMD_EXTENDED;
-							e.parameter = psy_audio_PATTERNCMD_PATTERN_LOOP + (param & 0xf);
-							break;
-						case XMCMD_E_TREMOLO_WAVE:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter = XM_SAMPLER_CMD_E_TREMOLO_WAVE | exchwave[param & 0x3];
-							break;
-						case XMCMD_E_MOD_RETRIG:
-							e.cmd = XM_SAMPLER_CMD_RETRIG;
-							e.parameter = param & 0xf;
-							break;
-						case XMCMD_E_FINE_VOLUME_UP:
-							e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-							e.parameter = 0x0f + ((param & 0xf)<<4);
-							break;
-						case XMCMD_E_FINE_VOLUME_DOWN:
-							e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-							e.parameter = 0xf0 + (param & 0xf);
-							break;
-						case XMCMD_E_DELAYED_NOTECUT:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter = XM_SAMPLER_CMD_E_DELAYED_NOTECUT | (param & 0xf);
-							break;
-						case XMCMD_E_NOTE_DELAY:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter = XM_SAMPLER_CMD_E_NOTE_DELAY | ( param & 0xf);
-							break;
-						case XMCMD_E_PATTERN_DELAY:
-							e.cmd = psy_audio_PATTERNCMD_EXTENDED;
-							e.parameter = psy_audio_PATTERNCMD_PATTERN_DELAY | (param & 0xf);
-							break;
-						case XMCMD_E_SET_MIDI_MACRO:
-							e.cmd = XM_SAMPLER_CMD_EXTENDED;
-							e.parameter = XMCMD_MIDI_MACRO | (param & 0x0f);
-							break;
-						default:
-							e.cmd = XM_SAMPLER_CMD_NONE;
-							break;
-						}
-						break;
-					case XMCMD_SETSPEED:
-						if ( param < 32)
+				e._parameter = param;
+				switch (type) {
+				case XMCMD_ARPEGGIO:
+					if (param != 0) {
+						e._cmd = XM_SAMPLER_CMD_ARPEGGIO;
+					} else {
+						e._cmd = XM_SAMPLER_CMD_NONE;
+					}
+					break;
+				case XMCMD_PORTAUP:
+					e._cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+					if (e._parameter == 0) {
+						if (self->memportapos[col] != 1)
 						{
-							int extraticks;
-
-							e.cmd= psy_audio_PATTERNCMD_EXTENDED;
-							extraticks=0;
-							e.parameter = calclpbfromspeed(param, &extraticks);
-							if (extraticks != 0) {
-								psy_audio_PatternEvent entry;
-
-								psy_audio_patternevent_init_all(&entry,
-									psy_audio_NOTECOMMANDS_EMPTY,
-									psy_audio_NOTECOMMANDS_EMPTY,
-									psy_audio_NOTECOMMANDS_MACH_EMPTY,
-									0,
-									psy_audio_PATTERNCMD_EXTENDED,
-									psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks);
-								xmsongloader_writepatternentry(self, &node,
-									pattern, row, self->extracolumn, &entry);
-								self->extracolumn++;
-							}
+							e._parameter = self->memportaup[col];
 						}
-						else
+					} else {
+						if (e._parameter > 0xDF) { e._parameter = 0xDF; }
+						self->memportaup[col] = e._parameter;
+					}
+					self->memportapos[col] = 1;
+					break;
+				case XMCMD_PORTADOWN:
+					e._cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+					if (e._parameter == 0) {
+						if (self->memportapos[col] != 2)
 						{
-							e.cmd = psy_audio_PATTERNCMD_SET_TEMPO;
+							e._parameter = self->memportadown[col];
 						}
-						break;
-					case XMCMD_SET_GLOBAL_VOLUME:						
-						e.cmd = XM_SAMPLER_CMD_SET_GLOBAL_VOLUME;
-						if (param >= 0x80) e.parameter = 0xFF;
-						else e.parameter = param*2;
-						break;
-					case XMCMD_GLOBAL_VOLUME_SLIDE:
-						e.cmd = XM_SAMPLER_CMD_GLOBAL_VOLUME_SLIDE;
-						//Double the parameter, since FT2's range is 0-0x40.
-						if ( (param & 0x0F) == 0 || (param & 0x0F) == 0xF){ // Slide up
-							e.parameter = (param & 0xF0)>>4;
-							e.parameter = e.parameter>7?15:e.parameter*2;
-							e.parameter<<=4;
-							e.parameter |= (param & 0x0F);
+					} else {
+						if (e._parameter > 0xDF) { e._parameter = 0xDF; }
+						self->memportadown[col] = e._parameter;
+					}
+					self->memportapos[col] = 2;
+					break;
+				case XMCMD_PORTA2NOTE:
+					e._cmd = XM_SAMPLER_CMD_PORTA2NOTE;
+					if (e._parameter == 0) {
+						if (self->memportapos[col] != 3)
+						{
+							e._parameter = self->memportanote[col];
 						}
-						else if ( (param & 0xF0) == 0 || (param & 0xF0) == 0xF0)  { // Slide down
-							e.parameter = (param & 0x0F);
-							e.parameter = e.parameter>7?15:e.parameter*2;
-							e.parameter |= (param & 0xF0);
-						}
+					} else {
+						self->memportanote[col] = e._parameter;
+					}
+					self->memportapos[col] = 3;
+					break;
+				case XMCMD_VIBRATO:
+					e._cmd = XM_SAMPLER_CMD_VIBRATO;
+					break;
+				case XMCMD_TONEPORTAVOL:
+					e._cmd = XM_SAMPLER_CMD_TONEPORTAVOL;
+					break;
+				case XMCMD_VIBRATOVOL:
+					e._cmd = XM_SAMPLER_CMD_VIBRATOVOL;
+					break;
+				case XMCMD_TREMOLO:
+					e._cmd = XM_SAMPLER_CMD_TREMOLO;
+					break;
+				case XMCMD_PANNING:
+					e._cmd = XM_SAMPLER_CMD_PANNING;
+					break;
+				case XMCMD_OFFSET:
+					e._cmd = XM_SAMPLER_CMD_OFFSET | self->highoffset[col];
+					break;
+				case XMCMD_VOLUMESLIDE:
+					e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+					break;
+				case XMCMD_POSITION_JUMP:
+					e._cmd = psy_audio_PATTERNCMD_JUMP_TO_ORDER;
+					break;
+				case XMCMD_VOLUME:
+					e._cmd = XM_SAMPLER_CMD_VOLUME;
+					e._parameter = param * 2;
+					break;
+				case XMCMD_PATTERN_BREAK:
+					e._cmd = psy_audio_PATTERNCMD_BREAK_TO_LINE;
+					e._parameter = ((param & 0xF0) >> 4) * 10 + (param & 0x0F);
+					break;
+				case XMCMD_EXTENDED:
+					switch (param & 0xf0) {
+					case XMCMD_E_FINE_PORTA_UP:
+						e._cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+						e._parameter = 0xF0 + (param & 0x0F);
 						break;
-					case XMCMD_NOTE_OFF:
-						e.cmd = XM_SAMPLER_CMD_VOLUME;
-						e.parameter = 0;
+					case XMCMD_E_FINE_PORTA_DOWN:
+						e._cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+						e._parameter = 0xF0 + (param & 0x0F);
 						break;
-					case XMCMD_SET_ENV_POSITION:
-						e.cmd = XM_SAMPLER_CMD_SET_ENV_POSITION;
+					case XMCMD_E_GLISSANDO_STATUS:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XM_SAMPLER_CMD_E_GLISSANDO_TYPE | ((param == 0) ? 0 : 1);
 						break;
-					case XMCMD_PANNINGSLIDE:
-						e.cmd = XM_SAMPLER_CMD_PANNINGSLIDE;
+					case XMCMD_E_VIBRATO_WAVE:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XM_SAMPLER_CMD_E_VIBRATO_WAVE | exchwave[param & 0x3];
 						break;
-					case XMCMD_RETRIG:
-						e.cmd = XM_SAMPLER_CMD_RETRIG;
+					case XMCMD_E_FINETUNE:
+						e._cmd = XM_SAMPLER_CMD_NONE;
+						e._parameter = 0;
 						break;
-					case XMCMD_TREMOR:
-						e.cmd =  XM_SAMPLER_CMD_TREMOR;
+					case XMCMD_E_PATTERN_LOOP:
+						e._cmd = psy_audio_PATTERNCMD_EXTENDED;
+						e._parameter = psy_audio_PATTERNCMD_PATTERN_LOOP + (param & 0xf);
 						break;
-					case XMCMD_EXTEND_XM_EFFECTS:
-						switch(param & 0xf0){
-						case XMCMD_X_EXTRA_FINE_PORTA_DOWN:
-							e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
-							e.parameter = 0xE0 | (param & +0xf);
-							break;
-						case XMCMD_X_EXTRA_FINE_PORTA_UP:
-							e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
-							e.parameter = 0xE0 | (param & +0xf);
-							break;
-						case XMCMD_X9:
-							switch ( param & 0xf){
-							case XMCMD_X9_SURROUND_OFF:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_SURROUND_OFF;
-								break;
-							case XMCMD_X9_SURROUND_ON:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_SURROUND_ON;
-								break;
-							case XMCMD_X9_REVERB_OFF:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_REVERB_OFF;
-								break;
-							case XMCMD_X9_REVERB_FORCE:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_REVERB_FORCE;
-								break;
-							case XMCMD_X9_STANDARD_SURROUND:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_STANDARD_SURROUND;
-								break;
-							case XMCMD_X9_QUAD_SURROUND:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_QUAD_SURROUND;
-								break;
-							case XMCMD_X9_GLOBAL_FILTER:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_GLOBAL_FILTER;
-								break;
-							case XMCMD_X9_LOCAL_FILTER:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_LOCAL_FILTER;
-								break;
-							case XMCMD_X9_PLAY_FORWARD:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_PLAY_FORWARD;
-								break;
-							case XMCMD_X9_PLAY_BACKWARD:
-								e.cmd = XM_SAMPLER_CMD_EXTENDED;
-								e.parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_PLAY_BACKWARD;
-								break;
-							default:
-								e.cmd = XM_SAMPLER_CMD_NONE;
-								break;
-							}
-							break;
-						case XMCMD_X_HIGH_OFFSET:
-							self->highoffset[col] = param & 0x0F;
-							break;
-						default:
-							e.cmd = XM_SAMPLER_CMD_NONE;
-							break;
-						}
+					case XMCMD_E_TREMOLO_WAVE:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XM_SAMPLER_CMD_E_TREMOLO_WAVE | exchwave[param & 0x3];
 						break;
-					case XMCMD_PANBRELLO:
-						e.cmd = XM_SAMPLER_CMD_PANBRELLO;
+					case XMCMD_E_MOD_RETRIG:
+						e._cmd = XM_SAMPLER_CMD_RETRIG;
+						e._parameter = param & 0xf;
 						break;
-					case XMCMD_MIDI_MACRO:
-						e.cmd = XM_SAMPLER_CMD_MIDI_MACRO;
+					case XMCMD_E_FINE_VOLUME_UP:
+						e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+						e._parameter = 0x0f + ((param & 0xf) << 4);
+						break;
+					case XMCMD_E_FINE_VOLUME_DOWN:
+						e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+						e._parameter = 0xf0 + (param & 0xf);
+						break;
+					case XMCMD_E_DELAYED_NOTECUT:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XM_SAMPLER_CMD_E_DELAYED_NOTECUT | (param & 0xf);
+						break;
+					case XMCMD_E_NOTE_DELAY:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XM_SAMPLER_CMD_E_NOTE_DELAY | (param & 0xf);
+						break;
+					case XMCMD_E_PATTERN_DELAY:
+						e._cmd = psy_audio_PATTERNCMD_EXTENDED;
+						e._parameter = psy_audio_PATTERNCMD_PATTERN_DELAY | (param & 0xf);
+						break;
+					case XMCMD_E_SET_MIDI_MACRO:
+						e._cmd = XM_SAMPLER_CMD_EXTENDED;
+						e._parameter = XMCMD_MIDI_MACRO | (param & 0x0f);
 						break;
 					default:
-						e.cmd = XM_SAMPLER_CMD_NONE;
+						e._cmd = XM_SAMPLER_CMD_NONE;
 						break;
+					}
+					break;
+				case XMCMD_SETSPEED:
+					if (param < 32)
+					{
+						int extraticks;
+
+						e._cmd = psy_audio_PATTERNCMD_EXTENDED;
+						extraticks = 0;
+						e._parameter = calclpbfromspeed(param, &extraticks);
+						if (extraticks != 0) {
+							psy_audio_LegacyPatternEntry entry;
+
+							psy_audio_legacypatternentry_init_all(&entry,
+								PSY2_NOTECOMMANDS_EMPTY, 255, 255,								
+								psy_audio_PATTERNCMD_EXTENDED,
+								psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks);
+							if (!xmsongloader_writepatternentry(self, ppattern,
+									row, self->extracolumn, &entry)) {
+								free(ppattern);
+								return PSY_ERRFILE;
+							}
+							self->extracolumn++;
+						}
+					} else
+					{
+						e._cmd = psy_audio_PATTERNCMD_SET_TEMPO;
+					}
+					break;
+				case XMCMD_SET_GLOBAL_VOLUME:
+					e._cmd = XM_SAMPLER_CMD_SET_GLOBAL_VOLUME;
+					if (param >= 0x80) e._parameter = 0xFF;
+					else e._parameter = param * 2;
+					break;
+				case XMCMD_GLOBAL_VOLUME_SLIDE:
+					e._cmd = XM_SAMPLER_CMD_GLOBAL_VOLUME_SLIDE;
+					//Double the parameter, since FT2's range is 0-0x40.
+					if ((param & 0x0F) == 0 || (param & 0x0F) == 0xF) { // Slide up
+						e._parameter = (param & 0xF0) >> 4;
+						e._parameter = e._parameter > 7 ? 15 : e._parameter * 2;
+						e._parameter <<= 4;
+						e._parameter |= (param & 0x0F);
+					} else if ((param & 0xF0) == 0 || (param & 0xF0) == 0xF0) { // Slide down
+						e._parameter = (param & 0x0F);
+						e._parameter = e._parameter > 7 ? 15 : e._parameter * 2;
+						e._parameter |= (param & 0xF0);
+					}
+					break;
+				case XMCMD_NOTE_OFF:
+					e._cmd = XM_SAMPLER_CMD_VOLUME;
+					e._parameter = 0;
+					break;
+				case XMCMD_SET_ENV_POSITION:
+					e._cmd = XM_SAMPLER_CMD_SET_ENV_POSITION;
+					break;
+				case XMCMD_PANNINGSLIDE:
+					e._cmd = XM_SAMPLER_CMD_PANNINGSLIDE;
+					break;
+				case XMCMD_RETRIG:
+					e._cmd = XM_SAMPLER_CMD_RETRIG;
+					break;
+				case XMCMD_TREMOR:
+					e._cmd = XM_SAMPLER_CMD_TREMOR;
+					break;
+				case XMCMD_EXTEND_XM_EFFECTS:
+					switch (param & 0xf0) {
+					case XMCMD_X_EXTRA_FINE_PORTA_DOWN:
+						e._cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+						e._parameter = 0xE0 | (param & +0xf);
+						break;
+					case XMCMD_X_EXTRA_FINE_PORTA_UP:
+						e._cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+						e._parameter = 0xE0 | (param & +0xf);
+						break;
+					case XMCMD_X9:
+						switch (param & 0xf) {
+						case XMCMD_X9_SURROUND_OFF:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_SURROUND_OFF;
+							break;
+						case XMCMD_X9_SURROUND_ON:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_SURROUND_ON;
+							break;
+						case XMCMD_X9_REVERB_OFF:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_REVERB_OFF;
+							break;
+						case XMCMD_X9_REVERB_FORCE:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_REVERB_FORCE;
+							break;
+						case XMCMD_X9_STANDARD_SURROUND:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_STANDARD_SURROUND;
+							break;
+						case XMCMD_X9_QUAD_SURROUND:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_QUAD_SURROUND;
+							break;
+						case XMCMD_X9_GLOBAL_FILTER:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_GLOBAL_FILTER;
+							break;
+						case XMCMD_X9_LOCAL_FILTER:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_LOCAL_FILTER;
+							break;
+						case XMCMD_X9_PLAY_FORWARD:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_PLAY_FORWARD;
+							break;
+						case XMCMD_X9_PLAY_BACKWARD:
+							e._cmd = XM_SAMPLER_CMD_EXTENDED;
+							e._parameter = XM_SAMPLER_CMD_E9 | XM_SAMPLER_CMD_E9_PLAY_BACKWARD;
+							break;
+						default:
+							e._cmd = XM_SAMPLER_CMD_NONE;
+							break;
+						}
+						break;
+					case XMCMD_X_HIGH_OFFSET:
+						self->highoffset[col] = param & 0x0F;
+						break;
+					default:
+						e._cmd = XM_SAMPLER_CMD_NONE;
+						break;
+					}
+					break;
+				case XMCMD_PANBRELLO:
+					e._cmd = XM_SAMPLER_CMD_PANBRELLO;
+					break;
+				case XMCMD_MIDI_MACRO:
+					e._cmd = XM_SAMPLER_CMD_MIDI_MACRO;
+					break;
+				default:
+					e._cmd = XM_SAMPLER_CMD_NONE;
+					break;
 				}
 				// instrument/note
 				note = note & 0x7f;
-				switch(note)
+				switch (note)
 				{
-					case 0x00: 
-						e.note = psy_audio_NOTECOMMANDS_EMPTY;
-						break;// no note
+				case 0x00:
+					e._note = PSY2_NOTECOMMANDS_EMPTY;
+					break;// no note
 
-					case 0x61:
-						e.note = psy_audio_NOTECOMMANDS_RELEASE;
-						e.inst = psy_audio_NOTECOMMANDS_EMPTY;
-						e.mach = 0;
-						break;// noteoff		
-						
-					default: 
-						//if(note > 96 || note <= 0)
-						// TRACE(_T("invalid note: %d\n"), note);
-						e.note  = note+11; // +11 -> +12 ( FT2 C-0 is Psycle's C-1) -1 ( Ft2 C-0 is value 1)
+				case 0x61:
+					e._note = PSY2_NOTECOMMANDS_RELEASE;
+					e._inst = 255;
+					e._mach = 0;
+					break;// noteoff		
 
-						break;	// transpose
+				default:
+					//if(note > 96 || note <= 0)
+					// TRACE(_T("invalid note: %d\n"), note);
+					e._note = note + 11; // +11 -> +12
+					                     // ( FT2 C-0 is Psycle's C-1) -1
+					                     // ( Ft2 C-0 is value 1)
+					break;	// transpose
 				}
 
 				// If empty, do not inform machine
-				if (e.note == psy_audio_NOTECOMMANDS_EMPTY && instr == psy_audio_NOTECOMMANDS_EMPTY && volume == 255 && e.cmd == 00 && e.parameter == 00) {
-					e.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY;
-					e.inst = psy_audio_NOTECOMMANDS_EMPTY;
+				if (e._note == PSY2_NOTECOMMANDS_EMPTY && instr == 255 &&
+						volume == 255 && e._cmd == 00 && e._parameter == 00) {
+					e._mach = 255;
+					e._inst = 255;
 				}
-				// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
-				else if (( e.note == psy_audio_NOTECOMMANDS_EMPTY && instr != psy_audio_NOTECOMMANDS_EMPTY) || ( e.note < psy_audio_NOTECOMMANDS_RELEASE && instr == psy_audio_NOTECOMMANDS_EMPTY)) {
-					e.mach = 0;
-					e.inst = instr;
-					if (e.inst != psy_audio_NOTECOMMANDS_EMPTY) {
-						// We cannot use the virtual instrument, but we should remember which it is.
-						if (psy_table_exists(&self->xmtovirtual, e.inst)) {
-							lastmach[col] = (uint8_t)(uintptr_t)psy_table_at(&self->xmtovirtual, e.inst);
-						}						
+				// if instrument without note, or note without instrument,
+				// cannot use virtual instrument, so use sampulse directly
+				else if ((e._note == PSY2_NOTECOMMANDS_EMPTY && instr != 255) ||
+						(e._note < psy_audio_NOTECOMMANDS_RELEASE &&
+						 instr == 255)) {
+					e._mach = 0;
+					e._inst = instr;
+					if (e._inst != 255) {
+						// We cannot use the virtual instrument, but we should
+						// remember which it is.
+						if (psy_table_exists(&self->xmtovirtual, e._inst)) {
+							lastmach[col] = (uint8_t)(uintptr_t)
+								psy_table_at(&self->xmtovirtual, e._inst);
+						}
 					}
 				}
 				//default behaviour, let's find the virtual instrument.
 				else {
-					e.inst = instr;					
-					if (!psy_table_exists(&self->xmtovirtual, e.inst)) {
-						if (e.inst != 255) {
-							e.mach = 0;
-							lastmach[col] = e.mach;
+					e._inst = instr;
+					if (!psy_table_exists(&self->xmtovirtual, e._inst)) {
+						if (e._inst != 255) {
+							e._mach = 0;
+							lastmach[col] = e._mach;
+						} else if (lastmach[col] != 255) {
+							e._mach = (uint8_t)lastmach[col];
+						} else if (volume != 255) {
+							e._mach = 0;
+						} else {
+							e._mach = 255;
 						}
-						else if (lastmach[col] != 255) {
-							e.mach = (uint8_t)lastmach[col];
-						}
-						else if (volume != 255) {
-							e.mach = 0;
-						}
-						else {
-							e.mach = 255;
-						}
-					}
-					else {
-						e.mach = (uint8_t)(uintptr_t)psy_table_at(
-							&self->xmtovirtual, e.inst);
-						e.inst= 255;
-						lastmach[col]=e.mach;
+					} else {
+						e._mach = (uint8_t)(uintptr_t)psy_table_at(
+							&self->xmtovirtual, e._inst);
+						e._inst = 255;
+						lastmach[col] = e._mach;
 					}
 				}
-				if (e.mach == 0) { // fallback to the old behaviour. This will happen only if an unused instrument is present in the pattern.
-					if(e.cmd != 0 || e.parameter != 0) {
-						if(volume!= psy_audio_NOTECOMMANDS_EMPTY) {
-							psy_audio_PatternEvent entry;
+				if (e._mach == 0) { // fallback to the old behaviour. This will
+					                // happen only if an unused instrument is
+					                // present in the pattern.
+					if (e._cmd != 0 || e._parameter != 0) {
+						if (volume != 255) {
+							psy_audio_LegacyPatternEntry entry;
 
-							psy_audio_patternevent_init_all(&entry,
-								psy_audio_NOTECOMMANDS_MIDICC,
-								col,
-								e.mach,
-								0,
-								0,
-								0);
-
-							entry.cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
-							entry.parameter = volume;
-							xmsongloader_writepatternentry(self, &node,
-								pattern, row,self->extracolumn,&entry);
+							psy_audio_legacypatternentry_init_all(&entry,
+								PSY2_NOTECOMMANDS_MIDICC, col, e._mach, 0, 0);
+							entry._cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
+							entry._parameter = volume;
+							if (!xmsongloader_writepatternentry(self, ppattern,
+									row, self->extracolumn, &entry)) {
+								free(ppattern);
+								return PSY_ERRFILE;
+							}
 							self->extracolumn++;
 						}
+					} else if (volume < 0x40) {
+						e._cmd = XM_SAMPLER_CMD_VOLUME;
+						e._parameter = volume * 2;
+					} else if (volume != 255) {
+						e._cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
+						e._parameter = volume;
 					}
-					else if(volume < 0x40) {
-						e.cmd = XM_SAMPLER_CMD_VOLUME;
-						e.parameter = volume*2;
-					}
-					else if(volume!=255) {
-						e.cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
-						e.parameter = volume;
-					}
+				} else {
+					e._inst = volume;
 				}
-				else {
-					e.inst = volume;
+				if (!xmsongloader_writepatternentry(self, ppattern, row, col,
+						&e)) {
+					free(ppattern);
+					return PSY_ERRFILE;
 				}
-				xmsongloader_writepatternentry(self, &node, pattern, row, col,
-					&e);
 			}
 			self->maxextracolumn = psy_max(self->maxextracolumn,
 				self->extracolumn);
 		}
+
+		// convert ppattern to pattern
+		node = NULL;
+		for (row = 0; row < numrows; ++row) {			
+			uint32_t track;
+			psy_dsp_big_beat_t offset;
+			psy_dsp_big_beat_t bpl;
+
+			bpl = 1.0 / psy_audio_song_lpb(self->song);
+			offset = bpl * row;
+			for (track = 0; track < MAX_TRACKS; ++track) {				
+				psy_audio_LegacyPatternEntry* psy2ev;
+				bool empty;
+
+				psy2ev = psy_audio_ptrackline(ppattern, track, row);
+				empty = psy2ev->_note == PSY2_NOTECOMMANDS_EMPTY &&
+					psy2ev->_inst == 255 &&
+					psy2ev->_mach == 255 &&
+					psy2ev->_cmd == 0 &&
+					psy2ev->_parameter == 0;
+				if (!empty) {
+					psy_audio_PatternEvent event;
+
+					psy_audio_patternevent_clear(&event);
+					event.note = (psy2ev->_note == 255) ? psy_audio_NOTECOMMANDS_EMPTY : psy2ev->_note;
+					event.inst = (psy2ev->_inst == 255) ? psy_audio_NOTECOMMANDS_INST_EMPTY : psy2ev->_inst;
+					event.mach = (psy2ev->_mach == 255) ? psy_audio_NOTECOMMANDS_MACH_EMPTY : psy2ev->_mach;
+					event.cmd = psy2ev->_cmd;
+					event.parameter = psy2ev->_parameter;								
+					node = psy_audio_pattern_insert(pattern, node, track, offset,
+						&event);
+				}				
+			}			
+		}				
 	}
-
+	free(ppattern);
 	//int z = ftell(_file);
-	return start + packedsize + headerlen;
-
+	*rv_nextstart = start + packedsize + headerlen;
+	return PSY_OK;
 }
 
 bool xmsongloader_writepatternentry(XMSongLoader* self,
-	psy_audio_PatternNode** node, psy_audio_Pattern* pattern,
-	int row, int col, psy_audio_PatternEvent* e)
+	psy_audio_LegacyPattern pattern, int row, int col,
+	psy_audio_LegacyPatternEntry* e)
 {
-	assert(self);
-	assert(pattern && node && e);
+	psy_audio_LegacyPatternEntry* pData;
 
-	if (!psy_audio_patternevent_empty(e)) {		
-		psy_audio_PatternEvent ev;
+	assert(self);	
+	assert(pattern && e);
+		
+	pData = psy_audio_ptrackline(pattern, col, row);
 
-		ev = *e;		
-		if (e->inst == psy_audio_NOTECOMMANDS_EMPTY) {
-			// until now empty instruments has been marked with 255,
-			// correct it to psy_audio_NOTECOMMANDS_INST_EMPTY (16bit)
-			ev.inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
-		}			
-		*node = psy_audio_pattern_insert(pattern, *node, col,
-			(psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb),
-			&ev);
+	if (!pData) {
+		return FALSE;
 	}
+		
+	*pData = *e;
+
 	return TRUE;
 }	
 
-// Load instruments
-bool xmsongloader_loadinstruments(XMSongLoader* self, uintptr_t instr_start)
+int xmsongloader_loadinstruments(XMSongLoader* self, uintptr_t instr_start)
 {
-	uintptr_t i;	
+	int32_t i;	
 	
-	for (i = 1; i <= self->header.instruments; ++i) {
-		instr_start = xmsongloader_loadinstrument(self, i, instr_start);				
+	for (i = 1; i <= self->instrcount; ++i) {
+		int status;
+		
+		if (status = xmsongloader_loadinstrument(self, i, instr_start,
+				&instr_start)) {
+			return status;
+		}
 		if (psy_table_exists(&self->xmtovirtual, i)) {
 			// sampulse: 0
 			psy_audio_song_insertvirtualgenerator(self->songfile->song,
 				(uintptr_t)psy_table_at(&self->xmtovirtual, i), 0, i);
 		}
 	}
-	return TRUE;
+	return PSY_OK;
 }
 
-uintptr_t xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot, uintptr_t start)
-{
-// void xm_readinstrument(psy_audio_SongFile* self, uint32_t slot, uint32_t start, bool xi)
-//{
-	struct XMINSTRUMENTHEADER instrumentheader;
-	psy_audio_Instrument* instrument;
-	PsyFile* fp;
-	psy_audio_Song* song;	
-
-	fp = self->songfile->file;
-	song = self->songfile->song;
-	psyfile_seek(fp, (uint32_t)start);
-	
-	instrument = psy_audio_instrument_allocinit();			
-	psy_audio_instrument_setindex(instrument, slot + 1);
-	psy_audio_instruments_insert(&song->instruments, instrument,
-		psy_audio_instrumentindex_make(INSTRUMENTGROUP, slot));
-	//if (!xi) {
-		instrumentheader.size = psyfile_read_uint32(fp);
-	//} else {
-		//instrumentheader.size = 0;
-	//}
-	
-	psyfile_read(fp, &instrumentheader.name,
-		sizeof(instrumentheader.name));
-	instrumentheader.name[sizeof(instrumentheader.name) - 1] = '\0';
-	psy_audio_instrument_setname(instrument, instrumentheader.name);
-	start += instrumentheader.size;	
-
-	instrumentheader.type = psyfile_read_uint8(fp);
-	instrumentheader.samples = psyfile_read_uint16(fp);
-	//if (!xi) {	
-	
-	//} else {
-	//	uint16_t version;
-	//
-	//	psyfile_skip(fp, 20);
-	//	version = psyfile_read_uint16(fp);
-	//	if (version != 0x102) {
-	//		return;
-	//	}
-	//	instrumentheader.samples = 1;
-	//}	
-	if (instrumentheader.samples > 0) {
-		struct XMSAMPLEHEADER sampleheader;
-		XMSAMPLESTRUCT* xmsamples = 0;
-		int s;
-		int note;
-		psy_audio_InstrumentEntry instentry;
-		
-		//if (!xi) {
-			// psy_audio_Sample header size
-			psyfile_read(fp, &sampleheader.shsize, 4);
-		//}
-		// psy_audio_Sample number for all notes
-		psyfile_read(fp, &sampleheader.snum, 96);
-		// Points for volume envelope
-		psyfile_read(fp, &sampleheader.venv, 48);
-		// Points for panning envelope
-		psyfile_read(fp, &sampleheader.penv, 48);
-		// Number of volume points
-		psyfile_read(fp, &sampleheader.vnum, 1);
-		// Number of panning points
-		psyfile_read(fp, &sampleheader.pnum, 1);
-		// Volume sustain point
-		psyfile_read(fp, &sampleheader.psustain, 1);
-		// Volume loop start point
-		psyfile_read(fp, &sampleheader.vloops, 1);
-		// Volume loop end point
-		psyfile_read(fp, &sampleheader.vloope, 1);
-		// Panning sustain point
-		psyfile_read(fp, &sampleheader.psustain, 1);
-		// Panning loop start point
-		psyfile_read(fp, &sampleheader.ploops, 1);
-		// Panning loop end point
-		psyfile_read(fp, &sampleheader.ploope, 1);
-		// Volume type: bit 0: On; 1: Sustain; 2: Loop
-		psyfile_read(fp, &sampleheader.vtype, 1);
-		// Panning type: bit 0: On; 1: Sustain; 2: Loop
-		psyfile_read(fp, &sampleheader.ptype, 1);
-		psyfile_read(fp, &sampleheader.vibtype, 1);
-		psyfile_read(fp, &sampleheader.vibsweep, 1);
-		psyfile_read(fp, &sampleheader.vibdepth, 1);
-		psyfile_read(fp, &sampleheader.vibrate, 1);
-		psyfile_read(fp, &sampleheader.volfade, 2);
-		psyfile_read(fp, &sampleheader.reserved, 2);
-		//if (xi) {
-		//	psyfile_skip(fp, 20);
-		//	psyfile_read(fp, &instrumentheader.samples, 2);
-		//}
-		xmsamples = (XMSAMPLESTRUCT*)malloc(sizeof(
-			XMSAMPLESTRUCT) * (int)instrumentheader.samples);
-		// create instrument entries
-		psy_audio_instrument_clearentries(instrument);
-		psy_audio_instrumententry_init(&instentry);
-		instentry.sampleindex =
-			sampleindex_make(slot, sampleheader.snum[0]);
-		for (note = 1; note < 96; ++note) {
-			if (sampleheader.snum[note] != instentry.sampleindex.subslot) {
-				instentry.keyrange.high = note - 1;
-				psy_audio_instrument_addentry(instrument, &instentry);
-				instentry.keyrange.low = note;
-				instentry.sampleindex.subslot = sampleheader.snum[note];
-			}
-		}
-		instentry.keyrange.high = 119;
-		psy_audio_instrument_addentry(instrument, &instentry);
-		//if (!xi) {
-			psyfile_seek(fp, (uint32_t)start);
-		//}
-		for (s = 0; s < instrumentheader.samples; ++s) {
-			//if (!xi) {
-				psyfile_seek(fp, (uint32_t)start);
-				//}
-			psyfile_read(fp, &xmsamples[s].samplen, 4);
-			psyfile_read(fp, &xmsamples[s].loopstart, 4);
-			psyfile_read(fp, &xmsamples[s].looplen, 4);
-			psyfile_read(fp, &xmsamples[s].vol, 1);
-			// Finetune (signed byte -16..+15)
-			psyfile_read(fp, &xmsamples[s].finetune, 1);
-			// Type: Bit 0-1: 0 = No loop, 1 = Forward loop,
-			//		 2 = Ping-pong loop;
-			//		 4: 16-bit sampledata				
-			psyfile_read(fp, &xmsamples[s].type, 1);
-			// Panning (0-255)
-			psyfile_read(fp, &xmsamples[s].pan, 1);
-			// Relative note number (signed byte)
-			psyfile_read(fp, &xmsamples[s].relnote, 1);
-			psyfile_read(fp, &xmsamples[s].res, 1);
-			psyfile_read(fp, &xmsamples[s].name, 22);
-			xmsamples[s].name[21] = '\0';
-			start += 40;
-		}
-		xmsongloader_setenvelopes(instrument, &sampleheader);
-		for (s = 0; s < instrumentheader.samples; ++s) {
-			psy_audio_Sample* sample;
-			int is16bit;
-
-			sample = psy_audio_sample_allocinit(1);
-			psy_audio_sample_setname(sample, xmsamples[s].name);
-
-			is16bit = (xmsamples[s].type & 0x10) == 0x10;
-			sample->panfactor = xmsamples[s].pan / (psy_dsp_amp_t)255.f;
-			// Type: Bit 0-1: 0 = No loop, 1 = Forward loop,
-			//		 2 = Ping-pong loop;
-			//		 4: 16-bit sampledata
-			if (xmsamples[s].looplen > 0) {
-				if (xmsamples[s].type & 0x01) {
-					sample->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;
-				} else
-					if (xmsamples[s].type & 0x02) {
-						sample->loop.type = psy_audio_SAMPLE_LOOP_BIDI;
-					} else {
-						sample->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
-					}
-			} else {
-				sample->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
-			}
-			if (sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
-				sample->loop.start = xmsamples[s].loopstart / (is16bit ? 2 : 1);
-				sample->loop.end = (xmsamples[s].loopstart + xmsamples[s].looplen) /
-					(is16bit ? 2 : 1);
-			}
-			sample->numframes = xmsamples[s].samplen / (is16bit ? 2 : 1);
-			sample->samplerate = (psy_dsp_big_hz_t)8363.0;
-			sample->defaultvolume = xmsamples[s].vol * 2;
-			sample->tune = xmsamples[s].relnote - 24;
-			// WaveFineTune has +-100 range in Psycle.
-			sample->finetune = (int16_t)(xmsamples[s].finetune / 1.28f);
-			// Sounds Stupid, but it isn't. Some modules save sample
-			// header when there is no sample.
-			if (xmsamples[s].samplen > 0) {
-				unsigned char* smpbuf;
-				int16_t oldvalue;
-				uintptr_t i;
-				uintptr_t j;
-
-				smpbuf = malloc(xmsamples[s].samplen);
-				if (smpbuf) {
-					psyfile_read(fp, smpbuf, xmsamples[s].samplen);
-					psy_audio_sample_allocwavedata(sample);
-					oldvalue = 0;
-					for (i = 0, j = 0; i < sample->numframes; ++i) {
-						int16_t value;
-
-						if (is16bit) {
-							value = (smpbuf[j] & 0xFF) | (smpbuf[j + 1] << 8);
-							j += 2;
-						} else {
-							value = (int16_t)(smpbuf[j] << 8);
-							++j;
-						}
-						value += oldvalue;
-						sample->channels.samples[0][i] = (psy_dsp_amp_t)value;
-						oldvalue = value;
-					}
-					free(smpbuf);
-				}
-			}
-			psy_audio_samples_insert(&song->samples, sample,
-				sampleindex_make(slot, s));
-			start += xmsamples[s].samplen;
-		}
-		free(xmsamples);
+int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
+	uintptr_t start, uintptr_t* rv_nextstart)
+{	
+	psy_audio_Instrument* instrument;	
+	int32_t instrsize;
+	char instrname[24];
+	uint16_t samplecount;	
+	XMSAMPLEHEADER samph;
+	int exchwave[4] = {
+		psy_audio_WAVEFORMS_SINUS,
+		psy_audio_WAVEFORMS_SQUARE,
+		psy_audio_WAVEFORMS_SAWDOWN,
+		psy_audio_WAVEFORMS_SAWUP
+	};
+	int32_t i;
+	int note;
+	psy_audio_InstrumentEntry instentry;
+			
+	if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
+		return PSY_ERRFILE;
 	}
-	return start;
+	// create and insert instrument
+	instrument = psy_audio_instrument_allocinit();			
+	psy_audio_instrument_setindex(instrument, slot);
+	psy_audio_instruments_insert(&self->song->instruments, instrument,
+		psy_audio_instrumentindex_make(INSTRUMENTGROUP, slot));
+	psy_dsp_envelope_clear(&instrument->volumeenvelope);
+	psy_dsp_envelope_setmode(&instrument->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&instrument->panenvelope);
+	psy_dsp_envelope_setmode(&instrument->panenvelope, psy_dsp_ENVELOPETIME_TICK);	
+	psy_dsp_envelope_clear(&instrument->pitchenvelope);
+	psy_dsp_envelope_setmode(&instrument->pitchenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&instrument->filterenvelope);
+	psy_dsp_envelope_setmode(&instrument->filterenvelope, psy_dsp_ENVELOPETIME_TICK);
+	// read header
+	if (!psyfile_read(self->fp, &instrsize, sizeof(int32_t))) {
+		return PSY_ERRFILE;
+	}
+	start += instrsize;
+	memset(instrname, 0, sizeof(instrname));
+	if (!psyfile_read(self->fp, instrname, 22)) {
+		return PSY_ERRFILE;
+	}
+	psy_audio_instrument_setname(instrument, instrname);
+	// //int iInstrType = ReadInt1();
+	if (psyfile_skip(self->fp, 1) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &samplecount, sizeof(uint16_t))) {
+		return PSY_ERRFILE;
+	}	
+	if (samplecount > 1) {
+		//TRACE(_T("ssmple count = %d\n"), iSampleCount);
+	}
+	if (samplecount == 0) {
+		*rv_nextstart = start;
+		return PSY_OK;
+	}
+
+	memset(&samph, 0, sizeof samph);
+	if (!psyfile_read(self->fp, &samph, sizeof(XMSAMPLEHEADER))) {
+		return PSY_ERRFILE;
+	}
+	xmsongloader_setenvelopes(instrument, &samph);
+	// load individual samples	
+	for (i = 0; i < samplecount; i++) {
+		int status;
+		psy_audio_Sample* wave;
+
+		wave = psy_audio_sample_allocinit(0);		
+		if (status = xmsongloader_loadsampleheader(self, wave, start, i, &start)) {
+			psy_audio_sample_dispose(wave);
+			return PSY_ERRFILE;
+		}
+		// Only get REAL samples.
+		// if (self->smplen[*cursample] > 0) {
+			psy_audio_samples_insert(&self->song->samples, wave,
+				sampleindex_make(slot, i));
+		// }
+	}
+	// load individual samples
+	for (i = 0; i < samplecount; i++) {
+		int status;
+		psy_audio_Sample* wave;
+
+		wave = psy_audio_samples_at(&self->song->samples,
+			sampleindex_make(slot, i));
+		assert(wave);
+		if (!wave) {
+			return PSY_ERRFILE;
+		}
+		if (status = xmsongloader_loadsampledata(self, wave, i, start, &start)) {
+			return status;
+		}
+		wave->vibrato.attack = samph.vibsweep == 0 ? 0 : 256 - samph.vibsweep;
+		wave->vibrato.depth = samph.vibdepth;
+		wave->vibrato.speed = samph.vibrate;
+		wave->vibrato.type = exchwave[samph.vibtype & 3];
+	}
+	// create instrument entries
+	psy_audio_instrument_clearentries(instrument);
+	psy_audio_instrumententry_init(&instentry);
+	instentry.sampleindex =
+		sampleindex_make(slot, samph.snum[0]);
+	for (note = 1; note < 96; ++note) {
+		if (samph.snum[note] != instentry.sampleindex.subslot) {
+			instentry.keyrange.high = note - 1;
+			psy_audio_instrument_addentry(instrument, &instentry);
+			instentry.keyrange.low = note;
+			instentry.sampleindex.subslot = samph.snum[note];
+		}
+	}
+	instentry.keyrange.high = 119;
+	psy_audio_instrument_addentry(instrument, &instentry);	
+	*rv_nextstart = start;
+	return PSY_OK;
+}
+
+int xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* wave,
+	int32_t sampleidx, uintptr_t start, uintptr_t* rv_nextstart)
+{
+	// parse
+
+	BOOL b16Bit;
+	char* smpbuf;
+	int16_t wNew;	
+	int32_t samplecnt;
+
+	b16Bit = self->smpflags[sampleidx] & 0x10;
+	wNew = 0;
+
+	// cache sample data
+	if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
+		return PSY_ERRFILE;
+	}
+
+	if (self->smplen[sampleidx] == 0) {
+		return PSY_OK;
+	}	
+	smpbuf = (char*)malloc(self->smplen[sampleidx]);
+	if (!smpbuf) {
+		return PSY_ERRFILE;
+	}
+	memset(smpbuf, 0, self->smplen[sampleidx]);
+	if (!psyfile_read(self->fp, smpbuf, self->smplen[sampleidx])) {
+		free(smpbuf);
+		return PSY_ERRFILE;
+	}	
+	samplecnt = self->smplen[sampleidx];	
+	psy_audio_sample_resize(wave, 1);
+	wave->numframes = self->smplen[sampleidx];
+	psy_audio_sample_allocwavedata(wave);
+
+	// unpack sample data
+	if (b16Bit)
+	{
+		// 16 bit mono sample, delta
+		int out = 0;
+		for (int j = 0; j <= samplecnt - 2; j += 2)
+		{
+			wNew += (smpbuf[j] & 0xFF) | (smpbuf[j + 1] << 8);
+			wave->channels.samples[0][out] = (psy_dsp_amp_t)wNew;			
+			out++;
+		}
+	} else
+	{
+		// 8 bit mono sample
+		for (int j = 0; j < samplecnt; j++)
+		{
+			wNew += (int16_t)(smpbuf[j] << 8);
+			wave->channels.samples[0][j] = (psy_dsp_amp_t)wNew;			
+		}
+	}
+
+	// cleanup
+	free(smpbuf);
+
+	// complete
+	start += self->smplen[sampleidx];
+	*rv_nextstart = start;	
+	return PSY_OK;
 }
 	
 	
 void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER* sampleHeader)
 {
-	// volume envelope
-	psy_dsp_Envelope ampenvelope;
-
-	psy_dsp_envelope_init(&ampenvelope);
-	//inst.AmpEnvelope().Init();
-	//inst.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	if (sampleHeader->vtype & 1) {// enable volume envelope
-		// inst.AmpEnvelope().IsEnabled(true);
-		// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
-		// volumefadespeed in this case, so that a check during playback time is not needed.		
-		// inst.VolumeFadeSpeed(value_mapper::map_32768_1(sampleHeader.volfade));
+	// volume envelope	
+	
+	psy_dsp_envelope_clear(&inst->volumeenvelope);
+	psy_dsp_envelope_setmode(&inst->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
+	if (sampleHeader->vtype & 1) {// enable volume envelope		
 		int i;
 		int envelope_point_num = sampleHeader->vnum;
+		// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
+		// volumefadespeed in this case, so that a check during playback time is not needed.		
+		psy_audio_instrument_setvolumefadespeed(inst,
+			psy_dsp_map_32768_1(sampleHeader->volfade));				
+
+		psy_dsp_envelope_setenabled(&inst->volumeenvelope, TRUE);
 		if (envelope_point_num > 12) { // Max number of envelope points in Fasttracker format is 12.
 			envelope_point_num = 12;
 		}
 		// Format of FastTracker points is :
 		// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 		// Value : 0..64. , divide by 64 to use it as a multiplier.
-		psy_dsp_envelope_append(&ampenvelope, psy_dsp_envelopepoint_make(
-			(int)sampleHeader->venv[0] * 512 / 8363.f, (float)sampleHeader->venv[1] / 64.0f));
-		//inst.AmpEnvelope().Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
+		psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make(
+			sampleHeader->venv[0], (float)sampleHeader->venv[1] / 64.0f));		
 		for (i = 1; i < envelope_point_num; i++) {
 			if (sampleHeader->venv[i * 2] > sampleHeader->venv[(i - 1) * 2])// Some rare modules have erroneous points. This tries to solve that.
-				psy_dsp_envelope_append(&ampenvelope, psy_dsp_envelopepoint_make(
-					(int)sampleHeader->venv[i * 2] * 512 / 8363.f, (float)sampleHeader->venv[i * 2 + 1] / 64.0f));
+				psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make(
+					sampleHeader->venv[i * 2], (float)sampleHeader->venv[i * 2 + 1] / 64.0f));
 		}
-		psy_dsp_envelope_init_copy(&inst->volumeenvelope, &ampenvelope);
-		psy_dsp_envelope_init_dispose(&ampenvelope);
-	}
-	
-		
-		if(sampleHeader->vtype & 2) {
+
+		if (sampleHeader->vtype & 2) {
 			psy_dsp_envelope_setsustainbegin(&inst->volumeenvelope, sampleHeader->vsustain);
-			psy_dsp_envelope_setsustainend(&inst->volumeenvelope, sampleHeader->vsustain);			
-		}
-		else
+			psy_dsp_envelope_setsustainend(&inst->volumeenvelope, sampleHeader->vsustain);
+		} else
 		{
 			// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 			// IT also sets the Sustain points to the end of the envelope, but i can't see a reason for this to be needed.
 //				inst.AmpEnvelope().SustainBegin(inst.AmpEnvelope().NumOfPoints()-1);
 //				inst.AmpEnvelope().SustainEnd(inst.AmpEnvelope().NumOfPoints()-1);
 		}
-
-/*
-		if(sampleHeader.vtype & 4){
-			if(sampleHeader.vloops < sampleHeader.vloope){
-				inst.AmpEnvelope().LoopStart(sampleHeader.vloops);
-				inst.AmpEnvelope().LoopEnd(sampleHeader.vloope);
+	
+		if(sampleHeader->vtype & 4){
+			if(sampleHeader->vloops < sampleHeader->vloope){
+				psy_dsp_envelope_setloopstart(&inst->volumeenvelope,
+					sampleHeader->vloops);
+				psy_dsp_envelope_setloopend(&inst->volumeenvelope,
+					sampleHeader->vloope);				
 			}
 			// if loopstart >= loopend, Fasttracker ignores the loop!.
 			// We can't ignore them because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 			else {
 //					inst.AmpEnvelope().LoopStart(XMInstrument::Envelope::INVALID);
 //					inst.AmpEnvelope().LoopEnd(XMInstrument::Envelope::INVALID);
-				inst.AmpEnvelope().LoopStart(inst.AmpEnvelope().NumOfPoints()-1);
-				inst.AmpEnvelope().LoopEnd(inst.AmpEnvelope().NumOfPoints()-1);
+				psy_dsp_envelope_setloopstart(&inst->volumeenvelope,
+					psy_dsp_envelope_numofpoints(&inst->volumeenvelope) - 1);
+				psy_dsp_envelope_setloopend(&inst->volumeenvelope,
+					psy_dsp_envelope_numofpoints(&inst->volumeenvelope) - 1);				
 			}
 		}
 		else
 		{
 			// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
-			inst.AmpEnvelope().LoopStart(inst.AmpEnvelope().NumOfPoints()-1);
-			inst.AmpEnvelope().LoopEnd(inst.AmpEnvelope().NumOfPoints()-1);
-		}*/
-
-	//} else {
-		//inst.AmpEnvelope().IsEnabled(false);
-	//}
-
-	/*
-	// pan envelope
-	inst.PanEnvelope().Init();
-	inst.PanEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	if(sampleHeader.ptype & 1){// enable volume envelope
-			
-		inst.PanEnvelope().IsEnabled(true);
-			
-		if(sampleHeader.ptype & 2){
-			inst.PanEnvelope().SustainBegin(sampleHeader.psustain);
-			inst.PanEnvelope().SustainEnd(sampleHeader.psustain);
+			psy_dsp_envelope_setloopstart(&inst->volumeenvelope,
+				psy_dsp_envelope_numofpoints(&inst->volumeenvelope) - 1);
+			psy_dsp_envelope_setloopend(&inst->volumeenvelope,
+				psy_dsp_envelope_numofpoints(&inst->volumeenvelope) - 1);
 		}
+	} else {
+		psy_dsp_envelope_setenabled(&inst->volumeenvelope, FALSE);
+	}
+	
+	// pan envelope	
+	psy_dsp_envelope_clear(&inst->panenvelope);
+	psy_dsp_envelope_setmode(&inst->panenvelope, psy_dsp_ENVELOPETIME_TICK);
+	if(sampleHeader->ptype & 1){// enable volume envelope
+		int envelope_point_num;
 
+		psy_dsp_envelope_setenabled(&inst->panenvelope, TRUE);
 			
-		if(sampleHeader.ptype & 4){
-			if(sampleHeader.ploops < sampleHeader.ploope){
-				inst.PanEnvelope().LoopStart(sampleHeader.ploops);
-				inst.PanEnvelope().LoopEnd(sampleHeader.ploope);
+		if(sampleHeader->ptype & 2){
+			psy_dsp_envelope_setsustainbegin(&inst->panenvelope, sampleHeader->psustain);
+			psy_dsp_envelope_setsustainend(&inst->panenvelope, sampleHeader->psustain);			
+		}			
+		if(sampleHeader->ptype & 4){
+			if (sampleHeader->ploops < sampleHeader->ploope) {
+				psy_dsp_envelope_setloopstart(&inst->panenvelope,
+					sampleHeader->ploops);
+				psy_dsp_envelope_setloopend(&inst->panenvelope,
+					sampleHeader->ploope);
 			} else {
-				inst.PanEnvelope().LoopStart(sampleHeader.ploope);
-				inst.PanEnvelope().LoopEnd(sampleHeader.ploops);
-			}
+				psy_dsp_envelope_setloopstart(&inst->panenvelope,
+					sampleHeader->ploope);
+				psy_dsp_envelope_setloopend(&inst->panenvelope,
+					sampleHeader->ploops);
+			}			
 		}
-		int envelope_point_num = sampleHeader.pnum;
+		envelope_point_num = sampleHeader->pnum;
 		if(envelope_point_num > 12){
 			envelope_point_num = 12;
 		}
 
 		for(int i = 0; i < envelope_point_num;i++){
-			inst.PanEnvelope().Append((int)sampleHeader.penv[i * 2] ,(float)(sampleHeader.penv[i * 2 + 1]-32.0f) / 32.0f);
+			psy_dsp_envelope_append(&inst->panenvelope, psy_dsp_envelopepoint_make(
+				sampleHeader->penv[i * 2], (float)(sampleHeader->penv[i * 2 + 1] -32.0f )/ 32.0f));
 		}
 
 	} else {
-		inst.PanEnvelope().IsEnabled(false);
-	}*/
-}	
+		psy_dsp_envelope_setenabled(&inst->panenvelope, FALSE);
+	}
+}
+
+int xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* wave,
+	uintptr_t start, int32_t sampleidx, uintptr_t* rv_nextstart)
+{	
+	int32_t len;
+	int32_t loopstart;
+	int32_t looplength;
+	// params
+	int8_t vol;
+	int8_t finetune;
+	int8_t flags;
+	uint8_t panning;
+	int8_t relativenote;
+	char cname[23];
+	bool bLoop;
+	bool bPingPong;
+	bool b16Bit;
+
+	// get sample header
+	if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &len, sizeof(int32_t))) {
+		return PSY_ERRFILE;
+	}	
+
+	// loop data
+	if (!psyfile_read(self->fp, &loopstart, sizeof(int32_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &looplength, sizeof(int32_t))) {
+		return PSY_ERRFILE;
+	}	
+
+	// params
+	if (!psyfile_read(self->fp, &vol, sizeof(int8_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &finetune, sizeof(int8_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &flags, sizeof(int8_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &panning, sizeof(uint8_t))) {
+		return PSY_ERRFILE;
+	}
+	if (!psyfile_read(self->fp, &relativenote, sizeof(int8_t))) {
+		return PSY_ERRFILE;
+	}
+	//char iReserved = ReadInt1();
+	if (psyfile_skip(self->fp, 1) == -1) {
+		return PSY_ERRFILE;
+	}	
+
+	// sample name
+	memset(cname, 0, sizeof(cname));
+	if (!psyfile_read(self->fp, &cname, 22)) {
+		return PSY_ERRFILE;
+	}	
+	// parse
+	bLoop = (flags & 0x01 || flags & 0x02) && (looplength > 0);
+	bPingPong = flags & 0x02;
+	b16Bit = flags & 0x10;
+
+	// alloc wave memory
+
+	ASSERT(len < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
+	
+	//_wave.Init();
+	if (len > 0) // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
+	{
+		// allocwave data in loadsampledata		
+	}
+	wave->panenabled = TRUE;
+	wave->panfactor = panning / 255.0f;	
+
+	if (bLoop)
+	{
+		if (bPingPong) {
+			wave->loop.type = wave->loop.type = psy_audio_SAMPLE_LOOP_BIDI;
+		} else {
+			wave->loop.type = wave->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;			
+		}
+
+		if (b16Bit)
+		{
+			wave->loop.start = loopstart / 2;
+			wave->loop.end = (looplength + loopstart) / 2;
+		} else
+		{
+			wave->loop.start = loopstart;
+			wave->loop.end = looplength + loopstart;
+		}
+
+		//			TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
+
+	} else {
+		wave->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;		
+	}
+
+	wave->samplerate = 8363.0;
+	wave->defaultvolume = vol * 2;
+	wave->tune = relativenote;
+	wave->finetune = (int16_t)(finetune / 1.28); // WaveFineTune has +-100 range in Psycle.
+	psy_audio_sample_setname(wave, cname);	
+
+	self->smplen[sampleidx] = len;
+	self->smpflags[sampleidx] = flags;
+
+	start += 40;
+	*rv_nextstart = start;
+	return PSY_OK;
+}
 
 // MODSongLoader
 //

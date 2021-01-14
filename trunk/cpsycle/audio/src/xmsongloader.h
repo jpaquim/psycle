@@ -8,6 +8,7 @@
 
 // local
 #include "machine.h"
+#include "song.h"
 #include "songio.h"
 #include "xmdefs.h"
 
@@ -23,7 +24,7 @@ extern "C" {
 // XMSongLoader
 typedef struct XMSongLoader {
 	// internal data
-	int32_t m_iInstrCnt;
+	int32_t instrcount;
 	int32_t smplen[256];
 	int8_t smpflags[256];
 	uint8_t highoffset[32];
@@ -40,12 +41,14 @@ typedef struct XMSongLoader {
 	psy_Table xmtovirtual;
 	// references
 	psy_audio_SongFile* songfile;
+	PsyFile* fp;
+	psy_audio_Song* song;
 } XMSongLoader;
 
 void xmsongloader_init(XMSongLoader*, psy_audio_SongFile*);
 void xmsongloader_dispose(XMSongLoader*);
 
-bool xmsongloader_load(XMSongLoader*);
+int xmsongloader_load(XMSongLoader*);
 
 // MODSongLoader
 typedef struct MODHEADER
@@ -70,6 +73,7 @@ typedef struct MODSongLoader
 {
 	// internal data
 	uint16_t smplen[32];
+	int8_t smpflags[256];
 	bool speedpatch;
 	MODHEADER header;
 	MODSAMPLEHEADER samples[32];
