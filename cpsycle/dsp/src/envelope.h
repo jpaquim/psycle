@@ -213,6 +213,12 @@ INLINE void psy_dsp_envelope_setcarry(
 	self->carry = value;
 }
 
+INLINE void psy_dsp_envelope_setmode(psy_dsp_Envelope* self,
+	psy_dsp_EnvelopeTimeMode mode)
+{
+	self->timemode = mode;
+}
+
 INLINE psy_dsp_EnvelopeTimeMode psy_dsp_envelope_mode(
 	const psy_dsp_Envelope* self) 
 {

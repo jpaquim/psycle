@@ -65,30 +65,80 @@ INLINE void psy_audio_songproperties_setbpm(psy_audio_SongProperties* self,
 INLINE psy_dsp_big_beat_t psy_audio_songproperties_bpm(const
 	psy_audio_SongProperties* self)
 {
+	assert(self);
+
 	return self->bpm;
 }
 
 INLINE void psy_audio_songproperties_setlpb(psy_audio_SongProperties* self,
 	uintptr_t lpb)
 {
+	assert(self);
+
 	self->lpb = lpb;
 }
 
 INLINE uintptr_t psy_audio_songproperties_lpb(const
 	psy_audio_SongProperties* self)
 {
+	assert(self);
+
 	return self->lpb;
+}
+
+INLINE void psy_audio_songproperties_setnumsongtracks(
+	psy_audio_SongProperties* self, uintptr_t numtracks)
+{
+	assert(self);
+
+	self->tracks = numtracks;
 }
 
 INLINE uintptr_t psy_audio_songproperties_numtracks(const
 	psy_audio_SongProperties* self)
 {
+	assert(self);
+
 	return self->tracks;
+}
+
+INLINE void psy_audio_songproperties_settpb(psy_audio_SongProperties* self,
+	uintptr_t tpb)
+{
+	assert(self);
+
+	self->tpb = tpb;
+}
+
+INLINE uintptr_t psy_audio_songproperties_tpb(const
+	psy_audio_SongProperties* self)
+{
+	assert(self);
+
+	return self->tpb;
+}
+
+INLINE void psy_audio_songproperties_setextraticksperbeat(
+	psy_audio_SongProperties* self, uintptr_t extraticksperbeat)
+{
+	assert(self);
+
+	self->extraticksperbeat = extraticksperbeat;
+}
+
+INLINE uintptr_t psy_audio_songproperties_extraticksperbeat(const
+	psy_audio_SongProperties* self)
+{
+	assert(self);
+
+	return self->extraticksperbeat;
 }
 
 INLINE const char* psy_audio_songproperties_title(const
 	psy_audio_SongProperties* self)
 {
+	assert(self);
+
 	return self->title;
 }
 
@@ -248,14 +298,51 @@ INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)
 
 	return psy_audio_songproperties_lpb(&self->properties);
 }
+/// set song properties songtrack (pattern channels) number
+INLINE void psy_audio_song_setnumsongtracks(psy_audio_Song* self,
+	uintptr_t numtracks)
+{
+	assert(self);
+
+	psy_audio_songproperties_setnumsongtracks(&self->properties, numtracks);
+}
 /// return song numtracks (pattern channels)
-INLINE uintptr_t psy_audio_song_numtracks(const psy_audio_Song* self)
+INLINE uintptr_t psy_audio_song_numsongtracks(const psy_audio_Song* self)
 {
 	assert(self);
 
 	return psy_audio_songproperties_numtracks(&self->properties);
 }
+/// return song properties tpb
+INLINE uintptr_t psy_audio_song_tpb(const psy_audio_Song* self)
+{
+	assert(self);
 
+	return psy_audio_songproperties_tpb(&self->properties);
+}
+/// set song properties ticks per beat
+INLINE void psy_audio_song_settpb(psy_audio_Song* self, uintptr_t tpb)
+{
+	assert(self);
+
+	psy_audio_songproperties_settpb(&self->properties, tpb);
+}
+/// return song properties extraticksperbeat
+INLINE uintptr_t psy_audio_song_extraticksperbeat(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_extraticksperbeat(&self->properties);
+}
+/// set song properties ticks per beat
+INLINE void psy_audio_song_setextraticksperbeat(psy_audio_Song* self,
+	uintptr_t extraticksperbeat)
+{
+	assert(self);
+
+	psy_audio_songproperties_setextraticksperbeat(&self->properties,
+		extraticksperbeat);
+}
 #ifdef __cplusplus
 }
 #endif

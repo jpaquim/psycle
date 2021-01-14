@@ -16,9 +16,13 @@
 extern "C" {
 #endif
 
-// Compatibility methods/structs for song file load/save
+// Compatibility methods/structs for song fileio
 
 // Patterns
+
+#define PSY2_NOTECOMMANDS_EMPTY 255
+#define PSY2_NOTECOMMANDS_RELEASE 120
+#define PSY2_NOTECOMMANDS_MIDICC 123	
 
 typedef struct psy_audio_LegacyPatternEntry {
 	uint8_t _note;
@@ -27,6 +31,23 @@ typedef struct psy_audio_LegacyPatternEntry {
 	uint8_t _cmd;
 	uint8_t _parameter;
 } psy_audio_LegacyPatternEntry;
+
+INLINE void psy_audio_legacypatternentry_init_all(
+	psy_audio_LegacyPatternEntry* self,
+	uint8_t note, uint8_t inst, uint8_t machine, uint8_t cmd, uint8_t param)
+{
+	self->_note = note;
+	self->_inst = inst;
+	self->_mach = machine;
+	self->_cmd = cmd;
+	self->_parameter = param;
+}
+
+uint8_t _note;
+uint8_t _inst;
+uint8_t _mach;
+uint8_t _cmd;
+uint8_t _parameter;
 
 typedef unsigned char* psy_audio_LegacyPattern;
 

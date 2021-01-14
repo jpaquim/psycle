@@ -290,6 +290,7 @@ INLINE void psy_audio_sample_resize(psy_audio_Sample* self,
 	uintptr_t numchannels)
 {
 	psy_audio_buffer_resize(&self->channels, numchannels);	
+	self->stereo = (numchannels > 1);	
 }
 
 #ifdef __cplusplus

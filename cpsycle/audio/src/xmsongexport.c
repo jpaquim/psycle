@@ -123,7 +123,7 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	self->m_Header.size = sizeof(self->m_Header);
 	self->m_Header.norder = (uint16_t)psy_audio_sequence_maxtracksize(&songfile->song->sequence);
 	self->m_Header.restartpos = 0;	
-	self->m_Header.channels = (uint16_t)psy_min(psy_audio_song_numtracks(songfile->song), 32);
+	self->m_Header.channels = (uint16_t)psy_min(psy_audio_song_numsongtracks(songfile->song), 32);
 	// Number of patterns stored in file. There should be at least 1 pattern
 	// if you expect to hear anything out of the speakers. The maximum value is
 	// 256. Don’t confuse this with[Song length]!
@@ -180,7 +180,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 	psyfile_write(songfile->file, &ptHeader, sizeof(ptHeader));
 	currentpos = psyfile_getpos(songfile->file);
 
-	maxtracks = (int32_t)psy_min(psy_audio_song_numtracks(songfile->song), 32);
+	maxtracks = (int32_t)psy_min(psy_audio_song_numsongtracks(songfile->song), 32);
 	// check every pattern for validity
 	if (psy_audio_sequence_patternused(&songfile->song->sequence, patIdx))
 	{
@@ -197,7 +197,7 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 			for (i = 0; i < maxtracks; i++) {
 				self->extraEntry[i] = NULL;
 			}
-			for (i = 0; i < (int32_t)psy_audio_song_numtracks(songfile->song); i++) {
+			for (i = 0; i < (int32_t)psy_audio_song_numsongtracks(songfile->song); i++) {
 				const psy_audio_LegacyPatternEntry* pData;
 
 				pData = psy_audio_ptrackline_const(ppattern, i, j);

@@ -147,9 +147,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			if (strcmp(header, XM_HEADER) == 0) {
 				XMSongLoader loader;
 
+				psyfile_seek(self->file, 0);
 				xmsongloader_init(&loader, self);
-				xmsongloader_load(&loader);
+				if (status = xmsongloader_load(&loader)) {
+					psy_audio_songfile_errfile(self);
+				}
 				xmsongloader_dispose(&loader);
+				psyfile_close(self->file);
 			} else {
 				MODSongLoader loader;
 
@@ -158,7 +162,8 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 				if (!modsongloader_load(&loader)) {
 					self->err = 2;
 				}
-				modsongloader_dispose(&loader);				
+				modsongloader_dispose(&loader);
+				psyfile_close(self->file);
 			}
 #else
 			status = PSY_ERRFILEFORMAT;
