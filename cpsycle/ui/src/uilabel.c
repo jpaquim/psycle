@@ -105,7 +105,7 @@ void psy_ui_label_text(psy_ui_Label* self, char* text)
 
 void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	char* text;
 
 	if (self->translate && self->translation) {
@@ -122,20 +122,20 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 
 			size = psy_ui_component_textsize(psy_ui_label_base(self),
 				text);
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
-				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4 +
+				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, tm));
 		}		
 	} else {
-		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
+		rv->width = psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx((tm.tmHeight * self->linespacing) +
-		psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));	
+	rv->height = psy_ui_value_makepx((tm->tmHeight * self->linespacing) +
+		psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, tm));
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	psy_ui_TextMetric tm;	
+	const psy_ui_TextMetric* tm;	
 	double centerx = 0.0;
 	double centery = 0.0;
 	uintptr_t count;
@@ -158,13 +158,13 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
-	if (size.height >= tm.tmHeight * 2) {
-		numcolumnavgchars = (int)(size.width / tm.tmAveCharWidth);
+	if (size.height >= tm->tmHeight * 2) {
+		numcolumnavgchars = (int)(size.width / tm->tmAveCharWidth);
 	} else {
 		numcolumnavgchars = UINTPTR_MAX;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (size.height - tm.tmHeight) / 2;
+		centery = (size.height - tm->tmHeight) / 2;
 	}
 	string = malloc(strlen(text) + 1);
 	psy_snprintf(string, strlen(text) + 1, "%s", text);
@@ -187,10 +187,10 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 				break;
 			}
 			psy_ui_textout(g, centerx, centery, token, numoutput);
-			centery += tm.tmHeight;
+			centery += tm->tmHeight;
 			count -= numoutput;
 			token += numoutput;
-			if (centery + tm.tmHeight >= size.height) {
+			if (centery + tm->tmHeight >= size.height) {
 				numcolumnavgchars = UINTPTR_MAX;
 			}
 		}

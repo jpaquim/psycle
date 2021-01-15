@@ -6,6 +6,7 @@
 #include "psyconvert.h"
 #include "constants.h"
 
+// Pattern
 psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,
 	int* rv_lines)
 {
@@ -58,6 +59,49 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* patt
 	return rv;
 }
 
+void psy_audio_convert_legacypattern(
+	psy_audio_Pattern* dst, psy_audio_LegacyPattern src,
+	uintptr_t numtracks, uintptr_t numrows,
+	uintptr_t lpb)
+{
+	psy_audio_PatternNode* node;
+	uintptr_t row;
+	uintptr_t track;
+
+	node = NULL;
+	for (row = 0; row < numrows; ++row) {
+		uint32_t track;
+		psy_dsp_big_beat_t offset;
+		psy_dsp_big_beat_t bpl;
+
+		bpl = 1.0 / lpb;
+		offset = bpl * row;
+		for (track = 0; track < MAX_TRACKS; ++track) {
+			psy_audio_LegacyPatternEntry* psy2ev;
+			bool empty;
+
+			psy2ev = psy_audio_ptrackline(src, track, row);
+			empty = psy2ev->_note == PSY2_NOTECOMMANDS_EMPTY &&
+				psy2ev->_inst == 255 &&
+				psy2ev->_mach == 255 &&
+				psy2ev->_cmd == 0 &&
+				psy2ev->_parameter == 0;
+			if (!empty) {
+				psy_audio_PatternEvent event;
+
+				psy_audio_patternevent_clear(&event);
+				event.note = (psy2ev->_note == 255) ? psy_audio_NOTECOMMANDS_EMPTY : psy2ev->_note;
+				event.inst = (psy2ev->_inst == 255) ? psy_audio_NOTECOMMANDS_INST_EMPTY : psy2ev->_inst;
+				event.mach = (psy2ev->_mach == 255) ? psy_audio_NOTECOMMANDS_MACH_EMPTY : psy2ev->_mach;
+				event.cmd = psy2ev->_cmd;
+				event.parameter = psy2ev->_parameter;
+				node = psy_audio_pattern_insert(dst, node, track, offset,
+					&event);
+			}
+		}
+	}
+}
+
 const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
 	psy_audio_LegacyPattern pattern, int track, int line)
 {
@@ -70,6 +114,7 @@ psy_audio_LegacyPatternEntry* psy_audio_ptrackline(
 	return (psy_audio_LegacyPatternEntry*)(pattern + (track * EVENT_SIZE) + (line * MULTIPLY));
 }
 
+// Instrument
 psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument* instrument)
 {
 	psy_audio_LegacyInstrument rv;	

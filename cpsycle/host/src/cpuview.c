@@ -47,12 +47,12 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 	if (workspace_song(self->workspace)) {
 		uintptr_t slot;
 		int cpy = 0;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_ui_IntSize size;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_intsize_init_size(
-			psy_ui_component_size(&self->component), &tm);
+			psy_ui_component_size(&self->component), tm);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
@@ -65,7 +65,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 				psy_ui_Value scrolltop;
 
 				scrolltop = psy_ui_component_scrolltop(&self->component);
-				if ((cpy - psy_ui_value_px(&scrolltop, &tm)) >= 0) {
+				if ((cpy - psy_ui_value_px(&scrolltop, tm)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;					
 
@@ -73,24 +73,24 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 					if (info) {						
 						psy_snprintf(text, 20, "%d", (int)slot);
 						psy_ui_textout(g, 0, cpy, text, strlen(text));
-						psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
+						psy_ui_textout(g, tm->tmAveCharWidth * 5, cpy,
 							psy_audio_machine_editname(machine),
 							psy_min(strlen(psy_audio_machine_editname(machine)), 14));
-						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
+						psy_ui_textout(g, tm->tmAveCharWidth * 21, cpy,
 							info->Name, strlen(info->Name));
 						if (psy_audio_player_measuring_cpu_usage(workspace_player(self->workspace))) {
 							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
 						} else {
 							psy_snprintf(text, 40, "N/A");
 						}
-						psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
+						psy_ui_textout(g, tm->tmAveCharWidth * 60, cpy, text,
 							strlen(text));
 					}
-					if ((cpy - psy_ui_value_px(&scrolltop, &tm)) > size.height) {
+					if ((cpy - psy_ui_value_px(&scrolltop, tm)) > size.height) {
 						break;
 					}
 				}
-				cpy += tm.tmHeight;
+				cpy += tm->tmHeight;
 			}
 		}
 	}

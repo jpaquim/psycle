@@ -212,7 +212,7 @@ void about_onalign(About* self)
 {
 	psy_ui_Size size;
 	psy_ui_Size bitmapsize;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double centerx;
 	double centery;
 	psy_ui_Size contribbuttonsize;
@@ -228,22 +228,22 @@ void about_onalign(About* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);
 	bitmapsize.width = psy_ui_value_makepx(
-		psy_max(tm.tmAveCharWidth * 40,
-			psy_ui_value_px(&bitmapsize.width, &tm)));
+		psy_max(tm->tmAveCharWidth * 40,
+			psy_ui_value_px(&bitmapsize.width, tm)));
 	bitmapsize.height = psy_ui_value_makepx(
-		psy_max(tm.tmHeight * 20,
-			psy_ui_value_px(&bitmapsize.height, &tm) + tm.tmHeight * 4));
-	centerx = (psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&bitmapsize.width, &tm)) / 2;
-	centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
+		psy_max(tm->tmHeight * 20,
+			psy_ui_value_px(&bitmapsize.height, tm) + tm->tmHeight * 4));
+	centerx = (psy_ui_value_px(&size.width, tm) - psy_ui_value_px(&bitmapsize.width, tm)) / 2;
+	centery = (psy_ui_value_px(&size.height, tm) - psy_ui_value_px(&bitmapsize.height, tm)) / 2;
 	contribbuttonsize = psy_ui_component_preferredsize(&self->contribbutton.component, &size);
 	versionbuttonsize = psy_ui_component_preferredsize(&self->versionbutton.component, &size);
 	licencebuttonsize = psy_ui_component_preferredsize(&self->licencebutton.component, &size);
 	okbuttonsize = psy_ui_component_preferredsize(&self->okbutton.component, &size);
-	if (centery + psy_ui_value_px(&bitmapsize.height, &tm) +
-		psy_ui_value_px(&okbuttonsize.height, &tm) > psy_ui_value_px(&size.height, &tm)) {
-		bitmapsize.height = psy_ui_value_makepx(psy_ui_value_px(&size.height, &tm) -
-			psy_ui_value_px(&okbuttonsize.height, &tm) * 2);
-		centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
+	if (centery + psy_ui_value_px(&bitmapsize.height, tm) +
+		psy_ui_value_px(&okbuttonsize.height, tm) > psy_ui_value_px(&size.height, tm)) {
+		bitmapsize.height = psy_ui_value_makepx(psy_ui_value_px(&size.height, tm) -
+			psy_ui_value_px(&okbuttonsize.height, tm) * 2);
+		centery = (psy_ui_value_px(&size.height, tm) - psy_ui_value_px(&bitmapsize.height, tm)) / 2;
 	}
 	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
 		psy_ui_point_make(
@@ -251,40 +251,40 @@ void about_onalign(About* self)
 			psy_ui_value_makepx(centery)),
 		bitmapsize);
 	do {
-		margin = tm.tmAveCharWidth * charmargin;
-		width = psy_ui_value_px(&contribbuttonsize.width, &tm) +
-			psy_ui_value_px(&versionbuttonsize.width, &tm) +
-			psy_ui_value_px(&licencebuttonsize.width, &tm) +
-			psy_ui_value_px(&okbuttonsize.width, &tm) + margin * 3;
+		margin = tm->tmAveCharWidth * charmargin;
+		width = psy_ui_value_px(&contribbuttonsize.width, tm) +
+			psy_ui_value_px(&versionbuttonsize.width, tm) +
+			psy_ui_value_px(&licencebuttonsize.width, tm) +
+			psy_ui_value_px(&okbuttonsize.width, tm) + margin * 3;
 		--charmargin;
-	} while (width > psy_ui_value_px(&size.width, &tm) && charmargin > 0);
-	cpx = (psy_ui_value_px(&size.width, &tm) - width) / 2;
+	} while (width > psy_ui_value_px(&size.width, tm) && charmargin > 0);
+	cpx = (psy_ui_value_px(&size.width, tm) - width) / 2;
 	psy_ui_component_setposition(&self->contribbutton.component,
 		psy_ui_point_make(
 			psy_ui_value_makepx(cpx),
-			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, tm))),
 		contribbuttonsize);
 	psy_ui_component_setposition(&self->versionbutton.component,
 		psy_ui_point_make(
-			psy_ui_value_makepx(cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) + margin),
-			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+			psy_ui_value_makepx(cpx + psy_ui_value_px(&contribbuttonsize.width, tm) + margin),
+			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, tm))),
 		versionbuttonsize);
 	psy_ui_component_setposition(&self->licencebutton.component,
 		psy_ui_point_make(
-			psy_ui_value_makepx(cpx + psy_ui_value_px(&contribbuttonsize.width, &tm)
-				+ psy_ui_value_px(&versionbuttonsize.width, &tm) +
+			psy_ui_value_makepx(cpx + psy_ui_value_px(&contribbuttonsize.width, tm)
+				+ psy_ui_value_px(&versionbuttonsize.width, tm) +
 				margin * 2),
-			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, tm))),
 		licencebuttonsize);
 	psy_ui_component_setposition(&self->okbutton.component,
 		psy_ui_point_make(
 			psy_ui_value_makepx(
-				cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) +
-				psy_ui_value_px(&versionbuttonsize.width, &tm) +
-				psy_ui_value_px(&licencebuttonsize.width, &tm) + 
+				cpx + psy_ui_value_px(&contribbuttonsize.width, tm) +
+				psy_ui_value_px(&versionbuttonsize.width, tm) +
+				psy_ui_value_px(&licencebuttonsize.width, tm) + 
 				margin * 3),
 			psy_ui_value_makepx(
-				centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+				centery + psy_ui_value_px(&bitmapsize.height, tm))),
 		okbuttonsize);
 }
 

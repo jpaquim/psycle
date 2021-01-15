@@ -45,7 +45,7 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 {
 	uintptr_t ch;
 	double cpx;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Value colew;
 	double headercolw_px;
 	double colw_px;
@@ -53,11 +53,11 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(4);
-	headercolw_px = psy_ui_value_px(&colew, &tm);
-	lineheight = (int)(tm.tmHeight * 1.2);
+	headercolw_px = psy_ui_value_px(&colew, tm);
+	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0, "Ch:", strlen("Ch:"));
 	colew = psy_ui_value_makeew(3.5);
-	colw_px = psy_ui_value_px(&colew, &tm);
+	colw_px = psy_ui_value_px(&colew, tm);
 	for (ch = 0, cpx = headercolw_px; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
 			cpx += colw_px) {
 		char text[256];
@@ -112,7 +112,7 @@ void midiactiveclockbox_init(MidiActiveClockBox* self,
 void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 	psy_ui_Graphics* g)
 {	
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Value colew;
 	double headercolw_px;
 	double colw_px;
@@ -120,10 +120,10 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_makeew(20);
-	headercolw_px = psy_ui_value_px(&colew, &tm);
+	headercolw_px = psy_ui_value_px(&colew, tm);
 	colew = psy_ui_value_makeew(3.5);
-	colw_px = psy_ui_value_px(&colew, &tm);
-	lineheight = (int)(tm.tmHeight * 1.2);
+	colw_px = psy_ui_value_px(&colew, tm);
+	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", strlen("MIDI Sync: START"));
 	psy_ui_textout(g, 0, lineheight, "MIDI Sync: CLOCK", strlen("MIDI Sync: CLOCK"));
 	psy_ui_textout(g, 0, lineheight * 2, "MIDI Sync: STOP", strlen("MIDI Sync: STOP"));
@@ -203,15 +203,15 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 	intptr_t ch;
 	double cpy;
 	double colx_px[4];
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	intptr_t i;
 	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	for (i = 0; i < 4; ++i) {
-		colx_px[i] = psy_ui_value_px(&self->colx[i], &tm);
+		colx_px[i] = psy_ui_value_px(&self->colx[i], tm);
 	}
-	lineheight = (int)(tm.tmHeight * 1.2);
+	lineheight = (int)(tm->tmHeight * 1.2);
 	midichannelmappingview_drawheader(self, g, colx_px, 0);
 	midiinput = &workspace_player(self->workspace)->midiinput;
 	for (ch = 0, cpy = lineheight; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,

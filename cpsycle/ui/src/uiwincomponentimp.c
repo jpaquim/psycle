@@ -74,7 +74,7 @@ static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id,
 	uintptr_t interval);
 static void dev_stoptimer(psy_ui_win_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
-static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp*);
+static const psy_ui_TextMetric* dev_textmetric(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
 	psy_ui_Font*);
 static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
@@ -345,15 +345,12 @@ void dev_move(psy_ui_win_ComponentImp* self, double left, double top)
 }
 
 void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)
-{
-	psy_ui_TextMetric tm;
-
-	tm = dev_textmetric(self);
+{	
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, NULL,
 		0, 0,
-		(int)psy_ui_value_px(&size.width, &tm),
-		(int)psy_ui_value_px(&size.height, &tm),
+		(int)psy_ui_value_px(&size.width, dev_textmetric(self)),
+		(int)psy_ui_value_px(&size.height, dev_textmetric(self)),
 		SWP_NOZORDER | SWP_NOMOVE);
 	
 	self->sizecache = size;
@@ -373,8 +370,8 @@ void dev_clientresize(psy_ui_win_ComponentImp* self, intptr_t width, intptr_t he
 		windowexstyle(self));
 	dev_resize(self,
 		psy_ui_size_make(
-			psy_ui_value_makepx(rc.right - rc.left),
-			psy_ui_value_makepx(rc.bottom - rc.top)));
+			psy_ui_value_makepx((double)rc.right - (double)rc.left),
+			psy_ui_value_makepx((double)rc.bottom - (double)rc.top)));
 }
 
 
@@ -399,15 +396,15 @@ psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp* self)
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, 0,
-		(int)psy_ui_value_px(&topleft.x, &tm),
-		(int)psy_ui_value_px(&topleft.y, &tm),
-		(int)(psy_ui_value_px(&size.width, &tm)),
-		(int)(psy_ui_value_px(&size.height, &tm)),
+		(int)psy_ui_value_px(&topleft.x, tm),
+		(int)psy_ui_value_px(&topleft.y, tm),
+		(int)(psy_ui_value_px(&size.width, tm)),
+		(int)(psy_ui_value_px(&size.height, tm)),
 		SWP_NOZORDER);	
 	dev_updatesize(self);
 }
@@ -531,13 +528,13 @@ void dev_invalidaterect(psy_ui_win_ComponentImp* self,
 	const psy_ui_Rectangle* r)
 {
 	RECT rc;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(self->component);
-	rc.left = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, &tm));
-	rc.top = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, &tm));
-	rc.right = (int)(r->right - psy_ui_value_px(&self->component->scroll.x, &tm));
-	rc.bottom = (int)(r->bottom - psy_ui_value_px(&self->component->scroll.y, &tm));
+	rc.left = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, tm));
+	rc.top = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, tm));
+	rc.right = (int)(r->right - psy_ui_value_px(&self->component->scroll.x, tm));
+	rc.bottom = (int)(r->bottom - psy_ui_value_px(&self->component->scroll.y, tm));
 	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 
@@ -606,11 +603,9 @@ void dev_preventinput(psy_ui_win_ComponentImp* self)
 	EnableWindow(self->hwnd, 0);
 }
 
-psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp* self)
+const psy_ui_TextMetric* dev_textmetric(psy_ui_win_ComponentImp* self)
 {
-	if (self->tmcachevalid) {
-		return self->tm;
-	} else {
+	if (!self->tmcachevalid) {		
 		psy_ui_TextMetric rv;
 		TEXTMETRIC tm;
 		HDC hdc;
@@ -658,9 +653,9 @@ psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp* self)
 		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
 		rv.tmCharSet = tm.tmCharSet;
 		self->tm = rv;
-		self->tmcachevalid = TRUE;
-		return rv;
+		self->tmcachevalid = TRUE;		
 	}
+	return &self->tm;
 }
 
 void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle

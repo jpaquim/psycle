@@ -823,12 +823,12 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, psy_ui_MouseEvent
 				if (machineuis_at(self, self->dragslot)) {
 					psy_ui_Point scroll;
 					psy_ui_RealPoint scroll_px;
-					psy_ui_TextMetric tm;
+					const psy_ui_TextMetric* tm;
 
 					tm = psy_ui_component_textmetric(&self->component);
 					scroll = psy_ui_component_scroll(&self->component);
-					scroll_px.x = psy_ui_value_px(&scroll.x, &tm);
-					scroll_px.y = psy_ui_value_px(&scroll.y, &tm);						
+					scroll_px.x = psy_ui_value_px(&scroll.x, tm);
+					scroll_px.y = psy_ui_value_px(&scroll.y, tm);						
 					machineui_editname(machineuis_at(self, self->dragslot),
 						&self->editname, scroll_px);
 					psy_ui_component_scrolltop(&self->component);
@@ -1428,7 +1428,7 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, double x, doub
 {		
 	psy_audio_Wire rv;
 	psy_TableIterator it;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);	
 	psy_audio_wire_init(&rv);

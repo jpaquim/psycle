@@ -118,20 +118,16 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 		
 		if (self->multiline) {
 			psy_ui_Size preferredsize;
-			psy_ui_TextMetric tm;
-
-			tm = psy_ui_component_textmetric(&self->component);			
-			preferredsize = self->imp->component_imp.vtable->dev_preferredsize(&self->imp->component_imp,
-				limit);
+					
+			preferredsize = self->imp->component_imp.vtable->dev_preferredsize(
+				&self->imp->component_imp, limit);
 			//rv->width = limit->width;
 			rv->height = preferredsize.height;
-		} else {
-			psy_ui_TextMetric tm;
-
-			tm = psy_ui_component_textmetric(&self->component);				
+		} else {			
 			size = psy_ui_component_textsize(&self->component,
 				self->translation);
-				rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 20);
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width,
+				psy_ui_component_textmetric(&self->component)) + 20);
 			rv->height = size.height;
 		}
 	}

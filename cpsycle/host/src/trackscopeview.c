@@ -232,14 +232,14 @@ void trackscopeview_ontimer(TrackScopeView* self, uintptr_t timerid)
 
 void trackscopeview_onalign(TrackScopeView* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;	
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);	
-	self->trackheight = (int)(tm.tmHeight * 2.75f);
-	self->textheight = tm.tmHeight;
-	self->trackwidth = psy_ui_value_px(&size.width, &tm) / self->maxcolumns;
+	self->trackheight = (int)(tm->tmHeight * 2.75f);
+	self->textheight = tm->tmHeight;
+	self->trackwidth = psy_ui_value_px(&size.width, tm) / self->maxcolumns;
 }
 
 void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
@@ -258,7 +258,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 	if (workspace_song(self->workspace)) {
 		intptr_t columns;
 		psy_ui_Size size;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		uintptr_t track;
 		double trackwidth;
 		uintptr_t numtracks;
@@ -267,7 +267,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		trackwidth = psy_ui_value_px(&size.width, &tm) / columns;		
+		trackwidth = psy_ui_value_px(&size.width, tm) / columns;		
 		track = (uintptr_t)((ev->x / trackwidth) + floor(ev->y / self->trackheight) * columns);
 		if (ev->button == 1) {
 			if (!psy_audio_trackstate_istrackmuted(

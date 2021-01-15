@@ -21,7 +21,7 @@ static void psy_ui_listbox_onpreferredsize(psy_ui_ListBox*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable psy_ui_listbox_vtable;
-static int psy_ui_listbox_vtable_initialized = 0;
+static bool psy_ui_listbox_vtable_initialized = FALSE;
 
 static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 {
@@ -30,7 +30,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 		psy_ui_listbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_listbox_onpreferredsize;		
-		psy_ui_listbox_vtable_initialized = 1;
+		psy_ui_listbox_vtable_initialized = TRUE;
 	}
 }
 
@@ -66,42 +66,58 @@ void ondestroy(psy_ui_ListBox* self, psy_ui_Component* sender)
 
 intptr_t psy_ui_listbox_addtext(psy_ui_ListBox* self, const char* text)
 {	
+	assert(self->imp);
+
 	return self->imp->vtable->dev_addtext(self->imp, text);
 }
 
 void psy_ui_listbox_settext(psy_ui_ListBox* self, const char* text,
 	intptr_t index)
 {
+	assert(self->imp);
+
 	self->imp->vtable->dev_settext(self->imp, text, index);
 }
 
 void psy_ui_listbox_clear(psy_ui_ListBox* self)
 {
+	assert(self->imp);
+
 	self->imp->vtable->dev_clear(self->imp);
 }
 
 void psy_ui_listbox_setcursel(psy_ui_ListBox* self, intptr_t index)
 {
+	assert(self->imp);
+
 	self->imp->vtable->dev_setcursel(self->imp, index);
 }
 
 intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
 {
+	assert(self->imp);
+
 	return self->imp->vtable->dev_cursel(self->imp);
 }
 
 void psy_ui_listbox_selitems(psy_ui_ListBox* self, int* items, int maxitems)
 {	
+	assert(self->imp);
+
 	self->imp->vtable->dev_selitems(self->imp, items, maxitems);
 }
 
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox* self)
 {
+	assert(self->imp);
+
 	return self->imp->vtable->dev_selcount(self->imp);
 }
 
 intptr_t psy_ui_listbox_count(psy_ui_ListBox* self)
 {
+	assert(self->imp);
+
 	return self->imp->vtable->dev_count(self->imp);
 }
 
@@ -113,13 +129,13 @@ void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, double num)
 void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm.tmAveCharWidth * 40) // tm.tmAveCharWidth
-		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber); // 
-	rv->height = psy_ui_value_makepx((tm.tmHeight * 1.2) *
+		? psy_ui_value_makepx(tm->tmAveCharWidth * 40) // tm.tmAveCharWidth
+		: psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber); // 
+	rv->height = psy_ui_value_makepx((tm->tmHeight * 1.2) *
 		psy_ui_listbox_count(self));	
 }
 

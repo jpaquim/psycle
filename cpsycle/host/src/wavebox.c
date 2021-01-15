@@ -193,12 +193,12 @@ uintptr_t waveboxcontext_numsustainloopframes(WaveBoxContext* self)
 
 void waveboxcontext_updateoffsetstep(WaveBoxContext* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(self->component);
 	if (self->zoomright - self->zoomleft >= 0) {
 		self->offsetstep = (double)waveboxcontext_numframes(self) /
-			psy_ui_value_px(&self->size.width, &tm) *
+			psy_ui_value_px(&self->size.width, tm) *
 			(self->zoomright - self->zoomleft);
 	} else {
 		self->offsetstep = 1.f;
@@ -341,7 +341,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle r;
 	psy_ui_RealSize size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	uintptr_t prevframe = 0;
 	psy_dsp_amp_t lastframevalue = 0;
 	
@@ -353,8 +353,8 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		psy_ui_textout(g,
-			(size.width - tm.tmAveCharWidth * strlen(self->nowavetext)) / 2,
-			(size.height - tm.tmHeight) / 2,
+			(size.width - tm->tmAveCharWidth * strlen(self->nowavetext)) / 2,
+			(size.height - tm->tmHeight) / 2,
 			self->nowavetext, strlen(self->nowavetext));
 	} else {
 		double scaley;		

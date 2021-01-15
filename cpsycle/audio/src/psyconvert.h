@@ -54,6 +54,10 @@ typedef unsigned char* psy_audio_LegacyPattern;
 // legacy pattern
 psy_audio_LegacyPattern psy_audio_allocoldpattern(psy_audio_Pattern* pattern, uintptr_t lpb,
 	int* rv_patternlines);
+void psy_audio_convert_legacypattern(
+	struct psy_audio_Pattern* dst, psy_audio_LegacyPattern src,
+	uintptr_t numtracks, uintptr_t numrows,
+	uintptr_t lpb);
 
 const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
 	psy_audio_LegacyPattern, int track, int line);

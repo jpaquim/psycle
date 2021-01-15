@@ -82,19 +82,19 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	intptr_t margin = 5;
 	double ident;
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_List* p;
 	psy_List* q;
 
 	size = psy_ui_component_size(&self->component);
 	size = psy_ui_component_preferredsize(&self->component, &size);
 	tm = psy_ui_component_textmetric(&self->component);
-	ident = 0; // tm.tmAveCharWidth * 0.5;
+	ident = 0; // tm->tmAveCharWidth * 0.5;
 	cpx = ident;
-	colwidth = floor((psy_ui_value_px(&size.width, &tm) - ident) / numparametercols);
+	colwidth = floor((psy_ui_value_px(&size.width, tm) - ident) / numparametercols);
 	p = q = psy_ui_component_children(&self->component, 0);
 	numrows = (psy_list_size(p) / numparametercols) + 1;
-	rowheight = floor(psy_ui_value_px(&size.height, &tm) / (double)numrows);
+	rowheight = floor(psy_ui_value_px(&size.height, tm) / (double)numrows);
 	for (; p != NULL; p = p->next, ++c, cpx += colwidth + margin) {
 		psy_ui_Component* component;
 
@@ -129,13 +129,13 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 		double cpymax = 0;
 		double colmax = 0;
 		psy_ui_Size size;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_List* p;
 		psy_List* q;
 
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		ident = tm.tmAveCharWidth * 1;
+		ident = tm->tmAveCharWidth * 1;
 		cpx = ident;
 		for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
 			p = p->next, ++c) {
@@ -148,17 +148,17 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 			}
 			component = (psy_ui_Component*)p->entry;
 			componentsize = psy_ui_component_preferredsize(component, &size);
-			if (colmax < psy_ui_value_px(&componentsize.width, &tm) + margin) {
-				colmax = (intptr_t)psy_ui_value_px(&componentsize.width, &tm) + margin;
+			if (colmax < psy_ui_value_px(&componentsize.width, tm) + margin) {
+				colmax = (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
 			}
-			cpx += (intptr_t)psy_ui_value_px(&componentsize.width, &tm) + margin;
-			if (cpymax < cpy + psy_ui_value_px(&componentsize.height, &tm) + margin) {
-				cpymax = floor(cpy + psy_ui_value_px(&componentsize.height, &tm) + margin);
+			cpx += (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
+			if (cpymax < cpy + psy_ui_value_px(&componentsize.height, tm) + margin) {
+				cpymax = floor(cpy + psy_ui_value_px(&componentsize.height, tm) + margin);
 			}
 		}
 		psy_list_free(q);
 		cpxmax = numparametercols * colmax;
-		rv->width = psy_ui_value_makepx(cpxmax + tm.tmAveCharWidth * 2);
+		rv->width = psy_ui_value_makepx(cpxmax + tm->tmAveCharWidth * 2);
 		rv->height = psy_ui_value_makepx(cpymax);
 	}
 }
@@ -236,7 +236,7 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 		uintptr_t t;
 		double cpx;
 		psy_ui_RealSize size;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		SequenceTrackBox trackheader;	
 
 		size = psy_ui_component_sizepx(&self->component);
@@ -272,7 +272,7 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 		psy_signal_emit(&self->signal_newtrack, self, 1,
 			(uintptr_t)psy_audio_sequence_sizetracks(self->state->sequence));
 	} else {				
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		SequenceTrackBox trackbox;
 		psy_audio_SequenceTrack* track;
@@ -416,15 +416,15 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 	psy_ui_Size* rv)
 {
 	if (self->state->sequence) {
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->width = psy_ui_value_makepx(self->state->margin +
 			psy_audio_sequence_sizetracks(self->state->sequence) *
-				psy_ui_value_px(&self->component.scrollstepx, &tm));
+				psy_ui_value_px(&self->component.scrollstepx, tm));
 		rv->height = psy_ui_value_makepx(
 			psy_audio_sequence_maxtracksize(self->state->sequence) *
-			psy_ui_value_px(&self->component.scrollstepy, &tm));
+			psy_ui_value_px(&self->component.scrollstepy, tm));
 	} else {
 		*rv = psy_ui_size_zero();
 	}
@@ -432,15 +432,15 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 
 void sequencelistview_computetextsizes(SequenceListView* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	self->avgcharwidth = tm.tmAveCharWidth;
-	self->lineheight = floor(tm.tmHeight * 1.2);
-	self->textoffsety = (self->lineheight - tm.tmHeight) / 2;
-	self->textheight = tm.tmHeight;
-	self->state->trackwidth = tm.tmAveCharWidth * 16;
-	self->identwidth = tm.tmAveCharWidth * 4;
+	self->avgcharwidth = tm->tmAveCharWidth;
+	self->lineheight = floor(tm->tmHeight * 1.2);
+	self->textoffsety = (self->lineheight - tm->tmHeight) / 2;
+	self->textheight = tm->tmHeight;
+	self->state->trackwidth = tm->tmAveCharWidth * 16;
+	self->identwidth = tm->tmAveCharWidth * 4;
 	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
 	self->component.scrollstepx = psy_ui_value_makepx(self->state->trackwidth);
 }

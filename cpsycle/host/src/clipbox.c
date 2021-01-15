@@ -135,18 +135,18 @@ void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Rectangle rc;
 	psy_ui_Colour currbackground;
 	psy_ui_Colour currborder;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	if (psy_ui_value_px(&size.height, &tm) > 40) {
+	if (psy_ui_value_px(&size.height, tm) > 40) {
 		size.height = psy_ui_value_makepx(40);
 	}
-	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, &tm) - 1,
-		psy_ui_value_px(&size.height, &tm) - 5);
+	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, tm) - 1,
+		psy_ui_value_px(&size.height, tm) - 5);
 	clipbox_currclipcolours(self, &currbackground, &currborder);
 	psy_ui_drawsolidrectangle(g, rc, currbackground);
 	psy_ui_setcolour(g, currborder);			

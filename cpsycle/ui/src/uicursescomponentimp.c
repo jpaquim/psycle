@@ -396,11 +396,12 @@ void dev_preventinput(psy_ui_curses_ComponentImp* self)
 {
 }
 
-psy_ui_TextMetric dev_textmetric(psy_ui_curses_ComponentImp* self, psy_ui_Font* font)
+const psy_ui_TextMetric* dev_textmetric(psy_ui_curses_ComponentImp* self, psy_ui_Font* font)
 {
-	psy_ui_TextMetric rv;
+	static psy_ui_TextMetric rv;
+
 	memset(&rv, 0, sizeof(psy_ui_TextMetric));
-	return rv;
+	return &rv;
 }
 
 void dev_setcursor(psy_ui_curses_ComponentImp* self, psy_ui_CursorStyle cursorstyle)

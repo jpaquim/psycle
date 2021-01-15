@@ -291,15 +291,15 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 
 void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	self->avgcharwidth = tm.tmAveCharWidth;
-	self->lineheight = (int) (tm.tmHeight * 1.5);
-	self->columnwidth = tm.tmAveCharWidth * 45;
-	self->identwidth = tm.tmAveCharWidth * 4;
+	self->avgcharwidth = tm->tmAveCharWidth;
+	self->lineheight = (int) (tm->tmHeight * 1.5);
+	self->columnwidth = tm->tmAveCharWidth * 45;
+	self->identwidth = tm->tmAveCharWidth * 4;
 	self->numparametercols = 
-		(uintptr_t)psy_max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
+		(uintptr_t)psy_max(1, psy_ui_value_px(&size->width, tm) / self->columnwidth);
 	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
 }
 

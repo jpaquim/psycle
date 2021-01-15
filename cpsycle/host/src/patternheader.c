@@ -123,7 +123,7 @@ TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader* self, uin
 void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double cpx;
 	double centerx;
 	uintptr_t track;
@@ -225,12 +225,12 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 		double track_x;
 		double centerx;
 		psy_ui_Value scrollleft;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		
 		tm = psy_ui_component_textmetric(&self->component);
 		scrollleft = psy_ui_component_scrollleft(&self->component);
 		track = trackergridstate_pxtotrack(self->gridstate,
-			ev->x + psy_ui_value_px(&scrollleft, &tm),
+			ev->x + psy_ui_value_px(&scrollleft, tm),
 			psy_audio_player_numsongtracks(workspace_player(self->workspace)));
 		centerx = psy_max(0, (trackergridstate_trackwidth(self->gridstate, track) -
 			self->gridstate->skin->headercoords.background.destwidth) / 2);
@@ -241,7 +241,7 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.mute.destwidth,
 			self->gridstate->skin->headercoords.mute.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
-				psy_ui_value_px(&scrollleft, &tm), ev->y)) {
+				psy_ui_value_px(&scrollleft, tm), ev->y)) {
 			if (psy_audio_patterns_istrackmuted(&workspace_song(self->workspace)->patterns,
 				track)) {
 				psy_audio_patterns_unmutetrack(&workspace_song(self->workspace)->patterns,
@@ -258,7 +258,7 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.solo.destwidth,
 			self->gridstate->skin->headercoords.solo.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
-			psy_ui_value_px(&scrollleft, &tm), ev->y)) {
+			psy_ui_value_px(&scrollleft, tm), ev->y)) {
 			if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
 				track)) {
 				psy_audio_patterns_deactivatesolotrack(

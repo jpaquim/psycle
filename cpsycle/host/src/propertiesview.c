@@ -168,14 +168,14 @@ void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Graphics* g)
 
 void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	self->textheight = tm.tmHeight;
+	self->textheight = tm->tmHeight;
 	self->lineheight = (int) (self->textheight * 1.5);
 	self->centery = (self->lineheight - self->textheight) / 2;
-	self->identwidth = tm.tmAveCharWidth * 4;
-	self->cpx = tm.tmAveCharWidth * 2;
+	self->identwidth = tm->tmAveCharWidth * 4;
+	self->cpx = tm->tmAveCharWidth * 2;
 	self->cpy = 0;
 	self->numblocklines = 1;
 	self->lastlevel = 0;
@@ -248,7 +248,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	psy_Property* property, int level)
 {			
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Value scrolltop;
 
 	if (self->linestate_clipstart && self->linestate_clipstart->properties != property) {
@@ -285,8 +285,8 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	scrolltop = psy_ui_component_scrolltop(&self->component);
-	return (self->cpy - psy_ui_value_px(&scrolltop, &tm))
-		< psy_ui_value_px(&size.height, &tm);
+	return (self->cpy - psy_ui_value_px(&scrolltop, tm))
+		< psy_ui_value_px(&size.height, tm);
 }
 
 void propertiesrenderer_addremoveident(PropertiesRenderer* self, int level)
@@ -330,7 +330,7 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 		uintptr_t count;
 		const char* str;
 		uintptr_t numcolumnavgchars;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		count = strlen(psy_property_translation(property));
 		str = psy_property_translation(property);
@@ -351,7 +351,7 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 		}
 		
 		numcolumnavgchars = (uintptr_t)(propertiesrenderer_columnwidth(self, column) /
-			(int)(tm.tmAveCharWidth * 1.70));
+			(int)(tm->tmAveCharWidth * 1.70));
 		while (count > 0) {
 			uintptr_t numoutput;
 			char* wrap;
@@ -473,12 +473,12 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* prop
 	}
 	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
 		psy_ui_Rectangle r;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);		
-		r.left = propertiesrenderer_columnstart(self, column + 1) - tm.tmAveCharWidth * 6;
+		r.left = propertiesrenderer_columnstart(self, column + 1) - tm->tmAveCharWidth * 6;
 		r.top = self->cpy + self->centery;
-		r.right = r.left + tm.tmAveCharWidth * 4;
+		r.right = r.left + tm->tmAveCharWidth * 4;
 		r.bottom = r.top + self->textheight + 2;
 		psy_ui_drawsolidrectangle(self->g, r,
 			psy_ui_colour_make(psy_property_item_colour(property)));
@@ -504,7 +504,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 	uintptr_t column)
 {
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Rectangle r;	
 	
 	psy_ui_setcolour(self->g, psy_ui_component_colour(&self->component));
@@ -545,8 +545,8 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 	tm = psy_ui_component_textmetric(&self->component);
 	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy;
-	r.right = r.left + psy_ui_value_px(&size.width, &tm) + 6;
-	r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;
+	r.right = r.left + psy_ui_value_px(&size.width, tm) + 6;
+	r.bottom = r.top + psy_ui_value_px(&size.height, tm) + 2;
 	psy_ui_drawrectangle(self->g, r);
 }
 
@@ -555,7 +555,7 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 {
 	psy_ui_Rectangle r;
 	int checked = 0;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
@@ -569,9 +569,9 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 	cornersize.height = psy_ui_value_makeeh(0.6);
 	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy + (self->lineheight -
-		psy_ui_value_px(&size.height, &tm)) / 2;
-	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
-	r.bottom = r.top + psy_ui_value_px(&size.height, &tm);
+		psy_ui_value_px(&size.height, tm)) / 2;
+	r.right = r.left + (int)(tm->tmAveCharWidth * 4.8);
+	r.bottom = r.top + psy_ui_value_px(&size.height, tm);
 	psy_ui_setcolour(self->g, psy_ui_colour_make(0x00555555));
 	psy_ui_drawroundrectangle(self->g, r, cornersize);
 	if (psy_property_ischoiceitem(property)) {
@@ -585,19 +585,19 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 		checked = psy_property_item_int(property) != 0;
 	}
 	if (!checked) {
-		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm.tmAveCharWidth * 0.4);
+		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm->tmAveCharWidth * 0.4);
 		r.top = self->cpy + (self->lineheight -
-			psy_ui_value_px(&knobsize.height, &tm)) / 2;
-		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
-		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
+			psy_ui_value_px(&knobsize.height, tm)) / 2;
+		r.right = r.left + (int)(tm->tmAveCharWidth * 2.5);
+		r.bottom = r.top + psy_ui_value_px(&knobsize.height, tm);
 		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
 			psy_ui_colour_make(0x00555555));
 	} else {
-		r.left = propertiesrenderer_columnstart(self, column) + tm.tmAveCharWidth * 2;
+		r.left = propertiesrenderer_columnstart(self, column) + tm->tmAveCharWidth * 2;
 		r.top = self->cpy + (self->lineheight -
-			psy_ui_value_px(&knobsize.height, &tm)) / 2;
-		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
-		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
+			psy_ui_value_px(&knobsize.height, tm)) / 2;
+		r.right = r.left + (int)(tm->tmAveCharWidth * 2.5);
+		r.bottom = r.top + psy_ui_value_px(&knobsize.height, tm);
 		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
 			psy_ui_colour_make(0x00CACACA));
 	}	
@@ -759,7 +759,7 @@ void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
 	uintptr_t count;
 	uintptr_t numcolumnavgchars;
 	const char* str;	
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	if (propertiesrenderer_columnwidth(self, column) == 0) {
 		++self->numblocklines;
@@ -770,7 +770,7 @@ void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
 	tm = psy_ui_component_textmetric(&self->component);
 	numcolumnavgchars = (uintptr_t)
 		(propertiesrenderer_columnwidth(self, column) /
-		(int)(tm.tmAveCharWidth * 1.70));
+		(int)(tm->tmAveCharWidth * 1.70));
 	while (count > 0) {
 		uintptr_t numoutput;
 		char* wrap;
@@ -805,14 +805,14 @@ bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 		psy_ui_Rectangle r;
 		int checked = 0;
 		psy_ui_Size size;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_textsize(&self->component, "x");
 		r.left = propertiesrenderer_columnstart(self, column);
 		r.top = self->cpy;
-		r.right = r.left + tm.tmAveCharWidth * 4;;
-		r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;	
+		r.right = r.left + tm->tmAveCharWidth * 4;;
+		r.bottom = r.top + psy_ui_value_px(&size.height, tm) + 2;	
 		rv = psy_ui_rectangle_intersect(&r, self->mx, self->my);
 	} else if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER ||
 			psy_property_type(property) == PSY_PROPERTY_TYPE_STRING ||
@@ -979,11 +979,11 @@ void propertiesrenderer_computecolumns(PropertiesRenderer* self,
 	const psy_ui_Size* size)
 {
 	uintptr_t column;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	tm = psy_ui_component_textmetric(&self->component);
 	for (column = 0; column < PROPERTIESRENDERER_NUMCOLS; ++column) {
 		self->col_width[column] = self->col_perc[column] *
-			psy_ui_value_px(&size->width, &tm);
+			psy_ui_value_px(&size->width, tm);
 		if (column == 0) {
 			self->col_start[column] = 0;
 		} else {
@@ -1265,13 +1265,13 @@ void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* se
 			psy_ui_Value scrollstepy;
 			double scrollstepxpx;
 			psy_ui_Value scrollstepx;
-			psy_ui_TextMetric tm;
+			const psy_ui_TextMetric* tm;
 
 			tm = psy_ui_component_textmetric(&self->renderer.component);			
 			scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
-			scrollstepypx = psy_ui_value_px(&scrollstepy, &tm);
+			scrollstepypx = psy_ui_value_px(&scrollstepy, tm);
 			scrollstepx = psy_ui_component_scrollstepx(&self->renderer.component);
-			scrollstepxpx = psy_ui_value_px(&scrollstepx, &tm);
+			scrollstepxpx = psy_ui_value_px(&scrollstepx, tm);
 			switch (cmd.id) {
 				case CMD_NAVTOP:
 					psy_ui_component_setscrolltop(&self->renderer.component,
@@ -1327,13 +1327,13 @@ double propertiesview_checkrange(PropertiesView* self, double position)
 	psy_ui_Value scrollstepy;
 	intptr_t minval;
 	intptr_t maxval;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->renderer.component);
 	psy_ui_component_verticalscrollrange(&self->renderer.component,
 		&minval, &maxval);
 	scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
-	scrollstepypx = psy_ui_value_px(&scrollstepy, &tm);
+	scrollstepypx = psy_ui_value_px(&scrollstepy, tm);
 	steps = (intptr_t)(position / scrollstepypx);
 	steps = psy_min(maxval, steps);
 	return (double)(steps * scrollstepypx);

@@ -111,10 +111,11 @@ void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,
 		if (self->charnumber == 0) {
 			rv->width = psy_ui_value_makeew(9);
 		} else {
-			psy_ui_TextMetric tm;
+			const psy_ui_TextMetric* tm;
 
 			tm = psy_ui_component_textmetric(&self->component);
-			rv->width = psy_ui_value_makepx(self->charnumber * tm.tmAveCharWidth + 40);
+			rv->width = psy_ui_value_makepx(
+				self->charnumber * tm->tmAveCharWidth + 40);
 		}
 		rv->height = psy_ui_value_makeeh(1);
 	}
@@ -130,7 +131,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	double ax;
 	double ay;
 	intptr_t sel;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double vcenter;
 	double varrowcenter;
 	uint32_t arrowcolour = 0x00777777;
@@ -139,10 +140,10 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, 
-		psy_ui_value_px(&size.width, &tm) - 42,
-		psy_ui_value_px(&size.height, &tm));	
-	vcenter = (psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2;
-	varrowcenter = (psy_ui_value_px(&size.height, &tm) - 10) / 2;
+		psy_ui_value_px(&size.width, tm) - 42,
+		psy_ui_value_px(&size.height, tm));	
+	vcenter = (psy_ui_value_px(&size.height, tm) - tm->tmHeight) / 2;
+	varrowcenter = (psy_ui_value_px(&size.height, tm) - 10) / 2;
 	sel = psy_ui_combobox_cursel(self);	
 	if (sel != -1) {
 		char text[512];
@@ -161,7 +162,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 				text, strlen(text));			
 		}
 	}
-	ax = psy_ui_value_px(&size.width, &tm) - 10;
+	ax = psy_ui_value_px(&size.width, tm) - 10;
 	ay = 4 + varrowcenter;
 
 	arrow_down[0].x = 0 + ax;
@@ -178,7 +179,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowcolour, arrowcolour);
 	}
 	if (hasnextentry(self)) {
-		ax = psy_ui_value_px(&size.width, &tm) - 25;
+		ax = psy_ui_value_px(&size.width, tm) - 25;
 		ay = 2 + varrowcenter;
 
 		arrow_right[0].x = 0 + ax;
@@ -198,7 +199,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	}
 
 	if (haspreventry(self)) {
-		ax = psy_ui_value_px(&size.width, &tm) - 40;
+		ax = psy_ui_value_px(&size.width, tm) - 40;
 		ay = 2 + varrowcenter;
 
 		arrow_left[0].x = 4 + ax;
@@ -220,11 +221,11 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 
 void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size = psy_ui_component_size(&self->component);
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	if (ev->x >= psy_ui_value_px(&size.width, &tm) - 40 && ev->x < psy_ui_value_px(&size.width, &tm) - 25) {
+	if (ev->x >= psy_ui_value_px(&size.width, tm) - 40 && ev->x < psy_ui_value_px(&size.width, tm) - 25) {
 		intptr_t index;
 
 		printf("combobox mousedown 1\n");
@@ -233,7 +234,7 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 			psy_ui_combobox_setcursel(self, index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
-	} else if (ev->x >= psy_ui_value_px(&size.width, &tm) - 25 && ev->x < psy_ui_value_px(&size.width, &tm) - 10) {
+	} else if (ev->x >= psy_ui_value_px(&size.width, tm) - 25 && ev->x < psy_ui_value_px(&size.width, tm) - 10) {
 		intptr_t count;
 		intptr_t index;
 		
@@ -253,21 +254,21 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	if (self->hover) {
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		int hover = self->hover;
 		psy_ui_Size size = psy_ui_component_size(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
 
-		if (ev->x >= psy_ui_value_px(&size.width, &tm) - 40 && ev->x <
-			psy_ui_value_px(&size.width, &tm) - 25) {
+		tm = psy_ui_component_textmetric(&self->component);
+		if (ev->x >= psy_ui_value_px(&size.width, tm) - 40 && ev->x <
+			psy_ui_value_px(&size.width, tm) - 25) {
 			intptr_t index = psy_ui_combobox_cursel(self);
 			if (index > 0) {
 				self->hover = 2;
 			}
 		}
 		else
-			if (ev->x >= psy_ui_value_px(&size.width, &tm) - 25 && ev->x <
-					psy_ui_value_px(&size.width, &tm) - 10) {
+			if (ev->x >= psy_ui_value_px(&size.width, tm) - 25 && ev->x <
+					psy_ui_value_px(&size.width, tm) - 10) {
 				intptr_t count;
 				intptr_t index;
 				count = self->imp->vtable->dev_count(self->imp); 

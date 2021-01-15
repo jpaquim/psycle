@@ -501,7 +501,7 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 	double centery;
 	psy_ui_Rectangle r;
 	char label[512];
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
@@ -520,7 +520,7 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 		}
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	centery = (height - tm.tmHeight) / 2;
+	centery = (height - tm->tmHeight) / 2;
 	psy_ui_textoutrectangle(g, left + 20, top + centery,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, label, strlen(label));
@@ -578,7 +578,7 @@ void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* para
 
 void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, double* height)
 {	
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	static float SMALLDIV = 2.f;
 
 	switch (paramtype) {
@@ -589,26 +589,26 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, do
 	case MPF_SLIDERCHECK:
 		tm = psy_ui_component_textmetric(&self->component);
 		*height = psy_max(self->skin->checkoff.destheight,
-			tm.tmHeight);
+			tm->tmHeight);
 		*width = self->skin->checkoff.destwidth +
-			tm.tmAveCharWidth * 5;
+			tm->tmAveCharWidth * 5;
 		break;
 	case MPF_SLIDER:
 		*height = self->skin->slider.destheight;
 		*width = self->skin->slider.destwidth;
 		tm = psy_ui_component_textmetric(&self->component);
-		if (*width < tm.tmAveCharWidth * 30) {
-			*width = tm.tmAveCharWidth * 30;
+		if (*width < tm->tmAveCharWidth * 30) {
+			*width = tm->tmAveCharWidth * 30;
 		}
 		if (small) {
 			*width = *width / SMALLDIV;
 		}
 		if (*width < self->skin->vuon.destwidth +
 			self->skin->checkoff.destwidth + 50 +
-			tm.tmAveCharWidth * 5) {
+			tm->tmAveCharWidth * 5) {
 			*width = self->skin->vuon.destwidth +
 				self->skin->checkoff.destwidth + 50 +
-				tm.tmAveCharWidth * 5;
+				tm->tmAveCharWidth * 5;
 		}
 		break;
 		case MPF_SLIDERLEVEL:
@@ -620,8 +620,8 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, do
 		break;		
 		default:
 			tm = psy_ui_component_textmetric(&self->component);
-			*width = tm.tmAveCharWidth * 30;			
-			*height = tm.tmHeight * 2;			
+			*width = tm->tmAveCharWidth * 30;			
+			*height = tm->tmHeight * 2;			
 			if (small) {
 				*width = *width / SMALLDIV;
 			}			
@@ -836,7 +836,7 @@ void paramview_computepositions(ParamView* self)
 		double cpx = 0;
 		double cpy = 0;
 		double cpy_slidercheck;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		numrows = paramview_numrows(self);
@@ -901,7 +901,7 @@ void paramview_computepositions(ParamView* self)
 					}
 				}
 				cpx += colmax;
-				if (psy_ui_value_px(&self->cpmax.width, &tm) < cpx) {
+				if (psy_ui_value_px(&self->cpmax.width, tm) < cpx) {
 					self->cpmax.width = psy_ui_value_makepx(cpx);
 				}
 				++col;
@@ -941,7 +941,7 @@ void paramview_computepositions(ParamView* self)
 			} else {
 				position->bottom = cpy + height;				
 			}
-			if (psy_ui_value_px(&self->cpmax.height, &tm) < cpy + height) {
+			if (psy_ui_value_px(&self->cpmax.height, tm) < cpy + height) {
 				self->cpmax.height = psy_ui_value_makepx(cpy + height);
 			}
 			if (paramtype != MPF_IGNORE && paramtype != MPF_SLIDER &&

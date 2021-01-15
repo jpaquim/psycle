@@ -43,7 +43,7 @@ static void dev_setcursor(psy_ui_win_EditImp* self, psy_ui_CursorStyle style) { 
 static void dev_starttimer(psy_ui_win_EditImp* self, uintptr_t id, uintptr_t interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_win_EditImp* self, uintptr_t id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_win_EditImp* self, int ressourceid) { self->win_component_imp.imp.vtable->dev_seticonressource(&self->win_component_imp.imp, ressourceid); }
-static psy_ui_TextMetric dev_textmetric(psy_ui_win_EditImp* self, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
+static const psy_ui_TextMetric* dev_textmetric(psy_ui_win_EditImp* self, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_win_EditImp* self, const char* text, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textsize(&self->win_component_imp.imp, text, font); }
 static void dev_setbackgroundcolour(psy_ui_win_EditImp* self, psy_ui_Colour colour) { self->win_component_imp.imp.vtable->dev_setbackgroundcolour(&self->win_component_imp.imp, colour); }
 static void dev_settitle(psy_ui_win_EditImp* self, const char* title) { self->win_component_imp.imp.vtable->dev_settitle(&self->win_component_imp.imp, title); }
@@ -53,47 +53,47 @@ static void* dev_platform(psy_ui_win_EditImp* self) { return (void*) &self->win_
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void imp_vtable_init(void)
 {
 	if (!vtable_initialized) {		
-		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose) dev_dispose;
-		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy) dev_destroy;
-		vtable.dev_show = (psy_ui_fp_componentimp_dev_show) dev_show;
-		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate) dev_showstate;
-		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide) dev_hide;
-		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
-		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
-		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
-		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize) dev_clientresize;
-		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
-		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
-		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
-		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
-		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
-		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
-		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture) dev_capture;
-		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture) dev_releasecapture;
-		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
-		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect) dev_invalidaterect;
-		vtable.dev_update = (psy_ui_fp_componentimp_dev_update) dev_update;
-		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;
-		vtable.dev_children = (psy_ui_fp_componentimp_dev_children) dev_children;
-		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput) dev_enableinput;
-		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput) dev_preventinput;
-		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor) dev_setcursor;
-		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer) dev_starttimer;
-		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer) dev_stoptimer;
-		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
-		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
-		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolour = (psy_ui_fp_componentimp_dev_setbackgroundcolour) dev_setbackgroundcolour;
-		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
-		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
-		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;
-		vtable.dev_platform = (psy_ui_fp_componentimp_dev_platform) dev_platform;
-		vtable_initialized = 1;
+		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
+		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
+		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
+		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)dev_showstate;
+		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide)dev_hide;
+		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible)dev_visible;
+		vtable.dev_move = (psy_ui_fp_componentimp_dev_move)dev_move;
+		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)dev_resize;
+		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)dev_clientresize;
+		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)dev_setposition;
+		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
+		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)dev_framesize;
+		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto)dev_scrollto;
+		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent)dev_parent;
+		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
+		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)dev_releasecapture;
+		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate)dev_invalidate;
+		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect)dev_invalidaterect;
+		vtable.dev_update = (psy_ui_fp_componentimp_dev_update)dev_update;
+		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont)dev_setfont;
+		vtable.dev_children = (psy_ui_fp_componentimp_dev_children)dev_children;
+		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)dev_enableinput;
+		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)dev_preventinput;
+		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)dev_setcursor;
+		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)dev_starttimer;
+		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)dev_stoptimer;
+		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource)dev_seticonressource;
+		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)dev_textmetric;
+		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)dev_textsize;
+		vtable.dev_setbackgroundcolour = (psy_ui_fp_componentimp_dev_setbackgroundcolour)dev_setbackgroundcolour;
+		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
+		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
+		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
+		vtable.dev_platform = (psy_ui_fp_componentimp_dev_platform)dev_platform;
+		vtable_initialized = TRUE;
 	}
 }
 
