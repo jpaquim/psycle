@@ -125,7 +125,7 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size ptsize;
 	psy_ui_Size ptsize2;
 	psy_dsp_EnvelopePoint* q = 0;
@@ -139,19 +139,19 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	ptsize = psy_ui_size_make(psy_ui_value_makepx(5), psy_ui_value_makepx(5));
 	ptsize2 = psy_ui_size_make(
-		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, &tm) / 2),
-		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, &tm) / 2));
+		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, tm) / 2),
+		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, tm) / 2));
 	for (p = points; p != 0; p = p->next) {
 		psy_ui_Rectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
 		psy_ui_setrectangle(&r,
-			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&ptsize2.width, &tm),
+			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&ptsize2.width, tm),
 			envelopebox_pxvalue(self, pt->value * self->modamount) -
-				psy_ui_value_px(&ptsize2.height, &tm),
-			psy_ui_value_px(&ptsize.width, &tm),
-			psy_ui_value_px(&ptsize.height, &tm));
+				psy_ui_value_px(&ptsize2.height, tm),
+			psy_ui_value_px(&ptsize.width, tm),
+			psy_ui_value_px(&ptsize.height, tm));
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00B1C8B0));
 		q = pt;
 	}
@@ -197,13 +197,13 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 
 void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	self->cx = psy_ui_value_px(&size->width, &tm) - psy_ui_value_px(&self->spacing.left, &tm) -
-		psy_ui_value_px(&self->spacing.right, &tm);
-	self->cy = psy_ui_value_px(&size->height, &tm) - psy_ui_value_px(&self->spacing.top, &tm) -
-		psy_ui_value_px(&self->spacing.bottom, &tm);
+	self->cx = psy_ui_value_px(&size->width, tm) - psy_ui_value_px(&self->spacing.left, tm) -
+		psy_ui_value_px(&self->spacing.right, tm);
+	self->cy = psy_ui_value_px(&size->height, tm) - psy_ui_value_px(&self->spacing.top, tm) -
+		psy_ui_value_px(&self->spacing.bottom, tm);
 }
 
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)

@@ -440,7 +440,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;	
 	double baseline;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	uintptr_t frame;
 	uintptr_t step;
 
@@ -464,10 +464,10 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 			if (cpx >= 0 && cpx < size.width) {
 				char txt[40];
 
-				psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
+				psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm->tmHeight / 3);
 				psy_snprintf(txt, 40, "%d", (int)waveboxcontext_realframe(self->metric, frame));
-				psy_ui_textout(g, (int)cpx + (int)(tm.tmAveCharWidth * 0.75),
-					baseline - tm.tmHeight - tm.tmHeight / 6, txt, strlen(txt));
+				psy_ui_textout(g, (int)cpx + (int)(tm->tmAveCharWidth * 0.75),
+					baseline - tm->tmHeight - tm->tmHeight / 6, txt, strlen(txt));
 			}
 		}
 	}
@@ -478,7 +478,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 {
 	if (self->sample) {
 		psy_ui_Rectangle r;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		
 		size = psy_ui_component_sizepx(&sender->component);
@@ -490,8 +490,8 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
-				(size.height - tm.tmHeight) / 2, txt, strlen(txt));
+			psy_ui_textout(g, (size.width - tm->tmAveCharWidth * strlen(txt)) / 2,
+				(size.height - tm->tmHeight) / 2, txt, strlen(txt));
 		} else {
 			double x;
 			double centery;

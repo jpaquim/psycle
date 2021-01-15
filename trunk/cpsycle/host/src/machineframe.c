@@ -293,21 +293,21 @@ void machineframe_resize(MachineFrame* self)
 	psy_ui_Size viewsize;	
 	psy_ui_Size bar;
 	psy_ui_Size newval;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);	
 	viewsize = psy_ui_component_preferredsize(self->view, 0);	
 	if (psy_ui_component_visible(&self->parameterbox.component)) {				
 		viewsize.width = psy_ui_value_makepx(
-			psy_ui_value_px(&viewsize.width, &tm) + 150);
+			psy_ui_value_px(&viewsize.width, tm) + 150);
 	}	
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);
 	newval = psy_ui_component_preferredsize(&self->newval.component,
 		&viewsize);
-	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, &tm);
+	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, tm);
 	if (self->newval.component.visible) {
-		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, &tm);
+		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, tm);
 	}
 	psy_ui_component_clientresize(&self->component, viewsize);
 }

@@ -22,12 +22,19 @@ extern "C" {
 //       SampleIterator(Wavedatacontroller)?, xmenvelopecontroller?,
 //       samplervoice_work?
 
-#define XM_SAMPLER_TWK_AMIGASLIDES 0x18
-#define XM_SAMPLER_TWK_GLOBALVOLUME 0x28
-#define XM_SAMPLER_TWK_PANNINGMODE 0x40
+#define XM_SAMPLER_TWK_CHANNEL_START 4
+
+#define XM_SAMPLER_TWK_AMIGASLIDES 0
+#define XM_SAMPLER_TWK_GLOBALVOLUME 1
+#define XM_SAMPLER_TWK_PANNINGMODE 2
 
 #define XM_SAMPLER_MAX_POLYPHONY 64///< max polyphony
 #define XM_SAMPLER_MAX_TRACKS 64
+
+#define XM_SAMPLER_TWK_CHANNEL_PANNING 0x1
+
+#define XM_CHANNELROW 2
+
 
 typedef struct psy_audio_XMSampler {
 	// inherits

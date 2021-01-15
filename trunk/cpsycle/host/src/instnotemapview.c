@@ -155,7 +155,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	int numwhitekeys;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_IntSize size;
 
 	numwhitekeys = 0;
@@ -166,7 +166,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_size(&self->component), &tm);
+		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	self->component.scrollstepy = psy_ui_value_makepx(self->metrics.lineheight * 3);
 }
@@ -247,7 +247,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		int cpy;
 		psy_List* p;		
 		uintptr_t c = 0;		
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		uint8_t keymin = 0;
 		uint8_t keymax = psy_audio_NOTECOMMANDS_RELEASE;
@@ -287,9 +287,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					(int)(isblack((uint8_t)entry->keyrange.low + 1)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r, startx,
-					psy_ui_value_px(&scrolltop, &tm),
+					psy_ui_value_px(&scrolltop, tm),
 					endx - startx,
-					psy_ui_value_px(&scrolltop, &tm) + size.height);
+					psy_ui_value_px(&scrolltop, tm) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 				startx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.high) /
@@ -303,9 +303,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r,
 					startx,
-					psy_ui_value_px(&scrolltop, &tm),
+					psy_ui_value_px(&scrolltop, tm),
 					endx - startx,
-					psy_ui_value_px(&scrolltop, &tm) + size.height);
+					psy_ui_value_px(&scrolltop, tm) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 			}
 		}
@@ -340,20 +340,20 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			static const char* nomapping = "No Instrument Mapping";
 
 			psy_ui_textout(g, 
-				(size.width - tm.tmAveCharWidth * strlen(nomapping)) / 2,
-				(size.height - tm.tmHeight) / 2,
+				(size.width - tm->tmAveCharWidth * strlen(nomapping)) / 2,
+				(size.height - tm->tmHeight) / 2,
 				nomapping, strlen(nomapping));
 		}
 	} else {
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		static const char* noinst = "No Instrument";
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size =  psy_ui_component_sizepx(&self->component);
 		psy_ui_textout(g,
-			(size.width - tm.tmAveCharWidth * strlen(noinst)) / 2,
-			(size.height - tm.tmHeight) / 2,
+			(size.width - tm->tmAveCharWidth * strlen(noinst)) / 2,
+			(size.height - tm->tmHeight) / 2,
 			noinst, strlen(noinst));		
 	}
 }
@@ -380,7 +380,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	int numwhitekeys;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_IntSize size;
 
 	numwhitekeys = 0;
@@ -391,7 +391,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_size(&self->component), &tm);
+		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	self->component.scrollstepy = psy_ui_value_makepx(self->metrics.lineheight * 3);
 }
@@ -451,7 +451,7 @@ double instrumententryview_keysize(InstrumentEntryView* self)
 	int keymin = 0;
 	int keymax = psy_audio_NOTECOMMANDS_RELEASE - 1;
 	int numwhitekeys;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 
 	numwhitekeys = 0;
@@ -462,7 +462,7 @@ double instrumententryview_keysize(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	return psy_ui_value_px(&size.width, &tm) / numwhitekeys;
+	return psy_ui_value_px(&size.width, tm) / numwhitekeys;
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,

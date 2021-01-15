@@ -55,7 +55,7 @@ INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
 }
 
 INLINE double keyboardstate_height(KeyboardState* self,
-	psy_ui_TextMetric* tm)
+	const psy_ui_TextMetric* tm)
 {
 	assert(self);
 
@@ -285,7 +285,7 @@ typedef struct {
 } PianogridTrackEvent;
 
 typedef struct PianoGridDraw {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
 	bool cursorchanging;
 	bool cursoronnoterelease;
@@ -314,7 +314,7 @@ void pianogriddraw_init(PianoGridDraw*,
 	PianoTrackDisplay,
 	bool cursorchanging, bool cursoronnoterelease,
 	psy_audio_PatternSelection selection,
-	psy_ui_RealSize, psy_ui_TextMetric, Workspace*);
+	psy_ui_RealSize, const psy_ui_TextMetric*, Workspace*);
 void pianogriddraw_ondraw(PianoGridDraw*, psy_ui_Graphics*);
 
 INLINE void pianogriddraw_preventclip(PianoGridDraw* self)

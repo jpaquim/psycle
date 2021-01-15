@@ -44,7 +44,7 @@ static void dev_setcursor(psy_ui_win_CheckBoxImp* self, psy_ui_CursorStyle style
 static void dev_starttimer(psy_ui_win_CheckBoxImp* self, uintptr_t id, uintptr_t interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_win_CheckBoxImp* self, uintptr_t id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_win_CheckBoxImp* self, int ressourceid) { self->win_component_imp.imp.vtable->dev_seticonressource(&self->win_component_imp.imp, ressourceid); }
-static psy_ui_TextMetric dev_textmetric(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
+static const psy_ui_TextMetric* dev_textmetric(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_win_CheckBoxImp* self, const char* text, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textsize(&self->win_component_imp.imp, text, font); }
 static void dev_setbackgroundcolour(psy_ui_win_CheckBoxImp* self, psy_ui_Colour colour) { self->win_component_imp.imp.vtable->dev_setbackgroundcolour(&self->win_component_imp.imp, colour); }
 static void dev_settitle(psy_ui_win_CheckBoxImp* self, const char* title) { self->win_component_imp.imp.vtable->dev_settitle(&self->win_component_imp.imp, title); }
@@ -232,7 +232,7 @@ psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* l
 	HWND hwnd;
 	char text[512];
 	RECT rect = { 0 };
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	hwnd = self->win_component_imp.hwnd;
 
@@ -242,7 +242,7 @@ psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* l
 	dev_text(self, text);	
 	tm = dev_textmetric(self);
 	rect.left = 0;
-	rect.right = (int)psy_ui_value_px(&limits->width, &tm) - 40;
+	rect.right = (int)psy_ui_value_px(&limits->width, tm) - 40;
 	DrawText(hdc, text, -1, &rect, DT_LEFT | DT_WORDBREAK | DT_CALCRECT);	
 	psy_ui_graphics_dispose(&g);	
 	ReleaseDC(NULL, hdc);

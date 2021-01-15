@@ -36,7 +36,7 @@ typedef struct SequenceTrackBox {
 	psy_ui_Colour colour_highlight;
 	psy_ui_Colour colour_font;
 	psy_ui_Colour colour_fonthighlight;	
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	bool showname;
 	// references
 	psy_audio_SequenceTrack* track;
@@ -44,7 +44,7 @@ typedef struct SequenceTrackBox {
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*,
-	psy_ui_Rectangle position, psy_ui_TextMetric,
+	psy_ui_Rectangle position, const psy_ui_TextMetric*,
 	psy_audio_SequenceTrack*,
 	psy_audio_Sequence*,
 	uintptr_t trackindex, bool selected);

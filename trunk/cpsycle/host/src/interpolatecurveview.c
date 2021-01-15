@@ -191,7 +191,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	double lastcurveval = 0;
 	InterpolateCurveType curve;
 	KeyFrame* entry;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	if (!self->keyframes) {
@@ -327,16 +327,16 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, double x, dou
 	psy_List* kf;
 	psy_dsp_big_amp_t value;
 	psy_dsp_big_beat_t offset;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
-	scaley = psy_ui_value_px(&size.height, &tm) / (double)0xFF;
+	scalex = psy_ui_value_px(&size.width, tm) / self->range;
+	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
 
 	offset = x / scalex;
 	offset = (intptr_t)(offset / 0.25) * 0.25;
-	value = (psy_dsp_big_amp_t)(psy_ui_value_px(&size.height, &tm) - y) / scaley;
+	value = (psy_dsp_big_amp_t)(psy_ui_value_px(&size.height, tm) - y) / scaley;
 	
 	kf = self->keyframes;
 	while (kf != 0) {
@@ -385,13 +385,13 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 		psy_ui_Size size;
 		KeyFrame* entry;
 		double scaley;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		scaley = psy_ui_value_px(&size.height, &tm) / (double)0xFF;
+		scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
-		entry->value = (intptr_t)((psy_ui_value_px(&size.height, &tm) - ev->y) * 1 / scaley);
+		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm) - ev->y) * 1 / scaley);
 		if (entry->value < self->minval) {
 			entry->value = self->minval;
 		} else 
@@ -412,15 +412,15 @@ psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, double x, doubl
 {
 	psy_List* kf;
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double scalex;
 	double scaley;
 	intptr_t half = 4;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
-	scaley = psy_ui_value_px(&size.height, &tm) / (double)0xFF;
+	scalex = psy_ui_value_px(&size.width, tm) / self->range;
+	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
 	kf = self->keyframes;
 	while (kf != 0) {
 		KeyFrame* entry;

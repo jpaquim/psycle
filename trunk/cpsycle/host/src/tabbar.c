@@ -170,7 +170,7 @@ psy_ui_RealSize tabbar_calctabpositions(TabBar* self)
 	psy_ui_RealSize maxsize;
 	double cpy = 0;
 	psy_ui_RealSize size;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	assert(self);
 
@@ -192,42 +192,42 @@ psy_ui_RealSize tabbar_calctabpositions(TabBar* self)
 
 		tab = (Tab*)psy_list_entry(tabs);
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {
-			currpos.x += psy_ui_value_px(&tab->margin.left, &tm);
+			currpos.x += psy_ui_value_px(&tab->margin.left, tm);
 			position = currpos;			
-			currpos.x += psy_ui_value_px(&tab->size.width, &tm) +
-				psy_ui_value_px(&tab->margin.right, &tm);
+			currpos.x += psy_ui_value_px(&tab->size.width, tm) +
+				psy_ui_value_px(&tab->margin.right, tm);
 
-			if (maxsize.height < currpos.y + psy_ui_value_px(&tab->size.height, &tm) +
-				psy_ui_value_px(&tab->margin.top, &tm) +
-				psy_ui_value_px(&tab->margin.bottom, &tm)) {
-				maxsize.height = currpos.y + psy_ui_value_px(&tab->size.height, &tm) +
-					psy_ui_value_px(&tab->margin.top, &tm) +
-					psy_ui_value_px(&tab->margin.bottom, &tm);
+			if (maxsize.height < currpos.y + psy_ui_value_px(&tab->size.height, tm) +
+				psy_ui_value_px(&tab->margin.top, tm) +
+				psy_ui_value_px(&tab->margin.bottom, tm)) {
+				maxsize.height = currpos.y + psy_ui_value_px(&tab->size.height, tm) +
+					psy_ui_value_px(&tab->margin.top, tm) +
+					psy_ui_value_px(&tab->margin.bottom, tm);
 			}
 			if (maxsize.width < currpos.x) {
 				maxsize.width = currpos.x;
 			}
 		} else if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			currpos.x = psy_ui_value_px(&tab->margin.left, &tm);
-			currpos.y += psy_ui_value_px(&tab->margin.top, &tm);
+			currpos.x = psy_ui_value_px(&tab->margin.left, tm);
+			currpos.y += psy_ui_value_px(&tab->margin.top, tm);
 			position = currpos;
-			currpos.y += psy_ui_value_px(&tab->size.height, &tm) +
-				psy_ui_value_px(&tab->margin.bottom, &tm);
+			currpos.y += psy_ui_value_px(&tab->size.height, tm) +
+				psy_ui_value_px(&tab->margin.bottom, tm);
 
-			if (maxsize.width < currpos.x + psy_ui_value_px(&tab->size.width, &tm) +
-				psy_ui_value_px(&tab->margin.left, &tm) +
-				psy_ui_value_px(&tab->margin.right, &tm)) {
-				maxsize.width = currpos.x + psy_ui_value_px(&tab->size.width, &tm) +
-					psy_ui_value_px(&tab->margin.left, &tm) +
-					psy_ui_value_px(&tab->margin.right, &tm);
+			if (maxsize.width < currpos.x + psy_ui_value_px(&tab->size.width, tm) +
+				psy_ui_value_px(&tab->margin.left, tm) +
+				psy_ui_value_px(&tab->margin.right, tm)) {
+				maxsize.width = currpos.x + psy_ui_value_px(&tab->size.width, tm) +
+					psy_ui_value_px(&tab->margin.left, tm) +
+					psy_ui_value_px(&tab->margin.right, tm);
 			}
-			if (maxsize.height < currpos.y + psy_ui_value_px(&tab->size.height, &tm) +
-				psy_ui_value_px(&tab->margin.top, &tm) +
-				psy_ui_value_px(&tab->margin.bottom, &tm)) {
-				maxsize.height = currpos.y + psy_ui_value_px(&tab->size.height, &tm) +
-					psy_ui_value_px(&tab->margin.top, &tm) +
-					psy_ui_value_px(&tab->margin.bottom, &tm);
+			if (maxsize.height < currpos.y + psy_ui_value_px(&tab->size.height, tm) +
+				psy_ui_value_px(&tab->margin.top, tm) +
+				psy_ui_value_px(&tab->margin.bottom, tm)) {
+				maxsize.height = currpos.y + psy_ui_value_px(&tab->size.height, tm) +
+					psy_ui_value_px(&tab->margin.top, tm) +
+					psy_ui_value_px(&tab->margin.bottom, tm);
 			}
 
 		} else {
@@ -242,7 +242,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 	Tab* tab, bool hover, bool selected, bool drawselline)
 {
 	char* text;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_RealPoint position;
 
 	assert(self);
@@ -274,18 +274,18 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 	if (hover) {		
 		double width;
 				
-		width = psy_ui_value_px(&tab->size.width, &tm);
+		width = psy_ui_value_px(&tab->size.width, tm);
 		psy_ui_setcolour(g, self->skin.linehover);
-		psy_ui_drawline(g, position.x, position.y + tm.tmHeight + 2,
-			position.x + width, position.y + tm.tmHeight + 2);
+		psy_ui_drawline(g, position.x, position.y + tm->tmHeight + 2,
+			position.x + width, position.y + tm->tmHeight + 2);
 	}
 	if (selected && drawselline) {
 		double width;
 
-		width = psy_ui_value_px(&tab->size.width, &tm);
+		width = psy_ui_value_px(&tab->size.width, tm);
 		psy_ui_setcolour(g, self->skin.linesel);		
-		psy_ui_drawline(g, position.x, position.y + tm.tmHeight + 2,
-			position.x + width, position.y + tm.tmHeight + 2);
+		psy_ui_drawline(g, position.x, position.y + tm->tmHeight + 2,
+			position.x + width, position.y + tm->tmHeight + 2);
 	}
 }
 
@@ -322,7 +322,7 @@ uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 	psy_List* p;
 	uintptr_t rv;
 	intptr_t c;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	assert(self);
 
@@ -334,7 +334,7 @@ uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 		psy_ui_Rectangle r;
 
 		tab = (Tab*)psy_list_entry(p);
-		r = tab_position(tab, &tm);
+		r = tab_position(tab, tm);
 		if (psy_ui_rectangle_intersect(&r, x, y)) {
 			rv = c;
 			*rvtab = tab;

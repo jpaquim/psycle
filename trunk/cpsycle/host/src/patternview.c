@@ -769,16 +769,16 @@ void patternview_onalign(PatternView* self)
 void patternview_computemetrics(PatternView* self)
 {
 	psy_ui_Size gridsize;
-	psy_ui_TextMetric tm;
-	psy_ui_TextMetric gridtm;
+	const psy_ui_TextMetric* tm;
+	const psy_ui_TextMetric* gridtm;
 	double trackwidth;
 
 	gridsize = psy_ui_component_size(trackergrid_base(&self->tracker));
 	tm = psy_ui_component_textmetric(patternview_base(self));
 	gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
-	self->gridstate.trackconfig->textwidth = (int)(gridtm.tmAveCharWidth * 1.5) + 2;
+	self->gridstate.trackconfig->textwidth = (int)(gridtm->tmAveCharWidth * 1.5) + 2;
 	self->linestate.lineheightpx =
-		floor(psy_ui_value_px(&self->linestate.lineheight, &tm));
+		floor(psy_ui_value_px(&self->linestate.lineheight, tm));
 	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;
 	trackwidth = psy_max(
 		trackergridstate_preferredtrackwidth(&self->gridstate),
@@ -789,7 +789,7 @@ void patternview_computemetrics(PatternView* self)
 		self->trackconfig.patterntrackident = 0;
 	}
 	self->trackconfig.headertrackident = 0;
-	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, &tm) /
+	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, tm) /
 		self->linestate.lineheightpx);
 }
 
@@ -864,7 +864,7 @@ void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 
 void patternview_setfont(PatternView* self, psy_ui_Font* font)
 {	
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	tm = psy_ui_component_textmetric(&self->tracker.component);
 
 	psy_ui_component_setfont(trackergrid_base(&self->griddefaults), font);
@@ -872,7 +872,7 @@ void patternview_setfont(PatternView* self, psy_ui_Font* font)
 	psy_ui_component_setfont(trackerlinenumbers_base(&self->left.linenumbers), font);
 	self->linestate.gridfont = psy_ui_component_font(trackergrid_base(&self->tracker));	
 	self->linestate.lineheightpx = psy_ui_value_px(
-		&self->linestate.lineheight, &tm);
+		&self->linestate.lineheight, tm);
 	patternview_computemetrics(self);
 	patternview_updatescrollstep(self);
 	psy_ui_component_align(&self->component);
@@ -1229,13 +1229,13 @@ void patternview_updatescrollstep(PatternView* self)
 {
 	double scrollstepx;
 	psy_ui_Value scrollleft;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	scrollleft = psy_ui_component_scrollleft(trackergrid_base(&self->tracker));
 	scrollstepx = trackergridstate_trackwidth(&self->gridstate,
 			trackergridstate_pxtotrack(&self->gridstate,
-				psy_ui_value_px(&scrollleft, &tm),
+				psy_ui_value_px(&scrollleft, tm),
 				trackergridstate_numsongtracks(&self->gridstate)));
 	psy_ui_component_setscrollstep(trackergrid_base(&self->tracker),
 		psy_ui_value_makepx(scrollstepx),

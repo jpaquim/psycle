@@ -33,7 +33,7 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Size bmpsize;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double x;
 	double y;
 	double width;
@@ -43,11 +43,11 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 
 	size = psy_ui_component_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
-	width = psy_ui_value_px(&size.width, &tm);
-	height = psy_ui_value_px(&size.height, &tm);
+	width = psy_ui_value_px(&size.width, tm);
+	height = psy_ui_value_px(&size.height, tm);
 	bmpsize = psy_ui_bitmap_size(&self->bitmap);
-	bmpwidth = psy_ui_value_px(&bmpsize.width, &tm);
-	bmpheight = psy_ui_value_px(&bmpsize.height, &tm);
+	bmpwidth = psy_ui_value_px(&bmpsize.width, tm);
+	bmpheight = psy_ui_value_px(&bmpsize.height, tm);
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
 		x = (width - bmpwidth) / 2;
 	} else 		

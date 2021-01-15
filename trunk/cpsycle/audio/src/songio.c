@@ -19,9 +19,6 @@
 #include "xmsongloader.h"
 #include "itmodule2.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #if defined DIVERSALIS__OS__POSIX
 #include <errno.h>
 #endif
@@ -101,8 +98,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			psy_audio_psy3loader_dispose(&psy3loader);
 #else
 			status = PSY_ERRFILEFORMAT;
-#endif
-			psyfile_close(self->file);
+#endif			
 		} else if (strcmp(header,"PSY2SONG") == 0) {
 			// PSY2SONG is the Sign of the file.
 #ifdef PSYCLE_USE_PSY2
@@ -113,8 +109,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			psy2loader_dispose(&psy2loader);
 #else
 			status = PSY_ERRFILEFORMAT;
-#endif
-			psyfile_close(self->file);
+#endif			
 		} else if (strcmp(riff, "RIFF") == 0) {			
 			psyfile_read(&file, header, 8);
 			header[8] = 0;
@@ -128,8 +123,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			psyfile_seek(self->file, 0);
 			itmodule2_init(&itmodule, self);
 			itmodule2_load(&itmodule);
-			itmodule2_dispose(&itmodule);
-			psyfile_close(self->file);
+			itmodule2_dispose(&itmodule);			
 		} else if (strcmp(riff, "MThd") == 0) {
 			MidiLoader midifile;
 
@@ -138,8 +132,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			if (status = midiloader_load(&midifile)) {			
 				psy_audio_songfile_errfile(self);
 			}
-			midiloader_dispose(&midifile);
-			psyfile_close(self->file);
+			midiloader_dispose(&midifile);			
 		} else {
 #ifdef PSYCLE_USE_XM
 			psyfile_read(self->file, header + 8, (uint32_t)(strlen(XM_HEADER) - 8));
@@ -152,24 +145,22 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 				if (status = xmsongloader_load(&loader)) {
 					psy_audio_songfile_errfile(self);
 				}
-				xmsongloader_dispose(&loader);
-				psyfile_close(self->file);
+				xmsongloader_dispose(&loader);				
 			} else {
 				MODSongLoader loader;
 
 				psyfile_seek(self->file, 0);
 				modsongloader_init(&loader, self);
-				if (!modsongloader_load(&loader)) {
-					self->err = 2;
-				}
-				modsongloader_dispose(&loader);
-				psyfile_close(self->file);
+				if (status = modsongloader_load(&loader)) {
+					psy_audio_songfile_errfile(self);
+				}				
+				modsongloader_dispose(&loader);				
 			}
 #else
 			status = PSY_ERRFILEFORMAT;
-#endif
-			psyfile_close(self->file);
+#endif			
 		}
+		psyfile_close(self->file);
 		if (!psy_audio_machines_at(&self->song->machines, psy_audio_MASTER_INDEX)) {
 			psy_audio_songfile_createmaster(self);
 		}

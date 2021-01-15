@@ -99,7 +99,7 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 void kbdbox_initfont(KbdBox* self)
 {
 	psy_ui_Font* font;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	
 	font = psy_ui_component_font(&self->component);
 	if (font) {
@@ -115,10 +115,10 @@ void kbdbox_initfont(KbdBox* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	self->corner.width = psy_ui_value_makepx(5);
 	self->corner.height = psy_ui_value_makepx(5);
-	self->descident = tm.tmAveCharWidth * 6;
-	self->ident = (int)(tm.tmHeight * 0.3);
-	self->keyheight = (int)(tm.tmHeight * 3.5);
-	self->keywidth = tm.tmAveCharWidth * 16;
+	self->descident = tm->tmAveCharWidth * 6;
+	self->ident = (int)(tm->tmHeight * 0.3);
+	self->keyheight = (int)(tm->tmHeight * 3.5);
+	self->keywidth = tm->tmAveCharWidth * 16;
 }
 
 void kbdbox_ondraw(KbdBox* self, psy_ui_Graphics* g)
@@ -183,7 +183,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 
 void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	double cpx;
 	double cpy;
 
@@ -198,9 +198,9 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 	psy_ui_settextcolour(g, key->colour);
 	psy_ui_textout(g, cpx + self->descident, cpy,
 		key->desc0, strlen(key->desc0));
-	psy_ui_textout(g, cpx, cpy + tm.tmHeight,
+	psy_ui_textout(g, cpx, cpy + tm->tmHeight,
 		key->desc1, strlen(key->desc1));
-	psy_ui_textout(g, cpx, cpy + tm.tmHeight * 2,
+	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 2,
 		key->desc2, strlen(key->desc2));
 }
 

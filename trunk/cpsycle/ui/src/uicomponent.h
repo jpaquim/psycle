@@ -363,7 +363,7 @@ typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp
 	uintptr_t interval);
 typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
-typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*);
+typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolour)(struct psy_ui_ComponentImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
@@ -461,8 +461,10 @@ INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
 	self->imp->vtable->dev_stoptimer(self->imp, id);
 }
 
-INLINE psy_ui_TextMetric psy_ui_component_textmetric(psy_ui_Component* self)
+INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(psy_ui_Component* self)
 {
+	assert(self->imp);
+
 	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
@@ -553,11 +555,9 @@ INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 }
 
 INLINE double psy_ui_component_scrollleftpx(psy_ui_Component* self)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(self);
-	return floor(psy_ui_value_px(&self->scroll.x, &tm));
+{	
+	return floor(psy_ui_value_px(&self->scroll.x,
+		psy_ui_component_textmetric(self)));
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
@@ -568,11 +568,9 @@ INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
 }
 
 INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(self);
-	return floor(psy_ui_value_px(&self->scroll.y, &tm));
+{	
+	return floor(psy_ui_value_px(&self->scroll.y,
+		psy_ui_component_textmetric(self)));
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
@@ -652,23 +650,21 @@ void psy_ui_component_focus_next(psy_ui_Component*);
 void psy_ui_component_focus_prev(psy_ui_Component*);
 
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(self);
-	return psy_ui_intsize_init_size(psy_ui_component_size(self), &tm);
+{	
+	return psy_ui_intsize_init_size(psy_ui_component_size(self),
+		psy_ui_component_textmetric(self));
 }
 
 INLINE psy_ui_RealSize psy_ui_component_sizepx(psy_ui_Component* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 
 	tm = psy_ui_component_textmetric(self);
 	size = psy_ui_component_size(self);
 	return psy_ui_realsize_make(
-		psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
+		psy_ui_value_px(&size.width, tm),
+		psy_ui_value_px(&size.height, tm));
 		
 }
 

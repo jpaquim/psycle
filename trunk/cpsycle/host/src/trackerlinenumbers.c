@@ -336,10 +336,10 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 
 void trackerlinenumbers_onalign(TrackerLineNumbers* self)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(trackerlinenumbers_base(self));
-	self->linestate->flatsize = (double)(tm.tmAveCharWidth) + 2.0;
+	self->linestate->flatsize = (double)(tm->tmAveCharWidth) + 2.0;
 }
 
 void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* limit,

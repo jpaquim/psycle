@@ -104,22 +104,22 @@ void pinedit_drawpinoutput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	double pinwidth;
 	double pinheight;
 	double numchars;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	height = tm.tmHeight * 2;
+	height = tm->tmHeight * 2;
 	height2 = height / 2;
-	centery = (height - tm.tmHeight) / 2;
+	centery = (height - tm->tmHeight) / 2;
 	cpy = (int)(pin * height);
 	numchars = 10;
-	pinwidth = (int)(tm.tmAveCharWidth * 1.5);
-	pinheight = (int)(tm.tmHeight * 0.75);
+	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
+	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "Out %.02d", (int)pin);
 	psy_ui_textout(g, 0, cpy + centery, text, strlen(text));
-	psy_ui_setrectangle(&r, pinwidth + tm.tmAveCharWidth * numchars, cpy + height2 - pinheight / 2, pinwidth, pinheight);
+	psy_ui_setrectangle(&r, pinwidth + tm->tmAveCharWidth * numchars, cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	psy_ui_drawrectangle(g, r);
 }
 
@@ -133,22 +133,22 @@ void pinedit_drawpininput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	double pinwidth;
 	double pinheight;
 	double numchars;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	height = tm.tmHeight * 2;
+	height = tm->tmHeight * 2;
 	height2 = height / 2;
-	centery = (height - tm.tmHeight) / 2;
+	centery = (height - tm->tmHeight) / 2;
 	cpy = (int)(pin * height);
 	numchars = 10;
-	pinwidth = (int)(tm.tmAveCharWidth * 1.5);
-	pinheight = (int)(tm.tmHeight * 0.75);
+	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
+	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "In %.02d", (int)pin);
-	psy_ui_textout(g, psy_ui_value_px(&size.width, &tm) - tm.tmAveCharWidth * 8, cpy + centery, text, strlen(text));
-	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, &tm) - (pinwidth + tm.tmAveCharWidth * numchars),
+	psy_ui_textout(g, psy_ui_value_px(&size.width, tm) - tm->tmAveCharWidth * 8, cpy + centery, text, strlen(text));
+	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) - (pinwidth + tm->tmAveCharWidth * numchars),
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	psy_ui_drawrectangle(g, r);
 }
@@ -162,20 +162,20 @@ psy_ui_Rectangle pinedit_pinposition_output(PinEdit* self, uintptr_t pin)
 	double pinwidth;
 	double pinheight;
 	double numchars;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	height = tm.tmHeight * 2;
+	height = tm->tmHeight * 2;
 	height2 = height / 2;
-	centery = (height - tm.tmHeight) / 2;
+	centery = (height - tm->tmHeight) / 2;
 	cpy = (int)(pin * height);
 	numchars = 10;
-	pinwidth = (int)(tm.tmAveCharWidth * 1.5);
-	pinheight = (int)(tm.tmHeight * 0.75);	
-	psy_ui_setrectangle(&r, pinwidth + tm.tmAveCharWidth * numchars,
+	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
+	pinheight = (int)(tm->tmHeight * 0.75);	
+	psy_ui_setrectangle(&r, pinwidth + tm->tmAveCharWidth * numchars,
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	return r;
 }
@@ -189,20 +189,20 @@ psy_ui_Rectangle pinedit_pinposition_input(PinEdit* self, uintptr_t pin)
 	double pinwidth;
 	double pinheight;
 	double numchars;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
-	height = tm.tmHeight * 2;
+	height = tm->tmHeight * 2;
 	height2 = height / 2;
-	centery = (height - tm.tmHeight) / 2;
+	centery = (height - tm->tmHeight) / 2;
 	cpy = (int)(pin * height);
 	numchars = 10;
-	pinwidth = (int)(tm.tmAveCharWidth * 1.5);
-	pinheight = (int)(tm.tmHeight * 0.75);
-	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, &tm) - (pinwidth + tm.tmAveCharWidth * numchars),
+	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
+	pinheight = (int)(tm->tmHeight * 0.75);
+	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) - (pinwidth + tm->tmAveCharWidth * numchars),
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	return r;
 }
@@ -300,7 +300,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 			pinpair = pinedit_hittest_wire(self, ev->x, ev->y);
 			if (pinpair) {
 				psy_ui_Size size;
-				psy_ui_TextMetric tm;
+				const psy_ui_TextMetric* tm;
 				psy_audio_PinConnection* pinconnection;
 
 				pinconnection = (psy_audio_PinConnection*)(pinpair->entry);
@@ -308,7 +308,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 				self->drag_src = pinconnection->src;
 				size = psy_ui_component_size(&self->component);
 				tm = psy_ui_component_textmetric(&self->component);
-				if (ev->x < psy_ui_value_px(&size.width, &tm) / 2) {
+				if (ev->x < psy_ui_value_px(&size.width, tm) / 2) {
 					self->dragmode = PINEDIT_DRAG_SRC;
 				} else {
 					self->dragmode = PINEDIT_DRAG_DST;
@@ -354,10 +354,10 @@ bool pinedit_screentopin(PinEdit* self, double x, double y, uintptr_t* pin, bool
 	uintptr_t row;
 	double rowheight;
 	double cpy;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);	
-	rowheight = tm.tmHeight * 2;
+	rowheight = tm->tmHeight * 2;
 	row = (uintptr_t)(psy_max(0.0, y) / rowheight);
 	cpy = row * rowheight;
 	r = pinedit_pinposition_output(self, 0);

@@ -314,14 +314,14 @@ void stepsequencerbar_onlpbchanged(StepsequencerBar* self, psy_audio_Player* sen
 
 void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	self->stepwidth = tm.tmAveCharWidth * 4;
-	if (self->stepwidth > psy_ui_value_px(&size->width, &tm) / 16) {
-		self->stepwidth = psy_ui_value_px(&size->width, &tm) / 16;
+	self->stepwidth = tm->tmAveCharWidth * 4;
+	if (self->stepwidth > psy_ui_value_px(&size->width, tm) / 16) {
+		self->stepwidth = psy_ui_value_px(&size->width, tm) / 16;
 	}
-	self->stepheight = (int)(tm.tmHeight * 1.5);
+	self->stepheight = (int)(tm->tmHeight * 1.5);
 }
 
 void stepsequencerbar_onpreferredsize(StepsequencerBar* self, psy_ui_Size* limit,
@@ -454,11 +454,11 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
 	psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;	
+	const psy_ui_TextMetric* tm;	
 
 	tm = psy_ui_component_textmetric(&self->component);	
-	self->colwidth = tm.tmAveCharWidth * 4;
-	self->lineheight = (int)(0.8 * tm.tmHeight);	
+	self->colwidth = tm->tmAveCharWidth * 4;
+	self->lineheight = (int)(0.8 * tm->tmHeight);	
 }
 
 void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui_Size* limit,

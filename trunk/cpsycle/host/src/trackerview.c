@@ -794,11 +794,11 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		self->linestate->lineheightpx);
 	if (self->midline) {
 		psy_ui_Size gridsize;
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		gridsize = psy_ui_component_size(&self->component);
-		topline = (intptr_t)(psy_ui_value_px(&gridsize.height, &tm) / self->linestate->lineheightpx / 2);
+		topline = (intptr_t)(psy_ui_value_px(&gridsize.height, tm) / self->linestate->lineheightpx / 2);
 	} else {
 		topline = 0;
 	}
@@ -807,14 +807,14 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		
 		dlines = (intptr_t)((psy_ui_component_scrolltoppx(&self->component) + topline * self->linestate->lineheightpx - r.top) /
 			(self->linestate->lineheightpx));
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		self->linestate->cursorchanging = TRUE;
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_makepx(
 				psy_ui_component_scrolltoppx(&self->component) -
-				psy_ui_value_px(&self->component.scrollstepy, &tm) * dlines));
+				psy_ui_value_px(&self->component.scrollstepy, tm) * dlines));
 		return FALSE;
 	}
 	return TRUE;
@@ -824,7 +824,7 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 {
 	intptr_t line;
 	intptr_t visilines;
-	psy_ui_TextMetric tm;	
+	const psy_ui_TextMetric* tm;	
 
 	assert(self);
 
@@ -846,7 +846,7 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_makepx(
 				psy_ui_component_scrolltoppx(&self->component) +
-				psy_ui_value_px(&self->component.scrollstepy, &tm) * dlines));
+				psy_ui_value_px(&self->component.scrollstepy, tm) * dlines));
 		return FALSE;
 	}
 	return TRUE;
@@ -872,7 +872,7 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	uintptr_t visitracks;
 	uintptr_t tracks;
 	psy_ui_Size size;	
-	psy_ui_TextMetric tm;	
+	const psy_ui_TextMetric* tm;	
 	intptr_t trackright;
 	intptr_t trackleft;
 
@@ -884,12 +884,12 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		psy_ui_component_scrollleftpx(&self->component),
 		psy_audio_player_numsongtracks(workspace_player(self->workspace)));
 	trackright = trackergridstate_pxtotrack(self->gridstate,
-		psy_ui_value_px(&size.width, &tm) +
+		psy_ui_value_px(&size.width, tm) +
 		psy_ui_component_scrollleftpx(&self->component),
 		self->gridstate->numtracks);
 	if (trackergridstate_tracktopx(self->gridstate, trackright) +
 				trackergridstate_trackwidth(self->gridstate, trackright)
-			> psy_ui_value_px(&size.width, &tm)) {
+			> psy_ui_value_px(&size.width, tm)) {
 		--trackright;
 	}
 	visitracks = trackright - trackleft;

@@ -45,9 +45,12 @@ typedef struct XMSongLoader {
 	psy_audio_Song* song;
 } XMSongLoader;
 
+// inits the xm loader, songfile must contain a valid song and PsyFile pointer
 void xmsongloader_init(XMSongLoader*, psy_audio_SongFile*);
 void xmsongloader_dispose(XMSongLoader*);
 
+// loads a xm file
+// returns PSY_OK, if file was successfully loaded
 int xmsongloader_load(XMSongLoader*);
 
 // MODSongLoader
@@ -81,12 +84,14 @@ typedef struct MODSongLoader
 	psy_Table xmtovirtual;
 	// references
 	psy_audio_SongFile* songfile;
+	PsyFile* fp;
+	psy_audio_Song* song;
 } MODSongLoader;
 
 void modsongloader_init(MODSongLoader*, psy_audio_SongFile*);
 void modsongloader_dispose(MODSongLoader*);
 
-bool modsongloader_load(MODSongLoader*);
+int modsongloader_load(MODSongLoader*);
 
 #ifdef __cplusplus
 }

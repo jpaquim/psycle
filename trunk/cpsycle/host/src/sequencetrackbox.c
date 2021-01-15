@@ -12,7 +12,7 @@ static void sequencetrackbox_drawtext(SequenceTrackBox*,
 	psy_ui_Graphics*, double x, double y, const char* text);
 // implementation
 void sequencetrackbox_init(SequenceTrackBox* self,
-	psy_ui_Rectangle position, psy_ui_TextMetric tm,
+	psy_ui_Rectangle position, const psy_ui_TextMetric* tm,
 	psy_audio_SequenceTrack* track,
 	psy_audio_Sequence* sequence,
 	uintptr_t trackindex, bool selected)
@@ -37,7 +37,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 	char text[64];		
 	double centery;
 	
-	centery = (self->position.bottom - self->position.top - self->tm.tmHeight) / 2;
+	centery = (self->position.bottom - self->position.top - self->tm->tmHeight) / 2;
 	psy_ui_settextcolour(g, self->colour_font);
 	if (self->track) {
 		r = self->position;
@@ -49,19 +49,19 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 		psy_ui_drawrectangle(g, r);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
 		r.top += centery;
-		r.bottom = self->tm.tmHeight;
+		r.bottom = self->tm->tmHeight;
 		sequencetrackbox_drawtext(self, g, r.left +
-			(intptr_t)(self->tm.tmAveCharWidth * 0.2), r.top, text);
+			(intptr_t)(self->tm->tmAveCharWidth * 0.2), r.top, text);
 		if (psy_audio_sequence_istracksoloed(self->sequence, self->trackindex)) {
 			psy_ui_settextcolour(g, self->colour_fonthighlight);
 		} else {
 			psy_ui_settextcolour(g, self->colour_font);
 		}
 		sequencetrackbox_drawtext(self, g, r.left +
-			(intptr_t)(self->tm.tmAveCharWidth * 5), r.top, "S");
+			(intptr_t)(self->tm->tmAveCharWidth * 5), r.top, "S");
 		if (self->trackindex != 0) {
 			sequencetrackbox_drawtext(self, g, self->position.right -
-				(int)(self->tm.tmAveCharWidth * 3.5), r.top, "X");
+				(int)(self->tm->tmAveCharWidth * 3.5), r.top, "X");
 		}
 		if (psy_audio_sequence_istrackmuted(self->sequence, self->trackindex)) {		
 			psy_ui_settextcolour(g, self->colour_fonthighlight);
@@ -69,11 +69,11 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 			psy_ui_settextcolour(g, self->colour_font);
 		}
 		sequencetrackbox_drawtext(self, g,
-			r.left + (int)(self->tm.tmAveCharWidth * 8), r.top, "M");
+			r.left + (int)(self->tm->tmAveCharWidth * 8), r.top, "M");
 		psy_ui_settextcolour(g, self->colour_font);
 		if (self->showname) {
 			sequencetrackbox_drawtext(self, g,
-				r.left + (int)(self->tm.tmAveCharWidth * 11), r.top,
+				r.left + (int)(self->tm->tmAveCharWidth * 11), r.top,
 				self->track->name);
 		}
 	} else {		
@@ -83,7 +83,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 		sequencetrackbox_drawtext(self, g,
 			self->position.left +
 				(int)(((self->position.right - self->position.left) -
-				self->tm.tmAveCharWidth * 14) / 2),
+				self->tm->tmAveCharWidth * 14) / 2),
 			self->position.top + centery,
 			"+ New Track");
 	}
@@ -99,13 +99,13 @@ SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox* self,
 	double x, double y)
 {		
 	if (self->trackindex != 0 && x >= self->position.right -
-			(int)(self->tm.tmAveCharWidth * 3.5)) {
+			(int)(self->tm->tmAveCharWidth * 3.5)) {
 		return SEQUENCETRACKBOXEVENT_DEL;
-	} else if (x >= (int)(self->tm.tmAveCharWidth * 11)) {
+	} else if (x >= (int)(self->tm->tmAveCharWidth * 11)) {
 		return SEQUENCETRACKBOXEVENT_SELECT;
-	} else if (x >= (int)(self->tm.tmAveCharWidth * 8)) {
+	} else if (x >= (int)(self->tm->tmAveCharWidth * 8)) {
 		return SEQUENCETRACKBOXEVENT_MUTE;
-	} else if (x >= (int)(self->tm.tmAveCharWidth * 5)) {
+	} else if (x >= (int)(self->tm->tmAveCharWidth * 5)) {
 		return SEQUENCETRACKBOXEVENT_SOLO;
 	}
 	return SEQUENCETRACKBOXEVENT_SELECT;

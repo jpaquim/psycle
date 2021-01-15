@@ -80,7 +80,7 @@ void psy_ui_edit_setlinenumber(psy_ui_Edit* self, int number)
 void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {			
 	if (rv) {		
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 		
 		tm = psy_ui_component_textmetric(&self->component);			
 		if (self->charnumber == 0) {
@@ -88,11 +88,12 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			
 			size = psy_ui_component_textsize(&self->component,
 				psy_ui_edit_text(self));
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 2);
-			rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linenumber));
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width,
+				psy_ui_component_textmetric(&self->component)) + 2);
+			rv->height = psy_ui_value_makepx((int)(tm->tmHeight * self->linenumber));
 		} else {				
-			rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber + 2);
-			rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linenumber));
+			rv->width = psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber + 2);
+			rv->height = psy_ui_value_makepx((int)(tm->tmHeight * self->linenumber));
 		}
 	}
 }

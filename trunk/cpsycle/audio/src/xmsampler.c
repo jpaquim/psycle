@@ -157,7 +157,10 @@ static void generateaudio(psy_audio_XMSampler*, psy_audio_BufferContext*);
 static void psy_audio_xmsampler_stop(psy_audio_XMSampler*);
 static uintptr_t numparametercols(psy_audio_XMSampler*);
 static uintptr_t numparameters(psy_audio_XMSampler*);
+static uintptr_t numtweakparameters(psy_audio_XMSampler*);
 static psy_audio_MachineParam* parameter(psy_audio_XMSampler*,
+	uintptr_t param);
+static psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler*,
 	uintptr_t param);
 static void disposeparameters(psy_audio_XMSampler*);
 static void psy_audio_xmsampler_initparameters(psy_audio_XMSampler*);
@@ -191,7 +194,9 @@ static void sampler_vtable_init(psy_audio_XMSampler* self)
 		sampler_vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
 		sampler_vtable.numparameters = (fp_machine_numparameters)numparameters;
+		sampler_vtable.numtweakparameters = (fp_machine_numparameters)numtweakparameters;
 		sampler_vtable.parameter = (fp_machine_parameter)parameter;
+		sampler_vtable.tweakparameter = (fp_machine_parameter)tweakparameter;
 		sampler_vtable_initialized = TRUE;
 	}
 }
@@ -915,7 +920,53 @@ uintptr_t numparametercols(psy_audio_XMSampler* self)
 	return 10;
 }
 
-#define CHANNELROW 2
+psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler* self,
+	uintptr_t param)
+{
+	uintptr_t channelidx;
+	uintptr_t channelparamidx;
+	psy_audio_XMSamplerChannel* channel;
+
+	if (param < 4) {
+		// global tweaks
+		switch (param) {
+			case XM_SAMPLER_TWK_AMIGASLIDES:
+				return &self->param_amigaslides.machineparam;
+				break;
+			case XM_SAMPLER_TWK_GLOBALVOLUME:
+				return &self->param_blank.machineparam;
+				break;
+			case XM_SAMPLER_TWK_PANNINGMODE:
+				return &self->param_panningmode.machineparam;
+				break;
+			default:
+				break;
+		}
+	} else {
+		// channel tweaks
+		channelparamidx = param % 4;
+		channelidx = param / 4 - 1;
+		channel = psy_audio_xmsampler_rchannel(self, (int)channelidx);
+		if (channel) {
+			switch (channelparamidx) {
+				case 0:
+					return &channel->level_param.machineparam;
+					break;
+				case XM_SAMPLER_TWK_CHANNEL_PANNING:
+					return &channel->pan.machineparam;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	return NULL;
+}
+
+uintptr_t numtweakparameters(psy_audio_XMSampler* self)
+{
+	return 4 + 4 * MAX_TRACKS;
+}
 
 psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,
 	uintptr_t param)
@@ -931,10 +982,11 @@ psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,
 		switch (row) {
 		case 0: return &self->param_general.machineparam; break;
 		case 1: return &self->param_channels.machineparam; break;
-		case CHANNELROW + 1: return &self->param_filter_cutoff.machineparam; break;
-		case CHANNELROW + 2: return &self->param_filter_res.machineparam; break;
-		case CHANNELROW + 3: return &self->param_pan.machineparam;  break;
-		case CHANNELROW + 5: return &self->ignore_param.machineparam;  break;
+
+		case XM_CHANNELROW + 1: return &self->param_filter_cutoff.machineparam; break;
+		case XM_CHANNELROW + 2: return &self->param_filter_res.machineparam; break;
+		case XM_CHANNELROW + 3: return &self->param_pan.machineparam;  break;
+		case XM_CHANNELROW + 5: return &self->ignore_param.machineparam;  break;
 		default:
 			return &self->param_blank.machineparam; break;
 			break;
@@ -973,25 +1025,25 @@ psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,
 		channel = psy_audio_xmsampler_rchannel(self, (int)(col - 1 + self->channelbank * 8));
 		if (channel) {
 			switch (row) {
-				case CHANNELROW + 0:
+				case XM_CHANNELROW + 0:
 				return &channel->param_channel.machineparam;
 					break;
-				case CHANNELROW + 1:
+				case XM_CHANNELROW + 1:
 					return &channel->filter_cutoff.machineparam;
 					break;
-				case CHANNELROW + 2:
+				case XM_CHANNELROW + 2:
 					return &channel->filter_res.machineparam;
 					break;
-				case CHANNELROW + 3:
+				case XM_CHANNELROW + 3:
 					return &channel->pan.machineparam;
 					break;
-				case CHANNELROW + 4:
+				case XM_CHANNELROW + 4:
 					return &channel->slider_param.machineparam;
 					break;
-				case CHANNELROW + 5:
+				case XM_CHANNELROW + 5:
 					return &channel->level_param.machineparam;
 					break;
-				case CHANNELROW + 6:
+				case XM_CHANNELROW + 6:
 					return &self->ignore_param.machineparam;
 					break;
 				default:

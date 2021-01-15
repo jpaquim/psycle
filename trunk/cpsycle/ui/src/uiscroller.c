@@ -88,19 +88,19 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	double iPos;
 	double nPos;
 	double scrollstepx_px;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Value scrollleft;
 	
 	assert(self->client);
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, &tm);
-	iPos = psy_ui_value_px(&self->client->scroll.x, &tm) / scrollstepx_px;
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
+	iPos = psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px;
 	nPos = psy_ui_scrollbar_position(sender);
 
 	scrollleft = psy_ui_component_scrollleft(self->client);
 	psy_ui_component_setscrollleft(self->client,
-		psy_ui_value_makepx(floor(psy_ui_value_px(&scrollleft, &tm) -
+		psy_ui_value_makepx(floor(psy_ui_value_px(&scrollleft, tm) -
 			scrollstepx_px * floor(iPos - nPos))));
 }
 
@@ -109,19 +109,20 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar*
 	double iPos;
 	double nPos;
 	double scrollstepy_px;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_Value scrolltop;
 
 	assert(self->client);
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, &tm);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);
 	scrolltop = psy_ui_component_scrolltop(self->client);
-	iPos = psy_ui_value_px(&self->client->scroll.y, &tm) / scrollstepy_px;
+	iPos = psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px;
 	nPos = psy_ui_scrollbar_position(sender);
 	psy_ui_component_setscrolltop(self->client,
 		psy_ui_value_makepx(
-			floor(psy_ui_value_px(&scrolltop, &tm) - scrollstepy_px * floor(iPos - nPos))));		
+			floor(psy_ui_value_px(&scrolltop, tm) -
+				scrollstepy_px * floor(iPos - nPos))));		
 }
 
 void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
@@ -129,14 +130,14 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 	double nPos;
 	double scrollstepx_px;
 	double scrollstepy_px;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, &tm);	
-	nPos = floor(psy_ui_value_px(&self->client->scroll.y, &tm) / scrollstepy_px);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);	
+	nPos = floor(psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px);
 	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPos);
-	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, &tm);
-	nPos = floor(psy_ui_value_px(&self->client->scroll.x, &tm) / scrollstepx_px);
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
+	nPos = floor(psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px);
 	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPos);
 }
 
