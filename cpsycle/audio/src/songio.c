@@ -38,16 +38,13 @@ static char load_filters[] =
 static char save_filters[] =
 "Songs (*.psy)|*.psy";
 
-static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
-static int psy_audio_songfile_errfile(psy_audio_SongFile* self);
-
 void psy_audio_songfile_init(psy_audio_SongFile* self)
 {
 	psy_signal_init(&self->signal_output);
 	psy_signal_init(&self->signal_warning);
 	self->machinesoloed = -1;
 	self->legacywires = NULL;
-	self->path = NULL;
+	self->path = NULL;	
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
@@ -86,7 +83,8 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 		header[8] = '\0';
 		strncpy(riff, header, 4);
 		riff[4] = '\0';
-		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
+		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);		
+
 		if (strcmp(header,"PSY3SONG") == 0) {
 #ifdef PSYCLE_USE_PSY3
 			psy_audio_PSY3Loader psy3loader;
@@ -122,7 +120,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 
 			psyfile_seek(self->file, 0);
 			itmodule2_init(&itmodule, self);
-			itmodule2_load(&itmodule);
+			if (status = itmodule2_load(&itmodule)) {
+				psy_audio_songfile_errfile(self);
+			}
 			itmodule2_dispose(&itmodule);			
 		} else if (strcmp(riff, "MThd") == 0) {
 			MidiLoader midifile;

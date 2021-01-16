@@ -47,10 +47,10 @@ void parameterlistbox_build(ParameterListBox* self)
 		char label[256];
 		char text[256];		
 		
-
+		self = self;
 		for (i = 0; i < psy_audio_machine_numtweakparameters(self->machine); ++i) {
 			psy_audio_MachineParam* param;
-
+			
 			param = psy_audio_machine_tweakparameter(self->machine, i);
 			if (param) {
 				if (psy_audio_machineparam_label(param, label)) {
@@ -64,6 +64,7 @@ void parameterlistbox_build(ParameterListBox* self)
 				psy_ui_listbox_addtext(&self->listbox, text);
 			} else {
 				psy_snprintf(text, 256, "%s", "--------");
+				psy_ui_listbox_addtext(&self->listbox, text);
 			}
 		}
 	}

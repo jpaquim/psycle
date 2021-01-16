@@ -67,7 +67,7 @@ void psy2loader_dispose(PSY2Loader* self)
 	internalmachinesconvert_dispose(&self->converter);
 }
 
-void psy2loader_load(PSY2Loader* self)
+int psy2loader_load(PSY2Loader* self)
 {
 	self->songfile->legacywires = &self->legacywires;	
 	psy2loader_readheader(self);
@@ -83,6 +83,7 @@ void psy2loader_load(PSY2Loader* self)
 	psy2loader_readmachines(self);
 	psy2loader_addmachines(self);
 	psy2loader_postload(self);
+	return PSY_OK;
 }
 
 void psy2loader_postload(PSY2Loader* self)

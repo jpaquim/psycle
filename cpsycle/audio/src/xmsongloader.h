@@ -18,7 +18,7 @@ extern "C" {
 
 // XMSongLoader and MODSongLoader
 //
-// Imports xm and mod files using sampulse. The pattern is transformed to
+// Imports xm, xi and mod files using sampulse. The pattern is transformed to
 // sampulse cmds and instruments are mapped to virtual generators
 
 // XMSongLoader
@@ -52,6 +52,9 @@ void xmsongloader_dispose(XMSongLoader*);
 // loads a xm file
 // returns PSY_OK, if file was successfully loaded
 int xmsongloader_load(XMSongLoader*);
+// loads a xi instrument
+// returns PSY_OK, if file was successfully loaded
+int xmsongloader_loadxi(XMSongLoader*, psy_audio_InstrumentIndex);
 
 // MODSongLoader
 typedef struct MODHEADER

@@ -23,6 +23,7 @@ typedef struct psy_audio_PSY3Loader {
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader*,
 	struct psy_audio_SongFile*);
 void psy_audio_psy3loader_dispose(psy_audio_PSY3Loader*);
+
 int psy_audio_psy3loader_load(psy_audio_PSY3Loader*);
 
 #ifdef __cplusplus

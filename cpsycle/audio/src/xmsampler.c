@@ -139,6 +139,7 @@ static psy_audio_MachineInfo const macinfo = {
 
 // prototypes
 static void dispose(psy_audio_XMSampler*);
+static void disposeparameters(psy_audio_XMSampler*);
 static void disposevoices(psy_audio_XMSampler*);
 static void disposechannels(psy_audio_XMSampler*);
 static const psy_audio_MachineInfo* xmsampler_info(psy_audio_XMSampler*);
@@ -162,7 +163,8 @@ static psy_audio_MachineParam* parameter(psy_audio_XMSampler*,
 	uintptr_t param);
 static psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler*,
 	uintptr_t param);
-static void disposeparameters(psy_audio_XMSampler*);
+static void ontweakzxxvalue(psy_audio_XMSampler*,
+	psy_audio_IntMachineParam* sender, float value);
 static void psy_audio_xmsampler_initparameters(psy_audio_XMSampler*);
 static void resamplingmethod_tweak(psy_audio_XMSampler*,
 	psy_audio_ChoiceMachineParam* sender, float value);
@@ -871,6 +873,21 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 		MPF_SMALL);	
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-",
 		MPF_IGNORE | MPF_SMALL, 0, 0);
+	// tweak zxx macros	
+	self->tweak_zxxindex = 0;
+	self->tweak_zxxmode = 0;	
+	self->tweak_zxxvalue = 0;
+	psy_audio_intmachineparam_init(&self->tweakparam_zxxindex,
+		"zxxindex", "zxxindex", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->tweak_zxxindex, 1, 64);
+	psy_audio_intmachineparam_init(&self->tweakparam_zxxmode,
+		"zxxmode", "zxxmode", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->tweak_zxxmode, 1, 64);	
+	psy_audio_intmachineparam_init(&self->tweakparam_zxxvalue,
+		"zxxvalue", "zxxvalue", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->tweak_zxxvalue, 1, 64);
+	psy_signal_connect(&self->tweakparam_zxxvalue.machineparam.signal_tweak,
+		self, ontweakzxxvalue);	
 }
 
 void disposeparameters(psy_audio_XMSampler* self)
@@ -889,6 +906,10 @@ void disposeparameters(psy_audio_XMSampler* self)
 	psy_audio_infomachineparam_dispose(&self->param_filter_res);
 	psy_audio_infomachineparam_dispose(&self->param_pan);
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
+	// tweak
+	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxindex);
+	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxmode);	
+	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxvalue);	
 }
 
 void psy_audio_xmsampler_stop(psy_audio_XMSampler* self)
@@ -927,7 +948,11 @@ psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler* self,
 	uintptr_t channelparamidx;
 	psy_audio_XMSamplerChannel* channel;
 
-	if (param < 4) {
+	// global parameter start: 0
+	// channel parameter start:
+	// XM_SAMPLER_TWK_CHANNEL_START + (channelidx) * XM_SAMPLER_TWK_CHANNEL_START
+
+	if (param < XM_SAMPLER_TWK_CHANNEL_START) {
 		// global tweaks
 		switch (param) {
 			case XM_SAMPLER_TWK_AMIGASLIDES:
@@ -939,16 +964,26 @@ psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler* self,
 			case XM_SAMPLER_TWK_PANNINGMODE:
 				return &self->param_panningmode.machineparam;
 				break;
-			default:
+			case XM_SAMPLER_TWK_SETZXXMACRO_INDEX:
+				return &self->tweakparam_zxxindex.machineparam;
+				break;
+			case XM_SAMPLER_TWK_SETZXXMACRO_MODE:
+				return &self->tweakparam_zxxmode.machineparam;
+				break;			
+			case XM_SAMPLER_TWK_SETZXXMACRO_VALUE:
+				return &self->tweakparam_zxxvalue.machineparam;
+				break;
+			default:				
 				break;
 		}
 	} else {
 		// channel tweaks
-		channelparamidx = param % 4;
-		channelidx = param / 4 - 1;
-		channel = psy_audio_xmsampler_rchannel(self, (int)channelidx);
-		if (channel) {
-			switch (channelparamidx) {
+		channelparamidx = param % XM_SAMPLER_TWK_CHANNEL_START;
+		channelidx = param / XM_SAMPLER_TWK_CHANNEL_START - 1;
+		if (channelidx < MAX_TRACKS) {
+			channel = psy_audio_xmsampler_rchannel(self, (int)channelidx);
+			if (channel) {
+				switch (channelparamidx) {
 				case 0:
 					return &channel->level_param.machineparam;
 					break;
@@ -957,15 +992,28 @@ psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler* self,
 					break;
 				default:
 					break;
+				}
 			}
 		}
 	}
 	return NULL;
 }
 
+void ontweakzxxvalue(psy_audio_XMSampler* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	psy_audio_xmsampler_setzxxmacro(self,
+		self->tweak_zxxindex,		
+		self->tweak_zxxmode,
+		self->tweak_zxxvalue);
+}
+
 uintptr_t numtweakparameters(psy_audio_XMSampler* self)
 {
-	return 4 + 4 * MAX_TRACKS;
+	// global parameter start: 0
+	// channel parameter start:
+	// XM_SAMPLER_TWK_CHANNEL_START + (channelidx) * XM_SAMPLER_TWK_CHANNEL_START
+	return (XM_SAMPLER_TWK_CHANNEL_START + 1) * MAX_TRACKS;
 }
 
 psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,

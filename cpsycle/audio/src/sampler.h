@@ -124,7 +124,7 @@ extern "C" {
 		psy_audio_IntMachineParam param_numvoices;
 		psy_audio_ChoiceMachineParam param_resamplingmethod;
 		psy_audio_ChoiceMachineParam param_defaultspeed;
-		psy_audio_IntMachineParam param_instrumentbank;
+		psy_audio_IntMachineParam param_instrumentbank;		
 		// 0: basec = C3, 1: basec = C4
 		int32_t defaultspeed;
 		// Instrument Bank 0: PS1 1: Sampulse

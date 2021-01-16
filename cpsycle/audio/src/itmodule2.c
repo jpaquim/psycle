@@ -25,6 +25,9 @@
 #define ASSERT assert
 #endif
 
+// default sampulse group
+#define INSTRUMENTGROUP 1
+
 /*
 #ifndef BOOL
 typedef bool BOOL;
@@ -109,6 +112,14 @@ uint32_t bitsblock_readbits(BitsBlock* self, unsigned char bitwidth)
 // ITModule2
 // prototypes
 static void itmodule2_reset(ITModule2*);
+static void itmodule2_setsongcomments(ITModule2*);
+static bool itmodule2_makexmsampler(ITModule2*);
+static void itmodule2_setsamplerslidemode(ITModule2*);
+static void itmodule2_setglobalvolume(ITModule2*);
+static void itmodule2_setupchannels(ITModule2*);
+static int itmodule2_readmidiembedded(ITModule2*);
+static int itmodule2_readmessage(ITModule2*);
+static void itmodule2_tweaksampler(ITModule2*, int twk, int val);
 static int itmodule2_readsequence(ITModule2*);
 static bool itmodule2_loaditpattern(ITModule2*, int patIdx, int* numchans);
 static bool itmodule_writepatternentry(ITModule2*,
@@ -118,9 +129,9 @@ static bool itmodule2_parseeffect(ITModule2*, psy_audio_PatternEvent*,
 	psy_audio_PatternNode**, psy_audio_Pattern*, int patIdx,
 	int row, int command, int param, int channel);
 static bool itmodule2_loads3mpatternx(ITModule2*, uint16_t patidx);
-static bool itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curh,
+static int itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curh,
 	psy_audio_Instrument*);
-static bool itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curh,
+static int itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curh,
 	psy_audio_Instrument*);
 static bool itmodule2_loaditsample(ITModule2*, psy_audio_Sample*);
 static bool itmodule2_loaditsampledata(ITModule2*, psy_audio_Sample*,
@@ -135,6 +146,7 @@ void itmodule2_init(ITModule2* self, psy_audio_SongFile* songfile)
 
 	self->songfile = songfile;
 	self->fp = songfile->file;
+	self->song = songfile->song;
 	self->embeddeddata = NULL;
 	psy_table_init(&self->xmtovirtual);
 	itmodule2_reset(self);
@@ -143,8 +155,11 @@ void itmodule2_init(ITModule2* self, psy_audio_SongFile* songfile)
 void itmodule2_dispose(ITModule2* self)
 {
 	assert(self);
+
 	psy_table_dispose(&self->xmtovirtual);
 	self->songfile = NULL;
+	free(self->embeddeddata);
+	self->embeddeddata = NULL;
 }
 
 void itmodule2_reset(ITModule2* self)
@@ -156,264 +171,426 @@ void itmodule2_reset(ITModule2* self)
 	psy_table_clear(&self->xmtovirtual);
 }
 
-bool itmodule2_load(ITModule2* self)
+int itmodule2_load(ITModule2* self)
 {	
-	PsyFile* fp;
-	psy_audio_SongProperties songproperties;
-	char* comments;
-	bool stereo;
-	int i; // , j;
+	if (!psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+		return PSY_ERRFILE;
+	}
+	if (psyfile_seek(self->fp, 0) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (self->fileheader.tag == IMPM_ID) {
+		return itmodule2_loaditmodule(self);
+	}
+	if (!psyfile_read(self->fp, &self->s3mFileH, sizeof(self->s3mFileH))) {
+		return PSY_ERRFILE;
+	}
+	if (psyfile_seek(self->fp, 0) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (self->s3mFileH.tag == SCRM_ID && self->s3mFileH.type == 0x10) {		
+		//return itmodule2_loads3mmodulex(self);
+		return PSY_ERRFILE;
+	}
+	return PSY_OK;
+}
+
+int itmodule2_loaditmodule(ITModule2* self)
+{	
+	uint32_t i; // , j;
+	int status;
 	uint32_t* pointersi;	
 	uint32_t* pointerss;	
 	uint32_t* pointersp;
 	int virtualInst;
-	int numchans;
+	int numchans;	
 
 	assert(self);
-	assert(self->songfile);
-	assert(self->songfile->file);
-	assert(self->songfile->song);
+	assert(self->fp);
+	assert(self->song);	
 
 	itmodule2_reset(self);
-	fp = self->songfile->file;
-
-	if (psyfile_read(fp, &self->fileheader, sizeof(self->fileheader)) == 0) {
-		return FALSE;
+	if (!psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+		return PSY_ERRFILE;
 	}
+	psy_audio_song_settitle(self->song, self->fileheader.songName);
+	itmodule2_setsongcomments(self);	
+	if (!itmodule2_makexmsampler(self)) {
+		return PSY_ERRFILE;
+	}
+	itmodule2_setsamplerslidemode(self);
+	itmodule2_setglobalvolume(self);
+	itmodule2_setupchannels(self);
+	if (status = itmodule2_readsequence(self)) {
+		return status;
+	}		
+	if (self->fileheader.insNum) {
+		pointersi = malloc(self->fileheader.insNum * sizeof(uint32_t));
+		if (!psyfile_read(self->fp, pointersi, self->fileheader.insNum * sizeof(uint32_t))) {
+			// clean up
+			free(pointersi);
+			return PSY_ERRFILE;
+		}
+	} else {
+		pointersi = NULL;
+	}
+	if (self->fileheader.sampNum) {
+		pointerss = malloc(self->fileheader.sampNum * sizeof(uint32_t));
+		if (!psyfile_read(self->fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t))) {
+			// clean up
+			free(pointersi);
+			free(pointerss);
+			return PSY_ERRFILE;
+		}
+	} else {
+		pointerss = NULL;
+	}
+	if (self->fileheader.patNum) {
+		pointersp = malloc(self->fileheader.patNum * sizeof(uint32_t));
+		if (!psyfile_read(self->fp, pointersp, self->fileheader.patNum * sizeof(uint32_t))) {
+			// clean up
+			free(pointersi);
+			free(pointerss);
+			free(pointersp);
+			return PSY_ERRFILE;
+		}
+	} else {
+		pointersp = NULL;
+	}
+	if (status = itmodule2_readmidiembedded(self)) {
+		return status;
+	}
+	if (status = itmodule2_readmessage(self)) {
+		return status;
+	}
+	virtualInst = MAX_MACHINES;
+	for (i = 0; i < self->fileheader.insNum; ++i)
+	{			
+		psy_audio_Instrument* instrument;
+
+		if (psyfile_seek(self->fp, pointersi[i]) == -1) {
+			// clean up
+			free(pointersi);
+			free(pointerss);
+			free(pointersp);
+			return PSY_ERRFILE;
+		}
+		instrument = psy_audio_instrument_allocinit();
+		psy_audio_instruments_insert(&self->songfile->song->instruments,
+			instrument, psy_audio_instrumentindex_make(INSTRUMENTGROUP, i));
+		if (self->fileheader.ffv < 0x200) {
+			itInsHeader1x curh;
+			int status;
+
+			if (!psyfile_read(self->fp, &curh, sizeof(curh))) {
+				return PSY_ERRFILE;
+			}
+			if (status = itmodule2_loadolditinst(self, &curh, instrument)) {
+				return status;
+			}
+		} else {
+			itInsHeader2x curh;
+			int status;
+
+			if (!psyfile_read(self->fp, &curh, sizeof(curh))) {
+				return PSY_ERRFILE;
+			}
+			if (status = itmodule2_loaditinst(self, &curh, instrument)) {
+				return status;
+			}
+		}
+		psy_table_insert(&self->xmtovirtual, i,
+			(void*)(uintptr_t)virtualInst);
+		psy_audio_song_insertvirtualgenerator(self->songfile->song,
+			virtualInst++, 0, i);			
+	}
+	for (i = 0; i < self->fileheader.sampNum; i++)
+	{
+		psy_audio_Sample* wave;
+		psy_audio_Instrument* instr;
+		psy_audio_InstrumentEntry instentry;
+		bool created;
+
+		if (psyfile_seek(self->fp, pointerss[i]) == -1) {
+			// clean up
+			free(pointersi);
+			free(pointerss);
+			free(pointersp);
+			return PSY_ERRFILE;
+		}
+		wave = psy_audio_sample_allocinit(1);
+		psy_audio_samples_insert(&self->songfile->song->samples, wave,
+			sampleindex_make(i, 0));			
+		created = itmodule2_loaditsample(self, wave);
+		// If this IT file doesn't use Instruments, we need to map the notes manually.
+		if (created && !(self->fileheader.flags & IT2_FLAGS_USEINSTR))
+		{			
+		//	if (song.xminstruments.IsEnabled(i) == false) {
+		//		XMInstrument instr;
+		//		instr.Init();
+		//		song.xminstruments.SetInst(instr, i);
+		//	}
+		//	XMInstrument& instrument = song.xminstruments.get(i);
+		//	instrument.Name(wave.WaveName());
+		//	XMInstrument::NotePair npair;
+		//	npair.second = i;
+		//	for (int j = 0; j < XMInstrument::NOTE_MAP_SIZE; j++) {
+		//		npair.first = j;
+		//		instrument.NoteToSample(j, npair);
+		//	}
+		//	instrument.ValidateEnabled();
+
+		//	ittovirtual[i] = virtualInst;
+		//	song.SetVirtualInstrument(virtualInst++, 0, i);
+		}	
+		// create instrument entry
+		instr = psy_audio_instruments_at(&self->songfile->song->instruments,
+			psy_audio_instrumentindex_make(INSTRUMENTGROUP, i));
+		if (instr) {
+			psy_audio_instrument_clearentries(instr);
+			psy_audio_instrumententry_init(&instentry);
+			instentry.sampleindex = sampleindex_make(i, 0);
+			psy_audio_instrument_addentry(instr, &instentry);
+		}
+	}
+	numchans = self->maxextracolumn;
+	self->maxextracolumn = 0;
+	for (i = 0; i < self->fileheader.patNum; i++)
+	{
+		if (pointersp[i] == 0)
+		{
+			psy_audio_Pattern* pattern;
+
+			pattern = psy_audio_pattern_allocinit();
+			psy_audio_pattern_setname(pattern, "unnamed");
+			psy_audio_patterns_insert(&self->songfile->song->patterns,
+				i, pattern);
+			psy_audio_pattern_setlength(pattern,
+				64 * 1.0 / self->songfile->song->properties.lpb);				
+		} else {
+			psyfile_seek(self->fp, pointersp[i]);
+			itmodule2_loaditpattern(self, i, &numchans);				
+		}
+	}
+	psy_audio_song_setnumsongtracks(self->song,
+		 psy_max(numchans + 1, (int)self->maxextracolumn));
+	psy_audio_reposition(&self->songfile->song->sequence);
+	free(pointersi);
+	free(pointerss);
+	free(pointersp);	
+	return PSY_OK;
+}
+
+void itmodule2_setsongcomments(ITModule2* self)
+{
+	char_dyn_t* comments;
 
 	comments = strdup("Imported from Impulse Tracker Module: ");
 	comments = psy_strcat_realloc(comments, self->songfile->path);
-	psy_audio_songproperties_init(&songproperties, self->fileheader.songName,
-		"", comments);
+	psy_audio_song_setcomments(self->song, comments);
 	free(comments);
 	comments = NULL;
-	psy_audio_song_setproperties(self->songfile->song, &songproperties);
-	// build sampler
-	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", psy_INDEX_INVALID);
-	if (self->sampler) {
-		psy_audio_MachineParam* param;
-
-		psy_audio_machine_setposition(self->sampler, rand() / 64,
-			rand() / 80);	
-		psy_audio_machines_insert(&self->songfile->song->machines, 0,
-			self->sampler);
-		psy_audio_machines_connect(&self->songfile->song->machines,
-			psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
-		psy_audio_connections_setwirevolume(
-			&self->songfile->song->machines.connections,
-			psy_audio_wire_make(0, psy_audio_MASTER_INDEX),
-			psy_dsp_map_128_1((self->fileheader.mVol > 128)
-				? 128
-				: self->fileheader.mVol));		
-		param = psy_audio_machine_tweakparameter(self->sampler,
-			XM_SAMPLER_TWK_AMIGASLIDES);
-		if (param) {
-			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
-				(self->fileheader.flags & IT2_FLAGS_LINEARSLIDES)
-					? FALSE
-					: TRUE);			
-		}			
-		param = psy_audio_machine_tweakparameter(self->sampler,
-			XM_SAMPLER_TWK_GLOBALVOLUME);
-		if (param) {
-			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
-				self->fileheader.gVol);
-		}		
-		// Flags:   Bit 0: On = Stereo, Off = Mono
-		// 			Bit 1: Vol0MixOptimizations - If on, no mixing occurs if
-		// 			the volume at mixing time is 0 (redundant v1.04+)
-		// 			Bit 2: On = Use instruments, Off = Use samples.
-		// 			Bit 3: On = Linear slides, Off = Amiga slides.
-		// 			Bit 4: On = Old Effects, Off = IT Effects
-		// Differences:
-		// 		- Vibrato is updated EVERY frame in IT mode, whereas
-		// 			it is updated every non-row frame in other formats.
-		// 			Also, it is two times deeper with Old Effects ON
-		// 			- Command Oxx will set the sample offset to the END
-		// 			of a sample instead of ignoring the command under
-		// 			old effects mode.
-		// 			- (More to come, probably)
-		// 			Bit 5: On = Link Effect G's memory with Effect E/F. Also
-		// 			Gxx with an instrument present will cause the
-		// 			envelopes to be retriggered. If you change a
-		// 			sample on a row with Gxx, it'll adjust the
-		// 			frequency of the current note according to:
-		// 
-		// 		  NewFrequency = OldFrequency * NewC5 / OldC5;
-		// 		  Bit 6: Use MIDI pitch controller, Pitch depth given by PWD
-		// 			  Bit 7: Request embedded MIDI configuration
-		// 			  (Coded this way to permit cross-version saving)
-		// 
-		// Special:  Bit 0: On = song message attached.
-		// 		  Song message:
-		// 		  Stored at offset given by "Message Offset" field.
-		// 			  Length = MsgLgth.
-		// 			  NewLine = 0Dh (13 dec)
-		// 			  EndOfMsg = 0
-		// 
-		// 		Note: v1.04+ of IT may have song messages of up to
-		// 			8000 bytes included.
-		// 			Bit 1: Reserved
-		// 			Bit 2: Reserved
-		// 			Bit 3: MIDI configuration embedded
-		// 			Bit 4-15: Reserved
-
-		stereo = self->fileheader.flags & IT2_FLAGS_STEREO;
-		
-		for (i = 0; i < 64; i++)
-		{
-			// if (stereo && !(itFileH.chanPan[i] & ChanFlags::IS_DISABLED))
-			//{
-			//	if (itFileH.chanPan[i] == ChanFlags::IS_SURROUND)
-			//	{
-			//		sampler->rChannel(i).DefaultPanFactorFloat(0.5f, true);
-			//		sampler->rChannel(i).DefaultIsSurround(true);
-			//	} else {
-			//		sampler->rChannel(i).DefaultPanFactorFloat((itFileH.chanPan[i] & 0x7F) / 64.0f, true);
-			//	}
-			//  else {
-			//	  sampler->rChannel(i).DefaultPanFactorFloat(0.5f, true);
-			//  }
-			//sampler->rChannel(i).DefaultVolumeFloat(itFileH.chanVol[i] / 64.0f);
-			if ((self->fileheader.chanPan[i] & IT2_CHAN_FLAGS_IS_DISABLED))
-			{
-				// sampler->rChannel(i).DefaultIsMute(true);
-			} else {
-				//sampler->rChannel(i).DefaultIsMute(false);
-				self->maxextracolumn = i;
-			}
-			// sampler->rChannel(i).DefaultFilterType(dsp::F_ITLOWPASS);
-		}
-		if (self->maxextracolumn == 63) {
-			self->maxextracolumn = 15;
-		}
-
-		itmodule2_readsequence(self);
-
-		pointersi = malloc(self->fileheader.insNum * sizeof(uint32_t));
-		psyfile_read(fp, pointersi, self->fileheader.insNum * sizeof(uint32_t));		
-		pointerss = malloc(self->fileheader.sampNum * sizeof(uint32_t));
-		psyfile_read(fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t));		
-		pointersp = malloc(self->fileheader.patNum * sizeof(uint32_t));
-		psyfile_read(fp, pointersp, self->fileheader.patNum * sizeof(uint32_t));
-
-		if (self->fileheader.special & IT2_SPECIAL_FLAGS_MIDIEMBEDDED)
-		{
-			int16_t skipnum;
-
-			self->embeddeddata = (EmbeddedMIDIData*)malloc(sizeof(EmbeddedMIDIData));
-			psyfile_read(fp, &skipnum, sizeof(int16_t));
-			psyfile_skip(fp, skipnum * 8); // This is some strange data. It is not documented.
-			psyfile_read(fp, self->embeddeddata, sizeof(EmbeddedMIDIData));
-		}
-		if ((self->fileheader.special & IT2_SPECIAL_FLAGS_HASMESSAGE) != 0 &&
-				self->fileheader.msgLen > 0) {
-			char* comments;
-						
-			psyfile_seek(fp, self->fileheader.msgOffset);
-			// NewLine = 0Dh (13 dec)
-			// EndOfMsg = 0
-			comments = malloc(self->fileheader.msgLen + 2);			
-			psyfile_read(fp, comments,
-				self->fileheader.msgLen);
-			comments[self->fileheader.msgLen + 1] = '\0';
-			psy_audio_songproperties_setcomments(
-				&self->songfile->song->properties, comments);
-			free(comments);
-		}
-
-		virtualInst = MAX_MACHINES;
-		for (i = 0; i < self->fileheader.insNum; i++)
-		{			
-			psy_audio_Instrument* instrument;
-			psyfile_seek(fp, pointersi[i]);		
-
-			instrument = psy_audio_instrument_allocinit();
-			psy_audio_instruments_insert(&self->songfile->song->instruments,
-				instrument, psy_audio_instrumentindex_make(0, i));
-			if (self->fileheader.ffv < 0x200) {
-				itInsHeader1x curh;
-
-				psyfile_read(fp, &curh, sizeof(curh));
-				itmodule2_loadolditinst(self, &curh, instrument);
-			} else {
-				itInsHeader2x curh;
-
-				psyfile_read(fp, &curh, sizeof(curh));
-				itmodule2_loaditinst(self, &curh, instrument);
-			}
-			psy_table_insert(&self->xmtovirtual, i,
-				(void*)(uintptr_t)virtualInst);
-			psy_audio_song_insertvirtualgenerator(self->songfile->song,
-				virtualInst++, 0, i);			
-		}
-		for (i = 0; i < self->fileheader.sampNum; i++)
-		{
-			psy_audio_Sample* wave;
-			bool created;
-
-			psyfile_seek(fp, pointerss[i]);
-			wave = psy_audio_sample_allocinit(1);
-			psy_audio_samples_insert(&self->songfile->song->samples, wave,
-				sampleindex_make(i, 0));
-			
-			created = itmodule2_loaditsample(self, wave);
-			// If this IT file doesn't use Instruments, we need to map the notes manually.
-			//if (created && !(itFileH.flags & Flags::USEINSTR))
-			//{
-			//	if (song.xminstruments.IsEnabled(i) == false) {
-			//		XMInstrument instr;
-			//		instr.Init();
-			//		song.xminstruments.SetInst(instr, i);
-			//	}
-			//	XMInstrument& instrument = song.xminstruments.get(i);
-			//	instrument.Name(wave.WaveName());
-			//	XMInstrument::NotePair npair;
-			//	npair.second = i;
-			//	for (int j = 0; j < XMInstrument::NOTE_MAP_SIZE; j++) {
-			//		npair.first = j;
-			//		instrument.NoteToSample(j, npair);
-			//	}
-			//	instrument.ValidateEnabled();
-
-			//	ittovirtual[i] = virtualInst;
-			//	song.SetVirtualInstrument(virtualInst++, 0, i);
-			//}
-			//song.samples.SetSample(wave, i);
-		}
-		numchans = self->maxextracolumn;
-		self->maxextracolumn = 0;
-		for (i = 0; i < self->fileheader.patNum; i++)
-		{
-			if (pointersp[i] == 0)
-			{
-				psy_audio_Pattern* pattern;
-
-				pattern = psy_audio_pattern_allocinit();
-				psy_audio_pattern_setname(pattern, "unnamed");
-				psy_audio_patterns_insert(&self->songfile->song->patterns,
-					i, pattern);
-				psy_audio_pattern_setlength(pattern,
-					64 * 1.0 / self->songfile->song->properties.lpb);				
-			} else {
-				psyfile_seek(fp, pointersp[i]);
-				itmodule2_loaditpattern(self, i, &numchans);				
-			}
-		}
-		self->songfile->song->properties.tracks = psy_max(numchans + 1,
-			(int)self->maxextracolumn);
-		psy_audio_reposition(&self->songfile->song->sequence);
-		free(pointersi);
-		free(pointerss);
-		free(pointersp);
-	}
-	return TRUE;
 }
 
-bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audio_Instrument* xins)
+bool itmodule2_makexmsampler(ITModule2* self)
+{
+	self->sampler = psy_audio_machinefactory_makemachine(
+		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
+		psy_INDEX_INVALID);
+	if (self->sampler) {
+		psy_audio_Wire wire;
+
+		psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+		psy_audio_machines_insert(&self->song->machines, 0, self->sampler);
+		wire = psy_audio_wire_make(0, psy_audio_MASTER_INDEX);
+		psy_audio_machines_connect(&self->song->machines, wire);
+		psy_audio_connections_setwirevolume(&self->song->machines.connections,
+			wire, psy_dsp_map_128_1((self->fileheader.mVol > 128)
+					? 128
+					: self->fileheader.mVol));
+	}
+	return self->sampler != NULL;
+}
+
+void itmodule2_setsamplerslidemode(ITModule2* self)
+{
+	itmodule2_tweaksampler(self, XM_SAMPLER_TWK_AMIGASLIDES,
+		(self->fileheader.flags & IT2_FLAGS_LINEARSLIDES)
+		? FALSE
+		: TRUE);	
+}
+
+void itmodule2_setglobalvolume(ITModule2* self)
+{
+	itmodule2_tweaksampler(self, XM_SAMPLER_TWK_GLOBALVOLUME,
+		self->fileheader.gVol);
+}
+
+void itmodule2_setupchannels(ITModule2* self)
+{
+	bool stereo;
+	int i;
+
+	// Flags:   Bit 0: On = Stereo, Off = Mono
+	// 			Bit 1: Vol0MixOptimizations - If on, no mixing occurs if
+	// 			the volume at mixing time is 0 (redundant v1.04+)
+	// 			Bit 2: On = Use instruments, Off = Use samples.
+	// 			Bit 3: On = Linear slides, Off = Amiga slides.
+	// 			Bit 4: On = Old Effects, Off = IT Effects
+	// Differences:
+	// 		- Vibrato is updated EVERY frame in IT mode, whereas
+	// 			it is updated every non-row frame in other formats.
+	// 			Also, it is two times deeper with Old Effects ON
+	// 			- Command Oxx will set the sample offset to the END
+	// 			of a sample instead of ignoring the command under
+	// 			old effects mode.
+	// 			- (More to come, probably)
+	// 			Bit 5: On = Link Effect G's memory with Effect E/F. Also
+	// 			Gxx with an instrument present will cause the
+	// 			envelopes to be retriggered. If you change a
+	// 			sample on a row with Gxx, it'll adjust the
+	// 			frequency of the current note according to:
+	// 
+	// 		  NewFrequency = OldFrequency * NewC5 / OldC5;
+	// 		  Bit 6: Use MIDI pitch controller, Pitch depth given by PWD
+	// 			  Bit 7: Request embedded MIDI configuration
+	// 			  (Coded this way to permit cross-version saving)
+	// 
+	// Special:  Bit 0: On = song message attached.
+	// 		  Song message:
+	// 		  Stored at offset given by "Message Offset" field.
+	// 			  Length = MsgLgth.
+	// 			  NewLine = 0Dh (13 dec)
+	// 			  EndOfMsg = 0
+	// 
+	// 		Note: v1.04+ of IT may have song messages of up to
+	// 			8000 bytes included.
+	// 			Bit 1: Reserved
+	// 			Bit 2: Reserved
+	// 			Bit 3: MIDI configuration embedded
+	// 			Bit 4-15: Reserved
+
+	stereo = self->fileheader.flags & IT2_FLAGS_STEREO;
+
+	for (i = 0; i < 64; ++i)
+	{
+		// if (stereo && !(itFileH.chanPan[i] & ChanFlags::IS_DISABLED))
+		//{
+		//	if (itFileH.chanPan[i] == ChanFlags::IS_SURROUND)
+		//	{
+		//		sampler->rChannel(i).DefaultPanFactorFloat(0.5f, true);
+		//		sampler->rChannel(i).DefaultIsSurround(true);
+		//	} else {
+		//		sampler->rChannel(i).DefaultPanFactorFloat((itFileH.chanPan[i] & 0x7F) / 64.0f, true);
+		//	}
+		//  else {
+		//	  sampler->rChannel(i).DefaultPanFactorFloat(0.5f, true);
+		//  }
+		//sampler->rChannel(i).DefaultVolumeFloat(itFileH.chanVol[i] / 64.0f);
+		if ((self->fileheader.chanPan[i] & IT2_CHAN_FLAGS_IS_DISABLED))
+		{
+			// sampler->rChannel(i).DefaultIsMute(true);
+		} else {
+			//sampler->rChannel(i).DefaultIsMute(false);
+			self->maxextracolumn = i;
+		}
+		// sampler->rChannel(i).DefaultFilterType(dsp::F_ITLOWPASS);
+	}
+	if (self->maxextracolumn == 63) {
+		self->maxextracolumn = 15;
+	}
+}
+
+int itmodule2_readmidiembedded(ITModule2* self)
+{
+	if (self->fileheader.special & IT2_SPECIAL_FLAGS_MIDIEMBEDDED)
+	{
+		int16_t skipnum;
+		int i;
+
+		self->embeddeddata = (EmbeddedMIDIData*)malloc(sizeof(EmbeddedMIDIData));
+		if (!psyfile_read(self->fp, &skipnum, sizeof(int16_t))) {
+			return PSY_ERRFILE;
+		}
+		// This is some strange data. It is not documented.
+		if (psyfile_skip(self->fp, skipnum * 8) == -1) {
+			return PSY_ERRFILE;
+		}
+		if (!psyfile_read(self->fp, self->embeddeddata, sizeof(EmbeddedMIDIData))) {
+			return PSY_ERRFILE;
+		}
+
+		for (i = 0; i < 128; i++)
+		{
+			const char* zxx = self->embeddeddata->Zxx[i];
+			char zxx2[6];
+
+			memset(zxx2, 0, 6);
+			memcpy(zxx2, zxx, 5);
+			if (strcmp(zxx2, "F0F00") == 0)
+			{
+				int mode = 0;
+				int tmp = 0;
+
+				if (self->embeddeddata->Zxx[i][5] >= '0' && self->embeddeddata->Zxx[i][5] <= '9')
+					mode = self->embeddeddata->Zxx[i][5] - '0';
+				else if (self->embeddeddata->Zxx[i][5] >= 'A' && self->embeddeddata->Zxx[i][5] <= 'F')
+					mode = self->embeddeddata->Zxx[i][5] - 'A' + 0xA;
+
+				if (self->embeddeddata->Zxx[i][6] >= '0' && self->embeddeddata->Zxx[i][6] <= '9')
+					tmp = (self->embeddeddata->Zxx[i][6] - '0') * 0x10;
+				else if (self->embeddeddata->Zxx[i][6] >= 'A' && self->embeddeddata->Zxx[i][6] <= 'F')
+					tmp = (self->embeddeddata->Zxx[i][6] - 'A' + 0xA) * 0x10;
+				if (self->embeddeddata->Zxx[i][7] >= '0' && self->embeddeddata->Zxx[i][7] <= '9')
+					tmp += (self->embeddeddata->Zxx[i][7] - '0');
+				else if (self->embeddeddata->Zxx[i][7] >= 'A' && self->embeddeddata->Zxx[i][7] <= 'F')
+					tmp += (self->embeddeddata->Zxx[i][7] - 'A' + 0xA);
+				itmodule2_tweaksampler(self, XM_SAMPLER_TWK_SETZXXMACRO_INDEX, i);
+				itmodule2_tweaksampler(self, XM_SAMPLER_TWK_SETZXXMACRO_MODE, mode);
+				itmodule2_tweaksampler(self, XM_SAMPLER_TWK_SETZXXMACRO_VALUE, tmp);
+			}
+		}
+	}
+	return PSY_OK;
+}
+
+int itmodule2_readmessage(ITModule2* self)
+{
+	if ((self->fileheader.special & IT2_SPECIAL_FLAGS_HASMESSAGE) != 0 &&
+		self->fileheader.msgLen > 0) {
+		char_dyn_t* comments;
+
+		if (psyfile_seek(self->fp, self->fileheader.msgOffset) == -1) {
+			return PSY_ERRFILE;
+		}
+		// NewLine = 0Dh (13 dec)
+		// EndOfMsg = 0
+		comments = malloc(self->fileheader.msgLen + 2);
+		if (!psyfile_read(self->fp, comments, self->fileheader.msgLen)) {
+			free(comments);
+			return PSY_ERRFILE;
+		}
+		comments[self->fileheader.msgLen + 1] = '\0';
+		psy_audio_songproperties_setcomments(
+			&self->songfile->song->properties, comments);
+		free(comments);
+	}
+	return PSY_OK;
+}
+
+void itmodule2_tweaksampler(ITModule2* self, int twk, int val)
+{
+	psy_audio_MachineParam* param;
+
+	param = psy_audio_machine_tweakparameter(self->sampler, twk);
+	if (param) {
+		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, val);
+	}
+}
+
+int itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audio_Instrument* xins)
 {	
-	psy_audio_instrument_setname(xins, curh->sName);	
+	psy_audio_instrument_setname(xins, curh->sName);
 
 	xins->volumefadespeed = curh->fadeout / 512.0f;
 
@@ -423,188 +600,233 @@ bool itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_aud
 		xins->dct = psy_audio_DUPECHECK_NOTE;
 		xins->dca = psy_audio_NNA_STOP;
 	}
-	/*
-	XMInstrument::NotePair npair;
-	int i;
-	for (i = 0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
-		npair.first = curh.notes[i].first;
-		npair.second = curh.notes[i].second - 1;
-		xins.NoteToSample(i, npair);
-	}
-	xins.AmpEnvelope().Init();
-	if (curh.flg & EnvFlags::USE_ENVELOPE) {// enable volume envelope
-		xins.AmpEnvelope().IsEnabled(true);
+	psy_dsp_envelope_clear(&xins->volumeenvelope);
+	if (curh->flg & IT2_ENV_USE_ENVELOPE) {
+		psy_dsp_envelope_setmode(&xins->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
+		psy_dsp_envelope_setenabled(&xins->volumeenvelope, TRUE);
 
-		if (curh.flg & EnvFlags::USE_SUSTAIN) {
-			xins.AmpEnvelope().SustainBegin(curh.sustainS);
-			xins.AmpEnvelope().SustainEnd(curh.sustainE);
+		if (curh->flg & IT2_ENV_USE_SUSTAIN) {
+			psy_dsp_envelope_setsustainbegin(&xins->volumeenvelope,
+				curh->sustainS);
+			psy_dsp_envelope_setsustainend(&xins->volumeenvelope,
+				curh->sustainE);
+		}
+		if (curh->flg & IT2_ENV_USE_LOOP) {
+			psy_dsp_envelope_setloopstart(&xins->volumeenvelope,
+				curh->loopS);
+			psy_dsp_envelope_setloopend(&xins->volumeenvelope,
+				curh->loopE);
 		}
 
-		if (curh.flg & EnvFlags::USE_LOOP) {
-			xins.AmpEnvelope().LoopStart(curh.loopS);
-			xins.AmpEnvelope().LoopEnd(curh.loopE);
-		}
 		for (int i = 0; i < 25; i++) {
-			uint8_t tick = curh.nodepair[i].first;
-			uint8_t value = curh.nodepair[i].second;
+			uint8_t tick = curh->nodepair[i].first;
+			uint8_t value = curh->nodepair[i].second;
 			if (value == 0xFF || tick == 0xFF) break;
 
-			xins.AmpEnvelope().Append(tick, (float)value / 64.0f);
+			psy_dsp_envelope_append(&xins->volumeenvelope,
+				psy_dsp_envelopepoint_make(tick, (float)value / 64.0f));
 		}
 	}
-	xins.PanEnvelope().Init();
-	xins.PitchEnvelope().Init();
-	xins.FilterEnvelope().Init();
-	xins.ValidateEnabled();*/
-	return TRUE;
+	psy_dsp_envelope_clear(&xins->panenvelope);
+	psy_dsp_envelope_clear(&xins->pitchenvelope);
+	psy_dsp_envelope_clear(&xins->filterenvelope);	
+	//xins.ValidateEnabled();
+	return PSY_OK;
 }
 
-bool itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_Instrument* xins)
+int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_Instrument* xins)
 {
-	/*std::string itname(curh.sName);
-	xins.Name(itname);
+	int envelope_point_num;
 
-	xins.NNA((XMInstrument::NewNoteAction::Type)curh.NNA);
-	xins.DCT((XMInstrument::DupeCheck::Type)curh.DCT);
-	switch (curh.DCA)
+	assert(self);
+	assert(curh);
+	assert(xins);
+			
+	psy_audio_instrument_setname(xins, curh->sName);
+	xins->nna = (psy_audio_NewNoteAction)curh->NNA;
+	xins->dct = (psy_audio_DupeCheck)curh->DCT;
+	switch (curh->DCA) {
+		case IT2_DCACTION_NOTEOFF:
+			xins->dca = psy_audio_NNA_NOTEOFF;
+			break;
+		case IT2_DCACTION_FADEOUT:
+			xins->dca = psy_audio_NNA_FADEOUT;
+			break;
+		case IT2_DCACTION_STOP://fallthrough
+		default:
+			xins->dca = psy_audio_NNA_NOTEOFF;
+			break;
+	}
+
+	xins->initpan = (curh->defPan & 0x7F) / 64.0f;
+	xins->panenabled = (curh->defPan & 0x80) ? FALSE : TRUE;
+	xins->notemodpancenter = (curh->pPanCenter);
+	xins->notemodpansep = (curh->pPanSep);
+	xins->globalvolume = (curh->gVol / 127.0f);
+	xins->volumefadespeed = (curh->fadeout / 1024.0f);
+	xins->randomvolume = (curh->randVol / 100.f);
+	xins->randompanning = (curh->randPan / 64.f);
+	if ((curh->inFC & 0x80) != 0)
 	{
-	case DCAction::NOTEOFF:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF); break;
-	case DCAction::FADEOUT:xins.DCA(XMInstrument::NewNoteAction::FADEOUT); break;
-	case DCAction::STOP://fallthrough
-	default:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF); break;
+		psy_audio_instrument_setfiltertype(xins,
+			F_ITLOWPASS);
+		psy_audio_instrument_setfiltercutoff(xins,
+			(curh->inFC & 0x7F) / 127.f);
 	}
-
-	xins.Pan((curh.defPan & 0x7F) / 64.0f);
-	xins.PanEnabled((curh.defPan & 0x80) ? false : true);
-	xins.NoteModPanCenter(curh.pPanCenter);
-	xins.NoteModPanSep(curh.pPanSep);
-	xins.GlobVol(curh.gVol / 127.0f);
-	xins.VolumeFadeSpeed(curh.fadeout / 1024.0f);
-	xins.RandomVolume(curh.randVol / 100.f);
-	xins.RandomPanning(curh.randPan / 64.f);
-	if ((curh.inFC & 0x80) != 0)
+	if ((curh->inFR & 0x80) != 0)
 	{
-		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterCutoff(curh.inFC & 0x7F);
-	}
-	if ((curh.inFR & 0x80) != 0)
-	{
-		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterResonance(curh.inFR & 0x7F);
+		psy_audio_instrument_setfiltertype(xins,
+			F_ITLOWPASS);
+		psy_audio_instrument_setfilterresonance(xins,
+			(float)(curh->inFR & 0x7F));
 	}
 
-
-	XMInstrument::NotePair npair;
-	int i;
-	for (i = 0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
-		npair.first = curh.notes[i].first;
-		npair.second = curh.notes[i].second - 1;
-		xins.NoteToSample(i, npair);
-	}
+	//XMInstrument::NotePair npair;
+	//int i;
+	//for (i = 0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
+	//	npair.first = curh.notes[i].first;
+	//	npair.second = curh.notes[i].second - 1;
+	//	xins.NoteToSample(i, npair);
+	//}
 
 	// volume envelope
-	xins.AmpEnvelope().Init();
-	xins.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	xins.AmpEnvelope().IsEnabled(curh.volEnv.flg & EnvFlags::USE_ENVELOPE);
-	if (curh.volEnv.flg & EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
-	if (curh.volEnv.flg & EnvFlags::USE_SUSTAIN) {
-		xins.AmpEnvelope().SustainBegin(curh.volEnv.sustainS);
-		xins.AmpEnvelope().SustainEnd(curh.volEnv.sustainE);
+	psy_dsp_envelope_clear(&xins->volumeenvelope);
+	psy_dsp_envelope_setmode(&xins->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_setenabled(&xins->volumeenvelope,
+		curh->volEnv.flg & IT2_ENV_USE_ENVELOPE);		
+	if (curh->volEnv.flg & IT2_ENV_ENABLE_CARRY) {
+		psy_dsp_envelope_setcarry(&xins->volumeenvelope, TRUE);		
+	}
+	if (curh->volEnv.flg & IT2_ENV_USE_SUSTAIN) {
+		psy_dsp_envelope_setsustainbegin(&xins->volumeenvelope,
+			curh->volEnv.sustainS);
+		psy_dsp_envelope_setsustainend(&xins->volumeenvelope,
+			curh->volEnv.sustainE);		
+	}
+	if (curh->volEnv.flg & IT2_ENV_USE_LOOP) {
+		psy_dsp_envelope_setloopstart(&xins->volumeenvelope,
+			curh->volEnv.loopS);
+		psy_dsp_envelope_setloopend(&xins->volumeenvelope,
+			curh->volEnv.loopE);	
 	}
 
-	if (curh.volEnv.flg & EnvFlags::USE_LOOP) {
-		xins.AmpEnvelope().LoopStart(curh.volEnv.loopS);
-		xins.AmpEnvelope().LoopEnd(curh.volEnv.loopE);
-	}
-
-	int envelope_point_num = curh.volEnv.numP;
+	envelope_point_num = curh->volEnv.numP;
 	if (envelope_point_num > 25) {
 		envelope_point_num = 25;
 	}
 
 	for (int i = 0; i < envelope_point_num; i++) {
-		short envtmp = curh.volEnv.nodes[i].secondlo | (curh.volEnv.nodes[i].secondhi << 8);
-		xins.AmpEnvelope().Append(envtmp, (float)curh.volEnv.nodes[i].first / 64.0f);
+		short envtmp;
+		
+		envtmp = curh->volEnv.nodes[i].secondlo | (curh->volEnv.nodes[i].secondhi << 8);
+		psy_dsp_envelope_append(&xins->volumeenvelope,
+			psy_dsp_envelopepoint_make(envtmp, (float)curh->volEnv.nodes[i].first / 64.0f));
 	}
 
-	// Pan envelope
-	xins.PanEnvelope().Init();
-	xins.PanEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	xins.PanEnvelope().IsEnabled(curh.panEnv.flg & EnvFlags::USE_ENVELOPE);
-	if (curh.panEnv.flg & EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
-	if (curh.panEnv.flg & EnvFlags::USE_SUSTAIN) {
-		xins.PanEnvelope().SustainBegin(curh.panEnv.sustainS);
-		xins.PanEnvelope().SustainEnd(curh.panEnv.sustainE);
+	//// Pan envelope
+	psy_dsp_envelope_clear(&xins->panenvelope);
+	psy_dsp_envelope_setmode(&xins->panenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_setenabled(&xins->panenvelope,
+		curh->panEnv.flg & IT2_ENV_USE_ENVELOPE);
+	if (curh->panEnv.flg & IT2_ENV_ENABLE_CARRY) {
+		psy_dsp_envelope_setcarry(&xins->panenvelope, TRUE);
+	}
+	if (curh->panEnv.flg & IT2_ENV_USE_SUSTAIN) {
+		psy_dsp_envelope_setsustainbegin(&xins->panenvelope,
+			curh->panEnv.sustainS);
+		psy_dsp_envelope_setsustainend(&xins->panenvelope,
+			curh->panEnv.sustainE);
+	}
+	if (curh->panEnv.flg & IT2_ENV_USE_LOOP) {
+		psy_dsp_envelope_setloopstart(&xins->panenvelope,
+			curh->panEnv.loopS);
+		psy_dsp_envelope_setloopend(&xins->panenvelope,
+			curh->panEnv.loopE);
 	}
 
-	if (curh.panEnv.flg & EnvFlags::USE_LOOP) {
-		xins.PanEnvelope().LoopStart(curh.panEnv.loopS);
-		xins.PanEnvelope().LoopEnd(curh.panEnv.loopE);
-	}
-
-	envelope_point_num = curh.panEnv.numP;
-	if (envelope_point_num > 25) { // Max number of envelope points in Impulse format is 25.
+	envelope_point_num = curh->panEnv.numP;
+	if (envelope_point_num > 25) {
 		envelope_point_num = 25;
 	}
 
 	for (int i = 0; i < envelope_point_num; i++) {
-		short pantmp = curh.panEnv.nodes[i].secondlo | (curh.panEnv.nodes[i].secondhi << 8);
-		xins.PanEnvelope().Append(pantmp, (float)(curh.panEnv.nodes[i].first) / 32.0f);
+		short envtmp;
+
+		envtmp = curh->panEnv.nodes[i].secondlo | (curh->panEnv.nodes[i].secondhi << 8);
+		psy_dsp_envelope_append(&xins->panenvelope,
+			psy_dsp_envelopepoint_make(envtmp, (float)curh->panEnv.nodes[i].first / 32.0f));
 	}
 
 	// Pitch/Filter envelope
-	xins.PitchEnvelope().Init();
-	xins.PitchEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
-	xins.FilterEnvelope().Init();
-	xins.FilterEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
+	psy_dsp_envelope_clear(&xins->pitchenvelope);
+	psy_dsp_envelope_setmode(&xins->pitchenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&xins->filterenvelope);
+	psy_dsp_envelope_setmode(&xins->filterenvelope, psy_dsp_ENVELOPETIME_TICK);
 
-	envelope_point_num = curh.pitchEnv.numP;
+	envelope_point_num = curh->pitchEnv.numP;
 	if (envelope_point_num > 25) { // Max number of envelope points in Impulse format is 25.
 		envelope_point_num = 25;
 	}
 
-	if (curh.pitchEnv.flg & EnvFlags::ISFILTER)
+	if (curh->pitchEnv.flg & IT2_ENV_ISFILTER)
 	{
-		xins.FilterType(dsp::F_ITLOWPASS);
-		xins.FilterEnvelope().IsEnabled(curh.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
-		xins.PitchEnvelope().IsEnabled(false);
-		if (curh.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
-		if (curh.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
-			xins.FilterEnvelope().SustainBegin(curh.pitchEnv.sustainS);
-			xins.FilterEnvelope().SustainEnd(curh.pitchEnv.sustainE);
+		psy_audio_instrument_setfiltertype(xins, F_ITLOWPASS);
+		psy_dsp_envelope_setenabled(&xins->filterenvelope,
+			curh->pitchEnv.flg & IT2_ENV_USE_ENVELOPE);
+		psy_dsp_envelope_setenabled(&xins->pitchenvelope, FALSE);
+		if (curh->pitchEnv.flg & IT2_ENV_ENABLE_CARRY) {
+			psy_dsp_envelope_setcarry(&xins->filterenvelope, TRUE);
 		}
-
-		if (curh.pitchEnv.flg & EnvFlags::USE_LOOP) {
-			xins.FilterEnvelope().LoopStart(curh.pitchEnv.loopS);
-			xins.FilterEnvelope().LoopEnd(curh.pitchEnv.loopE);
+		if (curh->pitchEnv.flg & IT2_ENV_USE_SUSTAIN) {
+			psy_dsp_envelope_setsustainbegin(&xins->filterenvelope,
+				curh->pitchEnv.sustainS);
+			psy_dsp_envelope_setsustainend(&xins->filterenvelope,
+				curh->pitchEnv.sustainE);
+		}
+		if (curh->pitchEnv.flg & IT2_ENV_USE_LOOP) {
+			psy_dsp_envelope_setloopstart(&xins->filterenvelope,
+				curh->pitchEnv.loopS);
+			psy_dsp_envelope_setloopend(&xins->filterenvelope,
+				curh->pitchEnv.loopE);
 		}
 
 		for (int i = 0; i < envelope_point_num; i++) {
-			short pitchtmp = curh.pitchEnv.nodes[i].secondlo | (curh.pitchEnv.nodes[i].secondhi << 8);
-			xins.FilterEnvelope().Append(pitchtmp, (float)(curh.pitchEnv.nodes[i].first + 32) / 64.0f);
+			short envtmp;
+
+			envtmp = curh->pitchEnv.nodes[i].secondlo | (curh->pitchEnv.nodes[i].secondhi << 8);
+			psy_dsp_envelope_append(&xins->filterenvelope,
+				psy_dsp_envelopepoint_make(envtmp, (float)curh->pitchEnv.nodes[i].first / 64.0f));
 		}
 	} else {
-		xins.PitchEnvelope().IsEnabled(curh.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
-		xins.FilterEnvelope().IsEnabled(false);
-		if (curh.pitchEnv.flg & EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
-		if (curh.pitchEnv.flg & EnvFlags::USE_SUSTAIN) {
-			xins.PitchEnvelope().SustainBegin(curh.pitchEnv.sustainS);
-			xins.PitchEnvelope().SustainEnd(curh.pitchEnv.sustainE);
+		psy_dsp_envelope_setenabled(&xins->pitchenvelope,
+			curh->pitchEnv.flg& IT2_ENV_USE_ENVELOPE);
+		psy_dsp_envelope_setenabled(&xins->filterenvelope, FALSE);
+		if (curh->pitchEnv.flg & IT2_ENV_ENABLE_CARRY) {
+			psy_dsp_envelope_setcarry(&xins->pitchenvelope, TRUE);
 		}
-
-		if (curh.pitchEnv.flg & EnvFlags::USE_LOOP) {
-			xins.PitchEnvelope().LoopStart(curh.pitchEnv.loopS);
-			xins.PitchEnvelope().LoopEnd(curh.pitchEnv.loopE);
+		if (curh->pitchEnv.flg & IT2_ENV_USE_SUSTAIN) {
+			psy_dsp_envelope_setsustainbegin(&xins->pitchenvelope,
+				curh->pitchEnv.sustainS);
+			psy_dsp_envelope_setsustainend(&xins->pitchenvelope,
+				curh->pitchEnv.sustainE);
+		}
+		if (curh->pitchEnv.flg & IT2_ENV_USE_LOOP) {
+			psy_dsp_envelope_setloopstart(&xins->pitchenvelope,
+				curh->pitchEnv.loopS);
+			psy_dsp_envelope_setloopend(&xins->pitchenvelope,
+				curh->pitchEnv.loopE);
 		}
 
 		for (int i = 0; i < envelope_point_num; i++) {
-			short pitchtmp = curh.pitchEnv.nodes[i].secondlo | (curh.pitchEnv.nodes[i].secondhi << 8);
-			xins.PitchEnvelope().Append(pitchtmp, (float)(curh.pitchEnv.nodes[i].first) / 32.0f);
+			short envtmp;
+
+			envtmp = curh->pitchEnv.nodes[i].secondlo | (curh->pitchEnv.nodes[i].secondhi << 8);
+			psy_dsp_envelope_append(&xins->pitchenvelope,
+				psy_dsp_envelopepoint_make(envtmp, (float)curh->pitchEnv.nodes[i].first / 32.0f));
 		}
 	}
-
-	xins.ValidateEnabled();*/
-	return TRUE;
+	//xins.ValidateEnabled();
+	return PSY_OK;
 }
 
 int itmodule2_readsequence(ITModule2* self)
@@ -1375,10 +1597,6 @@ bool itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
 
 static bool itmodule2_loads3msampledatax(ITModule2*, psy_audio_Sample*, uint32_t iLen, bool bstereo, bool b16Bit, bool packed);
 static bool itmodule2_loads3msamplex(ITModule2* self, psy_audio_Sample* _wave, s3mSampleHeader* currHeader);
-
-static const uint32_t SCRM_ID = 0x5343524D;
-static const uint32_t SCRS_ID = 0x53435253;
-static const uint32_t SCRI_ID = 0x53435249;
 
 bool itmodule2_loads3minstx(ITModule2* self, uint16_t iSampleIdx)
 {

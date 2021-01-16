@@ -82,6 +82,8 @@ int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController*,
 	int numSamples, bool released);
 psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController*,
 	uintptr_t channel);
+void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self,
+	float* pLeftw, float* pRightw);
 void psy_audio_wavedatacontroller_postwork(psy_audio_WaveDataController*);
 void psy_audio_wavedatacontroller_changeloopdirection(psy_audio_WaveDataController*,
 	psy_audio_LoopDirection dir);

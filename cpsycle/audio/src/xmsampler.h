@@ -22,11 +22,14 @@ extern "C" {
 //       SampleIterator(Wavedatacontroller)?, xmenvelopecontroller?,
 //       samplervoice_work?
 
-#define XM_SAMPLER_TWK_CHANNEL_START 4
+#define XM_SAMPLER_TWK_CHANNEL_START 8
 
 #define XM_SAMPLER_TWK_AMIGASLIDES 0
 #define XM_SAMPLER_TWK_GLOBALVOLUME 1
 #define XM_SAMPLER_TWK_PANNINGMODE 2
+#define XM_SAMPLER_TWK_SETZXXMACRO_INDEX 3
+#define XM_SAMPLER_TWK_SETZXXMACRO_MODE 4
+#define XM_SAMPLER_TWK_SETZXXMACRO_VALUE 5
 
 #define XM_SAMPLER_MAX_POLYPHONY 64///< max polyphony
 #define XM_SAMPLER_MAX_TRACKS 64
@@ -75,7 +78,14 @@ typedef struct psy_audio_XMSampler {
 	psy_audio_ChoiceMachineParam param_usefilters;
 	psy_audio_ChoiceMachineParam param_panningmode;
 	psy_audio_CustomMachineParam param_channels;
-	psy_audio_ChoiceMachineParam param_channelview;	
+	psy_audio_ChoiceMachineParam param_channelview;
+	// tweak only
+	psy_audio_IntMachineParam tweakparam_zxxindex;
+	psy_audio_IntMachineParam tweakparam_zxxmode;	
+	psy_audio_IntMachineParam tweakparam_zxxvalue;
+	int32_t tweak_zxxindex;
+	int32_t tweak_zxxmode;	
+	int32_t tweak_zxxvalue;
 } psy_audio_XMSampler;
 
 void psy_audio_xmsampler_init(psy_audio_XMSampler*, psy_audio_MachineCallback*);
