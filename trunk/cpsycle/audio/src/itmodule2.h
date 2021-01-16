@@ -123,6 +123,20 @@ typedef struct itInsHeader2x {
 	struct ITEnvStruct pitchEnv;
 } itInsHeader2x;
 
+typedef enum EnvFlagsType {
+	IT2_ENV_USE_ENVELOPE = 0x01,
+	IT2_ENV_USE_LOOP = 0x02,
+	IT2_ENV_USE_SUSTAIN = 0x04,
+	IT2_ENV_ENABLE_CARRY = 0x08,
+	IT2_ENV_ISFILTER = 0x80, // Only meaningful in a pitch envelope
+} EnvFlagsType;
+
+typedef enum DCActionType {
+	IT2_DCACTION_STOP = 0x0,
+	IT2_DCACTION_NOTEOFF,
+	IT2_DCACTION_FADEOUT	
+} DCActionType;
+
 typedef struct itSampleHeader {
 	uint32_t tag;
 	char fileName[13];
@@ -132,6 +146,18 @@ typedef struct itSampleHeader {
 	uint32_t length, loopB, loopE, c5Speed, sustainB, sustainE, smpData;
 	uint8_t vibS, vibD, vibR, vibT;
 } itSampleHeader;
+
+
+// little-endian
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+#define SCRM_ID 0x4D524353
+#define SCRS_ID 0x53524353
+#define SCRI_ID 0x49524353
+#else
+#define SCRM_ID 0x5343524D
+#define SCRS_ID 0x53435253
+#define SCRI_ID 0x53435249
+#endif
 
 typedef struct s3mHeader {
 	char songName[28];
@@ -273,6 +299,8 @@ enum {
 	IT2_CMD_S_SET_MIDI_MACRO = 0xF0
 };
 
+struct psy_audio_Song;
+
 // ITModule2
 typedef struct ITModule2 {
 	// internal data
@@ -287,12 +315,14 @@ typedef struct ITModule2 {
 	// references
 	psy_audio_SongFile* songfile;
 	PsyFile* fp;
+	struct psy_audio_Song* song;
 } ITModule2;
 
 void itmodule2_init(ITModule2*, psy_audio_SongFile*);
 void itmodule2_dispose(ITModule2*);
 
-bool itmodule2_load(ITModule2*);
+int itmodule2_load(ITModule2*);
+int itmodule2_loaditmodule(ITModule2* self);
 
 #ifdef __cplusplus
 }

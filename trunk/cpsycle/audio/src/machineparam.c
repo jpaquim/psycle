@@ -399,6 +399,7 @@ void intmachineparam_tweak(psy_audio_IntMachineParam* self, float value)
 		scaled = (intptr_t)(value * (self->maxval - self->minval) + 0.5f) +
 			self->minval;
 		*self->data = (int32_t)scaled;
+		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 	}
 }
 

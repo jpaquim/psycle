@@ -80,6 +80,24 @@ void psy_audio_psy3loader_dispose(psy_audio_PSY3Loader* self)
 	psy_audio_legacywires_dispose(&self->legacywires);
 }
 
+psy_audio_PSY3Loader* psy_audio_psy3loader_allocinit(
+	psy_audio_SongFile* songfile)
+{
+	psy_audio_PSY3Loader* rv;
+
+	rv = (psy_audio_PSY3Loader*)malloc(sizeof(psy_audio_PSY3Loader));
+	if (rv) {
+		psy_audio_psy3loader_init(rv, songfile);
+	}
+	return rv;
+}
+
+void psy_audio_psy3loader_deallocate(psy_audio_PSY3Loader* self)
+{
+	psy_audio_psy3loader_dispose(self);
+	free(self);
+}
+
 //	===================
 //	PSY3 SONG LOAD
 //	===================

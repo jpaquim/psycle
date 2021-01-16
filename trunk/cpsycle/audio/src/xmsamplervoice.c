@@ -260,7 +260,7 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 			xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex);
 		} else {
 			self->m_Stage = XMENVELOPESTAGE_OFF;
-			self->m_PositionIndex = psy_dsp_envelope_numofpoints(self->m_pEnvelope);
+			self->m_PositionIndex = (int)psy_dsp_envelope_numofpoints(self->m_pEnvelope);
 			self->m_ModulationAmount = psy_dsp_envelope_value(self->m_pEnvelope, self->m_PositionIndex - 1);
 		}
 	} else xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex + 1);
@@ -352,7 +352,8 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self)
 	psy_dsp_slider_init(&self->rampr);
 	psy_dsp_slider_resetto(&self->rampl, 0.f);
 	psy_dsp_slider_resetto(&self->rampr, 0.f);
-	psy_audio_wavedatacontroller_init(&self->m_WaveDataController);		
+	psy_audio_wavedatacontroller_init(&self->m_WaveDataController);
+	psy_audio_xmsamplervoice_reset(self);
 }
 
 void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice* self)
@@ -485,7 +486,7 @@ void psy_audio_xmsamplervoice_voiceinit(psy_audio_XMSamplerVoice* self,
 					(float)rand() * psy_audio_instrument_randomcutoff(_inst) / 3276800.0f);
 			} else */ {
 			psy_audio_xmsamplervoice_setcutoff(self,
-				psy_audio_instrument_filtercutoff(_inst));
+				psy_audio_instrument_filtercutoff(_inst) * 127);
 		}
 /*			if (_inst.RandomResonance() > 0.f) {
 					Ressonance(_inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f);
@@ -541,8 +542,11 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
-			left_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 0);			
-			right_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 1);			
+			//left_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 0);			
+			// right_output = psy_audio_sampleiterator_work(&self->m_WaveDataController, 1);
+
+			psy_audio_sampleiterator_workstereo(&self->m_WaveDataController,
+				&left_output, &right_output);
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 2 : Process the Envelopes.
@@ -640,7 +644,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 					int tmpCO = (int)(self->m_CutOff * 
 						xmenvelopecontroller_modulationamount(&self->m_FilterEnvelope));
 					if (tmpCO < 0) { tmpCO = 0; } else if (tmpCO > 127) { tmpCO = 127; }
-					filter_setcutoff(&self->m_Filter, tmpCO);					
+					filter_setcutoff(&self->m_Filter, (float)(tmpCO / 127.f));
 					filter_workstereo_virtual(&self->m_Filter, &left_output, &right_output);
 				}
 			}
@@ -666,11 +670,11 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 			}
 
 			nextsamples--;
-			diff = psy_audio_wavedatacontroller_inc(&self->m_WaveDataController);
-			self->m_WaveDataController.left += diff;
-			if (psy_audio_buffer_numchannels(&self->m_WaveDataController.sample->channels) > 1) {
-				self->m_WaveDataController.right += diff;
-			}
+			//diff = psy_audio_wavedatacontroller_inc(&self->m_WaveDataController);
+			//self->m_WaveDataController.left += diff;
+			//if (psy_audio_buffer_numchannels(&self->m_WaveDataController.sample->channels) > 1) {
+			//	self->m_WaveDataController.right += diff;
+			//}
 		}
 		psy_audio_wavedatacontroller_postwork(&self->m_WaveDataController);
 		if (!psy_audio_wavedatacontroller_playing(&self->m_WaveDataController)) {
@@ -818,7 +822,9 @@ void psy_audio_xmsamplervoice_resetvolandpan(psy_audio_XMSamplerVoice* self,
 		// NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
 		fpan += (self->m_Note - psy_audio_instrument_notemodpancenter(psy_audio_xmsamplervoice_rinstrument(self))) *
 			psy_audio_instrument_notemodpansep(psy_audio_xmsamplervoice_rinstrument(self)) / 512.0f;			
-		// fpan += (float)(rand() - 16384.0f) * rInstrument().RandomPanning() / 16384.0f;
+		fpan += (float)(rand() - 16384.0f) * psy_audio_instrument_randompanning(
+			psy_audio_xmsamplervoice_rinstrument(self)) / 16384.0f;
+
 		if (fpan > 1.0f) {
 			fpan = 1.0f;
 		} else if (fpan < 0.0f) {
@@ -886,8 +892,7 @@ void psy_audio_xmsamplervoice_noteofffast(psy_audio_XMSamplerVoice* self)
 		psy_audio_xmsamplerchannel_volume(
 			psy_audio_xmsamplervoice_rchannel(self)) == 0.0f) {
 		psy_audio_xmsamplervoice_setisplaying(self, FALSE);
-	}
-	
+	}	
 	psy_audio_xmsamplervoice_setisstopping(self, TRUE);
 	if (psy_dsp_envelope_isenabled(self->m_AmplitudeEnvelope.m_pEnvelope)) {
 		xmenvelopecontroller_noteoff(&self->m_AmplitudeEnvelope);		
@@ -1055,7 +1060,7 @@ void psy_audio_xmsamplervoice_panbrello(psy_audio_XMSamplerVoice* self)
 	vdelta = vdelta * self->m_PanbrelloDepth;
 	self->m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
 	if (psy_audio_xmsamplerchannel_panbrellotype(psy_audio_xmsamplervoice_rchannel(self)) !=
-		psy_audio_WAVEFORMS_RANDOM) {
+			psy_audio_WAVEFORMS_RANDOM) {
 	 	self->m_PanbrelloPos = (self->m_PanbrelloPos + self->m_PanbrelloSpeed) & 0xFF;
 	} else if (++self->m_PanbrelloRandomCounter >= self->m_PanbrelloSpeed)
 	{
@@ -1077,7 +1082,7 @@ void psy_audio_xmsamplervoice_tremor(psy_audio_XMSamplerVoice* self)
 		} else
 		{
 			self->m_TremorTickChange = psy_audio_xmsampler_currenttick(self->m_pSampler) + self->m_TremorOffTicks;
-			self->m_bTremorMute = FALSE;
+			self->m_bTremorMute = TRUE;
 		}
 	}
 }
@@ -1167,8 +1172,7 @@ double psy_audio_xmsamplervoice_periodtospeed(const psy_audio_XMSamplerVoice* se
 		)
 		* self->m_WaveDataController.sample->samplerate / 
 			(double)psy_audio_xmsamplervoice_samplerate(self);
-	}
-	return 1.f;
+	}	
 }
 
 double psy_audio_xmsamplervoice_notetoperiod(const psy_audio_XMSamplerVoice* self,

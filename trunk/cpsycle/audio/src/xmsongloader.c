@@ -86,6 +86,7 @@ static int xmsongloader_loadpatterns(XMSongLoader*,
 	uintptr_t* rv_nextstart);
 static void xmsongloader_setsamplerslidemode(XMSongLoader*);
 static void xmsongloader_setsamplerpanningmode(XMSongLoader*);
+static void xmsongloader_tweaksampler(XMSongLoader*, int twk, int val);
 static void xmsongloader_makesequence(XMSongLoader*, struct XMFILEHEADER*);
 static int xmsongloader_loadsinglepattern(XMSongLoader*, uintptr_t start,
 	int patidx, int tracks, uintptr_t* rv_nextstart);
@@ -277,27 +278,24 @@ int xmsongloader_loadpatterns(XMSongLoader* self, uintptr_t* rv_nextstart)
 
 void xmsongloader_setsamplerslidemode(XMSongLoader* self)
 {
-	psy_audio_MachineParam* param;
-
-	param = psy_audio_machine_tweakparameter(self->sampler,
-		XM_SAMPLER_TWK_AMIGASLIDES);
-	if (param) {
-		psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
-			(self->header.flags & 0x01)
-			? FALSE
-			: TRUE);
-	}
+	xmsongloader_tweaksampler(self, XM_SAMPLER_TWK_AMIGASLIDES,
+		(self->header.flags & 0x01)
+		? FALSE
+		: TRUE);	
 }
 
 void xmsongloader_setsamplerpanningmode(XMSongLoader* self)
 {
+	xmsongloader_tweaksampler(self, XM_SAMPLER_TWK_PANNINGMODE, 1);
+}
+
+void xmsongloader_tweaksampler(XMSongLoader* self, int twk, int val)
+{
 	psy_audio_MachineParam* param;
 
-	param = psy_audio_machine_tweakparameter(self->sampler,
-		XM_SAMPLER_TWK_PANNINGMODE);
+	param = psy_audio_machine_tweakparameter(self->sampler, twk);
 	if (param) {
-		// XM_SAMPLER_PanningMode::TwoWay
-		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, 1);
+		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, val);
 	}
 }
 
@@ -941,6 +939,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 	uintptr_t start, uintptr_t* rv_nextstart)
 {	
 	psy_audio_Instrument* instrument;	
+
 	int32_t instrsize;
 	char instrname[24];
 	uint16_t samplecount;	
@@ -989,7 +988,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 		return PSY_ERRFILE;
 	}	
 	if (samplecount > 1) {
-		//TRACE(_T("ssmple count = %d\n"), iSampleCount);
+		//TRACE(_T("ssmple count = %d\n"), samplecount);
 	}
 	if (samplecount == 0) {
 		*rv_nextstart = start;
@@ -1050,7 +1049,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 		}
 	}
 	instentry.keyrange.high = 119;
-	psy_audio_instrument_addentry(instrument, &instentry);	
+	psy_audio_instrument_addentry(instrument, &instentry);
 	*rv_nextstart = start;
 	return PSY_OK;
 }
@@ -1345,6 +1344,165 @@ int xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* wave,
 	return PSY_OK;
 }
 
+// XI Instrument load
+int xmsongloader_loadxi(XMSongLoader* self, psy_audio_InstrumentIndex index)
+{
+	int exchwave[4] = {
+		psy_audio_WAVEFORMS_SINUS,
+		psy_audio_WAVEFORMS_SQUARE,
+		psy_audio_WAVEFORMS_SAWDOWN,
+		psy_audio_WAVEFORMS_SAWUP
+	};
+	int note;
+	int instidx;
+	XMINSTRUMENTFILEHEADER fileheader;
+	XMSAMPLEFILEHEADER insheader;
+	XMSAMPLEHEADER insheaderb;
+	char* pinsheaderb;
+	psy_audio_Instrument* instr;
+	psy_audio_InstrumentEntry instentry;
+	uint32_t samplecount;
+	uint32_t i;
+	int sample;
+
+	instidx = (int)index.subslot;
+	if (!psyfile_read(self->fp, &fileheader, sizeof(XMINSTRUMENTFILEHEADER))) {
+		return PSY_ERRFILE;
+	}
+	if (strncmp(fileheader.extxi, XI_HEADER, sizeof(fileheader.extxi)) != 0) {
+		return PSY_ERRFILE;
+	}
+	fileheader.name[22] = 0;
+	if (!psyfile_read(self->fp, &insheader, sizeof(XMSAMPLEFILEHEADER))) {
+		return PSY_ERRFILE;
+	}
+	pinsheaderb = (char*)(&insheaderb) + 4;
+	memcpy(pinsheaderb, &insheader, sizeof(XMSAMPLEFILEHEADER) - 2);
+
+	// create and insert instrument
+	instr = psy_audio_instrument_allocinit();
+	psy_audio_instrument_setindex(instr, instidx);
+	psy_audio_instruments_insert(&self->song->instruments, instr,
+		psy_audio_instrumentindex_make(index.groupslot, instidx));
+	psy_dsp_envelope_clear(&instr->volumeenvelope);
+	psy_dsp_envelope_setmode(&instr->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&instr->panenvelope);
+	psy_dsp_envelope_setmode(&instr->panenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&instr->pitchenvelope);
+	psy_dsp_envelope_setmode(&instr->pitchenvelope, psy_dsp_ENVELOPETIME_TICK);
+	psy_dsp_envelope_clear(&instr->filterenvelope);
+	psy_dsp_envelope_setmode(&instr->filterenvelope, psy_dsp_ENVELOPETIME_TICK);
+
+	psy_audio_instrument_setname(instr, fileheader.name);
+	xmsongloader_setenvelopes(instr, &insheaderb);
+
+	samplecount = 0;
+	for (i = 0; i < 96; ++i)
+	{
+		if (insheader.snum[i] > samplecount) samplecount = insheader.snum[i];
+	}
+	samplecount++;
+	if (samplecount > 32) samplecount = 32;
+
+	sample = -1;
+	/*if (loadhelp.IsPreview())
+	{
+		if (insheader.snum[48] >= samplecount)
+		{
+			for (int f = 0; f < 96; f++) if (insheader.snum[f] < samplecount) {
+				sample = insheader.snum[f];
+				break;
+			}
+		} else { sample = insheader.snum[48]; }
+		std::vector<XMInstrument::WaveData<>*> waves(samplecount);
+		for (i = 0; i < samplecount; i++)
+		{
+			waves[i] = new XMInstrument::WaveData<>();
+			LoadSampleHeader(*waves[i], GetPos(), instidx, i);
+		}
+		// load individual samples
+		for (i = 0; i < samplecount; i++)
+		{
+			if (smpLen[i] > 0)
+			{
+				LoadSampleData(*waves[i], GetPos(), instidx, i);
+				if (i == sample) {
+					int dummy = -1;
+					XMInstrument::WaveData<>& _wave = loadhelp.GetNextSample(dummy);
+					_wave = *waves[i];
+					_wave.VibratoAttack(insheader.vibsweep == 0 ? 0 : 256 - insheader.vibsweep);
+					_wave.VibratoDepth(insheader.vibdepth);
+					_wave.VibratoSpeed(insheader.vibrate);
+					_wave.VibratoType(exchwave[insheader.vibtype & 3]);
+					break;
+				}
+			}
+		}
+		for (i = 0; i < samplecount; i++)
+		{
+			delete waves[i];
+		}
+	} else {*/
+	{
+		// read instrument data
+		for (i = 0; i < samplecount; ++i) {
+			int status;
+			uintptr_t start;
+			psy_audio_Sample* wave;
+
+			wave = psy_audio_sample_allocinit(0);
+			start = psyfile_getpos(self->fp);
+			if (status = xmsongloader_loadsampleheader(self, wave, start, i, &start)) {
+				psy_audio_sample_deallocate(wave);
+				return PSY_ERRFILE;
+			}
+			// Only get REAL samples.
+			// if (self->smplen[*cursample] > 0) {
+			psy_audio_samples_insert(&self->song->samples, wave,
+				sampleindex_make(instidx, i));
+			// }
+		}
+		// load individual samples		
+		for (i = 0; i < samplecount; ++i) {
+			int status;
+			psy_audio_Sample* wave;
+			uintptr_t start;
+
+			wave = psy_audio_samples_at(&self->song->samples,
+				sampleindex_make(instidx, i));
+			assert(wave);
+			if (!wave) {
+				return PSY_ERRFILE;
+			}
+			start = psyfile_getpos(self->fp);
+			if (status = xmsongloader_loadsampledata(self, wave, i, start, &start)) {
+				return status;
+			}
+			wave->vibrato.attack = insheader.vibsweep == 0 ? 0 : 256 - insheader.vibsweep;
+			wave->vibrato.depth = insheader.vibdepth;
+			wave->vibrato.speed = insheader.vibrate;
+			wave->vibrato.type = exchwave[insheader.vibtype & 3];
+		}
+		// create instrument entries
+		psy_audio_instrument_clearentries(instr);
+		psy_audio_instrumententry_init(&instentry);
+		instentry.sampleindex =
+			sampleindex_make(instidx, insheader.snum[0]);
+		for (note = 1; note < 96; ++note) {
+			if (insheader.snum[note] != instentry.sampleindex.subslot) {
+				instentry.keyrange.high = note - 1;
+				psy_audio_instrument_addentry(instr, &instentry);
+				instentry.keyrange.low = note;
+				instentry.sampleindex.subslot = insheader.snum[note];
+			}
+		}
+		instentry.keyrange.high = 119;
+		psy_audio_instrument_addentry(instr, &instentry);		
+		// instr.ValidateEnabled();		
+	}
+	return PSY_OK;
+}
+
 // MODSongLoader
 //
 // prototypes
@@ -1353,6 +1511,7 @@ static bool modsongloader_isvalid(MODSongLoader*);
 static bool modsongloader_makexmsampler(MODSongLoader*);
 static void modsongloader_setsamplerpanningmode(MODSongLoader*);
 static void modsongloader_setsamplerslidemode(MODSongLoader*);
+static void modsongloader_tweaksampler(MODSongLoader*, int twk, int val);
 static int modsongloader_readtitle(MODSongLoader*);
 static void modsongloader_setsongcomments(MODSongLoader*);
 static void modsongloader_setnumsongtracks(MODSongLoader*);
@@ -1508,26 +1667,25 @@ bool modsongloader_makexmsampler(MODSongLoader* self)
 
 void modsongloader_setsamplerpanningmode(MODSongLoader* self)
 {
-	psy_audio_MachineParam* param;
-
-	param = psy_audio_machine_tweakparameter(self->sampler,
-		XM_SAMPLER_TWK_PANNINGMODE);
-	if (param) {
-		// XM_SAMPLER_PanningMode::TwoWay
-		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, 1);
-	}
+	// XM_SAMPLER_PanningMode::TwoWay
+	modsongloader_tweaksampler(self, XM_SAMPLER_TWK_PANNINGMODE, 1);	
 }
 
 void modsongloader_setsamplerslidemode(MODSongLoader* self)
 {
+	modsongloader_tweaksampler(self, XM_SAMPLER_TWK_AMIGASLIDES, TRUE);	
+}
+
+void modsongloader_tweaksampler(MODSongLoader* self, int twk, int val)
+{
 	psy_audio_MachineParam* param;
 
-	param = psy_audio_machine_tweakparameter(self->sampler,
-		XM_SAMPLER_TWK_AMIGASLIDES);
+	param = psy_audio_machine_tweakparameter(self->sampler, twk);
 	if (param) {
-		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, TRUE);
+		psy_audio_machine_parameter_tweak_scaled(self->sampler, param, val);
 	}
 }
+
 
 int modsongloader_readtitle(MODSongLoader* self)
 {

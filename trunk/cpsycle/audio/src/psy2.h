@@ -58,7 +58,7 @@ typedef struct PSY2Loader {
 
 void psy2loader_init(PSY2Loader*, struct psy_audio_SongFile*);
 void psy2loader_dispose(PSY2Loader*);
-void psy2loader_load(PSY2Loader*);
+int psy2loader_load(PSY2Loader*);
 // no psy2 save implemented
 
 psy_audio_MachineWires* psy_audio_read_psy2machinewires(struct PsyFile*);

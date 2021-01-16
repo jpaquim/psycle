@@ -200,6 +200,54 @@ psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, 
 	return 0.f;
 }
 
+void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self, float* pLeftw, float* pRightw)
+{
+	//Process sample
+	//todo: sinc resampling would benefit from having a stereo version of resampler_work
+
+	//int16_t buffer[256];
+
+	//buffer[0] = self->left[0];
+	//buffer[1] = self->left[1];
+	//buffer[2] = self->left[2];
+	//buffer[3] = self->left[3];
+	//buffer[4] = self->left[4];
+	//*pLeftw = psy_dsp_resampler_work_unchecked(
+	//	psy_dsp_multiresampler_base(&self->resampler),
+	//	buffer,
+	//	self->pos.LowPart, NULL);
+
+	// todo splinesse2
+	*pLeftw = psy_dsp_resampler_work_float_unchecked(
+		psy_dsp_multiresampler_base(&self->resampler),
+		self->left,
+		self->pos.LowPart);
+	if (self->sample->channels.numchannels > 1) {
+		//buffer[0] = self->right[0];
+		//buffer[1] = self->right[1];
+		//buffer[2] = self->right[2];
+		//buffer[3] = self->right[3];
+		//buffer[4] = self->right[4];
+		//*pLeftw = psy_dsp_resampler_work_unchecked(
+		//	psy_dsp_multiresampler_base(&self->resampler),
+		//	buffer,
+		//	self->pos.LowPart, NULL);
+		//
+		//	todo splinesse2
+			*pRightw = psy_dsp_resampler_work_float_unchecked(
+				psy_dsp_multiresampler_base(&self->resampler),
+				self->right,
+				self->pos.LowPart);
+	}
+	const old = self->pos.HighPart;
+	self->pos.QuadPart += self->speedinternal;
+	const ptrdiff_t diff = (ptrdiff_t)(self->pos.HighPart) - old;
+	self->left += diff;
+	self->right += diff;
+	//Note: m_pL/m_pR might be poiting at an erroneous place here. (like in looped samples).
+	//Postwork takes care of this.
+}
+
 void psy_audio_wavedatacontroller_postwork(psy_audio_WaveDataController* self)
 {
 	int32_t newIntPos = (int32_t)(self->pos.HighPart);

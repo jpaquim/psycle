@@ -11,6 +11,7 @@
 #include <exclusivelock.h>
 #include <instruments.h>
 #include <songio.h>
+#include <xmsongloader.h>
 #include <machinefactory.h>
 #include <virtualgenerator.h>
 // dsp
@@ -658,8 +659,16 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			songfile.song = workspace_song(self->workspace);
 			songfile.file = &file;
 			if (psyfile_open(&file, psy_path_full(psy_ui_opendialog_path(&dialog)))) {
-				// psy_audio_xi_load(&songfile, psy_audio_instruments_selected(
-				// &workspace_song(self->workspace)->instruments).subslot);
+				XMSongLoader xmsongloader;
+				int status;
+
+				xmsongloader_init(&xmsongloader, &songfile);
+				if (status = xmsongloader_loadxi(&xmsongloader,
+						psy_audio_instruments_selected(
+							&workspace_song(self->workspace)->instruments))) {
+					psy_audio_songfile_errfile(&songfile);
+				}
+				xmsongloader_dispose(&xmsongloader);
 			}
 			psyfile_close(&file);
 			psy_audio_songfile_dispose(&songfile);
