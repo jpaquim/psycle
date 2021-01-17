@@ -54,9 +54,18 @@ static short* psy_audio_psy3saver_floatbuffertoshort(float* buffer, uintptr_t nu
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver* self, psy_audio_SongFile* songfile)
 {
-	assert(self && songfile && songfile->song);
+	assert(self);
+	assert(songfile);	
+	assert(songfile->file);
+	assert(songfile->song);
 
 	self->songfile = songfile;
+	self->fp = songfile->file;
+	self->song = songfile->song;
+}
+
+void psy_audio_psy3saver_dispose(psy_audio_PSY3Saver* self)
+{
 }
 
 int psy_audio_psy3saver_save(psy_audio_PSY3Saver* self)
@@ -64,6 +73,11 @@ int psy_audio_psy3saver_save(psy_audio_PSY3Saver* self)
 	uint32_t chunkcount;
 	int status = PSY_OK;
 
+	assert(self);
+	assert(self->songfile);
+	assert(self->fp);
+	assert(self->song);
+	
 	chunkcount = psy_audio_psy3saver_chunkcount(self);
 	if (status = psy_audio_psy3saver_write_header(self)) {
 		return status;
@@ -589,7 +603,9 @@ int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver* self, psy_audio_Machi
 		psyfile_writestring(self->songfile->file, psy_audio_machine_editname(machine)
 			? psy_audio_machine_editname(machine) : "");
 		psy_audio_machine_savespecific(machine, self->songfile, slot);
-		psy_audio_machine_savewiremapping(machine, self->songfile, slot);
+		if (status = psy_audio_machine_savewiremapping(machine, self->songfile, slot)) {
+			return status;
+		}
 		// SaveParamMapping(pFile);
 	}
 	return status;
@@ -1411,5 +1427,90 @@ int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver* self)
 			}
 		}
 	}
+	return PSY_OK;
+}
+
+// Instrument
+int psy_audio_psy3saver_saveinstrument(psy_audio_PSY3Saver* self,
+	psy_audio_Instrument* instr)
+{
+	uint32_t riffpos;
+	uint32_t pos;
+	uint32_t size;
+	uint32_t index;
+	int status;
+	psy_List* sampidxs;
+	psy_List* ite;
+
+	assert(self);
+	assert(self->songfile);
+	assert(self->fp);
+	assert(self->song);
+
+	if (status = psyfile_write(self->fp, "RIFF", 4)) {
+		return status;
+	}	
+	riffpos = psyfile_getpos(self->fp);
+	size = 0;
+	if (status = psyfile_write(self->fp, &size, 4)) {
+		return status;
+	}
+	if (status = psyfile_write(self->fp, "PSYI", 4)) {
+		return status;
+	}
+	if (status = psyfile_writeheader(self->fp, "SMID",
+			CURRENT_FILE_VERSION_SMID, 0, &pos)) {
+		return status;
+	}
+	index = 0;
+	if (status = psyfile_write(self->fp, &index, sizeof(uint32_t))) {
+		return status;
+	}
+	psy_audio_psy3saver_xminstrument_save(self, instr,
+		CURRENT_FILE_VERSION_SMID);
+	psyfile_updatesize(self->songfile->file, pos);
+	
+	sampidxs = NULL;
+	for (ite = instr->entries; ite != NULL; psy_list_next(&ite)) {
+		psy_audio_InstrumentEntry* entry;		
+
+		entry = (psy_audio_InstrumentEntry*)psy_list_entry(ite);
+		if (!psy_list_findentry(sampidxs, &entry->sampleindex)) {
+			psy_list_append(&sampidxs, &entry->sampleindex);
+		}
+	}
+	// this writes just the first sample of a sample group because	
+	// todo extent file format to store subsamples aswell
+	for (ite = sampidxs; ite != NULL; psy_list_next(&ite)) {
+		uint32_t pos;
+		uint32_t index;
+		psy_audio_SampleIndex* sampidx;
+		psy_audio_Sample* sample;
+		
+		sampidx = (psy_audio_SampleIndex*)psy_list_entry(ite);
+		assert(sampidx);
+		sample = psy_audio_samples_at(&self->song->samples, *sampidx);
+		if (sample) {
+			if (status = psyfile_writeheader(self->fp, "SMSB",
+				CURRENT_FILE_VERSION_SMSB, 0, &pos)) {
+				return status;
+			}
+			index = (uint32_t)sampidx->slot;
+			// todo subsamples
+			if (status = psyfile_write(self->fp, &index, sizeof(uint32_t))) {
+				return status;
+			}
+
+			if (sample) {
+				if (status = psy_audio_psy3saver_save_sample(self, sample)) {
+					return status;
+				}
+			} else {
+				return PSY_ERRFILE;
+			}
+			psyfile_updatesize(self->fp, pos);
+		}
+	}	
+	psyfile_updatesize(self->fp, riffpos);
 	return PSY_OK;
 }

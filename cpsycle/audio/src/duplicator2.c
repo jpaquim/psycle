@@ -30,9 +30,9 @@ static uintptr_t numparametercols(psy_audio_Duplicator2*);
 static uintptr_t numinputs(psy_audio_Duplicator2* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Duplicator2* self) { return 0; }
 // SongIO
-static void loadspecific(psy_audio_Duplicator2*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_Duplicator2*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_Duplicator2*, psy_audio_SongFile*,
+static int savespecific(psy_audio_Duplicator2*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int transpose(int note, int offset);
 
@@ -61,27 +61,27 @@ const psy_audio_MachineInfo* psy_audio_duplicator2_info(void)
 }
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_Duplicator2* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;		
-		vtable.work = (fp_machine_work) work;	
-		vtable.info = (fp_machine_info) info;
-		vtable.sequencertick = (fp_machine_sequencertick) sequencertick;
-		vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;
+		vtable.work = (fp_machine_work)work;	
+		vtable.info = (fp_machine_info)info;
+		vtable.sequencertick = (fp_machine_sequencertick)sequencertick;
+		vtable.sequencerinsert = (fp_machine_sequencerinsert)sequencerinsert;
 		vtable.parameter = (fp_machine_parameter)parameter;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.dispose = (fp_machine_dispose) dispose;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;	
-		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;
-		vtable.stop = (fp_machine_stop) stop;
-		vtable_initialized = 1;
+		vtable.dispose = (fp_machine_dispose)dispose;
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;	
+		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
+		vtable.savespecific = (fp_machine_savespecific)savespecific;
+		vtable.stop = (fp_machine_stop)stop;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -238,7 +238,7 @@ uintptr_t numparametercols(psy_audio_Duplicator2* self)
 	return 4;	
 }
 
-void loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
@@ -247,18 +247,29 @@ void loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	int16_t lowkey[DUPLICATOR2_NUMOUTPUTS];
 	int16_t highkey[DUPLICATOR2_NUMOUTPUTS];
 	int32_t i;
+	int status;
 
 	// size of this part params to load
-	psyfile_read(songfile->file, &size, sizeof(size));
+	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
 	// TODO: endianess
-	psyfile_read(songfile->file, macoutput, DUPLICATOR2_NUMOUTPUTS *
-		sizeof(int16_t));
-	psyfile_read(songfile->file, noteoffset, DUPLICATOR2_NUMOUTPUTS *
-		sizeof(int16_t));
-	psyfile_read(songfile->file, lowkey, DUPLICATOR2_NUMOUTPUTS *
-		sizeof(int16_t));
-	psyfile_read(songfile->file, highkey, DUPLICATOR2_NUMOUTPUTS *
-		sizeof(int16_t));
+	if (status = psyfile_read(songfile->file, macoutput, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, noteoffset, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, lowkey, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, highkey, DUPLICATOR2_NUMOUTPUTS *
+			sizeof(int16_t))) {
+		return status;
+	}
 	for (i = 0; i < DUPLICATOR2_NUMOUTPUTS; ++i) {
 		psy_audio_DuplicatorOutput* output;
 
@@ -270,9 +281,10 @@ void loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	}
 	disposeparameters(self);
 	initparameters(self);
+	return PSY_OK;
 }
 
-void savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
@@ -281,6 +293,7 @@ void savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	int16_t lowkey[DUPLICATOR2_NUMOUTPUTS];
 	int16_t highkey[DUPLICATOR2_NUMOUTPUTS];
 	int32_t i;
+	int status;
 	
 	for (i = 0; i < DUPLICATOR2_NUMOUTPUTS; ++i) {
 		psy_audio_DuplicatorOutput* output;
@@ -294,16 +307,27 @@ void savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 	}	
 	size = sizeof(macoutput) + sizeof(noteoffset) + sizeof(lowkey) + sizeof(highkey);
 	// size of this part params to save
-	psyfile_write(songfile->file, &size, sizeof(size));
+	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
 	// TODO: endianess
-	psyfile_write(songfile->file, &macoutput[0],
-		DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t));
-	psyfile_write(songfile->file, &noteoffset[0],
-		DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t));
-	psyfile_write(songfile->file, &lowkey[0],
-		DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t));
-	psyfile_write(songfile->file, &highkey[0],
-		DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t));
+	if (status = psyfile_write(songfile->file, &macoutput[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &noteoffset[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &lowkey[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &highkey[0],
+			DUPLICATOR2_NUMOUTPUTS * sizeof(int16_t))) {
+		return status;
+	}
+	return PSY_OK;
 }
 
 void stop(psy_audio_Duplicator2* self)

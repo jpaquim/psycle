@@ -754,7 +754,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 	// progress.m_Progress.SetPos(8192 + 4096);
 	// ::Sleep(1);
 	if (psyfile_read(self->songfile->file, &self->busEffect[0],
-		sizeof(self->busEffect)) == 0)
+		sizeof(self->busEffect)) != PSY_OK)
 	{
 		int j = 0;
 		int i = 0;

@@ -47,9 +47,9 @@ static psy_dsp_amp_range_t amprange(psy_audio_AudioRecorder* self)
 {
 	return PSY_DSP_AMP_RANGE_NATIVE;
 }
-static void loadspecific(psy_audio_AudioRecorder*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_AudioRecorder*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_AudioRecorder*, psy_audio_SongFile*,
+static int savespecific(psy_audio_AudioRecorder*, psy_audio_SongFile*,
 	uintptr_t slot);
 // parameters
 static int parametertype(psy_audio_AudioRecorder* self, uintptr_t param);
@@ -101,29 +101,48 @@ void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, psy_audio_Machi
 	}	
 }
 
-void loadspecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
 	int32_t readcaptureidx;
 	float gainvol;
+	int status;
 
-	psyfile_read(songfile->file, &size, sizeof(size)); // size of this part params to load
-	psyfile_read(songfile->file, &readcaptureidx, sizeof(readcaptureidx));
-	psyfile_read(songfile->file, &gainvol, sizeof(gainvol));
+	// size of this part params to load
+	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &readcaptureidx, sizeof(readcaptureidx))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &gainvol, sizeof(gainvol))) {
+		return status;
+	}
 	self->_gainvol = gainvol;
 	self->_captureidx = readcaptureidx;
 	// ChangePort(readcaptureidx);
+	return PSY_OK;
 }
 
-void savespecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_AudioRecorder* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
-	uint32_t size = sizeof(self->_captureidx) + sizeof(self->_gainvol);
-
-	psyfile_write_uint32(songfile->file , size); // size of this part params to save
-	psyfile_write_int32(songfile->file, self->_captureidx);
-	psyfile_write_float(songfile->file, self->_gainvol);
+	uint32_t size;
+	int status;
+	
+	size = sizeof(self->_captureidx) + sizeof(self->_gainvol);
+	// size of this part params to save
+	if (status = psyfile_write_uint32(songfile->file, size)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(songfile->file, self->_captureidx)) {
+		return status;
+	}
+	if (status = psyfile_write_float(songfile->file, self->_gainvol)) {
+		return status;
+	}
+	return PSY_OK;
 }
 
 // parameters

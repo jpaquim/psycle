@@ -11,13 +11,25 @@ extern "C" {
 #endif
 
 struct psy_audio_SongFile;
+struct PsyFile;
+struct psy_audio_Song;
+struct psy_audio_Instrument;
 
 typedef struct psy_audio_PSY3Saver {
-	struct psy_audio_SongFile* songfile;	
+	// references
+	struct psy_audio_SongFile* songfile;
+	struct PsyFile* fp;
+	struct psy_audio_Song* song;
 } psy_audio_PSY3Saver;
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver*, struct psy_audio_SongFile*);
+void psy_audio_psy3saver_dispose(psy_audio_PSY3Saver*);
+
 int psy_audio_psy3saver_save(psy_audio_PSY3Saver*);
+
+// save Instrument (.psins)
+int psy_audio_psy3saver_saveinstrument(psy_audio_PSY3Saver*,
+	struct psy_audio_Instrument*);
 
 #ifdef __cplusplus
 }

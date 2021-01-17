@@ -78,9 +78,9 @@ static unsigned int numparametercols(psy_audio_VstPlugin*);
 static void dispose(psy_audio_VstPlugin* self);
 static uintptr_t numinputs(psy_audio_VstPlugin*);
 static uintptr_t numoutputs(psy_audio_VstPlugin*);
-static void loadspecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
+static int savespecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int haseditor(psy_audio_VstPlugin*);
 static void seteditorhandle(psy_audio_VstPlugin*, void* handle);
@@ -617,20 +617,27 @@ unsigned int numparametercols(psy_audio_VstPlugin* self)
 	return 6;
 }
 
-void loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
 	unsigned char program;
+	int status;
 
 	assert(self);
 
-	psyfile_read(songfile->file, &size, sizeof(size));
+	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
 	if(size) {
 		uint32_t count;
 
-		psyfile_read(songfile->file, &program, sizeof program);
-		psyfile_read(songfile->file, &count, sizeof count);
+		if (status = psyfile_read(songfile->file, &program, sizeof program)) {
+			return status;
+		}
+		if (status = psyfile_read(songfile->file, &count, sizeof count)) {
+			return status;
+		}
 		size -= sizeof(program) + sizeof(count) + sizeof(float) * count;
 		if(!size) {
 			if (program < psy_audio_vstinterface_numprograms(&self->mi)) {
@@ -641,7 +648,9 @@ void loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 				for(i = 0; i < count; ++i) {
 					float temp;
 				
-					psyfile_read(songfile->file, &temp, sizeof(temp));
+					if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+						return status;
+					}
 					psy_audio_vstinterface_setparametervalue(&self->mi, i,
 						temp);					
 				}
@@ -656,22 +665,28 @@ void loadspecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 				char * data;
 				
 				data = (char*)malloc(size);
-				psyfile_read(songfile->file, data, size); // Number of parameters
+				if (status = psyfile_read(songfile->file, data, size)) { // Number of parameters
+					free(data);
+					return status;
+				}
 				psy_audio_vstinterface_setchunkdata(&self->mi, FALSE, data, size);
 				free(data);				
 			} else {
 				// there is a data chunk, but this machine does not want one.
-				psyfile_skip(songfile->file, size);
-				return;
+				if (psyfile_skip(songfile->file, size) == -1) {
+					return PSY_ERRFILE;
+				}
+				return PSY_OK;
 			}
 		}	
 	}
 	disposeparameters(self);
 	psy_table_init(&self->parameters);
 	initparameters(self);
+	return PSY_OK;
 }
 
-void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {	
 	uint32_t count;
@@ -679,6 +694,7 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	uint32_t size;
 	uintptr_t chunksize;
 	char* data;
+	int status;
 
 	assert(self);
 
@@ -693,13 +709,21 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 	} else {
 		size += sizeof(float) * count;
 	}
-	psyfile_write(songfile->file, &size, sizeof(size));	
+	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
 	program = psy_audio_vstinterface_program(&self->mi);
-	psyfile_write(songfile->file, &program, sizeof(program));
-	psyfile_write(songfile->file, &count, sizeof count);
+	if (status = psyfile_write(songfile->file, &program, sizeof(program))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &count, sizeof count)) {
+		return status;
+	}
 
 	if (data) {
-		psyfile_write(songfile->file, data, (uint32_t)chunksize);
+		if (status = psyfile_write(songfile->file, data, (uint32_t)chunksize)) {
+			return status;
+		}
 	} else {
 		uint32_t i;
 
@@ -707,9 +731,12 @@ void savespecific(psy_audio_VstPlugin* self, psy_audio_SongFile* songfile,
 			float temp;
 			
 			temp = psy_audio_vstinterface_parametervalue(&self->mi, i);
-			psyfile_write(songfile->file, &temp, sizeof(temp));
+			if (status = psyfile_write(songfile->file, &temp, sizeof(float))) {
+				return status;
+			}
 		}
 	}
+	return PSY_OK;
 }
 
 int haseditor(psy_audio_VstPlugin* self)

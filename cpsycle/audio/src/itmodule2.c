@@ -56,13 +56,14 @@ bool bitsblock_readblock(BitsBlock* self, PsyFile* file)
 {
 	// block layout : uint16 size, <size> bytes data
 	uint16_t size;
+	int status;
 
 	psyfile_read(file, &size, 2);
 	self->pdata = (uint8_t*)malloc(size);
 	if (!self->pdata) {
 		return FALSE;
 	}
-	if (!psyfile_read(file, self->pdata, size)) {
+	if (status = psyfile_read(file, self->pdata, size)) {
 		free(self->pdata);
 		return FALSE;
 	}
@@ -173,8 +174,10 @@ void itmodule2_reset(ITModule2* self)
 
 int itmodule2_load(ITModule2* self)
 {	
-	if (!psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
-		return PSY_ERRFILE;
+	int status;
+
+	if (status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+		return status;
 	}
 	if (psyfile_seek(self->fp, 0) == -1) {
 		return PSY_ERRFILE;
@@ -182,8 +185,8 @@ int itmodule2_load(ITModule2* self)
 	if (self->fileheader.tag == IMPM_ID) {
 		return itmodule2_loaditmodule(self);
 	}
-	if (!psyfile_read(self->fp, &self->s3mFileH, sizeof(self->s3mFileH))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &self->s3mFileH, sizeof(self->s3mFileH))) {
+		return status;
 	}
 	if (psyfile_seek(self->fp, 0) == -1) {
 		return PSY_ERRFILE;
@@ -210,8 +213,8 @@ int itmodule2_loaditmodule(ITModule2* self)
 	assert(self->song);	
 
 	itmodule2_reset(self);
-	if (!psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &self->fileheader, sizeof(self->fileheader))) {
+		return status;
 	}
 	psy_audio_song_settitle(self->song, self->fileheader.songName);
 	itmodule2_setsongcomments(self);	
@@ -226,33 +229,33 @@ int itmodule2_loaditmodule(ITModule2* self)
 	}		
 	if (self->fileheader.insNum) {
 		pointersi = malloc(self->fileheader.insNum * sizeof(uint32_t));
-		if (!psyfile_read(self->fp, pointersi, self->fileheader.insNum * sizeof(uint32_t))) {
+		if (status = psyfile_read(self->fp, pointersi, self->fileheader.insNum * sizeof(uint32_t))) {
 			// clean up
 			free(pointersi);
-			return PSY_ERRFILE;
+			return status;
 		}
 	} else {
 		pointersi = NULL;
 	}
 	if (self->fileheader.sampNum) {
 		pointerss = malloc(self->fileheader.sampNum * sizeof(uint32_t));
-		if (!psyfile_read(self->fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t))) {
+		if (status = psyfile_read(self->fp, pointerss, self->fileheader.sampNum * sizeof(uint32_t))) {
 			// clean up
 			free(pointersi);
 			free(pointerss);
-			return PSY_ERRFILE;
+			return status;
 		}
 	} else {
 		pointerss = NULL;
 	}
 	if (self->fileheader.patNum) {
 		pointersp = malloc(self->fileheader.patNum * sizeof(uint32_t));
-		if (!psyfile_read(self->fp, pointersp, self->fileheader.patNum * sizeof(uint32_t))) {
+		if (status = psyfile_read(self->fp, pointersp, self->fileheader.patNum * sizeof(uint32_t))) {
 			// clean up
 			free(pointersi);
 			free(pointerss);
 			free(pointersp);
-			return PSY_ERRFILE;
+			return status;
 		}
 	} else {
 		pointersp = NULL;
@@ -282,8 +285,8 @@ int itmodule2_loaditmodule(ITModule2* self)
 			itInsHeader1x curh;
 			int status;
 
-			if (!psyfile_read(self->fp, &curh, sizeof(curh))) {
-				return PSY_ERRFILE;
+			if (status = psyfile_read(self->fp, &curh, sizeof(curh))) {
+				return status;
 			}
 			if (status = itmodule2_loadolditinst(self, &curh, instrument)) {
 				return status;
@@ -292,8 +295,8 @@ int itmodule2_loaditmodule(ITModule2* self)
 			itInsHeader2x curh;
 			int status;
 
-			if (!psyfile_read(self->fp, &curh, sizeof(curh))) {
-				return PSY_ERRFILE;
+			if (status = psyfile_read(self->fp, &curh, sizeof(curh))) {
+				return status;
 			}
 			if (status = itmodule2_loaditinst(self, &curh, instrument)) {
 				return status;
@@ -507,17 +510,18 @@ int itmodule2_readmidiembedded(ITModule2* self)
 	{
 		int16_t skipnum;
 		int i;
+		int status;
 
 		self->embeddeddata = (EmbeddedMIDIData*)malloc(sizeof(EmbeddedMIDIData));
-		if (!psyfile_read(self->fp, &skipnum, sizeof(int16_t))) {
-			return PSY_ERRFILE;
+		if (status = psyfile_read(self->fp, &skipnum, sizeof(int16_t))) {
+			return status;
 		}
 		// This is some strange data. It is not documented.
 		if (psyfile_skip(self->fp, skipnum * 8) == -1) {
 			return PSY_ERRFILE;
 		}
-		if (!psyfile_read(self->fp, self->embeddeddata, sizeof(EmbeddedMIDIData))) {
-			return PSY_ERRFILE;
+		if (status = psyfile_read(self->fp, self->embeddeddata, sizeof(EmbeddedMIDIData))) {
+			return status;
 		}
 
 		for (i = 0; i < 128; i++)
@@ -559,6 +563,7 @@ int itmodule2_readmessage(ITModule2* self)
 	if ((self->fileheader.special & IT2_SPECIAL_FLAGS_HASMESSAGE) != 0 &&
 		self->fileheader.msgLen > 0) {
 		char_dyn_t* comments;
+		int status;
 
 		if (psyfile_seek(self->fp, self->fileheader.msgOffset) == -1) {
 			return PSY_ERRFILE;
@@ -566,9 +571,9 @@ int itmodule2_readmessage(ITModule2* self)
 		// NewLine = 0Dh (13 dec)
 		// EndOfMsg = 0
 		comments = malloc(self->fileheader.msgLen + 2);
-		if (!psyfile_read(self->fp, comments, self->fileheader.msgLen)) {
+		if (status = psyfile_read(self->fp, comments, self->fileheader.msgLen)) {
 			free(comments);
-			return PSY_ERRFILE;
+			return status;
 		}
 		comments[self->fileheader.msgLen + 1] = '\0';
 		psy_audio_songproperties_setcomments(
@@ -840,8 +845,7 @@ int itmodule2_readsequence(ITModule2* self)
 	for (i = 0; i < self->fileheader.ordNum; ++i) {
 		uint8_t patidx;
 		
-		if (!psyfile_read(self->fp, &patidx, sizeof(uint8_t))) {
-			status = PSY_ERRFILE;
+		if (status = psyfile_read(self->fp, &patidx, sizeof(uint8_t))) {			
 			break;
 		}			
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
@@ -1146,6 +1150,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	psy_audio_Song* song;
 	bool append;
 	int row;
+	int status;
 	
 	fp = self->songfile->file;
 	song = self->songfile->song;
@@ -1167,7 +1172,9 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	pent = pempty;
 
 	psyfile_skip(fp, 2); // packedSize
-	rowCount = psyfile_read_int16(fp);
+	if (status = psyfile_read(self->fp, &rowCount, sizeof(int16_t))) {
+		return status;
+	}	
 	psyfile_skip(fp, 4); // unused
 	if (rowCount > MAX_LINES) rowCount = MAX_LINES;
 	else if (rowCount < 0) rowCount = 0;
@@ -1189,17 +1196,26 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 		while (newEntry)
 		{
 			unsigned char channel;
-			unsigned char volume;
+			unsigned char volume;			
 
 			channel = (newEntry - 1) & 0x3F;
 			if (channel >= self->extracolumn) { self->extracolumn = channel + 1; }
-			if (newEntry & 0x80) mask[channel] = psyfile_read_uint8(fp);
+			if (newEntry & 0x80) {
+				uint8_t tmp_u8;
+
+				if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
+					return status;
+				}
+				mask[channel] = tmp_u8;
+			}
 			volume = 255;
 			if (mask[channel] & 1)
 			{
-				unsigned char note;
+				uint8_t note;
 				
-				note = psyfile_read_uint8(fp);
+				if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+					return status;
+				}
 				if (note == 255) pent.note = psy_audio_NOTECOMMANDS_RELEASE;
 				else if (note == 254) pent.note = psy_audio_NOTECOMMANDS_RELEASE; //\todo: Attention ! Psycle doesn't have a note-cut note.
 				else pent.note = note;
@@ -1208,15 +1224,22 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 				pent.note = lastnote[channel];
 			}
 			if (mask[channel] & 2) {
-				pent.inst = psyfile_read_uint8(fp) - 1;
+				uint8_t tmp_u8;
+
+				if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
+					return status;
+				}
+				pent.inst = tmp_u8 - 1;
 			} else if (mask[channel] & 0x20) {
 				pent.inst = lastinst[channel];
 			}
 			if (mask[channel] & 4)
 			{
-				unsigned char tmp;
-				
-				tmp = psyfile_read_uint8(fp);
+				uint8_t tmp;				
+
+				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+					return status;
+				}
 				// Volume ranges from 0->64
 				// Panning ranges from 0->64, mapped onto 128->192
 				// Prepare for the following also:
@@ -1258,8 +1281,15 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 			}
 			if (mask[channel] & 8)
 			{
-				unsigned char command = psyfile_read_uint8(fp);
-				unsigned char param = psyfile_read_uint8(fp);
+				uint8_t command;
+				uint8_t param;
+
+				if (status = psyfile_read(self->fp, &command, sizeof(uint8_t))) {
+					return status;
+				}
+				if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+					return status;
+				}
 				if (command != 0) pent.parameter = param;
 				append = itmodule2_parseeffect(self, &pent, &node, pattern, patidx, row,
 					command, param, channel);
@@ -1794,21 +1824,44 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 			uint8_t volume = 255;
 			if (newEntry & 32)
 			{
-				uint8_t note = psyfile_read_uint8(fp);  // hi=oct, lo=note, 255=empty note,	254=key off
+				uint8_t note;
+				uint8_t tmp;
+				int status;
+				
+				// hi=oct, lo=note, 255=empty note,	254=key off
+				if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+					return status;
+				} 
 				if (note == 254) pent.note = psy_audio_NOTECOMMANDS_RELEASE;
 				else if (note == 255) pent.note = 255;
 				else pent.note = ((note >> 4) * 12 + (note & 0xF) + 12);  // +12 since ST3 C-4 is Psycle's C-5
-				pent.inst = psyfile_read_uint8(fp) - 1;
+				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+					return status;
+				}
+				pent.inst = tmp - 1;
 			}
 			if (newEntry & 64)
 			{
-				uint8_t tmp = psyfile_read_uint8(fp);
+				uint8_t tmp;
+				int status;
+				
+				if (status = psyfile_read(self->fp, &tmp, sizeof(uint8_t))) {
+					return status;
+				} 
 				volume = (tmp < 64) ? tmp : 63;
 			}
 			if (newEntry & 128)
 			{
-				uint8_t command = psyfile_read_uint8(fp);
-				uint8_t param = psyfile_read_uint8(fp);
+				uint8_t command;
+				uint8_t param;
+				int status;
+
+				if (status = psyfile_read(self->fp, &command, sizeof(uint8_t))) {
+					return status;
+				}
+				if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+					return status;
+				}
 				if (command != 0) pent.parameter = param;
 				append = itmodule2_parseeffect(self, &pent, &node, pattern,
 					patidx, row, command, param, channel);

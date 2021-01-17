@@ -196,13 +196,13 @@ typedef	int (*fp_machine_param_describe)(struct psy_audio_Machine*, struct
 	psy_audio_MachineParam*, char* text);
 typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*,
 	psy_audio_MachineCallback*);
-typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
+typedef	int (*fp_machine_loadspecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
-typedef	void (*fp_machine_loadwiremapping)(struct psy_audio_Machine*,
+typedef	int (*fp_machine_loadwiremapping)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
-typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*,
+typedef	int (*fp_machine_savespecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
-typedef	void (*fp_machine_savewiremapping)(struct psy_audio_Machine*,
+typedef	int (*fp_machine_savewiremapping)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_postload)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
@@ -502,28 +502,28 @@ INLINE psy_List* psy_audio_machine_sequencerinsert(psy_audio_Machine* self,
 	return self->vtable->sequencerinsert(self, events);
 }
 
-INLINE void psy_audio_machine_loadspecific(psy_audio_Machine* self,
+INLINE int psy_audio_machine_loadspecific(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	self->vtable->loadspecific(self, songfile, slot);
+	return self->vtable->loadspecific(self, songfile, slot);
 }
 
-INLINE void psy_audio_machine_loadwiremapping(psy_audio_Machine* self,
+INLINE int psy_audio_machine_loadwiremapping(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	self->vtable->loadwiremapping(self, songfile, slot);
+	return self->vtable->loadwiremapping(self, songfile, slot);
 }
 
-INLINE void psy_audio_machine_savespecific(psy_audio_Machine* self,
+INLINE int psy_audio_machine_savespecific(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	self->vtable->savespecific(self, songfile, slot);
+	return self->vtable->savespecific(self, songfile, slot);
 }
 
-INLINE void psy_audio_machine_savewiremapping(psy_audio_Machine* self,
+INLINE int psy_audio_machine_savewiremapping(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	self->vtable->savewiremapping(self, songfile, slot);
+	return self->vtable->savewiremapping(self, songfile, slot);
 }
 
 INLINE void psy_audio_machine_postload(psy_audio_Machine* self,

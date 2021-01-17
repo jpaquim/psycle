@@ -203,9 +203,9 @@ static float parametervalue(psy_audio_LadspaPlugin*, uintptr_t param);
 static void dispose(psy_audio_LadspaPlugin*);
 static uintptr_t numinputs(psy_audio_LadspaPlugin*);
 static uintptr_t numoutputs(psy_audio_LadspaPlugin*);
-static void loadspecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
+static int savespecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void setcallback(psy_audio_LadspaPlugin*, psy_audio_MachineCallback);
 
@@ -512,7 +512,7 @@ void setcallback(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback callbac
 {	
 }
 
-void loadspecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
@@ -535,7 +535,8 @@ void loadspecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
 				ladspaparam_setrawvalue(param, temp);
 			}
 		}
-	}	
+	}
+	return PSY_OK;
 }
 
 LadspaParam* valueat(psy_audio_LadspaPlugin* self, uintptr_t index)
@@ -550,7 +551,7 @@ void clearparams(psy_audio_LadspaPlugin* self)
 	psy_table_init(&self->values_);
 }
 
-void savespecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t count;
@@ -570,7 +571,8 @@ void savespecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,
 			temp = ladspaparam_rawvalue(param);
 		}		
 		psyfile_write(songfile->file, &temp, sizeof temp);
-	}	
+	}
+	return PSY_OK;
 }
 
 int parametertype(psy_audio_LadspaPlugin* self, uintptr_t param)

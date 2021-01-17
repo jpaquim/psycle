@@ -21,6 +21,8 @@ typedef struct {
 	int y;
 } psy_audio_MachineUi;
 
+struct psy_audio_Instrument;
+
 /// song load and save
 typedef struct psy_audio_SongFile {
 	struct psy_audio_Song* song;
@@ -42,6 +44,8 @@ int psy_audio_songfile_load(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_save(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmodule(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmidifile(psy_audio_SongFile*, const char* filename);
+int psy_audio_songfile_saveinstrument(psy_audio_SongFile*, const char* filename,
+	struct psy_audio_Instrument*);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 const char* psy_audio_songfile_loadfilter(void);

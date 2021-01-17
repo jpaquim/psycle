@@ -270,9 +270,9 @@ static void luaplugin_initmachine(psy_audio_LuaPlugin*);
 static bool hasdirectmetaaccess(psy_audio_LuaPlugin*);
 void psy_audio_luaplugin_getinfo(psy_audio_LuaPlugin*);
 int psy_audio_plugin_luascript_exportcmodules(psy_audio_PsycleScript*);
-static void loadspecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
+static int savespecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static psy_dsp_amp_range_t amprange(psy_audio_LuaPlugin* self)
 {
@@ -299,7 +299,7 @@ static int luamachine_setbuffer(lua_State*);
 static psy_audio_MachineParam* parameter(psy_audio_LuaPlugin*, uintptr_t param);
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static const luaL_Reg psycle_methods[] = {
 	{"setmachine", luascript_setmachine},
@@ -329,7 +329,7 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
 		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
 		vtable.savespecific = (fp_machine_savespecific)savespecific;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 		
@@ -1096,7 +1096,7 @@ psy_audio_MachineParam* parameter(psy_audio_LuaPlugin* self, uintptr_t param)
 	return &self->parameter.custommachineparam.machineparam;
 }
 
-void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
@@ -1105,9 +1105,14 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	uint32_t i;
 	psy_Table ids;
 	psy_Table vals;
+	int status;
 
-	psyfile_read(songfile->file, &size, sizeof(size));
-	psyfile_read(songfile->file, &numparams, sizeof(numparams));
+	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &numparams, sizeof(numparams))) {
+		return status;
+	}
 	//Read vals and names to do SetParameter.
 	//It is done this way to allow parameters to change without disrupting the loader.
 	psy_table_init(&ids);
@@ -1115,7 +1120,11 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	psy_audio_lock_enter(self->lock);
 	for (i = 0; i < numparams; i++) {
 		int temp;
-		psyfile_read(songfile->file, &temp, sizeof(temp));
+		if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+			psy_table_dispose(&vals);
+			psy_table_dispose(&ids);
+			return status;
+		}
 		psy_table_insert(&vals, psy_table_size(&vals), (void*)(intptr_t)temp);
 	}
 	for (i = 0; i < numparams; i++) {
@@ -1150,12 +1159,18 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	psy_table_dispose(&vals);
 	psy_table_dispose(&ids);
 	psy_audio_lock_leave(self->lock);
-	psyfile_skip(songfile->file, size - sizeof(numparams) - (numparams * sizeof(uint32_t)));
+	if (psyfile_skip(songfile->file, size - sizeof(numparams) - (numparams * sizeof(uint32_t))) == -1) {
+		return PSY_ERRFILE;
+	}
+	return PSY_OK;
 }
 
-void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
+	int status;
+
+	assert(self);
 	//if (proxy_.prsmode() == MachinePresetType::NATIVE) {
 		uint32_t count = (uint32_t)self->client->numparameters_;
 		uint32_t size2 = 0;
@@ -1175,8 +1190,12 @@ void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 			const char* id = luaplugin_id(self, i);
 			size += (uint32_t)strlen(id) + 1;
 		}
-		psyfile_write(songfile->file, &size, sizeof(size));
-		psyfile_write(songfile->file, &count, sizeof(count));
+		if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &count, sizeof(count))) {
+			return status;
+		}
 		for (i = 0; i < count; i++)
 		{
 			psy_audio_MachineParam* param;
@@ -1193,9 +1212,13 @@ void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		for (i = 0; i < count; i++) {
 			const char* id = luaplugin_id(self, i);
 
-			psyfile_writestring(songfile->file, id);
+			if (status = psyfile_writestring(songfile->file, id)) {
+				return status;
+			}
 		}
-		psyfile_write(songfile->file, &size2, sizeof(size2));
+		if (status = psyfile_write(songfile->file, &size2, sizeof(size2))) {
+			return status;
+		}
 		if (size2)
 		{
 			// psyfile_writes(songfile->file, pData, size2); // Number of parameters
@@ -1238,6 +1261,7 @@ void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		catch (...) {
 		}
 	}*/
+	return PSY_OK;
 }
 
 const char* luaplugin_id(psy_audio_LuaPlugin* self, int index)

@@ -125,10 +125,10 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 void psy_ui_rectangle_union(psy_ui_Rectangle* self,
 	const psy_ui_Rectangle* other)
 {
-	self->left = self->left < other->left ? self->left : other->left;
-	self->right = self->right > other->right ? self->right : other->right;
-	self->top = self->top < other->top ? self->top : other->top;
-	self->bottom = self->bottom > other->bottom ? self->bottom : other->bottom;
+	self->left = (self->left < other->left) ? self->left : other->left;
+	self->right = (self->right > other->right) ? self->right : other->right;
+	self->top = (self->top < other->top) ? self->top : other->top;
+	self->bottom = (self->bottom > other->bottom) ? self->bottom : other->bottom;
 }
 
 void psy_ui_rectangle_expand(psy_ui_Rectangle* self, double top, double right, double bottom, double left)

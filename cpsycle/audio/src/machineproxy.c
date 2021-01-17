@@ -58,13 +58,13 @@ static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy*);
-static void machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
+static int machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void machineproxy_loadwiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
+static int machineproxy_loadwiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
+static int machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void machineproxy_savewiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
+static int machineproxy_savewiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void machineproxy_postload(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
@@ -848,15 +848,17 @@ uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_loadspecific(psy_audio_MachineProxy* self,
+int machineproxy_loadspecific(psy_audio_MachineProxy* self,
 	psy_audio_SongFile* songfile, uintptr_t slot)
 {
+	int rv = PSY_OK;
+
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_loadspecific(self->client, songfile, slot);
+			rv = psy_audio_machine_loadspecific(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self,"loadspecific",  GetExceptionCode(),
@@ -864,17 +866,20 @@ void machineproxy_loadspecific(psy_audio_MachineProxy* self,
 		}
 #endif		
 	}
+	return rv;
 }
 
-void machineproxy_loadwiremapping(psy_audio_MachineProxy* self,
+int machineproxy_loadwiremapping(psy_audio_MachineProxy* self,
 	psy_audio_SongFile* songfile, uintptr_t slot)
 {
+	int rv = PSY_OK;
+
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_loadwiremapping(self->client, songfile, slot);
+			rv = psy_audio_machine_loadwiremapping(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "loadwiremapping", GetExceptionCode(),
@@ -882,17 +887,20 @@ void machineproxy_loadwiremapping(psy_audio_MachineProxy* self,
 		}
 #endif		
 	}
+	return rv;
 }
 
-void machineproxy_savespecific(psy_audio_MachineProxy* self,
+int machineproxy_savespecific(psy_audio_MachineProxy* self,
 	psy_audio_SongFile* songfile, uintptr_t slot)
 {
+	int rv = PSY_OK;
+
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_savespecific(self->client, songfile, slot);
+			rv = psy_audio_machine_savespecific(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self,"loadspecific",  GetExceptionCode(),
@@ -900,17 +908,20 @@ void machineproxy_savespecific(psy_audio_MachineProxy* self,
 		}
 #endif		
 	}
+	return rv;
 }
 
-void machineproxy_savewiremapping(psy_audio_MachineProxy* self,
+int machineproxy_savewiremapping(psy_audio_MachineProxy* self,
 	psy_audio_SongFile* songfile, uintptr_t slot)
 {
+	int rv = PSY_OK;
+
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_savewiremapping(self->client, songfile, slot);
+			rv = psy_audio_machine_savewiremapping(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "savewiremapping", GetExceptionCode(),
@@ -918,6 +929,7 @@ void machineproxy_savewiremapping(psy_audio_MachineProxy* self,
 		}
 #endif		
 	}
+	return rv;
 }
 
 void machineproxy_postload(psy_audio_MachineProxy* self,
