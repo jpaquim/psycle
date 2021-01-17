@@ -14,6 +14,7 @@
 // prototypes
 static void instrumentvolumeview_ondestroy(InstrumentVolumeView*,
 	psy_ui_Component* sender);
+static void instrumentvolumeview_updatesliders(InstrumentVolumeView*);
 static void instrumentvolumeview_ondescribe(InstrumentVolumeView*,
 	psy_ui_Slider* sender, char* text);
 static void instrumentvolumeview_ontweak(InstrumentVolumeView*,
@@ -21,6 +22,8 @@ static void instrumentvolumeview_ontweak(InstrumentVolumeView*,
 static void instrumentvolumeview_onvalue(InstrumentVolumeView*,
 	psy_ui_Slider* sender, float* value);
 static void instrumentvolumeview_ontweaked(InstrumentVolumeView*,
+	psy_ui_Component*, int pointindex);
+static void instrumentvolumeview_onenvelopeviewtweaked(InstrumentVolumeView*,
 	psy_ui_Component*, int pointindex);
 // implementation
 void instrumentvolumeview_init(InstrumentVolumeView* self, 
@@ -55,8 +58,8 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	adsrsliders_init(&self->adsrsliders, &self->component);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
 		instrumentvolumeview_ontweaked);
-	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
-		instrumentvolumeview_ontweaked);
+	psy_signal_connect(&self->envelopeview.signal_tweaked, self,
+		instrumentvolumeview_onenvelopeviewtweaked);
 	for (i = 0; i < 2; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 21);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
@@ -64,7 +67,8 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 			(ui_slider_fpdescribe)instrumentvolumeview_ondescribe,
 			(ui_slider_fptweak)instrumentvolumeview_ontweak,
 			(ui_slider_fpvalue)instrumentvolumeview_onvalue);
-	}	
+	}
+	instrumentvolumeview_updatesliders(self);
 }
 
 void instrumentvolumeview_ondestroy(InstrumentVolumeView* self,
@@ -86,6 +90,13 @@ void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
 		adsrsliders_setenvelope(&self->adsrsliders,	NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 	}
+	instrumentvolumeview_updatesliders(self);	
+}
+
+void instrumentvolumeview_updatesliders(InstrumentVolumeView* self)
+{	
+	psy_ui_slider_update(&self->randomvolume);
+	psy_ui_slider_update(&self->volumefadespeed);
 }
 
 void instrumentvolumeview_ondescribe(InstrumentVolumeView* self,
@@ -148,6 +159,12 @@ void instrumentvolumeview_ontweaked(InstrumentVolumeView* self,
 		pt = psy_dsp_envelope_at(&self->instrument->volumeenvelope, pointindex);
 		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
 			(float)pt.time, (float)pt.value);
-		psy_signal_emit(&self->signal_status, self, 1, statustext);
+		psy_signal_emit(&self->signal_status, self, 1, statustext);		
 	}
+}
+
+void instrumentvolumeview_onenvelopeviewtweaked(InstrumentVolumeView* self,
+	psy_ui_Component* sender, int pointindex)
+{
+	adsrsliders_update(&self->adsrsliders);
 }

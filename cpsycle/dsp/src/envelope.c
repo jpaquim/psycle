@@ -58,7 +58,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	rv.time = time;
 	rv.value = value;
 	rv.mintime = (psy_dsp_amp_t)0.f;
-	rv.maxtime = (psy_dsp_amp_t)0.f;
+	rv.maxtime = (psy_dsp_amp_t)65535.f;
 	rv.minvalue = (psy_dsp_amp_t)0.f;
 	rv.maxvalue = (psy_dsp_amp_t)1.f;
 
@@ -105,13 +105,13 @@ void psy_dsp_envelope_init_adsr(psy_dsp_Envelope* self)
 	psy_dsp_envelope_append(self, psy_dsp_envelopepoint_make_start());
 	// start decay
 	psy_dsp_envelope_append(self,
-		psy_dsp_envelopepoint_make_all(0.005f, 1.f, 0.f, 5.f, 1.f, 1.f));
+		psy_dsp_envelopepoint_make_all(0.005f, 1.f, 0.f, 65535.f, 1.f, 1.f));
 	// start release
 	psy_dsp_envelope_append(self,
-		psy_dsp_envelopepoint_make_all(0.01f, 1.f, 0.f, 5.f, 0.f, 1.f));
+		psy_dsp_envelopepoint_make_all(0.01f, 1.f, 0.f, 65535.f, 0.f, 1.f));
 	// end release
 	psy_dsp_envelope_append(self,
-		psy_dsp_envelopepoint_make_all(0.015f, 0.f, 0.f, 5.f, 0.f, 0.f));
+		psy_dsp_envelopepoint_make_all(0.015f, 0.f, 0.f, 65535.f, 0.f, 0.f));
 	psy_dsp_envelope_setsustainbegin(self, 2);
 	psy_dsp_envelope_setsustainend(self, 2);	
 }

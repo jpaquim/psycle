@@ -76,6 +76,8 @@ INLINE psy_ui_Component* envelopebar_base(EnvelopeBar* self)
 typedef struct EnvelopeView {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_tweaked;
 	// ui elements
 	EnvelopeBar bar;
 	EnvelopeBox envelopebox;

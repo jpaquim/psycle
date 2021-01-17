@@ -1937,8 +1937,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 		machineviewbar_onmixerconnectmodeclick);		
 	psy_ui_label_init(&self->status, machineviewbar_base(self));
 	psy_ui_label_preventtranslation(&self->status);
-	psy_ui_label_setcharnumber(&self->status, 44);
-	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
+	psy_ui_label_setcharnumber(&self->status, 44);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
 	if (workspace->song) {
