@@ -16,6 +16,7 @@ static void instrumentpanview_ondestroy(InstrumentPanView*,
 	psy_ui_Component* sender);
 static void instrumentpanview_oninstpanenabled(InstrumentPanView*,
 	psy_ui_CheckBox* sender);
+static void instrumentpanview_updatesliders(InstrumentPanView*);
 static void instrumentpanview_ondescribe(InstrumentPanView*,
 	psy_ui_Slider*, char* text);
 static void instrumentpanview_ontweak(InstrumentPanView*,
@@ -24,6 +25,8 @@ static void instrumentpanview_onvalue(InstrumentPanView*,
 	psy_ui_Slider*, float* value);
 static void instrumentpanview_ontweaked(InstrumentPanView*,
 	psy_ui_Component*, int pointindex);
+static void instrumentpanview_onenvelopeviewtweaked(InstrumentPanView*,
+	psy_ui_Component* sender, int pointindex);
 // implementation
 void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
@@ -99,6 +102,9 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)instrumentpanview_ontweak,
 			(ui_slider_fpvalue)instrumentpanview_onvalue);
 	}
+	psy_signal_connect(&self->envelopeview.signal_tweaked, self,
+		instrumentpanview_onenvelopeviewtweaked);
+	instrumentpanview_updatesliders(self);
 }
 
 void instrumentpanview_ondestroy(InstrumentPanView* self,
@@ -125,6 +131,15 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_checkbox_disablecheck(&self->instpanenabled);
 	}
+	instrumentpanview_updatesliders(self);	
+}
+
+void instrumentpanview_updatesliders(InstrumentPanView* self)
+{
+	psy_ui_slider_update(&self->instpanning);
+	psy_ui_slider_update(&self->randompanning);
+	psy_ui_slider_update(&self->notemodcenternote);
+	psy_ui_slider_update(&self->notemodamount);
 }
 
 void instrumentpanview_oninstpanenabled(InstrumentPanView* self,
@@ -243,4 +258,10 @@ void instrumentpanview_ontweaked(InstrumentPanView* self,
 			(float)pt.time, (float)pt.value);
 		psy_signal_emit(&self->signal_status, self, 1, statustext);
 	}
+}
+
+void instrumentpanview_onenvelopeviewtweaked(InstrumentPanView* self,
+	psy_ui_Component* sender, int pointindex)
+{
+	adsrsliders_update(&self->adsrsliders);
 }

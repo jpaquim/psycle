@@ -8,10 +8,12 @@
 #include "../../detail/portable.h"
 
 // prototypes
-void instrumentpitchview_ondestroy(InstrumentPitchView*,
+static void instrumentpitchview_ondestroy(InstrumentPitchView*,
 	psy_ui_Component* sender);
 static void instrumentpitchview_ontweaked(InstrumentPitchView*,
 	psy_ui_Component*, int pointindex);
+static void instrumentpitchview_onenvelopeviewtweaked(InstrumentPitchView*,
+	psy_ui_Component* sender, int pointindex);
 // implementation
 void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
@@ -37,6 +39,8 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 		instrumentpitchview_ontweaked);
 	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
 		instrumentpitchview_ontweaked);
+	psy_signal_connect(&self->envelopeview.signal_tweaked, self,
+		instrumentpitchview_onenvelopeviewtweaked);
 }
 
 void instrumentpitchview_ondestroy(InstrumentPitchView* self,
@@ -57,7 +61,7 @@ void instrumentpitchview_setinstrument(InstrumentPitchView* self,
 	} else {
 		adsrsliders_setenvelope(&self->adsrsliders, NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
-	}
+	}	
 }
 
 void instrumentpitchview_ontweaked(InstrumentPitchView* self,
@@ -73,4 +77,10 @@ void instrumentpitchview_ontweaked(InstrumentPitchView* self,
 			(float)pt.time, (float)pt.value);
 		psy_signal_emit(&self->signal_status, self, 1, statustext);
 	}
+}
+
+void instrumentpitchview_onenvelopeviewtweaked(InstrumentPitchView* self,
+	psy_ui_Component* sender, int pointindex)
+{
+	adsrsliders_update(&self->adsrsliders);
 }

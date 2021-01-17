@@ -6,13 +6,14 @@
 #include "envelopeview.h"
 
 #include <math.h>
-#include <string.h>
-#include <stdlib.h>
+// platform
+#include "../../detail/portable.h"
 
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawlines(EnvelopeBox*, psy_ui_Graphics*);
+static void envelopebox_drawruler(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_onsize(EnvelopeBox*, const psy_ui_Size*);
 static void envelopebox_ondestroy(EnvelopeBox*, psy_ui_Component* sender);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
@@ -21,10 +22,10 @@ static void envelopebox_onmouseup(EnvelopeBox*, psy_ui_MouseEvent*);
 static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y);
 static void envelopebox_shiftsuccessors(EnvelopeBox* self, double timeshift);
 static double envelopebox_pxvalue(EnvelopeBox*, double value);
-static double envelopebox_pxtime(EnvelopeBox*, psy_dsp_seconds_t t);
-static psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox*, double px);
+static double envelopebox_pxtime(EnvelopeBox*, psy_dsp_big_seconds_t t);
+static psy_dsp_big_seconds_t envelopebox_pxtotime(EnvelopeBox*, double px);
 static psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox*, double x, double y);
-static psy_dsp_seconds_t envelopebox_displaymaxtime(EnvelopeBox*);
+static psy_dsp_big_seconds_t envelopebox_displaymaxtime(EnvelopeBox*);
 
 static void checkadjustpointrange(psy_List* pointnode);
 
@@ -93,32 +94,39 @@ void envelopebox_ondestroy(EnvelopeBox* self, psy_ui_Component* sender)
 void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
 {	
 	envelopebox_drawgrid(self, g);
-	envelopebox_drawlines(self, g);
+	envelopebox_drawruler(self, g);
+	envelopebox_drawlines(self, g);	
 	envelopebox_drawpoints(self, g);	
 }
 
 void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 {
-	psy_dsp_seconds_t i;
-	psy_dsp_seconds_t smallstep;
-	psy_dsp_seconds_t step;
+	psy_dsp_big_seconds_t i;
+	psy_dsp_big_seconds_t smallstep;
+	psy_dsp_big_seconds_t step;
 
-	smallstep = (psy_dsp_seconds_t)0.1f;
+	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+		smallstep = 1;
+		step = 10;
+	} else {
+		smallstep = 0.1;
+		step = 0.5;
+	}	
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 	for (i = 0; i <= 1.0; i += smallstep ) {
+		double cpy;
+
+		cpy = envelopebox_pxvalue(self, i);
 		psy_ui_drawline(g,
-			self->spacing.left.quantity.px,
-				envelopebox_pxvalue(self, i),
-			self->spacing.left.quantity.px + self->cx,
-				envelopebox_pxvalue(self, i));
-	}
-	step = (psy_dsp_seconds_t)0.5f;
+			self->spacing.left.quantity.px, cpy,
+			self->spacing.left.quantity.px + self->cx, cpy);
+	}	
 	for (i = 0; i <= envelopebox_displaymaxtime(self); i += step) {
 		psy_ui_drawline(g,
 			envelopebox_pxtime(self, i),
 			self->spacing.top.quantity.px,
 			envelopebox_pxtime(self, i),
-			self->spacing.top.quantity.px + self->cy);
+			self->cy - self->spacing.bottom.quantity.px);
 	}
 }
 
@@ -195,6 +203,62 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	}	
 }
 
+void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
+{
+	psy_dsp_big_seconds_t t;
+	psy_dsp_big_seconds_t maxtime;
+	const psy_ui_TextMetric* tm;
+	int step;
+	int numsteps;
+
+	maxtime = envelopebox_displaymaxtime(self);
+	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+	psy_ui_drawline(g, 0, self->cy, self->cx, self->cy);
+	tm = psy_ui_component_textmetric(envelopebox_base(self));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00434343));
+	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+		numsteps = (int)(maxtime);
+	} else {
+		numsteps = (int)(maxtime / 0.1);
+	}
+	for (step = 0; step  <= numsteps; ++step) {
+		double cpx;
+		int res;
+		
+		if (self->settings &&
+				self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+			t = step;
+			res = 20;
+		} else {
+			res = 10;
+			t = step * 0.1;
+		}
+		cpx = envelopebox_pxtime(self, t);
+		psy_ui_drawline(g, cpx, self->cy - 5, cpx, self->cy);
+		if ((step % res) == 0.0) {
+			char text[64];
+
+			if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+				psy_snprintf(text, 64, "%dt", (int)t);
+			} else {
+				psy_snprintf(text, 64, "%ds", (int)t);
+			}
+			if (step < numsteps) {
+				psy_ui_textout(g, cpx + 4, self->cy - (tm->tmHeight * 1.5),
+					text, strlen(text));
+			} else {
+				psy_ui_textout(g,
+					cpx - 3.5 * (double)tm->tmAveCharWidth, self->cy - (tm->tmHeight * 1.5),
+					text, strlen(text));
+			}
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00434343));
+			psy_ui_drawline(g, cpx, self->spacing.top.quantity.px,
+				cpx, self->cy - self->spacing.bottom.quantity.px);
+			psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+		}
+	}
+}
+
 void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 {
 	const psy_ui_TextMetric* tm;
@@ -235,7 +299,7 @@ void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 						0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
 				} else {
 					*pt_insert = pt_new;
-					pt_insert->maxtime = 5.f;
+					pt_insert->maxtime = 65535.f;
 					pt_insert->maxvalue = 1.f;
 				}
 				if (p && p->next == NULL) {
@@ -386,7 +450,7 @@ psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox* self, double x,
 	double y)
 {	
 	return psy_dsp_envelopepoint_make(
-		envelopebox_pxtotime(self, x),
+		(float)envelopebox_pxtotime(self, x),
 		(psy_dsp_amp_t)(1.0 - (y - self->spacing.top.quantity.px) / self->cy));
 }
 
@@ -396,9 +460,9 @@ double envelopebox_pxvalue(EnvelopeBox* self, double value)
 		self->spacing.top.quantity.px;
 }
 
-double envelopebox_pxtime(EnvelopeBox* self, psy_dsp_seconds_t t)
+psy_dsp_big_seconds_t envelopebox_pxtime(EnvelopeBox* self, psy_dsp_big_seconds_t t)
 {
-	double offsetstep;
+	psy_dsp_big_seconds_t offsetstep;
 	
 	offsetstep= envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
@@ -406,9 +470,9 @@ double envelopebox_pxtime(EnvelopeBox* self, psy_dsp_seconds_t t)
 		self->zoomleft)) / offsetstep) + self->spacing.left.quantity.px;
 }
 
-psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
+psy_dsp_big_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
 {
-	double t;
+	psy_dsp_big_seconds_t t;
 
 	double offsetstep = envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
@@ -419,12 +483,16 @@ psy_dsp_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
 	} else if (t > envelopebox_displaymaxtime(self)) {
 		t = envelopebox_displaymaxtime(self);
 	}
-	return (psy_dsp_seconds_t)t;
+	return t;
 }
 
-float envelopebox_displaymaxtime(EnvelopeBox* self)
+psy_dsp_big_seconds_t envelopebox_displaymaxtime(EnvelopeBox* self)
 {
-	return 5.f;
+	if (self->settings &&
+			self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+		return 300.0;
+	}
+	return 5.f;	
 }
 
 psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
@@ -507,12 +575,15 @@ void envelopebar_onticks(EnvelopeBar* self, psy_ui_Component* sender)
 }
 
 // EnvelopeView
+static void envelopeview_ondestroy(EnvelopeView*);
 static void envelopeview_onzoom(EnvelopeView*, ScrollZoom* sender);
 static void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender);
 static void envelopeview_onenable(EnvelopeView*, psy_ui_CheckBox* sender);
 static void envelopeview_oncarry(EnvelopeView*, psy_ui_CheckBox* sender);
 static void envelopeview_onmillisecs(EnvelopeView*, psy_ui_Button* sender);
 static void envelopeview_onticks(EnvelopeView*, psy_ui_Button* sender);
+static void envelopeview_ontweaked(EnvelopeView*, EnvelopeBox* sender,
+	int pointindex);
 
 static psy_ui_ComponentVtable envelopeview_vtable;
 static int envelopeview_vtable_initialized = 0;
@@ -520,7 +591,9 @@ static int envelopeview_vtable_initialized = 0;
 static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 {
 	if (!envelopeview_vtable_initialized) {
-		envelopeview_vtable = *(self->component.vtable);	
+		envelopeview_vtable = *(self->component.vtable);
+		envelopeview_vtable.destroy = (psy_ui_fp_component_destroy)
+			envelopeview_ondestroy;
 		envelopeview_vtable_initialized = 1;
 	}
 	return &envelopeview_vtable;
@@ -556,6 +629,14 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* 
 		envelopeview_onmillisecs);
 	psy_signal_connect(&self->bar.ticks.signal_clicked, self,
 		envelopeview_onticks);
+	psy_signal_init(&self->signal_tweaked);
+	psy_signal_connect(&self->envelopebox.signal_tweaked, self,
+		envelopeview_ontweaked);	
+}
+
+void envelopeview_ondestroy(EnvelopeView* self)
+{
+	psy_signal_dispose(&self->signal_tweaked);
 }
 
 void envelopeview_settext(EnvelopeView* self, const char* text)
@@ -620,6 +701,8 @@ void envelopeview_onmillisecs(EnvelopeView* self, psy_ui_Button* sender)
 {
 	if (self->envelopebox.settings) {
 		self->envelopebox.settings->timemode = psy_dsp_ENVELOPETIME_SECONDS;
+		envelopeview_update(self);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 0);
 	}
 }
 
@@ -627,6 +710,8 @@ void envelopeview_onticks(EnvelopeView* self, psy_ui_Button* sender)
 {
 	if (self->envelopebox.settings) {
 		self->envelopebox.settings->timemode = psy_dsp_ENVELOPETIME_TICK;
+		envelopeview_update(self);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 0);
 	}
 }
 
@@ -640,4 +725,9 @@ void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender)
 		predefsconfig_storepredef(&self->workspace->config.predefs,
 			index, self->envelopebox.settings);		
 	}*/
+}
+
+void envelopeview_ontweaked(EnvelopeView* self, EnvelopeBox* sender, int pointindex)
+{
+	psy_signal_emit(&self->signal_tweaked, self, 1, pointindex);
 }

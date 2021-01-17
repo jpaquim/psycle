@@ -18,8 +18,10 @@ typedef struct {
 	double value;
 	double rulerstep;
 	double tweakbase;	
-	float step;	
-	double slidersize;
+	float step;
+	psy_ui_Size hslidersize;
+	psy_ui_Size vslidersize;
+	psy_ui_RealSize slidersizepx;
 	bool poll;
 	uintptr_t timerinterval;
 	psy_ui_Orientation orientation;

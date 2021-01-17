@@ -329,8 +329,7 @@ void mainframe_initviewstatusbars(MainFrame* self)
 
 void mainframe_initstatusbarlabel(MainFrame* self)
 {
-	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);
-	psy_ui_component_doublebuffer(psy_ui_label_base(&self->statusbarlabel));
+	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);

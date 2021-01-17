@@ -445,6 +445,15 @@ INLINE bool psy_ui_issizezero(psy_ui_Size size)
 	return psy_ui_size_iszero(&size);
 }
 
+INLINE psy_ui_RealSize psy_ui_size_px(psy_ui_Size* self, const psy_ui_TextMetric* tm)
+{
+	psy_ui_RealSize rv;
+
+	rv.width = psy_ui_value_px(&self->width, tm);
+	rv.height = psy_ui_value_px(&self->height, tm);
+	return rv;
+}
+
 INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
 	const psy_ui_TextMetric* tm)
 {

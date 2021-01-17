@@ -37,8 +37,8 @@ static void instrumentgeneralview_ondcarelease(InstrumentGeneralView*);
 static void instrumentgeneralview_ondcafadeout(InstrumentGeneralView*);
 static void instrumentgeneralview_ondcanone(InstrumentGeneralView*);
 static void instrumentgeneralview_updatedca(InstrumentGeneralView*);
-
-
+// slider
+static void instrumentgeneralview_updateslider(InstrumentGeneralView*);
 static void instrumentgeneralview_ongeneralviewdescribe(InstrumentGeneralView*,
 	psy_ui_Slider*, char* text);
 static void instrumentgeneralview_ongeneralviewtweak(InstrumentGeneralView*,
@@ -143,7 +143,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		"instrumentview.play-sample-to-fit");
 	psy_ui_slider_settext(&self->globalvolume,
 		"instrumentview.global-volume");
-	
+	instrumentgeneralview_updateslider(self);
 }
 
 void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
@@ -183,6 +183,12 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 	}
 	instrumentgeneralview_updatedct(self);
 	instrumentgeneralview_updatedca(self);
+	instrumentgeneralview_updateslider(self);
+}
+
+void instrumentgeneralview_updateslider(InstrumentGeneralView* self)
+{
+	psy_ui_slider_update(&self->globalvolume);
 }
 
 void instrumentgeneralview_onfitrow(InstrumentGeneralView* self,

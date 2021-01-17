@@ -14,6 +14,7 @@
 // prototypes
 static void instrumentfilterview_ondestroy(InstrumentFilterView*,
 	psy_ui_Component* sender);
+static void instrumentfilterview_updateslider(InstrumentFilterView*);
 static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
 static void instrumentfilterview_ondescribe(InstrumentFilterView*,
 	psy_ui_Slider*, char* text);
@@ -25,6 +26,9 @@ static void instrumentfilterview_onfiltercomboboxchanged(InstrumentFilterView*,
 	psy_ui_ComboBox* sender, int index);
 static void instrumentfilterview_ontweaked(InstrumentFilterView*,
 	psy_ui_Component*, int pointindex);
+static void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView*,
+	psy_ui_Component* sender, int pointindex);
+
 // implementation
 void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
@@ -106,12 +110,24 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 			(ui_slider_fptweak)instrumentfilterview_ontweak,
 			(ui_slider_fpvalue)instrumentfilterview_onvalue);
 	}
+	instrumentfilterview_updateslider(self);
+	psy_signal_connect(&self->envelopeview.signal_tweaked, self,
+		instrumentfilterview_onenvelopeviewtweaked);
 }
 
 void instrumentfilterview_ondestroy(InstrumentFilterView* self,
 	psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_status);
+}
+
+void instrumentfilterview_updateslider(InstrumentFilterView* self)
+{	
+	psy_ui_slider_update(&self->randomcutoff);
+	psy_ui_slider_update(&self->randomresonance);
+	psy_ui_slider_update(&self->cutoff);
+	psy_ui_slider_update(&self->res);
+	psy_ui_slider_update(&self->modamount);
 }
 
 void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
@@ -148,7 +164,8 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 			NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)F_NONE);
-	}	
+	}
+	instrumentfilterview_updateslider(self);	
 }
 
 void instrumentfilterview_ondescribe(InstrumentFilterView* self,
@@ -178,18 +195,18 @@ void instrumentfilterview_ondescribe(InstrumentFilterView* self,
 		psy_snprintf(text, 20, "%d%%",
 			(int)(self->instrument->filtermodamount * 100));		
 	} else if (slider == &self->randomcutoff) {
-		if (!self->instrument->randomcutoff == 0.f) {
+		if (self->instrument->randomcutoff == 0.f) {
 			psy_snprintf(text, 10, "off");
 		} else {
 			psy_snprintf(text, 20, "%d%%",
 				(int)(self->instrument->randomcutoff * 100));
 		}
 	} else if (slider == &self->randomresonance) {
-		if (!self->instrument->randompanning == 0.f) {
+		if (self->instrument->randomresonance == 0.f) {
 			psy_snprintf(text, 10, "off");
 		} else {
 			psy_snprintf(text, 20, "%d%%",
-				(int)(self->instrument->randompanning * 100));			
+				(int)(self->instrument->randomresonance * 100));
 		}
 	}
 }
@@ -256,6 +273,12 @@ void instrumentfilterview_ontweaked(InstrumentFilterView* self,
 		pt = psy_dsp_envelope_at(&self->instrument->filterenvelope, pointindex);
 		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
 			(float)pt.time, (float)pt.value);
-		psy_signal_emit(&self->signal_status, self, 1, statustext);
+		psy_signal_emit(&self->signal_status, self, 1, statustext);		
 	}
+}
+
+void instrumentfilterview_onenvelopeviewtweaked(InstrumentFilterView* self,
+	psy_ui_Component* sender, int pointindex)
+{
+	adsrsliders_update(&self->adsrsliders);
 }

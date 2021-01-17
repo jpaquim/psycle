@@ -1147,12 +1147,13 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		// Format of FastTracker points is :
 		// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 		// Value : 0..64. , divide by 64 to use it as a multiplier.
-		psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make(
-			sampleHeader->venv[0], (float)sampleHeader->venv[1] / 64.0f));		
+		psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make_all(
+			sampleHeader->venv[0], (float)sampleHeader->venv[1] / 64.0f, 0.0, 65535.f, 0.0, 1.0));		
 		for (i = 1; i < envelope_point_num; i++) {
 			if (sampleHeader->venv[i * 2] > sampleHeader->venv[(i - 1) * 2])// Some rare modules have erroneous points. This tries to solve that.
-				psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make(
-					sampleHeader->venv[i * 2], (float)sampleHeader->venv[i * 2 + 1] / 64.0f));
+				psy_dsp_envelope_append(&inst->volumeenvelope, psy_dsp_envelopepoint_make_all(
+					sampleHeader->venv[i * 2], (float)sampleHeader->venv[i * 2 + 1] / 64.0f,
+					0.0, 65535.f, 0.0, 1.0));
 		}
 
 		if (sampleHeader->vtype & 2) {
@@ -1227,8 +1228,9 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		}
 
 		for(int i = 0; i < envelope_point_num;i++){
-			psy_dsp_envelope_append(&inst->panenvelope, psy_dsp_envelopepoint_make(
-				sampleHeader->penv[i * 2], (float)(sampleHeader->penv[i * 2 + 1] -32.0f )/ 32.0f));
+			psy_dsp_envelope_append(&inst->panenvelope, psy_dsp_envelopepoint_make_all(
+				sampleHeader->penv[i * 2], (float)(sampleHeader->penv[i * 2 + 1] -32.0f )/ 32.0f,
+				0.0, 65535.f, 0.0, 1.0));
 		}
 
 	} else {

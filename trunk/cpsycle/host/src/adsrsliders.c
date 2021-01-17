@@ -19,6 +19,7 @@ static void adsrsliders_onvolumeviewtweak(AdsrSliders*,
 	psy_ui_Slider*, float value);
 static void adsrsliders_onvolumeviewvalue(AdsrSliders*,
 	psy_ui_Slider*, float* value);
+static psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders*);
 // implementation
 void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 {	
@@ -63,6 +64,15 @@ void adsrsliders_setenvelope(AdsrSliders* self,
 	psy_dsp_Envelope* envelope)
 {	
 	self->envelope = envelope;
+	adsrsliders_update(self);
+}
+
+void adsrsliders_update(AdsrSliders* self)
+{
+	psy_ui_slider_update(&self->attack);
+	psy_ui_slider_update(&self->decay);
+	psy_ui_slider_update(&self->sustain);
+	psy_ui_slider_update(&self->release);
 }
 
 void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
@@ -70,15 +80,25 @@ void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
 {
 	if (slider == &self->attack) {
 		if (self->envelope) {			
-			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelope_attacktime(self->envelope) * 1000);
+			if (self->envelope->timemode == psy_dsp_ENVELOPETIME_TICK) {
+				psy_snprintf(txt, 20, "%dt", (int)
+					psy_dsp_envelope_attacktime(self->envelope));
+			} else {
+				psy_snprintf(txt, 20, "%.4fms", (float)
+					psy_dsp_envelope_attacktime(self->envelope) * 1000);
+			}
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
 	} else if (slider == &self->decay) {
-		if (self->envelope) {			
-			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelope_decaytime(self->envelope) * 1000);
+		if (self->envelope) {
+			if (self->envelope->timemode == psy_dsp_ENVELOPETIME_TICK) {
+				psy_snprintf(txt, 20, "%dt", (int)
+					psy_dsp_envelope_decaytime(self->envelope));
+			} else {
+				psy_snprintf(txt, 20, "%.4fms", (float)
+					psy_dsp_envelope_decaytime(self->envelope) * 1000);
+			}
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
@@ -91,9 +111,14 @@ void adsrsliders_onvolumeviewdescribe(AdsrSliders* self,
 		}		
 	} else
 	if (slider == &self->release) {
-		if (self->envelope) {			
-			psy_snprintf(txt, 20, "%.4fms", (float)
-				psy_dsp_envelope_releasetime(self->envelope) * 1000);
+		if (self->envelope) {
+			if (self->envelope->timemode == psy_dsp_ENVELOPETIME_TICK) {
+				psy_snprintf(txt, 20, "%dt", (int)
+					psy_dsp_envelope_releasetime(self->envelope));
+			} else {
+				psy_snprintf(txt, 20, "%.4fms", (float)
+					psy_dsp_envelope_releasetime(self->envelope) * 1000);
+			}
 		} else {			
 			psy_snprintf(txt, 10, "0ms");
 		}		
@@ -107,16 +132,16 @@ void adsrsliders_onvolumeviewtweak(AdsrSliders* self,
 		return;
 	}
 	if (slider == &self->attack) {
-		psy_dsp_envelope_setattacktime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setattacktime(self->envelope, value * adsrsliders_maxtime(self));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 1);
 	} else if (slider == &self->decay) {
-		psy_dsp_envelope_setdecaytime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setdecaytime(self->envelope, value * adsrsliders_maxtime(self));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->sustain) {
 		psy_dsp_envelope_setsustainvalue(self->envelope, value);
 		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->release) {
-		psy_dsp_envelope_setreleasetime(self->envelope, value * 5.f);
+		psy_dsp_envelope_setreleasetime(self->envelope, value * adsrsliders_maxtime(self));
 		psy_signal_emit(&self->signal_tweaked, self, 1, 3);
 	}	
 }
@@ -126,13 +151,13 @@ void adsrsliders_onvolumeviewvalue(AdsrSliders* self,
 {
 	if (slider == &self->attack) {
 		if (self->envelope) {
-			*value = psy_dsp_envelope_attacktime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_attacktime(self->envelope) / adsrsliders_maxtime(self);
 		} else {
 			*value = 0.f;
 		}
 	} else if (slider == &self->decay) {
 		if (self->envelope) {
-			*value = psy_dsp_envelope_decaytime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_decaytime(self->envelope) / adsrsliders_maxtime(self);
 		} else {
 			*value = 0.f;
 		}	
@@ -144,9 +169,18 @@ void adsrsliders_onvolumeviewvalue(AdsrSliders* self,
 		}	
 	} else if (slider == &self->release) {
 		if (self->envelope) {
-			*value = psy_dsp_envelope_releasetime(self->envelope) / 5.f;
+			*value = psy_dsp_envelope_releasetime(self->envelope) / adsrsliders_maxtime(self);
 		} else {
 			*value = 0.5f;
 		}	
 	}
+}
+
+psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders* self)
+{
+	if (self->envelope && self->envelope->timemode ==
+			psy_dsp_ENVELOPETIME_TICK) {
+		return 300.f;	
+	}
+	return 5.f;
 }
