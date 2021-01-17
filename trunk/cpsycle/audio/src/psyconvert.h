@@ -22,7 +22,9 @@ extern "C" {
 
 #define PSY2_NOTECOMMANDS_EMPTY 255
 #define PSY2_NOTECOMMANDS_RELEASE 120
-#define PSY2_NOTECOMMANDS_MIDICC 123	
+#define PSY2_NOTECOMMANDS_TWEAK 121
+#define PSY2_NOTECOMMANDS_MIDICC 123
+#define PSY2_NOTECOMMANDS_TWEAKSLIDE 124
 
 typedef struct psy_audio_LegacyPatternEntry {
 	uint8_t _note;
@@ -56,8 +58,8 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(psy_audio_Pattern* pattern, ui
 	int* rv_patternlines);
 void psy_audio_convert_legacypattern(
 	struct psy_audio_Pattern* dst, psy_audio_LegacyPattern src,
-	uintptr_t numtracks, uintptr_t numrows,
-	uintptr_t lpb);
+	uint32_t numtracks, uint32_t numrows,
+	uint32_t lpb);
 
 const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
 	psy_audio_LegacyPattern, int track, int line);
@@ -125,6 +127,30 @@ typedef struct psy_audio_LegacyInstrument {
 } psy_audio_LegacyInstrument;
 
 psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument*);
+
+
+#define LEGACY_NOTE_MAP_SIZE 120
+
+// A Note pair(note number = first, and sample number = second)
+typedef struct LegacyNotePair {
+	uint8_t first;
+	uint8_t second;
+} LegacyNotePair;
+
+INLINE LegacyNotePair legacynotepair_make(uint8_t first, uint8_t second)
+{
+	LegacyNotePair rv;
+	
+	rv.first = first;
+	rv.second = second;	
+	return rv;
+}
+
+typedef struct LegacyNoteMap {
+	LegacyNotePair map[LEGACY_NOTE_MAP_SIZE];
+} LegacyNoteMap;
+
+LegacyNoteMap psy_audio_legacynotemap(psy_List* entries);
 
 #ifdef __cplusplus
 }

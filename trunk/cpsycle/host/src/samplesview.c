@@ -319,6 +319,7 @@ static void generalview_ondescribe(SamplesGeneralView*, psy_ui_Slider*, char* tx
 static void generalview_ontweak(SamplesGeneralView*, psy_ui_Slider*, float value);
 static void generalview_onvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
 static void generalview_updatetext(SamplesGeneralView*);
+static void generalview_updatesliders(SamplesGeneralView*);
 // implementation
 void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -334,21 +335,22 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	};	
 	int i;
 		
-	self->sample = 0;
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));	
+	self->sample = NULL;	
 	self->notestabmode = workspace_notetabmode(workspace);
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->defaultvolume, &self->component);
+	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
+	psy_ui_margin_settop(&margin, psy_ui_value_makeeh(1.0));
+	psy_ui_component_setmargin(&self->defaultvolume.component, &margin);
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_init(&self->panposition, &self->component);
 	psy_ui_slider_init(&self->samplednote, &self->component);
 	psy_ui_slider_init(&self->pitchfinetune, &self->component);
 	for (i = 0; sliders[i] != 0; ++i) {		
-		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);		
-		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_setcharnumber(sliders[i], 16);
+		psy_ui_slider_setvaluecharnumber(sliders[i], 10);
 		psy_ui_slider_connect(sliders[i], self,
 			(ui_slider_fpdescribe)generalview_ondescribe,
 			(ui_slider_fptweak)generalview_ontweak,
@@ -371,6 +373,15 @@ void generalview_updatetext(SamplesGeneralView* self)
 		"samplesview.pitch-finetune");
 }
 
+void generalview_updatesliders(SamplesGeneralView* self)
+{
+	psy_ui_slider_update(&self->defaultvolume);
+	psy_ui_slider_update(&self->globalvolume);
+	psy_ui_slider_update(&self->panposition);
+	psy_ui_slider_update(&self->samplednote);
+	psy_ui_slider_update(&self->pitchfinetune);
+}
+
 void generalview_setsample(SamplesGeneralView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
@@ -379,6 +390,7 @@ void generalview_setsample(SamplesGeneralView* self, psy_audio_Sample* sample)
 	} else {
 		psy_ui_component_preventinput(&self->component, 1);
 	}
+	generalview_updatesliders(self);
 }
 
 int map_1_128(float value) {
@@ -454,7 +466,7 @@ void generalview_ondescribe(SamplesGeneralView* self, psy_ui_Slider* slider, cha
 	} else
 	if (slider == &self->samplednote) {			
 		psy_snprintf(txt, 10, "%s", self->sample
-			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->tune), self->notestabmode)
+			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->tune + 60), self->notestabmode)
 			: psy_dsp_notetostr(60, self->notestabmode));
 	} else
 	if (slider == &self->pitchfinetune) {
@@ -1117,7 +1129,7 @@ void samplesview_setsample(SamplesView* self, psy_audio_SampleIndex index)
 {
 	psy_audio_Sample* sample;
 
-	sample = workspace_song(self->workspace)
+	sample = (workspace_song(self->workspace))
 		? psy_audio_samples_at(&workspace_song(self->workspace)->samples, index)
 		: 0;
 	wavebox_setsample(&self->wavebox, sample, 0);

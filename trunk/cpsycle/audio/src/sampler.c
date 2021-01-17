@@ -158,9 +158,9 @@ static void psy_audio_sampler_ontimerwork(psy_audio_Sampler*,
 static psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler*, psy_List* events);
 static void psy_audio_sampler_tick(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
-static void psy_audio_sampler_loadspecificchunk(psy_audio_Sampler*, psy_audio_SongFile*,
+static int psy_audio_sampler_loadspecificchunk(psy_audio_Sampler*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void psy_audio_sampler_savespecificchunk(psy_audio_Sampler*, psy_audio_SongFile*,
+static int psy_audio_sampler_savespecificchunk(psy_audio_Sampler*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void psy_audio_sampler_initparameters(psy_audio_Sampler*);
 static void psy_audio_sampler_disposeparameters(psy_audio_Sampler*);
@@ -1176,7 +1176,7 @@ void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
 }
 
 // mfc-psycle: Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
-void psy_audio_sampler_loadspecificchunk(psy_audio_Sampler* self,
+int psy_audio_sampler_loadspecificchunk(psy_audio_Sampler* self,
 	psy_audio_SongFile* songfile, uintptr_t machslot)
 {
 	uint32_t size;
@@ -1242,10 +1242,11 @@ void psy_audio_sampler_loadspecificchunk(psy_audio_Sampler* self,
 			}
 		}
 	}
+	return PSY_OK;
 }
 
 // mfc-psycle: Sampler::SaveSpecificChunk(RiffFile* pFile) 
-void psy_audio_sampler_savespecificchunk(psy_audio_Sampler* self,
+int psy_audio_sampler_savespecificchunk(psy_audio_Sampler* self,
 	psy_audio_SongFile* songfile, uintptr_t macslot)
 {
 	uint32_t temp;
@@ -1276,6 +1277,7 @@ void psy_audio_sampler_savespecificchunk(psy_audio_Sampler* self,
 	psyfile_write_uint8(songfile->file, (uint8_t)psy_audio_sampler_isdefaultC4(self)); // correct A4
 	psyfile_write_uint8(songfile->file, (uint8_t)self->linearslide); // correct slide
 	psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank);
+	return PSY_OK;
 }
 
 // mfc-psycle: bool Sampler::Load(RiffFile* pFile)

@@ -395,6 +395,8 @@ static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_onloadinstrument(InstrumentView*,
 	psy_ui_Component* sender);
+static void instrumentview_onsaveinstrument(InstrumentView*,
+	psy_ui_Component* sender);
 static void instrumentview_ondeleteinstrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_oninstrumentinsert(InstrumentView*,
@@ -516,6 +518,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		instrumentview_oncreateinstrument);
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
 		instrumentview_onloadinstrument);
+	psy_signal_connect(&self->buttons.save.signal_clicked, self,
+		instrumentview_onsaveinstrument);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self,
 		instrumentview_ondeleteinstrument);	
 	psy_signal_connect(&self->volume.signal_status, self,
@@ -675,6 +679,37 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			instrumentsbox_rebuild(&self->instrumentsbox);
 		}
 		psy_ui_opendialog_dispose(&dialog);
+	}
+}
+void instrumentview_onsaveinstrument(InstrumentView* self, psy_ui_Component* sender)
+{
+	if (workspace_song(self->workspace)) {
+		psy_ui_SaveDialog dialog;		
+		static char filter[] = "Instrument (*.psins)|*.psins";
+		psy_audio_Song* song;
+
+		psy_audio_Instrument* instrument;
+		song = workspace_song(self->workspace);
+		instrument = psy_audio_instruments_at(&song->instruments,
+			psy_audio_instruments_selected(&song->instruments));
+		if (instrument) {
+			psy_ui_savedialog_init_all(&dialog, 0, "Save Instrument", filter,
+				"PSINS",
+				dirconfig_samples(&self->workspace->config.directories));
+			if (psy_ui_savedialog_execute(&dialog)) {				
+				psy_audio_SongFile songfile;
+				PsyFile file;
+
+				psy_audio_songfile_init(&songfile);
+				songfile.song = song;
+				songfile.file = &file;
+				psy_audio_songfile_saveinstrument(&songfile,
+					psy_path_full(psy_ui_savedialog_path(&dialog)),
+					instrument);
+				psy_audio_songfile_dispose(&songfile);
+			}
+			psy_ui_savedialog_dispose(&dialog);
+		}
 	}
 }
 

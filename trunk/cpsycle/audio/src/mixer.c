@@ -322,9 +322,9 @@ static uintptr_t numoutputs(psy_audio_Mixer* self) { return 2; }
 static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, uintptr_t amount,
 	psy_audio_MachineSockets*, psy_audio_Machines*, psy_audio_Player*);
 static void work(psy_audio_Mixer*, psy_audio_BufferContext*);
-static void loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
+static int loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
+static int savespecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void postload(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
@@ -1697,21 +1697,36 @@ void paramcoords(psy_audio_Mixer* self, uintptr_t param, uintptr_t* col, uintptr
 	*col = param / rows;
 }
 
-void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t filesize;
 	int32_t numins = 0;
 	uint32_t numrets = 0;
 	uint32_t i;
+	int status;
 
-	psyfile_read(songfile->file, &filesize, sizeof(filesize));
-	psyfile_read(songfile->file, &self->solocolumn, sizeof(self->solocolumn));
-	psyfile_read(songfile->file, &self->master.volume, sizeof(float));
-	psyfile_read(songfile->file, &self->master.gain, sizeof(float));
-	psyfile_read(songfile->file, &self->master.drymix, sizeof(float));
-	psyfile_read(songfile->file, &numins, sizeof(int32_t));
-	psyfile_read(songfile->file, &numrets, sizeof(int32_t));
+	if (status = psyfile_read(songfile->file, &filesize, sizeof(filesize))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &self->solocolumn, sizeof(self->solocolumn))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &self->master.volume, sizeof(float))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &self->master.gain, sizeof(float))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &self->master.drymix, sizeof(float))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &numins, sizeof(int32_t))) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &numrets, sizeof(int32_t))) {
+		return status;
+	}
 	self->custommachine.slot = slot;
 	
 	for (i = 0; i < (uint32_t) numins; ++i) {
@@ -1725,22 +1740,36 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		for (j = 0; j < numrets; ++j) {
 			float send = 0.0f;
 
-			psyfile_read(songfile->file, &send, sizeof(float));
+			if (status = psyfile_read(songfile->file, &send, sizeof(float))) {
+				return status;
+			}
 			if (channel) {
 				psy_table_insert(&channel->sendvols, j, (void*)(intptr_t)(send * 0xFF));
 			}
 		}
-		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+			return status;
+		}
 		channel->volume = temp;		
-		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+			return status;
+		}
 		channel->panning = temp;		
-		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (status = psyfile_read(songfile->file, &temp, sizeof(float))) {
+			return status;
+		}
 		channel->drymix = temp;		
-		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
+		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+			return status;
+		}
 		channel->mute = temp8;		
-		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
+		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+			return status;
+		}
 		channel->dryonly = temp8;		
-		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
+		if (status = psyfile_read(songfile->file, &temp8, sizeof(uint8_t))) {
+			return status;
+		}
 		channel->wetonly = temp8;		
 	}
 	if (numins > 0) {
@@ -1759,13 +1788,19 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float wiremultiplier;
 
 			// Incoming (Return) connections psy_audio_Machine number
-			psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine));
+			if (status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine))) {
+				return status;
+			}
 			// volume value for the current return wire. Range 0.0..1.0. (As
 			// opposed to the standard wires)
-			psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol));
+			if (status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol))) {
+				return status;
+			}
 			// Ignore. (value to divide returnVolume for work. The reason is
 			// because natives output at -32768.0f..32768.0f range )
-			psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier));
+			if (status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier))) {
+				return status;
+			}
 			//bugfix on 1.10.1 alpha
 			if (inputconvol > 8.0f) {
 				inputconvol /= 32768.f;
@@ -1787,13 +1822,19 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float wiremultiplier;
 			
 			// Outgoing (Send) connections psy_audio_Machine number
-			psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine));
+			if (status = psyfile_read(songfile->file, &inputmachine, sizeof(inputmachine))) {
+
+			}
 			// volume value for the current send wire. Range 0.0..1.0. (As
 			// opposed to the standard wires)
-			psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol));
+			if (status = psyfile_read(songfile->file, &inputconvol, sizeof(inputconvol))) {
+				return status;
+			}
 			// Ignore. (value to divide returnVolume for work. The reason is
 			// because natives output at -32768.0f..32768.0f range )
-			psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier));
+			if (status = psyfile_read(songfile->file, &wiremultiplier, sizeof(wiremultiplier))) {
+				return status;
+			}
 			// bugfix on 1.10.1 alpha
 			if (inputconvol > 0.f && inputconvol < 0.0002f) {
 				inputconvol *= 32768.f;
@@ -1807,7 +1848,9 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		for (j = 0; j < numrets; ++j) {
 			uint8_t send = 0;
 
-			psyfile_read(songfile->file, &send, sizeof(uint8_t));
+			if (status = psyfile_read(songfile->file, &send, sizeof(uint8_t))) {
+				return status;
+			}
 			if (send != 0) {
 				psy_table_insert(&channel->sendsto, j, (void*)(uintptr_t)TRUE);
 			}
@@ -1819,10 +1862,18 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float panning;
 			uint8_t mute;
 
-			psyfile_read(songfile->file, &mastersend, sizeof(uint8_t));
-			psyfile_read(songfile->file, &volume, sizeof(float));
-			psyfile_read(songfile->file, &panning, sizeof(float));
-			psyfile_read(songfile->file, &mute, sizeof(uint8_t));
+			if (status = psyfile_read(songfile->file, &mastersend, sizeof(uint8_t))) {
+				return status;
+			}
+			if (status = psyfile_read(songfile->file, &volume, sizeof(float))) {
+				return status;
+			}
+			if (status = psyfile_read(songfile->file, &panning, sizeof(float))) {
+				return status;
+			}
+			if (status = psyfile_read(songfile->file, &mute, sizeof(uint8_t))) {
+				return status;
+			}
 			if (channel) {
 				channel->mastersend = mastersend;
 				channel->volume = volume;
@@ -1834,9 +1885,10 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	if (numrets > 0) {
 		self->maxreturn = numrets - 1;
 	}
+	return PSY_OK;
 }
 
-void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
+int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	float volume_;
@@ -1849,17 +1901,28 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	uint32_t j;
 	psy_audio_InputChannel emptyinput;
 	psy_audio_ReturnChannel emptyreturn;
+	int status;
 
 	size = (sizeof(self->solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +
 		2 * sizeof(uint32_t));
 	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(float)) * (uint32_t)self->inputs.count;
 	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->returns.count;
 	size += (2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->sends.count;
-	psyfile_write(songfile->file, &size, sizeof(size));
-	psyfile_write(songfile->file, &self->solocolumn, sizeof(self->solocolumn));
-	psyfile_write(songfile->file, &self->master.volume, sizeof(float));
-	psyfile_write(songfile->file, &self->master.gain, sizeof(float));
-	psyfile_write(songfile->file, &self->master.drymix, sizeof(float));
+	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &self->solocolumn, sizeof(self->solocolumn))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &self->master.volume, sizeof(float))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &self->master.gain, sizeof(float))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &self->master.drymix, sizeof(float))) {
+		return status;
+	}
 	numins = (uint32_t)numinputcolumns(self);
 	numrets = (uint32_t)numreturncolumns(self);
 	psyfile_write(songfile->file, &numins, sizeof(int32_t));
@@ -1876,14 +1939,28 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			float sendvol;
 
 			sendvol = (int)(intptr_t)psy_table_at(&channel->sendvols, j) / (psy_dsp_amp_t) 0xFF;
-			psyfile_write(songfile->file, &sendvol, sizeof(float));
+			if (status = psyfile_write(songfile->file, &sendvol, sizeof(float))) {
+				return status;
+			}
 		}
-		psyfile_write(songfile->file, &channel->volume, sizeof(float));
-		psyfile_write(songfile->file, &channel->panning, sizeof(float));
-		psyfile_write(songfile->file, &channel->drymix, sizeof(float));
-		psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t));
-		psyfile_write(songfile->file, &channel->dryonly, sizeof(uint8_t));
-		psyfile_write(songfile->file, &channel->wetonly, sizeof(uint8_t));
+		if (status = psyfile_write(songfile->file, &channel->volume, sizeof(float))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->panning, sizeof(float))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->drymix, sizeof(float))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->dryonly, sizeof(uint8_t))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->wetonly, sizeof(uint8_t))) {
+			return status;
+		}
 	}
 	returnchannel_init(&emptyreturn, self, 0, 0);
 	for (i = 0; i < (uint32_t) numrets; ++i) {
@@ -1901,11 +1978,17 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		//volume = wireRet.GetVolume();
 		volMultiplier = 1.0f; // wireRet.GetVolMultiplier();
 		// Incoming connections psy_audio_Machine number
-		psyfile_write_int32(songfile->file, (int32_t)channel->fxslot);
+		if (status = psyfile_write_int32(songfile->file, (int32_t)channel->fxslot)) {
+			return status;
+		}
 		// Incoming connections psy_audio_Machine vol
-		psyfile_write_float(songfile->file, channel->volume);
+		if (status = psyfile_write_float(songfile->file, channel->volume)) {
+			return status;
+		}
 		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-		psyfile_write_float(songfile->file, volMultiplier);
+		if (status = psyfile_write_float(songfile->file, volMultiplier)) {
+			return status;
+		}
 		//Sending machines and values
 		if (psy_table_exists(&channel->sendsto, i)) {
 			psy_audio_ReturnChannel* sendto;
@@ -1924,9 +2007,18 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			volume = 1.0f;
 		}
 		volMultiplier = 1.0f;
-		psyfile_write(songfile->file, &wMacIdx, sizeof(int));	// send connections psy_audio_Machine number
-		psyfile_write(songfile->file, &volume, sizeof(float));	// send connections psy_audio_Machine vol
-		psyfile_write(songfile->file, &volMultiplier, sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		// send connections psy_audio_Machine number
+		if (status = psyfile_write(songfile->file, &wMacIdx, sizeof(int))) {
+			return status;
+		}
+		// send connections psy_audio_Machine vol
+		if (status = psyfile_write(songfile->file, &volume, sizeof(float))) {
+			return status;
+		}
+		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		if (status = psyfile_write(songfile->file, &volMultiplier, sizeof(float))) {
+			return status;
+		}
 
 		//Rewiring of returns to sends and mix values
 		for (j = 0; j < numreturncolumns(self); j++)
@@ -1936,13 +2028,22 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			send = psy_table_exists(&channel->sendsto, j);
 			psyfile_write(songfile->file, &send, sizeof(uint8_t));
 		}
-		psyfile_write(songfile->file, &channel->mastersend, sizeof(uint8_t));
-		psyfile_write(songfile->file, &channel->volume, sizeof(float));
-		psyfile_write(songfile->file, &channel->panning, sizeof(float));
-		psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t));
+		if (status = psyfile_write(songfile->file, &channel->mastersend, sizeof(uint8_t))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->volume, sizeof(float))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->panning, sizeof(float))) {
+			return status;
+		}
+		if (status = psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t))) {
+			return status;
+		}
 	}
 	inputchannel_dispose(&emptyinput);
 	returnchannel_dispose(&emptyreturn);
+	return PSY_OK;
 }
 
 void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,

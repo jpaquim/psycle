@@ -162,13 +162,14 @@ int xmsongloader_load(XMSongLoader* self)
 bool xmsongloader_isvalid(XMSongLoader* self)
 {
 	char id[18];
+	int status;
 
 	// get header
 	memset(id, 0, 18);
 	if (psyfile_seek(self->fp, 0) == -1) {
 		return FALSE;
 	}
-	if (!psyfile_read(self->fp, id, 17)) {
+	if (status = psyfile_read(self->fp, id, 17)) {
 		return FALSE;
 	}
 	// check header
@@ -199,13 +200,14 @@ bool xmsongloader_makexmsampler(XMSongLoader* self)
 int xmsongloader_readtitle(XMSongLoader* self)
 {
 	char songname[21];
+	int status;
 
 	// get song name
 	memset(songname, 0, 21);
 	if (psyfile_seek(self->fp, 17) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, songname, 20)) {
+	if (status = psyfile_read(self->fp, songname, 20)) {
 		return PSY_ERRFILE;
 	}
 	psy_audio_song_settitle(self->song, songname);
@@ -230,13 +232,14 @@ int xmsongloader_loadpatterns(XMSongLoader* self, uintptr_t* rv_nextstart)
 	int extraticks;
 	uintptr_t nextpatstart;
 	int j;
+	int status;
 
 	// get data
 	if (psyfile_seek(self->fp, 60) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, &self->header, sizeof(XMFILEHEADER))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &self->header, sizeof(XMFILEHEADER))) {
+		return status;
 	}	
 	xmsongloader_setsamplerslidemode(self);	
 	xmsongloader_setsamplerpanningmode(self);
@@ -323,24 +326,25 @@ int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 	psy_audio_LegacyPattern ppattern;
 	psy_audio_Pattern* pattern;
 	psy_audio_LegacyPatternEntry e;
+	int status;
 	
 	if (start >= 0) {
 		if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
 			return PSY_ERRFILE;
 		}
 	}
-	if (!psyfile_read(self->fp, &headerlen, sizeof(int32_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &headerlen, sizeof(int32_t))) {
+		return status;
 	}
 	//char iPackingType = psyfile_read_int8();
 	if (psyfile_skip(self->fp, 1) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, &numrows, sizeof(int16_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &numrows, sizeof(int16_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &packedsize, sizeof(int16_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &packedsize, sizeof(int16_t))) {
+		return status;
 	}	
 	memset(lastmach, 255, sizeof(char) * 64);
 
@@ -386,9 +390,9 @@ int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 				volume = 0;
 
 				// read note
-				if (!psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+				if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
 					free(ppattern);
-					return PSY_ERRFILE;
+					return status;
 				}				
 
 				// is compression bit set?
@@ -408,53 +412,53 @@ int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 
 					note = 0;
 					if (bReadNote) {						
-						if (!psyfile_read(self->fp, &note, sizeof(uint8_t))) {
+						if (status = psyfile_read(self->fp, &note, sizeof(uint8_t))) {
 							free(ppattern);
-							return PSY_ERRFILE;
+							return status;
 						}
 					}
 					if (bReadInstr) {
-						if (!psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
+						if (status = psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
 							free(ppattern);
-							return PSY_ERRFILE;
+							return status;
 						}						
 					}
 					if (bReadVol) {
-						if (!psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
+						if (status = psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
 							free(ppattern);
-							return PSY_ERRFILE;
+							return status;
 						}
 					}
 					if (bReadType) {
-						if (!psyfile_read(self->fp, &type, sizeof(uint8_t))) {
+						if (status = psyfile_read(self->fp, &type, sizeof(uint8_t))) {
 							free(ppattern);
-							return PSY_ERRFILE;
+							return status;
 						}
 					}
 					if (bReadParam) {
-						if (!psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+						if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
 							free(ppattern);
-							return PSY_ERRFILE;
+							return status;
 						}
 					}
 				} else
 				{
 					// read all values
-					if (!psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
+					if (status = psyfile_read(self->fp, &instr, sizeof(uint8_t))) {
 						free(ppattern);
-						return PSY_ERRFILE;
+						return status;
 					}
-					if (!psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
+					if (status = psyfile_read(self->fp, &vol, sizeof(uint8_t))) {
 						free(ppattern);
-						return PSY_ERRFILE;
+						return status;
 					}
-					if (!psyfile_read(self->fp, &type, sizeof(uint8_t))) {
+					if (status = psyfile_read(self->fp, &type, sizeof(uint8_t))) {
 						free(ppattern);
-						return PSY_ERRFILE;
+						return status;
 					}
-					if (!psyfile_read(self->fp, &param, sizeof(uint8_t))) {
+					if (status = psyfile_read(self->fp, &param, sizeof(uint8_t))) {
 						free(ppattern);
-						return PSY_ERRFILE;
+						return status;
 					}					
 				}
 
@@ -887,7 +891,7 @@ int xmsongloader_loadsinglepattern(XMSongLoader* self, uintptr_t start,
 				self->extracolumn);
 		}
 		psy_audio_convert_legacypattern(pattern, ppattern, MAX_TRACKS, numrows,
-			psy_audio_song_lpb(self->song));
+			(uint32_t)psy_audio_song_lpb(self->song));
 	}	
 	free(ppattern);
 	//int z = ftell(_file);
@@ -953,6 +957,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 	int32_t i;
 	int note;
 	psy_audio_InstrumentEntry instentry;
+	int status;
 			
 	if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
 		return PSY_ERRFILE;
@@ -971,21 +976,21 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 	psy_dsp_envelope_clear(&instrument->filterenvelope);
 	psy_dsp_envelope_setmode(&instrument->filterenvelope, psy_dsp_ENVELOPETIME_TICK);
 	// read header
-	if (!psyfile_read(self->fp, &instrsize, sizeof(int32_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &instrsize, sizeof(int32_t))) {
+		return status;
 	}
 	start += instrsize;
 	memset(instrname, 0, sizeof(instrname));
-	if (!psyfile_read(self->fp, instrname, 22)) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, instrname, 22)) {
+		return status;
 	}
 	psy_audio_instrument_setname(instrument, instrname);
 	// //int iInstrType = ReadInt1();
 	if (psyfile_skip(self->fp, 1) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, &samplecount, sizeof(uint16_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &samplecount, sizeof(uint16_t))) {
+		return status;
 	}	
 	if (samplecount > 1) {
 		//TRACE(_T("ssmple count = %d\n"), samplecount);
@@ -996,8 +1001,8 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 	}
 
 	memset(&samph, 0, sizeof samph);
-	if (!psyfile_read(self->fp, &samph, sizeof(XMSAMPLEHEADER))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &samph, sizeof(XMSAMPLEHEADER))) {
+		return status;
 	}
 	xmsongloader_setenvelopes(instrument, &samph);
 	// load individual samples	
@@ -1063,6 +1068,7 @@ int xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* wave,
 	char* smpbuf;
 	int16_t wNew;	
 	int32_t samplecnt;
+	int status;
 
 	b16Bit = self->smpflags[sampleidx] & 0x10;
 	wNew = 0;
@@ -1080,9 +1086,9 @@ int xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* wave,
 		return PSY_ERRFILE;
 	}
 	memset(smpbuf, 0, self->smplen[sampleidx]);
-	if (!psyfile_read(self->fp, smpbuf, self->smplen[sampleidx])) {
+	if (status = psyfile_read(self->fp, smpbuf, self->smplen[sampleidx])) {
 		free(smpbuf);
-		return PSY_ERRFILE;
+		return status;
 	}	
 	samplecnt = self->smplen[sampleidx];	
 	psy_audio_sample_resize(wave, 1);
@@ -1246,38 +1252,39 @@ int xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* wave,
 	bool bLoop;
 	bool bPingPong;
 	bool b16Bit;
+	int status;
 
 	// get sample header
 	if (psyfile_seek(self->fp, (uint32_t)start) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, &len, sizeof(int32_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &len, sizeof(int32_t))) {
+		return status;
 	}	
 
 	// loop data
-	if (!psyfile_read(self->fp, &loopstart, sizeof(int32_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &loopstart, sizeof(int32_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &looplength, sizeof(int32_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &looplength, sizeof(int32_t))) {
+		return status;
 	}	
 
 	// params
-	if (!psyfile_read(self->fp, &vol, sizeof(int8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &vol, sizeof(int8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &finetune, sizeof(int8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &finetune, sizeof(int8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &flags, sizeof(int8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &flags, sizeof(int8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &panning, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &panning, sizeof(uint8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &relativenote, sizeof(int8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &relativenote, sizeof(int8_t))) {
+		return status;
 	}
 	//char iReserved = ReadInt1();
 	if (psyfile_skip(self->fp, 1) == -1) {
@@ -1286,8 +1293,8 @@ int xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* wave,
 
 	// sample name
 	memset(cname, 0, sizeof(cname));
-	if (!psyfile_read(self->fp, &cname, 22)) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &cname, 22)) {
+		return status;
 	}	
 	// parse
 	bLoop = (flags & 0x01 || flags & 0x02) && (looplength > 0);
@@ -1364,17 +1371,18 @@ int xmsongloader_loadxi(XMSongLoader* self, psy_audio_InstrumentIndex index)
 	uint32_t samplecount;
 	uint32_t i;
 	int sample;
+	int status;
 
 	instidx = (int)index.subslot;
-	if (!psyfile_read(self->fp, &fileheader, sizeof(XMINSTRUMENTFILEHEADER))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &fileheader, sizeof(XMINSTRUMENTFILEHEADER))) {
+		return status;
 	}
 	if (strncmp(fileheader.extxi, XI_HEADER, sizeof(fileheader.extxi)) != 0) {
 		return PSY_ERRFILE;
 	}
 	fileheader.name[22] = 0;
-	if (!psyfile_read(self->fp, &insheader, sizeof(XMSAMPLEFILEHEADER))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &insheader, sizeof(XMSAMPLEFILEHEADER))) {
+		return status;
 	}
 	pinsheaderb = (char*)(&insheaderb) + 4;
 	memcpy(pinsheaderb, &insheader, sizeof(XMSAMPLEFILEHEADER) - 2);
@@ -1596,8 +1604,8 @@ int modsongloader_load(MODSongLoader* self)
 	if (psyfile_seek(self->fp, 950) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, &self->header, sizeof(self->header))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &self->header, sizeof(self->header))) {
+		return status;
 	}
 	modsongloader_setnumsongtracks(self);
 	psy_audio_song_setbpm(self->song, 125);
@@ -1630,13 +1638,14 @@ bool modsongloader_isvalid(MODSongLoader* self)
 {
 	bool bIsValid;
 	char id[5];
+	int status;
 
 	bIsValid = FALSE;	
 	memset(id, 0, 5);
 	if (psyfile_seek(self->fp, 1080) == -1) {
 		return FALSE;
 	}
-	if (!psyfile_read(self->fp, id, 4)) {
+	if (status = psyfile_read(self->fp, id, 4)) {
 		return FALSE;
 	}
 	bIsValid = !strncmp(id,"M.K.",4);
@@ -1690,14 +1699,15 @@ void modsongloader_tweaksampler(MODSongLoader* self, int twk, int val)
 int modsongloader_readtitle(MODSongLoader* self)
 {
 	char songname[21];
+	int status;
 
 	// get song name
 	memset(songname, 0, 21);
 	if (psyfile_seek(self->fp, 0) == -1) {
 		return PSY_ERRFILE;
 	}
-	if (!psyfile_read(self->fp, songname, 20)) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, songname, 20)) {
+		return status;
 	}
 	psy_audio_song_settitle(self->song, songname);
 	return PSY_OK;
@@ -1866,23 +1876,24 @@ int modsongloader_loadsinglepattern(MODSongLoader* self, int patidx, int tracks)
 			type = 0;
 			param = 0;
 			period = 428;
+			int status;
 
 			// read _note
-			if (!psyfile_read(self->fp, &mentry[0], sizeof(uint8_t))) {
+			if (status = psyfile_read(self->fp, &mentry[0], sizeof(uint8_t))) {
 				free(ppattern);
-				return PSY_ERRFILE;
+				return status;
 			}
-			if (!psyfile_read(self->fp, &mentry[1], sizeof(uint8_t))) {
+			if (status = psyfile_read(self->fp, &mentry[1], sizeof(uint8_t))) {
 				free(ppattern);
-				return PSY_ERRFILE;
+				return status;
 			}
-			if (!psyfile_read(self->fp, &mentry[2], sizeof(uint8_t))) {
+			if (status = psyfile_read(self->fp, &mentry[2], sizeof(uint8_t))) {
 				free(ppattern);
-				return PSY_ERRFILE;
+				return status;
 			}
-			if (!psyfile_read(self->fp, &mentry[3], sizeof(uint8_t))) {
+			if (status = psyfile_read(self->fp, &mentry[3], sizeof(uint8_t))) {
 				free(ppattern);
-				return PSY_ERRFILE;
+				return status;
 			}
 			_instr = ((mentry[0] & 0xF0) + (mentry[2] >> 4));
 			period = ((mentry[0]& 0x0F) << 8) + mentry[1];
@@ -2072,7 +2083,7 @@ int modsongloader_loadsinglepattern(MODSongLoader* self, int patidx, int tracks)
 		}		
 	}
 	psy_audio_convert_legacypattern(pattern, ppattern, MAX_TRACKS, iNumRows,
-		psy_audio_song_lpb(self->song));
+		(uint32_t)psy_audio_song_lpb(self->song));
 	free(ppattern);
 	ppattern = NULL;
 	return PSY_OK;
@@ -2165,40 +2176,41 @@ int modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 	uint8_t byte2;
 	uint8_t finetune;
 	uint8_t volume;
+	int status;
 
-	if (!psyfile_read(self->fp, self->samples[instridx].sampleName, 22)) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, self->samples[instridx].sampleName, 22)) {
+		return status;
 	}
 	self->samples[instridx].sampleName[21]='\0';
 
-	if (!psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
+		return status;
 	}
 	self->smplen[instridx] = byte1 * 0x100 + byte2 * 2; 	
 	self->samples[instridx].sampleLength = self->smplen[instridx];
-	if (!psyfile_read(self->fp, &finetune, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &finetune, sizeof(uint8_t))) {
+		return status;
 	}
 	self->samples[instridx].finetune = finetune;
-	if (!psyfile_read(self->fp, &volume, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &volume, sizeof(uint8_t))) {
+		return status;
 	}
 	self->samples[instridx].volume = volume;
-	if (!psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
+		return status;
 	}
 	self->samples[instridx].loopStart =(byte1 * 256 + byte2) *2;
-	if (!psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte1, sizeof(uint8_t))) {
+		return status;
 	}
-	if (!psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
-		return PSY_ERRFILE;
+	if (status = psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
+		return status;
 	}
 	self->samples[instridx].loopLength = (byte1 * 256 + byte2)*2;
 	// parse
@@ -2241,12 +2253,13 @@ int modsongloader_loadsampledata(MODSongLoader* self, psy_audio_Sample* wave,
 	// cache sample data
 	smpbuf = (unsigned char*)malloc(self->smplen[instidx]);
 	if (smpbuf) {
-		uint16_t sampleCnt;		
+		uint16_t sampleCnt;
+		int status;
 
-		if (!psyfile_read(self->fp, smpbuf, self->smplen[instidx])) {
+		if (status = psyfile_read(self->fp, smpbuf, self->smplen[instidx])) {
 			// cleanup
 			free(smpbuf);
-			return PSY_ERRFILE;
+			return status;
 		}
 		sampleCnt = self->smplen[instidx];
 		// 8 bit mono sample		

@@ -69,71 +69,7 @@ int psyfile_read(PsyFile* self,
 				 uintptr_t numBytes)
 {
 	uintptr_t bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
-	return (bytesRead == numBytes);	
-}
-
-int8_t psyfile_read_int8(PsyFile* self)
-{
-	int8_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;
-}
-
-uint8_t psyfile_read_uint8(PsyFile* self)
-{
-	uint8_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;
-}
-
-int16_t psyfile_read_int16(PsyFile* self)
-{
-	int16_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;	
-}
-
-uint16_t psyfile_read_uint16(PsyFile* self)
-{
-	uint16_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));				
-	return temp;	
-}
-
-int32_t psyfile_read_int32(PsyFile* self)
-{
-	int32_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;	
-}
-
-uint32_t psyfile_read_uint32(PsyFile* self)
-{
-	uint32_t temp;
-	int err;
-
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;
-}
-
-float psyfile_read_float(PsyFile* self)
-{
-	float temp;
-	int err;
-
-	assert(sizeof(float) != 32);
-	err = psyfile_read(self, &temp, sizeof(temp));
-	return temp;
+	return (bytesRead == numBytes) ? PSY_OK : PSY_ERRFILE;	
 }
 
 int psyfile_write(PsyFile* self, const void* data, uintptr_t numbytes)
@@ -256,7 +192,7 @@ int psyfile_readstring(PsyFile* self, char* pData, uint32_t maxBytes)
 		memset(pData, 0, maxBytes);
 		for (index = 0; index < maxBytes; index++)
 		{
-			if (psyfile_read(self, &c, sizeof(c)))
+			if (psyfile_read(self, &c, sizeof(c)) == PSY_OK)
 			{
 				pData[index] = c;
 				if (c == 0)
@@ -271,15 +207,14 @@ int psyfile_readstring(PsyFile* self, char* pData, uint32_t maxBytes)
 		}
 		do
 		{
-			if (!psyfile_read(self, &c, sizeof(c)))
+			if (psyfile_read(self, &c, sizeof(c)) != PSY_OK)
 			{
 				return 0;
 			}
 		} while (c != 0);
 		return 1;
 	}
-	return 0;
-	
+	return 0;	
 }
 
 FILE* psyfile_getfile(PsyFile* self)

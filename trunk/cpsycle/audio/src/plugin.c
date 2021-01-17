@@ -183,9 +183,9 @@ static uintptr_t numparameters(psy_audio_Plugin*);
 static void dispose(psy_audio_Plugin*);
 static uintptr_t numinputs(psy_audio_Plugin*);
 static uintptr_t numoutputs(psy_audio_Plugin*);
-static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
+static int loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
+static int savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static const char* modulepath(psy_audio_Plugin*);
 static uintptr_t shellidx(psy_audio_Plugin*);
@@ -573,25 +573,34 @@ void currentpreset(psy_audio_Plugin* self, psy_audio_Preset* preset)
 	}
 }
 
-void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
+int loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {	
 	uint32_t size;
+	int status;
+
+	assert(self);
 
 	clearparameters(self);
 	// size of whole structure
-	psyfile_read(songfile->file, &size, sizeof(size));
+	if (status = psyfile_read(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
 	if(size) {
 		uint32_t numparams;
 		uint32_t i;
 
 		// size of vars
-		psyfile_read(songfile->file, &numparams, sizeof(numparams));
+		if (status = psyfile_read(songfile->file, &numparams, sizeof(numparams))) {
+			return status;
+		}
 		for (i = 0; i < numparams; ++i) {
 			int32_t temp;
 			psy_audio_MachineParam* param;
 			
-			psyfile_read(songfile->file, &temp, sizeof(temp));
+			if (status = psyfile_read(songfile->file, &temp, sizeof(temp))) {
+				return status;
+			}
 			if (i < numparameters(self)) {
 				intptr_t minval;
 				intptr_t maxval;
@@ -618,27 +627,36 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			// This way we guarantee that the plugin will have enough bytes,
 			// even if it does not fit what it reads.
 			pData = (unsigned char*)malloc(psy_max(size,size2));
-			psyfile_read(songfile->file, pData, size); // Read internal data.			
+			if (status = psyfile_read(songfile->file, pData, size)) { // Read internal data.			
+				free(pData);
+				return status;
+			}
 			mi_putdata(self->mi, pData); // Internal load
 			free(pData);
 		}						
-	}	
+	}
+	return PSY_OK;
 }			
 
-void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
+int savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t count;
 	uint32_t size2;
 	uint32_t size;
 	uint32_t i;
+	int status;
 
 	count = (uint32_t)psy_audio_machine_numparameters(
 		psy_audio_plugin_base(self));
 	size2 = mi_getdatasize(self->mi);
 	size = size2 + sizeof(count) + sizeof(int) * count;
-	psyfile_write(songfile->file, &size, sizeof(size));
-	psyfile_write(songfile->file, &count, sizeof(count));
+	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &count, sizeof(count))) {
+		return status;
+	}
 	for (i = 0; i < count; ++i) {
 		psy_audio_MachineParam* param;
 		intptr_t scaled = 0;		
@@ -648,17 +666,23 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			scaled = psy_audio_machine_parameter_scaledvalue(
 				psy_audio_plugin_base(self), param);			
 		}
-		psyfile_write_int32(songfile->file, (int32_t)scaled);
+		if (status = psyfile_write_int32(songfile->file, (int32_t)scaled)) {
+			return status;
+		}
 	}
 	if (size2) {
 		unsigned char* data;
 
 		data = malloc(size2);
 		mi_getdata(self->mi, data);
-		psyfile_write(songfile->file, data, size2); //data chunk
+		if (status = psyfile_write(songfile->file, data, size2)) { //data chunk		
+			free(data);
+			return status;
+		}
 		free(data);
 		data = NULL;
 	}
+	return PSY_OK;
 }
 
 void setpresets(psy_audio_Plugin* self, psy_audio_Presets* presets)

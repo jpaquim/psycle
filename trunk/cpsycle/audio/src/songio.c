@@ -191,6 +191,7 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* filename)
 		if (status = psy_audio_psy3saver_save(&psy3saver)) {
 			psy_audio_songfile_errfile(self);
 		}
+		psy_audio_psy3saver_dispose(&psy3saver);
 		psyfile_close(self->file);
 	} else {
 		return psy_audio_songfile_errfile(self);
@@ -211,10 +212,10 @@ int psy_audio_songfile_exportmodule(psy_audio_SongFile* self, const char* filena
 	if (psyfile_create(self->file, self->path, 1)) {
 		XMSongExport moduleexport;
 
-		xmsongexport_init(&moduleexport);
-		xmsongexport_exportsong(&moduleexport, self);
-			//psy_audio_songfile_errfile(self);
-		//}
+		xmsongexport_init(&moduleexport, self);
+		if (status = xmsongexport_exportsong(&moduleexport)) {
+			psy_audio_songfile_errfile(self);
+		}
 		xmsongexport_dispose(&moduleexport);
 		psyfile_close(self->file);
 	} else {
@@ -237,10 +238,36 @@ int psy_audio_songfile_exportmidifile(psy_audio_SongFile* self, const char* file
 		psy_audio_MidiSongExport moduleexport;
 
 		psy_audio_midisongexport_init(&moduleexport, self);
-		psy_audio_midisongexport_save(&moduleexport);
-		//psy_audio_songfile_errfile(self);
-	//}
+		if (status = psy_audio_midisongexport_save(&moduleexport)) {
+			psy_audio_songfile_errfile(self);
+		}
 		psy_audio_midisongexport_dispose(&moduleexport);
+		psyfile_close(self->file);
+	} else {
+		return psy_audio_songfile_errfile(self);
+	}
+	return status;
+}
+
+int psy_audio_songfile_saveinstrument(psy_audio_SongFile* self, const char* filename,
+	psy_audio_Instrument* instr)
+{
+	int status;
+	PsyFile file;
+
+	status = PSY_OK;
+	self->file = &file;
+	self->err = 0;
+	self->warnings = 0;
+	psy_strreset(&self->path, filename);
+	if (psyfile_create(self->file, self->path, 1)) {
+		psy_audio_PSY3Saver psy3saver;
+
+		psy_audio_psy3saver_init(&psy3saver, self);
+		if (psy_audio_psy3saver_saveinstrument(&psy3saver, instr)) {
+			psy_audio_songfile_errfile(self);
+		}
+		psy_audio_psy3saver_dispose(&psy3saver);
 		psyfile_close(self->file);
 	} else {
 		return psy_audio_songfile_errfile(self);

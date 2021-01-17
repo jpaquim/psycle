@@ -61,12 +61,11 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* patt
 
 void psy_audio_convert_legacypattern(
 	psy_audio_Pattern* dst, psy_audio_LegacyPattern src,
-	uintptr_t numtracks, uintptr_t numrows,
-	uintptr_t lpb)
+	uint32_t numtracks, uint32_t numrows,
+	uint32_t lpb)
 {
 	psy_audio_PatternNode* node;
-	uintptr_t row;
-	uintptr_t track;
+	uint32_t row;	
 
 	node = NULL;
 	for (row = 0; row < numrows; ++row) {
@@ -150,4 +149,26 @@ psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument
 	rv._RCUT = instrument->randomcutoff != 0.f;
 	rv._RRES = instrument->_RRES;
 	return rv;
+}
+
+// Instrument NoteMap
+LegacyNoteMap psy_audio_legacynotemap(psy_List* entries)
+{
+	LegacyNoteMap notemap;
+	psy_List* p;		
+
+	memset(&notemap, 0, sizeof(LegacyNoteMap));
+	for (p = entries; p != NULL; psy_list_next(&p)) {
+		psy_audio_InstrumentEntry* entry;
+		uint8_t key;
+
+		entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
+		for (key = (uint8_t)entry->keyrange.low; key <= (uint8_t)entry->keyrange.high; ++key) {
+			if (key < LEGACY_NOTE_MAP_SIZE) {
+				notemap.map[key] = legacynotepair_make(key,
+					(uint8_t)entry->sampleindex.slot);
+			}
+		}
+	}	
+	return notemap;
 }

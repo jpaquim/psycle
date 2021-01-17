@@ -27,9 +27,9 @@ static void master_seqtick(psy_audio_Master*, uintptr_t channel,
 static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);
 static const psy_audio_MachineInfo* info(psy_audio_Master*);
-static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
+static int master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
-static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
+static int master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static const char* master_editname(psy_audio_Master* self)
 {
@@ -426,32 +426,47 @@ uintptr_t numinputwires(psy_audio_Master* self)
 	return 0;
 }
 
-void master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
+int master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {	
 	uint32_t size;
 	int32_t outdry = 256;
 	unsigned char decreaseOnClip = 0;
+	int status;
 
 	// size of this part params to load
-	psyfile_read(songfile->file, &size, sizeof size );
-	psyfile_read(songfile->file, &outdry, sizeof outdry);
-	psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip);
-
+	if (status = psyfile_read(songfile->file, &size, sizeof size)) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &outdry, sizeof outdry)) {
+		return status;
+	}
+	if (status = psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip)) {
+		return status;
+	}
 	self->volume = outdry / (psy_dsp_amp_t) 256;
+	return PSY_OK;
 }
 
-void master_savespecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
+int master_savespecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
 	int32_t outdry;
 	unsigned char decreaseOnClip = 0;
+	int status;
 				
 	size = sizeof outdry + sizeof decreaseOnClip;
 	outdry = (int32_t)(self->volume * 256);
 	// size of this part params to save
-	psyfile_write(songfile->file, &size, sizeof(size));
-	psyfile_write(songfile->file, &outdry, sizeof(outdry));
-	psyfile_write(songfile->file, &decreaseOnClip, sizeof(decreaseOnClip));
+	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &outdry, sizeof(outdry))) {
+		return status;
+	}
+	if (status = psyfile_write(songfile->file, &decreaseOnClip, sizeof(decreaseOnClip))) {
+		return status;
+	}
+	return PSY_OK;
 }

@@ -12,6 +12,10 @@
 extern "C" {
 #endif
 
+struct psy_audio_SongFile;
+struct PsyFile;
+struct psy_audio_Song;
+
 typedef struct XMSongExport {
 	struct XMFILEHEADER m_Header;
 	int macInstruments;
@@ -23,11 +27,16 @@ typedef struct XMSongExport {
 	int lastInstr[32];
 	const psy_audio_LegacyPatternEntry* extraEntry[32];
 	int addTicks;
+	// references
+	struct psy_audio_SongFile* songfile;
+	struct PsyFile* fp;
+	struct psy_audio_Song* song;
 } XMSongExport;
 
-void xmsongexport_init(XMSongExport*);
+void xmsongexport_init(XMSongExport*, struct psy_audio_SongFile*);
 void xmsongexport_dispose(XMSongExport*);
-void xmsongexport_exportsong(XMSongExport*, struct psy_audio_SongFile*);
+
+int xmsongexport_exportsong(XMSongExport*);
 
 #ifdef __cplusplus
 }
