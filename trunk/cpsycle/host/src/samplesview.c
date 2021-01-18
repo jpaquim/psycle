@@ -111,7 +111,7 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	
 	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
 		psy_audio_songfile_loadfilter(),
-		psy_audio_songfile_defaultloadextension(),
+		psy_audio_songfile_standardloadfilter(),
 		dirconfig_songs(&self->workspace->config.directories));
 	if (psy_ui_opendialog_execute(&dialog)) {
 		psy_audio_SongFile songfile;

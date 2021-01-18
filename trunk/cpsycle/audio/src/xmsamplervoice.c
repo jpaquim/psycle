@@ -362,6 +362,7 @@ void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice* self)
 	xmenvelopecontroller_dispose(&self->m_PanEnvelope);
 	xmenvelopecontroller_dispose(&self->m_PitchEnvelope);
 	xmenvelopecontroller_dispose(&self->m_FilterEnvelope);
+	psy_audio_wavedatacontroller_dispose(&self->m_WaveDataController);
 }
 
 void psy_audio_xmsamplervoice_reset(psy_audio_XMSamplerVoice* self)

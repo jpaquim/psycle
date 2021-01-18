@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <hashtbl.h>
 #include <dir.h>
+#include "instruments.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,12 +47,18 @@ int psy_audio_songfile_exportmodule(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmidifile(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_saveinstrument(psy_audio_SongFile*, const char* filename,
 	struct psy_audio_Instrument*);
+int psy_audio_songfile_loadinstrument(psy_audio_SongFile*, const char* filename,
+	psy_audio_InstrumentIndex);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 const char* psy_audio_songfile_loadfilter(void);
+const char* psy_audio_songfile_standardloadfilter(void);
 const char* psy_audio_songfile_savefilter(void);
-const char* psy_audio_songfile_defaultloadextension(void);
-const char* psy_audio_songfile_defaultsaveextension(void);
+const char* psy_audio_songfile_standardsavefilter(void);
+const char* psy_audio_songfile_instloadfilter(void);
+const char* psy_audio_songfile_standardinstloadfilter(void);
+const char* psy_audio_songfile_instsavefilter(void);
+const char* psy_audio_songfile_standardinstsavefilter(void);
 int psy_audio_songfile_errfile(psy_audio_SongFile*);
 void psy_audio_songfile_createmaster(psy_audio_SongFile*);
 

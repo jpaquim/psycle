@@ -47,6 +47,7 @@ void psycleconfig_dispose(PsycleConfig* self)
 	midiviewconfig_dispose(&self->midi);
 	compatconfig_dispose(&self->compat);
 	predefsconfig_dispose(&self->predefs);
+	psy_property_dispose(&self->config);
 }
 
 void psycleconfig_definelanguage(PsycleConfig* self)

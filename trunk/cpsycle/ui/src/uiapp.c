@@ -8,11 +8,11 @@
 #include "uicomponent.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
-#include "uiwinapp.h"	
-#include "uiwinimpfactory.h"
+#include "imps/win32/uiwinapp.h"	
+#include "imps/win32/uiwinimpfactory.h"
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 #include <curses.h>
-#include "uicursesimpfactory.h"o
+#include "imps/curses/uicursesimpfactory.h"
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
 #include "uix11app.h"
 #include "uix11impfactory.h"

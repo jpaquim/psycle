@@ -1357,6 +1357,7 @@ void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)
 
 // SeqEditor
 // prototypes
+static void seqeditor_ondestroy(SeqEditor*);
 static void seqeditor_onsongchanged(SeqEditor*, Workspace*, int flag,
 	psy_audio_SongFile*);
 static void seqeditor_updatesong(SeqEditor*, psy_audio_Song*);
@@ -1387,7 +1388,9 @@ static bool seqeditor_vtable_initialized = FALSE;
 static void seqeditor_vtable_init(SeqEditor* self)
 {
 	if (!seqeditor_vtable_initialized) {
-		seqeditor_vtable = *(self->component.vtable);		
+		seqeditor_vtable = *(self->component.vtable);
+		seqeditor_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+			seqeditor_ondestroy;
 		seqeditor_vtable_initialized = TRUE;
 	}
 }
@@ -1458,6 +1461,11 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		seqeditor_ondragmodemove);
 	psy_signal_connect(&self->bar.reorder.signal_clicked, self,
 		seqeditor_ondragmodereorder);
+}
+
+void seqeditor_ondestroy(SeqEditor* self)
+{
+	seqeditortrackstate_dispose(&self->trackstate);
 }
 
 void seqeditor_onsongchanged(SeqEditor* self, Workspace* workspace, int flag,

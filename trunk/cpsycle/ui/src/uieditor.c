@@ -11,7 +11,7 @@
 
 #include "uiapp.h"
 #include "uilabel.h"
-#include "uiwincomponentimp.h"
+#include "imps/win32/uiwincomponentimp.h"
 #include "uiimpfactory.h"
 #include "scintilla/include/scintilla.h"
 

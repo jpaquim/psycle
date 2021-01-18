@@ -20,7 +20,7 @@
 #include <uisavedialog.h>
 #ifdef DIVERSALIS__OS__MICROSOFT
 // For directx drivers to get the win32 mainwindow handle
-#include <uiwincomponentimp.h>
+#include <imps/win32/uiwincomponentimp.h>
 // thread for pluginscan
 #include <windows.h>
 #include <process.h>
@@ -608,8 +608,7 @@ void workspace_newsong(Workspace* self)
 	assert(self);
 
 	song = psy_audio_song_allocinit(&self->machinefactory);
-	free(self->filename);
-	self->filename = strdup("Untitled.psy");	
+	psy_strreset(&self->filename, "Untitled.psy");	
 	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);
 	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
 }
@@ -621,7 +620,7 @@ void workspace_loadsong_fileselect(Workspace* self)
 	psy_ui_opendialog_init_all(&dialog, NULL,
 		psy_ui_translate("file.loadsong"),
 		psy_audio_songfile_loadfilter(),
-		psy_audio_songfile_defaultloadextension(),
+		psy_audio_songfile_standardloadfilter(),
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (psy_ui_opendialog_execute(&dialog)) {
@@ -697,10 +696,11 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		psy_audio_Song* oldsong;
 		ViewHistoryEntry view;
 
-		oldsong = self->song;
+		oldsong = self->song;		
 		psy_audio_player_stop(&self->player);
 		psy_audio_player_setemptysong(&self->player);
 		workspace_clearsequencepaste(self);	
+		workspace_clearundo(self);
 		self->sequenceselection.editposition =
 			psy_audio_orderindex_make(0, 0);
 		view = viewhistory_currview(&self->viewhistory);
@@ -726,7 +726,7 @@ bool workspace_savesong_fileselect(Workspace* self)
 	psy_ui_savedialog_init_all(&dialog, NULL,
 		psy_ui_translate("file.savesong"),
 		psy_audio_songfile_savefilter(),
-		psy_audio_songfile_defaultsaveextension(),
+		psy_audio_songfile_standardsavefilter(),
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (success = psy_ui_savedialog_execute(&dialog)) {
@@ -741,13 +741,12 @@ bool workspace_exportsong(Workspace* self)
 {
 	psy_ui_SaveDialog dialog;
 	int success;
-	static char export_filters[] =
+	static const char export_filters[] =
 		"All Songs (*.xm)" "|*.xm|"		
 		"FastTracker II Songs (*.xm)"       "|*.xm";
 	psy_ui_savedialog_init_all(&dialog, NULL,
 		psy_ui_translate("file.savesong"),
-		export_filters,
-		psy_audio_songfile_defaultsaveextension(),
+		export_filters, "xm",
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (success = psy_ui_savedialog_execute(&dialog)) {
@@ -767,8 +766,7 @@ void workspace_exportmodule(Workspace* self, const char* path)
 	psy_audio_songfile_init(&songfile);
 	songfile.file = 0;
 	songfile.song = self->song;
-	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
-	
+	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);	
 	if (psy_audio_songfile_exportmodule(&songfile, path)) {
 		psy_signal_emit(&self->signal_terminal_error, self, 1,
 			songfile.serr);
@@ -777,21 +775,20 @@ void workspace_exportmodule(Workspace* self, const char* path)
 		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
 	}
 	psy_audio_songfile_dispose(&songfile);
-	psy_signal_emit(&self->signal_terminal_out, self, 1,
-		"ready\n");
+	workspace_output(self, "ready\n");
 }
 
 bool workspace_exportmidifile_fileselect(Workspace* self)
 {
 	psy_ui_SaveDialog dialog;
 	int success;
-	static char export_filters[] =
+	static const char export_filters[] =
 		"All Songs (*.mid)" "|*.mid|"
 		"Midi File Songs (*.mid)"       "|*.mid";
+
 	psy_ui_savedialog_init_all(&dialog, NULL,
 		psy_ui_translate("file.savesong"),
-		export_filters,
-		psy_audio_songfile_defaultsaveextension(),
+		export_filters, "mid",
 		dirconfig_songs(psycleconfig_directories(
 			workspace_conf(self))));
 	if (success = psy_ui_savedialog_execute(&dialog)) {
@@ -821,8 +818,7 @@ void workspace_exportmidifile(Workspace* self, const char* path)
 		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
 	}
 	psy_audio_songfile_dispose(&songfile);
-	psy_signal_emit(&self->signal_terminal_out, self, 1,
-		"ready\n");
+	workspace_output(self, "ready\n");	
 }
 
 void workspace_savesong(Workspace* self, const char* path)
@@ -843,8 +839,7 @@ void workspace_savesong(Workspace* self, const char* path)
 		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
 	}
 	psy_audio_songfile_dispose(&songfile);
-	psy_signal_emit(&self->signal_terminal_out, self, 1,
-		"ready\n");
+	workspace_output(self, "ready\n");
 }
 
 psy_Property* workspace_pluginlist(Workspace* self)

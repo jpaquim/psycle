@@ -586,24 +586,24 @@ static void envelopeview_ontweaked(EnvelopeView*, EnvelopeBox* sender,
 	int pointindex);
 
 static psy_ui_ComponentVtable envelopeview_vtable;
-static int envelopeview_vtable_initialized = 0;
+static bool envelopeview_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 {
 	if (!envelopeview_vtable_initialized) {
 		envelopeview_vtable = *(self->component.vtable);
-		envelopeview_vtable.destroy = (psy_ui_fp_component_destroy)
+		envelopeview_vtable.ondestroy = (psy_ui_fp_component_destroy)
 			envelopeview_ondestroy;
-		envelopeview_vtable_initialized = 1;
+		envelopeview_vtable_initialized = TRUE;
 	}
 	return &envelopeview_vtable;
 }
 
 void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(envelopeview_base(self), parent);
+	psy_ui_component_init(envelopeview_base(self), parent);			
 	psy_ui_component_setvtable(envelopeview_base(self),
-		envelopeview_vtable_init(self));	
+		envelopeview_vtable_init(self));
 	self->workspace = workspace;
 	envelopebar_init(&self->bar, envelopeview_base(self));
 	psy_ui_component_setalign(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);

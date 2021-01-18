@@ -18,6 +18,8 @@ void psy_audio_sequencetrack_init(psy_audio_SequenceTrack* self)
 void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack* self)
 {
 	psy_list_deallocate(&self->entries, (psy_fp_disposefunc)NULL);
+	free(self->name);
+	self->name = NULL;
 }
 
 psy_audio_SequenceTrack* psy_audio_sequencetrack_alloc(void)

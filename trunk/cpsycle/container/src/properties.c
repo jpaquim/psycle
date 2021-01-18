@@ -52,8 +52,8 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 
 void psy_propertyitem_dispose(psy_PropertyItem* self)
 {
-	assert(self);
-	
+	assert(self);	
+
 	free(self->key);
 	free(self->text);
 	free(self->shorttext);
@@ -1169,10 +1169,7 @@ psy_Property* psy_property_setitem_str(psy_Property* self, const char* str)
 	assert(self);
 
 	if (!self->item.readonly) {
-		if (str != self->item.value.s) {
-			free(self->item.value.s);
-			self->item.value.s = psy_strdup(str);
-		}
+		psy_strreset(&self->item.value.s, str);		
 	}
 	return self;
 }

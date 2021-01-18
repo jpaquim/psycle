@@ -371,8 +371,7 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0)));		
 	psy_ui_label_init(&self->status, instrumentsviewbar_base(self));
 	psy_ui_label_preventtranslation(&self->status);
-	psy_ui_label_setcharnumber(&self->status, 44);
-	instrumentsviewbar_settext(self, "instrumentviewbar");
+	psy_ui_label_setcharnumber(&self->status, 44);	
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		instrumentsviewbar_onsongchanged);
@@ -648,11 +647,11 @@ void instrumentview_ondeleteinstrument(InstrumentView* self, psy_ui_Component* s
 void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sender)
 {
 	if (workspace_song(self->workspace)) {
-		psy_ui_OpenDialog dialog;
-		static char filter[] =
-			"Instrument (*.xi)|*.xi";
+		psy_ui_OpenDialog dialog;				
 
-		psy_ui_opendialog_init_all(&dialog, 0, "Load Instrument", filter, "XI",
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Instrument",
+			psy_audio_songfile_instloadfilter(),
+			psy_audio_songfile_standardinstloadfilter(),
 			dirconfig_samples(&self->workspace->config.directories));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			// psy_audio_SampleIndex index;
@@ -663,16 +662,10 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			songfile.song = workspace_song(self->workspace);
 			songfile.file = &file;
 			if (psyfile_open(&file, psy_path_full(psy_ui_opendialog_path(&dialog)))) {
-				XMSongLoader xmsongloader;
-				int status;
-
-				xmsongloader_init(&xmsongloader, &songfile);
-				if (status = xmsongloader_loadxi(&xmsongloader,
-						psy_audio_instruments_selected(
-							&workspace_song(self->workspace)->instruments))) {
-					psy_audio_songfile_errfile(&songfile);
-				}
-				xmsongloader_dispose(&xmsongloader);
+				psy_audio_songfile_loadinstrument(&songfile,
+					psy_path_full(psy_ui_opendialog_path(&dialog)),
+					psy_audio_instruments_selected(
+						&workspace_song(self->workspace)->instruments));
 			}
 			psyfile_close(&file);
 			psy_audio_songfile_dispose(&songfile);
@@ -685,7 +678,6 @@ void instrumentview_onsaveinstrument(InstrumentView* self, psy_ui_Component* sen
 {
 	if (workspace_song(self->workspace)) {
 		psy_ui_SaveDialog dialog;		
-		static char filter[] = "Instrument (*.psins)|*.psins";
 		psy_audio_Song* song;
 
 		psy_audio_Instrument* instrument;
@@ -693,8 +685,9 @@ void instrumentview_onsaveinstrument(InstrumentView* self, psy_ui_Component* sen
 		instrument = psy_audio_instruments_at(&song->instruments,
 			psy_audio_instruments_selected(&song->instruments));
 		if (instrument) {
-			psy_ui_savedialog_init_all(&dialog, 0, "Save Instrument", filter,
-				"PSINS",
+			psy_ui_savedialog_init_all(&dialog, 0, "Save Instrument",
+				psy_audio_songfile_instsavefilter(),
+				psy_audio_songfile_standardinstsavefilter(),
 				dirconfig_samples(&self->workspace->config.directories));
 			if (psy_ui_savedialog_execute(&dialog)) {				
 				psy_audio_SongFile songfile;
