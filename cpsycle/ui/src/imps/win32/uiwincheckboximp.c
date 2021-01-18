@@ -26,7 +26,7 @@ static void dev_resize(psy_ui_win_CheckBoxImp* self, psy_ui_Size size) { self->w
 static void dev_clientresize(psy_ui_win_CheckBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_CheckBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
-static psy_ui_Size dev_size(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
+static psy_ui_Size dev_size(const psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* limits);
 static psy_ui_Size dev_framesize(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
 static void dev_scrollto(psy_ui_win_CheckBoxImp* self, intptr_t dx, intptr_t dy) { self->win_component_imp.imp.vtable->dev_scrollto(&self->win_component_imp.imp, dx, dy); }
@@ -44,7 +44,7 @@ static void dev_setcursor(psy_ui_win_CheckBoxImp* self, psy_ui_CursorStyle style
 static void dev_starttimer(psy_ui_win_CheckBoxImp* self, uintptr_t id, uintptr_t interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_win_CheckBoxImp* self, uintptr_t id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_win_CheckBoxImp* self, int ressourceid) { self->win_component_imp.imp.vtable->dev_seticonressource(&self->win_component_imp.imp, ressourceid); }
-static const psy_ui_TextMetric* dev_textmetric(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_win_CheckBoxImp* self, const char* text, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textsize(&self->win_component_imp.imp, text, font); }
 static void dev_setbackgroundcolour(psy_ui_win_CheckBoxImp* self, psy_ui_Colour colour) { self->win_component_imp.imp.vtable->dev_setbackgroundcolour(&self->win_component_imp.imp, colour); }
 static void dev_settitle(psy_ui_win_CheckBoxImp* self, const char* title) { self->win_component_imp.imp.vtable->dev_settitle(&self->win_component_imp.imp, title); }

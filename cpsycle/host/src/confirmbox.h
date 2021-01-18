@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(CHECKUNSAVED_H)
-#define CHECKUNSAVED_H
+#if !defined(CONFIRMBOX_H)
+#define CONFIRMBOX_H
 
 // host
 #include "workspace.h"
@@ -56,4 +56,4 @@ INLINE psy_ui_Component* confirmbox_base(ConfirmBox* self)
 }
 #endif
 
-#endif /* CHECKUNSAVED_H */
+#endif /* CONFIRMBOX */

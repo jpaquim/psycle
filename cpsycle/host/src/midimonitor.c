@@ -3,11 +3,11 @@
 
 #include "../../detail/prefix.h"
 
-#include "midiview.h"
-
-#include <songio.h>
+#include "midimonitor.h"
+// audio
 #include <patterns.h>
-
+#include <songio.h>
+// platform
 #include "../../detail/portable.h"
 
 // MidiActiveChannelBox

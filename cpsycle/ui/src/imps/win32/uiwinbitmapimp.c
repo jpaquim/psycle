@@ -13,31 +13,36 @@
 extern psy_ui_App app;
 
 // VTable Prototypes
-static void dispose(psy_ui_win_BitmapImp*);
-static int load(psy_ui_win_BitmapImp*, const char* path);
-static int loadresource(psy_ui_win_BitmapImp*, int resourceid);
-static psy_ui_Size size(psy_ui_win_BitmapImp*);
-static int empty(psy_ui_win_BitmapImp*);
+static void dev_dispose(psy_ui_win_BitmapImp*);
+static int dev_load(psy_ui_win_BitmapImp*, const char* path);
+static int dev_loadresource(psy_ui_win_BitmapImp*, int resourceid);
+static psy_ui_Size dev_size(const psy_ui_win_BitmapImp*);
+static bool dev_empty(const psy_ui_win_BitmapImp*);
 
 // VTable init
 static psy_ui_BitmapImpVTable imp_vtable;
-static int imp_vtable_initialized = 0;
+static bool imp_vtable_initialized = FALSE;
 
 static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 {
+	assert(self);
+
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_bitmap_imp_fp_dispose) dispose;
-		imp_vtable.dev_load = (psy_ui_bitmap_imp_fp_load) load;
-		imp_vtable.dev_loadresource = (psy_ui_bitmap_imp_fp_loadresource) loadresource;
-		imp_vtable.dev_size = (psy_ui_bitmap_imp_fp_size) size;
-		imp_vtable.dev_empty = (psy_ui_bitmap_imp_fp_empty) empty;
-		imp_vtable_initialized = 1;
+		imp_vtable.dev_dispose = (psy_ui_bitmap_imp_fp_dispose)dev_dispose;
+		imp_vtable.dev_load = (psy_ui_bitmap_imp_fp_load)dev_load;
+		imp_vtable.dev_loadresource = (psy_ui_bitmap_imp_fp_loadresource)
+			dev_loadresource;
+		imp_vtable.dev_size = (psy_ui_bitmap_imp_fp_size)dev_size;
+		imp_vtable.dev_empty = (psy_ui_bitmap_imp_fp_empty)dev_empty;
+		imp_vtable_initialized = TRUE;
 	}
 }
 
 void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 {
+	assert(self);
+
 	psy_ui_bitmap_imp_init(&self->imp);
 	imp_vtable_init(self);
 	self->imp.vtable = &imp_vtable;
@@ -55,17 +60,21 @@ void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 	}	
 }
 
-void dispose(psy_ui_win_BitmapImp* self)
+void dev_dispose(psy_ui_win_BitmapImp* self)
 {
+	assert(self);
+
 	if (self->bitmap) {
 		DeleteObject(self->bitmap);
 		self->bitmap = 0;
 	}
 }
 
-int load(psy_ui_win_BitmapImp* self, const char* path)
+int dev_load(psy_ui_win_BitmapImp* self, const char* path)
 {
 	HBITMAP bitmap;
+
+	assert(self);
 
 	bitmap = (HBITMAP)LoadImage(NULL,
 		(LPCTSTR)path,
@@ -73,44 +82,45 @@ int load(psy_ui_win_BitmapImp* self, const char* path)
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	if (bitmap != NULL) {
-		dispose(self);
+		dev_dispose(self);
 		self->bitmap = bitmap;
 	}
 	return bitmap == 0;
 }
 
-int loadresource(psy_ui_win_BitmapImp* self, int resourceid)
+int dev_loadresource(psy_ui_win_BitmapImp* self, int resourceid)
 {
 	HBITMAP bitmap;
 	psy_ui_WinApp* winapp;
 
+	assert(self);
+
 	winapp = (psy_ui_WinApp*)app.platform;
 	bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
 	if (bitmap != NULL) {
-		dispose(self);
+		dev_dispose(self);
 		self->bitmap = bitmap;
 	}
 	return bitmap == 0;
 }
 
-psy_ui_Size size(psy_ui_win_BitmapImp* self)
+psy_ui_Size dev_size(const psy_ui_win_BitmapImp* self)
 {
-	psy_ui_Size size;
-	BITMAP bitmap;
+	assert(self);
 
 	if (self->bitmap) {
+		BITMAP bitmap;
+
 		GetObject(self->bitmap, sizeof(BITMAP), &bitmap);
-		size.width = psy_ui_value_makepx(bitmap.bmWidth);
-		size.height = psy_ui_value_makepx(bitmap.bmHeight);
-	} else {
-		size.width = psy_ui_value_makepx(0);
-		size.height = psy_ui_value_makepx(0);
+		return psy_ui_size_makepx(bitmap.bmWidth, bitmap.bmHeight);
 	}
-	return size;
+	return psy_ui_size_zero();	
 }
 
-int empty(psy_ui_win_BitmapImp* self)
+bool dev_empty(const psy_ui_win_BitmapImp* self)
 {
+	assert(self);
+
 	return self->bitmap == 0;
 }
 

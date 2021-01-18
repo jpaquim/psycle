@@ -154,9 +154,6 @@
     <ClCompile Include="src\oscilloscope.c">
       <Filter>monitors</Filter>
     </ClCompile>
-    <ClCompile Include="src\midiview.c">
-      <Filter>monitors</Filter>
-    </ClCompile>
     <ClCompile Include="src\cpuview.c">
       <Filter>monitors</Filter>
     </ClCompile>
@@ -286,9 +283,6 @@
     <ClCompile Include="src\about.c">
       <Filter>help</Filter>
     </ClCompile>
-    <ClCompile Include="src\checkunsaved.c">
-      <Filter>file</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderview.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -372,6 +366,12 @@
     </ClCompile>
     <ClCompile Include="src\exportview.c">
       <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\midimonitor.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\confirmbox.c">
+      <Filter>uicontrols</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -468,9 +468,6 @@
       <Filter>monitors</Filter>
     </ClInclude>
     <ClInclude Include="src\cpuview.h">
-      <Filter>monitors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\midiview.h">
       <Filter>monitors</Filter>
     </ClInclude>
     <ClInclude Include="src\oscilloscope.h">
@@ -626,9 +623,6 @@
     <ClInclude Include="src\kbdhelp.h">
       <Filter>help</Filter>
     </ClInclude>
-    <ClInclude Include="src\checkunsaved.h">
-      <Filter>file</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderview.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -721,6 +715,12 @@
     </ClInclude>
     <ClInclude Include="src\exportview.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midimonitor.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\confirmbox.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -47,7 +47,7 @@ static void dev_clientresize(psy_ui_win_ComponentImp*, intptr_t width, intptr_t 
 static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
 static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
-static psy_ui_Size dev_size(psy_ui_win_ComponentImp*);
+static psy_ui_Size dev_size(const psy_ui_win_ComponentImp*);
 static void dev_updatesize(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_win_ComponentImp*);
 static void dev_scrollto(psy_ui_win_ComponentImp*, intptr_t dx, intptr_t dy);
@@ -74,7 +74,7 @@ static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id,
 	uintptr_t interval);
 static void dev_stoptimer(psy_ui_win_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
-static const psy_ui_TextMetric* dev_textmetric(psy_ui_win_ComponentImp*);
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
 	psy_ui_Font*);
 static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
@@ -409,7 +409,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	dev_updatesize(self);
 }
 
-psy_ui_Size dev_size(psy_ui_win_ComponentImp* self)
+psy_ui_Size dev_size(const psy_ui_win_ComponentImp* self)
 {
 	if (self->sizecachevalid) {
 		return self->sizecache;
@@ -603,7 +603,7 @@ void dev_preventinput(psy_ui_win_ComponentImp* self)
 	EnableWindow(self->hwnd, 0);
 }
 
-const psy_ui_TextMetric* dev_textmetric(psy_ui_win_ComponentImp* self)
+const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
 {
 	if (!self->tmcachevalid) {		
 		psy_ui_TextMetric rv;
@@ -652,8 +652,9 @@ const psy_ui_TextMetric* dev_textmetric(psy_ui_win_ComponentImp* self)
 		rv.tmStruckOut = tm.tmStruckOut;
 		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
 		rv.tmCharSet = tm.tmCharSet;
-		self->tm = rv;
-		self->tmcachevalid = TRUE;		
+		// mutable
+		((psy_ui_win_ComponentImp*)(self))->tm = rv;
+		((psy_ui_win_ComponentImp*)(self))->tmcachevalid = TRUE;
 	}
 	return &self->tm;
 }
