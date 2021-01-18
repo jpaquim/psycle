@@ -2352,3 +2352,164 @@ int psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader* self)
 		inst_idx);
 	return PSY_OK;
 }
+
+int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_InstrumentIndex index)
+{
+	char id[5];
+	uint32_t size;
+	uint32_t version;
+	psy_audio_Instrument* instr;
+	int status;
+	//RiffFile file;
+
+	//std::map<int, int> sampMap;
+	//bool preview = loadhelp.IsPreview();
+	int instIdx = -1;
+
+	//if (!file.Open(filename) || !file.Expect("PSYI", 4)) {
+	//	file.Close();
+	//	return false;
+	//}
+	//XMInstrument& instr = loadhelp.GetNextInstrument(instIdx);
+
+	// create and insert instrument
+	instr = psy_audio_instrument_allocinit();
+	psy_audio_instrument_setindex(instr, index.subslot);
+	psy_audio_instruments_insert(&self->song->instruments, instr,
+		psy_audio_instrumentindex_make(index.groupslot, index.subslot));
+
+	if (status = psyfile_read(self->fp, &id, 4)) {
+		return status;
+	}
+	id[4] = '\0';
+	//Old format, only in 1.11 betas
+	if (strncmp(id, "EINS", 4) == 0) {
+		uint32_t numIns;
+
+		psyfile_read(self->fp, &size, sizeof(size));		
+		psyfile_read(self->fp, &numIns, sizeof(numIns));
+		//This loader only supports one instrument.
+		if (numIns == 1)
+		{
+			uint32_t sizeINST = 0;
+			uint32_t numSamps;
+			uint32_t i;
+
+			psyfile_read(self->fp, &id, 4);
+			id[4] = '\0';
+			psyfile_read(self->fp, &sizeINST, sizeof(sizeINST));
+			if (strncmp(id, "INST", 4) == 0) {
+				uint32_t versionINST;
+				psyfile_read(self->fp, &versionINST, sizeof(versionINST));
+
+				//instr.Load(file, versionINST, true, 0x1);
+			}
+			
+			psyfile_read(self->fp, &numSamps, sizeof(numSamps));
+			int sample = -1;
+			// if (preview) { // If preview, determine which sample to  load.
+			//	sample = instr.NoteToSample(notecommands::middleC).second;
+			//	if (sample == notecommands::empty) {
+			//		const std::set<int>& samps = instr.GetWavesUsed();
+			//		if (!samps.empty()) {
+			//			sample = *samps.begin();
+			//		}
+			//	}
+			//}
+			for (i = 0; i < numSamps && !psyfile_eof(self->fp); ++i) {
+				uint32_t sizeSMPD = 0;
+
+				psyfile_read(self->fp, &id, 4); id[4] = '\0';
+				psyfile_read(self->fp, &sizeSMPD, sizeof(sizeSMPD));
+				if (strcmp(id, "SMPD") == 0)
+				{
+					uint32_t versionSMPD;
+					int waveidx;
+
+					psyfile_read(self->fp, &versionSMPD, sizeof(versionSMPD));
+					waveidx = -1;
+					//XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
+					//wave.Load(file, versionSMPD, true);
+					//sampMap[i] = waveidx;
+					if (i == sample) {
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Current format
+	else if (strncmp(id, "SMID", 4) == 0) {
+		int sample;
+		uint32_t begins;
+
+		sample = -1;
+		psyfile_read(self->fp, &version, sizeof(version));
+		psyfile_read(self->fp, &size, sizeof(size));
+		begins = psyfile_getpos(self->fp);
+		if ((version & 0xFFFF0000) == VERSION_MAJOR_ZERO)
+		{
+			uint32_t instidx; // Unused
+
+			psyfile_read(self->fp, &instidx, sizeof(instidx));
+			//instr.Load(file, version & 0xFFFF);
+		}
+		
+		// if (preview) { // If preview, determine which sample to  load.
+		//	sample = instr.NoteToSample(notecommands::middleC).second;
+		//	if (sample == notecommands::empty) {
+		//		const std::set<int>& samps = instr.GetWavesUsed();
+		//		if (!samps.empty()) {
+		//			sample = *samps.begin();
+		//		}
+		//	}
+		// }
+		psyfile_seek(self->fp, begins + size);
+		while (!psyfile_eof(self->fp)) {
+			psyfile_read(self->fp, &id, 4);
+			id[4] = '\0';
+			if (strncmp(id, "SMSB", 4) != 0) {
+				break;
+			}
+			psyfile_read(self->fp, &version, sizeof(version));
+			psyfile_read(self->fp, &size, sizeof(size));
+			begins = psyfile_getpos(self->fp);
+			if ((version & 0xFFFF0000) == VERSION_MAJOR_ZERO)
+			{
+				uint32_t sampleidx;
+
+				psyfile_read(self->fp, &sampleidx, sizeof(sampleidx));
+				//if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
+					//int waveidx = -1;
+					//XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
+					// wave.Load(file, version & 0xFFFF);
+					//sampMap[sampleidx] = waveidx;
+					//if (sampleidx == sample) {
+					//	break;
+					//}
+				//}
+			}
+			psyfile_seek(self->fp, begins + size);
+		}
+	} else {
+		return PSY_ERRFILE;		
+	}
+	//Remap 
+	//if (!preview) {
+		//// for (int j = 0; j < XMInstrument::NOTE_MAP_SIZE; j++) {
+		//	XMInstrument::NotePair pair = instr.NoteToSample(j);
+		//	if (pair.second != 255) {
+		//		if (sampMap.find(pair.second) != sampMap.end()) {
+		//			pair.second = sampMap[pair.second];
+		//		} else { pair.second = 255; }
+		//		instr.NoteToSample(j, pair);
+		//	}
+		//}
+		//std::set<int> list = instr.GetWavesUsed();
+		//for (std::set<int>::iterator ite = list.begin(); ite != list.end(); ++ite) {
+		//	_pInstrument[*ite]->CopyXMInstrument(instr, tickstomillis(1));
+		//}
+	//}
+	
+	return PSY_OK;
+}

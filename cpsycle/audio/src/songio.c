@@ -25,6 +25,7 @@
 
 #include "../../detail/portable.h"
 
+// song/module filter
 static char load_filters[] =
 "All Songs (*.psy *.xm *.it *.s3m *.mod *.wav *.mid)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav;*.mid|"
 "Songs (*.psy)"				        "|*.psy|"
@@ -34,9 +35,10 @@ static char load_filters[] =
 "Original Mod Format Songs (*.mod)" "|*.mod|"
 "Wav Format Songs (*.wav)"			"|*.wav|"
 "Midi Standard Songs (*.mid)"	    "|*.mid|";
-
-static char save_filters[] =
-"Songs (*.psy)|*.psy";
+static const char save_filters[] = "Songs (*.psy)|*.psy";
+// instrument filter
+static const char instloadfilter[] = "All Instruments and samples|*.psins;*.xi;*.iti;*.wav;*.aif;*.aiff;*.its;*.s3i;*.8svx;*.16sv;*.svx;*.iff|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff|All files (*.*)|*.*||";
+static const char instsavefilter[] = "Instrument (*.psins)|*.psins";
 
 void psy_audio_songfile_init(psy_audio_SongFile* self)
 {
@@ -275,6 +277,34 @@ int psy_audio_songfile_saveinstrument(psy_audio_SongFile* self, const char* file
 	return status;
 }
 
+int psy_audio_songfile_loadinstrument(psy_audio_SongFile* self, const char* filename,
+	psy_audio_InstrumentIndex index)
+{	
+	int status;
+	psy_Path path;
+
+	status = PSY_ERRFILE;
+	psy_path_init(&path, filename);
+	if (strcmp(psy_path_ext(&path), "xi") == 0) {
+		XMSongLoader xmsongloader;
+
+		xmsongloader_init(&xmsongloader, self);
+		if (status = xmsongloader_loadxi(&xmsongloader, index)) {
+			psy_audio_songfile_errfile(self);
+		}
+		xmsongloader_dispose(&xmsongloader);
+	} else if (strcmp(psy_path_ext(&path), "psins") == 0) {
+		psy_audio_PSY3Loader psy3songloader;
+
+		psy_audio_psy3loader_init(&psy3songloader, self);
+		if (status = psy_audio_psy3loader_loadpsins(&psy3songloader, index)) {
+			psy_audio_songfile_errfile(self);
+		}
+		psy_audio_psy3loader_dispose(&psy3songloader);
+	}
+	return status;
+}
+
 void psy_audio_songfile_message(psy_audio_SongFile* self, const char* text)
 {
 	psy_signal_emit(&self->signal_output, self, 1, text);
@@ -304,17 +334,38 @@ const char* psy_audio_songfile_loadfilter(void)
 	return load_filters;
 }
 
+const char* psy_audio_songfile_standardloadfilter(void)
+{
+	return PSYCLE_DEFAULT_LOAD_EXTENSION;
+}
+
 const char* psy_audio_songfile_savefilter(void)
 {
 	return save_filters;
 }
 
-const char* psy_audio_songfile_defaultloadextension(void)
-{
-	return PSYCLE_DEFAULT_LOAD_EXTENSION;
-}
-
-const char* psy_audio_songfile_defaultsaveextension(void)
+const char* psy_audio_songfile_standardsavefilter(void)
 {
 	return PSYCLE_DEFAULT_SAVE_EXTENSION;
 }
+
+const char* psy_audio_songfile_instloadfilter(void)
+{
+	return instloadfilter;
+}
+
+const char* psy_audio_songfile_standardinstloadfilter(void)
+{
+	return "psins";
+}
+
+const char* psy_audio_songfile_instsavefilter(void)
+{
+	return instsavefilter;
+}
+
+const char* psy_audio_songfile_standardinstsavefilter(void)
+{
+	return "psins";
+}
+

@@ -63,7 +63,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self, psy_ui_Component* par
 void psy_ui_scrollbarpane_ondestroy(psy_ui_ScrollBarPane* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
-	psy_signal_init(&self->signal_clicked);
+	psy_signal_dispose(&self->signal_clicked);
 }
 
 void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self, psy_ui_Orientation orientation)

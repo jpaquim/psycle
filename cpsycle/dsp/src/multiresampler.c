@@ -77,9 +77,9 @@ void psy_dsp_multiresampler_initresamplers(psy_dsp_MultiResampler* self)
 
 void psy_dsp_multiresampler_dispose(psy_dsp_MultiResampler* self)
 {
-	if (self->selectedresampler) {
-		self->selectedresampler->vtable->dispose(self->selectedresampler);
-	}
+	self->linear.resampler.vtable->dispose(&self->linear.resampler);
+	self->spline.resampler.vtable->dispose(&self->spline.resampler);
+	self->sinc.resampler.vtable->dispose(&self->sinc.resampler);
 }
 
 void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler* self,

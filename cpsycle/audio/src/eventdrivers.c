@@ -122,29 +122,33 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 
 intptr_t psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
 	const char* path)
-{
+{	
 	if (strcmp("kbd", path) == 0) {
 		return PSY_EVENTDRIVER_KBD_GUID;
 	} else {
-		psy_Library* library;
+		psy_Library library;
+		intptr_t rv;
 
-		library = psy_library_allocinit();
-		psy_library_load(library, path);
-		if (!psy_library_empty(library)) {
+		rv = -1;
+		psy_library_init(&library);
+		psy_library_load(&library, path);
+		if (!psy_library_empty(&library)) {
 			pfneventdriver_info fpeventdriverinfo;
 
 			fpeventdriverinfo = (pfneventdriver_info)
-				psy_library_functionpointer(library,
+				psy_library_functionpointer(&library,
 					"psy_eventdriver_moduleinfo");
 			if (fpeventdriverinfo) {
 				psy_EventDriverInfo* eventdriverinfo;
 
 				eventdriverinfo = fpeventdriverinfo();
 				if (eventdriverinfo) {
-					return eventdriverinfo->guid;
+					rv = eventdriverinfo->guid;
 				}
 			}
 		}
+		psy_library_dispose(&library);
+		return rv;
 	}
 	return -1;
 }

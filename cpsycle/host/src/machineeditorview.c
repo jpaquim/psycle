@@ -5,7 +5,7 @@
 
 #include "machineeditorview.h"
 
-#include <uiwincomponentimp.h>
+#include <imps/win32/uiwincomponentimp.h>
 
 #include <stdlib.h>
 #include <string.h>

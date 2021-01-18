@@ -253,8 +253,7 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 			char_dyn_t* sections;
 
 			sections = psy_property_sections(property);
-			free(lastsection);
-			lastsection = sections ? strdup(sections) : 0;
+			psy_strreset(&lastsection, sections);			
 			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
 				fwrite(sections, sizeof(char), strlen(sections), fp);

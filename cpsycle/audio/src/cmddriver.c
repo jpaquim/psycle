@@ -118,6 +118,7 @@ psy_EventDriver* psy_audio_cmddriver_create(void)
 
 void driver_free(psy_EventDriver* driver)
 {
+	driver_dispose(driver);
 	free(driver);
 }
 

@@ -208,6 +208,26 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\imps\curses\uicursescomponentimp.c" />
+    <ClCompile Include="src\imps\curses\uicursesdef.c" />
+    <ClCompile Include="src\imps\curses\uicursesgraphicsimp.c" />
+    <ClCompile Include="src\imps\curses\uicursesimpfactory.c" />
+    <ClCompile Include="src\imps\win32\uiwinapp.c" />
+    <ClCompile Include="src\imps\win32\uiwinbitmapimp.c" />
+    <ClCompile Include="src\imps\win32\uiwincheckboximp.c" />
+    <ClCompile Include="src\imps\win32\uiwincolordialogimp.c" />
+    <ClCompile Include="src\imps\win32\uiwincomboboximp.c" />
+    <ClCompile Include="src\imps\win32\uiwincomponentimp.c" />
+    <ClCompile Include="src\imps\win32\uiwineditimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinfolderdialogimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinfontdialogimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinfontimp.c" />
+    <ClCompile Include="src\imps\win32\uiwingraphicsimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinimpfactory.c" />
+    <ClCompile Include="src\imps\win32\uiwinlabelimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinlistboximp.c" />
+    <ClCompile Include="src\imps\win32\uiwinopendialogimp.c" />
+    <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c" />
     <ClCompile Include="src\uialigner.c" />
     <ClCompile Include="src\uiapp.c" />
     <ClCompile Include="src\uibitmap.c" />
@@ -216,10 +236,6 @@
     <ClCompile Include="src\uicolordialog.c" />
     <ClCompile Include="src\uicombobox.c" />
     <ClCompile Include="src\uicomponent.c" />
-    <ClCompile Include="src\uicursescomponentimp.c" />
-    <ClCompile Include="src\uicursesdef.c" />
-    <ClCompile Include="src\uicursesgraphicsimp.c" />
-    <ClCompile Include="src\uicursesimpfactory.c" />
     <ClCompile Include="src\uidef.c" />
     <ClCompile Include="src\uidefaults.c" />
     <ClCompile Include="src\uiedit.c" />
@@ -247,24 +263,28 @@
     <ClCompile Include="src\uistyle.c" />
     <ClCompile Include="src\uiswitch.c" />
     <ClCompile Include="src\uiterminal.c" />
-    <ClCompile Include="src\uiwinapp.c" />
-    <ClCompile Include="src\uiwinbitmapimp.c" />
-    <ClCompile Include="src\uiwincheckboximp.c" />
-    <ClCompile Include="src\uiwincolordialogimp.c" />
-    <ClCompile Include="src\uiwincomboboximp.c" />
-    <ClCompile Include="src\uiwincomponentimp.c" />
-    <ClCompile Include="src\uiwineditimp.c" />
-    <ClCompile Include="src\uiwinfolderdialogimp.c" />
-    <ClCompile Include="src\uiwinfontdialogimp.c" />
-    <ClCompile Include="src\uiwinfontimp.c" />
-    <ClCompile Include="src\uiwingraphicsimp.c" />
-    <ClCompile Include="src\uiwinimpfactory.c" />
-    <ClCompile Include="src\uiwinlabelimp.c" />
-    <ClCompile Include="src\uiwinlistboximp.c" />
-    <ClCompile Include="src\uiwinopendialogimp.c" />
-    <ClCompile Include="src\uiwinsavedialogimp.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\imps\curses\uicursescomponentimp.h" />
+    <ClInclude Include="src\imps\curses\uicursesdef.h" />
+    <ClInclude Include="src\imps\curses\uicursesgraphicsimp.h" />
+    <ClInclude Include="src\imps\curses\uicursesimpfactory.h" />
+    <ClInclude Include="src\imps\win32\uiwinapp.h" />
+    <ClInclude Include="src\imps\win32\uiwinbitmapimp.h" />
+    <ClInclude Include="src\imps\win32\uiwincheckboximp.h" />
+    <ClInclude Include="src\imps\win32\uiwincolordialogimp.h" />
+    <ClInclude Include="src\imps\win32\uiwincomboboximp.h" />
+    <ClInclude Include="src\imps\win32\uiwincomponentimp.h" />
+    <ClInclude Include="src\imps\win32\uiwineditimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinfolderdialogimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinfontdialogimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinfontimp.h" />
+    <ClInclude Include="src\imps\win32\uiwingraphicsimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinimpfactory.h" />
+    <ClInclude Include="src\imps\win32\uiwinlabelimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinlistboximp.h" />
+    <ClInclude Include="src\imps\win32\uiwinopendialogimp.h" />
+    <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h" />
     <ClInclude Include="src\uialigner.h" />
     <ClInclude Include="src\uiapp.h" />
     <ClInclude Include="src\uibitmap.h" />

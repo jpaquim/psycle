@@ -287,7 +287,7 @@ void transformpatternview_applyto(TransformPatternView* self, int index)
 				psy_ui_colour_make(0x00666666));
 		}		
 	}
-	free(q);
+	psy_list_free(q);
 	psy_ui_component_invalidate(&self->searchonchoice);
 }
 

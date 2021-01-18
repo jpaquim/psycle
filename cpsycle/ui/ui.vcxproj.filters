@@ -9,6 +9,15 @@
       <UniqueIdentifier>{30c68587-cc40-4e4e-902e-f0b7e2ec17b5}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="imps">
+      <UniqueIdentifier>{4dedb712-3ffe-4a6b-b81a-5837cd16ff5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\win32">
+      <UniqueIdentifier>{e0e669fd-2fd7-4711-8664-695d8261b780}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\curses">
+      <UniqueIdentifier>{b6b4f55e-d741-4a46-85b5-f52464b889b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\uialigner.c">
@@ -30,18 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uicomponent.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicursescomponentimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicursesdef.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicursesgraphicsimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicursesimpfactory.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uidef.c">
@@ -119,62 +116,74 @@
     <ClCompile Include="src\uiterminal.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\uiwinapp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinbitmapimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwincheckboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwincomboboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwincomponentimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwineditimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinfolderdialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinfontdialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinfontimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwingraphicsimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinimpfactory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinlabelimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinlistboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinopendialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiwinsavedialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uiscrollbar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uiscroller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\uiwincolordialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uicolordialog.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinapp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinbitmapimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwincheckboximp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwincolordialogimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwincomboboximp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwincomponentimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwineditimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinfolderdialogimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinfontdialogimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinfontimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwingraphicsimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinimpfactory.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinlabelimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinlistboximp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinopendialogimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c">
+      <Filter>imps\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\curses\uicursescomponentimp.c">
+      <Filter>imps\curses</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\curses\uicursesdef.c">
+      <Filter>imps\curses</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\curses\uicursesgraphicsimp.c">
+      <Filter>imps\curses</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\curses\uicursesimpfactory.c">
+      <Filter>imps\curses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -390,6 +399,66 @@
     </ClInclude>
     <ClInclude Include="src\uixtcolordialogimp.h">
       <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinapp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinbitmapimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwincheckboximp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwincolordialogimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwincomboboximp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwincomponentimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwineditimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinfolderdialogimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinfontdialogimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinfontimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwingraphicsimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinimpfactory.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinlabelimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinlistboximp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinopendialogimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h">
+      <Filter>imps\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\curses\uicursescomponentimp.h">
+      <Filter>imps\curses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\curses\uicursesdef.h">
+      <Filter>imps\curses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\curses\uicursesgraphicsimp.h">
+      <Filter>imps\curses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\curses\uicursesimpfactory.h">
+      <Filter>imps\curses</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

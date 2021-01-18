@@ -3,6 +3,7 @@
 
 // linking
 #include "../../detail/prefix.h"
+
 #include "../audiodriversettings.h"
 #include "avrt.h"
 #include <quantize.h>

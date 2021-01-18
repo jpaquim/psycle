@@ -4,6 +4,7 @@
 #ifndef psy_audio_PSY3LOADER_H
 #define psy_audio_PSY3LOADER_H
 
+#include "instruments.h"
 #include "wire.h"
 
 #ifdef __cplusplus
@@ -25,6 +26,8 @@ void psy_audio_psy3loader_init(psy_audio_PSY3Loader*,
 void psy_audio_psy3loader_dispose(psy_audio_PSY3Loader*);
 
 int psy_audio_psy3loader_load(psy_audio_PSY3Loader*);
+
+int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader*, psy_audio_InstrumentIndex);
 
 #ifdef __cplusplus
 }
