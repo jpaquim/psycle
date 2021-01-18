@@ -251,7 +251,6 @@
     <ClCompile Include="src\uiknob.c" />
     <ClCompile Include="src\uilabel.c" />
     <ClCompile Include="src\uilistbox.c" />
-    <ClCompile Include="src\uimenu.c" />
     <ClCompile Include="src\uinotebook.c" />
     <ClCompile Include="src\uiopendialog.c" />
     <ClCompile Include="src\uiprogressbar.c" />
@@ -293,10 +292,6 @@
     <ClInclude Include="src\uicolordialog.h" />
     <ClInclude Include="src\uicombobox.h" />
     <ClInclude Include="src\uicomponent.h" />
-    <ClInclude Include="src\uicursescomponentimp.h" />
-    <ClInclude Include="src\uicursesdef.h" />
-    <ClInclude Include="src\uicursesgraphicsimp.h" />
-    <ClInclude Include="src\uicursesimpfactory.h" />
     <ClInclude Include="src\uidef.h" />
     <ClInclude Include="src\uidefaults.h" />
     <ClInclude Include="src\uiedit.h" />
@@ -312,7 +307,6 @@
     <ClInclude Include="src\uiknob.h" />
     <ClInclude Include="src\uilabel.h" />
     <ClInclude Include="src\uilistbox.h" />
-    <ClInclude Include="src\uimenu.h" />
     <ClInclude Include="src\uinotebook.h" />
     <ClInclude Include="src\uiopendialog.h" />
     <ClInclude Include="src\uiprogressbar.h" />
@@ -324,38 +318,6 @@
     <ClInclude Include="src\uistyle.h" />
     <ClInclude Include="src\uiswitch.h" />
     <ClInclude Include="src\uiterminal.h" />
-    <ClInclude Include="src\uiwinapp.h" />
-    <ClInclude Include="src\uiwinbitmapimp.h" />
-    <ClInclude Include="src\uiwincheckboximp.h" />
-    <ClInclude Include="src\uiwincolordialogimp.h" />
-    <ClInclude Include="src\uiwincomboboximp.h" />
-    <ClInclude Include="src\uiwincomponentimp.h" />
-    <ClInclude Include="src\uiwineditimp.h" />
-    <ClInclude Include="src\uiwinfolderdialogimp.h" />
-    <ClInclude Include="src\uiwinfontdialogimp.h" />
-    <ClInclude Include="src\uiwinfontimp.h" />
-    <ClInclude Include="src\uiwingraphicsimp.h" />
-    <ClInclude Include="src\uiwinimpfactory.h" />
-    <ClInclude Include="src\uiwinlabelimp.h" />
-    <ClInclude Include="src\uiwinlistboximp.h" />
-    <ClInclude Include="src\uiwinopendialogimp.h" />
-    <ClInclude Include="src\uiwinsavedialogimp.h" />
-    <ClInclude Include="src\uixtapp.h" />
-    <ClInclude Include="src\uixtbitmapimp.h" />
-    <ClInclude Include="src\uixtcheckboximp.h" />
-    <ClInclude Include="src\uixtcolordialogimp.h" />
-    <ClInclude Include="src\uixtcomboboximp.h" />
-    <ClInclude Include="src\uixtcomponentimp.h" />
-    <ClInclude Include="src\uixteditimp.h" />
-    <ClInclude Include="src\uixtfolderdialogimp.h" />
-    <ClInclude Include="src\uixtfontdialogimp.h" />
-    <ClInclude Include="src\uixtfontimp.h" />
-    <ClInclude Include="src\uixtgraphicsimp.h" />
-    <ClInclude Include="src\uixtimpfactory.h" />
-    <ClInclude Include="src\uixtlabelimp.h" />
-    <ClInclude Include="src\uixtlistboximp.h" />
-    <ClInclude Include="src\uixtopendialogimp.h" />
-    <ClInclude Include="src\uixtsavedialogimp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)container\container.vcxproj">

@@ -31,8 +31,8 @@ struct psy_ui_Bitmap;
 typedef void (*psy_ui_bitmap_fp_dispose)(struct psy_ui_Bitmap*);
 typedef int (*psy_ui_bitmap_fp_load)(struct psy_ui_Bitmap*, const char* path);
 typedef int (*psy_ui_bitmap_fp_loadresource)(struct psy_ui_Bitmap*, int resourceid);
-typedef psy_ui_Size (*psy_ui_bitmap_fp_size)(struct psy_ui_Bitmap*);
-typedef int(*psy_ui_bitmap_fp_empty)(struct psy_ui_Bitmap*);
+typedef psy_ui_Size (*psy_ui_bitmap_fp_size)(const struct psy_ui_Bitmap*);
+typedef bool (*psy_ui_bitmap_fp_empty)(const struct psy_ui_Bitmap*);
 	
 typedef struct psy_ui_BitmapVTable {
 	psy_ui_bitmap_fp_dispose dispose;
@@ -70,12 +70,12 @@ INLINE int psy_ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
 	return self->vtable->loadresource(self, resourceid);
 }
 
-INLINE psy_ui_Size psy_ui_bitmap_size(psy_ui_Bitmap* self)
+INLINE psy_ui_Size psy_ui_bitmap_size(const psy_ui_Bitmap* self)
 {
 	return self->vtable->size(self);
 }
 
-INLINE int psy_ui_bitmap_empty(psy_ui_Bitmap* self)
+INLINE bool psy_ui_bitmap_empty(const psy_ui_Bitmap* self)
 {
 	return self->vtable->empty(self);
 }
@@ -84,8 +84,8 @@ INLINE int psy_ui_bitmap_empty(psy_ui_Bitmap* self)
 typedef void (*psy_ui_bitmap_imp_fp_dispose)(struct psy_ui_BitmapImp*);
 typedef int (*psy_ui_bitmap_imp_fp_load)(struct psy_ui_BitmapImp*, const char* path);
 typedef int (*psy_ui_bitmap_imp_fp_loadresource)(struct psy_ui_BitmapImp*, int resourceid);
-typedef psy_ui_Size(*psy_ui_bitmap_imp_fp_size)(struct psy_ui_BitmapImp*);
-typedef int (*psy_ui_bitmap_imp_fp_empty)(struct psy_ui_BitmapImp*);
+typedef psy_ui_Size (*psy_ui_bitmap_imp_fp_size)(const struct psy_ui_BitmapImp*);
+typedef bool (*psy_ui_bitmap_imp_fp_empty)(const struct psy_ui_BitmapImp*);
 
 typedef struct psy_ui_BitmapImpVTable {
 	psy_ui_bitmap_imp_fp_dispose dev_dispose;

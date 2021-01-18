@@ -5,10 +5,6 @@
       <UniqueIdentifier>{c86cd1ab-1586-4851-83c7-7ae412e6e24c}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Source Files\Header Files">
-      <UniqueIdentifier>{30c68587-cc40-4e4e-902e-f0b7e2ec17b5}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
     <Filter Include="imps">
       <UniqueIdentifier>{4dedb712-3ffe-4a6b-b81a-5837cd16ff5b}</UniqueIdentifier>
     </Filter>
@@ -18,111 +14,27 @@
     <Filter Include="imps\curses">
       <UniqueIdentifier>{b6b4f55e-d741-4a46-85b5-f52464b889b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="comps">
+      <UniqueIdentifier>{5713747d-7657-4e70-a30a-c189d855f15d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dialogs">
+      <UniqueIdentifier>{37fc5767-a9af-41c1-b939-821f80b8766e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="configuration">
+      <UniqueIdentifier>{736250c9-7c60-42de-a302-1f8509f11a19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{019df39e-66c8-451d-b06d-db0a1a7d5d88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{ccaf32a1-7751-4ad3-b15d-15e2f1c5d979}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\uialigner.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uiapp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uibitmap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uibutton.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicheckbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicombobox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicomponent.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uidef.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uidefaults.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiedit.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uieditor.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uievents.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uifolderdialog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uifont.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uifontdialog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiframe.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uigraphics.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiimage.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiimpfactory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiknob.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uilabel.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uilistbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uimenu.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uinotebook.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiopendialog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiprogressbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uisavedialog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uislider.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uisplitbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uistyle.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiswitch.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiterminal.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiscrollbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uiscroller.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uicolordialog.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinapp.c">
@@ -185,221 +97,104 @@
     <ClCompile Include="src\imps\curses\uicursesimpfactory.c">
       <Filter>imps\curses</Filter>
     </ClCompile>
+    <ClCompile Include="src\uibutton.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicolordialog.c">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicheckbox.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicombobox.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicomponent.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uifolderdialog.c">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uifontdialog.c">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uilistbox.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uilabel.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiknob.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiscrollbar.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiprogressbar.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uisavedialog.c">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopendialog.c">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uislider.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiscroller.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uinotebook.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiswitch.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiterminal.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uisplitbar.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uieditor.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiimage.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiframe.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiedit.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidefaults.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uibitmap.c">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigraphics.c">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiimpfactory.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uievents.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidef.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uifont.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uistyle.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\uialigner.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiapp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uibitmap.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uibutton.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicheckbox.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicombobox.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicomponent.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicursescomponentimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicursesdef.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicursesgraphicsimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicursesimpfactory.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uidef.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uidefaults.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiedit.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uieditor.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uievents.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uifolderdialog.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uifont.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uifontdialog.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiframe.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uigraphics.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiimage.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiimpfactory.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiknob.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uilabel.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uilistbox.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uimenu.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uinotebook.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiopendialog.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiprogressbar.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uisavedialog.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uislider.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uisplitbar.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uistyle.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiswitch.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiterminal.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinapp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinbitmapimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwincheckboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwincomboboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwincomponentimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwineditimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinfolderdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinfontdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinfontimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwingraphicsimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinimpfactory.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinlabelimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinlistboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinopendialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwinsavedialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtapp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtbitmapimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtcheckboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtcomboboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtcomponentimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixteditimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtfolderdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtfontdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtfontimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtgraphicsimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtimpfactory.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtlabelimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtlistboximp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtopendialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtsavedialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiscrollbar.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiscroller.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicolordialog.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uiwincolordialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uixtcolordialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
       <Filter>imps\win32</Filter>
     </ClInclude>
@@ -459,6 +254,108 @@
     </ClInclude>
     <ClInclude Include="src\imps\curses\uicursesimpfactory.h">
       <Filter>imps\curses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uibutton.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uieditor.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicolordialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicombobox.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicomponent.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicheckbox.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uifolderdialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uifontdialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uilistbox.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiopendialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiprogressbar.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uinotebook.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiscrollbar.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uilabel.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiknob.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiscroller.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uisavedialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uislider.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uisplitbar.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiswitch.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiterminal.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiedit.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiframe.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiapp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uidefaults.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uibitmap.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uigraphics.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiimage.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiimpfactory.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uialigner.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uievents.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uidef.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uifont.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uistyle.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

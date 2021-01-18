@@ -288,11 +288,11 @@
     <ClCompile Include="src\adsrsliders.c" />
     <ClCompile Include="src\audioconfig.c" />
     <ClCompile Include="src\channelmappingview.c" />
-    <ClCompile Include="src\checkunsaved.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\cmdproperties.c" />
     <ClCompile Include="src\compatconfig.c" />
     <ClCompile Include="src\config.c" />
+    <ClCompile Include="src\confirmbox.c" />
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\defaultlang.c" />
     <ClCompile Include="src\dirconfig.c" />
@@ -333,7 +333,7 @@
     <ClCompile Include="src\machineviewconfig.c" />
     <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\mainframe.c" />
-    <ClCompile Include="src\midiview.c" />
+    <ClCompile Include="src\midimonitor.c" />
     <ClCompile Include="src\midiviewconfig.c" />
     <ClCompile Include="src\navigation.c" />
     <ClCompile Include="src\newmachine.c" />
@@ -410,13 +410,13 @@
     <ClInclude Include="src\adsrsliders.h" />
     <ClInclude Include="src\audioconfig.h" />
     <ClInclude Include="src\channelmappingview.h" />
-    <ClInclude Include="src\checkunsaved.h" />
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />
     <ClInclude Include="src\cmdsnotes.h" />
     <ClInclude Include="src\compatconfig.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\confirmbox.h" />
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\defaultlang.h" />
     <ClInclude Include="src\dirconfig.h" />
@@ -457,7 +457,7 @@
     <ClInclude Include="src\machineviewconfig.h" />
     <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\mainframe.h" />
-    <ClInclude Include="src\midiview.h" />
+    <ClInclude Include="src\midimonitor.h" />
     <ClInclude Include="src\midiviewconfig.h" />
     <ClInclude Include="src\navigation.h" />
     <ClInclude Include="src\newmachine.h" />

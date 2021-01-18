@@ -54,7 +54,7 @@ typedef void (*psy_ui_fp_component_move)(struct psy_ui_Component*, psy_ui_Point)
 typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size);
 typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size);
 typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui_Point, psy_ui_Size);
-typedef psy_ui_Size(*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
+typedef psy_ui_Size (*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
 typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, psy_ui_Font*);
 typedef void (*psy_ui_fp_component_sethorizontalscrollrange)(struct psy_ui_Component*, int min, int max);
@@ -340,7 +340,7 @@ typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, p
 typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentImp*, intptr_t width, intptr_t height);
 typedef psy_ui_Rectangle (*psy_ui_fp_componentimp_dev_position)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, psy_ui_Point, psy_ui_Size);
-typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(struct psy_ui_ComponentImp*);
+typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(const struct psy_ui_ComponentImp*);
 typedef psy_ui_Size(*psy_ui_fp_componentimp_dev_preferredsize)(struct psy_ui_ComponentImp*, const psy_ui_Size* limits);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_updatesize)(struct psy_ui_ComponentImp*);
@@ -363,7 +363,7 @@ typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp
 	uintptr_t interval);
 typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
-typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*);
+typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(const struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolour)(struct psy_ui_ComponentImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
@@ -438,7 +438,7 @@ INLINE void psy_ui_component_update(psy_ui_Component* self)
 	self->imp->vtable->dev_update(self->imp);
 }
 
-INLINE psy_ui_Size psy_ui_component_size(psy_ui_Component* self)
+INLINE psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 {	
 	return self->imp->vtable->dev_size(self->imp);	
 }
@@ -461,7 +461,7 @@ INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
 	self->imp->vtable->dev_stoptimer(self->imp, id);
 }
 
-INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(psy_ui_Component* self)
+INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Component* self)
 {
 	assert(self->imp);
 
@@ -655,7 +655,7 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 		psy_ui_component_textmetric(self));
 }
 
-INLINE psy_ui_RealSize psy_ui_component_sizepx(psy_ui_Component* self)
+INLINE psy_ui_RealSize psy_ui_component_sizepx(const psy_ui_Component* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;

@@ -857,7 +857,7 @@ static void dev_move(psy_ui_ComponentImp* self, double x, double y) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, intptr_t width, intptr_t height) { }
 static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
-static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
+static psy_ui_Size dev_size(const psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp* self, const psy_ui_Size* limit) { return psy_ui_size_zero(); }
 static void dev_updatesize(psy_ui_ComponentImp* self) { }
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
@@ -891,7 +891,7 @@ static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorst
 static void dev_starttimer(psy_ui_ComponentImp* self, uintptr_t id, uintptr_t interval) { }
 static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
-static const psy_ui_TextMetric* dev_textmetric(psy_ui_ComponentImp* self)
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_ComponentImp* self)
 {
 	if (!default_tm_initialized) {
 		memset(&default_tm, 0, sizeof(default_tm));

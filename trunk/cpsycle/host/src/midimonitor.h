@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(MIDIVIEW_H)
-#define MIDIVIEW_H
+#if !defined(MIDIMONITOR_H)
+#define MIDIMONITOR_H
 
 // host
 #include "labelpair.h"
@@ -132,4 +132,4 @@ INLINE psy_ui_Component* midimonitor_base(MidiMonitor* self)
 }
 #endif
 
-#endif /* MIDIVIEW_H */
+#endif /* MIDIMONITOR_H */
