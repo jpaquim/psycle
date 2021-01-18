@@ -11,7 +11,7 @@
 void psy_ui_fontdialog_init(psy_ui_FontDialog* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_fontdialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent);
 }
 

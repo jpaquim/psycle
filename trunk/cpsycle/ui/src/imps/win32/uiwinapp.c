@@ -2,24 +2,23 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/trace.h"
 
 #include "uiwinapp.h"
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
-
-
-#include "uiwingraphicsimp.h"
-#include "uiwinfontimp.h"
+// local
 #include "../../uicomponent.h"
-#include "../../uiapp.h"
+// windows
 #include "uiwincomponentimp.h"
+#include "uiwinfontimp.h"
+#include "uiwingraphicsimp.h"
 #include <excpt.h>
-#include <stdlib.h>
-#include <commctrl.h> // common control header
+// common control header
+#include <commctrl.h>
+// platform
+#include "../../detail/trace.h"
 
-int iDeltaPerLine = 120;
-extern psy_Table menumap;
-extern psy_ui_App app;
+static int iDeltaPerLine = 120;
+static psy_ui_WinApp* winapp = NULL;
 
 static psy_ui_Component* eventtarget(psy_ui_Component* component);
 static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
@@ -41,21 +40,52 @@ static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component*
 	return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
 }
 
-static int FilterException(const char* msg, int code,
-	struct _EXCEPTION_POINTERS *ep) 
-{	
-	// char txt[512];				
-	MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
-	return EXCEPTION_EXECUTE_HANDLER;
+//static int FilterException(const char* msg, int code,
+//	struct _EXCEPTION_POINTERS *ep) 
+//{	
+//	// char txt[512];				
+//	MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
+//	return EXCEPTION_EXECUTE_HANDLER;
+//}
+
+// virtual
+static void psy_ui_winapp_dispose(psy_ui_WinApp*);
+static int psy_ui_winapp_run(psy_ui_WinApp*);
+static void psy_ui_winapp_stop(psy_ui_WinApp*);
+static void psy_ui_winapp_close(psy_ui_WinApp*);
+
+// VTable init
+static psy_ui_AppImpVTable imp_vtable;
+static bool imp_vtable_initialized = FALSE;
+
+static void imp_vtable_init(psy_ui_WinApp* self)
+{
+	assert(self);
+
+	if (!imp_vtable_initialized) {
+		imp_vtable = *self->imp.vtable;
+		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)psy_ui_winapp_dispose;
+		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_winapp_run;
+		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_winapp_stop;
+		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_winapp_close;
+		imp_vtable_initialized = TRUE;
+	}
 }
 
-static void onlanguagechanged(psy_ui_WinApp*, psy_Translator* sender);
-
-void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
+void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance)
 {
-	static TCHAR szAppClass[] = TEXT("PsycleApp");	
-	static TCHAR szComponentClass[] = TEXT("PsycleComponent");
+	assert(self);
 
+	static TCHAR szAppClass[] = TEXT("PsycleApp");	
+	static TCHAR szComponentClass[] = TEXT("PsycleComponent");	
+	HRESULT hr;
+
+	psy_ui_appimp_init(&self->imp);
+	imp_vtable_init(self);
+	self->imp.vtable = &imp_vtable;
+	// init static winapp reference
+	winapp = self;
+	self->app = app;
 	self->instance = instance;
 	self->appclass = szAppClass;
 	self->componentclass = szComponentClass;
@@ -64,11 +94,23 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	self->winid = 20000;
 	self->eventretarget = 0;
 	psy_ui_winapp_registerclasses(self);
-	CoInitialize(NULL);
+	hr = CoInitialize(NULL);	
+	if (hr == S_FALSE) {
+		psy_ui_error(
+			"The COM library is already initialized on this thread. ",
+			"Warning! psy_ui_winapp_init: CoInitialize already initialized");
+	} else if (hr == RPC_E_CHANGED_MODE) {
+		psy_ui_error(
+			"A previous call to CoInitializeEx specified the concurrency model "
+			"for this thread as multithread apartment (MTA). This could also "
+			"indicate that a change from neutral-threaded apartment to "
+			"single-threaded apartment has occurred. ",
+			"Warning! psy_ui_winapp_init: CoInitialize RPC_E_CHANGED_MODE");
+	}
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		app.defaults.style_common.backgroundcolour.value);
+		app->defaults.style_common.backgroundcolour.value);
 	self->targetids = NULL;
 }
 
@@ -124,13 +166,11 @@ void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
 LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam)
 {
-	psy_ui_win_ComponentImp* imp;
-	psy_ui_WinApp* winapp;
+	psy_ui_win_ComponentImp* imp;	
 	psy_ui_fp_winproc winproc;
 	bool preventdefault;
 
-	preventdefault = 0;
-	winapp = (psy_ui_WinApp*) app.platform;
+	preventdefault = 0;	
 	imp = (psy_ui_win_ComponentImp*)psy_table_at(&winapp->selfmap, (uintptr_t)
 		hwnd);
 	if (imp) {		
@@ -263,16 +303,9 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
                                WPARAM wParam, LPARAM lParam)
-{	
-    PAINTSTRUCT  ps ;     
-	psy_ui_win_ComponentImp* imp;
-	psy_ui_Graphics	 g;
-	// HMENU		 hMenu;
-	// psy_ui_Menu* menu;
-	// int			 menu_id;
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*) app.platform;
+{    
+	psy_ui_win_ComponentImp* imp;			
+	
 	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap,
 		(uintptr_t) hwnd);
 	if (imp) {
@@ -330,9 +363,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 				} else {				
 					SetTextColor((HDC) wParam,
-						app.defaults.style_common.colour.value);
+						psy_ui_app()->defaults.style_common.colour.value);
 					SetBkColor((HDC)wParam,
-						app.defaults.style_common.backgroundcolour.value);
+						psy_ui_app()->defaults.style_common.backgroundcolour.value);
 					return (intptr_t) winapp->defaultbackgroundbrush;
 				}
 				break;
@@ -368,13 +401,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 				return 0;
 				break;
-			case WM_PAINT :			
+			case WM_PAINT :	
 				if (imp->component->vtable->ondraw || 
 						imp->component->signal_draw.slots ||
 						imp->component->backgroundmode !=
 							psy_ui_BACKGROUND_NONE) {
 					HDC hdc;					
-					POINT clipsize;														
+					POINT clipsize;
+					psy_ui_Graphics	g;
+					PAINTSTRUCT ps;
 
 					hdc = BeginPaint(hwnd, &ps);
 					// store clip/repaint size of paint request
@@ -932,9 +967,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 psy_ui_Component* eventtarget(psy_ui_Component* component)
 {
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*)app.platform;
 	if (winapp->targetids) {
 		HWND targethwnd;
 		psy_ui_win_ComponentImp* targetimp;
@@ -954,9 +986,6 @@ psy_ui_Component* eventtarget(psy_ui_Component* component)
 
 void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
 {
-	psy_ui_WinApp* winapp;
-	
-	winapp = (psy_ui_WinApp*)app.platform;	
 	if (psy_table_at(&winapp->selfmap,
 			(uintptr_t)GetParent(imp->hwnd))) {
 		psy_list_append(&winapp->targetids, imp->hwnd);
@@ -988,24 +1017,20 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
     int				iPos; //, iHorzPos;	
 	psy_ui_win_ComponentImp* imp;
      
-	si.cbSize = sizeof (si) ;
-    si.fMask  = SIF_ALL ;
-    GetScrollInfo (hwnd, SB_VERT, &si) ;	
+	si.cbSize = sizeof(si);
+    si.fMask  = SIF_ALL;
+    GetScrollInfo (hwnd, SB_VERT, &si);	
 	// Save the position for comparison later on
-	iPos = si.nPos ;
-
+	iPos = si.nPos;
 	handle_scrollparam(hwnd, &si, wParam);	
 	// Set the position and then retrieve it.  Due to adjustments
 	// by Windows it may not be the same as the value set.
-	si.fMask = SIF_POS ;
-	SetScrollInfo (hwnd, SB_VERT, &si, TRUE) ;
-	GetScrollInfo (hwnd, SB_VERT, &si) ;
+	si.fMask = SIF_POS;
+	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+	GetScrollInfo(hwnd, SB_VERT, &si);
 	// If the position has changed, scroll the window and update it
 	if (si.nPos != iPos)
 	{
-		psy_ui_WinApp* winapp;
-
-		winapp = (psy_ui_WinApp*) app.platform;
 		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);	
 		if (imp->component->handlevscroll) {
 			const psy_ui_TextMetric* tm;
@@ -1016,7 +1041,8 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			psy_ui_component_setscrolltop(imp->component,
 				psy_ui_value_makepx(
 					psy_ui_value_px(&scrolltop, tm) -
-					psy_ui_value_px(&imp->component->scrollstepy, tm) * (iPos - si.nPos)));
+					psy_ui_value_px(&imp->component->scrollstepy, tm) *
+						(iPos - si.nPos)));
 		}			
 	}
 }
@@ -1040,9 +1066,6 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	// If the position has changed, scroll the window and update it
 	if (si.nPos != iPos)
 	{                    
-		psy_ui_WinApp* winapp;
-
-		winapp = (psy_ui_WinApp*) app.platform;
 		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
 		if (imp->component->handlehscroll) {
 			const psy_ui_TextMetric* tm;
@@ -1090,17 +1113,17 @@ void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam)
 
 int psy_ui_winapp_run(psy_ui_WinApp* self) 
 {
-	MSG msg; 
+	MSG msg;
 
 	// __try
 	// {
-		while (GetMessage (&msg, NULL, 0, 0))
-		{
-			  TranslateMessage (&msg) ;
-			  DispatchMessage (&msg) ;
+		while (GetMessage(&msg, NULL, 0, 0)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 	// }
-	// __except(FilterException("app loop", GetExceptionCode(), GetExceptionInformation())) {			
+	// __except(FilterException("app loop", GetExceptionCode(),
+	//		GetExceptionInformation())) {
 	// }
     return (int) msg.wParam ;
 }
@@ -1110,14 +1133,17 @@ void psy_ui_winapp_stop(psy_ui_WinApp* self)
 	PostQuitMessage(0);
 }
 
-void psy_ui_winapp_close(psy_ui_WinApp* self, psy_ui_Component* main)
-{	
-	PostMessage(((psy_ui_win_ComponentImp*)(main->imp))->hwnd, WM_CLOSE, 0, 0);	
+void psy_ui_winapp_close(psy_ui_WinApp* self)
+{		
+	assert(self);
+
+	if (psy_ui_app_main(winapp->app)) {
+		assert(psy_ui_app_main(winapp->app)->imp);
+
+		PostMessage(((psy_ui_win_ComponentImp*)
+			(psy_ui_app_main(winapp->app)->imp))->hwnd,
+			WM_CLOSE, 0, 0);
+	}
 }
 
-void onlanguagechanged(psy_ui_WinApp* self, psy_Translator* sender)
-{
-
-}
-
-#endif
+#endif /* PSYCLE_TK_WIN32 */

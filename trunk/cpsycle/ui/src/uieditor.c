@@ -14,11 +14,9 @@
 #include "imps/win32/uiwincomponentimp.h"
 #include "uiimpfactory.h"
 #include "scintilla/include/scintilla.h"
-
+// std
 #include <stdio.h>
 #include <stdlib.h>
-
-extern psy_ui_App app;
 
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
 {
@@ -77,11 +75,11 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			if (imp->hwnd) {
 				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
 				vtable_init(self);				
-				psy_ui_editor_setcolour(self, app.defaults.style_common.colour);
+				psy_ui_editor_setcolour(self, psy_ui_app()->defaults.style_common.colour);
 				psy_ui_editor_setcaretcolour(self,
-					app.defaults.style_common.colour);
+					psy_ui_app()->defaults.style_common.colour);
 				psy_ui_editor_setbackgroundcolour(self,
-					app.defaults.style_common.backgroundcolour);
+					psy_ui_app()->defaults.style_common.backgroundcolour);
 				psy_ui_editor_setfont(self, NULL);
 				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
@@ -99,7 +97,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 		psy_ui_component_init(&self->component, parent);
 		/*psy_ui_LabelImp* imp;
 		
-		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(&app), &self->component, parent);
+		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 		psy_ui_component_init_imp(&self->component, parent, &imp->component_imp);
 		imp->vtable->dev_setstyle(imp, SS_CENTER);		
 #ifdef SCI_ENABLED
@@ -123,7 +121,7 @@ int loadscilexer(void)
 	if (scimodule == 0) {
 		scimodule = LoadLibrary ("SciLexer.dll");
 		if (scimodule != NULL) {		
-			psy_signal_connect(&app.signal_dispose, 0, onappdestroy);
+			psy_signal_connect(&psy_ui_app()->signal_dispose, 0, onappdestroy);
 		}		
 	}
 	return scimodule == NULL;

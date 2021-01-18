@@ -78,9 +78,18 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 
 void psy_ui_scroller_onsize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
-	//if (self->client->overflow != psy_ui_OVERFLOW_HIDDEN) {
-		// psy_ui_scroller_updateoverflow(self);
-	//}
+	double nPos;
+	double scrollstepx_px;
+	double scrollstepy_px;
+	const psy_ui_TextMetric* tm;
+
+	tm = psy_ui_component_textmetric(self->client);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);
+	nPos = floor(psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px);
+	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPos);
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
+	nPos = floor(psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px);
+	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPos);
 }
 
 void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)

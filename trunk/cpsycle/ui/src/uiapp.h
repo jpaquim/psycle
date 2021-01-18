@@ -4,16 +4,9 @@
 #ifndef psy_ui_APP_H
 #define psy_ui_APP_H
 
-#include "../../detail/psyconf.h"
-#include "../../detail/psydef.h"
-#include "../../detail/stdint.h"
-#include "../../detail/os.h"
-
 // local
 #include "uidefaults.h"
-#include "uistyle.h"
 // container
-#include <hashtbl.h>
 #include <signal.h>
 // file
 #include <translator.h>
@@ -22,23 +15,23 @@
 extern "C" {
 #endif
 
+struct psy_ui_AppImp;
+struct psy_ui_Component;
 struct psy_ui_ImpFactory;
 
-typedef struct {
+typedef struct psy_ui_App {
+	// signals
 	psy_Signal signal_dispose;
-	struct psy_ui_Component* main;
-	void* platform;
-	psy_ui_Defaults defaults;
+	// internal data
+	struct psy_ui_AppImp* imp;	
 	struct psy_ui_ImpFactory* imp_factory;
+	psy_ui_Defaults defaults;
 	psy_Translator translator;
+	// references
+	struct psy_ui_Component* main;
 } psy_ui_App;
 
-extern psy_ui_App app;
-
-INLINE psy_ui_App* psy_ui_app(void)
-{
-	return &app;
-}
+psy_ui_App* psy_ui_app(void);
 
 void psy_ui_app_init(psy_ui_App*, uintptr_t instance);
 void psy_ui_app_dispose(psy_ui_App*);
@@ -49,8 +42,30 @@ void psy_ui_app_close(psy_ui_App*);
 
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {
+	assert(self);
+
 	return self->imp_factory;
 }
+
+// psy_ui_AppImp
+typedef void (*psy_ui_fp_appimp_dispose)(struct psy_ui_AppImp*);
+typedef int (*psy_ui_fp_appimp_run)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_stop)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_close)(struct psy_ui_AppImp*);
+
+typedef struct psy_ui_AppImpVTable {
+	psy_ui_fp_appimp_dispose dev_dispose;
+	psy_ui_fp_appimp_run dev_run;
+	psy_ui_fp_appimp_stop dev_stop;
+	psy_ui_fp_appimp_close dev_close;
+} psy_ui_AppImpVTable;
+
+typedef struct psy_ui_AppImp {
+	psy_ui_AppImpVTable* vtable;
+} psy_ui_AppImp;
+
+void psy_ui_appimp_init(psy_ui_AppImp*);
+
 
 #ifdef __cplusplus
 }

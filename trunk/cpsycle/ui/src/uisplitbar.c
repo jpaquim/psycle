@@ -41,9 +41,7 @@ static void vtable_init(psy_ui_SplitBar* self)
 }
 
 void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
-{		
-	extern psy_ui_App app;
-
+{
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
@@ -279,7 +277,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolour(&self->component,
-			app.defaults.style_common.backgroundcolour);
+			psy_ui_app()->defaults.style_common.backgroundcolour);
 		psy_ui_component_invalidate(&self->component);
 		self->resize = 0;
 	}

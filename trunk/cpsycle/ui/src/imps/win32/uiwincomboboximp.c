@@ -141,7 +141,7 @@ void psy_ui_win_comboboximp_init(psy_ui_win_ComboBoxImp* self,
 {	
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;	
 	psy_ui_win_componentimp_init(&self->win_component_imp,
 		component,
 		parent,

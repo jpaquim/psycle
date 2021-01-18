@@ -14,8 +14,6 @@
 #include <commdlg.h>
 #include "../../detail/portable.h"
 
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_FolderDialogImp*);
 static int dev_execute(psy_ui_win_FolderDialogImp*);

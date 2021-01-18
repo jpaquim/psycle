@@ -15,8 +15,6 @@
 #include "../../detail/portable.h"
 #include "uicursesdef.h"
 
-extern psy_ui_App app;
-
 
 static void psy_ui_curses_component_create_window(psy_ui_curses_ComponentImp* self,
 	psy_ui_curses_ComponentImp* parent,	

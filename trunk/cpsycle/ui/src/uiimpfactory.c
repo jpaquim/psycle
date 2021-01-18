@@ -6,6 +6,12 @@
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
+struct psy_ui_AppImp* psy_ui_impfactory_allocinit_appimp(psy_ui_ImpFactory* self,
+	struct psy_ui_App* app, uintptr_t instance)
+{
+	return self->vtable->allocinit_appimp(self, app, instance);
+}
+
 struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self, psy_ui_RealSize size)
 {
 	return self->vtable->allocinit_bitmapimp(self, size);
@@ -173,6 +179,7 @@ static int vtable_initialized = 0;
 static void vtable_init(void)
 {
 	if (!vtable_initialized) {
+		vtable.allocinit_appimp = vtable.allocinit_appimp;
 		vtable.allocinit_bitmapimp = vtable.allocinit_bitmapimp;
 		vtable.allocinit_graphicsimp = allocinit_graphicsimp;
 		vtable.allocinit_graphicsimp_bitmap = allocinit_graphicsimp_bitmap;

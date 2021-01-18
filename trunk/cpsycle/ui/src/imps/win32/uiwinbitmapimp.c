@@ -10,8 +10,6 @@
 #include "../../uiapp.h"
 #include "uiwinapp.h"
 
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_BitmapImp*);
 static int dev_load(psy_ui_win_BitmapImp*, const char* path);
@@ -95,7 +93,7 @@ int dev_loadresource(psy_ui_win_BitmapImp* self, int resourceid)
 
 	assert(self);
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
 	if (bitmap != NULL) {
 		dev_dispose(self);

@@ -5,11 +5,11 @@
 #include "../../detail/os.h"
 
 #include "uigraphics.h"
+// local
 #include "uiapp.h"
 #include "uiimpfactory.h"
+// std
 #include <stdlib.h>
-
-extern psy_ui_App app;
 
 // VTable Prototypes
 static void dispose(psy_ui_Graphics*);
@@ -87,14 +87,14 @@ void psy_ui_graphics_init(psy_ui_Graphics* self, void* hdc)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_graphicsimp(psy_ui_app_impfactory(&app), hdc);
+	self->imp = psy_ui_impfactory_allocinit_graphicsimp(psy_ui_app_impfactory(psy_ui_app()), hdc);
 }
 
 void psy_ui_graphics_init_bitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_app_impfactory(&app), bitmap);
+	self->imp = psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_app_impfactory(psy_ui_app()), bitmap);
 }
 
 // Delegation Methods to GraphicsImp

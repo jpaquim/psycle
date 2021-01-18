@@ -37,7 +37,8 @@ static void vtable_init(psy_ui_CheckBox* self)
 
 void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {  	
-	self->imp = psy_ui_impfactory_allocinit_checkboximp(psy_ui_app_impfactory(&app), &self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_checkboximp(
+		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);
@@ -52,7 +53,8 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 
 void psy_ui_checkbox_init_multiline(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {
-	self->imp = psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_app_impfactory(&app), &self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_checkboximp_multiline(
+		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);

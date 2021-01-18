@@ -31,11 +31,13 @@
 extern "C" {
 #endif
 
+struct psy_ui_App;
 struct psy_ui_ImpFactory;
 struct psy_ui_Component;
 struct psy_ui_FontInfo;
 struct psy_ui_Bitmap;
 
+typedef struct psy_ui_AppImp* (*psy_ui_fp_impfactory_allocinit_appimp)(struct psy_ui_ImpFactory*, struct psy_ui_App*, uintptr_t instance);
 typedef struct psy_ui_BitmapImp* (*psy_ui_fp_impfactory_allocinit_bitmapimp)(struct psy_ui_ImpFactory*, psy_ui_RealSize);
 typedef struct psy_ui_GraphicsImp* (*psy_ui_fp_impfactory_allocinit_graphicsimp)(struct psy_ui_ImpFactory*, uintptr_t* platformdc);
 typedef struct psy_ui_GraphicsImp* (*psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)(struct psy_ui_ImpFactory*, struct psy_ui_Bitmap*);
@@ -69,6 +71,7 @@ typedef struct psy_ui_FolderDialogImp* (*psy_ui_fp_impfactory_allocinit_all_fold
 typedef struct psy_ui_FontDialogImp* (*psy_ui_fp_impfactory_allocinit_fontdialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent);
 
 typedef struct psy_ui_ImpFactoryVTable {
+	psy_ui_fp_impfactory_allocinit_appimp allocinit_appimp;
 	psy_ui_fp_impfactory_allocinit_bitmapimp allocinit_bitmapimp;
 	psy_ui_fp_impfactory_allocinit_graphicsimp allocinit_graphicsimp;
 	psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap allocinit_graphicsimp_bitmap;
@@ -100,6 +103,7 @@ void psy_ui_impfactory_init(psy_ui_ImpFactory*);
 
 struct psy_ui_FontInfo;
 
+struct psy_ui_AppImp* psy_ui_impfactory_allocinit_appimp(psy_ui_ImpFactory*, struct psy_ui_App*, uintptr_t instance);
 struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory*, psy_ui_RealSize);
 struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp(psy_ui_ImpFactory*, uintptr_t* platformdc);
 struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_ImpFactory*, struct psy_ui_Bitmap*);

@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp*);
 static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* other);

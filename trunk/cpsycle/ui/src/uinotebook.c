@@ -6,8 +6,6 @@
 #include "uinotebook.h"
 #include "uiapp.h"
 
-extern psy_ui_App app;
-
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
 static void ontabbarchange(psy_ui_Notebook*, psy_ui_Component* sender, int tabindex);
 

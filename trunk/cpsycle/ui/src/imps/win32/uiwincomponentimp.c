@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-extern psy_ui_App app;
 static BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 
 static int windowstyle(psy_ui_win_ComponentImp*);
@@ -193,7 +192,7 @@ void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 	HINSTANCE instance;
 	int err = 0;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	instance = psy_ui_win_component_instance(parent);
 	self->hwnd = CreateWindow(
 		classname,
@@ -227,7 +226,7 @@ HINSTANCE psy_ui_win_component_instance(psy_ui_win_ComponentImp* parent)
 	HINSTANCE rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*) app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	if (parent) {
 #if defined(_WIN64)		
 		rv = (HINSTANCE)GetWindowLongPtr(parent->hwnd, GWLP_HINSTANCE);
@@ -245,7 +244,7 @@ void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp* self,
 {
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*) app.platform;	
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 #if defined(_WIN64)		
 	self->wndproc = (winproc) GetWindowLongPtr(self->hwnd, GWLP_WNDPROC);
 #else		
@@ -459,7 +458,7 @@ psy_ui_Component* dev_parent(psy_ui_win_ComponentImp* self)
 	psy_ui_WinApp* winapp;
 	psy_ui_win_ComponentImp* imp;
 
-	winapp = (psy_ui_WinApp*) app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap,
 		(uintptr_t)GetParent(self->hwnd));
 	return imp ? imp->component : 0;
@@ -470,7 +469,7 @@ void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent)
 	psy_ui_WinApp* winapp;
 	psy_ui_win_ComponentImp* parentimp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	parentimp = (psy_ui_win_ComponentImp*) parent->imp;
 	if (parentimp) {
 		SetParent(self->hwnd, parentimp->hwnd);
@@ -567,7 +566,7 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 			psy_ui_win_ComponentImp* imp;
 			psy_ui_Component* child;
 
-			winapp = (psy_ui_WinApp*)app.platform;
+			winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 			imp = psy_table_at(&winapp->selfmap, hwnd);
 			child = imp ? imp->component : 0;
 			if (child) {
@@ -581,7 +580,7 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 				psy_ui_win_ComponentImp* imp;
 				psy_ui_Component* child;
 
-				winapp = (psy_ui_WinApp*)app.platform;
+				winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 				imp = psy_table_at(&winapp->selfmap, hwnd);
 				child = imp ? imp->component : 0;
 				if (child) {
@@ -758,7 +757,7 @@ void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 {
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 #if defined(_WIN64)	
 	SetClassLongPtr(self->hwnd, GCLP_HICON,
 		(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
@@ -820,7 +819,7 @@ BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam)
 	psy_ui_win_ComponentImp* imp;
 	psy_ui_Component* child;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = psy_table_at(&winapp->selfmap, (uintptr_t)hwnd);
 	child = imp ? imp->component : 0;
 	if (child) {

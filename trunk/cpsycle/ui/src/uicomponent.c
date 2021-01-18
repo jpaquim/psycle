@@ -4,16 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "uicomponent.h"
+// local
 #include "uialigner.h"
 #include "uiapp.h"
 #include "uiimpfactory.h"
-
-#include <assert.h>
+// std
 #include <math.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+// platform
 #include "../../detail/portable.h"
 
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
@@ -70,11 +67,11 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	psy_ui_Font* rv;
 	psy_ui_Style* common;	
 
-	common = &app.defaults.style_common;
+	common = &psy_ui_app()->defaults.style_common;
 	if (self->style.use_font) {
 		rv = &self->style.font;
 	} else {
-		rv = &app.defaults.style_common.font;
+		rv = &psy_ui_app()->defaults.style_common.font;
 	}
 	return rv;
 }
@@ -103,7 +100,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 	if (curr) {
 		return curr->style.backgroundcolour;
 	}
-	return app.defaults.style_common.backgroundcolour;
+	return psy_ui_app()->defaults.style_common.backgroundcolour;
 }
 
 void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
@@ -129,7 +126,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	if (curr) {
 		return curr->style.colour;
 	}
-	return app.defaults.style_common.colour;
+	return psy_ui_app()->defaults.style_common.colour;
 }
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
@@ -137,7 +134,7 @@ psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
 	if (self->style.border.mode.set) {
 		return self->style.border;
 	}
-	return app.defaults.style_common.border;
+	return psy_ui_app()->defaults.style_common.border;
 }
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
@@ -146,7 +143,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_Style* common;
 		psy_ui_Font old_default_font;
 
-		common = &app.defaults.style_common;
+		common = &psy_ui_app()->defaults.style_common;
 		old_default_font = common->font;
 		psy_ui_font_init(&common->font, 0);
 		psy_ui_font_copy(&common->font, font);
@@ -252,7 +249,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	vtable_init();
 	self->vtable = &vtable;
 	if (!parent) {
-		app.main = self;
+		psy_ui_app()->main = self;
 	}
 	self->imp = imp;
 	psy_ui_component_init_base(self);
@@ -272,9 +269,9 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 
 	self->vtable = &vtable;
 	if (!parent) {
-		app.main = self;
+		psy_ui_app()->main = self;
 	}
-	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(&app),
+	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
 		self, parent);
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
@@ -1118,7 +1115,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, border.colour_top);
 			} else {
 				psy_ui_setcolour(g,
-					app.defaults.style_common.border.colour_top);
+					psy_ui_app()->defaults.style_common.border.colour_top);
 			}
 			psy_ui_drawline(g, 0, 0, size.width, 0);
 		}
@@ -1127,7 +1124,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, border.colour_top);
 			} else {
 				psy_ui_setcolour(g,
-					app.defaults.style_common.border.colour_top);
+					psy_ui_app()->defaults.style_common.border.colour_top);
 			}
 			psy_ui_drawline(g, 0, size.height - 1, size.width,
 				size.height - 1);
@@ -1250,9 +1247,7 @@ void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 
 const struct psy_ui_Defaults* psy_ui_defaults(void)
 {
-	extern psy_ui_App app;
-
-	return &app.defaults;
+	return &psy_ui_app()->defaults;
 }
 
 void psy_ui_component_updatelanguage(psy_ui_Component* self)
@@ -1265,9 +1260,7 @@ void psy_ui_component_updatelanguage(psy_ui_Component* self)
 
 psy_Translator* psy_ui_translator(void)
 {
-	extern psy_ui_App app;
-
-	return &app.translator;
+	return &psy_ui_app()->translator;
 }
 
 const char* psy_ui_translate(const char* key)

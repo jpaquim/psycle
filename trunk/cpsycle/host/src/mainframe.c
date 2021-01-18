@@ -1379,7 +1379,7 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 				sequenceview_clear(&self->sequenceview);				
 			} else if (workspace_savesong_fileselect(&self->workspace)) {				
 				if (mode == CONFIRM_CLOSE) {
-					psy_ui_app_close(&app);
+					psy_ui_app_close(psy_ui_app());
 				} else if (mode == CONFIRM_LOAD) {
 					workspace_loadsong_fileselect(&self->workspace);
 				} else if (mode == CONFIRM_NEW) {										
@@ -1388,8 +1388,6 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 			}			
 			break;
 		case CONFIRM_NO: {
-			extern psy_ui_App app;
-
 			if (mode == CONFIRM_SEQUENCECLEAR) {
 				workspace_restoreview(&self->workspace);
 			} else {
@@ -1398,7 +1396,7 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 				self->workspace.machines_undosavepoint = psy_list_size(
 					self->workspace.song->machines.undoredo.undo);
 				if (mode == CONFIRM_CLOSE) {
-					psy_ui_app_close(&app);
+					psy_ui_app_close(psy_ui_app());
 				} else if (mode == CONFIRM_LOAD) {
 					workspace_loadsong_fileselect(&self->workspace);
 				} else if (mode == CONFIRM_NEW) {

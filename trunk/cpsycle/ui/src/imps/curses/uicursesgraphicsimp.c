@@ -20,8 +20,6 @@
 #define min(a, b) (((a < b) ? a : b))
 #endif
 
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void psy_ui_curses_g_imp_dispose(psy_ui_curses_GraphicsImp*);
 static void psy_ui_curses_g_imp_textout(psy_ui_curses_GraphicsImp*, int x, int y,  const char*, size_t len);

@@ -13,10 +13,8 @@
 #include <shlobj.h>
 #include "uiwincomponentimp.h"
 #include <commdlg.h>
-#include <stdlib.h>
+// platform
 #include "../../detail/portable.h"
-
-extern psy_ui_App app;
 
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_FontDialogImp*);

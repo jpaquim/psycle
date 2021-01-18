@@ -2,11 +2,13 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/psyconf.h"
-#include <list.h>
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #ifndef psy_ui_WINAPP_H
 #define psy_ui_WINAPP_H
+
+#include <list.h>
+#include "../../uiapp.h"
 
 // target win98 or nt 4 or later systems
 #if defined _WIN32_WINNT
@@ -30,7 +32,10 @@ typedef LRESULT (CALLBACK *psy_ui_fp_winproc)(HWND hwnd, UINT message,
 
 struct psy_ui_Component;
 
-typedef struct {
+typedef struct psy_ui_WinApp {
+	// implements
+	psy_ui_AppImp imp;
+	// internal data
 	int reserved;
 	HINSTANCE instance;
 	TCHAR* appclass;
@@ -43,13 +48,11 @@ typedef struct {
 	HBRUSH defaultbackgroundbrush;
 	struct psy_ui_Component* eventretarget;
 	psy_List* targetids;
+	// references
+	psy_ui_App* app;
 } psy_ui_WinApp;
 
-void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);
-void psy_ui_winapp_dispose(psy_ui_WinApp*);
-int psy_ui_winapp_run(psy_ui_WinApp*);
-void psy_ui_winapp_stop(psy_ui_WinApp*);
-void psy_ui_winapp_close(psy_ui_WinApp*, struct psy_ui_Component* main);
+void psy_ui_winapp_init(psy_ui_WinApp*, psy_ui_App* app, HINSTANCE instance);
 
 #ifdef __cplusplus
 }

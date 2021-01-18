@@ -29,6 +29,7 @@
 
 // psy_ui_win_ImpFactory
 
+static struct psy_ui_AppImp* allocinit_appimp(psy_ui_win_ImpFactory*, psy_ui_App*, uintptr_t instance);
 static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*, psy_ui_RealSize size);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory*, uintptr_t* platformdc);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(psy_ui_win_ImpFactory*, struct psy_ui_Bitmap*);
@@ -69,6 +70,7 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
+		vtable.allocinit_appimp = (psy_ui_fp_impfactory_allocinit_appimp)allocinit_appimp;
 		vtable.allocinit_bitmapimp = (psy_ui_fp_impfactory_allocinit_bitmapimp)allocinit_bitmapimp;
 		vtable.allocinit_graphicsimp = (psy_ui_fp_impfactory_allocinit_graphicsimp)allocinit_graphicsimp;
 		vtable.allocinit_graphicsimp_bitmap = (psy_ui_fp_impfactory_allocinit_graphicsimp_bitmap)allocinit_graphicsimp_bitmap;
@@ -113,6 +115,17 @@ psy_ui_win_ImpFactory* psy_ui_win_impfactory_allocinit(void)
 	rv = psy_ui_win_impfactory_alloc();
 	if (rv) {
 		psy_ui_win_impfactory_init(rv);
+	}
+	return rv;
+}
+
+psy_ui_AppImp* allocinit_appimp(psy_ui_win_ImpFactory* self, psy_ui_App* app, uintptr_t instance)
+{
+	psy_ui_AppImp* rv;
+
+	rv = (psy_ui_AppImp*)malloc(sizeof(psy_ui_WinApp));
+	if (rv) {
+		psy_ui_winapp_init((psy_ui_WinApp*)rv, app, (HINSTANCE)instance);
 	}
 	return rv;
 }
@@ -166,7 +179,7 @@ psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory* self, struct 
 	psy_ui_win_ComponentImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
@@ -186,7 +199,7 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self, struct psy_
 	psy_ui_win_ComponentImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
@@ -207,7 +220,7 @@ psy_ui_EditImp* allocinit_editimp(psy_ui_win_ImpFactory* self, struct psy_ui_Com
 	psy_ui_win_EditImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_editimp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -223,7 +236,7 @@ psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory* self, struct 
 	psy_ui_win_EditImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_editimp_multiline_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -239,7 +252,7 @@ psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory* self, struct psy_
 	psy_ui_win_ListBoxImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_listboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -256,7 +269,7 @@ psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct ps
 	psy_ui_win_ComboBoxImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_comboboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -272,7 +285,7 @@ psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory* self,
 	psy_ui_win_ListBoxImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_listboximp_multiselect_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -288,7 +301,7 @@ psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_win_ImpFactory* self, struct ps
 	psy_ui_win_CheckBoxImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_checkboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -304,7 +317,7 @@ psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(psy_ui_win_ImpFactory* self,
 	psy_ui_win_CheckBoxImp* rv;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_checkboximp_allocinit_multiline(
 		component,
 		parent ? parent->imp : 0);
@@ -320,7 +333,7 @@ psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_win_ImpFactory* self, s
 	psy_ui_win_ColourDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*) app.platform;
+	winapp = (psy_ui_WinApp*) psy_ui_app()->imp;
 	imp = (psy_ui_win_ColourDialogImp*) malloc(sizeof(psy_ui_win_ColourDialogImp));
 	if (imp) {
 		psy_ui_win_colourdialogimp_init(imp);
@@ -334,7 +347,7 @@ psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_win_ImpFactory* self, struc
 	psy_ui_win_OpenDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_OpenDialogImp*)malloc(sizeof(psy_ui_win_OpenDialogImp));
 	if (imp) {
 		psy_ui_win_opendialogimp_init(imp, parent);
@@ -352,7 +365,7 @@ psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_win_ImpFactory* self, s
 	psy_ui_win_OpenDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_OpenDialogImp*)malloc(sizeof(psy_ui_win_OpenDialogImp));
 	if (imp) {
 		psy_ui_win_opendialogimp_init_all(imp, parent,
@@ -367,7 +380,7 @@ psy_ui_SaveDialogImp* allocinit_savedialogimp(psy_ui_win_ImpFactory* self, struc
 	psy_ui_win_SaveDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_SaveDialogImp*)malloc(sizeof(psy_ui_win_SaveDialogImp));
 	if (imp) {
 		psy_ui_win_savedialogimp_init(imp, parent);
@@ -385,7 +398,7 @@ psy_ui_SaveDialogImp* allocinit_all_savedialogimp(psy_ui_win_ImpFactory* self, s
 	psy_ui_win_SaveDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_SaveDialogImp*)malloc(sizeof(psy_ui_win_SaveDialogImp));
 	if (imp) {
 		psy_ui_win_savedialogimp_init_all(imp, parent,
@@ -400,7 +413,7 @@ psy_ui_FolderDialogImp* allocinit_folderdialogimp(psy_ui_win_ImpFactory* self, s
 	psy_ui_win_FolderDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_FolderDialogImp*)malloc(sizeof(psy_ui_win_FolderDialogImp));
 	if (imp) {
 		psy_ui_win_folderdialogimp_init(imp);
@@ -416,7 +429,7 @@ psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(psy_ui_win_ImpFactory* sel
 	psy_ui_win_FolderDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_FolderDialogImp*)malloc(sizeof(psy_ui_win_FolderDialogImp));
 	if (imp) {
 		psy_ui_win_folderdialogimp_init_all(imp, parent,
@@ -431,7 +444,7 @@ psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_win_ImpFactory* self, struc
 	psy_ui_win_FontDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*)app.platform;
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_FontDialogImp*) malloc(sizeof(psy_ui_win_FontDialogImp));
 	if (imp) {
 		psy_ui_win_fontdialogimp_init(imp);
