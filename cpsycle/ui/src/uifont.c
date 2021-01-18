@@ -7,16 +7,9 @@
 #include "uiapp.h"
 #include "uifont.h"
 #include "uiimpfactory.h"
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
+// platform
 #include "../../detail/portable.h"
-
-#ifndef max
-#define max(a, b) (((a > b) ? a : b))
-#endif
-
-extern psy_ui_App app;
 
 // VTable Prototypes
 static void dispose(psy_ui_Font*);
@@ -39,7 +32,7 @@ void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {
 	vtable_init();
 	self->vtable = &vtable;
-    self->imp = psy_ui_impfactory_allocinit_fontimp(psy_ui_app_impfactory(&app), fontinfo);	
+    self->imp = psy_ui_impfactory_allocinit_fontimp(psy_ui_app_impfactory(psy_ui_app()), fontinfo);	
 }
 
 // Delegation Methods to FontImp
@@ -104,7 +97,7 @@ void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
 	token = strtok(buffer, ";");
 	while (token) {
 		if (c == 0) {			
-			memcpy(self->lfFaceName, token, max(strlen(token), 32));
+			memcpy(self->lfFaceName, token, psy_max(strlen(token), 32));
 			self->lfFaceName[31] = '\0';
 		} else
 		if (c == 1) {

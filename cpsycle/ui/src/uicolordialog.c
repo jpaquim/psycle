@@ -8,14 +8,12 @@
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
-extern psy_ui_App app;
-
 void psy_ui_colourdialog_init(psy_ui_ColourDialog* self, psy_ui_Component* parent)
 {
 	assert(self);
 
 	self->imp = psy_ui_impfactory_allocinit_colourdialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent);
 }
 

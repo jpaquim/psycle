@@ -9,12 +9,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern psy_ui_App app;
-
 void psy_ui_savedialog_init(psy_ui_SaveDialog* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_savedialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent);
 }
 
@@ -26,7 +24,7 @@ void psy_ui_savedialog_init_all(psy_ui_SaveDialog* self,
 	const char* initialdir)
 {
 	self->imp = psy_ui_impfactory_allocinit_all_savedialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent,
 		title,
 		filter,

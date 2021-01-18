@@ -11,7 +11,7 @@
 void psy_ui_folderdialog_init(psy_ui_FolderDialog* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_folderdialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent);
 }
 
@@ -21,7 +21,7 @@ void psy_ui_folderdialog_init_all(psy_ui_FolderDialog* self,
 	const char* initialdir)
 {
 	self->imp = psy_ui_impfactory_allocinit_all_folderdialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent,
 		title,	
 		initialdir);

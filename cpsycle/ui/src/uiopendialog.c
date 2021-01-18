@@ -12,7 +12,7 @@
 void psy_ui_opendialog_init(psy_ui_OpenDialog* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_opendialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent);
 }
 
@@ -24,7 +24,7 @@ void psy_ui_opendialog_init_all(psy_ui_OpenDialog* self,
 	const char* initialdir)
 {	
 	self->imp = psy_ui_impfactory_allocinit_all_opendialogimp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		parent, title, filter, defaultextension, initialdir);	
 }
 

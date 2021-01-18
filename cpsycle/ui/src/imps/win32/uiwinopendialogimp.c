@@ -13,10 +13,8 @@
 #include <shlobj.h>
 #include "uiwincomponentimp.h"
 #include <commdlg.h>
-#include <stdlib.h>
+// platform
 #include "../../detail/portable.h"
-
-extern psy_ui_App app;
 
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_OpenDialogImp*);
@@ -118,7 +116,7 @@ int dev_execute(psy_ui_win_OpenDialogImp* self)
 	ofn.nFileExtension = 0;
 	ofn.lpstrDefExt = (LPSTR)defextension;
 	rv = GetOpenFileName(&ofn);
-	if (app.main) {
+	if (psy_ui_app_main(psy_ui_app())) {
 		//InvalidateRect((HWND)psy_ui_win_component_details(app.main)->hwnd, 0, FALSE);
 		//UpdateWindow((HWND)psy_ui_win_component_details(app.main)->hwnd);
 	}

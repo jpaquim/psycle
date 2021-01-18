@@ -7,8 +7,6 @@
 #include "uiapp.h"
 #include "uiimpfactory.h"
 
-extern psy_ui_App app;
-
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -25,7 +23,7 @@ static void vtable_init(psy_ui_Edit* self)
 
 void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 { 
-	self->imp = psy_ui_impfactory_allocinit_editimp(psy_ui_app_impfactory(&app), &self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_editimp(psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);
@@ -38,7 +36,7 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 
 void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 {
-	self->imp = psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_app_impfactory(&app), &self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);

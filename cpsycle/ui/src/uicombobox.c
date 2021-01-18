@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-extern psy_ui_App app;
-
 static void onpreferredsize(psy_ui_ComboBox*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ondestroy(psy_ui_ComboBox*, psy_ui_Component* sender);
 static void onownerdraw(psy_ui_ComboBox*, psy_ui_Graphics*);
@@ -42,7 +40,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 {
 	self->imp = psy_ui_impfactory_allocinit_comboboximp(
-		psy_ui_app_impfactory(&app),
+		psy_ui_app_impfactory(psy_ui_app()),
 		&self->component, parent);
 	psy_ui_component_init_imp(psy_psy_ui_combobox_base(self), parent,
 		&self->imp->component_imp);

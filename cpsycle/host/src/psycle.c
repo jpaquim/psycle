@@ -61,7 +61,7 @@ int psycle_run(uintptr_t instance, int options)
 	int err = 0;
 	char workpath[_MAX_PATH];
 	const char* env = 0;
-	extern psy_ui_App app;
+	psy_ui_App app;
 	MainFrame* mainframe;
 	
 	// Adds the app path to the environment path to find some

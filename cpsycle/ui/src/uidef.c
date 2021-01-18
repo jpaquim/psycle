@@ -15,8 +15,6 @@
 #include <windows.h>
 #endif
 
-extern psy_ui_App app;
-
 void psy_ui_setrectangle(psy_ui_Rectangle* self, double left, double top, double width,
 	double height)
 {
