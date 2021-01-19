@@ -1100,16 +1100,20 @@ int xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* wave,
 	{
 		// 16 bit mono sample, delta
 		int out = 0;
-		for (int j = 0; j <= samplecnt - 2; j += 2)
+		int j;
+
+		for (j = 0; j <= samplecnt - 2; j += 2)
 		{
 			wNew += (smpbuf[j] & 0xFF) | (smpbuf[j + 1] << 8);
 			wave->channels.samples[0][out] = (psy_dsp_amp_t)wNew;			
 			out++;
 		}
 	} else
-	{
+	{		
 		// 8 bit mono sample
-		for (int j = 0; j < samplecnt; j++)
+		int j;
+
+		for (j = 0; j < samplecnt; j++)
 		{
 			wNew += (int16_t)(smpbuf[j] << 8);
 			wave->channels.samples[0][j] = (psy_dsp_amp_t)wNew;			
@@ -1202,6 +1206,7 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 	psy_dsp_envelope_setmode(&inst->panenvelope, psy_dsp_ENVELOPETIME_TICK);
 	if(sampleHeader->ptype & 1){// enable volume envelope
 		int envelope_point_num;
+		int i;
 
 		psy_dsp_envelope_setenabled(&inst->panenvelope, TRUE);
 			
@@ -1227,7 +1232,7 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 			envelope_point_num = 12;
 		}
 
-		for(int i = 0; i < envelope_point_num;i++){
+		for(i = 0; i < envelope_point_num;i++){
 			psy_dsp_envelope_append(&inst->panenvelope, psy_dsp_envelopepoint_make_all(
 				sampleHeader->penv[i * 2], (float)(sampleHeader->penv[i * 2 + 1] -32.0f )/ 32.0f,
 				0.0, 65535.f, 0.0, 1.0));
@@ -1872,13 +1877,13 @@ int modsongloader_loadsinglepattern(MODSongLoader* self, int patidx, int tracks)
 				psy_audio_WAVEFORMS_SAWDOWN,
 				psy_audio_WAVEFORMS_SQUARE
 			};
+			int status;
 
 			_note = PSY2_NOTECOMMANDS_EMPTY;
 			_instr = 255;
 			type = 0;
 			param = 0;
-			period = 428;
-			int status;
+			period = 428;			
 
 			// read _note
 			if (status = psyfile_read(self->fp, &mentry[0], sizeof(uint8_t))) {
@@ -2031,7 +2036,7 @@ int modsongloader_loadsinglepattern(MODSongLoader* self, int patidx, int tracks)
 							entry._cmd =psy_audio_PATTERNCMD_EXTENDED;
 							entry._parameter =psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;
 							modsongloader_writepatternentry(self, ppattern, row,
-								(int)self->song->properties.tracks, &entry);
+								(int)psy_audio_song_numsongtracks(self->song), &entry);
 						}
 					}
 					else

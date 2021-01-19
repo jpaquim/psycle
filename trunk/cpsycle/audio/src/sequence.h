@@ -322,7 +322,7 @@ void psy_audio_sequence_appendtrack(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*);
 psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(
 	psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
-uintptr_t psy_audio_sequence_sizetracks(psy_audio_Sequence*);
+uintptr_t psy_audio_sequence_width(const psy_audio_Sequence*);
 psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
 	uintptr_t trackidx);
 const psy_audio_SequenceTrack* psy_audio_sequence_track_at_const(const

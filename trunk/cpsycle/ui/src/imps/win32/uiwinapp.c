@@ -74,11 +74,11 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 
 void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance)
 {
-	assert(self);
-
 	static TCHAR szAppClass[] = TEXT("PsycleApp");	
 	static TCHAR szComponentClass[] = TEXT("PsycleComponent");	
 	HRESULT hr;
+
+	assert(self);
 
 	psy_ui_appimp_init(&self->imp);
 	imp_vtable_init(self);

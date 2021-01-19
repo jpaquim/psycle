@@ -119,6 +119,11 @@ uintptr_t samplesgroup_size(psy_audio_SamplesGroup* self)
 	return psy_table_size(&self->container);
 }
 
+psy_TableIterator psy_audio_samplesgroup_begin(psy_audio_SamplesGroup* self)
+{
+	return psy_table_begin(&self->container);
+}
+
 // psy_audio_Samples
 void psy_audio_samples_init(psy_audio_Samples* self)
 {
@@ -235,6 +240,25 @@ uintptr_t psy_audio_samples_size(const psy_audio_Samples* self, uintptr_t slot)
 	return 0;
 }
 
+uintptr_t psy_audio_samples_count(const psy_audio_Samples* self)
+{
+	psy_TableIterator it;
+	uintptr_t rv;
+
+	assert(self);
+	
+	rv = 0;
+	for (it = psy_audio_samples_begin((psy_audio_Samples*)self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_SamplesGroup* group;		
+
+		group = (psy_audio_SamplesGroup*)psy_tableiterator_value(&it);
+		rv += psy_table_size(&group->container);
+	}
+	return rv;
+}
+
 uintptr_t psy_audio_samples_groupsize(const psy_audio_Samples* self)
 {
 	assert(self);
@@ -243,6 +267,13 @@ uintptr_t psy_audio_samples_groupsize(const psy_audio_Samples* self)
 }
 
 psy_TableIterator psy_audio_samples_begin(psy_audio_Samples* self)
+{
+	assert(self);
+
+	return psy_table_begin(&self->groups);
+}
+
+psy_TableIterator psy_audio_samples_rbegin(psy_audio_Samples* self)
 {
 	assert(self);
 
@@ -258,7 +289,7 @@ psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples* self,
 
 	group = psy_table_at(&self->groups, slot);
 	if (group) {
-		return psy_table_begin(&group->container);
+		return psy_audio_samplesgroup_begin(group);		
 	}
 	return tableend;
 }

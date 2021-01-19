@@ -47,8 +47,9 @@ void psy_audio_patterns_mutetrack(psy_audio_Patterns*, uintptr_t track);
 void psy_audio_patterns_unmutetrack(psy_audio_Patterns*, uintptr_t track);
 int psy_audio_patterns_istrackmuted(const psy_audio_Patterns*, uintptr_t track);
 int psy_audio_patterns_istracksoloed(const psy_audio_Patterns*, uintptr_t track);
-void psy_audio_patterns_setsongtracks(psy_audio_Patterns*, uintptr_t trackcount);
-uintptr_t psy_audio_patterns_songtracks(psy_audio_Patterns*);
+uintptr_t psy_audio_patterns_tracksoloed(const psy_audio_Patterns*);
+void psy_audio_patterns_setnumtracks(psy_audio_Patterns*, uintptr_t numtracks);
+uintptr_t psy_audio_patterns_numtracks(const psy_audio_Patterns*);
 uintptr_t psy_audio_patterns_slot(psy_audio_Patterns*, psy_audio_Pattern*);
 
 #ifdef __cplusplus

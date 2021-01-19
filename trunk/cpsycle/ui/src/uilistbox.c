@@ -76,6 +76,13 @@ void psy_ui_listbox_settext(psy_ui_ListBox* self, const char* text,
 {
 	assert(self->imp);
 
+	if (index >= psy_ui_listbox_count(self)) {
+		intptr_t i;
+
+		for (i = psy_ui_listbox_count(self); i <= index; ++i) {
+			psy_ui_listbox_addtext(self, "");
+		}
+	}
 	self->imp->vtable->dev_settext(self->imp, text, index);
 }
 

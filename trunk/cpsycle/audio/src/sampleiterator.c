@@ -202,6 +202,8 @@ psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, 
 
 void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self, float* pLeftw, float* pRightw)
 {
+	int old;
+	ptrdiff_t diff;
 	//Process sample
 	//todo: sinc resampling would benefit from having a stereo version of resampler_work
 
@@ -239,9 +241,9 @@ void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self, flo
 				self->right,
 				self->pos.LowPart);
 	}
-	const old = self->pos.HighPart;
+	old = self->pos.HighPart;
 	self->pos.QuadPart += self->speedinternal;
-	const ptrdiff_t diff = (ptrdiff_t)(self->pos.HighPart) - old;
+	diff = (ptrdiff_t)(self->pos.HighPart) - old;
 	self->left += diff;
 	self->right += diff;
 	//Note: m_pL/m_pR might be poiting at an erroneous place here. (like in looped samples).

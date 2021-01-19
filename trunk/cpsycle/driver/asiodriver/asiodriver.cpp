@@ -537,9 +537,11 @@ bool ASIOInterface::Start()
 		else if (psy_audiodriversettings_blockframes(&settings_) > (uintptr_t) _selectedout.driver->maxSamples)
 			psy_audiodriversettings_setblockframes(&settings_, _selectedout.driver->prefSamples);
 	}
-
-
-	char bla[128]; strcpy(bla, _selectedout.driver->_name.c_str());
+	if (!_selectedout.driver) {
+		_running = false;
+		return false;
+	}
+	char bla[128]; strcpy(bla, _selectedout.driver->_name.c_str());	
 	if (!asioDrivers.loadDriver(bla))
 	{
 		_running = false;

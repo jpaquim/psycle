@@ -222,15 +222,22 @@ int psy_audio_patterns_istracksoloed(const psy_audio_Patterns* self, uintptr_t t
 	return psy_audio_trackstate_istracksoloed(&self->trackstate, track);
 }
 
-void psy_audio_patterns_setsongtracks(psy_audio_Patterns* self,
-	uintptr_t trackcount)
+uintptr_t psy_audio_patterns_tracksoloed(const psy_audio_Patterns* self)
 {
 	assert(self);
 
-	self->songtracks = trackcount;
+	return psy_audio_trackstate_tracksoloed(&self->trackstate);
 }
 
-uintptr_t psy_audio_patterns_songtracks(psy_audio_Patterns* self)
+void psy_audio_patterns_setnumtracks(psy_audio_Patterns* self,
+	uintptr_t numtracks)
+{
+	assert(self);
+
+	self->songtracks = numtracks;
+}
+
+uintptr_t psy_audio_patterns_numtracks(const psy_audio_Patterns* self)
 {
 	assert(self);
 

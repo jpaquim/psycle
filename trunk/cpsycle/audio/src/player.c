@@ -414,7 +414,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			uintptr_t mac = 0;
 			psy_audio_Machine* machine;
 
-			mac = psy_audio_machines_slot(&self->song->machines);
+			mac = psy_audio_machines_selected(&self->song->machines);
 			if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
 				note = (uint8_t)cmd.id + (uint8_t)self->octave * 12;
 			} else {
@@ -488,7 +488,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setnumsongtracks(self,
-			psy_audio_patterns_songtracks(&song->patterns));
+			psy_audio_song_numsongtracks(song));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 		

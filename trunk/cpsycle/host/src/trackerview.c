@@ -804,13 +804,12 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	}
 	if (psy_ui_component_scrolltoppx(&self->component) + topline * self->linestate->lineheightpx > r.top) {
 		intptr_t dlines;
+		const psy_ui_TextMetric* tm;
 		
 		dlines = (intptr_t)((psy_ui_component_scrolltoppx(&self->component) + topline * self->linestate->lineheightpx - r.top) /
-			(self->linestate->lineheightpx));
-		const psy_ui_TextMetric* tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
+			(self->linestate->lineheightpx));				
 		self->linestate->cursorchanging = TRUE;
+		tm = psy_ui_component_textmetric(&self->component);
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_makepx(
 				psy_ui_component_scrolltoppx(&self->component) -
@@ -1459,7 +1458,7 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	psy_audio_patternevent_init_all(&ev,
 		note,
 		psy_audio_NOTECOMMANDS_INST_EMPTY,
-		(unsigned char)psy_audio_machines_slot(&workspace_song(self->workspace)->machines),
+		(unsigned char)psy_audio_machines_selected(&workspace_song(self->workspace)->machines),
 		psy_audio_NOTECOMMANDS_VOL_EMPTY,
 		0,
 		0);
@@ -2452,7 +2451,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 				? psy_audio_NOTECOMMANDS_TWEAKSLIDE
 				: psy_audio_NOTECOMMANDS_TWEAK),
 			psy_audio_NOTECOMMANDS_INST_EMPTY,
-			(unsigned char)psy_audio_machines_slot(&workspace_song(self->workspace)->machines),
+			(unsigned char)psy_audio_machines_selected(&workspace_song(self->workspace)->machines),
 			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			(unsigned char)((value & 0xFF00) >> 8),
 			(unsigned char)(value & 0xFF));

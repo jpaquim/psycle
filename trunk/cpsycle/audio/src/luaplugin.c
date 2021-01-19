@@ -1170,7 +1170,6 @@ int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 {
 	int status;
 
-	assert(self);
 	//if (proxy_.prsmode() == MachinePresetType::NATIVE) {
 		uint32_t count = (uint32_t)self->client->numparameters_;
 		uint32_t size2 = 0;
@@ -1185,6 +1184,8 @@ int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 		//}
 		uint32_t size = size2 + sizeof(count) + sizeof(int) * count;
 		uint32_t i;
+
+		assert(self);
 
 		for (i = 0; i < count; i++) {
 			const char* id = luaplugin_id(self, i);

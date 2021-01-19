@@ -19,7 +19,7 @@ typedef struct psy_audio_PSY3Saver {
 	// references
 	struct psy_audio_SongFile* songfile;
 	struct PsyFile* fp;
-	struct psy_audio_Song* song;
+	struct psy_audio_Song* song;	
 } psy_audio_PSY3Saver;
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver*, struct psy_audio_SongFile*);

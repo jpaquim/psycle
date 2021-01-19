@@ -80,7 +80,7 @@ psy_audio_Buffer* psy_audio_machines_outputs(psy_audio_Machines*, uintptr_t slot
 void psy_audio_buffer_end(psy_audio_Machines*);
 void psy_audio_machines_changeslot(psy_audio_Machines*, uintptr_t slot);
 void psy_audio_machines_changetweakparam(psy_audio_Machines*, uintptr_t slot);
-uintptr_t psy_audio_machines_slot(psy_audio_Machines*);
+uintptr_t psy_audio_machines_selected(psy_audio_Machines*);
 uintptr_t psy_audio_machines_tweakparam(psy_audio_Machines*);
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines*);
 void psy_audio_machines_solo(psy_audio_Machines*, uintptr_t slot);

@@ -242,20 +242,33 @@ int psyfile_writeheader(PsyFile* file, char* data, uint32_t version,
 
 int psyfile_writestring(PsyFile* file, const char* str)
 {
-	return psyfile_write(file, str, (uint32_t)strlen(str) + 1);	
+	if (str == NULL) {
+		return psyfile_write(file, "", strlen("") + 1);
+	}
+	return psyfile_write(file, str, strlen(str) + 1);
 }
 
-uint32_t psyfile_updatesize(PsyFile* file, uint32_t startpos)
+int psyfile_updatesize(PsyFile* file, uint32_t startpos, uint32_t* rv_size)
 {
 	uint32_t pos2;
 	uint32_t size;
+	int status;
 	
 	pos2 = psyfile_getpos(file); 
 	size = (pos2 - startpos - 4);
-	psyfile_seek(file, startpos);
-	psyfile_write(file, &size, sizeof(size));
-	psyfile_seek(file, pos2);
-	return size;
+	if (status = psyfile_seek(file, startpos) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (status = psyfile_write(file, &size, sizeof(size))) {
+		return status;
+	}
+	if (psyfile_seek(file, pos2) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (rv_size) {
+		*rv_size = size;
+	}
+	return PSY_OK;
 }
 
 int psyfile_readchunkbegin(PsyFile* self)

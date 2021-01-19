@@ -30,16 +30,14 @@ void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	self->credits = psy_strdup(credits);
 	self->comments = psy_strdup(comments);
 	self->bpm = (psy_dsp_big_beat_t) 125.0;
-	self->lpb = 4;
-	self->tracks = 16;
+	self->lpb = 4;	
 	self->octave = 4;
 	self->tpb = 24;
 	self->extraticksperbeat = 0;
 }
 
 void psy_audio_songproperties_init_all(psy_audio_SongProperties* self, const char* title,
-	const char* credits, const char* comments,
-	uintptr_t tracks,
+	const char* credits, const char* comments,	
 	int octave,
 	uintptr_t lpb,
 	int tpb,
@@ -51,8 +49,7 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties* self, const cha
 	self->title = psy_strdup(title);
 	self->credits = psy_strdup(credits);
 	self->comments = psy_strdup(comments);
-	self->lpb = lpb;
-	self->tracks = tracks;
+	self->lpb = lpb;	
 	self->octave = octave;
 	self->tpb = tpb;
 	self->extraticksperbeat = extraticksperbeat;
@@ -84,8 +81,7 @@ void psy_audio_songproperties_copy(psy_audio_SongProperties* self, const psy_aud
 		self->lpb = other->lpb;
 		self->octave = other->octave;
 		self->tpb = other->tpb;
-		self->extraticksperbeat = other->extraticksperbeat;
-		self->tracks = other->tracks;
+		self->extraticksperbeat = other->extraticksperbeat;		
 	}
 }
 

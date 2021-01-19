@@ -892,7 +892,7 @@ void psy_audio_machines_changetweakparam(psy_audio_Machines* self,
 	self->tweakparam = param;
 }
 
-uintptr_t psy_audio_machines_slot(psy_audio_Machines* self)
+uintptr_t psy_audio_machines_selected(psy_audio_Machines* self)
 {
 	return self->slot;
 }

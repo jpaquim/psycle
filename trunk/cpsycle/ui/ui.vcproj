@@ -198,6 +198,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uialigner.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uiapp.c"
 				>
 				<FileConfiguration
@@ -220,27 +224,185 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uibitmap.c"
+				RelativePath="src\uiapp.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
+		</Filter>
+		<Filter
+			Name="imps"
+			>
+			<Filter
+				Name="win32"
+				>
+				<File
+					RelativePath=".\src\imps\win32\uiwinapp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinapp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinbitmapimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinbitmapimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincheckboximp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincheckboximp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincolordialogimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincolordialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincomboboximp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincomboboximp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincomponentimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwincomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwineditimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwineditimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfolderdialogimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfolderdialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfontdialogimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfontdialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfontimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinfontimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwingraphicsimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwingraphicsimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinimpfactory.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinimpfactory.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinlabelimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinlabelimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinlistboximp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinlistboximp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinopendialogimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinopendialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinsavedialogimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\win32\uiwinsavedialogimp.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="curses"
+				>
+				<File
+					RelativePath=".\src\imps\curses\uicursescomponentimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursescomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesdef.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesdef.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesgraphicsimp.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesgraphicsimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesimpfactory.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\imps\curses\uicursesimpfactory.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="comps"
+			>
 			<File
 				RelativePath="src\uibutton.c"
 				>
@@ -262,6 +424,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uibutton.h"
+				>
 			</File>
 			<File
 				RelativePath="src\uicheckbox.c"
@@ -286,7 +452,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uicolordialog.c"
+				RelativePath="src\uicheckbox.h"
 				>
 			</File>
 			<File
@@ -312,6 +478,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uicombobox.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uicomponent.c"
 				>
 				<FileConfiguration
@@ -334,64 +504,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uicursescomponentimp.c"
+				RelativePath="src\uicomponent.h"
 				>
-			</File>
-			<File
-				RelativePath=".\src\uicursesdef.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uicursesgraphicsimp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uicursesimpfactory.c"
-				>
-			</File>
-			<File
-				RelativePath="src\uidef.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\uidefaults.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\uiedit.c"
@@ -416,6 +530,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uiedit.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uieditor.c"
 				>
 				<FileConfiguration
@@ -438,37 +556,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uievents.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\uifolderdialog.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uifont.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\uifontdialog.c"
+				RelativePath="src\uieditor.h"
 				>
 			</File>
 			<File
@@ -494,26 +582,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uigraphics.c"
+				RelativePath="src\uiframe.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\uiimage.c"
@@ -538,7 +608,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uiimpfactory.c"
+				RelativePath="src\uiimage.h"
 				>
 			</File>
 			<File
@@ -564,6 +634,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uiknob.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uilabel.c"
 				>
 				<FileConfiguration
@@ -584,6 +658,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uilabel.h"
+				>
 			</File>
 			<File
 				RelativePath="src\uilistbox.c"
@@ -608,26 +686,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uimenu.c"
+				RelativePath="src\uilistbox.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\uinotebook.c"
@@ -652,26 +712,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uiopendialog.c"
+				RelativePath="src\uinotebook.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\uiprogressbar.c"
@@ -696,33 +738,23 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uisavedialog.c"
+				RelativePath="src\uiprogressbar.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\uiscrollbar.c"
 				>
 			</File>
 			<File
+				RelativePath=".\src\uiscrollbar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uiscroller.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiscroller.h"
 				>
 			</File>
 			<File
@@ -748,6 +780,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uislider.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uisplitbar.c"
 				>
 				<FileConfiguration
@@ -770,7 +806,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uistyle.c"
+				RelativePath="src\uisplitbar.h"
 				>
 			</File>
 			<File
@@ -796,6 +832,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\uiswitch.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uiterminal.c"
 				>
 				<FileConfiguration
@@ -818,7 +858,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uiwinapp.c"
+				RelativePath="src\uiterminal.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="common"
+			>
+			<File
+				RelativePath="src\uidef.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -840,354 +888,225 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uiwinbitmapimp.c"
+				RelativePath="src\uidef.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwincheckboximp.c"
+				RelativePath="src\uievents.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uievents.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwincolordialogimp.c"
+				RelativePath=".\src\uifont.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwincomboboximp.c"
+				RelativePath=".\src\uifont.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwincomponentimp.c"
+				RelativePath=".\src\uistyle.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwineditimp.c"
+				RelativePath=".\src\uistyle.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="dialogs"
+			>
+			<File
+				RelativePath=".\src\uicolordialog.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinfolderdialogimp.c"
+				RelativePath=".\src\uicolordialog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinfontdialogimp.c"
+				RelativePath=".\src\uifolderdialog.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinfontimp.c"
+				RelativePath=".\src\uifolderdialog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwingraphicsimp.c"
+				RelativePath=".\src\uifontdialog.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinimpfactory.c"
+				RelativePath=".\src\uifontdialog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinlabelimp.c"
+				RelativePath="src\uiopendialog.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uiopendialog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinlistboximp.c"
+				RelativePath="src\uisavedialog.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uisavedialog.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="graphics"
+			>
+			<File
+				RelativePath="src\uibitmap.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uibitmap.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinopendialogimp.c"
+				RelativePath="src\uigraphics.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uigraphics.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="configuration"
+			>
+			<File
+				RelativePath="src\uidefaults.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\uidefaults.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\uiwinsavedialogimp.c"
+				RelativePath=".\src\uiimpfactory.c"
 				>
 			</File>
-			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl"
+			<File
+				RelativePath=".\src\uiimpfactory.h"
 				>
-				<File
-					RelativePath="src\uialigner.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiapp.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uibitmap.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uibutton.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uicheckbox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uicolordialog.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uicombobox.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uicomponent.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uicursescomponentimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uicursesdef.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uicursesgraphicsimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uicursesimpfactory.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uidef.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uidefaults.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiedit.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uieditor.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uievents.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uifolderdialog.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uifont.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uifontdialog.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiframe.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uigraphics.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiimage.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiimpfactory.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiknob.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uilabel.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uilistbox.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uimenu.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uinotebook.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiopendialog.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiprogressbar.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uisavedialog.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiscrollbar.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiscroller.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uislider.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uisplitbar.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uistyle.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiswitch.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiterminal.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uiwinapp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinbitmapimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwincheckboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwincolordialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwincomboboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwincomponentimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwineditimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinfolderdialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinfontdialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinfontimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwingraphicsimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinimpfactory.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinlabelimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinlistboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinopendialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uiwinsavedialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtapp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtbitmapimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtcheckboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtcolordialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtcomboboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtcomponentimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixteditimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtfolderdialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtfontdialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtfontimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtgraphicsimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtimpfactory.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtlabelimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtlistboximp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtopendialogimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\uixtsavedialogimp.h"
-					>
-				</File>
-			</Filter>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

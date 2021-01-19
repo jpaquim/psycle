@@ -838,6 +838,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\midiloader.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midisongexport.c"
+				>
+			</File>
+			<File
 				RelativePath="src\mixer.c"
 				>
 				<FileConfiguration
@@ -1214,6 +1222,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\psyconvert.c"
+				>
+			</File>
+			<File
 				RelativePath="src\sample.c"
 				>
 				<FileConfiguration
@@ -1312,6 +1324,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\sequencecmds.c"
+				>
 			</File>
 			<File
 				RelativePath="src\sequencer.c"
@@ -1503,28 +1519,6 @@
 			<File
 				RelativePath=".\src\wire.c"
 				>
-			</File>
-			<File
-				RelativePath="src\xm.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\xmsampler.c"
@@ -1748,6 +1742,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\midiloader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midisongexport.h"
+				>
+			</File>
+			<File
 				RelativePath="src\mixer.h"
 				>
 			</File>
@@ -1824,6 +1826,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\psyconvert.h"
+				>
+			</File>
+			<File
 				RelativePath="src\sample.h"
 				>
 			</File>
@@ -1845,6 +1851,10 @@
 			</File>
 			<File
 				RelativePath="src\sequence.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencecmds.h"
 				>
 			</File>
 			<File
@@ -1905,10 +1915,6 @@
 			</File>
 			<File
 				RelativePath=".\src\wire.h"
-				>
-			</File>
-			<File
-				RelativePath="src\xm.h"
 				>
 			</File>
 			<File
