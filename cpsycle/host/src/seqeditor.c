@@ -776,10 +776,10 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 			uintptr_t track;
 
 			track = self->base.trackindex;
-			if (track >= psy_audio_sequence_sizetracks(
+			if (track >= psy_audio_sequence_width(
 					&self->base.workspace->song->sequence)) {
-				if (psy_audio_sequence_sizetracks(&self->base.workspace->song->sequence) > 0) {
-					track = psy_audio_sequence_sizetracks(&self->base.workspace->song->sequence) - 1;
+				if (psy_audio_sequence_width(&self->base.workspace->song->sequence) > 0) {
+					track = psy_audio_sequence_width(&self->base.workspace->song->sequence) - 1;
 				} else {
 					track = 0;
 				}
@@ -924,6 +924,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
 		uintptr_t c;
+		SeqEditorTrack* seqedittrack;
 		
 		for (t = sequence->tracks, c = 0; t != NULL;
 				psy_list_next(&t), ++c) {
@@ -945,9 +946,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 					t, (psy_audio_SequenceTrack*)t->entry, c);
 			}
 		}
-		// add an empty track for the add track button			
-		SeqEditorTrack* seqedittrack;
-
+		// add an empty track for the add track button
 		seqedittrack = seqeditortrackheader_base(
 			seqeditortrackheader_allocinit(self, self->trackstate,
 				self->workspace));

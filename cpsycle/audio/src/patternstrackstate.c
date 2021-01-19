@@ -62,5 +62,13 @@ int psy_audio_trackstate_istrackmuted(const psy_audio_TrackState* self, uintptr_
 
 int psy_audio_trackstate_istracksoloed(const psy_audio_TrackState* self, uintptr_t track)
 {
-	return self->soloactive && self->soloedtrack == track;		
+	return self->soloactive && self->soloedtrack == track;
+}
+
+uintptr_t psy_audio_trackstate_tracksoloed(const psy_audio_TrackState* self)
+{
+	if (self->soloactive) {
+		return self->soloedtrack;
+	}
+	return psy_INDEX_INVALID;
 }

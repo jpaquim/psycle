@@ -268,9 +268,9 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 	uintptr_t selectedtrack;
 
 	selectedtrack = (uintptr_t)(ev->x / self->state->trackwidth);
-	if (selectedtrack >= psy_audio_sequence_sizetracks(self->state->sequence)) {
+	if (selectedtrack >= psy_audio_sequence_width(self->state->sequence)) {
 		psy_signal_emit(&self->signal_newtrack, self, 1,
-			(uintptr_t)psy_audio_sequence_sizetracks(self->state->sequence));
+			(uintptr_t)psy_audio_sequence_width(self->state->sequence));
 	} else {				
 		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
@@ -420,7 +420,7 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->width = psy_ui_value_makepx(self->state->margin +
-			psy_audio_sequence_sizetracks(self->state->sequence) *
+			psy_audio_sequence_width(self->state->sequence) *
 				psy_ui_value_px(&self->component.scrollstepx, tm));
 		rv->height = psy_ui_value_makepx(
 			psy_audio_sequence_maxtracksize(self->state->sequence) *
@@ -458,7 +458,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g,
 	uintptr_t endrow;
 
 	startrow = (uintptr_t)floor(max(0, (g->clip.top - self->state->margin) / self->lineheight));
-	endrow = (uintptr_t)(round(g->clip.bottom - self->state->margin) / self->lineheight);
+	endrow = (uintptr_t)(floor(g->clip.bottom - self->state->margin + 0.5) / self->lineheight);
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->state->trackwidth - 5, size.height);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0));	
@@ -595,7 +595,7 @@ void sequencelistview_onmousedown(SequenceListView* self,
 	sequencelistview_computetextsizes(self);
 	selected = (uintptr_t)((ev->y - self->state->margin) / self->lineheight);
 	selectedtrack = (uintptr_t)(ev->x / self->state->trackwidth);
-	if (selectedtrack < psy_audio_sequence_sizetracks(self->state->sequence)) {
+	if (selectedtrack < psy_audio_sequence_width(self->state->sequence)) {
 		sequencelistview_select(self, selectedtrack, selected);
 	}
 }
@@ -603,9 +603,9 @@ void sequencelistview_onmousedown(SequenceListView* self,
 void sequencelistview_select(SequenceListView* self,
 	uintptr_t track, uintptr_t row)
 {
-	if (track >= psy_audio_sequence_sizetracks(self->state->sequence)) {
-		if (psy_audio_sequence_sizetracks(self->state->sequence) > 0) {
-			track = psy_audio_sequence_sizetracks(self->state->sequence) - 1;
+	if (track >= psy_audio_sequence_width(self->state->sequence)) {
+		if (psy_audio_sequence_width(self->state->sequence) > 0) {
+			track = psy_audio_sequence_width(self->state->sequence) - 1;
 		} else {
 			track = 0;
 		}
@@ -623,7 +623,7 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 	sequencelistview_computetextsizes(self);
 	selected = (uintptr_t)((ev->y - self->state->margin) / self->lineheight);
 	selectedtrack = (uintptr_t)(ev->x / self->state->trackwidth);
-	if (selectedtrack < psy_audio_sequence_sizetracks(self->state->sequence)) {
+	if (selectedtrack < psy_audio_sequence_width(self->state->sequence)) {
 		workspace_setsequenceeditposition(self->workspace,
 			psy_audio_orderindex_make(
 				selectedtrack, selected));		

@@ -1856,7 +1856,7 @@ void machinewireview_onnewmachineselected(MachineView* self,
 		} else
 			if (self->newmachine.pluginsview.calledby == 10) {
 				psy_audio_machines_insert(self->wireview.machines,
-					psy_audio_machines_slot(self->wireview.machines), machine);
+					psy_audio_machines_selected(self->wireview.machines), machine);
 			} else {
 				psy_audio_machines_changeslot(self->wireview.machines,
 					psy_audio_machines_append(self->wireview.machines, machine));

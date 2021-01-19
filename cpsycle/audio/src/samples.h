@@ -69,10 +69,11 @@ INLINE bool psy_audio_sampleindex_invalid(const psy_audio_SampleIndex* self)
 		   (self->subslot == psy_INDEX_INVALID);
 }
 
-typedef struct {
-	char* name;
+typedef struct {	
 	psy_Table container;
 } psy_audio_SamplesGroup;
+
+psy_TableIterator psy_audio_samplesgroup_begin(psy_audio_SamplesGroup*);
 
 typedef struct psy_audio_Samples {
 	psy_Table groups;
@@ -95,6 +96,8 @@ void psy_audio_samples_erase(psy_audio_Samples*, psy_audio_SampleIndex);
 psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples*, psy_audio_SampleIndex);
 /// Return number of samples in the group of the slot
 uintptr_t psy_audio_samples_size(const psy_audio_Samples*, uintptr_t slot);
+/// Return number of all samples
+uintptr_t psy_audio_samples_count(const psy_audio_Samples*);
 /// Return number of groups
 uintptr_t psy_audio_samples_groupsize(const psy_audio_Samples*);
 /// Iterator of the groups pointing to the start

@@ -607,6 +607,8 @@ int itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audi
 	}
 	psy_dsp_envelope_clear(&xins->volumeenvelope);
 	if (curh->flg & IT2_ENV_USE_ENVELOPE) {
+		int i;
+
 		psy_dsp_envelope_setmode(&xins->volumeenvelope, psy_dsp_ENVELOPETIME_TICK);
 		psy_dsp_envelope_setenabled(&xins->volumeenvelope, TRUE);
 
@@ -623,7 +625,7 @@ int itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audi
 				curh->loopE);
 		}
 
-		for (int i = 0; i < 25; i++) {
+		for (i = 0; i < 25; i++) {
 			uint8_t tick = curh->nodepair[i].first;
 			uint8_t value = curh->nodepair[i].second;
 			if (value == 0xFF || tick == 0xFF) break;
@@ -642,6 +644,7 @@ int itmodule2_loadolditinst(ITModule2* self, const itInsHeader1x* curh, psy_audi
 int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_Instrument* xins)
 {
 	int envelope_point_num;
+	int i;
 
 	assert(self);
 	assert(curh);
@@ -720,7 +723,7 @@ int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_I
 		envelope_point_num = 25;
 	}
 
-	for (int i = 0; i < envelope_point_num; i++) {
+	for (i = 0; i < envelope_point_num; i++) {
 		short envtmp;
 		
 		envtmp = curh->volEnv.nodes[i].secondlo | (curh->volEnv.nodes[i].secondhi << 8);
@@ -754,7 +757,7 @@ int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_I
 		envelope_point_num = 25;
 	}
 
-	for (int i = 0; i < envelope_point_num; i++) {
+	for (i = 0; i < envelope_point_num; i++) {
 		short envtmp;
 
 		envtmp = curh->panEnv.nodes[i].secondlo | (curh->panEnv.nodes[i].secondhi << 8);
@@ -795,7 +798,7 @@ int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_I
 				curh->pitchEnv.loopE);
 		}
 
-		for (int i = 0; i < envelope_point_num; i++) {
+		for (i = 0; i < envelope_point_num; i++) {
 			short envtmp;
 
 			envtmp = curh->pitchEnv.nodes[i].secondlo | (curh->pitchEnv.nodes[i].secondhi << 8);
@@ -822,7 +825,7 @@ int itmodule2_loaditinst(ITModule2* self, const itInsHeader2x* curh, psy_audio_I
 				curh->pitchEnv.loopE);
 		}
 
-		for (int i = 0; i < envelope_point_num; i++) {
+		for (i = 0; i < envelope_point_num; i++) {
 			short envtmp;
 
 			envtmp = curh->pitchEnv.nodes[i].secondlo | (curh->pitchEnv.nodes[i].secondhi << 8);
@@ -1815,7 +1818,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	node = NULL;
 	for (row = 0; row < 64; row++)
 	{
-		self->extracolumn = (int16_t)song->properties.tracks;
+		self->extracolumn = (int16_t)psy_audio_song_numsongtracks(self->song);
 		psyfile_read(fp, &newEntry, 1);
 		append = TRUE;
 		while (newEntry)
@@ -1941,7 +1944,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 			} else {
 				pent.cmd = volume;
 			}
-			if (channel < song->properties.tracks) {				
+			if (channel < psy_audio_song_numsongtracks(self->song)) {
 				itmodule_writepatternentry(self, &node, append, pattern,
 					row, channel, &pent);
 			}

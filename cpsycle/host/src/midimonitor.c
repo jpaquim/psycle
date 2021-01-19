@@ -234,7 +234,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		switch (midiinput->midiconfig.gen_select_with) {
 			case psy_audio_MIDICONFIG_MS_USE_SELECTED:
 				if (workspace_song(self->workspace)) {
-					selidx = psy_audio_machines_slot(&workspace_song(self->workspace)->machines);
+					selidx = psy_audio_machines_selected(&workspace_song(self->workspace)->machines);
 				}
 				break;
 			case psy_audio_MIDICONFIG_MS_BANK:

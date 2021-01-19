@@ -20,9 +20,8 @@ extern "C" {
 #endif
 
 typedef struct {
-	// public
-	uintptr_t tracks;
-	int octave;
+	// public	
+	uint8_t octave;
 	uintptr_t lpb;
 	uintptr_t tpb;
 	uintptr_t extraticksperbeat;
@@ -36,8 +35,7 @@ typedef struct {
 void psy_audio_songproperties_init(psy_audio_SongProperties*, const char* title,
 	const char* credits, const char* comments);
 void psy_audio_songproperties_init_all(psy_audio_SongProperties*, const char* title,
-	const char* credits, const char* comments,
-	uintptr_t tracks,
+	const char* credits, const char* comments,	
 	int octave,
 	uintptr_t lpb,
 	int tpb,
@@ -86,20 +84,12 @@ INLINE uintptr_t psy_audio_songproperties_lpb(const
 	return self->lpb;
 }
 
-INLINE void psy_audio_songproperties_setnumsongtracks(
-	psy_audio_SongProperties* self, uintptr_t numtracks)
-{
-	assert(self);
-
-	self->tracks = numtracks;
-}
-
-INLINE uintptr_t psy_audio_songproperties_numtracks(const
+INLINE uint8_t psy_audio_songproperties_octave(const
 	psy_audio_SongProperties* self)
 {
 	assert(self);
 
-	return self->tracks;
+	return self->octave;
 }
 
 INLINE void psy_audio_songproperties_settpb(psy_audio_SongProperties* self,
@@ -147,6 +137,14 @@ void psy_audio_songproperties_settitle(psy_audio_SongProperties* self,
 
 void psy_audio_songproperties_setcredits(psy_audio_SongProperties* self,
 	const char* credits);
+
+INLINE const char* psy_audio_songproperties_credits(const
+	psy_audio_SongProperties* self)
+{
+	assert(self);
+
+	return self->credits;
+}
 
 void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
 	const char* comments);
@@ -252,6 +250,14 @@ INLINE const char* psy_audio_song_title(const psy_audio_Song* self)
 	return psy_audio_songproperties_title(&self->properties);
 }
 
+/// return song title
+INLINE const char* psy_audio_song_credits(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_credits(&self->properties);
+}
+
 /// set song comments
 INLINE void psy_audio_song_setcomments(psy_audio_Song* self,
 	const char* comments)
@@ -298,20 +304,27 @@ INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)
 
 	return psy_audio_songproperties_lpb(&self->properties);
 }
+/// return song properties lpb
+INLINE uint8_t psy_audio_song_octave(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_octave(&self->properties);
+}
 /// set song properties songtrack (pattern channels) number
 INLINE void psy_audio_song_setnumsongtracks(psy_audio_Song* self,
 	uintptr_t numtracks)
 {
 	assert(self);
 
-	psy_audio_songproperties_setnumsongtracks(&self->properties, numtracks);
+	psy_audio_patterns_setnumtracks(&self->patterns, numtracks);
 }
 /// return song numtracks (pattern channels)
 INLINE uintptr_t psy_audio_song_numsongtracks(const psy_audio_Song* self)
 {
 	assert(self);
 
-	return psy_audio_songproperties_numtracks(&self->properties);
+	return psy_audio_patterns_numtracks(&self->patterns);
 }
 /// return song properties tpb
 INLINE uintptr_t psy_audio_song_tpb(const psy_audio_Song* self)

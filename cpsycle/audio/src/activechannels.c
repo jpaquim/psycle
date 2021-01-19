@@ -63,7 +63,7 @@ void psy_audio_activechannelmacs_clear(psy_audio_ActiveChannelMacs* self, uintpt
 	psy_table_remove(&self->activemacs, mac);
 }
 
-bool psy_audio_activechannelmacs_empty(psy_audio_ActiveChannelMacs* self)
+bool psy_audio_activechannelmacs_empty(const psy_audio_ActiveChannelMacs* self)
 {
 	assert(self);
 
@@ -137,13 +137,13 @@ void psy_audio_activechannels_write(psy_audio_ActiveChannels* self,
 	}
 }
 
-bool psy_audio_activechannels_playon(psy_audio_ActiveChannels* self, uintptr_t channel)
+bool psy_audio_activechannels_playon(const psy_audio_ActiveChannels* self, uintptr_t channel)
 {
 	psy_audio_ActiveChannelMacs* macs;
 
 	assert(self);
 
-	macs = psy_audio_activechannels_activemacs(self, channel);
+	macs = psy_audio_activechannels_activemacs((psy_audio_ActiveChannels*)self, channel);
 	if (macs) {
 		return !psy_audio_activechannelmacs_empty(macs);		
 	}

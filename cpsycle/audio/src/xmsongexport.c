@@ -745,19 +745,19 @@ int xmsongexport_saveemptyinstrument(XMSongExport* self, const char* name)
 int xmsongexport_savesampulseinstrument(XMSongExport* self, int instIdx)
 {
 	psy_audio_Instrument* inst;
-	psy_audio_InstrumentIndex index;		
+	psy_audio_InstrumentIndex index;
+	struct XMINSTRUMENTHEADER insHeader;
+	struct XMSAMPLEHEADER samphead;
 	
 	index = psy_audio_instrumentindex_make(1, instIdx);
 	inst = psy_audio_instruments_at(&self->song->instruments,
 		index);
 	if (!inst) {
 		return PSY_ERRFILE;
-	}	
-	struct XMINSTRUMENTHEADER insHeader;
+	}		
 	memset(&insHeader, 0, sizeof(insHeader));
 	strncpy(insHeader.name, psy_audio_instrument_name(inst), 22); //Names are not null terminated
-	//insHeader.type = 0; Implicit by memset
-	struct XMSAMPLEHEADER samphead;
+	//insHeader.type = 0; Implicit by memset	
 	memset(&samphead, 0, sizeof(samphead));	
 	
 	//If no samples for this instrument, write it and exit.
@@ -807,11 +807,11 @@ int xmsongexport_savesampulseinstrument(XMSongExport* self, int instIdx)
 
 int xmsongexport_savesamplerinstrument(XMSongExport* self, int instIdx)
 {
-	struct XMINSTRUMENTHEADER insHeader;
-	memset(&insHeader, 0, sizeof(insHeader));
 	psy_audio_Sample* sample;
-	char temp[22];	
-	
+	struct XMINSTRUMENTHEADER insHeader;
+	char temp[22];
+
+	memset(&insHeader, 0, sizeof(insHeader));		
 	memset(temp, 0, sizeof(temp));
 	sample = psy_audio_samples_at(&self->song->samples, sampleindex_make(instIdx, 0));
 	if (sample) {
@@ -940,11 +940,13 @@ void xmsongexport_setsampulseenvelopes(XMSongExport* self, int instrIdx,
 	}
 	sampleHeader->vtype = 0;
 
-	if (psy_dsp_envelope_isenabled(&inst->volumeenvelope)) {		
-		sampleHeader->vtype = 1;
+	if (psy_dsp_envelope_isenabled(&inst->volumeenvelope)) {
 		const psy_dsp_Envelope* env = &inst->volumeenvelope;
 		float convert = 1.f;
+		int idx;
+		unsigned int i;
 
+		sampleHeader->vtype = 1;
 		// Max number of envelope points in Fasttracker format is 12.
 		sampleHeader->vnum = (uint8_t)(psy_min(12u, psy_dsp_envelope_numofpoints(env)));
 		if (psy_dsp_envelope_mode(env) == psy_dsp_ENVELOPETIME_SECONDS) {
@@ -953,8 +955,8 @@ void xmsongexport_setsampulseenvelopes(XMSongExport* self, int instrIdx,
 		// Format of FastTracker points is :
 		// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 		// Value : 0..64. , divide by 64 to use it as a multiplier.
-		int idx = 0;
-		for (unsigned int i = 0; i < psy_dsp_envelope_numofpoints(env) && i < 12; i++) {
+		idx = 0;
+		for (i = 0; i < psy_dsp_envelope_numofpoints(env) && i < 12; i++) {
 			sampleHeader->venv[idx] = (uint16_t)(psy_dsp_envelope_time(env, i) * convert); idx++;
 			sampleHeader->venv[idx] = (uint16_t)(psy_dsp_envelope_value(env, i) * 64.f); idx++;
 		}
@@ -970,20 +972,23 @@ void xmsongexport_setsampulseenvelopes(XMSongExport* self, int instrIdx,
 		}
 	}
 	if (psy_dsp_envelope_isenabled(&inst->panenvelope)) {
-		sampleHeader->ptype = 1;
-		const psy_dsp_Envelope* env = &inst->panenvelope;		
+		float convert;		
+		const psy_dsp_Envelope* env = &inst->panenvelope;
+		int idx;
+		unsigned int i;
 
+		sampleHeader->ptype = 1;
 		// Max number of envelope points in Fasttracker format is 12.
 		sampleHeader->pnum = (uint8_t)(psy_min(12u, psy_dsp_envelope_numofpoints(env)));
-		float convert = 1.f;
+		convert = 1.f;
 		if (psy_dsp_envelope_mode(env) == psy_dsp_ENVELOPETIME_SECONDS) {
 			convert = (24.f * (float)(self->song->properties.bpm)) / 60000.f * 1000.f;
 		}
 		// Format of FastTracker points is :
 		// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 		// Value : 0..64. , divide by 64 to use it as a multiplier.
-		int idx = 0;
-		for (unsigned int i = 0; i < psy_dsp_envelope_numofpoints(env) && i < 12; i++) {
+		idx = 0;
+		for (i = 0; i < psy_dsp_envelope_numofpoints(env) && i < 12; i++) {
 			sampleHeader->penv[idx] = (uint16_t)(psy_dsp_envelope_time(env, i) * convert); idx++;
 			sampleHeader->penv[idx] = (uint16_t)(32 + (psy_dsp_envelope_value(env, i) * 32.f)); idx++;
 		}

@@ -810,7 +810,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			break;
 		case CMD_IMM_INFOMACHINE:
 			workspace_showparameters(&self->workspace,
-				psy_audio_machines_slot(&self->workspace.song->machines));
+				psy_audio_machines_selected(&self->workspace.song->machines));
 			break;
 		case CMD_IMM_EDITINSTR:
 			workspace_selectview(&self->workspace, VIEW_ID_INSTRUMENTSVIEW, 0,

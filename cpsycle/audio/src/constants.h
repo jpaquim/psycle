@@ -74,7 +74,7 @@
 //Version for the instrument (sampulse sampler) data
 #define CURRENT_FILE_VERSION_SMID	0x00000001
 //Version for the wave sample bank data
-#define CURRENT_FILE_VERSION_SMSB	0x00000001
+#define CURRENT_FILE_VERSION_SMSB	0x00000002
 //Version for the wave sample bank data
 #define CURRENT_FILE_VERSION_VIRG	0x00000000
 //Combined value for the fileformat.

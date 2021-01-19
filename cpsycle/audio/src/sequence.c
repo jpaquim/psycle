@@ -493,13 +493,9 @@ const psy_audio_SequenceTrack* psy_audio_sequence_track_at_const(const
 	return psy_audio_sequence_track_at((psy_audio_Sequence*)self, index);
 }
 
-uintptr_t psy_audio_sequence_sizetracks(psy_audio_Sequence* self)
+uintptr_t psy_audio_sequence_width(const psy_audio_Sequence* self)
 {
-	uintptr_t c = 0;	
-	psy_audio_SequenceTrackNode* p;
-	
-	for (p = self->tracks; p != NULL; psy_list_next(&p), ++c);
-	return c;
+	return psy_list_size(self->tracks);	
 }
 
 bool psy_audio_sequence_patternused(psy_audio_Sequence* self, uintptr_t patternslot)

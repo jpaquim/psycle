@@ -912,16 +912,17 @@ void pianogriddraw_drawplaybar(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 					pianogridstate_steppx(self->gridstate),
 					self->keyboardstate->keyboardheightpx),
 				patternviewskin_playbarcolour(self->gridstate->skin,
-					0, workspace_song(self->workspace)->properties.tracks));
+					0, psy_audio_song_numsongtracks(workspace_song(self->workspace))));
 		}
 	}
 }
 
 void pianogriddraw_drawentries(PianoGridDraw* self, psy_ui_Graphics* g,
 	psy_audio_PatternSelection clip)
-{
-	assert(self);
+{	
 	psy_Table lasttrackevent;
+
+	assert(self);
 
 	psy_table_init(&lasttrackevent);
 	if (pianogridstate_pattern(self->gridstate)) {		

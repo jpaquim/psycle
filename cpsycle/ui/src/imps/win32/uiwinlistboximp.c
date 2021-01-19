@@ -26,7 +26,7 @@ static void dev_resize(psy_ui_win_ListBoxImp* self, psy_ui_Size size) { self->wi
 static void dev_clientresize(psy_ui_win_ListBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_ListBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
-static psy_ui_Size dev_size(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
+static psy_ui_Size dev_size(const psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
 static void dev_scrollto(psy_ui_win_ListBoxImp* self, intptr_t dx, intptr_t dy) { self->win_component_imp.imp.vtable->dev_scrollto(&self->win_component_imp.imp, dx, dy); }
 static psy_ui_Component* dev_parent(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_parent(&self->win_component_imp.imp); }

@@ -172,8 +172,7 @@ void psy2loader_readheader(PSY2Loader* self)
 	psy_audio_songproperties_init_all(&songproperties,
 		name,
 		author,
-		comments,
-		16, // tracks
+		comments,		
 		4,  // octave
 		linesperbeat,
 		24, // extraticksperbeat

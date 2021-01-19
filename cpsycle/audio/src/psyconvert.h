@@ -68,6 +68,8 @@ psy_audio_LegacyPatternEntry* psy_audio_ptrackline(psy_audio_LegacyPattern,
 
 // Instruments
 
+#define PSY3_LEGACY_MAX_INSTRUMENTS 256
+
 typedef struct psy_audio_LegacyInstrument {
 	///\name Loop stuff
 			///\{

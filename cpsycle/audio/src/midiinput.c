@@ -214,7 +214,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 				inst = gParameter;
 
 				machine = psy_audio_machines_at(&self->song->machines,
-					psy_audio_machines_slot(&self->song->machines));
+					psy_audio_machines_selected(&self->song->machines));
 				if (machine && inst < (int)psy_audio_machine_numtweakparameters(machine))
 				{					
 					psy_audio_MachineParam* param;
@@ -445,8 +445,8 @@ uintptr_t psy_audio_midiinput_genmap(const psy_audio_MidiInput* self, uintptr_t 
 		case psy_audio_MIDICONFIG_MS_USE_SELECTED:
 			if (self->song) {
 				if (psy_audio_machines_at(&self->song->machines,
-						psy_audio_machines_slot(&self->song->machines))) {
-					return psy_audio_machines_slot(&self->song->machines);
+						psy_audio_machines_selected(&self->song->machines))) {
+					return psy_audio_machines_selected(&self->song->machines);
 				}
 			}
 			break;

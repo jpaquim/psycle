@@ -1519,11 +1519,11 @@ void psy_audio_sequencer_stopat(psy_audio_Sequencer* self,
 
 psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(
 	const psy_audio_Sequencer* self)
-{
-	assert(self);
-	
+{		
 	psy_dsp_big_beat_t seqoffset;
 	psy_dsp_big_beat_t length;
+
+	assert(self);
 
 	length = 0.0;
 	seqoffset = 0.0;

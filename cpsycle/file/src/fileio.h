@@ -61,7 +61,7 @@ FILE* psyfile_getfile(PsyFile*);
 int psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
 	uint32_t size, uint32_t* pos);
 int psyfile_writestring(PsyFile*, const char* str);
-uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
+int psyfile_updatesize(PsyFile*, uint32_t startpos, uint32_t* rv_size);
 int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
 int psyfile_error(PsyFile*);

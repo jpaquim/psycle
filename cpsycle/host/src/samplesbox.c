@@ -128,14 +128,14 @@ void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
 	psy_audio_SampleIndex* index)
 {
 	samplesbox_buildsamplelist(self);
-	samplesbox_buildsubsamplelist(self, index->subslot, FALSE);
+	samplesbox_buildsubsamplelist(self, index->slot, FALSE);
 }
 
 void samplesbox_onsampleremoved(SamplesBox* self, psy_ui_Component* sender,
 	psy_audio_SampleIndex* index)
 {
 	samplesbox_buildsamplelist(self);
-	samplesbox_buildsubsamplelist(self, index->subslot, FALSE);
+	samplesbox_buildsubsamplelist(self, index->slot, FALSE);
 }
 
 void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples)

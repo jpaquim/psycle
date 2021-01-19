@@ -5,6 +5,8 @@
 
 #include "psyconvert.h"
 #include "constants.h"
+// std
+#include <string.h>
 
 // Pattern
 psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,

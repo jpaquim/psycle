@@ -26,7 +26,7 @@ psy_audio_ActiveChannelMacs* psy_audio_activechannelmacs_allocinit(void);
 void psy_audio_activechannelmacs_deallocate(psy_audio_ActiveChannelMacs*);
 void psy_audio_activechannelmacs_set(psy_audio_ActiveChannelMacs*, uintptr_t macid);
 void psy_audio_activechannelmacs_clear(psy_audio_ActiveChannelMacs*, uintptr_t macid);
-bool psy_audio_activechannelmacs_empty(psy_audio_ActiveChannelMacs*);
+bool psy_audio_activechannelmacs_empty(const psy_audio_ActiveChannelMacs*);
 bool psy_audio_activechannelmacs_active(psy_audio_ActiveChannelMacs*, uintptr_t macid);
 
 struct psy_audio_Machines;
@@ -45,7 +45,7 @@ void psy_audio_activechannels_setmachines(psy_audio_ActiveChannels*,
 	struct psy_audio_Machines* machines);
 void psy_audio_activechannels_write(psy_audio_ActiveChannels*,
 	uintptr_t channel, psy_audio_PatternEvent*);
-bool psy_audio_activechannels_playon(psy_audio_ActiveChannels*,
+bool psy_audio_activechannels_playon(const psy_audio_ActiveChannels*,
 	uintptr_t channel);
 bool psy_audio_activechannels_playonmac(psy_audio_ActiveChannels*,
 	uintptr_t channel, uintptr_t mac);
