@@ -58,7 +58,7 @@ typedef int (*psy_audiodriver_fp_removecapture)(struct psy_AudioDriver*, int ind
 typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index,
 	float** pleft, float** pright, uintptr_t numsamples);
 typedef const psy_AudioDriverInfo* (*psy_audiodriver_fp_info)(struct psy_AudioDriver*);
-typedef uint32_t (*psy_audiodriver_fp_playposinsamples)(struct psy_AudioDriver*);
+typedef uintptr_t(*psy_audiodriver_fp_playposinsamples)(struct psy_AudioDriver*);
 
 typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_open open;
@@ -182,7 +182,7 @@ INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index,
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
 }
 
-INLINE uint32_t psy_audiodriver_playposinsamples(psy_AudioDriver* self)
+INLINE uintptr_t psy_audiodriver_playposinsamples(psy_AudioDriver* self)
 {
 	return self->vtable->playposinsamples(self);
 }

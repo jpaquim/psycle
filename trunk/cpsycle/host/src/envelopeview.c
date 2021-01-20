@@ -150,7 +150,7 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, tm) / 2),
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, tm) / 2));
 	for (p = points; p != 0; p = p->next) {
-		psy_ui_Rectangle r;
+		psy_ui_RealRectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;

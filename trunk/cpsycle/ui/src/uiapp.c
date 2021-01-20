@@ -44,9 +44,9 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	app = self;
 	self->main = NULL;
 	psy_signal_init(&self->signal_dispose);	
-	ui_app_initimpfactory(self);	
-	ui_app_initimp(self, instance);
+	ui_app_initimpfactory(self);
 	psy_ui_defaults_init(&self->defaults);
+	ui_app_initimp(self, instance);
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
 		psy_ui_app_onlanguagechanged);

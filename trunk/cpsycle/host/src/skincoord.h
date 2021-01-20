@@ -36,9 +36,9 @@ void skincoord_setall(SkinCoord*,
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4]);
 void skincoord_setdest(SkinCoord* coord, intptr_t vals[4]);
 
-INLINE psy_ui_Rectangle skincoord_destposition(SkinCoord* self)
+INLINE psy_ui_RealRectangle skincoord_destposition(SkinCoord* self)
 {
-	return psy_ui_rectangle_make(
+	return psy_ui_realrectangle_make(
 		self->destx, self->desty,
 		self->destwidth, self->destheight);
 }

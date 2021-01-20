@@ -219,7 +219,7 @@ static int numplaybacks(psy_AudioDriver*);
 static int addcaptureport(WasapiDriver*, int idx);
 static int removecaptureport(WasapiDriver*, int idx);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static void init_properties(psy_AudioDriver*);
@@ -347,8 +347,8 @@ bool IsFormatSupported(PortEnum* self, WAVEFORMATEXTENSIBLE* pwfx, AUDCLNT_SHARE
 		hr = IMMDevice_Activate(device, &IID_IAudioClient, CLSCTX_ALL, NULL,
 		(void**)&client);
 	EXIT_ON_ERROR(hr)
-		hr = IAudioClient_IsFormatSupported(client, sharemode, (WAVEFORMATEXTENSIBLE*)pwfx,
-		(sharemode == AUDCLNT_SHAREMODE_SHARED) ? &bla : NULL);
+		hr = IAudioClient_IsFormatSupported(client, sharemode, &pwfx->Format,
+			(sharemode == AUDCLNT_SHAREMODE_SHARED) ? (WAVEFORMATEX**)&bla : NULL);
 	if (bla != NULL) { CoTaskMemFree(bla); }
 	if (hr == S_OK) issuccess = TRUE;
 Exit:
@@ -612,7 +612,7 @@ bool start(WasapiDriver* self)
 		self->out.streamFlags,
 		self->out.period,
 		(self->out.shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE ? self->out.period : 0),
-		&self->out.wavex,
+		&self->out.wavex.Format,
 		NULL);
 	
 	EXIT_ON_ERROR(hr)
@@ -914,6 +914,8 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 	// Ask MMCSS to temporarily boost the thread priority
 	// to reduce glitches while the low-latency stream plays.
 	DWORD taskIndex = 0;
+	uint32_t u32;
+
 	hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
 	if (hTask == NULL)
 	{
@@ -936,7 +938,8 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 		pThis->out.bufferFrameCount = bufferFrameCount;
 
 	// Get the lantency.
-	hr = IAudioClient_GetBufferSize(pThis->out.client, &pThis->out.device_latency);
+	hr = IAudioClient_GetBufferSize(pThis->out.client, &u32);
+	pThis->out.device_latency = u32;
 	EXIT_ON_ERROR(hr)
 
 	hr = IAudioClient_GetService(pThis->out.client, &IID_IAudioRenderClient,
@@ -959,9 +962,9 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 		if (capport->client == NULL)
 			continue;
 		IAudioCaptureClient* captClient = NULL;
-		hr = IAudioClient_GetBufferSize(capport->client, capport->bufferFrameCount);
+		hr = IAudioClient_GetBufferSize(capport->client, &capport->bufferFrameCount);
 		EXIT_ON_ERROR(hr)
-		hr = IAudioClient_GetStreamLatency(capport->client, capport->device_latency);
+		hr = IAudioClient_GetStreamLatency(capport->client, &capport->device_latency);
 		EXIT_ON_ERROR(hr)
 		hr = IAudioClient_GetService(capport->client, &IID_IAudioCaptureClient,
 			(void**)&captClient);
@@ -1073,7 +1076,7 @@ HRESULT DoBlockRecording(WasapiDriver* self, PaWasapiSubStream* port, IAudioCapt
 	HRESULT hr = IAudioCaptureClient_GetNextPacketSize(pCaptureClient, &packetLength);
 	EXIT_ON_ERROR(hr)
 
-	while (packetLength != 0 && packetLength <= numFramesAvailable)
+	while (packetLength != 0 && (int)packetLength <= numFramesAvailable)
 	{
 		///\todo: finish this implementation.
 		HRESULT hr = IAudioCaptureClient_GetBuffer(pCaptureClient, &pData, &numf, &flags, NULL, NULL);
@@ -1105,9 +1108,7 @@ Exit:
 
 HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFramesAvailable)
 {
-	BYTE* pData;
-	DWORD flags;	
-	UINT32 numf;
+	BYTE* pData;	
 	// Grab the next empty buffer from the audio device.	
 	HRESULT hr = IAudioRenderClient_GetBuffer(pRenderClient, numFramesAvailable, &pData);
 	EXIT_ON_ERROR(hr)
@@ -1202,14 +1203,14 @@ HRESULT GetStreamFormat(WasapiDriver* self, PaWasapiSubStream* stream, WAVEFORMA
 		
 		PrepareWaveFormat((WAVEFORMATEXTENSIBLE*)&format,
 			psy_audiodriversettings_numchannels(&self->settings),
-			psy_audiodriversettings_samplespersec(&self->settings),
+			(int)psy_audiodriversettings_samplespersec(&self->settings),
 			psy_audiodriversettings_bitdepth(&self->settings),
 			psy_audiodriversettings_validbitdepth(&self->settings));
 		memcpy(wfOut, &format, sizeof(WAVEFORMATPCMEX));
 	}
 	WAVEFORMATEX* bla = NULL;	
-	hr = IAudioClient_IsFormatSupported(stream->client, stream->shareMode, wfOut,
-		(stream->shareMode == AUDCLNT_SHAREMODE_SHARED) ? &bla : NULL);
+	hr = IAudioClient_IsFormatSupported(stream->client, stream->shareMode, &wfOut->Format,
+		(stream->shareMode == AUDCLNT_SHAREMODE_SHARED) ? (WAVEFORMATEX**)&bla : NULL);
 	if (bla != NULL) { CoTaskMemFree(bla); }
 	return hr;
 Exit:
@@ -1229,10 +1230,11 @@ uint32_t GetPlayPosInSamples(WasapiDriver* self)
 		HRESULT hr = IAudioClock_GetPosition(self->pAudioClock, &pos, NULL);		
 		EXIT_ON_ERROR(hr)
 		if (self->audioClockFreq == psy_audiodriversettings_samplespersec(&self->settings)) {
-			retVal = pos;
+			retVal = (uintptr_t)pos;
 		} else {
 			// Thus, the stream-relative offset in seconds can always be calculated as p/f.
-			retVal = (pos * psy_audiodriversettings_samplespersec(&self->settings) / self->audioClockFreq);
+			retVal = (uintptr_t)(pos * psy_audiodriversettings_samplespersec(&self->settings) 
+				/ self->audioClockFreq);
 		}
 	}
 Exit:
@@ -1248,7 +1250,7 @@ uint32_t GetInputLatencyMs(WasapiDriver* self)
 
 		port = (PaWasapiSubStream*) self->_capPorts->entry;
 		rf = port->device_latency + port->period;
-		return nano100ToMillis(&rf);
+		return (uint32_t)nano100ToMillis(&rf);
 	} else
 	return 0;
 }
@@ -1258,17 +1260,19 @@ uint32_t GetOutputLatencyMs(WasapiDriver* self)
 	REFERENCE_TIME rf;
 	///\todo: The documentation suggests that the period has to be added to the latency. verify it.
 	rf = self->out.device_latency + self->out.period;
-	return nano100ToMillis(&rf);
+	return (uint32_t)nano100ToMillis(&rf);
 }
 
 uint32_t GetInputLatencySamples(WasapiDriver* self)
 { 
-	return GetInputLatencyMs(self) * psy_audiodriversettings_samplespersec(&self->settings) * 0.001f;
+	return GetInputLatencyMs(self) *
+		(uint32_t)(psy_audiodriversettings_samplespersec(&self->settings) * 0.001);
 }
 
 uint32_t GetOutputLatencySamples(WasapiDriver* self)
 { 
-	return GetOutputLatencyMs(self) * psy_audiodriversettings_samplespersec(&self->settings) * 0.001f;
+	return GetOutputLatencyMs(self) *
+		(uint32_t)(psy_audiodriversettings_samplespersec(&self->settings) * 0.001);
 }
 
 uint32_t GetIdxFromDevice(WasapiDriver* self, WCHAR* szDeviceID)
@@ -1620,21 +1624,21 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	WasapiDriver* self = (WasapiDriver*)driver;
 	UINT64 pos;
-	uint32_t retVal = 0;
+	uintptr_t retVal = 0;
 
 	if (self->running) {
 		HRESULT hr = IAudioClock_GetPosition(self->pAudioClock, &pos, NULL);
 		EXIT_ON_ERROR(hr)
 			if (self->audioClockFreq == psy_audiodriversettings_samplespersec(&self->settings)) {
-				retVal = pos;
+				retVal = (uintptr_t)pos;
 			} else {
 				//Thus, the stream-relative offset in seconds can always be calculated as p/f.
-				retVal = (pos * psy_audiodriversettings_samplespersec(&self->settings) /
-					self->audioClockFreq);
+				retVal = (uintptr_t)((pos * psy_audiodriversettings_samplespersec(&self->settings) /
+					self->audioClockFreq));
 			}
 	}
 Exit:

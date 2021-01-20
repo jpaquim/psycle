@@ -187,6 +187,14 @@ void psy_audio_patterns_activatesolotrack(psy_audio_Patterns* self,
 	psy_audio_trackstate_activatesolotrack(&self->trackstate, track);
 }
 
+void psy_audio_patterns_setsolotrack(psy_audio_Patterns* self,
+	uintptr_t track)
+{
+	assert(self);
+
+	psy_audio_trackstate_setsolotrack(&self->trackstate, track);
+}
+
 void psy_audio_patterns_deactivatesolotrack(psy_audio_Patterns* self)
 {
 	assert(self);
@@ -208,14 +216,14 @@ void psy_audio_patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track)
 	psy_audio_trackstate_unmutetrack(&self->trackstate, track);
 }
 
-int psy_audio_patterns_istrackmuted(const psy_audio_Patterns* self, uintptr_t track)
+bool psy_audio_patterns_istrackmuted(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
 	return psy_audio_trackstate_istrackmuted(&self->trackstate, track);
 }
 
-int psy_audio_patterns_istracksoloed(const psy_audio_Patterns* self, uintptr_t track)
+bool psy_audio_patterns_istracksoloed(const psy_audio_Patterns* self, uintptr_t track)
 {
 	assert(self);
 
@@ -227,6 +235,33 @@ uintptr_t psy_audio_patterns_tracksoloed(const psy_audio_Patterns* self)
 	assert(self);
 
 	return psy_audio_trackstate_tracksoloed(&self->trackstate);
+}
+
+void psy_audio_patterns_armtrack(psy_audio_Patterns* self, uintptr_t track)
+{
+	assert(self);
+
+	psy_audio_trackstate_armtrack(&self->trackstate, track);	
+}
+
+void psy_audio_patterns_unarmtrack(psy_audio_Patterns* self, uintptr_t track)
+{
+	assert(self);
+
+	psy_audio_trackstate_unarmtrack(&self->trackstate, track);	
+}
+
+bool psy_audio_patterns_istrackarmed(const psy_audio_Patterns* self, uintptr_t track)
+{
+	assert(self);
+
+	return psy_audio_trackstate_istrackarmed(&self->trackstate, track);
+}
+
+uintptr_t psy_audio_psy_audio_patterns_trackarmedcount(const
+	psy_audio_Patterns* self)
+{
+	return psy_audio_trackstate_trackarmedcount(&self->trackstate);
 }
 
 void psy_audio_patterns_setnumtracks(psy_audio_Patterns* self,

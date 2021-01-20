@@ -25,8 +25,8 @@ typedef struct {
 	psy_audio_Buffer memorybuffer;
 	uintptr_t memorybuffersize;
 	uintptr_t slot;
-	intptr_t x;
-	intptr_t y;
+	double x;
+	double y;
 } psy_audio_CustomMachine;
 
 void psy_audio_custommachine_init(psy_audio_CustomMachine*, psy_audio_MachineCallback*);

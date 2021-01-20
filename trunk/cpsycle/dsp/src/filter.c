@@ -340,7 +340,7 @@ void filter_init(Filter* self)
 	filter_init_samplerate(self, 44100);
 }
 
-void filter_init_samplerate(Filter* self, uintptr_t samplerate)
+void filter_init_samplerate(Filter* self, psy_dsp_big_hz_t samplerate)
 {
 	filtervtable_init(self);
 	self->vtable = &filtervtable;

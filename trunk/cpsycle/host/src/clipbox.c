@@ -136,7 +136,7 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Size size;
 	const psy_ui_TextMetric* tm;
-	psy_ui_Rectangle rc;
+	psy_ui_RealRectangle rc;
 	psy_ui_Colour currbackground;
 	psy_ui_Colour currborder;
 

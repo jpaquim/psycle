@@ -15,14 +15,14 @@
 static void dispose(psy_ui_Graphics*);
 static void textout(psy_ui_Graphics*, double x, double y,  const char* text, uintptr_t len);
 static void textoutrectangle(psy_ui_Graphics*, double x, double y, uintptr_t options,
-	psy_ui_Rectangle r, const char* text, uintptr_t len);
-static void drawrectangle(psy_ui_Graphics*, const psy_ui_Rectangle);
-static void drawroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
+	psy_ui_RealRectangle r, const char* text, uintptr_t len);
+static void drawrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle);
+static void drawroundrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Size cornersize);
 static psy_ui_Size textsize(psy_ui_Graphics*, const char* text);
-static void drawsolidrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
+static void drawsolidrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Colour colour);
-static void drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
+static void drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Size cornersize, psy_ui_Colour colour);
 static void drawsolidpolygon(psy_ui_Graphics*, psy_ui_RealPoint* points,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
@@ -111,17 +111,17 @@ void textout(psy_ui_Graphics* self, double x, double y,  const char* text, uintp
 }
 
 void textoutrectangle(psy_ui_Graphics* self, double x, double y, uintptr_t options,
-	psy_ui_Rectangle r, const char* text, uintptr_t len)
+	psy_ui_RealRectangle r, const char* text, uintptr_t len)
 {
 	self->imp->vtable->dev_textoutrectangle(self->imp, x, y, options, r, text, len);
 }
 
-void drawrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r)
+void drawrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r)
 {
 	self->imp->vtable->dev_drawrectangle(self->imp, r);
 }
 
-void drawroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
+void drawroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize)
 {
 		self->imp->vtable->dev_drawroundrectangle(self->imp, r, cornersize);
@@ -132,13 +132,13 @@ psy_ui_Size textsize(psy_ui_Graphics* self, const char* text)
 	return self->imp->vtable->dev_textsize(self->imp, text);
 }
 
-void drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
+void drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour)
 {
 	self->imp->vtable->dev_drawsolidrectangle(self->imp, r, colour);
 }
 
-void drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
+void drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour)
 {
 		self->imp->vtable->dev_drawsolidroundrectangle(self->imp, r, cornersize, colour);
@@ -239,9 +239,9 @@ static void setorigin(psy_ui_Graphics* self, double x, double y)
 static void dev_dispose(psy_ui_GraphicsImp* self) { }
 static void dev_textout(psy_ui_GraphicsImp* self, double x, double y, const char* text, uintptr_t len) { }
 static void dev_textoutrectangle(psy_ui_GraphicsImp* self, double x, double y, uintptr_t options,
-	psy_ui_Rectangle r, const char* text, uintptr_t len){ }
-static void dev_drawrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r) { }
-static void dev_drawroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+	psy_ui_RealRectangle r, const char* text, uintptr_t len){ }
+static void dev_drawrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r) { }
+static void dev_drawroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize) { }
 static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text)
 {
@@ -249,9 +249,9 @@ static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text)
 
 	return rv;
 }
-static void dev_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+static void dev_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour) { }
-static void dev_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+static void dev_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour) { }
 static void dev_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_RealPoint* pt,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter) { }

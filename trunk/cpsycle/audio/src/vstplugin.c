@@ -84,7 +84,7 @@ static int savespecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int haseditor(psy_audio_VstPlugin*);
 static void seteditorhandle(psy_audio_VstPlugin*, void* handle);
-static void editorsize(psy_audio_VstPlugin*, int* width, int* height);
+static void editorsize(psy_audio_VstPlugin*, double* width, double* height);
 static void editoridle(psy_audio_VstPlugin*);
 static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo*,
 	const char* path, int shellidx);
@@ -759,7 +759,7 @@ void seteditorhandle(psy_audio_VstPlugin* self, void* handle)
 	}
 }
 
-void editorsize(psy_audio_VstPlugin* self, int* width, int* height)
+void editorsize(psy_audio_VstPlugin* self, double* width, double* height)
 {
 	struct ERect* r = 0;
 
@@ -769,16 +769,13 @@ void editorsize(psy_audio_VstPlugin* self, int* width, int* height)
 
 		self->mi.effect->dispatcher(self->mi.effect, effEditGetRect, 0, 0, &r, 0);
 		if (r != 0) {
-			*width = r->right - r->left;
-			*height = r->bottom - r->top;
-		} else {
-			*width = 0;
-			*height = 0;
+			*width = (double)(r->right - r->left);
+			*height = (double)(r->bottom - r->top);
+			return;
 		}
-	} else {
-		*width = 0;
-		*height = 0;
 	}
+	*width = 0.0;
+	*height = 0.0;	
 }
 
 void editoridle(psy_audio_VstPlugin* self)

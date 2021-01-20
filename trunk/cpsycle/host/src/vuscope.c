@@ -93,7 +93,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	double right;
 	double step;
 	psy_ui_Size size;
-	psy_ui_Rectangle rect;	
+	psy_ui_RealRectangle rect;	
 	const psy_ui_TextMetric* tm;
 	double charwidth;
 
@@ -191,7 +191,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	const psy_ui_TextMetric* tm;
 	intptr_t scopesamples;
-	psy_ui_Rectangle rect;
+	psy_ui_RealRectangle rect;
 	float* pSamplesL;
 	float* pSamplesR;
 	psy_audio_Machine* machine;

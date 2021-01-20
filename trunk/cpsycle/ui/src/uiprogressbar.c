@@ -48,7 +48,7 @@ void ondestroy(psy_ui_ProgressBar* self, psy_ui_Component* sender)
 void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;	
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	int height;
 		
 	height = 10;

@@ -15,7 +15,7 @@
 #include <windows.h>
 #endif
 
-void psy_ui_setrectangle(psy_ui_Rectangle* self, double left, double top, double width,
+void psy_ui_setrectangle(psy_ui_RealRectangle* self, double left, double top, double width,
 	double height)
 {
    self->left = left;
@@ -24,8 +24,8 @@ void psy_ui_setrectangle(psy_ui_Rectangle* self, double left, double top, double
    self->bottom = top + height;   
 }
 
-int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle* self,
-	const psy_ui_Rectangle* other)
+int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle* self,
+	const psy_ui_RealRectangle* other)
 {
 	return !(other->left > self->right ||
 		other->right < self->left ||
@@ -33,7 +33,7 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle* self,
 		other->bottom < self->top);
 }
 
-int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, double x, double y)
+int psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self, double x, double y)
 {
 	return (x >= self->left && x < self->right && 
 			y >= self->top && y < self->bottom);
@@ -41,7 +41,7 @@ int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, double x, double y)
 
 // from stackoverflow by metamal
 // todo: use liang-barsky algorithm
-bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
+bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 	double a_p1x, double a_p1y, double a_p2x, double a_p2y)
 {
 	// Find min and max X for the segment
@@ -120,8 +120,8 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 	return TRUE;
 }
 
-void psy_ui_rectangle_union(psy_ui_Rectangle* self,
-	const psy_ui_Rectangle* other)
+void psy_ui_realrectangle_union(psy_ui_RealRectangle* self,
+	const psy_ui_RealRectangle* other)
 {
 	self->left = (self->left < other->left) ? self->left : other->left;
 	self->right = (self->right > other->right) ? self->right : other->right;
@@ -129,7 +129,7 @@ void psy_ui_rectangle_union(psy_ui_Rectangle* self,
 	self->bottom = (self->bottom > other->bottom) ? self->bottom : other->bottom;
 }
 
-void psy_ui_rectangle_expand(psy_ui_Rectangle* self, double top, double right, double bottom, double left)
+void psy_ui_realrectangle_expand(psy_ui_RealRectangle* self, double top, double right, double bottom, double left)
 {
 	self->top -= top;
 	self->right += right;
@@ -137,7 +137,7 @@ void psy_ui_rectangle_expand(psy_ui_Rectangle* self, double top, double right, d
 	self->left -= left;	
 }
 
-void psy_ui_rectangle_move(psy_ui_Rectangle* self, double dx, double dy)
+void psy_ui_realrectangle_move(psy_ui_RealRectangle* self, double dx, double dy)
 {
 	self->top += dy;
 	self->right += dx;

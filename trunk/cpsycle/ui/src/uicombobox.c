@@ -122,7 +122,7 @@ void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,
 void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	psy_ui_RealPoint arrow_down[4];
 	psy_ui_RealPoint arrow_left[4];
 	psy_ui_RealPoint arrow_right[4];
@@ -322,7 +322,7 @@ static void dev_setstyle(psy_ui_ComboBoxImp* self, int style) { }
 static void dev_clear(psy_ui_ComboBoxImp* self) { }
 static void dev_setcursel(psy_ui_ComboBoxImp* self, intptr_t index) { }
 static intptr_t dev_cursel(psy_ui_ComboBoxImp* self) { return -1; }
-static void dev_selitems(psy_ui_ComboBoxImp* self, int* items, int maxitems) { }
+static void dev_selitems(psy_ui_ComboBoxImp* self, intptr_t* items, intptr_t maxitems) { }
 static intptr_t dev_count(psy_ui_ComboBoxImp* self) { return 0; }
 static intptr_t dev_selcount(psy_ui_ComboBoxImp* self) { return 0; }
 static void dev_showdropdown(psy_ui_ComboBoxImp* self) { }

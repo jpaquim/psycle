@@ -238,7 +238,7 @@ static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender,
 static void wavebox_onmousedoubleclick(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static int wavebox_hittest(WaveBox*, uintptr_t frame, double x, int epsilon);
-static psy_ui_Rectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
+static psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
 	uintptr_t frameend);
 static int wavebox_hittest_range(WaveBox*, uintptr_t framemin, uintptr_t framemax, 
 	double x);
@@ -339,7 +339,7 @@ void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample,
 
 void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 {	
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;
 	uintptr_t prevframe = 0;
@@ -360,10 +360,10 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		double scaley;		
 		double x;
 		double centery = size.height / 2;
-		psy_ui_Rectangle cont_loop_rc;
-		psy_ui_Rectangle cont_doubleloop_rc;
-		psy_ui_Rectangle sustain_loop_rc;		
-		psy_ui_Rectangle sustain_doubleloop_rc;
+		psy_ui_RealRectangle cont_loop_rc;
+		psy_ui_RealRectangle cont_doubleloop_rc;
+		psy_ui_RealRectangle sustain_loop_rc;		
+		psy_ui_RealRectangle sustain_doubleloop_rc;
 		bool firstselstart = TRUE;
 
 		if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
@@ -420,7 +420,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			float frame;
 			uintptr_t realframe;
 			psy_dsp_amp_t framevalue;
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 
 			frame = (float)((self->context.offsetstep * x +
 				((double)waveboxcontext_numframes(&self->context) * self->context.zoomleft)));
@@ -451,7 +451,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				}
 			} else
 			if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT &&
-					psy_ui_rectangle_intersect(&cont_loop_rc, x, 0)) {
+					psy_ui_realrectangle_intersect(&cont_loop_rc, x, 0)) {
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00D1C5B6));
 			} else {
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
@@ -493,7 +493,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	}
 }
 
-psy_ui_Rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
+psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
 	uintptr_t frameend)
 {	
 	double startx;
@@ -503,7 +503,7 @@ psy_ui_Rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
 	startx = wavebox_frametoscreen(self, framebegin);	
 	endx = wavebox_frametoscreen(self, frameend);	
 	size = psy_ui_component_sizepx(&self->component);
-	return psy_ui_rectangle_make(startx, 0, endx - startx, size.height);	
+	return psy_ui_realrectangle_make(startx, 0, endx - startx, size.height);	
 }
 
 void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
@@ -709,8 +709,8 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 					psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 			if (!self->preventdrawonselect) {
-				psy_ui_Rectangle rold;
-				psy_ui_Rectangle rnew;
+				psy_ui_RealRectangle rold;
+				psy_ui_RealRectangle rnew;
 				
 				if (olddragmode == WAVEBOX_DRAG_RIGHT &&
 						self->dragmode == WAVEBOX_DRAG_RIGHT) {
@@ -723,7 +723,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.end,
 							self->context.oldselection.end);
-						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
+						psy_ui_realrectangle_expand(&rnew, 0, 2, 0, 2);
 						psy_ui_component_invalidaterect(&self->component, rnew);
 					}												
 				} else
@@ -738,7 +738,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.start,
 							self->context.oldselection.start);
-						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
+						psy_ui_realrectangle_expand(&rnew, 0, 2, 0, 2);
 						psy_ui_component_invalidaterect(&self->component, rnew);
 					}
 				} else {
@@ -748,8 +748,8 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 					rnew = wavebox_framerangetoscreen(self,
 						self->context.selection.start,
 						self->context.selection.end);
-					psy_ui_rectangle_expand(&rold, 0, 2, 0, 2);					
-					psy_ui_rectangle_union(&rnew, &rold);
+					psy_ui_realrectangle_expand(&rold, 0, 2, 0, 2);					
+					psy_ui_realrectangle_union(&rnew, &rold);
 					psy_ui_component_invalidaterect(&self->component, rnew);
 				}
 			}

@@ -316,14 +316,14 @@ static uintptr_t slot(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
 static int haseditor(psy_audio_Machine* self) { return 0; }
 static void seteditorhandle(psy_audio_Machine* self, void* handle) { }
-static void editorsize(psy_audio_Machine* self, int* width, int* height)
+static void editorsize(psy_audio_Machine* self, double* width, double* height)
 { 
 	*width = 0;
 	*height = 0;
 }
 static void editoridle(psy_audio_Machine* self) { }
-static void setposition(psy_audio_Machine* self, intptr_t x, intptr_t y) { }
-static void position(psy_audio_Machine* self, intptr_t* x, intptr_t* y) { *x = *y = 0; }
+static void setposition(psy_audio_Machine* self, double x, double y) { }
+static void position(psy_audio_Machine* self, double* x, double* y) { *x = *y = 0; }
 static const char* editname(psy_audio_Machine* self) { return ""; }
 static void seteditname(psy_audio_Machine* self, const char* name) { }
 static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return NULL; }

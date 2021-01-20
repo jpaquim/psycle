@@ -30,7 +30,7 @@ static const char* playbackname(psy_AudioDriver*, int index);
 static int numplaybacks(psy_AudioDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 static const psy_Property* driver_configuration(const struct psy_AudioDriver*);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static void init_properties(SilentDriver* driver);
 
@@ -181,7 +181,7 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	return 0;
 }

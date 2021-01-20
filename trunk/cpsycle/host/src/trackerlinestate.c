@@ -98,7 +98,7 @@ uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 	return 0;
 }
 
-void trackerlinestate_clip(TrackerLineState* self, const psy_ui_Rectangle* clip,
+void trackerlinestate_clip(TrackerLineState* self, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv)
 {
 	assert(self);

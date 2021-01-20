@@ -155,7 +155,7 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	int step, int mode)
 {
 	double cpx;
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	psy_ui_Size corner;
 
 	corner.width = psy_ui_value_makepx(5);
@@ -411,8 +411,8 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 	int i;
 	int cpx;
 	int cpy;
-	psy_ui_Rectangle r_outter;
-	psy_ui_Rectangle r_inner;
+	psy_ui_RealRectangle r_outter;
+	psy_ui_RealRectangle r_inner;
 	int numsteprows;
 
 	cpx = 0;

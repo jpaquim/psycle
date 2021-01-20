@@ -18,13 +18,13 @@
 typedef struct {
 	void* target;
 	psy_PropertyCallback callback;
-	int level;
+	uintptr_t level;
 } PropertiesCallbackContext;
 
 static int properties_enumerate_rec(psy_Property*, PropertiesCallbackContext*);
-static int psy_property_onsearchenum(psy_Property*, psy_Property*, int level);
+static int psy_property_onsearchenum(psy_Property*, psy_Property*, uintptr_t level);
 static int psy_property_onsearchpropertyenum(psy_Property*, psy_Property*,
-	int level);
+	uintptr_t level);
 
 // psy_PropertyItem
 // implementation
@@ -410,10 +410,14 @@ int properties_enumerate_rec(psy_Property* self,
 			if (((psy_Property*)(p->entry))->children) {
 				++context->level;
 				if (!properties_enumerate_rec(p->entry, context)) {
-					--context->level;
+					if (context->level > 0) {
+						--context->level;
+					}
 					return 0;
 				}
-				--context->level;
+				if (context->level > 0) {
+					--context->level;
+				}
 			}
 		}
 		p = p->next;
@@ -442,7 +446,7 @@ const psy_Property* psy_property_find_const(const psy_Property* self,
 	return psy_property_find((psy_Property*)self, key, typ);
 }
 
-int psy_property_onsearchenum(psy_Property* self, psy_Property* property, int level)
+int psy_property_onsearchenum(psy_Property* self, psy_Property* property, uintptr_t level)
 {
 	assert(self);
 
@@ -457,7 +461,7 @@ int psy_property_onsearchenum(psy_Property* self, psy_Property* property, int le
 }
 
 int psy_property_onsearchpropertyenum(psy_Property* self, psy_Property* property,
-	int level)
+	uintptr_t level)
 {
 	assert(self);
 

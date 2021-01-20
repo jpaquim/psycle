@@ -368,8 +368,8 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 			self->library.root);
 		if (rv->library.module) {
 			psy_audio_Preset preset;
-			intptr_t x;
-			intptr_t y;
+			double x;
+			double y;
 
 			psy_audio_preset_init(&preset);
 			currentpreset(self, &preset);

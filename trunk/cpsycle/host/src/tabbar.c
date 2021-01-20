@@ -52,11 +52,11 @@ void tab_settext(Tab* self, const char* text)
 	psy_strreset(&self->translation, psy_ui_translate(text));
 }
 
-psy_ui_Rectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
+psy_ui_RealRectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
 {
 	assert(self);
 	
-	return psy_ui_rectangle_make(self->position.x, self->position.y,
+	return psy_ui_realrectangle_make(self->position.x, self->position.y,
 		psy_ui_value_px(&self->size.width, tm), tm->tmHeight + 2);
 }
 
@@ -331,11 +331,11 @@ uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 	tm = psy_ui_component_textmetric(tabbar_base(self));	
 	for (c = 0, p = self->tabs; p != NULL; psy_list_next(&p), ++c) {
 		Tab* tab;
-		psy_ui_Rectangle r;
+		psy_ui_RealRectangle r;
 
 		tab = (Tab*)psy_list_entry(p);
 		r = tab_position(tab, tm);
-		if (psy_ui_rectangle_intersect(&r, x, y)) {
+		if (psy_ui_realrectangle_intersect(&r, x, y)) {
 			rv = c;
 			*rvtab = tab;
 			break;

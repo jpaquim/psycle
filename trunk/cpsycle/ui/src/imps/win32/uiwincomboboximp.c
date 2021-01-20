@@ -21,10 +21,10 @@ static void dev_show(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp
 static void dev_showstate(psy_ui_win_ComboBoxImp* self, int state) { self->win_component_imp.imp.vtable->dev_showstate(&self->win_component_imp.imp, state); }
 static void dev_hide(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_hide(&self->win_component_imp.imp); }
 static int dev_visible(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_visible(&self->win_component_imp.imp); }
-static void dev_move(psy_ui_win_ComboBoxImp* self, double left, double top) { self->win_component_imp.imp.vtable->dev_move(&self->win_component_imp.imp, left, top); }
+static void dev_move(psy_ui_win_ComboBoxImp* self, psy_ui_Point origin) { self->win_component_imp.imp.vtable->dev_move(&self->win_component_imp.imp, origin); }
 static void dev_resize(psy_ui_win_ComboBoxImp* self, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_win_ComboBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
-static psy_ui_Rectangle dev_position(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
+static psy_ui_RealRectangle dev_position(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_ComboBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(const psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
@@ -33,7 +33,7 @@ static psy_ui_Component* dev_parent(psy_ui_win_ComboBoxImp* self) { return self-
 static void dev_capture(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_capture(&self->win_component_imp.imp); }
 static void dev_releasecapture(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_releasecapture(&self->win_component_imp.imp); }
 static void dev_invalidate(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_invalidate(&self->win_component_imp.imp); }
-static void dev_invalidaterect(psy_ui_win_ComboBoxImp* self, const psy_ui_Rectangle* r) { self->win_component_imp.imp.vtable->dev_invalidaterect(&self->win_component_imp.imp, r); }
+static void dev_invalidaterect(psy_ui_win_ComboBoxImp* self, const psy_ui_RealRectangle* r) { self->win_component_imp.imp.vtable->dev_invalidaterect(&self->win_component_imp.imp, r); }
 static void dev_update(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_update(&self->win_component_imp.imp); }
 static void dev_setfont(psy_ui_win_ComboBoxImp* self, psy_ui_Font* font) { self->win_component_imp.imp.vtable->dev_setfont(&self->win_component_imp.imp, font); }
 static psy_List* dev_children(psy_ui_win_ComboBoxImp* self, int recursive) { return self->win_component_imp.imp.vtable->dev_children(&self->win_component_imp.imp, recursive); }
@@ -109,7 +109,7 @@ static void dev_setstyle(psy_ui_win_ComboBoxImp*, int style);
 static void dev_clear(psy_ui_win_ComboBoxImp*);
 static void dev_setcursel(psy_ui_win_ComboBoxImp*, intptr_t index);
 static intptr_t dev_cursel(psy_ui_win_ComboBoxImp*);
-static void dev_selitems(psy_ui_win_ComboBoxImp*, int* items, int maxitems);
+static void dev_selitems(psy_ui_win_ComboBoxImp*, intptr_t* items, intptr_t maxitems);
 static intptr_t dev_selcount(psy_ui_win_ComboBoxImp*);
 static intptr_t dev_count(psy_ui_win_ComboBoxImp*);
 static void dev_showdropdown(psy_ui_win_ComboBoxImp*);
@@ -120,17 +120,17 @@ static int comboboximp_vtable_initialized = 0;
 static void comboboximp_imp_vtable_init(psy_ui_win_ComboBoxImp* self)
 {
 	if (!comboboximp_vtable_initialized) {
-		comboboximp_vtable.dev_addtext = (psy_ui_fp_comboboximp_dev_addtext) dev_addtext;
-		comboboximp_vtable.dev_settext = (psy_ui_fp_comboboximp_dev_settext) dev_settext;
-		comboboximp_vtable.dev_text = (psy_ui_fp_comboboximp_dev_text) dev_text;
-		comboboximp_vtable.dev_setstyle = (psy_ui_fp_comboboximp_dev_setstyle) dev_setstyle;
-		comboboximp_vtable.dev_clear = (psy_ui_fp_comboboximp_dev_clear) dev_clear;
-		comboboximp_vtable.dev_setcursel = (psy_ui_fp_comboboximp_dev_setcursel) dev_setcursel;
-		comboboximp_vtable.dev_cursel = (psy_ui_fp_comboboximp_dev_cursel) dev_cursel;
-		comboboximp_vtable.dev_count = (psy_ui_fp_comboboximp_dev_count) dev_count;
-		comboboximp_vtable.dev_selitems = (psy_ui_fp_comboboximp_dev_selitems) dev_selitems;
-		comboboximp_vtable.dev_selcount = (psy_ui_fp_comboboximp_dev_selcount) dev_selcount;
-		comboboximp_vtable.dev_showdropdown = (psy_ui_fp_comboboximp_dev_showdropdown) dev_showdropdown;
+		comboboximp_vtable.dev_addtext = (psy_ui_fp_comboboximp_dev_addtext)dev_addtext;
+		comboboximp_vtable.dev_settext = (psy_ui_fp_comboboximp_dev_settext)dev_settext;
+		comboboximp_vtable.dev_text = (psy_ui_fp_comboboximp_dev_text)dev_text;
+		comboboximp_vtable.dev_setstyle = (psy_ui_fp_comboboximp_dev_setstyle)dev_setstyle;
+		comboboximp_vtable.dev_clear = (psy_ui_fp_comboboximp_dev_clear)dev_clear;
+		comboboximp_vtable.dev_setcursel = (psy_ui_fp_comboboximp_dev_setcursel)dev_setcursel;
+		comboboximp_vtable.dev_cursel = (psy_ui_fp_comboboximp_dev_cursel)dev_cursel;
+		comboboximp_vtable.dev_count = (psy_ui_fp_comboboximp_dev_count)dev_count;
+		comboboximp_vtable.dev_selitems = (psy_ui_fp_comboboximp_dev_selitems)dev_selitems;
+		comboboximp_vtable.dev_selcount = (psy_ui_fp_comboboximp_dev_selcount)dev_selcount;
+		comboboximp_vtable.dev_showdropdown = (psy_ui_fp_comboboximp_dev_showdropdown)dev_showdropdown;
 		comboboximp_vtable_initialized = 1;
 	}
 }
@@ -258,7 +258,7 @@ intptr_t dev_count(psy_ui_win_ComboBoxImp* self)
 	return SendMessage(self->win_combo_imp.hwnd, CB_GETCOUNT, 0, (LPARAM) 0);
 }
 
-void dev_selitems(psy_ui_win_ComboBoxImp* self, int* items, int maxitems)
+void dev_selitems(psy_ui_win_ComboBoxImp* self, intptr_t* items, intptr_t maxitems)
 {
 	//SendMessage(self->win_combo_imp.hwnd, CB_GETSELITEMS, (WPARAM)maxitems,
 	//	(LPARAM)items);

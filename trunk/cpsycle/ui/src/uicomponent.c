@@ -335,11 +335,9 @@ int drawvisible(psy_ui_Component* self)
 	return self->imp->vtable->dev_drawvisible(self->imp);
 }
 
-void move(psy_ui_Component* self, psy_ui_Point topleft)
+void move(psy_ui_Component* self, psy_ui_Point origin)
 {	
-	self->imp->vtable->dev_move(self->imp, 
-		psy_ui_value_px(&topleft.x, psy_ui_component_textmetric(self)),
-		psy_ui_value_px(&topleft.y, psy_ui_component_textmetric(self)));
+	self->imp->vtable->dev_move(self->imp, origin);		
 }
 
 void resize(psy_ui_Component* self, psy_ui_Size size)
@@ -849,8 +847,8 @@ static void dev_showstate(psy_ui_ComponentImp* self, int state) { }
 static void dev_hide(psy_ui_ComponentImp* self) { }
 static int dev_visible(psy_ui_ComponentImp* self) { return 0; }
 static int dev_drawvisible(psy_ui_ComponentImp* self) { return 0; }
-static psy_ui_Rectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_Rectangle rv = { 0, 0, 0, 0 }; return rv; }
-static void dev_move(psy_ui_ComponentImp* self, double x, double y) { }
+static psy_ui_RealRectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_RealRectangle rv = { 0, 0, 0, 0 }; return rv; }
+static void dev_move(psy_ui_ComponentImp* self, psy_ui_Point origin) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, intptr_t width, intptr_t height) { }
 static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
@@ -866,7 +864,7 @@ static void dev_setorder(psy_ui_ComponentImp* self, psy_ui_ComponentImp* inserta
 static void dev_capture(psy_ui_ComponentImp* self) { }
 static void dev_releasecapture(psy_ui_ComponentImp* self) { }
 static void dev_invalidate(psy_ui_ComponentImp* self) { }
-static void dev_invalidaterect(psy_ui_ComponentImp* self, const psy_ui_Rectangle* r) { }
+static void dev_invalidaterect(psy_ui_ComponentImp* self, const psy_ui_RealRectangle* r) { }
 static void dev_update(psy_ui_ComponentImp* self) { }
 static void dev_setfont(psy_ui_ComponentImp* self, psy_ui_Font* font) { }
 static void dev_showhorizontalscrollbar(psy_ui_ComponentImp* self) { }
@@ -1148,12 +1146,12 @@ void psy_ui_component_togglevisibility(psy_ui_Component* self)
 	}
 }
 
-psy_ui_Rectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
+psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 {
 	psy_ui_RealSize size;	
 	
 	size = psy_ui_component_sizepx(self);	
-	return psy_ui_rectangle_make(
+	return psy_ui_realrectangle_make(
 		psy_ui_component_scrollleftpx(self),
 		psy_ui_component_scrolltoppx(self),
 		size.width, size.height);

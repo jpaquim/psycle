@@ -29,12 +29,12 @@ static uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine*);
 static void custommachine_setbuffermemorysize(psy_audio_CustomMachine*, uintptr_t size);
 static uintptr_t custommachine_slot(psy_audio_CustomMachine*);
 static void custommachine_setslot(psy_audio_CustomMachine*, uintptr_t slot);
-static void setposition(psy_audio_CustomMachine* self, intptr_t x, intptr_t y)
+static void setposition(psy_audio_CustomMachine* self, double x, double y)
 {
 	self->x = x;
 	self->y = y;
 }
-static void position(psy_audio_CustomMachine* self, intptr_t* x, intptr_t* y)
+static void position(psy_audio_CustomMachine* self, double* x, double* y)
 {
 	*x = self->x;
 	*y = self->y;

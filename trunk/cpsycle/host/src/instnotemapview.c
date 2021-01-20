@@ -117,7 +117,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));
 	for (key = keymin; key < keymax; ++key) {
 		if (!isblack(key)) {
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 
 			psy_ui_setrectangle(&r,
 				cp, 0,
@@ -132,7 +132,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 		if (!isblack(key)) {			
 			cp += self->metrics.keysize;
 		} else {
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 			int x;
 			int width;
 
@@ -267,7 +267,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			psy_audio_InstrumentEntry* entry;
 			double startx;
 			double endx;
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 			psy_ui_Value scrollleft;
 			psy_ui_Value scrolltop;
 

@@ -16,7 +16,7 @@
 // std
 #include <assert.h>
 #include <math.h>
-
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -175,7 +175,7 @@ void xmenvelopecontroller_stop(XMEnvelopeController* self)
 
 void xmenvelopecontroller_start(XMEnvelopeController* self)
 {
-	if (self->m_PositionIndex < psy_dsp_envelope_numofpoints(self->m_pEnvelope)) {
+	if (self->m_PositionIndex < (int)psy_dsp_envelope_numofpoints(self->m_pEnvelope)) {
 		self->m_Stage = (XMEnvelopeStage)(self->m_Stage | XMENVELOPESTAGE_DOSTEP);
 		if (self->m_Samples == 0) {
 			//envelope is stopped. Le'ts do the first calc.
@@ -282,7 +282,7 @@ void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int en
 	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 		time *= 1000;
 	}
-	self->m_Samples = time * xmenvelopecontroller_sratedeviation(self);	
+	self->m_Samples = (int)((int)time * xmenvelopecontroller_sratedeviation(self));
 	time = psy_dsp_envelope_time(self->m_pEnvelope, end);
 	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
 		time *= 1000;
@@ -380,8 +380,7 @@ void psy_audio_xmsamplervoice_reset(psy_audio_XMSamplerVoice* self)
 	
 	filter_reset(&self->m_Filter);
 	// self->m_FilterIT.Reset();
-	// self->m_FilterClassic.Reset();
-	
+	// self->m_FilterClassic.Reset();	
 	self->m_CutOff = 127;
 	self->m_Ressonance = 0;
 	self->_coModify = 0;
@@ -393,8 +392,7 @@ void psy_audio_xmsamplervoice_reset(psy_audio_XMSamplerVoice* self)
 	self->m_Period = 0;
 	self->m_Note = psy_audio_NOTECOMMANDS_EMPTY;
 	self->m_Volume = 128;
-	self->m_RealVolume = 1.0f;
-	
+	self->m_RealVolume = 1.0f;	
 	psy_dsp_slider_resetto(&self->rampl, 0.f);
 	psy_dsp_slider_resetto(&self->rampr, 0.f);	
 
@@ -467,7 +465,8 @@ void psy_audio_xmsamplervoice_voiceinit(psy_audio_XMSamplerVoice* self,
 	xmenvelopecontroller_initcontroller_envelope(&self->m_FilterEnvelope,
 		&_inst->filterenvelope);
 	
-	filter_init_samplerate(&self->m_Filter, 44100);
+	filter_init_samplerate(&self->m_Filter,
+		psy_audio_machine_samplerate(psy_audio_xmsampler_base(self->m_pSampler)));
 
 	if (psy_audio_instrument_filtertype(_inst) != F_NONE) {
 		psy_audio_xmsamplervoice_setfiltertype(self,
@@ -493,7 +492,7 @@ void psy_audio_xmsamplervoice_voiceinit(psy_audio_XMSamplerVoice* self,
 					Ressonance(_inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f);
 			} else */ {
 			psy_audio_xmsamplervoice_setressonance(self,
-				psy_audio_instrument_filterresonance(_inst));
+				psy_audio_instrument_filterresonance(_inst) * 127);
 		}
 	}
 	else {
@@ -536,9 +535,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 		{
 			float volume;
 			float lVolDest;
-			float rVolDest;					
-
-			intptr_t diff;
+			float rVolDest;			
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.

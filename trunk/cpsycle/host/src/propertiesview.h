@@ -29,8 +29,8 @@ extern "C" {
 typedef struct PropertiesRenderLineState {
 	double cpy;
 	double cpx;
-	intptr_t level;
-	intptr_t numlines;
+	uintptr_t level;
+	uintptr_t numlines;
 	psy_Property* properties;
 } PropertiesRenderLineState;
 
@@ -42,8 +42,8 @@ typedef struct PropertiesRenderer {
 	psy_ui_Component component;
 	// internal data	
 	psy_ui_Graphics* g;
-	psy_ui_Rectangle selrect;
-	int lastlevel;	
+	psy_ui_RealRectangle selrect;
+	uintptr_t lastlevel;
 	int keyselected;
 	int button;	
 	double mx;
@@ -53,10 +53,10 @@ typedef struct PropertiesRenderer {
 	double lineheight;
 	double textheight;
 	double centery;
-	intptr_t numblocklines;
+	uintptr_t numblocklines;
 	double identwidth;
 	bool showkeyselection;
-	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
+	double col_perc[PROPERTIESRENDERER_NUMCOLS];	
 	double col_width[PROPERTIESRENDERER_NUMCOLS];
 	double col_start[PROPERTIESRENDERER_NUMCOLS];
 	psy_ui_Edit edit;

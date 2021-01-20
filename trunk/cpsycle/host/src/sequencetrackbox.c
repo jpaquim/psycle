@@ -12,7 +12,7 @@ static void sequencetrackbox_drawtext(SequenceTrackBox*,
 	psy_ui_Graphics*, double x, double y, const char* text);
 // implementation
 void sequencetrackbox_init(SequenceTrackBox* self,
-	psy_ui_Rectangle position, const psy_ui_TextMetric* tm,
+	psy_ui_RealRectangle position, const psy_ui_TextMetric* tm,
 	psy_audio_SequenceTrack* track,
 	psy_audio_Sequence* sequence,
 	uintptr_t trackindex, bool selected)
@@ -33,7 +33,7 @@ void sequencetrackbox_init(SequenceTrackBox* self,
 
 void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 {	
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	char text[64];		
 	double centery;
 	

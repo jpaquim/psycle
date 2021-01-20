@@ -87,7 +87,7 @@ typedef struct psy_Property {
 	void (*dispose)(psy_PropertyItem*);
 } psy_Property;
 
-typedef int (*psy_PropertyCallback)(void*, psy_Property*, int level);
+typedef int (*psy_PropertyCallback)(void*, psy_Property*, uintptr_t level);
 
 // Init/dispose
 //

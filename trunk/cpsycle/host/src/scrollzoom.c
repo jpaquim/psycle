@@ -74,7 +74,7 @@ void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
 		++zoomrightpx;
 	}	
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));	
-	psy_ui_drawrectangle(g, psy_ui_rectangle_make(
+	psy_ui_drawrectangle(g, psy_ui_realrectangle_make(
 		zoomleftpx, 0, zoomrightpx - zoomleftpx, size.height));
 	psy_signal_emit(&self->signal_customdraw, self, 1, g);
 }

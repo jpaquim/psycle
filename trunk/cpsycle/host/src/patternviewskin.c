@@ -369,7 +369,7 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 void patternviewskin_setclassicheadercoords(PatternViewSkin* self)
 {
 	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };
-	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
+	static SkinCoord record = { 96, 40, 17, 17, 85, 3, 17, 17, 0 };
 	static SkinCoord mute = { 79, 40, 17, 17, 66, 3, 17, 17, 0 };
 	static SkinCoord solo = { 62, 40, 17, 17, 47, 3, 17, 17, 0 };
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };

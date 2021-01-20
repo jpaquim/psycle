@@ -25,7 +25,7 @@ static void psy_ui_sliderpane_updatevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
-static psy_ui_Rectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
+static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
 
 
 static psy_ui_ComponentVtable vtable;
@@ -118,7 +118,7 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		psy_ui_defaults()->style_common.colour);	
 	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
 	size = psy_ui_component_sizepx(&self->component);
-	psy_ui_drawrectangle(g, psy_ui_rectangle_make(
+	psy_ui_drawrectangle(g, psy_ui_realrectangle_make(
 		0.0, 0.0, size.width, size.height));
 }
 
@@ -424,17 +424,17 @@ void psy_ui_slider_update(psy_ui_Slider* self)
 	psy_ui_sliderpane_describevalue(&self->pane);	
 }
 
-psy_ui_Rectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* self)
+psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* self)
 {
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_sizepx(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		return psy_ui_rectangle_make(
+		return psy_ui_realrectangle_make(
 			floor((size.width - self->slidersizepx.width) * self->value), 2,
 			self->slidersizepx.width, size.height - 4);
 	}
-	return psy_ui_rectangle_make(2,
+	return psy_ui_realrectangle_make(2,
 		floor(((size.height - self->slidersizepx.height) * (1 - self->value))),
 		size.width - 4, self->slidersizepx.height);
 }

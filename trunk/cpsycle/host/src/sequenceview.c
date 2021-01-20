@@ -247,7 +247,7 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 			psy_audio_SequenceTrack* track;
 			track = (psy_audio_SequenceTrack*)p->entry;			
 			sequencetrackbox_init(&trackheader,
-				psy_ui_rectangle_make(cpx, 0, self->state->trackwidth, size.height),
+				psy_ui_realrectangle_make(cpx, 0, self->state->trackwidth, size.height),
 				tm,
 				track,
 				self->state->sequence,
@@ -256,7 +256,7 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 			sequencetrackbox_draw(&trackheader, g);
 		}
 		sequencetrackbox_init(&trackheader,
-			psy_ui_rectangle_make(cpx, 0, self->state->trackwidth, size.height),
+			psy_ui_realrectangle_make(cpx, 0, self->state->trackwidth, size.height),
 			tm, NULL, self->state->sequence, 0, 0);
 		sequencetrackbox_draw(&trackheader, g);
 	}	
@@ -282,7 +282,7 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 		track = (psy_audio_SequenceTrack*)psy_audio_sequence_track_at(
 			self->state->sequence, selectedtrack);
 		sequencetrackbox_init(&trackbox,
-			psy_ui_rectangle_make(
+			psy_ui_realrectangle_make(
 				selectedtrack * self->state->trackwidth, 0,
 				self->state->trackwidth, size.height),
 			tm, track, self->state->sequence, selectedtrack,
@@ -323,7 +323,7 @@ static void sequencelistview_onmousedoubleclick(SequenceListView*,
 static void sequencelistview_ontimer(SequenceListView*, uintptr_t timerid);
 static void sequencelistview_onpatternnamechanged(SequenceListView*,
 	psy_audio_Patterns*, uintptr_t slot);
-static psy_ui_Rectangle sequencelistview_rowrectangle(SequenceListView*,
+static psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView*,
 	uintptr_t row);
 static void sequencelistview_invalidaterow(SequenceListView*, uintptr_t row);
 static void sequencelistview_oneditkeydown(SequenceListView*,
@@ -401,7 +401,7 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 			psy_audio_sequence_track_size(self->state->sequence,
 			self->state->selection->editposition.track) == 0) {
 		double cpy;
-		psy_ui_Rectangle r;
+		psy_ui_RealRectangle r;
 
 		cpx = self->state->selection->editposition.track * self->state->trackwidth + self->state->margin + 5;
 		cpy = self->state->margin;
@@ -452,7 +452,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g,
 	uintptr_t c;
 	double cpy = 0;
 	char text[20];
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	psy_ui_RealSize size;
 	uintptr_t startrow;
 	uintptr_t endrow;
@@ -518,9 +518,9 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 	psy_ui_Graphics* g, double x, double y,
 	psy_audio_SequenceEntry* sequenceentry)
 {
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 
-	r = psy_ui_rectangle_make(x + 5, y + self->state->margin,
+	r = psy_ui_realrectangle_make(x + 5, y + self->state->margin,
 		floor((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
 			(self->state->trackwidth - 5)), self->lineheight);
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
@@ -673,13 +673,13 @@ void sequencelistview_invalidaterow(SequenceListView* self, uintptr_t row)
 	}
 }
 
-psy_ui_Rectangle sequencelistview_rowrectangle(SequenceListView* self,
+psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 	uintptr_t row)
 {
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_sizepx(&self->component);
-	return psy_ui_rectangle_make(0, self->lineheight * row + self->state->margin,
+	return psy_ui_realrectangle_make(0, self->lineheight * row + self->state->margin,
 		size.width, self->lineheight);
 }
 

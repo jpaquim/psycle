@@ -16,14 +16,14 @@
 static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, double x, double y, const char*, uintptr_t len);
 static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, double x, double y, uintptr_t options,
-	psy_ui_Rectangle r, const char* text, uintptr_t len);
-static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle);
-static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle,
+	psy_ui_RealRectangle r, const char* text, uintptr_t len);
+static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle);
+static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle,
 	psy_ui_Size cornersize);
 static psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp*, const char*);
-static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
+static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
-static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
+static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_RealPoint*,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
@@ -156,7 +156,7 @@ void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, double x, double y,
 }
 
 void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, double x, double y, uintptr_t options,
-	psy_ui_Rectangle r, const char* text, uintptr_t len)
+	psy_ui_RealRectangle r, const char* text, uintptr_t len)
 {
 	RECT rect;
 	uintptr_t woptions = 0;
@@ -188,7 +188,7 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 	return rv;
 }
 
-void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r)
+void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -199,7 +199,7 @@ void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_R
 	SelectObject(self->hdc, hOldBrush);
 }
 
-void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r, psy_ui_Size cornersize)
+void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r, psy_ui_Size cornersize)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -216,7 +216,7 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy
 	SelectObject(self->hdc, hOldBrush);
 }
 
-void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r, psy_ui_Colour colour)
+void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r, psy_ui_Colour colour)
 {
      HBRUSH hBrush;     
      RECT   rect;	 
@@ -227,7 +227,7 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy
      DeleteObject (hBrush) ;
 }
 
-void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r,
+void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour)
 {
 	HBRUSH hBrush;
