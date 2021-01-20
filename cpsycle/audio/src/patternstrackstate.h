@@ -13,19 +13,24 @@ extern "C" {
 typedef struct {
 	psy_Table mute;	
 	psy_Table record;
-	int soloactive;
+	bool soloactive;
 	uintptr_t soloedtrack;	
 } psy_audio_TrackState;
 
 void psy_audio_trackstate_init(psy_audio_TrackState*);
 void psy_audio_trackstate_dispose(psy_audio_TrackState*);
 void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState*, uintptr_t track);
+void psy_audio_trackstate_setsolotrack(psy_audio_TrackState*, uintptr_t track);
 void psy_audio_trackstate_deactivatesolotrack(psy_audio_TrackState*);
 void psy_audio_trackstate_mutetrack(psy_audio_TrackState*, uintptr_t track);
 void psy_audio_trackstate_unmutetrack(psy_audio_TrackState*, uintptr_t track);
-int psy_audio_trackstate_istrackmuted(const psy_audio_TrackState*, uintptr_t track);
-int psy_audio_trackstate_istracksoloed(const psy_audio_TrackState*, uintptr_t track);
+bool psy_audio_trackstate_istrackmuted(const psy_audio_TrackState*, uintptr_t track);
+bool psy_audio_trackstate_istracksoloed(const psy_audio_TrackState*, uintptr_t track);
 uintptr_t psy_audio_trackstate_tracksoloed(const psy_audio_TrackState*);
+void psy_audio_trackstate_armtrack(psy_audio_TrackState*, uintptr_t track);
+void psy_audio_trackstate_unarmtrack(psy_audio_TrackState*, uintptr_t track);
+bool psy_audio_trackstate_istrackarmed(const psy_audio_TrackState*, uintptr_t track);
+uintptr_t psy_audio_trackstate_trackarmedcount(const psy_audio_TrackState*);
 
 #ifdef __cplusplus
 }

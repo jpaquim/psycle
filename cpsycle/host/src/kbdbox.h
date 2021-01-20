@@ -27,7 +27,7 @@ typedef struct KbdBoxKey {
 	char* desc1; // row 1 keycode with shift
 	char* desc2; // row 2 keycode with ctrl
 	psy_ui_Colour colour;
-	psy_ui_Rectangle position;
+	psy_ui_RealRectangle position;
 } KbdBoxKey;
 
 void kbdboxkey_init_all(KbdBoxKey*, int x, int y, int width, int height,

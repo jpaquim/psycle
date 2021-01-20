@@ -44,7 +44,7 @@ void ondestroy(psy_ui_Switch* self, psy_ui_Component* sender)
 
 void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 {
-	/* psy_ui_Rectangle r;
+	/* psy_ui_RealRectangle r;
 	int checked = 0;
 	psy_ui_TextMetric tm;
 	psy_ui_Size switchsize;

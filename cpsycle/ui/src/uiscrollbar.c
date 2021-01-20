@@ -74,13 +74,13 @@ void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self, psy_ui_Orie
 void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	
 	size = psy_ui_component_sizepx(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		r = psy_ui_rectangle_make(self->screenpos, 2, 20, size.height - 4);		
+		r = psy_ui_realrectangle_make(self->screenpos, 2, 20, size.height - 4);		
 	} else {
-		r = psy_ui_rectangle_make(2, self->screenpos, size.width - 4, 20);
+		r = psy_ui_realrectangle_make(2, self->screenpos, size.width - 4, 20);
 	}
 	psy_ui_drawsolidrectangle(g, r,
 		psy_ui_component_colour(&self->component));

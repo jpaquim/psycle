@@ -117,7 +117,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
 		}
 	} else {
-		psy_ui_Rectangle position;
+		psy_ui_RealRectangle position;
 
 		position = psy_ui_component_position(&self->component);
 		psy_ui_component_capture(&self->component);
@@ -140,10 +140,10 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 {
 	if (self->resize == 1) {		
-		psy_ui_Rectangle position;
-		psy_ui_Rectangle parentposition;
-		psy_ui_Rectangle prevposition;
-		psy_ui_Rectangle nextposition;
+		psy_ui_RealRectangle position;
+		psy_ui_RealRectangle parentposition;
+		psy_ui_RealRectangle prevposition;
+		psy_ui_RealRectangle nextposition;
 		psy_ui_Component* parent;
 		psy_ui_Component* prev;
 		psy_ui_Component* next;
@@ -213,7 +213,7 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 {			
 	if (ev->button == 1) {
-		psy_ui_Rectangle position;
+		psy_ui_RealRectangle position;
 		psy_ui_Component* prev;
 		psy_ui_Component* next;
 
@@ -231,7 +231,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		if (prev) {
 			position = psy_ui_component_position(&self->component);
 			if (prev->align == psy_ui_ALIGN_LEFT) {
-				psy_ui_Rectangle prev_position;
+				psy_ui_RealRectangle prev_position;
 
 				prev->preventpreferredsizeatalign = TRUE;
 				prev_position = psy_ui_component_position(prev);
@@ -240,7 +240,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 						psy_ui_value_makepx(position.left - prev_position.left),
 						psy_ui_component_size(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_RIGHT) {
-					psy_ui_Rectangle prev_position;
+					psy_ui_RealRectangle prev_position;
 
 				prev->preventpreferredsizeatalign = TRUE;
 				prev_position = psy_ui_component_position(prev);
@@ -255,7 +255,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 						psy_ui_component_size(prev).width,
 						psy_ui_value_makepx(position.top)));
 			} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
-				psy_ui_Rectangle prev_position;
+				psy_ui_RealRectangle prev_position;
 
 				prev->preventpreferredsizeatalign = TRUE;
 				prev_position = psy_ui_component_position(prev);

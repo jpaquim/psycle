@@ -277,7 +277,7 @@ double hermitecurveinterpolate(intptr_t kf0, intptr_t kf1, intptr_t kf2,
 void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
 	psy_ui_Graphics* g, double x, double y, psy_List* keyframe)
 {
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	double half = 2;
 	psy_ui_Colour colour;
 

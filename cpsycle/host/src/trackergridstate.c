@@ -52,6 +52,7 @@ void trackerpianogridstate_init(TrackerGridState* self, TrackConfig* trackconfig
 	// set references
 	self->trackconfig = trackconfig;
 	self->pattern = NULL;
+	self->patterns = NULL;
 	self->sequence = NULL;
 	self->skin = NULL;	
 	// init internal data
@@ -399,7 +400,7 @@ void trackergridstate_setcursor(TrackerGridState* self,
 	trackergridstate_synccursor(self);
 }
 
-void trackergridstate_clip(TrackerGridState* self, const psy_ui_Rectangle* clip,
+void trackergridstate_clip(TrackerGridState* self, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv)
 {
 	assert(self);

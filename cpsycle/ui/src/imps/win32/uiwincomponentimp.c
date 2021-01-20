@@ -40,10 +40,10 @@ static void dev_showstate(psy_ui_win_ComponentImp*, int state);
 static void dev_hide(psy_ui_win_ComponentImp*);
 static int dev_visible(psy_ui_win_ComponentImp*);
 static int dev_drawvisible(psy_ui_win_ComponentImp*);
-static void dev_move(psy_ui_win_ComponentImp*, double left, double top);
+static void dev_move(psy_ui_win_ComponentImp*, psy_ui_Point origin);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_win_ComponentImp*, intptr_t width, intptr_t height);
-static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
+static psy_ui_RealRectangle dev_position(psy_ui_win_ComponentImp*);
 static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
 static psy_ui_Size dev_size(const psy_ui_win_ComponentImp*);
@@ -60,7 +60,7 @@ static void dev_capture(psy_ui_win_ComponentImp*);
 static void dev_releasecapture(psy_ui_win_ComponentImp*);
 static void dev_invalidate(psy_ui_win_ComponentImp*);
 static void dev_invalidaterect(psy_ui_win_ComponentImp*,
-	const psy_ui_Rectangle*);
+	const psy_ui_RealRectangle*);
 static void dev_update(psy_ui_win_ComponentImp*);
 static void dev_setfont(psy_ui_win_ComponentImp*, psy_ui_Font*);
 static void dev_showhorizontalscrollbar(psy_ui_win_ComponentImp*);
@@ -89,16 +89,16 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
-		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose) dev_dispose;
-		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy) dev_destroy;
-		vtable.dev_show = (psy_ui_fp_componentimp_dev_show) dev_show;
+		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
+		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
+		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
 		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
 			dev_showstate;
-		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide) dev_hide;
-		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
+		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide)dev_hide;
+		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible)dev_visible;
 		vtable.dev_drawvisible = (psy_ui_fp_componentimp_dev_drawvisible)dev_drawvisible;
-		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
-		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
+		vtable.dev_move = (psy_ui_fp_componentimp_dev_move)dev_move;
+		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)dev_resize;
 		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
 			dev_clientresize;
 		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
@@ -335,10 +335,11 @@ int dev_drawvisible(psy_ui_win_ComponentImp* self)
 	return IsWindowVisible(self->hwnd);
 }
 
-void dev_move(psy_ui_win_ComponentImp* self, double left, double top)
+void dev_move(psy_ui_win_ComponentImp* self, psy_ui_Point origin)
 {
 	SetWindowPos(self->hwnd, NULL,
-		(int)left, (int)top,
+		(int)psy_ui_value_px(&origin.x, dev_textmetric(self)),
+		(int)psy_ui_value_px(&origin.y, dev_textmetric(self)),
 		0, 0,
 		SWP_NOZORDER | SWP_NOSIZE);
 }
@@ -374,9 +375,9 @@ void dev_clientresize(psy_ui_win_ComponentImp* self, intptr_t width, intptr_t he
 }
 
 
-psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp* self)
+psy_ui_RealRectangle dev_position(psy_ui_win_ComponentImp* self)
 {
-	psy_ui_Rectangle rv;
+	psy_ui_RealRectangle rv;
 	RECT rc;
 	POINT pt;
 	
@@ -524,7 +525,7 @@ void dev_invalidate(psy_ui_win_ComponentImp* self)
 }
 
 void dev_invalidaterect(psy_ui_win_ComponentImp* self,
-	const psy_ui_Rectangle* r)
+	const psy_ui_RealRectangle* r)
 {
 	RECT rc;
 	const psy_ui_TextMetric* tm;

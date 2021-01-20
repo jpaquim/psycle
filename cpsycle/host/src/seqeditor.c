@@ -297,7 +297,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 	intptr_t c;	
 	const psy_ui_TextMetric* tm;
 	double lineheight;
-	psy_ui_Rectangle bg;
+	psy_ui_RealRectangle bg;
 
 	if (!workspace_song(self->workspace)) {
 		return;
@@ -307,7 +307,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 	}	
 	tm = psy_ui_component_textmetric(&self->parent->component);
 	lineheight = floor(psy_ui_value_px(&self->trackstate->lineheight, tm));
-	bg = psy_ui_rectangle_make(0, y,		
+	bg = psy_ui_realrectangle_make(0, y,		
 		psy_ui_component_sizepx(&self->parent->component).width, lineheight);
 	psy_ui_drawsolidrectangle(g, bg,
 		psy_ui_component_backgroundcolour(&self->parent->component));	
@@ -318,7 +318,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 
 		psy_ui_bitmap_dispose(&self->bitmap);
 		seqeditortrack_onpreferredsize_virtual(self, NULL, &preferredsize);
-		bg = psy_ui_rectangle_make(0, 0,
+		bg = psy_ui_realrectangle_make(0, 0,
 			psy_ui_value_px(&preferredsize.width, tm),
 			lineheight);
 		size = psy_ui_realsize_make(bg.right, lineheight);
@@ -341,12 +341,12 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 				double patternwidth;
 				bool selected;
 				char text[256];				
-				psy_ui_Rectangle r;
+				psy_ui_RealRectangle r;
 				double centery;
 				
 				centery = (size.height - tm->tmHeight) / 2;
 				patternwidth = (psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);				
-				r = psy_ui_rectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
+				r = psy_ui_realrectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
 					0, patternwidth, lineheight);
 				selected =
 					self->workspace->sequenceselection.editposition.track == self->trackindex &&
@@ -360,7 +360,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 					psy_ui_setcolour(&gr, psy_ui_colour_make(0x00444444));
 					psy_ui_drawrectangle(&gr, r);
 				}
-				r = psy_ui_rectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
+				r = psy_ui_realrectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
 					centery, patternwidth, tm->tmHeight);
 				if (generalconfig_showingpatternnames(psycleconfig_general(
 					workspace_conf(self->workspace)))) {
@@ -434,7 +434,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 			0, 0);
 	}
 	if (self->drag_sequenceitem_node && !self->dragstarting) {
-		psy_ui_Rectangle r;
+		psy_ui_RealRectangle r;
 		const psy_ui_TextMetric* tm;
 		psy_ui_IntSize size;
 		psy_audio_SequenceEntry* sequenceentry;
@@ -446,7 +446,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->parent->component), tm);
 		cpx = self->itemdragposition * self->trackstate->pxperbeat;
-		r = psy_ui_rectangle_make(cpx, y, 2, lineheight);
+		r = psy_ui_realrectangle_make(cpx, y, 2, lineheight);
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));		
 	}
 }
@@ -485,7 +485,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 		pattern = psy_audio_patterns_at(&workspace_song(self->workspace)->patterns,
 			entry->patternslot);
 		if (pattern) {
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 			double patternwidth;
 			const psy_ui_TextMetric* tm;
 			double lineheight;
@@ -493,9 +493,9 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 			tm = psy_ui_component_textmetric(&self->parent->component);
 			lineheight = psy_ui_value_px(&self->trackstate->lineheight, tm);
 			patternwidth = psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat;
-			r = psy_ui_rectangle_make(entry->offset * self->trackstate->pxperbeat, 0,
+			r = psy_ui_realrectangle_make(entry->offset * self->trackstate->pxperbeat, 0,
 				patternwidth, lineheight);
-			if (psy_ui_rectangle_intersect(&r, ev->x, ev->y)) {
+			if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
 				if (self->currtrack) {
 					uintptr_t trackindex;
 
@@ -699,7 +699,7 @@ void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
 	tm = psy_ui_component_textmetric(&self->base.parent->component);
 	size = psy_ui_component_sizepx(&self->base.parent->component);	
 	sequencetrackbox_init(&trackbox,
-		psy_ui_rectangle_make(
+		psy_ui_realrectangle_make(
 			x, y, size.width,
 			psy_ui_value_px(&self->base.trackstate->lineheight, tm)),
 		tm, self->base.currtrack,
@@ -732,7 +732,7 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 		tm = psy_ui_component_textmetric(&self->base.parent->component);
 		size = psy_ui_component_sizepx(&self->base.parent->component);		
 		sequencetrackbox_init(&trackbox,
-			psy_ui_rectangle_make(
+			psy_ui_realrectangle_make(
 				0, 0, size.width,
 				psy_ui_value_px(&self->base.trackstate->lineheight, tm)),
 			tm,
@@ -1010,7 +1010,7 @@ void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
 void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 {
 	if (psy_audio_player_playing(workspace_player(self->workspace))) {		
-		psy_ui_Rectangle position;		
+		psy_ui_RealRectangle position;		
 		
 		position = psy_ui_component_scrolledposition(&self->component);		
 		psy_ui_setcolour(g, self->skin->playbar);
@@ -1022,7 +1022,7 @@ void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 void seqeditortracks_drawcursorline(SeqEditorTracks* self, psy_ui_Graphics* g)
 {
 	if (self->trackstate->drawcursor) {
-		psy_ui_Rectangle position;
+		psy_ui_RealRectangle position;
 		const psy_ui_TextMetric* tm;				
 		double cpx;
 
@@ -1284,30 +1284,30 @@ void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
 	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		if (seqeditortracks_playlinechanged(self)) {
 			double playlinepx;			
-			psy_ui_Rectangle redrawrect;
+			psy_ui_RealRectangle redrawrect;
 						
 			playlinepx = seqeditortrackstate_beattopx(self->trackstate,
 				psy_audio_player_position(workspace_player(self->workspace)));
 			redrawrect = psy_ui_component_scrolledposition(&self->component);
 			if (self->lastplaylinepx == -1) {
-				psy_ui_rectangle_setleft(&redrawrect, playlinepx);
-				psy_ui_rectangle_setwidth(&redrawrect, 2);
+				psy_ui_realrectangle_setleft(&redrawrect, playlinepx);
+				psy_ui_realrectangle_setwidth(&redrawrect, 2);
 			} else if (playlinepx > self->lastplaylinepx) {
-				psy_ui_rectangle_setleft(&redrawrect, self->lastplaylinepx);
-				psy_ui_rectangle_setright(&redrawrect, playlinepx + 1);
+				psy_ui_realrectangle_setleft(&redrawrect, self->lastplaylinepx);
+				psy_ui_realrectangle_setright(&redrawrect, playlinepx + 1);
 			} else {
-				psy_ui_rectangle_setleft(&redrawrect, playlinepx);
-				psy_ui_rectangle_setright(&redrawrect, self->lastplaylinepx + 1);				
+				psy_ui_realrectangle_setleft(&redrawrect, playlinepx);
+				psy_ui_realrectangle_setright(&redrawrect, self->lastplaylinepx + 1);				
 			}
 			self->lastplaylinepx = playlinepx;
 			psy_ui_component_invalidaterect(&self->component, redrawrect);
 		}
 	} else if (self->lastplaylinepx != -1) {
-		psy_ui_Rectangle redrawrect;
+		psy_ui_RealRectangle redrawrect;
 
 		redrawrect = psy_ui_component_scrolledposition(&self->component);		
-		psy_ui_rectangle_setleft(&redrawrect, self->lastplaylinepx);
-		psy_ui_rectangle_setwidth(&redrawrect, 2);
+		psy_ui_realrectangle_setleft(&redrawrect, self->lastplaylinepx);
+		psy_ui_realrectangle_setwidth(&redrawrect, 2);
 		self->lastplaylinepx = -1;
 		psy_ui_component_invalidate(&self->component);
 	}	

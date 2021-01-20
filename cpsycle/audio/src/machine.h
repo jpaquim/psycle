@@ -209,16 +209,16 @@ typedef	void (*fp_machine_postload)(struct psy_audio_Machine*,
 typedef	int (*fp_machine_haseditor)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditorhandle)(struct psy_audio_Machine*,
 	void* handle);
-typedef	void (*fp_machine_editorsize)(struct psy_audio_Machine*, int* width,
-	int* height);
+typedef	void (*fp_machine_editorsize)(struct psy_audio_Machine*, double* width,
+	double* height);
 typedef	void (*fp_machine_editoridle)(struct psy_audio_Machine*);
 typedef	const char* (*fp_machine_editname)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditname)(struct psy_audio_Machine*, const char*
 	name);
-typedef void (*fp_machine_setposition)(struct psy_audio_Machine*, intptr_t x,
-	intptr_t y);
-typedef void (*fp_machine_position)(struct psy_audio_Machine*, intptr_t* x,
-	intptr_t* y);
+typedef void (*fp_machine_setposition)(struct psy_audio_Machine*, double x,
+	double y);
+typedef void (*fp_machine_position)(struct psy_audio_Machine*, double* x,
+	double* y);
 typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct
 	psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
@@ -861,8 +861,8 @@ INLINE void psy_audio_machine_seteditorhandle(psy_audio_Machine* self, void*
 	self->vtable->seteditorhandle(self, handle);
 }
 
-INLINE void psy_audio_machine_editorsize(psy_audio_Machine* self, int* width,
-	int* height)
+INLINE void psy_audio_machine_editorsize(psy_audio_Machine* self, double* width,
+	double* height)
 {
 	self->vtable->editorsize(self, width, height);
 }
@@ -872,14 +872,14 @@ INLINE void psy_audio_machine_editoridle(psy_audio_Machine* self)
 	self->vtable->editoridle(self);
 }
 
-INLINE void psy_audio_machine_setposition(psy_audio_Machine* self, intptr_t x,
-	intptr_t y)
+INLINE void psy_audio_machine_setposition(psy_audio_Machine* self, double x,
+	double y)
 {
 	self->vtable->setposition(self, x, y);
 }
 
-INLINE void psy_audio_machine_position(psy_audio_Machine* self, intptr_t* x,
-	intptr_t* y)
+INLINE void psy_audio_machine_position(psy_audio_Machine* self, double* x,
+	double* y)
 {
 	self->vtable->position(self, x, y);
 }

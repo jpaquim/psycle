@@ -477,7 +477,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 	psy_ui_Graphics* g)
 {
 	if (self->sample) {
-		psy_ui_Rectangle r;
+		psy_ui_RealRectangle r;
 		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		

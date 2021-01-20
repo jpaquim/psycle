@@ -31,14 +31,13 @@ static void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChann
 void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel* self)
 {
 	self->m_Index = 0;
+	self->m_DelayedNote = NULL;
 	psy_audio_xmsamplerchannel_initchannel(self);
 }
 
 void psy_audio_xmsamplerchannel_initchannel(psy_audio_XMSamplerChannel* self)
-{	
-	self->m_Index = 0;
-
-	self->m_InstrumentNo = psy_audio_NOTECOMMANDS_INST_EMPTY;
+{
+	self->m_InstrumentNo = 255; // psy_audio_NOTECOMMANDS_INST_EMPTY;
 	self->m_pForegroundVoice = NULL;
 
 	self->m_Note = psy_audio_NOTECOMMANDS_EMPTY;
@@ -157,7 +156,7 @@ void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel* self)
 
 void psy_audio_xmsamplerchannel_restore(psy_audio_XMSamplerChannel* self)
 {
-	self->m_InstrumentNo = psy_audio_NOTECOMMANDS_INST_EMPTY;
+	self->m_InstrumentNo = 255; // psy_audio_NOTECOMMANDS_INST_EMPTY;
 	self->m_pForegroundVoice = NULL;
 
 	self->m_LastVoiceVolume = 0;
@@ -499,7 +498,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			if ((volcmd & 0x0F) == 0) slidval = 0;
 			else if ((volcmd & 0x0F) == 1)  slidval = 1;
 			else if ((volcmd & 0x0F) < 9) slidval = powf(2.0f, volcmd & 0x0F);
-			else slidval = 255;
+			else slidval = 255;			
 			psy_audio_xmsamplerchannel_pitchslide(self,
 				// up ?
 				psy_audio_xmsamplervoice_period(voice) >
@@ -686,7 +685,8 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 		}
 	}	
 	//3rd check: It is not needed that the voice is playing, but it applies to the last instrument.
-	if (psy_audio_xmsamplerchannel_instrumentno(self) != psy_audio_NOTECOMMANDS_INST_EMPTY &&
+	if (/*psy_audio_xmsamplerchannel_instrumentno(self) != psy_audio_NOTECOMMANDS_INST_EMPTY*/ 
+		psy_audio_xmsamplerchannel_instrumentno(self) != 255 &&
 			cmd == XM_SAMPLER_CMD_EXTENDED && (parameter & 0xF0) == XM_SAMPLER_CMD_EE)
 	{
 		switch (parameter & 0x0F)

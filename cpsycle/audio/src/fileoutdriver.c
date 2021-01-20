@@ -71,7 +71,7 @@ static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
 	uintptr_t amount);
 static void fileoutdriver_closefile(FileOutDriver*);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static void init_properties(FileOutDriver* driver);
 
@@ -513,7 +513,7 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	return 0;
 }

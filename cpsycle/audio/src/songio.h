@@ -34,7 +34,7 @@ typedef struct psy_audio_SongFile {
 	psy_Signal signal_output;
 	psy_Signal signal_warning;	
 	char* path;
-	uintptr_t machinesoloed;	
+	uintptr_t machinesoloed;
 	// MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)]
 	psy_audio_LegacyWires* legacywires;	
 } psy_audio_SongFile;

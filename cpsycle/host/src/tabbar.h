@@ -41,7 +41,7 @@ typedef struct Tab {
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
 void tab_settext(Tab*, const char* text);
-psy_ui_Rectangle tab_position(const Tab*, const psy_ui_TextMetric*);
+psy_ui_RealRectangle tab_position(const Tab*, const psy_ui_TextMetric*);
 
 typedef struct TabBarSkin {
 	psy_ui_Colour text;

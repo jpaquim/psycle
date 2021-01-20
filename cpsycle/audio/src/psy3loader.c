@@ -281,17 +281,13 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 {		
 	int32_t i;
 	int32_t temp;
-	int32_t songtracks;		
-	int32_t currentoctave;
-	int32_t _tracksoloed;
+	int32_t songtracks;
+	int32_t tracksoloed;
 	int32_t seqbus;
 	int32_t paramselected;
 	int32_t auxcolselected;
-	int32_t instselected;
-	unsigned char _trackmuted[64];
-	int32_t _trackarmedcount;
-	unsigned char _trackarmed[64];	
-	unsigned char sharetracknames;
+	int32_t instselected;	
+	uint8_t sharetracknames;
 	int status;
 		
 	// why all these temps?  to make sure if someone changes the defs of
@@ -307,6 +303,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	// bpm
 	{///\todo: this was a hack added in 1.9alpha to allow decimal bpm values
 		int32_t bpmcoarse;
+		int32_t bpmfine;		
 		short temp16 = 0;
 
 		if (status = psyfile_read(self->fp, &temp16, sizeof temp16)) {
@@ -316,25 +313,26 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &temp16, sizeof temp16)) {
 			return status;
 		}
-		self->song->properties.bpm = bpmcoarse + (temp16 / 100.0f);
+		bpmfine = temp16;
+		psy_audio_song_setbpm(self->song, bpmcoarse + (bpmfine / 100.0));
 	}
 	// linesperbeat
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
-	self->song->properties.lpb = temp;
+	psy_audio_song_setlpb(self->song, temp);	
 	// current octave
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
-	currentoctave = temp;
+	psy_audio_song_setoctave(self->song, temp);	
 	// machinesoloed
 	// we need to buffer this because destroy machine will clear it
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
 	if (temp >= 0) {
-		self->songfile->machinesoloed = (uint32_t) temp;
+		self->songfile->machinesoloed = (uint32_t)temp;
 	} else {
 		self->songfile->machinesoloed = UINTPTR_MAX;
 	}
@@ -342,7 +340,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
-	_tracksoloed = temp;
+	tracksoloed = temp;
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
@@ -362,22 +360,34 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	// sequence width, for multipattern
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		return status;
-	}
-	_trackarmedcount = 0;
+	}	
 	for(i = 0 ; i < songtracks; ++i)
 	{
-		if (status = psyfile_read(self->fp, &_trackmuted[i], sizeof(_trackmuted[i]))) {
+		uint8_t temp;
+
+		// trackmuted
+		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 			return status;
 		}
-		// remember to count them
-		if (status = psyfile_read(self->fp, &_trackarmed[i], sizeof(_trackarmed[i]))) {
+		if (temp != FALSE) {
+			psy_audio_patterns_mutetrack(&self->song->patterns, i);
+		}		
+		// trackarmed
+		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 			return status;
 		}
-		if(_trackarmed[i]) ++_trackarmedcount;
+		if (temp != FALSE) {
+			psy_audio_patterns_armtrack(&self->song->patterns, i);
+		}		
+	}
+	if (tracksoloed >= 0) {
+		psy_audio_patterns_setsolotrack(&self->song->patterns, tracksoloed);
 	}
 	if(self->fp->currchunk.version == 0) {
 		// fix for a bug existing in the song saver in the 1.7.x series
-		self->fp->currchunk.size = (11 * sizeof(int32_t)) + (songtracks * 2 * 1); //sizeof(bool));
+		self->fp->currchunk.size = (11 * sizeof(int32_t)) + 
+			(songtracks * 2 * 1);
+		//sizeof(bool));
 	}
 	if(self->fp->currchunk.version >= 1) {
 		if (status = psyfile_read(self->fp, &sharetracknames, 1)) {
@@ -386,7 +396,8 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		self->song->patterns.sharetracknames = sharetracknames;
 		if( sharetracknames) {
 			int32_t t;
-			for(t = 0; t < songtracks; t++) {
+
+			for(t = 0; t < songtracks; ++t) {
 				char txt[40];
 				psyfile_readstring(self->fp, txt, 40);
 				// changetrackname(0,t,name);
@@ -397,14 +408,14 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 			return status;
 		}
-		self->song->properties.tpb = temp;
+		psy_audio_song_settpb(self->song, temp);		
 		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 			return status;
 		}
-		self->song->properties.extraticksperbeat = temp;
+		psy_audio_song_setextraticksperbeat(self->song, temp);		
 	} else {
-		self->song->properties.tpb = 24;
-		self->song->properties.extraticksperbeat = 0;
+		psy_audio_song_settpb(self->song, 24);
+		psy_audio_song_setextraticksperbeat(self->song, 0);
 	}
 //		if (fullopen)
 	{
@@ -766,7 +777,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		unsigned char loop;
 		int32_t lines;
 		psy_audio_NewNoteAction nna;
-
+		
 		instrument = psy_audio_instrument_allocinit();
 		if (status = psyfile_read(self->fp, &loop, sizeof(loop))) {
 			psy_audio_instrument_deallocate(instrument);

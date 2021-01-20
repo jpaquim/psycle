@@ -221,7 +221,7 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	self->m_bAmigaSlides = FALSE;
 	self->m_UseFilters = TRUE;
 	self->m_GlobalVolume = 128;
-	self->m_PanningMode = psy_audio_PANNING_LINEAR;		
+	self->m_PanningMode = psy_audio_PANNING_LINEAR;	
 	self->channelbank = 0;
 	self->instrumentbank = 1;
 
@@ -304,10 +304,10 @@ void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler* self)
 
 	// Do the Tick jump.
 	for (channel = 0; channel < MAX_TRACKS; channel++)
-	{
+	{		
 		psy_audio_xmsamplerchannel_performfx(
 			psy_audio_xmsampler_rchannel(self, channel));
-	}	
+	}
 }
 
 void generateaudio(psy_audio_XMSampler* self, psy_audio_BufferContext* bc)
@@ -332,7 +332,7 @@ void psy_audio_xmsampler_workvoices(psy_audio_XMSampler* self,
 {
 	int voice;
 
-	// psy_audio_buffer_clearsamples(bc->output, bc->numsamples);
+	//psy_audio_buffer_clearsamples(bc->output, bc->numsamples);
 	for (voice = 0; voice < self->_numVoices; voice++)
 	{
 		if (psy_audio_xmsamplervoice_isplaying(&self->m_Voices[voice])) {
@@ -387,7 +387,7 @@ void psy_audio_xmsampler_clearmulticmdmem(psy_audio_XMSampler* self)
 }
 
 void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
-	uintptr_t channelNum, const psy_audio_PatternEvent* pData)
+	uintptr_t channelNum, const psy_audio_PatternEvent* pEvData)
 {
 	bool bInstrumentSet;
 	bool bPortaEffect;
@@ -396,8 +396,15 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 	bool bNoteOn;
 	psy_audio_XMSamplerVoice* currentVoice;
 	psy_audio_XMSamplerVoice* newVoice;
-	psy_audio_XMSamplerChannel* thisChannel;	
+	psy_audio_XMSamplerChannel* thisChannel;
+	psy_audio_PatternEvent transform_event;
+	psy_audio_PatternEvent* pData;
 
+	transform_event = *pEvData;
+	if (transform_event.inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
+		transform_event.inst = 255;
+	}
+	pData = &transform_event;
 	if (pData->note == psy_audio_NOTECOMMANDS_MIDICC && pData->inst < MAX_TRACKS)
 	{
 		//TODO: This has one problem, it requires a non-mcm command to trigger the memory.				
@@ -414,7 +421,7 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 	}
 
 	// define some variables to ease the case checking.
-	bInstrumentSet =  (pData->inst < psy_audio_NOTECOMMANDS_INST_EMPTY);
+	bInstrumentSet =  (pData->inst < 255);
 	bPortaEffect = FALSE;
 	for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
 		psy_audio_PatternEvent* ite_ev;
@@ -615,8 +622,7 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 			_inst = psy_audio_instruments_at(psy_audio_machine_instruments(
 				psy_audio_xmsampler_base(self)),
 				index);
-			if (newVoice && psy_audio_xmsamplerchannel_instrumentno(thisChannel) != psy_audio_NOTECOMMANDS_INST_EMPTY
-					&& _inst) {
+			if (newVoice && psy_audio_xmsamplerchannel_instrumentno(thisChannel) != 255 && _inst) {
 				// && Global::song().xminstruments.IsEnabled(thisChannel.InstrumentNo())) {
 				psy_List* _layer;
 				psy_audio_Sample* wave;

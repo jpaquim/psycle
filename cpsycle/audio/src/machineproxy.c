@@ -95,10 +95,10 @@ static const char* machineproxy_language(psy_audio_MachineProxy*);
 static void machineproxy_setcallback(psy_audio_MachineProxy*, psy_audio_MachineCallback*);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
-static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
+static void machineproxy_editorsize(psy_audio_MachineProxy*, double* width, double* height);
 static void machineproxy_editoridle(psy_audio_MachineProxy*);
-static void machineproxy_setposition(psy_audio_MachineProxy*, intptr_t x, intptr_t y);
-static void machineproxy_position(psy_audio_MachineProxy*, intptr_t* x, intptr_t* y);
+static void machineproxy_setposition(psy_audio_MachineProxy*, double x, double y);
+static void machineproxy_position(psy_audio_MachineProxy*, double* x, double* y);
 static const char* machineproxy_editname(psy_audio_MachineProxy*);
 static void machineproxy_seteditname(psy_audio_MachineProxy*, const char* name);
 static psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy*);
@@ -1334,7 +1334,7 @@ void machineproxy_seteditorhandle(psy_audio_MachineProxy* self, void* handle)
 	}	
 }
 
-void machineproxy_editorsize(psy_audio_MachineProxy* self, int* width, int* height)
+void machineproxy_editorsize(psy_audio_MachineProxy* self, double* width, double* height)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1370,7 +1370,7 @@ static void machineproxy_editoridle(psy_audio_MachineProxy* self)
 	}
 }
 
-void machineproxy_setposition(psy_audio_MachineProxy* self, intptr_t x, intptr_t y)
+void machineproxy_setposition(psy_audio_MachineProxy* self, double x, double y)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1387,7 +1387,7 @@ void machineproxy_setposition(psy_audio_MachineProxy* self, intptr_t x, intptr_t
 	}
 }
 
-void machineproxy_position(psy_audio_MachineProxy* self, intptr_t* x, intptr_t* y)
+void machineproxy_position(psy_audio_MachineProxy* self, double* x, double* y)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

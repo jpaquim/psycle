@@ -140,6 +140,7 @@ typedef struct TrackerGridState {
 	uintptr_t numtracks;	
 	// references
 	psy_audio_Pattern* pattern;
+	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;
 	PatternViewSkin* skin;
 	TrackConfig* trackconfig;
@@ -169,6 +170,20 @@ INLINE void trackergridstate_setpattern(TrackerGridState* self, psy_audio_Patter
 	assert(self);
 
 	self->pattern = pattern;
+}
+
+INLINE void trackergridstate_setpatterns(TrackerGridState* self, psy_audio_Patterns* patterns)
+{
+	assert(self);
+
+	self->patterns = patterns;
+}
+
+INLINE psy_audio_Patterns* trackergridstate_patterns(TrackerGridState* self)
+{
+	assert(self);
+
+	return self->patterns;
 }
 
 INLINE psy_audio_Pattern* trackergridstate_pattern(TrackerGridState* self)
@@ -212,7 +227,7 @@ INLINE uintptr_t trackergridstate_cursorposition_valid(TrackerGridState* self)
 
 void trackergridstate_synccursor(TrackerGridState*);
 void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor cursor);
-void trackergridstate_clip(TrackerGridState*, const psy_ui_Rectangle* clip,
+void trackergridstate_clip(TrackerGridState*, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv);
 
 #endif /* TRACKERGRIDSTATE */

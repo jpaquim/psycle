@@ -128,6 +128,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->navigating = FALSE;	
 	self->restoreview = VIEW_ID_MACHINEVIEW;
 	self->patternsinglemode = TRUE;
+	self->zoom = 1.0;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -187,11 +188,13 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
+	psy_signal_init(&self->signal_defaultfontchange);
 	psy_signal_init(&self->signal_togglegear);	
 	psy_signal_init(&self->signal_selectpatterndisplay);
 	psy_signal_init(&self->signal_floatsection);
 	psy_signal_init(&self->signal_docksection);
 	psy_signal_init(&self->signal_machineeditresize);
+	psy_signal_init(&self->signal_zoom);
 }
 
 void workspace_dispose(Workspace* self)
@@ -240,11 +243,13 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
+	psy_signal_dispose(&self->signal_defaultfontchange);
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 	psy_signal_dispose(&self->signal_floatsection);
 	psy_signal_dispose(&self->signal_docksection);
 	psy_signal_dispose(&self->signal_machineeditresize);
+	psy_signal_dispose(&self->signal_zoom);
 }
 
 void workspace_clearsequencepaste(Workspace* self)
@@ -308,8 +313,10 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 
 	psy_ui_fontinfo_init_string(&fontinfo,
 		psycleconfig_defaultfontstr(&self->config));	
-	fontinfo.lfHeight = size;
-	psy_ui_font_init(&font, &fontinfo);
+	fontinfo.lfHeight = size;	
+	psy_ui_font_init(&font, &fontinfo);	
+	psy_signal_emit(&self->signal_defaultfontchange, self, 
+		1, &font);
 	psy_ui_replacedefaultfont(self->mainhandle, &font);
 	psy_ui_component_invalidate(self->mainhandle);
 	psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
@@ -713,7 +720,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
 		psy_audio_exclusivelock_leave();
-		psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);
+		psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);		
 		psy_audio_song_deallocate(oldsong);
 	}
 }

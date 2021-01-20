@@ -146,7 +146,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 		KbdBoxKey* key;
 
 		key = (KbdBoxKey*)psy_tableiterator_value(&it);
-		if (psy_ui_rectangle_intersect(&key->position, ev->x, ev->y)) {
+		if (psy_ui_realrectangle_intersect(&key->position, ev->x, ev->y)) {
 			psy_EventDriver* kbd;
 			psy_EventDriverInput input;
 			double rowheight;

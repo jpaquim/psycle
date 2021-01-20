@@ -119,12 +119,14 @@ typedef struct {
 	psy_Signal signal_status_out;
 	psy_Signal signal_followsongchanged;
 	psy_Signal signal_dockview;
+	psy_Signal signal_defaultfontchange;
 	psy_Signal signal_defaultfontchanged;
 	psy_Signal signal_togglegear;
 	psy_Signal signal_selectpatterndisplay;
 	psy_Signal signal_floatsection;
 	psy_Signal signal_docksection;
 	psy_Signal signal_machineeditresize;
+	psy_Signal signal_zoom;
 	// audio
 	psy_audio_Song* song;
 	psy_audio_Player player;
@@ -152,6 +154,7 @@ typedef struct {
 	int fontheight;	
 	bool hasnewline;
 	bool gearvisible;
+	double zoom;
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
@@ -240,8 +243,17 @@ INLINE int workspace_fontheight(Workspace* self)
 
 INLINE void workspace_zoom(Workspace* self, double factor)
 {
-	workspace_changedefaultfontsize(self, (int)(factor *
-		workspace_fontheight(self)));
+	int fontsize;
+
+	self->zoom = factor;
+	psy_signal_emit_float(&self->signal_zoom, self, (float)factor);
+	fontsize = (int)(factor * workspace_fontheight(self));
+	workspace_changedefaultfontsize(self, fontsize);
+}
+
+INLINE double workspace_zoomrate(const Workspace* self)
+{
+	return self->zoom;
 }
 
 void workspace_dockview(Workspace*, psy_ui_Component*);

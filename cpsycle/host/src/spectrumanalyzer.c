@@ -98,7 +98,7 @@ void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 
 void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 {
-	psy_ui_Rectangle rect;
+	psy_ui_RealRectangle rect;
 	char buf[64];
 	int i;
 	float invlog2;
@@ -175,7 +175,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	uintptr_t scopesamples;
 	psy_audio_Buffer* buffer;
 	int DCBar;
-	psy_ui_Rectangle rect;
+	psy_ui_RealRectangle rect;
 	char buf[64];
 	uintptr_t writepos;
 	float temp[SCOPE_BUF_SIZE];

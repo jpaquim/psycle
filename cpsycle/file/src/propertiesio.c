@@ -24,7 +24,7 @@ typedef enum {
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
-static int OnSaveIniEnum(FILE* file, psy_Property*, int level);
+static int OnSaveIniEnum(FILE* file, psy_Property*, uintptr_t level);
 
 int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 {
@@ -192,8 +192,8 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 }
 
 static int skip;
-static int skiplevel;
-static int choicelevel;
+static uintptr_t skiplevel;
+static uintptr_t choicelevel;
 static char* lastsection;
 
 void propertiesio_save(const psy_Property* self, const psy_Path* path)
@@ -213,7 +213,7 @@ void propertiesio_save(const psy_Property* self, const psy_Path* path)
 	}
 }
 
-int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
+int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 {
 	if (skip && level > skiplevel) {
 		return 1;

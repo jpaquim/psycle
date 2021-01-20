@@ -1384,7 +1384,7 @@ static void init_properties(psy_AudioDriver*);
 static void readbuffers(AsioDriver* self, int idx,
 	float** left, float** right, uintptr_t numsamples);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static psy_AudioDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -1508,7 +1508,8 @@ void init_properties(psy_AudioDriver* driver)
 	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&ASIOInterface::settings_), 0, 32);
 	psy_property_append_int(self->configuration, "samplerate",
-		psy_audiodriversettings_samplespersec(&ASIOInterface::settings_), 0, 0);
+		(intptr_t)psy_audiodriversettings_samplespersec(
+			&ASIOInterface::settings_), 0, 0);
 	psy_property_append_int(self->configuration, "dither", 0, 0, 1);
 	psy_property_settext(
 		psy_property_append_int(self->configuration, "numbuf",
@@ -1647,7 +1648,7 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	AsioDriver* self = (AsioDriver*)driver;
 

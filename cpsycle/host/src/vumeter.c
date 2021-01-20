@@ -71,8 +71,8 @@ void vumeter_ondestroy(Vumeter* self, psy_ui_Component* sender)
 
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 {	
-	psy_ui_Rectangle left;
-	psy_ui_Rectangle right;	
+	psy_ui_RealRectangle left;
+	psy_ui_RealRectangle right;	
 	psy_ui_RealSize size;	
 	double vuprevL;
 	double vuprevR;

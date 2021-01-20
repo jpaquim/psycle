@@ -84,6 +84,14 @@ INLINE uintptr_t psy_audio_songproperties_lpb(const
 	return self->lpb;
 }
 
+INLINE void psy_audio_songproperties_setoctave(psy_audio_SongProperties* self,
+	uint8_t octave)
+{
+	assert(self);
+
+	self->octave = octave;
+}
+
 INLINE uint8_t psy_audio_songproperties_octave(const
 	psy_audio_SongProperties* self)
 {
@@ -303,6 +311,13 @@ INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)
 	assert(self);
 
 	return psy_audio_songproperties_lpb(&self->properties);
+}
+/// set song properties octave
+INLINE void psy_audio_song_setoctave(psy_audio_Song* self, uint8_t octave)
+{
+	assert(self);
+
+	psy_audio_songproperties_setoctave(&self->properties, octave);
 }
 /// return song properties lpb
 INLINE uint8_t psy_audio_song_octave(const psy_audio_Song* self)

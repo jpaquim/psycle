@@ -21,10 +21,10 @@ static void dev_show(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.
 static void dev_showstate(psy_ui_win_ListBoxImp* self, int state) { self->win_component_imp.imp.vtable->dev_showstate(&self->win_component_imp.imp, state); }
 static void dev_hide(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_hide(&self->win_component_imp.imp); }
 static int dev_visible(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_visible(&self->win_component_imp.imp); }
-static void dev_move(psy_ui_win_ListBoxImp* self, double left, double top) { self->win_component_imp.imp.vtable->dev_move(&self->win_component_imp.imp, left, top); }
+static void dev_move(psy_ui_win_ListBoxImp* self, psy_ui_Point origin) { self->win_component_imp.imp.vtable->dev_move(&self->win_component_imp.imp, origin); }
 static void dev_resize(psy_ui_win_ListBoxImp* self, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_win_ListBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
-static psy_ui_Rectangle dev_position(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
+static psy_ui_RealRectangle dev_position(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_ListBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(const psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
@@ -33,7 +33,7 @@ static psy_ui_Component* dev_parent(psy_ui_win_ListBoxImp* self) { return self->
 static void dev_capture(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_capture(&self->win_component_imp.imp); }
 static void dev_releasecapture(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_releasecapture(&self->win_component_imp.imp); }
 static void dev_invalidate(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_invalidate(&self->win_component_imp.imp); }
-static void dev_invalidaterect(psy_ui_win_ListBoxImp* self, const psy_ui_Rectangle* r) { self->win_component_imp.imp.vtable->dev_invalidaterect(&self->win_component_imp.imp, r); }
+static void dev_invalidaterect(psy_ui_win_ListBoxImp* self, const psy_ui_RealRectangle* r) { self->win_component_imp.imp.vtable->dev_invalidaterect(&self->win_component_imp.imp, r); }
 static void dev_update(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_update(&self->win_component_imp.imp); }
 static void dev_setfont(psy_ui_win_ListBoxImp* self, psy_ui_Font* font) { self->win_component_imp.imp.vtable->dev_setfont(&self->win_component_imp.imp, font); }
 static psy_List* dev_children(psy_ui_win_ListBoxImp* self, int recursive) { return self->win_component_imp.imp.vtable->dev_children(&self->win_component_imp.imp, recursive); }
@@ -111,7 +111,8 @@ static void dev_setstyle(psy_ui_win_ListBoxImp*, int style);
 static void dev_clear(psy_ui_win_ListBoxImp*);
 static void dev_setcursel(psy_ui_win_ListBoxImp*, intptr_t index);
 static intptr_t dev_cursel(psy_ui_win_ListBoxImp*);
-static void dev_selitems(psy_ui_win_ListBoxImp*, int* items, int maxitems);
+static void dev_selitems(psy_ui_win_ListBoxImp*, intptr_t* items,
+	intptr_t maxitems);
 static intptr_t dev_selcount(psy_ui_win_ListBoxImp*);
 static intptr_t dev_count(psy_ui_win_ListBoxImp*);
 
@@ -270,10 +271,33 @@ intptr_t dev_cursel(psy_ui_win_ListBoxImp* self)
 	return SendMessage(self->win_component_imp.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 }
 
-void dev_selitems(psy_ui_win_ListBoxImp* self, int* items, int maxitems)
+void dev_selitems(psy_ui_win_ListBoxImp* self, intptr_t* items, intptr_t maxitems)
 {
-	SendMessage(self->win_component_imp.hwnd, LB_GETSELITEMS, (WPARAM)maxitems,
-		(LPARAM)items);
+	if (maxitems > 0) {
+		int32_t* win32_items;
+		int32_t win32_maxitems;
+		int32_t i;
+
+		if (maxitems < INT32_MAX) {
+			win32_maxitems = (int32_t)maxitems;
+		} else {
+			win32_maxitems = INT32_MAX;
+		}
+		win32_items = (int32_t*)malloc(sizeof(int32_t) * (intptr_t)(maxitems));
+		if (win32_items) {
+			for (i = 0; i < win32_maxitems; ++i) {
+				win32_items[i] = (int32_t)items[i];
+			}
+			SendMessage(self->win_component_imp.hwnd, LB_GETSELITEMS, (WPARAM)win32_maxitems,
+				(LPARAM)win32_items);
+			for (i = 0; i < win32_maxitems; ++i) {
+				items[i] = win32_items[i];
+			}
+			for (i = win32_maxitems; i < maxitems; ++i) {
+				items[i] = -1;
+			}
+		}
+	}
 }
 
 intptr_t dev_selcount(psy_ui_win_ListBoxImp* self)

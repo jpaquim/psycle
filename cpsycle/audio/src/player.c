@@ -491,7 +491,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 			psy_audio_song_numsongtracks(song));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
-		
+		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
 	}
 }
 
@@ -513,8 +513,11 @@ void psy_audio_player_setoctave(psy_audio_Player* self, uint8_t octave)
 	assert(self);
 
 	if (octave >= 0 && octave < 8) {
-		self->octave = octave;		
-	}
+		self->octave = octave;
+		if (self->song) {
+			psy_audio_song_setoctave(self->song, octave);
+		}
+	}	
 }
 
 void psy_audio_player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)

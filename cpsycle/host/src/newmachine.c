@@ -576,11 +576,11 @@ void pluginsview_hittest(PluginsView* self, double x, double y)
 		pluginsview_computetextsizes(self, &size);
 		for (p = psy_property_begin(self->plugins), cpx = 0, cpy = 0;
 				p != NULL; psy_list_next(&p)) {
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
-			if (psy_ui_rectangle_intersect(&r, x, y)) {
+			if (psy_ui_realrectangle_intersect(&r, x, y)) {
 				self->selectedplugin = (psy_Property*)psy_list_entry(p);
 				break;
 			}		

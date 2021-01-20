@@ -46,12 +46,12 @@ static int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver*,
 static int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver*,
 	psy_audio_Instrument*);
 static int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver*,
-	psy_audio_Instrument*, int version);
+	psy_audio_Instrument*, int32_t version);
 static int psy_audio_psy3saver_write_smie(psy_audio_PSY3Saver*,
 	psy_dsp_Envelope*, uint32_t version);
 static int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver*,
 	psy_audio_Sample*);
-static int16_t* psy_audio_psy3saver_floatbuffertoshort(float* buffer,
+static int16_t* psy_audio_psy3saver_clone_array_float_to_int16(float* buffer,
 	uintptr_t numframes);
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver* self,
@@ -296,7 +296,7 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 			return status;
 		}
 		 // remember to count them
-		temp8 = 0; // todo track armed
+		temp8 = psy_audio_patterns_istrackarmed(&self->song->patterns, i);
 		if (status = psyfile_write(self->fp, &temp8, sizeof(uint8_t))) {
 			return status;
 		}
@@ -623,8 +623,8 @@ int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver* self, psy_audio_Machi
 {
 	const psy_audio_MachineInfo* info;
 	int status = PSY_OK;
-	intptr_t x;
-	intptr_t y;
+	double x;
+	double y;
 
 	info = psy_audio_machine_info(machine);
 	if (info) {			
@@ -814,91 +814,59 @@ int psy_audio_psy3saver_write_insd(psy_audio_PSY3Saver* self)
 int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 	psy_audio_Instrument* instrument)
 {	
-	int status = PSY_OK;	
-	psy_dsp_EnvelopePoint pt_start;
-	psy_dsp_EnvelopePoint pt_end;	
-	
-	// loop	
-	if (status = psyfile_write_uint8(self->fp, instrument->loop != FALSE)) {
-		return status;
-	}
-	// lines	
-	if (status = psyfile_write_int32(self->fp,
-			(int32_t) instrument->lines)) {
+	int status;
+	psy_audio_LegacyInstrument legacy_instr;
+
+	assert(self);
+	assert(instrument);
+
+	legacy_instr = psy_audio_legacyinstrument(instrument);	
+	if (status = psyfile_write_uint8(self->fp, legacy_instr._loop != FALSE)) {
 		return status;
 	}	
-	if (status = psyfile_write_uint8(self->fp, (uint8_t) instrument->nna)) {
-		return status;
-	}
-	// env_at
-	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 1);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		(pt_start.time * 44100 + 0.5f))) {
-		return status;
-	}
-	// env_dt	
-	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 1);
-	pt_end = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
-		return status;
-	}
-	// env_sl
-	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-			(pt_start.value * 100))) {
-		return status;
-	}
-	// env_rt
-	pt_start = psy_dsp_envelope_at(&instrument->volumeenvelope, 2);
-	pt_end = psy_dsp_envelope_at(&instrument->volumeenvelope, 3);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
-		return status;
-	}
-	// env_f_at
-	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 1);	
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		(pt_start.time * 44100 + 0.5f))) {
-		return status;
-	}
-	// env_f_dt
-	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 1);
-	pt_end = psy_dsp_envelope_at(&instrument->filterenvelope, 2);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
-		return status;
-	}
-	// env_f_sl
-	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 2);	
 	if (status = psyfile_write_int32(self->fp,
-		(int32_t)(pt_start.value * 128))) {
+		legacy_instr._lines)) {
+		return status;
+	}	
+	if (status = psyfile_write_uint8(self->fp, legacy_instr._NNA)) {
 		return status;
 	}
-	// env_f_rt
-	pt_start = psy_dsp_envelope_at(&instrument->filterenvelope, 2);
-	pt_end = psy_dsp_envelope_at(&instrument->filterenvelope, 3);
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
+	// Amp envelope
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_AT)) {
 		return status;
 	}
-	// env_f_co	
-	if (status = psyfile_write_int32(self->fp,
-		(int32_t) (instrument->filtercutoff * 127.f))) {
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_DT)) {
 		return status;
 	}
-	// env_f_rq	
-	if (status = psyfile_write_int32(self->fp,
-		(int32_t) (instrument->filterres * 127))) {
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_SL)) {
 		return status;
 	}
-	// env_f_ea	
-	if (status = psyfile_write_int32(self->fp, 0)) {
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_RT)) {
 		return status;
 	}
-	// env_f_tp	
-	if (status = psyfile_write_int32(self->fp, (int32_t)
-		instrument->filtertype)) {
+	// Filter envelope
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_AT)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_DT)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_SL)) {
+		return status;
+	}	
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_RT)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_CO)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_RQ)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp,  legacy_instr.ENV_F_EA)) {
+		return status;
+	}
+	if (status = psyfile_write_int32(self->fp, legacy_instr.ENV_F_TP)) {
 		return status;
 	}
 	// No longer saving pan in version 2
@@ -906,16 +874,13 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 	if (status = psyfile_write_int32(self->fp, 128)) {
 		return status;
 	}
-	if (status = psyfile_write_uint8(self->fp, (uint8_t)
-			instrument->randompanning != 0.f)) {
+	if (status = psyfile_write_uint8(self->fp, legacy_instr._RPAN != FALSE)) {
 		return status;
 	}
-	if (status = psyfile_write_uint8(self->fp, (uint8_t)
-			instrument->randomcutoff != 0.f)) {
+	if (status = psyfile_write_uint8(self->fp, legacy_instr._RCUT != FALSE)) {
 		return status;
 	}
-	if (status = psyfile_write_uint8(self->fp, (uint8_t)
-			instrument->_RRES)) {
+	if (status = psyfile_write_uint8(self->fp, legacy_instr._RRES != FALSE)) {
 		return status;
 	}
 	// No longer saving name in version 2	
@@ -927,15 +892,13 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 	if (status = psyfile_write_int32(self->fp, 0)) {
 		return status;
 	}
-	// sampler_to_use
-	if (status = psyfile_write_int32(self->fp, 0)) {
+	if (status = psyfile_write_int32(self->fp, legacy_instr.sampler_to_use)) {
 		return status;
 	}
-	// lockinst
-	if (status = psyfile_write_int32(self->fp, 0)) {
+	if (status = psyfile_write_int32(self->fp, legacy_instr._LOCKINST)) {
 		return status;
 	}
-	return status;
+	return PSY_OK;
 }
 
 /*
@@ -975,13 +938,14 @@ int psy_audio_psy3saver_write_smid(psy_audio_PSY3Saver* self)
 }
 
 int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
-	psy_audio_Instrument* instrument, int version)	
+	psy_audio_Instrument* instrument, int32_t version)
 {
 	int status;
 
 	status = PSY_OK;
-	if (!instrument->enabled) return PSY_OK;
-
+	if (!instrument->enabled) {
+		return PSY_OK;
+	}
 	// instrument name
 	if (status = psyfile_writestring(self->fp, instrument->name)) {
 		return status;
@@ -1291,14 +1255,14 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 	int status = PSY_OK;
 	
 	if (psy_audio_buffer_numchannels(&sample->channels) > 0) {
-		wavedata_left = psy_audio_psy3saver_floatbuffertoshort(
+		wavedata_left = psy_audio_psy3saver_clone_array_float_to_int16(
 			psy_audio_buffer_at(&sample->channels, 0), sample->numframes);
 		if (!wavedata_left) {
 			return PSY_ERRFILE;
 		}
 	}
 	if (psy_audio_buffer_numchannels(&sample->channels) > 1) {
-		wavedata_right = psy_audio_psy3saver_floatbuffertoshort(
+		wavedata_right = psy_audio_psy3saver_clone_array_float_to_int16(
 			psy_audio_buffer_at(&sample->channels, 1), sample->numframes);
 		if (!wavedata_right) {
 			free(wavedata_left);
@@ -1455,7 +1419,8 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 	return status;
 }
 
-int16_t* psy_audio_psy3saver_floatbuffertoshort(float* buffer, uintptr_t numframes)
+int16_t* psy_audio_psy3saver_clone_array_float_to_int16(float* buffer,
+	uintptr_t numframes)
 {
 	if (buffer && numframes > 0) {
 		int16_t* rv;

@@ -89,8 +89,8 @@ void machineeditorview_ontimer(MachineEditorView* self, uintptr_t timerid)
 void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
-	int width;
-	int height;
+	double width;
+	double height;
 
 	psy_audio_machine_editorsize(self->machine, &width, &height);
 	rv->width = psy_ui_value_makepx(width);
@@ -99,12 +99,17 @@ void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* lim
 
 void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* sender,
 	psy_audio_Machine* machine, intptr_t width, intptr_t height)
-{
-	if (machine == self->machine) {		
+{	
+	// In case to machineproxy self->machine and machine are different ptrs,
+	// therefore the machine slots are compared
+	if (self->machine && psy_audio_machine_slot(machine) ==
+			psy_audio_machine_slot(self->machine)) {
+		// change preferred size
 		psy_ui_component_setpreferredsize(machineeditorview_base(self),
 			psy_ui_size_make(
 				psy_ui_value_makepx((double)width),
 				psy_ui_value_makepx((double)height)));
+		// signal will be catched by machineframe to resize the frame
 		psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 	}
 }

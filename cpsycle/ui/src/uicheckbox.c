@@ -232,14 +232,14 @@ void psy_ui_checkbox_ondraw(psy_ui_CheckBox* self, psy_ui_Graphics* g)
 	psy_ui_IntSize size;
 	psy_ui_IntSize checksize;
 	psy_ui_TextMetric tm;
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
 		&tm);
 	checksize = psy_ui_intsize_make(15, tm.tmHeight);
-	r = psy_ui_rectangle_make(0, (size.height - checksize.height) / 2, checksize.width,
+	r = psy_ui_realrectangle_make(0, (size.height - checksize.height) / 2, checksize.width,
 		checksize.height);
 	if (self->state == 0) {
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00444444));

@@ -175,8 +175,8 @@ void machinesbox_clone(MachinesBox* self)
 	
 	selcount = psy_ui_listbox_selcount(&self->listbox);
 	if (selcount) {
-		int selection[256];	
-		int i;
+		intptr_t selection[256];	
+		intptr_t i;
 		psy_audio_Machine* srcmachine = 0;
 
 		psy_ui_listbox_selitems(&self->listbox, selection, (int)selcount);
@@ -226,21 +226,24 @@ void machinesbox_remove(MachinesBox* self)
 	
 	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
-		int* selection;
-		int i;
+		intptr_t* selection;		
 
-		selection = (int*)malloc(selcount * sizeof(int));
-		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
-		for (i = 0; i < selcount; ++i) {				
-			if (psy_table_exists(&self->listboxslots, selection[i])) {
-				uintptr_t slot;
-				
-				slot = (uintptr_t)psy_table_at(&self->listboxslots,
-					selection[i]);
-				psy_audio_machines_remove(self->machines, slot);			
+		selection = (intptr_t*)malloc(selcount * sizeof(intptr_t));
+		if (selection) {
+			intptr_t i;
+
+			psy_ui_listbox_selitems(&self->listbox, selection, selcount);
+			for (i = 0; i < selcount; ++i) {
+				if (psy_table_exists(&self->listboxslots, selection[i])) {
+					uintptr_t slot;
+
+					slot = (uintptr_t)psy_table_at(&self->listboxslots,
+						selection[i]);
+					psy_audio_machines_remove(self->machines, slot);
+				}
 			}
+			free(selection);
 		}
-		free(selection);
 	}
 }
 
@@ -250,8 +253,8 @@ void machinesbox_exchange(MachinesBox* self)
 
 	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
-		int selection[256];	
-		int i;
+		intptr_t selection[256];	
+		intptr_t i;
 		uintptr_t srcslot = UINTPTR_MAX;
 
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
@@ -286,8 +289,8 @@ void machinesbox_showparameters(MachinesBox* self)
 	
 	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
-		int selection[256];
-		int i;
+		intptr_t selection[256];
+		intptr_t i;
 
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
@@ -311,8 +314,8 @@ void machinesbox_connecttomaster(MachinesBox* self)
 
 	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
 	if (selcount > 0) {
-		int selection[256];
-		int i;
+		intptr_t selection[256];
+		intptr_t i;
 
 		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {

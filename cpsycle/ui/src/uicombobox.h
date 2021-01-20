@@ -54,17 +54,26 @@ INLINE psy_ui_Component* psy_psy_ui_combobox_base(psy_ui_ComboBox* self)
 
 // uicomboboximp
 // vtable function pointers
-typedef int (*psy_ui_fp_comboboximp_dev_addtext)(struct psy_ui_ComboBoxImp*, const char* text);
-typedef void (*psy_ui_fp_comboboximp_dev_settext)(struct psy_ui_ComboBoxImp*, const char* text, intptr_t index);
-typedef void (*psy_ui_fp_comboboximp_dev_text)(struct psy_ui_ComboBoxImp*, char* text);
-typedef void (*psy_ui_fp_comboboximp_dev_setstyle)(struct psy_ui_ComboBoxImp*, int style);
+typedef int (*psy_ui_fp_comboboximp_dev_addtext)(struct psy_ui_ComboBoxImp*,
+    const char* text);
+typedef void (*psy_ui_fp_comboboximp_dev_settext)(struct psy_ui_ComboBoxImp*,
+    const char* text, intptr_t index);
+typedef void (*psy_ui_fp_comboboximp_dev_text)(struct psy_ui_ComboBoxImp*,
+    char* text);
+typedef void (*psy_ui_fp_comboboximp_dev_setstyle)(struct psy_ui_ComboBoxImp*,
+    int style);
 typedef void (*psy_ui_fp_comboboximp_dev_clear)(struct psy_ui_ComboBoxImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_setcursel)(struct psy_ui_ComboBoxImp*, intptr_t index);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_cursel)(struct psy_ui_ComboBoxImp*);
+typedef void (*psy_ui_fp_comboboximp_dev_setcursel)(struct psy_ui_ComboBoxImp*,
+    intptr_t index);
+typedef intptr_t(*psy_ui_fp_comboboximp_dev_cursel)(
+    struct psy_ui_ComboBoxImp*);
 typedef intptr_t(*psy_ui_fp_comboboximp_dev_count)(struct psy_ui_ComboBoxImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_selitems)(struct psy_ui_ComboBoxImp*, int* items, int maxitems);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_selcount)(struct psy_ui_ComboBoxImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_showdropdown)(struct psy_ui_ComboBoxImp*);
+typedef void (*psy_ui_fp_comboboximp_dev_selitems)(struct psy_ui_ComboBoxImp*,
+    intptr_t* items, intptr_t maxitems);
+typedef intptr_t(*psy_ui_fp_comboboximp_dev_selcount)(
+    struct psy_ui_ComboBoxImp*);
+typedef void (*psy_ui_fp_comboboximp_dev_showdropdown)(
+    struct psy_ui_ComboBoxImp*);
 
 typedef struct {
     psy_ui_fp_comboboximp_dev_addtext dev_addtext;

@@ -156,7 +156,7 @@ INLINE bool trackerlinestate_testplayposition(TrackerLineState* self,
 	return FALSE;
 }
 
-void trackerlinestate_clip(TrackerLineState*, const psy_ui_Rectangle* clip,
+void trackerlinestate_clip(TrackerLineState*, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv);
 
 #ifdef __cplusplus

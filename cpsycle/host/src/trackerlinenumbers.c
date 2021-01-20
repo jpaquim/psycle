@@ -245,7 +245,7 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 	uintptr_t startdigit;
 	double blankspace;
 	char digit[2];
-	psy_ui_Rectangle r;
+	psy_ui_RealRectangle r;
 	uintptr_t c;
 
 	digit[1] = '\0';
@@ -258,7 +258,7 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 		} else {
 			digit[0] = ' ';
 		}
-		r = psy_ui_rectangle_make(c * self->linestate->flatsize, y,
+		r = psy_ui_realrectangle_make(c * self->linestate->flatsize, y,
 			self->linestate->flatsize,
 			self->linestate->lineheightpx - 1);
 		psy_ui_textoutrectangle(g, r.left, r.top,
@@ -268,7 +268,7 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 	r.left += self->linestate->flatsize;
 	blankspace = (width - r.left) - 4;
 	if (blankspace > 0) {
-		r = psy_ui_rectangle_make(r.left, y, blankspace,
+		r = psy_ui_realrectangle_make(r.left, y, blankspace,
 			self->linestate->lineheightpx - 1);
 		digit[0] = ' ';
 		psy_ui_textoutrectangle(g, r.left, r.top,
@@ -310,7 +310,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	line = trackerlinestate_beattoline(self->linestate,
 		cursor->offset + cursor->seqoffset);
 	psy_ui_component_invalidaterect(&self->component,
-		psy_ui_rectangle_make(
+		psy_ui_realrectangle_make(
 			0, self->linestate->lineheightpx * line,
 			size.width, self->linestate->lineheightpx));
 }
@@ -328,7 +328,7 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 				? self->linestate->sequenceentryoffset
 				: 0.0));
 		psy_ui_component_invalidaterect(&self->component,
-			psy_ui_rectangle_make(
+			psy_ui_realrectangle_make(
 				0.0, self->linestate->lineheightpx * line,
 				size.width, self->linestate->lineheightpx));
 	}
@@ -466,7 +466,7 @@ void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
 void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	psy_ui_Rectangle r;	
+	psy_ui_RealRectangle r;	
 	
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);

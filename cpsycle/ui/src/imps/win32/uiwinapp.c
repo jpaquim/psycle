@@ -366,7 +366,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_app()->defaults.style_common.colour.value);
 					SetBkColor((HDC)wParam,
 						psy_ui_app()->defaults.style_common.backgroundcolour.value);
-					return (intptr_t) winapp->defaultbackgroundbrush;
+					return (intptr_t)winapp->defaultbackgroundbrush;
 				}
 				break;
 			case WM_ERASEBKGND:
@@ -456,7 +456,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							// psy_ui_Colour c;
 							// float gain;
 							// draw background
-							psy_ui_Rectangle r;
+							psy_ui_RealRectangle r;
 							psy_ui_setrectangle(&r,
 								ps.rcPaint.left - dblbuffer_offset.x,
 								ps.rcPaint.top - dblbuffer_offset.y,

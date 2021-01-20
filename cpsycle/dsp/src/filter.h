@@ -4,8 +4,10 @@
 #ifndef psy_dsp_FILTER_H
 #define psy_dsp_FILTER_H
 
-#include "filtercoeff.h"
 #include "../../detail/psydef.h"
+// local
+#include "filtercoeff.h"
+#include "dsptypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,7 +96,7 @@ typedef struct Filter {
 } Filter;
 
 void filter_init(Filter*);
-void filter_init_samplerate(Filter*, uintptr_t samplerate);
+void filter_init_samplerate(Filter*, psy_dsp_big_hz_t samplerate);
 void filter_reset(Filter*);//Same as init, without samplerate
 void filter_dispose(Filter*);
 void filter_update(Filter*);

@@ -72,9 +72,9 @@ psy_audio_LegacyPatternEntry* psy_audio_ptrackline(psy_audio_LegacyPattern,
 
 typedef struct psy_audio_LegacyInstrument {
 	///\name Loop stuff
-			///\{
-	bool _loop;
-	int _lines;
+	///\{
+	uint8_t _loop;
+	int32_t _lines;
 	///\}
 
 	///\verbatim
@@ -84,48 +84,48 @@ typedef struct psy_audio_LegacyInstrument {
 	/// 1 = Note Release  [Release Stage]
 	/// 2 = Note Continue [No NNA]
 	///\endverbatim
-	unsigned char _NNA;
+	uint8_t _NNA;
 
 
-	int sampler_to_use; // Sampler machine index for lockinst.
-	bool _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
+	int32_t sampler_to_use; // Sampler machine index for lockinst.
+	uint8_t _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
 
 	///\name Amplitude Envelope overview:
 	///\{
 	/// Attack Time [in Samples at 44.1Khz, independently of the real samplerate]
-	int ENV_AT;
+	int32_t ENV_AT;
 	/// Decay Time [in Samples at 44.1Khz, independently of the real samplerate]
-	int ENV_DT;
+	int32_t ENV_DT;
 	/// Sustain Level [in %]
-	int ENV_SL;
+	int32_t ENV_SL;
 	/// Release Time [in Samples at 44.1Khz, independently of the real samplerate]
-	int ENV_RT;
+	int32_t ENV_RT;
 	///\}
 
 	///\name Filter 
 	///\{
 	/// Attack Time [in Samples at 44.1Khz]
-	int ENV_F_AT;
+	int32_t ENV_F_AT;
 	/// Decay Time [in Samples at 44.1Khz]
-	int ENV_F_DT;
+	int32_t ENV_F_DT;
 	/// Sustain Level [0..128]
-	int ENV_F_SL;
+	int32_t ENV_F_SL;
 	/// Release Time [in Samples at 44.1Khz]
-	int ENV_F_RT;
+	int32_t ENV_F_RT;
 
 	/// Cutoff Frequency [0-127]
-	int ENV_F_CO;
+	int32_t ENV_F_CO;
 	/// Resonance [0-127]
-	int ENV_F_RQ;
+	int32_t ENV_F_RQ;
 	/// EnvAmount [-128,128]
-	int ENV_F_EA;
+	int32_t ENV_F_EA;
 	/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
 	psy_dsp_FilterType ENV_F_TP;
 	///\}
 
-	bool _RPAN;
-	bool _RCUT;
-	bool _RRES;
+	uint8_t _RPAN;
+	uint8_t _RCUT;
+	uint8_t _RRES;
 } psy_audio_LegacyInstrument;
 
 psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument*);

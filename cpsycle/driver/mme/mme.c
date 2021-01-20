@@ -151,7 +151,7 @@ static int numplaybacks(psy_AudioDriver*);
 static bool start(MmeDriver*);
 static bool stop(MmeDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
@@ -308,7 +308,8 @@ static void init_properties(psy_AudioDriver* driver)
 		"Bitrate");
 	psy_property_settext(
 		psy_property_append_int(self->configuration, "samplerate",
-			psy_audiodriversettings_samplespersec(&self->settings), 0, 0),
+			(intptr_t)psy_audiodriversettings_samplespersec(&self->settings),
+				0, 0),
 		"Samplerate"
 		);
 	psy_property_settext(
@@ -363,7 +364,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 			psy_audiodriversettings_validbitdepth(&self->settings)));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
 		psy_property_at_int(self->configuration, "samplerate",
-			psy_audiodriversettings_samplespersec(&self->settings)));
+			(intptr_t)psy_audiodriversettings_samplespersec(&self->settings)));
 	psy_audiodriversettings_setblockcount(&self->settings,
 		psy_property_at_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings)));
@@ -397,7 +398,7 @@ bool start(MmeDriver* self)
 	}
 	preparewaveformat((WAVEFORMATEXTENSIBLE*)&format,
 		psy_audiodriversettings_numchannels(&self->settings),
-		psy_audiodriversettings_samplespersec(&self->settings),
+		(int)psy_audiodriversettings_samplespersec(&self->settings),
 		psy_audiodriversettings_bitdepth(&self->settings),
 		psy_audiodriversettings_validbitdepth(&self->settings));
 	if (waveOutOpen(&self->_handle, self->_deviceId, &format, 0UL, 0,
@@ -764,7 +765,7 @@ bool createcaptureport(MmeDriver* self, PortCapt* port)
 	}
 	preparewaveformat((WAVEFORMATEXTENSIBLE*)&format,
 		psy_audiodriversettings_numchannels(&self->settings),
-		psy_audiodriversettings_samplespersec(&self->settings),
+		(int)psy_audiodriversettings_samplespersec(&self->settings),
 		psy_audiodriversettings_bitdepth(&self->settings),
 		psy_audiodriversettings_validbitdepth(&self->settings));
 	_blockSizeBytes = psy_audiodriversettings_blockbytes(&self->settings);
@@ -888,7 +889,7 @@ bool removecaptureport(MmeDriver* self, int idx)
 	return TRUE;
 }
 
-void readbuffers(MmeDriver* self, int idx, float** pleft, float** pright, int numsamples)
+void readbuffers(MmeDriver* self, int idx, float** pleft, float** pright, uintptr_t numsamples)
 {
 	PortCapt* portcap;
 	int mpos;
@@ -964,7 +965,7 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	uint32_t retval;
 	MMTIME time;
@@ -986,10 +987,10 @@ uint32_t playposinsamples(psy_AudioDriver* driver)
 
 	retval = time.u.sample;
 	// sample counter wrap around?
-	if (self->m_lastPlayPos > retval)
+	if (self->m_lastPlayPos > (int)retval)
 	{
 		self->m_readPosWraps++;
-		if (self->m_lastPlayPos > self->_writePos) {
+		if (self->m_lastPlayPos > (int)self->_writePos) {
 			self->m_readPosWraps = 0;
 			// PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
 		}

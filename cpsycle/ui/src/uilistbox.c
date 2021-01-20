@@ -107,7 +107,7 @@ intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
 	return self->imp->vtable->dev_cursel(self->imp);
 }
 
-void psy_ui_listbox_selitems(psy_ui_ListBox* self, int* items, int maxitems)
+void psy_ui_listbox_selitems(psy_ui_ListBox* self, intptr_t* items, intptr_t maxitems)
 {	
 	assert(self->imp);
 
@@ -159,7 +159,7 @@ static void dev_setstyle(psy_ui_ListBoxImp* self, int style) { }
 static void dev_clear(psy_ui_ListBoxImp* self) { }
 static void dev_setcursel(psy_ui_ListBoxImp* self, intptr_t index) { }
 static intptr_t dev_cursel(psy_ui_ListBoxImp* self) { return -1; }
-static void dev_selitems(psy_ui_ListBoxImp* self, int* items, int maxitems) { }
+static void dev_selitems(psy_ui_ListBoxImp* self, intptr_t* items, intptr_t maxitems) { }
 static intptr_t dev_selcount(psy_ui_ListBoxImp* self) { return 0;  }
 static intptr_t dev_count(psy_ui_ListBoxImp* self) { return 0; }
 
@@ -278,9 +278,9 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 		itemtext = (char*)psy_tableiterator_value(&it);
 		if (self->selindex != -1 && self->selindex == (intptr_t)
 				psy_tableiterator_key(&it)) {
-			psy_ui_Rectangle r;
+			psy_ui_RealRectangle r;
 
-			r = psy_ui_rectangle_make(0, cpy, size.width, lineheight);			
+			r = psy_ui_realrectangle_make(0, cpy, size.width, lineheight);			
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
 		}
 		psy_ui_textout(g, cpx, cpy, itemtext, strlen(itemtext));
@@ -423,7 +423,7 @@ intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
 	return psy_ui_listboxclient_cursel(&self->client);
 }
 
-void psy_ui_listbox_selitems(psy_ui_ListBox* self, int* items, int maxitems)
+void psy_ui_listbox_selitems(psy_ui_ListBox* self, intptr_t* items, intptr_t maxitems)
 {
 
 }

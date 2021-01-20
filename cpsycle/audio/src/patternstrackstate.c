@@ -23,15 +23,20 @@ void psy_audio_trackstate_dispose(psy_audio_TrackState* self)
 
 void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState* self, uintptr_t track)
 {
-	self->soloactive = 1;
-	self->soloedtrack = track;
+	psy_audio_trackstate_setsolotrack(self, track);
 	psy_table_clear(&self->mute);
 	psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
 }
 
+void psy_audio_trackstate_setsolotrack(psy_audio_TrackState* self, uintptr_t track)
+{
+	self->soloactive = TRUE;
+	self->soloedtrack = track;	
+}
+
 void psy_audio_trackstate_deactivatesolotrack(psy_audio_TrackState* self)
 {
-	self->soloactive = 0;
+	self->soloactive = FALSE;
 	psy_table_clear(&self->mute);
 }
 
@@ -53,14 +58,14 @@ void psy_audio_trackstate_unmutetrack(psy_audio_TrackState* self, uintptr_t trac
 	}
 }
 
-int psy_audio_trackstate_istrackmuted(const psy_audio_TrackState* self, uintptr_t track)
+bool psy_audio_trackstate_istrackmuted(const psy_audio_TrackState* self, uintptr_t track)
 {
-	return self->soloactive
+	return (self->soloactive)
 		? !psy_table_exists(&self->mute, track)
 		: psy_table_exists(&self->mute, track);
 }
 
-int psy_audio_trackstate_istracksoloed(const psy_audio_TrackState* self, uintptr_t track)
+bool psy_audio_trackstate_istracksoloed(const psy_audio_TrackState* self, uintptr_t track)
 {
 	return self->soloactive && self->soloedtrack == track;
 }
@@ -71,4 +76,24 @@ uintptr_t psy_audio_trackstate_tracksoloed(const psy_audio_TrackState* self)
 		return self->soloedtrack;
 	}
 	return psy_INDEX_INVALID;
+}
+
+void psy_audio_trackstate_armtrack(psy_audio_TrackState* self, uintptr_t track)
+{	
+	psy_table_insert(&self->record, track, (void*)(uintptr_t)TRUE);	
+}
+
+void psy_audio_trackstate_unarmtrack(psy_audio_TrackState* self, uintptr_t track)
+{	
+	psy_table_remove(&self->record, track);
+}
+
+bool psy_audio_trackstate_istrackarmed(const psy_audio_TrackState* self, uintptr_t track)
+{
+	return psy_table_exists(&self->record, track);
+}
+
+uintptr_t psy_audio_trackstate_trackarmedcount(const psy_audio_TrackState* self)
+{
+	return psy_table_size(&self->record);
 }

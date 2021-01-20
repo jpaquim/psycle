@@ -164,7 +164,7 @@ static void clearcapports(DXDriver*);
 static bool createcaptureport(DXDriver*, PortCapt* port);
 static void readbuffers(DXDriver* self, int index,
 	float** pleft, float** pright, uintptr_t numsamples);
-static uint32_t playposinsamples(psy_AudioDriver*);
+static uintptr_t playposinsamples(psy_AudioDriver*);
 
 static psy_AudioDriverVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -379,7 +379,8 @@ static void init_properties(psy_AudioDriver* driver)
 		"Bitdepth");
 	psy_property_settext(
 		psy_property_append_int(self->configuration, "samplerate",
-			psy_audiodriversettings_samplespersec(&self->settings), 0, 0),
+			(intptr_t)psy_audiodriversettings_samplespersec(&self->settings),
+				0, 0),
 		"Samplerate");
 	psy_property_settext(
 		psy_property_append_int(self->configuration, "dither", 0, 0, 1),
@@ -423,7 +424,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 		psy_audiodriversettings_validbitdepth(&self->settings)));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
 		psy_property_at_int(self->configuration, "samplerate",
-			psy_audiodriversettings_samplespersec(&self->settings)));
+			(intptr_t)psy_audiodriversettings_samplespersec(&self->settings)));
 	psy_audiodriversettings_setblockcount(&self->settings,
 		psy_property_at_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings)));
@@ -499,7 +500,7 @@ bool start(DXDriver* self)
 	self->_dsBufferSize = psy_audiodriversettings_totalbufferbytes(&self->settings);
 	preparewaveformat((WAVEFORMATEXTENSIBLE*)&format,
 		psy_audiodriversettings_numchannels(&self->settings),
-		psy_audiodriversettings_samplespersec(&self->settings),
+		(int)psy_audiodriversettings_samplespersec(&self->settings),
 		psy_audiodriversettings_bitdepth(&self->settings),
 		psy_audiodriversettings_validbitdepth(&self->settings));
 	ZeroMemory(&desc, sizeof(DSBUFFERDESC));
@@ -868,7 +869,7 @@ bool createcaptureport(DXDriver* self, PortCapt* port)
 	// Create the capture buffer	
 	preparewaveformat((WAVEFORMATEXTENSIBLE*)&wf,
 		psy_audiodriversettings_numchannels(&self->settings),
-		psy_audiodriversettings_samplespersec(&self->settings),
+		(int)psy_audiodriversettings_samplespersec(&self->settings),
 		psy_audiodriversettings_bitdepth(&self->settings),
 		psy_audiodriversettings_validbitdepth(&self->settings));	
 	ZeroMemory(&dscbd, sizeof(DSCBUFFERDESC));
@@ -1061,7 +1062,7 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	return self->configuration;
 }
 
-uint32_t playposinsamples(psy_AudioDriver* driver)
+uintptr_t playposinsamples(psy_AudioDriver* driver)
 {
 	DXDriver* self = (DXDriver*)driver;
 	HRESULT hr;

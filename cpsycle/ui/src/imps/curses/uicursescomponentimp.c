@@ -27,10 +27,10 @@ static void dev_show(psy_ui_curses_ComponentImp*);
 static void dev_showstate(psy_ui_curses_ComponentImp*, int state);
 static void dev_hide(psy_ui_curses_ComponentImp*);
 static int dev_visible(psy_ui_curses_ComponentImp*);
-static void dev_move(psy_ui_curses_ComponentImp*, double left, double top);
+static void dev_move(psy_ui_curses_ComponentImp*, psy_ui_Point origin);
 static void dev_resize(psy_ui_curses_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_curses_ComponentImp*, int width, int height);
-static psy_ui_Rectangle dev_position(psy_ui_curses_ComponentImp*);
+static psy_ui_RealRectangle dev_position(psy_ui_curses_ComponentImp*);
 static void dev_setposition(psy_ui_curses_ComponentImp*, psy_ui_Point, psy_ui_Size);
 static psy_ui_Size dev_size(const psy_ui_curses_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_curses_ComponentImp*);
@@ -39,7 +39,7 @@ static psy_ui_Component* dev_parent(psy_ui_curses_ComponentImp*);
 static void dev_capture(psy_ui_curses_ComponentImp*);
 static void dev_releasecapture(psy_ui_curses_ComponentImp*);
 static void dev_invalidate(psy_ui_curses_ComponentImp*);
-static void dev_invalidaterect(psy_ui_curses_ComponentImp*, const psy_ui_Rectangle*);
+static void dev_invalidaterect(psy_ui_curses_ComponentImp*, const psy_ui_RealRectangle*);
 static void dev_update(psy_ui_curses_ComponentImp*);
 static void dev_setfont(psy_ui_curses_ComponentImp*, psy_ui_Font*);
 static void dev_showhorizontalscrollbar(psy_ui_curses_ComponentImp*);
@@ -223,7 +223,7 @@ int dev_visible(psy_ui_curses_ComponentImp* self)
 	return 1; 
 }
 
-void dev_move(psy_ui_curses_ComponentImp* self, double left, double top)
+void dev_move(psy_ui_curses_ComponentImp* self, psy_ui_Point origin)
 {
 	int maxyscr;
 	int maxxscr;
@@ -261,9 +261,9 @@ void dev_clientresize(psy_ui_curses_ComponentImp* self, int width, int height)
 {
 }
 
-psy_ui_Rectangle dev_position(psy_ui_curses_ComponentImp* self)
+psy_ui_RealRectangle dev_position(psy_ui_curses_ComponentImp* self)
 {
-	psy_ui_Rectangle rv;
+	psy_ui_RealRectangle rv;
 	psy_ui_setrectangle(&rv, 0, 0, 0, 0);
 	return rv;
 }
@@ -315,7 +315,7 @@ void dev_invalidate(psy_ui_curses_ComponentImp* self)
 	psy_signal_emit(&self->component->signal_draw, self, 1, &g);	
 }
 
-void dev_invalidaterect(psy_ui_curses_ComponentImp* self, const psy_ui_Rectangle* r)
+void dev_invalidaterect(psy_ui_curses_ComponentImp* self, const psy_ui_RealRectangle* r)
 {
 }
 

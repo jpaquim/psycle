@@ -4,14 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "samplesbox.h"
-#include <stdio.h>
+// platform
 #include "../../detail/portable.h"
 
 static void samplesbox_ondestroy(SamplesBox*);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot, bool create);
-static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
-static void samplesbox_onsampleremoved(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
+static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender,
+	psy_audio_SampleIndex*);
+static void samplesbox_onsampleremoved(SamplesBox*, psy_ui_Component* sender,
+	psy_audio_SampleIndex*);
 static void samplesbox_onsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
 static void samplesbox_onsubsamplelistchanged(SamplesBox*, psy_ui_Component* sender,

@@ -26,12 +26,12 @@ INLINE psy_dsp_amp_t psy_dsp_convert_db_to_amp(psy_dsp_amp_t db)
 	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
 }
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).
-bool INLINE roughly_equals(float a, float b)
+INLINE bool roughly_equals(float a, float b)
 {
 	return fabs(a - b) < psy_dsp_epsilon;
 }
 /// compares two floating point numbers for rough equality
-bool INLINE roughly_equals_e(float a, float b, float tolerance)
+INLINE bool roughly_equals_e(float a, float b, float tolerance)
 {
 	return fabs(a - b) < tolerance;
 }
