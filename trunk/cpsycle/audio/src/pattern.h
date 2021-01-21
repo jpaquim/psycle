@@ -25,6 +25,7 @@ typedef struct {
 	uintptr_t track;
 	psy_dsp_big_beat_t offset;
 	psy_dsp_big_beat_t seqoffset;
+	uintptr_t lpb;
 	uintptr_t line;
 	uintptr_t column;
 	uintptr_t digit;
@@ -191,6 +192,8 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern*,
 ///\return the pattern node
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
+psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern* pattern,
+	psy_audio_PatternCursor cursor, psy_audio_PatternNode** prev);
 /// gets the first pattern
 ///\return the first pattern node
 INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* self)

@@ -97,9 +97,6 @@
     <ClCompile Include="src\patterns.c">
       <Filter>pattern</Filter>
     </ClCompile>
-    <ClCompile Include="src\patternstrackstate.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="src\presetio.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -310,6 +307,9 @@
     <ClCompile Include="src\sequencecmds.c">
       <Filter>sequence</Filter>
     </ClCompile>
+    <ClCompile Include="src\trackstate.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -385,9 +385,6 @@
       <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="src\patterns.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternstrackstate.h">
       <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="src\presets.h">
@@ -593,6 +590,9 @@
     </ClInclude>
     <ClInclude Include="src\sequencecmds.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackstate.h">
+      <Filter>pattern</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

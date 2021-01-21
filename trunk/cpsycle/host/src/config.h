@@ -32,6 +32,7 @@ typedef struct PsycleConfig {
 	psy_Property config;
 	psy_Property* global;
 	psy_Property* visual;
+	psy_Property* defaultfont;
 	GeneralConfig general;
 	AudioConfig audio;
 	EventDriverConfig input;

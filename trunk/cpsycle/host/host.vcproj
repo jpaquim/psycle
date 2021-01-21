@@ -222,6 +222,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\interpreter.h"
+				>
+			</File>
+			<File
 				RelativePath="src\mainframe.c"
 				>
 				<FileConfiguration
@@ -242,6 +246,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\mainframe.h"
+				>
 			</File>
 			<File
 				RelativePath="src\navigation.c"
@@ -266,6 +274,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\navigation.h"
+				>
+			</File>
+			<File
 				RelativePath="src\psycle.c"
 				>
 				<FileConfiguration
@@ -286,6 +298,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\resources\resource.h"
+				>
 			</File>
 			<File
 				RelativePath="src\resources\resource.rc"
@@ -354,7 +370,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\songproperties.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\viewhistory.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\viewhistory.h"
 				>
 			</File>
 			<File
@@ -379,477 +403,25 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="src\workspace.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath="src\about.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\adsrsliders.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\audioconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\channelmappingview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\clipbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\cmdproperties.h"
-				>
-			</File>
-			<File
-				RelativePath="src\cmdsgeneral.h"
-				>
-			</File>
-			<File
-				RelativePath="src\cmdsnotes.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\compatconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\config.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\confirmbox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\cpuview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\defaultlang.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\dirconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\envelopeview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\eventdriverconfig.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\exportview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\filebar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fileview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\gear.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\generalconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\greet.h"
-				>
-			</File>
-			<File
-				RelativePath="src\help.h"
-				>
-			</File>
-			<File
-				RelativePath="src\helpview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\inputdefiner.h"
-				>
-			</File>
-			<File
-				RelativePath="src\instnotemapview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\instrumentampview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\instrumentfilterview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\instrumentgenview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\instrumentpanview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\instrumentpitchview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\instrumentsbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\instrumentview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\intedit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\interpolatecurveview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\interpreter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\kbdbox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\kbdhelp.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\keyboardmiscconfig.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\labelpair.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\languageconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\linesperbeatbar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\machinebar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\machineeditorview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\machineframe.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\machineparamconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\machinesbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\machineview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\machineviewconfig.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\machineviewskin.h"
-				>
-			</File>
-			<File
-				RelativePath="src\mainframe.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\midimonitor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\midiviewconfig.h"
-				>
-			</File>
-			<File
-				RelativePath="src\navigation.h"
-				>
-			</File>
-			<File
-				RelativePath="src\newmachine.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\newval.h"
-				>
-			</File>
-			<File
-				RelativePath="src\octavebar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\oscilloscope.h"
-				>
-			</File>
-			<File
-				RelativePath="src\paramlistbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\paramview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\patterncmds.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\patternheader.h"
-				>
-			</File>
-			<File
-				RelativePath="src\patternproperties.h"
-				>
-			</File>
-			<File
-				RelativePath="src\patternview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\patternviewconfig.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\patternviewmenu.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\patternviewskin.h"
-				>
-			</File>
-			<File
-				RelativePath="src\pianoroll.h"
-				>
-			</File>
-			<File
-				RelativePath="src\playbar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\playposbar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\plugineditor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\predefsconfig.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\presetsbar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\propertiesview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\realedit.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\recentview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\renderview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\resources\resource.h"
-				>
-			</File>
-			<File
-				RelativePath="src\sampleeditor.h"
-				>
-			</File>
-			<File
-				RelativePath="..\audio\src\sampler.h"
-				>
-			</File>
-			<File
-				RelativePath="src\samplesbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\samplesview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\scrollzoom.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\seqeditor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\sequencetrackbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\sequenceview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\skincoord.h"
-				>
-			</File>
-			<File
-				RelativePath="src\skingraphics.h"
-				>
-			</File>
-			<File
-				RelativePath="src\skinio.h"
-				>
-			</File>
-			<File
-				RelativePath="src\songbar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\songproperties.h"
-				>
-			</File>
-			<File
-				RelativePath="src\songtrackbar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\spectrumanalyzer.h"
-				>
-			</File>
-			<File
-				RelativePath="src\stepbox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\stepsequencerview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\stereophase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\swingfillview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\tabbar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\timebar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\trackergridstate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\trackerlinenumbers.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\trackerlinestate.h"
-				>
-			</File>
-			<File
-				RelativePath="src\trackerview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\trackscopeview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\transformpatternview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\undoredobar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\viewhistory.h"
-				>
-			</File>
-			<File
-				RelativePath="src\volslider.h"
-				>
-			</File>
-			<File
-				RelativePath="src\vubar.h"
-				>
-			</File>
-			<File
-				RelativePath="src\vumeter.h"
-				>
-			</File>
-			<File
-				RelativePath="src\vuscope.h"
-				>
-			</File>
-			<File
-				RelativePath="src\wavebox.h"
-				>
-			</File>
-			<File
-				RelativePath="src\wireview.h"
-				>
-			</File>
-			<File
-				RelativePath="src\workspace.h"
-				>
-			</File>
-			<File
-				RelativePath="src\zoombox.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="configuration"
 			>
 			<File
 				RelativePath=".\src\audioconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\audioconfig.h"
 				>
 			</File>
 			<File
@@ -875,7 +447,19 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\cmdproperties.h"
+				>
+			</File>
+			<File
+				RelativePath="src\cmdsgeneral.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\compatconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\compatconfig.h"
 				>
 			</File>
 			<File
@@ -901,7 +485,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\config.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\defaultlang.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\defaultlang.h"
 				>
 			</File>
 			<File
@@ -909,7 +501,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\dirconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\eventdriverconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\eventdriverconfig.h"
 				>
 			</File>
 			<File
@@ -917,7 +517,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\generalconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\keyboardmiscconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\keyboardmiscconfig.h"
 				>
 			</File>
 			<File
@@ -925,7 +533,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\languageconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\machineparamconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machineparamconfig.h"
 				>
 			</File>
 			<File
@@ -933,11 +549,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\machineviewconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\midiviewconfig.c"
 				>
 			</File>
 			<File
+				RelativePath=".\src\midiviewconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\patternviewconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternviewconfig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\predefsconfig.h"
 				>
 			</File>
 		</Filter>
@@ -949,11 +581,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\exportview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\fileview.c"
 				>
 			</File>
 			<File
+				RelativePath=".\src\fileview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\recentview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\recentview.h"
 				>
 			</File>
 			<File
@@ -977,6 +621,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\renderview.h"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -1005,6 +653,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\about.h"
+				>
+			</File>
+			<File
 				RelativePath="src\greet.c"
 				>
 				<FileConfiguration
@@ -1025,6 +677,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\greet.h"
+				>
 			</File>
 			<File
 				RelativePath="src\help.c"
@@ -1049,6 +705,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\help.h"
+				>
+			</File>
+			<File
 				RelativePath="src\helpview.c"
 				>
 				<FileConfiguration
@@ -1071,7 +731,19 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\helpview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\kbdbox.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\kbdhelp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\kbdhelp.h"
 				>
 			</File>
 		</Filter>
@@ -1101,6 +773,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\channelmappingview.h"
+				>
+			</File>
+			<File
+				RelativePath="src\clipbox.h"
+				>
+			</File>
+			<File
 				RelativePath="src\gear.c"
 				>
 				<FileConfiguration
@@ -1123,7 +803,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\gear.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\machineeditorview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machineeditorview.h"
 				>
 			</File>
 			<File
@@ -1149,6 +837,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\machineframe.h"
+				>
+			</File>
+			<File
 				RelativePath="src\machinesbox.c"
 				>
 				<FileConfiguration
@@ -1169,6 +861,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\machinesbox.h"
+				>
 			</File>
 			<File
 				RelativePath="src\machineview.c"
@@ -1193,7 +889,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\machineview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\machineviewskin.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machineviewskin.h"
 				>
 			</File>
 			<File
@@ -1219,7 +923,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\newmachine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\newval.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\newval.h"
 				>
 			</File>
 			<File
@@ -1245,6 +957,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\paramlistbox.h"
+				>
+			</File>
+			<File
 				RelativePath="src\paramview.c"
 				>
 				<FileConfiguration
@@ -1265,6 +981,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\paramview.h"
+				>
 			</File>
 			<File
 				RelativePath="src\plugineditor.c"
@@ -1289,7 +1009,23 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\plugineditor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\presetsbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\presetsbar.h"
+				>
+			</File>
+			<File
+				RelativePath="src\skincoord.h"
+				>
+			</File>
+			<File
+				RelativePath="src\skinio.h"
 				>
 			</File>
 			<File
@@ -1314,11 +1050,19 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="src\wireview.h"
+				>
+			</File>
 			<Filter
 				Name="instrument"
 				>
 				<File
 					RelativePath=".\src\adsrsliders.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\adsrsliders.h"
 					>
 				</File>
 				<File
@@ -1344,6 +1088,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="src\envelopeview.h"
+					>
+				</File>
+				<File
 					RelativePath="src\instnotemapview.c"
 					>
 					<FileConfiguration
@@ -1366,7 +1114,15 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="src\instnotemapview.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\instrumentampview.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\instrumentampview.h"
 					>
 				</File>
 				<File
@@ -1374,7 +1130,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\instrumentfilterview.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\instrumentgenview.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\instrumentgenview.h"
 					>
 				</File>
 				<File
@@ -1382,7 +1146,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\instrumentpanview.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\instrumentpitchview.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\instrumentpitchview.h"
 					>
 				</File>
 				<File
@@ -1408,6 +1180,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="src\instrumentsbox.h"
+					>
+				</File>
+				<File
 					RelativePath="src\instrumentview.c"
 					>
 					<FileConfiguration
@@ -1428,6 +1204,10 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\instrumentview.h"
+					>
 				</File>
 				<File
 					RelativePath=".\src\predefsconfig.c"
@@ -1456,6 +1236,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="src\sampleeditor.h"
+					>
+				</File>
+				<File
 					RelativePath="src\samplesbox.c"
 					>
 					<FileConfiguration
@@ -1476,6 +1260,10 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\samplesbox.h"
+					>
 				</File>
 				<File
 					RelativePath="src\samplesview.c"
@@ -1500,6 +1288,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="src\samplesview.h"
+					>
+				</File>
+				<File
 					RelativePath="src\wavebox.c"
 					>
 					<FileConfiguration
@@ -1521,6 +1313,10 @@
 						/>
 					</FileConfiguration>
 				</File>
+				<File
+					RelativePath="src\wavebox.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1531,7 +1327,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\cpuview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\midimonitor.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midimonitor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\oscilloscope.h"
+				>
+			</File>
+			<File
+				RelativePath="src\patternproperties.h"
 				>
 			</File>
 			<File
@@ -1539,7 +1351,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\spectrumanalyzer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\stereophase.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\stereophase.h"
 				>
 			</File>
 			<File
@@ -1565,6 +1385,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\vumeter.h"
+				>
+			</File>
+			<File
 				RelativePath="src\vuscope.c"
 				>
 				<FileConfiguration
@@ -1586,12 +1410,20 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="src\vuscope.h"
+				>
+			</File>
 		</Filter>
 		<Filter
-			Name="patterns"
+			Name="pattern"
 			>
 			<File
 				RelativePath=".\src\interpolatecurveview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\interpolatecurveview.h"
 				>
 			</File>
 			<File
@@ -1599,7 +1431,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\patterncmds.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\patternheader.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternheader.h"
 				>
 			</File>
 			<File
@@ -1647,11 +1487,27 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\patternview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\patternviewmenu.c"
 				>
 			</File>
 			<File
+				RelativePath=".\src\patternviewmenu.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\patternviewskin.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternviewskin.h"
+				>
+			</File>
+			<File
+				RelativePath="src\pianoroll.h"
 				>
 			</File>
 			<File
@@ -1725,7 +1581,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\swingfillview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\trackergridstate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackergridstate.h"
 				>
 			</File>
 			<File
@@ -1733,7 +1597,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\trackerlinenumbers.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\trackerlinestate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackerlinestate.h"
 				>
 			</File>
 			<File
@@ -1759,6 +1631,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\trackerview.h"
+				>
+			</File>
+			<File
 				RelativePath="src\trackscopeview.c"
 				>
 				<FileConfiguration
@@ -1781,7 +1657,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\trackscopeview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\transformpatternview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\transformpatternview.h"
 				>
 			</File>
 		</Filter>
@@ -1793,7 +1677,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\seqeditor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\sequencetrackbox.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencetrackbox.h"
 				>
 			</File>
 			<File
@@ -1819,6 +1711,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\sequenceview.h"
+				>
+			</File>
+			<File
 				RelativePath="src\stepsequencerview.c"
 				>
 				<FileConfiguration
@@ -1840,12 +1736,20 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="src\stepsequencerview.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="uicontrols"
 			>
 			<File
 				RelativePath=".\src\confirmbox.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\confirmbox.h"
 				>
 			</File>
 			<File
@@ -1871,7 +1775,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\inputdefiner.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\intedit.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\intedit.h"
 				>
 			</File>
 			<File
@@ -1883,11 +1795,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\labelpair.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\propertiesview.c"
 				>
 			</File>
 			<File
+				RelativePath=".\src\propertiesview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\realedit.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\realedit.h"
 				>
 			</File>
 			<File
@@ -1911,6 +1835,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\scrollzoom.h"
+				>
 			</File>
 			<File
 				RelativePath="src\skincoord.c"
@@ -1979,6 +1907,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\tabbar.h"
+				>
+			</File>
+			<File
+				RelativePath="src\timebar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\volslider.c"
 				>
 				<FileConfiguration
@@ -2001,6 +1937,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\volslider.h"
+				>
+			</File>
+			<File
 				RelativePath="src\zoombox.c"
 				>
 				<FileConfiguration
@@ -2021,6 +1961,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\zoombox.h"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -2071,6 +2015,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\filebar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\linesperbeatbar.c"
 				>
 				<FileConfiguration
@@ -2091,6 +2039,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\linesperbeatbar.h"
+				>
 			</File>
 			<File
 				RelativePath="src\machinebar.c"
@@ -2115,6 +2067,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\machinebar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\octavebar.c"
 				>
 				<FileConfiguration
@@ -2135,6 +2091,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\octavebar.h"
+				>
 			</File>
 			<File
 				RelativePath=".\src\oscilloscope.c"
@@ -2163,6 +2123,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\playbar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\playposbar.c"
 				>
 				<FileConfiguration
@@ -2185,6 +2149,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\playposbar.h"
+				>
+			</File>
+			<File
+				RelativePath="src\skingraphics.h"
+				>
+			</File>
+			<File
 				RelativePath="src\songbar.c"
 				>
 				<FileConfiguration
@@ -2205,6 +2177,18 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\songbar.h"
+				>
+			</File>
+			<File
+				RelativePath="src\songtrackbar.h"
+				>
+			</File>
+			<File
+				RelativePath="src\stepbox.h"
+				>
 			</File>
 			<File
 				RelativePath="src\timebar.c"
@@ -2251,6 +2235,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\undoredobar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\vubar.c"
 				>
 				<FileConfiguration
@@ -2271,6 +2259,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\vubar.h"
+				>
 			</File>
 		</Filter>
 		<File

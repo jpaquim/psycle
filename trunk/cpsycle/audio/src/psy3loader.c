@@ -1086,29 +1086,44 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 
 int psy_audio_psy3loader_read_smid(psy_audio_PSY3Loader* self)
 {		
-	uint32_t index;
+	uint32_t groupidx;
+	uint32_t instidx;
 	int status;
+	psy_audio_Instrument* instrument;
 
-	if (status = psyfile_read(self->fp, &index, sizeof(index))) {
+	assert(self);
+
+	if (status = psyfile_read(self->fp, &instidx, sizeof(instidx))) {
+		return status;
+	}	
+	instrument = psy_audio_instrument_allocinit();
+	psy_audio_instrument_setindex(instrument, instidx);		
+	if (status = psy_audio_psy3loader_loadxminstrument(self, instrument, 0,
+			self->fp->currchunk.version & 0xFFFF)) {
+		psy_audio_instrument_deallocate(instrument);
 		return status;
 	}
-	if (index < MAX_INSTRUMENTS) {
-		psy_audio_Instrument* instrument;		
+	// read groupidx
+	if ((psyfile_currchunkversion(self->fp) &
+			CURRENT_FILE_VERSION_SMID) > 1) {
+		uint8_t revert;
 
-		if (!psy_audio_instruments_at(&self->song->instruments,
-				psy_audio_instrumentindex_make(1, index))) {
-			instrument = psy_audio_instrument_allocinit();
-			psy_audio_instrument_setindex(instrument, index);
-			psy_audio_instruments_insert(&self->song->instruments, instrument,
-				psy_audio_instrumentindex_make(1, index));
-		}
-		instrument = psy_audio_instruments_at(&self->song->instruments,
-			psy_audio_instrumentindex_make(1, index));
-		if (status = psy_audio_psy3loader_loadxminstrument(self, instrument, 0,
-				self->fp->currchunk.version & 0xFFFF)) {
+		if (status = psyfile_read(self->fp, &revert, sizeof(uint8_t))) {
+			psy_audio_instrument_deallocate(instrument);
 			return status;
 		}
-	}
+		if (revert != FALSE) {
+			instidx = UINT32_MAX - instidx;
+		}
+		if (status = psyfile_read(self->fp, &groupidx, sizeof(uint32_t))) {
+			psy_audio_instrument_deallocate(instrument);
+			return status;
+		}
+	} else {
+		groupidx = 1;
+	}	
+	psy_audio_instruments_insert(&self->song->instruments, instrument,
+		psy_audio_instrumentindex_make(groupidx, instidx));
 	return PSY_OK;
 }
 

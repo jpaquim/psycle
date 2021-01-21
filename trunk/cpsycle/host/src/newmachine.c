@@ -83,7 +83,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
 		"newmachine.select-plugin-to-view-description"));
 	psy_ui_label_settextalignment(&self->desclabel,
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
+		psy_ui_ALIGNMENT_TOP);
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_checkbox_init(&self->compatblitzgamefx, &self->component);
 	psy_ui_checkbox_settext(&self->compatblitzgamefx,

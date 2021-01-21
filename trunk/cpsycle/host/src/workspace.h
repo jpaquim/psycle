@@ -118,15 +118,12 @@ typedef struct {
 	psy_Signal signal_terminal_out;		
 	psy_Signal signal_status_out;
 	psy_Signal signal_followsongchanged;
-	psy_Signal signal_dockview;
-	psy_Signal signal_defaultfontchange;
-	psy_Signal signal_defaultfontchanged;
+	psy_Signal signal_dockview;	
 	psy_Signal signal_togglegear;
 	psy_Signal signal_selectpatterndisplay;
 	psy_Signal signal_floatsection;
 	psy_Signal signal_docksection;
-	psy_Signal signal_machineeditresize;
-	psy_Signal signal_zoom;
+	psy_Signal signal_machineeditresize;	
 	// audio
 	psy_audio_Song* song;
 	psy_audio_Player player;
@@ -153,8 +150,7 @@ typedef struct {
 	MaximizedView maximizeview;
 	int fontheight;	
 	bool hasnewline;
-	bool gearvisible;
-	double zoom;
+	bool gearvisible;	
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
@@ -234,28 +230,6 @@ void workspace_forward(Workspace*);
 void workspace_updatecurrview(Workspace*);
 uintptr_t workspace_currview(Workspace*);
 void workspace_addhistory(Workspace*);
-void workspace_changedefaultfontsize(Workspace*, int size);
-// unzoomed font height
-INLINE int workspace_fontheight(Workspace* self)
-{
-	return self->fontheight;
-}
-
-INLINE void workspace_zoom(Workspace* self, double factor)
-{
-	int fontsize;
-
-	self->zoom = factor;
-	psy_signal_emit_float(&self->signal_zoom, self, (float)factor);
-	fontsize = (int)(factor * workspace_fontheight(self));
-	workspace_changedefaultfontsize(self, fontsize);
-}
-
-INLINE double workspace_zoomrate(const Workspace* self)
-{
-	return self->zoom;
-}
-
 void workspace_dockview(Workspace*, psy_ui_Component*);
 void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);

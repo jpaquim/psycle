@@ -127,8 +127,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->machines_undosavepoint = 0;
 	self->navigating = FALSE;	
 	self->restoreview = VIEW_ID_MACHINEVIEW;
-	self->patternsinglemode = TRUE;
-	self->zoom = 1.0;
+	self->patternsinglemode = TRUE;	
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -186,15 +185,12 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_warning);
 	psy_signal_init(&self->signal_status_out);
 	psy_signal_init(&self->signal_followsongchanged);
-	psy_signal_init(&self->signal_dockview);
-	psy_signal_init(&self->signal_defaultfontchanged);
-	psy_signal_init(&self->signal_defaultfontchange);
+	psy_signal_init(&self->signal_dockview);	
 	psy_signal_init(&self->signal_togglegear);	
 	psy_signal_init(&self->signal_selectpatterndisplay);
 	psy_signal_init(&self->signal_floatsection);
 	psy_signal_init(&self->signal_docksection);
 	psy_signal_init(&self->signal_machineeditresize);
-	psy_signal_init(&self->signal_zoom);
 }
 
 void workspace_dispose(Workspace* self)
@@ -241,15 +237,12 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_warning);
 	psy_signal_dispose(&self->signal_status_out);
 	psy_signal_dispose(&self->signal_followsongchanged);
-	psy_signal_dispose(&self->signal_dockview);
-	psy_signal_dispose(&self->signal_defaultfontchanged);
-	psy_signal_dispose(&self->signal_defaultfontchange);
+	psy_signal_dispose(&self->signal_dockview);	
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 	psy_signal_dispose(&self->signal_floatsection);
 	psy_signal_dispose(&self->signal_docksection);
-	psy_signal_dispose(&self->signal_machineeditresize);
-	psy_signal_dispose(&self->signal_zoom);
+	psy_signal_dispose(&self->signal_machineeditresize);	
 }
 
 void workspace_clearsequencepaste(Workspace* self)
@@ -302,24 +295,6 @@ void workspace_configvisual(Workspace* self)
 	self->fontheight = fontinfo.lfHeight;
 	psy_ui_replacedefaultfont(self->mainhandle, &font);
 	psy_ui_font_dispose(&font);	
-}
-
-void workspace_changedefaultfontsize(Workspace* self, int size)
-{
-	psy_ui_FontInfo fontinfo;
-	psy_ui_Font font;
-
-	assert(self);
-
-	psy_ui_fontinfo_init_string(&fontinfo,
-		psycleconfig_defaultfontstr(&self->config));	
-	fontinfo.lfHeight = size;	
-	psy_ui_font_init(&font, &fontinfo);	
-	psy_signal_emit(&self->signal_defaultfontchange, self, 
-		1, &font);
-	psy_ui_replacedefaultfont(self->mainhandle, &font);
-	psy_ui_component_invalidate(self->mainhandle);
-	psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
 }
 
 const char* workspace_driverpath(Workspace* self)
@@ -600,12 +575,9 @@ void workspace_setdefaultfont(Workspace* self, psy_Property* property)
 	psy_ui_Font font;
 	psy_ui_FontInfo fontinfo;
 
-	psy_ui_fontinfo_init_string(&fontinfo,
-		psy_property_item_str(property));
+	psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_replacedefaultfont(self->mainhandle, &font);
-	psy_ui_component_invalidate(self->mainhandle);
-	psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
+	psy_ui_app_setdefaultfont(psy_ui_app(), &font);	
 }
 
 void workspace_newsong(Workspace* self)
@@ -912,7 +884,8 @@ void workspace_load_configuration(Workspace* self)
 		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
 			&self->machinefactory);
 	}
-	psycleconfig_notifyall_changed(&self->config);		
+	workspace_setdefaultfont(self, self->config.defaultfont);
+	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
@@ -1154,6 +1127,7 @@ void workspace_idle(Workspace* self)
 				bool prevented;
 
 				entry = (psy_audio_SequenceEntry*)it.sequencentrynode->entry;
+				self->lastentry = (psy_audio_SequenceEntry*)it.sequencentrynode->entry;
 				prevented = viewhistory_prevented(&self->viewhistory);
 				viewhistory_prevent(&self->viewhistory);
 				workspace_setsequenceeditposition(self,
@@ -1161,8 +1135,7 @@ void workspace_idle(Workspace* self)
 						0, entry->row));				
 				if (!prevented) {
 					viewhistory_enable(&self->viewhistory);
-				}				
-				self->lastentry = (psy_audio_SequenceEntry*) it.sequencentrynode->entry;
+				}								
 			}
 			if (self->lastentry) {				
 				self->patterneditposition.line = (int) (

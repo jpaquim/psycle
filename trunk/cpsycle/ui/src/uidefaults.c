@@ -28,7 +28,7 @@ void psy_ui_defaults_init(psy_ui_Defaults* self)
 	{
 		psy_ui_FontInfo fontinfo;
 	
-		psy_ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);	
 		psy_ui_font_init(&self->style_common.font, &fontinfo);
 	}			
 	// group

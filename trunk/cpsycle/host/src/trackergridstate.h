@@ -136,8 +136,7 @@ typedef struct TrackerGridState {
 	// signals
 	psy_Signal signal_cursorchanged;
 	// internal data
-	psy_audio_PatternCursor cursor;	
-	uintptr_t numtracks;	
+	psy_audio_PatternCursor cursor;
 	// references
 	psy_audio_Pattern* pattern;
 	psy_audio_Patterns* patterns;
@@ -147,35 +146,38 @@ typedef struct TrackerGridState {
 	bool singlemode;
 } TrackerGridState;
 
-void trackerpianogridstate_init(TrackerGridState*, TrackConfig*);
+void trackergridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
-double trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
+double trackergridstate_trackwidth(const TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
 double trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_pxtotrack(TrackerGridState*, double x,
-	uintptr_t numsongtracks);
+uintptr_t trackergridstate_pxtotrack(const TrackerGridState*, double x);
 double trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, double x);
+uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track,
+	double x);
 
 
-INLINE void trackergridstate_setsequence(TrackerGridState* self, psy_audio_Sequence* sequence)
+INLINE void trackergridstate_setsequence(TrackerGridState* self,
+	psy_audio_Sequence* sequence)
 {
 	assert(self);
 
 	self->sequence = sequence;
 }
 
-INLINE void trackergridstate_setpattern(TrackerGridState* self, psy_audio_Pattern* pattern)
+INLINE void trackergridstate_setpattern(TrackerGridState* self,
+	psy_audio_Pattern* pattern)
 {
 	assert(self);
 
 	self->pattern = pattern;
 }
 
-INLINE void trackergridstate_setpatterns(TrackerGridState* self, psy_audio_Patterns* patterns)
+INLINE void trackergridstate_setpatterns(TrackerGridState* self,
+	psy_audio_Patterns* patterns)
 {
 	assert(self);
-
+	
 	self->patterns = patterns;
 }
 
@@ -193,7 +195,8 @@ INLINE psy_audio_Pattern* trackergridstate_pattern(TrackerGridState* self)
 	return self->pattern;
 }
 
-INLINE double trackergridstate_preferredtrackwidth(TrackerGridState* self)
+INLINE double trackergridstate_preferredtrackwidth(const
+	TrackerGridState* self)
 {
 	if (self->skin) {
 		return self->skin->headercoords.background.destwidth;
@@ -201,15 +204,12 @@ INLINE double trackergridstate_preferredtrackwidth(TrackerGridState* self)
 	return 0;
 }
 
-INLINE uintptr_t trackergridstate_numsongtracks(TrackerGridState* self)
+INLINE uintptr_t trackergridstate_numsongtracks(const TrackerGridState* self)
 {
-	return self->numtracks;
-}
-
-INLINE void trackergridstate_setnumsongtracks(TrackerGridState* self,
-	uintptr_t numtracks)
-{
-	self->numtracks = numtracks;
+	if (self->patterns) {
+		return psy_audio_patterns_numtracks(self->patterns);
+	}
+	return 0;
 }
 
 INLINE psy_audio_PatternCursor trackergridstate_cursor(TrackerGridState* self)
@@ -226,7 +226,7 @@ INLINE uintptr_t trackergridstate_cursorposition_valid(TrackerGridState* self)
 }
 
 void trackergridstate_synccursor(TrackerGridState*);
-void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor cursor);
+void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor);
 void trackergridstate_clip(TrackerGridState*, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv);
 

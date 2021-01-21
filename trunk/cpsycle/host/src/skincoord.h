@@ -36,7 +36,7 @@ void skincoord_setall(SkinCoord*,
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4]);
 void skincoord_setdest(SkinCoord* coord, intptr_t vals[4]);
 
-INLINE psy_ui_RealRectangle skincoord_destposition(SkinCoord* self)
+INLINE psy_ui_RealRectangle skincoord_destposition(const SkinCoord* self)
 {
 	return psy_ui_realrectangle_make(
 		self->destx, self->desty,
@@ -46,6 +46,14 @@ INLINE psy_ui_RealRectangle skincoord_destposition(SkinCoord* self)
 INLINE double skincoord_position(SkinCoord* coord, double value)
 {
 	return value * coord->range;
+}
+
+INLINE bool skincoord_hittest(const SkinCoord* self, double x, double y)
+{
+	psy_ui_RealRectangle destposition;
+
+	destposition = skincoord_destposition(self);	
+	return psy_ui_realrectangle_intersect(&destposition, x, y);
 }
 
 #ifdef __cplusplus

@@ -317,7 +317,6 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
-    <ClCompile Include="src\patternstrackstate.c" />
     <ClCompile Include="src\player.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -376,6 +375,7 @@
     </ClCompile>
     <ClCompile Include="src\songio.c" />
     <ClCompile Include="src\ticktimer.c" />
+    <ClCompile Include="src\trackstate.c" />
     <ClCompile Include="src\virtualgenerator.c" />
     <ClCompile Include="src\vstevents.c" />
     <ClCompile Include="src\vstplugin.c">
@@ -451,7 +451,6 @@
     <ClInclude Include="src\patternevent.h" />
     <ClInclude Include="src\patternio.h" />
     <ClInclude Include="src\patterns.h" />
-    <ClInclude Include="src\patternstrackstate.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\plugin.h" />
     <ClInclude Include="src\plugincatcher.h" />
@@ -477,6 +476,7 @@
     <ClInclude Include="src\song.h" />
     <ClInclude Include="src\songio.h" />
     <ClInclude Include="src\ticktimer.h" />
+    <ClInclude Include="src\trackstate.h" />
     <ClInclude Include="src\virtualgenerator.h" />
     <ClInclude Include="src\vstevents.h" />
     <ClInclude Include="src\vstplugin.h" />

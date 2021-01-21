@@ -4,7 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "uiapp.h"
+// local
 #include "uicomponent.h"
+// std
+#include <stdlib.h>
 // platform
 #include "../../detail/psyconf.h"
 #include "../../detail/os.h"
@@ -20,12 +23,56 @@
 #else
 	#error "Platform not supported"
 #endif
-// std
-#include <stdlib.h>
 
+// global app reference set by app_init
 static psy_ui_App* app = NULL;
 
-void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
+// psy_ui_AppZoom
+
+static void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom*, psy_ui_Font*);
+
+void psy_ui_appzoom_init(psy_ui_AppZoom* self)
+{
+	assert(self);
+
+	self->rate = 1.0;
+	self->basefontsize = -16;
+	psy_signal_init(&self->signal_zoom);
+}
+
+void psy_ui_appzoom_dispose(psy_ui_AppZoom* self)
+{
+	psy_signal_dispose(&self->signal_zoom);
+}
+
+void psy_ui_appzoom_setrate(psy_ui_AppZoom* self, double rate)
+{
+	assert(self);
+
+	self->rate = rate;
+	psy_signal_emit_float(&self->signal_zoom, self, 0);
+}
+
+double psy_ui_appzoom_rate(const psy_ui_AppZoom* self)
+{
+	assert(self);
+
+	return self->rate;
+}
+
+void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom* self, psy_ui_Font* basefont)
+{
+	psy_ui_FontInfo fontinfo;	
+
+	assert(self);
+
+	fontinfo = psy_ui_font_fontinfo(basefont);
+	self->basefontsize = fontinfo.lfHeight;
+}
+
+// psy_ui_App
+static void psy_ui_app_changedefaultfontsize(psy_ui_App*, int size);
+static void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
 
 static void ui_app_initimpfactory(psy_ui_App*);
 static void ui_app_initimp(psy_ui_App*, uintptr_t instance);
@@ -44,8 +91,11 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	app = self;
 	self->main = NULL;
 	psy_signal_init(&self->signal_dispose);	
+	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);
 	psy_ui_defaults_init(&self->defaults);
+	psy_ui_appzoom_updatebasefontsize(&self->zoom,
+		psy_ui_defaults_font(&self->defaults));
 	ui_app_initimp(self, instance);
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
@@ -94,6 +144,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 
 	psy_signal_emit(&self->signal_dispose, self, 0);
 	psy_signal_dispose(&self->signal_dispose);
+	psy_ui_appzoom_dispose(&self->zoom);
 	if (self->imp) {
 		self->imp->vtable->dev_dispose(self->imp);
 		free(self->imp);
@@ -162,6 +213,56 @@ void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 		psy_list_free(q);
 		psy_ui_component_alignall(self->main);
 	}	
+}
+
+void psy_ui_app_setzoomrate(psy_ui_App* self, double rate)
+{
+	psy_ui_appzoom_setrate(&self->zoom, rate);
+	psy_ui_app_changedefaultfontsize(self,
+		(int)(self->zoom.basefontsize * rate));
+}
+
+double psy_ui_app_zoomrate(const psy_ui_App* self)
+{
+	return psy_ui_appzoom_rate(&self->zoom);
+}
+
+psy_ui_AppZoom* psy_ui_app_zoom(psy_ui_App* self)
+{
+	return &self->zoom;
+}
+
+void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
+{
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font font;
+
+	assert(self);
+
+	fontinfo = psy_ui_font_fontinfo(&self->defaults.style_common.font);	
+	fontinfo.lfHeight = size;	
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_replacedefaultfont(self->main, &font);
+	psy_ui_component_invalidate(self->main);	
+}
+
+void psy_ui_app_setdefaultfont(psy_ui_App* self, psy_ui_Font* font)
+{	
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font zoomedfont;
+
+	assert(self);
+	
+	psy_ui_appzoom_updatebasefontsize(&self->zoom, font);
+	if (self->zoom.rate != 1.0) {
+		fontinfo = psy_ui_font_fontinfo(font);
+		fontinfo.lfHeight = (int)(self->zoom.basefontsize * self->zoom.rate);
+		psy_ui_font_init(&zoomedfont, &fontinfo);
+		psy_ui_replacedefaultfont(self->main, &zoomedfont);
+	} else {
+		psy_ui_replacedefaultfont(self->main, font);
+	}
+	psy_ui_component_invalidate(self->main);
 }
 
 // psy_ui_AppImp

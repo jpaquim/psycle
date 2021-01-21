@@ -19,14 +19,31 @@ struct psy_ui_AppImp;
 struct psy_ui_Component;
 struct psy_ui_ImpFactory;
 
+// psy_ui_AppZoom
+typedef struct psy_ui_AppZoom {
+	// signals
+	psy_Signal signal_zoom;
+	// internal data
+	double rate;
+	int basefontsize;
+} psy_ui_AppZoom;
+
+void psy_ui_appzoom_init(psy_ui_AppZoom*);
+void psy_ui_appzoom_dispose(psy_ui_AppZoom*);
+
+void psy_ui_appzoom_setrate(psy_ui_AppZoom*, double rate);
+double psy_ui_appzoom_rate(const psy_ui_AppZoom*);
+
+// psy_ui_App
 typedef struct psy_ui_App {
 	// signals
 	psy_Signal signal_dispose;
 	// internal data
 	struct psy_ui_AppImp* imp;	
 	struct psy_ui_ImpFactory* imp_factory;
+	psy_ui_AppZoom zoom;
 	psy_ui_Defaults defaults;
-	psy_Translator translator;
+	psy_Translator translator;	
 	// references
 	struct psy_ui_Component* main;
 } psy_ui_App;
@@ -39,6 +56,10 @@ struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);
 void psy_ui_app_close(psy_ui_App*);
+void psy_ui_app_setzoomrate(psy_ui_App*, double rate);
+double psy_ui_app_zoomrate(const psy_ui_App*);
+psy_ui_AppZoom* psy_ui_app_zoom(psy_ui_App*);
+void psy_ui_app_setdefaultfont(psy_ui_App*, psy_ui_Font*);
 
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {

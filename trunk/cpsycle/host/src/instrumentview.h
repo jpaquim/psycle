@@ -68,13 +68,14 @@ typedef struct InstrumentHeaderView {
 	psy_ui_Label namelabel;
 	psy_ui_Edit nameedit;	
 	psy_ui_Button prevbutton;
-	psy_ui_Button nextbutton;	
-	psy_audio_Instrument* instrument;
-	psy_audio_Instruments* instruments;
+	psy_ui_Button nextbutton;
+	psy_ui_Component more;
 	VirtualGeneratorsBox virtualgenerators;
 	InstrumentPredefsBar predefs;
 	// references
 	struct InstrumentView* view; // todo remove view reference
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentHeaderView;
 
 void instrumentheaderview_init(InstrumentHeaderView*, psy_ui_Component* parent,
@@ -95,16 +96,6 @@ typedef struct InstrumentViewButtons {
 
 void instrumentviewbuttons_init(InstrumentViewButtons*,
 	psy_ui_Component* parent, Workspace*);
-
-typedef struct InstrumentEmpty {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	psy_ui_Label empty;
-} InstrumentEmpty;
-
-void instrumentempty_init(InstrumentEmpty*, psy_ui_Component* parent);
-
 
 // InstrumentViewBar
 typedef struct InstrumentsViewBar {
@@ -133,11 +124,11 @@ typedef struct InstrumentView {
 	psy_ui_Notebook notebook;
 	TabBar tabbar;
 	psy_ui_Component left;
-	psy_ui_Label label;	
+	psy_ui_Label label;
 	InstrumentViewButtons buttons;
 	InstrumentsBox instrumentsbox;
 	psy_ui_Notebook clientnotebook;
-	InstrumentEmpty empty;
+	psy_ui_Label empty;
 	psy_ui_Component client;
 	InstrumentHeaderView header;
 	InstrumentGeneralView general;

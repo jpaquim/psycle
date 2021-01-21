@@ -5,7 +5,7 @@
 #define psy_audio_PATTERNS_H
 
 #include "pattern.h"
-#include "patternstrackstate.h"
+#include "trackstate.h"
 
 #include <hashtbl.h>
 #include <list.h>
