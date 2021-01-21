@@ -109,8 +109,9 @@ void psycleconfig_makevisual(PsycleConfig* self)
 		psy_property_append_action(self->visual, "defaultskin"),
 		"settingsview.default-skin"),
 		PROPERTY_ID_DEFAULTSKIN);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_font(self->visual, "defaultfont", PSYCLE_DEFAULT_FONT),
+	self->defaultfont = psy_property_setid(psy_property_settext(
+		psy_property_append_font(self->visual, "defaultfont",
+			PSYCLE_DEFAULT_FONT),
 		"settingsview.default-font"),
 		PROPERTY_ID_DEFAULTFONT);
 	patternviewconfig_init(&self->patview, self->visual);

@@ -23,6 +23,7 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor* self)
 	self->offset = 0.0;
 	self->seqoffset = 0.0;
 	self->line = 0;
+	self->lpb = 4;
 	self->column = 0;
 	self->digit = 0;
 	self->patternid = 0;
@@ -278,6 +279,13 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern* s
 		psy_list_next(&p);
 	}
 	return p;
+}
+
+psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern* self,
+	psy_audio_PatternCursor cursor, psy_audio_PatternNode** prev)
+{
+	return psy_audio_pattern_findnode(self, cursor.track,
+		cursor.offset, 1.0 / (double)cursor.lpb, prev);
 }
 
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* self, uintptr_t track,

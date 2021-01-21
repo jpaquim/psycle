@@ -45,7 +45,7 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // implementation
-void trackerpianogridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
+void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
 	// init signals
 	psy_signal_init(&self->signal_cursorchanged);
@@ -57,7 +57,6 @@ void trackerpianogridstate_init(TrackerGridState* self, TrackConfig* trackconfig
 	self->skin = NULL;	
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
-	self->numtracks = 16;
 	self->singlemode = TRUE;
 }
 
@@ -114,11 +113,11 @@ void trackdef_init(TrackDef* self)
 }
 
 
-double trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
+double trackergridstate_trackwidth(const TrackerGridState* self, uintptr_t track)
 {
 	TrackDef* trackdef;
 	
-	trackdef = trackergridstate_trackdef(self, track);
+	trackdef = trackergridstate_trackdef((TrackerGridState*)self, track);
 	if (trackdef) {
 		return trackdef_width(trackdef,
 			(self->trackconfig)
@@ -140,12 +139,12 @@ double trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 	return rv;
 }
 
-uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, double x, uintptr_t numsongtracks)
+uintptr_t trackergridstate_pxtotrack(const TrackerGridState* self, double x)
 {
 	double currx = 0;
 	uintptr_t rv = 0;
 
-	while (rv < numsongtracks) {
+	while (rv < trackergridstate_numsongtracks(self)) {
 		currx += trackergridstate_trackwidth(self, rv);
 		if (currx > x) {
 			break;
@@ -405,12 +404,12 @@ void trackergridstate_clip(TrackerGridState* self, const psy_ui_RealRectangle* c
 {
 	assert(self);
 
-	rv->topleft.track = trackergridstate_pxtotrack(self, clip->left, self->numtracks);
+	rv->topleft.track = trackergridstate_pxtotrack(self, clip->left);
 	rv->topleft.column = 0;
 	rv->topleft.digit = 0;		
-	rv->bottomright.track = trackergridstate_pxtotrack(self, clip->right, self->numtracks) + 1;
-	if (rv->bottomright.track > self->numtracks) {
-		rv->bottomright.track = self->numtracks;
+	rv->bottomright.track = trackergridstate_pxtotrack(self, clip->right) + 1;
+	if (rv->bottomright.track > trackergridstate_numsongtracks(self)) {
+		rv->bottomright.track = trackergridstate_numsongtracks(self);
 	}
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;	

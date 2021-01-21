@@ -40,6 +40,12 @@ static void trackerheader_drawtrackledarmed(TrackerHeader* self, psy_ui_Graphics
 static void trackerheader_drawtrackselection(TrackerHeader*, psy_ui_Graphics*,
 	double x, uintptr_t track);
 static void trackerheader_onmousedown(TrackerHeader*, psy_ui_MouseEvent*);
+double trackerheader_trackposition(const TrackerHeader* self, uintptr_t track);
+static double trackerheader_centerx(const TrackerHeader* self,
+	uintptr_t track);
+static bool trackerheader_hittest_mute(const TrackerHeader*, double x, double y);
+static bool trackerheader_hittest_solo(const TrackerHeader*, double x, double y);
+static bool trackerheader_hittest_record(const TrackerHeader*, double x, double y);
 static void trackerheader_onpreferredsize(TrackerHeader*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void trackerheader_onpatterncursorchanged(TrackerHeader*, Workspace*);
@@ -73,14 +79,15 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 }
 // implementation
 void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
-	TrackConfig* trackconfig, TrackerGridState* gridstate, Workspace* workspace)
+	TrackConfig* trackconfig, TrackerGridState* gridstate,
+	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	trackerheader_vtable_init(self);
 	self->component.vtable = &trackerheader_vtable;
 	trackerheader_setsharedgridstate(self, gridstate, trackconfig);	
 	psy_ui_component_doublebuffer(&self->component);
-	self->classic = 1;
+	self->classic = TRUE;
 	self->workspace = workspace;
 	self->currtrack = 0;
 	psy_table_init(&self->trackstates);
@@ -103,7 +110,7 @@ void trackerheader_setsharedgridstate(TrackerHeader* self, TrackerGridState*
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		trackerpianogridstate_init(&self->defaultgridstate, trackconfig);
+		trackergridstate_init(&self->defaultgridstate, trackconfig);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -139,8 +146,7 @@ TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader* self,
 void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;	
-	double cpx;
-	double centerx;
+	double cpx;	
 	uintptr_t track;
 	double scrollleft;
 
@@ -149,9 +155,11 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 	psy_ui_drawsolidrectangle(g,
 		psy_ui_realrectangle_make(scrollleft, 0, size.width, size.height),
 		self->gridstate->skin->background);
-	for (track = 0, cpx = 0; track < self->gridstate->numtracks; ++track) {
-		centerx = psy_max(0, (trackergridstate_trackwidth(self->gridstate, track) -
-			self->gridstate->skin->headercoords.background.destwidth) / 2);
+	for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
+			self->gridstate); ++track) {
+		double centerx;
+
+		centerx = trackerheader_centerx(self, track);
 		trackerheader_drawtrackseparator(self, g, cpx, track);
 		trackerheader_drawtrackbackground(self, g, cpx + centerx);
 		trackerheader_drawtrackplayon(self, g, cpx + centerx, track);
@@ -261,51 +269,37 @@ void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g,
 
 void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 {
-	if (workspace_song(self->workspace)) {
-		psy_ui_RealRectangle r;
+	if (trackergridstate_patterns(self->gridstate)) {
 		uintptr_t track;
 		double track_x;
-		double centerx;
-		psy_audio_Patterns* patterns;
+		double ev_track_x;
+		psy_audio_Patterns* patterns;		
 
-		patterns = &workspace_song(self->workspace)->patterns;				
-		track = trackergridstate_pxtotrack(self->gridstate, ev->x,
-			trackergridstate_numsongtracks(self->gridstate));
-		centerx = psy_max(0.0,
-			(trackergridstate_trackwidth(self->gridstate, track) -
-			self->gridstate->skin->headercoords.background.destwidth) / 2);
-		track_x = trackergridstate_tracktopx(self->gridstate, track) + centerx;
-		r = skincoord_destposition(&self->gridstate->skin->headercoords.mute);
-		psy_ui_realrectangle_move(&r, track_x, 0.0);
-		if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
-			if (psy_audio_patterns_istrackmuted(patterns, track)) {
-				psy_audio_patterns_unmutetrack(patterns, track);
-			} else {
-				psy_audio_patterns_mutetrack(patterns, track);
-			}
-			psy_ui_component_invalidate(&self->component);
-			return;
-		}
-		r = skincoord_destposition(&self->gridstate->skin->headercoords.record);
-		psy_ui_realrectangle_move(&r, track_x, 0.0);
-		if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
-			if (psy_audio_patterns_istrackarmed(patterns, track)) {
-				psy_audio_patterns_unarmtrack(patterns, track);
-			} else {
-				psy_audio_patterns_armtrack(patterns, track);
-			}
-			psy_ui_component_invalidate(&self->component);
-			return;
-		}
-		r = skincoord_destposition(&self->gridstate->skin->headercoords.solo);
-		psy_ui_realrectangle_move(&r, track_x, 0.0);		
-		if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
+		patterns = trackergridstate_patterns(self->gridstate);
+		track = trackergridstate_pxtotrack(self->gridstate, ev->x);	
+		track_x = trackerheader_trackposition(self, track);
+		ev_track_x = ev->x - track_x;		
+		 if (trackerheader_hittest_solo(self, ev_track_x, ev->y)) {
 			if (psy_audio_patterns_istracksoloed(patterns, track)) {
 				psy_audio_patterns_deactivatesolotrack(patterns);
 			} else {
 				psy_audio_patterns_activatesolotrack(patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);
+		} else if (trackerheader_hittest_mute(self, ev_track_x, ev->y)) {
+			if (psy_audio_patterns_istrackmuted(patterns, track)) {
+				psy_audio_patterns_unmutetrack(patterns, track);
+			} else {
+				psy_audio_patterns_mutetrack(patterns, track);
+			}
+			psy_ui_component_invalidate(&self->component);			
+		} else if (trackerheader_hittest_record(self, ev_track_x, ev->y)) {
+			if (psy_audio_patterns_istrackarmed(patterns, track)) {
+				psy_audio_patterns_unarmtrack(patterns, track);
+			} else {
+				psy_audio_patterns_armtrack(patterns, track);
+			}
+			psy_ui_component_invalidate(&self->component);			
 		} else {
 			psy_audio_PatternCursor cursor;
 
@@ -317,12 +311,38 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 	}
 }
 
+bool trackerheader_hittest_mute(const TrackerHeader* self, double x, double y)
+{
+	return skincoord_hittest(&self->gridstate->skin->headercoords.mute, x, y);
+}
+
+bool trackerheader_hittest_solo(const TrackerHeader* self, double x, double y)
+{
+	return skincoord_hittest(&self->gridstate->skin->headercoords.solo, x, y);
+}
+
+bool trackerheader_hittest_record(const TrackerHeader* self, double x, double y)
+{
+	return skincoord_hittest(&self->gridstate->skin->headercoords.record, x, y);
+}
+
+double trackerheader_trackposition(const TrackerHeader* self, uintptr_t track)
+{
+	return trackergridstate_tracktopx(self->gridstate, track) +
+		trackerheader_centerx(self, track);
+}
+
+double trackerheader_centerx(const TrackerHeader* self, uintptr_t track)
+{
+	return psy_max(0.0, (trackergridstate_trackwidth(self->gridstate, track) -
+		self->gridstate->skin->headercoords.background.destwidth) / 2);
+}
+
 void trackerheader_onpreferredsize(TrackerHeader* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(
-		trackergridstate_tracktopx(self->gridstate,
-			self->gridstate->numtracks));
+	rv->width = psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate,
+		trackergridstate_numsongtracks(self->gridstate)));
 	rv->height = psy_ui_value_makepx(30);
 }
 
@@ -352,7 +372,8 @@ bool trackerheader_hasredraw(const TrackerHeader* self)
 	uintptr_t track;
 
 	rv = FALSE;
-	for (track = 0; track < self->gridstate->numtracks; ++track) {
+	for (track = 0; track < trackergridstate_numsongtracks(self->gridstate);
+			++track) {
 		if (trackerheader_hastrackredraw(self, track)) {
 			rv = TRUE;
 			break;
@@ -373,7 +394,6 @@ bool trackerheader_hastrackredraw(const TrackerHeader* self, uintptr_t track)
 
 void trackerheader_numtrackschanged(TrackerHeader* self,
 	psy_audio_Player* player, uintptr_t numsongtracks)
-{
-	trackergridstate_setnumsongtracks(self->gridstate, numsongtracks);
+{	
 	psy_ui_component_invalidate(&self->component);
 }

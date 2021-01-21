@@ -55,14 +55,6 @@ void trackerlinestate_dispose(TrackerLineState* self)
 	assert(self);
 }
 
-int trackerlinestate_beattoline(const TrackerLineState* self,
-	psy_dsp_big_beat_t offset)
-{
-	assert(self);
-
-	return cast_decimal(offset * self->lpb);	
-}
-
 bool trackerlinestate_testplaybar(TrackerLineState* self, psy_dsp_big_beat_t offset)
 {
 	assert(self);
@@ -78,24 +70,29 @@ uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 {
 	assert(self);
 
+	return trackerlinestate_beattoline(self,
+		trackerlinestate_length(self));	
+}
+
+psy_dsp_big_beat_t trackerlinestate_length(const TrackerLineState* self)
+{
+	assert(self);
+
 	if (self->singlemode) {
 		if (self->pattern) {
-			return trackerlinestate_beattoline(self,
-				psy_audio_pattern_length(self->pattern));
-		}		
+			return psy_audio_pattern_length(self->pattern);
+		}
 	} else if (self->sequence) {
 		psy_audio_SequenceTrack* track;
 
 		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
 		if (track) {
-			return trackerlinestate_beattoline(self, 
-				psy_audio_sequencetrack_duration(track,
-					self->sequence->patterns));
+			return psy_audio_sequencetrack_duration(track,
+					self->sequence->patterns);
 		}
-		return trackerlinestate_beattoline(self,
-			psy_audio_sequence_duration(self->sequence));		
+		return psy_audio_sequence_duration(self->sequence);
 	}
-	return 0;
+	return 0.0;
 }
 
 void trackerlinestate_clip(TrackerLineState* self, const psy_ui_RealRectangle* clip,
@@ -105,10 +102,11 @@ void trackerlinestate_clip(TrackerLineState* self, const psy_ui_RealRectangle* c
 	
 	rv->topleft.column = 0;
 	rv->topleft.digit = 0;
-	rv->topleft.offset = trackerlinestate_pxtobeat(self, clip->top);
+	rv->topleft.offset = trackerlinestate_pxtobeat(self, psy_max(0.0, clip->top));
 	rv->topleft.line = trackerlinestate_beattoline(self, rv->topleft.offset);
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;
-	rv->bottomright.offset = trackerlinestate_pxtobeatnotquantized(self, clip->bottom);
+	rv->bottomright.offset = trackerlinestate_pxtobeatnotquantized(self,
+		psy_max(0.0, clip->bottom));
 	rv->bottomright.line = (uintptr_t)(rv->bottomright.offset * self->lpb + 0.5);
 }

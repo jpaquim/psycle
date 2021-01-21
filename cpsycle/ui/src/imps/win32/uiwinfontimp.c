@@ -77,7 +77,16 @@ psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
 	if (ret == 0) {
 		psy_ui_fontinfo_init(&rv, "", 0);
 	} else {
-		rv = psy_ui_fontinfo(lf);		
+		//HDC hdc;
+		rv = psy_ui_fontinfo(lf);
+		/*hdc = GetDC(NULL);
+		SaveDC(hdc);
+		rv.lfHeight = -MulDiv(rv.lfHeight / 10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+		rv.lfHeight = (double)rv.lfHeight / 72 * GetDeviceCaps(hdc, LOGPIXELSY);
+		 //MulDiv(-rv.lfHeight / 10, 72, GetDeviceCaps(hdc, LOGPIXELSY));
+
+		RestoreDC(hdc, -1);
+		ReleaseDC(NULL, hdc);		*/
 	}
 	return rv;
 }

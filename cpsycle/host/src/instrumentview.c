@@ -251,6 +251,8 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	self->instrument = 0;
 	self->instruments = instruments;
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		margin);
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"instrumentview.instrument-name");
 	psy_ui_edit_init(&self->nameedit, &self->component);
@@ -263,17 +265,17 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_button_init_connect(&self->nextbutton, &self->component,
 		self, instrumentheaderview_onnextinstrument);
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);
-	virtualgeneratorbox_init(&self->virtualgenerators, &self->component,
+	psy_ui_component_init(&self->more, &self->component);
+	psy_ui_component_setdefaultalign(&self->more, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	virtualgeneratorbox_init(&self->virtualgenerators, &self->more,
 		workspace);
-	instrumentpredefsbar_init(&self->predefs, &self->component, NULL,
-		view, workspace);
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-			&margin));		
+	instrumentpredefsbar_init(&self->predefs, &self->more, NULL,
+		view, workspace);		
 	tab = margin;
 	tab.right = psy_ui_value_makeew(4.0);
-	psy_ui_component_setmargin(&self->virtualgenerators.component, &tab);
+	psy_ui_component_setmargin(&self->more, &tab);
+	psy_ui_component_hide(&self->more);
 }
 
 void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
@@ -289,6 +291,11 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 		: "");
 	psy_signal_enable(&self->nameedit.signal_change, self,
 		instrumentheaderview_oneditinstrumentname);
+	if (instrument) {
+		psy_ui_component_show_align(&self->more);
+	} else {
+		psy_ui_component_hide(&self->more);
+	}
 }
 
 void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView* self,
@@ -344,16 +351,6 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_button_init_text(&self->save, &self->component, "file.save");
 	psy_ui_button_init_text(&self->duplicate, &self->component, "edit.duplicate");
 	psy_ui_button_init_text(&self->del, &self->component, "edit.delete");
-}
-
-// InstrumentEmpty
-void instrumentempty_init(InstrumentEmpty* self, psy_ui_Component* parent)
-{
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_label_init_text(&self->empty, &self->component,
-		"No Instrument");
-	psy_ui_component_setalign(psy_ui_label_base(&self->empty),
-		psy_ui_ALIGN_CENTER);
 }
 
 // InstrumentViewBar
@@ -465,8 +462,10 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 			&margin);
 	}
 	// empty
-	instrumentempty_init(&self->empty,
-		psy_ui_notebook_base(&self->clientnotebook));
+	psy_ui_label_init_text(&self->empty,
+		psy_ui_notebook_base(&self->clientnotebook), "No Instrument");
+	psy_ui_label_settextalignment(&self->empty,
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL);	
 	// client
 	psy_ui_component_init(&self->client,
 		psy_ui_notebook_base(&self->clientnotebook));

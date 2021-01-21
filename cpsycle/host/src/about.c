@@ -63,7 +63,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_edit_init(&self->sourceforge, contrib_base(self));
 	psy_ui_edit_preventedit(&self->sourceforge);
 	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");
-	psy_ui_label_init(&self->steincopyright, contrib_base(self));
+	psy_ui_label_init(&self->steincopyright, contrib_base(self));	
 	psy_ui_label_preventtranslation(&self->steincopyright);
 	psy_ui_label_settext(&self->steincopyright,
 		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	

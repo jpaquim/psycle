@@ -52,7 +52,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->charnumber = 0;
 	self->linespacing = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;
+		psy_ui_ALIGNMENT_LEFT;
 	self->text = NULL;
 	self->translation = NULL;
 	self->translate = TRUE;		
@@ -168,7 +168,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - tm->tmHeight) / 2;
-	}
+	}	
 	string = malloc(strlen(text) + 1);
 	psy_snprintf(string, strlen(text) + 1, "%s", text);
 	token = strtok(string, seps);
@@ -188,6 +188,9 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			}
 			if (numoutput == 0) {
 				break;
+			}
+			if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) == psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+				centerx = (size.width - psy_strlen(token) * tm->tmAveCharWidth) / 2;
 			}
 			psy_ui_textout(g, centerx, centery, token, numoutput);
 			centery += tm->tmHeight;

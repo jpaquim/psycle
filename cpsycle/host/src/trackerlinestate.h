@@ -42,11 +42,18 @@ typedef struct TrackerLineState {
 
 void trackerlinestate_init(TrackerLineState*);
 void trackerlinestate_dispose(TrackerLineState*);
-int trackerlinestate_beattoline(const TrackerLineState*,
-	psy_dsp_big_beat_t);
 uintptr_t trackerlinestate_numlines(const TrackerLineState*);
+psy_dsp_big_beat_t trackerlinestate_length(const TrackerLineState*);
 bool trackerlinestate_testplaybar(TrackerLineState*, psy_dsp_big_beat_t
 	offset);
+
+INLINE intptr_t trackerlinestate_beattoline(const TrackerLineState* self,
+	psy_dsp_big_beat_t offset)
+{
+	assert(self);
+
+	return cast_decimal(offset * self->lpb);
+}
 
 INLINE void trackerlinestate_setlpb(TrackerLineState* self, uintptr_t lpb)
 {

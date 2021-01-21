@@ -26,6 +26,7 @@
 #endif
 
 static uint32_t psy_audio_psy3saver_chunkcount(psy_audio_PSY3Saver*);
+static uint32_t psy_audio_instruments_smidcount(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_header(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_songinfo(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver*);
@@ -129,11 +130,38 @@ uint32_t psy_audio_psy3saver_chunkcount(psy_audio_PSY3Saver* self)
 	rv += (uint32_t)psy_audio_patterns_size(&self->song->patterns);
 	// MACD
 	rv += (uint32_t)psy_audio_machines_size(&self->song->machines);
-	// INSD
-	// todo instrument group
+	// INSD	
 	rv += (uint32_t)psy_audio_instruments_size(&self->song->instruments, 0);
+	// SMID
+	rv += (uint32_t)psy_audio_instruments_smidcount(self);
 	// SMSB	
 	rv += (uint32_t)psy_audio_samples_count(&self->song->samples);
+	return rv;
+}
+
+uint32_t psy_audio_instruments_smidcount(psy_audio_PSY3Saver* self)
+{
+	uint32_t rv;
+	psy_TableIterator it;		
+	
+	rv = 0;
+	for (it = psy_audio_instruments_begin(&self->song->instruments);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_InstrumentsGroup* group;
+		psy_TableIterator it_group;
+
+		if (psy_tableiterator_key(&it) == 0) {
+			// group 0 is counted already as insd
+			continue;
+		}		
+		group = (psy_audio_InstrumentsGroup*)psy_tableiterator_value(&it);		
+		for (it_group = psy_table_begin(&group->container);
+				!psy_tableiterator_equal(&it_group, psy_table_end());
+				psy_tableiterator_inc(&it_group)) {
+			++rv;
+		}
+	}
 	return rv;
 }
 
@@ -909,32 +937,76 @@ id = "SMID";
 */
 int psy_audio_psy3saver_write_smid(psy_audio_PSY3Saver* self)
 {
-	psy_TableIterator it;
-	uint32_t sizepos;
+	psy_TableIterator it;		
 	int status = PSY_OK;
+	psy_Table instsaved;
 
-	for (it = psy_audio_instruments_groupbegin(&self->song->instruments, 1);
+	psy_table_init(&instsaved);
+	for (it = psy_audio_instruments_begin(&self->song->instruments);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		psy_audio_Instrument* instrument;
+		psy_audio_InstrumentsGroup* group;
+		psy_TableIterator it_group;
+		uintptr_t groupindex;
 
-		if (status = psyfile_writeheader(self->fp, "SMID",
-			CURRENT_FILE_VERSION_SMID, 0, &sizepos)) {
-			return status;
+		groupindex = (uint32_t)psy_tableiterator_key(&it);
+		if (groupindex == 0) {
+			// saved as insd (reserved sampler ps1 group)
+			continue;
 		}
-		// write index
-		if (status = psyfile_write_int32(self->fp, (int32_t)
-			psy_tableiterator_key(&it))) {
-			return status;
-		}
-		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
-		psy_audio_psy3saver_xminstrument_save(self, instrument,
-			CURRENT_FILE_VERSION_SMID);
-		if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
-			return status;
+		group = (psy_audio_InstrumentsGroup*)psy_tableiterator_value(&it);
+		for (it_group = psy_table_begin(&group->container);
+				!psy_tableiterator_equal(&it_group, psy_table_end());
+				psy_tableiterator_inc(&it_group)) {
+			psy_audio_Instrument* instrument;
+			uintptr_t instindex;
+			uint32_t sizepos;
+			uint8_t revertindex;
+
+			instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it_group);
+			instindex = psy_tableiterator_key(&it_group);
+			if (status = psyfile_writeheader(self->fp, "SMID",
+					CURRENT_FILE_VERSION_SMID, 0, &sizepos)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}
+			if (psy_table_exists(&instsaved, instindex)) {
+				// if already a sample at this index exists
+				// save backward from max range that mfc-psycle skips it				
+				instindex = UINT32_MAX - instindex;
+				revertindex = TRUE;
+			} else {
+				revertindex = FALSE;
+				psy_table_insert(&instsaved, instindex, NULL);
+			}
+			// write index
+			// is instrument already used index is stored reversed from UINT32_MAX			
+			if (status = psyfile_write_uint32(self->fp, (uint32_t)instindex)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}			
+			if (status = psy_audio_psy3saver_xminstrument_save(self, instrument,
+					CURRENT_FILE_VERSION_SMID)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}
+			// version extends mfc-psycle format with instrument groupindex			
+			if (status = psyfile_write_uint8(self->fp, revertindex)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}
+			if (status = psyfile_write_uint32(self->fp, (uint32_t)groupindex)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}
+			if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
+				psy_table_dispose(&instsaved);
+				return status;
+			}
 		}
 	}
-	return status;
+	psy_table_dispose(&instsaved);
+	return PSY_OK;
 }
 
 int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
@@ -1180,9 +1252,9 @@ int psy_audio_psy3saver_write_smsb(psy_audio_PSY3Saver* self)
 	psy_TableIterator it;	
 	uint32_t sizepos;	
 	int status = PSY_OK;
-	psy_Table samplegroupsaved;
+	psy_Table groupsaved;
 
-	psy_table_init(&samplegroupsaved);
+	psy_table_init(&groupsaved);
 	for (it = psy_audio_samples_begin(&self->song->samples);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -1204,43 +1276,43 @@ int psy_audio_psy3saver_write_smsb(psy_audio_PSY3Saver* self)
 			assert(sample);		
 			if (status = psyfile_writeheader(self->fp, "SMSB",
 					CURRENT_FILE_VERSION_SMSB, 0, &sizepos)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;
 			}
-			if (psy_table_exists(&samplegroupsaved, index)) {
+			if (psy_table_exists(&groupsaved, index)) {
 				// if already a sample at this index exists
 				// save backward from max range that mfc-psycle skips it				
 				index = UINT32_MAX - index;
 				revertindex = TRUE;
 			} else {
 				revertindex = FALSE;
-				psy_table_insert(&samplegroupsaved, index, NULL);
+				psy_table_insert(&groupsaved, index, NULL);
 			}
 			if (status = psyfile_write_uint32(self->fp, (uint32_t)index)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;
 			}						
 			if (status = psy_audio_psy3saver_save_sample(self, sample)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;				
 			}			
 			// version extends mfc-psycle format with sample subslot
-			// is sample already used index stored backward (from UINT32_MAX)
+			// is sample already used index is stored reversed from UINT32_MAX
 			if (status = psyfile_write_uint8(self->fp, revertindex)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;
 			}			
 			if (status = psyfile_write_uint32(self->fp, (uint32_t)subindex)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;
 			}
 			if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
-				psy_table_dispose(&samplegroupsaved);
+				psy_table_dispose(&groupsaved);
 				return status;
 			}
 		}
 	}
-	psy_table_dispose(&samplegroupsaved);
+	psy_table_dispose(&groupsaved);
 	return PSY_OK;
 }
 

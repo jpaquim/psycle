@@ -153,8 +153,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	} else {
 		machineframe_setdockbar(self);
 	}	
-	psy_signal_connect(&self->workspace->signal_defaultfontchanged, self,
-		ondefaultfontchanged);	
+	//psy_signal_connect(&self->workspace->signal_defaultfontchanged, self,
+	//	ondefaultfontchanged);	
 	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
 		machineframe_onzoomboxchanged);
 }
@@ -211,8 +211,8 @@ void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
 	if (self->view) {
 		free(self->view);
 	}
-	psy_signal_disconnect(&self->workspace->signal_defaultfontchanged, self,
-		ondefaultfontchanged);
+	//psy_signal_disconnect(&self->workspace->signal_defaultfontchanged, self,
+	//	ondefaultfontchanged);
 }
 
 MachineFrame* machineframe_alloc(void)

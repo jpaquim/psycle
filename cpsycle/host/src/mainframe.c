@@ -1304,7 +1304,7 @@ void mainframe_updateterminalbutton(MainFrame* self)
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 {	
-	workspace_zoom(&self->workspace, zoombox_rate(sender));
+	psy_ui_app_setzoomrate(psy_ui_app(), zoombox_rate(sender));	
 }
 
 void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Player* sender,

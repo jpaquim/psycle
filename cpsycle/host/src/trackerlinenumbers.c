@@ -19,8 +19,8 @@
 static int testcursor(psy_audio_PatternCursor cursor, TrackerLineState* linestate,
 	uintptr_t track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl)
 {
-	int currline;
-	int cursorline;
+	intptr_t currline;
+	intptr_t cursorline;
 	currline = trackerlinestate_beattoline(linestate, offset);
 	cursorline = trackerlinestate_beattoline(linestate, cursor.offset + cursor.seqoffset);
 
@@ -106,6 +106,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		psy_audio_SequenceTrackIterator ite;
 		double seqoffset;		
 		double length;
+		psy_dsp_big_beat_t maxlines;
 		uintptr_t patidx;
 		psy_audio_PatternSelection clip;
 				
@@ -122,7 +123,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		ite.patterns = &self->workspace->song->patterns;
 		seqoffset = 0.0;		
 		patidx = 0;
-		length = ite.pattern->length;
+		length = ite.pattern->length;		
 		if (!self->linestate->singlemode && self->linestate->sequence) {
 			psy_audio_SequenceTrackNode* tracknode;
 
@@ -140,8 +141,9 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			}
 		} else {
 			ite.sequencentrynode = NULL;			
-		}		
-		while (offset <= clip.bottomright.offset) {			
+		}
+		maxlines = trackerlinestate_numlines(self->linestate);
+		while (offset <= clip.bottomright.offset && line < maxlines) {
 			double ystart;			
 			char text[64];
 				
@@ -304,7 +306,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	const psy_audio_PatternCursor* cursor)
 {	
 	psy_ui_RealSize size;
-	int line;
+	intptr_t line;
 		
 	size = psy_ui_component_sizepx(&self->component);
 	line = trackerlinestate_beattoline(self->linestate,
@@ -320,7 +322,7 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 	if (!self->linestate->singlemode ||(trackerlinestate_pattern(self->linestate) &&
 			trackerlinestate_testplayposition(self->linestate, offset))) {
 		psy_ui_RealSize size;		
-		int line;
+		intptr_t line;
 
 		size = psy_ui_component_sizepx(&self->component);		
 		line = trackerlinestate_beattoline(self->linestate,

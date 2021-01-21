@@ -55,6 +55,11 @@ INLINE const psy_ui_Margin* psy_ui_defaults_pcmargin(const psy_ui_Defaults* self
 	return &self->cmargin;
 }
 
+INLINE psy_ui_Font* psy_ui_defaults_font(psy_ui_Defaults* self)
+{
+	return &self->style_common.font;
+}
+
 #ifdef __cplusplus
 }
 #endif

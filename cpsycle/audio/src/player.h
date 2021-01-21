@@ -50,7 +50,7 @@ typedef struct psy_audio_Player {
 	psy_dsp_Dither dither;
 	bool dodither;
 	uint8_t octave;
-	uint32_t resyncplayposinsamples;
+	uintptr_t resyncplayposinsamples;
 	psy_dsp_big_beat_t resyncplayposinbeats;
 	psy_audio_MidiInput midiinput;
 	psy_audio_ActiveChannels playon;
