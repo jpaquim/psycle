@@ -198,8 +198,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->sequence = sequence;
 	self->machines = machines;
 	psy_audio_sequencertime_init(&self->seqtime);
-	self->seqtime.samplerate = samplerate;
-	self->numsongtracks = 16;	
+	self->seqtime.samplerate = samplerate;	
 	self->lpb = 4;
 	self->lpbspeed = (psy_dsp_big_beat_t)1.0;
 	self->playing = FALSE;
@@ -920,6 +919,9 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 	assert(self);	
 
 	ev = psy_audio_patternentry_front(patternentry);
+	if (ev->mach == 0) {
+		self = self;
+	}
 	if (ev->note == psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
 		psy_audio_sequencer_maketweakslideevents(self, patternentry,
 			track->channeloffset, offset);
@@ -1403,7 +1405,7 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 	assert(self);	
 
 	numevents = psy_list_size(self->events);
-	if (numevents == 2) {
+	/*if (numevents == 2) {
 		if (psy_audio_sequencer_comp_events(self->events,
 				psy_list_last(self->events)) > 0) {
 			psy_audio_PatternEntry* temp;		
@@ -1412,7 +1414,7 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 			self->events->entry = self->events->tail->entry;
 			self->events->tail->entry = temp;
 		}
-	} else if (numevents > 1) {		
+	} else if (numevents > 1) {		*/
 		// sort with qsort
 		// convert the event list to an array, sort the array and recreate
 		// the sorted event list
@@ -1440,7 +1442,7 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 			psy_list_free(self->events);
 			self->events = sorted;
 		}		
-	}
+	//}
 	// psy_audio_sequencer_assertorder(self);
 }
 
@@ -1484,21 +1486,27 @@ int psy_audio_sequencer_comp_events(psy_audio_PatternNode* lhsnode,
 	return rv;		
 }	
 
-// void psy_audio_sequencer_assertorder(psy_audio_Sequencer* self)
-// {
-//		psy_List* p;
-//		psy_dsp_big_beat_t last = 0;
-// 	
-//		p = self->events;
-// 		while (p) {
-// 			psy_audio_PatternEntry* entry;
-// 		
-// 			entry = psy_audio_patternnode_entry(p);
-// 			assert(entry->delta >= last);
-// 			last = entry->delta;			
-// 			psy_list_next(&p);
-// 		}
-// }
+ void psy_audio_sequencer_assertorder(psy_audio_Sequencer* self)
+ {
+		psy_List* p;
+		psy_dsp_big_beat_t last = 0;
+		uintptr_t lasttrack = 0;
+ 	
+		p = self->events;
+ 		while (p) {
+ 			psy_audio_PatternEntry* entry;
+ 		
+ 			entry = psy_audio_patternnode_entry(p);			
+ 			assert(entry->delta >= last);
+			if (entry->delta != last) {
+				lasttrack = 0;
+			}
+			assert(entry->track >= lasttrack);
+ 			last = entry->delta;
+			lasttrack = entry->track;			
+ 			psy_list_next(&p);
+ 		}
+ }
 
 void psy_audio_sequencer_jumpto(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t position)

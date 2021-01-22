@@ -1164,8 +1164,9 @@ void trackergrid_prevcol(TrackerGrid* self)
 		} else if (self->wraparound) {
 			TrackDef* trackdef;
 
-			self->gridstate->cursor.track = psy_audio_player_numsongtracks(
-				workspace_player(self->workspace)) - 1;
+			self->gridstate->cursor.track = workspace_song(self->workspace)
+				? psy_audio_song_numsongtracks(workspace_song(self->workspace)) - 1
+				: 0;
 			trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
 			self->gridstate->cursor.column = trackdef_numcolumns(trackdef) - 1;
 			self->gridstate->cursor.digit = trackdef_numdigits(trackdef,
@@ -1193,38 +1194,40 @@ void trackergrid_prevcol(TrackerGrid* self)
 
 void trackergrid_nextcol(TrackerGrid* self)
 {
-	TrackDef* trackdef;
-	int invalidate = 1;
+	if (workspace_song(self->workspace)) {
+		TrackDef* trackdef;
+		int invalidate = 1;
 
-	assert(self);
-	
-	trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
-	if (self->gridstate->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
-		self->gridstate->cursor.digit == trackdef_numdigits(trackdef,
-			self->gridstate->cursor.column) - 1) {
-		if (self->gridstate->cursor.track < psy_audio_player_numsongtracks(
-				workspace_player(self->workspace)) - 1) {
-			self->gridstate->cursor.column = 0;
-			self->gridstate->cursor.digit = 0;
-			++self->gridstate->cursor.track;
-			invalidate = trackergrid_scrollright(self, self->gridstate->cursor);
-		} else if (self->wraparound) {
-			self->gridstate->cursor.column = 0;
-			self->gridstate->cursor.digit = 0;
-			self->gridstate->cursor.track = 0;
-			invalidate = trackergrid_scrollleft(self, self->gridstate->cursor);
+		assert(self);
+
+		trackdef = trackergridstate_trackdef(self->gridstate, self->gridstate->cursor.track);
+		if (self->gridstate->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
+			self->gridstate->cursor.digit == trackdef_numdigits(trackdef,
+				self->gridstate->cursor.column) - 1) {
+			if (self->gridstate->cursor.track < psy_audio_song_numsongtracks(
+				workspace_song(self->workspace)) - 1) {
+				self->gridstate->cursor.column = 0;
+				self->gridstate->cursor.digit = 0;
+				++self->gridstate->cursor.track;
+				invalidate = trackergrid_scrollright(self, self->gridstate->cursor);
+			} else if (self->wraparound) {
+				self->gridstate->cursor.column = 0;
+				self->gridstate->cursor.digit = 0;
+				self->gridstate->cursor.track = 0;
+				invalidate = trackergrid_scrollleft(self, self->gridstate->cursor);
+			}
+		} else {
+			++self->gridstate->cursor.digit;
+			if (self->gridstate->cursor.digit >=
+				trackdef_numdigits(trackdef, self->gridstate->cursor.column)) {
+				++self->gridstate->cursor.column;
+				self->gridstate->cursor.digit = 0;
+			}
 		}
-	} else {
-		++self->gridstate->cursor.digit;
-		if (self->gridstate->cursor.digit >=
-			trackdef_numdigits(trackdef, self->gridstate->cursor.column)) {
-			++self->gridstate->cursor.column;
-			self->gridstate->cursor.digit = 0;
+		trackergridstate_synccursor(self->gridstate);
+		if (invalidate) {
+			trackergrid_invalidatecursor(self);
 		}
-	}
-	trackergridstate_synccursor(self->gridstate);
-	if (invalidate) {
-		trackergrid_invalidatecursor(self);
 	}
 }
 
@@ -1952,8 +1955,8 @@ psy_audio_PatternCursor trackergrid_makecursor(TrackerGrid* self, double x, doub
 		}
 	}
 	rv.track = trackergridstate_pxtotrack(self->gridstate, x);
-	if (rv.track >= psy_audio_player_numsongtracks(workspace_player(self->workspace))) {
-		rv.track = psy_audio_player_numsongtracks(workspace_player(self->workspace)) - 1;
+	if (rv.track >= psy_audio_song_numsongtracks(workspace_song(self->workspace))) {
+		rv.track = psy_audio_song_numsongtracks(workspace_song(self->workspace)) - 1;
 	}
 	coloffset = (x - self->gridstate->trackconfig->patterntrackident) -
 		trackergridstate_tracktopx(self->gridstate, rv.track);

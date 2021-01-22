@@ -486,7 +486,7 @@ void psy_audio_xmsamplervoice_voiceinit(psy_audio_XMSamplerVoice* self,
 					(float)rand() * psy_audio_instrument_randomcutoff(_inst) / 3276800.0f);
 			} else */ {
 			psy_audio_xmsamplervoice_setcutoff(self,
-				psy_audio_instrument_filtercutoff(_inst) * 127);
+				(int)(psy_audio_instrument_filtercutoff(_inst) * 127));
 		}
 /*			if (_inst.RandomResonance() > 0.f) {
 					Ressonance(_inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f);

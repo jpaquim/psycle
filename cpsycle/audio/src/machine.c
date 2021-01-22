@@ -661,6 +661,12 @@ void machine_base_dispose(psy_audio_Machine* self)
 	psy_signal_dispose(&self->signal_worked);
 }
 
+void psy_audio_machine_deallocate(psy_audio_Machine* self)
+{
+	psy_audio_machine_dispose(self);
+	free(self);
+}
+
 void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {
 	psy_List* p;
@@ -798,8 +804,8 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 
 	output = psy_audio_machines_outputs(machines, slot);
 	if (output) {
-		if (output->preventmixclear == FALSE) {
-			psy_audio_buffer_clearsamples(output, amount);
+		if (output->preventmixclear == FALSE) {			
+			psy_audio_buffer_clearsamples(output, amount);			
 		}
 		if (sockets) {
 			psy_TableIterator it;
@@ -809,10 +815,10 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 				psy_tableiterator_inc(&it)) {
 				psy_audio_WireSocket* source;
 
-				source = (psy_audio_WireSocket*)psy_tableiterator_value(&it);				
+				source = (psy_audio_WireSocket*)psy_tableiterator_value(&it);					
 				psy_audio_buffer_mixsamples(output,
 					psy_audio_machines_outputs(machines, source->slot),
-					amount, source->volume, &source->mapping);
+					amount, source->volume, &source->mapping);				
 			}							
 		}
 	}

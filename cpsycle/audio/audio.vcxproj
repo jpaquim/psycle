@@ -294,6 +294,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\machinescmds.c" />
     <ClCompile Include="src\master.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -440,6 +441,7 @@
     <ClInclude Include="src\machineparam.h" />
     <ClInclude Include="src\machineproxy.h" />
     <ClInclude Include="src\machines.h" />
+    <ClInclude Include="src\machinescmds.h" />
     <ClInclude Include="src\master.h" />
     <ClInclude Include="src\midiconfig.h" />
     <ClInclude Include="src\midiinput.h" />

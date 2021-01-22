@@ -52,9 +52,124 @@ const psy_audio_MachineInfo* psy_audio_sampler_info(void)
 	return &macinfo;
 }
 
+void samplerwavedatacontroller_init(SamplerWaveDataController* self)
+{
+	self->wave = NULL;
+	self->_speed = 0;
+	self->_vol = 0.f;
+	self->_lVolDest = 0;
+	self->_rVolDest = 0;
+	self->_lVolCurr = 0;
+	self->_rVolCurr = 0;
+	psy_dsp_multiresampler_init(&self->resampler,
+		psy_dsp_RESAMPLERQUALITY_LINEAR);
+	self->_pos.QuadPart = 0;
+}
+
+void samplerwavedatacontroller_dispose(SamplerWaveDataController* self)
+{
+	psy_dsp_resampler_dispose(psy_dsp_multiresampler_base(&self->resampler));
+}
+
+void samplerwavedatacontroller_work(SamplerWaveDataController* self,
+	float* left_output, float* right_output)
+{	
+	*left_output = psy_dsp_resampler_work_float(
+		psy_dsp_multiresampler_base(&self->resampler),
+		self->wave->channels.samples[0],
+		(float)double_real(&self->_pos),
+		self->wave->numframes,
+		self->wave->channels.samples[0],
+		self->wave->channels.samples[0] + self->wave->numframes - 1);
+	if (psy_audio_sample_stero(self->wave))
+	{		
+		*right_output =
+			 psy_dsp_resampler_work_float(
+				psy_dsp_multiresampler_base(&self->resampler),
+				self->wave->channels.samples[0],
+				(float)double_real(&self->_pos),
+				self->wave->numframes,
+				self->wave->channels.samples[0],
+				self->wave->channels.samples[0] + self->wave->numframes - 1);
+	}
+}
+
+void samplerwavedatacontroller_rampvolume(SamplerWaveDataController* self)
+{
+	// calculate volume  (volume ramped)
+	if (self->_lVolCurr > self->_lVolDest) {
+		self->_lVolCurr -= 0.005f;
+		if (self->_lVolCurr < self->_lVolDest)	self->_lVolCurr = self->_lVolDest;
+	} else if (self->_lVolCurr < self->_lVolDest) {
+		self->_lVolCurr += 0.005f;
+		if (self->_lVolCurr > self->_lVolDest)	self->_lVolCurr = self->_lVolDest;
+	}
+	if (self->_rVolCurr > self->_rVolDest) {
+		self->_rVolCurr -= 0.005f;
+		if (self->_rVolCurr < self->_rVolDest) self->_rVolCurr = self->_rVolDest;
+	} else if (self->_rVolCurr < self->_rVolDest) {
+		self->_rVolCurr += 0.005f;
+		if (self->_rVolCurr > self->_rVolDest)	self->_rVolCurr = self->_rVolDest;
+	}
+}
+
+bool samplerwavedatacontroller_postwork(SamplerWaveDataController* self)
+{
+	self->_pos.QuadPart += self->_speed;
+
+	// Loop handler
+	//
+	if ((self->wave->loop.type == psy_audio_SAMPLE_LOOP_NORMAL)
+		&& (self->_pos.HighPart >= self->wave->loop.end))
+	{
+		self->_pos.HighPart -= (self->wave->loop.end - self->wave->loop.start);
+	}
+	return (self->_pos.HighPart < self->wave->numframes);
+}
+
+void samplerwavedatacontroller_setspeed(SamplerWaveDataController* self, double
+	speeddouble)
+{
+
+}
+
+// Envelope
+void samplerenvelope_tick(SamplerEnvelope* self, int decaysamples)
+{
+	switch (self->_stage)
+	{
+	case SAMPLER_ENV_ATTACK:
+		self->_value += self->_step;
+		if (self->_value > 1.0f)
+		{
+			self->_value = 1.0f;
+			self->_stage = SAMPLER_ENV_DECAY;
+			self->_step = ((1.0f - self->_sustain) / decaysamples) * self->sratefactor;
+		}
+		break;
+	case SAMPLER_ENV_DECAY:
+		self->_value -= self->_step;
+		if (self->_value < self->_sustain)
+		{
+			self->_value = self->_sustain;
+			self->_stage = SAMPLER_ENV_SUSTAIN;
+		}
+		break;
+	case SAMPLER_ENV_RELEASE:
+	case SAMPLER_ENV_FASTRELEASE:
+		self->_value -= self->_step;
+		if (self->_value <= 0)
+		{
+			self->_value = 0;
+			self->_stage = SAMPLER_ENV_OFF;
+		}
+		break;
+	default:break;
+	}
+}
+
 // Voice
 // prototypes
-static void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice*);
 static bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice*);
 // implementation
 // psycle-mfc: Voice::Voice()
@@ -62,18 +177,10 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	psy_audio_Sampler* sampler)
 {
 	assert(self);	
-
-	// The voice uses the XMWaveDataController instead a separate controller
-	// like in mfc psycle. The missing ps1 controller variables are added here:
-	self->pan = 0.5f;
-	self->vol = 0.f;
-	// used to ramp volume during work
-	self->lvoldest = 0;
-	self->rvoldest = 0;
-	self->lvolcurr = 0;
-	self->rvolcurr = 0;
-	// The XMWaveDataController
-	psy_audio_wavedatacontroller_init(&self->controller);	
+		
+	samplerwavedatacontroller_init(&self->controller);
+	samplerenvelope_init(&self->envelope);
+	samplerenvelope_init(&self->filterenv);
 	// Voice Constructor
 	self->sampler = sampler;
 	self->inst = NULL;
@@ -82,13 +189,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->samplecounter = 0;
 	self->cutoff = 0;
 	self->effcmd = PS1_SAMPLER_CMD_NONE;	
-	psy_dsp_envelopecontroller_init_adsr(&self->envelope);	
-	psy_dsp_envelopecontroller_setsamplerate(&self->envelope,
-		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
-	filter_init(&self->filter);
-	psy_dsp_envelopecontroller_init_adsr(&self->filterenv);
-	psy_dsp_envelopecontroller_setsamplerate(&self->filterenv,
-		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));	
+	filter_init(&self->filter);	
 	psy_audio_samplervoice_setup(self);
 }
 
@@ -96,10 +197,8 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-
-	psy_dsp_envelopecontroller_dispose(&self->envelope);
-	psy_dsp_envelopecontroller_dispose(&self->filterenv);
-	psy_audio_wavedatacontroller_dispose(&self->controller);
+	
+	samplerwavedatacontroller_dispose(&self->controller);
 	filter_dispose(&self->filter);
 }
 
@@ -108,8 +207,10 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 {	
 	assert(self);
 			
-	psy_dsp_envelopecontroller_stop(&self->filterenv);
-	psy_dsp_envelopecontroller_stop(&self->envelope);	
+	self->envelope._stage = SAMPLER_ENV_OFF;
+	self->envelope._sustain = 0;
+	self->filterenv._stage = SAMPLER_ENV_OFF;
+	self->filterenv._sustain = 0;
 	self->channel = psy_INDEX_INVALID;
 	self->triggernoteoff = 0;
 	self->triggernotedelay = 0;
@@ -173,7 +274,6 @@ static void psy_audio_sampler_resamplingmethod_tweak(psy_audio_Sampler*,
 static void psy_audio_sampler_defaultC4(psy_audio_Sampler*, bool correct);
 static bool psy_audio_sampler_isdefaultC4(const psy_audio_Sampler*);
 
-
 static const psy_audio_MachineInfo* psy_audio_sampler_vinfo(psy_audio_Sampler*
 	self)
 {
@@ -193,10 +293,29 @@ static uintptr_t psy_audio_sampler_numoutputs(psy_audio_Sampler* self)
 	return 2;
 }
 
+static void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
+	psy_dsp_ResamplerQuality quality);
+
+static psy_dsp_ResamplerQuality psy_audio_sampler_resamplerquality(psy_audio_Sampler* self)
+{
+	assert(self);
+	return self->resamplerquality;
+}
+
+static bool psy_audio_sampler_usefilters(const psy_audio_Sampler* self)
+{
+	assert(self);
+	return self->usefilters != FALSE;
+}
+
+static void psy_audio_sampler_setnumvoices(psy_audio_Sampler* self, uintptr_t num)
+{
+	self->numvoices = num;
+}
+
 // vtable
 static MachineVtable sampler_vtable;
 static bool sampler_vtable_initialized = FALSE;
-// implementation
 static void sampler_vtable_init(psy_audio_Sampler* self)
 {
 	assert(self);
@@ -268,6 +387,8 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 		self, // callback context (sampler)
 		(fp_samplerticktimer_ontick)psy_audio_sampler_ontimertick,
 		(fp_samplerticktimer_onwork)psy_audio_sampler_ontimerwork);
+	psy_audio_sampler_setsamplerate(self,
+		psy_audio_machine_samplerate(psy_audio_sampler_base(self)));
 }
 
 void psy_audio_sampler_init_voices(psy_audio_Sampler* self)
@@ -323,7 +444,7 @@ void psy_audio_sampler_stopinstrument(psy_audio_Sampler* self,
 	for (i = 0; i < self->numvoices; ++i) {
 		psy_audio_SamplerVoice* voice = &self->voices[i];
 		if (voice->instrument == insIdx &&
-			(psy_dsp_envelopecontroller_playing(&voice->envelope) || //.stage != ENV_OFF ||
+			(voice->envelope._stage != SAMPLER_ENV_OFF ||
 				voice->triggernotedelay > 0)) {
 			psy_audio_samplervoice_setup(voice);
 		}
@@ -338,12 +459,11 @@ void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, int sr)
 {
 	uintptr_t i;
 
-	assert(self);
-	//Machine::SetSampleRate(sr);
+	assert(self);	
 	for (i = 0; i < self->numvoices; ++i) {
 		filter_setsamplerate(&self->voices[i].filter, sr);
-		psy_dsp_envelopecontroller_setsamplerate(&self->voices[i].envelope, sr);
-		psy_dsp_envelopecontroller_setsamplerate(&self->voices[i].filterenv, sr);		
+		samplerenvelope_updatesrate(&self->voices[i].envelope, sr);
+		samplerenvelope_updatesrate(&self->voices[i].filterenv, sr);		
 	}
 }
 
@@ -366,8 +486,8 @@ uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, uintptr_t t
 		// ENV_OFF is not checked, because channel will be -1
 		if (self->voices[voice].channel == track &&
 			(self->voices[voice].triggernotedelay > 0) ||
-				(psy_dsp_envelopecontroller_playing(&self->voices[voice].envelope) &&
-				!(self->voices[voice].envelope.fastrelease))) {
+				(self->voices[voice].envelope._stage !=
+					SAMPLER_ENV_FASTRELEASE)) {
 			return voice;
 		}
 	}
@@ -417,33 +537,27 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 
 	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice)	// Find a voice to apply the new note
-	{
-		if (!psy_dsp_envelopecontroller_playing(&self->voices[voice].envelope)) {
-			usevoice = voice;
-			voice = self->numvoices; // Ok, we can go out from the loop already.
-		} else if (&self->voices[voice].envelope.susdone) {
-			usevoice = voice;
-		}
-		/*switch (self->voices[voice].envelope.stage)
+	{		
+		switch (self->voices[voice].envelope._stage)
 		{
-			case ENV_OFF:
+			case SAMPLER_ENV_OFF:
 				if (self->voices[voice].triggernotedelay == 0)
 				{
 					usevoice = voice;
 					voice = self->numvoices; // Ok, we can go out from the loop already.
 				}
 				break;
-			case ENV_FASTRELEASE:
+			case SAMPLER_ENV_FASTRELEASE:
 				usevoice = voice;
 				break;
-			case ENV_RELEASE:
+			case SAMPLER_ENV_RELEASE:
 				if (usevoice == UINTPTR_MAX) {
 					usevoice = voice;
 				}
 				break;
 			default:
 				break;
-		}*/
+		}
 	}
 	return usevoice;
 }
@@ -487,7 +601,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 		self->lastinstrument[channel] = data.inst;
 	}
 	samples = psy_audio_machine_samples(psy_audio_sampler_base(self));
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                	if (!psy_audio_samples_at(samples,
+	if (!psy_audio_samples_at(samples,
 			sampleindex_make(data.inst, self->instrumentbank))) {
 		return; // if no wave, return.
 	}
@@ -524,7 +638,8 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 	if (data.note < psy_audio_NOTECOMMANDS_RELEASE && !doporta) {	// Handle Note On.	
 		usevoice = psy_audio_sampler_getfreevoice(self); // Find a voice to apply the new note
 		if (voice != psy_INDEX_INVALID) { // NoteOff previous Notes in this channel.
-			switch (self->voices[voice].inst->nna) {
+			if (self->voices[voice].inst) {
+				switch (self->voices[voice].inst->nna) {
 				case 0:
 					psy_audio_samplervoice_noteofffast(&self->voices[voice]);
 					break;
@@ -533,6 +648,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 					break;
 				default:
 					break;
+				}
 			}
 			if (usevoice == psy_INDEX_INVALID) {
 				usevoice = voice;
@@ -592,7 +708,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			// one shot {
 			switch (ev->cmd) {
 			case PS1_SAMPLER_CMD_PANNING: {
-				self->pan = psy_dsp_map_256_1(ev->parameter);
+				self->controller._pan = psy_dsp_map_256_1(ev->parameter);
 				//dopan = TRUE;
 			} break;
 			case PS1_SAMPLER_CMD_OFFSET: {
@@ -605,7 +721,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				dooffset = TRUE;
 			} break;
 			case PS1_SAMPLER_CMD_VOLUME: {
-				self->vol = psy_dsp_map_256_1(ev->parameter);
+				self->controller._vol = psy_dsp_map_256_1(ev->parameter);
 				dovol = TRUE;
 			} break;
 			// }
@@ -619,7 +735,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				self->effcmd = ev->cmd;
 			} break;
 			case PS1_SAMPLER_CMD_PORTA2NOTE: {
-				if (psy_dsp_envelopecontroller_playing(&self->envelope)) { //.stage != ENV_OFF) {
+				if (self->envelope._stage != SAMPLER_ENV_OFF) {
 					self->effcmd = ev->cmd;
 					self->effval = ev->parameter;
 					if (pEntry->note < psy_audio_NOTECOMMANDS_RELEASE) {
@@ -637,7 +753,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 								psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
 						self->effportaspeed = (int64_t)(speeddouble * 4294967296.0f);
 					}
-					if (self->effportaspeed < self->controller.speed) {
+					if (self->effportaspeed < self->controller._speed) {
 						self->effval *= -1;
 					}
 					doporta = TRUE;
@@ -704,9 +820,9 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		sample = psy_audio_samples_at(
 			psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
 			sampleindex_make(self->instrument, 0));
-		psy_audio_wavedatacontroller_initcontroller(&self->controller,
-			sample, self->sampler->resamplerquality);
-		//psy_audio_wavedatacontroller_setsample(&self->controller, sample);
+		self->controller.wave = sample;
+		psy_dsp_multiresampler_setquality(&self->controller.resampler,
+			self->sampler->resamplerquality);
 		if (self->inst->loop)
 		{
 			double const totalsamples = (double)(
@@ -720,41 +836,44 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				(sample->samplerate / psy_audio_machine_samplerate(
 					psy_audio_sampler_base(self->sampler)));
 		}
-		psy_audio_wavedatacontroller_setspeed(&self->controller, speeddouble);
-		psy_audio_wavedatacontroller_play(&self->controller);
+		self->controller._speed = (int64_t)(speeddouble * 4294967296.0f);
+		psy_dsp_resampler_setspeed(&self->controller.resampler.resampler, speeddouble);
 
 		if (!dooffset) { dooffset = TRUE; w_offset = 0; }
 
 		// Init Amplitude Envelope
 		//		
-		//psy_dsp_adsr_init(&self->envelope, &self->_envelopesettings,
-			//psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
-		//psy_dsp_envelopecontroller_set_settings(&self->envelope, &self->inst->volumeenvelope.settings);
-		//psy_dsp_envelopecontroller_reset(&self->envelope);
-		self->lvolcurr = self->lvoldest;
-		self->rvolcurr = self->rvoldest;
-		if (!dovol) { dovol = TRUE; self->vol = 1.f; }
+		{
+			int ENV_AT;
+			self->envelope._sustain =
+				psy_dsp_envelope_sustainvalue(&self->inst->volumeenvelope);
+			ENV_AT = (int32_t)(psy_dsp_envelope_attacktime(
+				&self->inst->volumeenvelope) * 44100 + 0.5f);
+			self->envelope._step = (1.0f /
+				ENV_AT) * self->envelope.sratefactor;
+			self->envelope._value = 0.0f;
+		}
+		self->controller._lVolCurr = self->controller._lVolDest;
+		self->controller._rVolCurr = self->controller._rVolDest;
+		if (!dovol) { dovol = TRUE; self->controller._vol = 1.f; }
 		if (!dopan) {
 			if (self->inst->randompanning != 0.f) {
 				dopan = TRUE;
-				self->pan = psy_dsp_map_32768_1(rand());
+				self->controller._pan = psy_dsp_map_32768_1(rand());
 			} else {
 				dopan = TRUE;
-				self->pan = self->controller.sample->panfactor;
+				self->controller._pan = self->controller.wave->panfactor;
 			}
 		}				
-		if (self->triggernotedelay == 0) {
-			if (self->inst) {
-				psy_dsp_envelopecontroller_set_settings(&self->envelope,
-					&self->inst->volumeenvelope);
-				psy_dsp_envelopecontroller_set_settings(&self->filterenv,
-					&self->inst->filterenvelope);
-				//psy_dsp_envelopecontroller_start(&self->envelope);
-				//psy_dsp_envelopecontroller_tick_ps1(&self->envelope);
-			}
-			psy_dsp_envelopecontroller_start(&self->envelope);
-			psy_dsp_envelopecontroller_start(&self->filterenv);			
+		if (self->triggernotedelay == 0) {			
+			self->envelope._stage = SAMPLER_ENV_ATTACK;
+			self->filterenv._stage = SAMPLER_ENV_ATTACK;			
+		} else {
+			self->envelope._stage = SAMPLER_ENV_OFF;
+			self->filterenv._stage = SAMPLER_ENV_OFF;
 		}
+
+		triggered = 1;
 
 		//Init filter
 		if (self->inst) {
@@ -771,32 +890,39 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			filter_settype(&self->filter, self->inst->filtertype);
 			self->comodify = self->inst->filtermodamount;
 		}
-		//filterenv._sustain = value_mapper::map_128_1(inst->ENV_F_SL);
-		//filterenv._step = (1.0f / inst->ENV_F_AT) * envelope.sratefactor;
-		//filterenv._value = 0;
+		{
+			int ENV_F_AT;
+			
+			ENV_F_AT = (int32_t)(psy_dsp_envelope_attacktime(
+				&self->inst->filterenvelope) * 44100 + 0.5f);
+			self->filterenv._sustain =
+				psy_dsp_envelope_sustainvalue(&self->inst->filterenvelope);
+			self->filterenv._step = (1.0f / ENV_F_AT) * self->envelope.sratefactor;
+			self->filterenv._value = 0;
+		}
 
-		triggered = 1;
+		
 	}
 
 	if (dovol || dopan) {
 		// Panning calculation -------------------------------------------
-		self->rvoldest = self->pan;
-		self->lvoldest = 1.f - self->pan;
+		self->controller._rVolDest = self->controller._pan;
+		self->controller._lVolDest = 1.f - self->controller._pan;
 		//FT2 Style (Two slides) mode, but with max amp = 0.5.
-		if (self->rvoldest > 0.5f) { self->rvoldest = 0.5f; }
-		if (self->lvoldest > 0.5f) { self->lvoldest = 0.5f; }
+		if (self->controller._rVolDest > 0.5f) { self->controller._rVolDest = 0.5f; }
+		if (self->controller._lVolDest > 0.5f) { self->controller._lVolDest = 0.5f; }
 
-		self->lvoldest *= self->controller.sample->globalvolume * self->vol;
-		self->rvoldest *= self->controller.sample->globalvolume * self->vol;
+		self->controller._lVolDest *= self->controller.wave->globalvolume * self->controller._vol;
+		self->controller._rVolDest *= self->controller.wave->globalvolume * self->controller._vol;
 	}
 	if (dooffset) {
-		self->controller.pos.QuadPart = w_offset;
+		self->controller._pos.QuadPart = w_offset;
 	}
 
 	if (triggered)
 	{
-		self->lvolcurr = self->lvoldest;
-		self->rvolcurr = self->rvoldest;
+		self->controller._lVolCurr = self->controller._lVolDest;
+		self->controller._rVolCurr = self->controller._rVolDest;
 	}
 
 	return triggered;
@@ -935,99 +1061,93 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, uintptr_t numsamp
 				self->effretticks--;
 				self->triggernotedelay = (int)self->samplecounter + self->effval;
 				pt = psy_dsp_envelope_at(&self->inst->volumeenvelope, 1);
-				self->envelope.step = (1.0f / (pt.time * (float)self->envelope.samplerate));
+				self->envelope._step = (1.0f / (pt.time * (float)self->envelope.sratefactor));
 				pt = psy_dsp_envelope_at(&self->inst->filterenvelope, 1);
-				self->filterenv.step = (1.0f / (pt.time * (float)self->envelope.samplerate));
-				self->controller.pos.QuadPart = 0;
+				self->filterenv._step = (1.0f / (pt.time * (float)self->envelope.sratefactor));
+				self->controller._pos.QuadPart = 0;
 				if (self->effretmode == 1)
 				{
-					self->lvoldest += self->effretVol;
-					self->rvoldest += self->effretVol;
+					self->controller._lVolDest += self->effretVol;
+					self->controller._rVolDest += self->effretVol;
 				} else if (self->effretmode == 2)
 				{
-					self->lvoldest *= self->effretVol;
-					self->rvoldest *= self->effretVol;
+					self->controller._lVolDest *= self->effretVol;
+					self->controller._rVolDest *= self->effretVol;
 				}
 			} else
 			{
 				self->triggernotedelay = 0;
-			}
-			psy_dsp_envelopecontroller_start(&self->envelope);
-			//self->envelope.stage = ENV_ATTACK;
-		} else if (!psy_dsp_envelopecontroller_playing(&self->envelope))  //self->envelope.stage == ENV_OFF)
+			}			
+			self->envelope._stage = SAMPLER_ENV_ATTACK;
+		} else if (self->envelope._stage == SAMPLER_ENV_OFF)
 		{
 			return;
 		}
-	} else
-		if (!psy_dsp_envelopecontroller_playing(&self->envelope)) //self->envelope.stage == ENV_OFF)
+	} else if (self->envelope._stage == SAMPLER_ENV_OFF)
+	{
+		psy_audio_samplervoice_setup(self);
+		return;
+	} else if ((self->triggernoteoff) && (self->samplecounter >= self->triggernoteoff))
+	{
+		psy_audio_samplervoice_noteoff(self);
+	}
+
+	dstpos = 0;
+	while (numsamples)
+	{
+		left_output = 0;
+		right_output = 0;
+
+		samplerwavedatacontroller_work(&self->controller, &left_output, &right_output);
+		
+		// Amplitude section			
 		{
+			int ENV_DT;
+			
+			ENV_DT = (int32_t)(psy_dsp_envelope_decaytime(
+				&self->inst->volumeenvelope) * 44100 + 0.5f);
+			samplerenvelope_tick(&self->envelope, ENV_DT);		
+			samplerwavedatacontroller_rampvolume(&self->controller);
+		}
+		// Filter section
+		if (filter_type(&self->filter) != F_NONE) {
+			int newcutoff;
+			int ENV_F_DT;
+
+			ENV_F_DT = (int32_t)(psy_dsp_envelope_decaytime(
+				&self->inst->filterenvelope) * 44100 + 0.5f);
+			samplerenvelope_tick(&self->envelope, ENV_F_DT);			
+			newcutoff = self->cutoff +
+				psy_dsp_roundf(self->filterenv._value * self->comodify * 128.f);
+			if (newcutoff < 0) {
+				newcutoff = 0;
+			} else if (newcutoff > 127) {
+				newcutoff = 127;
+			}
+			filter_setcutoff(&self->filter, newcutoff);
+			if (self->controller.wave->stereo) {
+				self->filter.vtable->workstereo(&self->filter, &left_output, &right_output);
+			} else {
+				left_output = self->filter.vtable->work(&self->filter, left_output);
+			}
+		}
+
+		if (!self->controller.wave->stereo) {
+			right_output = left_output;
+		}		
+		right_output *= self->controller._rVolCurr * self->envelope._value;
+		left_output *= self->controller._lVolCurr * self->envelope._value;
+
+		// Move sample position
+		if (!samplerwavedatacontroller_postwork(&self->controller)) {
 			psy_audio_samplervoice_setup(self);
-			return;
-		} else if ((self->triggernoteoff) && (self->samplecounter >= self->triggernoteoff))
-		{
-			psy_audio_samplervoice_noteoff(self);
+			break;
 		}
 
-		dstpos = 0;
-		while (numsamples)
-		{
-			intptr_t nextsamples;
-
-			left_output = 0;
-			right_output = 0;
-			nextsamples = psy_min(psy_audio_wavedatacontroller_prework(&self->controller,
-				(int)numsamples, FALSE), numsamples);
-			numsamples -= nextsamples;
-			while (nextsamples)
-			{
-				intptr_t diff;
-
-				left_output = psy_audio_sampleiterator_work(&self->controller, 0);
-				if (self->controller.sample->stereo) {
-					right_output = psy_audio_sampleiterator_work(&self->controller, 1);
-				}
-				// Amplitude section				
-				psy_dsp_envelopecontroller_tick_ps1(&self->envelope);
-				psy_audio_samplervoice_rampvolume(self);				
-				// Filter section
-				if (filter_type(&self->filter) != F_NONE) {
-					int newcutoff;
-
-					psy_dsp_envelopecontroller_tick_ps1(&self->filterenv);
-					newcutoff = self->cutoff +
-						psy_dsp_roundf(self->filterenv.value * self->comodify * 128.f);
-					if (newcutoff < 0) {
-						newcutoff = 0;
-					} else if (newcutoff > 127) {
-						newcutoff = 127;
-					}					
-					filter_setcutoff(&self->filter, newcutoff);
-					if (self->controller.sample->stereo) {
-						self->filter.vtable->workstereo(&self->filter, &left_output, &right_output);
-					} else {
-						left_output = self->filter.vtable->work(&self->filter, left_output);
-					}
-				}
-
-				if (!self->controller.sample->stereo) {
-					right_output = left_output;
-				}
-				right_output *= self->rvolcurr * self->envelope.value;
-				left_output *= self->lvolcurr * self->envelope.value;
-				pSamplesL[dstpos] += left_output;
-				pSamplesR[dstpos] += right_output;
-				++dstpos;
-				nextsamples--;
-				diff = psy_audio_wavedatacontroller_inc(&self->controller);
-				self->controller.left += diff;
-				self->controller.right += diff;
-			}
-			psy_audio_wavedatacontroller_postwork(&self->controller);
-			if (!psy_audio_wavedatacontroller_playing(&self->controller)) {
-				psy_audio_samplervoice_setup(self);
-				break;
-			}
-		}
+		*pSamplesL++ = *pSamplesL + left_output;
+		*pSamplesR++ = *pSamplesR + right_output;
+		numsamples--;
+	}	
 }
 
 // mfc-psycle: if check in work method
@@ -1039,33 +1159,24 @@ bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice* self)
 		sampleindex_make(self->instrument, 0));
 }
 
-// mfc-psycle: WaveDataController::RampVolume
-void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self)
-{
-	assert(self);
-	// calculate volume  (volume ramped)
-	if (self->lvolcurr > self->lvoldest) {
-		self->lvolcurr -= 0.005f;
-		if (self->lvolcurr < self->lvoldest)	self->lvolcurr = self->lvoldest;
-	} else if (self->lvolcurr < self->lvoldest) {
-		self->lvolcurr += 0.005f;
-		if (self->lvolcurr > self->lvoldest)	self->lvolcurr = self->lvoldest;
-	}
-	if (self->rvolcurr > self->rvoldest) {
-		self->rvolcurr -= 0.005f;
-		if (self->rvolcurr < self->rvoldest) self->rvolcurr = self->rvoldest;
-	} else if (self->rvolcurr < self->rvoldest) {
-		self->rvolcurr += 0.005f;
-		if (self->rvolcurr > self->rvoldest)	self->rvolcurr = self->rvoldest;
-	}
-}
-
 // mfc-psycle: Voice::NoteOff()
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-	psy_dsp_envelopecontroller_release(&self->envelope);
-	psy_dsp_envelopecontroller_release(&self->filterenv);
+	if (self->envelope._stage != SAMPLER_ENV_OFF)
+	{
+		int ENV_RT;
+		int ENV_F_RT;
+
+		ENV_RT = (int32_t)((psy_dsp_envelope_releasetime(
+			&self->inst->volumeenvelope)) * 44100 + 0.5f);
+		ENV_F_RT = (int32_t)((psy_dsp_envelope_releasetime(
+			&self->inst->filterenvelope)) * 44100 + 0.5f);
+		self->envelope._stage = SAMPLER_ENV_RELEASE;
+		self->filterenv._stage = SAMPLER_ENV_RELEASE;
+		self->envelope._step = (self->envelope._value / ENV_RT) * self->envelope.sratefactor;
+		self->filterenv._step = (self->filterenv._value / ENV_F_RT) * self->envelope.sratefactor;
+	}
 	self->triggernotedelay = 0;
 	self->triggernoteoff = 0;
 }
@@ -1074,8 +1185,14 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-	psy_dsp_envelopecontroller_fastrelease(&self->envelope);	
-	psy_dsp_envelopecontroller_fastrelease(&self->filterenv);	
+	if (self->envelope._stage != SAMPLER_ENV_OFF)
+	{
+		self->envelope._stage = SAMPLER_ENV_FASTRELEASE;
+		self->envelope._step = self->envelope._value / OVERLAPTIME;
+
+		self->filterenv._stage = SAMPLER_ENV_RELEASE;
+		self->filterenv._step = self->filterenv._value / OVERLAPTIME;
+	}
 	self->triggernotedelay = 0;
 	self->triggernoteoff = 0;
 }
@@ -1085,38 +1202,42 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 {
 	// 4294967 stands for (2^30/250), meaning that
 	//value 250 = (inc)decreases the speed in 1/4th of the original (wave) speed each PerformFx call.
-	int64_t shift;
-	int64_t speed;
+	int64_t shift;	
 
 	assert(self);
 	switch (self->effcmd)
 	{
 		// 0x01 : Pitch Up
 	case PS1_SAMPLER_CMD_PORTAUP:
-		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.sample->numframes) /
+		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.wave->numframes) /
 			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler));
-		psy_audio_wavedatacontroller_setspeed(&self->controller, (self->controller.speed + shift) / 4294967296.0);
+		self->controller._speed += shift;
+		psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+			self->controller._speed);
 		break;
 		// 0x02 : Pitch Down
 	case PS1_SAMPLER_CMD_PORTADOWN:
-		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.sample->numframes) /
+		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.wave->numframes) /
 			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler));
-		speed = self->controller.speed - shift;
-		if (speed < 0) speed = 0;
-		psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
+		self->controller._speed -= shift;
+		if (self->controller._speed < 0) self->controller._speed = 0;
+		psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+			self->controller._speed);
 		break;
 		// 0x03 : Porta to note
 	case PS1_SAMPLER_CMD_PORTA2NOTE:
 		//effval is multiplied by -1 in Tick if it needs to slide down.
-		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.sample->numframes) /
+		shift = (int64_t)(self->effval) * 4294967ll * (double)(self->controller.wave->numframes) /
 			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler));
-		speed = self->controller.speed + shift;
-		if ((self->effval < 0 && self->controller.speed < self->effportaspeed)
-			|| (self->effval > 0 && self->controller.speed > self->effportaspeed)) {
-			self->controller.speed = self->effportaspeed;
+		self->controller._speed += shift;
+		if ((self->effval < 0 && self->controller._speed < self->effportaspeed)
+			|| (self->effval > 0 && self->controller._speed > self->effportaspeed)) {
+			self->controller._speed = self->effportaspeed;
 			self->effcmd = PS1_SAMPLER_CMD_NONE;
 		}
-		psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
+		psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+			self->controller._speed);
+		//psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
 		break;
 	default:
 		break;
@@ -1126,8 +1247,7 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 // mfc-psycle: Voice::PerformFxNew(dsp::resampler& resampler)
 void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 {	
-	double factor;
-	int64_t speed;
+	double factor;	
 
 	assert(self);
 	// value 1 = (inc)decreases the speed in one seminote each beat.
@@ -1136,25 +1256,28 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 	switch (self->effcmd) {
 		// 0x01 : Pitch Up
 		case PS1_SAMPLER_CMD_PORTAUP:
-			speed = self->controller.speed * pow(2.0, self->effval * factor);
-			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
+			self->controller._speed *= pow(2.0, self->effval * factor);
+			psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+				self->controller._speed);
 			break;
 			// 0x02 : Pitch Down
 		case PS1_SAMPLER_CMD_PORTADOWN:
-			speed = self->controller.speed * pow(2.0, -self->effval * factor);
-			if (speed < 0) speed = 0;
-			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
+			self->controller._speed *= pow(2.0, -self->effval * factor);
+			if (self->controller._speed < 0) self->controller._speed = 0;
+			psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+				self->controller._speed);
 			break;
 			// 0x03 : Porta to note
 		case PS1_SAMPLER_CMD_PORTA2NOTE:
 			//effval is multiplied by -1 in Tick() if it needs to slide down.
-			speed = self->controller.speed * pow(2.0, self->effval * factor);
-			if ((self->effval < 0 && speed < self->effportaspeed)
-				|| (self->effval > 0 && speed > self->effportaspeed)) {
-				speed = self->effportaspeed;
+			self->controller._speed *= pow(2.0, self->effval * factor);
+			if ((self->effval < 0 && self->controller._speed < self->effportaspeed)
+				|| (self->effval > 0 && self->controller._speed > self->effportaspeed)) {
+				self->controller._speed = self->effportaspeed;
 				self->effcmd = PS1_SAMPLER_CMD_NONE;
-			}
-			psy_audio_wavedatacontroller_setspeed(&self->controller, speed / 4294967296.0);
+			}			
+			psy_dsp_resampler_setspeed(&self->controller.resampler.resampler,
+				self->controller._speed);
 			break;
 		default:
 			break;
@@ -1165,14 +1288,9 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
 	psy_dsp_ResamplerQuality quality)
 {
-	uintptr_t voice;
-
 	assert(self);
 
-	for (voice = 0; voice < self->numvoices; ++voice) {
-		psy_audio_wavedatacontroller_setquality(&self->voices[voice].controller,
-			quality);
-	}
+	self->resamplerquality = quality;	
 }
 
 // mfc-psycle: Sampler::LoadSpecificChunk(RiffFile* pFile, int version)

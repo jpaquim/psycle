@@ -33,6 +33,7 @@ void psy_audio_patterns_init_signals(psy_audio_Patterns* self)
 {
 	assert(self);
 
+	psy_signal_init(&self->signal_numsongtrackschanged);
 	psy_signal_init(&self->signal_namechanged);
 	psy_signal_init(&self->signal_lengthchanged);
 }
@@ -50,6 +51,7 @@ void psy_audio_patterns_dispose_signals(psy_audio_Patterns* self)
 {
 	assert(self);
 
+	psy_signal_dispose(&self->signal_numsongtrackschanged);
 	psy_signal_dispose(&self->signal_namechanged);
 	psy_signal_dispose(&self->signal_lengthchanged);
 }
@@ -270,6 +272,8 @@ void psy_audio_patterns_setnumtracks(psy_audio_Patterns* self,
 	assert(self);
 
 	self->songtracks = numtracks;
+	psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
+		numtracks);
 }
 
 uintptr_t psy_audio_patterns_numtracks(const psy_audio_Patterns* self)

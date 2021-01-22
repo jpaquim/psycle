@@ -1268,7 +1268,7 @@ void ASIOInterface::sampleRateChanged(ASIOSampleRate sRate)
 	// might not have even changed, maybe only the sample rate status of an
 	// AES/EBU or S/PDIF digital input at the audio device.
 	// You might have to update time/sample related conversion routines, etc.
-	psy_audiodriversettings_setsamplespersec(&settings_, (uintptr_t) sRate);
+	psy_audiodriversettings_setsamplespersec(&settings_, sRate);
 }
 
 long ASIOInterface::asioMessages(long selector, long value, void* message, double* opt)
@@ -1547,7 +1547,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 		PSY_PROPERTY_TYPE_INTEGER);
 	if (property) {
 		psy_audiodriversettings_setsamplespersec(&ASIOInterface::settings_,
-			psy_property_item_int(property));
+			(psy_dsp_big_hz_t)psy_property_item_int(property));
 	}
 	property = psy_property_at(self->configuration, "numbuf",
 		PSY_PROPERTY_TYPE_INTEGER);

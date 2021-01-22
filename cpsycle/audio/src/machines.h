@@ -15,6 +15,7 @@ extern "C" {
 
 #define psy_audio_MASTER_INDEX 128
 #define psy_audio_MAX_STREAM_SIZE 256
+#define psy_audio_MAX_MACHINE_BUFFERS 256
 
 typedef psy_List MachinePath;
 typedef psy_List MachineList;

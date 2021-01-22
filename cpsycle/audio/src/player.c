@@ -108,7 +108,6 @@ void psy_audio_player_initsignals(psy_audio_Player* self)
 {
 	assert(self);
 
-	psy_signal_init(&self->signal_numsongtrackschanged);
 	psy_signal_init(&self->signal_lpbchanged);
 	psy_signal_init(&self->signal_inputevent);
 }
@@ -120,7 +119,6 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_player_unloaddriver(self);
 	psy_library_dispose(&self->drivermodule);
 	psy_audio_eventdrivers_dispose(&self->eventdrivers);	
-	psy_signal_dispose(&self->signal_numsongtrackschanged);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);
 	psy_audio_activechannels_dispose(&self->playon);
@@ -249,7 +247,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 				// delimits the machines that could be processed parallel
 				// todo: add thread functions
 				continue;				
-			}
+			}			
 			if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
 				psy_audio_player_workmachine(self, amount, slot);
 			}
@@ -277,20 +275,22 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 			psy_List* p;
 			
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
-				slot, amount);			
+				slot, amount);		
 			if (psy_audio_player_playing(self)) {
 				// update playon
 				for (p = events; p != NULL; psy_list_next(&p)) {
 					psy_audio_PatternEntry* patternentry;
-
-					patternentry = (psy_audio_PatternEntry*)psy_list_entry(p);
+					
+					patternentry = (psy_audio_PatternEntry*)psy_list_entry(p);					
 					psy_audio_activechannels_write(&self->playon,
 						patternentry->track,
 						psy_audio_patternentry_front(patternentry));
 				}
 			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
-				self->sequencer.numsongtracks);
+				(self->song)
+				? psy_audio_song_numsongtracks(self->song)
+				: MAX_TRACKS);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
 			if (self->measure_cpu_usage) {
@@ -487,24 +487,9 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 	if (self->song) {		
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
-		psy_audio_player_setnumsongtracks(self,
-			psy_audio_song_numsongtracks(song));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
-	}
-}
-
-void psy_audio_player_setnumsongtracks(psy_audio_Player* self,
-	uintptr_t numsongtracks)
-{
-	assert(self);
-
-	if (numsongtracks >= 1 && numsongtracks < MAX_TRACKS) {
-		psy_audio_sequencer_setnumsongtracks(&self->sequencer,
-			numsongtracks);
-		psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
-			numsongtracks);
 	}
 }
 

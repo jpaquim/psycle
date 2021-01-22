@@ -45,6 +45,8 @@ INLINE double double_real(Double* self)
 	return self->QuadPart * 1 / 4294967296.0;
 }
 
+typedef psy_dsp_amp_t wavedata_t;
+
 typedef struct {
 	struct psy_audio_Sample* sample;
 	Double pos;
@@ -62,11 +64,14 @@ typedef struct {
 	// properly identifying which buffer to use.
 	bool looped;
 	bool playing;
-	// psy_audio_Buffer buffer;
-	psy_dsp_amp_t* lBuffer;
-	psy_dsp_amp_t* rBuffer;
-	psy_dsp_amp_t* left;
-	psy_dsp_amp_t* right;
+
+	wavedata_t* m_pL;
+	wavedata_t* m_pR;
+
+	wavedata_t lBuffer[64 * 3];
+	wavedata_t rBuffer[64 * 3];
+	//int requiredpre;  //Currently assumed to be the highest one, i.e. SINC sizes.
+	//int requiredpost;
 } psy_audio_WaveDataController;
 
 void psy_audio_wavedatacontroller_init(psy_audio_WaveDataController*);
@@ -80,7 +85,7 @@ intptr_t psy_audio_wavedatacontroller_inc(psy_audio_WaveDataController*);
 void psy_audio_wavedatacontroller_noteoff(psy_audio_WaveDataController*);
 int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController*,
 	int numSamples, bool released);
-psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController*,
+wavedata_t psy_audio_sampleiterator_work(psy_audio_WaveDataController*,
 	uintptr_t channel);
 void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self,
 	float* pLeftw, float* pRightw);

@@ -4,16 +4,15 @@
 #include "../../detail/prefix.h"
 
 #include "plugin.h"
+// local
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "preset.h"
 #include "presets.h"
 #include "songio.h"
-
-#include <stdlib.h>
-#include <string.h>
+// std
 #include <math.h>
-
+// platform
 #include "../../detail/portable.h"
 
 // psy_audio_PluginMachineParam
@@ -440,7 +439,7 @@ void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
 	mi_work(self->mi,
 		psy_audio_buffer_at(bc->output, 0),
 		psy_audio_buffer_at(bc->output, 1),
-		bc->numsamples, bc->numtracks);
+		bc->numsamples, bc->numsongtracks);
 }
 
 int hostevent(psy_audio_Plugin* self, int const eventNr, int val1, float val2)

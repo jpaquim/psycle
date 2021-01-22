@@ -78,7 +78,6 @@ typedef struct {
 	psy_Signal signal_newline;
 	// internal data
 	psy_audio_SequencerTime seqtime;
-	uintptr_t numsongtracks;
 	psy_dsp_big_beat_t beatspersample;
 	uintptr_t lpb; // global
 	psy_dsp_big_beat_t lpbspeed; // pattern
@@ -264,16 +263,6 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 		rv = 1.0;
 	}
 	return rv;
-}
-
-INLINE void psy_audio_sequencer_setnumsongtracks(psy_audio_Sequencer* self,
-	uintptr_t numsongtracks)
-{
-	assert(self);
-
-	if (numsongtracks >= 1 && numsongtracks < MAX_TRACKS) {
-		self->numsongtracks = numsongtracks;		
-	}
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(
