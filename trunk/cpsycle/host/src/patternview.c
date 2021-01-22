@@ -209,7 +209,7 @@ static void patternview_onlpbchanged(PatternView*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void patternview_ontimer(PatternView*, uintptr_t timerid);
 static void patternview_updateksin(PatternView*);
-static void patternview_numtrackschanged(PatternView*, psy_audio_Player*,
+static void patternview_numtrackschanged(PatternView*, psy_audio_Pattern*,
 	uintptr_t numsongtracks);
 static void patternview_oneventdriverinput(PatternView*, psy_EventDriver*);
 static PatternViewTarget patternview_target(PatternView*, psy_EventDriver*
@@ -396,6 +396,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	if (workspace->song) {
 		psy_signal_connect(&workspace->song->sequence.signal_changed,
 			self, patternview_onsequencechanged);
+		psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
+			patternview_numtrackschanged);
 	}
 	psy_signal_connect(&psy_ui_app_zoom(psy_ui_app())->signal_zoom, self,
 		patternview_onappzoom);
@@ -414,9 +416,7 @@ void patternview_ondestroy(PatternView* self, psy_ui_Component* sender)
 void patternview_connectplayer(PatternView* self, psy_audio_Player* player)
 {
 	psy_signal_connect(&player->signal_lpbchanged, self,
-		patternview_onlpbchanged);
-	psy_signal_connect(&player->signal_numsongtrackschanged, self,
-		patternview_numtrackschanged);
+		patternview_onlpbchanged);	
 }
 
 void patternview_initbasefontsize(PatternView* self)
@@ -500,6 +500,8 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 		pianoroll_setpattern(&self->pianoroll, pattern);		
 		psy_signal_connect(&workspace->song->sequence.signal_changed,
 			self, patternview_onsequencechanged);
+		psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
+			patternview_numtrackschanged);
 	} else {		
 		patternview_setpattern(self, NULL);
 		pianoroll_setpattern(&self->pianoroll, NULL);
@@ -993,10 +995,11 @@ void patternview_updateksin(PatternView* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void patternview_numtrackschanged(PatternView* self, psy_audio_Player* player,
+void patternview_numtrackschanged(PatternView* self, psy_audio_Pattern* sender,
 	uintptr_t numsongtracks)
 {	
 	psy_ui_component_updateoverflow(trackergrid_base(&self->tracker));
+	psy_ui_component_invalidate(trackerheader_base(&self->header));
 	psy_ui_component_invalidate(trackergrid_base(&self->tracker));
 	psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));
 }
@@ -1131,7 +1134,7 @@ void patternview_onpatternexport(PatternView* self)
 			psy_audio_patternio_save(trackergridstate_pattern(&self->gridstate),
 				psy_ui_savedialog_path(&dialog),
 				psy_audio_player_bpl(workspace_player(self->workspace)),
-				psy_audio_player_numsongtracks(workspace_player(self->workspace)));
+				psy_audio_song_numsongtracks(workspace_song(self->workspace)));
 		}
 		psy_ui_savedialog_dispose(&dialog);
 	}

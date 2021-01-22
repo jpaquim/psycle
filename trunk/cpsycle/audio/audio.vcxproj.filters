@@ -310,6 +310,9 @@
     <ClCompile Include="src\trackstate.c">
       <Filter>pattern</Filter>
     </ClCompile>
+    <ClCompile Include="src\machinescmds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -594,5 +597,6 @@
     <ClInclude Include="src\trackstate.h">
       <Filter>pattern</Filter>
     </ClInclude>
+    <ClInclude Include="src\machinescmds.h" />
   </ItemGroup>
 </Project>

@@ -63,133 +63,165 @@ extern "C" {
 #define PS1_SAMPLER_CMD_EXT_NOTEOFF		0xC0
 #define PS1_SAMPLER_CMD_EXT_NOTEDELAY	0xD0
 
-	struct psy_audio_Sampler;
+struct psy_audio_Sampler;
 
-	typedef struct psy_audio_SamplerVoice
-	{
-		struct psy_audio_Sampler* sampler;
-		psy_audio_WaveDataController controller;
-		psy_dsp_EnvelopeController envelope;	
-		//psy_dsp_ADSRSettings _envelopesettings;
-		psy_dsp_EnvelopeController filterenv;
-		// psy_dsp_ADSRSettings _filterenvsettings;
-		Filter filter;
-		psy_audio_Instrument* inst;
-		int instrument;
-		uintptr_t channel;
+typedef struct SamplerWaveDataController
+{	
+	psy_audio_Sample* wave;
 
-		// Amount of samples since line Tick on this voice.
-		uintptr_t samplecounter;
-		// Amount of samples previous to do a delayed noteoff
-		int triggernoteoff;
-		// Amount of samples previous to do a delayed noteon (Also used for
-		// retrig)
-		int triggernotedelay;
-		int cutoff;
-		float comodify;
-		int64_t effportaspeed;
-		// Line memory for command being executed
-		// running command (like porta or retrig).
-		int effcmd;
-		//value related to the running command (like porta or retrig)
-		int effval;
-		// retrig
-		int effretticks; // Number of ticks remaining for retrig
-		float effretVol; // volume change amount
-		int effretmode;  // volume change mode (multipler or sum)
-		// WaveDataController
-		float vol; // 0..1 value of this voice volume,
-		float pan;
-		float lvoldest;
-		float rvoldest;
-		float lvolcurr;
-		float rvolcurr;
-	} psy_audio_SamplerVoice;
+	Double _pos;
+	int64_t _speed;
+	float _vol; // 0..1 value of this voice volume,
+	float _pan;
+	float _lVolDest;
+	float _rVolDest;
+	float _lVolCurr;
+	float _rVolCurr;
+	psy_dsp_MultiResampler resampler;
+} SamplerWaveDataController;
 
-	void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, struct psy_audio_Sampler*);
-	void psy_audio_samplervoice_setup(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
+void samplerwavedatacontroller_init(SamplerWaveDataController*);
+void samplerwavedatacontroller_dispose(SamplerWaveDataController*);
 
-	void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, uintptr_t numsamples, float* pSamplesL, float* pSamplesR);
-	int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData, uintptr_t channelNum, int baseC, psy_List* multicmdMem);
-	void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
-	void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
+void samplerwavedatacontroller_work(SamplerWaveDataController*,
+	float* left_output, float* right_output);
+void samplerwavedatacontroller_rampvolume(SamplerWaveDataController*);
+bool samplerwavedatacontroller_postwork(SamplerWaveDataController*);
+void samplerwavedatacontroller_setspeed(SamplerWaveDataController*, double
+	speeddouble);
 
-	typedef struct psy_audio_Sampler {
-		// base class
-		psy_audio_CustomMachine custommachine;
-		psy_audio_IntMachineParam param_numvoices;
-		psy_audio_ChoiceMachineParam param_resamplingmethod;
-		psy_audio_ChoiceMachineParam param_defaultspeed;
-		psy_audio_IntMachineParam param_instrumentbank;		
-		// 0: basec = C3, 1: basec = C4
-		int32_t defaultspeed;
-		// Instrument Bank 0: PS1 1: Sampulse
-		int32_t instrumentbank;
-		psy_dsp_ResamplerQuality resamplerquality;
-		psy_audio_TickTimer ticktimer;
-		uintptr_t samplerowcounter;
-		int32_t usefilters;
-		int32_t panningmode;
 
-		uint16_t lastinstrument[MAX_TRACKS];
-		uintptr_t numvoices;
-		psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];
-		// psycle::helpers::dsp::cubic_resampler _resampler;
-		psy_List* multicmdMem; // PatternEvent
-		bool linearslide;
-	} psy_audio_Sampler;
+typedef enum
+{
+	SAMPLER_ENV_OFF = 0,
+	SAMPLER_ENV_ATTACK = 1,
+	SAMPLER_ENV_DECAY = 2,
+	SAMPLER_ENV_SUSTAIN = 3,
+	SAMPLER_ENV_RELEASE = 4,
+	SAMPLER_ENV_FASTRELEASE = 5
+} SamplerEnvelopeStage;
 
-	void psy_audio_sampler_init(psy_audio_Sampler*,
-		psy_audio_MachineCallback*);
+typedef struct SamplerEnvelope
+{
+	SamplerEnvelopeStage _stage;
+	float _value;
+	float _step;
+	float _attack;
+	float _decay;
+	float _sustain;
+	float _release;
+	float sratefactor;
+} SamplerEnvelope;
 
-	INLINE psy_audio_Sampler* psy_audio_sampler_alloc(void)
-	{
-		return (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
+INLINE void samplerenvelope_init(SamplerEnvelope* self)
+{
+	self->sratefactor = 1.f;
+}
+
+void samplerenvelope_tick(SamplerEnvelope*,
+	int decaysamples);
+INLINE void samplerenvelope_updatesrate(SamplerEnvelope* self,
+	double samplerate)
+{
+	self->sratefactor = 44100.0f / (float)samplerate;
+}
+
+typedef struct psy_audio_SamplerVoice
+{
+	struct psy_audio_Sampler* sampler;
+	SamplerWaveDataController controller;
+	SamplerEnvelope envelope;
+	SamplerEnvelope filterenv;
+	Filter filter;
+	psy_audio_Instrument* inst;
+	int instrument;
+	uintptr_t channel;
+
+	// Amount of samples since line Tick on this voice.
+	uintptr_t samplecounter;
+	// Amount of samples previous to do a delayed noteoff
+	int triggernoteoff;
+	// Amount of samples previous to do a delayed noteon (Also used for
+	// retrig)
+	int triggernotedelay;
+	int cutoff;
+	float comodify;
+	int64_t effportaspeed;
+	// Line memory for command being executed
+	// running command (like porta or retrig).
+	int effcmd;
+	//value related to the running command (like porta or retrig)
+	int effval;
+	// retrig
+	int effretticks; // Number of ticks remaining for retrig
+	float effretVol; // volume change amount
+	int effretmode;  // volume change mode (multipler or sum)		
+} psy_audio_SamplerVoice;
+
+void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, struct psy_audio_Sampler*);
+void psy_audio_samplervoice_setup(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
+
+void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, uintptr_t numsamples, float* pSamplesL, float* pSamplesR);
+int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData, uintptr_t channelNum, int baseC, psy_List* multicmdMem);
+void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
+
+typedef struct psy_audio_Sampler {
+	// base class
+	psy_audio_CustomMachine custommachine;
+	psy_audio_IntMachineParam param_numvoices;
+	psy_audio_ChoiceMachineParam param_resamplingmethod;
+	psy_audio_ChoiceMachineParam param_defaultspeed;
+	psy_audio_IntMachineParam param_instrumentbank;		
+	// 0: basec = C3, 1: basec = C4
+	int32_t defaultspeed;
+	// Instrument Bank 0: PS1 1: Sampulse
+	int32_t instrumentbank;
+	psy_dsp_ResamplerQuality resamplerquality;
+	psy_audio_TickTimer ticktimer;
+	uintptr_t samplerowcounter;
+	int32_t usefilters;
+	int32_t panningmode;
+
+	uint16_t lastinstrument[MAX_TRACKS];
+	uintptr_t numvoices;
+	psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];
+	// psycle::helpers::dsp::cubic_resampler _resampler;
+	psy_List* multicmdMem; // PatternEvent
+	bool linearslide;
+} psy_audio_Sampler;
+
+void psy_audio_sampler_init(psy_audio_Sampler*,
+	psy_audio_MachineCallback*);
+
+INLINE psy_audio_Sampler* psy_audio_sampler_alloc(void)
+{
+	return (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
+}
+
+INLINE psy_audio_Sampler* psy_audio_sampler_allocinit(
+	psy_audio_MachineCallback* callback)
+{
+	psy_audio_Sampler* rv;
+
+	rv = psy_audio_sampler_alloc();
+	if (rv) {
+		psy_audio_sampler_init(rv, callback);
 	}
-
-	INLINE psy_audio_Sampler* psy_audio_sampler_allocinit(
-		psy_audio_MachineCallback* callback)
-	{
-		psy_audio_Sampler* rv;
-
-		rv = psy_audio_sampler_alloc();
-		if (rv) {
-			psy_audio_sampler_init(rv, callback);
-		}
-		return rv;
-	}
+	return rv;
+}
 	
-	const psy_audio_MachineInfo* psy_audio_sampler_info(void);
+const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 
-	INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
-	{
-		assert(self);
-		return &(self->custommachine.machine);
-	}
-
-	void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
-		psy_dsp_ResamplerQuality quality);
-
-	INLINE psy_dsp_ResamplerQuality psy_audio_sampler_resamplerquality(psy_audio_Sampler* self)
-	{
-		assert(self);
-		return self->resamplerquality;
-	}
-
-	INLINE bool psy_audio_sampler_usefilters(const psy_audio_Sampler* self)
-	{
-		assert(self);
-		return self->usefilters != FALSE;
-	}
-
-	INLINE void psy_audio_sampler_setnumvoices(psy_audio_Sampler* self, uintptr_t num)
-	{
-		self->numvoices = num;
-	}
+INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
+{
+	assert(self);
+	return &(self->custommachine.machine);
+}
 
 #ifdef __cplusplus
 }

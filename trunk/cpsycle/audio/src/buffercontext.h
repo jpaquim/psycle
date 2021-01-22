@@ -23,7 +23,7 @@ typedef struct psy_audio_BufferContext {
 	psy_audio_Buffer* output;
 	psy_List* events;
 	uintptr_t numsamples;
-	uintptr_t numtracks;
+	uintptr_t numsongtracks;
 } psy_audio_BufferContext;
 
 void psy_audio_buffercontext_init(psy_audio_BufferContext*,
@@ -31,7 +31,7 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 	psy_audio_Buffer* input,
 	psy_audio_Buffer* output,
 	uintptr_t numsamples,
-	uintptr_t numtracks);
+	uintptr_t numsongtracks);
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
 void psy_audio_buffercontext_setoffset(psy_audio_BufferContext*,
 	uintptr_t offset);
@@ -46,12 +46,6 @@ INLINE uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext*
 	self)
 {
 	return self->numsamples;
-}
-
-INLINE uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext*
-	self)
-{
-	return self->numtracks;
 }
 
 #ifdef __cplusplus

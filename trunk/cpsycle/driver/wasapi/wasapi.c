@@ -521,7 +521,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 		PSY_PROPERTY_TYPE_INTEGER);
 	if (property) {
 		psy_audiodriversettings_setsamplespersec(&self->settings,
-			psy_property_item_int(property));
+			(psy_dsp_big_hz_t)psy_property_item_int(property));
 	}
 	//property = psy_property_at(self->driver.properties, "numbuf");
 	//if (property && property->item.typ == PSY_PROPERTY_TYPE_INTEGER) {

@@ -14,7 +14,7 @@
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
-static void songtrackbar_onsongtracknumchanged(SongTrackBar*, Workspace*,
+static void songtrackbar_onsongtracknumchanged(SongTrackBar*, psy_audio_Patterns*,
 	uintptr_t numsongtracks);
 static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*,
 	int flag, psy_audio_SongFile* songfile);
@@ -34,7 +34,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	songtrackbar_build(self);	
 	psy_signal_connect(&self->trackbox.signal_selchanged, self,
 		songtrackbar_onselchange);	
-	psy_signal_connect(&workspace->player.signal_numsongtrackschanged, self,
+	psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);	
@@ -56,21 +56,22 @@ void songtrackbar_build(SongTrackBar* self)
 		psy_snprintf(text, 20, "%d", track);
 		psy_ui_combobox_addtext(&self->trackbox, text);
 	}	
-	psy_ui_combobox_setcursel(&self->trackbox,
-		psy_audio_player_numsongtracks(workspace_player(self->workspace)) - MIN_TRACKS);
+	if (workspace_song(self->workspace)) {
+		psy_ui_combobox_setcursel(&self->trackbox,
+			psy_audio_song_numsongtracks(workspace_song(self->workspace)) - MIN_TRACKS);
+	}
 }
 
 void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 	int index)
 {		
-	psy_audio_player_setnumsongtracks(workspace_player(self->workspace), index + MIN_TRACKS);
 	if (workspace_song(self->workspace)) {
 		psy_audio_song_setnumsongtracks(workspace_song(self->workspace), index + MIN_TRACKS);
 	}
 }
 
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
-	Workspace* workspace, uintptr_t numsongtracks)
+	psy_audio_Patterns* patterns, uintptr_t numsongtracks)
 {
 	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks - MIN_TRACKS);
 }
@@ -79,5 +80,7 @@ void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->trackbox,
-		psy_audio_player_numsongtracks(&workspace->player) - MIN_TRACKS);
+		psy_audio_song_numsongtracks(workspace->song) - MIN_TRACKS);
+	psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
+		songtrackbar_onsongtracknumchanged);
 }

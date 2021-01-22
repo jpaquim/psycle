@@ -426,6 +426,7 @@ typedef struct psy_audio_Machine {
 
 void psy_audio_machine_init(psy_audio_Machine*, psy_audio_MachineCallback*);
 void machine_base_dispose(psy_audio_Machine*);
+void psy_audio_machine_deallocate(psy_audio_Machine*);
 int machine_supports(psy_audio_Machine*, int option);
 
 // vtable calls

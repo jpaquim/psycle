@@ -24,7 +24,7 @@ typedef struct TrackScopeView {
 	uintptr_t maxcolumns;
 	double trackwidth;
 	double trackheight;
-	double textheight;
+	double textheight;	
 	// references
 	Workspace* workspace;	
 } TrackScopeView;

@@ -32,8 +32,7 @@ typedef struct psy_audio_Player {
 	// song switching	
 	psy_audio_MachineFactory machinefactory;
 	psy_audio_Song emptysong;
-	psy_audio_Sequencer sequencer;
-	psy_Signal signal_numsongtrackschanged;
+	psy_audio_Sequencer sequencer;	
 	psy_Signal signal_lpbchanged;
 	psy_Signal signal_inputevent;
 	psy_Signal signal_stop;	
@@ -65,12 +64,6 @@ void psy_audio_player_setsong(psy_audio_Player*, psy_audio_Song*);
 INLINE psy_audio_Song* psy_audio_player_song(psy_audio_Player* self)
 {
 	return self->song;
-}
-void psy_audio_player_setnumsongtracks(psy_audio_Player*, uintptr_t numsongtracks);
-
-INLINE uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
-{
-	return self->sequencer.numsongtracks;
 }
 
 INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)

@@ -56,12 +56,11 @@ INLINE uint32_t psy_audio_sampleiterator_length(psy_audio_WaveDataController* se
 
 static void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
 	psy_audio_WaveDataController*, psy_audio_Sample*);
-static void psy_audio_sampleiterator_initbuffer(psy_audio_WaveDataController*);
 static void psy_audio_sampleiterator_disposebuffer(psy_audio_WaveDataController*);
 static void psy_audio_sampleiterator_refillbuffers(psy_audio_WaveDataController*,
 	bool released/*=false*/);
 static void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController*,
-	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released);
+	wavedata_t buffer[192], wavedata_t* data, bool released);
 
 void psy_audio_wavedatacontroller_init(psy_audio_WaveDataController* self)
 {
@@ -69,8 +68,7 @@ void psy_audio_wavedatacontroller_init(psy_audio_WaveDataController* self)
 	psy_dsp_multiresampler_init(&self->resampler,
 		psy_dsp_RESAMPLERQUALITY_LINEAR);
 	self->playing = FALSE;
-	self->looped = FALSE;
-	psy_audio_sampleiterator_initbuffer(self);
+	self->looped = FALSE;	
 }
 
 void psy_audio_wavedatacontroller_initcontroller(psy_audio_WaveDataController* self,
@@ -88,34 +86,9 @@ void psy_audio_wavedatacontroller_initcontroller(psy_audio_WaveDataController* s
 	psy_audio_sampleiterator_refillbuffers(self, FALSE);
 }
 
-void psy_audio_sampleiterator_initbuffer(psy_audio_WaveDataController* self)
-{
-	// uintptr_t channel;
-	
-	//for (channel = 0; channel < self->buffer.numchannels; ++channel) {
-	//	self->buffer.samples[channel] = dsp.memory_alloc(
-	//		size, sizeof(psy_dsp_amp_t));
-	//}
-	//psy_audio_buffer_clearsamples(&self->buffer, size);
-	self->lBuffer = dsp.memory_alloc(REFILLBUFFERSIZE, sizeof(psy_dsp_amp_t));
-	self->rBuffer = dsp.memory_alloc(REFILLBUFFERSIZE, sizeof(psy_dsp_amp_t));
-	if (self->sample) {
-		psy_audio_sampleiterator_refillbuffers(self, FALSE);
-	}
-}
-
 void psy_audio_wavedatacontroller_dispose(psy_audio_WaveDataController* self)
 {
-	//uintptr_t channel;
-	//uintptr_t size;
-
-	//for (channel = 0; channel < self->buffer.numchannels; ++channel) {
-//		dsp.memory_dealloc(self->buffer.samples[channel]);
-	//}
-	//psy_audio_buffer_dispose(&self->buffer);
-	dsp.memory_dealloc(self->lBuffer);
-	dsp.memory_dealloc(self->rBuffer);
-	psy_dsp_resampler_dispose(psy_dsp_multiresampler_base(&self->resampler));	
+	psy_dsp_resampler_dispose(psy_dsp_multiresampler_base(&self->resampler));
 }
 
 void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
@@ -186,15 +159,12 @@ intptr_t psy_audio_wavedatacontroller_inc(psy_audio_WaveDataController* self)
 	return diff;
 }
 
-psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, uintptr_t channel)
+wavedata_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, uintptr_t channel)
 {
-	psy_dsp_amp_t* src;
-
-	if (channel < self->sample->channels.numchannels) {
-		src = psy_audio_buffer_at(&self->sample->channels, channel);
+	if (channel < self->sample->channels.numchannels) {		
 		return psy_dsp_resampler_work_float_unchecked(
 			psy_dsp_multiresampler_base(&self->resampler),
-			(channel == 0) ? self->left : self->right,
+			(channel == 0) ? self->m_pL : self->m_pR,
 			self->pos.LowPart);
 	}
 	return 0.f;
@@ -206,47 +176,17 @@ void psy_audio_sampleiterator_workstereo(psy_audio_WaveDataController* self, flo
 	ptrdiff_t diff;
 	//Process sample
 	//todo: sinc resampling would benefit from having a stereo version of resampler_work
-
-	//int16_t buffer[256];
-
-	//buffer[0] = self->left[0];
-	//buffer[1] = self->left[1];
-	//buffer[2] = self->left[2];
-	//buffer[3] = self->left[3];
-	//buffer[4] = self->left[4];
-	//*pLeftw = psy_dsp_resampler_work_unchecked(
-	//	psy_dsp_multiresampler_base(&self->resampler),
-	//	buffer,
-	//	self->pos.LowPart, NULL);
-
-	// todo splinesse2
-	*pLeftw = psy_dsp_resampler_work_float_unchecked(
-		psy_dsp_multiresampler_base(&self->resampler),
-		self->left,
-		self->pos.LowPart);
-	if (self->sample->channels.numchannels > 1) {
-		//buffer[0] = self->right[0];
-		//buffer[1] = self->right[1];
-		//buffer[2] = self->right[2];
-		//buffer[3] = self->right[3];
-		//buffer[4] = self->right[4];
-		//*pLeftw = psy_dsp_resampler_work_unchecked(
-		//	psy_dsp_multiresampler_base(&self->resampler),
-		//	buffer,
-		//	self->pos.LowPart, NULL);
-		//
-		//	todo splinesse2
-			*pRightw = psy_dsp_resampler_work_float_unchecked(
-				psy_dsp_multiresampler_base(&self->resampler),
-				self->right,
-				self->pos.LowPart);
+	
+	* pLeftw = psy_audio_sampleiterator_work(self, 0);
+	if (self->sample->channels.numchannels > 1) {	
+		*pRightw = psy_audio_sampleiterator_work(self, 1);
 	}
 	old = self->pos.HighPart;
 	self->pos.QuadPart += self->speedinternal;
 	diff = (ptrdiff_t)(self->pos.HighPart) - old;
-	self->left += diff;
-	self->right += diff;
-	//Note: m_pL/m_pR might be poiting at an erroneous place here. (like in looped samples).
+	self->m_pL += diff;
+	self->m_pR += diff;
+	//Note: self->m_pL/self->m_pR might be poiting at an erroneous place here. (like in looped samples).
 	//Postwork takes care of this.
 }
 
@@ -349,7 +289,7 @@ void psy_audio_sampleiterator_refillbuffers(psy_audio_WaveDataController* self,
 }
 
 void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
-	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released)
+	wavedata_t buffer[192], wavedata_t* data, bool released)
 {
 	//These values are for the max size of sinc resampler (which suits the rest).
 	const uint32_t presamples = 15;
@@ -372,16 +312,16 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
 		loopend = psy_audio_sampleiterator_loopend(self);
 	}
 	//Begin
-	memset(buffer, 0, REFILLBUFFERSIZE * sizeof(psy_dsp_amp_t));
-	memcpy(buffer + presamples, data, psy_min(psy_audio_sampleiterator_length(self), totalsamples) * sizeof(psy_dsp_amp_t));
+	memset(buffer, 0, REFILLBUFFERSIZE * sizeof(wavedata_t));
+	memcpy(buffer + presamples, data, psy_min(psy_audio_sampleiterator_length(self), totalsamples) * sizeof(wavedata_t));
 	if (looptype == psy_audio_SAMPLE_LOOP_DO_NOT) {
 		//End
 		if (psy_audio_sampleiterator_length(self) < totalsamples) {
 			memset(buffer + secbegin, 0, totalsamples + postsamples);
 			memcpy(buffer + secbegin + totalsamples - psy_audio_sampleiterator_length(self),
-				data, psy_audio_sampleiterator_length(self) * sizeof(psy_dsp_amp_t));
+				data, psy_audio_sampleiterator_length(self) * sizeof(wavedata_t));
 		} else {
-			memcpy(buffer + secbegin, data + psy_audio_sampleiterator_length(self) - totalsamples, totalsamples * sizeof(psy_dsp_amp_t));
+			memcpy(buffer + secbegin, data + psy_audio_sampleiterator_length(self) - totalsamples, totalsamples * sizeof(wavedata_t));
 			memset(buffer + secbegin + totalsamples, 0, postsamples);
 		}
 	} else if (looptype == psy_audio_SAMPLE_LOOP_NORMAL) {
@@ -402,8 +342,8 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
 				}
 			}
 		} else {
-			memcpy(buffer + secbegin, data + loopend - totalsamples, totalsamples * sizeof(psy_dsp_amp_t));
-			memcpy(buffer + secbegin + totalsamples, data + loopstart, totalsamples * sizeof(psy_dsp_amp_t));
+			memcpy(buffer + secbegin, data + loopend - totalsamples, totalsamples * sizeof(wavedata_t));
+			memcpy(buffer + secbegin + totalsamples, data + loopstart, totalsamples * sizeof(wavedata_t));
 		}
 	} else if (looptype == psy_audio_SAMPLE_LOOP_BIDI) {
 		if (loopend - loopstart < totalsamples) {
@@ -433,8 +373,8 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
 			int i;
 
 			//Ping pong loop (end and start).
-			memcpy(buffer + secbegin, data + loopend - totalsamples, totalsamples * sizeof(psy_dsp_amp_t));
-			memcpy(buffer + thirdbegin + totalsamples, data + loopstart, totalsamples * sizeof(psy_dsp_amp_t));
+			memcpy(buffer + secbegin, data + loopend - totalsamples, totalsamples * sizeof(wavedata_t));
+			memcpy(buffer + thirdbegin + totalsamples, data + loopstart, totalsamples * sizeof(wavedata_t));
 			for (i = 0; i < totalsamples; i++) {
 				buffer[secbegin + totalsamples + i] = data[loopend - i - 1];
 				buffer[thirdbegin + i] = data[loopstart + totalsamples - i];
@@ -464,13 +404,13 @@ int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController* self, int
 	//TRACE("RealPos %d\n",pos);
 	if (psy_audio_wavedatacontroller_currentloopdirection(self) == psy_audio_LOOPDIRECTION_FORWARD) {
 		if (pos < presamples && !self->looped) {
-			self->left = &self->lBuffer[presamples + pos];
-			self->right = &self->rBuffer[presamples + pos];
+			self->m_pL = &self->lBuffer[presamples + pos];
+			self->m_pR = &self->rBuffer[presamples + pos];
 			max = presamples - pos;
 			//TRACE("Begin buffer at pos %d for samples %d\n" ,pos+presamples , max);
 		} else if (pos + postsamples >= self->currentloopend && pos < self->currentloopend + presamples) {
-			self->left = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
-			self->right = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
+			self->m_pL = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
+			self->m_pR = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
 			if ((released || psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT)
 				&& psy_audio_sampleiterator_looptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT) {
 				max = self->currentloopend - pos;
@@ -482,17 +422,17 @@ int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController* self, int
 		} else if (self->looped && pos + postsamples >= self->currentloopstart && pos < self->currentloopstart + presamples) {
 			if ((!released && psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_NORMAL)
 				|| (psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT && self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL)) {
-				self->left = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
-				self->right = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
+				self->m_pL = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
+				self->m_pR = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
 			} else {
-				self->left = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
-				self->right = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+				self->m_pL = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+				self->m_pR = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
 			}
 			max = presamples + self->currentloopstart - pos;
 			//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 		} else {
-			self->left = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
-			self->right = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
+			self->m_pL = (wavedata_t*)(self->sample->channels.samples[0] + pos);
+			self->m_pR = (wavedata_t*)(self->sample->channels.samples[1] + pos);
 			if ((int32_t)(amount.HighPart) + postsamples < self->currentloopend) {
 				return numSamples;
 			}
@@ -509,13 +449,13 @@ int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController* self, int
 		amount.QuadPart -= self->pos.LowPart;
 	} else if (psy_audio_wavedatacontroller_currentloopdirection(self) == psy_audio_LOOPDIRECTION_BACKWARD) {
 		if (pos - presamples <= self->currentloopstart) {
-			self->left = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
-			self->right = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+			self->m_pL = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+			self->m_pR = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
 			max = pos - self->currentloopstart;
 			//TRACE("backward-loop buffer at pos %d for samples %d\n" ,thirdbegin+(pos+totalsamples-m_CurrentLoopStart) , max);
 		} else {
-			self->left = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
-			self->right = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
+			self->m_pL = (wavedata_t*)(self->sample->channels.samples[0] + pos);
+			self->m_pR = (wavedata_t*)(self->sample->channels.samples[1] + pos);
 			if ((int32_t)(amount.HighPart) - presamples >= self->currentloopstart) {
 				return numSamples;
 			}
@@ -572,7 +512,7 @@ uintptr_t psy_audio_wavedatacontroller_length(const
 }
 
 // Set Current sample position 
-void psy_audio_wavedatacontroller_setposition(psy_audio_WaveDataController* self, int value)
+void psy_audio_wavedatacontroller_setposition(psy_audio_WaveDataController* self, uintptr_t value)
 {
 	if (!self->sample) {
 		return;

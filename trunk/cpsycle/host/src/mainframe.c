@@ -117,7 +117,7 @@ static void mainframe_onstatus(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_updateterminalbutton(MainFrame*);
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
-static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
+static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
@@ -635,9 +635,7 @@ void mainframe_connectworkspace(MainFrame* self)
 {
 	workspace_configure_host(&self->workspace);
 	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
-		mainframe_oneventdriverinput);
-	psy_signal_connect(&self->workspace.player.signal_numsongtrackschanged,
-		self, mainframe_onsongtrackschanged);
+		mainframe_oneventdriverinput);	
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_dockview, self,
@@ -658,6 +656,9 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_eventdrivercallback, self);
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
+	psy_signal_connect(&workspace_song(
+		&self->workspace)->patterns.signal_numsongtrackschanged,
+		self, mainframe_onsongtrackschanged);
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -945,6 +946,12 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 	if (flag == WORKSPACE_NEWSONG) {
 		machinewireview_centermaster(&self->machineview.wireview);
 	}
+	if (workspace_song(&self->workspace)) {
+		psy_signal_connect(
+			&workspace_song(&self->workspace)->patterns.signal_numsongtrackschanged,
+			self, mainframe_onsongtrackschanged);
+	}	
+	psy_ui_component_align(mainframe_base(self));
 }
 
 void mainframe_updatesongtitle(MainFrame* self)
@@ -1307,10 +1314,11 @@ void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 	psy_ui_app_setzoomrate(psy_ui_app(), zoombox_rate(sender));	
 }
 
-void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Player* sender,
+void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks)
 {
 	// TrackScopeView can change its height, realign mainframe
+	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
 	psy_ui_component_align(mainframe_base(self));
 }
 

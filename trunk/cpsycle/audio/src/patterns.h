@@ -14,7 +14,10 @@
 extern "C" {
 #endif
 
-typedef struct {	
+typedef struct {
+	// Signals
+	psy_Signal signal_numsongtrackschanged;
+	// internal data
 	psy_Table slots;
 	uintptr_t songtracks;
 	bool sharetracknames;

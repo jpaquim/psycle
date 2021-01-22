@@ -53,8 +53,6 @@ static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
 static bool trackerheader_hasredraw(const TrackerHeader*);
 static bool trackerheader_hastrackredraw(const TrackerHeader*,
 	uintptr_t track);
-static void trackerheader_numtrackschanged(TrackerHeader*, psy_audio_Player*,
-	uintptr_t numsongtracks);
 // vtable
 static psy_ui_ComponentVtable trackerheader_vtable;
 static bool trackerheader_vtable_initialized = FALSE;
@@ -93,9 +91,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	psy_table_init(&self->trackstates);
 	self->playing = FALSE;
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
-		trackerheader_onpatterncursorchanged);
-	psy_signal_connect(&workspace_player(self->workspace)->signal_numsongtrackschanged, self,
-		trackerheader_numtrackschanged);
+		trackerheader_onpatterncursorchanged);	
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -390,10 +386,4 @@ bool trackerheader_hastrackredraw(const TrackerHeader* self, uintptr_t track)
 	return (psy_audio_activechannels_playon(
 		&workspace_player(self->workspace)->playon, track) !=
 		trackstate->playon);
-}
-
-void trackerheader_numtrackschanged(TrackerHeader* self,
-	psy_audio_Player* player, uintptr_t numsongtracks)
-{	
-	psy_ui_component_invalidate(&self->component);
 }

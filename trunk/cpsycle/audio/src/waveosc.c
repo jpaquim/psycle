@@ -116,8 +116,8 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, uintptr_t amount, float* da
 				nextsamples--;
 				++dstpos;				
 				diff = psy_audio_wavedatacontroller_inc(&self->sampleiterator);				
-				self->sampleiterator.left += diff;
-				self->sampleiterator.right += diff;				
+				self->sampleiterator.m_pL += diff;
+				self->sampleiterator.m_pR += diff;				
 				
 			}
 			psy_audio_wavedatacontroller_postwork(&self->sampleiterator);

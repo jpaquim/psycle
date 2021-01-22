@@ -184,6 +184,11 @@ INLINE void workspace_configure_host(Workspace* self)
 
 INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
 
+INLINE const psy_audio_Song* workspace_song_const(const Workspace* self)
+{
+	return self->song;
+}
+
 INLINE psy_audio_Player* workspace_player(Workspace* self)
 {
 	return &self->player;

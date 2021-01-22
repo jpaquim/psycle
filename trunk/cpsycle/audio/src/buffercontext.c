@@ -12,13 +12,13 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext* self,
 	psy_audio_Buffer* input,
 	psy_audio_Buffer* output,
 	uintptr_t numsamples,
-	uintptr_t numtracks)
+	uintptr_t numsongtracks)
 {	
 	self->events = events;
 	self->input = input;
 	self->output = output;
 	self->numsamples = numsamples;
-	self->numtracks = numtracks;
+	self->numsongtracks = numsongtracks;
 }
 
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext* self)
