@@ -65,6 +65,14 @@ enum {
 	SECTION_ID_MACHINEVIEW_NEWMACHINE = 1
 };
 
+typedef enum {
+	GENERATORS_ENABLED = 1,
+	EFFECTS_ENABLED = 2,
+	NEWMACHINE_INSERT = 4,
+	NEWMACHINE_APPEND = 8,
+	NEWMACHINE_ADDEFFECT = 16,
+} NewMachineBarOptions;
+
 // The patternview display modes
 typedef enum {
 	PATTERN_DISPLAYMODE_TRACKER,					// only tracker visible

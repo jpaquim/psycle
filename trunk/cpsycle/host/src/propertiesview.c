@@ -1048,7 +1048,7 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 static void propertiesview_ondestroy(PropertiesView*, psy_ui_Component* sender);
 static void propertiesview_initsectionfloated(PropertiesView*);
 static void propertiesview_selectsection(PropertiesView*, psy_ui_Component* sender,
-	uintptr_t section);
+	uintptr_t section, uintptr_t options);
 static void propertiesview_updatetabbarsections(PropertiesView*);
 static void propertiesview_ontabbarchange(PropertiesView*, psy_ui_Component* sender,
 	uintptr_t tabindex);
@@ -1142,7 +1142,7 @@ void propertiesview_initsectionfloated(PropertiesView* self)
 }
 
 void propertiesview_selectsection(PropertiesView* self,
-	psy_ui_Component* sender, uintptr_t section)
+	psy_ui_Component* sender, uintptr_t section, uintptr_t options)
 {
 	tabbar_select(&self->tabbar, section);
 }

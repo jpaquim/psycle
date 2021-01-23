@@ -57,6 +57,8 @@ static int machineproxy_bypassed(psy_audio_MachineProxy*);
 static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy*);
+static uintptr_t paramselected(psy_audio_MachineProxy*);
+static void selectparam(psy_audio_MachineProxy*, uintptr_t index);
 static uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy*);
 static int machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
@@ -133,6 +135,11 @@ static void machineproxy_setpresets(psy_audio_MachineProxy*, struct psy_audio_Pr
 static struct psy_audio_Presets* machineproxy_presets(psy_audio_MachineProxy*);
 static bool machineproxy_acceptpresets(psy_audio_MachineProxy*);
 static void machineproxy_command(psy_audio_MachineProxy*);
+// auxcolumns
+static const char* auxcolumnname(psy_audio_MachineProxy*, uintptr_t index);
+static uintptr_t numauxcolumns(psy_audio_MachineProxy*);
+static uintptr_t auxcolumnselected(psy_audio_MachineProxy*);
+static void selectauxcolumn(psy_audio_MachineProxy*, uintptr_t index);
 
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
@@ -198,6 +205,10 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_numparameters;
 		vtable.numtweakparameters = (fp_machine_numtweakparameters)
 			machineproxy_numtweakparameters;
+		vtable.paramselected = (fp_machine_paramselected)
+			paramselected;
+		vtable.selectparam = (fp_machine_selectparam)
+			selectparam;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			machineproxy_numparametercols;		
 		vtable.loadspecific = (fp_machine_loadspecific)
@@ -280,6 +291,10 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.parameter_label = (fp_machine_param_label)machineproxy_param_label;
 		vtable.parameter_name = (fp_machine_param_name)machineproxy_param_name;
 		vtable.parameter_describe = (fp_machine_param_describe)machineproxy_param_describe;
+		vtable.auxcolumnname = (fp_machine_auxcolumnname)auxcolumnname;
+		vtable.numauxcolumns = (fp_machine_numauxcolumns)numauxcolumns;
+		vtable.selectauxcolumn = (fp_machine_selectauxcolumn)selectauxcolumn;
+		vtable.auxcolumnselected = (fp_machine_auxcolumnselected)auxcolumnselected;
 		vtable_initialized = TRUE;
 	}
 }
@@ -826,6 +841,45 @@ uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy* self)
 #endif		
 	}
 	return rv;
+}
+
+uintptr_t paramselected(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_paramselected(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "paramselected", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void selectparam(psy_audio_MachineProxy* self, uintptr_t index)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_selectparam(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "selectparam", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}	
 }
 
 uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy* self)
@@ -2117,4 +2171,82 @@ psy_audio_Machine* machineproxy_clone(psy_audio_MachineProxy* self)
 #endif	
 	}
 	return rv;
+}
+
+
+const char* auxcolumnname(psy_audio_MachineProxy* self, uintptr_t index)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_auxcolumnname(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "auxcolumnname", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t numauxcolumns(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numauxcolumns(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "numauxcolumns", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t auxcolumnselected(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_auxcolumnselected(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "auxcolumnselected", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void selectauxcolumn(psy_audio_MachineProxy* self, uintptr_t index)
+{	
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_selectauxcolumn(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "selectauxcolumn", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}	
 }

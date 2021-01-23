@@ -12,7 +12,7 @@ static void helpview_inittabbar(HelpView*, psy_ui_Component* tabbarparent,
 static void helpview_initsections(HelpView*, Workspace* workspace);
 static void helpview_initsectionfloated(HelpView*);
 static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
-	uintptr_t section);
+	uintptr_t section, uintptr_t options);
 static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
 static void helpview_onfloatsection(HelpView*, psy_ui_Button* sender);
 
@@ -78,7 +78,7 @@ void helpview_initsectionfloated(HelpView* self)
 
 // events
 void helpview_onselectsection(HelpView* self, psy_ui_Component* sender,
-	uintptr_t section)
+	uintptr_t section, uintptr_t options)
 {
 	tabbar_select(&self->tabbar, (int)section);
 }

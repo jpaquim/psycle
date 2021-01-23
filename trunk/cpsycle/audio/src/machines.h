@@ -38,14 +38,15 @@ typedef struct psy_audio_Machines {
 	float* samplebuffers;
 	int numsamplebuffers;
 	int currsamplebuffer;
-	uintptr_t slot;
-	uintptr_t tweakparam;
+	uintptr_t selected;
+	uintptr_t paramselected;	
 	uintptr_t soloed;
 	int filemode;
 	uintptr_t maxindex;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
+	psy_Signal signal_paramselected;
 	psy_audio_Machine* master;
 	bool mixersendconnect;
 	psy_UndoRedo undoredo;
@@ -63,6 +64,8 @@ void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot,
 	uintptr_t dstslot);
 uintptr_t psy_audio_machines_append(psy_audio_Machines*, psy_audio_Machine*);
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines*, uintptr_t slot);
+const psy_audio_Machine* psy_audio_machines_at_const(const psy_audio_Machines*,
+	uintptr_t index);
 uintptr_t psy_audio_machines_size(psy_audio_Machines*);
 bool psy_audio_machines_valid_connection(psy_audio_Machines*, psy_audio_Wire wire);
 void psy_audio_machines_connect(psy_audio_Machines*, psy_audio_Wire);
@@ -79,9 +82,13 @@ INLINE MachineList* psy_audio_machines_path(psy_audio_Machines* self)
 psy_audio_Buffer* psy_audio_machines_inputs(psy_audio_Machines*, uintptr_t slot);
 psy_audio_Buffer* psy_audio_machines_outputs(psy_audio_Machines*, uintptr_t slot);
 void psy_audio_buffer_end(psy_audio_Machines*);
-void psy_audio_machines_changeslot(psy_audio_Machines*, uintptr_t slot);
-void psy_audio_machines_changetweakparam(psy_audio_Machines*, uintptr_t slot);
-uintptr_t psy_audio_machines_selected(psy_audio_Machines*);
+void psy_audio_machines_select(psy_audio_Machines*, uintptr_t slot);
+void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t slot);
+uintptr_t psy_audio_machines_selected(const psy_audio_Machines*);
+psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines*);
+const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const
+	psy_audio_Machines*);
+uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines*);
 uintptr_t psy_audio_machines_tweakparam(psy_audio_Machines*);
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines*);
 void psy_audio_machines_solo(psy_audio_Machines*, uintptr_t slot);

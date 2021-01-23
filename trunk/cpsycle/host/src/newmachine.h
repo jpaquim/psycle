@@ -18,7 +18,8 @@
 extern "C" {
 #endif
 
-// aim: adding machines
+// NewMachine
+// Adding machines
 
 typedef struct {
 	psy_ui_Component component;	
@@ -56,30 +57,37 @@ typedef struct PluginScanView {
 void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
 
 typedef struct {
-   psy_ui_Component component;
-   intptr_t count;
-   double lineheight;
-   double columnwidth;
-   double identwidth;
-   intptr_t numparametercols;
-   double avgcharwidth;
-   intptr_t pluginpos;
-   psy_Property* plugins;
-   psy_Property* selectedplugin;   
-   Workspace* workspace;
-   intptr_t calledby;
-   bool onlyfavorites;
-   // Signals
-   psy_Signal signal_selected;
-   psy_Signal signal_changed;
+	// inherits
+	psy_ui_Component component;
+	// Signals
+	psy_Signal signal_selected;
+	psy_Signal signal_changed;
+	// internal data
+	intptr_t count;
+	double lineheight;
+	double columnwidth;
+	double identwidth;
+	intptr_t numparametercols;
+	double avgcharwidth;
+	intptr_t pluginpos;
+	psy_Property* plugins;
+	psy_Property* selectedplugin;   
+	Workspace* workspace;	
+	bool onlyfavorites;
+	bool generatorsenabled;
+	bool effectsenabled;
+	int mode;
 } PluginsView;
 
-void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites, Workspace*);
+void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites,
+	Workspace*);
 
 typedef struct NewMachine {
 	// inherits
 	psy_ui_Component component;
-	// ui elements	
+	// Signals
+	psy_Signal signal_selected;	
+	// internal ui elements	
 	psy_ui_Notebook notebook;
 	psy_ui_Component client;
 	psy_ui_Label favoriteheader;
@@ -90,17 +98,26 @@ typedef struct NewMachine {
 	PluginScanView scanview;
 	MachineViewSkin* skin;
 	psy_ui_Scroller scroller_fav;
-	psy_ui_Scroller scroller_main;
+	psy_ui_Scroller scroller_main;	
 	// internal data
 	bool scanending;
-	// Signals
-	psy_Signal signal_selected;
+	int mode;
 	// references
 	Workspace* workspace;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
 void newmachine_updateskin(NewMachine*);
+
+void newmachine_enableall(NewMachine*);
+void newmachine_enablegenerators(NewMachine*);
+void newmachine_preventgenerators(NewMachine*);
+void newmachine_enableeffects(NewMachine*);
+void newmachine_preventeffects(NewMachine*);
+
+void newmachine_insertmode(NewMachine*);
+void newmachine_appendmode(NewMachine*);
+void newmachine_addeffectmode(NewMachine*);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {

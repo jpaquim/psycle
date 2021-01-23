@@ -9,6 +9,7 @@
 #include "instruments.h"
 #include "pattern.h"
 // container
+#include <containerconvert.h>
 #include <qsort.h>
 // std
 #include <math.h>
@@ -98,8 +99,8 @@ static uintptr_t psy_audio_sequencer_currframesperline(psy_audio_Sequencer*);
 static void psy_audio_sequencer_sortevents(psy_audio_Sequencer*);
 static void psy_audio_sequencer_resizeqsortarray(psy_audio_Sequencer*,
 	uintptr_t numevents);
-static int psy_audio_sequencer_comp_events(psy_audio_PatternNode* lhs,
-	psy_audio_PatternNode* rhs);
+static int psy_audio_sequencer_comp_events(psy_audio_PatternEntry* lhs,
+	psy_audio_PatternEntry* rhs);
 static void psy_audio_sequencer_assertorder(psy_audio_Sequencer*);
 static void psy_audio_sequencer_jumpto(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
@@ -160,7 +161,7 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 void psy_audio_sequencer_init_qsortarray(psy_audio_Sequencer* self)
 {
 	self->qsortarray = malloc(sizeof(psy_audio_PatternNode*) *
-		QSORTARRAYRESIZE);	
+		QSORTARRAYRESIZE);
 	self->qsortarraysize = QSORTARRAYRESIZE;
 }
 
@@ -1405,16 +1406,16 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 	assert(self);	
 
 	numevents = psy_list_size(self->events);
-	/*if (numevents == 2) {
-		if (psy_audio_sequencer_comp_events(self->events,
-				psy_list_last(self->events)) > 0) {
+	if (numevents == 2) {
+		if (psy_audio_sequencer_comp_events(self->events->entry,
+				psy_list_last(self->events)->entry) > 0) {
 			psy_audio_PatternEntry* temp;		
 			// swap	entries
 			temp = self->events->entry;
 			self->events->entry = self->events->tail->entry;
 			self->events->tail->entry = temp;
 		}
-	} else if (numevents > 1) {		*/
+	} else if (numevents > 1) {
 		// sort with qsort
 		// convert the event list to an array, sort the array and recreate
 		// the sorted event list
@@ -1422,27 +1423,20 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 						
 		psy_audio_sequencer_resizeqsortarray(self, numevents);
 		eventarray = self->qsortarray;
-		if (eventarray) {
-			uintptr_t i;
-			psy_audio_PatternNode* sorted;
-			psy_audio_PatternNode* p;
+		if (eventarray) {			
+			psy_audio_PatternNode* sorted;			
 				
-			// copy event node to qsort array
-			for (i = 0, p = self->events; p != NULL; psy_list_next(&p), ++i) {
-				eventarray[i] = p;
-			}
-			assert(i != (numevents - 1));
+			// copy events to qsort array
+			psy_list_to_array(eventarray, numevents, self->events);				
 			// sort array
 			psy_qsort((void**)eventarray, 0, numevents - 1, (psy_fp_comp)
 				psy_audio_sequencer_comp_events);
 			// recreate sorted events
-			for (sorted = NULL, i = 0; i < numevents; ++i) {
-				psy_list_append(&sorted, eventarray[i]->entry);
-			}
+			sorted = psy_array_to_list(eventarray, numevents);			
 			psy_list_free(self->events);
 			self->events = sorted;
 		}		
-	//}
+	}
 	// psy_audio_sequencer_assertorder(self);
 }
 
@@ -1460,18 +1454,13 @@ void psy_audio_sequencer_resizeqsortarray(psy_audio_Sequencer* self,
 	}
 }
 
-
-int psy_audio_sequencer_comp_events(psy_audio_PatternNode* lhsnode,
-	psy_audio_PatternNode* rhsnode)
+int psy_audio_sequencer_comp_events(psy_audio_PatternEntry* lhs,
+	psy_audio_PatternEntry* rhs)
 {
-	int rv;
-	psy_audio_PatternEntry* lhs;
-	psy_audio_PatternEntry* rhs;
+	int rv;	
 
-	assert(lhsnode && rhsnode);
-
-	lhs = psy_audio_patternnode_entry(lhsnode);
-	rhs = psy_audio_patternnode_entry(rhsnode);	
+	assert(lhs && rhs);
+	
 	if (lhs->delta == rhs->delta) {
 		if (lhs->track < rhs->track) {
 			rv = -1;

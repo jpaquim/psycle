@@ -424,7 +424,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			psy_audio_patternevent_init_all(&ev,
 				note,
 				(note == psy_audio_NOTECOMMANDS_TWEAK)
-				? (uint16_t)self->song->machines.tweakparam
+				? (uint16_t)psy_audio_machines_paramselected(&self->song->machines)
 				: (uint16_t)(machine && machine_supports(machine,
 					MACH_SUPPORTS_INSTRUMENTS)
 					? psy_audio_instruments_selected(&self->song->instruments).subslot

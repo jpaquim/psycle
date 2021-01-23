@@ -28,6 +28,9 @@
     <ClCompile Include="src\command.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\containerconvert.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\command.h">
@@ -49,6 +52,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\undoredo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\containerconvert.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

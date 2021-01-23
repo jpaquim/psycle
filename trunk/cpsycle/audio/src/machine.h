@@ -177,6 +177,8 @@ typedef	psy_audio_MachineParam* (*fp_machine_tweakparameter)(struct
 	psy_audio_Machine*, uintptr_t param);
 typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
+typedef uintptr_t(*fp_machine_paramselected)(struct psy_audio_Machine*);
+typedef void (*fp_machine_selectparam)(struct psy_audio_Machine*, uintptr_t index);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_param_tweak)(struct psy_audio_Machine*, struct
 	psy_audio_MachineParam*, float val);
@@ -241,6 +243,12 @@ typedef void (*fp_machine_bankname)(struct psy_audio_Machine*,
 typedef uintptr_t (*fp_machine_numbanks)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, uintptr_t bnkidx);
 typedef uintptr_t (*fp_machine_currbank)(struct psy_audio_Machine*);
+// auxcolumns
+typedef const char* (*fp_machine_auxcolumnname)(struct psy_audio_Machine*, uintptr_t index);
+typedef uintptr_t(*fp_machine_numauxcolumns)(struct psy_audio_Machine*);
+typedef uintptr_t (*fp_machine_auxcolumnselected)(struct psy_audio_Machine*);
+typedef void (*fp_machine_selectauxcolumn)(struct psy_audio_Machine*, uintptr_t index);
+// presets
 typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*,
 	struct psy_audio_Preset*);
 typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*,
@@ -337,6 +345,8 @@ typedef struct {
 	fp_machine_parameter parameter;
 	fp_machine_numtweakparameters numtweakparameters;	
 	fp_machine_tweakparameter tweakparameter;
+	fp_machine_paramselected paramselected;
+	fp_machine_selectparam selectparam;
 	// machineparameter calls
 	fp_machine_param_type parameter_type;
 	fp_machine_param_name parameter_name;
@@ -367,6 +377,13 @@ typedef struct {
 	fp_machine_presets presets;
 	fp_machine_acceptpresets acceptpresets;
 	fp_machine_command command;	
+///\}
+///\name auxcolumn
+///\{
+	fp_machine_auxcolumnname auxcolumnname;
+	fp_machine_numauxcolumns numauxcolumns;
+	fp_machine_auxcolumnselected auxcolumnselected;
+	fp_machine_selectauxcolumn selectauxcolumn;
 ///\}
 ///\name gui stuff
 ///\{
@@ -629,6 +646,17 @@ INLINE psy_audio_MachineParam* psy_audio_machine_tweakparameter(
 	return self->vtable->tweakparameter(self, param);
 }
 
+INLINE uintptr_t psy_audio_machine_paramselected(
+	psy_audio_Machine* self)
+{
+	return self->vtable->paramselected(self);
+}
+
+INLINE void psy_audio_machine_selectparam(psy_audio_Machine* self, uintptr_t index)
+{
+	self->vtable->selectparam(self, index);
+}
+
 // MachineParameter calls
 INLINE void psy_audio_machine_parameter_tweak(psy_audio_Machine* self,
 	psy_audio_MachineParam* param, float val)
@@ -844,6 +872,26 @@ INLINE struct psy_audio_Presets* psy_audio_machine_presets(
 INLINE bool psy_audio_machine_acceptpresets(psy_audio_Machine* self)
 {
 	return self->vtable->acceptpresets(self);
+}
+
+INLINE const char* psy_audio_machine_auxcolumnname(psy_audio_Machine* self, uintptr_t index)
+{
+	return self->vtable->auxcolumnname(self, index);
+}
+
+INLINE uintptr_t psy_audio_machine_numauxcolumns(psy_audio_Machine* self)
+{
+	return self->vtable->numauxcolumns(self);
+}
+
+INLINE uintptr_t psy_audio_machine_auxcolumnselected(psy_audio_Machine* self)
+{
+	return self->vtable->auxcolumnselected(self);
+}
+
+INLINE void psy_audio_machine_selectauxcolumn(psy_audio_Machine* self, uintptr_t index)
+{
+	self->vtable->selectauxcolumn(self, index);
 }
 
 INLINE void psy_audio_machine_command(psy_audio_Machine* self)

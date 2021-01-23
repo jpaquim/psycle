@@ -536,9 +536,9 @@ INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
 	self->wheelscroll = lines;
 }
 
-INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t section)
+INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t section, uintptr_t options)
 {
-	psy_signal_emit(&self->signal_selectsection, self, 1, section);
+	psy_signal_emit(&self->signal_selectsection, self, 2, section, options);
 }
 
 INLINE psy_ui_Point psy_ui_component_scroll(psy_ui_Component* self)

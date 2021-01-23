@@ -37,10 +37,13 @@ extern "C" {
 struct psy_ui_ListBoxImp;
 
 typedef struct {
-   psy_ui_Component component;
-   struct psy_ui_ListBoxImp* imp;
-   psy_Signal signal_selchanged;
-   double charnumber;
+    // inherits
+    psy_ui_Component component;
+    // signals
+    psy_Signal signal_selchanged;
+    // internal data
+    struct psy_ui_ListBoxImp* imp;    
+    double charnumber;
 } psy_ui_ListBox;
 
 #else

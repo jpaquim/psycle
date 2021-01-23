@@ -94,9 +94,6 @@
     <ClCompile Include="src\defaultlang.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\machinebar.c">
-      <Filter>machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\machineeditorview.c">
       <Filter>machine</Filter>
     </ClCompile>
@@ -373,6 +370,9 @@
     <ClCompile Include="src\confirmbox.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\machinebar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -438,9 +438,6 @@
       <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\machineeditorview.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinebar.h">
       <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\machineview.h">
@@ -721,6 +718,9 @@
     </ClInclude>
     <ClInclude Include="src\confirmbox.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinebar.h">
+      <Filter>toolbars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

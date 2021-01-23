@@ -101,6 +101,11 @@ INLINE void psy_psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
     self->imp->vtable->dev_text(self->imp, text);
 }
 
+INLINE intptr_t psy_ui_combobox_count(psy_ui_ComboBox* self)
+{
+    return self->imp->vtable->dev_count(self->imp);
+}
+
 #ifdef __cplusplus
 }
 #endif

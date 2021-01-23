@@ -201,6 +201,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\command.c" />
+    <ClCompile Include="src\containerconvert.c" />
     <ClCompile Include="src\hashtbl.c" />
     <ClCompile Include="src\list.c" />
     <ClCompile Include="src\properties.c" />
@@ -210,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\command.h" />
+    <ClInclude Include="src\containerconvert.h" />
     <ClInclude Include="src\hashtbl.h" />
     <ClInclude Include="src\list.h" />
     <ClInclude Include="src\properties.h" />

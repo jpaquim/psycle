@@ -80,7 +80,7 @@ psy_Slot* psy_signal_findslot(psy_Signal*, void* context, void* fp);
 // emit functions {
 // traverses the slot list and calls the callback with the slot context,
 // the sender argument and additionaly with num void* arguments
-void psy_signal_emit(psy_Signal*, void* sender, int num, ...);
+void psy_signal_emit(psy_Signal*, void* sender, intptr_t num, ...);
 // traverses the slot list and calls te callback with the slot context,
 // the sender argument and additionaly with one int argument
 void psy_signal_emit_int(psy_Signal*, void* sender, intptr_t param);
