@@ -172,6 +172,7 @@ static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
 static uintptr_t pluginsview_numlines(const PluginsView*);
+static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
 
 static psy_ui_ComponentVtable pluginsview_vtable;
 static int pluginsview_vtable_initialized = 0;
@@ -203,6 +204,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	self->component.vtable = &pluginsview_vtable;
 	self->workspace = workspace;
 	self->onlyfavorites = favorites;
+	self->mode = NEWMACHINE_APPEND;
 	if (workspace_pluginlist(workspace)) {
 		if (favorites) {
 			self->plugins = newmachine_favorites(
@@ -220,7 +222,8 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);
 	self->selectedplugin = NULL;
-	self->calledby = 0;
+	self->generatorsenabled = TRUE;
+	self->effectsenabled = TRUE;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
@@ -269,11 +272,15 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	char text[128];
 
 	if (property == self->selectedplugin) {
-		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));
+		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));		
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	} else {
 		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
+		if (pluginenabled(self, property)) {
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
+		} else {
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
+		}
 	}		
 	plugindisplayname(property, text);	
 	psy_ui_textout(g, x, y + 2, text, strlen(text));
@@ -351,6 +358,20 @@ uintptr_t pluginmode(psy_Property* property, char* text)
 	return rv;
 }
 
+uintptr_t pluginenabled(const PluginsView* self, psy_Property* property)
+{
+	uintptr_t mode;
+	
+	mode = psy_property_at_int(property, "mode", MACHMODE_FX);
+	if (self->effectsenabled && mode == MACHMODE_FX) {
+		return TRUE;
+	}
+	if (self->generatorsenabled && mode == MACHMODE_GENERATOR) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
@@ -377,7 +398,8 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				if (self->selectedplugin) {
 					psy_signal_emit(&self->signal_selected, self, 1,
 						self->selectedplugin);
-					workspace_selectview(self->workspace, self->calledby, 0, 0);
+					workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+						SECTION_ID_MACHINEVIEW_WIRES, 0);
 					psy_ui_keyevent_stoppropagation(ev);
 				}
 				break;
@@ -581,7 +603,9 @@ void pluginsview_hittest(PluginsView* self, double x, double y)
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
 			if (psy_ui_realrectangle_intersect(&r, x, y)) {
-				self->selectedplugin = (psy_Property*)psy_list_entry(p);
+				if (pluginenabled(self, (psy_Property*)psy_list_entry(p))) {
+					self->selectedplugin = (psy_Property*)psy_list_entry(p);
+				}
 				break;
 			}		
 			cpx += self->columnwidth;
@@ -598,7 +622,8 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 	if (self->selectedplugin) {		
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->selectedplugin);
-		workspace_selectview(self->workspace, self->calledby, 0, 0);
+		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+			SECTION_ID_MACHINEVIEW_WIRES, 0);
 		psy_ui_mouseevent_stoppropagation(ev);		
 	}	
 }
@@ -671,6 +696,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->skin = skin;
 	self->workspace = workspace;
 	self->scanending = FALSE;
+	self->mode = NEWMACHINE_APPEND;
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -1033,4 +1059,82 @@ void  newmachine_ontimer(NewMachine* self, uintptr_t timerid)
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_ui_component_stoptimer(newmachine_base(self), 0);
 	}
+}
+
+void newmachine_enableall(NewMachine* self)
+{
+	self->pluginsview.effectsenabled = TRUE;
+	self->pluginsview.generatorsenabled = TRUE;
+	self->favoriteview.effectsenabled = TRUE;
+	self->favoriteview.generatorsenabled = TRUE;
+	psy_ui_component_invalidate(&self->pluginsview.component);
+	psy_ui_component_invalidate(&self->favoriteview.component);
+}
+
+void newmachine_enablegenerators(NewMachine* self)
+{	
+	self->pluginsview.generatorsenabled = TRUE;	
+	self->favoriteview.generatorsenabled = TRUE;
+	psy_ui_component_invalidate(&self->pluginsview.component);
+	psy_ui_component_invalidate(&self->favoriteview.component);
+}
+
+void newmachine_preventgenerators(NewMachine* self)
+{
+	self->pluginsview.generatorsenabled = FALSE;
+	self->favoriteview.generatorsenabled = FALSE;
+	psy_ui_component_invalidate(&self->pluginsview.component);
+	psy_ui_component_invalidate(&self->favoriteview.component);
+}
+
+void newmachine_enableeffects(NewMachine* self)
+{
+	self->pluginsview.effectsenabled = TRUE;
+	self->favoriteview.effectsenabled = TRUE;
+	psy_ui_component_invalidate(&self->pluginsview.component);
+	psy_ui_component_invalidate(&self->favoriteview.component);
+}
+
+void newmachine_preventeffects(NewMachine* self)
+{
+	self->pluginsview.effectsenabled = FALSE;
+	self->favoriteview.effectsenabled = FALSE;
+	psy_ui_component_invalidate(&self->pluginsview.component);
+	psy_ui_component_invalidate(&self->favoriteview.component);
+}
+
+void newmachine_insertmode(NewMachine* self)
+{
+	uintptr_t index;
+
+	index = psy_audio_machines_selected(&self->workspace->song->machines);
+	if (index != psy_INDEX_INVALID) {
+		if (index < 0x40) {
+			newmachine_enablegenerators(self);
+			newmachine_preventeffects(self);
+		} else {
+			newmachine_enableeffects(self);
+			newmachine_preventgenerators(self);
+		}
+	}
+	self->mode = NEWMACHINE_INSERT;
+	self->pluginsview.mode = NEWMACHINE_INSERT;
+	self->favoriteview.mode = NEWMACHINE_INSERT;
+}
+
+void newmachine_appendmode(NewMachine* self)
+{
+	newmachine_enableall(self);
+	self->mode = NEWMACHINE_APPEND;
+	self->pluginsview.mode = NEWMACHINE_APPEND;
+	self->favoriteview.mode = NEWMACHINE_APPEND;
+}
+
+void newmachine_addeffectmode(NewMachine* self)
+{	
+	newmachine_preventgenerators(self);
+	newmachine_enableeffects(self);
+	self->mode = NEWMACHINE_ADDEFFECT;
+	self->pluginsview.mode = NEWMACHINE_ADDEFFECT;
+	self->favoriteview.mode = NEWMACHINE_ADDEFFECT;		
 }

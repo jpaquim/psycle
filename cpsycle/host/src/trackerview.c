@@ -1297,7 +1297,7 @@ void trackergrid_selectmachine(TrackerGrid* self)
 
 			entry = (psy_audio_PatternEntry*)node->entry;
 			ev = psy_audio_patternentry_front(entry);
-			psy_audio_machines_changeslot(&workspace_song(self->workspace)->machines,
+			psy_audio_machines_select(&workspace_song(self->workspace)->machines,
 				ev->mach);
 			psy_audio_instruments_select(&workspace_song(self->workspace)->instruments,
 				psy_audio_instrumentindex_make(0, ev->inst));			
@@ -2096,7 +2096,7 @@ void trackergrid_changegenerator(TrackerGrid* self)
 		psy_audio_pattern_changemachine(trackergridstate_pattern(self->gridstate),
 			self->selection.topleft,
 			self->selection.bottomright,
-			workspace_song(self->workspace)->machines.slot);
+			psy_audio_machines_selected(&workspace_song(self->workspace)->machines));
 		psy_ui_component_invalidate(&self->component);
 	}
 }

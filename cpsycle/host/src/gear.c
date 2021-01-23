@@ -5,11 +5,12 @@
 
 #include "gear.h"
 // audio
-#include "songio.h"
+#include <songio.h>
 
 // GearButtons
 // implementation
-void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* workspace)
+void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {
 	psy_ui_component_init(gearbuttons_base(self), parent);	
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
@@ -34,14 +35,19 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 
 // Gear
 // prototypes
+static void gear_oncreate(Gear*, psy_ui_Component* sender);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
 static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
+static void gear_connectsongsignals(Gear*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
 static void gear_onmaster(Gear*, psy_ui_Component* sender);
 static void gear_onconnecttomaster(Gear*, psy_ui_Component* sender);
+static void gear_connectsongsignals(Gear*);
 static void gear_onhide(Gear*);
+static void gear_onmachineselected(Gear*, psy_audio_Machines* sender,
+	uintptr_t slot);
 // implementation
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -99,6 +105,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_select(&self->tabbar, 0);
 	gearbuttons_init(&self->buttons, &self->client, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->buttons.createreplace.signal_clicked, self,
+		gear_oncreate);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_ondelete);
 	psy_signal_connect(&self->buttons.clone.signal_clicked, self,
 		gear_onclone);
@@ -110,6 +118,17 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		gear_onconnecttomaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
 		gear_onexchange);
+	gear_connectsongsignals(self);
+}
+
+void gear_oncreate(Gear* self, psy_ui_Component* sender)
+{	
+	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+		SECTION_ID_MACHINEVIEW_NEWMACHINE,
+		(psy_audio_machines_selected(&self->workspace->song->machines)
+			!= psy_INDEX_INVALID)
+		? NEWMACHINE_INSERT
+		: NEWMACHINE_APPEND);
 }
 
 void gear_ondelete(Gear* self, psy_ui_Component* sender)
@@ -132,7 +151,28 @@ void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_So
 	instrumentsbox_setinstruments(&self->instrumentsbox,
 		&workspace->song->instruments);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
+	gear_connectsongsignals(self);
 	psy_ui_component_invalidate(gear_base(self));
+}
+
+void gear_connectsongsignals(Gear* self)
+{
+	psy_signal_connect(&self->machines->signal_slotchange, self,
+		gear_onmachineselected);
+}
+
+void gear_onmachineselected(Gear* self, psy_audio_Machines* sender,
+	uintptr_t slot)
+{
+	if (slot >= 0 && slot < 0x40) {
+		if (tabbar_selected(&self->tabbar) != 0) {
+			tabbar_select(&self->tabbar, 0);
+		}
+	} else if (slot >= 0x40 && slot < 0x80) {
+		if (tabbar_selected(&self->tabbar) != 1) {
+			tabbar_select(&self->tabbar, 1);
+		}
+	}
 }
 
 void gear_onclone(Gear* self, psy_ui_Component* sender)

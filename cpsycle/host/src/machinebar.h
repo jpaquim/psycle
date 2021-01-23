@@ -12,10 +12,16 @@
 extern "C" {
 #endif
 
-// aim: Select Machine – Select the machine to be used
-//      Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
-//      Sampler : Select Instrument – Selects the instrument to be used or
-//      other Generator/Effect: Select Tweak Parameter
+// Select Machine – Select the machine to be used
+// Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
+// Sampler : Select Instrument – Selects the instrument to be used or
+// other Generator/Effect: Select Tweak Parameter
+
+typedef enum {
+	MACHINEBAR_INST,
+	MACHINEBAR_AUX,
+	MACHINEBAR_PARAM
+} MachineBarInstParamMode;
 
 typedef struct {
 	psy_ui_Component component;

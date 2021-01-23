@@ -693,7 +693,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		psy_audio_player_setsong(&self->player, self->song);
 		psy_audio_exclusivelock_leave();
 		psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);		
-		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self, 
+		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,  1,
 			self->song->patterns.songtracks);
 		psy_audio_song_deallocate(oldsong);
 	}

@@ -152,7 +152,8 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);
 	self->imp.vtable = &listboximp_vtable;	
-psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
+	psy_signal_connect(&self->win_component_imp.imp.signal_command, component,
+		oncommand);
 }
 
 void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
@@ -172,6 +173,8 @@ void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);
 	self->imp.vtable = &listboximp_vtable;
+	psy_signal_connect(&self->win_component_imp.imp.signal_command, component,
+		oncommand);
 }
 
 psy_ui_win_ListBoxImp* psy_ui_win_listboximp_alloc(void)
@@ -256,7 +259,9 @@ void dev_setcursel(psy_ui_win_ListBoxImp* self, intptr_t index)
 
 	if ((windowstyle(self->win_component_imp.hwnd) & LBS_EXTENDEDSEL) == LBS_EXTENDEDSEL) {
 		SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)0, (LPARAM)-1);
-		SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)1, (LPARAM)index);
+		if (index != -1) {
+			SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)1, (LPARAM)index);
+		}
 	} else {				
 		SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);		
 	}

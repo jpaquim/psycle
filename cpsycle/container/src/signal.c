@@ -232,7 +232,7 @@ void psy_signal_emit_float(psy_Signal* self, void* sender, float param)
 	}
 }
 
-void psy_signal_emit(psy_Signal* self, void* sender, int num, ...)
+void psy_signal_emit(psy_Signal* self, void* sender, intptr_t num, ...)
 {
 	va_list ap;
 

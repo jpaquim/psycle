@@ -95,6 +95,9 @@ static PluginEntryProc getmainentry(psy_Library* library);
 static void processevents(psy_audio_VstPlugin*, psy_audio_BufferContext*);
 static void generateaudio(psy_audio_VstPlugin*, psy_audio_BufferContext*);
 static void stop(psy_audio_VstPlugin*);
+// auxcolumns
+static const char* auxcolumnname(psy_audio_VstPlugin*, uintptr_t index);
+static uintptr_t numauxcolumns(psy_audio_VstPlugin*);
 
 static psy_dsp_amp_range_t amprange(psy_audio_VstPlugin* self)
 {
@@ -117,6 +120,13 @@ static void vstplugin_onfileselect(psy_audio_VstPlugin*,
 static void initparameters(psy_audio_VstPlugin*);
 static void disposeparameters(psy_audio_VstPlugin*);
 static void update_vsttimeinfo(psy_audio_VstPlugin*);
+
+const char* MIDI_CHAN_NAMES[16] = {
+	"MIDI Channel 01", "MIDI Channel 02","MIDI Channel 03","MIDI Channel 04",
+	"MIDI Channel 05","MIDI Channel 06","MIDI Channel 07","MIDI Channel 08",
+	"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
+	"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
+};
 
 // init vstplugin class vtable
 static MachineVtable vtable;
@@ -153,6 +163,8 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable.currbank = (fp_machine_currbank)currbank;
 		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
 		vtable.stop = (fp_machine_stop)stop;
+		vtable.auxcolumnname = (fp_machine_auxcolumnname)auxcolumnname;
+		vtable.numauxcolumns = (fp_machine_numauxcolumns)numauxcolumns;
 		vtable_initialized = TRUE;
 	}
 }
@@ -1042,4 +1054,17 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 		break;
 	}
 	return result;
+}
+
+const char* auxcolumnname(psy_audio_VstPlugin* self, uintptr_t index)
+{
+	if (index < 16) {
+		return MIDI_CHAN_NAMES[index];
+	}
+	return "";
+}
+
+uintptr_t numauxcolumns(psy_audio_VstPlugin* self)
+{
+	return 16;
 }

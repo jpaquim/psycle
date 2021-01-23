@@ -277,6 +277,8 @@ static psy_audio_MachineParam* tweakparameter(psy_audio_Machine* self,
 {
 	return psy_audio_machine_parameter(self, param);
 }
+static uintptr_t paramselected(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
+static void selectparam(psy_audio_Machine* self, uintptr_t index) { }
 static uintptr_t numparameters(psy_audio_Machine* self) { return 0; }
 static uintptr_t numtweakparameters(psy_audio_Machine* self) 
 {
@@ -399,6 +401,11 @@ static void setpresets(psy_audio_Machine* self, struct psy_audio_Presets* preset
 static struct psy_audio_Presets* presets(psy_audio_Machine* self) { return NULL; }
 static bool acceptpresets(psy_audio_Machine* self) { return FALSE; }
 static void command(psy_audio_Machine* self) { }
+// auxcolumn
+static const char* auxcolumnname(psy_audio_Machine* self, uintptr_t index) { return ""; }
+static uintptr_t numauxcolumns(psy_audio_Machine* self) { return 0; }
+static uintptr_t auxcolumnselected(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
+static void selectauxcolumn(psy_audio_Machine* self, uintptr_t index) { }
 
 /// machinecallback
 static psy_dsp_big_hz_t samplerate(psy_audio_Machine* self) {
@@ -537,9 +544,9 @@ static const char* language(psy_audio_Machine* self)
 		? self->callback->vtable->language(self->callback)
 		: 0;
 }
-
+// vtable
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -574,6 +581,8 @@ static void vtable_init(void)
 		vtable.numoutputs = numoutputs;	
 		vtable.numparameters = numparameters;
 		vtable.numtweakparameters = numtweakparameters;
+		vtable.paramselected = paramselected;
+		vtable.selectparam = selectparam;
 		vtable.numparametercols = numparametercols;
 		vtable.setcallback = setcallback;
 		vtable.updatesamplerate = updatesamplerate;
@@ -640,7 +649,11 @@ static void vtable_init(void)
 		vtable.parameter_label = param_label;
 		vtable.parameter_name = param_name;
 		vtable.parameter_describe = param_describe;
-		vtable_initialized = 1;
+		vtable.auxcolumnname = auxcolumnname;
+		vtable.numauxcolumns = numauxcolumns;
+		vtable.selectauxcolumn = selectauxcolumn;
+		vtable.auxcolumnselected = auxcolumnselected;
+		vtable_initialized = TRUE;
 	}
 }
 

@@ -39,23 +39,50 @@ static void position(psy_audio_CustomMachine* self, double* x, double* y)
 	*x = self->x;
 	*y = self->y;
 }
+// parameters
+static void selectparam(psy_audio_CustomMachine* self, uintptr_t index)
+{
+	self->paramselected = index;
+}
 
+static uintptr_t paramselected(psy_audio_CustomMachine* self)
+{
+	return self->paramselected;
+}
+// auxcolumn
+static const char* auxcolumnname(psy_audio_CustomMachine* self,
+	uintptr_t index)
+{
+	return "";
+}
+static uintptr_t numauxcolumns(psy_audio_CustomMachine* self) { return 0; }
+static uintptr_t auxcolumnselected(psy_audio_CustomMachine* self)
+{
+	return self->auxcolumnselected;
+}
+
+static void selectauxcolumn(psy_audio_CustomMachine* self, uintptr_t index)
+{
+	self->auxcolumnselected = index;
+}
+
+// vtable
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_CustomMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
-		vtable.setpanning = (fp_machine_setpanning) setpanning;
-		vtable.panning = (fp_machine_panning) panning;
-		vtable.mute = (fp_machine_mute) mute;
-		vtable.unmute = (fp_machine_unmute) unmute;
-		vtable.muted = (fp_machine_muted) muted;
-		vtable.bypass = (fp_machine_bypass) bypass;
-		vtable.unbypass = (fp_machine_unbypass) unbypass;
-		vtable.bypassed = (fp_machine_bypassed) bypassed;
-		vtable.editname = (fp_machine_editname) custommachine_editname;
+		vtable.setpanning = (fp_machine_setpanning)setpanning;
+		vtable.panning = (fp_machine_panning)panning;
+		vtable.mute = (fp_machine_mute)mute;
+		vtable.unmute = (fp_machine_unmute)unmute;
+		vtable.muted = (fp_machine_muted)muted;
+		vtable.bypass = (fp_machine_bypass)bypass;
+		vtable.unbypass = (fp_machine_unbypass)unbypass;
+		vtable.bypassed = (fp_machine_bypassed)bypassed;
+		vtable.editname = (fp_machine_editname)custommachine_editname;
 		vtable.seteditname = (fp_machine_seteditname)
 			custommachine_seteditname;
 		vtable.buffermemory = (fp_machine_buffermemory)
@@ -68,7 +95,12 @@ static void vtable_init(psy_audio_CustomMachine* self)
 		vtable.slot = (fp_machine_slot) custommachine_slot;
 		vtable.setposition = (fp_machine_setposition)setposition;
 		vtable.position = (fp_machine_position)position;
-		vtable_initialized = 1;
+		vtable.numauxcolumns = (fp_machine_numauxcolumns)numauxcolumns;
+		vtable.selectauxcolumn = (fp_machine_selectauxcolumn)selectauxcolumn;
+		vtable.auxcolumnselected = (fp_machine_auxcolumnselected)auxcolumnselected;
+		vtable.paramselected = (fp_machine_paramselected)paramselected;
+		vtable.selectparam = (fp_machine_selectparam)selectparam;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -85,6 +117,8 @@ void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 	self->slot = psy_INDEX_INVALID;
 	self->x = 0;
 	self->y = 0;
+	self->auxcolumnselected = 0;
+	self->paramselected = 0;
 	custommachine_init_memory(self, psy_audio_MAX_STREAM_SIZE);
 }
 

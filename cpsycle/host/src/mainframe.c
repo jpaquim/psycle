@@ -18,8 +18,6 @@
 // platform
 #include "../../detail/portable.h"
 
-#define GEARVIEW 10
-
 // MainFrame
 // prototypes
 // build
@@ -77,7 +75,6 @@ static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
 #endif
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
-static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
@@ -523,8 +520,6 @@ void mainframe_initgear(MainFrame* self)
 	psy_ui_component_hide(gear_base(&self->gear));
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ontogglegear);	
-	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
-		mainframe_ongearcreate);
 	psy_signal_connect(&gear_base(&self->gear)->signal_hide, self,
 		mainframe_onhidegear);
 }
@@ -698,11 +693,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		case CMD_IMM_EDITPATTERN:
 			tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
 			break;
-		case CMD_IMM_ADDMACHINE:
-			self->machineview.newmachine.pluginsview.calledby =
-				self->tabbar.selected;
+		case CMD_IMM_ADDMACHINE:						
 			workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
-				1, 0);
+				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
 			break;
 		case CMD_IMM_PLAYSONG:
 			psy_audio_player_setposition(&self->workspace.player, 0);
@@ -1059,13 +1052,6 @@ void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 	tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 }
 
-void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
-{
-	self->machineview.newmachine.pluginsview.calledby = GEARVIEW;
-	tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
-	tabbar_select(&self->machineview.tabbar, 1);
-}
-
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 	psy_Property* property)
 {
@@ -1186,51 +1172,43 @@ void mainframe_onstartup(MainFrame* self)
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,
-	uintptr_t section, int option)
-{	
-	if (index != GEARVIEW) {
-		psy_ui_Component* view;
+	uintptr_t section, int options)
+{		
+	psy_ui_Component* view;
 
-		if (index == VIEW_ID_CHECKUNSAVED) {			
-			if (option == CONFIRM_CLOSE) {
-				self->checkunsavedbox.mode = option;
-				confirmbox_setlabels(&self->checkunsavedbox,
-					"Exit Psycle Request, but your Song is not saved!",
-					"Save and Exit",
-					"Exit (no save)");
-			} else if (option == CONFIRM_NEW) {				
-				self->checkunsavedbox.mode = option;
-				confirmbox_setlabels(&self->checkunsavedbox,
-					"New Song Request, but your Song is not saved!",
-					"Save and Create New Song",
-					"Create New Song (no save)");
-			} else if (option == CONFIRM_LOAD) {
-				self->checkunsavedbox.mode = option;
-				confirmbox_setlabels(&self->checkunsavedbox,
-					"Song Load Request, but your Song is not saved!",
-					"Save and Load Song",
-					"Load Song (no save)");
-			} else if (option == CONFIRM_SEQUENCECLEAR) {
-				self->checkunsavedbox.mode = option;
-				confirmbox_setlabels(&self->checkunsavedbox,
-					"Sequence Clear Request, Do you really want clear the sequence and pattern data?",
-					"Yes",
-					"No");
-			}
-		}
-		tabbar_select(&self->tabbar, index);
-		view = psy_ui_notebook_activepage(&self->notebook);
-		if (view) {
-			psy_ui_component_setfocus(view);
-			psy_ui_component_selectsection(view, section);			
-		}
-		if (index == VIEW_ID_MACHINEVIEW && section == 1) {
-			if (option == 20) {
-				self->machineview.wireview.randominsert = 0;
-				self->machineview.wireview.addeffect = 1;
-			}
+	if (index == VIEW_ID_CHECKUNSAVED) {			
+		if (options == CONFIRM_CLOSE) {
+			self->checkunsavedbox.mode = options;
+			confirmbox_setlabels(&self->checkunsavedbox,
+				"Exit Psycle Request, but your Song is not saved!",
+				"Save and Exit",
+				"Exit (no save)");
+		} else if (options == CONFIRM_NEW) {				
+			self->checkunsavedbox.mode = options;
+			confirmbox_setlabels(&self->checkunsavedbox,
+				"New Song Request, but your Song is not saved!",
+				"Save and Create New Song",
+				"Create New Song (no save)");
+		} else if (options == CONFIRM_LOAD) {
+			self->checkunsavedbox.mode = options;
+			confirmbox_setlabels(&self->checkunsavedbox,
+				"Song Load Request, but your Song is not saved!",
+				"Save and Load Song",
+				"Load Song (no save)");
+		} else if (options == CONFIRM_SEQUENCECLEAR) {
+			self->checkunsavedbox.mode = options;
+			confirmbox_setlabels(&self->checkunsavedbox,
+				"Sequence Clear Request, Do you really want clear the sequence and pattern data?",
+				"Yes",
+				"No");
 		}
 	}
+	tabbar_select(&self->tabbar, index);
+	view = psy_ui_notebook_activepage(&self->notebook);
+	if (view) {
+		psy_ui_component_setfocus(view);
+		psy_ui_component_selectsection(view, section, options);	
+	}	
 }
 
 void mainframe_onfocusview(MainFrame* self, Workspace* sender)

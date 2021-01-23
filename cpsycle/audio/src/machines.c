@@ -45,8 +45,8 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 		self->numsamplebuffers, sizeof(psy_dsp_amp_t));
 	assert(self->samplebuffers);
 	self->currsamplebuffer = 0;
-	self->slot = 0;
-	self->tweakparam = 0;
+	self->selected = 0;
+	self->paramselected = 0;	
 	self->soloed = psy_INDEX_INVALID;
 	self->buffers = 0;
 	self->filemode = 0;
@@ -61,7 +61,8 @@ void machines_initsignals(psy_audio_Machines* self)
 {
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
-	psy_signal_init(&self->signal_slotchange);	
+	psy_signal_init(&self->signal_slotchange);
+	psy_signal_init(&self->signal_paramselected);
 }
 
 void psy_audio_machines_dispose(psy_audio_Machines* self)
@@ -84,7 +85,8 @@ void machines_disposesignals(psy_audio_Machines* self)
 {
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
-	psy_signal_dispose(&self->signal_slotchange);	
+	psy_signal_dispose(&self->signal_slotchange);
+	psy_signal_dispose(&self->signal_paramselected);
 }
 
 void machines_free(psy_audio_Machines* self)
@@ -179,7 +181,7 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	machines_setpath(self, psy_audio_compute_path(self, psy_audio_MASTER_INDEX,
 		TRUE));	
 	if (slot == self->maxindex) {
-		self->slot = machines_findmaxindex(self);
+		self->selected = machines_findmaxindex(self);
 	}
 	psy_signal_emit(&self->signal_removed, self, 1, slot);	
 	psy_audio_exclusivelock_leave();	
@@ -248,6 +250,12 @@ uintptr_t machines_freeslot(psy_audio_Machines* self, uintptr_t start)
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines* self, uintptr_t slot)
 {		
 	return psy_table_at(&self->slots, slot);
+}
+
+const psy_audio_Machine* psy_audio_machines_at_const(const psy_audio_Machines* self,
+	uintptr_t index)
+{
+	return (const psy_audio_Machine*)psy_table_at_const(&self->slots, index);
 }
 
 bool psy_audio_machines_valid_connection(psy_audio_Machines* self, psy_audio_Wire wire)
@@ -563,21 +571,43 @@ psy_audio_Buffer* psy_audio_machines_outputs(psy_audio_Machines* self,
 	return psy_table_at(&self->outputbuffers, slot);
 }
 
-void psy_audio_machines_changeslot(psy_audio_Machines* self, uintptr_t slot)
+void psy_audio_machines_select(psy_audio_Machines* self, uintptr_t slot)
 {
-	self->slot = slot;
+	self->selected = slot;
 	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
-void psy_audio_machines_changetweakparam(psy_audio_Machines* self,
-	uintptr_t param)
-{
-	self->tweakparam = param;
+void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t index)
+{	
+	if (psy_audio_machines_selectedmachine(self)) {
+		psy_audio_machine_selectparam(psy_audio_machines_selectedmachine(self),
+			index);
+	}
+	self->paramselected = index;
+	psy_signal_emit(&self->signal_paramselected, self, 1, index);
 }
 
-uintptr_t psy_audio_machines_selected(psy_audio_Machines* self)
+uintptr_t psy_audio_machines_selected(const psy_audio_Machines* self)
 {
-	return self->slot;
+	return self->selected;
+}
+
+psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines* self)
+{
+	return (psy_audio_Machine*)psy_audio_machines_at(self,
+		psy_audio_machines_selected(self));
+}
+
+const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const
+	psy_audio_Machines* self)
+{
+	return (psy_audio_Machine*)psy_audio_machines_at_const(self,
+		psy_audio_machines_selected(self));
+}
+
+uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines* self)
+{
+	return self->paramselected;
 }
 
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)

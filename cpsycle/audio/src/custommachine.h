@@ -27,6 +27,8 @@ typedef struct {
 	uintptr_t slot;
 	double x;
 	double y;
+	uintptr_t auxcolumnselected;
+	uintptr_t paramselected;
 } psy_audio_CustomMachine;
 
 void psy_audio_custommachine_init(psy_audio_CustomMachine*, psy_audio_MachineCallback*);

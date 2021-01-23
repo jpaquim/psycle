@@ -15,13 +15,14 @@ static void machinesbox_buildmachineslist(MachinesBox*);
 static void machinesbox_insertslot(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
 static void machinesbox_insertmachine(MachinesBox*, uintptr_t slot, psy_audio_Machine*);
 static int machinesbox_checkmachinemode(MachinesBox*, psy_audio_Machine*);
-static void machinesbox_onmachineslotchanged(MachinesBox*, psy_audio_Machines* sender, uintptr_t slot);
+static void machinesbox_onmachineselected(MachinesBox*, psy_audio_Machines* sender, uintptr_t slot);
 static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sender, uintptr_t slot);
 static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, uintptr_t slot);
-static void machinesbox_onmachineslistchanged(MachinesBox*, psy_ui_Component* sender,
-	int slot);
+static void machinesbox_onlistboxselected(MachinesBox*, psy_ui_Component* sender,
+	intptr_t slot);
 static void machinesbox_onkeydown(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
 static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
+static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
@@ -35,8 +36,8 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_ui_listbox_init_multiselect(&self->listbox, &self->component);
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	machinesbox_setmachines(self, machines);
-	//psy_signal_connect(&self->listbox.signal_selchanged, self,
-		//machinesbox_onmachineslistchanged);
+	psy_signal_connect(&self->listbox.signal_selchanged, self,
+		machinesbox_onlistboxselected);
 	psy_signal_connect(&self->listbox.component.signal_destroy, self,
 		machinesbox_ondestroy);
 	psy_signal_connect(&self->listbox.component.signal_keydown, self,
@@ -131,20 +132,29 @@ void machinesbox_clearmachinebox(MachinesBox* self)
 	psy_table_init(&self->slotslistbox);
 }
 
-void machinesbox_onmachineslistchanged(MachinesBox* self, psy_ui_Component* sender, int sel)
-{
-	uintptr_t slot;
+void machinesbox_onlistboxselected(MachinesBox* self, psy_ui_Component* sender,
+	intptr_t sel)
+{	
+	if (psy_table_exists(&self->listboxslots, sel)) {
+		uintptr_t slot;
 
-	psy_List* slots = self->listbox.signal_selchanged.slots;
-	self->listbox.signal_selchanged.slots = 0;
-	slot = (uintptr_t)psy_table_at(&self->listboxslots, sel);
-	psy_audio_machines_changeslot(self->machines, slot);
-	self->listbox.signal_selchanged.slots = slots;
+		slot = (uintptr_t)psy_table_at(&self->listboxslots, sel);
+		if (self->machines) {
+			// prevent self notify to keep multi selection
+			psy_signal_disconnect(&self->machines->signal_slotchange, self,
+				machinesbox_onmachineselected);
+			psy_audio_machines_select(self->machines, slot);
+			psy_signal_connect(&self->machines->signal_slotchange, self,
+				machinesbox_onmachineselected);
+		}
+	}
 }
 
-void machinesbox_onmachinesinsert(MachinesBox* self, psy_audio_Machines* machines, uintptr_t slot)
+void machinesbox_onmachinesinsert(MachinesBox* self,
+	psy_audio_Machines* sender, uintptr_t slot)
 {	
-	if (machinesbox_checkmachinemode(self, psy_audio_machines_at(self->machines, slot))) {
+	if (machinesbox_checkmachinemode(self,
+			psy_audio_machines_at(self->machines, slot))) {
 		uintptr_t boxindex;
 
 		machinesbox_buildmachineslist(self);
@@ -153,19 +163,40 @@ void machinesbox_onmachinesinsert(MachinesBox* self, psy_audio_Machines* machine
 	}
 }
 
-void machinesbox_onmachineslotchanged(MachinesBox* self, psy_audio_Machines* sender, uintptr_t slot)
-{
+void machinesbox_onmachineselected(MachinesBox* self,
+	psy_audio_Machines* sender, uintptr_t slot)
+{			
 	if (psy_table_exists(&self->slotslistbox, slot)) {
-		psy_ui_listbox_setcursel(&self->listbox, slot);
-		psy_ui_component_invalidate(&self->listbox.component);
+		uintptr_t boxindex;
+
+		boxindex = (uintptr_t)psy_table_at(&self->slotslistbox, slot);
+		psy_ui_listbox_setcursel(&self->listbox, boxindex);
+	} else {
+		psy_ui_listbox_setcursel(&self->listbox, -1);
 	}
 }
 
-void machinesbox_onmachinesremoved(MachinesBox* self, psy_audio_Machines* machines, uintptr_t slot)
+bool machinesbox_testmachinemode(const MachinesBox* self, uintptr_t index)
+{
+	if (self->mode == MACHINEBOX_ALL) {
+		return TRUE;
+	}
+	if (self->mode == MACHINEBOX_FX && index >= 0x40 && index <= 0x80) {
+		return TRUE;
+	}
+	if (self->mode == MACHINEBOX_GENERATOR && index >= 0x0 && index <= 0x40) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void machinesbox_onmachinesremoved(MachinesBox* self,
+	psy_audio_Machines* sender, uintptr_t slot)
 {	
 	if (psy_table_exists(&self->slotslistbox, slot)) {
 		machinesbox_buildmachineslist(self);
-		psy_ui_listbox_setcursel(&self->listbox, machines->slot);
+		psy_ui_listbox_setcursel(&self->listbox,
+			psy_audio_machines_selected(sender));
 	}
 }
 
@@ -179,7 +210,7 @@ void machinesbox_clone(MachinesBox* self)
 		intptr_t i;
 		psy_audio_Machine* srcmachine = 0;
 
-		psy_ui_listbox_selitems(&self->listbox, selection, (int)selcount);
+		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
 			if (psy_table_exists(&self->listboxslots, selection[i])) {
 				uintptr_t slot;
@@ -211,7 +242,8 @@ void machinesbox_clone(MachinesBox* self)
 						if (clone) {
 							psy_audio_machine_setposition(clone,
 								rand() / 64, rand() / 80);
-							psy_audio_machines_insert(self->machines, slot, clone);
+							psy_audio_machines_insert(self->machines, slot,
+								clone);
 						}
 					}
 				}
@@ -334,7 +366,6 @@ void machinesbox_connecttomaster(MachinesBox* self)
 	}
 }
 
-
 void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 {
 	self->machines = machines;
@@ -344,7 +375,7 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 	psy_signal_connect(&self->machines->signal_removed, self,
 		machinesbox_onmachinesremoved);
 	psy_signal_connect(&self->machines->signal_slotchange, self,
-		machinesbox_onmachineslotchanged);
+		machinesbox_onmachineselected);
 }
 
 void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyEvent* ev)
