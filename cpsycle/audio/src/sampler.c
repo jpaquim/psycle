@@ -245,7 +245,7 @@ static void psy_audio_sampler_dispose_voices(psy_audio_Sampler*);
 static void psy_audio_sampler_stop(psy_audio_Sampler*);
 static void psy_audio_sampler_stopinstrument(psy_audio_Sampler*,
 	int insIdx);
-static void psy_audio_sampler_setsamplerate(psy_audio_Sampler*, int sr);
+static void psy_audio_sampler_setsamplerate(psy_audio_Sampler*, psy_dsp_big_hz_t sr);
 static bool psy_audio_sampler_playstrack(psy_audio_Sampler*, int track);
 static uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler*,
 	uintptr_t track);
@@ -455,13 +455,13 @@ void psy_audio_sampler_stopinstrument(psy_audio_Sampler* self,
 // not implemented
 
 // mfc-psycle: SetSampleRate(int sr)
-void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, int sr)
+void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, psy_dsp_big_hz_t sr)
 {
 	uintptr_t i;
 
 	assert(self);	
 	for (i = 0; i < self->numvoices; ++i) {
-		filter_setsamplerate(&self->voices[i].filter, sr);
+		filter_setsamplerate(&self->voices[i].filter, (int)sr);
 		samplerenvelope_updatesrate(&self->voices[i].envelope, sr);
 		samplerenvelope_updatesrate(&self->voices[i].filterenv, sr);		
 	}
@@ -551,7 +551,7 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 				usevoice = voice;
 				break;
 			case SAMPLER_ENV_RELEASE:
-				if (usevoice == UINTPTR_MAX) {
+				if (usevoice == psy_INDEX_INVALID) {
 					usevoice = voice;
 				}
 				break;
@@ -623,15 +623,15 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 			if (ev->cmd == PS1_SAMPLER_CMD_PORTA2NOTE &&
 					data.note < psy_audio_NOTECOMMANDS_RELEASE &&
 					voice != psy_INDEX_INVALID) {
-				// if (self->linearslide) {   // isLinearSlide()
+				if (self->linearslide) {
 					// EnablePerformFx();
-				// }
+				}
 				doporta = TRUE;
 			} else if (ev->cmd == PS1_SAMPLER_CMD_PORTADOWN ||
 					   ev->cmd == PS1_SAMPLER_CMD_PORTAUP) {
-				//	if (isLinearSlide()) {
+				if (self->linearslide) {
 					//	EnablePerformFx();
-					//}
+				}
 			}
 		}
 	}	
@@ -871,9 +871,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		} else {
 			self->envelope._stage = SAMPLER_ENV_OFF;
 			self->filterenv._stage = SAMPLER_ENV_OFF;
-		}
-
-		triggered = 1;
+		}		
 
 		//Init filter
 		if (self->inst) {
@@ -884,14 +882,14 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				? alteRand((int)(self->inst->filtercutoff * 127))
 				: self->inst->filtercutoff * 127);
 			filter_setressonance(&self->filter,
-				(self->inst->_RRES)
-					? alteRand((int)(self->inst->filterres * 127))
-					: (int)(self->inst->filterres * 127));
+				(self->inst->randomresonance != 0.f)
+					? alteRand((int32_t)(self->inst->filterres * 127))
+					: (int32_t)(self->inst->filterres * 127));
 			filter_settype(&self->filter, self->inst->filtertype);
-			self->comodify = self->inst->filtermodamount;
+			self->comodify = self->inst->filtermodamount * 128.0;
 		}
-		{
-			int ENV_F_AT;
+		if (self->inst) {
+			int32_t ENV_F_AT;
 			
 			ENV_F_AT = (int32_t)(psy_dsp_envelope_attacktime(
 				&self->inst->filterenvelope) * 44100 + 0.5f);
@@ -901,7 +899,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			self->filterenv._value = 0;
 		}
 
-		
+		triggered = 1;
 	}
 
 	if (dovol || dopan) {
@@ -1056,14 +1054,18 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, uintptr_t numsamp
 		{
 			if (self->effretticks > 0)
 			{
-				psy_dsp_EnvelopePoint pt;
-
+				int32_t ENV_AT;
+				int32_t ENV_F_AT;
+								
 				self->effretticks--;
 				self->triggernotedelay = (int)self->samplecounter + self->effval;
-				pt = psy_dsp_envelope_at(&self->inst->volumeenvelope, 1);
-				self->envelope._step = (1.0f / (pt.time * (float)self->envelope.sratefactor));
-				pt = psy_dsp_envelope_at(&self->inst->filterenvelope, 1);
-				self->filterenv._step = (1.0f / (pt.time * (float)self->envelope.sratefactor));
+				ENV_AT = (int32_t)(psy_dsp_envelope_attacktime(
+					&self->inst->volumeenvelope) * 44100 + 0.5f);
+								
+				self->envelope._step = (1.0f / ENV_AT) * (float)self->envelope.sratefactor;
+				ENV_F_AT = (int32_t)(psy_dsp_envelope_attacktime(
+					&self->inst->filterenvelope) * 44100 + 0.5f);				
+				self->filterenv._step = (1.0f / ENV_F_AT) * (float)self->envelope.sratefactor;
 				self->controller._pos.QuadPart = 0;
 				if (self->effretmode == 1)
 				{

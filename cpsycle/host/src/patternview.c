@@ -694,8 +694,15 @@ void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* co
 	} else {
 		patternview_displaysequencepatterns(self);
 	}
-	if (self->tracker.midline) {
+	if (patternviewconfig_centercursoronscreen(config)) {
 		trackergrid_centeroncursor(&self->tracker);
+	}
+	if (patternviewconfig_issmoothscrolling(config)) {
+		psy_ui_scroller_scrollsmooth(&self->trackerscroller);
+		psy_ui_scroller_scrollsmooth(&self->pianoroll.scroller);
+	} else {
+		psy_ui_scroller_scrollfast(&self->trackerscroller);
+		psy_ui_scroller_scrollfast(&self->pianoroll.scroller);
 	}
 }
 

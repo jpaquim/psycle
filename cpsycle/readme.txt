@@ -2,35 +2,34 @@ This version has now most of the psycle mfc host and hopefully helps some new
 programmers to continue psycle. It is written in c with c++ parts, in which
 some plugin and driver apis are written in. It replaced MFC from Psycle, can
 be viewed in different screen resolutions, has a sequencer, unified the
-instruments and the wave controller Sampulse and Sampler ps1 use and avoids
-ui dependencies in the audio core.  The ui was reduced from mfc to win32 and
-wrapped behind an own layer. A X11 implementation is started but not finished.
-The command line player needs to be finsihed, too. Still missing is the full
-XMSampler reimplementation, XM and IT Songimport and some Mixer options.
-Event Input like Midi and Keyboard are now driver orientated and make it
-possible to have more than one midi input or other inputs like a
-a game controller. This still needs to be fully worked out, but at least works
-for the keyboard and midi input. Midi sync is not fully working, too.
-Additional to MFC Psycle, the version has a pianoroll, multitracking,
-track scopes and optional a sequenceview that displays the sequence in a gantt
-layout. Besides english, more language are possible, and a spanish language
-file was added. Many limititation of Psycle are related to the file format.
-Internally the use of fixed arrays were replaced by dynamic structures,
-but many limitation remain to maintain file compatibility. This needs to be
-worked out further.
+instruments Sampulse and Sampler ps1 use and avoids ui dependencies in the
+audio core.  The ui was reduced from mfc to win32 and wrapped behind an own
+layer. A X11 implementation is started but not finished. The command line
+player needs to be finsihed, too. Still missing is the full XMSampler
+reimplementation, XM and IT Songimport and some Mixer options. Event Input
+like Midi and Keyboard are now driver orientated and make it possible to have
+more than one midi input or other inputs like a a game controller. This still
+needs to be fully worked out, but at least works for the keyboard and midi
+input. Midi sync is not fully working, too. Additional the version has a
+pianoroll, multitracking, track scopes and optional a sequenceview that
+displays the sequence in a gantt layout. Besides english, more language are
+possible, and a spanish language file was added. Many limititation of Psycle
+are related to the file format. Internally the use of fixed arrays were
+replaced by dynamic structures, but the limitations remain to maintain file
+compatibility. This needs to be worked out further.
 
 Structure of the host
 
-audio           machines, patterns, instruments, sequence, player,
+audio           machines, patterns, instruments, sequence, player, sequencer,
                 song import/export, library load, ...
 host            graphical psycle front end
 player          textmode psycle front end
 ui              bridged win32/x11(not finished) calls
 uitest			a test program for X11 (placeholder, just a few
                 tests)
-audiodrivers	win: asio, mme, mmemidi, directx, wasapi
+audiodrivers	win: asio, mme, directx, wasapi
                 linux: alsa
-eventdrivers	
+eventdrivers	mmemidi, dxjoystick
 
 external libs
 lua             script engine used since psycle 1.10

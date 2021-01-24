@@ -43,6 +43,9 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 		psy_property_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
 		"settingsview.font");
 	psy_property_settext(
+		psy_property_append_bool(pvc, "smoothscroll", FALSE),
+		"settingsview.smoothscroll");
+	psy_property_settext(
 		psy_property_append_bool(pvc, "drawemptydata", FALSE),
 		"settingsview.draw-empty-data");
 	psy_property_settext(
@@ -389,6 +392,22 @@ void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig* self, bool on)
 
 	psy_property_set_bool(self->patternview, "movecursorwhenpaste", on);
 }
+
+bool patternviewconfig_issmoothscrolling(const PatternViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->patternview, "smoothscroll",
+		TRUE);
+}
+
+void patternviewconfig_setsmoothscrolling(PatternViewConfig* self, bool on)
+{
+	assert(self);
+
+	psy_property_set_bool(self->patternview, "smoothscroll", on);
+}
+
 
 void patternviewconfig_setdisplaysinglepattern(PatternViewConfig* self, bool on)
 {

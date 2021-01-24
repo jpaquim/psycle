@@ -6,22 +6,41 @@
 
 #include "uiscrollbar.h"
 
-typedef struct {
+typedef struct {	
+	double speed;
+	double targetpx;	
+	double steppx;
+	uintptr_t counter;	
+} psy_ui_ScrollAnimate;
+
+typedef struct psy_ui_Scroller {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
+	// internal
 	psy_ui_ScrollBar vscroll;
 	psy_ui_Component bottom;
 	psy_ui_ScrollBar hscroll;
 	psy_ui_Component spacer;
-	psy_ui_Component* client;	
+	psy_ui_Component* client;
+	// internal data
+	psy_ui_ScrollAnimate hanimate;
+	psy_ui_ScrollAnimate vanimate;
+	bool smooth;
 } psy_ui_Scroller;
 
 void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,
 	psy_ui_Component* parent);
-//void psy_ui_scroller_updateoverflow(psy_ui_Scroller*);
 
-//void psy_ui_scroller_connectclient(psy_ui_Scroller* self);
-//void psy_ui_scroller_init_reparent(psy_ui_Scroller* self,
-	//psy_ui_Component* client, psy_ui_Component* parent);
+INLINE void psy_ui_scroller_scrollsmooth(psy_ui_Scroller* self)
+{
+	self->smooth = TRUE;
+}
+
+INLINE void psy_ui_scroller_scrollfast(psy_ui_Scroller* self)
+{
+	self->smooth = FALSE;
+}
 
 INLINE psy_ui_Component* psy_ui_scroller_base(psy_ui_Scroller* self)
 {

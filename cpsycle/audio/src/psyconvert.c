@@ -145,11 +145,11 @@ psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument
 		&instrument->filterenvelope) * 44100 + 0.5f);
 	rv.ENV_F_CO = (int32_t)(instrument->filtercutoff * 127.f);
 	rv.ENV_F_RQ = (int32_t)(instrument->filterres * 127);
-	rv.ENV_F_EA = 0;	
+	rv.ENV_F_EA = (int32_t)(instrument->filtermodamount * 128);
 	rv.ENV_F_TP = (int32_t)instrument->filtertype;		
 	rv._RPAN = instrument->randompanning != 0.f;
-	rv._RCUT = instrument->randomcutoff != 0.f;
-	rv._RRES = instrument->_RRES;
+	rv._RCUT = instrument->randomcutoff != 0.f;	;
+	rv._RRES = instrument->randomresonance != 0.f;
 	return rv;
 }
 
