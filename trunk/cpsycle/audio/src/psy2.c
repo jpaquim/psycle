@@ -524,7 +524,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 
 						instrument->randompanning = (_RPAN[i]) ? 1.f : 0.f;
 						instrument->randomcutoff = (_RCUT[i]) ? 1.f : 0.f;
-						instrument->_RRES = _RRES[i];
+						instrument->randomresonance = (_RRES[i]) ? 1.f : 0.f;
 					}
 				} else
 				{

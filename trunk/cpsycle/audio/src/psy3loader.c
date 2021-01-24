@@ -922,7 +922,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 
 		instrument->randompanning = (_RPAN) ? 1.f : 0.f;
 		instrument->randomcutoff = (_RCUT) ? 1.f : 0.f;
-		instrument->_RRES = _RRES;			
+		instrument->randomresonance = (_RRES) ? 1.f : 0.f;		
 			
 		psyfile_readstring(self->fp, instrum_name,sizeof(instrum_name));
 
@@ -933,7 +933,8 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		}
 		for (i = 0; i < numwaves; i++)
 		{
-			if (status = psy_audio_psy3loader_loadwavesubchunk(self, index, pan, instrum_name, 1, i)) {
+			if (status = psy_audio_psy3loader_loadwavesubchunk(self, index,
+					pan, instrum_name, 1, i)) {
 				return status;
 			}
 		}
@@ -951,7 +952,10 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		}
 
 		//Ensure validity of values read
-		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) { _LOCKINST=FALSE; sampler_to_use = -1; }				
+		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) {
+			_LOCKINST=FALSE;
+			sampler_to_use = -1;
+		}				
 		psy_audio_instrument_setname(instrument, instrum_name);
 		psy_audio_instrument_setindex(instrument, index);
 		psy_audio_instruments_insert(&self->song->instruments, instrument,
@@ -976,7 +980,8 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 	uint32_t numInstruments;
 	int status;
 
-	if (status = psyfile_read(self->fp, &numInstruments, sizeof(numInstruments))) {
+	if (status = psyfile_read(self->fp, &numInstruments,
+			sizeof(numInstruments))) {
 		return status;
 	}
 	for(i = 0; i < numInstruments && filepos < self->fp->currchunk.begins +
@@ -997,12 +1002,14 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 		if (strcmp(temp,"INST")== 0) {
 			uint32_t versionINST;
 
-			if (status = psyfile_read(self->fp, &versionINST, sizeof(versionINST))) {
+			if (status = psyfile_read(self->fp, &versionINST,
+					sizeof(versionINST))) {
 				return status;
 			}
 			if (versionINST == 1) {
 				bool legacyenabled;
-				if (status = psyfile_read(self->fp, &legacyenabled, sizeof(legacyenabled))) {
+				if (status = psyfile_read(self->fp, &legacyenabled,
+						sizeof(legacyenabled))) {
 					return status;
 				}
 			} else {
@@ -1013,7 +1020,8 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 				versionINST = 0;
 			}
 //				XMInstrument inst;
-			if (status = psy_audio_psy3loader_loadxminstrument(self, 0, TRUE, lowversion)) {
+			if (status = psy_audio_psy3loader_loadxminstrument(self, 0, TRUE,
+					lowversion)) {
 				return status;
 			}
 //				inst.Load(*pFile, versionINST, true, lowversion);
@@ -1281,9 +1289,9 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 		return NULL;
 	}
 	if (temp8 <= psy_audio_WAVEFORMS_RANDOM) {
-		// wave->vibratotype = (psy_audio_WaveForms) temp8;
+		wave->vibrato.type = (psy_audio_WaveForms)temp8;
 	} else { 
-		// wave->vibratotype = (psy_audio_WaveForms) psy_audio_WAVEFORMS_SINUS;
+		wave->vibrato.type = (psy_audio_WaveForms)psy_audio_WAVEFORMS_SINUS;
 	}														
 	{ // wave data
 		byte* pData;

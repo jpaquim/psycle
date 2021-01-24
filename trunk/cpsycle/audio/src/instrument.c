@@ -96,10 +96,10 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	self->notemodpancenter = psy_audio_NOTECOMMANDS_MIDDLEC;
 	self->notemodpansep = 0;	
 	self->filtertype = F_NONE;
-	self->randomvolume = 0;
-	self->randompanning = 0;
-	self->randomcutoff = 0;
-	self->randomresonance = 0;
+	self->randomvolume = 0.f;
+	self->randompanning = 0.f;
+	self->randomcutoff = 0.f;
+	self->randomresonance = 0.f;
 
 	self->nna = psy_audio_NNA_STOP;
 	self->dct = psy_audio_DUPECHECK_NONE;
@@ -115,8 +115,7 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 		3, 0.005f + 0.370f + 0.370f, 0.0f);
 	self->filtermodamount = 1.0f;
 	self->filtercutoff = 1.f;	
-	self->filterres = 0.f;
-	self->_RRES = 0;
+	self->filterres = 0.f;	
 	psy_dsp_envelope_init_adsr(&self->panenvelope);
 	psy_dsp_envelope_init_adsr(&self->pitchenvelope);
 	psy_signal_init(&self->signal_namechanged);

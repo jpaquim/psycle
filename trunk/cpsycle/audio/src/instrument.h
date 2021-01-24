@@ -111,8 +111,7 @@ typedef struct psy_audio_Instrument {
 	/// Cutoff Frequency [0..1]
 	float filtercutoff;	
 	/// Resonance [0..1]	
-	float filterres;
-	unsigned char _RRES;
+	float filterres;	
 	// [-1.0 .. 1.0]
 	float filtermodamount;
 	/// Filter Type. See psy_dsp_FilterType

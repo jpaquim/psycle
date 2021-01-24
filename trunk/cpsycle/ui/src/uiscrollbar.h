@@ -10,39 +10,49 @@
 //
 // displays a scrollbar
 //
-// psy_ui_Component
-//      ^
-//      |                         | 
-//      |
-// psy_ui_Scrollbar
+//               psy_ui_Component 
+//                      ^
+//                      |
+//      --------------------------------
+//      |                              |
+// psy_ui_Scrollbar <>------ psy_ui_ScrollBarPane
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct psy_ui_ScrollBarPane {
+    // inherits
     psy_ui_Component component;
+    // signals
+    psy_Signal signal_changed;
+    psy_Signal signal_clicked;
+    // internal data
     double pos;
     double screenpos;
     double scrollmax;
     double scrollmin;
     double dragoffset;
     int drag;
-    psy_ui_Orientation orientation;
-    psy_Signal signal_changed;
-    psy_Signal signal_clicked;
+    psy_ui_Orientation orientation;    
 } psy_ui_ScrollBarPane;
 
-void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*, psy_ui_Component* parent);
-void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*, psy_ui_Orientation);
+void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*,
+    psy_ui_Component* parent);
+void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*,
+    psy_ui_Orientation);
 
-typedef struct {
+typedef struct psy_ui_ScrollBar {
+    // inherits
     psy_ui_Component component;
+    // signals
+    psy_Signal signal_changed;
+    psy_Signal signal_clicked;
+    /// internal
+    // ui elements
     psy_ui_Button less;
     psy_ui_Button more;
-    psy_ui_ScrollBarPane sliderpane;
-    psy_Signal signal_changed;
-    psy_Signal signal_clicked;    
+    psy_ui_ScrollBarPane sliderpane;    
 } psy_ui_ScrollBar;
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);

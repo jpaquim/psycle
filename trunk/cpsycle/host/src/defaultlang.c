@@ -235,6 +235,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "choose-font", "Choose Font");
 	// settingsview/patternview
 	psy_property_set_str(section, "draw-empty-data", "Draw empty data");
+	psy_property_set_str(section, "smoothscroll", "Scroll smooth");
 	psy_property_set_str(section, "default-entries", "Default entries");
 	psy_property_set_str(section, "displaysinglepattern", "Display Single Pattern");	
 	psy_property_set_str(section, "line-numbers", "Line numbers");
