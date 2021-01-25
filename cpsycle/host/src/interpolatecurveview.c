@@ -169,7 +169,8 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 			double x;
 
 			x = i * self->bpl * scalex;
-			psy_ui_drawline(g, x, 0, x, size.height);
+			psy_ui_drawline(g, psy_ui_realpoint_make(x, 0),
+				psy_ui_realpoint_make(x, size.height));
 		}
 	}
 }
@@ -226,8 +227,8 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 		distance = (entry->offset * scalex) - (lastoffset * scalex);
 		if (curve == INTERPOLATECURVETYPE_LINEAR) {
 			psy_ui_drawline(g,
-				x, size.height - lastcurveval * scaley,
-				x + distance, size.height - entry->value * scaley);
+				psy_ui_realpoint_make(x, size.height - lastcurveval * scaley),
+				psy_ui_realpoint_make(x + distance, size.height - entry->value * scaley));
 		} else
 		if (curve == INTERPOLATECURVETYPE_HERMITE) {
 			intptr_t i;
@@ -236,8 +237,8 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 				double curveval = hermitecurveinterpolate(val0, val1, val2, val3, i,
 					(intptr_t)distance, 0, TRUE);
 				psy_ui_drawline(g,
-					x + i - 1, size.height - lastcurveval * scaley,
-					x + i, size.height - curveval * scaley);
+					psy_ui_realpoint_make(x + i - 1, size.height - lastcurveval * scaley),
+					psy_ui_realpoint_make(x + i, size.height - curveval * scaley));
 				lastcurveval = curveval;
 			}
 		}

@@ -146,8 +146,7 @@ typedef struct MainFrame {
 	int pluginscanprogress;
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
-	bool restoreloop;	
-	uintptr_t statusdefaultcounter;	
+	bool restoreloop;		
 	psy_ui_Colour terminalbutton_colours[TERMINALMSGTYPE_NUM];
 } MainFrame;
 

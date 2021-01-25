@@ -3,41 +3,36 @@
 
 #include "skincoord.h"
 
-void skincoord_setall(SkinCoord* self,
-	double srcx,
-	double srcy,
-	double srcwidth,
-	double srcheight,
-	double destx,
-	double desty,
-	double destwidth,
-	double destheight,
-	double range)
+void skincoord_init(SkinCoord* self)
 {
-	self->srcx = srcx;
-	self->srcy = srcy;
-	self->srcwidth = srcwidth;
-	self->srcheight = srcheight;
-	self->destx = destx;
-	self->desty = desty;
-	self->destwidth = destwidth;
-	self->destheight = destheight;
+	self->src = psy_ui_realrectangle_zero();
+	self->dest = psy_ui_realrectangle_zero();
+	self->range = 0.0;
+}
+
+void skincoord_init_all(SkinCoord* self,
+	double srcx, double srcy, double srcwidth, double srcheight,
+	double destx, double desty, double destwidth, double destheight,
+	double range)
+{	
+	self->src = psy_ui_realrectangle_make(psy_ui_realpoint_make(srcx, srcy),
+		psy_ui_realsize_make(srcwidth, srcheight));
+	self->dest = psy_ui_realrectangle_make(psy_ui_realpoint_make(destx, desty),
+		psy_ui_realsize_make(destwidth, destheight));
 	self->range = range;
 }
 
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4])
 {
-	coord->srcx = (double)vals[0];
-	coord->srcy = (double)vals[1];
-	coord->srcwidth = (double)vals[2];
-	coord->srcheight = (double)vals[3];
-	coord->destwidth = (double)vals[2];
-	coord->destheight = (double)vals[3];
+	coord->src.left = (double)vals[0];
+	coord->src.top = (double)vals[1];	
+	psy_ui_realrectangle_resize(&coord->src, (double)vals[2], (double)vals[3]);	
+	psy_ui_realrectangle_resize(&coord->dest, (double)vals[2], (double)vals[3]);
 }
 
 void skincoord_setdest(SkinCoord* coord, intptr_t vals[4])
 {
-	coord->destx = (double)vals[0];
-	coord->desty = (double)vals[1];
+	coord->dest.left = (double)vals[0];
+	coord->dest.top = (double)vals[1];
 	coord->range = (double)vals[2];
 }

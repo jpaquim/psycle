@@ -1115,7 +1115,9 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g,
 					psy_ui_app()->defaults.style_common.border.colour_top);
 			}
-			psy_ui_drawline(g, 0, 0, size.width, 0);
+			psy_ui_drawline(g,
+				psy_ui_realpoint_zero(), 
+				psy_ui_realpoint_make(size.width, 0));
 		}
 		if (border.bottom != psy_ui_BORDER_NONE) {
 			if (border.colour_top.mode.set) {
@@ -1124,8 +1126,9 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g,
 					psy_ui_app()->defaults.style_common.border.colour_top);
 			}
-			psy_ui_drawline(g, 0, size.height - 1, size.width,
-				size.height - 1);
+			psy_ui_drawline(g,
+				psy_ui_realpoint_make(0, size.height - 1),
+				psy_ui_realpoint_make(size.width, size.height - 1));
 		}
 	}
 }
@@ -1147,14 +1150,12 @@ void psy_ui_component_togglevisibility(psy_ui_Component* self)
 }
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
-{
-	psy_ui_RealSize size;	
-	
-	size = psy_ui_component_sizepx(self);	
+{	
 	return psy_ui_realrectangle_make(
-		psy_ui_component_scrollleftpx(self),
-		psy_ui_component_scrolltoppx(self),
-		size.width, size.height);
+		psy_ui_realpoint_make(
+			psy_ui_component_scrollleftpx(self),
+			psy_ui_component_scrolltoppx(self)),
+		psy_ui_component_sizepx(self));
 }
 
 void psy_ui_component_focus_next(psy_ui_Component* self)

@@ -24,6 +24,8 @@ typedef struct {
 	SkinCoord name;
 } MachineCoords;
 
+void machinecoords_init(MachineCoords*);
+
 typedef struct {
 	MachineCoords master;
 	MachineCoords generator;
@@ -48,7 +50,8 @@ typedef struct {
 	psy_ui_Colour effect_fontcolour;
 	psy_ui_Bitmap skinbmp;
 	psy_ui_Font font;
-	int drawmachineindexes;
+	bool drawmachineindexes;
+	bool drawvumeters;
 } MachineViewSkin;
 
 void machineviewskin_init(MachineViewSkin*);

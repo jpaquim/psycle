@@ -157,8 +157,8 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	scrollleft = psy_ui_component_scrollleftpx(&self->component);
 	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
 		0, 0));
-	psy_ui_drawline(g, scrollleft, baseline, size.width + scrollleft,
-		baseline);
+	psy_ui_drawline(g, psy_ui_realpoint_make(scrollleft, baseline),
+		psy_ui_realpoint_make(size.width + scrollleft, baseline));
 	currstep = pianogridstate_beattosteps(self->gridstate, clip.topleft.offset);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (c = clip.topleft.offset; c <= clip.bottomright.offset;
@@ -166,7 +166,8 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 		double cpx;
 		
 		cpx = pianogridstate_beattopx(self->gridstate, c);
-		psy_ui_drawline(g, cpx, baseline, cpx, baselinetop);
+		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
+			psy_ui_realpoint_make(cpx, baselinetop));
 		if ((currstep % self->gridstate->lpb) == 0) {
 			pianoruler_drawbeat(self, g, (intptr_t)(c), cpx, baseline, tm->tmHeight);
 		}
@@ -187,7 +188,8 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 		psy_ui_settextcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
 			0, 0));
 	}
-	psy_ui_drawline(g, x, baseline, x, baseline - tmheight / 2);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
+		psy_ui_realpoint_make(x, baseline - tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
 	psy_ui_textout(g, x + 3, baseline - tmheight, txt, strlen(txt));
 	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
@@ -268,30 +270,35 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 		double cpy;
 
 		cpy = keyboardstate_keytopx(self->keyboardstate, key);
-		psy_ui_drawline(g, 0, cpy, size.width, cpy);
+		psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
+			psy_ui_realpoint_make(size.width, cpy));
 		if (self->keyboardstate->drawpianokeys) {
 			if (psy_dsp_isblack(key)) {
 				psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-					size.width * 0.75, cpy,
-					size.width * 0.25, self->keyboardstate->keyheightpx),
+					psy_ui_realpoint_make(size.width * 0.75, cpy),
+					psy_ui_realsize_make(size.width * 0.25,
+						self->keyboardstate->keyheightpx)),
 					patternviewskin_keywhitecolour(self->keyboardstate->skin));
 				psy_ui_drawline(g,
-					0, cpy + self->keyboardstate->keyheightpx / 2,
-					size.width, cpy + self->keyboardstate->keyheightpx / 2);
-				psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(0, cpy,
-					size.width * 0.75, self->keyboardstate->keyheightpx),
+					psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx / 2),
+					psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx / 2));
+				psy_ui_drawsolidrectangle(g,
+					psy_ui_realrectangle_make(psy_ui_realpoint_make(0, cpy),
+						psy_ui_realsize_make(size.width * 0.75,
+							self->keyboardstate->keyheightpx)),
 					patternviewskin_keyblackcolour(self->keyboardstate->skin));
 			} else {
 				psy_ui_RealRectangle r;
 
-				r = psy_ui_realrectangle_make(0, cpy, size.width,
-					self->keyboardstate->keyheightpx);
+				r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
+						psy_ui_realsize_make(size.width,
+							self->keyboardstate->keyheightpx));
 				psy_ui_drawsolidrectangle(g, r,
 					patternviewskin_keywhitecolour(self->keyboardstate->skin));
 				if (psy_dsp_iskey_c(key) || psy_dsp_iskey_e(key)) {
 					psy_ui_drawline(g,
-						0, cpy + self->keyboardstate->keyheightpx,
-						size.width, cpy + self->keyboardstate->keyheightpx);
+						psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
+						psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));
 					if (psy_dsp_iskey_c(key)) {
 						psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
 							psy_dsp_notetostr(key, self->keyboardstate->notemode),
@@ -302,15 +309,15 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 		} else {
 			psy_ui_RealRectangle r;
 
-			r = psy_ui_realrectangle_make(0, cpy, size.width,
-				self->keyboardstate->keyheightpx);
+			r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
+					psy_ui_realsize_make(size.width,
+						self->keyboardstate->keyheightpx));
 			psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
 				psy_dsp_notetostr(key, self->keyboardstate->notemode),
 				strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
 			psy_ui_drawline(g,
-				0, cpy + self->keyboardstate->keyheightpx,
-				size.width,
-				cpy + self->keyboardstate->keyheightpx);
+				psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
+				psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));
 		}
 	}
 	pianokeyboard_drawuncoveredbottombackground(self, g, size);
@@ -328,9 +335,10 @@ void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard* self, psy_ui_Gra
 	if (blankstart - psy_ui_component_scrolltoppx(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-			0, blankstart, size.width,
-			size.height - (blankstart - psy_ui_component_scrolltoppx(
-				pianokeyboard_base(self)))),
+				psy_ui_realpoint_make(0, blankstart),
+				psy_ui_realsize_make(size.width,
+					size.height - (blankstart - psy_ui_component_scrolltoppx(
+					pianokeyboard_base(self))))),
 			patternviewskin_separatorcolour(self->keyboardstate->skin, 1, 2));
 	}
 }
@@ -719,11 +727,12 @@ void pianogrid_drawuncoveredrightbackground(Pianogrid* self,
 	if (blankstart - psy_ui_component_scrollleftpx(&self->component) <
 			size.width) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				blankstart,
-				psy_ui_component_scrolltoppx(&self->component),
-				size.width - (blankstart - psy_ui_component_scrollleftpx(
+				psy_ui_realpoint_make(
+					blankstart,
+					psy_ui_component_scrolltoppx(&self->component)),
+				psy_ui_realsize_make(size.width - (blankstart - psy_ui_component_scrollleftpx(
 					pianogrid_base(self))),
-				size.height),
+					size.height)),
 			patternviewskin_separatorcolour(self->gridstate->skin, 1, 2));
 	}
 }
@@ -740,11 +749,12 @@ void pianogrid_drawuncoveredbottombackground(Pianogrid* self,
 	if (blankstart - psy_ui_component_scrolltoppx(&self->component) <
 			size.height) {
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				psy_ui_component_scrollleftpx(pianogrid_base(self)),
-				blankstart,
-				size.width,
-				size.height - (blankstart - psy_ui_component_scrolltoppx(
-					pianogrid_base(self)))),
+				psy_ui_realpoint_make(
+					psy_ui_component_scrollleftpx(pianogrid_base(self)),
+					blankstart),
+				psy_ui_realsize_make(size.width,
+					size.height - (blankstart - psy_ui_component_scrolltoppx(
+					pianogrid_base(self))))),
 			patternviewskin_separatorcolour(self->gridstate->skin, 1, 2));
 	}
 }
@@ -776,9 +786,11 @@ void pianogriddraw_drawgridcells(PianoGridDraw* self, psy_ui_Graphics* g,
 		for (; c <= clip.bottomright.offset;
 				c += pianogridstate_step(self->gridstate), ++steps) {			
 			psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-				pianogridstate_beattopx(self->gridstate, c), cpy,
-				pianogridstate_steppx(self->gridstate) + 1,
-				self->keyboardstate->keyheightpx + 1),
+				psy_ui_realpoint_make(
+					pianogridstate_beattopx(self->gridstate, c), cpy),
+				psy_ui_realsize_make(
+					pianogridstate_steppx(self->gridstate) + 1,
+					self->keyboardstate->keyheightpx + 1)),
 				pianogriddraw_cellcolour(self, steps, key,
 					pianogriddraw_testselection(self, key, c)));
 		}
@@ -839,8 +851,9 @@ void pianogriddraw_drawstepseparators(PianoGridDraw* self, psy_ui_Graphics* g,
 		double cpx;
 
 		cpx = pianogridstate_beattopx(self->gridstate, c);
-		psy_ui_drawline(g, cpx, psy_ui_value_px(&self->scrolltop, self->tm),
-			cpx, self->keyboardstate->keyboardheightpx);
+		psy_ui_drawline(g,
+			psy_ui_realpoint_make(cpx, psy_ui_value_px(&self->scrolltop, self->tm)),
+			psy_ui_realpoint_make(cpx, self->keyboardstate->keyboardheightpx));
 	}
 }
 
@@ -860,10 +873,12 @@ void pianogriddraw_drawkeyseparators(PianoGridDraw* self, psy_ui_Graphics* g,
 
 			cpy = keyboardstate_keytopx(self->keyboardstate, key);
 			psy_ui_drawline(g,
-				pianogridstate_beattopx(self->gridstate, clip.topleft.offset),
-				cpy,
-				pianogridstate_beattopx(self->gridstate, clip.bottomright.offset),
-				cpy);
+				psy_ui_realpoint_make(
+					pianogridstate_beattopx(self->gridstate, clip.topleft.offset),
+					cpy),
+				psy_ui_realpoint_make(
+					pianogridstate_beattopx(self->gridstate, clip.bottomright.offset),
+					cpy));
 		}
 	}
 }
@@ -885,10 +900,12 @@ void pianogriddraw_drawcursor(PianoGridDraw* self, psy_ui_Graphics* g, psy_audio
 			key = psy_audio_NOTECOMMANDS_MIDDLEC;
 		}						
 		psy_ui_drawsolidrectangle(g, psy_ui_realrectangle_make(
-			pianogridstate_beattopx(self->gridstate, cursor.offset),
-			keyboardstate_keytopx(self->keyboardstate, key),
-			pianogridstate_steppx(self->gridstate),
-			self->keyboardstate->keyheightpx),
+			psy_ui_realpoint_make(
+				pianogridstate_beattopx(self->gridstate, cursor.offset),
+				keyboardstate_keytopx(self->keyboardstate, key)),
+			psy_ui_realsize_make(
+				pianogridstate_steppx(self->gridstate),
+				self->keyboardstate->keyheightpx)),
 			patternviewskin_cursorcolour(self->gridstate->skin,
 				0, 0));
 	}
@@ -907,10 +924,13 @@ void pianogriddraw_drawplaybar(PianoGridDraw* self, psy_ui_Graphics* g, psy_audi
 				pianogridstate_pattern(self->gridstate))) {			
 			psy_ui_drawsolidrectangle(g,
 				psy_ui_realrectangle_make(
-					pianogridstate_beattopx(self->gridstate, pianogridstate_quantize(
-						self->gridstate, offset)), 0,
+					psy_ui_realpoint_make(
+						pianogridstate_beattopx(self->gridstate,
+							pianogridstate_quantize(self->gridstate, offset)),
+						0.0),
+				psy_ui_realsize_make(
 					pianogridstate_steppx(self->gridstate),
-					self->keyboardstate->keyboardheightpx),
+					self->keyboardstate->keyboardheightpx)),
 				patternviewskin_playbarcolour(self->gridstate->skin,
 					0, psy_audio_song_numsongtracks(workspace_song(self->workspace))));
 		}
@@ -1682,8 +1702,11 @@ void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t position)
 		size =  psy_ui_component_sizepx(&self->component);
 		psy_ui_component_invalidaterect(&self->component,
 			psy_ui_realrectangle_make(
-				pianogridstate_quantizebeattopx(self->gridstate, position), scrolltoppx,
-				pianogridstate_steppx(self->gridstate), size.height));
+				psy_ui_realpoint_make(
+					pianogridstate_quantizebeattopx(self->gridstate, position),
+					scrolltoppx),
+				psy_ui_realsize_make(
+					pianogridstate_steppx(self->gridstate), size.height)));
 	}
 }
 

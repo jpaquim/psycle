@@ -105,9 +105,9 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 	psy_ui_setlinewidth(g, 8);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 
-	psy_ui_drawline(g, 32, 32, 128, 128);
-	psy_ui_drawline(g, 128, 128, 128, 0);
-	psy_ui_drawline(g, 128, 128, 256 - 32, 32);
+	psy_ui_drawline(g, psy_ui_realpoint_make(32, 32), psy_ui_realpoint_make(128, 128));
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(128, 0));
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(256 - 32, 32));
 	
 	psy_ui_drawarc(g, 0, 0, 256, 256, 256, 128, 0, 128);
 	psy_ui_drawarc(g, 96, 96, 256 - 96, 256 - 96, 256 - 96, 128, 96, 128);
@@ -116,9 +116,9 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 
 	psy_ui_setlinewidth(g, 4);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00404040));
-	psy_ui_drawline(g, 32, 32, 128, 128);
-	psy_ui_drawline(g, 128, 128, 128, 0);
-	psy_ui_drawline(g, 128, 128, 256 - 32, 32);
+	psy_ui_drawline(g, psy_ui_realpoint_make(32, 32), psy_ui_realpoint_make(128, 128));
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(128, 0));
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(256 - 32, 32));
 	psy_ui_setlinewidth(g, 1);
 }
 
@@ -258,48 +258,48 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 
 	x = psy_dsp_fround((float)sin(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
-	psy_ui_drawline(g, x, y, 128, 128);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x, y), psy_ui_realpoint_make(128, 128));
 	//	bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvpc*128.0f));
 	//	bufDC.MoveTo(128,128);
 	x = psy_dsp_fround((float)sin(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
-	psy_ui_drawline(g, 128, 128, x, y);
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(x, y));
 
 	// panning data
 	// bufDC.SelectObject(&linepenbR);
 
 	x = psy_dsp_fround((float)sin(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
-	psy_ui_drawline(g, x, y, 128, 128);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x, y), psy_ui_realpoint_make(128, 128));
 
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvc*128.0f));
 	//						bufDC.MoveTo(128,128);
 	x = psy_dsp_fround((float)sin((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
-	psy_ui_drawline(g, 128, 128, x, y);
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(x, y));
 
 	// bufDC.SelectObject(&linepenL);
 
 	x = psy_dsp_fround((float)sin(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
-	psy_ui_drawline(g, x, y, 128, 128);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x, y), psy_ui_realpoint_make(128, 128));
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvpc*128.0f));
 	//						bufDC.MoveTo(128,128);
 	x = psy_dsp_fround((float)sin(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
-	psy_ui_drawline(g, 128, 128, x, y);
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(x, y));
 
 	// panning data
 	// bufDC.SelectObject(&linepenR);
 
 	x = psy_dsp_fround((float)sin(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
-	psy_ui_drawline(g, x, y, 128, 128);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x, y), psy_ui_realpoint_make(128, 128));
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvc*128.0f));
 	//						bufDC.MoveTo(128,128);
 	x = psy_dsp_fround((float)sin((mvdr * quarterpi)) * mvr * 128.0f) + 128;
 	y = psy_dsp_fround(-(float)cos((mvdr * quarterpi)) * mvr * 128.0f) + 128;
-	psy_ui_drawline(g, 128, 128, x, y);
+	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(x, y));
 
 	if (!self->hold)
 	{

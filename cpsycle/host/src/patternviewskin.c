@@ -7,11 +7,9 @@
 #include "patternviewskin.h"
 #include "skinio.h"
 #include "resources/resource.h"
-
+// file
 #include <dir.h>
-
-#include <stdlib.h>
-
+// platform
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
 
@@ -368,59 +366,34 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 
 void patternviewskin_setclassicheadercoords(PatternViewSkin* self)
 {
-	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };
-	static SkinCoord record = { 96, 40, 17, 17, 85, 3, 17, 17, 0 };
-	static SkinCoord mute = { 79, 40, 17, 17, 66, 3, 17, 17, 0 };
-	static SkinCoord solo = { 62, 40, 17, 17, 47, 3, 17, 17, 0 };
-	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
-	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
-	static SkinCoord dplayon = { 0, 40, 7, 17, 5, 3, 7, 17, 0 };
-
-	self->headercoords.background = background;
-	self->headercoords.record = record;
-	self->headercoords.mute = mute;
-	self->headercoords.solo = solo;
-	self->headercoords.digit0x = digit0x;
-	self->headercoords.digitx0 = digitx0;
-	self->headercoords.dplayon = dplayon;
-	self->headercoords.hasplayon = TRUE;
+	skincoord_init_all(&self->headercoords.background, 2, 0, 102, 23, 0, 0, 102, 23, 0);
+	skincoord_init_all(&self->headercoords.record, 96, 40, 17, 17, 85, 3, 17, 17, 0);
+	skincoord_init_all(&self->headercoords.mute, 79, 40, 17, 17, 66, 3, 17, 17, 0);
+	skincoord_init_all(&self->headercoords.solo, 62, 40, 17, 17, 47, 3, 17, 17, 0);
+	skincoord_init_all(&self->headercoords.digitx0, 0, 23, 9, 17, 15, 3, 9, 17, 0);
+	skincoord_init_all(&self->headercoords.digit0x, 0, 23, 9, 17, 22, 3, 9, 17, 0);
+	skincoord_init_all(&self->headercoords.dplayon, 0, 40, 7, 17, 5, 3, 7, 17, 0);	
 }
 
 void patternviewskin_setheadercoords(PatternViewSkin* self)
 {
-	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };
-	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
-	static SkinCoord mute = { 79, 40, 17, 17, 75, 66, 3, 17, 17 };
-	static SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
-	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
-	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
-	static SkinCoord dplayon = { 0, 40, 7, 17, 5, 3, 7, 17, 0 };
-
-	self->headercoords.background = background;
-	self->headercoords.record = record;
-	self->headercoords.mute = mute;
-	self->headercoords.solo = solo;
-	self->headercoords.digit0x = digit0x;
-	self->headercoords.digitx0 = digitx0;
-	self->headercoords.dplayon = dplayon;
-	self->headercoords.hasplayon = TRUE;
+	skincoord_init_all(&self->headercoords.background, 2, 0, 102, 23, 0, 0, 102, 23, 0);
+	skincoord_init_all(&self->headercoords.record, 0, 18, 7, 12, 52, 3, 7, 12, 0);
+	skincoord_init_all(&self->headercoords.mute, 79, 40, 17, 17, 75, 66, 3, 17, 17);
+	skincoord_init_all(&self->headercoords.solo, 92, 18, 11, 11, 97, 3, 11, 11, 0);
+	skincoord_init_all(&self->headercoords.digitx0, 0, 23, 9, 17, 15, 3, 9, 17, 0);
+	skincoord_init_all(&self->headercoords.digit0x, 0, 23, 9, 17, 22, 3, 9, 17, 0);
+	skincoord_init_all(&self->headercoords.dplayon, 0, 40, 7, 17, 5, 3, 7, 17, 0);	
 }
 
 void patternviewskin_setheadertextcoords(PatternViewSkin* self)
 {
-	SkinCoord background = { 2, 57, 103, 23, 0, 0, 103, 23, 0 };
-	SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
-	SkinCoord mute = { 81, 18, 11, 11, 75, 3, 11, 11, 0 };
-	SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
-	SkinCoord digitx0 = { 0, 80, 6, 12, 5, 8, 6, 12, 0 };
-	SkinCoord digit0x = { 0, 80, 6, 12, 11, 8, 6, 12, 0 };
-
-	self->headercoords.background = background;
-	self->headercoords.record = record;
-	self->headercoords.mute = mute;
-	self->headercoords.solo = solo;
-	self->headercoords.digit0x = digit0x;
-	self->headercoords.digitx0 = digitx0;
+	skincoord_init_all(&self->headercoords.background, 2, 57, 103, 23, 0, 0, 103, 23, 0);
+	skincoord_init_all(&self->headercoords.record, 0, 18, 7, 12, 52, 3, 7, 12, 0);
+	skincoord_init_all(&self->headercoords.mute, 81, 18, 11, 11, 75, 3, 11, 11, 0);
+	skincoord_init_all(&self->headercoords.solo, 92, 18, 11, 11, 97, 3, 11, 11, 0);
+	skincoord_init_all(&self->headercoords.digitx0, 0, 80, 6, 12, 5, 8, 6, 12, 0);
+	skincoord_init_all(&self->headercoords.digit0x, 0, 80, 6, 12, 11, 8, 6, 12, 0);
 }
 
 void patternviewskin_setcoords(PatternViewSkin* self, psy_Property* p)
@@ -430,66 +403,68 @@ void patternviewskin_setcoords(PatternViewSkin* self, psy_Property* p)
 
 	if (s = psy_property_at_str(p, "background_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.background.srcx = (double)vals[0];
-		self->headercoords.background.srcy = (double)vals[1];
-		self->headercoords.background.destwidth = (double)vals[2];
-		self->headercoords.background.destheight = (double)vals[3];
+		self->headercoords.background.src.left = (double)vals[0];
+		self->headercoords.background.src.top = (double)vals[1];
+		psy_ui_realrectangle_setwidth(&self->headercoords.background.dest,
+			(double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.background.dest,
+			(double)vals[3]);
 	}
 	if (s = psy_property_at_str(p, "number_0_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.digitx0.srcx = (double)vals[0];
-		self->headercoords.digitx0.srcy = (double)vals[1];
-		self->headercoords.digit0x.srcx = (double)vals[0];
-		self->headercoords.digit0x.srcy = (double)vals[1];
-		self->headercoords.digitx0.srcwidth = (double)vals[2];
-		self->headercoords.digitx0.srcheight = (double)vals[3];
-		self->headercoords.digit0x.srcwidth = (double)vals[2];
-		self->headercoords.digit0x.srcheight = (double)vals[3];
+		self->headercoords.digitx0.src.left = (double)vals[0];
+		self->headercoords.digitx0.src.top = (double)vals[1];
+		self->headercoords.digit0x.src.left = (double)vals[0];
+		self->headercoords.digit0x.src.top = (double)vals[1];
+		psy_ui_realrectangle_setwidth(&self->headercoords.digitx0.src, (double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.digitx0.src, (double)vals[3]);
+		psy_ui_realrectangle_setwidth(&self->headercoords.digit0x.src, (double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.digit0x.src, (double)vals[3]);
 	}
 	if (s = psy_property_at_str(p, "record_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.record.srcx = (double)vals[0];
-		self->headercoords.record.srcy = (double)vals[1];
-		self->headercoords.record.destwidth = (double)vals[2];
-		self->headercoords.record.destheight = (double)vals[3];
+		self->headercoords.record.src.left = (double)vals[0];
+		self->headercoords.record.src.top = (double)vals[1];
+		psy_ui_realrectangle_setwidth(&self->headercoords.record.dest, (double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.record.dest, (double)vals[3]);
 	}
 	if (s = psy_property_at_str(p, "mute_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.mute.srcx = (double)vals[0];
-		self->headercoords.mute.srcy = (double)vals[1];
-		self->headercoords.mute.destwidth = (double)vals[2];
-		self->headercoords.mute.destheight = (double)vals[3];
+		self->headercoords.mute.src.left = (double)vals[0];
+		self->headercoords.mute.src.top = (double)vals[1];
+		psy_ui_realrectangle_setwidth(&self->headercoords.mute.dest, (double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.mute.dest, (double)vals[3]);
 	}
 	if (s = psy_property_at_str(p, "solo_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->headercoords.solo.srcx = (double)vals[0];
-		self->headercoords.solo.srcy = (double)vals[1];
-		self->headercoords.solo.destwidth = (double)vals[2];
-		self->headercoords.solo.destheight = (double)vals[3];
+		self->headercoords.solo.src.left = (double)vals[0];
+		self->headercoords.solo.src.top = (double)vals[1];
+		psy_ui_realrectangle_setwidth(&self->headercoords.solo.dest, (double)vals[2]);
+		psy_ui_realrectangle_setheight(&self->headercoords.solo.dest, (double)vals[3]);
 	}
 	if (s = psy_property_at_str(p, "digit_x0_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.digitx0.destx = (double)vals[0];
-		self->headercoords.digitx0.desty = (double)vals[1];
+		self->headercoords.digitx0.dest.left = (double)vals[0];
+		self->headercoords.digitx0.dest.top = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "digit_0x_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.digit0x.destx = (double)vals[0];
-		self->headercoords.digit0x.desty = (double)vals[1];
+		self->headercoords.digit0x.dest.left = (double)vals[0];
+		self->headercoords.digit0x.dest.top = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "record_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.record.destx = (double)vals[0];
-		self->headercoords.record.desty = (double)vals[1];
+		self->headercoords.record.dest.left = (double)vals[0];
+		self->headercoords.record.dest.top = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "mute_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.mute.destx = (double)vals[0];
-		self->headercoords.mute.desty = (double)vals[1];
+		self->headercoords.mute.dest.left = (double)vals[0];
+		self->headercoords.mute.dest.top = (double)vals[1];
 	}
 	if (s = psy_property_at_str(p, "solo_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->headercoords.solo.destx = (double)vals[0];
-		self->headercoords.solo.desty = (double)vals[1];
+		self->headercoords.solo.dest.left = (double)vals[0];
+		self->headercoords.solo.dest.top = (double)vals[1];
 	}
 }

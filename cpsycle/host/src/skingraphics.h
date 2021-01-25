@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-void skin_blitpart(psy_ui_Graphics*, psy_ui_Bitmap*, double x, double y, SkinCoord*);
-void skin_blitpartstretched(psy_ui_Graphics*, psy_ui_Bitmap*, double x, double y,
+void skin_blitpart(psy_ui_Graphics*, psy_ui_Bitmap*, psy_ui_RealPoint dest, SkinCoord*);
+void skin_blitpartstretched(psy_ui_Graphics*, psy_ui_Bitmap*, psy_ui_RealPoint dest,
 	double ratiowidth, double ratioheight,
 	SkinCoord*);
 void skin_stretchratio(SkinCoord*, double width, double height,

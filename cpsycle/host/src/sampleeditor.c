@@ -448,7 +448,8 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	baseline = size.height - 1;
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));
-	psy_ui_drawline(g, 0, baseline, size.width, baseline);
+	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
+		psy_ui_realpoint_make(size.width, baseline));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00999999));
 	if (self->metric) {
@@ -464,7 +465,8 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 			if (cpx >= 0 && cpx < size.width) {
 				char txt[40];
 
-				psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm->tmHeight / 3);
+				psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
+					psy_ui_realpoint_make(cpx, baseline - tm->tmHeight / 3));
 				psy_snprintf(txt, 40, "%d", (int)waveboxcontext_realframe(self->metric, frame));
 				psy_ui_textout(g, (int)cpx + (int)(tm->tmAveCharWidth * 0.75),
 					baseline - tm->tmHeight - tm->tmHeight / 6, txt, strlen(txt));
@@ -511,8 +513,8 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 					break;
 				}
 				framevalue = self->sample->channels.samples[0][frame];							
-				psy_ui_drawline(g, x, centery, x,
-					centery + framevalue * scaley);
+				psy_ui_drawline(g, psy_ui_realpoint_make(x, centery),
+					psy_ui_realpoint_make(x, centery + framevalue * scaley));
 			}
 		}
 	}

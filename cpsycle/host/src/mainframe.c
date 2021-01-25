@@ -329,8 +329,7 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
-	self->statusdefaultcounter = 0;
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);	
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -959,6 +958,8 @@ void mainframe_updatesongtitle(MainFrame* self)
 	if (workspace_song(&self->workspace)) {
 		psy_ui_label_settext(&self->statusbarlabel,
 			psy_audio_song_title(workspace_song(&self->workspace)));
+		psy_ui_label_setdefaulttext(&self->statusbarlabel,
+			psy_audio_song_title(workspace_song(&self->workspace)));
 	}
 	psy_path_dispose(&path);
 }
@@ -1135,28 +1136,6 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 			psy_ui_progressbar_tick(&self->progressbar);
 		}
 	}	
-	if (self->statusdefaultcounter > 0) {
-		psy_ui_Colour colour;
-		float fadeoutstep;
-
-		--self->statusdefaultcounter;
-		if (self->statusdefaultcounter <= 80) {
-			colour = psy_ui_defaults()->style_common.colour;
-			fadeoutstep = self->statusdefaultcounter * 1/80.f;
-			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
-			if (colour.value > psy_ui_component_backgroundcolour(mainframe_base(self)).value) {
-				psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
-					colour);
-			}
-			psy_ui_component_invalidate(psy_ui_label_base(&self->statusbarlabel));			
-		}
-		if (self->statusdefaultcounter == 0) {
-			// reset statusbar label to song title			
-			psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
-				psy_ui_defaults()->style_common.colour);
-			mainframe_updatesongtitle(self);
-		}
-	}
 }
 
 // event is called when mainframe has its final size and is visible on screen
@@ -1271,14 +1250,9 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 
 void mainframe_onstatus(MainFrame* self, Workspace* sender,
 	const char* text)
-{
-	// Keep new message 5secs active (Timer interval(50ms) * 100). The counter
-	// is decremented each timer tick (ontimer) and at zero the status is set
-	// set back to the song title
-	self->statusdefaultcounter = 100;
-	psy_ui_component_setcolour(psy_ui_label_base(&self->statusbarlabel),
-		psy_ui_defaults()->style_common.colour);
+{	
 	psy_ui_label_settext(&self->statusbarlabel, text);
+	psy_ui_label_fadeout(&self->statusbarlabel);
 }
 
 void mainframe_updateterminalbutton(MainFrame* self)

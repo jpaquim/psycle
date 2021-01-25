@@ -108,7 +108,8 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 	//psy_audio_sequence_duration(&workspace_song(self->workspace)->sequence);
 	linewidth = duration * self->trackstate->pxperbeat;
 	psy_ui_setcolour(g, self->skin->row);
-	psy_ui_drawline(g, 0, baseline, linewidth, baseline);
+	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
+		psy_ui_realpoint_make(linewidth, baseline));
 	clipstart = 0;
 	clipend = duration;
 	step = seqeditorruler_step(self);
@@ -127,7 +128,8 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 			psy_ui_settextcolour(g, self->skin->row);
 			psy_ui_setcolour(g, self->skin->row);
 		}
-		psy_ui_drawline(g, cpx, baseline, cpx, baseline - tm->tmHeight / 3);
+		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
+			psy_ui_realpoint_make(cpx, baseline - tm->tmHeight / 3));
 		if (self->trackstate->drawcursor) {
 			psy_dsp_big_beat_t cursor;
 
@@ -146,7 +148,8 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, self->skin->row4beat);
 				start = cursor * self->trackstate->pxperbeat;
 				end = (cursor + step) * self->trackstate->pxperbeat;
-				psy_ui_drawline(g, start, baseline, end, baseline);
+				psy_ui_drawline(g, psy_ui_realpoint_make(start, baseline),
+					psy_ui_realpoint_make(end, baseline));
 			}
 		}		
 		psy_snprintf(txt, 40, "%d", (int)(currbeat));
@@ -157,7 +160,8 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 		
 		psy_ui_setcolour(g, self->skin->cursor);
 		cpx = self->trackstate->cursorposition * self->trackstate->pxperbeat;
-		psy_ui_drawline(g, cpx, baseline, cpx, baseline - tm->tmHeight / 3);
+		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, baseline),
+			psy_ui_realpoint_make(cpx, baseline - tm->tmHeight / 3));
 	}
 }
 
@@ -307,8 +311,9 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 	}	
 	tm = psy_ui_component_textmetric(&self->parent->component);
 	lineheight = floor(psy_ui_value_px(&self->trackstate->lineheight, tm));
-	bg = psy_ui_realrectangle_make(0, y,		
-		psy_ui_component_sizepx(&self->parent->component).width, lineheight);
+	bg = psy_ui_realrectangle_make(psy_ui_realpoint_make(0, y),
+		psy_ui_realsize_make(
+			psy_ui_component_sizepx(&self->parent->component).width, lineheight));
 	psy_ui_drawsolidrectangle(g, bg,
 		psy_ui_component_backgroundcolour(&self->parent->component));	
 	if (!self->bitmapvalid && self->currtrack->entries) {
@@ -318,9 +323,10 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 
 		psy_ui_bitmap_dispose(&self->bitmap);
 		seqeditortrack_onpreferredsize_virtual(self, NULL, &preferredsize);
-		bg = psy_ui_realrectangle_make(0, 0,
-			psy_ui_value_px(&preferredsize.width, tm),
-			lineheight);
+		bg = psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+			psy_ui_realsize_make(
+				psy_ui_value_px(&preferredsize.width, tm),
+				lineheight));
 		size = psy_ui_realsize_make(bg.right, lineheight);
 		psy_ui_bitmap_init_size(&self->bitmap, size);
 		psy_ui_graphics_init_bitmap(&gr, &self->bitmap);
@@ -346,8 +352,11 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 				
 				centery = (size.height - tm->tmHeight) / 2;
 				patternwidth = (psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat);				
-				r = psy_ui_realrectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
-					0, patternwidth, lineheight);
+				r = psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(
+						sequenceentry->offset * self->trackstate->pxperbeat,
+						0.0)
+					, psy_ui_realsize_make(patternwidth, lineheight));
 				selected =
 					self->workspace->sequenceselection.editposition.track == self->trackindex &&
 					self->workspace->sequenceselection.editposition.order == c;
@@ -360,8 +369,11 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 					psy_ui_setcolour(&gr, psy_ui_colour_make(0x00444444));
 					psy_ui_drawrectangle(&gr, r);
 				}
-				r = psy_ui_realrectangle_make(sequenceentry->offset * self->trackstate->pxperbeat,
-					centery, patternwidth, tm->tmHeight);
+				r = psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(
+							sequenceentry->offset * self->trackstate->pxperbeat,
+							centery),
+						psy_ui_realsize_make(patternwidth, tm->tmHeight));
 				if (generalconfig_showingpatternnames(psycleconfig_general(
 					workspace_conf(self->workspace)))) {
 					psy_audio_Pattern* pattern;
@@ -428,10 +440,13 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 		psy_ui_Size bitmapsize;
 
 		bitmapsize = psy_ui_bitmap_size(&self->bitmap);
-		psy_ui_drawbitmap(g, &self->bitmap, 0, y,
-			psy_ui_value_px(&bitmapsize.width, tm),
-			psy_ui_value_px(&bitmapsize.height, tm),
-			0, 0);
+		psy_ui_drawbitmap(g, &self->bitmap,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(0.0, y),
+				psy_ui_realsize_make(
+					psy_ui_value_px(&bitmapsize.width, tm),
+					psy_ui_value_px(&bitmapsize.height, tm))),
+			psy_ui_realpoint_zero());
 	}
 	if (self->drag_sequenceitem_node && !self->dragstarting) {
 		psy_ui_RealRectangle r;
@@ -446,7 +461,8 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->parent->component), tm);
 		cpx = self->itemdragposition * self->trackstate->pxperbeat;
-		r = psy_ui_realrectangle_make(cpx, y, 2, lineheight);
+		r = psy_ui_realrectangle_make(psy_ui_realpoint_make(cpx, y),
+			psy_ui_realsize_make(2, lineheight));
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));		
 	}
 }
@@ -493,8 +509,9 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 			tm = psy_ui_component_textmetric(&self->parent->component);
 			lineheight = psy_ui_value_px(&self->trackstate->lineheight, tm);
 			patternwidth = psy_audio_pattern_length(pattern) * self->trackstate->pxperbeat;
-			r = psy_ui_realrectangle_make(entry->offset * self->trackstate->pxperbeat, 0,
-				patternwidth, lineheight);
+			r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(entry->offset * self->trackstate->pxperbeat, 0.0),
+				psy_ui_realsize_make(patternwidth, lineheight));
 			if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
 				if (self->currtrack) {
 					uintptr_t trackindex;
@@ -700,8 +717,10 @@ void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
 	size = psy_ui_component_sizepx(&self->base.parent->component);	
 	sequencetrackbox_init(&trackbox,
 		psy_ui_realrectangle_make(
-			x, y, size.width,
-			psy_ui_value_px(&self->base.trackstate->lineheight, tm)),
+			psy_ui_realpoint_make(x, y),
+			psy_ui_realsize_make(
+				size.width,
+				psy_ui_value_px(&self->base.trackstate->lineheight, tm))),
 		tm, self->base.currtrack,
 		(self->base.workspace->song) ? &self->base.workspace->song->sequence : NULL,
 		self->base.trackindex,
@@ -733,8 +752,10 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 		size = psy_ui_component_sizepx(&self->base.parent->component);		
 		sequencetrackbox_init(&trackbox,
 			psy_ui_realrectangle_make(
-				0, 0, size.width,
-				psy_ui_value_px(&self->base.trackstate->lineheight, tm)),
+				psy_ui_realpoint_zero(),
+				psy_ui_realsize_make(
+					size.width,
+					psy_ui_value_px(&self->base.trackstate->lineheight, tm))),
 			tm,
 			self->base.currtrack,
 			(self->base.workspace->song) ? &self->base.workspace->song->sequence : NULL,
@@ -1014,8 +1035,8 @@ void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 		
 		position = psy_ui_component_scrolledposition(&self->component);		
 		psy_ui_setcolour(g, self->skin->playbar);
-		psy_ui_drawline(g, self->lastplaylinepx, position.top, self->lastplaylinepx,
-			position.bottom - position.top);
+		psy_ui_drawline(g, psy_ui_realpoint_make(self->lastplaylinepx, position.top),
+			psy_ui_realpoint_make(self->lastplaylinepx, position.bottom - position.top));
 	}
 }
 
@@ -1030,8 +1051,9 @@ void seqeditortracks_drawcursorline(SeqEditorTracks* self, psy_ui_Graphics* g)
 		cpx = self->trackstate->cursorposition * self->trackstate->pxperbeat;
 		position = psy_ui_component_scrolledposition(&self->component);
 		psy_ui_setcolour(g, self->skin->playbar);
-		psy_ui_drawline(g, cpx, position.top, cpx,
-			(psy_ui_value_px(&self->trackstate->trackssize.height, tm) - position.top));
+		psy_ui_drawline(g, psy_ui_realpoint_make(cpx, position.top),
+			psy_ui_realpoint_make(cpx,
+			(psy_ui_value_px(&self->trackstate->trackssize.height, tm) - position.top)));
 		psy_ui_setcolour(g, self->skin->cursor);
 	}	
 }

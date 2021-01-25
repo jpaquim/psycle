@@ -271,7 +271,9 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	propertiesrenderer_setlinebackground(self, property);
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {		
 		psy_ui_setcolour(self->g, self->separatorcolour);
-		psy_ui_drawline(self->g, self->cpx, self->cpy, size.width, self->cpy);
+		psy_ui_drawline(self->g,
+			psy_ui_realpoint_make(self->cpx, self->cpy),
+			psy_ui_realpoint_make(size.width, self->cpy));
 	}
 	propertiesrenderer_drawkey(self, property, 0);
 	if (self->col_perc[1] > 0.0) {

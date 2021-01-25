@@ -64,8 +64,11 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	} else {		
 		y = 0;		
 	}	
-	psy_ui_drawbitmap(g, &self->bitmap, 
-		x, y, bmpwidth, bmpheight, 0, 0);
+	psy_ui_drawbitmap(g, &self->bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(x, y),
+			psy_ui_realsize_make(bmpwidth, bmpheight)),
+		psy_ui_realpoint_zero());
 }
 
 int checkalignment(psy_ui_Image* self, psy_ui_Alignment alignment)

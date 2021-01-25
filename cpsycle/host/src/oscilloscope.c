@@ -162,7 +162,8 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 					if (x1 != x2) {
 						y1 = y2;
 						y2 = (int)(buffer->samples[channel][frame] * py);
-						psy_ui_drawline(g, x1, centery + y1, x2, centery + y2);
+						psy_ui_drawline(g, psy_ui_realpoint_make(x1, centery + y1),
+							psy_ui_realpoint_make(x2, centery + y2));
 					}
 					frame++;
 					if (frame >= numsamples) {
@@ -172,7 +173,8 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 			}
 		}
 		if (!active) {
-			psy_ui_drawline(g, 0, centery, size.width, centery);
+			psy_ui_drawline(g, psy_ui_realpoint_make(0, centery),
+				psy_ui_realpoint_make(size.width, centery));
 		}
 	}
 }

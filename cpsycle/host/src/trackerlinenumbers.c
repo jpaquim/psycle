@@ -106,7 +106,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		psy_audio_SequenceTrackIterator ite;
 		double seqoffset;		
 		double length;
-		psy_dsp_big_beat_t maxlines;
+		uintptr_t maxlines;
 		uintptr_t patidx;
 		psy_audio_PatternSelection clip;
 				
@@ -143,7 +143,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			ite.sequencentrynode = NULL;			
 		}
 		maxlines = trackerlinestate_numlines(self->linestate);
-		while (offset <= clip.bottomright.offset && line < maxlines) {
+		while (offset <= clip.bottomright.offset && line < (intptr_t)maxlines) {
 			double ystart;			
 			char text[64];
 				
@@ -260,9 +260,10 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 		} else {
 			digit[0] = ' ';
 		}
-		r = psy_ui_realrectangle_make(c * self->linestate->flatsize, y,
-			self->linestate->flatsize,
-			self->linestate->lineheightpx - 1);
+		r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(c * self->linestate->flatsize, y),
+			psy_ui_realsize_make(self->linestate->flatsize,
+				self->linestate->lineheightpx - 1));
 		psy_ui_textoutrectangle(g, r.left, r.top,
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
 			digit, strlen(digit));
@@ -270,8 +271,10 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 	r.left += self->linestate->flatsize;
 	blankspace = (width - r.left) - 4;
 	if (blankspace > 0) {
-		r = psy_ui_realrectangle_make(r.left, y, blankspace,
-			self->linestate->lineheightpx - 1);
+		r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(r.left, y),
+			psy_ui_realsize_make(
+				blankspace, self->linestate->lineheightpx - 1));
 		digit[0] = ' ';
 		psy_ui_textoutrectangle(g, r.left, r.top,
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
@@ -313,8 +316,8 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 		cursor->offset + cursor->seqoffset);
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
-			0, self->linestate->lineheightpx * line,
-			size.width, self->linestate->lineheightpx));
+			psy_ui_realpoint_make(0.0, self->linestate->lineheightpx * line),
+			psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));
 }
 
 void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_beat_t offset)
@@ -331,8 +334,8 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 				: 0.0));
 		psy_ui_component_invalidaterect(&self->component,
 			psy_ui_realrectangle_make(
-				0.0, self->linestate->lineheightpx * line,
-				size.width, self->linestate->lineheightpx));
+				psy_ui_realpoint_make(0.0, self->linestate->lineheightpx * line),
+				psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));
 	}
 }
 

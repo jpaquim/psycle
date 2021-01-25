@@ -56,8 +56,8 @@ psy_ui_RealRectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
 {
 	assert(self);
 	
-	return psy_ui_realrectangle_make(self->position.x, self->position.y,
-		psy_ui_value_px(&self->size.width, tm), tm->tmHeight + 2);
+	return psy_ui_realrectangle_make(self->position,
+		psy_ui_realsize_make(psy_ui_value_px(&self->size.width, tm), tm->tmHeight + 2));
 }
 
 
@@ -276,16 +276,18 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				
 		width = psy_ui_value_px(&tab->size.width, tm);
 		psy_ui_setcolour(g, self->skin.linehover);
-		psy_ui_drawline(g, position.x, position.y + tm->tmHeight + 2,
-			position.x + width, position.y + tm->tmHeight + 2);
+		psy_ui_drawline(g,
+			psy_ui_realpoint_make(position.x, position.y + tm->tmHeight + 2),
+			psy_ui_realpoint_make(position.x + width, position.y + tm->tmHeight + 2));
 	}
 	if (selected && drawselline) {
 		double width;
 
 		width = psy_ui_value_px(&tab->size.width, tm);
 		psy_ui_setcolour(g, self->skin.linesel);		
-		psy_ui_drawline(g, position.x, position.y + tm->tmHeight + 2,
-			position.x + width, position.y + tm->tmHeight + 2);
+		psy_ui_drawline(g,
+			psy_ui_realpoint_make(position.x, position.y + tm->tmHeight + 2),
+			psy_ui_realpoint_make(position.x + width, position.y + tm->tmHeight + 2));
 	}
 }
 

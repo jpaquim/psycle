@@ -118,8 +118,8 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		psy_ui_defaults()->style_common.colour);	
 	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
 	size = psy_ui_component_sizepx(&self->component);
-	psy_ui_drawrectangle(g, psy_ui_realrectangle_make(
-		0.0, 0.0, size.width, size.height));
+	psy_ui_drawrectangle(g,
+		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size));
 }
 
 void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphics* g)
@@ -134,8 +134,10 @@ void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphic
 		double cpy;
 
 		cpy = step * size.height;
-		psy_ui_drawline(g, 0, cpy, markwidth, cpy);
-		psy_ui_drawline(g, size.width - markwidth, cpy, size.width, cpy);
+		psy_ui_drawline(g, psy_ui_realpoint_make(0, cpy),
+			psy_ui_realpoint_make(markwidth, cpy));
+		psy_ui_drawline(g, psy_ui_realpoint_make(size.width - markwidth, cpy),
+			psy_ui_realpoint_make(size.width, cpy));
 	}
 }
 
@@ -430,11 +432,11 @@ psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* s
 
 	size = psy_ui_component_sizepx(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		return psy_ui_realrectangle_make(
-			floor((size.width - self->slidersizepx.width) * self->value), 2,
-			self->slidersizepx.width, size.height - 4);
+		return psy_ui_realrectangle_make(psy_ui_realpoint_make(
+			floor((size.width - self->slidersizepx.width) * self->value), 2.0),
+			psy_ui_realsize_make(self->slidersizepx.width, size.height - 4));
 	}
-	return psy_ui_realrectangle_make(2,
-		floor(((size.height - self->slidersizepx.height) * (1 - self->value))),
-		size.width - 4, self->slidersizepx.height);
+	return psy_ui_realrectangle_make(psy_ui_realpoint_make(2.0,
+		floor(((size.height - self->slidersizepx.height) * (1 - self->value)))),
+		psy_ui_realsize_make(size.width - 4, self->slidersizepx.height));
 }

@@ -185,8 +185,9 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 								if (y2 > height / 2 || y2 < -height / 2) {
 									continue;
 								}
-								psy_ui_drawline(g, x + x1, centery + y1, x + x2,
-									centery + y2);								
+								psy_ui_drawline(g,
+									psy_ui_realpoint_make(x + x1, centery + y1),
+									psy_ui_realpoint_make(x + x2, centery + y2));
 							}
 							++frame;
 							if (frame >= numsamples) {
@@ -198,7 +199,8 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 			}			
 		}
 		if (!active) {
-			psy_ui_drawline(g, x, centery, x + width, centery);
+			psy_ui_drawline(g, psy_ui_realpoint_make(x, centery),
+				psy_ui_realpoint_make(x + width, centery));
 		}
 	}	
 }

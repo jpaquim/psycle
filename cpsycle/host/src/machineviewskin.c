@@ -20,6 +20,18 @@
 #define _MAX_PATH 4096
 #endif
 
+void machinecoords_init(MachineCoords* self)
+{
+	skincoord_init(&self->background);
+	skincoord_init(&self->vu0);
+	skincoord_init(&self->vupeak);
+	skincoord_init(&self->pan);
+	skincoord_init(&self->mute);
+	skincoord_init(&self->bypass);
+	skincoord_init(&self->solo);
+	skincoord_init(&self->name);
+}
+
 // MachineViewSkin
 // prototypes
 static void machineviewskin_initdefaultmachinecoords(MachineViewSkin*);
@@ -35,6 +47,7 @@ void machineviewskin_init(MachineViewSkin* self)
 	psy_ui_font_init(&self->font, &fontinfo);
 	machineviewskin_initdefaultmachinecoords(self);
 	self->drawmachineindexes = TRUE;
+	self->drawvumeters = TRUE;
 }
 
 void machineviewskin_dispose(MachineViewSkin* self)
@@ -44,40 +57,28 @@ void machineviewskin_dispose(MachineViewSkin* self)
 }
 
 void machineviewskin_initdefaultmachinecoords(MachineViewSkin* self)
-{
-	MachineCoords master = {
-		{ 0, 52, 138, 35, 0, 0, 138, 35, 0 },		// background
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 }
-	};
-	MachineCoords generator = {
-		{ 0, 87, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 156, 0, 7, 4, 20, 129, 7, 129},		// vu0
-		{ 108, 156, 1, 7, 4, 20, 1, 7, 82 },		// vupeak
-		{ 0, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
-		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
-		{ 6, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
-		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name
-	};
-	MachineCoords effect = {
-		{ 0, 0, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 163, 0, 7, 4, 20, 129, 7, 129 },		// vu0
-		{ 96, 144, 1, 7, 4, 20, 1, 7, 0 },			// vupeak
-		{ 57, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
-		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
-		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name 
-	};
-	self->master = master;
-	self->generator = generator;
-	self->effect = effect;
+{	
+	// Master
+	machinecoords_init(&self->master);
+	skincoord_init_all(&self->master.background, 0, 52, 138, 35, 0, 0, 138, 35, 0);
+	// Generator
+	skincoord_init_all(&self->generator.background, 0, 87, 138, 52, 0, 0, 138, 52, 0);
+	skincoord_init_all(&self->generator.vu0,  0, 156, 0, 7, 4, 20, 129, 7, 129);
+	skincoord_init_all(&self->generator.vupeak, 108, 156, 1, 7, 4, 20, 1, 7, 82);
+	skincoord_init_all(&self->generator.pan, 0, 139, 6, 13, 6, 33, 6, 13, 82);
+	skincoord_init_all(&self->generator.mute, 23, 139, 17, 17, 117, 31, 17, 17, 0);
+	skincoord_init_all(&self->generator.bypass, 40, 139, 17, 17, 98, 31, 17, 17, 0);
+	skincoord_init_all(&self->generator.solo, 6, 139, 17, 17, 98, 31, 17, 17, 0);
+	skincoord_init_all(&self->generator.name, 0, 0, 0, 0, 20, 3, 117, 15, 0);
+	// Effect
+	skincoord_init_all(&self->effect.background, 0, 0, 138, 52, 0, 0, 138, 52, 0);
+	skincoord_init_all(&self->effect.vu0, 0, 163, 0, 7, 4, 20, 129, 7, 129);
+	skincoord_init_all(&self->effect.vupeak, 96, 144, 1, 7, 4, 20, 1, 7, 0);
+	skincoord_init_all(&self->effect.pan, 57, 139, 6, 13, 6, 33, 6, 13, 82);
+	skincoord_init_all(&self->effect.mute, 23, 139, 17, 17, 117, 31, 17, 17, 0);
+	skincoord_init_all(&self->effect.bypass, 40, 139, 17, 17, 98, 31, 17, 17, 0);
+	skincoord_init_all(&self->effect.solo, 40, 139, 17, 17, 98, 31, 17, 17, 0);
+	skincoord_init_all(&self->effect.name, 0, 0, 0, 0, 20, 3, 117, 15, 0);
 }
 
 void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char* skindir)
@@ -196,7 +197,8 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	if (s = psy_property_at_str(p, "generator_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->generator.vu0, vals);
-		self->generator.vu0.destwidth = (double)vals[2];
+		psy_ui_realrectangle_setwidth(&self->generator.vu0.dest,
+			(double)vals[2]);
 	}
 	if (s = psy_property_at_str(p, "generator_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
@@ -242,7 +244,8 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	if (s = psy_property_at_str(p, "effect_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->effect.vu0, vals);
-		self->generator.vu0.destwidth = (double)vals[2];
+		psy_ui_realrectangle_setwidth(&self->generator.vu0.dest,
+			(double)vals[2]);
 	}
 	if (s = psy_property_at_str(p, "effect_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
