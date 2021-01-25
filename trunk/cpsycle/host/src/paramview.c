@@ -272,8 +272,8 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	double w;
 	double h;
 	
-	knob_cx = self->skin->knob.destwidth;
-	knob_cy = self->skin->knob.destheight;	
+	knob_cx = psy_ui_realrectangle_width(&self->skin->knob.dest);
+	knob_cy = psy_ui_realrectangle_height(&self->skin->knob.dest);
 	mpfsize(self, MPF_STATE, FALSE, &w, &h);	
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
@@ -315,17 +315,26 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 
 			ratio = h / (double)knob_cy;
 			w = ratio * knob_cx;
-			psy_ui_drawstretchedbitmap(g, &self->skin->knobbitmap, r.left, r.top, w,
-				h, knob_frame * knob_cx, 0, knob_cx, knob_cy);
+			psy_ui_drawstretchedbitmap(g, &self->skin->knobbitmap,
+				psy_ui_realrectangle_make(
+					psy_ui_realrectangle_topleft(&r),
+					psy_ui_realsize_make(w, h)),
+					psy_ui_realpoint_make(knob_frame * knob_cx, 0.0),
+					psy_ui_realsize_make(knob_cx, knob_cy));
 		} else {
-			psy_ui_drawbitmap(g, &self->skin->knobbitmap, r.left, r.top, knob_cx,
-				knob_cy, knob_frame * knob_cx, 0);
+			psy_ui_drawbitmap(g, &self->skin->knobbitmap,
+				psy_ui_realrectangle_make(
+					psy_ui_realrectangle_topleft(&r),
+					psy_ui_realsize_make(knob_cx, knob_cy)),
+				psy_ui_realpoint_make(knob_frame * knob_cx, 0));
 		}
 
 	}
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00232323));
-	psy_ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
-	psy_ui_drawline(g, r.right - 1, r.top, r.right - 1, r.bottom - 1);
+	psy_ui_drawline(g, psy_ui_realpoint_make(r.left, r.bottom - 1),
+		psy_ui_realpoint_make(r.right, r.bottom - 1));
+	psy_ui_drawline(g, psy_ui_realpoint_make(r.right - 1, r.top),
+		psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
 }
 
 void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
@@ -420,23 +429,27 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
-	skin_blitpart(g, &self->skin->mixerbitmap, left, top, &self->skin->slider);
-	xoffset = (self->skin->slider.destwidth - self->skin->knob.destwidth) / 2;
+	skin_blitpart(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_make(left, top), &self->skin->slider);
+	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
+		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
 	value =	psy_audio_machine_parameter_normvalue(self->machine, param);
 	yoffset = ((1.0 - value) *
-		(self->skin->slider.destheight - self->skin->sliderknob.destheight));
-	skin_blitpart(g, &self->skin->mixerbitmap, left + xoffset, top + yoffset,
+		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
+		psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
+	skin_blitpart(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_make(left + xoffset, top + yoffset),
 		&self->skin->sliderknob);
 			
 	if (psy_audio_machine_parameter_name(self->machine, param, str) != FALSE) {
 		psy_ui_setbackgroundcolour(g, self->skin->topcolour);
 		psy_ui_settextcolour(g, self->skin->fonttopcolour);
-		psy_ui_setrectangle(&r, left + 32, top + self->skin->slider.destheight - 48, width - 32, 24);
-		psy_ui_textoutrectangle(g, left + 32, top + self->skin->slider.destheight - 48,
+		psy_ui_setrectangle(&r, left + 32, top + self->skin->slider.dest.bottom - self->skin->slider.dest.top - 48, width - 32, 24);
+		psy_ui_textoutrectangle(g, left + 32, top + self->skin->slider.dest.bottom - self->skin->slider.dest.top - 48,
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 			r, str, strlen(str));
 	}	
-	psy_ui_setrectangle(&r, left + 32, top + self->skin->slider.destheight - 24,
+	psy_ui_setrectangle(&r, left + 32, top + psy_ui_realrectangle_height(&self->skin->slider.dest) - 24,
 		width - 32, 24);
 	if (psy_audio_machine_parameter_describe(self->machine, param, str) == FALSE) {
 		psy_snprintf(str, 128, "%d",
@@ -444,7 +457,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	}
 	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
 	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
-	psy_ui_textoutrectangle(g, left + 32, top + self->skin->slider.destheight - 24,
+	psy_ui_textoutrectangle(g, left + 32, top + psy_ui_realrectangle_height(&self->skin->slider.dest) - 24,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, str, strlen(str));
 }
@@ -470,25 +483,23 @@ void mixer_vumeterdraw(ParamView* self, psy_ui_Graphics* g, double x, double y, 
 
 	if (value < 0.f) value = 0.f;
 	if (value > 1.f) value = 1.f;
-	ypos = ((1.f - value) * self->skin->vuoff.destheight);
+	ypos = (1.f - value) * psy_ui_realrectangle_height(&self->skin->vuoff.dest);
 	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
-		x,
-		y + ypos,
-		self->skin->vuoff.destwidth,
-		self->skin->vuoff.destheight - ypos,
-		self->skin->vuon.srcx,
-		self->skin->vuon.srcy + ypos);	
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(x, y + ypos),
+			psy_ui_realsize_make(
+				psy_ui_realrectangle_width(&self->skin->vuoff.dest),
+				psy_ui_realrectangle_height(&self->skin->vuoff.dest) - ypos)),
+		psy_ui_realrectangle_topleft(&self->skin->vuon.src));
 }
 
 void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, double x, double y)
 {
 	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
-		x,
-		y,
-		self->skin->vuoff.destwidth,
-		self->skin->vuoff.destheight,
-		self->skin->vuoff.srcx,
-		self->skin->vuoff.srcy);
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(x, y),
+			psy_ui_realrectangle_size(&self->skin->vuoff.dest)),
+		psy_ui_realrectangle_topleft(&self->skin->vuoff.src));
 }
 
 void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
@@ -505,13 +516,13 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
-	centery = (height - self->skin->checkoff.destheight) / 2;
+	centery = (height - psy_ui_realrectangle_height(&self->skin->checkoff.dest)) / 2;
 	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top + centery, &self->skin->checkoff);
+		skin_blitpart(g, &self->skin->mixerbitmap,
+			psy_ui_realpoint_make(left, top + centery), &self->skin->checkoff);
 	} else {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top + centery, & self->skin->checkon);
+		skin_blitpart(g, &self->skin->mixerbitmap,
+			psy_ui_realpoint_make(left, top + centery), & self->skin->checkon);
 	}
 	psy_ui_setrectangle(&r, left + 20, top, width, height);
 	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
@@ -541,12 +552,12 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top, &self->skin->switchoff);
+		skin_blitpart(g, &self->skin->mixerbitmap,
+			psy_ui_realpoint_make(left, top), &self->skin->switchoff);
 	}
 	else {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top, &self->skin->switchon);
+		skin_blitpart(g, &self->skin->mixerbitmap,
+			psy_ui_realpoint_make(left, top), &self->skin->switchon);
 	}	
 	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
 		if (!psy_audio_machine_parameter_label(self->machine, param, label)) {
@@ -555,8 +566,8 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	}
 	psy_ui_setbackgroundcolour(g, self->skin->topcolour);
 	psy_ui_settextcolour(g, self->skin->fonttopcolour);
-	psy_ui_setrectangle(&r, left + self->skin->switchon.destwidth, top, width, height / 2);
-	psy_ui_textoutrectangle(g, left + self->skin->switchon.destwidth, top,
+	psy_ui_setrectangle(&r, left + psy_ui_realrectangle_width(&self->skin->switchon.dest), top, width, height / 2);
+	psy_ui_textoutrectangle(g, left + psy_ui_realrectangle_width(&self->skin->switchon.dest), top,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, label, strlen(label));
 }
@@ -588,14 +599,14 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, do
 		break;
 	case MPF_SLIDERCHECK:
 		tm = psy_ui_component_textmetric(&self->component);
-		*height = psy_max(self->skin->checkoff.destheight,
+		*height = psy_max(psy_ui_realrectangle_height(&self->skin->checkoff.dest),
 			tm->tmHeight);
-		*width = self->skin->checkoff.destwidth +
+		*width = psy_ui_realrectangle_height(&self->skin->checkoff.dest) +
 			tm->tmAveCharWidth * 5;
 		break;
 	case MPF_SLIDER:
-		*height = self->skin->slider.destheight;
-		*width = self->skin->slider.destwidth;
+		*height = psy_ui_realrectangle_height(&self->skin->slider.dest);
+		*width = psy_ui_realrectangle_width(&self->skin->slider.dest);
 		tm = psy_ui_component_textmetric(&self->component);
 		if (*width < tm->tmAveCharWidth * 30) {
 			*width = tm->tmAveCharWidth * 30;
@@ -603,17 +614,17 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, double* width, do
 		if (small) {
 			*width = *width / SMALLDIV;
 		}
-		if (*width < self->skin->vuon.destwidth +
-			self->skin->checkoff.destwidth + 50 +
+		if (*width < psy_ui_realrectangle_width(&self->skin->vuon.dest) +
+			psy_ui_realrectangle_width(&self->skin->checkoff.dest) + 50 +
 			tm->tmAveCharWidth * 5) {
-			*width = self->skin->vuon.destwidth +
-				self->skin->checkoff.destwidth + 50 +
+			*width = psy_ui_realrectangle_width(&self->skin->vuon.dest) +
+				psy_ui_realrectangle_width(&self->skin->checkoff.dest) + 50 +
 				tm->tmAveCharWidth * 5;
 		}
 		break;
 		case MPF_SLIDERLEVEL:
-			*height = self->skin->vuon.destheight;
-			*width = self->skin->slider.destwidth;
+			*height = psy_ui_realrectangle_height(&self->skin->vuon.dest);
+			*width = psy_ui_realrectangle_width(&self->skin->slider.dest);
 			if (small) {
 				*width = *width / SMALLDIV;
 			}
@@ -862,7 +873,7 @@ void paramview_computepositions(ParamView* self)
 			position = (psy_ui_RealRectangle*)malloc(sizeof(psy_ui_RealRectangle));
 			psy_ui_setrectangle(position, cpx, 0, 0, 0);
 			if (paramtype == MPF_SLIDERLEVEL) {
-				position->left += self->skin->slider.destwidth;
+				position->left += psy_ui_realrectangle_width(&self->skin->slider.dest);
 			} else
 				if (paramtype == MPF_SLIDERCHECK) {
 					position->left += 50;

@@ -459,8 +459,9 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			r.top = centery - (int)(framevalue * scaley);
 			r.bottom = centery;
 			if (self->drawline) {
-				psy_ui_drawline(g, r.left - 1, centery - (int)(lastframevalue * scaley),
-					r.left, r.top);
+				psy_ui_drawline(g,
+					psy_ui_realpoint_make(r.left - 1, centery - (int)(lastframevalue * scaley)),
+					psy_ui_realpoint_make(r.left, r.top));
 				lastframevalue = framevalue;
 			} else {
 				if (r.top > r.bottom) {
@@ -478,17 +479,17 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		}
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			psy_ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
-				size.height);
-			psy_ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,
-				size.height);
+			psy_ui_drawline(g, psy_ui_realpoint_make(cont_loop_rc.left, 0),
+				psy_ui_realpoint_make(cont_loop_rc.left + 1, size.height));
+			psy_ui_drawline(g, psy_ui_realpoint_make(cont_loop_rc.right, 0),
+				psy_ui_realpoint_make(cont_loop_rc.right + 1, size.height));
 		}
 		if (self->context.sample && self->context.sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00B6C5D1));
-			psy_ui_drawline(g, sustain_loop_rc.left, 0, sustain_loop_rc.left + 1,
-				size.height);
-			psy_ui_drawline(g, sustain_loop_rc.right, 0, sustain_loop_rc.right + 1,
-				size.height);
+			psy_ui_drawline(g, psy_ui_realpoint_make(sustain_loop_rc.left, 0),
+				psy_ui_realpoint_make(sustain_loop_rc.left + 1, size.height));
+			psy_ui_drawline(g, psy_ui_realpoint_make(sustain_loop_rc.right, 0),
+				psy_ui_realpoint_make(sustain_loop_rc.right + 1, size.height));
 		}
 	}
 }
@@ -503,7 +504,8 @@ psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebe
 	startx = wavebox_frametoscreen(self, framebegin);	
 	endx = wavebox_frametoscreen(self, frameend);	
 	size = psy_ui_component_sizepx(&self->component);
-	return psy_ui_realrectangle_make(startx, 0, endx - startx, size.height);	
+	return psy_ui_realrectangle_make(psy_ui_realpoint_make(startx, 0.0),
+		psy_ui_realsize_make(endx - startx, size.height));
 }
 
 void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,

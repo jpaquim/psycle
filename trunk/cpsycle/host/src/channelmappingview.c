@@ -247,9 +247,10 @@ void pinedit_drawdrag(PinEdit* self, psy_ui_Graphics* g)
 
 		in = pinedit_pinposition_input(self, self->drag_dst);
 		psy_ui_setcolour(g, self->wirecolour);
-		psy_ui_drawline(g, self->mx, self->my,
+		psy_ui_drawline(g, psy_ui_realpoint_make(self->mx, self->my),
+			psy_ui_realpoint_make(
 			in.left + (in.right - in.left) / 2,
-			in.top + (in.bottom - in.top) / 2);
+			in.top + (in.bottom - in.top) / 2));
 	} else
 	if (self->dragmode == PINEDIT_DRAG_DST ||
 		self->dragmode == PINEDIT_DRAG_NEW_DST) {
@@ -257,9 +258,9 @@ void pinedit_drawdrag(PinEdit* self, psy_ui_Graphics* g)
 
 		out = pinedit_pinposition_output(self, self->drag_src);
 		psy_ui_setcolour(g, self->wirecolour);
-		psy_ui_drawline(g, self->mx, self->my,
-			out.left + (out.right - out.left) / 2,
-			out.top + (out.bottom - out.top) / 2);
+		psy_ui_drawline(g, psy_ui_realpoint_make(self->mx, self->my),
+			psy_ui_realpoint_make(out.left + (out.right - out.left) / 2,
+			out.top + (out.bottom - out.top) / 2));
 	}
 }
 

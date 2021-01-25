@@ -52,6 +52,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->filemode = 0;
 	self->master = 0;
 	self->maxindex = 0;
+	self->mixercount = 0;
 	self->preventundoredo = FALSE;
 	psy_undoredo_init(&self->undoredo);
 	machines_initsignals(self);
@@ -79,6 +80,7 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 	psy_table_dispose(&self->nopath);
 	dsp.memory_dealloc(self->samplebuffers);
 	psy_undoredo_dispose(&self->undoredo);
+	self->mixercount = 0;
 }
 
 void machines_disposesignals(psy_audio_Machines* self)
@@ -102,7 +104,7 @@ void machines_free(psy_audio_Machines* self)
 		assert(machine);
 		psy_audio_machine_deallocate(machine);		
 		psy_table_insert(&self->slots, psy_tableiterator_key(&it), NULL);
-	}
+	}	
 }
 
 void psy_audio_machines_clear(psy_audio_Machines* self)
@@ -128,6 +130,9 @@ void psy_audio_machines_insert(psy_audio_Machines* self, uintptr_t slot,
 			psy_audio_machine_setslot(machine, slot);
 			if (slot > self->maxindex) {
 				self->maxindex = slot;
+			}
+			if (psy_audio_machine_type(machine) == MACH_MIXER) {
+				++self->mixercount;
 			}
 			psy_signal_emit(&self->signal_insert, self, 1, slot);
 			if (!self->filemode) {
@@ -172,9 +177,15 @@ void psy_audio_machines_insertmaster(psy_audio_Machines* self,
 
 void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 {	
+	psy_audio_Machine* machine;
+
 	psy_audio_exclusivelock_enter();
 	if (slot == psy_audio_MASTER_INDEX) {
 		self->master = NULL;
+	}
+	machine = psy_audio_machines_at(self, slot);
+	if (machine && psy_audio_machine_type(machine) == MACH_MIXER) {
+		--self->mixercount;
 	}
 	psy_audio_machines_disconnectall(self, slot);	
 	psy_table_remove(&self->slots, slot);
@@ -182,7 +193,7 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 		TRUE));	
 	if (slot == self->maxindex) {
 		self->selected = machines_findmaxindex(self);
-	}
+	}	
 	psy_signal_emit(&self->signal_removed, self, 1, slot);	
 	psy_audio_exclusivelock_leave();	
 }
@@ -212,7 +223,7 @@ void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)
 	machine = psy_audio_machines_at(self, slot);
 	if (machine) {
 		if (self->preventundoredo || slot == psy_audio_MASTER_INDEX || self->filemode) {
-			psy_audio_machines_erase(self, slot);
+			psy_audio_machines_erase(self, slot);			
 			psy_audio_machine_dispose(machine);
 			free(machine);
 		} else {
@@ -709,7 +720,7 @@ void  psy_audio_machines_connectasmixerinput(psy_audio_Machines* self)
 	self->mixersendconnect = FALSE;
 }
 
-bool  psy_audio_machines_isconnectasmixersend(psy_audio_Machines* self)
+bool  psy_audio_machines_isconnectasmixersend(const psy_audio_Machines* self)
 {
 	return self->mixersendconnect;
 }

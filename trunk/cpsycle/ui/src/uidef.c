@@ -145,6 +145,17 @@ void psy_ui_realrectangle_move(psy_ui_RealRectangle* self, double dx, double dy)
 	self->left += dx;
 }
 
+void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle* self, psy_ui_RealPoint topleft)
+{
+	psy_ui_RealSize size;
+
+	size = psy_ui_realrectangle_size(self);
+	self->left = topleft.x;
+	self->top = topleft.y;
+	self->right = self->left + size.width;
+	self->bottom = self->top + size.height;	
+}
+
 void psy_ui_margin_init(psy_ui_Margin* self)
 {
 	self->top = psy_ui_value_makepx(0);

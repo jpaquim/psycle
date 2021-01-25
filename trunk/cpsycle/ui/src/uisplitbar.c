@@ -67,11 +67,13 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 		center = size.height / 2 - thumbsize / 2;
 		ident = size.width / 2;		
-		psy_ui_drawline(g, ident, center, ident, center + thumbsize);
+		psy_ui_drawline(g, psy_ui_realpoint_make(ident, center),
+			psy_ui_realpoint_make(ident, center + thumbsize));
 	} else {
 		center = size.width / 2 - thumbsize / 2;
 		ident = size.height / 2;		
-		psy_ui_drawline(g, center, ident, center + thumbsize, ident);
+		psy_ui_drawline(g, psy_ui_realpoint_make(center, ident),
+			psy_ui_realpoint_make(center + thumbsize, ident));
 	}
 }
 

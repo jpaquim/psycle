@@ -123,7 +123,8 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 				cp, 0,
 				(self->metrics.keysize + 1), size.height);
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));
-			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+			psy_ui_drawline(g, psy_ui_realpoint_make(cp, 0),
+				psy_ui_realpoint_make(cp, size.height));
 			cp += self->metrics.keysize;			
 		}
 	}
@@ -331,9 +332,12 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			} else {
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00CACACA));
 			}
-			psy_ui_drawline(g, startx, cpy + 5, endx, cpy + 5);
-			psy_ui_drawline(g, startx, cpy, startx, cpy + 10);
-			psy_ui_drawline(g, endx, cpy, endx, cpy + 10);			
+			psy_ui_drawline(g, psy_ui_realpoint_make(startx, cpy + 5),
+				psy_ui_realpoint_make(endx, cpy + 5));
+			psy_ui_drawline(g, psy_ui_realpoint_make(startx, cpy),
+				psy_ui_realpoint_make(startx, cpy + 10));
+			psy_ui_drawline(g, psy_ui_realpoint_make(endx, cpy),
+				psy_ui_realpoint_make(endx, cpy + 10));
 			cpy += self->metrics.lineheight * 3;
 		}		
 		if (!self->instrument->entries) {

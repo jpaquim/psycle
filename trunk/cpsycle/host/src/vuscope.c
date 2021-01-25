@@ -249,8 +249,8 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	} else {
 		psy_ui_setcolour(g, psy_ui_colour_make(linepenL));
 	}
-	psy_ui_drawline(g, rect.left - 1, (int)self->peakL, 		
-		rect.right - 1, (int)self->peakL);	
+	psy_ui_drawline(g, psy_ui_realpoint_make(rect.left - 1, (int)self->peakL),
+		psy_ui_realpoint_make(rect.right - 1, (int)self->peakL));
 
 	rect.top = (int) maxL;
 	rect.bottom = centerx;
@@ -277,8 +277,8 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	} else {
 		psy_ui_setcolour(g, psy_ui_colour_make(linepenR));
 	}
-	psy_ui_drawline(g, rect.left - 1, (int)self->peakR, rect.right - 1,
-		(int)self->peakR);
+	psy_ui_drawline(g, psy_ui_realpoint_make(rect.left - 1, self->peakR),
+		psy_ui_realpoint_make(rect.right - 1, self->peakR));
 
 	rect.top = (int) maxR;
 	rect.bottom = psy_ui_value_px(&size.height, tm);

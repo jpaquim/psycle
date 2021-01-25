@@ -40,6 +40,11 @@ typedef struct MachineUi {
 	MachineCoords* coords;
 	MachineViewSkin* skin;
 	psy_audio_Machine* machine;
+	psy_ui_Colour font;
+	psy_ui_Colour bgcolour;
+	psy_ui_RealRectangle position;
+	psy_ui_RealRectangle vuposition;
+	psy_ui_RealPoint topleft;
 	uintptr_t slot;
 	MachineFrame* frame;
 	ParamView* paramview;
@@ -71,8 +76,7 @@ typedef struct MachineWireView {
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire selectedwire;
-	psy_audio_Wire hoverwire;
-	bool drawvumeters;	
+	psy_audio_Wire hoverwire;	
 	psy_audio_PluginCatcher plugincatcher;
 	MachineViewSkin skin;	
 	psy_ui_Edit editname;
@@ -80,7 +84,7 @@ typedef struct MachineWireView {
 	int addeffect;
 	bool mousemoved;
 	bool showwirehover;
-	bool drawvumode;
+	bool vudrawupdate;
 	bool drawvirtualgenerators;
 	// references
 	struct MachineViewBar* statusbar;

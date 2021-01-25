@@ -199,7 +199,8 @@ INLINE double trackergridstate_preferredtrackwidth(const
 	TrackerGridState* self)
 {
 	if (self->skin) {
-		return self->skin->headercoords.background.destwidth;
+		return self->skin->headercoords.background.dest.right - 
+			self->skin->headercoords.background.dest.left;
 	}
 	return 0;
 }

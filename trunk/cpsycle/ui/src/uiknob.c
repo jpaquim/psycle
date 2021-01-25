@@ -8,30 +8,32 @@
 #include <stdlib.h>
 #include <string.h>
 
+// prototypes
 static void ondestroy(psy_ui_Knob*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Knob*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_Knob*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Knob*);
 static void onmouseleave(psy_ui_Knob*);
-static void onpreferredsize(psy_ui_Knob*, psy_ui_Size* limit,
+static void onpreferredsize(psy_ui_Knob*, const psy_ui_Size* limit,
 	psy_ui_Size* size);
-
+// vtable
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_Knob* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown) onmousedown;
-		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) onmouseleave;
-		vtable_initialized = 1;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;
+		vtable_initialized = TRUE;
 	}
 }
-
+// implementation
 void psy_ui_knob_init(psy_ui_Knob* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(&self->component, parent);
@@ -74,7 +76,10 @@ void psy_ui_knob_setdesc(psy_ui_Knob* self, const char* text)
 void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 {
 	if (self->bitmap) {
-		psy_ui_drawbitmap(g, self->bitmap, 0, 0, 28, 28, 0, 0);
+		psy_ui_drawbitmap(g, self->bitmap,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_zero(), psy_ui_realsize_make(28, 28)),
+			psy_ui_realpoint_zero());
 	}
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
@@ -82,7 +87,8 @@ void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));
 }
 
-void onpreferredsize(psy_ui_Knob* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void onpreferredsize(psy_ui_Knob* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {		
 	if (rv) {		
 		rv->width = psy_ui_value_makepx(28 + 50);

@@ -247,7 +247,10 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 			psy_audio_SequenceTrack* track;
 			track = (psy_audio_SequenceTrack*)p->entry;			
 			sequencetrackbox_init(&trackheader,
-				psy_ui_realrectangle_make(cpx, 0, self->state->trackwidth, size.height),
+				psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(cpx, 0),
+					psy_ui_realsize_make(
+						self->state->trackwidth, size.height)),
 				tm,
 				track,
 				self->state->sequence,
@@ -256,7 +259,10 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 			sequencetrackbox_draw(&trackheader, g);
 		}
 		sequencetrackbox_init(&trackheader,
-			psy_ui_realrectangle_make(cpx, 0, self->state->trackwidth, size.height),
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(cpx, 0),
+				psy_ui_realsize_make(
+					self->state->trackwidth, size.height)),
 			tm, NULL, self->state->sequence, 0, 0);
 		sequencetrackbox_draw(&trackheader, g);
 	}	
@@ -283,8 +289,9 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 			self->state->sequence, selectedtrack);
 		sequencetrackbox_init(&trackbox,
 			psy_ui_realrectangle_make(
-				selectedtrack * self->state->trackwidth, 0,
-				self->state->trackwidth, size.height),
+				psy_ui_realpoint_make(
+					selectedtrack * self->state->trackwidth, 0.0),
+				psy_ui_realsize_make(self->state->trackwidth, size.height)),
 			tm, track, self->state->sequence, selectedtrack,
 			self->state->selection->editposition.track == selectedtrack);
 		switch (sequencetrackbox_hittest(&trackbox, ev->x, ev->y)) {		
@@ -520,9 +527,11 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 {
 	psy_ui_RealRectangle r;
 
-	r = psy_ui_realrectangle_make(x + 5, y + self->state->margin,
-		floor((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
-			(self->state->trackwidth - 5)), self->lineheight);
+	r = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(x + 5.0, y + self->state->margin),
+		psy_ui_realsize_make(
+			floor((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
+			(self->state->trackwidth - 5)), self->lineheight));
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
 
@@ -679,8 +688,9 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_sizepx(&self->component);
-	return psy_ui_realrectangle_make(0, self->lineheight * row + self->state->margin,
-		size.width, self->lineheight);
+	return psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(0.0, self->lineheight * row + self->state->margin),
+		psy_ui_realsize_make(size.width, self->lineheight));
 }
 
 // SequenceViewDuration

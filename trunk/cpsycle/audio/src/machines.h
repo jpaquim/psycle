@@ -51,6 +51,7 @@ typedef struct psy_audio_Machines {
 	bool mixersendconnect;
 	psy_UndoRedo undoredo;
 	bool preventundoredo;
+	uintptr_t mixercount;
 } psy_audio_Machines;
 
 void psy_audio_machines_init(psy_audio_Machines*);
@@ -103,7 +104,13 @@ void psy_audio_machines_addmixersend(psy_audio_Machines* self, uintptr_t slot);
 void psy_audio_machines_removemixersend(psy_audio_Machines* self, uintptr_t slot);
 void psy_audio_machines_connectasmixersend(psy_audio_Machines*);
 void psy_audio_machines_connectasmixerinput(psy_audio_Machines*);
-bool psy_audio_machines_isconnectasmixersend(psy_audio_Machines*);
+bool psy_audio_machines_isconnectasmixersend(const psy_audio_Machines*);
+
+INLINE bool psy_audio_machines_hasmixer(const psy_audio_Machines* self)
+{
+	return self->mixercount != 0;
+}
+
 uintptr_t psy_audio_machines_maxindex(psy_audio_Machines*);
 
 #ifdef __cplusplus

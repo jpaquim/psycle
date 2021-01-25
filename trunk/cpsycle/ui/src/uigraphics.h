@@ -161,22 +161,39 @@ INLINE void psy_ui_drawsolidpolygon(psy_ui_Graphics* self, psy_ui_RealPoint* pts
 {
 	self->vtable->drawsolidpolygon(self, pts, numpoints, inner, outter);	
 }
-
-INLINE void psy_ui_drawfullbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap, double x, double y)
+// blits a bitmap with its full size to the device context
+// dest: topleft point of the destination rectangle
+INLINE void psy_ui_drawfullbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap,
+	psy_ui_RealPoint dest)
 {	
-	self->vtable->drawfullbitmap(self, bitmap, x, y);
+	self->vtable->drawfullbitmap(self, bitmap, dest.x, dest.y);
 }
-
-INLINE void psy_ui_drawbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap, double x, double y, double width,
-	double height, double xsrc, double ysrc)
+// blits a bitmap to the device context
+// dest: destination rectangle of the blitted bitmap and size of the source
+//       bitmap part to be copied
+// src: topleft position of the source rectangle
+INLINE void psy_ui_drawbitmap(psy_ui_Graphics* self,
+	psy_ui_Bitmap* bitmap,
+	psy_ui_RealRectangle dest,
+	psy_ui_RealPoint src)
 {	
-	self->vtable->drawbitmap(self, bitmap, x, y, width, height, xsrc, ysrc);
+	self->vtable->drawbitmap(self, bitmap, dest.left, dest.top,
+		psy_ui_realrectangle_width(&dest), psy_ui_realrectangle_height(&dest),
+		src.x, src.y);
 }
-
-INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap, double x, double y, double width,
-	double height, double xsrc, double ysrc, double wsrc, double hsrc)
+// blits a bitmap to the device context
+// dest: destination rectangle of the blitted bitmap
+//       srcsize will be sized to the destination size
+// src: topleft position of the source rectangle
+// srcsize: part of the source bitmap to be copied
+INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self,
+	psy_ui_Bitmap* bitmap,
+	psy_ui_RealRectangle dest,
+	psy_ui_RealPoint src, psy_ui_RealSize srcsize)
 {
-	self->vtable->drawstretchedbitmap(self, bitmap, x, y, width, height, xsrc, ysrc, wsrc, hsrc);
+	self->vtable->drawstretchedbitmap(self, bitmap, dest.left, dest.top,
+		psy_ui_realrectangle_width(&dest), psy_ui_realrectangle_height(&dest),
+		src.x, src.y, srcsize.width, srcsize.height);
 }
 
 INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
@@ -209,9 +226,10 @@ INLINE void psy_ui_setfont(psy_ui_Graphics* self, psy_ui_Font* font)
 	self->vtable->setfont(self, font);
 }
 
-INLINE void psy_ui_drawline(psy_ui_Graphics* self, double x1, double y1, double x2, double y2)
+INLINE void psy_ui_drawline(psy_ui_Graphics* self, psy_ui_RealPoint pt1,
+	psy_ui_RealPoint pt2)
 {	
-	self->vtable->drawline(self, x1, y1, x2, y2);
+	self->vtable->drawline(self, pt1.x, pt1.y, pt2.x, pt2.y);
 }
 
 INLINE void psy_ui_moveto(psy_ui_Graphics* self, psy_ui_RealPoint pt)

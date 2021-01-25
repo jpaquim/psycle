@@ -5,26 +5,36 @@
 
 #include "skingraphics.h"
 
-void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, double x, double y,
-	SkinCoord* coord)
+void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
+	psy_ui_RealPoint dest, SkinCoord* coord)
 {
-	psy_ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
-		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
+	psy_ui_drawbitmap(g, bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(dest.x + coord->dest.left, dest.y + coord->dest.top),
+			psy_ui_realrectangle_size(&coord->dest)),
+		psy_ui_realrectangle_topleft(&coord->src));
 }
 
-void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, double x, double y,
-	double ratiowidth, double ratioheight,
+void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
+	psy_ui_RealPoint dest, double ratiowidth, double ratioheight,
 	SkinCoord* coord)
 {
-	psy_ui_drawstretchedbitmap(g, bitmap, x + coord->destx, y + coord->desty,
-		(int)(coord->destwidth * ratiowidth), (int)(coord->destheight * ratioheight),
-		coord->srcx, coord->srcy, coord->destwidth, coord->destheight);
+	psy_ui_drawstretchedbitmap(g, bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				dest.x + coord->dest.left,
+				dest.y + coord->dest.top),
+			psy_ui_realsize_make(
+				psy_ui_realrectangle_width(&coord->dest) * ratiowidth,
+				psy_ui_realrectangle_height(&coord->dest) * ratioheight)),
+			psy_ui_realpoint_make(coord->src.left, coord->src.top),
+			psy_ui_realrectangle_size(&coord->dest));
 }
 
 void skin_stretchratio(SkinCoord* coord, double width, double height,
 	double* ratiowidth, double* ratioheight)
 {
-	*ratiowidth = width / (double)coord->destwidth;
-	*ratioheight = height / (double)coord->destheight;
+	*ratiowidth = width / psy_ui_realrectangle_width(&coord->dest);
+	*ratioheight = height / psy_ui_realrectangle_height(&coord->dest);
 }
 

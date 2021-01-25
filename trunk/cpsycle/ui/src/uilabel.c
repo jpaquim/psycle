@@ -15,6 +15,7 @@ static void psy_ui_label_ondestroy(psy_ui_Label*);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
+static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
 
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 // vtable
@@ -37,6 +38,8 @@ static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
 		vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_label_onlanguagechanged;
+		vtable.ontimer = (psy_ui_fp_component_ontimer)
+			psy_ui_label_ontimer;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -54,8 +57,11 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_LEFT;
 	self->text = NULL;
+	self->defaulttext = NULL;
 	self->translation = NULL;
-	self->translate = TRUE;		
+	self->translate = TRUE;
+	self->fadeoutcounter = 0;
+	self->fadeout = FALSE;
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
@@ -92,6 +98,14 @@ void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 		psy_strreset(&self->translation, psy_translator_translate(
 			psy_ui_translator(), text));
 	}
+	psy_ui_component_invalidate(psy_ui_label_base(self));
+}
+
+void psy_ui_label_setdefaulttext(psy_ui_Label* self, const char* text)
+{
+	assert(self);
+
+	psy_strreset(&self->defaulttext, text);	
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
@@ -247,4 +261,44 @@ char* strrchrpos(char* str, char c, uintptr_t pos)
 		--count;
 	}
 	return 0;
+}
+
+void psy_ui_label_fadeout(psy_ui_Label* self)
+{
+	self->fadeout = TRUE;
+	// Keep new message 5secs active (Timer interval(50ms) * 100). The counter
+	// is decremented each timer tick (ontimer). The first 20 ticks the colour 
+	// stays full and then starts to fadeout. At zero the label text is reset
+	// to the default text
+	self->fadeoutcounter = 100;
+	psy_ui_component_setcolour(psy_ui_label_base(self),
+		psy_ui_defaults()->style_common.colour);
+	psy_ui_component_starttimer(&self->component, 0, 50);
+}
+
+void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
+{
+	if (self->fadeoutcounter > 0) {
+		psy_ui_Colour colour;
+		float fadeoutstep;
+
+		--self->fadeoutcounter;
+		if (self->fadeoutcounter <= 80) {
+			colour = psy_ui_defaults()->style_common.colour;
+			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
+			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
+			if (colour.value > psy_ui_component_backgroundcolour(
+					psy_ui_label_base(self)).value) {
+				psy_ui_component_setcolour(psy_ui_label_base(self), colour);
+			}
+			psy_ui_component_invalidate(psy_ui_label_base(self));
+		}
+		if (self->fadeoutcounter == 0) {
+			// reset statusbar label to song title
+			psy_ui_label_settext(self, self->defaulttext);
+			psy_ui_component_setcolour(psy_ui_label_base(self),
+				psy_ui_defaults()->style_common.colour);
+			psy_ui_component_stoptimer(&self->component, 0);
+		}
+	}
 }

@@ -317,7 +317,8 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		psy_ui_RealSize size;
 		
 		size = psy_ui_component_sizepx(psy_ui_button_base(self));
-		client_position = psy_ui_realrectangle_make(0, 0, size.width, size.height);
+		client_position = psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(), size);
 		if (psy_ui_realrectangle_intersect(&client_position, ev->x, ev->y)) {
 			self->shiftstate = ev->shift;
 			self->ctrlstate = ev->ctrl;

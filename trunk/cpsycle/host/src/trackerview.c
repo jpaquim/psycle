@@ -321,10 +321,10 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 		cpx = trackergridstate_tracktopx(self->gridstate, track);
 		trackwidth = trackergridstate_trackwidth(self->gridstate, track);
 		psy_ui_drawsolidrectangle(g,
-			psy_ui_realrectangle_make(cpx,
-				psy_ui_component_scrolltoppx(&self->component),
-				trackwidth,
-				size.height),
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					cpx, psy_ui_component_scrolltoppx(&self->component)),
+				psy_ui_realsize_make(trackwidth, size.height)),
 			patternviewskin_separatorcolour(self->gridstate->skin, track,
 				trackergridstate_numsongtracks(self->gridstate)));
 	}
@@ -335,10 +335,13 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 				trackergridstate_numsongtracks(self->gridstate) - 1);
 		if (blankcpx - psy_ui_component_scrollleftpx(&self->component) < size.width) {
 			psy_ui_drawsolidrectangle(g,
-				psy_ui_realrectangle_make(blankcpx,
-					psy_ui_component_scrolltoppx(&self->component),
-					size.width - (blankcpx - psy_ui_component_scrollleftpx(&self->component)),
-					size.height),
+				psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(
+						blankcpx,
+						psy_ui_component_scrolltoppx(&self->component)),
+					psy_ui_realsize_make(
+						size.width - (blankcpx - psy_ui_component_scrollleftpx(&self->component)),
+						size.height)),
 				patternviewskin_separatorcolour(self->gridstate->skin, 1, 2));
 		}
 	}
@@ -723,9 +726,11 @@ void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g,
 	psy_ui_textoutrectangle(g,
 		x + self->gridstate->trackconfig->textleftedge, y,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		psy_ui_realrectangle_make(x, y,
-			self->gridstate->trackconfig->textwidth,
-			self->linestate->lineheightpx - 1),
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(x, y),
+			psy_ui_realsize_make(
+				self->gridstate->trackconfig->textwidth,
+				self->linestate->lineheightpx - 1)),
 		text, strlen(text));	
 }
 
@@ -1560,11 +1565,13 @@ void trackergrid_invalidateinternalcursor(TrackerGrid* self,
 {
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
-			trackergridstate_tracktopx(self->gridstate, cursor.track),
-			trackerlinestate_beattopx(self->linestate, cursor.offset +
-				cursor.seqoffset),
-			trackergridstate_trackwidth(self->gridstate, cursor.track),
-			trackerlinestate_lineheight(self->linestate)));
+			psy_ui_realpoint_make(
+				trackergridstate_tracktopx(self->gridstate, cursor.track),
+				trackerlinestate_beattopx(self->linestate, cursor.offset +
+					cursor.seqoffset)),
+			psy_ui_realsize_make(
+				trackergridstate_trackwidth(self->gridstate, cursor.track),
+				trackerlinestate_lineheight(self->linestate))));
 }
 
 void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
@@ -1583,12 +1590,13 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 		size = psy_ui_component_sizepx(&self->component);		
 		psy_ui_component_invalidaterect(&self->component,
 			psy_ui_realrectangle_make(
-				psy_ui_component_scrollleftpx(&self->component),
-				trackerlinestate_beattopx(self->linestate,
-					position - ((self->gridstate->singlemode)
+				psy_ui_realpoint_make(					
+					psy_ui_component_scrollleftpx(&self->component),
+					trackerlinestate_beattopx(self->linestate,
+						position - ((self->gridstate->singlemode)
 						? self->linestate->sequenceentryoffset
-						: 0.0)),
-				size.width, self->linestate->lineheightpx));
+						: 0.0))),
+				psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));
 	}
 }
 
@@ -1614,10 +1622,11 @@ void trackergrid_clearmidline(TrackerGrid* self)
 	self->midline = FALSE;
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_realrectangle_make(
-			psy_ui_component_scrollleftpx(&self->component),
-			self->linestate->visilines / 2 * self->linestate->lineheightpx +
-			psy_ui_component_scrolltoppx(&self->component),
-			size.width, self->linestate->lineheightpx * 2));
+			psy_ui_realpoint_make(
+				psy_ui_component_scrollleftpx(&self->component),
+				self->linestate->visilines / 2 * self->linestate->lineheightpx +
+					psy_ui_component_scrolltoppx(&self->component)),
+			psy_ui_realsize_make(size.width, self->linestate->lineheightpx * 2)));
 	self->midline = TRUE;
 }
 
