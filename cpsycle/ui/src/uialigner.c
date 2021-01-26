@@ -206,7 +206,34 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						&componentsize.height, c_tm)) +
 						floor(psy_ui_margin_height_px(&component->margin, c_tm));
 				}
-			}			
+			} else if (component->align == psy_ui_ALIGN_VCLIENT) {
+				psy_ui_RealRectangle position;
+				
+				position = psy_ui_component_position(component);
+				cp_topleft.x = position.left + floor(
+					psy_ui_value_px(&component->margin.left, c_tm));					
+				psy_ui_component_setposition(component,
+					psy_ui_point_make(
+						psy_ui_value_makepx(cp_topleft.x),
+						psy_ui_value_makepx(cp_topleft.y + floor(psy_ui_value_px(
+							&component->margin.top, c_tm)))),
+					psy_ui_size_make(
+						componentsize.width,
+						psy_ui_value_makepx(component->justify ==
+							psy_ui_JUSTIFY_EXPAND
+							? cp_bottomright.y - cp_topleft.y -
+							floor(psy_ui_margin_height_px(&component->margin, c_tm))
+							: psy_ui_value_px(&componentsize.height, c_tm))));
+				cp_topleft.x += floor(psy_ui_value_px(&component->margin.right, c_tm));
+				cp_topleft.x += floor(psy_ui_value_px(&componentsize.width, c_tm));
+				if (cpymax < cp_topleft.y +
+					psy_ui_value_px(&componentsize.height, c_tm) +
+					floor(psy_ui_margin_height_px(&component->margin, c_tm))) {
+					cpymax = cp_topleft.y + floor(psy_ui_value_px(
+						&componentsize.height, c_tm)) +
+						floor(psy_ui_margin_height_px(&component->margin, c_tm));
+				}				
+			}
 		}
 	}
 	psy_ui_align_alignclients(self, q, cp_topleft, cp_bottomright);
@@ -315,6 +342,12 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
 					c_tm = psy_ui_component_textmetric(component);
+					if (!psy_ui_value_iszero(&component->maxsize.width)) {
+						if (psy_ui_value_comp(&component->maxsize.width,
+							&componentsize.width, tm) < 0) {
+							componentsize.width = component->maxsize.width;
+						}
+					}
 					if (component->align == psy_ui_ALIGN_CLIENT) {
 						if (psy_ui_value_px(&maxsize.height, tm) < cp.y +
 								psy_ui_value_px(&componentsize.height, c_tm) +

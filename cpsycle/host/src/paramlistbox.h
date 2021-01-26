@@ -4,8 +4,12 @@
 #if !defined(PARAMLISTBOX_H)
 #define PARAMLISTBOX_H
 
+// host
+#include "workspace.h"
+// ui
 #include <uilistbox.h>
-#include <uislider.h>
+#include <uiknob.h>
+// audio
 #include <machine.h>
 
 #ifdef __cplusplus
@@ -15,11 +19,14 @@ extern "C" {
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_ListBox listbox;
-	psy_ui_Slider slider;
+	psy_ui_Knob knob;
 	psy_audio_Machine* machine;
+	psy_ui_Bitmap knobbitmap;
+	Workspace* workspace;
 } ParameterListBox;
 
-void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*);
+void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*,
+	Workspace* workspace);
 void parameterlistbox_setmachine(ParameterListBox*, psy_audio_Machine*);
 intptr_t parameterlistbox_selected(ParameterListBox*);
 

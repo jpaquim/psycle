@@ -80,6 +80,7 @@ MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Wor
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
 void machineframe_setparamview(MachineFrame* self, ParamView* view, psy_audio_Machine*);
 
+
 #ifdef __cplusplus
 }
 #endif

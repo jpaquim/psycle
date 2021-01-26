@@ -15,6 +15,7 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext* self,
 	uintptr_t numsongtracks)
 {	
 	self->events = events;
+	self->outevents = NULL;
 	self->input = input;
 	self->output = output;
 	self->numsamples = numsamples;

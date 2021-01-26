@@ -21,6 +21,7 @@
 #include "kbdhelp.h"
 #include "machinebar.h"
 #include "machineview.h"
+#include "machinedock.h"
 #include "midimonitor.h"
 #include "navigation.h"
 #include "playbar.h"
@@ -101,6 +102,7 @@ typedef struct MainFrame {
 	psy_ui_Component paramviews;
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
+	MachineDock machinedock;
 	psy_ui_SplitBar splitseqeditor;
 	SeqEditor seqeditor;
 	MachineView machineview;

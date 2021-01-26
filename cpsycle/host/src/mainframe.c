@@ -44,6 +44,7 @@ static void mainframe_initmainviews(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
 static void mainframe_initgear(MainFrame*);
+static void mainframe_initdock(MainFrame*);
 static void mainframe_initcpuview(MainFrame*);
 static void mainframe_initmidimonitor(MainFrame*);
 static void mainframe_initstepsequencerview(MainFrame*);
@@ -66,6 +67,8 @@ static void mainframe_onsequenceselchange(MainFrame*,
 static void mainframe_ontogglegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ontoggledock(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onhidedock(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidemidimonitor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidecpu(MainFrame*, psy_ui_Component* sender);
@@ -165,14 +168,15 @@ void mainframe_init(MainFrame* self)
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
 	mainframe_inittoparea(self);
-	mainframe_initclientarea(self);
+	mainframe_initclientarea(self);	
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);
 	mainframe_initmaintabbar(self);	
 	mainframe_initmainviews(self);
 	mainframe_initrightarea(self);
-	mainframe_initgear(self);
+	mainframe_initgear(self);	
+	mainframe_initdock(self);
 	mainframe_initcpuview(self);
 	mainframe_initmidimonitor(self);		
 	mainframe_initstepsequencerview(self);	
@@ -521,6 +525,18 @@ void mainframe_initgear(MainFrame* self)
 		mainframe_ontogglegear);	
 	psy_signal_connect(&gear_base(&self->gear)->signal_hide, self,
 		mainframe_onhidegear);
+}
+
+void mainframe_initdock(MainFrame* self)
+{
+	machinedock_init(&self->machinedock, &self->client, &self->workspace);
+	psy_ui_component_setalign(&self->machinedock.component,
+		psy_ui_ALIGN_BOTTOM);		
+	psy_ui_component_hide(machinedock_base(&self->machinedock));
+	psy_signal_connect(&self->machinebar.dock.signal_clicked, self,
+		mainframe_ontoggledock);
+	psy_signal_connect(&machinedock_base(&self->machinedock)->signal_hide, self,
+		mainframe_onhidedock);
 }
 
 void mainframe_initcpuview(MainFrame* self)
@@ -985,6 +1001,24 @@ void mainframe_ontogglegearworkspace(MainFrame* self, Workspace* sender)
 void mainframe_onhidegear(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.gear);
+}
+
+void mainframe_ontoggledock(MainFrame* self, psy_ui_Component* sender)
+{
+	if (!psy_ui_component_visible(&self->machinedock.component)) {
+		psy_ui_button_highlight(&self->machinebar.dock);
+	}
+	psy_ui_component_togglevisibility(&self->machinedock.component);
+	if (!psy_ui_component_visible(&self->machinedock.component) &&
+		psy_ui_notebook_activepage(&self->notebook)) {
+		psy_ui_component_setfocus(psy_ui_notebook_activepage(
+			&self->notebook));
+	}
+}
+
+void mainframe_onhidedock(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_button_disablehighlight(&self->machinebar.dock);
 }
 
 void mainframe_onhidemidimonitor(MainFrame* self, psy_ui_Component* sender)

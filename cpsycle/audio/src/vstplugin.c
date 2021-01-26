@@ -183,7 +183,8 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 	psy_table_init(&self->parameters);	
 	self->editorhandle = NULL;
 	self->plugininfo = NULL;
-	psy_audio_vstevents_init(&self->vstevents, 0);	
+	psy_audio_vstevents_init(&self->vstevents, 0);
+	psy_audio_vstevents_init(&self->vstoutevents, 0);
 	self->vsttimeinfo = vsttimeinfo_alloc();
 	vsttimeinfo_init_default(self->vsttimeinfo);
 	psy_audio_vstinterface_init(&self->mi, NULL, NULL);
@@ -197,7 +198,9 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self,
 		effect = mainproc(hostcallback);
 		if (effect) {						
 			psy_audio_vstevents_dispose(&self->vstevents);
-			psy_audio_vstevents_init(&self->vstevents, 1024);					
+			psy_audio_vstevents_dispose(&self->vstoutevents);
+			psy_audio_vstevents_init(&self->vstevents, 1024);
+			psy_audio_vstevents_init(&self->vstoutevents, 1024);
 			psy_audio_vstinterface_init(&self->mi, effect, self);			
 			psy_audio_vstinterface_open(&self->mi);
 			psy_audio_vstinterface_setsamplerate(&self->mi,	(float)
@@ -228,6 +231,7 @@ void dispose(psy_audio_VstPlugin* self)
 		psy_audio_vstinterface_close(&self->mi);		
 		psy_library_dispose(&self->library);		
 		psy_audio_vstevents_dispose(&self->vstevents);
+		psy_audio_vstevents_dispose(&self->vstoutevents);
 	}	
 	if (self->plugininfo) {
 		machineinfo_dispose(self->plugininfo);
@@ -308,11 +312,22 @@ bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {	
+	uintptr_t n;
+
 	assert(self);
 
 	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {		
 		processevents(self, bc);		
 	}
+	for (n = 0; n < self->vstoutevents.counter; ++n) {
+		struct VstMidiEvent* buffer;
+		struct VstMidiEvent* ev;
+
+		buffer = (struct VstMidiEvent*)self->vstoutevents.events->events[n];
+		ev = allocmidi(buffer->midiData[0], buffer->midiData[1], buffer->midiData[2]);
+		psy_list_append(&bc->outevents, ev);
+	}
+	psy_audio_vstevents_clear(&self->vstoutevents);
 }
 
 void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
@@ -463,7 +478,7 @@ void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				bc->output->samples[c] = bc->output->samples[c] +
 					bc->output->offset;
 			}
-		}		
+		}				
 		psy_audio_vstinterface_tick(&self->mi, self->vstevents.events);		
 		if (bc->output->numchannels > 0) {
 			psy_audio_vstinterface_work(&self->mi, bc);
@@ -930,7 +945,7 @@ void vstplugin_onfileselect(psy_audio_VstPlugin* self,
 
 void update_vsttimeinfo(psy_audio_VstPlugin* self)
 {	
-	psy_audio_SequencerTime* sequencertime;
+	psy_audio_SequencerTime* sequencertime;	
 
 	assert(self);
 
@@ -941,8 +956,17 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 	self->vsttimeinfo->ppqPos = sequencertime->position;
 	self->vsttimeinfo->tempo = sequencertime->bpm;
 	self->vsttimeinfo->barStartPos = sequencertime->lastbarposition;
+	// SMPTE offset(in SMPTE subframes(bits; 1 / 80 of a frame))
+	self->vsttimeinfo->smpteOffset = 0; // (sequencertime->playcounter / sequencertime->samplerate)*	
+	self->vsttimeinfo->samplesToNextClock = sequencertime->samplestonextclock;
 	self->vsttimeinfo->flags =
-		kVstPpqPosValid | kVstBarsValid | kVstTempoValid;
+		kVstPpqPosValid | kVstBarsValid | kVstTempoValid | kVstTimeSigValid;
+	if (sequencertime->playing) {
+		self->vsttimeinfo->flags |= kVstTransportPlaying;
+	}
+	if (sequencertime->playstarting || sequencertime->playstopping) {
+		self->vsttimeinfo->flags |= kVstTransportChanged;
+	}
 }
 
 // VSTCALLBACK
@@ -952,11 +976,11 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 	VstIntPtr result = 0;
 	psy_audio_VstPlugin* self;
 
-	// if (opcode != audioMasterGetTime) {
-	//	TRACE("vst-opcode: ");
-	//	TRACE_INT(opcode);
-	//	TRACE("\n");
-	// }
+	if (opcode != audioMasterGetTime) {
+		TRACE("vst-opcode: ");
+		TRACE_INT(opcode);
+		TRACE("\n");
+	}
 	if (effect) {
 		self = (psy_audio_VstPlugin*)effect->user;
 	} else
@@ -970,6 +994,22 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 	case audioMasterVersion:
 		result = kVstVersion;
 		break;
+	case audioMasterProcessEvents: {
+		// VstEvents* in <ptr>		
+		struct VstEvents* v = (struct VstEvents*)ptr;
+		VstInt32 n;
+				
+		for (n = 0; n < v->numEvents; ++n) {
+			VstEvent* vme = (VstEvent*)(v->events[n]);			
+			if (vme->type == kVstMidiType) {
+				VstEvent* copy;
+
+				copy = (VstEvent*)malloc(sizeof(VstEvent));
+				*copy = *vme;
+				psy_audio_vstevents_append(&self->vstoutevents, copy);
+			}
+		}
+		break; }
 	case audioMasterIdle:
 		break;
 	case audioMasterGetCurrentProcessLevel:

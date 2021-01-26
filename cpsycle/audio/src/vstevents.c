@@ -13,7 +13,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-static struct VstMidiEvent* allocmidi(uint8_t data0, uint8_t data1, uint8_t data2)
+struct VstMidiEvent* allocmidi(uint8_t data0, uint8_t data1, uint8_t data2)
 {
 	struct VstMidiEvent* rv;
 

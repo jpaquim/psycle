@@ -202,7 +202,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->seqtime.samplerate = samplerate;	
 	self->lpb = 4;
 	self->lpbspeed = (psy_dsp_big_beat_t)1.0;
-	self->playing = FALSE;
+	self->seqtime.playing = FALSE;
 	self->looping = TRUE;
 	self->numplaybeats = (psy_dsp_big_beat_t)4.0;	
 	self->window = (psy_dsp_big_beat_t)0.0;
@@ -226,7 +226,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 
 void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t offset)
-{
+{	
 	assert(self);
 
 	psy_audio_sequencer_clearevents(self);
@@ -236,7 +236,10 @@ void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 	// todo only estimated sample pos on current bpm
 	self->seqtime.playcounter = psy_audio_sequencer_frames(self,
 		offset);
-	self->seqtime.lastbarposition = floor(offset / 4) * 4;
+	self->seqtime.lastbarposition = floor(offset / 4) * 4;		
+	self->seqtime.samplestonextclock =
+		psy_audio_sequencer_frames(self, offset + 1 / 24.0) - self->seqtime.playcounter;
+	self->seqtime.currplaytime = psy_audio_sequencer_currplaytime(self);
 	self->linetickcount = 0.0;		
 	self->window = (psy_dsp_big_beat_t)0.0;
 	psy_audio_sequencer_makecurrtracks(self, offset);
@@ -255,7 +258,8 @@ void psy_audio_sequencer_start(psy_audio_Sequencer* self)
 	if (self->mode == psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 		psy_audio_sequencer_setbarloop(self);		
 	}	
-	self->playing = TRUE;
+	self->seqtime.playing = TRUE;
+	self->seqtime.playstarting = TRUE;
 }
 
 void psy_audio_sequencer_setbarloop(psy_audio_Sequencer* self)
@@ -445,7 +449,7 @@ void psy_audio_sequencer_frametick(psy_audio_Sequencer* self, uintptr_t
 {	
 	assert(self);
 
-	if (self->playing) {		
+	if (self->seqtime.playing) {		
 		self->seqtime.playcounter += numframes;		
 	}	
 	psy_audio_sequencer_tick(self, psy_audio_sequencer_frametooffset(self,
@@ -458,7 +462,10 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	assert(self);
 
 	if (psy_audio_sequencer_playing(self)) {		
-		self->seqtime.lastbarposition = floor(self->seqtime.position / 4) * 4;
+		self->seqtime.samplestonextclock =
+			psy_audio_sequencer_frames(self, self->seqtime.position + 1 / 24.0) -
+			self->seqtime.playcounter;
+		self->seqtime.currplaytime = psy_audio_sequencer_currplaytime(self);
 		psy_audio_sequencer_advanceposition(self, width);		
 	}
 	psy_audio_sequencer_clearevents(self);
@@ -472,8 +479,10 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	if (psy_audio_sequencer_playing(self) &&
 			psy_audio_sequencer_sequencerinsert(self)) {
 		psy_audio_sequencer_insertdelayedevents(self);
-	}	
+	}
 	psy_audio_sequencer_sortevents(self);	
+	self->seqtime.playstarting = FALSE;
+	self->seqtime.playstopping = FALSE;
 }
 
 void psy_audio_sequencer_advanceposition(psy_audio_Sequencer* self,
@@ -689,7 +698,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 	if (self->looping && !continueplaying) {
 		psy_audio_sequencer_setposition(self, 0.f);
 	} else {
-		self->playing = continueplaying;
+		self->seqtime.playing = continueplaying;
 	}
 }
 

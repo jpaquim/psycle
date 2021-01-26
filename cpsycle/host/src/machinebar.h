@@ -29,6 +29,7 @@ typedef struct {
 	psy_ui_Button prevmachinebutton;
 	psy_ui_Button nextmachinebutton;
 	psy_ui_Button gear;
+	psy_ui_Button dock;
 	psy_ui_Button editor;
 	psy_ui_Button cpu;
 	psy_ui_Button midi;

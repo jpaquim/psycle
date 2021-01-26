@@ -526,7 +526,7 @@ static bool machinewireview_dragging_connection(const MachineWireView*);
 static bool machinewireview_dragging_newconnection(const MachineWireView*);
 static void machinewireview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
-static void machinewireview_onmachineschangeslot(MachineWireView*,
+static void machinewireview_onmachineselected(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachinesinsert(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
@@ -638,7 +638,7 @@ void machinewireview_connectsong(MachineWireView* self)
 {	
 	if (self->machines) {
 		psy_signal_connect(&self->machines->signal_slotchange, self,
-			machinewireview_onmachineschangeslot);
+			machinewireview_onmachineselected);
 		psy_signal_connect(&self->machines->signal_insert, self,
 			machinewireview_onmachinesinsert);
 		psy_signal_connect(&self->machines->signal_removed, self,
@@ -1570,7 +1570,7 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, double x,
 	return rv;
 }
 
-void machinewireview_onmachineschangeslot(MachineWireView* self,
+void machinewireview_onmachineselected(MachineWireView* self,
 	psy_audio_Machines* machines, uintptr_t slot)
 {
 	self->selectedslot = slot;

@@ -518,6 +518,12 @@ void psy_ui_component_destroy(psy_ui_Component* self)
 	self->vtable->destroy(self);
 }
 
+void psy_ui_component_deallocate(psy_ui_Component* self)
+{
+	psy_ui_component_destroy(self);
+	free(self);
+}
+
 void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
 	double stepy)
 {

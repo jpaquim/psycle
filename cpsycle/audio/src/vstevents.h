@@ -18,7 +18,7 @@ struct VstEvent;
 typedef struct psy_audio_VstEvents {
 	struct VstEvents* events;
 	uintptr_t eventcap;
-	uintptr_t counter;
+	uintptr_t counter;	
 } psy_audio_VstEvents;
 
 void psy_audio_vstevents_init(psy_audio_VstEvents*, uintptr_t capacity);
@@ -33,6 +33,8 @@ void psy_audio_vstevents_append_noteoff(psy_audio_VstEvents*,
 void psy_audio_vstevents_append_midi(psy_audio_VstEvents*,
 	uint8_t byte0, uint8_t byte1, uint8_t byte2);
 void psy_audio_vstevents_clear(psy_audio_VstEvents*);
+
+struct VstMidiEvent* allocmidi(uint8_t data0, uint8_t data1, uint8_t data2);
 
 #ifdef __cplusplus
 }

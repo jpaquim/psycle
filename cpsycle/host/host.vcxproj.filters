@@ -373,6 +373,9 @@
     <ClCompile Include="src\machinebar.c">
       <Filter>toolbars</Filter>
     </ClCompile>
+    <ClCompile Include="src\machinedock.c">
+      <Filter>machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -721,6 +724,9 @@
     </ClInclude>
     <ClInclude Include="src\machinebar.h">
       <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinedock.h">
+      <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
