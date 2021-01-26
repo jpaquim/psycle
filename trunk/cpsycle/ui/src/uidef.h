@@ -470,6 +470,12 @@ INLINE void psy_ui_size_setpx(psy_ui_Size* self, double width, double height)
 	self->height = psy_ui_value_makepx(height);
 }
 
+INLINE void psy_ui_size_setem(psy_ui_Size* self, double width, double height)
+{
+	self->width = psy_ui_value_makeew(width);
+	self->height = psy_ui_value_makeeh(height);
+}
+
 INLINE psy_ui_Size psy_ui_size_zero(void)
 {
 	return psy_ui_size_makeem(0.0, 0.0);
@@ -606,7 +612,8 @@ typedef enum {
 	psy_ui_ALIGN_BOTTOM,
 	psy_ui_ALIGN_RIGHT,
 	psy_ui_ALIGN_FILL,
-	psy_ui_ALIGN_CENTER
+	psy_ui_ALIGN_CENTER,
+	psy_ui_ALIGN_VCLIENT
 } psy_ui_AlignType;
 
 typedef enum {

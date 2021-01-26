@@ -22,6 +22,7 @@ typedef struct psy_audio_BufferContext {
 	psy_audio_Buffer* input;
 	psy_audio_Buffer* output;
 	psy_List* events;
+	psy_List* outevents;
 	uintptr_t numsamples;
 	uintptr_t numsongtracks;
 } psy_audio_BufferContext;

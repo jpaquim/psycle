@@ -25,6 +25,7 @@ typedef struct VstPlugin {
 	psy_Library library;	
 	void* editorhandle;
 	psy_audio_VstEvents vstevents;
+	psy_audio_VstEvents vstoutevents;
 	psy_audio_VstInterface mi;
 	struct VstTimeInfo* vsttimeinfo;	
 	psy_audio_MachineInfo* plugininfo;

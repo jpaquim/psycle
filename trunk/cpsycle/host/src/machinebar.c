@@ -90,6 +90,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	// Tool Buttons
 	psy_ui_button_init(&self->gear, &self->component);
 	psy_ui_button_settext(&self->gear, "machinebar.gear");
+	psy_ui_button_init(&self->dock, &self->component);
+	psy_ui_button_settext(&self->dock, "machinebar.dock");
 	psy_ui_button_init(&self->editor, &self->component);
 	psy_ui_button_settext(&self->editor, "machinebar.editor");
 	psy_ui_button_init(&self->cpu, &self->component);

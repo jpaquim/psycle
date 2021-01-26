@@ -26,7 +26,17 @@ typedef struct psy_audio_SequencerTime {
 	// tempo in beats per minute
 	psy_dsp_big_beat_t bpm;
 	// last bar position in beats
-	psy_dsp_big_beat_t lastbarposition;	
+	psy_dsp_big_beat_t lastbarposition;
+	// samples to next midi clock
+	psy_dsp_frame_t samplestonextclock;
+	// current playtime in seconds
+	psy_dsp_big_seconds_t currplaytime;
+	// playing
+	bool playing;
+	// starting
+	bool playstarting;
+	// stopping
+	bool playstopping;
 } psy_audio_SequencerTime;
 
 INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
@@ -35,7 +45,12 @@ INLINE void psy_audio_sequencertime_init(psy_audio_SequencerTime* self)
 	self->samplerate = (psy_dsp_big_hz_t)44100.0;
 	self->position = (psy_dsp_big_beat_t)0.0;
 	self->bpm = (psy_dsp_big_beat_t)125.0;
-	self->lastbarposition = (psy_dsp_big_beat_t)0.0;	
+	self->lastbarposition = (psy_dsp_big_beat_t)0.0;
+	self->samplestonextclock = 0;
+	self->currplaytime = 0.0;
+	self->playing = FALSE;
+	self->playstarting = FALSE;
+	self->playstopping = FALSE;
 }
 
 typedef enum {
@@ -82,8 +97,7 @@ typedef struct {
 	uintptr_t lpb; // global
 	psy_dsp_big_beat_t lpbspeed; // pattern
 	uintptr_t extraticks;
-	uintptr_t tpb;
-	bool playing;
+	uintptr_t tpb;	
 	psy_dsp_big_beat_t window;
 	uintptr_t currrowposition;
 	psy_List* currtracks;
@@ -153,7 +167,9 @@ void psy_audio_sequencer_start(psy_audio_Sequencer*);
 
 INLINE void psy_audio_sequencer_stop(psy_audio_Sequencer* self)
 {
-	self->playing = FALSE;
+	self->seqtime.playing = FALSE;
+	self->seqtime.playstarting = FALSE;
+	self->seqtime.playstopping = TRUE;
 }
 
 void psy_audio_sequencer_setnumplaybeats(psy_audio_Sequencer*,
@@ -210,7 +226,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_frametooffset(
 
 INLINE int psy_audio_sequencer_playing(const psy_audio_Sequencer* self)
 {
-	return self->playing;
+	return self->seqtime.playing;
 }
 
 void psy_audio_sequencer_addinputevent(psy_audio_Sequencer*,

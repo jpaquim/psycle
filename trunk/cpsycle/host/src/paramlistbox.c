@@ -4,40 +4,69 @@
 #include "../../detail/prefix.h"
 
 #include "paramlistbox.h"
-#include <stdio.h>
+#include <uislider.h>
+#include "resources/resource.h"
+// platform
 #include "../../detail/portable.h"
 
+static intptr_t parameterlistbox_refcount = 0;
+
+static void parameterlistbox_ondestroy(ParameterListBox*, psy_ui_Component* sender);
 static void parameterlistbox_build(ParameterListBox*);
 static void parameterlistbox_ondescribe(ParameterListBox*, psy_ui_Slider*,
 	char* txt);
-static void parameterlistbox_ontweak(ParameterListBox*, psy_ui_Slider*,
+static void parameterlistbox_ontweak(ParameterListBox*, psy_ui_Knob*,
 	float value);
 static void parameterlistbox_onvalue(ParameterListBox*, psy_ui_Slider*,
 	float* value);
 
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
-	psy_audio_Machine* machine)
+	psy_audio_Machine* machine, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_listbox_init(&self->listbox, &self->component);
-	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setpreferredsize(&self->listbox.component,
-		psy_ui_size_make(psy_ui_value_makeew(40),
-			psy_ui_value_makeeh(20)));
-	psy_ui_slider_init(&self->slider, &self->component);
-	psy_ui_slider_setcharnumber(&self->slider, 4);
-	psy_ui_slider_showvertical(&self->slider);
-	psy_ui_component_setpreferredsize(&self->slider.component,
-		psy_ui_size_make(psy_ui_value_makeew(2), psy_ui_value_makepx(0)));
-	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);	
+	psy_signal_connect(&self->component.signal_destroy, self,
+		parameterlistbox_ondestroy);
+	self->workspace = workspace;
+	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setmaximumsize(&self->listbox.component,
+		psy_ui_size_makeem(20.0, 0.0));			
+	psy_ui_knob_init(&self->knob, &self->component);
+	if (parameterlistbox_refcount == 0) {
+		psy_ui_bitmap_init(&self->knobbitmap);
+		if (!machineparamconfig_dialbpm(psycleconfig_macparam(workspace_conf(self->workspace)))) {
+			psy_ui_bitmap_loadresource(&self->knobbitmap, IDB_PARAMKNOB);
+		} else if (psy_ui_bitmap_load(&self->knobbitmap,
+			machineparamconfig_dialbpm(psycleconfig_macparam(workspace_conf(self->workspace)))) != PSY_OK) {
+			psy_ui_bitmap_loadresource(&self->knobbitmap, IDB_PARAMKNOB);
+		}		
+	}
+	psy_ui_knob_setbitmap(&self->knob, &self->knobbitmap);
+	psy_signal_connect(&self->knob.signal_tweak, self, parameterlistbox_ontweak);
+	//psy_ui_slider_setcharnumber(&self->slider, 4);
+	//psy_ui_slider_showvertical(&self->slider);
+	//psy_ui_component_setpreferredsize(&self->slider.component,
+	//	psy_ui_size_make(psy_ui_value_makeew(2), psy_ui_value_makepx(0)));
+	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_LEFT);
 	parameterlistbox_setmachine(self, machine);	
-	psy_ui_slider_connect(&self->slider, self,
-		(ui_slider_fpdescribe)parameterlistbox_ondescribe,
-		(ui_slider_fptweak)parameterlistbox_ontweak,
-		(ui_slider_fpvalue)parameterlistbox_onvalue);
+	//psy_ui_slider_connect(&self->slider, self,
+	//	(ui_slider_fpdescribe)parameterlistbox_ondescribe,
+	//	(ui_slider_fptweak)parameterlistbox_ontweak,
+	//	(ui_slider_fpvalue)parameterlistbox_onvalue);
 	// psy_signal_connect(&self->parameterlist.signal_selchanged, self,
 		//onparameterlistchanged);
 }
+
+void parameterlistbox_ondestroy(ParameterListBox* self, psy_ui_Component* sender)
+{
+	if (parameterlistbox_refcount > 0) {
+		--parameterlistbox_refcount;
+	}
+	if (parameterlistbox_refcount == 0) {
+		psy_ui_bitmap_dispose(&self->knobbitmap);		
+	}
+}
+
 
 void parameterlistbox_build(ParameterListBox* self)
 {	
@@ -105,7 +134,7 @@ void parameterlistbox_ondescribe(ParameterListBox* self, psy_ui_Slider* slider, 
 	}
 }
 
-void parameterlistbox_ontweak(ParameterListBox* self, psy_ui_Slider* slider, float value)
+void parameterlistbox_ontweak(ParameterListBox* self, psy_ui_Knob* slider, float value)
 {
 	uintptr_t param = 0;
 

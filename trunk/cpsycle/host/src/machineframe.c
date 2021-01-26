@@ -120,7 +120,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0, "new val", workspace);
 	psy_ui_component_setalign(&self->newval.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->newval.component);
-	parameterlistbox_init(&self->parameterbox, &self->component, NULL);
+	parameterlistbox_init(&self->parameterbox, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->parameterbox.component,
 		psy_ui_ALIGN_RIGHT);	
 	psy_ui_notebook_init(&self->notebook, &self->component);

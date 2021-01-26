@@ -3,22 +3,28 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "player.h"
+// local
+#include "cmdsnotes.h"
 #include "constants.h"
 #include "exclusivelock.h"
-#include "math.h"
+#include "kbddriver.h"
 #include "master.h"
 #include "silentdriver.h"
-#include "kbddriver.h"
-#include <rms.h>
+#include "aeffectx.h"
+// dsp
 #include <operations.h>
+#include <rms.h>
+// file
+#include <fileio.h>
+// std
+#include "math.h"
 #include <time.h>
+// platform
 #include "../../detail/portable.h"
-#include "fileio.h"
-#include "../../detail/psyconf.h"
-#include "stdlib.h"
 #include "../../detail/trace.h"
-#include "cmdsnotes.h"
+
 
 static psy_dsp_amp_t bufferdriver[MAX_SAMPLES_WORKFN];
 static void* mainframe;
@@ -29,9 +35,9 @@ static PsyFile logfile;
 static uint16_t midi_combinebytes(unsigned char data1, unsigned char data2)
 {
 	uint16_t rv_14bit;
-	rv_14bit = (unsigned short)data2;
+	rv_14bit = (uint16_t)data2;
 	rv_14bit <<= 7;
-	rv_14bit |= (unsigned short)data1;
+	rv_14bit |= (uint16_t)data1;
 	return rv_14bit;
 }
 
@@ -297,6 +303,24 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 				psy_audio_cputimeclock_measure(&machine->cpu_time);
 			}
 			psy_audio_machine_work(machine, &bc);
+			if (bc.outevents) {
+				for (p = bc.outevents; p != NULL; psy_list_next(&p)) {
+					struct VstMidiEvent* vstev;
+					psy_audio_PatternEvent ev;
+					psy_EventDriverMidiData midi;
+
+					vstev = (struct VstMidiEvent*)p->entry;
+					midi.byte0 = vstev->midiData[0];
+					midi.byte1 = vstev->midiData[1];
+					midi.byte2 = vstev->midiData[2];
+					psy_audio_patternevent_clear(&ev);
+					if (psy_audio_midiinput_workinput(&self->midiinput, midi,
+							&self->song->machines, &ev)) {
+						psy_audio_sequencer_addinputevent(&self->sequencer, &ev, 0);
+					}					
+				}
+				psy_list_deallocate(&bc.outevents, NULL);
+			}			
 			psy_audio_buffer_pan(output, psy_audio_machine_panning(machine),
 				amount);
 			psy_audio_machine_updatememory(machine, &bc);
