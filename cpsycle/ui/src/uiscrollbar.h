@@ -34,6 +34,7 @@ typedef struct psy_ui_ScrollBarPane {
     double scrollmin;
     double dragoffset;
     int drag;
+    bool enabled;
     psy_ui_Orientation orientation;    
 } psy_ui_ScrollBarPane;
 

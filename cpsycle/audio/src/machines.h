@@ -99,8 +99,11 @@ psy_audio_Machine* psy_audio_machines_master(psy_audio_Machines*);
 void psy_audio_machines_startfilemode(psy_audio_Machines*);
 void psy_audio_machines_endfilemode(psy_audio_Machines*);
 psy_TableIterator psy_audio_machines_begin(psy_audio_Machines*);
-MachineList* psy_audio_compute_path(psy_audio_Machines*, uintptr_t slot, bool concat);
-bool psy_audio_machines_ismixersend(psy_audio_Machines* self, uintptr_t slot);
+MachineList* psy_audio_compute_path(psy_audio_Machines*, uintptr_t slot,
+	bool concat);
+bool psy_audio_machines_isvirtualgenerator(const psy_audio_Machines*,
+	uintptr_t slot);
+bool psy_audio_machines_ismixersend(const psy_audio_Machines* self, uintptr_t slot);
 void psy_audio_machines_addmixersend(psy_audio_Machines* self, uintptr_t slot);
 void psy_audio_machines_removemixersend(psy_audio_Machines* self, uintptr_t slot);
 void psy_audio_machines_connectasmixersend(psy_audio_Machines*);

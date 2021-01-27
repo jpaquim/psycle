@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(MACHINEDOCK_H)
-#define MACHINEDOCK_H
+#if !defined(PARAMRACK_H)
+#define PARAMRACK_H
 
 // host
 #include "workspace.h"
@@ -46,11 +46,11 @@ void paramrackbox_deselect(ParamRackBox*);
 
 // ParamRackMode
 typedef enum ParamRackMode {
-	MACHINEDOCK_ALL = 0,
-	MACHINEDOCK_INPUTS = 1,
-	MACHINEDOCK_OUTPUTS = 2,
-	MACHINEDOCK_INCHAIN = 3,
-	MACHINEDOCK_OUTCHAIN = 4
+	PARAMRACK_ALL = 0,
+	PARAMRACK_INPUTS = 1,
+	PARAMRACK_OUTPUTS = 2,
+	PARAMRACK_INCHAIN = 3,
+	PARAMRACK_OUTCHAIN = 4
 } ParamRackMode;
 
 // ParamRackPane
@@ -94,4 +94,4 @@ INLINE psy_ui_Component* paramrack_base(ParamRack* self)
 }
 #endif
 
-#endif /* MACHINEDOCK_H */
+#endif /* PARAMRACK_H */

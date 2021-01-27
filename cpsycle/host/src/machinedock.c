@@ -50,7 +50,7 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 		paramrackbox_onmousedoubleclick);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0),
 		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5));
-	psy_ui_component_setspacing(&self->title.component, &margin);
+	//psy_ui_component_setspacing(&self->title.component, &margin);
 	// Insert Effect
 	if (machine && slot != psy_audio_MASTER_INDEX) {
 		psy_ui_button_init_text(&self->inserteffect, &self->header, "+");
@@ -116,7 +116,7 @@ void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
 
 // ParamRackPane
 // implementation
-static void ondestroy(ParamRackPane*);
+static void paramrackpane_ondestroy(ParamRackPane*);
 static void paramrackpane_build(ParamRackPane*);
 static void paramrackpane_buildall(ParamRackPane*);
 static void paramrackpane_buildinputs(ParamRackPane*);
@@ -149,7 +149,7 @@ static void vtable_init(ParamRackPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)ondestroy;		
+		vtable.ondestroy = (psy_ui_fp_component_ondestroy)paramrackpane_ondestroy;		
 		vtable_initialized = TRUE;
 	}
 }
@@ -164,12 +164,13 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.1),
-		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0)));
+		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0)));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setscrollstepx(&self->component, psy_ui_value_makepx(100));
 	if (workspace_song(workspace)) {
 		self->machines = &workspace->song->machines;
 	}
-	self->mode = MACHINEDOCK_OUTCHAIN;
+	self->mode = PARAMRACK_OUTCHAIN;
 	self->workspace = workspace;
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		paramrackpane_onsongchanged);
@@ -179,7 +180,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	paramrackpane_build(self);
 }
 
-void ondestroy(ParamRackPane* self)
+void paramrackpane_ondestroy(ParamRackPane* self)
 {
 	psy_table_dispose(&self->boxes);
 }
@@ -197,15 +198,15 @@ void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender,
 {
 	if (workspace_song(sender)) {
 		self->machines = &sender->song->machines;
-		paramrackpane_connectsong(self);
 		self->lastselected = psy_audio_machines_selected(self->machines);		
+		paramrackpane_connectsong(self);		
 		paramrackpane_build(self);		
 	} else {
+		self->machines = NULL;
 		self->lastselected = psy_INDEX_INVALID;
 		psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
 			psy_ui_component_destroy);
-		psy_table_init(&self->boxes);
-		self->machines = NULL;
+		psy_table_init(&self->boxes);		
 	}
 }
 
@@ -213,22 +214,22 @@ void paramrackpane_build(ParamRackPane* self)
 {
 	self->lastinserted = NULL;
 	switch (self->mode) {
-		case MACHINEDOCK_INPUTS:
+		case PARAMRACK_INPUTS:
 		paramrackpane_buildinputs(self);
 		break;
-		case MACHINEDOCK_OUTPUTS:
+		case PARAMRACK_OUTPUTS:
 			paramrackpane_buildoutputs(self);
 			break;
-		case MACHINEDOCK_INCHAIN:
+		case PARAMRACK_INCHAIN:
 			paramrackpane_buildinchain(self);
 			break;
-		case MACHINEDOCK_OUTCHAIN: {
+		case PARAMRACK_OUTCHAIN: {
 			psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
 				psy_ui_component_destroy);
 			paramrackpane_buildoutchain(self, self->lastselected);
 			break; }
 		// Fallthrough
-		case MACHINEDOCK_ALL:
+		case PARAMRACK_ALL:
 		default:
 			paramrackpane_buildall(self);
 			break;
@@ -245,10 +246,10 @@ void paramrackpane_buildall(ParamRackPane* self)
 		psy_ui_component_destroy);
 	psy_table_init(&self->boxes);
 	for (it = psy_audio_machines_begin(self->machines);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		if (!(psy_tableiterator_key(&it) > 0x80 &&
-				psy_tableiterator_key(&it) <= 0xFE)) {			
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		if (!psy_audio_machines_isvirtualgenerator(self->machines,
+				psy_tableiterator_key(&it))) {
 			paramrackpane_insertbox(self, psy_tableiterator_key(&it));
 		}
 	}
@@ -267,8 +268,8 @@ void paramrackpane_buildinputs(ParamRackPane* self)
 		psy_TableIterator it;
 
 		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
 			psy_audio_WireSocket* socket;
 
 			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
@@ -364,7 +365,7 @@ void paramrackpane_buildoutchain(ParamRackPane* self, uintptr_t slot)
 			paramrackpane_removebox(self, slot);
 		}
 		box = (ParamRackBox*)malloc(sizeof(ParamRackBox));
-		if (box) {
+		if (box) {			
 			paramrackbox_init(box, &self->component, slot, self->workspace);
 			if (self->lastinserted) {
 				self->lastinserted->nextbox = box;
@@ -407,7 +408,7 @@ void paramrackpane_connectsong(ParamRackPane* self)
 void paramrackpane_onmachineselected(ParamRackPane* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
-	if (self->mode == MACHINEDOCK_ALL) {
+	if (self->mode == PARAMRACK_ALL) {
 		if (psy_table_exists(&self->boxes, self->lastselected)) {
 			paramrackbox_deselect((ParamRackBox*)
 				psy_table_at(&self->boxes, self->lastselected));
@@ -442,7 +443,7 @@ void paramrackpane_onmachinesremoved(ParamRackPane* self,
 void paramrackpane_onconnected(ParamRackPane* self,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot)
 {
-	if (self->mode != MACHINEDOCK_ALL) {
+	if (self->mode != PARAMRACK_ALL) {
 		paramrackpane_build(self);
 	}
 }
@@ -450,7 +451,7 @@ void paramrackpane_onconnected(ParamRackPane* self,
 void paramrackpane_ondisconnected(ParamRackPane* self,
 	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot)
 {
-	if (self->mode != MACHINEDOCK_ALL) {
+	if (self->mode != PARAMRACK_ALL) {
 		paramrackpane_build(self);
 	}
 }
@@ -461,6 +462,7 @@ static void paramrack_horizontal_onchanged(ParamRack*, psy_ui_ScrollBar* sender)
 static void paramrack_scrollrangechanged(ParamRack*, psy_ui_Component* sender,
 	psy_ui_Orientation orientation);
 static void paramrack_onmodeselected(ParamRack*, TabBar* sender, intptr_t index);
+static void paramrack_onalign(ParamRack*, psy_ui_Component* sender);
 // implementation
 void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -494,6 +496,8 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_scrollbar_setscrollrange(&self->hscroll, 0, 100);
 	psy_signal_connect(&self->pane.component.signal_scrollrangechanged, self,
 		paramrack_scrollrangechanged);
+	psy_signal_connect(&self->component.signal_align, self,
+		paramrack_onalign);	
 	tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);
 }
 
@@ -501,23 +505,72 @@ void paramrack_horizontal_onchanged(ParamRack* self, psy_ui_ScrollBar* sender)
 {
 	psy_ui_RealRectangle position;
 	double nPos;
-
+	psy_ui_Value step;
+	double steppx;
+		
 	nPos = psy_ui_scrollbar_position(sender);
 	position = psy_ui_component_position(&self->pane.component);
+	step = psy_ui_component_scrollstepx(&self->pane.component);
+	steppx = psy_ui_value_px(&step,
+		psy_ui_component_textmetric(&self->component));
 	psy_ui_component_move(&self->pane.component,		
-		psy_ui_point_makepx(-nPos * 100, 0));
+		psy_ui_point_makepx(floor(-nPos) * steppx, 0));
 }
 
 void paramrack_scrollrangechanged(ParamRack* self, psy_ui_Component* sender,
 	psy_ui_Orientation orientation)
-{
+{	
+	double nPos;
+
+	nPos = psy_ui_scrollbar_position(&self->hscroll);	
 	psy_ui_scrollbar_setscrollrange(&self->hscroll,
 		(double)sender->hscrollrange.x,
 		(double)sender->hscrollrange.y);
+	if (nPos > sender->hscrollrange.y) {
+		psy_ui_scrollbar_setthumbposition(&self->hscroll, sender->hscrollrange.y);
+	}	
 }
 
 void paramrack_onmodeselected(ParamRack* self, TabBar* sender,
 	intptr_t index)
 {	
 	paramrackpane_setmode(&self->pane, (ParamRackMode)index);
+}
+
+void paramrack_onalign(ParamRack* self, psy_ui_Component* sender)
+{
+	psy_ui_Size limit;
+	psy_ui_Size preferredsize;
+	double widthpx;
+	double visipx;
+	const psy_ui_TextMetric* tm;
+	psy_ui_Value step;
+	double steppx;
+	double steps;	
+
+	limit = psy_ui_component_size(&self->component);
+
+	if (psy_ui_component_at(&self->pane.component, 0)) {
+		psy_ui_Size preferredboxsize;
+		
+		preferredboxsize = psy_ui_component_preferredsize(
+			psy_ui_component_at(&self->pane.component, 0), &limit);
+		psy_ui_component_setscrollstepx(&self->pane.component,
+			preferredboxsize.width);
+	}
+	preferredsize = psy_ui_component_preferredsize(&self->pane.component, &limit);
+	tm = psy_ui_component_textmetric(&self->pane.component);
+	widthpx = psy_ui_value_px(&preferredsize.width, tm);
+	visipx = psy_ui_value_px(&limit.width, tm);
+	step = psy_ui_component_scrollstepx(&self->pane.component);
+	steppx =
+		psy_ui_value_px(&step,
+		psy_ui_component_textmetric(&self->pane.component));
+	steps = psy_max(0.0, ((widthpx - visipx) / steppx + 0.5));	
+	psy_ui_component_sethorizontalscrollrange(&self->pane.component, 0, (intptr_t)steps);	
+	if (steps == 0) {
+		psy_ui_component_preventinput(&self->hscroll.component, TRUE);
+	} else {
+		psy_ui_component_enableinput(&self->hscroll.component, TRUE);
+	}
 }
