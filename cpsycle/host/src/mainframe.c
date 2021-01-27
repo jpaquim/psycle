@@ -44,7 +44,7 @@ static void mainframe_initmainviews(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
 static void mainframe_initgear(MainFrame*);
-static void mainframe_initdock(MainFrame*);
+static void mainframe_initparamrack(MainFrame*);
 static void mainframe_initcpuview(MainFrame*);
 static void mainframe_initmidimonitor(MainFrame*);
 static void mainframe_initstepsequencerview(MainFrame*);
@@ -67,8 +67,8 @@ static void mainframe_onsequenceselchange(MainFrame*,
 static void mainframe_ontogglegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
-static void mainframe_ontoggledock(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onhidedock(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ontoggleparamrack(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onhideparamrack(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidemidimonitor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidecpu(MainFrame*, psy_ui_Component* sender);
@@ -121,8 +121,6 @@ static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Patterns* sender
 	uintptr_t numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
-static void mainframe_ondockview(MainFrame*, Workspace* sender,
-	psy_ui_Component* view);
 static void mainframe_onfloatsection(MainFrame*, Workspace* sender,
 	int view, uintptr_t section);
 static void mainframe_ondocksection(MainFrame*, Workspace* sender,
@@ -176,7 +174,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initmainviews(self);
 	mainframe_initrightarea(self);
 	mainframe_initgear(self);	
-	mainframe_initdock(self);
+	mainframe_initparamrack(self);
 	mainframe_initcpuview(self);
 	mainframe_initmidimonitor(self);		
 	mainframe_initstepsequencerview(self);	
@@ -255,8 +253,6 @@ void mainframe_initclientarea(MainFrame* self)
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client,
 		psy_ui_BACKGROUND_NONE);	
-	psy_ui_component_init_align(&self->paramviews, &self->client,
-		psy_ui_ALIGN_BOTTOM);
 }
 
 void mainframe_initrightarea(MainFrame* self)
@@ -527,16 +523,20 @@ void mainframe_initgear(MainFrame* self)
 		mainframe_onhidegear);
 }
 
-void mainframe_initdock(MainFrame* self)
-{
-	machinedock_init(&self->machinedock, &self->client, &self->workspace);
-	psy_ui_component_setalign(&self->machinedock.component,
-		psy_ui_ALIGN_BOTTOM);		
-	psy_ui_component_hide(machinedock_base(&self->machinedock));
+void mainframe_initparamrack(MainFrame* self)
+{	
+	paramrack_init(&self->paramrack, &self->client, &self->workspace);
+	psy_ui_component_setalign(&self->paramrack.component,
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_splitbar_init(&self->splitbarparamrack, &self->client);
+	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarparamrack),
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(paramrack_base(&self->paramrack));
+	psy_ui_component_hide(psy_ui_splitbar_base(&self->splitbarparamrack));	
 	psy_signal_connect(&self->machinebar.dock.signal_clicked, self,
-		mainframe_ontoggledock);
-	psy_signal_connect(&machinedock_base(&self->machinedock)->signal_hide, self,
-		mainframe_onhidedock);
+		mainframe_ontoggleparamrack);
+	psy_signal_connect(&paramrack_base(&self->paramrack)->signal_hide, self,
+		mainframe_onhideparamrack);
 }
 
 void mainframe_initcpuview(MainFrame* self)
@@ -647,9 +647,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
 		mainframe_oneventdriverinput);	
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
-		mainframe_onchangecontrolskin);
-	psy_signal_connect(&self->workspace.signal_dockview, self,
-		mainframe_ondockview);
+		mainframe_onchangecontrolskin);	
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
 		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
@@ -1003,20 +1001,21 @@ void mainframe_onhidegear(MainFrame* self, psy_ui_Component* sender)
 	psy_ui_button_disablehighlight(&self->machinebar.gear);
 }
 
-void mainframe_ontoggledock(MainFrame* self, psy_ui_Component* sender)
+void mainframe_ontoggleparamrack(MainFrame* self, psy_ui_Component* sender)
 {
-	if (!psy_ui_component_visible(&self->machinedock.component)) {
+	if (!psy_ui_component_visible(&self->paramrack.component)) {
 		psy_ui_button_highlight(&self->machinebar.dock);
 	}
-	psy_ui_component_togglevisibility(&self->machinedock.component);
-	if (!psy_ui_component_visible(&self->machinedock.component) &&
+	psy_ui_component_togglevisibility(&self->paramrack.component);
+	psy_ui_component_togglevisibility(psy_ui_splitbar_base(&self->splitbarparamrack));
+	if (!psy_ui_component_visible(&self->paramrack.component) &&
 		psy_ui_notebook_activepage(&self->notebook)) {
 		psy_ui_component_setfocus(psy_ui_notebook_activepage(
-			&self->notebook));
+			&self->notebook));		
 	}
 }
 
-void mainframe_onhidedock(MainFrame* self, psy_ui_Component* sender)
+void mainframe_onhideparamrack(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.dock);
 }
@@ -1311,17 +1310,8 @@ void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 	const char* path)
 {
+	paramskin_update(&self->workspace.config.macparam);
 	paramview_changecontrolskin(path);
-}
-
-void mainframe_ondockview(MainFrame* self, Workspace* sender,
-	psy_ui_Component* view)
-{			
-	psy_ui_component_resize(view, psy_ui_size_zero());	
-	psy_ui_component_setparent(view, &self->paramviews);	
-	psy_ui_component_setalign(view, psy_ui_ALIGN_LEFT);	
-	psy_ui_component_align(&self->client);
-	psy_ui_component_align(&self->paramviews);
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

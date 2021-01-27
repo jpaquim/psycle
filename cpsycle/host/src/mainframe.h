@@ -98,11 +98,11 @@ typedef struct MainFrame {
 	SongBar songbar;
 	PlayBar playbar;
 	PlayPosBar playposbar;
-	TrackScopeView trackscopeview;
-	psy_ui_Component paramviews;
+	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
-	MachineDock machinedock;
+	psy_ui_SplitBar splitbarparamrack;
+	ParamRack paramrack;
 	psy_ui_SplitBar splitseqeditor;
 	SeqEditor seqeditor;
 	MachineView machineview;

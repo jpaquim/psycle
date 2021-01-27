@@ -33,18 +33,13 @@ extern "C" {
 typedef struct {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
-	psy_ui_Component titlerow;
+	// ui elements	
 	psy_ui_Component row0;
-	ZoomBox zoombox;
-	psy_ui_Label title;
-	psy_ui_Button floatview;
-	psy_ui_Button close;
+	ZoomBox zoombox;		
 	psy_ui_Button mute;
 	psy_ui_Button parameters;
 	psy_ui_Button command;
-	psy_ui_Button help;	
-	psy_ui_Button dock;
+	psy_ui_Button help;		
 	PresetsBar presetsbar;
 	// references
 	psy_audio_Machine* machine;
@@ -61,10 +56,7 @@ typedef struct {
 	psy_ui_Component* view;
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	
-	int dofloat;
-	int dodock;
-	int doclose;
-	int floated;		
+	int doclose;	
 	NewValView newval;
 	// references
 	ParamView* paramview;
@@ -73,9 +65,9 @@ typedef struct {
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);
 
-void machineframe_init(MachineFrame*, psy_ui_Component* parent, bool floated, Workspace* workspace);
+void machineframe_init(MachineFrame*, psy_ui_Component* parent, Workspace* workspace);
 MachineFrame* machineframe_alloc(void);
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Workspace* workspace);
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent, Workspace* workspace);
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
 void machineframe_setparamview(MachineFrame* self, ParamView* view, psy_audio_Machine*);

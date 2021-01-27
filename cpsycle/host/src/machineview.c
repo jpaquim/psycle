@@ -285,7 +285,7 @@ void machineui_drawbackground(MachineUi* self, psy_ui_Graphics* g)
 			psy_ui_RealRectangle clip;
 
 			clip = machineui_coordposition(self, &self->coords->name);
-			psy_ui_textoutrectangle(g, clip.left, clip.top,
+			psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&clip),
 				psy_ui_ETO_CLIPPED, clip, "Master", strlen("Master"));
 		}
 	}
@@ -312,7 +312,7 @@ void machineui_draweditname(MachineUi* self, psy_ui_Graphics* g)
 		if (psy_strlen(editname) > 0) {
 			r = machineui_coordposition(self, &self->coords->name);
 			psy_ui_settextcolour(g, self->font);
-			psy_ui_textoutrectangle(g, r.left, r.top,
+			psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
 				psy_ui_ETO_CLIPPED, r, editname, strlen(editname));
 		}
 	}
@@ -436,10 +436,7 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 	if (self->machine) {		
 		if (!self->frame) {
 			self->frame = machineframe_alloc();
-			machineframe_init(self->frame, parent,
-				machineparamconfig_showfloated(
-					psycleconfig_macparam(workspace_conf(self->workspace))),
-				self->workspace);			
+			machineframe_init(self->frame, parent, self->workspace);			
 			psy_signal_connect(&self->frame->component.signal_destroy, self,
 				machineui_onframedestroyed);
 			if (psy_audio_machine_haseditor(self->machine)) {
@@ -465,11 +462,7 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 			}			
 		}
 		if (self->frame) {
-			psy_ui_component_show(&self->frame->component);
-			if (!machineparamconfig_showfloated(
-					psycleconfig_macparam(workspace_conf(self->workspace)))) {
-				workspace_dockview(self->workspace, &self->frame->component);
-			}
+			psy_ui_component_show(&self->frame->component);			
 		}		
 	}
 }
@@ -528,6 +521,8 @@ static void machinewireview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
 static void machinewireview_onmachineselected(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
+static void machinewireview_onwireselected(MachineWireView*,
+	psy_audio_Machines* sender, psy_audio_Wire);
 static void machinewireview_onmachinesinsert(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachinesremoved(MachineWireView*,
@@ -639,6 +634,8 @@ void machinewireview_connectsong(MachineWireView* self)
 	if (self->machines) {
 		psy_signal_connect(&self->machines->signal_slotchange, self,
 			machinewireview_onmachineselected);
+		psy_signal_connect(&self->machines->signal_wireselected, self,
+			machinewireview_onwireselected);		
 		psy_signal_connect(&self->machines->signal_insert, self,
 			machinewireview_onmachinesinsert);
 		psy_signal_connect(&self->machines->signal_removed, self,
@@ -839,10 +836,9 @@ void machineui_drawhighlight(MachineUi* self, psy_ui_Graphics* g)
 {		
 	static intptr_t d = 5; // the distance of the highlight from the machine
 	static psy_ui_RealPoint dirs[] = {
-		{ 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }
+		{ 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 }
 	};
 	psy_ui_RealPoint edges[4];	
-	uintptr_t i;	
 		
 	edges[0] = psy_ui_realpoint_make(self->position.left - d,
 		self->position.top - d);
@@ -1579,6 +1575,13 @@ void machinewireview_onmachineselected(MachineWireView* self,
 	psy_ui_component_setfocus(&self->component);
 }
 
+void machinewireview_onwireselected(MachineWireView* self,
+	psy_audio_Machines* sender, psy_audio_Wire wire)
+{
+	self->selectedwire = wire;
+	psy_ui_component_invalidate(&self->component);
+}
+
 void machinewireview_onmachinesinsert(MachineWireView* self,
 	psy_audio_Machines* machines, uintptr_t slot)
 {
@@ -1708,14 +1711,8 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 		MachineUi* machineui;
 
 		machineui = psy_tableiterator_value(&it);
-		if (machineui->frame) {
-			if (machineui->frame->dofloat) {
-				machinewireview_floatparamview(self, machineui);
-			} else if (machineui->frame->dodock) {
-				machinewireview_dockparamview(self, machineui);
-			} else if (machineui->frame->doclose) {
-				machinewireview_closeparamview(self, machineui);
-			}
+		if (machineui->frame && machineui->frame->doclose) {
+			machinewireview_closeparamview(self, machineui);			
 		}
 		if (updatevus) {
 			machineui_invalidate(machineui, machinewireview_base(self), TRUE);
@@ -1747,84 +1744,6 @@ void machinewireview_destroywireframes(MachineWireView* self)
 			psy_list_remove(&self->wireframes, p);
 		}
 	}
-}
-
-void machinewireview_floatparamview(MachineWireView* self, MachineUi* machineui)
-{
-	MachineFrame* frame;
-	psy_ui_Component temp;
-	psy_ui_Component* view;
-	ParamView* paramview;
-	psy_audio_Machine* machine;
-	psy_ui_Component* dockparent;
-
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_SET);
-	frame = machineui->frame;
-	psy_ui_component_init(&temp, &self->component);
-	view = frame->view;
-	paramview = frame->paramview;
-	dockparent = psy_ui_component_parent(&frame->component);
-	machine = frame->machine;
-	psy_ui_component_setparent(frame->view, &temp);
-	psy_signal_disconnectall(&view->signal_preferredsizechanged);
-	frame->view = 0;
-	psy_ui_component_destroy(&frame->component);
-	frame = machineframe_alloc();
-	machineframe_init(frame, &self->component, TRUE,
-		self->workspace);
-	psy_ui_component_insert(&frame->notebook.component, view,
-		&frame->help.component);
-	if (paramview) {
-		machineframe_setparamview(frame, paramview, machine);
-	} else {
-		machineframe_setview(frame, view, machine);
-	}
-	psy_ui_component_show(&frame->component);
-	psy_ui_component_destroy(&temp);
-	machineui->frame = frame;
-	psy_signal_connect(&frame->component.signal_destroy, machineui,
-		machineui_onframedestroyed);
-	psy_ui_component_align(psy_ui_component_parent(dockparent));
-	psy_ui_component_align(dockparent);
-}
-
-void machinewireview_dockparamview(MachineWireView* self, MachineUi* machineui)
-{
-	MachineFrame* frame;
-	psy_ui_Component temp;
-	psy_ui_Component* view;
-	ParamView* paramview;
-	psy_audio_Machine* machine;
-
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_SET);
-	frame = machineui->frame;
-	psy_ui_component_init(&temp, &self->component);
-	view = frame->view;
-	paramview = frame->paramview;
-	machine = frame->machine;
-	psy_ui_component_setparent(frame->view, &temp);
-	frame->view = 0;
-	psy_signal_disconnectall(&view->signal_preferredsizechanged);
-	psy_ui_component_destroy(&frame->component);
-	frame = machineframe_alloc();
-	machineframe_init(frame, &self->component, FALSE,
-		self->workspace);
-	psy_ui_component_insert(&frame->notebook.component, view,
-		&frame->help.component);
-	if (paramview) {
-		machineframe_setparamview(frame, paramview, machine);
-	} else {
-		machineframe_setview(frame, view, machine);
-	}
-	psy_ui_component_show(&frame->component);
-	psy_ui_component_destroy(&temp);
-	machineui->frame = frame;
-	workspace_dockview(self->workspace,
-		&machineui->frame->component);
-	psy_signal_connect(&frame->component.signal_destroy,
-		machineui, machineui_onframedestroyed);
 }
 
 void machinewireview_closeparamview(MachineWireView* self, MachineUi* machineui)

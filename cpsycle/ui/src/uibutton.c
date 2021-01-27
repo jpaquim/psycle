@@ -158,8 +158,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 	if (text) {
 		psy_ui_textoutrectangle(g,
-			centerx,
-			centery,
+			psy_ui_realpoint_make(centerx, centery),
 			psy_ui_ETO_CLIPPED,
 			r,
 			text,

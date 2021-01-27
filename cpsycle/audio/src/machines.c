@@ -64,6 +64,7 @@ void machines_initsignals(psy_audio_Machines* self)
 	psy_signal_init(&self->signal_removed);
 	psy_signal_init(&self->signal_slotchange);
 	psy_signal_init(&self->signal_paramselected);
+	psy_signal_init(&self->signal_wireselected);	
 }
 
 void psy_audio_machines_dispose(psy_audio_Machines* self)
@@ -89,6 +90,7 @@ void machines_disposesignals(psy_audio_Machines* self)
 	psy_signal_dispose(&self->signal_removed);
 	psy_signal_dispose(&self->signal_slotchange);
 	psy_signal_dispose(&self->signal_paramselected);
+	psy_signal_dispose(&self->signal_wireselected);
 }
 
 void machines_free(psy_audio_Machines* self)
@@ -723,4 +725,9 @@ void  psy_audio_machines_connectasmixerinput(psy_audio_Machines* self)
 bool  psy_audio_machines_isconnectasmixersend(const psy_audio_Machines* self)
 {
 	return self->mixersendconnect;
+}
+
+void psy_audio_machines_selectwire(psy_audio_Machines* self, psy_audio_Wire wire)
+{
+	psy_signal_emit(&self->signal_wireselected, self, 1, &wire);
 }

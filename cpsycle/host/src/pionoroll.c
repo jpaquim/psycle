@@ -300,7 +300,8 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 						psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
 						psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));
 					if (psy_dsp_iskey_c(key)) {
-						psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
+						psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
+							psy_ui_ETO_CLIPPED, r,
 							psy_dsp_notetostr(key, self->keyboardstate->notemode),
 							strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
 					}
@@ -312,7 +313,8 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 			r = psy_ui_realrectangle_make(psy_ui_realpoint_make(0.0, cpy),
 					psy_ui_realsize_make(size.width,
 						self->keyboardstate->keyheightpx));
-			psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
+			psy_ui_textoutrectangle(g,
+				psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
 				psy_dsp_notetostr(key, self->keyboardstate->notemode),
 				strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
 			psy_ui_drawline(g,

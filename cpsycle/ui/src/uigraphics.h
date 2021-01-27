@@ -124,10 +124,10 @@ INLINE void psy_ui_textout(psy_ui_Graphics* self, double x, double y, const char
 	self->vtable->textout(self, x, y, text, len);
 }
 
-INLINE void psy_ui_textoutrectangle(psy_ui_Graphics* self, double x, double y, uintptr_t options,
+INLINE void psy_ui_textoutrectangle(psy_ui_Graphics* self, psy_ui_RealPoint dest, uintptr_t options,
 	psy_ui_RealRectangle r, const char* text, uintptr_t len)
 {
-	self->vtable->textoutrectangle(self, x, y, options, r, text, len);
+	self->vtable->textoutrectangle(self, dest.x, dest.y, options, r, text, len);
 }
 
 INLINE psy_ui_Size psy_ui_textsize(psy_ui_Graphics* self, const char* text)

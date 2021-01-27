@@ -264,7 +264,7 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 			psy_ui_realpoint_make(c * self->linestate->flatsize, y),
 			psy_ui_realsize_make(self->linestate->flatsize,
 				self->linestate->lineheightpx - 1));
-		psy_ui_textoutrectangle(g, r.left, r.top,
+		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
 			digit, strlen(digit));
 	}
@@ -276,7 +276,7 @@ void trackerlinennumbers_drawtext(TrackerLineNumbers* self, psy_ui_Graphics* g,
 			psy_ui_realsize_make(
 				blankspace, self->linestate->lineheightpx - 1));
 		digit[0] = ' ';
-		psy_ui_textoutrectangle(g, r.left, r.top,
+		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
 			digit, strlen(digit));
 	}
@@ -478,16 +478,16 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);
 	psy_ui_settextcolour(g, self->linestate->skin->font);
-	psy_ui_textoutrectangle(g, r.left, 0, 0, r, self->linestr, strlen(self->linestr));
+	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, 0), 0, r, self->linestr, strlen(self->linestr));
 	if (self->showdefaultline) {
 		if (self->linestate->gridfont) {
 			psy_ui_setfont(g, self->linestate->gridfont);
 		}
 		if ((self->showbeatoffset)) {
-			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
+			psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, self->headerheight), 0,
 				r, self->defaultstr, strlen(self->defaultstr));
 		} else {			
-			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
+			psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, self->headerheight), 0,
 				r, "Def", strlen("Def"));
 		}
 	}

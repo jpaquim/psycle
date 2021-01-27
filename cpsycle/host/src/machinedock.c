@@ -9,45 +9,143 @@
 // platform
 #include "../../detail/portable.h"
 
-
-void machinedockbox_init(MachineDockBox* self, psy_ui_Component* parent,
+// ParamRackBox
+// prototypes
+static void paramrackbox_onmousedoubleclick(ParamRackBox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void paramrackbox_onthemechanged(ParamRackBox*, MachineViewConfig*,
+	psy_Property* theme);
+static void paramrackbox_onaddeffect(ParamRackBox*, psy_ui_Button* sender);
+// implementation
+void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	uintptr_t slot, Workspace* workspace)
 {
+	psy_Property* theme;
 	psy_audio_Machine* machine;
+	psy_ui_Margin margin;
 
 	machine = psy_audio_machines_at(&workspace->song->machines, slot);
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_label_setcharnumber(&self->header, 20.0);
-	psy_ui_component_setbackgroundcolour(psy_ui_label_base(&self->header),
-		psy_ui_colour_make(0x00404040));
-	if (machine) {
-		psy_ui_label_settext(&self->header, psy_audio_machine_editname(machine));
+	self->workspace = workspace;
+	self->slot = slot;
+	theme = workspace->config.macparam.theme;
+	if (theme) {
+		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
+			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));		
 	}
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->header, &self->component);
+	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
+	if (theme) {
+		psy_ui_component_setcolour(&self->header, psy_ui_colour_make(
+			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
+	}
+	// title label
+	psy_ui_label_init(&self->title, &self->header);
+	psy_ui_label_preventtranslation(&self->title);	
+	if (machine) {
+		psy_ui_label_settext(&self->title, psy_audio_machine_editname(machine));
+	}
+	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->title.component.signal_mousedoubleclick, self,
+		paramrackbox_onmousedoubleclick);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0),
+		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5));
+	psy_ui_component_setspacing(&self->title.component, &margin);
+	// Insert Effect
+	if (machine && slot != psy_audio_MASTER_INDEX) {
+		psy_ui_button_init_text(&self->inserteffect, &self->header, "+");
+		psy_ui_component_setalign(&self->inserteffect.component, psy_ui_ALIGN_RIGHT);
+		psy_signal_connect(&self->inserteffect.signal_clicked, self,
+			paramrackbox_onaddeffect);
+	}
+	// Parameter List
 	parameterlistbox_init(&self->parameters, &self->component,
 		psy_audio_machines_at(&workspace->song->machines, slot), workspace);
 	psy_ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(
+		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,
+		self, paramrackbox_onthemechanged);
+	self->nextbox = NULL;
 }
 
-static void ondestroy(MachineDockPane*);
-static void machinedockpane_build(MachineDockPane*);
-static void machinedockpane_insertbox(MachineDockPane*, uintptr_t slot);
-static void machinedockpane_removebox(MachineDockPane*, uintptr_t slot);
-static void machinedockpane_onsongchanged(MachineDockPane*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
-static void machinedockpane_connectsong(MachineDockPane*);
-static void machinedockpane_onmachineselected(MachineDockPane*,
-	psy_audio_Machines*, uintptr_t slot);
-static void machinedockpane_onmachinesinsert(MachineDockPane*,
-	psy_audio_Machines*, uintptr_t slot);
-static void machinedockpane_onmachinesremoved(MachineDockPane*,
-	psy_audio_Machines*, uintptr_t slot);
+void paramrackbox_select(ParamRackBox* self)
+{
+	psy_ui_component_invalidate(&self->header);
+}
 
+void paramrackbox_deselect(ParamRackBox* self)
+{
+	psy_ui_component_invalidate(&self->header);
+}
+
+void paramrackbox_onmousedoubleclick(ParamRackBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{	
+	workspace_showparameters(self->workspace, self->slot);	
+}
+
+void paramrackbox_onthemechanged(ParamRackBox* self, MachineViewConfig* config,
+	psy_Property* theme)
+{
+	if (theme) {
+		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
+			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));	
+		psy_ui_component_setcolour(&self->header, psy_ui_colour_make(
+			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
+		psy_ui_component_setbackgroundcolour(&self->parameters.listbox.component,
+			psy_ui_colour_make(
+			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));		
+	}
+	psy_ui_component_invalidate(&self->component);
+}
+
+void paramrackbox_onaddeffect(ParamRackBox* self, psy_ui_Button* sender)
+{
+	if (self->workspace && workspace_song(self->workspace)) {
+		if (self->nextbox) {
+			psy_audio_machines_selectwire(&self->workspace->song->machines,
+				psy_audio_wire_make(self->slot, self->nextbox->slot));
+			workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECT);
+		} else {
+			workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
+		}
+	}
+}
+
+// ParamRackPane
+// implementation
+static void ondestroy(ParamRackPane*);
+static void paramrackpane_build(ParamRackPane*);
+static void paramrackpane_buildall(ParamRackPane*);
+static void paramrackpane_buildinputs(ParamRackPane*);
+static void paramrackpane_buildoutputs(ParamRackPane*);
+static void paramrackpane_buildinchain(ParamRackPane*);
+static void paramrackpane_buildoutchain(ParamRackPane*, uintptr_t slot);
+static void paramrackpane_insertbox(ParamRackPane*, uintptr_t slot);
+static void paramrackpane_removebox(ParamRackPane*, uintptr_t slot);
+static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender,
+	int flag, psy_audio_SongFile*);
+static void paramrackpane_connectsong(ParamRackPane*);
+static void paramrackpane_onmachineselected(ParamRackPane*,
+	psy_audio_Machines*, uintptr_t slot);
+static void paramrackpane_onmachinesinsert(ParamRackPane*,
+	psy_audio_Machines*, uintptr_t slot);
+static void paramrackpane_onmachinesremoved(ParamRackPane*,
+	psy_audio_Machines*, uintptr_t slot);
+static void paramrackpane_onconnected(ParamRackPane*,
+	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void paramrackpane_ondisconnected(ParamRackPane*,
+	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+
+
+// ParamRackPane
+// vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static void vtable_init(MachineDockPane* self)
+static void vtable_init(ParamRackPane* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
@@ -55,43 +153,91 @@ static void vtable_init(MachineDockPane* self)
 		vtable_initialized = TRUE;
 	}
 }
-
-void machinedockpane_init(MachineDockPane* self, psy_ui_Component* parent,
+// implementation
+void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{
+{	
 	psy_ui_component_init(&self->component, parent);	
 	vtable_init(self);
 	self->component.vtable = &vtable;
+	self->lastselected = psy_INDEX_INVALID;
 	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
+		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
+		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.1),
+		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0)));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	if (workspace_song(workspace)) {
 		self->machines = &workspace->song->machines;
 	}
+	self->mode = MACHINEDOCK_OUTCHAIN;
 	self->workspace = workspace;
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		machinedockpane_onsongchanged);
-	machinedockpane_connectsong(self);
+		paramrackpane_onsongchanged);
+	paramrackpane_connectsong(self);
 	psy_table_init(&self->boxes);
-	machinedockpane_build(self);
+	self->lastinserted = NULL;
+	paramrackpane_build(self);
 }
 
-void ondestroy(MachineDockPane* self)
+void ondestroy(ParamRackPane* self)
 {
 	psy_table_dispose(&self->boxes);
 }
 
-void machinedockpane_onsongchanged(MachineDockPane* self, Workspace* sender,
-	int flag, psy_audio_SongFile* songfile)
+void paramrackpane_setmode(ParamRackPane* self, ParamRackMode mode)
 {
-	self->machines = &sender->song->machines;	
-	machinedockpane_connectsong(self);
-	machinedockpane_build(self);
-	psy_ui_component_align(&self->component);
-	psy_ui_component_align(psy_ui_component_parent(&self->component));	
+	if (self->mode != mode) {
+		self->mode = mode;
+		paramrackpane_build(self);
+	}
 }
 
-void machinedockpane_build(MachineDockPane* self)
+void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender,
+	int flag, psy_audio_SongFile* songfile)
+{
+	if (workspace_song(sender)) {
+		self->machines = &sender->song->machines;
+		paramrackpane_connectsong(self);
+		self->lastselected = psy_audio_machines_selected(self->machines);		
+		paramrackpane_build(self);		
+	} else {
+		self->lastselected = psy_INDEX_INVALID;
+		psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
+			psy_ui_component_destroy);
+		psy_table_init(&self->boxes);
+		self->machines = NULL;
+	}
+}
+
+void paramrackpane_build(ParamRackPane* self)
+{
+	self->lastinserted = NULL;
+	switch (self->mode) {
+		case MACHINEDOCK_INPUTS:
+		paramrackpane_buildinputs(self);
+		break;
+		case MACHINEDOCK_OUTPUTS:
+			paramrackpane_buildoutputs(self);
+			break;
+		case MACHINEDOCK_INCHAIN:
+			paramrackpane_buildinchain(self);
+			break;
+		case MACHINEDOCK_OUTCHAIN: {
+			psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
+				psy_ui_component_destroy);
+			paramrackpane_buildoutchain(self, self->lastselected);
+			break; }
+		// Fallthrough
+		case MACHINEDOCK_ALL:
+		default:
+			paramrackpane_buildall(self);
+			break;
+	}
+	psy_ui_component_align(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+}
+
+void paramrackpane_buildall(ParamRackPane* self)
 {
 	psy_TableIterator it;	
 
@@ -103,32 +249,137 @@ void machinedockpane_build(MachineDockPane* self)
 		psy_tableiterator_inc(&it)) {
 		if (!(psy_tableiterator_key(&it) > 0x80 &&
 				psy_tableiterator_key(&it) <= 0xFE)) {			
-			machinedockpane_insertbox(self, psy_tableiterator_key(&it));
+			paramrackpane_insertbox(self, psy_tableiterator_key(&it));
 		}
 	}
 }
 
- void machinedockpane_insertbox(MachineDockPane* self, uintptr_t slot)
+void paramrackpane_buildinputs(ParamRackPane* self)
+{
+	psy_audio_MachineSockets* sockets;
+
+	psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
+		psy_ui_component_destroy);
+	paramrackpane_insertbox(self, self->lastselected);
+	sockets = psy_audio_connections_at(&self->machines->connections,
+		self->lastselected);
+	if (sockets) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (socket->slot != psy_INDEX_INVALID) {
+				if (!psy_table_exists(&self->boxes, socket->slot)) {
+					paramrackpane_insertbox(self, socket->slot);
+				}
+			}
+		}
+	}
+}
+
+void paramrackpane_buildoutputs(ParamRackPane* self)
+{	
+	psy_audio_MachineSockets* sockets;
+
+	psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
+		psy_ui_component_destroy);
+	paramrackpane_insertbox(self, self->lastselected);
+	sockets = psy_audio_connections_at(&self->machines->connections,
+		self->lastselected);
+	if (sockets) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (socket->slot != psy_INDEX_INVALID) {
+				if (!psy_table_exists(&self->boxes, socket->slot)) {
+					paramrackpane_insertbox(self, socket->slot);
+				}
+			}
+		}
+	}
+}
+
+void paramrackpane_buildinchain(ParamRackPane* self)
+{
+	psy_table_disposeall(&self->boxes, (psy_fp_disposefunc)
+		psy_ui_component_destroy);
+	if (self->machines) {
+		MachineList* path;
+			
+		path = psy_audio_compute_path(self->machines, self->lastselected, FALSE);
+		for (; path != 0; path = path->next) {
+			uintptr_t slot;
+
+			slot = (size_t)path->entry;
+			if (slot == psy_INDEX_INVALID) {
+				// delimits the machines that could be processed parallel
+				// todo: add thread functions
+				continue;
+			}
+			paramrackpane_insertbox(self, slot);
+		}
+		psy_list_free(path);
+	}
+}
+
+void paramrackpane_buildoutchain(ParamRackPane* self, uintptr_t slot)
+{
+	psy_audio_MachineSockets* sockets;
+	
+	paramrackpane_insertbox(self, slot);
+	sockets = psy_audio_connections_at(&self->machines->connections, slot);
+	if (sockets) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (socket->slot != psy_INDEX_INVALID) {
+				if (!psy_table_exists(&self->boxes, socket->slot)) {
+					paramrackpane_buildoutchain(self, socket->slot);
+				}
+			}
+		}
+	}
+}
+
+ void paramrackpane_insertbox(ParamRackPane* self, uintptr_t slot)
 {
 	if (psy_audio_machines_at(self->machines, slot)) {
-		MachineDockBox* box;
+		ParamRackBox* box;
 
 		if (psy_table_exists(&self->boxes, slot)) {
-			machinedockpane_removebox(self, slot);
+			paramrackpane_removebox(self, slot);
 		}
-		box = (MachineDockBox*)malloc(sizeof(MachineDockBox));
+		box = (ParamRackBox*)malloc(sizeof(ParamRackBox));
 		if (box) {
-			machinedockbox_init(box, &self->component, slot, self->workspace);
+			paramrackbox_init(box, &self->component, slot, self->workspace);
+			if (self->lastinserted) {
+				self->lastinserted->nextbox = box;
+			}
+			self->lastinserted = box;
 			psy_ui_component_setalign(&box->component, psy_ui_ALIGN_LEFT);
-			psy_table_insert(&self->boxes, slot, box);
+			psy_table_insert(&self->boxes, slot, box);			
 		}		
 	}
 }
 
-void machinedockpane_removebox(MachineDockPane* self, uintptr_t slot)
+void paramrackpane_removebox(ParamRackPane* self, uintptr_t slot)
 {
 	if (psy_table_exists(&self->boxes, slot)) {
-		MachineDockBox* box;
+		ParamRackBox* box;
 
 		box = psy_table_at(&self->boxes, slot);
 		psy_ui_component_deallocate(&box->component);		
@@ -136,56 +387,101 @@ void machinedockpane_removebox(MachineDockPane* self, uintptr_t slot)
 	}
 }
 
-void machinedockpane_connectsong(MachineDockPane* self)
+void paramrackpane_connectsong(ParamRackPane* self)
 {
 	if (self->machines) {
 		psy_signal_connect(&self->machines->signal_slotchange, self,
-			machinedockpane_onmachineselected);
+			paramrackpane_onmachineselected);
 		psy_signal_connect(&self->machines->signal_insert, self,
-			machinedockpane_onmachinesinsert);
+			paramrackpane_onmachinesinsert);
 		psy_signal_connect(&self->machines->signal_removed, self,
-			machinedockpane_onmachinesremoved);
-		// psy_signal_connect(&self->machines->connections.signal_connected, self,
-		//	machinedockpane_onconnected);
-		// psy_signal_connect(&self->machines->connections.signal_disconnected, self,
-		//	machinedockpane_ondisconnected);
+			paramrackpane_onmachinesremoved);
+		psy_signal_connect(&self->machines->connections.signal_connected, self,
+			paramrackpane_onconnected);
+		psy_signal_connect(&self->machines->connections.signal_disconnected, self,
+			paramrackpane_ondisconnected);
 	}
 }
 
 
-void machinedockpane_onmachineselected(MachineDockPane* self,
+void paramrackpane_onmachineselected(ParamRackPane* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
+	if (self->mode == MACHINEDOCK_ALL) {
+		if (psy_table_exists(&self->boxes, self->lastselected)) {
+			paramrackbox_deselect((ParamRackBox*)
+				psy_table_at(&self->boxes, self->lastselected));
+		}
+		if (psy_table_exists(&self->boxes, slot)) {
+			paramrackbox_select((ParamRackBox*)
+				psy_table_at(&self->boxes, slot));
+			self->lastselected = slot;
+		} else {
+			self->lastselected = psy_INDEX_INVALID;
+		}
+	} else if (self->lastselected != slot) {
+		self->lastselected = slot;
+		paramrackpane_build(self);
+	}
 }
 
-void machinedockpane_onmachinesinsert(MachineDockPane* self,
+void paramrackpane_onmachinesinsert(ParamRackPane* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
-	machinedockpane_insertbox(self, slot);
+	paramrackpane_insertbox(self, slot);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }
 
-void machinedockpane_onmachinesremoved(MachineDockPane* self,
+void paramrackpane_onmachinesremoved(ParamRackPane* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
-	machinedockpane_removebox(self, slot);
+	paramrackpane_removebox(self, slot);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }
 
-// MachineDock
-static void machinedock_horizontal_onchanged(MachineDock*, psy_ui_ScrollBar* sender);
-static void machinedock_scrollrangechanged(MachineDock*, psy_ui_Component* sender,
+void paramrackpane_onconnected(ParamRackPane* self,
+	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot)
+{
+	if (self->mode != MACHINEDOCK_ALL) {
+		paramrackpane_build(self);
+	}
+}
+
+void paramrackpane_ondisconnected(ParamRackPane* self,
+	psy_audio_Connections* con, uintptr_t outputslot, uintptr_t inputslot)
+{
+	if (self->mode != MACHINEDOCK_ALL) {
+		paramrackpane_build(self);
+	}
+}
+
+// ParamRack
+// prototypes
+static void paramrack_horizontal_onchanged(ParamRack*, psy_ui_ScrollBar* sender);
+static void paramrack_scrollrangechanged(ParamRack*, psy_ui_Component* sender,
 	psy_ui_Orientation orientation);
-// implemnetation
-void machinedock_init(MachineDock* self, psy_ui_Component* parent, Workspace* workspace)
+static void paramrack_onmodeselected(ParamRack*, TabBar* sender, intptr_t index);
+// implementation
+void paramrack_init(ParamRack* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	// Scrollbar
-	psy_ui_scrollbar_init(&self->hscroll, &self->component);
+	// Bottom
+	psy_ui_component_init_align(&self->bottom, &self->component,
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_scrollbar_init(&self->hscroll, &self->bottom);
 	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);
-	psy_ui_component_setalign(psy_ui_scrollbar_base(&self->hscroll), psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_setalign(psy_ui_scrollbar_base(&self->hscroll),
+		psy_ui_ALIGN_CLIENT);	
+	tabbar_init(&self->modeselector, &self->bottom);
+	tabbar_append_tabs(&self->modeselector,
+		"All", "Inputs", "Outputs", "Inchain", "Outchain", NULL);	
+	psy_signal_connect(&self->modeselector.signal_change, self,
+		paramrack_onmodeselected);
+	psy_ui_component_setalign(tabbar_base(&self->modeselector),
+		psy_ui_ALIGN_RIGHT);
 	// Pane
-	machinedockpane_init(&self->pane, &self->component, workspace);		
+	paramrackpane_init(&self->pane, &self->component, workspace);		
 	psy_ui_component_setalign(&self->pane.component,
 		psy_ui_ALIGN_VCLIENT);
 	psy_ui_component_setmaximumsize(&self->component,
@@ -194,13 +490,14 @@ void machinedock_init(MachineDock* self, psy_ui_Component* parent, Workspace* wo
 		psy_ui_size_makeem(0.0, 10.0));	
 	// connect scrollbar
 	psy_signal_connect(&self->hscroll.signal_changed, self,
-		machinedock_horizontal_onchanged);
+		paramrack_horizontal_onchanged);
 	psy_ui_scrollbar_setscrollrange(&self->hscroll, 0, 100);
 	psy_signal_connect(&self->pane.component.signal_scrollrangechanged, self,
-		machinedock_scrollrangechanged);
+		paramrack_scrollrangechanged);
+	tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);
 }
 
-void machinedock_horizontal_onchanged(MachineDock* self, psy_ui_ScrollBar* sender)
+void paramrack_horizontal_onchanged(ParamRack* self, psy_ui_ScrollBar* sender)
 {
 	psy_ui_RealRectangle position;
 	double nPos;
@@ -211,10 +508,16 @@ void machinedock_horizontal_onchanged(MachineDock* self, psy_ui_ScrollBar* sende
 		psy_ui_point_makepx(-nPos * 100, 0));
 }
 
-void machinedock_scrollrangechanged(MachineDock* self, psy_ui_Component* sender,
+void paramrack_scrollrangechanged(ParamRack* self, psy_ui_Component* sender,
 	psy_ui_Orientation orientation)
 {
 	psy_ui_scrollbar_setscrollrange(&self->hscroll,
 		(double)sender->hscrollrange.x,
 		(double)sender->hscrollrange.y);
+}
+
+void paramrack_onmodeselected(ParamRack* self, TabBar* sender,
+	intptr_t index)
+{	
+	paramrackpane_setmode(&self->pane, (ParamRackMode)index);
 }

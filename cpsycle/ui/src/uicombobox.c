@@ -156,8 +156,8 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 			else {
 				psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 			}
-			psy_ui_textoutrectangle(g, 0, vcenter, psy_ui_ETO_CLIPPED, r,
-				text, strlen(text));			
+			psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, vcenter),
+				psy_ui_ETO_CLIPPED, r, text, strlen(text));			
 		}
 	}
 	ax = psy_ui_value_px(&size.width, tm) - 10;

@@ -446,9 +446,8 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* prope
 		self->cpy + self->centery,
 		propertiesrenderer_columnstart(self, column), self->textheight);
 	psy_ui_realrectangle_expand(&r, 0, -5, 0, 0);
-	psy_ui_textoutrectangle(self->g, propertiesrenderer_columnstart(self, column),
-		self->cpy + self->centery,
-		psy_ui_ETO_CLIPPED, r,
+	psy_ui_textoutrectangle(self->g,
+		psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
 		psy_property_item_str(property),
 		strlen(psy_property_item_str(property)));
 	//psy_ui_setbackgroundcolour(self->g, psy_ui_colour_make(0x003E3E3E));		

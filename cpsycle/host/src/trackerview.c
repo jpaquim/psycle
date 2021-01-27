@@ -584,7 +584,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 		self->gridstate->trackconfig->textwidth * 3,
 		self->linestate->lineheightpx - 1);
 	notestr = trackergrid_notestr(self, *event);
-	psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
+	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, r.top), psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
 		notestr, strlen(notestr));
 	cpx += trackdef_columnwidth(trackdef, 0, self->gridstate->trackconfig->textwidth);
 	// draw digit columns
@@ -711,20 +711,21 @@ void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g,
 	double x, double y, intptr_t value, uintptr_t empty, bool mid)
 {
-	const char* text;
-	static const char* emptystr = ".";
+	const char* text;	
 
 	assert(self);
 		
 	if (!empty && value < 0x10) {
 		text = hex_tab[value];
 	} else if (self->showemptydata) {
+		static const char* emptystr = ".";
+
 		text = emptystr;
 	} else {
 		text = "";
 	}
 	psy_ui_textoutrectangle(g,
-		x + self->gridstate->trackconfig->textleftedge, y,
+		psy_ui_realpoint_make(x + self->gridstate->trackconfig->textleftedge, y),
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(x, y),

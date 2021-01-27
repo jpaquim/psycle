@@ -57,7 +57,7 @@ void make_translator_default(psy_Property* lang)
 	// Machinebar
 	section = psy_property_append_section(lang, "machinebar");
 	psy_property_set_str(section, "gear", "Gear Rack");
-	psy_property_set_str(section, "dock", "Dock");
+	psy_property_set_str(section, "dock", "Param Rack");
 	psy_property_set_str(section, "editor", "Editor");
 	psy_property_set_str(section, "cpu", "CPU");
 	psy_property_set_str(section, "midi", "MIDI");
