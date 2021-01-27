@@ -1,14 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-
 #if !defined(MACHINEDOCK_H)
 #define MACHINEDOCK_H
 
 // host
 #include "workspace.h"
 #include "paramlistbox.h"
+#include "tabbar.h"
 // ui
+#include <uibutton.h>
 #include <uilabel.h>
 #include <uiscrollbar.h>
 // audio
@@ -18,18 +19,42 @@
 extern "C" {
 #endif
 
-typedef struct MachineDockBox {
+// ParamRackBox
+
+struct ParamRackBox;
+
+typedef struct ParamRackBox {
 	// inherits
 	psy_ui_Component component;
 	// internal
-	psy_ui_Label header;
-	ParameterListBox parameters;
-} MachineDockBox;
+	psy_ui_Component header;
+	psy_ui_Label title;
+	psy_ui_Button inserteffect;
+	ParameterListBox parameters;	
+	psy_ui_Colour restorebgcolour;
+	uintptr_t slot;
+	// referenced
+	Workspace* workspace;
+	struct ParamRackBox* nextbox;
+} ParamRackBox;
 
-void machinedockbox_init(MachineDockBox*, psy_ui_Component* parent,
+void paramrackbox_init(ParamRackBox*, psy_ui_Component* parent,
 	uintptr_t slot, Workspace*);
 
-typedef struct MachineDockPane {
+void paramrackbox_select(ParamRackBox*);
+void paramrackbox_deselect(ParamRackBox*);
+
+// ParamRackMode
+typedef enum ParamRackMode {
+	MACHINEDOCK_ALL = 0,
+	MACHINEDOCK_INPUTS = 1,
+	MACHINEDOCK_OUTPUTS = 2,
+	MACHINEDOCK_INCHAIN = 3,
+	MACHINEDOCK_OUTCHAIN = 4
+} ParamRackMode;
+
+// ParamRackPane
+typedef struct ParamRackPane {
 	// inherit
 	psy_ui_Component component;	
 	// internal data
@@ -37,22 +62,30 @@ typedef struct MachineDockPane {
 	// references
 	Workspace* workspace;
 	psy_audio_Machines* machines;
-} MachineDockPane;
+	uintptr_t lastselected;
+	ParamRackMode mode;
+	ParamRackBox* lastinserted;
+} ParamRackPane;
 
-void machinedockpane_init(MachineDockPane*, psy_ui_Component* parent, Workspace*);
+void paramrackpane_init(ParamRackPane*, psy_ui_Component* parent, Workspace*);
 
-typedef struct MachineDock {
+void paramrackpane_setmode(ParamRackPane*, ParamRackMode);
+
+// ParamRack
+typedef struct ParamRack {
 	// inherit
 	psy_ui_Component component;
 	// internal
 	// ui elements
-	MachineDockPane pane;
-	psy_ui_ScrollBar hscroll;
-} MachineDock;
+	ParamRackPane pane;
+	psy_ui_Component bottom;	
+	TabBar modeselector;	
+	psy_ui_ScrollBar hscroll;	
+} ParamRack;
 
-void machinedock_init(MachineDock*, psy_ui_Component* parent, Workspace*);
+void paramrack_init(ParamRack*, psy_ui_Component* parent, Workspace*);
 
-INLINE psy_ui_Component* machinedock_base(MachineDock* self)
+INLINE psy_ui_Component* paramrack_base(ParamRack* self)
 {
 	return &self->component;
 }

@@ -47,6 +47,7 @@ typedef struct psy_audio_Machines {
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
 	psy_Signal signal_paramselected;
+	psy_Signal signal_wireselected;
 	psy_audio_Machine* master;
 	bool mixersendconnect;
 	psy_UndoRedo undoredo;
@@ -105,6 +106,7 @@ void psy_audio_machines_removemixersend(psy_audio_Machines* self, uintptr_t slot
 void psy_audio_machines_connectasmixersend(psy_audio_Machines*);
 void psy_audio_machines_connectasmixerinput(psy_audio_Machines*);
 bool psy_audio_machines_isconnectasmixersend(const psy_audio_Machines*);
+void psy_audio_machines_selectwire(psy_audio_Machines*, psy_audio_Wire);
 
 INLINE bool psy_audio_machines_hasmixer(const psy_audio_Machines* self)
 {

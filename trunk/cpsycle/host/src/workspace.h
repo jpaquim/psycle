@@ -125,8 +125,7 @@ typedef struct {
 	psy_Signal signal_terminal_warning;
 	psy_Signal signal_terminal_out;		
 	psy_Signal signal_status_out;
-	psy_Signal signal_followsongchanged;
-	psy_Signal signal_dockview;	
+	psy_Signal signal_followsongchanged;	
 	psy_Signal signal_togglegear;
 	psy_Signal signal_selectpatterndisplay;
 	psy_Signal signal_floatsection;
@@ -243,7 +242,6 @@ void workspace_forward(Workspace*);
 void workspace_updatecurrview(Workspace*);
 uintptr_t workspace_currview(Workspace*);
 void workspace_addhistory(Workspace*);
-void workspace_dockview(Workspace*, psy_ui_Component*);
 void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(const Workspace*);

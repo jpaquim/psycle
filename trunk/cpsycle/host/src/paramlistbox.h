@@ -6,6 +6,7 @@
 
 // host
 #include "workspace.h"
+#include "paramview.h"
 // ui
 #include <uilistbox.h>
 #include <uiknob.h>
@@ -19,7 +20,7 @@ extern "C" {
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_ListBox listbox;
-	psy_ui_Knob knob;
+	ParamKnob knob;
 	psy_audio_Machine* machine;
 	psy_ui_Bitmap knobbitmap;
 	Workspace* workspace;

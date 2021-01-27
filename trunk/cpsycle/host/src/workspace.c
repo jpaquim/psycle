@@ -184,8 +184,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_out);
 	psy_signal_init(&self->signal_terminal_warning);
 	psy_signal_init(&self->signal_status_out);
-	psy_signal_init(&self->signal_followsongchanged);
-	psy_signal_init(&self->signal_dockview);	
+	psy_signal_init(&self->signal_followsongchanged);	
 	psy_signal_init(&self->signal_togglegear);	
 	psy_signal_init(&self->signal_selectpatterndisplay);
 	psy_signal_init(&self->signal_floatsection);
@@ -236,8 +235,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_out);
 	psy_signal_dispose(&self->signal_terminal_warning);
 	psy_signal_dispose(&self->signal_status_out);
-	psy_signal_dispose(&self->signal_followsongchanged);
-	psy_signal_dispose(&self->signal_dockview);	
+	psy_signal_dispose(&self->signal_followsongchanged);	
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 	psy_signal_dispose(&self->signal_floatsection);
@@ -1357,13 +1355,6 @@ void workspace_outputstatus(Workspace* self, const char* text)
 	assert(self);
 
 	psy_signal_emit(&self->signal_status_out, self, 1, text);
-}
-
-void workspace_dockview(Workspace* self, psy_ui_Component* view)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_dockview, self, 1, view);
 }
 
 void workspace_connectasmixersend(Workspace* self)

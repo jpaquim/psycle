@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "machineparamconfig.h"
+#include "paramview.h"
 
 static void machineparamconfig_makeview(MachineParamConfig*, psy_Property*);
 static void machineparamconfig_maketheme(MachineParamConfig*, psy_Property*);
@@ -164,6 +165,7 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 {
 	assert(self);
 
+	paramskin_update(self);
 	psy_property_set_str(self->theme, "machinedialbmp", filename);
 }
 
@@ -172,7 +174,7 @@ bool machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	property)
 {
 	assert(self);
-
+		
 	psy_signal_emit(&self->signal_changed, self, 1, property);
 	return TRUE;
 }
@@ -181,6 +183,7 @@ bool machineparamconfig_onthemechanged(MachineParamConfig* self, psy_Property* p
 {
 	assert(self);
 
+	paramskin_update(self);
 	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
 }

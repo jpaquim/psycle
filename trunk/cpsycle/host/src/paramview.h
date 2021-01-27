@@ -40,6 +40,53 @@ typedef struct {
     SkinCoord checkoff;    
 } ParamSkin;
 
+typedef struct ParamTweak {
+    // internal data
+    float tweakbase;
+    float tweakval;
+    // references
+    psy_audio_Machine* machine;
+    psy_audio_MachineParam* param;
+    ParamSkin skin;
+} ParamTweak;
+
+void paramtweak_init(ParamTweak*);
+
+void paramtweak_begin(ParamTweak*, psy_audio_Machine*,
+    psy_audio_MachineParam*);
+void paramtweak_end(ParamTweak*);
+void paramtweak_onmousedown(ParamTweak*, psy_ui_MouseEvent*);
+void paramtweak_onmousemove(ParamTweak*, psy_ui_MouseEvent*);
+
+
+typedef struct KnobDraw {
+    ParamSkin* skin;
+    psy_audio_MachineParam* param;
+    psy_ui_RealSize size;
+    psy_audio_Machine* machine;
+    const psy_ui_TextMetric* tm;
+    bool tweaking;
+    psy_ui_RealRectangle r_top;
+    psy_ui_RealRectangle r_bottom;    
+} KnobDraw;
+
+void knobdraw_init(KnobDraw* self, ParamSkin*, psy_audio_Machine*,
+    psy_audio_MachineParam*, psy_ui_RealSize, const psy_ui_TextMetric*,
+    bool tweaking);
+
+typedef struct {
+    psy_ui_Component component;    
+    ParamTweak paramtweak;
+    ParamSkin* skin;
+    psy_audio_Machine* machine;
+    psy_audio_MachineParam* param;
+} ParamKnob;
+
+void paramknob_init(ParamKnob*, psy_ui_Component* parent, psy_audio_Machine*,
+    psy_audio_MachineParam*, Workspace*);
+
+void paramskin_update(MachineParamConfig*);
+
 typedef struct ParamView {
    psy_ui_Component component;
    psy_audio_Machine* machine;
@@ -56,6 +103,7 @@ typedef struct ParamView {
    uintptr_t numparams;
    int sizechanged;   
    psy_ui_FontInfo fontinfo;
+   ParamTweak paramtweak;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,

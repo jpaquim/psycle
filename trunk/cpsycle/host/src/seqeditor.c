@@ -387,13 +387,15 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 						psy_snprintf(text, 20, "%02X:%02X(ERR)", c,
 							(int)psy_audio_sequenceentry_patternslot(sequenceentry));
 					}
-					psy_ui_textoutrectangle(&gr, r.left + 2, r.top, psy_ui_ETO_CLIPPED, r,
+					psy_ui_textoutrectangle(&gr,
+						psy_ui_realpoint_make(r.left + 2, r.top), psy_ui_ETO_CLIPPED, r,
 						text, strlen(text));
 				} else {
 					psy_snprintf(text, 256, "%02X",
 						(int)psy_audio_sequenceentry_patternslot(sequenceentry));
-					psy_ui_textoutrectangle(&gr, r.left + 2, r.top, psy_ui_ETO_CLIPPED, r,
-						text, strlen(text));
+					psy_ui_textoutrectangle(&gr,
+						psy_ui_realpoint_make(r.left + 2, r.top),
+						psy_ui_ETO_CLIPPED, r, text, strlen(text));
 				}
 				if (self->parent->drawpatternevents) {
 					PianoGridDraw griddraw;
