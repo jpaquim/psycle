@@ -24,9 +24,6 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
 			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));
 	}
-	psy_ui_listbox_init(&self->listbox, &self->component);	
-	psy_signal_connect(&self->listbox.signal_selchanged, self,
-		parameterlistbox_onlistboxselected);
 	self->workspace = workspace;
 	self->machine = machine;
 	if (self->machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
@@ -36,9 +33,11 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	}
 	paramknob_init(&self->knob, &self->component, machine, param, workspace);
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
+	psy_ui_listbox_init(&self->listbox, &self->component);	
+	psy_ui_listbox_setcharnumber(&self->listbox, 5.0);
+	psy_signal_connect(&self->listbox.signal_selchanged, self,
+		parameterlistbox_onlistboxselected);		
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setmaximumsize(&self->listbox.component,
-		psy_ui_size_makeem(20.0, 0.0));
 	parameterlistbox_setmachine(self, self->machine);
 	
 }

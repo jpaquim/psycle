@@ -24,6 +24,8 @@ static void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane*,
 static double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane*);
 static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*,
 	double pos);
+static void psy_ui_scrollbarpane_enableinput(psy_ui_ScrollBarPane*);
+static void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane*);
 // vtable
 static psy_ui_ComponentVtable psy_ui_scrollbarpane_vtable;
 static bool psy_ui_scrollbarpane_vtable_initialized = FALSE;
@@ -42,7 +44,12 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 		//	(psy_ui_fp_component_onmousewheel)
 		//	psy_ui_scrollbarpane_onmousewheel;
 		psy_ui_scrollbarpane_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseup)psy_ui_scrollbarpane_onmouseup;
+			(psy_ui_fp_component_onmouseup)psy_ui_scrollbarpane_onmouseup;		
+		psy_ui_scrollbarpane_vtable.enableinput =
+			(psy_ui_fp_component_enableinput)psy_ui_scrollbarpane_enableinput;
+		psy_ui_scrollbarpane_vtable.preventinput =
+			(psy_ui_fp_component_preventinput)
+			psy_ui_scrollbarpane_preventinput;
 		psy_ui_scrollbarpane_vtable_initialized = TRUE;
 	}
 }
@@ -66,6 +73,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	self->scrollmin = 0;
 	self->scrollmax = 0;
 	self->screenpos = 0;
+	self->enabled = TRUE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -88,21 +96,23 @@ void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane* self,
 void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self,
 	psy_ui_Graphics* g)
 {
-	psy_ui_RealSize size;
-	psy_ui_RealRectangle r;
-	
-	size = psy_ui_component_sizepx(&self->component);
-	if (self->orientation == psy_ui_HORIZONTAL) {
-		r = psy_ui_realrectangle_make(
+	if (self->enabled) {
+		psy_ui_RealSize size;
+		psy_ui_RealRectangle r;
+
+		size = psy_ui_component_sizepx(&self->component);
+		if (self->orientation == psy_ui_HORIZONTAL) {
+			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(self->screenpos, 2.0),
 				psy_ui_realsize_make(20, size.height - 4));
-	} else {
-		r = psy_ui_realrectangle_make(
+		} else {
+			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(2.0, self->screenpos),
 				psy_ui_realsize_make(size.width - 4, 20));
+		}
+		psy_ui_drawsolidrectangle(g, r,
+			psy_ui_component_colour(&self->component));
 	}
-	psy_ui_drawsolidrectangle(g, r,
-		psy_ui_component_colour(&self->component));
 }
 
 void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
@@ -170,9 +180,11 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self,
 		pos = self->scrollmax;
 	}
 	step = psy_ui_scrollbarpane_step(self);
-	self->screenpos = (1.0 / step) * floor(pos - self->scrollmin);
-	self->pos = pos;
-	psy_ui_component_invalidate(&self->component);
+	if (step != 0.0) {
+		self->screenpos = (1.0 / step) * floor(pos - self->scrollmin);
+		self->pos = pos;
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane* self)
@@ -194,6 +206,22 @@ double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane* self)
 		rv = 0.0;
 	}
 	return rv;
+}
+
+void psy_ui_scrollbarpane_enableinput(psy_ui_ScrollBarPane* self)
+{
+	self->enabled = TRUE;
+	psy_ui_component_setbackgroundcolour(&self->component,
+		psy_ui_colour_make(0x00292929));
+	psy_ui_component_invalidate(&self->component);
+}
+
+void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane* self)
+{
+	self->enabled = FALSE;
+	psy_ui_component_setbackgroundcolour(&self->component,
+		psy_ui_defaults()->style_common.backgroundcolour);
+	psy_ui_component_invalidate(&self->component);
 }
 
 // psy_ui_ScrollBar

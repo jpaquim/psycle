@@ -696,7 +696,17 @@ psy_TableIterator psy_audio_machines_begin(psy_audio_Machines* self)
 	return psy_table_begin(&self->slots);
 }
 
-bool psy_audio_machines_ismixersend(psy_audio_Machines* self, uintptr_t slot)
+bool psy_audio_machines_isvirtualgenerator(const psy_audio_Machines* self,
+	uintptr_t slot)
+{
+	if (psy_table_exists(&self->connections.sends, slot)) {
+		return (slot > 0x80 && slot < 0xFF);
+	}
+	return FALSE;
+}
+
+bool psy_audio_machines_ismixersend(const psy_audio_Machines* self,
+	uintptr_t slot)
 {
 	return psy_table_exists(&self->connections.sends, slot);
 }
