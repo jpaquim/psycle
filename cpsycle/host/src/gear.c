@@ -31,6 +31,8 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 		"gear.show-master");
 	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self),
 		"gear.connecttomaster");
+	psy_ui_button_init_text(&self->muteunmute, gearbuttons_base(self),
+		"gear.mute-unmute");
 }
 
 // Gear
@@ -44,6 +46,7 @@ static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
 static void gear_onmaster(Gear*, psy_ui_Component* sender);
 static void gear_onconnecttomaster(Gear*, psy_ui_Component* sender);
+static void gear_onmuteunmute(Gear*, psy_ui_Component* sender);
 static void gear_connectsongsignals(Gear*);
 static void gear_onhide(Gear*);
 static void gear_onmachineselected(Gear*, psy_audio_Machines* sender,
@@ -118,6 +121,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		gear_onconnecttomaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
 		gear_onexchange);
+	psy_signal_connect(&self->buttons.muteunmute.signal_clicked, self,
+		gear_onmuteunmute);
 	gear_connectsongsignals(self);
 }
 
@@ -199,6 +204,12 @@ void gear_onexchange(Gear* self, psy_ui_Component* sender)
 	}
 }
 
+void gear_onmuteunmute(Gear* self, psy_ui_Component* sender)
+{
+	machinesbox_muteunmute(&self->machinesboxgen);
+	machinesbox_muteunmute(&self->machinesboxfx);	
+}
+
 void gear_onparameters(Gear* self, psy_ui_Component* sender)
 {
 	switch (tabbar_selected(&self->tabbar)) {
@@ -232,4 +243,20 @@ void gear_onconnecttomaster(Gear* self, psy_ui_Component* sender)
 		default:
 			break;
 	}	
+}
+
+void gear_select(Gear* self, psy_List* machinelist)
+{
+	psy_List* p;
+
+
+	machinesbox_deselectall(&self->machinesboxfx);
+	machinesbox_deselectall(&self->machinesboxgen);
+	for (p = machinelist; p != NULL; psy_list_next(&p)) {
+		uintptr_t slot;
+
+		slot = (uintptr_t)psy_list_entry(p);
+		machinesbox_addsel(&self->machinesboxfx, slot);
+		machinesbox_addsel(&self->machinesboxgen, slot);
+	}
 }

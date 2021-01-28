@@ -93,7 +93,8 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);	
 	// bottom
 	psy_ui_component_init(&self->bottom, &self->component);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -107,7 +108,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_component_preventalign(&self->spacer);
 	// horizontal scrollbar
 	psy_ui_scrollbar_init(&self->hscroll, &self->bottom);
-	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);
+	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);	
 	psy_ui_component_setalign(&self->hscroll.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);
@@ -125,7 +126,11 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	// reparent client
 	self->client = client;
 	psy_ui_component_setparent(client, &self->component);
-	psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
+	if (client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
+	} else {
+		psy_ui_component_setalign(client, psy_ui_ALIGN_VCLIENT);
+	}
 	psy_signal_connect(&self->vscroll.signal_changed, self,
 		psy_ui_scroller_vertical_onchanged);
 	psy_signal_connect(&self->hscroll.signal_changed, self,
@@ -143,8 +148,12 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 	psy_signal_connect(&self->client->signal_size, self,
 		psy_ui_scroller_onsize);
 	psy_signal_connect(&self->client->signal_scroll, self,
-		psy_ui_scroller_onscroll);		
-	psy_ui_component_setalign(self->client, psy_ui_ALIGN_CLIENT);
+		psy_ui_scroller_onscroll);	
+	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		psy_ui_component_setalign(self->client, psy_ui_ALIGN_CLIENT);
+	} else {		
+		psy_ui_component_setalign(self->client, psy_ui_ALIGN_VCLIENT);
+	}
 }
 
 void psy_ui_scroller_onsize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)
@@ -155,11 +164,18 @@ void psy_ui_scroller_onsize(psy_ui_Scroller* self, psy_ui_Component* sender, psy
 	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);	
 	nPos = floor(psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px);
-	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPos);
+	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPos);	
 	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
-	nPos = floor(psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px);
+	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		nPos = floor(psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px);
+	} else {
+		psy_ui_RealRectangle r;
+
+		r = psy_ui_component_position(self->client);
+		nPos = floor(-r.left / scrollstepx_px);
+	}
 	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPos);
 }
 
@@ -167,7 +183,7 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 {
 	double iPos;
 	double nPos;
-	double scrollstep_px;
+	double scrollsteppx;
 	const psy_ui_TextMetric* tm;
 	double scrollleftpx;
 	double diff;
@@ -175,25 +191,57 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	assert(self->client);
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstep_px = psy_ui_value_px(&self->client->scrollstepx, tm);
-	iPos = psy_ui_value_px(&self->client->scroll.x, tm) / scrollstep_px;
-	nPos = psy_ui_scrollbar_position(sender);
-	scrollleftpx = psy_ui_component_scrollleftpx(self->client);
-	diff = -scrollstep_px * floor(iPos - nPos);
+	scrollsteppx = psy_ui_value_px(&self->client->scrollstepx, tm);
+	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		scrollleftpx = psy_ui_component_scrollleftpx(self->client);
+		iPos = psy_ui_value_px(&self->client->scroll.x, tm) / scrollsteppx;
+	} else {
+		psy_ui_RealRectangle r;
+		
+		r = psy_ui_component_position(self->client);
+		iPos = -r.left / scrollsteppx;
+		scrollleftpx = -r.left;
+	}
+	nPos = psy_ui_scrollbar_position(sender);	
+	diff = -scrollsteppx * floor(iPos - nPos);
 	if (self->smooth) {	
 		if (self->hanimate.counter == 0) {
 			psy_ui_scrollanimate_reset(&self->hanimate);
 			psy_ui_scrollanimate_calcstep(&self->hanimate, scrollleftpx,
-				floor((scrollleftpx + diff) / scrollstep_px) * scrollstep_px);
+				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx);
 			psy_ui_component_starttimer(psy_ui_scroller_base(self), 0, 50);
 		} else {
 			self->hanimate.targetpx =
-				floor((scrollleftpx + diff) / scrollstep_px) * scrollstep_px;			
+				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx;			
 		}
 	} else {
-		psy_ui_component_setscrollleft(self->client,
-			psy_ui_value_makepx(
-				floor((scrollleftpx + diff) / scrollstep_px) * scrollstep_px));
+		if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			psy_ui_component_setscrollleft(self->client,
+				psy_ui_value_makepx(
+					floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx));
+		} else {
+			psy_ui_RealRectangle updaterect;
+			psy_ui_RealRectangle position;
+			
+			psy_ui_component_move(self->client,
+				psy_ui_point_make(
+					psy_ui_value_makepx(
+						floor(-(scrollleftpx + diff) / scrollsteppx) *
+							scrollsteppx),
+					psy_ui_value_zero()));
+			position = psy_ui_component_position(&self->component);
+			updaterect = psy_ui_component_position(self->client);
+			if (updaterect.right < position.right) {
+				updaterect.left = updaterect.right;
+				updaterect.right = position.right;			
+				psy_ui_component_setbackgroundmode(&self->component,
+					psy_ui_BACKGROUND_SET);
+				psy_ui_component_invalidaterect(&self->component, updaterect);
+				psy_ui_component_update(&self->component);
+				psy_ui_component_setbackgroundmode(&self->component,
+					psy_ui_BACKGROUND_NONE);
+			}
+		}
 	}
 }
 
@@ -274,6 +322,9 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component* sender,
 	psy_ui_Orientation orientation)
 {
+	if (self->component.debugflag == 2000) {
+		self = self;
+	}
 	if (orientation == psy_ui_VERTICAL) {
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			(double)sender->vscrollrange.x,

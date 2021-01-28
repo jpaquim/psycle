@@ -26,7 +26,7 @@ typedef struct psy_ui_Scroller {
 	// internal data
 	psy_ui_ScrollAnimate hanimate;
 	psy_ui_ScrollAnimate vanimate;
-	bool smooth;
+	bool smooth;	
 } psy_ui_Scroller;
 
 void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,

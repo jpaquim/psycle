@@ -36,6 +36,7 @@ typedef struct GearButtons {
 	psy_ui_Button clone;
 	psy_ui_Button showmaster;
 	psy_ui_Button connecttomaster;
+	psy_ui_Button muteunmute;
 } GearButtons;
 
 void gearbuttons_init(GearButtons*, psy_ui_Component* parent, Workspace*);
@@ -67,6 +68,8 @@ typedef struct Gear {
 } Gear;
 
 void gear_init(Gear*, psy_ui_Component* parent, Workspace*);
+
+void gear_select(Gear*, psy_List* list);
 
 INLINE psy_ui_Component* gear_base(Gear* self)
 {

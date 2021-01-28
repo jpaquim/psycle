@@ -79,6 +79,7 @@ void psy_ui_listbox_settext(psy_ui_ListBox*, const char* text, intptr_t index);
 void psy_ui_listbox_clear(psy_ui_ListBox*);
 void psy_ui_listbox_setcursel(psy_ui_ListBox*, intptr_t index);
 intptr_t psy_ui_listbox_cursel(psy_ui_ListBox*);
+void psy_ui_listbox_addsel(psy_ui_ListBox*, intptr_t index);
 void psy_ui_listbox_selitems(psy_ui_ListBox*, intptr_t* items, intptr_t maxitems);
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
 void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, double num);
@@ -105,6 +106,8 @@ typedef void (*psy_ui_fp_listboximp_dev_clear)(struct psy_ui_ListBoxImp*);
 typedef void (*psy_ui_fp_listboximp_dev_setcursel)(struct psy_ui_ListBoxImp*,
     intptr_t index);
 typedef intptr_t (*psy_ui_fp_listboximp_dev_cursel)(struct psy_ui_ListBoxImp*);
+typedef void (*psy_ui_fp_listboximp_dev_addsel)(struct psy_ui_ListBoxImp*,
+    intptr_t index);
 typedef void (*psy_ui_fp_listboximp_dev_selitems)(struct psy_ui_ListBoxImp*,
     intptr_t* items, intptr_t maxitems);
 typedef intptr_t (*psy_ui_fp_listboximp_dev_selcount)(
@@ -118,7 +121,8 @@ typedef struct {
     psy_ui_fp_listboximp_dev_text dev_text;
     psy_ui_fp_listboximp_dev_clear dev_clear;
     psy_ui_fp_listboximp_dev_setcursel dev_setcursel;
-    psy_ui_fp_listboximp_dev_cursel dev_cursel;
+    psy_ui_fp_listboximp_dev_cursel dev_cursel;    
+    psy_ui_fp_listboximp_dev_addsel dev_addsel;
     psy_ui_fp_listboximp_dev_selitems dev_selitems;
     psy_ui_fp_listboximp_dev_selcount dev_selcount;
     psy_ui_fp_listboximp_dev_count dev_count;

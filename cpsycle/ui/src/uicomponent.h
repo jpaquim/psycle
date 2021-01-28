@@ -34,6 +34,11 @@
 extern "C" {
 #endif
 
+typedef enum psy_ui_ScrollMode {
+	psy_ui_SCROLL_GRAPHICS = 1,
+	psy_ui_SCROLL_COMPONENTS
+} psy_ui_ScrollMode;
+
 typedef enum {
 	psy_ui_BACKGROUND_NONE,
 	psy_ui_BACKGROUND_SET,
@@ -201,6 +206,7 @@ typedef struct psy_ui_Component {
 	intptr_t preventpreferredsizeatalign;
 	psy_ui_AlignType insertaligntype;
 	psy_ui_Margin insertmargin;	
+	psy_ui_ScrollMode scrollmode;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -681,6 +687,8 @@ void psy_ui_component_updatelanguage(psy_ui_Component* self);
 psy_Translator* psy_ui_translator(void);
 
 const char* psy_ui_translate(const char* key);
+
+void psy_ui_component_setmode(psy_ui_Component*, psy_ui_ScrollMode);
 
 
 #ifdef __cplusplus

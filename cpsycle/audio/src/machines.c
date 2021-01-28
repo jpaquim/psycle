@@ -31,9 +31,13 @@ static psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines*,
 static void machines_freebuffers(psy_audio_Machines*);
 static bool isleaf(psy_audio_Machines*, uintptr_t slot, psy_Table* worked);
 static uintptr_t machines_findmaxindex(psy_audio_Machines*);
+static void compute_leafs(psy_audio_Machines*, uintptr_t slot,
+	psy_List** leafs);
 // implementation
 void psy_audio_machines_init(psy_audio_Machines* self)
 {
+	assert(self);
+
 	psy_table_init(&self->slots);	
 	psy_audio_connections_init(&self->connections);	
 	psy_table_init(&self->inputbuffers);
@@ -53,6 +57,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->master = 0;
 	self->maxindex = 0;
 	self->mixercount = 0;
+	self->opcount = 0;
 	self->preventundoredo = FALSE;
 	psy_undoredo_init(&self->undoredo);
 	machines_initsignals(self);
@@ -60,6 +65,8 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 
 void machines_initsignals(psy_audio_Machines* self)
 {
+	assert(self);
+
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
 	psy_signal_init(&self->signal_slotchange);
@@ -69,6 +76,8 @@ void machines_initsignals(psy_audio_Machines* self)
 
 void psy_audio_machines_dispose(psy_audio_Machines* self)
 {	
+	assert(self);
+
 	machines_disposesignals(self);
 	machines_free(self);
 	psy_table_dispose(&self->inputbuffers);
@@ -86,6 +95,8 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 
 void machines_disposesignals(psy_audio_Machines* self)
 {
+	assert(self);
+
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 	psy_signal_dispose(&self->signal_slotchange);
@@ -97,6 +108,8 @@ void machines_free(psy_audio_Machines* self)
 {
 	psy_TableIterator it;
 	
+	assert(self);
+
 	for (it = psy_audio_machines_begin(self);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {			
@@ -106,23 +119,29 @@ void machines_free(psy_audio_Machines* self)
 		assert(machine);
 		psy_audio_machine_deallocate(machine);		
 		psy_table_insert(&self->slots, psy_tableiterator_key(&it), NULL);
-	}	
+	}
 }
 
 void psy_audio_machines_clear(psy_audio_Machines* self)
 {
+	assert(self);
+
 	psy_audio_machines_dispose(self);
 	psy_audio_machines_init(self);
 }
 
 uintptr_t psy_audio_machines_maxindex(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->maxindex;	
 }
 
 void psy_audio_machines_insert(psy_audio_Machines* self, uintptr_t slot,
 	psy_audio_Machine* machine)
 {	
+	assert(self);
+
 	if (machine) {
 		if (self->preventundoredo || slot == psy_audio_MASTER_INDEX || self->filemode) {
 			psy_table_insert(&self->slots, slot, machine);
@@ -181,6 +200,8 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 {	
 	psy_audio_Machine* machine;
 
+	assert(self);
+
 	psy_audio_exclusivelock_enter();
 	if (slot == psy_audio_MASTER_INDEX) {
 		self->master = NULL;
@@ -205,6 +226,8 @@ uintptr_t machines_findmaxindex(psy_audio_Machines* self)
 	uintptr_t rv = 0;
 	psy_TableIterator it;
 
+	assert(self);
+
 	for (it = psy_audio_machines_begin(self);
 		!psy_tableiterator_equal(&it, psy_table_end());
 		psy_tableiterator_inc(&it)) {
@@ -221,6 +244,8 @@ uintptr_t machines_findmaxindex(psy_audio_Machines* self)
 void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)
 {	
 	psy_audio_Machine* machine;
+
+	assert(self);
 	
 	machine = psy_audio_machines_at(self, slot);
 	if (machine) {
@@ -233,6 +258,7 @@ void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)
 				&deletemachinecommand_allocinit(self, slot)
 				->command);
 		}
+		++self->opcount;
 	}
 }
 
@@ -241,6 +267,8 @@ void psy_audio_machines_exchange(psy_audio_Machines* self, uintptr_t srcslot,
 {
 	psy_audio_Machine* src;
 	psy_audio_Machine* dst;
+
+	assert(self);
 
 	src = psy_audio_machines_at(self, srcslot);
 	dst = psy_audio_machines_at(self, dstslot);
@@ -256,18 +284,24 @@ uintptr_t machines_freeslot(psy_audio_Machines* self, uintptr_t start)
 {
 	uintptr_t rv;
 	
+	assert(self);
+
 	for (rv = start; psy_table_at(&self->slots, rv) != 0; ++rv);
 	return rv;
 }
 
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines* self, uintptr_t slot)
-{		
+{	
+	assert(self);
+
 	return psy_table_at(&self->slots, slot);
 }
 
 const psy_audio_Machine* psy_audio_machines_at_const(const psy_audio_Machines* self,
 	uintptr_t index)
 {
+	assert(self);
+
 	return (const psy_audio_Machine*)psy_table_at_const(&self->slots, index);
 }
 
@@ -275,6 +309,8 @@ bool psy_audio_machines_valid_connection(psy_audio_Machines* self, psy_audio_Wir
 {
 	psy_audio_Machine* src;
 	psy_audio_Machine* dst;
+
+	assert(self);
 
 	src = psy_audio_machines_at(self, wire.src);
 	dst = psy_audio_machines_at(self, wire.dst);
@@ -287,6 +323,8 @@ bool psy_audio_machines_valid_connection(psy_audio_Machines* self, psy_audio_Wir
 
 void psy_audio_machines_connect(psy_audio_Machines* self, psy_audio_Wire wire)
 {
+	assert(self);
+
 	if (self->preventundoredo || self->filemode) {
 		int rv;
 
@@ -308,6 +346,8 @@ void psy_audio_machines_connect(psy_audio_Machines* self, psy_audio_Wire wire)
 
 void psy_audio_machines_disconnect(psy_audio_Machines* self, psy_audio_Wire wire)
 {
+	assert(self);
+
 	if (self->preventundoredo || self->filemode) {
 		psy_audio_exclusivelock_enter();
 		psy_audio_connections_disconnect(&self->connections, wire);
@@ -323,6 +363,8 @@ void psy_audio_machines_disconnect(psy_audio_Machines* self, psy_audio_Wire wire
 
 void psy_audio_machines_disconnectall(psy_audio_Machines* self, uintptr_t slot)
 {
+	assert(self);
+
 	psy_audio_exclusivelock_enter();
 	psy_audio_connections_disconnectall(&self->connections, slot);
 	psy_audio_exclusivelock_leave();
@@ -330,17 +372,23 @@ void psy_audio_machines_disconnectall(psy_audio_Machines* self, uintptr_t slot)
 
 int psy_audio_machines_connected(psy_audio_Machines* self, psy_audio_Wire wire)
 {	
+	assert(self);
+
 	return psy_audio_connections_connected(&self->connections, wire);
 }
 
 void psy_audio_machines_updatepath(psy_audio_Machines* self)
 {
+	assert(self);
+
 	machines_setpath(self, psy_audio_compute_path(self,
 		psy_audio_MASTER_INDEX, TRUE));
 }
 
 void machines_setpath(psy_audio_Machines* self, MachineList* path)
 {	
+	assert(self);
+
 	machines_preparebuffers(self, path, psy_audio_MAX_STREAM_SIZE);
 	if (self->path) {
 		psy_list_free(self->path);
@@ -358,6 +406,8 @@ void machines_setpath(psy_audio_Machines* self, MachineList* path)
 // 4. Set sorted path
 void machines_sortpath(psy_audio_Machines* self)
 {	
+	assert(self);
+
 	if (self->path) {
 		psy_Table worked;
 		psy_List* sorted = 0;
@@ -396,6 +446,8 @@ bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 {
 	psy_audio_MachineSockets* sockets;
 
+	assert(self);
+
 	sockets = psy_audio_connections_at(&self->connections, slot);
 	if (!sockets || (wiresockets_size(&sockets->inputs) == 0)) {
 		return TRUE;
@@ -424,9 +476,10 @@ void reset_nopath(psy_audio_Machines* self)
 {		
 	psy_TableIterator it;
 
+	assert(self);
+
 	psy_table_dispose(&self->nopath);
-	psy_table_init(&self->nopath);
-		
+	psy_table_init(&self->nopath);		
 	for (it = psy_table_begin(&self->slots); it.curr != 0;
 			psy_tableiterator_inc(&it)) {
 		psy_table_insert(&self->nopath, it.curr->key, 0);		
@@ -435,12 +488,16 @@ void reset_nopath(psy_audio_Machines* self)
 
 void remove_nopath(psy_audio_Machines* self, uintptr_t slot)
 {
+	assert(self);
+
 	psy_table_remove(&self->nopath, slot);
 }
 
 MachineList* nopath(psy_audio_Machines* self)
 {
-	psy_List* rv = 0;	
+	psy_List* rv = 0;
+
+	assert(self);
 
 	psy_TableIterator it;
 	for (it = psy_table_begin(&self->nopath); it.curr != 0;
@@ -454,10 +511,16 @@ MachineList* psy_audio_compute_path(psy_audio_Machines* self, uintptr_t slot, bo
 {
 	MachineList* rv = 0;	
 
+	assert(self);
+
 	reset_nopath(self);	
+	self->currlevel = 0;
+	self->maxlevel = 0;
 	psy_table_init(&self->colours);
+	psy_table_init(&self->levels);
 	compute_slotpath(self, slot, &rv);
 	psy_table_dispose(&self->colours);
+	psy_table_dispose(&self->levels);
 	//	Debug Path Output
 	// if (rv) {
 	// 	psy_List* p;
@@ -476,7 +539,9 @@ MachineList* psy_audio_compute_path(psy_audio_Machines* self, uintptr_t slot, bo
 void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 	psy_List** path)
 {	
-	psy_audio_MachineSockets* sockets;	
+	psy_audio_MachineSockets* sockets;
+
+	assert(self);
 
 	sockets = psy_audio_connections_at(&self->connections, slot);	
 	if (sockets) {
@@ -489,8 +554,14 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 
 			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
 			if (!psy_table_exists(&self->colours, socket->slot)) {
-				psy_table_insert(&self->colours, socket->slot, (void*) 1);
+				psy_table_insert(&self->colours, socket->slot, (void*)self->currlevel);
+				psy_table_insert(&self->levels, socket->slot, (void*)self->currlevel);
+				++self->currlevel;
+				if (self->maxlevel < self->currlevel) {
+					self->maxlevel = self->currlevel;
+				}
 				compute_slotpath(self, socket->slot, path);
+				--self->currlevel;
 			} else {
 				// cycle detected				
 				// skip
@@ -508,6 +579,8 @@ void machines_preparebuffers(psy_audio_Machines* self, MachineList* path,
 	uintptr_t amount)
 {
 	psy_TableIterator it;
+
+	assert(self);
 	
 	for (it = psy_audio_machines_begin(self);
 			!psy_tableiterator_equal(&it, psy_table_end());
@@ -525,6 +598,8 @@ void machines_preparebuffers(psy_audio_Machines* self, MachineList* path,
 
 void machines_releasebuffers(psy_audio_Machines* self)
 {
+	assert(self);
+
 	psy_table_dispose(&self->inputbuffers);
 	psy_table_dispose(&self->outputbuffers);
 	psy_table_init(&self->inputbuffers);
@@ -538,6 +613,8 @@ psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self,
 {
 	uintptr_t channel;
 	psy_audio_Buffer* rv;
+
+	assert(self);
 
 	rv = psy_audio_buffer_allocinit(channels);
 	for (channel = 0; channel < channels; ++channel) {
@@ -561,6 +638,8 @@ void machines_freebuffers(psy_audio_Machines* self)
 	psy_List* p;
 	psy_List* q;
 
+	assert(self);
+
 	for (p = q = self->buffers; p != NULL; psy_list_next(&p)) {
 		psy_audio_Buffer* buffer;
 
@@ -575,23 +654,31 @@ void machines_freebuffers(psy_audio_Machines* self)
 psy_audio_Buffer* psy_audio_machines_inputs(psy_audio_Machines* self,
 	uintptr_t slot)
 {
+	assert(self);
+
 	return psy_table_at(&self->inputbuffers, slot);
 }
 
 psy_audio_Buffer* psy_audio_machines_outputs(psy_audio_Machines* self,
 	uintptr_t slot)
-{	
+{
+	assert(self);
+
 	return psy_table_at(&self->outputbuffers, slot);
 }
 
 void psy_audio_machines_select(psy_audio_Machines* self, uintptr_t slot)
 {
+	assert(self);
+
 	self->selected = slot;
 	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
 void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t index)
-{	
+{
+	assert(self);
+
 	if (psy_audio_machines_selectedmachine(self)) {
 		psy_audio_machine_selectparam(psy_audio_machines_selectedmachine(self),
 			index);
@@ -602,11 +689,15 @@ void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t index)
 
 uintptr_t psy_audio_machines_selected(const psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->selected;
 }
 
 psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return (psy_audio_Machine*)psy_audio_machines_at(self,
 		psy_audio_machines_selected(self));
 }
@@ -614,22 +705,30 @@ psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines* self)
 const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const
 	psy_audio_Machines* self)
 {
+	assert(self);
+
 	return (psy_audio_Machine*)psy_audio_machines_at_const(self,
 		psy_audio_machines_selected(self));
 }
 
 uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->paramselected;
 }
 
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->soloed;
 }
 
 void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 {
+	assert(self);
+
 	if (self->filemode != 0) {
 		self->soloed = slot;
 	} else
@@ -669,17 +768,23 @@ void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 
 psy_audio_Machine* psy_audio_machines_master(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->master;
 }
 
 void psy_audio_machines_startfilemode(psy_audio_Machines* self)
 {
+	assert(self);
+
 	self->filemode = 1;
 	self->connections.filemode = 1;
 }
 
 void psy_audio_machines_endfilemode(psy_audio_Machines* self)
 {
+	assert(self);
+
 	machines_setpath(self, psy_audio_compute_path(self,
 		psy_audio_MASTER_INDEX, TRUE));
 	self->filemode = 0;	
@@ -688,17 +793,23 @@ void psy_audio_machines_endfilemode(psy_audio_Machines* self)
 
 uintptr_t psy_audio_machines_size(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return psy_table_size(&self->slots);
 }
 
 psy_TableIterator psy_audio_machines_begin(psy_audio_Machines* self)
 {
+	assert(self);
+
 	return psy_table_begin(&self->slots);
 }
 
 bool psy_audio_machines_isvirtualgenerator(const psy_audio_Machines* self,
 	uintptr_t slot)
 {
+	assert(self);
+
 	if (psy_table_exists(&self->connections.sends, slot)) {
 		return (slot > 0x80 && slot < 0xFF);
 	}
@@ -708,36 +819,196 @@ bool psy_audio_machines_isvirtualgenerator(const psy_audio_Machines* self,
 bool psy_audio_machines_ismixersend(const psy_audio_Machines* self,
 	uintptr_t slot)
 {
+	assert(self);
+
 	return psy_table_exists(&self->connections.sends, slot);
 }
 
 void psy_audio_machines_addmixersend(psy_audio_Machines* self, uintptr_t slot)
 {
+	assert(self);
+
 	psy_table_insert(&self->connections.sends, slot, (void*)(uintptr_t)1);
 }
 
 void psy_audio_machines_removemixersend(psy_audio_Machines* self,
 	uintptr_t slot)
 {
+	assert(self);
+
 	psy_table_remove(&self->connections.sends, slot);
 }
 
 void  psy_audio_machines_connectasmixersend(psy_audio_Machines* self)
 {
+	assert(self);
+
 	self->mixersendconnect = TRUE;
 }
 
 void  psy_audio_machines_connectasmixerinput(psy_audio_Machines* self)
 {
+	assert(self);
+
 	self->mixersendconnect = FALSE;
 }
 
 bool  psy_audio_machines_isconnectasmixersend(const psy_audio_Machines* self)
 {
+	assert(self);
+
 	return self->mixersendconnect;
 }
 
 void psy_audio_machines_selectwire(psy_audio_Machines* self, psy_audio_Wire wire)
 {
+	assert(self);
+
 	psy_signal_emit(&self->signal_wireselected, self, 1, &wire);
+}
+
+MachineList* psy_audio_machines_level(psy_audio_Machines* self, uintptr_t slot,
+	uintptr_t level)
+{
+	MachineList* rv;
+	MachineList* path;	
+	psy_TableIterator it;
+
+	assert(self);
+
+	rv = NULL;
+	reset_nopath(self);
+	self->currlevel = 0;
+	self->maxlevel = 0;
+	psy_table_init(&self->colours);
+	psy_table_init(&self->levels);
+	path = NULL;
+	compute_slotpath(self, slot, &path);	
+	for (it = psy_table_begin(&self->levels);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
+		if ((uintptr_t)psy_tableiterator_value(&it) == level) {
+			psy_list_append(&rv, (void*)psy_tableiterator_key(&it));
+		}
+	}
+	psy_table_dispose(&self->colours);
+	psy_table_dispose(&self->levels);
+	psy_list_free(path);
+	return rv;
+}
+
+void psy_audio_machines_levels(psy_audio_Machines* self, psy_Table* rv)
+{	
+	MachineList* path;
+	psy_TableIterator it;
+
+	assert(self);
+	
+	reset_nopath(self);
+	self->currlevel = 0;
+	self->maxlevel = 0;
+	psy_table_init(&self->colours);
+	psy_table_init(&self->levels);
+	path = NULL;
+	compute_slotpath(self, psy_audio_MASTER_INDEX, &path);
+	psy_table_clear(rv);
+	for (it = psy_table_begin(&self->levels);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_table_insert(rv, psy_tableiterator_key(&it), psy_tableiterator_value(&it));
+	}
+	psy_table_dispose(&self->colours);
+	psy_table_dispose(&self->levels);
+	psy_list_free(path);	
+}
+
+
+MachineList* psy_audio_machines_leafs(psy_audio_Machines* self)
+{
+	MachineList* rv;
+
+	rv = NULL;
+	reset_nopath(self);
+	self->currlevel = 0;
+	self->maxlevel = 0;
+	psy_table_init(&self->colours);
+	compute_leafs(self, psy_audio_MASTER_INDEX, &rv);
+	psy_table_dispose(&self->colours);
+	return rv;
+}
+
+void compute_leafs(psy_audio_Machines* self, uintptr_t slot,
+	psy_List** leafs)
+{
+	psy_audio_MachineSockets* sockets;
+	bool inconn;
+
+	assert(self);
+
+	inconn = FALSE;
+	sockets = psy_audio_connections_at(&self->connections, slot);
+	if (sockets) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (!psy_table_exists(&self->colours, socket->slot)) {
+				psy_table_insert(&self->colours, socket->slot, (void*)self->currlevel);				
+				++self->currlevel;
+				if (self->maxlevel < self->currlevel) {
+					self->maxlevel = self->currlevel;
+				}
+				inconn = TRUE;
+				compute_leafs(self, socket->slot, leafs);
+				--self->currlevel;
+			} else {
+				// cycle detected				
+				// skip
+			}
+			psy_table_remove(&self->colours, socket->slot);
+		}
+	}	
+	if (psy_table_exists(&self->nopath, slot)) {
+		remove_nopath(self, slot);
+		if (!inconn) {
+			psy_list_append(leafs, (void*)(uintptr_t)slot);
+		}
+	}
+}
+
+
+
+uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines* self, uintptr_t slot)
+{
+	uintptr_t rv;
+	MachineList* path;
+	
+	assert(self);
+
+	rv = psy_INDEX_INVALID;
+	reset_nopath(self);
+	self->currlevel = 0;
+	self->maxlevel = 0;
+	psy_table_init(&self->colours);
+	psy_table_init(&self->levels);
+	path = NULL;	
+	compute_slotpath(self, psy_audio_MASTER_INDEX, &path);	
+	if (psy_table_exists(&self->levels, slot)) {
+		rv = (uintptr_t)psy_table_at(&self->levels, slot);
+	}	
+	psy_table_dispose(&self->colours);
+	psy_table_dispose(&self->levels);
+	psy_list_free(path);
+	return rv;
+}
+
+uintptr_t psy_audio_machines_depth(psy_audio_Machines* self)
+{
+	assert(self);
+
+	return self->maxlevel;
 }

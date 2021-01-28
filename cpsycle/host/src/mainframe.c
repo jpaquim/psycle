@@ -137,6 +137,8 @@ static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 static void mainframe_onfileload(MainFrame*, FileView* sender);
 #endif
+static void mainframe_ongearselect(MainFrame*, Workspace* sender, psy_List* machinelist);
+
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -664,6 +666,8 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_eventdrivercallback, self);
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
+	psy_signal_connect(&self->workspace.signal_gearselect, self,
+		mainframe_ongearselect);
 	psy_signal_connect(&workspace_song(
 		&self->workspace)->patterns.signal_numsongtrackschanged,
 		self, mainframe_onsongtrackschanged);
@@ -1614,4 +1618,9 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 			break;
 	}
 	return 0;
+}
+
+void mainframe_ongearselect(MainFrame* self, Workspace* sender, psy_List* machinelist)
+{
+	gear_select(&self->gear, machinelist);
 }

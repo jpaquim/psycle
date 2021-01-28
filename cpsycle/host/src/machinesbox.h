@@ -41,8 +41,11 @@ void machinesbox_clone(MachinesBox*);
 void machinesbox_remove(MachinesBox*);
 void machinesbox_exchange(MachinesBox*);
 void machinesbox_showparameters(MachinesBox*);
+void machinesbox_muteunmute(MachinesBox*);
 void machinesbox_connecttomaster(MachinesBox*);
 void machinesbox_setmachines(MachinesBox*, psy_audio_Machines*);
+void machinesbox_addsel(MachinesBox*, uintptr_t slot);
+void machinesbox_deselectall(MachinesBox*);
 
 #ifdef __cplusplus
 }
