@@ -315,6 +315,37 @@ void machinesbox_exchange(MachinesBox* self)
 	}
 }
 
+void machinesbox_muteunmute(MachinesBox* self)
+{
+	int selcount;
+
+	selcount = (int)psy_ui_listbox_selcount(&self->listbox);
+	if (selcount > 0) {
+		intptr_t selection[256];
+		intptr_t i;
+		uintptr_t slot = UINTPTR_MAX;
+
+		psy_ui_listbox_selitems(&self->listbox, selection, selcount);
+		for (i = 0; i < selcount; ++i) {
+			if (psy_table_exists(&self->listboxslots, selection[i])) {
+				psy_audio_Machine* machine;
+
+				slot = (uintptr_t)psy_table_at(&self->listboxslots,
+					selection[i]);
+				machine = psy_audio_machines_at(self->machines, slot);
+				if (machine) {
+					if (psy_audio_machine_muted(machine)) {
+						psy_audio_machine_unmute(machine);
+					} else {
+						psy_audio_machine_mute(machine);
+					}
+				}
+			}
+		}
+		++self->machines->opcount;
+	}
+}
+
 void machinesbox_showparameters(MachinesBox* self)
 {	
 	int selcount;	
@@ -389,4 +420,19 @@ void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_K
 void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_KeyEvent* ev)
 {
 	psy_ui_keyevent_stoppropagation(ev);
+}
+
+void machinesbox_addsel(MachinesBox* self, uintptr_t slot)
+{
+	if (psy_table_exists(&self->slotslistbox, slot)) {
+		uintptr_t boxindex;
+
+		boxindex = (uintptr_t)psy_table_at(&self->slotslistbox, slot);
+		psy_ui_listbox_addsel(&self->listbox, boxindex);
+	}
+}
+
+void machinesbox_deselectall(MachinesBox* self)
+{
+	psy_ui_listbox_setcursel(&self->listbox, -1);
 }

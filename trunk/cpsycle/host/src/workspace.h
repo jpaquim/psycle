@@ -62,7 +62,8 @@ enum {
 
 enum {
 	SECTION_ID_MACHINEVIEW_WIRES = 0,
-	SECTION_ID_MACHINEVIEW_NEWMACHINE = 1
+	SECTION_ID_MACHINEVIEW_STACK = 1,
+	SECTION_ID_MACHINEVIEW_NEWMACHINE = 2
 };
 
 typedef enum {
@@ -131,6 +132,7 @@ typedef struct {
 	psy_Signal signal_floatsection;
 	psy_Signal signal_docksection;
 	psy_Signal signal_machineeditresize;	
+	psy_Signal signal_gearselect;
 	// audio
 	psy_audio_Song* song;
 	psy_audio_Player player;
@@ -264,6 +266,7 @@ void workspace_songposinc(Workspace*);
 void workspace_gotocursor(Workspace*, psy_audio_PatternCursor);
 PatternDisplayMode workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
+void workspace_multiselectgear(Workspace*, psy_List* slotlist);
 
 #ifdef __cplusplus
 }

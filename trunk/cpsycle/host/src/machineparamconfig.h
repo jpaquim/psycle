@@ -4,6 +4,10 @@
 #if !defined(MACHINEPARAMCONFIG_H)
 #define MACHINEPARAMCONFIG_H
 
+// host
+#include "skincoord.h"
+// ui
+#include <uibitmap.h>
 // container
 #include <properties.h>
 #include <signal.h>
@@ -11,6 +15,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// ParamSkin
+typedef struct ParamSkin {
+    psy_ui_Colour fonttopcolour;
+    psy_ui_Colour fontbottomcolour;
+    psy_ui_Colour fonthtopcolour;
+    psy_ui_Colour fonthbottomcolour;
+    psy_ui_Colour fonttitlecolour;
+    psy_ui_Colour topcolour;
+    psy_ui_Colour bottomcolour;
+    psy_ui_Colour htopcolour;
+    psy_ui_Colour hbottomcolour;
+    psy_ui_Colour titlecolour;
+    psy_ui_Bitmap knobbitmap;
+    psy_ui_Bitmap mixerbitmap;
+    char* bitmappath;
+    SkinCoord slider;
+    SkinCoord knob;
+    SkinCoord sliderknob;
+    SkinCoord vuoff;
+    SkinCoord vuon;
+    SkinCoord switchon;
+    SkinCoord switchoff;
+    SkinCoord checkon;
+    SkinCoord checkoff;
+} ParamSkin;
 
 // MachineParamConfig
 

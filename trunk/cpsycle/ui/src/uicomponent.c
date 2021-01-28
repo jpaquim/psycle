@@ -465,7 +465,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->backgroundmode = psy_ui_BACKGROUND_SET;
 	self->mousetracking = 0;
 	self->cursor = psy_ui_CURSOR_DEFAULT;
-	self->tabindex = -1;	
+	self->tabindex = -1;
+	self->scrollmode = psy_ui_SCROLL_GRAPHICS;
 	psy_ui_point_init(&self->scroll);
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
@@ -1085,17 +1086,28 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		intptr_t currrow;
 		psy_ui_Size size;
 		intptr_t scrollstepx_px;
-		psy_ui_Value scrollleft;
+		double scrollleftpx;
 
 		tm = psy_ui_component_textmetric(self);
-		size = psy_ui_component_size(self);
+		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			size = psy_ui_component_size(self);
+		} else {
+			size = psy_ui_component_size(psy_ui_component_parent(self));
+		}
 		scrollstepx_px = (intptr_t)psy_ui_value_px(&self->scrollstepx, tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxrows = (int)(psy_ui_value_px(&preferredsize.width, tm) /
 			(double)scrollstepx_px + 0.5);
 		visirows = (intptr_t)(psy_ui_value_px(&size.width, tm) / scrollstepx_px);
-		scrollleft = psy_ui_component_scrollleft(self);
-		currrow = (intptr_t)(psy_ui_value_px(&scrollleft, tm) / scrollstepx_px);
+		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			scrollleftpx = psy_ui_component_scrollleftpx(self);
+		} else {			
+			psy_ui_RealRectangle position;
+
+			position = psy_ui_component_position(self);
+			scrollleftpx = -position.left;			
+		}		
+		currrow = (intptr_t)(scrollleftpx / scrollstepx_px);
 		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			
 		if (currrow > maxrows - visirows) {
 			currrow = psy_max(0, maxrows - visirows);
@@ -1271,4 +1283,9 @@ psy_Translator* psy_ui_translator(void)
 const char* psy_ui_translate(const char* key)
 {
 	return psy_translator_translate(psy_ui_translator(), key);
+}
+
+void psy_ui_component_setmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
+{
+	self->scrollmode = mode;
 }

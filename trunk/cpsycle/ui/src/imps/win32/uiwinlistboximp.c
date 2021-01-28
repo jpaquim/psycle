@@ -111,6 +111,7 @@ static void dev_setstyle(psy_ui_win_ListBoxImp*, int style);
 static void dev_clear(psy_ui_win_ListBoxImp*);
 static void dev_setcursel(psy_ui_win_ListBoxImp*, intptr_t index);
 static intptr_t dev_cursel(psy_ui_win_ListBoxImp*);
+static void dev_addsel(psy_ui_win_ListBoxImp*, intptr_t index);
 static void dev_selitems(psy_ui_win_ListBoxImp*, intptr_t* items,
 	intptr_t maxitems);
 static intptr_t dev_selcount(psy_ui_win_ListBoxImp*);
@@ -129,6 +130,7 @@ static void listboximp_imp_vtable_init(psy_ui_win_ListBoxImp* self)
 		listboximp_vtable.dev_clear = (psy_ui_fp_listboximp_dev_clear)dev_clear;
 		listboximp_vtable.dev_setcursel = (psy_ui_fp_listboximp_dev_setcursel)dev_setcursel;
 		listboximp_vtable.dev_cursel = (psy_ui_fp_listboximp_dev_cursel)dev_cursel;
+		listboximp_vtable.dev_addsel = (psy_ui_fp_listboximp_dev_addsel)dev_addsel;
 		listboximp_vtable.dev_selitems = (psy_ui_fp_listboximp_dev_selitems)dev_selitems;
 		listboximp_vtable.dev_selcount = (psy_ui_fp_listboximp_dev_selcount)dev_selcount;
 		listboximp_vtable.dev_count = (psy_ui_fp_listboximp_dev_count)dev_count;
@@ -268,6 +270,15 @@ void dev_setcursel(psy_ui_win_ListBoxImp* self, intptr_t index)
 	GetClientRect(self->win_component_imp.hwnd, &rect);
 	if (rect.bottom - rect.top < 20) {
 		SendMessage(self->win_component_imp.hwnd, LB_SETTOPINDEX, (WPARAM)0, (LPARAM)0);
+	}
+}
+
+void dev_addsel(psy_ui_win_ListBoxImp* self, intptr_t index)
+{
+	if ((windowstyle(self->win_component_imp.hwnd) & LBS_EXTENDEDSEL) == LBS_EXTENDEDSEL) {
+		if (index != -1) {
+			SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)1, (LPARAM)index);
+		}
 	}
 }
 

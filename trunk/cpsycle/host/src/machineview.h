@@ -50,9 +50,52 @@ typedef struct MachineUi {
 	ParamView* paramview;
 	MachineEditorView* editorview;
 	char* restorename;
+	bool machinepos;
+	int dragmode;
 	// references
 	Workspace* workspace;
+	psy_audio_Machines* machines;
+	psy_ui_Component* view;
+	double mx;
 } MachineUi;
+
+
+typedef psy_Table MachineUiTrack;
+
+typedef struct MachineUiMatrix {
+	psy_Table tracks;
+	uintptr_t maxlines;
+} MachineUiMatrix;
+
+void machineuimatrix_init(MachineUiMatrix*);
+void machineuimatrix_dispose(MachineUiMatrix*);
+
+void machineuimatrix_insert(MachineUiMatrix* self, uintptr_t trackidx,
+	uintptr_t line, MachineUi* machineui);
+MachineUi* machineuimatrix_at(MachineUiMatrix* self, uintptr_t trackidx,
+	uintptr_t line);
+uintptr_t machineuimatrix_numtracks(MachineUiMatrix* self);
+uintptr_t machineuimatrix_numlines(MachineUiMatrix* self);
+
+typedef struct MachineStackView {
+	// inherits
+	psy_ui_Component component;
+	// internal data
+	MachineUiMatrix matrix;
+	psy_Table maxlevels;	
+	uintptr_t dragslot;
+	MachineUi* dragmachineui;
+	bool vudrawupdate;
+	uintptr_t opcount;
+	// references
+	psy_audio_Machines* machines;	
+	Workspace* workspace;
+	MachineViewSkin* skin;	
+} MachineStackView;
+
+void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller,
+	MachineViewSkin* skin, Workspace*);
 
 enum {	
 	MACHINEWIREVIEW_DRAG_NONE,
@@ -77,8 +120,7 @@ typedef struct MachineWireView {
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire selectedwire;
 	psy_audio_Wire hoverwire;	
-	psy_audio_PluginCatcher plugincatcher;
-	MachineViewSkin skin;	
+	psy_audio_PluginCatcher plugincatcher;	
 	psy_ui_Edit editname;
 	int randominsert;
 	int addeffect;
@@ -86,15 +128,18 @@ typedef struct MachineWireView {
 	bool showwirehover;
 	bool vudrawupdate;
 	bool drawvirtualgenerators;
+	uintptr_t opcount;
 	// references
 	struct MachineViewBar* statusbar;
 	psy_audio_Machines* machines;
 	psy_ui_Scroller* scroller;
-	Workspace* workspace;
+	Workspace* workspace;	
+	MachineViewSkin* skin;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace*);
+	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller,
+	MachineViewSkin* skin, Workspace*);
 void machinewireview_centermaster(MachineWireView*);
 void machinewireview_configure(MachineWireView*, MachineViewConfig*);
 
@@ -131,7 +176,10 @@ typedef struct MachineView {
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;
 	psy_ui_Scroller scroller;
+	MachineStackView stackview;
+	psy_ui_Scroller stackscroller;
 	NewMachine newmachine;
+	MachineViewSkin skin;
 	// references
 	Workspace* workspace;
 } MachineView;

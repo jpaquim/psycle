@@ -34,6 +34,7 @@ typedef struct psy_audio_Machines {
 	MachinePath* path;
 	psy_Table nopath;
 	psy_Table colours;
+	psy_Table levels;
 	psy_List* buffers;	
 	float* samplebuffers;
 	int numsamplebuffers;
@@ -53,6 +54,9 @@ typedef struct psy_audio_Machines {
 	psy_UndoRedo undoredo;
 	bool preventundoredo;
 	uintptr_t mixercount;
+	uintptr_t currlevel;
+	uintptr_t maxlevel;
+	uintptr_t opcount;
 } psy_audio_Machines;
 
 void psy_audio_machines_init(psy_audio_Machines*);
@@ -115,6 +119,13 @@ INLINE bool psy_audio_machines_hasmixer(const psy_audio_Machines* self)
 {
 	return self->mixercount != 0;
 }
+
+MachineList* psy_audio_machines_level(psy_audio_Machines*, uintptr_t slot,
+	uintptr_t level);
+uintptr_t psy_audio_machines_depth(psy_audio_Machines*);
+void psy_audio_machines_levels(psy_audio_Machines*, psy_Table* rv);
+MachineList* psy_audio_machines_leafs(psy_audio_Machines*);
+uintptr_t psy_audio_machines_levelofmachine(psy_audio_Machines*, uintptr_t slot);
 
 uintptr_t psy_audio_machines_maxindex(psy_audio_Machines*);
 

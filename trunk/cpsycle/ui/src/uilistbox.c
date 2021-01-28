@@ -107,6 +107,13 @@ intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
 	return self->imp->vtable->dev_cursel(self->imp);
 }
 
+void psy_ui_listbox_addsel(psy_ui_ListBox* self, intptr_t index)
+{
+	assert(self->imp);
+
+	self->imp->vtable->dev_addsel(self->imp, index);
+}
+
 void psy_ui_listbox_selitems(psy_ui_ListBox* self, intptr_t* items, intptr_t maxitems)
 {	
 	assert(self->imp);
@@ -159,6 +166,7 @@ static void dev_setstyle(psy_ui_ListBoxImp* self, int style) { }
 static void dev_clear(psy_ui_ListBoxImp* self) { }
 static void dev_setcursel(psy_ui_ListBoxImp* self, intptr_t index) { }
 static intptr_t dev_cursel(psy_ui_ListBoxImp* self) { return -1; }
+static void dev_addsel(psy_ui_ListBoxImp* self, intptr_t index) { }
 static void dev_selitems(psy_ui_ListBoxImp* self, intptr_t* items, intptr_t maxitems) { }
 static intptr_t dev_selcount(psy_ui_ListBoxImp* self) { return 0;  }
 static intptr_t dev_count(psy_ui_ListBoxImp* self) { return 0; }
@@ -176,6 +184,7 @@ static void listbox_imp_vtable_init(void)
 		listbox_imp_vtable.dev_clear = dev_clear;
 		listbox_imp_vtable.dev_setcursel = dev_setcursel;
 		listbox_imp_vtable.dev_cursel = dev_cursel;
+		listbox_imp_vtable.dev_addsel = dev_addsel;
 		listbox_imp_vtable.dev_selitems = dev_selitems;
 		listbox_imp_vtable.dev_selcount = dev_selcount;
 		listbox_imp_vtable.dev_count = dev_count;

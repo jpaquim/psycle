@@ -190,6 +190,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_floatsection);
 	psy_signal_init(&self->signal_docksection);
 	psy_signal_init(&self->signal_machineeditresize);
+	psy_signal_init(&self->signal_gearselect);
 }
 
 void workspace_dispose(Workspace* self)
@@ -240,7 +241,8 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 	psy_signal_dispose(&self->signal_floatsection);
 	psy_signal_dispose(&self->signal_docksection);
-	psy_signal_dispose(&self->signal_machineeditresize);	
+	psy_signal_dispose(&self->signal_machineeditresize);
+	psy_signal_dispose(&self->signal_gearselect);
 }
 
 void workspace_clearsequencepaste(Workspace* self)
@@ -1618,4 +1620,9 @@ psy_audio_MachineFactory* onmachinefactory(Workspace* self)
 	assert(self);
 
 	return &self->machinefactory;
+}
+
+void workspace_multiselectgear(Workspace* self, psy_List* machinelist)
+{
+	psy_signal_emit(&self->signal_gearselect, self, 1, machinelist);
 }
