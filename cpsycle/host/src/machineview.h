@@ -21,14 +21,36 @@
 extern "C" {
 #endif
 
-// MachineWireView
-//
-// Editor for the machines and their connections
-
 // MachineView
 //
-// tabbed view for MachineWireView and NewMachine 
+// Editor/Viewer for the machines, their connections and owner of the
+// wiremonitors
 
+// MachineStackView: displays stacks of the machines starting with their leafs
+// MachineWireView:  displays and edits machines with their wires
+// NewMachine:       displays available machines to select the new machine
+// MachineView:      tabbed view with MachineStack-/MachineWireView and
+//                   NewMachine
+// MachineViewBar:   Statusbar that displays actions in the wireview and adds
+//                   a selector for the mixer, if new wires are added to the
+//                   mixer inputs or sent/returns
+// Helper
+// MachineUi:        Draws a machine with its buttons and vumeter and reacts to
+//                   ui events to solo/mute/bypass or pan the machine
+// MachineUiMatrix:  Container of MachineUis for the MachineStackView with
+//                   track and line as key and a MachineUi pointer as value
+
+
+typedef enum MachineViewDragMode {
+	MACHINEVIEW_DRAG_NONE,
+	MACHINEVIEW_DRAG_MACHINE,
+	MACHINEVIEW_DRAG_NEWCONNECTION,
+	MACHINEVIEW_DRAG_LEFTCONNECTION,
+	MACHINEVIEW_DRAG_RIGHTCONNECTION,
+	MACHINEVIEW_DRAG_PAN
+} MachineViewDragMode;
+
+// MachineUi
 typedef struct MachineUi {
 	int mode;
 	/// output level for display (0 .. 1.f)	
@@ -46,12 +68,12 @@ typedef struct MachineUi {
 	psy_ui_RealRectangle vuposition;
 	psy_ui_RealPoint topleft;
 	uintptr_t slot;
-	MachineFrame* frame;
+	MachineFrame* machineframe;
 	ParamView* paramview;
 	MachineEditorView* editorview;
 	char* restorename;
 	bool machinepos;
-	int dragmode;
+	MachineViewDragMode dragmode;
 	// references
 	Workspace* workspace;
 	psy_audio_Machines* machines;
@@ -59,7 +81,7 @@ typedef struct MachineUi {
 	double mx;
 } MachineUi;
 
-
+// MachineUiMatrix
 typedef psy_Table MachineUiTrack;
 
 typedef struct MachineUiMatrix {
@@ -70,13 +92,14 @@ typedef struct MachineUiMatrix {
 void machineuimatrix_init(MachineUiMatrix*);
 void machineuimatrix_dispose(MachineUiMatrix*);
 
-void machineuimatrix_insert(MachineUiMatrix* self, uintptr_t trackidx,
-	uintptr_t line, MachineUi* machineui);
-MachineUi* machineuimatrix_at(MachineUiMatrix* self, uintptr_t trackidx,
+void machineuimatrix_insert(MachineUiMatrix*, uintptr_t trackidx,
+	uintptr_t line, MachineUi*);
+MachineUi* machineuimatrix_at(MachineUiMatrix*, uintptr_t trackidx,
 	uintptr_t line);
-uintptr_t machineuimatrix_numtracks(MachineUiMatrix* self);
-uintptr_t machineuimatrix_numlines(MachineUiMatrix* self);
+uintptr_t machineuimatrix_numtracks(const MachineUiMatrix*);
+uintptr_t machineuimatrix_numlines(const MachineUiMatrix*);
 
+// MachineStackView
 typedef struct MachineStackView {
 	// inherits
 	psy_ui_Component component;
@@ -97,25 +120,18 @@ void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller,
 	MachineViewSkin* skin, Workspace*);
 
-enum {	
-	MACHINEWIREVIEW_DRAG_NONE,
-	MACHINEWIREVIEW_DRAG_MACHINE,
-	MACHINEWIREVIEW_DRAG_NEWCONNECTION,
-	MACHINEWIREVIEW_DRAG_LEFTCONNECTION,
-	MACHINEWIREVIEW_DRAG_RIGHTCONNECTION,
-	MACHINEWIREVIEW_DRAG_PAN,
-};
+// MachineWireView
 
 typedef struct MachineWireView {
 	// inherits
 	psy_ui_Component component;
 	// internal data
 	psy_Table machineuis;
-	psy_List* wireframes;	
-	double mx;
-	double my;
+	psy_List* wireframes;
+	psy_ui_RealPoint dragpt;	
 	uintptr_t dragslot;
-	int dragmode;
+	MachineUi* dragmachineui;
+	MachineViewDragMode dragmode;
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire selectedwire;
@@ -131,17 +147,17 @@ typedef struct MachineWireView {
 	uintptr_t opcount;
 	// references
 	struct MachineViewBar* statusbar;
-	psy_audio_Machines* machines;
-	psy_ui_Scroller* scroller;
+	psy_audio_Machines* machines;	
 	Workspace* workspace;	
 	MachineViewSkin* skin;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller,
-	MachineViewSkin* skin, Workspace*);
+	psy_ui_Component* tabbarparent, MachineViewSkin*, Workspace*);
 void machinewireview_centermaster(MachineWireView*);
 void machinewireview_configure(MachineWireView*, MachineViewConfig*);
+void machinewireview_showvirtualgenerators(MachineWireView*);
+void machinewireview_hidevirtualgenerators(MachineWireView*);
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 {
@@ -152,14 +168,16 @@ INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 typedef struct MachineViewBar {
 	// inherits
 	psy_ui_Component component;
+	// internal
 	// ui elements
 	psy_ui_CheckBox mixersend;
 	psy_ui_Label status;
-	// references
-	Workspace* workspace;
+	// references	
+	psy_audio_Machines* machines;
 } MachineViewBar;
 
 void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
+
 void machineviewbar_settext(MachineViewBar*, const char* text);
 
 INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)

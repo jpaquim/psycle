@@ -25,7 +25,8 @@ enum {
 	PROPERTY_ID_REGENERATEPLUGINCACHE = 1,
 	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,	
-	PROPERTY_ID_DEFAULTFONT	
+	PROPERTY_ID_DEFAULTFONT,
+	PROPERTY_ID_APPTHEME
 };
 
 typedef struct PsycleConfig {
@@ -33,6 +34,7 @@ typedef struct PsycleConfig {
 	psy_Property* global;
 	psy_Property* visual;
 	psy_Property* defaultfont;
+	psy_Property* apptheme;
 	GeneralConfig general;
 	AudioConfig audio;
 	EventDriverConfig input;

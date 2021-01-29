@@ -39,7 +39,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 // prototypes
 static void gear_oncreate(Gear*, psy_ui_Component* sender);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
-static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
+static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_Song*);
 static void gear_connectsongsignals(Gear*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
@@ -148,7 +148,7 @@ void gear_ondelete(Gear* self, psy_ui_Component* sender)
 	}
 }
 
-void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_Song* song)
 {	
 	self->machines = &workspace->song->machines;		
 	machinesbox_setmachines(&self->machinesboxgen, &workspace->song->machines);

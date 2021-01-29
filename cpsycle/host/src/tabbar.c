@@ -64,12 +64,12 @@ psy_ui_RealRectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
 // TabBarSkin
 void tabbarskin_init(TabBarSkin* self)
 {
-	self->text = psy_ui_colour_make(0x00D1C5B6);
-	self->textsel = psy_ui_colour_make(0x00B1C8B0);
-	self->texthover = psy_ui_colour_make(0x00EAEAEA);
+	self->text = psy_ui_defaults()->style_tab.colour;
+	self->textsel = psy_ui_defaults()->style_tab_select.colour; // (0x00B1C8B0);
+	self->texthover = psy_ui_defaults()->style_tab_hover.colour; // psy_ui_colour_make(0x00EAEAEA);
 	self->textlabel = psy_ui_colour_make(0x00666666);
-	self->linehover = psy_ui_colour_make(0x00FFFFFF);
-	self->linesel = psy_ui_colour_make(0x00B1C8B0);
+	self->linehover = psy_ui_defaults()->style_tab_hover.backgroundcolour;// psy_ui_colour_make(0x00FFFFFF);
+	self->linesel = psy_ui_defaults()->style_tab_select.backgroundcolour; //  colourpsy_ui_colour_make(0x00B1C8B0);
 }
 
 // TabBar
@@ -121,6 +121,10 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(tabbar_base(self));
+	if (psy_ui_defaults()->style_tab.backgroundcolour.mode.set) {
+		psy_ui_component_setbackgroundcolour(tabbar_base(self),
+			psy_ui_defaults()->style_tab.backgroundcolour);
+	}
 	psy_signal_init(&self->signal_change);
 	self->tabs = NULL;
 	self->selected = 0;
@@ -299,7 +303,7 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	tab = NULL;
-	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
+	tabindex = tabbar_tabhittest(self, ev->pt.x, ev->pt.y, &tab);
 	if (tab && tab->mode == TABMODE_LABEL) {
 		return;
 	}
@@ -337,7 +341,8 @@ uintptr_t tabbar_tabhittest(TabBar* self, double x, double y, Tab** rvtab)
 
 		tab = (Tab*)psy_list_entry(p);
 		r = tab_position(tab, tm);
-		if (psy_ui_realrectangle_intersect(&r, x, y)) {
+		if (psy_ui_realrectangle_intersect(&r,
+				psy_ui_realpoint_make(x, y))) {
 			rv = c;
 			*rvtab = tab;
 			break;
@@ -354,7 +359,7 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	tab = NULL;
-	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
+	tabindex = tabbar_tabhittest(self, ev->pt.x, ev->pt.y, &tab);
 	if (tab && tab->mode == TABMODE_LABEL) {
 		self->hoverindex = psy_INDEX_INVALID;
 		psy_ui_component_invalidate(tabbar_base(self));

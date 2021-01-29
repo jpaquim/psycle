@@ -1121,7 +1121,7 @@ void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
 
 void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	self->dragcursor = pianogrid_makecursor(self, ev->x, ev->y);	
+	self->dragcursor = pianogrid_makecursor(self, ev->pt.x, ev->pt.y);	
 	self->selection.topleft = self->dragcursor;
 	self->dragselectionbase = self->dragcursor;
 	self->lastdragcursor = self->dragcursor;
@@ -1144,7 +1144,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 			self->gridstate->cursor.track,
 				pianogridstate_quantize(self->gridstate,
 					pianogridstate_pxtobeat(self->gridstate,
-						ev->x - psy_ui_component_scrollleftpx(&self->component))),
+						ev->pt.x - psy_ui_component_scrollleftpx(&self->component))),
 				pianogridstate_step(self->gridstate), &prev);
 		if (!node) {
 			if (prev) {
@@ -1162,7 +1162,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 			node = prev;
 		}
 		if (node && pianogrid_keyhittest(self, node, self->gridstate->cursor.track,
-			keyboardstate_pxtokey(self->keyboardstate, ev->y))) {
+			keyboardstate_pxtokey(self->keyboardstate, ev->pt.y))) {
 			self->hoverpatternentry = psy_audio_patternnode_entry(node);
 		} else {
 			self->hoverpatternentry = NULL;
@@ -1171,7 +1171,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 		}
 		if (ev->button == 1) {
-			cursor = pianogrid_makecursor(self, ev->x, ev->y);
+			cursor = pianogrid_makecursor(self, ev->pt.x, ev->pt.y);
 			if (cursor.key != self->lastdragcursor.key ||
 				cursor.offset != self->lastdragcursor.offset) {
 				if (!self->selection.valid) {

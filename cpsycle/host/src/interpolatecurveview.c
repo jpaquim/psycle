@@ -296,7 +296,7 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 	psy_List* selected;
 	
 	self->dragkeyframe = 0;
-	selected = interpolatecurvebox_hittest(self, ev->x, ev->y);
+	selected = interpolatecurvebox_hittest(self, ev->pt.x, ev->pt.y);
 	if (ev->button == 1) {
 		if (selected) {
 			self->dragkeyframe = selected;
@@ -305,7 +305,7 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_capture(&self->component);
 		} else {
-			interpolatecurvebox_insertkeyframe(self, ev->x, ev->y);
+			interpolatecurvebox_insertkeyframe(self, ev->pt.x, ev->pt.y);
 		}
 	} else
 	if (ev->button == 2) {
@@ -392,7 +392,7 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 		tm = psy_ui_component_textmetric(&self->component);
 		scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
-		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm) - ev->y) * 1 / scaley);
+		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm) - ev->pt.y) * 1 / scaley);
 		if (entry->value < self->minval) {
 			entry->value = self->minval;
 		} else 

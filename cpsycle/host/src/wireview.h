@@ -64,7 +64,25 @@ typedef struct WireView {
 } WireView;
 
 void wireview_init(WireView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
-int wireview_wireexists(WireView*);
+
+INLINE WireView* wireview_alloc(void)
+{
+	return (WireView*)malloc(sizeof(WireView));
+}
+
+INLINE WireView* wireview_allocinit(psy_ui_Component* parent, psy_audio_Wire wire,
+	Workspace* workspace)
+{
+	WireView* rv;	
+	
+	rv = wireview_alloc();
+	if (rv) {
+		wireview_init(rv, parent, wire, workspace);
+	}
+	return rv;
+}
+
+bool wireview_wireexists(const WireView*);
 
 INLINE psy_ui_Component* wireview_base(WireView* self)
 {
@@ -80,10 +98,33 @@ INLINE psy_ui_Component* wireview_base(WireView* self)
 typedef struct WireFrame{
 	// inherits
 	psy_ui_Component component;
-	WireView* wireview;
+	WireView wireview;
 } WireFrame;
 
-void wireframe_init(WireFrame*, psy_ui_Component* parent, WireView* view);
+void wireframe_init(WireFrame*, psy_ui_Component* parent, psy_audio_Wire,
+	Workspace*);
+
+INLINE WireFrame* wireframe_alloc(void)
+{
+	return (WireFrame*)malloc(sizeof(WireFrame));
+}
+
+INLINE WireFrame* wireframe_allocinit(psy_ui_Component* parent,
+	psy_audio_Wire wire, Workspace* workspace)
+{
+	WireFrame* rv;
+
+	rv = wireframe_alloc();
+	if (rv) {
+		wireframe_init(rv, parent, wire, workspace);
+	}
+	return rv;
+}
+
+INLINE const psy_audio_Wire* wireframe_wire(const WireFrame* self)
+{
+	return &self->wireview.wire;
+}
 
 INLINE psy_ui_Component* wireframe_base(WireFrame* self)
 {

@@ -810,7 +810,7 @@ bool psy_audio_machines_isvirtualgenerator(const psy_audio_Machines* self,
 {
 	assert(self);
 
-	if (psy_table_exists(&self->connections.sends, slot)) {
+	if (psy_table_exists(&self->slots, slot)) {
 		return (slot > 0x80 && slot < 0xFF);
 	}
 	return FALSE;

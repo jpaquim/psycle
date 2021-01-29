@@ -223,7 +223,7 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 	psy_ui_Size size = psy_ui_component_size(&self->component);
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	if (ev->x >= psy_ui_value_px(&size.width, tm) - 40 && ev->x < psy_ui_value_px(&size.width, tm) - 25) {
+	if (ev->pt.x >= psy_ui_value_px(&size.width, tm) - 40 && ev->pt.x < psy_ui_value_px(&size.width, tm) - 25) {
 		intptr_t index;
 
 		printf("combobox mousedown 1\n");
@@ -232,7 +232,7 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 			psy_ui_combobox_setcursel(self, index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
-	} else if (ev->x >= psy_ui_value_px(&size.width, tm) - 25 && ev->x < psy_ui_value_px(&size.width, tm) - 10) {
+	} else if (ev->pt.x >= psy_ui_value_px(&size.width, tm) - 25 && ev->pt.x < psy_ui_value_px(&size.width, tm) - 10) {
 		intptr_t count;
 		intptr_t index;
 		
@@ -257,7 +257,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 		psy_ui_Size size = psy_ui_component_size(&self->component);
 
 		tm = psy_ui_component_textmetric(&self->component);
-		if (ev->x >= psy_ui_value_px(&size.width, tm) - 40 && ev->x <
+		if (ev->pt.x >= psy_ui_value_px(&size.width, tm) - 40 && ev->pt.x <
 			psy_ui_value_px(&size.width, tm) - 25) {
 			intptr_t index = psy_ui_combobox_cursel(self);
 			if (index > 0) {
@@ -265,7 +265,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 			}
 		}
 		else
-			if (ev->x >= psy_ui_value_px(&size.width, tm) - 25 && ev->x <
+			if (ev->pt.x >= psy_ui_value_px(&size.width, tm) - 25 && ev->pt.x <
 					psy_ui_value_px(&size.width, tm) - 10) {
 				intptr_t count;
 				intptr_t index;

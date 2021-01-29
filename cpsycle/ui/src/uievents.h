@@ -37,8 +37,7 @@ INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Compo
 }
 
 typedef struct {	
-	double x;
-	double y;
+	psy_ui_RealPoint pt;
 	intptr_t button;
 	intptr_t delta;
 	bool shift;

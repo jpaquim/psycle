@@ -5,7 +5,7 @@
 
 #include "skingraphics.h"
 
-void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
+void skin_blitcoord(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
 	psy_ui_RealPoint dest, SkinCoord* coord)
 {
 	psy_ui_drawbitmap(g, bitmap,
@@ -15,7 +15,7 @@ void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
 		psy_ui_realrectangle_topleft(&coord->src));
 }
 
-void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
+void skin_blitcoordstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
 	psy_ui_RealPoint dest, double ratiowidth, double ratioheight,
 	SkinCoord* coord)
 {

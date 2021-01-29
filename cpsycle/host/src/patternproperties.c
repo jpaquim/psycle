@@ -90,7 +90,7 @@ void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand* self)
 }
 
 static void patternproperties_onsongchanged(PatternProperties*, Workspace*,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void patternproperties_connectsongsignals(PatternProperties*);
 static void patternproperties_onpatternnamechanged(PatternProperties*, psy_audio_Patterns*,
 	uintptr_t slot);
@@ -238,7 +238,7 @@ void patternproperties_onpatternlengthchanged(PatternProperties* self,
 }
 
 void patternproperties_onsongchanged(PatternProperties* self, Workspace* workspace, int flag,
-	psy_audio_SongFile* songfile)
+	psy_audio_Song* song)
 {
 	patternproperties_connectsongsignals(self);
 }

@@ -492,7 +492,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 	
 	psy_ui_component_capture(&self->parent->component);
 	self->drag_sequenceitem_node = NULL;
-	self->dragstartpx = ev->x;
+	self->dragstartpx = ev->pt.x;
 	for (sequenceitem_node = self->currtrack->entries, selected = 0;
 		sequenceitem_node != NULL;
 		psy_list_next(&sequenceitem_node), ++selected) {
@@ -514,11 +514,13 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(entry->offset * self->trackstate->pxperbeat, 0.0),
 				psy_ui_realsize_make(patternwidth, lineheight));
-			if (psy_ui_realrectangle_intersect(&r, ev->x, ev->y)) {
+			if (psy_ui_realrectangle_intersect(&r,
+					psy_ui_realpoint_make(ev->pt.x, ev->pt.y))) {
 				if (self->currtrack) {
 					uintptr_t trackindex;
 
-					trackindex = psy_list_entry_index(workspace_song(self->workspace)->sequence.tracks,
+					trackindex = psy_list_entry_index(
+						workspace_song(self->workspace)->sequence.tracks,
 						self->currtrack);
 					if (trackindex != psy_INDEX_INVALID) {
 						psy_audio_OrderIndex seqeditpos;
@@ -532,7 +534,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 								psy_audio_orderindex_make(trackindex, selected));
 						}						
 						cursor = self->workspace->patterneditposition;
-						position = seqeditortrackstate_pxtobeat(self->trackstate, ev->x);
+						position = seqeditortrackstate_pxtobeat(self->trackstate, ev->pt.x);
 						position =
 							(intptr_t)(position * psy_audio_player_lpb(workspace_player(self->workspace))) /
 							(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->workspace));							
@@ -546,7 +548,7 @@ bool seqeditortrack_onmousedown_virtual(SeqEditorTrack* self,
 				self->parent->capture = self;
 				self->itemdragposition = entry->offset;
 				self->dragstarting = TRUE;
-				seqeditortrack_outputstatusposition(self, ev->x);				
+				seqeditortrack_outputstatusposition(self, ev->pt.x);				
 			}
 		}		
 	}
@@ -564,8 +566,8 @@ bool seqeditortrack_onmousemove_virtual(SeqEditorTrack* self,
 		psy_dsp_big_beat_t dragposition;
 
 		sequenceentry = (psy_audio_SequenceEntry*)self->drag_sequenceitem_node->entry;
-		dragposition = seqeditortrackstate_pxtobeat(self->trackstate, ev->x);
-		if (self->dragstarting && ((abs((int)(self->dragstartpx - ev->x)) < 2) ||
+		dragposition = seqeditortrackstate_pxtobeat(self->trackstate, ev->pt.x);
+		if (self->dragstarting && ((abs((int)(self->dragstartpx - ev->pt.x)) < 2) ||
 			dragposition - (sequenceentry->offset - sequenceentry->repositionoffset) == 0.0)) {
 			// just select the pattern
 			return TRUE;
@@ -591,7 +593,7 @@ bool seqeditortrack_onmousemove_virtual(SeqEditorTrack* self,
 		self->dragstarting = FALSE;
 		psy_ui_component_invalidate(&self->parent->component);
 	}
-	seqeditortrack_outputstatusposition(self, ev->x);	
+	seqeditortrack_outputstatusposition(self, ev->pt.x);	
 	return TRUE;
 }
 
@@ -763,7 +765,7 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 			(self->base.workspace->song) ? &self->base.workspace->song->sequence : NULL,
 			self->base.trackindex,
 			self->base.workspace->sequenceselection.editposition.track == self->base.trackindex);
-		switch (sequencetrackbox_hittest(&trackbox, ev->x, 0)) {
+		switch (sequencetrackbox_hittest(&trackbox, ev->pt.x, 0)) {
 		case SEQUENCETRACKBOXEVENT_MUTE:
 			if (self->base.currtrack) {
 				if (psy_audio_sequence_istrackmuted(sequence, self->base.trackindex)) {
@@ -1204,7 +1206,7 @@ bool seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 			psy_ui_MouseEvent trackev;
 
 			trackev = *ev;
-			trackev.y = ev->y - (self->capture->trackindex *
+			trackev.pt.y = ev->pt.y - (self->capture->trackindex *
 				(lineheight + linemargin));
 			rv = fp_notify(self->capture, &trackev);			
 		} else {
@@ -1224,12 +1226,12 @@ bool seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 				}
 				seqeditortrack_updatetrack(seqedittrack, seqnode, seqtrack, c);
 				cpy += lineheight + linemargin;
-				if (ev->y >= c * (lineheight + linemargin) &&
-						ev->y < (c + 1) * (lineheight + linemargin)) {
+				if (ev->pt.y >= c * (lineheight + linemargin) &&
+						ev->pt.y < (c + 1) * (lineheight + linemargin)) {
 					psy_ui_MouseEvent trackev;
 
 					trackev = *ev;
-					trackev.y = ev->y - (cpy - (lineheight + linemargin));
+					trackev.pt.y = ev->pt.y - (cpy - (lineheight + linemargin));
 					rv = fp_notify(seqedittrack, &trackev);
 					break;
 				}
@@ -1382,7 +1384,7 @@ void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)
 // prototypes
 static void seqeditor_ondestroy(SeqEditor*);
 static void seqeditor_onsongchanged(SeqEditor*, Workspace*, int flag,
-	psy_audio_SongFile*);
+	psy_audio_Song*);
 static void seqeditor_updatesong(SeqEditor*, psy_audio_Song*);
 static void seqeditor_build(SeqEditor*);
 static void seqeditor_onentryscroll(SeqEditor*, psy_ui_Component* sender);
@@ -1492,7 +1494,7 @@ void seqeditor_ondestroy(SeqEditor* self)
 }
 
 void seqeditor_onsongchanged(SeqEditor* self, Workspace* workspace, int flag,
-	psy_audio_SongFile* songfile)
+	psy_audio_Song* song)
 {
 	seqeditor_updatesong(self, workspace->song);
 }

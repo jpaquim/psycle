@@ -417,7 +417,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 		if (self->instrument) {
 			uintptr_t numentry;	
 
-			numentry = (uintptr_t)(ev->y / (self->metrics.lineheight * 3));
+			numentry = (uintptr_t)(ev->pt.y / (self->metrics.lineheight * 3));
 			if (numentry < psy_list_size(
 					psy_audio_instrument_entries(self->instrument))) {
 				self->selected = numentry;
@@ -428,12 +428,12 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 			self->selected = psy_INDEX_INVALID;
 		}
 		self->dragmode = 1;
-		self->currkey = screentokey(ev->x, self->metrics.keysize);
+		self->currkey = screentokey(ev->pt.x, self->metrics.keysize);
 		entry = psy_audio_instrument_entryat(self->instrument, self->selected);
 		if (entry) {
-			if (abs((int)(entry->keyrange.low  - screentokey(ev->x,
+			if (abs((int)(entry->keyrange.low  - screentokey(ev->pt.x,
 					self->metrics.keysize))) <
-				abs((int)(entry->keyrange.high  - screentokey(ev->x,
+				abs((int)(entry->keyrange.high  - screentokey(ev->pt.x,
 					self->metrics.keysize)))) {
 				self->dragmode = INSTVIEW_DRAG_LEFT;
 				psy_ui_component_setcursor(&self->component,
@@ -475,20 +475,20 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 	bool showresizecursor;
 
 	showresizecursor = FALSE;
-	self->currkey = screentokey(ev->x, self->metrics.keysize);
+	self->currkey = screentokey(ev->pt.x, self->metrics.keysize);
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;		
 				
 		entry = psy_audio_instrument_entryat(self->instrument, self->selected);
 		if (entry) {			
 			if (self->dragmode == INSTVIEW_DRAG_LEFT) {
-				entry->keyrange.low = screentokey(ev->x,
+				entry->keyrange.low = screentokey(ev->pt.x,
 					self->metrics.keysize);
 				if (entry->keyrange.low > entry->keyrange.high) {
 					entry->keyrange.low = entry->keyrange.high;
 				}
 			} else {
-				entry->keyrange.high = screentokey(ev->x,
+				entry->keyrange.high = screentokey(ev->pt.x,
 					self->metrics.keysize);
 				if (entry->keyrange.high < entry->keyrange.low) {
 					entry->keyrange.high = entry->keyrange.low;

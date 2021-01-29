@@ -128,7 +128,7 @@ static void paramrackpane_buildlevel(ParamRackPane*, uintptr_t level);
 static void paramrackpane_insertbox(ParamRackPane*, uintptr_t slot);
 static void paramrackpane_removebox(ParamRackPane*, uintptr_t slot);
 static void paramrackpane_onsongchanged(ParamRackPane*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void paramrackpane_connectsong(ParamRackPane*);
 static void paramrackpane_onmachinesinsert(ParamRackPane*,
 	psy_audio_Machines*, uintptr_t slot);
@@ -195,7 +195,7 @@ void paramrackpane_setmode(ParamRackPane* self, ParamRackMode mode)
 }
 
 void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender,
-	int flag, psy_audio_SongFile* songfile)
+	int flag, psy_audio_Song* song)
 {
 	if (workspace_song(sender)) {
 		self->machines = &sender->song->machines;
@@ -503,7 +503,7 @@ static void paramrack_onselect(ParamRack*, psy_ui_Button* sender);
 static void paramrack_onmachineselected(ParamRack*,
 	psy_audio_Machines*, uintptr_t slot);
 static void paramrack_onsongchanged(ParamRack*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void paramrack_connectsong(ParamRack*);
 
 // implementation
@@ -715,7 +715,7 @@ void paramrack_onselect(ParamRack* self, psy_ui_Button* sender)
 }
 
 void paramrack_onsongchanged(ParamRack* self, Workspace* sender,
-	int flag, psy_audio_SongFile* songfile)
+	int flag, psy_audio_Song* song)
 {
 	if (workspace_song(sender)) {
 		paramrack_connectsong(self);

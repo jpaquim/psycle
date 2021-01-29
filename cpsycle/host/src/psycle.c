@@ -73,7 +73,7 @@ int psycle_run(uintptr_t instance, int options)
 		insertpathenv(workdir(workpath));
 	}
 	// Initialize the ui
-	psy_ui_app_init(&app, instance);
+	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
 	// Creates the mainframe
 	mainframe = (MainFrame*)malloc(sizeof(MainFrame));
 	if (mainframe) {

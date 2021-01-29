@@ -85,7 +85,7 @@ static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
@@ -943,7 +943,7 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
-	psy_audio_SongFile* songfile)
+	psy_audio_Song* song)
 {		
 	if (flag == WORKSPACE_LOADSONG) {		
 		if (generalconfig_showsonginfoonload(psycleconfig_general(

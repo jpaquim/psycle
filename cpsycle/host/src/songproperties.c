@@ -14,7 +14,7 @@
 static void songpropertiesview_initalign(SongPropertiesView*);
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_ontitlechanged(SongPropertiesView*,
@@ -174,7 +174,7 @@ void songpropertiesview_read(SongPropertiesView* self)
 }
 
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
-	Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+	Workspace* workspace, int flag, psy_audio_Song* song)
 {
 	if (flag == WORKSPACE_LOADSONG) {
 		songpropertiesview_disableedit(self);

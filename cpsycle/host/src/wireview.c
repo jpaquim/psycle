@@ -4,13 +4,24 @@
 #include "../../detail/prefix.h"
 
 #include "wireview.h"
+// local
 #include "resources/resource.h"
+// ui
 #include <uiframe.h>
-
+// std
 #include <math.h>
-
+// platform
 #include "../../detail/portable.h"
 
+
+// WireView
+enum {
+	WIREVIEW_TAB_VUMETER = 0,
+	WIREVIEW_TAB_OSCILLOSCOPE,
+	WIREVIEW_TAB_SPECTRUM,
+	WIREVIEW_TAB_PHASE
+};
+// prototypes
 static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView*);
@@ -34,22 +45,13 @@ static void wireview_ontabbarchanged(WireView*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void wireview_dockscope(WireView*, int index);
 static void wireview_movescope(WireView* self, int index,
-	psy_ui_AlignType align, int width);
+	psy_ui_AlignType, int width);
 static psy_ui_Component* wireview_scope(WireView*, int index);
 static bool wireview_scopedocked(WireView* self, int index);
 static void wireview_ontogglevu(WireView*, psy_ui_Component* sender);
 static int wireview_currscope(WireView*);
 
-static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
-static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
-
-enum {
-	TABPAGE_VUMETER = 0,
-	TABPAGE_OSCILLOSCOPE = 1,
-	TABPAGE_SPECTRUM = 2,
-	TABPAGE_PHASE = 3,	
-};
-
+// implementation
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
@@ -88,7 +90,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		wireview_ontabbarchanged);
-	tabbar_select(&self->tabbar, TABPAGE_VUMETER);	
+	tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
 }
 
 void wireview_ondestroy(WireView* self)
@@ -268,9 +270,9 @@ void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
 void wireview_onhold(WireView* self, psy_ui_Component* sender)
 {	
 	switch (tabbar_selected(&self->tabbar)) {
-		case TABPAGE_VUMETER:
+		case WIREVIEW_TAB_VUMETER:
 		break;
-		case TABPAGE_OSCILLOSCOPE:
+		case WIREVIEW_TAB_OSCILLOSCOPE:
 			if (oscilloscope_stopped(&self->oscilloscopeview.oscilloscope)) {
 				oscilloscope_continue(&self->oscilloscopeview.oscilloscope);
 			} else {
@@ -280,14 +282,14 @@ void wireview_onhold(WireView* self, psy_ui_Component* sender)
 				oscilloscope_hold(&self->oscilloscopeview.oscilloscope);
 			}
 		break;
-		case TABPAGE_SPECTRUM:
+		case WIREVIEW_TAB_SPECTRUM:
 			if (spectrumanalyzer_stopped(&self->spectrumanalyzer)) {
 				spectrumanalyzer_continue(&self->spectrumanalyzer);
 			} else {								
 				spectrumanalyzer_hold(&self->spectrumanalyzer);
 			}
 		break;
-		case TABPAGE_PHASE:
+		case WIREVIEW_TAB_PHASE:
 		break;
 		default:
 		break;
@@ -321,17 +323,17 @@ void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 	vuscope_disconnect(&self->vuscope);
 }
 
-int wireview_wireexists(WireView* self)
+bool wireview_wireexists(const WireView* self)
 {
-	return (self->workspace && workspace_song(self->workspace))
-		   ? psy_audio_machines_connected(&workspace_song(self->workspace)->machines,
-				self->wire)
-		   : 0;
+	return workspace_song(self->workspace) &&
+		psy_audio_machines_connected(
+			psy_audio_song_machines(workspace_song(self->workspace)),
+			self->wire);
 }
 
 void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 {	
-	if (workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_signal_connect(
 			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
 			self, wireview_ondisconnected);
@@ -400,16 +402,16 @@ psy_ui_Component* wireview_scope(WireView* self, int index)
 	psy_ui_Component* rv;
 
 	switch (index) {
-		case TABPAGE_VUMETER:
+		case WIREVIEW_TAB_VUMETER:
 			rv = &self->vuscope.component;
 		break;
-		case TABPAGE_OSCILLOSCOPE:
+		case WIREVIEW_TAB_OSCILLOSCOPE:
 			rv = &self->oscilloscopeview.component;
 		break;
-		case TABPAGE_SPECTRUM:
+		case WIREVIEW_TAB_SPECTRUM:
 			rv = &self->spectrumanalyzer.component;
 		break;
-		case TABPAGE_PHASE:
+		case WIREVIEW_TAB_PHASE:
 			rv = &self->stereophase.component;
 		break;
 		default:
@@ -425,17 +427,19 @@ void wireview_ontogglevu(WireView* self, psy_ui_Component* sender)
 
 	oldtabindex = tabbar_selected(&self->tabbar);
 	tabbar_clear(&self->tabbar);
-	if (wireview_scopedocked(self, TABPAGE_VUMETER)) {
-		wireview_movescope(self, TABPAGE_VUMETER, psy_ui_ALIGN_RIGHT, 150);
+	if (wireview_scopedocked(self, WIREVIEW_TAB_VUMETER)) {
+		wireview_movescope(self, WIREVIEW_TAB_VUMETER, psy_ui_ALIGN_RIGHT,
+			150);
 		psy_ui_component_show(&self->vulabel.component);
 		tabbar_append_tabs(&self->tabbar, "Osc", "Spectrum", "Stereo Phase",
 			"Channel Mapping", NULL);
 		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_LESS);
-		tabbar_select(&self->tabbar, (oldtabindex - 1 > 0) ? oldtabindex - 1 : 0);
+		tabbar_select(&self->tabbar,
+			(oldtabindex - 1 > 0) ? oldtabindex - 1 : 0);
 	} else {
-		wireview_dockscope(self, TABPAGE_VUMETER);
-		tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
-			"Channel Mapping", NULL);
+		wireview_dockscope(self, WIREVIEW_TAB_VUMETER);
+		tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum",
+			"Stereo Phase", "Channel Mapping", NULL);
 		psy_ui_component_hide(&self->vulabel.component);
 		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
 		tabbar_select(&self->tabbar, oldtabindex + 1);
@@ -451,31 +455,41 @@ int wireview_currscope(WireView* self)
 		: 0;
 }
 
-void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
+// WireFrame
+// prototypes
+static void wireframe_updatetitle(WireFrame*, psy_audio_Machines*);
+// implementation
+void wireframe_init(WireFrame* self, psy_ui_Component* parent,
+	psy_audio_Wire wire, Workspace* workspace)
 {	
+	assert(workspace);
+	assert(workspace->song);
+	assert(psy_audio_wire_valid(&wire));
+
 	psy_ui_frame_init(wireframe_base(self), parent);
-	self->wireview = view;
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	psy_ui_component_move(wireframe_base(self),
-		psy_ui_point_make(
-			psy_ui_value_makepx(200),
-			psy_ui_value_makepx(150)));
-	psy_ui_component_resize(wireframe_base(self),
-		psy_ui_size_make(
-		psy_ui_value_makeew(80), psy_ui_value_makeeh(25)));
-	psy_signal_connect(&wireframe_base(self)->signal_destroy, self,
-		wireframe_ondestroy);
-	psy_signal_connect(&wireframe_base(self)->signal_size, self,
-		wireframe_onsize);
+	psy_ui_component_setposition(wireframe_base(self),
+		psy_ui_point_makepx(200.0, 150.0),
+		psy_ui_size_makeem(80.0, 25.0));
+	wireview_init(&self->wireview, &self->component, wire, workspace);
+	psy_ui_component_setalign(wireview_base(&self->wireview),
+		psy_ui_ALIGN_CLIENT);
+	wireframe_updatetitle(self,
+		psy_audio_song_machines(workspace_song(workspace)));
 }
 
-void wireframe_ondestroy(WireFrame* self, psy_ui_Component* frame)
-{		
-}
-
-void wireframe_onsize(WireFrame* self, psy_ui_Component* sender, psy_ui_Size* size)
+void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
 {
-	if (self->wireview) {
-		psy_ui_component_resize(wireview_base(self->wireview), *size);
-	}
+	char title[128];
+	psy_audio_Machine* srcmachine;
+	psy_audio_Machine* dstmachine;
+	
+	srcmachine = psy_audio_machines_at(machines, self->wireview.wire.src);
+	dstmachine = psy_audio_machines_at(machines, self->wireview.wire.dst);
+	psy_snprintf(title, 128, "[%d] %s -> %s Connection Volume",
+		(int)psy_audio_connections_wireindex(&machines->connections,
+			self->wireview.wire),
+		(srcmachine) ? psy_audio_machine_editname(srcmachine) : "ERR",
+		(dstmachine) ? psy_audio_machine_editname(dstmachine) : "ERR");
+	psy_ui_component_settitle(wireframe_base(self), title);
 }

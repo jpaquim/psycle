@@ -32,8 +32,7 @@ void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y, intptr_t button,
 	intptr_t delta, bool shift, bool ctrl)
 {
-	self->x = x;
-	self->y = y;
+	self->pt = psy_ui_realpoint_make(x, y);	
 	self->button = button;
 	self->delta = delta;
 	self->bubble = 1;

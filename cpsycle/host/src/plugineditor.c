@@ -65,7 +65,7 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace*, int flag,
-	psy_audio_SongFile*);
+	psy_audio_Song*);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
 static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onnewplugin(PluginEditor*, psy_ui_Component* sender);
@@ -174,7 +174,8 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 	}
 }
 
-void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace,
+	int flag, psy_audio_Song* song)
 {
 	plugineditor_connectmachinesignals(self, workspace);
 }

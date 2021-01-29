@@ -54,7 +54,8 @@ typedef struct {
 	bool drawvumeters;
 } MachineViewSkin;
 
-void machineviewskin_init(MachineViewSkin*);
+void machineviewskin_init(MachineViewSkin*, psy_Property* theme,
+	const char* skindir);
 void machineviewskin_dispose(MachineViewSkin*);
 void machineviewskin_settheme(MachineViewSkin*, psy_Property* p,
 	const char* skindir);

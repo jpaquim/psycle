@@ -619,8 +619,8 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 	}	
 	self->selected = 0;
 	self->keyselected = 1;
-	self->mx = ev->x;
-	self->my = ev->y;
+	self->mx = ev->pt.x;
+	self->my = ev->pt.y;
 	self->choiceproperty = 0;
 	self->button = 0;	
 	propertiesrenderer_preparepropertiesenum(self);
@@ -813,7 +813,8 @@ bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 		r.top = self->cpy;
 		r.right = r.left + tm->tmAveCharWidth * 4;;
 		r.bottom = r.top + psy_ui_value_px(&size.height, tm) + 2;	
-		rv = psy_ui_realrectangle_intersect(&r, self->mx, self->my);
+		rv = psy_ui_realrectangle_intersect(&r,
+			psy_ui_realpoint_make(self->mx, self->my));
 	} else if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER ||
 			psy_property_type(property) == PSY_PROPERTY_TYPE_STRING ||
 			psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION ||
@@ -823,7 +824,8 @@ bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 			self->cpy,
 			propertiesrenderer_columnwidth(self, column), self->lineheight);
 		self->selrect = r;
-		rv = psy_ui_realrectangle_intersect(&r, self->mx, self->my);
+		rv = psy_ui_realrectangle_intersect(&r,
+			psy_ui_realpoint_make(self->mx, self->my));
 		if (!rv && (
 				psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 				psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR ||
@@ -833,7 +835,8 @@ bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 				self->cpy, propertiesrenderer_columnstart(self, column + 1),
 				self->lineheight);
 			self->selrect = r;
-			rv = psy_ui_realrectangle_intersect(&r, self->mx, self->my);
+			rv = psy_ui_realrectangle_intersect(&r,
+				psy_ui_realpoint_make(self->mx, self->my));
 			if (rv) {
 				self->button = 1;
 			}
@@ -855,7 +858,8 @@ int propertiesrenderer_intersectskey(PropertiesRenderer* self, psy_Property*
 		propertiesrenderer_columnwidth(self, column),
 		self->lineheight * self->numblocklines);
 	self->selrect = r;
-	rv = psy_ui_realrectangle_intersect(&r, self->mx, self->my);
+	rv = psy_ui_realrectangle_intersect(&r,
+		psy_ui_realpoint_make(self->mx, self->my));
 	return rv;
 }
 

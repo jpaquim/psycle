@@ -68,7 +68,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->text = NULL;
 	self->translation = NULL;
 	self->translate = TRUE;
-	self->textcolour = psy_ui_colour_make(0x00BDBDBD);
+	self->textcolour = psy_ui_defaults()->style_button.colour;
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
@@ -140,11 +140,11 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
 	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
+		psy_ui_settextcolour(g, psy_ui_defaults()->style_button_hover.colour);
 	} else if (psy_ui_button_highlighted(self)) {
 		//psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		//psy_ui_drawrectangle(g, r);
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));		
+		psy_ui_settextcolour(g, psy_ui_defaults()->style_button_select.colour);
 	} else {
 		psy_ui_settextcolour(g, self->textcolour);
 	}
@@ -318,7 +318,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_sizepx(psy_ui_button_base(self));
 		client_position = psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(), size);
-		if (psy_ui_realrectangle_intersect(&client_position, ev->x, ev->y)) {
+		if (psy_ui_realrectangle_intersect(&client_position, ev->pt)) {				
 			self->shiftstate = ev->shift;
 			self->ctrlstate = ev->ctrl;
 			psy_signal_emit(&self->signal_clicked, self, 0);

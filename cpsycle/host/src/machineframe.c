@@ -60,8 +60,6 @@ static void machineframe_oncommand(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_togglehelp(MachineFrame*,
 	psy_ui_Component* sender);
-static void machineframe_onclose(MachineFrame*,
-	psy_ui_Component* sender);
 static void machineframe_resize(MachineFrame*);
 static void machineframe_onalign(MachineFrame*, psy_ui_Component* sender);
 static void machineframe_preferredviewsizechanged(MachineFrame*,
@@ -78,8 +76,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	self->view = NULL;
 	self->paramview = NULL;
 	self->machine = NULL;
-	self->machineview = parent;	
-	self->doclose = FALSE;	
+	self->machineview = parent;		
 	self->workspace = workspace;		
 	psy_ui_frame_init(&self->component, parent);
 	psy_ui_component_move(&self->component,
@@ -219,11 +216,6 @@ void machineframe_togglehelp(MachineFrame* self,
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_ui_button_highlight(&self->parameterbar.help);
 	}	
-}
-
-void machineframe_onclose(MachineFrame* self, psy_ui_Component* sender)
-{
-	self->doclose = 1;
 }
 
 void machineframe_resize(MachineFrame* self)

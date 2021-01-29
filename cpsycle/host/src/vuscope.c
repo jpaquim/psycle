@@ -34,9 +34,10 @@ static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*)
 static void vuscope_drawscale(VuScope*, psy_ui_Graphics*);
 static void vuscope_drawbars(VuScope*, psy_ui_Graphics*);
 static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, uintptr_t timerid);
-static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
-static void vuscope_onsongchanged(VuScope*, Workspace*,
-	int flag, psy_audio_SongFile* songfile);
+static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*,
+	uintptr_t slot, psy_audio_BufferContext*);
+static void vuscope_onsongchanged(VuScope*, Workspace*, int flag,
+	psy_audio_Song*);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
@@ -315,8 +316,8 @@ void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, uintptr_t timerid)
 	psy_ui_component_invalidate(&self->component);	
 }
 
-void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsigned int slot,
-	psy_audio_BufferContext* bc)
+void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master,
+	uintptr_t slot, psy_audio_BufferContext* bc)
 {	
 	if (self->running) {
 		psy_audio_Machine* machine;
@@ -340,7 +341,8 @@ psy_dsp_amp_t vuscope_wirevolume(VuScope* self)
 		self->wire);
 }
 
-void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag,
+	psy_audio_Song* song)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;

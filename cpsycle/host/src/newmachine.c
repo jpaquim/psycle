@@ -577,7 +577,7 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {
 		psy_ui_component_setfocus(&self->component);
-		pluginsview_hittest(self, ev->x, ev->y);
+		pluginsview_hittest(self, ev->pt.x, ev->pt.y);
 		psy_ui_component_invalidate(&self->component);
 		psy_signal_emit(&self->signal_changed, self, 1,
 			self->selectedplugin);		
@@ -602,7 +602,8 @@ void pluginsview_hittest(PluginsView* self, double x, double y)
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
-			if (psy_ui_realrectangle_intersect(&r, x, y)) {
+			if (psy_ui_realrectangle_intersect(&r,
+					psy_ui_realpoint_make(x, y))) {
 				if (pluginenabled(self, (psy_Property*)psy_list_entry(p))) {
 					self->selectedplugin = (psy_Property*)psy_list_entry(p);
 				}

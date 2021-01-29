@@ -37,7 +37,8 @@ void machinecoords_init(MachineCoords* self)
 static void machineviewskin_initdefaultmachinecoords(MachineViewSkin*);
 static void machineviewskin_setcoords(MachineViewSkin*, psy_Property* p);
 // implementation
-void machineviewskin_init(MachineViewSkin* self)
+void machineviewskin_init(MachineViewSkin* self, psy_Property* theme,
+	const char* skindir)
 {
 	psy_ui_FontInfo fontinfo;
 
@@ -48,6 +49,7 @@ void machineviewskin_init(MachineViewSkin* self)
 	machineviewskin_initdefaultmachinecoords(self);
 	self->drawmachineindexes = TRUE;
 	self->drawvumeters = TRUE;
+	machineviewskin_settheme(self, theme, skindir);
 }
 
 void machineviewskin_dispose(MachineViewSkin* self)

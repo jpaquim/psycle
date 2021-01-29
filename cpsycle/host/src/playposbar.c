@@ -14,7 +14,7 @@
 static void playposbar_ontimer(PlayPosBar*, uintptr_t timerid);
 static void playposbar_updatelabel(PlayPosBar*);
 static void playposbar_onsongchanged(PlayPosBar*, Workspace*,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -70,7 +70,7 @@ void playposbar_updatelabel(PlayPosBar* self)
 }
 
 void playposbar_onsongchanged(PlayPosBar* self, Workspace* sender, int flag,
-	psy_audio_SongFile* songfile)
+	psy_audio_Song* song)
 {
 	playposbar_updatelabel(self);
 }
