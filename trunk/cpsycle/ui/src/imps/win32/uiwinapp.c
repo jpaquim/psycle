@@ -664,7 +664,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
@@ -681,7 +681,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
@@ -698,7 +698,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
@@ -715,7 +715,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
@@ -732,7 +732,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
@@ -749,7 +749,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
@@ -766,7 +766,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
@@ -783,7 +783,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
@@ -800,7 +800,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
@@ -833,7 +833,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 						wParam, 0, GetKeyState(VK_SHIFT) < 0,
 						GetKeyState(VK_CONTROL) < 0);
-					adjustcoordinates(imp->component, &ev.x, &ev.y);
+					adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 					//psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove,
@@ -871,7 +871,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);

@@ -27,7 +27,8 @@ static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
 static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, uintptr_t timerid);
 static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*,
 	uintptr_t slot, psy_audio_BufferContext*);
-static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag, psy_audio_SongFile*);
+static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag,
+	psy_audio_Song*);
 static void oscilloscope_connectmachinessignals(Oscilloscope*, Workspace*);
 static void oscilloscope_disconnectmachinessignals(Oscilloscope*, Workspace*);
 static psy_audio_Buffer* oscilloscope_buffer(Oscilloscope*, uintptr_t* numsamples);
@@ -227,7 +228,7 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self,
 
 
 void oscilloscope_onsongchanged(Oscilloscope* self, Workspace* workspace,
-	int flag, psy_audio_SongFile* songfile)
+	int flag, psy_audio_Song* song)
 {	
 	self->invol = 1.f;
 	oscilloscope_connectmachinessignals(self, workspace);	

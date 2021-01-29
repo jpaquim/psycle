@@ -324,7 +324,8 @@ static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace, int flag, psy_audio_SongFile*);
+static void sampleeditor_onsongchanged(SampleEditor*, Workspace*, int flag,
+	psy_audio_Song*);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
@@ -786,7 +787,8 @@ void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
 	psy_ui_component_invalidate(&self->header.component);
 }
 
-void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace,
+	int flag, psy_audio_Song* song)
 {
 	sampleeditor_connectmachinessignals(self, workspace);
 	sampleeditorbar_clearselection(&self->sampleeditortbar);

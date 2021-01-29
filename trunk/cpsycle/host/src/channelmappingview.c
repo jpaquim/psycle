@@ -269,7 +269,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 2) {
 		psy_List* pinpair;
 
-		pinpair = pinedit_hittest_wire(self, ev->x, ev->y);
+		pinpair = pinedit_hittest_wire(self, ev->pt.x, ev->pt.y);
 		if (pinpair) {			
 			psy_audio_PinMapping* mapping;
 
@@ -287,9 +287,9 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 		uintptr_t newpin;
 		bool isout;
 		
-		self->mx = ev->x;
-		self->my = ev->y;
-		if (pinedit_screentopin(self, ev->x, ev->y, &newpin, &isout)) {			
+		self->mx = ev->pt.x;
+		self->my = ev->pt.y;
+		if (pinedit_screentopin(self, ev->pt.x, ev->pt.y, &newpin, &isout)) {			
 			if (isout) {
 				self->dragmode = PINEDIT_DRAG_NEW_DST;
 				self->drag_src = newpin;
@@ -298,7 +298,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 				self->drag_dst = newpin;
 			}
 		} else {
-			pinpair = pinedit_hittest_wire(self, ev->x, ev->y);
+			pinpair = pinedit_hittest_wire(self, ev->pt.x, ev->pt.y);
 			if (pinpair) {
 				psy_ui_Size size;
 				const psy_ui_TextMetric* tm;
@@ -309,7 +309,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 				self->drag_src = pinconnection->src;
 				size = psy_ui_component_size(&self->component);
 				tm = psy_ui_component_textmetric(&self->component);
-				if (ev->x < psy_ui_value_px(&size.width, tm) / 2) {
+				if (ev->pt.x < psy_ui_value_px(&size.width, tm) / 2) {
 					self->dragmode = PINEDIT_DRAG_SRC;
 				} else {
 					self->dragmode = PINEDIT_DRAG_DST;
@@ -363,7 +363,8 @@ bool pinedit_screentopin(PinEdit* self, double x, double y, uintptr_t* pin, bool
 	cpy = row * rowheight;
 	r = pinedit_pinposition_output(self, 0);
 	psy_ui_realrectangle_move(&r, 0, cpy);	
-	if (psy_ui_realrectangle_intersect(&r, x, y)) {
+	if (psy_ui_realrectangle_intersect(&r,
+			psy_ui_realpoint_make(x, y))) {
 		if (row >= pinedit_numoutputs(self)) {
 			return FALSE;
 		}
@@ -373,7 +374,8 @@ bool pinedit_screentopin(PinEdit* self, double x, double y, uintptr_t* pin, bool
 	}
 	r = pinedit_pinposition_input(self, 0);
 	psy_ui_realrectangle_move(&r, 0, cpy);
-	if (psy_ui_realrectangle_intersect(&r, x, y)) {
+	if (psy_ui_realrectangle_intersect(&r,
+			psy_ui_realpoint_make(x, y))) {
 		if (row >= pinedit_numinputs(self)) {
 			return FALSE;
 		}
@@ -389,8 +391,8 @@ bool pinedit_screentopin(PinEdit* self, double x, double y, uintptr_t* pin, bool
 void pinedit_onmousemove(PinEdit* self, psy_ui_MouseEvent* ev)
 {
 	if (self->dragmode != PINEDIT_DRAG_NONE) {
-		self->mx = ev->x;
-		self->my = ev->y;
+		self->mx = ev->pt.x;
+		self->my = ev->pt.y;
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -401,7 +403,7 @@ void pinedit_onmouseup(PinEdit* self, psy_ui_MouseEvent* ev)
 		uintptr_t newpin;
 		bool isout;
 
-		if (pinedit_screentopin(self, ev->x, ev->y, &newpin, &isout)) {						
+		if (pinedit_screentopin(self, ev->pt.x, ev->pt.y, &newpin, &isout)) {						
 			switch (self->dragmode) {
 				case PINEDIT_DRAG_SRC:
 					if (isout) {

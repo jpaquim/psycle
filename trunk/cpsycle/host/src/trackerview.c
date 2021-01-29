@@ -1667,13 +1667,13 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (trackergridstate_pattern(self->gridstate) && ev->button == 1) {
-		self->dragcolumn = trackergrid_resizecolumn(self, ev->x, ev->y);
+		self->dragcolumn = trackergrid_resizecolumn(self, ev->pt.x, ev->pt.y);
 		if (self->dragcolumn == psy_INDEX_INVALID) {
 			if (psy_audio_patternselection_valid(&self->selection)) {
 				psy_audio_patternselection_disable(&self->selection);
 				psy_ui_component_invalidate(&self->component);
 			}
-			self->dragselectionbase = trackergrid_makecursor(self, ev->x, ev->y);
+			self->dragselectionbase = trackergrid_makecursor(self, ev->pt.x, ev->pt.y);
 			if (!self->linestate->singlemode) {
 				psy_audio_OrderIndex index;
 
@@ -1695,9 +1695,9 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			}
 			psy_ui_component_capture(&self->component);
 		} else {
-			self->dragcolumnbase = ev->x;
-			self->dragtrack = trackergridstate_pxtotrack(self->gridstate, ev->x);
-			self->dragparamcol = trackergridstate_paramcol(self->gridstate, self->dragtrack, ev->x);
+			self->dragcolumnbase = ev->pt.x;
+			self->dragtrack = trackergridstate_pxtotrack(self->gridstate, ev->pt.x);
+			self->dragparamcol = trackergridstate_paramcol(self->gridstate, self->dragtrack, ev->pt.x);
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			psy_ui_component_invalidate(&self->component);
 		}
@@ -1717,8 +1717,8 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 
 			trackdef = trackergridstate_trackdef(self->gridstate, self->dragtrack);
 			if (trackdef) {
-				paramcol = trackergridstate_paramcol(self->gridstate, self->dragtrack, ev->x);
-				self->dragcolumnbase = ev->x;
+				paramcol = trackergridstate_paramcol(self->gridstate, self->dragtrack, ev->pt.x);
+				self->dragcolumnbase = ev->pt.x;
 				if (self->dragparamcol < paramcol) {
 					if (trackdef == &self->gridstate->trackconfig->trackdef) {
 						trackdef = malloc(sizeof(TrackDef));
@@ -1748,7 +1748,7 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			}
 		} else {			
 			cursor = trackergrid_checkcursorbounds(self,
-				trackergrid_makecursor(self, ev->x, ev->y));
+				trackergrid_makecursor(self, ev->pt.x, ev->pt.y));
 			if (!psy_audio_patterncursor_equal(&cursor,
 					&self->lastdragcursor)) {
 				if (!psy_audio_patternselection_valid(&self->selection)) {
@@ -1833,10 +1833,10 @@ void trackergrid_dragcolumn(TrackerGrid* self, psy_ui_MouseEvent* ev)
 		uintptr_t track;
 		TrackDef* trackdef;
 
-		track = trackergridstate_pxtotrack(self->gridstate, ev->x +
+		track = trackergridstate_pxtotrack(self->gridstate, ev->pt.x +
 			psy_ui_component_scrollleftpx(&self->component));
 		trackdef = trackergridstate_trackdef(self->gridstate, track);
-		if (ev->x > self->dragcolumnbase) {
+		if (ev->pt.x > self->dragcolumnbase) {
 			if (trackdef != &self->gridstate->trackconfig->trackdef) {
 				trackdef->numfx++;
 			} else {
@@ -1845,7 +1845,7 @@ void trackergrid_dragcolumn(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				trackdef->numfx = 2;
 				psy_table_insert(&self->gridstate->trackconfig->trackconfigs, track, trackdef);
 			}
-		} else if (ev->x < self->dragcolumnbase && trackdef->numfx > 1) {
+		} else if (ev->pt.x < self->dragcolumnbase && trackdef->numfx > 1) {
 			if (trackdef != &self->gridstate->trackconfig->trackdef) {
 				trackdef->numfx--;
 				if (trackdef->numfx == 1) {
@@ -1854,7 +1854,7 @@ void trackergrid_dragcolumn(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				}
 			}
 		}
-		self->dragcolumnbase = ev->x;
+		self->dragcolumnbase = ev->pt.x;
 		// todo
 		//psy_ui_component_invalidate(&self->view->component);
 		//trackerview_updatescrollstep(self->view);
@@ -1862,7 +1862,7 @@ void trackergrid_dragcolumn(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	} else {
 		intptr_t resizecolumn;
 
-		resizecolumn = trackergrid_resizecolumn(self, ev->x, ev->y);
+		resizecolumn = trackergrid_resizecolumn(self, ev->pt.x, ev->pt.y);
 		if (resizecolumn != -1) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		}

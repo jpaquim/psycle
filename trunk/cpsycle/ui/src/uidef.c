@@ -33,12 +33,6 @@ int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle* self,
 		other->bottom < self->top);
 }
 
-int psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self, double x, double y)
-{
-	return (x >= self->left && x < self->right && 
-			y >= self->top && y < self->bottom);
-}
-
 // from stackoverflow by metamal
 // todo: use liang-barsky algorithm
 bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,

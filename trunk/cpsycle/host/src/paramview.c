@@ -248,7 +248,7 @@ void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1 && self->param) {
 		uintptr_t paramtype;
 
-		self->tweakbase = (float)ev->y;
+		self->tweakbase = (float)ev->pt.y;
 		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, self->param);
 		paramtype = psy_audio_machine_parameter_type(self->machine, self->param) & ~MPF_SMALL;
 		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
@@ -268,7 +268,7 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 	assert(self->machine);
 	assert(self->param);
 		
-	val = self->tweakval + (self->tweakbase - (float)ev->y) / 200.f;
+	val = self->tweakval + (self->tweakbase - (float)ev->pt.y) / 200.f;
 	if (val > 1.f) {
 		val = 1.f;
 	} else
@@ -643,7 +643,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
-	skin_blitpart(g, &self->skin->mixerbitmap,
+	skin_blitcoord(g, &self->skin->mixerbitmap,
 		psy_ui_realpoint_make(left, top), &self->skin->slider);
 	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
 		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
@@ -651,7 +651,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	yoffset = ((1.0 - value) *
 		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
 		psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
-	skin_blitpart(g, &self->skin->mixerbitmap,
+	skin_blitcoord(g, &self->skin->mixerbitmap,
 		psy_ui_realpoint_make(left + xoffset, top + yoffset),
 		&self->skin->sliderknob);
 			
@@ -735,10 +735,10 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 	cellsize(self, row, col, &width, &height);
 	centery = (height - psy_ui_realrectangle_height(&self->skin->checkoff.dest)) / 2;
 	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
-		skin_blitpart(g, &self->skin->mixerbitmap,
+		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(left, top + centery), &self->skin->checkoff);
 	} else {
-		skin_blitpart(g, &self->skin->mixerbitmap,
+		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(left, top + centery), & self->skin->checkon);
 	}
 	psy_ui_setrectangle(&r, left + 20, top, width, height);
@@ -769,11 +769,11 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
-		skin_blitpart(g, &self->skin->mixerbitmap,
+		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(left, top), &self->skin->switchoff);
 	}
 	else {
-		skin_blitpart(g, &self->skin->mixerbitmap,
+		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(left, top), &self->skin->switchon);
 	}	
 	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
@@ -905,7 +905,7 @@ psy_ui_RealRectangle cellrectangle(ParamView* self, uintptr_t row, uintptr_t col
 
 void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 {
-	self->lasttweak = hittest(self, ev->x, ev->y);
+	self->lasttweak = hittest(self, ev->pt.x, ev->pt.y);
 	if (ev->button == 1) {
 		psy_audio_MachineParam* param;
 		
@@ -947,7 +947,8 @@ uintptr_t hittest(ParamView* self, double x, double y)
 
 				position = (psy_ui_RealRectangle*) psy_table_at(&self->positions,
 					paramnum);
-				if (position && psy_ui_realrectangle_intersect(position, x, y)) {
+				if (position && psy_ui_realrectangle_intersect(position,
+						psy_ui_realpoint_make(x, y))) {
 					rv = paramnum;
 				}
 				// break;
@@ -977,7 +978,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 {
 	psy_audio_MachineParam* param;
 
-	self->tweak = hittest(self, ev->x, ev->y);
+	self->tweak = hittest(self, ev->pt.x, ev->pt.y);
 	param = tweakparam(self);
 	if (param != NULL) {
 		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
@@ -1019,7 +1020,7 @@ void onmousedoubleclick(ParamView* self, psy_ui_MouseEvent* ev)
 		psy_audio_MachineParam* tweakpar;
 		uintptr_t paramindex;
 
-		paramindex = hittest(self, ev->x, ev->y);
+		paramindex = hittest(self, ev->pt.x, ev->pt.y);
 		if (paramindex != psy_INDEX_INVALID) {
 			tweakpar = psy_audio_machine_parameter(self->machine, paramindex);
 			if (tweakpar) {

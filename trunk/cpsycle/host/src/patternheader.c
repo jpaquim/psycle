@@ -184,7 +184,7 @@ void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g,
 void trackerheader_drawtrackbackground(TrackerHeader* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint dest)
 {
-	skin_blitpart(g, &self->gridstate->skin->bitmap, dest,
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest,
 		&self->gridstate->skin->headercoords.background);
 }
 
@@ -195,7 +195,7 @@ void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g,
 
 	trackstate = trackerheader_updatetrackstate(self, track);
 	if (trackstate->playon) {
-		skin_blitpart(g, &self->gridstate->skin->bitmap,
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
 			psy_ui_realpoint_make(dest.x, 0),
 			&self->gridstate->skin->headercoords.dplayon);
 	}
@@ -210,8 +210,8 @@ void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g,
 	SkinCoord digit0x = self->gridstate->skin->headercoords.digit0x;
 	digitx0.src.left += trackx0 * psy_ui_realrectangle_width(&digitx0.src);
 	digit0x.src.left += track0x * psy_ui_realrectangle_width(&digit0x.src);
-	skin_blitpart(g, &self->gridstate->skin->bitmap, dest, &digitx0);
-	skin_blitpart(g, &self->gridstate->skin->bitmap, dest, &digit0x);
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest, &digitx0);
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest, &digit0x);
 }
 
 void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g,
@@ -229,7 +229,7 @@ void trackerheader_drawtrackledmute(TrackerHeader* self, psy_ui_Graphics* g,
 {	
 	if (psy_audio_patterns_istrackmuted(
 		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitpart(g, &self->gridstate->skin->bitmap,
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
 			dest, &self->gridstate->skin->headercoords.mute);
 	}
 }
@@ -239,7 +239,7 @@ void trackerheader_drawtrackledsoloed(TrackerHeader* self,
 {
 	if (psy_audio_patterns_istracksoloed(
 		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitpart(g, &self->gridstate->skin->bitmap,
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
 			dest, &self->gridstate->skin->headercoords.solo);
 	}
 }
@@ -249,7 +249,7 @@ void trackerheader_drawtrackledarmed(TrackerHeader* self, psy_ui_Graphics* g,
 {	
 	if (psy_audio_patterns_istrackarmed(
 		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitpart(g, &self->gridstate->skin->bitmap,
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
 			dest, &self->gridstate->skin->headercoords.record);
 	}
 }
@@ -278,24 +278,24 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 		psy_audio_Patterns* patterns;		
 
 		patterns = trackergridstate_patterns(self->gridstate);
-		track = trackergridstate_pxtotrack(self->gridstate, ev->x);	
+		track = trackergridstate_pxtotrack(self->gridstate, ev->pt.x);	
 		track_x = trackerheader_trackposition(self, track);
-		ev_track_x = ev->x - track_x;		
-		 if (trackerheader_hittest_solo(self, ev_track_x, ev->y)) {
+		ev_track_x = ev->pt.x - track_x;		
+		 if (trackerheader_hittest_solo(self, ev_track_x, ev->pt.y)) {
 			if (psy_audio_patterns_istracksoloed(patterns, track)) {
 				psy_audio_patterns_deactivatesolotrack(patterns);
 			} else {
 				psy_audio_patterns_activatesolotrack(patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);
-		} else if (trackerheader_hittest_mute(self, ev_track_x, ev->y)) {
+		} else if (trackerheader_hittest_mute(self, ev_track_x, ev->pt.y)) {
 			if (psy_audio_patterns_istrackmuted(patterns, track)) {
 				psy_audio_patterns_unmutetrack(patterns, track);
 			} else {
 				psy_audio_patterns_mutetrack(patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);			
-		} else if (trackerheader_hittest_record(self, ev_track_x, ev->y)) {
+		} else if (trackerheader_hittest_record(self, ev_track_x, ev->pt.y)) {
 			if (psy_audio_patterns_istrackarmed(patterns, track)) {
 				psy_audio_patterns_unarmtrack(patterns, track);
 			} else {

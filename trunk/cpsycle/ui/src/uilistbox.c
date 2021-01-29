@@ -317,7 +317,7 @@ void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient* self,
 	intptr_t index;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	index = ev->y / (int)(tm.tmHeight * 1.2);
+	index = ev->pt.y / (int)(tm.tmHeight * 1.2);
 	if (index < (intptr_t)psy_table_size(&self->items)) {
 		self->selindex = index;
 		psy_ui_component_invalidate(&self->component);

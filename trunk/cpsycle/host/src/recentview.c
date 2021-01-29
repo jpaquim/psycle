@@ -39,7 +39,7 @@ static void recentview_onmovedown(RecentView*, psy_ui_Button* sender);
 static void recentview_ontimer(RecentView*, uintptr_t timerid);
 static void recentview_onmousedown(RecentView*, psy_ui_MouseEvent*);
 static void recentview_onsongchanged(RecentView*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -194,11 +194,9 @@ void recentview_onmousedown(RecentView* self, psy_ui_MouseEvent* ev)
 }
 
 void recentview_onsongchanged(RecentView* self, Workspace* sender,
-	int flag, psy_audio_SongFile* songfile)
-{
-	if (songfile) {
-		psy_ui_component_invalidate(&self->view.renderer.component);
-	}
+	int flag, psy_audio_Song* song)
+{	
+	psy_ui_component_invalidate(&self->view.renderer.component);	
 }
 
 void recentview_onup(RecentView* self, psy_ui_Button* sender)

@@ -41,8 +41,7 @@ static void workspace_initsignals(Workspace*);
 static void workspace_disposesignals(Workspace*);
 // config
 static void workspace_configvisual(Workspace*);
-static void workspace_setsong(Workspace*, psy_audio_Song*, int flag,
-	psy_audio_SongFile*);
+static void workspace_setsong(Workspace*, psy_audio_Song*, int flag);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int progress);
 static void workspace_onpatternviewconfigurationchanged(Workspace*,
@@ -56,6 +55,7 @@ static void workspace_onaddeventdriver(Workspace*);
 static void workspace_onremoveeventdriver(Workspace*);
 static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
+static void workspace_setapptheme(Workspace*, psy_Property*);
 /// Machinecallback
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[], char inoutName[]);
@@ -371,6 +371,9 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 	case PROPERTY_ID_DEFAULTFONT:
 		workspace_setdefaultfont(self, property);
 		break;
+	case PROPERTY_ID_APPTHEME:
+		workspace_setapptheme(self, property);
+		break;
 	case PROPERTY_ID_DEFAULTLINES:
 		if (psy_property_item_int(property) > 0) {
 			psy_audio_pattern_setdefaultlines((uintptr_t)psy_property_item_int(property));
@@ -580,6 +583,22 @@ void workspace_setdefaultfont(Workspace* self, psy_Property* property)
 	psy_ui_app_setdefaultfont(psy_ui_app(), &font);	
 }
 
+void workspace_setapptheme(Workspace* self, psy_Property* property)
+{
+	psy_Property* choice;
+
+	assert(self);
+				
+	choice = psy_property_at_choice(self->config.apptheme);
+	if (choice) {		
+		if (psy_property_item_int(choice) == psy_ui_LIGHTTHEME) {
+			psy_ui_app_lighttheme(psy_ui_app());
+		} else {
+			psy_ui_app_darktheme(psy_ui_app());
+		}		
+	}
+}
+
 void workspace_newsong(Workspace* self)
 {			
 	psy_audio_Song* song;	
@@ -588,7 +607,7 @@ void workspace_newsong(Workspace* self)
 
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_strreset(&self->filename, "Untitled.psy");	
-	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);
+	workspace_setsong(self, song, WORKSPACE_NEWSONG);
 	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
 }
 
@@ -641,7 +660,7 @@ void workspace_loadsong(Workspace* self, const char* filename, bool play)
 			play = FALSE;
 		} else {			
 			psy_strreset(&self->filename, filename);
-			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
+			workspace_setsong(self, song, WORKSPACE_LOADSONG);
 			psy_audio_songfile_dispose(&songfile);
 			if (generalconfig_saverecentsongs(psycleconfig_general(
 					workspace_conf(self)))) {
@@ -666,8 +685,7 @@ void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender,
 	psy_signal_emit(&self->signal_loadprogress, self, 1, progress);
 }
 
-void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
-	psy_audio_SongFile* songfile)
+void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 {		
 	assert(self);
 
@@ -692,7 +710,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag,
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
 		psy_audio_exclusivelock_leave();
-		psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);		
+		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);		
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,  1,
 			self->song->patterns.songtracks);
 		psy_audio_song_deallocate(oldsong);
@@ -887,6 +905,7 @@ void workspace_load_configuration(Workspace* self)
 			&self->machinefactory);
 	}
 	workspace_setdefaultfont(self, self->config.defaultfont);
+	workspace_setapptheme(self, self->config.apptheme);
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	self->patternsinglemode =

@@ -114,6 +114,14 @@ void psycleconfig_makevisual(PsycleConfig* self)
 			PSYCLE_DEFAULT_FONT),
 		"settingsview.default-font"),
 		PROPERTY_ID_DEFAULTFONT);
+	self->apptheme = psy_property_setid(psy_property_settext(
+		psy_property_append_choice(self->visual,
+			"apptheme", 1),
+		"settingsview.apptheme"),
+		PROPERTY_ID_APPTHEME);
+		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 1);
+		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 1);
+	
 	patternviewconfig_init(&self->patview, self->visual);
 	machineviewconfig_init(&self->macview, self->visual);
 	machineparamconfig_init(&self->macparam, self->visual);

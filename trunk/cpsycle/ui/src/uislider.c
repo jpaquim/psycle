@@ -156,10 +156,10 @@ void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 
 	size = psy_ui_component_sizepx(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		self->tweakbase = (ev->x) -
+		self->tweakbase = (ev->pt.x) -
 			self->value * (size.width - self->slidersizepx.width);
 	} else if (self->orientation == psy_ui_VERTICAL) {
-		self->tweakbase = ev->y -
+		self->tweakbase = ev->pt.y -
 			((1.0 - self->value) * (size.height - self->slidersizepx.width));
 	}
 	if (self->poll) {
@@ -178,10 +178,10 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 		size = psy_ui_component_sizepx(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {			
 			self->value = psy_max(0.0, psy_min(1.0,
-				(ev->x - self->tweakbase) / (size.width - self->slidersizepx.width)));
+				(ev->pt.x - self->tweakbase) / (size.width - self->slidersizepx.width)));
 		} else {			
 			self->value = psy_max(0.0, psy_min(1.0,
-				1.0 - (ev->y - self->tweakbase) / (size.height - self->slidersizepx.width)));
+				1.0 - (ev->pt.y - self->tweakbase) / (size.height - self->slidersizepx.width)));
 		}
 		if (self->slider) {
 			psy_signal_emit_float(&self->signal_tweakvalue,

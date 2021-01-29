@@ -554,6 +554,13 @@ INLINE psy_ui_Point psy_ui_component_scroll(psy_ui_Component* self)
 	return self->scroll;
 }
 
+INLINE psy_ui_RealPoint psy_ui_component_scrollpx(psy_ui_Component* self)
+{
+	return psy_ui_realpoint_make(
+		psy_ui_value_px(&self->scroll.x, psy_ui_component_textmetric(self)),
+		psy_ui_value_px(&self->scroll.y, psy_ui_component_textmetric(self)));
+}
+
 void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_Point);
 void psy_ui_component_setscrollleft(psy_ui_Component*, psy_ui_Value left);
 

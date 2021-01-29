@@ -21,7 +21,7 @@ static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
 static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
 	psy_audio_BufferContext*);
 static bool clipbox_clipoccurred(ClipBox* self, psy_audio_Machine*);
-static void clipbox_onsongchanged(ClipBox*, Workspace*, int flag, psy_audio_SongFile*);
+static void clipbox_onsongchanged(ClipBox*, Workspace*, int flag, psy_audio_Song*);
 static void clipbox_connectmachinessignals(ClipBox*, Workspace*);
 
 static ClipBoxSkin clipboxdefaultskin;
@@ -117,7 +117,7 @@ void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void clipbox_onsongchanged(ClipBox* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void clipbox_onsongchanged(ClipBox* self, Workspace* workspace, int flag, psy_audio_Song* song)
 {
 	clipbox_connectmachinessignals(self, workspace);	
 }

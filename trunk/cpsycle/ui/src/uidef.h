@@ -389,7 +389,14 @@ INLINE psy_ui_RealSize psy_ui_realrectangle_size(const psy_ui_RealRectangle* sel
 }
 
 void psy_ui_setrectangle(psy_ui_RealRectangle*, double left, double top, double width, double height);
-int psy_ui_realrectangle_intersect(const psy_ui_RealRectangle*, double x, double y);
+
+INLINE bool psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self,
+	psy_ui_RealPoint pt)
+{
+	return (pt.x >= self->left && pt.x < self->right&&
+		pt.y >= self->top && pt.y < self->bottom);
+}
+
 bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle*,
 	double x1, double y1, double x2, double y2);
 int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle*,

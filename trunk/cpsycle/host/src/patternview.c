@@ -30,7 +30,7 @@ static void patternviewbar_onupdatestatus(PatternViewBar*,
 static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
 	psy_audio_SequenceSelection* sender);
 static void patternviewbar_onsongchanged(PatternViewBar*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void patternviewbar_updatestatus(PatternViewBar*);
 // implementation
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
@@ -109,7 +109,7 @@ void patternviewbar_ondisplaysinglepattern(PatternViewBar* self, psy_ui_CheckBox
 }
 
 void patternviewbar_onsongchanged(PatternViewBar* self, Workspace* sender,
-	int flag, psy_audio_SongFile* songfile)
+	int flag, psy_audio_Song* song)
 {
 	patternviewbar_updatestatus(self);
 }
@@ -174,7 +174,7 @@ static void patternview_connectplayer(PatternView*, psy_audio_Player*);
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	int tabindex);
 static void patternview_onsongchanged(PatternView*, Workspace* sender,
-	int flag, psy_audio_SongFile*);
+	int flag, psy_audio_Song*);
 static void patternview_onsequenceselectionchanged(PatternView*,
 	psy_audio_SequenceSelection* sender);
 static void patternview_onpatternviewconfigure(PatternView*,
@@ -487,7 +487,7 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 }
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag,
-	psy_audio_SongFile* songfile)
+	psy_audio_Song* song)
 {
 	psy_audio_Pattern* pattern;
 

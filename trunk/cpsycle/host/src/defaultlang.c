@@ -179,6 +179,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "configure", "Configure");
 	psy_property_set_str(section, "jme-version-unknown",
 		"Load new gamefx and blitz if version is unknown");	
+	psy_property_set_str(section, "apptheme", "App Theme (After change restart Psycle)");
 	// settingsview/general
 	psy_property_set_str(section, "language", "Language");
 	psy_property_set_str(section, "de", "german");

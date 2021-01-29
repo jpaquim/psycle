@@ -198,7 +198,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		psy_dsp_big_beat_t bpl;
 
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(self->workspace));
-		step = (intptr_t)(ev->x / self->stepwidth + self->position.steprow * 16);
+		step = (intptr_t)(ev->pt.x / self->stepwidth + self->position.steprow * 16);
 		cursor = workspace_patterncursor(self->workspace);
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
@@ -474,8 +474,8 @@ void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 	intptr_t row;
 	intptr_t steprow;
 
-	row = (intptr_t)(ev->y / self->lineheight);
-	steprow = (intptr_t)(row * 4 + (ev->x / self->colwidth));
+	row = (intptr_t)(ev->pt.y / self->lineheight);
+	steprow = (intptr_t)(row * 4 + (ev->pt.x / self->colwidth));
 	self->position.steprow = steprow;
 	psy_ui_component_invalidate(&self->component);
 	psy_signal_emit(&self->signal_selected, self, 0);		
@@ -494,7 +494,7 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 static void stepsequencerview_ondestroy(StepsequencerView*, psy_ui_Component* sender);
 static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
-	Workspace* sender, int flag, psy_audio_SongFile* songfile);
+	Workspace* sender, int flag, psy_audio_Song* song);
 static void stepsequencerview_onsteprowselected(StepsequencerView*,
 	psy_ui_Component* sender);
 static void stepsequencerview_setpattern(StepsequencerView*,
@@ -591,7 +591,7 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 }
 
 void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace,
-	int flag, psy_audio_SongFile* songfile)
+	int flag, psy_audio_Song* song)
 {	
 	psy_audio_Pattern* pattern;
 	

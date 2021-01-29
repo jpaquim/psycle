@@ -126,9 +126,9 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		self->resize = 1;
 		if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
-			self->dragoffset = ev->x;
+			self->dragoffset = ev->pt.x;
 		} else {
-			self->dragoffset = ev->y;
+			self->dragoffset = ev->pt.y;
 		}		
 		splitbar_setcursor(self);
 	}
@@ -174,7 +174,7 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				psy_ui_point_make(
 					psy_ui_value_makepx(
 						psy_max(prevposition.left,
-						psy_min(nextposition.right - (position.right - position.left), position.left + ev->x - self->dragoffset))),
+						psy_min(nextposition.right - (position.right - position.left), position.left + ev->pt.x - self->dragoffset))),
 					psy_ui_value_makepx(position.top)));
 		} else
 		if (self->component.align == psy_ui_ALIGN_RIGHT) {
@@ -182,7 +182,7 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				psy_ui_point_make(
 					psy_ui_value_makepx(
 						psy_max(nextposition.left,
-						psy_min(prevposition.right - (position.right - position.left), position.left + ev->x - self->dragoffset))),
+						psy_min(prevposition.right - (position.right - position.left), position.left + ev->pt.x - self->dragoffset))),
 					psy_ui_value_makepx(position.top)));
 		} else
 		if (self->component.align == psy_ui_ALIGN_TOP) {
@@ -191,7 +191,7 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					psy_ui_value_makepx(position.left),
 					psy_ui_value_makepx(
 						psy_max(prevposition.top,
-						psy_min(nextposition.bottom - (position.bottom - position.top), position.top + ev->y - self->dragoffset)))
+						psy_min(nextposition.bottom - (position.bottom - position.top), position.top + ev->pt.y - self->dragoffset)))
 					));
 		} else
 		if (self->component.align == psy_ui_ALIGN_BOTTOM) {
@@ -201,7 +201,7 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					psy_ui_value_makepx(
 						psy_max(0,
 						psy_min((parentposition.bottom - parentposition.top) - (position.bottom - position.top),
-							 position.top + ev->y - self->dragoffset)))));
+							 position.top + ev->pt.y - self->dragoffset)))));
 			
 		}			
 		psy_ui_component_invalidate(&self->component);

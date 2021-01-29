@@ -56,7 +56,6 @@ typedef struct {
 	psy_ui_Component* view;
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	
-	int doclose;	
 	NewValView newval;
 	// references
 	ParamView* paramview;

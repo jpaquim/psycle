@@ -14,15 +14,25 @@
 extern "C" {
 #endif
 
+#define psy_ui_LIGHTTHEME 0
+#define psy_ui_DARKTHEME 1
+
 typedef struct psy_ui_Defaults {
 	uint32_t errorcolour;
-	psy_ui_Style style_common;	
+	psy_ui_Style style_common;
+	psy_ui_Style style_button;
+	psy_ui_Style style_button_hover;
+	psy_ui_Style style_button_select;
+	psy_ui_Style style_tab;
+	psy_ui_Style style_tab_hover;
+	psy_ui_Style style_tab_select;
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
 	psy_ui_Margin cmargin;
+	bool hasdarktheme;
 } psy_ui_Defaults;
 
-void psy_ui_defaults_init(psy_ui_Defaults*);
+void psy_ui_defaults_init(psy_ui_Defaults*, bool dark);
 void psy_ui_defaults_dispose(psy_ui_Defaults*);
 
 INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)
@@ -59,6 +69,10 @@ INLINE psy_ui_Font* psy_ui_defaults_font(psy_ui_Defaults* self)
 {
 	return &self->style_common.font;
 }
+
+void psy_ui_defaults_initdarktheme(psy_ui_Defaults*);
+void psy_ui_defaults_initlighttheme(psy_ui_Defaults*);
+
 
 #ifdef __cplusplus
 }

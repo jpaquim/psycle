@@ -291,7 +291,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		trackwidth = psy_ui_value_px(&size.width, tm) / columns;		
-		track = (uintptr_t)((ev->x / trackwidth) + floor(ev->y / self->trackheight) * columns);
+		track = (uintptr_t)((ev->pt.x / trackwidth) + floor(ev->pt.y / self->trackheight) * columns);
 		if (ev->button == 1) {
 			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, track)) {

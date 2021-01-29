@@ -84,7 +84,7 @@ psy_ui_App* psy_ui_app(void)
 	return app;
 }
 
-void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
+void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 {	
 	assert(self);
 
@@ -93,7 +93,7 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	psy_signal_init(&self->signal_dispose);	
 	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);
-	psy_ui_defaults_init(&self->defaults);
+	psy_ui_defaults_init(&self->defaults, dark);
 	psy_ui_appzoom_updatebasefontsize(&self->zoom,
 		psy_ui_defaults_font(&self->defaults));
 	ui_app_initimp(self, instance);
@@ -263,6 +263,21 @@ void psy_ui_app_setdefaultfont(psy_ui_App* self, psy_ui_Font* font)
 		psy_ui_replacedefaultfont(self->main, font);
 	}
 	psy_ui_component_invalidate(self->main);
+}
+
+void psy_ui_app_lighttheme(psy_ui_App* self)
+{
+	psy_ui_defaults_initlighttheme(psy_ui_defaults());
+}
+
+void psy_ui_app_darktheme(psy_ui_App* self)
+{
+	psy_ui_defaults_initdarktheme(psy_ui_defaults());
+}
+
+bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
+{
+	return psy_ui_defaults()->hasdarktheme;
 }
 
 // psy_ui_AppImp

@@ -119,9 +119,9 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		self->dragoffset = ev->x - self->screenpos;
+		self->dragoffset = ev->pt.x - self->screenpos;
 	} else if (self->orientation == psy_ui_VERTICAL) {
-		self->dragoffset = ev->y - self->screenpos;
+		self->dragoffset = ev->pt.y - self->screenpos;
 	}
 	self->drag = 1;
 	psy_ui_component_capture(&self->component);
@@ -145,10 +145,10 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 		
 		size = psy_ui_component_sizepx(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {
-			self->screenpos = max(0, min(ev->x - self->dragoffset,
+			self->screenpos = max(0, min(ev->pt.x - self->dragoffset,
 				size.width - 20));
 		} else {
-			self->screenpos = max(0, min(ev->y - self->dragoffset,
+			self->screenpos = max(0, min(ev->pt.y - self->dragoffset,
 				size.height - 20));
 		}
 		psy_ui_component_invalidate(&self->component);
