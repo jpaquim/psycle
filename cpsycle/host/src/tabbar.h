@@ -44,12 +44,9 @@ void tab_settext(Tab*, const char* text);
 psy_ui_RealRectangle tab_position(const Tab*, const psy_ui_TextMetric*);
 
 typedef struct TabBarSkin {
-	psy_ui_Colour text;
-	psy_ui_Colour textsel;
-	psy_ui_Colour texthover;
+	psy_ui_Colour text;		
 	psy_ui_Colour textlabel;
-	psy_ui_Colour linesel;
-	psy_ui_Colour linehover;
+	psy_ui_Colour linesel;	
 } TabBarSkin;
 
 void tabbarskin_init(TabBarSkin*);
@@ -64,9 +61,13 @@ typedef struct TabBar {
 	uintptr_t hoverindex;
 	psy_ui_AlignType tabalignment;
 	psy_ui_Margin defaulttabmargin;
+	psy_ui_Value defaulttabheight;
 	TabBarSkin skin;
+	psy_ui_Style style_tab;
+	psy_ui_Style style_tab_hover;
+	psy_ui_Style style_tab_select;
 	// Signals
-	psy_Signal signal_change;
+	psy_Signal signal_change;	
 } TabBar;
 
 void tabbar_init(TabBar*, psy_ui_Component* parent);

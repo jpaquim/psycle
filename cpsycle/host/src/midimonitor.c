@@ -546,10 +546,10 @@ void midimonitor_onhide(MidiMonitor* self)
 
 void midimonitor_onconfigure(MidiMonitor* self)
 {	
-	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 5, 0);
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 6, 0);
 }
 
 void midimonitor_onmapconfigure(MidiMonitor* self)
 {
-	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 6, 0);
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 7, 0);
 }

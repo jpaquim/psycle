@@ -115,7 +115,7 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		psy_ui_sliderpane_drawverticalruler(self, g);		
 	}
 	psy_ui_drawsolidrectangle(g, psy_ui_sliderpane_sliderposition(self),
-		psy_ui_defaults()->style_common.colour);	
+		psy_ui_defaults()->style_slider.colour);
 	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_drawrectangle(g,
@@ -353,8 +353,10 @@ void psy_ui_slider_showvertical(psy_ui_Slider* self)
 	psy_ui_Margin margin;
 
 	psy_ui_sliderpane_showvertical(&self->pane);
-	psy_ui_component_setalign(psy_ui_label_base(&self->desc), psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setalign(psy_ui_label_base(&self->value), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(psy_ui_label_base(&self->value),
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(2.0));
@@ -367,8 +369,10 @@ void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
 	psy_ui_Margin margin;
 
 	psy_ui_sliderpane_showhorizontal(&self->pane);
-	psy_ui_component_setalign(psy_ui_label_base(&self->desc), psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalign(psy_ui_label_base(&self->value), psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(psy_ui_label_base(&self->value),
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(2.0));

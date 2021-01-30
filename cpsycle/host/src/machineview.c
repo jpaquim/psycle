@@ -699,6 +699,7 @@ static void machinestackview_onmousemove(MachineStackView*,
 	psy_ui_MouseEvent*);
 static void machinestackview_onmouseup(MachineStackView*,
 	psy_ui_MouseEvent*);
+static void machinestackview_updateskin(MachineStackView*);
 static void machinestackview_ontimer(MachineStackView*, uintptr_t timerid);
 static void machinestackview_hittest(MachineStackView* self,
 	double x, double y, uintptr_t* track, uintptr_t* line);
@@ -750,6 +751,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	self->dragmachineui = NULL;
 	self->vudrawupdate = FALSE;
 	self->opcount = 0;
+	machinestackview_updateskin(self);
 	psy_ui_component_setfont(&self->component, &self->skin->font);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	if (workspace_song(workspace)) {
@@ -1086,6 +1088,12 @@ void machinestackview_hittest(MachineStackView* self, double x, double y,
 	}	
 }
 
+void machinestackview_updateskin(MachineStackView* self)
+{
+	psy_ui_component_setbackgroundcolour(&self->component,
+		self->skin->colour);
+}
+
 void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 {	
 	bool updatevus;
@@ -1252,14 +1260,12 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->vudrawupdate = FALSE;
 	self->showwirehover = FALSE;
 	self->drawvirtualgenerators = FALSE;	
-	self->skin = skin;
-	machinewireview_updateskin(self);	
+	self->skin = skin;	
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_table_init(&self->machineuis);	
 	psy_ui_component_setfont(&self->component, &self->skin->font);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	machinewireview_updateskin(self);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	self->dragslot = psy_INDEX_INVALID;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = psy_audio_MASTER_INDEX;	
@@ -1277,6 +1283,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 		machinewireview_onshowparameters);	
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
+	machinewireview_updateskin(self);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -1332,6 +1339,7 @@ void machinewireview_updateskin(MachineWireView* self)
 {
 	psy_ui_component_setbackgroundcolour(&self->component,
 		self->skin->colour);
+	machinewireview_buildmachineuis(self);
 }
 
 void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
@@ -2691,6 +2699,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "machineview.wires",
 		"machineview.stack", "machineview.new-machine", NULL);
+	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		machineview_selectsection);
 	psy_ui_notebook_select(&self->notebook, SECTION_ID_MACHINEVIEW_WIRES);
@@ -2873,7 +2882,10 @@ void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
 	psy_Property* theme)
 {
+	machineviewskin_settheme(&self->skin, theme,
+		dirconfig_skins(&self->workspace->config.directories));
 	machinewireview_updateskin(&self->wireview);
+	machinestackview_updateskin(&self->stackview);
 	newmachine_updateskin(&self->newmachine);
 	psy_ui_component_invalidate(&self->component);
 }

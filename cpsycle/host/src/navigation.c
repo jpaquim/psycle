@@ -16,19 +16,15 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->prev, &self->component);	
-	psy_ui_button_settextalignment(&self->prev,
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_TOP);
 	psy_ui_component_setalign(&self->prev.component, psy_ui_ALIGN_LEFT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->prev.component, &margin);
 	psy_ui_button_settext(&self->prev, "<");
 	psy_signal_connect(&self->prev.signal_clicked, self, navigation_onprev);
 	psy_ui_button_init(&self->next, &self->component);
-	psy_ui_button_settext(&self->next, ">");
-	psy_ui_button_settextalignment(&self->next,
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_TOP);
+	psy_ui_button_settext(&self->next, ">");	
 	psy_ui_component_setalign(&self->next.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->next.signal_clicked, self, navigation_onnext);
 }

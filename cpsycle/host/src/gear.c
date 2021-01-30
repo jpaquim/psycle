@@ -63,6 +63,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 	// client
 	psy_ui_component_init(&self->client, gear_base(self));
+	psy_ui_component_setbackgroundcolour(gear_base(self),
+		psy_ui_defaults()->style_sidemenu.backgroundcolour);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
