@@ -24,7 +24,7 @@ typedef struct {
 	bool hasplayon;
 } TrackerHeaderCoords;
 
-typedef struct {
+typedef struct PatternViewSkin {
 	psy_ui_Colour separator;
 	psy_ui_Colour separator2;
 	psy_ui_Colour background;

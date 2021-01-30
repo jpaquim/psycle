@@ -76,12 +76,14 @@ typedef void (*psy_ui_fp_appimp_dispose)(struct psy_ui_AppImp*);
 typedef int (*psy_ui_fp_appimp_run)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stop)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_close)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_onappdefaultschange)(struct psy_ui_AppImp*);
 
 typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_dispose dev_dispose;
 	psy_ui_fp_appimp_run dev_run;
 	psy_ui_fp_appimp_stop dev_stop;
-	psy_ui_fp_appimp_close dev_close;
+	psy_ui_fp_appimp_close dev_close;	
+	psy_ui_fp_appimp_onappdefaultschange dev_onappdefaultschange;
 } psy_ui_AppImpVTable;
 
 typedef struct psy_ui_AppImp {

@@ -280,9 +280,6 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_select(&self->editnotebook, 0);
-	patternproperties_init(&self->properties, &self->component, NULL, workspace);
-	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_hide(&self->properties.component);
 	// Skin
 	patternviewskin_init(&self->skin);
 	patternviewskin_settheme(&self->skin,
@@ -295,6 +292,11 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		self, patternview_onpatternviewconfigure);
 	psy_signal_connect(&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
 		self, patternview_onmiscconfigure);
+	// Pattern Properties
+	patternproperties_init(&self->properties, &self->component, NULL, &self->skin,
+		workspace);
+	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->properties.component);	
 	// shared states
 	trackconfig_init(&self->trackconfig,
 		patternviewconfig_showwideinstcolumn(
@@ -435,6 +437,7 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split",
 		"Vertical", "Horizontal", "Properties", NULL);
+	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	tabbar_tab(&self->tabbar, 2)->mode = TABMODE_LABEL;
 	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;
 	tabbar_select(&self->tabbar, 0);
@@ -991,14 +994,34 @@ void patternview_updateksin(PatternView* self)
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->interpolatecurveview.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setcolour(&self->trackerscroller.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.sliderpane.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.spacer,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->trackerscroller.hscroll.sliderpane.component,
 		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.less.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.more.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.sliderpane.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.less.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.more.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->trackerscroller.vscroll.sliderpane.component,
 		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->left.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setcolour(&self->left.component,
+		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->blockmenu.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setcolour(&self->blockmenu.component,
+		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_invalidate(&self->component);
 }
 

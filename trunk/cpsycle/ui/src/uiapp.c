@@ -267,16 +267,28 @@ void psy_ui_app_setdefaultfont(psy_ui_App* self, psy_ui_Font* font)
 
 void psy_ui_app_lighttheme(psy_ui_App* self)
 {
+	assert(self);
+
 	psy_ui_defaults_initlighttheme(psy_ui_defaults());
+	if (self->imp) {
+		self->imp->vtable->dev_onappdefaultschange(self->imp);
+	}
 }
 
 void psy_ui_app_darktheme(psy_ui_App* self)
 {
+	assert(self);
+
 	psy_ui_defaults_initdarktheme(psy_ui_defaults());
+	if (self->imp) {
+		self->imp->vtable->dev_onappdefaultschange(self->imp);
+	}
 }
 
 bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 {
+	assert(self);
+
 	return psy_ui_defaults()->hasdarktheme;
 }
 
@@ -285,6 +297,7 @@ static void psy_ui_appimp_dispose(psy_ui_AppImp* self) { }
 static int psy_ui_appimp_run(psy_ui_AppImp* self) { return PSY_ERRRUN; }
 static void psy_ui_appimp_stop(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_close(psy_ui_AppImp* self) { }
+static void psy_ui_appimp_onappdefaultschange(psy_ui_AppImp* self) { }
 
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -295,7 +308,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_dispose = psy_ui_appimp_dispose;		
 		imp_vtable.dev_run = psy_ui_appimp_run;
 		imp_vtable.dev_stop = psy_ui_appimp_stop;
-		imp_vtable.dev_close = psy_ui_appimp_close;		
+		imp_vtable.dev_close = psy_ui_appimp_close;	
+		imp_vtable.dev_onappdefaultschange = psy_ui_appimp_onappdefaultschange;
 		imp_vtable_initialized = TRUE;
 	}
 }

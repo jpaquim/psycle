@@ -12,6 +12,7 @@
 
 // ParamRackBox
 // prototypes
+static void paramrackbox_ondestroy(ParamRackBox*, psy_ui_Component* sender);
 static void paramrackbox_onmousedoubleclick(ParamRackBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void paramrackbox_onthemechanged(ParamRackBox*, MachineViewConfig*,
@@ -27,6 +28,8 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 
 	machine = psy_audio_machines_at(&workspace->song->machines, slot);
 	psy_ui_component_init(&self->component, parent);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		paramrackbox_ondestroy);
 	self->workspace = workspace;
 	self->slot = slot;
 	theme = workspace->config.macparam.theme;
@@ -48,7 +51,7 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	}
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->title.component.signal_mousedoubleclick, self,
-		paramrackbox_onmousedoubleclick);
+		paramrackbox_onmousedoubleclick);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0),
 		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5));
 	//psy_ui_component_setspacing(&self->title.component, &margin);
@@ -67,6 +70,12 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,
 		self, paramrackbox_onthemechanged);
 	self->nextbox = NULL;
+}
+
+void paramrackbox_ondestroy(ParamRackBox* self, psy_ui_Component* sender)
+{
+	psy_signal_disconnect_context(&psycleconfig_macview(
+		workspace_conf(self->workspace))->signal_themechanged, self);
 }
 
 void paramrackbox_select(ParamRackBox* self)

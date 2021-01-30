@@ -539,7 +539,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				psy_property_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITopColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUITopColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)

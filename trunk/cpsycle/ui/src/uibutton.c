@@ -11,9 +11,6 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-static unsigned int arrowcolour = 0x00777777;
-static unsigned int arrowhighlightcolour = 0x00FFFFFF;
-
 static void ondestroy(psy_ui_Button*);
 static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
@@ -125,12 +122,12 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	double centerx = 0;
 	double centery = 0;
 	char* text;
-
+	
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
 		text = self->text;
-	}
+	}	
 	size = psy_ui_component_size(psy_ui_button_base(self));
 	textsize = psy_ui_component_textsize(psy_ui_button_base(self), text);
 	tm = psy_ui_component_textmetric(&self->component);   
@@ -154,11 +151,12 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (psy_ui_value_px(&size.height, tm) - psy_ui_value_px(&textsize.height, tm)) / 2;
+		centery = (psy_ui_value_px(&size.height, tm) - tm->tmHeight) / 2;
 	}
 	if (text) {
+		
 		psy_ui_textoutrectangle(g,
-			psy_ui_realpoint_make(centerx, centery),
+			psy_ui_realpoint_make(r.left + centerx, r.top + centery),
 			psy_ui_ETO_CLIPPED,
 			r,
 			text,
@@ -203,6 +201,11 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 
 void drawarrow(psy_ui_Button* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g)
 {
+	uint32_t arrowcolour;
+	uint32_t arrowhighlightcolour;
+
+	arrowcolour = psy_ui_defaults()->style_button.colour.value;
+	arrowhighlightcolour = psy_ui_defaults()->style_button_hover.colour.value;
 	if (self->hover == 1) {
 		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
 			arrowhighlightcolour);

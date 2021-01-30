@@ -20,12 +20,16 @@ extern "C" {
 typedef struct psy_ui_Defaults {
 	uint32_t errorcolour;
 	psy_ui_Style style_common;
+	psy_ui_Style style_common_select;
 	psy_ui_Style style_button;
 	psy_ui_Style style_button_hover;
 	psy_ui_Style style_button_select;
 	psy_ui_Style style_tab;
 	psy_ui_Style style_tab_hover;
 	psy_ui_Style style_tab_select;
+	psy_ui_Style style_slider;
+	psy_ui_Style style_sidemenu;
+	psy_ui_Style style_sidemenu_select;
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
 	psy_ui_Margin cmargin;

@@ -330,7 +330,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 					p != NULL; p = p->next) {
 				psy_ui_Component* component;
 					
-				component = (psy_ui_Component*)p->entry;		
+				component = (psy_ui_Component*)psy_list_entry(p);				
 				if (component->visible) {
 					psy_ui_Size componentsize;
 					psy_ui_Size limit;

@@ -4,9 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "patternproperties.h"
-#include "songio.h"
+// host
+#include "patternviewskin.h"
+// audio
 #include "command.h"
-#include <stdlib.h>
+// platform
 #include "../../detail/portable.h"
 
 // Commands
@@ -102,6 +104,7 @@ static void patternproperties_onapply(PatternProperties*,
 static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onfocus(PatternProperties*);
+static void patternproperties_updateskin(PatternProperties*);
 
 static psy_ui_ComponentVtable patternproperties_vtable;
 static bool patternproperties_vtable_initialized = FALSE;
@@ -122,10 +125,12 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 }
 
 void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
-	psy_audio_Pattern* pattern, Workspace* workspace)
+	psy_audio_Pattern* pattern, PatternViewSkin* skin,
+	Workspace* workspace)
 {
 	self->workspace = workspace;
 	self->pattern = pattern;
+	self->skin = skin;
 
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setvtable(&self->component,
@@ -133,6 +138,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
+	patternproperties_updateskin(self);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Pattern Name");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
@@ -251,4 +257,12 @@ void patternproperties_connectsongsignals(PatternProperties* self)
 		psy_signal_connect(&workspace_song(self->workspace)->patterns.signal_lengthchanged, self,
 			patternproperties_onpatternlengthchanged);
 	}
+}
+
+void patternproperties_updateskin(PatternProperties* self)
+{	
+	psy_ui_component_setbackgroundcolour(&self->component,
+		self->skin->background);
+	psy_ui_component_setcolour(&self->component,
+		self->skin->font);
 }

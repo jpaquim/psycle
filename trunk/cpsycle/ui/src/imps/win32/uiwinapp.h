@@ -54,6 +54,8 @@ typedef struct psy_ui_WinApp {
 
 void psy_ui_winapp_init(psy_ui_WinApp*, psy_ui_App* app, HINSTANCE instance);
 
+void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp*);
+
 #ifdef __cplusplus
 }
 #endif

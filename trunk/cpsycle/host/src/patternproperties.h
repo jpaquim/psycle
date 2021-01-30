@@ -15,19 +15,23 @@
 extern "C" {
 #endif
 
+struct PatternViewSkin;
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label namelabel;
 	psy_ui_Label lengthlabel;
 	psy_ui_Edit nameedit;
 	psy_ui_Edit lengthedit;
-	psy_ui_Button applybutton;	
+	psy_ui_Button applybutton;
+	// references
 	psy_audio_Pattern* pattern;
 	Workspace* workspace;
+	struct PatternViewSkin* skin;
 } PatternProperties;
 
 void patternproperties_init(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*,
-	Workspace*);
+	struct PatternViewSkin* skin, Workspace*);
 void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
 
 #ifdef __cplusplus

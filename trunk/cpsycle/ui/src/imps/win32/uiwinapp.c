@@ -27,6 +27,7 @@ static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
 static void adjustcoordinates(psy_ui_Component*, double* x, double* y);
+static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -64,10 +65,13 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)psy_ui_winapp_dispose;
+		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)
+			psy_ui_winapp_dispose;
 		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_winapp_run;
 		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_winapp_stop;
 		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_winapp_close;
+		imp_vtable.dev_onappdefaultschange = (psy_ui_fp_appimp_close)
+			psy_ui_winapp_onappdefaultschange;		
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -110,7 +114,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		app->defaults.style_common.backgroundcolour.value);
+		psy_ui_defaults()->style_common.backgroundcolour.value);
 	self->targetids = NULL;
 }
 
@@ -363,9 +367,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 				} else {				
 					SetTextColor((HDC) wParam,
-						psy_ui_app()->defaults.style_common.colour.value);
+						psy_ui_defaults()->style_common.colour.value);
 					SetBkColor((HDC)wParam,
-						psy_ui_app()->defaults.style_common.backgroundcolour.value);
+						psy_ui_defaults()->style_common.backgroundcolour.value);
 					return (intptr_t)winapp->defaultbackgroundbrush;
 				}
 				break;
@@ -1144,6 +1148,13 @@ void psy_ui_winapp_close(psy_ui_WinApp* self)
 			(psy_ui_app_main(winapp->app)->imp))->hwnd,
 			WM_CLOSE, 0, 0);
 	}
+}
+
+void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
+{
+	DeleteObject(self->defaultbackgroundbrush);
+	self->defaultbackgroundbrush = CreateSolidBrush(
+		psy_ui_defaults()->style_common.backgroundcolour.value);
 }
 
 #endif /* PSYCLE_TK_WIN32 */

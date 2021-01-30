@@ -84,6 +84,7 @@ static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
+static void mainframe_updatetabbarstyle(MainFrame*);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
@@ -106,7 +107,8 @@ static void mainframe_updateseqeditorbuttons(MainFrame*);
 static void mainframe_connectseqeditorbuttons(MainFrame*);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onselectpatterndisplay(MainFrame*, psy_ui_Component* sender, PatternDisplayMode);
+static void mainframe_onselectpatterndisplay(MainFrame*,
+	psy_ui_Component* sender, PatternDisplayMode);
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
@@ -137,7 +139,11 @@ static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 static void mainframe_onfileload(MainFrame*, FileView* sender);
 #endif
-static void mainframe_ongearselect(MainFrame*, Workspace* sender, psy_List* machinelist);
+static void mainframe_ongearselect(MainFrame*, Workspace* sender,
+	psy_List* machinelist);
+static void mainframe_onthemechanged(MainFrame*, MachineViewConfig* sender,
+	psy_Property*);
+static void mainframe_updatethemes(MainFrame* self);
 
 // vtable
 static psy_ui_ComponentVtable vtable;
@@ -195,6 +201,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_connectstepsequencerbuttons(self);
 	mainframe_updateseqeditorbuttons(self);
 	mainframe_connectseqeditorbuttons(self);
+	mainframe_updatethemes(self);
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -356,12 +363,23 @@ void mainframe_initterminalcolours(MainFrame* self)
 {
 	self->terminalbutton_colours[TERMINALMSGTYPE_NONE] =
 		psy_ui_component_colour(psy_ui_button_base(&self->toggleterminal));
-	self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
-		psy_ui_colour_make(0x000000FF);
-	self->terminalbutton_colours[TERMINALMSGTYPE_WARNING] =
-		psy_ui_colour_make(0x0000FFFF);
-	self->terminalbutton_colours[TERMINALMSGTYPE_MESSAGE] =
-		psy_ui_colour_make(0x0000FF00);
+	if (psy_ui_defaults()->hasdarktheme) {
+		self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
+			psy_ui_colour_make(0x000000FF);
+		self->terminalbutton_colours[TERMINALMSGTYPE_WARNING] =
+			psy_ui_colour_make(0x0000FFFF);
+		self->terminalbutton_colours[TERMINALMSGTYPE_MESSAGE] =
+			psy_ui_colour_make(0x0000FF00);
+	} else {
+		self->terminalbutton_colours[TERMINALMSGTYPE_NONE] =
+			psy_ui_colour_make(0x00808080);
+		self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
+			psy_ui_colour_make(0x00000080);
+		self->terminalbutton_colours[TERMINALMSGTYPE_WARNING] =
+			psy_ui_colour_make(0x0000A0A0);
+		self->terminalbutton_colours[TERMINALMSGTYPE_MESSAGE] =
+			psy_ui_colour_make(0x00008000);
+	}
 }
 
 
@@ -430,7 +448,7 @@ void mainframe_inittabbars(MainFrame* self)
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->tabbars, &self->client);
-	psy_ui_component_setspacing(&self->tabbars, &spacing);
+	//psy_ui_component_setspacing(&self->tabbars, &spacing);
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
 }
 
@@ -450,6 +468,7 @@ void mainframe_initnavigation(MainFrame* self)
 void mainframe_initmaintabbar(MainFrame* self)
 {
 	tabbar_init(&self->tabbar, &self->tabbars);
+	self->tabbar.component.debugflag = 3000;
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
@@ -459,6 +478,7 @@ void mainframe_initmaintabbar(MainFrame* self)
 		psy_ui_value_makeew(4.0);
 	tabbar_append(&self->tabbar, "main.help")->margin.right =
 		psy_ui_value_makeew(4.0);
+	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
 }
@@ -671,6 +691,9 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&workspace_song(
 		&self->workspace)->patterns.signal_numsongtrackschanged,
 		self, mainframe_onsongtrackschanged);
+	psy_signal_connect(
+		&psycleconfig_macview(workspace_conf(&self->workspace))->signal_themechanged,
+		self, mainframe_onthemechanged);
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -1250,7 +1273,44 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	if (component) {
 		psy_ui_component_setfocus(component);
 	}
+	mainframe_updatetabbarstyle(self);
 	psy_ui_component_align(&self->component);
+}
+
+void mainframe_updatetabbarstyle(MainFrame* self)
+{
+	switch (tabbar_selected(&self->tabbar)) {
+		case VIEW_ID_MACHINEVIEW:		
+				self->machineview.tabbar.style_tab.backgroundcolour = self->machineview.skin.colour;								
+				self->machineview.tabbar.style_tab.colour = self->machineview.skin.effect_fontcolour;
+				self->machineview.tabbar.style_tab_select.colour = self->machineview.skin.generator_fontcolour;
+				self->machineview.tabbar.style_tab_select.backgroundcolour =
+					self->machineview.skin.polycolour;
+				self->machineview.tabbar.style_tab_hover.colour =
+					self->machineview.skin.polycolour;
+				self->machineview.tabbar.style_tab_hover.backgroundcolour =
+					self->machineview.skin.polycolour;				
+				psy_ui_component_setbackgroundcolour(tabbar_base(&self->machineview.tabbar),
+					self->machineview.tabbar.style_tab.backgroundcolour);			
+				psy_ui_component_invalidate(tabbar_base(&self->machineview.tabbar));
+			break;
+		case VIEW_ID_PATTERNVIEW:
+			self->patternview.tabbar.style_tab.backgroundcolour = self->patternview.skin.background;
+			self->patternview.tabbar.style_tab.colour = self->patternview.skin.font;
+			self->patternview.tabbar.style_tab_select.colour = self->patternview.skin.fontsel;
+			self->patternview.tabbar.style_tab_select.backgroundcolour =
+				self->patternview.skin.selection;
+			self->patternview.tabbar.style_tab_hover.colour = self->patternview.tabbar.style_tab_select.colour;
+			self->patternview.tabbar.style_tab_hover.backgroundcolour =
+				self->patternview.tabbar.style_tab_select.backgroundcolour;
+			psy_ui_component_setbackgroundcolour(tabbar_base(&self->patternview.tabbar),
+				self->patternview.tabbar.style_tab.backgroundcolour);
+			psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
+			break;
+		default:
+			self->tabbar.style_tab = psy_ui_defaults()->style_tab;
+			break;
+	}	
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
@@ -1620,7 +1680,19 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	return 0;
 }
 
-void mainframe_ongearselect(MainFrame* self, Workspace* sender, psy_List* machinelist)
+void mainframe_ongearselect(MainFrame* self, Workspace* sender,
+	psy_List* machinelist)
 {
 	gear_select(&self->gear, machinelist);
+}
+
+void mainframe_onthemechanged(MainFrame* self, MachineViewConfig* sender,
+	psy_Property* theme)
+{
+	mainframe_updatetabbarstyle(self);
+}
+
+void mainframe_updatethemes(MainFrame* self)
+{
+	
 }

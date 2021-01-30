@@ -44,12 +44,17 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
-		"help.greetings", NULL);
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, "float",
-		self, helpview_onfloatsection);
+		"help.greetings", NULL);	
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, "Split [Main|Help]",
+		self, helpview_onfloatsection);	
+	psy_ui_button_settextalignment(&self->floatsection,
+		psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setalign(psy_ui_button_base(&self->floatsection),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_button_settextalignment(&self->floatsection, psy_ui_ALIGNMENT_TOP);
+	psy_ui_component_setcolour(psy_ui_button_base(&self->floatsection),
+		psy_ui_defaults()->style_tab.colour);
+	psy_ui_component_setbackgroundcolour(psy_ui_button_base(&self->floatsection),
+		psy_ui_defaults()->style_tab.backgroundcolour);	
 }
 
 void helpview_initsections(HelpView* self, Workspace* workspace)
@@ -107,7 +112,7 @@ void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* d
 		psy_ui_component_preventalign(&self->help.editor.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "dock");
+		psy_ui_button_settext(&self->floatsection, "Combine [Help]");
 	}
 }
 
@@ -122,7 +127,7 @@ void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* de
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "float");
+		psy_ui_button_settext(&self->floatsection, "Split [Main|Help]");
 	}
 }
 
