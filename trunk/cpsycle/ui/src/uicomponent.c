@@ -62,16 +62,16 @@ void psy_ui_updatealign(psy_ui_Component* main, psy_List* children)
 	}
 }
 
-psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
+const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 {
-	psy_ui_Font* rv;
-	psy_ui_Style* common;	
+	const psy_ui_Font* rv;
+	const psy_ui_Style* common;	
 
-	common = &psy_ui_app()->defaults.style_common;
+	common = psy_ui_style(psy_ui_STYLE_COMMON);
 	if (self->style.use_font) {
 		rv = &self->style.font;
 	} else {
-		rv = &psy_ui_app()->defaults.style_common.font;
+		rv = &psy_ui_style(psy_ui_STYLE_COMMON)->font;
 	}
 	return rv;
 }
@@ -100,7 +100,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 	if (curr) {
 		return curr->style.backgroundcolour;
 	}
-	return psy_ui_app()->defaults.style_common.backgroundcolour;
+	return psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour;
 }
 
 void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
@@ -126,7 +126,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	if (curr) {
 		return curr->style.colour;
 	}
-	return psy_ui_app()->defaults.style_common.colour;
+	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
 }
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
@@ -134,7 +134,7 @@ psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
 	if (self->style.border.mode.set) {
 		return self->style.border;
 	}
-	return psy_ui_app()->defaults.style_common.border;
+	return psy_ui_style(psy_ui_STYLE_COMMON)->border;
 }
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
@@ -143,7 +143,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_Style* common;
 		psy_ui_Font old_default_font;
 
-		common = &psy_ui_app()->defaults.style_common;
+		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_COMMON);
 		old_default_font = common->font;
 		psy_ui_font_init(&common->font, 0);
 		psy_ui_font_copy(&common->font, font);
@@ -1131,7 +1131,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, border.colour_top);
 			} else {
 				psy_ui_setcolour(g,
-					psy_ui_app()->defaults.style_common.border.colour_top);
+					psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 			}
 			psy_ui_drawline(g,
 				psy_ui_realpoint_zero(), 
@@ -1142,7 +1142,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, border.colour_top);
 			} else {
 				psy_ui_setcolour(g,
-					psy_ui_app()->defaults.style_common.border.colour_top);
+					psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 			}
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(0, size.height - 1),
@@ -1262,6 +1262,11 @@ void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	self->insertmargin = margin;
 }
 
+const psy_ui_Style* psy_ui_style(int styletype)
+{
+	return psy_ui_app_style(psy_ui_app(), styletype);
+}
+
 const struct psy_ui_Defaults* psy_ui_defaults(void)
 {
 	return &psy_ui_app()->defaults;
@@ -1288,4 +1293,9 @@ const char* psy_ui_translate(const char* key)
 void psy_ui_component_setmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
 {
 	self->scrollmode = mode;
+}
+
+void psy_ui_component_setstyle(psy_ui_Component* self, psy_ui_Style style)
+{
+	psy_ui_style_copy(&self->style, &style);
 }

@@ -215,7 +215,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, dou
 	width = self->trackwidth;
 	height = self->trackheight;
 	ident = width * 0.25;
-	psy_ui_setcolour(g, psy_ui_defaults()->style_common.colour);
+	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->colour);
 	psy_ui_moveto(g, psy_ui_realpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
 		psy_ui_realpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),

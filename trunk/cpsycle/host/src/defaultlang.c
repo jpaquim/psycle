@@ -136,6 +136,13 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "instruments", "Instruments");
 	psy_property_set_str(section, "generators", "Generators");
 	psy_property_set_str(section, "waves", "Waves");
+	// cpu
+	section = psy_property_append_section(lang, "cpu");
+	psy_property_set_str(section, "resources", "Windows Resources");
+	psy_property_set_str(section, "ram", "Physical Memory(RAM)");
+	psy_property_set_str(section, "ram", "Memoria fisica");
+	psy_property_set_str(section, "swap", "Page File (Swap)");
+	psy_property_set_str(section, "vram", "Virtual Memory");
 	// settingsview
 	section = psy_property_append_section(lang, "settingsview");
 	psy_property_set_str(section, "general", "General");

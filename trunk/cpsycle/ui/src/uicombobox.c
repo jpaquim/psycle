@@ -135,8 +135,8 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	uint32_t arrowcolour;
 	uint32_t arrowhighlightcolour;
 
-	arrowcolour = psy_ui_defaults()->style_button.colour.value;
-	arrowhighlightcolour = psy_ui_defaults()->style_button_hover.colour.value;
+	arrowcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour.value;
+	arrowhighlightcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour.value;
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, 
@@ -153,10 +153,11 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 		if (strlen(text)) {		
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			if (self->hover) {
-				psy_ui_settextcolour(g, psy_ui_defaults()->style_button_hover.colour);
-			}
-			else {
-				psy_ui_settextcolour(g, psy_ui_defaults()->style_button.colour);
+				psy_ui_settextcolour(g, 
+					psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour);
+			} else {
+				psy_ui_settextcolour(g,
+					psy_ui_style(psy_ui_STYLE_BUTTON)->colour);
 			}
 			psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, vcenter),
 				psy_ui_ETO_CLIPPED, r, text, strlen(text));			

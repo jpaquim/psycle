@@ -375,13 +375,14 @@ void midimonitor_inittitle(MidiMonitor* self)
 	// titlebar
 	psy_ui_component_init(&self->titlebar, &self->client);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_component_setstyle(&self->titlebar,
+		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar,
-		"Psycle MIDI Monitor");
-	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
+		"Psycle MIDI Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->configure, &self->titlebar);
 	psy_ui_button_settext(&self->configure, "(configure devices)");

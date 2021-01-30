@@ -75,11 +75,11 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			if (imp->hwnd) {
 				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
 				vtable_init(self);				
-				psy_ui_editor_setcolour(self, psy_ui_app()->defaults.style_common.colour);
+				psy_ui_editor_setcolour(self, psy_ui_style(psy_ui_STYLE_COMMON)->colour);
 				psy_ui_editor_setcaretcolour(self,
-					psy_ui_app()->defaults.style_common.colour);
+					psy_ui_style(psy_ui_STYLE_COMMON)->colour);
 				psy_ui_editor_setbackgroundcolour(self,
-					psy_ui_app()->defaults.style_common.backgroundcolour);
+					psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
 				psy_ui_editor_setfont(self, NULL);
 				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
@@ -282,7 +282,7 @@ void psy_ui_editor_enableedit(psy_ui_Editor* self)
 void psy_ui_editor_setfont(psy_ui_Editor* self, psy_ui_Font* source)
 {
 	psy_ui_FontInfo fontinfo;
-	psy_ui_Font* font;
+	const psy_ui_Font* font;
 
 	if (source) {
 		super_setfont(&self->component, source);

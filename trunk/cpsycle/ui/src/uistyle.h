@@ -20,7 +20,18 @@ typedef struct psy_ui_Style {
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
+void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour,
+	psy_ui_Colour background);
 void psy_ui_style_dispose(psy_ui_Style*);
+void psy_ui_style_copy(psy_ui_Style*, psy_ui_Style* other);
+
+psy_ui_Style* psy_ui_style_alloc(void);
+psy_ui_Style* psy_ui_style_allocinit(void);
+psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
+	psy_ui_Colour background);
+void psy_ui_style_deallocate(psy_ui_Style*);
+
+
 
 #ifdef __cplusplus
 }

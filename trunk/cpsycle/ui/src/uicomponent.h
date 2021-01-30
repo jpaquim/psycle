@@ -286,7 +286,7 @@ psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
-psy_ui_Font* psy_ui_component_font(psy_ui_Component*);
+const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
 void psy_ui_component_preventdefault(psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
@@ -362,7 +362,7 @@ typedef void (*psy_ui_fp_componentimp_dev_releasecapture)(struct psy_ui_Componen
 typedef void (*psy_ui_fp_componentimp_dev_invalidate)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_invalidaterect)(struct psy_ui_ComponentImp*, const psy_ui_RealRectangle*);
 typedef void (*psy_ui_fp_componentimp_dev_update)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_setfont)(struct psy_ui_ComponentImp*, psy_ui_Font*);
+typedef void (*psy_ui_fp_componentimp_dev_setfont)(struct psy_ui_ComponentImp*, const psy_ui_Font*);
 typedef psy_List* (*psy_ui_fp_componentimp_dev_children)(struct psy_ui_ComponentImp*, int recursive);
 typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
@@ -372,7 +372,8 @@ typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp
 typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef const psy_ui_TextMetric* (*psy_ui_fp_componentimp_dev_textmetric)(const struct psy_ui_ComponentImp*);
-typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
+typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(const struct psy_ui_ComponentImp*,
+	const char* text, const psy_ui_Font*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolour)(struct psy_ui_ComponentImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
@@ -476,7 +477,7 @@ INLINE const psy_ui_TextMetric* psy_ui_component_textmetric(const psy_ui_Compone
 	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
-INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char* text)
+INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const char* text)
 {
 	return self->imp->vtable->dev_textsize(self->imp, text,
 		psy_ui_component_font(self));
@@ -684,9 +685,11 @@ INLINE psy_ui_RealSize psy_ui_component_sizepx(const psy_ui_Component* self)
 }
 
 int psy_ui_component_level(const psy_ui_Component* self);
-
+const psy_ui_Style* psy_ui_style(int styletype);
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType, psy_ui_Margin margin);
+
+void psy_ui_component_setstyle(psy_ui_Component* self, psy_ui_Style);
 
 const struct psy_ui_Defaults* psy_ui_defaults(void);
 

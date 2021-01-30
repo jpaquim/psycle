@@ -239,7 +239,7 @@ void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
 
 	assert(self);
 
-	fontinfo = psy_ui_font_fontinfo(&self->defaults.style_common.font);	
+	fontinfo = psy_ui_font_fontinfo(&psy_ui_style(psy_ui_STYLE_COMMON)->font);	
 	fontinfo.lfHeight = size;	
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_replacedefaultfont(self->main, &font);
@@ -269,7 +269,7 @@ void psy_ui_app_lighttheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initlighttheme(psy_ui_defaults());
+	psy_ui_defaults_initlighttheme(&self->defaults);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}
@@ -279,7 +279,7 @@ void psy_ui_app_darktheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initdarktheme(psy_ui_defaults());
+	psy_ui_defaults_initdarktheme(&self->defaults);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}
@@ -290,6 +290,11 @@ bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 	assert(self);
 
 	return psy_ui_defaults()->hasdarktheme;
+}
+
+const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, int styletype)
+{
+	return psy_ui_defaults_style(&self->defaults, styletype);
 }
 
 // psy_ui_AppImp

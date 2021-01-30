@@ -36,7 +36,7 @@ typedef struct TrackerLineState {
 	psy_audio_Sequence* sequence;
 	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
-	psy_ui_Font* gridfont;
+	const psy_ui_Font* gridfont;
 	bool singlemode;
 } TrackerLineState;
 

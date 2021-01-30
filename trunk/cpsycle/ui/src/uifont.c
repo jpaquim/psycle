@@ -51,7 +51,7 @@ void copy(psy_ui_Font* self, psy_ui_Font* other)
 // psy_ui_FontImp
 static void dev_dispose(psy_ui_FontImp* self) { }
 static void dev_copy(psy_ui_FontImp* self, psy_ui_FontImp* other) { }
-static psy_ui_FontInfo dev_fontinfo(psy_ui_FontImp* self)
+static const psy_ui_FontInfo dev_fontinfo(const psy_ui_FontImp* self)
 {
     psy_ui_FontInfo rv;
     psy_ui_fontinfo_init(&rv, "tahoma", 8);

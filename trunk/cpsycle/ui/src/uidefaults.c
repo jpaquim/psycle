@@ -8,17 +8,11 @@
 
 void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 {		
+	psy_table_init(&self->styles);
 	if (dark) {
 		psy_ui_defaults_initdarktheme(self);
 	} else {
 		psy_ui_defaults_initlighttheme(self);
-	}
-	self->style_common.use_font = 1;
-	{
-		psy_ui_FontInfo fontinfo;
-	
-		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);	
-		psy_ui_font_init(&self->style_common.font, &fontinfo);
 	}			
 	// group
 	psy_ui_margin_init_all(&self->hmargin,
@@ -36,138 +30,209 @@ void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 
 void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 {
+	psy_ui_Style* style;
+
 	self->hasdarktheme = TRUE;
 	self->errorcolour = 0xCF6679;	
 	// common
-	psy_ui_colour_set(&self->style_common.colour, psy_ui_colour_make(0x00D1C5B6));
-	psy_ui_colour_set(&self->style_common.backgroundcolour,
+	style = psy_ui_style_allocinit();	
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00232323));
-	psy_ui_border_init(&self->style_common.border);
-	psy_ui_colour_set(&self->style_common.border.colour_top,
+	psy_ui_border_init(&style->border);
+	psy_ui_colour_set(&style->border.colour_top,
 		psy_ui_colour_make(0x00333333));
-	psy_ui_colour_set(&self->style_common.border.colour_right,
-		self->style_common.border.colour_top);
-	psy_ui_colour_set(&self->style_common.border.colour_bottom,
-		self->style_common.border.colour_top);
-	psy_ui_colour_set(&self->style_common.border.colour_left,
-		self->style_common.border.colour_top);
+	psy_ui_colour_set(&style->border.colour_right,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_bottom,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_left,
+		style->border.colour_top);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON, style);
 	// common::select
-	psy_ui_colour_set(&self->style_common_select.colour, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_colour_set(&self->style_common_select.backgroundcolour,
-		psy_ui_colour_make(0x00232323));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00FFFFFF),
+			psy_ui_colour_make(0x00232323)));	
 	// button
-	psy_ui_style_init(&self->style_button);
-	psy_ui_colour_set(&self->style_button.colour, psy_ui_colour_make(0x00BDBDBD));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00BDBDBD));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON, style);	
 	// button::hover
-	psy_ui_style_init(&self->style_button_hover);
-	psy_ui_colour_set(&self->style_button_hover.colour,
-		psy_ui_colour_make(0x00FFFFFF));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_HOVER, style);
 	// button::select
-	psy_ui_style_init(&self->style_button_select);
-	psy_ui_colour_set(&self->style_button_select.colour,
-		psy_ui_colour_make(0x00B1C8B0));	
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);	
 	// tab
-	psy_ui_style_init(&self->style_tab);
-	psy_ui_colour_set(&self->style_tab.colour, psy_ui_colour_make(0x00D1C5B6));
-	psy_ui_colour_set(&self->style_tab.backgroundcolour,
-		psy_ui_colour_make(0x00232323));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00D1C5B6),
+			psy_ui_colour_make(0x00232323)));	
 	// tab::hover
-	psy_ui_style_init(&self->style_tab_hover);
-	psy_ui_colour_set(&self->style_tab_hover.colour,
-		psy_ui_colour_make(0x00EAEAEA));
-	psy_ui_colour_set(&self->style_tab_hover.backgroundcolour,
-		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00EAEAEA),
+			psy_ui_colour_make(0x00FFFFFF)));	
 	// tab::select
-	psy_ui_style_init(&self->style_tab_select);
-	psy_ui_colour_set(&self->style_tab_select.colour,
-		psy_ui_colour_make(0x00B1C8B0));
-	psy_ui_colour_set(&self->style_tab_select.backgroundcolour,
-		psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00B1C8B0),
+			psy_ui_colour_make(0x00B1C8B0)));	
 	// slider
-	psy_ui_style_init(&self->style_slider);
-	psy_ui_colour_set(&self->style_slider.colour,
-		psy_ui_colour_make(0x003E3E3E));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x003E3E3E));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SLIDER, style);	
 	// sidemenu
-	psy_ui_style_init(&self->style_sidemenu);
-	psy_ui_colour_set(&self->style_sidemenu.colour, psy_ui_colour_make(0x00D1C5B6));
-	psy_ui_colour_set(&self->style_sidemenu.backgroundcolour,
-		psy_ui_colour_make(0x00232323)); 
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SIDEMENU,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00D1C5B6),
+			psy_ui_colour_make(0x00232323)));	
 	// sidemenu::select
-	psy_ui_style_init(&self->style_sidemenu_select);
-	psy_ui_colour_set(&self->style_sidemenu_select.colour, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_colour_set(&self->style_sidemenu_select.backgroundcolour,
-		psy_ui_colour_make(0x00232323));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SIDEMENU_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00FFFFFF),
+			psy_ui_colour_make(0x00232323)));	
+	// psy_ui_Style style_containerheader;
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_CONTAINERHEADER,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00D1C5B6),
+			psy_ui_colour_make(0x00232323)));
+	// font
+	psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
+	{
+		psy_ui_FontInfo fontinfo;
+
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
+			&fontinfo);
+	}
 }
 
 void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 {
+	psy_ui_Style* style;
+
 	self->hasdarktheme = FALSE;
 	self->errorcolour = 0xCF6679;
 	// common
-	psy_ui_colour_set(&self->style_common.colour, psy_ui_colour_make(0x00000000));
-	psy_ui_colour_set(&self->style_common.backgroundcolour,
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00000000));
+	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00FBFBFB));
-	psy_ui_border_init(&self->style_common.border);
-	psy_ui_colour_set(&self->style_common.border.colour_top,
+	psy_ui_border_init(&style->border);
+	psy_ui_colour_set(&style->border.colour_top,
 		psy_ui_colour_make(0x00B2B2B2));
-	psy_ui_colour_set(&self->style_common.border.colour_right,
-		self->style_common.border.colour_top);
-	psy_ui_colour_set(&self->style_common.border.colour_bottom,
-		self->style_common.border.colour_top);
-	psy_ui_colour_set(&self->style_common.border.colour_left,
-		self->style_common.border.colour_top);
+	psy_ui_colour_set(&style->border.colour_right,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_bottom,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_left,
+		style->border.colour_top);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON, style);
 	// common::select
-	psy_ui_colour_set(&self->style_common.colour, psy_ui_colour_make(0x00000000));
-	psy_ui_colour_set(&self->style_common.backgroundcolour,
-		psy_ui_colour_make(0x00FBFBFB));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00FFFFFF),
+			psy_ui_colour_make(0x00232323)));
 	// button
-	psy_ui_style_init(&self->style_button);
-	psy_ui_colour_set(&self->style_button.colour,
-		psy_ui_colour_make(0x00787573));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00787573));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON, style);	
 	// button::hover
-	psy_ui_style_init(&self->style_button_hover);
-	psy_ui_colour_set(&self->style_button_hover.colour,
-		psy_ui_colour_make(0x000000));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x000000));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_HOVER, style);
 	// button::select
-	psy_ui_style_init(&self->style_button_select);
-	psy_ui_colour_set(&self->style_button_select.colour,
-		psy_ui_colour_make(0x1b8ff2));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x1b8ff2));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
 	// tab
-	psy_ui_style_init(&self->style_tab);
-	psy_ui_colour_set(&self->style_tab.colour,
-		psy_ui_colour_make(0x00474849));
-	psy_ui_colour_set(&self->style_tab.backgroundcolour,
-		psy_ui_colour_make(0x00F2F2F2));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00474849),
+			psy_ui_colour_make(0x00F2F2F2)));
 	// tab::hover
-	psy_ui_style_init(&self->style_tab_hover);
-	psy_ui_colour_set(&self->style_tab_hover.colour,
-		psy_ui_colour_make(0x00474849));
-	psy_ui_colour_set(&self->style_tab_hover.backgroundcolour,
-		psy_ui_colour_make(0x0041047A));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00474849),
+			psy_ui_colour_make(0x0041047A)));
 	// tab::select
-	psy_ui_style_init(&self->style_tab_select);
-	psy_ui_colour_set(&self->style_tab_select.colour,
-		psy_ui_colour_make(0x00474849));
-	psy_ui_colour_set(&self->style_tab_select.backgroundcolour,
-		psy_ui_colour_make(0x0041047A));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00474849),
+			psy_ui_colour_make(0x0041047A)));
 	// slider
-	psy_ui_style_init(&self->style_slider);
-	psy_ui_colour_set(&self->style_slider.colour,
-		psy_ui_colour_make(0x00C9C3C2));
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00C9C3C2));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SLIDER, style);
 	// sidemenu
-	psy_ui_style_init(&self->style_sidemenu);
-	psy_ui_colour_set(&self->style_sidemenu.colour, psy_ui_colour_make(0x00787573));
-	psy_ui_colour_set(&self->style_sidemenu.backgroundcolour,
-		psy_ui_colour_make(0x00E9E9E9));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SIDEMENU,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00787573),
+			psy_ui_colour_make(0x00E9E9E9)));
 	// sidemenu::select
-	psy_ui_style_init(&self->style_sidemenu_select);
-	psy_ui_colour_set(&self->style_sidemenu_select.colour, psy_ui_colour_make(0x00000000));
-	psy_ui_colour_set(&self->style_sidemenu_select.backgroundcolour,
-		psy_ui_colour_make(0x00FBFBFB));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SIDEMENU_SELECT,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00000000),
+			psy_ui_colour_make(0x00FBFBFB)));
+	// psy_ui_Style style_containerheader;
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_CONTAINERHEADER,
+		psy_ui_style_allocinit_colours(
+			psy_ui_colour_make(0x00444444),
+			psy_ui_colour_make(0x00DEDEDE)));
+	// font
+	psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
+	{
+		psy_ui_FontInfo fontinfo;
+
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
+			&fontinfo);
+	}	
 }
 
 void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 {	
-	psy_ui_style_dispose(&self->style_common);
+	psy_table_disposeall(&self->styles,
+		(psy_fp_disposefunc)psy_ui_style_dispose);
 }
 
+void psy_ui_defaults_setstyle(psy_ui_Defaults* self, int styletype,
+	psy_ui_Style* style)
+{
+	psy_ui_Style* currstyle;
+
+	assert(self);
+	assert(style);
+
+	if (currstyle = (psy_ui_Style*)psy_table_at(&self->styles, styletype))
+	{
+		psy_ui_style_deallocate(currstyle);
+	}
+	psy_table_insert(&self->styles, styletype, style);
+}
+
+psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, int type)
+{
+	psy_ui_Style* rv;
+
+	assert(self);
+
+	rv = (psy_ui_Style*)psy_table_at(&self->styles, type);
+	if (!rv) {
+		rv = (psy_ui_Style*)psy_table_at(&self->styles,
+			psy_ui_STYLE_COMMON);
+		assert(rv);
+	}
+	return rv;
+}
+
+const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self, int type)
+{
+	assert(self);
+
+	return psy_ui_defaults_style((psy_ui_Defaults*)self, type);	
+}

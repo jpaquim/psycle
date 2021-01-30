@@ -63,7 +63,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setcolour(&self->component,
-		psy_ui_defaults()->style_slider.colour);
+		psy_ui_style(psy_ui_STYLE_SLIDER)->colour);
 	if (psy_ui_defaults()->hasdarktheme) {
 		psy_ui_component_setbackgroundcolour(&self->component,
 			psy_ui_colour_make(0x00292929));
@@ -226,7 +226,7 @@ void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane* self)
 {
 	self->enabled = FALSE;
 	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_defaults()->style_common.backgroundcolour);
+		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
 	psy_ui_component_invalidate(&self->component);
 }
 

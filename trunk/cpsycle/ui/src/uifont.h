@@ -76,7 +76,7 @@ INLINE void psy_ui_font_copy(psy_ui_Font* self, psy_ui_Font* other)
 // psy_ui_FontImp
 typedef void (*psy_ui_font_imp_fp_dispose)(struct psy_ui_FontImp*);
 typedef void (*psy_ui_font_imp_fp_copy)(struct psy_ui_FontImp*, struct psy_ui_FontImp*);
-typedef psy_ui_FontInfo (*psy_ui_font_imp_fp_dev_fontinfo)(struct psy_ui_FontImp*);
+typedef const psy_ui_FontInfo (*psy_ui_font_imp_fp_dev_fontinfo)(const struct psy_ui_FontImp*);
 
 typedef struct psy_ui_FontImpVTable {
 	psy_ui_font_imp_fp_dispose dev_dispose;	
@@ -90,7 +90,7 @@ typedef struct psy_ui_FontImp {
 
 void psy_ui_font_imp_init(psy_ui_FontImp*);
 
-INLINE psy_ui_FontInfo psy_ui_font_fontinfo(psy_ui_Font* self)
+INLINE psy_ui_FontInfo psy_ui_font_fontinfo(const psy_ui_Font* self)
 {
     return self->imp->vtable->dev_fontinfo(self->imp);
 }

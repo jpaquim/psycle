@@ -198,7 +198,7 @@ static void setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 	self->imp->vtable->dev_setcolour(self->imp, colour);
 }
 
-static void setfont(psy_ui_Graphics* self, psy_ui_Font* font)
+static void setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
 {
 	self->imp->vtable->dev_setfont(self->imp, font);
 }
@@ -266,7 +266,7 @@ static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, uintptr_t mode) { }
 static void dev_settextcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_settextalign(psy_ui_GraphicsImp* self, uintptr_t align) { }
 static void dev_setcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
-static void dev_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
+static void dev_setfont(psy_ui_GraphicsImp* self, const psy_ui_Font* font) { }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint pt) { }
 static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p) { }

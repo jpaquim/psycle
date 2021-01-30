@@ -1308,7 +1308,7 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 			psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
 			break;
 		default:
-			self->tabbar.style_tab = psy_ui_defaults()->style_tab;
+			self->tabbar.style_tab = *psy_ui_style(psy_ui_STYLE_TAB);
 			break;
 	}	
 }
