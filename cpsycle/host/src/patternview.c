@@ -849,7 +849,7 @@ void patternview_hidebeatnumbers(PatternView* self)
 
 void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 {
-	psy_ui_Font* font;
+	const psy_ui_Font* font;
 
 	font = psy_ui_component_font(&self->tracker.component);
 	if (font) {
@@ -1379,7 +1379,7 @@ void patternview_updatestates(PatternView* self)
 
 void patternview_onappzoom(PatternView* self, psy_ui_AppZoom* sender)
 {
-	psy_ui_Font* font;
+	const psy_ui_Font* font;
 
 	font = psy_ui_component_font(&self->tracker.component);
 	if (font) {

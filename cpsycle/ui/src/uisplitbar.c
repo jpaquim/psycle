@@ -279,7 +279,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_app()->defaults.style_common.backgroundcolour);
+			psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
 		psy_ui_component_invalidate(&self->component);
 		self->resize = 0;
 	}

@@ -212,7 +212,7 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 	int numsteps;
 
 	maxtime = envelopebox_displaymaxtime(self);
-	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, self->cy),
 		psy_ui_realpoint_make(self->cx, self->cy));
 	tm = psy_ui_component_textmetric(envelopebox_base(self));
@@ -257,7 +257,7 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(cpx, self->spacing.top.quantity.px),
 				psy_ui_realpoint_make(cpx, self->cy - self->spacing.bottom.quantity.px));
-			psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+			psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 		}
 	}
 }

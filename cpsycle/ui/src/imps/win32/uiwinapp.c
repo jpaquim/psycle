@@ -114,7 +114,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_defaults()->style_common.backgroundcolour.value);
+		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value);
 	self->targetids = NULL;
 }
 
@@ -367,9 +367,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 				} else {				
 					SetTextColor((HDC) wParam,
-						psy_ui_defaults()->style_common.colour.value);
+						psy_ui_style(psy_ui_STYLE_COMMON)->colour.value);
 					SetBkColor((HDC)wParam,
-						psy_ui_defaults()->style_common.backgroundcolour.value);
+						psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value);
 					return (intptr_t)winapp->defaultbackgroundbrush;
 				}
 				break;
@@ -1154,7 +1154,7 @@ void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
 {
 	DeleteObject(self->defaultbackgroundbrush);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_defaults()->style_common.backgroundcolour.value);
+		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value);
 }
 
 #endif /* PSYCLE_TK_WIN32 */

@@ -115,8 +115,8 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		psy_ui_sliderpane_drawverticalruler(self, g);		
 	}
 	psy_ui_drawsolidrectangle(g, psy_ui_sliderpane_sliderposition(self),
-		psy_ui_defaults()->style_slider.colour);
-	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+		psy_ui_style(psy_ui_STYLE_SLIDER)->colour);
+	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_drawrectangle(g,
 		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size));
@@ -128,7 +128,7 @@ void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphic
 	double markwidth = 5;
 	psy_ui_RealSize size;
 
-	psy_ui_setcolour(g, psy_ui_defaults()->style_common.border.colour_top);
+	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 	size = psy_ui_component_sizepx(&self->component);
 	for (step = 0; step <= 1.0; step += self->rulerstep) {
 		double cpy;

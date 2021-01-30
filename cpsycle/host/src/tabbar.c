@@ -65,7 +65,7 @@ psy_ui_RealRectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
 // TabBarSkin
 void tabbarskin_init(TabBarSkin* self)
 {
-	self->text = psy_ui_defaults()->style_tab.colour;	
+	self->text = psy_ui_style(psy_ui_STYLE_TAB)->colour;
 	self->textlabel = psy_ui_colour_make(0x00666666);	
 }
 
@@ -118,9 +118,9 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(tabbar_base(self));
-	if (psy_ui_defaults()->style_tab.backgroundcolour.mode.set) {
+	if (psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour.mode.set) {
 		psy_ui_component_setbackgroundcolour(tabbar_base(self),
-			psy_ui_defaults()->style_tab.backgroundcolour);
+			psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour);
 	}
 	psy_signal_init(&self->signal_change);
 	self->tabs = NULL;
@@ -128,9 +128,9 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->hover = FALSE;
 	self->hoverindex = psy_INDEX_INVALID;
 	self->tabalignment = psy_ui_ALIGN_TOP;
-	self->style_tab = psy_ui_defaults()->style_tab;
-	self->style_tab_hover = psy_ui_defaults()->style_tab_hover;
-	self->style_tab_select = psy_ui_defaults()->style_tab_select;
+	self->style_tab = *psy_ui_style(psy_ui_STYLE_TAB);
+	self->style_tab_hover = *psy_ui_style(psy_ui_STYLE_TAB_HOVER);
+	self->style_tab_select = *psy_ui_style(psy_ui_STYLE_TAB_SELECT);
 	self->defaulttabheight = psy_ui_value_makeeh(1.8);
 	tabbarskin_init(&self->skin);
 	psy_ui_margin_init_all(&self->defaulttabmargin,

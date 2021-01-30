@@ -65,7 +65,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->text = NULL;
 	self->translation = NULL;
 	self->translate = TRUE;
-	self->textcolour = psy_ui_defaults()->style_button.colour;
+	self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour;
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
@@ -137,11 +137,11 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
 	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_settextcolour(g, psy_ui_defaults()->style_button_hover.colour);
+		psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour);
 	} else if (psy_ui_button_highlighted(self)) {
 		//psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		//psy_ui_drawrectangle(g, r);
-		psy_ui_settextcolour(g, psy_ui_defaults()->style_button_select.colour);
+		psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour);
 	} else {
 		psy_ui_settextcolour(g, self->textcolour);
 	}
@@ -204,8 +204,8 @@ void drawarrow(psy_ui_Button* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g)
 	uint32_t arrowcolour;
 	uint32_t arrowhighlightcolour;
 
-	arrowcolour = psy_ui_defaults()->style_button.colour.value;
-	arrowhighlightcolour = psy_ui_defaults()->style_button_hover.colour.value;
+	arrowcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour.value;
+	arrowhighlightcolour = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour.value;
 	if (self->hover == 1) {
 		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
 			arrowhighlightcolour);

@@ -14,7 +14,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(gearbuttons_base(self), parent);	
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
-		psy_ui_defaults_vmargin(psy_ui_defaults()));
+		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self),
 		"gear.create-replace");
 	psy_ui_button_init_text(&self->del, gearbuttons_base(self),
@@ -64,19 +64,20 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	// client
 	psy_ui_component_init(&self->client, gear_base(self));
 	psy_ui_component_setbackgroundcolour(gear_base(self),
-		psy_ui_defaults()->style_sidemenu.backgroundcolour);
+		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
+	psy_ui_component_setstyle(&self->titlebar,
+		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
-	psy_ui_label_init_text(&self->title, &self->titlebar, "Gear Rack");
-	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_label_init_text(&self->title, &self->titlebar, "machinebar.gear");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init_connect(&self->hide, &self->titlebar,
 		self, gear_onhide);

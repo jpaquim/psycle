@@ -272,7 +272,7 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 	// to the default text
 	self->fadeoutcounter = 100;
 	psy_ui_component_setcolour(psy_ui_label_base(self),
-		psy_ui_defaults()->style_common.colour);
+		psy_ui_style(psy_ui_STYLE_COMMON)->colour);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -284,7 +284,7 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 
 		--self->fadeoutcounter;
 		if (self->fadeoutcounter <= 80) {
-			colour = psy_ui_defaults()->style_common.colour;
+			colour = psy_ui_style(psy_ui_STYLE_COMMON)->colour;
 			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
 			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
 			if (colour.value > psy_ui_component_backgroundcolour(
@@ -297,7 +297,7 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 			// reset statusbar label to song title
 			psy_ui_label_settext(self, self->defaulttext);
 			psy_ui_component_setcolour(psy_ui_label_base(self),
-				psy_ui_defaults()->style_common.colour);
+				psy_ui_style(psy_ui_STYLE_COMMON)->colour);
 			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}

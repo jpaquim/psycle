@@ -154,13 +154,14 @@ void cpuview_inittitle(CPUView* self)
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->component,
 		psy_ui_ALIGN_TOP);
+	psy_ui_component_setstyle(&self->titlebar,
+		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar,
-		"Psycle DSP/CPU Performance Monitor");
-	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
+		"Psycle DSP/CPU Performance Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init_connect(&self->hide, &self->titlebar,
 		self, cpuview_onhide);
@@ -186,10 +187,10 @@ void cpuview_initresources(CPUView* self)
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
 		"Available Resources");		
-	labelpair_init(&self->resources_win, &self->resources, "Windows Resources");
-	labelpair_init(&self->resources_mem, &self->resources, "Physical Memory(RAM)");
-	labelpair_init(&self->resources_swap, &self->resources, "Page File (Swap)");
-	labelpair_init(&self->resources_vmem, &self->resources, "Virtual Memory");	
+	labelpair_init(&self->resources_win, &self->resources, "cpu.resources");
+	labelpair_init(&self->resources_mem, &self->resources, "cpu.ram");
+	labelpair_init(&self->resources_swap, &self->resources, "cpu.swap");
+	labelpair_init(&self->resources_vmem, &self->resources, "cpu.vram");	
 }
 
 void cpuview_initperformance(CPUView* self)

@@ -59,12 +59,12 @@ typedef void (*psy_ui_fp_graphics_drawbitmap)(struct psy_ui_Graphics*, psy_ui_Bi
 	double height, double xsrc, double ysrc);
 typedef void (*psy_ui_fp_graphics_drawstretchedbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc);
-typedef void (*psy_ui_fp_graphics_setbackgroundcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
+typedef void (*psy_ui_fp_graphics_setbackgroundcolour)(struct psy_ui_Graphics*, psy_ui_Colour);
 typedef void (*psy_ui_fp_graphics_setbackgroundmode)(struct psy_ui_Graphics*, uintptr_t mode);
-typedef void (*psy_ui_fp_graphics_settextcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
+typedef void (*psy_ui_fp_graphics_settextcolour)(struct psy_ui_Graphics*, psy_ui_Colour);
 typedef void (*psy_ui_fp_graphics_settextalign)(struct psy_ui_Graphics*, uintptr_t align);
-typedef void (*psy_ui_fp_graphics_setcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
-typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*, psy_ui_Font* font);
+typedef void (*psy_ui_fp_graphics_setcolour)(struct psy_ui_Graphics*, psy_ui_Colour);
+typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*, const psy_ui_Font*);
 typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_RealPoint pt);
 typedef void (*psy_ui_fp_graphics_curveto)(struct psy_ui_Graphics*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
@@ -221,7 +221,7 @@ INLINE void psy_ui_settextalign(psy_ui_Graphics* self, uintptr_t align)
 	self->vtable->settextalign(self, align);
 }
 
-INLINE void psy_ui_setfont(psy_ui_Graphics* self, psy_ui_Font* font)
+INLINE void psy_ui_setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
 {		
 	self->vtable->setfont(self, font);
 }
@@ -286,12 +286,12 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawbitmap)(struct psy_ui_GraphicsImp*,
 	double height, double xsrc, double ysrc);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc);
-typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
+typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundmode)(struct psy_ui_GraphicsImp*, uintptr_t mode);
-typedef void (*psy_ui_fp_graphicsimp_dev_settextcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
+typedef void (*psy_ui_fp_graphicsimp_dev_settextcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextalign)(struct psy_ui_GraphicsImp*, uintptr_t align);
-typedef void (*psy_ui_fp_graphicsimp_dev_setcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
-typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*, psy_ui_Font* font);
+typedef void (*psy_ui_fp_graphicsimp_dev_setcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour);
+typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*, const psy_ui_Font*);
 typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy_ui_RealPoint pt);
 typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
