@@ -168,9 +168,11 @@ typedef struct {
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
+
 void workspace_clearsequencepaste(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
+void workspace_save_styleconfiguration(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong_fileselect(Workspace*);
 void workspace_loadsong(Workspace*, const char*, bool play);

@@ -8,6 +8,7 @@
 #include "cmdsgeneral.h"
 #include "paramview.h"
 #include "resources/resource.h"
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 #include <songio.h>
@@ -209,6 +210,7 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_frame_init_main(mainframe_base(self));
 	psy_ui_component_setvtable(mainframe_base(self), vtable_init(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
+	initdarkstyles();
 	self->startup = TRUE;
 	self->pluginscanprogress = -1;
 }

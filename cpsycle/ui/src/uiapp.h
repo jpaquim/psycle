@@ -34,6 +34,8 @@ void psy_ui_appzoom_dispose(psy_ui_AppZoom*);
 void psy_ui_appzoom_setrate(psy_ui_AppZoom*, double rate);
 double psy_ui_appzoom_rate(const psy_ui_AppZoom*);
 
+void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom*, psy_ui_Font*);
+
 // psy_ui_App
 typedef struct psy_ui_App {
 	// signals

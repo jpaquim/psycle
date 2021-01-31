@@ -4,12 +4,8 @@
 #ifndef psy_ui_DEFAULTS_H
 #define psy_ui_DEFAULTS_H
 
-#include "../../detail/psyconf.h"
-#include "../../detail/stdint.h"
-#include "uidef.h"
+// local
 #include "uistyle.h"
-// container
-#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +31,7 @@ typedef enum psy_ui_StyleTypes {
 
 typedef struct psy_ui_Defaults {
 	uint32_t errorcolour;	
-	psy_Table styles;
+	psy_ui_Styles styles;
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
 	psy_ui_Margin cmargin;
@@ -49,6 +45,8 @@ void psy_ui_defaults_setstyle(psy_ui_Defaults*, int styletype, psy_ui_Style*);
 psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, int styletype);
 const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
 	int styletype);
+void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* configdir,
+	bool isdark);
 
 INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)
 {
@@ -87,7 +85,7 @@ INLINE psy_ui_Font* psy_ui_defaults_font(psy_ui_Defaults* self)
 
 void psy_ui_defaults_initdarktheme(psy_ui_Defaults*);
 void psy_ui_defaults_initlighttheme(psy_ui_Defaults*);
-
+void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* path, bool isdark);
 
 #ifdef __cplusplus
 }

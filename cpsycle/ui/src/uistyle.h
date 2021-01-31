@@ -4,8 +4,12 @@
 #ifndef psy_ui_STYLE_H
 #define psy_ui_STYLE_H
 
+// local
 #include "uifont.h"
 #include "uidef.h"
+// container
+#include <hashtbl.h>
+#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,7 +35,21 @@ psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
 	psy_ui_Colour background);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
+typedef struct psy_ui_Styles {
+	psy_Table styles;
+	psy_Property config;
+} psy_ui_Styles;
 
+void psy_ui_styles_init(psy_ui_Styles*);
+void psy_ui_styles_dispose(psy_ui_Styles*);
+
+void psy_ui_styles_setstyle(psy_ui_Styles*, int styletype, psy_ui_Style*);
+void psy_ui_styles_mixstyle(psy_ui_Styles*, int styletype, psy_ui_Style*);
+psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, int styletype);
+const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles* self,
+	int styletype);
+void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
+psy_Property* psy_ui_styles_configuration(psy_ui_Styles*);
 
 #ifdef __cplusplus
 }

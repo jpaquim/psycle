@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "sequencetrackbox.h"
+// host
+#include "styles.h"
 // platform
 #include "../../detail/portable.h"
 
@@ -42,9 +44,9 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 	if (self->track) {
 		r = self->position;
 		if (self->selected) {
-			psy_ui_setcolour(g, self->colour_highlight);			
+			psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB_SELECT)->border.colour_top); // self->colour_highlight);
 		} else {
-			psy_ui_setcolour(g, self->colour);
+			psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB)->border.colour_top);
 		}
 		psy_ui_drawrectangle(g, r);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
@@ -77,7 +79,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 				self->track->name);
 		}
 	} else {		
-		psy_ui_setcolour(g, self->colour);
+		psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB)->border.colour_top);
 		psy_ui_drawrectangle(g, self->position);
 		psy_ui_settextcolour(g, self->colour);
 		sequencetrackbox_drawtext(self, g,

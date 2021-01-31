@@ -5,6 +5,8 @@
 #include "../../detail/prefix.h"
 
 #include "patternviewskin.h"
+#include "styles.h"
+#include "uicomponent.h"
 #include "skinio.h"
 #include "resources/resource.h"
 // file
@@ -325,7 +327,7 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->keyblack = psy_ui_colour_make(0x00595959);
 	self->keywhite = psy_ui_colour_make(0x00C0C0C0);	
 	self->keyseparator = psy_ui_colour_make(0x999999);	
-	self->event = psy_ui_colour_make(0x00999999);
+	self->event = psy_ui_style(STYLE_SEQEDT_EVENT)->backgroundcolour;
 	self->eventhover = psy_ui_colour_make(0x00DADADA);
 	self->eventcurrchannel = psy_ui_colour_make(0x00CACACA);	
 	pattern_header_skin_name = psy_property_at_str(p, "pattern_header_skin",

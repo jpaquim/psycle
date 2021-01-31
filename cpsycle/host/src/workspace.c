@@ -7,6 +7,7 @@
 #include "workspace.h"
 // local
 #include "cmdproperties.h"
+#include "styles.h"
 // file
 #include <dir.h>
 // dsp
@@ -102,7 +103,8 @@ void workspace_init(Workspace* self, void* mainhandle)
 {
 	assert(self);
 	
-	psy_audio_machinecallback_init(&self->machinecallback, &self->player, NULL);
+	psy_audio_machinecallback_init(&self->machinecallback, &self->player,
+		NULL);
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
 	psy_audio_exclusivelock_init();	
@@ -196,7 +198,8 @@ void workspace_initsignals(Workspace* self)
 void workspace_dispose(Workspace* self)
 {	
 	assert(self);
-
+	
+	workspace_save_styleconfiguration(self);
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
 	self->song = NULL;
@@ -213,6 +216,27 @@ void workspace_dispose(Workspace* self)
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
 	psy_playlist_dispose(&self->playlist);	
 	psy_audio_exclusivelock_dispose();	
+}
+
+void workspace_save_styleconfiguration(Workspace* self)
+{
+	psy_Path path;
+	const psy_Property* styleconfig;
+
+	assert(self);
+
+	styleconfig = psy_ui_styles_configuration(&psy_ui_defaults()->styles);
+	if (styleconfig && !psy_property_empty(styleconfig)) {
+		psy_path_init(&path, NULL);
+		psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+		if (psy_ui_defaults()->hasdarktheme) {
+			psy_path_setname(&path, PSYCLE_DARKSTYLES_INI);
+		} else {
+			psy_path_setname(&path, PSYCLE_LIGHTSTYLES_INI);
+		}
+		//propertiesio_save(styleconfig, &path);
+		psy_path_dispose(&path);
+	}
 }
 
 void workspace_disposesignals(Workspace* self)
@@ -590,12 +614,24 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 	assert(self);
 				
 	choice = psy_property_at_choice(self->config.apptheme);
-	if (choice) {		
-		if (psy_property_item_int(choice) == psy_ui_LIGHTTHEME) {
-			psy_ui_app_lighttheme(psy_ui_app());
+	if (choice) {				
+		bool islight;		
+		
+		islight = psy_property_item_int(choice) == psy_ui_LIGHTTHEME;
+		// reset host styles
+		if (islight) {
+			initlightstyles();
 		} else {
-			psy_ui_app_darktheme(psy_ui_app());
-		}		
+			initdarkstyles();
+		}
+		psy_ui_defaults_loadtheme(psy_ui_defaults(),
+			dirconfig_config(&self->config.directories),
+			!islight);		
+		if (psy_ui_app()->imp) {
+			psy_ui_app()->imp->vtable->dev_onappdefaultschange(psy_ui_app()->imp);		
+		}
+		psy_ui_appzoom_updatebasefontsize(&psy_ui_app()->zoom,
+			psy_ui_defaults_font(&psy_ui_app()->defaults));
 	}
 }
 

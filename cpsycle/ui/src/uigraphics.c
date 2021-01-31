@@ -32,12 +32,12 @@ static void drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, double x, double y,
 	double height, double xsrc, double ysrc);
 static void drawstretchedbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, double x, double y, double width,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc);
-static void setbackgroundcolour(psy_ui_Graphics*, psy_ui_Colour colour);
+static void setbackgroundcolour(psy_ui_Graphics*, psy_ui_Colour);
 static void setbackgroundmode(psy_ui_Graphics*, uintptr_t mode);
-static void settextcolour(psy_ui_Graphics*, psy_ui_Colour colour);
+static void settextcolour(psy_ui_Graphics*, psy_ui_Colour);
 static void settextalign(psy_ui_Graphics*, uintptr_t align);
-static void setcolour(psy_ui_Graphics*, psy_ui_Colour colour);
-static void setfont(psy_ui_Graphics*, psy_ui_Font* font);
+static void setcolour(psy_ui_Graphics*, psy_ui_Colour);
+static void setfont(psy_ui_Graphics*, const psy_ui_Font*);
 static void moveto(psy_ui_Graphics*, psy_ui_RealPoint point);
 static void curveto(psy_ui_Graphics*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
@@ -198,7 +198,7 @@ static void setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 	self->imp->vtable->dev_setcolour(self->imp, colour);
 }
 
-static void setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
+void setfont(psy_ui_Graphics* self, const psy_ui_Font* font)
 {
 	self->imp->vtable->dev_setfont(self->imp, font);
 }

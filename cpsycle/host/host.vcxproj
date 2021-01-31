@@ -378,6 +378,7 @@
     <ClCompile Include="src\stepbox.c" />
     <ClCompile Include="src\stepsequencerview.c" />
     <ClCompile Include="src\stereophase.c" />
+    <ClCompile Include="src\styles.c" />
     <ClCompile Include="src\swingfillview.c" />
     <ClCompile Include="src\tabbar.c" />
     <ClCompile Include="src\timebar.c" />
@@ -503,6 +504,7 @@
     <ClInclude Include="src\stepbox.h" />
     <ClInclude Include="src\stepsequencerview.h" />
     <ClInclude Include="src\stereophase.h" />
+    <ClInclude Include="src\styles.h" />
     <ClInclude Include="src\swingfillview.h" />
     <ClInclude Include="src\tabbar.h" />
     <ClInclude Include="src\timebar.h" />
