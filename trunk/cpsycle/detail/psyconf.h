@@ -63,6 +63,8 @@
 #define PSYCLE_UNTITLED "Untitled.psy"
 #define PSYCLE_INI "psycle.ini"
 #define PSYCLE_RECENT_SONG_INI "psycle-recentsongs.ini"
+#define PSYCLE_DARKSTYLES_INI "psycle-darkstyles.ini"
+#define PSYCLE_LIGHTSTYLES_INI "psycle-lightstyles.ini"
 
 #define PSYCLE_HELPFILES "readme.txt keys.txt tweaking.txt whatsnew.txt"
 

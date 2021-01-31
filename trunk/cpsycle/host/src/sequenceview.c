@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "sequenceview.h"
+// host
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 #include <patterns.h>
@@ -513,7 +515,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g,
 			self->foundselected = 1;
 		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
+			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_PROGRESS)->colour);
 		} else {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_SIDEMENU)->colour);
@@ -534,7 +536,7 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 		psy_ui_realsize_make(
 			floor((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
 			(self->state->trackwidth - 5)), self->lineheight));
-	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_style(STYLE_SEQ_PROGRESS)->backgroundcolour);
 }
 
 void sequencelistview_showpatternnames(SequenceListView* self)

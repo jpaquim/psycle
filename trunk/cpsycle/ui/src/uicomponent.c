@@ -903,7 +903,12 @@ static const psy_ui_TextMetric* dev_textmetric(const psy_ui_ComponentImp* self)
 	}
 	return &default_tm;
 }
-static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }
+static psy_ui_Size dev_textsize(const psy_ui_ComponentImp* self, const char* text,
+	const psy_ui_Font* font)
+{
+	psy_ui_Size rv = { 0, 0 }; return rv;
+}
+
 static void dev_setbackgroundcolour(psy_ui_ComponentImp* self, psy_ui_Colour colour) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }

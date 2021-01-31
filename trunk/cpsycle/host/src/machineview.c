@@ -2657,12 +2657,11 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
-	psy_ui_Margin leftmargin;
-	
-	psy_ui_component_init(machineview_base(self), parent);
-	machineview_vtable_init(self);
+	psy_ui_component_init(machineview_base(self), parent);	
 	psy_ui_component_setvtable(machineview_base(self),
 		machineview_vtable_init(self));
+	psy_ui_component_setbackgroundmode(machineview_base(self),
+		psy_ui_BACKGROUND_NONE);
 	self->workspace = workspace;	
 	// skin init
 	machineviewskin_init(&self->skin,	
@@ -2671,12 +2670,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
 	psy_ui_notebook_init(&self->notebook, &self->component);	
-	psy_ui_margin_init(&leftmargin);
-	psy_ui_margin_setleft(&leftmargin,	psy_ui_value_makeew(3.0));
-	psy_ui_component_setmargin(psy_ui_notebook_base(&self->notebook),
-		&leftmargin);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);	
+		psy_ui_ALIGN_CLIENT);
 	// wireview
 	machinewireview_init(&self->wireview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent, &self->skin,

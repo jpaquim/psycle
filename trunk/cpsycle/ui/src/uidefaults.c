@@ -5,10 +5,13 @@
 
 #include "uidefaults.h"
 #include "uifont.h"
+// file
+#include <dir.h>
+#include <propertiesio.h>
 
 void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 {		
-	psy_table_init(&self->styles);
+	psy_ui_styles_init(&self->styles);
 	if (dark) {
 		psy_ui_defaults_initdarktheme(self);
 	} else {
@@ -33,7 +36,7 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	psy_ui_Style* style;
 
 	self->hasdarktheme = TRUE;
-	self->errorcolour = 0xCF6679;	
+	self->errorcolour = 0xCF6679;
 	// common
 	style = psy_ui_style_allocinit();	
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -48,6 +51,14 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
+	// font	
+	{
+		psy_ui_FontInfo fontinfo;
+
+		style->use_font = 1;
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_font_init(&style->font, &fontinfo);
+	}
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON, style);
 	// common::select
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT,
@@ -99,16 +110,7 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_CONTAINERHEADER,
 		psy_ui_style_allocinit_colours(
 			psy_ui_colour_make(0x00D1C5B6),
-			psy_ui_colour_make(0x00232323)));
-	// font
-	psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
-	{
-		psy_ui_FontInfo fontinfo;
-
-		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
-		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
-			&fontinfo);
-	}
+			psy_ui_colour_make(0x00232323)));	
 }
 
 void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
@@ -122,7 +124,7 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00000000));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00FBFBFB));
-	psy_ui_border_init(&style->border);
+	psy_ui_border_init(&style->border);	
 	psy_ui_colour_set(&style->border.colour_top,
 		psy_ui_colour_make(0x00B2B2B2));
 	psy_ui_colour_set(&style->border.colour_right,
@@ -130,7 +132,15 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_colour_set(&style->border.colour_bottom,
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
-		style->border.colour_top);
+		style->border.colour_top);	
+	// font	
+	{
+		psy_ui_FontInfo fontinfo;
+
+		style->use_font = 1;
+		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+		psy_ui_font_init(&style->font, &fontinfo);
+	}
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON, style);
 	// common::select
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT,
@@ -182,57 +192,63 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_CONTAINERHEADER,
 		psy_ui_style_allocinit_colours(
 			psy_ui_colour_make(0x00444444),
-			psy_ui_colour_make(0x00DEDEDE)));
-	// font
-	psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
-	{
-		psy_ui_FontInfo fontinfo;
-
-		psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
-		psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
-			&fontinfo);
-	}	
+			psy_ui_colour_make(0x00DEDEDE)));	
 }
 
 void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 {	
-	psy_table_disposeall(&self->styles,
-		(psy_fp_disposefunc)psy_ui_style_dispose);
+	psy_ui_styles_dispose(&self->styles);		
 }
 
 void psy_ui_defaults_setstyle(psy_ui_Defaults* self, int styletype,
 	psy_ui_Style* style)
 {
-	psy_ui_Style* currstyle;
-
-	assert(self);
-	assert(style);
-
-	if (currstyle = (psy_ui_Style*)psy_table_at(&self->styles, styletype))
-	{
-		psy_ui_style_deallocate(currstyle);
-	}
-	psy_table_insert(&self->styles, styletype, style);
+	psy_ui_styles_setstyle(&self->styles, styletype, style);
 }
 
 psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, int type)
 {
-	psy_ui_Style* rv;
-
-	assert(self);
-
-	rv = (psy_ui_Style*)psy_table_at(&self->styles, type);
-	if (!rv) {
-		rv = (psy_ui_Style*)psy_table_at(&self->styles,
-			psy_ui_STYLE_COMMON);
-		assert(rv);
-	}
-	return rv;
+	return psy_ui_styles_at(&self->styles, type);
 }
 
 const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self, int type)
 {
-	assert(self);
+	return psy_ui_styles_at_const(&self->styles, type);
+}
 
-	return psy_ui_defaults_style((psy_ui_Defaults*)self, type);	
+void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* configdir, bool isdark)
+{
+	psy_Property* styleconfig;
+	psy_Path path;
+	
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, configdir);
+	if (isdark) {
+		psy_path_setname(&path, PSYCLE_DARKSTYLES_INI);		
+	} else {
+		psy_path_setname(&path, PSYCLE_LIGHTSTYLES_INI);
+	}	
+	// reset to defaults
+	if (isdark) {
+		psy_ui_defaults_initdarktheme(self);
+	}  else {
+		psy_ui_defaults_initlighttheme(self);
+	}
+	styleconfig = psy_property_clone(
+		psy_ui_styles_configuration(&self->styles));
+	if (propertiesio_load(styleconfig, &path, 0)) {	
+		self->hasdarktheme = isdark;
+		psy_ui_styles_configure(&self->styles, styleconfig);
+		// font
+		psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
+		{
+			psy_ui_FontInfo fontinfo;
+
+			psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
+			psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
+				&fontinfo);
+		}
+	}	
+	psy_property_deallocate(styleconfig);
+	psy_path_dispose(&path);	
 }

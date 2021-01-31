@@ -7,6 +7,7 @@
 // host
 #include "cmdsgeneral.h"
 #include "sequencetrackbox.h"
+#include "styles.h"
 #include "pianoroll.h"
 // audio
 #include <exclusivelock.h>
@@ -331,8 +332,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 		psy_ui_bitmap_init_size(&self->bitmap, size);
 		psy_ui_graphics_init_bitmap(&gr, &self->bitmap);
 		psy_ui_setfont(&gr, psy_ui_component_font(&self->parent->component));
-		psy_ui_setbackgroundmode(&gr, psy_ui_TRANSPARENT);
-		psy_ui_settextcolour(&gr, psy_ui_component_colour(&self->parent->component));				
+		psy_ui_setbackgroundmode(&gr, psy_ui_TRANSPARENT);		
 		psy_ui_drawsolidrectangle(&gr, bg,
 			psy_ui_component_backgroundcolour(&self->parent->component));
 		for (p = self->currtrack->entries, c = 0; p != NULL;
@@ -361,12 +361,16 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 					self->workspace->sequenceselection.editposition.track == self->trackindex &&
 					self->workspace->sequenceselection.editposition.order == c;
 				if (selected) {
-					psy_ui_drawsolidrectangle(&gr, r, psy_ui_colour_make(0x00514536));
-					psy_ui_setcolour(&gr, psy_ui_colour_make(0x00555555));
+					psy_ui_drawsolidrectangle(&gr, r,
+						psy_ui_style(STYLE_SEQEDT_ITEM_SELECTED)->backgroundcolour);
+					psy_ui_setcolour(&gr,
+						psy_ui_style(STYLE_SEQEDT_ITEM_SELECTED)->border.colour_top);
 					psy_ui_drawrectangle(&gr, r);
 				} else {
-					psy_ui_drawsolidrectangle(&gr, r, psy_ui_colour_make(0x00333333));
-					psy_ui_setcolour(&gr, psy_ui_colour_make(0x00444444));
+					psy_ui_drawsolidrectangle(&gr, r,
+						psy_ui_style(STYLE_SEQEDT_ITEM)->backgroundcolour);
+					psy_ui_setcolour(&gr,
+						psy_ui_style(STYLE_SEQEDT_ITEM)->border.colour_top);
 					psy_ui_drawrectangle(&gr, r);
 				}
 				r = psy_ui_realrectangle_make(
@@ -374,6 +378,13 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 							sequenceentry->offset * self->trackstate->pxperbeat,
 							centery),
 						psy_ui_realsize_make(patternwidth, tm->tmHeight));
+				if (selected) {
+					psy_ui_settextcolour(&gr,
+						psy_ui_style(STYLE_SEQEDT_ITEM_SELECTED)->colour);
+				} else {					
+					psy_ui_settextcolour(&gr,
+						psy_ui_style(STYLE_SEQEDT_ITEM)->colour);
+				}
 				if (generalconfig_showingpatternnames(psycleconfig_general(
 					workspace_conf(self->workspace)))) {
 					psy_audio_Pattern* pattern;
@@ -429,7 +440,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 					pianogriddraw_preventgrid(&griddraw);
 					pianogriddraw_preventcursor(&griddraw);
 					pianogriddraw_preventplaybar(&griddraw);					
-					psy_ui_setorigin(&gr, -r.left, 0);
+					psy_ui_setorigin(&gr, -r.left, 0);					
 					pianogriddraw_ondraw(&griddraw, &gr);
 					psy_ui_setorigin(&gr, 0, 0);					
 				}

@@ -6,6 +6,7 @@
 
 #include "../../detail/psydef.h"
 #include "uibitmap.h"
+#include "uifont.h"
 
 // Graphics Device Interface
 // Bridge

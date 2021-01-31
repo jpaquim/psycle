@@ -29,8 +29,6 @@ static psy_ui_App* app = NULL;
 
 // psy_ui_AppZoom
 
-static void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom*, psy_ui_Font*);
-
 void psy_ui_appzoom_init(psy_ui_AppZoom* self)
 {
 	assert(self);
