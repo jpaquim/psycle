@@ -25,6 +25,7 @@ static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* rv)
 static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
+static void button_updatestyles(psy_ui_Button*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -54,6 +55,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
+	psy_ui_border_init(&self->border);
 	self->hover = 0;
 	self->highlight = FALSE;
 	self->icon = psy_ui_ICON_NONE;
@@ -69,8 +71,9 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
-	self->allowrightclick = FALSE;
+	self->allowrightclick = FALSE;	
 	psy_signal_init(&self->signal_clicked);	
+	button_updatestyles(self);
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
@@ -121,7 +124,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r;
 	double centerx = 0;
 	double centery = 0;
-	char* text;
+	char* text;	
 	
 	if (self->translate && self->translation) {
 		text = self->translation;
@@ -136,12 +139,6 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
-	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour);
-	} else if (psy_ui_button_highlighted(self)) {
-		//psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-		//psy_ui_drawrectangle(g, r);
-		psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour);
 	} else {
 		psy_ui_settextcolour(g, self->textcolour);
 	}
@@ -153,8 +150,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (psy_ui_value_px(&size.height, tm) - tm->tmHeight) / 2;
 	}
-	if (text) {
-		
+	if (text) {		
 		psy_ui_textoutrectangle(g,
 			psy_ui_realpoint_make(r.left + centerx, r.top + centery),
 			psy_ui_ETO_CLIPPED,
@@ -164,7 +160,8 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
 		drawicon(self, g);
-	}
+	}	
+	psy_ui_drawborder(g, r, self->border);
 }
 
 void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
@@ -334,16 +331,18 @@ void onmouseenter(psy_ui_Button* self)
 {
 	if (self->enabled) {
 		self->hover = 1;
+		button_updatestyles(self);
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
 
 void onmouseleave(psy_ui_Button* self)
 {		
-	if (self->enabled) {		
-		psy_ui_component_invalidate(psy_ui_button_base(self));
-	}
 	self->hover = 0;
+	if (self->enabled) {		
+		button_updatestyles(self);
+		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}	
 }
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
@@ -365,12 +364,9 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 
 void psy_ui_button_highlight(psy_ui_Button* self)
 {
-	if (!psy_ui_button_highlighted(self)) {
-		self->restorebgcolour = psy_ui_component_backgroundcolour(
-			psy_ui_button_base(self));
-		//psy_ui_component_setbackgroundcolour(psy_ui_button_base(self),
-			//psy_ui_colour_make(0x002F3E25));
-		self->highlight = TRUE;		
+	if (!psy_ui_button_highlighted(self)) {				
+		self->highlight = TRUE;
+		button_updatestyles(self);
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
@@ -379,8 +375,7 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (psy_ui_button_highlighted(self)) {
 		self->highlight = FALSE;
-		//psy_ui_component_setbackgroundcolour(psy_ui_button_base(self),
-		//	self->restorebgcolour);
+		button_updatestyles(self);		
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
@@ -434,5 +429,31 @@ void button_onkeydown(psy_ui_Button* self, psy_ui_KeyEvent* ev)
 	if (self->enabled && ev->keycode == psy_ui_KEY_RETURN) {		
 		psy_signal_emit(&self->signal_clicked, self, 0);
 		psy_ui_keyevent_stoppropagation(ev);
+	}
+}
+
+void button_updatestyles(psy_ui_Button* self)
+{		
+	if (self->highlight) {
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->backgroundcolour);
+		if (psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour.mode.set) {
+			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour;
+		}
+		self->border = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->border;
+	} else if (self->hover) {
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->backgroundcolour);		
+		if (psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour.mode.set) {
+			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour;
+		}
+		self->border = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->border;
+	} else {		
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_style(psy_ui_STYLE_BUTTON)->backgroundcolour);
+		if (psy_ui_style(psy_ui_STYLE_BUTTON)->colour.mode.set) {
+			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour;
+		}		
+		self->border = psy_ui_style(psy_ui_STYLE_BUTTON)->border;
 	}
 }

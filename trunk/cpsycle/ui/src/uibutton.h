@@ -33,6 +33,7 @@ typedef struct psy_ui_Button {
 	bool enabled;
 	psy_ui_Colour textcolour;
 	psy_ui_Colour restorebgcolour;
+	psy_ui_Border border;
 	bool shiftstate;
 	bool ctrlstate;
 	bool buttonstate;

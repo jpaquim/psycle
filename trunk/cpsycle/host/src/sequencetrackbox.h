@@ -32,6 +32,7 @@ typedef struct SequenceTrackBox {
 	psy_ui_RealRectangle position;	
 	uintptr_t trackindex;
 	bool selected;
+	bool hover;
 	psy_ui_Colour colour;
 	psy_ui_Colour colour_highlight;
 	psy_ui_Colour colour_font;
@@ -47,7 +48,7 @@ void sequencetrackbox_init(SequenceTrackBox*,
 	psy_ui_RealRectangle position, const psy_ui_TextMetric*,
 	psy_audio_SequenceTrack*,
 	psy_audio_Sequence*,
-	uintptr_t trackindex, bool selected);
+	uintptr_t trackindex, bool selected, bool hover);
 
 void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox*,

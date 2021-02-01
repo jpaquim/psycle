@@ -22,11 +22,16 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_BUTTON_SELECT,
 	psy_ui_STYLE_TAB,
 	psy_ui_STYLE_TAB_HOVER,
-	psy_ui_STYLE_TAB_SELECT,
-	psy_ui_STYLE_SLIDER,
+	psy_ui_STYLE_TAB_SELECT,	
 	psy_ui_STYLE_SIDEMENU,
 	psy_ui_STYLE_SIDEMENU_SELECT,
-	psy_ui_STYLE_CONTAINERHEADER
+	psy_ui_STYLE_CONTAINERHEADER,
+	psy_ui_STYLE_SCROLLPANE,
+	psy_ui_STYLE_SCROLLTHUMB,
+	psy_ui_STYLE_SCROLLTHUMB_HOVER,
+	psy_ui_STYLE_SLIDERPANE,
+	psy_ui_STYLE_SLIDERTHUMB,
+	psy_ui_STYLE_SLIDERTHUMB_HOVER
 } psy_ui_StyleTypes;
 
 typedef struct psy_ui_Defaults {

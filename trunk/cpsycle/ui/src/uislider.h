@@ -13,8 +13,17 @@ extern "C" {
 
 struct psy_ui_Slider;
 
-typedef struct {
+// todo combine with scrollbarpane
+typedef struct psy_ui_SliderPane {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_clicked;
+	psy_Signal signal_changed;
+	psy_Signal signal_describevalue;
+	psy_Signal signal_tweakvalue;
+	psy_Signal signal_value;
+	// internal
 	double value;
 	double rulerstep;
 	double tweakbase;	
@@ -23,14 +32,11 @@ typedef struct {
 	psy_ui_Size vslidersize;
 	psy_ui_RealSize slidersizepx;
 	bool poll;
+	bool hover;
 	uintptr_t timerinterval;
 	psy_ui_Orientation orientation;
-	struct psy_ui_Slider* slider;
-	psy_Signal signal_clicked;
-	psy_Signal signal_changed;
-	psy_Signal signal_describevalue;
-	psy_Signal signal_tweakvalue;
-	psy_Signal signal_value;
+	// references
+	struct psy_ui_Slider* slider;	
 } psy_ui_SliderPane;
 
 typedef void (*ui_slider_fpdescribe)(void*, struct psy_ui_Slider*, char* txt);
@@ -52,7 +58,10 @@ INLINE psy_ui_Component* psy_ui_sliderpane_base(psy_ui_SliderPane* self)
 }
 
 typedef struct psy_ui_Slider {
+	// inherits
 	psy_ui_Component component;
+	// internal
+	// ui elements
 	psy_ui_Label desc;
 	psy_ui_SliderPane pane;
 	psy_ui_Label value;

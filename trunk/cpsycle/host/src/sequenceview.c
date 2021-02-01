@@ -181,6 +181,10 @@ static void sequencetrackheaders_ondraw(SequenceTrackHeaders*,
 	psy_ui_Graphics*);
 static void sequencetrackheaders_onmousedown(SequenceTrackHeaders*,
 	psy_ui_MouseEvent*);
+static void sequencetrackheaders_onmousemove(SequenceTrackHeaders*,
+	psy_ui_MouseEvent*);
+static void sequencetrackheaders_onmouseenter(SequenceTrackHeaders*);
+static void sequencetrackheaders_onmouseleave(SequenceTrackHeaders*);
 // vtable
 static psy_ui_ComponentVtable trackheaderviews_vtable;
 static bool trackheaderviews_vtable_initialized = FALSE;
@@ -195,6 +199,12 @@ static void trackheaderview_vtable_init(SequenceTrackHeaders* self)
 			sequencetrackheaders_ondraw;
 		trackheaderviews_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			sequencetrackheaders_onmousedown;
+		trackheaderviews_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+			sequencetrackheaders_onmousemove;
+		trackheaderviews_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
+			sequencetrackheaders_onmouseenter;
+		trackheaderviews_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
+			sequencetrackheaders_onmouseleave;
 		trackheaderviews_vtable_initialized = TRUE;
 	}
 }
@@ -213,7 +223,7 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(1)));
 	psy_ui_component_preventalign(&self->component);
-	
+	self->hovertrack = psy_INDEX_INVALID;
 	psy_signal_init(&self->signal_newtrack);
 	psy_signal_init(&self->signal_deltrack);
 	psy_signal_init(&self->signal_trackselected);
@@ -257,7 +267,8 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 				track,
 				self->state->sequence,
 				t,
-				self->state->selection->editposition.track == t);
+				self->state->selection->editposition.track == t,
+				self->hovertrack == t);
 			sequencetrackbox_draw(&trackheader, g);
 		}
 		sequencetrackbox_init(&trackheader,
@@ -265,7 +276,8 @@ void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 				psy_ui_realpoint_make(cpx, 0),
 				psy_ui_realsize_make(
 					self->state->trackwidth, size.height)),
-			tm, NULL, self->state->sequence, 0, 0);
+			tm, NULL, self->state->sequence, 0, 0,
+			FALSE);
 		sequencetrackbox_draw(&trackheader, g);
 	}	
 }
@@ -295,7 +307,8 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 					selectedtrack * self->state->trackwidth, 0.0),
 				psy_ui_realsize_make(self->state->trackwidth, size.height)),
 			tm, track, self->state->sequence, selectedtrack,
-			self->state->selection->editposition.track == selectedtrack);
+			self->state->selection->editposition.track == selectedtrack,
+			self->hovertrack == selectedtrack);
 		switch (sequencetrackbox_hittest(&trackbox, ev->pt.x, ev->pt.y)) {
 			case SEQUENCETRACKBOXEVENT_MUTE:
 				psy_signal_emit(&self->signal_mutetrack, self, 1, selectedtrack);
@@ -315,6 +328,35 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 	}
 	psy_ui_component_invalidate(&self->component);
 }
+
+void sequencetrackheaders_onmousemove(SequenceTrackHeaders* self,
+	psy_ui_MouseEvent* ev)
+{
+	uintptr_t selectedtrack;
+
+	selectedtrack = (uintptr_t)(ev->pt.x / self->state->trackwidth);
+	if (selectedtrack >= psy_audio_sequence_width(self->state->sequence)) {
+		selectedtrack = psy_INDEX_INVALID;
+	}
+	if (self->hovertrack != selectedtrack) {
+		self->hovertrack = selectedtrack;
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+void sequencetrackheaders_onmouseenter(SequenceTrackHeaders* self)
+{
+
+}
+
+void sequencetrackheaders_onmouseleave(SequenceTrackHeaders* self)
+{	
+	if (self->hovertrack != psy_INDEX_INVALID) {
+		self->hovertrack = psy_INDEX_INVALID;
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
 
 // SequenceListView
 // prototypes
