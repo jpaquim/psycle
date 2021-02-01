@@ -120,6 +120,11 @@ INLINE void psy_ui_graphics_dispose(psy_ui_Graphics* self)
 	self->vtable->dispose(self);	
 }
 
+INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
+{
+	self->vtable->setcolour(self, colour);
+}
+
 INLINE void psy_ui_textout(psy_ui_Graphics* self, double x, double y, const char* text, uintptr_t len)
 {		
 	self->vtable->textout(self, x, y, text, len);
@@ -197,11 +202,6 @@ INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self,
 		src.x, src.y, srcsize.width, srcsize.height);
 }
 
-INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
-{	
-	self->vtable->setcolour(self, colour);
-}
-
 INLINE void psy_ui_setbackgroundmode(psy_ui_Graphics* self, uintptr_t mode)
 {	
 	self->vtable->setbackgroundmode(self, mode);
@@ -263,6 +263,31 @@ INLINE uintptr_t psy_ui_linewidth(psy_ui_Graphics* self)
 INLINE void psy_ui_setorigin(psy_ui_Graphics* self, double x, double y)
 {
 	self->vtable->setorigin(self, x, y);
+}
+
+INLINE void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
+	psy_ui_Border b)
+{
+	if (b.colour_top.mode.set) {
+		psy_ui_setcolour(self, b.colour_top);
+		psy_ui_drawline(self, psy_ui_realrectangle_topleft(&r),
+			psy_ui_realpoint_make(r.right - 1, r.top));
+	}
+	if (b.colour_right.mode.set) {
+		psy_ui_setcolour(self, b.colour_right);
+		psy_ui_drawline(self, psy_ui_realpoint_make(r.right - 1, r.top),
+			psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
+	}
+	if (b.colour_bottom.mode.set) {
+		psy_ui_setcolour(self, b.colour_bottom);
+		psy_ui_drawline(self, psy_ui_realpoint_make(r.left, r.bottom - 1),
+			psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
+	}
+	if (b.colour_left.mode.set) {
+		psy_ui_setcolour(self, b.colour_left);
+		psy_ui_drawline(self, psy_ui_realrectangle_topleft(&r),
+			psy_ui_realpoint_make(r.left, r.bottom - 1));
+	}	
 }
 
 // psy_ui_GraphicsImp

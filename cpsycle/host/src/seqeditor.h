@@ -85,6 +85,8 @@ typedef bool (*seqeditortrack_fp_onmousemove)(struct SeqEditorTrack*,
 	psy_ui_MouseEvent*);
 typedef bool (*seqeditortrack_fp_onmouseup)(struct SeqEditorTrack*,
 	psy_ui_MouseEvent*);
+typedef bool (*seqeditortrack_fp_onmousedoubleclick)(struct SeqEditorTrack*,
+	psy_ui_MouseEvent*);
 
 typedef struct SeqEditorTrackVTable {
 	seqeditortrack_fp_ondraw ondraw;
@@ -92,6 +94,7 @@ typedef struct SeqEditorTrackVTable {
 	seqeditortrack_fp_onmousedown onmousedown;
 	seqeditortrack_fp_onmousemove onmousemove;
 	seqeditortrack_fp_onmouseup onmouseup;
+	seqeditortrack_fp_onmousedoubleclick onmousedoubleclick;
 } SeqEditorTrackVTable;
 
 typedef struct SeqEditorTrack {
@@ -167,6 +170,14 @@ INLINE bool seqeditortrack_onmouseup(SeqEditorTrack* self,
 	assert(self);
 
 	return self->vtable->onmouseup(self, ev);
+}
+
+INLINE bool seqeditortrack_onmousedoubleclick(SeqEditorTrack* self,
+	psy_ui_MouseEvent* ev)
+{
+	assert(self);
+
+	return self->vtable->onmousedoubleclick(self, ev);
 }
 
 typedef struct SeqEditorTrackHeader {

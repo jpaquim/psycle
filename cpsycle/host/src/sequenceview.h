@@ -136,7 +136,8 @@ typedef struct SequenceTrackHeaders {
 	psy_Signal signal_trackselected;
 	psy_Signal signal_mutetrack;
 	psy_Signal signal_solotrack;
-	// internal data	
+	// internal data
+	uintptr_t hovertrack;
 	// references
 	SequenceListViewState* state;	
 } SequenceTrackHeaders;

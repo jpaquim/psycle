@@ -9,7 +9,9 @@ extern "C" {
 #endif
 
 #define STYLE_SEQ_TAB              100
-#define STYLE_SEQ_TAB_SELECT       101
+#define STYLE_SEQ_TAB_HOVER        101
+#define STYLE_SEQ_TAB_SELECT       102
+#define STYLE_SEQ_TAB_NEW		   103
 #define STYLE_SEQ_PROGRESS         104
 #define STYLE_SEQEDT_ITEM          120
 #define STYLE_SEQEDT_ITEM_SELECTED 121

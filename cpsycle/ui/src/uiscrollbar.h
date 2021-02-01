@@ -21,6 +21,7 @@
 extern "C" {
 #endif
 
+// todo combine with sliderpane
 typedef struct psy_ui_ScrollBarPane {
     // inherits
     psy_ui_Component component;
@@ -35,6 +36,7 @@ typedef struct psy_ui_ScrollBarPane {
     double dragoffset;
     int drag;
     bool enabled;
+    bool hover;
     psy_ui_Orientation orientation;    
 } psy_ui_ScrollBarPane;
 

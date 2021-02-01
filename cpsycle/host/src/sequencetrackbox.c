@@ -17,7 +17,7 @@ void sequencetrackbox_init(SequenceTrackBox* self,
 	psy_ui_RealRectangle position, const psy_ui_TextMetric* tm,
 	psy_audio_SequenceTrack* track,
 	psy_audio_Sequence* sequence,
-	uintptr_t trackindex, bool selected)
+	uintptr_t trackindex, bool selected, bool hover)
 {
 	self->position = position;
 	self->tm = tm;
@@ -26,6 +26,7 @@ void sequencetrackbox_init(SequenceTrackBox* self,
 	self->sequence = sequence;
 	self->trackindex = trackindex;
 	self->selected = selected;
+	self->hover = hover;
 	self->showname = FALSE;
 	self->colour = psy_ui_colour_make(0x00303030);
 	self->colour_highlight = psy_ui_colour_make(0x00545454);
@@ -40,18 +41,26 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 	double centery;
 	
 	centery = (self->position.bottom - self->position.top - self->tm->tmHeight) / 2;
-	psy_ui_settextcolour(g, self->colour_font);
+	r = self->position;
 	if (self->track) {
-		r = self->position;
+		int styletype;
+		
 		if (self->selected) {
-			psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB_SELECT)->border.colour_top); // self->colour_highlight);
+			styletype = STYLE_SEQ_TAB_SELECT;
+		} else if (self->hover) {
+			styletype = STYLE_SEQ_TAB_HOVER;
 		} else {
-			psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB)->border.colour_top);
-		}
-		psy_ui_drawrectangle(g, r);
+			styletype = STYLE_SEQ_TAB;
+		}			
+		if (psy_ui_style(styletype)->backgroundcolour.mode.set) {
+			psy_ui_drawsolidrectangle(g, r,
+				psy_ui_style(styletype)->backgroundcolour);
+		}		
+		psy_ui_drawborder(g, r, psy_ui_style(styletype)->border);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
 		r.top += centery;
 		r.bottom = self->tm->tmHeight;
+		psy_ui_settextcolour(g, psy_ui_style(styletype)->colour);
 		sequencetrackbox_drawtext(self, g, r.left +
 			(intptr_t)(self->tm->tmAveCharWidth * 0.2), r.top, text);
 		if (psy_audio_sequence_istracksoloed(self->sequence, self->trackindex)) {
@@ -79,9 +88,11 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 				self->track->name);
 		}
 	} else {		
-		psy_ui_setcolour(g, psy_ui_style(STYLE_SEQ_TAB)->border.colour_top);
-		psy_ui_drawrectangle(g, self->position);
-		psy_ui_settextcolour(g, self->colour);
+		if (psy_ui_style(STYLE_SEQ_TAB_NEW)->backgroundcolour.mode.set) {
+			psy_ui_drawsolidrectangle(g, r,
+				psy_ui_style(STYLE_SEQ_TAB_NEW)->backgroundcolour);
+		}		
+		psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_TAB_NEW)->colour);
 		sequencetrackbox_drawtext(self, g,
 			self->position.left +
 				(int)(((self->position.right - self->position.left) -

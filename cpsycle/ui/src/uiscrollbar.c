@@ -21,6 +21,8 @@ static void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
 static void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
+static void psy_ui_scrollbarpane_onmouseenter(psy_ui_ScrollBarPane*);
+static void psy_ui_scrollbarpane_onmouseleave(psy_ui_ScrollBarPane*);
 static double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane*);
 static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*,
 	double pos);
@@ -40,11 +42,12 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 			(psy_ui_fp_component_onmousedown)psy_ui_scrollbarpane_onmousedown;
 		psy_ui_scrollbarpane_vtable.onmousemove =
 			(psy_ui_fp_component_onmousemove)psy_ui_scrollbarpane_onmousemove;
-		// psy_ui_scrollbarpane_vtable.onmousewheel =
-		//	(psy_ui_fp_component_onmousewheel)
-		//	psy_ui_scrollbarpane_onmousewheel;
 		psy_ui_scrollbarpane_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseup)psy_ui_scrollbarpane_onmouseup;		
+			(psy_ui_fp_component_onmouseup)psy_ui_scrollbarpane_onmouseup;
+		psy_ui_scrollbarpane_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
+			psy_ui_scrollbarpane_onmouseenter;
+		psy_ui_scrollbarpane_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
+			psy_ui_scrollbarpane_onmouseleave;
 		psy_ui_scrollbarpane_vtable.enableinput =
 			(psy_ui_fp_component_enableinput)psy_ui_scrollbarpane_enableinput;
 		psy_ui_scrollbarpane_vtable.preventinput =
@@ -63,14 +66,10 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setcolour(&self->component,
-		psy_ui_style(psy_ui_STYLE_SLIDER)->colour);
-	if (psy_ui_defaults()->hasdarktheme) {
+		psy_ui_style(psy_ui_STYLE_SCROLLTHUMB)->colour);
+	if (psy_ui_style(psy_ui_STYLE_SCROLLPANE)->backgroundcolour.mode.set) {
 		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_colour_make(0x00292929));
-		
-	} else {
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_colour_make(0x00ECE8E8));		
+			psy_ui_style(psy_ui_STYLE_SCROLLPANE)->backgroundcolour);
 	}
 	self->pos = 0;
 	self->drag = 0;
@@ -80,6 +79,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	self->scrollmax = 0;
 	self->screenpos = 0;
 	self->enabled = TRUE;
+	self->hover = FALSE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -105,6 +105,7 @@ void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self,
 	if (self->enabled) {
 		psy_ui_RealSize size;
 		psy_ui_RealRectangle r;
+		int styletype;
 
 		size = psy_ui_component_sizepx(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {
@@ -116,8 +117,13 @@ void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self,
 				psy_ui_realpoint_make(2.0, self->screenpos),
 				psy_ui_realsize_make(size.width - 4, 20));
 		}
+		if (self->hover) {
+			styletype = psy_ui_STYLE_SCROLLTHUMB_HOVER;
+		} else {
+			styletype = psy_ui_STYLE_SCROLLTHUMB;
+		}
 		psy_ui_drawsolidrectangle(g, r,
-			psy_ui_component_colour(&self->component));
+			psy_ui_style(styletype)->backgroundcolour);			
 	}
 }
 
@@ -143,7 +149,7 @@ void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane* self,
 
 void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 	psy_ui_MouseEvent* ev)
-{
+{	
 	if (self->drag) {
 		double step;
 		double pos;
@@ -171,6 +177,42 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 			self->pos = pos;
 			psy_signal_emit(&self->signal_changed, self, 0);
 		}		
+	} else if (self->enabled) {
+		psy_ui_RealRectangle r;
+		psy_ui_RealSize size;
+
+		size = psy_ui_component_sizepx(&self->component);
+		if (self->orientation == psy_ui_HORIZONTAL) {
+			r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(self->screenpos, 2.0),
+				psy_ui_realsize_make(20, size.height - 4));
+		} else {
+			r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(2.0, self->screenpos),
+				psy_ui_realsize_make(size.width - 4, 20));
+		}
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			if (self->hover != TRUE) {
+				self->hover = TRUE;
+				psy_ui_component_invalidate(&self->component);
+			}
+		} else if (self->hover) {
+			self->hover = FALSE;
+			psy_ui_component_invalidate(&self->component);
+		}
+	}
+}
+
+void psy_ui_scrollbarpane_onmouseenter(psy_ui_ScrollBarPane* self)
+{
+
+}
+
+void psy_ui_scrollbarpane_onmouseleave(psy_ui_ScrollBarPane* self)
+{
+	if (self->hover != FALSE) {
+		self->hover = FALSE;
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
