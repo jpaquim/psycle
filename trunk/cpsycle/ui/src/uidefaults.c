@@ -42,15 +42,7 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00232323));
-	psy_ui_border_init(&style->border);
-	psy_ui_colour_set(&style->border.colour_top,
-		psy_ui_colour_make(0x00333333));
-	psy_ui_colour_set(&style->border.colour_right,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_bottom,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_left,
-		style->border.colour_top);
+	psy_ui_border_init(&style->border);	
 	// font	
 	{
 		psy_ui_FontInfo fontinfo;
@@ -156,16 +148,7 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00000000));
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_make(0x00FBFBFB));
-	psy_ui_border_init(&style->border);	
-	psy_ui_colour_set(&style->border.colour_top,
-		psy_ui_colour_make(0x00B2B2B2));
-	psy_ui_colour_set(&style->border.colour_right,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_bottom,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_left,
-		style->border.colour_top);	
+		psy_ui_colour_make(0x00FBFBFB));	
 	// font	
 	{
 		psy_ui_FontInfo fontinfo;

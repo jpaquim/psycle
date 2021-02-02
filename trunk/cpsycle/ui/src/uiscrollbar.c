@@ -28,6 +28,7 @@ static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*,
 	double pos);
 static void psy_ui_scrollbarpane_enableinput(psy_ui_ScrollBarPane*);
 static void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane*);
+static void psy_ui_scrollbarpane_onupdatestyles(psy_ui_ScrollBarPane*);
 // vtable
 static psy_ui_ComponentVtable psy_ui_scrollbarpane_vtable;
 static bool psy_ui_scrollbarpane_vtable_initialized = FALSE;
@@ -53,6 +54,9 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 		psy_ui_scrollbarpane_vtable.preventinput =
 			(psy_ui_fp_component_preventinput)
 			psy_ui_scrollbarpane_preventinput;
+		psy_ui_scrollbarpane_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_scrollbarpane_onupdatestyles;
 		psy_ui_scrollbarpane_vtable_initialized = TRUE;
 	}
 }
@@ -270,6 +274,16 @@ void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane* self)
 	psy_ui_component_setbackgroundcolour(&self->component,
 		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
 	psy_ui_component_invalidate(&self->component);
+}
+
+void psy_ui_scrollbarpane_onupdatestyles(psy_ui_ScrollBarPane* self)
+{
+	psy_ui_component_setcolour(&self->component,
+		psy_ui_style(psy_ui_STYLE_SCROLLTHUMB)->colour);
+	if (psy_ui_style(psy_ui_STYLE_SCROLLPANE)->backgroundcolour.mode.set) {
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_style(psy_ui_STYLE_SCROLLPANE)->backgroundcolour);
+	}
 }
 
 // psy_ui_ScrollBar

@@ -329,6 +329,7 @@ static void midimonitor_updatechannelmap(MidiMonitor*);
 static void midimonitor_onhide(MidiMonitor*);
 static void midimonitor_onconfigure(MidiMonitor*);
 static void midimonitor_onmapconfigure(MidiMonitor*);
+static void midimonitor_onupdatestyles(MidiMonitor*);
 // vtable
 static psy_ui_ComponentVtable midimonitor_vtable;
 static bool midimonitor_vtable_initialized = FALSE;
@@ -339,6 +340,9 @@ static psy_ui_ComponentVtable* midimonitor_vtable_init(MidiMonitor* self)
 		midimonitor_vtable = *(self->component.vtable);		
 		midimonitor_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			midimonitor_ontimer;
+		midimonitor_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			midimonitor_onupdatestyles;
 		midimonitor_vtable_initialized = TRUE;
 	}
 	return &midimonitor_vtable;
@@ -375,8 +379,8 @@ void midimonitor_inittitle(MidiMonitor* self)
 	// titlebar
 	psy_ui_component_init(&self->titlebar, &self->client);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyle(&self->titlebar,
-		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
@@ -553,4 +557,10 @@ void midimonitor_onconfigure(MidiMonitor* self)
 void midimonitor_onmapconfigure(MidiMonitor* self)
 {
 	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 7, 0);
+}
+
+void midimonitor_onupdatestyles(MidiMonitor* self)
+{
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 }

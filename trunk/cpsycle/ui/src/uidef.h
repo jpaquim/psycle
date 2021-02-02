@@ -713,6 +713,10 @@ typedef struct {
 	psy_ui_Colour colour_right;
 	psy_ui_Colour colour_bottom;
 	psy_ui_Colour colour_left;
+	psy_ui_Value radius_top;
+	psy_ui_Value radius_right;
+	psy_ui_Value radius_bottom;
+	psy_ui_Value radius_left;
 } psy_ui_Border;
 
 INLINE void psy_ui_border_init(psy_ui_Border* self)
@@ -723,6 +727,10 @@ INLINE void psy_ui_border_init(psy_ui_Border* self)
 	self->right = psy_ui_BORDER_NONE;
 	self->bottom = psy_ui_BORDER_NONE;
 	self->left = psy_ui_BORDER_NONE;
+	self->radius_top = psy_ui_value_zero();
+	self->radius_right = psy_ui_value_zero();
+	self->radius_bottom = psy_ui_value_zero();
+	self->radius_left = psy_ui_value_zero();
 	psy_ui_colour_init(&self->colour_top);
 	psy_ui_colour_init(&self->colour_right);
 	psy_ui_colour_init(&self->colour_bottom);

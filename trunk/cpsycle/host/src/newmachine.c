@@ -716,6 +716,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// section border, define for the top line above a section label
 	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+	psy_ui_colour_set(&sectionborder.colour_top, psy_ui_colour_make(0x00B2B2B2));
 	// favorite view
 	psy_ui_label_init_text(&self->favoriteheader, &self->client,
 			"newmachine.favorites");
@@ -726,8 +727,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->favoriteheader.component, &margin);
 	self->favoriteheader.component.preventpreferredsizeatalign = TRUE;
 	psy_ui_component_resize(&self->favoriteheader.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));	
-	psy_ui_component_setborder(&self->favoriteheader.component, sectionborder);
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
+	self->favoriteheader.component.style.style.border = sectionborder;
 	pluginsview_init(&self->favoriteview, &self->client, TRUE, workspace);
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(4.0)));
@@ -745,8 +746,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->pluginsheader.component, &margin);
 	self->pluginsheader.component.preventpreferredsizeatalign = TRUE;
 	psy_ui_component_resize(&self->pluginsheader.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
-	psy_ui_component_setborder(&self->pluginsheader.component, sectionborder);
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));	
+	self->pluginsheader.component.style.style.border = sectionborder;
 	pluginsview_init(&self->pluginsview, &self->client, FALSE, workspace);
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
 		&self->client);

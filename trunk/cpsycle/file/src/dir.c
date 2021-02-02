@@ -123,10 +123,8 @@ void psy_path_extract_path(psy_Path* self)
 		free(self->name);
 		self->name = strdup(p + 1);		
 	} else {
-		free(self->prefix);
-		self->prefix = strdup("");
-		free(self->name);
-		self->name = strdup(self->path);
+		psy_strreset(&self->prefix, "");
+		psy_strreset(&self->name, self->path);		
 	}
 	p = strrchr(self->name, '.');
 	if (p) {
@@ -139,8 +137,7 @@ void psy_path_extract_path(psy_Path* self)
 		free(self->ext);
 		self->ext = strdup("");
 	}	
-	free(self->filename);
-	self->filename = psy_strdup(self->name);
+	psy_strreset(&self->filename, self->name);	
 	if (psy_strlen(self->ext) != 0) {
 		self->filename = psy_strcat_realloc(self->filename, ".");
 		self->filename = psy_strcat_realloc(self->filename, self->ext);

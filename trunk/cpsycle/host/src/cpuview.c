@@ -15,7 +15,7 @@
 static void cpumoduleview_ondraw(CPUModuleView*, psy_ui_Graphics*);
 static void cpumoduleview_onpreferredsize(CPUModuleView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-
+// vtable
 static psy_ui_ComponentVtable cpumoduleview_vtable;
 static bool cpumoduleview_vtable_initialized = FALSE;
 
@@ -29,7 +29,7 @@ static void cpumoduleview_vtable_init(CPUModuleView* self)
 		cpumoduleview_vtable_initialized = TRUE;
 	}
 }
-
+// implementation
 void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -122,6 +122,21 @@ static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void cpuview_onhide(CPUView*);
 static void cpuview_oncpuperf(CPUView*, psy_ui_CheckBox* sender);
+static void cpuview_onupdatestyles(CPUView*);
+// vtable
+static psy_ui_ComponentVtable cpuview_vtable;
+static bool cpuview_vtable_initialized = FALSE;
+
+static void cpuview_vtable_init(CPUView* self)
+{
+	if (!cpuview_vtable_initialized) {
+		cpuview_vtable = *(self->component.vtable);		
+		cpuview_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			cpuview_onupdatestyles;
+		cpuview_vtable_initialized = TRUE;
+	}
+}
 
 void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -131,7 +146,9 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2.0));
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	cpuview_vtable_init(self);
+	self->component.vtable = &cpuview_vtable;
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init_align(&self->top, &self->component,
@@ -154,8 +171,8 @@ void cpuview_inittitle(CPUView* self)
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->component,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyle(&self->titlebar,
-		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2.0));
@@ -285,4 +302,10 @@ void cpuview_oncpuperf(CPUView* self, psy_ui_CheckBox* sender)
 	} else {
 		psy_audio_player_stop_measure_cpu_usage(workspace_player(self->workspace));
 	}
+}
+
+void cpuview_onupdatestyles(CPUView* self)
+{
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 }

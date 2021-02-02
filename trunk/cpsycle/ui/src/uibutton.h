@@ -30,10 +30,7 @@ typedef struct psy_ui_Button {
 	int charnumber;
 	double linespacing;
 	psy_ui_Alignment textalignment;
-	bool enabled;
-	psy_ui_Colour textcolour;
-	psy_ui_Colour restorebgcolour;
-	psy_ui_Border border;
+	bool enabled;		
 	bool shiftstate;
 	bool ctrlstate;
 	bool buttonstate;

@@ -531,14 +531,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						hfont = ((psy_ui_win_FontImp*)
 							psy_ui_component_font(imp->component)->imp)->hfont;
 						hPrevFont = SelectObject(win_g->hdc, hfont);						
+						// draw border						
+						psy_ui_component_drawborder(imp->component, &g);
 						// prepare colours
 						psy_ui_setcolour(&g, psy_ui_component_colour(
 							imp->component));
 						psy_ui_settextcolour(&g, psy_ui_component_colour(
 							imp->component));
-						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);						
-						// draw border						
-						psy_ui_component_drawborder(imp->component, &g);
+						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);
 						// update graphics origin
 						GetWindowOrgEx(win_g->hdc, &org);
 						win_g->orgx = org.x;

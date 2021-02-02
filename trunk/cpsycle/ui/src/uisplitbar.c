@@ -161,49 +161,54 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		if (prev) {
 			prevposition = psy_ui_component_position(prev);
 		} else {
-			prevposition = psy_ui_component_position(psy_ui_component_parent(&self->component));
+			prevposition = psy_ui_component_position(
+				psy_ui_component_parent(&self->component));
 		}
 		next = splitbar_nextcomponent(self);
 		if (next) {
 			nextposition = psy_ui_component_position(next);
 		} else {
-			nextposition = psy_ui_component_position(psy_ui_component_parent(&self->component));
+			nextposition = psy_ui_component_position(
+				psy_ui_component_parent(&self->component));
 		}
-		if (self->component.align == psy_ui_ALIGN_LEFT) {
-			psy_ui_component_move(&self->component,
-				psy_ui_point_make(
-					psy_ui_value_makepx(
-						psy_max(prevposition.left,
-						psy_min(nextposition.right - (position.right - position.left), position.left + ev->pt.x - self->dragoffset))),
-					psy_ui_value_makepx(position.top)));
-		} else
-		if (self->component.align == psy_ui_ALIGN_RIGHT) {
-			psy_ui_component_move(&self->component,
-				psy_ui_point_make(
-					psy_ui_value_makepx(
-						psy_max(nextposition.left,
-						psy_min(prevposition.right - (position.right - position.left), position.left + ev->pt.x - self->dragoffset))),
-					psy_ui_value_makepx(position.top)));
-		} else
-		if (self->component.align == psy_ui_ALIGN_TOP) {
-			psy_ui_component_move(&self->component,
-				psy_ui_point_make(
-					psy_ui_value_makepx(position.left),
-					psy_ui_value_makepx(
-						psy_max(prevposition.top,
-						psy_min(nextposition.bottom - (position.bottom - position.top), position.top + ev->pt.y - self->dragoffset)))
-					));
-		} else
-		if (self->component.align == psy_ui_ALIGN_BOTTOM) {
-			psy_ui_component_move(&self->component,
-				psy_ui_point_make(
-					psy_ui_value_makepx(position.left),
-					psy_ui_value_makepx(
-						psy_max(0,
-						psy_min((parentposition.bottom - parentposition.top) - (position.bottom - position.top),
-							 position.top + ev->pt.y - self->dragoffset)))));
-			
-		}			
+		switch (self->component.align) {
+			case psy_ui_ALIGN_LEFT:
+				psy_ui_component_move(&self->component,
+					psy_ui_point_makepx(psy_max(prevposition.left, psy_min(
+							nextposition.right - (position.right - position.left),
+							position.left + ev->pt.x - self->dragoffset)),
+						position.top));
+				break;
+			case psy_ui_ALIGN_RIGHT:
+				TRACE_INT(nextposition.left);
+				TRACE("; ");
+				TRACE_INT(position.left);
+				TRACE("\n");
+				psy_ui_component_move(&self->component,
+					psy_ui_point_makepx(
+							psy_max(nextposition.left,
+								psy_min(prevposition.right - psy_ui_realrectangle_width(&position),
+									position.left + ev->pt.x - self->dragoffset)),
+						position.top));
+				break;
+			case psy_ui_ALIGN_TOP:
+				psy_ui_component_move(&self->component,
+					psy_ui_point_makepx(
+						position.left, psy_max(prevposition.top, psy_min(
+							nextposition.bottom - (position.bottom - position.top),
+						position.top + ev->pt.y - self->dragoffset))));
+				break;
+			case psy_ui_ALIGN_BOTTOM:				
+				psy_ui_component_move(&self->component,
+					psy_ui_point_makepx(
+						position.left,
+						psy_max(0.0, psy_min(prevposition.bottom -
+							psy_ui_realrectangle_height(&position),
+							position.top + ev->pt.y - self->dragoffset))));
+				break;
+			default:
+				break;
+		}
 		psy_ui_component_invalidate(&self->component);
 		psy_ui_component_update(&self->component);
 	} else {
@@ -248,7 +253,8 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				prev_position = psy_ui_component_position(prev);
 				psy_ui_component_resize(prev,
 					psy_ui_size_make(
-						psy_ui_value_makepx(prev_position.right - position.right),
+						psy_ui_value_makepx(
+							prev_position.right - position.right),
 						psy_ui_component_size(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_TOP) {
 				prev->preventpreferredsizeatalign = TRUE;
@@ -276,6 +282,13 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		}
 		splitbar_setcursor(self);		
 		self->hover = 1;
+		if (prev) {
+			psy_ui_component_invalidate(prev);
+		}
+		if (next) {
+			psy_ui_component_invalidate(next);
+		}
+		psy_ui_component_invalidate(&self->component);
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolour(&self->component,

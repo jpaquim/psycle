@@ -95,6 +95,7 @@ typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t)
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -135,11 +136,21 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 	psy_ui_fp_component_onfocus onfocus;
 	psy_ui_fp_component_onfocus onfocuslost;
+	psy_ui_fp_component_onupdatestyles onupdatestyles;
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
+
+typedef struct psy_ui_ComponentStyle {
+	psy_ui_Style* currstyle;
+	psy_ui_Style style;
+	psy_ui_Style hover;
+	psy_ui_Style select;
+} psy_ui_ComponentStyle;
+
+void psy_ui_componentstyle_init(psy_ui_ComponentStyle* style);
 
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
@@ -193,8 +204,7 @@ typedef struct psy_ui_Component {
 	bool handlevscroll;
 	bool handlehscroll;
 	int cursor;	
-	bool mousetracking;
-	psy_ui_Style style;
+	bool mousetracking;	
 	psy_ui_Size preferredsize;
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;
@@ -207,10 +217,12 @@ typedef struct psy_ui_Component {
 	psy_ui_AlignType insertaligntype;
 	psy_ui_Margin insertmargin;	
 	psy_ui_ScrollMode scrollmode;
+	psy_ui_ComponentStyle style;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 void psy_ui_updatealign(psy_ui_Component* main, psy_List* children);
+void psy_ui_notifystyleupdate(psy_ui_Component* main);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
 void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
@@ -296,12 +308,6 @@ void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_alignall(psy_ui_Component*);
 void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
-
-INLINE void psy_ui_component_setborder(psy_ui_Component* self, psy_ui_Border border)
-{
-	self->style.border = border;
-	self->style.border.mode.set = TRUE;
-}
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
@@ -689,8 +695,6 @@ const psy_ui_Style* psy_ui_style(int styletype);
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType, psy_ui_Margin margin);
 
-void psy_ui_component_setstyle(psy_ui_Component* self, psy_ui_Style);
-
 const struct psy_ui_Defaults* psy_ui_defaults(void);
 
 void psy_ui_component_updatelanguage(psy_ui_Component* self);
@@ -700,6 +704,8 @@ const char* psy_ui_translate(const char* key);
 
 void psy_ui_component_setmode(psy_ui_Component*, psy_ui_ScrollMode);
 
+void psy_ui_component_setstyletypes(psy_ui_Component*,
+	int standard, int hover, int select);
 
 #ifdef __cplusplus
 }

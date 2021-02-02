@@ -88,8 +88,11 @@ typedef struct {
 void sampleeditluaprocessor_init(SampleEditLuaProcessor*, psy_ui_Component* parent,
 	Workspace* workspace);
 
-typedef struct {
+typedef struct SampleEditorProcessView {
+	// inherits
 	psy_ui_Component component;
+	// internal
+	psy_ui_Component client;
 	SampleEditorOperations copypaste;
 	psy_ui_Button process;
 	psy_ui_ListBox processors;

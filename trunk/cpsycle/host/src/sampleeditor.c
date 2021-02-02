@@ -260,9 +260,15 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
-	sampleeditoroperations_init(&self->copypaste, &self->component, workspace);
+	psy_ui_component_init(&self->client, &self->component);
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0.0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1.0));
+	psy_ui_component_setmargin(&self->client, &margin);
+	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
-	psy_ui_button_init(&self->process, &self->component);
+	psy_ui_button_init(&self->process, &self->client);
 	psy_ui_button_settext(&self->process, "samplesview.process");
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1.5),
@@ -270,10 +276,10 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));	
 	psy_ui_component_setmargin(&self->process.component, &margin);
-	psy_ui_listbox_init(&self->processors, &self->component);
+	psy_ui_listbox_init(&self->processors, &self->client);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->processors.component, &margin);	
-	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component, workspace);	
 	sampleprocessview_buildprocessorlist(self);
@@ -295,10 +301,7 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	psy_ui_listbox_setcursel(&self->processors, 0);
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
-		sampleeditorprocessview_onprocessorselected);
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(20),
-			psy_ui_value_makeeh(10)));
+		sampleeditorprocessview_onprocessorselected);	
 }
 
 void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
@@ -690,7 +693,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
 	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setmargin(&self->processview.component, &margin);
+	//psy_ui_component_setmargin(&self->processview.component, &margin);
 	psy_signal_connect(&self->processview.process.signal_clicked, self,
 		sampleeditor_onprocess);
 	psy_signal_connect(&self->processview.copypaste.crop.signal_clicked, self,
@@ -711,9 +714,9 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_component_setmargin(&self->header.component, &margin);	
+	//psy_ui_component_setmargin(&self->header.component, &margin);	
 	samplebox_init(&self->samplebox, &self->component, workspace);
-	psy_ui_component_setmargin(&self->samplebox.component, &margin);
+	//psy_ui_component_setmargin(&self->samplebox.component, &margin);
 	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->samplebox.signal_selectionchanged, self,
 		sampleeditor_onselectionchanged);
@@ -724,7 +727,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(&self->zoom.component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(2)));	
-	psy_ui_component_setmargin(&self->zoom.component, &margin);
+	//psy_ui_component_setmargin(&self->zoom.component, &margin);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);	

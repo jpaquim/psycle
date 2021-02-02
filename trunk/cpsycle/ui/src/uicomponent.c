@@ -13,6 +13,21 @@
 // platform
 #include "../../detail/portable.h"
 
+void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
+{
+	psy_ui_style_init(&self->style);
+	psy_ui_style_init(&self->hover);
+	psy_ui_style_init(&self->select);
+	self->currstyle = &self->style;
+}
+
+void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
+{
+	psy_ui_style_dispose(&self->style);
+	psy_ui_style_dispose(&self->hover);
+	psy_ui_style_dispose(&self->select);
+}
+
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_updatesyles(psy_ui_Component* main);
 static void psy_ui_component_updatefont(psy_ui_Component*);
@@ -29,11 +44,34 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
 			psy_ui_Component* child;			
 			child = (psy_ui_Component*) p->entry;			
-			psy_ui_component_updatefont(child);						
+			psy_ui_component_updatefont(child);		
 		}
 		// align
 		psy_ui_updatealign(main, q);
 	}
+}
+
+void psy_ui_notifystyleupdate(psy_ui_Component* main)
+{
+	if (main) {
+		psy_List* p;
+		psy_List* q;
+
+		// merge
+		main->vtable->onupdatestyles(main);
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
+			psy_ui_Component* child;
+			child = (psy_ui_Component*)p->entry;
+			child->vtable->onupdatestyles(child);
+			if (child->imp) {			
+				child->imp->vtable->dev_setbackgroundcolour(child->imp,
+					psy_ui_component_backgroundcolour(child));
+				psy_ui_component_updatefont(child);
+			}
+
+		}
+	}
+	psy_ui_component_invalidate(main);
 }
 
 void psy_ui_updatealign(psy_ui_Component* main, psy_List* children)
@@ -68,8 +106,8 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 	const psy_ui_Style* common;	
 
 	common = psy_ui_style(psy_ui_STYLE_COMMON);
-	if (self->style.use_font) {
-		rv = &self->style.font;
+	if (self->style.currstyle->use_font) {
+		rv = &self->style.currstyle->font;
 	} else {
 		rv = &psy_ui_style(psy_ui_STYLE_COMMON)->font;
 	}
@@ -79,7 +117,7 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {		
-	self->style.backgroundcolour = colour;
+	self->style.currstyle->backgroundcolour = colour;
 	//psy_ui_colour_set(&self->style.backgroundcolour, colour);
 }
 
@@ -89,24 +127,24 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 
 	curr = self;
 	while (curr) {
-		if (curr->style.backgroundcolour.mode.set) {
+		if (curr->style.currstyle->backgroundcolour.mode.set) {
 			break;
 		}
-		if (self->style.backgroundcolour.mode.inherited == FALSE) {
+		if (self->style.currstyle->backgroundcolour.mode.inherited == FALSE) {
 			curr = NULL;
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
 	if (curr) {
-		return curr->style.backgroundcolour;
+		return curr->style.currstyle->backgroundcolour;
 	}
 	return psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour;
 }
 
 void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
 {
-	psy_ui_colour_set(&self->style.colour, colour);
+	psy_ui_colour_set(&self->style.currstyle->colour, colour);
 }
 
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
@@ -115,25 +153,25 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 
 	curr = self;
 	while (curr) {
-		if (curr->style.colour.mode.set) {
+		if (curr->style.currstyle->colour.mode.set) {
 			break;
 		}
-		if (self->style.colour.mode.inherited == FALSE) {
+		if (self->style.currstyle->colour.mode.inherited == FALSE) {
 			curr = NULL;
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
 	if (curr) {
-		return curr->style.colour;
+		return curr->style.currstyle->colour;
 	}
 	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
 }
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
 {
-	if (self->style.border.mode.set) {
-		return self->style.border;
+	if (self->style.currstyle->border.mode.set) {
+		return self->style.currstyle->border;
 	}
 	return psy_ui_style(psy_ui_STYLE_COMMON)->border;
 }
@@ -141,15 +179,13 @@ psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
-		psy_ui_Style* common;
-		psy_ui_Font old_default_font;
+		psy_ui_Style* common;		
 
-		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_COMMON);
-		old_default_font = common->font;
-		psy_ui_font_init(&common->font, 0);
+		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_COMMON);		
+		psy_ui_font_dispose(&common->font);
+		psy_ui_font_init(&common->font, NULL);
 		psy_ui_font_copy(&common->font, font);
 		psy_ui_updatesyles(main);
-		psy_ui_font_dispose(&old_default_font);
 	}
 }
 
@@ -191,6 +227,7 @@ static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
 static void onlanguagechanged(psy_ui_Component* self) { }
 static void onfocus(psy_ui_Component* self) { }
 static void onfocuslost(psy_ui_Component* self) { }
+static void onupdatestyles(psy_ui_Component* self) { }
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -237,6 +274,7 @@ static void vtable_init(void)
 		vtable.preventinput = preventinput;
 		vtable.onfocus = onfocus;
 		vtable.onfocuslost = onfocuslost;
+		vtable.onupdatestyles = onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 }
@@ -287,7 +325,7 @@ void dispose(psy_ui_Component* self)
 	self->imp->vtable->dev_dispose(self->imp);
 	free(self->imp);
 	self->imp = 0;
-	psy_ui_style_dispose(&self->style);
+	psy_ui_componentstyle_dispose(&self->style);
 }
 
 void destroy(psy_ui_Component* self)
@@ -376,23 +414,23 @@ void setfont(psy_ui_Component* self, psy_ui_Font* font)
 	if (font) {
 		int dispose;
 
-		dispose = self->style.use_font;
+		dispose = self->style.currstyle->use_font;
 		self->imp->vtable->dev_setfont(self->imp, font);
 		if (dispose) {
-			psy_ui_font_dispose(&self->style.font);
+			psy_ui_font_dispose(&self->style.currstyle->font);
 		}
-		psy_ui_font_init(&self->style.font, 0);
-		psy_ui_font_copy(&self->style.font, font);
-		self->style.use_font = 1;
+		psy_ui_font_init(&self->style.currstyle->font, 0);
+		psy_ui_font_copy(&self->style.currstyle->font, font);
+		self->style.currstyle->use_font = 1;
 	} else {
 		int dispose;
 
-		dispose = self->style.use_font;
-		self->style.use_font = 0;
+		dispose = self->style.currstyle->use_font;
+		self->style.currstyle->use_font = 0;
 		psy_ui_component_updatefont(self);
 		self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));		
 		if (dispose) {
-			psy_ui_font_dispose(&self->style.font);
+			psy_ui_font_dispose(&self->style.currstyle->font);
 		}
 	}
 }
@@ -436,6 +474,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
+	psy_ui_componentstyle_init(&self->style);
 	self->scrollstepx = psy_ui_value_makeew(8.0);
 	self->scrollstepy = psy_ui_value_makeeh(1.0);
 	self->overflow = psy_ui_OVERFLOW_HIDDEN;	
@@ -454,7 +493,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preferredsize = psy_ui_component_size(self);
 	self->maxsize = psy_ui_size_zero();
 	self->minsize = psy_ui_size_zero();
-	psy_ui_style_init(&self->style);	
+	psy_ui_componentstyle_init(&self->style);	
 	psy_ui_margin_init(&self->spacing);	
 	self->debugflag = 0;	
 	self->visible = 1;
@@ -479,7 +518,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 void psy_ui_component_dispose(psy_ui_Component* self)
 {
 	self->vtable->dispose(self);
-	psy_ui_component_dispose_signals(self);	
+	psy_ui_component_dispose_signals(self);		
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -874,7 +913,7 @@ static void dev_releasecapture(psy_ui_ComponentImp* self) { }
 static void dev_invalidate(psy_ui_ComponentImp* self) { }
 static void dev_invalidaterect(psy_ui_ComponentImp* self, const psy_ui_RealRectangle* r) { }
 static void dev_update(psy_ui_ComponentImp* self) { }
-static void dev_setfont(psy_ui_ComponentImp* self, psy_ui_Font* font) { }
+static void dev_setfont(psy_ui_ComponentImp* self, const psy_ui_Font* font) { }
 static void dev_showhorizontalscrollbar(psy_ui_ComponentImp* self) { }
 static void dev_hidehorizontalscrollbar(psy_ui_ComponentImp* self) { }
 static void dev_sethorizontalscrollrange(psy_ui_ComponentImp* self, intptr_t min, intptr_t max) { }
@@ -1124,37 +1163,12 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 }
 
 void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
-{
-	psy_ui_Border border;
-
-	border = psy_ui_component_border(self);
-	if (border.mode.set) {		
-		psy_ui_RealSize size;
-		
-		size = psy_ui_component_sizepx(self);
-		if (border.top != psy_ui_BORDER_NONE) {
-			if (border.colour_top.mode.set) {
-				psy_ui_setcolour(g, border.colour_top);
-			} else {
-				psy_ui_setcolour(g,
-					psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
-			}
-			psy_ui_drawline(g,
-				psy_ui_realpoint_zero(), 
-				psy_ui_realpoint_make(size.width, 0));
-		}
-		if (border.bottom != psy_ui_BORDER_NONE) {
-			if (border.colour_top.mode.set) {
-				psy_ui_setcolour(g, border.colour_top);
-			} else {
-				psy_ui_setcolour(g,
-					psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
-			}
-			psy_ui_drawline(g,
-				psy_ui_realpoint_make(0, size.height - 1),
-				psy_ui_realpoint_make(size.width, size.height - 1));
-		}
-	}
+{	
+	psy_ui_drawborder(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			psy_ui_component_sizepx(self)),
+		psy_ui_component_border(self));
 }
 
 void psy_ui_component_togglevisibility(psy_ui_Component* self)
@@ -1301,7 +1315,13 @@ void psy_ui_component_setmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
 	self->scrollmode = mode;
 }
 
-void psy_ui_component_setstyle(psy_ui_Component* self, psy_ui_Style style)
+void psy_ui_component_setstyletypes(psy_ui_Component* self,
+	int standard, int hover, int select)
 {
-	psy_ui_style_copy(&self->style, &style);
+	psy_ui_style_copy(&self->style.style,
+		psy_ui_style(standard));
+	psy_ui_style_copy(&self->style.hover,
+		psy_ui_style(hover));
+	psy_ui_style_copy(&self->style.select,
+		psy_ui_style(select));
 }

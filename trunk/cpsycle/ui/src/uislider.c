@@ -28,7 +28,7 @@ static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
-
+static void psy_ui_sliderpane_onupdatestyles(psy_ui_SliderPane*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -54,6 +54,9 @@ static void vtable_init(psy_ui_SliderPane* self)
 			psy_ui_sliderpane_onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
 			psy_ui_sliderpane_onmouseleave;
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_sliderpane_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 }
@@ -332,6 +335,14 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 	} else {
 		rv->width = psy_ui_value_makeew(4.0);
 		rv->height = psy_ui_value_makeeh(20.0);
+	}
+}
+
+void psy_ui_sliderpane_onupdatestyles(psy_ui_SliderPane* self)
+{
+	if (psy_ui_style(psy_ui_STYLE_SLIDERPANE)->backgroundcolour.mode.set) {
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_style(psy_ui_STYLE_SLIDERPANE)->backgroundcolour);
 	}
 }
 

@@ -231,6 +231,7 @@ static void seqeditortracks_invalidatebitmap(SeqEditorTracks*);
 static void seqeditortrack_outputstatusposition(SeqEditorTrack*, double x);
 static psy_audio_OrderIndex seqeditortrack_hittest(SeqEditorTrack*,
 	psy_ui_RealPoint);
+
 // vtable
 static SeqEditorTrackVTable seqeditortrack_vtable;
 static bool seqeditortrack_vtable_initialized = FALSE;
@@ -238,18 +239,24 @@ static bool seqeditortrack_vtable_initialized = FALSE;
 static void seqeditortrack_vtable_init(void)
 {
 	if (!seqeditortrack_vtable_initialized) {
-		seqeditortrack_vtable.ondraw = (seqeditortrack_fp_ondraw)
+		seqeditortrack_vtable.ondraw =
+			(seqeditortrack_fp_ondraw)
 			seqeditortrack_ondraw_virtual;
-		seqeditortrack_vtable.onpreferredsize = (seqeditortrack_fp_onpreferredsize)
+		seqeditortrack_vtable.onpreferredsize =
+			(seqeditortrack_fp_onpreferredsize)
 			seqeditortrack_onpreferredsize_virtual;
-		seqeditortrack_vtable.onmousedown = (seqeditortrack_fp_onmousedown)
+		seqeditortrack_vtable.onmousedown =
+			(seqeditortrack_fp_onmousedown)
 			seqeditortrack_onmousedown_virtual;
-		seqeditortrack_vtable.onmousemove = (seqeditortrack_fp_onmousemove)
+		seqeditortrack_vtable.onmousemove =
+			(seqeditortrack_fp_onmousemove)
 			seqeditortrack_onmousemove_virtual;
-		seqeditortrack_vtable.onmouseup = (seqeditortrack_fp_onmouseup)
+		seqeditortrack_vtable.onmouseup =
+			(seqeditortrack_fp_onmouseup)
 			seqeditortrack_onmouseup_virtual;
-		seqeditortrack_vtable.onmousedoubleclick = (seqeditortrack_fp_onmousedoubleclick)
-			seqeditortrack_onmousedoubleclick_virtual;
+		seqeditortrack_vtable.onmousedoubleclick =
+			(seqeditortrack_fp_onmousedoubleclick)
+			seqeditortrack_onmousedoubleclick_virtual;		
 		seqeditortrack_vtable_initialized = TRUE;
 	}
 }
@@ -952,6 +959,7 @@ static void seqeditortracks_onsequenceselectionupdate(SeqEditorTracks*,
 	psy_audio_SequenceSelection*);
 static void seqeditortracks_onsequencetrackreposition(SeqEditorTracks*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
+static void seqeditortracks_onupdatestyles(SeqEditorTracks*);
 
 static void seqeditortracks_ontimer(SeqEditorTracks*, uintptr_t timerid);
 static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditorTrackState*);
@@ -981,6 +989,9 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 			seqeditortracks_onmouseleave;
 		seqeditortracks_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			seqeditortracks_ontimer;
+		seqeditortracks_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			seqeditortracks_onupdatestyles;
 		seqeditortracks_vtable_initialized = TRUE;
 	}
 }
@@ -1440,6 +1451,11 @@ void seqeditortracks_oncursorchanged(SeqEditorTracks* self,
 	SeqEditorTrackState* trackstate)
 {
 	psy_ui_component_invalidate(&self->component);
+}
+
+void seqeditortracks_onupdatestyles(SeqEditorTracks* self)
+{
+	seqeditortracks_invalidatebitmap(self);
 }
 
 // SeqEditor
