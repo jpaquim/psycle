@@ -51,7 +51,7 @@ psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, int styletype);
 const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles* self,
 	int styletype);
 void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
-psy_Property* psy_ui_styles_configuration(psy_ui_Styles*);
+const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles*);
 
 
 #ifdef __cplusplus

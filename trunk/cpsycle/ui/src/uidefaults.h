@@ -31,7 +31,10 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_SCROLLTHUMB_HOVER,
 	psy_ui_STYLE_SLIDERPANE,
 	psy_ui_STYLE_SLIDERTHUMB,
-	psy_ui_STYLE_SLIDERTHUMB_HOVER
+	psy_ui_STYLE_SLIDERTHUMB_HOVER,
+	psy_ui_STYLE_COMBOBOX,
+	psy_ui_STYLE_COMBOBOX_HOVER,
+	psy_ui_STYLE_COMBOBOX_SELECT,
 } psy_ui_StyleTypes;
 
 typedef struct psy_ui_Defaults {
@@ -52,6 +55,7 @@ const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
 	int styletype);
 void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* configdir,
 	bool isdark);
+void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* filename);
 
 INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)
 {

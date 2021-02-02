@@ -611,7 +611,7 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
 		HDC hdc;
 		HFONT hPrevFont = 0;
 		HFONT hfont = 0;
-		psy_ui_Font* font = NULL;
+		const psy_ui_Font* font = NULL;
 
 		hdc = GetDC(self->hwnd);
 		SaveDC(hdc);

@@ -244,7 +244,7 @@ psy_ui_Colour psy_ui_styles_readcolour(psy_ui_Styles* self, psy_Property* parent
 	return rv;
 }
 
-psy_Property* psy_ui_styles_configuration(psy_ui_Styles* self)
+const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles* self)
 {	
 	psy_ui_styles_updateconfig(self);
 	return &self->config;

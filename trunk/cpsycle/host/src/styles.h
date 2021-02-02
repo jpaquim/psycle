@@ -17,8 +17,10 @@ extern "C" {
 #define STYLE_SEQEDT_ITEM_SELECTED 121
 #define STYLE_SEQEDT_EVENT         122
 
+struct psy_ui_Defaults;
 
-void initdarkstyles(void);
+void initlightstyles(struct psy_ui_Defaults*);
+void initdarkstyles(struct psy_ui_Defaults*);
 
 #ifdef __cplusplus
 }

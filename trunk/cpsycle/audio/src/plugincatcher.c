@@ -308,18 +308,14 @@ int psy_audio_plugincatcher_load(psy_audio_PluginCatcher* self)
 	psy_audio_plugincatcher_clear(self);	
 	rv = propertiesio_load(self->plugins, &path, 1);
 	psy_path_dispose(&path);
-	self->hasplugincache = rv;
+	self->hasplugincache = (rv == PSY_OK);
 	psy_signal_emit(&self->signal_changed, self, 0);
 	return rv;
 }
 
-void psy_audio_plugincatcher_save(psy_audio_PluginCatcher* self)
-{	
-	psy_Path path;
-
-	psy_path_init(&path, self->inipath);
-	propertiesio_save(self->plugins, &path);
-	psy_path_dispose(&path);
+int psy_audio_plugincatcher_save(psy_audio_PluginCatcher* self)
+{		
+	return propertiesio_save(self->plugins, self->inipath);	
 }
 
 uintptr_t psy_audio_plugincatcher_extractshellidx(const char* path)

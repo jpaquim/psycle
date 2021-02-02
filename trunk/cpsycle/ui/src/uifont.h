@@ -75,7 +75,7 @@ INLINE void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
 
 // psy_ui_FontImp
 typedef void (*psy_ui_font_imp_fp_dispose)(struct psy_ui_FontImp*);
-typedef void (*psy_ui_font_imp_fp_copy)(struct psy_ui_FontImp*, struct psy_ui_FontImp*);
+typedef void (*psy_ui_font_imp_fp_copy)(struct psy_ui_FontImp*, const struct psy_ui_FontImp*);
 typedef const psy_ui_FontInfo (*psy_ui_font_imp_fp_dev_fontinfo)(const struct psy_ui_FontImp*);
 
 typedef struct psy_ui_FontImpVTable {

@@ -1287,11 +1287,6 @@ const psy_ui_Style* psy_ui_style(int styletype)
 	return psy_ui_app_style(psy_ui_app(), styletype);
 }
 
-const struct psy_ui_Defaults* psy_ui_defaults(void)
-{
-	return &psy_ui_app()->defaults;
-}
-
 void psy_ui_component_updatelanguage(psy_ui_Component* self)
 {
 	assert(self);

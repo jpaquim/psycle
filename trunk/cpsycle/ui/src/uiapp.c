@@ -324,3 +324,18 @@ void psy_ui_appimp_init(psy_ui_AppImp* self)
 	imp_vtable_init();
 	self->vtable = &imp_vtable;
 }
+
+const struct psy_ui_Defaults* psy_ui_defaults(void)
+{
+	return &psy_ui_app()->defaults;
+}
+
+struct psy_ui_Defaults* psy_ui_appdefaults(void)
+{
+	return &psy_ui_app()->defaults;
+}
+
+const struct psy_ui_Defaults* psy_ui_appdefaults_const(void)
+{
+	return &psy_ui_app()->defaults;
+}

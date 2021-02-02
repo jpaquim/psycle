@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 int propertiesio_load(psy_Property*, const psy_Path*, int allowappend);
-void propertiesio_save(const psy_Property*, const psy_Path*);
+int propertiesio_save(const psy_Property*, const char* filename);
 
 #ifdef __cplusplus
 }

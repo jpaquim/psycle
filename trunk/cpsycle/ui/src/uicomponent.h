@@ -695,8 +695,6 @@ const psy_ui_Style* psy_ui_style(int styletype);
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType, psy_ui_Margin margin);
 
-const struct psy_ui_Defaults* psy_ui_defaults(void);
-
 void psy_ui_component_updatelanguage(psy_ui_Component* self);
 psy_Translator* psy_ui_translator(void);
 

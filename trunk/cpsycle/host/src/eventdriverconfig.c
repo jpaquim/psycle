@@ -192,7 +192,7 @@ void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
 		success = psy_ui_savedialog_execute(&dialog);
 		if (success) {
 			propertiesio_save(psy_eventdriver_configuration(eventdriver),
-				psy_ui_savedialog_path(&dialog));
+				psy_path_full(psy_ui_savedialog_path(&dialog)));
 		}
 		psy_ui_savedialog_dispose(&dialog);
 	}

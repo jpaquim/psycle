@@ -2,9 +2,10 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "styles.h"
-#include <uicomponent.h>
+// ui
+#include <uidefaults.h>
 
-void initdarkstyles(void)
+void initdarkstyles(psy_ui_Defaults* defaults)
 {
 	psy_ui_Style* style;
 
@@ -22,7 +23,7 @@ void initdarkstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQEDT_ITEM, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
 	// sequenceeditor item::selected
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -37,7 +38,7 @@ void initdarkstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQEDT_ITEM_SELECTED, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_SELECTED, style);
 	// sequencetrackbox tab
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -52,7 +53,7 @@ void initdarkstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB, style);
 	// sequencetrackbox tab::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -67,7 +68,7 @@ void initdarkstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_HOVER, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_HOVER, style);
 	// sequencetrackbox tab::select
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00B1C8B0));
@@ -82,20 +83,20 @@ void initdarkstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_SELECT, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_SELECT, style);
 	// sequencetrackbox newtrack
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00444444));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_NEW, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_NEW, style);
 	// sequenceview progress
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00514536));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_PROGRESS, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_PROGRESS, style);
 }
 
-void initlightstyles(void)
+void initlightstyles(psy_ui_Defaults* defaults)
 {
 	psy_ui_Style* style;	
 
@@ -113,7 +114,7 @@ void initlightstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQEDT_ITEM, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
 	// sequenceeditor item selected
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0xFFFFFF));
@@ -128,7 +129,7 @@ void initlightstyles(void)
 		style->border.colour_top);
 	psy_ui_colour_set(&style->border.colour_left,
 		style->border.colour_top);
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQEDT_ITEM_SELECTED,
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_SELECTED,
 		style);
 	// sequencetrackbox tab
 	style = psy_ui_style_allocinit();
@@ -136,36 +137,36 @@ void initlightstyles(void)
 	psy_ui_border_init(&style->border);
 	psy_ui_colour_set(&style->border.colour_left,
 		psy_ui_colour_make(0x00B2B2B2));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB, style);
 	// sequencetrackbox tab::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x1050F0));
 	psy_ui_border_init(&style->border);
 	psy_ui_colour_set(&style->border.colour_left,
 		psy_ui_colour_make(0x00B2B2B2));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_HOVER, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_HOVER, style);
 	// sequencetrackbox tab::select
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x1050F0));
 	psy_ui_border_init(&style->border);
 	psy_ui_colour_set(&style->border.colour_left,
 		psy_ui_colour_make(0x1050F0));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_SELECT, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_SELECT, style);
 	// sequencetrackbox newtrack
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));		
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_TAB_NEW, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_NEW, style);
 	// sequenceeditor event
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x8398F1));	
 	psy_ui_border_init(&style->border);
 	psy_ui_colour_set(&style->border.colour_left,
 		psy_ui_colour_make(0x1b8ff2));	
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQEDT_EVENT, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_EVENT, style);
 	// sequenceview progress
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00444444));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x0979F7));
-	psy_ui_defaults_setstyle(psy_ui_defaults(), STYLE_SEQ_PROGRESS, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_PROGRESS, style);
 }

@@ -13,7 +13,7 @@
 
 // VTable Prototypes
 static void dispose(psy_ui_Font*);
-static void copy(psy_ui_Font*, psy_ui_Font* other);
+static void copy(psy_ui_Font*, const psy_ui_Font* other);
 
 // VTable init
 static psy_ui_FontVTable vtable;
@@ -43,14 +43,14 @@ void dispose(psy_ui_Font* self)
 	self->imp = 0;
 }
 
-void copy(psy_ui_Font* self, psy_ui_Font* other)
+void copy(psy_ui_Font* self, const psy_ui_Font* other)
 {
 	self->imp->vtable->dev_copy(self->imp, other->imp);	
 }
 
 // psy_ui_FontImp
 static void dev_dispose(psy_ui_FontImp* self) { }
-static void dev_copy(psy_ui_FontImp* self, psy_ui_FontImp* other) { }
+static void dev_copy(psy_ui_FontImp* self, const psy_ui_FontImp* other) { }
 static const psy_ui_FontInfo dev_fontinfo(const psy_ui_FontImp* self)
 {
     psy_ui_FontInfo rv;
