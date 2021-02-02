@@ -98,7 +98,7 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 
 void kbdbox_initfont(KbdBox* self)
 {
-	psy_ui_Font* font;
+	const psy_ui_Font* font;
 	const psy_ui_TextMetric* tm;
 	
 	font = psy_ui_component_font(&self->component);

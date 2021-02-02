@@ -187,20 +187,21 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 		}
 		free(key);
 		free(value);
+		return PSY_OK;
 	}	
-	return fp != NULL;
+	return PSY_ERRFILE;
 }
 
-static int skip;
+static uintptr_t skip;
 static uintptr_t skiplevel;
 static uintptr_t choicelevel;
 static char* lastsection;
 
-void propertiesio_save(const psy_Property* self, const psy_Path* path)
+int propertiesio_save(const psy_Property* self, const char* filename)
 {
 	FILE* fp;
 
-	fp = fopen(psy_path_full(path), "wb");
+	fp = fopen(filename, "wb");
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;
@@ -210,7 +211,9 @@ void propertiesio_save(const psy_Property* self, const psy_Path* path)
 			OnSaveIniEnum);
 		free(lastsection);
 		fclose(fp);
-	}
+		return PSY_OK;
+	}	
+	return PSY_ERRFILE;
 }
 
 int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)

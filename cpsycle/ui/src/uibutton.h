@@ -5,24 +5,18 @@
 #define psy_ui_BUTTON_H
 
 #include "uicomponent.h"
+#include "uiicondraw.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-	psy_ui_ICON_NONE,
-	psy_ui_ICON_LESS,
-	psy_ui_ICON_MORE,
-	psy_ui_ICON_MOREMORE,
-	psy_ui_ICON_LESSLESS,
-	psy_ui_ICON_UP,
-	psy_ui_ICON_DOWN
-} psy_ui_ButtonIcon;
-
 typedef struct psy_ui_Button {
 	// inherits
 	psy_ui_Component component;	
+	// signals
+	psy_Signal signal_clicked;
+	// internal
 	char* text;
 	int hover;
 	int highlight;
@@ -36,9 +30,7 @@ typedef struct psy_ui_Button {
 	bool buttonstate;
 	bool allowrightclick;
 	char* translation;
-	bool translate;
-	// signals
-	psy_Signal signal_clicked;
+	bool translate;	
 } psy_ui_Button;
 
 void psy_ui_button_init(psy_ui_Button*, psy_ui_Component* parent);

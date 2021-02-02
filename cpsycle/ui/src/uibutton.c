@@ -8,12 +8,11 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
+// psy_ui_Button
+// prototypes
 static void ondestroy(psy_ui_Button*);
 static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
-static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
-static void drawarrow(psy_ui_Button*, psy_ui_RealPoint* arrow, psy_ui_Graphics*);
-static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon icon, double x, double y);
 static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseup(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Button*);
@@ -24,7 +23,9 @@ static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 static void button_updatestyles(psy_ui_Button*);
 static void button_onupdatestyles(psy_ui_Button*);
-
+static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
+	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
+// vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -49,7 +50,7 @@ static void vtable_init(psy_ui_Button* self)
 		vtable_initialized = TRUE;
 	}
 }
-
+// implementation
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_button_base(self), parent);
@@ -71,10 +72,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
 	psy_signal_init(&self->signal_clicked);
-	psy_ui_component_setstyletypes(&self->component,	
-		psy_ui_STYLE_BUTTON,
-		psy_ui_STYLE_BUTTON_HOVER,
-		psy_ui_STYLE_BUTTON_SELECT);
+	button_onupdatestyles(self);
 	button_updatestyles(self);
 }
 
@@ -90,6 +88,8 @@ void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
 void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
 	void* context, void* fp)
 {
+	assert(self);
+
 	psy_ui_button_init(self, parent);
 	psy_signal_connect(&self->signal_clicked, context, fp);
 }
@@ -97,12 +97,16 @@ void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
 void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
 	parent, const char* text, void* context, void* fp)
 {
+	assert(self);
+
 	psy_ui_button_init_connect(self, parent, context, fp);
 	psy_ui_button_settext(self, text);
 }
 
 void ondestroy(psy_ui_Button* self)
 {	
+	assert(self);
+
 	free(self->text);
 	self->text = NULL;
 	free(self->translation);
@@ -114,144 +118,66 @@ void onlanguagechanged(psy_ui_Button* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_ui_translate(self->text));
-	psy_ui_component_invalidate(&self->component);
+	psy_strreset(&self->translation, psy_ui_translate(self->text));	
 }
 
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;
-	psy_ui_Size textsize;
-	const psy_ui_TextMetric* tm;
+	psy_ui_RealSize size;	
 	psy_ui_RealRectangle r;
-	double centerx = 0;
-	double centery = 0;
-	char* text;	
+	char* text;
 	
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
 		text = self->text;
-	}	
-	size = psy_ui_component_size(psy_ui_button_base(self));
-	textsize = psy_ui_component_textsize(psy_ui_button_base(self), text);
-	tm = psy_ui_component_textmetric(&self->component);   
-	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, tm),
-		psy_ui_value_px(&size.height, tm));
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	}
+	size = psy_ui_component_sizepx(psy_ui_button_base(self));
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);		
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
-	}
-	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		centerx = (psy_ui_value_px(&size.width, tm) - psy_ui_value_px(&textsize.width, tm)) / 2;
-	}
-	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
-		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (psy_ui_value_px(&size.height, tm) - tm->tmHeight) / 2;
-	}
-	if (text) {		
+	}	
+	if (psy_strlen(text) > 0) {
+		psy_ui_Size textsize;		
+		const psy_ui_TextMetric* tm;
+		
+		textsize = psy_ui_component_textsize(psy_ui_button_base(self), text);
+		tm = psy_ui_component_textmetric(&self->component);		
 		psy_ui_textoutrectangle(g,
-			psy_ui_realpoint_make(r.left + centerx, r.top + centery),
-			psy_ui_ETO_CLIPPED,
-			r,
-			text,
-			strlen(text));
+			psy_ui_button_center(self, psy_ui_realpoint_zero(),
+				psy_ui_realsize_make(psy_ui_value_px(&textsize.width, tm),
+				tm->tmHeight)),
+			psy_ui_ETO_CLIPPED, r, text, strlen(text));
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
-		drawicon(self, g);
+		psy_ui_IconDraw icondraw;
+
+		psy_ui_icondraw_init(&icondraw, self->icon,
+			self->component.style.currstyle);
+		psy_ui_icondraw_draw(&icondraw, g,
+			psy_ui_button_center(self,
+				psy_ui_realpoint_make(4.0, 0.0),
+				psy_ui_realsize_make(4.0, 8.0)));		
 	}	
 }
 
-void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
+psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
+	psy_ui_RealPoint center, psy_ui_RealSize itemsize)
 {
-	psy_ui_RealSize size;	
-	psy_ui_RealPoint arrow[4];
-	double centerx = 4;
-	double centery = 0;
+	psy_ui_RealPoint rv;
+	psy_ui_RealSize sizepx;
 	
-	size = psy_ui_component_sizepx(psy_ui_button_base(self));
+	sizepx = psy_ui_component_sizepx(psy_ui_button_base(self));
+	rv = center;
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		centerx = (size.width - 4) / 2;
+		rv.x = (sizepx.width - itemsize.width) / 2;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (size.height - 8) / 2;
+		rv.y = (sizepx.height - itemsize.height) / 2;
 	}
-	if (self->icon == psy_ui_ICON_LESSLESS) {
-		makearrow(arrow, psy_ui_ICON_LESS, centerx - 4, centery);
-		drawarrow(self, arrow, g);
-		makearrow(arrow, psy_ui_ICON_LESS, centerx + 4, centery);	
-		drawarrow(self, arrow, g);
-	} else if (self->icon == psy_ui_ICON_MOREMORE) {
-		makearrow(arrow, psy_ui_ICON_MORE, centerx - 6, centery);
-		drawarrow(self, arrow, g);
-		makearrow(arrow, psy_ui_ICON_MORE, centerx + 2, centery);
-		drawarrow(self, arrow, g);
-	} else {
-		makearrow(arrow, self->icon, centerx - 2, centery);
-		drawarrow(self, arrow, g);
-	}
-}
-
-void drawarrow(psy_ui_Button* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g)
-{
-	uint32_t arrowcolour;
-	uint32_t arrowhighlightcolour;
-
-	arrowcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour.value;
-	arrowhighlightcolour = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour.value;
-	if (self->hover == 1) {
-		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
-			arrowhighlightcolour);
-	} else {		
-		psy_ui_drawsolidpolygon(g, arrow, 4, arrowcolour, arrowcolour);
-	}		
-}
-
-void makearrow(psy_ui_RealPoint* arrow, psy_ui_ButtonIcon icon, double x, double y)
-{
-	switch (icon) {
-		case psy_ui_ICON_LESS:		
-			arrow[0].x = 4 + x;
-			arrow[0].y = 0 + y;
-			arrow[1].x = 4 + x;
-			arrow[1].y = 8 + y;
-			arrow[2].x = 0 + x;
-			arrow[2].y = 4 + y;
-			arrow[3] = arrow[0];
-			break;
-		case psy_ui_ICON_MORE:
-			arrow[0].x = 0 + x;
-			arrow[0].y = 0 + y;
-			arrow[1].x = 0 + x;
-			arrow[1].y = 8 + y;
-			arrow[2].x = 4 + x;
-			arrow[2].y = 4 + y;
-			arrow[3] = arrow[0];
-			break;
-		case psy_ui_ICON_UP:
-			arrow[0].x = 0 + x;
-			arrow[0].y = 4 + y;
-			arrow[1].x = 8 + x;
-			arrow[1].y = 4 + y;
-			arrow[2].x = 4 + x;
-			arrow[2].y = 0 + y;
-			arrow[3] = arrow[0];
-			break;
-		case psy_ui_ICON_DOWN:
-			arrow[0].x = 0 + x;
-			arrow[0].y = 0 + y;
-			arrow[1].x = 8 + x;
-			arrow[1].y = 0 + y;
-			arrow[2].x = 4 + x;
-			arrow[2].y = 4 + y;
-			arrow[3] = arrow[0];
-			break;
-		default:
-		break;
-	}
+	return rv;
 }
 
 void psy_ui_button_setcharnumber(psy_ui_Button* self, int number)

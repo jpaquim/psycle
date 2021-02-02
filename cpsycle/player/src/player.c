@@ -219,7 +219,7 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 	psy_audio_plugincatcher_setdirectories(&self->plugincatcher, self->directories);
 	// psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 	//	workspace_onscanprogress);
-	if (!psy_audio_plugincatcher_load(&self->plugincatcher)) {
+	if (psy_audio_plugincatcher_load(&self->plugincatcher) == PSY_ERRFILE) {
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
 	}
@@ -229,8 +229,12 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 
 void cmdplayer_scanplugins(CmdPlayer* self)
 {		
-	psy_audio_plugincatcher_scan(&self->plugincatcher);	
-	psy_audio_plugincatcher_save(&self->plugincatcher);
+	int status;
+
+	psy_audio_plugincatcher_scan(&self->plugincatcher);
+	if (status = psy_audio_plugincatcher_save(&self->plugincatcher)) {
+		printf("Error saving plugin scanner list\n");
+	}
 }
 
 void cmdplayer_makedirectories(CmdPlayer* self)
@@ -267,7 +271,7 @@ void cmdplayer_makeinputoutput(CmdPlayer* self)
 		cmdplayer_setdriverlist(self);
 	self->driverconfigure = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "configure"),
-		"Configure");		
+		"Configure");
 }
 
 void cmdplayer_setdriverlist(CmdPlayer* self)

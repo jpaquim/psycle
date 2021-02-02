@@ -624,11 +624,11 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		islight = psy_property_item_int(choice) == psy_ui_LIGHTTHEME;
 		// reset host styles
 		if (islight) {
-			initlightstyles();
+			initlightstyles(psy_ui_appdefaults());
 		} else {
-			initdarkstyles();
+			initdarkstyles(psy_ui_appdefaults());
 		}
-		psy_ui_defaults_loadtheme(psy_ui_defaults(),
+		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_config(&self->config.directories),
 			!islight);		
 		if (psy_ui_app()->imp) {
@@ -965,7 +965,7 @@ void workspace_save_configuration(Workspace* self)
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
 	midiviewconfig_makecontrollersave(
 		psycleconfig_midi(&self->config));
-	propertiesio_save(&self->config.config, &path);
+	propertiesio_save(&self->config.config, psy_path_full(&path));
 	psy_path_dispose(&path);
 }
 

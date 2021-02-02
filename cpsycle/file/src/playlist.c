@@ -73,15 +73,11 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 }
 
 void psy_playlist_clear(psy_Playlist* self)
-{	
-	psy_Path path;
-	
+{		
 	assert(self);
-
-	psy_path_init(&path, self->path);
+	
 	psy_property_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, &path);
-	psy_path_dispose(&path);
+	propertiesio_save(self->recentsongs, self->path);	
 }
 
 void psy_playlist_load(psy_Playlist* self)
@@ -110,13 +106,9 @@ void psy_playlist_load(psy_Playlist* self)
 
 void psy_playlist_save(psy_Playlist* self)
 {		
-	psy_Path path;
-
 	assert(self);
-
-	psy_path_init(&path, self->path);
-	propertiesio_save(self->recentsongs, &path);
-	psy_path_dispose(&path);
+	
+	propertiesio_save(self->recentsongs, self->path);
 }
 
 void psy_playlist_setpath(psy_Playlist* self, const char* path)

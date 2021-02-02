@@ -85,7 +85,7 @@ bool psy_translator_test(const psy_Translator* self, const char* path, char* id)
 	assert(self);
 
 	psy_path_init(&dicpath, path);
-	if (propertiesio_load(lang, &dicpath, 1)) {
+	if (propertiesio_load(lang, &dicpath, 1) == PSY_OK) {
 		psy_Property* p;
 		
 		p = psy_property_at(lang, "lang", PSY_PROPERTY_TYPE_NONE);

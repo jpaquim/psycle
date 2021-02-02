@@ -209,8 +209,8 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	psy_ui_component_setvtable(mainframe_base(self), vtable_init(self));
-	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
-	initdarkstyles();
+	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);	
+	initdarkstyles(psy_ui_appdefaults());
 	self->startup = TRUE;
 	self->pluginscanprogress = -1;
 }

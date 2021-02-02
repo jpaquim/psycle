@@ -68,7 +68,19 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	// button::select
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00B1C8B0));
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);	
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
+	// combobox;
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00BDBDBD));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
+	// combobox::hover
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_HOVER, style);
+	// combobox::select
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
 	// tab
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB,
 		psy_ui_style_allocinit_colours(
@@ -185,6 +197,28 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x1b8ff2));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
+	// combobox
+	style = psy_ui_style_allocinit(); //0x00787573
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00787573));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
+	// combobox::hover
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00787573));
+	psy_ui_colour_set(&style->backgroundcolour, psy_ui_colour_make(0xFFF3E5));
+	psy_ui_border_init(&style->border);
+	psy_ui_colour_set(&style->border.colour_top,
+		psy_ui_colour_make(0xFFE8CC));
+	psy_ui_colour_set(&style->border.colour_right,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_bottom,
+		style->border.colour_top);
+	psy_ui_colour_set(&style->border.colour_left,
+		style->border.colour_top);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_HOVER, style);
+	// combobox::select
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x1b8ff2));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
 	// tab
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB,
 		psy_ui_style_allocinit_colours(
@@ -295,7 +329,7 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* configdir, boo
 	}
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));
-	if (propertiesio_load(styleconfig, &path, 0)) {	
+	if (propertiesio_load(styleconfig, &path, 0) == PSY_OK) {	
 		self->hasdarktheme = isdark;
 		psy_ui_styles_configure(&self->styles, styleconfig);
 		// font
@@ -310,4 +344,16 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* configdir, boo
 	}	
 	psy_property_deallocate(styleconfig);
 	psy_path_dispose(&path);	
+}
+
+void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* filename)
+{	
+	const psy_Property* styleconfig;
+
+	assert(self);
+
+	styleconfig = psy_ui_styles_configuration(&self->styles);
+	if (styleconfig && !psy_property_empty(styleconfig)) {	
+		propertiesio_save(styleconfig, filename);		
+	}	
 }

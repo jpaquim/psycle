@@ -28,22 +28,32 @@ extern "C" {
 
 struct psy_ui_ComboBoxImp;
 
-typedef struct {
-   psy_ui_Component component;   
-   struct psy_ui_ComboBoxImp* imp;   
-   psy_Signal signal_selchanged;
-   int ownerdrawn;   
-   int hover;
-   int charnumber;
-   psy_Table itemdata;
+typedef enum psy_ui_ComboBoxHover {
+    psy_ui_COMBOBOXHOVER_NONE = 0,
+    psy_ui_COMBOBOXHOVER_DOWN,
+    psy_ui_COMBOBOXHOVER_LESS,
+    psy_ui_COMBOBOXHOVER_MORE
+} psy_ui_ComboBoxHover;
+
+typedef struct psy_ui_ComboBox {
+    // inherits
+    psy_ui_Component component;
+    // signals
+    psy_Signal signal_selchanged;
+    // internal
+    struct psy_ui_ComboBoxImp* imp;       
+    int ownerdrawn;   
+    psy_ui_ComboBoxHover hover;
+    uintptr_t charnumber;
+    psy_Table itemdata;
 } psy_ui_ComboBox;
 
 void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
 intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox*, const char* text);
 void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
-intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox*);
-void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
+intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox*);
+void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, uintptr_t num);
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
 intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
 
@@ -66,7 +76,7 @@ typedef void (*psy_ui_fp_comboboximp_dev_clear)(struct psy_ui_ComboBoxImp*);
 typedef void (*psy_ui_fp_comboboximp_dev_setcursel)(struct psy_ui_ComboBoxImp*,
     intptr_t index);
 typedef intptr_t(*psy_ui_fp_comboboximp_dev_cursel)(
-    struct psy_ui_ComboBoxImp*);
+    const struct psy_ui_ComboBoxImp*);
 typedef intptr_t(*psy_ui_fp_comboboximp_dev_count)(struct psy_ui_ComboBoxImp*);
 typedef void (*psy_ui_fp_comboboximp_dev_selitems)(struct psy_ui_ComboBoxImp*,
     intptr_t* items, intptr_t maxitems);

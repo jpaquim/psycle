@@ -193,6 +193,9 @@
     <ClCompile Include="src\uistyle.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiicondraw.c">
+      <Filter>comps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -356,6 +359,9 @@
     </ClInclude>
     <ClInclude Include="src\uistyle.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiicondraw.h">
+      <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

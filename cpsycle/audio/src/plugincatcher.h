@@ -31,7 +31,7 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
-void psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
+int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher*, psy_Property*);
 /*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, MachineType,
 	const char* name);*/

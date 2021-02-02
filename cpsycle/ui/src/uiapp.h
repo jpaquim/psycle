@@ -96,6 +96,10 @@ typedef struct psy_ui_AppImp {
 
 void psy_ui_appimp_init(psy_ui_AppImp*);
 
+const struct psy_ui_Defaults* psy_ui_defaults(void);
+struct psy_ui_Defaults* psy_ui_appdefaults(void);
+const struct psy_ui_Defaults* psy_ui_appdefaults_const(void);
+
 
 #ifdef __cplusplus
 }
