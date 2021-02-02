@@ -40,6 +40,7 @@ static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 static void psy_ui_editor_getrange(psy_ui_Editor*, intptr_t start, intptr_t end, char* text);
 static void setstyle(psy_ui_Editor*, int style, COLORREF fore, COLORREF back,
 	int size, const char* face);
+static void psy_ui_editor_onstylesupdate(psy_ui_Editor* self);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -51,6 +52,9 @@ static void vtable_init(psy_ui_Editor* self)
 		vtable = *(self->component.vtable);
 		super_setfont = vtable.setfont;
 		vtable.setfont = (psy_ui_fp_component_setfont)psy_ui_editor_setfont;
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_editor_onstylesupdate;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -311,6 +315,16 @@ void psy_ui_editor_enablewrap(psy_ui_Editor* self)
 void psy_ui_editor_disablewrap(psy_ui_Editor* self)
 {
 	sci(self, SCI_SETWRAPMODE, SC_WRAP_NONE, 0);
+}
+
+void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
+{
+	psy_ui_editor_setcolour(self, psy_ui_style(psy_ui_STYLE_COMMON)->colour);
+	psy_ui_editor_setcaretcolour(self,
+		psy_ui_style(psy_ui_STYLE_COMMON)->colour);
+	psy_ui_editor_setbackgroundcolour(self,
+		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
+	psy_ui_editor_setfont(self, NULL);
 }
 
 #else

@@ -50,11 +50,7 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	psy_ui_button_settextalignment(&self->floatsection,
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setalign(psy_ui_button_base(&self->floatsection),
-		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setcolour(psy_ui_button_base(&self->floatsection),
-		psy_ui_style(psy_ui_STYLE_TAB)->colour);
-	psy_ui_component_setbackgroundcolour(psy_ui_button_base(&self->floatsection),
-		psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour);
+		psy_ui_ALIGN_LEFT);	
 }
 
 void helpview_initsections(HelpView* self, Workspace* workspace)

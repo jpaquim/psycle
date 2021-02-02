@@ -46,7 +46,7 @@ const char* psy_ui_fontinfo_string(psy_ui_FontInfo*);
 struct psy_ui_Font;
 
 typedef void (*psy_ui_font_fp_dispose)(struct psy_ui_Font*);
-typedef void (*psy_ui_font_fp_copy)(struct psy_ui_Font*, struct psy_ui_Font*);
+typedef void (*psy_ui_font_fp_copy)(struct psy_ui_Font*, const struct psy_ui_Font*);
 
 typedef struct psy_ui_FontVTable {
 	psy_ui_font_fp_dispose dispose;	
@@ -68,7 +68,7 @@ INLINE void psy_ui_font_dispose(psy_ui_Font* self)
 	self->vtable->dispose(self);	
 }
 
-INLINE void psy_ui_font_copy(psy_ui_Font* self, psy_ui_Font* other)
+INLINE void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
 {
 	self->vtable->copy(self, other);
 }

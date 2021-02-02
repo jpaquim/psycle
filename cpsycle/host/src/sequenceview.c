@@ -217,8 +217,6 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	trackheaderview_vtable_init(self);
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
-	//psy_ui_component_setbackgroundcolour(&self->component,
-		//psy_ui_colour_make(0x00262626));
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(1)));
@@ -379,6 +377,7 @@ static psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView*,
 static void sequencelistview_invalidaterow(SequenceListView*, uintptr_t row);
 static void sequencelistview_oneditkeydown(SequenceListView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
+static void sequencelistview_onupdatestyles(SequenceListView*);
 // vtable
 static psy_ui_ComponentVtable sequencelistview_vtable;
 static bool sequencelistview_vtable_initialized = FALSE;
@@ -387,17 +386,24 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 {
 	if (!sequencelistview_vtable_initialized) {
 		sequencelistview_vtable = *(self->component.vtable);
-		sequencelistview_vtable.ondraw = (psy_ui_fp_component_ondraw)
+		sequencelistview_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
 			sequencelistview_ondraw;
-		sequencelistview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		sequencelistview_vtable.onmousedown =
+			(psy_ui_fp_component_onmousedown)
 			sequencelistview_onmousedown;
 		sequencelistview_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmousedoubleclick)
 			sequencelistview_onmousedoubleclick;
-		sequencelistview_vtable.ontimer = (psy_ui_fp_component_ontimer)
+		sequencelistview_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
 			sequencelistview_ontimer;
-		sequencelistview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		sequencelistview_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			sequencelistview_onpreferredsize;
+		sequencelistview_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			sequencelistview_onupdatestyles;
 		sequencelistview_vtable_initialized = TRUE;
 	}
 }
@@ -739,6 +745,12 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 		psy_ui_realsize_make(size.width, self->lineheight));
 }
 
+void sequencelistview_onupdatestyles(SequenceListView* self)
+{
+	psy_ui_component_setbackgroundcolour(&self->component,
+		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
+}
+
 // SequenceViewDuration
 // implementation
 void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
@@ -827,7 +839,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		psy_ui_component_setalign(&self->toggleseqediticon.component,
 			psy_ui_ALIGN_LEFT);		
 		psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit,
-			"Show Sequenceeditor");
+			"sequencerview.showseqeditor");
 		psy_ui_component_setalign(&self->toggleseqedit.component,
 			psy_ui_ALIGN_LEFT);		
 		// stepseq buttons
@@ -842,7 +854,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_component_setmargin(&self->togglestepseqicon.component, &margin);
 		psy_ui_button_init_text(&self->togglestepseq, &self->stepseq,
-			"Show Stepsequencer");
+			"sequencerview.showstepsequencer");
 		psy_ui_component_setalign(&self->togglestepseq.component,
 			psy_ui_ALIGN_LEFT);		
 	}	

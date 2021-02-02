@@ -4,9 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "uibutton.h"
-// std
-#include <string.h>
-#include <stdlib.h>
 // platform
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
@@ -26,6 +23,7 @@ static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 static void button_updatestyles(psy_ui_Button*);
+static void button_onupdatestyles(psy_ui_Button*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -46,6 +44,8 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.onkeydown = (psy_ui_fp_component_onkeydown)button_onkeydown;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			onlanguagechanged;
+		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
+			button_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 }
@@ -54,8 +54,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_ui_border_init(&self->border);
+	self->component.vtable = &vtable;	
 	self->hover = 0;
 	self->highlight = FALSE;
 	self->icon = psy_ui_ICON_NONE;
@@ -66,13 +65,16 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->enabled = TRUE;
 	self->text = NULL;
 	self->translation = NULL;
-	self->translate = TRUE;
-	self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour;
+	self->translate = TRUE;	
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
-	psy_signal_init(&self->signal_clicked);	
+	psy_signal_init(&self->signal_clicked);
+	psy_ui_component_setstyletypes(&self->component,	
+		psy_ui_STYLE_BUTTON,
+		psy_ui_STYLE_BUTTON_HOVER,
+		psy_ui_STYLE_BUTTON_SELECT);
 	button_updatestyles(self);
 }
 
@@ -105,7 +107,7 @@ void ondestroy(psy_ui_Button* self)
 	self->text = NULL;
 	free(self->translation);
 	self->translation = NULL;
-	psy_signal_dispose(&self->signal_clicked);	
+	psy_signal_dispose(&self->signal_clicked);
 }
 
 void onlanguagechanged(psy_ui_Button* self)
@@ -139,8 +141,6 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
-	} else {
-		psy_ui_settextcolour(g, self->textcolour);
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
@@ -161,7 +161,6 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	if (self->icon != psy_ui_ICON_NONE) {
 		drawicon(self, g);
 	}	
-	psy_ui_drawborder(g, r, self->border);
 }
 
 void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
@@ -386,9 +385,11 @@ bool psy_ui_button_highlighted(psy_ui_Button* self)
 }
 
 void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
-{
-	if (self->textcolour.value != colour.value) {
-		self->textcolour = colour;
+{	
+	if (self->component.style.currstyle->colour.mode.set != colour.mode.set ||
+			self->component.style.currstyle->colour.mode.inherited != colour.mode.inherited ||
+			self->component.style.currstyle->colour.value != colour.value) {
+		psy_ui_colour_set(&self->component.style.currstyle->colour, colour);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -434,26 +435,19 @@ void button_onkeydown(psy_ui_Button* self, psy_ui_KeyEvent* ev)
 
 void button_updatestyles(psy_ui_Button* self)
 {		
-	if (self->highlight) {
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->backgroundcolour);
-		if (psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour.mode.set) {
-			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON_SELECT)->colour;
-		}
-		self->border = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->border;
+	if (self->highlight) {		
+		self->component.style.currstyle = &self->component.style.select;
 	} else if (self->hover) {
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->backgroundcolour);		
-		if (psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour.mode.set) {
-			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->colour;
-		}
-		self->border = psy_ui_style(psy_ui_STYLE_BUTTON_HOVER)->border;
-	} else {		
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_style(psy_ui_STYLE_BUTTON)->backgroundcolour);
-		if (psy_ui_style(psy_ui_STYLE_BUTTON)->colour.mode.set) {
-			self->textcolour = psy_ui_style(psy_ui_STYLE_BUTTON)->colour;
-		}		
-		self->border = psy_ui_style(psy_ui_STYLE_BUTTON)->border;
-	}
+		self->component.style.currstyle = &self->component.style.hover;
+	} else {
+		self->component.style.currstyle = &self->component.style.style;
+	}		
+}
+
+void button_onupdatestyles(psy_ui_Button* self)
+{
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_BUTTON,
+		psy_ui_STYLE_BUTTON_HOVER,
+		psy_ui_STYLE_BUTTON_SELECT);
 }

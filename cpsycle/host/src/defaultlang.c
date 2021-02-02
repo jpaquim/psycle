@@ -186,7 +186,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "configure", "Configure");
 	psy_property_set_str(section, "jme-version-unknown",
 		"Load new gamefx and blitz if version is unknown");	
-	psy_property_set_str(section, "apptheme", "App Theme (After change restart Psycle)");
+	psy_property_set_str(section, "apptheme", "App Theme");
 	// settingsview/general
 	psy_property_set_str(section, "language", "Language");
 	psy_property_set_str(section, "de", "german");
@@ -404,6 +404,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "paste", "Paste");
 	psy_property_set_str(section, "singlesel", "SingleSel");
 	psy_property_set_str(section, "multisel", "MultiSel");
+	psy_property_set_str(section, "showseqeditor", "Show SequenceEditor");
+	psy_property_set_str(section, "hideseqeditor", "Hide SequenceEditor");
+	psy_property_set_str(section, "showstepsequencer", "Show Stepsequencer");
+	psy_property_set_str(section, "hidestepsequencer", "Hide Stepsequencer");
 	section = psy_property_append_section(lang, "newmachine");
 	psy_property_set_str(section, "all", "All");
 	psy_property_set_str(section, "favorites", "Favorites");

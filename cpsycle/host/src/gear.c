@@ -51,6 +51,21 @@ static void gear_connectsongsignals(Gear*);
 static void gear_onhide(Gear*);
 static void gear_onmachineselected(Gear*, psy_audio_Machines* sender,
 	uintptr_t slot);
+static void gear_onupdatestyles(Gear*);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(Gear* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			gear_onupdatestyles;
+		vtable_initialized = TRUE;
+	}
+}
 // implementation
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -63,6 +78,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 	// client
 	psy_ui_component_init(&self->client, gear_base(self));
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_ui_component_setbackgroundcolour(gear_base(self),
 		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
@@ -71,8 +88,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyle(&self->titlebar,
-		*psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
@@ -262,4 +279,12 @@ void gear_select(Gear* self, psy_List* machinelist)
 		machinesbox_addsel(&self->machinesboxfx, slot);
 		machinesbox_addsel(&self->machinesboxgen, slot);
 	}
+}
+
+void gear_onupdatestyles(Gear* self)
+{
+	psy_ui_component_setbackgroundcolour(gear_base(self),
+		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
+	psy_ui_style_copy(&self->titlebar.style.style,
+		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 }

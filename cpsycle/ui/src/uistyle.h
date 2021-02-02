@@ -24,10 +24,12 @@ typedef struct psy_ui_Style {
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
+void psy_ui_style_init_default(psy_ui_Style*, int styletype);
+void psy_ui_style_init_copy(psy_ui_Style*, const psy_ui_Style* other);
 void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour,
 	psy_ui_Colour background);
 void psy_ui_style_dispose(psy_ui_Style*);
-void psy_ui_style_copy(psy_ui_Style*, psy_ui_Style* other);
+void psy_ui_style_copy(psy_ui_Style*, const psy_ui_Style* other);
 
 psy_ui_Style* psy_ui_style_alloc(void);
 psy_ui_Style* psy_ui_style_allocinit(void);
@@ -50,6 +52,7 @@ const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles* self,
 	int styletype);
 void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
 psy_Property* psy_ui_styles_configuration(psy_ui_Styles*);
+
 
 #ifdef __cplusplus
 }

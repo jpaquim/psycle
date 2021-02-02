@@ -438,11 +438,14 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		break; }
 	default: {
 			psy_Property* choice;
-
+	
 			choice = (psy_property_ischoiceitem(property))
 				? psy_property_parent(property)
 				: NULL;
-			if (audioconfig_onpropertychanged(&self->config.audio, property)) {
+			if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
+				workspace_setapptheme(self, property);
+				worked = TRUE;
+			} else if (audioconfig_onpropertychanged(&self->config.audio, property)) {
 				worked = TRUE;
 			} else if (languageconfig_onchanged(
 				&self->config.language, property)) {
@@ -604,7 +607,8 @@ void workspace_setdefaultfont(Workspace* self, psy_Property* property)
 
 	psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
 	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_app_setdefaultfont(psy_ui_app(), &font);	
+	psy_ui_app_setdefaultfont(psy_ui_app(), &font);
+	psy_ui_font_dispose(&font);
 }
 
 void workspace_setapptheme(Workspace* self, psy_Property* property)
@@ -632,6 +636,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		}
 		psy_ui_appzoom_updatebasefontsize(&psy_ui_app()->zoom,
 			psy_ui_defaults_font(&psy_ui_app()->defaults));
+		psy_ui_notifystyleupdate(psy_ui_app()->main);
 	}
 }
 

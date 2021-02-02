@@ -87,6 +87,7 @@ static void tabbar_onalign(TabBar*);
 static void tabbar_onpreferredsize(TabBar*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void tabbar_resettabcheckstates(TabBar*);
+static void tabbar_onupdatestyles(TabBar*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -106,6 +107,8 @@ static void vtable_init(TabBar* self)
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)tabbar_onmouseleave;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			tabbar_onlanguagechanged;
+		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
+			tabbar_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 }
@@ -128,9 +131,9 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->hover = FALSE;
 	self->hoverindex = psy_INDEX_INVALID;
 	self->tabalignment = psy_ui_ALIGN_TOP;
-	self->style_tab = *psy_ui_style(psy_ui_STYLE_TAB);
-	self->style_tab_hover = *psy_ui_style(psy_ui_STYLE_TAB_HOVER);
-	self->style_tab_select = *psy_ui_style(psy_ui_STYLE_TAB_SELECT);
+	psy_ui_style_init_default(&self->style_tab, psy_ui_STYLE_TAB);
+	psy_ui_style_init_default(&self->style_tab_hover, psy_ui_STYLE_TAB_HOVER);
+	psy_ui_style_init_default(&self->style_tab_select, psy_ui_STYLE_TAB_SELECT);	
 	self->defaulttabheight = psy_ui_value_makeeh(1.8);
 	tabbarskin_init(&self->skin);
 	psy_ui_margin_init_all(&self->defaulttabmargin,
@@ -144,6 +147,9 @@ void tabbar_ondestroy(TabBar* self)
 
 	psy_list_deallocate(&self->tabs, (psy_fp_disposefunc)tab_dispose);	
 	psy_signal_dispose(&self->signal_change);
+	psy_ui_style_dispose(&self->style_tab);
+	psy_ui_style_dispose(&self->style_tab_hover);
+	psy_ui_style_dispose(&self->style_tab_select);
 }
 
 void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
@@ -653,4 +659,15 @@ void tabbar_onlanguagechanged(TabBar* self)
 		}
 	}
 	psy_ui_component_invalidate(&self->component);
+}
+
+void tabbar_onupdatestyles(TabBar* self)
+{
+	psy_ui_style_copy(&self->style_tab, psy_ui_style(psy_ui_STYLE_TAB));
+	psy_ui_style_copy(&self->style_tab_hover, psy_ui_style(psy_ui_STYLE_TAB_HOVER));
+	psy_ui_style_copy(&self->style_tab_select, psy_ui_style(psy_ui_STYLE_TAB_SELECT));
+	if (psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour.mode.set) {
+		psy_ui_component_setbackgroundcolour(tabbar_base(self),
+			psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour);
+	}
 }

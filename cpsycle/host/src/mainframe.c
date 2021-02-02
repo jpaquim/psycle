@@ -282,7 +282,7 @@ void mainframe_initterminal(MainFrame* self)
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
-	self->splitbarterminal.component.debugflag = 1000;
+	// self->splitbarterminal.component.debugflag = 1000;
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
 	psy_signal_connect(&self->workspace.signal_terminal_out, self,
@@ -1491,13 +1491,13 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 	if (generalconfig_showsequenceedit(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
 		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
-			"Hide SequenceEditor");
+			"sequencerview.hideseqeditor");
 		psy_ui_button_highlight(&self->sequenceview.options.toggleseqedit);
 		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
-			"Show SequenceEditor");
+			"sequencerview.showseqeditor");
 		psy_ui_button_disablehighlight(
 			&self->sequenceview.options.toggleseqedit);
 		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
@@ -1536,13 +1536,13 @@ void mainframe_updatestepsequencerbuttons(MainFrame* self)
 	if (generalconfig_showstepsequencer(psycleconfig_general(
 			workspace_conf(&self->workspace)))) {
 		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
-			"Hide Stepsequencer");
+			"sequencerview.hidestepsequencer");
 		psy_ui_button_highlight(&self->sequenceview.options.togglestepseq);
 		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
-			"Show Stepsequencer");
+			"sequencerview.showstepsequencer");
 		psy_ui_button_disablehighlight(
 			&self->sequenceview.options.togglestepseq);
 		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,

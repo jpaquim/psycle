@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uistyle.h"
+#include "uicomponent.h"
 // platform
 #include "../../detail/portable.h"
 
@@ -11,8 +12,20 @@ void psy_ui_style_init(psy_ui_Style* self)
 {
 	psy_ui_colour_init(&self->colour);
 	psy_ui_colour_init(&self->backgroundcolour);
+	psy_ui_border_init(&self->border);	
+	self->use_font = 0;
+}
+
+void psy_ui_style_init_default(psy_ui_Style* self, int styletype)
+{	
+	psy_ui_style_init_copy(self, psy_ui_style(styletype));	
+}
+
+void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)
+{	
 	psy_ui_border_init(&self->border);
 	self->use_font = 0;
+	psy_ui_style_copy(self, other);	
 }
 
 void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
@@ -20,7 +33,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 {
 	self->colour = colour;
 	self->backgroundcolour = background;
-	psy_ui_border_init(&self->border);
+	psy_ui_border_init(&self->border);	
 	self->use_font = 0;
 }
 
@@ -31,10 +44,19 @@ void psy_ui_style_dispose(psy_ui_Style* self)
 	}
 }
 
-void psy_ui_style_copy(psy_ui_Style* self, psy_ui_Style* other)
+void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {
 	self->colour = other->colour;
 	self->backgroundcolour = other->backgroundcolour;
+	self->border = other->border;
+	if (other->use_font) {
+		if (self->use_font) {
+			psy_ui_font_dispose(&self->font);
+		}
+		psy_ui_font_init(&self->font, NULL);
+		psy_ui_font_copy(&self->font, &other->font);
+		self->use_font = TRUE;
+	}
 }
 
 psy_ui_Style* psy_ui_style_alloc(void)
