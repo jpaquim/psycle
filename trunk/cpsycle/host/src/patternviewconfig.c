@@ -87,7 +87,13 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 		"settingsview.move-cursor-when-paste");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "displaysinglepattern", TRUE),
-		"settingsview.displaysinglepattern");	
+		"settingsview.displaysinglepattern");
+	// useheaderbitmap
+	// default set to false, because the bitmap skins dont fit to recent
+	// resolutions
+	psy_property_settext(
+		psy_property_append_bool(pvc, "useheaderbitmap", FALSE),
+		"settingsview.useheaderbitmap");
 	// pattern display choice
 	choice = psy_property_setid(psy_property_settext(
 		psy_property_append_choice(pvc,
@@ -428,6 +434,15 @@ bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig* self)
 
 	return psy_property_at_bool(self->patternview, "displaysinglepattern", TRUE);
 }
+
+bool patternviewconfig_useheaderbitmap(const PatternViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->patternview, "useheaderbitmap", TRUE);
+}
+
+
 
 bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)
 {

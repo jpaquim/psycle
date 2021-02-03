@@ -65,8 +65,7 @@ psy_ui_RealRectangle tab_position(const Tab* self, const psy_ui_TextMetric* tm)
 // TabBarSkin
 void tabbarskin_init(TabBarSkin* self)
 {
-	self->text = psy_ui_style(psy_ui_STYLE_TAB)->colour;
-	self->textlabel = psy_ui_colour_make(0x00666666);	
+	self->text = psy_ui_style(psy_ui_STYLE_TAB)->colour;	
 }
 
 // TabBar
@@ -133,7 +132,8 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->tabalignment = psy_ui_ALIGN_TOP;
 	psy_ui_style_init_default(&self->style_tab, psy_ui_STYLE_TAB);
 	psy_ui_style_init_default(&self->style_tab_hover, psy_ui_STYLE_TAB_HOVER);
-	psy_ui_style_init_default(&self->style_tab_select, psy_ui_STYLE_TAB_SELECT);	
+	psy_ui_style_init_default(&self->style_tab_select, psy_ui_STYLE_TAB_SELECT);
+	psy_ui_style_init_default(&self->style_tab_label, psy_ui_STYLE_COMMON);
 	self->defaulttabheight = psy_ui_value_makeeh(1.8);
 	tabbarskin_init(&self->skin);
 	psy_ui_margin_init_all(&self->defaulttabmargin,
@@ -269,7 +269,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 		text = tab->text;
 	}
 	if (tab->mode == TABMODE_LABEL) {
-		psy_ui_settextcolour(g, self->skin.textlabel);
+		psy_ui_settextcolour(g, self->style_tab_label.colour);
 	} else if (tab->istoggle) {
 		if (tab->checkstate) {
 			psy_ui_settextcolour(g, self->style_tab_select.colour);
@@ -666,6 +666,7 @@ void tabbar_onupdatestyles(TabBar* self)
 	psy_ui_style_copy(&self->style_tab, psy_ui_style(psy_ui_STYLE_TAB));
 	psy_ui_style_copy(&self->style_tab_hover, psy_ui_style(psy_ui_STYLE_TAB_HOVER));
 	psy_ui_style_copy(&self->style_tab_select, psy_ui_style(psy_ui_STYLE_TAB_SELECT));
+	psy_ui_style_copy(&self->style_tab_label, psy_ui_style(psy_ui_STYLE_COMMON));
 	if (psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour.mode.set) {
 		psy_ui_component_setbackgroundcolour(tabbar_base(self),
 			psy_ui_style(psy_ui_STYLE_TAB)->backgroundcolour);

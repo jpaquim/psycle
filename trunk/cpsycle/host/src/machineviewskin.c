@@ -49,6 +49,7 @@ void machineviewskin_init(MachineViewSkin* self, psy_Property* theme,
 	machineviewskin_initdefaultmachinecoords(self);
 	self->drawmachineindexes = TRUE;
 	self->drawvumeters = TRUE;
+	self->hastransparency = FALSE;
 	machineviewskin_settheme(self, theme, skindir);
 }
 
@@ -87,6 +88,8 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 {
 	const char* machine_skin_name;
 
+	self->hastransparency = FALSE;
+	self->transparency = psy_ui_colour_make(0x00000000);
 	if (p) {
 		self->colour = psy_ui_colour_make(psy_property_at_colour(p, "mv_colour", 0x00232323));
 		self->wirecolour = psy_ui_colour_make(psy_property_at_colour(p, "mv_wirecolour", 0x005F5F5F));
@@ -100,6 +103,8 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 			psy_ui_colour_make(psy_property_at_colour(p, "mv_effect_fontcolour", 0x00D1C5B6));
 		self->triangle_size = (double)psy_property_at_int(p, "mv_triangle_size", 10);
 		machine_skin_name = psy_property_at_str(p, "machine_skin", 0);
+		self->transparency = psy_ui_colour_make(psy_property_at_colour(p, "transparency", 0x00000000));
+		self->hastransparency = psy_property_at(p, "transparency", PSY_PROPERTY_TYPE_NONE) != NULL;		
 	} else {
 		self->colour = psy_ui_colour_make(0x00232323);
 		self->wirecolour = psy_ui_colour_make(0x005F5F5F);
@@ -147,10 +152,20 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 		psy_dir_findfile(skindir, filename, path);
 		if (path[0] != '\0') {
 			psy_Property* coords;
+			psy_Property* transparency;
 
 			coords = psy_property_allocinit_key(NULL);
 			skin_loadpsh(coords, path);
 			machineviewskin_setcoords(self, coords);
+			transparency = psy_property_at(coords,
+				"transparency", PSY_PROPERTY_TYPE_NONE);
+			self->hastransparency = transparency != NULL;
+			if (transparency) {
+				self->transparency = psy_ui_colour_make(
+					strtol(psy_property_item_str(transparency), 0, 16));
+				psy_ui_bitmap_settransparency(&self->skinbmp,
+					self->transparency);
+			}
 			psy_property_deallocate(coords);
 		}
 	} else {
@@ -198,25 +213,25 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	}
 	if (s = psy_property_at_str(p, "generator_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->generator.vu0, vals);
+		skincoord_setdest(&self->generator.vu0, vals, 3);
 		psy_ui_realrectangle_setwidth(&self->generator.vu0.dest,
-			(double)vals[2]);
+			(double)vals[2]);		
 	}
 	if (s = psy_property_at_str(p, "generator_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->generator.pan, vals);
+		skincoord_setdest(&self->generator.pan, vals, 3);		
 	}
 	if (s = psy_property_at_str(p, "generator_mute_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->generator.mute, vals);
+		skincoord_setdest(&self->generator.mute, vals, 2);		
 	}
 	if (s = psy_property_at_str(p, "generator_solo_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->generator.solo, vals);
+		skincoord_setdest(&self->generator.solo, vals, 2);		
 	}
 	if (s = psy_property_at_str(p, "generator_name_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->generator.name, vals);
+		skincoord_setdest(&self->generator.name, vals, 2);		
 	}
 	// effect
 	if (s = psy_property_at_str(p, "effect_source", 0)) {
@@ -245,24 +260,24 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Property* p)
 	}
 	if (s = psy_property_at_str(p, "effect_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->effect.vu0, vals);
+		skincoord_setdest(&self->effect.vu0, vals, 3);
 		psy_ui_realrectangle_setwidth(&self->generator.vu0.dest,
 			(double)vals[2]);
 	}
 	if (s = psy_property_at_str(p, "effect_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->effect.pan, vals);
+		skincoord_setdest(&self->effect.pan, vals, 3);
 	}
 	if (s = psy_property_at_str(p, "effect_mute_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->effect.mute, vals);
+		skincoord_setdest(&self->effect.mute, vals, 2);
 	}
 	if (s = psy_property_at_str(p, "effect_bypass_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->effect.bypass, vals);
+		skincoord_setdest(&self->effect.bypass, vals, 2);
 	}
 	if (s = psy_property_at_str(p, "effect_name_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->effect.name, vals);
+		skincoord_setdest(&self->effect.name, vals, 2);
 	}
 }

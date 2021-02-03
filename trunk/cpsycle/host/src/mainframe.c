@@ -1302,9 +1302,12 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 			self->patternview.tabbar.style_tab_select.colour = self->patternview.skin.fontsel;
 			self->patternview.tabbar.style_tab_select.backgroundcolour =
 				self->patternview.skin.selection;
-			self->patternview.tabbar.style_tab_hover.colour = self->patternview.tabbar.style_tab_select.colour;
+			self->patternview.tabbar.style_tab_hover.colour =
+				self->patternview.tabbar.style_tab_select.colour;
 			self->patternview.tabbar.style_tab_hover.backgroundcolour =
 				self->patternview.tabbar.style_tab_select.backgroundcolour;
+			self->patternview.tabbar.style_tab_label.colour =
+				self->patternview.skin.font;
 			psy_ui_component_setbackgroundcolour(tabbar_base(&self->patternview.tabbar),
 				self->patternview.tabbar.style_tab.backgroundcolour);
 			psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));

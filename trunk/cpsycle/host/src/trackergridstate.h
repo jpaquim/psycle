@@ -149,6 +149,7 @@ typedef struct TrackerGridState {
 void trackergridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
 double trackergridstate_trackwidth(const TrackerGridState*, uintptr_t track);
+double trackergridstate_defaulttrackwidth(const TrackerGridState* self);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
 double trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_pxtotrack(const TrackerGridState*, double x);

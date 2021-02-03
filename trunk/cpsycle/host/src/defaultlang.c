@@ -247,7 +247,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "draw-empty-data", "Draw empty data");
 	psy_property_set_str(section, "smoothscroll", "Scroll smooth");
 	psy_property_set_str(section, "default-entries", "Default entries");
-	psy_property_set_str(section, "displaysinglepattern", "Display Single Pattern");	
+	psy_property_set_str(section, "displaysinglepattern", "Display Single Pattern");
+	psy_property_set_str(section, "useheaderbitmap", "Use Pattern Header Bitmap");
 	psy_property_set_str(section, "line-numbers", "Line numbers");
 	psy_property_set_str(section, "beat-offset", "Beat offset");
 	psy_property_set_str(section,

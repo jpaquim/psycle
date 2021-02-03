@@ -44,8 +44,7 @@ void tab_settext(Tab*, const char* text);
 psy_ui_RealRectangle tab_position(const Tab*, const psy_ui_TextMetric*);
 
 typedef struct TabBarSkin {
-	psy_ui_Colour text;		
-	psy_ui_Colour textlabel;
+	psy_ui_Colour text;			
 	psy_ui_Colour linesel;	
 } TabBarSkin;
 
@@ -66,6 +65,7 @@ typedef struct TabBar {
 	psy_ui_Style style_tab;
 	psy_ui_Style style_tab_hover;
 	psy_ui_Style style_tab_select;
+	psy_ui_Style style_tab_label;
 	// Signals
 	psy_Signal signal_change;	
 } TabBar;

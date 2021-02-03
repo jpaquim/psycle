@@ -13,6 +13,316 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+static void trackdraw_drawseparator(TrackDraw*, psy_ui_Graphics*,
+	double x);
+static void trackdraw_drawbackground(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawplayon(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawnumber(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawleds(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawledmute(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawledsoloed(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawledarmed(TrackDraw*, psy_ui_Graphics*);
+static void trackdraw_drawselection(TrackDraw*, psy_ui_Graphics*);
+
+void trackdraw_init(TrackDraw* self, TrackerGridState* state, uintptr_t index,
+	double height, bool playon)
+{
+	self->gridstate = state;
+	self->track = index;
+	self->height = height;
+	self->playon = playon;
+}
+
+void trackdraw_draw(TrackDraw* self, psy_ui_Graphics* g, double cpx, psy_ui_RealPoint dest)
+{
+	trackdraw_drawseparator(self, g, cpx);
+	psy_ui_setorigin(g, -dest.x, -dest.y);
+	trackdraw_drawbackground(self, g);
+	trackdraw_drawplayon(self, g);
+	trackdraw_drawnumber(self, g);
+	trackdraw_drawleds(self, g);
+	trackdraw_drawselection(self, g);
+	psy_ui_setorigin(g, 0.0, 0.0);
+}
+
+void trackdraw_drawseparator(TrackDraw* self, psy_ui_Graphics* g,
+	double x)
+{
+	double trackwidth;
+
+	trackwidth = trackergridstate_trackwidth(self->gridstate, self->track);
+	psy_ui_setcolour(g, self->gridstate->skin->separator);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x + trackwidth - 1, 0),
+		psy_ui_realpoint_make(x + trackwidth - 1, self->height));
+}
+
+void trackdraw_drawbackground(TrackDraw* self, psy_ui_Graphics* g)
+{
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, psy_ui_realpoint_zero(),
+		&self->gridstate->skin->headercoords.background);
+}
+
+void trackdraw_drawplayon(TrackDraw* self, psy_ui_Graphics* g)
+{
+	if (self->playon) {
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
+			psy_ui_realpoint_make(0, 0),
+			&self->gridstate->skin->headercoords.dplayon);
+	}
+}
+
+void trackdraw_drawnumber(TrackDraw* self, psy_ui_Graphics* g)
+{
+	intptr_t trackx0 = self->track / 10;
+	intptr_t track0x = self->track % 10;
+	SkinCoord digitx0 = self->gridstate->skin->headercoords.digitx0;
+	SkinCoord digit0x = self->gridstate->skin->headercoords.digit0x;
+	digitx0.src.left += trackx0 * psy_ui_realrectangle_width(&digitx0.src);
+	digit0x.src.left += track0x * psy_ui_realrectangle_width(&digit0x.src);
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, psy_ui_realpoint_zero(), &digitx0);
+	skin_blitcoord(g, &self->gridstate->skin->bitmap, psy_ui_realpoint_zero(), &digit0x);
+}
+
+void trackdraw_drawleds(TrackDraw* self, psy_ui_Graphics* g)
+{
+	if (trackergridstate_patterns(self->gridstate)) {
+		trackdraw_drawledmute(self, g);
+		trackdraw_drawledsoloed(self, g);
+		trackdraw_drawledarmed(self, g);
+	}
+}
+
+void trackdraw_drawledmute(TrackDraw* self, psy_ui_Graphics* g)
+{
+	if (psy_audio_patterns_istrackmuted(
+		trackergridstate_patterns(self->gridstate), self->track)) {
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
+			psy_ui_realpoint_zero(),
+			&self->gridstate->skin->headercoords.mute);
+	}
+}
+
+void trackdraw_drawledsoloed(TrackDraw* self,
+	psy_ui_Graphics* g)
+{
+	if (psy_audio_patterns_istracksoloed(
+		trackergridstate_patterns(self->gridstate), self->track)) {
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
+			psy_ui_realpoint_zero(),
+			&self->gridstate->skin->headercoords.solo);
+	}
+}
+
+void trackdraw_drawledarmed(TrackDraw* self, psy_ui_Graphics* g)
+{
+	if (psy_audio_patterns_istrackarmed(
+		trackergridstate_patterns(self->gridstate), self->track)) {
+		skin_blitcoord(g, &self->gridstate->skin->bitmap,
+			psy_ui_realpoint_zero(),
+			&self->gridstate->skin->headercoords.record);
+	}
+}
+
+void trackdraw_drawselection(TrackDraw* self, psy_ui_Graphics* g)
+{
+	if (self->track == self->gridstate->cursor.track) {
+		psy_ui_setcolour(g, self->gridstate->skin->font);
+		psy_ui_drawline(g, psy_ui_realpoint_zero(),
+			psy_ui_realpoint_make(
+				psy_min(
+					self->gridstate->skin->headercoords.background.dest.right -
+					self->gridstate->skin->headercoords.background.dest.left,
+					trackergridstate_trackwidth(self->gridstate, self->track)),
+				0.0));
+	}
+}
+
+// plain trackdraw
+static void trackplaindraw_drawseparator(TrackPlainDraw*, psy_ui_Graphics*,
+	double x);
+static void trackplaindraw_drawbackground(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawplayon(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawnumber(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawleds(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawledmute(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawledsoloed(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawledarmed(TrackPlainDraw*, psy_ui_Graphics*);
+static void trackplaindraw_drawselection(TrackPlainDraw*, psy_ui_Graphics*);
+static psy_ui_RealRectangle realrectangle_zoom(psy_ui_RealRectangle src,
+	psy_ui_RealPoint zoom);
+
+void trackplaindraw_init(TrackPlainDraw* self, TrackerGridState* state,
+	psy_ui_RealPoint zoom, uintptr_t index,
+	double height, bool playon)
+{
+	self->zoom = zoom;
+	self->gridstate = state;
+	self->track = index;
+	self->height = height;
+	self->playon = playon;
+	self->coords = trackerheadercoords_default_classic();
+}
+
+void trackplaindraw_draw(TrackPlainDraw* self, psy_ui_Graphics* g, double cpx, psy_ui_RealPoint dest)
+{
+	trackplaindraw_drawseparator(self, g, cpx);
+	psy_ui_setorigin(g, -dest.x, -dest.y);
+	trackplaindraw_drawbackground(self, g);
+	trackplaindraw_drawplayon(self, g);
+	trackplaindraw_drawnumber(self, g);
+	trackplaindraw_drawleds(self, g);
+	trackplaindraw_drawselection(self, g);
+	psy_ui_setorigin(g, 0.0, 0.0);
+}
+
+void trackplaindraw_drawseparator(TrackPlainDraw* self, psy_ui_Graphics* g,
+	double x)
+{
+	double trackwidth;
+
+	trackwidth = trackergridstate_trackwidth(self->gridstate, self->track);
+	psy_ui_setcolour(g, self->gridstate->skin->separator);
+	psy_ui_drawline(g, psy_ui_realpoint_make(x + trackwidth - 1, 0),
+		psy_ui_realpoint_make(x + trackwidth - 1, self->height));
+}
+
+void trackplaindraw_drawbackground(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+
+	psy_ui_RealRectangle r;
+	
+	r = self->coords->background.dest;
+	psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+	r = realrectangle_zoom(r, self->zoom);
+	psy_ui_drawsolidrectangle(g, r, self->gridstate->skin->background);
+	psy_ui_setcolour(g, self->gridstate->skin->row4beat);		
+	psy_ui_drawrectangle(g, r);
+}
+
+psy_ui_RealRectangle realrectangle_zoom(psy_ui_RealRectangle src, psy_ui_RealPoint zoom)
+{
+	double width;
+	double height;
+	
+	width = psy_ui_realrectangle_width(&src);
+	height = psy_ui_realrectangle_height(&src);
+	return psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(src.left * zoom.x, src.top * zoom.y),
+		psy_ui_realsize_make(width * zoom.x, height * zoom.y));	
+}
+
+void trackplaindraw_drawplayon(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealRectangle r;
+
+	r = self->coords->dplayon.dest;
+	psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+	r = realrectangle_zoom(r, self->zoom);
+	psy_ui_setcolour(g, self->gridstate->skin->row4beat);	
+	if (self->playon) {
+		psy_ui_drawsolidrectangle(g, r, self->gridstate->skin->selection);		
+	} else {
+		psy_ui_drawsolidrectangle(g, r, self->gridstate->skin->row);
+	}		
+}
+
+void trackplaindraw_drawnumber(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	char str[2];
+
+	intptr_t trackx0 = self->track / 10;
+	intptr_t track0x = self->track % 10;
+	SkinCoord digitx0 = self->coords->digitx0;
+	SkinCoord digit0x = self->coords->digit0x;
+
+	digitx0.dest = realrectangle_zoom(digitx0.dest, self->zoom);
+	digit0x.dest = realrectangle_zoom(digit0x.dest, self->zoom);
+	psy_ui_settextcolour(g, self->gridstate->skin->font);
+	psy_snprintf(str, 2, "%X", (int)trackx0);
+	psy_ui_textout(g, digitx0.dest.left, digitx0.dest.top, str, strlen(str));
+	psy_snprintf(str, 2, "%X", (int)track0x);
+	psy_ui_textout(g, digit0x.dest.left + 2, digit0x.dest.top, str, strlen(str));
+}
+
+void trackplaindraw_drawleds(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	if (trackergridstate_patterns(self->gridstate)) {
+		trackplaindraw_drawledmute(self, g);
+		trackplaindraw_drawledsoloed(self, g);
+		trackplaindraw_drawledarmed(self, g);
+	}
+}
+
+void trackplaindraw_drawledmute(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealRectangle r;
+
+	r = self->coords->mute.dest;
+	psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+	r = realrectangle_zoom(r, self->zoom);
+	psy_ui_setcolour(g, self->gridstate->skin->row4beat);
+	psy_ui_drawrectangle(g, r);
+	if (psy_audio_patterns_istrackmuted(
+			trackergridstate_patterns(self->gridstate), self->track)) {
+		psy_ui_settextcolour(g, self->gridstate->skin->fontcur);
+	} else {
+		psy_ui_settextcolour(g, self->gridstate->skin->font);
+	}
+	psy_ui_textout(g, r.left + 2, r.top, "M", 1);
+}
+
+void trackplaindraw_drawledsoloed(TrackPlainDraw* self,
+	psy_ui_Graphics* g)
+{
+	psy_ui_RealRectangle r;
+
+	r = self->coords->solo.dest;
+	psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+	r = realrectangle_zoom(r, self->zoom);
+	psy_ui_setcolour(g, self->gridstate->skin->row4beat);
+	psy_ui_drawrectangle(g, r);
+	if (psy_audio_patterns_istracksoloed(
+			trackergridstate_patterns(self->gridstate), self->track)) {		
+		psy_ui_settextcolour(g, self->gridstate->skin->fontcur);
+	} else {
+		psy_ui_settextcolour(g, self->gridstate->skin->font);
+	}
+	psy_ui_textout(g, r.left + 2, r.top, "S", 1);
+}
+
+void trackplaindraw_drawledarmed(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealRectangle r;
+
+	r = self->coords->record.dest;
+	psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+	r = realrectangle_zoom(r, self->zoom);
+	psy_ui_setcolour(g, self->gridstate->skin->row4beat);
+	psy_ui_drawrectangle(g, r);
+	if (psy_audio_patterns_istrackarmed(
+		trackergridstate_patterns(self->gridstate), self->track)) {
+		psy_ui_settextcolour(g, self->gridstate->skin->fontcur);
+	} else {
+		psy_ui_settextcolour(g, self->gridstate->skin->font);
+	}	
+	psy_ui_textout(g, r.left + 2, r.top, "R", 1);
+}
+
+void trackplaindraw_drawselection(TrackPlainDraw* self, psy_ui_Graphics* g)
+{
+	if (self->track == self->gridstate->cursor.track) {
+		psy_ui_setcolour(g, self->gridstate->skin->font);
+		psy_ui_drawline(g, psy_ui_realpoint_zero(),
+			psy_ui_realpoint_make(
+				psy_min(
+					self->gridstate->skin->headercoords.background.dest.right -
+					self->gridstate->skin->headercoords.background.dest.left,
+					trackergridstate_trackwidth(self->gridstate, self->track)),
+				0.0));
+	}
+}
+
+
 // TrackerHeader
 // prototypes
 static void trackerheader_ondestroy(TrackerHeader*);
@@ -21,24 +331,6 @@ static TrackerHeaderTrackState* trackerheader_trackstate(TrackerHeader*,
 static TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader*,
 	uintptr_t track);
 static void trackerheader_ondraw(TrackerHeader*, psy_ui_Graphics*);
-static void trackerheader_drawtrackseparator(TrackerHeader*, psy_ui_Graphics*,
-	double x, uintptr_t track);
-static void trackerheader_drawtrackbackground(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest);
-static void trackerheader_drawtrackplayon(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtracknumber(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtrackleds(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtrackledmute(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtrackledsoloed(TrackerHeader* self, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtrackledarmed(TrackerHeader* self, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
-static void trackerheader_drawtrackselection(TrackerHeader*, psy_ui_Graphics*,
-	psy_ui_RealPoint dest, uintptr_t track);
 static void trackerheader_onmousedown(TrackerHeader*, psy_ui_MouseEvent*);
 double trackerheader_trackposition(const TrackerHeader* self, uintptr_t track);
 static double trackerheader_centerx(const TrackerHeader* self,
@@ -88,6 +380,8 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->classic = TRUE;
 	self->workspace = workspace;
 	self->currtrack = 0;
+	self->usebitmapskin = TRUE;
+	trackerheader_updatecoords(self);
 	psy_table_init(&self->trackstates);
 	self->playing = FALSE;
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
@@ -108,6 +402,15 @@ void trackerheader_setsharedgridstate(TrackerHeader* self, TrackerGridState*
 	} else {
 		trackergridstate_init(&self->defaultgridstate, trackconfig);
 		self->gridstate = &self->defaultgridstate;
+	}
+}
+
+void trackerheader_updatecoords(TrackerHeader* self)
+{
+	if (self->usebitmapskin) {
+		self->coords = &self->gridstate->skin->headercoords;
+	} else {
+		self->coords = trackerheadercoords_default_classic();
 	}
 }
 
@@ -152,120 +455,39 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 		psy_ui_realrectangle_make(psy_ui_realpoint_make(scrollleft, 0.0),
 			size),
 		self->gridstate->skin->background);
-	for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
-			self->gridstate); ++track) {		
-		psy_ui_RealPoint dest;
-				
-		dest = psy_ui_realpoint_make(cpx + trackerheader_centerx(self, track),
-			0.0);
-		trackerheader_drawtrackseparator(self, g, cpx, track);
-		trackerheader_drawtrackbackground(self, g, dest);
-		trackerheader_drawtrackplayon(self, g, dest, track);
-		trackerheader_drawtracknumber(self, g, dest, track);
-		trackerheader_drawtrackleds(self, g, dest, track);
-		trackerheader_drawtrackselection(self, g, dest, track);
-		cpx += trackergridstate_trackwidth(self->gridstate, track);
-	}
-}
+	if (self->usebitmapskin) {
+		for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
+			self->gridstate); ++track) {
+			TrackDraw trackdraw;			
+			TrackerHeaderTrackState* trackstate;
 
-void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g,
-	double x, uintptr_t track)
-{
-	double trackwidth;
-	psy_ui_RealSize size;	
+			trackstate = trackerheader_updatetrackstate(self, track);
+			trackdraw_init(&trackdraw, self->gridstate, track, size.height,
+				trackstate->playon);
+			trackdraw_draw(&trackdraw, g, cpx,
+				psy_ui_realpoint_make(
+					cpx + trackerheader_centerx(self, track), 0.0));
+			cpx += trackergridstate_trackwidth(self->gridstate, track);
+		}
+	} else {
+		for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
+			self->gridstate); ++track) {			
+			TrackPlainDraw trackdraw;
+			TrackerHeaderTrackState* trackstate;
 
-	size = psy_ui_component_sizepx(&self->component);
-	trackwidth = trackergridstate_trackwidth(self->gridstate, track);
-	psy_ui_setcolour(g, self->gridstate->skin->separator);
-	psy_ui_drawline(g, psy_ui_realpoint_make(x + trackwidth - 1, 0),
-		psy_ui_realpoint_make(x + trackwidth - 1, size.height));
-}
-
-void trackerheader_drawtrackbackground(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest)
-{
-	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest,
-		&self->gridstate->skin->headercoords.background);
-}
-
-void trackerheader_drawtrackplayon(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{
-	TrackerHeaderTrackState* trackstate;
-
-	trackstate = trackerheader_updatetrackstate(self, track);
-	if (trackstate->playon) {
-		skin_blitcoord(g, &self->gridstate->skin->bitmap,
-			psy_ui_realpoint_make(dest.x, 0),
-			&self->gridstate->skin->headercoords.dplayon);
-	}
-}
-
-void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{
-	intptr_t trackx0 = track / 10;
-	intptr_t track0x = track % 10;
-	SkinCoord digitx0 = self->gridstate->skin->headercoords.digitx0;
-	SkinCoord digit0x = self->gridstate->skin->headercoords.digit0x;
-	digitx0.src.left += trackx0 * psy_ui_realrectangle_width(&digitx0.src);
-	digit0x.src.left += track0x * psy_ui_realrectangle_width(&digit0x.src);
-	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest, &digitx0);
-	skin_blitcoord(g, &self->gridstate->skin->bitmap, dest, &digit0x);
-}
-
-void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{
-	if (trackergridstate_patterns(self->gridstate)) {
-		trackerheader_drawtrackledmute(self, g, dest, track);
-		trackerheader_drawtrackledsoloed(self, g, dest, track);
-		trackerheader_drawtrackledarmed(self, g, dest, track);		
-	}
-}
-
-void trackerheader_drawtrackledmute(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{	
-	if (psy_audio_patterns_istrackmuted(
-		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitcoord(g, &self->gridstate->skin->bitmap,
-			dest, &self->gridstate->skin->headercoords.mute);
-	}
-}
-
-void trackerheader_drawtrackledsoloed(TrackerHeader* self,
-	psy_ui_Graphics* g, psy_ui_RealPoint dest, uintptr_t track)
-{
-	if (psy_audio_patterns_istracksoloed(
-		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitcoord(g, &self->gridstate->skin->bitmap,
-			dest, &self->gridstate->skin->headercoords.solo);
-	}
-}
-
-void trackerheader_drawtrackledarmed(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{	
-	if (psy_audio_patterns_istrackarmed(
-		trackergridstate_patterns(self->gridstate), track)) {
-		skin_blitcoord(g, &self->gridstate->skin->bitmap,
-			dest, &self->gridstate->skin->headercoords.record);
-	}
-}
-
-void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint dest, uintptr_t track)
-{		
-	if (track == self->gridstate->cursor.track) {
-		psy_ui_setcolour(g, self->gridstate->skin->font);
-		psy_ui_drawline(g, dest,
-			psy_ui_realpoint_make(
-				psy_min(
-					dest.x + self->gridstate->skin->headercoords.background.dest.right -
-						self->gridstate->skin->headercoords.background.dest.left,
-					dest.x + trackergridstate_trackwidth(self->gridstate, track)),
-				0));
+			trackstate = trackerheader_updatetrackstate(self, track);
+			trackplaindraw_init(&trackdraw, self->gridstate,
+				psy_ui_realpoint_make(
+					trackergridstate_defaulttrackwidth(self->gridstate) /
+					psy_ui_realrectangle_width(&self->coords->background.dest),
+					size.height /
+					psy_ui_realrectangle_height(&self->coords->background.dest)),
+				track, size.height,
+				trackstate->playon);
+			trackplaindraw_draw(&trackdraw, g, cpx,
+				psy_ui_realpoint_make(cpx,  0.0));
+			cpx += trackergridstate_trackwidth(self->gridstate, track);
+		}
 	}
 }
 
@@ -279,9 +501,18 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 
 		patterns = trackergridstate_patterns(self->gridstate);
 		track = trackergridstate_pxtotrack(self->gridstate, ev->pt.x);	
-		track_x = trackerheader_trackposition(self, track);
-		ev_track_x = ev->pt.x - track_x;		
-		 if (trackerheader_hittest_solo(self, ev_track_x, ev->pt.y)) {
+		if (!self->usebitmapskin) {
+			double zoomx;
+
+			zoomx = trackergridstate_defaulttrackwidth(self->gridstate) /
+				psy_ui_realrectangle_width(&self->coords->background.dest);
+			track_x = trackergridstate_tracktopx(self->gridstate, track);
+			ev_track_x = (ev->pt.x - track_x) * 1.0 / zoomx;
+		} else {
+			track_x = trackerheader_trackposition(self, track);
+			ev_track_x = ev->pt.x - track_x;
+		}				
+		if (trackerheader_hittest_solo(self, ev_track_x, ev->pt.y)) {
 			if (psy_audio_patterns_istracksoloed(patterns, track)) {
 				psy_audio_patterns_deactivatesolotrack(patterns);
 			} else {
@@ -314,18 +545,18 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 }
 
 bool trackerheader_hittest_mute(const TrackerHeader* self, double x, double y)
-{
-	return skincoord_hittest(&self->gridstate->skin->headercoords.mute, x, y);
+{	
+	return skincoord_hittest(&self->coords->mute, x, y);
 }
 
 bool trackerheader_hittest_solo(const TrackerHeader* self, double x, double y)
 {
-	return skincoord_hittest(&self->gridstate->skin->headercoords.solo, x, y);
+	return skincoord_hittest(&self->coords->solo, x, y);
 }
 
 bool trackerheader_hittest_record(const TrackerHeader* self, double x, double y)
 {
-	return skincoord_hittest(&self->gridstate->skin->headercoords.record, x, y);
+	return skincoord_hittest(&self->coords->record, x, y);
 }
 
 double trackerheader_trackposition(const TrackerHeader* self, uintptr_t track)
@@ -338,16 +569,23 @@ double trackerheader_centerx(const TrackerHeader* self, uintptr_t track)
 {
 	return psy_max(0.0,
 		((trackergridstate_trackwidth(self->gridstate, track) -
-		self->gridstate->skin->headercoords.background.dest.right -
-		self->gridstate->skin->headercoords.background.dest.left)) / 2);
+			self->coords->background.dest.right -
+			self->coords->background.dest.left)) / 2);
 }
 
 void trackerheader_onpreferredsize(TrackerHeader* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate,
-		trackergridstate_numsongtracks(self->gridstate)));
-	rv->height = psy_ui_value_makepx(30);
+	rv->width = psy_ui_value_makepx(
+		trackergridstate_tracktopx(self->gridstate,
+			trackergridstate_numsongtracks(self->gridstate)));
+	if (self->usebitmapskin) {
+		rv->height = psy_ui_value_makepx(
+			psy_ui_realrectangle_height(
+				&self->coords->background.dest));
+	} else {
+		rv->height = psy_ui_value_makeeh(1.5);
+	}
 }
 
 void trackerheader_onpatterncursorchanged(TrackerHeader* self,

@@ -37,6 +37,8 @@ typedef struct {
 	psy_ui_Colour wireaacolour;
 	psy_ui_Colour wireaacolour2;
 	psy_ui_Colour polycolour;
+	psy_ui_Colour transparency;
+	bool hastransparency;
 	uintptr_t wirewidth;
 	uintptr_t wireaa;
 	double triangle_size;
@@ -51,7 +53,7 @@ typedef struct {
 	psy_ui_Bitmap skinbmp;
 	psy_ui_Font font;
 	bool drawmachineindexes;
-	bool drawvumeters;
+	bool drawvumeters;	
 } MachineViewSkin;
 
 void machineviewskin_init(MachineViewSkin*, psy_Property* theme,

@@ -59,6 +59,7 @@ bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);
 void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig*, bool on);
 void patternviewconfig_setdisplaysinglepattern(PatternViewConfig*, bool on);
 bool patternviewconfig_issinglepatterndisplay(const PatternViewConfig*);
+bool patternviewconfig_useheaderbitmap(const PatternViewConfig*);
 bool patternviewconfig_showtrackscopes(const PatternViewConfig*);
 void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
 bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);

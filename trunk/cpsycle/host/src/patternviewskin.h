@@ -24,6 +24,10 @@ typedef struct {
 	bool hasplayon;
 } TrackerHeaderCoords;
 
+void trackerheadercoords_init_classic(TrackerHeaderCoords*);
+
+const TrackerHeaderCoords* trackerheadercoords_default_classic(void);
+
 typedef struct PatternViewSkin {
 	psy_ui_Colour separator;
 	psy_ui_Colour separator2;

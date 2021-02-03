@@ -24,7 +24,8 @@ void skincoord_init_all(SkinCoord*,
 	double range);
 
 void skincoord_setsource(SkinCoord* coord, intptr_t vals[4]);
-void skincoord_setdest(SkinCoord* coord, intptr_t vals[4]);
+void skincoord_setdest(SkinCoord* coord, intptr_t vals[4],
+	uintptr_t num);
 
 INLINE psy_ui_RealRectangle skincoord_destposition(const SkinCoord* self)
 {
