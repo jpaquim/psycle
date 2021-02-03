@@ -649,6 +649,9 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* config,
 	psy_Property* property)
 {	
+	self->header.usebitmapskin = patternviewconfig_useheaderbitmap(config);
+	trackerheader_updatecoords(&self->header);
+	self->left.linenumberslabel.useheaderbitmap = self->header.usebitmapskin;
 	if (patternviewconfig_linenumbers(config)) {
 		patternview_showlinenumbers(self);
 	} else {
@@ -791,8 +794,9 @@ void patternview_computemetrics(PatternView* self)
 	tm = psy_ui_component_textmetric(patternview_base(self));
 	//gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) + 2;
-	self->linestate.lineheightpx =
-		floor(psy_ui_value_px(&self->linestate.lineheight, tm));
+	self->linestate.lineheightpx = 
+		psy_max(1.0,
+		floor(psy_ui_value_px(&self->linestate.lineheight, tm)));
 	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;
 	trackwidth = psy_max(
 		trackergridstate_preferredtrackwidth(&self->gridstate),
@@ -889,6 +893,7 @@ void patternview_setfont(PatternView* self, psy_ui_Font* font)
 		&self->linestate.lineheight, tm);
 	self->griddefaults.linestate->lineheightpx = psy_ui_value_px(
 		&self->linestate.lineheight, tm);
+	psy_ui_component_setfont(trackerheader_base(&self->header), font);
 	psy_ui_component_setfont(trackergrid_base(&self->griddefaults), font);
 	psy_ui_component_setfont(trackerlinenumbers_base(&self->left.linenumbers), font);	
 	patternview_computemetrics(self);
@@ -1022,6 +1027,7 @@ void patternview_updateksin(PatternView* self)
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->blockmenu.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
+	trackerheader_updatecoords(&self->header);
 	psy_ui_component_invalidate(&self->component);
 }
 

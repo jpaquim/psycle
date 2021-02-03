@@ -30,9 +30,17 @@ void skincoord_setsource(SkinCoord* coord, intptr_t vals[4])
 	psy_ui_realrectangle_resize(&coord->dest, (double)vals[2], (double)vals[3]);
 }
 
-void skincoord_setdest(SkinCoord* coord, intptr_t vals[4])
+void skincoord_setdest(SkinCoord* coord, intptr_t vals[4], uintptr_t num)
 {
 	coord->dest.left = (double)vals[0];
 	coord->dest.top = (double)vals[1];
-	coord->range = (double)vals[2];
+	if (num == 2) {
+		coord->range = 0;		
+	} else if (num == 3) {
+		coord->range = (double)vals[2];		
+	}
+	psy_ui_realrectangle_setwidth(&coord->dest,
+		psy_ui_realrectangle_width(&coord->src));
+	psy_ui_realrectangle_setheight(&coord->dest,
+		psy_ui_realrectangle_height(&coord->src));
 }

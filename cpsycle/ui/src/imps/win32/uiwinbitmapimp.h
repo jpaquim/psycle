@@ -21,6 +21,7 @@ extern "C" {
 typedef struct psy_ui_win_BitmapImp {
 	psy_ui_BitmapImp imp;
 	HBITMAP bitmap;
+	HBITMAP mask;
 } psy_ui_win_BitmapImp;
 
 void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size);

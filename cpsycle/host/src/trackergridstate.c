@@ -127,6 +127,20 @@ double trackergridstate_trackwidth(const TrackerGridState* self, uintptr_t track
 	return trackergridstate_preferredtrackwidth(self);	
 }
 
+double trackergridstate_defaulttrackwidth(const TrackerGridState* self)
+{
+	TrackDef* trackdef;
+
+	if (self->trackconfig) {
+		trackdef = &self->trackconfig->trackdef;		
+		return trackdef_width(trackdef,
+			(self->trackconfig)
+			? self->trackconfig->textwidth
+			: 12) + 1;		
+	}
+	return trackergridstate_preferredtrackwidth(self);
+}
+
 
 double trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
 {

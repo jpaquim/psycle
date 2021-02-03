@@ -59,11 +59,14 @@ static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
 /// Machinecallback
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
-static bool onmachinefileselectload(Workspace*, char filter[], char inoutName[]);
-static bool onmachinefileselectsave(Workspace*, char filter[], char inoutName[]);
+static bool onmachinefileselectload(Workspace*, char filter[],
+	char inoutName[]);
+static bool onmachinefileselectsave(Workspace*, char filter[],
+	char inoutName[]);
 static void onmachinefileselectdirectory(Workspace*);
 static void onmachineterminaloutput(Workspace*, const char* text);
-static bool onmachineeditresize(Workspace*, psy_audio_Machine* sender, intptr_t w, intptr_t h);
+static bool onmachineeditresize(Workspace*, psy_audio_Machine* sender,
+	intptr_t w, intptr_t h);
 static const char* onmachinelanguage(Workspace*);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
@@ -93,8 +96,7 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 			(fp_mcb_fileselect_directory)onmachinefileselectdirectory;
 		machinecallback_vtable.editresize =
 			(fp_mcb_editresize)onmachineeditresize;
-		machinecallback_vtable.output = (fp_mcb_output)
-			onmachineterminaloutput;
+		machinecallback_vtable.output = (fp_mcb_output)onmachineterminaloutput;
 		machinecallback_vtable_initialized = TRUE;
 	}
 }

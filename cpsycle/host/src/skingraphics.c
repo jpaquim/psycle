@@ -15,6 +15,16 @@ void skin_blitcoord(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
 		psy_ui_realrectangle_topleft(&coord->src));
 }
 
+void skin_transblitcoord(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
+	psy_ui_RealPoint dest, SkinCoord* coord)
+{
+	psy_ui_drawbitmap(g, bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(dest.x + coord->dest.left, dest.y + coord->dest.top),
+			psy_ui_realrectangle_size(&coord->dest)),
+		psy_ui_realrectangle_topleft(&coord->src));
+}
+
 void skin_blitcoordstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap,
 	psy_ui_RealPoint dest, double ratiowidth, double ratioheight,
 	SkinCoord* coord)

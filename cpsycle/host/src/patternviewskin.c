@@ -1,16 +1,17 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-// prefix file for each .c file
 #include "../../detail/prefix.h"
 
 #include "patternviewskin.h"
+// host
 #include "styles.h"
-#include "uicomponent.h"
 #include "skinio.h"
 #include "resources/resource.h"
 // file
 #include <dir.h>
+// ui
+#include "uicomponent.h"
 // platform
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
@@ -18,6 +19,31 @@
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
 #endif
+
+static bool coords_default_classic_initialized = FALSE;
+static TrackerHeaderCoords coords_default_classic;
+
+// TrackerHeaderCoords
+
+void trackerheadercoords_init_classic(TrackerHeaderCoords* self)
+{
+	skincoord_init_all(&self->background, 2, 0, 102, 23, 0, 0, 102, 23, 0);
+	skincoord_init_all(&self->record, 96, 40, 17, 17, 85, 3, 17, 17, 0);
+	skincoord_init_all(&self->mute, 79, 40, 17, 17, 66, 3, 17, 17, 0);
+	skincoord_init_all(&self->solo, 62, 40, 17, 17, 47, 3, 17, 17, 0);
+	skincoord_init_all(&self->digitx0, 0, 23, 9, 17, 15, 3, 9, 17, 0);
+	skincoord_init_all(&self->digit0x, 0, 23, 9, 17, 22, 3, 9, 17, 0);
+	skincoord_init_all(&self->dplayon, 0, 40, 7, 17, 5, 3, 7, 17, 0);
+}
+
+const TrackerHeaderCoords* trackerheadercoords_default_classic(void)
+{
+	if (!coords_default_classic_initialized) {
+		trackerheadercoords_init_classic(&coords_default_classic);
+		coords_default_classic_initialized = TRUE;
+	}
+	return &coords_default_classic;
+}
 
 // PatternViewSkin
 // prototypes

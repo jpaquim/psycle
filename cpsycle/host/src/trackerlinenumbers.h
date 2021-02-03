@@ -29,6 +29,7 @@ typedef struct TrackerLineNumbersLabel {
 	double headerheight;
 	bool showdefaultline;
 	bool showbeatoffset;
+	bool useheaderbitmap;
 	// references
 	struct TrackerView* view;
 	TrackerLineState* linestate;

@@ -421,6 +421,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	self->headerheight = 12;
 	self->showdefaultline = TRUE;
 	self->showbeatoffset = FALSE;
+	self->useheaderbitmap = TRUE;
 	trackerlinenumberslabel_updatetext(self);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		trackerlinenumberslabel_ondestroy);
@@ -478,6 +479,9 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);
 	psy_ui_settextcolour(g, self->linestate->skin->font);
+	if (!self->useheaderbitmap && self->linestate->gridfont) {
+		psy_ui_setfont(g, self->linestate->gridfont);
+	}
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, 0), 0, r, self->linestr, strlen(self->linestr));
 	if (self->showdefaultline) {
 		if (self->linestate->gridfont) {
