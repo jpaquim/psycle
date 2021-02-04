@@ -28,7 +28,7 @@
 //
 // connects the player with the psycle host ui and configures both
 //
-// psy_ui_MachineCallback
+// psy_audio_MachineCallback
 //         ^
 //         |
 //       Workspace
