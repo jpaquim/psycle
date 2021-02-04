@@ -28,10 +28,7 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
-	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1),
-		psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(2));
+	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);		
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	kbdhelp_markpatterncmds(self, "notes");
 	kbdhelp_appendtabbarsections(self);	

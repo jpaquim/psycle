@@ -49,9 +49,7 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 		"newmachine.sort-by-mode");
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinebar_onselectdirectories);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
@@ -102,9 +100,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		"newmachine.song-loading-compatibility");
 	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);	
 	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2), psy_ui_value_makeeh(1.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 1.5, 0.0);
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
@@ -182,13 +178,16 @@ static void pluginsview_vtable_init(PluginsView* self)
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);				
 		pluginsview_vtable.ondraw = (psy_ui_fp_component_ondraw) pluginsview_ondraw;		
-		pluginsview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+		pluginsview_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			pluginsview_onkeydown;
-		pluginsview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		pluginsview_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			pluginsview_onmousedown;
-		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
+		pluginsview_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
 			pluginsview_onmousedoubleclick;
-		pluginsview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		pluginsview_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			pluginsview_onpreferredsize;		
 	}
 }
@@ -678,7 +677,7 @@ static void newmachine_vtable_init(NewMachine* self)
 {
 	if (!newmachine_vtable_initialized) {
 		newmachine_vtable = *(self->component.vtable);				
-		newmachine_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+		newmachine_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			newmachine_onkeydown;		
 		newmachine_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			newmachine_ontimer;
@@ -710,9 +709,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	pluginscanview_init(&self->scanview,
 		psy_ui_notebook_base(&self->notebook));
 	// header margin
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(1),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 1.0, 0.0);
 	// section border, define for the top line above a section label
 	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);

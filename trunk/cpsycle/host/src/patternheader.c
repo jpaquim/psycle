@@ -359,7 +359,7 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 			trackerheader_ontimer;
 		trackerheader_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			trackerheader_ondraw;
-		trackerheader_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		trackerheader_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			trackerheader_onmousedown;
 		trackerheader_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)

@@ -157,9 +157,9 @@ static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
 		vtable.onclose = (psy_ui_fp_component_onclose)mainframe_onclose;
 		vtable.ondestroyed = (psy_ui_fp_component_ondestroyed)
 			mainframe_ondestroyed;
-		vtable.onkeydown = (psy_ui_fp_component_onkeydown)mainframe_onkeydown;
-		vtable.onkeyup = (psy_ui_fp_component_onkeyup)mainframe_onkeyup;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)mainframe_onkeydown;
+		vtable.onkeyup = (psy_ui_fp_component_onkeyevent)mainframe_onkeyup;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			mainframe_onmousedown;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)mainframe_ontimer;
 		vtable_initialized = TRUE;
@@ -401,9 +401,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin margin;
 	psy_ui_Margin row0margin;	
 
-	psy_ui_margin_init_all(&row0margin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeeh(0.5));		
+	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.5);		
 	// Vugroup
 	psy_ui_component_init(&self->topright, &self->top);
 	psy_ui_component_setalign(&self->topright, psy_ui_ALIGN_RIGHT);
@@ -412,9 +410,7 @@ void mainframe_initbars(MainFrame* self)
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->top);	
 	psy_ui_component_setmargin(&self->toprow0, &row0margin);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
 		margin);
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);
@@ -446,9 +442,7 @@ void mainframe_inittabbars(MainFrame* self)
 {
 	psy_ui_Margin spacing;
 
-	psy_ui_margin_init_all(&spacing, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->tabbars, &self->client);
 	//psy_ui_component_setspacing(&self->tabbars, &spacing);
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
@@ -458,9 +452,7 @@ void mainframe_initnavigation(MainFrame* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 2.0);		
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
 	psy_ui_component_setalign(navigation_base(&self->navigation),
 		psy_ui_ALIGN_LEFT);
@@ -1282,8 +1274,8 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 void mainframe_updatetabbarstyle(MainFrame* self)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case VIEW_ID_MACHINEVIEW:		
-				self->machineview.tabbar.style_tab.backgroundcolour = self->machineview.skin.colour;								
+		case VIEW_ID_MACHINEVIEW:				
+				self->machineview.tabbar.style_tab.backgroundcolour = self->machineview.skin.colour;
 				self->machineview.tabbar.style_tab.colour = self->machineview.skin.effect_fontcolour;
 				self->machineview.tabbar.style_tab_select.colour = self->machineview.skin.generator_fontcolour;
 				self->machineview.tabbar.style_tab_select.backgroundcolour =
@@ -1296,7 +1288,7 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 					self->machineview.tabbar.style_tab.backgroundcolour);			
 				psy_ui_component_invalidate(tabbar_base(&self->machineview.tabbar));
 			break;
-		case VIEW_ID_PATTERNVIEW:
+		case VIEW_ID_PATTERNVIEW:			
 			self->patternview.tabbar.style_tab.backgroundcolour = self->patternview.skin.background;
 			self->patternview.tabbar.style_tab.colour = self->patternview.skin.font;
 			self->patternview.tabbar.style_tab_select.colour = self->patternview.skin.fontsel;

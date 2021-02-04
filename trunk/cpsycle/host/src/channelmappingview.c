@@ -38,9 +38,9 @@ static void vtable_init(PinEdit* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_component_ondraw)pinedit_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)pinedit_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousedown)pinedit_onmousemove;
-		vtable.onmouseup = (psy_ui_fp_component_onmousedown)pinedit_onmouseup;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)pinedit_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)pinedit_onmousemove;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)pinedit_onmouseup;
 		vtable_initialized = TRUE;
 	}
 }
@@ -573,9 +573,7 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
 	psy_ui_component_setalign(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->pinedit.component, &margin);
 	psy_ui_component_setmargin(&self->help.component, &margin);	
 }

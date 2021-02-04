@@ -15,14 +15,8 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00333333));
 	psy_ui_border_init(&style->border);
-	psy_ui_colour_set(&style->border.colour_top,
-		psy_ui_colour_make(0x00444444));
-	psy_ui_colour_set(&style->border.colour_right,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_bottom,
-		style->border.colour_top);
-	psy_ui_colour_set(&style->border.colour_left,
-		style->border.colour_top);
+	psy_ui_border_setcolour(&style->border,	
+		psy_ui_colour_make(0x00444444));	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
 	// sequenceeditor item::selected
 	style = psy_ui_style_allocinit();

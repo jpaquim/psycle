@@ -63,7 +63,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
 		kbdbox_vtable.ondraw = (psy_ui_fp_component_ondraw)kbdbox_ondraw;
-		kbdbox_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		kbdbox_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			kbdbox_onmousedown;
 		kbdbox_vtable_initialized = 1;
 	}

@@ -159,7 +159,7 @@ static void about_vtable_init(About* self)
 	if (!about_vtable_initialized) {
 		about_vtable = *(self->component.vtable);
 		about_vtable.onalign = (psy_ui_fp_component_onalign)about_onalign;
-		about_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
+		about_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			about_onmousedoubleclick;		
 		about_vtable_initialized = 1;
 	}

@@ -69,7 +69,7 @@ static void vtable_init(StepsequencerBar* self)
 		vtable.onsize = (psy_ui_fp_component_onsize) stepsequencerbar_onsize;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			stepsequencerbar_onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			stepsequencerbar_onmousedown;
 	}
 }
@@ -344,7 +344,7 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 		stepsequencerbarselect_vtable.onsize = (psy_ui_fp_component_onsize) stepsequencerbarselect_onsize;
 		stepsequencerbarselect_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)stepsequencerbarselect_onpreferredsize;				
-		stepsequencerbarselect_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		stepsequencerbarselect_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			stepsequencerbarselect_onmousedown;
 	}
 }
@@ -519,9 +519,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 2.0);		
 	self->workspace = workspace;	
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);

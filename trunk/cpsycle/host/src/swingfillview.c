@@ -61,9 +61,7 @@ void swingfillview_initactions(SwingFillView* self)
 	assert(self);
 
 	psy_ui_component_init(&self->actions, &self->client);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1.0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->actions, &margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_RIGHT, psy_ui_defaults_hmargin(psy_ui_defaults()));	

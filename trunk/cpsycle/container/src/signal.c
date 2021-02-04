@@ -237,7 +237,10 @@ void psy_signal_emit(psy_Signal* self, void* sender, intptr_t num, ...)
 	va_list ap;
 
 	assert(self);
-
+	
+	if (!self->slots) {
+		return;
+	}
 	va_start(ap, num);	
 	if (num == 0) {
 		psy_signal_notify(self, sender);

@@ -35,8 +35,8 @@ static void vtable_init(psy_ui_ComboBox* self)
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove)onmousemove;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)onmousemove;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;
 		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)

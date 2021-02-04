@@ -48,7 +48,7 @@ static void vtable_init(RecentView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			recentview_onmousedown;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
 			recentview_ontimer;

@@ -33,10 +33,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->greetz, &self->component);
 	psy_ui_component_setalign(&self->greetz.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(2),
-		psy_ui_value_makeew(6));
+	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 2.0, 6.0);		
 	psy_ui_component_setmargin(&self->greetz.component, &margin);
 	psy_ui_button_init_connect(&self->original, &self->component,
 		self, greet_onoriginal);

@@ -17,9 +17,7 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->prev, &self->component);	
 	psy_ui_component_setalign(&self->prev.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->prev.component, &margin);
 	psy_ui_button_settext(&self->prev, "<");
 	psy_signal_connect(&self->prev.signal_clicked, self, navigation_onprev);

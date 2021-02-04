@@ -21,7 +21,7 @@ static void vtable_init(psy_ui_Switch* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;
 		vtable_initialized = 1;

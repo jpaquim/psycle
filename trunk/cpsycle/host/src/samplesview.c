@@ -25,9 +25,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 1.0, 0.0);		
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
@@ -197,9 +195,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 
 	self->view = view;
 	self->instruments = instruments;
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"samplesview.samplename");	
@@ -534,9 +530,8 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	// header
 	{
 		psy_ui_Margin header_margin;
-		psy_ui_margin_init_all(&header_margin, psy_ui_value_makepx(0),
-			psy_ui_value_makeew(2), psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0));
+
+		psy_ui_margin_init_all_em(&header_margin, 0.0, 2.0, 0.0, 0.0);
 		psy_ui_component_init(&self->header, &self->component);
 		psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);		
 		psy_ui_label_init(&self->waveformheaderlabel, &self->header);
@@ -564,9 +559,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	psy_ui_slider_settext(&self->speed,"Speed");
 	psy_ui_slider_init(&self->depth, &self->component);
 	psy_ui_slider_settext(&self->depth, "Depth");
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 0.0);
 	for (i = 0; i < 3; ++i) {				
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
@@ -575,8 +568,8 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			(ui_slider_fpdescribe)vibratoview_ondescribe,
 			(ui_slider_fptweak)vibratoview_ontweak,
 			(ui_slider_fpvalue)vibratoview_onvalue);
-	}	
-	sliders[0]->component.margin.top.quantity.px = 32;		
+	}
+	sliders[0]->component.margin.top = psy_ui_value_makeew(2.0);	
 }
 
 void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)
@@ -727,13 +720,9 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_Margin rowmargin;
 	
 	self->view = view;
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_ui_margin_init_all(&rowmargin, psy_ui_value_makeew(1.5),
-		psy_ui_value_makepx(0), psy_ui_value_makeew(1.5),
-		psy_ui_value_makepx(0));
-	self->sample = 0;
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_all_em(&rowmargin, 1.5, 0.0, 1.5, 0.0);		
+	self->sample = NULL;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_init(&self->cont, &self->component);
 	psy_ui_component_setmargin(&self->cont, &rowmargin);
@@ -994,17 +983,11 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Margin waveboxmargin;
 	psy_ui_Margin leftmargin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_ui_margin_init_all(&waveboxmargin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(1.0), psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.5));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
+	psy_ui_margin_init_all_em(&waveboxmargin, 0.5, 1.0, 0.0, 0.5);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(3));
+	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);
 	psy_ui_component_setmargin(&self->header.component, &leftmargin);

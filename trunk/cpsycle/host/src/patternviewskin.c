@@ -242,7 +242,7 @@ psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_
 {
 	psy_ui_Colour rv;
 
-	if (psy_ui_equal_colours(source1, source2)) {
+	if (psy_ui_equal_colours(&source1, &source2)) {
 		return source1;
 	}
 	if (numtracks < 2) {

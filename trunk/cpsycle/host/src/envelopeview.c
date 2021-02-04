@@ -38,11 +38,11 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 		envelopebox_vtable = *(self->component.vtable);
 		envelopebox_vtable.onsize = (psy_ui_fp_component_onsize) envelopebox_onsize;
 		envelopebox_vtable.ondraw = (psy_ui_fp_component_ondraw) envelopebox_ondraw;		
-		envelopebox_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		envelopebox_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			envelopebox_onmousedown;
-		envelopebox_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		envelopebox_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			envelopebox_onmousemove;
-		envelopebox_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		envelopebox_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			envelopebox_onmouseup;
 		envelopebox_vtable_initialized = TRUE;
 	}
@@ -118,15 +118,15 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 
 		cpy = envelopebox_pxvalue(self, i);
 		psy_ui_drawline(g,
-			psy_ui_realpoint_make(self->spacing.left.quantity.px, cpy),
-			psy_ui_realpoint_make(self->spacing.left.quantity.px + self->cx, cpy));
+			psy_ui_realpoint_make(self->spacing.left.quantity, cpy),
+			psy_ui_realpoint_make(self->spacing.left.quantity + self->cx, cpy));
 	}	
 	for (i = 0; i <= envelopebox_displaymaxtime(self); i += step) {
 		psy_ui_drawline(g,
 			psy_ui_realpoint_make(envelopebox_pxtime(self, i),
-			self->spacing.top.quantity.px),
+			self->spacing.top.quantity),
 			psy_ui_realpoint_make(envelopebox_pxtime(self, i),
-			self->cy - self->spacing.bottom.quantity.px));
+			self->cy - self->spacing.bottom.quantity));
 	}
 }
 
@@ -195,9 +195,9 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00516850));
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
-					self->spacing.top.quantity.px),
+					self->spacing.top.quantity),
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
-				self->spacing.top.quantity.px + self->cy));
+				self->spacing.top.quantity + self->cy));
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		}
 	}	
@@ -255,8 +255,8 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 			}
 			psy_ui_setcolour(g, psy_ui_colour_make(0x00434343));
 			psy_ui_drawline(g,
-				psy_ui_realpoint_make(cpx, self->spacing.top.quantity.px),
-				psy_ui_realpoint_make(cpx, self->cy - self->spacing.bottom.quantity.px));
+				psy_ui_realpoint_make(cpx, self->spacing.top.quantity),
+				psy_ui_realpoint_make(cpx, self->cy - self->spacing.bottom.quantity));
 			psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
 		}
 	}
@@ -368,7 +368,7 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 
 		pt = (psy_dsp_EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = (psy_dsp_amp_t)((1.0 - ((ev->pt.y - self->spacing.top.quantity.px) /
+		pt->value = (psy_dsp_amp_t)((1.0 - ((ev->pt.y - self->spacing.top.quantity) /
 			self->cy)) / (double)(self->modamount));
 		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self, ev->pt.x);
 		checkadjustpointrange(self->dragpoint);
@@ -454,13 +454,13 @@ psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox* self, double x,
 {	
 	return psy_dsp_envelopepoint_make(
 		(float)envelopebox_pxtotime(self, x),
-		(psy_dsp_amp_t)(1.0 - (y - self->spacing.top.quantity.px) / self->cy));
+		(psy_dsp_amp_t)(1.0 - (y - self->spacing.top.quantity) / self->cy));
 }
 
 double envelopebox_pxvalue(EnvelopeBox* self, double value)
 {
 	return (self->cy - value * self->cy) +
-		self->spacing.top.quantity.px;
+		self->spacing.top.quantity;
 }
 
 psy_dsp_big_seconds_t envelopebox_pxtime(EnvelopeBox* self, psy_dsp_big_seconds_t t)
@@ -470,7 +470,7 @@ psy_dsp_big_seconds_t envelopebox_pxtime(EnvelopeBox* self, psy_dsp_big_seconds_
 	offsetstep= envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
 	return ((t - (envelopebox_displaymaxtime(self) *
-		self->zoomleft)) / offsetstep) + self->spacing.left.quantity.px;
+		self->zoomleft)) / offsetstep) + self->spacing.left.quantity;
 }
 
 psy_dsp_big_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
@@ -479,7 +479,7 @@ psy_dsp_big_seconds_t envelopebox_pxtotime(EnvelopeBox* self, double px)
 
 	double offsetstep = envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
-	t = (offsetstep * (px - self->spacing.left.quantity.px)) +
+	t = (offsetstep * (px - self->spacing.left.quantity)) +
 		(envelopebox_displaymaxtime(self) * self->zoomleft);
 	if (t < 0) {
 		t = 0;

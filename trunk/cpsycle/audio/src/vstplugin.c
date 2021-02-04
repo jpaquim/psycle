@@ -958,7 +958,7 @@ void update_vsttimeinfo(psy_audio_VstPlugin* self)
 	self->vsttimeinfo->barStartPos = sequencertime->lastbarposition;
 	// SMPTE offset(in SMPTE subframes(bits; 1 / 80 of a frame))
 	self->vsttimeinfo->smpteOffset = 0; // (sequencertime->playcounter / sequencertime->samplerate)*	
-	self->vsttimeinfo->samplesToNextClock = sequencertime->samplestonextclock;
+	self->vsttimeinfo->samplesToNextClock = (VstInt32)sequencertime->samplestonextclock;
 	self->vsttimeinfo->flags =
 		kVstPpqPosValid | kVstBarsValid | kVstTempoValid | kVstTimeSigValid;
 	if (sequencertime->playing) {

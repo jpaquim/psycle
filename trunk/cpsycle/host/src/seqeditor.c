@@ -975,13 +975,13 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 			seqeditortracks_ondraw;
 		seqeditortracks_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			seqeditortracks_onpreferredsize;
-		seqeditortracks_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		seqeditortracks_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousedown;
-		seqeditortracks_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		seqeditortracks_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousemove;
-		seqeditortracks_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		seqeditortracks_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmouseup;
-		seqeditortracks_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
+		seqeditortracks_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousedoubleclick;
 		seqeditortracks_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
 			seqeditortracks_onmouseenter;
@@ -1463,9 +1463,7 @@ void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin topmargin;
 
-	psy_ui_margin_init_all(&topmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -1539,9 +1537,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 {		
 	psy_ui_Margin topmargin;
 	
-	psy_ui_margin_init_all(&topmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent);
 	seqeditor_vtable_init(self);
 	self->component.vtable = &seqeditor_vtable;

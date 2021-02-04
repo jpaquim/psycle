@@ -38,11 +38,11 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.preventinput = (psy_ui_fp_component_preventinput)preventinput;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseup)onmouseup;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)onmouseup;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;		
-		vtable.onkeydown = (psy_ui_fp_component_onkeydown)button_onkeydown;
+		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)button_onkeydown;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			onlanguagechanged;
 		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)

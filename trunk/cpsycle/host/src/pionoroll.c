@@ -214,7 +214,7 @@ static psy_ui_ComponentVtable* pianokeyboard_vtable_init(PianoKeyboard* self)
 		pianokeyboard_vtable = *(self->component.vtable);
 		pianokeyboard_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			pianokeyboard_ondraw;
-		pianokeyboard_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		pianokeyboard_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			pianokeyboard_onmousedown;
 		pianokeyboard_vtable_initialized = TRUE;
 	}
@@ -555,11 +555,11 @@ static psy_ui_ComponentVtable* pianogrid_vtable_init(Pianogrid* self)
 	if (!pianogrid_vtable_initialized) {
 		pianogrid_vtable = *(self->component.vtable);
 		pianogrid_vtable.ondraw = (psy_ui_fp_component_ondraw)pianogrid_ondraw;
-		pianogrid_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		pianogrid_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			pianogrid_onmousedown;
-		pianogrid_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		pianogrid_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			pianogrid_onmouseup;
-		pianogrid_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		pianogrid_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			pianogrid_onmousemove;
 		pianogrid_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			pianogrid_onpreferredsize;
@@ -1796,7 +1796,7 @@ static psy_ui_ComponentVtable* pianoroll_vtable_init(Pianoroll* self)
 		pianoroll_vtable = *(self->component.vtable);
 		pianoroll_vtable.onalign = (psy_ui_fp_component_onalign)
 			pianoroll_onalign;
-		pianoroll_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		pianoroll_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			pianoroll_onmousedown;		
 		pianoroll_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			pianoroll_ontimer;

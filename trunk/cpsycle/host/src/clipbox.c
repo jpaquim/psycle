@@ -47,7 +47,7 @@ static void vtable_init(ClipBox* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_component_ondraw)clipbox_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)clipbox_onmousedown;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)clipbox_onmousedown;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)clipbox_ontimer;
 		vtable_initialized = TRUE;
 	}

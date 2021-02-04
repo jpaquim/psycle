@@ -4,583 +4,23 @@
 #ifndef psy_ui_DEF_H
 #define psy_ui_DEF_H
 
-#include "../../detail/prefix.h"
-#include "../../detail/psyconf.h"
-
-#include "../../detail/stdint.h"
-#include <stddef.h>
-#include <string.h>
+// local
+#include "uiborder.h"
+#include "uicolour.h"
 #include "uifont.h"
+#include "uigeometry.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if defined min
-#undef min
-#endif
-
 #define	psy_ui_NONRECURSIVE 0
 #define	psy_ui_RECURSIVE 1
 
-typedef struct psy_ui_PropertyMode {
-	bool inherited;
-	bool set;
-} psy_ui_PropertyMode;
+#define psy_ui_ETO_OPAQUE	0x0002
+#define psy_ui_ETO_CLIPPED	0x0004
 
-typedef struct psy_ui_TextMetric
-{
-    int32_t tmHeight;
-    int32_t tmAscent;
-    int32_t tmDescent;
-    int32_t tmInternalLeading;
-    int32_t tmExternalLeading;
-    int32_t tmAveCharWidth;
-    int32_t tmMaxCharWidth;
-    int32_t tmWeight;
-    int32_t tmOverhang;
-    int32_t tmDigitizedAspectX;
-    int32_t tmDigitizedAspectY;
-    uint8_t tmFirstChar;
-    uint8_t tmLastChar;
-    uint8_t tmDefaultChar;
-    uint8_t tmBreakChar;
-    uint8_t tmItalic;
-    uint8_t tmUnderlined;
-    uint8_t tmStruckOut;
-    uint8_t tmPitchAndFamily;
-    uint8_t tmCharSet;
-} psy_ui_TextMetric;
-
-typedef enum {
-	psy_ui_UNIT_EH,
-	psy_ui_UNIT_EW,
-	psy_ui_UNIT_PX,
-	psy_ui_UNIT_PE
-} psy_ui_Unit;
-
-typedef struct {
-	union {
-		double px;
-		double real;
-	} quantity;
-	psy_ui_Unit unit;
-} psy_ui_Value;
-
-void psy_ui_value_init(psy_ui_Value*);
-
-INLINE psy_ui_Value psy_ui_value_makepx(double px)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.px = px;
-	rv.unit = psy_ui_UNIT_PX;
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_value_makeew(double em)
-{	
-	psy_ui_Value rv;
-
-	rv.quantity.real = em;
-	rv.unit = psy_ui_UNIT_EW;
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_value_makeeh(double em)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.real = em;
-	rv.unit = psy_ui_UNIT_EH;
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_value_makepe(double pe)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.real = pe;
-	rv.unit = psy_ui_UNIT_PE;
-	return rv;
-}
-
-double psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
-void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
-	const psy_ui_TextMetric*);
-void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
-	const psy_ui_TextMetric*);
-void psy_ui_value_mul_real(psy_ui_Value*, double factor);
-int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
-	const psy_ui_TextMetric* tm);
-
-INLINE psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{	
-	psy_ui_Value rv;
-
-	rv = lhs;
-	psy_ui_value_add(&rv, &rhs, tm);
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{
-	psy_ui_Value rv;
-
-	rv = lhs;
-	psy_ui_value_sub(&rv, &rhs, tm);
-	return rv;
-}
-
-
-INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
-{
-	psy_ui_Value rv;
-
-	rv = lhs;
-	psy_ui_value_mul_real(&rv, factor);
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{	
-	if (psy_ui_value_comp(&lhs, &rhs, tm) > 0) {
-		return lhs;
-	}	
-	return rhs;
-}
-
-INLINE psy_ui_Value psy_ui_value_zero(void)
-{
-	return psy_ui_value_makepx(0);
-}
-
-INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
-{
-	return (self->unit == psy_ui_UNIT_PX)
-		? self->quantity.px == 0
-		: self->quantity.real == 0.0;	
-}
-
-INLINE bool psy_ui_isvaluezero(psy_ui_Value value)
-{
-	return psy_ui_value_iszero(&value);
-}
-
-typedef struct {
-	psy_ui_Value x;
-	psy_ui_Value y;
-} psy_ui_Point;
-
-INLINE void psy_ui_point_init(psy_ui_Point* self)
-{
-	self->x = psy_ui_value_zero();
-	self->y = psy_ui_value_zero();
-}
-
-INLINE void psy_ui_point_init_all(psy_ui_Point* self, psy_ui_Value x, psy_ui_Value y)
-{	
-	self->x = x;
-	self->y = y;	
-}
-
-INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
-{
-	psy_ui_Point rv;
-
-	rv.x = x;
-	rv.y = y;
-	return rv;
-}
-
-INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
-{
-	psy_ui_Point rv;
-
-	rv.x = psy_ui_value_makepx(x);
-	rv.y = psy_ui_value_makepx(y);
-	return rv;
-}
-
-INLINE psy_ui_Point psy_ui_point_zero(void)
-{
-	psy_ui_Point rv;
-
-	rv.x = psy_ui_value_makeew(0.0);
-	rv.y = psy_ui_value_makeeh(0.0);
-	return rv;
-}
-
-typedef struct { 
-	intptr_t x;
-	intptr_t y;
-} psy_ui_IntPoint;
-
-INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
-{
-	self->x = 0;
-	self->y = 0;
-}
-
-INLINE psy_ui_IntPoint psy_ui_intpoint_make(intptr_t x, intptr_t y)
-{
-	psy_ui_IntPoint rv;
-
-	rv.x = x;
-	rv.y = y;
-	return rv;
-}
-
-INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
-{
-	psy_ui_IntPoint rv;
-
-	rv.x = 0;
-	rv.y = 0;
-	return rv;
-}
-
-typedef struct {
-	double x;
-	double y;
-} psy_ui_RealPoint;
-
-INLINE void psy_ui_realpoint_init(psy_ui_RealPoint* self)
-{
-	self->x = 0;
-	self->y = 0;
-}
-
-INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
-{
-	psy_ui_RealPoint rv;
-
-	rv.x = x;
-	rv.y = y;
-	return rv;
-}
-
-INLINE psy_ui_RealPoint psy_ui_realpoint_zero(void)
-{
-	return psy_ui_realpoint_make(0.0, 0.0);	
-}
-
-typedef struct {
-	double width;
-	double height;
-} psy_ui_RealSize;
-
-INLINE psy_ui_RealSize psy_ui_realsize_make(double width, double height)
-{
-	psy_ui_RealSize rv;
-
-	rv.width = width;
-	rv.height = height;
-	return rv;
-}
-
-INLINE psy_ui_RealSize psy_ui_realsize_zero(void)
-{
-	return psy_ui_realsize_make(0.0, 0.0);
-}
-
-typedef struct {
-	double left;
-	double top;
-	double right;
-	double bottom;
-} psy_ui_RealRectangle;
-
-INLINE psy_ui_RealRectangle psy_ui_realrectangle_make(psy_ui_RealPoint topleft,
-	psy_ui_RealSize size)
-{
-	psy_ui_RealRectangle rv;
-
-	rv.left = topleft.x;
-	rv.top = topleft.y;
-	rv.right = topleft.x + size.width;
-	rv.bottom = topleft.y + size.height;
-	return rv;
-}
-
-INLINE psy_ui_RealRectangle psy_ui_realrectangle_zero(void)
-{
-	return psy_ui_realrectangle_make(psy_ui_realpoint_zero(), psy_ui_realsize_zero());
-}
-
-INLINE double psy_ui_realrectangle_width(const psy_ui_RealRectangle* self)
-{
-	return self->right - self->left;
-}
-
-INLINE void psy_ui_realrectangle_setwidth(psy_ui_RealRectangle* self, double width)
-{
-	self->right = self->left + width;
-}
-
-INLINE void psy_ui_realrectangle_resize(psy_ui_RealRectangle* self, double width,
-	double height)
-{
-	self->right = self->left + width;
-	self->bottom = self->top + height;
-}
-
-INLINE void psy_ui_realrectangle_setleft_resize(psy_ui_RealRectangle* self, double left)
-{
-	double width;
-
-	width = psy_ui_realrectangle_width(self);
-	self->left = left;
-	self->right += width;
-}
-
-INLINE void psy_ui_realrectangle_setleft(psy_ui_RealRectangle* self, double left)
-{	
-	self->left = left;	
-}
-
-INLINE double psy_ui_realrectangle_left(const psy_ui_RealRectangle* self)
-{
-	return self->left;
-}
-
-INLINE void psy_ui_realrectangle_setright_resize(psy_ui_RealRectangle* self, double right)
-{
-	double width;
-
-	width = psy_ui_realrectangle_width(self);
-	self->left = self->right - width;
-	self->right = right;
-}
-
-INLINE void psy_ui_realrectangle_setright(psy_ui_RealRectangle* self, double right)
-{
-	self->right = right;
-}
-
-INLINE double psy_ui_realrectangle_right(const psy_ui_RealRectangle* self)
-{
-	return self->right;
-}
-
-INLINE double psy_ui_realrectangle_height(const psy_ui_RealRectangle* self)
-{
-	return self->bottom - self->top;
-}
-
-INLINE void psy_ui_realrectangle_setheight(psy_ui_RealRectangle* self, double height)
-{
-	self->bottom = self->top + height;
-}
-
-INLINE psy_ui_RealPoint psy_ui_realrectangle_topleft(const psy_ui_RealRectangle* self)
-{
-	return psy_ui_realpoint_make(self->left, self->top);
-}
-
-INLINE psy_ui_RealSize psy_ui_realrectangle_size(const psy_ui_RealRectangle* self)
-{
-	return psy_ui_realsize_make(
-		psy_ui_realrectangle_width(self),
-		psy_ui_realrectangle_height(self));
-}
-
-void psy_ui_setrectangle(psy_ui_RealRectangle*, double left, double top, double width, double height);
-
-INLINE bool psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self,
-	psy_ui_RealPoint pt)
-{
-	return (pt.x >= self->left && pt.x < self->right&&
-		pt.y >= self->top && pt.y < self->bottom);
-}
-
-bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle*,
-	double x1, double y1, double x2, double y2);
-int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle*,
-	const psy_ui_RealRectangle* other);
-void psy_ui_realrectangle_union(psy_ui_RealRectangle*, const psy_ui_RealRectangle* other);
-void psy_ui_realrectangle_expand(psy_ui_RealRectangle*, double top, double right, double bottom, double left);
-void psy_ui_realrectangle_move(psy_ui_RealRectangle*, double dx, double dy);
-void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*, psy_ui_RealPoint topleft);
-
-void psy_ui_error(const char* err, const char* shorterr);
-
-INLINE bool psy_ui_realrectangle_equal(psy_ui_RealRectangle* self, psy_ui_RealRectangle* other)
-{
-	return memcmp(self, other, sizeof(psy_ui_RealRectangle)) == 0;
-}
-
-typedef struct {
-	intptr_t width;
-	intptr_t height;
-} psy_ui_IntSize;
-
-INLINE psy_ui_IntSize psy_ui_intsize_make(intptr_t width, intptr_t height)
-{
-	psy_ui_IntSize rv;
-
-	rv.width = width;
-	rv.height = height;
-	return rv;
-}
-
-typedef struct {
-	psy_ui_Value width;
-	psy_ui_Value height;
-} psy_ui_Size;
-
-INLINE void psy_ui_size_init(psy_ui_Size* self)
-{
-	psy_ui_value_init(&self->width);
-	psy_ui_value_init(&self->height);
-}
-
-INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width, psy_ui_Value height)
-{
-	self->width = width;
-	self->height = height;
-}
-
-INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
-{
-	psy_ui_Size rv;
-
-	rv.width = width;
-	rv.height = height;
-	return rv;
-}
-
-INLINE psy_ui_Size psy_ui_size_makepx(double width, double height)
-{
-	psy_ui_Size rv;
-
-	rv.width = psy_ui_value_makepx(width);
-	rv.height = psy_ui_value_makepx(height);
-	return rv;
-}
-
-INLINE psy_ui_Size psy_ui_size_makeem(double width, double height)
-{
-	psy_ui_Size rv;
-
-	rv.width = psy_ui_value_makeew(width);
-	rv.height = psy_ui_value_makeeh(height);
-	return rv;
-}
-
-INLINE void psy_ui_size_setpx(psy_ui_Size* self, double width, double height)
-{
-	self->width = psy_ui_value_makepx(width);
-	self->height = psy_ui_value_makepx(height);
-}
-
-INLINE void psy_ui_size_setem(psy_ui_Size* self, double width, double height)
-{
-	self->width = psy_ui_value_makeew(width);
-	self->height = psy_ui_value_makeeh(height);
-}
-
-INLINE psy_ui_Size psy_ui_size_zero(void)
-{
-	return psy_ui_size_makeem(0.0, 0.0);
-}
-
-INLINE bool psy_ui_size_iszero(const psy_ui_Size* self)
-{		
-	return psy_ui_value_iszero(&self->width) &&
-		psy_ui_value_iszero(&self->height);
-}
-
-INLINE bool psy_ui_issizezero(psy_ui_Size size)
-{
-	return psy_ui_size_iszero(&size);
-}
-
-INLINE psy_ui_RealSize psy_ui_size_px(psy_ui_Size* self, const psy_ui_TextMetric* tm)
-{
-	psy_ui_RealSize rv;
-
-	rv.width = psy_ui_value_px(&self->width, tm);
-	rv.height = psy_ui_value_px(&self->height, tm);
-	return rv;
-}
-
-INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
-	const psy_ui_TextMetric* tm)
-{
-	psy_ui_IntSize rv;
-
-	rv.width = (intptr_t)psy_ui_value_px(&size.width, tm);
-	rv.height = (intptr_t)psy_ui_value_px(&size.height, tm);
-	return rv;
-}
-
-INLINE psy_ui_Size psy_ui_max_size(psy_ui_Size lhs, psy_ui_Size rhs,
-	const psy_ui_TextMetric* tm)
-{
-	psy_ui_Size rv;
-
-	if (psy_ui_value_comp(&lhs.width, &rhs.width, tm) > 0) {
-		rv.width = lhs.width;
-	} else {
-		rv.width = rhs.width;
-	}
-	if (psy_ui_value_comp(&lhs.height, &rhs.height, tm) > 0) {
-		rv.height = lhs.height;
-	} else {
-		rv.height = rhs.height;
-	}
-	return rv;
-}
-
-typedef struct {
-	psy_ui_Value top;
-	psy_ui_Value right;
-	psy_ui_Value bottom;
-	psy_ui_Value left;
-} psy_ui_Margin;
-
-void psy_ui_margin_init(psy_ui_Margin*);
-void psy_ui_margin_init_all(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
-	psy_ui_Value bottom, psy_ui_Value left);
-void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
-void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
-void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
-void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
-psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*);
-double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
-psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
-double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
-
-INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
-{
-	return psy_ui_value_iszero(&self->left) &&
-		psy_ui_value_iszero(&self->top) &&
-		psy_ui_value_iszero(&self->right) &&
-		psy_ui_value_iszero(&self->bottom);
-}
-
-INLINE psy_ui_Margin psy_ui_margin_make(psy_ui_Value top, psy_ui_Value right,
-	psy_ui_Value bottom, psy_ui_Value left)
-{
-	psy_ui_Margin rv;
-
-	psy_ui_margin_init_all(&rv, top, right, bottom, left);
-	return rv;
-}
-
-INLINE psy_ui_Margin psy_ui_margin_zero(void)
-{
-	psy_ui_Margin rv;
-
-	psy_ui_margin_init(&rv);
-	return rv;
-}
-
-typedef enum {
+typedef enum psy_ui_Overflow {
 	psy_ui_OVERFLOW_HIDDEN = 0,
 	psy_ui_OVERFLOW_VSCROLL = 1,
 	psy_ui_OVERFLOW_HSCROLL = 2,
@@ -590,28 +30,28 @@ typedef enum {
 	psy_ui_OVERFLOW_SCROLLCENTER = psy_ui_OVERFLOW_VSCROLLCENTER | psy_ui_OVERFLOW_HSCROLLCENTER
 } psy_ui_Overflow;
 
-typedef enum {
+typedef enum psy_ui_Cursor {
 	psy_ui_CURSOR_DEFAULT,
 	psy_ui_CURSOR_COLRESIZE
 } psy_ui_Cursor;
 
-typedef enum {
+typedef enum psy_ui_JustifyType {
 	psy_ui_JUSTIFY_NONE,	
 	psy_ui_JUSTIFY_EXPAND	
 } psy_ui_JustifyType;
 
-typedef enum {
+typedef enum psy_ui_ExpandMode {
 	psy_ui_NOEXPAND = 1,	
 	psy_ui_HORIZONTALEXPAND = 2,
 	psy_ui_VERTICALEXPAND = 4	
 } psy_ui_ExpandMode;
 
-typedef enum {
+typedef enum psy_ui_Orientation {
 	psy_ui_HORIZONTAL,
 	psy_ui_VERTICAL
 } psy_ui_Orientation;
 
-typedef enum {
+typedef enum psy_ui_AlignType {
 	psy_ui_ALIGN_NONE,
 	psy_ui_ALIGN_CLIENT,
 	psy_ui_ALIGN_TOP,
@@ -623,7 +63,7 @@ typedef enum {
 	psy_ui_ALIGN_VCLIENT
 } psy_ui_AlignType;
 
-typedef enum {
+typedef enum psy_ui_Alignment {
 	psy_ui_ALIGNMENT_NONE = 0,
 	psy_ui_ALIGNMENT_LEFT = 2,
 	psy_ui_ALIGNMENT_RIGHT = 4,
@@ -635,124 +75,7 @@ typedef enum {
 		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
 
-typedef struct psy_ui_Colour
-{
-	psy_ui_PropertyMode mode;
-	uint32_t value;
-} psy_ui_Colour;
-
-INLINE void psy_ui_colour_init(psy_ui_Colour* self)
-{
-	self->mode.inherited = TRUE;
-	self->mode.set = FALSE;
-	self->value = 0x00000000;
-}
-
-INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
-{
-	psy_ui_Colour rv;
-
-	rv.mode.inherited = TRUE;
-	rv.mode.set = TRUE;
-	rv.value = value;
-	return rv;
-}
-
-INLINE void psy_ui_colour_set(psy_ui_Colour* self, psy_ui_Colour colour)
-{
-	self->mode.inherited = TRUE;
-	self->mode.set = TRUE;
-	self->value = colour.value;
-}
-
-INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
-{
-	psy_ui_Colour rv;
-
-	rv.mode.inherited = TRUE;
-	rv.mode.set = TRUE;
-	rv.value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
-	return rv;
-}
-
-INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
-	uint8_t* r, uint8_t* g, uint8_t* b)
-{
-	uint32_t temp;
-		
-	temp = (self->value & 0xFF);
-	*r = (uint8_t) temp;	
-	temp = ((self->value >> 8) & 0xFF);
-	*g = (uint8_t) temp;	
-	temp = ((self->value >> 16) & 0xFF);
-	*b = (uint8_t) temp;
-}
-
-psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
-psy_ui_Colour* psy_ui_colour_mul_rgb(psy_ui_Colour* self, float r, float g, float b);
-psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
-	psy_ui_Colour add);
-
-INLINE bool psy_ui_equal_colours(psy_ui_Colour lhs, psy_ui_Colour rhs)
-{
-	return lhs.value == rhs.value;
-}
-
-typedef enum {
-	psy_ui_BORDER_NONE,
-	psy_ui_BORDER_SOLID
-} psy_ui_BorderStyle;
-
-typedef struct {
-	psy_ui_PropertyMode mode;
-	psy_ui_BorderStyle top;
-	psy_ui_BorderStyle right;
-	psy_ui_BorderStyle bottom;
-	psy_ui_BorderStyle left;
-	psy_ui_Colour colour_top;
-	psy_ui_Colour colour_right;
-	psy_ui_Colour colour_bottom;
-	psy_ui_Colour colour_left;
-	psy_ui_Value radius_top;
-	psy_ui_Value radius_right;
-	psy_ui_Value radius_bottom;
-	psy_ui_Value radius_left;
-} psy_ui_Border;
-
-INLINE void psy_ui_border_init(psy_ui_Border* self)
-{
-	self->mode.inherited = FALSE;
-	self->mode.set = FALSE;
-	self->top = psy_ui_BORDER_NONE;
-	self->right = psy_ui_BORDER_NONE;
-	self->bottom = psy_ui_BORDER_NONE;
-	self->left = psy_ui_BORDER_NONE;
-	self->radius_top = psy_ui_value_zero();
-	self->radius_right = psy_ui_value_zero();
-	self->radius_bottom = psy_ui_value_zero();
-	self->radius_left = psy_ui_value_zero();
-	psy_ui_colour_init(&self->colour_top);
-	psy_ui_colour_init(&self->colour_right);
-	psy_ui_colour_init(&self->colour_bottom);
-	psy_ui_colour_init(&self->colour_left);
-}
-
-INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
-	psy_ui_BorderStyle right, psy_ui_BorderStyle bottom, psy_ui_BorderStyle left)
-{
-	self->mode.inherited = FALSE;
-	self->mode.set = TRUE;
-	self->top = top;
-	self->right = right;
-	self->bottom = bottom;
-	self->left = left;
-	psy_ui_colour_init(&self->colour_top);
-	psy_ui_colour_init(&self->colour_right);
-	psy_ui_colour_init(&self->colour_bottom);
-	psy_ui_colour_init(&self->colour_left);
-}
-
-typedef enum {
+typedef enum psy_ui_CursorStyle {
 	psy_ui_CURSORSTYLE_AUTO,
 	psy_ui_CURSORSTYLE_MOVE,
 	psy_ui_CURSORSTYLE_NODROP,
@@ -778,10 +101,7 @@ typedef enum {
 	psy_ui_CURSORSTYLE_SW_RESIZE
 } psy_ui_CursorStyle;
 
-#define psy_ui_ETO_OPAQUE	0x0002
-#define psy_ui_ETO_CLIPPED	0x0004
-
-typedef enum {
+typedef enum psy_ui_Key {
 	psy_ui_KEY_LBUTTON         = 0x01,
 	psy_ui_KEY_RBUTTON         = 0x02,
 	psy_ui_KEY_CANCEL          = 0x03,
@@ -908,7 +228,6 @@ typedef enum {
 	psy_ui_KEY_QUOTE           = 0xDE,
 	psy_ui_KEY_BRACKETRIGHT    = 0xDD
 } psy_ui_Key;
-
 
 #ifdef __cplusplus
 }
