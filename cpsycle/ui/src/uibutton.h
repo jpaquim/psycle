@@ -11,13 +11,45 @@
 extern "C" {
 #endif
 
+// psy_ui_Button
+//
+// Displays a text field and/or a predefined Icon (psy_ui_ButtonIcon).
+// Clicking with the mouse on it triggers the Signal signal_clicked.
+// Style classes: psy_ui_STYLE_BUTTON (_HOVER, _SELECT)
+// Callback signature: (void) -> (Context*) X (psy_ui_Button*)
+//
+// Example:
+//
+// 1a: psy_ui_button_init_text_connect(&example.button, "ok",
+//         self, onbuttonclick);
+//   Parameters:
+//    - &example.button: reference to the button
+//    - "ok": text to be displayed (translated)
+//    - self: callback context
+//    - onbuttonclick: functionpointer
+// or
+// 1b: psy_ui_button_init(&example.button);
+//    psy_ui_button_preventtranslation(&example.button);
+//    psy_ui_button_settext(&example.button, "ok");
+//	  psy_ui_button_allowrightclick(&example.button);
+//    psy_signal_connect(&example.button.signal_clicked, self, onbuttonclick);
+//
+// The function callback notified if the button click is triggered
+// 2: void onbuttonclick(Example* self, psy_ui_Button* sender) { }
+//
+// psy_ui_Component <>----<> psy_ui_ComponentImp
+//      ^
+//      |                         
+//      |
+// psy_ui_Button
+
 typedef struct psy_ui_Button {
 	// inherits
 	psy_ui_Component component;	
 	// signals
 	psy_Signal signal_clicked;
 	// internal
-	char* text;
+	char_dyn_t* text;
 	int hover;
 	int highlight;
 	psy_ui_ButtonIcon icon;
@@ -51,6 +83,7 @@ void psy_ui_button_setlinespacing(psy_ui_Button*, double spacing);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
 void psy_ui_button_preventtranslation(psy_ui_Button*);
 
+
 INLINE bool psy_ui_button_hasctrl(const psy_ui_Button* self)
 {
 	assert(self);
@@ -70,6 +103,14 @@ INLINE void psy_ui_button_allowrightclick(psy_ui_Button* self)
 	assert(self);
 
 	self->allowrightclick = TRUE;
+}
+
+// default
+INLINE void psy_ui_button_preventrightclick(psy_ui_Button* self)
+{
+	assert(self);
+
+	self->allowrightclick = FALSE;
 }
 
 INLINE bool psy_ui_button_hasshift(const psy_ui_Button* self)

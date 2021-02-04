@@ -85,12 +85,14 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 		propertiesrenderer_vtable = *(self->component.vtable);
 		propertiesrenderer_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			propertiesrenderer_ondraw;
-		propertiesrenderer_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		propertiesrenderer_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			propertiesrenderer_onmousedown;
 		propertiesrenderer_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmousedoubleclick)
+			(psy_ui_fp_component_onmouseevent)
 			propertiesrenderer_onmousedoubleclick;
-		propertiesrenderer_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		propertiesrenderer_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			propertiesrenderer_onpreferredsize;
 		propertiesrenderer_vtable_initialized = TRUE;
 	}
@@ -1110,9 +1112,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
-	psy_ui_margin_init_all(&tabmargin,
-		psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
-		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);		
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	propertiesview_updatetabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,

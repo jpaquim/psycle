@@ -58,16 +58,12 @@ void confirmbox_initalign(ConfirmBox* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(1),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);		
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->view, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(2),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 2.0, 0.0);		
 	psy_ui_component_setmargin(&self->header.component, &margin);
 }
 

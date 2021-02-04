@@ -40,11 +40,11 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 		psy_ui_scrollbarpane_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			psy_ui_scrollbarpane_ondraw;
 		psy_ui_scrollbarpane_vtable.onmousedown =
-			(psy_ui_fp_component_onmousedown)psy_ui_scrollbarpane_onmousedown;
+			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmousedown;
 		psy_ui_scrollbarpane_vtable.onmousemove =
-			(psy_ui_fp_component_onmousemove)psy_ui_scrollbarpane_onmousemove;
+			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmousemove;
 		psy_ui_scrollbarpane_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseup)psy_ui_scrollbarpane_onmouseup;
+			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmouseup;
 		psy_ui_scrollbarpane_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
 			psy_ui_scrollbarpane_onmouseenter;
 		psy_ui_scrollbarpane_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)

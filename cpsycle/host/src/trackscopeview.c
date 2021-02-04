@@ -40,7 +40,7 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopeView* self)
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackscopeview_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)trackscopeview_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			trackscopeview_onmousedown;
 		vtable_initialized = TRUE;
 	}

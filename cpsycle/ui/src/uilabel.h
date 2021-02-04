@@ -6,9 +6,9 @@
 
 #include "uicomponent.h"
 
-// Label
+// psy_ui_Label
 //
-// aim: displays a text field
+// Displays a text field
 //
 // psy_ui_Component <>----<> psy_ui_ComponentImp
 //      ^

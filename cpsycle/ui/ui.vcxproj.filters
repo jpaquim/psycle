@@ -196,6 +196,18 @@
     <ClCompile Include="src\uiicondraw.c">
       <Filter>comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uicolour.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiborder.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uivalue.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigeometry.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -362,6 +374,18 @@
     </ClInclude>
     <ClInclude Include="src\uiicondraw.h">
       <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicolour.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiborder.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uivalue.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uigeometry.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

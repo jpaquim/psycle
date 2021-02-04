@@ -379,6 +379,15 @@
     <ClCompile Include="src\styles.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\machineui.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinestackview.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinewireview.c">
+      <Filter>machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -733,6 +742,15 @@
     </ClInclude>
     <ClInclude Include="src\styles.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineui.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinestackview.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinewireview.h">
+      <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

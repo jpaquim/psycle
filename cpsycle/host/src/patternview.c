@@ -243,11 +243,11 @@ static void patternview_vtable_init(PatternView* self)
 			patternview_onalign;
 		patternview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			patternview_onpreferredsize;
-		patternview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		patternview_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			patternview_onmousedown;
-		patternview_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		patternview_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			patternview_onmouseup;
-		patternview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+		patternview_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			patternview_onkeydown;
 		patternview_vtable_initialized = TRUE;
 	}
@@ -374,9 +374,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
 	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
 	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);	
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(-1.0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1));
+	psy_ui_margin_init_all_em(&margin, -1.0, 0.0, 0.0, 1.0);		
 	psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		patternview_ondestroy);
@@ -864,7 +862,7 @@ void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 		self->linestate.lineheight = psy_ui_mul_value_real(
 			self->linestate.defaultlineheight,
 			psy_ui_app_zoomrate(psy_ui_app()) * zoombox_rate(sender));
-		fontinfo.lfHeight = (int)(self->linestate.lineheight.quantity.real * self->baselfheight);
+		fontinfo.lfHeight = (int)(self->linestate.lineheight.quantity * self->baselfheight);
 		psy_ui_font_init(&newfont, &fontinfo);
 		patternview_setfont(self, &newfont);
 		psy_ui_font_dispose(&newfont);
@@ -1396,7 +1394,7 @@ void patternview_onappzoom(PatternView* self, psy_ui_AppZoom* sender)
 		self->linestate.lineheight = psy_ui_mul_value_real(
 			self->linestate.defaultlineheight,
 			psy_ui_app_zoomrate(psy_ui_app()) * zoombox_rate(&self->left.zoombox));
-		fontinfo.lfHeight = (int)(self->linestate.lineheight.quantity.real *
+		fontinfo.lfHeight = (int)(self->linestate.lineheight.quantity *
 			self->baselfheight);
 		psy_ui_font_init(&newfont, &fontinfo);
 		patternview_setfont(self, &newfont);

@@ -46,8 +46,8 @@ static void vtable_init(InputDefiner* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);	
 		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
-		vtable.onkeydown = (psy_ui_fp_component_onkeydown) onkeydown;
-		vtable.onkeyup = (psy_ui_fp_component_onkeyup) onkeyup;
+		vtable.onkeydown = (psy_ui_fp_component_onkeyevent) onkeydown;
+		vtable.onkeyup = (psy_ui_fp_component_onkeyevent) onkeyup;
 		vtable_initialized = 1;
 	}
 }

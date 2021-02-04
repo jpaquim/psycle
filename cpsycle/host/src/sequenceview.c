@@ -197,9 +197,9 @@ static void trackheaderview_vtable_init(SequenceTrackHeaders* self)
 			sequencetrackheaders_ondestroy;
 		trackheaderviews_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			sequencetrackheaders_ondraw;
-		trackheaderviews_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		trackheaderviews_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			sequencetrackheaders_onmousedown;
-		trackheaderviews_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		trackheaderviews_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			sequencetrackheaders_onmousemove;
 		trackheaderviews_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
 			sequencetrackheaders_onmouseenter;
@@ -390,10 +390,10 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 			(psy_ui_fp_component_ondraw)
 			sequencelistview_ondraw;
 		sequencelistview_vtable.onmousedown =
-			(psy_ui_fp_component_onmousedown)
+			(psy_ui_fp_component_onmouseevent)
 			sequencelistview_onmousedown;
 		sequencelistview_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmousedoubleclick)
+			(psy_ui_fp_component_onmouseevent)
 			sequencelistview_onmousedoubleclick;
 		sequencelistview_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
@@ -758,9 +758,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 2.0);		
 	self->sequence = sequence;
 	self->workspace = workspace;
 	self->duration_ms = 0;
@@ -845,9 +843,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		// stepseq buttons
 		psy_ui_component_init(&self->stepseq, &self->component);
 		psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);
-		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-			psy_ui_value_makepx(0));
+		psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);
 		psy_ui_button_init(&self->togglestepseqicon, &self->stepseq);
 		psy_ui_button_seticon(&self->togglestepseqicon, psy_ui_ICON_MORE);
 		psy_ui_component_setalign(&self->togglestepseqicon.component,
@@ -858,16 +854,12 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		psy_ui_component_setalign(&self->togglestepseq.component,
 			psy_ui_ALIGN_LEFT);		
 	}	
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.2),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.2, 2.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));	
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.0),
-		psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 2.0);
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, &margin);
 }
 

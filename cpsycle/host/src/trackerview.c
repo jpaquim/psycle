@@ -169,16 +169,16 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
 			trackergrid_ondestroy;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)trackergrid_ondraw;
-		vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			trackergrid_onkeydown;
-		vtable.onkeyup = (psy_ui_fp_component_onkeyup)trackergrid_onkeyup;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		vtable.onkeyup = (psy_ui_fp_component_onkeyevent)trackergrid_onkeyup;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			trackergrid_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			trackergrid_onmousemove;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			trackergrid_onmouseup;
-		vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
+		vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			trackergrid_onmousedoubleclick;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackergrid_onpreferredsize;

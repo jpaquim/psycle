@@ -398,11 +398,14 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 		trackerlinenumberslabel_vtable = *(self->component.vtable);
 		trackerlinenumberslabel_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			trackerlinenumberslabel_ondraw;
-		trackerlinenumberslabel_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		trackerlinenumberslabel_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			trackerlinenumberslabel_onmousedown;
-		trackerlinenumberslabel_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		trackerlinenumberslabel_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			trackerlinenumberslabel_onpreferredsize;
-		trackerlinenumberslabel_vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+		trackerlinenumberslabel_vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
 			trackerlinenumberslabel_onlanguagechanged;
 	}
 }

@@ -54,4 +54,9 @@ typedef void (*psy_fp_disposefunc)(void*);
 
 typedef char char_dyn_t;
 
+typedef struct psy_ui_PropertyMode {
+	bool inherited;
+	bool set;
+} psy_ui_PropertyMode;
+
 #endif

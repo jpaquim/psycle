@@ -10,11 +10,26 @@
 extern "C" {
 #endif
 
-typedef struct {
+// psy_ui_SplitBar
+//
+// The Splitter divides a component into resizable panes and is itself
+// implemented as a component. The aligntype defines if the splitter is
+// vertical or horizontal. More then one splitter in the parent component are
+// possible.
+//
+// psy_ui_Component <>----<> psy_ui_ComponentImp
+//        ^
+//        |                         
+//        |
+// psy_ui_SplitBar
+
+typedef struct psy_ui_SplitBar {
+	// inherits
 	psy_ui_Component component;
-	int resize;
-	double dragoffset;
-	int hover;
+	// internal
+	double dragoffset;	
+	bool hover;
+	bool resize;
 	psy_ui_Size restoresize;
 	bool hasrestore;
 } psy_ui_SplitBar;

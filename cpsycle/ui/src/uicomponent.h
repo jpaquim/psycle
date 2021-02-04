@@ -82,15 +82,10 @@ typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 typedef void (*psy_ui_fp_component_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_component_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
 typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onmousedown)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onmousemove)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onmousewheel)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onmouseup)(struct psy_ui_Component*, psy_ui_MouseEvent*);
-typedef void (*psy_ui_fp_component_onmousedoubleclick)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_component_onmouseevent)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_component_onmouseenter)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onmouseleave)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
-typedef void (*psy_ui_fp_component_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
+typedef void (*psy_ui_fp_component_onkeyevent)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
@@ -123,15 +118,15 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onclose onclose;
 	psy_ui_fp_component_onalign onalign;
 	psy_ui_fp_component_onpreferredsize onpreferredsize;
-	psy_ui_fp_component_onmousedown onmousedown;
-	psy_ui_fp_component_onmousemove onmousemove;
-	psy_ui_fp_component_onmousewheel onmousewheel;
-	psy_ui_fp_component_onmouseup onmouseup;
-	psy_ui_fp_component_onmousedoubleclick onmousedoubleclick;
+	psy_ui_fp_component_onmouseevent onmousedown;
+	psy_ui_fp_component_onmouseevent onmousemove;
+	psy_ui_fp_component_onmouseevent onmousewheel;
+	psy_ui_fp_component_onmouseevent onmouseup;
+	psy_ui_fp_component_onmouseevent onmousedoubleclick;
 	psy_ui_fp_component_onmouseenter onmouseenter;
 	psy_ui_fp_component_onmouseleave onmouseleave;
-	psy_ui_fp_component_onkeydown onkeydown;
-	psy_ui_fp_component_onkeydown onkeyup;
+	psy_ui_fp_component_onkeyevent onkeydown;
+	psy_ui_fp_component_onkeyevent onkeyup;
 	psy_ui_fp_component_ontimer ontimer;
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 	psy_ui_fp_component_onfocus onfocus;
@@ -597,6 +592,7 @@ INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
 void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
+void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {

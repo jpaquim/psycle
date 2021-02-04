@@ -79,9 +79,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_button_init(&self->ok, &self->component);
 	psy_ui_button_settext(&self->ok, "Interpolate");
 	psy_ui_component_setalign(&self->ok.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
@@ -96,11 +94,11 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 		interpolatecurvebox_vtable = *(self->component.vtable);
 		interpolatecurvebox_vtable.ondraw =
 			(psy_ui_fp_component_ondraw) interpolatecurvebox_ondraw;
-		interpolatecurvebox_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		interpolatecurvebox_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			interpolatecurvebox_onmousedown;
-		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			interpolatecurvebox_onmousemove;
-		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			interpolatecurvebox_onmouseup;		
 		interpolatecurvebox_vtable_initialized = TRUE;
 	}

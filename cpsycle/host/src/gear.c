@@ -90,9 +90,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_ALIGN_TOP);
 	psy_ui_style_copy(&self->titlebar.style.style,
 		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, "machinebar.gear");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
@@ -100,9 +98,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		self, gear_onhide);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 	// client
 	tabbar_init(&self->tabbar, &self->client);

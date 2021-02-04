@@ -196,11 +196,11 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 		instrumententryview_vtable = *(self->component.vtable);
 		instrumententryview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			instrumententryview_ondraw;
-		instrumententryview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		instrumententryview_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			instrumententryview_onmousedown;
-		instrumententryview_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		instrumententryview_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			instrumententryview_onmousemove;
-		instrumententryview_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		instrumententryview_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			instrumententryview_onmouseup;
 		instrumententryview_vtable.onsize = (psy_ui_fp_component_onsize)
 			instrumententryview_onsize;
@@ -614,18 +614,14 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	samplesbox_init(&self->samplesbox, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);	
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.5, 0.0);
 	psy_ui_component_setmargin(&self->label.component, &margin);
 	instrumentnotemapbuttons_init(&self->buttons, &self->component);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->buttons.component, &margin);
 	instrumentparameterview_init(&self->parameterview, &self->component);
 	psy_ui_component_setalign(&self->parameterview.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_all(&margin,
-		psy_ui_value_makepx(0), psy_ui_value_makeew(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeew(2));
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->parameterview.component, &margin);
 	instrumententryview_init(&self->entryview,
 		&self->component, &self->parameterview);
@@ -638,16 +634,12 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	// todo: scroller here slows X11 down
 	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_CLIENT);
 #endif
-	psy_ui_margin_init_all(&margin,
-		psy_ui_value_makepx(0), psy_ui_value_makeew(2),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->entryview.component, &margin);	
 	instrumentkeyboardview_init(&self->keyboard, &self->component);
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->keyboard.component, &margin);
-	psy_ui_margin_init_all(&margin,
-		psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->keyboard.component, &margin);
 	instrumentnotemapview_setmetrics(self, self->metrics);
 	psy_signal_connect(&self->buttons.add.signal_clicked, self,

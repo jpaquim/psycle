@@ -1171,6 +1171,33 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 		psy_ui_component_border(self));
 }
 
+void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
+{
+	if (self->backgroundmode == psy_ui_BACKGROUND_SET) {				
+		psy_ui_Border b;
+
+		
+		b = psy_ui_component_border(self);
+		if (psy_ui_border_isround(&b)) {
+			psy_ui_RealRectangle r;
+
+			r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_zero(),
+				psy_ui_component_sizepx(self));			
+			psy_ui_drawsolidrectangle(g, r, // c);
+				psy_ui_component_backgroundcolour(
+					psy_ui_component_parent(self)));
+			psy_ui_drawsolidroundrectangle(g, r,
+				psy_ui_size_make(b.border_bottom_left_radius,
+					b.border_bottom_left_radius),
+				psy_ui_component_backgroundcolour(self));
+		} else {
+			psy_ui_drawsolidrectangle(g, g->clip,
+				psy_ui_component_backgroundcolour(self));
+		}
+	}
+}
+
 void psy_ui_component_togglevisibility(psy_ui_Component* self)
 {
 	assert(self);

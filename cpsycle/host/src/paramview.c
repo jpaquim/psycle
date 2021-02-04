@@ -300,11 +300,11 @@ static void paramknob_vtable_init(ParamKnob* self)
 			paramknob_ondestroy;
 		paramknob_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			paramknob_ondraw;
-		paramknob_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		paramknob_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			paramknob_onmousedown;
-		paramknob_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+		paramknob_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			paramknob_onmousemove;
-		paramknob_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+		paramknob_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			paramknob_onmouseup;
 		// paramknob_vtable.onmousedoubleclick =
 		//	(psy_ui_fp_component_onmousedoubleclick)
@@ -393,10 +393,10 @@ static void vtable_init(ParamView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove)onmousemove;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseup)onmouseup;
-		vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)onmousemove;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)onmouseup;
+		vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			onmousedoubleclick;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			onpreferredsize;
