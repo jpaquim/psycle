@@ -316,3 +316,44 @@ void psy_ui_graphics_imp_init(psy_ui_GraphicsImp* self)
 	imp_vtable_init();	
 	self->vtable = &imp_vtable;
 }
+
+void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
+	psy_ui_Border b)
+{	
+	if (psy_ui_border_isrect(&b)) {
+		psy_ui_setcolour(self, b.colour_top);
+		if (psy_ui_border_isround(&b)) {
+			psy_ui_drawroundrectangle(self, r,
+				psy_ui_size_make(b.border_bottom_left_radius,
+					b.border_bottom_left_radius));
+		} else {			
+			psy_ui_setcolour(self, b.colour_top);			
+			psy_ui_drawrectangle(self, r);
+		}
+	} else {
+		if (b.colour_top.mode.set) {
+			psy_ui_setcolour(self, b.colour_top);
+			//border_top_left_radius
+			psy_ui_drawline(self,
+				psy_ui_realpoint_make(
+					r.left + psy_ui_value_px(&b.border_top_left_radius, 0),
+					r.top),
+				psy_ui_realpoint_make(r.right - 1, r.top));
+		}
+		if (b.colour_right.mode.set) {
+			psy_ui_setcolour(self, b.colour_right);
+			psy_ui_drawline(self, psy_ui_realpoint_make(r.right - 1, r.top),
+				psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
+		}
+		if (b.colour_bottom.mode.set) {
+			psy_ui_setcolour(self, b.colour_bottom);
+			psy_ui_drawline(self, psy_ui_realpoint_make(r.left, r.bottom - 1),
+				psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
+		}
+		if (b.colour_left.mode.set) {
+			psy_ui_setcolour(self, b.colour_left);
+			psy_ui_drawline(self, psy_ui_realrectangle_topleft(&r),
+				psy_ui_realpoint_make(r.left, r.bottom - 1));
+		}
+	}
+}

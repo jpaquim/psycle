@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	
 #define STYLE_SEQ_TAB              100
 #define STYLE_SEQ_TAB_HOVER        101
 #define STYLE_SEQ_TAB_SELECT       102
@@ -16,6 +16,7 @@ extern "C" {
 #define STYLE_SEQEDT_ITEM          120
 #define STYLE_SEQEDT_ITEM_SELECTED 121
 #define STYLE_SEQEDT_EVENT         122
+#define STYLE_SEQLISTVIEW          140
 
 struct psy_ui_Defaults;
 

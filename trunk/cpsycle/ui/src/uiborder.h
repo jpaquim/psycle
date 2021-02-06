@@ -84,9 +84,13 @@ INLINE void psy_ui_border_init(psy_ui_Border* self)
 
 INLINE bool psy_ui_border_isrect(const psy_ui_Border* self)
 {
-	return psy_ui_equal_colours(&self->colour_top, &self->colour_right) &&
-		psy_ui_equal_colours(&self->colour_right, &self->colour_bottom) &&
-		psy_ui_equal_colours(&self->colour_bottom, &self->colour_left);
+	return self->left == psy_ui_BORDER_SOLID &&
+		self->top == psy_ui_BORDER_SOLID &&
+		self->right == psy_ui_BORDER_SOLID &&
+		self->bottom == psy_ui_BORDER_SOLID;
+		//psy_ui_equal_colours(&self->colour_top, &self->colour_right) &&
+		//psy_ui_equal_colours(&self->colour_right, &self->colour_bottom) &&
+		//psy_ui_equal_colours(&self->colour_bottom, &self->colour_left);
 }
 
 INLINE bool psy_ui_border_isround(const psy_ui_Border* self)
