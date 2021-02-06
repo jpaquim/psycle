@@ -22,7 +22,6 @@ static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 static void button_updatestyles(psy_ui_Button*);
-static void button_onupdatestyles(psy_ui_Button*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
 // vtable
@@ -37,16 +36,15 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.enableinput = (psy_ui_fp_component_enableinput)enableinput;
 		vtable.preventinput = (psy_ui_fp_component_preventinput)preventinput;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			onpreferredsize;
 		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
 		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)onmouseup;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;		
 		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)button_onkeydown;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
-			onlanguagechanged;
-		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
-			button_onupdatestyles;
+			onlanguagechanged;		
 		vtable_initialized = TRUE;
 	}
 }
@@ -71,9 +69,10 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
-	psy_signal_init(&self->signal_clicked);
-	button_onupdatestyles(self);
-	button_updatestyles(self);
+	psy_signal_init(&self->signal_clicked);	
+	psy_ui_component_setstyletypes(self,
+		psy_ui_STYLE_BUTTON, psy_ui_STYLE_BUTTON_HOVER,
+		psy_ui_STYLE_BUTTON_SELECT);
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
@@ -368,12 +367,4 @@ void button_updatestyles(psy_ui_Button* self)
 	} else {
 		self->component.style.currstyle = &self->component.style.style;
 	}		
-}
-
-void button_onupdatestyles(psy_ui_Button* self)
-{
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_BUTTON,
-		psy_ui_STYLE_BUTTON_HOVER,
-		psy_ui_STYLE_BUTTON_SELECT);
 }

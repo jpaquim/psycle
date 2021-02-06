@@ -19,6 +19,9 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 	psy_ui_style_init(&self->hover);
 	psy_ui_style_init(&self->select);
 	self->currstyle = &self->style;
+	self->style_id = psy_INDEX_INVALID;
+	self->hover_id = psy_INDEX_INVALID;
+	self->select_id = psy_INDEX_INVALID;
 }
 
 void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
@@ -227,7 +230,7 @@ static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
 static void onlanguagechanged(psy_ui_Component* self) { }
 static void onfocus(psy_ui_Component* self) { }
 static void onfocuslost(psy_ui_Component* self) { }
-static void onupdatestyles(psy_ui_Component* self) { }
+static void onupdatestyles(psy_ui_Component* self);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -1175,7 +1178,6 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 {
 	if (self->backgroundmode == psy_ui_BACKGROUND_SET) {				
 		psy_ui_Border b;
-
 		
 		b = psy_ui_component_border(self);
 		if (psy_ui_border_isround(&b)) {
@@ -1338,12 +1340,30 @@ void psy_ui_component_setmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
 }
 
 void psy_ui_component_setstyletypes(psy_ui_Component* self,
-	int standard, int hover, int select)
+	uintptr_t standard, uintptr_t hover, uintptr_t select)
 {
-	psy_ui_style_copy(&self->style.style,
-		psy_ui_style(standard));
-	psy_ui_style_copy(&self->style.hover,
-		psy_ui_style(hover));
-	psy_ui_style_copy(&self->style.select,
-		psy_ui_style(select));
+	self->style.style_id = standard;
+	self->style.hover_id = hover;
+	self->style.select_id = select;	
+	onupdatestyles(self);	
+}
+
+void onupdatestyles(psy_ui_Component* self)
+{
+	if (self->style.style_id != psy_INDEX_INVALID) {
+		psy_ui_style_copy(&self->style.style,
+			psy_ui_style(self->style.style_id));		
+	}
+	if (self->style.style_id != psy_INDEX_INVALID) {
+		psy_ui_style_copy(&self->style.hover,
+			psy_ui_style(self->style.hover_id));	
+	}
+	if (self->style.style_id != psy_INDEX_INVALID) {
+		psy_ui_style_copy(&self->style.select,
+			psy_ui_style(self->style.select_id));
+	}
+	if (self->style.style.backgroundcolour.mode.set) {
+		psy_ui_component_setbackgroundcolour(self,
+			self->style.style.backgroundcolour);
+	}
 }

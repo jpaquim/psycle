@@ -12,6 +12,8 @@
 static uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner*);
 static void psy_ui_align_alignclients(psy_ui_Aligner*, psy_List* children,
 	psy_ui_RealPoint cp_topleft, psy_ui_RealPoint cp_bottomright);
+static void psy_ui_aligner_adjustborder(psy_ui_Aligner* self,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
 
 void psy_ui_aligner_init(psy_ui_Aligner* self, psy_ui_Component* component)
 {
@@ -33,6 +35,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = floor(psy_ui_value_px(&size.width, tm));
 	cp_bottomright.y = floor(psy_ui_value_px(&size.height, tm));
+	psy_ui_aligner_adjustborder(self, &cp_topleft, &cp_bottomright);
 	for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
 			p = p->next) {
 		psy_ui_Component* component;
@@ -224,9 +227,11 @@ void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
 	uintptr_t numclients;
 
 	numclients = psy_ui_aligner_numclients(self);
-	if (numclients != 0) {		
+	if (numclients != 0) {
+		
 		tm = psy_ui_component_textmetric(self->component);
 		height = (double)((cp_bottomright.y - cp_topleft.y) / numclients);
+		
 		for (curr = 0, p = children; p != NULL; p = p->next) {
 			psy_ui_Component* component;			
 
@@ -277,6 +282,25 @@ void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
 				++curr;
 			}
 		}
+	}
+}
+
+void psy_ui_aligner_adjustborder(psy_ui_Aligner* self,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
+{
+	psy_ui_Border border;
+	border = psy_ui_component_border(self->component);
+	if (border.left == psy_ui_BORDER_SOLID) {
+		cp_topleft->x += 1;		
+	}
+	if (border.top == psy_ui_BORDER_SOLID) {
+		cp_topleft->y += 1;		
+	}
+	if (border.right == psy_ui_BORDER_SOLID) {
+		cp_bottomright->x -= 1;
+	}
+	if (border.bottom == psy_ui_BORDER_SOLID) {
+		cp_bottomright->y -= 1;
 	}
 }
 

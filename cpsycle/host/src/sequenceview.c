@@ -417,9 +417,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->component.vtable = &sequencelistview_vtable;
 	self->state = state;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 1);
-	psy_ui_component_setbackgroundcolour(&self->component, 
-		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
+	psy_ui_component_setwheelscroll(&self->component, 1);	
 	psy_ui_edit_init(&self->rename, &self->component);
 	psy_signal_connect(&self->rename.component.signal_keydown, self,
 		sequencelistview_oneditkeydown);
@@ -441,6 +439,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	sequencelistview_computetextsizes(self);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	psy_ui_component_starttimer(&self->component, 0, 200);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW);
 }
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
@@ -903,9 +903,6 @@ static void sequenceview_onsequencechanged(SequenceView*,
 	psy_audio_Sequence* sender);
 static void sequenceview_onconfigure(SequenceView*, GeneralConfig*,
 	psy_Property*);
-static void sequenceview_onthemechanged(SequenceView*, MachineViewConfig*,
-	psy_Property* theme);
-static void sequenceview_updateskin(SequenceView*);
 static void sequenceview_onalign(SequenceView*, psy_ui_Component* sender);
 // implementation
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
@@ -929,12 +926,12 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequencelistview_init(&self->listview, &self->component,
 		&self->state, self, self->patterns, workspace);	
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-		&self->component);
+		&self->component);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	self->listview.player = &workspace->player;
 	// button bar
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
-	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	// spacer
 	psy_ui_component_init(&self->spacer, &self->component);
 	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_makeem(0.0, 0.3));
@@ -1017,11 +1014,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 			self, sequenceview_onsequencetrackreposition);
 	}
 	psy_signal_connect(&psycleconfig_general(workspace_conf(workspace))->signal_changed, self,
-		sequenceview_onconfigure);
-	psy_signal_connect(
-		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,
-		self, sequenceview_onthemechanged);
-	sequenceview_updateskin(self);
+		sequenceview_onconfigure);	
 	psy_signal_connect(&self->component.signal_align, self,
 		sequenceview_onalign);
 }
@@ -1407,21 +1400,6 @@ void sequenceview_onconfigure(SequenceView* self, GeneralConfig* config,
 			psy_ui_checkbox_disablecheck(&self->options.shownames);
 		}
 	}
-}
-
-void sequenceview_onthemechanged(SequenceView* self, MachineViewConfig* config,
-	psy_Property* theme)
-{
-	sequenceview_updateskin(self);
-}
-
-void sequenceview_updateskin(SequenceView* self)
-{
-	// psy_ui_Colour bg;	
-	
-	// bg = psy_ui_colour_make(psy_property_at_int(
-	//	self->workspace->config.macview.theme, "mv_colour", 0x00232323));
-	// psy_ui_component_setbackgroundcolour(&self->component, bg);
 }
 
 void sequenceview_onalign(SequenceView* self, psy_ui_Component* sender)

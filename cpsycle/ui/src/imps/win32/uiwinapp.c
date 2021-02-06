@@ -382,13 +382,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					imp->component, 0);				
 				return 0;
 				break;
-			case WM_PAINT :	
-				if (imp->component->vtable->ondraw || 
-						imp->component->signal_draw.slots ||
-						imp->component->backgroundmode !=
-							psy_ui_BACKGROUND_NONE) {
-					HDC hdc;					
-					POINT clipsize;					
+			case WM_PAINT: {
+				psy_ui_Border border;
+
+				border = psy_ui_component_border(imp->component);
+				if (imp->component->vtable->ondraw ||
+					imp->component->signal_draw.slots ||
+					imp->component->backgroundmode != psy_ui_BACKGROUND_NONE ||
+					psy_ui_border_isrect(&border)) {
+					HDC hdc;
+					POINT clipsize;
 					PAINTSTRUCT ps;
 
 					hdc = BeginPaint(hwnd, &ps);
@@ -404,7 +407,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_win_GraphicsImp* win_g;
 						POINT dblbuffer_offset;
 						HFONT hfont = 0;
-						HFONT hPrevFont = 0;																		
+						HFONT hPrevFont = 0;
 						POINT org;
 						POINT origin;
 						const psy_ui_TextMetric* tm;
@@ -439,22 +442,28 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						// set coordinates origin to fit bufferDC if used
 						// (DPtoLP?)
 						origin.x = dblbuffer_offset.x;
-						origin.y = dblbuffer_offset.y;						
+						origin.y = dblbuffer_offset.y;
+						// draw border
+						psy_ui_setrectangle(&g.clip,
+							ps.rcPaint.left, ps.rcPaint.top,
+							clipsize.x, clipsize.y);
+						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
+						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
+							psy_ui_component_drawbackground(imp->component, &g);
+						}
+						psy_ui_component_drawborder(imp->component, &g);
 						// prepare a clip rect that can be used by a component
 						// to optimize the draw amount
 						psy_ui_setrectangle(&g.clip,
 							ps.rcPaint.left + psy_ui_value_px(&imp->component->scroll.x, tm),
 							ps.rcPaint.top + psy_ui_value_px(&imp->component->scroll.y, tm),
-							clipsize.x, clipsize.y);						
+							clipsize.x, clipsize.y);
 						// add scroll coords
 						tm = psy_ui_component_textmetric(imp->component);
 						origin.x += (int)psy_ui_value_px(&imp->component->scroll.x, tm);
-						origin.y += (int)psy_ui_value_px(&imp->component->scroll.y, tm);						
+						origin.y += (int)psy_ui_value_px(&imp->component->scroll.y, tm);
 						// set translation
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						// draw border	
-						psy_ui_component_drawbackground(imp->component, &g);
-						psy_ui_component_drawborder(imp->component, &g);
 						// sub spacing
 						if (!psy_ui_margin_iszero(&imp->component->spacing)) {
 							tm = psy_ui_component_textmetric(imp->component);
@@ -462,7 +471,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							origin.x -= (int)psy_ui_value_px(&imp->component->spacing.left, tm);
 							origin.y -= (int)psy_ui_value_px(&imp->component->spacing.top, tm);
 							SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						}						
+						}
 						// prepare colours
 						psy_ui_setcolour(&g, psy_ui_component_colour(
 							imp->component));
@@ -473,10 +482,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						GetWindowOrgEx(win_g->hdc, &org);
 						win_g->orgx = org.x;
 						win_g->orgy = org.y;
-						// call specialization methods (vtable, then signals)						
+						// call specialization methods (vtable, then signals)			
 						if (imp->component->vtable->ondraw) {
 							imp->component->vtable->ondraw(imp->component, &g);
-						}												
+						}
 						psy_signal_emit(&imp->component->signal_draw,
 							imp->component, 1, &g);						
 						// clean up font
@@ -500,9 +509,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_graphics_dispose(&g);
 					}
 					EndPaint(hwnd, &ps);
-					return 0 ;
+					return 0;
 				}
-				break;
+				break; }
 			case WM_NCDESTROY:
 				if (imp->component) {					
 					psy_signal_emit(&imp->component->signal_destroyed,

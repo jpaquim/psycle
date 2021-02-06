@@ -143,6 +143,9 @@ typedef struct psy_ui_ComponentStyle {
 	psy_ui_Style style;
 	psy_ui_Style hover;
 	psy_ui_Style select;
+	uintptr_t style_id;
+	uintptr_t hover_id;
+	uintptr_t select_id;
 } psy_ui_ComponentStyle;
 
 void psy_ui_componentstyle_init(psy_ui_ComponentStyle* style);
@@ -699,7 +702,7 @@ const char* psy_ui_translate(const char* key);
 void psy_ui_component_setmode(psy_ui_Component*, psy_ui_ScrollMode);
 
 void psy_ui_component_setstyletypes(psy_ui_Component*,
-	int standard, int hover, int select);
+	uintptr_t standard, uintptr_t hover, uintptr_t select);
 
 #ifdef __cplusplus
 }

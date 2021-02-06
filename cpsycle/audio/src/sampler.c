@@ -18,11 +18,9 @@
 // std
 #include <assert.h>
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
-// #include "../../detail/trace.h"
+#include "../../detail/trace.h"
 
 static int alteRand(int x) { return (x * rand()) / 32768; }
 
@@ -184,7 +182,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	// Voice Constructor
 	self->sampler = sampler;
 	self->inst = NULL;
-	self->instrument = 0xFF;
+	self->instrument = psy_audio_NOTECOMMANDS_INST_EMPTY;
 	self->channel = psy_INDEX_INVALID;
 	self->samplecounter = 0;
 	self->cutoff = 0;
@@ -215,7 +213,7 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 	self->triggernoteoff = 0;
 	self->triggernotedelay = 0;
 	self->effretticks = 0;
-	self->effportaspeed = 4294967296.0f;
+	self->effportaspeed = 4294967296.0f;	
 }
 
 // mfc name: Voice::NewLine()
@@ -485,9 +483,9 @@ uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, uintptr_t t
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		// ENV_OFF is not checked, because channel will be -1
 		if (self->voices[voice].channel == track &&
-			(self->voices[voice].triggernotedelay > 0) ||
+			((self->voices[voice].triggernotedelay > 0) ||
 				(self->voices[voice].envelope._stage !=
-					SAMPLER_ENV_FASTRELEASE)) {
+					SAMPLER_ENV_FASTRELEASE))) {
 			return voice;
 		}
 	}
@@ -573,8 +571,8 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 	uintptr_t voice;
 	bool doporta = FALSE;
 
-	assert(self);
-
+	assert(self);	
+	
 	// machine work already does this
 	// if (_mute) return; // Avoid new note entering when muted.
 
@@ -634,9 +632,10 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 				}
 			}
 		}
-	}	
+	}
+	usevoice = psy_INDEX_INVALID;
 	if (data.note < psy_audio_NOTECOMMANDS_RELEASE && !doporta) {	// Handle Note On.	
-		usevoice = psy_audio_sampler_getfreevoice(self); // Find a voice to apply the new note
+		usevoice = psy_audio_sampler_getfreevoice(self); // Find a voice to apply the new note		
 		if (voice != psy_INDEX_INVALID) { // NoteOff previous Notes in this channel.
 			if (self->voices[voice].inst) {
 				switch (self->voices[voice].inst->nna) {
@@ -650,7 +649,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 					break;
 				}
 			}
-			if (usevoice == psy_INDEX_INVALID) {
+			if (usevoice == psy_INDEX_INVALID) {				
 				usevoice = voice;
 			}
 		}

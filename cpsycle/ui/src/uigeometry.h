@@ -5,6 +5,7 @@
 #define psy_ui_GEOMETRY_H
 
 #include "uivalue.h"
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {

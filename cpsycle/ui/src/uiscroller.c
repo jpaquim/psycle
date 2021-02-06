@@ -73,6 +73,7 @@ static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Componen
 static void psy_ui_scroller_connectclient(psy_ui_Scroller*);
 static void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender);
 static void psy_ui_scroller_ontimer(psy_ui_Scroller* self, uintptr_t timerid);
+static void psy_ui_scroller_onupdatestyles(psy_ui_Scroller*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -82,7 +83,9 @@ static void vtable_init(psy_ui_Scroller* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
-			psy_ui_scroller_ontimer;		
+			psy_ui_scroller_ontimer;
+		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
+			psy_ui_scroller_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 }
@@ -125,11 +128,15 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_scrollanimate_init(&self->vanimate);
 	// reparent client
 	self->client = client;
-	psy_ui_component_setparent(client, &self->component);
-	if (client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
-	} else {
-		psy_ui_component_setalign(client, psy_ui_ALIGN_VCLIENT);
+	if (self->client) {
+		psy_ui_component_setparent(client, &self->component);
+		if (client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
+		} else {
+			psy_ui_component_setalign(client, psy_ui_ALIGN_VCLIENT);
+		}				
+		self->component.style.style.border = self->client->style.style.border;
+		psy_ui_border_init(&self->client->style.style.border);
 	}
 	psy_signal_connect(&self->vscroll.signal_changed, self,
 		psy_ui_scroller_vertical_onchanged);
@@ -374,5 +381,12 @@ void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender)
 {
 	if (self->client) {
 		psy_ui_component_setfocus(self->client);
+	}
+}
+
+void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
+{
+	if (self->client) {		
+		self->component.style.style.border = psy_ui_style(self->client->style.style_id)->border;		
 	}
 }
