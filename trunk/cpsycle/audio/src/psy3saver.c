@@ -1118,42 +1118,20 @@ int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
 		return status;
 	}		
 	{
-		psy_Table notemap;
-		psy_List* p;
-		static const int NOTE_MAP_SIZE = 120;
+		LegacyNoteMap notemap;
+		psy_List* p;		
 		uint8_t i;
-
-		psy_table_init(&notemap);		
-		for (p = instrument->entries; p != NULL; psy_list_next(&p)) {
-			psy_audio_InstrumentEntry* entry;
-			uint8_t key;
-
-			entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
-			for (key = (uint8_t)entry->keyrange.low; key <= (uint8_t)entry->keyrange.high; ++key) {
-				psy_table_insert(&notemap, key, (void*)(uintptr_t)entry->sampleindex.slot);
+				
+		notemap = psy_audio_legacynotemap(instrument->entries);		
+		for (i = 0; i < LEGACY_NOTE_MAP_SIZE; i++) {
+			if (status = psyfile_write_uint8(self->fp, notemap.map[i].first)) {
+					return status;
 			}
-		}
-		for (i = 0; i < NOTE_MAP_SIZE; i++) {
-			if (psy_table_exists(&notemap, i)) {
-				// todo: correct note
-				if (status = psyfile_write_uint8(self->fp,
-					i)) {
-					return status;
-				}
-				if (status = psyfile_write_uint8(self->fp,
-					(uint8_t)(uintptr_t)psy_table_at(&notemap, i))) {
-					return status;
-				}				
-			} else {
-				if (status = psyfile_write_uint8(self->fp, i)) {
-					return status;
-				}
-				if (status = psyfile_write_uint8(self->fp, 0)) {
-					return status;
-				}
-			}
-		}
-		psy_table_dispose(&notemap);
+			if (status = psyfile_write_uint8(self->fp,
+					notemap.map[i].second)) {
+				return status;
+			}							
+		}		
 	}	
 	psy_audio_psy3saver_write_smie(self, &instrument->volumeenvelope, version);	
 	psy_audio_psy3saver_write_smie(self, &instrument->panenvelope, version);

@@ -428,7 +428,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 			self->selected = psy_INDEX_INVALID;
 		}
 		self->dragmode = 1;
-		self->currkey = screentokey(ev->pt.x, self->metrics.keysize);
+		self->currkey = screentokey(ev->pt.x, self->metrics.keysize);		
 		entry = psy_audio_instrument_entryat(self->instrument, self->selected);
 		if (entry) {
 			if (abs((int)(entry->keyrange.low  - screentokey(ev->pt.x,
@@ -515,9 +515,15 @@ void instrumententryview_onmouseup(InstrumentEntryView* self,
 }
 
 // ParameterView
+// prototypes
 static void instrumentparameterview_ondraw(InstrumentParameterView*,
 	psy_ui_Graphics*);
-
+static void instrumentparameterview_onmousedown(InstrumentParameterView*,
+	psy_ui_MouseEvent*);
+static void instrumentparameterview_onapplyedit(InstrumentParameterView*,
+	psy_ui_Button* sender);
+static void instrumentparameterview_initeditgroup(InstrumentParameterView*);
+// vtable
 static psy_ui_ComponentVtable instrumentparameterview_vtable;
 static bool instrumentparameterview_vtable_initialized = FALSE;
 
@@ -526,7 +532,10 @@ static void instrumentparameterview_vtable_init(InstrumentParameterView* self)
 	if (!instrumentparameterview_vtable_initialized) {
 		instrumentparameterview_vtable = *(self->component.vtable);
 		instrumentparameterview_vtable.ondraw = (psy_ui_fp_component_ondraw)
-			instrumentparameterview_ondraw;		
+			instrumentparameterview_ondraw;
+		instrumentparameterview_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			instrumentparameterview_onmousedown;
 		instrumentparameterview_vtable_initialized = TRUE;
 	}
 }
@@ -541,8 +550,21 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(20),
-			psy_ui_value_makeeh(20)));
+		psy_ui_size_makeem(20.0, 20.0));
+	self->currentryindex = psy_INDEX_INVALID;
+	instrumentparameterview_initeditgroup(self);
+}
+
+void instrumentparameterview_initeditgroup(InstrumentParameterView* self)
+{
+	psy_ui_component_init(&self->editgroup, &self->component);	
+	intedit_init(&self->edit, &self->editgroup, "", 0, 0, 0);
+	psy_ui_component_setalign(intedit_base(&self->edit), psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init_text_connect(&self->apply, &self->editgroup,
+		"Apply", self, instrumentparameterview_onapplyedit);
+	psy_ui_component_setalign(psy_ui_button_base(&self->apply),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->editgroup);
 }
 
 void instrumentparameterview_setinstrument(InstrumentParameterView* self,
@@ -591,6 +613,56 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 	}
 }
 
+void instrumentparameterview_onmousedown(InstrumentParameterView* self,
+	psy_ui_MouseEvent* ev)
+{	
+	psy_ui_RealSize size;
+	psy_ui_RealPoint fixedkey_topleft;
+	psy_ui_RealSize fixedkey_size;
+	psy_ui_RealRectangle fixedkey_bounds;
+	
+	size = psy_ui_component_sizepx(&self->component);
+	fixedkey_topleft = psy_ui_realpoint_make(0.0,
+		self->metrics.lineheight * 2.0);
+	fixedkey_size = psy_ui_realsize_make(size.width, self->metrics.lineheight);
+	fixedkey_bounds = psy_ui_realrectangle_make(fixedkey_topleft,
+		fixedkey_size);		
+	if (psy_ui_realrectangle_intersect(&fixedkey_bounds, ev->pt)) {
+		psy_audio_InstrumentEntry* entry;
+		uintptr_t entryindex;
+
+		entryindex = (uintptr_t)(ev->pt.y / (self->metrics.lineheight * 3));
+		entry = psy_audio_instrument_entryat(self->instrument, entryindex);
+		if (entry) {
+			self->currentryindex = entryindex;
+			psy_ui_component_setposition(intedit_base(&self->editgroup),
+				psy_ui_point_makepx(fixedkey_topleft.x, fixedkey_topleft.y),
+				psy_ui_size_makepx(fixedkey_size.width, fixedkey_size.height * 1.5));
+			intedit_setvalue(&self->edit, entry->fixedkey);
+			psy_ui_component_show(&self->editgroup);			
+		} else {
+			self->currentryindex = psy_INDEX_INVALID;
+		}
+	}
+	psy_ui_mouseevent_stoppropagation(ev);
+}
+
+void instrumentparameterview_onapplyedit(InstrumentParameterView* self,
+	psy_ui_Button* sender)
+{
+	psy_audio_InstrumentEntry* entry;
+	
+	entry = psy_audio_instrument_entryat(self->instrument, self->currentryindex);
+	if (entry) {
+		entry->fixedkey = intedit_value(&self->edit);		
+	}
+	self->currentryindex = psy_INDEX_INVALID;
+	psy_ui_component_hide(&self->editgroup);
+	psy_ui_component_invalidate(&self->component);
+}
+
+// InstrumentNoteMapButtons
+// implementation
 void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_Component* parent)
 {	

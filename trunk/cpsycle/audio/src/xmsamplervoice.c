@@ -643,7 +643,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice * self,
 					int tmpCO = (int)(self->m_CutOff * 
 						xmenvelopecontroller_modulationamount(&self->m_FilterEnvelope));
 					if (tmpCO < 0) { tmpCO = 0; } else if (tmpCO > 127) { tmpCO = 127; }
-					filter_setcutoff(&self->m_Filter, (float)(tmpCO / 127.f));
+					filter_setcutoff(&self->m_Filter, (float)(tmpCO));
 					filter_workstereo_virtual(&self->m_Filter, &left_output, &right_output);
 				}
 			}
