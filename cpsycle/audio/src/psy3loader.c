@@ -1105,7 +1105,7 @@ int psy_audio_psy3loader_read_smid(psy_audio_PSY3Loader* self)
 		return status;
 	}	
 	instrument = psy_audio_instrument_allocinit();
-	psy_audio_instrument_setindex(instrument, instidx);		
+	psy_audio_instrument_setindex(instrument, instidx);	
 	if (status = psy_audio_psy3loader_loadxminstrument(self, instrument, 0,
 			self->fp->currchunk.version & 0xFFFF)) {
 		psy_audio_instrument_deallocate(instrument);
@@ -1571,7 +1571,7 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 	}
 	{
 		int32_t i;		
-		int first = 1;		
+		bool first;		
 		uint8_t targetnote;
 		uint8_t sampleslot;
 		psy_audio_InstrumentEntry instentry;		
@@ -1581,25 +1581,36 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 		if (instrument) {
 			psy_audio_instrument_clearentries(instrument);
 		}
+		first = TRUE;
 		for(i = 0; i < note_map_size; i++) {
 			int note;
 
-			note = i;
+			note = i;			
 			if (status = psyfile_read(self->fp, &targetnote, sizeof(targetnote))) {
 				return status;
 			}
 			if (status = psyfile_read(self->fp, &sampleslot, sizeof(sampleslot))) {
 				return status;
-			}
+			}			
 			if (instrument) {
 				if (first) {
 					instentry.sampleindex.slot = sampleslot;
 					instentry.keyrange.low = note;
+					if (note != targetnote) {
+						instentry.fixedkey = targetnote;
+					} else {
+						instentry.fixedkey = psy_audio_NOTECOMMANDS_EMPTY;
+					}
 					first = 0;
-				} else
-				if (sampleslot != instentry.sampleindex.slot) {
+				} else if (sampleslot != instentry.sampleindex.slot ||
+						note != targetnote) {					
 					instentry.keyrange.high = note - 1;				
 					psy_audio_instrument_addentry(instrument, &instentry);
+					if (note != targetnote) {
+						instentry.fixedkey = targetnote;
+					} else {
+						instentry.fixedkey = psy_audio_NOTECOMMANDS_EMPTY;
+					}
 					instentry.keyrange.low = note;
 					instentry.sampleindex.slot = sampleslot;
 				}

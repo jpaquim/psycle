@@ -631,7 +631,7 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 					psy_audio_xmsamplerchannel_note(thisChannel), 127, 0);					
 				// int _layer = _inst.NoteToSample(thisChannel.Note()).second;
 				// if (Global::song().samples.IsEnabled(_layer))
-				wave = NULL;
+				wave = NULL;				
 				if (_layer)
 				{
 					psy_audio_InstrumentEntry* entry;
@@ -639,6 +639,7 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 
 					samples = psy_audio_machine_samples(psy_audio_xmsampler_base(self));
 					entry = (psy_audio_InstrumentEntry*)_layer->entry;
+					entry->fixedkey = entry->fixedkey;
 					wave = psy_audio_samples_at(samples, entry->sampleindex);
 				}
 				if (wave) {
@@ -669,7 +670,7 @@ void psy_audio_xmsampler_tick(psy_audio_XMSampler* self,
 						vol = pData->parameter;
 					} else if (pData->cmd == XM_SAMPLER_CMD_SENDTOVOLUME && (pData->parameter & 0xF0) <= XM_SAMPLER_CMD_VOL_VOLUME3) {
 						vol = pData->parameter << 1;
-					}
+					}					
 					psy_audio_xmsamplervoice_noteon(newVoice,
 						psy_audio_xmsamplerchannel_note(thisChannel),
 						vol, bInstrumentSet);
@@ -1249,7 +1250,7 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		}
 		switch (temp) {
 			case 2: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break;
-			case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SINC; break;
+			case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break; // psy_dsp_RESAMPLERQUALITY_SINC; break;
 			case 0:	resamplertype = psy_dsp_RESAMPLERQUALITY_ZERO_ORDER; break;
 			case 1:
 			default:

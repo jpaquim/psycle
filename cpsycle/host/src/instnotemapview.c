@@ -575,8 +575,15 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 				entry->keyrange.high);
 			psy_ui_textout(g, 0, cpy + self->metrics.lineheight, text,
 				strlen(text));
-			psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
-				entry->velocityrange.high);
+			//psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
+				//entry->velocityrange.high);
+			if (entry->fixedkey == psy_audio_NOTECOMMANDS_EMPTY) {
+				psy_snprintf(text, 40, "%s", "No Fixedkey");
+			} else {
+				psy_snprintf(text, 40, "Fixed key %d", (int)entry->fixedkey);
+			}
+			//psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
+				//entry->velocityrange.high);
 			psy_ui_textout(g, 0, cpy + self->metrics.lineheight * 2, text,
 				strlen(text));
 			cpy += (self->metrics.lineheight * 3);

@@ -138,8 +138,10 @@ void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
 
 void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 {
-	psy_TableIterator it;
+	psy_TableIterator it;	
 
+	psy_ui_combobox_setcursel(&self->generators, -1);
+	psy_ui_combobox_setcursel(&self->samplers, -1);
 	psy_ui_checkbox_disablecheck(&self->active);
 	for (it = psy_audio_machines_begin(&self->workspace->song->machines);
 		!psy_tableiterator_equal(&it, psy_table_end());
@@ -152,24 +154,23 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 			
 			param = psy_audio_machine_parameter(machine, 0);
 			if (param) {
-				intptr_t index;
+				intptr_t instindex;
 
-				index = psy_audio_machine_parameter_scaledvalue(machine, param);
-				if (index == psy_audio_instruments_selected(&self->workspace->song->instruments).subslot) {
+				instindex = psy_audio_machine_parameter_scaledvalue(machine, param);
+				if (instindex == psy_audio_instruments_selected(&self->workspace->song->instruments).subslot) {
 					param = psy_audio_machine_parameter(machine, 1);
 					if (param) {
-						index = psy_audio_machine_parameter_scaledvalue(machine, param);
-						if (index == psy_audio_instruments_selected(
-								&self->workspace->song->instruments).subslot) {
-							psy_ui_combobox_setcursel(&self->samplers, index);							
-						}
+						uintptr_t macindex;
+
+						macindex = psy_audio_machine_parameter_scaledvalue(machine, param);											
+						psy_ui_combobox_setcursel(&self->samplers, macindex);					
 					}
 					psy_ui_combobox_setcursel(&self->generators,
 						psy_audio_machine_slot(machine) - 0x81);
 					psy_ui_checkbox_check(&self->active);
 					break;
 				}
-			}
+			} 
 		}		
 	}	
 }
