@@ -144,6 +144,7 @@ typedef struct psy_audio_XMSamplerVoice {
 	bool m_Background;
 	bool m_Stopping;
 	int m_Note;
+	int m_FixedKey;
 	int m_Period;
 	int m_Volume;
 	float m_RealVolume;

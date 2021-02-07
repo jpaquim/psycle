@@ -354,6 +354,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self)
 	psy_dsp_slider_resetto(&self->rampr, 0.f);
 	psy_audio_wavedatacontroller_init(&self->m_WaveDataController);
 	psy_audio_xmsamplervoice_reset(self);
+	self->m_FixedKey = psy_audio_NOTECOMMANDS_EMPTY;
 }
 
 void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice* self)
@@ -711,7 +712,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 	*/
 	psy_List* entries;
 	psy_audio_Sample* sample;
-
+	
 	entries = psy_audio_instrument_entriesintersect(
 		psy_audio_xmsamplervoice_rinstrument(self), note, 127, 0);
 	if (entries) {
@@ -724,9 +725,10 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 		psy_audio_wavedatacontroller_initcontroller(&self->m_WaveDataController,
 			sample, psy_dsp_RESAMPLERQUALITY_LINEAR);
 		self->m_Note = note;
+		self->m_FixedKey = entry->fixedkey; // target note
 		//\todo : add pInstrument().LinesMode
 		self->m_Period = psy_audio_xmsamplervoice_notetoperiod(self,
-			note, FALSE);
+			note, TRUE);
 		self->m_NNA = psy_audio_instrument_nna(
 			psy_audio_xmsamplervoice_rinstrument(self));
 		psy_audio_xmsamplervoice_resetvolandpan(self, playvol, reset);
@@ -1179,9 +1181,14 @@ double psy_audio_xmsamplervoice_notetoperiod(const psy_audio_XMSamplerVoice* sel
 	psy_audio_Sample* wave;
 	int note;
 
-	wave = self->m_WaveDataController.sample;	
+	wave = self->m_WaveDataController.sample;
+
 	// (correctNote) ? rInstrument().NoteToSample(noteIn).first : noteIn;
-	note = noteIn;
+	if (correctNote && self->m_FixedKey != psy_audio_NOTECOMMANDS_EMPTY) {
+		note = self->m_FixedKey;
+	} else {
+		note = noteIn;
+	}	
 	if (psy_audio_xmsampler_isamigaslides(self->m_pSampler))
 	{				
 		return psy_dsp_notetoamigaperiod(note,
