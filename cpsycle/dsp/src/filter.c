@@ -466,11 +466,13 @@ const char* filter_name(psy_dsp_FilterType type)
 		"None",
 		"LowPass/IT",
 		"LowPass/MPT (Ext)",
-		"LowPass 2p",
+		"HighPass/MPT (Ext)",
 		"LowPass 2p",
 		"HighPass 2p",
 		"BandPass 2p",
-		"NotchBand 2p"};
+		"NotchBand 2p"
+	};
+
 	if ((int)type < F_NUMFILTERS) {
 		return names[type];
 	} else {

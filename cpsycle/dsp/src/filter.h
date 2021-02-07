@@ -18,7 +18,9 @@ typedef enum psy_dsp_FilterType {
 	F_HIGHPASS12 = 1,
 	F_BANDPASS12 = 2,
 	F_BANDREJECT12 = 3,
-	F_NONE = 4,//This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default"
+	F_NONE = 4, // This one is kept here because it is used in load/save.
+	            // Also used in Sampulse instrument filter as
+				// "use channel default"
 	F_ITLOWPASS = 5,
 	F_MPTLOWPASSE = 6,
 	F_MPTHIGHPASSE = 7,
@@ -105,7 +107,7 @@ uintptr_t filter_numfilters(void);
 
 INLINE void filter_setcutoff(Filter* self, int iCutoff)
 {
-	if (self->cutoff != iCutoff) {
+	if (self->cutoff != iCutoff) {		
 		self->cutoff = iCutoff;
 		filter_update(self);
 	}
@@ -118,7 +120,7 @@ INLINE int filter_cutoff(const Filter* self)
 
 INLINE void filter_setressonance(Filter* self, int iRes)
 {
-	if (self->_q != iRes) {
+	if (self->_q != iRes) {		
 		self->_q = iRes;
 		filter_update(self);
 	}

@@ -6,6 +6,7 @@
 
 #include "envelopeview.h"
 #include "instrumentsbox.h"
+#include "intedit.h"
 #include "samplesbox.h"
 #include "tabbar.h"
 #include "workspace.h"
@@ -65,6 +66,10 @@ typedef struct {
 	psy_ui_Component component;
 	psy_audio_Instrument* instrument;
 	InstrumentNoteMapMetrics metrics;
+	psy_ui_Component editgroup;
+	IntEdit edit;
+	psy_ui_Button apply;
+	uintptr_t currentryindex;
 } InstrumentParameterView;
 
 void instrumentparameterview_init(InstrumentParameterView*,
@@ -110,10 +115,12 @@ typedef struct InstrumentNoteMapView {
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,
 	psy_ui_Component* parent, Workspace*);
-void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
+void instrumentnotemapview_setinstrument(InstrumentNoteMapView*,
+	psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
 
-INLINE psy_ui_Component* instrumentnotemapview_base(InstrumentNoteMapView* self)
+INLINE psy_ui_Component* instrumentnotemapview_base(
+	InstrumentNoteMapView* self)
 {
 	return &self->component;
 }

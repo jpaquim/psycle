@@ -167,7 +167,10 @@ LegacyNoteMap psy_audio_legacynotemap(psy_List* entries)
 		entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
 		for (key = (uint8_t)entry->keyrange.low; key <= (uint8_t)entry->keyrange.high; ++key) {
 			if (key < LEGACY_NOTE_MAP_SIZE) {
-				notemap.map[key] = legacynotepair_make(key,
+				notemap.map[key] = legacynotepair_make(
+					(entry->fixedkey == psy_audio_NOTECOMMANDS_EMPTY)
+					? key
+					: entry->fixedkey,
 					(uint8_t)entry->sampleindex.slot);
 			}
 		}
