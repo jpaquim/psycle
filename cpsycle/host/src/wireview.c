@@ -59,16 +59,19 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	self->workspace = workspace;
 	self->scope_spec_mode = 0.2f;
 	self->scope_spec_rate = 0.f;
-	psy_ui_component_init(wireview_base(self), parent);
+	psy_ui_component_init(wireview_base(self), parent);	
 	psy_ui_component_doublebuffer(wireview_base(self));
+	psy_ui_component_setalign(wireview_base(self),
+		psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&wireview_base(self)->signal_destroy, self,
+		wireview_ondestroy);
 	wireview_initvolumeslider(self);
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
 	wireview_inittabbar(self);	
 	psy_ui_notebook_init(&self->notebook, wireview_base(self));	
-	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);	
-	psy_signal_connect(&wireview_base(self)->signal_destroy, self,
-		wireview_ondestroy);
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+		psy_ui_ALIGN_CLIENT);	
 	wireview_connectmachinessignals(self, workspace);	
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
@@ -462,14 +465,12 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 
 	psy_ui_frame_init(wireframe_base(self), parent);
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	psy_ui_component_setposition(wireframe_base(self),
-		psy_ui_point_makepx(200.0, 150.0),
-		psy_ui_size_makeem(80.0, 25.0));
 	wireview_init(&self->wireview, &self->component, wire, workspace);
-	psy_ui_component_setalign(wireview_base(&self->wireview),
-		psy_ui_ALIGN_CLIENT);
 	wireframe_updatetitle(self,
 		psy_audio_song_machines(workspace_song(workspace)));
+	psy_ui_component_setposition(wireframe_base(self),
+		psy_ui_point_makepx(200.0, 150.0),
+		psy_ui_size_makeem(80.0, 25.0));		
 }
 
 void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)

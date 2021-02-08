@@ -411,41 +411,34 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 
 psy_ui_Size dev_size(const psy_ui_win_ComponentImp* self)
 {
-	if (self->sizecachevalid) {
-		return self->sizecache;
-	} else {
+	if (!self->sizecachevalid) {	
 		psy_ui_Size rv;
 		RECT rect;
 
 		GetClientRect(self->hwnd, &rect);
 		rv.width = psy_ui_value_makepx(rect.right);
-		rv.height = psy_ui_value_makepx(rect.bottom);	
-		GetWindowRect(self->hwnd, &rect);
-		return rv;
+		rv.height = psy_ui_value_makepx(rect.bottom);		
+		((psy_ui_win_ComponentImp*)self)->sizecache = rv;
+		((psy_ui_win_ComponentImp*)self)->sizecachevalid = TRUE;		
 	}
+	return self->sizecache;
 }
 
 void dev_updatesize(psy_ui_win_ComponentImp* self)
-{
-	psy_ui_Size size;
+{	
 	RECT rect;
 
 	GetClientRect(self->hwnd, &rect);
-	size.width = psy_ui_value_makepx(rect.right);
-	size.height = psy_ui_value_makepx(rect.bottom);
-	self->sizecache = size;
+	psy_ui_size_setpx(&self->sizecache, rect.right, rect.bottom);
 	self->sizecachevalid = TRUE;
 }
 
 psy_ui_Size dev_framesize(psy_ui_win_ComponentImp* self)
-{
-	psy_ui_Size rv;
+{	
 	RECT rect;
 
 	GetWindowRect(self->hwnd, &rect);
-	rv.width = psy_ui_value_makepx(rect.right);
-	rv.height = psy_ui_value_makepx(rect.bottom);
-	return rv;
+	return psy_ui_size_makepx(rect.right, rect.bottom);	
 }
 
 void dev_scrollto(psy_ui_win_ComponentImp* self, intptr_t dx, intptr_t dy)

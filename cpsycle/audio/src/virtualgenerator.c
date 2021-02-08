@@ -43,15 +43,21 @@ static uintptr_t numoutputs(psy_audio_VirtualGenerator* self) { return 0; }
 static psy_audio_MachineParam* parameter(psy_audio_VirtualGenerator*,
 	uintptr_t param);
 static uintptr_t numparameters(psy_audio_VirtualGenerator*);
-static unsigned int numparametercols(psy_audio_VirtualGenerator* self);
+static unsigned int numparametercols(psy_audio_VirtualGenerator*);
+static psy_audio_Buffer* buffermemory(psy_audio_VirtualGenerator*);
+static uintptr_t buffermemorysize(psy_audio_VirtualGenerator*);
+static void setbuffermemorysize(psy_audio_VirtualGenerator*, uintptr_t size);
+
+static MachineVtable super_vtable;
 
 static MachineVtable vtable;
 static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_VirtualGenerator* self)
 {
-	if (!vtable_initialized) {
+	if (!vtable_initialized) {		
 		vtable = *self->custommachine.machine.vtable;
+		super_vtable = vtable;
 		vtable.dispose = (fp_machine_dispose)dispose;
 		vtable.info = (fp_machine_info)info;
 		vtable.mode = (fp_machine_mode)mode;
@@ -61,6 +67,12 @@ static void vtable_init(psy_audio_VirtualGenerator* self)
 		vtable.parameter = (fp_machine_parameter)parameter;		
 		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)numparametercols;
+		vtable.buffermemory = (fp_machine_buffermemory)
+			buffermemory;
+		vtable.buffermemorysize = (fp_machine_buffermemorysize)
+			buffermemorysize;
+		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
+			setbuffermemorysize;
 		vtable_initialized = TRUE;
 	}
 }
@@ -118,9 +130,12 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 		sampler = psy_audio_machines_at(machines, self->machine_index);
 		if (sampler) {			
 			psy_audio_PatternEvent realevent;
+			bool instisvol;
 									
 			realevent = *ev;
 			realevent.inst = (uint16_t)self->instrument_index.subslot;
+			realevent.mach = (uint16_t)self->machine_index;
+			psy_audio_machine_seqtick(sampler, channel, &realevent);
 			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {				
 				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
 					realevent.cmd = 0x1E;
@@ -128,8 +143,8 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 					realevent.cmd = 0xFC;
 				}
 				realevent.parameter = (uint8_t)ev->inst;
-			}
-			psy_audio_machine_seqtick(sampler, channel, &realevent);
+				psy_audio_machine_seqtick(sampler, channel, &realevent);
+			}			
 		}
 	}
 }
@@ -152,4 +167,54 @@ uintptr_t numparameters(psy_audio_VirtualGenerator* self)
 unsigned int numparametercols(psy_audio_VirtualGenerator* self)
 {
 	return 1;
+}
+
+psy_audio_Buffer* buffermemory(psy_audio_VirtualGenerator* self)
+{
+	psy_audio_Machines* machines;
+
+	// delegate the buffermemory from the real machine that the scopes
+	// display it
+	machines = psy_audio_machine_machines(&self->custommachine.machine);
+	if (machines) {
+		psy_audio_Machine* sampler;
+
+		sampler = psy_audio_machines_at(machines, self->machine_index);
+		if (sampler) {
+			return psy_audio_machine_buffermemory(sampler);
+		}
+	}
+	return super_vtable.buffermemory(&self->custommachine.machine);
+}
+
+uintptr_t buffermemorysize(psy_audio_VirtualGenerator* self)
+{
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(&self->custommachine.machine);
+	if (machines) {
+		psy_audio_Machine* sampler;
+
+		sampler = psy_audio_machines_at(machines, self->machine_index);
+		if (sampler) {
+			return psy_audio_machine_buffermemorysize(sampler);
+		}
+	}
+	return super_vtable.buffermemorysize(&self->custommachine.machine);
+}
+
+void setbuffermemorysize(psy_audio_VirtualGenerator* self, uintptr_t size)
+{
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(&self->custommachine.machine);
+	if (machines) {
+		psy_audio_Machine* sampler;
+
+		sampler = psy_audio_machines_at(machines, self->machine_index);
+		if (sampler) {
+			psy_audio_machine_setbuffermemorysize(sampler, size);
+		}
+	}
+	super_vtable.setbuffermemorysize(&self->custommachine.machine, size);
 }

@@ -415,6 +415,15 @@ INLINE psy_ui_Margin psy_ui_margin_make(psy_ui_Value top, psy_ui_Value right,
 	return rv;
 }
 
+INLINE psy_ui_Margin psy_ui_margin_makeem(double top,
+	double right, double bottom, double left)
+{
+	psy_ui_Margin rv;
+
+	psy_ui_margin_init_all_em(&rv, top, right, bottom, left);
+	return rv;
+}
+
 INLINE psy_ui_Margin psy_ui_margin_zero(void)
 {
 	psy_ui_Margin rv;

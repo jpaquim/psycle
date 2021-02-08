@@ -32,9 +32,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(machineviewbar_base(self), parent);	
 	psy_ui_component_setdefaultalign(machineviewbar_base(self),
-		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
-			psy_ui_value_makepx(0.0), psy_ui_value_makeew(4.0),
-			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));	
+		psy_ui_ALIGN_LEFT, psy_ui_margin_makeem(0.0, 4.0, 0.0, 0.0));
 	psy_ui_checkbox_init_text(&self->mixersend, machineviewbar_base(self),
 		"machineview.connect-to-mixer-send-return-input");		
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
@@ -132,6 +130,7 @@ void machineviewbar_onmachineremoved(MachineViewBar* self,
 }
 
 // MachineView
+// prototypes
 static void machineview_ondestroy(MachineView*);
 static void machineview_updatetext(MachineView*, psy_Translator*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
@@ -149,7 +148,7 @@ static void machineview_onthemechanged(MachineView*, MachineViewConfig*,
 	psy_Property* theme);
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
-
+// vtable
 static psy_ui_ComponentVtable machineview_vtable;
 static bool machineview_vtable_initialized = FALSE;
 
@@ -172,7 +171,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 	}
 	return &machineview_vtable;
 }
-
+// implementation
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
@@ -362,7 +361,7 @@ void machineview_onnewmachineselected(MachineView* self,
 			psy_audio_machines_select(self->wireview.machines,
 				psy_audio_machines_append(self->wireview.machines, machine));
 		}
-		tabbar_select(&self->tabbar, 0);
+		tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
 	} else {
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);

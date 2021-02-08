@@ -306,20 +306,21 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0 ;				
 				break;		
 			case WM_SIZE: {
-				psy_ui_Size size;
-				
-				if (imp->component->alignchildren) {
-					psy_ui_component_align(imp->component);
+				if (imp->component) {
+					psy_ui_Size size;
+					
+					imp->sizecachevalid = FALSE;
+					if (imp->component->alignchildren) {
+						psy_ui_component_align(imp->component);
+					}
+					size = psy_ui_size_makepx(LOWORD(lParam), (HIWORD(lParam)));
+					imp->component->vtable->onsize(imp->component, &size);
+					if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
+						psy_ui_component_updateoverflow(imp->component);
+					}
+					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
+						(void*)&size);
 				}
-				size.width = psy_ui_value_makepx(LOWORD(lParam));
-				size.height = psy_ui_value_makepx(HIWORD(lParam));					
-				imp->component->vtable->onsize(imp->component, &size);
-				if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
-					psy_ui_component_updateoverflow(imp->component);						
-				}
-				psy_signal_emit(&imp->component->signal_size, imp->component, 1,
-					(void*)&size);
-
 				return 0;
 			break; }
 			case WM_TIMER:				
