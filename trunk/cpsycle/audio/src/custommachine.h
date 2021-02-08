@@ -12,8 +12,8 @@ extern "C" {
 
 // psy_audio_CustomMachine
 //	
-// aim:	more specialized base class for "Machines", the audio producing
-// elements, offering more default implementations than psy_audio_Machine
+// A specialized base class for "Machines", the audio producing
+// elements, offering default implementations.
 // Most plugins inherit from this class instead from Machine.
 
 typedef struct {

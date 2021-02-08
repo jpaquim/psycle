@@ -1250,7 +1250,7 @@ int loadspecificchunk(psy_audio_XMSampler* self, psy_audio_SongFile* songfile,
 		}
 		switch (temp) {
 			case 2: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break;
-			case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SPLINE; break; // psy_dsp_RESAMPLERQUALITY_SINC; break;
+			case 3: resamplertype = psy_dsp_RESAMPLERQUALITY_SINC; break;
 			case 0:	resamplertype = psy_dsp_RESAMPLERQUALITY_ZERO_ORDER; break;
 			case 1:
 			default:

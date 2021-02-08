@@ -38,16 +38,17 @@ void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(psy_ui_app()),
-		psy_ui_realsize_make(0, 0));
+	self->imp = psy_ui_impfactory_allocinit_bitmapimp(
+		psy_ui_app_impfactory(psy_ui_app()),
+		psy_ui_realsize_zero());
 }
 
 void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_RealSize size)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(psy_ui_app()),
-		size);
+	self->imp = psy_ui_impfactory_allocinit_bitmapimp(
+		psy_ui_app_impfactory(psy_ui_app()), size);
 }
 
 // Delegation Methods to psy_ui_BitmapImp
@@ -55,7 +56,7 @@ void dispose(psy_ui_Bitmap* self)
 {
 	self->imp->vtable->dev_dispose(self->imp);
 	free(self->imp);
-	self->imp = 0;
+	self->imp = NULL;
 }
 
 int load(psy_ui_Bitmap* self, const char* path)
@@ -90,7 +91,8 @@ static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self, const char* path)
 	return 0;
 }
 
-static int psy_ui_bitmap_imp_loadresource(psy_ui_BitmapImp* self, int resourceid)
+static int psy_ui_bitmap_imp_loadresource(psy_ui_BitmapImp* self,
+	int resourceid)
 {
 	return 0;
 }

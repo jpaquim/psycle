@@ -705,8 +705,9 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 uintptr_t work_dogenerateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc,
 	uintptr_t position, uintptr_t amount)
 {
-	if (amount > 0 && !psy_audio_machine_bypassed(self) &&
-			!psy_audio_machine_muted(self)) {
+	if (amount > 0 && !psy_audio_machine_muted(self) &&
+			((psy_audio_machine_mode(self) == MACHMODE_GENERATOR) || 
+			 !psy_audio_machine_bypassed(self))) {
 		uintptr_t restorenumsamples;
 
 		restorenumsamples = psy_audio_buffercontext_numsamples(bc);		
