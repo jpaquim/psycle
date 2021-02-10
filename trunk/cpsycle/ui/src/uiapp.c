@@ -88,6 +88,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 
 	app = self;
 	self->main = NULL;
+	psy_ui_geometry_init();
 	psy_signal_init(&self->signal_dispose);	
 	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);

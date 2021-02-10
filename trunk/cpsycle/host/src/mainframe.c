@@ -1370,8 +1370,10 @@ void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 
 void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 	const char* path)
-{
-	paramskin_update(&self->workspace.config.macparam);
+{	
+	machineparamconfig_releaseskin();
+	machineparamconfig_skin(psycleconfig_macparam(workspace_conf(
+		&self->workspace)));
 	paramview_changecontrolskin(path);
 }
 

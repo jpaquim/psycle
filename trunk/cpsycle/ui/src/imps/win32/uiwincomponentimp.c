@@ -213,7 +213,7 @@ void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
-		psy_table_insert(&winapp->selfmap, (uintptr_t) self->hwnd, self);
+		psy_table_insert(&winapp->selfmap, (uintptr_t)self->hwnd, self);
 	}
 	if (err == 0 && usecommand) {
 		psy_table_insert(&winapp->winidmap, winapp->winid, self);

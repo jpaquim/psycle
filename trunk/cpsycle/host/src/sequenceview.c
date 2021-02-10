@@ -307,7 +307,7 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 			tm, track, self->state->sequence, selectedtrack,
 			self->state->selection->editposition.track == selectedtrack,
 			self->hovertrack == selectedtrack);
-		switch (sequencetrackbox_hittest(&trackbox, ev->pt.x, ev->pt.y)) {
+		switch (sequencetrackbox_hittest(&trackbox, ev->pt)) {
 			case SEQUENCETRACKBOXEVENT_MUTE:
 				psy_signal_emit(&self->signal_mutetrack, self, 1, selectedtrack);
 				break;
@@ -318,7 +318,7 @@ void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 				psy_signal_emit(&self->signal_deltrack, self, 1, selectedtrack);
 				break;
 			// fallthrough
-			case SEQUENCETRACKBOXEVENT_SELECT:				
+			case SEQUENCETRACKBOXEVENT_SELECT:
 			default:
 				psy_signal_emit(&self->signal_trackselected, self, 1, selectedtrack);
 				break;

@@ -60,7 +60,6 @@ typedef struct psy_audio_XMSamplerChannel {
 	psy_audio_WaveForms m_TremoloType;
 	psy_audio_WaveForms m_PanbrelloType;
 
-
 	int m_EffectFlags;
 
 	int	m_PitchSlideSpeed;
@@ -115,13 +114,15 @@ typedef struct psy_audio_XMSamplerChannel {
 	int m_DefaultCutoff;
 	int m_DefaultRessonance;
 	psy_dsp_FilterType m_DefaultFilterType;
-	// paramview
+	// paramview/tweak parameters
 	psy_audio_InfoMachineParam param_channel;
+	psy_audio_ChoiceMachineParam param_filtertype;
 	psy_audio_IntMachineParam filter_cutoff;
 	psy_audio_IntMachineParam filter_res;
 	psy_audio_IntMachineParam pan;
-	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_IntMachineParam level_param;
+	psy_audio_IntMachineParam surround;
+	psy_audio_IntMachineParam mute;	
+	psy_audio_IntMachineParam slider_param;	
 } psy_audio_XMSamplerChannel;
 
 // mfc-psycle: constructor
@@ -268,13 +269,16 @@ INLINE int psy_audio_xmsamplerchannel_defaultvolume(const psy_audio_XMSamplerCha
 
 INLINE bool psy_audio_xmsamplerchannel_defaultismute(const psy_audio_XMSamplerChannel* self)
 {
-	return self->m_ChannelDefVolume & 0x100;
+	return (self->m_ChannelDefVolume & 0x100) == 0x100;
 }
 
 INLINE void psy_audio_xmsamplerchannel_setdefaultismute(psy_audio_XMSamplerChannel* self, bool mute)
 {
-	if (mute) self->m_ChannelDefVolume |= 0x100;
-	else self->m_ChannelDefVolume &= 0xFF;
+	if (mute) {
+		self->m_ChannelDefVolume |= 0x100;
+	} else {
+		self->m_ChannelDefVolume &= 0xFF;
+	}
 	self->m_bMute = mute;
 }
 
@@ -287,18 +291,25 @@ INLINE float psy_audio_xmsamplerchannel_defaultvolumefloat(const psy_audio_XMSam
 INLINE void psy_audio_xmsamplerchannel_setdefaultvolumefloat(psy_audio_XMSamplerChannel* self,
 	float value, bool updatecurrent)
 {
-	if (psy_audio_xmsamplerchannel_defaultismute(self)) self->m_ChannelDefVolume = (int)((value * 200)) | 0x100;
-	else self->m_ChannelDefVolume = (int)(value * 200);
-	if (updatecurrent) psy_audio_xmsamplerchannel_setvolume(self,
-		value);
+	if (psy_audio_xmsamplerchannel_defaultismute(self)) {
+		self->m_ChannelDefVolume = (int)((value * 200)) | 0x100;
+	} else {
+		self->m_ChannelDefVolume = (int)(value * 200);
+	}
+	if (updatecurrent) {
+		psy_audio_xmsamplerchannel_setvolume(self, value);
+	}
 }
 
 // default: bool updatecurrent = true
 INLINE void psy_audio_xmsamplerchannel_setdefaultvolume(psy_audio_XMSamplerChannel* self,
 	int value, bool updatecurrent)
 {
-	if (psy_audio_xmsamplerchannel_defaultismute(self)) self->m_ChannelDefVolume = value | 0x100;
-	else self->m_ChannelDefVolume = value;
+	if (psy_audio_xmsamplerchannel_defaultismute(self)) {
+		self->m_ChannelDefVolume = value | 0x100;
+	} else {
+		self->m_ChannelDefVolume = value;
+	}
 	if (updatecurrent) {
 		psy_audio_xmsamplerchannel_setvolume(self,
 			psy_audio_xmsamplerchannel_defaultvolumefloat(self));
@@ -325,6 +336,20 @@ INLINE void psy_audio_xmsamplerchannel_setlastvoicerandvol(psy_audio_XMSamplerCh
 	self->m_LastVoiceRandVol = value;
 }
 
+INLINE bool psy_audio_xmsamplerchannel_defaultissurround(const psy_audio_XMSamplerChannel* self)
+{
+	return (self->m_DefaultPanFactor & 0x100) == 0x100;
+}
+
+INLINE void psy_audio_xmsamplerchannel_setdefaultissurround(psy_audio_XMSamplerChannel* self, bool surr)
+{
+	if (surr) {
+		self->m_DefaultPanFactor |= 0x100;
+	} else {
+		self->m_DefaultPanFactor &= 0xFF;
+	}
+}
+
 INLINE float psy_audio_xmsamplerchannel_panfactor(const psy_audio_XMSamplerChannel* self)
 {
 	return self->m_PanFactor;
@@ -342,9 +367,15 @@ INLINE float psy_audio_xmsamplerchannel_defaultpanfactorfloat(const psy_audio_XM
 	return (self->m_DefaultPanFactor & 0xFF) / 200.0f;
 }
 
-INLINE bool psy_audio_xmsamplerchannel_defaultissurround(const psy_audio_XMSamplerChannel* self)
+// default: bool ignoresurround = false
+INLINE void psy_audio_xmsamplerchannel_setdefaultpanfactorfloat(psy_audio_XMSamplerChannel* self,
+	float value, bool ignoresurround)
 {
-	return (self->m_DefaultPanFactor & 0x100);
+	if (psy_audio_xmsamplerchannel_defaultissurround(self) && !ignoresurround) {
+		self->m_DefaultPanFactor = ((int)(value * 200)) | 0x100;
+	} else {
+		self->m_DefaultPanFactor = (int)(value * 200);
+	}
 }
 
 INLINE float psy_audio_xmsamplerchannel_lastvoicepanfactor(const psy_audio_XMSamplerChannel* self)

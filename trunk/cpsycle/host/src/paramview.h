@@ -21,14 +21,14 @@ typedef struct ParamTweak {
     float tweakval;
     // references
     psy_audio_Machine* machine;
-    psy_audio_MachineParam* param;
+    uintptr_t paramindex;
     ParamSkin skin;
 } ParamTweak;
 
 void paramtweak_init(ParamTweak*);
 
 void paramtweak_begin(ParamTweak*, psy_audio_Machine*,
-    psy_audio_MachineParam*);
+    uintptr_t paramindex);
 void paramtweak_end(ParamTweak*);
 void paramtweak_onmousedown(ParamTweak*, psy_ui_MouseEvent*);
 void paramtweak_onmousemove(ParamTweak*, psy_ui_MouseEvent*);
@@ -54,13 +54,11 @@ typedef struct {
     ParamTweak paramtweak;
     ParamSkin* skin;
     psy_audio_Machine* machine;
-    psy_audio_MachineParam* param;
+    uintptr_t paramindex;    
 } ParamKnob;
 
 void paramknob_init(ParamKnob*, psy_ui_Component* parent, psy_audio_Machine*,
-    psy_audio_MachineParam*, Workspace*);
-
-void paramskin_update(MachineParamConfig*);
+    uintptr_t paramindex, Workspace*);
 
 typedef struct ParamView {
    psy_ui_Component component;

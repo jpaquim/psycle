@@ -15,7 +15,7 @@ static void parameterlistbox_onlistboxselected(ParameterListBox*,
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, Workspace* workspace)
 {	
-	psy_audio_MachineParam* param;
+	uintptr_t paramindex;
 	psy_Property* theme;
 
 	psy_ui_component_init(&self->component, parent);	
@@ -27,11 +27,11 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->machine = machine;
 	if (self->machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
-		param = psy_audio_machine_tweakparameter(self->machine, 0);
+		paramindex = 0;
 	} else {
-		param = NULL;
+		paramindex = psy_INDEX_INVALID;
 	}
-	paramknob_init(&self->knob, &self->component, machine, param, workspace);
+	paramknob_init(&self->knob, &self->component, machine, paramindex, workspace);
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_listbox_setcharnumber(&self->listbox, 5.0);
@@ -76,31 +76,31 @@ void parameterlistbox_build(ParameterListBox* self)
 void parameterlistbox_onlistboxselected(ParameterListBox* self,
 	psy_ui_Component* sender, intptr_t slot)
 {
-	psy_audio_MachineParam* param;
+	uintptr_t paramindex;
 			
 	if (self->machine && slot < (intptr_t)psy_audio_machine_numtweakparameters(self->machine)) {
-		param = psy_audio_machine_tweakparameter(self->machine, slot);		
+		paramindex = slot;		
 	} else {
-		param = NULL;
+		paramindex = psy_INDEX_INVALID;
 	}
-	self->knob.param = param;
+	self->knob.paramindex = paramindex;
 	psy_ui_component_invalidate(&self->knob.component);
 }
 
 void parameterlistbox_setmachine(ParameterListBox* self,
 	psy_audio_Machine* machine)
 {
-	psy_audio_MachineParam* param;
+	uintptr_t paramindex;
 
 	self->machine = machine;
 	parameterlistbox_build(self);
 	self->knob.machine = machine;
 	if (machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
-		param = psy_audio_machine_tweakparameter(self->machine, 0);
+		paramindex = 0;
 	} else {
-		param = 0;
+		paramindex = psy_INDEX_INVALID;
 	}
-	self->knob.param = param;
+	self->knob.paramindex = paramindex;
 	psy_ui_component_invalidate(&self->knob.component);
 }
 

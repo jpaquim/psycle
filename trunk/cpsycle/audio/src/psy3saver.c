@@ -1118,8 +1118,7 @@ int psy_audio_psy3saver_xminstrument_save(psy_audio_PSY3Saver* self,
 		return status;
 	}		
 	{
-		LegacyNoteMap notemap;
-		psy_List* p;		
+		LegacyNoteMap notemap;		
 		uint8_t i;
 				
 		notemap = psy_audio_legacynotemap(instrument->entries);		

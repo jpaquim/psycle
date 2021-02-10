@@ -260,9 +260,14 @@ INLINE uintptr_t psy_ui_linewidth(psy_ui_Graphics* self)
 	return self->vtable->linewidth(self);
 }
 
-INLINE void psy_ui_setorigin(psy_ui_Graphics* self, double x, double y)
+INLINE void psy_ui_setorigin(psy_ui_Graphics* self, psy_ui_RealPoint origin)
 {
-	self->vtable->setorigin(self, x, y);
+	self->vtable->setorigin(self, origin.x, origin.y);
+}
+INLINE void psy_ui_resetorigin(psy_ui_Graphics* self)
+{
+	self->vtable->setorigin(self, psy_ui_realpoint_zero().x,
+		psy_ui_realpoint_zero().y);
 }
 
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
