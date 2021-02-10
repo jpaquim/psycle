@@ -138,6 +138,7 @@ void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel* self)
 void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel* self)
 {
 	psy_audio_infomachineparam_dispose(&self->param_channel);
+	psy_audio_choicemachineparam_dispose(&self->param_filtertype);
 	psy_audio_intmachineparam_dispose(&self->filter_cutoff);
 	psy_audio_intmachineparam_dispose(&self->filter_res);
 	psy_audio_intmachineparam_dispose(&self->pan);
