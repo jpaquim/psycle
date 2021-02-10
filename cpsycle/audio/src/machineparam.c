@@ -89,6 +89,7 @@ void psy_audio_machineparam_init(psy_audio_MachineParam* self)
 	psy_signal_init(&self->signal_describe);
 	psy_signal_init(&self->signal_name);
 	psy_signal_init(&self->signal_label);
+	self->isslidergroup = FALSE;
 }
 
 void psy_audio_machineparam_dispose(psy_audio_MachineParam* self)
@@ -399,6 +400,8 @@ void intmachineparam_tweak(psy_audio_IntMachineParam* self, float value)
 		scaled = (intptr_t)(value * (self->maxval - self->minval) + 0.5f) +
 			self->minval;
 		*self->data = (int32_t)scaled;
+		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
+	} else {
 		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 	}
 }
@@ -813,6 +816,8 @@ void choicemachineparam_tweak(psy_audio_ChoiceMachineParam* self, float value)
 			self->minval;
 		*self->data = (int32_t)scaled;
 		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
+	} else {
+		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 	}
 }
 
@@ -825,27 +830,27 @@ float choicemachineparam_normvalue(psy_audio_ChoiceMachineParam* self)
 			? (*self->data - self->minval) /
 			(float)(self->maxval - self->minval)
 			: 0.f;
+	} else {
+		psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
 	}
 	return rv;
 }
 
 int choicemachineparam_describe(psy_audio_ChoiceMachineParam* self, char* text)
 {
-	int rv = 0;
-	if (self->data) {
-		char* desc;
-
-		rv = 1;
-		desc = (char*)psy_table_at(&self->descriptions, (uintptr_t)*self->data);
-		if (desc) {
-			psy_snprintf(text, 128, "%s", desc);
-		} else {
-			psy_snprintf(text, 128, "%d",
-				(int)psy_audio_machineparam_scaledvalue(
-					psy_audio_choicemachineparam_base(self)));
-		}
-	}
-	return rv;
+	char* desc;
+	uintptr_t selection;
+	
+	selection = (uintptr_t)(choicemachineparam_normvalue(self) * (self->maxval - self->minval));
+	desc = (char*)psy_table_at(&self->descriptions, selection);
+	if (desc) {
+		psy_snprintf(text, 128, "%s", desc);
+	} else {
+		psy_snprintf(text, 128, "%d",
+			(int)psy_audio_machineparam_scaledvalue(
+				psy_audio_choicemachineparam_base(self)));
+	}	
+	return TRUE;
 }
 
 int choicemachineparam_label(psy_audio_ChoiceMachineParam* self, char* text)

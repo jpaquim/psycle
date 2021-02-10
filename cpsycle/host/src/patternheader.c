@@ -36,13 +36,13 @@ void trackdraw_init(TrackDraw* self, TrackerGridState* state, uintptr_t index,
 void trackdraw_draw(TrackDraw* self, psy_ui_Graphics* g, double cpx, psy_ui_RealPoint dest)
 {
 	trackdraw_drawseparator(self, g, cpx);
-	psy_ui_setorigin(g, -dest.x, -dest.y);
+	psy_ui_setorigin(g, psy_ui_realpoint_make(-dest.x, -dest.y));
 	trackdraw_drawbackground(self, g);
 	trackdraw_drawplayon(self, g);
 	trackdraw_drawnumber(self, g);
 	trackdraw_drawleds(self, g);
 	trackdraw_drawselection(self, g);
-	psy_ui_setorigin(g, 0.0, 0.0);
+	psy_ui_resetorigin(g);
 }
 
 void trackdraw_drawseparator(TrackDraw* self, psy_ui_Graphics* g,
@@ -166,13 +166,13 @@ void trackplaindraw_init(TrackPlainDraw* self, TrackerGridState* state,
 void trackplaindraw_draw(TrackPlainDraw* self, psy_ui_Graphics* g, double cpx, psy_ui_RealPoint dest)
 {
 	trackplaindraw_drawseparator(self, g, cpx);
-	psy_ui_setorigin(g, -dest.x, -dest.y);
+	psy_ui_setorigin(g, psy_ui_realpoint_make(-dest.x, -dest.y));
 	trackplaindraw_drawbackground(self, g);
 	trackplaindraw_drawplayon(self, g);
 	trackplaindraw_drawnumber(self, g);
 	trackplaindraw_drawleds(self, g);
 	trackplaindraw_drawselection(self, g);
-	psy_ui_setorigin(g, 0.0, 0.0);
+	psy_ui_resetorigin(g);
 }
 
 void trackplaindraw_drawseparator(TrackPlainDraw* self, psy_ui_Graphics* g,

@@ -54,6 +54,7 @@ typedef struct psy_audio_MachineParam {
 	psy_Signal signal_name;
 	psy_Signal signal_label;
 	int crashed;
+	bool isslidergroup;
 } psy_audio_MachineParam;
 
 void psy_audio_machineparam_init(psy_audio_MachineParam*);

@@ -4,7 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "machineparamconfig.h"
+// host
 #include "paramview.h"
+#include "resources/resource.h"
+// platform
+#include "../../detail/portable.h"
+
+static bool paramskin_initialized = FALSE;
+static ParamSkin paramskin;
 
 static void machineparamconfig_makeview(MachineParamConfig*, psy_Property*);
 static void machineparamconfig_maketheme(MachineParamConfig*, psy_Property*);
@@ -24,7 +31,8 @@ void machineparamconfig_dispose(MachineParamConfig* self)
 	assert(self);
 
 	psy_signal_dispose(&self->signal_changed);
-	psy_signal_dispose(&self->signal_themechanged);	
+	psy_signal_dispose(&self->signal_themechanged);
+	machineparamconfig_releaseskin();
 }
 
 void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
@@ -121,14 +129,24 @@ void machineparamconfig_resettheme(MachineParamConfig* self)
 		psy_property_remove(self->paramview, self->theme);
 	}
 	machineparamconfig_maketheme(self, self->paramview);
+	if (paramskin_initialized) {
+		machineparamconfig_releaseskin();
+		// forces a reload of the dialbitmap
+		machineparamconfig_skin(self);
+	}
 }
 
-void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* skin)
+void machineparamconfig_settheme(MachineParamConfig* self, psy_Property* theme)
 {
 	assert(self);
 
 	if (self->theme) {
-		psy_property_sync(self->theme, skin);
+		psy_property_sync(self->theme, theme);
+		if (paramskin_initialized) {
+			machineparamconfig_releaseskin();
+			// forces a reload of the dialbitmap
+			machineparamconfig_skin(self);
+		}
 	}
 }
 
@@ -164,9 +182,11 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 	const char* filename)
 {
 	assert(self);
-
-	paramskin_update(self);
+	
 	psy_property_set_str(self->theme, "machinedialbmp", filename);
+	machineparamconfig_releaseskin();
+	// forces a reload of the dialbitmap
+	machineparamconfig_skin(self);
 }
 
 // events
@@ -183,7 +203,79 @@ bool machineparamconfig_onthemechanged(MachineParamConfig* self, psy_Property* p
 {
 	assert(self);
 
-	paramskin_update(self);
+	machineparamconfig_releaseskin();
+	// forces a reload of the dialbitmap
+	machineparamconfig_skin(self);
 	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
+}
+
+ParamSkin* machineparamconfig_skin(MachineParamConfig* self)
+{
+	if (!paramskin_initialized) {
+		psy_Property* theme;
+		SkinCoord knob;
+		SkinCoord slider;
+		SkinCoord sliderknob;
+		SkinCoord vuoff;
+		SkinCoord vuon;
+		SkinCoord switchon;
+		SkinCoord switchoff;
+		SkinCoord checkon;
+		SkinCoord checkoff;
+
+		theme = self->theme;
+		skincoord_init_all(&knob, 0.0, 0.0, 28.0, 28.0, 0.0, 0.0, 28.0, 28.0, 0.0);
+		skincoord_init_all(&slider, 0.0, 0.0, 30.0, 182.0, 0.0, 0.0, 30.0, 182.0, 0.0);
+		skincoord_init_all(&sliderknob, 0.0, 182.0, 22.0, 10.0, 0.0, 0.0, 22.0, 10.0, 0.0);
+		skincoord_init_all(&vuoff, 30.0, 0.0, 16.0, 90.0, 0.0, 0.0, 16.0, 90.0, 0.0);
+		skincoord_init_all(&vuon, 46.0, 0.0, 16.0, 90.0, 0.0, 0.0, 16.0, 90.0, 0.0);
+		skincoord_init_all(&switchon, 30.0, 118.0, 28.0, 28.0, 0.0, 0.0, 28.0, 28.0, 0.0);
+		skincoord_init_all(&switchoff, 30.0, 90.0, 28.0, 28.0, 0.0, 0.0, 28.0, 28.0, 0.0);
+		skincoord_init_all(&checkon, 30.0, 159.0, 13.0, 13.0, 0.0, 0.0, 13.0, 13.0, 0.0);
+		skincoord_init_all(&checkoff, 30.0, 146.0, 13.0, 13.0, 0.0, 0.0, 13.0, 13.0, 0.0);
+
+		paramskin.slider = slider;
+		paramskin.sliderknob = sliderknob;
+		paramskin.knob = knob;
+		paramskin.vuoff = vuoff;
+		paramskin.vuon = vuon;
+		paramskin.switchon = switchon;
+		paramskin.switchoff = switchoff;
+		paramskin.checkon = checkon;
+		paramskin.checkoff = checkoff;
+
+		paramskin.topcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguitopcolour", 0x00555555));
+		paramskin.fonttopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguifonttopcolour", 0x00CDCDCD));
+		paramskin.bottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguibottomcolour", 0x00444444));
+		paramskin.fontbottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguifontbottomcolour", 0x00E7BD18));
+		//highlighted param colours
+		paramskin.htopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihtopcolour", 0x00555555));
+		paramskin.fonthtopcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihfonttopcolour", 0x00CDCDCD));
+		paramskin.hbottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihbottomcolour", 0x00292929));
+		paramskin.fonthbottomcolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguihfontbottomcolour", 0x00E7BD18));
+
+		paramskin.titlecolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguititlecolour", 0x00292929));
+		paramskin.fonttitlecolour = psy_ui_colour_make(psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4));
+		psy_ui_bitmap_init(&paramskin.knobbitmap);
+		if (psy_strlen(machineparamconfig_dialbpm(self)) == 0) {
+			psy_ui_bitmap_loadresource(&paramskin.knobbitmap, IDB_PARAMKNOB);
+		} else if (psy_ui_bitmap_load(&paramskin.knobbitmap,
+			machineparamconfig_dialbpm(self)) != PSY_OK) {
+			psy_ui_bitmap_loadresource(&paramskin.knobbitmap, IDB_PARAMKNOB);
+		}
+		psy_ui_bitmap_init(&paramskin.mixerbitmap);
+		psy_ui_bitmap_loadresource(&paramskin.mixerbitmap, IDB_MIXERSKIN);
+		paramskin_initialized = 1;
+	}
+	return &paramskin;
+}
+
+void machineparamconfig_releaseskin(void)
+{
+	if (paramskin_initialized) {		
+		psy_ui_bitmap_dispose(&paramskin.knobbitmap);
+		psy_ui_bitmap_dispose(&paramskin.mixerbitmap);
+		paramskin_initialized = 0;
+	}
 }

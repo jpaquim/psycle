@@ -20,12 +20,32 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-const char E8VolMap[16] = { 0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64 };
+static const char E8VolMap[16] = {
+	0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64
+};
 
 // prototypes
-static void psy_audio_xmsamplerchannel_level_normvalue(psy_audio_XMSamplerChannel*,
-	psy_audio_IntMachineParam* sender, float* rv);
 static void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel*);
+static void psy_audio_xmsamplerchannel_filtertype_tweak(psy_audio_XMSamplerChannel*,
+	psy_audio_ChoiceMachineParam* sender, float value);
+static void psy_audio_xmsamplerchannel_filtertype_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_ChoiceMachineParam* sender, float* rv);
+static void psy_audio_xmsamplerchannel_defaultpan_tweak(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void psy_audio_xmsamplerchannel_defaultpan_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void psy_audio_xmsamplerchannel_slider_tweak(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void psy_audio_xmsamplerchannel_slider_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void psy_audio_xmsamplerchannel_defaultismute_tweak(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void psy_audio_xmsamplerchannel_defaultismute_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void psy_audio_xmsamplerchannel_defaultissurround_tweak(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void psy_audio_xmsamplerchannel_defaultissurround_normvalue(psy_audio_XMSamplerChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
 
 // implementation
 void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel* self)
@@ -66,25 +86,53 @@ void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel* self)
 {
 	char text[127];
 	int index;
+	uintptr_t ft;
 	
 	index = self->m_Index;
 	psy_snprintf(text, 127, "Channel %d", (int)index);
 	//}
 	psy_audio_infomachineparam_init(&self->param_channel, text, "", MPF_SMALL);
+	psy_audio_choicemachineparam_init(&self->param_filtertype,
+		"Filter", "", MPF_STATE | MPF_SMALL,
+		NULL, 0, filter_numfilters() - 1);
+	for (ft = 0; ft < filter_numfilters(); ++ft) {
+		psy_audio_choicemachineparam_setdescription(&self->param_filtertype,
+			ft, filter_name(ft));
+	}
+	psy_signal_connect(&self->param_filtertype.machineparam.signal_tweak, self,
+		psy_audio_xmsamplerchannel_filtertype_tweak);
+	psy_signal_connect(&self->param_filtertype.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_filtertype_normvalue);
 	psy_audio_intmachineparam_init(&self->filter_cutoff,
 		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultCutoff, 0, 200);
 	psy_audio_intmachineparam_init(&self->filter_res,
 		"", "", MPF_STATE | MPF_SMALL, &self->m_Ressonance, 0, 200);
 	psy_audio_intmachineparam_init(&self->pan,
-		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);	
-	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->m_ChannelDefVolume);
-	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);
-	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 200);
-	psy_audio_intmachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
-	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
-		psy_audio_xmsamplerchannel_level_normvalue);
+		"", "", MPF_STATE | MPF_SMALL, NULL, 0, 200);
+	psy_signal_connect(&self->pan.machineparam.signal_tweak, self,
+		psy_audio_xmsamplerchannel_defaultpan_tweak);
+	psy_signal_connect(&self->pan.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_defaultpan_normvalue);
+	psy_audio_intmachineparam_init(&self->surround,
+		"Surround", "Surround", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	self->surround.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->surround.machineparam.signal_tweak, self,
+		psy_audio_xmsamplerchannel_defaultissurround_tweak);
+	psy_signal_connect(&self->surround.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_defaultissurround_normvalue);
+	psy_audio_intmachineparam_init(&self->mute,
+		"Mute", "Mute", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	self->mute.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->mute.machineparam.signal_tweak, self,
+		psy_audio_xmsamplerchannel_defaultismute_tweak);
+	psy_signal_connect(&self->mute.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_defaultismute_normvalue);
+	psy_audio_intmachineparam_init(&self->slider_param,
+		"Volume", "", MPF_SLIDER | MPF_SMALL, NULL, 0, 200);
+	psy_signal_connect(&self->slider_param.machineparam.signal_tweak, self,
+		psy_audio_xmsamplerchannel_slider_tweak);
+	psy_signal_connect(&self->slider_param.machineparam.signal_normvalue, self,
+		psy_audio_xmsamplerchannel_slider_normvalue);	
 }
 
 void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel* self)
@@ -93,8 +141,9 @@ void psy_audio_xmsamplerchannel_disposeparamview(psy_audio_XMSamplerChannel* sel
 	psy_audio_intmachineparam_dispose(&self->filter_cutoff);
 	psy_audio_intmachineparam_dispose(&self->filter_res);
 	psy_audio_intmachineparam_dispose(&self->pan);
-	psy_audio_volumemachineparam_dispose(&self->slider_param);
-	psy_audio_intmachineparam_dispose(&self->level_param);	
+	psy_audio_intmachineparam_dispose(&self->surround);
+	psy_audio_intmachineparam_dispose(&self->mute);
+	psy_audio_intmachineparam_dispose(&self->slider_param);	
 }
 
 void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel* self)
@@ -1325,22 +1374,100 @@ void psy_audio_xmsamplerchannel_save(psy_audio_XMSamplerChannel* self,
 	psyfile_write_uint32(songfile->file, (uint32_t)self->m_DefaultFilterType);
 }
 
-// paramview
-void psy_audio_xmsamplerchannel_level_normvalue(psy_audio_XMSamplerChannel* self,
+void psy_audio_xmsamplerchannel_filtertype_tweak(psy_audio_XMSamplerChannel* self,
+	psy_audio_ChoiceMachineParam* sender, float value)
+{
+	psy_audio_xmsamplerchannel_setdefaultfiltertype(self,
+		(psy_dsp_FilterType)(int)((filter_numfilters() - 1)* value));
+}
+
+void psy_audio_xmsamplerchannel_filtertype_normvalue(psy_audio_XMSamplerChannel* self,
+	psy_audio_ChoiceMachineParam* sender, float* rv)
+{
+	*rv = (float)psy_audio_xmsamplerchannel_defaultfiltertype(self) /
+		((float)filter_numfilters() - 1);
+}
+
+void psy_audio_xmsamplerchannel_defaultpan_tweak(psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (self->m_pSampler->channeldisplay == 0) {
+		psy_audio_xmsamplerchannel_setdefaultpanfactorfloat(self, value, FALSE);		
+	} else {
+		psy_audio_xmsamplerchannel_setpanfactor(self, value);		
+	}	
+}
+
+void psy_audio_xmsamplerchannel_defaultpan_normvalue(psy_audio_XMSamplerChannel* self,
 	psy_audio_IntMachineParam* sender, float* rv)
 {
-	/*if (self->index == UINTPTR_MAX) {
-		psy_audio_Buffer* memory;
+	if (self->m_pSampler->channeldisplay == 0) {
+		*rv = psy_audio_xmsamplerchannel_defaultpanfactorfloat(self);
+	} else {
+		*rv = psy_audio_xmsamplerchannel_panfactor(self);
+	}	
+}
 
-		memory = psy_audio_machine_buffermemory(
-			psy_audio_xmsampler_base(self->sampler));
-		if (memory) {
-			*rv = psy_audio_buffer_rmsdisplay(memory);
-		} else {
-			*rv = 0.f;
-		}
+void psy_audio_xmsamplerchannel_slider_tweak(psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (self->m_pSampler->channeldisplay == 0) {
+		psy_audio_xmsamplerchannel_setdefaultvolumefloat(self, value, TRUE);		
+	} else if (psy_audio_xmsamplerchannel_foregroundvoice(self)) {
+		psy_audio_xmsamplerchannel_setvolume(self, value);
+	}
+}
+
+void psy_audio_xmsamplerchannel_slider_normvalue(psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (self->m_pSampler->channeldisplay == 0) {
+		*rv = psy_audio_xmsamplerchannel_defaultvolumefloat(self);
+	} else if (psy_audio_xmsamplerchannel_foregroundvoice(self)) {
+		*rv = psy_audio_xmsamplerchannel_volume(self);
+	}
+}
+
+void psy_audio_xmsamplerchannel_defaultismute_tweak(
+	psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (value == 0.f) {
+		psy_audio_xmsamplerchannel_setdefaultismute(self, FALSE);
+	} else {
+		psy_audio_xmsamplerchannel_setdefaultismute(self, TRUE);
+	}
+}
+
+void psy_audio_xmsamplerchannel_defaultismute_normvalue(
+	psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (psy_audio_xmsamplerchannel_defaultismute(self)) {
+		*rv = 1.f;
 	} else {
 		*rv = 0.f;
-	}*/
-	* rv = 0;
+	}
+}
+
+void psy_audio_xmsamplerchannel_defaultissurround_tweak(
+	psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (value == 0.f) {
+		psy_audio_xmsamplerchannel_setdefaultissurround(self, FALSE);
+	} else {
+		psy_audio_xmsamplerchannel_setdefaultissurround(self, TRUE);
+	}
+}
+
+void psy_audio_xmsamplerchannel_defaultissurround_normvalue(
+	psy_audio_XMSamplerChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (psy_audio_xmsamplerchannel_defaultissurround(self)) {
+		*rv = 1.f;
+	} else {
+		*rv = 0.f;
+	}
 }

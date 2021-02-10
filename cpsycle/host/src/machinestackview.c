@@ -219,9 +219,9 @@ void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 
 				position = machineui_position(machineui);
 				if (psy_ui_realrectangle_intersect_rectangle(&g->clip, position)) {
-					psy_ui_setorigin(g, -position->left, -position->top);
+					psy_ui_setorigin(g, psy_ui_realpoint_make(-position->left, -position->top));
 					machineui_draw(machineui, g, machineui->slot, FALSE);
-					psy_ui_setorigin(g, 0.0, 0.0);
+					psy_ui_resetorigin(g);
 				}
 			}
 		}

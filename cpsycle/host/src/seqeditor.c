@@ -454,9 +454,9 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 					pianogriddraw_preventgrid(&griddraw);
 					pianogriddraw_preventcursor(&griddraw);
 					pianogriddraw_preventplaybar(&griddraw);					
-					psy_ui_setorigin(&gr, -r.left, 0);					
+					psy_ui_setorigin(&gr, psy_ui_realpoint_make(-r.left, 0.0));
 					pianogriddraw_ondraw(&griddraw, &gr);
-					psy_ui_setorigin(&gr, 0, 0);					
+					psy_ui_resetorigin(&gr);
 				}
 			}			
 		}	
@@ -849,7 +849,7 @@ bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,
 			self->base.trackindex,
 			self->base.workspace->sequenceselection.editposition.track == self->base.trackindex,
 			FALSE);
-		switch (sequencetrackbox_hittest(&trackbox, ev->pt.x, 0)) {
+		switch (sequencetrackbox_hittest(&trackbox, ev->pt)) {
 		case SEQUENCETRACKBOXEVENT_MUTE:
 			if (self->base.currtrack) {
 				if (psy_audio_sequence_istrackmuted(sequence, self->base.trackindex)) {

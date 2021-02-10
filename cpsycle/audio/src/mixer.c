@@ -31,16 +31,19 @@ static int inputlabelparam_name(psy_audio_InputLabelParam*, char* text);
 static int inputlabelparam_describe(psy_audio_InputLabelParam*, char* text);
 
 static MachineParamVtable inputlabelparam_vtable;
-static int inputlabelparam_vtable_initialized = 0;
+static bool inputlabelparam_vtable_initialized = FALSE;
 
 static void inputlabelparam_vtable_init(psy_audio_InputLabelParam* self)
 {
 	if (!inputlabelparam_vtable_initialized) {
 		inputlabelparam_vtable = *(self->machineparam.vtable);
-		inputlabelparam_vtable.describe = (fp_machineparam_describe)inputlabelparam_describe;
-		inputlabelparam_vtable.name = (fp_machineparam_name)inputlabelparam_name;
-		inputlabelparam_vtable.type = (fp_machineparam_type)inputlabelparam_type;
-		inputlabelparam_vtable_initialized = 1;
+		inputlabelparam_vtable.describe = (fp_machineparam_describe)
+			inputlabelparam_describe;
+		inputlabelparam_vtable.name = (fp_machineparam_name)
+			inputlabelparam_name;
+		inputlabelparam_vtable.type = (fp_machineparam_type)
+			inputlabelparam_type;
+		inputlabelparam_vtable_initialized = TRUE;
 	}
 }
 
@@ -66,7 +69,8 @@ int inputlabelparam_name(psy_audio_InputLabelParam* self, char* text)
 
 int inputlabelparam_describe(psy_audio_InputLabelParam* self, char* text)
 {
-	mixer_describeeditname(self->channel->mixer, text, self->channel->inputslot);
+	mixer_describeeditname(self->channel->mixer, text,
+		self->channel->inputslot);
 	return 1;
 }
 
@@ -502,21 +506,25 @@ void masterchannel_init(psy_audio_MasterChannel* self, psy_audio_Mixer* mixer, c
 		"Pan", "Pan", MPF_STATE | MPF_SMALL, &self->panning, 0, 0x100);
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe, self, channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
+		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);	
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		masterchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->dryonly_param,
 		"D", "D", MPF_SLIDERCHECK | MPF_SMALL, &self->dryonly, 0, 1);
+	self->dryonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->wetonly_param,
 		"W", "W", MPF_SLIDERCHECK | MPF_SMALL, &self->wetonly, 0, 1);
+	self->wetonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
-		&self->dryonly, &self->wetonly);
+		&self->dryonly, &self->wetonly);	
 }
 
 void masterchannel_dispose(psy_audio_MasterChannel* self)
@@ -621,21 +629,26 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe,
 		self, channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
+		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);	
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		inputchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->dryonly_param,
 		"D", "D", MPF_SLIDERCHECK | MPF_SMALL, &self->dryonly, 0, 1);
+	self->dryonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->wetonly_param,
 		"W", "W", MPF_SLIDERCHECK | MPF_SMALL, &self->wetonly, 0, 1);
+	self->wetonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
-		&self->dryonly, &self->wetonly);	
+		&self->dryonly, &self->wetonly);
+	
 }
 
 void inputchannel_dispose(psy_audio_InputChannel* self)
@@ -796,15 +809,17 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe, self,
 		channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);
+		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		returnchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_audio_routemachineparam_init(&self->route_param, self, mixer, 0);
 }
 
@@ -1441,35 +1456,25 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 		channel = &self->master;
 		if (row == 0) {
 			return &channel->info_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 1) {
+		} else if (row == numreturncolumns(self) + 1) {
 			return &channel->dw_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 2) {
+		} else if (row == numreturncolumns(self) + 2) {
 			return &channel->gain_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 3) {
+		} else if (row == numreturncolumns(self) + 3) {
 			return &channel->pan_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 4) {
+		} else if (row == numreturncolumns(self) + 4) {
 			return &channel->slider_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 5) {
+		} else if (row == numreturncolumns(self) + 5) {
 			return &channel->level_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 6) {
+		} else if (row == numreturncolumns(self) + 6) {
 			return &channel->solo_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 7) {
+		} else if (row == numreturncolumns(self) + 7) {
 			return &channel->mute_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 8) {
+		} else if (row == numreturncolumns(self) + 8) {
 			return &channel->dryonly_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 9) {
+		} else if (row == numreturncolumns(self) + 9) {
 			return &channel->wetonly_param.machineparam;
-		} else
-		if (row == numreturncolumns(self) + 10) {
+		} else if (row == numreturncolumns(self) + 10) {
 			return &self->ignore_param.machineparam;
 		} else {
 			return &self->blank_param.machineparam;

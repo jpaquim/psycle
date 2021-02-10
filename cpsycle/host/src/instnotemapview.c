@@ -635,7 +635,7 @@ void instrumentparameterview_onmousedown(InstrumentParameterView* self,
 		entry = psy_audio_instrument_entryat(self->instrument, entryindex);
 		if (entry) {
 			self->currentryindex = entryindex;
-			psy_ui_component_setposition(intedit_base(&self->editgroup),
+			psy_ui_component_setposition(&self->editgroup,
 				psy_ui_point_makepx(fixedkey_topleft.x, fixedkey_topleft.y),
 				psy_ui_size_makepx(fixedkey_size.width, fixedkey_size.height * 1.5));
 			intedit_setvalue(&self->edit, entry->fixedkey);

@@ -52,7 +52,7 @@ void sequencetrackbox_init(SequenceTrackBox*,
 
 void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox*,
-	double x, double y);
+	psy_ui_RealPoint);
 
 #ifdef __cplusplus
 }

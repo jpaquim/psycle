@@ -7,6 +7,18 @@
 
 #include <math.h>
 
+// extern
+psy_ui_Point psy_ui_internal_point_zero;
+psy_ui_RealPoint psy_ui_internal_realpoint_zero;
+
+void psy_ui_geometry_init(void)
+{
+	psy_ui_point_init(&psy_ui_internal_point_zero);
+	psy_ui_realpoint_init(&psy_ui_internal_realpoint_zero);
+}
+
+
+
 void psy_ui_setrectangle(psy_ui_RealRectangle* self, double left, double top, double width,
 	double height)
 {

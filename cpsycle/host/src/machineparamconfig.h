@@ -64,7 +64,10 @@ void machineparamconfig_init(MachineParamConfig*, psy_Property* parent);
 void machineparamconfig_dispose(MachineParamConfig*);
 
 void machineparamconfig_resettheme(MachineParamConfig*);
-void machineparamconfig_settheme(MachineParamConfig*, psy_Property* skin);
+void machineparamconfig_settheme(MachineParamConfig*, psy_Property* theme);
+ParamSkin* machineparamconfig_skin(MachineParamConfig*);
+void machineparamconfig_releaseskin(void);
+
 bool machineparamconfig_hasthemeproperty(const MachineParamConfig*,
 	psy_Property*);
 bool machineparamconfig_hasproperty(const MachineParamConfig*, psy_Property*);

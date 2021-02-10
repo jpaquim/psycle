@@ -44,6 +44,7 @@ typedef struct psy_audio_XMSampler {
 	psy_audio_CustomMachine custommachine;
 	// internal data
 	int _numVoices;
+	int playingVoices;
 
 	psy_audio_XMSamplerVoice m_Voices[XM_SAMPLER_MAX_POLYPHONY];
 	psy_audio_XMSamplerChannel m_Channel[XM_SAMPLER_MAX_TRACKS];	
@@ -54,6 +55,7 @@ typedef struct psy_audio_XMSampler {
 	int m_GlobalVolume;
 	int m_PanningMode;	
 	int m_sampleRate;
+	int channeldisplay;
 	psy_List* multicmdMem; // entry: PatternEvent*
 	// ticktimer: current tick number, sample position of the next tracker tick
 	//            functionpointers to buffer work and timer tick
@@ -72,7 +74,13 @@ typedef struct psy_audio_XMSampler {
 	psy_audio_InfoMachineParam param_filter_cutoff;
 	psy_audio_InfoMachineParam param_filter_res;
 	psy_audio_InfoMachineParam param_pan;
-	psy_audio_XMSamplerChannel masterchannel;
+	psy_audio_IntMachineParam param_display_channel;
+	psy_audio_IntMachineParam param_display_playback;
+	psy_audio_IntMachineParam param_display_playmix;	
+	psy_audio_InfoMachineParam param_masterchannel;
+	psy_audio_IntMachineParam param_numplayvoices;
+	psy_audio_IntMachineParam param_masterslider;
+	psy_audio_IntMachineParam param_masterlevel;
 	psy_audio_CustomMachineParam ignore_param;
 	psy_audio_ChoiceMachineParam param_amigaslides;
 	psy_audio_ChoiceMachineParam param_usefilters;

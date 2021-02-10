@@ -169,7 +169,13 @@ static void psy_audio_xmsampler_initparameters(psy_audio_XMSampler*);
 static void resamplingmethod_tweak(psy_audio_XMSampler*,
 	psy_audio_ChoiceMachineParam* sender, float value);
 static void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler*,
-	psy_dsp_ResamplerQuality quality);
+	psy_dsp_ResamplerQuality);
+static void display_tweak(psy_audio_XMSampler*,
+	psy_audio_IntMachineParam* sender, float value);
+static void display_normvalue(psy_audio_XMSampler*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void masterlevel_normvalue(psy_audio_XMSampler* self,
+	psy_audio_CustomMachineParam* sender, float* rv);
 
 const psy_audio_MachineInfo* psy_audio_xmsampler_info(void)
 {
@@ -214,6 +220,7 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	psy_audio_machine_seteditname(psy_audio_xmsampler_base(self), "XMSampler");
 
 	self->_numVoices = XM_SAMPLER_MAX_POLYPHONY;
+	self->playingVoices = 0;
 	self->multicmdMem = NULL;	
 	self->m_sampleRate = (int)
 		psy_audio_machine_samplerate(psy_audio_xmsampler_base(self));
@@ -308,6 +315,7 @@ void psy_audio_xmsampler_ontimertick(psy_audio_XMSampler* self)
 		psy_audio_xmsamplerchannel_performfx(
 			psy_audio_xmsampler_rchannel(self, channel));
 	}
+	self->playingVoices = psy_audio_xmsampler_getplayingvoices(self);
 }
 
 void generateaudio(psy_audio_XMSampler* self, psy_audio_BufferContext* bc)
@@ -878,6 +886,25 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 		"Filter Q (Res)", "", MPF_SMALL);
 	psy_audio_infomachineparam_init(&self->param_pan, "Panning", "",
 		MPF_SMALL);	
+	self->channeldisplay = 0;
+	psy_audio_intmachineparam_init(&self->param_display_channel,
+		"Channel", "Channel", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	psy_signal_connect(&self->param_display_channel.machineparam.signal_tweak, self,
+		display_tweak);
+	psy_signal_connect(&self->param_display_channel.machineparam.signal_normvalue, self,
+		display_normvalue);
+	psy_audio_intmachineparam_init(&self->param_display_playback,
+		"Playback", "Playback", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	psy_signal_connect(&self->param_display_playback.machineparam.signal_tweak, self,
+		display_tweak);
+	psy_signal_connect(&self->param_display_playback.machineparam.signal_normvalue, self,
+		display_normvalue);
+	psy_audio_intmachineparam_init(&self->param_display_playmix,
+		"Play mix", "Play mix", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	psy_signal_connect(&self->param_display_playmix.machineparam.signal_tweak, self,
+		display_tweak);
+	psy_signal_connect(&self->param_display_playmix.machineparam.signal_normvalue, self,
+		display_normvalue);
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-",
 		MPF_IGNORE | MPF_SMALL, 0, 0);
 	// tweak zxx macros	
@@ -886,7 +913,7 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 	self->tweak_zxxvalue = 0;
 	psy_audio_intmachineparam_init(&self->tweakparam_zxxindex,
 		"zxxindex", "zxxindex", MPF_STATE | MPF_SMALL,
-		(int32_t*)&self->tweak_zxxindex, 1, 64);
+		(int32_t*)&self->tweak_zxxindex, 1, 64);	
 	psy_audio_intmachineparam_init(&self->tweakparam_zxxmode,
 		"zxxmode", "zxxmode", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->tweak_zxxmode, 1, 64);	
@@ -895,6 +922,17 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 		(int32_t*)&self->tweak_zxxvalue, 1, 64);
 	psy_signal_connect(&self->tweakparam_zxxvalue.machineparam.signal_tweak,
 		self, ontweakzxxvalue);	
+	// Master
+	psy_audio_infomachineparam_init(&self->param_masterchannel, "Master", "", MPF_SMALL);
+	psy_audio_intmachineparam_init(&self->param_masterslider,
+		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->m_GlobalVolume, 0, 128);
+	psy_audio_intmachineparam_init(&self->param_masterlevel,
+		"", "", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->param_masterlevel.machineparam.signal_normvalue, self,
+		masterlevel_normvalue);
+	psy_audio_intmachineparam_init(&self->param_numplayvoices,
+		"Voices in use", "", MPF_INFOLABEL | MPF_SMALL, &self->playingVoices,
+		0, XM_SAMPLER_MAX_POLYPHONY);
 }
 
 void disposeparameters(psy_audio_XMSampler* self)
@@ -912,11 +950,19 @@ void disposeparameters(psy_audio_XMSampler* self)
 	psy_audio_infomachineparam_dispose(&self->param_filter_cutoff);
 	psy_audio_infomachineparam_dispose(&self->param_filter_res);
 	psy_audio_infomachineparam_dispose(&self->param_pan);
+	psy_audio_intmachineparam_dispose(&self->param_display_channel);
+	psy_audio_intmachineparam_dispose(&self->param_display_playback);
+	psy_audio_intmachineparam_dispose(&self->param_display_playmix);
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
 	// tweak
 	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxindex);
-	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxmode);	
-	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxvalue);	
+	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxmode);
+	psy_audio_intmachineparam_dispose(&self->tweakparam_zxxvalue);
+	// master
+	psy_audio_infomachineparam_dispose(&self->param_masterchannel);
+	psy_audio_intmachineparam_dispose(&self->param_masterslider);
+	psy_audio_intmachineparam_dispose(&self->param_masterlevel);
+	psy_audio_intmachineparam_dispose(&self->param_numplayvoices);
 }
 
 void psy_audio_xmsampler_stop(psy_audio_XMSampler* self)
@@ -940,7 +986,7 @@ const psy_audio_MachineInfo* xmsampler_info(psy_audio_XMSampler* self)
 
 uintptr_t numparameters(psy_audio_XMSampler* self)
 {
-	return numparametercols(self) * 8;
+	return numparametercols(self) * 11;
 }
 
 uintptr_t numparametercols(psy_audio_XMSampler* self)
@@ -992,7 +1038,7 @@ psy_audio_MachineParam* tweakparameter(psy_audio_XMSampler* self,
 			if (channel) {
 				switch (channelparamidx) {
 				case 0:
-					return &channel->level_param.machineparam;
+					return &channel->slider_param.machineparam;
 					break;
 				case XM_SAMPLER_TWK_CHANNEL_PANNING:
 					return &channel->pan.machineparam;
@@ -1037,23 +1083,29 @@ psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,
 		switch (row) {
 		case 0: return &self->param_general.machineparam; break;
 		case 1: return &self->param_channels.machineparam; break;
-
-		case XM_CHANNELROW + 1: return &self->param_filter_cutoff.machineparam; break;
-		case XM_CHANNELROW + 2: return &self->param_filter_res.machineparam; break;
-		case XM_CHANNELROW + 3: return &self->param_pan.machineparam;  break;
-		case XM_CHANNELROW + 5: return &self->ignore_param.machineparam;  break;
+		case XM_CHANNELROW + 2: return &self->param_filter_cutoff.machineparam; break;
+		case XM_CHANNELROW + 3: return &self->param_filter_res.machineparam; break;
+		case XM_CHANNELROW + 4: return &self->param_pan.machineparam;  break;		
+		case XM_CHANNELROW + 5: return &self->param_display_channel.machineparam; break;
+		case XM_CHANNELROW + 6: return &self->param_display_playback.machineparam; break;
+		case XM_CHANNELROW + 7: return &self->param_display_playmix.machineparam; break;
+		case XM_CHANNELROW + 8: return &self->ignore_param.machineparam;  break;
 		default:
 			return &self->param_blank.machineparam; break;
 			break;
 		}
 	} else if (col == 9) {
+		// Master Column
 		switch (row) {		
-		// case CHANNELROW + 0: return &self->masterchannel.param_channel.machineparam; break;
-		// case CHANNELROW + 4: return &self->masterchannel.slider_param.machineparam; break;
-		// case CHANNELROW + 5: return &self->masterchannel.level_param.machineparam; break;
-		//default:
-		//	return &self->param_blank.machineparam;
-		//	break;
+		case XM_CHANNELROW + 0: return &self->param_masterchannel.machineparam; break;
+		case XM_CHANNELROW + 3: return &self->param_numplayvoices.machineparam; break;
+		case XM_CHANNELROW + 5: return &self->param_masterslider.machineparam; break;
+		case XM_CHANNELROW + 6: return &self->param_masterlevel.machineparam;  break;
+		case XM_CHANNELROW + 7: return &self->ignore_param.machineparam;  break;
+		case XM_CHANNELROW + 8: return &self->ignore_param.machineparam;  break;
+		default:
+			return &self->param_blank.machineparam;
+			break;
 		}
 	} else if (row == 0) {
 		switch (col) {		
@@ -1084,23 +1136,32 @@ psy_audio_MachineParam* parameter(psy_audio_XMSampler* self,
 				return &channel->param_channel.machineparam;
 					break;
 				case XM_CHANNELROW + 1:
-					return &channel->filter_cutoff.machineparam;
+					return &channel->param_filtertype.machineparam;
 					break;
 				case XM_CHANNELROW + 2:
-					return &channel->filter_res.machineparam;
+					return &channel->filter_cutoff.machineparam;
 					break;
 				case XM_CHANNELROW + 3:
-					return &channel->pan.machineparam;
+					return &channel->filter_res.machineparam;
 					break;
 				case XM_CHANNELROW + 4:
+					return &channel->pan.machineparam;
+					break;				
+				case XM_CHANNELROW + 5:
 					return &channel->slider_param.machineparam;
 					break;
-				case XM_CHANNELROW + 5:
-					return &channel->level_param.machineparam;
-					break;
 				case XM_CHANNELROW + 6:
-					return &self->ignore_param.machineparam;
+					return &self->ignore_param.machineparam;					
+					break;				
+				case XM_CHANNELROW + 7:
+					return &channel->surround.machineparam;
 					break;
+				case XM_CHANNELROW + 8:
+					return &channel->mute.machineparam;
+					break;
+				//case XM_CHANNELROW + 8:
+					//return &self->ignore_param.machineparam;
+					//break;
 				default:
 					return &self->param_blank.machineparam; break;
 				break;
@@ -1117,6 +1178,44 @@ void resamplingmethod_tweak(psy_audio_XMSampler* self,
 		(int)(value * (sender->maxval - sender->minval) + 0.5f) +
 			sender->minval);	
 }
+
+void display_tweak(psy_audio_XMSampler* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (sender == &self->param_display_channel) {
+		self->channeldisplay = 0;
+	} else if (sender == &self->param_display_playback) {
+		self->channeldisplay = 1;
+	} else if (sender == &self->param_display_playmix) {
+		self->channeldisplay = 2;
+	}
+}
+
+void display_normvalue(psy_audio_XMSampler* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if ((sender == &self->param_display_channel && self->channeldisplay == 0) ||
+			(sender == &self->param_display_playback && self->channeldisplay == 1) ||
+			(sender == &self->param_display_playmix && self->channeldisplay == 2)) {
+		*rv = 1.f;
+		return;
+	}
+	*rv = 0.f;	
+}
+
+void masterlevel_normvalue(psy_audio_XMSampler* self,
+	psy_audio_CustomMachineParam* sender, float* rv)
+{
+	psy_audio_Buffer* memory;
+
+	memory = psy_audio_machine_buffermemory(psy_audio_xmsampler_base(self));
+	if (memory) {
+		*rv = psy_audio_buffer_rmsdisplay(memory);
+	} else {
+		*rv = 0.f;
+	}
+}
+
 
 void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,
 	psy_dsp_ResamplerQuality quality)

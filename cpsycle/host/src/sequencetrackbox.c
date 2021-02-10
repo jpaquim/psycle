@@ -109,16 +109,16 @@ void sequencetrackbox_drawtext(SequenceTrackBox* self,
 }
 
 SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox* self,
-	double x, double y)
+	psy_ui_RealPoint pt)
 {		
-	if (self->trackindex != 0 && x >= self->position.right -
+	if (self->trackindex != 0 && pt.x >= self->position.right -
 			(int)(self->tm->tmAveCharWidth * 3.5)) {
 		return SEQUENCETRACKBOXEVENT_DEL;
-	} else if (x >= (int)(self->tm->tmAveCharWidth * 11)) {
+	} else if (pt.x >= (int)(self->tm->tmAveCharWidth * 11)) {
 		return SEQUENCETRACKBOXEVENT_SELECT;
-	} else if (x >= (int)(self->tm->tmAveCharWidth * 8)) {
+	} else if (pt.x >= (int)(self->tm->tmAveCharWidth * 8)) {
 		return SEQUENCETRACKBOXEVENT_MUTE;
-	} else if (x >= (int)(self->tm->tmAveCharWidth * 5)) {
+	} else if (pt.x >= (int)(self->tm->tmAveCharWidth * 5)) {
 		return SEQUENCETRACKBOXEVENT_SOLO;
 	}
 	return SEQUENCETRACKBOXEVENT_SELECT;

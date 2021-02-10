@@ -11,6 +11,8 @@
 extern "C" {
 #endif
 
+void psy_ui_geometry_init(void);
+
 typedef struct psy_ui_Point {
 	psy_ui_Value x;
 	psy_ui_Value y;
@@ -48,11 +50,9 @@ INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
 
 INLINE psy_ui_Point psy_ui_point_zero(void)
 {
-	psy_ui_Point rv;
+	extern psy_ui_Point psy_ui_internal_point_zero;
 
-	rv.x = psy_ui_value_makeew(0.0);
-	rv.y = psy_ui_value_makeeh(0.0);
-	return rv;
+	return psy_ui_internal_point_zero;
 }
 
 typedef struct psy_ui_IntPoint {
@@ -91,8 +91,8 @@ typedef struct psy_ui_RealPoint {
 
 INLINE void psy_ui_realpoint_init(psy_ui_RealPoint* self)
 {
-	self->x = 0;
-	self->y = 0;
+	// assume IEEE754
+	memset(self, 0, sizeof(psy_ui_RealPoint));
 }
 
 INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
@@ -106,7 +106,9 @@ INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
 
 INLINE psy_ui_RealPoint psy_ui_realpoint_zero(void)
 {
-	return psy_ui_realpoint_make(0.0, 0.0);	
+	extern psy_ui_RealPoint psy_ui_internal_realpoint_zero;
+
+	return psy_ui_internal_realpoint_zero;
 }
 
 typedef struct psy_ui_RealSize {
@@ -134,6 +136,22 @@ typedef struct psy_ui_RealRectangle {
 	double right;
 	double bottom;
 } psy_ui_RealRectangle;
+
+INLINE void psy_ui_realrectangle_init(psy_ui_RealRectangle* self)
+{
+	// assume IEEE754
+	memset(self, 0, sizeof(psy_ui_RealRectangle));	
+}
+
+INLINE void psy_ui_realrectangle_init_all(psy_ui_RealRectangle* self,
+	psy_ui_RealPoint topleft,
+	psy_ui_RealSize size)
+{
+	self->left = topleft.x;
+	self->top = topleft.y;
+	self->right = topleft.x + size.width;
+	self->bottom = topleft.y + size.height;
+}
 
 INLINE psy_ui_RealRectangle psy_ui_realrectangle_make(psy_ui_RealPoint topleft,
 	psy_ui_RealSize size)

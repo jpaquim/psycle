@@ -372,12 +372,13 @@ void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 		machineui = (MachineUi*)psy_tableiterator_value(&it);
 		position = machineui_position(machineui);
 		if (psy_ui_realrectangle_intersect_rectangle(&g->clip, position)) {
-			psy_ui_setorigin(g, -position->left, -position->top);
+			psy_ui_setorigin(g, psy_ui_realpoint_make(-position->left,
+				-position->top));
 			machineui_draw(machineui, g, psy_tableiterator_key(&it),
 				self->vudrawupdate);
-			psy_ui_setorigin(g, 0.0, 0.0);
+			psy_ui_resetorigin(g);
 			if (self->selectedwire.src == psy_INDEX_INVALID &&
-				self->selectedslot == psy_tableiterator_key(&it)) {
+					self->selectedslot == psy_tableiterator_key(&it)) {
 				machineui_drawhighlight(machineui, g);
 			}
 		}

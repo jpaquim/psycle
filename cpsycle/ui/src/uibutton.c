@@ -70,7 +70,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
 	psy_signal_init(&self->signal_clicked);	
-	psy_ui_component_setstyletypes(self,
+	psy_ui_component_setstyletypes(psy_ui_button_base(self),
 		psy_ui_STYLE_BUTTON, psy_ui_STYLE_BUTTON_HOVER,
 		psy_ui_STYLE_BUTTON_SELECT);
 }
