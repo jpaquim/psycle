@@ -308,7 +308,7 @@ void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 
-psy_ui_Border psy_ui_component_border(psy_ui_Component*);
+psy_ui_Border psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_Component* parent, psy_ui_AlignType aligntype)
@@ -618,12 +618,12 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 	return self->overflow;
 }
 
-INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, psy_ui_Value stepx, psy_ui_Value stepy)
+INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, psy_ui_Size step)
 {
 	assert(self);
 
-	self->scrollstepx = stepx;
-	self->scrollstepy = stepy;
+	self->scrollstepx = step.width;
+	self->scrollstepy = step.height;
 }
 
 INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, psy_ui_Value step)

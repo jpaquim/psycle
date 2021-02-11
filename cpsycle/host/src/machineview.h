@@ -27,7 +27,7 @@ extern "C" {
 // MachineView
 //
 // Editor/Viewer for the machines, their connections and owner of the
-// wiremonitors
+// wiremonitors. Composite of Wire-/Stackview and Newmachine.
 
 // MachineStackView: displays stacks of the machines starting with their leafs
 // MachineWireView:  displays and edits machines with their wires
@@ -42,27 +42,6 @@ extern "C" {
 //                   ui events to solo/mute/bypass or pan the machine
 // MachineUiMatrix:  Container of MachineUis for the MachineStackView with
 //                   track and line as key and a MachineUi pointer as value
-
-// MachineViewBar
-typedef struct MachineViewBar {
-	// inherits
-	psy_ui_Component component;
-	// internal
-	// ui elements
-	psy_ui_CheckBox mixersend;
-	psy_ui_Label status;
-	// references	
-	psy_audio_Machines* machines;
-} MachineViewBar;
-
-void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
-
-void machineviewbar_settext(MachineViewBar*, const char* text);
-
-INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
-{
-	return &self->component;
-}
 
 // MachineView
 typedef struct MachineView {

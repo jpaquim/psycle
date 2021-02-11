@@ -388,6 +388,12 @@
     <ClCompile Include="src\machinewireview.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\patternviewbar.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewbar.c">
+      <Filter>machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -750,6 +756,12 @@
       <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\machinewireview.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewbar.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewbar.h">
       <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>

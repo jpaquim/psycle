@@ -333,6 +333,7 @@
     <ClCompile Include="src\machinestackview.c" />
     <ClCompile Include="src\machineui.c" />
     <ClCompile Include="src\machineview.c" />
+    <ClCompile Include="src\machineviewbar.c" />
     <ClCompile Include="src\machineviewconfig.c" />
     <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\machinewireview.c" />
@@ -350,6 +351,7 @@
     <ClCompile Include="src\patternheader.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
+    <ClCompile Include="src\patternviewbar.c" />
     <ClCompile Include="src\patternviewconfig.c" />
     <ClCompile Include="src\patternviewmenu.c" />
     <ClCompile Include="src\patternviewskin.c" />
@@ -462,6 +464,7 @@
     <ClInclude Include="src\machinestackview.h" />
     <ClInclude Include="src\machineui.h" />
     <ClInclude Include="src\machineview.h" />
+    <ClInclude Include="src\machineviewbar.h" />
     <ClInclude Include="src\machineviewconfig.h" />
     <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\machinewireview.h" />
@@ -479,6 +482,7 @@
     <ClInclude Include="src\patternheader.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
+    <ClInclude Include="src\patternviewbar.h" />
     <ClInclude Include="src\patternviewconfig.h" />
     <ClInclude Include="src\patternviewmenu.h" />
     <ClInclude Include="src\patternviewskin.h" />

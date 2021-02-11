@@ -1936,8 +1936,9 @@ void pianoroll_updatescroll(Pianoroll* self)
 	
 	pianogrid_updatekeystate(&self->grid);
 	psy_ui_component_setscrollstep(pianogrid_base(&self->grid),
-		psy_ui_value_makepx(pianogridstate_steppx(&self->gridstate)),
-		psy_ui_value_makepx(self->keyboardstate.keyheightpx));
+		psy_ui_size_makepx(
+			pianogridstate_steppx(&self->gridstate),
+			self->keyboardstate.keyheightpx));
 	psy_ui_component_setscrollstepy(pianokeyboard_base(&self->keyboard),
 		psy_ui_value_makepx(self->keyboardstate.keyheightpx));
 	psy_ui_component_setscrollstepx(pianoruler_base(&self->header),

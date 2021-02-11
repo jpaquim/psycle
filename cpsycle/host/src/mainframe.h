@@ -21,6 +21,7 @@
 #include "kbdhelp.h"
 #include "machinebar.h"
 #include "machineview.h"
+#include "machineviewbar.h"
 #include "machinedock.h"
 #include "midimonitor.h"
 #include "navigation.h"
