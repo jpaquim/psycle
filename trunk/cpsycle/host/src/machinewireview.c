@@ -8,6 +8,7 @@
 #include "skingraphics.h"
 #include "wireview.h"
 #include "machineview.h"
+#include "machineviewbar.h"
 // audio
 #include <exclusivelock.h>
 // std
@@ -22,7 +23,6 @@ static void machinewireview_ondestroy(MachineWireView*);
 static psy_ui_RealRectangle machinewireview_bounds(MachineWireView*);
 static void machinewireview_setmachines(MachineWireView*, psy_audio_Machines*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
-static void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
 static bool machinewireview_wiredragging(const MachineWireView*);
 static void machinewireview_drawwires(MachineWireView*, psy_ui_Graphics*);
@@ -37,8 +37,6 @@ static void machinewireview_onmouseup(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmousemove(MachineWireView*, psy_ui_MouseEvent*);
 static bool machinewireview_movemachine(MachineWireView*, uintptr_t slot,
 	double dx, double dy);
-static bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
-	double x, double y);
 static void machinewireview_onmousedoubleclick(MachineWireView*,
 	psy_ui_MouseEvent*);
 static void machinewireview_onkeydown(MachineWireView*, psy_ui_KeyEvent*);

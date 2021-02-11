@@ -171,7 +171,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
 }
 
-psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
+psy_ui_Border psy_ui_component_border(const psy_ui_Component* self)
 {
 	if (self->style.currstyle->border.mode.set) {
 		return self->style.currstyle->border;

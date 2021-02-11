@@ -62,6 +62,9 @@ void machinewireview_configure(MachineWireView*, MachineViewConfig*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);
 void machinewireview_updateskin(MachineWireView*);
+void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
+bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
+	double x, double y);
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 {

@@ -461,7 +461,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 		tab_init(tab, label, 0, &self->defaulttabmargin);
 		if (self->tabs == 0) {
 			if (self->tabalignment == psy_ui_ALIGN_TOP) {
-				tab->margin.left = psy_ui_value_makepx(0);				
+				tab->margin.left = psy_ui_value_makepx(10);
 			} else {
 				// tab->margin.top = psy_ui_value_makepx(0);
 			}			

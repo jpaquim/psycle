@@ -23,8 +23,9 @@ extern "C" {
 #endif
 
 // psy_audio_Machine, psy_audio_MachineCallback
-// aim : abstract base class for "Machines", the audio producing elements,
-//       but most classes inherit from CustomMachine offering more defaults.
+//
+// Abstract base class for "Machines", the audio producing elements,
+// but most classes inherit from CustomMachine offering more defaults.
 //
 // psy_audio_machine_work is called by the player or the mixer to fill the
 // buffer provided by BufferContext. Machines themself have no buffers,

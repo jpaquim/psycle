@@ -129,14 +129,19 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 
 		sampler = psy_audio_machines_at(machines, self->machine_index);
 		if (sampler) {			
-			psy_audio_PatternEvent realevent;
-			bool instisvol;
+			psy_audio_PatternEvent realevent;			
 									
 			realevent = *ev;
+			// translate event to real machine
+			// instrument_index.subslot: instrument index of the real sampler
+			// (instrument group is set in the sampler machine)
+			// self->machine_index:      machine index of the real sampler
 			realevent.inst = (uint16_t)self->instrument_index.subslot;
-			realevent.mach = (uint16_t)self->machine_index;
+			realevent.mach = (uint8_t)self->machine_index;
+			// 1. tick with cmd and parameter
 			psy_audio_machine_seqtick(sampler, channel, &realevent);
-			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {				
+			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+				// 
 				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
 					realevent.cmd = 0x1E;
 				} else {

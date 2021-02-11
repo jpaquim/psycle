@@ -9,6 +9,7 @@
 #include "patternheader.h"
 #include "patternproperties.h"
 #include "patternviewmenu.h"
+#include "patternviewbar.h"
 #include "pianoroll.h"
 #include "stepbox.h"
 #include "tabbar.h"
@@ -27,39 +28,23 @@
 extern "C" {
 #endif
 
-// PatternViewBar
-//
-// The bar displayed in the mainframe status bar, if the patternview is active
-
-typedef struct PatternViewBar {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	PatternCursorStepBox cursorstep;
-	psy_ui_CheckBox movecursorwhenpaste;
-	psy_ui_CheckBox defaultentries;
-	psy_ui_CheckBox displaysinglepattern;
-	psy_ui_Label status;
-	// references
-	Workspace* workspace;
-} PatternViewBar;
-
-void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
-	Workspace*);
-
-INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
-{
-	return &self->component;
-}
-
-
 // PatternView
 //
 // Displays the tracker and/or pianoroll
 
+// PatternView
+//
+// Editor/Viewer for a single pattern or the whole sequence.
+// Composite of TrackerView and Pianoroll.
+
+// TrackerView:      displays patternevents in a sheet
+// Pianoroll:        displays patternevents as a roll
+
+
 typedef struct PatternView {
 	// inherits
 	psy_ui_Component component;
+	// internal
 	// ui elements
 	psy_ui_Component sectionbar;
 	TabBar tabbar;
