@@ -17,6 +17,9 @@ extern "C" {
 #define STYLE_SEQEDT_ITEM_SELECTED 121
 #define STYLE_SEQEDT_EVENT         122
 #define STYLE_SEQLISTVIEW          140
+#define STYLE_STATUSBAR            160
+#define STYLE_MACHINEBOX           180
+#define STYLE_ZOOMBOX              200
 
 struct psy_ui_Defaults;
 

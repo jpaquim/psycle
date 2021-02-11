@@ -93,12 +93,22 @@ void psy_ui_style_deallocate(psy_ui_Style* self)
 	free(self);
 }
 
+void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
+{	
+	psy_ui_FontInfo fontinfo;
+
+	self->use_font = 1;
+	psy_ui_fontinfo_init(&fontinfo, family, size);
+	psy_ui_font_init(&self->font, &fontinfo);
+}
+
 // Styles
 // prototypes
 static void psy_ui_styles_updateconfig(psy_ui_Styles*);
-static void psy_ui_styles_addstyletoconfig(psy_ui_Styles*, psy_ui_Style*, int styletype);
-static void psy_ui_styles_addcolourtoconfig(psy_ui_Styles*, psy_Property* parent,
-	const char* key, psy_ui_Colour);
+static void psy_ui_styles_addstyletoconfig(psy_ui_Styles*, psy_ui_Style*,
+	int styletype);
+static void psy_ui_styles_addcolourtoconfig(psy_ui_Styles*,
+	psy_Property* parent, const char* key, psy_ui_Colour);
 static psy_ui_Style* psy_ui_styles_readstyle(psy_ui_Styles*, int styletype);
 static psy_ui_Colour psy_ui_styles_readcolour(psy_ui_Styles*, psy_Property* parent,
 	const char* key);

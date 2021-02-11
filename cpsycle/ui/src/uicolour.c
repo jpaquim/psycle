@@ -4,6 +4,58 @@
 #include "../../detail/prefix.h"
 
 #include "uicolour.h"
+// platform
+#include "../../detail/portable.h"
+
+static uint8_t psy_hexdigit(const char* str)
+{
+	if (str[0] >= '0' && str[0] <= '9') {
+		return (str[0] - '0');
+	} else if (str[0] >= 'A' && str[0] <= 'Z') {
+		return (str[0] - 'A');
+	} else if (str[0] >= 'a' && str[0] <= 'z') {
+		return (str[0] - 'a');
+	}
+	return 0;
+}
+
+static uint8_t psy_hexbyte(const char* str)
+{	
+	return ((psy_hexdigit(str) << 4) | psy_hexdigit(str + 1));	
+}
+
+static uint8_t psy_shorthexbyte(const char* str)
+{
+	uint8_t digit;
+	
+	digit = psy_hexdigit(str);
+	return ((digit << 4) | digit);
+}
+
+void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str)
+{	
+	if (psy_strlen(str) > 0) {
+		if (str[0] == '#') {
+			if (psy_strlen(str) == 7) {
+				// parse hex triplet
+				psy_ui_colour_init_rgb(self,
+					psy_hexbyte(str + 1),
+					psy_hexbyte(str + 3),
+					psy_hexbyte(str + 5));				
+			} else if (psy_strlen(str) == 4) {
+				// parse shorthand hexadecimal form
+				psy_ui_colour_init_rgb(self,
+					psy_shorthexbyte(str + 1),
+					psy_shorthexbyte(str + 2),
+					psy_shorthexbyte(str + 3));
+			}
+		} else {
+			psy_ui_colour_init(self);
+		}
+	} else {
+		psy_ui_colour_init(self);
+	}
+}
 
 psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b)
 {

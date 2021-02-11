@@ -85,6 +85,8 @@ static void tabbar_onpreferredsize(TabBar*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void tabbar_resettabcheckstates(TabBar*);
 static void tabbar_onupdatestyles(TabBar*);
+static void tabbar_drawtabbackground(TabBar*, psy_ui_Graphics*, Tab*,
+	psy_ui_Style*, psy_ui_RealPoint);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -98,10 +100,14 @@ static void vtable_init(TabBar* self)
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			tabbar_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)tabbar_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)tabbar_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)tabbar_onmousemove;
-		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)tabbar_onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)tabbar_onmouseleave;
+		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+			tabbar_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+			tabbar_onmousemove;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
+			tabbar_onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
+			tabbar_onmouseleave;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			tabbar_onlanguagechanged;
 		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
@@ -275,20 +281,26 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 		psy_ui_settextcolour(g, self->style_tab_hover.colour);
 	} else {
 		psy_ui_settextcolour(g, self->style_tab.colour);
+	}	
+	if (hover) {
+		double width;
+
+		tabbar_drawtabbackground(self, g, tab, &self->style_tab_hover,
+			position);
+		width = psy_ui_value_px(&tab->size.width, tm);		
+		psy_ui_drawborder(g,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(position.x, position.y),
+				psy_ui_realsize_make(
+					psy_ui_value_px(&tab->size.width, tm),
+					psy_ui_value_px(&tab->size.height, tm))),
+				//psy_ui_realsize_make(
+				//	width,
+				//	centery + tm->tmHeight + 2)),
+				self->style_tab_hover.border);				
 	}
 	psy_ui_textout(g, position.x, position.y + centery, text,
 		psy_strlen(text));
-	if (hover) {		
-		double width;
-				
-		width = psy_ui_value_px(&tab->size.width, tm);
-		psy_ui_setcolour(g, self->style_tab_hover.backgroundcolour);
-		psy_ui_drawline(g,
-			psy_ui_realpoint_make(position.x, position.y + centery
-				+ tm->tmHeight + 2),
-			psy_ui_realpoint_make(position.x + width,
-				position.y + centery + tm->tmHeight + 2));
-	}
 	if (selected && drawselline) {
 		double width;
 
@@ -299,6 +311,31 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				centery + tm->tmHeight + 2),
 			psy_ui_realpoint_make(position.x + width, position.y +
 				centery + tm->tmHeight + 2));
+	}
+}
+
+void tabbar_drawtabbackground(TabBar* self, psy_ui_Graphics* g,
+	Tab* tab, psy_ui_Style* style, psy_ui_RealPoint position)
+{		
+	if (style->backgroundcolour.mode.set) {
+		psy_ui_RealRectangle r;
+		const psy_ui_TextMetric* tm;		
+
+		tm = psy_ui_component_textmetric(tabbar_base(self));
+		r = psy_ui_realrectangle_make(
+			position,
+			psy_ui_realsize_make(
+				psy_ui_value_px(&tab->size.width, tm),
+				psy_ui_value_px(&tab->size.height, tm)));
+		if (psy_ui_border_isround(&style->border)) {	
+			psy_ui_drawsolidroundrectangle(g, r,
+				psy_ui_size_make(
+					style->border.border_bottom_left_radius,
+					style->border.border_bottom_left_radius),
+				style->backgroundcolour);
+		} else {
+			psy_ui_drawsolidrectangle(g, r, style->backgroundcolour);
+		}
 	}
 }
 

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+// psy_ui_Style
 typedef struct psy_ui_Style {
 	psy_ui_Font font;
 	psy_ui_Colour colour;
@@ -37,6 +38,29 @@ psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
 	psy_ui_Colour background);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
+// Properties
+INLINE void psy_ui_style_setcolour(psy_ui_Style* self, psy_ui_Colour colour)
+{
+	self->colour = colour;
+}
+
+INLINE void psy_ui_style_setbackgroundcolour(psy_ui_Style* self,
+	psy_ui_Colour colour)
+{
+	self->backgroundcolour = colour;
+}
+
+INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
+	psy_ui_Colour colour, psy_ui_Colour background)
+{
+	psy_ui_style_setcolour(self, colour);
+	psy_ui_style_setbackgroundcolour(self, background);	
+}
+
+void psy_ui_style_setfont(psy_ui_Style*, const char* family, int size);
+
+
+// psy_ui_Styles
 typedef struct psy_ui_Styles {
 	psy_Table styles;
 	psy_Property config;
