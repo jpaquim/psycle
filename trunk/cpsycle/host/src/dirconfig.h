@@ -12,15 +12,13 @@
 extern "C" {
 #endif
 
-// DirConfig
-
 typedef struct DirConfig {
 	// signals
 	psy_Signal signal_changed;
+	// internal
 	psy_Property* directories;
 	// references
-	psy_Property* parent;
-	
+	psy_Property* parent;	
 } DirConfig;
 
 void dirconfig_init(DirConfig*, psy_Property* parent);

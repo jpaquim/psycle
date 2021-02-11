@@ -4,9 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "machinesbox.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+// host
+#include "styles.h"
+// platform
 #include "../../detail/portable.h"
 
 static void machinesbox_ondestroy(MachinesBox*, psy_ui_Component*);
@@ -27,7 +27,9 @@ static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setstyletypes(&self->component, STYLE_MACHINEBOX,
+		STYLE_MACHINEBOX, STYLE_MACHINEBOX);
 	self->workspace = workspace;
 	self->mode = mode;
 	self->showslots = 1;

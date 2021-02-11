@@ -533,6 +533,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\icon1.ico" />
+    <Image Include="src\resources\kbd.bmp" />
     <Image Include="src\resources\machine_skin.bmp" />
     <Image Include="src\resources\macparam.ico" />
     <Image Include="src\resources\mixer_skin.bmp" />
@@ -540,6 +541,7 @@
     <Image Include="src\resources\Project3.ico" />
     <Image Include="src\resources\splash_screen.bmp" />
     <Image Include="src\resources\TbMainKnob.bmp" />
+    <Image Include="src\resources\term.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)audio\audio.vcxproj">

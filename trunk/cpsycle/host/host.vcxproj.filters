@@ -762,5 +762,7 @@
     <Image Include="src\resources\Project3.ico" />
     <Image Include="src\resources\splash_screen.bmp" />
     <Image Include="src\resources\TbMainKnob.bmp" />
+    <Image Include="src\resources\kbd.bmp" />
+    <Image Include="src\resources\term.bmp" />
   </ItemGroup>
 </Project>

@@ -51,21 +51,9 @@ static void gear_connectsongsignals(Gear*);
 static void gear_onhide(Gear*);
 static void gear_onmachineselected(Gear*, psy_audio_Machines* sender,
 	uintptr_t slot);
-static void gear_onupdatestyles(Gear*);
-// vtable
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
+static void gear_showgenerators(Gear*);
+static void gear_showeffects(Gear*);
 
-static void vtable_init(Gear* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
-			gear_onupdatestyles;
-		vtable_initialized = TRUE;
-	}
-}
 // implementation
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -74,22 +62,21 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
 	psy_ui_component_init(gear_base(self), parent);	
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	// client
-	psy_ui_component_init(&self->client, gear_base(self));
-	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_ui_component_setbackgroundcolour(gear_base(self),
-		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
+	psy_ui_component_init(&self->client, gear_base(self));		
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
-	psy_ui_style_copy(&self->titlebar.style.style,
-		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
+	psy_ui_component_setstyletypes(&self->titlebar,
+		psy_ui_STYLE_CONTAINERHEADER, psy_ui_STYLE_CONTAINERHEADER,
+		psy_ui_STYLE_CONTAINERHEADER);	
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, "machinebar.gear");	
@@ -155,11 +142,11 @@ void gear_oncreate(Gear* self, psy_ui_Component* sender)
 void gear_ondelete(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
-		case 0: machinesbox_remove(&self->machinesboxgen);
+	case 0: machinesbox_remove(&self->machinesboxgen);
 		break;
-		case 1: machinesbox_remove(&self->machinesboxfx);
+	case 1: machinesbox_remove(&self->machinesboxfx);
 		break;
-		default:
+	default:
 		break;
 	}
 }
@@ -183,40 +170,59 @@ void gear_connectsongsignals(Gear* self)
 }
 
 void gear_onmachineselected(Gear* self, psy_audio_Machines* sender,
-	uintptr_t slot)
+	uintptr_t macidx)
 {
-	if (slot >= 0 && slot < 0x40) {
-		if (tabbar_selected(&self->tabbar) != 0) {
-			tabbar_select(&self->tabbar, 0);
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machines_at(sender, macidx);
+	if (machine) {
+		if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
+			gear_showgenerators(self);
+		} else if (psy_audio_machine_mode(machine) == MACHMODE_FX) {
+			gear_showeffects(self);
 		}
-	} else if (slot >= 0x40 && slot < 0x80) {
-		if (tabbar_selected(&self->tabbar) != 1) {
-			tabbar_select(&self->tabbar, 1);
-		}
+	} else if (macidx >= 0 && macidx < 0x40) {
+		gear_showgenerators(self);
+	} else if (macidx >= 0x40 && macidx < 0x80) {
+		gear_showeffects(self);
+	}	
+}
+
+void gear_showgenerators(Gear* self)
+{
+	if (tabbar_selected(&self->tabbar) != 0) {
+		tabbar_select(&self->tabbar, 0);
+	}
+}
+
+void gear_showeffects(Gear* self)
+{
+	if (tabbar_selected(&self->tabbar) != 1) {
+		tabbar_select(&self->tabbar, 1);
 	}
 }
 
 void gear_onclone(Gear* self, psy_ui_Component* sender)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case 0: machinesbox_clone(&self->machinesboxgen);
-			break;
-		case 1: machinesbox_clone(&self->machinesboxfx);
-			break;
-		default:
-			break;
+	case 0: machinesbox_clone(&self->machinesboxgen);
+		break;
+	case 1: machinesbox_clone(&self->machinesboxfx);
+		break;
+	default:
+		break;
 	}
 }
 
 void gear_onexchange(Gear* self, psy_ui_Component* sender)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case 0: machinesbox_exchange(&self->machinesboxgen);
-			break;
-		case 1: machinesbox_exchange(&self->machinesboxfx);
-			break;
-		default:
-			break;
+	case 0: machinesbox_exchange(&self->machinesboxgen);
+		break;
+	case 1: machinesbox_exchange(&self->machinesboxfx);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -229,12 +235,12 @@ void gear_onmuteunmute(Gear* self, psy_ui_Component* sender)
 void gear_onparameters(Gear* self, psy_ui_Component* sender)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case 0: machinesbox_showparameters(&self->machinesboxgen);
-			break;
-		case 1: machinesbox_showparameters(&self->machinesboxfx);
-			break;
-		default:
-			break;
+	case 0: machinesbox_showparameters(&self->machinesboxgen);
+		break;
+	case 1: machinesbox_showparameters(&self->machinesboxfx);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -252,19 +258,18 @@ void gear_onhide(Gear* self)
 void gear_onconnecttomaster(Gear* self, psy_ui_Component* sender)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case 0: machinesbox_connecttomaster(&self->machinesboxgen);
-			break;
-		case 1: machinesbox_connecttomaster(&self->machinesboxfx);
-			break;
-		default:
-			break;
+	case 0: machinesbox_connecttomaster(&self->machinesboxgen);
+		break;
+	case 1: machinesbox_connecttomaster(&self->machinesboxfx);
+		break;
+	default:
+		break;
 	}	
 }
 
 void gear_select(Gear* self, psy_List* machinelist)
 {
 	psy_List* p;
-
 
 	machinesbox_deselectall(&self->machinesboxfx);
 	machinesbox_deselectall(&self->machinesboxgen);
@@ -275,12 +280,4 @@ void gear_select(Gear* self, psy_List* machinelist)
 		machinesbox_addsel(&self->machinesboxfx, slot);
 		machinesbox_addsel(&self->machinesboxgen, slot);
 	}
-}
-
-void gear_onupdatestyles(Gear* self)
-{
-	psy_ui_component_setbackgroundcolour(gear_base(self),
-		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
-	psy_ui_style_copy(&self->titlebar.style.style,
-		psy_ui_style(psy_ui_STYLE_CONTAINERHEADER));
 }

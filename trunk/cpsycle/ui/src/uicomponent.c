@@ -715,6 +715,28 @@ void psy_ui_component_setmargin(psy_ui_Component* self,
 	}
 }
 
+psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
+{
+	psy_ui_Margin rv;
+	psy_ui_Border border;
+
+	psy_ui_margin_init(&rv);
+	border = psy_ui_component_border(self);
+	if (border.left == psy_ui_BORDER_SOLID) {		
+		rv.left = psy_ui_value_makepx(1);
+	}
+	if (border.top == psy_ui_BORDER_SOLID) {
+		rv.top = psy_ui_value_makepx(1);		
+	}
+	if (border.right == psy_ui_BORDER_SOLID) {
+		rv.right = psy_ui_value_makepx(1);
+	}
+	if (border.bottom == psy_ui_BORDER_SOLID) {
+		rv.bottom = psy_ui_value_makepx(1);
+	}
+	return rv;
+}
+
 void psy_ui_component_setspacing(psy_ui_Component* self,
 	const psy_ui_Margin* spacing)
 {	

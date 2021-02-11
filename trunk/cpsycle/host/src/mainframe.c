@@ -242,10 +242,10 @@ void mainframe_initemptystatusbar(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
 		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setstyletypes(&self->statusbar,
+		STYLE_STATUSBAR, STYLE_STATUSBAR, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make(
-			psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
-			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0)));	
+		psy_ui_margin_makeem(0.25, 1.0, 0.25, 0.0));
 }
 
 void mainframe_inittoparea(MainFrame* self)
@@ -344,11 +344,20 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
-{
+{	
 	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
 		"Kbd", self, mainframe_ontogglekbdhelp);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
-		psy_ui_ALIGN_RIGHT);	
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_image_init(&self->kbdimg, &self->statusbar);
+	psy_ui_bitmap_loadresource(&self->kbdimg.bitmap, IDB_KBD);
+	psy_ui_bitmap_settransparency(&self->kbdimg.bitmap,
+		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_component_setalign(&self->kbdimg.component,
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setpreferredsize(&self->kbdimg.component,
+		psy_ui_size_makepx(45, 18));
+	psy_ui_component_preventalign(&self->kbdimg.component);
 }
 
 void mainframe_initterminalbutton(MainFrame* self)
@@ -359,6 +368,15 @@ void mainframe_initterminalbutton(MainFrame* self)
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
 	mainframe_initterminalcolours(self);
+	psy_ui_image_init(&self->termimg, &self->statusbar);
+	psy_ui_bitmap_loadresource(&self->termimg.bitmap, IDB_TERM);
+	psy_ui_bitmap_settransparency(&self->termimg.bitmap,
+		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_component_setalign(&self->termimg.component,
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setpreferredsize(&self->termimg.component,
+		psy_ui_size_makepx(24, 18));
+	psy_ui_component_preventalign(&self->termimg.component);
 }
 
 void mainframe_initterminalcolours(MainFrame* self)
@@ -443,8 +461,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_Margin spacing;
 
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_init(&self->tabbars, &self->client);
-	//psy_ui_component_setspacing(&self->tabbars, &spacing);
+	psy_ui_component_init(&self->tabbars, &self->client);	
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
 }
 
@@ -461,8 +478,9 @@ void mainframe_initnavigation(MainFrame* self)
 
 void mainframe_initmaintabbar(MainFrame* self)
 {
-	tabbar_init(&self->tabbar, &self->tabbars);
-	self->tabbar.component.debugflag = 3000;
+	psy_ui_Margin margin;
+
+	tabbar_init(&self->tabbar, &self->tabbars);		
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
@@ -473,8 +491,10 @@ void mainframe_initmaintabbar(MainFrame* self)
 	tabbar_append(&self->tabbar, "main.help")->margin.right =
 		psy_ui_value_makeew(4.0);
 	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
+	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_component_setmargin(&self->tabbar.component, &margin);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
-	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
 }
 
 void mainframe_initmainviews(MainFrame* self)
@@ -714,190 +734,190 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 
 	cmd = psy_eventdriver_getcmd(sender, "general");
 	switch (cmd.id) {
-		case CMD_IMM_HELP:
-			tabbar_select(&self->helpview.tabbar, 0);
-			tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
-			break;
-		case CMD_IMM_HELPSHORTCUT:
-			mainframe_ontogglekbdhelp(self, mainframe_base(self));
-			break;
-		case CMD_IMM_EDITMACHINE:
-			tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
-			break;
-		case CMD_IMM_EDITPATTERN:
-			tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
-			break;
-		case CMD_IMM_ADDMACHINE:						
-			workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
-			break;
-		case CMD_IMM_PLAYSONG:
-			psy_audio_player_setposition(&self->workspace.player, 0);
-			psy_audio_player_start(&self->workspace.player);
-			break;
-		case CMD_IMM_PLAYROWTRACK: {
-			/*psy_dsp_big_beat_t playposition = 0;
-			psy_audio_SequenceEntry* entry;
+	case CMD_IMM_HELP:
+		tabbar_select(&self->helpview.tabbar, 0);
+		tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
+		break;
+	case CMD_IMM_HELPSHORTCUT:
+		mainframe_ontogglekbdhelp(self, mainframe_base(self));
+		break;
+	case CMD_IMM_EDITMACHINE:
+		tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
+		break;
+	case CMD_IMM_EDITPATTERN:
+		tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
+		break;
+	case CMD_IMM_ADDMACHINE:						
+		workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
+			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
+		break;
+	case CMD_IMM_PLAYSONG:
+		psy_audio_player_setposition(&self->workspace.player, 0);
+		psy_audio_player_start(&self->workspace.player);
+		break;
+	case CMD_IMM_PLAYROWTRACK: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
 
-			psy_audio_exclusivelock_enter();
-			psy_audio_player_stop(&self->workspace.player);
-			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-			playposition = (entry ? entry->offset : 0) +
-				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-			self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
-			self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
-			self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
-			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
-			psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-			psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
-				psy_audio_player_bpl(&self->workspace.player));
-			self->workspace.player.sequencer.playtrack = self->workspace.patterneditposition.track;
-			psy_audio_player_setposition(&self->workspace.player, playposition);
-			psy_audio_player_start(&self->workspace.player);
-			self->playrow = TRUE;
-			psy_audio_exclusivelock_leave();
-			break; */ }
-		case CMD_IMM_PLAYROWPATTERN: {
-			/*psy_dsp_big_beat_t playposition = 0;
-			psy_audio_SequenceEntry* entry;
+		psy_audio_exclusivelock_enter();
+		psy_audio_player_stop(&self->workspace.player);
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+			psy_audio_player_bpl(&self->workspace.player));
+		self->workspace.player.sequencer.playtrack = self->workspace.patterneditposition.track;
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		self->playrow = TRUE;
+		psy_audio_exclusivelock_leave();
+		break; */ }
+	case CMD_IMM_PLAYROWPATTERN: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
 
-			psy_audio_exclusivelock_enter();
-			psy_audio_player_stop(&self->workspace.player);			
-			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-			playposition = (entry ? entry->offset : 0) +
-				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-			self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
-			self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
-			self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
-			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
-			psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-			psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
-				psy_audio_player_bpl(&self->workspace.player));
-			psy_audio_player_setposition(&self->workspace.player, playposition);
-			psy_audio_player_start(&self->workspace.player);
-			self->playrow = TRUE;
-			psy_audio_exclusivelock_leave();
-			break; */ }
-		case CMD_IMM_PLAYSTART:
-			workspace_playstart(&self->workspace);
-			break;
-		case CMD_IMM_PLAYFROMPOS: {
-			/*psy_dsp_big_beat_t playposition = 0;
-			psy_audio_SequenceEntry* entry;
+		psy_audio_exclusivelock_enter();
+		psy_audio_player_stop(&self->workspace.player);			
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+			psy_audio_player_bpl(&self->workspace.player));
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		self->playrow = TRUE;
+		psy_audio_exclusivelock_leave();
+		break; */ }
+	case CMD_IMM_PLAYSTART:
+		workspace_playstart(&self->workspace);
+		break;
+	case CMD_IMM_PLAYFROMPOS: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
 
-			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-			playposition = (entry ? entry->offset : 0) +
-				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-			psy_audio_player_setposition(&self->workspace.player, playposition);
-			psy_audio_player_start(&self->workspace.player);
-			break; */}
-		case CMD_IMM_PLAYSTOP:
-			psy_audio_player_stop(&self->workspace.player);
-			break;
-		case CMD_IMM_FOLLOWSONG:		
-			if (workspace_followingsong(&self->workspace)) {
-				workspace_stopfollowsong(&self->workspace);
-			} else {
-				workspace_followsong(&self->workspace);
-			}
-			break;
-		case CMD_IMM_PATTERNINC:
-			workspace_patterninc(&self->workspace);
-			sequenceduration_update(&self->sequenceview.duration);
-			break;
-		case CMD_IMM_PATTERNDEC:
-			workspace_patterndec(&self->workspace);
-			sequenceduration_update(&self->sequenceview.duration);
-			break;
-		case CMD_IMM_SONGPOSDEC:
-			workspace_songposdec(&self->workspace);			
-			break;
-		case CMD_IMM_SONGPOSINC:
-			workspace_songposinc(&self->workspace);
-			break;
-		case CMD_IMM_INFOPATTERN:
-			if (workspace_currview(&self->workspace) != VIEW_ID_PATTERNVIEW) {
-				workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
-			}
-			if (!psy_ui_component_visible(&self->patternview.properties.component)) {
-				Tab* tab;
-				psy_ui_component_togglevisibility(&self->patternview.properties.component);
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		break; */}
+	case CMD_IMM_PLAYSTOP:
+		psy_audio_player_stop(&self->workspace.player);
+		break;
+	case CMD_IMM_FOLLOWSONG:		
+		if (workspace_followingsong(&self->workspace)) {
+			workspace_stopfollowsong(&self->workspace);
+		} else {
+			workspace_followsong(&self->workspace);
+		}
+		break;
+	case CMD_IMM_PATTERNINC:
+		workspace_patterninc(&self->workspace);
+		sequenceduration_update(&self->sequenceview.duration);
+		break;
+	case CMD_IMM_PATTERNDEC:
+		workspace_patterndec(&self->workspace);
+		sequenceduration_update(&self->sequenceview.duration);
+		break;
+	case CMD_IMM_SONGPOSDEC:
+		workspace_songposdec(&self->workspace);			
+		break;
+	case CMD_IMM_SONGPOSINC:
+		workspace_songposinc(&self->workspace);
+		break;
+	case CMD_IMM_INFOPATTERN:
+		if (workspace_currview(&self->workspace) != VIEW_ID_PATTERNVIEW) {
+			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
+		}
+		if (!psy_ui_component_visible(&self->patternview.properties.component)) {
+			Tab* tab;
+			psy_ui_component_togglevisibility(&self->patternview.properties.component);
 
-				tab = tabbar_tab(&self->patternview.tabbar, 5);
-				if (tab) {
-					tab->checkstate = TRUE;
-					psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
-				}				
-			}
-			psy_ui_component_setfocus(&self->patternview.properties.component);
-			break;
-		case CMD_IMM_MAXPATTERN:
-			mainframe_maximizeorminimizeview(self);
-			break;
-		case CMD_IMM_INFOMACHINE:
-			workspace_showparameters(&self->workspace,
-				psy_audio_machines_selected(&self->workspace.song->machines));
-			break;
-		case CMD_IMM_EDITINSTR:
-			workspace_selectview(&self->workspace, VIEW_ID_INSTRUMENTSVIEW, 0,
-				0);
-			break;
-		case CMD_IMM_EDITSAMPLE:
-			workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-			tabbar_select(&self->samplesview.clienttabbar, 0);
-			break;
-		case CMD_IMM_EDITWAVE:
-			workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-			tabbar_select(&self->samplesview.clienttabbar, 2);
-			break;
-		case CMD_IMM_TERMINAL:
-			mainframe_ontoggleterminal(self, mainframe_base(self));
-			break;
-		case CMD_IMM_INSTRDEC:
-			if (self->workspace.song) {
-				psy_audio_instruments_dec(&self->workspace.song->instruments);				
-			}
-			break;
-		case CMD_IMM_INSTRINC:
-			if (self->workspace.song) {
-				psy_audio_instruments_inc(&self->workspace.song->instruments);
-			}
-			break;
-		case CMD_IMM_SETTINGS:			
-			workspace_selectview(&self->workspace, VIEW_ID_SETTINGSVIEW, 0, 0);
-			break;
-		case CMD_IMM_ENABLEAUDIO: {
-			if (psycleconfig_audioenabled(workspace_conf(&self->workspace))) {
-				psycleconfig_enableaudio(workspace_conf(&self->workspace),
-					FALSE);
-			} else {
-				psycleconfig_enableaudio(workspace_conf(&self->workspace),
-					TRUE);
-			}
-			break; }
-		case CMD_IMM_LOADSONG:
-			if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-					workspace_songmodified(&self->workspace)) {				
-				workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
-			} else {
-				workspace_loadsong_fileselect(&self->workspace);				
-			}
-			break;
-		case CMD_IMM_SAVESONG:			
-			workspace_savesong_fileselect(&self->workspace);			
-			break;
-		case CMD_EDT_EDITQUANTIZEDEC:
-			workspace_editquantizechange(&self->workspace, -1);
-			patterncursorstepbox_update(&self->patternbar.cursorstep);
-			break;
-		case CMD_EDT_EDITQUANTIZEINC:
-			workspace_editquantizechange(&self->workspace, 1);
-			patterncursorstepbox_update(&self->patternbar.cursorstep);
-			break;
-		default:
-			break;
+			tab = tabbar_tab(&self->patternview.tabbar, 5);
+			if (tab) {
+				tab->checkstate = TRUE;
+				psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
+			}				
+		}
+		psy_ui_component_setfocus(&self->patternview.properties.component);
+		break;
+	case CMD_IMM_MAXPATTERN:
+		mainframe_maximizeorminimizeview(self);
+		break;
+	case CMD_IMM_INFOMACHINE:
+		workspace_showparameters(&self->workspace,
+			psy_audio_machines_selected(&self->workspace.song->machines));
+		break;
+	case CMD_IMM_EDITINSTR:
+		workspace_selectview(&self->workspace, VIEW_ID_INSTRUMENTSVIEW, 0,
+			0);
+		break;
+	case CMD_IMM_EDITSAMPLE:
+		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
+		tabbar_select(&self->samplesview.clienttabbar, 0);
+		break;
+	case CMD_IMM_EDITWAVE:
+		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
+		tabbar_select(&self->samplesview.clienttabbar, 2);
+		break;
+	case CMD_IMM_TERMINAL:
+		mainframe_ontoggleterminal(self, mainframe_base(self));
+		break;
+	case CMD_IMM_INSTRDEC:
+		if (self->workspace.song) {
+			psy_audio_instruments_dec(&self->workspace.song->instruments);				
+		}
+		break;
+	case CMD_IMM_INSTRINC:
+		if (self->workspace.song) {
+			psy_audio_instruments_inc(&self->workspace.song->instruments);
+		}
+		break;
+	case CMD_IMM_SETTINGS:			
+		workspace_selectview(&self->workspace, VIEW_ID_SETTINGSVIEW, 0, 0);
+		break;
+	case CMD_IMM_ENABLEAUDIO: {
+		if (psycleconfig_audioenabled(workspace_conf(&self->workspace))) {
+			psycleconfig_enableaudio(workspace_conf(&self->workspace),
+				FALSE);
+		} else {
+			psycleconfig_enableaudio(workspace_conf(&self->workspace),
+				TRUE);
+		}
+		break; }
+	case CMD_IMM_LOADSONG:
+		if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
+				workspace_songmodified(&self->workspace)) {				
+			workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
+		} else {
+			workspace_loadsong_fileselect(&self->workspace);				
+		}
+		break;
+	case CMD_IMM_SAVESONG:			
+		workspace_savesong_fileselect(&self->workspace);			
+		break;
+	case CMD_EDT_EDITQUANTIZEDEC:
+		workspace_editquantizechange(&self->workspace, -1);
+		patterncursorstepbox_update(&self->patternbar.cursorstep);
+		break;
+	case CMD_EDT_EDITQUANTIZEINC:
+		workspace_editquantizechange(&self->workspace, 1);
+		patterncursorstepbox_update(&self->patternbar.cursorstep);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -1118,36 +1138,36 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 				seqeditor_base(&self->seqeditor));
 		}
 		break;
-		case PROPERTY_ID_SHOWSTEPSEQUENCER:
-			if (psy_property_item_bool(property) != psy_ui_component_visible(
-					stepsequencerview_base(&self->stepsequencerview))) {
-				psy_ui_component_togglevisibility(
-					stepsequencerview_base(&self->stepsequencerview));
-			}			
-			break;
-		case PROPERTY_ID_SHOWPLAYLIST:
-			if (psy_property_item_bool(property) != psy_ui_component_visible(
-				recentview_base(&self->recentview))) {
-				psy_ui_component_togglevisibility(
-					recentview_base(&self->recentview));
-			}
-			break;
-		case PROPERTY_ID_TRACKSCOPES:
-			if (psy_property_item_bool(property) != psy_ui_component_visible(
-					trackscopeview_base(&self->trackscopeview))) {
-				psy_ui_component_togglevisibility(
-					trackscopeview_base(&self->trackscopeview));
-				psy_ui_component_align(mainframe_base(self));
-			}
-			if (psy_property_item_bool(property)) {				
-				trackscopeview_start(&self->trackscopeview);
-			} else {
-				trackscopeview_stop(&self->trackscopeview);
-			}
-			break;
-		default:
-			workspace_configurationchanged(&self->workspace, property);
-			break;
+	case PROPERTY_ID_SHOWSTEPSEQUENCER:
+		if (psy_property_item_bool(property) != psy_ui_component_visible(
+				stepsequencerview_base(&self->stepsequencerview))) {
+			psy_ui_component_togglevisibility(
+				stepsequencerview_base(&self->stepsequencerview));
+		}			
+		break;
+	case PROPERTY_ID_SHOWPLAYLIST:
+		if (psy_property_item_bool(property) != psy_ui_component_visible(
+			recentview_base(&self->recentview))) {
+			psy_ui_component_togglevisibility(
+				recentview_base(&self->recentview));
+		}
+		break;
+	case PROPERTY_ID_TRACKSCOPES:
+		if (psy_property_item_bool(property) != psy_ui_component_visible(
+				trackscopeview_base(&self->trackscopeview))) {
+			psy_ui_component_togglevisibility(
+				trackscopeview_base(&self->trackscopeview));
+			psy_ui_component_align(mainframe_base(self));
+		}
+		if (psy_property_item_bool(property)) {				
+			trackscopeview_start(&self->trackscopeview);
+		} else {
+			trackscopeview_stop(&self->trackscopeview);
+		}
+		break;
+	default:
+		workspace_configurationchanged(&self->workspace, property);
+		break;
 	}
 }
 
@@ -1281,9 +1301,7 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 				self->machineview.tabbar.style_tab_select.backgroundcolour =
 					self->machineview.skin.polycolour;
 				self->machineview.tabbar.style_tab_hover.colour =
-					self->machineview.skin.polycolour;
-				self->machineview.tabbar.style_tab_hover.backgroundcolour =
-					self->machineview.skin.polycolour;				
+					self->machineview.skin.polycolour;								
 				psy_ui_component_setbackgroundcolour(tabbar_base(&self->machineview.tabbar),
 					self->machineview.tabbar.style_tab.backgroundcolour);			
 				psy_ui_component_invalidate(tabbar_base(&self->machineview.tabbar));
@@ -1295,9 +1313,7 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 			self->patternview.tabbar.style_tab_select.backgroundcolour =
 				self->patternview.skin.selection;
 			self->patternview.tabbar.style_tab_hover.colour =
-				self->patternview.tabbar.style_tab_select.colour;
-			self->patternview.tabbar.style_tab_hover.backgroundcolour =
-				self->patternview.tabbar.style_tab_select.backgroundcolour;
+				self->patternview.tabbar.style_tab_select.colour;			
 			self->patternview.tabbar.style_tab_label.colour =
 				self->patternview.skin.font;
 			psy_ui_component_setbackgroundcolour(tabbar_base(&self->patternview.tabbar),

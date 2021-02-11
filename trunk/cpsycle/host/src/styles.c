@@ -7,8 +7,13 @@
 
 void initdarkstyles(psy_ui_Defaults* defaults)
 {
+	// Statusbar
 	psy_ui_Style* style;
-
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_make(0x00202020));	
+	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// sequencelistview item
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -97,12 +102,32 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00514536));
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_PROGRESS, style);
+	// machinebox
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_make(0x00202020));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make(0x282828));
+	psy_ui_defaults_setstyle(defaults, STYLE_MACHINEBOX, style);
+	// zoombox
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_make(0x00282828));	
+	psy_ui_defaults_setstyle(defaults, STYLE_ZOOMBOX, style);
 }
 
 void initlightstyles(psy_ui_Defaults* defaults)
 {
 	psy_ui_Style* style;	
 
+	// StatusBar	
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00474849));
+	psy_ui_colour_set(&style->backgroundcolour, psy_ui_colour_make(0x00F2F2F2));
+	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// sequencelistview item
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
@@ -132,7 +157,7 @@ void initlightstyles(psy_ui_Defaults* defaults)
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_SELECTED,
 		style);
 	// sequencetrackbox tab
-	style = psy_ui_style_allocinit();
+	style = psy_ui_style_allocinit();	
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_border_init(&style->border);
 	psy_ui_colour_set(&style->border.colour_left,
@@ -169,4 +194,22 @@ void initlightstyles(psy_ui_Defaults* defaults)
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x0979F7));
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_PROGRESS, style);
+	// machinebox
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_make(0x00E9E9E9));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make(0xb8d6ff));
+	psy_ui_defaults_setstyle(defaults, STYLE_MACHINEBOX, style);
+	// zoombox
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_make(0x00E9E9E9));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make(0xb8d6ff));
+	psy_ui_defaults_setstyle(defaults, STYLE_ZOOMBOX, style);
 }

@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,24 +13,31 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Germany) resources
+// Deutsch (Deutschland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDB_ABOUT               BITMAP  DISCARDABLE     "splash_screen.bmp"
-IDB_MACHINESKIN         BITMAP  DISCARDABLE     "machine_skin.bmp"
-IDB_HEADERSKIN          BITMAP  DISCARDABLE     "pattern_header_skin.bmp"
-IDB_PARAMKNOB           BITMAP  DISCARDABLE     "TbMainKnob.bmp"
-IDB_MIXERSKIN           BITMAP  DISCARDABLE     "mixer_skin.bmp"
+IDB_ABOUT               BITMAP                  "splash_screen.bmp"
+
+IDB_MACHINESKIN         BITMAP                  "machine_skin.bmp"
+
+IDB_HEADERSKIN          BITMAP                  "pattern_header_skin.bmp"
+
+IDB_PARAMKNOB           BITMAP                  "TbMainKnob.bmp"
+
+IDB_MIXERSKIN           BITMAP                  "mixer_skin.bmp"
+
+IDB_KBD                 BITMAP                  "kbd.bmp"
+
+IDB_TERM                BITMAP                  "term.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -38,18 +45,18 @@ IDB_MIXERSKIN           BITMAP  DISCARDABLE     "mixer_skin.bmp"
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
@@ -65,9 +72,11 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_PSYCLEICON          ICON    DISCARDABLE     "icon1.ico"
-IDI_MACPARAM            ICON    DISCARDABLE     "macparam.ico"
-#endif    // German (Germany) resources
+IDI_PSYCLEICON          ICON                    "icon1.ico"
+
+IDI_MACPARAM            ICON                    "macparam.ico"
+
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

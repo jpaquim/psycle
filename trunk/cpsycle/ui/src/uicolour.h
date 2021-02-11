@@ -23,6 +23,17 @@ INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 	self->value = 0x00000000;
 }
 
+INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
+{
+	self->mode.inherited = TRUE;
+	self->mode.set = TRUE;
+	self->mode.inherited = TRUE;
+	self->mode.set = TRUE;
+	self->value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
+}
+
+void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str);
+
 INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
 {
 	psy_ui_Colour rv;
@@ -30,6 +41,14 @@ INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
 	rv.mode.inherited = TRUE;
 	rv.mode.set = TRUE;
 	rv.value = value;
+	return rv;
+}
+
+INLINE psy_ui_Colour psy_ui_colour_make_notset(void)
+{
+	psy_ui_Colour rv;
+
+	psy_ui_colour_init(&rv);
 	return rv;
 }
 
