@@ -58,7 +58,7 @@ void samplerwavedatacontroller_init(SamplerWaveDataController* self)
 	self->_lVolDest = 0;
 	self->_rVolDest = 0;
 	self->_lVolCurr = 0;
-	self->_rVolCurr = 0;
+	self->_rVolCurr = 0;	
 	psy_dsp_multiresampler_init(&self->resampler,
 		psy_dsp_RESAMPLERQUALITY_LINEAR);
 	self->_pos.QuadPart = 0;
@@ -117,10 +117,10 @@ bool samplerwavedatacontroller_postwork(SamplerWaveDataController* self)
 
 	// Loop handler
 	//
-	if ((self->wave->loop.type == psy_audio_SAMPLE_LOOP_NORMAL)
-		&& (self->_pos.HighPart >= self->wave->loop.end))
+	if ((self->loop.type == psy_audio_SAMPLE_LOOP_NORMAL)
+		&& (self->_pos.HighPart >= self->loop.end))
 	{
-		self->_pos.HighPart -= (self->wave->loop.end - self->wave->loop.start);
+		self->_pos.HighPart -= (self->loop.end - self->loop.start);
 	}
 	return (self->_pos.HighPart < self->wave->numframes);
 }
@@ -813,13 +813,51 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 	}
 	if (pEntry->note < psy_audio_NOTECOMMANDS_RELEASE && !doporta)
 	{
-		psy_audio_Sample* sample;
+		psy_audio_Sample* sample;		
 		double speeddouble;
+		int16_t tune;
 
-		sample = psy_audio_samples_at(
-			psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-			sampleindex_make(self->instrument, 0));
-		self->controller.wave = sample;
+		if (!dooffset) { dooffset = TRUE; w_offset = 0; }
+
+		if (self->inst) {
+			psy_List* layer;
+
+			layer = psy_audio_instrument_entriesintersect(self->inst, pEntry->note, 127, 0.0);
+			if (layer) {
+				psy_audio_InstrumentEntry* zone;
+
+				zone = (psy_audio_InstrumentEntry*)layer->entry;
+				sample = psy_audio_samples_at(
+					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
+					zone->sampleindex);
+				self->controller.wave = sample;
+				if (zone->use_loop) {
+					self->controller.loop = zone->loop;
+					self->controller._pos.HighPart = zone->loop.start;
+					self->controller._pos.LowPart = 0;
+					dooffset = FALSE; // already set
+					if (zone->tune_set) {
+						tune = zone->tune;
+					} else {
+						tune = sample->tune;
+					}
+				} else {
+					self->controller.loop = sample->loop;
+					tune = sample->tune;
+				}
+			} else {
+				sample = psy_audio_samples_at(
+					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
+					sampleindex_make(self->instrument, 0));
+				self->controller.wave = sample;
+				self->controller.loop = sample->loop;
+				tune = sample->tune;
+			}
+		} else {
+			self->controller.wave = NULL;
+			return FALSE;
+		}
+		
 		psy_dsp_multiresampler_setquality(&self->controller.resampler,
 			self->sampler->resamplerquality);
 		if (self->inst->loop)
@@ -831,14 +869,14 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		} else
 		{
 			double finetune = sample->finetune * 0.01;
-			speeddouble = pow(2.0f, (pEntry->note + sample->tune - basec + finetune) / 12.0f) *
+			speeddouble = pow(2.0f, (pEntry->note + tune - basec + finetune) / 12.0f) *
 				(sample->samplerate / psy_audio_machine_samplerate(
 					psy_audio_sampler_base(self->sampler)));
 		}
 		self->controller._speed = (int64_t)(speeddouble * 4294967296.0f);
 		psy_dsp_resampler_setspeed(&self->controller.resampler.resampler, speeddouble);
 
-		if (!dooffset) { dooffset = TRUE; w_offset = 0; }
+		
 
 		// Init Amplitude Envelope
 		//		

@@ -463,6 +463,11 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->tabbars, &self->client);	
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->tabspacer, &self->client);
+	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
+	psy_ui_component_preventalign(&self->tabspacer);
+	psy_ui_component_setpreferredsize(&self->tabspacer,
+		psy_ui_size_makeem(0.0, 0.4));
 }
 
 void mainframe_initnavigation(MainFrame* self)

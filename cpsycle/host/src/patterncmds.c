@@ -5,9 +5,9 @@
 #include "../../detail/prefix.h"
 
 #include "patterncmds.h"
+#include "workspace.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <exclusivelock.h>
 #include <math.h>
 #include <assert.h>
 
@@ -310,6 +310,13 @@ void BlockRemoveCommandDispose(BlockRemoveCommand* self) { }
 
 void BlockRemoveCommandExecute(BlockRemoveCommand* self)
 {
+	bool isplaying;
+
+	psy_audio_exclusivelock_enter();
+	isplaying = psy_audio_player_playing(&self->workspace->player);		
+	if (isplaying) {
+		psy_audio_player_pause(&self->workspace->player);
+	}
 	if (!self->remove) {
 		psy_audio_pattern_init(&self->oldpattern);
 		psy_audio_pattern_copy(&self->oldpattern,
@@ -319,17 +326,29 @@ void BlockRemoveCommandExecute(BlockRemoveCommand* self)
 		self->selection.topleft,
 		self->selection.bottomright);
 	self->remove = TRUE;
-	//psy_audio_sequencer_checkiterators(
-		//&workspace_player(self->workspace).sequencer,
-		//node);	
+	if (isplaying) {
+		psy_audio_player_resume(&self->workspace->player);
+	}
+	psy_audio_exclusivelock_leave();
 }
 
 void BlockRemoveCommandRevert(BlockRemoveCommand* self)
 {
 	if (self->remove) {
+		bool isplaying;
+
+		psy_audio_exclusivelock_enter();
+		isplaying = psy_audio_player_playing(&self->workspace->player);
+		if (isplaying) {
+			psy_audio_player_pause(&self->workspace->player);
+		}
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 		psy_audio_pattern_dispose(&self->oldpattern);
 		self->remove = 0;
+		if (isplaying) {
+			psy_audio_player_resume(&self->workspace->player);
+		}
+		psy_audio_exclusivelock_leave();
 	}
 }
 

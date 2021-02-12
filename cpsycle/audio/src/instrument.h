@@ -65,9 +65,14 @@ typedef struct {
 	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
 	psy_audio_ParameterRange velocityrange;	
+	psy_audio_SampleLoop loop;
+	int16_t tune;
+	bool tune_set;
+
 	bool use_keyrange;
 	bool use_velrange;
-	bool use_freqrange;
+	bool use_freqrange;	
+	bool use_loop;	
 } psy_audio_InstrumentEntry;
 
 void psy_audio_instrumententry_init(psy_audio_InstrumentEntry*);

@@ -313,6 +313,9 @@
     <ClCompile Include="src\machinescmds.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\exs24loader.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -599,6 +602,9 @@
     </ClInclude>
     <ClInclude Include="src\machinescmds.h">
       <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exs24loader.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

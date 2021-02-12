@@ -78,6 +78,7 @@ typedef struct SamplerWaveDataController
 	float _lVolCurr;
 	float _rVolCurr;
 	psy_dsp_MultiResampler resampler;
+	psy_audio_SampleLoop loop;
 } SamplerWaveDataController;
 
 void samplerwavedatacontroller_init(SamplerWaveDataController*);

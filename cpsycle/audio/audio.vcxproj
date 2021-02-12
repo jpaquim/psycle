@@ -250,6 +250,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\exs24loader.c" />
     <ClCompile Include="src\fileoutdriver.c" />
     <ClCompile Include="src\instrument.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
@@ -417,6 +418,7 @@
     <ClInclude Include="src\duplicatormap.h" />
     <ClInclude Include="src\eventdrivers.h" />
     <ClInclude Include="src\exclusivelock.h" />
+    <ClInclude Include="src\exs24loader.h" />
     <ClInclude Include="src\fileoutdriver.h" />
     <ClInclude Include="src\instrument.h" />
     <ClInclude Include="src\instruments.h" />

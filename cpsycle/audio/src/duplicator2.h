@@ -5,14 +5,17 @@
 #define psy_audio_DUPLICATOR2_H
 
 #include "custommachine.h"
+// local
 #include "duplicatormap.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-	psy_audio_CustomMachine custommachine;	
+typedef struct psy_audio_Duplicator2 {
+	// inherits
+	psy_audio_CustomMachine custommachine;
+	// internal
 	psy_audio_DuplicatorMap map;
 	int isticking;
 	psy_Table parameters;

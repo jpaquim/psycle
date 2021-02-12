@@ -11,8 +11,10 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_audio_Duplicator {
+	// inherits
 	psy_audio_CustomMachine custommachine;
+	// internal
 	int isticking;
 	psy_audio_DuplicatorMap map;
 	psy_Table parameters;
