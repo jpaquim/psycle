@@ -434,9 +434,10 @@ void mainframe_initbars(MainFrame* self)
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);
-	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace);
+	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace);			
+	metronomebar_init(&self->metronomebar, &self->toprow0, &self->workspace);
 	margin.right = psy_ui_value_makepx(0);
-	psy_ui_component_setmargin(playposbar_base(&self->playposbar), &margin);
+	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), &margin);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->top);
 	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
@@ -484,17 +485,23 @@ void mainframe_initnavigation(MainFrame* self)
 void mainframe_initmaintabbar(MainFrame* self)
 {
 	psy_ui_Margin margin;
+	Tab* tab;
 
 	tabbar_init(&self->tabbar, &self->tabbars);		
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
-	tabbar_append_tabs(&self->tabbar, "main.machines", "main.patterns",
-		"main.samples", "main.instruments", "main.properties", NULL);	
-	tabbar_append(&self->tabbar, "main.settings")->margin.left =
-		psy_ui_value_makeew(4.0);
-	tabbar_append(&self->tabbar, "main.help")->margin.right =
-		psy_ui_value_makeew(4.0);
+	tabbar_append(&self->tabbar, "main.machines");
+	tab = tabbar_append(&self->tabbar, "main.patterns");	
+	tabbar_append(&self->tabbar, "main.samples");
+	tabbar_append(&self->tabbar, "main.instruments");
+	tabbar_append(&self->tabbar, "main.properties");		
+	tab = tabbar_append(&self->tabbar, "main.settings");
+	tab->margin.left = psy_ui_value_makeew(4.0);
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_CONF_GENERAL);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
+	tab = tabbar_append(&self->tabbar, "main.help");
+	tab->margin.right = psy_ui_value_makeew(4.0);	
 	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->tabbar.component, &margin);

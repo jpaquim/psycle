@@ -34,6 +34,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "record-notes", "Record Notes");
 	psy_property_set_str(section, "play", "Play");
 	psy_property_set_str(section, "stop", "Stop");
+	// metronomebar
+	section = psy_property_append_section(lang, "metronome");
+	psy_property_set_str(section, "metronome", "Metronome");
+	psy_property_set_str(section, "precount", "Precount");	
 	// mainview
 	section = psy_property_append_section(lang, "main");
 	psy_property_set_str(section, "machines", "Machines");

@@ -213,6 +213,8 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->extraticks = 0;
 	self->tpb = 24;
 	self->playtrack = psy_INDEX_INVALID;
+	self->metronome = FALSE;
+	self->precount = 0;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -644,11 +646,35 @@ int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer* self) {
 }
 
 void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
-{	
+{
 	bool continueplaying = FALSE;
 	bool work = TRUE;
 
 	assert(self);
+
+	if (self->metronome) {
+		uintptr_t start;
+		uintptr_t end;
+		uintptr_t i;
+
+		start = (uintptr_t)floor(self->seqtime.position);
+		end = (uintptr_t)floor(self->seqtime.position + self->window);
+		for (i = start; i <= end; ++i) {
+			if (psy_audio_sequencer_isoffsetinwindow(self, (double)i)) {
+				psy_audio_PatternEntry* entry;
+				psy_audio_PatternEvent* ev;
+
+				entry = psy_audio_patternentry_allocinit();
+				entry->bpm = self->seqtime.bpm;
+				entry->track = METRONOME_TRACK;
+				entry->delta = (double)i - self->seqtime.position;
+				ev = psy_audio_patternentry_front(entry);
+				ev->note = 0x48;
+				ev->mach = 0x3F;
+				psy_list_append(&self->events, entry);
+			}
+		}		
+	}
 
 	while (work) {
 		psy_List* p;
@@ -908,7 +934,7 @@ void psy_audio_sequencer_append(psy_audio_Sequencer* self, psy_List* events)
 
 		entry = psy_audio_patternnode_entry(p);
 		entry->delta += self->seqtime.position;
-		psy_list_append(&self->delayedevents, entry);		
+		psy_list_append(&self->delayedevents, entry);
 	}
 }
 
@@ -983,7 +1009,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			newev->mach = psy_audio_MASTER_INDEX;
 			psy_audio_patternentry_setbpm(entry, self->seqtime.bpm);
 			entry->delta = offset - self->seqtime.position;
-			psy_list_append(&self->events, entry);		
+			psy_list_append(&self->events, entry);	
 		}		
 	} else if (ev->note == psy_audio_NOTECOMMANDS_TWEAK) {
 		psy_audio_sequencer_tweak(self, patternentry, track->channeloffset,

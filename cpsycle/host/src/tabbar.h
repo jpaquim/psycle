@@ -37,11 +37,13 @@ typedef struct Tab {
 	bool istoggle;	
 	TabCheckState checkstate;
 	psy_ui_RealPoint position;
+	psy_ui_Bitmap icon;
 } Tab;
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
 void tab_settext(Tab*, const char* text);
 psy_ui_RealRectangle tab_position(const Tab*, const psy_ui_TextMetric*);
+psy_ui_Size tab_preferredsize(Tab*, psy_ui_Component* base);
 
 typedef struct TabBarSkin {
 	psy_ui_Colour text;			
@@ -76,6 +78,7 @@ void tabbar_append_tabs(TabBar*, const char* label, ...);
 void tabbar_clear(TabBar*);
 void tabbar_rename_tabs(TabBar*, const char* label, ...);
 void tabbar_select(TabBar*, uintptr_t tabindex);
+void tabbar_updatealign(TabBar*);
 
 INLINE uintptr_t tabbar_selected(const TabBar* self)
 {	

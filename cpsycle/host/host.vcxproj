@@ -338,6 +338,7 @@
     <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\machinewireview.c" />
     <ClCompile Include="src\mainframe.c" />
+    <ClCompile Include="src\metronomebar.c" />
     <ClCompile Include="src\midimonitor.c" />
     <ClCompile Include="src\midiviewconfig.c" />
     <ClCompile Include="src\navigation.c" />
@@ -469,6 +470,7 @@
     <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\machinewireview.h" />
     <ClInclude Include="src\mainframe.h" />
+    <ClInclude Include="src\metronomebar.h" />
     <ClInclude Include="src\midimonitor.h" />
     <ClInclude Include="src\midiviewconfig.h" />
     <ClInclude Include="src\navigation.h" />
@@ -536,11 +538,14 @@
     <ClInclude Include="src\zoombox.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="src\resources\conf-general.bmp" />
+    <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
     <Image Include="src\resources\kbd.bmp" />
     <Image Include="src\resources\machine_skin.bmp" />
     <Image Include="src\resources\macparam.ico" />
     <Image Include="src\resources\mixer_skin.bmp" />
+    <Image Include="src\resources\pattern-editor.bmp" />
     <Image Include="src\resources\pattern_header_skin.bmp" />
     <Image Include="src\resources\Project3.ico" />
     <Image Include="src\resources\splash_screen.bmp" />
