@@ -294,7 +294,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 				}
 			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
-				(self->song)
+				(self->song && !self->sequencer.metronome)
 				? psy_audio_song_numsongtracks(self->song)
 				: MAX_TRACKS);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),

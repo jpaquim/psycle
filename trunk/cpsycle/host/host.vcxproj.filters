@@ -394,6 +394,9 @@
     <ClCompile Include="src\machineviewbar.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\metronomebar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -764,6 +767,9 @@
     <ClInclude Include="src\machineviewbar.h">
       <Filter>machine</Filter>
     </ClInclude>
+    <ClInclude Include="src\metronomebar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\resources\icon1.ico" />
@@ -776,5 +782,8 @@
     <Image Include="src\resources\TbMainKnob.bmp" />
     <Image Include="src\resources\kbd.bmp" />
     <Image Include="src\resources\term.bmp" />
+    <Image Include="src\resources\conf-general.bmp" />
+    <Image Include="src\resources\pattern-editor.bmp" />
+    <Image Include="src\resources\help.bmp" />
   </ItemGroup>
 </Project>

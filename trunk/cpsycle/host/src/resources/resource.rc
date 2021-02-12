@@ -38,6 +38,12 @@ IDB_KBD                 BITMAP                  "kbd.bmp"
 
 IDB_TERM                BITMAP                  "term.bmp"
 
+IDB_CONF_GENERAL        BITMAP                  "conf-general.bmp"
+
+IDB_PATTERNEDITOR       BITMAP                  "pattern-editor.bmp"
+
+IDB_HELP                BITMAP                  "help.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

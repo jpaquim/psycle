@@ -23,6 +23,7 @@
 #include "machineview.h"
 #include "machineviewbar.h"
 #include "machinedock.h"
+#include "metronomebar.h"
 #include "midimonitor.h"
 #include "navigation.h"
 #include "playbar.h"
@@ -101,6 +102,7 @@ typedef struct MainFrame {
 	MachineBar machinebar;
 	SongBar songbar;
 	PlayBar playbar;
+	MetronomeBar metronomebar;
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;

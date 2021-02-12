@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#define METRONOME_TRACK 65535
+
 typedef struct psy_audio_SequencerTime {
 	// current play position in frames
 	psy_dsp_frame_t playcounter;
@@ -119,6 +121,9 @@ typedef struct {
 	uintptr_t playtrack;	
 	psy_audio_PatternNode** qsortarray;
 	uintptr_t qsortarraysize;
+	// metronome
+	bool metronome;
+	uintptr_t precount;
 	// references
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;
