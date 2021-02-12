@@ -13,13 +13,14 @@
 #include <string.h>
 #include <stdlib.h> 
 
-void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
+int psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 {
 	char header[9];
-	PsyFile file;	
+	PsyFile file;
+	int status;
 	
 	if (!psyfile_open(&file, path)) {		
-		return;
+		return PSY_ERRFILE;
 	}	
 	psyfile_read(&file, header, 4);
 	header[4] = 0;		
@@ -31,6 +32,10 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 		psyfile_read(&file, &chunksize, sizeof(chunksize));
 		psyfile_read(&file, header, 8);
 		header[8] = 0;
+		if (strcmp(&header[0], "WAVEJUNK") == 0) {
+			psyfile_read(&file, &chunksize, sizeof(chunksize));
+				psyfile_skip(&file, chunksize);
+		}
 		if (strcmp(&header[0], "WAVEfmt ") == 0) {
 			psy_audio_WaveFormatChunk format;			
 			psyfile_read(&file, &pcmsize, sizeof(pcmsize));
@@ -46,7 +51,12 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 			psy_audio_sample_resize(sample, format.nChannels);
 			psyfile_seek(&file, pcmbegin + pcmsize);
 			psyfile_read(&file, header, 4);
-			header[4] = 0;			
+			header[4] = 0;
+			if (strcmp(&header[0], "JUNK") == 0) {
+				psyfile_read(&file, &chunksize, sizeof(chunksize));
+				psyfile_skip(&file, chunksize);
+				psyfile_read(&file, header, 4);
+			}
 			if (strcmp(&header[0], "data") == 0) {
 				int numsamples;
 				unsigned int frame;
@@ -57,7 +67,7 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 				int32_t frame32;
 				psyfile_read(&file, &numsamples, 4);
 				sample->numframes = numsamples / 
-					format.nChannels / (format.wBitsPerSample / 8);
+					format.nChannels / (format.wBitsPerSample / 8);				
 				sample->stereo = (format.nChannels == 2);
 				psy_audio_sample_allocwavedata(sample);				
 				for (frame = 0; frame < sample->numframes; ++frame) {
@@ -101,6 +111,7 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 		}
 	}
 	psyfile_close(&file);
+	return PSY_OK;
 }
 
 void psy_audio_wave_save(psy_audio_Sample* sample, const char* path)

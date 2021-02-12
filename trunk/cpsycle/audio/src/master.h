@@ -12,11 +12,11 @@ extern "C" {
 
 // psy_audio_Master
 // 
-// Aim: root node of Machines and mini mixer. Any machine that wants to produce
-//      sound must be connected to the master. The player copies the output
-//      buffer of the master to the current audio driver buffer. The master
-//      handles global volume changes redirected by the Sequencer and the
-// 	    connected input wires can be tweaked
+// root node of Machines and mini mixer. Any machine that wants to produce
+// sound must be connected to the master. The player copies the output
+// buffer of the master to the current audio driver buffer. The master
+// handles global volume changes redirected by the Sequencer and the
+// connected input wires can be tweaked
 //
 // Structure:
 //      psy_audio_Machine

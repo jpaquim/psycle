@@ -586,6 +586,27 @@ void psy_audio_player_stop(psy_audio_Player* self)
 	psy_audio_exclusivelock_leave();
 }
 
+void psy_audio_player_pause(psy_audio_Player* self)
+{
+	assert(self);
+
+	psy_audio_exclusivelock_enter();
+	psy_audio_sequencer_stop(&self->sequencer);	
+	psy_audio_exclusivelock_leave();
+}
+
+void psy_audio_player_resume(psy_audio_Player* self)
+{
+	assert(self);
+
+	psy_audio_exclusivelock_enter();
+	// forces to regenerate trackiterators
+	psy_audio_sequencer_setposition(&self->sequencer,
+		psy_audio_sequencer_position(&self->sequencer));
+	psy_audio_sequencer_start(&self->sequencer);
+	psy_audio_exclusivelock_leave();
+}
+
 void psy_audio_player_dostop(psy_audio_Player* self)
 {
 	assert(self);

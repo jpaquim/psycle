@@ -4,26 +4,27 @@
 #include "../../detail/prefix.h"
 
 #include "songio.h"
-
+// local
+#include "exs24loader.h"
+#include "itmodule2.h"
+#include "machinefactory.h"
 #include "midiloader.h"
+#include "midisongexport.h"
 #include "psy3loader.h"
 #include "psy3saver.h"
 #include "psy2.h"
 #include "song.h"
-#include "machinefactory.h"
-#include "midisongexport.h"
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
 #include "xmsongexport.h"
 #include "xmsongloader.h"
-#include "itmodule2.h"
+// platform
+#include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__POSIX
 #include <errno.h>
 #endif
-
-#include "../../detail/portable.h"
 
 // song/module filter
 static char load_filters[] =
@@ -37,7 +38,7 @@ static char load_filters[] =
 "Midi Standard Songs (*.mid)"	    "|*.mid|";
 static const char save_filters[] = "Songs (*.psy)|*.psy";
 // instrument filter
-static const char instloadfilter[] = "All Instruments and samples|*.psins;*.xi;*.iti;*.wav;*.aif;*.aiff;*.its;*.s3i;*.8svx;*.16sv;*.svx;*.iff|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff|All files (*.*)|*.*||";
+static const char instloadfilter[] = "All Instruments and samples|*.psins;*.xi;*.iti;*.wav;*.aif;*.aiff;*.its;*.s3i;*.8svx;*.16sv;*.svx;*.iff;*.exs|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff;*.exs|All files (*.*)|*.*||";
 static const char instsavefilter[] = "Instrument (*.psins)|*.psins";
 
 void psy_audio_songfile_init(psy_audio_SongFile* self)
@@ -301,6 +302,14 @@ int psy_audio_songfile_loadinstrument(psy_audio_SongFile* self, const char* file
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_psy3loader_dispose(&psy3songloader);
+	} else if (strcmp(psy_path_ext(&path), "exs") == 0) {
+		psy_audio_EXS24Loader instloader;
+
+		psy_audio_exs24loader_init(&instloader, self);
+		if (status = psy_audio_exs24loader_load(&instloader)) {
+			psy_audio_songfile_errfile(self);
+		}
+		psy_audio_exs24loader_dispose(&instloader);
 	}
 	return status;
 }

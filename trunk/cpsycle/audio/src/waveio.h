@@ -47,7 +47,7 @@ INLINE void psy_audio_waveformatchunk_config(psy_audio_WaveFormatChunk* self,
 
 struct psy_audio_Sample;
 
-void psy_audio_wave_load(struct psy_audio_Sample*, const char* path);
+int psy_audio_wave_load(struct psy_audio_Sample*, const char* path);
 void psy_audio_wave_save(struct psy_audio_Sample*, const char* path);
 
 #ifdef __cplusplus

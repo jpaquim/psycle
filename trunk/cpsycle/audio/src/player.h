@@ -90,6 +90,9 @@ void psy_audio_player_setdither(psy_audio_Player*, uintptr_t depth,
 // sequencer
 void psy_audio_player_start(psy_audio_Player*);
 void psy_audio_player_stop(psy_audio_Player*);
+void psy_audio_player_pause(psy_audio_Player*);
+void psy_audio_player_resume(psy_audio_Player*);
+
 
 INLINE int psy_audio_player_playing(psy_audio_Player* self)
 {

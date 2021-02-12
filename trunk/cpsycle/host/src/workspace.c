@@ -280,8 +280,6 @@ void workspace_clearsequencepaste(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	psy_Property* cmds;
-
 	assert(self);
 
 #ifdef DIVERSALIS__OS__MICROSOFT
@@ -293,10 +291,9 @@ void workspace_initplayer(Workspace* self)
 #endif
 #else
 	psy_audio_player_init(&self->player, self->song, 0);
-#endif		
-	cmds = cmdproperties_create();	
-	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers, cmds);
-	psy_property_deallocate(cmds);
+#endif				
+	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
+		cmdproperties_create());
 	workspace_initaudio(self);
 }
 
@@ -550,12 +547,8 @@ void workspace_onaddeventdriver(Workspace* self)
 
 			driver = psy_audio_player_loadeventdriver(&self->player,
 				psy_property_item_str(choice));
-			if (driver) {
-				psy_Property* cmds;
-
-				cmds = cmdproperties_create();		
-				psy_eventdriver_setcmddef(driver, cmds);
-				psy_property_deallocate(cmds);
+			if (driver) {					
+				psy_eventdriver_setcmddef(driver, self->player.eventdrivers.cmds);
 			}
 			eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 			activedrivers = psy_property_at(self->config.input.eventinputs, "activedrivers",

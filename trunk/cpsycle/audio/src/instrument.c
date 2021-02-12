@@ -43,6 +43,9 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 	self->use_keyrange = TRUE;
 	self->use_velrange = FALSE;
 	self->use_freqrange = FALSE;
+	self->use_loop = FALSE;	
+	self->tune = 0;
+	self->tune_set = FALSE;	
 }
 
 psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void)

@@ -180,6 +180,7 @@ psy_audio_Buffer* buffermemory(psy_audio_VirtualGenerator* self)
 
 	// delegate the buffermemory from the real machine that the scopes
 	// display it
+	// todo delegate channel voice buffer of inst selected
 	machines = psy_audio_machine_machines(&self->custommachine.machine);
 	if (machines) {
 		psy_audio_Machine* sampler;
@@ -189,6 +190,7 @@ psy_audio_Buffer* buffermemory(psy_audio_VirtualGenerator* self)
 			return psy_audio_machine_buffermemory(sampler);
 		}
 	}
+	// fallback to own buffermemory if sampler machine is not valid
 	return super_vtable.buffermemory(&self->custommachine.machine);
 }
 
@@ -205,6 +207,7 @@ uintptr_t buffermemorysize(psy_audio_VirtualGenerator* self)
 			return psy_audio_machine_buffermemorysize(sampler);
 		}
 	}
+	// fallback to own buffermemory if sampler machine is not valid
 	return super_vtable.buffermemorysize(&self->custommachine.machine);
 }
 
@@ -221,5 +224,6 @@ void setbuffermemorysize(psy_audio_VirtualGenerator* self, uintptr_t size)
 			psy_audio_machine_setbuffermemorysize(sampler, size);
 		}
 	}
+	// fallback to own buffermemory if sampler machine is not valid
 	super_vtable.setbuffermemorysize(&self->custommachine.machine, size);
 }

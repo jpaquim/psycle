@@ -652,6 +652,7 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			psy_audio_songfile_init(&songfile);
 			songfile.song = workspace_song(self->workspace);
 			songfile.file = &file;
+			songfile.path = psy_strdup(psy_path_full(psy_ui_opendialog_path(&dialog)));
 			if (psyfile_open(&file, psy_path_full(psy_ui_opendialog_path(&dialog)))) {
 				psy_audio_songfile_loadinstrument(&songfile,
 					psy_path_full(psy_ui_opendialog_path(&dialog)),
