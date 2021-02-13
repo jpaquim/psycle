@@ -438,7 +438,7 @@ void psy_ui_componentimp_init(psy_ui_ComponentImp*);
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
-{
+{	
 	self->imp->vtable->dev_invalidate(self->imp);
 }
 

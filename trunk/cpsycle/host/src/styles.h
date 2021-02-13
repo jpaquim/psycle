@@ -8,23 +8,36 @@
 extern "C" {
 #endif
 	
-#define STYLE_SEQ_TAB              100
-#define STYLE_SEQ_TAB_HOVER        101
-#define STYLE_SEQ_TAB_SELECT       102
-#define STYLE_SEQ_TAB_NEW		   103
-#define STYLE_SEQ_PROGRESS         104
-#define STYLE_SEQEDT_ITEM          120
-#define STYLE_SEQEDT_ITEM_SELECTED 121
-#define STYLE_SEQEDT_EVENT         122
-#define STYLE_SEQLISTVIEW          140
-#define STYLE_STATUSBAR            160
-#define STYLE_MACHINEBOX           180
-#define STYLE_ZOOMBOX              200
+#define STYLE_SEQ_TAB               100
+#define STYLE_SEQ_TAB_HOVER         101
+#define STYLE_SEQ_TAB_SELECT        102
+#define STYLE_SEQ_TAB_NEW		    103
+#define STYLE_SEQ_PROGRESS          104
+#define STYLE_SEQEDT			    120
+#define STYLE_SEQEDT_ITEM           130
+#define STYLE_SEQEDT_ITEM_SELECTED  131
+#define STYLE_SEQEDT_EVENT          132
+#define STYLE_SEQLISTVIEW           140
+#define STYLE_SEQVIEW_BUTTONS       160
+#define STYLE_SEQVIEW_BUTTON        180
+#define STYLE_SEQVIEW_BUTTON_HOVER  181
+#define STYLE_SEQVIEW_BUTTON_SELECT 182
+#define STYLE_STATUSBAR             200
+#define STYLE_MACHINEBOX            220
+#define STYLE_ZOOMBOX               240
+#define STYLE_MACHINEVIEW           260
+#define STYLE_STEPSEQUENCER         280
+#define STYLE_TOP                   320
+#define STYLE_TOPROWS               360
+#define STYLE_TOPROW0               400
+#define STYLE_TOPROW1               440
+#define STYLE_TOPROW2               480
+#define STYLE_TRACKSCOPES           500
 
 struct psy_ui_Defaults;
 
-void initlightstyles(struct psy_ui_Defaults*);
 void initdarkstyles(struct psy_ui_Defaults*);
+void initlightstyles(struct psy_ui_Defaults*);
 
 #ifdef __cplusplus
 }

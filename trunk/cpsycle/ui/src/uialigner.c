@@ -111,10 +111,12 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 								c_tm)));
 			} else if (component->align == psy_ui_ALIGN_TOP) {
 				cp_topleft.y += floor(psy_ui_value_px(&component->margin.top, c_tm));
+				cp_topleft.y += floor(psy_ui_value_px(&self->component->spacing.top, c_tm));
 				psy_ui_component_setposition(component, 
 					psy_ui_point_make(
 						psy_ui_value_makepx(cp_topleft.x + floor(psy_ui_value_px(
-							&component->margin.left, c_tm))),
+							&component->margin.left, c_tm)) +
+							floor(psy_ui_value_px(&self->component->spacing.left, c_tm))),
 						psy_ui_value_makepx(cp_topleft.y)),
 					psy_ui_size_make(
 						psy_ui_value_makepx(cp_bottomright.x - cp_topleft.x -
@@ -333,9 +335,11 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 		psy_ui_Size size;
 		const psy_ui_TextMetric* tm;
 		psy_ui_Component* client = 0;
+		psy_ui_Margin border;
 
 		size = *rv;
 		tm = psy_ui_component_textmetric(self->component);
+		border = psy_ui_component_bordermargin(self->component);
 		if (self->component->alignchildren &&
 				!self->component->preventpreferredsize) {
 			psy_List* p;
@@ -463,16 +467,20 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 			}
 			*rv = maxsize;			
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&rv->width, tm) +
-				psy_ui_margin_width_px(&self->component->spacing, tm));
+				psy_ui_margin_width_px(&self->component->spacing, tm) +
+				psy_ui_margin_width_px(&border, tm));
 			rv->height = psy_ui_value_makepx(psy_ui_value_px(&rv->height, tm) +
-				psy_ui_margin_height_px(&self->component->spacing, tm));
+				psy_ui_margin_height_px(&self->component->spacing, tm) +
+				psy_ui_margin_height_px(&border, tm));
 			psy_list_free(q);				
 		} else {
 			*rv = size;
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&rv->width, tm) +
-				psy_ui_margin_width_px(&self->component->spacing, tm));
+				psy_ui_margin_width_px(&self->component->spacing, tm) +
+				psy_ui_margin_height_px(&border, tm));
 			rv->height = psy_ui_value_makepx(psy_ui_value_px(&rv->height, tm) +
-				psy_ui_margin_height_px(&self->component->spacing, tm));
+				psy_ui_margin_width_px(&self->component->spacing, tm) +
+				psy_ui_margin_height_px(&border, tm));
 		}
 	}	
 }

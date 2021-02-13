@@ -35,7 +35,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "play", "Play");
 	psy_property_set_str(section, "stop", "Stop");
 	// metronomebar
-	section = psy_property_append_section(lang, "metronome");
+	section = psy_property_append_section(lang, "metronome");	
+	psy_property_set_str(section, "configure", "(Configure)");
 	psy_property_set_str(section, "metronome", "Metronome");
 	psy_property_set_str(section, "precount", "Precount");	
 	// mainview
@@ -149,6 +150,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "vram", "Virtual Memory");
 	// settingsview
 	section = psy_property_append_section(lang, "settingsview");
+	// Metronome	
+	psy_property_set_str(section, "metronome", "Metronome");
 	psy_property_set_str(section, "general", "General");
 	psy_property_set_str(section, "visual", "Visual");
 	psy_property_set_str(section, "machineview", "Machine View");
@@ -196,6 +199,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "de", "german");
 	psy_property_set_str(section, "en", "english");
 	psy_property_set_str(section, "es", "spanish");
+	// settingsview/metronome
+	psy_property_set_str(section, "metronome-show", "Show Metronome Bar");	
+	psy_property_set_str(section, "metronome-machine", "Machine");	
+	psy_property_set_str(section, "metronome-note", "Note");	
 	// settingsview/directories
 	psy_property_set_str(section,
 		"directories", "Directories");
@@ -397,7 +404,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"multichannel-audition", "Multitrack playback on keypress");
 	psy_property_set_str(section, "duration", "Duration");
-	psy_property_set_str(section, "ins", "Insert");
+	psy_property_set_str(section, "ins", "Ins");
 	psy_property_set_str(section, "new", "New");
 	psy_property_set_str(section, "clone", "Clone");
 	psy_property_set_str(section, "del", "Delete");
@@ -447,7 +454,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "process", "Process");
 	psy_property_set_str(section, "no-wave-loaded", "No wave loaded");	
 	section = psy_property_append_section(lang, "cmds");
-	psy_property_set_str(section, "keymap", "Keymap");
+	psy_property_set_str(section, "keymap", "Keymap");	
 	// General
 	psy_property_set_str(section, "help", "Help");
 	psy_property_set_str(section, "helpshortcut", "Kbd Help");

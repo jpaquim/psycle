@@ -397,6 +397,9 @@
     <ClCompile Include="src\metronomebar.c">
       <Filter>toolbars</Filter>
     </ClCompile>
+    <ClCompile Include="src\metronomeconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -769,6 +772,9 @@
     </ClInclude>
     <ClInclude Include="src\metronomebar.h">
       <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metronomeconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

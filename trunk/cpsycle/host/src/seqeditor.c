@@ -1540,6 +1540,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent);
 	seqeditor_vtable_init(self);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_SEQEDT, STYLE_SEQEDT, STYLE_SEQEDT);
 	self->component.vtable = &seqeditor_vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	seqeditortrackstate_init(&self->trackstate);

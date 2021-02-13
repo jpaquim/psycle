@@ -385,7 +385,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				break;
 			case WM_PAINT: {
 				psy_ui_Border border;
-
+				
 				border = psy_ui_component_border(imp->component);
 				if (imp->component->vtable->ondraw ||
 					imp->component->signal_draw.slots ||
@@ -394,7 +394,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					HDC hdc;
 					POINT clipsize;
 					PAINTSTRUCT ps;
-
+					
 					hdc = BeginPaint(hwnd, &ps);
 					// store clip/repaint size of paint request
 					clipsize.x = ps.rcPaint.right - ps.rcPaint.left;
@@ -449,7 +449,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							ps.rcPaint.left, ps.rcPaint.top,
 							clipsize.x, clipsize.y);
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
+						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {							
 							psy_ui_component_drawbackground(imp->component, &g);
 						}
 						psy_ui_component_drawborder(imp->component, &g);
@@ -465,7 +465,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						origin.y += (int)psy_ui_value_px(&imp->component->scroll.y, tm);
 						// set translation
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						// sub spacing
+						// spacing
 						if (!psy_ui_margin_iszero(&imp->component->spacing)) {
 							tm = psy_ui_component_textmetric(imp->component);
 

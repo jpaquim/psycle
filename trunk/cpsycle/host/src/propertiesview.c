@@ -968,7 +968,8 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 		} else {
 			psy_ui_keyevent_preventdefault(ev);
 		}
-	}	
+	}
+	psy_ui_keyevent_stoppropagation(ev);
 }
 
 void propertiesrenderer_onalign(PropertiesRenderer* self, psy_ui_Component*

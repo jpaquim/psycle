@@ -1215,9 +1215,9 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_size_make(b.border_bottom_left_radius,
 					b.border_bottom_left_radius),
 				psy_ui_component_backgroundcolour(self));
-		} else {
+		} else {			
 			psy_ui_drawsolidrectangle(g, g->clip,
-				psy_ui_component_backgroundcolour(self));
+				psy_ui_component_backgroundcolour(self));			
 		}
 	}
 }

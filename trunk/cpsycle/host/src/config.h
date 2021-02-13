@@ -16,6 +16,7 @@ extern "C" {
 #include "dirconfig.h"
 #include "machineviewconfig.h"
 #include "machineparamconfig.h"
+#include "metronomeconfig.h"
 #include "midiviewconfig.h"
 #include "patternviewconfig.h"
 #include "compatconfig.h"
@@ -43,6 +44,7 @@ typedef struct PsycleConfig {
 	PatternViewConfig patview;
 	MachineViewConfig macview;
 	MachineParamConfig macparam;
+	MetronomeConfig metronome;
 	KeyboardMiscConfig misc;
 	MidiViewConfig midi;
 	CompatConfig compat;

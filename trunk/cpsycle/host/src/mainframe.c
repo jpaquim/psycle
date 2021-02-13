@@ -251,7 +251,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 void mainframe_inittoparea(MainFrame* self)
 {	
 	psy_ui_component_init_align(&self->top, mainframe_base(self),
-		psy_ui_ALIGN_TOP);
+		psy_ui_ALIGN_TOP);	
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
@@ -281,8 +281,7 @@ void mainframe_initterminal(MainFrame* self)
 		psy_ui_size_zero());
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
-		psy_ui_ALIGN_BOTTOM);
-	// self->splitbarterminal.component.debugflag = 1000;
+		psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
 	psy_signal_connect(&self->workspace.signal_terminal_out, self,
@@ -417,16 +416,34 @@ void mainframe_initprogressbar(MainFrame* self)
 void mainframe_initbars(MainFrame* self)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin toprowsmargin;
 	psy_ui_Margin row0margin;	
+	psy_ui_Margin scopemargin;
 
-	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.5);		
+	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.5);
 	// Vugroup
 	psy_ui_component_init(&self->topright, &self->top);
 	psy_ui_component_setalign(&self->topright, psy_ui_ALIGN_RIGHT);
 	vubar_init(&self->vubar, &self->topright, &self->workspace);	
 	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_TOP);
+	// rows
+	psy_ui_component_init_align(&self->toprows, &self->top,
+		psy_ui_ALIGN_TOP);
+	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
+		workspace_conf(&self->workspace)))) {		
+	}
+	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 2.0);	
+	psy_ui_component_setmargin(&self->toprows, &toprowsmargin);
+	psy_ui_component_setstyletypes(&self->toprows,
+		STYLE_TOPROWS, STYLE_TOPROWS, STYLE_TOPROWS);
+	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
+		psy_ui_margin_make(
+			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5)));
 	// row0
-	psy_ui_component_init(&self->toprow0, &self->top);	
+	psy_ui_component_init(&self->toprow0, &self->toprows);
+	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
+		STYLE_TOPROW0, STYLE_TOPROW0);
 	psy_ui_component_setmargin(&self->toprow0, &row0margin);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
@@ -436,25 +453,41 @@ void mainframe_initbars(MainFrame* self)
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);
 	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace);			
 	metronomebar_init(&self->metronomebar, &self->toprow0, &self->workspace);
+	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
+		psy_ui_component_hide(&self->metronomebar.component);
+	}
 	margin.right = psy_ui_value_makepx(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), &margin);
 	// row1
-	psy_ui_component_init(&self->toprow1, &self->top);
+	psy_ui_component_init(&self->toprow1, &self->toprows);
+	psy_ui_component_setstyletypes(&self->toprow1, STYLE_TOPROW1,
+		STYLE_TOPROW1, STYLE_TOPROW1);
 	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
-	// row2
-	psy_ui_component_init(&self->toprow2, &self->top);
+	// row2	
+	psy_ui_component_init(&self->toprow2, &self->toprows);
 	psy_ui_component_setdefaultalign(&self->toprow2, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_zero());
-	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);
+		psy_ui_margin_zero());	
+	psy_ui_component_setstyletypes(&self->toprow2, STYLE_TOPROW2,
+		STYLE_TOPROW2, STYLE_TOPROW2);
+	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);		
 	// scopebar
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);	
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
-			workspace_conf(&self->workspace)))) {
+		workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
-		trackscopeview_stop(&self->trackscopeview);
-	}	
+		trackscopes_stop(&self->trackscopeview.scopes);
+	}
+	psy_ui_margin_init_all_em(&scopemargin, 0.0, 1.0, 0.0, 2.0);	
+	psy_ui_component_setmargin(&self->trackscopeview.component, &scopemargin);
+	psy_ui_component_init(&self->topspacer, &self->component);
+	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
+	psy_ui_component_preventalign(&self->topspacer);
+	psy_ui_component_setpreferredsize(&self->topspacer,
+		psy_ui_size_makeem(0.0, 0.5));
+	psy_ui_component_setstyletypes(&self->topspacer,
+		STYLE_TOP, STYLE_TOP, STYLE_TOP);
 }
 
 void mainframe_inittabbars(MainFrame* self)
@@ -1172,9 +1205,16 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 			psy_ui_component_align(mainframe_base(self));
 		}
 		if (psy_property_item_bool(property)) {				
-			trackscopeview_start(&self->trackscopeview);
+			trackscopes_start(&self->trackscopeview.scopes);
 		} else {
-			trackscopeview_stop(&self->trackscopeview);
+			trackscopes_stop(&self->trackscopeview.scopes);
+		}
+		break;
+	case PROPERTY_ID_SHOWMETRONOME:
+		if (metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
+			psy_ui_component_show_align(&self->metronomebar.component);			
+		} else {
+			psy_ui_component_hide_align(&self->metronomebar.component);
 		}
 		break;
 	default:
@@ -1391,7 +1431,7 @@ void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks)
 {
-	// TrackScopeView can change its height, realign mainframe
+	// TrackScopes can change its height, realign mainframe
 	psy_ui_component_align(trackscopeview_base(&self->trackscopeview));
 	psy_ui_component_align(mainframe_base(self));
 }

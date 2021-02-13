@@ -80,10 +80,12 @@ typedef struct MainFrame {
 	// ui elements
 	psy_ui_Component top;
 	psy_ui_Component topright;
+	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
 	psy_ui_Component toprow1;
 	psy_ui_Component toprow2;
 	psy_ui_Component tabbars;
+	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
 	psy_ui_Component client;
 	psy_ui_Terminal terminal;

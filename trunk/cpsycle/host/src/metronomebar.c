@@ -10,6 +10,7 @@
 // prototypes
 static void metronomebar_fillprecount(MetronomeBar*);
 static void metronomebar_ontogglemetronomestate(MetronomeBar*);
+static void metronomebar_onconfigure(MetronomeBar*, psy_ui_Button* sender);
 
 // vtable
 static psy_ui_ComponentVtable vtable;
@@ -42,6 +43,9 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent, Workspace* 
 	psy_ui_combobox_setcharnumber(&self->precount, 6);
 	metronomebar_fillprecount(self);
 	psy_ui_combobox_setcursel(&self->precount, 2);
+	// configure
+	psy_ui_button_init_text_connect(&self->configure, metronomebar_base(self),
+		"metronome.configure", self, metronomebar_onconfigure);
 }
 
 void metronomebar_fillprecount(MetronomeBar* self)
@@ -66,4 +70,9 @@ void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 		psy_ui_button_highlight(&self->activated);
 		self->workspace->player.sequencer.metronome = TRUE;
 	}
+}
+
+void metronomebar_onconfigure(MetronomeBar* self, psy_ui_Button* sender)
+{
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 10, 0);
 }
