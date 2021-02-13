@@ -71,7 +71,7 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	style = psy_ui_style_allocinit();	
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);	
 	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00333333));
-	psy_ui_border_setradius_px(&style->border, 10.0);
+	psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);
 	// tabbar::hover
 	style = psy_ui_style_allocinit();

@@ -215,6 +215,9 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->playtrack = psy_INDEX_INVALID;
 	self->metronome = FALSE;
 	self->precount = 0;
+	psy_audio_patternevent_init(&self->metronome_event);
+	self->metronome_event.note = 48;
+	self->metronome_event.mach = 0x3F;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -669,8 +672,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 				entry->track = METRONOME_TRACK;
 				entry->delta = (double)i - self->seqtime.position;
 				ev = psy_audio_patternentry_front(entry);
-				ev->note = 0x48;
-				ev->mach = 0x3F;
+				*ev = self->metronome_event;				
 				psy_list_append(&self->events, entry);
 			}
 		}		

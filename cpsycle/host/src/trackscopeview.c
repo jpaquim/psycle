@@ -4,50 +4,51 @@
 #include "../../detail/prefix.h"
 
 #include "trackscopeview.h"
+// host
+#include "styles.h"
 // ui
 #include <uiapp.h>
 // std
 #include <math.h>
-#include <string.h>
 // platform
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
 // prototypes
-static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
-static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
-static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
+static void trackscopes_ondraw(TrackScopes*, psy_ui_Graphics*);
+static void trackscopes_onmousedown(TrackScopes*, psy_ui_MouseEvent*);
+static void trackscopes_drawtrack(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
-void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
+void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
-void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, double x,
+void trackscopes_drawtrackmuted(TrackScopes*, psy_ui_Graphics*, double x,
 	double y, uintptr_t track);
-static void trackscopeview_ontimer(TrackScopeView*, uintptr_t timerid);
-static void trackscopeview_onalign(TrackScopeView*);
-static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
+static void trackscopes_ontimer(TrackScopes*, uintptr_t timerid);
+static void trackscopes_onalign(TrackScopes*);
+static void trackscopes_onpreferredsize(TrackScopes*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static uintptr_t trackscopeview_numrows(const TrackScopeView*);
+static uintptr_t trackscopes_numrows(const TrackScopes*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(TrackScopeView* self)
+static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)trackscopeview_ontimer;
-		vtable.onalign = (psy_ui_fp_component_onalign)trackscopeview_onalign;
+		vtable.ontimer = (psy_ui_fp_component_ontimer)trackscopes_ontimer;
+		vtable.onalign = (psy_ui_fp_component_onalign)trackscopes_onalign;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
-			trackscopeview_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_component_ondraw)trackscopeview_ondraw;
+			trackscopes_onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)trackscopes_ondraw;
 		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
-			trackscopeview_onmousedown;
+			trackscopes_onmousedown;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
 }
 // implementation
-void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
+void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);
@@ -61,7 +62,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
+void trackscopes_ondraw(TrackScopes* self, psy_ui_Graphics* g)
 {
 	if (workspace_song(self->workspace)) {
 		uintptr_t numtracks = psy_audio_song_numsongtracks(
@@ -77,12 +78,12 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00777777));
 		currtrack = 0;
 		for (c = 0, cpx = cpy = 0; c < numtracks; ++c) {
-			trackscopeview_drawtrackindex(self, g, cpx, cpy, c);
+			trackscopes_drawtrackindex(self, g, cpx, cpy, c);
 			if (!psy_audio_trackstate_istrackmuted(
 					&workspace_song(self->workspace)->patterns.trackstate, c)) {
-				trackscopeview_drawtrack(self, g, cpx, cpy, c);
+				trackscopes_drawtrack(self, g, cpx, cpy, c);
 			} else {
-				trackscopeview_drawtrackmuted(self, g, cpx, cpy, c);
+				trackscopes_drawtrackmuted(self, g, cpx, cpy, c);
 			}
 			if (currtrack < self->maxcolumns - 1) {
 				++currtrack;
@@ -96,17 +97,17 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 	}
 }
 
-void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
+void trackscopes_drawtrackindex(TrackScopes* self, psy_ui_Graphics* g,
 	double x, double y, uintptr_t track)
 {
 	char text[40];
 		
 	psy_snprintf(text, 40, "%X", (int)track);
-	psy_ui_textout(g, x + 3, y, text, strlen(text));
+	psy_ui_textout(g, x + 3, y + 2, text, strlen(text));
 }
 
 
-void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
+void trackscopes_drawtrack(TrackScopes* self, psy_ui_Graphics* g,
 	double x, double y, uintptr_t track)
 {
 	uintptr_t lastmachine;
@@ -205,7 +206,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	}	
 }
 
-void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, double x,
+void trackscopes_drawtrackmuted(TrackScopes* self, psy_ui_Graphics* g, double x,
 	double y, uintptr_t track)
 {	
 	double width;
@@ -229,12 +230,12 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, dou
 		psy_ui_realpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
-void trackscopeview_ontimer(TrackScopeView* self, uintptr_t timerid)
+void trackscopes_ontimer(TrackScopes* self, uintptr_t timerid)
 {
 	psy_ui_component_invalidate(&self->component);	
 }
 
-void trackscopeview_onalign(TrackScopeView* self)
+void trackscopes_onalign(TrackScopes* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;	
@@ -258,15 +259,15 @@ void trackscopeview_onalign(TrackScopeView* self)
 	self->trackwidth = psy_ui_value_px(&size.width, tm) / self->maxcolumns;
 }
 
-void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
+void trackscopes_onpreferredsize(TrackScopes* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {			
 	
 	rv->width = psy_ui_value_makeew(2 * 30);
-	rv->height = psy_ui_value_makeeh(trackscopeview_numrows(self) * 2.75);
+	rv->height = psy_ui_value_makeeh(trackscopes_numrows(self) * 2.75);
 }
 
-uintptr_t trackscopeview_numrows(const TrackScopeView* self)
+uintptr_t trackscopes_numrows(const TrackScopes* self)
 {	
 	if (workspace_song_const(self->workspace) &&
 			psy_audio_song_numsongtracks(workspace_song_const(self->workspace))
@@ -276,7 +277,7 @@ uintptr_t trackscopeview_numrows(const TrackScopeView* self)
 	return 1;
 }
 
-void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
+void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 {
 	if (workspace_song(self->workspace)) {
 		intptr_t columns;
@@ -315,12 +316,24 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void trackscopeview_start(TrackScopeView* self)
+void trackscopes_start(TrackScopes* self)
 {
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void trackscopeview_stop(TrackScopeView* self)
+void trackscopes_stop(TrackScopes* self)
 {
 	psy_ui_component_stoptimer(&self->component, 0);
+}
+
+
+// TrackScopeView
+void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
+	Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setstyletypes(&self->component, STYLE_TRACKSCOPES,
+		STYLE_TRACKSCOPES, STYLE_TRACKSCOPES);
+	trackscopes_init(&self->scopes, &self->component, workspace);
+	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);
 }

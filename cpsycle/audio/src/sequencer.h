@@ -123,7 +123,8 @@ typedef struct {
 	uintptr_t qsortarraysize;
 	// metronome
 	bool metronome;
-	uintptr_t precount;
+	uintptr_t precount;	
+	psy_audio_PatternEvent metronome_event;
 	// references
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;

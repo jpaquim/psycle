@@ -320,7 +320,7 @@ void psy_ui_graphics_imp_init(psy_ui_GraphicsImp* self)
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 	psy_ui_Border b)
 {	
-	if (psy_ui_border_isrect(&b)) {
+	if (psy_ui_border_isrect(&b) && psy_ui_border_monochrome(&b)) {
 		psy_ui_setcolour(self, b.colour_top);
 		if (psy_ui_border_isround(&b)) {
 			psy_ui_drawroundrectangle(self, r,
@@ -348,7 +348,7 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 		if (b.bottom != psy_ui_BORDER_NONE && b.colour_bottom.mode.set) {
 			psy_ui_setcolour(self, b.colour_bottom);
 			psy_ui_drawline(self, psy_ui_realpoint_make(r.left, r.bottom - 1),
-				psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
+				psy_ui_realpoint_make(r.right, r.bottom - 1));
 		}
 		if (b.left != psy_ui_BORDER_NONE && b.colour_left.mode.set) {
 			psy_ui_setcolour(self, b.colour_left);

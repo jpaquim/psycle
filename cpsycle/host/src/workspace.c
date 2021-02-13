@@ -57,6 +57,7 @@ static void workspace_onremoveeventdriver(Workspace*);
 static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
+static void workspace_updatemetronome(Workspace*);
 /// Machinecallback
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[],
@@ -302,6 +303,16 @@ void workspace_initaudio(Workspace* self)
 	audioconfig_driverconfigure_section(&self->config.audio);	
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input, 0);
+	workspace_updatemetronome(self);
+}
+
+void workspace_updatemetronome(Workspace* self)
+{
+	self->player.sequencer.metronome_event.note =
+		metronomeconfig_note(&self->config.metronome);
+	self->player.sequencer.metronome_event.mach =
+		(uint8_t)
+		metronomeconfig_machine(&self->config.metronome);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -471,6 +482,8 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 					self->config.midi.controllers, FALSE);
 				midiviewconfig_makecontrollersave(
 					psycleconfig_midi(&self->config));
+			} else if (psy_property_insection(property, self->config.metronome.metronome)) {
+				workspace_updatemetronome(self);
 			} else {
 				worked = FALSE;
 			}
@@ -946,6 +959,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_dispose(&path);
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
+	workspace_updatemetronome(self);
 }
 
 void workspace_save_configuration(Workspace* self)

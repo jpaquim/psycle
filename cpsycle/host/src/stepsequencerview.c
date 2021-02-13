@@ -5,9 +5,12 @@
 
 #include "stepsequencerview.h"
 
+// host
+#include "styles.h"
+// audio
 #include <songio.h>
 #include <exclusivelock.h>
-#include "resources/resource.h"
+// platform
 #include "../../detail/portable.h"
 
 // barselect
@@ -21,9 +24,9 @@ static void stepsequencerbarselect_ondraw(StepsequencerBarSelect*,
 	psy_ui_Graphics*);
 static void stepsequencerbarselect_onmousedown(StepsequencerBarSelect*,
 	psy_ui_MouseEvent*);
-static void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
+static void stepsequencerbarselect_onsize(StepsequencerBarSelect*,
 	psy_ui_Size*);
-static void stepsequencerbarselect_setposition(StepsequencerBarSelect* self,
+static void stepsequencerbarselect_setposition(StepsequencerBarSelect*,
 	StepSequencerPosition position);
 static void stepsequencerbarselect_oneditpositionchanged(
 	StepsequencerBarSelect*,
@@ -524,6 +527,8 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);
 	self->component.vtable = &stepsequencerview_vtable;
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_STEPSEQUENCER, STYLE_STEPSEQUENCER, STYLE_STEPSEQUENCER);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,

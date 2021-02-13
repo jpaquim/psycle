@@ -6,6 +6,7 @@
 #include "machineview.h"
 // host
 #include "skingraphics.h"
+#include "styles.h"
 #include "wireview.h"
 // audio
 #include <exclusivelock.h>
@@ -66,6 +67,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machineview_vtable_init(self));
 	psy_ui_component_setbackgroundmode(machineview_base(self),
 		psy_ui_BACKGROUND_NONE);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_MACHINEVIEW, STYLE_MACHINEVIEW, STYLE_MACHINEVIEW);
 	self->workspace = workspace;	
 	// skin init
 	machineviewskin_init(&self->skin,	

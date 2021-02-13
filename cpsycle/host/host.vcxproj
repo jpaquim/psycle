@@ -339,6 +339,7 @@
     <ClCompile Include="src\machinewireview.c" />
     <ClCompile Include="src\mainframe.c" />
     <ClCompile Include="src\metronomebar.c" />
+    <ClCompile Include="src\metronomeconfig.c" />
     <ClCompile Include="src\midimonitor.c" />
     <ClCompile Include="src\midiviewconfig.c" />
     <ClCompile Include="src\navigation.c" />
@@ -471,6 +472,7 @@
     <ClInclude Include="src\machinewireview.h" />
     <ClInclude Include="src\mainframe.h" />
     <ClInclude Include="src\metronomebar.h" />
+    <ClInclude Include="src\metronomeconfig.h" />
     <ClInclude Include="src\midimonitor.h" />
     <ClInclude Include="src\midiviewconfig.h" />
     <ClInclude Include="src\navigation.h" />

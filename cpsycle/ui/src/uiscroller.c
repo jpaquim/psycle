@@ -328,10 +328,7 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 
 void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component* sender,
 	psy_ui_Orientation orientation)
-{
-	if (self->component.debugflag == 2000) {
-		self = self;
-	}
+{	
 	if (orientation == psy_ui_VERTICAL) {
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			(double)sender->vscrollrange.x,

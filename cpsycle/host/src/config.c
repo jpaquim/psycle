@@ -43,6 +43,7 @@ void psycleconfig_dispose(PsycleConfig* self)
 	patternviewconfig_dispose(&self->patview);
 	machineviewconfig_dispose(&self->macview);
 	machineparamconfig_dispose(&self->macparam);
+	metronomeconfig_dispose(&self->metronome);
 	keyboardmiscconfig_dispose(&self->misc);
 	midiviewconfig_dispose(&self->midi);
 	compatconfig_dispose(&self->compat);
@@ -74,6 +75,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	midiviewconfig_init(&self->midi, &self->config, player);	
 	compatconfig_init(&self->compat, &self->config, machinefactory);
 	predefsconfig_init(&self->predefs, &self->config);
+	metronomeconfig_init(&self->metronome, &self->config);
 }
 
 void psycleconfig_makeglobal(PsycleConfig* self)

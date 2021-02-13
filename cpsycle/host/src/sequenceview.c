@@ -16,60 +16,87 @@
 #include "../../detail/trace.h"
 
 // SequenceButtons
-// prototypes
-static void sequencebuttons_onalign(SequenceButtons*);
-static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
-// vtable
-static psy_ui_ComponentVtable sequencebuttons_vtable;
-static bool sequencebuttons_vtable_initialized = FALSE;
-
-static void sequencebuttons_vtable_init(SequenceButtons* self)
-{
-	if (!sequencebuttons_vtable_initialized) {
-		sequencebuttons_vtable = *(self->component.vtable);
-		sequencebuttons_vtable.onalign = (psy_ui_fp_component_onalign)
-			sequencebuttons_onalign;
-		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
-			sequencebuttons_onpreferredsize;
-		sequencebuttons_vtable_initialized = TRUE;
-	}
-}
 // implementation
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Workspace* workspace)
-{
+{	
+	psy_ui_Margin spacing;
+	psy_ui_Margin rowmargin;
+	psy_ui_Button* buttons[] = {
+		&self->incpattern, &self->insertentry, &self->decpattern,
+		&self->newentry, &self->delentry, &self->cloneentry,
+		&self->clear, &self->rename, &self->copy,
+		&self->paste, &self->singlesel, &self->multisel
+	};
+	uintptr_t i;	
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	sequencebuttons_vtable_init(self);
-	self->component.vtable = &sequencebuttons_vtable;
-	psy_ui_button_init_text(&self->incpattern, &self->component,
-		"+");
-	psy_ui_button_init_text(&self->insertentry, &self->component,
-		"sequencerview.ins");
-	psy_ui_button_init_text(&self->decpattern, &self->component,
-		"-");
-	psy_ui_button_init_text(&self->newentry, &self->component,
+	psy_ui_component_setstyletypes(&self->component, STYLE_SEQVIEW_BUTTONS,
+		STYLE_SEQVIEW_BUTTONS, STYLE_SEQVIEW_BUTTONS);
+	psy_ui_margin_init_all_em(&spacing, 0.0, 0.5, 0.5, 0.5);
+	psy_ui_component_setspacing(&self->component, &spacing);
+	psy_ui_component_init(&self->standard, &self->component);
+	psy_ui_component_setalign(&self->standard, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->row0, &self->standard);
+	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->row0, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_margin_init_all_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
+	psy_ui_component_setmargin(&self->row0, &rowmargin);
+	psy_ui_button_init_text(&self->incpattern, &self->row0, "+");	
+	psy_ui_button_init_text(&self->insertentry, &self->row0,
+		"sequencerview.ins");	
+	psy_ui_button_init_text(&self->decpattern, &self->row0, "-");
+	psy_ui_component_init(&self->row1, &self->standard);
+	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->row1, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init_text(&self->newentry, &self->row1,
 		"sequencerview.new");
-	psy_ui_button_init_text(&self->cloneentry, &self->component,
+	psy_ui_button_init_text(&self->cloneentry, &self->row1,
 		"sequencerview.clone");
-	psy_ui_button_init_text(&self->delentry, &self->component,
-		"sequencerview.del");	
-	psy_ui_button_init_text(&self->clear, &self->component,
-		"sequencerview.clear");
-	psy_ui_button_init_text(&self->rename, &self->component,
+	psy_ui_button_init_text(&self->delentry, &self->row1,
+		"sequencerview.del");
+	psy_ui_component_init(&self->block, &self->component);
+	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->row2, &self->block);
+	psy_ui_margin_init_all_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_component_setmargin(&self->row2, &rowmargin);
+	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->row2, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));	
+	psy_ui_button_init_text(&self->clear, &self->row2,
+		"sequencerview.clear");	
+	psy_ui_button_init_text(&self->rename, &self->row2,
 		"sequencerview.rename");
 	// psy_ui_button_init(&self->cut, &self->component);
 	// psy_ui_button_settext(&self->cut, "");
-	psy_ui_button_init_text(&self->copy, &self->component,
+	psy_ui_button_init_text(&self->copy, &self->row2,
 		"sequencerview.copy");
-	psy_ui_button_init_text(&self->paste, &self->component,
+	psy_ui_component_init(&self->row3, &self->block);
+	psy_ui_component_setalign(&self->row3, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->row3, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init_text(&self->paste, &self->row3,
 		"sequencerview.paste");
-	psy_ui_button_init_text(&self->singlesel, &self->component,
+	psy_ui_button_init_text(&self->singlesel, &self->row3,
 		"sequencerview.singlesel");
-	psy_ui_button_init_text(&self->multisel, &self->component,
+	psy_ui_button_init_text(&self->multisel, &self->row3,
 		"sequencerview.multisel");
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
+	psy_ui_component_hide(&self->block);
+
+	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {
+		double colwidth;
+
+		colwidth = 10.0;
+		psy_ui_button_setcharnumber(buttons[i], colwidth);
+		psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
+			STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
+			STYLE_SEQVIEW_BUTTON_SELECT);
+		psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
+		psy_ui_button_setlinespacing(buttons[i], 1.4);
+	}
 }
 
 void sequencebuttons_onalign(SequenceButtons* self)
@@ -650,14 +677,24 @@ void sequencelistview_oneditkeydown(SequenceListView* self,
 void sequencelistview_onmousedown(SequenceListView* self,
 	psy_ui_MouseEvent* ev)
 {
-	uintptr_t selected;
-	uintptr_t selectedtrack;
+	if (ev->button == 1) {
+		uintptr_t selected;
+		uintptr_t selectedtrack;
 
-	sequencelistview_computetextsizes(self);
-	selected = (uintptr_t)((ev->pt.y - self->state->margin) / self->lineheight);
-	selectedtrack = (uintptr_t)(ev->pt.x / self->state->trackwidth);
-	if (selectedtrack < psy_audio_sequence_width(self->state->sequence)) {
-		sequencelistview_select(self, selectedtrack, selected);
+		sequencelistview_computetextsizes(self);
+		selected = (uintptr_t)((ev->pt.y - self->state->margin) / self->lineheight);
+		selectedtrack = (uintptr_t)(ev->pt.x / self->state->trackwidth);
+		if (selectedtrack < psy_audio_sequence_width(self->state->sequence)) {
+			sequencelistview_select(self, selectedtrack, selected);
+		}
+	} else if (ev->button == 2) {
+		if (psy_ui_component_visible(&self->view->buttons.block)) {
+			psy_ui_component_hide(&self->view->buttons.block);
+			psy_ui_component_align(&self->view->component);
+		} else {
+			psy_ui_component_show(&self->view->buttons.block);
+			psy_ui_component_align(&self->view->component);
+		}
 	}
 }
 

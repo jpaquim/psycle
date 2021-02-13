@@ -179,7 +179,7 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 	return rv;
 }
 
-void psy_ui_button_setcharnumber(psy_ui_Button* self, int number)
+void psy_ui_button_setcharnumber(psy_ui_Button* self, double number)
 {
 	self->charnumber = number;
 }
@@ -223,7 +223,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	} else {
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx((int)(tm->tmHeight * self->linespacing));
+	rv->height = psy_ui_value_makeeh(self->linespacing);
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
@@ -304,7 +304,7 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 	}
 }
 
-bool psy_ui_button_highlighted(psy_ui_Button* self)
+bool psy_ui_button_highlighted(const psy_ui_Button* self)
 {
 	return self->highlight != FALSE;
 }

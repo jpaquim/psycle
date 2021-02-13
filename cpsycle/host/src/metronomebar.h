@@ -23,6 +23,7 @@ typedef struct MetronomeBar {
 	psy_ui_Button activated;
 	psy_ui_Label desc;
 	psy_ui_ComboBox precount;
+	psy_ui_Button configure;
 	// references
 	psy_audio_Player* player;
 	Workspace* workspace;

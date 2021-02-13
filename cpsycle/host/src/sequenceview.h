@@ -26,16 +26,22 @@ typedef struct SequenceButtons {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
+	psy_ui_Component standard;
+	psy_ui_Component row0;
 	psy_ui_Button incpattern;
-	psy_ui_Button decpattern;	
-	psy_ui_Button newentry;
 	psy_ui_Button insertentry;
+	psy_ui_Button decpattern;
+	psy_ui_Component row1;
+	psy_ui_Button newentry;		
 	psy_ui_Button delentry;
-	psy_ui_Button cloneentry;	
+	psy_ui_Button cloneentry;
+	psy_ui_Component block;
+	psy_ui_Component row2;
 	psy_ui_Button clear;
 	psy_ui_Button rename;
-	psy_ui_Button cut;
+	//psy_ui_Button cut;	
 	psy_ui_Button copy;
+	psy_ui_Component row3;
 	psy_ui_Button paste;
 	psy_ui_Button singlesel;
 	psy_ui_Button multisel;

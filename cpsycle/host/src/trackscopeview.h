@@ -13,26 +13,44 @@
 extern "C" {
 #endif
 
-// TrackScopeView
+// TrackScopes
 //
 // Displays scopes for each pattern track with the current machine buffer
 
-typedef struct TrackScopeView {
+typedef struct TrackScopes {
 	// inherits
 	psy_ui_Component component;
-	// internal data
+	// internal data	
 	uintptr_t maxcolumns;
 	double trackwidth;
 	double trackheight;
 	double textheight;	
 	// references
 	Workspace* workspace;	
+} TrackScopes;
+
+void trackscopes_init(TrackScopes*, psy_ui_Component* parent,
+	Workspace*);
+void trackscopes_start(TrackScopes*);
+void trackscopes_stop(TrackScopes*);
+
+INLINE psy_ui_Component* trackscopes_base(TrackScopes* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+// TrackScopeView
+typedef struct TrackScopeView {
+	// inherits
+	psy_ui_Component component;
+	// internal data	
+	TrackScopes scopes;
 } TrackScopeView;
 
 void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent,
 	Workspace*);
-void trackscopeview_start(TrackScopeView*);
-void trackscopeview_stop(TrackScopeView*);
 
 INLINE psy_ui_Component* trackscopeview_base(TrackScopeView* self)
 {
