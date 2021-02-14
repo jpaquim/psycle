@@ -68,10 +68,9 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00B1C8B0));	
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
 	// tabbar
-	style = psy_ui_style_allocinit();	
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);	
-	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00333333));
-	psy_ui_border_setradius_px(&style->border, 5.0);
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x00232323));	
+	//psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);
 	// tabbar::hover
 	style = psy_ui_style_allocinit();
@@ -85,10 +84,9 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 			psy_ui_colour_make(0x00EEFFFF),
 			psy_ui_colour_make(0x00EEFFFF)));
 	// tab
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB,
-		psy_ui_style_allocinit_colours(
-			psy_ui_colour_make(0x00BBBBBB),
-			psy_ui_colour_make(0x00232323)));	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00BBBBBB));	
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB, style);
 	// tab::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00EEFFFF));		

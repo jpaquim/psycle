@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "metronomebar.h"
+// host
+#include "resources/resource.h"
 // platform
 #include "../../detail/portable.h"
 
@@ -44,8 +46,10 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent, Workspace* 
 	metronomebar_fillprecount(self);
 	psy_ui_combobox_setcursel(&self->precount, 2);
 	// configure
-	psy_ui_button_init_text_connect(&self->configure, metronomebar_base(self),
-		"metronome.configure", self, metronomebar_onconfigure);
+	psy_ui_button_init_connect(&self->configure, metronomebar_base(self),
+		self, metronomebar_onconfigure);
+	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
+	psy_ui_bitmap_settransparency(&self->configure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 }
 
 void metronomebar_fillprecount(MetronomeBar* self)

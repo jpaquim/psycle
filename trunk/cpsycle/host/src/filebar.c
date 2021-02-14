@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "filebar.h"
+// host
+#include "resources/resource.h"
 // audio
 #include <songio.h>
 // ui
@@ -31,18 +33,28 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->newbutton, filebar_base(self),
 		self, filebar_onnewsong);
 	psy_ui_button_settext(&self->newbutton, "file.new");
+	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
+	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init(&self->loadbutton, filebar_base(self));
-	psy_ui_button_settext(&self->loadbutton, "file.load");
+	psy_ui_button_settext(&self->loadbutton, "file.load");	
+	psy_ui_bitmap_loadresource(&self->loadbutton.bitmapicon, IDB_OPEN_DARK);
+	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 #ifdef PSYCLE_USE_PLATFORM_FILEOPEN
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 #endif
 	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self),
 		"file.save", self, filebar_onsavesong);
+	psy_ui_bitmap_loadresource(&self->savebutton.bitmapicon, IDB_SAVE_DARK);
+	psy_ui_bitmap_settransparency(&self->savebutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
 		"file.export");
+	psy_ui_bitmap_loadresource(&self->exportbutton.bitmapicon, IDB_EARTH_DARK);
+	psy_ui_bitmap_settransparency(&self->exportbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
 		"file.render");	
+	psy_ui_bitmap_loadresource(&self->renderbutton.bitmapicon, IDB_PULSE_DARK);
+	psy_ui_bitmap_settransparency(&self->renderbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 }
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)

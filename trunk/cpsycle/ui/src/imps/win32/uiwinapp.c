@@ -384,8 +384,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 				break;
 			case WM_PAINT: {
-				psy_ui_Border border;
-				
+				psy_ui_Border border;							
+
 				border = psy_ui_component_border(imp->component);
 				if (imp->component->vtable->ondraw ||
 					imp->component->signal_draw.slots ||

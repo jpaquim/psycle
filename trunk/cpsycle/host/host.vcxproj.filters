@@ -791,5 +791,22 @@
     <Image Include="src\resources\conf-general.bmp" />
     <Image Include="src\resources\pattern-editor.bmp" />
     <Image Include="src\resources\help.bmp" />
+    <Image Include="src\resources\arrow-back-circle-outline.bmp" />
+    <Image Include="src\resources\arrow-forward-circle-outline.bmp" />
+    <Image Include="src\resources\arrow-back-dark.bmp" />
+    <Image Include="src\resources\arrow-forward-dark.bmp" />
+    <Image Include="src\resources\settings-dark.bmp" />
+    <Image Include="src\resources\play-dark.bmp" />
+    <Image Include="src\resources\stop-dark.bmp" />
+    <Image Include="src\resources\save-dark.bmp" />
+    <Image Include="src\resources\open-dark.bmp" />
+    <Image Include="src\resources\new-dark.bmp" />
+    <Image Include="src\resources\pulse-dark.bmp" />
+    <Image Include="src\resources\earth-dark.bmp" />
+    <Image Include="src\resources\undo-dark.bmp" />
+    <Image Include="src\resources\redo-dark.bmp" />
+    <Image Include="src\resources\notes-dark.bmp" />
+    <Image Include="src\resources\machines-dark.bmp" />
+    <Image Include="src\resources\newmachine-dark.bmp" />
   </ItemGroup>
 </Project>

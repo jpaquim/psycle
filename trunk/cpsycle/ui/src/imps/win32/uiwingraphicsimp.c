@@ -313,18 +313,22 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	wbitmap = winimp->bitmap;
 	hdcmem = CreateCompatibleDC(self->hdc);
 	if (winimp->mask) {
+		uint32_t restoretextcolour;
+
 		// We are going to paint the two DDB's in sequence to the destination.
 		// 1st the monochrome bitmap will be blitted using an AND operation to
 		// cut a hole in the destination. The color image will then be ORed
 		// with the destination, filling it into the hole, but leaving the
 		// surrounding area untouched.
 		SelectObject(hdcmem, winimp->mask);
+		restoretextcolour = GetTextColor(self->hdc);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
 		SetBkColor(self->hdc, RGB(255, 255, 255));
 		BitBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCAND);
 		SelectObject(hdcmem, wbitmap);
 		// Also note the use of SRCPAINT rather than SRCCOPY.
 		BitBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCPAINT);
+		SetTextColor(self->hdc, restoretextcolour);
 	} else {
 		SelectObject(hdcmem, wbitmap);
 		BitBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCCOPY);
@@ -337,13 +341,37 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 	double height, double xsrc, double ysrc, double wsrc, double hsrc)
 {
 	HDC hdcmem;
+	HBITMAP mask;
 	HBITMAP wbitmap;
+	psy_ui_win_BitmapImp* winimp;
 
-	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
+	winimp = (psy_ui_win_BitmapImp*)bitmap->imp;
+	mask = winimp->mask;
+	wbitmap = winimp->bitmap;
 	hdcmem = CreateCompatibleDC(self->hdc);
-	SelectObject(hdcmem, wbitmap);
-	StretchBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
-		SRCCOPY);
+	if (winimp->mask) {
+		uint32_t restoretextcolour;
+		// We are going to paint the two DDB's in sequence to the destination.
+		// 1st the monochrome bitmap will be blitted using an AND operation to
+		// cut a hole in the destination. The color image will then be ORed
+		// with the destination, filling it into the hole, but leaving the
+		// surrounding area untouched.
+		restoretextcolour = GetTextColor(self->hdc);
+		SelectObject(hdcmem, winimp->mask);
+		SetTextColor(self->hdc, RGB(0, 0, 0));
+		SetBkColor(self->hdc, RGB(255, 255, 255));		
+		StretchBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
+			SRCAND);
+		SelectObject(hdcmem, wbitmap);
+		// Also note the use of SRCPAINT rather than SRCCOPY.		
+		StretchBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
+			SRCPAINT);
+		SetTextColor(self->hdc, restoretextcolour);
+	} else {
+		SelectObject(hdcmem, wbitmap);
+		StretchBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
+			SRCCOPY);
+	}
 	DeleteDC(hdcmem);
 }
 

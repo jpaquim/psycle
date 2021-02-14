@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "undoredobar.h"
+// host
+#include "resources/resource.h"
 // std
 #include <assert.h>
 
@@ -42,9 +44,13 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self),
 		self, undoredobar_onundo);
 	psy_ui_button_settext(&self->undobutton, "undo.undo");
+	psy_ui_bitmap_loadresource(&self->undobutton.bitmapicon, IDB_UNDO_DARK);
+	psy_ui_bitmap_settransparency(&self->undobutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self),
 		self, undoredobar_onredo);
-	psy_ui_button_settext(&self->redobutton,"undo.redo");	
+	psy_ui_button_settext(&self->redobutton,"undo.redo");		
+	psy_ui_bitmap_loadresource(&self->redobutton.bitmapicon, IDB_REDO_DARK);
+	psy_ui_bitmap_settransparency(&self->redobutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_component_starttimer(undoredobar_base(self), 0, UNDOREDOBAR_UPDATERATE);
 }
 

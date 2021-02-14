@@ -540,19 +540,36 @@
     <ClInclude Include="src\zoombox.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="src\resources\arrow-back-circle-outline.bmp" />
+    <Image Include="src\resources\arrow-back-dark.bmp" />
+    <Image Include="src\resources\arrow-forward-circle-outline.bmp" />
+    <Image Include="src\resources\arrow-forward-dark.bmp" />
     <Image Include="src\resources\conf-general.bmp" />
+    <Image Include="src\resources\earth-dark.bmp" />
     <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
     <Image Include="src\resources\kbd.bmp" />
+    <Image Include="src\resources\machines-dark.bmp" />
     <Image Include="src\resources\machine_skin.bmp" />
     <Image Include="src\resources\macparam.ico" />
     <Image Include="src\resources\mixer_skin.bmp" />
+    <Image Include="src\resources\new-dark.bmp" />
+    <Image Include="src\resources\newmachine-dark.bmp" />
+    <Image Include="src\resources\notes-dark.bmp" />
+    <Image Include="src\resources\open-dark.bmp" />
     <Image Include="src\resources\pattern-editor.bmp" />
     <Image Include="src\resources\pattern_header_skin.bmp" />
+    <Image Include="src\resources\play-dark.bmp" />
     <Image Include="src\resources\Project3.ico" />
+    <Image Include="src\resources\pulse-dark.bmp" />
+    <Image Include="src\resources\redo-dark.bmp" />
+    <Image Include="src\resources\save-dark.bmp" />
+    <Image Include="src\resources\settings-dark.bmp" />
     <Image Include="src\resources\splash_screen.bmp" />
+    <Image Include="src\resources\stop-dark.bmp" />
     <Image Include="src\resources\TbMainKnob.bmp" />
     <Image Include="src\resources\term.bmp" />
+    <Image Include="src\resources\undo-dark.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)audio\audio.vcxproj">

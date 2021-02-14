@@ -31,6 +31,7 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 	} else {
 		psy_ui_margin_init(&self->margin);			
 	}
+	self->bitmapident = 1.0;
 }
 
 void tab_dispose(Tab* self)
@@ -81,7 +82,7 @@ psy_ui_Size tab_preferredsize(Tab* self, psy_ui_Component* base)
 
 		bpmsize = psy_ui_bitmap_size(&self->icon);
 		psy_ui_value_add(&rv.width, &bpmsize.width, tm);
-		ident = psy_ui_value_makepx(5.0);
+		ident = psy_ui_value_makeew(self->bitmapident);
 		psy_ui_value_add(&rv.width, &ident, tm);
 	}
 	return rv;
@@ -151,7 +152,12 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(tabbar_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
+	self->component.debugflag = 4000;
 	psy_ui_component_doublebuffer(tabbar_base(self));	
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_TABBAR,
+		psy_ui_STYLE_TABBAR,
+		psy_ui_STYLE_TABBAR);
 	psy_signal_init(&self->signal_change);
 	self->tabs = NULL;
 	self->selected = 0;
@@ -163,7 +169,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_ui_style_init_default(&self->style_tab_select, psy_ui_STYLE_TAB_SELECT);
 	psy_ui_style_init_default(&self->style_tab_label, psy_ui_STYLE_COMMON);
 	self->defaulttabheight = psy_ui_value_makeeh(1.8);
-	tabbarskin_init(&self->skin);		
+	tabbarskin_init(&self->skin);
 	psy_ui_margin_init_all_em(&self->defaulttabmargin, 0.0, 2.0, 0.0, 0.0);		
 	tabbar_onupdatestyles(self);
 }
@@ -190,7 +196,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	for (tabs = self->tabs; tabs != 0; psy_list_next(&tabs), ++c) {
 		Tab* tab;		
 
-		tab = (Tab*)psy_list_entry(tabs);		
+		tab = (Tab*)psy_list_entry(tabs);
 		tabbar_drawtab(self, g, tab,
 			self->hover && self->hoverindex == c &&
 			self->hoverindex != self->selected,
@@ -299,7 +305,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 	}	
 	if (hover) {
 		double width;
-
+	
 		tabbar_drawtabbackground(self, g, tab, &self->style_tab_hover,
 			position);
 		width = psy_ui_value_px(&tab->size.width, tm);		
@@ -313,6 +319,12 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				//	width,
 				//	centery + tm->tmHeight + 2)),
 				self->style_tab_hover.border);				
+	} else if (selected) {
+		//tabbar_drawtabbackground(self, g, tab, &self->style_tab_select,
+			//position);
+	} else {
+		//tabbar_drawtabbackground(self, g, tab, &self->style_tab,
+			//position);
 	}
 	if (!psy_ui_bitmap_empty(&tab->icon)) {
 		psy_ui_Size bpmsize;
@@ -326,8 +338,8 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				psy_ui_realsize_make(
 					psy_ui_value_px(&bpmsize.width, tm),
 					psy_ui_value_px(&bpmsize.height, tm))),
-			psy_ui_realpoint_zero());
-		textident += psy_ui_value_px(&bpmsize.width, tm) + 5;
+			psy_ui_realpoint_zero());		
+		textident += psy_ui_value_px(&bpmsize.width, tm) + tm->tmAveCharWidth * tab->bitmapident;
 	}
 	if (tab->mode == TABMODE_LABEL) {
 		psy_ui_settextcolour(g, self->style_tab_label.colour);
@@ -739,11 +751,7 @@ void tabbar_onlanguagechanged(TabBar* self)
 }
 
 void tabbar_onupdatestyles(TabBar* self)
-{
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_TABBAR,
-		psy_ui_STYLE_TABBAR_HOVER,
-		psy_ui_STYLE_TABBAR_SELECT);
+{	
 	psy_ui_style_copy(&self->style_tab, psy_ui_style(psy_ui_STYLE_TAB));
 	psy_ui_style_copy(&self->style_tab_hover, psy_ui_style(psy_ui_STYLE_TAB_HOVER));
 	psy_ui_style_copy(&self->style_tab_select, psy_ui_style(psy_ui_STYLE_TAB_SELECT));

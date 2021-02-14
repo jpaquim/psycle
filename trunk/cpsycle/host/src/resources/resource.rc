@@ -44,6 +44,40 @@ IDB_PATTERNEDITOR       BITMAP                  "pattern-editor.bmp"
 
 IDB_HELP                BITMAP                  "help.bmp"
 
+IDB_ARROW_BACK_CIRCLE_OUTLINE BITMAP                  "arrow-back-circle-outline.bmp"
+
+IDB_ARROW_FORWARD_CIRCLE_OUTLINE BITMAP                  "arrow-forward-circle-outline.bmp"
+
+IDB_ARROW_BACK_DARK     BITMAP                  "arrow-back-dark.bmp"
+
+IDB_ARROW_FORWARD_DARK  BITMAP                  "arrow-forward-dark.bmp"
+
+IDB_SETTINGS_DARK       BITMAP                  "settings-dark.bmp"
+
+IDB_PLAY_DARK           BITMAP                  "play-dark.bmp"
+
+IDB_STOP_DARK           BITMAP                  "stop-dark.bmp"
+
+IDB_SAVE_DARK           BITMAP                  "save-dark.bmp"
+
+IDB_OPEN_DARK           BITMAP                  "open-dark.bmp"
+
+IDB_NEW_DARK            BITMAP                  "new-dark.bmp"
+
+IDB_PULSE_DARK          BITMAP                  "pulse-dark.bmp"
+
+IDB_EARTH_DARK          BITMAP                  "earth-dark.bmp"
+
+IDB_UNDO_DARK           BITMAP                  "undo-dark.bmp"
+
+IDB_REDO_DARK           BITMAP                  "redo-dark.bmp"
+
+IDB_NOTES_DARK          BITMAP                  "notes-dark.bmp"
+
+IDB_MACHINES_DARK       BITMAP                  "machines-dark.bmp"
+
+IDB_NEWMACHINE_DARK     BITMAP                  "newmachine-dark.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
