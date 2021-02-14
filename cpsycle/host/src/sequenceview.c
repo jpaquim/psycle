@@ -246,7 +246,7 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	self->state = state;	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
-			psy_ui_value_makeeh(1)));
+			psy_ui_value_makeeh(2.0)));
 	psy_ui_component_preventalign(&self->component);
 	self->hovertrack = psy_INDEX_INVALID;
 	psy_signal_init(&self->signal_newtrack);

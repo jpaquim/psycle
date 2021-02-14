@@ -5,6 +5,7 @@
 
 #include "machineview.h"
 // host
+#include "resources/resource.h"
 #include "skingraphics.h"
 #include "styles.h"
 #include "wireview.h"
@@ -62,6 +63,8 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
+	Tab* tab;
+
 	psy_ui_component_init(machineview_base(self), parent);	
 	psy_ui_component_setvtable(machineview_base(self),
 		machineview_vtable_init(self));
@@ -99,9 +102,12 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "machineview.wires",
-		"machineview.stack", "machineview.new-machine", NULL);
+	tabbar_append(&self->tabbar, "machineview.wires");
+	tabbar_append(&self->tabbar, "machineview.stack");
+	tab = tabbar_append(&self->tabbar, "machineview.new-machine");		
 	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_NEWMACHINE_DARK);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));	
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		machineview_selectsection);
 	psy_ui_notebook_select(&self->notebook, SECTION_ID_MACHINEVIEW_WIRES);

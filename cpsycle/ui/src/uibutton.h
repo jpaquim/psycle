@@ -53,8 +53,10 @@ typedef struct psy_ui_Button {
 	int hover;
 	int highlight;
 	psy_ui_ButtonIcon icon;
-	int charnumber;
+	psy_ui_Bitmap bitmapicon;
+	double charnumber;
 	double linespacing;
+	double bitmapident;
 	psy_ui_Alignment textalignment;
 	bool enabled;		
 	bool shiftstate;

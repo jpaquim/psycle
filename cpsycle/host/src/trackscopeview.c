@@ -53,7 +53,7 @@ void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);	
 	self->workspace = workspace;
 	self->trackwidth = 90;
 	self->trackheight = 30;
@@ -333,7 +333,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setstyletypes(&self->component, STYLE_TRACKSCOPES,
-		STYLE_TRACKSCOPES, STYLE_TRACKSCOPES);
+		STYLE_TRACKSCOPES, STYLE_TRACKSCOPES);	
 	trackscopes_init(&self->scopes, &self->component, workspace);
 	psy_ui_component_setalign(&self->scopes.component, psy_ui_ALIGN_CLIENT);
 }

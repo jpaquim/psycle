@@ -12,7 +12,11 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_make(0x00D1C5B6),	
-		psy_ui_colour_make(0x00303030));	
+		psy_ui_colour_make(0x00252525));
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00282828));	
+	psy_ui_colour_set(&style->border.colour_bottom, psy_ui_colour_make(0x00232323));	
 	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// seqview buttons
 	style = psy_ui_style_allocinit();	
@@ -47,18 +51,18 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 		psy_ui_colour_make(0x00444444));
 	psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON_SELECT, style);
-	// sequencelistview item
+	// seqlistview
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_make(0x00D1C5B6),	
-		psy_ui_colour_make(0x00202020));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_make(0x00282828));
-	psy_ui_colour_set(&style->border.colour_bottom,
-		psy_ui_colour_make(0x00333333));
+		psy_ui_colour_make(0x00202121));
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x000151515));
+	psy_ui_colour_set(&style->border.colour_right, psy_ui_colour_make(0x00303030));
+	psy_ui_colour_set(&style->border.colour_bottom, psy_ui_colour_make(0x00303030));
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW, style);
-	// sequenceeditor
+	// seqeditor
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_colour_set(&style->backgroundcolour,
@@ -125,7 +129,7 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_HOVER, style);
 	// sequencetrackbox tab::select
 	style = psy_ui_style_allocinit();
-	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x009F7B00));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00232323));
 	psy_ui_border_init(&style->border);
@@ -152,10 +156,12 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_make(0x00202020));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_make(0x00333333));	
+		psy_ui_colour_make(0x00202122));
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x000161616));
+	psy_ui_colour_set(&style->border.colour_right, psy_ui_colour_make(0x00282828));
+	psy_ui_colour_set(&style->border.colour_bottom, psy_ui_colour_make(0x00303030));
 	psy_ui_defaults_setstyle(defaults, STYLE_MACHINEBOX, style);
 	// zoombox
 	style = psy_ui_style_allocinit();
@@ -180,6 +186,9 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	psy_ui_defaults_setstyle(defaults, STYLE_STEPSEQUENCER, style);
 	// top
 	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00303030));
 	psy_ui_defaults_setstyle(defaults, STYLE_TOP, style);	
 	// toprows
 	style = psy_ui_style_allocinit();
@@ -198,14 +207,7 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	// trackscopes
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_make(0x00202122));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_make(0x00252525));
-	psy_ui_colour_set(&style->border.colour_bottom,
-		psy_ui_colour_make(0x00272727));
-	psy_ui_colour_set(&style->border.colour_right,
-		psy_ui_colour_make(0x00302827));
+		psy_ui_colour_make(0x00232323));	
 	psy_ui_defaults_setstyle(defaults, STYLE_TRACKSCOPES, style);
 }
 

@@ -59,6 +59,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0;
 	self->linespacing = 1.0;
+	self->bitmapident = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
@@ -69,6 +70,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
+	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
 	psy_ui_component_setstyletypes(psy_ui_button_base(self),
 		psy_ui_STYLE_BUTTON, psy_ui_STYLE_BUTTON_HOVER,
@@ -111,6 +113,7 @@ void ondestroy(psy_ui_Button* self)
 	free(self->translation);
 	self->translation = NULL;
 	psy_signal_dispose(&self->signal_clicked);
+	psy_ui_bitmap_dispose(&self->bitmapicon);
 }
 
 void onlanguagechanged(psy_ui_Button* self)
@@ -125,6 +128,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;	
 	psy_ui_RealRectangle r;
 	char* text;
+	double ident;
 	
 	if (self->translate && self->translation) {
 		text = self->translation;
@@ -132,18 +136,47 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		text = self->text;
 	}
 	size = psy_ui_component_sizepx(psy_ui_button_base(self));
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);		
-	if (self->enabled == FALSE) {
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
-	}	
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	ident = 0.0;
+	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
+		psy_ui_Size srcbpmsize;
+		psy_ui_RealSize destbpmsize;
+		double vcenter;
+		const psy_ui_TextMetric* tm;
+		double ratio;
+
+		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
+		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
+		ratio = (tm->tmAscent - tm->tmDescent) / psy_ui_value_px(&srcbpmsize.height, tm);
+		if (fabs(ratio - 1.0) < 0.15) {
+			ratio = 1.0;
+		}		
+		destbpmsize.width = psy_ui_value_px(&srcbpmsize.width, tm) * ratio;
+		destbpmsize.height = psy_ui_value_px(&srcbpmsize.height, tm) * ratio;
+		vcenter = (size.height - destbpmsize.height) / 2.0;
+		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(0, vcenter),
+				destbpmsize),
+			psy_ui_realpoint_zero(),
+			psy_ui_realsize_make(
+				psy_ui_value_px(&srcbpmsize.width, tm),
+				psy_ui_value_px(&srcbpmsize.height, tm)));
+		ident += destbpmsize.width + tm->tmAveCharWidth * self->bitmapident;
+	}
 	if (psy_strlen(text) > 0) {
 		psy_ui_Size textsize;		
 		const psy_ui_TextMetric* tm;
 		
 		textsize = psy_ui_component_textsize(psy_ui_button_base(self), text);
-		tm = psy_ui_component_textmetric(&self->component);		
+		tm = psy_ui_component_textmetric(&self->component);
+		if (self->enabled == FALSE) {
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
+		} else {
+			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
+		}
 		psy_ui_textoutrectangle(g,
-			psy_ui_button_center(self, psy_ui_realpoint_zero(),
+			psy_ui_button_center(self, psy_ui_realpoint_make(ident, 0.0),
 				psy_ui_realsize_make(psy_ui_value_px(&textsize.width, tm),
 				tm->tmHeight)),
 			psy_ui_ETO_CLIPPED, r, text, strlen(text));
@@ -170,7 +203,7 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 	rv = center;
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		rv.x = (sizepx.width - itemsize.width) / 2;
+		rv.x = center.x + (sizepx.width - itemsize.width - center.x) / 2;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
@@ -218,7 +251,24 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			} else {
 				size.width = psy_ui_component_textsize(psy_ui_button_base(self), "<<").width;				
 			}
-		}		
+		}
+		if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
+			psy_ui_Size srcbpmsize;			
+			const psy_ui_TextMetric* tm;
+			double ratio;
+
+			tm = psy_ui_component_textmetric(psy_ui_button_base(self));
+			srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);
+			ratio = (tm->tmAscent - tm->tmDescent) / psy_ui_value_px(&srcbpmsize.height, tm);
+			if (fabs(ratio - 1.0) < 0.15) {
+				ratio = 1.0;
+			}			
+			rv->width = psy_ui_add_values(
+				psy_ui_value_makepx(
+					psy_ui_value_px(&srcbpmsize.width, tm) * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
+			rv->height = psy_ui_value_makeeh(self->linespacing);
+			return;
+		}
 		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4);
 	} else {
 		rv->width = psy_ui_value_makeew(self->charnumber);

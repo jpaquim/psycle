@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "mainframe.h"
-// local
+// host
 #include "cmdsgeneral.h"
 #include "paramview.h"
 #include "resources/resource.h"
@@ -524,14 +524,18 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
-	tabbar_append(&self->tabbar, "main.machines");
-	tab = tabbar_append(&self->tabbar, "main.patterns");	
+	tab = tabbar_append(&self->tabbar, "main.machines");
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_MACHINES_DARK);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
+	tab = tabbar_append(&self->tabbar, "main.patterns");
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_NOTES_DARK);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));	
 	tabbar_append(&self->tabbar, "main.samples");
 	tabbar_append(&self->tabbar, "main.instruments");
 	tabbar_append(&self->tabbar, "main.properties");		
 	tab = tabbar_append(&self->tabbar, "main.settings");
 	tab->margin.left = psy_ui_value_makeew(4.0);
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_CONF_GENERAL);
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
 	tab = tabbar_append(&self->tabbar, "main.help");
 	tab->margin.right = psy_ui_value_makeew(4.0);	

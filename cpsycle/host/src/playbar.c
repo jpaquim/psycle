@@ -4,10 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "playbar.h"
+// host
+#include "resources/resource.h"
 // audio
 #include <exclusivelock.h>
-// std
-#include <stdlib.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -66,6 +66,8 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->play, playbar_base(self),
 		self, playbar_onplayclicked);
 	psy_ui_button_settext(&self->play, "play.play");
+	psy_ui_bitmap_loadresource(&self->play.bitmapicon, IDB_PLAY_DARK);
+	psy_ui_bitmap_settransparency(&self->play.bitmapicon, psy_ui_colour_make(0x00FFFFFF));		
 	// playmode
 	psy_ui_combobox_init(&self->playmode, playbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
@@ -83,6 +85,8 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->stop, playbar_base(self),
 		self, playbar_onstopclicked);
 	psy_ui_button_settext(&self->stop, "play.stop");
+	psy_ui_bitmap_loadresource(&self->stop.bitmapicon, IDB_STOP_DARK);
+	psy_ui_bitmap_settransparency(&self->stop.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	playbar_updatetext(self);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,

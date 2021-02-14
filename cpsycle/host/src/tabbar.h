@@ -38,6 +38,7 @@ typedef struct Tab {
 	TabCheckState checkstate;
 	psy_ui_RealPoint position;
 	psy_ui_Bitmap icon;
+	double bitmapident;
 } Tab;
 
 void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
@@ -67,7 +68,7 @@ typedef struct TabBar {
 	psy_ui_Style style_tab;
 	psy_ui_Style style_tab_hover;
 	psy_ui_Style style_tab_select;
-	psy_ui_Style style_tab_label;
+	psy_ui_Style style_tab_label;	
 	// Signals
 	psy_Signal signal_change;	
 } TabBar;
