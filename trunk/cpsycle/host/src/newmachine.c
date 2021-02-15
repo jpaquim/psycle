@@ -4,10 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "newmachine.h"
+// host
+#include "resources/resource.h"
+// audio
 #include <plugin_interface.h>
+// container
 #include <qsort.h>
-#include <string.h>
-#include <stdlib.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -688,6 +690,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	MachineViewSkin* skin, Workspace* workspace)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
 	psy_ui_Border sectionborder;
 	
 	psy_ui_component_init(&self->component, parent);	
@@ -711,21 +714,31 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// header margin
 	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 1.0, 0.0);
 	// section border, define for the top line above a section label
-	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_NONE,
-		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
-	psy_ui_colour_set(&sectionborder.colour_top, psy_ui_colour_make(0x00B2B2B2));
+	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE,psy_ui_BORDER_NONE);
+	psy_ui_colour_set(&sectionborder.colour_top, psy_ui_colour_make(0x00666666));
 	// favorite view
-	psy_ui_label_init_text(&self->favoriteheader, &self->client,
-			"newmachine.favorites");
-	psy_ui_label_settextalignment(&self->favoriteheader,
+	psy_ui_component_init(&self->favoriteheader, &self->client);
+	psy_ui_component_setalign(&self->favoriteheader, psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->favoriteheader, &margin);
+	psy_ui_margin_init_all_em(&spacing, 1.0, 0.0, 0.0, 0.0);
+	psy_ui_component_setspacing(&self->favoriteheader, &spacing);
+	psy_ui_component_setdefaultalign(&self->favoriteheader, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	self->favoriteheader.style.style.border = sectionborder;
+	psy_ui_image_init(&self->favoriteicon, &self->favoriteheader);
+	psy_ui_bitmap_loadresource(&self->favoriteicon.bitmap, IDB_HEART_DARK);
+	psy_ui_bitmap_settransparency(&self->favoriteicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_image_setbitmapalignment(&self->favoriteicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_component_setpreferredsize(&self->favoriteicon.component,
+		psy_ui_size_makepx(16, 14));
+	psy_ui_component_preventalign(&self->favoriteicon.component);
+	psy_ui_label_init_text(&self->favoritelabel, &self->favoriteheader,
+			"newmachine.favorites");	
+	psy_ui_label_settextalignment(&self->favoritelabel,
 		psy_ui_ALIGNMENT_LEFT |
-		psy_ui_ALIGNMENT_CENTER_VERTICAL);
-	psy_ui_component_setalign(&self->favoriteheader.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->favoriteheader.component, &margin);
-	self->favoriteheader.component.preventpreferredsizeatalign = TRUE;
-	psy_ui_component_resize(&self->favoriteheader.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
-	self->favoriteheader.component.style.style.border = sectionborder;
+		psy_ui_ALIGNMENT_CENTER_VERTICAL);	
+	// Favorite View
 	pluginsview_init(&self->favoriteview, &self->client, TRUE, workspace);
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(4.0)));
@@ -734,17 +747,29 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
 	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// plugin view
-	psy_ui_label_init_text(&self->pluginsheader, &self->client,
+	psy_ui_component_init(&self->pluginsheader, &self->client);
+	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->pluginsheader, &margin);
+	psy_ui_component_setspacing(&self->pluginsheader, &spacing);
+	psy_ui_component_setdefaultalign(&self->pluginsheader, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	self->pluginsheader.style.style.border = sectionborder;
+	psy_ui_image_init(&self->pluginsicon, &self->pluginsheader);
+	psy_ui_bitmap_loadresource(&self->pluginsicon.bitmap, IDB_TRAY_DARK);
+	psy_ui_bitmap_settransparency(&self->pluginsicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_image_setbitmapalignment(&self->pluginsicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_component_setpreferredsize(&self->pluginsicon.component,
+		psy_ui_size_makepx(16, 14));
+	psy_ui_component_preventalign(&self->pluginsicon.component);
+	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader,
 		"newmachine.all");
-	psy_ui_label_settextalignment(&self->pluginsheader,
+	//self->favoritelabel.component.preventpreferredsizeatalign = TRUE;
+	//psy_ui_component_resize(&self->favoritelabel.component,
+	//	psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
+	psy_ui_label_settextalignment(&self->pluginslabel,
 		psy_ui_ALIGNMENT_LEFT |
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
-	psy_ui_component_setalign(&self->pluginsheader.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->pluginsheader.component, &margin);
-	self->pluginsheader.component.preventpreferredsizeatalign = TRUE;
-	psy_ui_component_resize(&self->pluginsheader.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));	
-	self->pluginsheader.component.style.style.border = sectionborder;
+	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->client, FALSE, workspace);
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
 		&self->client);

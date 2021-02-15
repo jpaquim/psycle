@@ -91,10 +91,17 @@ void psy_ui_graphics_init(psy_ui_Graphics* self, void* hdc)
 }
 
 void psy_ui_graphics_init_bitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap)
-{
+{	
+	psy_ui_Size bpmsize;
 	vtable_init();
 	self->vtable = &vtable;
 	self->imp = psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui_app_impfactory(psy_ui_app()), bitmap);
+	bpmsize = psy_ui_bitmap_size(bitmap);
+	self->clip = psy_ui_realrectangle_make(
+		psy_ui_realpoint_zero(),
+		psy_ui_realsize_make(
+			psy_ui_value_px(&bpmsize.width, NULL),
+			psy_ui_value_px(&bpmsize.height, NULL)));
 }
 
 // Delegation Methods to GraphicsImp

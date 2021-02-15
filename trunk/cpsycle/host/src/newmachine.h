@@ -7,6 +7,7 @@
 #include "machineviewskin.h"
 #include "workspace.h"
 #include <uibutton.h>
+#include <uiimage.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uiscroller.h>
@@ -90,9 +91,13 @@ typedef struct NewMachine {
 	// internal ui elements	
 	psy_ui_Notebook notebook;
 	psy_ui_Component client;
-	psy_ui_Label favoriteheader;
+	psy_ui_Component favoriteheader;
+	psy_ui_Image favoriteicon;
+	psy_ui_Label favoritelabel;
 	PluginsView favoriteview;
-	psy_ui_Label pluginsheader;
+	psy_ui_Component pluginsheader;
+	psy_ui_Image pluginsicon;
+	psy_ui_Label pluginslabel;
 	PluginsView pluginsview;
 	NewMachineDetail detail;
 	PluginScanView scanview;

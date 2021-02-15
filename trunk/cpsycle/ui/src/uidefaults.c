@@ -53,7 +53,7 @@ void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_HOVER, style);
 	// button::select
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x009F7B00));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
 	// combobox;
 	style = psy_ui_style_allocinit();
@@ -206,10 +206,12 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00EAEAEA));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);
 	// tabbar::hover
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR_HOVER,
-		psy_ui_style_allocinit_colours(
-			psy_ui_colour_make(0x00474849),
-			psy_ui_colour_make(0x0041047A)));
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00474849));
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x00B1C8B0));	
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);	
 	// tabbar::select
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR_SELECT,
 		psy_ui_style_allocinit_colours(
@@ -221,10 +223,13 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_colour_set(&style->backgroundcolour, psy_ui_colour_make(0x00F2F2F2));	
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB, style);
 	// tab::hover
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER,
-		psy_ui_style_allocinit_colours(
-			psy_ui_colour_make(0x00474849),
-			psy_ui_colour_make(0x0041047A)));	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00474849));
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+	psy_ui_border_setcolour(&style->border, psy_ui_colour_make(0x0041047A));
+	psy_ui_border_setradius_px(&style->border, 2);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);	
 	// tab::select
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT,
 		psy_ui_style_allocinit_colours(
@@ -259,7 +264,7 @@ void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SCROLLTHUMB_HOVER,
 		psy_ui_style_allocinit_colours(
 			psy_ui_colour_make(0x00686868),
-			psy_ui_colour_make(0x00686868)));
+			psy_ui_colour_make(0x00A6A6A6)));
 	// sliderpane
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init(&style->border);

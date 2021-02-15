@@ -750,15 +750,14 @@ void dev_stoptimer(psy_ui_win_ComponentImp* self, uintptr_t id)
 void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 {
 	psy_ui_WinApp* winapp;
+	LPARAM hicon;
+
+	assert(self);
 
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
-#if defined(_WIN64)	
-	SetClassLongPtr(self->hwnd, GCLP_HICON,
-		(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
-#else	
-	SetClassLong(self->hwnd, GCL_HICON,
-		(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
-#endif
+	hicon = (intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid));
+	SendMessage(self->hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);
+	//SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hiconbig);
 }
 
 psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,

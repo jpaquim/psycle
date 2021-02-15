@@ -32,6 +32,7 @@ static void mainframe_initrightarea(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
+static void mainframe_initminiview(MainFrame*);
 static void mainframe_initviewstatusbars(MainFrame*);
 static void mainframe_initstatusbarlabel(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
@@ -303,17 +304,18 @@ void mainframe_initkbdhelp(MainFrame* self)
 void mainframe_initstatusbar(MainFrame* self)
 {	
 	zoombox_init_connect(&self->zoombox, &self->statusbar,
-		self, mainframe_onzoomboxchanged);
-	mainframe_initstatusbarlabel(self);
+		self, mainframe_onzoomboxchanged);	
+	mainframe_initstatusbarlabel(self);	
 	mainframe_initviewstatusbars(self);
 	mainframe_initkbdhelpbutton(self);
-	mainframe_initterminalbutton(self);		
+	mainframe_initterminalbutton(self);	
 	mainframe_initprogressbar(self);
+	mainframe_initminiview(self);
 }
 
 void mainframe_initviewstatusbars(MainFrame* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
+	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);	
 	psy_ui_component_setdefaultalign(
 		psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -339,7 +341,13 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);	
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
+}
+
+void mainframe_initminiview(MainFrame* self)
+{
+	miniview_init(&self->miniview, &self->statusbar);
+	psy_ui_component_setalign(&self->miniview.component, psy_ui_ALIGN_RIGHT);	
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -347,16 +355,10 @@ void mainframe_initkbdhelpbutton(MainFrame* self)
 	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
 		"Kbd", self, mainframe_ontogglekbdhelp);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_image_init(&self->kbdimg, &self->statusbar);
-	psy_ui_bitmap_loadresource(&self->kbdimg.bitmap, IDB_KBD);
-	psy_ui_bitmap_settransparency(&self->kbdimg.bitmap,
+		psy_ui_ALIGN_RIGHT);	
+	psy_ui_bitmap_loadresource(&self->togglekbdhelp.bitmapicon, IDB_KBD);
+	psy_ui_bitmap_settransparency(&self->togglekbdhelp.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_component_setalign(&self->kbdimg.component,
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setpreferredsize(&self->kbdimg.component,
-		psy_ui_size_makepx(45, 18));
-	psy_ui_component_preventalign(&self->kbdimg.component);
 }
 
 void mainframe_initterminalbutton(MainFrame* self)
@@ -366,16 +368,10 @@ void mainframe_initterminalbutton(MainFrame* self)
 		"Terminal", self, mainframe_ontoggleterminal);
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
-	mainframe_initterminalcolours(self);
-	psy_ui_image_init(&self->termimg, &self->statusbar);
-	psy_ui_bitmap_loadresource(&self->termimg.bitmap, IDB_TERM);
-	psy_ui_bitmap_settransparency(&self->termimg.bitmap,
-		psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_component_setalign(&self->termimg.component,
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setpreferredsize(&self->termimg.component,
-		psy_ui_size_makepx(24, 18));
-	psy_ui_component_preventalign(&self->termimg.component);
+	mainframe_initterminalcolours(self);	
+	psy_ui_bitmap_loadresource(&self->toggleterminal.bitmapicon, IDB_TERM);
+	psy_ui_bitmap_settransparency(&self->toggleterminal.bitmapicon,
+		psy_ui_colour_make(0x00FFFFFF));	
 }
 
 void mainframe_initterminalcolours(MainFrame* self)
@@ -757,6 +753,10 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(&self->workspace))->signal_themechanged,
 		self, mainframe_onthemechanged);
+	if (!psycleconfig_miniview(&self->workspace.config)) {		
+		psy_ui_component_stoptimer(&self->miniview.component, 0);
+		psy_ui_component_hide_align(&self->miniview.component);
+	}
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -1221,6 +1221,16 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 			psy_ui_component_hide_align(&self->metronomebar.component);
 		}
 		break;
+	case PROPERTY_ID_SHOWMINIVIEW:
+		if (psycleconfig_miniview(&self->workspace.config)) {
+			psy_ui_component_starttimer(&self->miniview.component, 0, 200);
+			psy_ui_component_show(&self->miniview.component);
+		} else {			
+			psy_ui_component_stoptimer(&self->miniview.component, 0);
+			psy_ui_component_hide(&self->miniview.component);
+		}
+		psy_ui_component_align(&self->component);
+		break;
 	default:
 		workspace_configurationchanged(&self->workspace, property);
 		break;
@@ -1284,7 +1294,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 	uintptr_t section, int options)
 {		
 	psy_ui_Component* view;
-
+	
 	if (index == VIEW_ID_CHECKUNSAVED) {			
 		if (options == CONFIRM_CLOSE) {
 			self->checkunsavedbox.mode = options;
@@ -1345,21 +1355,30 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	}
 	mainframe_updatetabbarstyle(self);
 	psy_ui_component_align(&self->component);
+	if (workspace_currview(&self->workspace) == VIEW_ID_MACHINEVIEW) {
+		miniview_setview(&self->miniview, &self->machineview.wireview.component);
+	} else if (workspace_currview(&self->workspace) == VIEW_ID_PATTERNVIEW) {
+		miniview_setview(&self->miniview, &self->patternview.tracker.component);
+	} else {
+		miniview_setview(&self->miniview, NULL);
+	}
 }
 
 void mainframe_updatetabbarstyle(MainFrame* self)
 {
 	switch (tabbar_selected(&self->tabbar)) {
-		case VIEW_ID_MACHINEVIEW:				
+		case VIEW_ID_MACHINEVIEW:
 				self->machineview.tabbar.style_tab.backgroundcolour = self->machineview.skin.colour;
 				self->machineview.tabbar.style_tab.colour = self->machineview.skin.effect_fontcolour;
 				self->machineview.tabbar.style_tab_select.colour = self->machineview.skin.generator_fontcolour;
-				self->machineview.tabbar.style_tab_select.backgroundcolour =
+				psy_ui_border_init_all(&self->machineview.tabbar.style_tab_select.border,
+					psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+				self->machineview.tabbar.style_tab_select.border.colour_bottom =
 					self->machineview.skin.polycolour;
 				self->machineview.tabbar.style_tab_hover.colour =
-					self->machineview.skin.polycolour;								
+					self->machineview.skin.polycolour;			
 				psy_ui_component_setbackgroundcolour(tabbar_base(&self->machineview.tabbar),
-					self->machineview.tabbar.style_tab.backgroundcolour);			
+					self->machineview.tabbar.style_tab.backgroundcolour);
 				psy_ui_component_invalidate(tabbar_base(&self->machineview.tabbar));
 			break;
 		case VIEW_ID_PATTERNVIEW:			
@@ -1372,6 +1391,13 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 				self->patternview.tabbar.style_tab_select.colour;			
 			self->patternview.tabbar.style_tab_label.colour =
 				self->patternview.skin.font;
+			psy_ui_border_init_all(&self->patternview.tabbar.style_tab_select.border,
+				psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+			self->patternview.tabbar.style_tab_select.border.colour_bottom =
+				self->patternview.skin.selection;
+			self->patternview.tabbar.style_tab_hover.border = self->patternview.tabbar.style_tab_select.border;
+			self->patternview.tabbar.style_tab_select.border.colour_bottom =
+				self->patternview.skin.selection;
 			psy_ui_component_setbackgroundcolour(tabbar_base(&self->patternview.tabbar),
 				self->patternview.tabbar.style_tab.backgroundcolour);
 			psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));

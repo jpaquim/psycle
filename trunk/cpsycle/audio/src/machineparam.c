@@ -4,18 +4,17 @@
 #include "../../detail/prefix.h"
 
 #include "machineparam.h"
+// local
 #include "plugin_interface.h"
-
+// dsp
 #include <convert.h>
 #include <valuemapper.h>
-
+// std
 #include <math.h>
-#include <stdlib.h>
-
+// platform
 #include "../../detail/portable.h"
 
 // MachineParameter
-
 static void machineparam_tweak(psy_audio_MachineParam* self, float value)
 {
 	psy_signal_emit_float(&self->signal_tweak, self, value);
@@ -332,13 +331,20 @@ static void intmachineparam_vtable_init(psy_audio_IntMachineParam* self)
 {
 	if (!intmachineparam_vtable_initialized) {
 		intmachineparam_vtable = *(self->machineparam.vtable);
-		intmachineparam_vtable.tweak = (fp_machineparam_tweak)intmachineparam_tweak;
-		intmachineparam_vtable.normvalue = (fp_machineparam_normvalue)intmachineparam_normvalue;
-		intmachineparam_vtable.range = (fp_machineparam_range)intmachineparam_range;
-		intmachineparam_vtable.name = (fp_machineparam_name)intmachineparam_name;
-		intmachineparam_vtable.label = (fp_machineparam_label)intmachineparam_label;
-		intmachineparam_vtable.type = (fp_machineparam_type)intmachineparam_type;
-		intmachineparam_vtable.describe = (fp_machineparam_describe)intmachineparam_describe;
+		intmachineparam_vtable.tweak = (fp_machineparam_tweak)
+			intmachineparam_tweak;
+		intmachineparam_vtable.normvalue = (fp_machineparam_normvalue)
+			intmachineparam_normvalue;
+		intmachineparam_vtable.range = (fp_machineparam_range)
+			intmachineparam_range;
+		intmachineparam_vtable.name = (fp_machineparam_name)
+			intmachineparam_name;
+		intmachineparam_vtable.label = (fp_machineparam_label)
+			intmachineparam_label;
+		intmachineparam_vtable.type = (fp_machineparam_type)
+			intmachineparam_type;
+		intmachineparam_vtable.describe = (fp_machineparam_describe)
+			intmachineparam_describe;
 		intmachineparam_vtable_initialized = 1;
 	}
 }

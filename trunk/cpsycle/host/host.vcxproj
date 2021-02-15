@@ -342,6 +342,7 @@
     <ClCompile Include="src\metronomeconfig.c" />
     <ClCompile Include="src\midimonitor.c" />
     <ClCompile Include="src\midiviewconfig.c" />
+    <ClCompile Include="src\miniview.c" />
     <ClCompile Include="src\navigation.c" />
     <ClCompile Include="src\newmachine.c" />
     <ClCompile Include="src\newval.c" />
@@ -475,6 +476,7 @@
     <ClInclude Include="src\metronomeconfig.h" />
     <ClInclude Include="src\midimonitor.h" />
     <ClInclude Include="src\midiviewconfig.h" />
+    <ClInclude Include="src\miniview.h" />
     <ClInclude Include="src\navigation.h" />
     <ClInclude Include="src\newmachine.h" />
     <ClInclude Include="src\newval.h" />
@@ -540,18 +542,21 @@
     <ClInclude Include="src\zoombox.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="heart-dark.bmp" />
     <Image Include="src\resources\arrow-back-circle-outline.bmp" />
     <Image Include="src\resources\arrow-back-dark.bmp" />
     <Image Include="src\resources\arrow-forward-circle-outline.bmp" />
     <Image Include="src\resources\arrow-forward-dark.bmp" />
     <Image Include="src\resources\conf-general.bmp" />
     <Image Include="src\resources\earth-dark.bmp" />
+    <Image Include="src\resources\heart-dark.bmp" />
     <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
     <Image Include="src\resources\kbd.bmp" />
     <Image Include="src\resources\machines-dark.bmp" />
     <Image Include="src\resources\machine_skin.bmp" />
     <Image Include="src\resources\macparam.ico" />
+    <Image Include="src\resources\matrix-dark.bmp" />
     <Image Include="src\resources\mixer_skin.bmp" />
     <Image Include="src\resources\new-dark.bmp" />
     <Image Include="src\resources\newmachine-dark.bmp" />
@@ -569,7 +574,11 @@
     <Image Include="src\resources\stop-dark.bmp" />
     <Image Include="src\resources\TbMainKnob.bmp" />
     <Image Include="src\resources\term.bmp" />
+    <Image Include="src\resources\tray-dark.bmp" />
     <Image Include="src\resources\undo-dark.bmp" />
+    <Image Include="src\resources\wires-dark.bmp" />
+    <Image Include="tray-dark.bmp" />
+    <Image Include="wires-dark.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)audio\audio.vcxproj">

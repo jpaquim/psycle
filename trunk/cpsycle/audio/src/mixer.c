@@ -22,6 +22,8 @@
 
 #include "../../detail/portable.h"
 
+#define MASTERCHANNEL_SOLOCOLUMN_INDEX psy_INDEX_INVALID - 1
+
 static void mixer_describeeditname(psy_audio_Mixer*, char* text, uintptr_t slot);
 static uintptr_t numreturncolumns(psy_audio_Mixer*);
 
@@ -484,6 +486,12 @@ psy_audio_MixerSend* psy_audio_mixersend_allocinit(uintptr_t slot)
 }
 
 // MasterChannel
+// prototypes
+static void masterchannel_solo_tweak(psy_audio_MasterChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void masterchannel_solo_normvalue(psy_audio_MasterChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+// implementation
 void masterchannel_init(psy_audio_MasterChannel* self, psy_audio_Mixer* mixer, const char* name, const char* label)
 {
 	self->mixer = mixer;
@@ -514,6 +522,10 @@ void masterchannel_init(psy_audio_MasterChannel* self, psy_audio_Mixer* mixer, c
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
+		masterchannel_solo_tweak);
+	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
+		masterchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
 	self->mute_param.machineparam.isslidergroup = TRUE;
@@ -583,7 +595,33 @@ void masterchannel_level_normvalue(psy_audio_MasterChannel* self,
 	}
 }
 
-// Mixer Channel
+void masterchannel_solo_tweak(psy_audio_MasterChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (value != 0.f) {
+		self->mixer->solocolumn = MASTERCHANNEL_SOLOCOLUMN_INDEX;
+	} else {
+		self->mixer->solocolumn = psy_INDEX_INVALID;
+	}
+}
+
+void masterchannel_solo_normvalue(psy_audio_MasterChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (self->mixer->solocolumn == MASTERCHANNEL_SOLOCOLUMN_INDEX) {
+		*rv = 1.f;
+	} else {
+		*rv = 0.f;
+	}
+}
+
+// Input Channel
+// prototypes
+static void inputchannel_mute_tweak(psy_audio_InputChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void inputchannel_mute_normvalue(psy_audio_InputChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+// implementation
 void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 	psy_audio_Mixer* mixer,
 	uintptr_t inputslot)
@@ -638,8 +676,12 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->mute_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
+		inputchannel_mute_tweak);
+	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,
+		inputchannel_mute_normvalue);
 	psy_audio_intmachineparam_init(&self->dryonly_param,
 		"D", "D", MPF_SLIDERCHECK | MPF_SMALL, &self->dryonly, 0, 1);
 	self->dryonly_param.machineparam.isslidergroup = TRUE;
@@ -783,6 +825,35 @@ psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel* self)
 	return rv;
 }
 
+void inputchannel_mute_tweak(psy_audio_InputChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (self->mixer->solocolumn == psy_INDEX_INVALID) {
+		self->mute = (value > 0.f);
+	}
+}
+
+void inputchannel_mute_normvalue(psy_audio_InputChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (self->mixer->solocolumn != psy_INDEX_INVALID) {
+		if (self->mixer->solocolumn == self->id) {
+			*rv = 0.f;
+			return;
+		}
+		*rv = 1.f;
+		return;
+	}
+	*rv = (self->mute) ? 1.f : 0.f;
+}
+
+// Return Channel
+// prototypes
+static void returnchannel_mute_tweak(psy_audio_ReturnChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void returnchannel_mute_normvalue(psy_audio_ReturnChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
+// implementation
 void returnchannel_init(psy_audio_ReturnChannel* self,
 	struct psy_audio_Mixer* mixer,
 	uintptr_t id,
@@ -818,7 +889,11 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
+		returnchannel_mute_tweak);
+	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,
+		returnchannel_mute_normvalue);
 	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_audio_routemachineparam_init(&self->route_param, self, mixer, 0);
 }
@@ -924,6 +999,28 @@ void returnchannel_level_normvalue(psy_audio_ReturnChannel* self,
 	}
 }
 
+void returnchannel_mute_tweak(psy_audio_ReturnChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	if (self->mixer->solocolumn == psy_INDEX_INVALID) {
+		self->mute = (value > 0.f);
+	}
+}
+
+void returnchannel_mute_normvalue(psy_audio_ReturnChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	if (self->mixer->solocolumn != psy_INDEX_INVALID) {
+		if (self->mixer->solocolumn == self->id) {
+			*rv = 0.f;
+			return;
+		}
+		*rv = 1.f;
+		return;
+	}
+	*rv = (self->mute) ? 1.f : 0.f;
+}
+
 // Mixer
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -971,6 +1068,7 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	self->maxreturn = 0;
 	psy_table_init(&self->legacyreturn_);
 	psy_table_init(&self->legacysend_);
+	self->solocolumn = psy_INDEX_INVALID;
 	machines = psy_audio_machine_machines(base);
 	psy_signal_connect(&machines->connections.signal_connected, self,
 		onconnected);
@@ -1709,14 +1807,21 @@ int loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	int32_t numins = 0;
 	uint32_t numrets = 0;
 	uint32_t i;
+	int32_t solocolumn;
 	int status;
 
 	if (status = psyfile_read(songfile->file, &filesize, sizeof(filesize))) {
 		return status;
 	}
-	if (status = psyfile_read(songfile->file, &self->solocolumn, sizeof(self->solocolumn))) {
+	if (status = psyfile_read(songfile->file, &solocolumn, sizeof(solocolumn))) {
 		return status;
 	}
+	if (solocolumn == -1) {
+		self->solocolumn = psy_INDEX_INVALID;
+	} else {
+		self->solocolumn = (uintptr_t)solocolumn;
+	}
+	self->solocolumn = solocolumn;
 	if (status = psyfile_read(songfile->file, &self->master.volume, sizeof(float))) {
 		return status;
 	}
@@ -1904,11 +2009,12 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	uint32_t size;
 	uint32_t i;
 	uint32_t j;
+	int32_t solocolumn;
 	psy_audio_InputChannel emptyinput;
 	psy_audio_ReturnChannel emptyreturn;
 	int status;
 
-	size = (sizeof(self->solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +
+	size = (sizeof(solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +
 		2 * sizeof(uint32_t));
 	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(float)) * (uint32_t)self->inputs.count;
 	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + (uint32_t)self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * (uint32_t)self->returns.count;
@@ -1916,7 +2022,12 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
 		return status;
 	}
-	if (status = psyfile_write(songfile->file, &self->solocolumn, sizeof(self->solocolumn))) {
+	if (self->solocolumn == psy_INDEX_INVALID) {
+		solocolumn = -1;
+	} else {
+		solocolumn = (int32_t)self->solocolumn;
+	}
+	if (status = psyfile_write(songfile->file, &solocolumn, sizeof(solocolumn))) {
 		return status;
 	}
 	if (status = psyfile_write(songfile->file, &self->master.volume, sizeof(float))) {

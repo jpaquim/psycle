@@ -407,7 +407,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		break;
 	case PROPERTY_ID_APPTHEME:
 		workspace_setapptheme(self, property);
-		break;
+		break;	
 	case PROPERTY_ID_DEFAULTLINES:
 		if (psy_property_item_int(property) > 0) {
 			psy_audio_pattern_setdefaultlines((uintptr_t)psy_property_item_int(property));

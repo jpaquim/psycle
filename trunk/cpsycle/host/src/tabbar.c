@@ -314,12 +314,10 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				psy_ui_realpoint_make(position.x, position.y),
 				psy_ui_realsize_make(
 					psy_ui_value_px(&tab->size.width, tm),
-					psy_ui_value_px(&tab->size.height, tm))),
-				//psy_ui_realsize_make(
-				//	width,
-				//	centery + tm->tmHeight + 2)),
-				self->style_tab_hover.border);				
+					psy_ui_value_px(&tab->size.height, tm))),				
+				self->style_tab_hover.border);
 	} else if (selected) {
+
 		//tabbar_drawtabbackground(self, g, tab, &self->style_tab_select,
 			//position);
 	} else {
@@ -359,15 +357,13 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 	psy_ui_textout(g, position.x + textident, position.y + centery, text,
 		psy_strlen(text));
 	if (selected && drawselline) {
-		double width;
-
-		width = psy_ui_value_px(&tab->size.width, tm);
-		psy_ui_setcolour(g, self->style_tab_select.backgroundcolour);
-		psy_ui_drawline(g,
-			psy_ui_realpoint_make(position.x, position.y +
-				centery + tm->tmHeight + 2),
-			psy_ui_realpoint_make(position.x + width, position.y +
-				centery + tm->tmHeight + 2));
+		psy_ui_drawborder(g,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(position.x, position.y),
+				psy_ui_realsize_make(
+					psy_ui_value_px(&tab->size.width, tm),
+					psy_ui_value_px(&tab->size.height, tm))),
+			self->style_tab_select.border);
 	}
 }
 

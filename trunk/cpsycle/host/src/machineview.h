@@ -44,6 +44,9 @@ extern "C" {
 //                   track and line as key and a MachineUi pointer as value
 
 // MachineView
+
+struct MiniView;
+
 typedef struct MachineView {
 	// inherits
 	psy_ui_Component component;
@@ -62,6 +65,9 @@ typedef struct MachineView {
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+void machineview_onminiviewcustomdraw(MachineView*, struct MiniView*,
+	psy_ui_Graphics*);
 
 INLINE psy_ui_Component* machineview_base(MachineView* self)
 {

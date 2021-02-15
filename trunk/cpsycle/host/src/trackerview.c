@@ -212,7 +212,6 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	trackergrid_init_signals(self);
 	// init internal data	
-	self->opcount = 0;
 	self->syncpattern = TRUE;	
 	self->midline = FALSE;	
 	self->columnresize = 0;
@@ -1558,7 +1557,7 @@ void trackergrid_invalidatecursor(TrackerGrid* self)
 
 	trackergrid_invalidateinternalcursor(self, self->oldcursor);
 	trackergrid_invalidateinternalcursor(self, self->gridstate->cursor);
-	trackergrid_storecursor(self);
+	trackergrid_storecursor(self);	
 }
 
 void trackergrid_invalidateinternalcursor(TrackerGrid* self,
@@ -1598,6 +1597,13 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 						? self->linestate->sequenceentryoffset
 						: 0.0))),
 				psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));
+		if (trackergridstate_pattern(
+			self->gridstate)) {
+			trackergrid_preventpatternsync(self);
+			trackergridstate_pattern(
+				self->gridstate)->opcount++;
+			trackergrid_resetpatternsync(self);
+		}
 	}
 }
 
@@ -2091,10 +2097,10 @@ void trackergrid_resetpatternsync(TrackerGrid* self)
 	assert(self);
 
 	if (trackergridstate_pattern(self->gridstate)) {
-		self->opcount = trackergridstate_pattern(
+		self->component.opcount = trackergridstate_pattern(
 			self->gridstate)->opcount;
 	} else {
-		self->opcount = 0;
+		self->component.opcount = 0;
 	}
 }
 
