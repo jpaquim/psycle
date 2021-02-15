@@ -78,6 +78,14 @@ IDB_MACHINES_DARK       BITMAP                  "machines-dark.bmp"
 
 IDB_NEWMACHINE_DARK     BITMAP                  "newmachine-dark.bmp"
 
+IDB_MATRIX_DARK         BITMAP                  "matrix-dark.bmp"
+
+IDB_WIRES_DARK          BITMAP                  "wires-dark.bmp"
+
+IDB_HEART_DARK          BITMAP                  "heart-dark.bmp"
+
+IDB_TRAY_DARK           BITMAP                  "tray-dark.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

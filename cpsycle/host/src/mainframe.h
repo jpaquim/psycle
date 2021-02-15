@@ -25,6 +25,7 @@
 #include "machinedock.h"
 #include "metronomebar.h"
 #include "midimonitor.h"
+#include "miniview.h"
 #include "navigation.h"
 #include "playbar.h"
 #include "playposbar.h"
@@ -92,10 +93,8 @@ typedef struct MainFrame {
 	psy_ui_SplitBar splitbar;
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
-	psy_ui_Button toggleterminal;
-	psy_ui_Image termimg;
-	psy_ui_Button togglekbdhelp;
-	psy_ui_Image kbdimg;	
+	psy_ui_Button toggleterminal;	
+	psy_ui_Button togglekbdhelp;	
 	Navigation navigation;
 	TabBar tabbar;	
 	psy_ui_Notebook notebook;
@@ -145,6 +144,7 @@ typedef struct MainFrame {
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;
+	MiniView miniview;
 	ConfirmBox checkunsavedbox;
 	//Confirm confirm;
 	TerminalMsgType terminalmsgtype;

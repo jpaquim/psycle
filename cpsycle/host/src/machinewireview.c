@@ -5,10 +5,12 @@
 
 #include "machinewireview.h"
 // host
+#include "resources/resource.h"
 #include "skingraphics.h"
 #include "wireview.h"
 #include "machineview.h"
 #include "machineviewbar.h"
+#include "miniview.h"
 // audio
 #include <exclusivelock.h>
 // std
@@ -580,6 +582,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 		machineui = machineuis_at(self, self->dragslot);
 		if (machineui) {
 			machineui_onmousemove(machineui, ev);
+			++self->component.opcount;
 			if (!ev->bubble) {
 				return;
 			}
@@ -592,7 +595,8 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 		} else if (machinewireview_dragging_connection(self)) {
 			self->dragpt.x = ev->pt.x;
 			self->dragpt.y = ev->pt.y;
-			psy_ui_component_invalidate(&self->component);			
+			psy_ui_component_invalidate(&self->component);
+			++self->component.opcount;
 		}		
 	} else if (self->showwirehover) {
 		psy_audio_Wire hoverwire;
@@ -607,6 +611,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 					psy_ui_realpoint_make(ev->pt.x, ev->pt.y))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
+					++self->component.opcount;
 					return;
 				}
 			}
@@ -616,12 +621,14 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 						psy_ui_realpoint_make(ev->pt.x, ev->pt.y))) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
+					++self->component.opcount;
 					return;
 				}
 			}
 		}
 		if (!psy_audio_wire_equal(&hoverwire, &self->hoverwire)) {
 			self->hoverwire = hoverwire;
+			++self->component.opcount;
 			psy_ui_component_invalidate(&self->component);
 		}		
 	}
@@ -1040,6 +1047,7 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 		}
 		psy_ui_component_updateoverflow(&self->component);
 		psy_ui_component_invalidate(&self->component);
+		++self->component.opcount;
 		self->randominsert = 1;
 	}
 }
@@ -1050,18 +1058,21 @@ void machinewireview_onmachineremoved(MachineWireView* self,
 	machineuis_remove(self, slot);
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
+	++self->component.opcount;
 }
 
 void machinewireview_onconnected(MachineWireView* self,
 	psy_audio_Connections* sender, uintptr_t src, uintptr_t dst)
 {
 	psy_ui_component_invalidate(&self->component);
+	++self->component.opcount;
 }
 
 void machinewireview_ondisconnected(MachineWireView* self,
 	psy_audio_Connections* sender, uintptr_t src, uintptr_t dst)
 {
 	psy_ui_component_invalidate(&self->component);
+	++self->component.opcount;
 }
 
 void machinewireview_buildmachineuis(MachineWireView* self)
@@ -1087,6 +1098,7 @@ void machinewireview_buildmachineuis(MachineWireView* self)
 			machinewireview_centermaster(self);
 		}
 	}
+	++self->component.opcount;
 }
 
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
@@ -1100,7 +1112,8 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
 	}	
 	psy_ui_component_setscroll(&self->component, psy_ui_point_zero());	
 	psy_ui_component_updateoverflow(&self->component);
-	psy_ui_component_invalidate(&self->component);	
+	psy_ui_component_invalidate(&self->component);
+	++self->component.opcount;
 }
 
 void machinewireview_onshowparameters(MachineWireView* self, Workspace* sender,
@@ -1376,4 +1389,59 @@ psy_ui_RealRectangle machinewireview_bounds(MachineWireView* self)
 	}
 	psy_ui_realrectangle_expand(&rv, 0.0, 10.0, 10.0, 0.0);
 	return rv;
+}
+
+void machinewireview_onminiviewcustomdraw(MachineWireView* self, MiniView* miniview,
+	psy_ui_Graphics* g)
+{
+	psy_TableIterator it;
+	psy_ui_Bitmap bitmap;
+	psy_ui_Graphics mem;	
+	psy_ui_Size preferredsize;
+	psy_ui_RealSize preferredsizepx;
+	psy_ui_RealSize size;
+	const psy_ui_TextMetric* tm;
+	
+	tm = psy_ui_component_textmetric(&self->component);
+	preferredsize = psy_ui_component_preferredsize(&self->component, NULL);
+	size = psy_ui_component_sizepx(&self->component);
+	preferredsizepx.width = psy_ui_value_px(&preferredsize.width, tm);
+	preferredsizepx.height = psy_ui_value_px(&preferredsize.height, tm);
+	if (preferredsizepx.width < size.width) {
+		preferredsizepx.width = size.width;
+	}
+	if (preferredsizepx.height < size.height) {
+		preferredsizepx.height = size.height;
+	}	
+	psy_ui_bitmap_init_size(&bitmap, preferredsizepx);	
+	psy_ui_graphics_init_bitmap(&mem, &bitmap);
+	psy_ui_drawsolidrectangle(&mem,
+		psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+			preferredsizepx),
+		psy_ui_component_backgroundcolour(&self->component));
+	for (it = psy_table_begin(&self->machineuis);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		MachineUi* machineui;
+		const psy_ui_RealRectangle* position;
+
+		machineui = (MachineUi*)psy_tableiterator_value(&it);
+		position = machineui_position(machineui);		
+		psy_ui_setorigin(&mem, psy_ui_realpoint_make(-position->left,
+			-position->top));
+		machineui_draw(machineui, &mem, psy_tableiterator_key(&it), FALSE);
+		psy_ui_resetorigin(&mem);
+		if (self->selectedwire.src == psy_INDEX_INVALID &&
+			self->selectedslot == psy_tableiterator_key(&it)) {
+			machineui_drawhighlight(machineui, &mem);
+		}		
+	}
+	psy_ui_graphics_dispose(&mem);
+	psy_ui_drawstretchedbitmap(g, &bitmap,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_zero(),
+			psy_ui_component_sizepx(&miniview->component)),
+		psy_ui_realpoint_zero(),
+		preferredsizepx);
+	psy_ui_bitmap_dispose(&bitmap);		
 }

@@ -202,7 +202,8 @@ typedef struct psy_ui_Component {
 	bool handlevscroll;
 	bool handlehscroll;
 	int cursor;	
-	bool mousetracking;	
+	bool mousetracking;
+	uintptr_t opcount;
 	psy_ui_Size preferredsize;
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;

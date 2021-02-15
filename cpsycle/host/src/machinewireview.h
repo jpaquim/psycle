@@ -25,6 +25,8 @@ extern "C" {
 //	
 // Displays and edits machines with their wires
 
+struct MiniView;
+
 typedef struct MachineWireView {
 	// inherits
 	psy_ui_Component component;
@@ -65,6 +67,8 @@ void machinewireview_updateskin(MachineWireView*);
 void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
 bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
 	double x, double y);
+void machinewireview_onminiviewcustomdraw(MachineWireView*, struct MiniView*,
+	psy_ui_Graphics*);
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 {

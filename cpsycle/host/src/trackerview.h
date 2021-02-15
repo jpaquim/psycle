@@ -65,7 +65,6 @@ typedef struct {
 	double dragcolumnbase;
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
-	uintptr_t opcount;
 	bool syncpattern;
 	bool wraparound;
 	bool showemptydata;

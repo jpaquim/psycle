@@ -510,6 +510,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->cursor = psy_ui_CURSOR_DEFAULT;
 	self->tabindex = -1;
 	self->scrollmode = psy_ui_SCROLL_GRAPHICS;
+	self->opcount = 0;
 	psy_ui_point_init(&self->scroll);
 	psy_ui_component_updatefont(self);
 	if (self->imp) {

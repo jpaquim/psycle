@@ -130,7 +130,7 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	self->hFontPrev = SelectObject(self->hdc,
 		((psy_ui_win_FontImp*)psy_ui_style(psy_ui_STYLE_COMMON)->font.imp)->hfont);
 	self->orgx = 0;
-	self->orgy = 0;
+	self->orgy = 0;	
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);	
 }
 

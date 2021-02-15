@@ -6,6 +6,7 @@
 #include "machineview.h"
 // host
 #include "resources/resource.h"
+#include "miniview.h"
 #include "skingraphics.h"
 #include "styles.h"
 #include "wireview.h"
@@ -102,8 +103,12 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append(&self->tabbar, "machineview.wires");
-	tabbar_append(&self->tabbar, "machineview.stack");
+	tab = tabbar_append(&self->tabbar, "machineview.wires");
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_WIRES_DARK);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));	
+	tab = tabbar_append(&self->tabbar, "machineview.stack");
+	psy_ui_bitmap_loadresource(&tab->icon, IDB_MATRIX_DARK);
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
 	tab = tabbar_append(&self->tabbar, "machineview.new-machine");		
 	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_NEWMACHINE_DARK);
@@ -260,5 +265,13 @@ void machineview_onnewmachineselected(MachineView* self,
 	} else {
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);
+	}
+}
+
+void machineview_onminiviewcustomdraw(MachineView* self, MiniView* miniview,
+	psy_ui_Graphics* g)
+{
+	if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
+		machinewireview_onminiviewcustomdraw(&self->wireview, miniview, g);
 	}
 }

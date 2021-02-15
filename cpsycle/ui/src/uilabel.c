@@ -13,7 +13,8 @@
 // prototypes
 static void psy_ui_label_ondestroy(psy_ui_Label*);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
-static void psy_ui_label_onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void psy_ui_label_onpreferredsize(psy_ui_Label*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
 
@@ -120,7 +121,8 @@ void psy_ui_label_text(psy_ui_Label* self, char* text)
 	}
 }
 
-void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void psy_ui_label_onpreferredsize(psy_ui_Label* self,
+	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
 	char* text;

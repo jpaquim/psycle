@@ -823,12 +823,12 @@ void patternview_ontimer(PatternView* self, uintptr_t timerid)
 			self->linestate.lastplayposition = -1;
 		}
 		if (trackergridstate_pattern(&self->gridstate) &&
-				trackergridstate_pattern(&self->gridstate)->opcount != self->tracker.opcount &&
+				trackergridstate_pattern(&self->gridstate)->opcount != self->tracker.component.opcount &&
 			self->tracker.syncpattern) {
 			psy_ui_component_invalidate(&self->tracker.component);
 			psy_ui_component_invalidate(&self->left.linenumbers.component);
 		}
-		self->tracker.opcount = (trackergridstate_pattern(&self->gridstate))
+		self->tracker.component.opcount = (trackergridstate_pattern(&self->gridstate))
 			? trackergridstate_pattern(&self->gridstate)->opcount
 			: 0;
 	}
