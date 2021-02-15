@@ -64,6 +64,11 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
 		"sequencerview.show-pattern-names");
+	psy_property_setid(psy_property_settext(
+		psy_property_append_bool(self->general,
+			"showminiview", FALSE),
+		"settingsview.showminiview"),
+		PROPERTY_ID_SHOWMINIVIEW);
 }
 
 bool generalconfig_showsonginfoonload(const GeneralConfig* self)
@@ -150,22 +155,6 @@ void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
 	psy_property_set_bool(self->general, "showstepsequencer", state);
 }
 
-// events
-bool generalconfig_onchanged(GeneralConfig* self, psy_Property*
-	property)
-{
-	psy_signal_emit(&self->signal_changed, self, 1, property);
-	return TRUE;
-}
-
-bool generalconfig_hasproperty(const GeneralConfig* self,
-	psy_Property* property)
-{
-	assert(self && self->general);
-
-	return psy_property_insection(property, self->general);
-}
-
 void generalconfig_showpatternnames(GeneralConfig* self)
 {
 	assert(self);
@@ -180,4 +169,27 @@ void generalconfig_showpatternids(GeneralConfig* self)
 
 	psy_signal_emit(&self->signal_changed, self, 1,
 		psy_property_set_bool(self->general, "showpatternnames", FALSE));
+}
+
+bool generalconfig_showminiview(const GeneralConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->general, "showminiview", FALSE);
+}
+
+// events
+bool generalconfig_onchanged(GeneralConfig* self, psy_Property*
+	property)
+{
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool generalconfig_hasproperty(const GeneralConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->general);
+
+	return psy_property_insection(property, self->general);
 }

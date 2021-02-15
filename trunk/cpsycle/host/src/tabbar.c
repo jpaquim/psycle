@@ -77,13 +77,13 @@ psy_ui_Size tab_preferredsize(Tab* self, psy_ui_Component* base)
 	rv = psy_ui_component_textsize(base, text);
 	rv.height = psy_ui_value_makeeh(1.8);
 	if (!psy_ui_bitmap_empty(&self->icon)) {
-		psy_ui_Size bpmsize;		
-		psy_ui_Value ident;
+		psy_ui_RealSize bpmsize;				
+		psy_ui_RealSize textsizepx;
 
 		bpmsize = psy_ui_bitmap_size(&self->icon);
-		psy_ui_value_add(&rv.width, &bpmsize.width, tm);
-		ident = psy_ui_value_makeew(self->bitmapident);
-		psy_ui_value_add(&rv.width, &ident, tm);
+		textsizepx = psy_ui_size_px(&rv, tm);				
+		rv.width = psy_ui_value_makepx(textsizepx.width + bpmsize.width
+			+ tm->tmAveCharWidth * self->bitmapident);
 	}
 	return rv;
 }
@@ -315,7 +315,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				psy_ui_realsize_make(
 					psy_ui_value_px(&tab->size.width, tm),
 					psy_ui_value_px(&tab->size.height, tm))),				
-				self->style_tab_hover.border);
+				&self->style_tab_hover.border);
 	} else if (selected) {
 
 		//tabbar_drawtabbackground(self, g, tab, &self->style_tab_select,
@@ -325,19 +325,17 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 			//position);
 	}
 	if (!psy_ui_bitmap_empty(&tab->icon)) {
-		psy_ui_Size bpmsize;
+		psy_ui_RealSize bpmsize;
 		double vcenter;
 
 		bpmsize = psy_ui_bitmap_size(&tab->icon);
-		vcenter = (psy_ui_value_px(&tab->size.height, tm) - psy_ui_value_px(&bpmsize.height, tm)) / 2.0;
+		vcenter = (psy_ui_value_px(&tab->size.height, tm) - bpmsize.height) / 2.0;
 		psy_ui_drawbitmap(g, &tab->icon,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(position.x, position.y + vcenter),
-				psy_ui_realsize_make(
-					psy_ui_value_px(&bpmsize.width, tm),
-					psy_ui_value_px(&bpmsize.height, tm))),
+				bpmsize),
 			psy_ui_realpoint_zero());		
-		textident += psy_ui_value_px(&bpmsize.width, tm) + tm->tmAveCharWidth * tab->bitmapident;
+		textident += bpmsize.width + tm->tmAveCharWidth * tab->bitmapident;
 	}
 	if (tab->mode == TABMODE_LABEL) {
 		psy_ui_settextcolour(g, self->style_tab_label.colour);
@@ -363,7 +361,7 @@ void tabbar_drawtab(TabBar* self, psy_ui_Graphics* g,
 				psy_ui_realsize_make(
 					psy_ui_value_px(&tab->size.width, tm),
 					psy_ui_value_px(&tab->size.height, tm))),
-			self->style_tab_select.border);
+			&self->style_tab_select.border);
 	}
 }
 

@@ -32,42 +32,37 @@ void psy_ui_image_setbitmapalignment(psy_ui_Image* self,
 void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
-	psy_ui_Size bmpsize;
+	psy_ui_RealSize bmpsize;
 	const psy_ui_TextMetric* tm;
 	double x;
 	double y;
 	double width;
-	double height;
-	double bmpwidth;
-	double bmpheight;
+	double height;	
 
 	size = psy_ui_component_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
 	width = psy_ui_value_px(&size.width, tm);
 	height = psy_ui_value_px(&size.height, tm);
-	bmpsize = psy_ui_bitmap_size(&self->bitmap);
-	bmpwidth = psy_ui_value_px(&bmpsize.width, tm);
-	bmpheight = psy_ui_value_px(&bmpsize.height, tm);
+	bmpsize = psy_ui_bitmap_size(&self->bitmap);	
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
-		x = (width - bmpwidth) / 2;
+		x = (width - bmpsize.width) / 2;
 	} else 		
 	if (checkalignment(self, psy_ui_ALIGNMENT_RIGHT)) {
-		x = width - bmpwidth;
+		x = width - bmpsize.width;
 	} else {		
 		x = 0;		
 	}
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_VERTICAL)) {								
-		y = (height - bmpheight) / 2;
+		y = (height - bmpsize.height) / 2;
 	} else 		
 	if (checkalignment(self, psy_ui_ALIGNMENT_BOTTOM)) {
-		y = height - bmpheight;
+		y = height - bmpsize.height;
 	} else {		
 		y = 0;		
 	}	
 	psy_ui_drawbitmap(g, &self->bitmap,
 		psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(x, y),
-			psy_ui_realsize_make(bmpwidth, bmpheight)),
+			psy_ui_realpoint_make(x, y), bmpsize),
 		psy_ui_realpoint_zero());
 }
 

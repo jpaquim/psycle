@@ -108,6 +108,9 @@ INLINE float psy_dsp_resampler_work_float(psy_dsp_Resampler* self,
 		loopEnd);
 }
 
+// Float version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
+// data = input signal to be resampled already pointing at the integer offset.
+// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
 INLINE float psy_dsp_resampler_work_float_unchecked(psy_dsp_Resampler* self,
 	float const* data, uint32_t res)
 {

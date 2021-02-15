@@ -395,6 +395,32 @@ INLINE psy_ui_Size psy_ui_max_size(psy_ui_Size lhs, psy_ui_Size rhs,
 	return rv;
 }
 
+typedef struct psy_ui_Rectangle {
+	psy_ui_Point topleft;
+	psy_ui_Size size;
+} psy_ui_Rectangle;
+
+INLINE psy_ui_Rectangle psy_ui_rectangle_make(psy_ui_Point topleft,
+	psy_ui_Size size)
+{
+	psy_ui_Rectangle rv;
+
+	rv.topleft = topleft;
+	rv.size = size;
+	return rv;
+}
+
+INLINE psy_ui_Rectangle psy_ui_rectangle_make_px(const psy_ui_RealRectangle* r)
+{
+	psy_ui_Rectangle rv;
+
+	rv.topleft = psy_ui_point_makepx(r->left, r->top);	
+	rv.size = psy_ui_size_make(
+		psy_ui_value_makepx(psy_ui_realrectangle_width(r)),
+		psy_ui_value_makepx(psy_ui_realrectangle_height(r)));
+	return rv;
+}
+
 typedef struct psy_ui_Margin {
 	psy_ui_Value top;
 	psy_ui_Value right;

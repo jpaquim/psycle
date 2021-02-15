@@ -220,7 +220,6 @@ typedef struct psy_ui_Component {
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
-void psy_ui_updatealign(psy_ui_Component* main, psy_List* children);
 void psy_ui_notifystyleupdate(psy_ui_Component* main);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
@@ -291,8 +290,7 @@ void psy_ui_component_scrollstep(psy_ui_Component*, double stepx, double stepy);
 void psy_ui_component_move(psy_ui_Component*, psy_ui_Point origin);
 void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_clientresize(psy_ui_Component*, psy_ui_Size);
-void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Point,
-	psy_ui_Size);
+void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Rectangle position);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
@@ -309,7 +307,7 @@ void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 
-psy_ui_Border psy_ui_component_border(const psy_ui_Component*);
+const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_Component* parent, psy_ui_AlignType aligntype)

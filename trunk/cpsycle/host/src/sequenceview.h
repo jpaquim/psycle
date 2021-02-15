@@ -188,7 +188,8 @@ INLINE psy_ui_Component* sequenceroptionsbar_base(SequencerOptionsBar* self)
 typedef struct SequenceView {
 	// inherits
 	psy_ui_Component component;
-	// ui elements	
+	// ui elements
+	psy_ui_Component spacerleft;
 	SequenceListView listview;
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;

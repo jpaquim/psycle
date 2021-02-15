@@ -31,7 +31,7 @@ struct psy_ui_Bitmap;
 typedef void (*psy_ui_bitmap_fp_dispose)(struct psy_ui_Bitmap*);
 typedef int (*psy_ui_bitmap_fp_load)(struct psy_ui_Bitmap*, const char* path);
 typedef int (*psy_ui_bitmap_fp_loadresource)(struct psy_ui_Bitmap*, int resourceid);
-typedef psy_ui_Size (*psy_ui_bitmap_fp_size)(const struct psy_ui_Bitmap*);
+typedef psy_ui_RealSize (*psy_ui_bitmap_fp_size)(const struct psy_ui_Bitmap*);
 typedef bool (*psy_ui_bitmap_fp_empty)(const struct psy_ui_Bitmap*);
 typedef void (*psy_ui_bitmap_fp_settransparency)(struct psy_ui_Bitmap*,
 	psy_ui_Colour);
@@ -73,7 +73,7 @@ INLINE int psy_ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
 	return self->vtable->loadresource(self, resourceid);
 }
 
-INLINE psy_ui_Size psy_ui_bitmap_size(const psy_ui_Bitmap* self)
+INLINE psy_ui_RealSize psy_ui_bitmap_size(const psy_ui_Bitmap* self)
 {
 	return self->vtable->size(self);
 }
@@ -92,7 +92,7 @@ INLINE void psy_ui_bitmap_settransparency(psy_ui_Bitmap* self, psy_ui_Colour col
 typedef void (*psy_ui_bitmap_imp_fp_dispose)(struct psy_ui_BitmapImp*);
 typedef int (*psy_ui_bitmap_imp_fp_load)(struct psy_ui_BitmapImp*, const char* path);
 typedef int (*psy_ui_bitmap_imp_fp_loadresource)(struct psy_ui_BitmapImp*, int resourceid);
-typedef psy_ui_Size (*psy_ui_bitmap_imp_fp_size)(const struct psy_ui_BitmapImp*);
+typedef psy_ui_RealSize (*psy_ui_bitmap_imp_fp_size)(const struct psy_ui_BitmapImp*);
 typedef bool (*psy_ui_bitmap_imp_fp_empty)(const struct psy_ui_BitmapImp*);
 typedef void (*psy_ui_bitmap_imp_fp_settransparency)(struct psy_ui_BitmapImp*,
 	psy_ui_Colour);

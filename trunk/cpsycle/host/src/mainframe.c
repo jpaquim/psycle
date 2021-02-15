@@ -753,7 +753,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(&self->workspace))->signal_themechanged,
 		self, mainframe_onthemechanged);
-	if (!psycleconfig_miniview(&self->workspace.config)) {		
+	if (!generalconfig_showminiview(&self->workspace.config.general)) {
 		psy_ui_component_stoptimer(&self->miniview.component, 0);
 		psy_ui_component_hide_align(&self->miniview.component);
 	}
@@ -1222,7 +1222,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		}
 		break;
 	case PROPERTY_ID_SHOWMINIVIEW:
-		if (psycleconfig_miniview(&self->workspace.config)) {
+		if (generalconfig_showminiview(&self->workspace.config.general)) {
 			psy_ui_component_starttimer(&self->miniview.component, 0, 200);
 			psy_ui_component_show(&self->miniview.component);
 		} else {			

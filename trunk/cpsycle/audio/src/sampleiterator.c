@@ -164,7 +164,9 @@ wavedata_t psy_audio_sampleiterator_work(psy_audio_WaveDataController* self, uin
 	if (channel < self->sample->channels.numchannels) {		
 		return psy_dsp_resampler_work_float_unchecked(
 			psy_dsp_multiresampler_base(&self->resampler),
-			(channel == 0) ? self->m_pL : self->m_pR,
+			(channel == 0)
+			? self->m_pL
+			: self->m_pR,
 			self->pos.LowPart);
 	}
 	return 0.f;
@@ -312,7 +314,7 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_WaveDataController* self,
 		loopend = psy_audio_sampleiterator_loopend(self);
 	}
 	//Begin
-	memset(buffer, 0, REFILLBUFFERSIZE * sizeof(wavedata_t));
+	memset(buffer, 0, sizeof(self->lBuffer));
 	memcpy(buffer + presamples, data, psy_min(psy_audio_sampleiterator_length(self), totalsamples) * sizeof(wavedata_t));
 	if (looptype == psy_audio_SAMPLE_LOOP_DO_NOT) {
 		//End
@@ -474,12 +476,8 @@ int psy_audio_wavedatacontroller_prework(psy_audio_WaveDataController* self, int
 	// if (*left != *(m_pWave->pWaveDataL() + pos) && pos < Length()) {
 		// TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *left, *(m_pWave->pWaveDataL() + pos), (left - lBuffer), pos);
 	// }
-#endif
-	//if (psy_audio_wavedatacontroller_speed(self) != 0) {
-		amount.QuadPart /= psy_audio_wavedatacontroller_speed(self);
-	//} else {
-		amount.QuadPart = 0;
-	//}
+#endif	
+	amount.QuadPart /= psy_audio_wavedatacontroller_speed(self);	
 	return amount.LowPart + 1;
 }
 

@@ -122,12 +122,7 @@ void psycleconfig_makevisual(PsycleConfig* self)
 		"settingsview.apptheme"),
 		PROPERTY_ID_APPTHEME);
 		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 1);
-		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 1);
-	psy_property_setid(psy_property_settext(
-			psy_property_append_bool(self->visual,
-				"showminiview", TRUE),
-			"settingsview.showminiview"),
-			PROPERTY_ID_SHOWMINIVIEW);			
+		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 1);	
 	patternviewconfig_init(&self->patview, self->visual);
 	machineviewconfig_init(&self->macview, self->visual);
 	machineparamconfig_init(&self->macparam, self->visual);
@@ -211,13 +206,6 @@ void psycleconfig_enableaudio(PsycleConfig* self, bool on)
 
 	psy_property_set_bool(self->global, "enableaudio", on);
 	audioconfig_enableaudio(&self->audio, on);
-}
-
-bool psycleconfig_miniview(const PsycleConfig* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(self->visual, "showminiview", TRUE);
 }
 
 void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)

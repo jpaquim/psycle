@@ -384,13 +384,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 				break;
 			case WM_PAINT: {
-				psy_ui_Border border;							
+				const psy_ui_Border* border;							
 
 				border = psy_ui_component_border(imp->component);
 				if (imp->component->vtable->ondraw ||
 					imp->component->signal_draw.slots ||
 					imp->component->backgroundmode != psy_ui_BACKGROUND_NONE ||
-					psy_ui_border_isrect(&border)) {
+					psy_ui_border_isset(border)) {
 					HDC hdc;
 					POINT clipsize;
 					PAINTSTRUCT ps;

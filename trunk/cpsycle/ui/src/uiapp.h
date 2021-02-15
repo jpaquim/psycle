@@ -46,6 +46,7 @@ typedef struct psy_ui_App {
 	psy_ui_AppZoom zoom;
 	psy_ui_Defaults defaults;
 	psy_Translator translator;	
+	bool alignvalid;
 	// references
 	struct psy_ui_Component* main;
 } psy_ui_App;

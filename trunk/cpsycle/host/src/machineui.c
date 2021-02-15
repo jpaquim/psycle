@@ -168,10 +168,7 @@ void machineui_editname(MachineUi* self, psy_ui_Edit* edit,
 		r = machineui_coordposition(self, &self->coords->name);		
 		psy_ui_realrectangle_move(&r, -scroll.x, -scroll.y);
 		psy_ui_component_setposition(psy_ui_edit_base(edit),
-			psy_ui_point_makepx(r.left, r.top),
-			psy_ui_size_makepx(
-				psy_ui_realrectangle_width(&r),
-				psy_ui_realrectangle_height(&r)));
+			psy_ui_rectangle_make_px(&r));
 		psy_ui_component_show(&edit->component);
 	}
 }

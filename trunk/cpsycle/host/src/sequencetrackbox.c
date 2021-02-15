@@ -56,7 +56,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 			psy_ui_drawsolidrectangle(g, r,
 				psy_ui_style(styletype)->backgroundcolour);
 		}		
-		psy_ui_drawborder(g, r, psy_ui_style(styletype)->border);
+		psy_ui_drawborder(g, r, &psy_ui_style(styletype)->border);
 		psy_snprintf(text, 64, "%.2X", (int)self->trackindex);
 		r.top += centery;
 		r.bottom = self->tm->tmHeight;

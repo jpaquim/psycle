@@ -636,8 +636,9 @@ void instrumentparameterview_onmousedown(InstrumentParameterView* self,
 		if (entry) {
 			self->currentryindex = entryindex;
 			psy_ui_component_setposition(&self->editgroup,
+				psy_ui_rectangle_make(
 				psy_ui_point_makepx(fixedkey_topleft.x, fixedkey_topleft.y),
-				psy_ui_size_makepx(fixedkey_size.width, fixedkey_size.height * 1.5));
+				psy_ui_size_makepx(fixedkey_size.width, fixedkey_size.height * 1.5)));
 			intedit_setvalue(&self->edit, entry->fixedkey);
 			psy_ui_component_show(&self->editgroup);			
 		} else {

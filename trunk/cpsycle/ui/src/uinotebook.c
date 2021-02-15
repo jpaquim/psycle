@@ -42,7 +42,8 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 			} else {
 				if (c == pageindex) {
 					psy_ui_component_show(component);
-					psy_ui_component_setposition(component, psy_ui_point_zero(), size);
+					psy_ui_component_setposition(component,
+						psy_ui_rectangle_make(psy_ui_point_zero(), size));
 				} else {
 					psy_ui_component_hide(component);
 				}
@@ -77,12 +78,13 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 		psy_List* q;
 
 		int cpx = 0;
-		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
+		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; 
+				psy_list_next(&p)) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)p->entry;
 			psy_ui_component_setposition(component,
-				psy_ui_point_zero(), *size);
+				psy_ui_rectangle_make(psy_ui_point_zero(), *size));
 		}
 		psy_list_free(q);
 	} else {

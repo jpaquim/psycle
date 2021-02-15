@@ -898,6 +898,7 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 		}		
 		if (edit) {
 			psy_ui_component_setposition(edit,
+				psy_ui_rectangle_make(
 				psy_ui_point_make(
 					psy_ui_value_makepx(self->selrect.left -
 						psy_ui_component_scrollleftpx(&self->component)),
@@ -905,7 +906,7 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 						psy_ui_component_scrolltoppx(&self->component))),
 				psy_ui_size_make(
 					psy_ui_value_makepx(self->selrect.right - self->selrect.left),
-					psy_ui_value_makepx(self->textheight + 2)));
+					psy_ui_value_makepx(self->textheight + 2))));
 			if (!psy_property_readonly(self->selected)) {				
 				psy_ui_component_show(edit);
 				psy_ui_component_setfocus(edit);

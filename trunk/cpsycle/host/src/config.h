@@ -27,8 +27,7 @@ enum {
 	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,	
 	PROPERTY_ID_DEFAULTFONT,
-	PROPERTY_ID_APPTHEME,
-	PROPERTY_ID_SHOWMINIVIEW
+	PROPERTY_ID_APPTHEME	
 };
 
 typedef struct PsycleConfig {
@@ -123,7 +122,6 @@ INLINE PredefsConfig* psycleconfig_predefs(PsycleConfig* self)
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
 bool psycleconfig_audioenabled(const PsycleConfig*);
 void psycleconfig_enableaudio(PsycleConfig*, bool on);
-bool psycleconfig_miniview(const PsycleConfig*);
 
 void psycleconfig_notifyall_changed(PsycleConfig*);
 void psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
