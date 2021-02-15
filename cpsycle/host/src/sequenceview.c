@@ -20,6 +20,7 @@
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin spacing;
+
 	psy_ui_Margin rowmargin;
 	psy_ui_Button* buttons[] = {
 		&self->incpattern, &self->insertentry, &self->decpattern,
@@ -108,7 +109,7 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	double cpx = 0;
 	double cpy = 0;
 	uintptr_t c = 0;
-	intptr_t margin = 5;
+	intptr_t margin;
 	double ident;
 	psy_ui_Size size;
 	const psy_ui_TextMetric* tm;
@@ -119,6 +120,7 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	size = psy_ui_component_preferredsize(&self->component, &size);
 	tm = psy_ui_component_textmetric(&self->component);
 	ident = 0; // tm->tmAveCharWidth * 0.5;
+	margin = 5;
 	cpx = ident;
 	colwidth = floor((psy_ui_value_px(&size.width, tm) - ident) / numparametercols);
 	p = q = psy_ui_component_children(&self->component, 0);
@@ -134,62 +136,56 @@ void sequencebuttons_onalign(SequenceButtons* self)
 			c = 0;
 		}
 		psy_ui_component_setposition(component,
-			psy_ui_point_make(
-				psy_ui_value_makepx(cpx),
-				psy_ui_value_makepx(cpy)),
-			psy_ui_size_make(
-				psy_ui_value_makepx(colwidth),
-				psy_ui_value_makepx(rowheight)));
+			psy_ui_rectangle_make(
+				psy_ui_point_makepx(cpx, cpy),
+				psy_ui_size_makepx(colwidth, rowheight)));
 	}
 	psy_list_free(q);
 }
 
 void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
-	if (rv) {
-		uintptr_t numparametercols = 3;
-		double margin = 5;
-		double ident = 0;
-		uintptr_t c = 0;
-		double cpx = 0;
-		double cpy = 0;
-		double cpxmax = 0;
-		double cpymax = 0;
-		double colmax = 0;
-		psy_ui_Size size;
-		const psy_ui_TextMetric* tm;
-		psy_List* p;
-		psy_List* q;
+{	
+	uintptr_t numparametercols = 3;
+	double margin = 5;
+	double ident = 0;
+	uintptr_t c = 0;
+	double cpx = 0;
+	double cpy = 0;
+	double cpxmax = 0;
+	double cpymax = 0;
+	double colmax = 0;
+	psy_ui_Size size;
+	const psy_ui_TextMetric* tm;
+	psy_List* p;
+	psy_List* q;
 
-		size = psy_ui_component_size(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
-		ident = tm->tmAveCharWidth * 1;
-		cpx = ident;
-		for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
-			p = p->next, ++c) {
-			psy_ui_Component* component;
-			psy_ui_Size componentsize;
-			if (c >= numparametercols) {
-				cpx = ident;
-				cpy = cpymax;
-				c = 0;
-			}
-			component = (psy_ui_Component*)p->entry;
-			componentsize = psy_ui_component_preferredsize(component, &size);
-			if (colmax < psy_ui_value_px(&componentsize.width, tm) + margin) {
-				colmax = (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
-			}
-			cpx += (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
-			if (cpymax < cpy + psy_ui_value_px(&componentsize.height, tm) + margin) {
-				cpymax = floor(cpy + psy_ui_value_px(&componentsize.height, tm) + margin);
-			}
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	ident = tm->tmAveCharWidth * 1;
+	cpx = ident;
+	for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
+		p = p->next, ++c) {
+		psy_ui_Component* component;
+		psy_ui_Size componentsize;
+		if (c >= numparametercols) {
+			cpx = ident;
+			cpy = cpymax;
+			c = 0;
 		}
-		psy_list_free(q);
-		cpxmax = numparametercols * colmax;
-		rv->width = psy_ui_value_makepx(cpxmax + tm->tmAveCharWidth * 2);
-		rv->height = psy_ui_value_makepx(cpymax);
+		component = (psy_ui_Component*)p->entry;
+		componentsize = psy_ui_component_preferredsize(component, &size);
+		if (colmax < psy_ui_value_px(&componentsize.width, tm) + margin) {
+			colmax = (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
+		}
+		cpx += (intptr_t)psy_ui_value_px(&componentsize.width, tm) + margin;
+		if (cpymax < cpy + psy_ui_value_px(&componentsize.height, tm) + margin) {
+			cpymax = floor(cpy + psy_ui_value_px(&componentsize.height, tm) + margin);
+		}
 	}
+	psy_list_free(q);
+	cpxmax = numparametercols * colmax;
+	*rv = psy_ui_size_makepx(cpxmax + tm->tmAveCharWidth * 2, cpymax);
 }
 
 // SequenceListViewState
@@ -439,6 +435,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	SequenceListViewState* state, SequenceView* view,
 	psy_audio_Patterns* patterns, Workspace* workspace)
 {
+	// psy_ui_Margin spacing;
+
 	psy_ui_component_init(&self->component, parent);
 	sequencelistview_vtable_init(self);
 	self->component.vtable = &sequencelistview_vtable;
@@ -449,6 +447,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->rename.component.signal_keydown, self,
 		sequencelistview_oneditkeydown);
 	psy_ui_component_hide(&self->rename.component);
+	// spacing = psy_ui_margin_makeem(1.0, 0.0, 0.0, 0.0);
+	// psy_ui_component_setspacing(&self->component, &spacing);
 	self->view = view;	
 	self->patterns = patterns;
 	self->workspace = workspace;		
@@ -636,9 +636,10 @@ void sequencelistview_rename(SequenceListView* self)
 		self->state->selection->editposition);			
 	if (pattern) {
 		psy_ui_component_setposition(&self->rename.component,
+			psy_ui_rectangle_make(
 			psy_ui_point_make(psy_ui_value_makepx(0),
 				psy_ui_value_makepx(self->state->margin)),
-			psy_ui_size_make(psy_ui_value_makeew(20), psy_ui_value_makeeh(1)));
+			psy_ui_size_make(psy_ui_value_makeew(20), psy_ui_value_makeeh(1))));
 		psy_ui_edit_settext(&self->rename, psy_audio_pattern_name(
 			pattern));
 		psy_ui_component_show(&self->rename.component);
@@ -959,6 +960,12 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	}
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
+	// spacer left
+	psy_ui_component_init(&self->spacerleft, &self->component);
+	psy_ui_component_preventalign(&self->spacerleft);
+	psy_ui_component_setpreferredsize(&self->spacerleft,
+		psy_ui_size_makeem(1.0, 0.0));
+	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
 	// sequence listview
 	sequencelistview_init(&self->listview, &self->component,
 		&self->state, self, self->patterns, workspace);	

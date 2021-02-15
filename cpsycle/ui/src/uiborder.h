@@ -90,6 +90,14 @@ INLINE bool psy_ui_border_isrect(const psy_ui_Border* self)
 		self->bottom == psy_ui_BORDER_SOLID;		
 }
 
+INLINE bool psy_ui_border_isset(const psy_ui_Border* self)
+{
+	return self->left == psy_ui_BORDER_SOLID ||
+		self->top == psy_ui_BORDER_SOLID ||
+		self->right == psy_ui_BORDER_SOLID ||
+		self->bottom == psy_ui_BORDER_SOLID;
+}
+
 INLINE bool psy_ui_border_monochrome(const psy_ui_Border* self)
 {
 	return psy_ui_equal_colours(&self->colour_top, &self->colour_right) &&

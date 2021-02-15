@@ -44,13 +44,19 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 		
 		// merge
 		psy_ui_component_updatefont(main);
-		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
-			psy_ui_Component* child;			
-			child = (psy_ui_Component*) p->entry;			
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL;
+				psy_list_next(&p)) {
+			psy_ui_Component* child;
+
+			child = (psy_ui_Component*)psy_list_entry(p);
 			psy_ui_component_updatefont(child);		
 		}
 		// align
-		psy_ui_updatealign(main, q);
+		// call align even if position has not changed
+		psy_ui_app()->alignvalid = FALSE;
+		psy_ui_component_align(main);
+		// reset to normal align
+		psy_ui_app()->alignvalid = TRUE;		
 	}
 }
 
@@ -75,32 +81,6 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 		}
 	}
 	psy_ui_component_invalidate(main);
-}
-
-void psy_ui_updatealign(psy_ui_Component* main, psy_List* children)
-{
-	if (main) {
-		psy_List* p;
-		psy_List* q;
-
-		psy_ui_component_align(main);
-		if (!children) {
-			q = psy_ui_component_children(main, 1);
-		} else {
-			q = children;
-		}
-		for (p = q; p != NULL; p = p->next) {
-			psy_ui_Component* child;
-
-			child = (psy_ui_Component*)p->entry;
-			if ((!psy_ui_component_parent(child) ||
-				(psy_ui_component_parent(child) && !psy_ui_component_parent(child)->alignchildren))
-				&& child->alignchildren) {
-				psy_ui_component_align(child);
-			}
-		}
-		psy_list_free(q);
-	}
 }
 
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
@@ -171,12 +151,12 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
 }
 
-psy_ui_Border psy_ui_component_border(const psy_ui_Component* self)
+const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
 {
 	if (self->style.currstyle->border.mode.set) {
-		return self->style.currstyle->border;
+		return &self->style.currstyle->border;
 	}
-	return psy_ui_style(psy_ui_STYLE_COMMON)->border;
+	return &psy_ui_style(psy_ui_STYLE_COMMON)->border;
 }
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
@@ -400,6 +380,16 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {	
 	self->imp->vtable->dev_setposition(self->imp, topleft, size);
+	if (!psy_ui_app()->alignvalid) {		
+		psy_ui_Size size;
+		
+		if (self->alignchildren) {
+			psy_ui_component_align(self);
+		}		
+		if (self->overflow != psy_ui_OVERFLOW_HIDDEN) {
+			psy_ui_component_updateoverflow(self);
+		}		
+	}
 }
 
 psy_ui_Size framesize(psy_ui_Component* self)
@@ -622,10 +612,9 @@ void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Size size)
 	self->vtable->resize(self, size);	
 }
 
-void psy_ui_component_setposition(psy_ui_Component* self, psy_ui_Point topleft,
-	psy_ui_Size size)
+void psy_ui_component_setposition(psy_ui_Component* self, psy_ui_Rectangle position)
 {		
-	self->vtable->setposition(self, topleft, size);	
+	self->vtable->setposition(self, position.topleft, position.size);	
 }
 
 psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
@@ -719,20 +708,20 @@ void psy_ui_component_setmargin(psy_ui_Component* self,
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
 {
 	psy_ui_Margin rv;
-	psy_ui_Border border;
+	const psy_ui_Border* border;
 
 	psy_ui_margin_init(&rv);
 	border = psy_ui_component_border(self);
-	if (border.left == psy_ui_BORDER_SOLID) {		
+	if (border->left == psy_ui_BORDER_SOLID) {		
 		rv.left = psy_ui_value_makepx(1);
 	}
-	if (border.top == psy_ui_BORDER_SOLID) {
+	if (border->top == psy_ui_BORDER_SOLID) {
 		rv.top = psy_ui_value_makepx(1);		
 	}
-	if (border.right == psy_ui_BORDER_SOLID) {
+	if (border->right == psy_ui_BORDER_SOLID) {
 		rv.right = psy_ui_value_makepx(1);
 	}
-	if (border.bottom == psy_ui_BORDER_SOLID) {
+	if (border->bottom == psy_ui_BORDER_SOLID) {
 		rv.bottom = psy_ui_value_makepx(1);
 	}
 	return rv;
@@ -1200,10 +1189,10 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 {
 	if (self->backgroundmode == psy_ui_BACKGROUND_SET) {				
-		psy_ui_Border b;
+		const psy_ui_Border* b;
 		
 		b = psy_ui_component_border(self);
-		if (psy_ui_border_isround(&b)) {
+		if (psy_ui_border_isround(b)) {
 			psy_ui_RealRectangle r;
 
 			r = psy_ui_realrectangle_make(
@@ -1213,8 +1202,8 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 				psy_ui_component_backgroundcolour(
 					psy_ui_component_parent(self)));
 			psy_ui_drawsolidroundrectangle(g, r,
-				psy_ui_size_make(b.border_bottom_left_radius,
-					b.border_bottom_left_radius),
+				psy_ui_size_make(b->border_bottom_left_radius,
+					b->border_bottom_left_radius),
 				psy_ui_component_backgroundcolour(self));
 		} else {			
 			psy_ui_drawsolidrectangle(g, g->clip,

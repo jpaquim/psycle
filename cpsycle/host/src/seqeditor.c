@@ -464,15 +464,12 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g,
 		self->bitmapvalid = TRUE;
 	}
 	if (self->bitmapvalid) {
-		psy_ui_Size bitmapsize;
+		psy_ui_RealSize bitmapsize;
 
 		bitmapsize = psy_ui_bitmap_size(&self->bitmap);
 		psy_ui_drawbitmap(g, &self->bitmap,
 			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(0.0, y),
-				psy_ui_realsize_make(
-					psy_ui_value_px(&bitmapsize.width, tm),
-					psy_ui_value_px(&bitmapsize.height, tm))),
+				psy_ui_realpoint_make(0.0, y), bitmapsize),
 			psy_ui_realpoint_zero());
 	}
 	if (self->drag_sequenceitem_node && !self->dragstarting) {

@@ -271,7 +271,7 @@ INLINE void psy_ui_resetorigin(psy_ui_Graphics* self)
 }
 
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
-	psy_ui_Border b);
+	const psy_ui_Border*);
 
 // psy_ui_GraphicsImp
 

@@ -14,7 +14,7 @@
 static void dev_dispose(psy_ui_win_BitmapImp*);
 static int dev_load(psy_ui_win_BitmapImp*, const char* path);
 static int dev_loadresource(psy_ui_win_BitmapImp*, int resourceid);
-static psy_ui_Size dev_size(const psy_ui_win_BitmapImp*);
+static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
 static void dev_settransparency(psy_ui_win_BitmapImp*, psy_ui_Colour);
 static void dev_preparemask(psy_ui_win_BitmapImp*, psy_ui_Colour clrtrans);
@@ -111,7 +111,7 @@ int dev_loadresource(psy_ui_win_BitmapImp* self, int resourceid)
 	return bitmap == 0;
 }
 
-psy_ui_Size dev_size(const psy_ui_win_BitmapImp* self)
+psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp* self)
 {
 	assert(self);
 
@@ -119,9 +119,9 @@ psy_ui_Size dev_size(const psy_ui_win_BitmapImp* self)
 		BITMAP bitmap;
 
 		GetObject(self->bitmap, sizeof(BITMAP), &bitmap);
-		return psy_ui_size_makepx(bitmap.bmWidth, bitmap.bmHeight);
+		return psy_ui_realsize_make(bitmap.bmWidth, bitmap.bmHeight);
 	}
-	return psy_ui_size_zero();	
+	return psy_ui_realsize_zero();	
 }
 
 bool dev_empty(const psy_ui_win_BitmapImp* self)

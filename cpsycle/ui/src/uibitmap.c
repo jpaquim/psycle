@@ -13,7 +13,7 @@
 static void dispose(psy_ui_Bitmap*);
 static int load(psy_ui_Bitmap*, const char* path);
 static int loadresource(psy_ui_Bitmap*, int resourceid);
-static psy_ui_Size size(const psy_ui_Bitmap*);
+static psy_ui_RealSize size(const psy_ui_Bitmap*);
 static bool empty(const psy_ui_Bitmap*);
 static void settransparency(psy_ui_Bitmap*, psy_ui_Colour);
 
@@ -69,7 +69,7 @@ int loadresource(psy_ui_Bitmap* self, int resourceid)
 	return self->imp->vtable->dev_loadresource(self->imp, resourceid);
 }
 
-psy_ui_Size size(const psy_ui_Bitmap* self)
+psy_ui_RealSize size(const psy_ui_Bitmap* self)
 {
 	return self->imp->vtable->dev_size(self->imp);
 }
@@ -97,9 +97,9 @@ static int psy_ui_bitmap_imp_loadresource(psy_ui_BitmapImp* self,
 	return 0;
 }
 
-static psy_ui_Size psy_ui_bitmap_imp_size(const psy_ui_BitmapImp* self)
+static psy_ui_RealSize psy_ui_bitmap_imp_size(const psy_ui_BitmapImp* self)
 {
-	return psy_ui_size_zero();	
+	return psy_ui_realsize_zero();	
 }
 
 static bool psy_ui_bitmap_imp_empty(const psy_ui_BitmapImp* self)

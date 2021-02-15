@@ -283,7 +283,7 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_Real
 void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, double x, double y)
 {
 	HDC hdcmem;
-	psy_ui_Size size;
+	psy_ui_RealSize size;
 	HBITMAP wbitmap;
 	psy_ui_TextMetric tm;
 	TEXTMETRIC win_tm;
@@ -294,8 +294,8 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap
 	size = psy_ui_bitmap_size(bitmap);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
-	BitBlt(self->hdc, (int)x, (int)y, (int)psy_ui_value_px(&size.width, &tm),
-		(int)psy_ui_value_px(&size.height, &tm), hdcmem, 0, 0, SRCCOPY);
+	BitBlt(self->hdc, (int)x, (int)y, (int)size.width,
+		(int)size.height, hdcmem, 0, 0, SRCCOPY);
 	DeleteDC(hdcmem);
 }
 

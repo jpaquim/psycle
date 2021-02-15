@@ -139,7 +139,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ident = 0.0;
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
-		psy_ui_Size srcbpmsize;
+		psy_ui_RealSize srcbpmsize;
 		psy_ui_RealSize destbpmsize;
 		double vcenter;
 		const psy_ui_TextMetric* tm;
@@ -147,21 +147,19 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 
 		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
-		ratio = (tm->tmAscent - tm->tmDescent) / psy_ui_value_px(&srcbpmsize.height, tm);
+		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 		if (fabs(ratio - 1.0) < 0.15) {
 			ratio = 1.0;
 		}		
-		destbpmsize.width = psy_ui_value_px(&srcbpmsize.width, tm) * ratio;
-		destbpmsize.height = psy_ui_value_px(&srcbpmsize.height, tm) * ratio;
+		destbpmsize.width = srcbpmsize.width * ratio;
+		destbpmsize.height = srcbpmsize.height * ratio;
 		vcenter = (size.height - destbpmsize.height) / 2.0;
 		psy_ui_drawstretchedbitmap(g, &self->bitmapicon,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(0, vcenter),
 				destbpmsize),
 			psy_ui_realpoint_zero(),
-			psy_ui_realsize_make(
-				psy_ui_value_px(&srcbpmsize.width, tm),
-				psy_ui_value_px(&srcbpmsize.height, tm)));
+			srcbpmsize);
 		ident += destbpmsize.width + tm->tmAveCharWidth * self->bitmapident;
 	}
 	if (psy_strlen(text) > 0) {
@@ -253,19 +251,18 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			}
 		}
 		if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
-			psy_ui_Size srcbpmsize;			
+			psy_ui_RealSize srcbpmsize;			
 			const psy_ui_TextMetric* tm;
 			double ratio;
 
 			tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 			srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);
-			ratio = (tm->tmAscent - tm->tmDescent) / psy_ui_value_px(&srcbpmsize.height, tm);
+			ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
 			if (fabs(ratio - 1.0) < 0.15) {
 				ratio = 1.0;
 			}			
 			rv->width = psy_ui_add_values(
-				psy_ui_value_makepx(
-					psy_ui_value_px(&srcbpmsize.width, tm) * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
+				psy_ui_value_makepx(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
 			rv->height = psy_ui_value_makeeh(self->linespacing);
 			return;
 		}

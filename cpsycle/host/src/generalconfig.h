@@ -17,7 +17,8 @@ extern "C" {
 enum {
 	PROPERTY_ID_SHOWSTEPSEQUENCER = 500,
 	PROPERTY_ID_SHOWPLAYLIST,
-	PROPERTY_ID_SHOWSEQUENCEEDIT
+	PROPERTY_ID_SHOWSEQUENCEEDIT,
+	PROPERTY_ID_SHOWMINIVIEW
 };
 
 typedef struct GeneralConfig {
@@ -45,6 +46,7 @@ bool generalconfig_showplaylist(const GeneralConfig*);
 void generalconfig_setplaylistshowstate(GeneralConfig*, bool state);
 void generalconfig_showpatternnames(GeneralConfig*);
 void generalconfig_showpatternids(GeneralConfig*);
+bool generalconfig_showminiview(const GeneralConfig*);
 
 bool generalconfig_onchanged(GeneralConfig*, psy_Property*);
 bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);

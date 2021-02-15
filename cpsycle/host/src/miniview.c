@@ -342,10 +342,10 @@ void miniview_setview(MiniView* self, psy_ui_Component* view)
 		psy_ui_bitmap_init_size(&self->scaledbitmap,
 			psy_ui_component_sizepx(self->view));
 	}
-	if (self->view) {
+	if (self->view && psy_ui_component_visible(&self->component)) {
 		psy_ui_component_starttimer(&self->component, 0, 200);
 	} else {
 		psy_ui_component_invalidate(&self->component);
-		psy_ui_component_stoptimer(&self->component, 0, 200);
+		psy_ui_component_stoptimer(&self->component, 0);
 	}
 }

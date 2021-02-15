@@ -133,7 +133,7 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size),
-		psy_ui_style(psy_ui_STYLE_SLIDERPANE)->border);
+		&psy_ui_style(psy_ui_STYLE_SLIDERPANE)->border);
 }
 
 void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphics* g)
