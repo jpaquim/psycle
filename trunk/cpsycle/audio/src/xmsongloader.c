@@ -1346,8 +1346,8 @@ int xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* wave,
 
 	wave->samplerate = 8363.0;
 	wave->defaultvolume = vol * 2;
-	wave->tune = relativenote;
-	wave->finetune = (int16_t)(finetune / 1.28); // WaveFineTune has +-100 range in Psycle.
+	wave->zone.tune = relativenote;
+	wave->zone.finetune = (int16_t)(finetune / 1.28); // WaveFineTune has +-100 range in Psycle.
 	psy_audio_sample_setname(wave, cname);	
 
 	self->smplen[sampleidx] = len;
@@ -2245,7 +2245,7 @@ int modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 	tmpfine = (char)self->samples[instridx].finetune;
 	if (tmpfine > 7 ) tmpfine -= 16;
 	// finetune has +-100 range in Psycle
-	wave->finetune = (int16_t)(tmpfine * 12.5);
+	wave->zone.finetune = (int16_t)(tmpfine * 12.5);
 	psy_audio_sample_setname(wave, self->samples[instridx].sampleName);
 	return PSY_OK;
 }

@@ -59,15 +59,14 @@ typedef enum psy_audio_DupeCheck {
 	psy_audio_DUPECHECK_INSTRUMENT	
 } psy_audio_DupeCheck;
 
-typedef struct {	
-	psy_audio_SampleIndex sampleindex;
+typedef struct {
+	psy_audio_SampleIndex sampleindex;	
 	uint8_t fixedkey;
 	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
 	psy_audio_ParameterRange velocityrange;	
 	psy_audio_SampleLoop loop;
-	int16_t tune;
-	bool tune_set;
+	psy_audio_Zone zone;	
 
 	bool use_keyrange;
 	bool use_velrange;
@@ -81,6 +80,11 @@ psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void);
 
 bool psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry*,
 	uintptr_t key, uintptr_t velocity, double frequency);
+
+psy_audio_Sample* psy_audio_instrumententry_sample(psy_audio_InstrumentEntry*,
+	psy_audio_Samples*);
+int16_t psy_audio_instrumententry_tune(psy_audio_InstrumentEntry*,
+	psy_audio_Samples* samples);
 
 typedef struct psy_audio_Instrument {
 	bool enabled;

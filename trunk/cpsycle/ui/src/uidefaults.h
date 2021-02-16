@@ -37,7 +37,10 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_SLIDERTHUMB_HOVER,
 	psy_ui_STYLE_COMBOBOX,
 	psy_ui_STYLE_COMBOBOX_HOVER,
-	psy_ui_STYLE_COMBOBOX_SELECT,	
+	psy_ui_STYLE_COMBOBOX_SELECT,
+	psy_ui_STYLE_SPLITTER,
+	psy_ui_STYLE_SPLITTER_HOVER,
+	psy_ui_STYLE_SPLITTER_SELECT
 } psy_ui_StyleTypes;
 
 typedef struct psy_ui_Defaults {

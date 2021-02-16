@@ -56,6 +56,10 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 	self->hasrestore = FALSE;
 	psy_ui_size_init(&self->restoresize);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_SPLITTER,
+		psy_ui_STYLE_SPLITTER_HOVER,
+		psy_ui_STYLE_SPLITTER_SELECT);
 }
 
 void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
@@ -67,7 +71,7 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 	
 	size = psy_ui_component_sizepx(&self->component);
 	thumbsize = 30;
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
+	//psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 	if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 		center = size.height / 2 - thumbsize / 2;
@@ -138,8 +142,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		splitbar_setcursor(self);
 	}
 	if (self->resize) {
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_colour_make(0x00333333));
+		self->component.style.currstyle = &self->component.style.select;		
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -294,23 +297,21 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(next);
 		}
 		psy_ui_component_invalidate(&self->component);
-	}
-	if (self->resize) {
-		psy_ui_component_setbackgroundcolour(&self->component,
-			psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
-		psy_ui_component_invalidate(&self->component);
-		self->resize = 0;
-	}
+	}	
+	self->resize = 0;	
+	self->component.style.currstyle = &self->component.style.hover;
 }
 
 void splitbar_onmouseenter(psy_ui_SplitBar* self)
 {		
 	splitbar_setcursor(self);
-	self->hover = 1;	
+	self->component.style.currstyle = &self->component.style.hover;
+	self->hover = 1;
 }
 
 void splitbar_onmouseleave(psy_ui_SplitBar* self)
 {			
+	self->component.style.currstyle = &self->component.style.style;
 	self->hover = 0;
 }
 

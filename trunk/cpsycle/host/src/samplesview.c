@@ -407,10 +407,10 @@ void generalview_ontweak(SamplesGeneralView* self, psy_ui_Slider* slider,
 			self->sample->panfactor = value;
 		} else
 		if (slider == &self->samplednote) {
-			self->sample->tune = (int)(value * 119.f) - 60;
+			self->sample->zone.tune = (int)(value * 119.f) - 60;
 		} else
 		if (slider == &self->pitchfinetune) {
-			self->sample->finetune = (int)(value * 200.f) - 100;
+			self->sample->zone.finetune = (int)(value * 200.f) - 100;
 		}
 	}
 }
@@ -432,10 +432,10 @@ void generalview_onvalue(SamplesGeneralView* self, psy_ui_Slider* slider,
 		*value = self->sample ? self->sample->panfactor : 0.5f;
 	} else
 	if (slider == &self->samplednote) {
-		*value = self->sample ? (self->sample->tune + 60) / 119.f : 0.5f;
+		*value = self->sample ? (self->sample->zone.tune + 60) / 119.f : 0.5f;
 	} else
 	if (slider == &self->pitchfinetune) {
-		*value = self->sample ? self->sample->finetune / 200.f + 0.5f : 0.f;
+		*value = self->sample ? self->sample->zone.finetune / 200.f + 0.5f : 0.f;
 	}
 }
 
@@ -462,12 +462,13 @@ void generalview_ondescribe(SamplesGeneralView* self, psy_ui_Slider* slider, cha
 	} else
 	if (slider == &self->samplednote) {			
 		psy_snprintf(txt, 10, "%s", self->sample
-			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->tune + 60), self->notestabmode)
+			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->zone.tune + 60),
+				self->notestabmode)
 			: psy_dsp_notetostr(60, self->notestabmode));
 	} else
 	if (slider == &self->pitchfinetune) {
 		psy_snprintf(txt, 10, "%d ct.", self->sample
-			? self->sample->finetune
+			? self->sample->zone.finetune
 			: 0);
 	}
 }

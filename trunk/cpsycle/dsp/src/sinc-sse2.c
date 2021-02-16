@@ -8,6 +8,7 @@
 
 #include "operations.h"
 
+#include <assert.h>
 #include <math.h>
 
 #if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__MICROSOFT && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
@@ -431,11 +432,10 @@ float sinc_sse2_float_internal(float const* data, uint32_t res, int leftExtent, 
 	//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
 	//On the non-filtered version, we can just return the data
 	if (res == 0) return *data;
-
+		
 	float newval = 0.0f;
 	register __m128 result = _mm_setzero_ps();
 	float const* pdata = data;
-
 	float* psinc = &sinc_sse2_windowed_table[res];
 	while (leftExtent > 3) {
 		register __m128 datafloat = _mm_set_ps(pdata[-3], pdata[-2], pdata[-1], pdata[0]);
@@ -446,7 +446,7 @@ float sinc_sse2_float_internal(float const* data, uint32_t res, int leftExtent, 
 #endif
 		result = _mm_add_ps(result, _mm_mul_ps(datafloat, sincfloat));
 		pdata -= 4;
-		psinc += 4;
+		psinc += 4;		
 		leftExtent -= 4;
 	}
 	while (leftExtent > 0) {
@@ -457,7 +457,7 @@ float sinc_sse2_float_internal(float const* data, uint32_t res, int leftExtent, 
 	}
 	pdata = data + 1;
 	psinc = &sinc_sse2_windowed_table[SINC_TABLESIZE - res];
-	while (rightExtent > 3) {
+	while (rightExtent > 3) {		
 		register __m128 datafloat = _mm_loadu_ps(pdata);
 #if OPTIMIZED_RES_SHIFT > 1
 		register __m128 sincfloat = _mm_load_ps(psinc);

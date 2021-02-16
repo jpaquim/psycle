@@ -16,8 +16,7 @@
 int psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 {
 	char header[9];
-	PsyFile file;
-	int status;
+	PsyFile file;	
 	
 	if (!psyfile_open(&file, path)) {		
 		return PSY_ERRFILE;

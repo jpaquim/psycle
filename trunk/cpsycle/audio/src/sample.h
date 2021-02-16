@@ -92,6 +92,22 @@ INLINE bool psy_audio_sampleloop_equal(psy_audio_SampleLoop* self,
 #define psy_audio_PAN_LEFT 0.f;
 #define psy_audio_PAN_RIGHT 1.f;
 
+typedef enum {
+	psy_audio_ZONESET_NONE = 0,	
+	psy_audio_ZONESET_TUNE = 1,
+	psy_audio_ZONESET_FINETUNE = 2
+} psy_audio_ZoneSet;
+
+typedef struct psy_audio_Zone {
+	/// Tuning for the center note (value that is added to the note received).
+	/// values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed
+	/// with note C-5);
+	int16_t tune;	
+	/// [ -100 .. 100] full range = -/+ 1 seminote
+	int16_t finetune;
+	int zoneset;
+} psy_audio_Zone;
+
 typedef struct psy_audio_Sample {
 	char* name;
 	/// Sample(wave) length in frames(samples).
@@ -104,12 +120,7 @@ typedef struct psy_audio_Sample {
 	psy_audio_SampleLoop loop;
 	psy_audio_SampleLoop sustainloop;
 	psy_dsp_big_hz_t samplerate;
-	/// Tuning for the center note (value that is added to the note received).
-	/// values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed
-	/// with note C-5);
-	int16_t tune;
-	/// [ -100 .. 100] full range = -/+ 1 seminote
-	int16_t finetune;	
+	psy_audio_Zone zone;
 	bool stereo;
 	// Wave data, (use psy_audio_sample_allocwavedata to create the memory,
 	//             else only the channel structure is created without
@@ -243,22 +254,22 @@ INLINE void psy_audio_sample_setsustainloop(psy_audio_Sample* self,
 
 INLINE int16_t psy_audio_sample_tune(const psy_audio_Sample* self)
 {
-	return self->tune;
+	return self->zone.tune;
 }
 
 INLINE void psy_audio_sample_settune(psy_audio_Sample* self, int16_t tune)
 {
-	self->tune = tune;
+	self->zone.tune = tune;
 }
 
 INLINE int16_t psy_audio_sample_finetune(const psy_audio_Sample* self)
 {
-	return self->finetune;
+	return self->zone.finetune;
 }
 
 INLINE void psy_audio_sample_setfinetune(psy_audio_Sample* self, int16_t tune)
 {
-	self->finetune = tune;
+	self->zone.finetune = tune;
 }
 
 INLINE bool psy_audio_sample_stero(const psy_audio_Sample* self)

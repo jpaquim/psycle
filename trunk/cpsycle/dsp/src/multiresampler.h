@@ -9,10 +9,9 @@
 #ifdef PSYCLE_USE_SSE
 #include "spline-sse2.h"
 #include "sinc-sse2.h"
-#else
+#endif
 #include "spline.h"
 #include "sinc.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,14 +30,14 @@ typedef struct psy_dsp_MultiResampler {
 	psy_dsp_Resampler resampler;
 	psy_dsp_LinearResampler linear;
 #ifdef PSYCLE_USE_SSE
-	psy_dsp_SplineSEE2Resampler spline;	
-	psy_dsp_SincSSE2Resampler sinc;
-#else
+	psy_dsp_SplineSEE2Resampler spline_sse2;	
+	psy_dsp_SincSSE2Resampler sinc_sse2;
+#endif
 	psy_dsp_SplineResampler spline;
-	psy_dsp_SincResampler sinc;
-#endif	
+	psy_dsp_SincResampler sinc;	
 	psy_dsp_ResamplerQuality selected;
-	psy_dsp_Resampler* selectedresampler;	
+	psy_dsp_Resampler* selectedresampler;
+	bool use_sse2_if_available;
 } psy_dsp_MultiResampler;
 
 void psy_dsp_multiresampler_init(psy_dsp_MultiResampler*, psy_dsp_ResamplerQuality);

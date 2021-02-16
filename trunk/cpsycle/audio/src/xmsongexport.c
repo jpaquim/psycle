@@ -867,8 +867,8 @@ int xmsongexport_savesampleheader(XMSongExport* self, int instIdx, int sampleIdx
 	strncpy(stheader.name, psy_audio_sample_name(wave), 22); //Names are not null terminated
 	// stheader.res Implicitely set at zero by memset
 
-	tune = wave->tune;
-	finetune = (int)((float)wave->finetune * 1.28);
+	tune = wave->zone.tune;
+	finetune = (int)((float)wave->zone.finetune * 1.28);
 	if (wave->samplerate != 8363) {
 		//correct the tuning
 		double newtune = log10((double)(wave->samplerate) / 8363.0) / log10(2.0);

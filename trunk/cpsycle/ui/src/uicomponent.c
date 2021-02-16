@@ -60,28 +60,6 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 	}
 }
 
-void psy_ui_notifystyleupdate(psy_ui_Component* main)
-{
-	if (main) {
-		psy_List* p;
-		psy_List* q;
-
-		// merge
-		main->vtable->onupdatestyles(main);
-		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
-			psy_ui_Component* child;
-			child = (psy_ui_Component*)p->entry;
-			child->vtable->onupdatestyles(child);
-			if (child->imp) {			
-				child->imp->vtable->dev_setbackgroundcolour(child->imp,
-					psy_ui_component_backgroundcolour(child));
-				psy_ui_component_updatefont(child);
-			}
-
-		}
-	}
-	psy_ui_component_invalidate(main);
-}
 
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 {
@@ -210,7 +188,8 @@ static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
 static void onlanguagechanged(psy_ui_Component* self) { }
 static void onfocus(psy_ui_Component* self) { }
 static void onfocuslost(psy_ui_Component* self) { }
-static void onupdatestyles(psy_ui_Component* self);
+static void onupdatestyles(psy_ui_Component* self) { }
+static void updatestyles(psy_ui_Component*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -381,8 +360,6 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 {	
 	self->imp->vtable->dev_setposition(self->imp, topleft, size);
 	if (!psy_ui_app()->alignvalid) {		
-		psy_ui_Size size;
-		
 		if (self->alignchildren) {
 			psy_ui_component_align(self);
 		}		
@@ -1357,10 +1334,10 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 	self->style.style_id = standard;
 	self->style.hover_id = hover;
 	self->style.select_id = select;	
-	onupdatestyles(self);	
+	updatestyles(self);	
 }
 
-void onupdatestyles(psy_ui_Component* self)
+void updatestyles(psy_ui_Component* self)
 {
 	if (self->style.style_id != psy_INDEX_INVALID) {
 		psy_ui_style_copy(&self->style.style,
@@ -1378,4 +1355,30 @@ void onupdatestyles(psy_ui_Component* self)
 		psy_ui_component_setbackgroundcolour(self,
 			self->style.style.backgroundcolour);
 	}
+}
+
+void psy_ui_notifystyleupdate(psy_ui_Component* main)
+{
+	if (main) {
+		psy_List* p;
+		psy_List* q;
+
+		// merge		
+		updatestyles(main);
+		main->vtable->onupdatestyles(main);
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* child;
+
+			child = (psy_ui_Component*)psy_list_entry(p);
+			updatestyles(child);			
+			child->vtable->onupdatestyles(child);
+			if (child->imp) {
+				child->imp->vtable->dev_setbackgroundcolour(child->imp,
+					psy_ui_component_backgroundcolour(child));
+				psy_ui_component_updatefont(child);
+			}
+
+		}
+	}
+	psy_ui_component_invalidate(main);
 }

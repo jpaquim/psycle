@@ -1366,7 +1366,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 
 void mainframe_updatetabbarstyle(MainFrame* self)
 {
-	switch (tabbar_selected(&self->tabbar)) {
+	/*switch (tabbar_selected(&self->tabbar)) {
 		case VIEW_ID_MACHINEVIEW:
 				self->machineview.tabbar.style_tab.backgroundcolour = self->machineview.skin.colour;
 				self->machineview.tabbar.style_tab.colour = self->machineview.skin.effect_fontcolour;
@@ -1405,7 +1405,7 @@ void mainframe_updatetabbarstyle(MainFrame* self)
 		default:
 			self->tabbar.style_tab = *psy_ui_style(psy_ui_STYLE_TAB);
 			break;
-	}	
+	}	*/
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,

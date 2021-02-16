@@ -123,7 +123,7 @@ static bool vtable_initialized = FALSE;
 static void vtable_init(TabBar* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);		
+		vtable = *(self->component.vtable);
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)tabbar_ondestroy;
 		vtable.onalign = (psy_ui_fp_component_onalign)tabbar_onalign;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
@@ -745,7 +745,7 @@ void tabbar_onlanguagechanged(TabBar* self)
 }
 
 void tabbar_onupdatestyles(TabBar* self)
-{	
+{		
 	psy_ui_style_copy(&self->style_tab, psy_ui_style(psy_ui_STYLE_TAB));
 	psy_ui_style_copy(&self->style_tab_hover, psy_ui_style(psy_ui_STYLE_TAB_HOVER));
 	psy_ui_style_copy(&self->style_tab_select, psy_ui_style(psy_ui_STYLE_TAB_SELECT));

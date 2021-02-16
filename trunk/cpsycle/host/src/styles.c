@@ -129,7 +129,7 @@ void initdarkstyles(psy_ui_Defaults* defaults)
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQ_TAB_HOVER, style);
 	// sequencetrackbox tab::select
 	style = psy_ui_style_allocinit();
-	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x009F7B00));
+	psy_ui_colour_set(&style->colour, psy_ui_colour_make(0x00FC86BB));
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_make(0x00232323));
 	psy_ui_border_init(&style->border);
