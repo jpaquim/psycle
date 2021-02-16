@@ -1089,7 +1089,8 @@ void psy_audio_xmsamplervoice_tremor(psy_audio_XMSamplerVoice* self)
 
 void psy_audio_xmsamplervoice_retrig(psy_audio_XMSamplerVoice* self)
 {
-	if ((psy_audio_xmsampler_currenttick(self->m_pSampler) % self->m_RetrigTicks) == 0)
+	// todo: check self->m_RetrigTicks why it can be 0
+	if (self->m_RetrigTicks != 0 && (psy_audio_xmsampler_currenttick(self->m_pSampler) % self->m_RetrigTicks) == 0)
 	{
 		psy_audio_xmsamplervoice_noteon(self, self->m_Note, -1, FALSE);
 	}
@@ -1206,8 +1207,8 @@ int psy_audio_xmsamplervoice_periodtonote(psy_audio_XMSamplerVoice* self, double
 
 	wave = self->m_WaveDataController.sample;
 	if (psy_audio_xmsampler_isamigaslides(self->m_pSampler)) {		
-		return psy_dsp_amigaperiodtonote(period, (double)wave->samplerate, wave->tune,
-			wave->finetune);
+		return psy_dsp_amigaperiodtonote(period, (double)wave->samplerate, wave->zone.tune,
+			wave->zone.finetune);
 	}		
-	return psy_dsp_periodtonote(period, wave->tune, wave->finetune);		
+	return psy_dsp_periodtonote(period, wave->zone.tune, wave->zone.finetune);
 }

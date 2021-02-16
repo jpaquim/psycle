@@ -24,6 +24,15 @@
 // platform
 #include "../../detail/portable.h"
 
+int32_t twos_complement(value, bits)
+{
+	// if sign bit is set(128 - 255 for 8 bit)
+	if ((value & (1 << (bits - 1))) != 0) {
+		return (value - (1 << bits));
+	}
+	return value;
+}
+
 typedef struct EXS24Zone {
 	uint32_t id;
 	char name[64];
@@ -31,9 +40,9 @@ typedef struct EXS24Zone {
 	uint8_t oneshot;
 	uint8_t reverse;
 	uint8_t key;
-	uint8_t fine_tuning;
+	int8_t fine_tuning;
 	uint8_t pan;
-	uint8_t volume;
+	int8_t volume;
 	uint8_t coarse_tuning;
 	uint8_t key_low;
 	uint8_t key_high;
@@ -197,11 +206,11 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 				entry->loop.start = zone.sample_start;
 				entry->loop.end = zone.sample_end;
 			}
-			entry->tune = zone.key - self->baseC;
-			entry->tune_set = TRUE;
+			entry->zone.tune = zone.key - self->baseC;
+			entry->zone.zoneset = psy_audio_ZONESET_TUNE;			
 			psy_audio_instrument_addentry(instrument, entry);
 		} else if (chunk_type == 0x03) {
-			EXS24Sample sample;			
+			EXS24Sample sample;
 			psy_audio_Sample* wave;
 			const char* parentdir;
 
@@ -340,6 +349,7 @@ int psy_audio_exs24loader_readzone(psy_audio_EXS24Loader* self,
 	if (status = psyfile_read(self->fp, &zone->fine_tuning, 1)) {
 		return status;
 	}
+	//zone->fine_tuning = twos_complement(zone->fine_tuning, 8);
 	// twos_complement(string.byte(fh:read(1)), 8)
 	if (psyfile_seek(self->fp, i + 87) == -1) {
 		return PSY_ERRFILE;

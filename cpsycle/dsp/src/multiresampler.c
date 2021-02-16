@@ -58,8 +58,13 @@ void psy_dsp_multiresampler_init(psy_dsp_MultiResampler* self, psy_dsp_Resampler
 	psy_dsp_resampler_init(&self->resampler);
 	vtable_init(self);
 	self->resampler.vtable = &vtable;
+	self->use_sse2_if_available = FALSE;
+	// todo: sse2 let sampulse crash with sinc_sse2
+	// e.g.: Sampulsedemo.psy 10:0B (sinc_sse2_float_internal) around
+	// float* psinc = &sinc_sse2_windowed_table[res];
+	// release win32 build
 	psy_dsp_multiresampler_initresamplers(self);
-	self->selected = psy_dsp_RESAMPLERQUALITY_LINEAR;
+	self->selected = psy_dsp_RESAMPLERQUALITY_LINEAR;	
 	psy_dsp_multiresampler_setquality(self, type);
 }
 
@@ -67,12 +72,11 @@ void psy_dsp_multiresampler_initresamplers(psy_dsp_MultiResampler* self)
 {
 	psy_dsp_linearresampler_init(&self->linear);
 #ifdef PSYCLE_USE_SSE
-	psy_dsp_spline_sse2_resampler_init(&self->spline);
-	psy_dsp_sinc_sse2_resampler_init(&self->sinc);
-#else
+	psy_dsp_spline_sse2_resampler_init(&self->spline_sse2);
+	psy_dsp_sinc_sse2_resampler_init(&self->sinc_sse2);
+#endif
 	psy_dsp_spline_resampler_init(&self->spline);
-	psy_dsp_sinc_resampler_init(&self->sinc);
-#endif	
+	psy_dsp_sinc_resampler_init(&self->sinc);	
 }
 
 void psy_dsp_multiresampler_dispose(psy_dsp_MultiResampler* self)
@@ -92,22 +96,29 @@ void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler* self,
 		case psy_dsp_RESAMPLERQUALITY_LINEAR:
 			base = psy_dsp_linearresampler_base(&self->linear);
 		break;
-#ifdef PSYCLE_USE_SSE	
+
 		case psy_dsp_RESAMPLERQUALITY_SPLINE:	
-			base = psy_dsp_spline_sse2_resampler_base(&self->spline);
-		break;
-		case psy_dsp_RESAMPLERQUALITY_SINC:
-			base = psy_dsp_sinc_sse2_resampler_base(&self->sinc);
-		break;
-		break;
-#else
-		case psy_dsp_RESAMPLERQUALITY_SPLINE:
-			base = psy_dsp_spline_resampler_base(&self->spline);
-		break;
-		case psy_dsp_RESAMPLERQUALITY_SINC:
-			base = psy_dsp_sinc_resampler_base(&self->sinc);
-		break;
+			if (self->use_sse2_if_available) {
+#ifdef PSYCLE_USE_SSE	
+				base = psy_dsp_spline_sse2_resampler_base(&self->spline_sse2);
+#elif
+				base = psy_dsp_spline_resampler_base(&self->spline);
 #endif
+			} else {
+				base = psy_dsp_spline_resampler_base(&self->spline);
+			}
+		break;
+		case psy_dsp_RESAMPLERQUALITY_SINC:
+			if (self->use_sse2_if_available) {
+#ifdef PSYCLE_USE_SSE	
+			base = psy_dsp_sinc_sse2_resampler_base(&self->sinc_sse2);
+#elif
+			base = psy_dsp_sinc_resampler_base(&self->sinc);
+#endif
+			} else {
+				base = psy_dsp_sinc_resampler_base(&self->sinc);
+			}
+		break;		
 		default:
 			base = NULL;
 		break;

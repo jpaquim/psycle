@@ -449,7 +449,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							ps.rcPaint.left, ps.rcPaint.top,
 							clipsize.x, clipsize.y);
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {							
+						// draw background
+						if (imp->component->debugflag == 4000) {
+							imp = imp;
+						}
+						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
 							psy_ui_component_drawbackground(imp->component, &g);
 						}
 						psy_ui_component_drawborder(imp->component, &g);

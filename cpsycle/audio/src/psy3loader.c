@@ -1226,13 +1226,13 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
-	wave->tune = temp16;
+	wave->zone.tune = temp16;
 	// wave fine tune
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
-	wave->finetune = temp16;			
+	wave->zone.finetune = temp16;
 	// wave stereo
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
@@ -1919,13 +1919,13 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
-	wave->tune = temp16;
+	wave->zone.tune = temp16;
 	// wave fine tune
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
-	wave->finetune = temp16;
+	wave->zone.finetune = temp16;
 	// wave stereo
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
@@ -2127,13 +2127,13 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 			psy_audio_sample_deallocate(sample);
 			return status;
 		}
-		sample->tune = tmp_u32;
+		sample->zone.tune = tmp_u32;
 		if (status = psyfile_read(self->fp, &tmp, sizeof(tmp))) {
 			psy_audio_sample_deallocate(sample);
 			return status;
 		}
 		//Current sampler uses 100 cents. Older used +-256		
-		sample->finetune = (int16_t)(tmp / 2.56f);
+		sample->zone.finetune = (int16_t)(tmp / 2.56f);
 		if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
 			psy_audio_sample_deallocate(sample);
 			return status;

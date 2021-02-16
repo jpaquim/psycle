@@ -452,7 +452,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 					psyfile_read(self->songfile->file, &tmpFineTune, sizeof(short));
 					//Current sample uses 100 cents. Older used +-256
 					tmpFineTune = (int32_t)((float)tmpFineTune / 2.56f);
-					wave->finetune = tmpFineTune;
+					wave->zone.finetune = tmpFineTune;
 
 					psyfile_read(self->songfile->file, &wave->loop.start, sizeof wave->loop.start);
 					psyfile_read(self->songfile->file, &wave->loop.end, sizeof wave->loop.end);

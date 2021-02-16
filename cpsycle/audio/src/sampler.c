@@ -747,7 +747,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 							sampleindex_make(self->instrument, 0));
 						finetune = sample->numframes * 0.01;
 						speeddouble = pow(2.0, (((double)pEntry->note +
-							(double)sample->tune - (double)basec) + finetune) / 12.0) *
+							(double)psy_audio_sample_tune(sample) - (double)basec) + finetune) / 12.0) *
 							((double)sample->numframes /
 								psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
 						self->effportaspeed = (int64_t)(speeddouble * 4294967296.0f);
@@ -824,34 +824,29 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 			layer = psy_audio_instrument_entriesintersect(self->inst, pEntry->note, 127, 0.0);
 			if (layer) {
-				psy_audio_InstrumentEntry* zone;
+				psy_audio_InstrumentEntry* entry;
+				psy_audio_Samples* samples;
 
-				zone = (psy_audio_InstrumentEntry*)layer->entry;
-				sample = psy_audio_samples_at(
-					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-					zone->sampleindex);
+				entry = (psy_audio_InstrumentEntry*)layer->entry;
+				samples = psy_audio_machine_samples(psy_audio_sampler_base(self->sampler));
+				sample = psy_audio_instrumententry_sample(entry, samples);
 				self->controller.wave = sample;
-				if (zone->use_loop) {
-					self->controller.loop = zone->loop;
-					self->controller._pos.HighPart = zone->loop.start;
+				if (entry->use_loop) {
+					self->controller.loop = entry->loop;
+					self->controller._pos.HighPart = entry->loop.start;
 					self->controller._pos.LowPart = 0;
-					dooffset = FALSE; // already set
-					if (zone->tune_set) {
-						tune = zone->tune;
-					} else {
-						tune = sample->tune;
-					}
+					dooffset = FALSE; // already set										
 				} else {
-					self->controller.loop = sample->loop;
-					tune = sample->tune;
+					self->controller.loop = sample->loop;					
 				}
+				tune = psy_audio_instrumententry_tune(entry, samples);
 			} else {
 				sample = psy_audio_samples_at(
 					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
 					sampleindex_make(self->instrument, 0));
 				self->controller.wave = sample;
 				self->controller.loop = sample->loop;
-				tune = sample->tune;
+				tune = psy_audio_sample_tune(sample);
 			}
 		} else {
 			self->controller.wave = NULL;
@@ -868,7 +863,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			speeddouble = (sample->numframes / totalsamples);
 		} else
 		{
-			double finetune = sample->finetune * 0.01;
+			double finetune = psy_audio_sample_finetune(sample) * 0.01;
 			speeddouble = pow(2.0f, (pEntry->note + tune - basec + finetune) / 12.0f) *
 				(sample->samplerate / psy_audio_machine_samplerate(
 					psy_audio_sampler_base(self->sampler)));

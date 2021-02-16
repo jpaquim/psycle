@@ -35,8 +35,8 @@ void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 	psy_audio_buffer_init(&self->channels, numchannels);
 	self->channels.shared = FALSE;
 	self->samplerate = (psy_dsp_big_hz_t)44100;
-	self->tune = 0;
-	self->finetune = 0;
+	self->zone.tune = 0;
+	self->zone.finetune = 0;
 	self->stereo = numchannels > 1;
 	self->panenabled = TRUE;
 	self->panfactor = psy_audio_PAN_CENTER;
@@ -70,8 +70,7 @@ void psy_audio_sample_copy(psy_audio_Sample* self,
 		self->sustainloop.start = src->sustainloop.start;
 		self->sustainloop.end = src->sustainloop.end;
 		self->sustainloop.type = src->sustainloop.type;
-		self->tune = src->tune;
-		self->finetune = src->finetune;
+		self->zone = src->zone;		
 		self->panfactor = src->panfactor;
 		self->panenabled = src->panenabled;
 		self->surround = src->surround;

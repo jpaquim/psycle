@@ -207,9 +207,19 @@ void machinestackview_ondraw(MachineStackView* self, psy_ui_Graphics* g)
 void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 {	
 	uintptr_t i;
+	psy_ui_Size size;
+	psy_ui_RealSize sizepx;
+	psy_ui_RealRectangle r;
+	psy_ui_Border border;
 
+	size = psy_ui_component_preferredsize(&self->component, NULL);
+	sizepx = psy_ui_size_px(&size, psy_ui_component_textmetric(&self->component));
+	psy_ui_border_init_style(&border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&border, psy_ui_colour_make(0x000151515));
+	psy_ui_colour_set(&border.colour_right, psy_ui_colour_make(0x00303030));
+	psy_ui_colour_set(&border.colour_bottom, psy_ui_colour_make(0x00303030));	
 	for (i = 0; i < machineuimatrix_numtracks(&self->matrix); ++i) {
-		uintptr_t j;
+		uintptr_t j;		
 		for (j = 0; j < machineuimatrix_numlines(&self->matrix) + 1; ++j) {
 			MachineUi* machineui;
 
@@ -218,6 +228,13 @@ void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 				const psy_ui_RealRectangle* position;
 
 				position = machineui_position(machineui);
+				if (j == 0) {
+					r = psy_ui_realrectangle_make(
+						psy_ui_realpoint_make(position->left - 6, position->top),
+						psy_ui_realsize_make(psy_ui_realrectangle_width(position) + 14, sizepx.height));
+					psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00202020));
+					psy_ui_drawborder(g, r, &border);					
+				}
 				if (psy_ui_realrectangle_intersect_rectangle(&g->clip, position)) {
 					psy_ui_setorigin(g, psy_ui_realpoint_make(-position->left, -position->top));
 					machineui_draw(machineui, g, machineui->slot, FALSE);
@@ -226,6 +243,9 @@ void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 			}
 		}
 	}
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00AABBBB));
+	psy_ui_textout(g, 5, 0, "Input", strlen("Input"));
+	psy_ui_textout(g, 5, 60, "Effects", strlen("Effects"));
 	//machineui_drawhighlight(machineui, g);			
 }
 
@@ -241,6 +261,7 @@ void machinestackview_computemaxlevels(MachineStackView* self)
 		leafs = psy_audio_machines_leafs(self->machines);
 		for (track = 0, p = leafs; p != NULL; psy_list_next(&p), ++track) {
 			level = 0;
+
 			machinestackview_computeoutchainlevels(self, (uintptr_t)(p->entry), track, &level);			
 		}
 		if (psy_table_exists(&self->maxlevels, psy_audio_MASTER_INDEX)) {
@@ -347,11 +368,11 @@ MachineUi* machinestackview_insert(MachineStackView* self, uintptr_t slot,
 			uintptr_t maxlevel;
 			
 			machineui_init(rv, slot, self->skin, &self->component, self->workspace);
-			lineheight = 70;
-			trackwidth = 150;
+			lineheight = 60;
+			trackwidth = 158;
 			rv->machinepos = FALSE;
 			maxlevel = (uintptr_t)psy_table_at(&self->maxlevels, slot);
-			machineui_move(rv, psy_ui_realpoint_make(
+			machineui_move(rv, psy_ui_realpoint_make(100 +
 				(double)track * trackwidth, (double)line * lineheight));
 			machineuimatrix_insert(&self->matrix, track, line, rv);
 		}

@@ -44,8 +44,8 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 	self->use_velrange = FALSE;
 	self->use_freqrange = FALSE;
 	self->use_loop = FALSE;	
-	self->tune = 0;
-	self->tune_set = FALSE;	
+	self->zone.tune = 0;
+	self->zone.zoneset = psy_audio_ZONESET_NONE;
 }
 
 psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void)
@@ -79,6 +79,29 @@ bool psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintpt
 		return 0;
 	}
 	return 1;
+}
+
+psy_audio_Sample* psy_audio_instrumententry_sample(psy_audio_InstrumentEntry* self,
+	psy_audio_Samples* samples)
+{
+	return psy_audio_samples_at(samples, self->sampleindex);
+}
+
+int16_t psy_audio_instrumententry_tune(psy_audio_InstrumentEntry* self,
+	psy_audio_Samples* samples)
+{
+	if ((self->zone.zoneset & psy_audio_ZONESET_TUNE) == psy_audio_ZONESET_TUNE) {
+		return self->zone.tune;
+	}
+	if (samples) {
+		psy_audio_Sample* sample;
+
+		sample = psy_audio_samples_at(samples, self->sampleindex);
+		if (sample) {
+			return sample->zone.tune;
+		}
+	}
+	return 0;
 }
 
 // psy_audio_Instrument

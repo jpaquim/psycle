@@ -136,10 +136,22 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 			// instrument_index.subslot: instrument index of the real sampler
 			// (instrument group is set in the sampler machine)
 			// self->machine_index:      machine index of the real sampler
-			realevent.inst = (uint16_t)self->instrument_index.subslot;
+			if (ev->note <= psy_audio_NOTECOMMANDS_RELEASE) {
+				// set instrument only at notecommand else
+				// xmsampler::tick will reset the channel
+				// todo: check if sampulse should be changed instead here
+				// In XMSampler::Tick
+				// if (currentVoice != NULL && !bNoteOn && pData->note != psy_audio_NOTECOMMANDS_RELEASE) {
+				//	  //Whenever an instrument appears alone in a channel, the values are reset.
+				//	  //todo: It should be reset to the values of the instrument set.
+				//    psy_audio_xmsamplervoice_resetvolandpan(currentVoice, -1, TRUE);
+				realevent.inst = (uint16_t)self->instrument_index.subslot;
+			} else {
+				realevent.inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
+			}
 			realevent.mach = (uint8_t)self->machine_index;
 			// 1. tick with cmd and parameter
-			psy_audio_machine_seqtick(sampler, channel, &realevent);
+			psy_audio_machine_seqtick(sampler, channel, &realevent);			
 			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 				// 
 				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {

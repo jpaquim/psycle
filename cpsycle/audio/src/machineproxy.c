@@ -19,6 +19,26 @@
 #include "../../detail/portable.h"
 #include "plugin_interface.h"
 
+#if defined DIVERSALIS__OS__MICROSOFT
+static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
+	struct _EXCEPTION_POINTERS* ep)
+{
+	char text[512];
+	proxy->crashed = 1;
+
+	if (psy_audio_machine_info(proxy->client)) {
+		psy_snprintf(text, 512, "%u: %s crashed \n\r %s",
+			(unsigned int)proxy->client->vtable->slot(proxy->client),
+			proxy->client->vtable->info(proxy->client)->ShortName, msg);
+	} else {
+		psy_snprintf(text, 512, "Machine crashed");
+	}
+	psy_audio_machine_output(psy_audio_machineproxy_base(proxy), text);
+	// MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
+
 struct psy_audio_Preset;
 
 // proxy
@@ -140,26 +160,6 @@ static const char* auxcolumnname(psy_audio_MachineProxy*, uintptr_t index);
 static uintptr_t numauxcolumns(psy_audio_MachineProxy*);
 static uintptr_t auxcolumnselected(psy_audio_MachineProxy*);
 static void selectauxcolumn(psy_audio_MachineProxy*, uintptr_t index);
-
-#if defined DIVERSALIS__OS__MICROSOFT
-static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
-	struct _EXCEPTION_POINTERS *ep) 
-{	
-	char text[512];
-	proxy->crashed = 1;	
-		
-	if (psy_audio_machine_info(proxy->client)) {
-		psy_snprintf(text, 512, "%u: %s crashed \n\r %s",
-			(unsigned int)proxy->client->vtable->slot(proxy->client),
-			proxy->client->vtable->info(proxy->client)->ShortName, msg);
-	} else {
-		psy_snprintf(text, 512, "Machine crashed");
-	}
-	psy_audio_machine_output(psy_audio_machineproxy_base(proxy), text);
-	// MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
-	return EXCEPTION_EXECUTE_HANDLER;
-}
-#endif
 
 static MachineVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -351,19 +351,19 @@ psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy* self, uintptr_t slot,
 
 void machineproxy_work(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc)
 {
-	if (self->crashed == 0) {
+//	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
-		__try
+	//	__try
 #endif				
 		{
 			psy_audio_machine_work(self->client, bc);			
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
-		__except(FilterException(self, "work", GetExceptionCode(),
-			GetExceptionInformation())) {
-		}
+		//__except(FilterException(self, "work", GetExceptionCode(),
+		//	GetExceptionInformation())) {
+		//}
 #endif		
-	}
+	//}
 }
 
 void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc)

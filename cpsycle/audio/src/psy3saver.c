@@ -1387,12 +1387,12 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 		free(wavedata_left);
 		return status;
 	}
-	if (status = psyfile_write_int16(self->fp, sample->tune)) {
+	if (status = psyfile_write_int16(self->fp, sample->zone.tune)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
-	if (status = psyfile_write_int16(self->fp, sample->finetune)) {
+	if (status = psyfile_write_int16(self->fp, sample->zone.finetune)) {
 		free(data1);
 		free(wavedata_left);
 		return status;

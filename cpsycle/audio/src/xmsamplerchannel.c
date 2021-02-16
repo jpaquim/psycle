@@ -761,7 +761,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 		// tick "0" is worked on in channel.SetEffect();
 void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 {
-	int i;
+	int i;	
 	
 	for (i = 0; i < psy_audio_xmsampler_numvoices(self->m_pSampler); i++)
 	{
