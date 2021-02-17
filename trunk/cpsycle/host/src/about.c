@@ -4,11 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "about.h"
-// local
+// host
 #include "resources/resource.h"
-// std
-#include <stdio.h>
-#include <string.h>
+#include "styles.h"
 // platform
 #include "../../detail/portable.h"
 
@@ -170,8 +168,9 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(&self->component, parent);	
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
-	self->workspace = workspace;
-	
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_ABOUT, STYLE_ABOUT, STYLE_ABOUT);
+	self->workspace = workspace;	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	

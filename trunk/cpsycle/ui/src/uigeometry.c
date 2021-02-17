@@ -17,8 +17,6 @@ void psy_ui_geometry_init(void)
 	psy_ui_realpoint_init(&psy_ui_internal_realpoint_zero);
 }
 
-
-
 void psy_ui_setrectangle(psy_ui_RealRectangle* self, double left, double top, double width,
 	double height)
 {

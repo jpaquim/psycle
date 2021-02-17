@@ -44,6 +44,18 @@ INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
 	return rv;
 }
 
+INLINE psy_ui_Colour psy_ui_colour_make_argb(uint32_t value)
+{
+	psy_ui_Colour rv;
+
+	rv.mode.inherited = TRUE;
+	rv.mode.set = TRUE;	
+	//0x00B6C5D1
+	rv.value = ((((value) << 16) & 0xFF0000)
+		| (((value) & 0xFF00)) | (((value >> 16) & 0xFF)));
+	return rv;
+}
+
 INLINE psy_ui_Colour psy_ui_colour_make_notset(void)
 {
 	psy_ui_Colour rv;
@@ -69,7 +81,7 @@ INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 	return rv;
 }
 
-INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
+INLINE void psy_ui_colour_rgb(const psy_ui_Colour* self,
 	uint8_t* r, uint8_t* g, uint8_t* b)
 {
 	uint32_t temp;
@@ -91,6 +103,20 @@ INLINE bool psy_ui_equal_colours(const psy_ui_Colour* lhs, const psy_ui_Colour* 
 {
 	return lhs->mode.set && rhs->mode.set && lhs->value == rhs->value;
 }
+INLINE psy_ui_Colour psy_ui_colour_overlayed(psy_ui_Colour* self,
+	const psy_ui_Colour* colour, double p)
+{
+	uint8_t r1, g1, b1;
+	uint8_t r2, g2, b2;
+
+	psy_ui_colour_rgb(self, &r1, &g1, &b1);
+	psy_ui_colour_rgb(colour, &r2, &g2, &b2);
+	return psy_ui_colour_make_rgb(
+		(uint8_t)((1 - p) * r1 + p * r2),
+		(uint8_t)((1 - p) * g1 + p * g2),
+		(uint8_t)((1 - p) * b1 + p * b2));
+}
+
 
 #ifdef __cplusplus
 }

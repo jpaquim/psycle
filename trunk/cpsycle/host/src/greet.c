@@ -4,33 +4,44 @@
 #include "../../detail/prefix.h"
 
 #include "greet.h"
+// host
+#include "resources/resource.h"
 
+// prototypes
 static void greet_addstring(Greet*, const char* text);
 static void greet_build(Greet*);
 static void greet_buildoriginal(Greet*);
 static void greet_onoriginal(Greet*, psy_ui_Component* sender);
-
+// implementation
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin margin;
 	psy_ui_Margin leftmargin;
 
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(3));
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
-	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_label_preventtranslation(&self->header);
-	psy_ui_component_setmargin(&self->header.component, &leftmargin);
-	psy_ui_label_settextalignment(&self->header, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
-	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->thanks, &self->component, "Thanks!");
-	psy_ui_component_setmargin(&self->thanks.component, &leftmargin);
-	psy_ui_label_settextalignment(&self->thanks, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_TOP);
+	psy_ui_label_init(&self->headerlabel, &self->component);
+	psy_ui_component_setalign(&self->headerlabel, psy_ui_ALIGN_TOP);
+	psy_ui_label_preventtranslation(&self->headerlabel);
+	psy_ui_component_setmargin(&self->headerlabel.component, &leftmargin);
+	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+	psy_ui_label_settext(&self->headerlabel, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");	
+
+	psy_ui_component_init(&self->header, &self->component);
+	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
+	psy_ui_label_init_text(&self->thanks, &self->header, "Thanks! / ");
+	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(&self->thanks.component, &leftmargin);	
+	psy_ui_image_init(&self->favicon, &self->header);
+	psy_ui_component_setalign(&self->favicon.component, psy_ui_ALIGN_LEFT);
+	psy_ui_bitmap_loadresource(&self->favicon.bitmap, IDB_HEART_FULL_DARK);
+	psy_ui_bitmap_settransparency(&self->favicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_image_setbitmapalignment(&self->favicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_component_setpreferredsize(&self->favicon.component,
+		psy_ui_size_makepx(16, 14));
+	psy_ui_component_preventalign(&self->favicon.component);
 	psy_ui_listbox_init(&self->greetz, &self->component);
 	psy_ui_component_setalign(&self->greetz.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 2.0, 6.0);		

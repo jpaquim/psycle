@@ -8,6 +8,7 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uilistbox.h>
+#include <uiimage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,11 +25,13 @@ typedef struct Greet {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_Label header;
+	psy_ui_Component header;
+	psy_ui_Label headerlabel;
 	psy_ui_Label thanks;
 	psy_ui_Component view;
 	psy_ui_ListBox greetz;
 	psy_ui_Button original;
+	psy_ui_Image favicon;
 	// internal data
 	int current;
 } Greet;

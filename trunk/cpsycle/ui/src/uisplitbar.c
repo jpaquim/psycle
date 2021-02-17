@@ -386,7 +386,7 @@ void splitbar_onpreferredsize(psy_ui_SplitBar* self, const psy_ui_Size* limit,
 {
 	if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
-		*rv = psy_ui_size_make(psy_ui_value_makeew(1.2),
+		*rv = psy_ui_size_make(psy_ui_value_makeew(1.3),
 				psy_ui_value_makeeh(1.5));
 	} else {
 		*rv = psy_ui_size_make(psy_ui_value_makeew(1.5),

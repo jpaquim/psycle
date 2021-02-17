@@ -10,13 +10,16 @@
 extern "C" {
 #endif
 
-typedef struct {
-   psy_ui_Component component;   
-   char* text;   
-   float progress;
+typedef struct psy_ui_ProgressBar {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	char_dyn_t* text;
+	double progress;
 } psy_ui_ProgressBar;
 
 void psy_ui_progressbar_init(psy_ui_ProgressBar*, psy_ui_Component* parent);
+
 void psy_ui_progressbar_settext(psy_ui_ProgressBar*, const char* text);
 void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, float progress);
 void psy_ui_progressbar_tick(psy_ui_ProgressBar*);

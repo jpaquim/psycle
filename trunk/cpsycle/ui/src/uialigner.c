@@ -38,6 +38,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = floor(psy_ui_value_px(&size.width, tm));
 	cp_bottomright.y = floor(psy_ui_value_px(&size.height, tm));
+	cp_topleft.x = floor(psy_ui_value_px(&self->component->spacing.left, tm));
 	psy_ui_aligner_adjustborder(self, &cp_topleft, &cp_bottomright);
 	for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
 			p = p->next) {
@@ -143,13 +144,18 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 							floor(psy_ui_margin_height_px(&component->margin,
 								c_tm))))));
 			} else if (component->align == psy_ui_ALIGN_LEFT) {				
+				double spacingtop;
+				double spacingheight;
+
+				spacingtop = floor(psy_ui_value_px(&self->component->spacing.top, c_tm));
+				spacingheight = psy_ui_margin_height_px(&self->component->spacing, c_tm);					
 				if ((self->component->alignexpandmode & psy_ui_HORIZONTALEXPAND)
 						== psy_ui_HORIZONTALEXPAND) {
 				} else {
 					double requiredcomponentwidth;
-
-					requiredcomponentwidth = floor(psy_ui_value_px(
-						&componentsize.width, c_tm) +
+										
+					requiredcomponentwidth =
+						floor(psy_ui_value_px(&componentsize.width, c_tm) +
 						floor(psy_ui_margin_width_px(&component->margin, tm)));
 					if (cp_topleft.x + requiredcomponentwidth >
 						floor(psy_ui_value_px(&size.width, c_tm))) {
@@ -161,7 +167,8 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 							psy_ui_component_resize(c,
 								psy_ui_size_make(
 									psy_ui_component_size(c).width,
-								psy_ui_value_makepx(cpymax - cp_topleft.y -
+								psy_ui_value_makepx(cpymax - cp_topleft.y + spacingtop -
+									spacingheight -
 									floor(psy_ui_margin_height_px(&component->margin,
 									c_tm)))));
 						}
@@ -176,13 +183,16 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 					psy_ui_rectangle_make(
 					psy_ui_point_make(
 						psy_ui_value_makepx(cp_topleft.x),
-						psy_ui_value_makepx(cp_topleft.y + floor(psy_ui_value_px(
+						psy_ui_value_makepx(cp_topleft.y +
+							spacingtop +
+							floor(psy_ui_value_px(
 							&component->margin.top, c_tm)))),
 					psy_ui_size_make(
 						componentsize.width,
 						psy_ui_value_makepx(component->justify ==
 							psy_ui_JUSTIFY_EXPAND
 						? cp_bottomright.y - cp_topleft.y - 
+							spacingheight -
 							floor(psy_ui_margin_height_px(&component->margin, c_tm))
 						: psy_ui_value_px(&componentsize.height, c_tm)))));
 				cp_topleft.x += floor(psy_ui_value_px(&component->margin.right, c_tm));
@@ -372,7 +382,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 			size.width = (self->component->alignexpandmode &
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND
 				? psy_ui_value_makepx(0)
-				: limit->width;
+				: limit->width;			
 			for (p = q = psy_ui_component_children(self->component, 0);
 					p != NULL; p = p->next) {
 				psy_ui_Component* component;
@@ -387,7 +397,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 						&size.width, tm) - cp_topleft.x - cp_bottomright.x);
 					limit.height = size.height;
 					componentsize = psy_ui_component_preferredsize(component,
-						&limit);
+						&limit);					
 					psy_ui_aligner_adjustminmaxsize(self, component, tm, &componentsize);
 					c_tm = psy_ui_component_textmetric(component);					
 					if (component->align == psy_ui_ALIGN_CLIENT) {
@@ -425,8 +435,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 								psy_ui_margin_width_px(&component->margin,
 									c_tm));
 						}
-					} else
-					if (component->align == psy_ui_ALIGN_RIGHT) {
+					} else if (component->align == psy_ui_ALIGN_RIGHT) {
 						cp.x += (intptr_t)psy_ui_value_px(&componentsize.width, c_tm) +
 							(intptr_t)psy_ui_margin_width_px(&component->margin, c_tm);
 						cp_bottomright.x += (intptr_t)(psy_ui_value_px(
@@ -450,7 +459,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 							intptr_t requiredcomponentwidth;
 
 							requiredcomponentwidth = (intptr_t)psy_ui_value_px(
-									&componentsize.width, c_tm) +
+								&componentsize.width, c_tm) +
 								(intptr_t)psy_ui_margin_width_px(&component->margin, tm);
 							if (cp.x + requiredcomponentwidth >
 									psy_ui_value_px(&size.width, c_tm)) {
@@ -480,9 +489,10 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 				}
 			}
 			*rv = maxsize;			
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&rv->width, tm) +
-				psy_ui_margin_width_px(&self->component->spacing, tm) +
-				psy_ui_margin_width_px(&border, tm));
+			rv->width = psy_ui_value_makepx(
+				floor(psy_ui_value_px(&rv->width, tm)) +
+				floor(psy_ui_margin_width_px(&self->component->spacing, tm)) + 3 +
+				floor(psy_ui_margin_width_px(&border, tm)));
 			rv->height = psy_ui_value_makepx(psy_ui_value_px(&rv->height, tm) +
 				psy_ui_margin_height_px(&self->component->spacing, tm) +
 				psy_ui_margin_height_px(&border, tm));

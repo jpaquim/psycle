@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "songproperties.h"
+// host
+#include "styles.h"
 // audio
 #include <songio.h>
 // std
@@ -11,6 +13,7 @@
 // platform
 #include "../../detail/portable.h"
 
+// prototypes
 static void songpropertiesview_initalign(SongPropertiesView*);
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*,
@@ -41,7 +44,7 @@ static bool songpropertiesview_haseditfocus(SongPropertiesView*);
 static songpropertiesview_realbpm(SongPropertiesView*);
 static uintptr_t songpropertiesview_realtpb(SongPropertiesView*);
 static void songpropertiesview_updaterealspeed(SongPropertiesView*);
-
+// implementation
 void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {		
@@ -56,6 +59,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->tabbar, tabbarparent);	
 	// title
 	psy_ui_component_init(&self->title, &self->component);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_SONGPROPERTIES,
+		STYLE_SONGPROPERTIES,
+		STYLE_SONGPROPERTIES);
 	psy_ui_label_init(&self->label_title, &self->title);
 	psy_ui_label_settextalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_settext(&self->label_title, "Song Title");
@@ -117,6 +124,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);		
 	// Comments
 	psy_ui_component_init(&self->comments, &self->component);
+	psy_ui_component_setstyletypes(&self->comments,
+		STYLE_SONGPROPERTIES_COMMENTS,
+		STYLE_SONGPROPERTIES_COMMENTS,
+		STYLE_SONGPROPERTIES_COMMENTS);
 	psy_ui_label_init_text(&self->label_comments, &self->comments,
 		"Extended Comments");
 	psy_ui_label_settextalignment(&self->label_comments,
@@ -125,6 +136,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->label_comments.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->label_comments.component, &margin);
 	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
+	psy_ui_component_setstyletypes(&self->edit_comments.component,
+		STYLE_SONGPROPERTIES_COMMENTS,
+		STYLE_SONGPROPERTIES_COMMENTS,
+		STYLE_SONGPROPERTIES_COMMENTS);
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_comments.component, &margin);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
