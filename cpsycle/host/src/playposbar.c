@@ -41,8 +41,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_ui_label_init(&self->position, &self->component);
 	psy_ui_label_preventtranslation(&self->position);
-	psy_ui_label_setcharnumber(&self->position, 20);
-	psy_ui_label_settextalignment(&self->position, psy_ui_ALIGNMENT_LEFT);	
+	psy_ui_label_setcharnumber(&self->position, 20);	
 	playposbar_updatelabel(self);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		playposbar_onsongchanged);

@@ -86,6 +86,8 @@ IDB_HEART_DARK          BITMAP                  "heart-dark.bmp"
 
 IDB_TRAY_DARK           BITMAP                  "tray-dark.bmp"
 
+IDB_HEART_FULL_DARK     BITMAP                  "heart-full-dark.bpm.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

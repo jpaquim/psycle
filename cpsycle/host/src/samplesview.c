@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "samplesview.h"
+// host
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 #include <instruments.h>
@@ -988,6 +990,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&waveboxmargin, 0.5, 1.0, 0.0, 0.5);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_SAMPLESVIEW,
+		STYLE_SAMPLESVIEW,
+		STYLE_SAMPLESVIEW);
 	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);

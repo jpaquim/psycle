@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentview.h"
+// host
+#include "styles.h"
 // ui
 #include <uiopendialog.h>
 #include <uisavedialog.h>
@@ -419,7 +421,11 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 	psy_ui_Margin leftmargin;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_INSTRUMENTVIEW,
+		STYLE_INSTRUMENTVIEW,
+		STYLE_INSTRUMENTVIEW);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	self->statusbar = NULL;
 	self->player = &workspace->player;

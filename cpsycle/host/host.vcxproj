@@ -550,6 +550,7 @@
     <Image Include="src\resources\conf-general.bmp" />
     <Image Include="src\resources\earth-dark.bmp" />
     <Image Include="src\resources\heart-dark.bmp" />
+    <Image Include="src\resources\heart-full-dark.bpm.bmp" />
     <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
     <Image Include="src\resources\kbd.bmp" />

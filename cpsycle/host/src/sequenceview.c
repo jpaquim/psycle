@@ -33,7 +33,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setstyletypes(&self->component, STYLE_SEQVIEW_BUTTONS,
 		STYLE_SEQVIEW_BUTTONS, STYLE_SEQVIEW_BUTTONS);
-	psy_ui_margin_init_all_em(&spacing, 0.0, 0.5, 0.5, 0.5);
+	psy_ui_margin_init_all_em(&spacing, 0.25, 0.5, 0.5, 0.5);
 	psy_ui_component_setspacing(&self->component, &spacing);
 	psy_ui_component_init(&self->standard, &self->component);
 	psy_ui_component_setalign(&self->standard, psy_ui_ALIGN_TOP);
@@ -400,7 +400,7 @@ static psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView*,
 static void sequencelistview_invalidaterow(SequenceListView*, uintptr_t row);
 static void sequencelistview_oneditkeydown(SequenceListView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
-static void sequencelistview_onupdatestyles(SequenceListView*);
+
 // vtable
 static psy_ui_ComponentVtable sequencelistview_vtable;
 static bool sequencelistview_vtable_initialized = FALSE;
@@ -423,10 +423,7 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 			sequencelistview_ontimer;
 		sequencelistview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
-			sequencelistview_onpreferredsize;
-		sequencelistview_vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
-			sequencelistview_onupdatestyles;
+			sequencelistview_onpreferredsize;		
 		sequencelistview_vtable_initialized = TRUE;
 	}
 }
@@ -781,12 +778,6 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, self->lineheight * row + self->state->margin),
 		psy_ui_realsize_make(size.width, self->lineheight));
-}
-
-void sequencelistview_onupdatestyles(SequenceListView* self)
-{
-	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_style(psy_ui_STYLE_SIDEMENU)->backgroundcolour);
 }
 
 // SequenceViewDuration

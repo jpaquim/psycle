@@ -6,6 +6,7 @@
 #include "playbar.h"
 // host
 #include "resources/resource.h"
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 // platform
@@ -47,8 +48,14 @@ static psy_ui_ComponentVtable* vtable_init(PlayBar* self)
 // implementation
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {				
+	psy_ui_Margin spacing;
+
+	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.5, 1.0);
 	psy_ui_component_init(playbar_base(self), parent);
 	psy_ui_component_setvtable(playbar_base(self), vtable_init(self));
+	psy_ui_component_setstyletypes(playbar_base(self),
+		STYLE_PLAYBAR, STYLE_PLAYBAR, STYLE_PLAYBAR);
+	psy_ui_component_setspacing(playbar_base(self), &spacing);
 	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(playbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
