@@ -247,7 +247,7 @@ void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader* self)
 
 		instrument = psy_tableiterator_value(&it);
 		sample = psy_audio_samples_at(&self->song->samples,
-			sampleindex_make(psy_tableiterator_key(&it), 0));
+			psy_audio_sampleindex_make(psy_tableiterator_key(&it), 0));
 		if (sample) {
 			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
 		}
@@ -1075,7 +1075,7 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 				return PSY_ERRFILE;
 			}
 			psy_audio_samples_insert(&self->song->samples, wave,
-				sampleindex_make(idx, 0));
+				psy_audio_sampleindex_make(idx, 0));
 			// XMInstrument::WaveData<> wave;
 			// wave.Load(*pFile, versionSMPD, true);
 			// samples.SetSample(wave, idx);
@@ -1577,7 +1577,7 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 		psy_audio_InstrumentEntry instentry;		
 
 		psy_audio_instrumententry_init(&instentry);
-		instentry.sampleindex = sampleindex_make(0, 0);
+		instentry.sampleindex = psy_audio_sampleindex_make(0, 0);
 		if (instrument) {
 			psy_audio_instrument_clearentries(instrument);
 		}
@@ -2051,7 +2051,7 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 			samplesubidx = 0;
 		}
 		psy_audio_samples_insert(&self->song->samples, wave,
-			sampleindex_make(sampleidx, samplesubidx));
+			psy_audio_sampleindex_make(sampleidx, samplesubidx));
 	}
 	return PSY_OK;
 }
@@ -2214,7 +2214,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 			}
 		}
 		psy_audio_samples_insert(&self->song->samples, sample,
-			sampleindex_make(instrIdx, 0));
+			psy_audio_sampleindex_make(instrIdx, 0));
 	} else {
 		psyfile_skip(self->fp, size);
 	}

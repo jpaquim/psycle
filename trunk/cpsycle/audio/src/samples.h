@@ -44,7 +44,7 @@ typedef struct {
 	uintptr_t subslot;
 } psy_audio_SampleIndex;
 
-psy_audio_SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot);
+psy_audio_SampleIndex psy_audio_sampleindex_make(uintptr_t slot, uintptr_t subslot);
 
 INLINE uintptr_t psy_audio_sampleindex_slot(const psy_audio_SampleIndex* self)
 {
@@ -67,6 +67,11 @@ INLINE bool psy_audio_sampleindex_invalid(const psy_audio_SampleIndex* self)
 
 	return (self->slot == psy_INDEX_INVALID) ||
 		   (self->subslot == psy_INDEX_INVALID);
+}
+
+INLINE bool psy_audio_sampleindex_valid(const psy_audio_SampleIndex* self)
+{
+	return !psy_audio_sampleindex_invalid(self);
 }
 
 typedef struct {	

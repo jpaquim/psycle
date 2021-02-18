@@ -323,7 +323,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 		}
 		wave = psy_audio_sample_allocinit(1);
 		psy_audio_samples_insert(&self->songfile->song->samples, wave,
-			sampleindex_make(i, 0));			
+			psy_audio_sampleindex_make(i, 0));			
 		created = itmodule2_loaditsample(self, wave);
 		// If this IT file doesn't use Instruments, we need to map the notes manually.
 		if (created && !(self->fileheader.flags & IT2_FLAGS_USEINSTR))
@@ -352,7 +352,7 @@ int itmodule2_loaditmodule(ITModule2* self)
 		if (instr) {
 			psy_audio_instrument_clearentries(instr);
 			psy_audio_instrumententry_init(&instentry);
-			instentry.sampleindex = sampleindex_make(i, 0);
+			instentry.sampleindex = psy_audio_sampleindex_make(i, 0);
 			psy_audio_instrument_addentry(instr, &instentry);
 		}
 	}
@@ -1657,7 +1657,7 @@ bool itmodule2_loads3minstx(ITModule2* self, uint16_t iSampleIdx)
 
 		wave = psy_audio_sample_allocinit(1);
 		psy_audio_samples_insert(&song->samples, wave,
-			sampleindex_make(iSampleIdx, 0));
+			psy_audio_sampleindex_make(iSampleIdx, 0));
 		result = itmodule2_loads3msamplex(self, wave, (s3mSampleHeader*)(&curh));		
 		if (result) {
 			// instr.SetDefaultNoteMap(iSampleIdx);

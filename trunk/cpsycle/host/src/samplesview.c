@@ -1072,7 +1072,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_notebook_select(&self->clientnotebook, 0);
 	psy_ui_notebook_connectcontroller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
-	samplesview_setsample(self, sampleindex_make(0, 0));
+	samplesview_setsample(self, psy_audio_sampleindex_make(0, 0));
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
@@ -1245,7 +1245,7 @@ void samplesview_onduplicatesample(SamplesView* self, psy_ui_Component* sender)
 				psy_audio_instrument_setindex(instrument, dst.slot);
 				psy_audio_instruments_insert(&workspace_song(self->workspace)->instruments,
 					instrument, psy_audio_instrumentindex_make(0, dst.slot));
-				samplesview_setsample(self, sampleindex_make(dst.slot, 0));
+				samplesview_setsample(self, psy_audio_sampleindex_make(dst.slot, 0));
 			}
 		}
 	}
@@ -1260,7 +1260,7 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 		int first = startslot != 0;
 
 		while (psy_audio_samples_at(&workspace_song(self->workspace)->samples,
-			sampleindex_make(rv, 0)) != 0) {
+			psy_audio_sampleindex_make(rv, 0)) != 0) {
 			if (rv == maxslots) {
 				if (first) {
 					rv = 0;
@@ -1291,7 +1291,7 @@ void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
-	samplesview_setsample(self, sampleindex_make(0, 0));
+	samplesview_setsample(self, psy_audio_sampleindex_make(0, 0));
 }
 
 void samplesview_onresamplermethodchanged(SamplesView* self,

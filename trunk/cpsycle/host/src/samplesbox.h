@@ -19,14 +19,18 @@ extern "C" {
 //      The upper displays the first sample of group, the lower all the samples
 //      of the selected group.
 
-typedef struct {
+typedef struct SamplesBox {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_changed;
+	// internal
 	psy_ui_ListBox samplelist;
 	psy_ui_Label header;
 	psy_ui_Label group;
-	psy_ui_ListBox subsamplelist;	
-	psy_audio_Samples* samples;
-	psy_Signal signal_changed;
+	psy_ui_ListBox subsamplelist;
+	// references
+	psy_audio_Samples* samples;	
 } SamplesBox;
 
 void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*,

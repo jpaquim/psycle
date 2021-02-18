@@ -352,7 +352,7 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 		psy_ui_component_setalign(&self->more.component, psy_ui_ALIGN_BOTTOM);
 		psy_ui_component_setpreferredsize(&self->sliderpane.component,
-			psy_ui_size_makeem(2.5, 1.0));				
+			psy_ui_size_makeem(2.0, 1.0));				
 	}
 }
 

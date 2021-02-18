@@ -20,10 +20,10 @@ static void samplesgroup_erase(psy_audio_SamplesGroup*, uintptr_t slot);
 static void psy_audio_samples_removeemptygroup(psy_audio_Samples* self,
 	psy_audio_SampleIndex index,
 	psy_audio_SamplesGroup* group);
-static psy_audio_Sample* samplesgroup_at(psy_audio_SamplesGroup*,
+static psy_audio_Sample* psy_audio_samplesgroup_at(psy_audio_SamplesGroup*,
 	uintptr_t slot);
 
-psy_audio_SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
+psy_audio_SampleIndex psy_audio_sampleindex_make(uintptr_t slot, uintptr_t subslot)
 {
 	psy_audio_SampleIndex rv;
 
@@ -104,7 +104,7 @@ void samplesgroup_erase(psy_audio_SamplesGroup* self, uintptr_t slot)
 	}
 }
 
-psy_audio_Sample* samplesgroup_at(psy_audio_SamplesGroup* self,
+psy_audio_Sample* psy_audio_samplesgroup_at(psy_audio_SamplesGroup* self,
 	uintptr_t slot)
 {
 	assert(self);
@@ -222,7 +222,7 @@ psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples* self,
 
 	group = psy_table_at(&self->groups, index.slot);
 	if (group) {
-		return samplesgroup_at(group, psy_audio_sampleindex_subslot(&index));
+		return psy_audio_samplesgroup_at(group, psy_audio_sampleindex_subslot(&index));
 	}
 	return 0;
 }

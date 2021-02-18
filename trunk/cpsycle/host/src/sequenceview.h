@@ -17,6 +17,7 @@
 #include <uilabel.h>
 #include <uiscroller.h>
 #include <uisplitbar.h>
+#include <uinotebook.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,8 @@ typedef struct SequenceButtons {
 	psy_ui_Button newentry;		
 	psy_ui_Button delentry;
 	psy_ui_Button cloneentry;
+	psy_ui_Component expand;
+	psy_ui_Button toggle;
 	psy_ui_Component block;
 	psy_ui_Component row2;
 	psy_ui_Button clear;
@@ -208,6 +211,7 @@ void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
 void sequenceview_updateplayposition(SequenceView*);
 void sequenceview_changeplayposition(SequenceView*);
 void sequenceview_clear(SequenceView*);
+void sequenceview_toggleedit(SequenceView*);
 
 INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
 {

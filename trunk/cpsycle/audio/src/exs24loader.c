@@ -199,7 +199,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 			entry = psy_audio_instrumententry_allocinit();
 			entry->keyrange.low = zone.key_low;
 			entry->keyrange.high = zone.key_high;
-			entry->sampleindex = sampleindex_make(0, zone.sample_index);
+			entry->sampleindex = psy_audio_sampleindex_make(0, zone.sample_index);
 			if (zone.sample_start != 0) {
 				entry->use_loop = TRUE;
 				entry->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
@@ -222,7 +222,7 @@ int psy_audio_exs24loader_load(psy_audio_EXS24Loader* self)
 			wave = psy_audio_sample_allocinit(0);
 			psy_audio_sample_setname(wave, sample.name);
 			psy_audio_samples_insert(&self->song->samples, wave,
-				sampleindex_make(0, sampleidx));
+				psy_audio_sampleindex_make(0, sampleidx));
 			parentdir = strrchr(sample.file_path, '/');
 			if ((parentdir) && (parentdir + 1) != NULL) {
 				char_dyn_t* samplepath;

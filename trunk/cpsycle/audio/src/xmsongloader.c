@@ -1018,7 +1018,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 		// Only get REAL samples.
 		// if (self->smplen[*cursample] > 0) {
 			psy_audio_samples_insert(&self->song->samples, wave,
-				sampleindex_make(slot, i));
+				psy_audio_sampleindex_make(slot, i));
 		// }
 	}
 	// load individual samples
@@ -1027,7 +1027,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 		psy_audio_Sample* wave;
 
 		wave = psy_audio_samples_at(&self->song->samples,
-			sampleindex_make(slot, i));
+			psy_audio_sampleindex_make(slot, i));
 		assert(wave);
 		if (!wave) {
 			return PSY_ERRFILE;
@@ -1044,7 +1044,7 @@ int xmsongloader_loadinstrument(XMSongLoader* self, uintptr_t slot,
 	psy_audio_instrument_clearentries(instrument);
 	psy_audio_instrumententry_init(&instentry);
 	instentry.sampleindex =
-		sampleindex_make(slot, samph.snum[0]);
+		psy_audio_sampleindex_make(slot, samph.snum[0]);
 	for (note = 1; note < 96; ++note) {
 		if (samph.snum[note] != instentry.sampleindex.subslot) {
 			instentry.keyrange.high = note - 1;
@@ -1474,7 +1474,7 @@ int xmsongloader_loadxi(XMSongLoader* self, psy_audio_InstrumentIndex index)
 			// Only get REAL samples.
 			// if (self->smplen[*cursample] > 0) {
 			psy_audio_samples_insert(&self->song->samples, wave,
-				sampleindex_make(instidx, i));
+				psy_audio_sampleindex_make(instidx, i));
 			// }
 		}
 		// load individual samples		
@@ -1484,7 +1484,7 @@ int xmsongloader_loadxi(XMSongLoader* self, psy_audio_InstrumentIndex index)
 			uintptr_t start;
 
 			wave = psy_audio_samples_at(&self->song->samples,
-				sampleindex_make(instidx, i));
+				psy_audio_sampleindex_make(instidx, i));
 			assert(wave);
 			if (!wave) {
 				return PSY_ERRFILE;
@@ -1502,7 +1502,7 @@ int xmsongloader_loadxi(XMSongLoader* self, psy_audio_InstrumentIndex index)
 		psy_audio_instrument_clearentries(instr);
 		psy_audio_instrumententry_init(&instentry);
 		instentry.sampleindex =
-			sampleindex_make(instidx, insheader.snum[0]);
+			psy_audio_sampleindex_make(instidx, insheader.snum[0]);
 		for (note = 1; note < 96; ++note) {
 			if (insheader.snum[note] != instentry.sampleindex.subslot) {
 				instentry.keyrange.high = note - 1;
@@ -1606,7 +1606,7 @@ int modsongloader_load(MODSongLoader* self)
 			return status;
 		}
 		psy_audio_samples_insert(&self->song->samples, wave,
-			sampleindex_make(i, 0));
+			psy_audio_sampleindex_make(i, 0));
 	}
 	if (psyfile_seek(self->fp, 950) == -1) {
 		return PSY_ERRFILE;
@@ -2161,13 +2161,13 @@ int modsongloader_loadinstrument(MODSongLoader* self, int idx)
 
 		if (status = modsongloader_loadsampledata(self,
 			psy_audio_samples_at(&self->song->samples,
-				sampleindex_make(idx, 0)), idx)) {
+				psy_audio_sampleindex_make(idx, 0)), idx)) {
 			return status;
 		}
 		// create instrument entries
 		psy_audio_instrument_clearentries(instrument);
 		psy_audio_instrumententry_init(&instentry);
-		instentry.sampleindex = sampleindex_make(idx, 0);
+		instentry.sampleindex = psy_audio_sampleindex_make(idx, 0);
 		psy_audio_instrument_addentry(instrument, &instentry);
 	}
 	//instr.ValidateEnabled();
