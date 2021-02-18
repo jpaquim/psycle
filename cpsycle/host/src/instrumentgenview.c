@@ -136,7 +136,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		(ui_slider_fptweak)instrumentgeneralview_ongeneralviewtweak,
 		(ui_slider_fpvalue)instrumentgeneralview_ongeneralviewvalue);
 	instrumentnotemapview_init(&self->notemapview, &self->component, workspace);
-	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_checkbox_settext(&self->fitrowcheck,
 		"instrumentview.play-sample-to-fit");
 	psy_ui_slider_settext(&self->globalvolume,

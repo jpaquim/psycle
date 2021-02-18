@@ -57,6 +57,13 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 		"sequencerview.clone");
 	psy_ui_button_init_text(&self->delentry, &self->row1,
 		"sequencerview.del");
+	psy_ui_component_init(&self->expand, &self->component);
+	psy_ui_component_setalign(&self->expand, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->toggle, &self->expand);
+	psy_ui_button_preventtranslation(&self->toggle);
+	psy_ui_button_settext(&self->toggle, ". . .");
+	psy_ui_component_setalign(psy_ui_button_base(&self->toggle),
+		psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->block, &self->component);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->row2, &self->block);
@@ -686,13 +693,7 @@ void sequencelistview_onmousedown(SequenceListView* self,
 			sequencelistview_select(self, selectedtrack, selected);
 		}
 	} else if (ev->button == 2) {
-		if (psy_ui_component_visible(&self->view->buttons.block)) {
-			psy_ui_component_hide(&self->view->buttons.block);
-			psy_ui_component_align(&self->view->component);
-		} else {
-			psy_ui_component_show(&self->view->buttons.block);
-			psy_ui_component_align(&self->view->component);
-		}
+		sequenceview_toggleedit(self->view);		
 	}
 }
 
@@ -894,6 +895,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 
 // SequenceView
 // prototypes
+static void sequenceview_ontoggleedit(SequenceView*, psy_ui_Component* sender);
 static void sequenceview_onnewentry(SequenceView*);
 static void sequenceview_oninsertentry(SequenceView*);
 static void sequenceview_oncloneentry(SequenceView*);
@@ -981,7 +983,9 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
 	// duration
 	sequenceduration_init(&self->duration, &self->component, self->state.sequence, workspace);
-	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
+	psy_signal_connect(&self->buttons.toggle.signal_clicked, self,
+		sequenceview_ontoggleedit);
 	psy_signal_connect(&self->buttons.newentry.signal_clicked, self,
 		sequenceview_onnewentry);
 	psy_signal_connect(&self->buttons.insertentry.signal_clicked, self,
@@ -1052,6 +1056,25 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onconfigure);	
 	psy_signal_connect(&self->component.signal_align, self,
 		sequenceview_onalign);
+}
+
+void sequenceview_ontoggleedit(SequenceView* self, psy_ui_Component* sender)
+{
+	sequenceview_toggleedit(self);
+}
+
+void sequenceview_toggleedit(SequenceView* self)
+{
+	if (psy_ui_component_visible(&self->buttons.block)) {
+		psy_ui_component_hide(&self->buttons.block);		
+		psy_ui_button_seticon(&self->buttons.toggle, psy_ui_ICON_NONE);
+		psy_ui_button_settext(&self->buttons.toggle, ". . .");
+		psy_ui_component_align(&self->component);		
+	} else {
+		psy_ui_button_settext(&self->buttons.toggle, "-");		
+		psy_ui_component_show(&self->buttons.block);
+		psy_ui_component_align(&self->component);		
+	}
 }
 
 void sequenceview_onnewentry(SequenceView* self)

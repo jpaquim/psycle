@@ -600,7 +600,7 @@ void psy_audio_sampler_tick(psy_audio_Sampler* self, uintptr_t channel,
 	}
 	samples = psy_audio_machine_samples(psy_audio_sampler_base(self));
 	if (!psy_audio_samples_at(samples,
-			sampleindex_make(data.inst, self->instrumentbank))) {
+			psy_audio_sampleindex_make(data.inst, self->instrumentbank))) {
 		return; // if no wave, return.
 	}
 	voice = psy_audio_sampler_getcurrentvoice(self, channel);
@@ -715,7 +715,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 				sample = psy_audio_samples_at(
 					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-					sampleindex_make(self->instrument, 0));
+					psy_audio_sampleindex_make(self->instrument, 0));
 				w_offset = (uint64_t)(ev->parameter * sample->numframes) << 24;
 				dooffset = TRUE;
 			} break;
@@ -744,7 +744,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 						sample = psy_audio_samples_at(
 							psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-							sampleindex_make(self->instrument, 0));
+							psy_audio_sampleindex_make(self->instrument, 0));
 						finetune = sample->numframes * 0.01;
 						speeddouble = pow(2.0, (((double)pEntry->note +
 							(double)psy_audio_sample_tune(sample) - (double)basec) + finetune) / 12.0) *
@@ -843,7 +843,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			} else {
 				sample = psy_audio_samples_at(
 					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-					sampleindex_make(self->instrument, 0));
+					psy_audio_sampleindex_make(self->instrument, 0));
 				self->controller.wave = sample;
 				self->controller.loop = sample->loop;
 				tune = psy_audio_sample_tune(sample);
@@ -1190,7 +1190,7 @@ bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice* self)
 {
 	return !psy_audio_samples_at(
 		psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-		sampleindex_make(self->instrument, 0));
+		psy_audio_sampleindex_make(self->instrument, 0));
 }
 
 // mfc-psycle: Voice::NoteOff()

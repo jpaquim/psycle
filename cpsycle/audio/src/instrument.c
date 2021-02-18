@@ -33,7 +33,7 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 {	
 	assert(self);
 
-	self->sampleindex = sampleindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+	self->sampleindex = psy_audio_sampleindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->fixedkey = psy_audio_NOTECOMMANDS_EMPTY; // disabled
 	psy_audio_parameterrange_init(&self->keyrange,
 		0, psy_audio_NOTECOMMANDS_RELEASE - 1,
@@ -211,7 +211,7 @@ void psy_audio_instrument_setindex(psy_audio_Instrument* self, uintptr_t index)
 	assert(self);
 
 	psy_audio_instrumententry_init(&entry);	
-	entry.sampleindex = sampleindex_make(index, 0);	
+	entry.sampleindex = psy_audio_sampleindex_make(index, 0);	
 	psy_audio_instrument_addentry(self, &entry);
 }
 

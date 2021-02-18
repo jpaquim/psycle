@@ -25,7 +25,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	psy_path_init(&path, self->path);
 	psy_audio_sample_load(sample, &path);
 	psy_path_dispose(&path);
-	index = index = sampleindex_make(0, 0);
+	index = index = psy_audio_sampleindex_make(0, 0);
 	psy_audio_samples_insert(&self->song->samples, sample, index);
 	instrument = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));

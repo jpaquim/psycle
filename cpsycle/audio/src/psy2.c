@@ -485,7 +485,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 						pData = 0;						
 					}
 					psy_audio_samples_insert(&self->songfile->song->samples, wave,
-						sampleindex_make(i, 0));
+						psy_audio_sampleindex_make(i, 0));
 					{
 						psy_audio_Instrument* instrument;
 

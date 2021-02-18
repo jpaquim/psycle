@@ -162,6 +162,23 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 			srcbpmsize);
 		ident += destbpmsize.width + tm->tmAveCharWidth * self->bitmapident;
 	}
+	if (self->icon != psy_ui_ICON_NONE) {
+		psy_ui_IconDraw icondraw;
+		const psy_ui_TextMetric* tm;
+		psy_ui_RealSize buttonsize;
+
+		buttonsize = psy_ui_component_sizepx(psy_ui_button_base(self));		
+		psy_ui_icondraw_init(&icondraw, self->icon,
+			self->component.style.currstyle);
+		psy_ui_icondraw_draw(&icondraw, g,
+			psy_ui_button_center(self,
+				psy_ui_realpoint_make(4.0, 0.0),
+				psy_ui_realsize_make(buttonsize.width, 8.0)));
+		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
+		if (psy_strlen(text) > 0) {
+			ident += tm->tmAveCharWidth * 2;
+		}
+	}
 	if (psy_strlen(text) > 0) {
 		psy_ui_Size textsize;		
 		const psy_ui_TextMetric* tm;
@@ -179,16 +196,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 				tm->tmHeight)),
 			psy_ui_ETO_CLIPPED, r, text, strlen(text));
 	}
-	if (self->icon != psy_ui_ICON_NONE) {
-		psy_ui_IconDraw icondraw;
-
-		psy_ui_icondraw_init(&icondraw, self->icon,
-			self->component.style.currstyle);
-		psy_ui_icondraw_draw(&icondraw, g,
-			psy_ui_button_center(self,
-				psy_ui_realpoint_make(4.0, 0.0),
-				psy_ui_realsize_make(4.0, 8.0)));		
-	}	
+	
 }
 
 psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
@@ -239,15 +247,17 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			size = psy_ui_size_zero();
 		}
 		if (self->icon) {
-			if (self->icon == psy_ui_ICON_LESS || self->icon == psy_ui_ICON_MORE) {
-				psy_ui_Size textsize;
+			if (self->icon == psy_ui_ICON_LESS || self->icon == psy_ui_ICON_MORE) {				
+				if (text) {
+					psy_ui_Size textsize;
 
-				textsize = psy_ui_component_textsize(psy_ui_button_base(self), "<");
-				size.width = psy_ui_value_makepx(
-					psy_ui_value_px(&size.width, tm) +
-					psy_ui_value_px(&textsize.width, tm));				
+					textsize = psy_ui_size_makeem(2.0, 1.0);
+					psy_ui_value_add(&size.width, &textsize.width, tm);
+				} else {
+					size.width = psy_ui_value_makeew(1.0);
+				}
 			} else {
-				size.width = psy_ui_component_textsize(psy_ui_button_base(self), "<<").width;				
+				size.width = psy_ui_value_makeew(2.0);
 			}
 		}
 		if (!psy_ui_bitmap_empty(&self->bitmapicon)) {

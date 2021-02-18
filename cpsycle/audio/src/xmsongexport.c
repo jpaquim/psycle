@@ -703,7 +703,7 @@ int xmsongexport_saveinstruments(XMSongExport* self)
 	}
 	remaining = self->m_Header.instruments - self->macInstruments;
 	for (j = 0, i = (self->correctionIndex == 0) ? 1 : 0; j < self->xmInstruments && j < remaining; j++, i++) {
-		if (psy_audio_samples_at(&self->song->samples, sampleindex_make(i, 0))) {
+		if (psy_audio_samples_at(&self->song->samples, psy_audio_sampleindex_make(i, 0))) {
 			xmsongexport_savesampulseinstrument(self, i);
 		} else {
 			psy_audio_Instrument* inst;
@@ -714,7 +714,7 @@ int xmsongexport_saveinstruments(XMSongExport* self)
 	}
 	remaining = self->m_Header.instruments - self->macInstruments - self->xmInstruments;
 	for (i = 0; i < remaining; i++) {
-		if (psy_audio_samples_at(&self->song->samples, sampleindex_make(i, 0))) {
+		if (psy_audio_samples_at(&self->song->samples, psy_audio_sampleindex_make(i, 0))) {
 			xmsongexport_savesamplerinstrument(self, i);
 		} else {
 			psy_audio_Instrument* inst;
@@ -813,7 +813,7 @@ int xmsongexport_savesamplerinstrument(XMSongExport* self, int instIdx)
 
 	memset(&insHeader, 0, sizeof(insHeader));		
 	memset(temp, 0, sizeof(temp));
-	sample = psy_audio_samples_at(&self->song->samples, sampleindex_make(instIdx, 0));
+	sample = psy_audio_samples_at(&self->song->samples, psy_audio_sampleindex_make(instIdx, 0));
 	if (sample) {
 		strncpy(temp, psy_audio_sample_name(sample), 22); //Names are not null terminated
 	}	
@@ -860,7 +860,7 @@ int xmsongexport_savesampleheader(XMSongExport* self, int instIdx, int sampleIdx
 	uint8_t type;
 	int status;
 
-	index = sampleindex_make(instIdx, sampleIdx);
+	index = psy_audio_sampleindex_make(instIdx, sampleIdx);
 	wave = psy_audio_samples_at(&self->song->samples,
 		index);
 	memset(&stheader, 0, sizeof(stheader));
@@ -908,7 +908,7 @@ int xmsongexport_savesampledata(XMSongExport* self, int instrIdx, int sampleinde
 	int j;
 	
 	wave = psy_audio_samples_at(&self->song->samples,
-		sampleindex_make(instrIdx, sampleindex));
+		psy_audio_sampleindex_make(instrIdx, sampleindex));
 	// pack sample data
 	samples = wave->channels.samples[0];
 	length = (int32_t)wave->numframes;
