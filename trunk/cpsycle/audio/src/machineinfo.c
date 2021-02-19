@@ -14,7 +14,7 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->Author = strdup("");
 	self->Command = strdup("");
 	self->Flags = 0;
-	self->mode = MACHMODE_FX;
+	self->mode = psy_audio_MACHMODE_FX;
 	self->Name = strdup("");	
 	self->ShortName = strdup("");
 	self->APIVersion = 0;
@@ -94,7 +94,7 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 	self->Author = strdup(info->Author);
 	self->Command = strdup(info->Command);
 	self->Flags = info->Flags;
-	self->mode = (info->Flags & 3) == 3 ? MACHMODE_GENERATOR : MACHMODE_FX;
+	self->mode = (info->Flags & 3) == 3 ? psy_audio_MACHMODE_GENERATOR : psy_audio_MACHMODE_FX;
 	self->Name = strdup(info->Name);		
 	self->ShortName = strdup(info->ShortName);
 	self->APIVersion = info->APIVersion;

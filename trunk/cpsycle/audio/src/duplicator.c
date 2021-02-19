@@ -39,7 +39,7 @@ static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
-	MACHMODE_GENERATOR,
+	psy_audio_MACHMODE_GENERATOR,
 	"Duplicator"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -48,7 +48,7 @@ static psy_audio_MachineInfo const macinfo = {
 	"Duplicator",
 	"Psycledelics",
 	"help",	
-	MACH_DUPLICATOR,
+	psy_audio_DUPLICATOR,
 	0,
 	0,
 	""

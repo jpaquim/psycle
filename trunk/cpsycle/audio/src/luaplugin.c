@@ -553,13 +553,13 @@ uintptr_t numparameters(psy_audio_LuaPlugin* self)
 
 int mode(psy_audio_LuaPlugin* self)
 {
-	return MACHMODE_FX;		
+	return psy_audio_MACHMODE_FX;		
 }
 
 uintptr_t numinputs(psy_audio_LuaPlugin* self)
 {
 	if (info(self)) {
-		return self->plugininfo->mode == MACHMODE_FX ? 2 : 0;
+		return self->plugininfo->mode == psy_audio_MACHMODE_FX ? 2 : 0;
 	} else {
 		return 0;
 	}
@@ -721,7 +721,7 @@ int luamachine_create(lua_State* L)
 			}
 			machinefactory = psy_audio_machine_machinefactory(psy_audio_luaplugin_base(host));
 			if (machinefactory) {
-				machine = psy_audio_machinefactory_makemachine(machinefactory, MACH_PLUGIN,
+				machine = psy_audio_machinefactory_makemachine(machinefactory, psy_audio_PLUGIN,
 					plug_name, psy_INDEX_INVALID);
 				if (machine) {
 					ud = malloc(sizeof(psy_audio_LuaMachine));

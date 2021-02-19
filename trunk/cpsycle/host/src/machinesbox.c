@@ -112,14 +112,14 @@ int machinesbox_checkmachinemode(MachinesBox* self, psy_audio_Machine* machine)
 		return 0;
 	}
 	if (self->mode == MACHINEBOX_FX && 
-		psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
+		psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 		return 0;
 	}
 	if (self->mode == MACHINEBOX_GENERATOR &&
-		psy_audio_machine_mode(machine) == MACHMODE_FX) {
+		psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX) {
 		return 0;
 	}
-	if (psy_audio_machine_mode(machine) == MACHMODE_MASTER) {
+	if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_MASTER) {
 		return 0;
 	}
 	return 1;

@@ -182,7 +182,7 @@ bool xmsongloader_isvalid(XMSongLoader* self)
 bool xmsongloader_makexmsampler(XMSongLoader* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
+		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;
@@ -1666,7 +1666,7 @@ bool modsongloader_isvalid(MODSongLoader* self)
 bool modsongloader_makexmsampler(MODSongLoader* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
+		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;

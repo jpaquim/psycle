@@ -288,7 +288,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	plugintype(property, text);
 	psy_ui_textout(g, x + self->columnwidth - self->avgcharwidth * 7,
 		y + 2, text, strlen(text));
-	if (pluginmode(property, text) == MACHMODE_FX) {
+	if (pluginmode(property, text) == psy_audio_MACHMODE_FX) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
@@ -328,19 +328,19 @@ uintptr_t plugintype(psy_Property* property, char* text)
 	
 	rv = (uintptr_t)psy_property_at_int(property, "type", -1);
 	switch (rv) {
-		case MACH_PLUGIN:
+		case psy_audio_PLUGIN:
 			strcpy(text, "psy");
 		break;
-		case MACH_LUA:
+		case psy_audio_LUA:
 			strcpy(text, "lua");
 		break;
-		case MACH_VST:
+		case psy_audio_VST:
 			strcpy(text, "vst");
 		break;
-		case MACH_VSTFX:
+		case psy_audio_VSTFX:
 			strcpy(text, "vst");
 		break;
-		case MACH_LADSPA:
+		case psy_audio_LADSPA:
 			strcpy(text, "lad");
 			break;
 		default:
@@ -355,7 +355,7 @@ uintptr_t pluginmode(psy_Property* property, char* text)
 	uintptr_t rv;
 
 	rv = (uintptr_t)psy_property_at_int(property, "mode", -1);
-	strcpy(text, rv == MACHMODE_FX ? "fx" : "gn");
+	strcpy(text, rv == psy_audio_MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
 
@@ -363,11 +363,11 @@ uintptr_t pluginenabled(const PluginsView* self, psy_Property* property)
 {
 	uintptr_t mode;
 	
-	mode = psy_property_at_int(property, "mode", MACHMODE_FX);
-	if (self->effectsenabled && mode == MACHMODE_FX) {
+	mode = psy_property_at_int(property, "mode", psy_audio_MACHMODE_FX);
+	if (self->effectsenabled && mode == psy_audio_MACHMODE_FX) {
 		return TRUE;
 	}
-	if (self->generatorsenabled && mode == MACHMODE_GENERATOR) {
+	if (self->generatorsenabled && mode == psy_audio_MACHMODE_GENERATOR) {
 		return TRUE;
 	}
 	return FALSE;
@@ -1041,11 +1041,11 @@ int newmachine_comp_type(psy_Property* p, psy_Property* q)
 
 int newmachine_isplugin(int type)
 {
-	return (type == MACH_PLUGIN) ||
-	   (type == MACH_VST) ||
-	   (type == MACH_VSTFX) ||
-	   (type == MACH_LUA) ||
-	   (type == MACH_LADSPA);
+	return (type == psy_audio_PLUGIN) ||
+	   (type == psy_audio_VST) ||
+	   (type == psy_audio_VSTFX) ||
+	   (type == psy_audio_LUA) ||
+	   (type == psy_audio_LADSPA);
 }
 
 int newmachine_comp_mode(psy_Property* p, psy_Property* q)

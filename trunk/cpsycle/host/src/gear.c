@@ -62,8 +62,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
 	psy_ui_component_init(gear_base(self), parent);	
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU);
+	//psy_ui_component_setstyletypes(&self->component,
+		//psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	// client
@@ -176,9 +176,9 @@ void gear_onmachineselected(Gear* self, psy_audio_Machines* sender,
 
 	machine = psy_audio_machines_at(sender, macidx);
 	if (machine) {
-		if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
+		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 			gear_showgenerators(self);
-		} else if (psy_audio_machine_mode(machine) == MACHMODE_FX) {
+		} else if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX) {
 			gear_showeffects(self);
 		}
 	} else if (macidx >= 0 && macidx < 0x40) {

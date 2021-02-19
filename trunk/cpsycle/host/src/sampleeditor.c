@@ -800,7 +800,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		psy_audio_patternevent_init_all(&event,
 			(unsigned char) 48,
 			(unsigned char)psy_audio_instruments_selected(&workspace_song(self->workspace)->instruments).subslot,
-			psy_audio_NOTECOMMANDS_MACH_EMPTY,
+			psy_audio_NOTECOMMANDS_psy_audio_EMPTY,
 			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	
 		psy_audio_patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
@@ -818,7 +818,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 	psy_audio_patternevent_init_all(&event,
 		psy_audio_NOTECOMMANDS_RELEASE,
 		0,		
-		psy_audio_NOTECOMMANDS_MACH_EMPTY,
+		psy_audio_NOTECOMMANDS_psy_audio_EMPTY,
 		psy_audio_NOTECOMMANDS_VOL_EMPTY,
 		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerentry);

@@ -291,7 +291,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 				mi_init(self->mi);
 				tweakdefaults(self, pInfo);
 				self->plugininfo = machineinfo_allocinit();				
-				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
+				machineinfo_setnativeinfo(self->plugininfo, pInfo, psy_audio_PLUGIN,
 					self->library.path, 0);				
 				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
 					pInfo->ShortName);
@@ -400,7 +400,7 @@ int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_M
 		if (GetInfo != NULL) {	
 			CMachineInfo* nativeinfo = GetInfo();
 			if (nativeinfo) {				
-				machineinfo_setnativeinfo(info, nativeinfo, MACH_PLUGIN,
+				machineinfo_setnativeinfo(info, nativeinfo, psy_audio_PLUGIN,
 					library.path, 0);
 				rv = 1;
 			}
@@ -520,7 +520,7 @@ uintptr_t numparameters(psy_audio_Plugin* self)
 
 uintptr_t numinputs(psy_audio_Plugin* self)
 {
-	return info(self) ? (self->plugininfo->mode == MACHMODE_FX ? 2 : 0) : 0;
+	return info(self) ? (self->plugininfo->mode == psy_audio_MACHMODE_FX ? 2 : 0) : 0;
 }
 
 uintptr_t numoutputs(psy_audio_Plugin* self)

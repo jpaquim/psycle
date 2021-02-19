@@ -295,7 +295,7 @@ const psy_audio_MachineInfo* psy_audio_mixer_info(void)
 		MI_VERSION,
 		0x0250,
 		GENERATOR | 32 | 64,
-		MACHMODE_GENERATOR,
+		psy_audio_MACHMODE_GENERATOR,
 		"Mixer"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -304,7 +304,7 @@ const psy_audio_MachineInfo* psy_audio_mixer_info(void)
 		"Mixer",
 		"Psycledelics",
 		"help",
-		MACH_MIXER,
+		psy_audio_MIXER,
 		0,
 		0,
 		""
@@ -322,7 +322,7 @@ static void psy_audio_mixer_dispose_sends(psy_audio_Mixer*);
 static void psy_audio_mixer_dispose_returns(psy_audio_Mixer*);
 static void psy_audio_mixer_dispose_legacywires(psy_audio_Mixer*);
 
-static int mixer_mode(psy_audio_Mixer* self) { return MACHMODE_FX; }
+static int mixer_mode(psy_audio_Mixer* self) { return psy_audio_MACHMODE_FX; }
 static uintptr_t numinputs(psy_audio_Mixer* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_Mixer* self) { return 2; }
 static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, uintptr_t amount,
@@ -1302,7 +1302,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 
 			machines = psy_audio_machine_machines(base);
 			machine = psy_audio_machines_at(machines, outputslot);
-			if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR ||
+			if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
 					!psy_audio_machines_isconnectasmixersend(machines)) {
 				uintptr_t inputnum;
 				
@@ -1365,7 +1365,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 
 		machines = psy_audio_machine_machines(base);
 		machine = psy_audio_machines_at(machines, outputslot);
-		if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
+		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 			psy_TableIterator it;
 
 			for (it = psy_table_begin(&self->inputs);

@@ -231,7 +231,7 @@ static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
-	MACHMODE_FX,
+	psy_audio_MACHMODE_FX,
 	"Machine"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -240,7 +240,7 @@ static psy_audio_MachineInfo const macinfo = {
 	"Machine",
 	"Psycledelics",
 	"help",
-	MACH_UNDEFINED,
+	psy_audio_UNDEFINED,
 	0,
 	0,	
 	""
@@ -706,7 +706,7 @@ uintptr_t work_dogenerateaudio(psy_audio_Machine* self, psy_audio_BufferContext*
 	uintptr_t position, uintptr_t amount)
 {
 	if (amount > 0 && !psy_audio_machine_muted(self) &&
-			((psy_audio_machine_mode(self) == MACHMODE_GENERATOR) || 
+			((psy_audio_machine_mode(self) == psy_audio_MACHMODE_GENERATOR) || 
 			 !psy_audio_machine_bypassed(self))) {
 		uintptr_t restorenumsamples;
 
@@ -796,7 +796,7 @@ int mode(psy_audio_Machine* self)
 	const psy_audio_MachineInfo* info;
 
 	info = psy_audio_machine_info(self);
-	return (!info) ? MACHMODE_FX : info->mode;
+	return (!info) ? psy_audio_MACHMODE_FX : info->mode;
 }
 
 int machine_supports(psy_audio_Machine* self, int option)

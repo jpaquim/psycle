@@ -13,7 +13,7 @@ const psy_audio_MachineInfo* psy_audio_virtualgenerator_info(void)
 		MI_VERSION,
 		0x0250,
 		EFFECT | 32 | 64,
-		MACHMODE_GENERATOR,
+		psy_audio_MACHMODE_GENERATOR,
 		"Virtual Generator"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -22,7 +22,7 @@ const psy_audio_MachineInfo* psy_audio_virtualgenerator_info(void)
 		"Virtual Generator",
 		"Psycledelics",
 		"help",		
-		MACH_VIRTUALGENERATOR,
+		psy_audio_VIRTUALGENERATOR,
 		0,
 		0,		
 		""
@@ -35,7 +35,7 @@ static const psy_audio_MachineInfo* info(psy_audio_VirtualGenerator* self) {
 }
 
 static void dispose(psy_audio_VirtualGenerator*);
-static int mode(psy_audio_VirtualGenerator* self) { return MACHMODE_GENERATOR; }
+static int mode(psy_audio_VirtualGenerator* self) { return psy_audio_MACHMODE_GENERATOR; }
 static void seqtick(psy_audio_VirtualGenerator*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
 static uintptr_t numinputs(psy_audio_VirtualGenerator* self) { return 0; }
@@ -154,7 +154,7 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 			psy_audio_machine_seqtick(sampler, channel, &realevent);			
 			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 				// 
-				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
+				if (psy_audio_machine_type(sampler) == psy_audio_XMSAMPLER) {
 					realevent.cmd = 0x1E;
 				} else {
 					realevent.cmd = 0xFC;

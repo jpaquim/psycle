@@ -172,7 +172,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 			self->component.style.currstyle);
 		psy_ui_icondraw_draw(&icondraw, g,
 			psy_ui_button_center(self,
-				psy_ui_realpoint_make(4.0, 0.0),
+				psy_ui_realpoint_make(12.0, 0.0),
 				psy_ui_realsize_make(buttonsize.width, 8.0)));
 		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 		if (psy_strlen(text) > 0) {

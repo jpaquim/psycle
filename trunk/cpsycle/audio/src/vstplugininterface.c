@@ -83,8 +83,8 @@ void psy_audio_vstinterface_tick(psy_audio_VstInterface* self, struct VstEvents*
 psy_audio_MachineMode psy_audio_vstinterface_mode(psy_audio_VstInterface* self)
 {	
 	return ((self->effect->flags & effFlagsIsSynth) == effFlagsIsSynth)
-		? MACHMODE_GENERATOR
-		: MACHMODE_FX;
+		? psy_audio_MACHMODE_GENERATOR
+		: psy_audio_MACHMODE_FX;
 }
 
 void psy_audio_vstinterface_beginprogram(psy_audio_VstInterface* self)

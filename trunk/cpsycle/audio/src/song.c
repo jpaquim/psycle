@@ -128,7 +128,7 @@ void song_initmachines(psy_audio_Song* self)
 	psy_audio_machines_init(&self->machines);
 	psy_audio_machines_insertmaster(&self->machines,
 		psy_audio_machinefactory_makemachine(self->machinefactory,
-			MACH_MASTER, NULL, psy_INDEX_INVALID));
+			psy_audio_MASTER, NULL, psy_INDEX_INVALID));
 }
 
 void song_initpatterns(psy_audio_Song* self)
@@ -234,8 +234,8 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 {
 	assert(self);
 
-	// && mac != NULL && (mac->_type == MACH_SAMPLER ||
-	//    mac->_type == MACH_XMSAMPLER))
+	// && mac != NULL && (mac->_type == psy_audio_SAMPLER ||
+	//    mac->_type == psy_audio_XMSAMPLER))
 	if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS) {
 		psy_audio_Machine* machine;
 		
@@ -244,7 +244,7 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 			psy_audio_machines_remove(&self->machines, virtual_inst);
 		}
 		machine = psy_audio_machinefactory_makemachinefrompath(
-			self->machinefactory, MACH_VIRTUALGENERATOR, NULL,
+			self->machinefactory, psy_audio_VIRTUALGENERATOR, NULL,
 			mac_idx, inst_idx);
 		if (machine) {
 			psy_audio_machine_seteditname(machine, "Virtual Generator");

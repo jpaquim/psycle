@@ -14,14 +14,14 @@ extern "C" {
 
 // psy_audio_MachineFactory
 //
-// aim: It creates machines using the MachineType and the plugincatchername
+// aim: It creates machines using the psy_audio_MachineType and the plugincatchername
 //      defined by 'PluginFinder'. (psy_audio_machinefactory_makemachine)
 //      Therefore it needs a 'PluginFinder' to translate the name to the
 //      module path. The plugincatchername ends with a shellindex ':index'
 //      to select the right plugin inside a plugin bundle (e.g. 'vstbundle:2'),
 //      Bundles can be Vst and Ladspa plugins, the others use as suffix ':0'.
 //      Internal machines use no path and the path can be NULL.
-//      Besides the factory can make a machine from a MachineType, module path
+//      Besides the factory can make a machine from a psy_audio_MachineType, module path
 //      and a shellindex. (psy_audio_machinefactory_makemachinefrompath)
 //      At creation it also uses the MachineCallback for the host and depending
 //      on the configuration it wraps the machine inside a machineproxy,
@@ -43,9 +43,9 @@ typedef struct psy_audio_MachineFactory {
 
 void psy_audio_machinefactory_init(psy_audio_MachineFactory*, psy_audio_MachineCallback*, psy_audio_PluginCatcher*);
 void psy_audio_machinefactory_dispose(psy_audio_MachineFactory*);
-psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory*, MachineType,
+psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory*, psy_audio_MachineType,
 	const char* plugincatchername, uintptr_t instindex);
-psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory*, MachineType,
+psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory*, psy_audio_MachineType,
 	const char* path, uintptr_t shellidx, uintptr_t instindex);
 void psy_audio_machinefactory_createasproxy(psy_audio_MachineFactory*);
 void psy_audio_machinefactory_createwithoutproxy(psy_audio_MachineFactory*);

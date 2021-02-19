@@ -276,12 +276,12 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 					psDescriptor->Maker,
 					"", //const char* command,
 					0, // int flags,
-					MACHMODE_FX,
+					psy_audio_MACHMODE_FX,
 					psDescriptor->Name,
 					psDescriptor->Name, //const char* shortname,
 					1, // short apiversion,
 					0, // short plugversion,
-					MACH_LADSPA,
+					psy_audio_LADSPA,
 					path, //const char* modulepath,
 					shellidx,
 					"");
@@ -352,12 +352,12 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, 
 					psDescriptor->Maker,
 					"", //const char* command,
 					0, // int flags,
-					MACHMODE_FX, //int mode,
+					psy_audio_MACHMODE_FX, //int mode,
 					psDescriptor->Name, // const char* name,
 					psDescriptor->Label, //const char* shortname,
 					1, // short apiversion,
 					0, // short plugversion,
-					MACH_LADSPA, // int type,
+					psy_audio_LADSPA, // int type,
 					path, //const char* modulepath,
 					shellidx,
 					"");
@@ -500,7 +500,7 @@ float parametervalue(psy_audio_LadspaPlugin* self, uintptr_t param)
 
 uintptr_t numinputs(psy_audio_LadspaPlugin* self)
 {
-	return info(self) ? (self->plugininfo->mode == MACHMODE_FX ? 2 : 0) : 0;
+	return info(self) ? (self->plugininfo->mode == psy_audio_MACHMODE_FX ? 2 : 0) : 0;
 }
 
 uintptr_t numoutputs(psy_audio_LadspaPlugin* self)

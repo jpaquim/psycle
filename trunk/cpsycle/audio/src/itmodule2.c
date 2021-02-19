@@ -398,7 +398,7 @@ void itmodule2_setsongcomments(ITModule2* self)
 bool itmodule2_makexmsampler(ITModule2* self)
 {
 	self->sampler = psy_audio_machinefactory_makemachine(
-		self->songfile->song->machinefactory, MACH_XMSAMPLER, "",
+		self->songfile->song->machinefactory, psy_audio_XMSAMPLER, "",
 		psy_INDEX_INVALID);
 	if (self->sampler) {
 		psy_audio_Wire wire;

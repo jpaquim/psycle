@@ -156,14 +156,14 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 
 	machine = psy_audio_machines_at(machines, slot);
 	if (machine && psy_audio_machine_info(machine) &&
-			psy_audio_machine_info(machine)->type == MACH_LUA) {
+			psy_audio_machine_info(machine)->type == psy_audio_LUA) {
 		const char* path;
 		char catchername[256];
 		
 		psy_snprintf(catchername, 256, "%s:0",
 			psy_audio_machine_info(machine)->Name);		
 		path = psy_audio_plugincatcher_searchpath(&self->workspace->plugincatcher, catchername,
-			MACH_LUA);
+			psy_audio_LUA);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
 				psy_ui_editor_load(&self->editor, path);
@@ -232,7 +232,7 @@ void plugineditor_buildpluginlist(PluginEditor* self)
 			psy_Property* property;
 
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_at_int(property, "type", -1) == MACH_LUA) {
+			if (psy_property_at_int(property, "type", -1) == psy_audio_LUA) {
 				psy_ui_combobox_addtext(&self->pluginselector, psy_property_key(property));
 				psy_table_insert(&self->pluginmappping, (uintptr_t)c, property);
 				++c;
@@ -286,7 +286,7 @@ void plugineditor_buildfilelist(PluginEditor* self)
 		psy_dir_extract_path(self->basepath, prefix, name, ext);		
 		psy_snprintf(path, 4096, "%s\\%s", prefix, name);		
 		psy_dir_enumerate_recursive(self, path, "*.lua",
-			MACH_PLUGIN, (psy_fp_findfile)plugineditor_onenumdir);		
+			psy_audio_PLUGIN, (psy_fp_findfile)plugineditor_onenumdir);		
 	}
 }
 

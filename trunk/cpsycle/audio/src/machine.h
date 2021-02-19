@@ -491,7 +491,7 @@ INLINE intptr_t psy_audio_machine_type(psy_audio_Machine* self)
 	info = self->vtable->info(self);
 	return (info)
 		? info->type
-		: MACH_UNDEFINED;	
+		: psy_audio_UNDEFINED;	
 }
 
 INLINE void psy_audio_machine_sequencertick(psy_audio_Machine* self)

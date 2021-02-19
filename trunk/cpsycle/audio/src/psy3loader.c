@@ -569,7 +569,7 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 							? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 							: ptrack[1];
 						event.mach = (ptrack[2] == 0xFF)
-							? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
+							? event.mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY
 							: ptrack[2];
 						event.cmd = ptrack[3];
 						event.parameter = ptrack[4];
@@ -2385,7 +2385,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 		type, catchername, psy_INDEX_INVALID);
 	if (!machine) {
 		machine = psy_audio_machinefactory_makemachine(
-			self->song->machinefactory, MACH_DUMMY,
+			self->song->machinefactory, psy_audio_DUMMY,
 			catchername, psy_INDEX_INVALID);
 		*replaced = TRUE;
 	}

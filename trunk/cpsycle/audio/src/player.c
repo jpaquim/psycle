@@ -450,7 +450,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 				(note == psy_audio_NOTECOMMANDS_TWEAK)
 				? (uint16_t)psy_audio_machines_paramselected(&self->song->machines)
 				: (uint16_t)(machine && machine_supports(machine,
-					MACH_SUPPORTS_INSTRUMENTS)
+					psy_audio_SUPPORTS_INSTRUMENTS)
 					? psy_audio_instruments_selected(&self->song->instruments).subslot
 					: psy_audio_NOTECOMMANDS_INST_EMPTY),
 				(uint8_t)mac,

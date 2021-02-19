@@ -152,7 +152,7 @@ void psy_audio_machines_insert(psy_audio_Machines* self, uintptr_t slot,
 			if (slot > self->maxindex) {
 				self->maxindex = slot;
 			}
-			if (psy_audio_machine_type(machine) == MACH_MIXER) {
+			if (psy_audio_machine_type(machine) == psy_audio_MIXER) {
 				++self->mixercount;
 			}
 			psy_signal_emit(&self->signal_insert, self, 1, slot);
@@ -178,7 +178,7 @@ uintptr_t psy_audio_machines_append(psy_audio_Machines* self,
 	assert(self);
 
 	slot = machines_freeslot(self,
-		(psy_audio_machine_mode(machine) == MACHMODE_FX)
+		(psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX)
 		? 0x40
 		: 0);
 	psy_audio_machines_insert(self, slot, machine);
@@ -207,7 +207,7 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 		self->master = NULL;
 	}
 	machine = psy_audio_machines_at(self, slot);
-	if (machine && psy_audio_machine_type(machine) == MACH_MIXER) {
+	if (machine && psy_audio_machine_type(machine) == psy_audio_MIXER) {
 		--self->mixercount;
 	}
 	psy_audio_machines_disconnectall(self, slot);	
@@ -742,7 +742,7 @@ void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 			psy_audio_Machine* machine;
 
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-			if ((psy_audio_machine_mode(machine) == MACHMODE_GENERATOR)) {
+			if ((psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR)) {
 				psy_audio_machine_unmute(machine);
 			}
 		}
@@ -755,7 +755,7 @@ void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 			psy_audio_Machine* machine;
 
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);											
-			if ((psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) &&
+			if ((psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) &&
 				psy_tableiterator_key(&it) != slot) {
 				psy_audio_machine_mute(machine);
 			} else

@@ -693,7 +693,7 @@ void paramrack_onreplace(ParamRack* self, psy_ui_Button* sender)
 			psy_audio_machines_insert(self->pane.machines, slot,
 				psy_audio_machinefactory_makemachine(
 					&self->workspace->machinefactory,
-					MACH_DUMMY, NULL, 0));
+					psy_audio_DUMMY, NULL, 0));
 		}
 		psy_audio_exclusivelock_leave();
 		// clean up

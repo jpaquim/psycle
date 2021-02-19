@@ -187,7 +187,7 @@ int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_Machi
 {  
 	char* name = 0;
 	char* vendor = 0;	
-	int mode = MACHMODE_FX;
+	int mode = psy_audio_MACHMODE_FX;
 	int version = 0;
 	int apiversion = 0;
 	int noteon = 0;
@@ -221,21 +221,21 @@ int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_Machi
 				value = luaL_checkinteger(self->L, -1);
 				switch (value) {
 					case 0:
-						mode = MACHMODE_GENERATOR;
+						mode = psy_audio_MACHMODE_GENERATOR;
 					break;
 					case 3:
 						// mode = MACHMODE_HOST;
-						mode = MACHMODE_FX;
+						mode = psy_audio_MACHMODE_FX;
 					break;
 					default:
-						mode = MACHMODE_FX;
+						mode = psy_audio_MACHMODE_FX;
 					break;
 				}
 			} else
 			if (strcmp(key, "generator") == 0) {
 				// deprecated, use mode instead
 				int64_t value = luaL_checkinteger(self->L, -1);
-				mode = (value == 1) ? MACHMODE_GENERATOR : MACHMODE_FX;
+				mode = (value == 1) ? psy_audio_MACHMODE_GENERATOR : psy_audio_MACHMODE_FX;
 			} else
 			if (strcmp(key, "version") == 0) {
 				version = (int) luaL_checkinteger(self->L, -1);
@@ -250,13 +250,13 @@ int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_Machi
 		}
 	}	     
 	// std::ostringstream s;
-	// s << (result.mode == MACHMODE_GENERATOR ? "Lua instrument"
+	// s << (result.mode == psy_audio_MACHMODE_GENERATOR ? "Lua instrument"
 	//                                          : "Lua effect")
 	//    << " by "
 	//    << result.vendor;
 	// result.desc = s.str();
 	machineinfo_set(rv, vendor, "", 0, mode, name, name, (short) apiversion, 
-		(short) version, MACH_LUA, "", 0, "");
+		(short) version, psy_audio_LUA, "", 0, "");
 	free(name);
 	free(vendor);
 	return err;

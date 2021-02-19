@@ -66,7 +66,7 @@ void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 		psy_ui_component_colour(&self->component));	
 }
 
-void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,
+void onpreferredsize(psy_ui_ProgressBar* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
 	if (rv) {

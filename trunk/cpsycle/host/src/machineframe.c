@@ -13,37 +13,87 @@
 #include "../../detail/trace.h"
 
 // ParameterBar
+static void parameterbar_onalign(ParameterBar*);
+
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* vtable_init(ParameterBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.onalign = (psy_ui_fp_component_onalign)
+			parameterbar_onalign;
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
+}
 // implementation
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {			
 	psy_ui_Margin margin;
 	
-	psy_ui_component_init(&self->component, parent);			
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// row0
 	psy_ui_component_init(&self->row0, &self->component);
+	psy_ui_component_setalignexpand(&self->row0,
+		psy_ui_HORIZONTALEXPAND);	
 	zoombox_init(&self->zoombox, &self->row0);
-	self->zoombox.zoomstep = 0.10;
-	psy_ui_button_init(&self->mute, &self->row0);	
+	psy_ui_component_setalign(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);
+	self->zoombox.zoomstep = 0.10;	
+	psy_ui_component_init(&self->buttons, &self->row0);
+	psy_ui_component_setalign(&self->buttons, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalignexpand(&self->buttons,
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init(&self->mute, &self->buttons);
 	psy_ui_button_settext(&self->mute, "Mute");
-	psy_ui_button_init(&self->parameters, &self->row0);
+	psy_ui_button_init(&self->parameters, &self->buttons);
 	psy_ui_button_settext(&self->parameters, "Parameters");	
-	psy_ui_button_init(&self->command, &self->row0);
+	psy_ui_button_init(&self->command, &self->buttons);
 	psy_ui_button_settext(&self->command, "Command");
-	psy_ui_button_init(&self->help, &self->row0);	
+	psy_ui_button_init(&self->help, &self->buttons);
 	psy_ui_button_settext(&self->help, "Help");	
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->row0, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
+	psy_ui_button_init(&self->more, &self->row0);
+	psy_ui_button_preventtranslation(&self->more);
+	psy_ui_button_settext(&self->more, ". . .");
+	psy_ui_component_setalign(psy_ui_button_base(&self->more),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setmargin(psy_ui_button_base(&self->more), NULL);
+	psy_ui_component_hide(psy_ui_button_base(&self->more));
 	// row1	
 	presetsbar_init(&self->presetsbar, &self->component, workspace);
-	psy_ui_component_setalign(&self->presetsbar.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init_all_em(&margin, 0.25, 0.0, 0.25, 0.0);		
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP, NULL));
-	psy_ui_component_setmargin(&self->presetsbar.component, &margin);
+	psy_ui_component_setalign(&self->presetsbar.component, psy_ui_ALIGN_TOP);	
+}
+
+void parameterbar_onalign(ParameterBar* self)
+{
+	psy_ui_Size preferredsize;
+	psy_ui_Size preferredsize_more;
+	psy_ui_RealSize size;
+	const psy_ui_TextMetric* tm;
+
+	preferredsize = psy_ui_component_preferredsize(&self->component, NULL);
+	preferredsize_more = psy_ui_component_preferredsize(
+		psy_ui_button_base(&self->more), NULL);
+	size = psy_ui_component_sizepx(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	if (size.width < psy_ui_value_px(&preferredsize.width, tm)) {
+		if (!psy_ui_component_visible(psy_ui_button_base(&self->more))) {
+			psy_ui_component_show(psy_ui_button_base(&self->more));
+		}
+	} else {
+		if (psy_ui_component_visible(psy_ui_button_base(&self->more))) {
+			psy_ui_component_hide(psy_ui_button_base(&self->more));
+		}
+	}
 }
 
 // MachineFrame

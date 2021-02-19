@@ -288,7 +288,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		} else {
 			selidx = inst;
 		}
-		if (machine && machine_supports(machine, MACH_SUPPORTS_INSTRUMENTS) &&
+		if (machine && machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS) &&
 				selidx >= 0 && selidx < MAX_INSTRUMENTS) { // pMachine->NumAuxColumnIndexes())		
 			psy_snprintf(text, 256, "%02X", selidx);
 		} else { psy_snprintf(text, 256, "-"); }
