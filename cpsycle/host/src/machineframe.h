@@ -35,11 +35,13 @@ typedef struct {
 	psy_ui_Component component;
 	// ui elements	
 	psy_ui_Component row0;
+	psy_ui_Component buttons;
 	ZoomBox zoombox;		
 	psy_ui_Button mute;
 	psy_ui_Button parameters;
 	psy_ui_Button command;
-	psy_ui_Button help;		
+	psy_ui_Button help;	
+	psy_ui_Button more;
 	PresetsBar presetsbar;
 	// references
 	psy_audio_Machine* machine;

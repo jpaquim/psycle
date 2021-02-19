@@ -67,7 +67,7 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_big_beat_t bpl)
 						? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 						: ptrack[1];
 					event.mach = (ptrack[2] == 0xFF)
-						? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
+						? event.mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY
 						: ptrack[2];
 					event.cmd = ptrack[3];
 					event.parameter = ptrack[4];

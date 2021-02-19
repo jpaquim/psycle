@@ -317,7 +317,7 @@ void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		
 	if (bc->numsamples > 0 &&
 			!psy_audio_machine_muted(psy_audio_vstplugin_base(self)) &&
-			((psy_audio_vstinterface_mode(&self->mi) == MACHMODE_GENERATOR) ||
+			((psy_audio_vstinterface_mode(&self->mi) == psy_audio_MACHMODE_GENERATOR) ||
 			 !psy_audio_machine_bypassed(psy_audio_vstplugin_base(self)))) {
 		processevents(self, bc);		
 	}
@@ -580,8 +580,8 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			psy_path_dispose(&path);
 		}				
 		mode = ((effect->flags & effFlagsIsSynth) == effFlagsIsSynth)
-			? MACHMODE_GENERATOR
-			: MACHMODE_FX;
+			? psy_audio_MACHMODE_GENERATOR
+			: psy_audio_MACHMODE_FX;
 		machineinfo_set(
 			info,
 			vendorString,
@@ -592,7 +592,7 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			productNameShort,
 			(int16_t) 0, 
 			(int16_t) 0,
-			(mode == MACHMODE_GENERATOR) ? MACH_VST : MACH_VSTFX,
+			(mode == psy_audio_MACHMODE_GENERATOR) ? psy_audio_VST : psy_audio_VSTFX,
 			filename,
 			shellidx,
 			"");		

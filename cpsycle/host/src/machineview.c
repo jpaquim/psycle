@@ -233,7 +233,7 @@ void machineview_onnewmachineselected(MachineView* self,
 
 	machine = psy_audio_machinefactory_makemachinefrompath(
 		&self->workspace->machinefactory,
-		(MachineType)psy_property_at_int(plugininfo, "type", MACH_UNDEFINED),
+		(psy_audio_MachineType)psy_property_at_int(plugininfo, "type", psy_audio_UNDEFINED),
 		psy_property_at_str(plugininfo, "path", ""),
 		psy_property_at_int(plugininfo, "shellidx", 0),
 		psy_INDEX_INVALID);

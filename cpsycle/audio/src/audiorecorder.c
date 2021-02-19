@@ -19,7 +19,7 @@ const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void)
 		MI_VERSION,
 		0x0250,
 		0,
-		MACHMODE_GENERATOR,
+		psy_audio_MACHMODE_GENERATOR,
 		"AudioRecorder"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -28,7 +28,7 @@ const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void)
 		"AudioRecorder",
 		"Psycledelics",
 		"help",
-		MACH_RECORDER,
+		psy_audio_RECORDER,
 		0,
 		0,
 		""
@@ -39,7 +39,7 @@ const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void)
 static const psy_audio_MachineInfo* info(psy_audio_AudioRecorder* self) {
 	return psy_audio_audiorecorder_info();
 }
-static int mode(psy_audio_AudioRecorder* self) { return MACHMODE_GENERATOR; }
+static int mode(psy_audio_AudioRecorder* self) { return psy_audio_MACHMODE_GENERATOR; }
 static void work(psy_audio_AudioRecorder*, psy_audio_BufferContext*);
 static uintptr_t numinputs(psy_audio_AudioRecorder* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_AudioRecorder* self) { return 2; }

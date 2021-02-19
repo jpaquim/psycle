@@ -23,7 +23,8 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
 	psy_ui_label_init(&self->headerlabel, &self->component);
-	psy_ui_component_setalign(&self->headerlabel, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(psy_ui_label_base(&self->headerlabel),
+		psy_ui_ALIGN_TOP);
 	psy_ui_label_preventtranslation(&self->headerlabel);
 	psy_ui_component_setmargin(&self->headerlabel.component, &leftmargin);
 	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);

@@ -258,7 +258,7 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 		if (psy_audio_patternentry_front(entry)->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			event->inst = psy_audio_patternentry_front(entry)->inst;
 		}
-		if (psy_audio_patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
 			event->mach = psy_audio_patternentry_front(entry)->mach;
 		}
 		if (psy_audio_patternentry_front(entry)->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {

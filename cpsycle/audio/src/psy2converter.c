@@ -199,7 +199,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	psy_audio_plugincatcher_catchername(songfile->song->machinefactory->catcher,
 		sDllName, plugincatchername, 0);
 	machine = psy_audio_machinefactory_makemachine(songfile->song->machinefactory,
-		MACH_PLUGIN, plugincatchername, psy_INDEX_INVALID);
+		psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 
 	psyfile_read(songfile->file, _editName, 16);
 	_editName[15] = 0;
@@ -354,7 +354,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
 	Vals = malloc(sizeof(int32_t) * numParameters);
 	psyfile_read(songfile->file, Vals, numParameters * sizeof(int));
-	if (type == MACH_DUMMY) {
+	if (type == psy_audio_DUMMY) {
 		//do nothing.
 	} else if (strcmp(name, abass) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, 15, 0);

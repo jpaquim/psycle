@@ -120,8 +120,8 @@ static int psy_audio_xmsampler_getdelta(psy_audio_WaveForms wavetype,
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
-	GENERATOR | 32 | 64 | MACH_SUPPORTS_INSTRUMENTS,
-	MACHMODE_GENERATOR,
+	GENERATOR | 32 | 64 | psy_audio_SUPPORTS_INSTRUMENTS,
+	psy_audio_MACHMODE_GENERATOR,
 	"Sampulse"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -130,7 +130,7 @@ static psy_audio_MachineInfo const macinfo = {
 	"Sampulse",
 	"Psycledelics",
 	"help",
-	MACH_XMSAMPLER,
+	psy_audio_XMSAMPLER,
 	NULL,		// NO MODULPATH
 	0,			// shellidx	
 	SAMPLERHELP	// help text

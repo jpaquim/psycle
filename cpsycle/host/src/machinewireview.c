@@ -429,12 +429,12 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 					psy_ui_component_scrollpx(&self->component));				
 			}
 		} else if (machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y,
-				MACHMODE_GENERATOR, &self->skin->generator.solo) ||
-			machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y, MACHMODE_FX,
+				psy_audio_MACHMODE_GENERATOR, &self->skin->generator.solo) ||
+			machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y, psy_audio_MACHMODE_FX,
 				&self->skin->effect.bypass) ||
 			machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y,
-				MACHMODE_GENERATOR, &self->skin->generator.mute) ||
-			machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y, MACHMODE_FX,
+				psy_audio_MACHMODE_GENERATOR, &self->skin->generator.mute) ||
+			machinewireview_hittestcoord(self, ev->pt.x, ev->pt.y, psy_audio_MACHMODE_FX,
 				&self->skin->effect.mute) ||
 			machinewireview_hittestpan(self, ev->pt.x, ev->pt.y,
 				self->dragslot, &self->dragpt.x)) {

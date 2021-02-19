@@ -70,7 +70,7 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox* self)
 			machine = (psy_audio_Machine*)psy_audio_machines_at(
 				&self->workspace->song->machines, i);
 			if (machine && machine_supports(machine,
-				MACH_SUPPORTS_INSTRUMENTS)) {
+				psy_audio_SUPPORTS_INSTRUMENTS)) {
 				char text[512];
 
 				psy_snprintf(text, 512, "%X: %s", (int)i,
@@ -151,7 +151,7 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 		psy_audio_Machine* machine;
 
 		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-		if (psy_audio_machine_type(machine) == MACH_VIRTUALGENERATOR) {
+		if (psy_audio_machine_type(machine) == psy_audio_VIRTUALGENERATOR) {
 			psy_audio_MachineParam* param;
 			
 			param = psy_audio_machine_parameter(machine, 0);

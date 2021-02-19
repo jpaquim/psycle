@@ -24,7 +24,7 @@
 static void master_generateaudio(psy_audio_Master*, psy_audio_BufferContext*);
 static void master_seqtick(psy_audio_Master*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
-static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
+static int master_mode(psy_audio_Master* self) { return psy_audio_MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);
 static const psy_audio_MachineInfo* info(psy_audio_Master*);
 static int master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
@@ -70,7 +70,7 @@ static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
-	MACHMODE_FX,
+	psy_audio_MACHMODE_FX,
 	"Master"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -79,7 +79,7 @@ static psy_audio_MachineInfo const MacInfo = {
 	"Master",
 	"Psycledelics",
 	"help",
-	MACH_MASTER,
+	psy_audio_MASTER,
 	0,
 	0,
 	""

@@ -227,7 +227,7 @@ void psy2loader_readpatterns(PSY2Loader* self)
 						? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 						: ptrack[1];
 					event.mach = (ptrack[2] == 0xFF)
-						? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
+						? event.mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY
 						: ptrack[2];
 					event.cmd = ptrack[3];
 					event.parameter = ptrack[4];
@@ -591,22 +591,22 @@ void psy2loader_readmachines(PSY2Loader* self)
 				self->pMac[i] = internalmachinesconvert_redirect(&self->converter,
 					self->songfile, &i, type, "");
 			} else switch (type) {
-				case MACH_MASTER:
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_MASTER, "", psy_INDEX_INVALID);
+				case psy_audio_MASTER:
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_MASTER, "", psy_INDEX_INVALID);
 					// psy_audio_machines_insert(&songfile->song->machines, psy_audio_MASTER_INDEX, pMac[i]);
 					psy2loader_master_load(self, self->pMac[i], i);
 					break;
-				case MACH_SAMPLER: {
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_SAMPLER, "", psy_INDEX_INVALID);
+				case psy_audio_SAMPLER: {
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_SAMPLER, "", psy_INDEX_INVALID);
 					psy2loader_sampler_load(self, self->pMac[i], i);
 					break; }
-				case MACH_XMSAMPLER:
+				case psy_audio_XMSAMPLER:
 					assert(0);
 					//pMac[i] = pXMSampler = new XMSampler(i);
 					//pMac[i]->Init();
 					//pMac[i]->Load(pFile);
 					break;
-				case MACH_PLUGIN: {
+				case psy_audio_PLUGIN: {
 					char sDllName[256];
 					char plugincatchername[_MAX_PATH];
 
@@ -619,11 +619,11 @@ void psy2loader_readmachines(PSY2Loader* self)
 					} else {
 						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
 							sDllName, plugincatchername, 0);
-						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, psy_INDEX_INVALID);
+						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (self->pMac[i]) {
 							psy2loader_plugin_load(self, self->pMac[i], i);
 						} else {
-							self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, psy_INDEX_INVALID);
+							self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_DUMMY, plugincatchername, psy_INDEX_INVALID);
 							psy_audio_machine_setslot(self->pMac[i], i);
 							psy2loader_plugin_skipload(self, self->pMac[i], i);
 							psy_audio_songfile_warn(self->songfile, "replaced missing module ");
@@ -636,8 +636,8 @@ void psy2loader_readmachines(PSY2Loader* self)
 						}
 					}
 					break; }
-				case MACH_VST:
-				case MACH_VSTFX: {				
+				case psy_audio_VST:
+				case psy_audio_VSTFX: {				
 					char plugincatchername[_MAX_PATH];
 					char sError[128];
 					bool berror;
@@ -666,7 +666,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 					} else {		
 						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
 							self->vstL[instance].dllName, plugincatchername, shellIdx);
-						pVstPlugin = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername, psy_INDEX_INVALID);
+						pVstPlugin = psy_audio_machinefactory_makemachine(factory, psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (pVstPlugin) {
 							int c;
 							int numpars;
@@ -691,19 +691,19 @@ void psy2loader_readmachines(PSY2Loader* self)
 						}
 					}
 					if (berror) {
-						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername, psy_INDEX_INVALID);
+						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_DUMMY, plugincatchername, psy_INDEX_INVALID);
 						psy_audio_machine_setslot(self->pMac[i], i);
 						psy_audio_machine_seteditname(self->pMac[i], plugincatchername);
 						// todo set mode
-						// self->pMac[i]->_mode = MACHMODE_FX;						
-						// self->pMac[i]->_mode = MACHMODE_GENERATOR;						
+						// self->pMac[i]->_mode = psy_audio_MACHMODE_FX;						
+						// self->pMac[i]->_mode = psy_audio_MACHMODE_GENERATOR;						
 					}
 					break;
 				}
 				default: {
 					char sError[128];
 					sprintf(sError, "unknown machine type: %i", type);
-					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, sError, psy_INDEX_INVALID);
+					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_DUMMY, sError, psy_INDEX_INVALID);
 					psy_audio_machine_setslot(self->pMac[i], i);
 					psy2loader_plugin_skipload(self, self->pMac[i], i);
 					psy_audio_songfile_warn(self->songfile, sError);
@@ -820,14 +820,14 @@ void psy2loader_addmachines(PSY2Loader* self)
 			// If there's a dummy, force it to be an effect
 			else
 				if (self->busEffect[i] < 128 && self->pMac[self->busEffect[i]] &&
-					psy_audio_machine_type(self->pMac[self->busEffect[i]]) == MACH_DUMMY)
+					psy_audio_machine_type(self->pMac[self->busEffect[i]]) == psy_audio_DUMMY)
 				{
-					// pMac[busEffect[i]]->_mode = MACHMODE_FX;
+					// pMac[busEffect[i]]->_mode = psy_audio_MACHMODE_FX;
 				}
 			// Else if the machine is a generator, move it to gens bus.
 			// This can't happen, but it is here for completeness
 				else if (self->busEffect[i] < 128 && self->pMac[self->busEffect[i]] &&
-					psy_audio_machine_mode(self->pMac[self->busEffect[i]]) == MACHMODE_GENERATOR)
+					psy_audio_machine_mode(self->pMac[self->busEffect[i]]) == psy_audio_MACHMODE_GENERATOR)
 				{
 					int k = 0;
 					while (self->busEffect[k] != 255 && k < MAX_BUSES)
@@ -844,14 +844,14 @@ void psy2loader_addmachines(PSY2Loader* self)
 					!self->_machineActive[self->busMachine[i]]))
 				self->busMachine[i] = 255;
 			// If there's a dummy, force it to be a Generator
-			else if (psy_audio_machine_type(self->pMac[self->busMachine[i]]) == MACH_DUMMY)
+			else if (psy_audio_machine_type(self->pMac[self->busMachine[i]]) == psy_audio_DUMMY)
 			{
-				// pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
+				// pMac[busMachine[i]]->_mode = psy_audio_MACHMODE_GENERATOR;
 			}
 			// Else if the machine is an fx, move it to FXs bus.
 			// This can't happen, but it is here for completeness
 			else if (self->busEffect[i] < 128 && self->pMac[self->busEffect[i]] &&
-				psy_audio_machine_mode(self->pMac[self->busMachine[i]]) != MACHMODE_GENERATOR)
+				psy_audio_machine_mode(self->pMac[self->busMachine[i]]) != psy_audio_MACHMODE_GENERATOR)
 			{
 				int j = 0;
 				while (self->busEffect[j] != 255 && j < MAX_BUSES)
@@ -900,7 +900,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 		{
 			if (self->_machineActive[i])
 			{
-				if (psy_audio_machine_mode(self->pMac[i]) == MACHMODE_GENERATOR)
+				if (psy_audio_machine_mode(self->pMac[i]) == psy_audio_MACHMODE_GENERATOR)
 				{
 					while (psy_audio_machines_at(&self->songfile->song->machines, j) && j < 64) j++;
 

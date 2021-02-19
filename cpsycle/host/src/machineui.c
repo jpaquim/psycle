@@ -56,18 +56,18 @@ void machineui_update(MachineUi* self)
 	assert(self);
 			
 	switch (self->mode) {
-		case MACHMODE_MASTER:
+		case psy_audio_MACHMODE_MASTER:
 			self->coords = &self->skin->master;
 			self->font = self->skin->effect_fontcolour;
 			self->bgcolour = psy_ui_colour_make(0x00333333);
 			break;
-		case MACHMODE_GENERATOR:
+		case psy_audio_MACHMODE_GENERATOR:
 			self->coords = &self->skin->generator;
 			self->font = self->skin->generator_fontcolour;
 			self->bgcolour = psy_ui_colour_make(0x002f3E25);
 			break;
 			// fallthrough
-		case MACHMODE_FX:
+		case psy_audio_MACHMODE_FX:
 		default:
 			self->coords = &self->skin->effect;
 			self->font = self->skin->effect_fontcolour;
@@ -233,7 +233,7 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g, uintptr_t slot,
 	machineui_drawbackground(self, g);		
 	if (!vuupdate) {
 		machineui_draweditname(self, g);
-		if (self->mode != MACHMODE_MASTER) {				
+		if (self->mode != psy_audio_MACHMODE_MASTER) {				
 			machineui_drawpanning(self, g);
 			machineui_drawmute(self, g);
 			machineui_drawbypassed(self, g);
@@ -255,7 +255,7 @@ void machineui_drawbackground(MachineUi* self, psy_ui_Graphics* g)
 			&self->coords->background);
 	} else {
 		psy_ui_drawsolidrectangle(g, self->position, self->bgcolour);
-		if (self->mode == MACHMODE_MASTER) {			
+		if (self->mode == psy_audio_MACHMODE_MASTER) {			
 			psy_ui_textoutrectangle(g, 
 				psy_ui_realrectangle_topleft(&self->coords->name.dest),
 				psy_ui_ETO_CLIPPED, self->coords->name.dest, "Master",
@@ -268,7 +268,7 @@ void machineui_draweditname(MachineUi* self, psy_ui_Graphics* g)
 {
 	assert(self);
 
-	if (self->mode != MACHMODE_MASTER) {
+	if (self->mode != psy_audio_MACHMODE_MASTER) {
 		char editname[130];		
 
 		editname[0] = '\0';
@@ -318,7 +318,7 @@ void machineui_drawbypassed(MachineUi* self, psy_ui_Graphics* g)
 {
 	assert(self);
 
-	if ((psy_audio_machine_mode(self->machine) == MACHMODE_FX) &&
+	if ((psy_audio_machine_mode(self->machine) == psy_audio_MACHMODE_FX) &&
 		psy_audio_machine_bypassed(self->machine)) {
 		skin_blitcoord(g, &self->skin->skinbmp,
 			psy_ui_realpoint_zero(),
@@ -331,7 +331,7 @@ void machineui_drawsoloed(MachineUi* self, psy_ui_Graphics* g,
 {
 	assert(self);
 
-	if ((psy_audio_machine_mode(self->machine) == MACHMODE_GENERATOR) &&
+	if ((psy_audio_machine_mode(self->machine) == psy_audio_MACHMODE_GENERATOR) &&
 			psy_audio_machines_soloed(machines) == self->slot) {
 		skin_blitcoord(g, &self->skin->skinbmp,
 			psy_ui_realpoint_zero(),
@@ -343,7 +343,7 @@ void machineui_drawvu(MachineUi* self, psy_ui_Graphics* g)
 {
 	assert(self);
 
-	if (self->mode != MACHMODE_MASTER) {		
+	if (self->mode != psy_audio_MACHMODE_MASTER) {		
 		machineui_drawvudisplay(self, g);
 		machineui_drawvupeak(self, g);
 	}
@@ -451,22 +451,22 @@ void machineui_onmousedown(MachineUi* self, psy_ui_MouseEvent* ev)
 	if (self->slot == psy_audio_MASTER_INDEX) {
 		return;
 	}	
-	if (machineui_hittestcoord(self, ev->pt, MACHMODE_GENERATOR,
+	if (machineui_hittestcoord(self, ev->pt, psy_audio_MACHMODE_GENERATOR,
 			&self->skin->generator.solo)) {				
 		psy_audio_machines_solo(self->machines, self->slot);		
 		psy_ui_mouseevent_stoppropagation(ev);
 	} else if (machineui_hittestcoord(self, ev->pt,
-			MACHMODE_FX, &self->skin->effect.bypass)) {				
+			psy_audio_MACHMODE_FX, &self->skin->effect.bypass)) {				
 		if (psy_audio_machine_bypassed(self->machine)) {
 			psy_audio_machine_unbypass(self->machine);
 		} else {
 			psy_audio_machine_bypass(self->machine);
 		}		
 		psy_ui_mouseevent_stoppropagation(ev);
-	} else if (machineui_hittestcoord(self, ev->pt, MACHMODE_GENERATOR,
+	} else if (machineui_hittestcoord(self, ev->pt, psy_audio_MACHMODE_GENERATOR,
 			&self->skin->generator.mute) ||
 		machineui_hittestcoord(self, ev->pt,
-		MACHMODE_FX, &self->skin->effect.mute)) {				
+		psy_audio_MACHMODE_FX, &self->skin->effect.mute)) {				
 		if (psy_audio_machine_muted(self->machine)) {
 			psy_audio_machine_unmute(self->machine);
 		} else {

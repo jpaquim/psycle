@@ -1343,7 +1343,7 @@ void trackergrid_setdefaultevent(TrackerGrid* self,
 		if (defaultevent->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			ev->inst = defaultevent->inst;
 		}
-		if (defaultevent->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+		if (defaultevent->mach != psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
 			ev->mach = defaultevent->mach;
 		}
 		if (defaultevent->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {

@@ -102,7 +102,7 @@ void trackdef_init(TrackDef* self)
 	trackcolumndef_init(&self->inst, 2, 2, 1,
 		TRACKER_COLUMN_INST, TRACKER_COLUMN_INST, psy_audio_NOTECOMMANDS_INST_EMPTY);
 	trackcolumndef_init(&self->mach, 2, 2, 1,
-		TRACKER_COLUMN_MACH, TRACKER_COLUMN_MACH, psy_audio_NOTECOMMANDS_MACH_EMPTY);
+		TRACKER_COLUMN_MACH, TRACKER_COLUMN_MACH, psy_audio_NOTECOMMANDS_psy_audio_EMPTY);
 	trackcolumndef_init(&self->vol, 2, 2, 1,
 		TRACKER_COLUMN_VOL, TRACKER_COLUMN_VOL, psy_audio_NOTECOMMANDS_VOL_EMPTY);
 	trackcolumndef_init(&self->cmd, 2, 2, 0,

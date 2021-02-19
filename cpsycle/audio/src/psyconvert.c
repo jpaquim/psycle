@@ -93,7 +93,7 @@ void psy_audio_convert_legacypattern(
 				psy_audio_patternevent_clear(&event);
 				event.note = (psy2ev->_note == 255) ? psy_audio_NOTECOMMANDS_EMPTY : psy2ev->_note;
 				event.inst = (psy2ev->_inst == 255) ? psy_audio_NOTECOMMANDS_INST_EMPTY : psy2ev->_inst;
-				event.mach = (psy2ev->_mach == 255) ? psy_audio_NOTECOMMANDS_MACH_EMPTY : psy2ev->_mach;
+				event.mach = (psy2ev->_mach == 255) ? psy_audio_NOTECOMMANDS_psy_audio_EMPTY : psy2ev->_mach;
 				event.cmd = psy2ev->_cmd;
 				event.parameter = psy2ev->_parameter;
 				node = psy_audio_pattern_insert(dst, node, track, offset,

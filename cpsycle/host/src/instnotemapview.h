@@ -133,9 +133,11 @@ typedef struct InstrumentEntryTableView {
 	// signals
 	psy_Signal signal_selected;
 	// internal	
+	IntEdit edit;
 	uintptr_t selected;
 	int dragmode;
-	uint8_t currkey;	
+	uint8_t currkey;
+	psy_ui_Value lineheight;
 	InstrumentNoteMapMetrics metrics;
 	// references	
 	psy_audio_Instrument* instrument;

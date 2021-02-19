@@ -56,7 +56,7 @@ static void machinebar_updatemode(MachineBar* self)
 	psy_audio_Machine* machine;
 
 	machine = psy_audio_machines_selectedmachine(self->machines);	
-	if (machine && (machine_supports(machine, MACH_SUPPORTS_INSTRUMENTS) ||
+	if (machine && (machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS) ||
 		psy_audio_machine_numauxcolumns(machine))) {
 		psy_ui_combobox_setcursel(&self->selectinstparam, 1);
 	} else {

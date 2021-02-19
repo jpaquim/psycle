@@ -10,6 +10,8 @@
 // platform
 #include "../../detail/portable.h"
 
+#define COLWIDTH 12.0
+
 static int isblack(int key)
 {
 	int offset = key % 12;
@@ -546,7 +548,7 @@ void instrumententryview_setsample(InstrumentEntryView* self, psy_audio_SampleIn
 // TableColumn
 void instrumententrytablecolumn_init(InstrumentEntryTableColumn* self, const char* label)
 {	
-	self->width = psy_ui_value_makeew(10.0);
+	self->width = psy_ui_value_makeew(COLWIDTH);
 	self->label = psy_strdup(label);
 }
 
@@ -672,6 +674,12 @@ static void instrumententrytableview_onmousemove(InstrumentEntryTableView*,
 	psy_ui_MouseEvent*);
 static void instrumententrytableview_onmouseup(InstrumentEntryTableView*,
 	psy_ui_MouseEvent*);
+static void instrumententrytableview_onmousedoubleclick(
+	InstrumentEntryTableView*, psy_ui_MouseEvent*);
+static psy_ui_Point instrumententrytableview_hittest(InstrumentEntryTableView*,
+	psy_ui_RealPoint);
+static psy_ui_Rectangle instrumententrytableview_editposition(
+	InstrumentEntryTableView*, uintptr_t col, uintptr_t row);
 
 // vtable
 static psy_ui_ComponentVtable instrumententrytableview_vtable;
@@ -681,6 +689,8 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 {
 	if (!instrumententrytableview_vtable_initialized) {
 		instrumententrytableview_vtable = *(self->component.vtable);
+		instrumententryview_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+			instrumententrytableview_ondestroy;
 		instrumententrytableview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			instrumententrytableview_ondraw;
 		instrumententrytableview_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
@@ -688,7 +698,9 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 		instrumententrytableview_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			instrumententrytableview_onmousemove;
 		instrumententrytableview_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
-			instrumententrytableview_onmouseup;		
+			instrumententrytableview_onmouseup;
+		instrumententrytableview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+			instrumententrytableview_onmousedoubleclick;
 		instrumententrytableview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			instrumententrytableview_onpreferredsize;
@@ -706,9 +718,12 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	self->state = state;	
 	self->instrument = NULL;
 	self->selected = psy_INDEX_INVALID;
+	self->lineheight = psy_ui_value_makeeh(1.0);
 	psy_signal_init(&self->signal_selected);
 	psy_ui_component_setbackgroundcolour(&self->component,
 		psy_ui_colour_make(0x00232323));
+	intedit_init(&self->edit, &self->component, "", 0, 0, 0);
+	psy_ui_component_hide(intedit_base(&self->edit));
 }
 
 void instrumententrytableview_ondestroy(InstrumentEntryTableView* self)
@@ -726,7 +741,8 @@ void instrumententrytableview_setinstrument(InstrumentEntryTableView* self,
 	}
 }
 
-psy_audio_InstrumentEntry* instrumententrytableview_selected(InstrumentEntryTableView* self)
+psy_audio_InstrumentEntry* instrumententrytableview_selected(
+	InstrumentEntryTableView* self)
 {
 	if (self->instrument) {
 		return psy_audio_instrument_entryat(self->instrument, self->selected);
@@ -734,7 +750,8 @@ psy_audio_InstrumentEntry* instrumententrytableview_selected(InstrumentEntryTabl
 	return NULL;
 }
 
-void instrumententrytableview_select(InstrumentEntryTableView* self, uintptr_t row)
+void instrumententrytableview_select(InstrumentEntryTableView* self,
+	uintptr_t row)
 {
 	self->selected = row;
 	psy_ui_component_invalidate(&self->component);
@@ -754,14 +771,16 @@ void instrumententrytableview_onpreferredsize(InstrumentEntryTableView* self,
 void instrumententrytableview_ondraw(InstrumentEntryTableView* self,
 	psy_ui_Graphics* g)
 {
-	int cpy = 0;
+	double cpy = 0;
 	psy_List* p;	
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
 	uintptr_t i;
+	double lineheightpx;
 
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_sizepx(&self->component);
+	lineheightpx = floor(psy_ui_value_px(&self->lineheight, tm));
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00CACACA));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
@@ -814,7 +833,7 @@ void instrumententrytableview_ondraw(InstrumentEntryTableView* self,
 			cpx += psy_ui_value_px(&column->width, tm);
 		}
 		entry = (psy_audio_InstrumentEntry*)p->entry;		
-		cpy += 20;
+		cpy += lineheightpx;
 	}
 }
 
@@ -826,8 +845,10 @@ void instrumententrytableview_onmousedown(InstrumentEntryTableView* self,
 
 		if (self->instrument) {
 			uintptr_t numentry;
+			const psy_ui_TextMetric* tm;
 
-			numentry = (uintptr_t)(ev->pt.y / (20.0));
+			tm = psy_ui_component_textmetric(&self->component);
+			numentry = (uintptr_t)(ev->pt.y / (floor(psy_ui_value_px(&self->lineheight, tm))));
 			if (numentry < psy_list_size(
 				psy_audio_instrument_entries(self->instrument))) {
 				self->selected = numentry;
@@ -845,6 +866,48 @@ void instrumententrytableview_onmousedown(InstrumentEntryTableView* self,
 		}
 		psy_ui_component_invalidate(&self->component);
 	}
+}
+
+void instrumententrytableview_onmousedoubleclick(InstrumentEntryTableView* self,
+	psy_ui_MouseEvent* ev)
+{
+	psy_ui_Point pt;
+
+	pt = instrumententrytableview_hittest(self, ev->pt);
+	psy_ui_component_setposition(intedit_base(&self->edit),
+		instrumententrytableview_editposition(
+			self, (uintptr_t)pt.x.quantity, (uintptr_t)pt.y.quantity));
+	psy_ui_component_show(intedit_base(&self->edit));
+}
+
+psy_ui_Point instrumententrytableview_hittest(InstrumentEntryTableView* self,
+	psy_ui_RealPoint pt)
+{
+	const psy_ui_TextMetric* tm;
+	psy_ui_Value colwidth;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	colwidth = psy_ui_value_makeew(COLWIDTH);
+	return psy_ui_point_makeem(
+		floor((pt.x / (floor(psy_ui_value_px(&colwidth, tm))))),
+		floor((pt.y / (floor(psy_ui_value_px(&self->lineheight, tm))))));
+}
+
+psy_ui_Rectangle instrumententrytableview_editposition(InstrumentEntryTableView* self,
+	uintptr_t col, uintptr_t row)
+{
+	double scrollleft;
+	double scrolltop;
+	const psy_ui_TextMetric* tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	scrollleft = psy_ui_component_scrollleftpx(&self->component);
+	scrolltop = psy_ui_component_scrolltoppx(&self->component);
+	return psy_ui_rectangle_make(
+		psy_ui_point_makepx(
+			(double)col * COLWIDTH * (double)tm->tmAveCharWidth - scrollleft,
+			(double)row * (double)tm->tmHeight - scrolltop),
+		psy_ui_size_make(psy_ui_value_makeew(COLWIDTH), self->lineheight));
 }
 
 void instrumententrytableview_onmousemove(InstrumentEntryTableView* self,

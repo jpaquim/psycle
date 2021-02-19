@@ -18,6 +18,7 @@ extern "C" {
 #define STYLE_SEQEDT_ITEM_SELECTED    131
 #define STYLE_SEQEDT_EVENT            132
 #define STYLE_SEQLISTVIEW             140
+#define STYLE_SEQLISTVIEW_SELECT      142
 #define STYLE_SEQVIEW_BUTTONS         160
 #define STYLE_SEQVIEW_BUTTON          180
 #define STYLE_SEQVIEW_BUTTON_HOVER    181

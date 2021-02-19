@@ -29,8 +29,8 @@ static int alteRand(int x) { return (x * rand()) / 32768; }
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
-	GENERATOR | 32 | 64 | MACH_SUPPORTS_INSTRUMENTS,
-	MACHMODE_GENERATOR,
+	GENERATOR | 32 | 64 | psy_audio_SUPPORTS_INSTRUMENTS,
+	psy_audio_MACHMODE_GENERATOR,
 	"Sampler"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -39,7 +39,7 @@ static psy_audio_MachineInfo const macinfo = {
 	"Sampler",
 	"Psycledelics",
 	"help",
-	MACH_SAMPLER,
+	psy_audio_SAMPLER,
 	NULL,			// NO MODULPATH
 	0,				// shellidx	
 	PS1SAMPLERHELP	// help text

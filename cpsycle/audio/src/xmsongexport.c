@@ -86,11 +86,11 @@ int xmsongexport_writesongheader(XMSongExport* self)
 	}
 	for (i = 0; i < MAX_BUSES; i++) {
 		if (psy_audio_machines_at(&self->song->machines, i)  != NULL) {
-			self->isSampler[i] = hasSampler = (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == MACH_SAMPLER);
-			self->isSampulse[i] = (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == MACH_XMSAMPLER);
+			self->isSampler[i] = hasSampler = (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == psy_audio_SAMPLER);
+			self->isSampulse[i] = (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == psy_audio_XMSAMPLER);
 			if (!(self->isSampler[i] || self->isSampulse[i])) {
 				self->macInstruments++;
-				if (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == MACH_PLUGIN) {
+				if (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == psy_audio_PLUGIN) {
 					const psy_audio_MachineInfo* info;
 
 					info = psy_audio_machine_info(psy_audio_machines_at(&self->song->machines, i));
@@ -100,7 +100,7 @@ int xmsongexport_writesongheader(XMSongExport* self)
 							self->isBlitzorVst[i + 1] = TRUE;
 						}
 					}
-				} else if (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == MACH_VST) {
+				} else if (psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) == psy_audio_VST) {
 					self->isBlitzorVst[i + 1] = TRUE;
 				}
 			}
@@ -312,7 +312,7 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 					/// song.GetMachineOfBus(pData->_mach, instrint);
 					if (instrint == -1) instrint = 0xFF;
 					if (mac != NULL && pData->_inst != 255) {
-						volumeEntries[i]._cmd = (psy_audio_machine_type(mac) == MACH_SAMPLER)
+						volumeEntries[i]._cmd = (psy_audio_machine_type(mac) == psy_audio_SAMPLER)
 							? PS1_SAMPLER_CMD_VOLUME :
 							XM_SAMPLER_CMD_SENDTOVOLUME;
 						volumeEntries[i]._parameter = pData->_inst;
@@ -320,9 +320,9 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 					}
 				}
 				if (mac != NULL) {
-					if (psy_audio_machine_type(mac) == MACH_SAMPLER) {
+					if (psy_audio_machine_type(mac) == psy_audio_SAMPLER) {
 						if (instrint != 0xFF) instr = (uint8_t)(self->macInstruments + self->xmInstruments + instrint + 1);
-					} else if (psy_audio_machine_type(mac) == MACH_XMSAMPLER) {
+					} else if (psy_audio_machine_type(mac) == psy_audio_XMSAMPLER) {
 						if (instrint != 0xFF &&
 							(pData->_note != psy_audio_NOTECOMMANDS_EMPTY || pData->_mach < MAX_BUSES)) {
 							instr = (uint8_t)(self->macInstruments + instrint + self->correctionIndex);
@@ -338,7 +338,7 @@ int xmsongexport_savesinglepattern(XMSongExport* self, int patIdx)
 
 					// todo
 					isdefaultc4 = FALSE; // (Sampler*)mac)->isDefaultC4() == false)
-					if (mac != NULL && psy_audio_machine_type(mac) == MACH_SAMPLER && isdefaultc4)
+					if (mac != NULL && psy_audio_machine_type(mac) == psy_audio_SAMPLER && isdefaultc4)
 					{
 						note = pData->_note + 1;
 					} else {
@@ -695,8 +695,8 @@ int xmsongexport_saveinstruments(XMSongExport* self)
 
 	for (i = 0; i < MAX_BUSES; i++) {
 		if (psy_audio_machines_at(&self->song->machines, i) != NULL && 
-			psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) != MACH_SAMPLER &&
-			psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) != MACH_XMSAMPLER) {
+			psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) != psy_audio_SAMPLER &&
+			psy_audio_machine_type(psy_audio_machines_at(&self->song->machines, i)) != psy_audio_XMSAMPLER) {
 			xmsongexport_saveemptyinstrument(self,
 				psy_audio_machine_editname(psy_audio_machines_at(&self->song->machines, i)));
 		}

@@ -117,6 +117,101 @@ INLINE psy_ui_Colour psy_ui_colour_overlayed(psy_ui_Colour* self,
 		(uint8_t)((1 - p) * b1 + p * b2));
 }
 
+INLINE int psy_ui_equal_colour_weight(const psy_ui_Colour* self)
+{
+	uint8_t r;
+	double r_p;
+	uint8_t g;
+	double g_p;
+	uint8_t b;
+	double b_p;
+	double perc;
+	int rv;
+
+	psy_ui_colour_rgb(self, &r, &g, &b);
+	r_p = r / 255.f;
+	g_p = g / 255.f;
+	b_p = b / 255.f;
+	perc = (r_p * 0.40) + (g_p * 0.20) + (b_p * 0.40);
+	if (perc >= 0.9) {
+		rv = 50;
+	} else if (perc >= 0.86) {
+		rv = 100;
+	} else if (perc >= 0.77) {
+		rv = 200;
+	} else if (perc >= 0.68) {
+		rv = 300;
+	} else if (perc >= 0.61) {
+		rv = 400;
+	} else if (perc >= 0.54) {
+		rv = 500;
+	} else if (perc >= 0.51) {
+		rv = 600;
+	} else if (perc >= 0.46) {
+		rv = 700;
+	} else if (perc >= 0.42) {
+		rv = 800;
+	} else {
+		rv = 900;
+	}
+	return rv;
+}
+
+
+INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weight)
+{	
+	if (psy_ui_equal_colour_weight(self) != weight) {
+		double gain;
+		
+		uint8_t r;
+		uint16_t rd;
+		double r_p;
+		uint8_t g;
+		uint16_t gd;
+		double g_p;
+		uint8_t b;
+		uint16_t bd;
+		double b_p;
+		double s;
+		double perc;
+
+		psy_ui_colour_rgb(self, &r, &g, &b);
+		r_p = r / 255.f;
+		g_p = g / 255.f;
+		b_p = b / 255.f;
+		if (weight < 100) {
+			perc = 0.9; // 50
+		} else if (weight < 200) {
+			perc = 0.86; // 100
+		} else if (weight < 300) {
+			perc = 0.77; // 200
+		} else if (weight < 400) {
+			perc = 0.68; // 300
+		} else if (weight < 500) {
+			perc = 0.61; // 400
+		} else if (weight < 600) {
+			perc = 0.54; // 500
+		} else if (weight < 700) {
+			perc = 0.51; // 600
+		} else if (weight < 800) {
+			perc = 0.46; // 700
+		} else if (weight < 900) {
+			perc = 0.42; // 800
+		} else {
+			perc = 0.34;  // 900
+		}
+		s = (r_p * 0.40) + (g_p * 0.20) + (b_p * 0.40);
+		gain = perc / s;		
+		rd = (uint16_t)(r * gain);
+		gd = (uint16_t)(g * gain);
+		bd = (uint16_t)(b * gain);
+		return psy_ui_colour_make_rgb(
+			(uint8_t)(rd & 0xFF),
+			(uint8_t)(gd & 0xFF),
+			(uint8_t)(bd & 0xFF));
+	}
+	return *self;
+}
 
 #ifdef __cplusplus
 }

@@ -970,7 +970,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 
 			machine = psy_audio_machines_at(self->machines, ev->mach);
 			if (!machine) {
-				if (ev->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+				if (ev->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
 					uintptr_t lastmachine;
 
 					lastmachine = (uintptr_t)psy_table_at(&self->lastmachine,
@@ -1004,7 +1004,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			newev = psy_audio_patternentry_front(entry);
 			entry->track += track->channeloffset;
 			// volume column used to store mach
-			newev->vol = (newev->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY)
+			newev->vol = (newev->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY)
 				? psy_audio_MASTER_INDEX
 				: newev->mach;
 			// master handles all wire's volumes
@@ -1096,7 +1096,7 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 	entry = psy_audio_patternentry_clone(patternentry);
 	ev = psy_audio_patternentry_front(entry);
 	entry->track += channeloffset;
-	if (ev->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+	if (ev->mach == psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
 		uintptr_t lastmachine;
 
 		lastmachine = (uintptr_t)psy_table_at(&self->lastmachine,

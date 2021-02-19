@@ -471,7 +471,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	psy_ui_component_starttimer(&self->component, 0, 200);
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW);
+		STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW_SELECT);
 }
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
@@ -590,14 +590,14 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g,
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			}
-			psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_SIDEMENU_SELECT)->colour);
+			psy_ui_settextcolour(g, self->component.style.select.colour);
 			self->foundselected = 1;
 		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_PROGRESS)->colour);
 		} else {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, psy_ui_style(psy_ui_STYLE_SIDEMENU)->colour);
+			psy_ui_settextcolour(g, self->component.style.style.colour);
 		}
 		psy_ui_textout(g, x + 5, cpy + self->state->margin + self->textoffsety, text,
 			strlen(text));		

@@ -12,7 +12,7 @@ const psy_audio_MachineInfo* psy_audio_dummymachine_info(void)
 		MI_VERSION,
 		0x0250,
 		EFFECT | 32 | 64,
-		MACHMODE_FX,
+		psy_audio_MACHMODE_FX,
 		"Dummy plug"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -21,7 +21,7 @@ const psy_audio_MachineInfo* psy_audio_dummymachine_info(void)
 		"Dummy Plug",
 		"Psycledelics",
 		"help",		
-		MACH_DUMMY,
+		psy_audio_DUMMY,
 		0,
 		0,		
 		""
@@ -61,7 +61,7 @@ void psy_audio_dummymachine_init(psy_audio_DummyMachine* self,
 {
 	assert(self);
 
-	self->mode = MACHMODE_FX;
+	self->mode = psy_audio_MACHMODE_FX;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;

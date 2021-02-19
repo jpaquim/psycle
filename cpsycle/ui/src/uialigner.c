@@ -379,8 +379,8 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 			psy_ui_IntPoint cp_bottomright = { 0, 0 };
 			
 			
-			size.width = (self->component->alignexpandmode &
-				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND
+			size.width = (!limit || (self->component->alignexpandmode &
+				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
 				? psy_ui_value_makepx(0)
 				: limit->width;			
 			for (p = q = psy_ui_component_children(self->component, 0);

@@ -328,7 +328,7 @@ void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 {	
 	psy_audio_machines_insertmaster(&self->song->machines,
 		psy_audio_machinefactory_makemachine(self->song->machinefactory,
-		MACH_MASTER, NULL, UINTPTR_MAX));
+		psy_audio_MASTER, NULL, UINTPTR_MAX));
 }
 
 int psy_audio_songfile_errfile(psy_audio_SongFile* self)

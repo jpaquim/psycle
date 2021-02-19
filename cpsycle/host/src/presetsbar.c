@@ -41,6 +41,8 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
 	self->workspace = workspace;
 	self->machine = NULL;	
 	self->userpreset = FALSE;
@@ -218,8 +220,8 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 		uintptr_t index;
 		int status;
 
-		if ((psy_audio_machine_type(self->machine) == MACH_VST ||
-				psy_audio_machine_type(self->machine) == MACH_VSTFX)) {
+		if ((psy_audio_machine_type(self->machine) == psy_audio_VST ||
+				psy_audio_machine_type(self->machine) == psy_audio_VSTFX)) {
 			psy_ui_SaveDialog dialog;
 
 			psy_ui_savedialog_init_all(&dialog, NULL, "Export Preset",

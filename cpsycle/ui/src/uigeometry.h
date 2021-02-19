@@ -48,6 +48,15 @@ INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
 	return rv;
 }
 
+INLINE psy_ui_Point psy_ui_point_makeem(double x, double y)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_makeew(x);
+	rv.y = psy_ui_value_makeeh(y);
+	return rv;
+}
+
 INLINE psy_ui_Point psy_ui_point_zero(void)
 {
 	extern psy_ui_Point psy_ui_internal_point_zero;

@@ -33,9 +33,9 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher*, psy_Property*);
-/*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, MachineType,
+/*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, psy_audio_MachineType,
 	const char* name);*/
-char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType,
+char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, psy_audio_MachineType,
 	int newgamefxblitzifversionunknown,
 	const char* path,
 	char* fullpath);
