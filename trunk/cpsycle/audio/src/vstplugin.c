@@ -5,7 +5,7 @@
 #include "../../detail/os.h"
 
 #include "vstplugin.h"
-#if defined(__GNUC__)
+#if defined(DIVERSALIS__OS__UNIX)
 #define _inline static inline
 #endif
 #include "aeffectx.h"
@@ -19,6 +19,8 @@
 #include "plugin_interface.h"
 #include "songio.h"
 #include "preset.h"
+
+#include "../../driver/eventdriver.h"
 
 #include <dir.h>
 
@@ -326,11 +328,13 @@ void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	// will delegate them to the midiinput of sequencer
 	for (n = 0; n < self->vstoutevents.counter; ++n) {
 		struct VstMidiEvent* buffer;
-		struct VstMidiEvent* ev;
+		struct psy_EventDriverMidiData* ev;
 
 		buffer = (struct VstMidiEvent*)self->vstoutevents.events->events[n];
-		ev = allocmidi(buffer->midiData[0], buffer->midiData[1],
-			buffer->midiData[2]);
+		ev = (psy_EventDriverMidiData*)malloc(sizeof(psy_EventDriverMidiData));
+		ev->byte0 = buffer->midiData[0];
+		ev->byte1 = buffer->midiData[1];
+		ev->byte2 = buffer->midiData[2];
 		psy_list_append(&bc->outevents, ev);
 	}
 	psy_audio_vstevents_clear(&self->vstoutevents);

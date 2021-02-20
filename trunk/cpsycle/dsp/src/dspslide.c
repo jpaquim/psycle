@@ -2,7 +2,7 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "dspslide.h"
-
+// platform
 #include "../../detail/portable.h"
 
 static uintptr_t m_length = 0;
@@ -27,7 +27,7 @@ uintptr_t psy_dsp_slider_getlength(psy_dsp_Slider* self)
 
 void psy_dsp_slider_setlength(psy_dsp_Slider* self, uintptr_t length)
 {
-	length= min((uintptr_t)2048, length);
+	length= psy_min((uintptr_t)2048, length);
 	if (m_length != length) {
 		double const resdouble = 1.0 / (double)length;
 		uintptr_t i;

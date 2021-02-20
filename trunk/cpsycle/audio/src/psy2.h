@@ -61,6 +61,8 @@ void psy2loader_dispose(PSY2Loader*);
 int psy2loader_load(PSY2Loader*);
 // no psy2 save implemented
 
+struct PsyFile;
+
 psy_audio_MachineWires* psy_audio_read_psy2machinewires(struct PsyFile*);
 
 #ifdef __cplusplus

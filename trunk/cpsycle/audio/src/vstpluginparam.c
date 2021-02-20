@@ -2,13 +2,15 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "vstpluginparam.h"
 // local
+#if defined(DIVERSALIS__OS__UNIX)
+#define _inline static inline
+#endif
 #include "aeffectx.h"
 #include "plugin_interface.h"
-// std
-#include <stdlib.h>
 // platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"

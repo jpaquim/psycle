@@ -222,13 +222,13 @@ void psy_audio_samplervoice_newline(psy_audio_SamplerVoice* self)
 	assert(self);
 	self->effretticks = 0;
 	self->effcmd = PS1_SAMPLER_CMD_NONE;
-	if (self->triggernoteoff > (int)self->samplecounter) {
-		self->triggernoteoff -= (int)self->samplecounter;
+	if (self->triggernoteoff > self->samplecounter) {
+		self->triggernoteoff -= self->samplecounter;
 	} else {
 		self->triggernoteoff = 0;
 	}
-	if (self->triggernotedelay > (int)self->samplecounter) {
-		self->triggernotedelay -= (int)self->samplecounter;
+	if (self->triggernotedelay > self->samplecounter) {
+		self->triggernotedelay -= self->samplecounter;
 	} else {
 		self->triggernotedelay = 0;
 	}
@@ -918,7 +918,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 					? alteRand((int32_t)(self->inst->filterres * 127))
 					: (int32_t)(self->inst->filterres * 127));
 			filter_settype(&self->filter, self->inst->filtertype);
-			self->comodify = self->inst->filtermodamount * 128.0;
+			self->comodify = self->inst->filtermodamount * 128.f;
 		}
 		if (self->inst) {
 			int32_t ENV_F_AT;
@@ -1441,10 +1441,10 @@ void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
 
 	assert(self);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
-		"Limit Voices", "Limit Voices", MPF_STATE,
+		"Polyphony", "Polyphony", MPF_STATE,
 		(int32_t*)&self->numvoices, 1, PS1_SAMPLER_MAX_POLYPHONY);
 	psy_audio_choicemachineparam_init(&self->param_resamplingmethod,
-		"Quality", "Quality", MPF_STATE,
+		"Resampling Method", "Resampling Method", MPF_STATE,
 		(int32_t*)&self->resamplerquality, 0, 3);
 	psy_signal_connect(&self->param_resamplingmethod.machineparam.signal_tweak, self,
 		psy_audio_sampler_resamplingmethod_tweak);
@@ -1455,13 +1455,21 @@ void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
 				quality));
 	}
 	psy_audio_choicemachineparam_init(&self->param_defaultspeed,
-		"Default Speed", "Default Speed", MPF_STATE,
+		"Default speed played by", "Default Speed", MPF_STATE,
 		(int32_t*)&self->defaultspeed,
 		0, 1);
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 0,
-		"played by C3");
+		"C3");
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 1,
-		"played by C4");
+		"C4");
+	psy_audio_choicemachineparam_init(&self->param_slidemode,
+		"Slide mode", "Slide mode", MPF_STATE,
+		(int32_t*)&self->linearslide,
+		0, 1);
+	psy_audio_choicemachineparam_setdescription(&self->param_slidemode, 0,
+		"old buggy slide");
+	psy_audio_choicemachineparam_setdescription(&self->param_slidemode, 1,
+		"Linear slide mode");
 	psy_audio_intmachineparam_init(&self->param_instrumentbank,
 		"Instrumentbank", "Instrumentbank", MPF_STATE,
 		(int32_t*)&self->instrumentbank,
@@ -1475,6 +1483,7 @@ void psy_audio_sampler_disposeparameters(psy_audio_Sampler* self)
 	psy_audio_intmachineparam_dispose(&self->param_numvoices);
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
+	psy_audio_choicemachineparam_dispose(&self->param_slidemode);
 	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
 }
 
@@ -1482,14 +1491,14 @@ uintptr_t psy_audio_sampler_numparameters(psy_audio_Sampler* self)
 {
 	assert(self);
 
-	return 4;
+	return 5;
 }
 
 uintptr_t psy_audio_sampler_numparametercols(psy_audio_Sampler* self)
 {
 	assert(self);
 
-	return 4;
+	return 1;
 }
 
 psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler* self,
@@ -1508,7 +1517,11 @@ psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler* self,
 			return psy_audio_choicemachineparam_base(&self->param_defaultspeed);
 			break;
 		case 3:
+			return psy_audio_choicemachineparam_base(&self->param_slidemode);
+		case 4:
 			return psy_audio_intmachineparam_base(&self->param_instrumentbank);
+			break;
+		
 			break;
 		default:
 			break;

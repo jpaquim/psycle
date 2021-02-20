@@ -822,5 +822,6 @@
     <Image Include="tray-dark.bmp" />
     <Image Include="src\resources\tray-dark.bmp" />
     <Image Include="src\resources\heart-full-dark.bpm.bmp" />
+    <Image Include="src\resources\loop_dark.bmp" />
   </ItemGroup>
 </Project>

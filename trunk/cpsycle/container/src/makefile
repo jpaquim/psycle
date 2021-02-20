@@ -5,7 +5,7 @@ libcontainer.a: $(obj)
 	ar rsv $@ $^
 
 %.o : %.c
-	$(CC) -c -g $(src)
+	$(CC) -c -g -fPIC $(src)
 
 .PHONY: clean	
 clean:

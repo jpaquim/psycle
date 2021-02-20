@@ -27,6 +27,10 @@
 #define PSY2_EVENT_SIZE 5
 #define PSY2_MAX_CONNECTIONS 12
 
+#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
+#define _MAX_PATH 4096
+#endif
+
 typedef struct cpoint_t {
 	int32_t x;
 	int32_t y;

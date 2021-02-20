@@ -4,8 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "envelope.h"
-#include <stdlib.h>
-
+// platform
+#include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
 static const psy_dsp_seconds_t defaultfastrelease = 0.003f;

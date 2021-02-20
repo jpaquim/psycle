@@ -617,6 +617,10 @@ void masterchannel_solo_normvalue(psy_audio_MasterChannel* self,
 
 // Input Channel
 // prototypes
+static void inputchannel_solo_tweak(psy_audio_InputChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void inputchannel_solo_normvalue(psy_audio_InputChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
 static void inputchannel_mute_tweak(psy_audio_InputChannel*,
 	psy_audio_IntMachineParam* sender, float value);
 static void inputchannel_mute_normvalue(psy_audio_InputChannel*,
@@ -626,6 +630,8 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 	psy_audio_Mixer* mixer,
 	uintptr_t inputslot)
 {
+	assert(self);
+
 	self->id = id;
 	self->mixer = mixer;
 	self->inputslot = inputslot;
@@ -675,6 +681,10 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
+		inputchannel_solo_tweak);
+	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
+		inputchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->mute_param.machineparam.isslidergroup = TRUE;
@@ -695,6 +705,8 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 
 void inputchannel_dispose(psy_audio_InputChannel* self)
 {
+	assert(self);
+
 	psy_audio_inputlabelparam_dispose(&self->info_param);
 	psy_audio_custommachineparam_dispose(&self->sendvol_param);
 	psy_audio_floatmachineparam_dispose(&self->mix_param);
@@ -715,6 +727,8 @@ psy_audio_InputChannel* inputchannel_allocinit(psy_audio_Mixer* mixer, uintptr_t
 {
 	psy_audio_InputChannel* rv;
 
+	assert(mixer);
+
 	rv = (psy_audio_InputChannel*) malloc(sizeof(psy_audio_InputChannel));
 	if (rv) {
 		inputchannel_init(rv, id, mixer, inputslot);
@@ -727,6 +741,8 @@ void inputchannel_sendvol_tweak(psy_audio_InputChannel* self,
 {
 	int scaled;
 
+	assert(self);
+
 	scaled = (int)(value * 0xFF);
 	psy_table_insert(&self->sendvols, sender->row, (void*)(uintptr_t) scaled);
 }
@@ -734,6 +750,8 @@ void inputchannel_sendvol_tweak(psy_audio_InputChannel* self,
 void inputchannel_sendvol_normvalue(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, float* rv)
 {
+	assert(self);
+
 	*rv = (uintptr_t)psy_table_at(&self->sendvols,
 		sender->row) / (float)0xFF;
 }
@@ -742,6 +760,8 @@ void inputchannel_sendvol_describe(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, int* active, char* txt)
 {
 	psy_dsp_amp_t sendvol;
+
+	assert(self);
 
 	sendvol = psy_audio_machineparam_normvalue(
 		psy_audio_custommachineparam_base(sender));
@@ -756,6 +776,8 @@ void inputchannel_sendvol_describe(psy_audio_InputChannel* self,
 void inputchannel_dw_describe(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, int* active, char* txt)
 {
+	assert(self);
+
 	psy_snprintf(txt, 20, "%d%%", (int)(self->drymix * 100));
 	*active = 1;
 }
@@ -763,6 +785,8 @@ void inputchannel_dw_describe(psy_audio_InputChannel* self,
 void inputchannel_gain_tweak(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, float value)
 {
+	assert(self);
+
 	psy_audio_connections_setwirevolume(&psy_audio_machine_machines(
 		psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
@@ -774,6 +798,8 @@ void inputchannel_gain_tweak(psy_audio_InputChannel* self,
 void inputchannel_gain_normvalue(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, float* rv)
 {
+	assert(self);
+
 	*rv = (float)sqrt(psy_audio_connections_wirevolume(
 		&psy_audio_machine_machines(psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
@@ -786,6 +812,8 @@ void inputchannel_gain_describe(psy_audio_InputChannel* self,
 {
 	float db;
 	
+	assert(self);
+
 	db = (psy_dsp_amp_t) (20 * log10(inputchannel_wirevolume(self)));
 	psy_snprintf(txt, 10, "%.2f dB", db);
 	*active = 1;	
@@ -797,6 +825,8 @@ void inputchannel_level_normvalue(psy_audio_InputChannel* self,
 	psy_audio_Machines* machines;
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* memory;
+
+	assert(self);
 
 	*rv = 0.f;
 	machines = psy_audio_machine_machines(psy_audio_mixer_base(self->mixer));
@@ -817,6 +847,8 @@ psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel* self)
 {
 	psy_dsp_amp_t rv;
 
+	assert(self);
+
 	rv = psy_audio_connections_wirevolume(
 		&psy_audio_machine_machines(psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
@@ -825,9 +857,35 @@ psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel* self)
 	return rv;
 }
 
+void inputchannel_solo_tweak(psy_audio_InputChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	assert(self);
+
+	if (value != 0.f) {
+		self->mixer->solocolumn = self->id;
+	} else {
+		self->mixer->solocolumn = psy_INDEX_INVALID;
+	}
+}
+
+void inputchannel_solo_normvalue(psy_audio_InputChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	assert(self);
+
+	if (self->mixer->solocolumn == self->id) {
+		*rv = 1.f;
+	} else {
+		*rv = 0.f;
+	}
+}
+
 void inputchannel_mute_tweak(psy_audio_InputChannel* self,
 	psy_audio_IntMachineParam* sender, float value)
 {
+	assert(self);
+
 	if (self->mixer->solocolumn == psy_INDEX_INVALID) {
 		self->mute = (value > 0.f);
 	}
@@ -836,6 +894,8 @@ void inputchannel_mute_tweak(psy_audio_InputChannel* self,
 void inputchannel_mute_normvalue(psy_audio_InputChannel* self,
 	psy_audio_IntMachineParam* sender, float* rv)
 {
+	assert(self);	
+
 	if (self->mixer->solocolumn != psy_INDEX_INVALID) {
 		if (self->mixer->solocolumn == self->id) {
 			*rv = 0.f;
@@ -849,6 +909,10 @@ void inputchannel_mute_normvalue(psy_audio_InputChannel* self,
 
 // Return Channel
 // prototypes
+static void returnchannel_solo_tweak(psy_audio_ReturnChannel*,
+	psy_audio_IntMachineParam* sender, float value);
+static void returnchannel_solo_normvalue(psy_audio_ReturnChannel*,
+	psy_audio_IntMachineParam* sender, float* rv);
 static void returnchannel_mute_tweak(psy_audio_ReturnChannel*,
 	psy_audio_IntMachineParam* sender, float value);
 static void returnchannel_mute_normvalue(psy_audio_ReturnChannel*,
@@ -888,6 +952,10 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
+		returnchannel_solo_tweak);
+	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
+		returnchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
 		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
@@ -996,6 +1064,30 @@ void returnchannel_level_normvalue(psy_audio_ReturnChannel* self,
 				(double)self->volume))) / 97.f;
 			*rv = psy_audio_buffer_rmsdisplay(memory) + temp;
 		}
+	}
+}
+
+void returnchannel_solo_tweak(psy_audio_ReturnChannel* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	assert(self);
+
+	if (value != 0.f) {
+		self->mixer->solocolumn = self->id;
+	} else {
+		self->mixer->solocolumn = psy_INDEX_INVALID;
+	}
+}
+
+void returnchannel_solo_normvalue(psy_audio_ReturnChannel* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	assert(self);
+
+	if (self->mixer->solocolumn == self->id) {
+		*rv = 1.f;
+	} else {
+		*rv = 0.f;
 	}
 }
 

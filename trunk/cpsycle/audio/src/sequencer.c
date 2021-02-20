@@ -1464,12 +1464,12 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 			psy_audio_PatternNode* sorted;			
 				
 			// copy events to qsort array
-			psy_list_to_array(eventarray, numevents, self->events);				
+			psy_list_to_array((void**)eventarray, numevents, self->events);				
 			// sort array
 			psy_qsort((void**)eventarray, 0, numevents - 1, (psy_fp_comp)
 				psy_audio_sequencer_comp_events);
 			// recreate sorted events
-			sorted = psy_array_to_list(eventarray, numevents);			
+			sorted = psy_array_to_list((void**)eventarray, numevents);			
 			psy_list_free(self->events);
 			self->events = sorted;
 		}		

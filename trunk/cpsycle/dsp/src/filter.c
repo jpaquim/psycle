@@ -322,14 +322,14 @@ float filter_work(Filter*, float x);
 void filter_workstereo(Filter*, float* l, float* r);
 
 FilterVtable filtervtable;
-static filtervtable_initialized = 0;
+static bool filtervtable_initialized = FALSE;
 
 void filtervtable_init(Filter* self)
 {
 	if (!filtervtable_initialized) {
 		filtervtable.work = filter_work;
 		filtervtable.workstereo = filter_workstereo;
-		filtervtable_initialized = 1;
+		filtervtable_initialized = TRUE;
 	}		
 }
 
@@ -415,14 +415,14 @@ static float itfilter_work(ITFilter* self, float sample);
 static void itfilter_workstereo(ITFilter* self, float* left, float* right);
 
 FilterVtable itfiltervtable;
-static itfiltervtable_initialized = 0;
+static bool itfiltervtable_initialized = FALSE;
 
 void itfiltervtable_init(ITFilter* self)
 {
 	if (!itfiltervtable_initialized) {
 		itfiltervtable.work = filter_work;
 		itfiltervtable.workstereo = filter_workstereo;
-		itfiltervtable_initialized = 1;
+		itfiltervtable_initialized = TRUE;
 	}
 }
 

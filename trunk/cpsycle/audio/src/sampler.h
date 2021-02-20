@@ -144,7 +144,7 @@ typedef struct psy_audio_SamplerVoice
 	int triggernoteoff;
 	// Amount of samples previous to do a delayed noteon (Also used for
 	// retrig)
-	int triggernotedelay;
+	uintptr_t triggernotedelay;
 	int cutoff;
 	float comodify;
 	int64_t effportaspeed;
@@ -177,6 +177,7 @@ typedef struct psy_audio_Sampler {
 	psy_audio_IntMachineParam param_numvoices;
 	psy_audio_ChoiceMachineParam param_resamplingmethod;
 	psy_audio_ChoiceMachineParam param_defaultspeed;
+	psy_audio_ChoiceMachineParam param_slidemode;
 	psy_audio_IntMachineParam param_instrumentbank;		
 	// 0: basec = C3, 1: basec = C4
 	int32_t defaultspeed;
@@ -193,7 +194,7 @@ typedef struct psy_audio_Sampler {
 	psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];
 	// psycle::helpers::dsp::cubic_resampler _resampler;
 	psy_List* multicmdMem; // PatternEvent
-	bool linearslide;
+	int32_t linearslide;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*,

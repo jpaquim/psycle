@@ -65,6 +65,8 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->loop, playbar_base(self),
 		self, playbar_onloopclicked);
 	psy_ui_button_settext(&self->loop, "play.loop");
+	psy_ui_bitmap_loadresource(&self->loop.bitmapicon, IDB_LOOP_DARK);
+	psy_ui_bitmap_settransparency(&self->loop.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	// record
 	psy_ui_button_init_connect(&self->recordnotes, playbar_base(self),
 		self, playbar_onrecordnotesclicked);
@@ -74,7 +76,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 		self, playbar_onplayclicked);
 	psy_ui_button_settext(&self->play, "play.play");
 	psy_ui_bitmap_loadresource(&self->play.bitmapicon, IDB_PLAY_DARK);
-	psy_ui_bitmap_settransparency(&self->play.bitmapicon, psy_ui_colour_make(0x00FFFFFF));		
+	psy_ui_bitmap_settransparency(&self->play.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	// playmode
 	psy_ui_combobox_init(&self->playmode, playbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
