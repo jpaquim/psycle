@@ -183,8 +183,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
-		vtable.deallocate = driver_deallocate;
-		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;		
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;

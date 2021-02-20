@@ -6,6 +6,9 @@
 
 #include "vstplugininterface.h"
 // local
+#if defined(DIVERSALIS__OS__UNIX)
+#define _inline static inline
+#endif
 #include "aeffectx.h"
 #include "buffercontext.h"
 // std

@@ -16,6 +16,8 @@ typedef struct {
 	psy_Property* configuration;
 } SilentDriver;
 
+static const psy_AudioDriverInfo* driverinfo(void);
+
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(SilentDriver*);
 static int driver_open(psy_AudioDriver*);
@@ -58,7 +60,7 @@ static void vtable_init(void)
 	}
 }
 
-static const psy_AudioDriverInfo* GetPsycleDriverInfo(void)
+const psy_AudioDriverInfo* driverinfo(void)
 {
 	static psy_AudioDriverInfo info;
 
@@ -170,7 +172,7 @@ int numplaybacks(psy_AudioDriver* driver)
 
 const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 {
-	return GetPsycleDriverInfo();
+	return driverinfo();
 }
 
 const psy_Property* driver_configuration(const psy_AudioDriver* driver)

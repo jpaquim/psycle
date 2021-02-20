@@ -1064,7 +1064,7 @@ int xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* wave,
 {
 	// parse
 
-	BOOL b16Bit;
+	bool b16Bit;
 	char* smpbuf;
 	int16_t wNew;	
 	int32_t samplecnt;
@@ -2177,7 +2177,7 @@ int modsongloader_loadinstrument(MODSongLoader* self, int idx)
 int modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 	int instridx)
 {	
-	BOOL bLoop;
+	bool bLoop;
 	char tmpfine;
 	uint8_t byte1;
 	uint8_t byte2;

@@ -5,7 +5,7 @@
 #include "../../detail/os.h"
 
 #include "vstevents.h"
-#if defined(__GNUC__)
+#if defined(DIVERSALIS__OS__UNIX)
 #define _inline static inline
 #endif
 #include "aeffectx.h"
@@ -76,7 +76,7 @@ void psy_audio_vstevents_clear(psy_audio_VstEvents* self)
 	}
 }
 
-void psy_audio_vstevents_append(psy_audio_VstEvents* self, VstEvent* ev)
+void psy_audio_vstevents_append(psy_audio_VstEvents* self, struct VstEvent* ev)
 {
 	if (self->counter < self->eventcap) {
 		self->events->events[self->counter++] = ev;

@@ -4,19 +4,21 @@
 #include "../../detail/prefix.h"
 #include "../audiodriversettings.h"
 
-
 // includes
 #include <alsa/asoundlib.h>
 #include <string.h>
 #include "../audiodriver.h"
 #include <stdio.h>
 #include "quantize.h"
+#include <pthread.h>
 #include "../../detail/portable.h"
 
 #define PSY_AUDIODRIVER_ALSA_GUID 0x0005
 
 typedef struct {		
-	psy_AudioDriver driver;	
+	psy_AudioDriver driver;
+	psy_AudioDriverSettings settings;
+	psy_Property* configuration;
 	/// stream rate
 	unsigned int rate;
 	/// sample format
@@ -56,15 +58,39 @@ typedef struct {
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,void* handle);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
-static unsigned int driver_samplerate(psy_AudioDriver*);
+static psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 static uint32_t playposinsamples(psy_AudioDriver*);
+static bool addcaptureport(psy_AudioDriver* self, int idx) { }
+static bool removecaptureport(psy_AudioDriver* self, int idx) { return TRUE; }
+static void readbuffers(psy_AudioDriver* self, int idx, float** pleft,
+	float** pright,
+	uintptr_t numsamples)
+{
+	*pleft = NULL;
+	*pright = NULL;
+}
+static const char* capturename(psy_AudioDriver* self, int index)
+{
+	return "undefined";
+}
+static int numcaptures(psy_AudioDriver* self)
+{
+	return 0;
+}
+static const char* playbackname(psy_AudioDriver* self, int index)
+{
+	return "undefined";
+}
+static int numplaybacks(psy_AudioDriver* self)
+{
+	return 0;
+}
 
 static void thread_function(void* driver);
 static void init_properties(psy_AudioDriver*);
@@ -84,15 +110,20 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
-		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
 		vtable.configuration = driver_configuration;
-		vtable.samplerate = driver_samplerate;
+		vtable.samplerate = driver_samplerate;		
+		vtable.addcapture = addcaptureport;
+		vtable.removecapture = removecaptureport;
+		vtable.readbuffers = readbuffers;
+		vtable.capturename = capturename;
+		vtable.numcaptures = numcaptures;
+		vtable.playbackname = playbackname;
+		vtable.numplaybacks = numplaybacks;
 		vtable.playposinsamples = playposinsamples;
-		vtable.info = (psy_audiodriver_fp_info)driver_info;
+		vtable.info = driver_info;
 		vtable_initialized = 1;
 	}
 }
@@ -127,7 +158,7 @@ EXPORT psy_AudioDriver* __cdecl driver_create(void)
 
 void driver_deallocate(psy_AudioDriver* driver)
 {
-	driver->dispose(driver);
+	driver_dispose(driver);
 	free(driver);
 }
 
@@ -152,6 +183,7 @@ int driver_init(psy_AudioDriver* driver)
 	self->buffer_size = 0;
 	self->period_size = 0;
 	self->output = 0;
+	psy_audiodriversettings_init(&self->settings);
 	init_properties(driver);
 	return 0;
 }
@@ -159,58 +191,56 @@ int driver_init(psy_AudioDriver* driver)
 int driver_dispose(psy_AudioDriver* driver)
 {
 	AlsaDriver* self = (AlsaDriver*) driver;
-	psy_properties_free(self->driver.properties);
-	self->driver.properties = 0;	
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	return 0;
 }
 
-void init_properties(psy_AudioDriver* self)
+void init_properties(psy_AudioDriver* driver)
 {	
-	psy_Properties* property;	
+	AlsaDriver* self;
+	psy_Property* property;	
 	char key[256];
 
+	self = (AlsaDriver*)driver;
 	psy_snprintf(key, 256, "alsa-guid-%d", PSY_AUDIODRIVER_ALSA_GUID);
-	self->properties = psy_property_settext(
-		psy_properties_create(key), "Linux ALSA Interface");
-	psy_properties_sethint(psy_properties_append_int(self->driver.properties,
+	self->configuration = psy_property_settext(
+		psy_property_create(key), "Linux ALSA Interface");
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_ALSA_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_setreadonly(
-		psy_properties_append_string(self->properties, "name", "alsa"),
+		psy_property_append_string(self->configuration, "name", "alsa"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		psy_property_append_string(self->configuration, "vendor",
+		"Psycedelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_properties_append_string(self->properties, "version", "1.0"),
+		psy_property_append_string(self->configuration, "version", "1.0"),
 		TRUE);
-	property = psy_properties_append_choice(self->properties, "device", -1);	
-	psy_properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	psy_properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	psy_properties_append_int(self->properties, "dither", 0, 0, 1);
-	psy_properties_append_int(self->properties, "numbuf", 8, 6, 8);
-	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
+	property = psy_property_append_choice(self->configuration, "device", -1);	
+	psy_property_append_int(self->configuration, "bitdepth", 16, 0, 32);
+	psy_property_append_int(self->configuration, "samplerate", 44100, 0, 0);
+	psy_property_append_int(self->configuration, "dither", 0, 0, 1);
+	psy_property_append_int(self->configuration, "numbuf", 8, 6, 8);
+	psy_property_append_int(self->configuration, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 {
 	AlsaDriver* self;
 
-	if (config) {
-		psy_property_sync(self->driver.properties, config);
+	self = (AlsaDriver*)driver;
+	if (self->configuration && config) {
+		psy_property_sync(self->configuration, config);
 	}	
 }
 
-unsigned int driver_samplerate(psy_AudioDriver* self)
+psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 {
 	// return psy_audiodriversettings_samplespersec(&((DXDriver*)self)->settings);
-	return 44100;
-}
-
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{	
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;	
+	return 44100.0;
 }
 
 int driver_open(psy_AudioDriver* driver)
@@ -223,7 +253,7 @@ int driver_open(psy_AudioDriver* driver)
 
 	// return immediatly if the thread is already running
 	if (self->running_) return 0;
-	if (self->driver._pCallback == NULL) {
+	if (driver->callback == NULL) {
 		return FALSE;
 	}	
 	snd_pcm_hw_params_t* hwparams;
@@ -410,8 +440,8 @@ void FillBuffer(AlsaDriver* self, snd_pcm_uframes_t offset, int count)
 	}
 	// fill the channel areas
 	num = count;
-	input = self->driver._pCallback(
-		self->driver._callbackContext, &num, &hostisplaying);		
+	input = self->driver.callback(
+		self->driver.callbackcontext, &num, &hostisplaying);
 	while (count-- > 0) {
 		*samples[0] = (int16_t)(*input++);
 		samples[0] += steps[0];
@@ -560,9 +590,11 @@ const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 	return GetPsycleDriverInfo();
 }
 
-const psy_Property* driver_configuration(const psy_AudioDriver* self)
+const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 {
-	return self->properties;
+	AlsaDriver* self = (AlsaDriver*)driver;
+	
+	return self->configuration;
 }
 
 uint32_t playposinsamples(psy_AudioDriver* driver)

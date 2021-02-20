@@ -80,6 +80,8 @@ INLINE psy_EventDriverCmd psy_eventdrivercmd_makeid(int id)
 	return rv;
 }
 
+struct psy_EventDriver;
+
 typedef int (*EVENTDRIVERWORKFN)(void* context, int msg, int param1, int param2);
 
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);

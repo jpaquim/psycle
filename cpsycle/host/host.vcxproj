@@ -554,6 +554,7 @@
     <Image Include="src\resources\help.bmp" />
     <Image Include="src\resources\icon1.ico" />
     <Image Include="src\resources\kbd.bmp" />
+    <Image Include="src\resources\loop_dark.bmp" />
     <Image Include="src\resources\machines-dark.bmp" />
     <Image Include="src\resources\machine_skin.bmp" />
     <Image Include="src\resources\macparam.ico" />

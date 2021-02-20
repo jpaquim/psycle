@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "multiresampler.h"
-
+// std
 #include <math.h>
+// platform
+#include "../../detail/portable.h"
 
 static const char* names[] = {
 	"Zero Hold",
@@ -101,7 +103,7 @@ void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler* self,
 			if (self->use_sse2_if_available) {
 #ifdef PSYCLE_USE_SSE	
 				base = psy_dsp_spline_sse2_resampler_base(&self->spline_sse2);
-#elif
+#else
 				base = psy_dsp_spline_resampler_base(&self->spline);
 #endif
 			} else {
@@ -112,7 +114,7 @@ void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler* self,
 			if (self->use_sse2_if_available) {
 #ifdef PSYCLE_USE_SSE	
 			base = psy_dsp_sinc_sse2_resampler_base(&self->sinc_sse2);
-#elif
+#else
 			base = psy_dsp_sinc_resampler_base(&self->sinc);
 #endif
 			} else {
