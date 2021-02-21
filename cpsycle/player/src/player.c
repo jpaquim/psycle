@@ -51,6 +51,8 @@ static void cmdplayer_idle(void);
 /// Machinecallback
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void machinecallback_output(CmdPlayer*, const char* text);
+static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
+static psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
 
 static void usage(void) {
 	printf(
@@ -166,6 +168,11 @@ static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
 		psy_audio_machinecallbackvtable_vtable = *self->machinecallback.vtable;		
 		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
 			machinecallback_output;
+		psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
+			machinecallback_samples;
+			psy_audio_machinecallbackvtable_vtable.instruments =
+				(fp_mcb_instruments)
+				machinecallback_instruments;
 		psy_audio_machinecallbackvtable_initialized = 1;
 	}
 }
@@ -283,12 +290,18 @@ void cmdplayer_setdriverlist(CmdPlayer* self)
 	drivers = psy_property_append_choice(self->inputoutput, "driver", 1); 
 	psy_property_settext(drivers, "Audio Driver");
 	psy_property_append_string(drivers, "silent", "silentdriver");
+#if !defined _WIN32
+	printf("add alsa\n");
+	psy_property_append_string(drivers, "alsa",
+			"../../driver/alsa/libpsyalsa.so");
+#else	
 #if defined(_DEBUG)
 	psy_property_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
 	psy_property_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
 #else
 	psy_property_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
 	psy_property_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+#endif
 #endif
 }
 
@@ -307,6 +320,11 @@ void cmdplayer_dispose(CmdPlayer* self)
 const char* cmdplayer_driverpath(CmdPlayer* self)
 {	
 	const char* rv = 0;
+	
+	#if !defined _WIN32
+	return "../../driver/alsa/libpsyalsa.so";
+	#endif
+	
 	/*psy_Property* p;
 
 	p = psy_property_at(self->inputoutput, "driver", PSY_PROPERTY_TYPE_NONE);
@@ -341,6 +359,9 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	songfile.song = self->song;
 	songfile.file = 0;
 	psy_audio_songfile_init(&songfile);
+	if (path) {
+		printf("path: %s\n", path);
+	}
 	psy_audio_songfile_load(&songfile, path);	
 	if (songfile.err) {
 		fprintf(stderr, "Couldn't load song\n");
@@ -363,4 +384,20 @@ void cmdplayer_applysongproperties(CmdPlayer* self)
 void machinecallback_output(CmdPlayer* self, const char* text)
 {
     printf("%s\n", text);
+}
+
+psy_audio_Samples* machinecallback_samples(CmdPlayer* self)
+{
+	if (self->song) {
+		return &self->song->samples;
+	}
+	return NULL;
+}
+
+psy_audio_Instruments* machinecallback_instruments(CmdPlayer* self)
+{
+	if (self->song) {
+		return &self->song->instruments;
+	}
+	return NULL;
 }

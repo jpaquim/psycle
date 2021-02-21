@@ -105,7 +105,7 @@ void psy_ui_win_impfactory_init(psy_ui_win_ImpFactory* self)
 
 psy_ui_win_ImpFactory* psy_ui_win_impfactory_alloc(void)
 {
-	return (psy_ui_win_ImpFactory*) malloc(sizeof(psy_ui_win_ImpFactory));
+	return (psy_ui_win_ImpFactory*)malloc(sizeof(psy_ui_win_ImpFactory));
 }
 
 psy_ui_win_ImpFactory* psy_ui_win_impfactory_allocinit(void)

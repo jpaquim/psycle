@@ -24,7 +24,9 @@ static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* s
 }
 
 
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #define SCI_ENABLED 1
+#endif
 
 static HMODULE scimodule = 0;
 
@@ -61,9 +63,11 @@ static void vtable_init(psy_ui_Editor* self)
 }
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  					
+	printf("Init Editor\n");
 #ifdef SCI_ENABLED
 	int err;
 
+	printf("sci enabled\n");
 	if ((err = loadscilexer()) == 0) {
 		psy_ui_win_ComponentImp* imp;
 
@@ -98,6 +102,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	} else
 #endif	
 	{	
+		printf("Init Editor\n");
 		psy_ui_component_init(&self->component, parent);
 		/*psy_ui_LabelImp* imp;
 		
@@ -331,7 +336,7 @@ void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
 
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {
-
+	psy_ui_component_init(&self->component, parent);
 }
 void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 {

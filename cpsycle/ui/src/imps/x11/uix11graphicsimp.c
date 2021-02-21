@@ -133,6 +133,11 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->region = XCreateRegion();
 }
 
+void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self, psy_ui_Bitmap* bitmap)
+{
+	psy_ui_x11_graphicsimp_init(self, NULL);
+}
+
 void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
 {
 	XftDrawDestroy(self->xfd);

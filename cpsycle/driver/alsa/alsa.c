@@ -204,8 +204,8 @@ void init_properties(psy_AudioDriver* driver)
 
 	self = (AlsaDriver*)driver;
 	psy_snprintf(key, 256, "alsa-guid-%d", PSY_AUDIODRIVER_ALSA_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_create(key), "Linux ALSA Interface");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "Linux ALSA Interface"));	
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_ALSA_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);

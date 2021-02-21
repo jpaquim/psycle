@@ -8,6 +8,7 @@
 #include "uicomponent.h"
 // std
 #include <stdlib.h>
+#include <stdio.h>
 // platform
 #include "../../detail/psyconf.h"
 #include "../../detail/os.h"
@@ -93,10 +94,10 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_signal_init(&self->signal_dispose);	
 	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);
+	ui_app_initimp(self, instance);
 	psy_ui_defaults_init(&self->defaults, dark);
 	psy_ui_appzoom_updatebasefontsize(&self->zoom,
-		psy_ui_defaults_font(&self->defaults));
-	ui_app_initimp(self, instance);
+		psy_ui_defaults_font(&self->defaults));	
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
 		psy_ui_app_onlanguagechanged);
@@ -119,6 +120,7 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	printf("Create X11 Impfactory\n");
 	self->imp_factory = (psy_ui_ImpFactory*)
 		psy_ui_x11_impfactory_allocinit();	
+	printf("X11 Impfactory created\n");
 #else
 	#error "Platform not supported"
 #endif	
@@ -128,9 +130,12 @@ void ui_app_initimp(psy_ui_App* self, uintptr_t instance)
 {
 	assert(self);
 
-	if (self->imp_factory) {
+	if (self->imp_factory) {		
 		self->imp = psy_ui_impfactory_allocinit_appimp(self->imp_factory, self,
 			instance);
+		if (!self->imp) {
+			printf("Create App Imp failed\n");
+		}
 	} else {
 		self->imp = NULL;
 	}

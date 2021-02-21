@@ -17,6 +17,8 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+#include <stdlib.h>
+
 static void dev_rec_children(psy_ui_x11_ComponentImp*,
 	psy_List** children);
 static int windowstyle(psy_ui_x11_ComponentImp*);
@@ -413,7 +415,7 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 	psy_ui_X11App* x11app;
 		
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	tm = dev_textmetric(self);
+	tm = dev_textmetric(self);	
 	self->sizecachevalid = FALSE;	
 	XResizeWindow(x11app->dpy, self->hwnd,
 		(psy_ui_value_px(&size.width, tm) > 0)
@@ -421,9 +423,9 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 			: 1,
 		(psy_ui_value_px(&size.height, tm) > 0)
 			? psy_ui_value_px(&size.height, tm)
-			: 1);
+			: 1);	
 	self->sizecache = size;
-	self->sizecachevalid = TRUE;
+	self->sizecachevalid = TRUE;	
 }
 
 void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)

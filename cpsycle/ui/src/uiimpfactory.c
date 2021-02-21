@@ -179,8 +179,8 @@ static int vtable_initialized = 0;
 static void vtable_init(void)
 {
 	if (!vtable_initialized) {
-		vtable.allocinit_appimp = vtable.allocinit_appimp;
-		vtable.allocinit_bitmapimp = vtable.allocinit_bitmapimp;
+		vtable.allocinit_appimp = psy_ui_impfactory_allocinit_appimp;
+		vtable.allocinit_bitmapimp = psy_ui_impfactory_allocinit_bitmapimp;
 		vtable.allocinit_graphicsimp = allocinit_graphicsimp;
 		vtable.allocinit_graphicsimp_bitmap = allocinit_graphicsimp_bitmap;
 		vtable.allocinit_fontimp = allocinit_fontimp;
