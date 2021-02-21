@@ -22,7 +22,7 @@
 #endif
 #include <dir.h>
 
-typedef struct {
+typedef struct CmdPlayer {
 	psy_audio_MachineCallback machinecallback;
 	psy_audio_Player player;
 	psy_audio_Song* song;	
@@ -53,6 +53,26 @@ static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void machinecallback_output(CmdPlayer*, const char* text);
 static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
 static psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
+
+// MachineCallback VTable
+static psy_audio_MachineCallbackVtable psy_audio_machinecallbackvtable_vtable;
+static int psy_audio_machinecallbackvtable_initialized = 0;
+
+static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
+{
+	if (!psy_audio_machinecallbackvtable_initialized) {
+		psy_audio_machinecallbackvtable_vtable = *self->machinecallback.vtable;
+		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
+			machinecallback_output;
+		//psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
+		//	machinecallback_samples;
+		//psy_audio_machinecallbackvtable_vtable.instruments =
+		//	(fp_mcb_instruments)
+		//	machinecallback_instruments;
+		psy_audio_machinecallbackvtable_initialized = 1;
+	}
+}
+
 
 static void usage(void) {
 	printf(
@@ -158,24 +178,7 @@ void cmdplayer_idle(void)
 #endif
 }
 
-// MachineCallback VTable
-static psy_audio_MachineCallbackVtable psy_audio_machinecallbackvtable_vtable;
-static int psy_audio_machinecallbackvtable_initialized = 0;
 
-static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
-{
-	if (!psy_audio_machinecallbackvtable_initialized) {
-		psy_audio_machinecallbackvtable_vtable = *self->machinecallback.vtable;		
-		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
-			machinecallback_output;
-		psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
-			machinecallback_samples;
-			psy_audio_machinecallbackvtable_vtable.instruments =
-				(fp_mcb_instruments)
-				machinecallback_instruments;
-		psy_audio_machinecallbackvtable_initialized = 1;
-	}
-}
 
 void cmdplayer_init(CmdPlayer* self)
 {    
@@ -192,18 +195,18 @@ void cmdplayer_init(CmdPlayer* self)
 	psy_dsp_noopt_init(&dsp);    
     printf("init directories\n");
 	cmdplayer_makedirectories(self);
-	cmdplayer_makeinputoutput(self);
-    printf("init driverlist\n");
-	cmdplayer_setdriverlist(self);
+	cmdplayer_makeinputoutput(self);    	
     printf("init factory\n");
 	cmdplayer_initplugincatcherandmachinefactory(self);
     printf("alloc song\n");
 	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	psy_audio_player_init(&self->player, self->song, (void*)0);
+	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
     printf("load driver \n");
 	psy_audio_player_loaddriver(&self->player, cmdplayer_driverpath(self),
-		NULL /*no config*/, TRUE /*open*/);
-	if (self->player.driver) {
+		NULL /*no config*/, FALSE /*open*/);	
+	if (self->player.driver) {		
+		psy_audiodriver_open(self->player.driver);
 		printf("Audio driver %s \n",
 			psy_audiodriver_info(self->player.driver)->Name);
 	}
@@ -275,7 +278,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 void cmdplayer_makeinputoutput(CmdPlayer* self)
 {		
 	self->inputoutput = psy_property_append_section(self->config, "inputoutput");
-		cmdplayer_setdriverlist(self);
+	cmdplayer_setdriverlist(self);
 	self->driverconfigure = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "configure"),
 		"Configure");
@@ -284,25 +287,34 @@ void cmdplayer_makeinputoutput(CmdPlayer* self)
 void cmdplayer_setdriverlist(CmdPlayer* self)
 {
 	psy_Property* drivers;
-
-	psy_property_settext(self->inputoutput, "Input/Output");
+	
+	printf("init driverlist\n");
 	// change number to set startup driver, if no psycle.ini found
-	drivers = psy_property_append_choice(self->inputoutput, "driver", 1); 
-	psy_property_settext(drivers, "Audio Driver");
+#if defined(DIVERSALIS__OS__MICROSOFT)	
+	// 2 : directx
+	drivers = psy_property_append_choice(self->inputoutput,
+		"audiodrivers", 1);
+
+#elif defined(DIVERSALIS__OS__LINUX)
+	// 1 : alsa
+	drivers = psy_property_append_choice(self->inputoutput,
+		"audiodrivers", 1);
+#endif		
 	psy_property_append_string(drivers, "silent", "silentdriver");
-#if !defined _WIN32
-	printf("add alsa\n");
+#if defined(DIVERSALIS__OS__MICROSOFT)
+	// output target for the audio driver dlls is {solutiondir}/Debug or 
+	// {solutiondir}/Release
+	// if they aren't found, check if direcories fit and if
+	// dlls are compiled
+	psy_property_append_string(drivers, "mme", ".\\mme.dll");
+	psy_property_append_string(drivers, "directx", ".\\directx.dll");
+	psy_property_append_string(drivers, "wasapi", ".\\wasapi.dll");
+	psy_property_append_string(drivers, "asio", ".\\asiodriver.dll");
+#elif defined(DIVERSALIS__OS__LINUX)
 	psy_property_append_string(drivers, "alsa",
-			"../../driver/alsa/libpsyalsa.so");
-#else	
-#if defined(_DEBUG)
-	psy_property_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
-	psy_property_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
-#else
-	psy_property_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	psy_property_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+		"../../driver/alsa/libpsyalsa.so");
 #endif
-#endif
+
 }
 
 void cmdplayer_dispose(CmdPlayer* self)
@@ -318,33 +330,21 @@ void cmdplayer_dispose(CmdPlayer* self)
 }
 
 const char* cmdplayer_driverpath(CmdPlayer* self)
-{	
-	const char* rv = 0;
-	
-	#if !defined _WIN32
+{		
+	psy_Property* p;
+#if !defined _WIN32
 	return "../../driver/alsa/libpsyalsa.so";
-	#endif
-	
-	/*psy_Property* p;
+#else
+	assert(self);
 
-	p = psy_property_at(self->inputoutput, "driver", PSY_PROPERTY_TYPE_NONE);
-	if (p) {
-		int choice;		
-		int count;
-		
-		choice = psy_property_item_int(p);
-		p = p->children;
-		count = 0;
-		while (p) {
-			if (count == choice) {
-				rv = psy_property_item_str(p);
-				break;
-			}
-			p = psy_property_next(p);
-			++count;
+	if (p = psy_property_at(self->inputoutput, "audiodrivers",
+		PSY_PROPERTY_TYPE_NONE)) {
+		if (p = psy_property_at_choice(p)) {
+			return psy_property_item_str(p);
 		}
-	}*/
-	return rv;
+	}
+	return NULL;
+#endif	
 }
 
 void cmdplayer_loadsong(CmdPlayer* self, const char* path)
@@ -355,7 +355,8 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	psy_audio_player_stop(&self->player);
 	oldsong = self->song;
 	psy_audio_exclusivelock_enter();	
-	self->song = psy_audio_song_allocinit(&self->machinefactory);	
+	self->song = psy_audio_song_allocinit(&self->machinefactory);
+	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
 	songfile.song = self->song;
 	songfile.file = 0;
 	psy_audio_songfile_init(&songfile);
@@ -366,7 +367,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	if (songfile.err) {
 		fprintf(stderr, "Couldn't load song\n");
 	}	
-	psy_audio_player_setsong(&self->player, self->song);
+	psy_audio_player_setsong(&self->player, self->song);	
 	cmdplayer_applysongproperties(self);
 	psy_audio_exclusivelock_leave();
 	psy_audio_song_deallocate(oldsong);

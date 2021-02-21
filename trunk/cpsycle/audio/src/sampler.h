@@ -222,6 +222,7 @@ const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 {
 	assert(self);
+
 	return &(self->custommachine.machine);
 }
 

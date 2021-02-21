@@ -77,6 +77,17 @@ scintilla.dll (vc6, vc2008 only, search for an old compatible win98/xp dll)
 
 Posix
 
+Command line player:
+
+Since the linux psycle plugin makefiles are out of date it is very limited,
+but to build:
+
+go to cpsycle/player
+run: make
+cd src
+execute ./psyplayer filename.psy
+
+Host:
 The X11 part is unfinished, but to build execute the makefiles in the src
 directories of audio, container, dsp, file, ui, build the alsa driver and
 finally the host. The devel libs for X11 with xft, freetype, xmu, xshape and
