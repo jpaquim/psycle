@@ -110,6 +110,104 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 			self->size.height - 1));
 }
 
+// SliderDraw
+// implementation
+void sliderdraw_init(SliderDraw* self, ParamSkin* skin,
+	psy_audio_Machine* machine, psy_audio_MachineParam* param,
+	psy_ui_RealSize size, const psy_ui_TextMetric* tm, bool tweaking)
+{
+	self->machine = machine;
+	self->skin = skin;
+	self->param = param;
+	self->size = size;
+	self->tweaking = tweaking;
+	self->tm = tm;
+}
+
+void sliderdraw_draw(SliderDraw* self, psy_ui_Graphics* g)
+{
+	double xoffset;
+	double yoffset;
+	double value;
+	psy_ui_RealRectangle r;
+	char str[128];
+	bool drawparamname;
+
+	// todo: make the slider scalable
+	str[0] = '\0';	
+	psy_ui_setrectangle(&r, 0, 0, self->size.width, self->size.height);
+	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
+	skin_blitcoord(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_zero(), &self->skin->slider);
+	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
+		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
+	if (self->param) {
+		if (self->machine) {
+			value = psy_audio_machine_parameter_normvalue(self->machine,
+				self->param);
+		} else {
+			value = psy_audio_machineparam_normvalue(self->param);
+		}
+	} else {
+		value = 0.f;
+	}
+	yoffset = ((1.0 - value) *
+		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
+			psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
+	skin_blitcoord(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_make(xoffset, yoffset),
+		&self->skin->sliderknob);
+	drawparamname = FALSE;
+	if (self->param) {
+		if (self->machine) {
+			// call with proxy protection via machine
+			if (psy_audio_machine_parameter_name(self->machine, self->param, str) != FALSE) {
+				drawparamname = TRUE;
+			}
+		} else {
+			if (psy_audio_machineparam_name(self->param, str) != FALSE) {
+				drawparamname = TRUE;
+			}
+		}
+	}
+	if (drawparamname != FALSE) {
+		psy_ui_setbackgroundcolour(g, self->skin->topcolour);
+		psy_ui_settextcolour(g, self->skin->fonttopcolour);
+		psy_ui_setrectangle(&r,
+			32, self->skin->slider.dest.bottom -
+			self->skin->slider.dest.top - 48,
+			self->size.width - 32, 24);
+		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
+			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
+			r, str, strlen(str));
+	}
+	psy_ui_setrectangle(&r,
+		32, psy_ui_realrectangle_height(&self->skin->slider.dest) - 24,
+		self->size.width - 32, 24);
+	str[0] = '\0';
+	if (self->param) {
+		if (self->machine) {
+			// call with proxy protection via machine
+			if (psy_audio_machine_parameter_describe(self->machine, self->param, str) == FALSE) {
+				psy_snprintf(str, 128, "%d",
+					psy_audio_machine_parameter_normvalue(self->machine, self->param));
+			}
+		} else {			
+			if (psy_audio_machineparam_describe(self->param, str) == FALSE) {
+				psy_snprintf(str, 128, "%d",
+					psy_audio_machineparam_normvalue(self->param));
+			}
+		}
+	}	
+	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
+	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
+	psy_ui_textoutrectangle(g,
+		psy_ui_realpoint_make(
+			32,
+			psy_ui_realrectangle_height(&self->skin->slider.dest) - 24),
+		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
+		r, str, strlen(str));
+}
 
 // ParamTweak
 static psy_audio_MachineParam* paramtweak_tweakparam(ParamTweak* self);
@@ -321,7 +419,7 @@ static void ondraw(ParamView*, psy_ui_Graphics*);
 static void drawparameter(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*,
 	uintptr_t paramindex, uintptr_t row, uintptr_t col);
 static void drawslider(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*,
-	psy_ui_RealSize);
+	uintptr_t paramnum, psy_ui_RealSize);
 static void drawsliderlevel(ParamView*, psy_ui_Graphics*,
 	psy_audio_MachineParam*, psy_ui_RealSize);
 static void drawslidercheck(ParamView*, psy_ui_Graphics*,
@@ -492,7 +590,7 @@ void drawparameter(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 			drawknob(self, g, param, paramindex, size);
 			break;
 		case MPF_SLIDER:
-			drawslider(self, g, param, size);
+			drawslider(self, g, param, paramindex, size);
 			break;
 		case MPF_SLIDERCHECK:
 			drawslidercheck(self, g, param, size);
@@ -584,56 +682,14 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g,
 }
 
 void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	psy_ui_RealSize size)
+	uintptr_t paramnum, psy_ui_RealSize size)
 {	
-	double xoffset;
-	double yoffset;
-	double value;	
-	psy_ui_RealRectangle r;
-	char str[128];
-	str[0] = '\0';
-	
-	// todo: make the slider more scalable
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
-	skin_blitcoord(g, &self->skin->mixerbitmap,
-		psy_ui_realpoint_zero(), &self->skin->slider);
-	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
-		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
-	value =	psy_audio_machine_parameter_normvalue(self->machine, param);
-	yoffset = ((1.0 - value) *
-		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
-		psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
-	skin_blitcoord(g, &self->skin->mixerbitmap,
-		psy_ui_realpoint_make(xoffset, yoffset),
-		&self->skin->sliderknob);
-			
-	if (psy_audio_machine_parameter_name(self->machine, param, str) != FALSE) {
-		psy_ui_setbackgroundcolour(g, self->skin->topcolour);
-		psy_ui_settextcolour(g, self->skin->fonttopcolour);
-		psy_ui_setrectangle(&r,
-			32, self->skin->slider.dest.bottom -
-				self->skin->slider.dest.top - 48,
-			size.width - 32, 24);
-		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
-			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-			r, str, strlen(str));
-	}	
-	psy_ui_setrectangle(&r,
-		32, psy_ui_realrectangle_height(&self->skin->slider.dest) - 24,
-		size.width - 32, 24);
-	if (psy_audio_machine_parameter_describe(self->machine, param, str) == FALSE) {
-		psy_snprintf(str, 128, "%d",
-			psy_audio_machine_parameter_normvalue(self->machine, param));
-	}
-	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
-	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
-	psy_ui_textoutrectangle(g,
-		psy_ui_realpoint_make(
-			32,
-			psy_ui_realrectangle_height(&self->skin->slider.dest) - 24),
-		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, str, strlen(str));
+	SliderDraw draw;
+
+	sliderdraw_init(&draw, self->skin, self->machine, param,
+		size, psy_ui_component_textmetric(&self->component),
+		self->tweak == paramnum);
+	sliderdraw_draw(&draw, g);	
 }
 
 void drawsliderlevel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,

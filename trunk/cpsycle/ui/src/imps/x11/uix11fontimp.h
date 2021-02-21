@@ -7,7 +7,7 @@
 #ifndef psy_ui_x11_FONTIMP_H
 #define psy_ui_x11_FONTIMP_H
 
-#include "uifont.h"
+#include "../../uifont.h"
 #include <X11/Xft/Xft.h>
 
 #ifdef __cplusplus

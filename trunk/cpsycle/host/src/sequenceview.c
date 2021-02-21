@@ -547,7 +547,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g,
 	uintptr_t startrow;
 	uintptr_t endrow;
 
-	startrow = (uintptr_t)floor(max(0, (g->clip.top - self->state->margin) / self->lineheight));
+	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top - self->state->margin) / self->lineheight));
 	endrow = (uintptr_t)(floor(g->clip.bottom - self->state->margin + 0.5) / self->lineheight);
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->state->trackwidth - 5, size.height);
@@ -839,21 +839,21 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
-	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);
+	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);	
 	psy_ui_checkbox_settext(&self->followsong,
 		"sequencerview.follow-song");
-	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);
+	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);	
 	psy_ui_checkbox_settext(&self->shownames,
-		"sequencerview.show-pattern-names");		
+		"sequencerview.show-pattern-names");			
 	psy_ui_checkbox_init_multiline(&self->recordnoteoff, &self->component);
 	psy_ui_checkbox_settext(&self->recordnoteoff,
-		"sequencerview.record-noteoff");
+		"sequencerview.record-noteoff");	
 	psy_ui_checkbox_init_multiline(&self->recordtweak, &self->component);
 	psy_ui_checkbox_settext(&self->recordtweak,
-		"sequencerview.record-tweak");
+		"sequencerview.record-tweak");	
 	psy_ui_checkbox_init_multiline(&self->multichannelaudition, &self->component);
 	psy_ui_checkbox_settext(&self->multichannelaudition,
-		"sequencerview.multichannel-audition");		
+		"sequencerview.multichannel-audition");			
 	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
 		"sequencerview.allow-notes-to_effect");	

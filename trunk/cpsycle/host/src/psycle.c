@@ -83,11 +83,11 @@ int psycle_run(uintptr_t instance, int options)
 #ifdef DIVERSALIS__OS__MICROSOFT		
 			psy_ui_component_showstate(&mainframe->component, SW_MAXIMIZE);
 #else
-			psy_ui_component_resize(&mainframe.component,
+			psy_ui_component_resize(&mainframe->component,
 				psy_ui_size_make(
 					psy_ui_value_makepx(1024),
 					psy_ui_value_makepx(768)));
-			psy_ui_component_showstate(&mainframe.component, 0);
+			psy_ui_component_showstate(&mainframe->component, 0);
 #endif		
 		} else {
 			psy_ui_component_showstate(&mainframe->component, options);

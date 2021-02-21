@@ -64,7 +64,7 @@ static int psy_ui_winapp_run(psy_ui_WinApp*);
 static void psy_ui_winapp_stop(psy_ui_WinApp*);
 static void psy_ui_winapp_close(psy_ui_WinApp*);
 
-// VTable init
+// vtable
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -79,7 +79,8 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_winapp_run;
 		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_winapp_stop;
 		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_winapp_close;
-		imp_vtable.dev_onappdefaultschange = (psy_ui_fp_appimp_close)
+		imp_vtable.dev_onappdefaultschange =
+			(psy_ui_fp_appimp_onappdefaultschange)
 			psy_ui_winapp_onappdefaultschange;		
 		imp_vtable_initialized = TRUE;
 	}

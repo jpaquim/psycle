@@ -14,35 +14,35 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void dev_dispose(psy_ui_x11_ColorDialogImp*);
 static int dev_execute(psy_ui_x11_ColorDialogImp*);
 static const char* dev_path(psy_ui_x11_ColorDialogImp*);
-psy_ui_Color dev_color(psy_ui_x11_ColorDialogImp*);
+psy_ui_Colour dev_color(psy_ui_x11_ColorDialogImp*);
 
 // VTable init
-static psy_ui_ColorDialogImpVTable imp_vtable;
+static psy_ui_ColourDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
 static void imp_vtable_init(psy_ui_x11_ColorDialogImp* self)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_colordialogimp_dev_dispose) dev_dispose;
-		imp_vtable.dev_execute = (psy_ui_fp_colordialogimp_dev_execute) dev_execute;		
-		imp_vtable.dev_color = (psy_ui_fp_colordialogimp_dev_color) dev_color;
+		imp_vtable.dev_dispose = (psy_ui_fp_colourdialogimp_dev_dispose)
+			dev_dispose;
+		imp_vtable.dev_execute = (psy_ui_fp_colourdialogimp_dev_execute)
+			dev_execute;
+		imp_vtable.dev_colour = (psy_ui_fp_colourdialogimp_dev_colour)dev_color;
 		imp_vtable_initialized = 1;
 	}
 }
 
 void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp* self)
 {
-	psy_ui_colordialogimp_init(&self->imp);
+	psy_ui_colourdialogimp_init(&self->imp);
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
-	self->color = psy_ui_color_make(0x00000000);
+	self->color = psy_ui_colour_make(0x00000000);
 }
 
 // win32 implementation method for psy_ui_ColorDialog
@@ -73,7 +73,7 @@ int dev_execute(psy_ui_x11_ColorDialogImp* self)
 	return rv;
 }
 
-psy_ui_Color dev_color(psy_ui_x11_ColorDialogImp* self)
+psy_ui_Colour dev_color(psy_ui_x11_ColorDialogImp* self)
 {
 	return self->color;	
 }

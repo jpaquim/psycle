@@ -37,7 +37,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	int prev_h; // triggered for other reasons than resize
 	psy_ui_TextMetric tm;
 	bool tmcachevalid;
-	psy_ui_Color backgroundcolor;
+	psy_ui_Colour backgroundcolor;
 	bool mapped;
 	psy_ui_Graphics g;
 	psy_List* children_nonrec_cache;

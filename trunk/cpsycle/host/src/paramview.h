@@ -45,9 +45,25 @@ typedef struct KnobDraw {
     psy_ui_RealRectangle r_bottom;    
 } KnobDraw;
 
-void knobdraw_init(KnobDraw* self, ParamSkin*, psy_audio_Machine*,
+void knobdraw_init(KnobDraw*, ParamSkin*, psy_audio_Machine*,
     psy_audio_MachineParam*, psy_ui_RealSize, const psy_ui_TextMetric*,
     bool tweaking);
+
+typedef struct SliderDraw {
+    ParamSkin* skin;
+    psy_audio_MachineParam* param;
+    psy_ui_RealSize size;
+    psy_audio_Machine* machine;
+    const psy_ui_TextMetric* tm;
+    bool tweaking;
+    psy_ui_RealRectangle r_top;
+    psy_ui_RealRectangle r_bottom;
+} SliderDraw;
+
+void sliderdraw_init(SliderDraw*, ParamSkin*, psy_audio_Machine*,
+    psy_audio_MachineParam*, psy_ui_RealSize, const psy_ui_TextMetric*,
+    bool tweaking);
+void sliderdraw_draw(SliderDraw*, psy_ui_Graphics*);
 
 typedef struct {
     psy_ui_Component component;    

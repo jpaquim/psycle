@@ -1655,8 +1655,8 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 	const char* path;
 
 	path = fileview_path(sender);
-	workspace_loadsong(&self->workspace, path,
-		workspace_playsongafterload(&self->workspace));
+	// workspace_loadsong(&self->workspace, path,
+	//	workspace_playsongafterload(&self->workspace));
 }
 #endif
 

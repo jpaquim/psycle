@@ -430,7 +430,7 @@ void machinesbox_addsel(MachinesBox* self, uintptr_t slot)
 		uintptr_t boxindex;
 
 		boxindex = (uintptr_t)psy_table_at(&self->slotslistbox, slot);
-		psy_ui_listbox_addsel(&self->listbox, boxindex);
+		// psy_ui_listbox_addsel(&self->listbox, boxindex);
 	}
 }
 

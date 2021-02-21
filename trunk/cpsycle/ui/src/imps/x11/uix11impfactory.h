@@ -7,7 +7,7 @@
 #ifndef psy_ui_x11_IMPFACTORY_H
 #define psy_ui_x11_IMPFACTORY_H
 
-#include "uiimpfactory.h"
+#include "../../uiimpfactory.h"
 
 #ifdef __cplusplus
 extern "C" {

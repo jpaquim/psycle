@@ -14,12 +14,8 @@
 #include "uix11graphicsimp.h"
 #include "uiapp.h"
 #include "uix11app.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
-
-extern psy_ui_App app;
 
 static void dev_rec_children(psy_ui_x11_ComponentImp*,
 	psy_List** children);
@@ -40,10 +36,10 @@ static void dev_show(psy_ui_x11_ComponentImp*);
 static void dev_showstate(psy_ui_x11_ComponentImp*, int state);
 static void dev_hide(psy_ui_x11_ComponentImp*);
 static int dev_visible(psy_ui_x11_ComponentImp*);
-static void dev_move(psy_ui_x11_ComponentImp*, int left, int top);
+static void dev_move(psy_ui_x11_ComponentImp*, psy_ui_Point origin);
 static void dev_resize(psy_ui_x11_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_x11_ComponentImp*, int width, int height);
-static psy_ui_Rectangle dev_position(psy_ui_x11_ComponentImp*);
+static psy_ui_RealRectangle dev_position(psy_ui_x11_ComponentImp*);
 static void dev_setposition(psy_ui_x11_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
 static psy_ui_Size dev_size(psy_ui_x11_ComponentImp*);
@@ -59,7 +55,7 @@ static void dev_capture(psy_ui_x11_ComponentImp*);
 static void dev_releasecapture(psy_ui_x11_ComponentImp*);
 static void dev_invalidate(psy_ui_x11_ComponentImp*);
 static void dev_invalidaterect(psy_ui_x11_ComponentImp*, const
-	psy_ui_Rectangle*);
+	const psy_ui_RealRectangle*);
 static void dev_update(psy_ui_x11_ComponentImp*);
 static void dev_setfont(psy_ui_x11_ComponentImp*, psy_ui_Font*);
 static psy_List* dev_children(psy_ui_x11_ComponentImp*, int recursive);
@@ -70,10 +66,10 @@ static void dev_starttimer(psy_ui_x11_ComponentImp*, uintptr_t id, uintptr_t
 	interval);
 static void dev_stoptimer(psy_ui_x11_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_x11_ComponentImp*, int ressourceid);
-static psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp*);
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text,
 	psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_x11_ComponentImp*, psy_ui_Color);
+static void dev_setbackgroundcolor(psy_ui_x11_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
@@ -135,8 +131,8 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 			dev_textmetric;
 		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)
 			dev_textsize;
-		vtable.dev_setbackgroundcolor =
-			(psy_ui_fp_componentimp_dev_setbackgroundcolor)
+		vtable.dev_setbackgroundcolour =
+			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
 			dev_setbackgroundcolor;
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
@@ -163,7 +159,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->winid = -1;
 	self->sizecachevalid = FALSE;
 	self->tmcachevalid = FALSE;
-	self->backgroundcolor = psy_ui_color_make(0);
+	self->backgroundcolor = psy_ui_colour_make(0);
 //	self->wndproc = 0;
 //	self->background = 0;
 	parent_imp = parent ? (psy_ui_x11_ComponentImp*)parent : 0;	
@@ -181,10 +177,10 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand)
 {	
-	psy_ui_X11App* x11app;	
-	int err = 0;	
-
-	x11app = (psy_ui_X11App*) app.platform;	
+	int err = 0;
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->prev_w = width;
 	self->prev_h = height;
 	self->d_backBuf = 0;
@@ -365,7 +361,7 @@ void dev_destroy(psy_ui_x11_ComponentImp* self)
 {	
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*) app.platform;
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XDestroyWindow(x11app->dpy, self->hwnd);
 }
 
@@ -373,7 +369,7 @@ void dev_show(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*) app.platform;        
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
 	XMapWindow(x11app->dpy, self->hwnd);
 	self->mapped = TRUE;
 }
@@ -382,7 +378,7 @@ void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
 {
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*) app.platform;
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XMapWindow(x11app->dpy, self->hwnd);
 	self->mapped = TRUE;
 }
@@ -391,7 +387,7 @@ void dev_hide(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*) app.platform;
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XUnmapWindow(x11app->dpy, self->hwnd);
 	self->mapped = FALSE;
 }
@@ -401,30 +397,30 @@ int dev_visible(psy_ui_x11_ComponentImp* self)
 	return self->mapped;
 }
 
-void dev_move(psy_ui_x11_ComponentImp* self, int left, int top)
+void dev_move(psy_ui_x11_ComponentImp* self, psy_ui_Point origin)
 {
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*) app.platform;
-	XMoveWindow(x11app->dpy, self->hwnd,
-		left,
-		top);    
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+    XMoveWindow(x11app->dpy, self->hwnd,		
+		(int)psy_ui_value_px(&origin.x, dev_textmetric(self)),
+		(int)psy_ui_value_px(&origin.y, dev_textmetric(self)));		
 }
 
 void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 {    
-	psy_ui_TextMetric tm;
-	psy_ui_X11App* x11app;		
-
-    x11app = (psy_ui_X11App*) app.platform;
+	const psy_ui_TextMetric* tm;
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;	
 	XResizeWindow(x11app->dpy, self->hwnd,
-		(psy_ui_value_px(&size.width, &tm) > 0)
-			? psy_ui_value_px(&size.width, &tm)
+		(psy_ui_value_px(&size.width, tm) > 0)
+			? psy_ui_value_px(&size.width, tm)
 			: 1,
-		(psy_ui_value_px(&size.height, &tm) > 0)
-			? psy_ui_value_px(&size.height, &tm)
+		(psy_ui_value_px(&size.height, tm) > 0)
+			? psy_ui_value_px(&size.height, tm)
 			: 1);
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;
@@ -442,9 +438,9 @@ void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)
 		//GetMenu(self->hwnd) != NULL,
 		//windowexstyle(self));
 	//dev_resize(self, rc.right - rc.left, rc.bottom - rc.top);
-	psy_ui_X11App* x11app;		
-
-    x11app = (psy_ui_X11App*) app.platform;	
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->sizecachevalid = FALSE;
 	XResizeWindow(x11app->dpy, self->hwnd,
 		width,
@@ -455,35 +451,35 @@ void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)
 void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
-	psy_ui_TextMetric tm;
-	psy_ui_X11App* x11app;		
-
-    x11app = (psy_ui_X11App*) app.platform;
+	const psy_ui_TextMetric* tm;
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;		
 	XMoveResizeWindow(x11app->dpy, self->hwnd,
-		psy_ui_value_px(&topleft.x, &tm),
-		psy_ui_value_px(&topleft.y, &tm),		
-		(psy_ui_value_px(&size.width, &tm) > 0)
-			? psy_ui_value_px(&size.width, &tm)
+		psy_ui_value_px(&topleft.x, tm),
+		psy_ui_value_px(&topleft.y, tm),		
+		(psy_ui_value_px(&size.width, tm) > 0)
+			? psy_ui_value_px(&size.width, tm)
 			: 1,
-		(psy_ui_value_px(&size.height, &tm) > 0)
-			? psy_ui_value_px(&size.height, &tm)
+		(psy_ui_value_px(&size.height, tm) > 0)
+			? psy_ui_value_px(&size.height, tm)
 			: 1);	
 	dev_updatesize(self);	
 }
 
-psy_ui_Rectangle dev_position(psy_ui_x11_ComponentImp* self)
+psy_ui_RealRectangle dev_position(psy_ui_x11_ComponentImp* self)
 {
-	psy_ui_Rectangle rv;
+	psy_ui_RealRectangle rv;
     psy_ui_Size size;
     
     Window root;
     unsigned int temp;    
-    psy_ui_X11App* x11app;
     XWindowAttributes win_attr;	
-
-    x11app = (psy_ui_X11App*) app.platform;
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
     XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
     rv.left = win_attr.x;
 	rv.top = win_attr.y;
@@ -500,11 +496,11 @@ psy_ui_Size dev_size(psy_ui_x11_ComponentImp* self)
         Window root;
         unsigned int temp;
         unsigned int width = 0;
-        unsigned int height = 0;
-        psy_ui_X11App* x11app;
+        unsigned int height = 0;        
         XWindowAttributes win_attr;		
-
-        x11app = (psy_ui_X11App*) app.platform;
+		psy_ui_X11App* x11app;
+		
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
         XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);       
         rv.width = psy_ui_value_makepx(win_attr.width);
         rv.height = psy_ui_value_makepx(win_attr.height);
@@ -521,11 +517,11 @@ void dev_updatesize(psy_ui_x11_ComponentImp* self)
 	Window root;
     unsigned int temp;
     unsigned int width = 0;
-    unsigned int height = 0;
-    psy_ui_X11App* x11app;
+    unsigned int height = 0;    
     XWindowAttributes win_attr;			
-
-    x11app = (psy_ui_X11App*) app.platform;        
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
 	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 	
     size.width = psy_ui_value_makepx(win_attr.width);
     size.height = psy_ui_value_makepx(win_attr.height);	
@@ -541,11 +537,11 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
         Window root;
         unsigned int temp;
         unsigned int width = 0;
-        unsigned int height = 0;
-        psy_ui_X11App* x11app;
+        unsigned int height = 0;        
         XWindowAttributes win_attr;			
-
-        x11app = (psy_ui_X11App*) app.platform;        
+		psy_ui_X11App* x11app;
+		
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
         XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 
         rv.width = psy_ui_value_makepx(win_attr.width);
         rv.height = psy_ui_value_makepx(win_attr.height);
@@ -558,15 +554,15 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 
 void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 {	
-	if (dx != 0 || dy != 0) {
-		psy_ui_X11App* x11app;
+	if (dx != 0 || dy != 0) {		
 		XWindowAttributes win_attr;			
 		psy_ui_x11_GraphicsImp* gx11;
 		XExposeEvent xev;
 		Region region;
 		XRectangle rectangle;
-
-		x11app = (psy_ui_X11App*) app.platform;        
+		psy_ui_X11App* x11app;
+		
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 
 		gx11 = (psy_ui_x11_GraphicsImp*)self->g.imp;	
 		region = XCreateRegion();
@@ -619,8 +615,8 @@ void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent)
 	if (parent) {
 		psy_ui_x11_ComponentImp* parentimp;
 		psy_ui_X11App* x11app;
-
-		x11app = (psy_ui_X11App*)app.platform;   
+		
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		parentimp = (psy_ui_x11_ComponentImp*)parent->imp;
 		if (parentimp) {	
 			self->parent = parentimp;	
@@ -650,8 +646,8 @@ void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 void dev_capture(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;
-
-	x11app = (psy_ui_X11App*)app.platform;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XGrabPointer(x11app->dpy,
 		   self->hwnd,
 		   0,
@@ -667,8 +663,8 @@ void dev_capture(psy_ui_x11_ComponentImp* self)
 void dev_releasecapture(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;
-
-	x11app = (psy_ui_X11App*)app.platform;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XUngrabPointer(x11app->dpy, CurrentTime);
 	XFlush(x11app->dpy);
 }
@@ -678,10 +674,10 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 	XExposeEvent xev;
 	Window root;
 	unsigned int temp;	
-	psy_ui_X11App* x11app;
     XWindowAttributes win_attr;			
-
-    x11app = (psy_ui_X11App*) app.platform;        
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;    
     XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);	
 	xev.type    = Expose ;
 	xev.display = x11app->dpy;
@@ -695,18 +691,20 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 }
 
 void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const
-	psy_ui_Rectangle* r)
+	const psy_ui_RealRectangle* r)
 {	
 	XExposeEvent xev;	
 	psy_ui_X11App* x11app;
+	const psy_ui_TextMetric* tm;
 
-	x11app = (psy_ui_X11App*) app.platform;
+	tm = psy_ui_component_textmetric(self->component);		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
-	xev.count = 0;
-	xev.x = r->left - self->component->scroll.x;
-	xev.y = r->top - self->component->scroll.y;
+	xev.count = 0;	
+	xev.x  = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, tm));
+	xev.y = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, tm));	
 	xev.width = r->right - r->left; 
 	xev.height = r->bottom - r->top;		
 	XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
@@ -714,9 +712,9 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const
 
 void dev_update(psy_ui_x11_ComponentImp* self)
 {
-	psy_ui_X11App* x11app;		
-
-	x11app = (psy_ui_X11App*) app.platform;	
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XFlush(x11app->dpy);
 	XSync(x11app->dpy, FALSE);
 }
@@ -728,16 +726,16 @@ void dev_setfont(psy_ui_x11_ComponentImp* self, psy_ui_Font* source)
 
 void dev_rec_children(psy_ui_x11_ComponentImp* self,
 	psy_List** children)
-{	
-	psy_ui_X11App* x11app;
+{		
 	Window root_win;
 	Window parent_win;
 	Window* child_windows;
 	int i;
 	int num_child_windows;	
-		    
-    x11app = (psy_ui_X11App*) app.platform; 
-	psy_ui_x11_ComponentImp* imp;		
+	psy_ui_x11_ComponentImp* imp;
+	psy_ui_X11App* x11app;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;		
 	XQueryTree(x11app->dpy, self->hwnd,
            &root_win,
            &parent_win,
@@ -773,16 +771,16 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 					psy_list_append(&children, (psy_ui_Component*)
 						psy_list_entry(p));
 			}
-		} else {
-			psy_ui_X11App* x11app;
+		} else {			
 			Window root_win;
 			Window parent_win;
 			Window* child_windows;
 			int i;
 			int num_child_windows;	
-					
-			x11app = (psy_ui_X11App*) app.platform; 
-			psy_ui_x11_ComponentImp* imp;		
+			psy_ui_x11_ComponentImp* imp;
+			psy_ui_X11App* x11app;
+		
+			x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 			XQueryTree(x11app->dpy, self->hwnd,
 				   &root_win,
 				   &parent_win,
@@ -817,11 +815,9 @@ void dev_preventinput(psy_ui_x11_ComponentImp* self)
 //	EnableWindow(self->hwnd, 0);
 }
 
-psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self)
-{
-	if (self->tmcachevalid) {
-		return self->tm;
-	} else {
+const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp* self)
+{	
+	if (!self->tmcachevalid) {
 		psy_ui_TextMetric rv;
 		psy_ui_X11App* x11app;
 		GC gc;
@@ -829,8 +825,8 @@ psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self)
 		psy_ui_Graphics g;
 		psy_ui_x11_GraphicsImp* gx11;
 									
-		rv.tmAveCharWidth = 10;
-		x11app = (psy_ui_X11App*) app.platform;
+		rv.tmAveCharWidth = 10;				
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		gc = XCreateGC(x11app->dpy, self->hwnd, 0, 0);
 		xgc.display =x11app->dpy;
 		if (x11app->dbe) {
@@ -848,49 +844,12 @@ psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self)
 		rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
 		rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
 		// printf("avcharwidth %d\n", rv.tmAveCharWidth);
-		psy_ui_graphics_dispose(&g);
-		self->tm = rv;
-		self->tmcachevalid = TRUE;
-		return rv;
-	}
-	//TEXTMETRIC tm;
-	//HDC hdc;
-	//HFONT hPrevFont = 0;
-	//HFONT hfont = 0;
-
-	//hdc = GetDC(self->hwnd);
-	//SaveDC(hdc);
-	//hfont = ((psy_ui_x11_FontImp*) font->imp)->hfont;
-	//if (hfont) {
-		//hPrevFont = SelectObject(hdc, hfont);
-	//}
-	//GetTextMetrics(hdc, &tm);
-	//if (hPrevFont) {
-		//SelectObject(hdc, hPrevFont);
-	//}
-	//RestoreDC(hdc, -1);
-	//ReleaseDC(self->hwnd, hdc);
-	//rv.tmHeight = tm.tmHeight;
-	//rv.tmAscent = tm.tmAscent;
-	//rv.tmDescent = tm.tmDescent;
-	//rv.tmInternalLeading = tm.tmInternalLeading;
-	//rv.tmExternalLeading = tm.tmExternalLeading;
-	//rv.tmAveCharWidth = tm.tmAveCharWidth;
-	//rv.tmMaxCharWidth = tm.tmMaxCharWidth;
-	//rv.tmWeight = tm.tmWeight;
-	//rv.tmOverhang = tm.tmOverhang;
-	//rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
-	//rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
-	//rv.tmFirstChar = tm.tmFirstChar;
-	//rv.tmLastChar = tm.tmLastChar;
-	//rv.tmDefaultChar = tm.tmDefaultChar;
-	//rv.tmBreakChar = tm.tmBreakChar;
-	//rv.tmItalic = tm.tmItalic;
-	//rv.tmUnderlined = tm.tmUnderlined;
-	//rv.tmStruckOut = tm.tmStruckOut;
-	//rv.tmPitchAndFamily = tm.tmPitchAndFamily;
-	//rv.tmCharSet = tm.tmCharSet;
-	
+		psy_ui_graphics_dispose(&g);		
+		// mutable
+		((psy_ui_x11_ComponentImp*)(self))->tm = rv;
+		((psy_ui_x11_ComponentImp*)(self))->tmcachevalid = TRUE;
+	}	
+	return &self->tm;	
 }
 
 void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle cursorstyle)
@@ -981,7 +940,7 @@ void dev_starttimer(psy_ui_x11_ComponentImp* self, uintptr_t id,
 {
 	psy_ui_X11App* x11app;
 	
-	x11app = (psy_ui_X11App*)app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	psy_ui_x11app_starttimer(x11app, self->hwnd, id, interval);
 }
 
@@ -989,7 +948,7 @@ void dev_stoptimer(psy_ui_x11_ComponentImp* self, uintptr_t id)
 {
 	psy_ui_X11App* x11app;
 	
-	x11app = (psy_ui_X11App*)app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	psy_ui_x11app_stoptimer(x11app, self->hwnd, id);
 }
 
@@ -1016,7 +975,7 @@ psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	PlatformXtGC xgc;
 	psy_ui_Graphics g;	
 									
-	x11app = (psy_ui_X11App*) app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	gc = XCreateGC(x11app->dpy, self->hwnd, 0, 0);
 	xgc.display =x11app->dpy;
 	if (x11app->dbe) {
@@ -1032,16 +991,16 @@ psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	return rv;
 }
 
-void dev_setbackgroundcolor(psy_ui_x11_ComponentImp* self, psy_ui_Color color)
+void dev_setbackgroundcolor(psy_ui_x11_ComponentImp* self, psy_ui_Colour colour)
 {
-	self->backgroundcolor = color;
+	self->backgroundcolor = colour;
 }
 
 void dev_settitle(psy_ui_x11_ComponentImp* self, const char* title)
 {
 	psy_ui_X11App* x11app;	
 		  
-	x11app = (psy_ui_X11App*) app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XStoreName(x11app->dpy, self->hwnd, title);   
 }
 
@@ -1051,12 +1010,12 @@ void dev_setfocus(psy_ui_x11_ComponentImp* self)
 		psy_ui_X11App* x11app;
 		XWindowAttributes win_attr;			
 
-		x11app = (psy_ui_X11App*) app.platform;        
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;       
 		XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
 		if (win_attr.map_state == IsViewable) {
 			psy_ui_X11App* x11app;
 
-			x11app = (psy_ui_X11App*)app.platform;	
+			x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
 			XSync(x11app->dpy, FALSE);
 			XSetInputFocus(x11app->dpy, self->hwnd, RevertToNone, CurrentTime);
 			psy_signal_emit(&self->component->signal_focus, self, 0);
@@ -1073,7 +1032,7 @@ int dev_hasfocus(psy_ui_x11_ComponentImp* self)
 	if (!self->mapped) {
 		return FALSE;
 	}		
-	x11app = (psy_ui_X11App*)app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XGetInputFocus(x11app->dpy, &window_focus, &revert);
 	return self->hwnd == window_focus;
 }

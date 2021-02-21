@@ -6,9 +6,7 @@
 #include "uilistbox.h"
 #include "uiimpfactory.h"
 #include "uiapp.h"
-
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -225,7 +223,8 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 		psy_ui_listboxclient_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_listboxclient_onpreferredsize;
-		psy_ui_listboxclient_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+		psy_ui_listboxclient_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			psy_ui_listboxclient_onmousedown;
 		psy_ui_listboxclient_vtable.onsize = (psy_ui_fp_component_onsize)
 			psy_ui_listboxclient_onsize;
@@ -258,18 +257,19 @@ void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient* self,
 
 void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self, const psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	int lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	lineheight = (int)(tm.tmHeight * 1.2);
-	self->component.scrollstepy = lineheight;
+	lineheight = (int)(tm->tmHeight * 1.2);
+	self->component.scrollstepy = 
+		psy_ui_value_makepx(lineheight);
 }
 
 void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	psy_ui_IntSize size;
 	int cpx = 0;
 	int cpy = 0;
@@ -277,8 +277,8 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 		
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
-		&tm);
-	lineheight = (int)(tm.tmHeight * 1.2);
+		tm);
+	lineheight = (int)(tm->tmHeight * 1.2);
 	for (it = psy_table_begin(&self->items);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -289,7 +289,9 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 				psy_tableiterator_key(&it)) {
 			psy_ui_RealRectangle r;
 
-			r = psy_ui_realrectangle_make(0, cpy, size.width, lineheight);			
+			r = psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(0, cpy),
+					psy_ui_realsize_make(size.width, lineheight));
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
 		}
 		psy_ui_textout(g, cpx, cpy, itemtext, strlen(itemtext));
@@ -300,24 +302,24 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;	
+	const psy_ui_TextMetric* tm;	
 
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm.tmAveCharWidth * 40)
-		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
-	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) *
+		? psy_ui_value_makepx(tm->tmAveCharWidth * 40)
+		: psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
+	rv->height = psy_ui_value_makepx((int)(tm->tmHeight * 1.2) *
 		psy_ui_listboxclient_count(self));
 }
 
 void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient* self,
 	psy_ui_MouseEvent* ev)
 {
-	psy_ui_TextMetric tm;
+	const psy_ui_TextMetric* tm;
 	intptr_t index;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	index = ev->pt.y / (int)(tm.tmHeight * 1.2);
+	index = ev->pt.y / (int)(tm->tmHeight * 1.2);
 	if (index < (intptr_t)psy_table_size(&self->items)) {
 		self->selindex = index;
 		psy_ui_component_invalidate(&self->component);
@@ -357,7 +359,7 @@ intptr_t psy_ui_listboxclient_cursel(psy_ui_ListBoxClient* self)
 	return self->selindex;
 }
 
-void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient* self, uintptr_t num)
+void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient* self, double num)
 {
 	self->charnumber = num;
 }

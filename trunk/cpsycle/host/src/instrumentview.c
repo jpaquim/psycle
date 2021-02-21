@@ -30,7 +30,6 @@ static void virtualgeneratorbox_onsamplerschanged(VirtualGeneratorsBox*,
 	psy_ui_Component* sender, int slot);
 static void virtualgeneratorbox_onactivechanged(VirtualGeneratorsBox*,
 	psy_ui_Component* sender);
-static void virtualgeneratorbox_update(VirtualGeneratorsBox*);
 
 void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* parent,
 	Workspace* workspace)

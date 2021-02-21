@@ -39,7 +39,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	self->curr = strdup("");
 	self->drive = strdup("C:\\");
 #else	
-	self->curr = strdup(workspace_songs_directory(workspace));
+	self->curr = strdup(""); //workspace_songs_directory(workspace));
 	self->drive = strdup("");
 #endif
 	fileview_builddrives(self);	

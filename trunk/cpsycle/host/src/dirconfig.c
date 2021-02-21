@@ -8,6 +8,7 @@
 #include <dir.h>
 // platform
 #include "../../detail/cpu.h"
+#include "../../detail/portable.h"
 
 static void dirconfig_make(DirConfig*);
 static void dirconfig_makedefaultuserpresets(DirConfig*);
@@ -58,10 +59,12 @@ void dirconfig_make(DirConfig* self)
 	dirconfig_append(self, "songs", "settingsview.song-directory",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #else
-	psy_snprintf(path, 4096, "%s", home);
+	psy_snprintf(path, 4096, "%s", psy_dir_home());
 	printf("path %s\n", path);
-	dirconfig_makedirectory(self, "songs", "settingsview.song-directory",
-		path);
+	//dirconfig_makedirectory(self, "songs", "settingsview.song-directory",
+		//path);
+	dirconfig_append(self, "songs", "settingsview.song-directory",
+		PSYCLE_SONGS_DEFAULT_DIR);
 #endif		
 	dirconfig_append(self, "samples", "settingsview.samples-directory",
 		PSYCLE_SAMPLES_DEFAULT_DIR);

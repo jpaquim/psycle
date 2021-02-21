@@ -21,7 +21,8 @@
 
 // int iDeltaPerLine = 120;
 
-extern psy_ui_App app;
+static psy_ui_X11App* x11app = NULL;
+
 static int shapeEventBase, shapeErrorBase;
 
 // double click
@@ -31,6 +32,15 @@ static int doubleclicktime = 200;
 static psy_ui_MouseEvent buttonpressevent;
 
 // prototypes
+
+// virtual
+static void psy_ui_x11app_dispose(psy_ui_X11App*);
+static int psy_ui_x11app_run(psy_ui_X11App*);
+static void psy_ui_x11app_stop(psy_ui_X11App*);
+static void psy_ui_x11app_close(psy_ui_X11App*);
+
+
+
 static int handleevent(psy_ui_X11App*, XEvent*);
 static void dispose_window(psy_ui_X11App*, Window);
 static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
@@ -41,19 +51,46 @@ static int translate_x11button(int button);
 static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
-static void adjustcoordinates(psy_ui_Component*, int* x, int* y);	
+static void adjustcoordinates(psy_ui_Component*, double* x, double* y);
 static int timertick(psy_ui_X11App*);
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
+
+// vtable
+static psy_ui_AppImpVTable imp_vtable;
+static bool imp_vtable_initialized = FALSE;
+
+static void imp_vtable_init(psy_ui_X11App* self)
+{
+	assert(self);
+
+	if (!imp_vtable_initialized) {
+		imp_vtable = *self->imp.vtable;
+		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)
+			psy_ui_x11app_dispose;
+		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_x11app_run;
+		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_x11app_stop;
+		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_x11app_close;
+		imp_vtable.dev_onappdefaultschange = (psy_ui_fp_appimp_onappdefaultschange)
+			psy_ui_x11app_onappdefaultschange;		
+		imp_vtable_initialized = TRUE;
+	}
+}
 	
 // implementation
-void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
+void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 {
 	static const char szAppClass[] = "PsycleApp";	
 	static const char szComponentClass[] = "PsycleComponent";
 	int argc = 0;
 	bool shape_extension;
 	
-	printf("open display\n");	
+	psy_ui_appimp_init(&self->imp);
+	imp_vtable_init(self);
+	self->imp.vtable = &imp_vtable;
+	
+	x11app = self;
+	self->app = app;	
+	printf("open display\n");		
 	self->dpy = XOpenDisplay(NULL);
 	self->appclass = szAppClass;
 	self->componentclass = szComponentClass;	
@@ -774,6 +811,11 @@ void psy_ui_x11app_stop(psy_ui_X11App* self)
 //	PostQuitMessage(0);
 }
 
+void psy_ui_x11app_close(psy_ui_X11App* self)
+{
+	self->running = FALSE;
+}
+
 int timertick(psy_ui_X11App* self)
 {
 	psy_List* p;
@@ -1012,7 +1054,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.x, &ev.y);
+			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 			if (buttonclicks == 0) {
 				buttonpressevent = ev;										
 				buttonpress_single(self, imp, &ev);
@@ -1023,7 +1065,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				// stop click timer
 				buttonclicks = 0;
 				// check distance
-				if (ev.x != buttonpressevent.x || ev.y != buttonpressevent.y) {
+				if (ev.pt.x != buttonpressevent.pt.x ||
+						ev.pt.y != buttonpressevent.pt.y) {
 					// single click
 					buttonpress_single(self, imp, &ev);
 				} else {
@@ -1054,7 +1097,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.x, &ev.y);		
+			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);		
 			imp->component->vtable->onmouseup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);			
@@ -1078,7 +1121,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.x, &ev.y);			
+			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);			
 			imp->component->vtable->onmousemove(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 					&ev);
@@ -1125,16 +1168,17 @@ void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	gx11->region = XCreateRegion();
 	// draw background					
 	psy_ui_drawsolidrectangle(&imp->g, imp->g.clip,
-		psy_ui_component_backgroundcolor(imp->component));			
+		psy_ui_component_backgroundcolour(imp->component));			
 	// prepare colors
-	psy_ui_setcolor(&imp->g, psy_ui_component_color(imp->component));
-	psy_ui_settextcolor(&imp->g, psy_ui_component_color(imp->component));
+	psy_ui_setcolour(&imp->g, psy_ui_component_colour(imp->component));
+	psy_ui_settextcolour(&imp->g, psy_ui_component_colour(imp->component));
 	psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
 	// translate coordinates			
-	gx11->dx = -imp->component->scroll.x;
-	gx11->dy = -imp->component->scroll.y;
+	gx11->dx = -psy_ui_component_scrollleftpx(imp->component);
+	gx11->dy = -psy_ui_component_scrolltoppx(imp->component);
 	psy_ui_setrectangle(&imp->g.clip,
-		x + imp->component->scroll.x, y + imp->component->scroll.y,
+		x + psy_ui_component_scrollleftpx(imp->component),
+		y + psy_ui_component_scrolltoppx(imp->component),
 		width, height);
 	// call draw handlers			
 	if (imp->component->vtable->ondraw) {				
@@ -1162,16 +1206,16 @@ void dispose_window(psy_ui_X11App* self, Window window)
 	}
 }
 
-void adjustcoordinates(psy_ui_Component* component, int* x, int* y)
+void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
 {		
-	*x += component->scroll.x;
-	*y += component->scroll.y;
+	*x += psy_ui_component_scrollleftpx(component);
+	*y += psy_ui_component_scrolltoppx(component);
 	if (!psy_ui_margin_iszero(&component->spacing)) {
-		psy_ui_TextMetric tm;
+		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(component);
-		*x -= psy_ui_value_px(&component->spacing.left, &tm);
-		*y -= psy_ui_value_px(&component->spacing.top, &tm);
+		*x -= psy_ui_value_px(&component->spacing.left, tm);
+		*y -= psy_ui_value_px(&component->spacing.top, tm);
 	}
 }
 
@@ -1307,12 +1351,13 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 	// 	printf("%d,%d\n", ret, (int)buf[0]);
 	// } else {
 	// 	printf("no lookup %d\n", keysym);
-	// }
+	// }	
 	psy_ui_keyevent_init(&rv,
 		keysym,
 		0,
 		shift,
 		ctrl,
+		0,
 		repeat);
 	return rv;
 }
@@ -1339,7 +1384,7 @@ void sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	//winapp->eventretarget = 0;
 }
 
-int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Color color)
+int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour color)
 {	
 	int rv;
 	XColor xcolor;
@@ -1352,7 +1397,7 @@ int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Color color)
 		rv = (int)(intptr_t)psy_table_at(&self->colormap,
 			(uintptr_t)color.value);
 	} else {				
-		psy_ui_color_rgb(&color, &r, &g, &b);
+		psy_ui_colour_rgb(&color, &r, &g, &b);
 		xcolor.red = r * 256;
 		xcolor.green = g * 256;
 		xcolor.blue = b * 256;	
@@ -1367,6 +1412,11 @@ int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Color color)
 			(void*)(uintptr_t)rv);
 	}
 	return rv;
+}
+
+void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
+{
+	
 }
 
 #endif
