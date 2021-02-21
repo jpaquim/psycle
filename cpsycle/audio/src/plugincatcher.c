@@ -304,6 +304,7 @@ int psy_audio_plugincatcher_load(psy_audio_PluginCatcher* self)
 	int rv;
 	psy_Path path;
 
+	printf("plugincatcher-ini: %s\n", self->inipath);
 	psy_path_init(&path, self->inipath);
 	psy_audio_plugincatcher_clear(self);	
 	rv = propertiesio_load(self->plugins, &path, 1);
