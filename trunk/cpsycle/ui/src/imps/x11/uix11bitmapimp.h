@@ -20,7 +20,8 @@ typedef struct psy_ui_x11_BitmapImp {
 	Pixmap pixmap;
 } psy_ui_x11_BitmapImp;
 
-void psy_ui_x11_bitmapimp_init(psy_ui_x11_BitmapImp* self);
+void psy_ui_x11_bitmapimp_init(psy_ui_x11_BitmapImp* self,
+	psy_ui_RealSize size);
 
 #ifdef __cplusplus
 }

@@ -123,8 +123,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	}
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
-	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value);
+	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);		
 	self->targetids = NULL;
 }
 

@@ -51,6 +51,8 @@ typedef struct psy_ui_x11_GraphicsImp {
 
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 
   PlatformXtGC*);
+void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp*,
+	psy_ui_Bitmap*);  
  // With dbe enabled, xft stops drawing if the window size changes
  // this recreates the XftDraw
  void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp*);

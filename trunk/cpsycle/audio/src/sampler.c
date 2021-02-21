@@ -1188,6 +1188,12 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, uintptr_t numsamp
 // If the sample has been deleted while playing...
 bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice* self)
 {
+	psy_audio_Samples* samples;
+	
+	samples = psy_audio_machine_samples(psy_audio_sampler_base(self->sampler));
+	if (!samples) {
+		return TRUE;		
+	}	
 	return !psy_audio_samples_at(
 		psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
 		psy_audio_sampleindex_make(self->instrument, 0));

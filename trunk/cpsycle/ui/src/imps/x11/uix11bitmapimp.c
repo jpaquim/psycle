@@ -45,7 +45,8 @@ static void imp_vtable_init(psy_ui_x11_BitmapImp* self)
 	}
 }
 
-void psy_ui_x11_bitmapimp_init(psy_ui_x11_BitmapImp* self)
+void psy_ui_x11_bitmapimp_init(psy_ui_x11_BitmapImp* self,
+	psy_ui_RealSize size)
 {
 	psy_ui_bitmap_imp_init(&self->imp);
 	imp_vtable_init(self);
