@@ -35,7 +35,7 @@ struct psy_ui_Component;
 typedef struct psy_ui_WinApp {
 	// implements
 	psy_ui_AppImp imp;
-	// internal data
+	// internal
 	int reserved;
 	HINSTANCE instance;
 	TCHAR* appclass;

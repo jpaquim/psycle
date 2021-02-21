@@ -18,8 +18,8 @@
 #include <curses.h>
 #include "imps/curses/uicursesimpfactory.h"
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
-#include "uix11app.h"
-#include "uix11impfactory.h"
+#include "imps/x11/uix11app.h"
+#include "imps/x11/uix11impfactory.h"
 #else
 	#error "Platform not supported"
 #endif
@@ -116,11 +116,9 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	//self->imp_factory = (psy_ui_ImpFactory*)
 		//psy_ui_curses_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
-	// todo
-	//self->platform = (psy_ui_X11App*)malloc(sizeof(psy_ui_X11App));
-	//psy_ui_x11app_init(app.platform, 0);
-	//self->imp_factory = (psy_ui_ImpFactory*)
-	//	psy_ui_x11_impfactory_allocinit();
+	printf("Create X11 Impfactory\n");
+	self->imp_factory = (psy_ui_ImpFactory*)
+		psy_ui_x11_impfactory_allocinit();	
 #else
 	#error "Platform not supported"
 #endif	

@@ -36,7 +36,7 @@ typedef struct psy_ui_x11_GraphicsImp {
 	XftFont* defaultfont;
 	XftFont* xftfont;
 	XftColor textcolor;
-	psy_ui_Color textbackgroundcolor;
+	psy_ui_Colour textbackgroundcolor;
 	unsigned int backgroundmode;
 	int dx;
 	int dy;

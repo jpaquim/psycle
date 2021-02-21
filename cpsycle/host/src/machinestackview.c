@@ -6,6 +6,7 @@
 #include "machinestackview.h"
 // host
 #include "skingraphics.h"
+#include "paramview.h"
 #include "wireview.h"
 // audio
 #include <exclusivelock.h>
@@ -104,7 +105,8 @@ static void machinestackview_onsongchanged(MachineStackView*, Workspace*,
 static void machinestackview_setmachines(MachineStackView*,
 	psy_audio_Machines*);
 static void  machinestackview_drawmachines(MachineStackView*,
-	psy_ui_Graphics* g);
+	psy_ui_Graphics*);
+static void  machinestackview_drawsliders(MachineStackView*, psy_ui_Graphics*);
 static MachineUi* machinestackview_insert(MachineStackView*, uintptr_t slot,
 	uintptr_t track, uintptr_t line);
 static MachineUi* machinestackview_at(MachineStackView*, uintptr_t slot);
@@ -201,10 +203,11 @@ void machinestackview_ondraw(MachineStackView* self, psy_ui_Graphics* g)
 {
 	if (self->machines) {
 		machinestackview_drawmachines(self, g);
+		machinestackview_drawsliders(self, g);
 	}
 }
 
-void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
+void machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 {	
 	uintptr_t i;
 	psy_ui_Size size;
@@ -247,6 +250,27 @@ void  machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, 5, 0, "Input", strlen("Input"));
 	psy_ui_textout(g, 5, 60, "Effects", strlen("Effects"));
 	//machineui_drawhighlight(machineui, g);			
+}
+
+void  machinestackview_drawsliders(MachineStackView* self, psy_ui_Graphics* g)
+{
+	psy_ui_RealSize size;
+	SliderDraw draw;
+	uintptr_t i;
+
+	size = psy_ui_realsize_make(
+		(double)machineuimatrix_numtracks(&self->matrix) * 150.0,
+		((double)machineuimatrix_numlines(&self->matrix) + 1) * 70.0);
+	
+	for (i = 0; i < machineuimatrix_numtracks(&self->matrix); ++i) {
+		sliderdraw_init(&draw,
+			machineparamconfig_skin(&self->workspace->config.macparam), NULL, NULL,
+			psy_ui_realsize_make(140, 200), psy_ui_component_textmetric(&self->component),
+			FALSE);
+		psy_ui_setorigin(g, psy_ui_realpoint_make(-100.0 - (double)i * 158.0, -size.height));
+		sliderdraw_draw(&draw, g);
+		psy_ui_resetorigin(g);
+	}
 }
 
 void machinestackview_computemaxlevels(MachineStackView* self)

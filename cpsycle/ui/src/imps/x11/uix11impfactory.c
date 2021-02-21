@@ -40,7 +40,7 @@ static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_x11_ImpFactory*, st
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ColorDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
+static struct psy_ui_ColourDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
 static struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
 static psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent,
 	const char* title,
@@ -78,7 +78,7 @@ static void vtable_init(psy_ui_x11_ImpFactory* self)
 		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect) allocinit_listboximp_multiselect;
 		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp) allocinit_checkboximp;
 		vtable.allocinit_comboboximp = (psy_ui_fp_impfactory_allocinit_comboboximp) allocinit_comboboximp;
-		vtable.allocinit_colordialogimp = (psy_ui_fp_impfactory_allocinit_colordialogimp) allocinit_colordialogimp;
+		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp)allocinit_colordialogimp;
 		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp) allocinit_opendialogimp;
 		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp) allocinit_all_opendialogimp;
 		vtable.allocinit_savedialogimp = (psy_ui_fp_impfactory_allocinit_savedialogimp) allocinit_savedialogimp;
@@ -149,13 +149,13 @@ psy_ui_FontImp* allocinit_fontimp(psy_ui_x11_ImpFactory* self, const psy_ui_Font
 psy_ui_ComponentImp* allocinit_componentimp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	psy_ui_x11_ComponentImp* rv;
-	psy_ui_X11App* winapp;
+	psy_ui_X11App* x11app;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
-		winapp->componentclass,
+		x11app->componentclass,
 		0, 0, 90, 90,
 		0, // WS_CHILDWINDOW | WS_VISIBLE,
 		0);
@@ -171,7 +171,7 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_x11_ImpFactory* self, struct psy_
 	psy_ui_x11_ComponentImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
@@ -193,7 +193,7 @@ psy_ui_EditImp* allocinit_editimp(psy_ui_x11_ImpFactory* self, struct psy_ui_Com
 	psy_ui_x11_EditImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_editimp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -209,7 +209,7 @@ psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_x11_ImpFactory* self, struct 
 	psy_ui_x11_EditImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_editimp_multiline_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -222,10 +222,11 @@ psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_x11_ImpFactory* self, struct 
 
 psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
-	psy_ui_x11_ListBoxImp* rv;
+	return NULL;
+	/*psy_ui_x11_ListBoxImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_listboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -233,16 +234,32 @@ psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_x11_ImpFactory* self, struct psy_
 		free(rv);
 		rv = 0;
 	}
-	return (psy_ui_ListBoxImp*)rv;
+	return (psy_ui_ListBoxImp*)rv;*/
 }
 
+psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return NULL;
+	/*psy_ui_x11_ListBoxImp* rv;
+	psy_ui_X11App* winapp;
+
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	rv = psy_ui_x11_listboximp_multiselect_allocinit(
+		component,
+		parent ? parent->imp : 0);
+	if (rv->x11_component_imp.hwnd == 0) {
+		free(rv);
+		rv = 0;
+	}
+	return (psy_ui_ListBoxImp*)rv;*/
+}
 
 psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	psy_ui_x11_ComboBoxImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_comboboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -253,28 +270,12 @@ psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct ps
 	return (psy_ui_ComboBoxImp*)rv;
 }
 
-psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	psy_ui_x11_ListBoxImp* rv;
-	psy_ui_X11App* winapp;
-
-	winapp = (psy_ui_X11App*)app.platform;
-	rv = psy_ui_x11_listboximp_multiselect_allocinit(
-		component,
-		parent ? parent->imp : 0);
-	if (rv->x11_component_imp.hwnd == 0) {
-		free(rv);
-		rv = 0;
-	}
-	return (psy_ui_ListBoxImp*)rv;
-}
-
 psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	psy_ui_x11_CheckBoxImp* rv;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_checkboximp_allocinit(
 		component,
 		parent ? parent->imp : 0);
@@ -285,13 +286,13 @@ psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_x11_ImpFactory* self, struct ps
 	return (psy_ui_CheckBoxImp*)rv;
 }
 
-psy_ui_ColorDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* parent)
+psy_ui_ColourDialogImp* allocinit_colordialogimp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* parent)
 {	
 	psy_ui_x11_ColorDialogImp* imp;
 	psy_ui_X11App* xtapp;
 
-	xtapp = (psy_ui_X11App*) app.platform;
-	imp = (psy_ui_x11_ColorDialogImp*) malloc(sizeof(psy_ui_x11_ColorDialogImp));
+	xtapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	imp = (psy_ui_x11_ColorDialogImp*)malloc(sizeof(psy_ui_x11_ColorDialogImp));
 	if (imp) {
 		psy_ui_x11_colordialogimp_init(imp);
 		return &imp->imp;
@@ -304,7 +305,7 @@ psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_x11_ImpFactory* self, struc
 	psy_ui_x11_OpenDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_OpenDialogImp*)malloc(sizeof(psy_ui_x11_OpenDialogImp));
 	if (imp) {
 		psy_ui_x11_opendialogimp_init(imp, parent);
@@ -322,7 +323,7 @@ psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_x11_ImpFactory* self, s
 	psy_ui_x11_OpenDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_OpenDialogImp*)malloc(sizeof(psy_ui_x11_OpenDialogImp));
 	if (imp) {
 		psy_ui_x11_opendialogimp_init_all(imp, parent,
@@ -337,7 +338,7 @@ psy_ui_SaveDialogImp* allocinit_savedialogimp(psy_ui_x11_ImpFactory* self, struc
 	psy_ui_x11_SaveDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_SaveDialogImp*)malloc(sizeof(psy_ui_x11_SaveDialogImp));
 	if (imp) {
 		psy_ui_x11_savedialogimp_init(imp, parent);
@@ -355,7 +356,7 @@ psy_ui_SaveDialogImp* allocinit_all_savedialogimp(psy_ui_x11_ImpFactory* self, s
 	psy_ui_x11_SaveDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_SaveDialogImp*)malloc(sizeof(psy_ui_x11_SaveDialogImp));
 	if (imp) {
 		psy_ui_x11_savedialogimp_init_all(imp, parent,
@@ -370,7 +371,7 @@ psy_ui_FolderDialogImp* allocinit_folderdialogimp(psy_ui_x11_ImpFactory* self, s
 	psy_ui_x11_FolderDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_FolderDialogImp*)malloc(sizeof(psy_ui_x11_FolderDialogImp));
 	if (imp) {
 		psy_ui_x11_folderdialogimp_init(imp);
@@ -386,7 +387,7 @@ psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(psy_ui_x11_ImpFactory* sel
 	psy_ui_x11_FolderDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_FolderDialogImp*)malloc(sizeof(psy_ui_x11_FolderDialogImp));
 	if (imp) {
 		psy_ui_x11_folderdialogimp_init_all(imp, parent,
@@ -401,7 +402,7 @@ psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_x11_ImpFactory* self, struc
 	psy_ui_x11_FontDialogImp* imp;
 	psy_ui_X11App* winapp;
 
-	winapp = (psy_ui_X11App*)app.platform;
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
 	imp = (psy_ui_x11_FontDialogImp*) malloc(sizeof(psy_ui_x11_FontDialogImp));
 	if (imp) {
 		psy_ui_x11_fontdialogimp_init(imp);

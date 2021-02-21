@@ -47,7 +47,7 @@ void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
 	if (fontinfo) {
 		psy_ui_X11App* x11app;		
 
-		x11app = (psy_ui_X11App*) app.platform;
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		self->hfont = XftFontOpenXlfd(
 			x11app->dpy,
 			DefaultScreen(x11app->dpy),
@@ -68,7 +68,7 @@ void psy_ui_x11_font_imp_dispose(psy_ui_x11_FontImp* self)
 	if (self->hfont) {
 		psy_ui_X11App* x11app;		
 
-		x11app = (psy_ui_X11App*) app.platform;
+		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 		XftFontClose(x11app->dpy, self->hfont);	
 		self->hfont = 0;
 	}

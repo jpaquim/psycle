@@ -1,14 +1,19 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#include "../../detail/psyconf.h"
+#include "../../detail/prefix.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_XT
 #ifndef psy_ui_x11_CHECKBOXIMP_H
 #define psy_ui_x11_CHECKBOXIMP_H
 
-#include "uicheckbox.h"
+#include "uix11checkboximp.h"
 #include "uix11componentimp.h"
+#include "../../uicomponent.h"
+#include "../../uicheckbox.h"
+#include "../../uiapp.h"
+#include "uix11app.h"
+#include "../../detail/portable.h"
 
 #ifdef __cplusplus
 extern "C" {

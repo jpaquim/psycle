@@ -41,7 +41,7 @@ typedef struct {
     psy_ui_Component component;
     // signals
     psy_Signal signal_selchanged;
-    // internal data
+    // internal
     struct psy_ui_ListBoxImp* imp;    
     double charnumber;
 } psy_ui_ListBox;
@@ -49,11 +49,14 @@ typedef struct {
 #else
 
 typedef struct psy_ui_ListBoxClient {
+	// inherits
     psy_ui_Component component;
-    psy_Table items;
-    intptr_t selindex;
+    // signals
     psy_Signal signal_selchanged;
-    uintptr_t charnumber;
+    // internal
+    psy_Table items;
+    intptr_t selindex;    
+    double charnumber;
 } psy_ui_ListBoxClient;
 
 void psy_ui_listboxclient_init(psy_ui_ListBoxClient*, psy_ui_Component* parent);

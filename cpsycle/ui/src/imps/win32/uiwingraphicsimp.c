@@ -422,7 +422,8 @@ void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 	}
 }
 
-void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, double x1, double y1, double x2, double y2)
+void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self,
+	double x1, double y1, double x2, double y2)
 {
 	MoveToEx(self->hdc, (int)x1, (int)y1, NULL) ;
 	LineTo(self->hdc, (int)x2, (int)y2);
@@ -433,8 +434,9 @@ void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint pt)
 	MoveToEx(self->hdc, (int)pt.x, (int)pt.y, NULL);
 }
 
-void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint control_p1,
-	psy_ui_RealPoint control_p2, psy_ui_RealPoint p)
+void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self,
+	psy_ui_RealPoint control_p1, psy_ui_RealPoint control_p2,
+	psy_ui_RealPoint p)
 {
 	POINT pts[3];
    
@@ -448,7 +450,8 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint 
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+	double x1, double y1, double x2, double y2, double x3, double y3,
+	double x4, double y4)
 {
 	Arc(self->hdc, (int)x1, (int)y1, (int)x2, (int)y2, (int)x3, (int)y3, (int)x4, (int)y4);
 }

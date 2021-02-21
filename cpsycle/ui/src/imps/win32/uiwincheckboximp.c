@@ -3,15 +3,13 @@
 
 #include "../../detail/prefix.h"
 
-#include "uiwincheckboximp.h"
-
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 
+#include "uiwincheckboximp.h"
 #include "uiwincomponentimp.h"
 #include "../../uicomponent.h"
 #include "../../uiapp.h"
 #include "uiwinapp.h"
-#include <stdlib.h>
 #include "../../detail/portable.h"
 
 // WinComponentImp VTable Delegation

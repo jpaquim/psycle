@@ -14,9 +14,9 @@ extern "C" {
 #endif
 
 typedef struct psy_ui_x11_ColorDialogImp {
-	psy_ui_ColorDialogImp imp;
+	psy_ui_ColourDialogImp imp;
 	struct psy_ui_Component* parent;		
-	psy_ui_Color color;
+	psy_ui_Colour color;
 } psy_ui_x11_ColorDialogImp;
 
 void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp*);

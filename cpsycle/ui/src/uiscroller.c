@@ -4,26 +4,24 @@
 #include "../../detail/prefix.h"
 
 #include "uiscroller.h"
-
+// std
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-static psy_ui_scrollanimate_init(psy_ui_ScrollAnimate* self)
+static void psy_ui_scrollanimate_init(psy_ui_ScrollAnimate* self)
 {
 	self->counter = 0;
 	self->speed = 1.0;
 }
 
-static psy_ui_scrollanimate_reset(psy_ui_ScrollAnimate* self)
+static void psy_ui_scrollanimate_reset(psy_ui_ScrollAnimate* self)
 {
 	self->speed = 1.0;
 }
 
-static psy_ui_scrollanimate_calcstep(psy_ui_ScrollAnimate* self,
+static void psy_ui_scrollanimate_calcstep(psy_ui_ScrollAnimate* self,
 	double startpx, double targetpx)
 {
 	double diff;

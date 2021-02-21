@@ -598,7 +598,7 @@ void dev_preventinput(psy_ui_win_ComponentImp* self)
 
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
 {
-	if (!self->tmcachevalid) {		
+	if (!self->tmcachevalid) {	
 		psy_ui_TextMetric rv;
 		TEXTMETRIC tm;
 		HDC hdc;

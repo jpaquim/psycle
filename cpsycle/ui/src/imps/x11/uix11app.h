@@ -10,7 +10,7 @@
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
 
-#include "uidef.h"
+#include "../../uiapp.h"
 
 #include <list.h>
 
@@ -35,6 +35,9 @@ typedef struct
 } psy_ui_X11TickCounter;
 
 typedef struct {
+	// implements
+	psy_ui_AppImp imp;
+	// internal
 	int reserved;	
 	Display * dpy;	
 	const char* appclass;
@@ -50,17 +53,19 @@ typedef struct {
 	bool dbe;
 	bool dograb;
 	Window grabwin;
+	// references
+	psy_ui_App* app;
 } psy_ui_X11App;
 
-void psy_ui_x11app_init(psy_ui_X11App*, void* instance);
-void psy_ui_x11app_dispose(psy_ui_X11App*);
-int psy_ui_x11app_run(psy_ui_X11App*);
-void psy_ui_x11app_stop(psy_ui_X11App*);
+void psy_ui_x11app_init(psy_ui_X11App*, psy_ui_App*, void* instance);
+
+void psy_ui_x11app_onappdefaultschange(psy_ui_X11App*);
+
 void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
 	uintptr_t interval);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
-int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Color);
+int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Colour);
 
 INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 {

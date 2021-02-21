@@ -8,10 +8,9 @@
 #if PSYCLE_USE_TK == PSYCLE_TK_XT
 
 #include "uix11componentimp.h"
-#include "uicomponent.h"
-#include "uiapp.h"
+#include "../../uicomponent.h"
+#include "../../uiapp.h"
 #include "uix11app.h"
-#include <stdlib.h>
 #include "../../detail/portable.h"
 
 // WinComponentImp VTable Delegation
@@ -21,35 +20,37 @@ static void dev_show(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp
 static void dev_showstate(psy_ui_x11_CheckBoxImp* self, int state) { self->x11_component_imp.imp.vtable->dev_showstate(&self->x11_component_imp.imp, state); }
 static void dev_hide(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_hide(&self->x11_component_imp.imp); }
 static int dev_visible(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_visible(&self->x11_component_imp.imp); }
-static void dev_move(psy_ui_x11_CheckBoxImp* self, int left, int top) { self->x11_component_imp.imp.vtable->dev_move(&self->x11_component_imp.imp, left, top); }
+static void dev_move(psy_ui_x11_CheckBoxImp* self, psy_ui_Point origin) { self->x11_component_imp.imp.vtable->dev_move(&self->x11_component_imp.imp, origin); }
 static void dev_resize(psy_ui_x11_CheckBoxImp* self, psy_ui_Size size) { self->x11_component_imp.imp.vtable->dev_resize(&self->x11_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_x11_CheckBoxImp* self, int width, int height) { self->x11_component_imp.imp.vtable->dev_clientresize(&self->x11_component_imp.imp, width, height); }
-static psy_ui_Rectangle dev_position(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_position(&self->x11_component_imp.imp); }
+static psy_ui_RealRectangle dev_position(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_position(&self->x11_component_imp.imp); }
 static void dev_setposition(psy_ui_x11_CheckBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->x11_component_imp.imp.vtable->dev_setposition(&self->x11_component_imp.imp, topleft, size); }
-static psy_ui_Size dev_size(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_size(&self->x11_component_imp.imp); }
+static psy_ui_Size dev_size(const psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_size(&self->x11_component_imp.imp); }
+static psy_ui_Size dev_preferredsize(psy_ui_x11_CheckBoxImp* self, const psy_ui_Size* limits);
 static psy_ui_Size dev_framesize(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_framesize(&self->x11_component_imp.imp); }
 static void dev_scrollto(psy_ui_x11_CheckBoxImp* self, intptr_t dx, intptr_t dy) { self->x11_component_imp.imp.vtable->dev_scrollto(&self->x11_component_imp.imp, dx, dy); }
 static psy_ui_Component* dev_parent(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_parent(&self->x11_component_imp.imp); }
 static void dev_capture(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_capture(&self->x11_component_imp.imp); }
 static void dev_releasecapture(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_releasecapture(&self->x11_component_imp.imp); }
 static void dev_invalidate(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_invalidate(&self->x11_component_imp.imp); }
-static void dev_invalidaterect(psy_ui_x11_CheckBoxImp* self, const psy_ui_Rectangle* r) { self->x11_component_imp.imp.vtable->dev_invalidaterect(&self->x11_component_imp.imp, r); }
+static void dev_invalidaterect(psy_ui_x11_CheckBoxImp* self, const psy_ui_RealRectangle* r) { self->x11_component_imp.imp.vtable->dev_invalidaterect(&self->x11_component_imp.imp, r); }
 static void dev_update(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_update(&self->x11_component_imp.imp); }
 static void dev_setfont(psy_ui_x11_CheckBoxImp* self, psy_ui_Font* font) { self->x11_component_imp.imp.vtable->dev_setfont(&self->x11_component_imp.imp, font); }
 static psy_List* dev_children(psy_ui_x11_CheckBoxImp* self, int recursive) { return self->x11_component_imp.imp.vtable->dev_children(&self->x11_component_imp.imp, recursive); }
 static void dev_enableinput(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_enableinput(&self->x11_component_imp.imp); }
 static void dev_preventinput(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_preventinput(&self->x11_component_imp.imp); }
 static void dev_setcursor(psy_ui_x11_CheckBoxImp* self, psy_ui_CursorStyle style) { self->x11_component_imp.imp.vtable->dev_setcursor(&self->x11_component_imp.imp, style); }
-static void dev_starttimer(psy_ui_x11_CheckBoxImp* self, uintptr_t id, unsigned int interval) { self->x11_component_imp.imp.vtable->dev_starttimer(&self->x11_component_imp.imp, id, interval); }
+static void dev_starttimer(psy_ui_x11_CheckBoxImp* self, uintptr_t id, uintptr_t interval) { self->x11_component_imp.imp.vtable->dev_starttimer(&self->x11_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_x11_CheckBoxImp* self, uintptr_t id) { self->x11_component_imp.imp.vtable->dev_stoptimer(&self->x11_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_x11_CheckBoxImp* self, int ressourceid) { self->x11_component_imp.imp.vtable->dev_seticonressource(&self->x11_component_imp.imp, ressourceid); }
-static psy_ui_TextMetric dev_textmetric(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_textmetric(&self->x11_component_imp.imp); }
+static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_textmetric(&self->x11_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_x11_CheckBoxImp* self, const char* text, psy_ui_Font* font) { return self->x11_component_imp.imp.vtable->dev_textsize(&self->x11_component_imp.imp, text, font); }
-static void dev_setbackgroundcolor(psy_ui_x11_CheckBoxImp* self, psy_ui_Color color) { self->x11_component_imp.imp.vtable->dev_setbackgroundcolor(&self->x11_component_imp.imp, color); }
+static void dev_setbackgroundcolour(psy_ui_x11_CheckBoxImp* self, psy_ui_Colour colour) { self->x11_component_imp.imp.vtable->dev_setbackgroundcolour(&self->x11_component_imp.imp, colour); }
 static void dev_settitle(psy_ui_x11_CheckBoxImp* self, const char* title) { self->x11_component_imp.imp.vtable->dev_settitle(&self->x11_component_imp.imp, title); }
 static void dev_setfocus(psy_ui_x11_CheckBoxImp* self) { self->x11_component_imp.imp.vtable->dev_setfocus(&self->x11_component_imp.imp); }
 static int dev_hasfocus(psy_ui_x11_CheckBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_hasfocus(&self->x11_component_imp.imp); }
 static void* dev_platform(psy_ui_x11_CheckBoxImp* self) { return (void*) &self->x11_component_imp; }
+
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -88,7 +89,9 @@ static void imp_vtable_init(void)
 		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
 		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
 		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolor = (psy_ui_fp_componentimp_dev_setbackgroundcolor) dev_setbackgroundcolor;
+		vtable.dev_setbackgroundcolour =
+			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
+			dev_setbackgroundcolour;
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;

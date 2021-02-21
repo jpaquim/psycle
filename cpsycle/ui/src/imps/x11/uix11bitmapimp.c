@@ -21,14 +21,11 @@ bigendian (void)
   return !u.c[0];
 }
 
-
-extern psy_ui_App app;
-
 // VTable Prototypes
 static void dispose(psy_ui_x11_BitmapImp*);
 static int load(psy_ui_x11_BitmapImp*, const char* path);
 static int loadresource(psy_ui_x11_BitmapImp*, int resourceid);
-static psy_ui_Size size(psy_ui_x11_BitmapImp*);
+static psy_ui_RealSize size(psy_ui_x11_BitmapImp*);
 static int empty(psy_ui_x11_BitmapImp*);
 
 // VTable init
@@ -84,9 +81,9 @@ int loadresource(psy_ui_x11_BitmapImp* self, int resourceid)
 	return 0;
 }
 
-psy_ui_Size size(psy_ui_x11_BitmapImp* self)
+psy_ui_RealSize size(psy_ui_x11_BitmapImp* self)
 {
-	psy_ui_Size size;    
+	psy_ui_RealSize size;    
 
 	if (self->pixmap) {
         Window root;
@@ -95,14 +92,14 @@ psy_ui_Size size(psy_ui_x11_BitmapImp* self)
         unsigned int height = 0;
         psy_ui_X11App* xtapp;		
 
-        xtapp = (psy_ui_X11App*) app.platform;        
+        xtapp = (psy_ui_X11App*)psy_ui_app()->imp;
         // XGetGeometry(xtapp->dpy, self->pixmap, &root, &temp, &temp,
             //&width, &height, &temp, &temp);
-		size.width = psy_ui_value_makepx(width);
-		size.height = psy_ui_value_makepx(height);
+		size.width = width;
+		size.height = height;
 	} else {
-		size.width = psy_ui_value_makepx(0);
-		size.height = psy_ui_value_makepx(0);
+		size.width = 0.0;
+		size.height = 0.0;
 	}
 	return size;
 }

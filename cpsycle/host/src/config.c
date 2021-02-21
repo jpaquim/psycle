@@ -13,6 +13,11 @@
 #include <dir.h>
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
+
+#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
+	#define _MAX_PATH 4096
+#endif
 
 // prototypes
 static void psycleconfig_definelanguage(PsycleConfig*);
