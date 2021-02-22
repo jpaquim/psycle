@@ -705,6 +705,7 @@ void workspace_loadsong(Workspace* self, const char* filename, bool play)
 			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
+			psy_signal_emit(&self->signal_terminal_error, self, 1, "\n");
 			psy_audio_songfile_dispose(&songfile);
 			play = FALSE;
 		} else {			
@@ -718,8 +719,7 @@ void workspace_loadsong(Workspace* self, const char* filename, bool play)
 			psy_audio_songfile_dispose(&songfile);
 		}
 		workspace_clearundo(self);
-		psy_signal_emit(&self->signal_terminal_out, self, 1,
-			"ready\n");
+		psy_signal_emit(&self->signal_terminal_out, self, 1, "ready\n");
 		if (play) {
 			psy_audio_player_start(&self->player);
 		}

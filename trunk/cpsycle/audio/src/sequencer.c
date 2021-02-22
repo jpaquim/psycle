@@ -57,6 +57,13 @@ static void psy_audio_sequencerrowdelay_init(psy_audio_SequencerRowDelay* self)
 	self->rowspeed = (psy_dsp_big_beat_t) 1.f;
 }
 
+void psy_audio_sequencermetronome_init(psy_audio_SequencerMetronome* self)
+{
+	self->active = FALSE;
+	self->precount = 0.0;
+	self->precounting = FALSE;
+	self->currprecount = 0.0;
+}
 
 static void psy_audio_sequencer_init_qsortarray(psy_audio_Sequencer*);
 static void psy_audio_sequencer_reset_common(psy_audio_Sequencer*,
@@ -89,6 +96,8 @@ static void psy_audio_sequencer_makeretriggercontinueevents(
 static int psy_audio_sequencer_isoffsetinwindow(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
 static void psy_audio_sequencer_insertevents(psy_audio_Sequencer*);
+static void psy_audio_sequencer_insertmetronometicks(psy_audio_Sequencer*,
+	psy_dsp_big_beat_t position, psy_dsp_big_beat_t width);
 static void psy_audio_sequencer_insertinputevents(psy_audio_Sequencer*);
 static void psy_audio_sequencer_insertdelayedevents(psy_audio_Sequencer*);
 static int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer*);
@@ -213,8 +222,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->extraticks = 0;
 	self->tpb = 24;
 	self->playtrack = psy_INDEX_INVALID;
-	self->metronome = FALSE;
-	self->precount = 0;
+	psy_audio_sequencermetronome_init(&self->metronome);
 	psy_audio_patternevent_init(&self->metronome_event);
 	self->metronome_event.note = 48;
 	self->metronome_event.mach = 0x3F;
@@ -263,8 +271,14 @@ void psy_audio_sequencer_start(psy_audio_Sequencer* self)
 	if (self->mode == psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 		psy_audio_sequencer_setbarloop(self);		
 	}	
-	self->seqtime.playing = TRUE;
-	self->seqtime.playstarting = TRUE;
+	if (self->metronome.active && self->metronome.precount > 0.0) {
+		self->metronome.currprecount = self->metronome.precount;
+		self->metronome.precounting = TRUE;
+	} else {
+		self->metronome.precounting = FALSE;
+		self->seqtime.playing = TRUE;
+		self->seqtime.playstarting = TRUE;
+	}
 }
 
 void psy_audio_sequencer_setbarloop(psy_audio_Sequencer* self)
@@ -449,8 +463,8 @@ void psy_audio_sequencer_clearinputevents(psy_audio_Sequencer* self)
 		psy_audio_patternentry_dispose);	
 }
 
-void psy_audio_sequencer_frametick(psy_audio_Sequencer* self, uintptr_t
-	numframes)
+void psy_audio_sequencer_frametick(psy_audio_Sequencer* self,
+	uintptr_t numframes)
 {	
 	assert(self);
 
@@ -465,7 +479,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t width)
 {
 	assert(self);
-
+		
 	if (psy_audio_sequencer_playing(self)) {		
 		self->seqtime.samplestonextclock =
 			psy_audio_sequencer_frames(self, self->seqtime.position + 1 / 24.0) -
@@ -477,17 +491,33 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 	psy_audio_sequencer_insertinputevents(self);
 	if (psy_audio_sequencer_playing(self)) {
 		psy_audio_sequencer_updateplaymodeposition(self);
+		if (self->metronome.active) {
+			psy_audio_sequencer_insertmetronometicks(self, self->seqtime.position,
+				width);
+		}
 		psy_audio_sequencer_insertevents(self);
 		psy_audio_sequencer_insertdelayedevents(self);
-	}
+	} 	
 	psy_audio_sequencer_notifysequencertick(self, width);
 	if (psy_audio_sequencer_playing(self) &&
 			psy_audio_sequencer_sequencerinsert(self)) {
 		psy_audio_sequencer_insertdelayedevents(self);
+	}		
+	if (self->metronome.active && self->metronome.precounting) {
+		psy_audio_sequencer_insertmetronometicks(self,
+			self->metronome.precount - self->metronome.currprecount, width);
+		if (self->metronome.precounting && self->metronome.currprecount > 0.0) {
+			self->metronome.currprecount -= width;
+			if (self->metronome.currprecount <= 0.0) {
+				self->metronome.precounting = FALSE;
+				self->seqtime.playing = TRUE;
+			}
+		}
+	} else {
+		self->seqtime.playstarting = FALSE;
+		self->seqtime.playstopping = FALSE;
 	}
-	psy_audio_sequencer_sortevents(self);	
-	self->seqtime.playstarting = FALSE;
-	self->seqtime.playstopping = FALSE;
+	psy_audio_sequencer_sortevents(self);
 }
 
 void psy_audio_sequencer_advanceposition(psy_audio_Sequencer* self,
@@ -511,7 +541,7 @@ void psy_audio_sequencer_updateplaymodeposition(psy_audio_Sequencer* self)
 			break;
 		case psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS: {
 			if (self->seqtime.position >= self->playbeatloopend -
-				1.f / (psy_dsp_big_beat_t)self->lpb) {
+					1.0 / (psy_dsp_big_beat_t)self->lpb) {
 				if (self->looping) {
 					psy_audio_sequencer_jumpto(self, self->playbeatloopstart);
 				} else {
@@ -653,30 +683,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 	bool continueplaying = FALSE;
 	bool work = TRUE;
 
-	assert(self);
-
-	if (self->metronome) {
-		uintptr_t start;
-		uintptr_t end;
-		uintptr_t i;
-
-		start = (uintptr_t)floor(self->seqtime.position);
-		end = (uintptr_t)floor(self->seqtime.position + self->window);
-		for (i = start; i <= end; ++i) {
-			if (psy_audio_sequencer_isoffsetinwindow(self, (double)i)) {
-				psy_audio_PatternEntry* entry;
-				psy_audio_PatternEvent* ev;
-
-				entry = psy_audio_patternentry_allocinit();
-				entry->bpm = self->seqtime.bpm;
-				entry->track = METRONOME_TRACK;
-				entry->delta = (double)i - self->seqtime.position;
-				ev = psy_audio_patternentry_front(entry);
-				*ev = self->metronome_event;				
-				psy_list_append(&self->events, entry);
-			}
-		}		
-	}
+	assert(self);	
 
 	while (work) {
 		psy_List* p;
@@ -727,6 +734,33 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 		psy_audio_sequencer_setposition(self, 0.f);
 	} else {
 		self->seqtime.playing = continueplaying;
+	}
+}
+
+void psy_audio_sequencer_insertmetronometicks(psy_audio_Sequencer* self,
+	psy_dsp_big_beat_t position, psy_dsp_big_beat_t width)
+{
+	if (self->metronome.active) {
+		uintptr_t start;
+		uintptr_t end;
+		uintptr_t i;
+
+		start = (uintptr_t)floor(position);
+		end = (uintptr_t)floor(position + width);
+		for (i = start; i <= end; ++i) {
+			if (psy_dsp_testrange((double)(i), position, width)) {
+				psy_audio_PatternEntry* entry;
+				psy_audio_PatternEvent* ev;
+
+				entry = psy_audio_patternentry_allocinit();
+				entry->bpm = self->seqtime.bpm;
+				entry->track = METRONOME_TRACK;
+				entry->delta = (double)i - position;
+				ev = psy_audio_patternentry_front(entry);
+				*ev = self->metronome_event;
+				psy_list_append(&self->events, entry);
+			}
+		}
 	}
 }
 

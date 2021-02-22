@@ -104,6 +104,13 @@ INLINE void psy_ui_realpoint_init(psy_ui_RealPoint* self)
 	memset(self, 0, sizeof(psy_ui_RealPoint));
 }
 
+INLINE void psy_ui_realpoint_init_all(psy_ui_RealPoint* self, double x, double y)
+{
+	// assume IEEE754
+	self->x = x;
+	self->y = y;
+}
+
 INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
 {
 	psy_ui_RealPoint rv;
@@ -310,6 +317,18 @@ INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width, psy_ui_V
 {
 	self->width = width;
 	self->height = height;
+}
+
+INLINE void psy_ui_size_init_em(psy_ui_Size* self, double width, double height)
+{
+	self->width = psy_ui_value_makeew(width);
+	self->height = psy_ui_value_makeeh(height);
+}
+
+INLINE void psy_ui_size_init_px(psy_ui_Size* self, double width, double height)
+{
+	self->width = psy_ui_value_makepx(width);
+	self->height = psy_ui_value_makepx(height);
 }
 
 INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)

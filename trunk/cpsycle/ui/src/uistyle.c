@@ -34,14 +34,14 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	self->colour = colour;
 	self->backgroundcolour = background;
 	psy_ui_border_init(&self->border);	
-	self->use_font = 0;
+	self->use_font = 0;	
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
 {
 	if (self->use_font) {
 		psy_ui_font_dispose(&self->font);
-	}
+	}	
 }
 
 void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
@@ -56,7 +56,7 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 		psy_ui_font_init(&self->font, NULL);
 		psy_ui_font_copy(&self->font, &other->font);
 		self->use_font = TRUE;
-	}
+	}	
 }
 
 psy_ui_Style* psy_ui_style_alloc(void)

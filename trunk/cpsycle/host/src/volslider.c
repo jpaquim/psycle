@@ -14,9 +14,9 @@
 
 #include "../../detail/portable.h"
 
-static void volslider_onviewdescribe(VolSlider*, psy_ui_Slider*, char* text);
-static void volslider_onviewtweak(VolSlider*, psy_ui_Slider*, float value);
-static void volslider_onviewvalue(VolSlider*, psy_ui_Slider*, float* value);
+static void volslider_ondescribe(VolSlider*, psy_ui_Slider*, char* text);
+static void volslider_ontweak(VolSlider*, psy_ui_Slider*, float value);
+static void volslider_onvalue(VolSlider*, psy_ui_Slider*, float* value);
 
 void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -29,12 +29,12 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	psy_ui_slider_startpoll(&self->slider);
 	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->slider, self,
-		(ui_slider_fpdescribe)volslider_onviewdescribe,
-		(ui_slider_fptweak)volslider_onviewtweak,
-		(ui_slider_fpvalue)volslider_onviewvalue);
+		(ui_slider_fpdescribe)volslider_ondescribe,
+		(ui_slider_fptweak)volslider_ontweak,
+		(ui_slider_fpvalue)volslider_onvalue);
 }
 
-void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender,
+void volslider_ondescribe(VolSlider* self, psy_ui_Slider* sender,
 	char* text)
 {
 	if (workspace_song(self->workspace) && psy_audio_machines_master(
@@ -55,7 +55,7 @@ void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender,
 	}
 }
 
-void volslider_onviewtweak(VolSlider* self, psy_ui_Slider* sender, float value)
+void volslider_ontweak(VolSlider* self, psy_ui_Slider* sender, float value)
 {
 	if (workspace_song(self->workspace) &&
 			psy_audio_machines_master(&workspace_song(self->workspace)->machines)) {
@@ -69,7 +69,7 @@ void volslider_onviewtweak(VolSlider* self, psy_ui_Slider* sender, float value)
 	}
 }
 
-void volslider_onviewvalue(VolSlider* self, psy_ui_Slider* sender, float* rv)
+void volslider_onvalue(VolSlider* self, psy_ui_Slider* sender, float* rv)
 {	
 	if (workspace_song(self->workspace) && psy_audio_machines_master(
 			&workspace_song(self->workspace)->machines)) {
