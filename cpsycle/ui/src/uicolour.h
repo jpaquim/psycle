@@ -213,6 +213,18 @@ INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weigh
 	return *self;
 }
 
+// standard colours
+
+INLINE psy_ui_Colour psy_ui_colour_white(void)
+{
+	return psy_ui_colour_make(0x00FFFFFF);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_black(void)
+{
+	return psy_ui_colour_make(0x00000000);
+}
+
 #ifdef __cplusplus
 }
 #endif

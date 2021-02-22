@@ -13,26 +13,16 @@
 static void metronomebar_fillprecount(MetronomeBar*);
 static void metronomebar_ontogglemetronomestate(MetronomeBar*);
 static void metronomebar_onconfigure(MetronomeBar*, psy_ui_Button* sender);
+static void metronomebar_onprecountchanged(MetronomeBar*,
+	psy_ui_Component* sender, int index);
 
-// vtable
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
-
-static psy_ui_ComponentVtable* vtable_init(MetronomeBar* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable_initialized = TRUE;
-	}
-	return &vtable;
-}
 // implementation
-void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent, Workspace* workspace)
+void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {				
-	psy_ui_component_init(metronomebar_base(self), parent);
-	psy_ui_component_setvtable(metronomebar_base(self), vtable_init(self));
-	psy_ui_component_setdefaultalign(metronomebar_base(self), psy_ui_ALIGN_LEFT,
-		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_init(metronomebar_base(self), parent);	
+	psy_ui_component_setdefaultalign(metronomebar_base(self),
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;
 	// activated
@@ -44,12 +34,15 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent, Workspace* 
 	psy_ui_combobox_init(&self->precount, metronomebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->precount, 6);
 	metronomebar_fillprecount(self);
-	psy_ui_combobox_setcursel(&self->precount, 2);
+	psy_ui_combobox_setcursel(&self->precount, 0);
+	psy_signal_connect(&self->precount.signal_selchanged, self,
+		metronomebar_onprecountchanged);
 	// configure
 	psy_ui_button_init_connect(&self->configure, metronomebar_base(self),
 		self, metronomebar_onconfigure);
 	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&self->configure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_bitmap_settransparency(&self->configure.bitmapicon,
+		psy_ui_colour_white());
 }
 
 void metronomebar_fillprecount(MetronomeBar* self)
@@ -69,14 +62,20 @@ void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 {
 	if (psy_ui_button_highlighted(&self->activated)) {
 		psy_ui_button_disablehighlight(&self->activated);
-		self->workspace->player.sequencer.metronome = FALSE;
+		self->workspace->player.sequencer.metronome.active = FALSE;
 	} else {
 		psy_ui_button_highlight(&self->activated);
-		self->workspace->player.sequencer.metronome = TRUE;
+		self->workspace->player.sequencer.metronome.active = TRUE;
 	}
 }
 
 void metronomebar_onconfigure(MetronomeBar* self, psy_ui_Button* sender)
 {
 	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 10, 0);
+}
+
+void metronomebar_onprecountchanged(MetronomeBar* self,
+	psy_ui_Component* sender, int index)
+{
+	self->player->sequencer.metronome.precount = (double)index;
 }

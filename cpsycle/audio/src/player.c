@@ -281,7 +281,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 			
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
 				slot, amount);		
-			if (psy_audio_player_playing(self)) {
+			if (psy_audio_player_playing(self) || self->sequencer.metronome.precounting) {
 				// update playon
 				for (p = events; p != NULL; psy_list_next(&p)) {
 					psy_audio_PatternEntry* patternentry;
@@ -293,7 +293,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 				}
 			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
-				(self->song && !self->sequencer.metronome)
+				(self->song && !self->sequencer.metronome.active)
 				? psy_audio_song_numsongtracks(self->song)
 				: MAX_TRACKS);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
@@ -503,12 +503,19 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 
 	self->song = song;
 	psy_audio_midiinput_setsong(&self->midiinput, song);
-	if (self->song) {		
+	if (self->song) {
+		double restoreprecount;
+		bool restoremetronomeactive;
+
+		restoreprecount = self->sequencer.metronome.precount;
+		restoremetronomeactive = self->sequencer.metronome.active;
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
+		self->sequencer.metronome.precount = restoreprecount;
+		self->sequencer.metronome.active = restoremetronomeactive;
 	}
 }
 

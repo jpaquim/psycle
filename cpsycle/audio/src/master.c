@@ -268,7 +268,7 @@ void master_slider_tweak(psy_audio_Master* self,
 
 			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {
-				input_socket->volume = value * value * 4.f;
+				input_socket->volume = value * value * 4.f;				
 			}
 		}
 	}

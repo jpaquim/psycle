@@ -91,6 +91,16 @@ typedef struct {
 } psy_audio_SequencerRowDelay;
 
 typedef struct {
+	// metronome
+	bool active;
+	bool precounting;
+	double precount;
+	double currprecount;
+} psy_audio_SequencerMetronome;
+
+void psy_audio_sequencermetronome_init(psy_audio_SequencerMetronome*);
+
+typedef struct {
 	// signals
 	psy_Signal signal_newline;
 	// internal data
@@ -122,8 +132,7 @@ typedef struct {
 	psy_audio_PatternNode** qsortarray;
 	uintptr_t qsortarraysize;
 	// metronome
-	bool metronome;
-	uintptr_t precount;	
+	psy_audio_SequencerMetronome metronome;
 	psy_audio_PatternEvent metronome_event;
 	// references
 	psy_audio_Sequence* sequence;
@@ -175,7 +184,8 @@ INLINE void psy_audio_sequencer_stop(psy_audio_Sequencer* self)
 {
 	self->seqtime.playing = FALSE;
 	self->seqtime.playstarting = FALSE;
-	self->seqtime.playstopping = TRUE;
+	self->seqtime.playstopping = TRUE;	
+	self->metronome.precounting = FALSE;
 }
 
 void psy_audio_sequencer_setnumplaybeats(psy_audio_Sequencer*,

@@ -15,8 +15,12 @@ static void psy_ui_aligner_adjustminmaxsize(psy_ui_Aligner*,
 static uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner*);
 static void psy_ui_align_alignclients(psy_ui_Aligner*, psy_List* children,
 	psy_ui_RealPoint cp_topleft, psy_ui_RealPoint cp_bottomright);
-static void psy_ui_aligner_adjustborder(psy_ui_Aligner* self,
+static void psy_ui_aligner_adjustborder(psy_ui_Aligner*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
+static void psy_ui_aligner_adjustspacing(psy_ui_Aligner*,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
+static void psy_ui_aligner_resizewrapline(psy_ui_Aligner*, psy_List* wrap,
+	double cpy, double cpymax);
 
 void psy_ui_aligner_init(psy_ui_Aligner* self, psy_ui_Component* component)
 {
@@ -27,8 +31,8 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 {	
 	psy_ui_Size size;
 	const psy_ui_TextMetric* tm;
-	psy_ui_RealPoint cp_topleft = { 0.0, 0.0 };
-	psy_ui_RealPoint cp_bottomright = { 0.0, 0.0 };
+	psy_ui_RealPoint cp_topleft;
+	psy_ui_RealPoint cp_bottomright;
 	double cpymax = 0;
 	psy_List* p;
 	psy_List* q;
@@ -36,12 +40,15 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	
 	size = psy_ui_component_size(self->component);
 	tm = psy_ui_component_textmetric(self->component);
-	cp_bottomright.x = floor(psy_ui_value_px(&size.width, tm));
-	cp_bottomright.y = floor(psy_ui_value_px(&size.height, tm));
-	cp_topleft.x = floor(psy_ui_value_px(&self->component->spacing.left, tm));
+	psy_ui_realpoint_init(&cp_topleft);
+	psy_ui_realpoint_init_all(&cp_bottomright,
+		floor(psy_ui_value_px(&size.width, tm)),
+		floor(psy_ui_value_px(&size.height, tm)));
 	psy_ui_aligner_adjustborder(self, &cp_topleft, &cp_bottomright);
+	psy_ui_aligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
+	
 	for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
-			p = p->next) {
+			psy_list_next(&p)) {
 		psy_ui_Component* component;
 			
 		component = (psy_ui_Component*)psy_list_entry(p);		
@@ -50,8 +57,9 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			psy_ui_Size limit;
 			const psy_ui_TextMetric* c_tm;
 				
-			limit.width = psy_ui_value_makepx(cp_bottomright.x - cp_topleft.x);
-			limit.height = psy_ui_value_makepx(cp_bottomright.y - cp_topleft.y);
+			psy_ui_size_init_px(&limit,
+				cp_bottomright.x - cp_topleft.x,
+				cp_bottomright.y - cp_topleft.y);
 			if (!component->preventpreferredsizeatalign) {
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);
@@ -143,12 +151,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						psy_ui_value_makepx(cp_bottomright.y - cp_topleft.y -
 							floor(psy_ui_margin_height_px(&component->margin,
 								c_tm))))));
-			} else if (component->align == psy_ui_ALIGN_LEFT) {				
-				double spacingtop;
-				double spacingheight;
-
-				spacingtop = floor(psy_ui_value_px(&self->component->spacing.top, c_tm));
-				spacingheight = psy_ui_margin_height_px(&self->component->spacing, c_tm);					
+			} else if (component->align == psy_ui_ALIGN_LEFT) {								
 				if ((self->component->alignexpandmode & psy_ui_HORIZONTALEXPAND)
 						== psy_ui_HORIZONTALEXPAND) {
 				} else {
@@ -158,33 +161,23 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						floor(psy_ui_value_px(&componentsize.width, c_tm) +
 						floor(psy_ui_margin_width_px(&component->margin, tm)));
 					if (cp_topleft.x + requiredcomponentwidth >
-						floor(psy_ui_value_px(&size.width, c_tm))) {
-						psy_List* w;						
+							floor(psy_ui_value_px(&size.width, c_tm))) {						
 						cp_topleft.x = 0;
-						for (w = wrap; w != 0; w = w->next) {
-							psy_ui_Component* c;
-							c = (psy_ui_Component*)w->entry;
-							psy_ui_component_resize(c,
-								psy_ui_size_make(
-									psy_ui_component_size(c).width,
-								psy_ui_value_makepx(cpymax - cp_topleft.y + spacingtop -
-									spacingheight -
-									floor(psy_ui_margin_height_px(&component->margin,
-									c_tm)))));
-						}
+						psy_ui_aligner_resizewrapline(self, wrap, cp_topleft.y,
+							cpymax);
 						cp_topleft.y = cpymax;
 						psy_list_free(wrap);						
 						wrap = 0;
 					}					
 					psy_list_append(&wrap, component);					
 				}
-				cp_topleft.x += floor(psy_ui_value_px(&component->margin.left, c_tm));
+				cp_topleft.x += floor(psy_ui_value_px(&component->margin.left, c_tm));				
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 					psy_ui_point_make(
 						psy_ui_value_makepx(cp_topleft.x),
 						psy_ui_value_makepx(cp_topleft.y +
-							spacingtop +
+							floor(psy_ui_value_px(&self->component->spacing.top, c_tm)) +
 							floor(psy_ui_value_px(
 							&component->margin.top, c_tm)))),
 					psy_ui_size_make(
@@ -192,7 +185,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						psy_ui_value_makepx(component->justify ==
 							psy_ui_JUSTIFY_EXPAND
 						? cp_bottomright.y - cp_topleft.y - 
-							spacingheight -
+							psy_ui_margin_height_px(&self->component->spacing, c_tm) -
 							floor(psy_ui_margin_height_px(&component->margin, c_tm))
 						: psy_ui_value_px(&componentsize.height, c_tm)))));
 				cp_topleft.x += floor(psy_ui_value_px(&component->margin.right, c_tm));
@@ -210,6 +203,23 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_ui_align_alignclients(self, q, cp_topleft, cp_bottomright);
 	psy_list_free(q);
 	psy_list_free(wrap);	
+}
+
+void psy_ui_aligner_resizewrapline(psy_ui_Aligner* self, psy_List* wrap, double cpy,
+	double cpymax)
+{
+	psy_List* w;
+
+	for (w = wrap; w != 0; w = w->next) {
+		psy_ui_Component* c;
+		c = (psy_ui_Component*)w->entry;
+		psy_ui_component_resize(c,
+			psy_ui_size_make(
+				psy_ui_component_size(c).width,
+				psy_ui_value_makepx(cpymax - cpy -
+					floor(psy_ui_margin_height_px(&c->margin,
+						psy_ui_component_textmetric(c))))));
+	}
 }
 
 void psy_ui_aligner_adjustminmaxsize(psy_ui_Aligner* self,
@@ -333,6 +343,13 @@ void psy_ui_aligner_adjustborder(psy_ui_Aligner* self,
 	if (border->bottom == psy_ui_BORDER_SOLID) {
 		cp_bottomright->y -= 1;
 	}
+}
+
+void psy_ui_aligner_adjustspacing(psy_ui_Aligner* self,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
+{
+	cp_topleft->x += floor(psy_ui_value_px(&self->component->spacing.left, 
+		psy_ui_component_textmetric(self->component)));
 }
 
 uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)

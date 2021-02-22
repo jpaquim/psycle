@@ -2196,7 +2196,7 @@ int modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave,
 	if (status = psyfile_read(self->fp, &byte2, sizeof(uint8_t))) {
 		return status;
 	}
-	self->smplen[instridx] = byte1 * 0x100 + byte2 * 2; 	
+	self->smplen[instridx] = (byte1 * 0x100 + byte2) * 2;
 	self->samples[instridx].sampleLength = self->smplen[instridx];
 	if (status = psyfile_read(self->fp, &finetune, sizeof(uint8_t))) {
 		return status;
@@ -2261,6 +2261,7 @@ int modsongloader_loadsampledata(MODSongLoader* self, psy_audio_Sample* wave,
 	smpbuf = (unsigned char*)malloc(self->smplen[instidx]);
 	if (smpbuf) {
 		uint16_t sampleCnt;
+		int16_t wNew = 0;
 		int status;
 
 		if (status = psyfile_read(self->fp, smpbuf, self->smplen[instidx])) {
@@ -2275,11 +2276,11 @@ int modsongloader_loadsampledata(MODSongLoader* self, psy_audio_Sample* wave,
 			int16_t value;
 
 			// In mods, samples are signed integer, so we can simply left shift
-			value = smpbuf[j] << 8;			
+			value = (smpbuf[j] << 8);
 			wave->channels.samples[0][j] = (psy_dsp_amp_t)value;
 		}
 		// cleanup
 		free(smpbuf);
 	}
-	return PSY_OK;
+	return PSY_OK;		
 }

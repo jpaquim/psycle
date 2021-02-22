@@ -21,22 +21,19 @@ static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_component_init(filebar_base(self), parent);
-	self->workspace = workspace;
-	psy_ui_component_setalignexpand(filebar_base(self),
-		psy_ui_HORIZONTALEXPAND);
+	self->workspace = workspace;	
 	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
 	psy_ui_label_init_text(&self->header, filebar_base(self),
 		"file.song");	
-	psy_ui_button_init_connect(&self->newbutton, filebar_base(self),
-		self, filebar_onnewsong);
-	psy_ui_button_settext(&self->newbutton, "file.new");
+	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
+		"file.new", self, filebar_onnewsong);
 	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init(&self->loadbutton, filebar_base(self));
-	psy_ui_button_settext(&self->loadbutton, "file.load");	
+	psy_ui_button_init_text(&self->loadbutton, filebar_base(self),
+		"file.load");
 	psy_ui_bitmap_loadresource(&self->loadbutton.bitmapicon, IDB_OPEN_DARK);
 	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 #ifdef PSYCLE_USE_PLATFORM_FILEOPEN
