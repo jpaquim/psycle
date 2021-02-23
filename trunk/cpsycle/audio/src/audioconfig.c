@@ -113,7 +113,7 @@ void audioconfig_makedriverlist(AudioConfig* self)
 
 #elif defined(DIVERSALIS__OS__LINUX)
 	// 1 : alsa
-	drivers = psy_property_settext(psy_property_append_choice(
+	self->drivers = psy_property_settext(psy_property_append_choice(
 		self->inputoutput, "audiodrivers", 1),
 		"settingsview.audio-drivers");
 #endif		

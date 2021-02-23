@@ -246,7 +246,7 @@ void cmdplayer_parse(CmdPlayer* self, int argc, char* argv[])
 
 	state = CMDPLAYER_PARSE_START;
 	for (c = 1; c < argc && state != CMDPLAYER_PARSE_END; ++c) {
-		if (strchr(argv[c], '-')) {
+		if (argv[c][0] == '-') {
 			// option
 			char* option;
 
@@ -401,7 +401,7 @@ void cmdplayer_run(CmdPlayer* self)
 		if (progress == 0) {
 			printf(".");
 			fflush(stdout);
-			progress = 4;
+			progress = 16;
 		}
 	}
 }
@@ -411,7 +411,7 @@ void cmdplayer_idle(CmdPlayer* self)
 #ifdef _WIN32
 	Sleep(200);
 #else
-	usleep(2000);
+	usleep(20000);
 #endif
 }
 
