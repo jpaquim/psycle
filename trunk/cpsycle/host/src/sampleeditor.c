@@ -239,8 +239,7 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 	psy_ui_editor_init(&self->console, &self->component);	
 	psy_ui_component_setalign(&self->console.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->console.component,
-		psy_ui_size_make(psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(10)));
+		psy_ui_size_makeem(0.0, 10.0));
 }
 
 static void sampleprocessview_buildprocessorlist(SampleEditorProcessView*);
@@ -695,11 +694,8 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_onstop);
 	psy_ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);	
 	sampleeditorheader_init(&self->header, &self->component);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	//psy_ui_component_setmargin(&self->header.component, &margin);	
-	samplebox_init(&self->samplebox, &self->component, workspace);
-	//psy_ui_component_setmargin(&self->samplebox.component, &margin);
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);		
+	samplebox_init(&self->samplebox, &self->component, workspace);	
 	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->samplebox.signal_selectionchanged, self,
 		sampleeditor_onselectionchanged);
@@ -708,9 +704,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_onscrollzoom_customdraw);
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->zoom.component,
-		psy_ui_size_make(psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(2)));	
-	//psy_ui_component_setmargin(&self->zoom.component, &margin);
+		psy_ui_size_makeem(0.0, 2.0));	
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);	

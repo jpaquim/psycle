@@ -80,7 +80,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_ui_slider_init(&self->notemodamount, &self->top);
 	psy_ui_slider_settext(&self->notemodamount,
 		"Note Mod Amount");
-	envelopeview_init(&self->envelopeview, &self->component, workspace);
+	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview,
 		psy_ui_translate("instrumentview.pan-envelope"));
 	psy_ui_component_setalign(&self->envelopeview.component,

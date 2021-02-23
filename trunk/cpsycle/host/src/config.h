@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include "audioconfig.h"
+// host
 #include "eventdriverconfig.h"
 #include "generalconfig.h"
 #include "keyboardmiscconfig.h"
@@ -21,6 +21,8 @@ extern "C" {
 #include "patternviewconfig.h"
 #include "compatconfig.h"
 #include "predefsconfig.h"
+// audio
+#include <audioconfig.h>
 
 enum {
 	PROPERTY_ID_REGENERATEPLUGINCACHE = 1,

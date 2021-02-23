@@ -5,7 +5,7 @@
 #define AUDIOCONFIG_H
 
 // audio
-#include <player.h>
+#include "player.h"
 // container
 #include <properties.h>
 
@@ -26,6 +26,7 @@ typedef struct AudioConfig {
 	// signals
 	psy_Signal signal_changed;
 	psy_Property* inputoutput;
+	psy_Property* drivers;
 	psy_Property* driverconfigure;
 	psy_Property* driverconfigurations;
 	// internal
@@ -42,7 +43,6 @@ void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_oneditaudiodriverconfiguration(AudioConfig*, bool enabled);
 
-
 bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*);
 
 const char* audioconfig_driverpath(AudioConfig*);
@@ -50,6 +50,8 @@ const char* audioconfig_driverkey(AudioConfig*);
 
 bool audioconfig_onchanged(AudioConfig*, psy_Property*);
 bool audioconfig_hasproperty(const AudioConfig*, psy_Property*);
+
+psy_Property* audioconfig_drivers(AudioConfig*);
 
 #ifdef __cplusplus
 }

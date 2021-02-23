@@ -106,16 +106,10 @@ void workspace_init(Workspace* self, void* mainhandle)
 {
 	assert(self);
 	
-	psy_audio_machinecallback_init(&self->machinecallback, &self->player,
-		NULL);
+	psy_audio_machinecallback_init(&self->machinecallback);
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
-	psy_audio_exclusivelock_init();	
-#ifdef PSYCLE_USE_SSE
-	psy_dsp_sse2_init(&dsp);
-#else
-	psy_dsp_noopt_init(&dsp);
-#endif
+	psy_audio_init();	
 	self->fontheight = 12;
 	self->cursorstep = 1;
 	self->followsong = 0;
@@ -217,8 +211,8 @@ void workspace_dispose(Workspace* self)
 	psy_audio_pattern_dispose(&self->patternpaste);	
 	psy_audio_sequenceselection_dispose(&self->sequenceselection);	
 	psy_audio_sequencepaste_dispose(&self->sequencepaste);
-	psy_playlist_dispose(&self->playlist);	
-	psy_audio_exclusivelock_dispose();	
+	psy_playlist_dispose(&self->playlist);
+	psy_audio_dispose();	
 }
 
 void workspace_save_styleconfiguration(Workspace* self)
@@ -292,7 +286,8 @@ void workspace_initplayer(Workspace* self)
 #endif
 #else
 	psy_audio_player_init(&self->player, self->song, 0);
-#endif				
+#endif
+	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers,
 		cmdproperties_create());
 	workspace_initaudio(self);

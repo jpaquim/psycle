@@ -52,7 +52,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	psy_ui_component_setmargin(&self->randomvolume.component, &margin);	
 	psy_ui_slider_init_text(&self->volumefadespeed, &self->component,
 		"instrumentview.fadeout");
-	envelopeview_init(&self->envelopeview, &self->component, workspace);
+	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "instrumentview.amplitude-envelope");	
 	psy_ui_component_setmargin(&self->envelopeview.component, &margin);
 	adsrsliders_init(&self->adsrsliders, &self->component);

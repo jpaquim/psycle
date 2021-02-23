@@ -46,9 +46,6 @@
     <ClCompile Include="src\workspace.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\audioconfig.c">
-      <Filter>configuration</Filter>
-    </ClCompile>
     <ClCompile Include="src\eventdriverconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
@@ -410,9 +407,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\audioconfig.h">
-      <Filter>configuration</Filter>
-    </ClInclude>
     <ClInclude Include="src\languageconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>

@@ -818,7 +818,8 @@ void seqeditortrackheader_onpreferredsize(SeqEditorTrackHeader* self,
 {
 	assert(rv);
 
-	*rv = psy_ui_size_make(psy_ui_value_makeew(40.0),
+	*rv = psy_ui_size_make(
+		psy_ui_value_makeew(40.0),
 		self->base.trackstate->lineheight);
 }
 

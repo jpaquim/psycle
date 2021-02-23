@@ -5,6 +5,7 @@
 #define psy_audio_PLAYER_H
 
 #include "../../driver/audiodriver.h"
+// local
 #include "eventdrivers.h"
 #include "song.h"
 #include "machinefactory.h"
@@ -12,12 +13,15 @@
 #include "sequencer.h"
 #include <signal.h>
 #include "library.h"
-
+// dsp
 #include <dither.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void psy_audio_init(void);
+void psy_audio_dispose(void);
 
 typedef enum {
 	VUMETER_NONE,

@@ -24,6 +24,20 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+void psy_audio_init(void)
+{	
+	psy_audio_exclusivelock_init();	
+#ifdef PSYCLE_USE_SSE
+	psy_dsp_sse2_init(&dsp);
+#else
+	psy_dsp_noopt_init(&dsp);
+#endif
+}
+
+void psy_audio_dispose(void)
+{
+	psy_audio_exclusivelock_dispose();
+}
 
 static psy_dsp_amp_t bufferdriver[MAX_SAMPLES_WORKFN];
 static void* mainframe;
@@ -68,7 +82,11 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 
 	psy_audio_machinefactory_init(&self->machinefactory, NULL, NULL);
 	psy_audio_song_init(&self->emptysong, &self->machinefactory);
-	self->song = song;	
+	if (song) {
+		self->song = song;		
+	} else {
+		self->song = &self->emptysong;
+	}	
 	self->recordingnotes = FALSE;
 	self->recordnoteoff = FALSE;
 	self->multichannelaudition = FALSE;
@@ -77,11 +95,12 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->resyncplayposinsamples = 0;
 	self->resyncplayposinbeats = 0.0;
 	self->measure_cpu_usage = FALSE;
-	psy_dsp_dither_init(&self->dither);
-	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
-		&song->machines);
+	psy_dsp_dither_init(&self->dither);	
+	psy_audio_sequencer_init(&self->sequencer,
+		&self->song->sequence,
+		&self->song->machines);
 	mainframe = handle;
-	psy_audio_midiinput_init(&self->midiinput, song);
+	psy_audio_midiinput_init(&self->midiinput, self->song);
 	psy_audio_activechannels_init(&self->playon);
 	psy_audio_player_initdriver(self);
 	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
@@ -93,8 +112,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
 	psy_audio_pattern_init(&self->patterndefaults);
-	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t)
-		0.25);
+	psy_audio_pattern_setlength(&self->patterndefaults,
+		(psy_dsp_big_beat_t)0.25);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif

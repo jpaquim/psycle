@@ -741,7 +741,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// Favorite View
 	pluginsview_init(&self->favoriteview, &self->client, TRUE, workspace);
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(4.0)));
+		psy_ui_size_makeem(0.0, 4.0));
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
 		&self->client);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
@@ -762,10 +762,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_size_makepx(16, 14));
 	psy_ui_component_preventalign(&self->pluginsicon.component);
 	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader,
-		"newmachine.all");
-	//self->favoritelabel.component.preventpreferredsizeatalign = TRUE;
-	//psy_ui_component_resize(&self->favoritelabel.component,
-	//	psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
+		"newmachine.all");	
 	psy_ui_label_settextalignment(&self->pluginslabel,
 		psy_ui_ALIGNMENT_LEFT |
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);

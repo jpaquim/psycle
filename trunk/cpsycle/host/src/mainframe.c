@@ -993,7 +993,7 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		psy_ui_component_resize(&self->sequenceview.component,
 			psy_ui_size_make(
 			self->workspace.maximizeview.sequenceviewrestorewidth,
-			psy_ui_value_makepx(0)));
+			psy_ui_value_makeeh(0.0)));
 	} else {
 		psy_ui_Size sequenceviewsize;		
 

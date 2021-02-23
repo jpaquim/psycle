@@ -4,7 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "envelopeview.h"
-
+// ui
+#include <uiapp.h>
 #include <math.h>
 // platform
 #include "../../detail/portable.h"
@@ -19,7 +20,7 @@ static void envelopebox_ondestroy(EnvelopeBox*, psy_ui_Component* sender);
 static void envelopebox_onmousedown(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmousemove(EnvelopeBox*, psy_ui_MouseEvent*);
 static void envelopebox_onmouseup(EnvelopeBox*, psy_ui_MouseEvent*);
-static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y);
+static psy_List* envelopebox_hittestpoint(EnvelopeBox* self, psy_ui_RealPoint);
 static void envelopebox_shiftsuccessors(EnvelopeBox* self, double timeshift);
 static double envelopebox_pxvalue(EnvelopeBox*, double value);
 static double envelopebox_pxtime(EnvelopeBox*, psy_dsp_big_seconds_t t);
@@ -69,9 +70,15 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
+	psy_ui_size_init_px(&self->ptsize, 5.0, 5.0);
+	psy_ui_size_init_px(&self->ptsize2, 2.5, 2.5);
+	self->pointcolour = psy_ui_colour_make(0x00B1C8B0);
+	self->curvecolour = psy_ui_colour_make(0x00B1C8B0);
+	self->gridcolour = psy_ui_colour_make(0x00333333);
+	self->sustaincolour = psy_ui_colour_make(0x00516850);
+	self->rulercolour = psy_ui_colour_make(0x00434343);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(20),
-			psy_ui_value_makeeh(15)));	
+		psy_ui_size_makeem(20.0, 15.0));
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		envelopebox_ondestroy);	
@@ -112,7 +119,7 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 		smallstep = 0.1;
 		step = 0.5;
 	}	
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
+	psy_ui_setcolour(g, self->gridcolour);
 	for (i = 0; i <= 1.0; i += smallstep ) {
 		double cpy;
 
@@ -134,8 +141,7 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	const psy_ui_TextMetric* tm;
-	psy_ui_Size ptsize;
-	psy_ui_Size ptsize2;
+	
 	psy_dsp_EnvelopePoint* q = 0;
 	psy_List* points;
 
@@ -144,23 +150,19 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 	} else {
 		return;
 	}
-	tm = psy_ui_component_textmetric(&self->component);
-	ptsize = psy_ui_size_make(psy_ui_value_makepx(5), psy_ui_value_makepx(5));
-	ptsize2 = psy_ui_size_make(
-		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, tm) / 2),
-		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, tm) / 2));
+	tm = psy_ui_component_textmetric(&self->component);	
 	for (p = points; p != 0; p = p->next) {
 		psy_ui_RealRectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
 		psy_ui_setrectangle(&r,
-			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&ptsize2.width, tm),
+			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&self->ptsize2.width, tm),
 			envelopebox_pxvalue(self, pt->value * self->modamount) -
-				psy_ui_value_px(&ptsize2.height, tm),
-			psy_ui_value_px(&ptsize.width, tm),
-			psy_ui_value_px(&ptsize.height, tm));
-		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00B1C8B0));
+				psy_ui_value_px(&self->ptsize2.height, tm),
+			psy_ui_value_px(&self->ptsize.width, tm),
+			psy_ui_value_px(&self->ptsize.height, tm));
+		psy_ui_drawsolidrectangle(g, r, self->pointcolour);
 		q = pt;
 	}
 }
@@ -177,8 +179,7 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	} else {
 		return;
 	}
-
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
+	psy_ui_setcolour(g, self->curvecolour);
 	for (p = points; p !=0; p = p->next, ++count) {		
 		psy_dsp_EnvelopePoint* pt;
 
@@ -192,13 +193,13 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 		}
 		q = pt;
 		if (count == self->sustainstage) {
-			psy_ui_setcolour(g, psy_ui_colour_make(0x00516850));
+			psy_ui_setcolour(g, self->sustaincolour);
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
 					self->spacing.top.quantity),
 				psy_ui_realpoint_make(envelopebox_pxtime(self, q->time),
 				self->spacing.top.quantity + self->cy));
-			psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
+			psy_ui_setcolour(g, self->curvecolour);
 		}
 	}	
 }
@@ -212,11 +213,11 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 	int numsteps;
 
 	maxtime = envelopebox_displaymaxtime(self);
-	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
+	psy_ui_setcolour(g, self->rulercolour);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, self->cy),
 		psy_ui_realpoint_make(self->cx, self->cy));
 	tm = psy_ui_component_textmetric(envelopebox_base(self));
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00434343));
+	psy_ui_settextcolour(g, self->rulercolour);
 	if (self->settings && self->settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
 		numsteps = (int)(maxtime);
 	} else {
@@ -252,12 +253,10 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 				psy_ui_textout(g,
 					cpx - 3.5 * (double)tm->tmAveCharWidth, self->cy - (tm->tmHeight * 1.5),
 					text, strlen(text));
-			}
-			psy_ui_setcolour(g, psy_ui_colour_make(0x00434343));
+			}			
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(cpx, self->spacing.top.quantity),
-				psy_ui_realpoint_make(cpx, self->cy - self->spacing.bottom.quantity));
-			psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_COMMON)->border.colour_top);
+				psy_ui_realpoint_make(cpx, self->cy - self->spacing.bottom.quantity));			
 		}
 	}
 }
@@ -275,7 +274,7 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
-	self->dragpoint = envelopebox_hittestpoint(self, ev->pt.x, ev->pt.y);
+	self->dragpoint = envelopebox_hittestpoint(self, ev->pt);
 	self->dragpointindex = psy_INDEX_INVALID;
 	if (ev->button == 1) {
 		if (!self->dragpoint && self->settings) {
@@ -425,7 +424,7 @@ void envelopebox_onmouseup(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 	self->dragpoint = NULL;	
 }
 
-psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y)
+psy_List* envelopebox_hittestpoint(EnvelopeBox* self, psy_ui_RealPoint screen_pt)
 {
 	psy_List* p;
 	psy_List* points;
@@ -437,12 +436,12 @@ psy_List* envelopebox_hittestpoint(EnvelopeBox* self, double x, double y)
 		return NULL;
 	}
 	for (p = points->tail; p != NULL; p = p->prev) {		
-		psy_dsp_EnvelopePoint* pt;		
+		psy_dsp_EnvelopePoint* env_pt;		
 
-		pt = (psy_dsp_EnvelopePoint*)p->entry;			
-		if (abs((int)(envelopebox_pxtime(self, pt->time) - x)) < 5 &&
+		env_pt = (psy_dsp_EnvelopePoint*)p->entry;
+		if (abs((int)(envelopebox_pxtime(self, env_pt->time) - screen_pt.x)) < 5 &&
 				abs((int)(envelopebox_pxvalue(self,
-					pt->value * self->modamount) - y)) < 5) {
+					env_pt->value * self->modamount) - screen_pt.y)) < 5) {
 			break;
 		}
 	}	
@@ -602,12 +601,11 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 	return &envelopeview_vtable;
 }
 
-void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* workspace)
+void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(envelopeview_base(self), parent);			
 	psy_ui_component_setvtable(envelopeview_base(self),
-		envelopeview_vtable_init(self));
-	self->workspace = workspace;
+		envelopeview_vtable_init(self));	
 	envelopebar_init(&self->bar, envelopeview_base(self));
 	psy_ui_component_setalign(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(envelopebar_base(&self->bar),

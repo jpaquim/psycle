@@ -55,8 +55,7 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	vumeterskin_init(self);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(25),
-			psy_ui_value_makeeh(1)));
+		psy_ui_size_makeem(25.0, 1.0));
 	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
 	psy_signal_connect(&self->component.signal_destroy, self,

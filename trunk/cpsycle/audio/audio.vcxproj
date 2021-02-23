@@ -228,6 +228,7 @@
     </ClCompile>
     <ClCompile Include="src\activechannels.c" />
     <ClCompile Include="src\array.c" />
+    <ClCompile Include="src\audioconfig.c" />
     <ClCompile Include="src\audiorecorder.c" />
     <ClCompile Include="src\buffer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
@@ -403,6 +404,7 @@
   <ItemGroup>
     <ClInclude Include="src\activechannels.h" />
     <ClInclude Include="src\array.h" />
+    <ClInclude Include="src\audioconfig.h" />
     <ClInclude Include="src\audiorecorder.h" />
     <ClInclude Include="src\buffer.h" />
     <ClInclude Include="src\buffercontext.h" />
