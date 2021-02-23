@@ -6,7 +6,6 @@
 
 // host
 #include "scrollzoom.h"
-#include "workspace.h"
 // ui
 #include <uibutton.h>
 #include <uicheckbox.h>
@@ -27,6 +26,7 @@ typedef struct {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_tweaked;
+	// internal
 	double cx;
 	double cy;
 	psy_dsp_Envelope* settings;
@@ -38,6 +38,13 @@ typedef struct {
 	double zoomleft;
 	double zoomright;
 	psy_dsp_amp_t modamount;
+	psy_ui_Size ptsize;
+	psy_ui_Size ptsize2;
+	psy_ui_Colour pointcolour;
+	psy_ui_Colour curvecolour;
+	psy_ui_Colour gridcolour;
+	psy_ui_Colour sustaincolour;
+	psy_ui_Colour rulercolour;
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
@@ -81,12 +88,10 @@ typedef struct EnvelopeView {
 	// ui elements
 	EnvelopeBar bar;
 	EnvelopeBox envelopebox;
-	ScrollZoom zoom;
-	// references
-	Workspace* workspace;
+	ScrollZoom zoom;	
 } EnvelopeView;
 
-void envelopeview_init(EnvelopeView*, psy_ui_Component* parent, Workspace*);
+void envelopeview_init(EnvelopeView*, psy_ui_Component* parent);
 void envelopeview_setenvelope(EnvelopeView*, psy_dsp_Envelope* settings);
 
 INLINE void envelopeview_setmodamount(EnvelopeView* self, psy_dsp_amp_t amount)

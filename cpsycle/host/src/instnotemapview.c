@@ -99,8 +99,7 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	self->metrics.lineheight = 15;
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(3)));	
+		psy_ui_size_makeem(0.0, 3.0));	
 }
 
 void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics* g)

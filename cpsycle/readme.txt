@@ -79,13 +79,23 @@ Posix
 
 Command line player:
 
-Since the linux psycle plugin makefiles are out of date it is very limited,
+Since the linux psycle plugin makefiles are out of date it use is very limited,
 but to build:
 
 go to cpsycle/player
 run: make
 cd src
-execute ./psyplayer filename.psy
+Windows only: copy the driver dlls from cpsycle/{target}/{platform} to
+the cpsycle/player/{target}
+{target} Debug or Release
+{platform} x86 or x64
+execute:
+Linux ./psyplayer filename.psy
+Windows player filename.psy
+
+Command Line Help:
+No options and no filename: prints help
+
 
 Host:
 The X11 part is unfinished, but to build execute the makefiles in the src

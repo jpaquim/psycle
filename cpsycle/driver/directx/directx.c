@@ -482,7 +482,7 @@ bool start(DXDriver* self)
 	}
 	self->m_hWnd = self->driver.handle;
 	if (self->m_hWnd == NULL) {
-		return FALSE;
+		self->m_hWnd = GetDesktopWindow();
 	}
 	if (self->driver.callback == NULL) {
 		return FALSE;

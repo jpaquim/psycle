@@ -587,6 +587,6 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_CLIENT);
 	zoombox_init(&self->zoombox, &self->component);
 	psy_ui_component_setpreferredsize(&self->zoombox.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(1.0)));
+		psy_ui_size_makeem(0.0, 1.0));
 	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_BOTTOM);	
 }

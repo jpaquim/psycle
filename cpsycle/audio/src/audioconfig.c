@@ -4,9 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "audioconfig.h"
-// std
-#include <stdio.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -102,15 +99,13 @@ void audioconfig_makedriverconfigurations(AudioConfig* self)
 }
 
 void audioconfig_makedriverlist(AudioConfig* self)
-{
-	psy_Property* drivers;
-
+{	
 	assert(self);
 
 	// change number to set startup driver, if no psycle.ini found
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	// 2 : directx
-	drivers = psy_property_setid(psy_property_settext(
+	self->drivers = psy_property_setid(psy_property_settext(
 		psy_property_append_choice(self->inputoutput,
 			"audiodrivers", 2),
 		"settingsview.audio-drivers"),
@@ -122,18 +117,18 @@ void audioconfig_makedriverlist(AudioConfig* self)
 		self->inputoutput, "audiodrivers", 1),
 		"settingsview.audio-drivers");
 #endif		
-	psy_property_append_string(drivers, "silent", "silentdriver");
+	psy_property_append_string(self->drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	// output target for the audio driver dlls is {solutiondir}/Debug or 
 	// {solutiondir}/Release
 	// if they aren't found, check if direcories fit and if
 	// dlls are compiled
-	psy_property_append_string(drivers, "mme", ".\\mme.dll");
-	psy_property_append_string(drivers, "directx", ".\\directx.dll");
-	psy_property_append_string(drivers, "wasapi", ".\\wasapi.dll");
-	psy_property_append_string(drivers, "asio", ".\\asiodriver.dll");
+	psy_property_append_string(self->drivers, "mme", ".\\mme.dll");
+	psy_property_append_string(self->drivers, "directx", ".\\directx.dll");
+	psy_property_append_string(self->drivers, "wasapi", ".\\wasapi.dll");
+	psy_property_append_string(self->drivers, "asio", ".\\asiodriver.dll");
 #elif defined(DIVERSALIS__OS__LINUX)
-	psy_property_append_string(drivers, "alsa",
+	psy_property_append_string(self->drivers, "alsa",
 		"../../driver/alsa/libpsyalsa.so");
 #endif
 }
@@ -301,4 +296,9 @@ bool audioconfig_hasproperty(const AudioConfig* self,
 	assert(self && self->driverconfigure);
 
 	return psy_property_insection(property, self->inputoutput);
+}
+
+psy_Property* audioconfig_drivers(AudioConfig* self)
+{
+	return self->drivers;
 }

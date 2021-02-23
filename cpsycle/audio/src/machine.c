@@ -211,14 +211,18 @@ static void psy_audio_machinecallbackvtable_init(void)
 		psy_audio_machinecallbackvtable_initialized = TRUE;
 	}
 }
-void psy_audio_machinecallback_init(psy_audio_MachineCallback* self,
-	psy_audio_Player* player,
-	psy_audio_Song* song)
+void psy_audio_machinecallback_init(psy_audio_MachineCallback* self)	
 {
 	psy_audio_machinecallbackvtable_init();
 	self->vtable = &psy_audio_machinecallbackvtable_vtable;
+	self->player = NULL;
+	self->song = NULL;
+}
+
+void psy_audio_machinecallback_setplayer(psy_audio_MachineCallback* self,
+	psy_audio_Player* player)
+{
 	self->player = player;
-	self->song = song;
 }
 
 void psy_audio_machinecallback_setsong(psy_audio_MachineCallback* self,

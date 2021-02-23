@@ -106,9 +106,7 @@ void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* s
 			psy_audio_machine_slot(self->machine)) {
 		// change preferred size
 		psy_ui_component_setpreferredsize(machineeditorview_base(self),
-			psy_ui_size_make(
-				psy_ui_value_makepx((double)width),
-				psy_ui_value_makepx((double)height)));
+			psy_ui_size_makepx((double)width, (double)height));
 		// signal will be catched by machineframe to resize the frame
 		psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 	}

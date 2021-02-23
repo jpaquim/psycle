@@ -35,6 +35,9 @@
     <Filter Include="sequence">
       <UniqueIdentifier>{d563655f-0d94-4128-a342-680e1db86d6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="configuration">
+      <UniqueIdentifier>{b967568f-9381-4f89-bc77-c33933cf5cc4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psyclescript.c">
@@ -315,6 +318,9 @@
     </ClCompile>
     <ClCompile Include="src\exs24loader.c">
       <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audioconfig.c">
+      <Filter>configuration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -605,6 +611,9 @@
     </ClInclude>
     <ClInclude Include="src\exs24loader.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audioconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

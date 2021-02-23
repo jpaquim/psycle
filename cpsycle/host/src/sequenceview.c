@@ -641,11 +641,9 @@ void sequencelistview_rename(SequenceListView* self)
 	if (pattern) {
 		psy_ui_component_setposition(&self->rename.component,
 			psy_ui_rectangle_make(
-			psy_ui_point_make(psy_ui_value_makepx(0),
-				psy_ui_value_makepx(self->state->margin)),
-			psy_ui_size_make(psy_ui_value_makeew(20), psy_ui_value_makeeh(1))));
-		psy_ui_edit_settext(&self->rename, psy_audio_pattern_name(
-			pattern));
+				psy_ui_point_makepx(0, self->state->margin),
+				psy_ui_size_makeem(20.0, 1.0)));
+		psy_ui_edit_settext(&self->rename, psy_audio_pattern_name(pattern));
 		psy_ui_component_show(&self->rename.component);
 		psy_ui_component_setfocus(&self->rename.component);
 	}	

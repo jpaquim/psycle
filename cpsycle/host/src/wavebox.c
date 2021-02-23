@@ -79,8 +79,7 @@ void waveboxcontext_init(WaveBoxContext* self, psy_ui_Component* component)
 	self->sample = 0;	
 	self->channel = 0;
 	waveboxselection_init(&self->selection);	
-	psy_ui_size_init_all(&self->size, psy_ui_value_makeew(10),
-		psy_ui_value_makeeh(10));
+	psy_ui_size_init_em(&self->size, 10.0, 10.0);		
 	psy_dsp_multiresampler_init(&self->resampler,
 		psy_dsp_RESAMPLERQUALITY_SPLINE);
 }

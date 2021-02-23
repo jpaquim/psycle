@@ -155,8 +155,7 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
 	psy_ui_component_resize(&self->volslider.component,
-		psy_ui_size_make(psy_ui_value_makeew(2),
-		psy_ui_value_makepx(0)));
+		psy_ui_size_makeem(2.0, 0.0));
 	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_slider_connect(&self->volslider, self,
 		(ui_slider_fpdescribe)wireview_ondescribevolume,
@@ -386,9 +385,7 @@ void wireview_movescope(WireView* self, int index, psy_ui_AlignType align, int w
 	}	
 	if (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook)) {
 		psy_ui_component_setparent(scope, &self->component);		
-		psy_ui_component_resize(scope,
-			psy_ui_size_make(psy_ui_value_makepx(width),
-			psy_ui_value_makepx(0)));
+		psy_ui_component_resize(scope, psy_ui_size_makepx(width, 0.0));
 		psy_ui_component_show(scope);
 	}
 	psy_ui_component_setalign(scope, align);

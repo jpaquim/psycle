@@ -62,8 +62,7 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->isclipon = FALSE;
 	clipboxdefaultskin_init(self);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(2),
-			psy_ui_value_makeeh(1.5)));
+		psy_ui_size_makeem(2.0, 1.5));
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		clipbox_onsongchanged);	
 	clipbox_connectmachinessignals(self, workspace);

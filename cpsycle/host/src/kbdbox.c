@@ -80,8 +80,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
 		kbdbox_ondestroy);	
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(80),
-			psy_ui_value_makeeh(23)));	
+		psy_ui_size_makeem(80.0, 23.0));			
 	psy_table_init(&self->keys);
 	self->keyset = NULL;
 	kbdbox_initfont(self);

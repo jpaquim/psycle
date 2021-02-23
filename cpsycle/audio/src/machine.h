@@ -115,9 +115,9 @@ typedef struct psy_audio_MachineCallback {
 	struct psy_audio_Song* song;
 } psy_audio_MachineCallback;
 
-void psy_audio_machinecallback_init(psy_audio_MachineCallback*,
-	struct psy_audio_Player*,
-	struct psy_audio_Song*);
+void psy_audio_machinecallback_init(psy_audio_MachineCallback*);
+void psy_audio_machinecallback_setplayer(psy_audio_MachineCallback*,
+	struct psy_audio_Player*);
 void psy_audio_machinecallback_setsong(psy_audio_MachineCallback*,
 	struct psy_audio_Song*);
 

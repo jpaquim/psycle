@@ -405,7 +405,7 @@ void midimonitor_initcorestatus(MidiMonitor* self)
 	psy_ui_label_init_text(&self->coretitle, &self->top,
 		"Core Status");
 	psy_ui_component_setminimumsize(&self->coretitle.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2.0)));
+		psy_ui_size_makeem(0.0, 2.0));
 	psy_ui_component_setalign(&self->coretitle.component,
 		psy_ui_ALIGN_TOP);
 }
@@ -448,7 +448,7 @@ void midimonitor_initflags(MidiMonitor* self)
 	self->channelstatcounter = 0;
 	psy_ui_label_init_text(&self->flagtitle, &self->client, "Flags");
 	psy_ui_component_setminimumsize(&self->flagtitle.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2.0)));	
+		psy_ui_size_makeem(0.0, 2.0));	
 	psy_ui_component_setalign(&self->flagtitle.component,
 		psy_ui_ALIGN_TOP);
 	midiflagsview_init(&self->flags, &self->client, self->workspace);
@@ -460,7 +460,7 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_init(&self->topchannelmapping, &self->client);
 	psy_ui_component_setalign(&self->topchannelmapping, psy_ui_ALIGN_TOP);
 	psy_ui_component_setminimumsize(&self->topchannelmapping,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2.0)));
+		psy_ui_size_makeem(0.0, 2.0));
 	psy_ui_label_init_text(&self->channelmappingtitle,
 		&self->topchannelmapping, "Channel Mapping");		
 	psy_ui_component_setalign(&self->channelmappingtitle.component,

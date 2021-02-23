@@ -76,7 +76,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_slider_settext(&self->randomcutoff, "Random Cutoff");
 	psy_ui_slider_init(&self->randomresonance, &self->top);
 	psy_ui_slider_settext(&self->randomresonance, "Random Res");
-	envelopeview_init(&self->envelopeview, &self->component, workspace);
+	envelopeview_init(&self->envelopeview, &self->component);
 	psy_ui_component_setalign(&self->envelopeview.component,
 		psy_ui_ALIGN_CLIENT);
 	envelopeview_settext(&self->envelopeview, "instrumentview.filter-envelope");
