@@ -168,6 +168,7 @@ static void setfont(psy_ui_Component*, psy_ui_Font*);
 static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
+static void invalidate(psy_ui_Component*);
 // events
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
@@ -237,6 +238,7 @@ static void vtable_init(void)
 		vtable.onfocus = onfocus;
 		vtable.onfocuslost = onfocuslost;
 		vtable.onupdatestyles = onupdatestyles;
+		vtable.invalidate = invalidate;
 		vtable_initialized = TRUE;
 	}
 }
@@ -293,6 +295,11 @@ void dispose(psy_ui_Component* self)
 void destroy(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_destroy(self->imp);
+}
+
+void invalidate(psy_ui_Component* self)
+{
+	self->imp->vtable->dev_invalidate(self->imp);
 }
 
 void psy_ui_component_updatefont(psy_ui_Component* self)

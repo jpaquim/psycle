@@ -127,6 +127,8 @@ static void machinestackview_onmousemove(MachineStackView*,
 	psy_ui_MouseEvent*);
 static void machinestackview_onmouseup(MachineStackView*,
 	psy_ui_MouseEvent*);
+static void machinestackview_onmousedoubleclick(MachineStackView*,
+	psy_ui_MouseEvent*);
 static void machinestackview_ontimer(MachineStackView*, uintptr_t timerid);
 static void machinestackview_hittest(MachineStackView* self,
 	double x, double y, uintptr_t* track, uintptr_t* line);
@@ -150,9 +152,9 @@ static psy_ui_ComponentVtable* machinestackview_vtable_init(MachineStackView* se
 			machinestackview_onmouseup;
 		machinestackview_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
 			machinestackview_onmousemove;
-		/*machinestackview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
-			machinewireview_onmousedoubleclick;
-		machinestackview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+		machinestackview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+			machinestackview_onmousedoubleclick;
+		/*machinestackview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			machinewireview_onkeydown;*/
 		machinestackview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			machinestackview_onpreferredsize;
@@ -239,9 +241,7 @@ void machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 					psy_ui_drawborder(g, r, &border);					
 				}
 				if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
-					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
-					machineui->selected = FALSE;
-					machineui->vuupdate = FALSE;
+					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));										
 					machineui->component.vtable->ondraw(&machineui->component, g);					
 					psy_ui_resetorigin(g);
 				}
@@ -538,6 +538,31 @@ void machinestackview_onmouseup(MachineStackView* self, psy_ui_MouseEvent* ev)
 	self->dragmachineui = NULL;
 }
 
+void machinestackview_onmousedoubleclick(MachineStackView* self,
+	psy_ui_MouseEvent* ev)
+{
+	uintptr_t track;
+	uintptr_t line;
+
+	line = psy_INDEX_INVALID;
+	track = psy_INDEX_INVALID;
+	self->dragslot = psy_INDEX_INVALID;
+	self->dragmachineui = NULL;
+	machinestackview_hittest(self, ev->pt.x, ev->pt.y, &track, &line);
+	if (line == psy_INDEX_INVALID) {
+	} else if (ev->button == 1) {
+		MachineUi* machineui;
+
+		machineui = machineuimatrix_at(&self->matrix, track, line);
+		if (machineui) {
+			machineui->component.vtable->onmousedoubleclick(
+				&machineui->component, ev);
+			self->dragslot = machineui->slot;
+			self->dragmachineui = machineui;
+		}
+	}
+}
+
 void machinestackview_hittest(MachineStackView* self, double x, double y,
 	uintptr_t* track, uintptr_t* line)
 {	
@@ -554,12 +579,14 @@ void machinestackview_hittest(MachineStackView* self, double x, double y,
 			assert(self);			
 
 			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
-			r = psy_ui_component_position(&machineui->component);
-			if (machineui && psy_ui_realrectangle_intersect(
-					&r, psy_ui_realpoint_make(x, y))) {
-				*track = i;
-				*line = j;
-				break;
+			if (machineui) {
+				r = psy_ui_component_position(&machineui->component);
+				if (psy_ui_realrectangle_intersect(&r,					
+						psy_ui_realpoint_make(x, y))) {
+					*track = i;
+					*line = j;
+					break;
+				}
 			}
 		}
 		if (*line != psy_INDEX_INVALID) {
@@ -579,34 +606,32 @@ void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 	bool updatevus;
 	uintptr_t i;
 	
-	self->vudrawupdate = TRUE;
+	self->vudrawupdate = TRUE;	
 	updatevus = psy_ui_component_drawvisible(&self->component);
 	if (updatevus) {
 		psy_ui_component_setbackgroundmode(&self->component,
-			psy_ui_BACKGROUND_NONE);
-	}	
-	for (i = 0; i < machineuimatrix_numtracks(&self->matrix); ++i) {
-		uintptr_t j;
-		for (j = 0; j < machineuimatrix_numlines(&self->matrix) + 1; ++j) {
-			MachineUi* machineui;
+			psy_ui_BACKGROUND_NONE);		
+		for (i = 0; i < machineuimatrix_numtracks(&self->matrix); ++i) {
+			uintptr_t j;
+			for (j = 0; j < machineuimatrix_numlines(&self->matrix) + 1; ++j) {
+				MachineUi* machineui;
 
-			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
-			if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {
-				if (updatevus) {
-					machineui_updatevolumedisplay(machineui);
-					machineui_invalidate_vu(machineui);
+				machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
+				if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {
+					if (updatevus) {	
+						psy_ui_component_invalidate(&machineui->component);					
+					}
 				}
 			}
-		}
-	}
-	if (updatevus) {
+		}	
 		psy_ui_component_update(&self->component);
 		psy_ui_component_setbackgroundmode(&self->component,
 			psy_ui_BACKGROUND_SET);
+		machineui_endvuupdate();
+		self->vudrawupdate = FALSE;
 	}
 	if (self->machines && self->opcount != self->machines->opcount) {
 		psy_ui_component_invalidate(&self->component);
 		self->opcount = self->machines->opcount;
-	}
-	self->vudrawupdate = FALSE;
+	}	
 }

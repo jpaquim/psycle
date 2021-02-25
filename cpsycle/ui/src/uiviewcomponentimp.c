@@ -305,10 +305,14 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
+	if (r) {
+		psy_ui_component_invalidaterect(self->view, *r);
+	}
 }
 
 void view_dev_update(psy_ui_ViewComponentImp* self)
 {
+	psy_ui_component_update(self->view);
 }
 
 void view_dev_setfont(psy_ui_ViewComponentImp* self, psy_ui_Font* source)

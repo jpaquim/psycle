@@ -106,6 +106,8 @@ void vudisplay_drawpeak(VuDisplay* self, psy_ui_Graphics* g)
 static void drawmachineline(psy_ui_Graphics*, psy_ui_RealPoint dir,
 	psy_ui_RealPoint edge);
 
+static bool vuupdate = FALSE;
+
 // MachineUi
 static void machineui_update(MachineUi*);
 static int machineui_hittestpan(MachineUi*, psy_ui_RealPoint, double* dx);
@@ -135,6 +137,11 @@ static void machineui_drawvu(MachineUi*, psy_ui_Graphics*);
 static void machineui_drawhighlight(MachineUi*, psy_ui_Graphics*);
 static void machineui_onframedestroyed(MachineUi*, psy_ui_Component* sender);
 static void machineui_move(MachineUi*, psy_ui_Point topleft);
+static void machineui_updatevolumedisplay(MachineUi*);
+static void machineui_invalidate(MachineUi*);
+static void machineui_onshowparameters(MachineUi*, Workspace* sender,
+	uintptr_t slot);
+static void machineui_showparameters(MachineUi*, psy_ui_Component* parent);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
@@ -145,7 +152,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineUi* self)
 	assert(self);
 
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);	
+		vtable = *(self->component.vtable);
 		super_vtable = vtable;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)machineui_ondraw;
 		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)machineui_onmousedown;
@@ -154,6 +161,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineUi* self)
 		vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			machineui_onmousedoubleclick;
 		vtable.move = (psy_ui_fp_component_move)machineui_move;
+		vtable.invalidate = (psy_ui_fp_component_invalidate)machineui_invalidate;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -174,9 +182,7 @@ void machineui_init(MachineUi* self, uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_component_init_imp(&self->component, view,
 		self->component.imp);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	self->vuupdate;
-	self->selected;
+	self->component.vtable = &vtable;	
 	self->machines = &workspace->song->machines;
 	self->machine = psy_audio_machines_at(self->machines, slot);
 	self->workspace = workspace;
@@ -192,7 +198,9 @@ void machineui_init(MachineUi* self, uintptr_t slot, MachineViewSkin* skin,
 	self->restorename = NULL;
 	self->machinepos = TRUE;
 	self->dragmode = MACHINEVIEW_DRAG_NONE;
-	machineui_update(self);	
+	machineui_update(self);
+	psy_signal_connect(&workspace->signal_showparameters, self,
+		machineui_onshowparameters);
 }
 
 void machineui_dispose(MachineUi* self)
@@ -209,6 +217,8 @@ void machineui_dispose(MachineUi* self)
 	}
 	free(self->restorename);
 	psy_ui_component_dispose(&self->component);
+	psy_signal_disconnect(&self->workspace->signal_showparameters, self,
+		machineui_onshowparameters);
 }
 
 void machineui_update(MachineUi* self)
@@ -353,26 +363,20 @@ void machineui_oneditfocuslost(MachineUi* self, psy_ui_Component* sender)
 	psy_ui_component_hide(sender);
 }
 
-void machineui_invalidate_vu(MachineUi* self)
-{		
-	assert(self);
-		
-	psy_ui_component_invalidaterect(self->view, self->vu.position);	
-}
-
 void machineui_ondraw(MachineUi* self, psy_ui_Graphics* g)
 {	
 	assert(self);
 		
 	machineui_drawbackground(self, g);		
-	if (!self->vuupdate) {
+	if (!vuupdate) {
 		machineui_draweditname(self, g);
 		if (self->mode != psy_audio_MACHMODE_MASTER) {				
 			machineui_drawpanning(self, g);
 			machineui_drawmute(self, g);
 			machineui_drawbypassed(self, g);
 			machineui_drawsoloed(self, g);
-			if (self->selected) {
+			if (self->machines &&
+					self->slot == psy_audio_machines_selected(self->machines)) {
 				machineui_drawhighlight(self, g);
 			}
 		}		
@@ -482,15 +486,16 @@ void machineui_drawvu(MachineUi* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (self->mode != psy_audio_MACHMODE_MASTER) {
+		machineui_updatevolumedisplay(self);
 		vudisplay_draw(&self->vu, g);		
 	}
 }
 
 void machineui_updatevolumedisplay(MachineUi* self)
 {
-	if (self->machine) {		
+	if (self->machine) {
 		vudisplay_update(&self->vu,
-			psy_audio_machine_buffermemory(self->machine));		
+			psy_audio_machine_buffermemory(self->machine));
 	}
 }
 
@@ -539,7 +544,10 @@ void machineui_onmousedown(MachineUi* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->slot == psy_audio_MASTER_INDEX) {
 		return;
-	}	
+	}
+	if (self->slot != psy_audio_machines_selected(self->machines)) {		
+		psy_audio_machines_select(self->machines, self->slot);
+	}
 	if (machineui_hittestcoord(self, ev->pt, psy_audio_MACHMODE_GENERATOR,
 			&self->skin->generator.solo)) {				
 		psy_audio_machines_solo(self->machines, self->slot);		
@@ -703,4 +711,33 @@ void drawmachineline(psy_ui_Graphics* g, psy_ui_RealPoint dir,
 
 	psy_ui_drawline(g, edge, psy_ui_realpoint_make(
 		edge.x + dir.x * hlength, edge.y + dir.y * hlength));
+}
+
+void machineui_invalidate(MachineUi* self)
+{
+	if (vuupdate) {
+		psy_ui_component_invalidaterect(self->view, self->vu.position);
+	} else {
+		super_vtable.invalidate(&self->component);
+	}
+}
+
+void machineui_onshowparameters(MachineUi* self, Workspace* sender,
+	uintptr_t slot)
+{	
+	if (slot == self->slot) {
+		machineui_showparameters(self, self->view);
+	}
+}
+
+// static methods
+
+void machineui_beginvuupdate(void)
+{
+	vuupdate = TRUE;
+}
+
+void machineui_endvuupdate(void)
+{
+	vuupdate = FALSE;
 }

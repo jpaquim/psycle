@@ -66,10 +66,6 @@ static void machinewireview_ondisconnected(MachineWireView*,
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
 	int flag, psy_audio_Song*);
 static void machinewireview_buildmachineuis(MachineWireView*);
-static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
-	uintptr_t slot);
-static void machinewireview_onmasterworked(MachineWireView*,
-	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
 static void machinewireview_destroywireframes(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
@@ -152,9 +148,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 			psy_audio_song_machines(workspace_song(workspace)));
 	} else {
 		machinewireview_setmachines(self, NULL);
-	}
-	psy_signal_connect(&workspace->signal_showparameters, self,
-		machinewireview_onshowparameters);	
+	}	
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
 	machinewireview_updateskin(self);
@@ -177,10 +171,7 @@ void machinewireview_setmachines(MachineWireView* self,
 		psy_signal_connect(&self->machines->connections.signal_connected, self,
 			machinewireview_onconnected);
 		psy_signal_connect(&self->machines->connections.signal_disconnected, self,
-			machinewireview_ondisconnected);
-		psy_signal_connect(
-			&psy_audio_machines_master(self->machines)->signal_worked, self,
-			machinewireview_onmasterworked);
+			machinewireview_ondisconnected);		
 	}
 	machinewireview_buildmachineuis(self);
 }
@@ -368,7 +359,7 @@ bool machinewireview_wiredragging(const MachineWireView* self)
 void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
-	
+		
 	for (it = psy_table_begin(&self->machineuis);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {				
@@ -379,14 +370,11 @@ void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 		position = psy_ui_component_position(&machineui->component);
 		if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
 			psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
-				-position.top));
-			machineui->selected = self->selectedwire.src == psy_INDEX_INVALID &&
-				self->selectedslot == psy_tableiterator_key(&it);
-			machineui->vuupdate = self->vudrawupdate;
+				-position.top));						
 			machineui->component.vtable->ondraw(&machineui->component, g);			
 			psy_ui_resetorigin(g);			
 		}
-	}
+	}	
 }
 
 
@@ -446,8 +434,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {
 		if (self->dragslot != psy_audio_MASTER_INDEX) {
 			self->selectedslot = self->dragslot;
-			psy_audio_wire_invalidate(&self->selectedwire);
-			psy_audio_machines_select(self->machines, self->selectedslot);
+			psy_audio_wire_invalidate(&self->selectedwire);			
 		}
 		if (self->dragmachineui) {
 			self->dragmachineui->component.vtable->onmousedown(&
@@ -1060,64 +1047,39 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
 	++self->component.opcount;
 }
 
-void machinewireview_onshowparameters(MachineWireView* self, Workspace* sender,
-	uintptr_t slot)
-{	
-	if (machineuis_at(self, slot)) {
-		machineui_showparameters(machineuis_at(self, slot), &self->component);
-	}
-}
-
-void machinewireview_onmasterworked(MachineWireView* self,
-	psy_audio_Machine* machine, uintptr_t slot, psy_audio_BufferContext* bc)
-{
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		MachineUi* machineui;
-		
-		machineui = psy_tableiterator_value(&it);
-		if (machineui->slot != psy_audio_MASTER_INDEX) {		
-			machineui_updatevolumedisplay(machineui);
-		}
-	}
-}
-
 void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 {	
 	psy_TableIterator it;
 	bool updatevus;
 	
-	machinewireview_destroywireframes(self);
-	self->vudrawupdate = TRUE;
+	machinewireview_destroywireframes(self);	
 	updatevus = psy_ui_component_drawvisible(&self->component) &&
 		self->skin->drawvumeters;
 	if (updatevus) {
+		self->vudrawupdate = TRUE;
 		psy_ui_component_setbackgroundmode(&self->component,
 			psy_ui_BACKGROUND_NONE);
-	}	
-	for (it = psy_table_begin(&self->machineuis);
+		machineui_beginvuupdate();
+		for (it = psy_table_begin(&self->machineuis);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		MachineUi* machineui;
+			MachineUi* machineui;
 
-		machineui = psy_tableiterator_value(&it);		
-		if (updatevus && machineui->slot != psy_audio_MASTER_INDEX) {
-			machineui_invalidate_vu(machineui);
-		}
-	}	
-	if (updatevus) {
+			machineui = psy_tableiterator_value(&it);		
+			if (updatevus && machineui->slot != psy_audio_MASTER_INDEX) {			
+				psy_ui_component_invalidate(&machineui->component);			
+			}
+		}		
 		psy_ui_component_update(machinewireview_base(self));		
 		psy_ui_component_setbackgroundmode(machinewireview_base(self),
 			psy_ui_BACKGROUND_SET);
+		machineui_endvuupdate();
+		self->vudrawupdate = FALSE;
 	}
 	if (self->machines && self->opcount != self->machines->opcount) {
 		psy_ui_component_invalidate(&self->component);
 		self->opcount = self->machines->opcount;
-	}
-	self->vudrawupdate = FALSE;
+	}	
 }
 
 void machinewireview_destroywireframes(MachineWireView* self)

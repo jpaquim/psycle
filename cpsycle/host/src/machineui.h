@@ -75,9 +75,7 @@ typedef struct MachineUi {
 	char* restorename;
 	bool machinepos;
 	MachineViewDragMode dragmode;
-	double mx;
-	bool vuupdate;
-	bool selected;
+	double mx;	
 	// references
 	Workspace* workspace;
 	psy_audio_Machine* machine;
@@ -92,9 +90,14 @@ void machineui_init(MachineUi*, uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
 void machineui_dispose(MachineUi*);
 
-void machineui_updatevolumedisplay(MachineUi*);
-void machineui_showparameters(MachineUi*, psy_ui_Component* parent);
-void machineui_invalidate_vu(MachineUi*);
+// vudraw optimization
+// sets a global vu update flag
+// machineui overwrites psy_ui_component_invalidate and if the flag is set
+// the vumeter position is invalidated else all of the machineui
+// methods called in ontimer of the wire-/stackview
+void machineui_beginvuupdate(void);
+void machineui_endvuupdate(void);
+
 
 #ifdef __cplusplus
 }
