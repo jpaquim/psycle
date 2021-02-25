@@ -60,8 +60,7 @@ typedef struct {
 	psy_audio_Machine* machine;	
 	NewValView newval;
 	// references
-	ParamView* paramview;
-	Workspace* workspace;
+	ParamView* paramview;	
 } MachineFrame;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);

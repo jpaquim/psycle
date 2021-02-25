@@ -228,19 +228,21 @@ void machinestackview_drawmachines(MachineStackView* self, psy_ui_Graphics* g)
 
 			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
 			if (machineui) {
-				const psy_ui_RealRectangle* position;
+				psy_ui_RealRectangle position;
 
-				position = machineui_position(machineui);
+				position = psy_ui_component_position(&machineui->component); 
 				if (j == 0) {
 					r = psy_ui_realrectangle_make(
-						psy_ui_realpoint_make(position->left - 6, position->top),
-						psy_ui_realsize_make(psy_ui_realrectangle_width(position) + 14, sizepx.height));
+						psy_ui_realpoint_make(position.left - 6, position.top),
+						psy_ui_realsize_make(psy_ui_realrectangle_width(&position) + 14, sizepx.height));
 					psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00202020));
 					psy_ui_drawborder(g, r, &border);					
 				}
-				if (psy_ui_realrectangle_intersect_rectangle(&g->clip, position)) {
-					psy_ui_setorigin(g, psy_ui_realpoint_make(-position->left, -position->top));
-					machineui_draw(machineui, g, machineui->slot, FALSE);
+				if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
+					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
+					machineui->selected = FALSE;
+					machineui->vuupdate = FALSE;
+					machineui->component.vtable->ondraw(&machineui->component, g);					
 					psy_ui_resetorigin(g);
 				}
 			}
@@ -391,13 +393,15 @@ MachineUi* machinestackview_insert(MachineStackView* self, uintptr_t slot,
 			double trackwidth;
 			uintptr_t maxlevel;
 			
-			machineui_init(rv, slot, self->skin, &self->component, self->workspace);
+			machineui_init(rv, slot, self->skin, &self->component, NULL, self->workspace);
 			lineheight = 60;
 			trackwidth = 158;
 			rv->machinepos = FALSE;
 			maxlevel = (uintptr_t)psy_table_at(&self->maxlevels, slot);
-			machineui_move(rv, psy_ui_realpoint_make(100 +
-				(double)track * trackwidth, (double)line * lineheight));
+			psy_ui_component_move(&rv->component,
+				psy_ui_point_make(
+					psy_ui_value_makepx(100 + (double)track * trackwidth),
+					psy_ui_value_makepx((double)line * lineheight)));
 			machineuimatrix_insert(&self->matrix, track, line, rv);
 		}
 		return rv;
@@ -508,8 +512,9 @@ void machinestackview_onmousedown(MachineStackView* self, psy_ui_MouseEvent* ev)
 		MachineUi* machineui;
 
 		machineui = machineuimatrix_at(&self->matrix, track, line);
-		if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {				
-			machineui_onmousedown(machineui, ev);			
+		if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {	
+			machineui->component.vtable->onmousedown(
+				&machineui->component, ev);					
 			self->dragslot = machineui->slot;
 			self->dragmachineui = machineui;
 		}
@@ -519,7 +524,8 @@ void machinestackview_onmousedown(MachineStackView* self, psy_ui_MouseEvent* ev)
 void machinestackview_onmousemove(MachineStackView* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->dragmachineui != NULL) {			
-		machineui_onmousemove(self->dragmachineui, ev);
+		self->dragmachineui->component.vtable->onmousemove(&
+			self->dragmachineui->component, ev);		
 		if (!ev->bubble) {
 			return;		
 		}
@@ -543,11 +549,14 @@ void machinestackview_hittest(MachineStackView* self, double x, double y,
 		uintptr_t j;
 		for (j = 0; j < machineuimatrix_numlines(&self->matrix) + 1; ++j) {
 			MachineUi* machineui;
+			psy_ui_RealRectangle r;
 
-			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);			
+			assert(self);			
+
+			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
+			r = psy_ui_component_position(&machineui->component);
 			if (machineui && psy_ui_realrectangle_intersect(
-					machineui_position(machineui),
-					psy_ui_realpoint_make(x, y))) {
+					&r, psy_ui_realpoint_make(x, y))) {
 				*track = i;
 				*line = j;
 				break;
@@ -584,8 +593,8 @@ void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 			machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
 			if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {
 				if (updatevus) {
-					machineui_updatevolumedisplay(machineui);					
-					machineui_invalidate(machineui, TRUE);
+					machineui_updatevolumedisplay(machineui);
+					machineui_invalidate_vu(machineui);
 				}
 			}
 		}

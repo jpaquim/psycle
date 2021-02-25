@@ -266,6 +266,7 @@
     <ClCompile Include="src\uiswitch.c" />
     <ClCompile Include="src\uiterminal.c" />
     <ClCompile Include="src\uivalue.c" />
+    <ClCompile Include="src\uiviewcomponentimp.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\curses\uicursescomponentimp.h" />
@@ -326,6 +327,7 @@
     <ClInclude Include="src\uiswitch.h" />
     <ClInclude Include="src\uiterminal.h" />
     <ClInclude Include="src\uivalue.h" />
+    <ClInclude Include="src\uiviewcomponentimp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)container\container.vcxproj">

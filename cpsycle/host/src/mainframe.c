@@ -32,7 +32,6 @@ static void mainframe_initrightarea(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
-static void mainframe_initminiview(MainFrame*);
 static void mainframe_initviewstatusbars(MainFrame*);
 static void mainframe_initstatusbarlabel(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
@@ -310,7 +309,6 @@ void mainframe_initstatusbar(MainFrame* self)
 	mainframe_initkbdhelpbutton(self);
 	mainframe_initterminalbutton(self);	
 	mainframe_initprogressbar(self);
-	mainframe_initminiview(self);
 }
 
 void mainframe_initviewstatusbars(MainFrame* self)
@@ -342,12 +340,6 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
-}
-
-void mainframe_initminiview(MainFrame* self)
-{
-	miniview_init(&self->miniview, &self->statusbar);
-	psy_ui_component_setalign(&self->miniview.component, psy_ui_ALIGN_RIGHT);	
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -757,10 +749,6 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(&self->workspace))->signal_themechanged,
 		self, mainframe_onthemechanged);
-	if (!generalconfig_showminiview(&self->workspace.config.general)) {
-		psy_ui_component_stoptimer(&self->miniview.component, 0);
-		psy_ui_component_hide_align(&self->miniview.component);
-	}
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -1226,17 +1214,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		} else {
 			psy_ui_component_hide_align(&self->metronomebar.component);
 		}
-		break;
-	case PROPERTY_ID_SHOWMINIVIEW:
-		if (generalconfig_showminiview(&self->workspace.config.general)) {
-			psy_ui_component_starttimer(&self->miniview.component, 0, 200);
-			psy_ui_component_show(&self->miniview.component);
-		} else {			
-			psy_ui_component_stoptimer(&self->miniview.component, 0);
-			psy_ui_component_hide(&self->miniview.component);
-		}
-		psy_ui_component_align(&self->component);
-		break;
+		break;	
 	default:
 		workspace_configurationchanged(&self->workspace, property);
 		break;
@@ -1359,14 +1337,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	if (component) {
 		psy_ui_component_setfocus(component);
 	}	
-	psy_ui_component_align(&self->component);
-	if (workspace_currview(&self->workspace) == VIEW_ID_MACHINEVIEW) {
-		miniview_setview(&self->miniview, &self->machineview.wireview.component);
-	} else if (workspace_currview(&self->workspace) == VIEW_ID_PATTERNVIEW) {
-		miniview_setview(&self->miniview, &self->patternview.tracker.component);
-	} else {
-		miniview_setview(&self->miniview, NULL);
-	}
+	psy_ui_component_align(&self->component);	
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,

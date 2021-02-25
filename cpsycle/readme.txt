@@ -4,15 +4,16 @@ some plugin and driver apis are written in. It replaced MFC from Psycle, can
 be viewed in different screen resolutions, has a sequencer, unified the
 instruments Sampulse and Sampler ps1 use and avoids ui dependencies in the
 audio core.  The ui was reduced from mfc to win32 and wrapped behind an own
-layer. A X11 implementation is started but not finished. The command line
-player needs to be finsihed, too. Still missing is the full XMSampler
-reimplementation, XM and IT Songimport and some Mixer options. Event Input
-like Midi and Keyboard are now driver orientated and make it possible to have
-more than one midi input or other inputs like a a game controller. This still
-needs to be fully worked out, but at least works for the keyboard and midi
-input. Midi sync is not fully working, too. Additional the version has a
-pianoroll, multitracking, track scopes, a param rack and optional a
-sequenceview that displays the sequence in a gantt layout. Besides english,
+layer. A X11 implementation is started but not finished. The separation of the
+audio core makes it alredy possible to use the command line player with posix
+aswell, too, although at the moment only a linux alsa driver exists. XMSampler
+has yet some problems correctly play all songs and the full IT Songimport and
+some Mixer options are missing. Event Input like Midi and Keyboard is now
+driver orientated and more than one midi or other inputs like a a game
+controller are possible. This needs to be fully worked out, but at least works
+for keyboard and midi input. Midi sync is not fully working. Additional the
+version has a pianoroll, multitracking, track scopes, a param rack and optional
+a sequenceview that displays the sequence in a gantt layout. Besides english,
 more language are possible, and a spanish language file was added. Many
 limititation of Psycle are related to the file format. Internally the use of
 fixed arrays were replaced by dynamic structures, but the limitations remain
@@ -75,29 +76,32 @@ boost_thread_your_version.dll, (from bin path)
 universalis.dll (depending on your version needed or not) (from bin path)
 scintilla.dll (vc6, vc2008 only, search for an old compatible win98/xp dll)
 
-Posix
-
 Command line player:
 
-Since the linux psycle plugin makefiles are out of date it use is very limited,
-but to build:
+Windows: it compiles with the psycle solution file. Then manually copy the
+driver dlls
+from: cpsycle/{target}/{platform}
+to:   cpsycle/player/{target}
+{target} Debug or Release
+{platform} x86 or x64
+CMD: player filename.psy
+or run inside
+Visual studio: Player Project Settings/Debugging/Command Line Options add
+       filename.psy
+
+Linux: Since the posix psycle plugin makefiles are out of date it
+use is very limited, but to build:
 
 go to cpsycle/player
 run: make
 cd src
-Windows only: copy the driver dlls from cpsycle/{target}/{platform} to
-the cpsycle/player/{target}
-{target} Debug or Release
-{platform} x86 or x64
-execute:
 Linux ./psyplayer filename.psy
-Windows player filename.psy
+
 
 Command Line Help:
 No options and no filename: prints help
 
-
-Host:
+Posix Host:
 The X11 part is unfinished, but to build execute the makefiles in the src
 directories of audio, container, dsp, file, ui, build the alsa driver and
 finally the host. The devel libs for X11 with xft, freetype, xmu, xshape and

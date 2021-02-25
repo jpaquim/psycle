@@ -5,8 +5,8 @@
 #define MACHINEUI_H
 
 // host
-#include "machineframe.h"
 #include "machineeditorview.h" // vst view
+#include "machineframe.h"
 #include "machineviewskin.h"
 #include "workspace.h"
 // ui
@@ -31,23 +31,43 @@ typedef enum MachineViewDragMode {
 	MACHINEVIEW_DRAG_PAN
 } MachineViewDragMode;
 
-// MachineUi
-typedef struct MachineUi {
-	int mode;
+typedef struct VuValues {
 	/// output level for display (0 .. 1.f)	
 	psy_dsp_amp_t volumedisplay;
 	/// output peak level for display (0 .. 1.f)
 	psy_dsp_amp_t volumemaxdisplay;
 	/// output peak level display time (refreshrate * 60)
 	int volumemaxcounterlife;
-	MachineCoords* coords;
-	MachineViewSkin* skin;
-	psy_audio_Machine* machine;
-	psy_ui_Colour font;
-	psy_ui_Colour bgcolour;
+} VuValues;
+
+void vuvalues_init(VuValues*);
+void vuvalues_tickcounter(VuValues*);
+void vuvalues_update(VuValues*, psy_audio_Buffer*);
+
+typedef struct VuDisplay {
+	// internal
 	psy_ui_RealRectangle position;
-	psy_ui_RealRectangle vuposition;
-	psy_ui_RealPoint topleft;
+	VuValues vuvalues;
+	// references
+	MachineViewSkin* skin;
+	MachineCoords* coords;
+} VuDisplay;
+
+void vudisplay_init(VuDisplay*,
+	MachineViewSkin*, MachineCoords*);
+
+void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
+void vudisplay_draw(VuDisplay*, psy_ui_Graphics*);
+
+// MachineUi
+typedef struct MachineUi {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	int mode;	
+	psy_ui_Colour font;
+	psy_ui_Colour bgcolour;	
+	VuDisplay vu;	
 	uintptr_t slot;
 	MachineFrame* machineframe;
 	ParamView* paramview;
@@ -55,57 +75,26 @@ typedef struct MachineUi {
 	char* restorename;
 	bool machinepos;
 	MachineViewDragMode dragmode;
+	double mx;
+	bool vuupdate;
+	bool selected;
 	// references
 	Workspace* workspace;
+	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
 	psy_ui_Component* view;
-	double mx;
+	psy_ui_Edit* editname;
+	MachineCoords* coords;
+	MachineViewSkin* skin;	
 } MachineUi;
 
 void machineui_init(MachineUi*, uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, Workspace*);
+	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
 void machineui_dispose(MachineUi*);
 
-void machineui_update(MachineUi*);
-void machineui_onframedestroyed(MachineUi*, psy_ui_Component* sender);
-	psy_ui_RealSize machineui_size(const MachineUi*);
-void machineui_move(MachineUi*, psy_ui_RealPoint dest);
-const psy_ui_RealRectangle* machineui_position(const MachineUi*);
-psy_ui_RealRectangle machineui_coordposition(MachineUi*, SkinCoord*);
-psy_ui_RealPoint machineui_centerposition(MachineUi*);
-void machineui_draw(MachineUi*, psy_ui_Graphics*, uintptr_t slot,
-	bool vuupdate);
-void machineui_drawbackground(MachineUi*, psy_ui_Graphics*);
-void machineui_draweditname(MachineUi*, psy_ui_Graphics*);
-void machineui_drawpanning(MachineUi*, psy_ui_Graphics*);
-void machineui_drawmute(MachineUi*, psy_ui_Graphics*);
-void machineui_drawbypassed(MachineUi*, psy_ui_Graphics*);
-void machineui_drawsoloed(MachineUi*, psy_ui_Graphics*,
-	psy_audio_Machines*);
-void machineui_drawvu(MachineUi*, psy_ui_Graphics*);
-void machineui_drawvudisplay(MachineUi*, psy_ui_Graphics*);
-void machineui_drawvupeak(MachineUi*, psy_ui_Graphics*);
-void machineui_drawhighlight(MachineUi*, psy_ui_Graphics*);
 void machineui_updatevolumedisplay(MachineUi*);
-void machineui_updatemaxvolumedisplay(MachineUi*);
 void machineui_showparameters(MachineUi*, psy_ui_Component* parent);
-void machineui_editname(MachineUi*, psy_ui_Edit*,
-	psy_ui_RealPoint scrolloffset);
-void machineui_onkeydown(MachineUi*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
-void machineui_oneditchange(MachineUi*, psy_ui_Edit* sender);
-void machineui_oneditfocuslost(MachineUi*, psy_ui_Component* sender);
-void machineui_invalidate(MachineUi*, bool vuupdate);
-void machineui_onmousedown(MachineUi*, psy_ui_MouseEvent*);
-void machineui_onmousemove(MachineUi*, psy_ui_MouseEvent*);
-void machineui_onmouseup(MachineUi*, psy_ui_MouseEvent*);
-void machineui_onmousedoubleclick(MachineUi*, psy_ui_MouseEvent*);
-bool machineui_hittestcoord(MachineUi*, psy_ui_RealPoint, int mode,
-	SkinCoord*);
-int machineui_hittestpan(MachineUi*, psy_ui_RealPoint, uintptr_t slot,
-	double* dx);
-psy_dsp_amp_t machineui_panvalue(MachineUi*, double dx, uintptr_t slot);
-
+void machineui_invalidate_vu(MachineUi*);
 
 #ifdef __cplusplus
 }
