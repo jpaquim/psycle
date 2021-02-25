@@ -205,6 +205,9 @@
     <ClCompile Include="src\uigeometry.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiviewcomponentimp.c">
+      <Filter>comps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -380,6 +383,9 @@
     </ClInclude>
     <ClInclude Include="src\uigeometry.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiviewcomponentimp.h">
+      <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

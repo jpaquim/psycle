@@ -66,9 +66,6 @@ typedef struct MachineView {
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
-void machineview_onminiviewcustomdraw(MachineView*, struct MiniView*,
-	psy_ui_Graphics*);
-
 INLINE psy_ui_Component* machineview_base(MachineView* self)
 {
 	return &self->component;

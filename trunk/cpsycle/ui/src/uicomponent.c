@@ -287,7 +287,7 @@ void dispose(psy_ui_Component* self)
 	self->imp->vtable->dev_dispose(self->imp);
 	free(self->imp);
 	self->imp = 0;
-	psy_ui_componentstyle_dispose(&self->style);
+	psy_ui_componentstyle_dispose(&self->style);	
 }
 
 void destroy(psy_ui_Component* self)
@@ -886,7 +886,12 @@ static void dev_showstate(psy_ui_ComponentImp* self, int state) { }
 static void dev_hide(psy_ui_ComponentImp* self) { }
 static int dev_visible(psy_ui_ComponentImp* self) { return 0; }
 static int dev_drawvisible(psy_ui_ComponentImp* self) { return 0; }
-static psy_ui_RealRectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_RealRectangle rv = { 0, 0, 0, 0 }; return rv; }
+
+static psy_ui_RealRectangle dev_position(const psy_ui_ComponentImp* self)
+{
+	return psy_ui_realrectangle_zero();
+}
+
 static void dev_move(psy_ui_ComponentImp* self, psy_ui_Point origin) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, intptr_t width, intptr_t height) { }

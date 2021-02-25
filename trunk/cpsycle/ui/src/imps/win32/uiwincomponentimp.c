@@ -32,7 +32,7 @@ static HINSTANCE psy_ui_win_component_instance(psy_ui_win_ComponentImp*
 static void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp*,
 	LPCSTR classname);
 
-// VTable Prototypes
+// prototypes
 static void dev_dispose(psy_ui_win_ComponentImp*);
 static void dev_destroy(psy_ui_win_ComponentImp*);
 static void dev_show(psy_ui_win_ComponentImp*);
@@ -83,7 +83,7 @@ static int dev_hasfocus(psy_ui_win_ComponentImp*);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 {
@@ -144,7 +144,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 

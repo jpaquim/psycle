@@ -123,7 +123,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	self->paramview = NULL;
 	self->machine = NULL;
 	self->machineview = parent;		
-	self->workspace = workspace;		
 	psy_ui_frame_init(&self->component, parent);
 	psy_ui_component_move(&self->component,
 		psy_ui_point_make(psy_ui_value_makepx(200),
@@ -154,8 +153,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_onmouseup);
 	psy_signal_connect(&self->component.signal_align, self,
 		machineframe_onalign);	
-	//psy_signal_connect(&self->workspace->signal_defaultfontchanged, self,
-	//	ondefaultfontchanged);	
 	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
 		machineframe_onzoomboxchanged);
 }

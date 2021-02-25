@@ -25,7 +25,6 @@
 #include "machinedock.h"
 #include "metronomebar.h"
 #include "midimonitor.h"
-#include "miniview.h"
 #include "navigation.h"
 #include "playbar.h"
 #include "playposbar.h"
@@ -144,8 +143,7 @@ typedef struct MainFrame {
 	psy_ui_Label statusbarlabel;
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
-	InstrumentsViewBar instrumentsviewbar;
-	MiniView miniview;
+	InstrumentsViewBar instrumentsviewbar;	
 	ConfirmBox checkunsavedbox;
 	//Confirm confirm;
 	TerminalMsgType terminalmsgtype;

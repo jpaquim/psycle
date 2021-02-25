@@ -6,7 +6,6 @@
 #include "machineview.h"
 // host
 #include "resources/resource.h"
-#include "miniview.h"
 #include "skingraphics.h"
 #include "styles.h"
 #include "wireview.h"
@@ -265,13 +264,5 @@ void machineview_onnewmachineselected(MachineView* self,
 	} else {
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);
-	}
-}
-
-void machineview_onminiviewcustomdraw(MachineView* self, MiniView* miniview,
-	psy_ui_Graphics* g)
-{
-	if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
-		machinewireview_onminiviewcustomdraw(&self->wireview, miniview, g);
 	}
 }
