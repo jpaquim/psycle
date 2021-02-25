@@ -73,6 +73,7 @@ typedef void (*psy_ui_fp_component_verticalscrollrange)(struct psy_ui_Component*
 typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component*, int recursive);
 typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_invalidate)(struct psy_ui_Component*);
 // vtable events function pointers 
 typedef void (*psy_ui_fp_component_ondestroy)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_ondestroyed)(struct psy_ui_Component*);
@@ -92,6 +93,7 @@ typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
 
+
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
 	psy_ui_fp_component_destroy destroy;
@@ -110,6 +112,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_children children;
 	psy_ui_fp_component_enableinput enableinput;
 	psy_ui_fp_component_preventinput preventinput;
+	psy_ui_fp_component_invalidate invalidate;
 	// events
 	psy_ui_fp_component_ondestroy ondestroy;
 	psy_ui_fp_component_ondestroyed ondestroyed;
@@ -438,7 +441,7 @@ void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	
-	self->imp->vtable->dev_invalidate(self->imp);
+	self->vtable->invalidate(self);	
 }
 
 INLINE void psy_ui_component_invalidaterect(psy_ui_Component* self, psy_ui_RealRectangle r)
