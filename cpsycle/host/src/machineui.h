@@ -59,15 +59,12 @@ void vudisplay_init(VuDisplay*,
 void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
 void vudisplay_draw(VuDisplay*, psy_ui_Graphics*);
 
-// MachineUi
-typedef struct MachineUi {
-	// inherits
-	psy_ui_Component component;
+typedef struct MachineUiCommon {
 	// internal
-	int mode;	
+	int mode;
 	psy_ui_Colour font;
-	psy_ui_Colour bgcolour;	
-	VuDisplay vu;	
+	psy_ui_Colour bgcolour;
+	VuDisplay vu;
 	uintptr_t slot;
 	MachineFrame* machineframe;
 	ParamView* paramview;
@@ -75,7 +72,7 @@ typedef struct MachineUi {
 	char* restorename;
 	bool machinepos;
 	MachineViewDragMode dragmode;
-	double mx;	
+	double mx;
 	// references
 	Workspace* workspace;
 	psy_audio_Machine* machine;
@@ -83,12 +80,33 @@ typedef struct MachineUi {
 	psy_ui_Component* view;
 	psy_ui_Edit* editname;
 	MachineCoords* coords;
-	MachineViewSkin* skin;	
+	MachineViewSkin* skin;
+} MachineUiCommon;
+
+void machineuicommon_init(MachineUiCommon*, uintptr_t slot, MachineViewSkin*,
+	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+
+// MasterUi
+typedef struct MasterUi {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	MachineUiCommon intern;
+} MasterUi;
+
+void masterui_init(MasterUi*, MachineViewSkin*, psy_ui_Component* view,
+	Workspace*);
+
+// MachineUi
+typedef struct MachineUi {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	MachineUiCommon intern;
 } MachineUi;
 
 void machineui_init(MachineUi*, uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
-void machineui_dispose(MachineUi*);
 
 // vudraw optimization
 // sets a global vu update flag

@@ -28,9 +28,9 @@ static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
 static bool machinewireview_wiredragging(const MachineWireView*);
 static void machinewireview_drawwires(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawwire(MachineWireView*, psy_ui_Graphics*,
-	MachineUi*);
+	uintptr_t slot);
 static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
-	double x1, double y1, double x2, double y2);
+	psy_ui_RealPoint p1, psy_ui_RealPoint p2);
 static psy_ui_RealPoint rotate_point(psy_ui_RealPoint, double phi);
 static psy_ui_RealPoint move_point(psy_ui_RealPoint pt, psy_ui_RealPoint d);
 static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
@@ -47,7 +47,7 @@ static uintptr_t machinewireview_machineup(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_machinedown(MachineWireView*, uintptr_t src);
 static uintptr_t machinewireview_hittest(const MachineWireView*);
 static psy_audio_Wire machinewireview_hittestwire(MachineWireView*,
-	double x, double y);
+	psy_ui_RealPoint);
 static bool machinewireview_dragging_machine(const MachineWireView*);
 static bool machinewireview_dragging_connection(const MachineWireView*);
 static bool machinewireview_dragging_newconnection(const MachineWireView*);
@@ -76,8 +76,8 @@ static psy_ui_RealRectangle machinewireview_updaterect(MachineWireView*,
 	uintptr_t slot);
 static void machinewireview_onpreferredsize(MachineWireView*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-static MachineUi* machineuis_insert(MachineWireView*, uintptr_t slot);
-static MachineUi* machineuis_at(MachineWireView*, uintptr_t slot);
+static psy_ui_Component* machineuis_insert(MachineWireView*, uintptr_t slot);
+static psy_ui_Component* machineuis_at(MachineWireView*, uintptr_t slot);
 static void machineuis_remove(MachineWireView*, uintptr_t slot);
 static void machineuis_removeall(MachineWireView*);
 static psy_ui_RealPoint  machinewireview_centerposition(psy_ui_RealRectangle);
@@ -183,7 +183,7 @@ void machinewireview_ondestroy(MachineWireView* self)
 			&psy_audio_machines_master(self->machines)->signal_worked, self);
 	}	
 	psy_table_disposeall(&self->machineuis, (psy_fp_disposefunc)
-		machineui_dispose);
+		psy_ui_component_dispose);
 	psy_list_deallocate(&self->wireframes, (psy_fp_disposefunc)
 		psy_ui_component_destroy);	
 }
@@ -225,21 +225,22 @@ void machinewireview_drawwires(MachineWireView* self, psy_ui_Graphics* g)
 	for (it = psy_table_begin(&self->machineuis); 
 			!psy_tableiterator_equal(&it, psy_table_end()); 
 			psy_tableiterator_inc(&it)) {
-		machinewireview_drawwire(self, g,
-			(MachineUi*)psy_tableiterator_value(&it));
+		machinewireview_drawwire(self, g, psy_tableiterator_key(&it));
 	}	
 }
 
 void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
-	MachineUi* machineui)
+	uintptr_t slot)
 {		
-	psy_audio_MachineSockets* sockets;	
+	psy_audio_MachineSockets* sockets;
 	
 	sockets	= psy_audio_connections_at(&self->machines->connections,
-		machineui->slot);
+		slot);
 	if (sockets) {
 		psy_TableIterator it;
+		psy_ui_Component* machineui;
 
+		machineui = (psy_ui_Component*)machineuis_at(self, slot);
 		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
@@ -247,29 +248,28 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 
 			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);		
 			if (socket->slot != psy_INDEX_INVALID) {
-				MachineUi* inmachineui;				
+				psy_ui_Component* inmachineui;
 
-				inmachineui = machineuis_at(self, socket->slot);
+				inmachineui = (psy_ui_Component*)machineuis_at(self, socket->slot);
 				if (inmachineui && machineui) {
 					psy_ui_RealPoint out;
 					psy_ui_RealPoint in;
 										
-					if (self->hoverwire.src == machineui->slot &&
+					if (self->hoverwire.src == slot &&
 							self->hoverwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin->hoverwirecolour);
-					} else if (self->selectedwire.src == machineui->slot &&
+					} else if (self->selectedwire.src == slot &&
 							self->selectedwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin->selwirecolour);
 					} else {
 						psy_ui_setcolour(g, self->skin->wirecolour);
 					}
 					out = machinewireview_centerposition(
-							psy_ui_component_position(&machineui->component));
+							psy_ui_component_position(machineui));
 					in = machinewireview_centerposition(
-							psy_ui_component_position(&inmachineui->component));
+							psy_ui_component_position(inmachineui));
 					psy_ui_drawline(g, out, in);
-					machinewireview_drawwirearrow(self, g, out.x, out.y,
-						in.x, in.y);
+					machinewireview_drawwirearrow(self, g, out, in);						
 				}
 			}
 		}
@@ -285,7 +285,7 @@ psy_ui_RealPoint  machinewireview_centerposition(psy_ui_RealRectangle r)
 
 
 void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
-	double x1, double y1, double x2, double y2)
+	psy_ui_RealPoint p1, psy_ui_RealPoint p2)
 {			
 	psy_ui_RealPoint center;
 	psy_ui_RealPoint a, b, c;	
@@ -300,8 +300,8 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	polyInnards = psy_ui_colour_make_rgb((uint8_t)(192 * deltaColR),
 		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB)).value;
 			
-	center.x = (x2 - x1) / 2 + x1;
-	center.y = (y2 - y1) / 2 + y1;
+	center.x = (p2.x - p1.x) / 2 + p1.x;
+	center.y = (p2.y - p1.y) / 2 + p1.y;
 
 	polysize = self->skin->triangle_size;
 	a.x = -polysize/2;
@@ -311,7 +311,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	c.x = 0;
 	c.y = -polysize/2;
 
-	phi = atan2(x2 - x1, y1 - y2);
+	phi = atan2(p2.x - p1.x, p1.y - p2.y);
 	
 	tri[0] = move_point(rotate_point(a, phi), center);
 	tri[1] = move_point(rotate_point(b, phi), center);
@@ -336,14 +336,14 @@ psy_ui_RealPoint move_point(psy_ui_RealPoint pt, psy_ui_RealPoint d)
 void machinewireview_drawdragwire(MachineWireView* self, psy_ui_Graphics* g)
 {
 	if (machinewireview_wiredragging(self)) {
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
 
-		machineui = machineuis_at(self, self->dragslot);
+		machineui = (psy_ui_Component*)machineuis_at(self, self->dragslot);
 		if (machineui) {			
 			psy_ui_setcolour(g, self->skin->wirecolour);
 			psy_ui_drawline(g, 
 				machinewireview_centerposition(
-					psy_ui_component_position(&machineui->component)),
+					psy_ui_component_position(machineui)),
 				self->dragpt);
 		}
 	}
@@ -363,15 +363,15 @@ void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 	for (it = psy_table_begin(&self->machineuis);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {				
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
 		psy_ui_RealRectangle position;
 
-		machineui = (MachineUi*)psy_tableiterator_value(&it);
-		position = psy_ui_component_position(&machineui->component);
+		machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
+		position = psy_ui_component_position(machineui);
 		if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
 			psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
 				-position.top));						
-			machineui->component.vtable->ondraw(&machineui->component, g);			
+			machineui->vtable->ondraw(machineui, g);			
 			psy_ui_resetorigin(g);			
 		}
 	}	
@@ -380,7 +380,7 @@ void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 
 void machinewireview_centermaster(MachineWireView* self)
 {
-	MachineUi* machineui;	
+	psy_ui_Component* machineui;	
 
 	machineui = machineuis_at(self, psy_audio_MASTER_INDEX);
 	if (machineui) {		
@@ -388,8 +388,8 @@ void machinewireview_centermaster(MachineWireView* self)
 		psy_ui_RealSize size;
 						
 		size = psy_ui_component_sizepx(&self->component);
-		machinesize = psy_ui_component_sizepx(&machineui->component);
-		psy_ui_component_move(&machineui->component,
+		machinesize = psy_ui_component_sizepx(machineui);
+		psy_ui_component_move(machineui,
 			psy_ui_point_make(
 				psy_ui_value_makepx((size.width - machinesize.width) / 2),
 				psy_ui_value_makepx((size.height - machinesize.height) / 2)));
@@ -404,8 +404,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 		self->dragpt = psy_ui_realpoint_make(ev->pt.x, ev->pt.y);
 		self->dragslot = machinewireview_hittest(self);		
 		if (self->dragslot == psy_INDEX_INVALID) {
-			self->selectedwire = machinewireview_hittestwire(self, ev->pt.x,
-				ev->pt.y);
+			self->selectedwire = machinewireview_hittestwire(self, ev->pt);
 			if (psy_audio_wire_valid(&self->selectedwire)) {
 				machinewireview_showwireview(self, self->selectedwire);
 				psy_ui_component_invalidate(&self->component);
@@ -414,8 +413,8 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 				return;
 			}
 		} else if (machineuis_at(self, self->dragslot)) {			
-			machineuis_at(self, self->dragslot)->component.vtable->onmousedoubleclick(
-				&machineuis_at(self, self->dragslot)->component, ev);			
+			machineuis_at(self, self->dragslot)->vtable->onmousedoubleclick(
+				machineuis_at(self, self->dragslot), ev);			
 		}
 		self->dragslot = psy_INDEX_INVALID;
 		psy_ui_mouseevent_stoppropagation(ev);
@@ -437,18 +436,16 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 			psy_audio_wire_invalidate(&self->selectedwire);			
 		}
 		if (self->dragmachineui) {
-			self->dragmachineui->component.vtable->onmousedown(&
-				self->dragmachineui->component, ev);
+			self->dragmachineui->vtable->onmousedown(self->dragmachineui, ev);
 			if (ev->bubble) {
 				self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 				self->dragpt = psy_ui_realpoint_make(
-					ev->pt.x - psy_ui_component_position(&self->dragmachineui->component).left,
-					ev->pt.y - psy_ui_component_position(&self->dragmachineui->component).top);
+					ev->pt.x - psy_ui_component_position(self->dragmachineui).left,
+					ev->pt.y - psy_ui_component_position(self->dragmachineui).top);
 				psy_ui_component_capture(&self->component);				
 			}
 		} else {			
-			self->selectedwire = machinewireview_hittestwire(self, ev->pt.x,
-				ev->pt.y);			
+			self->selectedwire = machinewireview_hittestwire(self, ev->pt);			
 			if (psy_audio_wire_valid(&self->selectedwire) && ev->shift) {
 				self->dragmode = MACHINEVIEW_DRAG_LEFTCONNECTION;
 				self->dragslot = self->selectedwire.src;
@@ -461,8 +458,10 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 		}
 		psy_ui_mouseevent_stoppropagation(ev);
 	} else if (ev->button == 2) {
-		if (self->dragmachineui &&
-				psy_audio_machine_numoutputs(self->dragmachineui->machine) > 0) {
+		psy_audio_Machine* machine;
+
+		machine = psy_audio_machines_at(self->machines, self->dragslot);
+		if (machine && psy_audio_machine_numoutputs(machine) > 0) {
 			self->dragmode = MACHINEVIEW_DRAG_NEWCONNECTION;
 			psy_ui_component_capture(&self->component);
 			psy_ui_mouseevent_stoppropagation(ev);
@@ -483,8 +482,8 @@ uintptr_t machinewireview_hittest(const MachineWireView* self)
 			psy_tableiterator_inc(&it)) {	
 		psy_ui_RealRectangle r;
 
-		r = psy_ui_component_position(&((MachineUi*)
-			psy_tableiterator_value(&it))->component);
+		r = psy_ui_component_position(((psy_ui_Component*)
+			psy_tableiterator_value(&it)));
 		if (psy_ui_realrectangle_intersect(&r, self->dragpt)) {
 			rv = psy_tableiterator_key(&it);
 			break;	
@@ -496,18 +495,18 @@ uintptr_t machinewireview_hittest(const MachineWireView* self)
 void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 {		
 	if (!self->mousemoved) {
-		if (self->dragpt.x != ev->pt.x || self->dragpt.y != ev->pt.y) {
+		if (!psy_ui_realpoint_equal(&self->dragpt, &ev->pt)) {
 			self->mousemoved = TRUE;
 		} else {
 			return;
 		}
 	}	
 	if (self->dragslot != psy_INDEX_INVALID) {
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
+
 		machineui = machineuis_at(self, self->dragslot);
 		if (machineui) {
-			machineui->component.vtable->onmousemove(&machineui->component,
-				ev);
+			machineui->vtable->onmousemove(machineui, ev);
 			++self->component.opcount;
 			if (!ev->bubble) {
 				return;
@@ -519,23 +518,22 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 				self->dragmode = MACHINEVIEW_DRAG_NONE;
 			}			
 		} else if (machinewireview_dragging_connection(self)) {
-			self->dragpt.x = ev->pt.x;
-			self->dragpt.y = ev->pt.y;
+			self->dragpt = ev->pt;	
 			psy_ui_component_invalidate(&self->component);
 			++self->component.opcount;
 		}		
 	} else if (self->showwirehover) {
 		psy_audio_Wire hoverwire;
 		
-		hoverwire = machinewireview_hittestwire(self, ev->pt.x, ev->pt.y);
+		hoverwire = machinewireview_hittestwire(self, ev->pt);
 		if (psy_audio_wire_valid(&hoverwire)) {
-			MachineUi* machineui;
+			psy_ui_Component* machineui;
 
 			machineui = machineuis_at(self, hoverwire.dst);
 			if (machineui) {				
 				psy_ui_RealRectangle r;
 
-				r = psy_ui_component_position(&machineui->component);
+				r = psy_ui_component_position(machineui);
 				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
@@ -547,7 +545,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 			if (machineui) {				
 				psy_ui_RealRectangle r;
 
-				r = psy_ui_component_position(&machineui->component);
+				r = psy_ui_component_position(machineui);
 				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 					psy_audio_wire_invalidate(&self->hoverwire);
 					psy_ui_component_invalidate(&self->component);
@@ -583,13 +581,13 @@ bool machinewireview_dragging_newconnection(const MachineWireView* self)
 bool machinewireview_movemachine(MachineWireView* self, uintptr_t slot,
 	double dx, double dy)
 {
-	MachineUi* machineui;
+	psy_ui_Component* machineui;
 
 	machineui = machineuis_at(self, slot);
 	if (machineui) {
 		return machinewireview_dragmachine(self, slot,
-			psy_ui_component_position(&machineui->component).left + dx,
-			psy_ui_component_position(&machineui->component).top + dy);
+			psy_ui_component_position(machineui).left + dx,
+			psy_ui_component_position(machineui).top + dy);
 	}
 	return FALSE;
 }
@@ -597,29 +595,37 @@ bool machinewireview_movemachine(MachineWireView* self, uintptr_t slot,
 bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
 	double x, double y)
 {
-	MachineUi* machineui;
+	psy_ui_Component* machineui;
 	psy_ui_RealRectangle r_old;
 	psy_ui_RealRectangle r_new;
 
 	machineui = machineuis_at(self, slot);
 	if (machineui) {
-		r_old = psy_ui_component_position(&machineui->component);
+		psy_ui_RealPoint topleft;
+		r_old = psy_ui_component_position(machineui);
 		psy_ui_realrectangle_expand(&r_old, 10.0, 10.0, 10.0, 10.0);
-		psy_ui_component_move(&machineui->component,
+		topleft = psy_ui_realpoint_make(psy_max(0.0, x), psy_max(0.0, y));
+		psy_ui_component_move(machineui,
 			psy_ui_point_make(
-				psy_ui_value_makepx(psy_max(0.0, x)),
-				psy_ui_value_makepx(psy_max(0.0, y))));
-		if (self->statusbar && machineui->machine) {
-			static char txt[128];
-			double mx;
-			double my;
+				psy_ui_value_makepx(topleft.x),
+				psy_ui_value_makepx(topleft.y)));
+		if (self->statusbar && psy_audio_machines_at(self->machines, slot)) {			
+			psy_audio_Machine* machine;
+			char txt[128];
 
-			psy_audio_machine_position(machineui->machine, &mx, &my);
-			psy_snprintf(txt, 128, "%s (%d, %d)",
-				(psy_audio_machine_editname(machineui->machine))
-				? psy_audio_machine_editname(machineui->machine)
-				: "",
-				(int)mx, (int)my);
+			machine = psy_audio_machines_at(self->machines, slot);
+			if (machine) {
+				const char* editname;				
+				
+				editname = psy_audio_machine_editname(machine);
+				if (editname) {					
+					psy_snprintf(txt, 128, "%s (%d, %d)", editname, (int)topleft.x, (int)topleft.y);
+				} else {
+					psy_snprintf(txt, 128, "(%d, %d)", (int)topleft.x, (int)topleft.y);
+				}				
+			} else {
+				psy_snprintf(txt, 128, "(%d, %d)", (int)topleft.x, (int)topleft.y);				
+			}
 			machineviewbar_settext(self->statusbar, txt);
 		}
 		r_new = machinewireview_updaterect(self, self->dragslot);
@@ -750,7 +756,7 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 uintptr_t machinewireview_machineleft(MachineWireView* self, uintptr_t src)
 {
 	uintptr_t rv;
-	MachineUi* srcmachineui;
+	psy_ui_Component* srcmachineui;
 	double currpos;	
 
 	rv = psy_INDEX_INVALID;
@@ -759,19 +765,19 @@ uintptr_t machinewireview_machineleft(MachineWireView* self, uintptr_t src)
 		psy_TableIterator it;
 		double srcpos;
 
-		srcpos = psy_ui_component_position(&srcmachineui->component).left;
+		srcpos = psy_ui_component_position(srcmachineui).left;
 		currpos = (double)INTPTR_MAX;
 		for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			MachineUi* machineui;
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_ui_Component* machineui;
 
-			machineui = (MachineUi*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(&machineui->component).left < srcpos) {
+			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
+			if (psy_ui_component_position(machineui).left < srcpos) {
 				if (currpos == INTPTR_MAX ||
-						currpos < psy_ui_component_position(&machineui->component).left) {
+						currpos < psy_ui_component_position(machineui).left) {
 					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(&machineui->component).left;
+					currpos = psy_ui_component_position(machineui).left;
 				}
 			}
 		}
@@ -782,7 +788,7 @@ uintptr_t machinewireview_machineleft(MachineWireView* self, uintptr_t src)
 uintptr_t machinewireview_machineright(MachineWireView* self, uintptr_t src)
 {
 	uintptr_t rv;
-	MachineUi* srcmachineui;
+	psy_ui_Component* srcmachineui;
 	double currpos;
 
 	rv = psy_INDEX_INVALID;
@@ -791,19 +797,19 @@ uintptr_t machinewireview_machineright(MachineWireView* self, uintptr_t src)
 		psy_TableIterator it;
 		double srcpos;
 
-		srcpos = psy_ui_component_position(&srcmachineui->component).left;
+		srcpos = psy_ui_component_position(srcmachineui).left;
 		currpos = (double)INTPTR_MIN;
 		for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			MachineUi* machineui;
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_ui_Component* machineui;
 
-			machineui = (MachineUi*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(&machineui->component).left > srcpos) {
+			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
+			if (psy_ui_component_position(machineui).left > srcpos) {
 				if (currpos == (double)INTPTR_MIN ||
-						currpos > psy_ui_component_position(&machineui->component).left) {
+						currpos > psy_ui_component_position(machineui).left) {
 					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(&machineui->component).left;
+					currpos = psy_ui_component_position(machineui).left;
 				}
 			}
 		}
@@ -814,7 +820,7 @@ uintptr_t machinewireview_machineright(MachineWireView* self, uintptr_t src)
 uintptr_t machinewireview_machineup(MachineWireView* self, uintptr_t src)
 {
 	uintptr_t rv;
-	MachineUi* srcmachineui;
+	psy_ui_Component* srcmachineui;
 	double currpos;
 
 	rv = psy_INDEX_INVALID;
@@ -823,19 +829,19 @@ uintptr_t machinewireview_machineup(MachineWireView* self, uintptr_t src)
 		psy_TableIterator it;
 		double srcpos;				
 
-		srcpos = psy_ui_component_position(&srcmachineui->component).top;
+		srcpos = psy_ui_component_position(srcmachineui).top;
 		currpos = (double)INTPTR_MAX;
 		for (it = psy_table_begin(&self->machineuis);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
-			MachineUi* machineui;
+			psy_ui_Component* machineui;
 
-			machineui = (MachineUi*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(&machineui->component).top < srcpos) {
+			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
+			if (psy_ui_component_position(machineui).top < srcpos) {
 				if (currpos == INTPTR_MAX ||
-					currpos < psy_ui_component_position(&machineui->component).top) {
+					currpos < psy_ui_component_position(machineui).top) {
 					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(&machineui->component).top;
+					currpos = psy_ui_component_position(machineui).top;
 				}
 			}
 		}
@@ -846,7 +852,7 @@ uintptr_t machinewireview_machineup(MachineWireView* self, uintptr_t src)
 uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src)
 {
 	uintptr_t rv;
-	MachineUi* srcmachineui;
+	psy_ui_Component* srcmachineui;
 	double currpos;
 
 	rv = psy_INDEX_INVALID;
@@ -855,19 +861,19 @@ uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src)
 		psy_TableIterator it;
 		double srcpos;
 
-		srcpos = psy_ui_component_position(&srcmachineui->component).bottom;
+		srcpos = psy_ui_component_position(srcmachineui).bottom;
 		currpos = INTPTR_MIN;
 		for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			MachineUi* machineui;
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_ui_Component* machineui;
 
-			machineui = (MachineUi*)psy_tableiterator_value(&it);
-			if (psy_ui_component_position(&machineui->component).bottom > srcpos) {
+			machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
+			if (psy_ui_component_position(machineui).bottom > srcpos) {
 				if (currpos == (double)INTPTR_MIN ||
-					currpos > psy_ui_component_position(&machineui->component).bottom) {
+					currpos > psy_ui_component_position(machineui).bottom) {
 					rv = psy_tableiterator_key(&it);
-					currpos = psy_ui_component_position(&machineui->component).bottom;
+					currpos = psy_ui_component_position(machineui).bottom;
 				}
 			}
 		}
@@ -875,8 +881,7 @@ uintptr_t machinewireview_machinedown(MachineWireView* self, uintptr_t src)
 	return rv;
 }
 
-psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, double x,
-	double y)
+psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoint pt)
 {		
 	psy_audio_Wire rv;
 	psy_TableIterator it;
@@ -900,32 +905,28 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, double x,
 
 				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);											
 				if (socket->slot != psy_INDEX_INVALID) {
-					MachineUi* inmachineui;
-					MachineUi* outmachineui;
+					psy_ui_Component* inmachineui;
+					psy_ui_Component* outmachineui;
 
-					inmachineui = machineuis_at(self, socket->slot);
-					outmachineui = machineuis_at(self, slot);
+					inmachineui = (psy_ui_Component*)machineuis_at(self, socket->slot);
+					outmachineui = (psy_ui_Component*)machineuis_at(self, slot);
 					if (inmachineui && outmachineui) {
 						psy_ui_RealRectangle r;
+						psy_ui_RealRectangle inposition;
+						psy_ui_RealRectangle outposition;
 						psy_ui_RealSize out;
 						psy_ui_RealSize in;
-						double d = 4;
-						double mxout;
-						double myout;
-						double mxin;
-						double myin;
+						double d = 4;						
 
-						psy_audio_machine_position(outmachineui->machine,
-							&mxout, &myout);
-						psy_audio_machine_position(inmachineui->machine,
-							&mxin, &myin);
-
-						out = psy_ui_component_sizepx(&outmachineui->component);
-						in = psy_ui_component_sizepx(&inmachineui->component);
-						psy_ui_setrectangle(&r, x - d, y - d, 2 * d, 2 * d);
+						inposition = psy_ui_component_position(inmachineui);
+						outposition = psy_ui_component_position(outmachineui);
+						out = psy_ui_component_sizepx(outmachineui);
+						in = psy_ui_component_sizepx(inmachineui);
+						psy_ui_setrectangle(&r, pt.x - d, pt.y - d, 2 * d,
+							2 * d);
 						if (psy_ui_realrectangle_intersect_segment(&r,
-								mxout + out.width / 2, myout + out.height / 2,
-								mxin + in.width / 2, myin + in.height / 2)) {
+							outposition.left + out.width / 2, outposition.top + out.height / 2,
+							inposition.left + in.width / 2, inposition.top + in.height / 2)) {
 							psy_audio_wire_set(&rv, slot, socket->slot);
 						}						
 					}
@@ -964,14 +965,14 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 	if (machine && 
 			(!psy_audio_machines_isvirtualgenerator(self->machines, slot) ||
 			self->drawvirtualgenerators)) {
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
 
-		machineui = machineuis_insert(self, slot);
+		machineui = (psy_ui_Component*)machineuis_insert(self, slot);
 		if (machineui && !self->randominsert) {
 			psy_ui_RealSize size;			
 
-			size = psy_ui_component_sizepx(&machineui->component);
-			psy_ui_component_move(&machineui->component,
+			size = psy_ui_component_sizepx(machineui);
+			psy_ui_component_move(machineui,
 				psy_ui_point_make(
 					psy_ui_value_makepx(psy_max(0.0, self->dragpt.x - size.width / 2)),
 					psy_ui_value_makepx(psy_max(0.0, self->dragpt.y - size.height / 2))));
@@ -1061,14 +1062,10 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 			psy_ui_BACKGROUND_NONE);
 		machineui_beginvuupdate();
 		for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			MachineUi* machineui;
-
-			machineui = psy_tableiterator_value(&it);		
-			if (updatevus && machineui->slot != psy_audio_MASTER_INDEX) {			
-				psy_ui_component_invalidate(&machineui->component);			
-			}
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {							
+			psy_ui_component_invalidate((psy_ui_Component*)
+				psy_tableiterator_value(&it));
 		}		
 		psy_ui_component_update(machinewireview_base(self));		
 		psy_ui_component_setbackgroundmode(machinewireview_base(self),
@@ -1158,37 +1155,54 @@ WireFrame* machinewireview_wireframe(MachineWireView* self,
 	return rv;
 }
 
-MachineUi* machineuis_insert(MachineWireView* self, uintptr_t slot)
+psy_ui_Component* machineuis_insert(MachineWireView* self, uintptr_t slot)
 {	
-	if (psy_audio_machines_at(self->machines, slot)) {
-		MachineUi* rv;
+	if (psy_audio_machines_at(self->machines, slot)) {		
+		psy_ui_Component* newui;
 
 		if (psy_table_exists(&self->machineuis, slot)) {
 			machineuis_remove(self, slot);
 		}	
-		rv = (MachineUi*)malloc(sizeof(MachineUi));
-		if (rv) {
-			machineui_init(rv, slot, self->skin, &self->component,
-				&self->editname, self->workspace);
-			psy_table_insert(&self->machineuis, slot, rv);
+		newui = NULL;
+		if (slot == psy_audio_MASTER_INDEX) {
+			MasterUi* masterui;
+
+			masterui = (MasterUi*)malloc(sizeof(MasterUi));
+			if (masterui) {
+				masterui_init(masterui, self->skin, &self->component,
+					self->workspace);
+				newui = &masterui->component;
+			}
+		} else {
+			MachineUi* machineui;
+
+			machineui = (MachineUi*)malloc(sizeof(MachineUi));
+			if (machineui) {
+				machineui_init(machineui, slot, self->skin, &self->component,
+					&self->editname, self->workspace);
+				newui = &machineui->component;
+			}
 		}
-		return rv;
+		if (newui) {			
+			psy_table_insert(&self->machineuis, slot, newui);
+			return newui;
+		}		
 	}
 	return NULL;
 }
 
-MachineUi* machineuis_at(MachineWireView* self, uintptr_t slot)
+psy_ui_Component* machineuis_at(MachineWireView* self, uintptr_t slot)
 {
-	return psy_table_at(&self->machineuis, slot);
+	return (psy_ui_Component*)psy_table_at(&self->machineuis, slot);
 }
 
 void machineuis_remove(MachineWireView* self, uintptr_t slot)
 {
-	MachineUi* machineui;
+	psy_ui_Component* machineui;
 
-	machineui = (MachineUi*) psy_table_at(&self->machineuis, slot);
+	machineui = machineuis_at(self, slot);
 	if (machineui) {
-		machineui_dispose(machineui);
+		psy_ui_component_dispose(machineui);		
 		free(machineui);
 		psy_table_remove(&self->machineuis, slot);
 	}
@@ -1197,7 +1211,7 @@ void machineuis_remove(MachineWireView* self, uintptr_t slot)
 void machineuis_removeall(MachineWireView* self)
 {
 	psy_table_disposeall(&self->machineuis, (psy_fp_disposefunc)
-		machineui_dispose);	
+		psy_ui_component_dispose);
 	psy_table_init(&self->machineuis);
 }
 
@@ -1223,13 +1237,13 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 	uintptr_t slot)
 {
 	psy_ui_RealRectangle rv;
-	MachineUi* machineui;
+	psy_ui_Component* machineui;
 
 	machineui = machineuis_at(self, slot);
 	if (machineui) {
 		psy_audio_MachineSockets* sockets;
 
-		rv = psy_ui_component_position(&machineui->component);
+		rv = psy_ui_component_position(machineui);
 		sockets = psy_audio_connections_at(&self->machines->connections, slot);
 		if (sockets) {
 			psy_TableIterator it;
@@ -1241,13 +1255,13 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 
 				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
 				if (socket->slot != UINTPTR_MAX) {
-					MachineUi* inmachineui;
+					psy_ui_Component* inmachineui;
 
 					inmachineui = machineuis_at(self, socket->slot);
 					if (inmachineui && machineui) {
 						psy_ui_RealRectangle r;
 
-						r = psy_ui_component_position(&inmachineui->component);
+						r = psy_ui_component_position(inmachineui);
 						psy_ui_realrectangle_union(&rv, &r);
 					}
 				}
@@ -1259,13 +1273,13 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 
 				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
 				if (socket->slot != psy_INDEX_INVALID) {
-					MachineUi* outmachineui;
+					psy_ui_Component* outmachineui;
 
 					outmachineui = machineuis_at(self, socket->slot);
 					if (outmachineui && machineui) {
 						psy_ui_RealRectangle r;
 
-						r = psy_ui_component_position(&outmachineui->component);
+						r = psy_ui_component_position(outmachineui);
 						psy_ui_realrectangle_union(&rv, &r);
 					}
 				}
