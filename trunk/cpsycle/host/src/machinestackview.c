@@ -34,7 +34,7 @@ void machineuimatrix_dispose(MachineUiMatrix* self)
 
 		track = (MachineUiTrack*)psy_tableiterator_value(&it);
 		psy_table_disposeall(track, (psy_fp_disposefunc)
-			machineui_dispose);
+			psy_ui_component_dispose);
 		free(track);
 	}
 	psy_table_dispose(&self->tracks);
@@ -48,7 +48,7 @@ void machineuimatrix_clear(MachineUiMatrix* self)
 }
 
 void machineuimatrix_insert(MachineUiMatrix* self, uintptr_t trackidx, uintptr_t line,
-	MachineUi* machineui)
+	psy_ui_Component* machineui)
 {
 	MachineUiTrack* track;
 	
@@ -65,7 +65,7 @@ void machineuimatrix_insert(MachineUiMatrix* self, uintptr_t trackidx, uintptr_t
 	psy_table_insert(track, line, (void*)machineui);
 }
 
-MachineUi* machineuimatrix_at(MachineUiMatrix* self, uintptr_t trackidx, uintptr_t line)
+psy_ui_Component* machineuimatrix_at(MachineUiMatrix* self, uintptr_t trackidx, uintptr_t line)
 {	
 	MachineUiTrack* track;
 
@@ -76,7 +76,7 @@ MachineUi* machineuimatrix_at(MachineUiMatrix* self, uintptr_t trackidx, uintptr
 	if (!psy_table_exists(track, line)) {
 		return NULL;
 	}
-	return (MachineUi*)psy_table_at(track, line);
+	return (psy_ui_Component*)psy_table_at(track, line);
 }
 
 uintptr_t machineuimatrix_numtracks(const MachineUiMatrix* self)
@@ -107,9 +107,9 @@ static void machinestackview_setmachines(MachineStackView*,
 static void  machinestackview_drawmachines(MachineStackView*,
 	psy_ui_Graphics*);
 static void  machinestackview_drawsliders(MachineStackView*, psy_ui_Graphics*);
-static MachineUi* machinestackview_insert(MachineStackView*, uintptr_t slot,
+static psy_ui_Component* machinestackview_insert(MachineStackView*, uintptr_t slot,
 	uintptr_t track, uintptr_t line);
-static MachineUi* machinestackview_at(MachineStackView*, uintptr_t slot);
+static psy_ui_Component* machinestackview_at(MachineStackView*, uintptr_t slot);
 static void machinestackview_remove(MachineStackView*, uintptr_t slot);
 static void machinestackview_onmachineinsert(MachineStackView*,
 	psy_audio_Machines*, uintptr_t slot);
@@ -175,8 +175,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	machineuimatrix_init(&self->matrix);
 	psy_table_init(&self->maxlevels);
 	self->workspace = workspace;
-	self->skin = skin;
-	self->dragslot = psy_INDEX_INVALID;
+	self->skin = skin;	
 	self->dragmachineui = NULL;
 	self->vudrawupdate = FALSE;
 	self->opcount = 0;
@@ -378,7 +377,7 @@ void machinestackview_buildoutchain(MachineStackView* self, uintptr_t slot, uint
 	}
 }
 
-MachineUi* machinestackview_insert(MachineStackView* self, uintptr_t slot,
+psy_ui_Component* machinestackview_insert(MachineStackView* self, uintptr_t slot,
 	uintptr_t track, uintptr_t line)
 {	
 //	if (psy_audio_machines_at(self->machines, slot)) {
@@ -387,29 +386,28 @@ MachineUi* machinestackview_insert(MachineStackView* self, uintptr_t slot,
 		//if (psy_table_exists(&self->machineuis, slot)) {
 			//machinestackview_remove(self, slot);
 		//}
-		rv = (MachineUi*)malloc(sizeof(MachineUi));
-		if (rv) {
-			double lineheight;
-			double trackwidth;
-			uintptr_t maxlevel;
+	rv = (MachineUi*)malloc(sizeof(MachineUi));
+	if (rv) {
+		double lineheight;
+		double trackwidth;
+		uintptr_t maxlevel;
 			
-			machineui_init(rv, slot, self->skin, &self->component, NULL, self->workspace);
-			lineheight = 60;
-			trackwidth = 158;
-			rv->machinepos = FALSE;
-			maxlevel = (uintptr_t)psy_table_at(&self->maxlevels, slot);
-			psy_ui_component_move(&rv->component,
-				psy_ui_point_make(
-					psy_ui_value_makepx(100 + (double)track * trackwidth),
-					psy_ui_value_makepx((double)line * lineheight)));
-			machineuimatrix_insert(&self->matrix, track, line, rv);
-		}
-		return rv;
-	//}
-	//return NULL;
+		machineui_init(rv, slot, self->skin, &self->component, NULL, self->workspace);
+		lineheight = 60;
+		trackwidth = 158;
+		rv->intern.machinepos = FALSE;
+		maxlevel = (uintptr_t)psy_table_at(&self->maxlevels, slot);
+		psy_ui_component_move(&rv->component,
+			psy_ui_point_make(
+				psy_ui_value_makepx(100 + (double)track * trackwidth),
+				psy_ui_value_makepx((double)line * lineheight)));
+		machineuimatrix_insert(&self->matrix, track, line, &rv->component);
+		return &rv->component;
+	}	
+	return NULL;
 }
 
-MachineUi* machinestackview_at(MachineStackView* self, uintptr_t slot)
+psy_ui_Component* machinestackview_at(MachineStackView* self, uintptr_t slot)
 {
 	return 0; // psy_list_at(&self->machineuis, slot);
 }
@@ -503,19 +501,16 @@ void machinestackview_onmousedown(MachineStackView* self, psy_ui_MouseEvent* ev)
 	uintptr_t line;
 
 	line = psy_INDEX_INVALID;
-	track = psy_INDEX_INVALID;
-	self->dragslot = psy_INDEX_INVALID;
+	track = psy_INDEX_INVALID;	
 	self->dragmachineui = NULL;
 	machinestackview_hittest(self, ev->pt.x, ev->pt.y, &track, &line);
 	if (line == psy_INDEX_INVALID) {
 	} else if (ev->button == 1) {		
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
 
 		machineui = machineuimatrix_at(&self->matrix, track, line);
-		if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {	
-			machineui->component.vtable->onmousedown(
-				&machineui->component, ev);					
-			self->dragslot = machineui->slot;
+		if (machineui) {	
+			machineui->vtable->onmousedown(machineui, ev);
 			self->dragmachineui = machineui;
 		}
 	}
@@ -524,8 +519,7 @@ void machinestackview_onmousedown(MachineStackView* self, psy_ui_MouseEvent* ev)
 void machinestackview_onmousemove(MachineStackView* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->dragmachineui != NULL) {			
-		self->dragmachineui->component.vtable->onmousemove(&
-			self->dragmachineui->component, ev);		
+		self->dragmachineui->vtable->onmousemove(self->dragmachineui, ev);		
 		if (!ev->bubble) {
 			return;		
 		}
@@ -533,8 +527,7 @@ void machinestackview_onmousemove(MachineStackView* self, psy_ui_MouseEvent* ev)
 }
 
 void machinestackview_onmouseup(MachineStackView* self, psy_ui_MouseEvent* ev)
-{
-	self->dragslot = psy_INDEX_INVALID;
+{	
 	self->dragmachineui = NULL;
 }
 
@@ -545,19 +538,16 @@ void machinestackview_onmousedoubleclick(MachineStackView* self,
 	uintptr_t line;
 
 	line = psy_INDEX_INVALID;
-	track = psy_INDEX_INVALID;
-	self->dragslot = psy_INDEX_INVALID;
+	track = psy_INDEX_INVALID;	
 	self->dragmachineui = NULL;
 	machinestackview_hittest(self, ev->pt.x, ev->pt.y, &track, &line);
 	if (line == psy_INDEX_INVALID) {
 	} else if (ev->button == 1) {
-		MachineUi* machineui;
+		psy_ui_Component* machineui;
 
 		machineui = machineuimatrix_at(&self->matrix, track, line);
 		if (machineui) {
-			machineui->component.vtable->onmousedoubleclick(
-				&machineui->component, ev);
-			self->dragslot = machineui->slot;
+			machineui->vtable->onmousedoubleclick(machineui, ev);			
 			self->dragmachineui = machineui;
 		}
 	}
@@ -616,11 +606,9 @@ void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 			for (j = 0; j < machineuimatrix_numlines(&self->matrix) + 1; ++j) {
 				MachineUi* machineui;
 
-				machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);
-				if (machineui && machineui->slot != psy_audio_MASTER_INDEX) {
-					if (updatevus) {	
-						psy_ui_component_invalidate(&machineui->component);					
-					}
+				machineui = (MachineUi*)machineuimatrix_at(&self->matrix, i, j);				
+				if (updatevus) {	
+					psy_ui_component_invalidate(&machineui->component);				
 				}
 			}
 		}	

@@ -38,8 +38,8 @@ void machineuimatrix_init(MachineUiMatrix*);
 void machineuimatrix_dispose(MachineUiMatrix*);
 
 void machineuimatrix_insert(MachineUiMatrix*, uintptr_t trackidx,
-	uintptr_t line, MachineUi*);
-MachineUi* machineuimatrix_at(MachineUiMatrix*, uintptr_t trackidx,
+	uintptr_t line, psy_ui_Component*);
+psy_ui_Component* machineuimatrix_at(MachineUiMatrix*, uintptr_t trackidx,
 	uintptr_t line);
 uintptr_t machineuimatrix_numtracks(const MachineUiMatrix*);
 uintptr_t machineuimatrix_numlines(const MachineUiMatrix*);
@@ -50,9 +50,8 @@ typedef struct MachineStackView {
 	psy_ui_Component component;
 	// internal data
 	MachineUiMatrix matrix;
-	psy_Table maxlevels;	
-	uintptr_t dragslot;
-	MachineUi* dragmachineui;
+	psy_Table maxlevels;		
+	psy_ui_Component* dragmachineui;
 	bool vudrawupdate;
 	uintptr_t opcount;
 	// references

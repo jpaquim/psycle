@@ -127,6 +127,11 @@ INLINE psy_ui_RealPoint psy_ui_realpoint_zero(void)
 	return psy_ui_internal_realpoint_zero;
 }
 
+INLINE bool psy_ui_realpoint_equal(const psy_ui_RealPoint* self, const psy_ui_RealPoint* other)
+{
+	return self->x == other->x && self->y == other->y;
+}
+
 typedef struct psy_ui_RealSize {
 	double width;
 	double height;

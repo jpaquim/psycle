@@ -35,7 +35,7 @@ typedef struct MachineWireView {
 	psy_List* wireframes;
 	psy_ui_RealPoint dragpt;	
 	uintptr_t dragslot;
-	MachineUi* dragmachineui;
+	psy_ui_Component* dragmachineui;
 	MachineViewDragMode dragmode;
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
