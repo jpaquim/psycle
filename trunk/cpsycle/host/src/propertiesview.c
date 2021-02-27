@@ -52,6 +52,8 @@ static void propertiesrenderer_drawkey(PropertiesRenderer*, psy_Property*, uintp
 static void propertiesrenderer_drawvalue(PropertiesRenderer*, psy_Property*, uintptr_t column);
 static void propertiesrenderer_drawstring(PropertiesRenderer*, psy_Property*,
 	uintptr_t column);
+static void propertiesrenderer_drawfontstring(PropertiesRenderer*, psy_Property*,
+	uintptr_t column);
 static void propertiesrenderer_drawinteger(PropertiesRenderer*, psy_Property*,
 	uintptr_t column);
 static void propertiesrenderer_drawbutton(PropertiesRenderer*, psy_Property*,
@@ -110,6 +112,8 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesrenderer_ondestroy);
+	psy_ui_component_init(&self->dummy, &self->component);
+	psy_ui_component_hide(&self->dummy);
 	self->selected = 0;
 	self->keyselected = 0;
 	self->choiceproperty = 0;
@@ -427,7 +431,7 @@ void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Property* proper
 		propertiesrenderer_drawstring(self, property, column);		
 	} else
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
-		propertiesrenderer_drawstring(self, property, column);		
+		propertiesrenderer_drawfontstring(self, property, column);		
 	} else
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		propertiesrenderer_drawinteger(self, property, column);
@@ -451,8 +455,45 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* prope
 	psy_ui_textoutrectangle(self->g,
 		psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
 		psy_property_item_str(property),
-		strlen(psy_property_item_str(property)));
-	//psy_ui_setbackgroundcolour(self->g, psy_ui_colour_make(0x003E3E3E));		
+		strlen(psy_property_item_str(property)));	
+}
+
+void propertiesrenderer_drawfontstring(PropertiesRenderer* self, psy_Property* property,
+	uintptr_t column)
+{
+	psy_ui_RealRectangle r;
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font font;
+	const psy_ui_TextMetric* tm;
+	char str[128];
+	int pt;
+
+	psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_component_setfont(&self->dummy, &font);
+	tm = psy_ui_component_textmetric(&self->dummy);
+	psy_ui_font_dispose(&font);
+	psy_ui_setrectangle(&r, propertiesrenderer_columnwidth(self, column) * column,
+		self->cpy + self->centery,
+		propertiesrenderer_columnstart(self, column), self->textheight);
+	psy_ui_realrectangle_expand(&r, 0, -5, 0, 0);
+	psy_ui_textoutrectangle(self->g,
+		psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
+		fontinfo.lfFaceName,
+		strlen(fontinfo.lfFaceName));	
+	psy_ui_setrectangle(&r, propertiesrenderer_columnwidth(self, column) * column + 
+		propertiesrenderer_columnwidth(self, column) / 2,
+		self->cpy + self->centery,
+		propertiesrenderer_columnwidth(self, column) / 2, self->textheight);
+	if (fontinfo.lfHeight < 0) {
+		pt = ((tm->tmHeight - tm->tmInternalLeading) * 72)/psy_ui_logpixelsy();		
+	} else {
+		pt = tm->tmHeight;		
+	}
+	psy_snprintf(str, 128, "Size %d", (int)pt);
+	psy_ui_textoutrectangle(self->g,
+		psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
+		str, strlen(str));
 }
 
 void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* property,

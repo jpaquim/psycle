@@ -15,6 +15,7 @@
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #include "imps/win32/uiwinimpfactory.h"
+#include <Windows.h>
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 #include <curses.h>
 #include "imps/curses/uicursesimpfactory.h"
@@ -343,4 +344,32 @@ struct psy_ui_Defaults* psy_ui_appdefaults(void)
 const struct psy_ui_Defaults* psy_ui_appdefaults_const(void)
 {
 	return &psy_ui_app()->defaults;
+}
+
+int psy_ui_logpixelsx(void)
+{
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+	int rv;
+	HDC screen;	
+
+	screen = GetDC(NULL);	
+	rv = GetDeviceCaps(screen, LOGPIXELSX);
+	ReleaseDC(NULL, screen);
+	return rv;
+#endif
+	return 72;
+}
+
+int psy_ui_logpixelsy(void)
+{
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+	int rv;
+	HDC screen;
+
+	screen = GetDC(NULL);
+	rv = GetDeviceCaps(screen, LOGPIXELSY);
+	ReleaseDC(NULL, screen);
+	return rv;
+#endif
+	return 72;
 }

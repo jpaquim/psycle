@@ -40,7 +40,9 @@ void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
 typedef struct PropertiesRenderer {
 	// inherits
 	psy_ui_Component component;
-	// internal data	
+	// internal data
+	// dummy used to calculate font size
+	psy_ui_Component dummy;
 	psy_ui_Graphics* g;
 	psy_ui_RealRectangle selrect;
 	uintptr_t lastlevel;

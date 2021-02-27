@@ -29,7 +29,7 @@ extern "C" {
 // Editor/Viewer for the machines, their connections and owner of the
 // wiremonitors. Composite of Wire-/Stackview and Newmachine.
 
-// MachineStackView: displays stacks of the machines starting with their leafs
+// MachineStackPane: displays stacks of the machines starting with their leafs
 // MachineWireView:  displays and edits machines with their wires
 // NewMachine:       displays available machines to select the new machine
 // MachineView:      tabbed view with MachineStack-/MachineWireView and
@@ -40,7 +40,7 @@ extern "C" {
 // Helper
 // MachineUi:        Draws a machine with its buttons and vumeter and reacts to
 //                   ui events to solo/mute/bypass or pan the machine
-// MachineUiMatrix:  Container of MachineUis for the MachineStackView with
+// MachineUiMatrix:  Container of MachineUis for the MachineStackPane with
 //                   track and line as key and a MachineUi pointer as value
 
 // MachineView
@@ -55,8 +55,7 @@ typedef struct MachineView {
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;
 	psy_ui_Scroller scroller;
-	MachineStackView stackview;
-	psy_ui_Scroller stackscroller;
+	MachineStackView stackview;	
 	NewMachine newmachine;
 	MachineViewSkin skin;
 	// references

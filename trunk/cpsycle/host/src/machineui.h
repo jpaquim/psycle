@@ -17,9 +17,7 @@
 extern "C" {
 #endif
 
-// MachineUi
-
-// Draws a machine with its buttons and vumeter and reacts to
+// Components to draw a machine with its buttons and vumeter and reacting to
 // ui events to solo/mute/bypass or pan the machine
 
 typedef enum MachineViewDragMode {
@@ -59,6 +57,7 @@ void vudisplay_init(VuDisplay*,
 void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
 void vudisplay_draw(VuDisplay*, psy_ui_Graphics*);
 
+
 typedef struct MachineUiCommon {
 	// internal
 	int mode;
@@ -97,16 +96,34 @@ typedef struct MasterUi {
 void masterui_init(MasterUi*, MachineViewSkin*, psy_ui_Component* view,
 	Workspace*);
 
-// MachineUi
-typedef struct MachineUi {
+// GeneratorUi
+typedef struct GeneratorUi {
 	// inherits
 	psy_ui_Component component;
 	// internal
 	MachineUiCommon intern;
-} MachineUi;
+} GeneratorUi;
 
-void machineui_init(MachineUi*, uintptr_t slot, MachineViewSkin*,
+void generatorui_init(GeneratorUi*, uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+
+// EffectUi
+typedef struct EffectUi {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	MachineUiCommon intern;
+} EffectUi;
+
+void effectui_init(EffectUi*, uintptr_t slot, MachineViewSkin*,
+	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+
+// static methods
+psy_ui_Component* machineui_create(psy_audio_Machine* machine,
+	uintptr_t slot, MachineViewSkin* skin,
+	psy_ui_Component* view, psy_ui_Edit* editname,
+	bool machinepos,
+	Workspace* workspace);
 
 // vudraw optimization
 // sets a global vu update flag
@@ -115,7 +132,6 @@ void machineui_init(MachineUi*, uintptr_t slot, MachineViewSkin*,
 // methods called in ontimer of the wire-/stackview
 void machineui_beginvuupdate(void);
 void machineui_endvuupdate(void);
-
 
 #ifdef __cplusplus
 }

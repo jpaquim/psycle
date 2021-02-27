@@ -91,10 +91,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	// stackview
 	machinestackview_init(&self->stackview,
-		psy_ui_notebook_base(&self->notebook), tabbarparent, NULL,
+		psy_ui_notebook_base(&self->notebook), tabbarparent,
 		&self->skin, workspace);
-	psy_ui_scroller_init(&self->stackscroller, &self->stackview.component,
-		psy_ui_notebook_base(&self->notebook));
 	// newmachine
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
 		&self->skin, self->workspace);		
@@ -220,7 +218,7 @@ void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
 	machineviewskin_settheme(&self->skin, theme,
 		dirconfig_skins(&self->workspace->config.directories));
 	machinewireview_updateskin(&self->wireview);
-	machinestackview_updateskin(&self->stackview);
+	machinestackpane_updateskin(&self->stackview.pane);
 	newmachine_updateskin(&self->newmachine);
 	psy_ui_component_invalidate(&self->component);
 }

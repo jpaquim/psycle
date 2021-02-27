@@ -55,9 +55,11 @@
 #define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "\\Presets"
 
 #if defined(_MSC_VER) && _MSC_VER > 1200
-#define PSYCLE_DEFAULT_FONT "tahoma;-16"
+#define PSYCLE_DEFAULT_FONT "Tahoma;-16"
+#define PSYCLE_DEFAULT_PATTERN_FONT "Verdana;-16"
 #else
 #define PSYCLE_DEFAULT_FONT "tahoma;-12"
+#define PSYCLE_DEFAULT_PATTERN_FONT "verdana;-12"
 #endif
 
 #define PSYCLE_UNTITLED "Untitled.psy"
