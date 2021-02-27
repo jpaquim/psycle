@@ -40,7 +40,7 @@ void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
 		"settingsview.patternview");
 	self->patternview = pvc;
 	psy_property_settext(
-		psy_property_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
+		psy_property_append_font(pvc, "font", PSYCLE_DEFAULT_PATTERN_FONT),
 		"settingsview.font");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "smoothscroll", FALSE),

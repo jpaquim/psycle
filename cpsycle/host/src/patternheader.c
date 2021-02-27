@@ -311,14 +311,13 @@ void trackplaindraw_drawledarmed(TrackPlainDraw* self, psy_ui_Graphics* g)
 void trackplaindraw_drawselection(TrackPlainDraw* self, psy_ui_Graphics* g)
 {
 	if (self->track == self->gridstate->cursor.track) {
-		psy_ui_setcolour(g, self->gridstate->skin->font);
-		psy_ui_drawline(g, psy_ui_realpoint_zero(),
-			psy_ui_realpoint_make(
-				psy_min(
-					self->gridstate->skin->headercoords.background.dest.right -
-					self->gridstate->skin->headercoords.background.dest.left,
-					trackergridstate_trackwidth(self->gridstate, self->track)),
-				0.0));
+		psy_ui_RealRectangle r;		
+
+		r = self->coords->background.dest;
+		psy_ui_realrectangle_expand(&r, 0, -1, -1, 0);
+		r = realrectangle_zoom(r, self->zoom);
+		psy_ui_realrectangle_setheight(&r, 1.0);
+		psy_ui_drawsolidrectangle(g, r, self->gridstate->skin->font);		
 	}
 }
 

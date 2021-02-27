@@ -1162,27 +1162,11 @@ psy_ui_Component* machineuis_insert(MachineWireView* self, uintptr_t slot)
 
 		if (psy_table_exists(&self->machineuis, slot)) {
 			machineuis_remove(self, slot);
-		}	
-		newui = NULL;
-		if (slot == psy_audio_MASTER_INDEX) {
-			MasterUi* masterui;
-
-			masterui = (MasterUi*)malloc(sizeof(MasterUi));
-			if (masterui) {
-				masterui_init(masterui, self->skin, &self->component,
-					self->workspace);
-				newui = &masterui->component;
-			}
-		} else {
-			MachineUi* machineui;
-
-			machineui = (MachineUi*)malloc(sizeof(MachineUi));
-			if (machineui) {
-				machineui_init(machineui, slot, self->skin, &self->component,
-					&self->editname, self->workspace);
-				newui = &machineui->component;
-			}
-		}
+		}		
+		newui = machineui_create(
+			psy_audio_machines_at(self->machines, slot),
+			slot, self->skin, &self->component, &self->editname,
+			TRUE, self->workspace);		
 		if (newui) {			
 			psy_table_insert(&self->machineuis, slot, newui);
 			return newui;
@@ -1249,8 +1233,8 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 			psy_TableIterator it;
 
 			for (it = psy_audio_wiresockets_begin(&sockets->outputs);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
+					!psy_tableiterator_equal(&it, psy_table_end());
+					psy_tableiterator_inc(&it)) {
 				psy_audio_WireSocket* socket;
 
 				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
@@ -1267,8 +1251,8 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 				}
 			}
 			for (it = psy_audio_wiresockets_begin(&sockets->inputs);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
+					!psy_tableiterator_equal(&it, psy_table_end());
+					psy_tableiterator_inc(&it)) {
 				psy_audio_WireSocket* socket;
 
 				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
@@ -1306,11 +1290,12 @@ psy_ui_RealRectangle machinewireview_bounds(MachineWireView* self)
 
 	rv = psy_ui_realrectangle_zero();
 	for (it = psy_table_begin(&self->machineuis);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
 		psy_ui_RealRectangle r;
 
-		r = psy_ui_component_position(&((MachineUi*)psy_tableiterator_value(&it))->component);
+		r = psy_ui_component_position(
+			((psy_ui_Component*)psy_tableiterator_value(&it)));
 		psy_ui_realrectangle_union(&rv, &r);
 	}
 	psy_ui_realrectangle_expand(&rv, 0.0, 10.0, 10.0, 0.0);

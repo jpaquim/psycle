@@ -101,6 +101,8 @@ const struct psy_ui_Defaults* psy_ui_defaults(void);
 struct psy_ui_Defaults* psy_ui_appdefaults(void);
 const struct psy_ui_Defaults* psy_ui_appdefaults_const(void);
 
+int psy_ui_logpixelsx(void);
+int psy_ui_logpixelsy(void);
 
 #ifdef __cplusplus
 }
