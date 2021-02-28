@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "helpview.h"
+// host
+#include "resources/resource.h"
 
 // prototypes
 static void helpview_initbase(HelpView*, psy_ui_Component* parent);
@@ -45,8 +47,11 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, "Split [Main|Help]",
-		self, helpview_onfloatsection);	
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, "Extract Help   ",
+		self, helpview_onfloatsection);		
+	psy_ui_bitmap_loadresource(&self->floatsection.bitmapicon, IDB_VSPLIT_DARK);
+	psy_ui_bitmap_settransparency(&self->floatsection.bitmapicon,
+		psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_settextalignment(&self->floatsection,
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setalign(psy_ui_button_base(&self->floatsection),
@@ -108,7 +113,7 @@ void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* d
 		psy_ui_component_preventalign(&self->help.editor.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "Combine [Help]");
+		psy_ui_button_settext(&self->floatsection, "Combine Help");				
 	}
 }
 
@@ -123,7 +128,7 @@ void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* de
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "Split [Main|Help]");
+		psy_ui_button_settext(&self->floatsection, "Extract Help   ");		
 	}
 }
 
@@ -135,5 +140,5 @@ void helpview_onfloatsection(HelpView* self, psy_ui_Button* sender)
 	} else {
 		workspace_floatsection(self->workspace, VIEW_ID_HELPVIEW,
 			HELPVIEWSECTION_HELP);
-	}
+	}	
 }

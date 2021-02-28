@@ -492,7 +492,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							imp->component->vtable->ondraw(imp->component, &g);
 						}
 						psy_signal_emit(&imp->component->signal_draw,
-							imp->component, 1, &g);						
+							imp->component, 1, &g);
+						// draw view components
+						imp->imp.vtable->dev_draw(&imp->imp, &g);
 						// clean up font
 						if (hPrevFont) {
 							SelectObject(win_g->hdc, hPrevFont);

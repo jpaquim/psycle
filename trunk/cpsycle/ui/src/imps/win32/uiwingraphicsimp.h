@@ -31,6 +31,8 @@ typedef struct psy_ui_win_GraphicsImp {
 	bool shareddc;
 	int orgx;
 	int orgy;
+	double dorgx;
+	double dorgy;
 } psy_ui_win_GraphicsImp;
 
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc);

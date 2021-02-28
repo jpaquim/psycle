@@ -104,9 +104,7 @@ static void patternview_vtable_init(PatternView* self)
 // implementation
 void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent,	Workspace* workspace)
-{
-	psy_ui_Margin margin;
-	
+{	
 	psy_ui_component_init(&self->component, parent);
 	patternview_vtable_init(self);
 	self->component.vtable = &patternview_vtable;	
@@ -221,10 +219,9 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	patternview_inittabbar(self, tabbarparent);
 	patternview_selectdisplay(self, PATTERN_DISPLAYMODE_TRACKER);
 	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
-	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
-	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);	
-	psy_ui_margin_init_all_em(&margin, -1.0, 0.0, 0.0, 1.0);		
-	psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);
+	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);	
+	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton),
+		psy_ui_ALIGN_RIGHT);		
 	psy_signal_connect(&self->component.signal_destroy, self,
 		patternview_ondestroy);
 	psy_signal_connect(&self->contextbutton.signal_clicked,

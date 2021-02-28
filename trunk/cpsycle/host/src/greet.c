@@ -25,14 +25,12 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->headerlabel, &self->component);
 	psy_ui_component_setalign(psy_ui_label_base(&self->headerlabel),
 		psy_ui_ALIGN_TOP);
-	psy_ui_label_preventtranslation(&self->headerlabel);
 	psy_ui_component_setmargin(&self->headerlabel.component, &leftmargin);
 	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
-	psy_ui_label_settext(&self->headerlabel, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");	
-
+	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
 	psy_ui_component_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->thanks, &self->header, "Thanks! / ");
+	psy_ui_label_init_text(&self->thanks, &self->header, "greetings.thanks");
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->thanks.component, &leftmargin);	
 	psy_ui_image_init(&self->favicon, &self->header);
@@ -49,7 +47,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_component_setmargin(&self->greetz.component, &margin);
 	psy_ui_button_init_connect(&self->original, &self->component,
 		self, greet_onoriginal);
-	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+	psy_ui_button_settext(&self->original, "greetings.showargurus");
 	psy_ui_component_setalign(&self->original.component, psy_ui_ALIGN_BOTTOM);
 /*
 	//Original Arguru's Greetings.
@@ -156,9 +154,9 @@ void greet_onoriginal(Greet* self, psy_ui_Component* sender)
 	self->current = self->current == 0;
 	if (self->current) {
 		greet_build(self);
-		psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+		psy_ui_button_settext(&self->original, "greetings.showargurus");
 	} else {
 		greet_buildoriginal(self);
-		psy_ui_button_settext(&self->original, "Show Current Greetings");
+		psy_ui_button_settext(&self->original, "greetings.showcurrent");
 	}	
 }

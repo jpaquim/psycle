@@ -48,6 +48,7 @@ static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
+static psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp*);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
 
@@ -84,6 +85,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_win_g_devsetlinewidth;
 		win_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_win_g_devlinewidth;
 		win_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_setorigin)psy_ui_win_g_devsetorigin;
+		win_imp_vtable.dev_origin = (psy_ui_fp_graphicsimp_dev_origin)psy_ui_win_g_devorigin;
 		win_imp_vtable_initialized = 1;
 	}
 }
@@ -103,7 +105,9 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->hFontPrev = SelectObject(self->hdc,
 		((psy_ui_win_FontImp*) psy_ui_style(psy_ui_STYLE_COMMON)->font.imp)->hfont);
 	self->orgx = 0;
-	self->orgy = 0;	
+	self->orgy = 0;
+	self->dorgx = 0;
+	self->dorgy = 0;
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
 }
 
@@ -508,10 +512,17 @@ psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
 
 void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp* self, double x, double y)
 {
+	self->dorgx = x;
+	self->dorgy = y;
 	SetWindowOrgEx(self->hdc,
 		self->orgx + (int)x,
 		self->orgy + (int)y,
 		NULL);
+}
+
+psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp* self)
+{
+	return psy_ui_realpoint_make(self->dorgx, self->dorgy);
 }
 
 #endif

@@ -54,6 +54,7 @@ static psy_ui_Component* dev_parent(psy_ui_win_ComponentImp*);
 static void dev_setparent(psy_ui_win_ComponentImp*, psy_ui_Component* parent);
 static void dev_insert(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child,
 	psy_ui_win_ComponentImp* insertafter);
+static void dev_remove(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child);
 static void dev_setorder(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp*
 	insertafter);
 static void dev_capture(psy_ui_win_ComponentImp*);
@@ -80,6 +81,8 @@ static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
+static void dev_clear(psy_ui_win_ComponentImp*);
+static void dev_draw(psy_ui_win_ComponentImp*, psy_ui_Graphics*);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -113,6 +116,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
 			dev_setparent;
 		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)dev_insert;
+		vtable.dev_remove = (psy_ui_fp_componentimp_dev_remove)dev_remove;
 		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
 		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
 			dev_releasecapture;
@@ -144,6 +148,8 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
+		vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)dev_clear;
+		vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)dev_draw;
 		vtable_initialized = TRUE;
 	}
 }
@@ -171,6 +177,7 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->tmcachevalid = FALSE;
 	self->dbg = 0;	
 	self->visible = parent ? TRUE : FALSE;
+	self->viewcomponents = NULL;
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
@@ -267,11 +274,32 @@ void dev_dispose(psy_ui_win_ComponentImp* self)
 		DeleteObject(self->background);
 	}
 	psy_ui_componentimp_dispose(&self->imp);
+	dev_clear(self);
+}
+
+void dev_clear(psy_ui_win_ComponentImp* self)
+{ 
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+		bool deallocate;
+
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		if (deallocate) {
+			psy_ui_component_deallocate(component);
+		} else {
+			psy_ui_component_dispose(component);
+		}
+	}
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
 }
 
 psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void)
 {
-	return (psy_ui_win_ComponentImp*) malloc(sizeof(psy_ui_win_ComponentImp));
+	return (psy_ui_win_ComponentImp*)malloc(sizeof(psy_ui_win_ComponentImp));
 }
 
 psy_ui_win_ComponentImp* psy_ui_win_componentimp_allocinit(
@@ -473,30 +501,56 @@ void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent)
 void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child,
 	psy_ui_win_ComponentImp* insertafter)
 {
-	SetParent(child->hwnd, self->hwnd);
-	if (insertafter) {
-		// psy_ui_WinApp* winapp;
-		// HINSTANCE instance;
-		int err = 0;
-		SetWindowPos(
-			child->hwnd,
-			(insertafter) ? insertafter->hwnd : (HWND)NULL,
-			0, 0, 0, 0,
-			SWP_NOMOVE | SWP_NOSIZE
-		);
-		// winapp = (psy_ui_WinApp*)app.platform;
-		// psy_list_free(winapp->targetids);
-		// winapp->targetids = NULL;
+	assert(child);
+
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_list_append(&self->viewcomponents, child->component);
+	} else {
+		SetParent(child->hwnd, self->hwnd);
+		if (insertafter) {
+			// psy_ui_WinApp* winapp;
+			// HINSTANCE instance;
+			int err = 0;
+			SetWindowPos(
+				child->hwnd,
+				(insertafter) ? insertafter->hwnd : (HWND)NULL,
+				0, 0, 0, 0,
+				SWP_NOMOVE | SWP_NOSIZE
+			);
+			// winapp = (psy_ui_WinApp*)app.platform;
+			// psy_list_free(winapp->targetids);
+			// winapp->targetids = NULL;
+		}
 	}
-	
+}
+
+void dev_remove(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child)
+{
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {
+			psy_list_remove(&self->viewcomponents, p);
+			if (child->component->deallocate) {
+				psy_ui_component_deallocate(child->component);
+			} else {
+				psy_ui_component_dispose(child->component);
+			}
+		}		
+	} else {
+		assert(0);
+		// todo
+	}
 }
 
 void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp*
 	insertafter)
 {
 	SetWindowPos(
-		self->hwnd,
-		insertafter->hwnd,
+		self->hwnd, insertafter->hwnd,
 		0, 0, 0, 0,
 		SWP_NOMOVE | SWP_NOSIZE
 	);
@@ -550,6 +604,7 @@ void dev_setfont(psy_ui_win_ComponentImp* self, psy_ui_Font* source)
 psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 {	
 	psy_List* rv = 0;
+	psy_List* p = 0;
 	if (recursive == 1) {
 		EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &rv);
 	}
@@ -576,12 +631,18 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 
 				winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 				imp = psy_table_at(&winapp->selfmap, hwnd);
-				child = imp ? imp->component : 0;
+				child = imp ? imp->component : NULL;
 				if (child) {
 					psy_list_append(&rv, child);
 				}
 			}
 		}
+	}
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {		
+		psy_ui_Component* child;
+
+		child = (psy_ui_Component*)p->entry;		
+		psy_list_append(&rv, child);
 	}
 	return rv;
 }
@@ -841,6 +902,34 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 	rv = (int)GetWindowLong(self->hwnd, GWL_EXSTYLE);
 #endif
 	return rv;
+}
+
+void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = self->viewcomponents;
+	for (p = q; p != NULL; psy_list_next(&p)) {
+		psy_ui_RealRectangle position;
+		psy_ui_Component* machineui;
+
+		machineui = (psy_ui_Component*)psy_list_entry(p);
+		if ((machineui->imp->vtable->dev_flags(machineui->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			position = psy_ui_component_position(machineui);
+			if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
+				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
+					-position.top));
+				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
+				if (machineui->vtable->ondraw) {
+					machineui->vtable->ondraw(machineui, g);
+				}
+				machineui->imp->vtable->dev_draw(machineui->imp, g);
+				psy_ui_resetorigin(g);
+			}
+		}
+	}	
 }
 
 #endif

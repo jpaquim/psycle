@@ -574,6 +574,7 @@
     <Image Include="src\resources\term.bmp" />
     <Image Include="src\resources\tray-dark.bmp" />
     <Image Include="src\resources\undo-dark.bmp" />
+    <Image Include="src\resources\vsplit_dark.bmp" />
     <Image Include="src\resources\wires-dark.bmp" />
     <Image Include="tray-dark.bmp" />
     <Image Include="wires-dark.bmp" />

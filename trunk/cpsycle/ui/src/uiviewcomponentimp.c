@@ -11,6 +11,7 @@
 // prototypes
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
+static void view_dev_clear(psy_ui_ViewComponentImp*);
 static void view_dev_show(psy_ui_ViewComponentImp*);
 static void view_dev_showstate(psy_ui_ViewComponentImp*, int state);
 static void view_dev_hide(psy_ui_ViewComponentImp*);
@@ -30,6 +31,8 @@ static psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp*);
 static void view_dev_setparent(psy_ui_ViewComponentImp*, psy_ui_Component* parent);
 static void view_dev_insert(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp* child,
 	psy_ui_ViewComponentImp* insertafter);
+static void view_dev_remove(psy_ui_ViewComponentImp*,
+	psy_ui_ViewComponentImp* child);
 static void view_dev_setorder(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp*
 	insertafter);
 static void view_dev_capture(psy_ui_ViewComponentImp*);
@@ -56,6 +59,9 @@ static void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp*, psy_ui_Colour
 static void view_dev_settitle(psy_ui_ViewComponentImp*, const char* title);
 static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
+static uintptr_t view_dev_flags(const psy_ui_ComponentImp*);
+static void view_dev_draw(psy_ui_ViewComponentImp*, psy_ui_Graphics*);
+static psy_List* view_dev_children(psy_ui_ViewComponentImp*, int recursive);
 
 // VTable init
 static psy_ui_ComponentImpVTable view_imp_vtable;
@@ -65,8 +71,8 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 {
 	if (!view_imp_vtable_initialized) {
 		view_imp_vtable = *self->imp.vtable;
-		view_imp_vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)view_dev_dispose;
-		view_imp_vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)view_dev_destroy;
+		view_imp_vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)view_dev_dispose;		
+		view_imp_vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)view_dev_clear;
 		view_imp_vtable.dev_show = (psy_ui_fp_componentimp_dev_show)view_dev_show;
 		view_imp_vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
 			view_dev_showstate;
@@ -89,6 +95,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
 			view_dev_setparent;
 		view_imp_vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)view_dev_insert;
+		view_imp_vtable.dev_remove = (psy_ui_fp_componentimp_dev_remove)view_dev_remove;
 		view_imp_vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)view_dev_capture;
 		view_imp_vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
 			view_dev_releasecapture;
@@ -120,6 +127,8 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)view_dev_settitle;
 		view_imp_vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)view_dev_setfocus;
 		view_imp_vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)view_dev_hasfocus;
+		view_imp_vtable.dev_flags = (psy_ui_fp_componentimp_dev_flags)view_dev_flags;
+		view_imp_vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)view_dev_draw;
 		view_imp_vtable_initialized = TRUE;
 	}
 }
@@ -140,14 +149,38 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->imp.vtable = &view_imp_vtable;
 	self->view = view;
 	self->component = component;
+	if (parent) {
+		parent->vtable->dev_insert(parent, &self->imp, NULL);
+	}
 	psy_ui_realrectangle_init_all(&self->position,
 		psy_ui_realpoint_make(x, y),
 		psy_ui_realsize_make(width, height));
+	self->viewcomponents = NULL;
 }
 
 void view_dev_dispose(psy_ui_ViewComponentImp* self)
-{
+{	
 	psy_ui_componentimp_dispose(&self->imp);
+}
+
+void view_dev_clear(psy_ui_ViewComponentImp* self)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+		bool deallocate;
+
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		if (deallocate) {
+			psy_ui_component_deallocate(component);
+		} else {
+			psy_ui_component_dispose(component);
+		}
+	}
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
 }
 
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_alloc(void)
@@ -281,6 +314,31 @@ void view_dev_setparent(psy_ui_ViewComponentImp* self, psy_ui_Component* parent)
 void view_dev_insert(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child,
 	psy_ui_ViewComponentImp* insertafter)
 {
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_list_append(&self->viewcomponents, child->component);
+	}
+}
+
+void view_dev_remove(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child)
+{
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {
+			psy_list_remove(&self->viewcomponents, p);
+			if (child->component->deallocate) {
+				psy_ui_component_deallocate(child->component);
+			} else {
+				psy_ui_component_dispose(child->component);
+			}
+		}
+	} else {
+		assert(0);
+		// todo
+	}
 }
 
 void view_dev_setorder(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp*
@@ -317,12 +375,6 @@ void view_dev_update(psy_ui_ViewComponentImp* self)
 
 void view_dev_setfont(psy_ui_ViewComponentImp* self, psy_ui_Font* source)
 {
-}
-
-psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
-{
-	psy_List* rv = 0;
-	return rv;
 }
 
 void view_dev_enableinput(psy_ui_ViewComponentImp* self)
@@ -377,4 +429,53 @@ void view_dev_setfocus(psy_ui_ViewComponentImp* self)
 int view_dev_hasfocus(psy_ui_ViewComponentImp* self)
 {
 	return FALSE;
+}
+
+uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
+{
+	return psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN;
+}
+
+void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = self->viewcomponents;
+	for (p = q; p != NULL; psy_list_next(&p)) {
+		psy_ui_RealRectangle position;
+		psy_ui_Component* machineui;
+
+		machineui = (psy_ui_Component*)psy_list_entry(p);
+		if ((machineui->imp->vtable->dev_flags(machineui->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			position = psy_ui_component_position(machineui);
+			if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
+				psy_ui_RealPoint origin;
+
+				origin = psy_ui_origin(g);
+				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
+					-position.top + origin.y));
+				if (machineui->vtable->ondraw) {
+					machineui->vtable->ondraw(machineui, g);
+				}
+				machineui->imp->vtable->dev_draw(machineui->imp, g);
+				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));				
+			}
+		}
+	}	
+}
+
+psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
+{
+	psy_List* rv = 0;
+	psy_List* p = 0;
+	
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+
+		child = (psy_ui_Component*)p->entry;
+		psy_list_append(&rv, child);
+	}
+	return rv;
 }
