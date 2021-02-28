@@ -105,8 +105,8 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 			psy_ui_value_makeew(1.0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0)));		
 	// Tempo
-	intedit_init_connect(&self->tempo, &self->speedbar, "songproperties.tempo", 32, 32, 999,
-		self, songpropertiesview_ontempoeditchange);
+	intedit_init_connect(&self->tempo, &self->speedbar, "songproperties.tempo",
+		32, 32, 999, self, songpropertiesview_ontempoeditchange);
 	intedit_init_connect(&self->lpb, &self->speedbar, "songproperties.lpb",
 		1, 1, 32, self, songpropertiesview_onlpbeditchange);
 	intedit_init_connect(&self->tpb, &self->speedbar, "songproperties.tpb",
