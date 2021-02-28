@@ -366,7 +366,9 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {	
 	self->imp->vtable->dev_setposition(self->imp, topleft, size);
-	if (!psy_ui_app()->alignvalid) {		
+	if (!psy_ui_app()->alignvalid || 
+		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {		
 		if (self->alignchildren) {
 			psy_ui_component_align(self);
 		}		
@@ -461,6 +463,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preventpreferredsize = 0;
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
+	self->deallocate = FALSE;
 	psy_ui_margin_init(&self->margin);		
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->insertaligntype = psy_ui_ALIGN_NONE;
@@ -911,6 +914,7 @@ static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { 
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
 static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }
 static void dev_insert(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child, psy_ui_ComponentImp* insertafter) { }
+static void dev_remove(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child) { }
 static void dev_setorder(psy_ui_ComponentImp* self, psy_ui_ComponentImp* insertafter) { }
 static void dev_capture(psy_ui_ComponentImp* self) { }
 static void dev_releasecapture(psy_ui_ComponentImp* self) { }
@@ -958,6 +962,9 @@ static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
 static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
+static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
+static void dev_clear(psy_ui_ComponentImp* self) {  }
+static void dev_draw(psy_ui_ComponentImp* self, psy_ui_Graphics* g) {  }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -985,6 +992,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_parent = dev_parent;
 		imp_vtable.dev_setparent = dev_setparent;
 		imp_vtable.dev_insert = dev_insert;
+		imp_vtable.dev_remove = dev_remove;		
 		imp_vtable.dev_setorder = dev_setorder;
 		imp_vtable.dev_capture = dev_capture;
 		imp_vtable.dev_releasecapture = dev_releasecapture;
@@ -1006,6 +1014,9 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_setfocus = dev_setfocus;
 		imp_vtable.dev_hasfocus = dev_hasfocus;
 		imp_vtable.dev_platform = dev_platform;
+		imp_vtable.dev_flags = dev_flags;
+		imp_vtable.dev_clear = dev_clear;
+		imp_vtable.dev_draw = dev_draw;
 	}
 }
 

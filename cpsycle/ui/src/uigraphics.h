@@ -74,6 +74,7 @@ typedef void (*psy_ui_fp_graphics_drawarc)(struct psy_ui_Graphics*,
 typedef void (*psy_ui_fp_graphics_setlinewidth)(struct psy_ui_Graphics*, uintptr_t width);
 typedef uintptr_t (*psy_ui_fp_graphics_linewidth)(struct psy_ui_Graphics*);
 typedef void (*psy_ui_fp_graphics_dev_setorigin)(struct psy_ui_Graphics*, double x, double y);
+typedef psy_ui_RealPoint (*psy_ui_fp_graphics_dev_origin)(const struct psy_ui_Graphics*);
 
 typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_dispose dispose;
@@ -101,6 +102,7 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_setlinewidth setlinewidth;
 	psy_ui_fp_graphics_linewidth linewidth;
 	psy_ui_fp_graphics_dev_setorigin setorigin;
+	psy_ui_fp_graphics_dev_origin origin;
 } psy_ui_GraphicsVTable;
 
 struct psy_ui_GraphicsImp;
@@ -264,6 +266,12 @@ INLINE void psy_ui_setorigin(psy_ui_Graphics* self, psy_ui_RealPoint origin)
 {
 	self->vtable->setorigin(self, origin.x, origin.y);
 }
+
+INLINE psy_ui_RealPoint psy_ui_origin(const psy_ui_Graphics* self)
+{
+	return self->vtable->origin(self);
+}
+
 INLINE void psy_ui_resetorigin(psy_ui_Graphics* self)
 {
 	self->vtable->setorigin(self, psy_ui_realpoint_zero().x,
@@ -309,6 +317,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawarc)(struct psy_ui_GraphicsImp*,
 typedef void (*psy_ui_fp_graphicsimp_dev_setlinewidth)(struct psy_ui_GraphicsImp*, uintptr_t width);
 typedef unsigned int (*psy_ui_fp_graphicsimp_dev_linewidth)(struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_setorigin)(struct psy_ui_GraphicsImp*, double x, double y);
+typedef psy_ui_RealPoint (*psy_ui_fp_graphicsimp_dev_origin)(const struct psy_ui_GraphicsImp*);
 
 typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_dispose dev_dispose;
@@ -336,6 +345,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_setlinewidth dev_setlinewidth;
 	psy_ui_fp_graphicsimp_dev_linewidth dev_linewidth;
 	psy_ui_fp_graphicsimp_dev_setorigin dev_setorigin;
+	psy_ui_fp_graphicsimp_dev_origin dev_origin;
 } psy_ui_GraphicsImpVTable;
 
 typedef struct psy_ui_GraphicsImp {

@@ -132,9 +132,12 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	} else {
 		text = self->text;
 	}
+	if (self->component.debugflag == 3000) {
+		self = self;
+	}
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
 	if (self->charnumber == 0) {		
-		if (psy_strlen(self->text) == 0) {
+		if (psy_strlen(text) == 0) {
 			rv->width = psy_ui_value_makepx(0);
 		} else {
 			psy_ui_Size size;

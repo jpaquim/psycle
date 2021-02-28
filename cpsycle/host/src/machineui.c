@@ -163,6 +163,8 @@ static void masterui_invalidate(MasterUi*);
 static void masterui_onshowparameters(MasterUi*, Workspace* sender,
 	uintptr_t slot);
 static void masterui_showparameters(MasterUi*, psy_ui_Component* parent);
+static void masterui_onpreferredsize(MasterUi*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 // vtable
 static psy_ui_ComponentVtable masterui_vtable;
 static psy_ui_ComponentVtable masterui_super_vtable;
@@ -180,13 +182,16 @@ static psy_ui_ComponentVtable* masterui_vtable_init(MasterUi* self)
 		masterui_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			masterui_onmousedoubleclick;
 		masterui_vtable.move = (psy_ui_fp_component_move)masterui_move;
-		masterui_vtable.invalidate = (psy_ui_fp_component_invalidate)masterui_invalidate;
+		masterui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+			masterui_invalidate;
+		masterui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			masterui_onpreferredsize;
 		masterui_vtable_initialized = TRUE;
 	}
 	return &masterui_vtable;
 }
 // implementation
-void masterui_init(MasterUi* self, MachineViewSkin* skin,
+void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* skin,
 	psy_ui_Component* view, Workspace* workspace)
 {
 	assert(self);
@@ -197,7 +202,8 @@ void masterui_init(MasterUi* self, MachineViewSkin* skin,
 
 	self->component.imp = (psy_ui_ComponentImp*)
 		psy_ui_viewcomponentimp_allocinit(
-			&self->component, view->imp, view, "", 0, 0, 100, 100, 0, 0);
+			&self->component, (parent) ? parent->imp : NULL,
+			view, "", 0, 0, 100, 100, 0, 0);
 	psy_ui_component_init_imp(&self->component, view,
 		self->component.imp);
 	masterui_vtable_init(self);
@@ -359,6 +365,14 @@ void masterui_onshowparameters(MasterUi* self, Workspace* sender,
 	}
 }
 
+void masterui_onpreferredsize(MasterUi* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_RealSize sizepx;
+	sizepx = psy_ui_realrectangle_size(&self->intern.coords->background.dest);
+	*rv = psy_ui_size_makepx(sizepx.width, sizepx.height);
+}
+
 // GeneratorUi
 
 // GeneratorUi
@@ -395,6 +409,8 @@ static void generatorui_invalidate(GeneratorUi*);
 static void generatorui_onshowparameters(GeneratorUi*, Workspace* sender,
 	uintptr_t slot);
 static void generatorui_showparameters(GeneratorUi*, psy_ui_Component* parent);
+static void generatorui_onpreferredsize(GeneratorUi*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 // vtable
 static psy_ui_ComponentVtable generatorui_vtable;
 static psy_ui_ComponentVtable generatorui_super_vtable;
@@ -416,12 +432,15 @@ static psy_ui_ComponentVtable* generatorui_vtable_init(GeneratorUi* self)
 			generatorui_onmousedoubleclick;
 		generatorui_vtable.move = (psy_ui_fp_component_move)generatorui_move;
 		generatorui_vtable.invalidate = (psy_ui_fp_component_invalidate)generatorui_invalidate;
+		generatorui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			generatorui_onpreferredsize;
 		generatorui_vtable_initialized = TRUE;
 	}
 	return &generatorui_vtable;
 }
 // implementation
-void generatorui_init(GeneratorUi* self, uintptr_t slot, MachineViewSkin* skin,
+void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
+	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace* workspace)
 {
 	assert(self);
@@ -432,7 +451,8 @@ void generatorui_init(GeneratorUi* self, uintptr_t slot, MachineViewSkin* skin,
 
 	self->component.imp = (psy_ui_ComponentImp*)
 		psy_ui_viewcomponentimp_allocinit(
-			&self->component, view->imp, view, "", 0, 0, 100, 100, 0, 0);
+			&self->component, (parent) ? parent->imp : NULL, view, "",
+			0, 0, 100, 100, 0, 0);
 	psy_ui_component_init_imp(&self->component, view,
 		self->component.imp);
 	generatorui_vtable_init(self);
@@ -899,6 +919,14 @@ void generatorui_onshowparameters(GeneratorUi* self, Workspace* sender,
 	}
 }
 
+void generatorui_onpreferredsize(GeneratorUi* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_RealSize sizepx;
+	sizepx = psy_ui_realrectangle_size(&self->intern.coords->background.dest);
+	*rv = psy_ui_size_makepx(sizepx.width, sizepx.height);
+}
+
 // EffectUi
 static void effectui_dispose(EffectUi*);
 static void effectui_initsize(EffectUi*);
@@ -932,6 +960,8 @@ static void effectui_invalidate(EffectUi*);
 static void effectui_onshowparameters(EffectUi*, Workspace* sender,
 	uintptr_t slot);
 static void effectui_showparameters(EffectUi*, psy_ui_Component* parent);
+static void effectui_onpreferredsize(EffectUi*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 // vtable
 static psy_ui_ComponentVtable effectui_vtable;
 static psy_ui_ComponentVtable effectui_super_vtable;
@@ -952,13 +982,17 @@ static psy_ui_ComponentVtable* effectui_vtable_init(EffectUi* self)
 		effectui_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
 			effectui_onmousedoubleclick;
 		effectui_vtable.move = (psy_ui_fp_component_move)effectui_move;
-		effectui_vtable.invalidate = (psy_ui_fp_component_invalidate)effectui_invalidate;
+		effectui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+			effectui_invalidate;
+		effectui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			effectui_onpreferredsize;
 		effectui_vtable_initialized = TRUE;
 	}
 	return &effectui_vtable;
 }
 // implementation
-void effectui_init(EffectUi* self, uintptr_t slot, MachineViewSkin* skin,
+void effectui_init(EffectUi* self, psy_ui_Component* parent,
+	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace* workspace)
 {
 	assert(self);
@@ -969,7 +1003,8 @@ void effectui_init(EffectUi* self, uintptr_t slot, MachineViewSkin* skin,
 
 	self->component.imp = (psy_ui_ComponentImp*)
 		psy_ui_viewcomponentimp_allocinit(
-			&self->component, view->imp, view, "", 0, 0, 100, 100, 0, 0);
+			&self->component, (parent) ? parent->imp : NULL, view, "",
+			0, 0, 100, 100, 0, 0);
 	psy_ui_component_init_imp(&self->component, view,
 		self->component.imp);
 	effectui_vtable_init(self);
@@ -1447,6 +1482,14 @@ void effectui_onshowparameters(EffectUi* self, Workspace* sender,
 	}
 }
 
+void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_RealSize sizepx;
+	sizepx = psy_ui_realrectangle_size(&self->intern.coords->background.dest);
+	*rv = psy_ui_size_makepx(sizepx.width, sizepx.height);
+}
+
 // static methods
 
 void machineui_beginvuupdate(void)
@@ -1460,7 +1503,8 @@ void machineui_endvuupdate(void)
 }
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
-	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* view,
+	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* parent,
+	psy_ui_Component* view,
 	psy_ui_Edit* editname, bool machinepos, Workspace* workspace)
 {	
 	psy_ui_Component* newui;
@@ -1471,7 +1515,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		masterui = (MasterUi*)malloc(sizeof(MasterUi));
 		if (masterui) {
-			masterui_init(masterui, skin, view, workspace);
+			masterui_init(masterui, parent, skin, view, workspace);
 			masterui->intern.machinepos = machinepos;
 			newui = &masterui->component;
 		}
@@ -1480,7 +1524,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		effectui = (EffectUi*)malloc(sizeof(EffectUi));
 		if (effectui) {
-			effectui_init(effectui, slot, skin, view, editname, workspace);
+			effectui_init(effectui, parent, slot, skin, view, editname, workspace);
 			effectui->intern.machinepos = machinepos;
 			newui = &effectui->component;
 		}
@@ -1489,10 +1533,14 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
 		if (generatorui) {
-			generatorui_init(generatorui, slot, skin, view, editname, workspace);
+			generatorui_init(generatorui, parent, slot, skin, view, editname, workspace);
 			generatorui->intern.machinepos = machinepos;
 			newui = &generatorui->component;
 		}
 	}	
+	if (newui) {
+		newui->deallocate = TRUE;
+	}
 	return newui;	
 }
+

@@ -59,6 +59,16 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "greetings", "Greetings");
 	psy_property_set_str(section, "contributors-credits", "Contributors / Credits");
 	psy_property_set_str(section, "ok", "OK");
+	// Greetings
+	section = psy_property_append_section(lang, "greetings");
+	psy_property_set_str(section, "thanks", "Thanks! / ");
+	psy_property_set_str(section, "wantstothank",
+		"Psycledelics, the Community, wants to thank the following people "
+		"for their contributions in the developement of Psycle");
+	psy_property_set_str(section, "showargurus",
+		"Show Original Arguru's Greetings");
+	psy_property_set_str(section, "showcurrent",
+		"Show Current Greetings");	
 	// Machinebar
 	section = psy_property_append_section(lang, "machinebar");
 	psy_property_set_str(section, "gear", "Gear Rack");
@@ -148,6 +158,18 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "ram", "Memoria fisica");
 	psy_property_set_str(section, "swap", "Page File (Swap)");
 	psy_property_set_str(section, "vram", "Virtual Memory");
+	// song properties
+	section = psy_property_append_section(lang, "songproperties");
+	psy_property_set_str(section, "title", "Song Title");
+	psy_property_set_str(section, "credits", "Credits");
+	psy_property_set_str(section, "speed", "Speed");
+	psy_property_set_str(section, "tempo", "Tempo");
+	psy_property_set_str(section, "lpb", "Lines Per Beat");
+	psy_property_set_str(section, "tpb", "Ticks Per Beat");
+	psy_property_set_str(section, "etpb", "Extra Ticks Per Beat");
+	psy_property_set_str(section, "realtempo", "Real Tempo");
+	psy_property_set_str(section, "realtpb", "Real Ticks Per Beat");
+	psy_property_set_str(section, "extcomments", "Extended Comments");	
 	// settingsview
 	section = psy_property_append_section(lang, "settingsview");
 	// Metronome	
@@ -409,7 +431,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "new", "New");
 	psy_property_set_str(section, "clone", "Clone");
 	psy_property_set_str(section, "del", "Delete");
-	psy_property_set_str(section, "new-trk", "New Track");
+	psy_property_set_str(section, "new-trk", "+ New Track");
 	psy_property_set_str(section, "del-trk", "Del Track");
 	psy_property_set_str(section, "clear", "Clear");
 	psy_property_set_str(section, "rename", "Rename");
@@ -421,6 +443,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "hideseqeditor", "Hide SequenceEditor");
 	psy_property_set_str(section, "showstepsequencer", "Show Stepsequencer");
 	psy_property_set_str(section, "hidestepsequencer", "Hide Stepsequencer");
+    // NewMachine	
 	section = psy_property_append_section(lang, "newmachine");
 	psy_property_set_str(section, "all", "All");
 	psy_property_set_str(section, "favorites", "Favorites");

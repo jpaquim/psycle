@@ -23,26 +23,6 @@ extern "C" {
 #endif
 
 // MachineStackPane: displays stacks of the machines starting with their leafs
-// MachineUiMatrix:  Container of MachineUis for the MachineStackPane with
-//                   track and line as key and a MachineUi pointer as value
-
-// MachineUiMatrix
-typedef psy_Table MachineUiTrack;
-
-typedef struct MachineUiMatrix {
-	psy_Table tracks;
-	uintptr_t maxlines;
-} MachineUiMatrix;
-
-void machineuimatrix_init(MachineUiMatrix*);
-void machineuimatrix_dispose(MachineUiMatrix*);
-
-void machineuimatrix_insert(MachineUiMatrix*, uintptr_t trackidx,
-	uintptr_t line, psy_ui_Component*);
-psy_ui_Component* machineuimatrix_at(MachineUiMatrix*, uintptr_t trackidx,
-	uintptr_t line);
-uintptr_t machineuimatrix_numtracks(const MachineUiMatrix*);
-uintptr_t machineuimatrix_numlines(const MachineUiMatrix*);
 
 // MachineStackInputs
 typedef struct MachineStackDesc {
@@ -55,11 +35,11 @@ typedef struct MachineStackDesc {
 
 void machinestackdesc_init(MachineStackDesc*, psy_ui_Component* parent);
 
+
 // MachineStackInputs
 typedef struct MachineStackInputs {
 	// inherits
-	psy_ui_Component component;
-	psy_List* components;
+	psy_ui_Component component;	
 	// references
 	psy_audio_Machines* machines;
 	Workspace* workspace;
@@ -75,8 +55,6 @@ typedef struct MachineStackPane {
 	// inherits
 	psy_ui_Component component;
 	// internal data
-	MachineUiMatrix matrix;
-	psy_Table maxlevels;		
 	psy_ui_Component* dragmachineui;
 	bool vudrawupdate;
 	uintptr_t opcount;
@@ -92,13 +70,22 @@ void machinestackpane_init(MachineStackPane*, psy_ui_Component* parent,
 void machinestackpane_updateskin(MachineStackPane*);
 
 
-// MachineStackInputs
+// MachineStackVolumes
 typedef struct MachineStackVolumes {
 	// inherits
 	psy_ui_Component component;
 } MachineStackVolumes;
 
 void machinestackvolumes_init(MachineStackVolumes*, psy_ui_Component* parent);
+
+// MachineStackPaneTrack
+typedef struct MachineStackPaneTrack {
+	// inherits
+	psy_ui_Component component;
+} MachineStackPaneTrack;
+
+void machinestackpanetrack_init(MachineStackPaneTrack*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 
 // MachineStackPane
 typedef struct MachineStackView {

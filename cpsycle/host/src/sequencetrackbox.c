@@ -98,7 +98,7 @@ void sequencetrackbox_draw(SequenceTrackBox* self, psy_ui_Graphics* g)
 				(int)(((self->position.right - self->position.left) -
 				self->tm->tmAveCharWidth * 14) / 2),
 			self->position.top + centery,
-			"+ New Track");
+			psy_ui_translate("sequencerview.new-trk"));
 	}
 }
 

@@ -182,8 +182,7 @@ void machinewireview_ondestroy(MachineWireView* self)
 		psy_signal_disconnect_context(
 			&psy_audio_machines_master(self->machines)->signal_worked, self);
 	}	
-	psy_table_disposeall(&self->machineuis, (psy_fp_disposefunc)
-		psy_ui_component_dispose);
+	psy_table_dispose(&self->machineuis);	
 	psy_list_deallocate(&self->wireframes, (psy_fp_disposefunc)
 		psy_ui_component_destroy);	
 }
@@ -211,8 +210,7 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 {	
 	if (!self->vudrawupdate) {
 		machinewireview_drawwires(self, g);
-	}
-	machinewireview_drawmachines(self, g);
+	}	
 	if (!self->vudrawupdate) {
 		machinewireview_drawdragwire(self, g);
 	}
@@ -355,28 +353,6 @@ bool machinewireview_wiredragging(const MachineWireView* self)
 		self->dragmode >= MACHINEVIEW_DRAG_NEWCONNECTION &&
 		self->dragmode <= MACHINEVIEW_DRAG_RIGHTCONNECTION;
 }
-
-void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
-{
-	psy_TableIterator it;
-		
-	for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {				
-		psy_ui_Component* machineui;
-		psy_ui_RealRectangle position;
-
-		machineui = (psy_ui_Component*)psy_tableiterator_value(&it);
-		position = psy_ui_component_position(machineui);
-		if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
-			psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
-				-position.top));						
-			machineui->vtable->ondraw(machineui, g);			
-			psy_ui_resetorigin(g);			
-		}
-	}	
-}
-
 
 void machinewireview_centermaster(MachineWireView* self)
 {
@@ -1165,7 +1141,7 @@ psy_ui_Component* machineuis_insert(MachineWireView* self, uintptr_t slot)
 		}		
 		newui = machineui_create(
 			psy_audio_machines_at(self->machines, slot),
-			slot, self->skin, &self->component, &self->editname,
+			slot, self->skin, &self->component, &self->component, &self->editname,
 			TRUE, self->workspace);		
 		if (newui) {			
 			psy_table_insert(&self->machineuis, slot, newui);
@@ -1186,17 +1162,15 @@ void machineuis_remove(MachineWireView* self, uintptr_t slot)
 
 	machineui = machineuis_at(self, slot);
 	if (machineui) {
-		psy_ui_component_dispose(machineui);		
-		free(machineui);
 		psy_table_remove(&self->machineuis, slot);
+		psy_ui_component_remove(&self->component, machineui);		
 	}
 }
 
 void machineuis_removeall(MachineWireView* self)
 {
-	psy_table_disposeall(&self->machineuis, (psy_fp_disposefunc)
-		psy_ui_component_dispose);
-	psy_table_init(&self->machineuis);
+	psy_ui_component_clear(&self->component);
+	psy_table_clear(&self->machineuis);	
 }
 
 void machinewireview_showvirtualgenerators(MachineWireView* self)
