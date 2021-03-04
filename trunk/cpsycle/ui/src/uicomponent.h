@@ -397,6 +397,10 @@ typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_draw)(struct psy_ui_ComponentImp*, psy_ui_Graphics*);
+typedef void (*psy_ui_fp_componentimp_dev_mousedown)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_componentimp_dev_mouseup)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_componentimp_dev_mousemove)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_componentimp_dev_mousedoubleclick)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 
 typedef struct {	
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
@@ -444,6 +448,10 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_flags dev_flags;
 	psy_ui_fp_componentimp_dev_clear dev_clear;
 	psy_ui_fp_componentimp_dev_draw dev_draw;
+	psy_ui_fp_componentimp_dev_mousedown dev_mousedown;
+	psy_ui_fp_componentimp_dev_mouseup dev_mouseup;
+	psy_ui_fp_componentimp_dev_mousemove dev_mousemove;
+	psy_ui_fp_componentimp_dev_mousedoubleclick dev_mousedoubleclick;
 } psy_ui_ComponentImpVTable;
 
 typedef struct psy_ui_ComponentImp {

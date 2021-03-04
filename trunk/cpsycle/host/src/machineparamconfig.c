@@ -279,3 +279,59 @@ void machineparamconfig_releaseskin(void)
 		paramskin_initialized = 0;
 	}
 }
+
+psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm, uintptr_t paramtype,
+	bool issmall)
+{
+	static float SMALLDIV = 1.6f;
+	psy_ui_RealSize rv;
+
+	assert(skin);
+	assert(tm);
+
+	switch (paramtype) {
+	case MPF_IGNORE:
+		rv.height = 0;
+		rv.width = 0;
+		break;
+	case MPF_SLIDERCHECK:
+		rv.height = psy_max(psy_ui_realrectangle_height(&skin->checkoff.dest),
+			tm->tmHeight);
+		rv.width = psy_ui_realrectangle_height(&skin->checkoff.dest) +
+			tm->tmAveCharWidth * 5;
+		break;
+	case MPF_SLIDER:
+		rv.height = psy_ui_realrectangle_height(&skin->slider.dest);
+		rv.width = psy_ui_realrectangle_width(&skin->slider.dest);
+		if (rv.width < tm->tmAveCharWidth * 30) {
+			rv.width = tm->tmAveCharWidth * 30;
+		}
+		if (issmall) {
+			rv.width = rv.width / SMALLDIV;
+		}
+		if (rv.width < psy_ui_realrectangle_width(&skin->vuon.dest) +
+			psy_ui_realrectangle_width(&skin->checkoff.dest) + 50 +
+			tm->tmAveCharWidth * 5) {
+			rv.width = psy_ui_realrectangle_width(&skin->vuon.dest) +
+				psy_ui_realrectangle_width(&skin->checkoff.dest) + 50 +
+				tm->tmAveCharWidth * 5;
+		}
+		break;
+	case MPF_SLIDERLEVEL:
+		rv.height = psy_ui_realrectangle_height(&skin->vuon.dest);
+		rv.width = psy_ui_realrectangle_width(&skin->slider.dest);
+		if (issmall) {
+			rv.width = rv.width / SMALLDIV;
+		}
+		break;
+	default:
+		rv.width = tm->tmAveCharWidth * 30;
+		rv.height = tm->tmHeight * 2;
+		if (issmall) {
+			rv.width = rv.width / SMALLDIV;
+		}
+		break;
+	}
+	return rv;
+}
+

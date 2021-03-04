@@ -964,7 +964,11 @@ static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
 static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
 static uintptr_t dev_flags(const psy_ui_ComponentImp* self) { return 0; }
 static void dev_clear(psy_ui_ComponentImp* self) {  }
-static void dev_draw(psy_ui_ComponentImp* self, psy_ui_Graphics* g) {  }
+static void dev_draw(psy_ui_ComponentImp* self, psy_ui_Graphics* g) { }
+static void dev_mousedown(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
+static void dev_mouseup(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
+static void dev_mousemove(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
+static void dev_mousedoubleclick(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -1017,6 +1021,10 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_flags = dev_flags;
 		imp_vtable.dev_clear = dev_clear;
 		imp_vtable.dev_draw = dev_draw;
+		imp_vtable.dev_mouseup = dev_mouseup;
+		imp_vtable.dev_mousedown = dev_mousedown;
+		imp_vtable.dev_mousemove = dev_mousemove;
+		imp_vtable.dev_mousedoubleclick = dev_mousedoubleclick;
 	}
 }
 

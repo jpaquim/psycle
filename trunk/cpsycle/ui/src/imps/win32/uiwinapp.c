@@ -664,6 +664,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						GetKeyState(VK_CONTROL) < 0);
 					adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
 					//psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
+					imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove,
 						imp->component, 1, &ev);					
@@ -880,11 +881,34 @@ void handle_mouseevent(psy_ui_Component* component,
 		GetKeyState(VK_CONTROL) < 0);
 	adjustcoordinates(component, &ev.pt.x, &ev.pt.y);
 	psy_ui_mouseevent_settarget(&ev, eventtarget(component));
+	switch (message) {
+	case WM_LBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONUP:
+		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);
+		break;
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		winimp->imp.vtable->dev_mousedown(&winimp->imp, &ev);
+		break;
+	case WM_MOUSEMOVE:
+		winimp->imp.vtable->dev_mousemove(&winimp->imp, &ev);
+		break;
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDBLCLK:
+		winimp->imp.vtable->dev_mousedoubleclick(&winimp->imp, &ev);
+		break;
+	default:
+		break;
+	}
 	fp(component, &ev);
 	psy_signal_emit(signal, component, 1, &ev);
 	if (ev.bubble != FALSE) {
 		sendmessagetoparent(winimp, message, wParam, lParam);
 	}	
+	
 }
 
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)

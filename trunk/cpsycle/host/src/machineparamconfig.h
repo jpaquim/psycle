@@ -42,6 +42,9 @@ typedef struct ParamSkin {
     SkinCoord checkoff;
 } ParamSkin;
 
+psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm,
+	uintptr_t paramtype, bool issmall);
+
 // MachineParamConfig
 
 enum {

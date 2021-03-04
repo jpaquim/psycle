@@ -624,8 +624,8 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 	if (self->selectedplugin) {		
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->selectedplugin);
-		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-			SECTION_ID_MACHINEVIEW_WIRES, 0);
+//		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+//			SECTION_ID_MACHINEVIEW_WIRES, 0);
 		psy_ui_mouseevent_stoppropagation(ev);		
 	}	
 }
@@ -700,6 +700,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->scanending = FALSE;
 	self->mode = NEWMACHINE_APPEND;
+	self->restoresection = psy_INDEX_INVALID;
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->notebook, &self->component);

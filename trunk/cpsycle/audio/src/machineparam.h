@@ -4,12 +4,15 @@
 #ifndef psy_audio_MACHINEPARAM_H
 #define psy_audio_MACHINEPARAM_H
 
+// local
+#include "wire.h"
+// container
 #include <signal.h>
 #include <hashtbl.h>
+// dsp
 #include <dsptypes.h>
 
 #include "../../detail/psydef.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -343,7 +346,25 @@ INLINE psy_audio_MachineParam* psy_audio_gainmachineparam_base(psy_audio_GainMac
 	return &(self->machineparam);
 }
 
+// WireParam
+struct psy_audio_Machines;
 
+typedef struct psy_audio_WireMachineParam {
+	psy_audio_MachineParam machineparam;
+	psy_audio_Wire wire;
+	// references
+	struct psy_audio_Machines* machines;
+} psy_audio_WireMachineParam;
+
+void psy_audio_wiremachineparam_init(psy_audio_WireMachineParam*,
+	psy_audio_Wire wire, struct psy_audio_Machines*);
+void psy_audio_wiremachineparam_dispose(psy_audio_WireMachineParam*);
+
+INLINE psy_audio_MachineParam* psy_audio_wiremachineparam_base(
+	psy_audio_WireMachineParam* self)
+{
+	return &(self->machineparam);
+}
 
 #ifdef __cplusplus
 }

@@ -188,10 +188,18 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 				newmachine_insertmode(&self->newmachine);
 			} else if (options & NEWMACHINE_APPEND) {
 				newmachine_appendmode(&self->newmachine);
+			} else if (options & NEWMACHINE_APPENDSTACK) {
+				self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
+				newmachine_appendmode(&self->newmachine);
 			} else if (options & NEWMACHINE_ADDEFFECT) {
 				self->wireview.addeffect = 1;
 				self->wireview.randominsert = 0;
 				newmachine_addeffectmode(&self->newmachine);
+			} else if (options & NEWMACHINE_ADDEFFECTSTACK) {
+				self->wireview.addeffect = 1;
+				self->wireview.randominsert = 0;				
+				newmachine_addeffectmode(&self->newmachine);
+				self->newmachine.restoresection = NEWMACHINE_ADDEFFECTSTACK;
 			}
 			break;
 		default:
@@ -228,6 +236,12 @@ void machineview_onnewmachineselected(MachineView* self,
 {
 	psy_audio_Machine* machine;
 
+	if (self->newmachine.restoresection == NEWMACHINE_ADDEFFECTSTACK) {
+		self->newmachine.restoresection = psy_INDEX_INVALID;
+		machinestackview_addeffect(&self->stackview, plugininfo);
+		tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_STACK);
+		return;
+	}
 	machine = psy_audio_machinefactory_makemachinefrompath(
 		&self->workspace->machinefactory,
 		(psy_audio_MachineType)psy_property_at_int(plugininfo, "type", psy_audio_UNDEFINED),
@@ -239,6 +253,7 @@ void machineview_onnewmachineselected(MachineView* self,
 
 		favorite = psy_property_at_int(plugininfo, "favorite", 0);
 		psy_property_set_int(plugininfo, "favorite", ++favorite);
+		
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
 
@@ -258,7 +273,13 @@ void machineview_onnewmachineselected(MachineView* self,
 			psy_audio_machines_select(self->wireview.machines,
 				psy_audio_machines_append(self->wireview.machines, machine));
 		}
-		tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
+		if (self->newmachine.restoresection == SECTION_ID_MACHINEVIEW_STACK) {
+			self->newmachine.restoresection = psy_INDEX_INVALID;
+			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_STACK);			
+		} else {
+			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
+		}
+		
 	} else {
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);

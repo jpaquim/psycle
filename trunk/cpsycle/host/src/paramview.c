@@ -12,8 +12,6 @@
 // platform
 #include "../../detail/portable.h"
 
-static psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm,
-	uintptr_t paramtype, bool issmall);
 
 // KnobDraw
 // implementation
@@ -217,7 +215,8 @@ void paramtweak_init(ParamTweak* self)
 	assert(self);
 
 	self->machine = NULL;
-	self->paramindex = psy_INDEX_INVALID;	
+	self->paramindex = psy_INDEX_INVALID;
+	self->param = NULL;
 }
 
 void paramtweak_begin(ParamTweak* self, psy_audio_Machine* machine,
@@ -227,6 +226,7 @@ void paramtweak_begin(ParamTweak* self, psy_audio_Machine* machine,
 
 	self->machine = machine;
 	self->paramindex = paramindex;
+	self->param = NULL;
 }
 
 void paramtweak_end(ParamTweak* self)
@@ -235,6 +235,7 @@ void paramtweak_end(ParamTweak* self)
 
 	self->machine = NULL;
 	self->paramindex = psy_INDEX_INVALID;
+	self->param = NULL;
 }
 
 void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
@@ -248,13 +249,27 @@ void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
 		uintptr_t paramtype;
 
 		self->tweakbase = (float)ev->pt.y;
-		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
-		paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+		if (self->machine) {
+			self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
+			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+		} else {
+			self->tweakval = psy_audio_machineparam_normvalue(param);
+			paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
+		}		
+		
 		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
 			if (self->tweakval == 0.f) {
-				psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
+				if (self->machine) {
+					psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
+				} else {
+					psy_audio_machineparam_tweak(param, 1.f);
+				}
 			} else {
-				psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
+				if (self->machine) {
+					psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
+				} else {
+					psy_audio_machineparam_tweak(param, 1.f);
+				}
 			}
 		}		
 	}
@@ -271,16 +286,23 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 		uintptr_t paramtype;
 		float val;		
 
-		paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+		if (self->machine) {
+			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+		} else {
+			paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
+		}
 		if ((paramtype != MPF_SLIDERCHECK) && (paramtype != MPF_SWITCH)) {
 			val = self->tweakval + (self->tweakbase - (float)ev->pt.y) / 200.f;
 			if (val > 1.f) {
 				val = 1.f;
-			} else
-				if (val < 0.f) {
-					val = 0.f;
-				}
-			psy_audio_machine_parameter_tweak(self->machine, param, val);
+			} else if (val < 0.f) {
+				val = 0.f;
+			}
+			if (self->machine) {
+				psy_audio_machine_parameter_tweak(self->machine, param, val);
+			} else {
+				psy_audio_machineparam_tweak(param, val);
+			}
 		}
 	}
 }
@@ -289,6 +311,9 @@ psy_audio_MachineParam* paramtweak_tweakparam(ParamTweak* self)
 {
 	assert(self);
 
+	if (self->param) {
+		return self->param;
+	}
 	if (self->machine && self->paramindex != psy_INDEX_INVALID) {
 		return psy_audio_machine_parameter(self->machine, self->paramindex);
 	}
@@ -793,61 +818,6 @@ void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* para
 	
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);	
-}
-
-psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm, uintptr_t paramtype,
-	bool issmall)
-{		
-	static float SMALLDIV = 1.6f;
-	psy_ui_RealSize rv;
-
-	assert(skin);
-	assert(tm);
-
-	switch (paramtype) {
-	case MPF_IGNORE:
-		rv.height = 0;
-		rv.width = 0;
-		break;
-	case MPF_SLIDERCHECK:		
-		rv.height = psy_max(psy_ui_realrectangle_height(&skin->checkoff.dest),
-			tm->tmHeight);
-		rv.width = psy_ui_realrectangle_height(&skin->checkoff.dest) +
-			tm->tmAveCharWidth * 5;
-		break;
-	case MPF_SLIDER:
-		rv.height = psy_ui_realrectangle_height(&skin->slider.dest);
-		rv.width = psy_ui_realrectangle_width(&skin->slider.dest);
-		if (rv.width < tm->tmAveCharWidth * 30) {
-			rv.width = tm->tmAveCharWidth * 30;
-		}
-		if (issmall) {
-			rv.width = rv.width / SMALLDIV;
-		}
-		if (rv.width < psy_ui_realrectangle_width(&skin->vuon.dest) +
-			psy_ui_realrectangle_width(&skin->checkoff.dest) + 50 +
-			tm->tmAveCharWidth * 5) {
-			rv.width = psy_ui_realrectangle_width(&skin->vuon.dest) +
-				psy_ui_realrectangle_width(&skin->checkoff.dest) + 50 +
-				tm->tmAveCharWidth * 5;
-		}
-		break;
-		case MPF_SLIDERLEVEL:
-			rv.height = psy_ui_realrectangle_height(&skin->vuon.dest);
-			rv.width = psy_ui_realrectangle_width(&skin->slider.dest);
-			if (issmall) {
-				rv.width = rv.width / SMALLDIV;
-			}
-		break;		
-		default:			
-			rv.width = tm->tmAveCharWidth * 30;
-			rv.height = tm->tmHeight * 2;
-			if (issmall) {
-				rv.width = rv.width / SMALLDIV;
-			}			
-		break;
-	}
-	return rv;
 }
 
 const psy_ui_RealRectangle* cellposition(const ParamView* self, uintptr_t row,

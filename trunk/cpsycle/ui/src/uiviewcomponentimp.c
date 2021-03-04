@@ -61,7 +61,10 @@ static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
 static uintptr_t view_dev_flags(const psy_ui_ComponentImp*);
 static void view_dev_draw(psy_ui_ViewComponentImp*, psy_ui_Graphics*);
-static psy_List* view_dev_children(psy_ui_ViewComponentImp*, int recursive);
+static void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
+static void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
+static void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
+static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
 
 // VTable init
 static psy_ui_ComponentImpVTable view_imp_vtable;
@@ -129,10 +132,17 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)view_dev_hasfocus;
 		view_imp_vtable.dev_flags = (psy_ui_fp_componentimp_dev_flags)view_dev_flags;
 		view_imp_vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)view_dev_draw;
+		view_imp_vtable.dev_mousedown = (psy_ui_fp_componentimp_dev_mousedown)
+			view_dev_mousedown;
+		view_imp_vtable.dev_mouseup = (psy_ui_fp_componentimp_dev_mouseup)
+			view_dev_mouseup;
+		view_imp_vtable.dev_mousemove = (psy_ui_fp_componentimp_dev_mousemove)
+			view_dev_mousemove;
+		view_imp_vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
+			view_dev_mousedoubleclick;
 		view_imp_vtable_initialized = TRUE;
 	}
 }
-
 
 void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	struct psy_ui_Component* component,
@@ -174,7 +184,8 @@ void view_dev_clear(psy_ui_ViewComponentImp* self)
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
 		if (deallocate) {
-			psy_ui_component_deallocate(component);
+			psy_ui_component_dispose(component);
+			free(component);
 		} else {
 			psy_ui_component_dispose(component);
 		}
@@ -478,4 +489,94 @@ psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 		psy_list_append(&rv, child);
 	}
 	return rv;
+}
+
+void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousedown(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousedown(child, ev);
+			break;
+		}
+	}
+}
+
+void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mouseup(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmouseup(child, ev);
+			break;
+		}
+	}
+}
+
+void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;		
+
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousemove(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousemove(child, ev);
+			break;
+		}
+	}
+}
+
+void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousedoubleclick(child, ev);
+			break;
+		}
+	}
 }

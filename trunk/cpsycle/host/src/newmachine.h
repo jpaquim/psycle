@@ -109,6 +109,7 @@ typedef struct NewMachine {
 	int mode;
 	// references
 	Workspace* workspace;
+	uintptr_t restoresection;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
