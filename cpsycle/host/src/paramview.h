@@ -23,6 +23,7 @@ typedef struct ParamTweak {
     psy_audio_Machine* machine;
     uintptr_t paramindex;
     ParamSkin skin;
+    psy_audio_MachineParam* param;
 } ParamTweak;
 
 void paramtweak_init(ParamTweak*);

@@ -26,7 +26,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_Colour overlay;
 	psy_ui_Colour onsurface;
 	psy_ui_Colour onprimary;
-	psy_ui_Colour onsecondary;
+	psy_ui_Colour onsecondary;	
 	// colour weight
 	int strong;
 	int accent;
@@ -65,7 +65,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&onprimary, medium),
-		psy_ui_colour_overlayed(&surface, &overlay, 0.12));
+		psy_ui_colour_overlayed(&surface, &overlay, 0.12));	
 	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// seqview buttons
 	style = psy_ui_style_allocinit();	

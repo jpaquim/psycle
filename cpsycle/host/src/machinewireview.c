@@ -411,8 +411,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 			self->selectedslot = self->dragslot;
 			psy_audio_wire_invalidate(&self->selectedwire);			
 		}
-		if (self->dragmachineui) {
-			self->dragmachineui->vtable->onmousedown(self->dragmachineui, ev);
+		if (self->dragmachineui) {			
 			if (ev->bubble) {
 				self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 				self->dragpt = psy_ui_realpoint_make(
@@ -477,17 +476,10 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 			return;
 		}
 	}	
-	if (self->dragslot != psy_INDEX_INVALID) {
-		psy_ui_Component* machineui;
-
-		machineui = machineuis_at(self, self->dragslot);
-		if (machineui) {
-			machineui->vtable->onmousemove(machineui, ev);
-			++self->component.opcount;
-			if (!ev->bubble) {
-				return;
-			}
-		}
+	if (self->dragslot != psy_INDEX_INVALID) {		
+		if (!ev->bubble) {
+			return;
+		}		
 		if (machinewireview_dragging_machine(self)) {
 			if (!machinewireview_dragmachine(self, self->dragslot,
 					ev->pt.x - self->dragpt.x, ev->pt.y - self->dragpt.y)) {
@@ -622,7 +614,9 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 			psy_ui_mouseevent_stoppropagation(ev);
 		} else if (machinewireview_dragging_connection(self)) {
 			if (self->mousemoved) {
-				uintptr_t slot = self->dragslot;
+				uintptr_t slot;
+				
+				slot = self->dragslot;
 				self->dragslot = machinewireview_hittest(self);
 				if (self->dragslot != psy_INDEX_INVALID) {
 					if (!machinewireview_dragging_newconnection(self)) {

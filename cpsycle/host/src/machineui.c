@@ -6,6 +6,7 @@
 #include "machineui.h"
 // host
 #include "skingraphics.h"
+#include "paramview.h"
 #include "wireview.h"
 // audio
 #include <exclusivelock.h>
@@ -799,7 +800,7 @@ bool generatorui_hittestcoord(GeneratorUi* self, psy_ui_RealPoint pt,
 }
 
 void generatorui_onmousemove(GeneratorUi* self, psy_ui_MouseEvent* ev)
-{
+{	
 	if (self->intern.dragmode == MACHINEVIEW_DRAG_PAN) {
 		psy_audio_machine_setpanning(self->intern.machine,
 			generatorui_panvalue(self, ev->pt.x, self->intern.slot));
@@ -843,7 +844,7 @@ psy_dsp_amp_t generatorui_panvalue(GeneratorUi* self, double dx, uintptr_t slot)
 
 void generatorui_onmouseup(GeneratorUi* self, psy_ui_MouseEvent* ev)
 {
-
+	self->intern.dragmode = MACHINEVIEW_DRAG_NONE;
 }
 
 void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
@@ -1398,7 +1399,7 @@ psy_dsp_amp_t effectui_panvalue(EffectUi* self, double dx, uintptr_t slot)
 
 void effectui_onmouseup(EffectUi* self, psy_ui_MouseEvent* ev)
 {
-
+	self->intern.dragmode = MACHINEVIEW_DRAG_NONE;
 }
 
 void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
@@ -1488,6 +1489,129 @@ void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
 	psy_ui_RealSize sizepx;
 	sizepx = psy_ui_realrectangle_size(&self->intern.coords->background.dest);
 	*rv = psy_ui_size_makepx(sizepx.width, sizepx.height);
+}
+
+// SliderUi
+// prototypes
+static void sliderui_dispose(SliderUi*);
+static void sliderui_ondraw(SliderUi*, psy_ui_Graphics*);
+static void sliderui_invalidate(SliderUi*);
+static void sliderui_onpreferredsize(SliderUi*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void sliderui_onmousedown(SliderUi*, psy_ui_MouseEvent*);
+static void sliderui_onmouseup(SliderUi*, psy_ui_MouseEvent*);
+static void sliderui_onmousemove(SliderUi*, psy_ui_MouseEvent*);
+
+// vtable
+static psy_ui_ComponentVtable sliderui_vtable;
+static psy_ui_ComponentVtable sliderui_super_vtable;
+static bool sliderui_vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
+{
+	assert(self);
+
+	if (!sliderui_vtable_initialized) {
+		sliderui_vtable = *(self->component.vtable);
+		sliderui_super_vtable = sliderui_vtable;
+		sliderui_vtable.dispose = (psy_ui_fp_component_dispose)sliderui_dispose;
+		sliderui_vtable.ondraw = (psy_ui_fp_component_ondraw)sliderui_ondraw;		
+		sliderui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+			sliderui_invalidate;
+		sliderui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			sliderui_onpreferredsize;
+		sliderui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)sliderui_onmousedown;
+		sliderui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)sliderui_onmouseup;
+		sliderui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)sliderui_onmousemove;
+		sliderui_vtable_initialized = TRUE;
+	}
+	return &sliderui_vtable;
+}
+// implementation
+void sliderui_init(SliderUi* self, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_MachineParam* param,
+	Workspace* workspace)
+{
+	assert(self);
+	assert(workspace);
+	assert(workspace->song);	
+	assert(view);
+
+	self->component.imp = (psy_ui_ComponentImp*)
+		psy_ui_viewcomponentimp_allocinit(
+			&self->component, (parent) ? parent->imp : NULL,
+			view, "", 0, 0, 100, 100, 0, 0);
+	psy_ui_component_init_imp(&self->component, view,
+		self->component.imp);
+	sliderui_vtable_init(self);
+	self->component.vtable = &sliderui_vtable;	
+	self->workspace = workspace;
+	self->view = view;	
+	self->skin = machineparamconfig_skin(
+		psycleconfig_macparam(workspace_conf(workspace)));
+	self->param = param;
+	paramtweak_init(&self->paramtweak);
+}
+
+void sliderui_dispose(SliderUi* self)
+{
+	assert(self);
+	
+	sliderui_super_vtable.dispose(&self->component);
+}
+
+void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
+{
+	SliderDraw draw;
+	psy_ui_RealSize size;
+
+	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
+		MPF_SLIDER, FALSE);	
+	size.width = 140;
+	sliderdraw_init(&draw, self->skin, NULL, self->param, size, NULL, FALSE);
+	sliderdraw_draw(&draw, g);	
+}
+
+void sliderui_invalidate(SliderUi* self)
+{
+	if (!vuupdate) {
+		sliderui_super_vtable.invalidate(&self->component);
+	}
+}
+
+void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{	
+	psy_ui_RealSize size;
+
+	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
+		MPF_SLIDER, FALSE);
+	*rv = psy_ui_size_makepx(140.0, size.height);
+}
+
+void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)
+{
+	if (ev->button == 1 && self->param != NULL) {
+		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID);
+		self->paramtweak.param = self->param;
+		paramtweak_onmousedown(&self->paramtweak, ev);
+		psy_ui_component_capture(&self->component);
+	}
+}
+
+void sliderui_onmousemove(SliderUi* self, psy_ui_MouseEvent* ev)
+{
+	if (self->paramtweak.param != NULL) {
+		paramtweak_onmousemove(&self->paramtweak, ev);
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+void sliderui_onmouseup(SliderUi* self, psy_ui_MouseEvent* ev)
+{
+	paramtweak_end(&self->paramtweak);
+	psy_ui_component_releasecapture(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 // static methods

@@ -72,6 +72,8 @@ typedef enum {
 	NEWMACHINE_INSERT = 4,
 	NEWMACHINE_APPEND = 8,
 	NEWMACHINE_ADDEFFECT = 16,
+	NEWMACHINE_APPENDSTACK = 32,
+	NEWMACHINE_ADDEFFECTSTACK = 64,
 } NewMachineBarOptions;
 
 // The patternview display modes

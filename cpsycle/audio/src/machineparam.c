@@ -5,6 +5,7 @@
 
 #include "machineparam.h"
 // local
+#include "machines.h"
 #include "plugin_interface.h"
 // dsp
 #include <convert.h>
@@ -1211,4 +1212,89 @@ void psy_audio_gainmachineparam_setmask(psy_audio_GainMachineParam* self, const 
 {
 	free(self->mask);
 	self->mask = (mask) ? strdup(mask) : 0;
+}
+
+// WireParam
+// WireParam
+static void psy_audio_wiremachineparam_tweak(psy_audio_WireMachineParam*, float val);
+static float psy_audio_wiremachineparam_normvalue(psy_audio_WireMachineParam*);
+static void psy_audio_wiremachineparam_range(psy_audio_WireMachineParam*,
+	intptr_t* minval, intptr_t* maxval);
+static int psy_audio_wiremachineparam_describe(psy_audio_WireMachineParam*, char* text);
+
+static MachineParamVtable psy_audio_wiremachineparam_vtable;
+static int psy_audio_wiremachineparam_vtable_initialized = 0;
+
+static void psy_audio_wiremachineparam_vtable_init(psy_audio_WireMachineParam* self)
+{
+	if (!psy_audio_wiremachineparam_vtable_initialized) {
+		psy_audio_wiremachineparam_vtable = *(self->machineparam.vtable);
+		psy_audio_wiremachineparam_vtable.tweak = (fp_machineparam_tweak)
+			psy_audio_wiremachineparam_tweak;
+		psy_audio_wiremachineparam_vtable.normvalue = (fp_machineparam_normvalue)
+			psy_audio_wiremachineparam_normvalue;
+		psy_audio_wiremachineparam_vtable.describe = (fp_machineparam_describe)
+			psy_audio_wiremachineparam_describe;
+		psy_audio_wiremachineparam_vtable.range = (fp_machineparam_range)
+			psy_audio_wiremachineparam_range;
+		psy_audio_wiremachineparam_vtable_initialized = 1;
+	}
+}
+
+void psy_audio_wiremachineparam_init(psy_audio_WireMachineParam* self,
+	psy_audio_Wire wire, psy_audio_Machines* machines)
+{
+	psy_audio_machineparam_init(&self->machineparam);
+	psy_audio_wiremachineparam_vtable_init(self);
+	self->machineparam.vtable = &psy_audio_wiremachineparam_vtable;
+	self->wire = wire;
+	self->machines = machines;
+}
+
+void psy_audio_wiremachineparam_dispose(psy_audio_WireMachineParam* self)
+{
+	psy_audio_machineparam_dispose(&self->machineparam);
+}
+
+void psy_audio_wiremachineparam_tweak(psy_audio_WireMachineParam* self, float val)
+{
+	if (!self->machines) {
+		return;
+	}
+	psy_audio_connections_setwirevolume(&self->machines->connections, self->wire, val * 4.f);
+}
+
+float psy_audio_wiremachineparam_normvalue(psy_audio_WireMachineParam* self)
+{
+	if (!self->machines) {
+		return 0.f;
+	}
+	return psy_audio_connections_wirevolume(&self->machines->connections, self->wire) / 4.f;
+}
+
+void psy_audio_wiremachineparam_range(psy_audio_WireMachineParam* self,
+	intptr_t* minval, intptr_t* maxval)
+{
+	*minval = 0;
+	*maxval = 127;
+}
+
+int psy_audio_wiremachineparam_describe(psy_audio_WireMachineParam* self, char* text)
+{
+	float volume;
+
+	if (!self->machines) {
+		return 0;
+	}
+	volume = psy_audio_connections_wirevolume(&self->machines->connections, self->wire);
+	if (volume < 0.00002f) {
+		psy_snprintf(text, 20, "%s", "-inf");
+	} else {		
+		float dbs;
+
+		dbs = psy_dsp_convert_amp_to_db(volume);
+		psy_snprintf(text, 20, "%.01fdB", (float)dbs);		
+		return 1;
+	}
+	return 0;
 }

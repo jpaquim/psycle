@@ -120,6 +120,22 @@ void effectui_init(EffectUi*, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
 
+// SliderUi
+typedef struct SliderUi {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	ParamTweak paramtweak;
+	// references
+	ParamSkin* skin;
+	Workspace* workspace;
+	psy_ui_Component* view;
+	psy_audio_MachineParam* param;
+} SliderUi;
+
+void sliderui_init(SliderUi*, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_MachineParam*, Workspace*);
+
 // static methods
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin,

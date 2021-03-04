@@ -83,6 +83,10 @@ static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
 static void dev_clear(psy_ui_win_ComponentImp*);
 static void dev_draw(psy_ui_win_ComponentImp*, psy_ui_Graphics*);
+static void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
+static void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
+static void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
+static void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -150,6 +154,14 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)dev_clear;
 		vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)dev_draw;
+		vtable.dev_mousedown = (psy_ui_fp_componentimp_dev_mousedown)
+			dev_mousedown;
+		vtable.dev_mouseup = (psy_ui_fp_componentimp_dev_mouseup)
+			dev_mouseup;
+		vtable.dev_mousemove = (psy_ui_fp_componentimp_dev_mousemove)
+			dev_mousemove;
+		vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
+			dev_mousedoubleclick;
 		vtable_initialized = TRUE;
 	}
 }
@@ -288,7 +300,8 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
 		if (deallocate) {
-			psy_ui_component_deallocate(component);
+			psy_ui_component_dispose(component);
+			free(component);
 		} else {
 			psy_ui_component_dispose(component);
 		}
@@ -931,5 +944,94 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 		}
 	}	
 }
+
+void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousedown(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousedown(child, ev);
+			break;
+		}
+	}
+}
+
+void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mouseup(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmouseup(child, ev);
+			break;
+		}
+	}
+}
+
+void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousemove(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousemove(child, ev);
+			break;
+		}
+	}
+}
+
+void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		r = psy_ui_component_position(child);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			ev->pt.x -= r.left;
+			ev->pt.y -= r.top;
+			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
+			ev->pt.x += r.left;
+			ev->pt.y += r.top;
+			child->vtable->onmousedoubleclick(child, ev);
+			break;
+		}
+	}
+}
+
 
 #endif

@@ -2157,9 +2157,8 @@ void trackergrid_blockpaste(TrackerGrid* self)
 		&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
 			&self->workspace->patternpaste, self->gridstate->cursor,
 			trackerlinestate_bpl(self->linestate), FALSE, self->workspace)->command);	
-	if (!trackergrid_movecursorwhenpaste(self)) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	trackergrid_movecursorwhenpaste(self);
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void trackergrid_blockmixpaste(TrackerGrid* self)
@@ -2170,9 +2169,8 @@ void trackergrid_blockmixpaste(TrackerGrid* self)
 		&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
 			&self->workspace->patternpaste, self->gridstate->cursor,
 			trackerlinestate_bpl(self->linestate), TRUE, self->workspace)->command);
-	if (!trackergrid_movecursorwhenpaste(self)) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	trackergrid_movecursorwhenpaste(self);
+	psy_ui_component_invalidate(&self->component);	
 }
 
 bool trackergrid_movecursorwhenpaste(TrackerGrid* self)
