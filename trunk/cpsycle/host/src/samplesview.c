@@ -28,14 +28,14 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 1.0, 0.0);		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init_text(&self->load, &self->component, "file.load");
-	psy_ui_button_init_text(&self->save, &self->component, "file.save");
-	psy_ui_button_init_text(&self->duplicate, &self->component,
+	psy_ui_button_init_text(&self->load, &self->component, NULL, "file.load");
+	psy_ui_button_init_text(&self->save, &self->component, NULL, "file.save");
+	psy_ui_button_init_text(&self->duplicate, &self->component, NULL,
 		"edit.duplicate");
-	psy_ui_button_init_text(&self->del, &self->component, "edit.delete");
+	psy_ui_button_init_text(&self->del, &self->component, NULL, "edit.delete");
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));	
@@ -58,8 +58,8 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	self->view = view;
 	self->source = 0;
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_init(&self->header, &self->component);
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_makepx(0),
@@ -70,15 +70,15 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_label_init(&self->songname, &self->header);
 	psy_ui_label_settext(&self->songname, "No song loaded");
 	psy_ui_label_setcharnumber(&self->songname, 30);	
-	psy_ui_button_init(&self->browse, &self->header);
+	psy_ui_button_init(&self->browse, &self->header, NULL);
 	psy_ui_button_settext(&self->browse, "Select a song");
 	psy_signal_connect(&self->browse.signal_clicked, self,
 		samplessongimportview_onloadsong);		
 	// bar
-	psy_ui_component_init(&self->bar, &self->component);
+	psy_ui_component_init(&self->bar, &self->component, NULL);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_LEFT);		
 	psy_ui_component_setminimumsize(&self->bar, psy_ui_size_makeem(12, 1));
-	psy_ui_button_init(&self->add, &self->bar);
+	psy_ui_button_init(&self->add, &self->bar, NULL);
 	psy_ui_button_settext(&self->add, "<- Copy");	
 	psy_ui_component_setalign(&self->add.component, psy_ui_ALIGN_CENTER);
 	psy_signal_connect(&self->add.signal_clicked, self,
@@ -198,18 +198,18 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	self->view = view;
 	self->instruments = instruments;
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.5, 0.0);
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"samplesview.samplename");	
 	psy_ui_edit_init(&self->nameedit, &self->component);		
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
 		samplesheaderview_oneditsamplename);
-	psy_ui_button_init(&self->prevbutton, &self->component);
+	psy_ui_button_init(&self->prevbutton, &self->component, NULL);
 	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);	
 	psy_signal_connect(&self->prevbutton.signal_clicked, self,
 		samplesheaderview_onprevsample);
-	psy_ui_button_init(&self->nextbutton, &self->component);
+	psy_ui_button_init(&self->nextbutton, &self->component, NULL);
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
 		samplesheaderview_onnextsample);
@@ -335,7 +335,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 		
 	self->sample = NULL;	
 	self->notestabmode = workspace_notetabmode(workspace);
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->defaultvolume, &self->component);
@@ -527,7 +527,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		&self->depth,		
 	};	
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->sample = 0;
 	self->player = player;
 	// header
@@ -535,7 +535,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		psy_ui_Margin header_margin;
 
 		psy_ui_margin_init_all_em(&header_margin, 0.0, 2.0, 0.0, 0.0);
-		psy_ui_component_init(&self->header, &self->component);
+		psy_ui_component_init(&self->header, &self->component, NULL);
 		psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);		
 		psy_ui_label_init(&self->waveformheaderlabel, &self->header);
 		psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
@@ -543,7 +543,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_component_setmargin(&self->waveformheaderlabel.component,
 			&header_margin);
-		psy_ui_combobox_init(&self->waveformbox, &self->header);
+		psy_ui_combobox_init(&self->waveformbox, &self->header, NULL);
 		psy_ui_combobox_setcharnumber(&self->waveformbox, 15);
 		psy_ui_combobox_addtext(&self->waveformbox, "Sinus");
 		psy_ui_combobox_addtext(&self->waveformbox, "Square");
@@ -726,13 +726,13 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_margin_init_all_em(&rowmargin, 1.5, 0.0, 1.5, 0.0);		
 	self->sample = NULL;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_init(&self->cont, &self->component);
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->cont, &self->component, NULL);
 	psy_ui_component_setmargin(&self->cont, &rowmargin);
 	psy_ui_label_init(&self->loopheaderlabel, &self->cont);	
 	psy_ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
 	psy_ui_label_setcharnumber(&self->loopheaderlabel, 18);	
-	psy_ui_combobox_init(&self->loopdir, &self->cont);
+	psy_ui_combobox_init(&self->loopdir, &self->cont, NULL);
 	psy_ui_combobox_addtext(&self->loopdir, "Disabled");
 	psy_ui_combobox_addtext(&self->loopdir, "Forward");
 	psy_ui_combobox_addtext(&self->loopdir, "Bidirection");
@@ -750,11 +750,11 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		psy_ui_component_children(&self->cont, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
-	psy_ui_component_init(&self->sustain, &self->component);
+	psy_ui_component_init(&self->sustain, &self->component, NULL);
 	psy_ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopheaderlabel, "Sustain Loop");
 	psy_ui_label_setcharnumber(&self->sustainloopheaderlabel, 18);
-	psy_ui_combobox_init(&self->sustainloopdir, &self->sustain);
+	psy_ui_combobox_init(&self->sustainloopdir, &self->sustain, NULL);
 	psy_ui_combobox_addtext(&self->sustainloopdir, "Disabled");
 	psy_ui_combobox_addtext(&self->sustainloopdir, "Forward");
 	psy_ui_combobox_addtext(&self->sustainloopdir, "Bidirection");
@@ -989,7 +989,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_margin_init_all_em(&waveboxmargin, 0.5, 1.0, 0.0, 0.5);
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_SAMPLESVIEW,
 		STYLE_SAMPLESVIEW,
@@ -1000,7 +1000,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->header.component, &leftmargin);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
-	psy_ui_component_init(&self->left, &self->component);
+	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->left, &leftmargin);
 	samplesviewbuttons_init(&self->buttons, &self->left, workspace);
@@ -1027,7 +1027,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(psy_ui_notebook_base(&self->clientnotebook),
 		&leftmargin);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_init(&self->client, &self->clientnotebook.component);
+	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);

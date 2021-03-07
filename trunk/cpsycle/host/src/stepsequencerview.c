@@ -86,7 +86,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	self->stepwidth = 25;
 	self->stepheight = 25;
 	stepsequencerposition_init(&self->position);	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);	
@@ -357,7 +357,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	StepTimer* steptimer,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	stepsequencerbarselect_vtable_init(self);
 	self->component.vtable = &stepsequencerbarselect_vtable;
 	self->steptimer = steptimer;
@@ -524,7 +524,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 
 	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 2.0);		
 	self->workspace = workspace;	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	stepsequencerview_vtable_init(self);
 	self->component.vtable = &stepsequencerview_vtable;
 	psy_ui_component_setstyletypes(&self->component,

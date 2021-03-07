@@ -51,7 +51,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_preventalign(&self->component);
 	envelopebox_vtable_init(self);
 	self->component.vtable = &envelopebox_vtable;
@@ -532,19 +532,19 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 	psy_ui_Margin tab;
 	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
 	tab.right = psy_ui_value_makeew(4.0);
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");	
 	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->enabled), &tab);
 	psy_ui_checkbox_init_text(&self->carry, &self->component, "Carry (continue)");	
 	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->carry), &tab);
-	psy_ui_button_init_text_connect(&self->millisec, &self->component, "Millisecs",
+	psy_ui_button_init_text_connect(&self->millisec, &self->component, NULL, "Millisecs",
 		self, envelopebar_onmillisecs);	
-	psy_ui_button_init_text_connect(&self->ticks, &self->component, "Ticks",
+	psy_ui_button_init_text_connect(&self->ticks, &self->component, NULL, "Ticks",
 		self, envelopebar_onticks);
 	psy_ui_component_setmargin(&self->ticks.component, &tab);
-	psy_ui_button_init_text(&self->adsr, &self->component, "ADSR");	
+	psy_ui_button_init_text(&self->adsr, &self->component, NULL, "ADSR");
 	psy_ui_button_allowrightclick(&self->adsr);
 	envelopebar_enablemillisecs(self);
 }
@@ -603,7 +603,7 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 
 void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(envelopeview_base(self), parent);			
+	psy_ui_component_init(envelopeview_base(self), parent, NULL);
 	psy_ui_component_setvtable(envelopeview_base(self),
 		envelopeview_vtable_init(self));	
 	envelopebar_init(&self->bar, envelopeview_base(self));

@@ -48,7 +48,7 @@ static void vtable_init(PinEdit* self)
 void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -553,9 +553,9 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_component_init(&self->buttongroup, &self->component);
+	psy_ui_component_init(&self->buttongroup, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->buttongroup, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->help, &self->component,
@@ -563,11 +563,11 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_label_settextalignment(&self->help, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_BOTTOM);		
 	psy_ui_component_setalign(&self->buttongroup, psy_ui_ALIGN_RIGHT);
-	psy_ui_button_init_connect(&self->autowire, &self->buttongroup, self,
-		channelmappingview_onautowire);
+	psy_ui_button_init_connect(&self->autowire, &self->buttongroup, NULL,
+		self, channelmappingview_onautowire);
 	psy_ui_button_settext(&self->autowire, "channelmapping.autowire");
 	psy_ui_button_settextalignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup,
+	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup, NULL,
 		self, channelmappingview_unselectall);
 	psy_ui_button_settext(&self->unselectall, "channelmapping.unselect-all");
 	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	

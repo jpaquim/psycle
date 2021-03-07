@@ -27,7 +27,7 @@ static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender,
 void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	const char* desc, int value, int minval, int maxval)
 {
-	psy_ui_component_init(intedit_base(self), parent);
+	psy_ui_component_init(intedit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(intedit_base(self), psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(intedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -38,10 +38,10 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->desc, desc);
 	psy_ui_edit_init(&self->edit, intedit_base(self));
 	psy_ui_edit_setcharnumber(&self->edit, 5);	
-	psy_ui_button_init_connect(&self->less, intedit_base(self),
+	psy_ui_button_init_connect(&self->less, intedit_base(self), NULL,
 		self, intedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
-	psy_ui_button_init_connect(&self->more, intedit_base(self),
+	psy_ui_button_init_connect(&self->more, intedit_base(self), NULL,
 		self, intedit_onmoreclicked);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);

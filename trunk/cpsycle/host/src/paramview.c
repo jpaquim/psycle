@@ -362,7 +362,7 @@ void paramknob_init(ParamKnob* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, uintptr_t paramindex,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	paramknob_vtable_init(self);
 	self->component.vtable = &paramknob_vtable;
 	psy_ui_component_doublebuffer(&self->component);	
@@ -500,7 +500,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 {
 	psy_Property* pv;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);	

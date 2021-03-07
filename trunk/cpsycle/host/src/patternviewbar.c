@@ -33,7 +33,7 @@ static void patternviewbar_updatestatus(PatternViewBar*);
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(patternviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));

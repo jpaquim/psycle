@@ -31,7 +31,7 @@ static void vtable_init(psy_ui_ProgressBar* self)
 void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_setstyletypes(&self->component,

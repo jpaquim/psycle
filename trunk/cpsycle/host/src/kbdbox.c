@@ -71,7 +71,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 
 void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
-	psy_ui_component_init(kbdbox_base(self), parent);
+	psy_ui_component_init(kbdbox_base(self), parent, NULL);
 	kbdbox_vtable_init(self);
 	self->component.vtable = &kbdbox_vtable;
 	self->workspace = workspace;

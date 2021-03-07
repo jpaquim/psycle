@@ -14,10 +14,10 @@ controller are possible. This needs to be fully worked out, but at least works
 for keyboard and midi input. Midi sync is not fully working. Additional the
 version has a pianoroll, multitracking, track scopes, a param rack and optional
 a sequenceview that displays the sequence in a gantt layout. Besides english,
-more language are possible, and a spanish language file was added. Many
-limititation of Psycle are related to the file format. Internally the use of
-fixed arrays were replaced by dynamic structures, but the limitations remain
-to maintain file compatibility. This needs to be worked out further.
+a spanish language file was added. Many limititation of Psycle are related to
+the file format. Internally the use of fixed arrays were replaced by dynamic
+structures, but the limitations remain to maintain file compatibility. This
+needs to be worked out further.
 
 Structure of the host
 
@@ -26,17 +26,17 @@ audio           machines, patterns, instruments, sequence, player, sequencer,
 host            graphical psycle front end
 player          textmode psycle front end
 ui              bridged win32/x11(not finished) calls
-uitest			a test program for X11 (placeholder, just a few
+uitest		    a test program for X11 (placeholder, just a few
                 tests)
-audiodrivers	win: asio, mme, directx, wasapi
+audiodrivers    win: asio, mme, directx, wasapi
                 linux: alsa
-eventdrivers	mmemidi, dxjoystick
+eventdrivers    mmemidi, dxjoystick
 
 external libs
 lua             script engine used since psycle 1.10
 scintilla       plugin editor, help file viewer
 
-helper libs				
+helper libs
 container       list, hashtable, properties, signals
 dsp             buffer operations, adsr, notetab defines, sse2 optimizations,
                 dither, resampler, filter
@@ -53,9 +53,7 @@ MS-Windows
 Momentarily it compiles only with the VC2019(x86/x64 Win10), the other builds
 needs to be updated. VC6/2008 are not updated or tested at every commit. If
 this is done it will compile with VC6 x86 (win98), VC2008(x86 XP SP1), too.
-For the 64Bit Configuration adjust the Output File Target in Project Linker
-settings for the host project. Set the Output File Target to the project
-standard. Install on older platforms the DirectX SDK and add the include/lib
+Install on older platforms the DirectX SDK and add the include/lib
 sdk directories (Tools/Options/Directories).
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
 installation to the output dir(cpsycle/debug and cpsycle/release).
@@ -89,8 +87,8 @@ or run inside
 Visual studio: Player Project Settings/Debugging/Command Line Options add
        filename.psy
 
-Linux: Since the posix psycle plugin makefiles are out of date it
-use is very limited, but to build:
+Linux: At the moment only an alsa driver for linux exists. Since the posix
+psycle plugin makefiles are out of date it use is very limited, but to build:
 
 go to cpsycle/player
 run: make

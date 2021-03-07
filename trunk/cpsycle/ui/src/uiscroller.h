@@ -30,7 +30,7 @@ typedef struct psy_ui_Scroller {
 } psy_ui_Scroller;
 
 void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,
-	psy_ui_Component* parent);
+	psy_ui_Component* parent, psy_ui_Component* view);
 
 INLINE void psy_ui_scroller_scrollsmooth(psy_ui_Scroller* self)
 {
@@ -46,6 +46,8 @@ INLINE psy_ui_Component* psy_ui_scroller_base(psy_ui_Scroller* self)
 {
 	return &self->component;
 }
+
+void psy_ui_scroller_connectclient(psy_ui_Scroller*);
 
 #ifdef __cplusplus
 }

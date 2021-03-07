@@ -7,7 +7,7 @@
 
 void songbar_init(SongBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(songbar_base(self), parent);
+	psy_ui_component_init(songbar_base(self), parent, NULL);
 	psy_ui_component_setdefaultalign(songbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	songtrackbar_init(&self->songtrackbar, songbar_base(self), workspace);

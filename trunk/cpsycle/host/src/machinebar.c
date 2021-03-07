@@ -75,30 +75,30 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	self->instruments = &workspace->song->instruments;
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(machinebar_base(self), psy_ui_ALIGN_LEFT,
 		margin);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machinebar_ondestroy);
 	// Machine ComboBox
-	psy_ui_combobox_init(&self->machinebox, &self->component);
+	psy_ui_combobox_init(&self->machinebox, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinebar_onmachineboxselchange);
 	machinebar_buildmachinebox(self);
 	// Tool Buttons
-	psy_ui_button_init(&self->gear, &self->component);
+	psy_ui_button_init(&self->gear, &self->component, NULL);
 	psy_ui_button_settext(&self->gear, "machinebar.gear");
-	psy_ui_button_init(&self->dock, &self->component);
+	psy_ui_button_init(&self->dock, &self->component, NULL);
 	psy_ui_button_settext(&self->dock, "machinebar.dock");
-	psy_ui_button_init(&self->editor, &self->component);
+	psy_ui_button_init(&self->editor, &self->component, NULL);
 	psy_ui_button_settext(&self->editor, "machinebar.editor");
-	psy_ui_button_init(&self->cpu, &self->component);
+	psy_ui_button_init(&self->cpu, &self->component, NULL);
 	psy_ui_button_settext(&self->cpu, "machinebar.cpu");
-	psy_ui_button_init(&self->midi, &self->component);
+	psy_ui_button_init(&self->midi, &self->component, NULL);
 	psy_ui_button_settext(&self->midi, "machinebar.midi");	
 	self->prevent_selchange_notify = FALSE;
-	psy_ui_combobox_init(&self->selectinstparam, &self->component);
+	psy_ui_combobox_init(&self->selectinstparam, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->selectinstparam, 14);
 	psy_ui_combobox_addtext(&self->selectinstparam, "Params");
 	psy_ui_combobox_addtext(&self->selectinstparam, psy_ui_translate(
@@ -106,7 +106,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_signal_connect(&self->selectinstparam.signal_selchanged, self,
 		machinebar_onselectinstparamselchange);
 	// Combobox for Instruments or Parameters
-	psy_ui_combobox_init(&self->instparambox, &self->component);
+	psy_ui_combobox_init(&self->instparambox, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->instparambox, 30);
 	machinebar_buildparaminstbox(self);
 	psy_ui_combobox_setcursel(&self->selectinstparam, 1);	

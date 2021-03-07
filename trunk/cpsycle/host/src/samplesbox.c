@@ -25,7 +25,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_settext(&self->header, "samplesview.groupsfirstsample");
 	psy_ui_label_setcharnumber(&self->header, 25);

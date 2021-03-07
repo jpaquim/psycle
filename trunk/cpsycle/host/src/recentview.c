@@ -9,22 +9,22 @@
 
 void recentbar_init(RecentBar* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_CLIENT,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makeew(0.5),
 			psy_ui_value_makeeh(0.5), psy_ui_value_makeeh(0.5)));
-	psy_ui_component_init(&self->client, &self->component);	
+	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->up, &self->client);
+	psy_ui_button_init(&self->up, &self->client, NULL);
 	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
-	psy_ui_button_init(&self->down, &self->client);
+	psy_ui_button_init(&self->down, &self->client, NULL);
 	psy_ui_button_seticon(&self->down, psy_ui_ICON_DOWN);
-	psy_ui_button_init_text(&self->play, &self->client, "Play");
-	psy_ui_button_init_text(&self->stop, &self->client, "Stop");	
-	psy_ui_button_init_text(&self->del, &self->client, "Delete");
-	psy_ui_button_init_text(&self->clear, &self->client, "Clear");
+	psy_ui_button_init_text(&self->play, &self->client, NULL, "Play");
+	psy_ui_button_init_text(&self->stop, &self->client, NULL, "Stop");
+	psy_ui_button_init_text(&self->del, &self->client, NULL, "Delete");
+	psy_ui_button_init_text(&self->clear, &self->client, NULL, "Clear");
 }
 
 static psy_Property* recentview_next(RecentView*);
@@ -58,7 +58,7 @@ static void vtable_init(RecentView* self)
 void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);

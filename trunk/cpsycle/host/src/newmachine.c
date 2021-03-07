@@ -33,21 +33,21 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 			
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_button_init_text(&self->rescan, &self->component,
+	psy_ui_button_init_text(&self->rescan, &self->component, NULL,
 		"newmachine.rescan");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
-	psy_ui_button_init_text(&self->selectdirectories, &self->component,
+	psy_ui_button_init_text(&self->selectdirectories, &self->component, NULL,
 		"newmachine.select-plugin-directories");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
-	psy_ui_button_init_text(&self->sortbyfavorite, &self->component,
+	psy_ui_button_init_text(&self->sortbyfavorite, &self->component, NULL,
 		"newmachine.sort-by-favorite");
-	psy_ui_button_init_text(&self->sortbyname, &self->component,
+	psy_ui_button_init_text(&self->sortbyname, &self->component, NULL,
 		"newmachine.sort-by-name");
-	psy_ui_button_init_text(&self->sortbytype, &self->component,
+	psy_ui_button_init_text(&self->sortbytype, &self->component, NULL,
 		"newmachine.sort-by-type");
-	psy_ui_button_init_text(&self->sortbymode, &self->component,
+	psy_ui_button_init_text(&self->sortbymode, &self->component, NULL,
 		"newmachine.sort-by-mode");
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinebar_onselectdirectories);
@@ -74,7 +74,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
@@ -141,7 +141,7 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 // PluginScanView
 void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->scan, &self->component,
 		"Scanning");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
@@ -200,7 +200,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 {	
 	psy_ui_Size size;
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
 	self->component.vtable = &pluginsview_vtable;
 	self->workspace = workspace;
@@ -693,7 +693,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_Margin spacing;
 	psy_ui_Border sectionborder;
 	
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	newmachine_vtable_init(self);
 	self->component.vtable = &newmachine_vtable;
 	self->skin = skin;
@@ -707,7 +707,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	// client
-	psy_ui_component_init(&self->client, psy_ui_notebook_base(&self->notebook));
+	psy_ui_component_init(&self->client, psy_ui_notebook_base(&self->notebook),
+		NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	// scanview
 	pluginscanview_init(&self->scanview,
@@ -719,7 +720,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE,psy_ui_BORDER_NONE);
 	psy_ui_colour_set(&sectionborder.colour_top, psy_ui_colour_make(0x00666666));
 	// favorite view
-	psy_ui_component_init(&self->favoriteheader, &self->client);
+	psy_ui_component_init(&self->favoriteheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->favoriteheader, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->favoriteheader, &margin);
 	psy_ui_margin_init_all_em(&spacing, 1.0, 0.0, 0.0, 0.0);
@@ -744,11 +745,11 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
 		psy_ui_size_makeem(0.0, 4.0));
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
-		&self->client);
+		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
 	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// plugin view
-	psy_ui_component_init(&self->pluginsheader, &self->client);
+	psy_ui_component_init(&self->pluginsheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->pluginsheader, &margin);
 	psy_ui_component_setspacing(&self->pluginsheader, &spacing);
@@ -770,7 +771,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->client, FALSE, workspace);
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
-		&self->client);
+		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_main.component, 1);
 	psy_ui_component_setalign(&self->scroller_main.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_selected);	

@@ -30,7 +30,7 @@ static void vtable_init(psy_ui_Switch* self)
 
 void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;		
 	psy_signal_init(&self->signal_clicked);	

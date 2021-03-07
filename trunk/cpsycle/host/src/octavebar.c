@@ -16,7 +16,7 @@ static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag, psy_audio_
 
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(octavebar_base(self), parent);
+	psy_ui_component_init(octavebar_base(self), parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(octavebar_base(self),
@@ -24,7 +24,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 	self->workspace = workspace;
 	psy_ui_label_init(&self->headerlabel, octavebar_base(self));
 	psy_ui_label_settext(&self->headerlabel, "octavebar.octave");
-	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
+	psy_ui_combobox_init(&self->octavebox, octavebar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
 	octavebar_buildoctavebox(self);
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,

@@ -48,7 +48,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 {
 	assert(self);
 
-	psy_ui_component_init(transformpatternview_base(self), parent);
+	psy_ui_component_init(transformpatternview_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->applyto = 0;
 	psy_audio_patternselection_init(&self->patternselection);
@@ -74,17 +74,17 @@ void transformpatternview_init_search(TransformPatternView* self)
 {
 	assert(self);
 	
-	psy_ui_component_init(&self->search, transformpatternview_base(self));	
+	psy_ui_component_init(&self->search, transformpatternview_base(self), NULL);
 	psy_ui_component_setdefaultalign(&self->search,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_component_init(&self->searchtop, &self->search);	
+	psy_ui_component_init(&self->searchtop, &self->search, NULL);
 	psy_ui_component_setalign(&self->searchtop, psy_ui_ALIGN_TOP);
 	// title
 	psy_ui_label_init(&self->searchtitle, &self->searchtop);
 	psy_ui_label_settext(&self->searchtitle, "Search pattern");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->searchtitle), psy_ui_ALIGN_LEFT);
 	// hide button
-	psy_ui_button_init_connect(&self->hide, &self->searchtop,
+	psy_ui_button_init_connect(&self->hide, &self->searchtop, NULL,
 		self, transformpatternview_onhide);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(psy_ui_button_base(&self->hide), psy_ui_ALIGN_RIGHT);
@@ -93,22 +93,22 @@ void transformpatternview_init_search(TransformPatternView* self)
 	// Note
 	psy_ui_label_init(&self-> searchnotedesc, &self->search);
 	psy_ui_label_settext(&self->searchnotedesc, "Note");
-	psy_ui_combobox_init(&self->searchnote, &self->search);	
+	psy_ui_combobox_init(&self->searchnote, &self->search, NULL);	
 	// Inst
 	psy_ui_label_init(&self->searchinstdesc, &self->search);
 	psy_ui_label_settext(&self->searchinstdesc, "Instrum/Aux");
-	psy_ui_combobox_init(&self->searchinst, &self->search);
+	psy_ui_combobox_init(&self->searchinst, &self->search, NULL);
 	// Mach	
 	psy_ui_label_init(&self-> searchmachdesc, &self->search);
 	psy_ui_label_settext(&self->searchmachdesc, "Machine");	
-	psy_ui_combobox_init(&self->searchmach, &self->search);	
+	psy_ui_combobox_init(&self->searchmach, &self->search, NULL);
 }
 
 void transformpatternview_init_replace(TransformPatternView* self)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->replace, transformpatternview_base(self));
+	psy_ui_component_init(&self->replace, transformpatternview_base(self), NULL);
 	psy_ui_component_setdefaultalign(&self->replace,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init(&self->replacetitle, &self->replace);
@@ -118,26 +118,26 @@ void transformpatternview_init_replace(TransformPatternView* self)
 	// Note
 	psy_ui_label_init(&self->replacenotedesc, &self->replace);
 	psy_ui_label_settext(&self->replacenotedesc, "Note");
-	psy_ui_combobox_init(&self->replacenote, &self->replace);
+	psy_ui_combobox_init(&self->replacenote, &self->replace, NULL);
 	// Inst
 	psy_ui_label_init(&self->replaceinstdesc, &self->replace);
 	psy_ui_label_settext(&self->replaceinstdesc, "Instrum/Aux");
-	psy_ui_combobox_init(&self->replaceinst, &self->replace);
+	psy_ui_combobox_init(&self->replaceinst, &self->replace, NULL);
 	// Mach
 	psy_ui_label_init(&self->replacemachdesc, &self->replace);
 	psy_ui_label_settext(&self->replacemachdesc, "Machine");
-	psy_ui_combobox_init(&self->replacemach, &self->replace);
+	psy_ui_combobox_init(&self->replacemach, &self->replace, NULL);
 }
 
 void transformpatternview_init_searchon(TransformPatternView* self)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->searchon, transformpatternview_base(self));	
+	psy_ui_component_init(&self->searchon, transformpatternview_base(self), NULL);
 	psy_ui_component_setdefaultalign(&self->searchon,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->searchontitle, &self->searchon, "Search on");	
-	psy_ui_component_init(&self->searchonchoice, &self->searchon);
+	psy_ui_component_init(&self->searchonchoice, &self->searchon, NULL);
 	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
 		transformpatternview_onsearchonmousedown);
 	psy_ui_component_setdefaultalign(&self->searchonchoice,
@@ -158,21 +158,21 @@ void transformpatternview_init_actions(TransformPatternView* self)
 
 	assert(self);
 
-	psy_ui_component_init(&self->actions, transformpatternview_base(self));
+	psy_ui_component_init(&self->actions, transformpatternview_base(self), NULL);
 	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.0, 2.0);		
 	psy_ui_component_setmargin(&self->actions, &margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	// search
-	psy_ui_button_init_connect(&self->dosearch, &self->actions,
+	psy_ui_button_init_connect(&self->dosearch, &self->actions, NULL,
 		self, transformpatternview_onsearch);
 	psy_ui_button_settext(&self->dosearch, "Search");
 	// replace
-	psy_ui_button_init_connect(&self->doreplace, &self->actions,
+	psy_ui_button_init_connect(&self->doreplace, &self->actions, NULL,
 		self, transformpatternview_onreplace);
 	psy_ui_button_settext(&self->doreplace, "Replace all");
 	// cancel
-	psy_ui_button_init_connect(&self->docancel, &self->actions,
+	psy_ui_button_init_connect(&self->docancel, &self->actions, NULL,
 		self, transformpatternview_onhide);	
 	psy_ui_button_settext(&self->docancel, "Cancel");
 	psy_ui_component_setalign(psy_ui_button_base(&self->docancel), psy_ui_ALIGN_RIGHT);

@@ -40,7 +40,7 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, Workspace* workspace)
 {			
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	machineeditorview_vtable_init(self);
 	self->component.vtable = &machineeditorview_vtable;
 	self->machine = machine;

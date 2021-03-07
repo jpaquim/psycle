@@ -20,19 +20,19 @@ static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
 // implementation
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(filebar_base(self), parent);
+	psy_ui_component_init(filebar_base(self), parent, NULL);
 	self->workspace = workspace;	
 	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->recentbutton, filebar_base(self));
+	psy_ui_button_init(&self->recentbutton, filebar_base(self), NULL);
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
 	psy_ui_label_init_text(&self->header, filebar_base(self),
 		"file.song");	
-	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self),
+	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self), NULL,
 		"file.new", self, filebar_onnewsong);
 	psy_ui_bitmap_loadresource(&self->newbutton.bitmapicon, IDB_NEW_DARK);
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init_text(&self->loadbutton, filebar_base(self),
+	psy_ui_button_init_text(&self->loadbutton, filebar_base(self), NULL,
 		"file.load");
 	psy_ui_bitmap_loadresource(&self->loadbutton.bitmapicon, IDB_OPEN_DARK);
 	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
@@ -40,15 +40,15 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 #endif
-	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self),
+	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self), NULL,
 		"file.save", self, filebar_onsavesong);
 	psy_ui_bitmap_loadresource(&self->savebutton.bitmapicon, IDB_SAVE_DARK);
 	psy_ui_bitmap_settransparency(&self->savebutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init_text(&self->exportbutton, filebar_base(self),
+	psy_ui_button_init_text(&self->exportbutton, filebar_base(self), NULL,
 		"file.export");
 	psy_ui_bitmap_loadresource(&self->exportbutton.bitmapicon, IDB_EARTH_DARK);
 	psy_ui_bitmap_settransparency(&self->exportbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init_text(&self->renderbutton, filebar_base(self),
+	psy_ui_button_init_text(&self->renderbutton, filebar_base(self), NULL,
 		"file.render");	
 	psy_ui_bitmap_loadresource(&self->renderbutton.bitmapicon, IDB_PULSE_DARK);
 	psy_ui_bitmap_settransparency(&self->renderbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	

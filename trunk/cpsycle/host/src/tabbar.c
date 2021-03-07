@@ -149,7 +149,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(tabbar_base(self), parent);
+	psy_ui_component_init(tabbar_base(self), parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->component.debugflag = 4000;

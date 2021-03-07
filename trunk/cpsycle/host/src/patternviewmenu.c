@@ -37,46 +37,46 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	assert(view);
 	assert(workspace);
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	self->view = view;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_button_init_text_connect(&self->cut, &self->component, "edit.cut",
+	psy_ui_button_init_text_connect(&self->cut, &self->component, NULL, "edit.cut",
 		self, patternblockmenu_oncut);
-	psy_ui_button_init_text_connect(&self->copy, &self->component, "edit.copy",
+	psy_ui_button_init_text_connect(&self->copy, &self->component, NULL, "edit.copy",
 		self, patternblockmenu_oncopy);
-	psy_ui_button_init_text_connect(&self->paste, &self->component, "edit.paste",
+	psy_ui_button_init_text_connect(&self->paste, &self->component, NULL, "edit.paste",
 		self, patternblockmenu_onpaste);
-	psy_ui_button_init_text_connect(&self->mixpaste, &self->component, "edit.mixpaste",
+	psy_ui_button_init_text_connect(&self->mixpaste, &self->component, NULL, "edit.mixpaste",
 		self, patternblockmenu_onmixpaste);	
-	psy_ui_button_init_text_connect(&self->del, &self->component, "edit.delete",
+	psy_ui_button_init_text_connect(&self->del, &self->component, NULL, "edit.delete",
 		self, patternblockmenu_ondelete);
-	psy_ui_button_init_text_connect(&self->transform, &self->component,
+	psy_ui_button_init_text_connect(&self->transform, &self->component, NULL,
 		"Search and replace", self, patternblockmenu_onreplace);
-	psy_ui_button_init_text_connect(&self->blockswingfill, &self->component,
+	psy_ui_button_init_text_connect(&self->blockswingfill, &self->component, NULL,
 		"Block Swing Fill", self, patternblockmenu_onblockswingfill);
-	psy_ui_button_init_text_connect(&self->trackswingfill, &self->component,
+	psy_ui_button_init_text_connect(&self->trackswingfill, &self->component, NULL,
 		"Track Swing Fill", self, patternblockmenu_ontrackswingfill);
-	psy_ui_button_init_text_connect(&self->interpolatelinear, &self->component,
+	psy_ui_button_init_text_connect(&self->interpolatelinear, &self->component, NULL,
 		"Interpolate (Linear)", self, patternblockmenu_oninterpolatelinear);
-	psy_ui_button_init_text_connect(&self->interpolatecurve, &self->component,
+	psy_ui_button_init_text_connect(&self->interpolatecurve, &self->component, NULL,
 		"Interpolate (Curve)", self, patternblockmenu_oninterpolatecurve);
-	psy_ui_button_init_text_connect(&self->changegenerator, &self->component,
+	psy_ui_button_init_text_connect(&self->changegenerator, &self->component, NULL,
 		"Change Generator", self, patternblockmenu_onchangegenerator);
-	psy_ui_button_init_text_connect(&self->changeinstrument, &self->component,
+	psy_ui_button_init_text_connect(&self->changeinstrument, &self->component, NULL,
 		"Change Instrument", self, patternblockmenu_onchangeinstrument);
-	psy_ui_button_init_text_connect(&self->blocktransposeup, &self->component,
+	psy_ui_button_init_text_connect(&self->blocktransposeup, &self->component, NULL,
 		"Transpose +1", self, patternblockmenu_onblocktransposeup);
-	psy_ui_button_init_text_connect(&self->blocktransposedown, &self->component,
+	psy_ui_button_init_text_connect(&self->blocktransposedown, &self->component, NULL,
 		"Transpose -1", self, patternblockmenu_onblocktransposedown);
-	psy_ui_button_init_text_connect(&self->blocktransposeup12, &self->component,
+	psy_ui_button_init_text_connect(&self->blocktransposeup12, &self->component, NULL,
 		"Transpose +12", self, patternblockmenu_onblocktransposeup12);
-	psy_ui_button_init_text_connect(&self->blocktransposedown12, &self->component,
+	psy_ui_button_init_text_connect(&self->blocktransposedown12, &self->component, NULL,
 		"Transpose -12", self, patternblockmenu_onblocktransposedown12);
-	psy_ui_button_init_text_connect(&self->import, &self->component, "Import (psb)",
+	psy_ui_button_init_text_connect(&self->import, &self->component, NULL, "Import (psb)",
 		self, patternblockmenu_onimport);
-	psy_ui_button_init_text_connect(&self->export, &self->component, "Export (psb)",
+	psy_ui_button_init_text_connect(&self->export, &self->component, NULL, "Export (psb)",
 		self, patternblockmenu_onexport);
 	self->target = PATTERNVIEWTARGET_TRACKER;
 }

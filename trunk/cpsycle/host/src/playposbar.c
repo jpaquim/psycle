@@ -32,7 +32,7 @@ static psy_ui_ComponentVtable* vtable_init(PlayPosBar* self)
 void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);

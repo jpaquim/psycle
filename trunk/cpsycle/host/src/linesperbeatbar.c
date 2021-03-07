@@ -34,7 +34,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	assert(self);
 	assert(workspace);
 
-	psy_ui_component_init(linesperbeatbar_base(self), parent);
+	psy_ui_component_init(linesperbeatbar_base(self), parent, NULL);
 	psy_ui_component_setvtable(linesperbeatbar_base(self), vtable_init(self));
 	self->lpb = 0;
 	self->workspace = workspace;
@@ -48,11 +48,11 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_ui_label_preventtranslation(&self->lpblabel);
 	psy_ui_label_setcharnumber(&self->lpblabel, 4);
 	// less
-	psy_ui_button_init_connect(&self->lessbutton, linesperbeatbar_base(self),
+	psy_ui_button_init_connect(&self->lessbutton, linesperbeatbar_base(self), NULL,
 		self, linesperbeatbar_onlessclicked);
 	psy_ui_button_seticon(&self->lessbutton, psy_ui_ICON_LESS);	
 	// more
-	psy_ui_button_init_connect(&self->morebutton, linesperbeatbar_base(self),
+	psy_ui_button_init_connect(&self->morebutton, linesperbeatbar_base(self), NULL,
 		self, linesperbeatbar_onmoreclicked);
 	psy_ui_button_seticon(&self->morebutton, psy_ui_ICON_MORE);	
 	psy_ui_component_starttimer(&self->component, 0, 200);	

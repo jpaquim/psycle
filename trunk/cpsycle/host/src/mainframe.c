@@ -26,6 +26,7 @@ static void mainframe_initframe(MainFrame*);
 static void mainframe_ondestroyed(MainFrame*);
 static void mainframe_initworkspace(MainFrame*);
 static void mainframe_initemptystatusbar(MainFrame*);
+static void mainframe_initspacerleft(MainFrame*);
 static void mainframe_inittoparea(MainFrame*);
 static void mainframe_initclientarea(MainFrame*);
 static void mainframe_initrightarea(MainFrame*);
@@ -171,9 +172,10 @@ static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
 // implementation
 void mainframe_init(MainFrame* self)
 {			
-	mainframe_initframe(self);
+	mainframe_initframe(self);	
 	mainframe_initworkspace(self);
-	mainframe_initemptystatusbar(self);	
+	mainframe_initemptystatusbar(self);
+	mainframe_initspacerleft(self);
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
 	mainframe_inittoparea(self);
@@ -194,7 +196,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initfileview(self);
 	mainframe_initsequenceview(self);			
 	mainframe_initplugineditor(self);
-	mainframe_initstatusbar(self);	
+	mainframe_initstatusbar(self);
 	mainframe_setstartpage(self);
 	mainframe_updatesongtitle(self);
 	mainframe_initinterpreter(self);
@@ -214,7 +216,7 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);	
 	initdarkstyles(psy_ui_appdefaults());
 	self->startup = TRUE;
-	self->pluginscanprogress = -1;
+	self->pluginscanprogress = -1;	
 }
 
 void mainframe_ondestroyed(MainFrame* self)
@@ -250,12 +252,21 @@ void mainframe_initemptystatusbar(MainFrame* self)
 		psy_ui_margin_makeem(0.25, 1.0, 0.25, 0.0));
 }
 
+void mainframe_initspacerleft(MainFrame* self)
+{	
+	psy_ui_component_init(&self->spacerleft, &self->component, NULL);
+	psy_ui_component_preventalign(&self->spacerleft);
+	psy_ui_component_setpreferredsize(&self->spacerleft,
+		psy_ui_size_makeem(2.0, 0.0));
+	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
+}
+
 void mainframe_inittoparea(MainFrame* self)
 {	
 	psy_ui_component_init_align(&self->top, mainframe_base(self),
 		psy_ui_ALIGN_TOP);	
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
-		psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.5));
+		psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.0));
 }
 
 void mainframe_initclientarea(MainFrame* self)
@@ -344,7 +355,7 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
 {	
-	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
+	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar, NULL,
 		"Kbd", self, mainframe_ontogglekbdhelp);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
@@ -356,7 +367,7 @@ void mainframe_initkbdhelpbutton(MainFrame* self)
 void mainframe_initterminalbutton(MainFrame* self)
 {	
 	self->terminalmsgtype = TERMINALMSGTYPE_NONE;
-	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar,
+	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar, NULL,
 		"Terminal", self, mainframe_ontoggleterminal);
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
@@ -408,9 +419,9 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin row0margin;	
 	psy_ui_Margin scopemargin;
 
-	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.5);
+	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.0);
 	// Vugroup
-	psy_ui_component_init(&self->topright, &self->top);
+	psy_ui_component_init(&self->topright, &self->top, NULL);
 	psy_ui_component_setalign(&self->topright, psy_ui_ALIGN_RIGHT);
 	vubar_init(&self->vubar, &self->topright, &self->workspace);	
 	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_TOP);
@@ -420,7 +431,7 @@ void mainframe_initbars(MainFrame* self)
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {		
 	}
-	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 2.0);	
+	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
 	psy_ui_component_setmargin(&self->toprows, &toprowsmargin);
 	psy_ui_component_setstyletypes(&self->toprows,
 		STYLE_TOPROWS, STYLE_TOPROWS, STYLE_TOPROWS);
@@ -429,7 +440,7 @@ void mainframe_initbars(MainFrame* self)
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5)));
 	// row0
-	psy_ui_component_init(&self->toprow0, &self->toprows);
+	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
 		STYLE_TOPROW0, STYLE_TOPROW0);
 	psy_ui_component_setmargin(&self->toprow0, &row0margin);
@@ -447,14 +458,14 @@ void mainframe_initbars(MainFrame* self)
 	margin.right = psy_ui_value_makepx(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), &margin);
 	// row1
-	psy_ui_component_init(&self->toprow1, &self->toprows);
+	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow1, STYLE_TOPROW1,
 		STYLE_TOPROW1, STYLE_TOPROW1);
 	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
 	// row2	
-	psy_ui_component_init(&self->toprow2, &self->toprows);
+	psy_ui_component_init(&self->toprow2, &self->toprows, NULL);
 	psy_ui_component_setdefaultalign(&self->toprow2, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());	
 	psy_ui_component_setstyletypes(&self->toprow2, STYLE_TOPROW2,
@@ -467,9 +478,9 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
-	psy_ui_margin_init_all_em(&scopemargin, 0.0, 1.0, 0.0, 2.0);	
+	psy_ui_margin_init_all_em(&scopemargin, 0.0, 1.0, 0.0, 0.0);	
 	psy_ui_component_setmargin(&self->trackscopeview.component, &scopemargin);
-	psy_ui_component_init(&self->topspacer, &self->component);
+	psy_ui_component_init(&self->topspacer, &self->component, NULL);
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->topspacer);
 	psy_ui_component_setpreferredsize(&self->topspacer,
@@ -483,9 +494,9 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_Margin spacing;
 
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_init(&self->tabbars, &self->client);	
+	psy_ui_component_init(&self->tabbars, &self->client, NULL);
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->tabspacer, &self->client);
+	psy_ui_component_init(&self->tabspacer, &self->client, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->tabspacer);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
@@ -592,7 +603,7 @@ void mainframe_initgear(MainFrame* self)
 		mainframe_ontogglegear);	
 	psy_signal_connect(&gear_base(&self->gear)->signal_hide, self,
 		mainframe_onhidegear);
-	psy_ui_component_init(&self->gearspacer, &self->client);
+	psy_ui_component_init(&self->gearspacer, &self->client, NULL);
 	psy_ui_component_setalign(&self->gearspacer, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_preventalign(&self->gearspacer);
 	psy_ui_component_setpreferredsize(&self->gearspacer,

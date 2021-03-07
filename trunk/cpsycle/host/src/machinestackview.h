@@ -32,7 +32,7 @@ struct psy_audio_Machines;
 typedef struct MachineStackColumn {
 	uintptr_t column;
 	psy_List* chain;	
-	psy_audio_WireMachineParam* wirevolume;
+	psy_audio_WireMachineParam* wirevolume;	
 } MachineStackColumn;
 
 void machinestackcolumn_init(MachineStackColumn*,
@@ -42,12 +42,14 @@ void machinestackcolumn_dispose(MachineStackColumn*);
 void machinestackcolumn_setwire(MachineStackColumn* self, psy_audio_Wire wire,
 	struct psy_audio_Machines* machines);
 psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn*);
+void machinestackcolumn_append(MachineStackColumn* self, uintptr_t macid);
 
 // MachineStackState
 typedef struct MachineStackState {
 	psy_Table columns;
 	psy_audio_Machines* machines;
 	uintptr_t selected;
+	psy_ui_Size size;
 } MachineStackState;
 
 void machinestackstate_init(MachineStackState*);
@@ -93,7 +95,7 @@ void machinestackinputs_init(MachineStackInputs*, psy_ui_Component* parent,
 	psy_audio_Machines*, MachineStackState* state, MachineViewSkin* skin,
 	Workspace* workspace);
 void machinestackinputs_setmachines(MachineStackInputs*, psy_audio_Machines*);
-
+void machinestackinputs_updatevus(MachineStackInputs*);
 
 // MachineStackOutputs
 typedef struct MachineStackOutputs {
@@ -117,8 +119,7 @@ typedef struct MachineStackPane {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_changed;
-	// internal data
-	psy_ui_Component* dragmachineui;
+	// internal data	
 	bool vudrawupdate;
 	uintptr_t opcount;
 	// references
@@ -131,6 +132,7 @@ typedef struct MachineStackPane {
 void machinestackpane_init(MachineStackPane*, psy_ui_Component* parent,
 	MachineStackState*, MachineViewSkin*, Workspace*);
 
+void machinestackpane_updatevus(MachineStackPane*);
 void machinestackpane_updateskin(MachineStackPane*);
 
 
@@ -154,6 +156,8 @@ void machinestackvolumes_build(MachineStackVolumes*);
 typedef struct MachineStackPaneTrack {
 	// inherits
 	psy_ui_Component component;
+	// psy_ui_Component client;
+	// psy_ui_Scroller scroller;
 	// internal
 	uintptr_t column;
 	// References
@@ -165,17 +169,18 @@ void machinestackpanetrack_init(MachineStackPaneTrack*, psy_ui_Component* parent
 	uintptr_t column, psy_ui_Component* view,
 	MachineStackState*, Workspace*);
 
-// MachineStackPane
+// MachineStackView
 typedef struct MachineStackView {
 	// inherits
 	psy_ui_Component component;
 	// internal data
 	MachineStackDesc desc;
+	psy_ui_Component columns;
 	MachineStackInputs inputs;
 	MachineStackOutputs outputs;
 	MachineStackPane pane;
-	MachineStackVolumes volumes;
-	psy_ui_Scroller scroller;
+	MachineStackVolumes volumes;	
+	psy_ui_Scroller scroller_columns;
 	MachineStackState state;
 	// internal
 	Workspace* workspace;

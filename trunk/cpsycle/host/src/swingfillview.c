@@ -19,9 +19,9 @@ static void swingfillview_setoffset(SwingFillView*, bool offset);
 void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(swingfillview_base(self), parent);		
+	psy_ui_component_init(swingfillview_base(self), parent, NULL);
 	self->workspace = workspace;		
-	psy_ui_component_init(&self->client, swingfillview_base(self));
+	psy_ui_component_init(&self->client, swingfillview_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
@@ -30,13 +30,13 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	intedit_init(&self->tempo, &self->client, "Tempo(BPM)", 125, 0, 0);
 	intedit_seteditcharnumber(&self->tempo, EDIT_CHARNUM);
 	intedit_setdesccharnumber(&self->tempo, DESC_CHARNUM);
-	psy_ui_component_init(&self->offsetrow, &self->client);
+	psy_ui_component_init(&self->offsetrow, &self->client, NULL);
 	psy_ui_component_setdefaultalign(&self->offsetrow, psy_ui_ALIGN_RIGHT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow, "BPM");
-	psy_ui_button_init_text_connect(&self->center_bpm, &self->offsetrow,
+	psy_ui_button_init_text_connect(&self->center_bpm, &self->offsetrow, NULL,
 		"Center", self, swingfillview_oncenterbpm);
-	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow,
+	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow, NULL,
 		"Actual", self, swingfillview_onactualbpm);		
 	swingfillview_setoffset(self, TRUE);
 	intedit_init(&self->width, &self->client,
@@ -60,14 +60,14 @@ void swingfillview_initactions(SwingFillView* self)
 
 	assert(self);
 
-	psy_ui_component_init(&self->actions, &self->client);
+	psy_ui_component_init(&self->actions, &self->client, NULL);
 	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->actions, &margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_RIGHT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text_connect(&self->cancel, &self->actions,
+	psy_ui_button_init_text_connect(&self->cancel, &self->actions, NULL,
 		"Cancel", self, swingfillview_onhide);
-	psy_ui_button_init_text(&self->apply, &self->actions, "Apply");
+	psy_ui_button_init_text(&self->apply, &self->actions, NULL, "Apply");
 }
 
 

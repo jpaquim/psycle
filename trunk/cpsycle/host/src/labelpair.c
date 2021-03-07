@@ -7,7 +7,7 @@
 
 void labelpair_init(LabelPair* self, psy_ui_Component* parent, const char* desc)
 {
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->desc, &self->component, desc);
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_setcharnumber(&self->desc, 25);

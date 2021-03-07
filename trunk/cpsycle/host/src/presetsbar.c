@@ -40,7 +40,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->workspace = workspace;
@@ -49,17 +49,17 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	psy_path_init(&self->presetpath, "");	
 	psy_ui_label_init(&self->bank, &self->component);
 	psy_ui_label_settext(&self->bank, "Bank");
-	psy_ui_combobox_init(&self->bankselector, &self->component);
+	psy_ui_combobox_init(&self->bankselector, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->bankselector, 10);
-	psy_ui_button_init(&self->importpresets, &self->component);
+	psy_ui_button_init(&self->importpresets, &self->component, NULL);
 	psy_ui_button_settext(&self->importpresets, "Import");
-	psy_ui_button_init(&self->exportpresets, &self->component);
+	psy_ui_button_init(&self->exportpresets, &self->component, NULL);
 	psy_ui_button_settext(&self->exportpresets, "Export");
 	psy_ui_label_init(&self->program, &self->component);
 	psy_ui_label_settext(&self->program, "Program");
-	psy_ui_combobox_init(&self->programbox, &self->component);
+	psy_ui_combobox_init(&self->programbox, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->programbox, 20);
-	psy_ui_button_init(&self->savepresets, &self->component);
+	psy_ui_button_init(&self->savepresets, &self->component, NULL);
 	psy_ui_button_settext(&self->savepresets, "Save as");
 	psy_ui_edit_init(&self->savename, &self->component);
 	psy_ui_edit_setcharnumber(&self->savename, 12);

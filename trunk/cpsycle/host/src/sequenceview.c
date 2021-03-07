@@ -30,65 +30,69 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 	};
 	uintptr_t i;	
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_SEQVIEW_BUTTONS,
 		STYLE_SEQVIEW_BUTTONS, STYLE_SEQVIEW_BUTTONS);
 	psy_ui_margin_init_all_em(&spacing, 0.25, 0.5, 0.5, 0.5);
 	psy_ui_component_setspacing(&self->component, &spacing);
-	psy_ui_component_init(&self->standard, &self->component);
+	psy_ui_component_init(&self->standard, &self->component, NULL);
 	psy_ui_component_setalign(&self->standard, psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->row0, &self->standard);
+	psy_ui_component_init(&self->row0, &self->standard, NULL);
 	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row0, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_all_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->row0, &rowmargin);
-	psy_ui_button_init_text(&self->incpattern, &self->row0, "+");	
-	psy_ui_button_init_text(&self->insertentry, &self->row0,
+	psy_ui_button_init(&self->incpattern, &self->row0, NULL);
+	psy_ui_button_preventtranslation(&self->incpattern);
+	psy_ui_button_settext(&self->incpattern, "+");
+	psy_ui_button_init_text(&self->insertentry, &self->row0, NULL,
 		"sequencerview.ins");	
-	psy_ui_button_init_text(&self->decpattern, &self->row0, "-");
-	psy_ui_component_init(&self->row1, &self->standard);
+	psy_ui_button_init(&self->decpattern, &self->row0, NULL);
+	psy_ui_button_preventtranslation(&self->decpattern);
+	psy_ui_button_settext(&self->decpattern, "-");
+	psy_ui_component_init(&self->row1, &self->standard, NULL);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row1, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init_text(&self->newentry, &self->row1,
+	psy_ui_button_init_text(&self->newentry, &self->row1, NULL,
 		"sequencerview.new");
-	psy_ui_button_init_text(&self->cloneentry, &self->row1,
+	psy_ui_button_init_text(&self->cloneentry, &self->row1, NULL,
 		"sequencerview.clone");
-	psy_ui_button_init_text(&self->delentry, &self->row1,
+	psy_ui_button_init_text(&self->delentry, &self->row1, NULL,
 		"sequencerview.del");
-	psy_ui_component_init(&self->expand, &self->component);
+	psy_ui_component_init(&self->expand, &self->component, NULL);
 	psy_ui_component_setalign(&self->expand, psy_ui_ALIGN_TOP);
-	psy_ui_button_init(&self->toggle, &self->expand);
+	psy_ui_button_init(&self->toggle, &self->expand, NULL);
 	psy_ui_button_preventtranslation(&self->toggle);
 	psy_ui_button_settext(&self->toggle, ". . .");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggle),
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->block, &self->component);
+	psy_ui_component_init(&self->block, &self->component, NULL);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->row2, &self->block);
+	psy_ui_component_init(&self->row2, &self->block, NULL);
 	psy_ui_margin_init_all_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->row2, &rowmargin);
 	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row2, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text(&self->clear, &self->row2,
+	psy_ui_button_init_text(&self->clear, &self->row2, NULL,
 		"sequencerview.clear");	
-	psy_ui_button_init_text(&self->rename, &self->row2,
+	psy_ui_button_init_text(&self->rename, &self->row2, NULL,
 		"sequencerview.rename");
 	// psy_ui_button_init(&self->cut, &self->component);
 	// psy_ui_button_settext(&self->cut, "");
-	psy_ui_button_init_text(&self->copy, &self->row2,
+	psy_ui_button_init_text(&self->copy, &self->row2, NULL,
 		"sequencerview.copy");
-	psy_ui_component_init(&self->row3, &self->block);
+	psy_ui_component_init(&self->row3, &self->block, NULL);
 	psy_ui_component_setalign(&self->row3, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row3, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init_text(&self->paste, &self->row3,
+	psy_ui_button_init_text(&self->paste, &self->row3, NULL,
 		"sequencerview.paste");
-	psy_ui_button_init_text(&self->singlesel, &self->row3,
+	psy_ui_button_init_text(&self->singlesel, &self->row3, NULL,
 		"sequencerview.singlesel");
-	psy_ui_button_init_text(&self->multisel, &self->row3,
+	psy_ui_button_init_text(&self->multisel, &self->row3, NULL,
 		"sequencerview.multisel");
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
@@ -243,7 +247,7 @@ static void trackheaderview_vtable_init(SequenceTrackHeaders* self)
 void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_Component* parent, SequenceListViewState* state)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackheaderview_vtable_init(self);
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
@@ -441,7 +445,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 {
 	// psy_ui_Margin spacing;
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	sequencelistview_vtable_init(self);
 	self->component.vtable = &sequencelistview_vtable;
 	self->state = state;
@@ -786,25 +790,26 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 2.0);		
 	self->sequence = sequence;
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	self->duration_bts = 0.0;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.5, 0.0);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_label_init(&self->desc, &self->component);
 	psy_ui_label_setcharnumber(&self->desc, 9);
 	psy_ui_label_settext(&self->desc, "sequencerview.duration");
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->duration, &self->component);
-	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_label_setcharnumber(&self->duration, 10);
+	psy_ui_component_setmargin(&self->desc.component, &margin);	
+	psy_ui_label_init(&self->duration, &self->component);	
+	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);
+	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_component_setmargin(&self->duration.component, &margin);
+	psy_ui_label_setcharnumber(&self->duration, 18);
 	psy_ui_label_preventtranslation(&self->duration);
-	psy_list_free(psy_ui_components_setmargin(
-		psy_ui_component_children(&self->component, 0),
-		&margin));	
+	psy_ui_component_setstyletypes(psy_ui_label_base(&self->duration),
+		STYLE_DURATION_TIME, STYLE_DURATION_TIME, STYLE_DURATION_TIME);
 	sequenceduration_update(self);	
 }
 
@@ -818,7 +823,7 @@ void sequenceduration_update(SequenceViewDuration* self)
 
 		self->duration_bts = duration_bts;
 		self->duration_ms = psy_audio_sequence_calcdurationinms(self->sequence);
-		psy_snprintf(text, 64, "%02dm%02ds %.2fb",
+		psy_snprintf(text, 64, " %02dm%02ds %.2fb",
 			(int)(self->duration_ms / 60), ((int)self->duration_ms % 60),
 			(float)self->duration_bts);
 		psy_ui_label_settext(&self->duration, text);
@@ -835,7 +840,10 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	assert(self);
 	assert(workspace);
 	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.25, 0.0);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		margin);
 	self->workspace = workspace;
 	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);	
 	psy_ui_checkbox_settext(&self->followsong,
@@ -855,39 +863,33 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
 		"sequencerview.allow-notes-to_effect");	
-	{
-		psy_ui_Margin margin;
+	{		
 		// seqedit buttons
-		psy_ui_component_init(&self->seqedit, &self->component);
+		psy_ui_component_init(&self->seqedit, &self->component, NULL);
 		psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);			
-		psy_ui_button_init(&self->toggleseqediticon, &self->seqedit);
+		psy_ui_button_init(&self->toggleseqediticon, &self->seqedit, NULL);
 		psy_ui_button_seticon(&self->toggleseqediticon, psy_ui_ICON_MORE);
 		psy_ui_component_setalign(&self->toggleseqediticon.component,
 			psy_ui_ALIGN_LEFT);		
-		psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit,
+		psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit, NULL,
 			"sequencerview.showseqeditor");
 		psy_ui_component_setalign(&self->toggleseqedit.component,
 			psy_ui_ALIGN_LEFT);		
 		// stepseq buttons
-		psy_ui_component_init(&self->stepseq, &self->component);
+		psy_ui_component_init(&self->stepseq, &self->component, NULL);
 		psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);
 		psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);
-		psy_ui_button_init(&self->togglestepseqicon, &self->stepseq);
+		psy_ui_button_init(&self->togglestepseqicon, &self->stepseq, NULL);
 		psy_ui_button_seticon(&self->togglestepseqicon, psy_ui_ICON_MORE);
 		psy_ui_component_setalign(&self->togglestepseqicon.component,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_component_setmargin(&self->togglestepseqicon.component, &margin);
-		psy_ui_button_init_text(&self->togglestepseq, &self->stepseq,
+		psy_ui_button_init_text(&self->togglestepseq, &self->stepseq, NULL,
 			"sequencerview.showstepsequencer");
 		psy_ui_component_setalign(&self->togglestepseq.component,
 			psy_ui_ALIGN_LEFT);		
 	}	
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.2, 2.0);
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP,
-		&margin));	
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 2.0);
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, &margin);
 }
 
@@ -937,7 +939,7 @@ static void sequenceview_onalign(SequenceView*, psy_ui_Component* sender);
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	// shared state
 	sequencelistviewstate_init(&self->state);
@@ -950,25 +952,19 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		self->state.sequence = NULL;
 	}
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
-	// spacer left
-	psy_ui_component_init(&self->spacerleft, &self->component);
-	psy_ui_component_preventalign(&self->spacerleft);
-	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_makeem(1.0, 0.0));
-	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
+		psy_ui_BACKGROUND_NONE);	
 	// sequence listview
 	sequencelistview_init(&self->listview, &self->component,
 		&self->state, self, self->patterns, workspace);	
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-		&self->component);	
+		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	self->listview.player = &workspace->player;
 	// button bar
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	// spacer
-	psy_ui_component_init(&self->spacer, &self->component);
+	psy_ui_component_init(&self->spacer, &self->component, NULL);
 	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_makeem(0.0, 0.3));
 	psy_ui_component_preventalign(&self->spacer);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_TOP);

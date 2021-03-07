@@ -132,6 +132,18 @@ INLINE bool psy_ui_realpoint_equal(const psy_ui_RealPoint* self, const psy_ui_Re
 	return self->x == other->x && self->y == other->y;
 }
 
+INLINE void psy_ui_realpoint_add(psy_ui_RealPoint* self, psy_ui_RealPoint other)
+{
+	self->x += other.x;
+	self->y += other.y;
+}
+
+INLINE void psy_ui_realpoint_sub(psy_ui_RealPoint* self, psy_ui_RealPoint other)
+{
+	self->x -= other.x;
+	self->y -= other.y;
+}
+
 typedef struct psy_ui_RealSize {
 	double width;
 	double height;
@@ -363,10 +375,25 @@ INLINE psy_ui_Size psy_ui_size_makeem(double width, double height)
 	return rv;
 }
 
+INLINE psy_ui_Size psy_ui_size_makereal(psy_ui_RealSize size)
+{
+	psy_ui_Size rv;
+
+	rv.width = psy_ui_value_makeew(size.width);
+	rv.height = psy_ui_value_makeeh(size.height);
+	return rv;
+}
+
 INLINE void psy_ui_size_setpx(psy_ui_Size* self, double width, double height)
 {
 	self->width = psy_ui_value_makepx(width);
 	self->height = psy_ui_value_makepx(height);
+}
+
+INLINE void psy_ui_size_setreal(psy_ui_Size* self, psy_ui_RealSize size)
+{	
+	self->width = psy_ui_value_makepx(size.width);
+	self->height = psy_ui_value_makepx(size.height);	
 }
 
 INLINE void psy_ui_size_setem(psy_ui_Size* self, double width, double height)

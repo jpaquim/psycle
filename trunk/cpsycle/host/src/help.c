@@ -29,7 +29,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_Margin leftmargin;
 	psy_ui_Margin tabmargin;
 
-	psy_ui_component_init(help_base(self), parent);	
+	psy_ui_component_init(help_base(self), parent, NULL);
 	self->workspace = workspace;
 	tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;

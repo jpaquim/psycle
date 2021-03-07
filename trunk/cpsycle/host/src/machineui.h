@@ -85,64 +85,17 @@ typedef struct MachineUiCommon {
 void machineuicommon_init(MachineUiCommon*,  uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
 
-// MasterUi
-typedef struct MasterUi {
-	// inherits
-	psy_ui_Component component;
-	// internal
-	MachineUiCommon intern;
-} MasterUi;
+void machineuicommon_move(MachineUiCommon*, psy_ui_Point topleft);
 
-void masterui_init(MasterUi*, psy_ui_Component* parent, MachineViewSkin*,
-	psy_ui_Component* view, Workspace*);
-
-// GeneratorUi
-typedef struct GeneratorUi {
-	// inherits
-	psy_ui_Component component;
-	// internal
-	MachineUiCommon intern;
-} GeneratorUi;
-
-void generatorui_init(GeneratorUi*, psy_ui_Component* parent,
-	uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
-
-// EffectUi
-typedef struct EffectUi {
-	// inherits
-	psy_ui_Component component;
-	// internal
-	MachineUiCommon intern;
-} EffectUi;
-
-void effectui_init(EffectUi*, psy_ui_Component* parent,
-	uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
-
-// SliderUi
-typedef struct SliderUi {
-	// inherits
-	psy_ui_Component component;
-	// internal
-	ParamTweak paramtweak;
-	// references
-	ParamSkin* skin;
-	Workspace* workspace;
-	psy_ui_Component* view;
-	psy_audio_MachineParam* param;
-} SliderUi;
-
-void sliderui_init(SliderUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, Workspace*);
-
-// static methods
+// global methods
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* parent,
 	psy_ui_Component* view, psy_ui_Edit* editname,
 	bool machinepos,
 	Workspace* workspace);
+
+void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position);
 
 // vudraw optimization
 // sets a global vu update flag
@@ -151,6 +104,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 // methods called in ontimer of the wire-/stackview
 void machineui_beginvuupdate(void);
 void machineui_endvuupdate(void);
+bool machineui_vuupdate(void);
 
 #ifdef __cplusplus
 }

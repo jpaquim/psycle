@@ -41,7 +41,7 @@ typedef struct psy_ui_ScrollBarPane {
 } psy_ui_ScrollBarPane;
 
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*,
-    psy_ui_Component* parent);
+    psy_ui_Component* parent, psy_ui_Component* view);
 void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*,
     psy_ui_Orientation);
 
@@ -58,7 +58,8 @@ typedef struct psy_ui_ScrollBar {
     psy_ui_ScrollBarPane sliderpane;    
 } psy_ui_ScrollBar;
 
-void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);
+void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent,
+    psy_ui_Component* view);
 void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar*, psy_ui_Orientation);
 double psy_ui_scrollbar_position(psy_ui_ScrollBar*);
 void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar*, double scrollmax,

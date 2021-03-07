@@ -62,9 +62,9 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 }
 // implementation
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
-	psy_ui_Component* parent)
+	psy_ui_Component* parent, psy_ui_Component* view)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_scrollbarpane_vtable_init(self);
 	self->component.vtable = &psy_ui_scrollbarpane_vtable;
 	psy_ui_component_preventalign(&self->component);
@@ -301,27 +301,28 @@ static void psy_ui_scrollbar_onscrollpaneclicked(psy_ui_ScrollBar*,
 // static void psy_ui_scrollbar_onmousewheel(psy_ui_ScrollBar*,
 //		psy_ui_Component* sender, psy_ui_MouseEvent*);
 // implementation
-void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
+void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbar_ondestroy);
 	// Less Button
-	psy_ui_button_init_connect(&self->less, &self->component,
+	psy_ui_button_init_connect(&self->less, &self->component, view,
 		self, psy_ui_scrollbar_onless);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 	psy_ui_button_setcharnumber(&self->less, 2);
 	psy_ui_component_setalign(&self->less.component, psy_ui_ALIGN_TOP);	
 	// More Button
-	psy_ui_button_init_connect(&self->more, &self->component,
+	psy_ui_button_init_connect(&self->more, &self->component, view,
 		self, psy_ui_scrollbar_onmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 	psy_ui_button_setcharnumber(&self->more, 2);
 	psy_ui_component_setalign(&self->more.component, psy_ui_ALIGN_BOTTOM);
 	// Pane
-	psy_ui_scrollbarpane_init(&self->sliderpane, &self->component);
+	psy_ui_scrollbarpane_init(&self->sliderpane, &self->component, view);
 	psy_ui_component_setalign(&self->sliderpane.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setpreferredsize(&self->sliderpane.component,
 		psy_ui_size_make(
@@ -352,7 +353,7 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 		psy_ui_component_setalign(&self->more.component, psy_ui_ALIGN_BOTTOM);
 		psy_ui_component_setpreferredsize(&self->sliderpane.component,
-			psy_ui_size_makeem(2.0, 1.0));				
+			psy_ui_size_makeem(2.5, 1.0));				
 	}
 }
 

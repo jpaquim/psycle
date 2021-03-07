@@ -18,7 +18,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	uintptr_t paramindex;
 	psy_Property* theme;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	theme = workspace->config.macparam.theme;
 	if (theme) {
 		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(

@@ -53,7 +53,7 @@ static void* dev_platform(psy_ui_win_ComboBoxImp* self) { return (void*)&self->w
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void imp_vtable_init(void)
 {
@@ -93,7 +93,7 @@ static void imp_vtable_init(void)
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable.dev_platform = (psy_ui_fp_componentimp_dev_platform)dev_platform;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -115,7 +115,7 @@ static intptr_t dev_count(psy_ui_win_ComboBoxImp*);
 static void dev_showdropdown(psy_ui_win_ComboBoxImp*);
 
 static psy_ui_ComboBoxImpVTable comboboximp_vtable;
-static int comboboximp_vtable_initialized = 0;
+static bool comboboximp_vtable_initialized = FALSE;
 
 static void comboboximp_imp_vtable_init(psy_ui_win_ComboBoxImp* self)
 {
@@ -131,13 +131,14 @@ static void comboboximp_imp_vtable_init(psy_ui_win_ComboBoxImp* self)
 		comboboximp_vtable.dev_selitems = (psy_ui_fp_comboboximp_dev_selitems)dev_selitems;
 		comboboximp_vtable.dev_selcount = (psy_ui_fp_comboboximp_dev_selcount)dev_selcount;
 		comboboximp_vtable.dev_showdropdown = (psy_ui_fp_comboboximp_dev_showdropdown)dev_showdropdown;
-		comboboximp_vtable_initialized = 1;
+		comboboximp_vtable_initialized = TRUE;
 	}
 }
 
 void psy_ui_win_comboboximp_init(psy_ui_win_ComboBoxImp* self,
 	psy_ui_Component* component,
-	psy_ui_ComponentImp* parent)
+	psy_ui_ComponentImp* parent,
+	psy_ui_Component* view)
 {	
 	psy_ui_WinApp* winapp;
 
@@ -172,13 +173,14 @@ psy_ui_win_ComboBoxImp* psy_ui_win_comboboximp_alloc(void)
 
 psy_ui_win_ComboBoxImp* psy_ui_win_comboboximp_allocinit(
 	struct psy_ui_Component* component,
-	psy_ui_ComponentImp* parent)
+	psy_ui_ComponentImp* parent,
+	psy_ui_Component* view)
 {
 	psy_ui_win_ComboBoxImp* rv;
 
 	rv = psy_ui_win_comboboximp_alloc();
 	if (rv) {
-		psy_ui_win_comboboximp_init(rv, component, parent);
+		psy_ui_win_comboboximp_init(rv, component, parent, view);
 	}
 	return rv;
 }
@@ -240,11 +242,16 @@ void dev_setcursel(psy_ui_win_ComboBoxImp* self, intptr_t index)
 {
 	char text[512];
 	intptr_t len;
+	intptr_t i;
 
+	if (self->component->debugflag == 3000) {
+		self = self;
+	}
 	SendMessage(self->win_combo_imp.hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	len = SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXTLEN, (WPARAM)index, 0);
 	SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXT, (WPARAM)index,
 		(LPARAM)text);
+	i = dev_cursel(self);
 	dev_invalidate(self);	
 }
 

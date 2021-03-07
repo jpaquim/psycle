@@ -28,12 +28,14 @@ extern "C" {
 
 	void psy_ui_win_comboboximp_init(psy_ui_win_ComboBoxImp* self,
 		struct psy_ui_Component* component,
-		struct psy_ui_ComponentImp* parent);
+		struct psy_ui_ComponentImp* parent,
+		psy_ui_Component* view);
 
 	psy_ui_win_ComboBoxImp* psy_ui_win_comboboximp_alloc(void);
 	psy_ui_win_ComboBoxImp* psy_ui_win_comboboximp_allocinit(
 		struct psy_ui_Component* component,
-		psy_ui_ComponentImp* parent);
+		psy_ui_ComponentImp* parent,
+		psy_ui_Component* view);
 
 #ifdef __cplusplus
 }

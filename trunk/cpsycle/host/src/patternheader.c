@@ -371,7 +371,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	TrackConfig* trackconfig, TrackerGridState* gridstate,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackerheader_vtable_init(self);
 	self->component.vtable = &trackerheader_vtable;
 	trackerheader_setsharedgridstate(self, gridstate, trackconfig);	

@@ -50,7 +50,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_doublebuffer(&self->component);
 	self->charnumber = 0;

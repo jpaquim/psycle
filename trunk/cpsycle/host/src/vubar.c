@@ -7,7 +7,7 @@
 
 void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_component_init(vubar_base(self), parent);
+	psy_ui_component_init(vubar_base(self), parent, NULL);
 	clipbox_init(&self->clipbox, vubar_base(self), workspace);
 	psy_ui_component_setalign(clipbox_base(&self->clipbox),
 		psy_ui_ALIGN_RIGHT);

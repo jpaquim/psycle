@@ -92,7 +92,7 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);		
+	psy_ui_component_init(&self->component, parent, NULL);
 	instrumentkeyboardview_vtable_init(self);	
 	self->component.vtable = &instrumentkeyboardview_vtable;
 	self->metrics.keysize = 6;
@@ -216,7 +216,7 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 void instrumententryview_init(InstrumentEntryView* self,
 	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	instrumententryview_vtable_init(self);
 	self->component.vtable = &instrumententryview_vtable;
 	psy_ui_component_doublebuffer(&self->component);	
@@ -624,7 +624,7 @@ void instrumententrytableviewheader_init(InstrumentEntryTableViewHeader* self,
 	psy_ui_Component* parent, InstrumentEntryTableState* state,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	instrumententrytableviewheader_vtable_init(self);
 	self->component.vtable = &instrumententrytableviewheader_vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -710,7 +710,7 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_Component* parent, InstrumentEntryTableState* state)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	instrumententrytableview_vtable_init(self);
 	self->component.vtable = &instrumententrytableview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -935,12 +935,12 @@ psy_audio_InstrumentEntry* instrumententrytavleview_selected(InstrumentEntryTabl
 void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->add, &self->component);
+	psy_ui_button_init(&self->add, &self->component, NULL);
 	psy_ui_button_settext(&self->add, "Add");
-	psy_ui_button_init(&self->remove, &self->component);
+	psy_ui_button_init(&self->remove, &self->component, NULL);
 	psy_ui_button_settext(&self->remove, "Remove");	
 }
 
@@ -966,7 +966,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	psy_ui_label_init_text(&self->label, &self->component, "Notemap");
@@ -1002,12 +1002,12 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->entries, &self->component);
+	psy_ui_component_init(&self->entries, &self->component, NULL);
 	psy_ui_component_setalign(&self->entries, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	instrumententryview_init(&self->entryview, &self->entries);
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
-		&self->entries);
+		&self->entries, NULL);
 	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	// todo: scroller here slows X11 down
@@ -1025,7 +1025,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 {
 	// table
 	instrumententrytablestate_init(&self->tablestate);
-	psy_ui_component_init(&self->table, &self->component);
+	psy_ui_component_init(&self->table, &self->component, NULL);
 	psy_ui_component_setalign(&self->table, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->table,
 		psy_ui_size_makeem(0.0, 6.0));
@@ -1036,7 +1036,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	instrumententrytableview_init(&self->tableview,
 		&self->table, &self->tablestate);
 	psy_ui_scroller_init(&self->scroller_table, &self->tableview.component,
-		&self->table);
+		&self->table, NULL);
 	psy_ui_component_setalign(&self->scroller_table.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setoverflow(&self->tableview.component, psy_ui_OVERFLOW_VSCROLL);
 }

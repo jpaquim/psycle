@@ -30,11 +30,11 @@ static const char* instrumentsbox_groupname(InstrumentsBox*,
 void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
 {		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// Groups
-	psy_ui_component_init(&self->groupheader, &self->component);
+	psy_ui_component_init(&self->groupheader, &self->component, NULL);
 	psy_ui_component_setalign(&self->groupheader, psy_ui_ALIGN_TOP);	
 	psy_ui_label_init_text(&self->header, &self->component,
 		"instrumentsbox.instrument-groups");
@@ -46,7 +46,7 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 		psy_ui_size_makeem(0.0, 10.0));
 	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
 	// Instruments
-	psy_ui_component_init(&self->instheader, &self->component);
+	psy_ui_component_init(&self->instheader, &self->component, NULL);
 	psy_ui_component_setalign(&self->instheader, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->group, &self->component,
 		"instrumentsbox.group-instruments");

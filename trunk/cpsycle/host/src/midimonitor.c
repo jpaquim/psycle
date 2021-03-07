@@ -36,7 +36,7 @@ static void midiactivechannelbox_vtable_init(MidiActiveChannelBox* self)
 void midiactivechannelbox_init(MidiActiveChannelBox* self,
 	psy_ui_Component* parent, int* channelmap)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	midiactivechannelbox_vtable_init(self);
 	self->component.vtable = &midiactivechannelbox_vtable;
 	self->channelmap = channelmap;
@@ -105,7 +105,7 @@ static void midiactiveclockbox_vtable_init(MidiActiveClockBox* self)
 void midiactiveclockbox_init(MidiActiveClockBox* self,
 	psy_ui_Component* parent, int* flags)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	midiactiveclockbox_vtable_init(self);
 	self->component.vtable = &midiactiveclockbox_vtable;
 	self->flags = flags;
@@ -152,7 +152,7 @@ void midiactiveclockbox_onpreferredsize(MidiActiveClockBox* self,
 void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	midiactiveclockbox_init(&self->clock, &self->component,
 		&workspace_player(self->workspace)->midiinput.stats.flags);
@@ -189,7 +189,7 @@ static void vtable_init(MidiChannelMappingView* self)
 void midichannelmappingview_init(MidiChannelMappingView* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &midichannelmappingview_vtable;
 	self->workspace = workspace;
@@ -349,15 +349,15 @@ static psy_ui_ComponentVtable* midimonitor_vtable_init(MidiMonitor* self)
 void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	midimonitor_vtable_init(self);
 	psy_ui_component_setvtable(midimonitor_base(self), midimonitor_vtable_init(self));
-	psy_ui_component_init(&self->client, midimonitor_base(self));
+	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
 	midimonitor_inittitle(self);
-	psy_ui_component_init(&self->top, &self->client);
+	psy_ui_component_init(&self->top, &self->client, NULL);
 	psy_ui_margin_init(&self->topmargin);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	self->workspace = workspace;
@@ -375,7 +375,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_ui_Margin margin;
 	
 	// titlebar
-	psy_ui_component_init(&self->titlebar, &self->client);
+	psy_ui_component_init(&self->titlebar, &self->client, NULL);
 	psy_ui_component_setstyletypes(&self->titlebar,
 		psy_ui_STYLE_CONTAINERHEADER,
 		psy_ui_STYLE_CONTAINERHEADER,
@@ -386,13 +386,13 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_ui_label_init_text(&self->title, &self->titlebar,
 		"Psycle MIDI Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
-	psy_ui_button_init(&self->configure, &self->titlebar);
+	psy_ui_button_init(&self->configure, &self->titlebar, NULL);
 	psy_ui_button_settext(&self->configure, "Devices");
 	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&self->configure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_component_setalign(&self->configure.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);
-	psy_ui_button_init(&self->hide, &self->titlebar);
+	psy_ui_button_init(&self->hide, &self->titlebar, NULL);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
@@ -412,7 +412,7 @@ void midimonitor_initcorestatus(MidiMonitor* self)
 
 void midimonitor_initcorestatusleft(MidiMonitor* self)
 {	
-	psy_ui_component_init(&self->resources, &self->top);
+	psy_ui_component_init(&self->resources, &self->top, NULL);
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
 		"Core Status");		
@@ -428,7 +428,7 @@ void midimonitor_initcorestatusleft(MidiMonitor* self)
 
 void midimonitor_initcorestatusright(MidiMonitor* self)
 {	
-	psy_ui_component_init(&self->performance, &self->top);
+	psy_ui_component_init(&self->performance, &self->top, NULL);
 	psy_ui_component_setalign(&self->performance, psy_ui_ALIGN_LEFT);
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
 	psy_ui_checkbox_settext(&self->cpucheck, "");	
@@ -457,7 +457,7 @@ void midimonitor_initflags(MidiMonitor* self)
 
 void midimonitor_initchannelmapping(MidiMonitor* self)
 {	
-	psy_ui_component_init(&self->topchannelmapping, &self->client);
+	psy_ui_component_init(&self->topchannelmapping, &self->client, NULL);
 	psy_ui_component_setalign(&self->topchannelmapping, psy_ui_ALIGN_TOP);
 	psy_ui_component_setminimumsize(&self->topchannelmapping,
 		psy_ui_size_makeem(0.0, 2.0));
@@ -465,7 +465,7 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 		&self->topchannelmapping, "Channel Mapping");		
 	psy_ui_component_setalign(&self->channelmappingtitle.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_button_init(&self->mapconfigure, &self->topchannelmapping);
+	psy_ui_button_init(&self->mapconfigure, &self->topchannelmapping, NULL);
 	psy_ui_bitmap_loadresource(&self->mapconfigure.bitmapicon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&self->mapconfigure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_signal_connect(&self->mapconfigure.signal_clicked, self, midimonitor_onmapconfigure);
@@ -475,7 +475,7 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_setoverflow(&self->channelmapping.component,
 		psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_scroller_init(&self->scroller, &self->channelmapping.component,
-		&self->client);
+		&self->client, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		midimonitor_onsongchanged);	

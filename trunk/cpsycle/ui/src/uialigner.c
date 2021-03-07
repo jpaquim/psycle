@@ -60,6 +60,9 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);
+			if (component->debugflag == 8000) {
+				component = component;
+			}
 			if (!component->preventpreferredsizeatalign) {
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);
@@ -380,22 +383,26 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 	if (rv) {
 		psy_ui_Size size;
 		const psy_ui_TextMetric* tm;
-		psy_ui_Component* client = 0;
+		psy_ui_Component* client;
 		psy_ui_Margin border;
 
 		size = *rv;
+		client = NULL;
 		tm = psy_ui_component_textmetric(self->component);
 		border = psy_ui_component_bordermargin(self->component);
 		if (self->component->alignchildren &&
 				!self->component->preventpreferredsize) {
 			psy_List* p;
 			psy_List* q;
-			psy_ui_IntPoint cp = { 0, 0 };
-			psy_ui_Size maxsize = { 0, 0 };
-			psy_ui_IntPoint cp_topleft = { 0, 0 };
-			psy_ui_IntPoint cp_bottomright = { 0, 0 };
-			
-			
+			psy_ui_IntPoint cp;
+			psy_ui_Size maxsize;
+			psy_ui_IntPoint cp_topleft;
+			psy_ui_IntPoint cp_bottomright;
+						
+			psy_ui_intpoint_init(&cp);
+			psy_ui_size_init(&maxsize);			
+			psy_ui_intpoint_init(&cp_topleft);
+			psy_ui_intpoint_init(&cp_bottomright);			
 			size.width = (!limit || (self->component->alignexpandmode &
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
 				? psy_ui_value_makepx(0)
@@ -508,7 +515,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 			*rv = maxsize;			
 			rv->width = psy_ui_value_makepx(
 				floor(psy_ui_value_px(&rv->width, tm)) +
-				floor(psy_ui_margin_width_px(&self->component->spacing, tm)) + 3 +
+				floor(psy_ui_margin_width_px(&self->component->spacing, tm)) +
 				floor(psy_ui_margin_width_px(&border, tm)));
 			rv->height = psy_ui_value_makepx(psy_ui_value_px(&rv->height, tm) +
 				psy_ui_margin_height_px(&self->component->spacing, tm) +

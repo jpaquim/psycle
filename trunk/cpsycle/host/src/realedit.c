@@ -27,7 +27,7 @@ static void realedit_oneditfocuslost(RealEdit*, psy_ui_Component* sender,
 void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	const char* desc, realedit_real_t value, realedit_real_t minval, realedit_real_t maxval)
 {
-	psy_ui_component_init(realedit_base(self), parent);
+	psy_ui_component_init(realedit_base(self), parent, NULL);
 	psy_ui_component_setalignexpand(realedit_base(self), psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(realedit_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -38,10 +38,10 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->desc, desc);
 	psy_ui_edit_init(&self->edit, realedit_base(self));
 	psy_ui_edit_setcharnumber(&self->edit, 5);	
-	psy_ui_button_init_connect(&self->less, realedit_base(self),
+	psy_ui_button_init_connect(&self->less, realedit_base(self), NULL,
 		self, realedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
-	psy_ui_button_init_connect(&self->more, realedit_base(self),
+	psy_ui_button_init_connect(&self->more, realedit_base(self), NULL,
 		self, realedit_onmoreclicked);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
 	psy_signal_init(&self->signal_changed);

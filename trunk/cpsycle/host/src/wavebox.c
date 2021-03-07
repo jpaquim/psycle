@@ -261,7 +261,7 @@ static void vtable_init(WaveBox* self)
 
 void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_preventalign(&self->component);

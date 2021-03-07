@@ -35,33 +35,33 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 {			
 	psy_ui_Margin margin;
 	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// row0
-	psy_ui_component_init(&self->row0, &self->component);
+	psy_ui_component_init(&self->row0, &self->component, NULL);
 	psy_ui_component_setalignexpand(&self->row0,
 		psy_ui_HORIZONTALEXPAND);	
 	zoombox_init(&self->zoombox, &self->row0);
 	psy_ui_component_setalign(zoombox_base(&self->zoombox), psy_ui_ALIGN_LEFT);
 	self->zoombox.zoomstep = 0.10;	
-	psy_ui_component_init(&self->buttons, &self->row0);
+	psy_ui_component_init(&self->buttons, &self->row0, NULL);
 	psy_ui_component_setalign(&self->buttons, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalignexpand(&self->buttons,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init(&self->mute, &self->buttons);
+	psy_ui_button_init(&self->mute, &self->buttons, NULL);
 	psy_ui_button_settext(&self->mute, "Mute");
-	psy_ui_button_init(&self->parameters, &self->buttons);
+	psy_ui_button_init(&self->parameters, &self->buttons, NULL);
 	psy_ui_button_settext(&self->parameters, "Parameters");	
-	psy_ui_button_init(&self->command, &self->buttons);
+	psy_ui_button_init(&self->command, &self->buttons, NULL);
 	psy_ui_button_settext(&self->command, "Command");
-	psy_ui_button_init(&self->help, &self->buttons);
+	psy_ui_button_init(&self->help, &self->buttons, NULL);
 	psy_ui_button_settext(&self->help, "Help");	
-	psy_ui_button_init(&self->more, &self->row0);
+	psy_ui_button_init(&self->more, &self->row0, NULL);
 	psy_ui_button_preventtranslation(&self->more);
 	psy_ui_button_settext(&self->more, ". . .");
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),

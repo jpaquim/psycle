@@ -41,7 +41,7 @@ static void scrollzoomvtable_init(ScrollZoom* self)
 
 void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 {		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	scrollzoomvtable_init(self);
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);

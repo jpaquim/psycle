@@ -27,7 +27,7 @@ static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_MACHINEBOX,
 		STYLE_MACHINEBOX, STYLE_MACHINEBOX);
 	self->workspace = workspace;

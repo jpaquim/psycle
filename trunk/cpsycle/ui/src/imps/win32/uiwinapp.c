@@ -124,7 +124,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);		
-	self->targetids = NULL;
+	self->targetids = NULL;	
 }
 
 void psy_ui_winapp_dispose(psy_ui_WinApp* self)
@@ -885,11 +885,11 @@ void handle_mouseevent(psy_ui_Component* component,
 	case WM_LBUTTONUP:
 	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
-		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);
+		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);		
 		break;
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
+	case WM_RBUTTONDOWN:		
 		winimp->imp.vtable->dev_mousedown(&winimp->imp, &ev);
 		break;
 	case WM_MOUSEMOVE:

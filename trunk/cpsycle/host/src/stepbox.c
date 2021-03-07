@@ -15,7 +15,7 @@ static void patterncursorstepbox_onselectionchanged(PatternCursorStepBox*,
 void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 	parent, Workspace* workspace)
 {	
-	psy_ui_component_init(patterncursorstepbox_base(self), parent);
+	psy_ui_component_init(patterncursorstepbox_base(self), parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(patterncursorstepbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -23,7 +23,7 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_label_init(&self->header, patterncursorstepbox_base(self));
 	psy_ui_label_settext(&self->header, "patternview.step");
-	psy_ui_combobox_init(&self->combobox, patterncursorstepbox_base(self));
+	psy_ui_combobox_init(&self->combobox, patterncursorstepbox_base(self), NULL);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		patterncursorstepbox_onselectionchanged);
 	psy_ui_combobox_setcharnumber(&self->combobox, 3);

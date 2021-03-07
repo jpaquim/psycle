@@ -8,6 +8,7 @@
 #include "uialigner.h"
 #include "uiapp.h"
 #include "uiimpfactory.h"
+#include "uiviewcomponentimp.h"
 // std
 #include <math.h>
 // platform
@@ -263,7 +264,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	}
 }
 
-void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
+void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_Component* view)
 {	
 	assert(self);
 	assert(self != parent);
@@ -274,8 +275,15 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 	if (!parent) {
 		psy_ui_app()->main = self;
 	}
-	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
-		self, parent);
+	if (view) {
+		self->imp = (psy_ui_ComponentImp*)
+			psy_ui_viewcomponentimp_allocinit(
+				self, (parent) ? parent->imp : NULL, view, "",
+				0, 0, 100, 100, 0, 0);		
+	} else {
+		self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
+			self, parent);
+	}
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
 	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
@@ -294,7 +302,9 @@ void dispose(psy_ui_Component* self)
 
 void destroy(psy_ui_Component* self)
 {
-	self->imp->vtable->dev_destroy(self->imp);
+	if (self->imp) {
+		self->imp->vtable->dev_destroy(self->imp);
+	}
 }
 
 void invalidate(psy_ui_Component* self)
@@ -891,6 +901,7 @@ static bool default_tm_initialized = FALSE;
 // psy_ui_ComponentImp vtable
 static void dev_dispose(psy_ui_ComponentImp* self) { }
 static void dev_destroy(psy_ui_ComponentImp* self) { }
+static void dev_destroyed(psy_ui_ComponentImp* self) { }
 static void dev_show(psy_ui_ComponentImp* self) { }
 static void dev_showstate(psy_ui_ComponentImp* self, int state) { }
 static void dev_hide(psy_ui_ComponentImp* self) { }
@@ -978,6 +989,7 @@ static void imp_vtable_init(void)
 	if (!imp_vtable_initialized) {
 		imp_vtable.dev_dispose = dev_dispose;
 		imp_vtable.dev_destroy = dev_destroy;
+		imp_vtable.dev_destroyed = dev_destroyed;
 		imp_vtable.dev_show = dev_show;
 		imp_vtable.dev_showstate = dev_showstate;
 		imp_vtable.dev_hide = dev_hide;

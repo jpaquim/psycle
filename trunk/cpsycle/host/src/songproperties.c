@@ -55,10 +55,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 1.0, 3.0);
 	self->song = workspace->song;
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_init(&self->tabbar, tabbarparent);	
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->tabbar, tabbarparent, NULL);
 	// title
-	psy_ui_component_init(&self->title, &self->component);
+	psy_ui_component_init(&self->title, &self->component, NULL);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_SONGPROPERTIES,
 		STYLE_SONGPROPERTIES,
@@ -77,7 +77,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit_title.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	// credits
-	psy_ui_component_init(&self->credits, &self->component);	
+	psy_ui_component_init(&self->credits, &self->component, NULL);
 	psy_ui_label_init_text(&self->label_credits, &self->credits,
 		"songproperties.credits");
 	psy_ui_label_setcharnumber(&self->label_credits, charnum);
@@ -92,12 +92,12 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit_credits.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	// Speed
-	psy_ui_component_init(&self->speed, &self->component);	
+	psy_ui_component_init(&self->speed, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->speed, psy_ui_ALIGN_LEFT,
-			margin);
+		margin);
 	psy_ui_label_init_text(&self->label_speed, &self->speed,
 		"songproperties.speed");
-	psy_ui_component_init(&self->speedbar, &self->speed);
+	psy_ui_component_init(&self->speedbar, &self->speed, NULL);
 	psy_ui_component_setalign(&self->speedbar, psy_ui_ALIGN_LEFT);
 	psy_ui_label_setcharnumber(&self->label_speed, charnum);
 	psy_ui_component_setdefaultalign(&self->speedbar, psy_ui_ALIGN_LEFT,
@@ -123,7 +123,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->realticksperbeat, &self->speedbar);
 	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);		
 	// Comments
-	psy_ui_component_init(&self->comments, &self->component);
+	psy_ui_component_init(&self->comments, &self->component, NULL);
 	psy_ui_component_setstyletypes(&self->comments,
 		STYLE_SONGPROPERTIES_COMMENTS,
 		STYLE_SONGPROPERTIES_COMMENTS,

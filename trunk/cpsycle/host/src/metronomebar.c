@@ -20,25 +20,25 @@ static void metronomebar_onprecountchanged(MetronomeBar*,
 void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {				
-	psy_ui_component_init(metronomebar_base(self), parent);	
+	psy_ui_component_init(metronomebar_base(self), parent, NULL);
 	psy_ui_component_setdefaultalign(metronomebar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;
 	// activated
-	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self),
+	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self), NULL,
 		"metronome.metronome", self, metronomebar_ontogglemetronomestate);
 	// precount
 	psy_ui_label_init_text(&self->desc, metronomebar_base(self),
 		"metronome.precount");
-	psy_ui_combobox_init(&self->precount, metronomebar_base(self));
+	psy_ui_combobox_init(&self->precount, metronomebar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->precount, 6);
 	metronomebar_fillprecount(self);
 	psy_ui_combobox_setcursel(&self->precount, 0);
 	psy_signal_connect(&self->precount.signal_selchanged, self,
 		metronomebar_onprecountchanged);
 	// configure
-	psy_ui_button_init_connect(&self->configure, metronomebar_base(self),
+	psy_ui_button_init_connect(&self->configure, metronomebar_base(self), NULL,
 		self, metronomebar_onconfigure);
 	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&self->configure.bitmapicon,
