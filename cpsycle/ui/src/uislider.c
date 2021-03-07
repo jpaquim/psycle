@@ -59,7 +59,7 @@ static void vtable_init(psy_ui_SliderPane* self)
 
 void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	self->slider = NULL;
@@ -335,7 +335,7 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 // psy_ui_Slider
 void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init(&self->desc, &self->component);	
 	psy_ui_sliderpane_init(&self->pane, &self->component);
 	self->pane.slider = self;	

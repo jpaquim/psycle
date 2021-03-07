@@ -23,7 +23,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		renderview_ondestroy);
 	psy_signal_connect(&self->component.signal_focus,

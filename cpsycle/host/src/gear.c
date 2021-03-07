@@ -12,26 +12,26 @@
 void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(gearbuttons_base(self), parent);	
+	psy_ui_component_init(gearbuttons_base(self), parent, NULL);
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
-	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self), NULL,
 		"gear.create-replace");
-	psy_ui_button_init_text(&self->del, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->del, gearbuttons_base(self), NULL,
 		"gear.delete");
-	psy_ui_button_init_text(&self->parameters, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->parameters, gearbuttons_base(self), NULL,
 		"gear.parameters");
-	psy_ui_button_init_text(&self->properties, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->properties, gearbuttons_base(self), NULL,
 		"gear.properties");
-	psy_ui_button_init_text(&self->exchange, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->exchange, gearbuttons_base(self), NULL,
 		"gear.exchange");
-	psy_ui_button_init_text(&self->clone, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->clone, gearbuttons_base(self), NULL,
 		"gear.clone");
-	psy_ui_button_init_text(&self->showmaster, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->showmaster, gearbuttons_base(self), NULL,
 		"gear.show-master");
-	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->connecttomaster, gearbuttons_base(self), NULL,
 		"gear.connecttomaster");
-	psy_ui_button_init_text(&self->muteunmute, gearbuttons_base(self),
+	psy_ui_button_init_text(&self->muteunmute, gearbuttons_base(self), NULL,
 		"gear.mute-unmute");
 }
 
@@ -61,13 +61,13 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
-	psy_ui_component_init(gear_base(self), parent);	
+	psy_ui_component_init(gear_base(self), parent, NULL);
 	//psy_ui_component_setstyletypes(&self->component,
 		//psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU, psy_ui_STYLE_SIDEMENU);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	// client
-	psy_ui_component_init(&self->client, gear_base(self));		
+	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_pcmargin(psy_ui_defaults()));
@@ -81,7 +81,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, "machinebar.gear");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init_connect(&self->hide, &self->titlebar,
+	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
 		self, gear_onhide);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);

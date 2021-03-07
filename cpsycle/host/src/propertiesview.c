@@ -105,14 +105,14 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 {	
 	self->workspace = workspace;
 	self->properties = properties;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesrenderer_vtable_init(self);
 	self->component.vtable = &propertiesrenderer_vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesrenderer_ondestroy);
-	psy_ui_component_init(&self->dummy, &self->component);
+	psy_ui_component_init(&self->dummy, &self->component, NULL);
 	psy_ui_component_hide(&self->dummy);
 	self->selected = 0;
 	self->keyselected = 0;
@@ -1126,7 +1126,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Margin tabmargin;
 
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_init(&self->notebook, propertiesview_base(self));
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
@@ -1136,9 +1136,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_ondestroy);
 	psy_signal_connect(&self->component.signal_focus,
 		self, propertiesview_onfocus);	
-	psy_ui_component_init(&self->viewtabbar, tabbarparent);
+	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	psy_ui_component_init(&self->client,
-		psy_ui_notebook_base(&self->notebook));
+		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_signal_connect(&self->client.signal_mousedown,
 		self, propertiesview_onmousedown);
 	psy_signal_connect(&self->client.signal_mouseup,
@@ -1147,7 +1147,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	propertiesrenderer_init(&self->renderer, &self->client, properties,
 		workspace);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
-		&self->client);
+		&self->client, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
@@ -1180,7 +1180,8 @@ void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
 
 void propertiesview_initsectionfloated(PropertiesView* self)
 {
-	psy_ui_component_init(&self->sectionfloated, psy_ui_notebook_base(&self->notebook));
+	psy_ui_component_init(&self->sectionfloated,
+		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_ui_component_hide(&self->sectionfloated);
 	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);
 	psy_ui_label_preventtranslation(&self->floatdesc);

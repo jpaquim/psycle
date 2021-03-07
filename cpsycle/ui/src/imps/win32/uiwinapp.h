@@ -47,7 +47,7 @@ typedef struct psy_ui_WinApp {
 	uintptr_t winid;
 	HBRUSH defaultbackgroundbrush;
 	struct psy_ui_Component* eventretarget;
-	psy_List* targetids;
+	psy_List* targetids;	
 	// references
 	psy_ui_App* app;
 } psy_ui_WinApp;

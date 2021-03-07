@@ -31,7 +31,7 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 		&self->release,		
 	};
 	self->envelope = NULL;	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroyed, self,
 		adsrsliders_ondestroy);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,

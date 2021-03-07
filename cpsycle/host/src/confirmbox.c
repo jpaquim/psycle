@@ -16,7 +16,7 @@ static void checkunsavedbox_ondestroy(ConfirmBox*, psy_ui_Component* sender);
 
 void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(confirmbox_base(self), parent);
+	psy_ui_component_init(confirmbox_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->mode = CONFIRM_CLOSE;
 	self->titlestr = strdup("");
@@ -26,11 +26,11 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 		psy_ui_ALIGN_CENTER);
 	psy_ui_label_init(&self->title, &self->view);
 	psy_ui_label_init(&self->header, &self->view);
-	psy_ui_button_init_connect(&self->yes, &self->view,
+	psy_ui_button_init_connect(&self->yes, &self->view, NULL,
 		self, confirmbox_onok);
-	psy_ui_button_init_connect(&self->no, &self->view, self,
-		confirmbox_onno);
-	psy_ui_button_init_connect(&self->cont, &self->view,
+	psy_ui_button_init_connect(&self->no, &self->view, NULL,
+		self, confirmbox_onno);
+	psy_ui_button_init_connect(&self->cont, &self->view, NULL,
 		self, confirmbox_oncontinue);
 	psy_ui_label_settext(&self->title, self->titlestr); // "no Psycle, but your Song is not saved!");
 	psy_ui_label_preventtranslation(&self->title);

@@ -55,7 +55,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 1.5, 0.0);
 	self->instruments = instruments;
 	self->instrument = NULL;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// left	
@@ -64,7 +64,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_setmargin(&self->notemapview.samplesbox.component,
 		&margin);
 	// nna
-	psy_ui_component_init(&self->nna, &self->component);
+	psy_ui_component_init(&self->nna, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->nna, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
@@ -72,52 +72,52 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_setmargin(&self->nna, &margin);	
 	psy_ui_label_init_text(&self->nnaheader, &self->nna,
 		"instrumentview.new-note-action");
-	psy_ui_button_init_connect(&self->nnacut, &self->nna,
+	psy_ui_button_init_connect(&self->nnacut, &self->nna, NULL,
 		self, instrumentgeneralview_onnnacut);
 	psy_ui_button_settext(&self->nnacut, "instrumentview.note-cut");		
-	psy_ui_button_init_connect(&self->nnarelease, &self->nna,
+	psy_ui_button_init_connect(&self->nnarelease, &self->nna, NULL,
 		self, instrumentgeneralview_onnnarelease);
 	psy_ui_button_settext(&self->nnarelease, "instrumentview.note-release");
-	psy_ui_button_init_connect(&self->nnafadeout, &self->nna,
+	psy_ui_button_init_connect(&self->nnafadeout, &self->nna, NULL,
 		self, instrumentgeneralview_onnnafadeout);
 	psy_ui_button_settext(&self->nnafadeout, "instrumentview.note-fadeout");
-	psy_ui_button_init_connect(&self->nnanone, &self->nna,
+	psy_ui_button_init_connect(&self->nnanone, &self->nna, NULL,
 		self, instrumentgeneralview_onnnanone);	
 	psy_ui_button_settext(&self->nnanone, "instrumentview.none");
 	// dct
-	psy_ui_component_init(&self->dct, &self->component);
+	psy_ui_component_init(&self->dct, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init_text(&self->dctheader, &self->dct,
 		"but if the same");
-	psy_ui_button_init_connect(&self->dctnone, &self->dct, self,
-		instrumentgeneralview_ondctnone);
+	psy_ui_button_init_connect(&self->dctnone, &self->dct, NULL,
+		self, instrumentgeneralview_ondctnone);
 	psy_ui_button_settext(&self->dctnone, "instrumentview.none");
-	psy_ui_button_init_connect(&self->dctnote, &self->dct, self,
-		instrumentgeneralview_ondctnote);
+	psy_ui_button_init_connect(&self->dctnote, &self->dct, NULL,
+		self, instrumentgeneralview_ondctnote);
 	psy_ui_button_settext(&self->dctnote, "Note");
-	psy_ui_button_init_connect(&self->dctsample, &self->dct, self,
-		instrumentgeneralview_ondctsample);
+	psy_ui_button_init_connect(&self->dctsample, &self->dct, NULL,
+		self, instrumentgeneralview_ondctsample);
 	psy_ui_button_settext(&self->dctsample, "Sample");
-	psy_ui_button_init_connect(&self->dctinstrument, &self->dct, self,
-		instrumentgeneralview_ondctinstrument);
+	psy_ui_button_init_connect(&self->dctinstrument, &self->dct, NULL,
+		self, instrumentgeneralview_ondctinstrument);
 	psy_ui_button_settext(&self->dctinstrument, "Instrument");
 	// dca	
 	psy_ui_label_init_text(&self->dcaheader, &self->dct, "do");
-	psy_ui_button_init_connect(&self->dcacut, &self->dct,
+	psy_ui_button_init_connect(&self->dcacut, &self->dct, NULL,
 		self, instrumentgeneralview_ondcacut);
 	psy_ui_button_settext(&self->dcacut, "instrumentview.note-cut");
-	psy_ui_button_init_connect(&self->dcarelease, &self->dct,
+	psy_ui_button_init_connect(&self->dcarelease, &self->dct, NULL,
 		self, instrumentgeneralview_ondcarelease);
 	psy_ui_button_settext(&self->dcarelease, "instrumentview.note-release");
-	psy_ui_button_init_connect(&self->dcafadeout, &self->dct,
+	psy_ui_button_init_connect(&self->dcafadeout, &self->dct, NULL,
 		self, instrumentgeneralview_ondcafadeout);
 	psy_ui_button_settext(&self->dcafadeout, "instrumentview.note-fadeout");
-	psy_ui_button_init_connect(&self->dcanone, &self->dct,
+	psy_ui_button_init_connect(&self->dcanone, &self->dct, NULL,
 		self, instrumentgeneralview_ondcanone);
 	psy_ui_button_settext(&self->dcanone, "instrumentview.none");	
 	// fitrow
-	psy_ui_component_init(&self->fitrow, &self->component);
+	psy_ui_component_init(&self->fitrow, &self->component, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
 	psy_ui_component_setmargin(&self->fitrow, &margin);

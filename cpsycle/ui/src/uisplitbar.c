@@ -47,7 +47,7 @@ static void vtable_init(psy_ui_SplitBar* self)
 
 void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
 	self->component.vtable = &vtable;	

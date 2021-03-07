@@ -45,13 +45,14 @@ static void vtable_init(psy_ui_ComboBox* self)
 	}
 }
 // implementation
-void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
+void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
 	assert(self);
 
 	self->imp = psy_ui_impfactory_allocinit_comboboximp(
 		psy_ui_app_impfactory(psy_ui_app()),
-		&self->component, parent);
+		&self->component, parent, view);
 	assert(self->imp);
 	psy_ui_component_init_imp(psy_psy_ui_combobox_base(self), parent,
 		&self->imp->component_imp);
@@ -162,6 +163,9 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	
 	size = psy_ui_component_sizepx(&self->component);	
 	varrowcenter = (size.height - 10) / 2;
+	if (self->component.debugflag == 3000) {
+		self = self;
+	}
 	sel = psy_ui_combobox_cursel(self);	
 	if (sel != -1) {
 		char text[512];		

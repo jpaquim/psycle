@@ -48,7 +48,7 @@ typedef struct psy_ui_EditImp* (*psy_ui_fp_impfactory_allocinit_editimp)(struct 
 typedef struct psy_ui_EditImp* (*psy_ui_fp_impfactory_allocinit_editimp_multiline)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_ListBoxImp* (*psy_ui_fp_impfactory_allocinit_listboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_ListBoxImp* (*psy_ui_fp_impfactory_allocinit_listboximp_multiselect)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
-typedef struct psy_ui_ComboBoxImp* (*psy_ui_fp_impfactory_allocinit_comboboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
+typedef struct psy_ui_ComboBoxImp* (*psy_ui_fp_impfactory_allocinit_comboboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent, struct psy_ui_Component* view);
 typedef struct psy_ui_CheckBoxImp* (*psy_ui_fp_impfactory_allocinit_checkboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_CheckBoxImp* (*psy_ui_fp_impfactory_allocinit_checkboximp_multiline)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_ColourDialogImp* (*psy_ui_fp_impfactory_allocinit_colourdialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent);
@@ -114,7 +114,7 @@ struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp(psy_ui_ImpFactory*, s
 struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp_multiselect(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
-struct psy_ui_ComboBoxImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
+struct psy_ui_ComboBoxImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent, struct psy_ui_Component* view);
 struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ColourDialogImp* psy_ui_impfactory_allocinit_colourdialogimp(psy_ui_ImpFactory*, struct psy_ui_Component* parent);

@@ -65,7 +65,7 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	TrackerLineState* linestate, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackerlinenumbers_vtable_init(self);
 	self->component.vtable = &trackerlinenumbers_vtable;
 	self->workspace = workspace;
@@ -414,7 +414,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	psy_ui_Component* parent, TrackerLineState* linestate,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackerlinenumberslabel_vtable_init(self);
 	self->component.vtable = &trackerlinenumberslabel_vtable;
 	trackerlinenumberslabel_setsharedlinestate(self, linestate);
@@ -578,7 +578,7 @@ void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* parent,
 	TrackerLineState* linestate, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate,
 		workspace);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);

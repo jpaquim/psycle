@@ -24,12 +24,12 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 {	
 	psy_ui_Margin margin;
 		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_label_init(&self->headerlabel, &self->component);
 	psy_ui_label_settext(&self->headerlabel, "trackbar.tracks");
-	psy_ui_combobox_init(&self->trackbox, &self->component);	
+	psy_ui_combobox_init(&self->trackbox, &self->component, NULL);
 	psy_ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
 	psy_signal_connect(&self->trackbox.signal_selchanged, self,

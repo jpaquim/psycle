@@ -54,7 +54,7 @@ static void vtable_init(InputDefiner* self)
 
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_connect(&self->component.signal_destroy, self,

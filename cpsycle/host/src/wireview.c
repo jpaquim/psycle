@@ -59,7 +59,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	self->workspace = workspace;
 	self->scope_spec_mode = 0.2f;
 	self->scope_spec_rate = 0.f;
-	psy_ui_component_init(wireview_base(self), parent);	
+	psy_ui_component_init(wireview_base(self), parent, NULL);
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(wireview_base(self),
 		psy_ui_ALIGN_CLIENT);
@@ -109,10 +109,10 @@ void wireview_inittabbar(WireView* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->top, &self->component);
+	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init_connect(&self->togglevu, &self->top,
+	psy_ui_button_init_connect(&self->togglevu, &self->top, NULL,
 		self, wireview_ontogglevu);
 	psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
 	psy_ui_component_setalign(&self->togglevu.component, psy_ui_ALIGN_LEFT);
@@ -134,18 +134,18 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
-	psy_ui_component_init(&self->slidergroup, wireview_base(self));
+	psy_ui_component_init(&self->slidergroup, wireview_base(self), NULL);
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setmargin(&self->slidergroup, &margin);
 	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_makeew(2),
 		//psy_ui_value_makepx(0));
-	psy_ui_button_init(&self->percvol, &self->slidergroup);
+	psy_ui_button_init(&self->percvol, &self->slidergroup, NULL);
 	psy_ui_button_settext(&self->percvol, "100%");
 	psy_ui_button_preventtranslation(&self->percvol);
 	psy_ui_button_setcharnumber(&self->percvol, 10);	
 	psy_ui_component_setalign(&self->percvol.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_button_init(&self->dbvol, &self->slidergroup);
+	psy_ui_button_init(&self->dbvol, &self->slidergroup, NULL);
 	psy_ui_component_doublebuffer(&self->dbvol.component);
 	psy_ui_button_settext(&self->dbvol, "db 100");
 	psy_ui_button_preventtranslation(&self->dbvol);
@@ -168,10 +168,10 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);		
-	psy_ui_component_init(&self->rategroup, wireview_base(self));
+	psy_ui_component_init(&self->rategroup, wireview_base(self), NULL);
 	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->rategroup, &margin);
-	psy_ui_button_init_connect(&self->hold, &self->rategroup,
+	psy_ui_button_init_connect(&self->hold, &self->rategroup, NULL,
 		self, wireview_onhold);
 	psy_ui_button_settext(&self->hold, "Hold");
 	psy_ui_component_setalign(&self->hold.component, psy_ui_ALIGN_RIGHT);
@@ -193,14 +193,14 @@ void wireview_initrategroup(WireView* self)
 
 void wireview_initbottomgroup(WireView* self)
 {
-	psy_ui_component_init(&self->bottomgroup, wireview_base(self));
+	psy_ui_component_init(&self->bottomgroup, wireview_base(self), NULL);
 	psy_ui_component_setalign(&self->bottomgroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setdefaultalign(&self->bottomgroup, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_button_init_connect(&self->deletewire, &self->bottomgroup,
+	psy_ui_button_init_connect(&self->deletewire, &self->bottomgroup, NULL,
 		self, wireview_ondeleteconnection);
 	psy_ui_button_settext(&self->deletewire, "Delete Connection");
-	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup,
+	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup, NULL,
 		self, wireview_onaddeffect);	
 	psy_ui_button_settext(&self->addeffect, "Add Effect");
 }

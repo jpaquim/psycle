@@ -72,7 +72,7 @@ void seqeditorruler_init(SeqEditorRuler* self, psy_ui_Component* parent,
 	assert(workspace);
 	assert(skin);
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditorruler_vtable_init(self);
 	self->component.vtable = &seqeditorruler_vtable;
 	psy_ui_component_doublebuffer(&self->component);	
@@ -1002,7 +1002,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	self->mode = mode;
 	self->drawpatternevents = TRUE;	
 	self->dragmode = SEQEDITORDRAG_MOVE;
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditortracks_vtable_init(self);
 	self->component.vtable = &seqeditortracks_vtable;
 	self->tracks = NULL;
@@ -1462,14 +1462,14 @@ void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 	psy_ui_Margin topmargin;
 
 	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	zoombox_init(&self->zoombox_beat, &self->component);	
 	psy_ui_component_setmargin(&self->component, &topmargin);
-	psy_ui_button_init_text(&self->move, &self->component,
+	psy_ui_button_init_text(&self->move, &self->component, NULL,
 		"Move");
-	psy_ui_button_init_text(&self->reorder, &self->component,
+	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
 		"Reorder");
 }
 
@@ -1536,7 +1536,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_Margin topmargin;
 	
 	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_SEQEDT, STYLE_SEQEDT, STYLE_SEQEDT);
@@ -1544,7 +1544,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	seqeditortrackstate_init(&self->trackstate);
 	self->workspace = workspace;
-	psy_ui_component_init(&self->left, &self->component);
+	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	seqeditorbar_init(&self->bar, &self->left);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
@@ -1572,7 +1572,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		&self->trackstate, SEQEDITOR_TRACKMODE_ENTRY, workspace);	
 	self->tracks.skin = skin;	
 	psy_ui_scroller_init(&self->scroller, &self->tracks.component,
-		&self->component);
+		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component,
 		psy_ui_ALIGN_CLIENT);
 	seqeditorbar_setdragmode(&self->bar, self->tracks.dragmode);	

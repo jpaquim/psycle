@@ -132,7 +132,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	self->pattern = pattern;
 	self->skin = skin;
 
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		patternproperties_vtable_init(self));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
@@ -150,7 +150,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_edit_init(&self->lengthedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->lengthedit, 20);
-	psy_ui_button_init_connect(&self->applybutton, &self->component, self,
+	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
 		patternproperties_onapply);
 	psy_ui_button_settext(&self->applybutton, "Apply");
 	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);

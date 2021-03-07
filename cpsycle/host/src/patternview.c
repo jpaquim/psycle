@@ -105,7 +105,7 @@ static void patternview_vtable_init(PatternView* self)
 void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent,	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	patternview_vtable_init(self);
 	self->component.vtable = &patternview_vtable;	
 	self->workspace = workspace;
@@ -183,7 +183,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		TRACKERGRID_EDITMODE_SONG, workspace);	
 	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
-		&self->editnotebook.component);
+		&self->editnotebook.component, NULL);
 	psy_ui_component_setalign(&self->trackerscroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tracker.signal_colresize, self,
 		patternview_oncolresize);
@@ -218,7 +218,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	// Tabbar
 	patternview_inittabbar(self, tabbarparent);
 	patternview_selectdisplay(self, PATTERN_DISPLAYMODE_TRACKER);
-	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
+	psy_ui_button_init(&self->contextbutton, &self->sectionbar, NULL);
 	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);	
 	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton),
 		psy_ui_ALIGN_RIGHT);		

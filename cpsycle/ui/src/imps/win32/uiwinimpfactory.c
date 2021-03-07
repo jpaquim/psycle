@@ -40,7 +40,7 @@ static struct psy_ui_EditImp* allocinit_editimp(psy_ui_win_ImpFactory*, struct p
 static struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view);
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
@@ -264,7 +264,7 @@ psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory* self, struct psy_
 }
 
 
-psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, psy_ui_Component* view)
 {
 	psy_ui_win_ComboBoxImp* rv;
 	psy_ui_WinApp* winapp;
@@ -272,7 +272,8 @@ psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct ps
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_comboboximp_allocinit(
 		component,
-		parent ? parent->imp : 0);
+		parent ? parent->imp : 0,
+		view);
 	if (rv->win_component_imp.hwnd == 0) {
 		free(rv);
 		rv = 0;

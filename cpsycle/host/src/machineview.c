@@ -65,7 +65,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 {	
 	Tab* tab;
 
-	psy_ui_component_init(machineview_base(self), parent);	
+	psy_ui_component_init(machineview_base(self), parent, NULL);
 	psy_ui_component_setvtable(machineview_base(self),
 		machineview_vtable_init(self));
 	psy_ui_component_setbackgroundmode(machineview_base(self),
@@ -87,7 +87,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		psy_ui_notebook_base(&self->notebook), tabbarparent, &self->skin,
 		workspace);
 	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
-		psy_ui_notebook_base(&self->notebook));	
+		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	// stackview
 	machinestackview_init(&self->stackview,
@@ -139,6 +139,7 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 		psy_ui_component_selectsection(machineview_base(self),
 			SECTION_ID_MACHINEVIEW_NEWMACHINE,
 			NEWMACHINE_APPEND);
+		psy_ui_mouseevent_stoppropagation(ev);
 	}
 }
 

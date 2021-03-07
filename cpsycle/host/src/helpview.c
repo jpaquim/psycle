@@ -32,7 +32,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 // construction
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(helpview_base(self), parent);	
+	psy_ui_component_init(helpview_base(self), parent, NULL);
 	psy_signal_connect(&helpview_base(self)->signal_focus, self,
 		helpview_onfocus);
 	psy_signal_connect(&helpview_base(self)->signal_selectsection, self,
@@ -47,7 +47,7 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, "Extract Help   ",
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL, "Extract Help   ",
 		self, helpview_onfloatsection);		
 	psy_ui_bitmap_loadresource(&self->floatsection.bitmapicon, IDB_VSPLIT_DARK);
 	psy_ui_bitmap_settransparency(&self->floatsection.bitmapicon,
@@ -73,7 +73,7 @@ void helpview_initsections(HelpView* self, Workspace* workspace)
 
 void helpview_initsectionfloated(HelpView* self)
 {
-	psy_ui_component_init(&self->sectionfloated, helpview_base(self));
+	psy_ui_component_init(&self->sectionfloated, helpview_base(self), NULL);
 	psy_ui_component_hide(&self->sectionfloated);
 	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);		
 	psy_ui_label_preventtranslation(&self->floatdesc);

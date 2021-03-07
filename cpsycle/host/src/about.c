@@ -12,7 +12,7 @@
 
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(contrib_base(self), parent);
+	psy_ui_component_init(contrib_base(self), parent, NULL);
 	psy_ui_component_setdefaultalign(contrib_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_edit_multiline_init(&self->contrib, contrib_base(self));
@@ -69,7 +69,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 
 void version_init(Version* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(version_base(self), parent);
+	psy_ui_component_init(version_base(self), parent, NULL);
 	psy_ui_label_init(&self->versioninfo, version_base(self));
 	psy_ui_label_preventtranslation(&self->versioninfo);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
@@ -80,7 +80,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 
 void licence_init(Licence* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_editor_init(&self->licenceinfo, &self->component);	
 	psy_ui_editor_settext(&self->licenceinfo,
 		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version."
@@ -165,7 +165,7 @@ static void about_vtable_init(About* self)
 // implementation
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
 	psy_ui_component_setstyletypes(&self->component,
@@ -189,21 +189,21 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 void about_initbuttons(About* self)
 {
 	// contrib
-	psy_ui_button_init_connect(&self->contribbutton, &self->component,
+	psy_ui_button_init_connect(&self->contribbutton, &self->component, NULL,
 		self, about_oncontributors);
 	psy_ui_button_settext(&self->contribbutton,
 		"help.contributors-credits");
 	// version
-	psy_ui_button_init_connect(&self->versionbutton, &self->component,
+	psy_ui_button_init_connect(&self->versionbutton, &self->component, NULL,
 		self, about_onversion);
 	psy_ui_button_preventtranslation(&self->versionbutton);
 	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
 	// licence
-	psy_ui_button_init_connect(&self->licencebutton, &self->component,
+	psy_ui_button_init_connect(&self->licencebutton, &self->component, NULL,
 		self, about_onlicence);	
 	psy_ui_button_settext(&self->licencebutton, "Licence");
 	// ok
-	psy_ui_button_init(&self->okbutton, &self->component);
+	psy_ui_button_init(&self->okbutton, &self->component, NULL);
 	psy_ui_button_settext(&self->okbutton, "help.ok");
 }
 

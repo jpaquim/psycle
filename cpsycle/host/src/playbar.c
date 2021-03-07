@@ -51,7 +51,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_Margin spacing;
 
 	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.5, 1.0);
-	psy_ui_component_init(playbar_base(self), parent);
+	psy_ui_component_init(playbar_base(self), parent, NULL);
 	psy_ui_component_setvtable(playbar_base(self), vtable_init(self));
 	psy_ui_component_setstyletypes(playbar_base(self),
 		STYLE_PLAYBAR, STYLE_PLAYBAR, STYLE_PLAYBAR);
@@ -62,36 +62,36 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;
 	self->player = &workspace->player;
 	// loop
-	psy_ui_button_init_connect(&self->loop, playbar_base(self),
+	psy_ui_button_init_connect(&self->loop, playbar_base(self), NULL,
 		self, playbar_onloopclicked);
 	psy_ui_button_settext(&self->loop, "play.loop");
 	psy_ui_bitmap_loadresource(&self->loop.bitmapicon, IDB_LOOP_DARK);
 	psy_ui_bitmap_settransparency(&self->loop.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	// record
-	psy_ui_button_init_connect(&self->recordnotes, playbar_base(self),
+	psy_ui_button_init_connect(&self->recordnotes, playbar_base(self), NULL,
 		self, playbar_onrecordnotesclicked);
 	psy_ui_button_settext(&self->recordnotes, "play.record-notes");
 	// play
-	psy_ui_button_init_connect(&self->play, playbar_base(self),
+	psy_ui_button_init_connect(&self->play, playbar_base(self), NULL,
 		self, playbar_onplayclicked);
 	psy_ui_button_settext(&self->play, "play.play");
 	psy_ui_bitmap_loadresource(&self->play.bitmapicon, IDB_PLAY_DARK);
 	psy_ui_bitmap_settransparency(&self->play.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	// playmode
-	psy_ui_combobox_init(&self->playmode, playbar_base(self));
+	psy_ui_combobox_init(&self->playmode, playbar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
 	// play beat num
 	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
 	psy_ui_edit_setcharnumber(&self->loopbeatsedit, 6);
-	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
+	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self), NULL,
 		self, playbar_onnumplaybeatsless);
 	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);	
-	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self),
+	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self), NULL,
 		self, playbar_onnumplaybeatsmore);
 	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
 	// stop
-	psy_ui_button_init_connect(&self->stop, playbar_base(self),
+	psy_ui_button_init_connect(&self->stop, playbar_base(self), NULL,
 		self, playbar_onstopclicked);
 	psy_ui_button_settext(&self->stop, "play.stop");
 	psy_ui_bitmap_loadresource(&self->stop.bitmapicon, IDB_STOP_DARK);

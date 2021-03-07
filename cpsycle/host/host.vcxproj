@@ -295,6 +295,7 @@
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\defaultlang.c" />
     <ClCompile Include="src\dirconfig.c" />
+    <ClCompile Include="src\effectui.c" />
     <ClCompile Include="src\envelopeview.c" />
     <ClCompile Include="src\eventdriverconfig.c" />
     <ClCompile Include="src\exportview.c" />
@@ -302,6 +303,7 @@
     <ClCompile Include="src\fileview.c" />
     <ClCompile Include="src\gear.c" />
     <ClCompile Include="src\generalconfig.c" />
+    <ClCompile Include="src\generatorui.c" />
     <ClCompile Include="src\greet.c" />
     <ClCompile Include="src\help.c" />
     <ClCompile Include="src\helpview.c" />
@@ -324,6 +326,7 @@
     <ClCompile Include="src\languageconfig.c" />
     <ClCompile Include="src\linesperbeatbar.c" />
     <ClCompile Include="src\machinebar.c" />
+    <ClCompile Include="src\machinecombobox.c" />
     <ClCompile Include="src\machinedock.c" />
     <ClCompile Include="src\machineeditorview.c" />
     <ClCompile Include="src\machineframe.c" />
@@ -337,6 +340,7 @@
     <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\machinewireview.c" />
     <ClCompile Include="src\mainframe.c" />
+    <ClCompile Include="src\masterui.c" />
     <ClCompile Include="src\metronomebar.c" />
     <ClCompile Include="src\metronomeconfig.c" />
     <ClCompile Include="src\midimonitor.c" />
@@ -377,6 +381,7 @@
     <ClCompile Include="src\skincoord.c" />
     <ClCompile Include="src\skingraphics.c" />
     <ClCompile Include="src\skinio.c" />
+    <ClCompile Include="src\sliderui.c" />
     <ClCompile Include="src\songbar.c" />
     <ClCompile Include="src\songproperties.c" />
     <ClCompile Include="src\songtrackbar.c" />
@@ -427,6 +432,7 @@
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\defaultlang.h" />
     <ClInclude Include="src\dirconfig.h" />
+    <ClInclude Include="src\effectui.h" />
     <ClInclude Include="src\envelopeview.h" />
     <ClInclude Include="src\eventdriverconfig.h" />
     <ClInclude Include="src\exportview.h" />
@@ -434,6 +440,7 @@
     <ClInclude Include="src\fileview.h" />
     <ClInclude Include="src\gear.h" />
     <ClInclude Include="src\generalconfig.h" />
+    <ClInclude Include="src\generatorui.h" />
     <ClInclude Include="src\greet.h" />
     <ClInclude Include="src\help.h" />
     <ClInclude Include="src\helpview.h" />
@@ -456,6 +463,7 @@
     <ClInclude Include="src\languageconfig.h" />
     <ClInclude Include="src\linesperbeatbar.h" />
     <ClInclude Include="src\machinebar.h" />
+    <ClInclude Include="src\machinecombobox.h" />
     <ClInclude Include="src\machinedock.h" />
     <ClInclude Include="src\machineeditorview.h" />
     <ClInclude Include="src\machineframe.h" />
@@ -469,6 +477,7 @@
     <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\machinewireview.h" />
     <ClInclude Include="src\mainframe.h" />
+    <ClInclude Include="src\masterui.h" />
     <ClInclude Include="src\metronomebar.h" />
     <ClInclude Include="src\metronomeconfig.h" />
     <ClInclude Include="src\midimonitor.h" />
@@ -509,6 +518,7 @@
     <ClInclude Include="src\skincoord.h" />
     <ClInclude Include="src\skingraphics.h" />
     <ClInclude Include="src\skinio.h" />
+    <ClInclude Include="src\sliderui.h" />
     <ClInclude Include="src\songbar.h" />
     <ClInclude Include="src\songproperties.h" />
     <ClInclude Include="src\songtrackbar.h" />

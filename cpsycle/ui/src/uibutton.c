@@ -49,9 +49,10 @@ static void vtable_init(psy_ui_Button* self)
 	}
 }
 // implementation
-void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
+void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
-	psy_ui_component_init(psy_ui_button_base(self), parent);
+	psy_ui_component_init(psy_ui_button_base(self), parent, view);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	self->hover = 0;
@@ -70,6 +71,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->ctrlstate = FALSE;
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
+	self->active = FALSE;
 	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
 	psy_ui_component_setstyletypes(psy_ui_button_base(self),
@@ -78,29 +80,29 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
-	const char* text)
+	psy_ui_Component* view, const char* text)
 {
 	assert(self);
 
-	psy_ui_button_init(self, parent);
+	psy_ui_button_init(self, parent, view);
 	psy_ui_button_settext(self, text);
 }
 
 void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
-	void* context, void* fp)
+	psy_ui_Component* view, void* context, void* fp)
 {
 	assert(self);
 
-	psy_ui_button_init(self, parent);
+	psy_ui_button_init(self, parent, view);
 	psy_signal_connect(&self->signal_clicked, context, fp);
 }
 
 void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
-	parent, const char* text, void* context, void* fp)
+	parent, psy_ui_Component* view, const char* text, void* context, void* fp)
 {
 	assert(self);
 
-	psy_ui_button_init_connect(self, parent, context, fp);
+	psy_ui_button_init_connect(self, parent, view, context, fp);
 	psy_ui_button_settext(self, text);
 }
 
@@ -285,11 +287,16 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
+	self->active = TRUE;
 	psy_ui_component_capture(psy_ui_button_base(self));
 }
 
 void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {		
+	if (!self->active) {
+		psy_ui_mouseevent_stoppropagation(ev);
+		return;
+	}
 	psy_ui_component_releasecapture(psy_ui_button_base(self));
 	self->buttonstate = ev->button != 0;
 	if (self->enabled && (ev->button == 1) || self->allowrightclick) {
@@ -304,8 +311,9 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			self->ctrlstate = ev->ctrl;
 			psy_signal_emit(&self->signal_clicked, self, 0);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stoppropagation(ev);		
 	}	
+	self->active = FALSE;
 }
 
 void onmouseenter(psy_ui_Button* self)

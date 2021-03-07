@@ -49,7 +49,7 @@ static void vtable_init(Oscilloscope* self)
 void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -339,12 +339,12 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	psy_ui_Margin margin;
 
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.0);		
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	self->oscilloscope = oscilloscope;
 	psy_ui_label_init(&self->channellbl, &self->component);
 	psy_ui_label_settext(&self->channellbl, "Channel");
 	psy_ui_component_setmargin(&self->channellbl.component, &margin);
-	psy_ui_button_init(&self->channelmode, &self->component);
+	psy_ui_button_init(&self->channelmode, &self->component, NULL);
 	psy_ui_button_setcharnumber(&self->channelmode, 6);
 	psy_ui_margin_setright(&margin, psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->channelmode.component, &margin);
@@ -394,7 +394,7 @@ void oscilloscopecontrols_onampzoomchanged(OscilloscopeControls* self, ZoomBox* 
 void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent, NULL);
 	oscilloscope_init(&self->oscilloscope, &self->component, wire,
 		workspace);
 	psy_ui_component_setalign(&self->oscilloscope.component,

@@ -292,6 +292,7 @@ void dev_dispose(psy_ui_win_ComponentImp* self)
 void dev_clear(psy_ui_win_ComponentImp* self)
 { 
 	psy_List* p;
+	psy_List* q;
 
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* component;
@@ -299,15 +300,29 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		if (deallocate) {
-			psy_ui_component_dispose(component);
+		psy_ui_component_destroy(component);		
+		if (deallocate) {			
 			free(component);
-		} else {
-			psy_ui_component_dispose(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;
+	self->viewcomponents = NULL;	
+
+	if (self->component) {
+		q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+		for (p = q; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* component;
+			bool deallocate;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			deallocate = component->deallocate;
+			psy_ui_component_destroy(component);
+			if (deallocate) {				
+				free(component);
+			}
+		}
+		psy_list_free(q);
+	}
 }
 
 psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void)

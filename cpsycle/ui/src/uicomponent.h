@@ -226,7 +226,8 @@ typedef struct psy_ui_Component {
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 void psy_ui_notifystyleupdate(psy_ui_Component* main);
 
-void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
+void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
 	struct psy_ui_ComponentImp*);
 
@@ -316,7 +317,7 @@ void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_Component* parent, psy_ui_AlignType aligntype)
 {
-	psy_ui_component_init(self, parent);
+	psy_ui_component_init(self, parent, NULL);
 	psy_ui_component_setalign(self, aligntype);
 }
 void psy_ui_component_enablealign(psy_ui_Component*);
@@ -352,6 +353,7 @@ typedef enum psy_ui_ComponentImpFlags {
 // vtable function pointers
 typedef void (*psy_ui_fp_componentimp_dev_dispose)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_destroy)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_destroyed)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_show)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_showstate)(struct psy_ui_ComponentImp*, int state);
 typedef void (*psy_ui_fp_componentimp_dev_hide)(struct psy_ui_ComponentImp*);
@@ -405,6 +407,7 @@ typedef void (*psy_ui_fp_componentimp_dev_mousedoubleclick)(struct psy_ui_Compon
 typedef struct {	
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
 	psy_ui_fp_componentimp_dev_destroy dev_destroy;
+	psy_ui_fp_componentimp_dev_destroyed dev_destroyed;
 	psy_ui_fp_componentimp_dev_show dev_show;
 	psy_ui_fp_componentimp_dev_showstate dev_showstate;
 	psy_ui_fp_componentimp_dev_hide dev_hide;

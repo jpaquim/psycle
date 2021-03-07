@@ -35,18 +35,18 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	assert(self);
 	assert(workspace);
 
-	psy_ui_component_init(undoredobar_base(self), parent);
+	psy_ui_component_init(undoredobar_base(self), parent, NULL);
 	psy_ui_component_setvtable(undoredobar_base(self), vtable_init(self));
 	self->workspace = workspace;
 	psy_ui_component_setalignexpand(undoredobar_base(self), psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(undoredobar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self),
+	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self), NULL,
 		self, undoredobar_onundo);
 	psy_ui_button_settext(&self->undobutton, "undo.undo");
 	psy_ui_bitmap_loadresource(&self->undobutton.bitmapicon, IDB_UNDO_DARK);
 	psy_ui_bitmap_settransparency(&self->undobutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
-	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self),
+	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self), NULL,
 		self, undoredobar_onredo);
 	psy_ui_button_settext(&self->redobutton,"undo.redo");		
 	psy_ui_bitmap_loadresource(&self->redobutton.bitmapicon, IDB_REDO_DARK);

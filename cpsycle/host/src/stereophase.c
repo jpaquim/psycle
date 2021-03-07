@@ -47,7 +47,7 @@ static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->leftavg = 0;

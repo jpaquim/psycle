@@ -35,6 +35,9 @@
     <Filter Include="help">
       <UniqueIdentifier>{1fefc104-1a07-4dfb-bc53-fa6ab30f3a11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="uicontrols\machine">
+      <UniqueIdentifier>{c99e891c-7518-4ae8-8f91-d43064b4a4fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mainframe.c">
@@ -376,9 +379,6 @@
     <ClCompile Include="src\styles.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\machineui.c">
-      <Filter>machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\machinestackview.c">
       <Filter>machine</Filter>
     </ClCompile>
@@ -396,6 +396,24 @@
     </ClCompile>
     <ClCompile Include="src\metronomeconfig.c">
       <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sliderui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\masterui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generatorui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\effectui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinecombobox.c">
+      <Filter>uicontrols\machine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -749,9 +767,6 @@
     <ClInclude Include="src\styles.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\machineui.h">
-      <Filter>machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\machinestackview.h">
       <Filter>machine</Filter>
     </ClInclude>
@@ -769,6 +784,24 @@
     </ClInclude>
     <ClInclude Include="src\metronomeconfig.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sliderui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\masterui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\generatorui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\effectui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinecombobox.h">
+      <Filter>uicontrols\machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

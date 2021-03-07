@@ -48,7 +48,8 @@ typedef struct psy_ui_ComboBox {
     psy_Table itemdata;
 } psy_ui_ComboBox;
 
-void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
+void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent,
+    psy_ui_Component* view);
 intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox*, const char* text);
 void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);

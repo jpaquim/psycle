@@ -9,7 +9,7 @@
 
 void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 {			
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_editor_init(&self->output, &self->component);
 	psy_ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_resize(&self->component, psy_ui_size_makeem(20.0, 20.0));

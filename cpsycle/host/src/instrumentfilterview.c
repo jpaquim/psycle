@@ -46,16 +46,16 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 
 	self->instruments = instruments;
 	self->instrument = NULL;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		instrumentfilterview_ondestroy);
 	psy_signal_init(&self->signal_status);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_component_init(&self->top, &self->component);
+	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_component_init(&self->filter, &self->top);
+	psy_ui_component_init(&self->filter, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
 	psy_ui_component_setmargin(&self->filter, &margin);
@@ -65,7 +65,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->filtertypeheader.component, &margin);
-	psy_ui_combobox_init(&self->filtertype, &self->filter);	
+	psy_ui_combobox_init(&self->filtertype, &self->filter, NULL);
 	psy_ui_combobox_setcharnumber(&self->filtertype, 20);
 	psy_ui_component_setalign(&self->filtertype.component, psy_ui_ALIGN_LEFT);
 	instrumentfilterview_fillfiltercombobox(self);
@@ -82,7 +82,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	envelopeview_settext(&self->envelopeview, "instrumentview.filter-envelope");
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
-	psy_ui_component_init(&self->bottom, &self->component);
+	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);

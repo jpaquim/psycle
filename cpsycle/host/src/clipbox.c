@@ -55,7 +55,7 @@ static void vtable_init(ClipBox* self)
 // implementation
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->workspace = workspace;

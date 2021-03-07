@@ -51,7 +51,7 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	psy_ui_component_doublebuffer(&self->component);	
 	self->workspace = workspace;
@@ -331,7 +331,7 @@ void trackscopes_stop(TrackScopes* self)
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_TRACKSCOPES,
 		STYLE_TRACKSCOPES, STYLE_TRACKSCOPES);	
 	trackscopes_init(&self->scopes, &self->component, workspace);

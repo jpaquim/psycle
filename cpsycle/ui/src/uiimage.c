@@ -11,7 +11,7 @@ static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
 
 void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
-    psy_ui_component_init(&self->component, parent);
+    psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);

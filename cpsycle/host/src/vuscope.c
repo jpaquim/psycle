@@ -50,7 +50,7 @@ static void vuscope_drawlabel_right(VuScope*, psy_ui_Graphics*, const char* text
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->workspace = workspace;

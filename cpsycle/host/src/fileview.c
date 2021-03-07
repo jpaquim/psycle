@@ -26,7 +26,7 @@ static void fileview_ondrives(FileView* self, TabBar* sender, int index);
 void fileview_init(FileView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
-	psy_ui_component_init(fileview_base(self), parent);
+	psy_ui_component_init(fileview_base(self), parent, NULL);
 	self->workspace = workspace;	
 	tabbar_init(&self->drives, fileview_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->drives), psy_ui_ALIGN_LEFT);

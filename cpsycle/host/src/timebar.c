@@ -40,7 +40,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent, Workspace* workspace)
 	assert(self);
 	assert(workspace);
 
-	psy_ui_component_init(timebar_base(self), parent);
+	psy_ui_component_init(timebar_base(self), parent, NULL);
 	psy_ui_component_setvtable(timebar_base(self), vtable_init(self));
 	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
@@ -60,10 +60,10 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_seticon(&self->lessless, psy_ui_ICON_LESSLESS);			
 #endif
 	// bpm -1
-	psy_ui_button_init_connect(&self->less, timebar_base(self),
+	psy_ui_button_init_connect(&self->less, timebar_base(self), NULL,
 		self, timebar_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);		
-	psy_ui_button_init_connect(&self->more, timebar_base(self),
+	psy_ui_button_init_connect(&self->more, timebar_base(self), NULL,
 		self, timebar_onmoreclicked);
 	// bpm +1
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);		

@@ -21,7 +21,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 {
 	char buf[32];
 
-	psy_ui_component_init(newvalview_base(self), parent);
+	psy_ui_component_init(newvalview_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->macindex = mindex;
 	self->paramindex = pindex;
@@ -48,11 +48,11 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	psy_ui_edit_setcharnumber(&self->edit, 40);
 	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_button_init_text_connect(&self->apply, &self->editbar,
+	psy_ui_button_init_text_connect(&self->apply, &self->editbar, NULL,
 		"Apply", self, onapply);
 	psy_ui_component_setalign(psy_ui_button_base(&self->apply),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_button_init_text_connect(&self->cancel, &self->editbar,
+	psy_ui_button_init_text_connect(&self->cancel, &self->editbar, NULL,
 		"Cancel", self, oncancel);
 	psy_ui_component_setalign(psy_ui_button_base(&self->cancel),
 		psy_ui_ALIGN_LEFT);	

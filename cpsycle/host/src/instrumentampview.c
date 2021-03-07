@@ -39,7 +39,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 
 	self->instruments = instruments;	
 	self->instrument = 0;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		instrumentvolumeview_ondestroy);
 	psy_signal_init(&self->signal_status);

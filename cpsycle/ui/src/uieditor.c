@@ -103,7 +103,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 #endif	
 	{	
 		printf("Init Editor\n");
-		psy_ui_component_init(&self->component, parent);
+		psy_ui_component_init(&self->component, parent, NULL);
 		/*psy_ui_LabelImp* imp;
 		
 		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);

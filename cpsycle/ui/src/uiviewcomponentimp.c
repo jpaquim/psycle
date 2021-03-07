@@ -9,6 +9,8 @@
 
 // ViewComponentImp
 // prototypes
+static void view_dev_destroy(psy_ui_ViewComponentImp*);
+static void view_dev_destroyed(psy_ui_ViewComponentImp*);
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
 static void view_dev_clear(psy_ui_ViewComponentImp*);
@@ -74,6 +76,8 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 {
 	if (!view_imp_vtable_initialized) {
 		view_imp_vtable = *self->imp.vtable;
+		view_imp_vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)view_dev_destroy;
+		view_imp_vtable.dev_destroyed = (psy_ui_fp_componentimp_dev_destroyed)view_dev_destroyed;
 		view_imp_vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)view_dev_dispose;		
 		view_imp_vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)view_dev_clear;
 		view_imp_vtable.dev_show = (psy_ui_fp_componentimp_dev_show)view_dev_show;
@@ -183,11 +187,9 @@ void view_dev_clear(psy_ui_ViewComponentImp* self)
 
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		if (deallocate) {
-			psy_ui_component_dispose(component);
+		psy_ui_component_destroy(component);		
+		if (deallocate) {			
 			free(component);
-		} else {
-			psy_ui_component_dispose(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
@@ -227,6 +229,36 @@ psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_allocinit(
 
 void view_dev_destroy(psy_ui_ViewComponentImp* self)
 {
+	psy_List* p;
+
+	if (self->component) {
+		psy_signal_emit(&self->component->signal_destroy,
+			self->component, 0);
+		self->component->vtable->ondestroy(self->component);
+	}
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+		bool deallocate;
+		
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		psy_ui_component_destroy(component);		
+		component->imp->vtable->dev_destroyed(component->imp);
+		if (deallocate) {
+			free(component);
+		}
+	}
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
+}
+
+void view_dev_destroyed(psy_ui_ViewComponentImp* self)
+{
+	// restore default winproc					
+	psy_signal_emit(&self->component->signal_destroyed,
+			self->component, 0);
+	self->component->vtable->ondestroyed(self->component);	
+	psy_ui_component_dispose(self->component);	
 }
 
 void view_dev_show(psy_ui_ViewComponentImp* self)
@@ -467,8 +499,8 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 				origin = psy_ui_origin(g);
 				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
 					-position.top + origin.y));
-				if (machineui->vtable->ondraw) {
-					machineui->vtable->ondraw(machineui, g);
+				if (machineui->vtable->ondraw) {					
+					machineui->vtable->ondraw(machineui, g);					
 				}
 				machineui->imp->vtable->dev_draw(machineui->imp, g);
 				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));				
@@ -482,11 +514,8 @@ psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 	psy_List* rv = 0;
 	psy_List* p = 0;
 	
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-
-		child = (psy_ui_Component*)p->entry;
-		psy_list_append(&rv, child);
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {		
+		psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(p));
 	}
 	return rv;
 }
@@ -499,14 +528,12 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
 
-		child = (psy_ui_Component*)p->entry;
+		child = (psy_ui_Component*)psy_list_entry(p);
 		r = psy_ui_component_position(child);
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mousedown(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->vtable->onmousedown(child, ev);
 			break;
 		}
@@ -521,14 +548,12 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
 
-		child = (psy_ui_Component*)p->entry;
+		child = (psy_ui_Component*)psy_list_entry(p);
 		r = psy_ui_component_position(child);
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mouseup(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->vtable->onmouseup(child, ev);
 			break;
 		}
@@ -543,15 +568,12 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
 
-		child = (psy_ui_Component*)p->entry;		
-
+		child = (psy_ui_Component*)psy_list_entry(p);
 		r = psy_ui_component_position(child);
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mousemove(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->vtable->onmousemove(child, ev);
 			break;
 		}
@@ -566,15 +588,12 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
 
-		child = (psy_ui_Component*)p->entry;
-
+		child = (psy_ui_Component*)psy_list_entry(p);
 		r = psy_ui_component_position(child);
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->vtable->onmousedoubleclick(child, ev);
 			break;
 		}
