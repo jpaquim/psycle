@@ -56,20 +56,17 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 // implementation
 void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam* param,
-	Workspace* workspace)
+	ParamSkin* skin)
 {
-	assert(self);
-	assert(workspace);
-	assert(workspace->song);	
+	assert(self);	
+	assert(skin);	
 	assert(view);
 
 	psy_ui_component_init(&self->component, parent, view);
 	sliderui_vtable_init(self);
-	self->component.vtable = &sliderui_vtable;	
-	self->workspace = workspace;
+	self->component.vtable = &sliderui_vtable;		
 	self->view = view;	
-	self->skin = machineparamconfig_skin(
-		psycleconfig_macparam(workspace_conf(workspace)));
+	self->skin = skin;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
 }
@@ -86,9 +83,7 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	SliderDraw draw;
 	psy_ui_RealSize size;
 
-	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
-		MPF_SLIDER, FALSE);	
-	size.width = 140;
+	size = psy_ui_component_sizepx(&self->component);	
 	sliderdraw_init(&draw, self->skin, NULL, self->param, size, NULL, FALSE);
 	sliderdraw_draw(&draw, g);	
 }

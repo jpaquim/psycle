@@ -36,10 +36,6 @@
 
 #endif			/* } */
 
-
-
-
-
 INLINE char* psy_strdup(const char* str)
 {
 #pragma warning(push )

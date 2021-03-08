@@ -82,6 +82,16 @@ psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory
 		instindex);
 }
 
+psy_audio_Machine* psy_audio_machinefactory_make_info(psy_audio_MachineFactory* self,
+	const psy_audio_MachineInfo* machineinfo)
+{
+	return psy_audio_machinefactory_makemachinefrompath(self,
+		machineinfo->type,
+		machineinfo->modulepath,
+		machineinfo->shellidx,
+		psy_INDEX_INVALID);
+}
+
 psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
 	psy_audio_MachineType type, const char* path, uintptr_t shellidx, uintptr_t instindex)
 {

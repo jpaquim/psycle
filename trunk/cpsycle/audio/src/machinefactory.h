@@ -47,6 +47,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory
 	const char* plugincatchername, uintptr_t instindex);
 psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory*, psy_audio_MachineType,
 	const char* path, uintptr_t shellidx, uintptr_t instindex);
+psy_audio_Machine* psy_audio_machinefactory_make_info(psy_audio_MachineFactory*, const psy_audio_MachineInfo*);
 void psy_audio_machinefactory_createasproxy(psy_audio_MachineFactory*);
 void psy_audio_machinefactory_createwithoutproxy(psy_audio_MachineFactory*);
 void psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(psy_audio_MachineFactory*);

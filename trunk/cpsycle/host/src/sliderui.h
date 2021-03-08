@@ -24,14 +24,13 @@ typedef struct SliderUi {
 	// internal
 	ParamTweak paramtweak;
 	// references
-	ParamSkin* skin;
-	Workspace* workspace;
+	ParamSkin* skin;	
 	psy_ui_Component* view;
 	psy_audio_MachineParam* param;
 } SliderUi;
 
 void sliderui_init(SliderUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, Workspace*);
+	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
 
 #ifdef __cplusplus
 }

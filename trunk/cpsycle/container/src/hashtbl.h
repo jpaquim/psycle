@@ -55,6 +55,7 @@ const void* psy_table_at_const(const psy_Table*, uintptr_t key);
 void* psy_table_at_strhash(psy_Table*, const char* strkey);
 uintptr_t psy_table_size(const psy_Table*);
 uintptr_t psy_table_maxkey(const psy_Table*);
+uintptr_t psy_table_maxsize(const psy_Table*);
 bool psy_table_exists(const psy_Table*, uintptr_t key);
 bool psy_table_exists_strhash(const psy_Table*, const char* strkey);
 void psy_table_clear(psy_Table*);

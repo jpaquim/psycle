@@ -5,25 +5,36 @@
 #define MACHINESTACKVIEW_H
 
 // host
-#include "machineframe.h"
-#include "machineeditorview.h" // vst view
 #include "machineviewskin.h"
 #include "machineui.h"
-#include "newmachine.h"
-#include "paramview.h"
-#include "tabbar.h"
 #include "workspace.h"
 // ui
-#include <uiedit.h>
-#include <uinotebook.h>
 #include <uiscroller.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// MachineStackPane: displays stacks of the machines starting with their leafs
+// MachineStackView: displays stacks of the machines starting with their leafs
 
+// MasterRouteParam
+typedef struct MasterRouteParam {
+	// inherits
+	psy_audio_MachineParam machineparam;
+	// internal
+	uintptr_t macid;
+	// references
+	psy_audio_Machines* machines;
+} MasterRouteParam;
+
+void masterrouteparam_init(MasterRouteParam*, psy_audio_Machines*);
+void masterrouteparam_dispose(MasterRouteParam*);
+
+INLINE psy_audio_MachineParam* masterrouteparam_base(
+	MasterRouteParam* self)
+{
+	return &(self->machineparam);
+}
 
 // MachineStackColumn
 struct psy_audio_MachineParam;
@@ -32,17 +43,27 @@ struct psy_audio_Machines;
 typedef struct MachineStackColumn {
 	uintptr_t column;
 	psy_List* chain;	
-	psy_audio_WireMachineParam* wirevolume;	
+	psy_audio_WireMachineParam* wirevolume;
+	MasterRouteParam masterroute;
+	psy_audio_Machines* machines;
 } MachineStackColumn;
 
 void machinestackcolumn_init(MachineStackColumn*,
-	uintptr_t column);
+	uintptr_t column, psy_audio_Machines*);
 void machinestackcolumn_dispose(MachineStackColumn*);
 
-void machinestackcolumn_setwire(MachineStackColumn* self, psy_audio_Wire wire,
-	struct psy_audio_Machines* machines);
-psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn*);
-void machinestackcolumn_append(MachineStackColumn* self, uintptr_t macid);
+void machinestackcolumn_setwire(MachineStackColumn*, psy_audio_Wire);
+
+INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* self)
+{
+	return self->wirevolume;
+}
+
+void machinestackcolumn_append(MachineStackColumn*, uintptr_t macid);
+uintptr_t machinestackcolumn_append_effect(MachineStackColumn*, psy_audio_Machine*);
+
+uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
+bool machinestackcolumn_connectedtomaster(const MachineStackColumn*);
 
 // MachineStackState
 typedef struct MachineStackState {
@@ -50,17 +71,37 @@ typedef struct MachineStackState {
 	psy_audio_Machines* machines;
 	uintptr_t selected;
 	psy_ui_Size size;
+	bool update;	
 } MachineStackState;
 
 void machinestackstate_init(MachineStackState*);
 void machinestackstate_dispose(MachineStackState*);
 
+void machinestackstate_buildcolumns(MachineStackState*);
+void machinestackstate_setmachines(MachineStackState*, psy_audio_Machines*);
 MachineStackColumn* machinestackstate_insertcolumn(MachineStackState*,
 	uintptr_t column);
 MachineStackColumn* machinestackstate_column(MachineStackState*,
 	uintptr_t column);
+MachineStackColumn* machinestackstate_selectedcolumn(MachineStackState*);
+uintptr_t machinestackstate_maxnumcolumns(const MachineStackState*);
 void machinestackstate_clear(MachineStackState*);
 psy_List* machinestackstate_inputs(MachineStackState*);
+
+INLINE void machinestackstate_rebuildview(MachineStackState* self)
+{
+	self->update = TRUE;
+}
+
+INLINE bool machinestackstate_rebuildingview(const MachineStackState* self)
+{
+	return self->update;
+}
+
+INLINE void machinestackstate_endviewbuild(MachineStackState* self)
+{
+	self->update = FALSE;
+}
 
 struct MachineStackView;
 
@@ -84,46 +125,44 @@ void machinestackdesc_init(MachineStackDesc*, psy_ui_Component* parent,
 typedef struct MachineStackInputs {
 	// inherits
 	psy_ui_Component component;	
-	// references
-	psy_audio_Machines* machines;
+	// references	
 	Workspace* workspace;
 	MachineViewSkin* skin;
 	MachineStackState* state;
 } MachineStackInputs;
 
 void machinestackinputs_init(MachineStackInputs*, psy_ui_Component* parent,
-	psy_audio_Machines*, MachineStackState* state, MachineViewSkin* skin,
-	Workspace* workspace);
-void machinestackinputs_setmachines(MachineStackInputs*, psy_audio_Machines*);
+	MachineStackState*, MachineViewSkin*, Workspace*);
+
+void machinestackinputs_build(MachineStackInputs*);
 void machinestackinputs_updatevus(MachineStackInputs*);
 
 // MachineStackOutputs
+
+struct ParamSkin;
+
 typedef struct MachineStackOutputs {
 	// inherits
 	psy_ui_Component component;
-	// references
-	psy_audio_Machines* machines;
+	// references	
 	Workspace* workspace;
-	MachineViewSkin* skin;
+	struct ParamSkin* skin;
 	MachineStackState* state;
 } MachineStackOutputs;
 
 void machinestackoutputs_init(MachineStackOutputs*, psy_ui_Component* parent,
-	psy_audio_Machines*, MachineStackState* state, MachineViewSkin* skin,
-	Workspace* workspace);
-void machinestackoutputs_setmachines(MachineStackOutputs*, psy_audio_Machines*);
+	MachineStackState* state, ParamSkin* skin);
+
+void machinestackoutputs_build(MachineStackOutputs*);
 
 // MachineStackPane
 typedef struct MachineStackPane {
 	// inherits
-	psy_ui_Component component;
-	// signals
-	psy_Signal signal_changed;
+	psy_ui_Component component;	
 	// internal data	
 	bool vudrawupdate;
 	uintptr_t opcount;
-	// references
-	psy_audio_Machines* machines;
+	// references	
 	Workspace* workspace;
 	MachineViewSkin* skin;
 	MachineStackState* state;
@@ -132,9 +171,9 @@ typedef struct MachineStackPane {
 void machinestackpane_init(MachineStackPane*, psy_ui_Component* parent,
 	MachineStackState*, MachineViewSkin*, Workspace*);
 
+void machinestackpane_build(MachineStackPane*);
 void machinestackpane_updatevus(MachineStackPane*);
 void machinestackpane_updateskin(MachineStackPane*);
-
 
 // MachineStackVolumes
 typedef struct MachineStackVolumes {
@@ -142,13 +181,12 @@ typedef struct MachineStackVolumes {
 	psy_ui_Component component;
 	// internal
 	// references
-	MachineStackState* state;
-	Workspace* workspace;
-	MachineViewSkin* skin;
+	MachineStackState* state;	
+	struct ParamSkin* skin;
 } MachineStackVolumes;
 
 void machinestackvolumes_init(MachineStackVolumes*, psy_ui_Component* parent,
-	MachineStackState*, MachineViewSkin* skin, Workspace*);
+	MachineStackState*, struct ParamSkin* skin);
 
 void machinestackvolumes_build(MachineStackVolumes*);
 
@@ -189,7 +227,8 @@ typedef struct MachineStackView {
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin*, Workspace*);
 
-void machinestackview_addeffect(MachineStackView*, psy_Property* plugininfo);
+void machinestackview_addeffect(MachineStackView*,
+	const psy_audio_MachineInfo*);
 
 void machinestackview_updateskin(MachineStackView*);
 

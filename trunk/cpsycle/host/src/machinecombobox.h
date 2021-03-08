@@ -15,9 +15,9 @@ extern "C" {
 typedef struct MachineComboBox {
 	// inherits
 	psy_ui_ComboBox machinebox;
+	// signals
+	psy_Signal signal_selected;
 	// internal	
-	void (*selchange)(void*, int);
-	void* eventcontext;
 	// references
 	psy_audio_Machines* machines;
 	psy_audio_Instruments* instruments;
@@ -27,6 +27,7 @@ typedef struct MachineComboBox {
 	Workspace* workspace;
 	bool sync_machines_select;
 	bool showmaster;
+	uintptr_t column;
 } MachineComboBox;
 
 void machinecombobox_init(MachineComboBox*, psy_ui_Component* parent,

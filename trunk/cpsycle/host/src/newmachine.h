@@ -72,7 +72,7 @@ typedef struct {
 	double avgcharwidth;
 	intptr_t pluginpos;
 	psy_Property* plugins;
-	psy_Property* selectedplugin;   
+	psy_Property* selectedplugin;  
 	Workspace* workspace;	
 	bool onlyfavorites;
 	bool generatorsenabled;
@@ -110,6 +110,7 @@ typedef struct NewMachine {
 	// references
 	Workspace* workspace;
 	uintptr_t restoresection;
+	psy_Property* selectedplugin;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
@@ -124,6 +125,8 @@ void newmachine_preventeffects(NewMachine*);
 void newmachine_insertmode(NewMachine*);
 void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
+
+void newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {

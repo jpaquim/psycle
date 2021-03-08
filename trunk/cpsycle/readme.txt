@@ -5,7 +5,7 @@ be viewed in different screen resolutions, has a sequencer, unified the
 instruments Sampulse and Sampler ps1 use and avoids ui dependencies in the
 audio core.  The ui was reduced from mfc to win32 and wrapped behind an own
 layer. A X11 implementation is started but not finished. The separation of the
-audio core makes it alredy possible to use the command line player with posix
+audio core makes it already possible to use the command line player with posix
 aswell, too, although at the moment only a linux alsa driver exists. XMSampler
 has yet some problems correctly play all songs and the full IT Songimport and
 some Mixer options are missing. Event Input like Midi and Keyboard is now
@@ -26,7 +26,7 @@ audio           machines, patterns, instruments, sequence, player, sequencer,
 host            graphical psycle front end
 player          textmode psycle front end
 ui              bridged win32/x11(not finished) calls
-uitest		    a test program for X11 (placeholder, just a few
+uitest          a test program for X11 (placeholder, just a few
                 tests)
 audiodrivers    win: asio, mme, directx, wasapi
                 linux: alsa

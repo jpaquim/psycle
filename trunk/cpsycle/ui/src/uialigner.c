@@ -8,7 +8,7 @@
 #include <math.h>
 #include <stdio.h>
 
-
+// prototypes
 static void psy_ui_aligner_adjustminmaxsize(psy_ui_Aligner*,
 	psy_ui_Component*, const psy_ui_TextMetric*,
 	psy_ui_Size*);
@@ -21,7 +21,7 @@ static void psy_ui_aligner_adjustspacing(psy_ui_Aligner*,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
 static void psy_ui_aligner_resizewrapline(psy_ui_Aligner*, psy_List* wrap,
 	double cpy, double cpymax);
-
+// implementation
 void psy_ui_aligner_init(psy_ui_Aligner* self, psy_ui_Component* component)
 {
 	self->component = component;
@@ -59,10 +59,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
-				cp_bottomright.y - cp_topleft.y);
-			if (component->debugflag == 8000) {
-				component = component;
-			}
+				cp_bottomright.y - cp_topleft.y);			
 			if (!component->preventpreferredsizeatalign) {
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);
@@ -235,10 +232,7 @@ void psy_ui_aligner_adjustminmaxsize(psy_ui_Aligner* self,
 			componentsize->width = component->maxsize.width;
 		}
 	}
-	if (!psy_ui_value_iszero(&component->maxsize.height)) {
-		if (component->debugflag == 50) {
-			self = self;
-		}
+	if (!psy_ui_value_iszero(&component->maxsize.height)) {		
 		if (psy_ui_value_comp(&component->maxsize.height,
 			&componentsize->height, tm) < 0) {
 			componentsize->height = component->maxsize.height;

@@ -5,9 +5,9 @@
 
 #include "machinedefs.h"
 #include "machineinfo.h"
-#include <string.h>
-#include <stdlib.h> 
 #include "plugin_interface.h"
+// platform
+#include "../../detail/portable.h"
 
 void machineinfo_init(psy_audio_MachineInfo* self)
 {
@@ -27,33 +27,33 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* src)
 {
-	self->Author = strdup(src->Author ? src->Author : "");
-	self->Command = strdup(src->Command ? src->Command : "");
+	self->Author = psy_strdup(src->Author);
+	self->Command = psy_strdup(src->Command);
 	self->Flags = src->Flags;
-	self->Name = strdup(src->Name ? src->Name : "");
-	self->ShortName = strdup(src->ShortName ? src->ShortName : "");
+	self->Name = psy_strdup(src->Name);
+	self->ShortName = psy_strdup(src->ShortName);
 	self->APIVersion = src->APIVersion;
 	self->PlugVersion = src->PlugVersion;
 	self->type = src->type;
-	self->modulepath = strdup(src->modulepath ? src->modulepath : "");
+	self->modulepath = psy_strdup(src->modulepath);
 	self->shellidx = src->shellidx;
-	self->helptext = strdup(src->helptext ? src->helptext : "");
+	self->helptext = psy_strdup(src->helptext);
 }
 
 void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* src)
 {
 	machineinfo_dispose(self);
-	self->Author = strdup(src->Author ? src->Author : "");
-	self->Command = strdup(src->Command ? src->Command : "");
+	self->Author = psy_strdup(src->Author);
+	self->Command = psy_strdup(src->Command);
 	self->Flags = src->Flags;
-	self->Name = strdup(src->Name ? src->Name : "");
-	self->ShortName = strdup(src->ShortName ? src->ShortName : "");
+	self->Name = psy_strdup(src->Name);
+	self->ShortName = psy_strdup(src->ShortName);
 	self->APIVersion = src->APIVersion;
 	self->PlugVersion = src->PlugVersion;
 	self->type = src->type;
-	self->modulepath = strdup(src->modulepath ? src->modulepath : "");
+	self->modulepath = psy_strdup(src->modulepath);
 	self->shellidx = src->shellidx;
-	self->helptext = strdup(src->helptext ? src->helptext : "");	
+	self->helptext = psy_strdup(src->helptext);
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,
@@ -69,19 +69,19 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		const char* modulepath,
 		uintptr_t shellidx,
 		const char* helptext)
-{	
-	self->Author = strdup(author);
-	self->Command = strdup(command);
+{		
+	psy_strreset(&self->Author, author);
+	psy_strreset(&self->Command, command);
 	self->Flags = flags;
 	self->mode = mode;
-	self->Name = strdup(name);	
-	self->ShortName = strdup(shortname);
+	psy_strreset(&self->Name, name);
+	psy_strreset(&self->ShortName, shortname);
 	self->APIVersion = apiversion;
 	self->PlugVersion = plugversion;
 	self->type = type;
-	self->modulepath = strdup(modulepath);
+	psy_strreset(&self->modulepath, modulepath);
 	self->shellidx = shellidx;
-	self->helptext = strdup(helptext);
+	psy_strreset(&self->helptext, helptext);
 }
 
 void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
@@ -91,18 +91,20 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 		int shellidx)
 {
 	machineinfo_dispose(self);
-	self->Author = strdup(info->Author);
-	self->Command = strdup(info->Command);
+	psy_strreset(&self->Author, info->Author);
+	psy_strreset(&self->Command, info->Command);
 	self->Flags = info->Flags;
-	self->mode = (info->Flags & 3) == 3 ? psy_audio_MACHMODE_GENERATOR : psy_audio_MACHMODE_FX;
-	self->Name = strdup(info->Name);		
-	self->ShortName = strdup(info->ShortName);
+	self->mode = ((info->Flags & 3) == 3)
+		? psy_audio_MACHMODE_GENERATOR
+		: psy_audio_MACHMODE_FX;
+	psy_strreset(&self->Name, info->Name);
+	psy_strreset(&self->ShortName, info->ShortName);
 	self->APIVersion = info->APIVersion;
 	self->PlugVersion = info->PlugVersion;
 	self->type = type;	
-	self->modulepath = strdup(modulepath);
+	psy_strreset(&self->modulepath, modulepath);
 	self->shellidx = shellidx;
-	self->helptext = info->Command ? strdup(info->Command) : strdup("");
+	psy_strreset(&self->helptext, info->Command);
 }
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
@@ -143,17 +145,23 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 
 	rv = (psy_audio_MachineInfo*) malloc(sizeof(psy_audio_MachineInfo));
 	if (rv) {
-		rv->Author = strdup(self->Author ? self->Author : "");
-		rv->Command = strdup(self->Command ? self->Command : "");
+		rv->Author = psy_strdup(self->Author);
+		rv->Command = psy_strdup(self->Command);
 		rv->Flags = self->Flags;
-		rv->Name = strdup(self->Name ? self->Name : "");
-		rv->ShortName = strdup(self->ShortName ? self->ShortName : "");
+		rv->Name = psy_strdup(self->Name);
+		rv->ShortName = psy_strdup(self->ShortName);
 		rv->APIVersion = self->APIVersion;
 		rv->PlugVersion = self->PlugVersion;
 		rv->type = self->type;
-		rv->modulepath = strdup(self->modulepath ? self->modulepath : "");
+		rv->modulepath = psy_strdup(self->modulepath);
 		rv->shellidx = self->shellidx;
-		rv->helptext = strdup(self->helptext ? self->helptext : "");
+		rv->helptext = psy_strdup(self->helptext);
 	}
 	return rv;
+}
+
+void machineinfo_clear(psy_audio_MachineInfo* self)
+{
+	machineinfo_dispose(self);
+	machineinfo_init(self);
 }

@@ -268,7 +268,7 @@ void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
 				if (self->machine) {
 					psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
 				} else {
-					psy_audio_machineparam_tweak(param, 1.f);
+					psy_audio_machineparam_tweak(param, 0.f);
 				}
 			}
 		}		
