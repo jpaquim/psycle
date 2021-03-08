@@ -83,6 +83,13 @@ INLINE psy_List* psy_list_last(psy_List* self)
 		? self->tail
 		: NULL;
 }
+
+INLINE const psy_List* psy_list_last_const(const psy_List* self)
+{
+	return (self)
+		? self->tail
+		: NULL;
+}
 /// returns the node number of the list
 INLINE uintptr_t psy_list_size(const psy_List* self)
 {

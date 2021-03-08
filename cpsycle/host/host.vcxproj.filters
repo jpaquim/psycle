@@ -415,6 +415,9 @@
     <ClCompile Include="src\machinecombobox.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\switchui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -801,6 +804,9 @@
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
     <ClInclude Include="src\machinecombobox.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\switchui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
   </ItemGroup>

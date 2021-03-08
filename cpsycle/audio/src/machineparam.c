@@ -1256,6 +1256,29 @@ void psy_audio_wiremachineparam_dispose(psy_audio_WireMachineParam* self)
 	psy_audio_machineparam_dispose(&self->machineparam);
 }
 
+psy_audio_WireMachineParam* psy_audio_wiremachineparam_alloc(void)
+{
+	return (psy_audio_WireMachineParam*)malloc(sizeof(psy_audio_WireMachineParam));
+}
+
+psy_audio_WireMachineParam* psy_audio_wiremachineparam_allocinit(
+	psy_audio_Wire wire, psy_audio_Machines* machines)
+{
+	psy_audio_WireMachineParam* rv;
+
+	rv = psy_audio_wiremachineparam_alloc();
+	if (rv) {
+		psy_audio_wiremachineparam_init(rv, wire, machines);
+	}
+	return rv;
+}
+
+void psy_audio_wiremachineparam_deallocate(psy_audio_WireMachineParam* self)
+{
+	psy_audio_wiremachineparam_dispose(self);
+	free(self);
+}
+
 void psy_audio_wiremachineparam_tweak(psy_audio_WireMachineParam* self, float val)
 {
 	if (!self->machines) {

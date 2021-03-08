@@ -199,13 +199,25 @@ bool psy_table_exists(const psy_Table* self, uintptr_t k)
 bool psy_table_exists_strhash(const psy_Table* self, const char* strkey)
 {
 	assert(self);
+
 	return psy_table_exists(self, psy_strhash(strkey));
 }
 
 uintptr_t psy_table_size(const psy_Table* self)
 {
 	assert(self);
+
 	return self->count;
+}
+
+uintptr_t psy_table_maxsize(const psy_Table* self)
+{
+	assert(self);
+
+	if (psy_table_size(self) > 0) {
+		return psy_table_maxkey(self) + 1;
+	}
+	return 0;
 }
 
 uintptr_t psy_table_maxkey(const psy_Table* self)

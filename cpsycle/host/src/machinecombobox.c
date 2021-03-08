@@ -31,8 +31,8 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->sync_machines_select = TRUE;
 	self->showmaster = showmaster;
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);			
-	self->selchange = 0;	
+	self->column = psy_INDEX_INVALID;
+	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);	
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;	
 	psy_table_init(&self->comboboxslots);
@@ -45,9 +45,10 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinecombobox_onmachineboxselchange);
 	machinecombobox_buildmachinebox(self);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		machinecombobox_onsongchanged);
-	machinecombobox_connectsongsignals(self);		
+	//psy_signal_connect(&workspace->signal_songchanged, self,
+		//machinecombobox_onsongchanged);
+	//machinecombobox_connectsongsignals(self);		
+	psy_signal_init(&self->signal_selected);
 }
 
 void machinecombobox_ondestroy(MachineComboBox* self, psy_ui_Component* component)
@@ -64,6 +65,7 @@ void machinecombobox_ondestroy(MachineComboBox* self, psy_ui_Component* componen
 		psy_signal_disconnect(&self->machines->signal_slotchange, self,
 			machinecombobox_onmachineselect);
 	}
+	psy_signal_dispose(&self->signal_selected);
 }
 
 void machinecombobox_clearmachinebox(MachineComboBox* self)
@@ -78,17 +80,17 @@ void machinecombobox_clearmachinebox(MachineComboBox* self)
 void machinecombobox_onmachinesinsert(MachineComboBox* self, psy_audio_Machines* sender,
 	uintptr_t slot)
 {	
-	machinecombobox_buildmachinebox(self);
-	psy_ui_combobox_setcursel(&self->machinebox,
-		psy_audio_machines_selected(sender));
+	//machinecombobox_buildmachinebox(self);
+	//psy_ui_combobox_setcursel(&self->machinebox,
+		//psy_audio_machines_selected(sender));
 }
 
 void machinecombobox_onmachinesremoved(MachineComboBox* self, psy_audio_Machines* sender,
 	uintptr_t slot)
 {
-	machinecombobox_buildmachinebox(self);
-	psy_ui_combobox_setcursel(&self->machinebox,
-		psy_audio_machines_selected(sender));
+	//machinecombobox_buildmachinebox(self);
+	//psy_ui_combobox_setcursel(&self->machinebox,
+		//psy_audio_machines_selected(sender));
 }
 
 void machinecombobox_buildmachinebox(MachineComboBox* self)
@@ -142,6 +144,7 @@ void machinecombobox_onmachineboxselchange(MachineComboBox* self,
 		slot = (size_t)psy_table_at(&self->comboboxslots, sel);
 		psy_audio_machines_select(self->machines, slot);
 	}
+	psy_signal_emit(&self->signal_selected, self, 0);
 }
 
 void machinecombobox_onmachineselect(MachineComboBox* self, psy_audio_Machines* machines,
@@ -182,5 +185,5 @@ void machinecombobox_select(MachineComboBox* self, uintptr_t slot)
 		comboboxindex = psy_ui_combobox_count(&self->machinebox) - 1;
 	}
 	self->machinebox.component.debugflag = 3000;
-	psy_ui_combobox_setcursel(&self->machinebox, comboboxindex);
+	psy_ui_combobox_setcursel(&self->machinebox, comboboxindex);	
 }

@@ -360,6 +360,11 @@ void psy_audio_wiremachineparam_init(psy_audio_WireMachineParam*,
 	psy_audio_Wire wire, struct psy_audio_Machines*);
 void psy_audio_wiremachineparam_dispose(psy_audio_WireMachineParam*);
 
+psy_audio_WireMachineParam* psy_audio_wiremachineparam_alloc(void);
+psy_audio_WireMachineParam* psy_audio_wiremachineparam_allocinit(
+	psy_audio_Wire, struct psy_audio_Machines*);
+void psy_audio_wiremachineparam_deallocate(psy_audio_WireMachineParam*);
+
 INLINE psy_audio_MachineParam* psy_audio_wiremachineparam_base(
 	psy_audio_WireMachineParam* self)
 {

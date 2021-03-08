@@ -236,25 +236,21 @@ void machineview_onnewmachineselected(MachineView* self,
 	psy_ui_Component* sender, psy_Property* plugininfo)
 {
 	psy_audio_Machine* machine;
-
+	psy_audio_MachineInfo machineinfo;	
+	
+	machineinfo_init(&machineinfo);
+	newmachine_selectedmachineinfo(&self->newmachine, &machineinfo);
 	if (self->newmachine.restoresection == NEWMACHINE_ADDEFFECTSTACK) {
 		self->newmachine.restoresection = psy_INDEX_INVALID;
-		machinestackview_addeffect(&self->stackview, plugininfo);
+		machinestackview_addeffect(&self->stackview, &machineinfo);
+		machineinfo_dispose(&machineinfo);
 		tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_STACK);
 		return;
-	}
-	machine = psy_audio_machinefactory_makemachinefrompath(
-		&self->workspace->machinefactory,
-		(psy_audio_MachineType)psy_property_at_int(plugininfo, "type", psy_audio_UNDEFINED),
-		psy_property_at_str(plugininfo, "path", ""),
-		psy_property_at_int(plugininfo, "shellidx", 0),
-		psy_INDEX_INVALID);
-	if (machine) {
-		intptr_t favorite;
-
-		favorite = psy_property_at_int(plugininfo, "favorite", 0);
-		psy_property_set_int(plugininfo, "favorite", ++favorite);
-		
+	}	
+	machine = psy_audio_machinefactory_make_info(
+		&self->workspace->machinefactory, &machineinfo);
+	machineinfo_dispose(&machineinfo);
+	if (machine) {		
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
 
@@ -284,5 +280,5 @@ void machineview_onnewmachineselected(MachineView* self,
 	} else {
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);
-	}
+	}	
 }

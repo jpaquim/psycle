@@ -391,6 +391,7 @@
     <ClCompile Include="src\stereophase.c" />
     <ClCompile Include="src\styles.c" />
     <ClCompile Include="src\swingfillview.c" />
+    <ClCompile Include="src\switchui.c" />
     <ClCompile Include="src\tabbar.c" />
     <ClCompile Include="src\timebar.c" />
     <ClCompile Include="src\trackergridstate.c" />
@@ -528,6 +529,7 @@
     <ClInclude Include="src\stereophase.h" />
     <ClInclude Include="src\styles.h" />
     <ClInclude Include="src\swingfillview.h" />
+    <ClInclude Include="src\switchui.h" />
     <ClInclude Include="src\tabbar.h" />
     <ClInclude Include="src\timebar.h" />
     <ClInclude Include="src\trackergridstate.h" />

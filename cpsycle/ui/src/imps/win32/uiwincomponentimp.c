@@ -311,15 +311,10 @@ void dev_clear(psy_ui_win_ComponentImp* self)
 	if (self->component) {
 		q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
 		for (p = q; p != NULL; psy_list_next(&p)) {
-			psy_ui_Component* component;
-			bool deallocate;
+			psy_ui_Component* component;			
 
-			component = (psy_ui_Component*)psy_list_entry(p);
-			deallocate = component->deallocate;
-			psy_ui_component_destroy(component);
-			if (deallocate) {				
-				free(component);
-			}
+			component = (psy_ui_Component*)psy_list_entry(p);			
+			psy_ui_component_destroy(component);			
 		}
 		psy_list_free(q);
 	}

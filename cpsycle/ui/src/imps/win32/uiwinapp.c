@@ -519,16 +519,24 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return 0;
 				}
 				break; }
-			case WM_NCDESTROY:
-				if (imp->component) {					
+			case WM_NCDESTROY: {
+				bool deallocate;
+				psy_ui_Component* component;
+
+				component = imp->component;
+				deallocate = imp->component->deallocate;
+				if (imp->component) {
 					psy_signal_emit(&imp->component->signal_destroyed,
-						imp->component, 0);					
+						imp->component, 0);
 					imp->component->vtable->ondestroyed(imp->component);
 				}
 				psy_ui_component_dispose(imp->component);
 				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
+				if (deallocate) {
+					free(component);
+				}
 				return 0;
-				break;
+				break; }
 			case WM_DESTROY:
 				if (imp->component) {									
 					psy_signal_emit(&imp->component->signal_destroy,

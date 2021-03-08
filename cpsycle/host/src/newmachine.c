@@ -152,7 +152,7 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
-	double x, double y);
+	psy_ui_RealPoint topleft);
 static void pluginsview_onpreferredsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
@@ -195,8 +195,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 }
 
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
-	bool favorites,
-	Workspace* workspace)
+	bool favorites, Workspace* workspace)
 {	
 	psy_ui_Size size;
 
@@ -243,32 +242,31 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 }
 
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
-{		
-	
+{	
 	if (self->plugins) {
 		psy_ui_Size size;
-		psy_List* p;		
-		double cpx;
-		double cpy;
+		psy_List* p;
+		psy_ui_RealPoint cp;		
 		
 		size = psy_ui_component_size(&self->component);
 		pluginsview_computetextsizes(self, &size);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		for (p = psy_property_begin(self->plugins), cpx = 0, cpy = 0;
+		psy_ui_realpoint_init(&cp);
+		for (p = psy_property_begin(self->plugins);
 				p != NULL; psy_list_next(&p)) {
 			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
-				cpx, cpy);
-			cpx += self->columnwidth;
-			if (cpx >= self->numparametercols * self->columnwidth) {
-				cpx = 0;
-				cpy += self->lineheight;
+				cp);
+			cp.x += self->columnwidth;
+			if (cp.x >= self->numparametercols * self->columnwidth) {
+				cp.x = 0.0;
+				cp.y += self->lineheight;
 			}
 		}
 	}
 }
 
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
-	psy_Property* property, double x, double y)
+	psy_Property* property, psy_ui_RealPoint topleft)
 {
 	char text[128];
 
@@ -284,17 +282,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		}
 	}		
 	plugindisplayname(property, text);	
-	psy_ui_textout(g, x, y + 2, text, strlen(text));
+	psy_ui_textout(g, topleft.x, topleft.y + 2, text, strlen(text));
 	plugintype(property, text);
-	psy_ui_textout(g, x + self->columnwidth - self->avgcharwidth * 7,
-		y + 2, text, strlen(text));
+	psy_ui_textout(g, topleft.x + self->columnwidth - self->avgcharwidth * 7,
+		topleft.y + 2, text, strlen(text));
 	if (pluginmode(property, text) == psy_audio_MACHMODE_FX) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
-	psy_ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
-		y + 2, text, strlen(text));
+	psy_ui_textout(g, topleft.x + self->columnwidth - 10 * self->avgcharwidth,
+		topleft.y + 2, text, strlen(text));
 }
 
 void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
@@ -701,6 +699,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->scanending = FALSE;
 	self->mode = NEWMACHINE_APPEND;
 	self->restoresection = psy_INDEX_INVALID;
+	self->selectedplugin = NULL;
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -834,7 +833,14 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	strcat(detail, ")");
 	psy_ui_label_settext(&self->detail.desclabel, detail);
 	self->detail.empty = FALSE;
+	self->selectedplugin = selected;	
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
+	if (self->selectedplugin) {
+		intptr_t favorite;
+
+		favorite = psy_property_at_int(self->selectedplugin, "favorite", 0);
+		psy_property_set_int(self->selectedplugin, "favorite", ++favorite);
+	}
 	psy_property_sync(workspace_pluginlist(self->pluginsview.workspace), self->pluginsview.plugins);
 	psy_audio_plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
 	pluginsview_onplugincachechanged(&self->favoriteview,
@@ -848,7 +854,7 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_component_setscrolltop(&self->favoriteview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->favoriteview.component);
 		psy_ui_component_invalidate(&self->favoriteview.component);
-	}
+	}	
 }
 
 void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
@@ -876,7 +882,8 @@ void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
 void newmachine_onplugincachechanged(NewMachine* self,
 	psy_audio_PluginCatcher* sender)
 {
-	newmachinedetail_reset(&self->detail);	
+	newmachinedetail_reset(&self->detail);
+	self->selectedplugin = NULL;
 }
 
 void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
@@ -1160,4 +1167,24 @@ void newmachine_addeffectmode(NewMachine* self)
 	self->mode = NEWMACHINE_ADDEFFECT;
 	self->pluginsview.mode = NEWMACHINE_ADDEFFECT;
 	self->favoriteview.mode = NEWMACHINE_ADDEFFECT;		
+}
+
+void newmachine_selectedmachineinfo(const NewMachine* self,
+	psy_audio_MachineInfo* rv)
+{
+	if (self->selectedplugin) {
+		machineinfo_set(rv,
+			psy_property_at_str(self->selectedplugin, "author", ""),
+			psy_property_at_str(self->selectedplugin, "command", ""),
+			psy_property_at_int(self->selectedplugin, "flags", 0),
+			psy_property_at_int(self->selectedplugin, "mode", 0),
+			psy_property_at_str(self->selectedplugin, "name", ""),
+			psy_property_at_str(self->selectedplugin, "shortname", ""),
+			(int16_t)psy_property_at_int(self->selectedplugin, "apiversion", 0),
+			(int16_t)psy_property_at_int(self->selectedplugin, "plugversion", 0),			
+			(psy_audio_MachineType)psy_property_at_int(self->selectedplugin, "type", psy_audio_UNDEFINED),
+			psy_property_at_str(self->selectedplugin, "path", ""),
+			psy_property_at_int(self->selectedplugin, "shellidx", 0),
+			psy_property_at_str(self->selectedplugin, "help", ""));
+	}	
 }
