@@ -418,6 +418,12 @@
     <ClCompile Include="src\switchui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\levelui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\labelui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -807,6 +813,12 @@
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
     <ClInclude Include="src\switchui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\levelui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\labelui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
   </ItemGroup>

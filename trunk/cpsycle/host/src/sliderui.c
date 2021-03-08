@@ -84,8 +84,9 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_sizepx(&self->component);	
-	sliderdraw_init(&draw, self->skin, NULL, self->param, size, NULL, FALSE);
-	sliderdraw_draw(&draw, g);	
+	sliderdraw_init(&draw, self->skin, NULL, self->param, size, NULL, FALSE,
+		FALSE);
+	sliderdraw_draw(&draw, g);
 }
 
 void sliderui_invalidate(SliderUi* self)
@@ -97,12 +98,9 @@ void sliderui_invalidate(SliderUi* self)
 
 void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
-	psy_ui_RealSize size;
-
-	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
-		MPF_SLIDER, FALSE);
-	*rv = psy_ui_size_makepx(140.0, 100.0);
+{		
+	psy_ui_size_setreal(rv, psy_ui_realrectangle_size(
+		&self->skin->slider.dest));
 }
 
 void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)

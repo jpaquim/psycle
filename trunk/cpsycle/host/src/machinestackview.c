@@ -5,6 +5,8 @@
 
 #include "machinestackview.h"
 // host
+#include "labelui.h"
+#include "levelui.h"
 #include "sliderui.h"
 #include "switchui.h"
 // audio
@@ -91,6 +93,10 @@ int masterrouteparam_name(MasterRouteParam* self, char* text)
 }
 
 // MachineStackColumn
+// prototypes
+static void  machinestackcolumn_level_normvalue(MachineStackColumn*,
+	psy_audio_IntMachineParam* sender, float* rv);
+// implementation
 void machinestackcolumn_init(MachineStackColumn* self, uintptr_t column,
 	psy_audio_Machines* machines)
 {
@@ -99,6 +105,10 @@ void machinestackcolumn_init(MachineStackColumn* self, uintptr_t column,
 	self->wirevolume = NULL;
 	self->machines = machines;
 	masterrouteparam_init(&self->masterroute, self->machines);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+		machinestackcolumn_level_normvalue);
 }
 
 void machinestackcolumn_dispose(MachineStackColumn* self)
@@ -112,11 +122,20 @@ void machinestackcolumn_dispose(MachineStackColumn* self)
 
 void machinestackcolumn_setwire(MachineStackColumn* self, psy_audio_Wire wire)
 {
+	psy_audio_Machine* machine;
+	const char* editname;
+
 	if (self->wirevolume) {
 		psy_audio_wiremachineparam_deallocate(self->wirevolume);		
 	}	
-	self->wirevolume = psy_audio_wiremachineparam_allocinit(wire,
-		self->machines);
+	machine = psy_audio_machines_at(self->machines, wire.src);
+	if (machine) {
+		editname = psy_audio_machine_editname(machine);
+	} else {
+		editname = NULL;
+	}
+	self->wirevolume = psy_audio_wiremachineparam_allocinit(
+		editname, wire, self->machines);
 }
 
 void machinestackcolumn_append(MachineStackColumn* self, uintptr_t macid)
@@ -180,6 +199,28 @@ bool machinestackcolumn_connectedtomaster(const MachineStackColumn* self)
 {
 	return (psy_audio_machineparam_normvalue(&self->masterroute.machineparam) >
 		0.f);
+}
+
+void  machinestackcolumn_level_normvalue(MachineStackColumn* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{	
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* memory;
+
+	*rv = 0.f;	
+	machine = psy_audio_machines_at(self->machines,
+		machinestackcolumn_lastbeforemaster(self));
+	if (machine) {
+		memory = psy_audio_machine_buffermemory(machine);
+		if (memory) {
+			psy_dsp_amp_t temp;
+			psy_dsp_amp_t volume;
+
+			volume = 1.f;
+			temp = ((int)(50.0f * log10((double)volume))) / 97.f;
+			*rv = psy_audio_buffer_rmsdisplay(memory) + temp;
+		}
+	}
 }
 
 // MachineStackState
@@ -770,30 +811,52 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 	psy_ui_component_clear(&self->component);
 	maxnumcolumns = machinestackstate_maxnumcolumns(self->state);
 	for (i = 0; i < maxnumcolumns; ++i) {
-		MachineStackColumn* column;		
-		SliderUi* slider;
+		MachineStackColumn* column;				
 		psy_ui_Component* component;
 
 		column = machinestackstate_column(self->state,  i);
-		component = NULL;
-		if (column && machinestackcolumn_wire(column)) {
-			slider = (SliderUi*)malloc(sizeof(SliderUi));
-			if (slider) {
-				sliderui_init(slider, &self->component, &self->component,
-					&column->wirevolume->machineparam, self->skin);
-				component = &slider->component;
-			}
-		} else {			
-			component = (psy_ui_Component*)malloc(sizeof(psy_ui_Component));
-			if (component) {
-				psy_ui_component_init(component, &self->component,
-					&self->component);				
-			}
-		}
+		component = (psy_ui_Component*)malloc(sizeof(psy_ui_Component));
 		if (component) {
+			psy_ui_component_init(component, &self->component,
+				&self->component);		
+			if (column && machinestackcolumn_wire(column)) {
+				SliderUi* slider;
+				LevelUi* level;
+				LabelUi* label;
+
+				slider = (SliderUi*)malloc(sizeof(SliderUi));
+				if (slider) {
+					sliderui_init(slider, component, &self->component,
+						&column->wirevolume->machineparam, self->skin);
+					slider->component.deallocate = TRUE;
+					psy_ui_component_setalign(&slider->component,
+						psy_ui_ALIGN_LEFT);
+				}
+				level = (LevelUi*)malloc(sizeof(LevelUi));
+				if (level) {
+					levelui_init(level, component, &self->component,
+						&column->level_param.machineparam, self->skin);
+					level->component.deallocate = TRUE;
+					psy_ui_component_setalign(&level->component,
+						psy_ui_ALIGN_LEFT);
+				}
+				label = (LabelUi*)malloc(sizeof(LabelUi));
+				if (label) {
+					labelui_init(label, component, &self->component,
+						&column->wirevolume->machineparam, self->skin);
+					label->component.deallocate = TRUE;
+					psy_ui_component_setalign(&label->component,
+						psy_ui_ALIGN_BOTTOM);
+				}
+			}		
 			component->deallocate = TRUE;
 			psy_ui_component_setalign(component, psy_ui_ALIGN_LEFT);
-			psy_ui_component_setminimumsize(component, self->state->size);
+			psy_ui_component_setminimumsize(component,
+				psy_ui_size_make(self->state->size.width,
+					psy_ui_value_makepx(182.0)));
+			psy_ui_component_setmaximumsize(component,
+				psy_ui_size_make(self->state->size.width,
+					psy_ui_value_makepx(182.0)));
 		}
 	}
 	psy_ui_component_align(&self->component);
