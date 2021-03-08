@@ -44,6 +44,7 @@ typedef struct MachineStackColumn {
 	uintptr_t column;
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
+	psy_audio_IntMachineParam level_param;
 	MasterRouteParam masterroute;
 	psy_audio_Machines* machines;
 } MachineStackColumn;

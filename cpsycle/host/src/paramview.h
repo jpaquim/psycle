@@ -59,11 +59,12 @@ typedef struct SliderDraw {
     bool tweaking;
     psy_ui_RealRectangle r_top;
     psy_ui_RealRectangle r_bottom;
+    bool drawlabel;
 } SliderDraw;
 
 void sliderdraw_init(SliderDraw*, ParamSkin*, psy_audio_Machine*,
     psy_audio_MachineParam*, psy_ui_RealSize, const psy_ui_TextMetric*,
-    bool tweaking);
+    bool tweaking, bool drawlabel);
 void sliderdraw_draw(SliderDraw*, psy_ui_Graphics*);
 
 typedef struct {

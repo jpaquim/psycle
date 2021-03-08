@@ -112,7 +112,8 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 // implementation
 void sliderdraw_init(SliderDraw* self, ParamSkin* skin,
 	psy_audio_Machine* machine, psy_audio_MachineParam* param,
-	psy_ui_RealSize size, const psy_ui_TextMetric* tm, bool tweaking)
+	psy_ui_RealSize size, const psy_ui_TextMetric* tm, bool tweaking,
+	bool drawlabel)
 {
 	self->machine = machine;
 	self->skin = skin;
@@ -120,6 +121,7 @@ void sliderdraw_init(SliderDraw* self, ParamSkin* skin,
 	self->size = size;
 	self->tweaking = tweaking;
 	self->tm = tm;
+	self->drawlabel = drawlabel;
 }
 
 void sliderdraw_draw(SliderDraw* self, psy_ui_Graphics* g)
@@ -156,7 +158,7 @@ void sliderdraw_draw(SliderDraw* self, psy_ui_Graphics* g)
 		psy_ui_realpoint_make(xoffset, yoffset),
 		&self->skin->sliderknob);
 	drawparamname = FALSE;
-	if (self->param) {
+	if (self->param && self->drawlabel) {
 		if (self->machine) {
 			// call with proxy protection via machine
 			if (psy_audio_machine_parameter_name(self->machine, self->param, str) != FALSE) {
@@ -183,7 +185,7 @@ void sliderdraw_draw(SliderDraw* self, psy_ui_Graphics* g)
 		32, psy_ui_realrectangle_height(&self->skin->slider.dest) - 24,
 		self->size.width - 32, 24);
 	str[0] = '\0';
-	if (self->param) {
+	if (self->drawlabel && self->param) {
 		if (self->machine) {
 			// call with proxy protection via machine
 			if (psy_audio_machine_parameter_describe(self->machine, self->param, str) == FALSE) {
@@ -196,15 +198,17 @@ void sliderdraw_draw(SliderDraw* self, psy_ui_Graphics* g)
 					psy_audio_machineparam_normvalue(self->param));
 			}
 		}
-	}	
-	psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
-	psy_ui_settextcolour(g, self->skin->fontbottomcolour);
-	psy_ui_textoutrectangle(g,
-		psy_ui_realpoint_make(
-			32,
-			psy_ui_realrectangle_height(&self->skin->slider.dest) - 24),
-		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, str, strlen(str));
+	}
+	if (self->drawlabel) {
+		psy_ui_setbackgroundcolour(g, self->skin->bottomcolour);
+		psy_ui_settextcolour(g, self->skin->fontbottomcolour);
+		psy_ui_textoutrectangle(g,
+			psy_ui_realpoint_make(
+				32,
+				psy_ui_realrectangle_height(&self->skin->slider.dest) - 24),
+			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
+			r, str, strlen(str));
+	}
 }
 
 // ParamTweak
@@ -540,8 +544,8 @@ ParamView* paramview_alloc(void)
 	return (ParamView*) malloc(sizeof(ParamView));
 }
 
-ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine* machine,
-	Workspace* workspace)
+ParamView* paramview_allocinit(psy_ui_Component* parent,
+	psy_audio_Machine* machine, Workspace* workspace)
 {
 	ParamView* rv;
 
@@ -713,7 +717,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 
 	sliderdraw_init(&draw, self->skin, self->machine, param,
 		size, psy_ui_component_textmetric(&self->component),
-		self->tweak == paramnum);
+		self->tweak == paramnum, TRUE);
 	sliderdraw_draw(&draw, g);	
 }
 

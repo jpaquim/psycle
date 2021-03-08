@@ -815,11 +815,13 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	} else {
 		topline = 0;
 	}
-	if (psy_ui_component_scrolltoppx(&self->component) + topline * self->linestate->lineheightpx > r.top) {
+	if (psy_ui_component_scrolltoppx(&self->component) +
+			topline * self->linestate->lineheightpx > r.top) {
 		intptr_t dlines;
 		const psy_ui_TextMetric* tm;
 		
-		dlines = (intptr_t)((psy_ui_component_scrolltoppx(&self->component) + topline * self->linestate->lineheightpx - r.top) /
+		dlines = (intptr_t)((psy_ui_component_scrolltoppx(&self->component) +
+			topline * self->linestate->lineheightpx - r.top) /
 			(self->linestate->lineheightpx));				
 		self->linestate->cursorchanging = TRUE;
 		tm = psy_ui_component_textmetric(&self->component);
@@ -847,12 +849,14 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	} else {
 		--visilines;
 	}
-	line = trackerlinestate_beattoline(self->linestate, cursor.offset + cursor.seqoffset);
+	line = trackerlinestate_beattoline(self->linestate,
+		cursor.offset + cursor.seqoffset);
 	if (visilines < line - psy_ui_component_scrolltoppx(&self->component) /
 			self->linestate->lineheightpx) {
 		intptr_t dlines;
 
-		dlines = (intptr_t)(line - psy_ui_component_scrolltoppx(&self->component) /
+		dlines = (intptr_t)
+			(line - psy_ui_component_scrolltoppx(&self->component) /
 			self->linestate->lineheightpx - visilines);
 		self->linestate->cursorchanging = TRUE;
 		psy_ui_component_setscrolltop(&self->component,
@@ -871,7 +875,8 @@ bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	if (trackergridstate_pxtotrack(self->gridstate,
 			psy_ui_component_scrollleftpx(&self->component)) > cursor.track) {
 		psy_ui_component_setscrollleft(&self->component,
-			psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate, cursor.track)));
+			psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate,
+				cursor.track)));
 		return FALSE;
 	}
 	return TRUE;
@@ -906,7 +911,8 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 			psy_ui_component_scrollleftpx(&self->component))) {
 		psy_ui_component_setscrollleft(&self->component,
 			psy_ui_value_makepx(
-				trackergridstate_tracktopx(self->gridstate, tracks - visitracks)));
+				trackergridstate_tracktopx(self->gridstate,
+					tracks - visitracks)));
 		return FALSE;
 	}
 	return TRUE;
@@ -940,8 +946,10 @@ void trackergrid_advancelines(TrackerGrid* self, uintptr_t lines, bool wrap)
 		if (!self->linestate->singlemode) {
 			wrap = TRUE;
 		}
-		psy_audio_patterncursornavigator_init(&cursornavigator, &self->gridstate->cursor,
-			trackergridstate_pattern(self->gridstate), trackerlinestate_bpl(self->linestate), wrap, 0);		
+		psy_audio_patterncursornavigator_init(&cursornavigator,
+			&self->gridstate->cursor,
+			trackergridstate_pattern(self->gridstate),
+			trackerlinestate_bpl(self->linestate), wrap, 0);		
 		if (psy_audio_patterncursornavigator_advancelines(&cursornavigator, lines)) {
 			trackergrid_scrolldown(self, self->gridstate->cursor);
 		} else if (!self->linestate->singlemode) {
@@ -2153,24 +2161,28 @@ void trackergrid_blockpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	psy_undoredo_execute(&self->workspace->undoredo,
-		&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
-			&self->workspace->patternpaste, self->gridstate->cursor,
-			trackerlinestate_bpl(self->linestate), FALSE, self->workspace)->command);	
-	trackergrid_movecursorwhenpaste(self);
-	psy_ui_component_invalidate(&self->component);	
+	if (!psy_audio_pattern_empty(&self->workspace->patternpaste)) {
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
+				&self->workspace->patternpaste, self->gridstate->cursor,
+				trackerlinestate_bpl(self->linestate), FALSE, self->workspace)->command);
+		trackergrid_movecursorwhenpaste(self);
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void trackergrid_blockmixpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	psy_undoredo_execute(&self->workspace->undoredo,
-		&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
-			&self->workspace->patternpaste, self->gridstate->cursor,
-			trackerlinestate_bpl(self->linestate), TRUE, self->workspace)->command);
-	trackergrid_movecursorwhenpaste(self);
-	psy_ui_component_invalidate(&self->component);	
+	if (!psy_audio_pattern_empty(&self->workspace->patternpaste)) {
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
+				&self->workspace->patternpaste, self->gridstate->cursor,
+				trackerlinestate_bpl(self->linestate), TRUE, self->workspace)->command);
+		trackergrid_movecursorwhenpaste(self);
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 bool trackergrid_movecursorwhenpaste(TrackerGrid* self)

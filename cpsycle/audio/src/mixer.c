@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "mixer.h"
+// local
 #include "machines.h"
 #include "player.h"
 #include "plugin_interface.h"
@@ -11,15 +12,13 @@
 #include "songio.h"
 #include "wire.h"
 #include "constants.h"
-
+// dsp
 #include <operations.h>
 #include <dsptypes.h>
 #include <convert.h>
-
+// std
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
 #define MASTERCHANNEL_SOLOCOLUMN_INDEX psy_INDEX_INVALID - 1
@@ -77,21 +76,30 @@ int inputlabelparam_describe(psy_audio_InputLabelParam* self, char* text)
 }
 
 // SendLabelParam
-static int sendreturnlabelparam_type(psy_audio_SendReturnLabelParam* self) { return MPF_INFOLABEL | MPF_SMALL; }
-static int sendreturnlabelparam_name(psy_audio_SendReturnLabelParam*, char* text);
-static int sendreturnlabelparam_describe(psy_audio_SendReturnLabelParam*, char* text);
+static int sendreturnlabelparam_type(psy_audio_SendReturnLabelParam* self)
+{
+	return MPF_INFOLABEL | MPF_SMALL;
+}
+
+static int sendreturnlabelparam_name(psy_audio_SendReturnLabelParam*,
+	char* text);
+static int sendreturnlabelparam_describe(psy_audio_SendReturnLabelParam*,
+	char* text);
 
 static MachineParamVtable sendreturnlabelparam_vtable;
-static int sendreturnlabelparam_vtable_initialized = 0;
+static bool sendreturnlabelparam_vtable_initialized = 0;
 
 static void sendreturnlabelparam_vtable_init(psy_audio_SendReturnLabelParam* self)
 {
 	if (!sendreturnlabelparam_vtable_initialized) {
 		sendreturnlabelparam_vtable = *(self->machineparam.vtable);
-		sendreturnlabelparam_vtable.describe = (fp_machineparam_describe)sendreturnlabelparam_describe;
-		sendreturnlabelparam_vtable.name = (fp_machineparam_name)sendreturnlabelparam_name;
-		sendreturnlabelparam_vtable.type = (fp_machineparam_type)sendreturnlabelparam_type;
-		sendreturnlabelparam_vtable_initialized = 1;
+		sendreturnlabelparam_vtable.describe = (fp_machineparam_describe)
+			sendreturnlabelparam_describe;
+		sendreturnlabelparam_vtable.name = (fp_machineparam_name)
+			sendreturnlabelparam_name;
+		sendreturnlabelparam_vtable.type = (fp_machineparam_type)
+			sendreturnlabelparam_type;
+		sendreturnlabelparam_vtable_initialized = TRUE;
 	}
 }
 
@@ -143,9 +151,12 @@ static void drywetmixmachineparam_vtable_init(psy_audio_DryWetMixMachineParam* s
 {
 	if (!drywetmixmachineparam_vtable_initialized) {
 		drywetmixmachineparam_vtable = *(self->machineparam.vtable);
-		drywetmixmachineparam_vtable.tweak = (fp_machineparam_tweak)drywetmixmachineparam_tweak;
-		drywetmixmachineparam_vtable.normvalue = (fp_machineparam_normvalue)drywetmixmachineparam_normvalue;
-		drywetmixmachineparam_vtable.range = (fp_machineparam_range)drywetmixmachineparam_range;
+		drywetmixmachineparam_vtable.tweak = (fp_machineparam_tweak)
+			drywetmixmachineparam_tweak;
+		drywetmixmachineparam_vtable.normvalue = (fp_machineparam_normvalue)
+			drywetmixmachineparam_normvalue;
+		drywetmixmachineparam_vtable.range = (fp_machineparam_range)
+			drywetmixmachineparam_range;
 		drywetmixmachineparam_vtable_initialized = 1;
 	}
 }
@@ -227,17 +238,21 @@ static float routemachineparam_normvalue(psy_audio_RouteMachineParam* self);
 static int routemachineparam_name(psy_audio_RouteMachineParam*, char* text);
 
 static MachineParamVtable routemachineparam_vtable;
-static int routemachineparam_vtable_initialized = 0;
+static bool routemachineparam_vtable_initialized = FALSE;
 
 static void routemachineparam_vtable_init(psy_audio_RouteMachineParam* self)
 {
 	if (!routemachineparam_vtable_initialized) {
 		routemachineparam_vtable = *(self->machineparam.vtable);
-		routemachineparam_vtable.normvalue = (fp_machineparam_normvalue) routemachineparam_normvalue;
-		routemachineparam_vtable.tweak = (fp_machineparam_tweak) routemachineparam_tweak;
-		routemachineparam_vtable.type = (fp_machineparam_type) routemachineparam_type;
-		routemachineparam_vtable.name = (fp_machineparam_name)routemachineparam_name;
-		routemachineparam_vtable_initialized = 1;
+		routemachineparam_vtable.normvalue = (fp_machineparam_normvalue)
+			routemachineparam_normvalue;
+		routemachineparam_vtable.tweak = (fp_machineparam_tweak)
+			routemachineparam_tweak;
+		routemachineparam_vtable.type = (fp_machineparam_type)
+			routemachineparam_type;
+		routemachineparam_vtable.name = (fp_machineparam_name)
+			routemachineparam_name;
+		routemachineparam_vtable_initialized = TRUE;
 	}
 }
 
@@ -267,7 +282,7 @@ void routemachineparam_tweak(psy_audio_RouteMachineParam* self, float val)
 		}
 	} else
 	if (self->send == numreturncolumns(self->mixer)) {
-		self->channel->mastersend = val > 0.f ? TRUE : FALSE;
+		self->channel->mastersend = (val > 0.f) ? TRUE : FALSE;
 	}
 }
 

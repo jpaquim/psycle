@@ -352,17 +352,18 @@ struct psy_audio_Machines;
 typedef struct psy_audio_WireMachineParam {
 	psy_audio_MachineParam machineparam;
 	psy_audio_Wire wire;
+	char* name;
 	// references
 	struct psy_audio_Machines* machines;
 } psy_audio_WireMachineParam;
 
 void psy_audio_wiremachineparam_init(psy_audio_WireMachineParam*,
-	psy_audio_Wire wire, struct psy_audio_Machines*);
+	const char* name, psy_audio_Wire wire, struct psy_audio_Machines*);
 void psy_audio_wiremachineparam_dispose(psy_audio_WireMachineParam*);
 
 psy_audio_WireMachineParam* psy_audio_wiremachineparam_alloc(void);
 psy_audio_WireMachineParam* psy_audio_wiremachineparam_allocinit(
-	psy_audio_Wire, struct psy_audio_Machines*);
+	const char* name, psy_audio_Wire, struct psy_audio_Machines*);
 void psy_audio_wiremachineparam_deallocate(psy_audio_WireMachineParam*);
 
 INLINE psy_audio_MachineParam* psy_audio_wiremachineparam_base(
