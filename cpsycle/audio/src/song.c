@@ -241,7 +241,7 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 		
 		machine = psy_audio_machines_at(&self->machines, virtual_inst);
 		if (machine) {
-			psy_audio_machines_remove(&self->machines, virtual_inst);
+			psy_audio_machines_remove(&self->machines, virtual_inst, FALSE);
 		}
 		machine = psy_audio_machinefactory_makemachinefrompath(
 			self->machinefactory, psy_audio_VIRTUALGENERATOR, NULL,

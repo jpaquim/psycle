@@ -162,10 +162,7 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	assert(self);
 	
 	size = psy_ui_component_sizepx(&self->component);	
-	varrowcenter = (size.height - 10) / 2;
-	if (self->component.debugflag >= 6000) {
-		self = self;
-	}
+	varrowcenter = (size.height - 10) / 2;	
 	sel = psy_ui_combobox_cursel(self);	
 	if (sel != -1) {
 		char text[512];		

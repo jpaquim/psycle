@@ -65,7 +65,7 @@ void psy_audio_machines_clear(psy_audio_Machines*);
 void psy_audio_machines_insert(psy_audio_Machines*, uintptr_t slot,
 	psy_audio_Machine*);
 void psy_audio_machines_erase(psy_audio_Machines*, uintptr_t slot);
-void psy_audio_machines_remove(psy_audio_Machines*, uintptr_t slot);
+void psy_audio_machines_remove(psy_audio_Machines*, uintptr_t slot, bool rewire);
 void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot,
 	uintptr_t dstslot);
 uintptr_t psy_audio_machines_append(psy_audio_Machines*, psy_audio_Machine*);

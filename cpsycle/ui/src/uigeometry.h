@@ -293,7 +293,10 @@ bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle*,
 	double x1, double y1, double x2, double y2);
 int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle*,
 	const psy_ui_RealRectangle* other);
-void psy_ui_realrectangle_union(psy_ui_RealRectangle*, const psy_ui_RealRectangle* other);
+void psy_ui_realrectangle_union(psy_ui_RealRectangle*,
+	const psy_ui_RealRectangle* other);
+bool psy_ui_realrectangle_intersection(psy_ui_RealRectangle*,
+	const psy_ui_RealRectangle* other);
 void psy_ui_realrectangle_expand(psy_ui_RealRectangle*, double top, double right, double bottom, double left);
 void psy_ui_realrectangle_move(psy_ui_RealRectangle*, double dx, double dy);
 void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*, psy_ui_RealPoint topleft);

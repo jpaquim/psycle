@@ -83,7 +83,7 @@ void insertmachinecommand_revert(InsertMachineCommand* self)
 		self->restoreconnection = TRUE;
 		self->machine = psy_audio_machine_clone(machine);
 		self->machines->preventundoredo = TRUE;
-		psy_audio_machines_remove(self->machines, self->slot);
+		psy_audio_machines_remove(self->machines, self->slot, FALSE);
 		self->machines->preventundoredo = FALSE;
 	}	
 }
@@ -138,7 +138,7 @@ void deletemachinecommand_execute(DeleteMachineCommand* self)
 		psy_audio_connections_copy(&self->connections, &self->machines->connections);		
 		self->machine = psy_audio_machine_clone(machine);
 		self->machines->preventundoredo = TRUE;
-		psy_audio_machines_remove(self->machines, self->slot);
+		psy_audio_machines_remove(self->machines, self->slot, TRUE);
 		self->machines->preventundoredo = FALSE;
 	}
 }

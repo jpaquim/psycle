@@ -136,6 +136,7 @@ psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping* self, uintptr_t sr
 	return rv;	
 }
 
+// MachineSockets
 void psy_audio_machinesockets_init(psy_audio_MachineSockets* self)
 {
 	wiresockets_init(&self->inputs);
@@ -151,7 +152,7 @@ void psy_audio_machinesockets_dispose(psy_audio_MachineSockets* self)
 void psy_audio_machinesockets_copy(psy_audio_MachineSockets* self,
 	psy_audio_MachineSockets* src)
 {
-	psy_TableIterator it;	
+	psy_TableIterator it;
 
 	psy_audio_machinesockets_dispose(self);
 	psy_audio_machinesockets_init(self);
@@ -483,6 +484,58 @@ int psy_audio_connections_connected(psy_audio_Connections* self, psy_audio_Wire 
 #endif
 	}
 	return p != NULL;
+}
+
+void psy_audio_connections_rewire(psy_audio_Connections* self,
+	psy_audio_MachineSockets* sockets)
+{
+	assert(self);
+
+	if (sockets) {
+		psy_TableIterator it;
+		psy_List* ins;
+		psy_List* outs;
+		psy_List* p;
+		psy_List* q;
+
+		ins = NULL;
+		outs = NULL;
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (!psy_list_findentry(ins, (void*)socket->slot)) {
+				psy_list_append(&ins, (void*)socket->slot);
+			}
+		}
+		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (!psy_list_findentry(outs, (void*)socket->slot)) {
+				psy_list_append(&outs, (void*)socket->slot);
+			}
+		}
+		for (p = ins; p != NULL; psy_list_next(&p)) {
+			for (q = outs; q != NULL; psy_list_next(&q)) {
+				uintptr_t src;
+				uintptr_t dst;
+
+				src = (uintptr_t)psy_list_entry(p);
+				dst = (uintptr_t)psy_list_entry(q);
+				psy_audio_connections_connect(self,
+					psy_audio_wire_make(src, dst));
+			}
+		}
+		psy_list_free(ins);
+		ins = NULL;
+		psy_list_free(outs);
+		outs = NULL;
+	}
 }
 
 void psy_audio_connections_setpinmapping(psy_audio_Connections* self,

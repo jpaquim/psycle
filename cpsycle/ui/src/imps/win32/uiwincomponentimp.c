@@ -13,7 +13,8 @@
 #include "uiwinbitmapimp.h"
 #include "../../uiapp.h"
 #include "uiwinapp.h"
-#include <stdlib.h>
+#include "uiwingraphicsimp.h"
+// details
 #include "../../detail/portable.h"
 
 static BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
@@ -931,7 +932,55 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	psy_List* q;
+	const psy_ui_TextMetric* tm;
+	psy_ui_win_GraphicsImp* win_g;
+	POINT origin;
+	POINT org;
 
+	tm = psy_ui_component_textmetric(self->component);
+	// draw background						
+	if (self->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
+		psy_ui_component_drawbackground(self->component, g);
+	}
+	psy_ui_component_drawborder(self->component, g);
+	// prepare a clip rect that can be used by a component
+	// to optimize the draw amount
+	psy_ui_realrectangle_settopleft(&g->clip,
+		psy_ui_realpoint_make(
+			g->clip.left + psy_ui_value_px(&self->component->scroll.x, tm),
+			g->clip.top + psy_ui_value_px(&self->component->scroll.y, tm)));
+	// add scroll coords
+	tm = psy_ui_component_textmetric(self->component);
+	win_g = (psy_ui_win_GraphicsImp*)g->imp;
+	GetWindowOrgEx(win_g->hdc, &origin);
+	origin.x += (int)psy_ui_value_px(&self->component->scroll.x, tm);
+	origin.y += (int)psy_ui_value_px(&self->component->scroll.y, tm);
+	// set translation
+	SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
+	// spacing
+	if (!psy_ui_margin_iszero(&self->component->spacing)) {
+		tm = psy_ui_component_textmetric(self->component);
+
+		origin.x -= (int)psy_ui_value_px(&self->component->spacing.left, tm);
+		origin.y -= (int)psy_ui_value_px(&self->component->spacing.top, tm);
+		SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
+	}
+	// prepare colours
+	psy_ui_setcolour(g, psy_ui_component_colour(
+		self->component));
+	psy_ui_settextcolour(g, psy_ui_component_colour(
+		self->component));
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	// update graphics origin
+	GetWindowOrgEx(win_g->hdc, &org);
+	win_g->orgx = org.x;
+	win_g->orgy = org.y;
+	// call specialization methods (vtable, then signals)			
+	if (self->component->vtable->ondraw) {
+		self->component->vtable->ondraw(self->component, g);
+	}
+	psy_signal_emit(&self->component->signal_draw,
+		self->component, 1, g);
 	q = self->viewcomponents;
 	for (p = q; p != NULL; psy_list_next(&p)) {
 		psy_ui_RealRectangle position;
@@ -940,8 +989,15 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 		machineui = (psy_ui_Component*)psy_list_entry(p);
 		if ((machineui->imp->vtable->dev_flags(machineui->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			psy_ui_RealRectangle restoreclip;
+
+			restoreclip = g->clip;
 			position = psy_ui_component_position(machineui);
-			if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
+			if (psy_ui_realrectangle_intersection(&g->clip, &position)) {								
+				psy_ui_realrectangle_settopleft(&g->clip,
+					psy_ui_realpoint_make(
+						g->clip.left - position.left,
+						g->clip.top - position.top));
 				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
 					-position.top));
 				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
@@ -949,8 +1005,9 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 					machineui->vtable->ondraw(machineui, g);
 				}
 				machineui->imp->vtable->dev_draw(machineui->imp, g);
-				psy_ui_resetorigin(g);
+				psy_ui_resetorigin(g);				
 			}
+			g->clip = restoreclip;
 		}
 	}	
 }
@@ -1035,9 +1092,9 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			ev->pt.x -= r.left;
 			ev->pt.y -= r.top;
 			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
+			child->vtable->onmousedoubleclick(child, ev);
 			ev->pt.x += r.left;
 			ev->pt.y += r.top;
-			child->vtable->onmousedoubleclick(child, ev);
 			break;
 		}
 	}

@@ -146,28 +146,46 @@ void machinestackcolumn_append(MachineStackColumn* self, uintptr_t macid)
 	}
 }
 
-uintptr_t machinestackcolumn_append_effect(MachineStackColumn* self,
-	psy_audio_Machine* machine)
+uintptr_t machinestackcolumn_insert_effect(MachineStackColumn* self,
+	uintptr_t insertpos, psy_audio_Machine* machine)
 {
 	uintptr_t mac;
-	uintptr_t lastmac;
+	uintptr_t lastmac;	
 
+	assert(self);
+	assert(self->machines);
+
+	if (self->chain) {
+		uintptr_t slot;
+		psy_audio_Machine* machine;
+
+		slot = machinestackcolumn_at(self, 0);
+		machine = psy_audio_machines_at(self->machines, slot);
+		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
+			// skip generator
+			++insertpos;
+		}
+	}
 	mac = psy_audio_machines_append(self->machines, machine);
-	lastmac = machinestackcolumn_lastbeforemaster(self);
-	if (lastmac != psy_INDEX_INVALID) {
-		bool masterconnected;
+	if (insertpos == psy_INDEX_INVALID) { // append
+		lastmac = machinestackcolumn_lastbeforemaster(self);
+	} else {
+		lastmac = machinestackcolumn_lastbeforeindex(self, insertpos);
+	}	
+	if (lastmac != psy_INDEX_INVALID) {		
+		uintptr_t dstmac;
 
-		masterconnected = machinestackcolumn_connectedtomaster(self);
+		dstmac = machinestackcolumn_at(self, insertpos);
 		psy_audio_exclusivelock_enter();
-		if (masterconnected) {
+		if (dstmac != psy_INDEX_INVALID) {
 			psy_audio_machines_disconnect(self->machines,
-				psy_audio_wire_make(lastmac, psy_audio_MASTER_INDEX));
+				psy_audio_wire_make(lastmac, dstmac));
 		}
 		psy_audio_machines_connect(self->machines,
 			psy_audio_wire_make(lastmac, mac));
-		if (masterconnected) {
+		if (dstmac != psy_INDEX_INVALID) {
 			psy_audio_machines_connect(self->machines,
-				psy_audio_wire_make(mac, psy_audio_MASTER_INDEX));
+				psy_audio_wire_make(mac, dstmac));
 		}
 		psy_audio_exclusivelock_leave();
 	}
@@ -190,6 +208,45 @@ uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn* self)
 			if (last->prev) {
 				return (uintptr_t)psy_list_entry_const(last->prev);
 			}
+		}
+	}
+	return psy_INDEX_INVALID;
+}
+
+uintptr_t machinestackcolumn_at(const MachineStackColumn* self, uintptr_t index)
+{
+	if (self->chain && index != psy_INDEX_INVALID) {
+		const psy_List* p;
+
+		p = psy_list_at(self->chain, index);
+		if (p) {
+			return (uintptr_t)psy_list_entry_const(p);
+		}
+	}
+	return psy_INDEX_INVALID;
+}
+
+uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn* self, uintptr_t index)
+{
+	if (self->chain && index > 0) {
+		const psy_List* last;
+
+		last = psy_list_at(self->chain, index - 1);
+		if (last) {
+			return (uintptr_t)psy_list_entry_const(last);			
+		}
+	}
+	return psy_INDEX_INVALID;
+}
+
+uintptr_t machinestackcolumn_nextindex(const MachineStackColumn* self, uintptr_t index)
+{
+	if (self->chain && index > 0) {
+		const psy_List* next;
+
+		next = psy_list_at(self->chain, index + 1);
+		if (next) {
+			return (uintptr_t)psy_list_entry_const(next);
 		}
 	}
 	return psy_INDEX_INVALID;
@@ -233,8 +290,9 @@ void machinestackstate_init(MachineStackState* self)
 	psy_table_init(&self->columns);
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
-	self->size = psy_ui_size_makepx(160.0, 70.0);
+	self->size = psy_ui_size_makepx(160.0, 52.0);
 	self->update = FALSE;
+	self->effectinsertpos = psy_INDEX_INVALID;
 }
 
 void machinestackstate_dispose(MachineStackState* self)
@@ -753,7 +811,6 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 	if (rv) {
 		psy_ui_component_setminimumsize(rv, self->state->size);
 		rv->deallocate = TRUE;
-		psy_ui_component_setalign(rv, psy_ui_ALIGN_TOP);
 		return rv;
 	}	
 	return NULL;
@@ -864,7 +921,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 
 // machinestackpanetrack
 static void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack*,
-	psy_ui_MouseEvent* ev);
+	psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable machinestackpanetrack_vtable;
 static bool machinestackpanetrack_vtable_initialized = FALSE;
@@ -889,6 +946,13 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(&self->component,
+		psy_ui_ALIGN_TOP,
+		psy_ui_margin_make(
+			psy_ui_value_makeew(20.0),
+			psy_ui_value_makeeh(0.0),
+			psy_ui_value_makepx(0.0),
+			psy_ui_value_makepx(0.0)));
 	self->column = column;
 	self->state = state;
 	self->workspace = workspace;
@@ -897,10 +961,37 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 	psy_ui_MouseEvent* ev)
 {
-	self->state->selected = self->column;
-	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-		SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_List* p;
+	psy_List* q;
+	uintptr_t effect;
+	uintptr_t c;
+	
+
+	q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
+	effect = psy_INDEX_INVALID;
+	for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
+		psy_ui_Component* component;
+		psy_ui_RealRectangle position;
+
+		component = (psy_ui_Component*)psy_list_entry(p);
+		position = psy_ui_component_position(component);
+		if (position.bottom > ev->pt.y) {
+			break;
+		}
+		if (psy_ui_realrectangle_intersect(&position, ev->pt)) {
+			effect = c;
+			break;
+		}
+	}
+	if (effect == psy_INDEX_INVALID) {
+		self->state->effectinsertpos = c;
+		self->state->selected = self->column;
+		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
+		psy_ui_mouseevent_stoppropagation(ev);
+	} else {
+		self->state->effectinsertpos = psy_INDEX_INVALID;
+	}
 }
 
 // MachineStackView
@@ -943,6 +1034,8 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
 	Workspace* workspace)
 {
+	assert(self);
+
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	self->workspace = workspace;
@@ -1071,8 +1164,9 @@ void machinestackview_addeffect(MachineStackView* self,
 {
 	if (machinestackstate_selectedcolumn(&self->state)) {
 		psy_audio_machines_select(self->state.machines,
-			machinestackcolumn_append_effect(
+			machinestackcolumn_insert_effect(
 				machinestackstate_selectedcolumn(&self->state),
+				self->state.effectinsertpos,
 				psy_audio_machinefactory_make_info(
 					&self->workspace->machinefactory, machineinfo)));
 	}

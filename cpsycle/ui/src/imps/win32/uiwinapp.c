@@ -388,8 +388,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				border = psy_ui_component_border(imp->component);
 				if (imp->component->vtable->ondraw ||
-					imp->component->signal_draw.slots ||
-					imp->component->backgroundmode != psy_ui_BACKGROUND_NONE ||
+						imp->component->signal_draw.slots ||
+						imp->component->backgroundmode != psy_ui_BACKGROUND_NONE ||
 					psy_ui_border_isset(border)) {
 					HDC hdc;
 					POINT clipsize;
@@ -408,8 +408,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_win_GraphicsImp* win_g;
 						POINT dblbuffer_offset;
 						HFONT hfont = 0;
-						HFONT hPrevFont = 0;
-						POINT org;
+						HFONT hPrevFont = 0;						
 						POINT origin;
 						const psy_ui_TextMetric* tm;
 
@@ -448,52 +447,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_setrectangle(&g.clip,
 							ps.rcPaint.left, ps.rcPaint.top,
 							clipsize.x, clipsize.y);
-						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						// draw background
-						if (imp->component->debugflag == 4000) {
-							imp = imp;
-						}
-						if (imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
-							psy_ui_component_drawbackground(imp->component, &g);
-						}
-						psy_ui_component_drawborder(imp->component, &g);
-						// prepare a clip rect that can be used by a component
-						// to optimize the draw amount
-						psy_ui_setrectangle(&g.clip,
-							ps.rcPaint.left + psy_ui_value_px(&imp->component->scroll.x, tm),
-							ps.rcPaint.top + psy_ui_value_px(&imp->component->scroll.y, tm),
-							clipsize.x, clipsize.y);
-						// add scroll coords
-						tm = psy_ui_component_textmetric(imp->component);
-						origin.x += (int)psy_ui_value_px(&imp->component->scroll.x, tm);
-						origin.y += (int)psy_ui_value_px(&imp->component->scroll.y, tm);
-						// set translation
-						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						// spacing
-						if (!psy_ui_margin_iszero(&imp->component->spacing)) {
-							tm = psy_ui_component_textmetric(imp->component);
-
-							origin.x -= (int)psy_ui_value_px(&imp->component->spacing.left, tm);
-							origin.y -= (int)psy_ui_value_px(&imp->component->spacing.top, tm);
-							SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
-						}
-						// prepare colours
-						psy_ui_setcolour(&g, psy_ui_component_colour(
-							imp->component));
-						psy_ui_settextcolour(&g, psy_ui_component_colour(
-							imp->component));
-						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);
-						// update graphics origin
-						GetWindowOrgEx(win_g->hdc, &org);
-						win_g->orgx = org.x;
-						win_g->orgy = org.y;
-						// call specialization methods (vtable, then signals)			
-						if (imp->component->vtable->ondraw) {
-							imp->component->vtable->ondraw(imp->component, &g);
-						}
-						psy_signal_emit(&imp->component->signal_draw,
-							imp->component, 1, &g);
-						// draw view components
+						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);												
+						// draw
 						imp->imp.vtable->dev_draw(&imp->imp, &g);
 						// clean up font
 						if (hPrevFont) {

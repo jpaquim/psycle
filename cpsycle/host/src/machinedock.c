@@ -651,7 +651,7 @@ void paramrack_onremove(ParamRack* self, psy_ui_Button* sender)
 			uintptr_t slot;
 
 			slot = (uintptr_t)psy_list_entry(p);
-			psy_audio_machines_remove(self->pane.machines, slot);
+			psy_audio_machines_remove(self->pane.machines, slot, TRUE);
 		}
 		psy_audio_exclusivelock_leave();
 		// clean up		
@@ -683,7 +683,7 @@ void paramrack_onreplace(ParamRack* self, psy_ui_Button* sender)
 			uintptr_t slot;
 
 			slot = (uintptr_t)psy_list_entry(p);
-			psy_audio_machines_remove(self->pane.machines, slot);
+			psy_audio_machines_remove(self->pane.machines, slot, FALSE);
 		}
 		// create dummy
 		for (p = removelist; p != NULL; psy_list_next(&p)) {

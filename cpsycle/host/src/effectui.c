@@ -524,8 +524,7 @@ void effectui_onshowparameters(EffectUi* self, Workspace* sender,
 void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	*rv = psy_ui_size_makepx(160.0, 70.0);
-	//psy_ui_size_setreal(rv, 		
-		//psy_ui_realrectangle_size(&
-		//self->intern.coords->background.dest));
+	psy_ui_size_setreal(rv, 		
+		psy_ui_realrectangle_size(&
+		self->intern.coords->background.dest));
 }

@@ -151,8 +151,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(tabbar_base(self), parent, NULL);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	self->component.debugflag = 4000;
+	self->component.vtable = &vtable;	
 	psy_ui_component_doublebuffer(tabbar_base(self));	
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_TABBAR,

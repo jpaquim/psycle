@@ -745,7 +745,7 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 	} else if (ev->keycode == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
 			self->selectedslot != psy_audio_MASTER_INDEX) {
 		psy_audio_exclusivelock_enter();
-		psy_audio_machines_remove(self->machines, self->selectedslot);		
+		psy_audio_machines_remove(self->machines, self->selectedslot, TRUE);		
 		self->selectedslot = psy_INDEX_INVALID;
 		psy_audio_exclusivelock_leave();
 	} else if (ev->repeat) {

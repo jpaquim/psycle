@@ -6,6 +6,7 @@
 #include "uiviewcomponentimp.h"
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 // ViewComponentImp
 // prototypes
@@ -484,27 +485,40 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 	psy_List* p;
 	psy_List* q;
 
+	// draw background						
+	if (self->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
+		// psy_ui_component_drawbackground(self->component, g);
+	}
+	psy_ui_component_drawborder(self->component, g);
+	if (self->component->vtable->ondraw) {
+		self->component->vtable->ondraw(self->component, g);
+	}
 	q = self->viewcomponents;
 	for (p = q; p != NULL; psy_list_next(&p)) {
 		psy_ui_RealRectangle position;
-		psy_ui_Component* machineui;
+		psy_ui_Component* component;
 
-		machineui = (psy_ui_Component*)psy_list_entry(p);
-		if ((machineui->imp->vtable->dev_flags(machineui->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		component = (psy_ui_Component*)psy_list_entry(p);
+		if ((component->imp->vtable->dev_flags(component->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-			position = psy_ui_component_position(machineui);
-			if (psy_ui_realrectangle_intersect_rectangle(&g->clip, &position)) {
-				psy_ui_RealPoint origin;
+			position = psy_ui_component_position(component);
+			psy_ui_RealRectangle restoreclip;
 
+			restoreclip = g->clip;			
+			if (psy_ui_realrectangle_intersection(&g->clip, &position)) {
+				psy_ui_RealPoint origin;
+								
+				psy_ui_realrectangle_settopleft(&g->clip,
+					psy_ui_realpoint_make(
+						g->clip.left - position.left,
+						g->clip.top - position.top));
 				origin = psy_ui_origin(g);
 				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-					-position.top + origin.y));
-				if (machineui->vtable->ondraw) {					
-					machineui->vtable->ondraw(machineui, g);					
-				}
-				machineui->imp->vtable->dev_draw(machineui->imp, g);
+					-position.top + origin.y));				
+				component->imp->vtable->dev_draw(component->imp, g);
 				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));				
 			}
+			g->clip = restoreclip;
 		}
 	}	
 }
@@ -592,9 +606,9 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 		r = psy_ui_component_position(child);
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
-			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
+			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);			
 			child->vtable->onmousedoubleclick(child, ev);
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			break;
 		}
 	}
