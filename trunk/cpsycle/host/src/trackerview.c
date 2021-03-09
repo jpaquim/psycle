@@ -2201,9 +2201,10 @@ bool trackergrid_movecursorwhenpaste(TrackerGrid* self)
 		if (end.offset >= psy_audio_pattern_length(trackergridstate_pattern(self->gridstate))) {
 			end.offset = psy_audio_pattern_length(trackergridstate_pattern(self->gridstate)) -
 				trackerlinestate_bpl(self->linestate);
-		}
+		}		
 		self->gridstate->cursor = end;
 		trackergridstate_synccursor(self->gridstate);
+		self->oldcursor = end;
 		return TRUE;
 	}
 	return FALSE;

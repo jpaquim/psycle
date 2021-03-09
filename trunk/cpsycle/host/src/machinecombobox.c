@@ -183,7 +183,6 @@ void machinecombobox_select(MachineComboBox* self, uintptr_t slot)
 		comboboxindex = (intptr_t)psy_table_at(&self->slotscombobox, slot);
 	} else {
 		comboboxindex = psy_ui_combobox_count(&self->machinebox) - 1;
-	}
-	self->machinebox.component.debugflag = 3000;
+	}	
 	psy_ui_combobox_setcursel(&self->machinebox, comboboxindex);	
 }

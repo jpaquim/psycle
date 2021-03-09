@@ -242,18 +242,11 @@ void dev_setcursel(psy_ui_win_ComboBoxImp* self, intptr_t index)
 {
 	char text[512];
 	intptr_t len;
-	intptr_t i;
-
-	if (self->component->debugflag >= 6000) {
-		if (index == -1) {
-			self = self;
-		}
-	}
+	
 	SendMessage(self->win_combo_imp.hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	len = SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXTLEN, (WPARAM)index, 0);
 	SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXT, (WPARAM)index,
-		(LPARAM)text);
-	i = dev_cursel(self);
+		(LPARAM)text);	
 	dev_invalidate(self);	
 }
 

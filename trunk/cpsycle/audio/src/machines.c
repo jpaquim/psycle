@@ -241,7 +241,7 @@ uintptr_t machines_findmaxindex(psy_audio_Machines* self)
 	return rv;
 }
 
-void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)
+void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot, bool rewire)
 {	
 	psy_audio_Machine* machine;
 
@@ -250,8 +250,12 @@ void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)
 	machine = psy_audio_machines_at(self, slot);
 	if (machine) {
 		if (self->preventundoredo || slot == psy_audio_MASTER_INDEX || self->filemode) {
-			psy_audio_machines_erase(self, slot);			
-			psy_audio_machine_dispose(machine);
+			if (rewire) {
+				psy_audio_connections_rewire(&self->connections,
+					psy_audio_connections_at(&self->connections, slot));
+			}		
+			psy_audio_machines_erase(self, slot);		
+			psy_audio_machine_dispose(machine);			
 			free(machine);
 		} else {
 			psy_undoredo_execute(&self->undoredo,

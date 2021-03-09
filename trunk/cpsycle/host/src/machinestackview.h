@@ -61,9 +61,16 @@ INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* s
 }
 
 void machinestackcolumn_append(MachineStackColumn*, uintptr_t macid);
-uintptr_t machinestackcolumn_append_effect(MachineStackColumn*, psy_audio_Machine*);
+uintptr_t machinestackcolumn_insert_effect(MachineStackColumn*,
+	uintptr_t insertpos, psy_audio_Machine*);
 
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
+uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn*,
+	uintptr_t index);
+uintptr_t machinestackcolumn_at(const MachineStackColumn*,
+	uintptr_t index);
+uintptr_t machinestackcolumn_nextindex(const MachineStackColumn*,
+	uintptr_t index);
 bool machinestackcolumn_connectedtomaster(const MachineStackColumn*);
 
 // MachineStackState
@@ -71,6 +78,7 @@ typedef struct MachineStackState {
 	psy_Table columns;
 	psy_audio_Machines* machines;
 	uintptr_t selected;
+	uintptr_t effectinsertpos;
 	psy_ui_Size size;
 	bool update;	
 } MachineStackState;
@@ -198,7 +206,7 @@ typedef struct MachineStackPaneTrack {
 	// psy_ui_Component client;
 	// psy_ui_Scroller scroller;
 	// internal
-	uintptr_t column;
+	uintptr_t column;	
 	// References
 	MachineStackState* state;
 	Workspace* workspace;

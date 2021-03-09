@@ -273,7 +273,7 @@ void machinesbox_remove(MachinesBox* self)
 
 					slot = (uintptr_t)psy_table_at(&self->listboxslots,
 						selection[i]);
-					psy_audio_machines_remove(self->machines, slot);
+					psy_audio_machines_remove(self->machines, slot, TRUE);
 				}
 			}
 			free(selection);

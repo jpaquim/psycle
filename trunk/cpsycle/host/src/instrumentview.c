@@ -132,7 +132,7 @@ void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
 			psy_ui_combobox_cursel(&self->generators) + 0x81);
 		if (generator) {
 			psy_audio_machines_remove(&self->workspace->song->machines,
-				psy_ui_combobox_cursel(&self->generators) + 0x81);
+				psy_ui_combobox_cursel(&self->generators) + 0x81, FALSE);
 		}		
 	}	
 }

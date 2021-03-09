@@ -207,6 +207,10 @@ psy_audio_MachineSockets* psy_audio_connections_initslot(psy_audio_Connections*,
 	uintptr_t slot);
 psy_audio_MachineSockets* psy_audio_connections_at(psy_audio_Connections*,
 	uintptr_t slot);
+// connects the inputs with the outputs of the machine sockets
+// (used by machines_remove to keep the wires)
+void psy_audio_connections_rewire(psy_audio_Connections*,
+	psy_audio_MachineSockets*);
 int psy_audio_connections_connect(psy_audio_Connections*, psy_audio_Wire);
 void psy_audio_connections_disconnect(psy_audio_Connections*, psy_audio_Wire);
 int psy_audio_connections_connected(psy_audio_Connections*, psy_audio_Wire);

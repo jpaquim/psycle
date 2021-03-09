@@ -125,6 +125,29 @@ void psy_ui_realrectangle_union(psy_ui_RealRectangle* self,
 	self->bottom = (self->bottom > other->bottom) ? self->bottom : other->bottom;
 }
 
+bool psy_ui_realrectangle_intersection(psy_ui_RealRectangle* self,
+	const psy_ui_RealRectangle* other)
+{	
+	psy_ui_RealRectangle intersection;
+	
+	intersection.left = psy_max(self->left, other->left);
+	intersection.right = psy_min(
+		self->left + psy_ui_realrectangle_width(self),
+		other->left + psy_ui_realrectangle_width(other));
+	intersection.top = psy_max(self->top, other->top);
+	intersection.bottom = psy_min(
+		self->top + psy_ui_realrectangle_height(self),
+		other->top + psy_ui_realrectangle_height(other));
+	if (intersection.left < intersection.right &&
+			intersection.top < intersection.bottom) {
+		*self = intersection;
+		return TRUE;
+	} else {		
+		*self = psy_ui_realrectangle_zero();
+		return FALSE;
+	}
+}
+
 void psy_ui_realrectangle_expand(psy_ui_RealRectangle* self, double top, double right, double bottom, double left)
 {
 	self->top -= top;
