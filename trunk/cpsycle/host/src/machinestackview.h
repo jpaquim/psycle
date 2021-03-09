@@ -7,6 +7,7 @@
 // host
 #include "machineviewskin.h"
 #include "machineui.h"
+#include "headerui.h"
 #include "workspace.h"
 // ui
 #include <uiscroller.h>
@@ -62,7 +63,7 @@ INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* s
 
 void machinestackcolumn_append(MachineStackColumn*, uintptr_t macid);
 uintptr_t machinestackcolumn_insert_effect(MachineStackColumn*,
-	uintptr_t insertpos, psy_audio_Machine*);
+	uintptr_t insertpos, uintptr_t destmac, psy_audio_Machine*);
 
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
 uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn*,
@@ -79,11 +80,15 @@ typedef struct MachineStackState {
 	psy_audio_Machines* machines;
 	uintptr_t selected;
 	uintptr_t effectinsertpos;
-	psy_ui_Size size;
-	bool update;	
+	bool effectinsertright;
+	psy_ui_Size effectsize;
+	psy_ui_Size columnsize;
+	bool update;
+	bool columnselected;
+	struct MachineViewBar* statusbar;
 } MachineStackState;
 
-void machinestackstate_init(MachineStackState*);
+void machinestackstate_init(MachineStackState*, struct MachineViewBar* statusbar);
 void machinestackstate_dispose(MachineStackState*);
 
 void machinestackstate_buildcolumns(MachineStackState*);
@@ -209,7 +214,8 @@ typedef struct MachineStackPaneTrack {
 	uintptr_t column;	
 	// References
 	MachineStackState* state;
-	Workspace* workspace;
+	// references
+	Workspace* workspace;	
 } MachineStackPaneTrack;
 
 void machinestackpanetrack_init(MachineStackPaneTrack*, psy_ui_Component* parent,
@@ -220,7 +226,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack*, psy_ui_Component* parent
 typedef struct MachineStackView {
 	// inherits
 	psy_ui_Component component;
-	// internal data
+	// internal
 	MachineStackDesc desc;
 	psy_ui_Component columns;
 	MachineStackInputs inputs;
@@ -228,13 +234,14 @@ typedef struct MachineStackView {
 	MachineStackPane pane;
 	MachineStackVolumes volumes;	
 	psy_ui_Scroller scroller_columns;
-	MachineStackState state;
-	// internal
-	Workspace* workspace;
+	MachineStackState state;	
+	// references
+	Workspace* workspace;	
 } MachineStackView;
 
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, MachineViewSkin*, Workspace*);
+	psy_ui_Component* tabbarparent, MachineViewSkin*,
+	struct MachineViewBar* statusbar, Workspace*);
 
 void machinestackview_addeffect(MachineStackView*,
 	const psy_audio_MachineInfo*);

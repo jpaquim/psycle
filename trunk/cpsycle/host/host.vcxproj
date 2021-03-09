@@ -287,6 +287,7 @@
     <ClCompile Include="src\about.c" />
     <ClCompile Include="src\adsrsliders.c" />
     <ClCompile Include="src\channelmappingview.c" />
+    <ClCompile Include="src\checkui.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\cmdproperties.c" />
     <ClCompile Include="src\compatconfig.c" />
@@ -305,6 +306,7 @@
     <ClCompile Include="src\generalconfig.c" />
     <ClCompile Include="src\generatorui.c" />
     <ClCompile Include="src\greet.c" />
+    <ClCompile Include="src\headerui.c" />
     <ClCompile Include="src\help.c" />
     <ClCompile Include="src\helpview.c" />
     <ClCompile Include="src\inputdefiner.c" />
@@ -322,6 +324,7 @@
     <ClCompile Include="src\kbdbox.c" />
     <ClCompile Include="src\kbdhelp.c" />
     <ClCompile Include="src\keyboardmiscconfig.c" />
+    <ClCompile Include="src\knobui.c" />
     <ClCompile Include="src\labelpair.c" />
     <ClCompile Include="src\labelui.c" />
     <ClCompile Include="src\languageconfig.c" />
@@ -383,6 +386,7 @@
     <ClCompile Include="src\skincoord.c" />
     <ClCompile Include="src\skingraphics.c" />
     <ClCompile Include="src\skinio.c" />
+    <ClCompile Include="src\slidergroupui.c" />
     <ClCompile Include="src\sliderui.c" />
     <ClCompile Include="src\songbar.c" />
     <ClCompile Include="src\songproperties.c" />
@@ -425,6 +429,7 @@
     <ClInclude Include="src\about.h" />
     <ClInclude Include="src\adsrsliders.h" />
     <ClInclude Include="src\channelmappingview.h" />
+    <ClInclude Include="src\checkui.h" />
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />
@@ -445,6 +450,7 @@
     <ClInclude Include="src\generalconfig.h" />
     <ClInclude Include="src\generatorui.h" />
     <ClInclude Include="src\greet.h" />
+    <ClInclude Include="src\headerui.h" />
     <ClInclude Include="src\help.h" />
     <ClInclude Include="src\helpview.h" />
     <ClInclude Include="src\inputdefiner.h" />
@@ -462,6 +468,7 @@
     <ClInclude Include="src\kbdbox.h" />
     <ClInclude Include="src\kbdhelp.h" />
     <ClInclude Include="src\keyboardmiscconfig.h" />
+    <ClInclude Include="src\knobui.h" />
     <ClInclude Include="src\labelpair.h" />
     <ClInclude Include="src\labelui.h" />
     <ClInclude Include="src\languageconfig.h" />
@@ -523,6 +530,7 @@
     <ClInclude Include="src\skincoord.h" />
     <ClInclude Include="src\skingraphics.h" />
     <ClInclude Include="src\skinio.h" />
+    <ClInclude Include="src\slidergroupui.h" />
     <ClInclude Include="src\sliderui.h" />
     <ClInclude Include="src\songbar.h" />
     <ClInclude Include="src\songproperties.h" />

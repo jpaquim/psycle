@@ -340,8 +340,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (imp && imp->component) {
 					colour = psy_ui_component_colour(imp->component).value;
 					bgcolour = psy_ui_component_backgroundcolour(imp->component).value;
-					brush = ((imp->component->backgroundmode & psy_ui_BACKGROUND_SET)
-							== psy_ui_BACKGROUND_SET)
+					brush = ((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
+							== psy_ui_SETBACKGROUND)
 						? psy_ui_win_component_details(imp->component)->background
 						: (HBRUSH)GetStockObject(NULL_BRUSH);
 				} else {
@@ -389,7 +389,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				border = psy_ui_component_border(imp->component);
 				if (imp->component->vtable->ondraw ||
 						imp->component->signal_draw.slots ||
-						imp->component->backgroundmode != psy_ui_BACKGROUND_NONE ||
+						imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
 					psy_ui_border_isset(border)) {
 					HDC hdc;
 					POINT clipsize;

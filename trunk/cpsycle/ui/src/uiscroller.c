@@ -94,7 +94,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);	
+		psy_ui_NOBACKGROUND);	
 	// bottom
 	psy_ui_component_init(&self->bottom, &self->component, view);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -241,11 +241,11 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 				updaterect.left = updaterect.right;
 				updaterect.right = position.right;			
 				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_BACKGROUND_SET);
+					psy_ui_SETBACKGROUND);
 				psy_ui_component_invalidaterect(&self->component, updaterect);
 				psy_ui_component_update(&self->component);
 				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_BACKGROUND_NONE);
+					psy_ui_NOBACKGROUND);
 			}
 		}
 	}

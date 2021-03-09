@@ -49,6 +49,7 @@ typedef struct KnobDraw {
 void knobdraw_init(KnobDraw*, ParamSkin*, psy_audio_Machine*,
     psy_audio_MachineParam*, psy_ui_RealSize, const psy_ui_TextMetric*,
     bool tweaking);
+void knobdraw_draw(KnobDraw*, psy_ui_Graphics*);
 
 typedef struct SliderDraw {
     ParamSkin* skin;

@@ -127,9 +127,10 @@ INLINE void wiresockets_append(psy_audio_WireSockets* self, psy_audio_WireSocket
 	}
 }
 
-void wiresockets_insert(psy_audio_WireSockets* self, uintptr_t id,
+void wiresockets_insert(psy_audio_WireSockets* self,
+	uintptr_t id, psy_audio_WireSocket* socket);
+void wiresockets_remove(psy_audio_WireSockets* self,
 	psy_audio_WireSocket* socket);
-void wiresockets_remove(psy_audio_WireSockets* self, psy_audio_WireSocket* socket);
 
 typedef struct {	
 	psy_audio_WireSockets inputs;

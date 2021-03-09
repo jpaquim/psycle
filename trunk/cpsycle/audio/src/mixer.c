@@ -27,7 +27,11 @@ static void mixer_describeeditname(psy_audio_Mixer*, char* text, uintptr_t slot)
 static uintptr_t numreturncolumns(psy_audio_Mixer*);
 
 // InputLabelParam
-static int inputlabelparam_type(psy_audio_InputLabelParam* self) { return MPF_INFOLABEL | MPF_SMALL; }
+static int inputlabelparam_type(psy_audio_InputLabelParam* self)
+{
+	return MPF_INFOLABEL | MPF_SMALL;
+}
+
 static int inputlabelparam_name(psy_audio_InputLabelParam*, char* text);
 static int inputlabelparam_describe(psy_audio_InputLabelParam*, char* text);
 

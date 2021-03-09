@@ -15,11 +15,9 @@
 #include <math.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // SwitchUi
 // prototypes
-static void switchui_dispose(SwitchUi*);
 static void switchui_ondraw(SwitchUi*, psy_ui_Graphics*);
 static void switchui_invalidate(SwitchUi*);
 static void switchui_onpreferredsize(SwitchUi*, const psy_ui_Size* limit,
@@ -39,8 +37,7 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 
 	if (!switchui_vtable_initialized) {
 		switchui_vtable = *(self->component.vtable);
-		switchui_super_vtable = switchui_vtable;
-		switchui_vtable.dispose = (psy_ui_fp_component_dispose)switchui_dispose;
+		switchui_super_vtable = switchui_vtable;		
 		switchui_vtable.ondraw = (psy_ui_fp_component_ondraw)switchui_ondraw;		
 		switchui_vtable.invalidate = (psy_ui_fp_component_invalidate)
 			switchui_invalidate;
@@ -64,18 +61,31 @@ void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, view);
 	switchui_vtable_init(self);
-	self->component.vtable = &switchui_vtable;		
+	self->component.vtable = &switchui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = paramskin;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
 }
 
-void switchui_dispose(SwitchUi* self)
+SwitchUi* switchui_alloc(void)
 {
-	assert(self);
-	
-	switchui_super_vtable.dispose(&self->component);
+	return (SwitchUi*)malloc(sizeof(SwitchUi));
+}
+
+SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	SwitchUi* rv;
+
+	rv = switchui_alloc();
+	if (rv) {
+		switchui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
 }
 
 void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)

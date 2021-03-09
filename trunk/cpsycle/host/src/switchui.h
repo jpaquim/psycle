@@ -5,13 +5,8 @@
 #define SWITCHUI_H
 
 // host
-#include "machineeditorview.h" // vst view
-#include "machineframe.h"
-#include "machineviewskin.h"
+#include "paramview.h"
 #include "workspace.h"
-// ui
-#include <uiedit.h>
-#include <uinotebook.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +27,10 @@ typedef struct SwitchUi {
 
 void switchui_init(SwitchUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+
+SwitchUi* switchui_alloc(void);
+SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam*, ParamSkin*);
 
 #ifdef __cplusplus
 }

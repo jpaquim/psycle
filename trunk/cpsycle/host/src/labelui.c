@@ -56,9 +56,29 @@ void labelui_init(LabelUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, view);
 	labelui_vtable_init(self);
 	self->component.vtable = &labelui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
 	self->param = param;	
+}
+
+LabelUi* labelui_alloc(void)
+{
+	return (LabelUi*)malloc(sizeof(LabelUi));
+}
+
+LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	LabelUi* rv;
+
+	rv = labelui_alloc();
+	if (rv) {
+		labelui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
 }
 
 void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)

@@ -154,7 +154,7 @@ static int machinecallback_numplaybacks(psy_audio_MachineCallback* self) {
 static const char* machinecallback_language(psy_audio_MachineCallback* self) {
 	return "en";
 }
-
+static void machinecallback_buschanged(psy_audio_MachineCallback* self) { }
 // MachineCallback VTable
 static psy_audio_MachineCallbackVtable psy_audio_machinecallbackvtable_vtable;
 static bool psy_audio_machinecallbackvtable_initialized = FALSE;
@@ -208,6 +208,8 @@ static void psy_audio_machinecallbackvtable_init(void)
 			machinecallback_numplaybacks;
 		psy_audio_machinecallbackvtable_vtable.language = (fp_mcb_language)
 			machinecallback_language;
+		psy_audio_machinecallbackvtable_vtable.buschanged = (fp_mcb_buschanged)
+			machinecallback_buschanged;
 		psy_audio_machinecallbackvtable_initialized = TRUE;
 	}
 }
@@ -296,6 +298,9 @@ static int muted(psy_audio_Machine* self) { return 0; }
 static void bypass(psy_audio_Machine* self) { }
 static void unbypass(psy_audio_Machine* self) { }
 static int bypassed(psy_audio_Machine* self) { return 0; }
+static void setbus(psy_audio_Machine* self) { }
+static void unsetbus(psy_audio_Machine* self) { }
+static int isbus(psy_audio_Machine* self) { return 0; }
 static void dispose(psy_audio_Machine*);
 static int mode(psy_audio_Machine*);
 static const char* modulepath(psy_audio_Machine* self) { return NULL; }
@@ -492,6 +497,11 @@ static bool editresize(psy_audio_Machine* self, intptr_t w, intptr_t h)
 	return self->callback->vtable->editresize(self->callback, self, w, h);
 }
 
+static void buschanged(psy_audio_Machine* self)
+{
+	self->callback->vtable->buschanged(self->callback);
+}
+
 static bool addcapture(psy_audio_Machine* self, int index)
 {
 	return (self->callback)
@@ -580,6 +590,9 @@ static void vtable_init(void)
 		vtable.bypass = bypass;
 		vtable.unbypass = unbypass;
 		vtable.bypassed = bypassed;
+		vtable.setbus = setbus;
+		vtable.unsetbus = unsetbus;
+		vtable.isbus = isbus;
 		vtable.generateaudio = generateaudio;
 		vtable.numinputs = numinputs;
 		vtable.numoutputs = numoutputs;	
@@ -607,6 +620,7 @@ static void vtable_init(void)
 		vtable.machines = machines;
 		vtable.output = output;
 		vtable.editresize = editresize;
+		vtable.buschanged = buschanged;
 		vtable.addcapture = addcapture;
 		vtable.removecapture = removecapture;
 		vtable.readbuffers = readbuffers;

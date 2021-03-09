@@ -58,9 +58,29 @@ void levelui_init(LevelUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, view);
 	levelui_vtable_init(self);
 	self->component.vtable = &levelui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
 	self->param = param;	
+}
+
+LevelUi* levelui_alloc(void)
+{
+	return (LevelUi*)malloc(sizeof(LevelUi));
+}
+
+LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	LevelUi* rv;
+
+	rv = levelui_alloc();
+	if (rv) {
+		levelui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
 }
 
 void levelui_ondraw(LevelUi* self, psy_ui_Graphics* g)

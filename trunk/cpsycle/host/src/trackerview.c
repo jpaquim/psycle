@@ -207,7 +207,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	trackergrid_storecursor(self);
 	// setup base component
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	trackergrid_init_signals(self);

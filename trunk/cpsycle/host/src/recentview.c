@@ -61,7 +61,7 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	self->workspace = workspace;
 	recentbar_init(&self->bar, &self->component);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);

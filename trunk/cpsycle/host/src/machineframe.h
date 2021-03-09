@@ -40,7 +40,8 @@ typedef struct {
 	psy_ui_Button mute;
 	psy_ui_Button parameters;
 	psy_ui_Button command;
-	psy_ui_Button help;	
+	psy_ui_Button help;
+	psy_ui_Button isbus;
 	psy_ui_Button more;
 	PresetsBar presetsbar;
 	// references

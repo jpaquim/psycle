@@ -424,6 +424,18 @@
     <ClCompile Include="src\labelui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\checkui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\knobui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\headerui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\slidergroupui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -819,6 +831,18 @@
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
     <ClInclude Include="src\labelui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\checkui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\knobui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\headerui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\slidergroupui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
   </ItemGroup>

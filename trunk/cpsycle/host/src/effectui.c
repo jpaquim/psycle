@@ -92,6 +92,8 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, view);	
 	effectui_vtable_init(self);
 	self->component.vtable = &effectui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	machineuicommon_init(&self->intern, slot, skin, view, editname, workspace);
 	self->intern.coords = &skin->effect;
 	self->intern.font = skin->effect_fontcolour;

@@ -1,43 +1,34 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(SLIDERUI_H)
-#define SLIDERUI_H
+#if !defined(HEADERUI_H)
+#define HEADERUI_H
 
 // host
-#include "machineeditorview.h" // vst view
-#include "machineframe.h"
-#include "machineviewskin.h"
-#include "workspace.h"
+#include "paramview.h"
 // ui
-#include <uiedit.h>
-#include <uinotebook.h>
+#include <uicomponent.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SliderUi
-typedef struct SliderUi {
+// HeaderUi
+typedef struct HeaderUi {
 	// inherits
 	psy_ui_Component component;
-	// internal
-	ParamTweak paramtweak;
+	// internal	
 	// references
 	ParamSkin* skin;	
 	psy_ui_Component* view;
 	psy_audio_MachineParam* param;
-} SliderUi;
+} HeaderUi;
 
-void sliderui_init(SliderUi*, psy_ui_Component* parent,
+void headerui_init(HeaderUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
-
-SliderUi* sliderui_alloc(void);
-SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_MachineParam* param, ParamSkin* paramskin);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SLIDERUI_H */
+#endif /* LABELUI_H */

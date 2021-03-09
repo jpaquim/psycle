@@ -21,6 +21,7 @@ typedef struct {
 	psy_dsp_amp_t pan;
 	int ismuted;
 	int isbypassed;
+	int isbus;
 	char* editname;
 	psy_audio_Buffer memorybuffer;
 	uintptr_t memorybuffersize;

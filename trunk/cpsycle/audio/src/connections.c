@@ -216,7 +216,7 @@ void psy_audio_wiresocket_copy(psy_audio_WireSocket* self,
 	psy_audio_WireSocket* src)
 {	
 	self->slot = src->slot;
-	self->volume = src->volume;
+	self->volume = src->volume;	
 	psy_audio_pinmapping_copy(&self->mapping, &src->mapping);
 }
 

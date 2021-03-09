@@ -79,6 +79,7 @@ typedef int (*fp_mcb_numplaybacks)(void*);
 typedef int (*fp_mcb_onerror)(void*);
 typedef int (*fp_mcb_onwarning)(void*);
 typedef int (*fp_mcb_onmessage)(void*);
+typedef void (*fp_mcb_buschanged)(void*);
 typedef const char* (*fp_mcb_language)(void*);
 
 typedef struct  {
@@ -105,6 +106,7 @@ typedef struct  {
 	fp_mcb_playbackname playbackname;
 	fp_mcb_numplaybacks numplaybacks;	
 	fp_mcb_language language;
+	fp_mcb_buschanged buschanged;
 } psy_audio_MachineCallbackVtable;
 
 struct psy_audio_Player;
@@ -163,6 +165,9 @@ typedef	int (*fp_machine_muted)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_bypass)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_unbypass)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_bypassed)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_setbus)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_unsetbus)(struct psy_audio_Machine*);
+typedef	int (*fp_machine_isbus)(struct psy_audio_Machine*);
 typedef	const psy_audio_MachineInfo* (*fp_machine_info)(struct
 	psy_audio_Machine*);
 typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);
@@ -278,6 +283,7 @@ typedef	struct psy_audio_MachineFactory* (*fp_machine_machinefactory)(struct
 	psy_audio_Machine*);
 typedef void (*fp_machine_output)(struct psy_audio_Machine*, const char* text);
 typedef	bool(*fp_machine_editresize)(struct psy_audio_Machine*, intptr_t w, intptr_t h);
+typedef	void (*fp_machine_buschanged)(struct psy_audio_Machine*);
 typedef bool (*fp_machine_addcapture)(struct psy_audio_Machine*, int idx);
 typedef bool (*fp_machine_removecapture)(struct psy_audio_Machine*, int idx);
 typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index,
@@ -403,7 +409,10 @@ typedef struct {
 	fp_machine_unbypass unbypass;
 	fp_machine_muted muted;
 	fp_machine_mute mute;
-	fp_machine_unmute unmute;	
+	fp_machine_unmute unmute;
+	fp_machine_isbus isbus;
+	fp_machine_setbus setbus;
+	fp_machine_unsetbus unsetbus;
 ///\}
 ///\name buffer memory
 ///\{
@@ -431,6 +440,7 @@ typedef struct {
 	fp_machine_playbackname playbackname;
 	fp_machine_numplaybacks numplaybacks;
 	fp_machine_language language;
+	fp_machine_buschanged buschanged;
 ///\}
 } MachineVtable;
 
@@ -949,6 +959,21 @@ INLINE int psy_audio_machine_muted(psy_audio_Machine* self)
 	return self->vtable->muted(self);
 }
 
+INLINE void psy_audio_machine_setbus(psy_audio_Machine* self)
+{
+	self->vtable->setbus(self);
+}
+
+INLINE void psy_audio_machine_unsetbus(psy_audio_Machine* self)
+{
+	self->vtable->unsetbus(self);
+}
+
+INLINE int psy_audio_machine_isbus(psy_audio_Machine* self)
+{
+	return self->vtable->isbus(self);
+}
+
 INLINE void psy_audio_machine_bypass(psy_audio_Machine* self)
 {
 	self->vtable->bypass(self);
@@ -1066,6 +1091,11 @@ INLINE bool psy_audio_machine_editresize(psy_audio_Machine* self,
 	uintptr_t width, uintptr_t height)
 {
 	return self->vtable->editresize(self, width, height);
+}
+
+INLINE void psy_audio_machine_buschanged(psy_audio_Machine* self)
+{
+	self->vtable->buschanged(self);
 }
 
 INLINE struct psy_audio_MachineFactory* psy_audio_machine_machinefactory(

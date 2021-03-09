@@ -492,7 +492,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->accumwheeldelta = 0;
 	self->handlevscroll = TRUE;
 	self->handlehscroll = TRUE;
-	self->backgroundmode = psy_ui_BACKGROUND_SET;
+	self->backgroundmode = psy_ui_SETBACKGROUND;
 	self->mousetracking = 0;
 	self->cursor = psy_ui_CURSOR_DEFAULT;
 	self->tabindex = -1;
@@ -554,6 +554,24 @@ void psy_ui_component_deallocate(psy_ui_Component* self)
 {
 	psy_ui_component_destroy(self);
 	free(self);
+}
+
+psy_ui_Component* psy_ui_component_alloc(void)
+{
+	return (psy_ui_Component*)malloc(sizeof(psy_ui_Component));	
+}
+
+psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view)
+{
+	psy_ui_Component* rv;
+
+	rv = psy_ui_component_alloc();
+	if (rv) {
+		psy_ui_component_init(rv, parent, view);
+		rv->deallocate = TRUE;
+	}
+	return rv;
 }
 
 void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
@@ -1208,7 +1226,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 
 void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 {
-	if (self->backgroundmode == psy_ui_BACKGROUND_SET) {				
+	if (self->backgroundmode == psy_ui_SETBACKGROUND) {				
 		const psy_ui_Border* b;
 		
 		b = psy_ui_component_border(self);

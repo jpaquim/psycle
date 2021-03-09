@@ -939,7 +939,7 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 
 	tm = psy_ui_component_textmetric(self->component);
 	// draw background						
-	if (self->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
+	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self->component, g);
 	}
 	psy_ui_component_drawborder(self->component, g);

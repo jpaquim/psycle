@@ -274,7 +274,7 @@ void mainframe_initclientarea(MainFrame* self)
 	psy_ui_component_init_align(&self->client, mainframe_base(self),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client,
-		psy_ui_BACKGROUND_NONE);	
+		psy_ui_NOBACKGROUND);	
 }
 
 void mainframe_initrightarea(MainFrame* self)
@@ -332,6 +332,7 @@ void mainframe_initviewstatusbars(MainFrame* self)
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->workspace);
 	self->machineview.wireview.statusbar = &self->machineviewbar;
+	self->machineview.stackview.state.statusbar = &self->machineviewbar;
 	patternviewbar_init(&self->patternbar,
 		psy_ui_notebook_base(&self->viewstatusbars), &self->workspace);
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,

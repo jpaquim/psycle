@@ -116,16 +116,16 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->trackmodeswingfill = TRUE;
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(&self->notebook));	
 	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_notebook_select(&self->editnotebook, 0);
 	// Skin
 	patternviewskin_init(&self->skin);
