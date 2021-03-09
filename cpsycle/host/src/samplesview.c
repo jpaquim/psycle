@@ -1037,7 +1037,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		psy_ui_BACKGROUND_SET);
+		psy_ui_SETBACKGROUND);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	// GeneralView

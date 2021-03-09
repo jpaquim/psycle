@@ -60,7 +60,9 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* sk
 
 	psy_ui_component_init(&self->component, parent, view);
 	masterui_vtable_init(self);
-	self->component.vtable = &masterui_vtable;	
+	self->component.vtable = &masterui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	machineuicommon_init(&self->intern, psy_audio_MASTER_INDEX, skin, view,
 		NULL, workspace);
 	self->intern.coords = &skin->master;

@@ -486,8 +486,8 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 	psy_List* q;
 
 	// draw background						
-	if (self->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
-		// psy_ui_component_drawbackground(self->component, g);
+	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
+		psy_ui_component_drawbackground(self->component, g);
 	}
 	psy_ui_component_drawborder(self->component, g);
 	if (self->component->vtable->ondraw) {

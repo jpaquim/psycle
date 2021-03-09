@@ -68,6 +68,7 @@ static void onmachinefileselectdirectory(Workspace*);
 static void onmachineterminaloutput(Workspace*, const char* text);
 static bool onmachineeditresize(Workspace*, psy_audio_Machine* sender,
 	intptr_t w, intptr_t h);
+static void onmachinebuschanged(Workspace*, psy_audio_Machine* sender);
 static const char* onmachinelanguage(Workspace*);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
@@ -97,6 +98,8 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 			(fp_mcb_fileselect_directory)onmachinefileselectdirectory;
 		machinecallback_vtable.editresize =
 			(fp_mcb_editresize)onmachineeditresize;
+		machinecallback_vtable.buschanged =
+			(fp_mcb_buschanged)onmachinebuschanged;
 		machinecallback_vtable.output = (fp_mcb_output)onmachineterminaloutput;
 		machinecallback_vtable_initialized = TRUE;
 	}
@@ -189,6 +192,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_floatsection);
 	psy_signal_init(&self->signal_docksection);
 	psy_signal_init(&self->signal_machineeditresize);
+	psy_signal_init(&self->signal_buschanged);
 	psy_signal_init(&self->signal_gearselect);
 }
 
@@ -263,6 +267,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_floatsection);
 	psy_signal_dispose(&self->signal_docksection);
 	psy_signal_dispose(&self->signal_machineeditresize);
+	psy_signal_dispose(&self->signal_buschanged);
 	psy_signal_dispose(&self->signal_gearselect);
 }
 
@@ -1629,6 +1634,11 @@ static bool onmachineeditresize(Workspace* self, psy_audio_Machine* sender, intp
 {
 	psy_signal_emit(&self->signal_machineeditresize, self, 3, sender, w, h);
 	return TRUE;
+}
+
+static void onmachinebuschanged(Workspace* self, psy_audio_Machine* sender)
+{
+	psy_signal_emit(&self->signal_buschanged, self, 1, sender);
 }
 
 static const char* onmachinelanguage(Workspace* self)

@@ -1059,7 +1059,7 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 	if (updatevus) {
 		self->vudrawupdate = TRUE;
 		psy_ui_component_setbackgroundmode(&self->component,
-			psy_ui_BACKGROUND_NONE);
+			psy_ui_NOBACKGROUND);
 		machineui_beginvuupdate();
 		for (it = psy_table_begin(&self->machineuis);
 				!psy_tableiterator_equal(&it, psy_table_end());
@@ -1069,7 +1069,7 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 		}		
 		psy_ui_component_update(machinewireview_base(self));		
 		psy_ui_component_setbackgroundmode(machinewireview_base(self),
-			psy_ui_BACKGROUND_SET);
+			psy_ui_SETBACKGROUND);
 		machineui_endvuupdate();
 		self->vudrawupdate = FALSE;
 	}

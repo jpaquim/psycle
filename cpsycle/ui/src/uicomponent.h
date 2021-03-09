@@ -40,8 +40,8 @@ typedef enum psy_ui_ScrollMode {
 } psy_ui_ScrollMode;
 
 typedef enum {
-	psy_ui_BACKGROUND_NONE,
-	psy_ui_BACKGROUND_SET,
+	psy_ui_NOBACKGROUND,
+	psy_ui_SETBACKGROUND,
 	psy_ui_BACKGROUND_PARENT,
 } psy_ui_BackgroundMode;
 
@@ -233,6 +233,10 @@ void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
 
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
+
+psy_ui_Component* psy_ui_component_alloc(void);
+psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view);
 void psy_ui_component_deallocate(psy_ui_Component*);
 
 

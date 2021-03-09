@@ -27,6 +27,10 @@ typedef struct LabelUi {
 void labelui_init(LabelUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
 
+LabelUi* labelui_alloc(void);
+LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin);
+
 #ifdef __cplusplus
 }
 #endif

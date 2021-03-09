@@ -133,7 +133,8 @@ typedef struct {
 	psy_Signal signal_selectpatterndisplay;
 	psy_Signal signal_floatsection;
 	psy_Signal signal_docksection;
-	psy_Signal signal_machineeditresize;	
+	psy_Signal signal_machineeditresize;
+	psy_Signal signal_buschanged;
 	psy_Signal signal_gearselect;
 	// audio
 	psy_audio_Song* song;

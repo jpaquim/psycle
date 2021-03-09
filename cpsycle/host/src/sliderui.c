@@ -59,16 +59,35 @@ void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 	ParamSkin* skin)
 {
 	assert(self);	
-	assert(skin);	
-	assert(view);
+	assert(skin);
 
 	psy_ui_component_init(&self->component, parent, view);
 	sliderui_vtable_init(self);
-	self->component.vtable = &sliderui_vtable;		
+	self->component.vtable = &sliderui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
+}
+
+SliderUi* sliderui_alloc(void)
+{
+	return (SliderUi*)malloc(sizeof(SliderUi));
+}
+
+SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	SliderUi* rv;
+
+	rv = sliderui_alloc();
+	if (rv) {
+		sliderui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
 }
 
 void sliderui_dispose(SliderUi* self)

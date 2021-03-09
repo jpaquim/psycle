@@ -24,6 +24,20 @@ static int muted(psy_audio_CustomMachine* self) { return self->ismuted; }
 static void bypass(psy_audio_CustomMachine* self) { self->isbypassed = 1; }
 static void unbypass(psy_audio_CustomMachine* self) { self->isbypassed = 0; }
 static int bypassed(psy_audio_CustomMachine* self) { return self->isbypassed; }
+
+static void setbus(psy_audio_CustomMachine* self)
+{
+	self->isbus = 1;
+	psy_audio_machine_buschanged(&self->machine);
+}
+
+static void unsetbus(psy_audio_CustomMachine* self)
+{
+	self->isbus = 0;
+	psy_audio_machine_buschanged(&self->machine);
+}
+
+static int isbus(psy_audio_CustomMachine* self) { return self->isbus; }
 static psy_audio_Buffer* custommachine_buffermemory(psy_audio_CustomMachine*);
 static uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine*);
 static void custommachine_setbuffermemorysize(psy_audio_CustomMachine*, uintptr_t size);
@@ -82,6 +96,9 @@ static void vtable_init(psy_audio_CustomMachine* self)
 		vtable.bypass = (fp_machine_bypass)bypass;
 		vtable.unbypass = (fp_machine_unbypass)unbypass;
 		vtable.bypassed = (fp_machine_bypassed)bypassed;
+		vtable.setbus = (fp_machine_setbus)setbus;
+		vtable.unsetbus = (fp_machine_unsetbus)unsetbus;
+		vtable.isbus = (fp_machine_isbus)isbus;
 		vtable.editname = (fp_machine_editname)custommachine_editname;
 		vtable.seteditname = (fp_machine_seteditname)
 			custommachine_seteditname;
@@ -113,6 +130,7 @@ void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 	self->editname = 0;
 	self->ismuted = 0;
 	self->isbypassed = 0;
+	self->isbus = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = psy_INDEX_INVALID;
 	self->x = 0;

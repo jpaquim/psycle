@@ -93,6 +93,8 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, view);	
 	generatorui_vtable_init(self);
 	self->component.vtable = &generatorui_vtable;
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	machineuicommon_init(&self->intern, slot, skin, view, editname, workspace);
 	self->intern.coords = &skin->generator;
 	self->intern.font = skin->generator_fontcolour;

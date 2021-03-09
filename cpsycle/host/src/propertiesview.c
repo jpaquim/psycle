@@ -1127,7 +1127,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_notebook_init(&self->notebook, propertiesview_base(self));
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_changed);

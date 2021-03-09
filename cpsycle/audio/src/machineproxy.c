@@ -71,6 +71,9 @@ static psy_dsp_amp_t machineproxy_panning(psy_audio_MachineProxy*);
 static void machineproxy_mute(psy_audio_MachineProxy*);
 static void machineproxy_unmute(psy_audio_MachineProxy*);
 static int machineproxy_muted(psy_audio_MachineProxy*);
+static void machineproxy_setbus(psy_audio_MachineProxy*);
+static void machineproxy_unsetbus(psy_audio_MachineProxy*);
+static int machineproxy_isbus(psy_audio_MachineProxy*);
 static void machineproxy_bypass(psy_audio_MachineProxy*);
 static void machineproxy_unbypass(psy_audio_MachineProxy*);
 static int machineproxy_bypassed(psy_audio_MachineProxy*);
@@ -104,6 +107,7 @@ static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineP
 static struct psy_audio_MachineFactory* machineproxy_machinefactory(psy_audio_MachineProxy*);
 static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
 static bool machineproxy_editresize(psy_audio_MachineProxy*, intptr_t w, intptr_t h);
+static void machineproxy_buschanged(psy_audio_MachineProxy*);
 static bool machineproxy_addcapture(psy_audio_MachineProxy*, int index);
 static bool machineproxy_removecapture(psy_audio_MachineProxy*, int index);
 static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index,
@@ -193,6 +197,9 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.mute = (fp_machine_mute)machineproxy_mute;
 		vtable.unmute = (fp_machine_unmute)machineproxy_unmute;
 		vtable.muted = (fp_machine_muted)machineproxy_muted;
+		vtable.setbus = (fp_machine_setbus)machineproxy_setbus;
+		vtable.unsetbus = (fp_machine_unsetbus)machineproxy_unsetbus;
+		vtable.isbus = (fp_machine_isbus)machineproxy_isbus;
 		vtable.bypass = (fp_machine_bypass)machineproxy_bypass;
 		vtable.unbypass = (fp_machine_unbypass)machineproxy_unbypass;
 		vtable.bypassed = (fp_machine_bypassed)machineproxy_bypassed;
@@ -238,6 +245,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_output;
 		vtable.editresize = (fp_machine_editresize)
 			machineproxy_editresize;
+		vtable.buschanged = (fp_machine_buschanged)
+			machineproxy_buschanged;
 		vtable.addcapture = (fp_machine_addcapture)machineproxy_addcapture;
 		vtable.removecapture = (fp_machine_removecapture)machineproxy_removecapture;
 		vtable.readbuffers = (fp_machine_readbuffers)machineproxy_readbuffers;
@@ -722,6 +731,60 @@ int machineproxy_muted(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "muted", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_setbus(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_setbus(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "setbus", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_unsetbus(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->unsetbus(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "unsetbus", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_isbus(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->isbus(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "isbus", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		
@@ -1234,6 +1297,21 @@ bool machineproxy_editresize(psy_audio_MachineProxy* self, intptr_t w, intptr_t 
 	}
 #endif			
 	return rv;
+}
+
+void machineproxy_buschanged(psy_audio_MachineProxy* self)
+{
+#if defined DIVERSALIS__OS__MICROSOFT        
+	__try
+#endif		
+	{
+		psy_audio_machine_buschanged(self->client);
+	}
+#if defined DIVERSALIS__OS__MICROSOFT		
+	__except (FilterException(self, "buschanged", GetExceptionCode(),
+		GetExceptionInformation())) {
+	}
+#endif			
 }
 
 

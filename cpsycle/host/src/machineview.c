@@ -20,7 +20,6 @@
 // MachineView
 // prototypes
 static void machineview_ondestroy(MachineView*);
-static void machineview_updatetext(MachineView*, psy_Translator*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
 	psy_audio_Song*);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
@@ -69,7 +68,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(machineview_base(self),
 		machineview_vtable_init(self));
 	psy_ui_component_setbackgroundmode(machineview_base(self),
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_MACHINEVIEW, STYLE_MACHINEVIEW, STYLE_MACHINEVIEW);
 	self->workspace = workspace;	
@@ -92,7 +91,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	// stackview
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		&self->skin, workspace);
+		&self->skin, NULL, workspace);
 	// newmachine
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
 		&self->skin, self->workspace);		

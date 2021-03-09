@@ -952,7 +952,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		self->state.sequence = NULL;
 	}
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);	
+		psy_ui_NOBACKGROUND);	
 	// sequence listview
 	sequencelistview_init(&self->listview, &self->component,
 		&self->state, self, self->patterns, workspace);	

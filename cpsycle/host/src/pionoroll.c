@@ -230,7 +230,7 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	pianokeyboard_setsharedkeyboardstate(self, keyboardstate);
 	psy_ui_component_doublebuffer(pianokeyboard_base(self));
 	psy_ui_component_setbackgroundmode(pianokeyboard_base(self),
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_setpreferredsize(pianokeyboard_base(self),
 		psy_ui_size_makeem(8.0, 0.0));
 	psy_ui_component_preventalign(pianokeyboard_base(self));
@@ -578,7 +578,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(pianogrid_base(self),
 		pianogrid_vtable_init(self));
 	psy_ui_component_setbackgroundmode(pianogrid_base(self),
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_doublebuffer(pianogrid_base(self));
 	psy_ui_component_setwheelscroll(pianogrid_base(self), 4);
 	pianogrid_setsharedgridstate(self, gridstate);
@@ -1816,7 +1816,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->opcount = 0;
 	self->syncpattern = 1;	
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);		
+		psy_ui_NOBACKGROUND);		
 	// shared states
 	keyboardstate_init(&self->keyboardstate, skin);
 	pianogridstate_init(&self->gridstate, skin);	

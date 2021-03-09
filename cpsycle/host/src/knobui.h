@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(SLIDERUI_H)
-#define SLIDERUI_H
+#if !defined(KNOBUI_H)
+#define KNOBUI_H
 
 // host
 #include "machineeditorview.h" // vst view
@@ -17,27 +17,24 @@
 extern "C" {
 #endif
 
-// SliderUi
-typedef struct SliderUi {
+// KnobUi
+typedef struct KnobUi {
 	// inherits
 	psy_ui_Component component;
 	// internal
 	ParamTweak paramtweak;
 	// references
-	ParamSkin* skin;	
+	ParamSkin* skin;
+	Workspace* workspace;
 	psy_ui_Component* view;
 	psy_audio_MachineParam* param;
-} SliderUi;
+} KnobUi;
 
-void sliderui_init(SliderUi*, psy_ui_Component* parent,
+void knobui_init(KnobUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
-
-SliderUi* sliderui_alloc(void);
-SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_MachineParam* param, ParamSkin* paramskin);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SLIDERUI_H */
+#endif /* KNOBUI_H */

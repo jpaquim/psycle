@@ -61,6 +61,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->command, "Command");
 	psy_ui_button_init(&self->help, &self->buttons, NULL);
 	psy_ui_button_settext(&self->help, "Help");	
+	psy_ui_button_init(&self->isbus, &self->buttons, NULL);
+	psy_ui_button_settext(&self->isbus, "Bus");	
 	psy_ui_button_init(&self->more, &self->row0, NULL);
 	psy_ui_button_preventtranslation(&self->more);
 	psy_ui_button_settext(&self->more, ". . .");
@@ -106,6 +108,8 @@ static void machineframe_oncommand(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_togglehelp(MachineFrame*,
 	psy_ui_Component* sender);
+static void machineframe_togglebus(MachineFrame*,
+	psy_ui_Component* sender);
 static void machineframe_resize(MachineFrame*);
 static void machineframe_onalign(MachineFrame*, psy_ui_Component* sender);
 static void machineframe_preferredviewsizechanged(MachineFrame*,
@@ -148,7 +152,9 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->parameterbar.command.signal_clicked, self,
 		machineframe_oncommand);
 	psy_signal_connect(&self->parameterbar.help.signal_clicked, self,
-		machineframe_togglehelp);	
+		machineframe_togglehelp);
+	psy_signal_connect(&self->parameterbar.isbus.signal_clicked, self,
+		machineframe_togglebus);
 	psy_signal_connect(&self->component.signal_mouseup, self,
 		machineframe_onmouseup);
 	psy_signal_connect(&self->component.signal_align, self,
@@ -197,7 +203,14 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 			: "");
 	} else {
 		psy_ui_editor_settext(&self->help, "");
-	}	
+	}
+	if (self->machine) {
+		if (psy_audio_machine_isbus(self->machine)) {	
+			psy_ui_button_highlight(&self->parameterbar.isbus);
+		} else {			
+			psy_ui_button_disablehighlight(&self->parameterbar.isbus);			
+		}
+	}
 }
 
 void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
@@ -259,6 +272,20 @@ void machineframe_togglehelp(MachineFrame* self,
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_ui_button_highlight(&self->parameterbar.help);
 	}	
+}
+
+void machineframe_togglebus(MachineFrame* self,
+	psy_ui_Component* sender)
+{
+	if (self->machine) {
+		if (psy_audio_machine_isbus(self->machine)) {
+			psy_audio_machine_unsetbus(self->machine);
+			psy_ui_button_disablehighlight(&self->parameterbar.isbus);
+		} else {
+			psy_audio_machine_setbus(self->machine);
+			psy_ui_button_highlight(&self->parameterbar.isbus);
+		}
+	}
 }
 
 void machineframe_resize(MachineFrame* self)

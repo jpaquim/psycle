@@ -27,6 +27,10 @@ typedef struct LevelUi {
 void levelui_init(LevelUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
 
+LevelUi* levelui_alloc(void);
+LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin);
+
 #ifdef __cplusplus
 }
 #endif
