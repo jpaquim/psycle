@@ -12,7 +12,6 @@
 // platform
 #include "../../detail/portable.h"
 
-
 // KnobDraw
 // implementation
 void knobdraw_init(KnobDraw* self, ParamSkin* skin,
@@ -34,7 +33,7 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r_top;
 	psy_ui_RealRectangle r_bottom;	
 		
-	if (self->machine && self->param) {
+	if (self->param) {
 		psy_ui_setrectangle(&r_top,
 			psy_ui_realrectangle_width(&self->skin->knob.dest), 0,
 			self->size.width - psy_ui_realrectangle_width(&self->skin->knob.dest),
@@ -49,15 +48,27 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 		psy_ui_realpoint_make(r_top.left,
 			r_top.top + psy_ui_realrectangle_height(&r_top)));		
 	psy_ui_drawsolidrectangle(g, r_bottom, self->skin->bottomcolour);
-	if (self->machine && self->param) {
-		if (!psy_audio_machine_parameter_name(self->machine, self->param, label)) {
-			if (!psy_audio_machine_parameter_label(self->machine, self->param, label)) {
-				psy_snprintf(label, 128, "%s", "");
+	if (self->param) {
+		if (self->machine) {
+			if (!psy_audio_machine_parameter_name(self->machine, self->param, label)) {
+				if (!psy_audio_machine_parameter_label(self->machine, self->param, label)) {
+					psy_snprintf(label, 128, "%s", "");
+				}
 			}
-		}
-		if (!psy_audio_machine_parameter_describe(self->machine, self->param, str)) {
-			psy_snprintf(str, 128, "%d",
-				(int)psy_audio_machineparam_scaledvalue(self->param));
+			if (!psy_audio_machine_parameter_describe(self->machine, self->param, str)) {
+				psy_snprintf(str, 128, "%d",
+					(int)psy_audio_machineparam_scaledvalue(self->param));
+			}
+		} else {
+			if (!psy_audio_machineparam_name(self->param, label)) {
+				if (!psy_audio_machineparam_label(self->param, label)) {
+					psy_snprintf(label, 128, "%s", "");
+				}
+			}
+			if (!psy_audio_machineparam_describe(self->param, str)) {
+				psy_snprintf(str, 128, "%d",
+					(int)psy_audio_machineparam_scaledvalue(self->param));
+			}
 		}
 		if (self->tweaking) {
 			psy_ui_setbackgroundcolour(g, self->skin->htopcolour);
@@ -76,9 +87,19 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 			psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
 		if (!psy_ui_bitmap_empty(&self->skin->knobbitmap)) {
 			intptr_t knob_frame;
-
-			knob_frame = (intptr_t)(
-				(psy_audio_machine_parameter_normvalue(self->machine, self->param) * 63.f));
+			
+			if (self->param) {
+				if (self->machine) {
+					knob_frame = (intptr_t)(
+						(psy_audio_machine_parameter_normvalue(self->machine,
+							self->param) * 63.f));
+				} else {
+					knob_frame = (intptr_t)(
+						(psy_audio_machineparam_normvalue(self->param) * 63.f));
+				}
+			} else {
+				knob_frame = 0;
+			}
 			if (self->size.height < psy_ui_realrectangle_height(&self->skin->knob.dest)) {
 				double ratio;
 				double w;

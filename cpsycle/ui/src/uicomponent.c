@@ -79,8 +79,7 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {		
-	self->style.currstyle->backgroundcolour = colour;
-	//psy_ui_colour_set(&self->style.backgroundcolour, colour);
+	self->style.currstyle->backgroundcolour = colour;	
 }
 
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
@@ -128,6 +127,16 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 		return curr->style.currstyle->colour;
 	}
 	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
+}
+
+void psy_ui_component_setborder(psy_ui_Component* self,
+	const psy_ui_Border* border)
+{
+	if (border) {
+		self->style.currstyle->border = *border;
+	} else {
+		self->style.currstyle->border = self->style.style.border;
+	}
 }
 
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
