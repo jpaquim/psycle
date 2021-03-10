@@ -25,13 +25,16 @@ typedef struct KnobUi {
 	ParamTweak paramtweak;
 	// references
 	ParamSkin* skin;
-	Workspace* workspace;
-	psy_ui_Component* view;
+	Workspace* workspace;	
 	psy_audio_MachineParam* param;
 } KnobUi;
 
 void knobui_init(KnobUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+
+KnobUi* knobui_alloc(void);
+KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam*, ParamSkin*);
 
 #ifdef __cplusplus
 }

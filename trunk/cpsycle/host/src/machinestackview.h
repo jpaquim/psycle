@@ -18,21 +18,25 @@ extern "C" {
 
 // MachineStackView: displays stacks of the machines starting with their leafs
 
-// MasterRouteParam
-typedef struct MasterRouteParam {
+struct MachineStackState;
+
+// OutputRouteParam
+typedef struct OutputRouteParam {
 	// inherits
 	psy_audio_MachineParam machineparam;
 	// internal
-	uintptr_t macid;
+	uintptr_t column;	
 	// references
 	psy_audio_Machines* machines;
-} MasterRouteParam;
+	struct MachineStackState* state;
+} OutputRouteParam;
 
-void masterrouteparam_init(MasterRouteParam*, psy_audio_Machines*);
-void masterrouteparam_dispose(MasterRouteParam*);
+void outputrouteparam_init(OutputRouteParam*, psy_audio_Machines*,
+	uintptr_t column, struct MachineStackState*);
+void outputrouteparam_dispose(OutputRouteParam*);
 
-INLINE psy_audio_MachineParam* masterrouteparam_base(
-	MasterRouteParam* self)
+INLINE psy_audio_MachineParam* outputrouteparam_base(
+	OutputRouteParam* self)
 {
 	return &(self->machineparam);
 }
@@ -46,16 +50,17 @@ typedef struct MachineStackColumn {
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
 	psy_audio_IntMachineParam level_param;
-	MasterRouteParam masterroute;
-	psy_audio_Machines* machines;
+	OutputRouteParam outputroute;
+	psy_audio_Machines* machines;	
 } MachineStackColumn;
 
 void machinestackcolumn_init(MachineStackColumn*,
-	uintptr_t column, psy_audio_Machines*);
+	uintptr_t column, psy_audio_Machines*, struct MachineStackState*);
 void machinestackcolumn_dispose(MachineStackColumn*);
 
 void machinestackcolumn_setwire(MachineStackColumn*, psy_audio_Wire);
 
+psy_audio_Wire machinestackcolumn_outputwire(MachineStackColumn*);
 INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* self)
 {
 	return self->wirevolume;
@@ -85,6 +90,7 @@ typedef struct MachineStackState {
 	psy_ui_Size columnsize;
 	bool update;
 	bool columnselected;
+	bool preventrebuild;
 	struct MachineViewBar* statusbar;
 } MachineStackState;
 
@@ -101,6 +107,7 @@ MachineStackColumn* machinestackstate_selectedcolumn(MachineStackState*);
 uintptr_t machinestackstate_maxnumcolumns(const MachineStackState*);
 void machinestackstate_clear(MachineStackState*);
 psy_List* machinestackstate_inputs(MachineStackState*);
+psy_List* machinestackstate_buses(MachineStackState*);
 
 INLINE void machinestackstate_rebuildview(MachineStackState* self)
 {

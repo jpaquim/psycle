@@ -19,7 +19,6 @@
 
 // KnobUi
 // prototypes
-static void knobui_dispose(KnobUi*);
 static void knobui_ondraw(KnobUi*, psy_ui_Graphics*);
 static void knobui_invalidate(KnobUi*);
 static void knobui_onpreferredsize(KnobUi*, const psy_ui_Size* limit,
@@ -40,7 +39,6 @@ static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
 	if (!knobui_vtable_initialized) {
 		knobui_vtable = *(self->component.vtable);
 		knobui_super_vtable = knobui_vtable;
-		knobui_vtable.dispose = (psy_ui_fp_component_dispose)knobui_dispose;
 		knobui_vtable.ondraw = (psy_ui_fp_component_ondraw)knobui_ondraw;		
 		knobui_vtable.invalidate = (psy_ui_fp_component_invalidate)
 			knobui_invalidate;
@@ -63,25 +61,35 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 {
 	assert(self);	
 	assert(paramskin);	
-	assert(view);
 
 	psy_ui_component_init(&self->component, parent, view);
 	knobui_vtable_init(self);
 	self->component.vtable = &knobui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = paramskin;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
 }
 
-void knobui_dispose(KnobUi* self)
+KnobUi* knobui_alloc(void)
 {
-	assert(self);
-	
-	knobui_super_vtable.dispose(&self->component);
+	return (KnobUi*)malloc(sizeof(KnobUi));
 }
+
+KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	KnobUi* rv;
+
+	rv = knobui_alloc();
+	if (rv) {
+		knobui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
+}
+
 
 void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 {	
@@ -108,9 +116,10 @@ void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 {	
 	psy_ui_RealSize size;
 
-	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
-		MPF_SWITCH, FALSE);
-	*rv = psy_ui_size_makepx(100.0, size.height);
+	//size = mpfsize(self->skin, NULL); 
+	//psy_ui_component_textmetric(self),
+	//	MPF_SWITCH, FALSE);
+	*rv = psy_ui_size_makepx(100.0, 38);
 }
 
 void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)

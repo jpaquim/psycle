@@ -15,8 +15,8 @@ void slidergroupui_init(SliderGroupUi* self, psy_ui_Component* parent,
 	assert(skin);
 	
 	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_setbackgroundcolour(&self->component,
+		psy_ui_colour_make(0x00444444));
 	sliderui_init(&self->slider, &self->component, view, volume, skin);
 	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_LEFT);
 	levelui_init(&self->level, &self->component, view, level, skin);
