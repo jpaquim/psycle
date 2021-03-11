@@ -322,7 +322,9 @@ uintptr_t machinestackcolumn_insert_effect(MachineStackColumn* self,
 	}	
 	if (lastmac != psy_INDEX_INVALID) {				
 		if (destmac == psy_INDEX_INVALID) {
-			
+			if ((machinestackcolumn_last(self) == psy_audio_MASTER_INDEX)) {
+				destmac = psy_audio_MASTER_INDEX;
+			}
 		} else {
 			destmac = machinestackcolumn_at(self, insertpos);
 		}
@@ -369,6 +371,19 @@ uintptr_t machinestackcolumn_at(const MachineStackColumn* self, uintptr_t index)
 		const psy_List* p;
 
 		p = psy_list_at(self->chain, index);
+		if (p) {
+			return (uintptr_t)psy_list_entry_const(p);
+		}
+	}
+	return psy_INDEX_INVALID;
+}
+
+uintptr_t machinestackcolumn_last(const MachineStackColumn* self)
+{
+	if (self->chain) {
+		const psy_List* p;
+
+		p = psy_list_last(self->chain);
 		if (p) {
 			return (uintptr_t)psy_list_entry_const(p);
 		}
@@ -864,44 +879,17 @@ void machinestackinputs_updatevus(MachineStackInputs* self)
 }
 
 // MachineStackOutputs
-// prototypes
-static void machinestackoutputs_onpreferredsize(MachineStackOutputs*,
-	const psy_ui_Size* limit, psy_ui_Size* rv);
-// vtable
-static psy_ui_ComponentVtable machinestackoutputs_vtable;
-static bool machinestackoutputs_vtable_initialized = FALSE;
-
-static psy_ui_ComponentVtable* machinestackoutputs_vtable_init(MachineStackOutputs* self)
-{
-	if (!machinestackoutputs_vtable_initialized) {
-		machinestackoutputs_vtable = *(self->component.vtable);
-		machinestackoutputs_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			machinestackoutputs_onpreferredsize;		
-		machinestackoutputs_vtable_initialized = TRUE;
-	}
-	return &machinestackoutputs_vtable;
-}
 // implementation
 void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_Component* parent, MachineStackState* state,
 	ParamSkin* skin)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component,
-		machinestackoutputs_vtable_init(self));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);		
+	psy_ui_component_setminimumsize(&self->component,
+		psy_ui_size_makeem(10.0, 2.0));
 	self->skin = skin;	
 	self->state = state;
-}
-
-void machinestackoutputs_onpreferredsize(MachineStackOutputs* self,
-	const psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	*rv = self->state->columnsize;
-	psy_ui_value_mul_real(&rv->width,
-		psy_max(1.0, machinestackstate_maxnumcolumns(self->state)));
-	rv->height = psy_ui_value_makeeh(2.0);	
 }
 
 void machinestackoutputs_build(MachineStackOutputs* self)
@@ -1383,6 +1371,7 @@ void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 	}
 	if (psy_ui_component_drawvisible(&self->volumes.component)) {
 		psy_ui_component_invalidate(&self->volumes.component);
+		//psy_ui_component_invalidate(&self->outputs.component);
 		machinestackinputs_updatevus(&self->inputs);
 		machinestackpane_updatevus(&self->pane);
 	}

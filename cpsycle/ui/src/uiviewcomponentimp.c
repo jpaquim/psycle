@@ -328,7 +328,7 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)
 {
-	return psy_ui_size_makeem(self->position.right - self->position.left,
+	return psy_ui_size_makepx(self->position.right - self->position.left,
 		self->position.bottom - self->position.top);
 }
 
@@ -338,7 +338,7 @@ void view_dev_updatesize(psy_ui_ViewComponentImp* self)
 
 psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp* self)
 {
-	return psy_ui_size_makeem(self->position.right - self->position.left,
+	return psy_ui_size_makepx(self->position.right - self->position.left,
 		self->position.bottom - self->position.top);
 }
 
@@ -430,7 +430,10 @@ void view_dev_preventinput(psy_ui_ViewComponentImp* self)
 }
 
 const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self)
-{
+{	
+	if (self->view) {		
+		return psy_ui_component_textmetric(self->view);
+	}
 	return NULL;
 }
 

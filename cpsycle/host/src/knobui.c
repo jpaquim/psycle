@@ -63,8 +63,8 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 	assert(paramskin);	
 
 	psy_ui_component_init(&self->component, parent, view);
-	knobui_vtable_init(self);
-	self->component.vtable = &knobui_vtable;
+	psy_ui_component_setvtable(&self->component,
+		knobui_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
 	self->skin = paramskin;
@@ -113,13 +113,8 @@ void knobui_invalidate(KnobUi* self)
 
 void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
-	psy_ui_RealSize size;
-
-	//size = mpfsize(self->skin, NULL); 
-	//psy_ui_component_textmetric(self),
-	//	MPF_SWITCH, FALSE);
-	*rv = psy_ui_size_makepx(100.0, 38);
+{		
+	psy_ui_size_setem(rv, 10.0, 2.0);
 }
 
 void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)
