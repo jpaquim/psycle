@@ -20,7 +20,6 @@ typedef struct LabelUi {
 	// internal	
 	// references
 	ParamSkin* skin;	
-	psy_ui_Component* view;
 	psy_audio_MachineParam* param;
 } LabelUi;
 

@@ -870,9 +870,9 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	} else {
 		psy_ui_Size rv;
 
-		rv = self->preferredsize;
+		rv = self->preferredsize;		
 		self->vtable->onpreferredsize(self, limit, &rv);
-			// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
+		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
 		return rv;
 	}
 }

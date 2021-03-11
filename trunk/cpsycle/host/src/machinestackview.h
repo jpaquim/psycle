@@ -73,6 +73,7 @@ uintptr_t machinestackcolumn_insert_effect(MachineStackColumn*,
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
 uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn*,
 	uintptr_t index);
+uintptr_t machinestackcolumn_last(const MachineStackColumn*);
 uintptr_t machinestackcolumn_at(const MachineStackColumn*,
 	uintptr_t index);
 uintptr_t machinestackcolumn_nextindex(const MachineStackColumn*,
@@ -126,7 +127,7 @@ INLINE void machinestackstate_endviewbuild(MachineStackState* self)
 
 struct MachineStackView;
 
-// MachineStackInputs
+// MachineStackDesc
 typedef struct MachineStackDesc {
 	// inherits
 	psy_ui_Component component;

@@ -47,7 +47,11 @@ void knobdraw_draw(KnobDraw* self, psy_ui_Graphics* g)
 	psy_ui_realrectangle_settopleft(&r_bottom,
 		psy_ui_realpoint_make(r_top.left,
 			r_top.top + psy_ui_realrectangle_height(&r_top)));		
-	psy_ui_drawsolidrectangle(g, r_bottom, self->skin->bottomcolour);
+	psy_ui_drawsolidrectangle(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0.0, self->size.height / 2),
+			psy_ui_realsize_make(self->size.width, self->size.height / 2)),
+			self->skin->bottomcolour);
 	if (self->param) {
 		if (self->machine) {
 			if (!psy_audio_machine_parameter_name(self->machine, self->param, label)) {

@@ -1,23 +1,20 @@
-This version has now most of the psycle mfc host and hopefully helps some new
-programmers to continue psycle. It is written in c with c++ parts, in which
-some plugin and driver apis are written in. It replaced MFC from Psycle, can
-be viewed in different screen resolutions, has a sequencer, unified the
-instruments Sampulse and Sampler ps1 use and avoids ui dependencies in the
-audio core.  The ui was reduced from mfc to win32 and wrapped behind an own
-layer. A X11 implementation is started but not finished. The separation of the
-audio core makes it already possible to use the command line player with posix
-aswell, too, although at the moment only a linux alsa driver exists. XMSampler
-has yet some problems correctly play all songs and the full IT Songimport and
-some Mixer options are missing. Event Input like Midi and Keyboard is now
-driver orientated and more than one midi or other inputs like a a game
-controller are possible. This needs to be fully worked out, but at least works
-for keyboard and midi input. Midi sync is not fully working. Additional the
-version has a pianoroll, multitracking, track scopes, a param rack and optional
-a sequenceview that displays the sequence in a gantt layout. Besides english,
-a spanish language file was added. Many limititation of Psycle are related to
-the file format. Internally the use of fixed arrays were replaced by dynamic
-structures, but the limitations remain to maintain file compatibility. This
-needs to be worked out further.
+C-Psycle is a variant of Psycle in "C" language (instead of C++, except
+some plugin and driver apis are written in C++) with the goal of being
+compatible with mfc-psycle and sharing as much features as possible.
+Work is now done to reach the point of releasing a 1.0 version, mainly
+finishing the stackview, completing a instrument zone structure rather than
+the a notepair map, fixing some incompatibilities in XMSampler and the
+psy fileformat.
+
+If anyone wants to try it, it should be easier to compile with visual studio
+2019 than Psycle, but at this point it still requires Psycle plugins and some
+manual changes to code for correct configuration.
+
+The core of is sequencer based and completly separated from the ui and makes it
+possbile to build the command line player under linux. Audio and Event Input
+(Midi/keyboard) are driver orientated.
+The ui was reduced from mfc to win32 and bridged to allow in the future a
+toolkit for posix aswell.
 
 Structure of the host
 

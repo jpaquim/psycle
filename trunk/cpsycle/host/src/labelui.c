@@ -54,11 +54,9 @@ void labelui_init(LabelUi* self, psy_ui_Component* parent,
 	assert(skin);	
 
 	psy_ui_component_init(&self->component, parent, view);
-	labelui_vtable_init(self);
-	self->component.vtable = &labelui_vtable;
+	psy_ui_component_setvtable(&self->component, labelui_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_NOBACKGROUND);
-	self->view = view;	
+		psy_ui_NOBACKGROUND);	
 	self->skin = skin;
 	self->param = param;	
 }
@@ -123,7 +121,6 @@ void labelui_invalidate(LabelUi* self)
 void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	psy_ui_size_setpx(rv,
-		100.0,
-		psy_ui_realrectangle_height(&self->skin->knob.dest));
+	rv->width = psy_ui_value_makepx(100.0);
+	rv->height = psy_ui_value_makepx(40.0);	
 }
