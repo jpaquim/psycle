@@ -42,6 +42,10 @@ static int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver*,
 	psy_audio_Machine*, uint32_t slot);
 static void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver*,
 	const char* name, uintptr_t shellindex);
+int psy_audio_psy3saver_saveparammapping(psy_audio_PSY3Saver*,
+	psy_audio_Machine*);
+int psy_audio_psy3saver_saveismachinebus(psy_audio_PSY3Saver*,
+	psy_audio_Machine*);
 static int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver*,
 	uintptr_t slot);
 static int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver*,
@@ -620,23 +624,23 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
 
 int psy_audio_psy3saver_write_macd(psy_audio_PSY3Saver* self)
 {
-	int32_t i;
+	int32_t index;
 	int status = PSY_OK;
 
-	for (i = 0; i < MAX_MACHINES; ++i) {
+	for (index = 0; index < MAX_MACHINES; ++index) {
 		psy_audio_Machine* machine;
 
-		machine = psy_audio_machines_at(&self->song->machines, i);
-		if (machine) {
-			int32_t index;
+		machine = psy_audio_machines_at(&self->song->machines, index);
+		if (machine) {			
 			uint32_t sizepos;
 
 			if (status = psyfile_writeheader(self->fp, "MACD",
 					CURRENT_FILE_VERSION_MACD, 0, &sizepos)) {
 				return status;
+			}			
+			if (status = psyfile_write_int32(self->fp, index)) {
+				return status;
 			}
-			index = i; // index
-			psyfile_write(self->fp, &index, sizeof(index));
 			psy_audio_psy3saver_write_machine(self, machine, index);
 			if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
 				return status;
@@ -688,7 +692,12 @@ int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver* self, psy_audio_Machi
 		if (status = psy_audio_machine_savewiremapping(machine, self->songfile, slot)) {
 			return status;
 		}
-		// SaveParamMapping(pFile);
+		if (status = psy_audio_psy3saver_saveparammapping(self, machine)) {
+			return status;
+		}
+		if (status = psy_audio_psy3saver_saveismachinebus(self, machine)) {
+			return status;
+		}
 	}
 	return status;
 }
@@ -804,6 +813,67 @@ void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver* self, const ch
 		psy_path_dispose(&path);
 	}
 	psyfile_write(self->fp, str, ((uint32_t)(strlen(str) + 1)));
+}
+
+int psy_audio_psy3saver_saveparammapping(psy_audio_PSY3Saver* self,
+	psy_audio_Machine* machine)
+{
+	uint8_t numMaps = 0;
+	int i;
+	int status;
+
+	for (i = 0; i < 256; ++i) {
+		uint32_t param;
+		
+		param = i; // translate_param(i);
+		if (param < psy_audio_machine_numparameters(machine)) {
+			++numMaps;
+		}
+	}
+	if (status = psyfile_write(self->fp, "PMAP", 4)) {
+		return status;
+	}
+	if (status = psyfile_write_uint8(self->fp, numMaps)) {
+		return status;
+	}
+	for (i = 0; i < 256; ++i) {
+		uint32_t param;
+
+		param = i; // translate_param(i);
+		if (param < psy_audio_machine_numparameters(machine)) {
+			uint8_t idx;
+			uint16_t value;			
+
+			idx = i;
+			value = param;
+			if (status = psyfile_write_uint8(self->fp, idx)) {
+				return status;
+			}
+			if (status = psyfile_write_uint16(self->fp, value)) {
+				return status;
+			}
+		}
+	}
+	return PSY_OK;
+}
+
+int psy_audio_psy3saver_saveismachinebus(psy_audio_PSY3Saver* self,
+	psy_audio_Machine* machine)
+{
+	int status;
+	uint8_t isbus;
+
+	assert(self);
+	assert(machine);
+
+	if (status = psyfile_write(self->fp, "PBUS", 4)) {
+		return status;
+	}
+	isbus = psy_audio_machine_isbus(machine) != FALSE;
+	if (status = psyfile_write_uint8(self->fp, isbus)) {
+		return status;
+	}
+	return PSY_OK;
 }
 
 //	===================

@@ -64,7 +64,7 @@
 //Version for the machine data
 #define CURRENT_FILE_VERSION_EPAT	0x00000001
 //Version for the machine data
-#define CURRENT_FILE_VERSION_MACD	0x00000002
+#define CURRENT_FILE_VERSION_MACD	0x00000003
 //Version for the instrument (classic sampler) data
 #define CURRENT_FILE_VERSION_INSD	0x00000002
 //Version for the wave (classic sampler) data subchunk (legacy)
