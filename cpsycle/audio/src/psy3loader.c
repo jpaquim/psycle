@@ -60,6 +60,10 @@ static int psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader*,
 static psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 	psy_audio_PSY3Loader*, int32_t index, char* modulename, char* catchername,
 	bool* replaced);
+static int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader*,
+	psy_audio_Machine*);
+static int psy_audio_psy3loader_loadismachinebus(psy_audio_PSY3Loader*,
+	psy_audio_Machine*);
 static void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_postload(psy_audio_PSY3Loader*);
 
@@ -2360,6 +2364,12 @@ int psy_audio_psy3loader_machineloadchunk(
 			return status;
 		}
 	}
+	if (psyfile_currchunkversion(self->fp) >= 2) {
+		psy_audio_psy3loader_loadparammapping(self, machine);
+	}
+	if (psyfile_currchunkversion(self->fp) >= 3) {
+		psy_audio_psy3loader_loadismachinebus(self, machine);
+	}
 	return PSY_OK;
 }
 
@@ -2390,6 +2400,55 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 		*replaced = TRUE;
 	}
 	return machine;
+}
+
+int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader* self, 
+	psy_audio_Machine* machine)
+{
+	uint8_t nummaps;
+	uint8_t i;
+	int status;
+
+	if (!psyfile_expect(self->fp, "PMAP", 4)) {
+		return PSY_ERRFILE;
+	}
+	if (status = psyfile_read(self->fp, &nummaps, sizeof(uint8_t))) {
+		return status;
+	}
+	for (i = 0; i < nummaps; ++i) {
+		uint8_t idx;
+		uint16_t value;		
+
+		if (status = psyfile_read(self->fp, &idx, sizeof(idx))) {
+			return status;
+		}
+		if (status = psyfile_read(self->fp, &value, sizeof(value))) {
+			return status;
+		}
+		//set_virtual_param_index(idx, value);
+	}
+	return PSY_OK;
+}
+
+int psy_audio_psy3loader_loadismachinebus(psy_audio_PSY3Loader* self,
+	psy_audio_Machine* machine)
+{
+	uint8_t isbus;
+	int status;
+
+	assert(self);
+	assert(machine);
+
+	if (!psyfile_expect(self->fp, "PBUS", 4)) {
+		return PSY_ERRFILE;
+	}
+	if (status = psyfile_read(self->fp, &isbus, sizeof(uint8_t))) {
+		return status;
+	}
+	if (isbus) {
+		psy_audio_machine_setbus(machine);
+	}
+	return PSY_OK;
 }
 
 int psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader* self)

@@ -1,20 +1,21 @@
 C-Psycle is a variant of Psycle in "C" language (instead of C++, except
-some plugin and driver apis are written in C++) with the goal of being
+of some plugin and driver apis written in C++) with the goal of being
 compatible with mfc-psycle and sharing as much features as possible.
 Work is now done to reach the point of releasing a 1.0 version, mainly
 finishing the stackview, completing a instrument zone structure rather than
-the a notepair map, fixing some incompatibilities in XMSampler and the
+a notepair map, fixing some incompatibilities in XMSampler and the
 psy fileformat.
 
 If anyone wants to try it, it should be easier to compile with visual studio
 2019 than Psycle, but at this point it still requires Psycle plugins and some
 manual changes to code for correct configuration.
 
-The core of is sequencer based and completly separated from the ui and makes it
-possbile to build the command line player under linux. Audio and Event Input
+The audio core is sequencer based and completly separated from the ui and makes
+it possbile to build the command line player under linux. Audio and event input
 (Midi/keyboard) are driver orientated.
 The ui was reduced from mfc to win32 and bridged to allow in the future a
 toolkit for posix aswell.
+Besides english, the host can be viewed in spanish aswell (except the help files).
 
 Structure of the host
 
@@ -47,11 +48,13 @@ Compiling
 
 MS-Windows
 
-Momentarily it compiles only with the VC2019(x86/x64 Win10), the other builds
-needs to be updated. VC6/2008 are not updated or tested at every commit. If
-this is done it will compile with VC6 x86 (win98), VC2008(x86 XP SP1), too.
-Install on older platforms the DirectX SDK and add the include/lib
-sdk directories (Tools/Options/Directories).
+It compiles only with the VC2019(x86/x64 Win10), other builds needs to be
+updated. VC6/2008 are not updated or tested at every commit but if so it will
+compile with VC6 x86 (win98), VC2008(x86 XP SP1), too. Install on older
+platforms the DirectX SDK and add the include/lib sdk directories
+(Tools/Options/Directories).
+At this point the host will run, but for loading the native plugins you need
+some modules from an existing psycle mfc installation.
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
 installation to the output dir(cpsycle/debug and cpsycle/release).
 Only in VC6 set the working dir (host project settings) to
@@ -97,13 +100,7 @@ Command Line Help:
 No options and no filename: prints help
 
 Posix Host:
-The X11 part is unfinished, but to build execute the makefiles in the src
-directories of audio, container, dsp, file, ui, build the alsa driver and
-finally the host. The devel libs for X11 with xft, freetype, xmu, xshape and
-in case of building the alsa driver (linux) the alsa devel libs needs to be
-installed. Other unix sound systems driver don't exist, but we wrote in the
-past for qpsycle some (jack, esound, oss). The psycle, qpsycle, cpsycle drivers
-are very simililar, so they can be added later. Unfortunatley the makefiles of
-the qpsycle plugins aren't working completly on a recent system without fixing
-them manually, thus only the internal plugins are currently available.
+
+The host part for linux is unfinished and we still have to decide which ui
+toolkit to fill the implementation side of the psycle ui bridge.
 
