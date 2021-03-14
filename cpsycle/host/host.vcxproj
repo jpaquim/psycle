@@ -336,6 +336,7 @@
     <ClCompile Include="src\machineeditorview.c" />
     <ClCompile Include="src\machineframe.c" />
     <ClCompile Include="src\machineparamconfig.c" />
+    <ClCompile Include="src\machineproperties.c" />
     <ClCompile Include="src\machinesbox.c" />
     <ClCompile Include="src\machinestackview.c" />
     <ClCompile Include="src\machineui.c" />
@@ -480,6 +481,7 @@
     <ClInclude Include="src\machineeditorview.h" />
     <ClInclude Include="src\machineframe.h" />
     <ClInclude Include="src\machineparamconfig.h" />
+    <ClInclude Include="src\machineproperties.h" />
     <ClInclude Include="src\machinesbox.h" />
     <ClInclude Include="src\machinestackview.h" />
     <ClInclude Include="src\machineui.h" />

@@ -47,15 +47,16 @@ struct psy_audio_Machines;
 
 typedef struct MachineStackColumn {
 	uintptr_t column;
+	uintptr_t inputroute;
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
 	psy_audio_IntMachineParam level_param;
 	OutputRouteParam outputroute;
-	psy_audio_Machines* machines;	
+	struct MachineStackState* state;
 } MachineStackColumn;
 
-void machinestackcolumn_init(MachineStackColumn*,
-	uintptr_t column, psy_audio_Machines*, struct MachineStackState*);
+void machinestackcolumn_init(MachineStackColumn*, uintptr_t column,
+	uintptr_t inputroute, struct MachineStackState*);
 void machinestackcolumn_dispose(MachineStackColumn*);
 
 void machinestackcolumn_setwire(MachineStackColumn*, psy_audio_Wire);
@@ -67,9 +68,6 @@ INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* s
 }
 
 void machinestackcolumn_append(MachineStackColumn*, uintptr_t macid);
-uintptr_t machinestackcolumn_insert_effect(MachineStackColumn*,
-	uintptr_t insertpos, uintptr_t destmac, psy_audio_Machine*);
-
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
 uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn*,
 	uintptr_t index);
@@ -101,7 +99,7 @@ void machinestackstate_dispose(MachineStackState*);
 void machinestackstate_buildcolumns(MachineStackState*);
 void machinestackstate_setmachines(MachineStackState*, psy_audio_Machines*);
 MachineStackColumn* machinestackstate_insertcolumn(MachineStackState*,
-	uintptr_t column);
+	uintptr_t column, uintptr_t inputroute);
 MachineStackColumn* machinestackstate_column(MachineStackState*,
 	uintptr_t column);
 MachineStackColumn* machinestackstate_selectedcolumn(MachineStackState*);

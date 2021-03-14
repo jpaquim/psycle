@@ -26,7 +26,7 @@ typedef struct {
 
 void machinecoords_init(MachineCoords*);
 
-typedef struct {
+typedef struct MachineViewSkin {
 	MachineCoords master;
 	MachineCoords generator;
 	MachineCoords effect;

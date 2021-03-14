@@ -176,7 +176,7 @@ void machinewireview_setmachines(MachineWireView* self,
 		psy_signal_connect(&self->machines->connections.signal_connected, self,
 			machinewireview_onconnected);
 		psy_signal_connect(&self->machines->connections.signal_disconnected, self,
-			machinewireview_ondisconnected);		
+			machinewireview_ondisconnected);
 	}
 	machinewireview_buildmachineuis(self);
 }
@@ -664,10 +664,11 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 				}
 				psy_ui_mouseevent_stoppropagation(ev);
 			} else if (ev->button == 2) {
-				if (!self->workspace->gearvisible) {
-					workspace_togglegear(self->workspace);					
-				}
-				psy_ui_mouseevent_stoppropagation(ev);
+				//if (!self->workspace->gearvisible) {
+
+					//workspace_togglegear(self->workspace);					
+				//}
+				//psy_ui_mouseevent_stoppropagation(ev);
 			}			
 		}
 	}

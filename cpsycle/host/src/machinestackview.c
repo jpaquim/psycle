@@ -5,14 +5,14 @@
 
 #include "machinestackview.h"
 // host
+#include "knobui.h"
 #include "machineviewbar.h"
 #include "slidergroupui.h"
-#include "switchui.h"
-#include "knobui.h"
 // audio
 #include <exclusivelock.h>
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 // RouteMachineParam
 static void outputrouteparam_tweak(OutputRouteParam*, float val);
@@ -243,13 +243,14 @@ static void  machinestackcolumn_level_normvalue(MachineStackColumn*,
 	psy_audio_IntMachineParam* sender, float* rv);
 // implementation
 void machinestackcolumn_init(MachineStackColumn* self, uintptr_t column,
-	psy_audio_Machines* machines, MachineStackState* state)
+	uintptr_t inputroute, MachineStackState* state)
 {
+	self->state = state;
 	self->column = column;
+	self->inputroute = inputroute;
 	self->chain = NULL;
-	self->wirevolume = NULL;
-	self->machines = machines;
-	outputrouteparam_init(&self->outputroute, self->machines, column, state);
+	self->wirevolume = NULL;	
+	outputrouteparam_init(&self->outputroute, state->machines, column, state);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
@@ -273,10 +274,10 @@ void machinestackcolumn_setwire(MachineStackColumn* self, psy_audio_Wire wire)
 		psy_audio_wiremachineparam_deallocate(self->wirevolume);
 		self->wirevolume = NULL;
 	}	
-	machine = psy_audio_machines_at(self->machines, wire.src);
+	machine = psy_audio_machines_at(self->state->machines, wire.src);
 	if (machine) {
 		self->wirevolume = psy_audio_wiremachineparam_allocinit(
-			psy_audio_machine_editname(machine), wire, self->machines);
+			psy_audio_machine_editname(machine), wire, self->state->machines);
 	}
 }
 
@@ -291,57 +292,6 @@ psy_audio_Wire machinestackcolumn_outputwire(MachineStackColumn* self)
 void machinestackcolumn_append(MachineStackColumn* self, uintptr_t macid)
 {
 	psy_list_append(&self->chain, (void*)macid);	
-}
-
-uintptr_t machinestackcolumn_insert_effect(MachineStackColumn* self,
-	uintptr_t insertpos, uintptr_t destmac, psy_audio_Machine* machine)
-{
-	uintptr_t mac;
-	uintptr_t lastmac;	
-
-	assert(self);
-	assert(self->machines);
-
-	if (self->chain) {
-		uintptr_t slot;
-		psy_audio_Machine* machine;
-
-		slot = machinestackcolumn_at(self, 0);
-		machine = psy_audio_machines_at(self->machines, slot);
-		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
-				psy_audio_machine_isbus(machine)) {
-			// skip generator/bus machine
-			++insertpos;
-		}
-	}
-	mac = psy_audio_machines_append(self->machines, machine);
-	if (insertpos == psy_INDEX_INVALID) { // append
-		lastmac = machinestackcolumn_lastbeforemaster(self);
-	} else {
-		lastmac = machinestackcolumn_lastbeforeindex(self, insertpos);
-	}	
-	if (lastmac != psy_INDEX_INVALID) {				
-		if (destmac == psy_INDEX_INVALID) {
-			if ((machinestackcolumn_last(self) == psy_audio_MASTER_INDEX)) {
-				destmac = psy_audio_MASTER_INDEX;
-			}
-		} else {
-			destmac = machinestackcolumn_at(self, insertpos);
-		}
-		psy_audio_exclusivelock_enter();
-		if (destmac != psy_INDEX_INVALID) {
-			psy_audio_machines_disconnect(self->machines,
-				psy_audio_wire_make(lastmac, destmac));
-		}
-		psy_audio_machines_connect(self->machines,
-			psy_audio_wire_make(lastmac, mac));
-		if (destmac != psy_INDEX_INVALID) {
-			psy_audio_machines_connect(self->machines,
-				psy_audio_wire_make(mac, destmac));
-		}
-		psy_audio_exclusivelock_leave();
-	}
-	return mac;
 }
 
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn* self)
@@ -430,7 +380,7 @@ void  machinestackcolumn_level_normvalue(MachineStackColumn* self,
 	psy_audio_Buffer* memory;
 
 	*rv = 0.f;	
-	machine = psy_audio_machines_at(self->machines,
+	machine = psy_audio_machines_at(self->state->machines,
 		machinestackcolumn_lastbeforemaster(self));
 	if (machine) {
 		memory = psy_audio_machine_buffermemory(machine);
@@ -448,7 +398,7 @@ void  machinestackcolumn_level_normvalue(MachineStackColumn* self,
 // MachineStackState
 // prototypes
 static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
-	uintptr_t slot, uintptr_t columnindex, bool first);
+	uintptr_t slot, uintptr_t prevslot, uintptr_t columnindex, bool first);
 // implementation
 void machinestackstate_init(MachineStackState* self, MachineViewBar* statusbar)
 {
@@ -486,7 +436,7 @@ void machinestackstate_setmachines(MachineStackState* self,
 }
 
 MachineStackColumn* machinestackstate_insertcolumn(MachineStackState* self,
-	uintptr_t columnindex)
+	uintptr_t columnindex, uintptr_t inputroute)
 {
 	MachineStackColumn* column;
 	
@@ -496,7 +446,7 @@ MachineStackColumn* machinestackstate_insertcolumn(MachineStackState* self,
 		free(column);
 	}
 	column = (MachineStackColumn*)malloc(sizeof(MachineStackColumn));
-	machinestackcolumn_init(column, columnindex, self->machines, self);
+	machinestackcolumn_init(column, columnindex, inputroute, self);
 	psy_table_insert(&self->columns, columnindex, column);
 	return column;
 }
@@ -572,11 +522,12 @@ void machinestackstate_buildcolumns(MachineStackState* self)
 		
 		inputs = machinestackstate_inputs(self);
 		if (inputs == 0) {
-			machinestackstate_buildcolumnoutchain(self, psy_INDEX_INVALID, 0, TRUE);
+			machinestackstate_buildcolumnoutchain(self, psy_INDEX_INVALID, 0, psy_INDEX_INVALID, TRUE);
 		} else {
 			columnindex = 0;
 			for (p = inputs; p != NULL; psy_list_next(&p)) {
-				columnindex = machinestackstate_buildcolumnoutchain(self, (uintptr_t)(p->entry),
+				columnindex = machinestackstate_buildcolumnoutchain(self,
+					(uintptr_t)(p->entry), psy_INDEX_INVALID,
 					columnindex, TRUE) + 1;
 			}
 			psy_list_free(inputs);
@@ -604,7 +555,7 @@ void machinestackstate_buildcolumns(MachineStackState* self)
 }
 
 uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self, uintptr_t slot,
-	uintptr_t columnindex, bool first)
+	uintptr_t prevslot, uintptr_t columnindex, bool first)
 {
 	uintptr_t rv;
 	MachineStackColumn* column;
@@ -617,7 +568,7 @@ uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self, uintptr
 	rv = columnindex;
 	column = machinestackstate_column(self, columnindex);
 	if (!machinestackstate_column(self, columnindex)) {
-		column = machinestackstate_insertcolumn(self, columnindex);
+		column = machinestackstate_insertcolumn(self, columnindex, prevslot);
 	}
 	machinestackcolumn_append(column, slot);
 	machine = psy_audio_machines_at(self->machines, slot);
@@ -637,7 +588,7 @@ uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self, uintptr
 			socket = (psy_audio_WireSocket*)psy_audio_wiresockets_at(
 				&sockets->outputs, i);
 			if (socket && socket->slot != psy_INDEX_INVALID) {				
-				rv = machinestackstate_buildcolumnoutchain(self, socket->slot,
+				rv = machinestackstate_buildcolumnoutchain(self, socket->slot, slot,
 					rv + c, FALSE);
 				++c;
 			}
@@ -921,6 +872,90 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 	}	
 }
 
+// MachineStackPaneTrack
+static void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack*,
+	psy_ui_MouseEvent*);
+// vtable
+static psy_ui_ComponentVtable machinestackpanetrack_vtable;
+static bool machinestackpanetrack_vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
+	MachineStackPaneTrack* self)
+{
+	if (!machinestackpanetrack_vtable_initialized) {
+		machinestackpanetrack_vtable = *(self->component.vtable);
+		machinestackpanetrack_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
+			machinestackpanetrack_onmousedoubleclick;
+		machinestackpanetrack_vtable_initialized = TRUE;
+	}
+	return &machinestackpanetrack_vtable;
+}
+
+void machinestackpanetrack_init(MachineStackPaneTrack* self,
+	psy_ui_Component* parent, uintptr_t column, psy_ui_Component* view,
+	MachineStackState* state, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setvtable(&self->component,
+		machinestackpanetrack_vtable_init(self));
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(&self->component,
+		psy_ui_ALIGN_TOP,
+		psy_ui_margin_make(
+			psy_ui_value_makepx(20.0), psy_ui_value_makepx(20.0),
+			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));
+	self->column = column;
+	self->state = state;
+	self->workspace = workspace;
+}
+
+void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
+	psy_ui_MouseEvent* ev)
+{
+	MachineStackColumn* column;
+
+	self->state->columnselected = TRUE;
+	column = machinestackstate_column(self->state, self->column);
+	if (column && column->chain) {
+		psy_List* p;
+		psy_List* q;
+		uintptr_t effect;
+		uintptr_t c;
+
+		q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
+		effect = psy_INDEX_INVALID;
+		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
+			psy_ui_Component* component;
+			psy_ui_RealRectangle position;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			position = psy_ui_component_position(component);
+			if (position.bottom > ev->pt.y) {
+				break;
+			}
+			if (psy_ui_realrectangle_intersect(&position, ev->pt)) {
+				effect = c;
+				break;
+			}
+		}
+		if (effect == psy_INDEX_INVALID) {
+			self->state->effectinsertpos = c;
+			self->state->effectinsertright =
+				(ev->pt.x > psy_ui_value_px(&self->state->effectsize.width,
+					psy_ui_component_textmetric(&self->component)));
+			self->state->selected = self->column;
+			workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
+			psy_ui_mouseevent_stoppropagation(ev);
+		} else {
+			self->state->effectinsertpos = psy_INDEX_INVALID;
+			self->state->effectinsertright = FALSE;
+		}
+	}
+}
+
 // MachineStackPane
 static void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 	psy_ui_MouseEvent* ev);
@@ -1135,89 +1170,6 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 	psy_ui_component_align(&self->component);
 }
 
-// machinestackpanetrack
-static void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack*,
-	psy_ui_MouseEvent*);
-// vtable
-static psy_ui_ComponentVtable machinestackpanetrack_vtable;
-static bool machinestackpanetrack_vtable_initialized = FALSE;
-
-static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
-	MachineStackPaneTrack* self)
-{
-	if (!machinestackpanetrack_vtable_initialized) {
-		machinestackpanetrack_vtable = *(self->component.vtable);		
-		machinestackpanetrack_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
-			machinestackpanetrack_onmousedoubleclick;
-		machinestackpanetrack_vtable_initialized = TRUE;
-	}
-	return &machinestackpanetrack_vtable;
-}
-
-void machinestackpanetrack_init(MachineStackPaneTrack* self,
-	psy_ui_Component* parent, uintptr_t column, psy_ui_Component* view,
-	MachineStackState* state, Workspace* workspace)
-{
-	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setvtable(&self->component,
-		machinestackpanetrack_vtable_init(self));
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_TOP,
-		psy_ui_margin_make(
-			psy_ui_value_makepx(20.0), psy_ui_value_makepx(20.0),
-			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));	
-	self->column = column;
-	self->state = state;
-	self->workspace = workspace;
-}
-
-void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
-	psy_ui_MouseEvent* ev)
-{	
-	MachineStackColumn* column;
-
-	self->state->columnselected = TRUE;
-	column = machinestackstate_column(self->state, self->column);
-	if (column && column->chain) {
-		psy_List* p;
-		psy_List* q;
-		uintptr_t effect;
-		uintptr_t c;
-
-		q = psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE);
-		effect = psy_INDEX_INVALID;
-		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
-			psy_ui_Component* component;
-			psy_ui_RealRectangle position;
-
-			component = (psy_ui_Component*)psy_list_entry(p);
-			position = psy_ui_component_position(component);
-			if (position.bottom > ev->pt.y) {
-				break;
-			}
-			if (psy_ui_realrectangle_intersect(&position, ev->pt)) {
-				effect = c;
-				break;
-			}
-		}
-		if (effect == psy_INDEX_INVALID) {
-			self->state->effectinsertpos = c;
-			self->state->effectinsertright =
-				(ev->pt.x > psy_ui_value_px(&self->state->effectsize.width,
-					psy_ui_component_textmetric(&self->component)));
-			self->state->selected = self->column;
-			workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
-			psy_ui_mouseevent_stoppropagation(ev);
-		} else {
-			self->state->effectinsertpos = psy_INDEX_INVALID;
-		}
-	}
-}
-
 // MachineStackView
 // prototypes
 static void machinestackview_destroy(MachineStackView*);
@@ -1399,35 +1351,63 @@ void machinestackview_build(MachineStackView* self)
 void machinestackview_addeffect(MachineStackView* self,
 	const psy_audio_MachineInfo* machineinfo)
 {
-	if (machinestackstate_selectedcolumn(&self->state)) {
-		uintptr_t destmac;
+	psy_audio_Machine* effect;	
+	
+	effect = psy_audio_machinefactory_make_info(
+		&self->workspace->machinefactory, machineinfo);	
+	if (effect) {
+		uintptr_t macid;
+		MachineStackColumn* insertcolumn;
 
-		destmac = psy_INDEX_INVALID;
-		if (self->state.effectinsertright) {
-			MachineStackColumn* column;
+		macid = psy_audio_machines_append(self->state.machines, effect);		
+		insertcolumn = machinestackstate_selectedcolumn(&self->state);
+		if (insertcolumn) {
+			uintptr_t firstmacid;
+			bool hasinput;
+			uintptr_t insertpos;
+			psy_audio_Machine* input;
+			uintptr_t prevmacid;
+			uintptr_t nextmacid;
 
-			column = machinestackstate_column(&self->state,
-				self->state.selected + 1);
-			if (column) {
-				uintptr_t first;
-
-				first = machinestackcolumn_at(column, 0);
-				if (first != psy_INDEX_INVALID) {
-					psy_audio_Machine* machine;
-
-					machine = psy_audio_machines_at(self->state.machines, first);
-					if (psy_audio_machine_type(machine) == psy_audio_MACHMODE_FX) {
-						destmac = first;
-					}
+			firstmacid = machinestackcolumn_at(insertcolumn, 0);
+			prevmacid = psy_INDEX_INVALID;
+			nextmacid = psy_INDEX_INVALID;
+			input = psy_audio_machines_at(self->state.machines, firstmacid);
+			hasinput = (input && (psy_audio_machine_isbus(input) ||
+				psy_audio_machine_mode(input) == psy_audio_MACHMODE_GENERATOR));
+			insertpos = self->state.effectinsertpos;
+			if (!hasinput) {
+				if (self->state.effectinsertpos > 0) {
+					insertpos -= 1;
+				} else {
+					insertpos = psy_INDEX_INVALID;
 				}
 			}
-		}
-		psy_audio_machines_select(self->state.machines,
-			machinestackcolumn_insert_effect(
-				machinestackstate_selectedcolumn(&self->state),
-				self->state.effectinsertpos,
-				destmac,
-				psy_audio_machinefactory_make_info(
-					&self->workspace->machinefactory, machineinfo)));
+			if (insertpos != psy_INDEX_INVALID) {
+				prevmacid = machinestackcolumn_at(insertcolumn, insertpos);
+			} else {
+				prevmacid = insertcolumn->inputroute;
+				nextmacid = machinestackcolumn_at(insertcolumn, 0);
+			}
+			if (self->state.effectinsertright) {
+				nextmacid = psy_INDEX_INVALID;
+			} else if (insertpos != psy_INDEX_INVALID) {
+				nextmacid = machinestackcolumn_at(insertcolumn, insertpos + 1);				
+			}
+			if (prevmacid != psy_INDEX_INVALID) {
+				psy_audio_exclusivelock_enter();
+				psy_audio_machines_connect(self->state.machines,
+					psy_audio_wire_make(prevmacid, macid));								
+				psy_audio_exclusivelock_leave();
+			}
+			if (nextmacid != psy_INDEX_INVALID) {
+				psy_audio_exclusivelock_enter();
+				psy_audio_machines_disconnect(self->state.machines,
+					psy_audio_wire_make(prevmacid, nextmacid));
+				psy_audio_machines_connect(self->state.machines,
+					psy_audio_wire_make(macid, nextmacid));
+				psy_audio_exclusivelock_leave();
+			}
+		}		
 	}
 }

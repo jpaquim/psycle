@@ -436,6 +436,9 @@
     <ClCompile Include="src\slidergroupui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\machineproperties.c">
+      <Filter>machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -844,6 +847,9 @@
     </ClInclude>
     <ClInclude Include="src\slidergroupui.h">
       <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineproperties.h">
+      <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
