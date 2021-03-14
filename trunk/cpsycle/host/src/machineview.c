@@ -78,6 +78,11 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		dirconfig_skins(&self->workspace->config.directories));	
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
+	// Machine Properties
+	machineproperties_init(&self->properties, &self->component, NULL,
+		&self->skin, workspace);
+	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->properties.component);
 	psy_ui_notebook_init(&self->notebook, &self->component);	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
@@ -151,7 +156,10 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 2) {
 		if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
-			workspace_togglegear(self->workspace);
+			if (!psy_ui_component_visible(&self->properties.component)) {
+				psy_ui_component_show_align(&self->properties.component);
+			}
+			// workspace_togglegear(self->workspace);
 		} else if (tabbar_selected(&self->tabbar) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
 			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);			
