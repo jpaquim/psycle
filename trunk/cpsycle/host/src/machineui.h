@@ -43,8 +43,7 @@ void vuvalues_tickcounter(VuValues*);
 void vuvalues_update(VuValues*, psy_audio_Buffer*);
 
 typedef struct VuDisplay {
-	// internal
-	psy_ui_RealRectangle position;
+	// internal	
 	VuValues vuvalues;
 	// references
 	MachineViewSkin* skin;

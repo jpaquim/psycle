@@ -866,8 +866,10 @@ void handle_mouseevent(psy_ui_Component* component,
 	default:
 		break;
 	}
-	fp(component, &ev);
-	psy_signal_emit(signal, component, 1, &ev);
+	if (ev.bubble != FALSE) {
+		fp(component, &ev);
+		psy_signal_emit(signal, component, 1, &ev);
+	}
 	if (ev.bubble != FALSE) {
 		sendmessagetoparent(winimp, message, wParam, lParam);
 	}	

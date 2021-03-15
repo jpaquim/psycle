@@ -22,6 +22,9 @@
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
 #include "imps/x11/uix11app.h"
 #include "imps/x11/uix11impfactory.h"
+#elif PSYCLE_USE_TK == PSYCLE_TK_GTK
+#include "imps/gtk/uigtkapp.h"
+#include "imps/gtk/uigtkimpfactory.h"
 #else
 	#error "Platform not supported"
 #endif
@@ -90,6 +93,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 
 	app = self;
 	self->main = NULL;
+	self->capture = NULL;	
 	self->alignvalid = TRUE;
 	psy_ui_geometry_init();
 	psy_signal_init(&self->signal_dispose);	
@@ -122,6 +126,9 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	self->imp_factory = (psy_ui_ImpFactory*)
 		psy_ui_x11_impfactory_allocinit();	
 	printf("X11 Impfactory created\n");
+#elif PSYCLE_USE_TK == PSYCLE_TK_GTK
+	self->imp_factory = (psy_ui_ImpFactory*)
+		psy_ui_gtk_impfactory_allocinit();
 #else
 	#error "Platform not supported"
 #endif	

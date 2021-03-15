@@ -16,6 +16,7 @@
 #include "uiwingraphicsimp.h"
 // details
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 static BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 
@@ -88,6 +89,8 @@ static void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 static void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 static void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 static void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
+static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Component* src,
+	psy_ui_Component* dst);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -506,7 +509,7 @@ psy_ui_Component* dev_parent(psy_ui_win_ComponentImp* self)
 
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap,
-		(uintptr_t)GetParent(self->hwnd));
+		(uintptr_t)GetParent(self->hwnd));	
 	return imp ? imp->component : 0;
 }
 
@@ -1027,60 +1030,93 @@ void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			ev->pt.y -= r.top;
 			child->imp->vtable->dev_mousedown(child->imp, ev);
 			ev->pt.x += r.left;
-			ev->pt.y += r.top;
-			child->vtable->onmousedown(child, ev);
+			ev->pt.y += r.top;			
 			break;
 		}
-	}
+	}	
 }
 
 void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
-	psy_List* p;
+	if (psy_ui_app()->capture) {
+		psy_ui_RealPoint translation;
 
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
+		translation = translatecoords(self, psy_ui_app()->capture,
+			self->component);
+		psy_ui_realpoint_sub(&ev->pt, translation);
+		psy_ui_app()->capture->vtable->onmouseup(psy_ui_app()->capture, ev);
+		psy_ui_realpoint_add(&ev->pt, translation);
+	} else {
+		psy_List* p;
 
-		child = (psy_ui_Component*)p->entry;
-		r = psy_ui_component_position(child);
-		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
-			child->imp->vtable->dev_mouseup(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
-			child->vtable->onmouseup(child, ev);
-			break;
+		for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* child;
+			psy_ui_RealRectangle r;
+
+			child = (psy_ui_Component*)p->entry;
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;
+				child->imp->vtable->dev_mouseup(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;				
+				break;
+			}
 		}
+	}	
+}
+
+psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = psy_ui_component_parent(src);
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
 	}
+	return rv;
 }
 
 void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
-{
-	psy_List* p;
+{	
+	if (psy_ui_app()->capture) {
+		psy_ui_Component* capture;
+		psy_ui_RealPoint translation;
+		
+		capture = psy_ui_app()->capture;
+		translation = translatecoords(self, capture, self->component);
+		psy_ui_realpoint_sub(&ev->pt, translation);			
+		capture->vtable->onmousemove(capture, ev);
+		psy_ui_realpoint_add(&ev->pt, translation);
+	} else {
+		psy_List* p;
 
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
+		for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* child;
+			psy_ui_RealRectangle r;
 
-		child = (psy_ui_Component*)p->entry;
-		r = psy_ui_component_position(child);
-		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
-			child->imp->vtable->dev_mousemove(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
-			child->vtable->onmousemove(child, ev);
-			break;
+			child = (psy_ui_Component*)p->entry;
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
+				child->imp->vtable->dev_mousemove(child->imp, ev);
+				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
+				break;
+			}
 		}
 	}
 }
 
 void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
-	psy_List* p;
+	psy_List* p;	
 
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* child;
@@ -1091,13 +1127,12 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 			ev->pt.x -= r.left;
 			ev->pt.y -= r.top;
-			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
-			child->vtable->onmousedoubleclick(child, ev);
+			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);			
 			ev->pt.x += r.left;
 			ev->pt.y += r.top;
 			break;
 		}
-	}
+	}	
 }
 
 

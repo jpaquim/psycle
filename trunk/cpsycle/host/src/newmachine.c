@@ -698,7 +698,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->scanending = FALSE;
 	self->mode = NEWMACHINE_APPEND;
-	self->restoresection = psy_INDEX_INVALID;
+	self->restoresection = SECTION_ID_MACHINEVIEW_WIRES;
 	self->selectedplugin = NULL;
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);

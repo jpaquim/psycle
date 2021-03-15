@@ -36,6 +36,8 @@ double psy_ui_appzoom_rate(const psy_ui_AppZoom*);
 
 void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom*, psy_ui_Font*);
 
+struct psy_ui_Component;
+
 // psy_ui_App
 typedef struct psy_ui_App {
 	// signals
@@ -49,6 +51,7 @@ typedef struct psy_ui_App {
 	bool alignvalid;
 	// references
 	struct psy_ui_Component* main;
+	struct psy_ui_Component* capture;	
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -67,6 +70,11 @@ void psy_ui_app_lighttheme(psy_ui_App*);
 void psy_ui_app_darktheme(psy_ui_App*);
 bool psy_ui_app_hasdarktheme(const psy_ui_App*);
 const psy_ui_Style* psy_ui_app_style(const psy_ui_App*, int styletype);
+
+INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
+{
+	return self->capture;
+}
 
 
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)

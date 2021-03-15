@@ -14,6 +14,7 @@
 #define PSYCLE_TK_WIN32 1
 #define PSYCLE_TK_CURSES 2
 #define PSYCLE_TK_XT 3
+#define PSYCLE_TK_GTK 4
 
 #if defined(DIVERSALIS__OS__UNIX)
 #define PSYCLE_USE_TK PSYCLE_TK_XT

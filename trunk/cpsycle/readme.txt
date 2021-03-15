@@ -102,5 +102,5 @@ No options and no filename: prints help
 Posix Host:
 
 The host part for linux is unfinished and we still have to decide which ui
-toolkit to fill the implementation side of the psycle ui bridge.
+toolkit (probably gtk) to fill the implementation side for linux.
 
