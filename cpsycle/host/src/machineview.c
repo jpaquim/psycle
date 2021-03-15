@@ -140,6 +140,11 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 {		
 	if (ev->button == 1 && tabbar_selected(&self->tabbar) ==
 			SECTION_ID_MACHINEVIEW_WIRES) {
+		if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
+			self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_WIRES;
+		} else if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_STACK) {
+			self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
+		}
 		psy_ui_component_selectsection(machineview_base(self),
 			SECTION_ID_MACHINEVIEW_NEWMACHINE,
 			NEWMACHINE_APPEND);
@@ -155,14 +160,14 @@ void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
 void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 2) {
-		if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
+		if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES ||
+			tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_STACK) {
 			if (!psy_ui_component_visible(&self->properties.component)) {
 				psy_ui_component_show_align(&self->properties.component);
-			}
-			// workspace_togglegear(self->workspace);
+			}			
 		} else if (tabbar_selected(&self->tabbar) ==
-				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
-			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);			
+				SECTION_ID_MACHINEVIEW_NEWMACHINE) {			 
+			tabbar_select(&self->tabbar, self->newmachine.restoresection);
 		}
 	}
 }

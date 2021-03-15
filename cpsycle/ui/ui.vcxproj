@@ -224,7 +224,6 @@
     <ClCompile Include="src\imps\win32\uiwinfontimp.c" />
     <ClCompile Include="src\imps\win32\uiwingraphicsimp.c" />
     <ClCompile Include="src\imps\win32\uiwinimpfactory.c" />
-    <ClCompile Include="src\imps\win32\uiwinlabelimp.c" />
     <ClCompile Include="src\imps\win32\uiwinlistboximp.c" />
     <ClCompile Include="src\imps\win32\uiwinopendialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c" />
@@ -285,7 +284,6 @@
     <ClInclude Include="src\imps\win32\uiwinfontimp.h" />
     <ClInclude Include="src\imps\win32\uiwingraphicsimp.h" />
     <ClInclude Include="src\imps\win32\uiwinimpfactory.h" />
-    <ClInclude Include="src\imps\win32\uiwinlabelimp.h" />
     <ClInclude Include="src\imps\win32\uiwinlistboximp.h" />
     <ClInclude Include="src\imps\win32\uiwinopendialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h" />

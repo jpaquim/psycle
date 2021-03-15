@@ -6,84 +6,8 @@
 #include "machineproperties.h"
 // host
 #include "machineviewskin.h"
-// audio
-#include "command.h"
 // platform
 #include "../../detail/portable.h"
-
-// Commands
-typedef struct {
-	psy_Command command;
-	psy_audio_Machine* machine;
-	char* newname;
-	char* oldname;
-	psy_dsp_big_beat_t newlength;
-	psy_dsp_big_beat_t oldlength;
-} MachinePropertiesApplyCommand;
-
-static void machinepropertiesapplycommand_dispose(MachinePropertiesApplyCommand*);
-static void machinepropertiesapplycommand_execute(MachinePropertiesApplyCommand*);
-static void machinepropertiesapplycommand_revert(MachinePropertiesApplyCommand*);
-
-// vtable
-static psy_CommandVtable machinepropertiesapplycommand_vtable;
-static bool machinepropertiesapplycommand_vtable_initialized = FALSE;
-
-static void machinepropertiesapplycommand_vtable_init(MachinePropertiesApplyCommand* self)
-{
-	if (!machinepropertiesapplycommand_vtable_initialized) {
-		machinepropertiesapplycommand_vtable = *(self->command.vtable);
-		machinepropertiesapplycommand_vtable.dispose = (psy_fp_command)
-			machinepropertiesapplycommand_dispose;
-		machinepropertiesapplycommand_vtable.execute = (psy_fp_command)
-			machinepropertiesapplycommand_execute;
-		machinepropertiesapplycommand_vtable.revert = (psy_fp_command)
-			machinepropertiesapplycommand_revert;		
-		machinepropertiesapplycommand_vtable_initialized = TRUE;
-	}
-}
-
-static MachinePropertiesApplyCommand* machinepropertiesapplycommand_allocinit(psy_audio_Machine* machine,
-	const char* name, psy_dsp_big_beat_t length)
-{
-	MachinePropertiesApplyCommand* rv;
-
-	rv = malloc(sizeof(MachinePropertiesApplyCommand));
-	if (rv) {
-		psy_command_init(&rv->command);
-		machinepropertiesapplycommand_vtable_init(rv);
-		rv->command.vtable = &machinepropertiesapplycommand_vtable;
-		rv->machine = machine;
-		rv->newname = strdup(name);
-		rv->newlength = length;
-		rv->oldname = 0;
-	}
-	return rv;
-}
-
-void machinepropertiesapplycommand_dispose(MachinePropertiesApplyCommand* self)
-{
-	free(self->newname);
-	self->newname = 0;
-	free(self->oldname);
-	self->oldname = 0;
-}
-
-void machinepropertiesapplycommand_execute(MachinePropertiesApplyCommand* self)
-{
-	self->oldname = psy_strdup(psy_audio_machine_editname(self->machine));
-	psy_audio_machine_seteditname(self->machine, self->newname);
-	free(self->newname);	
-	self->newname = 0;
-}
-
-void machinepropertiesapplycommand_revert(MachinePropertiesApplyCommand* self)
-{
-	self->newname = strdup(psy_audio_machine_editname(self->machine));
-	psy_audio_machine_seteditname(self->machine, self->oldname);
-	free(self->oldname);
-	self->oldname = 0;	
-}
 
 static void machineproperties_onsongchanged(MachineProperties*, Workspace*,
 	int flag, psy_audio_Song*);
@@ -91,6 +15,8 @@ static void machineproperties_connectsongsignals(MachineProperties*);
 static void machineproperties_ontogglebus(MachineProperties*,
 	psy_ui_Component* sender);
 static void machineproperties_onapply(MachineProperties*,
+	psy_ui_Component* sender);
+static void machineproperties_onremove(MachineProperties*,
 	psy_ui_Component* sender);
 static void machineproperties_onhide(MachineProperties*,
 	psy_ui_Component* sender);
@@ -143,8 +69,11 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
 	machineproperties_updateskin(self);
-	psy_ui_button_init(&self->isbus, &self->component, NULL);
-	psy_ui_button_settext(&self->isbus, "Bus");
+	psy_ui_button_init(&self->issolobypass, &self->component, NULL);
+	psy_ui_button_init_text(&self->ismute, &self->component, NULL,
+		"Mute");
+	psy_ui_button_init_text(&self->isbus, &self->component, NULL,
+		"Bus");
 	psy_signal_connect(&self->isbus.signal_clicked, self,
 		machineproperties_ontogglebus);
 	psy_ui_label_init(&self->namelabel, &self->component);
@@ -155,10 +84,12 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);	
 	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
 		machineproperties_onapply);
-	psy_ui_button_settext(&self->applybutton, "Apply");
-	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_button_settext(&self->applybutton, "Change");	
+	psy_ui_button_init_text_connect(&self->remove, &self->component, NULL,
+		"Delete", self, machineproperties_onremove);
 	psy_ui_button_init_connect(&self->cancel, &self->component, NULL, self,
 		machineproperties_onhide);
+	psy_ui_button_preventtranslation(&self->cancel);
 	psy_ui_button_settext(&self->cancel, "X");
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineproperties_onsongchanged);
@@ -175,10 +106,25 @@ void machineproperties_setmachine(MachineProperties* self,
 			psy_ui_button_highlight(&self->isbus);
 		} else {
 			psy_ui_button_disablehighlight(&self->isbus);
-		}	
+		}
+		if (psy_audio_machine_muted(machine)) {
+			psy_ui_button_highlight(&self->ismute);
+		} else {
+			psy_ui_button_disablehighlight(&self->ismute);
+		}
+		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
+			psy_ui_button_settext(&self->issolobypass, "Solo");
+			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));			
+		} else {
+			psy_ui_button_settext(&self->issolobypass, "Bypass");
+			psy_ui_component_show_align(psy_ui_button_base(&self->isbus));
+		}
 	} else {
+		self->macid = psy_INDEX_INVALID;
 		psy_ui_edit_settext(&self->nameedit, "");
+		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		psy_ui_button_disablehighlight(&self->isbus);
+		psy_ui_button_disablehighlight(&self->ismute);
 	}	
 }
 
@@ -200,7 +146,8 @@ void machineproperties_onapply(MachineProperties* self,
 	psy_ui_Component* sender)
 {
 	if (workspace_song(self->workspace) && self->machine) {
-
+		psy_audio_machine_seteditname(self->machine, 
+			psy_ui_edit_text(&self->nameedit));		
 	}
 }
 void machineproperties_onhide(MachineProperties* self,
@@ -210,9 +157,28 @@ void machineproperties_onhide(MachineProperties* self,
 
 }
 
+void machineproperties_onremove(MachineProperties* self,
+	psy_ui_Component* sender)
+{
+	if (self->macid != psy_INDEX_INVALID) {
+		uintptr_t macid;
+
+		macid = self->macid;				
+		machineproperties_setmachine(self, NULL);
+		psy_audio_machines_remove(self->machines, macid, TRUE);
+	}
+}
 
 void machineproperties_onkeydown(MachineProperties* self, psy_ui_KeyEvent* ev)
 {
+	if (ev->keycode == psy_ui_KEY_RETURN) {
+		machineproperties_onapply(self, &self->component);
+		psy_ui_keyevent_preventdefault(ev);
+	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		psy_ui_edit_settext(&self->nameedit,
+			psy_audio_machine_editname(self->machine));
+		psy_ui_keyevent_preventdefault(ev);
+	}	
 	psy_ui_keyevent_stoppropagation(ev);
 }
 

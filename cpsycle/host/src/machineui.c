@@ -59,8 +59,7 @@ void vudisplay_init(VuDisplay* self, MachineViewSkin* skin,
 	MachineCoords* coords)
 {
 	self->skin = skin;
-	self->coords = coords;
-	psy_ui_realrectangle_init(&self->position);
+	self->coords = coords;	
 	vuvalues_init(&self->vuvalues);
 }
 

@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uiviewcomponentimp.h"
+// local
+#include "uiapp.h"
 // platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -68,6 +70,8 @@ static void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 static void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
 static void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
 static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
+static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*, psy_ui_Component* src,
+	psy_ui_Component* dst);
 
 // VTable init
 static psy_ui_ComponentImpVTable view_imp_vtable;
@@ -151,7 +155,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 
 void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	struct psy_ui_Component* component,
-	psy_ui_ComponentImp* parent,
+	psy_ui_Component* parent,
 	psy_ui_Component* view,
 	const char* classname,
 	int x, int y, int width, int height,
@@ -164,8 +168,9 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->imp.vtable = &view_imp_vtable;
 	self->view = view;
 	self->component = component;
+	self->parent = parent;
 	if (parent) {
-		parent->vtable->dev_insert(parent, &self->imp, NULL);
+		parent->imp->vtable->dev_insert(parent->imp, &self->imp, NULL);		
 	}
 	psy_ui_realrectangle_init_all(&self->position,
 		psy_ui_realpoint_make(x, y),
@@ -175,7 +180,11 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 
 void view_dev_dispose(psy_ui_ViewComponentImp* self)
 {	
+	if (self->component == psy_ui_app_capture(psy_ui_app())) {
+		psy_ui_component_releasecapture(self->view);		
+	}
 	psy_ui_componentimp_dispose(&self->imp);
+	self->parent = NULL;
 }
 
 void view_dev_clear(psy_ui_ViewComponentImp* self)
@@ -204,7 +213,7 @@ psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_alloc(void)
 
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_allocinit(
 	struct psy_ui_Component* component,
-	psy_ui_ComponentImp* parent,
+	psy_ui_Component* parent,
 	psy_ui_Component* view,
 	const char* classname,
 	int x, int y, int width, int height,
@@ -348,11 +357,12 @@ void view_dev_scrollto(psy_ui_ViewComponentImp* self, intptr_t dx, intptr_t dy)
 
 psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp* self)
 {
-	return NULL;
+	return self->parent;
 }
 
 void view_dev_setparent(psy_ui_ViewComponentImp* self, psy_ui_Component* parent)
 {
+	self->parent = parent;
 }
 
 void view_dev_insert(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child,
@@ -392,25 +402,62 @@ void view_dev_setorder(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp*
 
 void view_dev_capture(psy_ui_ViewComponentImp* self)
 {
+	psy_ui_app()->capture = self->component;
+	self->view->imp->vtable->dev_capture(self->view->imp);
 }
 
 void view_dev_releasecapture(psy_ui_ViewComponentImp* self)
 {
+	self->view->imp->vtable->dev_releasecapture(self->view->imp);
 }
 
 void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 {	
-	psy_ui_component_invalidaterect(self->view, 
-		psy_ui_component_position(self->component));
+	psy_ui_RealSize size;
+	psy_ui_RealRectangle r;
+
+	size = psy_ui_component_sizepx(self->component);
+	r = psy_ui_realrectangle_make(
+		psy_ui_realpoint_zero(),
+		size);	
+	view_dev_invalidaterect(self, &r);
 }
 
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (r) {
-		psy_ui_component_invalidaterect(self->view, *r);
+	if (r) {		
+		psy_ui_RealPoint translation;
+		psy_ui_RealRectangle position;
+		
+		translation = translatecoords(self, self->component, self->view);
+		position = psy_ui_component_position(self->component);
+		psy_ui_component_invalidaterect(self->view,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					position.left + r->left + translation.x,
+					position.top + r->top + translation.y),
+				psy_ui_realrectangle_size(r)));
 	}
 }
+
+psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = psy_ui_component_parent(src);
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
+}
+
 
 void view_dev_update(psy_ui_ViewComponentImp* self)
 {
@@ -539,7 +586,7 @@ psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 
 void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 {
-	psy_List* p;
+	psy_List* p;	
 
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* child;
@@ -550,10 +597,12 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mousedown(child->imp, ev);
-			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-			child->vtable->onmousedown(child, ev);
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));			
 			break;
 		}
+	}
+	if (ev->bubble) {
+		self->component->vtable->onmousedown(self->component, ev);
 	}
 }
 
@@ -570,30 +619,35 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mouseup(child->imp, ev);
-			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-			child->vtable->onmouseup(child, ev);
+			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));			
 			break;
 		}
+	}
+	if (ev->bubble) {
+		self->component->vtable->onmouseup(self->component, ev);
 	}
 }
 
 void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
-{
+{	
 	psy_List* p;
-
+		
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
 
 		child = (psy_ui_Component*)psy_list_entry(p);
 		r = psy_ui_component_position(child);
-		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-			child->imp->vtable->dev_mousemove(child->imp, ev);
+		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {				
+			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));				
+			child->imp->vtable->dev_mousemove(child->imp, ev);				
 			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-			child->vtable->onmousemove(child, ev);
+								
 			break;
 		}
+	}
+	if (ev->bubble) {
+		self->component->vtable->onmousemove(self->component, ev);
 	}
 }
 
@@ -610,9 +664,11 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 			psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);			
-			child->vtable->onmousedoubleclick(child, ev);
 			psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 			break;
 		}
+	}
+	if (ev->bubble) {
+		self->component->vtable->onmousedoubleclick(self->component, ev);
 	}
 }

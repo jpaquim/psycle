@@ -28,7 +28,6 @@ static void effectui_drawpanning(EffectUi*, psy_ui_Graphics*);
 static void effectui_drawmute(EffectUi*, psy_ui_Graphics*);
 static void effectui_drawbypassed(EffectUi*, psy_ui_Graphics*);
 static bool effectui_hittesteditname(EffectUi*, psy_ui_RealPoint);
-static psy_ui_RealRectangle effectui_coordposition(EffectUi*, SkinCoord*);
 static void effectui_oneditchange(EffectUi*, psy_ui_Edit* sender);
 static void effectui_oneditfocuslost(EffectUi*, psy_ui_Component* sender);
 static psy_dsp_amp_t effectui_panvalue(EffectUi*, double dx, uintptr_t slot);
@@ -136,8 +135,7 @@ void effectui_initsize(EffectUi* self)
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(topleft.x, topleft.y),
 			psy_ui_size_makepx(size.width, size.height)));
-	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);
-	self->intern.vu.position = effectui_coordposition(self, &self->intern.coords->vu0);
+	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);	
 }
 
 void effectui_move(EffectUi* self, psy_ui_Point topleft)
@@ -145,23 +143,7 @@ void effectui_move(EffectUi* self, psy_ui_Point topleft)
 	assert(self);
 
 	effectui_super_vtable.move(&self->component, topleft);
-	machineuicommon_move(&self->intern, topleft);
-	self->intern.vu.position = effectui_coordposition(self,
-		&self->intern.coords->vu0);
-}
-
-psy_ui_RealRectangle effectui_coordposition(EffectUi* self, SkinCoord* coord)
-{
-	psy_ui_RealRectangle r;
-
-	assert(self);
-
-	r = psy_ui_component_position(&self->component);
-	return psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(
-			r.left + coord->dest.left,
-			r.top + coord->dest.top),
-		psy_ui_realrectangle_size(&coord->dest));
+	machineuicommon_move(&self->intern, topleft);	
 }
 
 void effectui_editname(EffectUi* self, psy_ui_Edit* edit,
@@ -171,6 +153,7 @@ void effectui_editname(EffectUi* self, psy_ui_Edit* edit,
 
 	if (self->intern.machine) {
 		psy_ui_RealRectangle r;
+		psy_ui_RealRectangle position;
 
 		psy_strreset(&self->intern.restorename,
 			psy_audio_machine_editname(self->intern.machine));
@@ -183,8 +166,10 @@ void effectui_editname(EffectUi* self, psy_ui_Edit* edit,
 		psy_signal_connect(&edit->component.signal_focuslost, self,
 			effectui_oneditfocuslost);
 		psy_ui_edit_settext(edit, psy_audio_machine_editname(self->intern.machine));
-		r = effectui_coordposition(self, &self->intern.coords->name);
-		psy_ui_realrectangle_move(&r, -scroll.x, -scroll.y);
+		position = psy_ui_component_position(&self->component);
+		r = self->intern.coords->name.dest;
+		psy_ui_realrectangle_move(&r, -scroll.x + position.left,
+			-scroll.y + position.top);
 		psy_ui_component_setposition(psy_ui_edit_base(edit),
 			psy_ui_rectangle_make_px(&r));
 		psy_ui_component_show(&edit->component);
@@ -416,21 +401,15 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 
 bool effectui_hittesteditname(EffectUi* self, psy_ui_RealPoint pt)
 {
-	psy_ui_RealRectangle r;
-
-	r = effectui_coordposition(self, &self->intern.coords->name);
-	return psy_ui_realrectangle_intersect(&r, pt);
+	return effectui_hittestcoord(self, pt, &self->intern.coords->name);
 }
 
 bool effectui_hittestcoord(EffectUi* self, psy_ui_RealPoint pt,
 	SkinCoord* coord)
-{	
-	psy_ui_RealRectangle r;
-
+{
 	assert(self);
 
-	r = effectui_coordposition(self, coord);
-	return psy_ui_realrectangle_intersect(&r, pt);	
+	return psy_ui_realrectangle_intersect(&coord->dest, pt);	
 }
 
 void effectui_onmousemove(EffectUi* self, psy_ui_MouseEvent* ev)
@@ -446,31 +425,25 @@ int effectui_hittestpan(EffectUi* self, psy_ui_RealPoint pt, double* dx)
 {
 	psy_ui_RealRectangle r;
 	double offset;
-	psy_ui_RealRectangle position;
-
-	position = psy_ui_component_position(&self->component);
+	
 	offset = psy_audio_machine_panning(self->intern.machine) *
 		self->intern.coords->pan.range;
 	r = skincoord_destposition(&self->intern.coords->pan);
 	psy_ui_realrectangle_move(&r, offset, 0);
-	*dx = pt.x - position.left - r.left;
-	return psy_ui_realrectangle_intersect(&r,
-		psy_ui_realpoint_make(pt.x - position.left,
-			pt.y - position.top));
+	*dx = pt.x - r.left;
+	return psy_ui_realrectangle_intersect(&r, pt);			
 }
 
 psy_dsp_amp_t effectui_panvalue(EffectUi* self, double dx, uintptr_t slot)
 {
-	psy_dsp_amp_t rv = 0.f;
+	psy_dsp_amp_t rv;
 	MachineCoords* coords;
-	psy_ui_RealRectangle position;
-
-	position = psy_ui_component_position(&self->component);
+	
+	rv = 0.f;
 	coords = self->intern.coords;
 	if (coords && coords->pan.range != 0) {
 		rv = (psy_dsp_amp_t)(
-			(dx - (double)position.left -
-				coords->pan.dest.left - (double)self->intern.mx) /
+			(dx - coords->pan.dest.left - (double)self->intern.mx) /
 			(double)coords->pan.range);
 	}
 	return rv;
@@ -508,8 +481,8 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 void effectui_invalidate(EffectUi* self)
 {
 	if (machineui_vuupdate()) {
-		psy_ui_component_invalidaterect(self->intern.view,
-			self->intern.vu.position);		
+		psy_ui_component_invalidaterect(&self->component,
+			self->intern.coords->vu0.dest);		
 	} else {
 		effectui_super_vtable.invalidate(&self->component);
 	}

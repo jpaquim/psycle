@@ -73,9 +73,6 @@
     <ClCompile Include="src\imps\win32\uiwinimpfactory.c">
       <Filter>imps\win32</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\win32\uiwinlabelimp.c">
-      <Filter>imps\win32</Filter>
-    </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinlistboximp.c">
       <Filter>imps\win32</Filter>
     </ClCompile>
@@ -244,9 +241,6 @@
       <Filter>imps\win32</Filter>
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinimpfactory.h">
-      <Filter>imps\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\win32\uiwinlabelimp.h">
       <Filter>imps\win32</Filter>
     </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinlistboximp.h">

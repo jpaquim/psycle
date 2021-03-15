@@ -18,13 +18,14 @@ typedef struct psy_ui_ViewComponentImp {
 	psy_ui_TextMetric tm;
 	bool tmcachevalid;
 	bool visible;
-	psy_ui_Component* view;	
+	psy_ui_Component* view;
+	psy_ui_Component* parent;
 	psy_List* viewcomponents;
 } psy_ui_ViewComponentImp;
 
 void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	struct psy_ui_Component* component,
-	psy_ui_ComponentImp* parent,
+	psy_ui_Component* parent,
 	psy_ui_Component* view,
 	const char* classname,
 	int x, int y, int width, int height,
@@ -34,7 +35,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_alloc(void);
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_allocinit(
 	struct psy_ui_Component* component,
-	psy_ui_ComponentImp* parent,
+	psy_ui_Component* parent,
 	psy_ui_Component* view,
 	const char* classname,
 	int x, int y, int width, int height,

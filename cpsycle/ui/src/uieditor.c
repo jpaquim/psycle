@@ -336,7 +336,7 @@ void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
 
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 }
 void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 {

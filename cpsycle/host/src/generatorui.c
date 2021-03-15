@@ -30,7 +30,6 @@ static void generatorui_drawpanning(GeneratorUi*, psy_ui_Graphics*);
 static void generatorui_drawmute(GeneratorUi*, psy_ui_Graphics*);
 static void generatorui_drawsoloed(GeneratorUi*, psy_ui_Graphics*);
 static bool generatorui_hittesteditname(GeneratorUi*, psy_ui_RealPoint);
-static psy_ui_RealRectangle generatorui_coordposition(GeneratorUi*, SkinCoord*);
 static void generatorui_oneditchange(GeneratorUi*, psy_ui_Edit* sender);
 static void generatorui_oneditfocuslost(GeneratorUi*, psy_ui_Component* sender);
 static psy_dsp_amp_t generatorui_panvalue(GeneratorUi*, double dx, uintptr_t slot);
@@ -64,16 +63,24 @@ static psy_ui_ComponentVtable* generatorui_vtable_init(GeneratorUi* self)
 	if (!generatorui_vtable_initialized) {
 		generatorui_vtable = *(self->component.vtable);
 		generatorui_super_vtable = generatorui_vtable;
-		generatorui_vtable.dispose = (psy_ui_fp_component_dispose)generatorui_dispose;
-		generatorui_vtable.ondraw = (psy_ui_fp_component_ondraw)generatorui_ondraw;
-		generatorui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)generatorui_onmousedown;
-		generatorui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)generatorui_onmouseup;
-		generatorui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)generatorui_onmousemove;
-		generatorui_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+		generatorui_vtable.dispose = (psy_ui_fp_component_dispose)
+			generatorui_dispose;
+		generatorui_vtable.ondraw = (psy_ui_fp_component_ondraw)
+			generatorui_ondraw;
+		generatorui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+			generatorui_onmousedown;
+		generatorui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+			generatorui_onmouseup;
+		generatorui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+			generatorui_onmousemove;
+		generatorui_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
 			generatorui_onmousedoubleclick;
 		generatorui_vtable.move = (psy_ui_fp_component_move)generatorui_move;
-		generatorui_vtable.invalidate = (psy_ui_fp_component_invalidate)generatorui_invalidate;
-		generatorui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		generatorui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+			generatorui_invalidate;
+		generatorui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			generatorui_onpreferredsize;
 		generatorui_vtable_initialized = TRUE;
 	}
@@ -137,8 +144,7 @@ void generatorui_initsize(GeneratorUi* self)
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(topleft.x, topleft.y),
 			psy_ui_size_makepx(size.width, size.height)));
-	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);
-	self->intern.vu.position = generatorui_coordposition(self, &self->intern.coords->vu0);
+	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);	
 }
 
 void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
@@ -146,23 +152,7 @@ void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
 	assert(self);
 
 	generatorui_super_vtable.move(&self->component, topleft);
-	machineuicommon_move(&self->intern, topleft);
-	self->intern.vu.position = generatorui_coordposition(self,
-		&self->intern.coords->vu0);
-}
-
-psy_ui_RealRectangle generatorui_coordposition(GeneratorUi* self, SkinCoord* coord)
-{
-	psy_ui_RealRectangle r;
-
-	assert(self);
-
-	r = psy_ui_component_position(&self->component);
-	return psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(
-			r.left + coord->dest.left,
-			r.top + coord->dest.top),
-		psy_ui_realrectangle_size(&coord->dest));
+	machineuicommon_move(&self->intern, topleft);	
 }
 
 void generatorui_editname(GeneratorUi* self, psy_ui_Edit* edit,
@@ -172,6 +162,7 @@ void generatorui_editname(GeneratorUi* self, psy_ui_Edit* edit,
 
 	if (self->intern.machine) {
 		psy_ui_RealRectangle r;
+		psy_ui_RealRectangle position;
 
 		psy_strreset(&self->intern.restorename,
 			psy_audio_machine_editname(self->intern.machine));
@@ -184,8 +175,10 @@ void generatorui_editname(GeneratorUi* self, psy_ui_Edit* edit,
 		psy_signal_connect(&edit->component.signal_focuslost, self,
 			generatorui_oneditfocuslost);
 		psy_ui_edit_settext(edit, psy_audio_machine_editname(self->intern.machine));
-		r = generatorui_coordposition(self, &self->intern.coords->name);
-		psy_ui_realrectangle_move(&r, -scroll.x, -scroll.y);
+		position = psy_ui_component_position(&self->component);
+		r = self->intern.coords->name.dest;
+		psy_ui_realrectangle_move(&r, -scroll.x + position.left,
+			-scroll.y + position.top);
 		psy_ui_component_setposition(psy_ui_edit_base(edit),
 			psy_ui_rectangle_make_px(&r));
 		psy_ui_component_show(&edit->component);
@@ -414,10 +407,7 @@ void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
 
 bool generatorui_hittesteditname(GeneratorUi* self, psy_ui_RealPoint pt)
 {
-	psy_ui_RealRectangle r;
-
-	r = generatorui_coordposition(self, &self->intern.coords->name);
-	return psy_ui_realrectangle_intersect(&r, pt);
+	return generatorui_hittestcoord(self, pt, &self->intern.coords->name);	
 }
 
 bool generatorui_hittestcoord(GeneratorUi* self, psy_ui_RealPoint pt,
@@ -425,10 +415,7 @@ bool generatorui_hittestcoord(GeneratorUi* self, psy_ui_RealPoint pt,
 {
 	assert(self);
 	
-	psy_ui_RealRectangle r;
-
-	r = generatorui_coordposition(self, coord);
-	return psy_ui_realrectangle_intersect(&r, pt);	
+	return psy_ui_realrectangle_intersect(&coord->dest, pt);	
 }
 
 void generatorui_onmousemove(GeneratorUi* self, psy_ui_MouseEvent* ev)
@@ -443,32 +430,26 @@ void generatorui_onmousemove(GeneratorUi* self, psy_ui_MouseEvent* ev)
 int generatorui_hittestpan(GeneratorUi* self, psy_ui_RealPoint pt, double* dx)
 {
 	psy_ui_RealRectangle r;
-	double offset;
-	psy_ui_RealRectangle position;
-
-	position = psy_ui_component_position(&self->component);
+	double offset;	
+	
 	offset = psy_audio_machine_panning(self->intern.machine) *
 		self->intern.coords->pan.range;
 	r = skincoord_destposition(&self->intern.coords->pan);
 	psy_ui_realrectangle_move(&r, offset, 0);
-	*dx = pt.x - position.left - r.left;
-	return psy_ui_realrectangle_intersect(&r,
-		psy_ui_realpoint_make(pt.x - position.left,
-			pt.y - position.top));
+	*dx = pt.x - r.left;
+	return psy_ui_realrectangle_intersect(&r, pt);
 }
 
 psy_dsp_amp_t generatorui_panvalue(GeneratorUi* self, double dx, uintptr_t slot)
 {
-	psy_dsp_amp_t rv = 0.f;
+	psy_dsp_amp_t rv;
 	MachineCoords* coords;
-	psy_ui_RealRectangle position;
-
-	position = psy_ui_component_position(&self->component);
+	
+	rv = 0.f;
 	coords = self->intern.coords;
 	if (coords && coords->pan.range != 0) {
 		rv = (psy_dsp_amp_t)(
-			(dx - (double)position.left -
-				coords->pan.dest.left - (double)self->intern.mx) /
+			(dx - coords->pan.dest.left - (double)self->intern.mx) /
 			(double)coords->pan.range);
 	}
 	return rv;
@@ -508,8 +489,8 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 void generatorui_invalidate(GeneratorUi* self)
 {
 	if (machineui_vuupdate()) {
-		psy_ui_component_invalidaterect(self->intern.view,
-			self->intern.vu.position);		
+		psy_ui_component_invalidaterect(&self->component,
+			self->intern.coords->vu0.dest);				
 	} else {
 		generatorui_super_vtable.invalidate(&self->component);
 	}

@@ -160,6 +160,17 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 	}
 }
 
+void psy_ui_component_capture(psy_ui_Component* self)
+{	
+	self->imp->vtable->dev_capture(self->imp);
+}
+
+void psy_ui_component_releasecapture(psy_ui_Component* self)
+{
+	psy_ui_app()->capture = NULL;
+	self->imp->vtable->dev_releasecapture(self->imp);
+}
+
 // vtable
 static void dispose(psy_ui_Component*);
 static void destroy(psy_ui_Component*);
@@ -287,7 +298,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	if (view) {
 		self->imp = (psy_ui_ComponentImp*)
 			psy_ui_viewcomponentimp_allocinit(
-				self, (parent) ? parent->imp : NULL, view, "",
+				self, parent, view, "",
 				0, 0, 100, 100, 0, 0);		
 	} else {
 		self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
