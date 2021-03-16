@@ -42,7 +42,7 @@ void tab_dispose(Tab* self)
 	self->text = NULL;
 	free(self->translation);
 	self->translation = NULL;
-	psy_ui_bitmap_dispose(&self->icon);
+	psy_ui_bitmap_dispose(&self->icon);	
 }
 
 void tab_settext(Tab* self, const char* text)
@@ -182,6 +182,7 @@ void tabbar_ondestroy(TabBar* self)
 	psy_ui_style_dispose(&self->style_tab);
 	psy_ui_style_dispose(&self->style_tab_hover);
 	psy_ui_style_dispose(&self->style_tab_select);
+	psy_ui_style_dispose(&self->style_tab_label);	
 }
 
 void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
@@ -745,8 +746,12 @@ void tabbar_onlanguagechanged(TabBar* self)
 
 void tabbar_onupdatestyles(TabBar* self)
 {		
-	psy_ui_style_copy(&self->style_tab, psy_ui_style(psy_ui_STYLE_TAB));
-	psy_ui_style_copy(&self->style_tab_hover, psy_ui_style(psy_ui_STYLE_TAB_HOVER));
-	psy_ui_style_copy(&self->style_tab_select, psy_ui_style(psy_ui_STYLE_TAB_SELECT));
-	psy_ui_style_copy(&self->style_tab_label, psy_ui_style(psy_ui_STYLE_COMMON));	
+	psy_ui_style_copy(&self->style_tab,
+		psy_ui_style(psy_ui_STYLE_TAB));
+	psy_ui_style_copy(&self->style_tab_hover,
+		psy_ui_style(psy_ui_STYLE_TAB_HOVER));
+	psy_ui_style_copy(&self->style_tab_select,
+		psy_ui_style(psy_ui_STYLE_TAB_SELECT));
+	psy_ui_style_copy(&self->style_tab_label,
+		psy_ui_style(psy_ui_STYLE_COMMON));
 }

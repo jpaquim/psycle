@@ -21,7 +21,8 @@ typedef struct psy_ui_Style {
 	psy_ui_Colour colour;
 	psy_ui_Colour backgroundcolour;	
 	psy_ui_Border border;	
-	bool use_font;	
+	bool use_font;
+	int dbgflag;
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);

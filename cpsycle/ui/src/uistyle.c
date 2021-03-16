@@ -14,6 +14,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_colour_init(&self->backgroundcolour);
 	psy_ui_border_init(&self->border);	
 	self->use_font = 0;
+	self->dbgflag = 0;
 }
 
 void psy_ui_style_init_default(psy_ui_Style* self, int styletype)
@@ -38,7 +39,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
-{
+{	
 	if (self->use_font) {
 		psy_ui_font_dispose(&self->font);
 	}	

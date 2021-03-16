@@ -554,6 +554,7 @@ void instrumententrytablecolumn_init(InstrumentEntryTableColumn* self, const cha
 void instrumententrytablecolumn_dispose(InstrumentEntryTableColumn* self)
 {
 	free(self->label);
+	self->label = NULL;
 }
 
 InstrumentEntryTableColumn* instrumententrytablecolumn_alloc(void)
@@ -946,6 +947,8 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 
 // InstrumentNoteMapView
 // prototypes
+static void instrumentnotemapview_destroy(InstrumentNoteMapView*,
+	psy_ui_Component* sender);	
 static void instrumentnotemapview_initentries(InstrumentNoteMapView*,
 	Workspace*);
 static void instrumentnotemapview_inittable(InstrumentNoteMapView*,
@@ -967,6 +970,8 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		instrumentnotemapview_destroy);
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	psy_ui_label_init_text(&self->label, &self->component, "Notemap");
@@ -996,6 +1001,12 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 		instrumentnotemapview_ontableentryselected);
 	psy_signal_connect(&self->samplesbox.signal_changed, self,
 		instrumentnotemapview_onsampleselected);
+}
+
+void instrumentnotemapview_destroy(InstrumentNoteMapView* self,
+	psy_ui_Component* sender)
+{
+	instrumententrytablestate_dispose(&self->tablestate);
 }
 
 void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* workspace)
