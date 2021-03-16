@@ -132,13 +132,14 @@ void psy_ui_win_editimp_init(psy_ui_win_EditImp* self,
 		TEXT("EDIT"),
 		0, 0, 100, 20,		
 		WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT,
-		1);
+		1);	
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_editimp_init(&self->imp);
 	editimp_imp_vtable_init(self);
 	self->imp.vtable = &editimp_vtable;
-	psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
+	psy_signal_connect(&self->win_component_imp.imp.signal_command, component,
+		oncommand);
 }
 
 void psy_ui_win_editimp_multiline_init(psy_ui_win_EditImp* self,

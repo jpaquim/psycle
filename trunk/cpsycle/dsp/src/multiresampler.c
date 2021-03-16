@@ -84,7 +84,10 @@ void psy_dsp_multiresampler_initresamplers(psy_dsp_MultiResampler* self)
 void psy_dsp_multiresampler_dispose(psy_dsp_MultiResampler* self)
 {
 	self->linear.resampler.vtable->dispose(&self->linear.resampler);
-	self->spline.resampler.vtable->dispose(&self->spline.resampler);
+	self->spline.resampler.vtable->dispose(&self->spline.resampler);	
+#ifdef PSYCLE_USE_SSE
+	self->sinc_sse2.resampler.vtable->dispose(&self->sinc_sse2.resampler);
+#endif
 	self->sinc.resampler.vtable->dispose(&self->sinc.resampler);
 }
 

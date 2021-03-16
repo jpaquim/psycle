@@ -88,6 +88,7 @@ static void vtable_init(psy_dsp_SincResampler* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->resampler.vtable;
+		vtable.dispose = (psy_dsp_fp_resampler_dispose)dispose;
 		vtable.setspeed =
 			(psy_dsp_fp_resampler_setspeed)setspeed;		
 		vtable.work = (psy_dsp_fp_resampler_work)work;

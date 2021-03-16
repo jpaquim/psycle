@@ -76,7 +76,7 @@ static float work_float_unchecked(psy_dsp_SincSSE2Resampler*,
 
 static void* getresamplerdata(psy_dsp_SincSSE2Resampler* self)
 {
-	return (sinc_data_t*) malloc(sizeof(sinc_data_t));
+	return (sinc_data_t*)malloc(sizeof(sinc_data_t));
 }
 
 static void disposeresamplerdata(psy_dsp_SincSSE2Resampler* self, void* resampler_data)
