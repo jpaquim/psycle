@@ -24,6 +24,7 @@ static void outputrouteparam_range(OutputRouteParam*,
 	intptr_t* minval, intptr_t* maxval);
 static psy_audio_Wire outputrouteparam_wire(OutputRouteParam*);
 static uintptr_t outputrouteparam_busid(OutputRouteParam*, psy_audio_Wire);
+static psy_List* outputrouteparam_buses(OutputRouteParam*);
 // vtable
 static MachineParamVtable outputrouteparam_vtable;
 static bool outputrouteparam_vtable_initialized = FALSE;
@@ -69,79 +70,52 @@ void outputrouteparam_tweak(OutputRouteParam* self, float value)
 	intptr_t minval;
 	intptr_t maxval;
 	intptr_t selidx;
-	psy_audio_Wire wire;
+	intptr_t src;	
+	MachineStackColumn* column;
 
-	psy_audio_exclusivelock_enter();
-	self->state->preventrebuild = TRUE;
+	column = machinestackstate_column(self->state, self->column);
+	if (!column) {
+		return;
+	}	
 	outputrouteparam_range(self, &minval, &maxval);
 	selidx = (intptr_t)(value * (maxval - minval) + 0.5f) + minval;	
-	wire = outputrouteparam_wire(self);
-	if (selidx == 0) { // No Connection
-		MachineStackColumn* column;
-		uintptr_t src;
+	self->state->oldwire = outputrouteparam_wire(self);
+	src = machinestackcolumn_lastbeforeroute(column);
+	if (self->state->oldwire.dst != psy_audio_MASTER_INDEX) {	
+		psy_audio_Machine* machine;
 
-		column = machinestackstate_column(self->state, self->column);
-		src = machinestackcolumn_lastbeforemaster(column);
-		if (wire.dst != psy_INDEX_INVALID) {
-			psy_audio_machines_disconnect(self->state->machines,
-				psy_audio_wire_make(src, wire.dst));	
-		}
-	} else if (selidx == 1) { // Master Connection
-		if (wire.dst != psy_audio_MASTER_INDEX) {
-			if (wire.dst != psy_INDEX_INVALID) {
-				psy_audio_Machine* machine;
-
-				machine = psy_audio_machines_at(self->state->machines,
-					wire.dst);
-				if (machine && psy_audio_machine_isbus(machine)) {
-					psy_audio_machines_disconnect(self->state->machines, wire);
-				}
-			}
-			if (wire.dst != psy_INDEX_INVALID) {
-				psy_audio_machines_connect(self->state->machines,
-					psy_audio_wire_make(wire.dst, psy_audio_MASTER_INDEX));
-			} else { // Bus Connection
-				MachineStackColumn* column;
-
-				column = machinestackstate_column(self->state, self->column);
-				if (column) {
-					uintptr_t src;
-					
-					src = machinestackcolumn_at(column, 0);
-					psy_audio_machines_connect(self->state->machines,
-						psy_audio_wire_make(src, psy_audio_MASTER_INDEX));
-				}
-			}
-		}					
-	} else {
-		MachineStackColumn* column;
-
-		column = machinestackstate_column(self->state, self->column);
-		if (psy_audio_wire_valid(&wire)) {
-			psy_audio_machines_disconnect(self->state->machines, wire);
-		}				
-		if (column) {
-			uintptr_t src;			
-			psy_List* buses;
-
-			src = machinestackcolumn_lastbeforemaster(column);
-			buses = machinestackstate_buses(self->state);
-			if (buses) {
-				psy_List* p;
-
-				p = psy_list_at(buses, selidx - 2);
-				if (p) {
-					uintptr_t dest;
-
-					dest = (uintptr_t)psy_list_entry(p);
-					psy_audio_machines_connect(self->state->machines,
-						psy_audio_wire_make(src, dest));
-				}
-			}
+		machine = psy_audio_machines_at(self->state->machines,
+			self->state->oldwire.dst);
+		if (!(machine && psy_audio_machine_isbus(machine))) {		
+			psy_audio_wire_invalidate(&self->state->oldwire);
 		}
 	}
-	psy_audio_exclusivelock_leave();
-	self->state->preventrebuild = FALSE;	
+	if ((selidx == 0) && (!psy_audio_wire_valid(&self->state->oldwire))) {
+		self->state->rewire = FALSE;
+		return;
+	} else if (selidx == 1) {
+		// Master Connection
+		self->state->newwire = psy_audio_wire_make(src, psy_audio_MASTER_INDEX);
+	} else {		
+		psy_List* buses;
+		
+		// Bus Connection
+		self->state->newwire = psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+		buses = outputrouteparam_buses(self);
+		if (buses) {
+			psy_List* p;
+
+			p = psy_list_at(buses, selidx - 2);
+			if (p) {
+				uintptr_t dest;
+
+				dest = (uintptr_t)psy_list_entry(p);
+				self->state->newwire = psy_audio_wire_make(src, dest);
+			}
+		}
+		psy_list_free(buses);	
+	}	
+	self->state->rewire = TRUE;
 }
 
 float outputrouteparam_normvalue(OutputRouteParam* self)
@@ -153,7 +127,11 @@ float outputrouteparam_normvalue(OutputRouteParam* self)
 	
 	outputrouteparam_range(self, &minval, &maxval);
 	selidx = 0;
-	wire = outputrouteparam_wire(self);
+	if (self->state->rewire) {
+		wire = self->state->newwire;
+	} else {
+		wire = outputrouteparam_wire(self);
+	}
 	if (wire.dst == psy_INDEX_INVALID) {
 		selidx = 0;
 	} else if (wire.dst == psy_audio_MASTER_INDEX) {
@@ -183,16 +161,29 @@ psy_audio_Wire outputrouteparam_wire(OutputRouteParam* self)
 }
 
 uintptr_t outputrouteparam_busid(OutputRouteParam* self, psy_audio_Wire wire)
-{
-	return psy_list_entry_index(machinestackstate_buses(self->state),
-		(void*)wire.dst);	
+{	
+	psy_List* buses;
+	
+	buses = outputrouteparam_buses(self);
+	if (buses) {
+		uintptr_t rv;
+
+		rv = psy_list_entry_index(buses, (void*)wire.dst);
+		psy_list_free(buses);
+		return rv;
+	}
+	return psy_INDEX_INVALID;
 }
 
 int outputrouteparam_describe(OutputRouteParam* self, char* text)
 {	
 	psy_audio_Wire wire;
 
-	wire = outputrouteparam_wire(self);
+	if (self->state->rewire) {
+		wire = self->state->newwire;
+	} else {
+		wire = outputrouteparam_wire(self);
+	}
 	if (psy_audio_wire_valid(&wire)) {
 		if (wire.dst == psy_audio_MASTER_INDEX) {
 			psy_snprintf(text, 128, "%s", "Master");
@@ -201,7 +192,7 @@ int outputrouteparam_describe(OutputRouteParam* self, char* text)
 
 			machine = psy_audio_machines_at(self->state->machines,
 				wire.dst);
-			if (psy_audio_machine_isbus(machine)) {
+			if (machine && psy_audio_machine_isbus(machine)) {
 				psy_snprintf(text, 128, "Bus %.2X", (int)wire.dst);
 			} else {
 				psy_snprintf(text, 128, "End at %.2X", (int)wire.dst);
@@ -229,12 +220,39 @@ void outputrouteparam_range(OutputRouteParam* self,
 {
 	psy_List* buses;
 		
+	// 0 : Not Connected to Master/Bus
+	// 1 : Connected to Master
 	*minval = 0;
 	*maxval = 1;
-	buses = machinestackstate_buses(self->state);
+	// 2 .. numbuses
+	buses = outputrouteparam_buses(self);
 	if (buses) {
 		*maxval += psy_list_size(buses);
+		psy_list_free(buses);
 	}
+}
+
+psy_List* outputrouteparam_buses(OutputRouteParam* self)
+{
+	psy_List* rv;
+	
+	rv = machinestackstate_buses(self->state);
+	if (rv) {
+		MachineStackColumn* column;
+		uintptr_t input;
+		psy_List* p;
+
+		// avoid connnection to same bus
+		column = machinestackstate_column(self->state, self->column);
+		if (column) {
+			input = machinestackcolumn_at(column, 0);
+			p = psy_list_findentry(rv, (void*)input);
+			if (p) {
+				psy_list_remove(&rv, p);
+			}
+		}
+	}
+	return rv;
 }
 
 // MachineStackColumn
@@ -315,6 +333,32 @@ uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn* self)
 	return psy_INDEX_INVALID;
 }
 
+uintptr_t machinestackcolumn_lastbeforeroute(const MachineStackColumn* self)
+{
+	if (self->chain) {
+		const psy_List* last;
+
+		last = psy_list_last_const(self->chain);
+		if (last) {
+			uintptr_t macid;			
+
+			macid = (uintptr_t)psy_list_entry_const(last);
+			if (macid != psy_audio_MASTER_INDEX) {
+				psy_audio_Machine* machine;
+
+				machine = psy_audio_machines_at(self->state->machines, macid);
+				if (self->chain == last || !psy_audio_machine_isbus(machine)) {
+					return macid;
+				}
+			}
+			if (last->prev) {
+				return (uintptr_t)psy_list_entry_const(last->prev);
+			}
+		}
+	}
+	return psy_INDEX_INVALID;
+}
+
 uintptr_t machinestackcolumn_at(const MachineStackColumn* self, uintptr_t index)
 {
 	if (self->chain && index != psy_INDEX_INVALID) {
@@ -369,7 +413,10 @@ uintptr_t machinestackcolumn_nextindex(const MachineStackColumn* self, uintptr_t
 
 bool machinestackcolumn_connectedtomaster(const MachineStackColumn* self)
 {	
-	return (psy_audio_machineparam_normvalue(&self->outputroute.machineparam) >
+	MachineStackColumn* const_cast_self;
+
+	const_cast_self = (MachineStackColumn*)self;
+	return (psy_audio_machineparam_normvalue(&const_cast_self->outputroute.machineparam) >
 		0.f);
 }
 
@@ -414,6 +461,9 @@ void machinestackstate_init(MachineStackState* self, MachineViewBar* statusbar)
 	self->effectinsertpos = psy_INDEX_INVALID;
 	self->effectinsertright = FALSE;
 	self->preventrebuild = FALSE;
+	self->rewire = FALSE;
+	psy_audio_wire_init(&self->oldwire);
+	psy_audio_wire_init(&self->newwire);
 }
 
 void machinestackstate_dispose(MachineStackState* self)
@@ -509,6 +559,18 @@ psy_List* machinestackstate_buses(MachineStackState* self)
 		return rv;
 	}
 	return NULL;
+}
+
+void machinestackstate_check_wirechange(MachineStackState* self)
+{
+	if (!psy_audio_wire_equal(&self->newwire, &self->oldwire)) {		
+		if (psy_audio_wire_valid(&self->oldwire)) {			
+			psy_audio_machines_disconnect(self->machines, self->oldwire);			
+		}
+		if (psy_audio_wire_valid(&self->newwire)) {			
+			psy_audio_machines_connect(self->machines, self->newwire);			
+		}
+	}
 }
 
 void machinestackstate_buildcolumns(MachineStackState* self)
@@ -830,13 +892,35 @@ void machinestackinputs_updatevus(MachineStackInputs* self)
 }
 
 // MachineStackOutputs
+// MachineStackOutputs
+static void machinestackoutputs_onmouseup(MachineStackOutputs*,
+	psy_ui_MouseEvent*);
+// vtable
+static psy_ui_ComponentVtable machinestackoutputs_vtable;
+static bool machinestackoutputs_vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* machinestackoutputs_vtable_init(
+	MachineStackOutputs* self)
+{
+	if (!machinestackoutputs_vtable_initialized) {
+		machinestackoutputs_vtable = *(self->component.vtable);
+		machinestackoutputs_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			machinestackoutputs_onmouseup;
+		machinestackoutputs_vtable_initialized = TRUE;
+	}
+	return &machinestackoutputs_vtable;
+}
 // implementation
 void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_Component* parent, MachineStackState* state,
 	ParamSkin* skin)
 {
-	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);		
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setvtable(&self->component,
+		machinestackoutputs_vtable_init(self));
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_makeem(10.0, 2.0));
 	self->skin = skin;	
@@ -856,7 +940,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 			KnobUi* knobui;
 
 			column = machinestackstate_column(self->state, i);			
-			knobui = knobui_allocinit(&self->component, NULL,
+			knobui = knobui_allocinit(&self->component, &self->component,
 				(column)
 				? &column->outputroute.machineparam
 				: NULL,
@@ -869,6 +953,15 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 					psy_ui_ALIGN_LEFT);
 			}
 		}		
+	}	
+}
+
+void machinestackoutputs_onmouseup(MachineStackOutputs* self,
+	psy_ui_MouseEvent* ev)
+{
+	if (self->state->rewire) {		
+		machinestackstate_check_wirechange(self->state);		
+		self->state->rewire = FALSE;		
 	}	
 }
 
@@ -1252,8 +1345,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	machinestackview_setmachines(self, workspace_song(workspace)
 		? &workspace_song(workspace)->machines : NULL);
 	psy_ui_component_setfont(&self->desc.component, &skin->font);
-	psy_ui_component_setfont(&self->inputs.component, &skin->font);
-	psy_ui_component_setfont(&self->outputs.component, &skin->font);
+	psy_ui_component_setfont(&self->inputs.component, &skin->font);	
 	psy_ui_component_setfont(&self->pane.component, &skin->font);
 	psy_ui_component_starttimer(&self->component, 0, 60);
 }
@@ -1323,7 +1415,7 @@ void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
 	}
 	if (psy_ui_component_drawvisible(&self->volumes.component)) {
 		psy_ui_component_invalidate(&self->volumes.component);
-		//psy_ui_component_invalidate(&self->outputs.component);
+		// psy_ui_component_invalidate(&self->outputs.component);
 		machinestackinputs_updatevus(&self->inputs);
 		machinestackpane_updatevus(&self->pane);
 	}
@@ -1343,8 +1435,8 @@ void machinestackview_build(MachineStackView* self)
 		// reset to normal align
 		psy_ui_app()->alignvalid = TRUE;
 		psy_ui_component_invalidate(&self->component);		
-		psy_audio_exclusivelock_leave();
-	}
+		psy_audio_exclusivelock_leave();		
+	}	
 	machinestackstate_endviewbuild(&self->state);
 }
 

@@ -16,7 +16,7 @@ void psy_audio_wire_init(psy_audio_Wire* self)
 
 bool psy_audio_wire_valid(const psy_audio_Wire* self)
 {
-	return self->src != psy_INDEX_INVALID && self->dst != psy_INDEX_INVALID;
+	return (self->src != psy_INDEX_INVALID) && (self->dst != psy_INDEX_INVALID);
 }
 
 void psy_audio_wire_invalidate(psy_audio_Wire* self)

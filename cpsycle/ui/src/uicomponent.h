@@ -200,16 +200,12 @@ typedef struct psy_ui_Component {
 	intptr_t debugflag;
 	psy_ui_BackgroundMode backgroundmode;
 	bool visible;	
-	int accumwheeldelta;
-	int wheelscroll;
-	bool handlevscroll;
-	bool handlehscroll;
+	int wheelscroll;	
 	int cursor;	
-	bool mousetracking;
 	uintptr_t opcount;
 	psy_ui_Size preferredsize;
-	psy_ui_Size minsize;
-	psy_ui_Size maxsize;
+	psy_ui_Size* minsize;
+	psy_ui_Size* maxsize;
 	psy_ui_Point scroll;	
 	psy_ui_IntPoint vscrollrange;
 	psy_ui_IntPoint hscrollrange;
@@ -221,10 +217,12 @@ typedef struct psy_ui_Component {
 	psy_ui_ScrollMode scrollmode;
 	psy_ui_ComponentStyle style;
 	bool deallocate;
+	bool uselevel;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 void psy_ui_notifystyleupdate(psy_ui_Component* main);
+void psy_ui_component_updatefont(psy_ui_Component*);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	psy_ui_Component* view);
@@ -335,9 +333,9 @@ void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
-psy_ui_Size psy_ui_component_maximumsize(psy_ui_Component*);
+const psy_ui_Size* psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
-psy_ui_Size psy_ui_component_minimumsize(psy_ui_Component*);
+const psy_ui_Size* psy_ui_component_minimumsize(const psy_ui_Component*);
 void psy_ui_component_preventpreferredsize(psy_ui_Component*);
 void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);

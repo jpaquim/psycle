@@ -380,3 +380,29 @@ int psy_ui_logpixelsy(void)
 #endif
 	return 72;
 }
+
+void psy_ui_app_updatesyles(psy_ui_App* self)
+{		
+	if (self->main) {
+		psy_List* p;
+		psy_List* q;
+
+		// merge
+		psy_ui_component_updatefont(self->main);
+		for (p = q = psy_ui_component_children(self->main, psy_ui_RECURSIVE);
+				p != NULL;
+				psy_list_next(&p)) {
+			psy_ui_Component* child;
+
+			child = (psy_ui_Component*)psy_list_entry(p);
+			psy_ui_component_updatefont(child);
+		}
+		// align
+		// call align even if position has not changed
+		self->alignvalid = FALSE;
+		psy_ui_component_align(self->main);
+		// reset to normal align
+		self->alignvalid = TRUE;
+		psy_list_free(q);
+	}
+}

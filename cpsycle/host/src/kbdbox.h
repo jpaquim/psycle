@@ -26,7 +26,7 @@ typedef struct KbdBoxKey {
 	char* desc0; // row 0 keycode
 	char* desc1; // row 1 keycode with shift
 	char* desc2; // row 2 keycode with ctrl
-	psy_ui_Colour colour;
+	bool marked;
 	psy_ui_RealRectangle position;
 } KbdBoxKey;
 
@@ -54,7 +54,8 @@ typedef struct KbdBox{
 } KbdBox;
 
 void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
-void kbdbox_setcolour(KbdBox*, uintptr_t keycode, psy_ui_Colour);
+void kbdbox_markkey(KbdBox*, uintptr_t keycode);
+void kbdbox_unmarkkey(KbdBox*, uintptr_t keycode);
 void kbdbox_cleardescriptions(KbdBox*);
 void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl,
 	const char* desc);

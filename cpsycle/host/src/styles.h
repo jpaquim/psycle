@@ -41,6 +41,9 @@ extern "C" {
 #define STYLE_INSTRUMENTVIEW		  580
 #define STYLE_PLAYBAR				  600
 #define STYLE_DURATION_TIME			  620
+#define STYLE_KEY                     640
+#define STYLE_KEY_HOVER               641
+#define STYLE_KEY_SELECT              642
 
 struct psy_ui_Defaults;
 

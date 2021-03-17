@@ -33,34 +33,7 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 }
 
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
-static void psy_ui_updatesyles(psy_ui_Component* main);
-static void psy_ui_component_updatefont(psy_ui_Component*);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
-
-void psy_ui_updatesyles(psy_ui_Component* main)
-{
-	if (main) {
-		psy_List* p;
-		psy_List* q;		
-		
-		// merge
-		psy_ui_component_updatefont(main);
-		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL;
-				psy_list_next(&p)) {
-			psy_ui_Component* child;
-
-			child = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_updatefont(child);		
-		}
-		// align
-		// call align even if position has not changed
-		psy_ui_app()->alignvalid = FALSE;
-		psy_ui_component_align(main);
-		// reset to normal align
-		psy_ui_app()->alignvalid = TRUE;		
-	}
-}
-
 
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 {
@@ -85,6 +58,9 @@ void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 {
 	psy_ui_Component* curr;
+	psy_ui_Colour base;
+
+	assert(self);
 
 	curr = self;
 	while (curr) {
@@ -98,9 +74,60 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 		curr = psy_ui_component_parent(curr);
 	}
 	if (curr) {
-		return curr->style.currstyle->backgroundcolour;
+		base = curr->style.currstyle->backgroundcolour;
+	} else {
+		base = psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour;
 	}
-	return psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour;
+	if (self->uselevel) {		
+		psy_ui_Colour overlay;
+		int level;
+		double q;
+
+		if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+			overlay = psy_ui_colour_make(0x00FFFFFF);
+		} else {
+			overlay = psy_ui_colour_make(0x00000000);
+		}
+		level = psy_ui_component_level(self);
+		switch (level) {
+		case 0:
+			q = 0.0;
+			break;
+		case 1:
+			q = 0.05;
+			break;
+		case 2:
+			q = 0.07;
+			break;
+		case 3:
+			q = 0.08;
+			break;
+		case 4:
+			q = 0.09;
+			break;
+		case 5:
+			q = 0.11;
+			break;
+		case 6:
+			q = 0.12;
+			break;
+		case 7:
+			q = 0.14;
+			break;
+		case 8:
+			q = 0.15;
+			break;
+		case 9:
+			q = 0.16;
+			break;
+		default:
+			q = 0.24;
+			break;
+		}		
+		psy_ui_colour_overlayed(&base, &overlay, q);
+		return base;
+	}
+	return base;
 }
 
 void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
@@ -156,7 +183,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_font_dispose(&common->font);
 		psy_ui_font_init(&common->font, NULL);
 		psy_ui_font_copy(&common->font, font);
-		psy_ui_updatesyles(main);
+		psy_ui_app_updatesyles(psy_ui_app());
 	}
 }
 
@@ -494,6 +521,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;
+	self->uselevel = FALSE;
 	psy_ui_margin_init(&self->margin);		
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->insertaligntype = psy_ui_ALIGN_NONE;
@@ -501,19 +529,15 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->alignchildren = 1;
 	self->alignexpandmode = psy_ui_NOEXPAND;	
 	self->preferredsize = psy_ui_component_size(self);
-	self->maxsize = psy_ui_size_zero();
-	self->minsize = psy_ui_size_zero();
+	self->maxsize = NULL;
+	self->minsize = NULL;
 	psy_ui_componentstyle_init(&self->style);	
 	psy_ui_margin_init(&self->spacing);	
 	self->debugflag = 0;	
 	self->visible = 1;
 	self->doublebuffered = FALSE;
-	self->wheelscroll = 0;
-	self->accumwheeldelta = 0;
-	self->handlevscroll = TRUE;
-	self->handlehscroll = TRUE;
+	self->wheelscroll = 0;	
 	self->backgroundmode = psy_ui_SETBACKGROUND;
-	self->mousetracking = 0;
 	self->cursor = psy_ui_CURSOR_DEFAULT;
 	self->tabindex = -1;
 	self->scrollmode = psy_ui_SCROLL_GRAPHICS;
@@ -529,7 +553,11 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 void psy_ui_component_dispose(psy_ui_Component* self)
 {
 	self->vtable->dispose(self);
-	psy_ui_component_dispose_signals(self);		
+	psy_ui_component_dispose_signals(self);
+	free(self->minsize);
+	self->maxsize = NULL;
+	free(self->maxsize);
+	self->maxsize = NULL;
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -630,7 +658,6 @@ void psy_ui_component_hide_align(psy_ui_Component* self)
 		}
 	}
 }
-
 
 void psy_ui_component_showstate(psy_ui_Component* self, int state)
 {
@@ -900,22 +927,40 @@ void psy_ui_component_enablepreferredsize(psy_ui_Component* self)
 
 void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	self->maxsize = size;
+	if (self->maxsize) {
+		free(self->maxsize);
+		self->maxsize = NULL;
+	}
+	if (!psy_ui_size_iszero(&size)) {		
+		self->maxsize = malloc(sizeof(psy_ui_Size));
+		if (self->maxsize) {
+			*self->maxsize = size;
+		}
+	}
 }
 
-psy_ui_Size psy_ui_component_maximumsize(psy_ui_Component* self)
+const psy_ui_Size* psy_ui_component_maximumsize(const psy_ui_Component* self)
 {
 	return self->maxsize;
 }
 
 void psy_ui_component_setminimumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	self->minsize = size;
+	if (self->minsize) {
+		free(self->minsize);
+		self->minsize = NULL;
+	}
+	if (!psy_ui_size_iszero(&size)) {
+		self->minsize = malloc(sizeof(psy_ui_Size));
+		if (self->minsize) {
+			*self->minsize = size;
+		}
+	}
 }
 
-psy_ui_Size psy_ui_component_minimumsize(psy_ui_Component* self)
+const psy_ui_Size* psy_ui_component_minimumsize(const psy_ui_Component* self)
 {
-	return self->minsize;
+	return self->minsize;	
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)

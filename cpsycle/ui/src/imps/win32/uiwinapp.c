@@ -17,8 +17,10 @@
 // platform
 #include "../../detail/trace.h"
 
-static int iDeltaPerLine = 120;
+static int deltaperline = 120;
+static int accumwheeldelta = 0;
 static psy_ui_WinApp* winapp = NULL;
+static bool mousetracking = FALSE;
 
 static psy_ui_Component* eventtarget(psy_ui_Component* component);
 static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
@@ -603,7 +605,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 				break;
 			case WM_MOUSEMOVE:
-				if (!imp->component->mousetracking) {
+				if (!mousetracking) {
 					TRACKMOUSEEVENT tme;
 					
 					imp->component->vtable->onmouseenter(imp->component);
@@ -614,7 +616,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					tme.dwHoverTime = 200;
 					tme.hwndTrack = hwnd;
 					if (_TrackMouseEvent(&tme)) {
-						imp->component->mousetracking = 1;
+						mousetracking = TRUE;
 					} 
 					return 0;
 				}				
@@ -641,11 +643,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					&ulScrollLines, 0) ;
       
 			   // ulScrollLines usually equals 3 or 0 (for no scrolling)
-			   // WHEEL_DELTA equals 120, so iDeltaPerLine will be 40
+			   // WHEEL_DELTA equals 120, so deltaperline will be 40
 				if (ulScrollLines) {
-					iDeltaPerLine = WHEEL_DELTA / ulScrollLines;
+					deltaperline = WHEEL_DELTA / ulScrollLines;
 				} else {
-					iDeltaPerLine = 0;
+					deltaperline = 0;
 				}
 				return 0;
 				break; }
@@ -670,11 +672,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					&ev);
 				preventdefault = ev.preventdefault;
 				if (!preventdefault && imp->component->wheelscroll > 0) {
-					if (iDeltaPerLine != 0) {
-						imp->component->accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
-						while (imp->component->accumwheeldelta >= iDeltaPerLine)
-						{
-							double iPos;
+					if (deltaperline != 0) {
+						accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
+						while (accumwheeldelta >= deltaperline) {
+							double pos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
 							psy_ui_Value scrolltop;
@@ -684,21 +685,19 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);							
 							scrolltop = psy_ui_component_scrolltop(imp->component);
-							iPos =  psy_ui_value_px(&scrolltop, tm) / 
+							pos =  psy_ui_value_px(&scrolltop, tm) / 
 								psy_ui_value_px(&imp->component->scrollstepy, tm) -
 								imp->component->wheelscroll;
-							if (iPos < (double)scrollmin) {
-								iPos = (double)scrollmin;
-							}
-							if (imp->component->handlevscroll) {
-								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, iPos));
+							if (pos < (double)scrollmin) {
+								pos = (double)scrollmin;
 							}							
-							imp->component->accumwheeldelta -= iDeltaPerLine;
+							psy_ui_component_setscrolltop(imp->component,
+								psy_ui_mul_value_real(imp->component->scrollstepy, pos));														
+							accumwheeldelta -= deltaperline;
 						}
-						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
+						while (accumwheeldelta <= -deltaperline)
 						{
-							double iPos;
+							double pos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
 							psy_ui_Value scrolltop;
@@ -708,17 +707,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);		
 							scrolltop = psy_ui_component_scrolltop(imp->component);
-							iPos = psy_ui_value_px(&scrolltop, tm) /
+							pos = psy_ui_value_px(&scrolltop, tm) /
 								psy_ui_value_px(&imp->component->scrollstepy, tm) +
 								imp->component->wheelscroll;
-							if (iPos > (double)scrollmax) {
-								iPos = (double)scrollmax;
-							}
-							if (imp->component->handlevscroll) {
-								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, iPos));
+							if (pos > (double)scrollmax) {
+								pos = (double)scrollmax;
 							}							
-							imp->component->accumwheeldelta += iDeltaPerLine;
+							psy_ui_component_setscrolltop(imp->component,
+								psy_ui_mul_value_real(imp->component->scrollstepy, pos));														
+							accumwheeldelta += deltaperline;
 						}
 					}
 				}
@@ -730,7 +727,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_MOUSELEAVE:
 			{
-				imp->component->mousetracking = 0;
+				mousetracking = FALSE;
 				imp->component->vtable->onmouseleave(imp->component);
 				psy_signal_emit(&imp->component->signal_mouseleave, imp->component, 0);
 				return 0;
@@ -879,14 +876,14 @@ void handle_mouseevent(psy_ui_Component* component,
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
-    int				iPos; //, iHorzPos;	
+    int				pos; //, iHorzPos;	
 	psy_ui_win_ComponentImp* imp;
      
 	si.cbSize = sizeof(si);
     si.fMask  = SIF_ALL;
     GetScrollInfo (hwnd, SB_VERT, &si);	
 	// Save the position for comparison later on
-	iPos = si.nPos;
+	pos = si.nPos;
 	handle_scrollparam(hwnd, &si, wParam);	
 	// Set the position and then retrieve it.  Due to adjustments
 	// by Windows it may not be the same as the value set.
@@ -894,34 +891,32 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
 	GetScrollInfo(hwnd, SB_VERT, &si);
 	// If the position has changed, scroll the window and update it
-	if (si.nPos != iPos)
+	if (si.nPos != pos)
 	{
-		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);	
-		if (imp->component->handlevscroll) {
-			const psy_ui_TextMetric* tm;
-			psy_ui_Value scrolltop;
+		const psy_ui_TextMetric* tm;
+		psy_ui_Value scrolltop;
+		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);					
 
-			tm = psy_ui_component_textmetric(imp->component);
-			scrolltop = psy_ui_component_scrolltop(imp->component);
-			psy_ui_component_setscrolltop(imp->component,
-				psy_ui_value_makepx(
-					psy_ui_value_px(&scrolltop, tm) -
-					psy_ui_value_px(&imp->component->scrollstepy, tm) *
-						(iPos - si.nPos)));
-		}			
+		tm = psy_ui_component_textmetric(imp->component);
+		scrolltop = psy_ui_component_scrolltop(imp->component);
+		psy_ui_component_setscrolltop(imp->component,
+			psy_ui_value_makepx(
+				psy_ui_value_px(&scrolltop, tm) -
+				psy_ui_value_px(&imp->component->scrollstepy, tm) *
+					(pos - si.nPos)));		
 	}
 }
 void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
-    int				iPos; 
+    int				pos; 
 	psy_ui_win_ComponentImp* imp;
      
 	si.cbSize = sizeof (si) ;
     si.fMask  = SIF_ALL ;
     GetScrollInfo (hwnd, SB_HORZ, &si) ;	
 	// Save the position for comparison later on
-	iPos = si.nPos ;
+	pos = si.nPos ;
 	handle_scrollparam(hwnd, &si, wParam);
 	// Set the position and then retrieve it.  Due to adjustments
 	// by Windows it may not be the same as the value set.
@@ -929,21 +924,18 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
 	GetScrollInfo (hwnd, SB_HORZ, &si) ;
 	// If the position has changed, scroll the window and update it
-	if (si.nPos != iPos)
-	{                    
-		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-		if (imp->component->handlehscroll) {
-			const psy_ui_TextMetric* tm;
-			psy_ui_Value scrollleft;
+	if (si.nPos != pos) {       
+		const psy_ui_TextMetric* tm;
+		psy_ui_Value scrollleft;
 
-			tm = psy_ui_component_textmetric(imp->component);
-			scrollleft = psy_ui_component_scrollleft(imp->component);
-			psy_ui_component_setscrollleft(imp->component,
-				psy_ui_value_makepx(
-					psy_ui_value_px(&scrollleft, tm) -
-					psy_ui_value_px(&imp->component->scrollstepx, tm) *
-						(iPos - si.nPos)));
-		}		
+		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);							
+		tm = psy_ui_component_textmetric(imp->component);
+		scrollleft = psy_ui_component_scrollleft(imp->component);
+		psy_ui_component_setscrollleft(imp->component,
+			psy_ui_value_makepx(
+				psy_ui_value_px(&scrollleft, tm) -
+				psy_ui_value_px(&imp->component->scrollstepx, tm) *
+					(pos - si.nPos)));				
 	}
 }
 

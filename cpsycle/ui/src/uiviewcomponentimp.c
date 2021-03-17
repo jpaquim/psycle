@@ -239,27 +239,32 @@ psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_allocinit(
 
 void view_dev_destroy(psy_ui_ViewComponentImp* self)
 {
-	psy_List* p;
+	psy_ui_Component* component;
+	psy_List* p;	
 
-	if (self->component) {
-		psy_signal_emit(&self->component->signal_destroy,
+	component = self->component;
+	if (!component) {
+		return;
+	}
+	if (component) {
+		psy_signal_emit(&component->signal_destroy,
 			self->component, 0);
-		self->component->vtable->ondestroy(self->component);
+		component->vtable->ondestroy(component);
 	}
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* component;
+		psy_ui_Component* component;	
 		bool deallocate;
-		
+
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);		
-		component->imp->vtable->dev_destroyed(component->imp);
+		psy_ui_component_destroy(component);
 		if (deallocate) {
 			free(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;
+	self->viewcomponents = NULL;	
+	component->imp->vtable->dev_destroyed(component->imp);	
 }
 
 void view_dev_destroyed(psy_ui_ViewComponentImp* self)

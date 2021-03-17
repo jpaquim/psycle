@@ -4,12 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "kbdbox.h"
-
-#include <stdlib.h>
-#include <string.h>
-
-#include "../../detail/portable.h"
+// host
+#include "styles.h"
+// audio
 #include <player.h>
+// platform
+#include "../../detail/portable.h"
 
 static void kbdbox_makekeyproperties(KbdBox*);
 static void kbdbox_addkeyproperties(KbdBox*, psy_Property* section,
@@ -22,7 +22,7 @@ void kbdboxkey_init_all(KbdBoxKey* self, int x, int y, int width, int height, co
 	self->desc0 = strdup("");
 	self->desc1 = strdup("");
 	self->desc2 = strdup("");
-	self->colour = psy_ui_colour_make(0x00666666);
+	self->marked = FALSE;	
 }
 
 void kbdboxkey_dispose(KbdBoxKey* self)
@@ -188,14 +188,18 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 	double cpy;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setcolour(g, key->colour);
-	psy_ui_drawroundrectangle(g, key->position, self->corner);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
+	if (key->marked) {
+		psy_ui_setcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
+		psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
+	} else {
+		psy_ui_setcolour(g, psy_ui_style(STYLE_KEY)->colour);
+		psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY)->colour);
+	}
+	psy_ui_drawroundrectangle(g, key->position, self->corner);	
 	cpx = key->position.left + 4;
 	cpy = key->position.top + 4;
 	psy_ui_textout(g, cpx, cpy,
-		key->label, strlen(key->label));
-	psy_ui_settextcolour(g, key->colour);
+		key->label, strlen(key->label));	
 	psy_ui_textout(g, cpx + self->descident, cpy,
 		key->desc0, strlen(key->desc0));
 	psy_ui_textout(g, cpx, cpy + tm->tmHeight,
@@ -406,13 +410,24 @@ void kbdbox_addlargekey(KbdBox* self, uintptr_t keycode, const char* label)
 	}
 }
 
-void kbdbox_setcolour(KbdBox* self, uintptr_t keycode, psy_ui_Colour colour)
+void kbdbox_markkey(KbdBox* self, uintptr_t keycode)
 {
 	KbdBoxKey* key;
 
 	key = psy_table_at(&self->keys, keycode);
 	if (key) {
-		key->colour = colour;
+		key->marked = TRUE;
+		psy_ui_component_invalidate(kbdbox_base(self));
+	}
+}
+
+void kbdbox_unmarkkey(KbdBox* self, uintptr_t keycode)
+{
+	KbdBoxKey* key;
+
+	key = psy_table_at(&self->keys, keycode);
+	if (key) {
+		key->marked = FALSE;
 		psy_ui_component_invalidate(kbdbox_base(self));
 	}
 }
