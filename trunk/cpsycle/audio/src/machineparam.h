@@ -45,7 +45,7 @@ typedef struct MachineParamVtable {
 	fp_machineparam_name name;
 	fp_machineparam_describe describe;
 	// events
-	fp_machineparam_tweak tweak;
+	fp_machineparam_tweak tweak;	
 	fp_machineparam_reset reset;
 } MachineParamVtable;
 

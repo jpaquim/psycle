@@ -226,28 +226,32 @@ void psy_ui_aligner_adjustminmaxsize(psy_ui_Aligner* self,
 	psy_ui_Component* component, const psy_ui_TextMetric* tm,
 	psy_ui_Size* componentsize)
 {	
-	if (!psy_ui_value_iszero(&component->maxsize.width)) {
-		if (psy_ui_value_comp(&component->maxsize.width,
-			&componentsize->width, tm) < 0) {
-			componentsize->width = component->maxsize.width;
+	if (psy_ui_component_maximumsize(component)) {	
+		if (!psy_ui_value_iszero(&psy_ui_component_maximumsize(component)->width)) {
+			if (psy_ui_value_comp(&psy_ui_component_maximumsize(component)->width,
+					&componentsize->width, tm) < 0) {				
+				componentsize->width = psy_ui_component_maximumsize(component)->width;
+			}
+		}	
+		if (!psy_ui_value_iszero(&psy_ui_component_maximumsize(component)->height)) {
+			if (psy_ui_value_comp(&psy_ui_component_maximumsize(component)->height,
+					&componentsize->height, tm) < 0) {
+				componentsize->height = psy_ui_component_maximumsize(component)->height;
+			}
 		}
 	}
-	if (!psy_ui_value_iszero(&component->maxsize.height)) {		
-		if (psy_ui_value_comp(&component->maxsize.height,
-			&componentsize->height, tm) < 0) {
-			componentsize->height = component->maxsize.height;
+	if (psy_ui_component_minimumsize(component)) {
+		if (!psy_ui_value_iszero(&psy_ui_component_minimumsize(component)->width)) {
+			if (psy_ui_value_comp(&psy_ui_component_minimumsize(component)->width,
+					&componentsize->width, tm) > 0) {
+				componentsize->width = psy_ui_component_minimumsize(component)->width;
+			}
 		}
-	}
-	if (!psy_ui_value_iszero(&component->minsize.width)) {
-		if (psy_ui_value_comp(&component->minsize.width,
-			&componentsize->width, tm) > 0) {
-			componentsize->width = component->minsize.width;
-		}
-	}
-	if (!psy_ui_value_iszero(&component->minsize.height)) {
-		if (psy_ui_value_comp(&component->minsize.height,
-			&componentsize->height, tm) > 0) {
-			componentsize->height = component->minsize.height;
+		if (!psy_ui_value_iszero(&psy_ui_component_minimumsize(component)->height)) {
+			if (psy_ui_value_comp(&psy_ui_component_minimumsize(component)->height,
+					&componentsize->height, tm) > 0) {
+				componentsize->height = psy_ui_component_minimumsize(component)->height;
+			}
 		}
 	}
 }

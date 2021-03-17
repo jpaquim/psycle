@@ -69,6 +69,7 @@ INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* s
 
 void machinestackcolumn_append(MachineStackColumn*, uintptr_t macid);
 uintptr_t machinestackcolumn_lastbeforemaster(const MachineStackColumn*);
+uintptr_t machinestackcolumn_lastbeforeroute(const MachineStackColumn*);
 uintptr_t machinestackcolumn_lastbeforeindex(const MachineStackColumn*,
 	uintptr_t index);
 uintptr_t machinestackcolumn_last(const MachineStackColumn*);
@@ -90,6 +91,9 @@ typedef struct MachineStackState {
 	bool update;
 	bool columnselected;
 	bool preventrebuild;
+	bool rewire;
+	psy_audio_Wire oldwire;
+	psy_audio_Wire newwire;		
 	struct MachineViewBar* statusbar;
 } MachineStackState;
 
@@ -107,6 +111,7 @@ uintptr_t machinestackstate_maxnumcolumns(const MachineStackState*);
 void machinestackstate_clear(MachineStackState*);
 psy_List* machinestackstate_inputs(MachineStackState*);
 psy_List* machinestackstate_buses(MachineStackState*);
+void machinestackstate_check_wirechange(MachineStackState*);
 
 INLINE void machinestackstate_rebuildview(MachineStackState* self)
 {

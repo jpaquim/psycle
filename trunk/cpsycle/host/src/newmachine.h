@@ -106,6 +106,7 @@ typedef struct NewMachine {
 	psy_ui_Scroller scroller_main;	
 	// internal data
 	bool scanending;
+	bool appendstack;
 	int mode;
 	// references
 	Workspace* workspace;

@@ -283,4 +283,18 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_colour_set(&style->border.colour_bottom,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.07));
 	psy_ui_defaults_setstyle(defaults, STYLE_DURATION_TIME, style);
+	// key
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		surface);	
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY, style);
+	// key::hover
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, onprimary, surface);	
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_HOVER, style);
+	// key::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, onsecondary, surface);	
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SELECT, style);
 }

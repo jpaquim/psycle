@@ -202,6 +202,7 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 			} else if (options & NEWMACHINE_APPEND) {
 				newmachine_appendmode(&self->newmachine);
 			} else if (options & NEWMACHINE_APPENDSTACK) {
+				self->newmachine.appendstack = TRUE;
 				self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
 				newmachine_appendmode(&self->newmachine);
 			} else if (options & NEWMACHINE_ADDEFFECT) {
@@ -262,10 +263,14 @@ void machineview_onnewmachineselected(MachineView* self,
 	machine = psy_audio_machinefactory_make_info(
 		&self->workspace->machinefactory, &machineinfo);
 	machineinfo_dispose(&machineinfo);
-	if (machine) {		
+	if (machine) {
+		if (self->newmachine.appendstack &&
+			psy_audio_machine_mode(machine) == psy_audio_MACHMODE_FX) {
+			psy_audio_machine_setbus(machine);
+		}
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
-
+						
 			slot = psy_audio_machines_append(self->wireview.machines, machine);
 			psy_audio_machines_disconnect(self->wireview.machines,
 				self->wireview.selectedwire);
@@ -293,4 +298,5 @@ void machineview_onnewmachineselected(MachineView* self,
 		workspace_outputerror(self->workspace,
 			self->workspace->machinefactory.errstr);
 	}	
+	self->newmachine.appendstack = FALSE;
 }
