@@ -273,11 +273,11 @@ void machineview_onnewmachineselected(MachineView* self,
 						
 			slot = psy_audio_machines_append(self->wireview.machines, machine);
 			psy_audio_machines_disconnect(self->wireview.machines,
-				self->wireview.selectedwire);
+				psy_audio_machines_selectedwire(self->wireview.machines));				
 			psy_audio_machines_connect(self->wireview.machines,
-				psy_audio_wire_make(self->wireview.selectedwire.src, slot));
+				psy_audio_wire_make(psy_audio_machines_selectedwire(self->wireview.machines).src, slot));
 			psy_audio_machines_connect(self->wireview.machines,
-				psy_audio_wire_make(slot, self->wireview.selectedwire.dst));
+				psy_audio_wire_make(slot, psy_audio_machines_selectedwire(self->wireview.machines).dst));
 			psy_audio_machines_select(self->wireview.machines, slot);
 			self->wireview.addeffect = 0;
 		} else if (self->newmachine.mode == NEWMACHINE_INSERT) {

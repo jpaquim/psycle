@@ -59,6 +59,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->mixercount = 0;
 	self->opcount = 0;
 	self->preventundoredo = FALSE;
+	psy_audio_wire_init(&self->selectedwire);
 	psy_undoredo_init(&self->undoredo);
 	machines_initsignals(self);
 }
@@ -722,6 +723,11 @@ uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines* self)
 	return self->paramselected;
 }
 
+psy_audio_Wire psy_audio_machines_selectedwire(const psy_audio_Machines* self)
+{
+	return self->selectedwire;
+}
+
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)
 {
 	assert(self);
@@ -868,6 +874,7 @@ void psy_audio_machines_selectwire(psy_audio_Machines* self, psy_audio_Wire wire
 {
 	assert(self);
 
+	self->selectedwire = wire;
 	psy_signal_emit(&self->signal_wireselected, self, 1, &wire);
 }
 

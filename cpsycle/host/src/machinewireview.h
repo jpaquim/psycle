@@ -39,7 +39,6 @@ typedef struct MachineWireView {
 	MachineViewDragMode dragmode;
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
-	psy_audio_Wire selectedwire;
 	psy_audio_Wire hoverwire;	
 	psy_audio_PluginCatcher plugincatcher;	
 	psy_ui_Edit editname;

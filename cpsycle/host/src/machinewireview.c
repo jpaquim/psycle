@@ -144,7 +144,6 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->dragslot = psy_INDEX_INVALID;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = psy_audio_MASTER_INDEX;	
-	psy_audio_wire_init(&self->selectedwire);
 	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinewireview_onsongchanged);	
@@ -265,7 +264,9 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);		
 			if (socket->slot != psy_INDEX_INVALID) {
 				psy_ui_Component* inmachineui;
+				psy_audio_Wire selectedwire;
 
+				selectedwire = psy_audio_machines_selectedwire(self->machines);
 				inmachineui = (psy_ui_Component*)machineuis_at(self, socket->slot);
 				if (inmachineui && machineui) {
 					psy_ui_RealPoint out;
@@ -274,8 +275,8 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 					if (self->hoverwire.src == slot &&
 							self->hoverwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin->hoverwirecolour);
-					} else if (self->selectedwire.src == slot &&
-							self->selectedwire.dst == socket->slot) {
+					} else if (selectedwire.src == slot &&
+							selectedwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin->selwirecolour);
 					} else {
 						psy_ui_setcolour(g, self->skin->wirecolour);
@@ -398,9 +399,12 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 		self->dragpt = psy_ui_realpoint_make(ev->pt.x, ev->pt.y);
 		self->dragslot = machinewireview_hittest(self);		
 		if (self->dragslot == psy_INDEX_INVALID) {
-			self->selectedwire = machinewireview_hittestwire(self, ev->pt);
-			if (psy_audio_wire_valid(&self->selectedwire)) {
-				machinewireview_showwireview(self, self->selectedwire);
+			psy_audio_Wire selectedwire;
+			
+			selectedwire = machinewireview_hittestwire(self, ev->pt);
+			if (psy_audio_wire_valid(&selectedwire)) {
+				psy_audio_machines_selectwire(self->machines, selectedwire);
+				machinewireview_showwireview(self, selectedwire);
 				psy_ui_component_invalidate(&self->component);
 			} else {				
 				self->randominsert = 0;
@@ -425,9 +429,10 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 	self->dragslot = machinewireview_hittest(self);
 	self->dragmachineui = machineuis_at(self, self->dragslot);
 	if (ev->button == 1) {
-		if (self->dragslot != psy_audio_MASTER_INDEX) {
-			self->selectedslot = self->dragslot;
-			psy_audio_wire_invalidate(&self->selectedwire);			
+		if (self->dragslot != psy_audio_MASTER_INDEX) {			
+			psy_audio_machines_selectwire(self->machines, 
+				psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID));
+			self->selectedslot = self->dragslot;			
 		}
 		if (self->dragmachineui) {			
 			if (ev->bubble) {
@@ -437,15 +442,19 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 					ev->pt.y - psy_ui_component_position(self->dragmachineui).top);
 				psy_ui_component_capture(&self->component);				
 			}
-		} else {			
-			self->selectedwire = machinewireview_hittestwire(self, ev->pt);			
-			if (psy_audio_wire_valid(&self->selectedwire) && ev->shift) {
+		} else {
+			psy_audio_Wire selectedwire;
+			
+			selectedwire = machinewireview_hittestwire(self, ev->pt);
+			psy_audio_machines_selectwire(self->machines,
+				selectedwire);
+			if (psy_audio_wire_valid(&selectedwire) && ev->shift) {
 				self->dragmode = MACHINEVIEW_DRAG_LEFTCONNECTION;
-				self->dragslot = self->selectedwire.src;
+				self->dragslot = selectedwire.src;
 			}
-			if (psy_audio_wire_valid(&self->selectedwire) && ev->ctrl) {
+			if (psy_audio_wire_valid(&selectedwire) && ev->ctrl) {
 				self->dragmode = MACHINEVIEW_DRAG_RIGHTCONNECTION;
-				self->dragslot = self->selectedwire.dst;
+				self->dragslot = selectedwire.dst;
 			}
 			psy_ui_component_invalidate(&self->component);
 		}
@@ -645,9 +654,9 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 				slot = self->dragslot;
 				self->dragslot = machinewireview_hittest(self);
 				if (self->dragslot != psy_INDEX_INVALID) {
-					if (!machinewireview_dragging_newconnection(self)) {
+					if (!machinewireview_dragging_newconnection(self)) {						
 						psy_audio_machines_disconnect(self->machines,
-							self->selectedwire);						
+							psy_audio_machines_selectedwire(self->machines));
 					}
 					if (self->dragmode < MACHINEVIEW_DRAG_RIGHTCONNECTION) {
 						if (psy_audio_machines_valid_connection(self->machines,
@@ -678,7 +687,10 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 
 void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 {		
-	if (ev->ctrl) {
+	psy_audio_Wire selectedwire;
+
+	selectedwire = psy_audio_machines_selectedwire(self->machines);
+	if (ev->ctrl) {		
 		if (ev->keycode == psy_ui_KEY_B) {
 			self->dragwire.src = self->selectedslot;
 		} else if (ev->keycode == psy_ui_KEY_E) {
@@ -689,7 +701,7 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 						self->dragwire)) {				
 					psy_audio_machines_connect(self->machines, self->dragwire);
 				} else {
-					self->selectedwire = self->dragwire;
+					psy_audio_machines_selectwire(self->machines, self->dragwire);					
 					psy_ui_component_invalidate(&self->component);
 				}
 			}
@@ -739,9 +751,9 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 			}
 		}
 	} else if (ev->keycode == psy_ui_KEY_DELETE &&
-			psy_audio_wire_valid(&self->selectedwire)) {
+			psy_audio_wire_valid(&selectedwire)) {
 		psy_audio_exclusivelock_enter();
-		psy_audio_machines_disconnect(self->machines, self->selectedwire);
+		psy_audio_machines_disconnect(self->machines, selectedwire);
 		psy_audio_exclusivelock_leave();
 	} else if (ev->keycode == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
 			self->selectedslot != psy_audio_MASTER_INDEX) {
@@ -944,16 +956,16 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoi
 void machinewireview_onmachineselected(MachineWireView* self,
 	psy_audio_Machines* machines, uintptr_t slot)
 {
-	self->selectedslot = slot;
-	psy_audio_wire_invalidate(&self->selectedwire);	
+	self->selectedslot = slot;	
+	psy_audio_machines_selectwire(self->machines,
+		psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID));	
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_component_setfocus(&self->component);
 }
 
 void machinewireview_onwireselected(MachineWireView* self,
 	psy_audio_Machines* sender, psy_audio_Wire wire)
-{
-	self->selectedwire = wire;
+{	
 	psy_ui_component_invalidate(&self->component);
 }
 
