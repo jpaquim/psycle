@@ -42,6 +42,7 @@ typedef struct psy_audio_Machines {
 	uintptr_t selected;
 	uintptr_t paramselected;	
 	uintptr_t soloed;
+	psy_audio_Wire selectedwire;
 	int filemode;
 	uintptr_t maxindex;
 	psy_Signal signal_insert;
@@ -95,6 +96,8 @@ psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines*);
 const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const
 	psy_audio_Machines*);
 uintptr_t psy_audio_machines_paramselected(const psy_audio_Machines*);
+void psy_audio_machines_selectwire(psy_audio_Machines*, psy_audio_Wire);
+psy_audio_Wire psy_audio_machines_selectedwire(const psy_audio_Machines*);
 uintptr_t psy_audio_machines_tweakparam(psy_audio_Machines*);
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines*);
 void psy_audio_machines_solo(psy_audio_Machines*, uintptr_t slot);

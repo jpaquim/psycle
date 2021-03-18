@@ -48,6 +48,7 @@ struct psy_audio_Machines;
 typedef struct MachineStackColumn {
 	uintptr_t column;
 	uintptr_t inputroute;
+	uintptr_t offset;
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
 	psy_audio_IntMachineParam level_param;
@@ -93,7 +94,9 @@ typedef struct MachineStackState {
 	bool preventrebuild;
 	bool rewire;
 	psy_audio_Wire oldwire;
-	psy_audio_Wire newwire;		
+	psy_audio_Wire newwire;
+	uintptr_t currlevel;
+	// references
 	struct MachineViewBar* statusbar;
 } MachineStackState;
 
