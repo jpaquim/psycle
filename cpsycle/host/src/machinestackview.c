@@ -518,22 +518,38 @@ psy_List* machinestackstate_inputs(MachineStackState* self)
 {
 	if (self->machines) {
 		psy_TableIterator it;
+		psy_List* p;
 		psy_List* rv;
+		psy_List* effectswithoutinput;
 
 		assert(self);
 
 		rv = NULL;
+		effectswithoutinput = NULL;
 		for (it = psy_audio_machines_begin(self->machines);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
-			psy_audio_Machine* machine;
+			psy_audio_Machine* machine;			
 
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+
 			if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
 					psy_audio_machine_isbus(machine)) {
 				psy_list_append(&rv, (void*)psy_tableiterator_key(&it));
+			} else if (psy_tableiterator_key(&it) != psy_audio_MASTER_INDEX) {
+				psy_audio_MachineSockets* sockets;
+
+				sockets = psy_audio_connections_at(&self->machines->connections,
+					psy_tableiterator_key(&it));
+				if (!sockets || wiresockets_size(&sockets->inputs) == 0) {
+					psy_list_append(&effectswithoutinput, (void*)psy_tableiterator_key(&it));
+				}
 			}
 		}
+		for (p = effectswithoutinput; p != NULL; psy_list_next(&p)) {
+			psy_list_append(&rv, psy_list_entry(p));
+		}
+		psy_list_free(effectswithoutinput);
 		return rv;
 	}
 	return NULL;
@@ -1004,11 +1020,16 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 		machinestackpanetrack_vtable_init(self));
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setdefaultalign(&self->component,
+	psy_ui_component_init(&self->client, &self->component, view);
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(20.0), psy_ui_value_makepx(20.0),
 			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));
+	//psy_ui_scroller_init(&self->scroller, &self->client, &self->component,
+		//&self->component);
+	//psy_ui_component_setalign(&self->scroller, psy_ui_ALIGN_CLIENT);
 	self->column = column;
 	self->state = state;
 	self->workspace = workspace;
@@ -1126,7 +1147,7 @@ void machinestackpane_build(MachineStackPane* self)
 					uintptr_t first;
 
 					first = machinestackcolumn_at(column, 0);
-					arrow = arrowui_allocinit(&trackpane->component,
+					arrow = arrowui_allocinit(&trackpane->client,
 						&self->component, psy_audio_wire_make(column->inputroute, first),
 						self->skin, self->workspace);
 					if (arrow) {
@@ -1154,7 +1175,7 @@ void machinestackpane_build(MachineStackPane* self)
 						if (machine && psy_audio_machine_mode(machine) ==
 								psy_audio_MACHMODE_FX && !psy_audio_machine_isbus(machine)) {							
 							machinestackpane_insert(self, slot,
-								&trackpane->component);
+								&trackpane->client);
 							insert = TRUE;
 						}
 					}

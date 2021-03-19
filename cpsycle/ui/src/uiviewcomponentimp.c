@@ -331,13 +331,16 @@ psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp* self)
 void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
+	const psy_ui_TextMetric* tm;
+
+	tm = view_dev_textmetric(self);
 	self->position = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
-			psy_ui_value_px(&topleft.x, NULL),
-			psy_ui_value_px(&topleft.y, NULL)),
+			psy_ui_value_px(&topleft.x, tm),
+			psy_ui_value_px(&topleft.y, tm)),
 		psy_ui_realsize_make(
-			psy_ui_value_px(&size.width, NULL),
-			psy_ui_value_px(&size.height, NULL)));
+			psy_ui_value_px(&size.width, tm),
+			psy_ui_value_px(&size.height, tm)));
 }
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)
