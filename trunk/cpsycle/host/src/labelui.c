@@ -121,6 +121,6 @@ void labelui_invalidate(LabelUi* self)
 void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(100.0);
-	rv->height = psy_ui_value_makepx(40.0);	
+	rv->width = psy_ui_value_makeew(10.0);
+	rv->height = psy_ui_value_makeeh(2.0);	
 }

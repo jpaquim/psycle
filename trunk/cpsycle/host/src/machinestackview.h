@@ -222,8 +222,8 @@ void machinestackvolumes_build(MachineStackVolumes*);
 typedef struct MachineStackPaneTrack {
 	// inherits
 	psy_ui_Component component;
-	// psy_ui_Component client;
-	// psy_ui_Scroller scroller;
+	psy_ui_Component client;
+	psy_ui_Scroller scroller;
 	// internal
 	uintptr_t column;	
 	// References

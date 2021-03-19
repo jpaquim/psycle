@@ -9,6 +9,7 @@
 #include "patterncmds.h"
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 #define PIANOROLL_REFRESHRATE 50
 
@@ -23,7 +24,7 @@ void keyboardstate_init(KeyboardState* self, PatternViewSkin* skin)
 	assert(self);
 
 	self->keymin = 0;
-	self->keymax = 88;	
+	self->keymax = 119;	
 	self->defaultkeyheight = psy_ui_value_makeeh(1.0);
 	self->keyheight = self->defaultkeyheight;
 	self->keyheightpx = 13;
@@ -471,7 +472,6 @@ psy_audio_PatternSelection pianogriddraw_clipselection(PianoGridDraw* self,
 	return rv;
 }
 
-
 void pianogriddraw_ondraw(PianoGridDraw* self, psy_ui_Graphics* g)
 {
 	psy_audio_PatternSelection clip;
@@ -508,7 +508,6 @@ bool pianogriddraw_testselection(PianoGridDraw* self, uint8_t key, double offset
 		offset >= self->selection.topleft.offset &&
 		offset < self->selection.bottomright.offset;
 }
-
 
 // Pianogrid
 // prototypes

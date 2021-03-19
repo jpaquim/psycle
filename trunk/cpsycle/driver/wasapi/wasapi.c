@@ -93,6 +93,10 @@ const IID IID_IAudioRenderClient = { 0xf294acfc, 0x3146, 0x4483,
 
 #define _CRT_SECURE_NO_WARNINGS
 
+// it looks a bit dumb to write a function to do that code,
+// but maybe someone will find an optimised way to do this.
+#define clip(minimum, value, maximum) ((value < minimum ? minimum : value > maximum ? maximum : value))
+
 interface IMMDevice;
 interface IMMDeviceEnumerator;
 interface IMMDeviceCollection;
@@ -228,6 +232,8 @@ static int on_error(int err, const char* msg);
 static void refreshavailableports(WasapiDriver*);
 static void clearplayenums(WasapiDriver*);
 static void clearcapenums(WasapiDriver*);
+
+static void quantize24in32bit(float* pin, int* piout, int c);
 
 static psy_AudioDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -471,8 +477,7 @@ static void init_properties(psy_AudioDriver* driver)
 	psy_property_setreadonly(
 		psy_property_append_string(self->configuration, "version", "1.0"),
 		TRUE);
-	devices = psy_property_append_choice(self->configuration, "device", -1);
-	
+	devices = psy_property_append_choice(self->configuration, "device", -1);	
 	psy_property_append_int(self->configuration, "bitdepth", 16, 0, 32);
 	psy_property_append_int(self->configuration, "samplerate", 44100, 0, 0);
 	psy_property_append_int(self->configuration, "dither", 0, 0, 1);
@@ -1112,18 +1117,16 @@ HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFr
 	// Grab the next empty buffer from the audio device.	
 	HRESULT hr = IAudioRenderClient_GetBuffer(pRenderClient, numFramesAvailable, &pData);
 	EXIT_ON_ERROR(hr)
-	unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
+		unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
 	int hostisplaying;
 	float* pFloatBlock =
 		self->driver.callback(
 			self->driver.callbackcontext, &numFramesAvailable, &hostisplaying);
 	if (_sampleValidBits == 32) {
-		dsp.movmul(pFloatBlock, (float*)pData, numFramesAvailable * 2, 1.f / 32768.f);
-	}
-	else if (_sampleValidBits == 24) {
-		// Quantize24in32Bit(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
-	}
-	else if (_sampleValidBits == 16) {
+		dsp.movmul(pFloatBlock, (float*)pData, numFramesAvailable * 2 , 1.f / 32768.f);
+	} else if (_sampleValidBits == 24) {
+		quantize24in32bit(pFloatBlock, (int*)(pData), numFramesAvailable);
+	} else if (_sampleValidBits == 16) {
 		//if (settings_->dither()) Quantize16WithDither(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 		// else Quantize16(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 		psy_dsp_quantize16(pFloatBlock, (int*)pFloatBlock, numFramesAvailable);
@@ -1133,6 +1136,20 @@ HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFr
 	self->writeMark += numFramesAvailable;
 Exit:
 	return hr;
+}
+
+void quantize24in32bit(float* pin, int* piout, int c)
+{
+	// TODO Don't really know why, but the -100 is what made the clipping work correctly.
+	int max;
+	int min;
+
+	max = ((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+	min = (-max - 1);
+	for (int i = 0; i < c; ++i) {
+		*piout++ = (int32_t)(clip(((float)min), ((*pin++) * 65536.0f), ((float)max)));
+		*piout++ = (int32_t)(clip(((float)min), ((*pin++) * 65536.0f), ((float)max)));
+	}
 }
 
 void GetPlaybackPorts(WasapiDriver* self, psy_List** ports)
