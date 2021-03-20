@@ -17,6 +17,7 @@ extern "C" {
 typedef struct SliderGroupUi {
 	// inherits
 	psy_ui_Component component;
+	psy_ui_Component controls;
 	// internal
 	SliderUi slider;
 	LevelUi level;

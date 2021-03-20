@@ -83,6 +83,26 @@ void checkui_dispose(CheckUi* self)
 	checkui_super_vtable.dispose(&self->component);
 }
 
+CheckUi* checkui_alloc(void)
+{
+	return (CheckUi*)malloc(sizeof(CheckUi));
+}
+
+CheckUi* checkui_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_MachineParam* param,
+	ParamSkin* skin)
+{
+	CheckUi* rv;
+
+	rv = checkui_alloc();
+	if (rv) {
+		checkui_init(rv, parent, view, param, skin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
+}
+
+
 void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 {	
 	double centery;
@@ -91,26 +111,29 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;
 
+	label[0] = '\0';
 	size = psy_ui_component_sizepx(&self->component);
 	centery = (size.height - psy_ui_realrectangle_height(&self->skin->checkoff.dest)) / 2;
-	if (psy_audio_machineparam_normvalue(self->param) == 0.f) {
+	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
 		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(0, centery), &self->skin->checkoff);
 	} else {
 		skin_blitcoord(g, &self->skin->mixerbitmap,
 			psy_ui_realpoint_make(0, centery), &self->skin->checkon);
 	}
-	psy_ui_setrectangle(&r, 20, 0, size.width, size.height);
-	if (!psy_audio_machineparam_name(self->param, label)) {
+	psy_ui_setrectangle(&r, 20, 0, size.width - 20, size.height);
+	if (self->param && !psy_audio_machineparam_name(self->param, label)) {
 		if (!psy_audio_machineparam_label(self->param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	centery = (size.height - tm->tmHeight) / 2;
-	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(20, centery),
-		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, label, strlen(label));
+	if (self->param) {
+		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(20, centery),
+			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
+			r, label, strlen(label));
+	}
 }
 
 void checkui_invalidate(CheckUi* self)
@@ -122,12 +145,8 @@ void checkui_invalidate(CheckUi* self)
 
 void checkui_onpreferredsize(CheckUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
-	psy_ui_RealSize size;
-
-	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
-		MPF_SWITCH, FALSE);
-	*rv = psy_ui_size_makepx(100.0, size.height);
+{		
+	psy_ui_size_setem(rv, 10.0, 1.0);
 }
 
 void checkui_onmousedown(CheckUi* self, psy_ui_MouseEvent* ev)

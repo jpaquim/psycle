@@ -63,7 +63,8 @@ void psy_audio_pinmapping_disconnect(psy_audio_PinMapping*, uintptr_t src,
 typedef struct {
 	uintptr_t slot;	
 	psy_dsp_amp_t volume;
-	psy_audio_PinMapping mapping;	
+	psy_audio_PinMapping mapping;
+	bool mute;
 } psy_audio_WireSocket;
 
 psy_audio_WireSocket* psy_audio_wiresocket_allocinit(uintptr_t slot,

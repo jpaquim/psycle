@@ -52,7 +52,8 @@ typedef struct MachineStackColumn {
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
 	psy_audio_IntMachineParam level_param;
-	OutputRouteParam outputroute;
+	psy_audio_IntMachineParam mute_param;
+	OutputRouteParam outputroute;	
 	struct MachineStackState* state;
 } MachineStackColumn;
 
@@ -63,6 +64,7 @@ void machinestackcolumn_dispose(MachineStackColumn*);
 void machinestackcolumn_setwire(MachineStackColumn*, psy_audio_Wire);
 
 psy_audio_Wire machinestackcolumn_outputwire(MachineStackColumn*);
+psy_audio_Wire machinestackcolumn_sendwire(MachineStackColumn*);
 INLINE psy_audio_WireMachineParam* machinestackcolumn_wire(MachineStackColumn* self)
 {
 	return self->wirevolume;

@@ -23,6 +23,8 @@ void slidergroupui_init(SliderGroupUi* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->level.component, psy_ui_ALIGN_LEFT);
 	labelui_init(&self->label, &self->component, view, volume, skin);
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_init(&self->controls, &self->component, view);	
+	psy_ui_component_setalign(&self->controls, psy_ui_ALIGN_CLIENT);
 }
 
 SliderGroupUi* slidergroupui_alloc(void)
