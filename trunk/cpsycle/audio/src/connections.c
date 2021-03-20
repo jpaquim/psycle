@@ -198,10 +198,11 @@ psy_audio_WireSocket* psy_audio_wiresocket_allocinit(uintptr_t slot,
 {
 	psy_audio_WireSocket* rv;
 		
-	rv = (psy_audio_WireSocket*) malloc(sizeof(psy_audio_WireSocket));
+	rv = (psy_audio_WireSocket*)malloc(sizeof(psy_audio_WireSocket));
 	if (rv) {
 		rv->slot = slot;
-		rv->volume = 1.0f;		
+		rv->volume = 1.0f;
+		rv->mute = FALSE;
 		psy_audio_pinmapping_init(&rv->mapping, 2);		
 	}
 	return rv;
@@ -216,7 +217,8 @@ void psy_audio_wiresocket_copy(psy_audio_WireSocket* self,
 	psy_audio_WireSocket* src)
 {	
 	self->slot = src->slot;
-	self->volume = src->volume;	
+	self->volume = src->volume;
+	self->mute = src->mute;
 	psy_audio_pinmapping_copy(&self->mapping, &src->mapping);
 }
 

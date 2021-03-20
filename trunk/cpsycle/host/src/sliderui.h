@@ -20,7 +20,7 @@ extern "C" {
 // SliderUi
 typedef struct SliderUi {
 	// inherits
-	psy_ui_Component component;
+	psy_ui_Component component;	
 	// internal
 	ParamTweak paramtweak;
 	// references

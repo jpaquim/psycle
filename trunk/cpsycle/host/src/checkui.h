@@ -33,6 +33,12 @@ typedef struct CheckUi {
 void checkui_init(CheckUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
 
+CheckUi* checkui_alloc(void);
+CheckUi* checkui_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_MachineParam*,
+	ParamSkin*);
+
+
 #ifdef __cplusplus
 }
 #endif

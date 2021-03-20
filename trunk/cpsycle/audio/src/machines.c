@@ -629,6 +629,7 @@ psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self,
 			? self->samplebuffers + (self->currsamplebuffer *
 				psy_audio_MAX_STREAM_SIZE)
 			: 0;
+		dsp.clear(samples, psy_audio_MAX_STREAM_SIZE);
 		++self->currsamplebuffer;
 		if (self->currsamplebuffer >= self->numsamplebuffers) {
 			self->currsamplebuffer = 0;
