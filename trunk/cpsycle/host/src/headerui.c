@@ -63,6 +63,24 @@ void headerui_init(HeaderUi* self, psy_ui_Component* parent,
 	self->param = param;	
 }
 
+HeaderUi* headerui_alloc(void)
+{
+	return (HeaderUi*)malloc(sizeof(HeaderUi));
+}
+
+HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
+{
+	HeaderUi* rv;
+
+	rv = headerui_alloc();
+	if (rv) {
+		headerui_init(rv, parent, view, param, paramskin);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
+}
+
 void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 {		
 	double half;

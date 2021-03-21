@@ -4,32 +4,20 @@
 #include "../../detail/prefix.h"
 
 #include "knobui.h"
-// host
-#include "skingraphics.h"
-#include "paramview.h"
-#include "machineui.h"
-#include "wireview.h"
-// audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // KnobUi
 // prototypes
 static void knobui_ondraw(KnobUi*, psy_ui_Graphics*);
-static void knobui_invalidate(KnobUi*);
 static void knobui_onpreferredsize(KnobUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
+static void knobui_updateparam(KnobUi*);
 static void knobui_onmousedown(KnobUi*, psy_ui_MouseEvent*);
 static void knobui_onmouseup(KnobUi*, psy_ui_MouseEvent*);
 static void knobui_onmousemove(KnobUi*, psy_ui_MouseEvent*);
-
 // vtable
 static psy_ui_ComponentVtable knobui_vtable;
-static psy_ui_ComponentVtable knobui_super_vtable;
 static bool knobui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
@@ -37,11 +25,8 @@ static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
 	assert(self);
 
 	if (!knobui_vtable_initialized) {
-		knobui_vtable = *(self->component.vtable);
-		knobui_super_vtable = knobui_vtable;
+		knobui_vtable = *(self->component.vtable);		
 		knobui_vtable.ondraw = (psy_ui_fp_component_ondraw)knobui_ondraw;		
-		knobui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			knobui_invalidate;
 		knobui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			knobui_onpreferredsize;
 		knobui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
@@ -56,7 +41,9 @@ static psy_ui_ComponentVtable* knobui_vtable_init(KnobUi* self)
 }
 // implementation
 void knobui_init(KnobUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam* param,
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param,
 	ParamSkin* paramskin)
 {
 	assert(self);	
@@ -69,7 +56,10 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);	
 	self->skin = paramskin;
 	self->param = param;
+	self->paramidx = paramidx;
+	self->machine = machine;
 	paramtweak_init(&self->paramtweak);
+	self->tweaking = FALSE;
 }
 
 KnobUi* knobui_alloc(void)
@@ -78,37 +68,125 @@ KnobUi* knobui_alloc(void)
 }
 
 KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	KnobUi* rv;
 
 	rv = knobui_alloc();
 	if (rv) {
-		knobui_init(rv, parent, view, param, paramskin);
+		knobui_init(rv, parent, view, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
 }
 
-
 void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
-{	
-	KnobDraw knobdraw;
-
+{
+	char label[128];
+	char str[128];
+	psy_ui_RealRectangle r_top;
+	psy_ui_RealRectangle r_bottom;
 	psy_ui_RealSize size;
 
 	size = psy_ui_component_sizepx(&self->component);
-	knobdraw_init(&knobdraw, self->skin, NULL, self->param,
-		size, psy_ui_component_textmetric(&self->component),
-		FALSE); // self->tweak == paramnum);
-	knobdraw_draw(&knobdraw, g);
-}
-
-void knobui_invalidate(KnobUi* self)
-{
-	if (!machineui_vuupdate()) {
-		knobui_super_vtable.invalidate(&self->component);
+	knobui_updateparam(self);
+	if (self->param) {
+		psy_ui_setrectangle(&r_top,
+			psy_ui_realrectangle_width(&self->skin->knob.dest), 0,
+			size.width - psy_ui_realrectangle_width(&self->skin->knob.dest),
+			size.height / 2);
+	} else {
+		psy_ui_setrectangle(&r_top, 0, 0, size.width, size.height / 2);
 	}
+	psy_ui_drawsolidrectangle(g, r_top, self->skin->topcolour);
+	r_bottom = r_top;
+	psy_ui_realrectangle_settopleft(&r_bottom,
+		psy_ui_realpoint_make(r_top.left,
+			r_top.top + psy_ui_realrectangle_height(&r_top)));
+	psy_ui_drawsolidrectangle(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0.0, size.height / 2),
+			psy_ui_realsize_make(size.width, size.height / 2)),
+		self->skin->bottomcolour);
+	if (self->param) {
+		if (self->machine) {
+			if (!psy_audio_machine_parameter_name(self->machine, self->param, label)) {
+				if (!psy_audio_machine_parameter_label(self->machine, self->param, label)) {
+					psy_snprintf(label, 128, "%s", "");
+				}
+			}
+			if (!psy_audio_machine_parameter_describe(self->machine, self->param, str)) {
+				psy_snprintf(str, 128, "%d",
+					(int)psy_audio_machineparam_scaledvalue(self->param));
+			}
+		} else {
+			if (!psy_audio_machineparam_name(self->param, label)) {
+				if (!psy_audio_machineparam_label(self->param, label)) {
+					psy_snprintf(label, 128, "%s", "");
+				}
+			}
+			if (!psy_audio_machineparam_describe(self->param, str)) {
+				psy_snprintf(str, 128, "%d",
+					(int)psy_audio_machineparam_scaledvalue(self->param));
+			}
+		}
+		if (self->tweaking) {
+			psy_ui_setbackgroundcolour(g, self->skin->htopcolour);
+			psy_ui_settextcolour(g, self->skin->fonthtopcolour);
+		} else {
+			psy_ui_setbackgroundcolour(g, self->skin->topcolour);
+			psy_ui_settextcolour(g, self->skin->fonttopcolour);
+		}
+		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_top),
+			psy_ui_ETO_OPAQUE, r_top, label, strlen(label));
+		psy_ui_setbackgroundcolour(g, (self->tweaking)
+			? self->skin->hbottomcolour : self->skin->bottomcolour);
+		psy_ui_settextcolour(g, (self->tweaking)
+			? self->skin->fonthbottomcolour : self->skin->fontbottomcolour);
+		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_bottom),
+			psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
+		if (!psy_ui_bitmap_empty(&self->skin->knobbitmap)) {
+			intptr_t knob_frame;
+
+			if (self->param) {
+				if (self->machine) {
+					knob_frame = (intptr_t)(
+						(psy_audio_machine_parameter_normvalue(self->machine,
+							self->param) * 63.f));
+				} else {
+					knob_frame = (intptr_t)(
+						(psy_audio_machineparam_normvalue(self->param) * 63.f));
+				}
+			} else {
+				knob_frame = 0;
+			}
+			if (size.height < psy_ui_realrectangle_height(&self->skin->knob.dest)) {
+				double ratio;
+				double w;
+
+				ratio = size.height / (double)psy_ui_realrectangle_height(&self->skin->knob.dest);
+				w = ratio * psy_ui_realrectangle_width(&self->skin->knob.dest);
+				psy_ui_drawstretchedbitmap(g, &self->skin->knobbitmap,
+					psy_ui_realrectangle_make(psy_ui_realpoint_zero(),
+						psy_ui_realsize_make(w, size.height)),
+					psy_ui_realpoint_make(knob_frame *
+						psy_ui_realrectangle_height(&self->skin->knob.dest), 0.0),
+					psy_ui_realrectangle_size(&self->skin->knob.dest));
+			} else {
+				psy_ui_drawbitmap(g, &self->skin->knobbitmap,
+					self->skin->knob.dest, psy_ui_realpoint_make(knob_frame *
+						psy_ui_realrectangle_width(&self->skin->knob.dest), 0));
+			}
+		}
+	}
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00232323));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(0, size.height - 1),
+		psy_ui_realpoint_make(size.width, size.height - 1));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(size.width - 1, 0),
+		psy_ui_realpoint_make(size.width - 1, size.height - 1));
 }
 
 void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
@@ -120,7 +198,8 @@ void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1 && self->param != NULL) {		
-		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID);
+		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx);
+		self->tweaking = TRUE;
 		self->paramtweak.param = self->param;
 		paramtweak_onmousedown(&self->paramtweak, ev);		
 		psy_ui_component_capture(&self->component);		
@@ -139,5 +218,14 @@ void knobui_onmouseup(KnobUi* self, psy_ui_MouseEvent* ev)
 {
 	paramtweak_end(&self->paramtweak);
 	psy_ui_component_releasecapture(&self->component);
+	self->tweaking = FALSE;
 	psy_ui_component_invalidate(&self->component);
+}
+
+void knobui_updateparam(KnobUi* self)
+{
+	if (self->machine && self->paramidx) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

@@ -195,7 +195,8 @@ typedef struct psy_audio_Mixer {
 	psy_Table sends;
 	psy_Table returns;
 	uintptr_t maxreturn;
-	uintptr_t solocolumn;	
+	uintptr_t solocolumn;
+	uintptr_t strobe;
 	psy_audio_MasterChannel master;
 	psy_audio_CustomMachineParam blank_param;
 	psy_audio_CustomMachineParam ignore_param;	

@@ -5,13 +5,15 @@
 #define LEVELUI_H
 
 // host
-#include "paramview.h"
+#include "machineparamconfig.h"
 // ui
 #include <uicomponent.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct psy_audio_MachineParam;
 
 // LevelUi
 typedef struct LevelUi {
@@ -21,15 +23,15 @@ typedef struct LevelUi {
 	// references
 	ParamSkin* skin;	
 	psy_ui_Component* view;
-	psy_audio_MachineParam* param;
+	struct psy_audio_MachineParam* param;
 } LevelUi;
 
 void levelui_init(LevelUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+	psy_ui_Component* view, struct psy_audio_MachineParam*, ParamSkin*);
 
 LevelUi* levelui_alloc(void);
 LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_MachineParam* param, ParamSkin* paramskin);
+	struct psy_audio_MachineParam* param, ParamSkin* paramskin);
 
 #ifdef __cplusplus
 }

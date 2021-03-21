@@ -176,6 +176,7 @@ static void display_normvalue(psy_audio_XMSampler*,
 	psy_audio_IntMachineParam* sender, float* rv);
 static void masterlevel_normvalue(psy_audio_XMSampler* self,
 	psy_audio_CustomMachineParam* sender, float* rv);
+static uintptr_t paramstrobe(const psy_audio_XMSampler*);
 
 const psy_audio_MachineInfo* psy_audio_xmsampler_info(void)
 {
@@ -205,6 +206,7 @@ static void sampler_vtable_init(psy_audio_XMSampler* self)
 		sampler_vtable.numtweakparameters = (fp_machine_numparameters)numtweakparameters;
 		sampler_vtable.parameter = (fp_machine_parameter)parameter;
 		sampler_vtable.tweakparameter = (fp_machine_parameter)tweakparameter;
+		sampler_vtable.paramstrobe = (fp_machine_paramstrobe)paramstrobe;
 		sampler_vtable_initialized = TRUE;
 	}
 }
@@ -224,13 +226,13 @@ void psy_audio_xmsampler_init(psy_audio_XMSampler* self,
 	self->multicmdMem = NULL;	
 	self->m_sampleRate = (int)
 		psy_audio_machine_samplerate(psy_audio_xmsampler_base(self));
-
 	self->m_bAmigaSlides = FALSE;
 	self->m_UseFilters = TRUE;
 	self->m_GlobalVolume = 128;
 	self->m_PanningMode = psy_audio_PANNING_LINEAR;	
 	self->channelbank = 0;
 	self->instrumentbank = 1;
+	self->strobe = 0;
 
 	for (i = 0; i < XM_SAMPLER_MAX_POLYPHONY; i++)
 	{
@@ -857,7 +859,7 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 	psy_audio_choicemachineparam_init(&self->param_channelview,
 		"display", "display", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->channelbank,
-		0, 7);
+		0, 7);	
 	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 0,
 		"00 - 07");
 	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 1,
@@ -1189,6 +1191,7 @@ void display_tweak(psy_audio_XMSampler* self,
 	} else if (sender == &self->param_display_playmix) {
 		self->channeldisplay = 2;
 	}
+	++self->strobe;
 }
 
 void display_normvalue(psy_audio_XMSampler* self,
@@ -1216,6 +1219,10 @@ void masterlevel_normvalue(psy_audio_XMSampler* self,
 	}
 }
 
+uintptr_t paramstrobe(const psy_audio_XMSampler* self)
+{
+	return self->strobe;
+}
 
 void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,
 	psy_dsp_ResamplerQuality quality)

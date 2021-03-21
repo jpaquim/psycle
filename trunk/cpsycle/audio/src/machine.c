@@ -322,7 +322,8 @@ static int savewiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
-static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
+static uintptr_t numparametercols(psy_audio_Machine* self) { return 0; }
+static uintptr_t paramstrobe(const psy_audio_Machine* self) { return 0; }
 static uintptr_t slot(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
 static int haseditor(psy_audio_Machine* self) { return 0; }
@@ -582,6 +583,7 @@ static void vtable_init(void)
 		vtable.info = info;
 		vtable.parameter = parameter;
 		vtable.tweakparameter = tweakparameter;
+		vtable.paramstrobe = paramstrobe;
 		vtable.setpanning = setpanning;
 		vtable.panning = panning;
 		vtable.mute = mute;

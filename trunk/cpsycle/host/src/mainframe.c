@@ -1415,8 +1415,7 @@ void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 {	
 	machineparamconfig_releaseskin();
 	machineparamconfig_skin(psycleconfig_macparam(workspace_conf(
-		&self->workspace)));
-	paramview_changecontrolskin(path);
+		&self->workspace)));	
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

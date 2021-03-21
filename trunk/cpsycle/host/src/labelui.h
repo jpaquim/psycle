@@ -19,15 +19,20 @@ typedef struct LabelUi {
 	psy_ui_Component component;
 	// internal	
 	// references
-	ParamSkin* skin;	
+	ParamSkin* skin;
+	psy_audio_Machine* machine;
+	uintptr_t paramidx;
 	psy_audio_MachineParam* param;
 } LabelUi;
 
 void labelui_init(LabelUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam*, ParamSkin*);
 
 LabelUi* labelui_alloc(void);
 LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin);
 
 #ifdef __cplusplus

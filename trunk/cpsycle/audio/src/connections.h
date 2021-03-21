@@ -194,6 +194,11 @@ INLINE bool psy_audio_wire_equal(const psy_audio_Wire* self,
 	return (self->src == other->src) && (self->dst == other->dst);
 }
 
+INLINE psy_audio_Wire psy_audio_wire_zero(void)
+{
+	return psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+}
+
 typedef struct {
 	psy_Table container;
 	psy_Table sends;

@@ -5,7 +5,7 @@
 #define SWITCHUI_H
 
 // host
-#include "paramview.h"
+#include "paramtweak.h"
 #include "workspace.h"
 
 #ifdef __cplusplus

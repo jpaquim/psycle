@@ -442,6 +442,9 @@
     <ClCompile Include="src\arrowui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\paramtweak.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -855,6 +858,9 @@
       <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\arrowui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramtweak.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
   </ItemGroup>

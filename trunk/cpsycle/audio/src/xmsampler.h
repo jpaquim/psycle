@@ -94,6 +94,7 @@ typedef struct psy_audio_XMSampler {
 	int32_t tweak_zxxindex;
 	int32_t tweak_zxxmode;	
 	int32_t tweak_zxxvalue;
+	uintptr_t strobe;
 } psy_audio_XMSampler;
 
 void psy_audio_xmsampler_init(psy_audio_XMSampler*, psy_audio_MachineCallback*);

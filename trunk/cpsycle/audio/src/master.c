@@ -46,8 +46,9 @@ static uintptr_t numparameters(psy_audio_Master*);
 static uintptr_t numtweakparameters(psy_audio_Master*);
 static uintptr_t numparametercols(psy_audio_Master*);
 static uintptr_t numinputwires(psy_audio_Master*);
-static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
+static uintptr_t paramstrobe(const psy_audio_Master*);
 
+static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
 static void master_title_name(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, char* text);
 static void master_title_describe(psy_audio_Master*,
@@ -60,6 +61,9 @@ static void master_level_normvalue(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, float* rv);
 static void master_level_describe(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, int* active, char* text);
+
+static void onconnected(psy_audio_Master*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void ondisconnected(psy_audio_Master*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 
 static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 {
@@ -90,7 +94,7 @@ const psy_audio_MachineInfo* psy_audio_master_info(void) { return &MacInfo; }
 #define NUMROWS 3
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_Master* self)
 {
@@ -114,18 +118,20 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.numparametercols = (fp_machine_numparametercols)numparametercols;
 		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numtweakparameters = (fp_machine_numparameters)numtweakparameters;
-		vtable.amprange = (fp_machine_amprange)amprange;		
-		vtable_initialized = 1;
+		vtable.amprange = (fp_machine_amprange)amprange;
+		vtable.paramstrobe = (fp_machine_paramstrobe)paramstrobe;
+		vtable_initialized = TRUE;
 	}
 }
 
 void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* callback)
-{
+{	
 	memset(self, 0, sizeof(psy_audio_Master));
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
 	self->volume = (psy_dsp_amp_t) 1.f;
+	self->strobe = 0;
 	psy_audio_custommachineparam_init(&self->param_info,
 		"", "", MPF_INFOLABEL | MPF_SMALL, 0, 0x1FFE);
 	psy_signal_connect(&self->param_info.machineparam.signal_name, self,
@@ -145,6 +151,7 @@ void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* ca
 	psy_signal_connect(&self->param_level.machineparam.signal_normvalue, self,
 		master_level_normvalue);
 	psy_audio_machine_setposition(&self->custommachine.machine, 320, 200);	
+	self->dostart = TRUE;
 }
 
 void master_dispose(psy_audio_Master* self)
@@ -424,6 +431,35 @@ uintptr_t numinputwires(psy_audio_Master* self)
 		return wiresockets_size(&sockets->inputs);
 	}
 	return 0;
+}
+
+uintptr_t paramstrobe(const psy_audio_Master* self)
+{
+	if (self->dostart) {
+		psy_audio_Machines* machines;
+
+		machines = psy_audio_machine_machines(&((psy_audio_Master*)self)->custommachine.machine);
+		if (machines) {
+			psy_signal_connect(&machines->connections.signal_connected, (psy_audio_Master*)self,
+				onconnected);
+			psy_signal_connect(&machines->connections.signal_disconnected, (psy_audio_Master*)self,
+				ondisconnected);
+			((psy_audio_Master*)self)->dostart = FALSE;
+		}
+	}
+	return self->strobe;
+}
+
+void onconnected(psy_audio_Master* self, psy_audio_Connections* connections,
+	uintptr_t outputslot, uintptr_t inputslot)
+{
+	++self->strobe;
+}
+
+void ondisconnected(psy_audio_Master* self, psy_audio_Connections* connections,
+	uintptr_t outputslot, uintptr_t inputslot)
+{
+	++self->strobe;
 }
 
 int master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,

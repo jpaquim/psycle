@@ -6,31 +6,19 @@
 #include "checkui.h"
 // host
 #include "skingraphics.h"
-#include "paramview.h"
-#include "machineui.h"
-#include "wireview.h"
-// audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // CheckUi
 // prototypes
-static void checkui_dispose(CheckUi*);
 static void checkui_ondraw(CheckUi*, psy_ui_Graphics*);
-static void checkui_invalidate(CheckUi*);
 static void checkui_onpreferredsize(CheckUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void checkui_onmousedown(CheckUi*, psy_ui_MouseEvent*);
 static void checkui_onmouseup(CheckUi*, psy_ui_MouseEvent*);
-static void checkui_onmousemove(CheckUi*, psy_ui_MouseEvent*);
 
 // vtable
 static psy_ui_ComponentVtable checkui_vtable;
-static psy_ui_ComponentVtable checkui_super_vtable;
 static bool checkui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* checkui_vtable_init(CheckUi* self)
@@ -39,19 +27,13 @@ static psy_ui_ComponentVtable* checkui_vtable_init(CheckUi* self)
 
 	if (!checkui_vtable_initialized) {
 		checkui_vtable = *(self->component.vtable);
-		checkui_super_vtable = checkui_vtable;
-		checkui_vtable.dispose = (psy_ui_fp_component_dispose)checkui_dispose;
 		checkui_vtable.ondraw = (psy_ui_fp_component_ondraw)checkui_ondraw;		
-		checkui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			checkui_invalidate;
 		checkui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			checkui_onpreferredsize;
 		checkui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			checkui_onmousedown;
 		checkui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
 			checkui_onmouseup;
-		checkui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
-			checkui_onmousemove;
 		checkui_vtable_initialized = TRUE;
 	}
 	return &checkui_vtable;
@@ -74,13 +56,6 @@ void checkui_init(CheckUi* self, psy_ui_Component* parent,
 	self->skin = paramskin;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
-}
-
-void checkui_dispose(CheckUi* self)
-{
-	assert(self);
-	
-	checkui_super_vtable.dispose(&self->component);
 }
 
 CheckUi* checkui_alloc(void)
@@ -136,13 +111,6 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 	}
 }
 
-void checkui_invalidate(CheckUi* self)
-{
-	if (!machineui_vuupdate()) {
-		checkui_super_vtable.invalidate(&self->component);
-	}
-}
-
 void checkui_onpreferredsize(CheckUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
@@ -159,17 +127,8 @@ void checkui_onmousedown(CheckUi* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void checkui_onmousemove(CheckUi* self, psy_ui_MouseEvent* ev)
-{
-	if (self->paramtweak.param != NULL) {
-		paramtweak_onmousemove(&self->paramtweak, ev);
-		psy_ui_component_invalidate(&self->component);
-	}
-}
-
 void checkui_onmouseup(CheckUi* self, psy_ui_MouseEvent* ev)
 {
 	paramtweak_end(&self->paramtweak);
-	psy_ui_component_releasecapture(&self->component);
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_releasecapture(&self->component);	
 }

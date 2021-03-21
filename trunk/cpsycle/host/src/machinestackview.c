@@ -267,11 +267,21 @@ static void machinestackcolumn_mute_normvalue(MachineStackColumn*,
 	psy_audio_IntMachineParam* sender, float* rv);
 // implementation
 void machinestackcolumn_init(MachineStackColumn* self, uintptr_t column,
-	uintptr_t inputroute, MachineStackState* state)
+	uintptr_t inputroute, uintptr_t input, MachineStackState* state)
 {
+	psy_audio_Machine* machine;
+
 	self->state = state;
 	self->column = column;
-	self->inputroute = inputroute;
+	self->inputroute = inputroute;	
+	machine = psy_audio_machines_at(state->machines, input);
+	if (machine && 
+		(psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
+			psy_audio_machine_isbus(machine))) {
+		self->input = input;
+	} else {
+		self->input = psy_INDEX_INVALID;
+	}
 	self->chain = NULL;
 	self->wirevolume = NULL;
 	self->offset = 0;
@@ -319,7 +329,7 @@ psy_audio_Wire machinestackcolumn_outputwire(MachineStackColumn* self)
 	if (self->wirevolume) {
 		return self->wirevolume->wire;
 	}
-	return psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+	return psy_audio_wire_zero();
 }
 
 psy_audio_Wire machinestackcolumn_sendwire(MachineStackColumn* self)
@@ -555,7 +565,7 @@ void machinestackstate_setmachines(MachineStackState* self,
 }
 
 MachineStackColumn* machinestackstate_insertcolumn(MachineStackState* self,
-	uintptr_t columnindex, uintptr_t inputroute)
+	uintptr_t columnindex, uintptr_t inputroute, uintptr_t input)
 {
 	MachineStackColumn* column;
 	
@@ -565,7 +575,7 @@ MachineStackColumn* machinestackstate_insertcolumn(MachineStackState* self,
 		free(column);
 	}
 	column = (MachineStackColumn*)malloc(sizeof(MachineStackColumn));
-	machinestackcolumn_init(column, columnindex, inputroute, self);
+	machinestackcolumn_init(column, columnindex, inputroute, input, self);
 	psy_table_insert(&self->columns, columnindex, column);
 	return column;
 }
@@ -716,7 +726,7 @@ uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self,
 	rv = columnindex;	
 	column = machinestackstate_column(self, columnindex);
 	if (!machinestackstate_column(self, columnindex)) {
-		column = machinestackstate_insertcolumn(self, columnindex, prevslot);
+		column = machinestackstate_insertcolumn(self, columnindex, prevslot, slot);
 		column->offset = self->currlevel;
 	}
 	machinestackcolumn_append(column, slot);
@@ -891,9 +901,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 {
 	psy_ui_Margin margin;
 
-	margin = psy_ui_margin_make(
-		psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0.0),
-		psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0.0));
+	margin = psy_ui_margin_makeem(0.5, 0.0, 0.5, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component,
 		machinestackinputs_vtable_init(self));
@@ -930,33 +938,14 @@ void machinestackinputs_build(MachineStackInputs* self)
 
 		maxnumcolumns = machinestackstate_maxnumcolumns(self->state);
 		for (i = 0; i < maxnumcolumns; ++i) {
-			MachineStackColumn* column;
-			uintptr_t inputmacid;
+			MachineStackColumn* column;			
 			psy_ui_Component* component;
 
-			column = machinestackstate_column(self->state, i);
-			inputmacid = psy_INDEX_INVALID;
-			if (column && column->chain) {
-				psy_audio_Machine* machine;
-				bool isbus;
-				bool isgen;
-
-				inputmacid = (uintptr_t)psy_list_entry(column->chain);
-				isbus = FALSE;
-				isgen = FALSE;
-				machine = psy_audio_machines_at(self->state->machines, inputmacid);
-				if (machine) {
-					isbus = psy_audio_machine_isbus(machine);
-					isgen = psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR;
-				}
-				if (!isgen && !isbus) {
-					inputmacid = psy_INDEX_INVALID;
-				}
-			}
-			if (inputmacid != psy_INDEX_INVALID) {
+			column = machinestackstate_column(self->state, i);			
+			if (column && column->input != psy_INDEX_INVALID) {
 				component = machineui_create(
-					psy_audio_machines_at(self->state->machines, inputmacid),
-					inputmacid, self->skin, &self->component, &self->component, NULL,
+					psy_audio_machines_at(self->state->machines, column->input),
+					column->input, self->skin, &self->component, &self->component, NULL,
 					FALSE, self->workspace);
 			} else {
 				component = psy_ui_component_allocinit(&self->component,
@@ -964,10 +953,9 @@ void machinestackinputs_build(MachineStackInputs* self)
 				psy_ui_component_setbackgroundmode(component,
 					psy_ui_NOBACKGROUND);
 			}
-			if (component) {				
-				component->deallocate = TRUE;				
+			if (component) {
 				psy_ui_component_setminimumsize(component,
-					self->state->columnsize);				
+					self->state->columnsize);
 			}
 		}		
 	}
@@ -1048,6 +1036,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 
 			column = machinestackstate_column(self->state, i);			
 			knobui = knobui_allocinit(&self->component, &self->component,
+				NULL, psy_INDEX_INVALID,
 				(column)
 				? &column->outputroute.machineparam
 				: NULL,
@@ -1365,7 +1354,9 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 
 			slidergroup = slidergroupui_allocinit(&self->component,
 				&self->component,
+				NULL, psy_INDEX_INVALID,
 				&column->wirevolume->machineparam,
+				psy_INDEX_INVALID,
 				&column->level_param.machineparam,
 				self->skin);
 			if (slidergroup) {								
