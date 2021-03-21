@@ -29,7 +29,9 @@ typedef struct psy_audio_Master {
 	psy_audio_CustomMachineParam param_info;
 	psy_audio_CustomMachineParam param_slider;
 	psy_audio_CustomMachineParam param_level;	
-	psy_dsp_amp_t volume;	
+	psy_dsp_amp_t volume;
+	uintptr_t strobe;
+	bool dostart;
 } psy_audio_Master;
 
 void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback*);

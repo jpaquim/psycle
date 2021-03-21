@@ -46,8 +46,9 @@ struct psy_audio_MachineParam;
 struct psy_audio_Machines;
 
 typedef struct MachineStackColumn {
-	uintptr_t column;
+	uintptr_t column;	
 	uintptr_t inputroute;
+	uintptr_t input;
 	uintptr_t offset;
 	psy_List* chain;	
 	psy_audio_WireMachineParam* wirevolume;
@@ -58,7 +59,7 @@ typedef struct MachineStackColumn {
 } MachineStackColumn;
 
 void machinestackcolumn_init(MachineStackColumn*, uintptr_t column,
-	uintptr_t inputroute, struct MachineStackState*);
+	uintptr_t inputroute, uintptr_t input, struct MachineStackState*);
 void machinestackcolumn_dispose(MachineStackColumn*);
 
 void machinestackcolumn_setwire(MachineStackColumn*, psy_audio_Wire);
@@ -108,7 +109,7 @@ void machinestackstate_dispose(MachineStackState*);
 void machinestackstate_buildcolumns(MachineStackState*);
 void machinestackstate_setmachines(MachineStackState*, psy_audio_Machines*);
 MachineStackColumn* machinestackstate_insertcolumn(MachineStackState*,
-	uintptr_t column, uintptr_t inputroute);
+	uintptr_t column, uintptr_t inputroute, uintptr_t input);
 MachineStackColumn* machinestackstate_column(MachineStackState*,
 	uintptr_t column);
 MachineStackColumn* machinestackstate_selectedcolumn(MachineStackState*);

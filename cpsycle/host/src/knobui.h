@@ -5,13 +5,8 @@
 #define KNOBUI_H
 
 // host
-#include "machineeditorview.h" // vst view
-#include "machineframe.h"
-#include "machineviewskin.h"
 #include "workspace.h"
-// ui
-#include <uiedit.h>
-#include <uinotebook.h>
+#include "paramtweak.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,14 +21,20 @@ typedef struct KnobUi {
 	// references
 	ParamSkin* skin;
 	Workspace* workspace;	
+	psy_audio_Machine* machine;
+	uintptr_t paramidx;
 	psy_audio_MachineParam* param;
+	bool tweaking;
 } KnobUi;
 
 void knobui_init(KnobUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam*, ParamSkin*);
 
 KnobUi* knobui_alloc(void);
 KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam*, ParamSkin*);
 
 #ifdef __cplusplus

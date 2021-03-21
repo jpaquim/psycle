@@ -48,7 +48,7 @@ typedef struct {
 	psy_audio_Machine* machine;
 } ParameterBar;
 
-typedef struct {
+typedef struct MachineFrame {
 	// inherits
 	psy_ui_Component component;
 	// ui elements

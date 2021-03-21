@@ -8,6 +8,7 @@
 #include "machineeditorview.h" // vst view
 #include "machineframe.h"
 #include "machineviewskin.h"
+#include "paramtweak.h"
 #include "workspace.h"
 // ui
 #include <uiedit.h>
@@ -26,14 +27,19 @@ typedef struct SliderUi {
 	// references
 	ParamSkin* skin;	
 	psy_ui_Component* view;
+	psy_audio_Machine* machine;
+	uintptr_t paramidx;
 	psy_audio_MachineParam* param;
 } SliderUi;
 
 void sliderui_init(SliderUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam*, ParamSkin*);
 
 SliderUi* sliderui_alloc(void);
 SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin);
 
 #ifdef __cplusplus

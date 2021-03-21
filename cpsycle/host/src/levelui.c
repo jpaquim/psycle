@@ -6,21 +6,14 @@
 #include "levelui.h"
 // host
 #include "skingraphics.h"
-#include "paramview.h"
-#include "machineui.h"
-#include "wireview.h"
 // audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
+#include <machineparam.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // LevelUi
 // prototypes
 static void levelui_ondraw(LevelUi*, psy_ui_Graphics*);
-static void levelui_invalidate(LevelUi*);
 static void levelui_onpreferredsize(LevelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
@@ -28,7 +21,6 @@ static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
 
 // vtable
 static psy_ui_ComponentVtable levelui_vtable;
-static psy_ui_ComponentVtable levelui_super_vtable;
 static bool levelui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
@@ -37,10 +29,7 @@ static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
 
 	if (!levelui_vtable_initialized) {
 		levelui_vtable = *(self->component.vtable);
-		levelui_super_vtable = levelui_vtable;
-		levelui_vtable.ondraw = (psy_ui_fp_component_ondraw)levelui_ondraw;
-		levelui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			levelui_invalidate;
+		levelui_vtable.ondraw = (psy_ui_fp_component_ondraw)levelui_ondraw;		
 		levelui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			levelui_onpreferredsize;		
 		levelui_vtable_initialized = TRUE;
@@ -117,14 +106,6 @@ void levelui_vumeterdraw(LevelUi* self, psy_ui_Graphics* g,
 		psy_ui_realpoint_make(
 			self->skin->vuon.src.left,
 			self->skin->vuon.src.top + ypos));
-}
-
-
-void levelui_invalidate(LevelUi* self)
-{
-	if (!machineui_vuupdate()) {
-		levelui_super_vtable.invalidate(&self->component);
-	}
 }
 
 void levelui_onpreferredsize(LevelUi* self, const psy_ui_Size* limit,

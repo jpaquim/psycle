@@ -5,13 +5,9 @@
 #define CHECKUI_H
 
 // host
-#include "machineeditorview.h" // vst view
-#include "machineframe.h"
 #include "machineviewskin.h"
+#include "paramtweak.h"
 #include "workspace.h"
-// ui
-#include <uiedit.h>
-#include <uinotebook.h>
 
 #ifdef __cplusplus
 extern "C" {

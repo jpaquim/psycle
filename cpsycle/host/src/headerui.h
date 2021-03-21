@@ -5,6 +5,7 @@
 #define HEADERUI_H
 
 // host
+#include "paramtweak.h"
 #include "paramview.h"
 // ui
 #include <uicomponent.h>
@@ -26,6 +27,10 @@ typedef struct HeaderUi {
 
 void headerui_init(HeaderUi*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+
+HeaderUi* headerui_alloc(void);
+HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_MachineParam*, ParamSkin*);
 
 #ifdef __cplusplus
 }

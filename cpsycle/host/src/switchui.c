@@ -6,20 +6,12 @@
 #include "switchui.h"
 // host
 #include "skingraphics.h"
-#include "paramview.h"
-#include "machineui.h"
-#include "wireview.h"
-// audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
 // platform
 #include "../../detail/portable.h"
 
 // SwitchUi
 // prototypes
 static void switchui_ondraw(SwitchUi*, psy_ui_Graphics*);
-static void switchui_invalidate(SwitchUi*);
 static void switchui_onpreferredsize(SwitchUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void switchui_onmousedown(SwitchUi*, psy_ui_MouseEvent*);
@@ -28,7 +20,6 @@ static void switchui_onmousemove(SwitchUi*, psy_ui_MouseEvent*);
 
 // vtable
 static psy_ui_ComponentVtable switchui_vtable;
-static psy_ui_ComponentVtable switchui_super_vtable;
 static bool switchui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
@@ -37,15 +28,15 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 
 	if (!switchui_vtable_initialized) {
 		switchui_vtable = *(self->component.vtable);
-		switchui_super_vtable = switchui_vtable;		
 		switchui_vtable.ondraw = (psy_ui_fp_component_ondraw)switchui_ondraw;		
-		switchui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			switchui_invalidate;
 		switchui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			switchui_onpreferredsize;
-		switchui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)switchui_onmousedown;
-		switchui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)switchui_onmouseup;
-		switchui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)switchui_onmousemove;
+		switchui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+			switchui_onmousedown;
+		switchui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+			switchui_onmouseup;
+		switchui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+			switchui_onmousemove;
 		switchui_vtable_initialized = TRUE;
 	}
 	return &switchui_vtable;
@@ -124,21 +115,10 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 		r, label, strlen(label));	
 }
 
-void switchui_invalidate(SwitchUi* self)
-{
-	if (!machineui_vuupdate()) {
-		switchui_super_vtable.invalidate(&self->component);
-	}
-}
-
 void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	psy_ui_RealSize size;
-
-	size = mpfsize(self->skin, psy_ui_component_textmetric(self->view),
-		MPF_SWITCH, FALSE);
-	*rv = psy_ui_size_makepx(100.0, size.height);
+	psy_ui_size_setem(rv, 10.0, 2.0);
 }
 
 void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)

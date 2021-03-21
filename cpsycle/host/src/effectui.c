@@ -85,7 +85,6 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	assert(self);
 	assert(workspace);
 	assert(workspace->song);
-	assert(skin);
 	assert(view);
 
 	psy_ui_component_init(&self->component, parent, view);	
@@ -94,7 +93,7 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	machineuicommon_init(&self->intern, slot, skin, view, editname, workspace);
-	self->intern.coords = &skin->effect;
+	self->intern.coords = &skin->effect;	
 	self->intern.font = skin->effect_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x003E2f25);
 	effectui_initsize(self);

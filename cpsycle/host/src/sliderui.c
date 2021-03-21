@@ -6,9 +6,7 @@
 #include "sliderui.h"
 // host
 #include "skingraphics.h"
-#include "paramview.h"
 #include "machineui.h"
-#include "wireview.h"
 // audio
 #include <exclusivelock.h>
 // std
@@ -55,7 +53,9 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 }
 // implementation
 void sliderui_init(SliderUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam* param,
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param,
 	ParamSkin* skin)
 {
 	assert(self);	
@@ -68,6 +68,8 @@ void sliderui_init(SliderUi* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
+	self->machine = machine;
+	self->paramidx = paramidx;
 	self->param = param;
 	paramtweak_init(&self->paramtweak);
 }
@@ -78,13 +80,14 @@ SliderUi* sliderui_alloc(void)
 }
 
 SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	SliderUi* rv;
 
 	rv = sliderui_alloc();
 	if (rv) {
-		sliderui_init(rv, parent, view, param, paramskin);
+		sliderui_init(rv, parent, view, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -99,14 +102,38 @@ void sliderui_dispose(SliderUi* self)
 
 void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 {
-	SliderDraw draw;
+	double xoffset;
+	double yoffset;
+	double value;
+	psy_ui_RealRectangle r;		
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_sizepx(&self->component);	
-	sliderdraw_init(&draw, self->skin, NULL, self->param, size, NULL, FALSE,
-		FALSE);
-	sliderdraw_draw(&draw, g);
+	size = psy_ui_component_sizepx(&self->component);
+	// todo: make the slider scalable	
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
+	skin_blitcoord(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_zero(), &self->skin->slider);
+	xoffset = (psy_ui_realrectangle_width(&self->skin->slider.dest) -
+		psy_ui_realrectangle_width(&self->skin->knob.dest)) / 2;
+	if (self->param) {
+		if (self->machine) {
+			value = psy_audio_machine_parameter_normvalue(self->machine,
+				self->param);
+		} else {
+			value = psy_audio_machineparam_normvalue(self->param);
+		}
+	} else {
+		value = 0.f;
+	}
+	yoffset = ((1.0 - value) *
+		(psy_ui_realrectangle_height(&self->skin->slider.dest) -
+			psy_ui_realrectangle_height(&self->skin->sliderknob.dest)));
+	skin_blitcoord(g, &self->skin->mixerbitmap,
+		psy_ui_realpoint_make(xoffset, yoffset),
+		&self->skin->sliderknob);			
 }
+
 
 void sliderui_invalidate(SliderUi* self)
 {

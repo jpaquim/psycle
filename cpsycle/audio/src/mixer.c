@@ -364,6 +364,7 @@ static psy_audio_MachineParam* tweakparameter(psy_audio_Mixer*, uintptr_t param)
 static uintptr_t numparameters(psy_audio_Mixer*);
 static uintptr_t numtweakparameters(psy_audio_Mixer*);
 static uintptr_t numparametercols(psy_audio_Mixer*);
+static uintptr_t paramstrobe(const psy_audio_Mixer*);
 static void paramcoords(psy_audio_Mixer* self, uintptr_t param, uintptr_t* col, uintptr_t* row);
 static psy_dsp_amp_range_t amprange(psy_audio_Mixer* self)
 {
@@ -1156,6 +1157,7 @@ static void vtable_init(psy_audio_Mixer* self)
 		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numtweakparameters = (fp_machine_numtweakparameters)numtweakparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)numparametercols;
+		vtable.paramstrobe = (fp_machine_paramstrobe)paramstrobe;
 		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
 		vtable.savespecific = (fp_machine_savespecific)savespecific;
 		vtable.postload = (fp_machine_postload)postload;
@@ -1180,6 +1182,7 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	psy_table_init(&self->legacyreturn_);
 	psy_table_init(&self->legacysend_);
 	self->solocolumn = psy_INDEX_INVALID;
+	self->strobe = 0;
 	machines = psy_audio_machine_machines(base);
 	psy_signal_connect(&machines->connections.signal_connected, self,
 		onconnected);
@@ -1634,6 +1637,11 @@ static uintptr_t numtweakparameters(psy_audio_Mixer* self)
 uintptr_t numparametercols(psy_audio_Mixer* self)
 {
 	return returncolumn(self) + numreturncolumns(self);
+}
+
+uintptr_t paramstrobe(const psy_audio_Mixer* self)
+{
+	return self->strobe;
 }
 
 psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
@@ -2471,6 +2479,7 @@ psy_audio_InputChannel* psy_audio_mixer_insertchannel(psy_audio_Mixer* self, uin
 	psy_audio_mixer_discardchannel(self, idx);
 	psy_table_insert(&self->inputs, idx, input);
 	self->maxinput = inputmax(self);
+	++self->strobe;
 	return input;
 }
 
@@ -2481,6 +2490,7 @@ psy_audio_ReturnChannel* psy_audio_mixer_insertreturn(psy_audio_Mixer* self, uin
 	psy_table_insert(&self->returns, idx,
 		retchan);
 	self->maxreturn = returnmax(self);
+	++self->strobe;
 	return retchan;
 }
 
@@ -2489,6 +2499,7 @@ psy_audio_MixerSend* psy_audio_mixer_insertsend(psy_audio_Mixer* self, uintptr_t
 {
 	psy_audio_mixer_discardsend(self, idx);
 	psy_table_insert(&self->sends, idx, (void*)send);
+	++self->strobe;
 	return send;
 }
 
@@ -2502,6 +2513,7 @@ void psy_audio_mixer_discardchannel(psy_audio_Mixer* self, uintptr_t idx)
 		free(channel);
 		psy_table_remove(&self->inputs, idx);
 		self->maxinput = inputmax(self);
+		++self->strobe;
 	}
 }
 
@@ -2515,6 +2527,7 @@ void psy_audio_mixer_discardreturn(psy_audio_Mixer* self, uintptr_t idx)
 		free(channel);
 		psy_table_remove(&self->returns, idx);
 		self->maxreturn = returnmax(self);
+		++self->strobe;
 	}
 }
 
@@ -2527,5 +2540,6 @@ void psy_audio_mixer_discardsend(psy_audio_Mixer* self, uintptr_t idx)
 		// mixersend_dispose(send);
 		free(send);
 		psy_table_remove(&self->sends, idx);
+		++self->strobe;
 	}
 }

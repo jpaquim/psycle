@@ -31,7 +31,9 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	} else {
 		paramindex = psy_INDEX_INVALID;
 	}
-	paramknob_init(&self->knob, &self->component, machine, paramindex, workspace);
+	knobui_init(&self->knob, &self->component, &self->component, machine, paramindex,
+		NULL, machineparamconfig_skin(
+			psycleconfig_macparam(workspace_conf(workspace))));
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_listbox_setcharnumber(&self->listbox, 5.0);
@@ -83,7 +85,7 @@ void parameterlistbox_onlistboxselected(ParameterListBox* self,
 	} else {
 		paramindex = psy_INDEX_INVALID;
 	}
-	self->knob.paramindex = paramindex;
+	self->knob.paramidx = paramindex;
 	psy_ui_component_invalidate(&self->knob.component);
 }
 
@@ -100,7 +102,7 @@ void parameterlistbox_setmachine(ParameterListBox* self,
 	} else {
 		paramindex = psy_INDEX_INVALID;
 	}
-	self->knob.paramindex = paramindex;
+	self->knob.paramidx = paramindex;
 	psy_ui_component_invalidate(&self->knob.component);
 }
 

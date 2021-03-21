@@ -185,7 +185,8 @@ typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef uintptr_t(*fp_machine_paramselected)(struct psy_audio_Machine*);
 typedef void (*fp_machine_selectparam)(struct psy_audio_Machine*, uintptr_t index);
-typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_numparametercols)(struct psy_audio_Machine*);
+typedef	uintptr_t(*fp_machine_paramstrobe)(const struct psy_audio_Machine*);
 typedef	void (*fp_machine_param_tweak)(struct psy_audio_Machine*, struct
 	psy_audio_MachineParam*, float val);
 typedef	void (*fp_machine_param_reset)(struct psy_audio_Machine*, struct
@@ -354,6 +355,7 @@ typedef struct {
 	fp_machine_tweakparameter tweakparameter;
 	fp_machine_paramselected paramselected;
 	fp_machine_selectparam selectparam;
+	fp_machine_paramstrobe paramstrobe;
 	// machineparameter calls
 	fp_machine_param_type parameter_type;
 	fp_machine_param_name parameter_name;
@@ -363,6 +365,7 @@ typedef struct {
 	fp_machine_param_label parameter_label;	
 	fp_machine_param_tweak parameter_tweak;
 	fp_machine_param_reset parameter_reset;
+
 	// data
 	fp_machine_putdata putdata;
 	fp_machine_data data;
@@ -400,7 +403,7 @@ typedef struct {
 	fp_machine_editresize editresize;
 	fp_machine_editoridle editoridle;
 	fp_machine_setposition setposition;
-	fp_machine_position position;
+	fp_machine_position position;	
 ///\}
 ///\name states
 ///\{
@@ -666,6 +669,11 @@ INLINE uintptr_t psy_audio_machine_paramselected(
 INLINE void psy_audio_machine_selectparam(psy_audio_Machine* self, uintptr_t index)
 {
 	self->vtable->selectparam(self, index);
+}
+
+INLINE uintptr_t psy_audio_machine_paramstrobe(const psy_audio_Machine* self)	
+{
+	return self->vtable->paramstrobe(self);
 }
 
 // MachineParameter calls

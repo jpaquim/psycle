@@ -15,9 +15,10 @@ extern "C" {
 typedef struct ArrowUi {
 	// inherits
 	psy_ui_Component component;
-	// internal
-	MachineUiCommon intern;
+	// internal	
 	psy_audio_Wire wire;
+	MachineViewSkin* skin;
+	Workspace* workspace;
 } ArrowUi;
 
 void arrowui_init(ArrowUi*, psy_ui_Component* parent,	

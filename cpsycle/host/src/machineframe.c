@@ -334,7 +334,7 @@ void machineframe_onzoomboxchanged(MachineFrame* self, ZoomBox* sender)
 void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && self->paramview && ev->target ==
+	/*if (ev->button == 2 && self->paramview && ev->target ==
 			&self->paramview->component && self->machine &&
 			self->paramview->lasttweak != psy_INDEX_INVALID) {
 		psy_audio_MachineParam* tweakpar;
@@ -364,7 +364,7 @@ void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
 			}
 			psy_ui_component_setfocus(psy_ui_edit_base(&self->newval.edit));
 		}
-	}
+	}*/
 }
 
 void machineframe_onalign(MachineFrame* self, psy_ui_Component* sender)
