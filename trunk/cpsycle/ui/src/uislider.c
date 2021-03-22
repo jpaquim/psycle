@@ -88,7 +88,8 @@ void psy_ui_sliderpane_initsignals(psy_ui_SliderPane* self)
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_describevalue);
 	psy_signal_init(&self->signal_tweakvalue);
-	psy_signal_init(&self->signal_value);	
+	psy_signal_init(&self->signal_value);
+	psy_signal_init(&self->signal_customdraw);
 }
 
 void psy_ui_sliderpane_ondestroy(psy_ui_SliderPane* self, psy_ui_Component* sender)
@@ -103,6 +104,7 @@ void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane* self)
 	psy_signal_dispose(&self->signal_describevalue);
 	psy_signal_dispose(&self->signal_tweakvalue);
 	psy_signal_dispose(&self->signal_value);
+	psy_signal_dispose(&self->signal_customdraw);
 }
 
 void psy_ui_sliderpane_setvalue(psy_ui_SliderPane* self, double value)
@@ -119,6 +121,8 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;
 	int styletype;
+
+	psy_signal_emit(&self->signal_customdraw, self, 1, g);
 
 	if (self->orientation == psy_ui_VERTICAL) {												
 		psy_ui_sliderpane_drawverticalruler(self, g);		

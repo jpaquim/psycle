@@ -25,8 +25,6 @@ extern "C" {
 //	
 // Displays and edits machines with their wires
 
-struct MiniView;
-
 typedef struct MachineWireView {
 	// inherits
 	psy_ui_Component component;

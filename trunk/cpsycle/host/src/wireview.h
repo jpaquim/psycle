@@ -31,9 +31,7 @@ typedef struct WireView {
 	psy_ui_Component component;
 	// ui elements
 	// Scope select
-	psy_ui_Component top;
-	psy_ui_Button togglevu;
-	psy_ui_Label vulabel;
+	psy_ui_Component top;	
 	TabBar tabbar;
 	psy_ui_Notebook notebook;
 	// Volume
