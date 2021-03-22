@@ -112,7 +112,9 @@ void wireview_ondestroy(WireView* self)
 	if (self->workspace && workspace_song(self->workspace)) {
 		psy_signal_disconnect(
 			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
-			self, wireview_ondisconnected);		
+			self, wireview_ondisconnected);
+		psy_signal_disconnect(&self->volslider.pane.signal_customdraw,
+			self, wireview_ondrawslidervu);
 	}
 }
 
@@ -458,7 +460,6 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	rmsL = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.leftavg * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
 	rmsR = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.rightavg * multright + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
 
-
 	if (maxL < self->vuscope.peakL) //  it is a cardinal value, so smaller means higher peak.
 	{
 		if (maxL < 0) maxL = 0;
@@ -471,7 +472,6 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		if (maxR < 0) maxR = 0;
 		self->vuscope.peakR = maxR;		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; //2 seconds
 	}
-
 	// now draw our scope
 	// LEFT CHANNEL		
 	rect.left = centerx - 60;
@@ -500,7 +500,6 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		rect.top = rect.bottom;
 	}
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0xC08040));
-
 	// RIGHT CHANNEL 
 	rect.left = centerx - 30;
 	rect.right = rect.left + 24;
@@ -528,14 +527,16 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	}
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x90D040));
 	// update peak counter.
-	if (!self->vuscope.hold)
-	{
-		if (self->vuscope.peakLifeL > 0 || self->vuscope.peakLifeR > 0)
-		{
-			self->vuscope.peakLifeL--;
-			self->vuscope.peakLifeR--;
-			if (self->vuscope.peakLifeL <= 0) { self->vuscope.peakL = (psy_dsp_amp_t)INT16_MAX; }
-			if (self->vuscope.peakLifeR <= 0) { self->vuscope.peakR = (psy_dsp_amp_t)INT16_MAX; }
+	if (!self->vuscope.hold) {
+		if (self->vuscope.peakLifeL > 0 || self->vuscope.peakLifeR > 0) {
+			--self->vuscope.peakLifeL;
+			--self->vuscope.peakLifeR;
+			if (self->vuscope.peakLifeL <= 0) {
+				self->vuscope.peakL = (psy_dsp_amp_t)INT16_MAX;
+			}
+			if (self->vuscope.peakLifeR <= 0) {
+				self->vuscope.peakR = (psy_dsp_amp_t)INT16_MAX;
+			}
 		}
 	}	
 }
