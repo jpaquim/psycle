@@ -6,6 +6,8 @@
 #include "wireview.h"
 // local
 #include "resources/resource.h"
+// audio
+#include <operations.h>
 // ui
 #include <uiframe.h>
 // std
@@ -13,6 +15,20 @@
 // platform
 #include "../../detail/portable.h"
 
+#define SCOPE_SPEC_BANDS 256
+
+static const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
+static const uint32_t CLBARDC = 0x001010DC;
+static const uint32_t CLBARPEAK = 0x00C0C0C0;
+static const uint32_t CLLEFT = 0x00C06060;
+static const uint32_t CLRIGHT = 0x0060C060;
+static const uint32_t CLBOTH = 0x00C0C060;
+static const uint32_t linepenbL = 0x00705050;
+static const uint32_t linepenbR = 0x00507050;
+static const uint32_t linepenL = 0x00c08080;
+static const uint32_t linepenR = 0x0080c080;
+
+static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
 // WireView
 enum {
@@ -41,15 +57,10 @@ static void wireview_onhold(WireView*, psy_ui_Component* sender);
 static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
 static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-static void wireview_ontabbarchanged(WireView*, psy_ui_Component* sender,
-	uintptr_t tabindex);
-static void wireview_dockscope(WireView*, int index);
-static void wireview_movescope(WireView* self, int index,
-	psy_ui_AlignType, int width);
 static psy_ui_Component* wireview_scope(WireView*, int index);
-static bool wireview_scopedocked(WireView* self, int index);
-static void wireview_ontogglevu(WireView*, psy_ui_Component* sender);
 static int wireview_currscope(WireView*);
+static void wireview_ondrawslidervu(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void wireview_ontimer(WireView*, psy_ui_Component* sender, uintptr_t timerid);
 
 // implementation
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
@@ -91,9 +102,9 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	psy_signal_connect(&self->tabbar.signal_change, self,
-		wireview_ontabbarchanged);
 	tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
+	psy_signal_connect(&self->component.signal_timer, self, wireview_ontimer);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void wireview_ondestroy(WireView* self)
@@ -107,23 +118,10 @@ void wireview_ondestroy(WireView* self)
 
 void wireview_inittabbar(WireView* self)
 {
-	psy_ui_Margin margin;
-
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init_connect(&self->togglevu, &self->top, NULL,
-		self, wireview_ontogglevu);
-	psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
-	psy_ui_component_setalign(&self->togglevu.component, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->vulabel, &self->top);
-	psy_ui_label_settext(&self->vulabel, "Vu");
-	psy_ui_label_settextalignment(&self->vulabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->vulabel.component, &margin);
-	psy_ui_component_setalign(&self->vulabel.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(&self->vulabel.component);
-	tabbar_init(&self->tabbar, &self->top);	
+	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);	
+	tabbar_init(&self->tabbar, &self->top);
 	tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
@@ -161,6 +159,9 @@ void wireview_initvolumeslider(WireView* self)
 		(ui_slider_fpdescribe)wireview_ondescribevolume,
 		(ui_slider_fptweak)wireview_ontweakvolume,
 		(ui_slider_fpvalue)wireview_onvaluevolume);
+	psy_signal_connect(&self->volslider.pane.signal_customdraw,
+		self, wireview_ondrawslidervu);
+	psy_ui_slider_startpoll(&self->volslider);
 }
 
 void wireview_initrategroup(WireView* self)
@@ -182,13 +183,15 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->modeslider, self, NULL,
 		wireview_ontweakmode, wireview_onvaluemode);
-	psy_ui_slider_init(&self->rateslider, &self->rategroup);
+	psy_ui_slider_init(&self->rateslider, &self->rategroup);	
 	psy_ui_slider_showhorizontal(&self->rateslider);	
 	psy_ui_slider_showhorizontal(&self->rateslider);
 	psy_ui_slider_hidevaluelabel(&self->rateslider);
 	psy_ui_component_setalign(&self->rateslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->rateslider, self, NULL,
 		wireview_ontweakrate, wireview_onvaluerate);
+	psy_ui_slider_update(&self->rateslider);
+	psy_ui_slider_update(&self->modeslider);
 }
 
 void wireview_initbottomgroup(WireView* self)
@@ -336,61 +339,6 @@ void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 	}
 }
 
-void wireview_ontabbarchanged(WireView* self, psy_ui_Component* sender,
-	uintptr_t tabindex)
-{		
-	/*if (wireview_currscope(self) == TABPAGE_VUMETER) {
-		vuscope_start(&self->vuscope);
-		psy_ui_component_hide(&self->modeslider.component);
-	} else {
-		vuscope_stop(&self->vuscope);
-		psy_ui_component_show(&self->modeslider.component);
-	}*/
-	//psy_ui_component_align(&self->component);
-
-}
-
-void wireview_dockscope(WireView* self, int index)
-{
-	psy_ui_Component* scope;
-
-	scope = wireview_scope(self, index);
-	if (scope == NULL) {
-		return;
-	}	
-	if (psy_ui_component_parent(scope) != psy_ui_notebook_base(&self->notebook)) {
-		psy_ui_component_setparent(scope, psy_ui_notebook_base(&self->notebook));
-		psy_ui_component_setalign(scope, psy_ui_ALIGN_CLIENT);
-	}
-}
-
-bool wireview_scopedocked(WireView* self, int index)
-{
-	psy_ui_Component* scope;
-
-	scope = wireview_scope(self, index);
-	if (scope == NULL) {
-		return FALSE;
-	}	
-	return (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook));
-}
-
-void wireview_movescope(WireView* self, int index, psy_ui_AlignType align, int width)
-{
-	psy_ui_Component* scope;
-
-	scope = wireview_scope(self, index);
-	if (scope == NULL) {
-		return;
-	}	
-	if (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook)) {
-		psy_ui_component_setparent(scope, &self->component);		
-		psy_ui_component_resize(scope, psy_ui_size_makepx(width, 0.0));
-		psy_ui_component_show(scope);
-	}
-	psy_ui_component_setalign(scope, align);
-}
-
 psy_ui_Component* wireview_scope(WireView* self, int index)
 {
 	psy_ui_Component* rv;
@@ -415,38 +363,9 @@ psy_ui_Component* wireview_scope(WireView* self, int index)
 	return rv;
 }
 
-void wireview_ontogglevu(WireView* self, psy_ui_Component* sender)
-{
-	intptr_t oldtabindex;
-
-	oldtabindex = tabbar_selected(&self->tabbar);
-	tabbar_clear(&self->tabbar);
-	if (wireview_scopedocked(self, WIREVIEW_TAB_VUMETER)) {
-		wireview_movescope(self, WIREVIEW_TAB_VUMETER, psy_ui_ALIGN_RIGHT,
-			150);
-		psy_ui_component_show(&self->vulabel.component);
-		tabbar_append_tabs(&self->tabbar, "Osc", "Spectrum", "Stereo Phase",
-			"Channel Mapping", NULL);
-		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_LESS);
-		tabbar_select(&self->tabbar,
-			(oldtabindex - 1 > 0) ? oldtabindex - 1 : 0);
-	} else {
-		wireview_dockscope(self, WIREVIEW_TAB_VUMETER);
-		tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum",
-			"Stereo Phase", "Channel Mapping", NULL);
-		psy_ui_component_hide(&self->vulabel.component);
-		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
-		tabbar_select(&self->tabbar, oldtabindex + 1);
-	}
-	psy_ui_component_align(wireview_base(self));
-}
-
 int wireview_currscope(WireView* self)
 {	
-	return tabbar_selected(&self->tabbar) +
-		(wireview_scopedocked(self, 0))
-		? 1
-		: 0;
+	return tabbar_selected(&self->tabbar);
 }
 
 // WireFrame
@@ -468,7 +387,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	psy_ui_component_setposition(wireframe_base(self),
 		psy_ui_rectangle_make(
 		psy_ui_point_makepx(200.0, 150.0),
-		psy_ui_size_makeem(80.0, 25.0)));		
+		psy_ui_size_makeem(80.0, 25.0)));
 }
 
 void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
@@ -485,4 +404,151 @@ void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)
 		(srcmachine) ? psy_audio_machine_editname(srcmachine) : "ERR",
 		(dstmachine) ? psy_audio_machine_editname(dstmachine) : "ERR");
 	psy_ui_component_settitle(wireframe_base(self), title);
+}
+
+void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+{
+	float maxL, maxR;
+	int rmsL, rmsR;
+	const float multleft = self->vuscope.invol * self->vuscope.mult * 1.0f; // self->srcMachine._lVol;
+	const float multright = self->vuscope.invol * self->vuscope.mult * 1.0f; // srcMachine._rVol;
+	uintptr_t samplerate = 44100;
+	unsigned int index = 0;
+	double centerx;
+	double right;
+	double step;
+	psy_ui_Size size;
+	const psy_ui_TextMetric* tm;
+	intptr_t scopesamples;
+	psy_ui_RealRectangle rect;
+	float* pSamplesL;
+	float* pSamplesR;
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* buffer;
+	psy_ui_Component* pane;
+
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
+	if (!machine) {
+		return;
+	}
+
+	buffer = psy_audio_machine_buffermemory(machine);
+	if (!buffer) {
+		return;
+	}
+	scopesamples = psy_audio_machine_buffermemorysize(machine);
+	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
+	scopesamples = psy_min(scopesamples, (int)(psy_audio_machine_samplerate(machine) *
+		self->vuscope.scope_peak_rate * 0.001)) & (~3);
+	pSamplesL = buffer->samples[0];
+	pSamplesR = buffer->samples[1];
+
+	pane = sender;
+	size = psy_ui_component_size(pane);
+	tm = psy_ui_component_textmetric(pane);
+	right = psy_ui_value_px(&size.width, tm);
+	centerx = psy_ui_value_px(&size.width, tm) / 2;
+	step = psy_ui_value_px(&size.height, tm) / 7;
+
+	maxL = dsp.maxvol(buffer->samples[0], scopesamples) / 32768.f;
+	maxR = dsp.maxvol(buffer->samples[1], scopesamples) / 32768.f;
+
+	maxL = ((psy_dsp_amp_t)(2 * step) - dB(maxL * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+	maxR = ((psy_dsp_amp_t)(2 * step) - dB(maxR * multright + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+	rmsL = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.leftavg * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+	rmsR = (int)((psy_dsp_amp_t)(2 * step) - dB(self->vuscope.rightavg * multright + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+
+
+	if (maxL < self->vuscope.peakL) //  it is a cardinal value, so smaller means higher peak.
+	{
+		if (maxL < 0) maxL = 0;
+		self->vuscope.peakL = maxL;
+		self->vuscope.peakLifeL = 2000 / self->vuscope.scope_peak_rate; //2 seconds
+	}
+
+	if (maxR < self->vuscope.peakR)//  it is a cardinal value, so smaller means higher peak.
+	{
+		if (maxR < 0) maxR = 0;
+		self->vuscope.peakR = maxR;		self->vuscope.peakLifeR = 2000 / self->vuscope.scope_peak_rate; //2 seconds
+	}
+
+	// now draw our scope
+	// LEFT CHANNEL		
+	rect.left = centerx - 60;
+	rect.right = rect.left + 24;
+	if (self->vuscope.peakL < 2 * step) {
+		psy_ui_setcolour(g, psy_ui_colour_make(linepenbL));
+	} else {
+		psy_ui_setcolour(g, psy_ui_colour_make(linepenL));
+	}
+	psy_ui_drawline(g, psy_ui_realpoint_make(rect.left - 1, (int)self->vuscope.peakL),
+		psy_ui_realpoint_make(rect.right - 1, (int)self->vuscope.peakL));
+
+	rect.top = (int)maxL;
+	rect.bottom = centerx;
+	rect.bottom = psy_ui_value_px(&size.height, tm);
+	if (rect.top > rect.bottom) {
+		rect.top = rect.bottom;
+	}
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0xC08040));
+
+	rect.left = centerx + 6;
+	rect.right = rect.left + 24;
+	rect.top = rmsL;
+	rect.bottom = psy_ui_value_px(&size.height, tm);
+	if (rect.top > rect.bottom) {
+		rect.top = rect.bottom;
+	}
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0xC08040));
+
+	// RIGHT CHANNEL 
+	rect.left = centerx - 30;
+	rect.right = rect.left + 24;
+	if (self->vuscope.peakR < 2 * step) {
+		psy_ui_setcolour(g, psy_ui_colour_make(linepenbR));
+	} else {
+		psy_ui_setcolour(g, psy_ui_colour_make(linepenR));
+	}
+	psy_ui_drawline(g, psy_ui_realpoint_make(rect.left - 1, self->vuscope.peakR),
+		psy_ui_realpoint_make(rect.right - 1, self->vuscope.peakR));
+
+	rect.top = (int)maxR;
+	rect.bottom = psy_ui_value_px(&size.height, tm);
+	if (rect.top > rect.bottom) {
+		rect.top = rect.bottom;
+	}
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x90D040));
+
+	rect.left = centerx + 36;
+	rect.right = rect.left + 24;
+	rect.top = rmsR;
+	rect.bottom = psy_ui_value_px(&size.height, tm);
+	if (rect.top > rect.bottom) {
+		rect.top = rect.bottom;
+	}
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x90D040));
+	// update peak counter.
+	if (!self->vuscope.hold)
+	{
+		if (self->vuscope.peakLifeL > 0 || self->vuscope.peakLifeR > 0)
+		{
+			self->vuscope.peakLifeL--;
+			self->vuscope.peakLifeR--;
+			if (self->vuscope.peakLifeL <= 0) { self->vuscope.peakL = (psy_dsp_amp_t)INT16_MAX; }
+			if (self->vuscope.peakLifeR <= 0) { self->vuscope.peakR = (psy_dsp_amp_t)INT16_MAX; }
+		}
+	}	
+}
+
+/// linear -> deciBell
+/// amplitude normalized to 1.0f.
+psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
+{
+	///\todo merge with psycle::helpers::math::linear_to_deci_bell
+	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
+}
+
+void wireview_ontimer(WireView* self, psy_ui_Component* sender, uintptr_t timerid)
+{
+	psy_ui_component_invalidate(&self->volslider.pane.component);
 }

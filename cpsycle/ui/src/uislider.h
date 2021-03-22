@@ -23,6 +23,7 @@ typedef struct psy_ui_SliderPane {
 	psy_Signal signal_describevalue;
 	psy_Signal signal_tweakvalue;
 	psy_Signal signal_value;
+	psy_Signal signal_customdraw;
 	// internal
 	double value;
 	double rulerstep;

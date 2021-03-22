@@ -61,6 +61,7 @@ static void vtable_init(psy_ui_Editor* self)
 	}
 	self->component.vtable = &vtable;
 }
+// implementation
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  					
 	printf("Init Editor\n");

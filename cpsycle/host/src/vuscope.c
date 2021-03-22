@@ -65,7 +65,7 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->running = TRUE;
 	psy_signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
 	psy_signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
-	psy_signal_connect(&self->component.signal_timer, self, vuscope_ontimer);	
+	psy_signal_connect(&self->component.signal_timer, self, vuscope_ontimer);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		vuscope_onsongchanged);
 	vuscope_connectmachinessignals(self, workspace);

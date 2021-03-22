@@ -13,7 +13,7 @@ extern "C" {
 
 typedef struct {
    psy_ui_Component component;
-   psy_ui_Editor output;
+   psy_ui_Editor output;   
 } psy_ui_Terminal;
 
 void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
