@@ -6,27 +6,22 @@
 #include "headerui.h"
 // host
 #include "skingraphics.h"
-#include "paramview.h"
-#include "machineui.h"
-#include "wireview.h"
+#include "machineparamconfig.h"
 // audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // HeaderUi
 // prototypes
 static void headerui_ondraw(HeaderUi*, psy_ui_Graphics*);
-static void headerui_invalidate(HeaderUi*);
 static void headerui_onpreferredsize(HeaderUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
+static void headerui_updateparam(HeaderUi*);
 
 // vtable
 static psy_ui_ComponentVtable headerui_vtable;
-static psy_ui_ComponentVtable headerui_super_vtable;
 static bool headerui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
@@ -34,11 +29,8 @@ static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
 	assert(self);
 
 	if (!headerui_vtable_initialized) {
-		headerui_vtable = *(self->component.vtable);
-		headerui_super_vtable = headerui_vtable;
-		headerui_vtable.ondraw = (psy_ui_fp_component_ondraw)headerui_ondraw;
-		headerui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			headerui_invalidate;
+		headerui_vtable = *(self->component.vtable);	
+		headerui_vtable.ondraw = (psy_ui_fp_component_ondraw)headerui_ondraw;		
 		headerui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			headerui_onpreferredsize;		
 		headerui_vtable_initialized = TRUE;
@@ -47,8 +39,9 @@ static psy_ui_ComponentVtable* headerui_vtable_init(HeaderUi* self)
 }
 // implementation
 void headerui_init(HeaderUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam* param,
-	ParamSkin* skin)
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param, ParamSkin* skin)
 {
 	assert(self);	
 	assert(skin);	
@@ -60,6 +53,8 @@ void headerui_init(HeaderUi* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
+	self->machine = machine;
+	self->paramidx = paramidx,
 	self->param = param;	
 }
 
@@ -69,13 +64,14 @@ HeaderUi* headerui_alloc(void)
 }
 
 HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	HeaderUi* rv;
 
 	rv = headerui_alloc();
 	if (rv) {
-		headerui_init(rv, parent, view, param, paramskin);
+		headerui_init(rv, parent, view, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -89,6 +85,7 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 	char str[128];
 	psy_ui_RealSize size;
 
+	headerui_updateparam(self);
 	size = psy_ui_component_sizepx(&self->component);
 	half = size.height / 2;
 	quarter = half / 2;
@@ -110,15 +107,23 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 		strlen(str));
 }
 
-void headerui_invalidate(HeaderUi* self)
-{
-	if (!machineui_vuupdate()) {
-		headerui_super_vtable.invalidate(&self->component);
-	}
-}
-
 void headerui_onpreferredsize(HeaderUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
+{	
+	headerui_updateparam(self);
+	if (self->param) {
+		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
+			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			return;
+		}
+	}
+	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
+}
+
+void headerui_updateparam(HeaderUi* self)
 {
-	psy_ui_size_setem(rv, 10.0, 2.0);
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

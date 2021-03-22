@@ -191,18 +191,6 @@ void machinewireview_ondestroy(MachineWireView* self)
 		psy_ui_component_destroy);	
 }
 
-void machinewireview_configure(MachineWireView* self, MachineViewConfig* config)
-{	
-	self->skin->drawvumeters = machineviewconfig_vumeters(config);
-	self->skin->drawmachineindexes = machineviewconfig_machineindexes(config);
-	self->showwirehover = machineviewconfig_wirehover(config);	
-	if (machineviewconfig_virtualgenerators(config)) {
-		machinewireview_showvirtualgenerators(self);
-	} else {
-		machinewireview_hidevirtualgenerators(self);
-	}
-}
-
 void machinewireview_updateskin(MachineWireView* self)
 {
 	psy_ui_component_setbackgroundcolour(&self->component,
@@ -307,26 +295,29 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint center;
 	psy_ui_RealPoint a, b, c;	
 	psy_ui_RealPoint tri[4];
-	double polysize;
-	float deltaColR = ((self->skin->polycolour.value     & 0xFF) / 510.0f) + .45f;
-	float deltaColG = ((self->skin->polycolour.value >>8  & 0xFF) / 510.0f) + .45f;
-	float deltaColB = ((self->skin->polycolour.value>>16 & 0xFF) / 510.0f) + .45f;
+	double polysize2;
+	float deltaColR;
+	float deltaColG;
+	float deltaColB;
 	unsigned int polyInnards;
 	double phi;
 	
+	deltaColR = ((self->skin->polycolour.value & 0xFF) / 510.0f) + .45f;
+	deltaColG = ((self->skin->polycolour.value >> 8 & 0xFF) / 510.0f) + .45f;
+	deltaColB = ((self->skin->polycolour.value >> 16 & 0xFF) / 510.0f) + .45f;
 	polyInnards = psy_ui_colour_make_rgb((uint8_t)(192 * deltaColR),
 		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB)).value;
 			
 	center.x = (p2.x - p1.x) / 2 + p1.x;
 	center.y = (p2.y - p1.y) / 2 + p1.y;
-
-	polysize = self->skin->triangle_size;
-	a.x = -polysize/2;
-	a.y = polysize/2;
-	b.x = polysize/2;
-	b.y = polysize/2;
+	
+	polysize2 = self->skin->triangle_size / 2;
+	a.x = -polysize2;
+	a.y = polysize2;
+	b.x = polysize2;
+	b.y = polysize2;
 	c.x = 0;
-	c.y = -polysize/2;
+	c.y = -polysize2;
 
 	phi = atan2(p2.x - p1.x, p1.y - p2.y);
 	

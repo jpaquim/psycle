@@ -5,9 +5,11 @@
 
 #include "levelui.h"
 // host
+#include "machineparamconfig.h"
 #include "skingraphics.h"
 // audio
-#include <machineparam.h>
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -18,6 +20,7 @@ static void levelui_onpreferredsize(LevelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void levelui_vumeterdraw(LevelUi*, psy_ui_Graphics*,
 	psy_ui_RealPoint topleft, double value);
+static void levelui_updateparam(LevelUi*);
 
 // vtable
 static psy_ui_ComponentVtable levelui_vtable;
@@ -38,7 +41,8 @@ static psy_ui_ComponentVtable* levelui_vtable_init(LevelUi* self)
 }
 // implementation
 void levelui_init(LevelUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam* param,
+	psy_ui_Component* view, psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param,
 	ParamSkin* skin)
 {
 	assert(self);	
@@ -51,6 +55,8 @@ void levelui_init(LevelUi* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = skin;
+	self->machine = machine;
+	self->paramidx = paramidx;
 	self->param = param;	
 }
 
@@ -60,13 +66,14 @@ LevelUi* levelui_alloc(void)
 }
 
 LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	LevelUi* rv;
 
 	rv = levelui_alloc();
 	if (rv) {
-		levelui_init(rv, parent, view, param, paramskin);
+		levelui_init(rv, parent, view, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -74,6 +81,7 @@ LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 
 void levelui_ondraw(LevelUi* self, psy_ui_Graphics* g)
 {		
+	levelui_updateparam(self);
 	if (self->param) {
 		levelui_vumeterdraw(self, g, psy_ui_realpoint_zero(),
 			(double)psy_audio_machineparam_normvalue(self->param));
@@ -113,4 +121,12 @@ void levelui_onpreferredsize(LevelUi* self, const psy_ui_Size* limit,
 {
 	psy_ui_size_setreal(rv,
 		psy_ui_realrectangle_size(&self->skin->vuoff.dest));	
+}
+
+void levelui_updateparam(LevelUi* self)
+{
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

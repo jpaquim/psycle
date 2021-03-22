@@ -890,19 +890,19 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 		MPF_SMALL);	
 	self->channeldisplay = 0;
 	psy_audio_intmachineparam_init(&self->param_display_channel,
-		"Channel", "Channel", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"Channel", "Channel", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->param_display_channel.machineparam.signal_tweak, self,
 		display_tweak);
 	psy_signal_connect(&self->param_display_channel.machineparam.signal_normvalue, self,
 		display_normvalue);
 	psy_audio_intmachineparam_init(&self->param_display_playback,
-		"Playback", "Playback", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"Playback", "Playback", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->param_display_playback.machineparam.signal_tweak, self,
 		display_tweak);
 	psy_signal_connect(&self->param_display_playback.machineparam.signal_normvalue, self,
 		display_normvalue);
 	psy_audio_intmachineparam_init(&self->param_display_playmix,
-		"Play mix", "Play mix", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"Play mix", "Play mix", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->param_display_playmix.machineparam.signal_tweak, self,
 		display_tweak);
 	psy_signal_connect(&self->param_display_playmix.machineparam.signal_normvalue, self,
@@ -929,7 +929,7 @@ void psy_audio_xmsampler_initparameters(psy_audio_XMSampler* self)
 	psy_audio_intmachineparam_init(&self->param_masterslider,
 		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->m_GlobalVolume, 0, 128);
 	psy_audio_intmachineparam_init(&self->param_masterlevel,
-		"", "", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+		"", "", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->param_masterlevel.machineparam.signal_normvalue, self,
 		masterlevel_normvalue);
 	psy_audio_intmachineparam_init(&self->param_numplayvoices,

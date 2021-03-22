@@ -9,31 +9,43 @@
 // ui
 #include <uicomponent.h>
 
+// LabelUi
+//
+// Label to display a MachineParameter (MPF_INFOLABEL)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct ParamSkin;
 
 // LabelUi
 typedef struct LabelUi {
 	// inherits
 	psy_ui_Component component;
 	// internal	
+	uintptr_t paramidx;
 	// references
 	ParamSkin* skin;
-	psy_audio_Machine* machine;
-	uintptr_t paramidx;
-	psy_audio_MachineParam* param;
+	struct psy_audio_Machine* machine;	
+	struct psy_audio_MachineParam* param;
 } LabelUi;
 
-void labelui_init(LabelUi*, psy_ui_Component* parent,
-	psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam*, ParamSkin*);
+void labelui_init(LabelUi*, psy_ui_Component* parent, psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, ParamSkin*);
 
 LabelUi* labelui_alloc(void);
 LabelUi* labelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* labelui_base(LabelUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

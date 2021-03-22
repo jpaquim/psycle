@@ -5,18 +5,20 @@
 #define SLIDERUI_H
 
 // host
-#include "machineeditorview.h" // vst view
-#include "machineframe.h"
-#include "machineviewskin.h"
 #include "paramtweak.h"
-#include "workspace.h"
 // ui
-#include <uiedit.h>
-#include <uinotebook.h>
+#include <uicomponent.h>
+
+// SliderUi
+//
+// Slider to display a MachineParameter (MPF_SLIDER)
+// (see also slidergroupui)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct ParamSkin;
 
 // SliderUi
 typedef struct SliderUi {
@@ -24,23 +26,30 @@ typedef struct SliderUi {
 	psy_ui_Component component;	
 	// internal
 	ParamTweak paramtweak;
-	// references
-	ParamSkin* skin;	
-	psy_ui_Component* view;
-	psy_audio_Machine* machine;
 	uintptr_t paramidx;
-	psy_audio_MachineParam* param;
+	// references
+	struct ParamSkin* skin;
+	psy_ui_Component* view;
+	struct psy_audio_Machine* machine;	
+	struct psy_audio_MachineParam* param;
 } SliderUi;
 
 void sliderui_init(SliderUi*, psy_ui_Component* parent,
 	psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 SliderUi* sliderui_alloc(void);
 SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam* param, ParamSkin* paramskin);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* sliderui_base(SliderUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

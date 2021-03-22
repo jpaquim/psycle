@@ -8,7 +8,6 @@
 #include "workspace.h"
 #include <uicomponent.h>
 #include <machine.h>
-#include <plugin_interface.h>
 #include "skincoord.h"
 
 #ifdef __cplusplus

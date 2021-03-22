@@ -4,6 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "knobui.h"
+// host
+#include "skingraphics.h"
+#include "machineparamconfig.h"
+// audio
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -58,8 +64,7 @@ void knobui_init(KnobUi* self, psy_ui_Component* parent,
 	self->param = param;
 	self->paramidx = paramidx;
 	self->machine = machine;
-	paramtweak_init(&self->paramtweak);
-	self->tweaking = FALSE;
+	paramtweak_init(&self->paramtweak);	
 }
 
 KnobUi* knobui_alloc(void)
@@ -131,7 +136,7 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 					(int)psy_audio_machineparam_scaledvalue(self->param));
 			}
 		}
-		if (self->tweaking) {
+		if ((paramtweak_active(&self->paramtweak))) {
 			psy_ui_setbackgroundcolour(g, self->skin->htopcolour);
 			psy_ui_settextcolour(g, self->skin->fonthtopcolour);
 		} else {
@@ -140,9 +145,9 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_top),
 			psy_ui_ETO_OPAQUE, r_top, label, strlen(label));
-		psy_ui_setbackgroundcolour(g, (self->tweaking)
+		psy_ui_setbackgroundcolour(g, (paramtweak_active(&self->paramtweak))
 			? self->skin->hbottomcolour : self->skin->bottomcolour);
-		psy_ui_settextcolour(g, (self->tweaking)
+		psy_ui_settextcolour(g, (paramtweak_active(&self->paramtweak))
 			? self->skin->fonthbottomcolour : self->skin->fontbottomcolour);
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_bottom),
 			psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
@@ -192,39 +197,46 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 void knobui_onpreferredsize(KnobUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
-	psy_ui_size_setem(rv, 10.0, 2.0);
+	knobui_updateparam(self);
+	if (self->param) {
+		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
+			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			return;
+		}
+	}
+	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
 }
 
 void knobui_onmousedown(KnobUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1 && self->param != NULL) {		
-		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx);
-		self->tweaking = TRUE;
-		self->paramtweak.param = self->param;
+	if (ev->button == 1) {
+		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
+			self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);		
-		psy_ui_component_capture(&self->component);		
+		psy_ui_component_capture(&self->component);
 	}
 }
 
 void knobui_onmousemove(KnobUi* self, psy_ui_MouseEvent* ev)
-{
-	if (self->paramtweak.param != NULL) {
-		paramtweak_onmousemove(&self->paramtweak, ev);
+{		
+	if (paramtweak_active(&self->paramtweak)) {
+		paramtweak_onmousemove(&self->paramtweak, ev);	
 		psy_ui_component_invalidate(&self->component);
 	}
 }
 
 void knobui_onmouseup(KnobUi* self, psy_ui_MouseEvent* ev)
 {
-	paramtweak_end(&self->paramtweak);
 	psy_ui_component_releasecapture(&self->component);
-	self->tweaking = FALSE;
-	psy_ui_component_invalidate(&self->component);
+	if (paramtweak_active(&self->paramtweak)) {
+		paramtweak_end(&self->paramtweak);		
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void knobui_updateparam(KnobUi* self)
 {
-	if (self->machine && self->paramidx) {
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
 		self->param = psy_audio_machine_parameter(self->machine,
 			self->paramidx);
 	}

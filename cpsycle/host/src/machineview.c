@@ -72,12 +72,12 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_MACHINEVIEW, STYLE_MACHINEVIEW, STYLE_MACHINEVIEW);
 	self->workspace = workspace;	
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		machineview_onsongchanged);
 	// skin init
 	machineviewskin_init(&self->skin,	
 		psycleconfig_macview(workspace_conf(self->workspace))->theme,
 		dirconfig_skins(&self->workspace->config.directories));	
-	psy_signal_connect(&self->workspace->signal_songchanged, self,
-		machineview_onsongchanged);
 	// Machine Properties
 	machineproperties_init(&self->properties, &self->component, NULL,
 		&self->skin, workspace);
@@ -132,7 +132,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 }
 
 void machineview_ondestroy(MachineView* self)
-{
+{	
 	machineviewskin_dispose(&self->skin);
 }
 
@@ -224,14 +224,23 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 
 void machineview_onsongchanged(MachineView* self, Workspace* workspace,
 	int flag, psy_audio_Song* song)
-{	
+{		
 	tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);	
 }
 
 void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	psy_Property* property)
 {
-	machinewireview_configure(&self->wireview, sender);		
+	self->skin.drawvumeters = machineviewconfig_vumeters(sender);
+	self->skin.drawmachineindexes = machineviewconfig_machineindexes(sender);
+	self->wireview.showwirehover = machineviewconfig_wirehover(sender);	
+	if (machineviewconfig_virtualgenerators(sender)) {
+		machinewireview_showvirtualgenerators(&self->wireview);
+		machinestackview_showvirtualgenerators(&self->stackview);
+	} else {
+		machinewireview_hidevirtualgenerators(&self->wireview);
+		machinestackview_hidevirtualgenerators(&self->stackview);
+	}	
 }
 
 void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,

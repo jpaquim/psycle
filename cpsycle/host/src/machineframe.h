@@ -48,6 +48,8 @@ typedef struct {
 	psy_audio_Machine* machine;
 } ParameterBar;
 
+void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace*);
+
 typedef struct MachineFrame {
 	// inherits
 	psy_ui_Component component;
@@ -64,15 +66,13 @@ typedef struct MachineFrame {
 	ParamView* paramview;	
 } MachineFrame;
 
-void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);
+void machineframe_init(MachineFrame*, psy_ui_Component* parent, Workspace*);
 
-void machineframe_init(MachineFrame*, psy_ui_Component* parent, Workspace* workspace);
 MachineFrame* machineframe_alloc(void);
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, Workspace* workspace);
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent, Workspace*);
 
-void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
-void machineframe_setparamview(MachineFrame* self, ParamView* view, psy_audio_Machine*);
-
+void machineframe_setview(MachineFrame*, psy_ui_Component* view, psy_audio_Machine*);
+void machineframe_setparamview(MachineFrame*, ParamView*, psy_audio_Machine*);
 
 #ifdef __cplusplus
 }

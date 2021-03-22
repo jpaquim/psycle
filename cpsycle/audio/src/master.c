@@ -147,7 +147,7 @@ void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback* ca
 	psy_signal_connect(&self->param_slider.machineparam.signal_describe, self,
 		master_level_describe);
 	psy_audio_custommachineparam_init(&self->param_level,
-		"", "", MPF_SLIDERLEVEL | MPF_SMALL, 0, 0xFFFF);
+		"", "", MPF_LEVEL | MPF_SMALL, 0, 0xFFFF);
 	psy_signal_connect(&self->param_level.machineparam.signal_normvalue, self,
 		master_level_normvalue);
 	psy_audio_machine_setposition(&self->custommachine.machine, 320, 200);	

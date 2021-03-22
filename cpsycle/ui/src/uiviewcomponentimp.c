@@ -169,6 +169,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	self->view = view;
 	self->component = component;
 	self->parent = parent;
+	self->visible = TRUE;
 	if (parent) {
 		parent->imp->vtable->dev_insert(parent->imp, &self->imp, NULL);		
 	}
@@ -278,6 +279,7 @@ void view_dev_destroyed(psy_ui_ViewComponentImp* self)
 
 void view_dev_show(psy_ui_ViewComponentImp* self)
 {
+	self->visible = TRUE;
 }
 
 void view_dev_showstate(psy_ui_ViewComponentImp* self, int state)
@@ -286,42 +288,48 @@ void view_dev_showstate(psy_ui_ViewComponentImp* self, int state)
 
 void view_dev_hide(psy_ui_ViewComponentImp* self)
 {
+	self->visible = FALSE;
 }
 
 int view_dev_visible(psy_ui_ViewComponentImp* self)
 {
-	return TRUE;
+	return self->visible;
 }
 
 int view_dev_drawvisible(psy_ui_ViewComponentImp* self)
 {
-	return TRUE;
+	return self->visible;
 }
 
 void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 {
+	const psy_ui_TextMetric* tm;
+	
+	tm = view_dev_textmetric(self);
 	psy_ui_realrectangle_settopleft(&self->position,
 		psy_ui_realpoint_make(
-			psy_ui_value_px(&origin.x, NULL),
-			psy_ui_value_px(&origin.y, NULL)));
+			psy_ui_value_px(&origin.x, tm),
+			psy_ui_value_px(&origin.y, tm)));
 }
 
 void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
 {
 	psy_ui_RealPoint topleft;
+	const psy_ui_TextMetric* tm;
 
 	topleft = psy_ui_realrectangle_topleft(&self->position);
+	tm = view_dev_textmetric(self);
 	self->position = psy_ui_realrectangle_make(
 		topleft,
 		psy_ui_realsize_make(
-			psy_ui_value_px(&size.width, NULL),
-			psy_ui_value_px(&size.height, NULL)));
+			psy_ui_value_px(&size.width, tm),
+			psy_ui_value_px(&size.height, tm)));
 }
 
-void view_dev_clientresize(psy_ui_ViewComponentImp* self, intptr_t width, intptr_t height)
+void view_dev_clientresize(psy_ui_ViewComponentImp* self, intptr_t width,
+	intptr_t height)
 {
 }
-
 
 psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp* self)
 {
@@ -542,43 +550,48 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	psy_List* q;
-
+	psy_ui_RealRectangle clip;
+	
 	// draw background						
 	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self->component, g);
-	}
+	}	
 	psy_ui_component_drawborder(self->component, g);
-	if (self->component->vtable->ondraw) {
+	if (self->component->vtable->ondraw) {				
 		self->component->vtable->ondraw(self->component, g);
 	}
 	q = self->viewcomponents;
-	for (p = q; p != NULL; psy_list_next(&p)) {
-		psy_ui_RealRectangle position;
+	clip = g->clip;
+	for (p = q; p != NULL; psy_list_next(&p)) {		
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)psy_list_entry(p);
-		if ((component->imp->vtable->dev_flags(component->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-			position = psy_ui_component_position(component);
-			psy_ui_RealRectangle restoreclip;
+		if ((component->imp->vtable->dev_flags(component->imp)
+				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			psy_ui_RealRectangle position;
+			psy_ui_RealRectangle intersection;
 
-			restoreclip = g->clip;			
-			if (psy_ui_realrectangle_intersection(&g->clip, &position)) {
+			position = psy_ui_component_position(component);
+			intersection = clip;
+			if (psy_ui_realrectangle_intersection(&intersection, &position)) {
 				psy_ui_RealPoint origin;
-								
-				psy_ui_realrectangle_settopleft(&g->clip,
+
+				// translate graphics clip and origin
+				psy_ui_realrectangle_settopleft(&intersection,
 					psy_ui_realpoint_make(
-						g->clip.left - position.left,
-						g->clip.top - position.top));
+						intersection.left - position.left,
+						intersection.top - position.top));
+				g->clip = intersection;
 				origin = psy_ui_origin(g);
 				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-					-position.top + origin.y));				
+					-position.top + origin.y));
 				component->imp->vtable->dev_draw(component->imp, g);
-				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));				
-			}
-			g->clip = restoreclip;
+				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
+			}																
 		}
-	}	
+	}
+	g->clip = clip;
 }
 
 psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)

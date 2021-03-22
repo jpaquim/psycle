@@ -6,6 +6,10 @@
 #include "switchui.h"
 // host
 #include "skingraphics.h"
+#include "machineparamconfig.h"
+// audio
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -17,6 +21,7 @@ static void switchui_onpreferredsize(SwitchUi*, const psy_ui_Size* limit,
 static void switchui_onmousedown(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_onmouseup(SwitchUi*, psy_ui_MouseEvent*);
 static void switchui_onmousemove(SwitchUi*, psy_ui_MouseEvent*);
+static void switchui_updateparam(SwitchUi*);
 
 // vtable
 static psy_ui_ComponentVtable switchui_vtable;
@@ -43,8 +48,9 @@ static psy_ui_ComponentVtable* switchui_vtable_init(SwitchUi* self)
 }
 // implementation
 void switchui_init(SwitchUi* self, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam* param,
-	ParamSkin* paramskin)
+	psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
+	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	assert(self);	
 	assert(paramskin);	
@@ -57,7 +63,9 @@ void switchui_init(SwitchUi* self, psy_ui_Component* parent,
 		psy_ui_NOBACKGROUND);
 	self->view = view;	
 	self->skin = paramskin;
-	self->param = param;
+	self->machine = machine;
+	self->paramidx = paramidx;
+	self->param = param;	
 	paramtweak_init(&self->paramtweak);
 }
 
@@ -67,13 +75,14 @@ SwitchUi* switchui_alloc(void)
 }
 
 SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_Machine* machine, uintptr_t paramidx,
 	psy_audio_MachineParam* param, ParamSkin* paramskin)
 {
 	SwitchUi* rv;
 
 	rv = switchui_alloc();
 	if (rv) {
-		switchui_init(rv, parent, view, param, paramskin);
+		switchui_init(rv, parent, view, machine, paramidx, param, paramskin);
 		rv->component.deallocate = TRUE;
 	}
 	return rv;
@@ -85,6 +94,7 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r;
 	char label[128];
 	
+	switchui_updateparam(self);
 	size = psy_ui_component_sizepx(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
@@ -118,22 +128,28 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 void switchui_onpreferredsize(SwitchUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	psy_ui_size_setem(rv, 10.0, 2.0);
+	switchui_updateparam(self);
+	if (self->param) {
+		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
+			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			return;
+		}
+	}
+	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
 }
 
 void switchui_onmousedown(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1 && self->param != NULL) {		
-		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID);
-		self->paramtweak.param = self->param;
-		paramtweak_onmousedown(&self->paramtweak, ev);		
+	if (ev->button == 1) {		
+		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID, self->param);		
+		paramtweak_onmousedown(&self->paramtweak, ev);
 		psy_ui_component_capture(&self->component);		
 	}
 }
 
 void switchui_onmousemove(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
-	if (self->paramtweak.param != NULL) {
+	if ((paramtweak_active(&self->paramtweak))) {
 		paramtweak_onmousemove(&self->paramtweak, ev);
 		psy_ui_component_invalidate(&self->component);
 	}
@@ -141,7 +157,17 @@ void switchui_onmousemove(SwitchUi* self, psy_ui_MouseEvent* ev)
 
 void switchui_onmouseup(SwitchUi* self, psy_ui_MouseEvent* ev)
 {
-	paramtweak_end(&self->paramtweak);
 	psy_ui_component_releasecapture(&self->component);
-	psy_ui_component_invalidate(&self->component);
+	if ((paramtweak_active(&self->paramtweak))) {
+		paramtweak_end(&self->paramtweak);
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+void switchui_updateparam(SwitchUi* self)
+{
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

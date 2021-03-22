@@ -91,6 +91,8 @@ static void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 static void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
 static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Component* src,
 	psy_ui_Component* dst);
+static psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst);
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -939,6 +941,7 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	psy_ui_win_GraphicsImp* win_g;
 	POINT origin;
 	POINT org;
+	psy_ui_RealRectangle clip;
 
 	tm = psy_ui_component_textmetric(self->component);
 	// draw background						
@@ -985,34 +988,35 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	psy_signal_emit(&self->component->signal_draw,
 		self->component, 1, g);
 	q = self->viewcomponents;
-	for (p = q; p != NULL; psy_list_next(&p)) {
-		psy_ui_RealRectangle position;
-		psy_ui_Component* machineui;
-
-		machineui = (psy_ui_Component*)psy_list_entry(p);
-		if ((machineui->imp->vtable->dev_flags(machineui->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-			psy_ui_RealRectangle restoreclip;
-
-			restoreclip = g->clip;
-			position = psy_ui_component_position(machineui);
-			if (psy_ui_realrectangle_intersection(&g->clip, &position)) {								
-				psy_ui_realrectangle_settopleft(&g->clip,
+	clip = g->clip;
+	for (p = q; p != NULL; psy_list_next(&p)) {		
+		psy_ui_Component* component;
+		
+		component = (psy_ui_Component*)psy_list_entry(p);		
+		if ((component->imp->vtable->dev_flags(component->imp) &
+				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+			psy_ui_RealRectangle position;
+			psy_ui_RealRectangle intersection;
+			
+			position = psy_ui_component_position(component);
+			intersection = clip;
+			if (psy_ui_realrectangle_intersection(&intersection, &position)) {
+				// translate graphics clip and origin
+				psy_ui_realrectangle_settopleft(&intersection,
 					psy_ui_realpoint_make(
-						g->clip.left - position.left,
-						g->clip.top - position.top));
-				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left,
-					-position.top));
-				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
-				if (machineui->vtable->ondraw) {
-					machineui->vtable->ondraw(machineui, g);
-				}
-				machineui->imp->vtable->dev_draw(machineui->imp, g);
-				psy_ui_resetorigin(g);				
+						intersection.left - position.left,
+						intersection.top - position.top));
+				g->clip = intersection;				
+				psy_ui_setorigin(g,
+					psy_ui_realpoint_make(-position.left, -position.top));
+				component->imp->vtable->dev_draw(component->imp, g);
 			}
-			g->clip = restoreclip;
 		}
-	}	
+	}
+	// graphics clip and origin
+	g->clip = clip;
+	psy_ui_resetorigin(g);
 }
 
 void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
@@ -1041,7 +1045,7 @@ void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 	if (psy_ui_app()->capture) {
 		psy_ui_RealPoint translation;
 
-		translation = translatecoords(self, psy_ui_app()->capture,
+		translation = mapcoords(self, psy_ui_app()->capture,
 			self->component);
 		psy_ui_realpoint_sub(&ev->pt, translation);
 		psy_ui_app()->capture->vtable->onmouseup(psy_ui_app()->capture, ev);
@@ -1084,6 +1088,23 @@ psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp* self, psy_ui_Component
 	return rv;
 }
 
+psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = src;
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
+}
+
 void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {	
 	if (psy_ui_app()->capture) {
@@ -1091,7 +1112,7 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_ui_RealPoint translation;
 		
 		capture = psy_ui_app()->capture;
-		translation = translatecoords(self, capture, self->component);
+		translation = mapcoords(self, capture, self->component);
 		psy_ui_realpoint_sub(&ev->pt, translation);			
 		capture->vtable->onmousemove(capture, ev);
 		psy_ui_realpoint_add(&ev->pt, translation);

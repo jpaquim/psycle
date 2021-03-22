@@ -59,9 +59,9 @@ typedef struct MachineView {
 	psy_ui_Scroller scroller;
 	MachineStackView stackview;	
 	NewMachine newmachine;
-	MachineViewSkin skin;
+	MachineViewSkin skin;	
 	// references
-	Workspace* workspace;
+	Workspace* workspace;	
 } MachineView;
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
