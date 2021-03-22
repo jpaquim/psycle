@@ -7,6 +7,8 @@
 // host
 #include "paramview.h"
 #include "resources/resource.h"
+// audio
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -266,7 +268,9 @@ ParamSkin* machineparamconfig_skin(MachineParamConfig* self)
 		}
 		psy_ui_bitmap_init(&paramskin.mixerbitmap);
 		psy_ui_bitmap_loadresource(&paramskin.mixerbitmap, IDB_MIXERSKIN);
-		paramskin_initialized = 1;
+		paramskin.paramwidth = 26.0;
+		paramskin.paramwidth_small = 18.0;
+		paramskin_initialized = TRUE;
 	}
 	return &paramskin;
 }
@@ -294,7 +298,7 @@ psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm, uintptr_t 
 		rv.height = 0;
 		rv.width = 0;
 		break;
-	case MPF_SLIDERCHECK:
+	case MPF_CHECK:
 		rv.height = psy_max(psy_ui_realrectangle_height(&skin->checkoff.dest),
 			tm->tmHeight);
 		rv.width = psy_ui_realrectangle_height(&skin->checkoff.dest) +
@@ -317,7 +321,7 @@ psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm, uintptr_t 
 				tm->tmAveCharWidth * 5;
 		}
 		break;
-	case MPF_SLIDERLEVEL:
+	case MPF_LEVEL:
 		rv.height = psy_ui_realrectangle_height(&skin->vuon.dest);
 		rv.width = psy_ui_realrectangle_width(&skin->slider.dest);
 		if (issmall) {

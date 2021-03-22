@@ -4,6 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "labelui.h"
+// host
+#include "machineparamconfig.h"
+// audio
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -13,6 +18,7 @@ static void labelui_ondraw(LabelUi*, psy_ui_Graphics*);
 static void labelui_invalidate(LabelUi*);
 static void labelui_onpreferredsize(LabelUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
+static void labelui_updateparam(LabelUi*);
 // vtable
 static psy_ui_ComponentVtable labelui_vtable;
 static bool labelui_vtable_initialized = FALSE;
@@ -77,10 +83,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 
 	str[0] = '\0';
-	if (self->machine && self->paramidx) {
-		self->param = psy_audio_machine_parameter(self->machine,
-			self->paramidx);
-	}
+	labelui_updateparam(self);
 	size = psy_ui_component_sizepx(&self->component);
 	half = size.height / 2;
 	psy_ui_setrectangle(&r, 0.0, 0.0, size.width, half);
@@ -110,6 +113,20 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makeew(10.0);
-	rv->height = psy_ui_value_makeeh(2.0);	
+	labelui_updateparam(self);
+	if (self->param) {
+		if (psy_audio_machineparam_type(self->param) & MPF_SMALL) {
+			psy_ui_size_setem(rv, self->skin->paramwidth_small, 2.0);
+			return;
+		}
+	}
+	psy_ui_size_setem(rv, self->skin->paramwidth, 2.0);
+}
+
+void labelui_updateparam(LabelUi* self)
+{
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

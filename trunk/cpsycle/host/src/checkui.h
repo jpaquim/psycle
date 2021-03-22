@@ -5,13 +5,19 @@
 #define CHECKUI_H
 
 // host
-#include "machineviewskin.h"
 #include "paramtweak.h"
-#include "workspace.h"
+// ui
+#include <uicomponent.h>
+
+// CheckUi
+//
+// Check Button to display a MachineParameter (MPF_CHECK)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct ParamSkin;
 
 // CheckUi
 typedef struct CheckUi {
@@ -19,21 +25,29 @@ typedef struct CheckUi {
 	psy_ui_Component component;
 	// internal
 	ParamTweak paramtweak;
+	uintptr_t paramidx;
 	// references
-	ParamSkin* skin;
-	Workspace* workspace;
+	struct ParamSkin* skin;	
 	psy_ui_Component* view;
-	psy_audio_MachineParam* param;
+	struct psy_audio_Machine* machine;	
+	struct psy_audio_MachineParam* param;
 } CheckUi;
 
-void checkui_init(CheckUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+void checkui_init(CheckUi*, psy_ui_Component* parent, psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 CheckUi* checkui_alloc(void);
-CheckUi* checkui_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*,
-	ParamSkin*);
+CheckUi* checkui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
+INLINE psy_ui_Component* checkui_base(CheckUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

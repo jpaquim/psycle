@@ -40,6 +40,8 @@ typedef struct ParamSkin {
     SkinCoord switchoff;
     SkinCoord checkon;
     SkinCoord checkoff;
+    double paramwidth;
+    double paramwidth_small;
 } ParamSkin;
 
 psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm,

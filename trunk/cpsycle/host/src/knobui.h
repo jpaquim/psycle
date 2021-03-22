@@ -5,37 +5,48 @@
 #define KNOBUI_H
 
 // host
-#include "workspace.h"
 #include "paramtweak.h"
+// ui
+#include <uicomponent.h>
+
+// KnobUi
+//
+// Knob ui to tweak a MachineParameter (MPF_STATE)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// KnobUi
+struct ParamSkin;
+
 typedef struct KnobUi {
 	// inherits
 	psy_ui_Component component;
 	// internal
 	ParamTweak paramtweak;
-	// references
-	ParamSkin* skin;
-	Workspace* workspace;	
-	psy_audio_Machine* machine;
 	uintptr_t paramidx;
-	psy_audio_MachineParam* param;
-	bool tweaking;
+	// references
+	struct ParamSkin* skin;	
+	struct psy_audio_Machine* machine;
+	struct psy_audio_MachineParam* param;
 } KnobUi;
 
 void knobui_init(KnobUi*, psy_ui_Component* parent,
 	psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 KnobUi* knobui_alloc(void);
 KnobUi* knobui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_Machine* machine, uintptr_t paramidx,
-	psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* knobui_base(KnobUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

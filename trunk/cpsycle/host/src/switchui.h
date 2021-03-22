@@ -6,34 +6,51 @@
 
 // host
 #include "paramtweak.h"
-#include "workspace.h"
+// ui
+#include <uicomponent.h>
+
+// SwitchUi
+//
+// Switch to tweak a MachineParameter (MPF_SWITCH)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SwitchUi
+struct ParamSkin;
+
 typedef struct SwitchUi {
 	// inherits
 	psy_ui_Component component;
 	// internal
 	ParamTweak paramtweak;
+	uintptr_t paramidx;
 	// references
-	ParamSkin* skin;
-	Workspace* workspace;
-	psy_ui_Component* view;
-	psy_audio_MachineParam* param;
+	struct ParamSkin* skin;	
+	psy_ui_Component* view;	
+	struct psy_audio_Machine* machine;
+	struct psy_audio_MachineParam* param;
 } SwitchUi;
 
 void switchui_init(SwitchUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+	psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 SwitchUi* switchui_alloc(void);
 SwitchUi* switchui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* switchui_base(SwitchUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SLIDERUI_H */
+#endif /* SWITCHUI_H */

@@ -38,6 +38,9 @@
     <Filter Include="uicontrols\machine">
       <UniqueIdentifier>{c99e891c-7518-4ae8-8f91-d43064b4a4fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="uicontrols\machineparam">
+      <UniqueIdentifier>{34940d58-d9b5-4186-b9b4-2df6b3622c28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mainframe.c">
@@ -397,43 +400,13 @@
     <ClCompile Include="src\metronomeconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\sliderui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\masterui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\generatorui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\effectui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
-    <ClCompile Include="src\machineui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\machinecombobox.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\switchui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\levelui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\labelui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\checkui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\knobui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\headerui.c">
-      <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\slidergroupui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\machineproperties.c">
@@ -442,8 +415,38 @@
     <ClCompile Include="src\arrowui.c">
       <Filter>uicontrols\machine</Filter>
     </ClCompile>
-    <ClCompile Include="src\paramtweak.c">
+    <ClCompile Include="src\switchui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sliderui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\slidergroupui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineui.c">
       <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\masterui.c">
+      <Filter>uicontrols\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\levelui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\labelui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\knobui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\headerui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\checkui.c">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramtweak.c">
+      <Filter>uicontrols\machineparam</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -815,43 +818,13 @@
     <ClInclude Include="src\metronomeconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\sliderui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\masterui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\generatorui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
     <ClInclude Include="src\effectui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
-    <ClInclude Include="src\machineui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\machinecombobox.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\switchui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\levelui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\labelui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\checkui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\knobui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\headerui.h">
-      <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\slidergroupui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
     <ClInclude Include="src\machineproperties.h">
@@ -860,8 +833,38 @@
     <ClInclude Include="src\arrowui.h">
       <Filter>uicontrols\machine</Filter>
     </ClInclude>
-    <ClInclude Include="src\paramtweak.h">
+    <ClInclude Include="src\switchui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sliderui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\slidergroupui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineui.h">
       <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\masterui.h">
+      <Filter>uicontrols\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\levelui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\labelui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\knobui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\headerui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\checkui.h">
+      <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramtweak.h">
+      <Filter>uicontrols\machineparam</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

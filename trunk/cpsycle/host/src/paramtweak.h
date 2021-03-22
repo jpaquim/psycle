@@ -4,33 +4,51 @@
 #if !defined(PARAMTWEAK)
 #define PARAMTWEAK
 
-#include "workspace.h"
-#include <uicomponent.h>
-#include <machine.h>
-#include "skincoord.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// ParamTweak
+//
+// MouseEvent Helper for psy_audio_MachineParam ui components
+
+// Forward Declarations
+// audio
+struct psy_audio_Machine;
+struct psy_audio_MachineParam;
+// ui
+struct psy_ui_MouseEvent;
+
 typedef struct ParamTweak {
     // internal data
     float tweakbase;
     float tweakval;
+    bool active;
     // references
-    psy_audio_Machine* machine;
-    uintptr_t paramindex;
-    ParamSkin skin;
-    psy_audio_MachineParam* param;
+    struct psy_audio_Machine* machine;
+    uintptr_t paramidx;
+    struct psy_audio_MachineParam* param;
 } ParamTweak;
 
 void paramtweak_init(ParamTweak*);
 
-void paramtweak_begin(ParamTweak*, psy_audio_Machine*,
-    uintptr_t paramindex);
+// activates tweak
+//     Either machine and paramidx or machineparam needs to be set
+//     machineparam is used only if machine or paramidx are not valid
+void paramtweak_begin(ParamTweak*, struct psy_audio_Machine*,
+    uintptr_t paramindex, struct psy_audio_MachineParam*);
+// deactivate tweak
 void paramtweak_end(ParamTweak*);
-void paramtweak_onmousedown(ParamTweak*, psy_ui_MouseEvent*);
-void paramtweak_onmousemove(ParamTweak*, psy_ui_MouseEvent*);
+// called by the uis to delegate the mouse events
+void paramtweak_onmousedown(ParamTweak*, struct psy_ui_MouseEvent*);
+void paramtweak_onmousemove(ParamTweak*, struct psy_ui_MouseEvent*);
+//\ return tweak status
+INLINE bool paramtweak_active(const ParamTweak* self)
+{
+    return self->active;
+}
 
 #ifdef __cplusplus
 }

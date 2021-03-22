@@ -99,6 +99,7 @@ typedef struct MachineStackState {
 	psy_audio_Wire oldwire;
 	psy_audio_Wire newwire;
 	uintptr_t currlevel;
+	bool drawvirtualgenerators;
 	// references
 	struct MachineViewBar* statusbar;
 } MachineStackState;
@@ -221,11 +222,25 @@ void machinestackvolumes_init(MachineStackVolumes*, psy_ui_Component* parent,
 
 void machinestackvolumes_build(MachineStackVolumes*);
 
+
+// MachineStackPaneTrackClient
+typedef struct MachineStackPaneTrackClient {
+	psy_ui_Component component;
+	// internal
+	uintptr_t column;
+	// references
+	MachineStackState* state;
+} MachineStackPaneTrackClient;
+
+void machinestackpanetrackclient_init(MachineStackPaneTrackClient*,
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	MachineStackState*);
+
 // MachineStackPaneTrack
 typedef struct MachineStackPaneTrack {
 	// inherits
 	psy_ui_Component component;
-	psy_ui_Component client;
+	MachineStackPaneTrackClient client;
 	psy_ui_Scroller scroller;
 	// internal
 	uintptr_t column;	
@@ -262,8 +277,9 @@ void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 
 void machinestackview_addeffect(MachineStackView*,
 	const psy_audio_MachineInfo*);
-
 void machinestackview_updateskin(MachineStackView*);
+void machinestackview_showvirtualgenerators(MachineStackView*);
+void machinestackview_hidevirtualgenerators(MachineStackView*);
 
 #ifdef __cplusplus
 }

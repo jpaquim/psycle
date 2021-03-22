@@ -9,6 +9,10 @@
 #include "levelui.h"
 #include "sliderui.h"
 
+// SliderGroupUi
+//
+// SliderGroup to display a slider and a level label
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +42,13 @@ SliderGroupUi* slidergroupui_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine* machine,
 	uintptr_t volumeparamidx, psy_audio_MachineParam* volume,
 	uintptr_t levelparamidx, psy_audio_MachineParam* level, ParamSkin*);
+
+INLINE psy_ui_Component* slidergroupui_base(SliderGroupUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

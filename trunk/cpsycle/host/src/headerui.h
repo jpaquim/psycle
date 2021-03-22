@@ -6,34 +6,50 @@
 
 // host
 #include "paramtweak.h"
-#include "paramview.h"
 // ui
 #include <uicomponent.h>
+
+// HeaderUi
+//
+// Header to display a MachineParameter (MPF_HEADER)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct ParamSkin;
 
 // HeaderUi
 typedef struct HeaderUi {
 	// inherits
 	psy_ui_Component component;
 	// internal	
+	uintptr_t paramidx;
 	// references
-	ParamSkin* skin;	
+	struct ParamSkin* skin;
 	psy_ui_Component* view;
-	psy_audio_MachineParam* param;
+	struct psy_audio_Machine* machine;
+	struct psy_audio_MachineParam* param;
 } HeaderUi;
 
-void headerui_init(HeaderUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_MachineParam*, ParamSkin*);
+void headerui_init(HeaderUi*, psy_ui_Component* parent, psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 HeaderUi* headerui_alloc(void);
 HeaderUi* headerui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_MachineParam*, ParamSkin*);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* headerui_base(HeaderUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LABELUI_H */
+#endif /* HEADERUI_H */

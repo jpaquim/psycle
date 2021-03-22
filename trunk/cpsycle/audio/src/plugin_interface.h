@@ -34,8 +34,8 @@ typedef unsigned long dword;
 #define MPF_STATE				2
 #define MPF_INFOLABEL			3
 #define MPF_SLIDER				4
-#define MPF_SLIDERLEVEL			5
-#define MPF_SLIDERCHECK			6
+#define MPF_LEVEL			    5
+#define MPF_CHECK			    6
 #define MPF_SWITCH				7
 #define MPF_IGNORE				8
 #define MPF_SMALL				512

@@ -5,33 +5,48 @@
 #define LEVELUI_H
 
 // host
-#include "machineparamconfig.h"
+#include "paramtweak.h"
 // ui
 #include <uicomponent.h>
+
+// LevelUi
+//
+// Level to display a MachineParameter (MPF_LEVEL)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct psy_audio_MachineParam;
+struct ParamSkin;
 
 // LevelUi
 typedef struct LevelUi {
 	// inherits
 	psy_ui_Component component;
 	// internal	
+	uintptr_t paramidx;
 	// references
-	ParamSkin* skin;	
+	struct ParamSkin* skin;	
 	psy_ui_Component* view;
-	struct psy_audio_MachineParam* param;
+	struct psy_audio_Machine* machine;	
+	struct psy_audio_MachineParam* param;	
 } LevelUi;
 
-void levelui_init(LevelUi*, psy_ui_Component* parent,
-	psy_ui_Component* view, struct psy_audio_MachineParam*, ParamSkin*);
+void levelui_init(LevelUi*, psy_ui_Component* parent, psy_ui_Component* view,
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
 
 LevelUi* levelui_alloc(void);
 LevelUi* levelui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
-	struct psy_audio_MachineParam* param, ParamSkin* paramskin);
+	struct psy_audio_Machine*, uintptr_t paramidx,
+	struct psy_audio_MachineParam*, struct ParamSkin*);
+
+INLINE psy_ui_Component* levelui_base(LevelUi* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

@@ -59,7 +59,6 @@ typedef struct MachineWireView {
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin*, Workspace*);
 void machinewireview_centermaster(MachineWireView*);
-void machinewireview_configure(MachineWireView*, MachineViewConfig*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);
 void machinewireview_updateskin(MachineWireView*);

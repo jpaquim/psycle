@@ -274,8 +274,7 @@ INLINE psy_ui_RealPoint psy_ui_origin(const psy_ui_Graphics* self)
 
 INLINE void psy_ui_resetorigin(psy_ui_Graphics* self)
 {
-	self->vtable->setorigin(self, psy_ui_realpoint_zero().x,
-		psy_ui_realpoint_zero().y);
+	self->vtable->setorigin(self, 0.0, 0.0);
 }
 
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,

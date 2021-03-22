@@ -36,7 +36,7 @@ INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Compo
 	self->target = target;
 }
 
-typedef struct {	
+typedef struct psy_ui_MouseEvent {
 	psy_ui_RealPoint pt;
 	intptr_t button;
 	intptr_t delta;

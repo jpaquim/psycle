@@ -114,14 +114,14 @@ void psy_audio_xmsamplerchannel_initparamview(psy_audio_XMSamplerChannel* self)
 	psy_signal_connect(&self->pan.machineparam.signal_normvalue, self,
 		psy_audio_xmsamplerchannel_defaultpan_normvalue);
 	psy_audio_intmachineparam_init(&self->surround,
-		"Surround", "Surround", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"Sur", "Sur", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->surround.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->surround.machineparam.signal_tweak, self,
 		psy_audio_xmsamplerchannel_defaultissurround_tweak);
 	psy_signal_connect(&self->surround.machineparam.signal_normvalue, self,
 		psy_audio_xmsamplerchannel_defaultissurround_normvalue);
 	psy_audio_intmachineparam_init(&self->mute,
-		"Mute", "Mute", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->mute.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->mute.machineparam.signal_tweak, self,
 		psy_audio_xmsamplerchannel_defaultismute_tweak);

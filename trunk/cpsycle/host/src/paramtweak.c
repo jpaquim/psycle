@@ -6,32 +6,40 @@
 // host
 #include "paramtweak.h"
 // audio
+#include <machine.h>
 #include <plugin_interface.h>
+// ui
+#include <uievents.h>
 // std
 #include <assert.h>
 // platform
 #include "../../detail/portable.h"
 
-// ParamTweak
-static psy_audio_MachineParam* paramtweak_tweakparam(ParamTweak* self);
-
+// prototypes
+static void paramtweak_updateparam(ParamTweak*);
+// implementation
 void paramtweak_init(ParamTweak* self)
 {
 	assert(self);
 
 	self->machine = NULL;
-	self->paramindex = psy_INDEX_INVALID;
+	self->paramidx = psy_INDEX_INVALID;
 	self->param = NULL;
+	self->machine = NULL;
+	self->paramidx = psy_INDEX_INVALID;
+	self->active = FALSE;
 }
 
 void paramtweak_begin(ParamTweak* self, psy_audio_Machine* machine,
-	uintptr_t paramindex)
+	uintptr_t paramindex, psy_audio_MachineParam* param)
 {
 	assert(self);
 
 	self->machine = machine;
-	self->paramindex = paramindex;
-	self->param = NULL;
+	self->paramidx = paramindex;
+	self->param = param;
+	self->active = TRUE;
+	paramtweak_updateparam(self);
 }
 
 void paramtweak_end(ParamTweak* self)
@@ -39,64 +47,72 @@ void paramtweak_end(ParamTweak* self)
 	assert(self);
 
 	self->machine = NULL;
-	self->paramindex = psy_INDEX_INVALID;
+	self->paramidx = psy_INDEX_INVALID;
 	self->param = NULL;
+	self->active = FALSE;
 }
 
 void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
-{	
-	psy_audio_MachineParam* param;
-
+{		
 	assert(self);
 
-	param = paramtweak_tweakparam(self);
-	if (ev->button == 1 && param) {
+	if (ev->button == 1) {
 		uintptr_t paramtype;
-
-		self->tweakbase = (float)ev->pt.y;
-		if (self->machine) {
-			self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
-			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
-		} else {
-			self->tweakval = psy_audio_machineparam_normvalue(param);
-			paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
-		}		
+		paramtweak_updateparam(self);
 		
-		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
-			if (self->tweakval == 0.f) {
-				if (self->machine) {
-					psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
-				} else {
-					psy_audio_machineparam_tweak(param, 1.f);
-				}
+		if (self->param) {
+			self->tweakbase = (float)ev->pt.y;
+			if (self->machine) {
+				self->tweakval = psy_audio_machine_parameter_normvalue(
+					self->machine, self->param);
+				paramtype = psy_audio_machine_parameter_type(self->machine,
+					self->param) & ~MPF_SMALL;
 			} else {
-				if (self->machine) {
-					psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
+				self->tweakval = psy_audio_machineparam_normvalue(self->param);
+				paramtype = psy_audio_machineparam_type(self->param)
+					& ~MPF_SMALL;
+			}
+			if (paramtype == MPF_CHECK || paramtype == MPF_SWITCH) {
+				if (self->tweakval == 0.f) {
+					if (self->machine) {
+						psy_audio_machine_parameter_tweak(self->machine,
+							self->param, 1.f);
+					} else {
+						psy_audio_machineparam_tweak(self->param, 1.f);
+					}
 				} else {
-					psy_audio_machineparam_tweak(param, 0.f);
+					if (self->machine) {
+						psy_audio_machine_parameter_tweak(self->machine,
+							self->param, 0.f);
+					} else {
+						psy_audio_machineparam_tweak(self->param, 0.f);
+					}
 				}
 			}
-		}		
+		}
 	}
 }
 
 void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
-{	
-	psy_audio_MachineParam* param;	
-
+{
 	assert(self);
 
-	param = paramtweak_tweakparam(self);	
-	if (param) {
+	if (!self->active) {
+		return;
+	}
+	paramtweak_updateparam(self);
+	if (self->param) {
 		uintptr_t paramtype;
 		float val;		
 
 		if (self->machine) {
-			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+			paramtype = psy_audio_machine_parameter_type(self->machine,
+				self->param) & ~MPF_SMALL;
 		} else {
-			paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
+			paramtype = psy_audio_machineparam_type(self->param) & ~MPF_SMALL;
 		}
-		if ((paramtype != MPF_SLIDERCHECK) && (paramtype != MPF_SWITCH)) {
+		if ((paramtype != MPF_CHECK) && (paramtype != MPF_SWITCH)) {
+			// todo add fine/ultrafine tweak
 			val = self->tweakval + (self->tweakbase - (float)ev->pt.y) / 200.f;
 			if (val > 1.f) {
 				val = 1.f;
@@ -104,23 +120,20 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 				val = 0.f;
 			}
 			if (self->machine) {
-				psy_audio_machine_parameter_tweak(self->machine, param, val);
+				psy_audio_machine_parameter_tweak(self->machine, self->param,
+					val);
 			} else {
-				psy_audio_machineparam_tweak(param, val);
+				psy_audio_machineparam_tweak(self->param, val);
 			}
 		}
-	}
+		psy_ui_mouseevent_stoppropagation(ev);
+	}	
 }
 
-psy_audio_MachineParam* paramtweak_tweakparam(ParamTweak* self)
+void paramtweak_updateparam(ParamTweak* self)
 {
-	assert(self);
-
-	if (self->param) {
-		return self->param;
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
 	}
-	if (self->machine && self->paramindex != psy_INDEX_INVALID) {
-		return psy_audio_machine_parameter(self->machine, self->paramindex);
-	}
-	return NULL;
 }

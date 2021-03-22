@@ -6,29 +6,24 @@
 #include "sliderui.h"
 // host
 #include "skingraphics.h"
-#include "machineui.h"
+#include "machineparamconfig.h"
 // audio
-#include <exclusivelock.h>
-// std
-#include <math.h>
+#include <machine.h>
+#include <plugin_interface.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // SliderUi
 // prototypes
-static void sliderui_dispose(SliderUi*);
 static void sliderui_ondraw(SliderUi*, psy_ui_Graphics*);
-static void sliderui_invalidate(SliderUi*);
 static void sliderui_onpreferredsize(SliderUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void sliderui_onmousedown(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_onmouseup(SliderUi*, psy_ui_MouseEvent*);
 static void sliderui_onmousemove(SliderUi*, psy_ui_MouseEvent*);
-
+static void sliderui_updateparam(SliderUi*);
 // vtable
 static psy_ui_ComponentVtable sliderui_vtable;
-static psy_ui_ComponentVtable sliderui_super_vtable;
 static bool sliderui_vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
@@ -36,12 +31,8 @@ static psy_ui_ComponentVtable* sliderui_vtable_init(SliderUi* self)
 	assert(self);
 
 	if (!sliderui_vtable_initialized) {
-		sliderui_vtable = *(self->component.vtable);
-		sliderui_super_vtable = sliderui_vtable;
-		sliderui_vtable.dispose = (psy_ui_fp_component_dispose)sliderui_dispose;
-		sliderui_vtable.ondraw = (psy_ui_fp_component_ondraw)sliderui_ondraw;		
-		sliderui_vtable.invalidate = (psy_ui_fp_component_invalidate)
-			sliderui_invalidate;
+		sliderui_vtable = *(self->component.vtable);				
+		sliderui_vtable.ondraw = (psy_ui_fp_component_ondraw)sliderui_ondraw;				
 		sliderui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sliderui_onpreferredsize;
 		sliderui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)sliderui_onmousedown;
@@ -93,13 +84,6 @@ SliderUi* sliderui_allocinit(psy_ui_Component* parent, psy_ui_Component* view,
 	return rv;
 }
 
-void sliderui_dispose(SliderUi* self)
-{
-	assert(self);
-	
-	sliderui_super_vtable.dispose(&self->component);
-}
-
 void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 {
 	double xoffset;
@@ -108,6 +92,7 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r;		
 	psy_ui_RealSize size;
 
+	sliderui_updateparam(self);
 	size = psy_ui_component_sizepx(&self->component);
 	// todo: make the slider scalable	
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
@@ -134,14 +119,6 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 		&self->skin->sliderknob);			
 }
 
-
-void sliderui_invalidate(SliderUi* self)
-{
-	if (!machineui_vuupdate()) {
-		sliderui_super_vtable.invalidate(&self->component);
-	}
-}
-
 void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
@@ -151,17 +128,17 @@ void sliderui_onpreferredsize(SliderUi* self, const psy_ui_Size* limit,
 
 void sliderui_onmousedown(SliderUi* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 1 && self->param != NULL) {
-		paramtweak_begin(&self->paramtweak, NULL, psy_INDEX_INVALID);
-		self->paramtweak.param = self->param;
+	if (ev->button == 1) {		
+		paramtweak_begin(&self->paramtweak, self->machine, self->paramidx,
+			self->param);		
 		paramtweak_onmousedown(&self->paramtweak, ev);
-		psy_ui_component_capture(&self->component);
+		psy_ui_component_capture(&self->component);		
 	}
 }
 
 void sliderui_onmousemove(SliderUi* self, psy_ui_MouseEvent* ev)
 {
-	if (self->paramtweak.param != NULL) {
+	if ((paramtweak_active(&self->paramtweak))) {		
 		paramtweak_onmousemove(&self->paramtweak, ev);
 		psy_ui_component_invalidate(&self->component);
 	}
@@ -169,7 +146,17 @@ void sliderui_onmousemove(SliderUi* self, psy_ui_MouseEvent* ev)
 
 void sliderui_onmouseup(SliderUi* self, psy_ui_MouseEvent* ev)
 {
-	paramtweak_end(&self->paramtweak);
 	psy_ui_component_releasecapture(&self->component);
-	psy_ui_component_invalidate(&self->component);
+	if ((paramtweak_active(&self->paramtweak))) {
+		paramtweak_end(&self->paramtweak);		
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+void sliderui_updateparam(SliderUi* self)
+{
+	if (self->machine && self->paramidx != psy_INDEX_INVALID) {
+		self->param = psy_audio_machine_parameter(self->machine,
+			self->paramidx);
+	}
 }

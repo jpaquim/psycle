@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+#include "paramview.h"
 // host
 #include "headerui.h"
 #include "labelui.h"
@@ -10,10 +11,11 @@
 #include "slidergroupui.h"
 #include "switchui.h"
 #include "checkui.h"
-#include "paramview.h"
 #include "resources/resource.h"
 #include "skingraphics.h"
 #include "machineui.h"
+// audio
+#include <plugin_interface.h>
 // std
 #include <assert.h>
 // platform
@@ -138,17 +140,19 @@ void paramview_build(ParamView* self)
 					~MPF_SMALL) {
 				case MPF_NULL: {
 					component = psy_ui_component_allocinit(currcolumn, &self->component);
+					psy_ui_component_setminimumsize(component,
+						psy_ui_size_makeem(self->skin->paramwidth_small, 2.0));
 					break; }
 				case MPF_HEADER: {
 					HeaderUi* header;
 
 					header = headerui_allocinit(currcolumn,
-						&self->component, machineparam, self->skin);
+						&self->component,
+						self->machine, paramnum, machineparam, self->skin);
 					if (header) {
 						component = &header->component;
 					}
-					break;
-				}
+					break; }
 				case MPF_INFOLABEL: {
 					LabelUi* label;
 
@@ -179,21 +183,23 @@ void paramview_build(ParamView* self)
 						component = &currslider->component;
 					}
 					break; }
-				case MPF_SLIDERLEVEL: {
+				case MPF_LEVEL: {
 					if (currslider) { // && machineparam->isslidergroup)
 						currslider->level.param = machineparam;
 					}
 					break; }
-				case MPF_SLIDERCHECK: {
+				case MPF_CHECK: {
 					CheckUi* check;
 
 					if (currslider && machineparam->isslidergroup) {
 						check = checkui_allocinit(&currslider->controls,
-							&self->component, machineparam, self->skin);
+							&self->component, self->machine, paramnum,
+							machineparam, self->skin);
 						checkinslidergroup = TRUE;
 					} else {
 						check = checkui_allocinit(currcolumn,
-							&self->component, machineparam, self->skin);
+							&self->component, self->machine, paramnum,
+							machineparam, self->skin);
 					}
 					if (check) {
 						component = &check->component;
@@ -204,11 +210,13 @@ void paramview_build(ParamView* self)
 
 					if (currslider && machineparam->isslidergroup) {
 						switchui = switchui_allocinit(&currslider->controls,
-							&self->component, machineparam, self->skin);
+							&self->component, self->machine, paramnum,
+							machineparam, self->skin);
 						checkinslidergroup = TRUE;
 					} else {
 						switchui = switchui_allocinit(currcolumn,
-							&self->component, machineparam, self->skin);
+							&self->component, self->machine, paramnum,
+							machineparam, self->skin);							
 					}
 					if (switchui) {
 						component = &switchui->component;
@@ -222,14 +230,6 @@ void paramview_build(ParamView* self)
 					if (slider) {
 						psy_ui_component_setminimumsize(component,
 							psy_ui_size_makeem(20.0, 15.0));
-					} else {
-						if (checkinslidergroup) {
-							psy_ui_component_setminimumsize(component,
-								psy_ui_size_makeem(20.0, 1.0));
-						} else {
-							psy_ui_component_setminimumsize(component,
-								psy_ui_size_makeem(20.0, 2.0));
-						}
 					}
 				}
 			}

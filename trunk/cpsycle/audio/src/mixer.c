@@ -536,24 +536,24 @@ void masterchannel_init(psy_audio_MasterChannel* self, psy_audio_Mixer* mixer, c
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);	
 	psy_audio_intmachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		masterchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
-		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
 		masterchannel_solo_tweak);
 	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
 		masterchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, &self->mute, 0, 1);
+		"M", "M", MPF_CHECK | MPF_SMALL, &self->mute, 0, 1);
 	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->dryonly_param,
-		"D", "D", MPF_SLIDERCHECK | MPF_SMALL, &self->dryonly, 0, 1);
+		"D", "D", MPF_CHECK | MPF_SMALL, &self->dryonly, 0, 1);
 	self->dryonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->wetonly_param,
-		"W", "W", MPF_SLIDERCHECK | MPF_SMALL, &self->wetonly, 0, 1);
+		"W", "W", MPF_CHECK | MPF_SMALL, &self->wetonly, 0, 1);
 	self->wetonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
 		&self->dryonly, &self->wetonly);	
@@ -695,28 +695,28 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);	
 	psy_audio_intmachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		inputchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
-		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
 		inputchannel_solo_tweak);
 	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
 		inputchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->mute_param.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
 		inputchannel_mute_tweak);
 	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,
 		inputchannel_mute_normvalue);
 	psy_audio_intmachineparam_init(&self->dryonly_param,
-		"D", "D", MPF_SLIDERCHECK | MPF_SMALL, &self->dryonly, 0, 1);
+		"D", "D", MPF_CHECK | MPF_SMALL, &self->dryonly, 0, 1);
 	self->dryonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_intmachineparam_init(&self->wetonly_param,
-		"W", "W", MPF_SLIDERCHECK | MPF_SMALL, &self->wetonly, 0, 1);
+		"W", "W", MPF_CHECK | MPF_SMALL, &self->wetonly, 0, 1);
 	self->wetonly_param.machineparam.isslidergroup = TRUE;
 	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
 		&self->dryonly, &self->wetonly);
@@ -966,18 +966,18 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Level", "Level", MPF_SLIDER | MPF_SMALL, &self->volume);
 	psy_audio_intmachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		returnchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
-		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
 		returnchannel_solo_tweak);
 	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
 		returnchannel_solo_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
+		"M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
 		returnchannel_mute_tweak);
 	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,

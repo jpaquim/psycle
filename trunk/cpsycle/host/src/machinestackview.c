@@ -11,6 +11,7 @@
 #include "machineviewbar.h"
 #include "slidergroupui.h"
 // audio
+#include <plugin_interface.h>
 #include <exclusivelock.h>
 // platform
 #include "../../detail/portable.h"
@@ -287,11 +288,11 @@ void machinestackcolumn_init(MachineStackColumn* self, uintptr_t column,
 	self->offset = 0;
 	outputrouteparam_init(&self->outputroute, state->machines, column, state);
 	psy_audio_intmachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		machinestackcolumn_level_normvalue);
 	psy_audio_intmachineparam_init(&self->mute_param,
-		"M", "M", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 100);
+		"M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
 		machinestackcolumn_mute_tweak);
 	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,
@@ -534,6 +535,7 @@ void machinestackstate_init(MachineStackState* self, MachineViewBar* statusbar)
 	self->selected = psy_INDEX_INVALID;
 	self->effectsize = psy_ui_size_makepx(138.0, 52.0);
 	self->columnselected = FALSE;
+	self->drawvirtualgenerators = FALSE;
 	// 20: right margin of column
 	self->columnsize = psy_ui_size_makepx(138.0 + 20, 52.0);
 	self->update = FALSE;
@@ -612,13 +614,17 @@ psy_List* machinestackstate_inputs(MachineStackState* self)
 
 			if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
 					psy_audio_machine_isbus(machine)) {
-				psy_list_append(&rv, (void*)psy_tableiterator_key(&it));
+				if (self->drawvirtualgenerators ||
+						!psy_audio_machines_isvirtualgenerator(self->machines,
+							psy_tableiterator_key(&it))) {
+					psy_list_append(&rv, (void*)psy_tableiterator_key(&it));
+				}
 			} else if (psy_tableiterator_key(&it) != psy_audio_MASTER_INDEX) {
 				psy_audio_MachineSockets* sockets;
 
 				sockets = psy_audio_connections_at(&self->machines->connections,
 					psy_tableiterator_key(&it));
-				if (!sockets || wiresockets_size(&sockets->inputs) == 0) {
+				if (!sockets || wiresockets_size(&sockets->inputs) == 0) {					
 					psy_list_append(&effectswithoutinput, (void*)psy_tableiterator_key(&it));
 				}
 			}
@@ -1061,6 +1067,36 @@ void machinestackoutputs_onmouseup(MachineStackOutputs* self,
 	}	
 }
 
+// MachineStackPaneTrackCient
+// prototypes
+static void machinestackpanetrackclient_ondraw(MachineStackPaneTrackClient*,
+	psy_ui_Graphics*);
+// vtable
+static psy_ui_ComponentVtable machinestackpanetrackclient_vtable;
+static bool machinestackpanetrackclient_vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* machinestackpanetrackclient_vtable_init(
+	MachineStackPaneTrackClient* self)
+{
+	if (!machinestackpanetrackclient_vtable_initialized) {
+		machinestackpanetrackclient_vtable = *(self->component.vtable);		
+		machinestackpanetrackclient_vtable_initialized = TRUE;
+	}
+	return &machinestackpanetrackclient_vtable;
+}
+
+void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	MachineStackState* state)
+{
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setvtable(&self->component,
+		machinestackpanetrackclient_vtable_init(self));
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	self->state = state;
+	self->column = column;
+}
+
 // MachineStackPaneTrack
 static void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack*,
 	psy_ui_MouseEvent*);
@@ -1072,7 +1108,7 @@ static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
 	MachineStackPaneTrack* self)
 {
 	if (!machinestackpanetrack_vtable_initialized) {
-		machinestackpanetrack_vtable = *(self->component.vtable);
+		machinestackpanetrack_vtable = *(self->component.vtable);		
 		machinestackpanetrack_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			machinestackpanetrack_onmousedoubleclick;
@@ -1087,12 +1123,14 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 {
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setvtable(&self->component,
-		machinestackpanetrack_vtable_init(self));
+		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_init(&self->client, &self->component, view);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setdefaultalign(&self->client,
+	machinestackpanetrackclient_init(&self->client, &self->component, view,
+		column, state);
+	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setdefaultalign(&self->client.component,
 		psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(20.0), psy_ui_value_makepx(20.0),
@@ -1118,7 +1156,7 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 		uintptr_t effect;
 		uintptr_t c;
 
-		q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
+		q = psy_ui_component_children(&self->client.component, psy_ui_NONRECURSIVE);
 		effect = psy_INDEX_INVALID;
 		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
 			psy_ui_Component* component;
@@ -1179,6 +1217,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		machinestackpane_vtable_init(self));
+	self->component.debugflag = 30;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
@@ -1218,7 +1257,7 @@ void machinestackpane_build(MachineStackPane* self)
 					uintptr_t first;
 
 					first = machinestackcolumn_at(column, 0);
-					arrow = arrowui_allocinit(&trackpane->client,
+					arrow = arrowui_allocinit(&trackpane->client.component,
 						&self->component, psy_audio_wire_make(column->inputroute, first),
 						self->skin, self->workspace);
 					if (arrow) {
@@ -1246,7 +1285,7 @@ void machinestackpane_build(MachineStackPane* self)
 						if (machine && psy_audio_machine_mode(machine) ==
 								psy_audio_MACHMODE_FX && !psy_audio_machine_isbus(machine)) {							
 							machinestackpane_insert(self, slot,
-								&trackpane->client);
+								&trackpane->client.component);
 							insert = TRUE;
 						}
 					}
@@ -1364,6 +1403,7 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 
 				component = &slidergroup->component;
 				mute = checkui_allocinit(&slidergroup->controls, &self->component,
+					NULL, psy_INDEX_INVALID,
 					&column->mute_param.machineparam,
 					self->skin);
 				psy_ui_component_setalign(&mute->component, psy_ui_ALIGN_TOP);
@@ -1381,11 +1421,11 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				psy_ui_value_makepx(138.0 + 19),
 				psy_ui_value_makepx(182.0)));
 			psy_ui_component_setmaximumsize(component, psy_ui_size_make(
-				psy_ui_value_zero(),
+				psy_ui_value_makepx(138.0 + 19),
 				psy_ui_value_makepx(182.0)));
 			margin = psy_ui_margin_make(
-				psy_ui_value_makepx(0.0), psy_ui_value_makepx(1.0),
-				psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0));
+				psy_ui_value_makeeh(0.0), psy_ui_value_makepx(1.0),
+				psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0));
 			psy_ui_component_setmargin(component, &margin);	
 		}
 	}
@@ -1633,4 +1673,16 @@ void machinestackview_addeffect(MachineStackView* self,
 			}
 		}		
 	}
+}
+
+void machinestackview_showvirtualgenerators(MachineStackView* self)
+{
+	self->state.drawvirtualgenerators = TRUE;
+	machinestackstate_rebuildview(&self->state);
+}
+
+void machinestackview_hidevirtualgenerators(MachineStackView* self)
+{
+	self->state.drawvirtualgenerators = FALSE;
+	machinestackstate_rebuildview(&self->state);
 }
