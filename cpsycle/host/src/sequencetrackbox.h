@@ -4,55 +4,36 @@
 #if !defined(SEQUENCETRACKBOX_H)
 #define SEQUENCETRACKBOX_H
 
-// host
-#include "workspace.h"
-// audio
-#include <patterns.h>
-#include <sequence.h>
 // ui
 #include <uibutton.h>
-#include <uicheckbox.h>
-#include <uiedit.h>
 #include <uilabel.h>
-#include <uiscroller.h>
-#include <uisplitbar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-	SEQUENCETRACKBOXEVENT_SELECT = 1,
-	SEQUENCETRACKBOXEVENT_MUTE,
-	SEQUENCETRACKBOXEVENT_SOLO,
-	SEQUENCETRACKBOXEVENT_DEL	
-} SequenceTrackBoxEvent;
+typedef struct TrackBox {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	psy_ui_Label trackidx;
+	psy_ui_Button solo;
+	psy_ui_Button mute;
+	psy_ui_Button close;
+} TrackBox;
 
-typedef struct SequenceTrackBox {
-	psy_ui_RealRectangle position;	
-	uintptr_t trackindex;
-	bool selected;
-	bool hover;
-	psy_ui_Colour colour;
-	psy_ui_Colour colour_highlight;
-	psy_ui_Colour colour_font;
-	psy_ui_Colour colour_fonthighlight;	
-	const psy_ui_TextMetric* tm;
-	bool showname;
-	// references
-	psy_audio_SequenceTrack* track;
-	psy_audio_Sequence* sequence;
-} SequenceTrackBox;
+void trackbox_init(TrackBox*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 
-void sequencetrackbox_init(SequenceTrackBox*,
-	psy_ui_RealRectangle position, const psy_ui_TextMetric*,
-	psy_audio_SequenceTrack*,
-	psy_audio_Sequence*,
-	uintptr_t trackindex, bool selected, bool hover);
+TrackBox* trackbox_alloc(void);
+TrackBox* trackbox_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view);
 
-void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);
-SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox*,
-	psy_ui_RealPoint);
+void trackbox_setindex(TrackBox*, uintptr_t index);
+void trackbox_mute(TrackBox*);
+void trackbox_unmute(TrackBox*);
+void trackbox_solo(TrackBox*);
+void trackbox_unsolo(TrackBox*);
 
 #ifdef __cplusplus
 }

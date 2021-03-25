@@ -33,7 +33,7 @@ void swingfillview_init(SwingFillView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->offsetrow, &self->client, NULL);
 	psy_ui_component_setdefaultalign(&self->offsetrow, psy_ui_ALIGN_RIGHT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow, "BPM");
+	psy_ui_label_init_text(&self->offsetdesc, &self->offsetrow, NULL, "BPM");
 	psy_ui_button_init_text_connect(&self->center_bpm, &self->offsetrow, NULL,
 		"Center", self, swingfillview_oncenterbpm);
 	psy_ui_button_init_text_connect(&self->actual_bpm, &self->offsetrow, NULL,

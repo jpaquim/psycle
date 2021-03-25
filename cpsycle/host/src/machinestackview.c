@@ -803,10 +803,10 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component,
 		machinestackdesc_vtable_init(self));
 	self->view = view;
-	psy_ui_label_init_text(&self->inputs, &self->component, "Inputs");	
-	psy_ui_label_init_text(&self->effects, &self->component, "Effects");	
-	psy_ui_label_init_text(&self->outputs, &self->component, "Outputs");
-	psy_ui_label_init_text(&self->volumes, &self->component, "Volumes");
+	psy_ui_label_init_text(&self->inputs, &self->component, NULL, "Inputs");	
+	psy_ui_label_init_text(&self->effects, &self->component, NULL, "Effects");
+	psy_ui_label_init_text(&self->outputs, &self->component, NULL, "Outputs");
+	psy_ui_label_init_text(&self->volumes, &self->component, NULL, "Volumes");
 	psy_ui_component_setcolour(&self->component,
 		psy_ui_colour_make(0x00AABBBB));
 }
@@ -1093,6 +1093,7 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrackclient_vtable_init(self));
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	self->state = state;
 	self->column = column;
 }
@@ -1122,6 +1123,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, view);
+	self->component.debugflag = 40;
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
@@ -1134,10 +1136,14 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 		psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(20.0), psy_ui_value_makepx(20.0),
-			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));
-	//psy_ui_scroller_init(&self->scroller, &self->client, &self->component,
-		//&self->component);
-	//psy_ui_component_setalign(&self->scroller, psy_ui_ALIGN_CLIENT);
+			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));	
+	// psy_ui_scroller_init(&self->scroller, &self->client.component, &self->component,
+	//	view);
+	// psy_ui_component_setbackgroundmode(&self->scroller.component,
+	//	psy_ui_SETBACKGROUND);
+	// psy_ui_component_setbackgroundcolour(&self->scroller.component,
+	//	psy_ui_colour_make(0x00CACACA));
+	// psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	self->column = column;
 	self->state = state;
 	self->workspace = workspace;

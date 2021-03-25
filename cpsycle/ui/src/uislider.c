@@ -57,9 +57,10 @@ static void vtable_init(psy_ui_SliderPane* self)
 	}
 }
 
-void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent)
+void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	self->slider = NULL;
@@ -337,23 +338,24 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 }
 
 // psy_ui_Slider
-void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
+void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init(&self->desc, &self->component);	
-	psy_ui_sliderpane_init(&self->pane, &self->component);
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_label_init(&self->desc, &self->component, view);	
+	psy_ui_sliderpane_init(&self->pane, &self->component, view);
 	self->pane.slider = self;	
 	psy_ui_component_setalign(psy_ui_sliderpane_base(&self->pane),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_label_init(&self->value, &self->component);
+	psy_ui_label_init(&self->value, &self->component, view);
 	psy_ui_label_preventtranslation(&self->value);	
 	psy_ui_slider_showhorizontal(self);
 }
 
 void psy_ui_slider_init_text(psy_ui_Slider* self, psy_ui_Component* parent,
-	const char* text)
+	psy_ui_Component* view, const char* text)
 {
-	psy_ui_slider_init(self, parent);
+	psy_ui_slider_init(self, parent, view);
 	psy_ui_slider_settext(self, text);
 }
 

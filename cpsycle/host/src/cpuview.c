@@ -158,7 +158,7 @@ void cpuview_inittitle(CPUView* self)
 		psy_ui_STYLE_CONTAINERHEADER);	
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 2.0);
 	psy_ui_component_setmargin(&self->titlebar, &margin);
-	psy_ui_label_init_text(&self->title, &self->titlebar,
+	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
 		"Psycle DSP/CPU Performance Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
@@ -171,7 +171,7 @@ void cpuview_inittitle(CPUView* self)
 
 void cpuview_initcoreinfo(CPUView* self)
 {
-	psy_ui_label_init_text(&self->coreinfo, &self->top, "Core Info");
+	psy_ui_label_init_text(&self->coreinfo, &self->top, NULL, "Core Info");
 	psy_ui_component_setalign(&self->coreinfo.component, psy_ui_ALIGN_TOP);
 }
 
@@ -181,7 +181,7 @@ void cpuview_initresources(CPUView* self)
 	psy_ui_component_setdefaultalign(&self->resources, psy_ui_ALIGN_TOP,
 		self->topmargin);
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
+	psy_ui_label_init_text(&self->resourcestitle, &self->resources, NULL,
 		"Available Resources");		
 	labelpair_init(&self->resources_win, &self->resources, "cpu.resources");
 	labelpair_init(&self->resources_mem, &self->resources, "cpu.ram");

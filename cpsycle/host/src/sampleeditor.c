@@ -45,16 +45,16 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
 	psy_ui_checkbox_settext(&self->selecttogether, "Select Channels Together");
 	psy_ui_checkbox_check(&self->selecttogether);
-	psy_ui_label_init(&self->selstartlabel, &self->component);
-	psy_ui_label_settext(&self->selstartlabel, "Selection Start");
+	psy_ui_label_init_text(&self->selstartlabel, &self->component, NULL,
+		"Selection Start");
 	psy_ui_edit_init(&self->selstartedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selstartedit, 10);			
-	psy_ui_label_init(&self->selendlabel, &self->component);
-	psy_ui_label_settext(&self->selendlabel, "Selection End");
+	psy_ui_label_init_text(&self->selendlabel, &self->component, NULL,
+		"Selection End");
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
-	psy_ui_label_init(&self->visualrepresentationdesc, &self->component);
-	psy_ui_label_settext(&self->visualrepresentationdesc, "Visual");
+	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
+		NULL, "Visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
 	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
@@ -181,10 +181,10 @@ void sampleeditoramplify_init(SampleEditorAmplify* self, psy_ui_Component* paren
 	self->workspace = workspace;
 	self->gainvalue = (psy_dsp_amp_t) 2/3.f;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_label_settext(&self->header, "Adjust Volume");
+	psy_ui_label_init_text(&self->header, &self->component, NULL,
+		"Adjust Volume");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_slider_init(&self->gain, &self->component);
+	psy_ui_slider_init(&self->gain, &self->component, NULL);
 	psy_ui_slider_showvertical(&self->gain);
 	psy_ui_slider_setcharnumber(&self->gain, 4);
 	psy_ui_slider_connect(&self->gain, self,
@@ -192,7 +192,8 @@ void sampleeditoramplify_init(SampleEditorAmplify* self, psy_ui_Component* paren
 		(ui_slider_fptweak)sampleeditoramplify_ontweak,
 		(ui_slider_fpvalue)sampleeditoramplify_onvalue);
 	psy_ui_component_setalign(&self->gain.component, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->dbdisplay, &self->component);
+	psy_ui_label_init(&self->dbdisplay, &self->component, NULL);
+	psy_ui_label_preventtranslation(&self->dbdisplay);
 	sampleeditoramplify_ondescribe(self, 0, text);
 	psy_ui_label_settext(&self->dbdisplay, text);
 	psy_ui_component_setalign(&self->dbdisplay.component, psy_ui_ALIGN_BOTTOM);
@@ -230,8 +231,8 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_label_settext(&self->header, "Lua Processor");
+	psy_ui_label_init_text(&self->header, &self->component, NULL,
+		"Lua Processor");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_editor_init(&self->editor, &self->component);
 	psy_ui_editor_settext(&self->editor, LUAPROCESSOR_DEFAULT);

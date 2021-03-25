@@ -45,7 +45,7 @@ void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* pare
 	psy_ui_combobox_init(&self->generators, &self->component, NULL);
 	psy_signal_connect(&self->generators.signal_selchanged, self,
 		virtualgeneratorbox_ongeneratorschanged);
-	psy_ui_label_init_text(&self->on, &self->component, "on");
+	psy_ui_label_init_text(&self->on, &self->component, NULL, "on");
 	psy_ui_combobox_setcharnumber(&self->generators, 10);
 	psy_ui_combobox_init(&self->samplers, &self->component, NULL);
 	psy_signal_connect(&self->samplers.signal_selchanged, self,
@@ -195,7 +195,7 @@ void instrumentpredefsbar_init(InstrumentPredefsBar* self, psy_ui_Component* par
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->predefs, &self->component);	
+	psy_ui_label_init(&self->predefs, &self->component, NULL);	
 	psy_ui_label_preventtranslation(&self->predefs);
 	psy_ui_label_settext(&self->predefs, "Predef.");	
 	for (c = 0; buttons[c] != NULL; ++c) {
@@ -253,7 +253,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		margin);
-	psy_ui_label_init_text(&self->namelabel, &self->component,
+	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
 		"instrumentview.instrument-name");
 	psy_ui_edit_init(&self->nameedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
@@ -366,7 +366,7 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makeew(4),
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0)));		
-	psy_ui_label_init(&self->status, instrumentsviewbar_base(self));
+	psy_ui_label_init(&self->status, instrumentsviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 44);	
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
@@ -461,13 +461,13 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	}
 	// empty
 	psy_ui_label_init_text(&self->empty,
-		psy_ui_notebook_base(&self->clientnotebook), "No Instrument");
+		psy_ui_notebook_base(&self->clientnotebook), NULL, "No Instrument");
 	psy_ui_label_settextalignment(&self->empty,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL);	
 	// client
 	psy_ui_component_init(&self->client,
 		psy_ui_notebook_base(&self->clientnotebook), NULL);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);		
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->client, &margin);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->client);

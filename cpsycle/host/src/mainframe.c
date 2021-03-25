@@ -348,7 +348,7 @@ void mainframe_initviewstatusbars(MainFrame* self)
 
 void mainframe_initstatusbarlabel(MainFrame* self)
 {
-	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);	
+	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
@@ -1531,23 +1531,20 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
 			"sequencerview.hideseqeditor");
 		psy_ui_button_highlight(&self->sequenceview.options.toggleseqedit);
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqedit,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
 			"sequencerview.showseqeditor");
 		psy_ui_button_disablehighlight(
 			&self->sequenceview.options.toggleseqedit);
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqedit,
 			psy_ui_ICON_MORE);
 	}
 }
 
 void mainframe_connectseqeditorbuttons(MainFrame* self)
-{
-	psy_signal_connect(
-		&self->sequenceview.options.toggleseqediticon.signal_clicked, self,
-		mainframe_ontoggleseqeditor);
+{	
 	psy_signal_connect(
 		&self->sequenceview.options.toggleseqedit.signal_clicked, self,
 		mainframe_ontoggleseqeditor);
@@ -1576,23 +1573,20 @@ void mainframe_updatestepsequencerbuttons(MainFrame* self)
 		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
 			"sequencerview.hidestepsequencer");
 		psy_ui_button_highlight(&self->sequenceview.options.togglestepseq);
-		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,
+		psy_ui_button_seticon(&self->sequenceview.options.togglestepseq,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
 			"sequencerview.showstepsequencer");
 		psy_ui_button_disablehighlight(
 			&self->sequenceview.options.togglestepseq);
-		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,
+		psy_ui_button_seticon(&self->sequenceview.options.togglestepseq,
 			psy_ui_ICON_MORE);		
 	}
 }
 
 void mainframe_connectstepsequencerbuttons(MainFrame* self)
-{
-	psy_signal_connect(
-		&self->sequenceview.options.togglestepseqicon.signal_clicked, self,
-		mainframe_ontogglestepsequencer);
+{	
 	psy_signal_connect(
 		&self->sequenceview.options.togglestepseq.signal_clicked, self,
 		mainframe_ontogglestepsequencer);

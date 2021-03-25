@@ -31,7 +31,7 @@ typedef struct MachineWireView {
 	// internal data
 	psy_Table machineuis;
 	psy_List* wireframes;
-	psy_ui_RealPoint dragpt;	
+	psy_ui_RealPoint dragpt;
 	uintptr_t dragslot;
 	psy_ui_Component* dragmachineui;
 	MachineViewDragMode dragmode;

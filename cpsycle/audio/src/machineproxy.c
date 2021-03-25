@@ -901,8 +901,8 @@ uintptr_t machineproxy_paramstrobe(const psy_audio_MachineProxy* self)
 			rv = psy_audio_machine_paramstrobe(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
-		__except (FilterException(self, "paramstrobe", GetExceptionCode(),
-			GetExceptionInformation())) {
+		__except (FilterException(((psy_audio_MachineProxy*)self),
+			"paramstrobe", GetExceptionCode(), GetExceptionInformation())) {
 		}
 #endif		
 	}

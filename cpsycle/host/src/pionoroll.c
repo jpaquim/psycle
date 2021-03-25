@@ -1744,8 +1744,8 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		margin);
 	self->workspace = workspace;
-	psy_ui_label_init(&self->keys, pianobar_base(self));
-	psy_ui_label_settext(&self->keys, "Keyboard");
+	psy_ui_label_init_text(&self->keys, pianobar_base(self), NULL,
+		"Keyboard");
 	zoombox_init(&self->zoombox_keyheight, &self->component);
 	psy_ui_combobox_init(&self->keytype, pianobar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->keytype, 8);	
@@ -1753,8 +1753,8 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_addtext(&self->keytype, "Notes");
 	psy_ui_combobox_addtext(&self->keytype, "Drums");
 	psy_ui_combobox_setcursel(&self->keytype, 0);
-	psy_ui_label_init(&self->tracks, pianobar_base(self));
-	psy_ui_label_settext(&self->tracks, "Show Tracks");
+	psy_ui_label_init_text(&self->tracks, pianobar_base(self), NULL,
+		"Show Tracks");
 	psy_ui_button_init_text(&self->tracks_all, pianobar_base(self), NULL, "All");
 	psy_ui_button_highlight(&self->tracks_all);
 	psy_ui_button_init_text(&self->track_curr, pianobar_base(self), NULL, "Current");

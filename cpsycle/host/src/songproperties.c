@@ -63,7 +63,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		STYLE_SONGPROPERTIES,
 		STYLE_SONGPROPERTIES,
 		STYLE_SONGPROPERTIES);
-	psy_ui_label_init(&self->label_title, &self->title);
+	psy_ui_label_init(&self->label_title, &self->title, NULL);
 	psy_ui_label_settextalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_settext(&self->label_title, "songproperties.title");
 	psy_ui_label_setcharnumber(&self->label_title, charnum);
@@ -78,7 +78,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		songpropertiesview_onfilterkeys);
 	// credits
 	psy_ui_component_init(&self->credits, &self->component, NULL);
-	psy_ui_label_init_text(&self->label_credits, &self->credits,
+	psy_ui_label_init_text(&self->label_credits, &self->credits, NULL,
 		"songproperties.credits");
 	psy_ui_label_setcharnumber(&self->label_credits, charnum);
 	psy_ui_component_setalign(&self->label_credits.component, psy_ui_ALIGN_LEFT);
@@ -95,7 +95,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->speed, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->speed, psy_ui_ALIGN_LEFT,
 		margin);
-	psy_ui_label_init_text(&self->label_speed, &self->speed,
+	psy_ui_label_init_text(&self->label_speed, &self->speed, NULL,
 		"songproperties.speed");
 	psy_ui_component_init(&self->speedbar, &self->speed, NULL);
 	psy_ui_component_setalign(&self->speedbar, psy_ui_ALIGN_LEFT);
@@ -114,13 +114,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	intedit_init_connect(&self->etpb, &self->speedbar, "songproperties.etpb",
 		0, 0, 99, self, songpropertiesview_onetpbeditchange);
 	// Real Speed
-	psy_ui_label_init_text(&self->realtempo_desc, &self->speedbar,
+	psy_ui_label_init_text(&self->realtempo_desc, &self->speedbar, NULL,
 		"songproperties.realtempo");
-	psy_ui_label_init(&self->realtempo, &self->speedbar);
+	psy_ui_label_init(&self->realtempo, &self->speedbar, NULL);
 	psy_ui_label_setcharnumber(&self->realtempo, 8);
-	psy_ui_label_init_text(&self->realticksperbeat_desc, &self->speedbar,
+	psy_ui_label_init_text(&self->realticksperbeat_desc, &self->speedbar, NULL,
 		"songproperties.realtpb");	
-	psy_ui_label_init(&self->realticksperbeat, &self->speedbar);
+	psy_ui_label_init(&self->realticksperbeat, &self->speedbar, NULL);
 	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);		
 	// Comments
 	psy_ui_component_init(&self->comments, &self->component, NULL);
@@ -128,7 +128,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		STYLE_SONGPROPERTIES_COMMENTS,
 		STYLE_SONGPROPERTIES_COMMENTS,
 		STYLE_SONGPROPERTIES_COMMENTS);
-	psy_ui_label_init_text(&self->label_comments, &self->comments,
+	psy_ui_label_init_text(&self->label_comments, &self->comments, NULL,
 		"songproperties.extcomments");
 	psy_ui_label_settextalignment(&self->label_comments,
 		psy_ui_ALIGNMENT_LEFT);

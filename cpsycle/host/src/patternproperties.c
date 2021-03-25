@@ -139,14 +139,14 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
 	patternproperties_updateskin(self);
-	psy_ui_label_init(&self->namelabel, &self->component);
-	psy_ui_label_settext(&self->namelabel, "Pattern Name");
+	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
+		"Pattern Name");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_edit_init(&self->nameedit, &self->component);
 	psy_ui_edit_settext(&self->nameedit, "No Pattern");
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);
-	psy_ui_label_init(&self->lengthlabel, &self->component);
-	psy_ui_label_settext(&self->lengthlabel, "Length");
+	psy_ui_label_init_text(&self->lengthlabel, &self->component, NULL,
+		"Length");
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_edit_init(&self->lengthedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->lengthedit, 20);

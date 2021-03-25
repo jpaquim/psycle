@@ -39,7 +39,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);		
-	psy_ui_label_init(&self->status, machineviewbar_base(self));
+	psy_ui_label_init(&self->status, machineviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 44.0);	
 	psy_signal_connect(&workspace->signal_songchanged, self,

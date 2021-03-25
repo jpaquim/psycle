@@ -46,11 +46,12 @@ static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
 	return &vtable;
 }
 // implementation
-void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
+void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_doublebuffer(&self->component);
 	self->charnumber = 0;
@@ -66,12 +67,30 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
-	const char* text)
+	psy_ui_Component* view, const char* text)
 {
 	assert(self);
 
-	psy_ui_label_init(self, parent);
+	psy_ui_label_init(self, parent, view);
 	psy_ui_label_settext(self, text);
+}
+
+psy_ui_Label* psy_ui_label_alloc(void)
+{
+	return (psy_ui_Label*)malloc(sizeof(psy_ui_Label));
+}
+
+psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view)
+{
+	psy_ui_Label* rv;
+
+	rv = psy_ui_label_alloc();
+	if (rv) {
+		psy_ui_label_init(rv, parent, view);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
 }
 
 void psy_ui_label_ondestroy(psy_ui_Label* self)

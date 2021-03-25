@@ -21,7 +21,7 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(patterncursorstepbox_base(self),
 		psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->header, patterncursorstepbox_base(self));
+	psy_ui_label_init(&self->header, patterncursorstepbox_base(self), NULL);
 	psy_ui_label_settext(&self->header, "patternview.step");
 	psy_ui_combobox_init(&self->combobox, patterncursorstepbox_base(self), NULL);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,

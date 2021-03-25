@@ -143,7 +143,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 			psy_ui_colour_weighted(&secondary, 100));
 	}
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, onprimary);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.11));
+	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
 	// sequenceeditor item::selected	
 	style = psy_ui_style_allocinit();

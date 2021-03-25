@@ -59,7 +59,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
 	psy_ui_component_setmargin(&self->filter, &margin);
-	psy_ui_label_init_text(&self->filtertypeheader, &self->filter,
+	psy_ui_label_init_text(&self->filtertypeheader, &self->filter, NULL,
 		"instrumentview.filter-type");	
 	psy_ui_component_setalign(&self->filtertypeheader.component,
 		psy_ui_ALIGN_LEFT);
@@ -72,9 +72,9 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_combobox_setcursel(&self->filtertype, (int)F_NONE);
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
 		instrumentfilterview_onfiltercomboboxchanged);
-	psy_ui_slider_init(&self->randomcutoff, &self->top);
+	psy_ui_slider_init(&self->randomcutoff, &self->top, NULL);
 	psy_ui_slider_settext(&self->randomcutoff, "Random Cutoff");
-	psy_ui_slider_init(&self->randomresonance, &self->top);
+	psy_ui_slider_init(&self->randomresonance, &self->top, NULL);
 	psy_ui_slider_settext(&self->randomresonance, "Random Res");
 	envelopeview_init(&self->envelopeview, &self->component);
 	psy_ui_component_setalign(&self->envelopeview.component,
@@ -94,11 +94,11 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		instrumentfilterview_ontweaked);
 	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
 		instrumentfilterview_ontweaked);
-	psy_ui_slider_init(&self->cutoff, &self->bottom);
+	psy_ui_slider_init(&self->cutoff, &self->bottom, NULL);
 	psy_ui_slider_settext(&self->cutoff, "instrumentview.cut-off");
-	psy_ui_slider_init(&self->res, &self->bottom);
+	psy_ui_slider_init(&self->res, &self->bottom, NULL);
 	psy_ui_slider_settext(&self->res, "instrumentview.res");	
-	psy_ui_slider_init(&self->modamount, &self->bottom);
+	psy_ui_slider_init(&self->modamount, &self->bottom, NULL);
 	psy_ui_slider_settext(&self->modamount, "instrumentview.mod");	
 	for (i = 0; i < 5; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 18);

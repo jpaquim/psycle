@@ -974,7 +974,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 		instrumentnotemapview_destroy);
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
-	psy_ui_label_init_text(&self->label, &self->component, "Notemap");
+	psy_ui_label_init_text(&self->label, &self->component, NULL, "Notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	samplesbox_init(&self->samplesbox, &self->component, NULL, workspace);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);

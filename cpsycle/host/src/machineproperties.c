@@ -76,9 +76,8 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		"Bus");
 	psy_signal_connect(&self->isbus.signal_clicked, self,
 		machineproperties_ontogglebus);
-	psy_ui_label_init(&self->namelabel, &self->component);
-	psy_ui_label_settext(&self->namelabel, "Machine Name");
-	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
+		"Machine Name");	
 	psy_ui_edit_init(&self->nameedit, &self->component);
 	psy_ui_edit_settext(&self->nameedit, "No Machine");
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);	

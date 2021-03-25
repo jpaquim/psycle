@@ -44,7 +44,7 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 			psy_property_at_colour(theme, "machineguititlefontcolour", 0x00B4B4B4)));
 	}
 	// title label
-	psy_ui_label_init(&self->title, &self->header);
+	psy_ui_label_init(&self->title, &self->header, NULL);
 	psy_ui_label_preventtranslation(&self->title);	
 	if (machine) {
 		psy_ui_label_settext(&self->title, psy_audio_machine_editname(machine));

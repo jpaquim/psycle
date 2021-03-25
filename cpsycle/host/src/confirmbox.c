@@ -24,8 +24,8 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 	self->nostr = strdup("");	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self),
 		psy_ui_ALIGN_CENTER);
-	psy_ui_label_init(&self->title, &self->view);
-	psy_ui_label_init(&self->header, &self->view);
+	psy_ui_label_init(&self->title, &self->view, NULL);
+	psy_ui_label_init(&self->header, &self->view, NULL);
 	psy_ui_button_init_connect(&self->yes, &self->view, NULL,
 		self, confirmbox_onok);
 	psy_ui_button_init_connect(&self->no, &self->view, NULL,

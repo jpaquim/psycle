@@ -29,7 +29,7 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self), NULL,
 		"metronome.metronome", self, metronomebar_ontogglemetronomestate);
 	// precount
-	psy_ui_label_init_text(&self->desc, metronomebar_base(self),
+	psy_ui_label_init_text(&self->desc, metronomebar_base(self), NULL,
 		"metronome.precount");
 	psy_ui_combobox_init(&self->precount, metronomebar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->precount, 6);

@@ -341,8 +341,8 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->oscilloscope = oscilloscope;
-	psy_ui_label_init(&self->channellbl, &self->component);
-	psy_ui_label_settext(&self->channellbl, "Channel");
+	psy_ui_label_init_text(&self->channellbl, &self->component, NULL,
+		"Channel");
 	psy_ui_component_setmargin(&self->channellbl.component, &margin);
 	psy_ui_button_init(&self->channelmode, &self->component, NULL);
 	psy_ui_button_setcharnumber(&self->channelmode, 6);
@@ -351,7 +351,8 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 	psy_signal_connect(&self->channelmode.signal_clicked, self,
 		oscilloscopecontrols_onchannelselect);
 	oscilloscopecontrols_updatechannelselect(self);
-	psy_ui_label_init(&self->amplbl, &self->component);
+	psy_ui_label_init(&self->amplbl, &self->component, NULL);
+	psy_ui_label_preventtranslation(&self->amplbl);
 	psy_ui_label_settext(&self->amplbl, "Amp");
 	psy_ui_margin_setright(&margin, psy_ui_value_makeew(0.5));
 	psy_ui_component_setmargin(&self->amplbl.component, &margin);

@@ -33,9 +33,15 @@ typedef struct {
     uintptr_t fadeoutcounter;
 } psy_ui_Label;
 
-void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
+void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent,
+    psy_ui_Component* view);
 void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
-    const char* text);
+    psy_ui_Component* view, const char* text);
+
+psy_ui_Label* psy_ui_label_alloc(void);
+psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
+    psy_ui_Component* view);
+
 void psy_ui_label_settext(psy_ui_Label*, const char* text);
 void psy_ui_label_text(psy_ui_Label*, char* text);
 void psy_ui_label_setdefaulttext(psy_ui_Label*, const char* text);

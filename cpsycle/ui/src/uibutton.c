@@ -61,6 +61,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 	self->charnumber = 0;
 	self->linespacing = 1.0;
 	self->bitmapident = 1.0;
+	self->data = psy_INDEX_INVALID;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
@@ -72,6 +73,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
 	self->active = FALSE;
+	self->stoppropagation = TRUE;
 	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
 	psy_ui_component_setstyletypes(psy_ui_button_base(self),
@@ -105,6 +107,25 @@ void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
 	psy_ui_button_init_connect(self, parent, view, context, fp);
 	psy_ui_button_settext(self, text);
 }
+
+psy_ui_Button* psy_ui_button_alloc(void)
+{
+	return (psy_ui_Button*)malloc(sizeof(psy_ui_Button));
+}
+
+psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view)
+{
+	psy_ui_Button* rv;
+
+	rv = psy_ui_button_alloc();
+	if (rv) {
+		psy_ui_button_init(rv, parent, view);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
+}
+
 
 void ondestroy(psy_ui_Button* self)
 {	
@@ -311,7 +332,9 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			self->ctrlstate = ev->ctrl;
 			psy_signal_emit(&self->signal_clicked, self, 0);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);		
+		if (self->stoppropagation) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
 	}	
 	self->active = FALSE;
 }

@@ -34,7 +34,7 @@ void realedit_init(RealEdit* self, psy_ui_Component* parent,
 	self->minval = minval;
 	self->maxval = maxval;
 	self->restore = value;
-	psy_ui_label_init(&self->desc, realedit_base(self));
+	psy_ui_label_init(&self->desc, realedit_base(self), NULL);
 	psy_ui_label_settext(&self->desc, desc);
 	psy_ui_edit_init(&self->edit, realedit_base(self));
 	psy_ui_edit_setcharnumber(&self->edit, 5);	

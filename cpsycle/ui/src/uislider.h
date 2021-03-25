@@ -44,7 +44,8 @@ typedef void (*ui_slider_fpdescribe)(void*, struct psy_ui_Slider*, char* txt);
 typedef void (*ui_slider_fptweak)(void*, struct psy_ui_Slider*, float value);
 typedef void (*ui_slider_fpvalue)(void*, struct psy_ui_Slider*, float* value);
 
-void psy_ui_sliderpane_init(psy_ui_SliderPane*, psy_ui_Component* parent);
+void psy_ui_sliderpane_init(psy_ui_SliderPane*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 void psy_ui_sliderpane_setvalue(psy_ui_SliderPane*, double value);
 double psy_ui_sliderpane_value(psy_ui_SliderPane*);
 void psy_ui_sliderpane_showvertical(psy_ui_SliderPane*);
@@ -68,9 +69,10 @@ typedef struct psy_ui_Slider {
 	psy_ui_Label value;
 } psy_ui_Slider;
 
-void psy_ui_slider_init(psy_ui_Slider*, psy_ui_Component* parent);
+void psy_ui_slider_init(psy_ui_Slider*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 void psy_ui_slider_init_text(psy_ui_Slider*, psy_ui_Component* parent,
-	const char* text);
+	psy_ui_Component* view, const char* text);
 
 void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
 	ui_slider_fptweak, ui_slider_fpvalue);

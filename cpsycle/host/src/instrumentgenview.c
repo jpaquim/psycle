@@ -70,7 +70,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
 	psy_ui_component_setmargin(&self->nna, &margin);	
-	psy_ui_label_init_text(&self->nnaheader, &self->nna,
+	psy_ui_label_init_text(&self->nnaheader, &self->nna, NULL,
 		"instrumentview.new-note-action");
 	psy_ui_button_init_connect(&self->nnacut, &self->nna, NULL,
 		self, instrumentgeneralview_onnnacut);
@@ -88,7 +88,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_init(&self->dct, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
-	psy_ui_label_init_text(&self->dctheader, &self->dct,
+	psy_ui_label_init_text(&self->dctheader, &self->dct, NULL,
 		"but if the same");
 	psy_ui_button_init_connect(&self->dctnone, &self->dct, NULL,
 		self, instrumentgeneralview_ondctnone);
@@ -103,7 +103,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		self, instrumentgeneralview_ondctinstrument);
 	psy_ui_button_settext(&self->dctinstrument, "Instrument");
 	// dca	
-	psy_ui_label_init_text(&self->dcaheader, &self->dct, "do");
+	psy_ui_label_init_text(&self->dcaheader, &self->dct, NULL, "do");
 	psy_ui_button_init_connect(&self->dcacut, &self->dct, NULL,
 		self, instrumentgeneralview_ondcacut);
 	psy_ui_button_settext(&self->dcacut, "instrumentview.note-cut");
@@ -128,9 +128,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		instrumentgeneralview_onfitrow);
 	psy_ui_edit_init(&self->fitrowedit, &self->fitrow);
 	psy_ui_edit_setcharnumber(&self->fitrowedit, 4);
-	psy_ui_label_init_text(&self->fitrowlabel, &self->fitrow,
+	psy_ui_label_init_text(&self->fitrowlabel, &self->fitrow, NULL,
 		"instrumentview.pattern-rows");
-	psy_ui_slider_init(&self->globalvolume, &self->component);	
+	psy_ui_slider_init(&self->globalvolume, &self->component, NULL);
 	psy_ui_slider_connect(&self->globalvolume, self,
 		(ui_slider_fpdescribe)instrumentgeneralview_ongeneralviewdescribe,
 		(ui_slider_fptweak)instrumentgeneralview_ongeneralviewtweak,

@@ -61,7 +61,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_edit_init(&self->sourceforge, contrib_base(self));
 	psy_ui_edit_preventedit(&self->sourceforge);
 	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");
-	psy_ui_label_init(&self->steincopyright, contrib_base(self));	
+	psy_ui_label_init(&self->steincopyright, contrib_base(self), NULL);	
 	psy_ui_label_preventtranslation(&self->steincopyright);
 	psy_ui_label_settext(&self->steincopyright,
 		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
@@ -70,7 +70,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(version_base(self), parent, NULL);
-	psy_ui_label_init(&self->versioninfo, version_base(self));
+	psy_ui_label_init(&self->versioninfo, version_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->versioninfo);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));

@@ -38,6 +38,8 @@ static void view_dev_insert(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp* c
 	psy_ui_ViewComponentImp* insertafter);
 static void view_dev_remove(psy_ui_ViewComponentImp*,
 	psy_ui_ViewComponentImp* child);
+static void view_dev_erase(psy_ui_ViewComponentImp*,
+	psy_ui_ViewComponentImp* child);
 static void view_dev_setorder(psy_ui_ViewComponentImp*, psy_ui_ViewComponentImp*
 	insertafter);
 static void view_dev_capture(psy_ui_ViewComponentImp*);
@@ -108,6 +110,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_setparent;
 		view_imp_vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)view_dev_insert;
 		view_imp_vtable.dev_remove = (psy_ui_fp_componentimp_dev_remove)view_dev_remove;
+		view_imp_vtable.dev_erase = (psy_ui_fp_componentimp_dev_erase)view_dev_erase;
 		view_imp_vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)view_dev_capture;
 		view_imp_vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
 			view_dev_releasecapture;
@@ -378,7 +381,11 @@ psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp* self)
 
 void view_dev_setparent(psy_ui_ViewComponentImp* self, psy_ui_Component* parent)
 {
+	if (self->parent) {
+		psy_ui_component_erase(self->parent, self->component);
+	}
 	self->parent = parent;
+	psy_ui_component_insert(parent, self->component, NULL);
 }
 
 void view_dev_insert(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child,
@@ -404,6 +411,22 @@ void view_dev_remove(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* chi
 			} else {
 				psy_ui_component_dispose(child->component);
 			}
+		}
+	} else {
+		assert(0);
+		// todo
+	}
+}
+
+void view_dev_erase(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child)
+{	
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {
+			psy_list_remove(&self->viewcomponents, p);			
 		}
 	} else {
 		assert(0);

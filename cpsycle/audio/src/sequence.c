@@ -98,6 +98,7 @@ void psy_audio_sequenceentry_init(psy_audio_SequenceEntry* self, uintptr_t patte
 	psy_dsp_big_beat_t offset)
 {
 	self->patternslot = patternslot;
+	self->sampleindex = psy_audio_sampleindex_zero();
 	self->offset = offset;
 	self->repositionoffset = 0.0;
 	self->selplay = 0;	
@@ -183,6 +184,8 @@ void psy_audio_sequence_initsignals(psy_audio_Sequence* self)
 	psy_signal_init(&self->signal_trackinsert);
 	psy_signal_init(&self->signal_trackremove);
 	psy_signal_init(&self->signal_trackreposition);
+	psy_signal_init(&self->signal_solochanged);
+	psy_signal_init(&self->signal_mutechanged);
 }
 
 void psy_audio_sequence_dispose(psy_audio_Sequence* self)
@@ -203,6 +206,8 @@ void psy_audio_sequence_disposesignals(psy_audio_Sequence* self)
 	psy_signal_dispose(&self->signal_trackinsert);
 	psy_signal_dispose(&self->signal_trackremove);
 	psy_signal_dispose(&self->signal_trackreposition);
+	psy_signal_dispose(&self->signal_solochanged);
+	psy_signal_dispose(&self->signal_mutechanged);
 }
 
 void psy_audio_sequence_copy(psy_audio_Sequence* self, psy_audio_Sequence* other)
@@ -626,7 +631,9 @@ void psy_audio_sequence_setplayselection(psy_audio_Sequence* self,
 
 		index = (psy_audio_OrderIndex*)psy_list_entry(p);		
 		entry = psy_audio_sequence_entry(self, *index);
-		entry->selplay = TRUE;
+		if (entry) {
+			entry->selplay = TRUE;
+		}
 	}
 }
 
@@ -722,13 +729,17 @@ void psy_audio_sequence_activatesolotrack(psy_audio_Sequence* self,
 	assert(self);
 
 	psy_audio_trackstate_activatesolotrack(&self->trackstate, track);
+	psy_signal_emit(&self->signal_solochanged, self, 1, track);
 }
 
 void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence* self)
 {
 	assert(self);
-
+	uintptr_t soloedtrack;
+	
+	soloedtrack = self->trackstate.soloedtrack;	
 	psy_audio_trackstate_deactivatesolotrack(&self->trackstate);
+	psy_signal_emit(&self->signal_solochanged, self, 1, soloedtrack);
 }
 
 void psy_audio_sequence_mutetrack(psy_audio_Sequence* self, uintptr_t track)
@@ -736,6 +747,7 @@ void psy_audio_sequence_mutetrack(psy_audio_Sequence* self, uintptr_t track)
 	assert(self);
 
 	psy_audio_trackstate_mutetrack(&self->trackstate, track);
+	psy_signal_emit(&self->signal_mutechanged, self, 1, track);
 }
 
 void psy_audio_sequence_unmutetrack(psy_audio_Sequence* self, uintptr_t track)
@@ -743,6 +755,7 @@ void psy_audio_sequence_unmutetrack(psy_audio_Sequence* self, uintptr_t track)
 	assert(self);
 
 	psy_audio_trackstate_unmutetrack(&self->trackstate, track);
+	psy_signal_emit(&self->signal_mutechanged, self, 1, track);
 }
 
 int psy_audio_sequence_istrackmuted(const psy_audio_Sequence* self, uintptr_t track)

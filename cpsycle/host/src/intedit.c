@@ -34,8 +34,7 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	self->minval = minval;
 	self->maxval = maxval;
 	self->restore = value;
-	psy_ui_label_init(&self->desc, intedit_base(self));
-	psy_ui_label_settext(&self->desc, desc);
+	psy_ui_label_init_text(&self->desc, intedit_base(self), NULL, desc);
 	psy_ui_edit_init(&self->edit, intedit_base(self));
 	psy_ui_edit_setcharnumber(&self->edit, 5);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self), NULL,
