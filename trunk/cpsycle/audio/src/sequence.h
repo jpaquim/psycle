@@ -6,6 +6,7 @@
 
 // audio
 #include "patterns.h"
+#include "samples.h"
 // container
 #include <list.h>
 #include <signal.h>
@@ -28,6 +29,9 @@ typedef struct psy_audio_SequenceEntry {
 	uintptr_t row;
 	// playorder value (the pattern to be played)
 	uintptr_t patternslot;
+	// sample index to be played if psycle will support audio patterns
+	// not used now
+	psy_audio_SampleIndex sampleindex;
 	// absolute start position (in beats) in the song
 	psy_dsp_big_beat_t offset;
 	// offset to the playlist index position allowing free positioning
@@ -91,10 +95,21 @@ INLINE psy_audio_OrderIndex psy_audio_orderindex_make(
 	return rv;
 }
 
+INLINE psy_audio_OrderIndex psy_audio_orderindex_zero(void)
+{
+	return psy_audio_orderindex_make(psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
+}
+
 INLINE bool psy_audio_orderindex_valid(const psy_audio_OrderIndex* self)
 {
 	return (self->order != psy_INDEX_INVALID &&
 		    self->track != psy_INDEX_INVALID);
+}
+
+INLINE bool psy_audio_orderindex_invalid(const psy_audio_OrderIndex* self)
+{
+	return psy_audio_orderindex_valid(self);
 }
 
 // psy_audio_SequenceSelection
@@ -278,6 +293,8 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_trackremove;
 	psy_Signal signal_trackreposition;
 	psy_Signal signal_clear;
+	psy_Signal signal_mutechanged;
+	psy_Signal signal_solochanged;
 	// internal data
 	psy_audio_SequenceTrackNode* tracks;	
 	psy_audio_TrackState trackstate;

@@ -416,29 +416,29 @@ void trackerheader_updatecoords(TrackerHeader* self)
 TrackerHeaderTrackState* trackerheader_trackstate(TrackerHeader* self,
 	uintptr_t track)
 {
-	TrackerHeaderTrackState* trackstate;
+	TrackerHeaderTrackState* state;
 
-	trackstate = (TrackerHeaderTrackState*)
+	state = (TrackerHeaderTrackState*)
 		psy_table_at(&self->trackstates, track);
-	if (!trackstate) {
-		trackstate = (TrackerHeaderTrackState*)malloc(sizeof(
+	if (!state) {
+		state = (TrackerHeaderTrackState*)malloc(sizeof(
 			TrackerHeaderTrackState));
-		if (trackstate) {
-			trackstate->playon = FALSE;
+		if (state) {
+			state->playon = FALSE;
 		}
 	}
-	return trackstate;
+	return state;
 }
 
 TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader* self,
 	uintptr_t track)
 {
-	TrackerHeaderTrackState* trackstate;
+	TrackerHeaderTrackState* state;
 
-	trackstate = trackerheader_trackstate(self, track);
-	trackstate->playon = psy_audio_activechannels_playon(
+	state = trackerheader_trackstate(self, track);
+	state->playon = psy_audio_activechannels_playon(
 		&workspace_player(self->workspace)->playon, track);
-	return trackstate;
+	return state;
 }
 
 void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
@@ -458,11 +458,11 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 		for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
 			self->gridstate); ++track) {
 			TrackDraw trackdraw;			
-			TrackerHeaderTrackState* trackstate;
+			TrackerHeaderTrackState* state;
 
-			trackstate = trackerheader_updatetrackstate(self, track);
+			state = trackerheader_updatetrackstate(self, track);
 			trackdraw_init(&trackdraw, self->gridstate, track, size.height,
-				trackstate->playon);
+				state->playon);
 			trackdraw_draw(&trackdraw, g, cpx,
 				psy_ui_realpoint_make(
 					cpx + trackerheader_centerx(self, track), 0.0));
@@ -472,9 +472,9 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 		for (track = 0, cpx = 0; track < trackergridstate_numsongtracks(
 			self->gridstate); ++track) {			
 			TrackPlainDraw trackdraw;
-			TrackerHeaderTrackState* trackstate;
+			TrackerHeaderTrackState* state;
 
-			trackstate = trackerheader_updatetrackstate(self, track);
+			state = trackerheader_updatetrackstate(self, track);
 			trackplaindraw_init(&trackdraw, self->gridstate,
 				psy_ui_realpoint_make(
 					trackergridstate_defaulttrackwidth(self->gridstate) /
@@ -482,7 +482,7 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 					size.height /
 					psy_ui_realrectangle_height(&self->coords->background.dest)),
 				track, size.height,
-				trackstate->playon);
+				state->playon);
 			trackplaindraw_draw(&trackdraw, g, cpx,
 				psy_ui_realpoint_make(cpx,  0.0));
 			cpx += trackergridstate_trackwidth(self->gridstate, track);
@@ -625,10 +625,10 @@ bool trackerheader_hasredraw(const TrackerHeader* self)
 
 bool trackerheader_hastrackredraw(const TrackerHeader* self, uintptr_t track)
 {
-	TrackerHeaderTrackState* trackstate;
+	TrackerHeaderTrackState* state;
 
-	trackstate = trackerheader_trackstate((TrackerHeader*)self, track);
+	state = trackerheader_trackstate((TrackerHeader*)self, track);
 	return (psy_audio_activechannels_playon(
 		&workspace_player(self->workspace)->playon, track) !=
-		trackstate->playon);
+		state->playon);
 }

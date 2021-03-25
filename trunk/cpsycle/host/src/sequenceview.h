@@ -60,10 +60,18 @@ INLINE psy_ui_Component* sequencebuttons_base(SequenceButtons* self)
 	return &self->component;
 }
 
+typedef enum {
+	SEQLVCMD_NONE = 0,
+	SEQLVCMD_NEWTRACK = 1,
+	SEQLVCMD_DELTRACK = 2
+} SeqLVCmd;
+
 typedef struct SequenceListViewState {
 	// public data
 	double margin;
-	double trackwidth;	
+	double trackwidth;
+	SeqLVCmd cmd;
+	uintptr_t cmdtrack;
 	// references
 	psy_audio_Sequence* sequence;
 	psy_audio_SequenceSelection* selection;
@@ -154,6 +162,8 @@ typedef struct SequenceTrackHeaders {
 void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_Component* parent, SequenceListViewState*);
 
+void sequencetrackheaders_build(SequenceTrackHeaders*);
+
 INLINE psy_ui_Component* sequencetrackheader_base(
 	SequenceTrackHeaders* self)
 {
@@ -171,11 +181,9 @@ typedef struct SequencerOptionsBar {
 	psy_ui_CheckBox multichannelaudition;
 	psy_ui_CheckBox allownotestoeffect;
 	psy_ui_Component seqedit;
-	psy_ui_Button toggleseqedit;
-	psy_ui_Button toggleseqediticon;
+	psy_ui_Button toggleseqedit;	
 	psy_ui_Component stepseq;
-	psy_ui_Button togglestepseq;
-	psy_ui_Button togglestepseqicon;
+	psy_ui_Button togglestepseq;	
 	// references
 	Workspace* workspace;
 } SequencerOptionsBar;

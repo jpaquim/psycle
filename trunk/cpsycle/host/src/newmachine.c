@@ -78,15 +78,12 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_preventtranslation(&self->desclabel);
-	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
-		"newmachine.select-plugin-to-view-description"));
+	psy_ui_label_init_text(&self->desclabel, &self->component, NULL,	
+		"newmachine.select-plugin-to-view-description");
 	psy_ui_label_settextalignment(&self->desclabel,
 		psy_ui_ALIGNMENT_TOP);
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_checkbox_init(&self->compatblitzgamefx, &self->component);
-	psy_ui_checkbox_settext(&self->compatblitzgamefx,
+	psy_ui_checkbox_init_text(&self->compatblitzgamefx, &self->component,	
 		"newmachine.jme-version-unknown");
 	//psy_ui_component_setmaximumsize(&self->compatblitzgamefx.component,
 	//	psy_ui_size_make(psy_ui_value_makeew(10),
@@ -98,7 +95,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);
 	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_label_init_text(&self->compatlabel, &self->component,	
+	psy_ui_label_init_text(&self->compatlabel, &self->component, NULL,
 		"newmachine.song-loading-compatibility");
 	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);	
 	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
@@ -142,7 +139,7 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_label_init_text(&self->scan, &self->component,
+	psy_ui_label_init_text(&self->scan, &self->component, NULL,
 		"Scanning");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
 		psy_ui_ALIGN_CENTER);
@@ -735,8 +732,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(&self->favoriteicon.component,
 		psy_ui_size_makepx(16, 14));
 	psy_ui_component_preventalign(&self->favoriteicon.component);
-	psy_ui_label_init_text(&self->favoritelabel, &self->favoriteheader,
-			"newmachine.favorites");	
+	psy_ui_label_init_text(&self->favoritelabel, &self->favoriteheader, NULL,
+		"newmachine.favorites");	
 	psy_ui_label_settextalignment(&self->favoritelabel,
 		psy_ui_ALIGNMENT_LEFT |
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);	
@@ -763,7 +760,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(&self->pluginsicon.component,
 		psy_ui_size_makepx(16, 14));
 	psy_ui_component_preventalign(&self->pluginsicon.component);
-	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader,
+	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader, NULL,
 		"newmachine.all");	
 	psy_ui_label_settextalignment(&self->pluginslabel,
 		psy_ui_ALIGNMENT_LEFT |

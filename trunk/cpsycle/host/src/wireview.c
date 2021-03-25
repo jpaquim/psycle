@@ -151,7 +151,7 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_button_preventtranslation(&self->dbvol);
 	psy_ui_button_setcharnumber(&self->dbvol, 10);	
 	psy_ui_component_setalign(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_slider_init(&self->volslider, &self->slidergroup);
+	psy_ui_slider_init(&self->volslider, &self->slidergroup, NULL);
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
 	psy_ui_component_resize(&self->volslider.component,
@@ -178,14 +178,14 @@ void wireview_initrategroup(WireView* self)
 		self, wireview_onhold);
 	psy_ui_button_settext(&self->hold, "Hold");
 	psy_ui_component_setalign(&self->hold.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_slider_init(&self->modeslider, &self->rategroup);
+	psy_ui_slider_init(&self->modeslider, &self->rategroup, NULL);
 	psy_ui_slider_showhorizontal(&self->modeslider);
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
 	psy_ui_component_setmargin(&self->modeslider.component, &margin);
 	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->modeslider, self, NULL,
 		wireview_ontweakmode, wireview_onvaluemode);
-	psy_ui_slider_init(&self->rateslider, &self->rategroup);	
+	psy_ui_slider_init(&self->rateslider, &self->rategroup, NULL);
 	psy_ui_slider_showhorizontal(&self->rateslider);	
 	psy_ui_slider_showhorizontal(&self->rateslider);
 	psy_ui_slider_hidevaluelabel(&self->rateslider);

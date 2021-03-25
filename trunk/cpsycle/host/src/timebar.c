@@ -47,9 +47,9 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;	
 	self->bpm = (psy_dsp_big_beat_t)0.0;
-	psy_ui_label_init(&self->bpmdesc, &self->component);
+	psy_ui_label_init(&self->bpmdesc, &self->component, NULL);
 	psy_ui_label_settext(&self->bpmdesc, "timebar.tempo");
-	psy_ui_label_init(&self->bpmlabel, &self->component);
+	psy_ui_label_init(&self->bpmlabel, &self->component, NULL);
 	psy_ui_label_settext(&self->bpmlabel, "125");
 	psy_ui_label_preventtranslation(&self->bpmlabel);
 	psy_ui_label_setcharnumber(&self->bpmlabel, 8);	

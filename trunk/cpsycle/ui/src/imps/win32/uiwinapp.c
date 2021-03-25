@@ -312,6 +312,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_Size size;
 					
 					imp->sizecachevalid = FALSE;
+					if (imp->component->debugflag == 70) {
+						imp = imp;
+					}
 					if (imp->component->alignchildren) {
 						psy_ui_component_align(imp->component);
 					}
@@ -546,6 +549,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					hwnd, message, wParam, lParam, MK_LBUTTON,
 					imp->component->vtable->onmouseup,
 					&imp->component->signal_mouseup);
+				mousetracking = FALSE;
 				return 0;
 				break;
 			case WM_RBUTTONUP: {
@@ -559,7 +563,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_mouseevent(imp->component, imp,
 					hwnd, message, wParam, lParam, MK_MBUTTON,
 					imp->component->vtable->onmouseup,
-					&imp->component->signal_mouseup);								
+					&imp->component->signal_mouseup);				
 				return 0;
 				break;
 			case WM_LBUTTONDOWN:
@@ -619,7 +623,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						mousetracking = TRUE;
 					} 
 					return 0;
-				}				
+				}
 				{
 					psy_ui_MouseEvent ev;
 

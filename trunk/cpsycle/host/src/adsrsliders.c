@@ -36,13 +36,13 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 		adsrsliders_ondestroy);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
-	psy_ui_slider_init(&self->attack, &self->component);
+	psy_ui_slider_init(&self->attack, &self->component, NULL);
 	psy_ui_slider_settext(&self->attack, "instrumentview.attack");
-	psy_ui_slider_init(&self->decay, &self->component);
+	psy_ui_slider_init(&self->decay, &self->component, NULL);
 	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
-	psy_ui_slider_init(&self->sustain, &self->component);
+	psy_ui_slider_init(&self->sustain, &self->component, NULL);
 	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
-	psy_ui_slider_init(&self->release, &self->component);
+	psy_ui_slider_init(&self->release, &self->component, NULL);
 	psy_ui_slider_settext(&self->release, "instrumentview.release");	
 	for (i = 0; i < 4; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 21);

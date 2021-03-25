@@ -80,7 +80,7 @@ void transformpatternview_init_search(TransformPatternView* self)
 	psy_ui_component_init(&self->searchtop, &self->search, NULL);
 	psy_ui_component_setalign(&self->searchtop, psy_ui_ALIGN_TOP);
 	// title
-	psy_ui_label_init(&self->searchtitle, &self->searchtop);
+	psy_ui_label_init(&self->searchtitle, &self->searchtop, NULL);
 	psy_ui_label_settext(&self->searchtitle, "Search pattern");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->searchtitle), psy_ui_ALIGN_LEFT);
 	// hide button
@@ -91,15 +91,15 @@ void transformpatternview_init_search(TransformPatternView* self)
 	psy_ui_component_setdefaultalign(&self->search, psy_ui_ALIGN_TOP,
 		self->sectionmargin);
 	// Note
-	psy_ui_label_init(&self-> searchnotedesc, &self->search);
+	psy_ui_label_init(&self-> searchnotedesc, &self->search, NULL);
 	psy_ui_label_settext(&self->searchnotedesc, "Note");
 	psy_ui_combobox_init(&self->searchnote, &self->search, NULL);	
 	// Inst
-	psy_ui_label_init(&self->searchinstdesc, &self->search);
+	psy_ui_label_init(&self->searchinstdesc, &self->search, NULL);
 	psy_ui_label_settext(&self->searchinstdesc, "Instrum/Aux");
 	psy_ui_combobox_init(&self->searchinst, &self->search, NULL);
 	// Mach	
-	psy_ui_label_init(&self-> searchmachdesc, &self->search);
+	psy_ui_label_init(&self-> searchmachdesc, &self->search, NULL);
 	psy_ui_label_settext(&self->searchmachdesc, "Machine");	
 	psy_ui_combobox_init(&self->searchmach, &self->search, NULL);
 }
@@ -111,20 +111,20 @@ void transformpatternview_init_replace(TransformPatternView* self)
 	psy_ui_component_init(&self->replace, transformpatternview_base(self), NULL);
 	psy_ui_component_setdefaultalign(&self->replace,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_label_init(&self->replacetitle, &self->replace);
+	psy_ui_label_init(&self->replacetitle, &self->replace, NULL);
 	psy_ui_label_settext(&self->replacetitle, "Replace pattern");	
 	psy_ui_component_setdefaultalign(&self->replace, psy_ui_ALIGN_TOP,
 		self->sectionmargin);
 	// Note
-	psy_ui_label_init(&self->replacenotedesc, &self->replace);
+	psy_ui_label_init(&self->replacenotedesc, &self->replace, NULL);
 	psy_ui_label_settext(&self->replacenotedesc, "Note");
 	psy_ui_combobox_init(&self->replacenote, &self->replace, NULL);
 	// Inst
-	psy_ui_label_init(&self->replaceinstdesc, &self->replace);
+	psy_ui_label_init(&self->replaceinstdesc, &self->replace, NULL);
 	psy_ui_label_settext(&self->replaceinstdesc, "Instrum/Aux");
 	psy_ui_combobox_init(&self->replaceinst, &self->replace, NULL);
 	// Mach
-	psy_ui_label_init(&self->replacemachdesc, &self->replace);
+	psy_ui_label_init(&self->replacemachdesc, &self->replace, NULL);
 	psy_ui_label_settext(&self->replacemachdesc, "Machine");
 	psy_ui_combobox_init(&self->replacemach, &self->replace, NULL);
 }
@@ -136,16 +136,18 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 	psy_ui_component_init(&self->searchon, transformpatternview_base(self), NULL);
 	psy_ui_component_setdefaultalign(&self->searchon,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_label_init_text(&self->searchontitle, &self->searchon, "Search on");	
+	psy_ui_label_init_text(&self->searchontitle, &self->searchon, NULL,
+		"Search on");
 	psy_ui_component_init(&self->searchonchoice, &self->searchon, NULL);
 	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
 		transformpatternview_onsearchonmousedown);
 	psy_ui_component_setdefaultalign(&self->searchonchoice,
 		psy_ui_ALIGN_TOP, self->sectionmargin);
-	psy_ui_label_init_text(&self->entire, &self->searchonchoice, "Entire song");
-	psy_ui_label_init_text(&self->currpattern, &self->searchonchoice,
+	psy_ui_label_init_text(&self->entire, &self->searchonchoice, NULL,
+		"Entire song");
+	psy_ui_label_init_text(&self->currpattern, &self->searchonchoice, NULL,
 		"Current pattern");
-	psy_ui_label_init_text(&self->currselection, &self->searchonchoice,
+	psy_ui_label_init_text(&self->currselection, &self->searchonchoice, NULL,
 		"Current selection");
 	psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
 		psy_ui_NONRECURSIVE);

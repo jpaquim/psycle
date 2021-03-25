@@ -75,7 +75,7 @@ void helpview_initsectionfloated(HelpView* self)
 {
 	psy_ui_component_init(&self->sectionfloated, helpview_base(self), NULL);
 	psy_ui_component_hide(&self->sectionfloated);
-	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);		
+	psy_ui_label_init(&self->floatdesc, &self->sectionfloated, NULL);		
 	psy_ui_label_preventtranslation(&self->floatdesc);
 	psy_ui_label_settext(&self->floatdesc, "This view is floated.");
 	psy_ui_component_setalign(&self->floatdesc.component,

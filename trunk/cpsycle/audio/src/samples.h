@@ -74,6 +74,12 @@ INLINE bool psy_audio_sampleindex_valid(const psy_audio_SampleIndex* self)
 	return !psy_audio_sampleindex_invalid(self);
 }
 
+INLINE psy_audio_SampleIndex psy_audio_sampleindex_zero(void)
+{
+	return psy_audio_sampleindex_make(psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
+}
+
 typedef struct {	
 	psy_Table container;
 } psy_audio_SamplesGroup;

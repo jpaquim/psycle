@@ -79,7 +79,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_STYLE_CONTAINERHEADER);	
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->titlebar, &margin);
-	psy_ui_label_init_text(&self->title, &self->titlebar, "machinebar.gear");	
+	psy_ui_label_init_text(&self->title, &self->titlebar, NULL, "machinebar.gear");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
 		self, gear_onhide);

@@ -491,7 +491,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_mouseenter);
 	psy_signal_init(&self->signal_mousehover);
 	psy_signal_init(&self->signal_mouseleave);
-	psy_signal_init(&self->signal_scroll);
+	psy_signal_init(&self->signal_scroll);	
 	psy_signal_init(&self->signal_create);
 	psy_signal_init(&self->signal_close);
 	psy_signal_init(&self->signal_destroy);
@@ -575,7 +575,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_mouseenter);
 	psy_signal_dispose(&self->signal_mousehover);
 	psy_signal_dispose(&self->signal_mouseleave);
-	psy_signal_dispose(&self->signal_scroll);
+	psy_signal_dispose(&self->signal_scroll);	
 	psy_signal_dispose(&self->signal_create);
 	psy_signal_dispose(&self->signal_close);
 	psy_signal_dispose(&self->signal_destroy);
@@ -675,7 +675,7 @@ void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Size size)
 }
 
 void psy_ui_component_setposition(psy_ui_Component* self, psy_ui_Rectangle position)
-{		
+{	
 	self->vtable->setposition(self, position.topleft, position.size);	
 }
 
@@ -1009,6 +1009,7 @@ static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
 static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }
 static void dev_insert(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child, psy_ui_ComponentImp* insertafter) { }
 static void dev_remove(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child) { }
+static void dev_erase(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child) { }
 static void dev_setorder(psy_ui_ComponentImp* self, psy_ui_ComponentImp* insertafter) { }
 static void dev_capture(psy_ui_ComponentImp* self) { }
 static void dev_releasecapture(psy_ui_ComponentImp* self) { }
@@ -1091,7 +1092,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_parent = dev_parent;
 		imp_vtable.dev_setparent = dev_setparent;
 		imp_vtable.dev_insert = dev_insert;
-		imp_vtable.dev_remove = dev_remove;		
+		imp_vtable.dev_remove = dev_remove;
+		imp_vtable.dev_erase = dev_erase;
 		imp_vtable.dev_setorder = dev_setorder;
 		imp_vtable.dev_capture = dev_capture;
 		imp_vtable.dev_releasecapture = dev_releasecapture;
@@ -1175,7 +1177,7 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 		scrollstepx_px = psy_ui_value_px(&self->scrollstepx, tm);
 		oldscrollx = psy_ui_value_px(&self->scroll.x, tm);
 		self->scroll.x = left;	
-		psy_signal_emit(&self->signal_scroll, self, 0);		
+		psy_signal_emit(&self->signal_scroll, self, 0);
 		psy_ui_component_scrollstep(self,
 			(oldscrollx - psy_ui_value_px(&self->scroll.x, tm)) /
 			scrollstepx_px, 0);

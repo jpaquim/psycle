@@ -32,7 +32,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	self->docancel = FALSE;
 	// title	
 	psy_snprintf(self->dlgtitle, 256, "%s", title);
-	psy_ui_label_init(&self->title, newvalview_base(self));
+	psy_ui_label_init(&self->title, newvalview_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->title);
 	psy_ui_label_settext(&self->title, self->dlgtitle);	
 	psy_ui_component_setalign(psy_ui_label_base(&self->title),
@@ -64,7 +64,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 		oneditkeyup);
 	//m_value.SetSel(-1, -1, false);
 	// init label
-	psy_ui_label_init(&self->text, newvalview_base(self));
+	psy_ui_label_init(&self->text, newvalview_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->text);
 	psy_ui_component_setalign(psy_ui_label_base(&self->text),
 		psy_ui_ALIGN_TOP);

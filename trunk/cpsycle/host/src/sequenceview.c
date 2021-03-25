@@ -206,19 +206,24 @@ void sequencelistviewstate_init(SequenceListViewState* self)
 	self->trackwidth = 100;	
 	self->sequence = NULL;
 	self->selection = NULL;
+	self->cmd = SEQLVCMD_NONE;
+	self->cmdtrack = psy_INDEX_INVALID;
 }
 
 // SequenceTrackHeaders
 // prototypes
 static void sequencetrackheaders_ondestroy(SequenceTrackHeaders*);
-static void sequencetrackheaders_ondraw(SequenceTrackHeaders*,
-	psy_ui_Graphics*);
-static void sequencetrackheaders_onmousedown(SequenceTrackHeaders*,
+static void sequencetrackheaders_onmouseup(SequenceTrackHeaders*,
 	psy_ui_MouseEvent*);
-static void sequencetrackheaders_onmousemove(SequenceTrackHeaders*,
-	psy_ui_MouseEvent*);
-static void sequencetrackheaders_onmouseenter(SequenceTrackHeaders*);
-static void sequencetrackheaders_onmouseleave(SequenceTrackHeaders*);
+static void sequencetrackheaders_onnewtrack(SequenceTrackHeaders*,
+	psy_ui_Button* sender);
+static void sequencetrackheaders_ondeltrack(SequenceTrackHeaders*,
+	psy_ui_Button* sender);
+static void sequencetrackheaders_onmutetrack(SequenceTrackHeaders*,
+	psy_ui_Button* sender);
+static void sequencetrackheaders_onsolotrack(SequenceTrackHeaders*,
+	psy_ui_Button* sender);
+
 // vtable
 static psy_ui_ComponentVtable trackheaderviews_vtable;
 static bool trackheaderviews_vtable_initialized = FALSE;
@@ -227,40 +232,46 @@ static void trackheaderview_vtable_init(SequenceTrackHeaders* self)
 {
 	if (!trackheaderviews_vtable_initialized) {
 		trackheaderviews_vtable = *(self->component.vtable);
-		trackheaderviews_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
-			sequencetrackheaders_ondestroy;
-		trackheaderviews_vtable.ondraw = (psy_ui_fp_component_ondraw)
-			sequencetrackheaders_ondraw;
-		trackheaderviews_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
-			sequencetrackheaders_onmousedown;
-		trackheaderviews_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
-			sequencetrackheaders_onmousemove;
-		trackheaderviews_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
-			sequencetrackheaders_onmouseenter;
-		trackheaderviews_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
-			sequencetrackheaders_onmouseleave;
+		trackheaderviews_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			sequencetrackheaders_ondestroy;		
+		trackheaderviews_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			sequencetrackheaders_onmouseup;
 		trackheaderviews_vtable_initialized = TRUE;
 	}
 }
-
 // implemenetation
 void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_Component* parent, SequenceListViewState* state)
 {	
+	psy_ui_Margin spacing;
+
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_margin_init_all(&spacing,
+		psy_ui_value_zero(), psy_ui_value_zero(), psy_ui_value_zero(),
+		psy_ui_value_makepx(state->margin));
+	psy_ui_component_setspacing(&self->component, &spacing);
 	trackheaderview_vtable_init(self);
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makepx(0),
-			psy_ui_value_makeeh(2.0)));
-	psy_ui_component_preventalign(&self->component);
+	psy_ui_component_setminimumsize(&self->component,
+		psy_ui_size_makeem(0.0, 2.0));
+	psy_ui_component_setdefaultalign(&self->component,
+		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setoverflow(&self->component,
+		psy_ui_OVERFLOW_HSCROLL);
+	psy_ui_component_setmode(&self->component,
+		psy_ui_SCROLL_COMPONENTS);
 	self->hovertrack = psy_INDEX_INVALID;
 	psy_signal_init(&self->signal_newtrack);
 	psy_signal_init(&self->signal_deltrack);
 	psy_signal_init(&self->signal_trackselected);
 	psy_signal_init(&self->signal_mutetrack);
 	psy_signal_init(&self->signal_solotrack);
+	sequencetrackheaders_build(self);
 }
 
 void sequencetrackheaders_ondestroy(SequenceTrackHeaders* self)
@@ -272,93 +283,59 @@ void sequencetrackheaders_ondestroy(SequenceTrackHeaders* self)
 	psy_signal_dispose(&self->signal_solotrack);
 }
 
-void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
-	psy_ui_Graphics* g)
+void sequencetrackheaders_build(SequenceTrackHeaders* self)
 {
-	if (self->state->sequence) {
-		psy_audio_SequenceTrackNode* p;
-		uintptr_t t;
-		double cpx;
-		psy_ui_RealSize size;
-		const psy_ui_TextMetric* tm;
-		SequenceTrackBox trackheader;	
+	psy_audio_Sequence* sequence;
 
-		size = psy_ui_component_sizepx(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);		
-		for (cpx = self->state->margin, p = self->state->sequence->tracks, t = 0;
-				p != NULL; psy_list_next(&p),
-				cpx += self->state->trackwidth, ++t) {			
-			psy_audio_SequenceTrack* track;
-			track = (psy_audio_SequenceTrack*)p->entry;			
-			sequencetrackbox_init(&trackheader,
-				psy_ui_realrectangle_make(
-					psy_ui_realpoint_make(cpx, 0),
-					psy_ui_realsize_make(
-						self->state->trackwidth, size.height)),
-				tm,
-				track,
-				self->state->sequence,
-				t,
-				self->state->selection->editposition.track == t,
-				self->hovertrack == t);
-			sequencetrackbox_draw(&trackheader, g);
+	psy_ui_component_clear(&self->component);
+	sequence = self->state->sequence;
+	if (sequence) {
+		psy_audio_SequenceTrackNode* t;
+		uintptr_t c;
+		psy_ui_Button* newtrack;
+
+		for (t = sequence->tracks, c = 0; t != NULL;
+			psy_list_next(&t), ++c) {
+			TrackBox* track;
+
+			track = trackbox_allocinit(&self->component, NULL); //&self->component,
+			if (track) {
+				trackbox_setindex(track, c);
+				psy_ui_component_setminimumsize(&track->component,
+					psy_ui_size_make(
+						psy_ui_value_makepx(self->state->trackwidth + self->state->margin),
+						psy_ui_value_zero()));							
+				track->close.stoppropagation = FALSE;
+				psy_signal_connect(&track->solo.signal_clicked, self,
+					sequencetrackheaders_onsolotrack);
+				psy_signal_connect(&track->mute.signal_clicked, self,
+					sequencetrackheaders_onmutetrack);
+				psy_signal_connect(&track->close.signal_clicked, self,
+					sequencetrackheaders_ondeltrack);
+			}
 		}
-		sequencetrackbox_init(&trackheader,
-			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(cpx, 0),
-				psy_ui_realsize_make(
-					self->state->trackwidth, size.height)),
-			tm, NULL, self->state->sequence, 0, 0,
-			FALSE);
-		sequencetrackbox_draw(&trackheader, g);
-	}	
+		newtrack = psy_ui_button_allocinit(&self->component, NULL);
+		if (newtrack) {
+			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
+			newtrack->stoppropagation = FALSE;
+			psy_signal_connect(&newtrack->signal_clicked, self,
+				sequencetrackheaders_onnewtrack);
+		}
+	}
+	psy_ui_component_align(&self->component);
 }
 
-void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
+void sequencetrackheaders_onmouseup(SequenceTrackHeaders* self,
 	psy_ui_MouseEvent* ev)
 {	
-	uintptr_t selectedtrack;
-
-	selectedtrack = (uintptr_t)(ev->pt.x / self->state->trackwidth);
-	if (selectedtrack >= psy_audio_sequence_width(self->state->sequence)) {
-		psy_signal_emit(&self->signal_newtrack, self, 1,
+	if (self->state->cmd == SEQLVCMD_NEWTRACK) {
+		psy_signal_emit(&self->signal_newtrack, self, 1, 
 			(uintptr_t)psy_audio_sequence_width(self->state->sequence));
-	} else {				
-		const psy_ui_TextMetric* tm;
-		psy_ui_RealSize size;
-		SequenceTrackBox trackbox;
-		psy_audio_SequenceTrack* track;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_component_sizepx(&self->component);		
-		track = (psy_audio_SequenceTrack*)psy_audio_sequence_track_at(
-			self->state->sequence, selectedtrack);
-		sequencetrackbox_init(&trackbox,
-			psy_ui_realrectangle_make(
-				psy_ui_realpoint_make(
-					selectedtrack * self->state->trackwidth, 0.0),
-				psy_ui_realsize_make(self->state->trackwidth, size.height)),
-			tm, track, self->state->sequence, selectedtrack,
-			self->state->selection->editposition.track == selectedtrack,
-			self->hovertrack == selectedtrack);
-		switch (sequencetrackbox_hittest(&trackbox, ev->pt)) {
-			case SEQUENCETRACKBOXEVENT_MUTE:
-				psy_signal_emit(&self->signal_mutetrack, self, 1, selectedtrack);
-				break;
-			case SEQUENCETRACKBOXEVENT_SOLO:
-				psy_signal_emit(&self->signal_solotrack, self, 1, selectedtrack);
-				break;
-			case SEQUENCETRACKBOXEVENT_DEL:
-				psy_signal_emit(&self->signal_deltrack, self, 1, selectedtrack);
-				break;
-			// fallthrough
-			case SEQUENCETRACKBOXEVENT_SELECT:
-			default:
-				psy_signal_emit(&self->signal_trackselected, self, 1, selectedtrack);
-				break;
-		}		
+	} else if (self->state->cmd == SEQLVCMD_DELTRACK) {
+		psy_signal_emit(&self->signal_deltrack, self, 1,
+			self->state->cmdtrack);
 	}
-	psy_ui_component_invalidate(&self->component);
+	self->state->cmd = SEQLVCMD_NONE;
 }
 
 void sequencetrackheaders_onmousemove(SequenceTrackHeaders* self,
@@ -376,17 +353,29 @@ void sequencetrackheaders_onmousemove(SequenceTrackHeaders* self,
 	}
 }
 
-void sequencetrackheaders_onmouseenter(SequenceTrackHeaders* self)
+void sequencetrackheaders_onnewtrack(SequenceTrackHeaders* self,
+	psy_ui_Button* sender)
 {
-
+	self->state->cmd = SEQLVCMD_NEWTRACK;
 }
 
-void sequencetrackheaders_onmouseleave(SequenceTrackHeaders* self)
-{	
-	if (self->hovertrack != psy_INDEX_INVALID) {
-		self->hovertrack = psy_INDEX_INVALID;
-		psy_ui_component_invalidate(&self->component);
-	}
+void sequencetrackheaders_ondeltrack(SequenceTrackHeaders* self,
+	psy_ui_Button* sender)
+{
+	self->state->cmd = SEQLVCMD_DELTRACK;
+	self->state->cmdtrack = sender->data;
+}
+
+void sequencetrackheaders_onmutetrack(SequenceTrackHeaders* self,
+	psy_ui_Button* sender)
+{
+	psy_signal_emit(&self->signal_mutetrack, self, 1, sender->data);
+}
+
+void sequencetrackheaders_onsolotrack(SequenceTrackHeaders* self,
+	psy_ui_Button* sender)
+{
+	psy_signal_emit(&self->signal_solotrack, self, 1, sender->data);
 }
 
 
@@ -796,13 +785,13 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	self->duration_bts = 0.0;
 	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent, NULL);	
-	psy_ui_label_init(&self->desc, &self->component);
+	psy_ui_label_init(&self->desc, &self->component, NULL);
 	psy_ui_label_setcharnumber(&self->desc, 9);
 	psy_ui_label_settext(&self->desc, "sequencerview.duration");
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->desc.component, &margin);	
-	psy_ui_label_init(&self->duration, &self->component);	
+	psy_ui_label_init(&self->duration, &self->component, NULL);	
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);
 	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->duration.component, &margin);
@@ -866,26 +855,18 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	{		
 		// seqedit buttons
 		psy_ui_component_init(&self->seqedit, &self->component, NULL);
-		psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);			
-		psy_ui_button_init(&self->toggleseqediticon, &self->seqedit, NULL);
-		psy_ui_button_seticon(&self->toggleseqediticon, psy_ui_ICON_MORE);
-		psy_ui_component_setalign(&self->toggleseqediticon.component,
-			psy_ui_ALIGN_LEFT);		
+		psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);		
 		psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit, NULL,
 			"sequencerview.showseqeditor");
 		psy_ui_component_setalign(&self->toggleseqedit.component,
-			psy_ui_ALIGN_LEFT);		
+			psy_ui_ALIGN_LEFT);
+		psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
 		// stepseq buttons
 		psy_ui_component_init(&self->stepseq, &self->component, NULL);
-		psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);
-		psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);
-		psy_ui_button_init(&self->togglestepseqicon, &self->stepseq, NULL);
-		psy_ui_button_seticon(&self->togglestepseqicon, psy_ui_ICON_MORE);
-		psy_ui_component_setalign(&self->togglestepseqicon.component,
-			psy_ui_ALIGN_LEFT);
-		psy_ui_component_setmargin(&self->togglestepseqicon.component, &margin);
+		psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);		
 		psy_ui_button_init_text(&self->togglestepseq, &self->stepseq, NULL,
 			"sequencerview.showstepsequencer");
+		psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
 		psy_ui_component_setalign(&self->togglestepseq.component,
 			psy_ui_ALIGN_LEFT);		
 	}	
@@ -1361,6 +1342,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace,
 		self->listview.patterns = NULL;		
 		self->state.sequence = NULL;
 	}
+	sequencetrackheaders_build(&self->trackheader);
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->listview.component);
@@ -1425,6 +1407,7 @@ void sequenceview_changeplayposition(SequenceView* self)
 void sequenceview_onsequencechanged(SequenceView* self,
 	psy_audio_Sequence* sender)
 {		
+	sequencetrackheaders_build(&self->trackheader);
 	sequenceduration_update(&self->duration);	
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->listview.component);

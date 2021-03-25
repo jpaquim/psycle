@@ -57,6 +57,7 @@ static void dev_setparent(psy_ui_win_ComponentImp*, psy_ui_Component* parent);
 static void dev_insert(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child,
 	psy_ui_win_ComponentImp* insertafter);
 static void dev_remove(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child);
+static void dev_erase(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child);
 static void dev_setorder(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp*
 	insertafter);
 static void dev_capture(psy_ui_win_ComponentImp*);
@@ -127,6 +128,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_setparent;
 		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)dev_insert;
 		vtable.dev_remove = (psy_ui_fp_componentimp_dev_remove)dev_remove;
+		vtable.dev_erase = (psy_ui_fp_componentimp_dev_erase)dev_erase;
 		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
 		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
 			dev_releasecapture;
@@ -392,13 +394,13 @@ int dev_drawvisible(psy_ui_win_ComponentImp* self)
 	return IsWindowVisible(self->hwnd);
 }
 
-void dev_move(psy_ui_win_ComponentImp* self, psy_ui_Point origin)
+void dev_move(psy_ui_win_ComponentImp* self, psy_ui_Point topleft)
 {
 	SetWindowPos(self->hwnd, NULL,
-		(int)psy_ui_value_px(&origin.x, dev_textmetric(self)),
-		(int)psy_ui_value_px(&origin.y, dev_textmetric(self)),
+		(int)psy_ui_value_px(&topleft.x, dev_textmetric(self)),
+		(int)psy_ui_value_px(&topleft.y, dev_textmetric(self)),
 		0, 0,
-		SWP_NOZORDER | SWP_NOSIZE);
+		SWP_NOZORDER | SWP_NOSIZE);	
 }
 
 void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)
@@ -454,7 +456,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
 	const psy_ui_TextMetric* tm;
-
+		
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, 0,
@@ -463,7 +465,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 		(int)(psy_ui_value_px(&size.width, tm)),
 		(int)(psy_ui_value_px(&size.height, tm)),
 		SWP_NOZORDER);	
-	dev_updatesize(self);
+	dev_updatesize(self);	
 }
 
 psy_ui_Size dev_size(const psy_ui_win_ComponentImp* self)
@@ -569,6 +571,22 @@ void dev_remove(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child)
 				psy_ui_component_dispose(child->component);
 			}
 		}		
+	} else {
+		assert(0);
+		// todo
+	}
+}
+
+void dev_erase(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child)
+{
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {			
+			psy_list_remove(&self->viewcomponents, p);			
+		}
 	} else {
 		assert(0);
 		// todo

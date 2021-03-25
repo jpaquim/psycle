@@ -53,7 +53,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 		STYLE_ZOOMBOX, psy_ui_STYLE_BUTTON_HOVER, STYLE_ZOOMBOX);
 	psy_ui_button_settext(&self->zoomout, "-");
 	psy_ui_button_setcharnumber(&self->zoomout, 2);
-	psy_ui_label_init(&self->label, zoombox_base(self));
+	psy_ui_label_init(&self->label, zoombox_base(self), NULL);
 	psy_ui_label_settext(&self->label, "100%");
 	psy_ui_label_setcharnumber(&self->label, 6);	
 	//psy_ui_component_setstyletypes(&self->label.component,

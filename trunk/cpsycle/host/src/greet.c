@@ -22,7 +22,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
-	psy_ui_label_init(&self->headerlabel, &self->component);
+	psy_ui_label_init(&self->headerlabel, &self->component, NULL);
 	psy_ui_component_setalign(psy_ui_label_base(&self->headerlabel),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->headerlabel.component, &leftmargin);
@@ -30,7 +30,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->thanks, &self->header, "greetings.thanks");
+	psy_ui_label_init_text(&self->thanks, &self->header, NULL, "greetings.thanks");
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->thanks.component, &leftmargin);	
 	psy_ui_image_init(&self->favicon, &self->header);

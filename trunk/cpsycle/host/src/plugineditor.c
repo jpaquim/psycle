@@ -51,15 +51,14 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->workspace = workspace;
-	psy_ui_label_init(&self->desc, &self->component);
-	psy_ui_label_settext(&self->desc, "Plugin Name");
+	psy_ui_label_init_text(&self->desc, &self->component, NULL,
+		"Plugin Name");
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_edit_init(&self->name, &self->component);
 	psy_ui_component_setalign(&self->name.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_edit_settext(&self->name, "newplugin");
-	psy_ui_button_init(&self->create, &self->component, NULL);
-	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_button_settext(&self->create, "Create");
+	psy_ui_button_init_text(&self->create, &self->component, NULL, "Create");
+	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);	
 }
 
 static void plugineditor_onmachineschangeslot(PluginEditor*,
@@ -106,8 +105,8 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	// Plugin select
 	psy_ui_component_init(&self->row0, &self->component, NULL);
 	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->plugindesc, &self->row0);
-	psy_ui_label_settext(&self->plugindesc, "Plugin");
+	psy_ui_label_init_text(&self->plugindesc, &self->row0, NULL,
+		"Plugin");
 	psy_ui_component_setalign(&self->plugindesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->pluginselector, &self->row0, NULL);
 	//psy_ui_combobox_setcharnumber(&self->pluginselector, 32);
@@ -115,8 +114,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	// File Select
 	psy_ui_component_init(&self->row1, &self->component, NULL);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->filedesc, &self->row1);
-	psy_ui_label_settext(&self->filedesc, "File");
+	psy_ui_label_init_text(&self->filedesc, &self->row1, NULL, "File");
 	psy_ui_component_setalign(&self->filedesc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->fileselector, &self->row1, NULL);
 	//psy_ui_combobox_setcharnumber(&self->fileselector, 32);

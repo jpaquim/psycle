@@ -169,7 +169,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_mouseenter;
 	psy_Signal signal_mousehover;
 	psy_Signal signal_mouseleave;
-	psy_Signal signal_scroll;
+	psy_Signal signal_scroll;	
 	psy_Signal signal_create;
 	psy_Signal signal_close;
 	psy_Signal signal_destroy;
@@ -377,6 +377,7 @@ typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy
 typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
 typedef void (*psy_ui_fp_componentimp_dev_insert)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_remove)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_erase)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setorder)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_capture)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_releasecapture)(struct psy_ui_ComponentImp*);
@@ -431,6 +432,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_setparent dev_setparent;
 	psy_ui_fp_componentimp_dev_insert dev_insert;
 	psy_ui_fp_componentimp_dev_remove dev_remove;
+	psy_ui_fp_componentimp_dev_remove dev_erase;
 	psy_ui_fp_componentimp_dev_setorder dev_setorder;
 	psy_ui_fp_componentimp_dev_capture dev_capture;
 	psy_ui_fp_componentimp_dev_releasecapture dev_releasecapture;
@@ -573,6 +575,11 @@ INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* ch
 INLINE void psy_ui_component_remove(psy_ui_Component* self, psy_ui_Component* child)
 {
 	self->imp->vtable->dev_remove(self->imp, child->imp);
+}
+
+INLINE void psy_ui_component_erase(psy_ui_Component* self, psy_ui_Component* child)
+{
+	self->imp->vtable->dev_erase(self->imp, child->imp);
 }
 
 INLINE void psy_ui_component_setorder(psy_ui_Component* self, psy_ui_Component* insertafter)

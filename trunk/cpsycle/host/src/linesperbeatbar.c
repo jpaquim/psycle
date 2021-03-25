@@ -43,8 +43,8 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(linesperbeatbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->lpbdesclabel, linesperbeatbar_base(self),
-		"lpb.lines-per-beat");
-	psy_ui_label_init(&self->lpblabel, linesperbeatbar_base(self));
+		NULL, "lpb.lines-per-beat");
+	psy_ui_label_init(&self->lpblabel, linesperbeatbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->lpblabel);
 	psy_ui_label_setcharnumber(&self->lpblabel, 4);
 	// less

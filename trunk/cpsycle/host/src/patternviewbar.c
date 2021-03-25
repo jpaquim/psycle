@@ -64,9 +64,9 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&self->displaysinglepattern.signal_clicked, self,
 		patternviewbar_ondisplaysinglepattern);
-	psy_ui_label_init(&self->status, patternviewbar_base(self));
+	psy_ui_label_init(&self->status, patternviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);
-	psy_ui_label_setcharnumber(&self->status, 40);
+	psy_ui_label_setcharnumber(&self->status, 40.0);
 	psy_signal_connect(&psycleconfig_patview(
 			workspace_conf(workspace))->signal_changed, self,
 		patternviewbar_onconfigure);
