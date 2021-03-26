@@ -150,9 +150,7 @@ typedef struct SequenceTrackHeaders {
 	// signals
 	psy_Signal signal_newtrack;
 	psy_Signal signal_deltrack;
-	psy_Signal signal_trackselected;
-	psy_Signal signal_mutetrack;
-	psy_Signal signal_solotrack;
+	psy_Signal signal_trackselected;	
 	// internal data
 	uintptr_t hovertrack;
 	// references

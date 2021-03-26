@@ -448,6 +448,9 @@
     <ClCompile Include="src\paramtweak.c">
       <Filter>uicontrols\machineparam</Filter>
     </ClCompile>
+    <ClCompile Include="src\trackbox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -865,6 +868,9 @@
     </ClInclude>
     <ClInclude Include="src\paramtweak.h">
       <Filter>uicontrols\machineparam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackbox.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

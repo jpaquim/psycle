@@ -22,6 +22,7 @@ typedef struct psy_ui_Scroller {
 	psy_ui_Component bottom;
 	psy_ui_ScrollBar hscroll;
 	psy_ui_Component spacer;
+	psy_ui_Component pane;
 	psy_ui_Component* client;
 	// internal data
 	psy_ui_ScrollAnimate hanimate;

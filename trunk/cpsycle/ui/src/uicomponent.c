@@ -604,6 +604,11 @@ void psy_ui_component_deallocate(psy_ui_Component* self)
 	free(self);
 }
 
+void psy_ui_component_deallocateafterdestroyed(psy_ui_Component* self)
+{
+	self->deallocate = TRUE;
+}
+
 psy_ui_Component* psy_ui_component_alloc(void)
 {
 	return (psy_ui_Component*)malloc(sizeof(psy_ui_Component));	
@@ -617,7 +622,7 @@ psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_component_alloc();
 	if (rv) {
 		psy_ui_component_init(rv, parent, view);
-		rv->deallocate = TRUE;
+		psy_ui_component_deallocateafterdestroyed(rv);		
 	}
 	return rv;
 }

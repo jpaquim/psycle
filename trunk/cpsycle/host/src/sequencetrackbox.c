@@ -4,85 +4,135 @@
 #include "../../detail/prefix.h"
 
 #include "sequencetrackbox.h"
-// host
-#include "styles.h"
-// ui
-#include <uiapp.h>
-// platform
-#include "../../detail/portable.h"
 
-// TrackBox
+// SequenceTrackBox
+// prototypes
+static void sequencetrackbox_ondestroy(SequenceTrackBox*);
+static void sequencetrackbox_onsolotrack(SequenceTrackBox*,
+	psy_ui_Button* sender);
+static void sequencetrackbox_onmutetrack(SequenceTrackBox*,
+	psy_ui_Button* sender);
+static void sequencetrackbox_onsolochanged(SequenceTrackBox*,
+	psy_audio_Sequence* sender, uintptr_t track);
+static void sequencetrackbox_onmutechanged(SequenceTrackBox*,
+	psy_audio_Sequence* sender, uintptr_t track);
+// vtable
+static psy_ui_ComponentVtable sequencetrackbox_vtable;
+static bool sequencetrackbox_vtable_initialized = FALSE;
+
+static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
+{
+	if (!sequencetrackbox_vtable_initialized) {
+		sequencetrackbox_vtable = *(sequencetrackbox_base(self)->vtable);
+		sequencetrackbox_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			sequencetrackbox_ondestroy;		
+		sequencetrackbox_vtable_initialized = TRUE;
+	}
+	psy_ui_component_setvtable(sequencetrackbox_base(self),
+		&sequencetrackbox_vtable);
+
+}
+
 // implementation
-void trackbox_init(TrackBox* self, psy_ui_Component* parent,
-	psy_ui_Component* view)
+void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_Sequence* sequence,
+	uintptr_t trackidx)
 {
-	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->trackidx, &self->component, view);
-	psy_ui_label_preventtranslation(&self->trackidx);
-	psy_ui_label_settext(&self->trackidx, "00");
-	psy_ui_label_setcharnumber(&self->trackidx, 3);
-	psy_ui_button_init(&self->solo, &self->component, view);
-	psy_ui_button_preventtranslation(&self->solo);
-	psy_ui_button_settext(&self->solo, "S");	
-	psy_ui_button_init(&self->mute, &self->component, view);
-	psy_ui_button_preventtranslation(&self->mute);
-	psy_ui_button_settext(&self->mute, "M");	
-	psy_ui_button_init(&self->close, & self->component, view);
-	psy_ui_button_preventtranslation(&self->close);
-	psy_ui_button_settext(&self->close, "X");	
+	trackbox_init(&self->trackbox, parent, view);
+	sequencetrackbox_vtable_init(self);
+	self->sequence = sequence;
+	self->trackidx = trackidx;
+	trackbox_setindex(&self->trackbox, trackidx);
+	if (self->sequence) {
+		psy_signal_connect(&self->sequence->signal_solochanged, self,
+			sequencetrackbox_onsolochanged);
+		psy_signal_connect(&self->sequence->signal_mutechanged, self,
+			sequencetrackbox_onmutechanged);
+	}
+	psy_signal_connect(&self->trackbox.solo.signal_clicked, self,
+		sequencetrackbox_onsolotrack);
+	psy_signal_connect(&self->trackbox.mute.signal_clicked, self,
+		sequencetrackbox_onmutetrack);
 }
 
-TrackBox* trackbox_alloc(void)
+void sequencetrackbox_ondestroy(SequenceTrackBox* self)
 {
-	return (TrackBox*)malloc(sizeof(TrackBox));
+	if (self->sequence) {
+		psy_signal_disconnect(&self->sequence->signal_solochanged, self,
+			sequencetrackbox_onsolochanged);
+		psy_signal_disconnect(&self->sequence->signal_mutechanged, self,
+			sequencetrackbox_onmutechanged);
+	}
 }
 
-TrackBox* trackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view)
+SequenceTrackBox* sequencetrackbox_alloc(void)
 {
-	TrackBox* rv;
+	return (SequenceTrackBox*)malloc(sizeof(SequenceTrackBox));
+}
 
-	rv = trackbox_alloc();
+SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_Sequence* sequence,
+	uintptr_t trackidx)
+{
+	SequenceTrackBox* rv;
+
+	rv = sequencetrackbox_alloc();
 	if (rv) {
-		trackbox_init(rv, parent, view);
-		rv->component.deallocate = TRUE;
+		sequencetrackbox_init(rv, parent, view, sequence, trackidx);
+		psy_ui_component_deallocateafterdestroyed(sequencetrackbox_base(rv));
 	}
 	return rv;
 }
 
-void trackbox_setindex(TrackBox* self, uintptr_t index)
+void sequencetrackbox_onsolotrack(SequenceTrackBox* self,
+	psy_ui_Button* sender)
 {
-	char text[128];
-
-	psy_snprintf(text, 128, "%.2X", index);
-	psy_ui_label_settext(&self->trackidx, text);
-	self->solo.data = index;
-	self->mute.data = index;
-	self->close.data = index;
-	if (index == 0) {
-		psy_ui_component_hide(&self->close.component);
+	if (self->sequence) {		
+		if (psy_audio_sequence_istracksoloed(self->sequence, self->trackidx)) {
+			psy_audio_sequence_deactivatesolotrack(self->sequence);
+		} else {
+			psy_audio_sequence_activatesolotrack(self->sequence, self->trackidx);
+		}
 	}
 }
 
-void trackbox_mute(TrackBox* self)
+void sequencetrackbox_onmutetrack(SequenceTrackBox* self,
+	psy_ui_Button* sender)
 {
-	psy_ui_button_highlight(&self->mute);
+	if (self->sequence) {				
+		if (psy_audio_sequence_istrackmuted(self->sequence, self->trackidx)) {
+			psy_audio_sequence_unmutetrack(self->sequence, self->trackidx);
+		} else {
+			psy_audio_sequence_mutetrack(self->sequence, self->trackidx);
+		}
+	}
 }
 
-void trackbox_unmute(TrackBox* self)
-{
-	psy_ui_button_disablehighlight(&self->mute);
+void sequencetrackbox_onsolochanged(SequenceTrackBox* self,
+	psy_audio_Sequence* sender, uintptr_t trackidx)
+{	
+	trackbox_unsolo(&self->trackbox);
+	if (self->trackidx == trackidx) {
+		if (psy_audio_sequence_istracksoloed(sender, trackidx)) {
+			trackbox_solo(&self->trackbox);
+		}
+	}
+	if (psy_audio_sequence_istrackmuted(sender, trackidx)) {
+		trackbox_mute(&self->trackbox);
+	} else {
+		trackbox_unmute(&self->trackbox);
+	}
 }
 
-void trackbox_solo(TrackBox* self)
+void sequencetrackbox_onmutechanged(SequenceTrackBox* self,
+	psy_audio_Sequence* sender, uintptr_t trackidx)
 {
-	psy_ui_button_highlight(&self->solo);
-}
-
-void trackbox_unsolo(TrackBox* self)
-{
-	psy_ui_button_disablehighlight(&self->solo);
+	if (self->trackidx == trackidx) {
+		if (psy_audio_sequence_istrackmuted(sender, trackidx)) {
+			trackbox_mute(&self->trackbox);
+		} else {
+			trackbox_unmute(&self->trackbox);
+		}
+	}
 }
