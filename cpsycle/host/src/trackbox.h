@@ -16,7 +16,7 @@ typedef struct TrackBox {
 	// inherits
 	psy_ui_Component component;
 	// internal
-	psy_ui_Label trackidx;
+	psy_ui_Label trackidx;	
 	psy_ui_Button solo;
 	psy_ui_Button mute;
 	psy_ui_Button close;

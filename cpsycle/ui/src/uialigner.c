@@ -57,9 +57,6 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			psy_ui_Size limit;
 			const psy_ui_TextMetric* c_tm;
 				
-			if (component->debugflag == 70) {
-				self = self;
-			}
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);			

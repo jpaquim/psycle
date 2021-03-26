@@ -1122,8 +1122,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_Component* parent, uintptr_t column, psy_ui_Component* view,
 	MachineStackState* state, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent, view);
-	self->component.debugflag = 40;
+	psy_ui_component_init(&self->component, parent, view);	
 	psy_ui_component_setvtable(&self->component,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
@@ -1222,8 +1221,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
-		machinestackpane_vtable_init(self));
-	self->component.debugflag = 30;
+		machinestackpane_vtable_init(self));	
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	

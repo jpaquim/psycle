@@ -400,7 +400,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					POINT clipsize;
 					PAINTSTRUCT ps;
 					
-					hdc = BeginPaint(hwnd, &ps);
+					hdc = BeginPaint(hwnd, &ps);					
 					// store clip/repaint size of paint request
 					clipsize.x = ps.rcPaint.right - ps.rcPaint.left;
 					clipsize.y = ps.rcPaint.bottom - ps.rcPaint.top;
@@ -417,7 +417,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						POINT origin;
 						const psy_ui_TextMetric* tm;
 
-						tm = psy_ui_component_textmetric(imp->component);
+						tm = psy_ui_component_textmetric(imp->component);						
 						if (imp->component->doublebuffered) {
 							// create a graphics context with back buffer bitmap
 							// with origin (0; 0) and size of the paint request
@@ -454,6 +454,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							clipsize.x, clipsize.y);
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);												
 						// draw
+						if (imp->component->debugflag == 90) {
+							imp = imp;
+						}
 						imp->imp.vtable->dev_draw(&imp->imp, &g);
 						// clean up font
 						if (hPrevFont) {

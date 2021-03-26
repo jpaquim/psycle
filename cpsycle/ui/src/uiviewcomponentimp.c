@@ -526,6 +526,7 @@ const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self
 void view_dev_setcursor(psy_ui_ViewComponentImp* self, psy_ui_CursorStyle
 	cursorstyle)
 {
+	psy_ui_component_setcursor(self->view, cursorstyle);
 }
 
 void view_dev_starttimer(psy_ui_ViewComponentImp* self, uintptr_t id,
@@ -571,50 +572,52 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {
-	psy_List* p;
-	psy_List* q;
-	psy_ui_RealRectangle clip;
-	
-	// draw background						
-	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
-		psy_ui_component_drawbackground(self->component, g);
-	}	
-	psy_ui_component_drawborder(self->component, g);
-	if (self->component->vtable->ondraw) {				
-		self->component->vtable->ondraw(self->component, g);
-	}
-	q = self->viewcomponents;
-	clip = g->clip;
-	for (p = q; p != NULL; psy_list_next(&p)) {		
-		psy_ui_Component* component;
+	if (self->visible) {
+		psy_List* p;
+		psy_List* q;
+		psy_ui_RealRectangle clip;
 
-		component = (psy_ui_Component*)psy_list_entry(p);
-		if ((component->imp->vtable->dev_flags(component->imp)
+		// draw background						
+		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
+			psy_ui_component_drawbackground(self->component, g);
+		}
+		psy_ui_component_drawborder(self->component, g);
+		if (self->component->vtable->ondraw) {
+			self->component->vtable->ondraw(self->component, g);
+		}
+		q = self->viewcomponents;
+		clip = g->clip;
+		for (p = q; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			if ((component->imp->vtable->dev_flags(component->imp)
 				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-			psy_ui_RealRectangle position;
-			psy_ui_RealRectangle intersection;
+				psy_ui_RealRectangle position;
+				psy_ui_RealRectangle intersection;
 
-			position = psy_ui_component_position(component);
-			intersection = clip;
-			if (psy_ui_realrectangle_intersection(&intersection, &position)) {
-				psy_ui_RealPoint origin;
+				position = psy_ui_component_position(component);
+				intersection = clip;
+				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
+					psy_ui_RealPoint origin;
 
-				// translate graphics clip and origin
-				psy_ui_realrectangle_settopleft(&intersection,
-					psy_ui_realpoint_make(
-						intersection.left - position.left,
-						intersection.top - position.top));
-				g->clip = intersection;
-				origin = psy_ui_origin(g);
-				psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-					-position.top + origin.y));
-				component->imp->vtable->dev_draw(component->imp, g);
-				psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
-			}																
+					// translate graphics clip and origin
+					psy_ui_realrectangle_settopleft(&intersection,
+						psy_ui_realpoint_make(
+							intersection.left - position.left,
+							intersection.top - position.top));
+					g->clip = intersection;
+					origin = psy_ui_origin(g);
+					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
+						-position.top + origin.y));
+					component->imp->vtable->dev_draw(component->imp, g);
+					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
+				}
+			}
 		}
+		g->clip = clip;
 	}
-	g->clip = clip;
 }
 
 psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)

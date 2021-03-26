@@ -109,7 +109,7 @@ INLINE bool psy_audio_orderindex_valid(const psy_audio_OrderIndex* self)
 
 INLINE bool psy_audio_orderindex_invalid(const psy_audio_OrderIndex* self)
 {
-	return psy_audio_orderindex_valid(self);
+	return (!psy_audio_orderindex_valid(self));
 }
 
 // psy_audio_SequenceSelection
