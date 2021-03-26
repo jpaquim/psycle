@@ -35,6 +35,7 @@ typedef struct SeqEditorState {
 	psy_ui_Value linemargin;
 	psy_dsp_big_beat_t cursorposition;
 	bool drawcursor;
+	bool cursoractive;
 	bool drawpatternevents;
 	SeqEdtCmd cmd;
 	uintptr_t cmdtrack;
@@ -78,10 +79,13 @@ INLINE void seqeditorstate_setcursor(SeqEditorState* self,
 	psy_signal_emit(&self->signal_cursorchanged, self, 0);
 }
 
+// SeqEditorRuler
 typedef struct SeqEditorRuler {
+	// inherits
 	psy_ui_Component component;	
+	// references
 	SeqEditorState* state;
-	PatternViewSkin* skin;
+	PatternViewSkin* skin;	
 	Workspace* workspace;
 } SeqEditorRuler;
 
@@ -96,7 +100,10 @@ INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 // SeqEditorPlayline
 typedef struct SeqEditorPlayline {
 	// inherits
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	// internal
+	bool drag;
+	double dragbase;
 	// references
 	SeqEditorState* state;
 } SeqEditorPlayline;
@@ -107,6 +114,24 @@ void seqeditorplayline_init(SeqEditorPlayline*,
 
 SeqEditorPlayline* seqeditorplayline_alloc(void);
 SeqEditorPlayline* seqeditorplayline_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	SeqEditorState*);
+void seqeditorplayline_update(SeqEditorPlayline*);
+
+// SeqEditorCursorline
+typedef struct SeqEditorCursorline {
+	// inherits
+	psy_ui_Component component;
+	// references
+	SeqEditorState* state;
+} SeqEditorCursorline;
+
+void seqeditorcursorline_init(SeqEditorCursorline*,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	SeqEditorState*);
+
+SeqEditorCursorline* seqeditorcursorline_alloc(void);
+SeqEditorCursorline* seqeditorcursorline_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState*);
 
@@ -194,14 +219,15 @@ typedef struct SeqEditorTracks {
 	psy_ui_Component component;
 	SeqEditorState* state;
 	Workspace* workspace;	
-	double lastplaylinepx;	
 	PatternViewSkin* skin;
 	SeqEditorPlayline* playline;
+	SeqEditorCursorline* cursorline;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,
-	SeqEditorState*, Workspace*);
-bool seqeditortracks_playlinechanged(SeqEditorTracks*);
+	SeqEditorState*, PatternViewSkin*, Workspace*);
+
+void seqeditortracks_checkcursorline(SeqEditorTracks*);
 
 INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 {

@@ -16,10 +16,14 @@
 void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {
+	psy_ui_Margin spacing;
+	
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
+	psy_ui_component_setspacing(&self->component, &spacing);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
 	psy_ui_label_init(&self->trackidx, &self->component, view);
 	psy_ui_label_preventtranslation(&self->trackidx);
 	psy_ui_label_settext(&self->trackidx, "00");
