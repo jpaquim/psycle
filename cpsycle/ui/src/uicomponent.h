@@ -231,12 +231,13 @@ void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
 
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
+void psy_ui_component_deallocate(psy_ui_Component*);
 
 psy_ui_Component* psy_ui_component_alloc(void);
 psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
-void psy_ui_component_deallocate(psy_ui_Component*);
-
+void psy_ui_component_deallocateafterdestroyed(psy_ui_Component*);
+void psy_ui_component_setheapmode(psy_ui_Component*);
 
 INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
 	psy_ui_ComponentVtable* vtable)

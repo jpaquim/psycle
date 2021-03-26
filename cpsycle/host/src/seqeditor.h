@@ -41,14 +41,17 @@ typedef struct SeqEditorState {
 	// references
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
+	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;
 	psy_audio_OrderIndex dragseqpos;	
 	psy_audio_SequenceEntry* sequenceentry;
-	Workspace* workspace;
+	Workspace* workspace;	
 } SeqEditorState;
 
 void seqeditorstate_init(SeqEditorState*);
 void seqeditorstate_dispose(SeqEditorState*);
+
+psy_audio_Sequence* seqeditorstate_sequence(SeqEditorState*);
 
 INLINE double seqeditorstate_beattopx(const SeqEditorState* self,
 	psy_dsp_big_beat_t position)
@@ -140,8 +143,7 @@ typedef struct SeqEditorTrack {
 	uintptr_t trackindex;
 	SeqEditorState* state;
 	bool dragstarting;	
-	double dragstartpx;
-	int mode;
+	double dragstartpx;	
 	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
 	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
@@ -152,8 +154,7 @@ typedef struct SeqEditorTrack {
 void seqeditortrack_init(SeqEditorTrack*,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState*, 
-	PatternViewSkin* skin,
-	int mode,
+	PatternViewSkin* skin,	
 	Workspace*);
 void seqeditortrack_dispose(SeqEditorTrack*);
 
@@ -161,42 +162,19 @@ SeqEditorTrack* seqeditortrack_alloc(void);
 SeqEditorTrack* seqeditortrack_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState*,
-	PatternViewSkin* skin,
-	int mode,
+	PatternViewSkin* skin,	
 	Workspace*);
 
 void seqeditortrack_updatetrack(SeqEditorTrack*,
 	psy_audio_SequenceTrackNode*,
 	psy_audio_SequenceTrack*,
-	uintptr_t trackindex,
-	int mode);
+	uintptr_t trackindex);
 
-INLINE SeqEditorTrack* seqeditortrack_base(SeqEditorTrack* self)
+INLINE psy_ui_Component* seqeditortrack_base(SeqEditorTrack* self)
 {
 	assert(self);
 
-	return self;
-}
-
-// SeqEditorTrackHeader
-typedef struct SeqEditorTrackHeader {
-	SeqEditorTrack base;
-	TrackBox trackbox;
-} SeqEditorTrackHeader;
-
-void seqeditortrackheader_init(SeqEditorTrackHeader*,	
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*, PatternViewSkin* skin,
-	Workspace*);
-
-SeqEditorTrackHeader* seqeditortrackheader_alloc(void);
-SeqEditorTrackHeader* seqeditortrackheader_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*, PatternViewSkin* skin, Workspace*);
-
-INLINE SeqEditorTrack* seqeditortrackheader_base(SeqEditorTrackHeader* self)
-{
-	return &self->base;
+	return &self->component;
 }
 
 // SeqEditorTrackDesc
@@ -211,11 +189,6 @@ typedef struct SeqEditorTrackDesc {
 
 void seqeditortrackdesc_init(SeqEditorTrackDesc*, psy_ui_Component* parent,
 	SeqEditorState*, Workspace*);
-
-enum {
-	SEQEDITOR_TRACKMODE_ENTRY,
-	SEQEDITOR_TRACKMODE_HEADER,
-};
 
 typedef struct SeqEditorTracks {
 	psy_ui_Component component;
@@ -253,7 +226,8 @@ typedef struct SeqEditor {
 	psy_ui_Component left;
 	SeqEditorBar bar;
 	ZoomBox zoombox_height;
-	SeqEditorTrackDesc trackheaders;
+	psy_ui_Component trackdescpane;
+	SeqEditorTrackDesc trackdescriptions;
 	SeqEditorTracks tracks;	
 	SeqEditorState state;
 	// references

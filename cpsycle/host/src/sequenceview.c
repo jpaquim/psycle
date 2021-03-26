@@ -269,8 +269,6 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_signal_init(&self->signal_newtrack);
 	psy_signal_init(&self->signal_deltrack);
 	psy_signal_init(&self->signal_trackselected);
-	psy_signal_init(&self->signal_mutetrack);
-	psy_signal_init(&self->signal_solotrack);
 	sequencetrackheaders_build(self);
 }
 
@@ -279,8 +277,6 @@ void sequencetrackheaders_ondestroy(SequenceTrackHeaders* self)
 	psy_signal_dispose(&self->signal_newtrack);
 	psy_signal_dispose(&self->signal_deltrack);
 	psy_signal_dispose(&self->signal_trackselected);
-	psy_signal_dispose(&self->signal_mutetrack);
-	psy_signal_dispose(&self->signal_solotrack);
 }
 
 void sequencetrackheaders_build(SequenceTrackHeaders* self)
@@ -296,21 +292,17 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 
 		for (t = sequence->tracks, c = 0; t != NULL;
 			psy_list_next(&t), ++c) {
-			TrackBox* track;
+			SequenceTrackBox* track;
 
-			track = trackbox_allocinit(&self->component, NULL); //&self->component,
-			if (track) {
-				trackbox_setindex(track, c);
-				psy_ui_component_setminimumsize(&track->component,
+			track = sequencetrackbox_allocinit(&self->component, NULL,
+				self->state->sequence, c);
+			if (track) {				
+				psy_ui_component_setminimumsize(sequencetrackbox_base(track),
 					psy_ui_size_make(
 						psy_ui_value_makepx(self->state->trackwidth + self->state->margin),
 						psy_ui_value_zero()));							
-				track->close.stoppropagation = FALSE;
-				psy_signal_connect(&track->solo.signal_clicked, self,
-					sequencetrackheaders_onsolotrack);
-				psy_signal_connect(&track->mute.signal_clicked, self,
-					sequencetrackheaders_onmutetrack);
-				psy_signal_connect(&track->close.signal_clicked, self,
+				track->trackbox.close.stoppropagation = FALSE;				
+				psy_signal_connect(&track->trackbox.close.signal_clicked, self,
 					sequencetrackheaders_ondeltrack);
 			}
 		}
@@ -364,18 +356,6 @@ void sequencetrackheaders_ondeltrack(SequenceTrackHeaders* self,
 {
 	self->state->cmd = SEQLVCMD_DELTRACK;
 	self->state->cmdtrack = sender->data;
-}
-
-void sequencetrackheaders_onmutetrack(SequenceTrackHeaders* self,
-	psy_ui_Button* sender)
-{
-	psy_signal_emit(&self->signal_mutetrack, self, 1, sender->data);
-}
-
-void sequencetrackheaders_onsolotrack(SequenceTrackHeaders* self,
-	psy_ui_Button* sender)
-{
-	psy_signal_emit(&self->signal_solotrack, self, 1, sender->data);
 }
 
 
@@ -889,10 +869,6 @@ static void sequenceview_ontrackselected(SequenceView*, psy_ui_Component* sender
 	uintptr_t trackindex);
 static void sequenceview_ondeltrack(SequenceView*, psy_ui_Component* sender,
 	uintptr_t trackindex);
-static void sequenceview_onsolotrack(SequenceView*, psy_ui_Component* sender,
-	uintptr_t trackindex);
-static void sequenceview_onmutetrack(SequenceView*, psy_ui_Component* sender,
-	uintptr_t trackindex);
 static void sequenceview_onclear(SequenceView*);
 static void sequenceview_onrename(SequenceView*);
 static void sequenceview_oncut(SequenceView*);
@@ -978,11 +954,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->trackheader.signal_trackselected, self,
 		sequenceview_ontrackselected);	
 	psy_signal_connect(&self->trackheader.signal_deltrack, self,
-		sequenceview_ondeltrack);
-	psy_signal_connect(&self->trackheader.signal_solotrack, self,
-		sequenceview_onsolotrack);
-	psy_signal_connect(&self->trackheader.signal_mutetrack, self,
-		sequenceview_onmutetrack);
+		sequenceview_ondeltrack);	
 	psy_signal_connect(&self->buttons.clear.signal_clicked, self,
 		sequenceview_onclear);
 	psy_signal_connect(&self->buttons.rename.signal_clicked, self,
@@ -1159,26 +1131,6 @@ void sequenceview_ondeltrack(SequenceView* self, psy_ui_Component* sender,
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
 	sequencelistview_select(&self->listview, trackindex, 0);
-}
-
-void sequenceview_onsolotrack(SequenceView* self, psy_ui_Component* sender,
-	uintptr_t trackindex)
-{
-	if (psy_audio_sequence_istracksoloed(self->state.sequence, trackindex)) {
-		psy_audio_sequence_deactivatesolotrack(self->state.sequence);
-	} else {
-		psy_audio_sequence_activatesolotrack(self->state.sequence, trackindex);
-	}
-}
-
-void sequenceview_onmutetrack(SequenceView* self, psy_ui_Component* sender,
-	uintptr_t trackindex)
-{	
-	if (psy_audio_sequence_istrackmuted(self->state.sequence, trackindex)) {
-		psy_audio_sequence_unmutetrack(self->state.sequence, trackindex);
-	} else {
-		psy_audio_sequence_mutetrack(self->state.sequence, trackindex);
-	}
 }
 
 void sequenceview_onclear(SequenceView* self)

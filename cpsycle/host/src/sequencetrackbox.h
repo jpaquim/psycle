@@ -4,36 +4,38 @@
 #if !defined(SEQUENCETRACKBOX_H)
 #define SEQUENCETRACKBOX_H
 
-// ui
-#include <uibutton.h>
-#include <uilabel.h>
+// host
+#include "trackbox.h"
+// audio
+#include <sequence.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct TrackBox {
+// SequenceTrackBox
+//
+// Discribes and controls a sequence track(used by SequenceView and SeqEditor).
+
+typedef struct SequenceTrackBox {
 	// inherits
-	psy_ui_Component component;
-	// internal
-	psy_ui_Label trackidx;
-	psy_ui_Button solo;
-	psy_ui_Button mute;
-	psy_ui_Button close;
-} TrackBox;
+	TrackBox trackbox;
+	uintptr_t trackidx;
+	// references
+	psy_audio_Sequence* sequence;
+} SequenceTrackBox;
 
-void trackbox_init(TrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view);
+void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx);
 
-TrackBox* trackbox_alloc(void);
-TrackBox* trackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view);
+SequenceTrackBox* sequencetrackbox_alloc(void);
+SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx);
 
-void trackbox_setindex(TrackBox*, uintptr_t index);
-void trackbox_mute(TrackBox*);
-void trackbox_unmute(TrackBox*);
-void trackbox_solo(TrackBox*);
-void trackbox_unsolo(TrackBox*);
+INLINE psy_ui_Component* sequencetrackbox_base(SequenceTrackBox* self)
+{
+	return &self->trackbox.component;
+}
 
 #ifdef __cplusplus
 }
