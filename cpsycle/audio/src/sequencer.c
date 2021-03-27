@@ -615,19 +615,19 @@ void psy_audio_sequencer_clockstop(psy_audio_Sequencer* self)
 void psy_audio_sequencer_onnewline(psy_audio_Sequencer* self)
 {
 	assert(self);
-
+	
 	if (self->jump.dostop) {
 		self->jump.active = 0;
 		psy_audio_sequencer_stop(self);
-	}
-	if (self->jump.active) {
+	}	
+	if (!self->calcduration && self->jump.active) {
 		psy_audio_sequencer_executejump(self);
 	}
 	if (self->rowdelay.active) {
 		self->rowdelay.active = 0;
 		psy_audio_sequencer_compute_beatspersample(self);
 	}
-	psy_signal_emit(&self->signal_newline, self, 0);	
+	psy_signal_emit(&self->signal_newline, self, 0);
 	self->linetickcount += psy_audio_sequencer_currbeatsperline(self);
 }
 

@@ -130,6 +130,7 @@ typedef struct SequenceViewDuration {
 	// internal data
 	psy_dsp_big_seconds_t duration_ms;
 	psy_dsp_big_beat_t duration_bts;
+	bool calcduration;
 	// references
 	psy_audio_Sequence* sequence;
 	Workspace* workspace;
@@ -138,6 +139,7 @@ typedef struct SequenceViewDuration {
 void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
 	psy_audio_Sequence*, Workspace*);
 void sequenceduration_update(SequenceViewDuration*);
+void sequenceduration_stopdurationcalc(SequenceViewDuration*);
 
 INLINE psy_ui_Component* sequenceduration_base(SequenceViewDuration* self)
 {

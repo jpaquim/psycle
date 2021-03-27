@@ -100,7 +100,7 @@ typedef struct {
 
 void psy_audio_sequencermetronome_init(psy_audio_SequencerMetronome*);
 
-typedef struct {
+typedef struct psy_audio_Sequencer {
 	// signals
 	psy_Signal signal_newline;
 	// internal data
@@ -319,7 +319,6 @@ INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 	return self->seqtime.playcounter /
 		(psy_dsp_seconds_t)self->seqtime.samplerate;
 }
-
 
 psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(const
 	psy_audio_Sequencer* self);
