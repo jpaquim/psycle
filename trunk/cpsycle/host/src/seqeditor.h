@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 typedef enum {
+	SEQEDITORDRAG_NONE,
 	SEQEDITORDRAG_MOVE,
 	SEQEDITORDRAG_REORDER
 } SeqEditorDragMode;
@@ -24,7 +25,8 @@ typedef enum {
 	SEQEDTCMD_NONE = 0,
 	SEQEDTCMD_NEWTRACK = 1,
 	SEQEDTCMD_DELTRACK = 2,
-	SEQEDTCMD_INSERTPATTERN = 3
+	SEQEDTCMD_INSERTPATTERN = 3,
+	SEQEDTCMD_REORDER = 4
 } SeqEdtCmd;
 
 typedef struct SeqEditorState {
@@ -39,12 +41,14 @@ typedef struct SeqEditorState {
 	bool drawpatternevents;
 	SeqEdtCmd cmd;
 	uintptr_t cmdtrack;
-	// references
+	uintptr_t cmdrow;
+	// drag
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
 	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;
-	psy_audio_OrderIndex dragseqpos;	
+	psy_audio_OrderIndex dragseqpos;
+	// references	
 	psy_audio_SequenceEntry* sequenceentry;
 	Workspace* workspace;	
 } SeqEditorState;
@@ -97,15 +101,38 @@ INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 	return &self->component;
 }
 
+// SeqEditorLine
+typedef struct SeqEditorLine {
+	// inherits
+	psy_ui_Component component;
+	// references
+	SeqEditorState* state;
+} SeqEditorLine;
+
+void seqeditorline_init(SeqEditorLine*,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	SeqEditorState*);
+
+SeqEditorLine* seqeditorline_alloc(void);
+SeqEditorLine* seqeditorline_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	SeqEditorState*);
+
+void seqeditorline_updateposition(SeqEditorLine*,
+	psy_dsp_big_beat_t position);
+
+INLINE psy_ui_Component* seqeditorline_base(SeqEditorLine* self)
+{
+	return &self->component;
+}
+
 // SeqEditorPlayline
 typedef struct SeqEditorPlayline {
 	// inherits
-	psy_ui_Component component;
+	SeqEditorLine seqeditorline;
 	// internal
 	bool drag;
-	double dragbase;
-	// references
-	SeqEditorState* state;
+	double dragbase;	
 } SeqEditorPlayline;
 
 void seqeditorplayline_init(SeqEditorPlayline*,
@@ -117,23 +144,6 @@ SeqEditorPlayline* seqeditorplayline_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState*);
 void seqeditorplayline_update(SeqEditorPlayline*);
-
-// SeqEditorCursorline
-typedef struct SeqEditorCursorline {
-	// inherits
-	psy_ui_Component component;
-	// references
-	SeqEditorState* state;
-} SeqEditorCursorline;
-
-void seqeditorcursorline_init(SeqEditorCursorline*,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*);
-
-SeqEditorCursorline* seqeditorcursorline_alloc(void);
-SeqEditorCursorline* seqeditorcursorline_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*);
 
 // SeqEditorPatternEntry
 typedef struct SeqEditorPatternEntry {
@@ -173,7 +183,8 @@ typedef struct SeqEditorTrack {
 	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
 	PatternViewSkin* skin;
-	psy_ui_Component* view;	
+	psy_ui_Component* view;
+	SeqEditorLine* dragline;
 } SeqEditorTrack;
 
 void seqeditortrack_init(SeqEditorTrack*,
@@ -221,7 +232,8 @@ typedef struct SeqEditorTracks {
 	Workspace* workspace;	
 	PatternViewSkin* skin;
 	SeqEditorPlayline* playline;
-	SeqEditorCursorline* cursorline;
+	SeqEditorLine* cursorline;
+	SeqEditorLine* seqeditposline;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,

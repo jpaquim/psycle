@@ -38,12 +38,12 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence* sequence,
 	uintptr_t trackidx)
-{
+{	
 	trackbox_init(&self->trackbox, parent, view);
 	sequencetrackbox_vtable_init(self);
 	self->sequence = sequence;
 	self->trackidx = trackidx;
-	trackbox_setindex(&self->trackbox, trackidx);
+	trackbox_setindex(&self->trackbox, trackidx);	
 	if (self->sequence) {
 		psy_signal_connect(&self->sequence->signal_solochanged, self,
 			sequencetrackbox_onsolochanged);
@@ -133,6 +133,18 @@ void sequencetrackbox_onmutechanged(SequenceTrackBox* self,
 			trackbox_mute(&self->trackbox);
 		} else {
 			trackbox_unmute(&self->trackbox);
+		}
+	}
+}
+
+void sequencetrackbox_showtrackname(SequenceTrackBox* self)
+{
+	if (self->sequence) {
+		psy_audio_SequenceTrack* track;
+
+		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
+		if (track) {
+			trackbox_setdescription(&self->trackbox, track->name);
 		}
 	}
 }
