@@ -171,6 +171,7 @@ void psy_audio_sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patte
 	self->tracks = 0;
 	self->patterns = patterns;
 	self->preventreposition = FALSE;
+	self->sequencerduration = NULL;
 	psy_audio_trackstate_init(&self->trackstate);
 }
 
@@ -193,7 +194,10 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 	psy_list_deallocate(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
 	psy_audio_trackstate_dispose(&self->trackstate);	
-	psy_audio_sequence_disposesignals(self);
+	psy_audio_sequence_disposesignals(self);	
+	if (self->sequencerduration) {
+		free(self->sequencerduration);
+	}
 }
 
 void psy_audio_sequence_disposesignals(psy_audio_Sequence* self)
@@ -655,58 +659,74 @@ void psy_audio_sequence_clearplayselection(psy_audio_Sequence* self)
 	}
 }
 
-psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
+void psy_audio_sequence_startcalcdurationinms(psy_audio_Sequence* self)
+{
+	self->durationms = 0.0;
+	if (!self->sequencerduration) {
+		self->sequencerduration =
+			(psy_audio_Sequencer*)malloc(sizeof(psy_audio_Sequencer));
+	}
+	if (!self->sequencerduration) {
+		return;
+	}
+	psy_audio_sequencer_init(self->sequencerduration, self, NULL);
+	psy_audio_sequencer_stoploop(self->sequencerduration);
+	psy_audio_sequencer_start(self->sequencerduration);
+	self->sequencerduration->calcduration = TRUE;
+}
+
+psy_dsp_big_seconds_t psy_audio_sequence_endcalcdurationinmsresult(psy_audio_Sequence* self)
 {
 	psy_dsp_big_seconds_t rv;
-	psy_audio_Sequencer sequencer;	
+
+	rv = psy_audio_sequencer_currplaytime(self->sequencerduration);
+	psy_audio_sequencer_dispose(self->sequencerduration);
+	return rv;
+}
+
+bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
+{		
 	uintptr_t maxamount;
 	uintptr_t amount;
 	uintptr_t numsamplex;
 		
-	psy_audio_sequencer_init(&sequencer, self, NULL);
-	psy_audio_sequencer_stoploop(&sequencer);
-	psy_audio_sequencer_start(&sequencer);
-	sequencer.calcduration = TRUE;	
-	while (psy_audio_sequencer_playing(&sequencer)) {
-		numsamplex = psy_audio_MAX_STREAM_SIZE;
-		maxamount = numsamplex;		
-		do {
-			amount = maxamount;
-			if (amount > numsamplex) {
-				amount = numsamplex;
-			}
-			if (sequencer.linetickcount <=
-				psy_audio_sequencer_frametooffset(&sequencer, amount)) {
-				if (sequencer.linetickcount > 0) {
-					uintptr_t pre;
+	numsamplex = 8192; // psy_audio_MAX_STREAM_SIZE;
+	maxamount = numsamplex;		
+	do {
+		amount = maxamount;
+		if (amount > numsamplex) {
+			amount = numsamplex;
+		}
+		if (self->sequencerduration->linetickcount <=
+			psy_audio_sequencer_frametooffset(self->sequencerduration, amount)) {
+			if (self->sequencerduration->linetickcount > 0) {
+				uintptr_t pre;
 
-					pre = psy_audio_sequencer_frames(&sequencer,
-						sequencer.linetickcount);
+				pre = psy_audio_sequencer_frames(self->sequencerduration,
+					self->sequencerduration->linetickcount);
+				if (pre) {
+					pre--;
 					if (pre) {
-						pre--;
-						if (pre) {
-							psy_audio_sequencer_frametick(&sequencer, pre);
-							numsamplex -= pre;
-							amount -= pre;
-							sequencer.linetickcount -=
-								psy_audio_sequencer_frametooffset(
-									&sequencer, pre);
-						}
+						psy_audio_sequencer_frametick(self->sequencerduration, pre);
+						numsamplex -= pre;
+						amount -= pre;
+						self->sequencerduration->linetickcount -=
+							psy_audio_sequencer_frametooffset(
+								self->sequencerduration, pre);
 					}
-				}					
-				psy_audio_sequencer_onnewline(&sequencer);
-			}			
-			if (amount > 0) {
-				psy_audio_sequencer_frametick(&sequencer, amount);
-				numsamplex -= amount;
-				sequencer.linetickcount -=
-					psy_audio_sequencer_frametooffset(&sequencer, amount);				
-			}
-		} while (numsamplex > 0);
-	}
-	rv = psy_audio_sequencer_currplaytime(&sequencer);	
-	psy_audio_sequencer_dispose(&sequencer);	
-	return rv;
+				}
+			}					
+			psy_audio_sequencer_onnewline(self->sequencerduration);
+		}			
+		if (amount > 0) {
+			psy_audio_sequencer_frametick(self->sequencerduration, amount);
+			numsamplex -= amount;
+			self->sequencerduration->linetickcount -=
+				psy_audio_sequencer_frametooffset(self->sequencerduration,
+					amount);
+		}
+	} while (numsamplex > 0);
+	return (psy_audio_sequencer_playing(self->sequencerduration));	
 }
 
 void sequence_onpatternlengthchanged(psy_audio_Sequence* self,

@@ -753,6 +753,10 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 }
 
 // SequenceViewDuration
+// prototypes
+static void sequenceduration_ontimer(SequenceViewDuration* self, psy_ui_Component* sender,
+	uintptr_t id);
+static void sequenceduration_ondestroy(SequenceViewDuration* self, psy_ui_Component* sender);	
 // implementation
 void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_audio_Sequence* sequence, Workspace* workspace)
@@ -779,23 +783,72 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_preventtranslation(&self->duration);
 	psy_ui_component_setstyletypes(psy_ui_label_base(&self->duration),
 		STYLE_DURATION_TIME, STYLE_DURATION_TIME, STYLE_DURATION_TIME);
-	sequenceduration_update(self);	
+	self->calcduration = FALSE;
+	psy_signal_connect(&self->component.signal_timer, self,
+		sequenceduration_ontimer);	
+	psy_signal_connect(&self->component.signal_destroy, self,
+		sequenceduration_ontimer);
+	psy_ui_component_starttimer(&self->component, 0, 50);
+	sequenceduration_update(self);
+}
+
+void sequenceduration_ondestroy(SequenceViewDuration* self, psy_ui_Component* sender)
+{	
+	psy_ui_component_stoptimer(&self->component, 0);
+	sequenceduration_stopdurationcalc(self);
+}
+
+void sequenceduration_stopdurationcalc(SequenceViewDuration* self)
+{
+	if (self->calcduration) {
+		psy_audio_sequence_endcalcdurationinmsresult(self->sequence);
+		self->calcduration = FALSE;
+	}
 }
 
 void sequenceduration_update(SequenceViewDuration* self)
 {			
 	psy_dsp_big_beat_t duration_bts;
-
-	duration_bts = psy_audio_sequence_duration(self->sequence);
+	
+	duration_bts = psy_audio_sequence_duration(self->sequence);	
 	if (self->duration_bts != duration_bts) {
 		char text[64];
 
 		self->duration_bts = duration_bts;
-		self->duration_ms = psy_audio_sequence_calcdurationinms(self->sequence);
-		psy_snprintf(text, 64, " %02dm%02ds %.2fb",
-			(int)(self->duration_ms / 60), ((int)self->duration_ms % 60),
-			(float)self->duration_bts);
+		if (self->calcduration) {
+			self->duration_ms =
+				psy_audio_sequence_endcalcdurationinmsresult(self->sequence);
+			self->calcduration = FALSE;
+		}
+		if (!self->calcduration) {
+			self->calcduration = TRUE;
+			psy_audio_sequence_startcalcdurationinms(self->sequence);
+			sequenceduration_ontimer(self, &self->component, 0);
+		}
+		psy_snprintf(text, 64, "--m--s %.2fb",	(float)self->duration_bts);
 		psy_ui_label_settext(&self->duration, text);
+	}
+}
+
+void sequenceduration_ontimer(SequenceViewDuration* self, psy_ui_Component* sender,
+	uintptr_t id)
+{
+	if (self->calcduration) {
+		uintptr_t i;
+
+		for (i = 0; i < 20; ++i) {
+			if (!psy_audio_sequence_calcdurationinms(self->sequence)) {
+				char text[64];
+
+				self->duration_ms = psy_audio_sequence_endcalcdurationinmsresult(self->sequence);
+				psy_snprintf(text, 64, " %02dm%02ds %.2fb",
+					(int)(self->duration_ms / 60), ((int)self->duration_ms % 60),
+					(float)self->duration_bts);
+				psy_ui_label_settext(&self->duration, text);
+				self->calcduration = FALSE;
+				break;
+			}
+		}
 	}
 }
 
@@ -1279,6 +1332,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace,
 		self->patterns = &workspace->song->patterns;		
 		self->listview.patterns = &workspace->song->patterns;		
 		self->state.sequence = &workspace->song->sequence;
+		sequenceduration_stopdurationcalc(self->duration.sequence);
 		self->duration.sequence = &workspace->song->sequence;
 		if (self->state.sequence && self->state.sequence->patterns) {
 			psy_signal_connect(&self->state.sequence->patterns->signal_namechanged,
@@ -1359,6 +1413,7 @@ void sequenceview_changeplayposition(SequenceView* self)
 void sequenceview_onsequencechanged(SequenceView* self,
 	psy_audio_Sequence* sender)
 {		
+	sequenceduration_stopdurationcalc(self->duration.sequence);
 	sequencetrackheaders_build(&self->trackheader);
 	sequenceduration_update(&self->duration);	
 	psy_ui_component_updateoverflow(&self->listview.component);

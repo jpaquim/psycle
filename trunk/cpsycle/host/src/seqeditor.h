@@ -179,8 +179,7 @@ typedef struct SeqEditorTrack {
 	SeqEditorState* state;
 	bool dragstarting;	
 	double dragstartpx;	
-	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
-	psy_dsp_big_beat_t itemdragposition;	
+	psy_audio_SequenceEntryNode* drag_sequenceitem_node;	
 	Workspace* workspace;
 	PatternViewSkin* skin;
 	psy_ui_Component* view;
