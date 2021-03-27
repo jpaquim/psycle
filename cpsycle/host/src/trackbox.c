@@ -18,25 +18,32 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setdefaultalign(&self->component,
+	psy_ui_component_init(trackbox_base(self), parent, view);
+	psy_ui_component_setdefaultalign(trackbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
-	psy_ui_component_setspacing(&self->component, &spacing);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
-	psy_ui_label_init(&self->trackidx, &self->component, view);
+	psy_ui_component_setspacing(trackbox_base(self), &spacing);
+	psy_ui_component_setalignexpand(trackbox_base(self),
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->trackidx, trackbox_base(self), view);
 	psy_ui_label_preventtranslation(&self->trackidx);
 	psy_ui_label_settext(&self->trackidx, "00");
 	psy_ui_label_setcharnumber(&self->trackidx, 3);
-	psy_ui_button_init(&self->solo, &self->component, view);
+	psy_ui_button_init(&self->solo, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->solo);
 	psy_ui_button_settext(&self->solo, "S");	
-	psy_ui_button_init(&self->mute, &self->component, view);
+	psy_ui_button_init(&self->mute, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->mute);
-	psy_ui_button_settext(&self->mute, "M");	
-	psy_ui_button_init(&self->close, & self->component, view);
+	psy_ui_button_settext(&self->mute, "M");
+	psy_ui_label_init(&self->desc, trackbox_base(self), view);
+	psy_ui_label_preventtranslation(&self->desc);
+	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init(&self->close, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->close);
-	psy_ui_button_settext(&self->close, "X");	
+	psy_ui_button_settext(&self->close, "X");
+	psy_ui_component_setalign(psy_ui_button_base(&self->close),
+		psy_ui_ALIGN_RIGHT);
 }
 
 TrackBox* trackbox_alloc(void)
@@ -57,6 +64,11 @@ TrackBox* trackbox_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
+void trackbox_setdescription(TrackBox* self, const char* text)
+{
+	psy_ui_label_settext(&self->desc, text);
+}
+
 void trackbox_setindex(TrackBox* self, uintptr_t index)
 {
 	char text[128];
@@ -67,7 +79,7 @@ void trackbox_setindex(TrackBox* self, uintptr_t index)
 	self->mute.data = index;
 	self->close.data = index;
 	if (index == 0) {
-		psy_ui_component_hide(&self->close.component);
+		psy_ui_component_hide(psy_ui_button_base(&self->close));
 	}
 }
 

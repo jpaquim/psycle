@@ -16,9 +16,10 @@ typedef struct TrackBox {
 	// inherits
 	psy_ui_Component component;
 	// internal
-	psy_ui_Label trackidx;	
+	psy_ui_Label trackidx;
 	psy_ui_Button solo;
 	psy_ui_Button mute;
+	psy_ui_Label desc;
 	psy_ui_Button close;
 } TrackBox;
 
@@ -29,6 +30,7 @@ TrackBox* trackbox_alloc(void);
 TrackBox* trackbox_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
 
+void trackbox_setdescription(TrackBox*, const char* text);
 void trackbox_setindex(TrackBox*, uintptr_t index);
 void trackbox_mute(TrackBox*);
 void trackbox_unmute(TrackBox*);

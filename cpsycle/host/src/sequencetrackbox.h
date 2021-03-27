@@ -32,6 +32,8 @@ SequenceTrackBox* sequencetrackbox_alloc(void);
 SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx);
 
+void sequencetrackbox_showtrackname(SequenceTrackBox*);
+
 INLINE psy_ui_Component* sequencetrackbox_base(SequenceTrackBox* self)
 {
 	return &self->trackbox.component;
