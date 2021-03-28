@@ -7,6 +7,7 @@
 // local
 #include "patterncmds.h"
 #include "skingraphics.h"
+#include "trackbox.h"
 // std
 #include <math.h>
 // platform
@@ -344,6 +345,7 @@ static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
 static bool trackerheader_hasredraw(const TrackerHeader*);
 static bool trackerheader_hastrackredraw(const TrackerHeader*,
 	uintptr_t track);
+
 // vtable
 static psy_ui_ComponentVtable trackerheader_vtable;
 static bool trackerheader_vtable_initialized = FALSE;
@@ -385,12 +387,29 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->playing = FALSE;
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		trackerheader_onpatterncursorchanged);	
+	trackerheader_build(self);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void trackerheader_ondestroy(TrackerHeader* self)
 {
 	psy_table_disposeall(&self->trackstates, (psy_fp_disposefunc)NULL);
+}
+
+void trackerheader_build(TrackerHeader* self)
+{
+	/*uintptr_t trackidx;
+
+	psy_ui_component_clear(&self->component);
+	for (trackidx = 0; trackidx < trackergridstate_numsongtracks(self->gridstate);
+			++trackidx) {
+		TrackBox* trackbox;
+
+		trackbox = trackbox_allocinit(&self->component, NULL);
+			//&self->component);
+		trackbox_setindex(trackbox, trackidx);
+		psy_ui_component_setalign(trackbox_base(trackbox), psy_ui_ALIGN_LEFT);
+	}*/
 }
 
 void trackerheader_setsharedgridstate(TrackerHeader* self, TrackerGridState*

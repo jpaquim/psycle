@@ -453,10 +453,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							ps.rcPaint.left, ps.rcPaint.top,
 							clipsize.x, clipsize.y);
 						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);												
-						// draw
-						if (imp->component->debugflag == 90) {
-							imp = imp;
-						}
+						// draw						
 						imp->imp.vtable->dev_draw(&imp->imp, &g);
 						// clean up font
 						if (hPrevFont) {
@@ -685,21 +682,41 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							double pos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
-							psy_ui_Value scrolltop;
+							double scrolltoppx;
 							const psy_ui_TextMetric* tm;
 
 							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);							
-							scrolltop = psy_ui_component_scrolltop(imp->component);
-							pos =  psy_ui_value_px(&scrolltop, tm) / 
+								&scrollmax);														
+							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+								scrolltoppx = psy_ui_component_scrolltoppx(imp->component);
+							} else {
+								psy_ui_RealRectangle position;
+
+								position = psy_ui_component_position(imp->component);
+								scrolltoppx = -position.top;
+							}
+							pos =  scrolltoppx / 
 								psy_ui_value_px(&imp->component->scrollstepy, tm) -
 								imp->component->wheelscroll;
 							if (pos < (double)scrollmin) {
 								pos = (double)scrollmin;
 							}							
-							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstepy, pos));														
+							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {								
+								psy_ui_component_setscrolltop(imp->component,
+									psy_ui_mul_value_real(imp->component->scrollstepy, pos));
+							} else {
+								psy_ui_RealRectangle position;
+								double diff;
+
+								position = psy_ui_component_position(imp->component);
+								diff = psy_ui_value_px(&imp->component->scrollstepy, tm) * pos;
+								psy_ui_component_move(imp->component,
+									psy_ui_point_make(
+										psy_ui_value_makepx(position.left),
+										psy_ui_value_makepx(-diff)));
+								psy_signal_emit(&imp->component->signal_scroll, imp->component, 0);
+							}
 							accumwheeldelta -= deltaperline;
 						}
 						while (accumwheeldelta <= -deltaperline)
@@ -707,21 +724,41 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							double pos;
 							intptr_t scrollmin;
 							intptr_t scrollmax;
-							psy_ui_Value scrolltop;
+							double scrolltoppx;
 							const psy_ui_TextMetric* tm;
 
 							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);		
-							scrolltop = psy_ui_component_scrolltop(imp->component);
-							pos = psy_ui_value_px(&scrolltop, tm) /
+							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+								scrolltoppx = psy_ui_component_scrolltoppx(imp->component);
+							} else {
+								psy_ui_RealRectangle position;
+
+								position = psy_ui_component_position(imp->component);
+								scrolltoppx = -position.top;
+							}
+							pos = scrolltoppx /
 								psy_ui_value_px(&imp->component->scrollstepy, tm) +
 								imp->component->wheelscroll;
 							if (pos > (double)scrollmax) {
 								pos = (double)scrollmax;
-							}							
-							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstepy, pos));														
+							}
+							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+								psy_ui_component_setscrolltop(imp->component,
+									psy_ui_mul_value_real(imp->component->scrollstepy, pos));
+							} else {
+								psy_ui_RealRectangle position;
+								double diff;
+
+								position = psy_ui_component_position(imp->component);
+								diff = psy_ui_value_px(&imp->component->scrollstepy, tm) * pos;								
+								psy_ui_component_move(imp->component,
+									psy_ui_point_make(
+										psy_ui_value_makepx(position.left),
+										psy_ui_value_makepx(-diff)));
+								psy_signal_emit(&imp->component->signal_scroll, imp->component, 0);
+							}
 							accumwheeldelta += deltaperline;
 						}
 					}

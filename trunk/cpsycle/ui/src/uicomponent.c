@@ -1221,15 +1221,28 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		psy_ui_Size size;		
 		intptr_t scrollstepy_px;
 		psy_ui_Value scrolltop;
+		double scrolltoppx;
 
 		tm = psy_ui_component_textmetric(self);
-		size = psy_ui_component_size(self);		
+		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			size = psy_ui_component_size(self);
+		} else {
+			size = psy_ui_component_size(psy_ui_component_parent(self));
+		}
 		scrollstepy_px = (intptr_t)psy_ui_value_px(&self->scrollstepy, tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxlines = (int)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);
-		currline = (intptr_t)(psy_ui_value_px(&scrolltop, tm) / scrollstepy_px);
+		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+			scrolltoppx = psy_ui_component_scrolltoppx(self);
+		} else {
+			psy_ui_RealRectangle position;
+
+			position = psy_ui_component_position(self);
+			scrolltoppx = -position.left;
+		}
+		currline = (intptr_t)(scrolltoppx / scrollstepy_px);
 		if ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
 				psy_ui_OVERFLOW_VSCROLLCENTER) {
 			psy_ui_component_setverticalscrollrange(self, -visilines / 2,
