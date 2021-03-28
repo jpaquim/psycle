@@ -1046,14 +1046,16 @@ void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		psy_ui_RealRectangle r;
 
 		child = (psy_ui_Component*)p->entry;
-		r = psy_ui_component_position(child);
-		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
-			child->imp->vtable->dev_mousedown(child->imp, ev);
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;			
-			break;
+		if (psy_ui_component_visible(child)) {
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;
+				child->imp->vtable->dev_mousedown(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;
+				break;
+			}
 		}
 	}	
 }
@@ -1076,14 +1078,16 @@ void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			psy_ui_RealRectangle r;
 
 			child = (psy_ui_Component*)p->entry;
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;
-				child->imp->vtable->dev_mouseup(child->imp, ev);
-				ev->pt.x += r.left;
-				ev->pt.y += r.top;				
-				break;
+			if (psy_ui_component_visible(child)) {
+				r = psy_ui_component_position(child);
+				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+					ev->pt.x -= r.left;
+					ev->pt.y -= r.top;
+					child->imp->vtable->dev_mouseup(child->imp, ev);
+					ev->pt.x += r.left;
+					ev->pt.y += r.top;
+					break;
+				}
 			}
 		}
 	}	
@@ -1142,12 +1146,14 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			psy_ui_RealRectangle r;
 
 			child = (psy_ui_Component*)p->entry;
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				child->imp->vtable->dev_mousemove(child->imp, ev);
-				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				break;
+			if (psy_ui_component_visible(child)) {
+				r = psy_ui_component_position(child);
+				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+					psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
+					child->imp->vtable->dev_mousemove(child->imp, ev);
+					psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
+					break;
+				}
 			}
 		}
 	}
@@ -1163,13 +1169,15 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 
 		child = (psy_ui_Component*)p->entry;
 		r = psy_ui_component_position(child);
-		if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-			ev->pt.x -= r.left;
-			ev->pt.y -= r.top;
-			child->imp->vtable->dev_mousedoubleclick(child->imp, ev);			
-			ev->pt.x += r.left;
-			ev->pt.y += r.top;
-			break;
+		if (psy_ui_component_visible(child)) {
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;
+				child->imp->vtable->dev_mousedoubleclick(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;
+				break;
+			}
 		}
 	}	
 }
