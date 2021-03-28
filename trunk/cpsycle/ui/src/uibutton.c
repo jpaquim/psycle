@@ -143,7 +143,10 @@ void onlanguagechanged(psy_ui_Button* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_ui_translate(self->text));	
+	if (self->translate) {
+		psy_strreset(&self->translation, psy_ui_translate(self->text));
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)

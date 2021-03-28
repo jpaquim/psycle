@@ -25,18 +25,14 @@ typedef struct ConfirmBox {
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_execute;
-	// ui elements
+	// internal
 	psy_ui_Component view;
 	psy_ui_Label title;
 	psy_ui_Label header;
 	psy_ui_Button yes;
 	psy_ui_Button no;
-	psy_ui_Button cont;			
-	ConfirmBoxAction mode;
-	// internal data
-	char* titlestr;
-	char* yesstr;
-	char* nostr;	
+	psy_ui_Button cont;	
+	ConfirmBoxAction mode;	
 	// references
 	Workspace* workspace;
 } ConfirmBox;

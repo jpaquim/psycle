@@ -18,27 +18,17 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 {	
 	psy_ui_component_init(confirmbox_base(self), parent, NULL);
 	self->workspace = workspace;
-	self->mode = CONFIRM_CLOSE;
-	self->titlestr = strdup("");
-	self->yesstr = strdup("");
-	self->nostr = strdup("");	
+	self->mode = CONFIRM_CLOSE;	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self),
 		psy_ui_ALIGN_CENTER);
-	psy_ui_label_init(&self->title, &self->view, NULL);
-	psy_ui_label_init(&self->header, &self->view, NULL);
-	psy_ui_button_init_connect(&self->yes, &self->view, NULL,
+	psy_ui_label_init_text(&self->title, &self->view, NULL, "msg.psyreq");
+	psy_ui_label_init_text(&self->header, &self->view, NULL, "");
+	psy_ui_button_init_text_connect(&self->yes, &self->view, NULL, "msg.yes",
 		self, confirmbox_onok);
-	psy_ui_button_init_connect(&self->no, &self->view, NULL,
+	psy_ui_button_init_text_connect(&self->no, &self->view, NULL, "msg.no",
 		self, confirmbox_onno);
-	psy_ui_button_init_connect(&self->cont, &self->view, NULL,
-		self, confirmbox_oncontinue);
-	psy_ui_label_settext(&self->title, self->titlestr); // "no Psycle, but your Song is not saved!");
-	psy_ui_label_preventtranslation(&self->title);
-	//psy_ui_label_setcharnumber(&self->title, 48);
-	psy_ui_label_settext(&self->header, "");
-	psy_ui_button_settext(&self->yes, self->yesstr); // "Save and no"));
-	psy_ui_button_settext(&self->no, self->nostr); // "no (no save)"));
-	psy_ui_button_settext(&self->cont, "continue");
+	psy_ui_button_init_text_connect(&self->cont, &self->view, NULL, "msg.cont",
+		self, confirmbox_oncontinue);	
 	psy_ui_component_align(&self->component);
 	confirmbox_initalign(self);
 	psy_signal_init(&self->signal_execute);
@@ -48,10 +38,7 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 
 void checkunsavedbox_ondestroy(ConfirmBox* self, psy_ui_Component* sender)
 {
-	psy_signal_dispose(&self->signal_execute);
-	free(self->titlestr);
-	free(self->yesstr);
-	free(self->nostr);
+	psy_signal_dispose(&self->signal_execute);	
 }
 
 void confirmbox_initalign(ConfirmBox* self)
@@ -69,18 +56,12 @@ void confirmbox_initalign(ConfirmBox* self)
 
 void confirmbox_setlabels(ConfirmBox* self, const char* title,
 	const char* yesstr, const char* nostr)
-{
-	free(self->titlestr);
-	self->titlestr = strdup(title);
-	free(self->yesstr);
-	self->yesstr = strdup(yesstr);
-	free(self->nostr);
-	self->nostr = strdup(nostr);
-	psy_ui_label_settext(&self->title, self->titlestr); // "no Psycle, but your Song is not saved!");
+{		
+	psy_ui_label_settext(&self->title, title); 
 	psy_ui_label_settext(&self->header, "");
-	psy_ui_button_settext(&self->yes, self->yesstr); // "Save and no"));
-	psy_ui_button_settext(&self->no, self->nostr); // "no (no save)"));
-	psy_ui_button_settext(&self->cont, "Continue");
+	psy_ui_button_settext(&self->yes, yesstr);
+	psy_ui_button_settext(&self->no, nostr);
+	psy_ui_button_settext(&self->cont, "msg.cont");
 	psy_ui_component_align(&self->component);
 }
 
