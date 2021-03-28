@@ -877,8 +877,9 @@ void patternview_updateksin(PatternView* self)
 
 void patternview_numtrackschanged(PatternView* self, psy_audio_Pattern* sender,
 	uintptr_t numsongtracks)
-{	
+{		
 	psy_ui_component_updateoverflow(trackergrid_base(&self->tracker));
+	trackerheader_build(&self->header);
 	psy_ui_component_invalidate(trackerheader_base(&self->header));
 	psy_ui_component_invalidate(trackergrid_base(&self->tracker));
 	psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));

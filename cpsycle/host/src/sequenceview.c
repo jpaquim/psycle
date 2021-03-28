@@ -17,7 +17,8 @@
 
 // SequenceButtons
 // implementation
-void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Workspace* workspace)
+void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {	
 	psy_ui_Margin spacing;
 
@@ -284,6 +285,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 	psy_audio_Sequence* sequence;
 
 	psy_ui_component_clear(&self->component);
+	self->component.debugflag = 200;
 	sequence = self->state->sequence;
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
@@ -294,6 +296,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 			psy_list_next(&t), ++c) {
 			SequenceTrackBox* track;
 
+			// track = sequencetrackbox_allocinit(&self->component, &self->component,
 			track = sequencetrackbox_allocinit(&self->component, NULL,
 				self->state->sequence, c);
 			if (track) {				
@@ -306,9 +309,11 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 					sequencetrackheaders_ondeltrack);
 			}
 		}
+		// newtrack = psy_ui_button_allocinit(&self->component, &self->component);
 		newtrack = psy_ui_button_allocinit(&self->component, NULL);
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
+			newtrack->component.debugflag = 400;
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				sequencetrackheaders_onnewtrack);
@@ -1332,7 +1337,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace,
 		self->patterns = &workspace->song->patterns;		
 		self->listview.patterns = &workspace->song->patterns;		
 		self->state.sequence = &workspace->song->sequence;
-		sequenceduration_stopdurationcalc(self->duration.sequence);
+		sequenceduration_stopdurationcalc(&self->duration);
 		self->duration.sequence = &workspace->song->sequence;
 		if (self->state.sequence && self->state.sequence->patterns) {
 			psy_signal_connect(&self->state.sequence->patterns->signal_namechanged,
@@ -1413,7 +1418,7 @@ void sequenceview_changeplayposition(SequenceView* self)
 void sequenceview_onsequencechanged(SequenceView* self,
 	psy_audio_Sequence* sender)
 {		
-	sequenceduration_stopdurationcalc(self->duration.sequence);
+	sequenceduration_stopdurationcalc(&self->duration);
 	sequencetrackheaders_build(&self->trackheader);
 	sequenceduration_update(&self->duration);	
 	psy_ui_component_updateoverflow(&self->listview.component);

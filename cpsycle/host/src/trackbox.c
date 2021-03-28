@@ -18,7 +18,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(trackbox_base(self), parent, view);
+	psy_ui_component_init(trackbox_base(self), parent, view);	
 	psy_ui_component_setdefaultalign(trackbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
@@ -80,7 +80,7 @@ void trackbox_setindex(TrackBox* self, uintptr_t index)
 	self->close.data = index;
 	if (index == 0) {
 		psy_ui_component_hide(psy_ui_button_base(&self->close));
-	}
+	}	
 }
 
 void trackbox_mute(TrackBox* self)

@@ -65,6 +65,7 @@ void trackerheader_init(TrackerHeader*, psy_ui_Component* parent, TrackConfig*,
 void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*,
 	TrackConfig*);
 void trackerheader_updatecoords(TrackerHeader*);
+void trackerheader_build(TrackerHeader*);
 
 INLINE psy_ui_Component* trackerheader_base(TrackerHeader* self)
 {
