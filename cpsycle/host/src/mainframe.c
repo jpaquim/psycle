@@ -357,7 +357,7 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 void mainframe_initkbdhelpbutton(MainFrame* self)
 {	
 	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar, NULL,
-		"Kbd", self, mainframe_ontogglekbdhelp);
+		"main.kbd", self, mainframe_ontogglekbdhelp);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
 	psy_ui_bitmap_loadresource(&self->togglekbdhelp.bitmapicon, IDB_KBD);
@@ -1295,27 +1295,19 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 		if (options == CONFIRM_CLOSE) {
 			self->checkunsavedbox.mode = options;
 			confirmbox_setlabels(&self->checkunsavedbox,
-				"Exit Psycle Request, but your Song is not saved!",
-				"Save and Exit",
-				"Exit (no save)");
+				"msg.psyexit", "msg.saveexit", "msg.nosaveexit");
 		} else if (options == CONFIRM_NEW) {				
 			self->checkunsavedbox.mode = options;
 			confirmbox_setlabels(&self->checkunsavedbox,
-				"New Song Request, but your Song is not saved!",
-				"Save and Create New Song",
-				"Create New Song (no save)");
+				"msg.newsong", "msg.savenew", "msg.nosavenew");
 		} else if (options == CONFIRM_LOAD) {
 			self->checkunsavedbox.mode = options;
 			confirmbox_setlabels(&self->checkunsavedbox,
-				"Song Load Request, but your Song is not saved!",
-				"Save and Load Song",
-				"Load Song (no save)");
+				"msg.loadsong", "msg.saveload", "msg.nosaveload");				
 		} else if (options == CONFIRM_SEQUENCECLEAR) {
 			self->checkunsavedbox.mode = options;
 			confirmbox_setlabels(&self->checkunsavedbox,
-				"Sequence Clear Request, Do you really want clear the sequence and pattern data?",
-				"Yes",
-				"No");
+				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
 	tabbar_select(&self->tabbar, index);

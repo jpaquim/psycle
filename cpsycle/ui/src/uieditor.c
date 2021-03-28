@@ -226,7 +226,20 @@ void psy_ui_editor_getrange(psy_ui_Editor* self, intptr_t start, intptr_t end, c
 void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
 {
 	if (text) {
+		bool readonly;
+
+		readonly = sci(self, SCI_GETREADONLY, 0, 0);
+		sci(self, SCI_SETREADONLY, 0, 0);
+		sci(self, SCI_CANCEL, 0, 0);
+		sci(self, SCI_SETUNDOCOLLECTION, 0, 0);
 		sci(self, SCI_SETTEXT, strlen(text), (uintptr_t)text);
+		sci(self, SCI_SETUNDOCOLLECTION, 1, 0);
+		sci(self, EM_EMPTYUNDOBUFFER, 0, 0);
+		sci(self, SCI_SETSAVEPOINT, 0, 0);
+		sci(self, SCI_GOTOPOS, 0, 0);
+		if (readonly) {
+			sci(self, SCI_SETREADONLY, 1, 0);
+		}
 	}
 }
 

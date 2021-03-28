@@ -284,8 +284,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 {
 	psy_audio_Sequence* sequence;
 
-	psy_ui_component_clear(&self->component);
-	self->component.debugflag = 200;
+	psy_ui_component_clear(&self->component);	
 	sequence = self->state->sequence;
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
@@ -312,8 +311,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 		// newtrack = psy_ui_button_allocinit(&self->component, &self->component);
 		newtrack = psy_ui_button_allocinit(&self->component, NULL);
 		if (newtrack) {
-			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
-			newtrack->component.debugflag = 400;
+			psy_ui_button_settext(newtrack, "sequencerview.new-trk");			
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				sequencetrackheaders_onnewtrack);
@@ -775,7 +773,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_label_init(&self->desc, &self->component, NULL);
-	psy_ui_label_setcharnumber(&self->desc, 9);
+	psy_ui_label_setcharnumber(&self->desc, 10);
 	psy_ui_label_settext(&self->desc, "sequencerview.duration");
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);

@@ -987,6 +987,8 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 		newtrack = psy_ui_button_allocinit(&self->component, NULL);
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
+			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),
+				psy_ui_size_makeem(0.0, 2.0));
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				seqeditortrackdesc_onnewtrack);
@@ -1250,6 +1252,9 @@ void seqeditortracks_onmousemove(SeqEditorTracks* self,
 		self->state->updatecursorposition = TRUE;
 		seqeditortracks_updatecursorlineposition(self);
 	}
+	if (self->state->dragstatus && self->state->dragmode == SEQEDITORDRAG_MOVE) {
+		seqeditortracks_updateseqeditlineposition(self);
+	}
 	seqeditortracks_outputstatusposition(self, ev->pt.x);
 }
 
@@ -1295,9 +1300,9 @@ void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	zoombox_init(&self->zoombox_beat, &self->component);
 	psy_ui_button_init_text(&self->move, &self->component, NULL,
-		"Move");
+		"seqedit.move");
 	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
-		"Reorder");
+		"seqedit.reorder");
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setspacing(&self->component, &spacing);	
 }

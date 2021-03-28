@@ -57,6 +57,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "help", "Help");
 	psy_property_set_str(section, "about", "About");
 	psy_property_set_str(section, "greetings", "Greetings");
+	psy_property_set_str(section, "licence", "Licence");	
 	psy_property_set_str(section, "contributors-credits", "Contributors / Credits");
 	psy_property_set_str(section, "ok", "OK");
 	// Greetings
@@ -443,6 +444,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "hideseqeditor", "Hide SequenceEditor");
 	psy_property_set_str(section, "showstepsequencer", "Show Stepsequencer");
 	psy_property_set_str(section, "hidestepsequencer", "Hide Stepsequencer");
+	// SeqEdit
+	section = psy_property_append_section(lang, "seqedit");
+	psy_property_set_str(section, "move", "Move");
+	psy_property_set_str(section, "reorder", "Reorder");
     // NewMachine	
 	section = psy_property_append_section(lang, "newmachine");
 	psy_property_set_str(section, "all", "All");
@@ -537,4 +542,20 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "undo", "Edit Undo");
 	psy_property_set_str(section, "redo", "Edit Redo");
 	psy_property_set_str(section, "followsong", "Follow Song");	
+	// Messages
+	section = psy_property_append_section(lang, "msg");
+	psy_property_set_str(section, "psyreq", "Psycle Request");
+	psy_property_set_str(section, "seqclear", "Sequence Clear Request! Do you really want clear the sequenceand pattern data?");
+	psy_property_set_str(section, "yes", "Yes");
+	psy_property_set_str(section, "no", "No");	
+	psy_property_set_str(section, "cont", "Continue");
+	psy_property_set_str(section, "psyexit", "Exit Psycle Request, but your Song is not saved!");
+	psy_property_set_str(section, "saveexit", "Save and Exit");
+	psy_property_set_str(section, "nosaveexit", "Exit (no save)");
+	psy_property_set_str(section, "newsong", "New Song Request, but your Song is not saved!");
+	psy_property_set_str(section, "savenew", "Save and Create New Song");
+	psy_property_set_str(section, "nosavenew", "Create New Song (no save)");
+	psy_property_set_str(section, "loadsong", "New Load Request, but your Song is not saved!");
+	psy_property_set_str(section, "saveload", "Save and Load Song");
+	psy_property_set_str(section, "nosaveload", "Load Song (no save)");
 }
