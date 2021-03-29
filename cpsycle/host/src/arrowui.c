@@ -81,7 +81,7 @@ void arrowui_ondraw(ArrowUi* self, psy_ui_Graphics* g)
 	if (arrowui_selected(self)) {
 		psy_ui_setcolour(g, self->skin->selwirecolour);
 	} else {
-		psy_ui_setcolour(g, self->skin->wireaacolour);
+		psy_ui_setcolour(g, self->skin->wireaacolour2);
 	}
 	size = psy_ui_component_sizepx(&self->component);	
 	psy_ui_drawline(g, 

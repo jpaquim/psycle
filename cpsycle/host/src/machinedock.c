@@ -563,6 +563,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setbackgroundmode(&self->scroller.pane, psy_ui_SETBACKGROUND);
 	psy_signal_connect(&self->component.signal_align, self,
 		paramrack_onalign);	
 	tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);

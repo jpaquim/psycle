@@ -2407,14 +2407,14 @@ void pianoroll_updatetheme(Pianoroll* self)
 		psy_ui_component_setbackgroundcolour(zoombox_base(&self->zoombox_beatwidth),
 			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 		// hbar
-		psy_ui_component_setbackgroundcolour(&self->scroller.hscroll.sliderpane.component,
+		psy_ui_component_setbackgroundcolour(&self->scroller.hscroll.pane.component,
 			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		psy_ui_component_setcolour(&self->scroller.hscroll.sliderpane.component,
+		psy_ui_component_setcolour(&self->scroller.hscroll.pane.component,
 			patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 		// vbar
-		psy_ui_component_setbackgroundcolour(&self->scroller.vscroll.sliderpane.component,
+		psy_ui_component_setbackgroundcolour(&self->scroller.vscroll.pane.component,
 			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		psy_ui_component_setcolour(&self->scroller.vscroll.sliderpane.component,
+		psy_ui_component_setcolour(&self->scroller.vscroll.pane.component,
 			patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 		// psy_ui_component_setbackgroundcolour(pianobar_base(&self->bar),
 		// patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));

@@ -8,10 +8,8 @@
 // SequenceTrackBox
 // prototypes
 static void sequencetrackbox_ondestroy(SequenceTrackBox*);
-static void sequencetrackbox_onsolotrack(SequenceTrackBox*,
-	psy_ui_Button* sender);
-static void sequencetrackbox_onmutetrack(SequenceTrackBox*,
-	psy_ui_Button* sender);
+static void sequencetrackbox_onsolotrack(SequenceTrackBox*, TrackBox* sender);
+static void sequencetrackbox_onmutetrack(SequenceTrackBox*, TrackBox* sender);
 static void sequencetrackbox_onsolochanged(SequenceTrackBox*,
 	psy_audio_Sequence* sender, uintptr_t track);
 static void sequencetrackbox_onmutechanged(SequenceTrackBox*,
@@ -38,7 +36,9 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence* sequence,
 	uintptr_t trackidx)
-{	
+{
+	assert(self);
+
 	trackbox_init(&self->trackbox, parent, view);
 	sequencetrackbox_vtable_init(self);
 	self->sequence = sequence;
@@ -50,14 +50,16 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 		psy_signal_connect(&self->sequence->signal_mutechanged, self,
 			sequencetrackbox_onmutechanged);
 	}
-	psy_signal_connect(&self->trackbox.solo.signal_clicked, self,
+	psy_signal_connect(&self->trackbox.signal_solo, self,
 		sequencetrackbox_onsolotrack);
-	psy_signal_connect(&self->trackbox.mute.signal_clicked, self,
+	psy_signal_connect(&self->trackbox.signal_mute, self,
 		sequencetrackbox_onmutetrack);
 }
 
 void sequencetrackbox_ondestroy(SequenceTrackBox* self)
 {
+	assert(self);
+
 	if (self->sequence) {
 		psy_signal_disconnect(&self->sequence->signal_solochanged, self,
 			sequencetrackbox_onsolochanged);
@@ -75,7 +77,7 @@ SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence* sequence,
 	uintptr_t trackidx)
 {
-	SequenceTrackBox* rv;
+	SequenceTrackBox* rv;	
 
 	rv = sequencetrackbox_alloc();
 	if (rv) {
@@ -85,9 +87,10 @@ SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	return rv;
 }
 
-void sequencetrackbox_onsolotrack(SequenceTrackBox* self,
-	psy_ui_Button* sender)
+void sequencetrackbox_onsolotrack(SequenceTrackBox* self, TrackBox* sender)
 {
+	assert(self);
+
 	if (self->sequence) {		
 		if (psy_audio_sequence_istracksoloed(self->sequence, self->trackidx)) {
 			psy_audio_sequence_deactivatesolotrack(self->sequence);
@@ -97,9 +100,10 @@ void sequencetrackbox_onsolotrack(SequenceTrackBox* self,
 	}
 }
 
-void sequencetrackbox_onmutetrack(SequenceTrackBox* self,
-	psy_ui_Button* sender)
+void sequencetrackbox_onmutetrack(SequenceTrackBox* self, TrackBox* sender)
 {
+	assert(self);
+
 	if (self->sequence) {				
 		if (psy_audio_sequence_istrackmuted(self->sequence, self->trackidx)) {
 			psy_audio_sequence_unmutetrack(self->sequence, self->trackidx);
@@ -112,6 +116,8 @@ void sequencetrackbox_onmutetrack(SequenceTrackBox* self,
 void sequencetrackbox_onsolochanged(SequenceTrackBox* self,
 	psy_audio_Sequence* sender, uintptr_t trackidx)
 {	
+	assert(self);
+
 	trackbox_unsolo(&self->trackbox);
 	if (self->trackidx == trackidx) {
 		if (psy_audio_sequence_istracksoloed(sender, trackidx)) {
@@ -128,6 +134,8 @@ void sequencetrackbox_onsolochanged(SequenceTrackBox* self,
 void sequencetrackbox_onmutechanged(SequenceTrackBox* self,
 	psy_audio_Sequence* sender, uintptr_t trackidx)
 {
+	assert(self);
+
 	if (self->trackidx == trackidx) {
 		if (psy_audio_sequence_istrackmuted(sender, trackidx)) {
 			trackbox_mute(&self->trackbox);
@@ -139,6 +147,8 @@ void sequencetrackbox_onmutechanged(SequenceTrackBox* self,
 
 void sequencetrackbox_showtrackname(SequenceTrackBox* self)
 {
+	assert(self);
+
 	if (self->sequence) {
 		psy_audio_SequenceTrack* track;
 

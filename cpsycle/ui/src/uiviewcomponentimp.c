@@ -68,10 +68,12 @@ static void view_dev_setfocus(psy_ui_ViewComponentImp*);
 static int view_dev_hasfocus(psy_ui_ViewComponentImp*);
 static uintptr_t view_dev_flags(const psy_ui_ComponentImp*);
 static void view_dev_draw(psy_ui_ViewComponentImp*, psy_ui_Graphics*);
-static void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
-static void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
-static void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
-static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev);
+static void view_dev_mousedown(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
+static void view_dev_mouseup(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
+static void view_dev_mousemove(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
+static void view_dev_mousedoubleclick(psy_ui_ViewComponentImp*, psy_ui_MouseEvent*);
+static void view_dev_mouseenter(psy_ui_ViewComponentImp*);
+static void view_dev_mouseleave(psy_ui_ViewComponentImp*);
 static psy_ui_RealPoint translatecoords(psy_ui_ViewComponentImp*, psy_ui_Component* src,
 	psy_ui_Component* dst);
 
@@ -153,6 +155,10 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_mousemove;
 		view_imp_vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
 			view_dev_mousedoubleclick;
+		view_imp_vtable.dev_mouseenter = (psy_ui_fp_componentimp_dev_mouseenter)
+			view_dev_mouseenter;
+		view_imp_vtable.dev_mouseleave = (psy_ui_fp_componentimp_dev_mouseleave)
+			view_dev_mouseleave;
 		view_imp_vtable_initialized = TRUE;
 	}
 }
@@ -627,10 +633,20 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)
 {
 	psy_List* rv = 0;
-	psy_List* p = 0;
+	psy_List* p;
 	
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {		
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(p));
+		if (recursive == psy_ui_RECURSIVE) {
+			psy_List* r;
+			psy_List* q;
+
+			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p), recursive);
+			for (r = q; r != NULL; psy_list_next(&r)) {
+				psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
+			}
+			psy_list_free(q);
+		}
 	}
 	return rv;
 }
@@ -730,4 +746,14 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 	if (ev->bubble) {
 		self->component->vtable->onmousedoubleclick(self->component, ev);
 	}
+}
+
+void view_dev_mouseenter(psy_ui_ViewComponentImp* self)
+{
+
+}
+
+void view_dev_mouseleave(psy_ui_ViewComponentImp* self)
+{
+
 }

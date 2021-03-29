@@ -86,10 +86,12 @@ static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
 static void dev_clear(psy_ui_win_ComponentImp*);
 static void dev_draw(psy_ui_win_ComponentImp*, psy_ui_Graphics*);
-static void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
-static void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
-static void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
-static void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev);
+static void dev_mousedown(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mouseup(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mousemove(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mousedoubleclick(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mouseenter(psy_ui_win_ComponentImp*);
+static void dev_mouseleave(psy_ui_win_ComponentImp*);
 static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Component* src,
 	psy_ui_Component* dst);
 static psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
@@ -170,6 +172,10 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_mousemove;
 		vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
 			dev_mousedoubleclick;
+		vtable.dev_mouseenter = (psy_ui_fp_componentimp_dev_mouseenter)
+			dev_mouseenter;
+		vtable.dev_mouseleave = (psy_ui_fp_componentimp_dev_mouseleave)
+			dev_mouseleave;
 		vtable_initialized = TRUE;
 	}
 }
@@ -365,8 +371,10 @@ void dev_destroy(psy_ui_win_ComponentImp* self)
 void dev_show(psy_ui_win_ComponentImp* self)
 {
 	self->visible = TRUE;
-	ShowWindow(self->hwnd, SW_SHOW);
-	UpdateWindow(self->hwnd);
+	if (!IsWindowVisible(self->hwnd)) {
+		ShowWindow(self->hwnd, SW_SHOW);
+		UpdateWindow(self->hwnd);
+	}
 }
 
 void dev_showstate(psy_ui_win_ComponentImp* self, int state)
@@ -652,10 +660,10 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 {	
 	psy_List* rv = 0;
 	psy_List* p = 0;
-	if (recursive == 1) {
-		EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &rv);
-	}
-	else {
+	// if (recursive == psy_ui_RECURSIVE) {
+	//	EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &rv);		
+	// } else
+	{
 		uintptr_t hwnd = (uintptr_t)GetWindow(self->hwnd, GW_CHILD);
 		if (hwnd) {
 			psy_ui_WinApp* winapp;
@@ -667,10 +675,20 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 			child = imp ? imp->component : 0;
 			if (child) {
 				rv = psy_list_create(child);
+				if (recursive == psy_ui_RECURSIVE) {
+					psy_List* r;
+					psy_List* q;
+
+					q = psy_ui_component_children(child, recursive);
+					for (r = q; r != NULL; psy_list_next(&r)) {
+						psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
+					}
+					psy_list_free(q);
+				}
 			}
 		}
 		while (hwnd) {
-			hwnd = (uintptr_t) GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
+			hwnd = (uintptr_t)GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
 			if (hwnd) {
 				psy_ui_WinApp* winapp;
 				psy_ui_win_ComponentImp* imp;
@@ -681,15 +699,32 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 				child = imp ? imp->component : NULL;
 				if (child) {
 					psy_list_append(&rv, child);
+					if (recursive == psy_ui_RECURSIVE) {
+						psy_List* r;
+						psy_List* q;
+
+						q = psy_ui_component_children(child, recursive);
+						for (r = q; r != NULL; psy_list_next(&r)) {
+							psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
+						}
+						psy_list_free(q);
+					}
 				}
 			}
 		}
 	}
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {		
-		psy_ui_Component* child;
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(p));
+		if (recursive == psy_ui_RECURSIVE) {
+			psy_List* r;
+			psy_List* q;
 
-		child = (psy_ui_Component*)p->entry;		
-		psy_list_append(&rv, child);
+			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p), recursive);
+			for (r = q; r != NULL; psy_list_next(&r)) {
+				psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
+			}
+			psy_list_free(q);
+		}
 	}
 	return rv;
 }
@@ -1182,5 +1217,17 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 	}	
 }
 
+void dev_mouseenter(psy_ui_win_ComponentImp* self)
+{
+	self->component->vtable->onmouseenter(self->component);
+	psy_signal_emit(&self->component->signal_mouseenter,
+		self->component, 0);
+}
+
+void dev_mouseleave(psy_ui_win_ComponentImp* self)
+{
+	self->component->vtable->onmouseleave(self->component);
+	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
+}
 
 #endif
