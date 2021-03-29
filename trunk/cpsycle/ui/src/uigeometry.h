@@ -120,6 +120,17 @@ INLINE psy_ui_RealPoint psy_ui_realpoint_make(double x, double y)
 	return rv;
 }
 
+INLINE psy_ui_RealPoint* psy_ui_realpoint_move(psy_ui_RealPoint* self,
+	double x, double y)
+{	
+	self->x = x;
+	self->y = y;
+	return self;
+}
+
+void psy_ui_realpoint_floor(psy_ui_RealPoint* self);
+
+
 INLINE psy_ui_RealPoint psy_ui_realpoint_zero(void)
 {
 	extern psy_ui_RealPoint psy_ui_internal_realpoint_zero;

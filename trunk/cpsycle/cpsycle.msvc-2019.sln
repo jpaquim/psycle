@@ -67,6 +67,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "effects", "effects", "{7A48
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "generators", "generators", "{C84ADEF5-2ED0-4569-ACD6-04619BC009F1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{6D6F16D8-A804-4DAA-86A6-EF90252D7E0E}"
+	ProjectSection(SolutionItems) = preProject
+		doc\cpsycle-developer-guide.docx = doc\cpsycle-developer-guide.docx
+		doc\uicomponent-vtable.txt = doc\uicomponent-vtable.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

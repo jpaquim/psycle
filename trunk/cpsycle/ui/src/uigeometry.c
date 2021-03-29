@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uigeometry.h"
-
+// std
 #include <math.h>
 
 // extern
@@ -245,4 +245,10 @@ psy_ui_Value psy_ui_margin_height(psy_ui_Margin* self,
 	const psy_ui_TextMetric* tm)
 {
 	return psy_ui_add_values(self->top, self->bottom, tm);
+}
+
+void psy_ui_realpoint_floor(psy_ui_RealPoint* self)
+{
+	self->x = floor(self->x);
+	self->y = floor(self->y);
 }

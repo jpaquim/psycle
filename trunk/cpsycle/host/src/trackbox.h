@@ -15,12 +15,20 @@ extern "C" {
 typedef struct TrackBox {
 	// inherits
 	psy_ui_Component component;
-	// internal
-	psy_ui_Label trackidx;
+	// signals
+	psy_Signal signal_mute;
+	psy_Signal signal_solo;
+	psy_Signal signal_close;
+	// internal	
+	// ui
+	psy_ui_Label track;
 	psy_ui_Button solo;
 	psy_ui_Button mute;
 	psy_ui_Label desc;
 	psy_ui_Button close;
+	// data
+	uintptr_t trackidx;
+	bool closeprevented;
 } TrackBox;
 
 void trackbox_init(TrackBox*, psy_ui_Component* parent,
@@ -36,6 +44,14 @@ void trackbox_mute(TrackBox*);
 void trackbox_unmute(TrackBox*);
 void trackbox_solo(TrackBox*);
 void trackbox_unsolo(TrackBox*);
+void trackbox_preventclose(TrackBox*);
+
+INLINE uintptr_t trackbox_trackindex(const TrackBox* self)
+{
+	assert(self);
+
+	return self->trackidx;
+}
 
 INLINE psy_ui_Component* trackbox_base(TrackBox* self)
 {

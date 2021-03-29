@@ -427,10 +427,14 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 		}
 		if (self->dragmachineui) {			
 			if (ev->bubble) {
+				psy_ui_RealRectangle position;
+
 				self->dragmode = MACHINEVIEW_DRAG_MACHINE;
-				self->dragpt = psy_ui_realpoint_make(
-					ev->pt.x - psy_ui_component_position(self->dragmachineui).left,
-					ev->pt.y - psy_ui_component_position(self->dragmachineui).top);
+				position = psy_ui_component_position(self->dragmachineui);				
+				psy_ui_realpoint_floor(
+					psy_ui_realpoint_move(&self->dragpt,
+						ev->pt.x - position.left,
+						ev->pt.y - position.top));
 				psy_ui_component_capture(&self->component);				
 			}
 		} else {

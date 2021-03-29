@@ -845,23 +845,23 @@ void patternview_updateksin(PatternView* self)
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->trackerscroller.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.sliderpane.component,
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.pane.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.spacer,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerscroller.hscroll.sliderpane.component,
+	psy_ui_component_setcolour(&self->trackerscroller.hscroll.pane.component,
 		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.less.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.more.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
-	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.sliderpane.component,
+	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.pane.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.less.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.more.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerscroller.vscroll.sliderpane.component,
+	psy_ui_component_setcolour(&self->trackerscroller.vscroll.pane.component,
 		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->left.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));

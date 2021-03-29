@@ -409,6 +409,8 @@ typedef void (*psy_ui_fp_componentimp_dev_mousedown)(struct psy_ui_ComponentImp*
 typedef void (*psy_ui_fp_componentimp_dev_mouseup)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_mousemove)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_mousedoubleclick)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_componentimp_dev_mouseenter)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_mouseleave)(struct psy_ui_ComponentImp*);
 
 typedef struct {	
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
@@ -462,6 +464,8 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_mouseup dev_mouseup;
 	psy_ui_fp_componentimp_dev_mousemove dev_mousemove;
 	psy_ui_fp_componentimp_dev_mousedoubleclick dev_mousedoubleclick;
+	psy_ui_fp_componentimp_dev_mouseenter dev_mouseenter;
+	psy_ui_fp_componentimp_dev_mouseleave dev_mouseleave;
 } psy_ui_ComponentImpVTable;
 
 typedef struct psy_ui_ComponentImp {
@@ -615,26 +619,54 @@ void psy_ui_component_setscrollleft(psy_ui_Component*, psy_ui_Value left);
 
 INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
 {
-	return self->scroll.x;
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		return self->scroll.x;
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		return psy_ui_value_makepx(-position.left);
+	}
 }
 
 INLINE double psy_ui_component_scrollleftpx(psy_ui_Component* self)
 {	
-	return floor(psy_ui_value_px(&self->scroll.x,
-		psy_ui_component_textmetric(self)));
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		return floor(psy_ui_value_px(&self->scroll.x,
+			psy_ui_component_textmetric(self)));
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		return -floor(position.left);
+	}
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
 
 INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
-{
-	return self->scroll.y;
+{	
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		return self->scroll.y;
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		return psy_ui_value_makepx(-position.top);
+	}
 }
 
 INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
-{	
-	return floor(psy_ui_value_px(&self->scroll.y,
-		psy_ui_component_textmetric(self)));
+{		
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		return floor(psy_ui_value_px(&self->scroll.y,
+			psy_ui_component_textmetric(self)));
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		return -floor(position.top);
+	}
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);

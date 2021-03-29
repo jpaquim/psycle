@@ -175,25 +175,11 @@ void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender,
 	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);	
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		nPosY = floor(psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px);
-	} else {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_component_position(self->client);
-		nPosY = floor(-r.top / scrollstepy_px);
-	}
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);		
+	nPosY = floor(psy_ui_component_scrolltoppx(self->client) / scrollstepy_px);	
 	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPosY);	
-	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		nPosX = floor(psy_ui_value_px(&self->client->scroll.x, tm) / scrollstepx_px);
-	} else {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_component_position(self->client);
-		nPosX = floor(-r.left / scrollstepx_px);
-	}
+	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);	
+	nPosX = floor(psy_ui_component_scrollleftpx(self->client) / scrollstepx_px);	
 	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPosX);	
 }
 
@@ -209,17 +195,9 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 	assert(self->client);
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollsteppx = psy_ui_value_px(&self->client->scrollstepx, tm);
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		scrollleftpx = psy_ui_component_scrollleftpx(self->client);
-		iPos = psy_ui_value_px(&self->client->scroll.x, tm) / scrollsteppx;
-	} else {
-		psy_ui_RealRectangle r;
-		
-		r = psy_ui_component_position(self->client);
-		iPos = -r.left / scrollsteppx;
-		scrollleftpx = -r.left;
-	}
+	scrollsteppx = psy_ui_value_px(&self->client->scrollstepx, tm);	
+	scrollleftpx = psy_ui_component_scrollleftpx(self->client);
+	iPos = scrollleftpx / scrollsteppx;	
 	nPos = psy_ui_scrollbar_position(sender);	
 	diff = -scrollsteppx * floor(iPos - nPos);
 	if (self->smooth) {	
@@ -232,36 +210,10 @@ void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBa
 			self->hanimate.targetpx =
 				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx;			
 		}
-	} else {
-		if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-			psy_ui_component_setscrollleft(self->client,
-				psy_ui_value_makepx(
-					floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx));
-		} else {
-			psy_ui_RealRectangle updaterect;
-			psy_ui_RealRectangle position;
-			
-			position = psy_ui_component_position(self->client);
-			psy_ui_component_move(self->client,
-				psy_ui_point_make(
-					psy_ui_value_makepx(
-						floor(-(scrollleftpx + diff) / scrollsteppx) *
-							scrollsteppx),
-					psy_ui_value_makepx(position.top)));
-			position = psy_ui_component_position(&self->component);
-			updaterect = psy_ui_component_position(self->client);
-			if (updaterect.right < position.right) {
-				updaterect.left = updaterect.right;
-				updaterect.right = position.right;			
-				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_SETBACKGROUND);
-				psy_ui_component_invalidaterect(&self->component, updaterect);
-				psy_ui_component_update(&self->component);
-				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_NOBACKGROUND);
-			}
-			psy_signal_emit(&self->client->signal_scroll, self->client, 0);
-		}
+	} else {		
+		psy_ui_component_setscrollleft(self->client,
+			psy_ui_value_makepx(
+				floor((scrollleftpx + diff) / scrollsteppx) * scrollsteppx));		
 	}
 }
 
@@ -278,17 +230,9 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 	assert(self->client);
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		scrolltoppx = psy_ui_component_scrolltoppx(self->client);
-		iPos = psy_ui_value_px(&self->client->scroll.y, tm) / scrollstepy_px;
-	} else {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_component_position(self->client);
-		iPos = -r.top / scrollstepy_px;
-		scrolltoppx = -r.top;
-	}
+	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);	
+	scrolltoppx = psy_ui_component_scrolltoppx(self->client);
+	iPos = scrolltoppx / scrollstepy_px;	
 	nPos = psy_ui_scrollbar_position(sender);
 	if (self->vanimate.counter > 0 && self->vanimate.steppx / (iPos - nPos) > 0) {
 		psy_ui_component_setscrolltop(self->client,
@@ -306,34 +250,9 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px;
 		}
 	} else {
-		if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-			psy_ui_component_setscrolltop(self->client,
-				psy_ui_value_makepx(
-					floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px));
-		} else {
-			psy_ui_RealRectangle updaterect;
-			psy_ui_RealRectangle position;
-
-			psy_ui_component_move(self->client,
-				psy_ui_point_make(
-					psy_ui_value_zero(),
-					psy_ui_value_makepx(
-						floor(-(scrolltoppx + diff) / scrollstepy_px) *
-						scrollstepy_px)));
-			position = psy_ui_component_position(&self->pane);
-			updaterect = psy_ui_component_position(self->client);
-			if (updaterect.bottom < position.bottom) {
-				updaterect.top = updaterect.bottom;
-				updaterect.bottom = position.bottom;
-				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_SETBACKGROUND);
-				psy_ui_component_invalidaterect(&self->pane, updaterect);
-				psy_ui_component_update(&self->pane);
-				psy_ui_component_setbackgroundmode(&self->component,
-					psy_ui_NOBACKGROUND);
-			}
-			psy_signal_emit(&self->client->signal_scroll, self->client, 0);
-		}
+		psy_ui_component_setscrolltop(self->client,
+			psy_ui_value_makepx(
+				floor((scrolltoppx + diff) / scrollstepy_px) * scrollstepy_px));		
 	}
 }
 
@@ -358,33 +277,17 @@ void psy_ui_scroller_ontimer(psy_ui_Scroller* self, uintptr_t timerid)
 
 void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 {
-	double pos;
-	double scrollstepx_px;
-	double scrollstepy_px;
+	double pos;	
 	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_value_px(&self->client->scrollstepy, tm);	
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-		pos = floor(psy_ui_component_scrolltoppx(self->client)
-			/ scrollstepy_px);
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self->client);
-		pos = floor(-position.top / scrollstepy_px);
-	}
-	psy_ui_scrollbar_setthumbposition(&self->vscroll, pos);	
-	scrollstepx_px = psy_ui_value_px(&self->client->scrollstepx, tm);
-	if (self->client->scrollmode == psy_ui_SCROLL_GRAPHICS) {		
-		pos = floor(psy_ui_component_scrollleftpx(self->client) /
-			scrollstepx_px);
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self->client);
-		pos = floor(-position.left / scrollstepx_px);
-	}
+	// vertical
+	pos = floor(psy_ui_component_scrolltoppx(self->client) /
+		psy_ui_value_px(&self->client->scrollstepy, tm));
+	psy_ui_scrollbar_setthumbposition(&self->vscroll, pos);
+	// horizontal
+	pos = floor(psy_ui_component_scrollleftpx(self->client) /
+		psy_ui_value_px(&self->client->scrollstepx, tm));
 	psy_ui_scrollbar_setthumbposition(&self->hscroll, pos);
 }
 
@@ -454,6 +357,7 @@ void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender)
 void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
 {
 	if (self->client) {		
-		self->component.style.style.border = psy_ui_style(self->client->style.style_id)->border;		
+		self->component.style.style.border =
+			psy_ui_style(self->client->style.style_id)->border;		
 	}
 }

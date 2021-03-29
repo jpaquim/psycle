@@ -4,31 +4,51 @@
 #include "../../detail/prefix.h"
 
 #include "trackbox.h"
-// host
-#include "styles.h"
 // ui
 #include <uiapp.h>
 // platform
 #include "../../detail/portable.h"
 
 // TrackBox
+static void trackbox_updatetrack(TrackBox*);
+static void trackbox_onmute(TrackBox*, psy_ui_Button* sender);
+static void trackbox_onsolo(TrackBox*, psy_ui_Button* sender);
+static void trackbox_onclose(TrackBox*, psy_ui_Button* sender);
+// prototypes
+static void trackbox_ondestroy(TrackBox*);
+// vtable
+static psy_ui_ComponentVtable trackbox_vtable;
+static bool trackbox_vtable_initialized = FALSE;
+
+static void trackbox_vtableinit_init(TrackBox* self)
+{
+	if (!trackbox_vtable_initialized) {
+		trackbox_vtable = *(self->component.vtable);
+		trackbox_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			trackbox_ondestroy;
+		trackbox_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &trackbox_vtable;
+}
+
 // implementation
 void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {
 	psy_ui_Margin spacing;
 	
-	psy_ui_component_init(trackbox_base(self), parent, view);	
+	psy_ui_component_init(trackbox_base(self), parent, view);
+	trackbox_vtableinit_init(self);
 	psy_ui_component_setdefaultalign(trackbox_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_component_setspacing(trackbox_base(self), &spacing);
 	psy_ui_component_setalignexpand(trackbox_base(self),
-		psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->trackidx, trackbox_base(self), view);
-	psy_ui_label_preventtranslation(&self->trackidx);
-	psy_ui_label_settext(&self->trackidx, "00");
-	psy_ui_label_setcharnumber(&self->trackidx, 3);
+		psy_ui_HORIZONTALEXPAND);	
+	psy_ui_label_init(&self->track, trackbox_base(self), view);
+	psy_ui_label_preventtranslation(&self->track);	
+	psy_ui_label_setcharnumber(&self->track, 3);
 	psy_ui_button_init(&self->solo, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->solo);
 	psy_ui_button_settext(&self->solo, "S");	
@@ -42,8 +62,25 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	psy_ui_button_init(&self->close, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->close);
 	psy_ui_button_settext(&self->close, "X");
+	self->close.stoppropagation = FALSE;
 	psy_ui_component_setalign(psy_ui_button_base(&self->close),
 		psy_ui_ALIGN_RIGHT);
+	psy_signal_init(&self->signal_mute);
+	psy_signal_init(&self->signal_solo);
+	psy_signal_init(&self->signal_close);
+	psy_signal_connect(&self->mute.signal_clicked, self, trackbox_onmute);
+	psy_signal_connect(&self->solo.signal_clicked, self, trackbox_onsolo);
+	psy_signal_connect(&self->close.signal_clicked, self, trackbox_onclose);
+	self->trackidx = psy_INDEX_INVALID;
+	self->closeprevented = FALSE;
+	trackbox_updatetrack(self);
+}
+
+void trackbox_ondestroy(TrackBox* self)
+{
+	psy_signal_dispose(&self->signal_mute);
+	psy_signal_dispose(&self->signal_solo);
+	psy_signal_dispose(&self->signal_close);
 }
 
 TrackBox* trackbox_alloc(void)
@@ -70,17 +107,26 @@ void trackbox_setdescription(TrackBox* self, const char* text)
 }
 
 void trackbox_setindex(TrackBox* self, uintptr_t index)
-{
-	char text[128];
+{	
+	self->trackidx = index;
+	trackbox_updatetrack(self);
+}
 
-	psy_snprintf(text, 128, "%.2X", index);
-	psy_ui_label_settext(&self->trackidx, text);
-	self->solo.data = index;
-	self->mute.data = index;
-	self->close.data = index;
-	if (index == 0) {
+void trackbox_updatetrack(TrackBox* self)
+{
+	char text[64];
+
+	if (self->trackidx == psy_INDEX_INVALID) {
+		psy_snprintf(text, 64, "%s", "--");
+	} else {
+		psy_snprintf(text, 64, "%.2X", self->trackidx);
+	}
+	psy_ui_label_settext(&self->track, text);	
+	if (self->closeprevented || self->trackidx == 0) {
 		psy_ui_component_hide(psy_ui_button_base(&self->close));
-	}	
+	} else {
+		psy_ui_component_show(psy_ui_button_base(&self->close));
+	}
 }
 
 void trackbox_mute(TrackBox* self)
@@ -101,4 +147,30 @@ void trackbox_solo(TrackBox* self)
 void trackbox_unsolo(TrackBox* self)
 {
 	psy_ui_button_disablehighlight(&self->solo);
+}
+
+void trackbox_preventclose(TrackBox* self)
+{
+	self->closeprevented = TRUE;
+	if (self->trackidx == 0) {
+		psy_ui_component_hide(psy_ui_button_base(&self->close));
+	} else {
+		psy_ui_component_show(psy_ui_button_base(&self->close));
+	}
+}
+
+// delegate button clicked signals to trackbox signals
+void trackbox_onmute(TrackBox* self, psy_ui_Button* sender)
+{
+	psy_signal_emit(&self->signal_mute, self, 0);
+}
+
+void trackbox_onsolo(TrackBox* self, psy_ui_Button* sender)
+{
+	psy_signal_emit(&self->signal_solo, self, 0);
+}
+
+void trackbox_onclose(TrackBox* self, psy_ui_Button* sender)
+{
+	psy_signal_emit(&self->signal_close, self, 0);
 }

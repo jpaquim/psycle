@@ -1,0 +1,27 @@
+// vtable
+static psy_ui_ComponentVtable name_vtable;
+static bool name_vtable_initialized = FALSE;
+
+static void name_vtableinit_init(class* self)
+{
+	if (!name_vtable_initialized) {
+		name_vtable = *(self->component.vtable);		
+		name_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &name_vtable;
+}
+
+// methods
+name_vtable.ondestroy =
+	(psy_ui_fp_component_ondestroy)
+	name_ondestroy;
+name_vtable.onmousedown =
+	(psy_ui_fp_component_onmouseevent)
+	name_onmousedown;
+name_vtable.onmousemove =
+	(psy_ui_fp_component_onmouseevent)
+	name_onmousemove;
+name_vtable.onmouseup =
+	(psy_ui_fp_component_onmouseevent)
+	name_onmouseup;
+

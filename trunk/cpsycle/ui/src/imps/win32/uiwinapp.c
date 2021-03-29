@@ -612,9 +612,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (!mousetracking) {
 					TRACKMOUSEEVENT tme;
 					
-					imp->component->vtable->onmouseenter(imp->component);
-					psy_signal_emit(&imp->component->signal_mouseenter,
-						imp->component, 0);					
+					imp->imp.vtable->dev_mouseenter(&imp->imp);					
 					tme.cbSize = sizeof(TRACKMOUSEEVENT);
 					tme.dwFlags = TME_LEAVE | TME_HOVER;
 					tme.dwHoverTime = 200;
@@ -687,36 +685,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);														
-							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-								scrolltoppx = psy_ui_component_scrolltoppx(imp->component);
-							} else {
-								psy_ui_RealRectangle position;
-
-								position = psy_ui_component_position(imp->component);
-								scrolltoppx = -position.top;
-							}
+								&scrollmax);																					
+							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
 							pos =  scrolltoppx / 
 								psy_ui_value_px(&imp->component->scrollstepy, tm) -
 								imp->component->wheelscroll;
 							if (pos < (double)scrollmin) {
 								pos = (double)scrollmin;
-							}							
-							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {								
-								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, pos));
-							} else {
-								psy_ui_RealRectangle position;
-								double diff;
-
-								position = psy_ui_component_position(imp->component);
-								diff = psy_ui_value_px(&imp->component->scrollstepy, tm) * pos;
-								psy_ui_component_move(imp->component,
-									psy_ui_point_make(
-										psy_ui_value_makepx(position.left),
-										psy_ui_value_makepx(-diff)));
-								psy_signal_emit(&imp->component->signal_scroll, imp->component, 0);
-							}
+							}														
+							psy_ui_component_setscrolltop(imp->component,
+								psy_ui_mul_value_real(imp->component->scrollstepy, pos));							
 							accumwheeldelta -= deltaperline;
 						}
 						while (accumwheeldelta <= -deltaperline)
@@ -729,36 +707,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 							tm = psy_ui_component_textmetric(imp->component);
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);		
-							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-								scrolltoppx = psy_ui_component_scrolltoppx(imp->component);
-							} else {
-								psy_ui_RealRectangle position;
-
-								position = psy_ui_component_position(imp->component);
-								scrolltoppx = -position.top;
-							}
+								&scrollmax);									
+							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
 							pos = scrolltoppx /
 								psy_ui_value_px(&imp->component->scrollstepy, tm) +
 								imp->component->wheelscroll;
 							if (pos > (double)scrollmax) {
 								pos = (double)scrollmax;
-							}
-							if (imp->component->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-								psy_ui_component_setscrolltop(imp->component,
-									psy_ui_mul_value_real(imp->component->scrollstepy, pos));
-							} else {
-								psy_ui_RealRectangle position;
-								double diff;
-
-								position = psy_ui_component_position(imp->component);
-								diff = psy_ui_value_px(&imp->component->scrollstepy, tm) * pos;								
-								psy_ui_component_move(imp->component,
-									psy_ui_point_make(
-										psy_ui_value_makepx(position.left),
-										psy_ui_value_makepx(-diff)));
-								psy_signal_emit(&imp->component->signal_scroll, imp->component, 0);
-							}
+							}							
+							psy_ui_component_setscrolltop(imp->component,
+								psy_ui_mul_value_real(imp->component->scrollstepy, pos));							
 							accumwheeldelta += deltaperline;
 						}
 					}
@@ -772,8 +730,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_MOUSELEAVE:
 			{
 				mousetracking = FALSE;
-				imp->component->vtable->onmouseleave(imp->component);
-				psy_signal_emit(&imp->component->signal_mouseleave, imp->component, 0);
+				imp->imp.vtable->dev_mouseleave(&imp->imp);				
 				return 0;
 			}				
 			break;
@@ -889,7 +846,7 @@ void handle_mouseevent(psy_ui_Component* component,
 	case WM_LBUTTONUP:
 	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
-		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);		
+		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);
 		break;
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:

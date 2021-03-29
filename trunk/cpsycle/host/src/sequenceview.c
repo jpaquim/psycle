@@ -219,12 +219,7 @@ static void sequencetrackheaders_onmouseup(SequenceTrackHeaders*,
 static void sequencetrackheaders_onnewtrack(SequenceTrackHeaders*,
 	psy_ui_Button* sender);
 static void sequencetrackheaders_ondeltrack(SequenceTrackHeaders*,
-	psy_ui_Button* sender);
-static void sequencetrackheaders_onmutetrack(SequenceTrackHeaders*,
-	psy_ui_Button* sender);
-static void sequencetrackheaders_onsolotrack(SequenceTrackHeaders*,
-	psy_ui_Button* sender);
-
+	TrackBox* sender);
 // vtable
 static psy_ui_ComponentVtable trackheaderviews_vtable;
 static bool trackheaderviews_vtable_initialized = FALSE;
@@ -293,18 +288,18 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 
 		for (t = sequence->tracks, c = 0; t != NULL;
 			psy_list_next(&t), ++c) {
-			SequenceTrackBox* track;
+			SequenceTrackBox* sequencetrackbox;
 
 			// track = sequencetrackbox_allocinit(&self->component, &self->component,
-			track = sequencetrackbox_allocinit(&self->component, NULL,
+			sequencetrackbox = sequencetrackbox_allocinit(&self->component, NULL,
 				self->state->sequence, c);
-			if (track) {				
-				psy_ui_component_setminimumsize(sequencetrackbox_base(track),
+			if (sequencetrackbox) {
+				psy_ui_component_setminimumsize(
+					sequencetrackbox_base(sequencetrackbox),
 					psy_ui_size_make(
 						psy_ui_value_makepx(self->state->trackwidth + self->state->margin),
-						psy_ui_value_zero()));							
-				track->trackbox.close.stoppropagation = FALSE;				
-				psy_signal_connect(&track->trackbox.close.signal_clicked, self,
+						psy_ui_value_zero()));															
+				psy_signal_connect(&sequencetrackbox->trackbox.signal_close, self,
 					sequencetrackheaders_ondeltrack);
 			}
 		}
@@ -355,10 +350,10 @@ void sequencetrackheaders_onnewtrack(SequenceTrackHeaders* self,
 }
 
 void sequencetrackheaders_ondeltrack(SequenceTrackHeaders* self,
-	psy_ui_Button* sender)
+	TrackBox* sender)
 {
 	self->state->cmd = SEQLVCMD_DELTRACK;
-	self->state->cmdtrack = sender->data;
+	self->state->cmdtrack = trackbox_trackindex(sender);
 }
 
 

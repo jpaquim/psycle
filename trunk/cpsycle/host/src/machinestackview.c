@@ -686,7 +686,8 @@ void machinestackstate_buildcolumns(MachineStackState* self)
 		inputs = machinestackstate_inputs(self);
 		self->currlevel = 0;
 		if (inputs == NULL) {
-			machinestackstate_buildcolumnoutchain(self, psy_INDEX_INVALID, 0, psy_INDEX_INVALID, TRUE);
+			machinestackstate_buildcolumnoutchain(self, psy_INDEX_INVALID, 0,
+				psy_INDEX_INVALID, TRUE);
 		} else {
 			columnindex = 0;
 			for (p = inputs; p != NULL; psy_list_next(&p)) {
@@ -703,14 +704,24 @@ void machinestackstate_buildcolumns(MachineStackState* self)
 					psy_List* lastnode;
 
 					lastnode = psy_list_last(column->chain);
-					if (lastnode && lastnode->prev) {
-						uintptr_t src;
-						uintptr_t dst;
+					if (lastnode) {
+						if (lastnode->prev) {
+							uintptr_t src;
+							uintptr_t dst;
 
-						src = (uintptr_t)psy_list_entry(lastnode->prev);
-						dst = (uintptr_t)psy_list_entry(lastnode);						
-						machinestackcolumn_setwire(column,
-							psy_audio_wire_make(src, dst));
+							src = (uintptr_t)psy_list_entry(lastnode->prev);
+							dst = (uintptr_t)psy_list_entry(lastnode);
+							machinestackcolumn_setwire(column,
+								psy_audio_wire_make(src, dst));
+						} else {
+							uintptr_t src;
+							uintptr_t dst;
+
+							src = column->inputroute;
+							dst = (uintptr_t)psy_list_entry(lastnode);
+							machinestackcolumn_setwire(column,
+								psy_audio_wire_make(src, dst));
+						}
 					}
 				}
 			}
@@ -954,10 +965,22 @@ void machinestackinputs_build(MachineStackInputs* self)
 					column->input, self->skin, &self->component, &self->component, NULL,
 					FALSE, self->workspace);
 			} else {
-				component = psy_ui_component_allocinit(&self->component,
-					&self->component);
-				psy_ui_component_setbackgroundmode(component,
-					psy_ui_NOBACKGROUND);
+				if (!column || column->offset != 0) {
+					component = psy_ui_component_allocinit(&self->component,
+						&self->component);
+					psy_ui_component_setbackgroundmode(component,
+						psy_ui_NOBACKGROUND);
+				} else {
+					ArrowUi* arrow;
+					uintptr_t first;
+
+					first = machinestackcolumn_at(column, 0);
+					arrow = arrowui_allocinit(&self->component,
+						&self->component,
+						psy_audio_wire_make(column->inputroute, first),
+						self->skin, self->workspace);
+					component = &arrow->component;
+				}
 			}
 			if (component) {
 				psy_ui_component_setminimumsize(component,
@@ -1094,8 +1117,10 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 		machinestackpanetrackclient_vtable_init(self));
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setwheelscroll(&self->component, 1);
 	psy_ui_component_setmode(&self->component, psy_ui_SCROLL_COMPONENTS);
+	psy_ui_component_setscrollstepy(&self->component,
+		state->effectsize.height);
 	self->state = state;
 	self->column = column;
 }
@@ -1282,7 +1307,7 @@ void machinestackpane_build(MachineStackPane* self)
 							psy_ui_value_zero(), psy_ui_value_zero(), psy_ui_value_zero());						
 						psy_ui_component_setmargin(&arrow->component, &levelmargin);
 						psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_TOP);
-					}										
+					}
 				}				
 				psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_LEFT);				
 				if (column) {

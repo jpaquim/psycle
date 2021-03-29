@@ -1069,6 +1069,8 @@ static void dev_mousedown(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 static void dev_mouseup(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 static void dev_mousemove(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 static void dev_mousedoubleclick(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
+static void dev_mouseenter(psy_ui_ComponentImp* self) { }
+static void dev_mouseleave(psy_ui_ComponentImp* self) { }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -1127,6 +1129,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_mousedown = dev_mousedown;
 		imp_vtable.dev_mousemove = dev_mousemove;
 		imp_vtable.dev_mousedoubleclick = dev_mousedoubleclick;
+		imp_vtable.dev_mouseenter = dev_mouseenter;
+		imp_vtable.dev_mouseleave = dev_mouseleave;
 	}
 }
 
@@ -1171,42 +1175,66 @@ void psy_ui_component_setscroll(psy_ui_Component* self,
 
 void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 {	
-	const psy_ui_TextMetric* tm;
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		const psy_ui_TextMetric* tm;
 
-	tm = psy_ui_component_textmetric(self);	
-	left = psy_ui_value_makepx(floor(psy_ui_value_px(&left, tm)));
-	if (psy_ui_value_comp(&self->scroll.x, &left, tm)) {
-		double oldscrollx;
-		double scrollstepx_px;
-		
-		scrollstepx_px = psy_ui_value_px(&self->scrollstepx, tm);
-		oldscrollx = psy_ui_value_px(&self->scroll.x, tm);
-		self->scroll.x = left;	
+		tm = psy_ui_component_textmetric(self);
+		left = psy_ui_value_makepx(floor(psy_ui_value_px(&left, tm)));
+		if (psy_ui_value_comp(&self->scroll.x, &left, tm)) {
+			double oldscrollx;
+			double scrollstepx_px;
+
+			scrollstepx_px = psy_ui_value_px(&self->scrollstepx, tm);
+			oldscrollx = psy_ui_value_px(&self->scroll.x, tm);
+			self->scroll.x = left;
+			psy_signal_emit(&self->signal_scroll, self, 0);
+			psy_ui_component_scrollstep(self,
+				(oldscrollx - psy_ui_value_px(&self->scroll.x, tm)) /
+				scrollstepx_px, 0);
+		}
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		psy_ui_component_move(self,
+			psy_ui_point_make(
+				psy_ui_value_makepx(
+					-psy_ui_value_px(&left, psy_ui_component_textmetric(self))),
+				psy_ui_value_makepx(position.top)));
 		psy_signal_emit(&self->signal_scroll, self, 0);
-		psy_ui_component_scrollstep(self,
-			(oldscrollx - psy_ui_value_px(&self->scroll.x, tm)) /
-			scrollstepx_px, 0);
 	}
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 {
-	const psy_ui_TextMetric* tm;
+	if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
+		const psy_ui_TextMetric* tm;
 
-	tm = psy_ui_component_textmetric(self);
-	top = psy_ui_value_makepx(floor(psy_ui_value_px(&top, tm)));
-	if (psy_ui_value_comp(&self->scroll.y, &top, tm)) {	
-		double oldscrolly;		
-		double scrollstepy_px;
-		double step;
+		tm = psy_ui_component_textmetric(self);
+		top = psy_ui_value_makepx(floor(psy_ui_value_px(&top, tm)));
+		if (psy_ui_value_comp(&self->scroll.y, &top, tm)) {
+			double oldscrolly;
+			double scrollstepy_px;
+			double step;
 
-		scrollstepy_px = psy_ui_value_px(&self->scrollstepy, tm);
-		oldscrolly = psy_ui_value_px(&self->scroll.y, tm);
-		self->scroll.y = top;
-		psy_signal_emit(&self->signal_scroll, self, 0);	
-		step = (oldscrolly - psy_ui_value_px(&self->scroll.y, tm)) /
-			scrollstepy_px;
-		psy_ui_component_scrollstep(self, 0, step);
+			scrollstepy_px = psy_ui_value_px(&self->scrollstepy, tm);
+			oldscrolly = psy_ui_value_px(&self->scroll.y, tm);
+			self->scroll.y = top;
+			psy_signal_emit(&self->signal_scroll, self, 0);
+			step = (oldscrolly - psy_ui_value_px(&self->scroll.y, tm)) /
+				scrollstepy_px;
+			psy_ui_component_scrollstep(self, 0, step);
+		}
+	} else {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_position(self);
+		psy_ui_component_move(self,
+			psy_ui_point_make(
+				psy_ui_value_makepx(position.left),
+				psy_ui_value_makepx(
+					-psy_ui_value_px(&top, psy_ui_component_textmetric(self)))));
+		psy_signal_emit(&self->signal_scroll, self, 0);
 	}
 }
 
@@ -1233,15 +1261,8 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxlines = (int)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
-		scrolltop = psy_ui_component_scrolltop(self);
-		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-			scrolltoppx = psy_ui_component_scrolltoppx(self);
-		} else {
-			psy_ui_RealRectangle position;
-
-			position = psy_ui_component_position(self);
-			scrolltoppx = -position.left;
-		}
+		scrolltop = psy_ui_component_scrolltop(self);		
+		scrolltoppx = psy_ui_component_scrolltoppx(self);		
 		currline = (intptr_t)(scrolltoppx / scrollstepy_px);
 		if ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
 				psy_ui_OVERFLOW_VSCROLLCENTER) {
@@ -1281,15 +1302,8 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxrows = (int)(psy_ui_value_px(&preferredsize.width, tm) /
 			(double)scrollstepx_px + 0.5);
-		visirows = (intptr_t)(psy_ui_value_px(&size.width, tm) / scrollstepx_px);
-		if (self->scrollmode == psy_ui_SCROLL_GRAPHICS) {
-			scrollleftpx = psy_ui_component_scrollleftpx(self);
-		} else {			
-			psy_ui_RealRectangle position;
-
-			position = psy_ui_component_position(self);
-			scrollleftpx = -position.left;			
-		}		
+		visirows = (intptr_t)(psy_ui_value_px(&size.width, tm) / scrollstepx_px);		
+		scrollleftpx = psy_ui_component_scrollleftpx(self);		
 		currrow = (intptr_t)(scrollleftpx / scrollstepx_px);
 		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			
 		if (currrow > maxrows - visirows) {
