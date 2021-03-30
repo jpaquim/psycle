@@ -986,7 +986,7 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 	VstIntPtr value, void* ptr, float opt)
 {
 	VstIntPtr result = 0;
-	psy_audio_VstPlugin* self;
+	psy_audio_VstPlugin* self = 0;
 
 	if (opcode != audioMasterGetTime) {
 		TRACE("vst-opcode: ");
@@ -995,30 +995,31 @@ VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 in
 	}
 	if (effect) {
 		self = (psy_audio_VstPlugin*)effect->user;
-	} else
-		if (opcode == audioMasterVersion) {
-			return kVstVersion;
-		} else {
-			return 0;
-		}
+	} else if (opcode == audioMasterVersion) {
+		return kVstVersion;
+	} else {
+		return 0;
+	}
 	switch (opcode)
 	{
 	case audioMasterVersion:
 		result = kVstVersion;
 		break;
 	case audioMasterProcessEvents: {
-		// VstEvents* in <ptr>		
-		struct VstEvents* v = (struct VstEvents*)ptr;
-		VstInt32 n;
-				
-		for (n = 0; n < v->numEvents; ++n) {
-			VstEvent* vme = (VstEvent*)(v->events[n]);			
-			if (vme->type == kVstMidiType) {
-				VstEvent* copy;
+		if (self) {
+			// VstEvents* in <ptr>		
+			struct VstEvents* v = (struct VstEvents*)ptr;
+			VstInt32 n;
 
-				copy = (VstEvent*)malloc(sizeof(VstEvent));
-				*copy = *vme;
-				psy_audio_vstevents_append(&self->vstoutevents, copy);
+			for (n = 0; n < v->numEvents; ++n) {
+				VstEvent* vme = (VstEvent*)(v->events[n]);
+				if (vme->type == kVstMidiType) {
+					VstEvent* copy;
+
+					copy = (VstEvent*)malloc(sizeof(VstEvent));
+					*copy = *vme;
+					psy_audio_vstevents_append(&self->vstoutevents, copy);
+				}
 			}
 		}
 		break; }
