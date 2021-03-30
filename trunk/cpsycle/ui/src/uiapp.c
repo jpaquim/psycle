@@ -95,6 +95,8 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	self->main = NULL;
 	self->capture = NULL;	
 	self->alignvalid = TRUE;
+	self->mousetracking = FALSE;
+	self->hover = NULL;
 	psy_ui_geometry_init();
 	psy_signal_init(&self->signal_dispose);	
 	psy_ui_appzoom_init(&self->zoom);
@@ -405,4 +407,9 @@ void psy_ui_app_updatesyles(psy_ui_App* self)
 		self->alignvalid = TRUE;
 		psy_list_free(q);
 	}
+}
+
+void psy_ui_app_sethover(psy_ui_App* self, psy_ui_Component* hover)
+{
+	self->hover = hover;
 }

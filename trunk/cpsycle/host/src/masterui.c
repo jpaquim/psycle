@@ -58,7 +58,7 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* sk
 	assert(skin);
 	assert(view);
 
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, view);	
 	masterui_vtable_init(self);
 	self->component.vtable = &masterui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,

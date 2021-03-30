@@ -21,9 +21,12 @@ typedef struct {
 	psy_dsp_big_beat_t oldlength;
 } PatternPropertiesApplyCommand;
 
-static void patternpropertiesapplycommand_dispose(PatternPropertiesApplyCommand*);
-static void patternpropertiesapplycommand_execute(PatternPropertiesApplyCommand*);
-static void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_dispose(
+	PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_execute(
+	PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_revert(
+	PatternPropertiesApplyCommand*);
 
 // vtable
 static psy_CommandVtable patternpropertiesapplycommand_vtable;
@@ -33,11 +36,14 @@ static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyComm
 {
 	if (!patternpropertiesapplycommand_vtable_initialized) {
 		patternpropertiesapplycommand_vtable = *(self->command.vtable);
-		patternpropertiesapplycommand_vtable.dispose = (psy_fp_command)
+		patternpropertiesapplycommand_vtable.dispose =
+			(psy_fp_command)
 			patternpropertiesapplycommand_dispose;
-		patternpropertiesapplycommand_vtable.execute = (psy_fp_command)
+		patternpropertiesapplycommand_vtable.execute =
+			(psy_fp_command)
 			patternpropertiesapplycommand_execute;
-		patternpropertiesapplycommand_vtable.revert = (psy_fp_command)
+		patternpropertiesapplycommand_vtable.revert =
+			(psy_fp_command)
 			patternpropertiesapplycommand_revert;		
 		patternpropertiesapplycommand_vtable_initialized = TRUE;
 	}
@@ -94,13 +100,12 @@ void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand* self)
 static void patternproperties_onsongchanged(PatternProperties*, Workspace*,
 	int flag, psy_audio_Song*);
 static void patternproperties_connectsongsignals(PatternProperties*);
-static void patternproperties_onpatternnamechanged(PatternProperties*, psy_audio_Patterns*,
-	uintptr_t slot);
-static void patternproperties_onpatternlengthchanged(PatternProperties*, psy_audio_Patterns*,
-	uintptr_t slot);
+static void patternproperties_onpatternnamechanged(PatternProperties*,
+	psy_audio_Patterns*, uintptr_t slot);
+static void patternproperties_onpatternlengthchanged(PatternProperties*,
+	psy_audio_Patterns*, uintptr_t slot);
 static void patternproperties_onapply(PatternProperties*,
 	psy_ui_Component* sender);
-
 static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onfocus(PatternProperties*);
@@ -113,11 +118,14 @@ static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* 
 {
 	if (!patternproperties_vtable_initialized) {
 		patternproperties_vtable = *(self->component.vtable);
-		patternproperties_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
+		patternproperties_vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
 			patternproperties_onkeydown;
-		patternproperties_vtable.onkeyup = (psy_ui_fp_component_onkeyevent)
+		patternproperties_vtable.onkeyup =
+			(psy_ui_fp_component_onkeyevent)
 			patternproperties_onkeyup;
-		patternproperties_vtable.onfocus = (psy_ui_fp_component_onfocus)
+		patternproperties_vtable.onfocus =
+			(psy_ui_fp_component_onfocus)
 			patternproperties_onfocus;
 		patternproperties_vtable_initialized = TRUE;
 	}
@@ -140,19 +148,19 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
 	patternproperties_updateskin(self);
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
-		"Pattern Name");
+		"patternview.patname");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_edit_init(&self->nameedit, &self->component);
-	psy_ui_edit_settext(&self->nameedit, "No Pattern");
+	psy_ui_edit_settext(&self->nameedit, "patternview.nopattern");
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);
 	psy_ui_label_init_text(&self->lengthlabel, &self->component, NULL,
-		"Length");
+		"patternview.length");
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_edit_init(&self->lengthedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->lengthedit, 20);
 	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
 		patternproperties_onapply);
-	psy_ui_button_settext(&self->applybutton, "Apply");
+	psy_ui_button_settext(&self->applybutton, "patternview.apply");
 	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		patternproperties_onsongchanged);

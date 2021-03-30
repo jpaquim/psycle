@@ -49,9 +49,11 @@ typedef struct psy_ui_App {
 	psy_ui_Defaults defaults;
 	psy_Translator translator;	
 	bool alignvalid;
+	bool mousetracking;
 	// references
 	struct psy_ui_Component* main;
 	struct psy_ui_Component* capture;	
+	struct psy_ui_Component* hover;
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -71,6 +73,7 @@ void psy_ui_app_darktheme(psy_ui_App*);
 bool psy_ui_app_hasdarktheme(const psy_ui_App*);
 const psy_ui_Style* psy_ui_app_style(const psy_ui_App*, int styletype);
 void psy_ui_app_updatesyles(psy_ui_App*);
+void psy_ui_app_sethover(psy_ui_App*, struct psy_ui_Component* hover);
 
 INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
 {

@@ -60,6 +60,8 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "licence", "Licence");	
 	psy_property_set_str(section, "contributors-credits", "Contributors / Credits");
 	psy_property_set_str(section, "ok", "OK");
+	psy_property_set_str(section, "extract", "Extract Help");
+	psy_property_set_str(section, "combine", "Combine Help");
 	// Greetings
 	section = psy_property_append_section(lang, "greetings");
 	psy_property_set_str(section, "thanks", "Thanks! / ");
@@ -411,11 +413,26 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"connect-to-mixer-send-return-input",
 		"Connect to Mixer-send/return-input");
+	section = psy_property_append_section(lang, "stackview");
+	psy_property_set_str(section, "inputs", "Inputs");
+	psy_property_set_str(section, "effects", "Effects");
+	psy_property_set_str(section, "outputs", "Outputs");
+	psy_property_set_str(section, "volumes", "Volumes");
 	// PatternView
 	section = psy_property_append_section(lang, "patternview");
 	psy_property_set_str(section, "line", "Line");
 	psy_property_set_str(section, "defaults", "Defaults");
 	psy_property_set_str(section, "step", "Step");
+	psy_property_set_str(section, "patname", "Pattern Name");
+	psy_property_set_str(section, "nopattern", "No Pattern");
+	psy_property_set_str(section, "length", "Length");
+	psy_property_set_str(section, "apply", "Apply");
+	psy_property_set_str(section, "tracker", "Tracker");
+	psy_property_set_str(section, "roll", "Pianoroll");
+	psy_property_set_str(section, "horz", "Horizontal");
+	psy_property_set_str(section, "vert", "Vertical");
+	psy_property_set_str(section, "split", "Split");
+	psy_property_set_str(section, "properties", "Properties");	
 	// SequenceView
 	section = psy_property_append_section(lang, "sequencerview");
 	psy_property_set_str(section, "follow-song", "Follow Song");

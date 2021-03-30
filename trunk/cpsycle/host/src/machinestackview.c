@@ -814,10 +814,10 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component,
 		machinestackdesc_vtable_init(self));
 	self->view = view;
-	psy_ui_label_init_text(&self->inputs, &self->component, NULL, "Inputs");	
-	psy_ui_label_init_text(&self->effects, &self->component, NULL, "Effects");
-	psy_ui_label_init_text(&self->outputs, &self->component, NULL, "Outputs");
-	psy_ui_label_init_text(&self->volumes, &self->component, NULL, "Volumes");
+	psy_ui_label_init_text(&self->inputs, &self->component, NULL, "stackview.inputs");	
+	psy_ui_label_init_text(&self->effects, &self->component, NULL, "stackview.effects");
+	psy_ui_label_init_text(&self->outputs, &self->component, NULL, "stackview.outputs");
+	psy_ui_label_init_text(&self->volumes, &self->component, NULL, "stackview.volumes");
 	psy_ui_component_setcolour(&self->component,
 		psy_ui_colour_make(0x00AABBBB));
 }
@@ -879,7 +879,7 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 void machinestackdesc_onpreferredsize(MachineStackDesc* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_size_setem(rv, 12.0, 10.0);
+	psy_ui_size_setem(rv, 15.0, 10.0);
 }
 
 // MachineStackInputs
@@ -1156,8 +1156,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component, view,
-		column, state);
-	self->client.component.debugflag = 2;
+		column, state);	
 	psy_ui_component_setwheelscroll(&self->client.component, 4);
 	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setdefaultalign(&self->client.component,
@@ -1167,8 +1166,6 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 			psy_ui_value_makepx(0.0), psy_ui_value_makepx(0.0)));	
 	psy_ui_scroller_init(&self->scroller, &self->client.component, &self->component,
 		view);
-	self->scroller.component.debugflag = 5;
-	self->scroller.pane.debugflag = 3;
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_FIXED_RESIZE);
 	// psy_ui_component_setbackgroundmode(&self->scroller.component,
@@ -1288,8 +1285,7 @@ void machinestackpane_build(MachineStackPane* self)
 				column = machinestackstate_column(self->state, i);
 				machinestackpanetrack_init(trackpane, &self->component, i,
 					&self->component, self->state, self->workspace);
-				trackpane->component.deallocate = TRUE;
-				trackpane->component.debugflag = 1;				
+				trackpane->component.deallocate = TRUE;						
 				if (column && column->offset > 0) {
 					ArrowUi* arrow;
 					uintptr_t first;

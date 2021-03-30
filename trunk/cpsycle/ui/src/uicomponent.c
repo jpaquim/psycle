@@ -558,6 +558,9 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	self->maxsize = NULL;
 	free(self->maxsize);
 	self->maxsize = NULL;
+	if (psy_ui_app()->hover == self) {
+		psy_ui_app_sethover(psy_ui_app(), NULL);
+	}
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)

@@ -279,8 +279,13 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 		psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split",
-		"Vertical", "Horizontal", "Properties", NULL);
+	tabbar_append_tabs(&self->tabbar,
+		"patternview.tracker",
+		"patternview.roll",
+		"patternview.split",
+		"patternview.vert",
+		"patternview.horz",
+		"patternview.properties", NULL);
 	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
 	tabbar_tab(&self->tabbar, 2)->mode = TABMODE_LABEL;
 	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;
