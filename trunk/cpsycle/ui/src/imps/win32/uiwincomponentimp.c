@@ -1184,8 +1184,7 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		tme.hwndTrack = self->hwnd;
 		if (_TrackMouseEvent(&tme)) {
 			psy_ui_app()->mousetracking = TRUE;
-		}
-		return;
+		}		
 	}
 	if (psy_ui_app()->capture) {
 		psy_ui_Component* capture;
@@ -1281,10 +1280,9 @@ void dev_mouseleave(psy_ui_win_ComponentImp* self)
 		hover->vtable->onmouseleave(hover);
 		psy_signal_emit(&hover->signal_mouseleave, hover, 0);
 		psy_ui_app_sethover(psy_ui_app(), NULL);		
-	} else {
-		self->component->vtable->onmouseleave(self->component);		
-		psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
-	}	
+	}
+	self->component->vtable->onmouseleave(self->component);		
+	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);		
 }
 
 #endif

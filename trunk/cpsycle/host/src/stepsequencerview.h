@@ -13,8 +13,10 @@
 extern "C" {
 #endif
 
-// aim: A classical stepsequencer view for entering notes in the patterneditor
-//      The Left StepBar component selects the current pattern bar.
+// StepsequencerView
+//
+// A classical stepsequencer view for entering notes in the patterneditor
+// The Left StepBar component selects the current pattern bar.
 
 typedef struct {
 	intptr_t line;
@@ -27,7 +29,7 @@ typedef struct {
 	psy_dsp_big_beat_t sequenceentryoffset;
 	psy_Signal signal_linetick;
 	int doseqtick;
-}  StepTimer;
+} StepTimer;
 
 void steptimer_init(StepTimer*, psy_audio_Player*);
 void steptimer_dispose(StepTimer*);
@@ -52,16 +54,32 @@ void stepsequencerbarselect_init(StepsequencerBarSelect*,
 	psy_ui_Component* parent,
 	StepTimer* steptimer,
 	Workspace* workspace);
-void stepsequencerbarselect_setpattern(StepsequencerBarSelect*, psy_audio_Pattern*);
+void stepsequencerbarselect_setpattern(StepsequencerBarSelect*,
+	psy_audio_Pattern*);
 
-typedef struct {
+typedef struct StepSequencerTile {
+	// inherits
+	psy_ui_Component component;
+} StepSequencerTile;
+
+void stepsequencertile_init(StepSequencerTile*, psy_ui_Component* parent,
+	psy_ui_Component* view);
+StepSequencerTile* stepsequencertile_alloc(void);
+StepSequencerTile* stepsequencertile_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view);
+
+void stepsequencertile_turnon(StepSequencerTile*);
+void stepsequencertile_turnoff(StepSequencerTile*);
+void stepsequencertile_play(StepSequencerTile*);
+
+
+typedef struct StepsequencerBar {
 	psy_ui_Component component;
 	Workspace* workspace;
-	psy_audio_Pattern* pattern;		
-	double stepwidth;
-	double stepheight;
+	psy_audio_Pattern* pattern;	
+	psy_Table tiles;
 	StepTimer* steptimer;
-	StepSequencerPosition position;	
+	StepSequencerPosition position;
 } StepsequencerBar;
 
 void stepsequencerbar_init(StepsequencerBar*,
@@ -69,7 +87,6 @@ void stepsequencerbar_init(StepsequencerBar*,
 	StepTimer* steptimer,
 	Workspace*);
 void stepsequencerbar_setpattern(StepsequencerBar*, psy_audio_Pattern*);
-
 
 typedef struct StepsequencerView {
 	psy_ui_Component component;
