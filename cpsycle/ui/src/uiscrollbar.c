@@ -25,6 +25,8 @@ void psy_ui_scrollbarstate_init(psy_ui_ScrollBarState* self)
 // prototypes
 static void psy_ui_scrollbarthumb_onmousedown(psy_ui_ScrollBarThumb*,
 	psy_ui_MouseEvent*);
+static void psy_ui_scrollbarthumb_onmouseenter(psy_ui_ScrollBarThumb*);
+static void psy_ui_scrollbarthumb_onmouseleave(psy_ui_ScrollBarThumb*);
 // vtable
 static psy_ui_ComponentVtable psy_ui_scrollbarthumb_vtable;
 static bool psy_ui_scrollbarthumb_vtable_initialized = FALSE;
@@ -37,7 +39,13 @@ static void psy_ui_scrollbarthumb_vtableinit_init(psy_ui_ScrollBarThumb* self)
 		psy_ui_scrollbarthumb_vtable = *(self->component.vtable);
 		psy_ui_scrollbarthumb_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
-			psy_ui_scrollbarthumb_onmousedown;		
+			psy_ui_scrollbarthumb_onmousedown;
+		psy_ui_scrollbarthumb_vtable.onmouseenter =
+			(psy_ui_fp_component_onmouseenter)
+			psy_ui_scrollbarthumb_onmouseenter;
+		psy_ui_scrollbarthumb_vtable.onmouseleave =
+			(psy_ui_fp_component_onmouseleave)
+			psy_ui_scrollbarthumb_onmouseleave;
 		psy_ui_scrollbarthumb_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &psy_ui_scrollbarthumb_vtable;
@@ -55,7 +63,7 @@ void psy_ui_scrollbarthumb_init(psy_ui_ScrollBarThumb* self,
 		psy_ui_STYLE_SCROLLTHUMB,
 		psy_ui_STYLE_SCROLLTHUMB_HOVER,
 		psy_ui_STYLE_SCROLLTHUMB_HOVER);
-	self->state = state;
+	self->state = state;	
 }
 
 void psy_ui_scrollbarthumb_onmousedown(psy_ui_ScrollBarThumb* self,
@@ -64,6 +72,22 @@ void psy_ui_scrollbarthumb_onmousedown(psy_ui_ScrollBarThumb* self,
 	assert(self);
 
 	self->state->dragthumb = TRUE;
+}
+
+void psy_ui_scrollbarthumb_onmouseenter(psy_ui_ScrollBarThumb* self)
+{
+	assert(self);
+
+	self->component.style.currstyle = &self->component.style.hover;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void psy_ui_scrollbarthumb_onmouseleave(psy_ui_ScrollBarThumb* self)
+{
+	assert(self);
+	
+	self->component.style.currstyle = &self->component.style.style;
+	psy_ui_component_invalidate(&self->component);	
 }
 
 // psy_ui_ScrollBarPane
@@ -76,10 +100,6 @@ static void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
 static void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane*,
 	psy_ui_MouseEvent*);
-static void psy_ui_scrollbarpane_onmouseenter(psy_ui_ScrollBarPane*);
-static void psy_ui_scrollbarpane_onmouseleave(psy_ui_ScrollBarPane*);
-static void psy_ui_scrollbarpane_checkthumbhover(psy_ui_ScrollBarPane*,
-	psy_ui_RealPoint);
 static double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane*);
 static void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane*,
 	double pos);
@@ -98,20 +118,20 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 	if (!psy_ui_scrollbarpane_vtable_initialized) {
 		psy_ui_scrollbarpane_vtable = *(self->component.vtable);	
 		psy_ui_scrollbarpane_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmousedown;
+			(psy_ui_fp_component_onmouseevent)
+			psy_ui_scrollbarpane_onmousedown;
 		psy_ui_scrollbarpane_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmousedown;
+			(psy_ui_fp_component_onmouseevent)
+			psy_ui_scrollbarpane_onmousedown;		
 		psy_ui_scrollbarpane_vtable.onmousemove =
-		psy_ui_scrollbarpane_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmousemove;
+			(psy_ui_fp_component_onmouseevent)
+			psy_ui_scrollbarpane_onmousemove;
 		psy_ui_scrollbarpane_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)psy_ui_scrollbarpane_onmouseup;
-		psy_ui_scrollbarpane_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
-			psy_ui_scrollbarpane_onmouseenter;
-		psy_ui_scrollbarpane_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
-			psy_ui_scrollbarpane_onmouseleave;
+			(psy_ui_fp_component_onmouseevent)
+			psy_ui_scrollbarpane_onmouseup;
 		psy_ui_scrollbarpane_vtable.enableinput =
-			(psy_ui_fp_component_enableinput)psy_ui_scrollbarpane_enableinput;
+			(psy_ui_fp_component_enableinput)
+			psy_ui_scrollbarpane_enableinput;
 		psy_ui_scrollbarpane_vtable.preventinput =
 			(psy_ui_fp_component_preventinput)
 			psy_ui_scrollbarpane_preventinput;
@@ -130,8 +150,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_scrollbarpane_vtable_init(self);
-	self->component.vtable = &psy_ui_scrollbarpane_vtable;
-	self->component.debugflag = 300;
+	self->component.vtable = &psy_ui_scrollbarpane_vtable;	
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setstyletypes(&self->component,
@@ -143,8 +162,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	self->orientation = psy_ui_VERTICAL;
 	self->scrollmin = 0;
 	self->scrollmax = 0;	
-	self->enabled = TRUE;
-	self->hover = FALSE;
+	self->enabled = TRUE;	
 	self->state = state;
 	self->repeat = 0;
 	self->repeatdelaycounter = 0;
@@ -290,46 +308,6 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 			self->pos = pos;
 			psy_signal_emit(&self->signal_changed, self, 0);
 		}		
-	} else if (self->enabled) {
-		psy_ui_scrollbarpane_checkthumbhover(self, ev->pt);		
-	}
-}
-
-void psy_ui_scrollbarpane_onmouseenter(psy_ui_ScrollBarPane* self)
-{	
-	assert(self);
-}
-
-void psy_ui_scrollbarpane_onmouseleave(psy_ui_ScrollBarPane* self)
-{	
-	assert(self);
-
-	if (self->hover != FALSE) {
-		self->hover = FALSE;
-		self->thumb.component.style.currstyle = &self->thumb.component.style.style;
-		psy_ui_component_invalidate(&self->component);
-	}
-}
-
-void psy_ui_scrollbarpane_checkthumbhover(psy_ui_ScrollBarPane* self,
-	psy_ui_RealPoint pt)
-{
-	psy_ui_RealRectangle r;
-
-	assert(self);
-
-	// todo psy_ui_viewcomponentimp mouseenter/leave event
-	r = psy_ui_component_position(psy_ui_scrollbarthumb_base(&self->thumb));
-	if (psy_ui_realrectangle_intersect(&r, pt)) {
-		if (self->hover != TRUE) {
-			self->thumb.component.style.currstyle = &self->thumb.component.style.hover;
-			self->hover = TRUE;
-			psy_ui_component_invalidate(&self->thumb.component);
-		}
-	} else if (self->hover) {
-		self->hover = FALSE;
-		self->thumb.component.style.currstyle = &self->thumb.component.style.style;
-		psy_ui_component_invalidate(&self->thumb.component);
 	}
 }
 
@@ -438,7 +416,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 		psy_ui_scrollbar_ondestroy);
 	// Less Button
 	psy_ui_button_init_connect(&self->less,
-		&self->component, view, self, psy_ui_scrollbar_onless);
+		&self->component, view, self, psy_ui_scrollbar_onless);	
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 	psy_ui_button_setcharnumber(&self->less, 2);
 	psy_ui_component_setalign(psy_ui_button_base(&self->less),

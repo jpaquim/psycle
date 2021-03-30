@@ -14,6 +14,8 @@
 #include "../../uiapp.h"
 #include "uiwinapp.h"
 #include "uiwingraphicsimp.h"
+// common control header
+#include <commctrl.h>
 // details
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -207,8 +209,8 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
-	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width,
-		height, dwStyle, usecommand);
+	psy_ui_win_component_create_window(self, parent_imp, classname, x, y,
+		width, height, dwStyle, usecommand);
 	if (self->hwnd) {
 		psy_ui_win_component_init_wndproc(self, classname);
 	}
@@ -1125,7 +1127,8 @@ void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 				}
 			}
 		}
-	}	
+	}
+	psy_ui_app()->mousetracking = FALSE;
 }
 
 psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
@@ -1164,6 +1167,26 @@ psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
 
 void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {	
+	psy_List* p;
+
+	if (!self->viewcomponents && psy_ui_app()->hover) {
+		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
+		psy_ui_app_sethover(psy_ui_app(), NULL);
+	}
+
+	if (!psy_ui_app()->mousetracking) {
+		TRACKMOUSEEVENT tme;
+
+		self->imp.vtable->dev_mouseenter(&self->imp);
+		tme.cbSize = sizeof(TRACKMOUSEEVENT);
+		tme.dwFlags = TME_LEAVE | TME_HOVER;
+		tme.dwHoverTime = 200;
+		tme.hwndTrack = self->hwnd;
+		if (_TrackMouseEvent(&tme)) {
+			psy_ui_app()->mousetracking = TRUE;
+		}
+		return;
+	}
 	if (psy_ui_app()->capture) {
 		psy_ui_Component* capture;
 		psy_ui_RealPoint translation;
@@ -1172,10 +1195,11 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		translation = mapcoords(self, capture, self->component);
 		psy_ui_realpoint_sub(&ev->pt, translation);			
 		capture->vtable->onmousemove(capture, ev);
-		psy_ui_realpoint_add(&ev->pt, translation);
+		psy_ui_realpoint_add(&ev->pt, translation);		
 	} else {
-		psy_List* p;
+		bool intersect;
 
+		intersect = FALSE;
 		for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 			psy_ui_Component* child;
 			psy_ui_RealRectangle r;
@@ -1183,7 +1207,8 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			child = (psy_ui_Component*)p->entry;
 			if (psy_ui_component_visible(child)) {
 				r = psy_ui_component_position(child);
-				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				intersect = psy_ui_realrectangle_intersect(&r, ev->pt);
+				if (intersect) {
 					psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 					child->imp->vtable->dev_mousemove(child->imp, ev);
 					psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
@@ -1191,7 +1216,25 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 				}
 			}
 		}
+		if (!intersect) {
+			if (psy_ui_app()->hover != self->component) {
+				psy_ui_Component* hover;
+
+				hover = psy_ui_app()->hover;				
+				if (hover) {
+					hover->vtable->onmouseleave(hover);
+				}
+				self->component->vtable->onmouseenter(self->component);
+				psy_ui_app_sethover(psy_ui_app(), self->component);
+			}
+		}
 	}
+	if (ev->bubble) {
+		self->component->vtable->onmousemove(self->component, ev);
+		psy_signal_emit(&self->component->signal_mousemove,
+			self->component, 1, ev);
+	}
+
 }
 
 void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
@@ -1219,15 +1262,29 @@ void dev_mousedoubleclick(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 
 void dev_mouseenter(psy_ui_win_ComponentImp* self)
 {
+//	if (psy_ui_app()->hover) {
+//		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
+//	}
+//	psy_ui_app_sethover(psy_ui_app(), NULL);
 	self->component->vtable->onmouseenter(self->component);
 	psy_signal_emit(&self->component->signal_mouseenter,
 		self->component, 0);
 }
 
 void dev_mouseleave(psy_ui_win_ComponentImp* self)
-{
-	self->component->vtable->onmouseleave(self->component);
-	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
+{	
+	psy_ui_app()->mousetracking = FALSE;
+	if (psy_ui_app()->hover) {
+		psy_ui_Component* hover;
+
+		hover = psy_ui_app()->hover;
+		hover->vtable->onmouseleave(hover);
+		psy_signal_emit(&hover->signal_mouseleave, hover, 0);
+		psy_ui_app_sethover(psy_ui_app(), NULL);		
+	} else {
+		self->component->vtable->onmouseleave(self->component);		
+		psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
+	}	
 }
 
 #endif

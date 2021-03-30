@@ -290,7 +290,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 			psy_list_next(&t), ++c) {
 			SequenceTrackBox* sequencetrackbox;
 
-			// track = sequencetrackbox_allocinit(&self->component, &self->component,
+			// sequencetrackbox = sequencetrackbox_allocinit(&self->component, &self->component,
 			sequencetrackbox = sequencetrackbox_allocinit(&self->component, NULL,
 				self->state->sequence, c);
 			if (sequencetrackbox) {

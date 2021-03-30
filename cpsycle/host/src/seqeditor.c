@@ -968,7 +968,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 			SequenceTrackBox* sequencetrackbox;
 			
 			sequencetrackbox = sequencetrackbox_allocinit(
-				&self->component, NULL,
+				&self->component, &self->component,
 				seqeditorstate_sequence(self->state), c);
 			if (sequencetrackbox) {				
 				psy_ui_component_setminimumsize(
@@ -982,7 +982,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 					seqeditortrackdesc_ondeltrack);
 			}
 		}
-		newtrack = psy_ui_button_allocinit(&self->component, NULL);
+		newtrack = psy_ui_button_allocinit(&self->component, &self->component);
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
 			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),

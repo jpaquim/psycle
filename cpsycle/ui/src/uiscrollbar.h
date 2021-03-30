@@ -60,8 +60,7 @@ typedef struct psy_ui_ScrollBarPane {
     double scrollmax;
     double scrollmin;
     double dragoffset;    
-    bool enabled;
-    bool hover;
+    bool enabled;    
     int repeat;
     int repeatdelaycounter;
     psy_ui_Orientation orientation; 

@@ -20,7 +20,6 @@
 static int deltaperline = 120;
 static int accumwheeldelta = 0;
 static psy_ui_WinApp* winapp = NULL;
-static bool mousetracking = FALSE;
 
 static psy_ui_Component* eventtarget(psy_ui_Component* component);
 static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
@@ -311,10 +310,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (imp->component) {
 					psy_ui_Size size;
 					
-					imp->sizecachevalid = FALSE;
-					if (imp->component->debugflag == 70) {
-						imp = imp;
-					}
+					imp->sizecachevalid = FALSE;					
 					if (imp->component->alignchildren) {
 						psy_ui_component_align(imp->component);
 					}
@@ -548,8 +544,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_mouseevent(imp->component, imp,
 					hwnd, message, wParam, lParam, MK_LBUTTON,
 					imp->component->vtable->onmouseup,
-					&imp->component->signal_mouseup);
-				mousetracking = FALSE;
+					&imp->component->signal_mouseup);				
 				return 0;
 				break;
 			case WM_RBUTTONUP: {
@@ -608,36 +603,18 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					&imp->component->signal_mousedoubleclick);				
 				return 0;
 				break;
-			case WM_MOUSEMOVE:
-				if (!mousetracking) {
-					TRACKMOUSEEVENT tme;
-					
-					imp->imp.vtable->dev_mouseenter(&imp->imp);					
-					tme.cbSize = sizeof(TRACKMOUSEEVENT);
-					tme.dwFlags = TME_LEAVE | TME_HOVER;
-					tme.dwHoverTime = 200;
-					tme.hwndTrack = hwnd;
-					if (_TrackMouseEvent(&tme)) {
-						mousetracking = TRUE;
-					} 
-					return 0;
-				}
-				{
-					psy_ui_MouseEvent ev;
+			case WM_MOUSEMOVE: {
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev,
-						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
-						wParam, 0, GetKeyState(VK_SHIFT) < 0,
-						GetKeyState(VK_CONTROL) < 0);
-					adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
-					//psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
-					imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
-					imp->component->vtable->onmousemove(imp->component, &ev);
-					psy_signal_emit(&imp->component->signal_mousemove,
-						imp->component, 1, &ev);					
-					return 0 ;
-				}
-				break;			
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+					wParam, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
+				// psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
+				imp->imp.vtable->dev_mousemove(&imp->imp, &ev);					
+				return 0;
+				break; }
 			case WM_SETTINGCHANGE: {
 				static int ulScrollLines;
 
@@ -727,13 +704,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_signal_emit(&imp->component->signal_mousehover, imp->component, 0);
 				return 0;				
 			break;
-			case WM_MOUSELEAVE:
-			{
-				mousetracking = FALSE;
+			case WM_MOUSELEAVE:							
 				imp->imp.vtable->dev_mouseleave(&imp->imp);				
-				return 0;
-			}				
-			break;
+				return 0;			
+				break;
 			case WM_VSCROLL:				
 				handle_vscroll(hwnd, wParam, lParam);
 				return 0;

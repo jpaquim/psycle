@@ -12,7 +12,6 @@
 
 // ViewComponentImp
 // prototypes
-static void view_dev_destroy(psy_ui_ViewComponentImp*);
 static void view_dev_destroyed(psy_ui_ViewComponentImp*);
 static void view_dev_dispose(psy_ui_ViewComponentImp*);
 static void view_dev_destroy(psy_ui_ViewComponentImp*);
@@ -257,7 +256,7 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 	if (!component) {
 		return;
 	}
-	if (component) {
+	if (component) {		
 		psy_signal_emit(&component->signal_destroy,
 			self->component, 0);
 		component->vtable->ondestroy(component);
@@ -702,7 +701,9 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 {	
 	psy_List* p;
+	bool intersect;
 		
+	intersect = FALSE;
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* child;
 		psy_ui_RealRectangle r;
@@ -710,7 +711,8 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		child = (psy_ui_Component*)psy_list_entry(p);
 		if (psy_ui_component_visible(child)) {
 			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+			intersect = psy_ui_realrectangle_intersect(&r, ev->pt);
+			if (intersect) {
 				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
 				child->imp->vtable->dev_mousemove(child->imp, ev);
 				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
@@ -718,6 +720,18 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 				break;
 			}
 		}
+	}
+	if (!intersect) {
+		if (psy_ui_app()->hover != self->component) {
+			psy_ui_Component* hover;
+
+			hover = psy_ui_app()->hover;
+			if (hover) {				
+				hover->vtable->onmouseleave(hover);
+			}						
+			self->component->vtable->onmouseenter(self->component);
+			psy_ui_app_sethover(psy_ui_app(), self->component);
+		}		
 	}
 	if (ev->bubble) {
 		self->component->vtable->onmousemove(self->component, ev);
@@ -750,10 +764,13 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 
 void view_dev_mouseenter(psy_ui_ViewComponentImp* self)
 {
-
+	if (psy_ui_app()->hover) {
+		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
+	}
+	psy_ui_app_sethover(psy_ui_app(), self->component);	
 }
 
 void view_dev_mouseleave(psy_ui_ViewComponentImp* self)
 {
-
+	psy_ui_app_sethover(psy_ui_app(), NULL);	
 }

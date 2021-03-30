@@ -343,7 +343,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 }
 
 void onmouseenter(psy_ui_Button* self)
-{
+{	
 	if (self->enabled) {
 		self->hover = 1;
 		button_updatestyles(self);

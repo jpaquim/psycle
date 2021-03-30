@@ -44,10 +44,11 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 {	
 	psy_ui_component_init_align(&self->bar, tabbarparent, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->bar);
+	psy_ui_component_setalignexpand(&self->bar, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL, "Extract Help   ",
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL, "help.extract",
 		self, helpview_onfloatsection);		
 	psy_ui_bitmap_loadresource(&self->floatsection.bitmapicon, IDB_VSPLIT_DARK);
 	psy_ui_bitmap_settransparency(&self->floatsection.bitmapicon,
@@ -113,7 +114,9 @@ void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* d
 		psy_ui_component_preventalign(&self->help.editor.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "Combine Help");				
+		psy_ui_button_settext(&self->floatsection, "help.combine");		
+		psy_ui_component_align(psy_ui_component_parent(
+			psy_ui_component_parent(&self->bar)));		
 	}
 }
 
@@ -128,7 +131,9 @@ void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* de
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);
-		psy_ui_button_settext(&self->floatsection, "Extract Help   ");		
+		psy_ui_button_settext(&self->floatsection, "help.extract");
+		psy_ui_component_align(psy_ui_component_parent(
+			psy_ui_component_parent(&self->bar)));
 	}
 }
 
