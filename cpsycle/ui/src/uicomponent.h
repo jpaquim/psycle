@@ -141,14 +141,24 @@ typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
 
+typedef enum psy_ui_StyleState {
+	psy_ui_STYLESTATE_NONE = 0,
+	psy_ui_STYLESTATE_HOVER = 1,
+	psy_ui_STYLESTATE_SELECT = 2,
+	psy_ui_STYLESTATE_DISABLED = 3
+} psy_ui_StyleState;
+
 typedef struct psy_ui_ComponentStyle {
 	psy_ui_Style* currstyle;
 	psy_ui_Style style;
 	psy_ui_Style hover;
 	psy_ui_Style select;
+	psy_ui_Style disabled;
 	uintptr_t style_id;
 	uintptr_t hover_id;
 	uintptr_t select_id;
+	uintptr_t disabled_id;
+	psy_ui_StyleState state;
 } psy_ui_ComponentStyle;
 
 void psy_ui_componentstyle_init(psy_ui_ComponentStyle* style);
@@ -330,6 +340,7 @@ void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
+bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
@@ -389,6 +400,7 @@ typedef void (*psy_ui_fp_componentimp_dev_setfont)(struct psy_ui_ComponentImp*, 
 typedef psy_List* (*psy_ui_fp_componentimp_dev_children)(struct psy_ui_ComponentImp*, int recursive);
 typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
+typedef bool (*psy_ui_fp_componentimp_dev_inputprevented)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setcursor)(struct psy_ui_ComponentImp*, psy_ui_CursorStyle);
 typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp*, uintptr_t id,
 	uintptr_t interval);
@@ -412,7 +424,7 @@ typedef void (*psy_ui_fp_componentimp_dev_mousedoubleclick)(struct psy_ui_Compon
 typedef void (*psy_ui_fp_componentimp_dev_mouseenter)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseleave)(struct psy_ui_ComponentImp*);
 
-typedef struct {	
+typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
 	psy_ui_fp_componentimp_dev_destroy dev_destroy;
 	psy_ui_fp_componentimp_dev_destroyed dev_destroyed;
@@ -446,6 +458,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_children dev_children;
 	psy_ui_fp_componentimp_dev_enableinput dev_enableinput;
 	psy_ui_fp_componentimp_dev_preventinput dev_preventinput;
+	psy_ui_fp_componentimp_dev_inputprevented dev_inputprevented;
 	psy_ui_fp_componentimp_dev_setcursor dev_setcursor;
 	psy_ui_fp_componentimp_dev_starttimer dev_starttimer;
 	psy_ui_fp_componentimp_dev_stoptimer dev_stoptimer;
@@ -765,20 +778,22 @@ INLINE psy_ui_RealSize psy_ui_component_sizepx(const psy_ui_Component* self)
 		
 }
 
-int psy_ui_component_level(const psy_ui_Component* self);
-const psy_ui_Style* psy_ui_style(int styletype);
-void psy_ui_component_setdefaultalign(psy_ui_Component* self,
-	psy_ui_AlignType, psy_ui_Margin margin);
+int psy_ui_component_level(const psy_ui_Component*);
+const psy_ui_Style* psy_ui_style(uintptr_t styletype);
+void psy_ui_component_setdefaultalign(psy_ui_Component*,
+	psy_ui_AlignType, psy_ui_Margin);
 
-void psy_ui_component_updatelanguage(psy_ui_Component* self);
+void psy_ui_component_updatelanguage(psy_ui_Component*);
 psy_Translator* psy_ui_translator(void);
-
 const char* psy_ui_translate(const char* key);
-
 void psy_ui_component_setscrollmode(psy_ui_Component*, psy_ui_ScrollMode);
 
 void psy_ui_component_setstyletypes(psy_ui_Component*,
-	uintptr_t standard, uintptr_t hover, uintptr_t select);
+	uintptr_t standard, uintptr_t hover, uintptr_t select, uintptr_t disabled);
+void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_updatestylestate(psy_ui_Component*);
 
 #ifdef __cplusplus
 }

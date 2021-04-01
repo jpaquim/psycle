@@ -305,7 +305,7 @@ bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 	return psy_ui_defaults()->hasdarktheme;
 }
 
-const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, int styletype)
+const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, uintptr_t styletype)
 {
 	return psy_ui_defaults_style_const(&self->defaults, styletype);
 }

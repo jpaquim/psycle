@@ -17,7 +17,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	self->dbgflag = 0;
 }
 
-void psy_ui_style_init_default(psy_ui_Style* self, int styletype)
+void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 {	
 	psy_ui_style_init_copy(self, psy_ui_style(styletype));	
 }
@@ -107,12 +107,13 @@ void psy_ui_style_setfont(psy_ui_Style* self, const char* family, int size)
 // prototypes
 static void psy_ui_styles_updateconfig(psy_ui_Styles*);
 static void psy_ui_styles_addstyletoconfig(psy_ui_Styles*, psy_ui_Style*,
-	int styletype);
+	uintptr_t styletype);
 static void psy_ui_styles_addcolourtoconfig(psy_ui_Styles*,
 	psy_Property* parent, const char* key, psy_ui_Colour);
-static psy_ui_Style* psy_ui_styles_readstyle(psy_ui_Styles*, int styletype);
-static psy_ui_Colour psy_ui_styles_readcolour(psy_ui_Styles*, psy_Property* parent,
-	const char* key);
+static psy_ui_Style* psy_ui_styles_readstyle(psy_ui_Styles*,
+	uintptr_t styletype);
+static psy_ui_Colour psy_ui_styles_readcolour(psy_ui_Styles*,
+	psy_Property* parent, const char* key);
 
 // implementation
 void psy_ui_styles_init(psy_ui_Styles* self)
@@ -128,7 +129,7 @@ void psy_ui_styles_dispose(psy_ui_Styles* self)
 	psy_property_dispose(&self->config);
 }
 
-void psy_ui_styles_setstyle(psy_ui_Styles* self, int styletype, psy_ui_Style* style)
+void psy_ui_styles_setstyle(psy_ui_Styles* self, uintptr_t styletype, psy_ui_Style* style)
 {
 	psy_ui_Style* currstyle;
 
@@ -141,7 +142,7 @@ void psy_ui_styles_setstyle(psy_ui_Styles* self, int styletype, psy_ui_Style* st
 	psy_table_insert(&self->styles, styletype, style);
 }
 
-void psy_ui_styles_mixstyle(psy_ui_Styles* self, int styletype,
+void psy_ui_styles_mixstyle(psy_ui_Styles* self, uintptr_t styletype,
 	psy_ui_Style* style)
 {
 	psy_ui_Style* currstyle;
@@ -165,7 +166,7 @@ void psy_ui_styles_mixstyle(psy_ui_Styles* self, int styletype,
 	psy_table_insert(&self->styles, styletype, style);
 }
 
-psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, int styletype)
+psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype)
 {
 	psy_ui_Style* rv;
 
@@ -180,7 +181,7 @@ psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, int styletype)
 }
 
 const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles* self,
-	int styletype)
+	uintptr_t styletype)
 {
 	assert(self);
 
@@ -205,7 +206,7 @@ void psy_ui_styles_configure(psy_ui_Styles* self, psy_Property* config)
 	}
 }
 
-psy_ui_Style* psy_ui_styles_readstyle(psy_ui_Styles* self, int styletype)
+psy_ui_Style* psy_ui_styles_readstyle(psy_ui_Styles* self, uintptr_t styletype)
 {	
 	char key[128];
 	psy_Property* section;
@@ -275,7 +276,8 @@ void psy_ui_styles_updateconfig(psy_ui_Styles* self)
 	}
 }
 
-void psy_ui_styles_addstyletoconfig(psy_ui_Styles* self, psy_ui_Style* style, int styletype)
+void psy_ui_styles_addstyletoconfig(psy_ui_Styles* self, psy_ui_Style* style,
+	uintptr_t styletype)
 {
 	psy_Property* section;	
 	char key[128];

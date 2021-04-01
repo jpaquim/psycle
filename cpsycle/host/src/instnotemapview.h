@@ -173,10 +173,7 @@ InstrumentEntryRow* instrumententryrow_allocinit(
 typedef struct InstrumentEntryTableView {
 	// inherits
 	psy_ui_Component component;		
-	// internal	
-	int dragmode;
-	uint8_t currkey;
-	psy_ui_Value lineheight;
+	// internal		
 	InstrumentNoteMapMetrics metrics;	
 	// references	
 	psy_audio_Instrument* instrument;

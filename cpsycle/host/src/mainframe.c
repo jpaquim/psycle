@@ -247,7 +247,8 @@ void mainframe_initemptystatusbar(MainFrame* self)
 	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setstyletypes(&self->statusbar,
-		STYLE_STATUSBAR, STYLE_STATUSBAR, STYLE_STATUSBAR);
+		STYLE_STATUSBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_makeem(0.25, 1.0, 0.25, 0.0));
 }
@@ -435,7 +436,8 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
 	psy_ui_component_setmargin(&self->toprows, &toprowsmargin);
 	psy_ui_component_setstyletypes(&self->toprows,
-		STYLE_TOPROWS, STYLE_TOPROWS, STYLE_TOPROWS);
+		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
@@ -443,7 +445,7 @@ void mainframe_initbars(MainFrame* self)
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
-		STYLE_TOPROW0, STYLE_TOPROW0);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setmargin(&self->toprow0, &row0margin);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
@@ -461,7 +463,7 @@ void mainframe_initbars(MainFrame* self)
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow1, STYLE_TOPROW1,
-		STYLE_TOPROW1, STYLE_TOPROW1);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
@@ -470,7 +472,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setdefaultalign(&self->toprow2, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());	
 	psy_ui_component_setstyletypes(&self->toprow2, STYLE_TOPROW2,
-		STYLE_TOPROW2, STYLE_TOPROW2);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);		
 	// scopebar
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);	
@@ -487,7 +489,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setpreferredsize(&self->topspacer,
 		psy_ui_size_makeem(0.0, 0.5));
 	psy_ui_component_setstyletypes(&self->topspacer,
-		STYLE_TOP, STYLE_TOP, STYLE_TOP);
+		STYLE_TOP, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 }
 
 void mainframe_inittabbars(MainFrame* self)

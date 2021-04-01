@@ -33,7 +33,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_SEQVIEW_BUTTONS,
-		STYLE_SEQVIEW_BUTTONS, STYLE_SEQVIEW_BUTTONS);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_margin_init_all_em(&spacing, 0.25, 0.5, 0.5, 0.5);
 	psy_ui_component_setspacing(&self->component, &spacing);
 	psy_ui_component_init(&self->standard, &self->component, NULL);
@@ -106,7 +106,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		psy_ui_button_setcharnumber(buttons[i], colwidth);
 		psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 			STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
-			STYLE_SEQVIEW_BUTTON_SELECT);
+			STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
 		psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
 		psy_ui_button_setlinespacing(buttons[i], 1.4);
 	}
@@ -442,7 +442,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	psy_ui_component_starttimer(&self->component, 0, 200);
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW, STYLE_SEQLISTVIEW_SELECT);
+		STYLE_SEQLISTVIEW, psy_INDEX_INVALID, STYLE_SEQLISTVIEW_SELECT,
+		psy_INDEX_INVALID);
 }
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
@@ -780,7 +781,8 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->duration, 18);
 	psy_ui_label_preventtranslation(&self->duration);
 	psy_ui_component_setstyletypes(psy_ui_label_base(&self->duration),
-		STYLE_DURATION_TIME, STYLE_DURATION_TIME, STYLE_DURATION_TIME);
+		STYLE_DURATION_TIME, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	self->calcduration = FALSE;
 	psy_signal_connect(&self->component.signal_timer, self,
 		sequenceduration_ontimer);	

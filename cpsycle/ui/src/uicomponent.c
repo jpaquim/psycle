@@ -19,10 +19,13 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 	psy_ui_style_init(&self->style);
 	psy_ui_style_init(&self->hover);
 	psy_ui_style_init(&self->select);
+	psy_ui_style_init(&self->disabled);
 	self->currstyle = &self->style;
 	self->style_id = psy_INDEX_INVALID;
 	self->hover_id = psy_INDEX_INVALID;
 	self->select_id = psy_INDEX_INVALID;
+	self->disabled_id = psy_INDEX_INVALID;
+	self->state = psy_ui_STYLESTATE_NONE;
 }
 
 void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
@@ -229,8 +232,16 @@ static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
-static void onmouseenter(psy_ui_Component* self) { }
-static void onmouseleave(psy_ui_Component* self) { }
+
+static void onmouseenter(psy_ui_Component* self)
+{
+	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_HOVER);
+}
+static void onmouseleave(psy_ui_Component* self)
+{
+	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_HOVER);
+}
+
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
@@ -829,17 +840,23 @@ void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode m
 
 void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
 {
-	enableinput_internal(self, TRUE, recursive);
+	if (psy_ui_component_inputprevented(self)) {
+		enableinput_internal(self, TRUE, recursive);		
+		psy_ui_component_invalidate(self);
+	}
 }
 
 void psy_ui_component_preventinput(psy_ui_Component* self, int recursive)
 {
-	enableinput_internal(self, FALSE, recursive);
+	if (!psy_ui_component_inputprevented(self)) {
+		enableinput_internal(self, FALSE, recursive);		
+		psy_ui_component_invalidate(self);
+	}
 }
 
 void enableinput_internal(psy_ui_Component* self, int enable, int recursive)
-{	
-	if (enable) {
+{		
+	if (enable) {		
 		self->vtable->enableinput(self);
 	} else {
 		self->vtable->preventinput(self);
@@ -865,12 +882,19 @@ void enableinput_internal(psy_ui_Component* self, int enable, int recursive)
 
 static void enableinput(psy_ui_Component* self)
 {
-	self->imp->vtable->dev_enableinput(self->imp);
+	self->imp->vtable->dev_enableinput(self->imp);	
+	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_DISABLED);
 }
 
 static void preventinput(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_preventinput(self->imp);
+	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_DISABLED);	
+}
+
+bool psy_ui_component_inputprevented(const psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_inputprevented(self->imp);
 }
 
 void psy_ui_component_setbackgroundmode(psy_ui_Component* self,
@@ -1040,6 +1064,7 @@ static void dev_setverticalscrollposition(psy_ui_ComponentImp* self, intptr_t po
 static psy_List* dev_children(psy_ui_ComponentImp* self, int recursive) { return 0; }
 static void dev_enableinput(psy_ui_ComponentImp* self) { }
 static void dev_preventinput(psy_ui_ComponentImp* self) { }
+static bool dev_inputprevented(const psy_ui_ComponentImp* self) { return FALSE; }
 static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorstyle) { }
 static void dev_starttimer(psy_ui_ComponentImp* self, uintptr_t id, uintptr_t interval) { }
 static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
@@ -1114,6 +1139,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_children = dev_children;
 		imp_vtable.dev_enableinput = dev_enableinput;
 		imp_vtable.dev_preventinput = dev_preventinput;
+		imp_vtable.dev_inputprevented = dev_inputprevented;
 		imp_vtable.dev_setcursor = dev_setcursor;
 		imp_vtable.dev_starttimer = dev_starttimer;
 		imp_vtable.dev_stoptimer = dev_stoptimer;
@@ -1463,7 +1489,7 @@ void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	self->insertmargin = margin;
 }
 
-const psy_ui_Style* psy_ui_style(int styletype)
+const psy_ui_Style* psy_ui_style(uintptr_t styletype)
 {
 	return psy_ui_app_style(psy_ui_app(), styletype);
 }
@@ -1492,12 +1518,94 @@ void psy_ui_component_setscrollmode(psy_ui_Component* self, psy_ui_ScrollMode mo
 }
 
 void psy_ui_component_setstyletypes(psy_ui_Component* self,
-	uintptr_t standard, uintptr_t hover, uintptr_t select)
+	uintptr_t standard, uintptr_t hover, uintptr_t select,
+	uintptr_t disabled)
 {
 	self->style.style_id = standard;
 	self->style.hover_id = hover;
-	self->style.select_id = select;	
+	self->style.select_id = select;
+	self->style.disabled_id = disabled;
 	updatestyles(self);	
+}
+
+void psy_ui_component_setstylestate(psy_ui_Component* self,
+	psy_ui_StyleState state)
+{		
+	if (state != self->style.state) {
+		self->style.state = state;
+		psy_ui_component_updatestylestate(self);
+	}
+}
+
+void psy_ui_component_addstylestate(psy_ui_Component* self,
+	psy_ui_StyleState state)
+{
+	uintptr_t newstate;
+
+	newstate = self->style.state | state;
+	if (newstate != self->style.state) {
+		self->style.state = newstate;
+		psy_ui_component_updatestylestate(self);
+	}
+}
+
+void psy_ui_component_removestylestate(psy_ui_Component* self,
+	psy_ui_StyleState state)
+{
+	uintptr_t newstate;
+
+	newstate = self->style.state & (~state);
+	if (newstate != self->style.state) {
+		self->style.state = newstate;
+		psy_ui_component_updatestylestate(self);
+	}
+}
+
+void psy_ui_component_updatestylestate(psy_ui_Component* self)
+{
+	uintptr_t state;
+
+	if ((self->style.state & psy_ui_STYLESTATE_DISABLED) == psy_ui_STYLESTATE_DISABLED) {
+		state = psy_ui_STYLESTATE_DISABLED;
+	} else if ((self->style.state & psy_ui_STYLESTATE_SELECT) == psy_ui_STYLESTATE_SELECT) {
+		state = psy_ui_STYLESTATE_SELECT;
+	} else if ((self->style.state & psy_ui_STYLESTATE_HOVER) == psy_ui_STYLESTATE_HOVER) {
+		state = psy_ui_STYLESTATE_HOVER;
+	} else {
+		state = psy_ui_STYLESTATE_NONE;
+	}
+	switch (state) {
+	case psy_ui_STYLESTATE_NONE:
+		if (self->style.currstyle != &self->style.style) {
+			self->style.currstyle = &self->style.style;
+			psy_ui_component_invalidate(self);
+		}
+		break;
+	case psy_ui_STYLESTATE_HOVER:
+		if (self->style.hover_id != psy_INDEX_INVALID) {
+			self->style.currstyle = &self->style.hover;
+			psy_ui_component_invalidate(self);
+		}
+		break;
+	case psy_ui_STYLESTATE_SELECT:
+		if (self->style.select_id != psy_INDEX_INVALID) {
+			self->style.currstyle = &self->style.select;
+			psy_ui_component_invalidate(self);
+		}
+		break;
+	case psy_ui_STYLESTATE_DISABLED:
+		if (self->style.disabled_id != psy_INDEX_INVALID) {
+			self->style.currstyle = &self->style.disabled;
+			psy_ui_component_invalidate(self);
+		}
+		break;
+	default:
+		if (self->style.currstyle != &self->style.style) {
+			self->style.currstyle = &self->style.style;
+			psy_ui_component_invalidate(self);
+		}
+		break;
+	}	
 }
 
 void updatestyles(psy_ui_Component* self)
@@ -1506,13 +1614,17 @@ void updatestyles(psy_ui_Component* self)
 		psy_ui_style_copy(&self->style.style,
 			psy_ui_style(self->style.style_id));		
 	}
-	if (self->style.style_id != psy_INDEX_INVALID) {
+	if (self->style.hover_id != psy_INDEX_INVALID) {
 		psy_ui_style_copy(&self->style.hover,
 			psy_ui_style(self->style.hover_id));	
 	}
-	if (self->style.style_id != psy_INDEX_INVALID) {
+	if (self->style.select_id != psy_INDEX_INVALID) {
 		psy_ui_style_copy(&self->style.select,
 			psy_ui_style(self->style.select_id));
+	}
+	if (self->style.disabled_id != psy_INDEX_INVALID) {
+		psy_ui_style_copy(&self->style.disabled,
+			psy_ui_style(self->style.disabled_id));
 	}
 	if (self->style.style.backgroundcolour.mode.set) {
 		psy_ui_component_setbackgroundcolour(self,

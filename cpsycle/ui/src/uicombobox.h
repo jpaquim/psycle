@@ -44,7 +44,7 @@ typedef struct psy_ui_ComboBox {
     struct psy_ui_ComboBoxImp* imp;       
     int ownerdrawn;   
     psy_ui_ComboBoxHover hover;
-    uintptr_t charnumber;
+    double charnumber;
     psy_Table itemdata;
 } psy_ui_ComboBox;
 
@@ -54,7 +54,7 @@ intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox*, const char* text);
 void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
 intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox*);
-void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, uintptr_t num);
+void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, double num);
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
 intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
 

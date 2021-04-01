@@ -480,7 +480,8 @@ void seqeditorpatternentry_init(SeqEditorPatternEntry* self,
 	psy_ui_component_setvtable(&self->component,
 		seqeditorpatternentry_vtable_init(self));
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQEDT_ITEM, STYLE_SEQEDT_ITEM, STYLE_SEQEDT_ITEM_SELECTED);
+		STYLE_SEQEDT_ITEM, psy_INDEX_INVALID, STYLE_SEQEDT_ITEM_SELECTED,
+		psy_INDEX_INVALID);
 	self->state = state;
 	self->sequenceentry = entry;
 	self->seqpos = seqpos;
@@ -1372,7 +1373,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);	
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQEDT, STYLE_SEQEDT, STYLE_SEQEDT);
+		STYLE_SEQEDT, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->component.vtable = &seqeditor_vtable;	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);

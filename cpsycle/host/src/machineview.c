@@ -70,7 +70,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(machineview_base(self),
 		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_MACHINEVIEW, STYLE_MACHINEVIEW, STYLE_MACHINEVIEW);
+		STYLE_MACHINEVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	self->workspace = workspace;	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineview_onsongchanged);

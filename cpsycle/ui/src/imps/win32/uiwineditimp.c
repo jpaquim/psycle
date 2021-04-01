@@ -39,6 +39,7 @@ static void dev_setfont(psy_ui_win_EditImp* self, psy_ui_Font* font) { self->win
 static psy_List* dev_children(psy_ui_win_EditImp* self, int recursive) { return self->win_component_imp.imp.vtable->dev_children(&self->win_component_imp.imp, recursive); }
 static void dev_enableinput(psy_ui_win_EditImp* self) { self->win_component_imp.imp.vtable->dev_enableinput(&self->win_component_imp.imp); }
 static void dev_preventinput(psy_ui_win_EditImp* self) { self->win_component_imp.imp.vtable->dev_preventinput(&self->win_component_imp.imp); }
+static bool dev_inputprevented(const psy_ui_win_EditImp* self) { return self->win_component_imp.imp.vtable->dev_inputprevented(&self->win_component_imp.imp); }
 static void dev_setcursor(psy_ui_win_EditImp* self, psy_ui_CursorStyle style) { self->win_component_imp.imp.vtable->dev_setcursor(&self->win_component_imp.imp, style); }
 static void dev_starttimer(psy_ui_win_EditImp* self, uintptr_t id, uintptr_t interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_win_EditImp* self, uintptr_t id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
@@ -82,6 +83,7 @@ static void imp_vtable_init(void)
 		vtable.dev_children = (psy_ui_fp_componentimp_dev_children)dev_children;
 		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)dev_enableinput;
 		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)dev_preventinput;
+		vtable.dev_inputprevented = (psy_ui_fp_componentimp_dev_inputprevented)dev_inputprevented;
 		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)dev_setcursor;
 		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)dev_starttimer;
 		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)dev_stoptimer;

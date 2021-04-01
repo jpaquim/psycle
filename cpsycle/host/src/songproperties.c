@@ -61,8 +61,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->title, &self->component, NULL);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_SONGPROPERTIES,
-		STYLE_SONGPROPERTIES,
-		STYLE_SONGPROPERTIES);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_label_init(&self->label_title, &self->title, NULL);
 	psy_ui_label_settextalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_settext(&self->label_title, "songproperties.title");
@@ -126,8 +125,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->comments, &self->component, NULL);
 	psy_ui_component_setstyletypes(&self->comments,
 		STYLE_SONGPROPERTIES_COMMENTS,
-		STYLE_SONGPROPERTIES_COMMENTS,
-		STYLE_SONGPROPERTIES_COMMENTS);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_label_init_text(&self->label_comments, &self->comments, NULL,
 		"songproperties.extcomments");
 	psy_ui_label_settextalignment(&self->label_comments,
@@ -138,8 +136,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
 	psy_ui_component_setstyletypes(&self->edit_comments.component,
 		STYLE_SONGPROPERTIES_COMMENTS,
-		STYLE_SONGPROPERTIES_COMMENTS,
-		STYLE_SONGPROPERTIES_COMMENTS);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_comments.component, &margin);
 	psy_signal_connect(&self->edit_comments.signal_change, self,

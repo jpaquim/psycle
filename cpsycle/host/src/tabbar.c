@@ -155,8 +155,8 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(tabbar_base(self));	
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_TABBAR,
-		psy_ui_STYLE_TABBAR,
-		psy_ui_STYLE_TABBAR);
+		psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	psy_signal_init(&self->signal_change);
 	self->tabs = NULL;
 	self->selected = 0;

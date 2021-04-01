@@ -423,8 +423,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_INSTRUMENTVIEW,
-		STYLE_INSTRUMENTVIEW,
-		STYLE_INSTRUMENTVIEW);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	self->statusbar = NULL;
 	self->player = &workspace->player;

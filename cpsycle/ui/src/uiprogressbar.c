@@ -36,8 +36,7 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	self->component.vtable = &vtable;
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_PROGRESSBAR,
-		psy_ui_STYLE_PROGRESSBAR,
-		psy_ui_STYLE_PROGRESSBAR);	
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->text = NULL;
 	self->progress = 0.f;	
 }

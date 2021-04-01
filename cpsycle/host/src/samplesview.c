@@ -812,7 +812,7 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		sprintf(tmp, "%d", (int)sample->sustainloop.end);
 		psy_ui_edit_settext(&self->sustainloopendedit, tmp);
 		psy_ui_combobox_setcursel(&self->loopdir,
-			LoopTypeToComboBox(self->sample->loop.type));
+			LoopTypeToComboBox(self->sample->loop.type));		
 		psy_ui_combobox_setcursel(&self->sustainloopdir,
 			LoopTypeToComboBox(self->sample->sustainloop.type));
 		self->currloop = self->sample->loop;
@@ -993,8 +993,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_SAMPLESVIEW,
-		STYLE_SAMPLESVIEW,
-		STYLE_SAMPLESVIEW);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);
