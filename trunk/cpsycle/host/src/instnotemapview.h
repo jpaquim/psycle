@@ -65,22 +65,52 @@ enum {
 	INSTVIEW_DRAG_RIGHT
 };
 
+struct psy_audio_InstrumentEntry;
+struct InstrumentEntryTableColumn;
+
+// State
+typedef struct InstrumentEntryState {
+	// signals
+	psy_Signal signal_select;
+	psy_Signal signal_entrychanged;
+	psy_Table columns;
+	IntEdit* curredit;
+	uintptr_t editcolumn;
+	// references
+	struct psy_audio_InstrumentEntry* selectedentry;	
+} InstrumentEntryState;
+
+void instrumententrystate_init(InstrumentEntryState*);
+void instrumententrystate_dispose(InstrumentEntryState*);
+
+void instrumententrystate_selectentry(
+	InstrumentEntryState*, psy_audio_InstrumentEntry*);
+void instrumententrystate_updateentry(InstrumentEntryState*,
+	psy_audio_InstrumentEntry*);
+struct InstrumentEntryTableColumn* instrumententrystate_at(
+	InstrumentEntryState*, uintptr_t column);
+double instrumententrystate_columnpx(
+	InstrumentEntryState*, uintptr_t column,
+	const psy_ui_TextMetric*);
+uintptr_t instrumententrystate_pxtocolumn(
+	InstrumentEntryState*, double x,
+	const psy_ui_TextMetric*);
+
 // InstrumentEntryView
 typedef struct InstrumentEntryView {
 	// inherits
-	psy_ui_Component component;
-	// signals
-	psy_Signal signal_selected;
-	// internal	
-	uintptr_t selected;
+	psy_ui_Component component;		
+	// internal		
 	int dragmode;
 	uint8_t currkey;	
 	InstrumentNoteMapMetrics metrics;
 	// references
 	psy_audio_Instrument* instrument;	
+	InstrumentEntryState* state;
 } InstrumentEntryView;
 
-void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent);
+void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,
+	InstrumentEntryState*);
 void instrumententryview_setinstrument(InstrumentEntryView*,
 	psy_audio_Instrument*);
 psy_audio_InstrumentEntry* instrumententryview_selected(InstrumentEntryView*);
@@ -106,51 +136,58 @@ void instrumententrytablecolumn_dispose(InstrumentEntryTableColumn*);
 InstrumentEntryTableColumn* instrumententrytablecolumn_alloc(void);
 InstrumentEntryTableColumn* instrumententrytablecolumn_allocinit(const char* label);
 
-// TableState
-typedef struct InstrumentEntryTableState {
-	psy_Table columns;
-} InstrumentEntryTableState;
-
-void instrumententrytablestate_init(InstrumentEntryTableState*);
-void instrumententrytablestate_dispose(InstrumentEntryTableState*);
-
 // TableHeader
 typedef struct InstrumentEntryTableViewHeader {
 	// inherits
 	psy_ui_Component component;
 	// references
-	InstrumentEntryTableState* state;
+	InstrumentEntryState* state;
 } InstrumentEntryTableViewHeader;
 
 void instrumententrytableviewheader_init(InstrumentEntryTableViewHeader* self,
-	psy_ui_Component* parent, InstrumentEntryTableState* state,
+	psy_ui_Component* parent, InstrumentEntryState* state,
 	Workspace* workspace);
+
+typedef struct InstrumentEntryRow {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	bool hover;
+	bool selected;
+	// references
+	psy_ui_Component* view;
+	psy_audio_InstrumentEntry* entry;
+	InstrumentEntryState* state;
+} InstrumentEntryRow;
+
+void instrumententryrow_init(InstrumentEntryRow*, psy_ui_Component* parent,
+	psy_ui_Component* view, psy_audio_InstrumentEntry*,
+	InstrumentEntryState*);
+
+InstrumentEntryRow* instrumententryrow_alloc(void);
+InstrumentEntryRow* instrumententryrow_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_InstrumentEntry*, InstrumentEntryState*);
 
 // TableView
 typedef struct InstrumentEntryTableView {
 	// inherits
-	psy_ui_Component component;
-	// signals
-	psy_Signal signal_selected;
+	psy_ui_Component component;		
 	// internal	
-	IntEdit edit;
-	uintptr_t selected;
 	int dragmode;
 	uint8_t currkey;
 	psy_ui_Value lineheight;
-	InstrumentNoteMapMetrics metrics;
+	InstrumentNoteMapMetrics metrics;	
 	// references	
 	psy_audio_Instrument* instrument;
-	InstrumentEntryTableState* state;
+	InstrumentEntryState* state;
 } InstrumentEntryTableView;
 
 void instrumententrytableview_init(InstrumentEntryTableView*,
-	psy_ui_Component* parent, InstrumentEntryTableState*);
+	psy_ui_Component* parent, InstrumentEntryState*);
 void instrumententrytableview_setinstrument(InstrumentEntryTableView*,
 	psy_audio_Instrument*);
-void instrumententrytableview_select(InstrumentEntryTableView*, uintptr_t row);
-
-psy_audio_InstrumentEntry* instrumententrytableview_selected(InstrumentEntryTableView*);
+void instrumententrytableview_build(InstrumentEntryTableView*);
 
 INLINE psy_ui_Component* instrumententrytableview_base(
 	InstrumentEntryTableView* self)
@@ -169,7 +206,7 @@ typedef struct InstrumentNoteMapView {
 	InstrumentEntryView entryview;
 	psy_ui_SplitBar splitter;
 	psy_ui_Component table;
-	InstrumentEntryTableState tablestate;
+	InstrumentEntryState state;
 	InstrumentEntryTableViewHeader tableheader;
 	InstrumentEntryTableView tableview;	
 	psy_audio_Instrument* instrument;

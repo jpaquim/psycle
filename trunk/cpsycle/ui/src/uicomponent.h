@@ -775,7 +775,7 @@ psy_Translator* psy_ui_translator(void);
 
 const char* psy_ui_translate(const char* key);
 
-void psy_ui_component_setmode(psy_ui_Component*, psy_ui_ScrollMode);
+void psy_ui_component_setscrollmode(psy_ui_Component*, psy_ui_ScrollMode);
 
 void psy_ui_component_setstyletypes(psy_ui_Component*,
 	uintptr_t standard, uintptr_t hover, uintptr_t select);

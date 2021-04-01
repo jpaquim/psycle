@@ -47,10 +47,11 @@ const TrackerHeaderCoords* trackerheadercoords_default_classic(void)
 
 // PatternViewSkin
 // prototypes
-psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_t numtracks,
+static psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_t numtracks,
 	psy_ui_Colour source1, psy_ui_Colour source2);
-psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t numtracks,
+static psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t numtracks,
 	psy_ui_Colour source1, psy_ui_Colour source2);
+static void patternviewskin_filleventcolourstable(PatternViewSkin*);
 // implementation
 void patternviewskin_init(PatternViewSkin* self)
 {
@@ -74,6 +75,8 @@ void patternviewskin_init(PatternViewSkin* self)
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
 	patternviewskin_setclassicheadercoords(self);
+	// pianoroll
+	patternviewskin_filleventcolourstable(self);
 }
 
 void patternviewskin_dispose(PatternViewSkin* self)
@@ -112,9 +115,57 @@ void patternviewskin_clearcache(PatternViewSkin* self)
 	psy_table_clear(&self->playbarcolours);
 	psy_table_clear(&self->cursorcolours);
 	psy_table_clear(&self->midlinecolours);
-	psy_table_clear(&self->eventcolours);
+	// psy_table_clear(&self->eventcolours);
 	psy_table_clear(&self->eventhovercolours);
 	psy_table_clear(&self->eventcurrchannelcolours);
+}
+
+void patternviewskin_filleventcolourstable(PatternViewSkin* self)
+{
+	// pianoroll colours		
+	psy_ui_Colour base;	
+	psy_ui_Colour overlay;
+	psy_ui_Colour colour;
+	uintptr_t track;
+
+	for (track = 0; track < 64; ++track) {
+		if (track < 4) {
+			base = psy_ui_colour_make_rgb(150, 200, 160);
+		} else if (track < 8) {
+			base = psy_ui_colour_make_rgb(165, 184, 219);
+		} else if (track < 12) {
+			base = psy_ui_colour_make_rgb(221, 167, 214);
+		} else if (track < 16) {
+			base = psy_ui_colour_make_rgb(212, 193, 160);
+		} else if (track < 20) {
+			base = psy_ui_colour_make_rgb(209, 158, 165);
+		} else if (track < 24) {
+			base = psy_ui_colour_make_rgb(184, 165, 219);
+		} else if (track < 28) {
+			base = psy_ui_colour_make_rgb(167, 221, 214);
+		} else if (track < 32) {
+			base = psy_ui_colour_make_rgb(193, 212, 160);
+		} else if (track < 36) {
+			base = psy_ui_colour_make_rgb(209, 165, 158);
+		} else if (track < 40) {
+			base = psy_ui_colour_make_rgb(184, 219, 165);
+		} else if (track < 44) {
+			base = psy_ui_colour_make_rgb(167, 214, 221);
+		} else if (track < 48) {
+			base = psy_ui_colour_make_rgb(212, 193, 160);
+		} else if (track < 52) {
+			base = psy_ui_colour_make_rgb(150, 200, 160);
+		} else if (track < 56) {
+			base = psy_ui_colour_make_rgb(165, 184, 219);
+		} else if (track < 60) {
+			base = psy_ui_colour_make_rgb(221, 167, 214);
+		} else if (track < 64) {
+			base = psy_ui_colour_make_rgb(212, 193, 160);
+		}
+		overlay = psy_ui_colour_make(0x00000000);
+		colour = psy_ui_colour_overlayed(&base, &overlay, (track % 4) * 0.15);
+		psy_table_insert(&self->eventcolours, track, (void*)(uintptr_t)colour.value);
+	}
 }
 
 psy_ui_Colour patternviewskin_backgroundcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
@@ -224,7 +275,12 @@ psy_ui_Colour patternviewskin_keyseparatorcolour(PatternViewSkin* self)
 
 psy_ui_Colour patternviewskin_eventcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	return self->event;
+	if (psy_table_exists(&self->eventcolours, track)) {
+		return psy_ui_colour_make((uint32_t)(uintptr_t)
+			psy_table_at(&self->eventcolours, track));
+	} else {
+		return psy_ui_colour_make(0x00FFFFFF);
+	}
 }
 
 psy_ui_Colour patternviewskin_eventhovercolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
@@ -233,8 +289,8 @@ psy_ui_Colour patternviewskin_eventhovercolour(PatternViewSkin* self, uintptr_t 
 }
 
 psy_ui_Colour patternviewskin_eventcurrchannelcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
-{
-	return self->eventcurrchannel;
+{	
+	return psy_ui_colour_make(0x00FEFFFF);
 }
 
 psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_t numtracks,

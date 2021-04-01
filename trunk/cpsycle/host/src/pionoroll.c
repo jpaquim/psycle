@@ -151,6 +151,9 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	
 	assert(self);
 
+	if (pianogridstate_step(self->gridstate) == 0) {
+		return;
+	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_sizepx(&self->component);	
 	baseline = size.height - 1;
@@ -661,7 +664,7 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 	clip = pianogrid_clipselection(self, g->clip);
 	pianogrid_drawbackground(self, g, clip);
 	size = psy_ui_component_sizepx(pianogrid_base(self));
-	tm = psy_ui_component_textmetric(&self->component);	
+	tm = psy_ui_component_textmetric(&self->component);		
 	pianogriddraw_init(&griddraw,
 		self->keyboardstate, self->gridstate,
 		self->component.scroll.x, self->component.scroll.y,		
@@ -1084,8 +1087,9 @@ void pianogriddraw_drawevent(PianoGridDraw* self, psy_ui_Graphics* g,
 	} else if (ev->track == cursor.track) {
 		colour = patternviewskin_eventcurrchannelcolour(self->gridstate->skin,
 			0, 0);
-	} else {
-		colour = patternviewskin_eventcolour(self->gridstate->skin, 0, 0);
+	} else {		
+		colour = patternviewskin_eventcolour(self->gridstate->skin, ev->track,
+			psy_audio_patterns_numtracks(&self->workspace->song->patterns));
 	}
 	if (!ev->noterelease) {
 		psy_ui_drawsolidroundrectangle(g, r, corner, colour);

@@ -58,7 +58,7 @@ static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
 static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static psy_ui_Component* wireview_scope(WireView*, int index);
-static int wireview_currscope(WireView*);
+static uintptr_t wireview_currscope(WireView*);
 static void wireview_ondrawslidervu(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void wireview_ontimer(WireView*, psy_ui_Component* sender, uintptr_t timerid);
 
@@ -365,7 +365,7 @@ psy_ui_Component* wireview_scope(WireView* self, int index)
 	return rv;
 }
 
-int wireview_currscope(WireView* self)
+uintptr_t wireview_currscope(WireView* self)
 {	
 	return tabbar_selected(&self->tabbar);
 }
