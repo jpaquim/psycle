@@ -250,7 +250,8 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_ABOUT, STYLE_ABOUT, STYLE_ABOUT);
+		STYLE_ABOUT, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	self->workspace = workspace;	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);

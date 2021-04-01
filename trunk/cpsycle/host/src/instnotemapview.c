@@ -520,7 +520,7 @@ void instrumententryview_onmouseup(InstrumentEntryView* self,
 {
 	if (self->instrument) {
 		self->dragmode = 0;		
-		psy_ui_component_releasecapture(&self->component);		
+		psy_ui_component_releasecapture(&self->component);	
 	}
 }
 
@@ -823,7 +823,8 @@ void instrumententryrow_init(InstrumentEntryRow* self, psy_ui_Component* parent,
 	instrumententryrow_vtableinit_init(self);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_TABLEROW, STYLE_TABLEROW_HOVER, STYLE_TABLEROW_SELECT);
+		STYLE_TABLEROW, STYLE_TABLEROW_HOVER, STYLE_TABLEROW_SELECT,
+		psy_INDEX_INVALID);
 	self->view = view;
 	self->entry = entry;
 	self->state = state;
@@ -1056,18 +1057,6 @@ static void instrumententrytableview_onpreferredsize(InstrumentEntryTableView*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void instrumententrytableview_ondraw(InstrumentEntryTableView*,
 	psy_ui_Graphics*);
-static void instrumententrytableview_onmousedown(InstrumentEntryTableView*,
-	psy_ui_MouseEvent*);
-static void instrumententrytableview_onmousemove(InstrumentEntryTableView*,
-	psy_ui_MouseEvent*);
-static void instrumententrytableview_onmouseup(InstrumentEntryTableView*,
-	psy_ui_MouseEvent*);
-static void instrumententrytableview_onmousedoubleclick(
-	InstrumentEntryTableView*, psy_ui_MouseEvent*);
-static psy_ui_Point instrumententrytableview_hittest(InstrumentEntryTableView*,
-	psy_ui_RealPoint);
-static psy_ui_Rectangle instrumententrytableview_editposition(
-	InstrumentEntryTableView*, uintptr_t col, uintptr_t row);
 
 // vtable
 static psy_ui_ComponentVtable instrumententrytableview_vtable;
@@ -1080,18 +1069,6 @@ static void instrumententrytableview_vtable_init(InstrumentEntryTableView* self)
 		instrumententryview_vtable.ondestroy =
 			(psy_ui_fp_component_ondestroy)
 			instrumententrytableview_ondestroy;
-		instrumententrytableview_vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententrytableview_onmousedown;
-		instrumententrytableview_vtable.onmousemove =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententrytableview_onmousemove;
-		instrumententrytableview_vtable.onmouseup =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententrytableview_onmouseup;
-		instrumententrytableview_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
-			instrumententrytableview_onmousedoubleclick;
 		instrumententrytableview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			instrumententrytableview_onpreferredsize;
@@ -1109,10 +1086,10 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	self->state = state;	
-	self->instrument = NULL;
-	self->lineheight = psy_ui_value_makeeh(1.0);	
+	self->instrument = NULL;		
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_TABLEROW, STYLE_TABLEROW, STYLE_TABLEROW);
+		STYLE_TABLEROW, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	instrumententrytableview_build(self);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setwheelscroll(&self->component, 4);
@@ -1164,81 +1141,6 @@ void instrumententrytableview_onpreferredsize(InstrumentEntryTableView* self,
 		*rv = psy_ui_size_makeem(80.0, 6.0);
 	}
 }
-
-void instrumententrytableview_onmousedown(InstrumentEntryTableView* self,
-	psy_ui_MouseEvent* ev)
-{
-	if (self->instrument) {
-		psy_audio_InstrumentEntry* entry;		
-		uintptr_t numentry;
-		const psy_ui_TextMetric* tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		numentry = (uintptr_t)(ev->pt.y / (floor(psy_ui_value_px(&self->lineheight, tm))));
-		if (numentry < psy_list_size(
-			psy_audio_instrument_entries(self->instrument))) {
-			entry = psy_audio_instrument_entryat(self->instrument, numentry);
-			instrumententrystate_selectentry(self->state, entry);				
-		} else {
-			entry = NULL;
-			instrumententrystate_selectentry(self->state, NULL);				
-		}		
-		if (entry) {
-			self->dragmode = 1;
-			self->currkey = screentokey(ev->pt.x, self->metrics.keysize);			
-			psy_ui_component_invalidate(&self->component);
-			psy_ui_component_capture(&self->component);
-		}
-	}
-}
-
-void instrumententrytableview_onmousedoubleclick(InstrumentEntryTableView* self,
-	psy_ui_MouseEvent* ev)
-{
-}
-
-psy_ui_Point instrumententrytableview_hittest(InstrumentEntryTableView* self,
-	psy_ui_RealPoint pt)
-{
-	const psy_ui_TextMetric* tm;
-	psy_ui_Value colwidth;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	colwidth = psy_ui_value_makeew(COLWIDTH);
-	return psy_ui_point_makeem(
-		floor((pt.x / (floor(psy_ui_value_px(&colwidth, tm))))),
-		floor((pt.y / (floor(psy_ui_value_px(&self->lineheight, tm))))));
-}
-
-psy_ui_Rectangle instrumententrytableview_editposition(InstrumentEntryTableView* self,
-	uintptr_t col, uintptr_t row)
-{
-	double scrollleft;
-	double scrolltop;
-	const psy_ui_TextMetric* tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	scrollleft = psy_ui_component_scrollleftpx(&self->component);
-	scrolltop = psy_ui_component_scrolltoppx(&self->component);
-	return psy_ui_rectangle_make(
-		psy_ui_point_makepx(
-			(double)col * COLWIDTH * (double)tm->tmAveCharWidth - scrollleft,
-			(double)row * (double)tm->tmHeight - scrolltop),
-		psy_ui_size_make(psy_ui_value_makeew(COLWIDTH), self->lineheight));
-}
-
-void instrumententrytableview_onmousemove(InstrumentEntryTableView* self,
-	psy_ui_MouseEvent* ev)
-{
-
-}
-
-void instrumententrytableview_onmouseup(InstrumentEntryTableView* self,
-	psy_ui_MouseEvent* ev)
-{
-
-}
-
 
 // InstrumentNoteMapButtons
 // implementation

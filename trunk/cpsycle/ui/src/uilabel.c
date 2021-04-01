@@ -64,6 +64,9 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 	self->translate = TRUE;
 	self->fadeoutcounter = 0;
 	self->fadeout = FALSE;
+	psy_ui_component_setstyletypes(psy_ui_label_base(self),
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_ui_STYLE_LABEL_DISABLED);
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,

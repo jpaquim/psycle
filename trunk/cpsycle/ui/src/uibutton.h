@@ -49,23 +49,20 @@ typedef struct psy_ui_Button {
 	// signals
 	psy_Signal signal_clicked;
 	// internal
-	char_dyn_t* text;
-	int hover;
+	char_dyn_t* text;	
 	int highlight;
 	psy_ui_ButtonIcon icon;
 	psy_ui_Bitmap bitmapicon;
 	double charnumber;
 	double linespacing;
 	double bitmapident;
-	psy_ui_Alignment textalignment;
-	bool enabled;		
+	psy_ui_Alignment textalignment;	
 	bool shiftstate;
 	bool ctrlstate;
 	bool buttonstate;
 	bool allowrightclick;
 	char* translation;
 	bool translate;	
-	bool active;
 	bool stoppropagation;
 	uintptr_t data;
 } psy_ui_Button;

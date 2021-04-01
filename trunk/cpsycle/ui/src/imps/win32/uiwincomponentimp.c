@@ -74,6 +74,7 @@ static void dev_hidehorizontalscrollbar(psy_ui_win_ComponentImp*);
 static psy_List* dev_children(psy_ui_win_ComponentImp*, int recursive);
 static void dev_enableinput(psy_ui_win_ComponentImp*);
 static void dev_preventinput(psy_ui_win_ComponentImp*);
+static bool dev_inputprevented(const psy_ui_win_ComponentImp* self);
 static void dev_setcursor(psy_ui_win_ComponentImp*, psy_ui_CursorStyle);
 static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id,
 	uintptr_t interval);
@@ -147,6 +148,8 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_enableinput;
 		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
 			dev_preventinput;
+		vtable.dev_inputprevented = (psy_ui_fp_componentimp_dev_inputprevented)
+			dev_inputprevented;		
 		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
 			dev_setcursor;
 		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
@@ -739,6 +742,11 @@ void dev_enableinput(psy_ui_win_ComponentImp* self)
 void dev_preventinput(psy_ui_win_ComponentImp* self)
 {
 	EnableWindow(self->hwnd, 0);
+}
+
+bool dev_inputprevented(const psy_ui_win_ComponentImp* self)
+{
+	return !IsWindowEnabled(self->hwnd);
 }
 
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)

@@ -251,8 +251,8 @@ void stepsequencerbar_update(StepsequencerBar* self)
 		curr = psy_audio_pattern_begin(self->pattern);
 		while (curr) {			
 			psy_audio_PatternEntry* entry;
-			int line;
-			int currstep;		
+			uintptr_t line;
+			uintptr_t currstep;		
 			
 			entry = psy_audio_patternnode_entry(curr);
 			line = offsettoline(workspace_player(self->workspace), entry->offset);
@@ -265,7 +265,7 @@ void stepsequencerbar_update(StepsequencerBar* self)
 					tile = (StepSequencerTile*)psy_table_at(&self->tiles, currstep);
 					if (tile) {
 						stepsequencertile_turnon(tile);
-						state = state | (1 << currstep);
+						state = state | (1 >> currstep);
 					}					
 				}
 			}
@@ -638,7 +638,8 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	stepsequencerview_vtable_init(self);
 	self->component.vtable = &stepsequencerview_vtable;
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_STEPSEQUENCER, STYLE_STEPSEQUENCER, STYLE_STEPSEQUENCER);
+		STYLE_STEPSEQUENCER, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,

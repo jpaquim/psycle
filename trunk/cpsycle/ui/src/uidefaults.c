@@ -91,6 +91,14 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	psy_ui_style_setfont(style, "Tahoma", -16);
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT, style);
 	psy_ui_style_setcolour(style, onsecondary);	
+	// label
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, accent));	
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_LABEL, style);
+	// label::disabled
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, weak));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_LABEL_DISABLED, style);
 	// button
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, 
@@ -211,18 +219,19 @@ void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 	psy_ui_styles_dispose(&self->styles);		
 }
 
-void psy_ui_defaults_setstyle(psy_ui_Defaults* self, int styletype,
+void psy_ui_defaults_setstyle(psy_ui_Defaults* self, uintptr_t styletype,
 	psy_ui_Style* style)
 {
 	psy_ui_styles_setstyle(&self->styles, styletype, style);
 }
 
-psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, int type)
+psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, uintptr_t type)
 {
 	return psy_ui_styles_at(&self->styles, type);
 }
 
-const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self, int type)
+const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
+	uintptr_t type)
 {
 	return psy_ui_styles_at_const(&self->styles, type);
 }

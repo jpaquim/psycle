@@ -29,7 +29,7 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_MACHINEBOX,
-		STYLE_MACHINEBOX, STYLE_MACHINEBOX);
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->workspace = workspace;
 	self->mode = mode;
 	self->showslots = 1;

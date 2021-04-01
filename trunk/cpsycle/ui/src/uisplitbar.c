@@ -59,7 +59,8 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_SPLITTER,
 		psy_ui_STYLE_SPLITTER_HOVER,
-		psy_ui_STYLE_SPLITTER_SELECT);
+		psy_ui_STYLE_SPLITTER_SELECT,
+		psy_INDEX_INVALID);
 }
 
 void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)

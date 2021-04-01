@@ -80,7 +80,8 @@ void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_timer, self,
 		psy_ui_sliderpane_ontimer);
 	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_SLIDERPANE, psy_ui_STYLE_SLIDERPANE, psy_ui_STYLE_SLIDERPANE);
+		psy_ui_STYLE_SLIDERPANE, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 }
 
 void psy_ui_sliderpane_initsignals(psy_ui_SliderPane* self)

@@ -62,7 +62,8 @@ void psy_ui_scrollbarthumb_init(psy_ui_ScrollBarThumb* self,
 	psy_ui_component_setstyletypes(psy_ui_scrollbarthumb_base(self),
 		psy_ui_STYLE_SCROLLTHUMB,
 		psy_ui_STYLE_SCROLLTHUMB_HOVER,
-		psy_ui_STYLE_SCROLLTHUMB_HOVER);
+		psy_ui_STYLE_SCROLLTHUMB_HOVER,
+		psy_INDEX_INVALID);
 	self->state = state;	
 }
 
@@ -154,8 +155,8 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self,
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_SCROLLPANE, psy_ui_STYLE_SCROLLPANE,
-		psy_ui_STYLE_SCROLLPANE);	
+		psy_ui_STYLE_SCROLLPANE, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_INDEX_INVALID);
 	psy_ui_scrollbarthumb_init(&self->thumb, &self->component, view, state);
 	self->pos = 0;	
 	self->screenpos = 0;	

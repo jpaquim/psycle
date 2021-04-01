@@ -17,6 +17,10 @@ extern "C" {
 typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_COMMON,
 	psy_ui_STYLE_COMMON_SELECT,
+	psy_ui_STYLE_LABEL,
+	psy_ui_STYLE_LABEL_HOVER,
+	psy_ui_STYLE_LABEL_SELECT,
+	psy_ui_STYLE_LABEL_DISABLED,
 	psy_ui_STYLE_BUTTON,
 	psy_ui_STYLE_BUTTON_HOVER,
 	psy_ui_STYLE_BUTTON_SELECT,
@@ -56,10 +60,10 @@ typedef struct psy_ui_Defaults {
 void psy_ui_defaults_init(psy_ui_Defaults*, bool dark);
 void psy_ui_defaults_dispose(psy_ui_Defaults*);
 
-void psy_ui_defaults_setstyle(psy_ui_Defaults*, int styletype, psy_ui_Style*);
-psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, int styletype);
+void psy_ui_defaults_setstyle(psy_ui_Defaults*, uintptr_t styletype, psy_ui_Style*);
+psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, uintptr_t styletype);
 const psy_ui_Style* psy_ui_defaults_style_const(const psy_ui_Defaults* self,
-	int styletype);
+	uintptr_t styletype);
 void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* configdir,
 	bool isdark);
 void psy_ui_defaults_savetheme(psy_ui_Defaults* self, const char* filename);

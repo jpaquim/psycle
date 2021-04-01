@@ -26,7 +26,7 @@ typedef struct psy_ui_Style {
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
-void psy_ui_style_init_default(psy_ui_Style*, int styletype);
+void psy_ui_style_init_default(psy_ui_Style*, uintptr_t styletype);
 void psy_ui_style_init_copy(psy_ui_Style*, const psy_ui_Style* other);
 void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour,
 	psy_ui_Colour background);
@@ -70,11 +70,11 @@ typedef struct psy_ui_Styles {
 void psy_ui_styles_init(psy_ui_Styles*);
 void psy_ui_styles_dispose(psy_ui_Styles*);
 
-void psy_ui_styles_setstyle(psy_ui_Styles*, int styletype, psy_ui_Style*);
-void psy_ui_styles_mixstyle(psy_ui_Styles*, int styletype, psy_ui_Style*);
-psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, int styletype);
-const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles* self,
-	int styletype);
+void psy_ui_styles_setstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
+void psy_ui_styles_mixstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
+psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype);
+const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles*,
+	uintptr_t styletype);
 void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
 const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles*);
 

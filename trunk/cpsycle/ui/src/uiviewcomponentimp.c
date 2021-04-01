@@ -53,6 +53,7 @@ static void view_dev_hidehorizontalscrollbar(psy_ui_ViewComponentImp*);
 static psy_List* view_dev_children(psy_ui_ViewComponentImp*, int recursive);
 static void view_dev_enableinput(psy_ui_ViewComponentImp*);
 static void view_dev_preventinput(psy_ui_ViewComponentImp*);
+bool view_dev_inputprevented(const psy_ui_ViewComponentImp*);
 static void view_dev_setcursor(psy_ui_ViewComponentImp*, psy_ui_CursorStyle);
 static void view_dev_starttimer(psy_ui_ViewComponentImp*, uintptr_t id,
 	uintptr_t interval);
@@ -126,6 +127,8 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			view_dev_enableinput;
 		view_imp_vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
 			view_dev_preventinput;
+		view_imp_vtable.dev_inputprevented = (psy_ui_fp_componentimp_dev_inputprevented)
+			view_dev_inputprevented;
 		view_imp_vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
 			view_dev_setcursor;
 		view_imp_vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
@@ -519,6 +522,11 @@ void view_dev_enableinput(psy_ui_ViewComponentImp* self)
 
 void view_dev_preventinput(psy_ui_ViewComponentImp* self)
 {
+}
+
+bool view_dev_inputprevented(const psy_ui_ViewComponentImp* self)
+{
+	return FALSE;
 }
 
 const psy_ui_TextMetric* view_dev_textmetric(const psy_ui_ViewComponentImp* self)

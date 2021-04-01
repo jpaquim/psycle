@@ -60,7 +60,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selchanged);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	self->charnumber = 0;
+	self->charnumber = 0.0;
 	self->hover = psy_ui_COMBOBOXHOVER_NONE;
 	psy_table_init(&self->itemdata);
 	onupdatestyles(self);	
@@ -110,7 +110,7 @@ intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox* self)
 	return self->imp->vtable->dev_cursel(self->imp);
 }
 
-void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, uintptr_t number)
+void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, double number)
 {
 	assert(self);
 
@@ -312,7 +312,8 @@ void onupdatestyles(psy_ui_ComboBox* self)
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_COMBOBOX,
 		psy_ui_STYLE_COMBOBOX_HOVER,
-		psy_ui_STYLE_COMBOBOX_SELECT);
+		psy_ui_STYLE_COMBOBOX_SELECT,
+		psy_ui_STYLE_LABEL_DISABLED);
 }
 
 

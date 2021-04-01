@@ -228,7 +228,7 @@ void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
 	if (text) {
 		bool readonly;
 
-		readonly = sci(self, SCI_GETREADONLY, 0, 0);
+		readonly = sci(self, SCI_GETREADONLY, 0, 0) != FALSE;
 		sci(self, SCI_SETREADONLY, 0, 0);
 		sci(self, SCI_CANCEL, 0, 0);
 		sci(self, SCI_SETUNDOCOLLECTION, 0, 0);
