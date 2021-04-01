@@ -1,6 +1,16 @@
+// Template for adding vtables to ui components
+// copy vtable section above component init
+// add virtual methods and protoypes
+// rename <name> and <class>
+// add name_vtableinit_init(self) after the component init
+// rename <name> <name_vtableinit_init>
+// (see existing classes/developer guide for vtables)
+
 // prototypes
 static void name_onpreferredsize(class*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void name_ondraw(class*, psy_ui_Graphics*);
+static void name_onalign(class*);
 
 // vtable
 static psy_ui_ComponentVtable name_vtable;
@@ -19,6 +29,15 @@ static void name_vtableinit_init(class* self)
 name_vtable.ondestroy =
 	(psy_ui_fp_component_ondestroy)
 	name_ondestroy;
+name_vtable.onalign =
+	(psy_ui_fp_component_onalign)
+	name_onalign;
+name_vtable.onpreferredsize =
+	(psy_ui_fp_component_onpreferredsize)
+	name_onpreferredsize;
+name_vtable.ondraw =
+	(psy_ui_fp_component_ondraw)
+	name_ondraw;
 name_vtable.onmousedown =
 	(psy_ui_fp_component_onmouseevent)
 	name_onmousedown;
@@ -28,7 +47,3 @@ name_vtable.onmousemove =
 name_vtable.onmouseup =
 	(psy_ui_fp_component_onmouseevent)
 	name_onmouseup;
-name_vtable.onpreferredsize =
-	(psy_ui_fp_component_onpreferredsize)
-	name_onpreferredsize;
-

@@ -84,13 +84,13 @@ INLINE void pianokeyboardstate_clip(KeyboardState* self,
 	double clip_top_px, double clip_bottom_px,
 	uint8_t* rv_keymin, uint8_t* rv_keymax)
 {
-	assert(self);
-
+	assert(self);	
+	
 	*rv_keymin = (uint8_t)psy_max((int16_t)self->keymin, (int16_t)
 		((self->keyboardheightpx - clip_bottom_px) / self->keyheightpx - 1));
-	*rv_keymax = (uint8_t)psy_min((int16_t)self->keymax, (int16_t)
+	*rv_keymax = (uint8_t)psy_max(0, psy_min((int16_t)self->keymax, (int16_t)
 		((self->keyboardheightpx - clip_top_px + self->keyheightpx) /
-		self->keyheightpx));
+		self->keyheightpx)));	
 }
 
 typedef enum {

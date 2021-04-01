@@ -20,8 +20,7 @@ static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
-static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender);
 
 // implementation
 void intedit_init(IntEdit* self, psy_ui_Component* parent,
@@ -61,6 +60,24 @@ void intedit_init_connect(IntEdit* self, psy_ui_Component* parent,
 {
 	intedit_init(self, parent, desc, value, minval, maxval);
 	psy_signal_connect(&self->signal_changed, context, fp);
+}
+
+IntEdit* intedit_alloc(void)
+{
+	return (IntEdit*)malloc(sizeof(IntEdit));
+}
+
+IntEdit* intedit_allocinit(psy_ui_Component* parent,
+	const char* desc, int value, int minval, int maxval)
+{
+	IntEdit* rv;
+
+	rv = intedit_alloc();
+	if (rv) {
+		intedit_init(rv, parent, desc, value, minval, maxval);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
 }
 
 void intedit_ondestroy(IntEdit* self, psy_ui_Component* sender)
@@ -145,12 +162,10 @@ void intedit_oneditkeyup(IntEdit* self, psy_ui_Component* sender,
 	psy_ui_keyevent_stoppropagation(ev);
 }
 
-void intedit_oneditfocuslost(IntEdit* self , psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+void intedit_oneditfocuslost(IntEdit* self , psy_ui_Component* sender)
 {
 	int value;
-
-	psy_ui_keyevent_preventdefault(ev);
+	
 	value = intedit_value(self);
 	intedit_setvalue(self, value);
 	psy_signal_emit(&self->signal_changed, self, 0);

@@ -299,4 +299,22 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onsecondary, surface);	
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SELECT, style);
+	// table row
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		psy_ui_colour_overlayed(&surface, &overlay, 0.09));
+	psy_ui_defaults_setstyle(defaults, STYLE_TABLEROW, style);
+	// table row::hover
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		psy_ui_colour_overlayed(&surface, &overlay, 0.12));
+	psy_ui_defaults_setstyle(defaults, STYLE_TABLEROW_HOVER, style);
+	// table row::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		psy_ui_colour_overlayed(&surface, &overlay, 0.15));
+	psy_ui_defaults_setstyle(defaults, STYLE_TABLEROW_SELECT, style);
 }

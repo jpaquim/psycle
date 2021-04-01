@@ -59,7 +59,7 @@ typedef enum psy_audio_DupeCheck {
 	psy_audio_DUPECHECK_INSTRUMENT	
 } psy_audio_DupeCheck;
 
-typedef struct {
+typedef struct psy_audio_InstrumentEntry {
 	psy_audio_SampleIndex sampleindex;	
 	uint8_t fixedkey;
 	psy_audio_FrequencyRange freqrange;

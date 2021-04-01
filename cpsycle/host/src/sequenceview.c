@@ -259,7 +259,7 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setoverflow(&self->component,
 		psy_ui_OVERFLOW_HSCROLL);
-	psy_ui_component_setmode(&self->component,
+	psy_ui_component_setscrollmode(&self->component,
 		psy_ui_SCROLL_COMPONENTS);
 	self->hovertrack = psy_INDEX_INVALID;
 	psy_signal_init(&self->signal_newtrack);

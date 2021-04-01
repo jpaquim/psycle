@@ -44,6 +44,9 @@ extern "C" {
 #define STYLE_KEY                     640
 #define STYLE_KEY_HOVER               641
 #define STYLE_KEY_SELECT              642
+#define STYLE_TABLEROW                640
+#define STYLE_TABLEROW_HOVER          641
+#define STYLE_TABLEROW_SELECT         642
 
 struct psy_ui_Defaults;
 

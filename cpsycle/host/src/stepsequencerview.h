@@ -60,6 +60,8 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect*,
 typedef struct StepSequencerTile {
 	// inherits
 	psy_ui_Component component;
+	bool on;
+	bool play;
 } StepSequencerTile;
 
 void stepsequencertile_init(StepSequencerTile*, psy_ui_Component* parent,
@@ -71,6 +73,10 @@ StepSequencerTile* stepsequencertile_allocinit(
 void stepsequencertile_turnon(StepSequencerTile*);
 void stepsequencertile_turnoff(StepSequencerTile*);
 void stepsequencertile_play(StepSequencerTile*);
+void stepsequencertile_resetplay(StepSequencerTile*);
+
+bool stepsequencertile_ison(StepSequencerTile*);
+bool stepsequencertile_isplaying(StepSequencerTile*);
 
 
 typedef struct StepsequencerBar {
@@ -80,6 +86,8 @@ typedef struct StepsequencerBar {
 	psy_Table tiles;
 	StepTimer* steptimer;
 	StepSequencerPosition position;
+	uintptr_t currplaystep;
+	uintptr_t laststate;
 } StepsequencerBar;
 
 void stepsequencerbar_init(StepsequencerBar*,

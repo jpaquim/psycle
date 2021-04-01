@@ -43,6 +43,7 @@ void stepsequencertile_init(StepSequencerTile* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, view);
 	stepsequencertile_vtableinit_init(self);
+	self->on = TRUE;
 	stepsequencertile_turnoff(self);
 }
 
@@ -66,20 +67,56 @@ StepSequencerTile* stepsequencertile_allocinit(
 
 void stepsequencertile_turnon(StepSequencerTile* self)
 {
-	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_colour_make(0x00CACACA));
+	if (!self->on) {
+		self->on = TRUE;
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_colour_make(0x00CACACA));
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+bool stepsequencertile_ison(StepSequencerTile* self)
+{
+	return self->on;
 }
 
 void stepsequencertile_turnoff(StepSequencerTile* self)
 {
-	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_colour_make(0x00292929));
+	if (self->play) {
+		stepsequencertile_resetplay(self);
+	} else if (self->on) {
+		self->on = FALSE;
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_colour_make(0x00292929));
+	}
 }
 
 void stepsequencertile_play(StepSequencerTile* self)
 {
-	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_colour_make(0x009F7B00));
+	if (!self->play) {
+		self->play = TRUE;
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_colour_make(0x009F7B00));
+	}
+}
+
+void stepsequencertile_resetplay(StepSequencerTile* self)
+{
+	if (self->play) {
+		self->play = FALSE;
+		if (self->on) {
+			psy_ui_component_setbackgroundcolour(&self->component,
+				psy_ui_colour_make(0x00CACACA));
+		} else {
+			psy_ui_component_setbackgroundcolour(&self->component,
+				psy_ui_colour_make(0x00292929));
+		}
+	}
+}
+
+bool stepsequencertile_isplaying(StepSequencerTile* self)
+{
+	return self->play;
 }
 
 void stepsequencertile_onpreferredsize(StepSequencerTile* self,
@@ -129,7 +166,9 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 {	
 	self->steptimer = steptimer;
 	self->workspace = workspace;
-	self->pattern = NULL;	
+	self->pattern = NULL;
+	self->laststate = psy_INDEX_INVALID;
+	self->currplaystep = psy_INDEX_INVALID;
 	stepsequencerposition_init(&self->position);	
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
@@ -142,9 +181,9 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		stepsequencerbar_onlpbchanged);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
-		stepsequencerbar_oneditpositionchanged);
-	stepsequencerbar_build(self);
+		stepsequencerbar_oneditpositionchanged);	
 	psy_table_init(&self->tiles);
+	stepsequencerbar_build(self);
 }
 
 void stepsequencerbar_ondestroy(StepsequencerBar* self)
@@ -198,7 +237,11 @@ void stepsequencerbar_turnoffall(StepsequencerBar* self)
 }
 
 void stepsequencerbar_update(StepsequencerBar* self)
-{					
+{	
+	uintptr_t state;
+	bool updateplaypos;
+
+	state = 0;
 	stepsequencerbar_turnoffall(self);	
 	if (self->pattern) {
 		psy_audio_PatternCursor cursor;
@@ -209,36 +252,51 @@ void stepsequencerbar_update(StepsequencerBar* self)
 		while (curr) {			
 			psy_audio_PatternEntry* entry;
 			int line;
+			int currstep;		
 			
 			entry = psy_audio_patternnode_entry(curr);
 			line = offsettoline(workspace_player(self->workspace), entry->offset);
+			currstep = line % 16;			
 			if (entry->track == cursor.track) {
 				if (line >= self->position.steprow * 16 &&
 					line < self->position.steprow * 16 + 16) {
 					StepSequencerTile* tile;
 
-					tile = (StepSequencerTile*)psy_table_at(&self->tiles, line % 16);
+					tile = (StepSequencerTile*)psy_table_at(&self->tiles, currstep);
 					if (tile) {
 						stepsequencertile_turnon(tile);
+						state = state | (1 << currstep);
 					}					
 				}
 			}
 			psy_audio_patternnode_next(&curr);
-		}
+		}				
 	}	
+	updateplaypos = FALSE;
 	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		if (self->steptimer->position.line >= self->position.steprow * 16 &&
 			self->steptimer->position.line < self->position.steprow * 16 + 16) {
 			StepSequencerTile* tile;
+			uintptr_t step;
 
-			tile = (StepSequencerTile*)psy_table_at(&self->tiles,
-				self->steptimer->position.line % 16);
+			step = self->steptimer->position.line % 16;
+			tile = (StepSequencerTile*)psy_table_at(&self->tiles, step);
 			if (tile) {
+				if (step != self->currplaystep) {
+					updateplaypos = TRUE;
+				}
 				stepsequencertile_play(tile);
 			}
+			self->currplaystep = step;
+		} else if (self->currplaystep != psy_INDEX_INVALID) {
+			updateplaypos = TRUE;
+			self->currplaystep = psy_INDEX_INVALID;			
 		}
 	}
-	psy_ui_component_invalidate(&self->component);
+	if (updateplaypos || state != self->laststate) {
+		psy_ui_component_invalidate(&self->component);
+		self->laststate = state;
+	}
 }
 
 void stepsequencerbar_onmousedown(StepsequencerBar* self,
@@ -621,7 +679,7 @@ void stepsequencerview_ondestroy(StepsequencerView* self, psy_ui_Component* send
 
 void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 {
-	if (psy_ui_component_visible(&self->component)) {
+	if (psy_ui_component_visible(&self->component)) {		
 		steptimer_tick(&self->steptimer);
 	}
 }
@@ -718,14 +776,11 @@ void steptimer_dispose(StepTimer* self)
 
 // ui thread
 void steptimer_tick(StepTimer* self)
-{
-	if (self->doseqtick) {
-		self->doseqtick = 0;
-		self->position.line = offsettoline(self->player,
-			psy_audio_player_position(self->player) - self->sequenceentryoffset);
-		self->position.steprow = self->position.line / 16;			
-		psy_signal_emit(&self->signal_linetick, self, 0);				
-	}
+{	
+	self->position.line = offsettoline(self->player,
+		psy_audio_player_position(self->player) - self->sequenceentryoffset);
+	self->position.steprow = self->position.line / 16;						
+	psy_signal_emit(&self->signal_linetick, self, 0);
 }
 
 // audio thread
@@ -747,4 +802,3 @@ void steptimer_reset(StepTimer* self, psy_dsp_big_beat_t entryoffset)
 	self->sequenceentryoffset = entryoffset;
 	self->doseqtick = 0;
 }
-

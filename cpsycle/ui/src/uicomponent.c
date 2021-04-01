@@ -1486,7 +1486,7 @@ const char* psy_ui_translate(const char* key)
 	return psy_translator_translate(psy_ui_translator(), key);
 }
 
-void psy_ui_component_setmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
+void psy_ui_component_setscrollmode(psy_ui_Component* self, psy_ui_ScrollMode mode)
 {
 	self->scrollmode = mode;
 }
