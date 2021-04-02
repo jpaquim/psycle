@@ -61,17 +61,32 @@ static psy_ui_ComponentVtable* effectui_vtable_init(EffectUi* self)
 	if (!effectui_vtable_initialized) {
 		effectui_vtable = *(self->component.vtable);
 		effectui_super_vtable = effectui_vtable;
-		effectui_vtable.dispose = (psy_ui_fp_component_dispose)effectui_dispose;
-		effectui_vtable.ondraw = (psy_ui_fp_component_ondraw)effectui_ondraw;
-		effectui_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)effectui_onmousedown;
-		effectui_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)effectui_onmouseup;
-		effectui_vtable.onmousemove = (psy_ui_fp_component_onmouseevent)effectui_onmousemove;
-		effectui_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+		effectui_vtable.dispose =
+			(psy_ui_fp_component_dispose)
+			effectui_dispose;
+		effectui_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			effectui_ondraw;
+		effectui_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			effectui_onmousedown;
+		effectui_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			effectui_onmouseup;
+		effectui_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
+			effectui_onmousemove;
+		effectui_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
 			effectui_onmousedoubleclick;
-		effectui_vtable.move = (psy_ui_fp_component_move)effectui_move;
-		effectui_vtable.invalidate = (psy_ui_fp_component_invalidate)
+		effectui_vtable.move =
+			(psy_ui_fp_component_move)
+			effectui_move;
+		effectui_vtable.invalidate =
+			(psy_ui_fp_component_invalidate)
 			effectui_invalidate;
-		effectui_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		effectui_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			effectui_onpreferredsize;
 		effectui_vtable_initialized = TRUE;
 	}
@@ -98,7 +113,7 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	self->intern.bgcolour = psy_ui_colour_make(0x003E2f25);
 	effectui_initsize(self);
 	psy_signal_connect(&workspace->signal_showparameters, self,
-		effectui_onshowparameters);
+		effectui_onshowparameters);	
 }
 
 void effectui_dispose(EffectUi* self)
@@ -226,10 +241,10 @@ void effectui_ondraw(EffectUi* self, psy_ui_Graphics* g)
 	effectui_drawbackground(self, g);
 	if (!machineui_vuupdate()) {
 		effectui_draweditname(self, g);		
-		effectui_drawpanning(self, g);
-		effectui_drawmute(self, g);
-		effectui_drawbypassed(self, g);	
+		effectui_drawpanning(self, g);		
 	}
+	effectui_drawmute(self, g);
+	effectui_drawbypassed(self, g);
 	if (self->intern.skin->drawvumeters) {
 		effectui_drawvu(self, g);
 	}
@@ -479,9 +494,13 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 
 void effectui_invalidate(EffectUi* self)
 {
-	if (machineui_vuupdate()) {
+	if (machineui_vuupdate()) {		
 		psy_ui_component_invalidaterect(&self->component,
-			self->intern.coords->vu0.dest);		
+			self->intern.coords->vu0.dest);
+		psy_ui_component_invalidaterect(&self->component,
+			self->intern.coords->bypass.dest);
+		psy_ui_component_invalidaterect(&self->component,
+			self->intern.coords->mute.dest);
 	} else {
 		effectui_super_vtable.invalidate(&self->component);
 	}

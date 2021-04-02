@@ -165,6 +165,9 @@ typedef	int (*fp_machine_muted)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_bypass)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_unbypass)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_bypassed)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_standby)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_deactivatestandby)(struct psy_audio_Machine*);
+typedef	int (*fp_machine_hasstandby)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setbus)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_unsetbus)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_isbus)(struct psy_audio_Machine*);
@@ -413,6 +416,9 @@ typedef struct {
 	fp_machine_muted muted;
 	fp_machine_mute mute;
 	fp_machine_unmute unmute;
+	fp_machine_standby standby;
+	fp_machine_deactivatestandby deactivatestandby;
+	fp_machine_hasstandby hasstandby;
 	fp_machine_isbus isbus;
 	fp_machine_setbus setbus;
 	fp_machine_unsetbus unsetbus;
@@ -966,7 +972,22 @@ INLINE int psy_audio_machine_muted(psy_audio_Machine* self)
 {
 	return self->vtable->muted(self);
 }
+// standby
+INLINE void psy_audio_machine_standby(psy_audio_Machine* self)
+{
+	self->vtable->standby(self);
+}
 
+INLINE void psy_audio_machine_deactivatestandby(psy_audio_Machine* self)
+{
+	self->vtable->deactivatestandby(self);
+}
+
+INLINE int psy_audio_machine_hasstandby(psy_audio_Machine* self)
+{
+	return self->vtable->hasstandby(self);
+}
+// bus
 INLINE void psy_audio_machine_setbus(psy_audio_Machine* self)
 {
 	self->vtable->setbus(self);

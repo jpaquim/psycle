@@ -42,6 +42,11 @@ struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_frameimp(psy_ui_ImpFacto
 	return self->vtable->allocinit_frameimp(self, component, parent);
 }
 
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_toolframeimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_toolframeimp(self, component, parent);
+}
+
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_listboximp(self, component, parent);
@@ -136,6 +141,7 @@ static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(struct psy_ui_Imp
 static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_toolframeimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_EditImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_EditImp* allocinit_editimp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
@@ -186,6 +192,7 @@ static void vtable_init(void)
 		vtable.allocinit_fontimp = allocinit_fontimp;
 		vtable.allocinit_componentimp = allocinit_componentimp;
 		vtable.allocinit_frameimp = allocinit_frameimp;
+		vtable.allocinit_toolframeimp = allocinit_toolframeimp;
 		vtable.allocinit_editimp = allocinit_editimp;
 		vtable.allocinit_editimp_multiline = allocinit_editimp_multiline;		
 		vtable.allocinit_listboximp = allocinit_listboximp;

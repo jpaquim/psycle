@@ -37,7 +37,7 @@ typedef struct {
 	psy_ui_Component row0;
 	psy_ui_Component buttons;
 	ZoomBox zoombox;		
-	psy_ui_Button mute;
+	psy_ui_Button power;
 	psy_ui_Button parameters;
 	psy_ui_Button command;
 	psy_ui_Button help;
@@ -55,6 +55,7 @@ typedef struct MachineFrame {
 	psy_ui_Component component;
 	// ui elements
 	ParameterBar parameterbar;
+	psy_ui_Component client;
 	ParameterListBox parameterbox;
 	psy_ui_Notebook notebook;
 	psy_ui_Editor help;
@@ -62,6 +63,7 @@ typedef struct MachineFrame {
 	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	
 	NewValView newval;
+	bool showfullmenu;
 	// references
 	ParamView* paramview;	
 } MachineFrame;

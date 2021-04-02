@@ -593,6 +593,7 @@
     <Image Include="src\resources\pattern-editor.bmp" />
     <Image Include="src\resources\pattern_header_skin.bmp" />
     <Image Include="src\resources\play-dark.bmp" />
+    <Image Include="src\resources\power_dark.bmp" />
     <Image Include="src\resources\Project3.ico" />
     <Image Include="src\resources\pulse-dark.bmp" />
     <Image Include="src\resources\redo-dark.bmp" />

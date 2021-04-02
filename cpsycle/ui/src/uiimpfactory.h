@@ -78,6 +78,7 @@ typedef struct psy_ui_ImpFactoryVTable {
 	psy_ui_fp_impfactory_allocinit_fontimp allocinit_fontimp;
 	psy_ui_fp_impfactory_allocinit_componentimp allocinit_componentimp;
 	psy_ui_fp_impfactory_allocinit_frameimp allocinit_frameimp;
+	psy_ui_fp_impfactory_allocinit_frameimp allocinit_toolframeimp;
 	psy_ui_fp_impfactory_allocinit_editimp allocinit_editimp;
 	psy_ui_fp_impfactory_allocinit_editimp_multiline allocinit_editimp_multiline;
 	psy_ui_fp_impfactory_allocinit_listboximp allocinit_listboximp;
@@ -110,6 +111,7 @@ struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp_bitmap(psy_ui
 struct psy_ui_FontImp* psy_ui_impfactory_allocinit_fontimp(psy_ui_ImpFactory*, const struct psy_ui_FontInfo*);
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_componentimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_frameimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_toolframeimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);

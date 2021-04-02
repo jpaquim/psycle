@@ -36,6 +36,7 @@ static struct psy_ui_GraphicsImp* allocinit_graphicsimp_bitmap(psy_ui_win_ImpFac
 static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_win_ImpFactory*, const psy_ui_FontInfo*);
 static struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_EditImp* allocinit_editimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
@@ -77,6 +78,7 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 		vtable.allocinit_fontimp = (psy_ui_fp_impfactory_allocinit_fontimp)allocinit_fontimp;
 		vtable.allocinit_componentimp = (psy_ui_fp_impfactory_allocinit_componentimp)allocinit_componentimp;
 		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_frameimp;
+		vtable.allocinit_toolframeimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_toolframeimp;
 		vtable.allocinit_editimp = (psy_ui_fp_impfactory_allocinit_editimp)allocinit_editimp;
 		vtable.allocinit_editimp_multiline = (psy_ui_fp_impfactory_allocinit_editimp_multiline)allocinit_editimp_multiline;
 		vtable.allocinit_listboximp = (psy_ui_fp_impfactory_allocinit_listboximp)allocinit_listboximp;
@@ -212,6 +214,30 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self, struct psy_
 		free(rv);
 		rv = 0;
 	}
+	return (psy_ui_ComponentImp*)rv;
+}
+
+psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	psy_ui_win_ComponentImp* rv;
+	psy_ui_WinApp* winapp;
+	
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
+	rv = psy_ui_win_componentimp_allocinit(
+		component,
+		parent ? parent->imp : 0,
+		winapp->appclass,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_POPUP | WS_VISIBLE |
+		WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
+		WS_CAPTION | WS_SYSMENU,
+		0);
+	if (rv->hwnd == 0) {
+		free(rv);
+		rv = 0;
+	}
+	
 	return (psy_ui_ComponentImp*)rv;
 }
 
