@@ -48,3 +48,6 @@ name_vtable.onmousemove =
 name_vtable.onmouseup =
 	(psy_ui_fp_component_onmouseevent)
 	name_onmouseup;
+name_vtable.ontimer =
+(psy_ui_fp_component_ontimer)
+name_ontimer;

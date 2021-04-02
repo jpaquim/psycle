@@ -73,8 +73,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 	self->sizechanged = 1;	
 	if (self->machine) {
 		paramview_build(self);
-	}
-	psy_ui_component_starttimer(&self->component, 0, 50);	
+	}	
 }
 
 ParamView* paramview_alloc(void)

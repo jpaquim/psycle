@@ -77,6 +77,9 @@ static int machineproxy_isbus(psy_audio_MachineProxy*);
 static void machineproxy_bypass(psy_audio_MachineProxy*);
 static void machineproxy_unbypass(psy_audio_MachineProxy*);
 static int machineproxy_bypassed(psy_audio_MachineProxy*);
+static void machineproxy_standby(psy_audio_MachineProxy*);
+static void machineproxy_deactivatestandby(psy_audio_MachineProxy*);
+static int machineproxy_hasstandby(psy_audio_MachineProxy*);
 static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_paramstrobe(const psy_audio_MachineProxy*);
@@ -204,6 +207,9 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.bypass = (fp_machine_bypass)machineproxy_bypass;
 		vtable.unbypass = (fp_machine_unbypass)machineproxy_unbypass;
 		vtable.bypassed = (fp_machine_bypassed)machineproxy_bypassed;
+		vtable.standby = (fp_machine_standby)machineproxy_standby;
+		vtable.deactivatestandby = (fp_machine_deactivatestandby)machineproxy_deactivatestandby;
+		vtable.hasstandby = (fp_machine_hasstandby)machineproxy_hasstandby;
 		vtable.info = (fp_machine_info)machineproxy_info;
 		vtable.parameter = (fp_machine_parameter)
 			machineproxy_parameter;
@@ -734,6 +740,60 @@ int machineproxy_muted(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "muted", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_standby(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_standby(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "standby", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_deactivatestandby(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->deactivatestandby(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "deactivatestandby", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_hasstandby(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->hasstandby(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "hasstandby", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

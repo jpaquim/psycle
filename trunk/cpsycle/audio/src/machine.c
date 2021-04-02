@@ -298,6 +298,9 @@ static int muted(psy_audio_Machine* self) { return 0; }
 static void bypass(psy_audio_Machine* self) { }
 static void unbypass(psy_audio_Machine* self) { }
 static int bypassed(psy_audio_Machine* self) { return 0; }
+static void standby(psy_audio_Machine* self) { }
+static void deactivatestandby(psy_audio_Machine* self) { }
+static int hasstandby(psy_audio_Machine* self) { return 0; }
 static void setbus(psy_audio_Machine* self) { }
 static void unsetbus(psy_audio_Machine* self) { }
 static int isbus(psy_audio_Machine* self) { return 0; }
@@ -592,6 +595,9 @@ static void vtable_init(void)
 		vtable.bypass = bypass;
 		vtable.unbypass = unbypass;
 		vtable.bypassed = bypassed;
+		vtable.standby = standby;
+		vtable.deactivatestandby = deactivatestandby;
+		vtable.hasstandby = hasstandby;
 		vtable.setbus = setbus;
 		vtable.unsetbus = unsetbus;
 		vtable.isbus = isbus;

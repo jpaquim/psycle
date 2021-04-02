@@ -24,6 +24,29 @@ static int muted(psy_audio_CustomMachine* self) { return self->ismuted; }
 static void bypass(psy_audio_CustomMachine* self) { self->isbypassed = 1; }
 static void unbypass(psy_audio_CustomMachine* self) { self->isbypassed = 0; }
 static int bypassed(psy_audio_CustomMachine* self) { return self->isbypassed; }
+static void standby(psy_audio_CustomMachine* self)
+{
+	if (psy_audio_machine_mode(&self->machine) == psy_audio_MACHMODE_GENERATOR) {
+		psy_audio_machine_mute(&self->machine);
+	} else {
+		psy_audio_machine_bypass(&self->machine);
+	}	
+}
+static void deactivatestandby(psy_audio_CustomMachine* self) {
+	if (psy_audio_machine_mode(&self->machine) == psy_audio_MACHMODE_GENERATOR) {
+		psy_audio_machine_unmute(&self->machine);
+	} else {
+		psy_audio_machine_unbypass(&self->machine);
+	}
+}
+static int hasstandby(psy_audio_CustomMachine* self)
+{
+	if (psy_audio_machine_mode(&self->machine) == psy_audio_MACHMODE_GENERATOR) {
+		return psy_audio_machine_muted(&self->machine);
+	} else {
+		return psy_audio_machine_bypassed(&self->machine);
+	}
+}
 
 static void setbus(psy_audio_CustomMachine* self)
 {
@@ -96,6 +119,10 @@ static void vtable_init(psy_audio_CustomMachine* self)
 		vtable.bypass = (fp_machine_bypass)bypass;
 		vtable.unbypass = (fp_machine_unbypass)unbypass;
 		vtable.bypassed = (fp_machine_bypassed)bypassed;
+		vtable.standby = (fp_machine_standby)standby;
+		vtable.deactivatestandby = (fp_machine_deactivatestandby)
+			deactivatestandby;
+		vtable.hasstandby = (fp_machine_hasstandby)hasstandby;
 		vtable.setbus = (fp_machine_setbus)setbus;
 		vtable.unsetbus = (fp_machine_unsetbus)unsetbus;
 		vtable.isbus = (fp_machine_isbus)isbus;

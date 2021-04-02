@@ -92,6 +92,8 @@ IDB_LOOP_DARK           BITMAP                  "loop_dark.bmp"
 
 IDB_VSPLIT_DARK         BITMAP                  "vsplit_dark.bmp"
 
+IDB_POWER_DARK          BITMAP                  "power_dark.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

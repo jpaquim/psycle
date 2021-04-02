@@ -991,5 +991,8 @@
     <Image Include="src\resources\wires-dark.bmp">
       <Filter>bitmaps</Filter>
     </Image>
+    <Image Include="src\resources\power_dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
   </ItemGroup>
 </Project>

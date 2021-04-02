@@ -36,7 +36,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 			psycleconfig_macparam(workspace_conf(workspace))));
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
-	psy_ui_listbox_setcharnumber(&self->listbox, 5.0);
+	psy_ui_listbox_setcharnumber(&self->listbox, 10.0);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		parameterlistbox_onlistboxselected);		
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
@@ -58,10 +58,10 @@ void parameterlistbox_build(ParameterListBox* self)
 			
 			param = psy_audio_machine_tweakparameter(self->machine, i);
 			if (param) {
-				if (psy_audio_machineparam_label(param, label)) {
+				if (psy_audio_machineparam_name(param, label)) {
 					psy_snprintf(text, 256, "%02X:%s", (int)i, label);
 				} else
-					if (psy_audio_machineparam_name(param, label)) {
+					if (psy_audio_machineparam_label(param, label)) {
 						psy_snprintf(text, 256, "%02X:%s", (int)i, label);
 					} else {
 						psy_snprintf(text, 256, "%02X: Parameter", (int)i);

@@ -14,9 +14,9 @@ extern "C" {
 // GeneratorUi
 typedef struct GeneratorUi {
 	// inherits
-	psy_ui_Component component;
+	psy_ui_Component component;	
 	// internal
-	MachineUiCommon intern;
+	MachineUiCommon intern;	
 } GeneratorUi;
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent,

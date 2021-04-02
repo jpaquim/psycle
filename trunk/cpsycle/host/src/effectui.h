@@ -16,7 +16,7 @@ typedef struct EffectUi {
 	// inherits
 	psy_ui_Component component;
 	// internal
-	MachineUiCommon intern;
+	MachineUiCommon intern;	
 } EffectUi;
 
 void effectui_init(EffectUi*, psy_ui_Component* parent,
