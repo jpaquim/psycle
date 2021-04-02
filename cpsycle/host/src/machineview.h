@@ -14,7 +14,7 @@
 #include "machineproperties.h"
 #include "newmachine.h"
 #include "paramview.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include <uiedit.h>
@@ -52,7 +52,7 @@ typedef struct MachineView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	MachineProperties properties;
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;

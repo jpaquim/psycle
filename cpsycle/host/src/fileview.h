@@ -5,7 +5,7 @@
 #define FILEVIEW_H
 
 // host
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include "uilistbox.h"
@@ -28,7 +28,7 @@ typedef struct FileView {
 	// ui elements
 	psy_ui_ListBox filebox;
 	// internal data
-	TabBar drives;	
+	psy_ui_TabBar drives;	
 	psy_Table filenames;
 	char* curr;
 	char* drive;	

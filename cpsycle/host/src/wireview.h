@@ -9,7 +9,7 @@
 #include "oscilloscope.h"
 #include "spectrumanalyzer.h"
 #include "stereophase.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "vuscope.h"
 #include "workspace.h"
 // ui
@@ -32,7 +32,7 @@ typedef struct WireView {
 	// ui elements
 	// Scope select
 	psy_ui_Component top;	
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	psy_ui_Notebook notebook;
 	// Volume
 	psy_ui_Component slidergroup;

@@ -12,7 +12,7 @@
 #include "instrumentgenview.h"
 #include "instrumentpanview.h"
 #include "instrumentpitchview.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 
 #ifdef __cplusplus
@@ -122,7 +122,7 @@ typedef struct InstrumentView {
 	// ui elements
 	psy_ui_Component viewtabbar;
 	psy_ui_Notebook notebook;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	psy_ui_Component left;
 	psy_ui_Label label;
 	InstrumentViewButtons buttons;

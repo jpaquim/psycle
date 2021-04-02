@@ -31,14 +31,14 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 
 	psy_ui_component_init(help_base(self), parent, NULL);
 	self->workspace = workspace;
-	tabbar_init(&self->tabbar, help_base(self));
+	psy_ui_tabbar_init(&self->tabbar, help_base(self));
 	self->lastalign = psy_ui_ALIGN_NONE;
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 1.5);
-	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
+	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), &margin);
 	psy_ui_margin_init_all_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);		
-	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+	psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_component_setmargin(&self->editor.component, &leftmargin);
@@ -84,14 +84,14 @@ void help_buildtabs(Help* self)
 {
 	psy_TableIterator it;
 
-	tabbar_clear(&self->tabbar);
+	psy_ui_tabbar_clear(&self->tabbar);
 	for (it = psy_table_begin(&self->filenames);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		psy_Path path;
 
 		psy_path_init(&path, (char*)psy_tableiterator_value(&it));		
-		tabbar_append(&self->tabbar, psy_path_name(&path));
+		psy_ui_tabbar_append(&self->tabbar, psy_path_name(&path));
 		psy_path_dispose(&path);
 	}
 }
@@ -130,18 +130,18 @@ void help_onalign(Help* self, psy_ui_Component* sender)
 	if (self->lastalign != psy_ui_component_parent(sender)->align) {
 		psy_ui_Margin tabmargin;
 
-		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {
-			self->tabbar.tabalignment = psy_ui_ALIGN_TOP;
+		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {			
+			psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_TOP);
 			psy_ui_component_setalign(&self->tabbar.component, psy_ui_ALIGN_TOP);
 			psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.5, 0.0, 0.0);				
-			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
-			psy_ui_component_align(tabbar_base(&self->tabbar));
+			psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+			psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));
 		} else {
-			psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-			self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
+			psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+			psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);
 			psy_ui_margin_init_all_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);				
-			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
-			psy_ui_component_align(tabbar_base(&self->tabbar));
+			psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+			psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));
 		}
 		self->lastalign = psy_ui_component_parent(sender)->align;
 	}

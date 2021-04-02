@@ -7,7 +7,7 @@
 
 // host
 #include "inputdefiner.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include <uiedit.h>
@@ -109,7 +109,7 @@ typedef struct PropertiesView {
 	psy_ui_Component sectionfloated;
 	psy_ui_Label floatdesc;
 	psy_ui_Component viewtabbar;	
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;
 	psy_Signal signal_changed;

@@ -102,7 +102,7 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
+	psy_ui_tabbar_select(&self->tabbar, WIREVIEW_TAB_VUMETER);
 	psy_signal_connect(&self->component.signal_timer, self, wireview_ontimer);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
@@ -123,10 +123,10 @@ void wireview_inittabbar(WireView* self)
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);	
-	tabbar_init(&self->tabbar, &self->top);
-	tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
+	psy_ui_tabbar_init(&self->tabbar, &self->top);
+	psy_ui_tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
 }
 
 void wireview_initvolumeslider(WireView* self)
@@ -270,7 +270,7 @@ void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
 
 void wireview_onhold(WireView* self, psy_ui_Component* sender)
 {	
-	switch (tabbar_selected(&self->tabbar)) {
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 		case WIREVIEW_TAB_VUMETER:
 		break;
 		case WIREVIEW_TAB_OSCILLOSCOPE:
@@ -367,7 +367,7 @@ psy_ui_Component* wireview_scope(WireView* self, int index)
 
 uintptr_t wireview_currscope(WireView* self)
 {	
-	return tabbar_selected(&self->tabbar);
+	return psy_ui_tabbar_selected(&self->tabbar);
 }
 
 // WireFrame

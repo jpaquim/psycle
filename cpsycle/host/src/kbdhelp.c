@@ -25,11 +25,11 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);	
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CLIENT);
-	tabbar_init(&self->tabbar, &self->component);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
+	psy_ui_tabbar_init(&self->tabbar, &self->component);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);		
-	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+	psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	kbdhelp_markpatterncmds(self, "notes");
 	kbdhelp_appendtabbarsections(self);	
 }
@@ -87,13 +87,13 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) ==
 					PSY_PROPERTY_TYPE_SECTION) {
-					tabbar_append(&self->tabbar,
+					psy_ui_tabbar_append(&self->tabbar,
 						psy_property_translation(property));
 				}
 			}
 		}
 	}
-	tabbar_select(&self->tabbar, 0);
+	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		kbdhelp_ontabbarchange);
 }
@@ -101,7 +101,7 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	int tabindex)
 {	
-	Tab* tab;
+	psy_ui_Tab* tab;
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
@@ -112,7 +112,7 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 		property = NULL;
 		cmds = psy_property_findsection_const(psy_eventdriver_configuration(kbd),
 			"cmds");
-		tab = tabbar_tab(&self->tabbar, tabindex);
+		tab = psy_ui_tabbar_tab(&self->tabbar, tabindex);
 		if (cmds && tab) {				
 			const psy_List* p = 0;
 

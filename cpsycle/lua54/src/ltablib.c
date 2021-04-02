@@ -409,7 +409,7 @@ static int sort (lua_State *L) {
 /* }====================================================== */
 
 
-static const luaL_Reg tab_funcs[] = {
+static const luaL_Reg psy_ui_tabfuncs[] = {
   {"concat", tconcat},
   {"insert", tinsert},
   {"pack", tpack},
@@ -422,7 +422,7 @@ static const luaL_Reg tab_funcs[] = {
 
 
 LUAMOD_API int luaopen_table (lua_State *L) {
-  luaL_newlib(L, tab_funcs);
+  luaL_newlib(L, psy_ui_tabfuncs);
   return 1;
 }
 

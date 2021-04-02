@@ -8,7 +8,7 @@
 #include "instrumentsbox.h"
 #include "intedit.h"
 #include "samplesbox.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 
 #include <uibutton.h>

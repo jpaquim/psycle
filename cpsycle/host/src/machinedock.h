@@ -7,7 +7,7 @@
 // host
 #include "workspace.h"
 #include "paramlistbox.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "intedit.h"
 // ui
 #include <uibutton.h>
@@ -97,7 +97,7 @@ typedef struct ParamRack {
 	ParamRackPane pane;
 	psy_ui_Component bottom;
 	ParamRackBatchBar batchbar;
-	TabBar modeselector;
+	psy_ui_TabBar modeselector;
 	IntEdit leveledit;
 	psy_ui_Scroller scroller;
 	// references

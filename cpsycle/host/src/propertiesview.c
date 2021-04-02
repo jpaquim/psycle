@@ -1152,11 +1152,11 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
 	propertiesview_translate(self);
-	tabbar_init(&self->tabbar, &self->client);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-	tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
+	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);		
-	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+	psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	propertiesview_updatetabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
 		propertiesview_onpropertiesrendererchanged);
@@ -1193,12 +1193,12 @@ void propertiesview_initsectionfloated(PropertiesView* self)
 void propertiesview_selectsection(PropertiesView* self,
 	psy_ui_Component* sender, uintptr_t section, uintptr_t options)
 {
-	tabbar_select(&self->tabbar, section);
+	psy_ui_tabbar_select(&self->tabbar, section);
 }
 
 void propertiesview_updatetabbarsections(PropertiesView* self)
 {	
-	tabbar_clear(&self->tabbar);
+	psy_ui_tabbar_clear(&self->tabbar);
 	if (propertiesrenderer_properties(&self->renderer)) {
 		const psy_List* p;
 		
@@ -1208,23 +1208,23 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 
 			property = (psy_Property*)psy_list_entry_const(p);
 			if (psy_property_hastype(property, PSY_PROPERTY_TYPE_SECTION)) {
-				tabbar_append(&self->tabbar, psy_property_text(property));
+				psy_ui_tabbar_append(&self->tabbar, psy_property_text(property));
 			}
 		}
 	}
-	tabbar_select(&self->tabbar, 0);	
+	psy_ui_tabbar_select(&self->tabbar, 0);	
 }
 
 void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {	
-	Tab* tab;
+	psy_ui_Tab* tab;
 
 	self->renderer.search = 0;
 	if (self->renderer.properties) {	
 		psy_Property* property = NULL;
 		
-		tab = tabbar_tab(&self->tabbar, tabindex);
+		tab = psy_ui_tabbar_tab(&self->tabbar, tabindex);
 		if (tab) {
 			psy_List* p;
 
@@ -1279,8 +1279,7 @@ void propertiesview_onpropertiesrendererselected(PropertiesView* self,
 
 void propertiesview_onlanguagechanged(PropertiesView* self, psy_ui_Component* sender)
 {
-	propertiesview_translate(self);
-	propertiesview_updatetabbarsections(self);
+	propertiesview_translate(self);	
 }
 
 void propertiesview_translate(PropertiesView* self)

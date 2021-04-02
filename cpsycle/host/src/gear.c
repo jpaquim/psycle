@@ -88,11 +88,11 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 	// client
-	tabbar_init(&self->tabbar, &self->client);
-	tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
+	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
 		"gear.instruments", "gear.waves", NULL);
-	tabbar_select(&self->tabbar, 0);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
+	psy_ui_tabbar_select(&self->tabbar, 0);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
@@ -108,7 +108,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		&workspace->song->samples, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	tabbar_select(&self->tabbar, 0);
+	psy_ui_tabbar_select(&self->tabbar, 0);
 	gearbuttons_init(&self->buttons, &self->client, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.createreplace.signal_clicked, self,
@@ -190,21 +190,21 @@ void gear_onmachineselected(Gear* self, psy_audio_Machines* sender,
 
 void gear_showgenerators(Gear* self)
 {
-	if (tabbar_selected(&self->tabbar) != 0) {
-		tabbar_select(&self->tabbar, 0);
+	if (psy_ui_tabbar_selected(&self->tabbar) != 0) {
+		psy_ui_tabbar_select(&self->tabbar, 0);
 	}
 }
 
 void gear_showeffects(Gear* self)
 {
-	if (tabbar_selected(&self->tabbar) != 1) {
-		tabbar_select(&self->tabbar, 1);
+	if (psy_ui_tabbar_selected(&self->tabbar) != 1) {
+		psy_ui_tabbar_select(&self->tabbar, 1);
 	}
 }
 
 void gear_onclone(Gear* self, psy_ui_Component* sender)
 {
-	switch (tabbar_selected(&self->tabbar)) {
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_clone(&self->machinesboxgen);
 		break;
 	case 1: machinesbox_clone(&self->machinesboxfx);
@@ -216,7 +216,7 @@ void gear_onclone(Gear* self, psy_ui_Component* sender)
 
 void gear_onexchange(Gear* self, psy_ui_Component* sender)
 {
-	switch (tabbar_selected(&self->tabbar)) {
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_exchange(&self->machinesboxgen);
 		break;
 	case 1: machinesbox_exchange(&self->machinesboxfx);
@@ -234,7 +234,7 @@ void gear_onmuteunmute(Gear* self, psy_ui_Component* sender)
 
 void gear_onparameters(Gear* self, psy_ui_Component* sender)
 {
-	switch (tabbar_selected(&self->tabbar)) {
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_showparameters(&self->machinesboxgen);
 		break;
 	case 1: machinesbox_showparameters(&self->machinesboxfx);
@@ -257,7 +257,7 @@ void gear_onhide(Gear* self)
 
 void gear_onconnecttomaster(Gear* self, psy_ui_Component* sender)
 {
-	switch (tabbar_selected(&self->tabbar)) {
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
 	case 0: machinesbox_connecttomaster(&self->machinesboxgen);
 		break;
 	case 1: machinesbox_connecttomaster(&self->machinesboxfx);

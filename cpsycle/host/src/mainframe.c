@@ -402,10 +402,9 @@ void mainframe_initterminalcolours(MainFrame* self)
 	}
 }
 
-
 void mainframe_initprogressbar(MainFrame* self)
 {
-	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
+	psy_ui_progressbar_init(&self->progressbar, &self->statusbar, NULL);
 	psy_ui_component_setalign(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->workspace.signal_loadprogress, self,
@@ -519,29 +518,29 @@ void mainframe_initnavigation(MainFrame* self)
 
 void mainframe_initmaintabbar(MainFrame* self)
 {	
-	Tab* tab;
+	psy_ui_Tab* tab;
 
-	tabbar_init(&self->tabbar, &self->tabbars);	
+	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
 
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalignexpand(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
-	tab = tabbar_append(&self->tabbar, "main.machines");
+	tab = psy_ui_tabbar_append(&self->tabbar, "main.machines");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_MACHINES_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
-	tab = tabbar_append(&self->tabbar, "main.patterns");
+	tab = psy_ui_tabbar_append(&self->tabbar, "main.patterns");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_NOTES_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));	
-	tabbar_append(&self->tabbar, "main.samples");
-	tabbar_append(&self->tabbar, "main.instruments");
-	tabbar_append(&self->tabbar, "main.properties");		
-	tab = tabbar_append(&self->tabbar, "main.settings");
-	tab->margin.left = psy_ui_value_makeew(4.0);
+	psy_ui_tabbar_append(&self->tabbar, "main.samples");
+	psy_ui_tabbar_append(&self->tabbar, "main.instruments");
+	psy_ui_tabbar_append(&self->tabbar, "main.properties");		
+	tab = psy_ui_tabbar_append(&self->tabbar, "main.settings");
+	tab->component.margin.left = psy_ui_value_makeew(4.0);
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
-	tab = tabbar_append(&self->tabbar, "main.help");
-	tab->margin.right = psy_ui_value_makeew(4.0);	
-	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);	
+	tab = psy_ui_tabbar_append(&self->tabbar, "main.help");	
+	tab->component.margin.right = psy_ui_value_makeew(4.0);
+	psy_ui_tabbar_tab(&self->tabbar, 0)->component.margin.left = psy_ui_value_makeew(1.0);	
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
 }
@@ -790,17 +789,17 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	cmd = psy_eventdriver_getcmd(sender, "general");
 	switch (cmd.id) {
 	case CMD_IMM_HELP:
-		tabbar_select(&self->helpview.tabbar, 0);
-		tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
+		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
+		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
 		break;
 	case CMD_IMM_HELPSHORTCUT:
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
 		break;
 	case CMD_IMM_EDITMACHINE:
-		tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
+		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 		break;
 	case CMD_IMM_EDITPATTERN:
-		tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
+		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
 		break;
 	case CMD_IMM_ADDMACHINE:						
 		workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
@@ -897,13 +896,13 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
 		}
 		if (!psy_ui_component_visible(&self->patternview.properties.component)) {
-			Tab* tab;
+			psy_ui_Tab* tab;
 			psy_ui_component_togglevisibility(&self->patternview.properties.component);
 
-			tab = tabbar_tab(&self->patternview.tabbar, 5);
+			tab = psy_ui_tabbar_tab(&self->patternview.tabbar, 5);
 			if (tab) {
 				tab->checkstate = TRUE;
-				psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
+				psy_ui_component_invalidate(psy_ui_tabbar_base(&self->patternview.tabbar));
 			}				
 		}
 		psy_ui_component_setfocus(&self->patternview.properties.component);
@@ -921,11 +920,11 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		break;
 	case CMD_IMM_EDITSAMPLE:
 		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-		tabbar_select(&self->samplesview.clienttabbar, 0);
+		psy_ui_tabbar_select(&self->samplesview.clienttabbar, 0);
 		break;
 	case CMD_IMM_EDITWAVE:
 		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-		tabbar_select(&self->samplesview.clienttabbar, 2);
+		psy_ui_tabbar_select(&self->samplesview.clienttabbar, 2);
 		break;
 	case CMD_IMM_TERMINAL:
 		mainframe_ontoggleterminal(self, mainframe_base(self));
@@ -1040,7 +1039,7 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 	if (flag == WORKSPACE_LOADSONG) {		
 		if (generalconfig_showsonginfoonload(psycleconfig_general(
 				workspace_conf(sender)))) {
-			tabbar_select(&self->tabbar, VIEW_ID_SONGPROPERTIES);
+			psy_ui_tabbar_select(&self->tabbar, VIEW_ID_SONGPROPERTIES);
 		}		
 	}	
 	mainframe_updatesongtitle(self);
@@ -1181,7 +1180,7 @@ void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 {
-	tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
+	psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
@@ -1312,7 +1311,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
-	tabbar_select(&self->tabbar, index);
+	psy_ui_tabbar_select(&self->tabbar, index);		
 	view = psy_ui_notebook_activepage(&self->notebook);
 	if (view) {
 		psy_ui_component_setfocus(view);
@@ -1333,7 +1332,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	psy_ui_Component* component;
 
 	if (self->startpage) {
-		tabbar_select(&self->helpview.tabbar, 0);
+		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
 		self->startpage = 0;
 	}
 	workspace_onviewchanged(&self->workspace, tabindex);				

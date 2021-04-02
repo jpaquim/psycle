@@ -252,7 +252,7 @@ void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
 
 	assert(self);
 
-	fontinfo = psy_ui_font_fontinfo(&psy_ui_style(psy_ui_STYLE_COMMON)->font);	
+	fontinfo = psy_ui_font_fontinfo(&psy_ui_style(psy_ui_STYLE_ROOT)->font);	
 	fontinfo.lfHeight = size;	
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_replacedefaultfont(self->main, &font);

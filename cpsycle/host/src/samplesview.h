@@ -5,7 +5,7 @@
 #define SAMPLESVIEW_H
 
 // host
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "samplesbox.h"
 #include "sampleeditor.h"
 #include "wavebox.h"
@@ -181,7 +181,7 @@ typedef struct SamplesView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	TabBar clienttabbar;
+	psy_ui_TabBar clienttabbar;
 	psy_ui_Notebook clientnotebook;
 	psy_ui_Component mainview;
 	psy_ui_Component importview;
@@ -193,7 +193,7 @@ typedef struct SamplesView {
 	SamplesSongImportView songimport;
 	SampleEditor sampleeditor;
 	SamplesHeaderView header;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
 	psy_ui_Component loop;

@@ -39,7 +39,7 @@
 #include "stepsequencerview.h"
 #include "songbar.h"
 #include "songproperties.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "trackscopeview.h"
 #include "undoredobar.h"
 #include "vubar.h"
@@ -96,7 +96,7 @@ typedef struct MainFrame {
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;	
 	Navigation navigation;
-	TabBar tabbar;	
+	psy_ui_TabBar tabbar;	
 	psy_ui_Notebook notebook;
 	FileBar filebar;
 	UndoRedoBar undoredobar;

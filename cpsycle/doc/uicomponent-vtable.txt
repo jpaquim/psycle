@@ -2,7 +2,7 @@
 // copy vtable section above component init
 // add virtual methods and protoypes
 // rename <name> and <class>
-// add name_vtableinit_init(self) after the component init
+// add name_vtable_init(self) after the component init
 // rename <name> <name_vtableinit_init>
 // (see existing classes/developer guide for vtables)
 
@@ -11,12 +11,13 @@ static void name_onpreferredsize(class*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void name_ondraw(class*, psy_ui_Graphics*);
 static void name_onalign(class*);
+static void name_onmousedown(class*, psy_ui_MouseEvent*);
 
 // vtable
 static psy_ui_ComponentVtable name_vtable;
 static bool name_vtable_initialized = FALSE;
 
-static void name_vtableinit_init(class* self)
+static void name_vtable_init(class* self)
 {
 	if (!name_vtable_initialized) {
 		name_vtable = *(self->component.vtable);		

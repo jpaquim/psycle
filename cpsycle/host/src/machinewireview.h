@@ -12,7 +12,7 @@
 #include "machinestackview.h"
 #include "newmachine.h"
 #include "paramview.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include <uiedit.h>
