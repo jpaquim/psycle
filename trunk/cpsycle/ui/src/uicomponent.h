@@ -11,6 +11,7 @@
 #include "uimenu.h"
 #include "uistyle.h"
 #include "uidefaults.h"
+#include "uicomponentstyle.h"
 #include <list.h>
 #include <translator.h>
 #include "../../detail/stdint.h"
@@ -140,28 +141,6 @@ typedef struct psy_ui_ComponentVTable {
 typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
-
-typedef enum psy_ui_StyleState {
-	psy_ui_STYLESTATE_NONE = 0,
-	psy_ui_STYLESTATE_HOVER = 1,
-	psy_ui_STYLESTATE_SELECT = 2,
-	psy_ui_STYLESTATE_DISABLED = 3
-} psy_ui_StyleState;
-
-typedef struct psy_ui_ComponentStyle {
-	psy_ui_Style* currstyle;
-	psy_ui_Style style;
-	psy_ui_Style hover;
-	psy_ui_Style select;
-	psy_ui_Style disabled;
-	uintptr_t style_id;
-	uintptr_t hover_id;
-	uintptr_t select_id;
-	uintptr_t disabled_id;
-	psy_ui_StyleState state;
-} psy_ui_ComponentStyle;
-
-void psy_ui_componentstyle_init(psy_ui_ComponentStyle* style);
 
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		

@@ -4,7 +4,20 @@
 #ifndef psy_ui_PROGRESSBAR_H
 #define psy_ui_PROGRESSBAR_H
 
+// local
 #include "uicomponent.h"
+
+// psy_ui_ProgressBar
+//
+// psy_ui_Component <>----<> psy_ui_ComponentImp
+//        ^
+//        |
+//        |
+// psy_ui_ProgressBar
+// 
+// Displays a simple progress bar.
+// The component draws a filled rectangle bar indicating the progress of an
+// operation.
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,15 +26,16 @@ extern "C" {
 typedef struct psy_ui_ProgressBar {
 	// inherits
 	psy_ui_Component component;
-	// internal
-	char_dyn_t* text;
+	// internal	
 	double progress;
 } psy_ui_ProgressBar;
 
-void psy_ui_progressbar_init(psy_ui_ProgressBar*, psy_ui_Component* parent);
+void psy_ui_progressbar_init(psy_ui_ProgressBar*, psy_ui_Component* parent,
+	psy_ui_Component* view);
 
-void psy_ui_progressbar_settext(psy_ui_ProgressBar*, const char* text);
-void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, float progress);
+// set the progress: 0..1 (0% - 100%)
+void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, double progress);
+// advance progress of 10%
 void psy_ui_progressbar_tick(psy_ui_ProgressBar*);
 
 INLINE psy_ui_Component* progressbar_base(psy_ui_ProgressBar* self)

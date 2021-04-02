@@ -27,7 +27,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 	helpview_inittabbar(self, tabbarparent, workspace);
 	helpview_initsections(self, workspace);
 	helpview_initsectionfloated(self);
-	tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
+	psy_ui_tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
 }
 // construction
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
@@ -43,10 +43,10 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init_align(&self->bar, tabbarparent, psy_ui_ALIGN_LEFT);
-	tabbar_init(&self->tabbar, &self->bar);
+	psy_ui_tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalignexpand(&self->bar, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	psy_ui_tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
 	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL, "help.extract",
 		self, helpview_onfloatsection);		
@@ -87,7 +87,7 @@ void helpview_initsectionfloated(HelpView* self)
 void helpview_onselectsection(HelpView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {
-	tabbar_select(&self->tabbar, (int)section);
+	psy_ui_tabbar_select(&self->tabbar, (int)section);
 }
 
 void helpview_onfocus(HelpView* self, psy_ui_Component* sender)

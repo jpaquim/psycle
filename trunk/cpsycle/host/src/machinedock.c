@@ -500,7 +500,7 @@ void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 
 // ParamRack
 // prototypes
-static void paramrack_onmodeselected(ParamRack*, TabBar* sender, intptr_t index);
+static void paramrack_onmodeselected(ParamRack*, psy_ui_TabBar* sender, intptr_t index);
 static void paramrack_onalign(ParamRack*, psy_ui_Component* sender);
 static void paramrack_onlevelchanged(ParamRack*, IntEdit* sender);
 static void paramrack_onsolo(ParamRack*, psy_ui_Button* sender);
@@ -528,12 +528,12 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->leveledit.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_onlevelchanged);
 	// ChainMode
-	tabbar_init(&self->modeselector, &self->bottom);
-	tabbar_append_tabs(&self->modeselector,
+	psy_ui_tabbar_init(&self->modeselector, &self->bottom);
+	psy_ui_tabbar_append_tabs(&self->modeselector,
 		"All", "Inputs", "Outputs", "Inchain", "Outchain", "Level", NULL);	
 	psy_signal_connect(&self->modeselector.signal_change, self,
 		paramrack_onmodeselected);	
-	psy_ui_component_setalign(tabbar_base(&self->modeselector),
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->modeselector),
 		psy_ui_ALIGN_RIGHT);
 	// BatchBar
 	paramrackbatchbar_init(&self->batchbar, &self->bottom);
@@ -566,13 +566,13 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->scroller.pane, psy_ui_SETBACKGROUND);
 	psy_signal_connect(&self->component.signal_align, self,
 		paramrack_onalign);	
-	tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);
+	psy_ui_tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		paramrack_onsongchanged);
 	paramrack_connectsong(self);
 }
 
-void paramrack_onmodeselected(ParamRack* self, TabBar* sender,
+void paramrack_onmodeselected(ParamRack* self, psy_ui_TabBar* sender,
 	intptr_t index)
 {	
 	paramrackpane_setmode(&self->pane, (ParamRackMode)index);

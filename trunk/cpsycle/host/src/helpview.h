@@ -8,7 +8,7 @@
 #include "about.h"
 #include "greet.h"
 #include "help.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 // ui
 #include <uibutton.h>
 #include <uilabel.h>
@@ -34,7 +34,7 @@ typedef struct HelpView {
 	// ui elements
 	psy_ui_Notebook notebook;
 	psy_ui_Component bar;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	psy_ui_Button floatsection;
 	// sections
 	Help help;

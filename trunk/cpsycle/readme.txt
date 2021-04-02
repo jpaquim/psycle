@@ -1,10 +1,8 @@
 C-Psycle is a variant of Psycle in "C" language (instead of C++, except
 of some plugin and driver apis written in C++) with the goal of being
 compatible with mfc-psycle and sharing as much features as possible.
-Work is now done to reach the point of releasing a 1.0 version, mainly
-finishing the stackview, completing a instrument zone structure rather than
-a notepair map, fixing some incompatibilities in XMSampler and the
-psy fileformat.
+Work is now done to reach the point of releasing a 1.0 version fixing some
+incompatibilities in XMSampler and the psy fileformat and cleaning the code.
 
 If anyone wants to try it, it should be easier to compile with visual studio
 2019 than Psycle, but at this point it still requires Psycle plugins and some

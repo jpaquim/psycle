@@ -12,7 +12,7 @@
 #include "patternviewbar.h"
 #include "pianoroll.h"
 #include "stepbox.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "trackerlinenumbers.h"
 #include "trackerview.h"
 #include "transformpatternview.h"
@@ -47,7 +47,7 @@ typedef struct PatternView {
 	// internal
 	// ui elements
 	psy_ui_Component sectionbar;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	psy_ui_Button contextbutton;
 	TrackerLineNumberBar left;
 	TrackerGrid griddefaults;

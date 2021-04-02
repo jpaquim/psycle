@@ -205,6 +205,12 @@
     <ClCompile Include="src\uiviewcomponentimp.c">
       <Filter>comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uicomponentstyle.c">
+      <Filter>comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitabbar.c">
+      <Filter>comps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -379,6 +385,12 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="src\uiviewcomponentimp.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicomponentstyle.h">
+      <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uitabbar.h">
       <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>

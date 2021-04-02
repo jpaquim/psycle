@@ -371,7 +371,7 @@ void psy_ui_scrollbarpane_preventinput(psy_ui_ScrollBarPane* self)
 
 	self->enabled = FALSE;
 	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
+		psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour);
 	psy_ui_component_invalidate(&self->component);
 }
 

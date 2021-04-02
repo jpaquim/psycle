@@ -599,6 +599,12 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			psy_ui_component_drawbackground(self->component, g);
 		}
 		psy_ui_component_drawborder(self->component, g);
+		// prepare colours
+		psy_ui_setcolour(g, psy_ui_component_colour(
+			self->component));
+		psy_ui_settextcolour(g, psy_ui_component_colour(
+			self->component));
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		if (self->component->vtable->ondraw) {
 			self->component->vtable->ondraw(self->component, g);
 		}

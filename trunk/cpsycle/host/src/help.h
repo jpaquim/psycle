@@ -5,7 +5,7 @@
 #define HELP_H
 
 // host
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include <uieditor.h>
@@ -26,7 +26,7 @@ typedef struct Help {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Editor editor;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	// internal data
 	psy_Table filenames;
 	psy_ui_AlignType lastalign;

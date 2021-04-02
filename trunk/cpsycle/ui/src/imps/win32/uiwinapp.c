@@ -346,8 +346,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						? psy_ui_win_component_details(imp->component)->background
 						: (HBRUSH)GetStockObject(NULL_BRUSH);
 				} else {
-					colour = psy_ui_style(psy_ui_STYLE_COMMON)->colour.value;
-					bgcolour = psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value;
+					colour = psy_ui_style(psy_ui_STYLE_ROOT)->colour.value;
+					bgcolour = psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour.value;
 					brush = winapp->defaultbackgroundbrush;
 				}
 				SetTextColor((HDC)wParam, colour);					
@@ -982,7 +982,7 @@ void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
 {
 	DeleteObject(self->defaultbackgroundbrush);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour.value);
+		psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour.value);
 }
 
 #endif /* PSYCLE_TK_WIN32 */

@@ -78,19 +78,13 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		medium = 600;
 		weak = 200;
 	}
-	// common
+	// root
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, 
 		psy_ui_colour_weighted(&onsurface, accent),
 		surface);
 	psy_ui_style_setfont(style, "Tahoma", -16);
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON, style);
-	// common::select
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, onsurface, surface);
-	psy_ui_style_setfont(style, "Tahoma", -16);
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMMON_SELECT, style);
-	psy_ui_style_setcolour(style, onsecondary);	
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_ROOT, style);	
 	// label
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, accent));	
@@ -99,6 +93,10 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, weak));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_LABEL_DISABLED, style);
+	// edit
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, accent));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_EDIT, style);
 	// button
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, 
@@ -131,16 +129,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	// tabbar
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, surface);	
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);
-	// tabbar::hover
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style,
-		onprimary, primary);	
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR_HOVER, style);
-	// tabbar::select
-	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR_SELECT,
-		psy_ui_style_allocinit_colours(
-			onprimary, primary));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);	
 	// tab
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -156,7 +145,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);	
 	// tab::select
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT,
-		psy_ui_style_allocinit_colours(onprimary, surface));
+		psy_ui_style_allocinit_colours(onprimary, primary));
 	// psy_ui_Style style_containerheader;
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -260,12 +249,12 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* configdir, boo
 		self->hasdarktheme = isdark;
 		psy_ui_styles_configure(&self->styles, styleconfig);
 		// font
-		psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->use_font = 1;
+		psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->use_font = 1;
 		{
 			psy_ui_FontInfo fontinfo;
 
 			psy_ui_fontinfo_init(&fontinfo, "Tahoma", -16);
-			psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font,
+			psy_ui_font_init(&psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font,
 				&fontinfo);
 		}
 	}	

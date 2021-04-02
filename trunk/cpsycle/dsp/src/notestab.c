@@ -5,7 +5,7 @@
 
 #include "notestab.h"
 
-static char* notes_tab_a440[256] = {
+static char* notes_psy_ui_taba440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
 	"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //1
 	"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //2
@@ -27,7 +27,7 @@ static char* notes_tab_a440[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
-static char* notes_tab_a220[256] = {
+static char* notes_psy_ui_taba220[256] = {
 	"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //0
 	"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //1
 	"C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","B-2", //2
@@ -49,7 +49,7 @@ static char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
-static char* notes_tab_gmpercussion[] = {
+static char* notes_psy_ui_tabgmpercussion[] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 0..15
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 16..31
 	"   ","   ","   ",																				 // 32..34
@@ -90,16 +90,16 @@ const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
 
 	switch (mode) {
 		case psy_dsp_NOTESTAB_A440:
-			rv = notes_tab_a440[note];
+			rv = notes_psy_ui_taba440[note];
 		break;
 		case psy_dsp_NOTESTAB_A220:
-			rv = notes_tab_a220[note];
+			rv = notes_psy_ui_taba220[note];
 		break;
 		case psy_dsp_NOTESTAB_GMPERCUSSION:
-			rv = notes_tab_gmpercussion[note];
+			rv = notes_psy_ui_tabgmpercussion[note];
 			break;
 		default:
-			rv = notes_tab_a220[255];
+			rv = notes_psy_ui_taba220[255];
 		break;
 	}
 	return rv;
@@ -111,16 +111,16 @@ const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)
 
 	switch (mode) {
 		case psy_dsp_NOTESTAB_A440:
-			rv = (const char* const *)notes_tab_a440;
+			rv = (const char* const *)notes_psy_ui_taba440;
 		break;
 		case psy_dsp_NOTESTAB_A220:
-			rv = (const char* const *)notes_tab_a220;
+			rv = (const char* const *)notes_psy_ui_taba220;
 		break;
 		case psy_dsp_NOTESTAB_GMPERCUSSION:
-			rv = (const char* const*)notes_tab_gmpercussion;
+			rv = (const char* const*)notes_psy_ui_tabgmpercussion;
 		break;
 		default:
-			rv = (const char* const *)notes_tab_a220;
+			rv = (const char* const *)notes_psy_ui_taba220;
 		break;
 	}
 	return rv;

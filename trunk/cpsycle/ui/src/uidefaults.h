@@ -15,12 +15,12 @@ extern "C" {
 #define psy_ui_DARKTHEME 1
 
 typedef enum psy_ui_StyleTypes {
-	psy_ui_STYLE_COMMON,
-	psy_ui_STYLE_COMMON_SELECT,
+	psy_ui_STYLE_ROOT,
 	psy_ui_STYLE_LABEL,
 	psy_ui_STYLE_LABEL_HOVER,
 	psy_ui_STYLE_LABEL_SELECT,
 	psy_ui_STYLE_LABEL_DISABLED,
+	psy_ui_STYLE_EDIT,
 	psy_ui_STYLE_BUTTON,
 	psy_ui_STYLE_BUTTON_HOVER,
 	psy_ui_STYLE_BUTTON_SELECT,
@@ -29,9 +29,7 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_TABBAR_SELECT,
 	psy_ui_STYLE_TAB,
 	psy_ui_STYLE_TAB_HOVER,
-	psy_ui_STYLE_TAB_SELECT,
-	// psy_ui_STYLE_SIDEMENU,
-	//psy_ui_STYLE_SIDEMENU_SELECT,
+	psy_ui_STYLE_TAB_SELECT,	
 	psy_ui_STYLE_CONTAINERHEADER,
 	psy_ui_STYLE_SCROLLPANE,
 	psy_ui_STYLE_SCROLLTHUMB,
@@ -100,7 +98,7 @@ INLINE const psy_ui_Margin* psy_ui_defaults_pcmargin(const psy_ui_Defaults* self
 
 INLINE psy_ui_Font* psy_ui_defaults_font(psy_ui_Defaults* self)
 {
-	return &psy_ui_defaults_style(self, psy_ui_STYLE_COMMON)->font;	
+	return &psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font;	
 }
 
 void psy_ui_defaults_initdarktheme(psy_ui_Defaults*);

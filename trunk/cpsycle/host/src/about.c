@@ -92,9 +92,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_editor_init(&self->licenceinfo, &self->component);	
 	licence_setlanguage(self);
 	psy_ui_component_resize(&self->licenceinfo.component,
-		psy_ui_size_makepx(500.0, 300.0));
-	psy_ui_component_setbackgroundcolour(&self->licenceinfo.component,
-		psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour);
+		psy_ui_size_makepx(500.0, 300.0));	
 	psy_ui_editor_preventedit(&self->licenceinfo);
 	psy_ui_editor_enablewrap(&self->licenceinfo);
 }

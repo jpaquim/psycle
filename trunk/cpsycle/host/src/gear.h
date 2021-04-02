@@ -8,7 +8,7 @@
 #include "instrumentsbox.h"
 #include "machinesbox.h"
 #include "samplesbox.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 // ui
 #include "uibutton.h"
@@ -51,7 +51,7 @@ typedef struct Gear {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Component client;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	psy_ui_Component titlebar;
 	psy_ui_Label title;
 	psy_ui_Button hide;

@@ -41,6 +41,9 @@
     <Filter Include="uicontrols\machineparam">
       <UniqueIdentifier>{34940d58-d9b5-4186-b9b4-2df6b3622c28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="bitmaps">
+      <UniqueIdentifier>{ddea50f9-39cc-4981-9ce8-a4352ed6d511}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mainframe.c">
@@ -209,9 +212,6 @@
       <Filter>uicontrols</Filter>
     </ClCompile>
     <ClCompile Include="src\labelpair.c">
-      <Filter>uicontrols</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tabbar.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
     <ClCompile Include="src\fileview.c">
@@ -602,9 +602,6 @@
     <ClInclude Include="src\skinio.h">
       <Filter>file</Filter>
     </ClInclude>
-    <ClInclude Include="src\tabbar.h">
-      <Filter>uicontrols</Filter>
-    </ClInclude>
     <ClInclude Include="src\kbdbox.h">
       <Filter>uicontrols</Filter>
     </ClInclude>
@@ -874,45 +871,125 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="src\resources\icon1.ico" />
-    <Image Include="src\resources\machine_skin.bmp" />
-    <Image Include="src\resources\macparam.ico" />
-    <Image Include="src\resources\mixer_skin.bmp" />
-    <Image Include="src\resources\pattern_header_skin.bmp" />
-    <Image Include="src\resources\Project3.ico" />
-    <Image Include="src\resources\splash_screen.bmp" />
-    <Image Include="src\resources\TbMainKnob.bmp" />
-    <Image Include="src\resources\kbd.bmp" />
-    <Image Include="src\resources\term.bmp" />
-    <Image Include="src\resources\conf-general.bmp" />
-    <Image Include="src\resources\pattern-editor.bmp" />
-    <Image Include="src\resources\help.bmp" />
-    <Image Include="src\resources\arrow-back-circle-outline.bmp" />
-    <Image Include="src\resources\arrow-forward-circle-outline.bmp" />
-    <Image Include="src\resources\arrow-back-dark.bmp" />
-    <Image Include="src\resources\arrow-forward-dark.bmp" />
-    <Image Include="src\resources\settings-dark.bmp" />
-    <Image Include="src\resources\play-dark.bmp" />
-    <Image Include="src\resources\stop-dark.bmp" />
-    <Image Include="src\resources\save-dark.bmp" />
-    <Image Include="src\resources\open-dark.bmp" />
-    <Image Include="src\resources\new-dark.bmp" />
-    <Image Include="src\resources\pulse-dark.bmp" />
-    <Image Include="src\resources\earth-dark.bmp" />
-    <Image Include="src\resources\undo-dark.bmp" />
-    <Image Include="src\resources\redo-dark.bmp" />
-    <Image Include="src\resources\notes-dark.bmp" />
-    <Image Include="src\resources\machines-dark.bmp" />
-    <Image Include="src\resources\newmachine-dark.bmp" />
-    <Image Include="src\resources\matrix-dark.bmp" />
-    <Image Include="wires-dark.bmp" />
-    <Image Include="src\resources\wires-dark.bmp" />
-    <Image Include="heart-dark.bmp" />
-    <Image Include="src\resources\heart-dark.bmp" />
-    <Image Include="tray-dark.bmp" />
-    <Image Include="src\resources\tray-dark.bmp" />
-    <Image Include="src\resources\heart-full-dark.bpm.bmp" />
-    <Image Include="src\resources\loop_dark.bmp" />
-    <Image Include="src\resources\vsplit_dark.bmp" />
+    <Image Include="src\resources\arrow-back-circle-outline.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\arrow-back-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\arrow-forward-circle-outline.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\arrow-forward-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\conf-general.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\earth-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="heart-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\heart-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\heart-full-dark.bpm.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\help.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\icon1.ico">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\kbd.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\loop_dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\machine_skin.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\machines-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\macparam.ico">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\matrix-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\mixer_skin.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\new-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\newmachine-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\notes-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\open-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\pattern_header_skin.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\pattern-editor.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\play-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\Project3.ico">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\pulse-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\redo-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\save-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\settings-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\splash_screen.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\stop-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\TbMainKnob.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\term.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\tray-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="tray-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\undo-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\vsplit_dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="wires-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\wires-dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
   </ItemGroup>
 </Project>

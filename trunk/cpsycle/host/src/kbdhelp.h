@@ -5,7 +5,7 @@
 #define KBDHELP_H
 
 #include "kbdbox.h"
-#include "tabbar.h"
+#include <uitabbar.h>
 #include "workspace.h"
 
 #include <uieditor.h>
@@ -19,7 +19,7 @@ extern "C" {
 
 typedef struct KbdHelp {
 	psy_ui_Component component;
-	TabBar tabbar;
+	psy_ui_TabBar tabbar;
 	KbdBox kbdbox;	
 	Workspace* workspace;
 } KbdHelp;

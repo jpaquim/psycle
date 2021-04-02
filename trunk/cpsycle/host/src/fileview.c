@@ -20,7 +20,7 @@ static void fileview_builddrives(FileView*);
 static void fileview_builddirectories(FileView*);
 static int fileview_onenumdir(FileView*, const char* path, int flag);
 static void fileview_onfileboxselected(FileView*, psy_ui_ListBox* sender, intptr_t index);
-static void fileview_ondrives(FileView* self, TabBar* sender, int index);
+static void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index);
 
 // implementation
 void fileview_init(FileView* self, psy_ui_Component* parent,
@@ -28,8 +28,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 {		
 	psy_ui_component_init(fileview_base(self), parent, NULL);
 	self->workspace = workspace;	
-	tabbar_init(&self->drives, fileview_base(self));
-	psy_ui_component_setalign(tabbar_base(&self->drives), psy_ui_ALIGN_LEFT);
+	psy_ui_tabbar_init(&self->drives, fileview_base(self));
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives), psy_ui_ALIGN_LEFT);
 	self->drives.tabalignment = psy_ui_ALIGN_LEFT;
 	psy_ui_listbox_init(&self->filebox, &self->component);
 	psy_ui_listbox_setcharnumber(&self->filebox, 40);
@@ -93,9 +93,9 @@ void fileview_builddrives(FileView* self)
 	psy_List* p;
 	psy_List* q;
 	
-	tabbar_clear(&self->drives);
+	psy_ui_tabbar_clear(&self->drives);
 	for (q = p = psy_drives(); p != NULL; psy_list_next(&p)) {		
-		tabbar_append(&self->drives, (char*)psy_list_entry(p));
+		psy_ui_tabbar_append(&self->drives, (char*)psy_list_entry(p));
 	}
 	psy_list_deallocate(&q, NULL);
 }
@@ -148,11 +148,11 @@ const char* fileview_path(FileView* self)
 	return "";
 }
 
-void fileview_ondrives(FileView* self, TabBar* sender, int index)
+void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index)
 {
-	Tab* tab;
+	psy_ui_Tab* tab;
 
-	tab = tabbar_tab(&self->drives, index);
+	tab = psy_ui_tabbar_tab(&self->drives, index);
 	if (tab) {
 		free(self->drive);
 		free(self->curr);

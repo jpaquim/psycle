@@ -14,27 +14,6 @@
 // platform
 #include "../../detail/portable.h"
 
-void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
-{
-	psy_ui_style_init(&self->style);
-	psy_ui_style_init(&self->hover);
-	psy_ui_style_init(&self->select);
-	psy_ui_style_init(&self->disabled);
-	self->currstyle = &self->style;
-	self->style_id = psy_INDEX_INVALID;
-	self->hover_id = psy_INDEX_INVALID;
-	self->select_id = psy_INDEX_INVALID;
-	self->disabled_id = psy_INDEX_INVALID;
-	self->state = psy_ui_STYLESTATE_NONE;
-}
-
-void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
-{
-	psy_ui_style_dispose(&self->style);
-	psy_ui_style_dispose(&self->hover);
-	psy_ui_style_dispose(&self->select);
-}
-
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
 
@@ -43,11 +22,11 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 	const psy_ui_Font* rv;
 	const psy_ui_Style* common;	
 
-	common = psy_ui_style(psy_ui_STYLE_COMMON);
+	common = psy_ui_style(psy_ui_STYLE_ROOT);
 	if (self->style.currstyle->use_font) {
 		rv = &self->style.currstyle->font;
 	} else {
-		rv = &psy_ui_style(psy_ui_STYLE_COMMON)->font;
+		rv = &psy_ui_style(psy_ui_STYLE_ROOT)->font;
 	}
 	return rv;
 }
@@ -79,7 +58,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 	if (curr) {
 		base = curr->style.currstyle->backgroundcolour;
 	} else {
-		base = psy_ui_style(psy_ui_STYLE_COMMON)->backgroundcolour;
+		base = psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour;
 	}
 	if (self->uselevel) {		
 		psy_ui_Colour overlay;
@@ -156,7 +135,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 	if (curr) {
 		return curr->style.currstyle->colour;
 	}
-	return psy_ui_style(psy_ui_STYLE_COMMON)->colour;
+	return psy_ui_style(psy_ui_STYLE_ROOT)->colour;
 }
 
 void psy_ui_component_setborder(psy_ui_Component* self,
@@ -174,7 +153,7 @@ const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
 	if (self->style.currstyle->border.mode.set) {
 		return &self->style.currstyle->border;
 	}
-	return &psy_ui_style(psy_ui_STYLE_COMMON)->border;
+	return &psy_ui_style(psy_ui_STYLE_ROOT)->border;
 }
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
@@ -182,7 +161,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 	if (main) {
 		psy_ui_Style* common;		
 
-		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_COMMON);		
+		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);		
 		psy_ui_font_dispose(&common->font);
 		psy_ui_font_init(&common->font, NULL);
 		psy_ui_font_copy(&common->font, font);
@@ -941,6 +920,9 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 		psy_ui_Size rv;
 
 		rv = self->preferredsize;		
+		if (self->debugflag == 2000) {
+			self = self;
+		}
 		self->vtable->onpreferredsize(self, limit, &rv);
 		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
 		return rv;

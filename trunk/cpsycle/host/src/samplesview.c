@@ -1006,10 +1006,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	samplesviewbuttons_init(&self->buttons, &self->left, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	// tabbarparent
-	tabbar_init(&self->clienttabbar, tabbarparent);
+	psy_ui_tabbar_init(&self->clienttabbar, tabbarparent);
 	psy_ui_component_setalign(&self->clienttabbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->clienttabbar.component);
-	tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
+	psy_ui_tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
 	samplesbox_init(&self->samplesbox, &self->left,
 		&workspace->song->samples, workspace);
 	psy_ui_component_setalign(&self->samplesbox.component,
@@ -1028,11 +1028,11 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		&leftmargin);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
-	tabbar_init(&self->tabbar, &self->client);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
-	tabbar_append(&self->tabbar, "General");
-	tabbar_append(&self->tabbar, "Vibrato");
+	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), &margin);
+	psy_ui_tabbar_append(&self->tabbar, "General");
+	psy_ui_tabbar_append(&self->tabbar, "Vibrato");
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_TOP);

@@ -275,21 +275,32 @@ void patternview_initbasefontsize(PatternView* self)
 
 void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 {
+	psy_ui_Tab* tab;
+
 	psy_ui_component_init_align(&self->sectionbar, tabbarparent,
 		psy_ui_ALIGN_LEFT);
-	tabbar_init(&self->tabbar, &self->sectionbar);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar,
+	psy_ui_tabbar_init(&self->tabbar, &self->sectionbar);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	psy_ui_tabbar_append_tabs(&self->tabbar,
 		"patternview.tracker",
 		"patternview.roll",
 		"patternview.split",
 		"patternview.vert",
 		"patternview.horz",
 		"patternview.properties", NULL);
-	tabbar_tab(&self->tabbar, 0)->margin.left = psy_ui_value_makeew(1.0);
-	tabbar_tab(&self->tabbar, 2)->mode = TABMODE_LABEL;
-	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;
-	tabbar_select(&self->tabbar, 0);
+	tab = psy_ui_tabbar_tab(&self->tabbar, 2);
+	if (tab) {
+		psy_ui_tab_setmode(tab, psy_ui_TABMODE_LABEL);
+	}
+	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
+	if (tab) {
+		tab->component.margin.left = psy_ui_value_makeew(1.0);
+	}
+	tab = psy_ui_tabbar_tab(&self->tabbar, 5);
+	if (tab) {
+		tab->istoggle = TRUE;
+	}
+	psy_ui_tabbar_select(&self->tabbar, 0);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);
 }
@@ -406,7 +417,7 @@ void patternview_onpatternpropertiesapply(PatternView* self, psy_ui_Component* s
 
 void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 {
-	if (tabbar_selected(&self->tabbar) == 1) { // Pianoroll
+	if (psy_ui_tabbar_selected(&self->tabbar) == 1) { // Pianoroll
 		psy_ui_component_setfocus(&self->pianoroll.grid.component);
 		return;
 	}
@@ -453,14 +464,14 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 		psy_ui_notebook_select(&self->editnotebook, tabindex);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
-		tabbar_select(&self->tabbar, tabindex);
+		psy_ui_tabbar_select(&self->tabbar, tabindex);
 		psy_signal_enable(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);		
 	} else if (tabindex == 3) {
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
-		tabbar_select(&self->tabbar, 0);
+		psy_ui_tabbar_select(&self->tabbar, 0);
 		psy_signal_enable(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
@@ -475,7 +486,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 		psy_ui_notebook_select(&self->notebook, 0);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
-		tabbar_select(&self->tabbar, 0);
+		psy_ui_tabbar_select(&self->tabbar, 0);
 		psy_signal_enable(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
@@ -489,7 +500,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 		psy_ui_notebook_select(&self->notebook, 1);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
-		tabbar_select(&self->tabbar, 1);
+		psy_ui_tabbar_select(&self->tabbar, 1);
 		psy_signal_enable(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 	}
