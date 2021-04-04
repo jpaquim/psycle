@@ -72,6 +72,7 @@ ViewHistoryEntry viewhistory_currview(const ViewHistory* self)
 	} else {
 		rv.seqpos = psy_INDEX_INVALID;
 		rv.id = 0;
+		rv.section = 0;
 	}
 	return rv;
 }

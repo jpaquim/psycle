@@ -1594,10 +1594,10 @@ psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(
 	assert(self);
 
 	length = 0.0;
-	seqoffset = 0.0;
+	seqoffset = 0.0;	
 	if (psy_audio_sequencer_playing(self)) {
 		const psy_List* p;
-		
+				
 		for (p = self->currtracks; p != NULL; psy_list_next_const(&p)) {
 			psy_audio_SequencerTrack* track;			
 
@@ -1621,8 +1621,8 @@ psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(
 						psy_audio_pattern_length(pattern));
 				}
 			}
-		}
-	}
+		}		
+	}	
 	if (length > 0.0) {
 		return (psy_dsp_percent_t)
 			((psy_audio_sequencer_position(self) - seqoffset) / length);

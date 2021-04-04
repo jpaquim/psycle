@@ -1325,7 +1325,7 @@ void trackergrid_oninput(TrackerGrid* self, psy_audio_Player* sender,
 
 	if (self->gridstate->cursor.column == TRACKER_COLUMN_NOTE &&
 			ev->note != psy_audio_NOTECOMMANDS_RELEASE) {
-		if (workspace_currview(self->workspace) == VIEW_ID_PATTERNVIEW &&
+		if (workspace_currview(self->workspace).id == VIEW_ID_PATTERNVIEW &&
 				self->editmode == TRACKERGRID_EDITMODE_SONG) {
 			trackergrid_setdefaultevent(self, &sender->patterndefaults, ev);
 			trackergrid_inputevent(self, ev, self->chordmode);

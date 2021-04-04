@@ -128,7 +128,8 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->gearvisible = FALSE;
 	self->machines_undosavepoint = 0;
 	self->navigating = FALSE;	
-	self->restoreview = VIEW_ID_MACHINEVIEW;
+	self->restoreview.id = VIEW_ID_MACHINEVIEW;
+	self->restoreview.section = SECTION_ID_MACHINEVIEW_WIRES;
 	self->patternsinglemode = TRUE;	
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
@@ -149,7 +150,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	workspace_initplayer(self);
 	eventdriverconfig_registereventdrivers(&self->config.input);
 	psy_audio_patterncursor_init(&self->patterneditposition);
-	psy_audio_pattern_init(&self->patternpaste);
+	psy_audio_pattern_init(&self->patternpaste);	
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -1019,7 +1020,7 @@ void workspace_undo(Workspace* self)
 {
 	assert(self);
 	
-	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self).id == VIEW_ID_MACHINEVIEW) {
 		psy_undoredo_undo(&self->song->machines.undoredo);
 	} else {
 		psy_undoredo_undo(&self->undoredo);
@@ -1030,7 +1031,7 @@ void workspace_redo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self).id == VIEW_ID_MACHINEVIEW) {
 		psy_undoredo_redo(&self->song->machines.undoredo);
 	} else {		
 		psy_undoredo_redo(&self->undoredo);		
@@ -1041,7 +1042,7 @@ bool workspace_currview_hasundo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self).id == VIEW_ID_MACHINEVIEW) {
 		return psy_list_size(self->song->machines.undoredo.undo) != 0;
 	}
 	return psy_list_size(self->undoredo.undo) != 0;
@@ -1051,7 +1052,7 @@ bool workspace_currview_hasredo(Workspace* self)
 {
 	assert(self);
 
-	if (workspace_currview(self) == VIEW_ID_MACHINEVIEW) {
+	if (workspace_currview(self).id == VIEW_ID_MACHINEVIEW) {
 		return psy_list_size(self->song->machines.undoredo.redo) != self->machines_undosavepoint;
 	}
 	return psy_list_size(self->undoredo.redo) != self->undosavepoint;	
@@ -1117,11 +1118,11 @@ psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace* self)
 	return self->sequenceselection.editposition;
 }
 
-uintptr_t workspace_currview(Workspace* self)
+ViewHistoryEntry workspace_currview(Workspace* self)
 {
 	assert(self);
 
-	return viewhistory_currview(&self->viewhistory).id;
+	return viewhistory_currview(&self->viewhistory);
 }
 
 void workspace_setcursorstep(Workspace* self, int step)
@@ -1262,17 +1263,18 @@ void workspace_restoreview(Workspace* self)
 {
 	assert(self);
 
-	workspace_selectview(self, self->restoreview, 0, 0);
+	workspace_selectview(self, self->restoreview.id, 
+		self->restoreview.section, 0);
 }
 
 void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
 	int option)
 {
-	assert(self);
+	assert(self);	
 
 	if (view == VIEW_ID_CHECKUNSAVED &&
-			workspace_currview(self) != VIEW_ID_CHECKUNSAVED &&
-			workspace_currview(self) != VIEW_ID_CONFIRM) {
+			workspace_currview(self).id != VIEW_ID_CHECKUNSAVED &&
+			workspace_currview(self).id != VIEW_ID_CONFIRM) {
 		workspace_saveview(self);
 	}	
 	psy_signal_emit(&self->signal_viewselected, self, 3, view, section, option);
@@ -1315,14 +1317,10 @@ int workspace_recordingtweaks(Workspace* self)
 	return self->recordtweaks;
 }
 
-void workspace_onviewchanged(Workspace* self, uintptr_t viewid)
+void workspace_onviewchanged(Workspace* self, ViewHistoryEntry view)
 {
-	ViewHistoryEntry view;
-
 	assert(self);
-
-	view = viewhistory_currview(&self->viewhistory);
-	view.id = viewid;
+	
 	viewhistory_add(&self->viewhistory, view);	
 }
 
@@ -1481,40 +1479,6 @@ psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 			"visual.patternview.notetab", 0))
 		? psy_dsp_NOTESTAB_A440
 		: psy_dsp_NOTESTAB_A220;
-}
-
-void workspace_patterndec(Workspace* self)
-{
-	if (self->song) {
-		uintptr_t patidx;
-
-		patidx = psy_audio_sequence_patternindex(&self->song->sequence,
-			self->sequenceselection.editposition);
-		if (patidx != psy_INDEX_INVALID && patidx > 0) {
-			psy_audio_sequence_setpatternindex(&self->song->sequence,
-				self->sequenceselection.editposition,
-				patidx - 1);
-			workspace_setsequenceeditposition(self,
-				self->sequenceselection.editposition);
-		}
-	}
-}
-
-void workspace_patterninc(Workspace* self)
-{
-	if (self->song) {
-		uintptr_t patidx;
-
-		patidx = psy_audio_sequence_patternindex(&self->song->sequence,
-			self->sequenceselection.editposition);
-		if (patidx != psy_INDEX_INVALID) {
-			psy_audio_sequence_setpatternindex(&self->song->sequence,
-				self->sequenceselection.editposition,
-				patidx + 1);
-			workspace_setsequenceeditposition(self,
-				self->sequenceselection.editposition);
-		}
-	}
 }
 
 void workspace_songposdec(Workspace* self)

@@ -12,8 +12,6 @@ void psy_ui_value_init(psy_ui_Value* self)
 	*self = psy_ui_value_makepx(0.0);
 }
 
-
-
 void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm)
 {	
@@ -22,7 +20,7 @@ void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
 	} else if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
 		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW) ||
 		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EH) ||
-		(self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EW)) {
+		(self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EW)) {		
 		self->quantity += other->quantity;
 	} else {
 		self->quantity = psy_ui_value_px(self, tm) +

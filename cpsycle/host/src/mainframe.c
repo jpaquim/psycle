@@ -9,6 +9,7 @@
 #include "paramview.h"
 #include "resources/resource.h"
 #include "styles.h"
+#include "sequencecmds.h"
 // audio
 #include <exclusivelock.h>
 #include <songio.h>
@@ -813,7 +814,17 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
 		break;
 	case CMD_IMM_EDITMACHINE:
-		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
+		if (workspace_currview(&self->workspace).id != VIEW_ID_MACHINEVIEW) {
+			psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
+		} else {
+			if (workspace_currview(&self->workspace).section == SECTION_ID_MACHINEVIEW_WIRES) {
+				workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_STACK, 0);
+			} else {
+				workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_WIRES, 0);
+			}
+		}
 		break;
 	case CMD_IMM_EDITPATTERN:
 		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
@@ -894,14 +905,18 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			workspace_followsong(&self->workspace);
 		}
 		break;
-	case CMD_IMM_PATTERNINC:
-		workspace_patterninc(&self->workspace);
-		sequenceduration_update(&self->sequenceview.duration, FALSE);
-		break;
-	case CMD_IMM_PATTERNDEC:
-		workspace_patterndec(&self->workspace);
-		sequenceduration_update(&self->sequenceview.duration, FALSE);
-		break;
+	case CMD_IMM_PATTERNINC: {
+		SequenceCmds cmds;
+
+		sequencecmds_init(&cmds, &self->workspace);
+		sequencecmds_incpattern(&cmds);
+		break; }
+	case CMD_IMM_PATTERNDEC: {
+		SequenceCmds cmds;
+
+		sequencecmds_init(&cmds, &self->workspace);
+		sequencecmds_decpattern(&cmds);
+		break; }
 	case CMD_IMM_SONGPOSDEC:
 		workspace_songposdec(&self->workspace);			
 		break;
@@ -909,7 +924,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		workspace_songposinc(&self->workspace);
 		break;
 	case CMD_IMM_INFOPATTERN:
-		if (workspace_currview(&self->workspace) != VIEW_ID_PATTERNVIEW) {
+		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
 			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
 		}
 		if (!psy_ui_component_visible(&self->patternview.properties.component)) {
@@ -1328,11 +1343,11 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
-	psy_ui_tabbar_select(&self->tabbar, index);		
-	view = psy_ui_notebook_activepage(&self->notebook);
-	if (view) {
+	view = psy_ui_notebook_page(&self->notebook, index);		
+	if (view) {		
+		psy_ui_component_selectsection(view, section, options);
+		psy_ui_tabbar_select(&self->tabbar, index);
 		psy_ui_component_setfocus(view);
-		psy_ui_component_selectsection(view, section, options);	
 	}	
 }
 
@@ -1351,14 +1366,19 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	if (self->startpage) {
 		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
 		self->startpage = 0;
-	}
-	workspace_onviewchanged(&self->workspace, tabindex);				
+	}			
 	psy_ui_notebook_select(&self->viewstatusbars, tabindex);	
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {
+		ViewHistoryEntry viewentry;
+
+		viewentry.id = tabindex;
+		viewentry.section = psy_ui_component_section(component);
+		viewentry.seqpos = psy_INDEX_INVALID;
+		workspace_onviewchanged(&self->workspace, viewentry);
 		psy_ui_component_setfocus(component);
-	}	
+	}
 	psy_ui_component_align(&self->component);	
 }
 
@@ -1684,7 +1704,7 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl, ev->alt),
-				0, workspace_currview(&self->workspace)));
+				0, workspace_currview(&self->workspace).id));
 }
 
 // eventdriver callback to handle chordmode, patternedit noterelease

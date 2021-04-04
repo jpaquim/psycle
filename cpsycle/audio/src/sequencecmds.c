@@ -6,6 +6,7 @@
 #include "sequencecmds.h"
 // local
 #include "exclusivelock.h"
+#include "exclusivelock.h"
 
 // psy_audio_SequenceInsertCommand
 // prototypes
@@ -119,7 +120,7 @@ void psy_audio_sequenceremovecommand_execute(psy_audio_SequenceRemoveCommand* se
 	psy_audio_OrderIndex editposition;
 
 	psy_audio_sequenceselection_copy(&self->restoreselection, self->selection);
-	psy_audio_sequence_copy(&self->restoresequence, self->sequence);
+	psy_audio_sequence_copy(&self->restoresequence, self->sequence);	
 	psy_audio_exclusivelock_enter();
 	editposition = self->selection->editposition;
 	psy_audio_sequence_remove_selection(self->sequence, self->selection);	
