@@ -133,7 +133,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&onprimary, strong),
-		psy_ui_colour_overlayed(&surface, &overlay, 0.05));	
+		psy_ui_colour_overlayed(&surface, &overlay, 0.07));	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW_TRACK_SELECT, style);
 	// seqeditor
 	style = psy_ui_style_allocinit();

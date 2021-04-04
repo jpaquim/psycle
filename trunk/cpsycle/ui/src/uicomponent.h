@@ -93,6 +93,7 @@ typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
+typedef uintptr_t (*psy_ui_fp_component_section)(const struct psy_ui_Component*);
 
 
 typedef struct psy_ui_ComponentVTable {
@@ -114,6 +115,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_enableinput enableinput;
 	psy_ui_fp_component_preventinput preventinput;
 	psy_ui_fp_component_invalidate invalidate;
+	psy_ui_fp_component_section section;
 	// events
 	psy_ui_fp_component_ondestroy ondestroy;
 	psy_ui_fp_component_ondestroyed ondestroyed;
@@ -135,7 +137,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 	psy_ui_fp_component_onfocus onfocus;
 	psy_ui_fp_component_onfocus onfocuslost;
-	psy_ui_fp_component_onupdatestyles onupdatestyles;
+	psy_ui_fp_component_onupdatestyles onupdatestyles;	
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
@@ -545,6 +547,13 @@ INLINE void psy_ui_component_setfocus(psy_ui_Component* self)
 INLINE int psy_ui_component_hasfocus(psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_hasfocus(self->imp);
+}
+
+INLINE uintptr_t psy_ui_component_section(const psy_ui_Component* self)
+{
+	assert(self);
+
+	return self->vtable->section(self);
 }
 
 INLINE psy_ui_Component* psy_ui_component_parent(psy_ui_Component* self)

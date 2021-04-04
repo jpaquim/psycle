@@ -199,6 +199,7 @@ static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
 static void invalidate(psy_ui_Component*);
+static uintptr_t section(const psy_ui_Component* self) { return 0; }
 // events
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
@@ -251,6 +252,7 @@ static void vtable_init(void)
 		vtable.scrollto = scrollto;		
 		vtable.setfont = setfont;		
 		vtable.children = children;
+		vtable.section = section;
 		// events
 		vtable.ondestroy = ondestroy;
 		vtable.ondestroyed = ondestroyed;

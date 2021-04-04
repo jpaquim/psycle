@@ -6,6 +6,9 @@
 
 #include "../../detail/psydef.h"
 
+// std
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +38,13 @@ typedef struct psy_ui_TextMetric
 } psy_ui_TextMetric;
 
 typedef enum {
+	psy_ui_ROUND_NONE,
+	psy_ui_ROUND,
+	psy_ui_ROUND_FLOOR,
+	psy_ui_ROUND_CEIL,	
+} psy_ui_Round;
+
+typedef enum {
 	psy_ui_UNIT_EH,
 	psy_ui_UNIT_EW,
 	psy_ui_UNIT_PX,
@@ -44,26 +54,40 @@ typedef enum {
 typedef struct {
 	double quantity;
 	psy_ui_Unit unit;
+	psy_ui_Round round;
 } psy_ui_Value;
 
 void psy_ui_value_init(psy_ui_Value*);
+
+INLINE void psy_ui_value_setroundmode(psy_ui_Value* self, psy_ui_Round round)
+{
+	self->round = round;
+}
+
+INLINE psy_ui_Round psy_ui_value_roundmode(const psy_ui_Value* self)
+{
+	return self->round;
+}
 
 INLINE void psy_ui_value_setpx(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_PX;
 	self->quantity = value;
+	self->round = psy_ui_ROUND_NONE;
 }
 
 INLINE void psy_ui_value_setew(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_EW;
 	self->quantity = value;
+	self->round = psy_ui_ROUND_NONE;
 }
 
 INLINE void psy_ui_value_seteh(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_EH;
 	self->quantity = value;
+	self->round = psy_ui_ROUND_NONE;
 }
 
 INLINE psy_ui_Value psy_ui_value_makepx(double px)
@@ -72,6 +96,7 @@ INLINE psy_ui_Value psy_ui_value_makepx(double px)
 
 	rv.quantity = px;
 	rv.unit = psy_ui_UNIT_PX;
+	rv.round = psy_ui_ROUND_NONE;
 	return rv;
 }
 
@@ -81,6 +106,7 @@ INLINE psy_ui_Value psy_ui_value_makeew(double em)
 
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EW;
+	rv.round = psy_ui_ROUND_NONE;
 	return rv;
 }
 
@@ -90,6 +116,7 @@ INLINE psy_ui_Value psy_ui_value_makeeh(double em)
 
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EH;
+	rv.round = psy_ui_ROUND_NONE;
 	return rv;
 }
 
@@ -99,25 +126,38 @@ INLINE psy_ui_Value psy_ui_value_makepe(double pe)
 
 	rv.quantity = pe;
 	rv.unit = psy_ui_UNIT_PE;
+	rv.round = psy_ui_ROUND_NONE;
 	return rv;
 }
 
 INLINE double psy_ui_value_px(const psy_ui_Value* self,
 	const psy_ui_TextMetric* tm)
 {
+	double rv;
+
 	if (tm) {
 		switch (self->unit) {
-		case psy_ui_UNIT_EW:	
-			return self->quantity * tm->tmAveCharWidth;			
+		case psy_ui_UNIT_EW:			
+			rv = self->quantity * tm->tmAveCharWidth;			
 			break;
 		case psy_ui_UNIT_EH:			
-			return self->quantity * tm->tmHeight;			
+			rv = self->quantity * tm->tmHeight;			
 			break;
 		default:
+			rv = self->quantity;
 			break;
 		}
+	} else {
+		rv = self->quantity;
 	}
-	return self->quantity;
+	if (self->round == psy_ui_ROUND_NONE) {
+		return rv;
+	} else if (self->round == psy_ui_ROUND_FLOOR) {
+		return floor(rv);
+	} else if (self->round == psy_ui_ROUND_CEIL) {
+		return ceil(rv);
+	}
+	return rv;
 }
 
 void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,

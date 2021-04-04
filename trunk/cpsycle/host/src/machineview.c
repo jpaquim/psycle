@@ -19,6 +19,7 @@
 
 // MachineView
 // prototypes
+static uintptr_t machineview_section(const MachineView*);
 static void machineview_ondestroy(MachineView*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
 	psy_audio_Song*);
@@ -54,6 +55,8 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 			machineview_onmousedoubleclick;
 		machineview_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			machineview_onkeydown;
+		machineview_vtable.section = (psy_ui_fp_component_section)
+			machineview_section;
 		machineview_vtable_initialized = TRUE;
 	}
 	return &machineview_vtable;
@@ -309,4 +312,22 @@ void machineview_onnewmachineselected(MachineView* self,
 			self->workspace->machinefactory.errstr);
 	}	
 	self->newmachine.appendstack = FALSE;
+}
+
+uintptr_t machineview_section(const MachineView* self)
+{
+	switch (psy_ui_tabbar_selected(&self->tabbar)) {
+	case 0:
+		return SECTION_ID_MACHINEVIEW_WIRES;
+		break;
+	case 1:
+		return SECTION_ID_MACHINEVIEW_STACK;
+		break;
+	case 2:
+		return SECTION_ID_MACHINEVIEW_NEWMACHINE;
+		break;
+	default:
+		break;
+	}
+	return SECTION_ID_MACHINEVIEW_WIRES;
 }

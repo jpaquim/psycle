@@ -25,6 +25,7 @@ void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
 void psy_ui_notebook_select(psy_ui_Notebook*, uintptr_t page);
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);
+psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook*, uintptr_t pageindex);
 void psy_ui_notebook_split(psy_ui_Notebook*, psy_ui_Orientation);
 int psy_ui_notebook_splitactivated(psy_ui_Notebook*);
 void psy_ui_notebook_full(psy_ui_Notebook*);

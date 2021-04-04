@@ -15,6 +15,7 @@ extern "C" {
 
 typedef struct ViewHistoryEntry {
 	uintptr_t id;
+	uintptr_t section;
 	uintptr_t seqpos;
 } ViewHistoryEntry;
 

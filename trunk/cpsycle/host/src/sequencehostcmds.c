@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "sequencehostcmds.h"
+// host
+#include "workspace.h"
 // audio
 #include <exclusivelock.h>
 #include <sequencecmds.h>
@@ -86,11 +88,21 @@ void sequencecmds_cloneentry(SequenceCmds* self)
 void sequencecmds_delentry(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {
+		bool playing;
 		sequencecmds_update(self);
-
+		
+		playing = psy_audio_player_playing(&self->workspace->player);
+		psy_audio_player_stop(&self->workspace->player);
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&psy_audio_sequenceremovecommand_alloc(self->sequence,
 				&self->workspace->sequenceselection)->command);
+		if (playing) {
+			psy_audio_exclusivelock_enter();		
+			psy_audio_player_setposition(&self->workspace->player,
+				psy_audio_player_position(&self->workspace->player));
+			psy_audio_player_start(&self->workspace->player);
+			psy_audio_exclusivelock_leave();
+		}
 	}
 }
 
@@ -193,7 +205,11 @@ void sequencecmds_multiselection(SequenceCmds* self)
 void sequencecmds_clear(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {
+		bool playing;
 		sequencecmds_update(self);
+
+		playing = psy_audio_player_playing(&self->workspace->player);
+		psy_audio_player_stop(&self->workspace->player);
 		psy_audio_exclusivelock_enter();
 		workspace_clearsequencepaste(self->workspace);
 		// no undo/redo
@@ -207,7 +223,10 @@ void sequencecmds_clear(SequenceCmds* self)
 				&self->workspace->sequenceselection)->command);
 		psy_audio_exclusivelock_leave();
 		workspace_setsequenceeditposition(self->workspace,
-			psy_audio_orderindex_make(0, 0));
+			psy_audio_orderindex_make(0, 0));		
+		psy_audio_exclusivelock_enter();
+		psy_audio_player_setposition(&self->workspace->player, 0.0);		
+		psy_audio_exclusivelock_leave();		
 	}
 }
 

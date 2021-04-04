@@ -180,3 +180,8 @@ psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
 {	
 	return psy_ui_component_at(psy_ui_notebook_base(self), self->pageindex);
 }
+
+psy_ui_Component* psy_ui_notebook_page(psy_ui_Notebook* self, uintptr_t pageindex)
+{
+	return psy_ui_component_at(psy_ui_notebook_base(self), pageindex);
+}

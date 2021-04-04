@@ -188,6 +188,7 @@ typedef struct SeqEditorTrack {
 	PatternViewSkin* skin;
 	psy_ui_Component* view;
 	SeqEditorLine* dragline;
+	psy_List* patternentries;
 } SeqEditorTrack;
 
 void seqeditortrack_init(SeqEditorTrack*,

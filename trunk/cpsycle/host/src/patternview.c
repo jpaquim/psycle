@@ -1057,7 +1057,7 @@ const psy_audio_PatternSelection* patternview_blockselection(const PatternView*
 
 void patternview_oneventdriverinput(PatternView* self, psy_EventDriver* sender)
 {
-	if (workspace_currview(self->workspace) == VIEW_ID_PATTERNVIEW) {
+	if (workspace_currview(self->workspace).id == VIEW_ID_PATTERNVIEW) {
 		psy_EventDriverCmd cmd;
 		PatternViewTarget target;
 
