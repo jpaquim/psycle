@@ -32,6 +32,7 @@
 #include "patternview.h"
 #include "recentview.h"
 #include "renderview.h"
+#include "sequencerbar.h"
 #include "samplesview.h"
 #include "sequenceview.h"
 #include "seqeditor.h"
@@ -108,6 +109,7 @@ typedef struct MainFrame {
 	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
+	SequencerBar sequencerbar;
 	psy_ui_SplitBar splitbarparamrack;
 	ParamRack paramrack;
 	psy_ui_SplitBar splitseqeditor;

@@ -869,7 +869,7 @@ void psy_audio_sequenceselection_select(psy_audio_SequenceSelection* self,
 		if (psy_audio_sequenceselection_isselected(self, index)) {
 			psy_audio_sequenceselection_deselect(self, index);
 			if (self->entries) {
-				psy_signal_emit(&self->signal_select, self, 1, &index);
+				psy_signal_emit(&self->signal_deselect, self, 1, &index);
 				psy_signal_emit(&self->signal_changed, self, 0);
 				return;
 			}

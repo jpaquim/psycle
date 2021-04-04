@@ -451,6 +451,15 @@
     <ClCompile Include="src\trackbox.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\sequencehostcmds.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencebuttons.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencerbar.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -868,6 +877,15 @@
     </ClInclude>
     <ClInclude Include="src\trackbox.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencehostcmds.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencebuttons.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencerbar.h">
+      <Filter>sequence</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

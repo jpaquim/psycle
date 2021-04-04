@@ -21,8 +21,11 @@
 
 #define DEFAULT_PXPERBEAT 5.0
 
-void seqeditorstate_init(SeqEditorState* self)
+void seqeditorstate_init(SeqEditorState* self, Workspace* workspace,
+	SequenceCmds* cmds)
 {
+	self->workspace = workspace;
+	self->cmds = cmds;
 	psy_signal_init(&self->signal_cursorchanged);
 	self->pxperbeat = DEFAULT_PXPERBEAT;
 	self->defaultlineheight = psy_ui_value_makeeh(2.0);	
@@ -30,8 +33,7 @@ void seqeditorstate_init(SeqEditorState* self)
 	self->linemargin = psy_ui_value_makeeh(0.2);	
 	self->cursorposition = (psy_dsp_big_beat_t)0.0;
 	self->drawcursor = TRUE;
-	self->drawpatternevents = TRUE;
-	self->workspace = NULL;	
+	self->drawpatternevents = TRUE;	
 	self->dragstatus = FALSE;
 	self->dragpt = psy_ui_realpoint_zero();
 	self->dragseqpos = psy_audio_orderindex_zero();	
@@ -41,7 +43,7 @@ void seqeditorstate_init(SeqEditorState* self)
 	self->cmd = SEQEDTCMD_NONE;
 	self->cmdtrack = psy_INDEX_INVALID;
 	self->cmdrow = psy_INDEX_INVALID;
-	self->workspace = NULL;	
+	self->showpatternnames = FALSE;
 }
 
 void seqeditorstate_dispose(SeqEditorState* self)
@@ -443,12 +445,19 @@ void seqeditorplayline_update(SeqEditorPlayline* self)
 }
 
 // SeqEditorPatternEnrty
+static void seqeditorpatternentry_ondestroy(SeqEditorPatternEntry*);
 static void seqeditorpatternentry_ondraw(SeqEditorPatternEntry*,
 	psy_ui_Graphics*);
 static void seqeditorpatternentry_onpreferredsize(SeqEditorPatternEntry*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry*,
 	psy_ui_MouseEvent*);
+static void seqeditorpatternentry_onmousedoubleclick(SeqEditorPatternEntry*,
+	psy_ui_MouseEvent*);
+static void seqeditorpatternentry_onsequenceselectionselect(SeqEditorPatternEntry*,
+	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
+static void seqeditorpatternentry_onsequenceselectiondeselect(SeqEditorPatternEntry*,
+	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 // vtable
 static psy_ui_ComponentVtable seqeditorpatternentry_vtable;
 static bool seqeditorpatternentry_vtable_initialized = FALSE;
@@ -457,6 +466,9 @@ static psy_ui_ComponentVtable* seqeditorpatternentry_vtable_init(SeqEditorPatter
 {
 	if (!seqeditorpatternentry_vtable_initialized) {
 		seqeditorpatternentry_vtable = *(self->component.vtable);
+		seqeditorpatternentry_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			seqeditorpatternentry_ondestroy;
 		seqeditorpatternentry_vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			seqeditorpatternentry_ondraw;
@@ -466,6 +478,9 @@ static psy_ui_ComponentVtable* seqeditorpatternentry_vtable_init(SeqEditorPatter
 		seqeditorpatternentry_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditorpatternentry_onmousedown;
+		seqeditorpatternentry_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
+			seqeditorpatternentry_onmousedoubleclick;
 	}
 	return &seqeditorpatternentry_vtable;
 }
@@ -476,15 +491,23 @@ void seqeditorpatternentry_init(SeqEditorPatternEntry* self,
 	psy_audio_OrderIndex seqpos,
 	SeqEditorState* state)
 {
-	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_init(&self->component, parent, view);	
 	psy_ui_component_setvtable(&self->component,
 		seqeditorpatternentry_vtable_init(self));
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQEDT_ITEM, psy_INDEX_INVALID, STYLE_SEQEDT_ITEM_SELECTED,
-		psy_INDEX_INVALID);
+		STYLE_SEQEDT_ITEM, STYLE_SEQEDT_ITEM_HOVER,
+		STYLE_SEQEDT_ITEM_SELECTED, psy_INDEX_INVALID);	
 	self->state = state;
 	self->sequenceentry = entry;
 	self->seqpos = seqpos;
+	psy_signal_connect(&state->workspace->sequenceselection.signal_select, self,
+		seqeditorpatternentry_onsequenceselectionselect);
+	psy_signal_connect(&state->workspace->sequenceselection.signal_deselect, self,
+		seqeditorpatternentry_onsequenceselectiondeselect);
+	if (psy_audio_orderindex_equal(&self->seqpos,
+			&self->state->workspace->sequenceselection.editposition)) {
+		psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
+	}
 }
 
 SeqEditorPatternEntry* seqeditorpatternentry_alloc(void)
@@ -507,6 +530,14 @@ SeqEditorPatternEntry* seqeditorpatternentry_allocinit(
 	return rv;
 }
 
+void seqeditorpatternentry_ondestroy(SeqEditorPatternEntry* self)
+{
+	psy_signal_disconnect(&self->state->workspace->sequenceselection.signal_select, self,
+		seqeditorpatternentry_onsequenceselectionselect);
+	psy_signal_disconnect(&self->state->workspace->sequenceselection.signal_deselect, self,
+		seqeditorpatternentry_onsequenceselectiondeselect);
+}
+
 void seqeditorpatternentry_ondraw(SeqEditorPatternEntry* self,
 	psy_ui_Graphics* g)
 {
@@ -519,16 +550,23 @@ void seqeditorpatternentry_ondraw(SeqEditorPatternEntry* self,
 			psy_ui_RealSize size;
 			const psy_ui_TextMetric* tm;
 			psy_ui_RealRectangle clip;
+			psy_ui_RealPoint topleft;
+			char text[64];
 
 			tm = psy_ui_component_textmetric(&self->component);
 			size = psy_ui_component_sizepx(&self->component);
 			size.width -= 4;
 			clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
-			psy_ui_textoutrectangle(g, psy_ui_realpoint_make(4, 2),
-				psy_ui_ETO_CLIPPED, clip,
-				psy_audio_pattern_name(pattern),
-				strlen(psy_audio_pattern_name(pattern)));
-		}
+			topleft = psy_ui_realpoint_make(4, 2);
+			if (self->state->showpatternnames) {					
+				psy_snprintf(text, 64, "%s", psy_audio_pattern_name(pattern));
+			} else {
+				psy_snprintf(text, 64, "%02X:%02X", self->seqpos.order,
+					(int)psy_audio_sequenceentry_patternslot(self->sequenceentry));				
+			}
+			psy_ui_textoutrectangle(g, topleft,
+				psy_ui_ETO_CLIPPED, clip, text, strlen(text));
+ 		}
 	}
 }
 
@@ -578,7 +616,32 @@ void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry* self,
 		//self->itemdragposition = self->sequenceentry->offset;
 		self->state->dragstatus = TRUE;
 		self->state->dragseqpos = self->seqpos;
-		self->state->sequenceentry = self->sequenceentry;
+		self->state->sequenceentry = self->sequenceentry;		
+	}
+}
+
+void seqeditorpatternentry_onmousedoubleclick(SeqEditorPatternEntry* self,
+	psy_ui_MouseEvent* ev)
+{
+	sequencecmds_changeplayposition(self->state->cmds);
+	psy_ui_mouseevent_stoppropagation(ev);
+}
+
+void seqeditorpatternentry_onsequenceselectionselect(SeqEditorPatternEntry* self,
+	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
+{
+	if (psy_audio_orderindex_equal(&self->seqpos, index)) {
+		psy_ui_component_addstylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
+	}
+}
+
+void seqeditorpatternentry_onsequenceselectiondeselect(SeqEditorPatternEntry* self,
+	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
+{
+	if (psy_audio_orderindex_equal(&self->seqpos, index)) {
+		psy_ui_component_removestylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);		
 	}
 }
 
@@ -1069,7 +1132,7 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		seqeditortracks_ondestroy);
 	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_TOP, psy_ui_margin_zero()); // makeem(0.0, 0.0, 0.1, 0.0));	
+		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
 		seqeditortracks_onsequenceselectionselect);
 	psy_signal_connect(&workspace->sequenceselection.signal_deselect, self,
@@ -1377,8 +1440,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	self->component.vtable = &seqeditor_vtable;	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
-	seqeditorstate_init(&self->state);
-	self->state.workspace = workspace;
+	sequencecmds_init(&self->cmds, workspace);
+	seqeditorstate_init(&self->state, workspace, &self->cmds);	
 	self->workspace = workspace;
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
@@ -1554,6 +1617,11 @@ void seqeditor_onheaderscroll(SeqEditor* self, psy_ui_Component* sender)
 void seqeditor_onconfigure(SeqEditor* self, GeneralConfig* sender,
 	psy_Property* property)
 {	
+	if (generalconfig_showingpatternnames(sender)) {
+		self->state.showpatternnames = TRUE;
+	} else {
+		self->state.showpatternnames = FALSE;
+	}	
 	psy_ui_component_invalidate(&self->tracks.component);
 }
 
@@ -1598,40 +1666,11 @@ void seqeditor_onmouseup(SeqEditor* self, psy_ui_MouseEvent* ev)
 		psy_audio_exclusivelock_leave();
 		psy_ui_component_invalidate(&self->tracks.component);
 	} else if (self->state.cmd == SEQEDTCMD_NEWTRACK) {
-		psy_audio_exclusivelock_enter();		
-		psy_audio_sequence_appendtrack(&self->workspace->song->sequence,
-			psy_audio_sequencetrack_allocinit());
-		workspace_setsequenceeditposition(self->workspace,
-			psy_audio_orderindex_make(
-				psy_audio_sequence_width(&self->workspace->song->sequence) - 1, 0));
-		psy_audio_exclusivelock_leave();
+		sequencecmds_appendtrack(&self->cmds);			
 	} else if (self->state.cmd == SEQEDTCMD_DELTRACK) {
-		psy_audio_SequencePosition position;
-
-		position = psy_audio_sequence_at(&self->workspace->song->sequence,
-			self->state.cmdtrack, 0);
-		psy_audio_exclusivelock_enter();		
-		psy_audio_sequence_removetrack(&self->workspace->song->sequence,
-			position.tracknode);
-		psy_audio_exclusivelock_leave();
+		sequencecmds_deltrack(&self->cmds, self->state.cmdtrack);		
 	} else if (self->state.cmd == SEQEDTCMD_INSERTPATTERN) {
-		psy_audio_Pattern* newpattern;
-		uintptr_t patidx;
-
-		newpattern = psy_audio_pattern_allocinit();
-		// change length to default lines
-		psy_audio_pattern_setlength(newpattern,
-			(psy_dsp_big_beat_t)
-			(psy_audio_pattern_defaultlines() /
-				(psy_audio_player_lpb(workspace_player(self->workspace)))));
-		patidx = psy_audio_patterns_append(&self->workspace->song->patterns, newpattern);
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&psy_audio_sequenceinsertcommand_alloc(
-				&self->workspace->song->sequence,
-				&self->workspace->sequenceselection,
-				psy_audio_orderindex_make(self->state.cmdtrack,
-					psy_INDEX_INVALID),
-				patidx)->command);
+		sequencecmds_newentry(&self->cmds);
 	}
 	self->state.cmd = SEQEDTCMD_NONE;
 	self->state.sequenceentry = NULL;

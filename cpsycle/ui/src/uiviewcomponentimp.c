@@ -594,12 +594,12 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 		psy_List* q;
 		psy_ui_RealRectangle clip;
 
-		// draw background						
+		// draw background		
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
 			psy_ui_component_drawbackground(self->component, g);
 		}
 		psy_ui_component_drawborder(self->component, g);
-		// prepare colours
+		// prepare colours		
 		psy_ui_setcolour(g, psy_ui_component_colour(
 			self->component));
 		psy_ui_settextcolour(g, psy_ui_component_colour(

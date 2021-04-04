@@ -29,6 +29,7 @@ static void mainframe_initemptystatusbar(MainFrame*);
 static void mainframe_initspacerleft(MainFrame*);
 static void mainframe_inittoparea(MainFrame*);
 static void mainframe_initclientarea(MainFrame*);
+static void mainframe_initleftarea(MainFrame*);
 static void mainframe_initrightarea(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
@@ -54,6 +55,7 @@ static void mainframe_initseqeditor(MainFrame*);
 static void mainframe_initrecentview(MainFrame*);
 static void mainframe_initfileview(MainFrame*);
 static void mainframe_initsequenceview(MainFrame*);
+static void mainframe_initsequencerbar(MainFrame*);
 static void mainframe_initplugineditor(MainFrame*);
 static void mainframe_connectworkspace(MainFrame*);
 static void mainframe_initinterpreter(MainFrame*);
@@ -189,12 +191,14 @@ void mainframe_init(MainFrame* self)
 	mainframe_initgear(self);	
 	mainframe_initparamrack(self);
 	mainframe_initcpuview(self);
-	mainframe_initmidimonitor(self);		
-	mainframe_initstepsequencerview(self);	
-	mainframe_initseqeditor(self);
-	mainframe_initrecentview(self);	
+	mainframe_initmidimonitor(self);	
+	mainframe_initrecentview(self);
+	mainframe_initleftarea(self);
 	mainframe_initfileview(self);
-	mainframe_initsequenceview(self);			
+	mainframe_initsequenceview(self);
+	mainframe_initsequencerbar(self);
+	mainframe_initstepsequencerview(self);
+	mainframe_initseqeditor(self);	
 	mainframe_initplugineditor(self);
 	mainframe_initstatusbar(self);
 	mainframe_setstartpage(self);
@@ -276,6 +280,13 @@ void mainframe_initclientarea(MainFrame* self)
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client,
 		psy_ui_NOBACKGROUND);	
+}
+
+void mainframe_initleftarea(MainFrame* self)
+{
+	psy_ui_component_init_align(&self->left, mainframe_base(self),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
 }
 
 void mainframe_initrightarea(MainFrame* self)
@@ -711,10 +722,16 @@ void mainframe_initfileview(MainFrame* self)
 
 void mainframe_initsequenceview(MainFrame* self)
 {
-	sequenceview_init(&self->sequenceview, mainframe_base(self), &self->workspace);
+	sequenceview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_setalign(sequenceview_base(&self->sequenceview),
-		psy_ui_ALIGN_LEFT);	
-	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
+		psy_ui_ALIGN_CLIENT);	
+}
+
+void mainframe_initsequencerbar(MainFrame* self)
+{
+	sequencerbar_init(&self->sequencerbar, &self->left, &self->workspace);
+	psy_ui_component_setalign(sequencerbar_base(&self->sequencerbar),
+		psy_ui_ALIGN_BOTTOM);	
 }
 
 void mainframe_initplugineditor(MainFrame* self)
@@ -879,11 +896,11 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		break;
 	case CMD_IMM_PATTERNINC:
 		workspace_patterninc(&self->workspace);
-		sequenceduration_update(&self->sequenceview.duration);
+		sequenceduration_update(&self->sequenceview.duration, FALSE);
 		break;
 	case CMD_IMM_PATTERNDEC:
 		workspace_patterndec(&self->workspace);
-		sequenceduration_update(&self->sequenceview.duration);
+		sequenceduration_update(&self->sequenceview.duration, FALSE);
 		break;
 	case CMD_IMM_SONGPOSDEC:
 		workspace_songposdec(&self->workspace);			
@@ -1521,17 +1538,17 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 {
 	if (generalconfig_showsequenceedit(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
-		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
+		psy_ui_button_settext(&self->sequencerbar.toggleseqedit,
 			"sequencerview.hideseqeditor");
-		psy_ui_button_highlight(&self->sequenceview.options.toggleseqedit);
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqedit,
+		psy_ui_button_highlight(&self->sequencerbar.toggleseqedit);
+		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
 			psy_ui_ICON_LESS);
 	} else {
-		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
+		psy_ui_button_settext(&self->sequencerbar.toggleseqedit,
 			"sequencerview.showseqeditor");
 		psy_ui_button_disablehighlight(
-			&self->sequenceview.options.toggleseqedit);
-		psy_ui_button_seticon(&self->sequenceview.options.toggleseqedit,
+			&self->sequencerbar.toggleseqedit);
+		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
 			psy_ui_ICON_MORE);
 	}
 }
@@ -1539,7 +1556,7 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 void mainframe_connectseqeditorbuttons(MainFrame* self)
 {	
 	psy_signal_connect(
-		&self->sequenceview.options.toggleseqedit.signal_clicked, self,
+		&self->sequencerbar.toggleseqedit.signal_clicked, self,
 		mainframe_ontoggleseqeditor);
 	if (!generalconfig_showsequenceedit(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
@@ -1563,17 +1580,17 @@ void mainframe_updatestepsequencerbuttons(MainFrame* self)
 {
 	if (generalconfig_showstepsequencer(psycleconfig_general(
 			workspace_conf(&self->workspace)))) {
-		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
+		psy_ui_button_settext(&self->sequencerbar.togglestepseq,
 			"sequencerview.hidestepsequencer");
-		psy_ui_button_highlight(&self->sequenceview.options.togglestepseq);
-		psy_ui_button_seticon(&self->sequenceview.options.togglestepseq,
+		psy_ui_button_highlight(&self->sequencerbar.togglestepseq);
+		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
 			psy_ui_ICON_LESS);
 	} else {
-		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
+		psy_ui_button_settext(&self->sequencerbar.togglestepseq,
 			"sequencerview.showstepsequencer");
 		psy_ui_button_disablehighlight(
-			&self->sequenceview.options.togglestepseq);
-		psy_ui_button_seticon(&self->sequenceview.options.togglestepseq,
+			&self->sequencerbar.togglestepseq);
+		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
 			psy_ui_ICON_MORE);		
 	}
 }
@@ -1581,7 +1598,7 @@ void mainframe_updatestepsequencerbuttons(MainFrame* self)
 void mainframe_connectstepsequencerbuttons(MainFrame* self)
 {	
 	psy_signal_connect(
-		&self->sequenceview.options.togglestepseq.signal_clicked, self,
+		&self->sequencerbar.togglestepseq.signal_clicked, self,
 		mainframe_ontogglestepsequencer);
 	if (!generalconfig_showstepsequencer(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
