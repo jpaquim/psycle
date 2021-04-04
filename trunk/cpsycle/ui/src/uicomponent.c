@@ -523,7 +523,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->minsize = NULL;
 	psy_ui_componentstyle_init(&self->style);	
 	psy_ui_margin_init(&self->spacing);	
-	self->debugflag = 0;	
+	self->debugflag = 0;
 	self->visible = 1;
 	self->doublebuffered = FALSE;
 	self->wheelscroll = 0;	
@@ -920,9 +920,6 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 		psy_ui_Size rv;
 
 		rv = self->preferredsize;		
-		if (self->debugflag == 2000) {
-			self = self;
-		}
 		self->vtable->onpreferredsize(self, limit, &rv);
 		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
 		return rv;

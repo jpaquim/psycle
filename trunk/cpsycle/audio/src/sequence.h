@@ -112,6 +112,12 @@ INLINE bool psy_audio_orderindex_invalid(const psy_audio_OrderIndex* self)
 	return (!psy_audio_orderindex_valid(self));
 }
 
+INLINE bool psy_audio_orderindex_equal(const psy_audio_OrderIndex* self,
+	const psy_audio_OrderIndex* other)
+{
+	return (self->order == other->order) && (self->track == other->track);
+}
+
 // psy_audio_SequenceSelection
 //
 // Selection of SequenceEntries stored as OrderIndexes

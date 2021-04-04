@@ -384,6 +384,9 @@
     <ClCompile Include="src\samplesview.c" />
     <ClCompile Include="src\scrollzoom.c" />
     <ClCompile Include="src\seqeditor.c" />
+    <ClCompile Include="src\sequencebuttons.c" />
+    <ClCompile Include="src\sequencehostcmds.c" />
+    <ClCompile Include="src\sequencerbar.c" />
     <ClCompile Include="src\sequencetrackbox.c" />
     <ClCompile Include="src\sequenceview.c" />
     <ClCompile Include="src\skincoord.c" />
@@ -531,6 +534,9 @@
     <ClInclude Include="src\samplesview.h" />
     <ClInclude Include="src\scrollzoom.h" />
     <ClInclude Include="src\seqeditor.h" />
+    <ClInclude Include="src\sequencebuttons.h" />
+    <ClInclude Include="src\sequencehostcmds.h" />
+    <ClInclude Include="src\sequencerbar.h" />
     <ClInclude Include="src\sequencetrackbox.h" />
     <ClInclude Include="src\sequenceview.h" />
     <ClInclude Include="src\skincoord.h" />

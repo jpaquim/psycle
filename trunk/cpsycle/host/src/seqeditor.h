@@ -4,6 +4,8 @@
 #if !defined(SEQEDITOR_H)
 #define SEQEDITOR_H
 
+// host
+#include "sequencehostcmds.h"
 #include "sequencetrackbox.h"
 #include "patternviewskin.h"
 #include "workspace.h"
@@ -42,6 +44,7 @@ typedef struct SeqEditorState {
 	SeqEdtCmd cmd;
 	uintptr_t cmdtrack;
 	uintptr_t cmdrow;
+	bool showpatternnames;
 	// drag
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
@@ -51,9 +54,10 @@ typedef struct SeqEditorState {
 	// references	
 	psy_audio_SequenceEntry* sequenceentry;
 	Workspace* workspace;	
+	SequenceCmds* cmds;
 } SeqEditorState;
 
-void seqeditorstate_init(SeqEditorState*);
+void seqeditorstate_init(SeqEditorState*, Workspace*, SequenceCmds*);
 void seqeditorstate_dispose(SeqEditorState*);
 
 psy_audio_Sequence* seqeditorstate_sequence(SeqEditorState*);
@@ -267,6 +271,7 @@ typedef struct SeqEditor {
 	SeqEditorTrackDesc trackdescriptions;
 	SeqEditorTracks tracks;	
 	SeqEditorState state;
+	SequenceCmds cmds;	
 	// references
 	Workspace* workspace;
 } SeqEditor;

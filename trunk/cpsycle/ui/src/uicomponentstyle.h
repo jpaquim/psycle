@@ -17,7 +17,7 @@ typedef enum psy_ui_StyleState {
 	psy_ui_STYLESTATE_NONE = 0,
 	psy_ui_STYLESTATE_HOVER = 1,
 	psy_ui_STYLESTATE_SELECT = 2,
-	psy_ui_STYLESTATE_DISABLED = 3
+	psy_ui_STYLESTATE_DISABLED = 4
 } psy_ui_StyleState;
 
 typedef struct psy_ui_ComponentStyle {

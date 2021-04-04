@@ -1100,11 +1100,15 @@ psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
 
 void workspace_setsequenceeditposition(Workspace* self, psy_audio_OrderIndex index)
 {
-	psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
-		index);	
-	if (!self->navigating) {
-		viewhistory_addseqpos(&self->viewhistory,
-			self->sequenceselection.editposition.order);			
+	if (workspace_song(self)) {
+		if (index.track < psy_audio_sequence_width(&self->song->sequence)) {
+			psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
+				index);
+			if (!self->navigating) {
+				viewhistory_addseqpos(&self->viewhistory,
+					self->sequenceselection.editposition.order);
+			}
+		}
 	}
 }
 

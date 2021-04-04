@@ -40,7 +40,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		primary = psy_ui_colour_make(0x00121212);
 		onprimary = psy_ui_colour_make(0x00EEFFFF);
 		secondary = psy_ui_colour_make(0x00FAD481);
-		onsecondary = psy_ui_colour_make(0x00FAD481);
+		onsecondary = psy_ui_colour_make(0x00FFFFFF);
 		overlay = psy_ui_colour_make(0x00FFFFFF);
 		strong = 50;
 		accent = 100;
@@ -123,6 +123,18 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_colour_set(&style->border.colour_bottom,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.07));
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW_SELECT, style);
+	// seqlistview_track
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		psy_ui_colour_overlayed(&surface, &overlay, 0.05));	
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW_TRACK, style);
+	// seqlistview_track::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, strong),
+		psy_ui_colour_overlayed(&surface, &overlay, 0.05));	
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW_TRACK_SELECT, style);
 	// seqeditor
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, onsecondary);
@@ -133,28 +145,55 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	if (dark) {
 		psy_ui_colour_set(&style->colour,
-			psy_ui_colour_weighted(&secondary, 800));
+			psy_ui_colour_weighted(&onsecondary, 300));
 		psy_ui_colour_set(&style->backgroundcolour,
 			psy_ui_colour_weighted(&secondary, 800));
 	} else {
 		psy_ui_colour_set(&style->colour,
-			psy_ui_colour_weighted(&secondary, 100));
+			psy_ui_colour_weighted(&onsecondary, 100));
 		psy_ui_colour_set(&style->backgroundcolour,
-			psy_ui_colour_weighted(&secondary, 100));
+			psy_ui_colour_weighted(&secondary, 800));
 	}
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.11));
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
+	// sequenceeditor item::hover	
+	style = psy_ui_style_allocinit();
+	if (dark) {
+		psy_ui_colour_set(&style->colour,
+			psy_ui_colour_weighted(&onsecondary, 200));
+		psy_ui_colour_set(&style->backgroundcolour,
+			psy_ui_colour_weighted(&secondary, 800));
+	} else {
+		psy_ui_colour_set(&style->colour,
+			psy_ui_colour_weighted(&onsecondary, 400));
+		psy_ui_colour_set(&style->backgroundcolour,
+			psy_ui_colour_weighted(&secondary, 800));
+	}
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.11));
+	psy_ui_border_setradius_px(&style->border, 6.0);
+	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_HOVER, style);
 	// sequenceeditor item::selected	
 	style = psy_ui_style_allocinit();
-	psy_ui_colour_set(&style->colour,
-		psy_ui_colour_weighted(&secondary, 500));
-	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_weighted(&secondary, 500));
+	if (dark) {
+		psy_ui_colour_set(&style->colour,
+			psy_ui_colour_weighted(&onsecondary, 100));
+		psy_ui_colour_set(&style->backgroundcolour,
+			psy_ui_colour_weighted(&secondary, 800));
+	} else {
+		psy_ui_colour_set(&style->colour,
+			psy_ui_colour_weighted(&onsecondary, 400));
+		psy_ui_colour_set(&style->backgroundcolour,
+			psy_ui_colour_weighted(&secondary, 800));
+	}
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, onprimary);	
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.11));
+	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_SELECTED, style);
 	// sequencetrackbox tab
 	style = psy_ui_style_allocinit();
