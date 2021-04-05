@@ -6,6 +6,8 @@
 
 // host
 #include "trackbox.h"
+// ui
+#include <uiedit.h>
 // audio
 #include <sequence.h>
 
@@ -23,14 +25,18 @@ typedef struct SequenceTrackBox {
 	uintptr_t trackidx;
 	// references
 	psy_audio_Sequence* sequence;
+	psy_ui_Edit* edit;
+	bool preventedit;
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx);
+	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
+	psy_ui_Edit*);
 
 SequenceTrackBox* sequencetrackbox_alloc(void);
 SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx);
+	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
+	psy_ui_Edit*);
 
 void sequencetrackbox_showtrackname(SequenceTrackBox*);
 

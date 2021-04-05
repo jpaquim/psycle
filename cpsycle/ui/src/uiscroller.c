@@ -166,6 +166,13 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 	}
 }
 
+void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,
+	psy_ui_BackgroundMode scroller, psy_ui_BackgroundMode pane)
+{
+	psy_ui_component_setbackgroundmode(&self->component, scroller);
+	psy_ui_component_setbackgroundmode(&self->pane, pane);
+}
+
 void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	double nPosX;

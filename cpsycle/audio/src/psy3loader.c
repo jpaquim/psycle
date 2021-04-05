@@ -461,17 +461,17 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 	if (playlength < 0) {
 		// skip
 		return PSY_OK;
-	}
-	// name, for multipattern, for now unused
+	}	
 	psyfile_readstring(self->fp, ptemp, sizeof ptemp);
+	psy_audio_sequencetrack_setname(track, ptemp);
 	for (i = 0; i < (uint32_t)playlength; ++i) {		
-		uint32_t patternslot;
+		uint32_t patternslot;		
 
 		if (status = psyfile_read(self->fp, &patternslot, sizeof(uint32_t))) {			
 			return status;
 		}		
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
-			psy_audio_orderindex_make(0, i), patternslot);		
+			psy_audio_orderindex_make(0, i), patternslot);				
 	}
 	if (self->fp->currchunk.version > 0) {
 		// this extends the seqd chunk file format to handle 

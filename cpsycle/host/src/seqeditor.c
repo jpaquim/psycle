@@ -989,6 +989,8 @@ void seqeditortrackdesc_init(SeqEditorTrackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setscrollmode(&self->component, psy_ui_SCROLL_COMPONENTS);	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
+	psy_ui_edit_init(&self->editname, &self->component);
+	psy_ui_component_hide(&self->editname.component);
 	seqeditortrackdesc_build(self);	
 	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
 		seqeditortrackdesc_onsequenceselectionselect);
@@ -1037,6 +1039,8 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 	psy_audio_Sequence* sequence;
 
 	psy_ui_component_clear(&self->component);
+	psy_ui_edit_init(&self->editname, &self->component);
+	psy_ui_component_hide(&self->editname.component);
 	sequence = &self->state->workspace->song->sequence;
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
@@ -1049,7 +1053,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 			
 			sequencetrackbox = sequencetrackbox_allocinit(
 				&self->component, &self->component,
-				seqeditorstate_sequence(self->state), c);
+				seqeditorstate_sequence(self->state), c, &self->editname);
 			if (sequencetrackbox) {				
 				psy_ui_component_setminimumsize(
 					sequencetrackbox_base(sequencetrackbox),
@@ -1363,7 +1367,6 @@ void seqeditortracks_outputstatusposition(SeqEditorTracks* self, double x)
 		(float)self->state->cursorposition);
 	workspace_outputstatus(self->workspace, text);
 }
-
 
 // SeqEditor
 void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)

@@ -108,14 +108,12 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 								psy_ui_margin_height(&component->margin, c_tm),
 								c_tm))));
 			} else if (component->align == psy_ui_ALIGN_TOP) {
-				cp_topleft.y += floor(psy_ui_value_px(&component->margin.top, c_tm));
-				cp_topleft.y += floor(psy_ui_value_px(&self->component->spacing.top, c_tm));
+				cp_topleft.y += floor(psy_ui_value_px(&component->margin.top, c_tm));				
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 						psy_ui_point_make(
 							psy_ui_value_makepx(cp_topleft.x + floor(psy_ui_value_px(
-								&component->margin.left, c_tm)) +
-								floor(psy_ui_value_px(&self->component->spacing.left, c_tm))),
+								&component->margin.left, c_tm))),								
 							psy_ui_value_makepx(cp_topleft.y)),
 					psy_ui_size_make(
 						psy_ui_value_makepx(cp_bottomright.x - cp_topleft.x -
@@ -186,15 +184,13 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 					psy_ui_rectangle_make(
 					psy_ui_point_make(
 						psy_ui_value_makepx(cp_topleft.x),
-						psy_ui_value_makepx(cp_topleft.y +
-							floor(psy_ui_value_px(&self->component->spacing.top, c_tm)) +
+						psy_ui_value_makepx(cp_topleft.y +	
 							floor(psy_ui_value_px(&component->margin.top, c_tm)))),
 					psy_ui_size_make(
 						componentsize.width,
 						psy_ui_value_makepx(component->justify ==
 							psy_ui_JUSTIFY_EXPAND
-						? cp_bottomright.y - cp_topleft.y - 
-							psy_ui_margin_height_px(&self->component->spacing, c_tm) -
+						? cp_bottomright.y - cp_topleft.y - 		
 							floor(psy_ui_margin_height_px(&component->margin, c_tm))
 						: psy_ui_value_px(&componentsize.height, c_tm)))));
 				cp_topleft.x += floor(psy_ui_value_px(&component->margin.right, c_tm));
@@ -387,6 +383,14 @@ void psy_ui_aligner_adjustspacing(psy_ui_Aligner* self,
 {
 	cp_topleft->x += floor(psy_ui_value_px(&self->component->spacing.left, 
 		psy_ui_component_textmetric(self->component)));
+	cp_topleft->y += floor(psy_ui_value_px(&self->component->spacing.top,
+		psy_ui_component_textmetric(self->component)));
+	cp_bottomright->x -= floor(psy_ui_value_px(&self->component->spacing.right,
+		psy_ui_component_textmetric(self->component)));
+	cp_bottomright->x = psy_max(0.0, cp_bottomright->x);
+	cp_bottomright->y -= floor(psy_ui_value_px(&self->component->spacing.bottom,
+		psy_ui_component_textmetric(self->component)));
+	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
 }
 
 uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)

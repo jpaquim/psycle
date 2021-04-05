@@ -202,7 +202,9 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 	psy_audio_trackstate_dispose(&self->trackstate);	
 	psy_audio_sequence_disposesignals(self);	
 	if (self->sequencerduration) {
+		psy_audio_sequencer_dispose(self->sequencerduration);
 		free(self->sequencerduration);
+		self->sequencerduration = NULL;
 	}
 }
 
@@ -715,12 +717,17 @@ void psy_audio_sequence_startcalcdurationinms(psy_audio_Sequence* self)
 }
 
 psy_dsp_big_seconds_t psy_audio_sequence_endcalcdurationinmsresult(psy_audio_Sequence* self)
-{
-	psy_dsp_big_seconds_t rv;
+{	
+	if (self->sequencerduration) {
+		psy_dsp_big_seconds_t rv;
 
-	rv = psy_audio_sequencer_currplaytime(self->sequencerduration);
-	psy_audio_sequencer_dispose(self->sequencerduration);
-	return rv;
+		rv = psy_audio_sequencer_currplaytime(self->sequencerduration);
+		psy_audio_sequencer_dispose(self->sequencerduration);
+		free(self->sequencerduration);
+		self->sequencerduration = NULL;
+		return rv;
+	}
+	return 0.0;
 }
 
 bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
@@ -728,7 +735,10 @@ bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 	uintptr_t maxamount;
 	uintptr_t amount;
 	uintptr_t numsamplex;
-		
+
+	if (!self->sequencerduration) {
+		return FALSE;
+	}		
 	numsamplex = 8192; // psy_audio_MAX_STREAM_SIZE;
 	maxamount = numsamplex;		
 	do {
