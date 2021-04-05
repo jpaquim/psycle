@@ -25,6 +25,7 @@ static void dev_move(psy_ui_win_EditImp* self, psy_ui_Point origin) { self->win_
 static void dev_resize(psy_ui_win_EditImp* self, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_win_EditImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
 static psy_ui_RealRectangle dev_position(psy_ui_win_EditImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
+static psy_ui_RealRectangle dev_screenposition(psy_ui_win_EditImp* self) { return self->win_component_imp.imp.vtable->dev_screenposition(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_EditImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(const psy_ui_win_EditImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_win_EditImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
@@ -69,6 +70,7 @@ static void imp_vtable_init(void)
 		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)dev_resize;
 		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)dev_clientresize;
 		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_screenposition = (psy_ui_fp_componentimp_dev_screenposition)dev_screenposition;
 		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)dev_setposition;
 		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
 		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)dev_framesize;
@@ -108,19 +110,21 @@ static void dev_text(psy_ui_win_EditImp* self, char* text);
 static void dev_setstyle(psy_ui_win_EditImp*, int style);
 static void dev_enableedit(psy_ui_win_EditImp*);
 static void dev_preventedit(psy_ui_win_EditImp*);
+static void dev_setsel(psy_ui_win_EditImp*, intptr_t cpmin, intptr_t cpmax);
 
 static psy_ui_EditImpVTable editimp_vtable;
-static int editimp_vtable_initialized = 0;
+static bool editimp_vtable_initialized = FALSE;
 
 static void editimp_imp_vtable_init(psy_ui_win_EditImp* self)
 {
 	if (!editimp_vtable_initialized) {
-		editimp_vtable.dev_settext = (psy_ui_fp_editimp_dev_settext) dev_settext;
-		editimp_vtable.dev_text = (psy_ui_fp_editimp_dev_text) dev_text;
-		editimp_vtable.dev_setstyle = (psy_ui_fp_editimp_dev_setstyle) dev_setstyle;
-		editimp_vtable.dev_enableedit = (psy_ui_fp_editimp_dev_preventedit) dev_enableedit;
-		editimp_vtable.dev_preventedit = (psy_ui_fp_editimp_dev_preventedit) dev_preventedit;
-		editimp_vtable_initialized = 1;
+		editimp_vtable.dev_settext = (psy_ui_fp_editimp_dev_settext)dev_settext;
+		editimp_vtable.dev_text = (psy_ui_fp_editimp_dev_text)dev_text;
+		editimp_vtable.dev_setstyle = (psy_ui_fp_editimp_dev_setstyle)dev_setstyle;
+		editimp_vtable.dev_enableedit = (psy_ui_fp_editimp_dev_enableedit)dev_enableedit;
+		editimp_vtable.dev_preventedit = (psy_ui_fp_editimp_dev_preventedit)dev_preventedit;
+		editimp_vtable.dev_setsel = (psy_ui_fp_editimp_dev_setsel)dev_setsel;
+		editimp_vtable_initialized = TRUE;
 	}
 }
 
@@ -223,6 +227,12 @@ void dev_preventedit(psy_ui_win_EditImp* self)
 {
 	SendMessage(self->win_component_imp.hwnd, EM_SETREADONLY, (WPARAM)1,
 		(LPARAM)0);
+}
+
+void dev_setsel(psy_ui_win_EditImp* self, intptr_t cpmin, intptr_t cpmax)
+{
+	SendMessage(self->win_component_imp.hwnd, EM_SETSEL, (WPARAM)cpmin,
+		(LPARAM)cpmax);
 }
 
 void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,

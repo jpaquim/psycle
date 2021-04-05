@@ -113,15 +113,21 @@ void psy_ui_edit_preventedit(psy_ui_Edit* self)
 	self->imp->vtable->dev_preventedit(self->imp);
 }
 
+void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax)
+{
+	self->imp->vtable->dev_setsel(self->imp, cpmin, cpmax);
+}
+
 // psy_ui_EditImp vtable
 static void dev_settext(psy_ui_EditImp* self, const char* title) { }
 static void dev_text(psy_ui_EditImp* self, char* text) { }
 static void dev_setstyle(psy_ui_EditImp* self, int style) { }
 static void dev_enableedit(psy_ui_EditImp* self) { }
 static void dev_preventedit(psy_ui_EditImp* self) { }
+static void dev_setsel(psy_ui_EditImp* self, intptr_t cpmin, intptr_t cpmax) { }
 
 static psy_ui_EditImpVTable edit_imp_vtable;
-static int edit_imp_vtable_initialized = 0;
+static bool edit_imp_vtable_initialized = FALSE;
 
 static void edit_imp_vtable_init(void)
 {
@@ -131,7 +137,8 @@ static void edit_imp_vtable_init(void)
 		edit_imp_vtable.dev_setstyle = dev_setstyle;
 		edit_imp_vtable.dev_enableedit = dev_enableedit;
 		edit_imp_vtable.dev_preventedit = dev_preventedit;
-		edit_imp_vtable_initialized = 1;
+		edit_imp_vtable.dev_setsel = dev_setsel;
+		edit_imp_vtable_initialized = TRUE;
 	}
 }
 

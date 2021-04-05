@@ -26,7 +26,7 @@ typedef struct SequenceTrackBox {
 	// references
 	psy_audio_Sequence* sequence;
 	psy_ui_Edit* edit;
-	bool preventedit;
+	bool preventedit;	
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,
