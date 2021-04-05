@@ -360,6 +360,7 @@ typedef void (*psy_ui_fp_componentimp_dev_move)(struct psy_ui_ComponentImp*, psy
 typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, psy_ui_Size);
 typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentImp*, intptr_t width, intptr_t height);
 typedef psy_ui_RealRectangle (*psy_ui_fp_componentimp_dev_position)(const struct psy_ui_ComponentImp*);
+typedef psy_ui_RealRectangle(*psy_ui_fp_componentimp_dev_screenposition)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(const struct psy_ui_ComponentImp*);
 typedef psy_ui_Size(*psy_ui_fp_componentimp_dev_preferredsize)(struct psy_ui_ComponentImp*, const psy_ui_Size* limits);
@@ -418,6 +419,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_resize dev_resize;
 	psy_ui_fp_componentimp_dev_clientresize dev_clientresize;
 	psy_ui_fp_componentimp_dev_position dev_position;
+	psy_ui_fp_componentimp_dev_screenposition dev_screenposition;
 	psy_ui_fp_componentimp_dev_setposition dev_setposition;
 	psy_ui_fp_componentimp_dev_size dev_size;
 	psy_ui_fp_componentimp_dev_preferredsize dev_preferredsize;
@@ -498,6 +500,11 @@ INLINE psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 INLINE psy_ui_RealRectangle psy_ui_component_position(const psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_position(self->imp);
+}
+
+INLINE psy_ui_RealRectangle psy_ui_component_screenposition(const psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_screenposition(self->imp);
 }
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component*);

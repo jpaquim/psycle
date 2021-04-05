@@ -42,6 +42,8 @@ void psy_ui_edit_setlinenumber(psy_ui_Edit*, int number);
 void psy_ui_edit_enableedit(psy_ui_Edit*);
 void psy_ui_edit_preventedit(psy_ui_Edit*);
 void psy_ui_edit_setstyle(psy_ui_Edit*, int style);
+void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax);
+
 INLINE psy_ui_Component* psy_ui_edit_base(psy_ui_Edit* self)
 {
     return &self->component;
@@ -54,6 +56,7 @@ typedef void (*psy_ui_fp_editimp_dev_text)(struct psy_ui_EditImp*, char* text);
 typedef void (*psy_ui_fp_editimp_dev_enableedit)(struct psy_ui_EditImp*);
 typedef void (*psy_ui_fp_editimp_dev_preventedit)(struct psy_ui_EditImp*);
 typedef void (*psy_ui_fp_editimp_dev_setstyle)(struct psy_ui_EditImp*, int style);
+typedef void (*psy_ui_fp_editimp_dev_setsel)(struct psy_ui_EditImp*, intptr_t cpmin, intptr_t cpmax);
 
 typedef struct {
     psy_ui_fp_editimp_dev_settext dev_settext;
@@ -61,6 +64,7 @@ typedef struct {
     psy_ui_fp_editimp_dev_text dev_text;
     psy_ui_fp_editimp_dev_enableedit dev_enableedit;
     psy_ui_fp_editimp_dev_preventedit dev_preventedit;
+    psy_ui_fp_editimp_dev_setsel dev_setsel;
 } psy_ui_EditImpVTable;
 
 typedef struct psy_ui_EditImp {

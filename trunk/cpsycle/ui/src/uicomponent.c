@@ -1009,6 +1009,11 @@ static psy_ui_RealRectangle dev_position(const psy_ui_ComponentImp* self)
 	return psy_ui_realrectangle_zero();
 }
 
+static psy_ui_RealRectangle dev_screenposition(const psy_ui_ComponentImp* self)
+{
+	return psy_ui_realrectangle_zero();
+}
+
 static void dev_move(psy_ui_ComponentImp* self, psy_ui_Point origin) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, intptr_t width, intptr_t height) { }
@@ -1099,6 +1104,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_resize = dev_resize;
 		imp_vtable.dev_clientresize = dev_clientresize;
 		imp_vtable.dev_position = dev_position;
+		imp_vtable.dev_screenposition = dev_position;
 		imp_vtable.dev_setposition = dev_setposition;
 		imp_vtable.dev_size = dev_size;
 		imp_vtable.dev_preferredsize = dev_preferredsize;

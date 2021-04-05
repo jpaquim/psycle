@@ -48,6 +48,7 @@ static void dev_move(psy_ui_win_ComponentImp*, psy_ui_Point origin);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_win_ComponentImp*, intptr_t width, intptr_t height);
 static psy_ui_RealRectangle dev_position(psy_ui_win_ComponentImp*);
+static psy_ui_RealRectangle dev_screenposition(psy_ui_win_ComponentImp*);
 static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
 static psy_ui_Size dev_size(const psy_ui_win_ComponentImp*);
@@ -121,6 +122,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
 			dev_clientresize;
 		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_screenposition = (psy_ui_fp_componentimp_dev_screenposition)dev_screenposition;
 		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)
 			dev_setposition;
 		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
@@ -463,6 +465,18 @@ psy_ui_RealRectangle dev_position(psy_ui_win_ComponentImp* self)
 	rv.right = rv.left + rc.right;
 	rv.bottom = rv.top + rc.bottom;	
 	return rv;
+}
+
+psy_ui_RealRectangle dev_screenposition(psy_ui_win_ComponentImp* self)
+{
+	POINT pt;
+	
+	pt.x = 0;
+	pt.y = 0;
+	ClientToScreen(self->hwnd, &pt);
+	return psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(pt.x, pt.y),
+		psy_ui_component_sizepx(self->component));
 }
 
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,

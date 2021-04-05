@@ -42,6 +42,7 @@ struct psy_ui_Component;
 typedef struct psy_ui_App {
 	// signals
 	psy_Signal signal_dispose;
+	psy_Signal signal_mousehook;
 	// internal data
 	struct psy_ui_AppImp* imp;	
 	struct psy_ui_ImpFactory* imp_factory;

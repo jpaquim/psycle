@@ -24,6 +24,7 @@ static void dev_move(psy_ui_win_CheckBoxImp* self, psy_ui_Point origin) { self->
 static void dev_resize(psy_ui_win_CheckBoxImp* self, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_win_CheckBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
 static psy_ui_RealRectangle dev_position(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
+static psy_ui_RealRectangle dev_screenposition(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_screenposition(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_CheckBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(const psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* limits);
@@ -67,10 +68,11 @@ static void imp_vtable_init(void)
 		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
 		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
 		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
-		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize) dev_clientresize;
-		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
-		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
-		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
+		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)dev_clientresize;
+		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_screenposition = (psy_ui_fp_componentimp_dev_screenposition)dev_screenposition;
+		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)dev_setposition;
+		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
 		vtable.dev_preferredsize = (psy_ui_fp_componentimp_dev_preferredsize)dev_preferredsize;
 		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
 		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;

@@ -292,7 +292,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 {    
 	psy_ui_win_ComponentImp* imp;	
 	
-	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap,
+	imp = (psy_ui_win_ComponentImp*)psy_table_at(&winapp->selfmap,
 		(uintptr_t) hwnd);	
 	if (imp) {
 		switch (message) {		
@@ -943,10 +943,38 @@ void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam)
 	}	
 }
 
+LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
+	if (nCode >= 0 && winapp && winapp->app) {
+		if (wParam == WM_LBUTTONDOWN) {
+			psy_ui_MouseEvent ev;
+			MOUSEHOOKSTRUCT* pMouseStruct = (MOUSEHOOKSTRUCT*)lParam;
+
+			psy_ui_mouseevent_init(&ev,
+				pMouseStruct->pt.x, pMouseStruct->pt.y,
+				0, 0, GetKeyState(VK_SHIFT) < 0,
+				GetKeyState(VK_CONTROL) < 0);
+			psy_signal_emit(&winapp->app->signal_mousehook, winapp->app,
+				1, &ev);			
+		} else if (wParam == WM_RBUTTONDOWN) {
+			psy_ui_MouseEvent ev;
+
+			psy_ui_mouseevent_init(&ev,
+				(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+				1, 0, GetKeyState(VK_SHIFT) < 0,
+				GetKeyState(VK_CONTROL) < 0);
+			psy_signal_emit(&winapp->app->signal_mousehook, winapp->app,
+				1, &ev);
+		}	
+	}
+	return CallNextHookEx(0, nCode, wParam, lParam);
+}
+
 int psy_ui_winapp_run(psy_ui_WinApp* self) 
 {
 	MSG msg;
 
+
+	HHOOK mousehook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, NULL, 0);
 	// __try
 	// {
 		while (GetMessage(&msg, NULL, 0, 0)) {

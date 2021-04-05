@@ -99,6 +99,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	self->hover = NULL;
 	psy_ui_geometry_init();
 	psy_signal_init(&self->signal_dispose);	
+	psy_signal_init(&self->signal_mousehook);
 	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);
 	ui_app_initimp(self, instance);
@@ -157,6 +158,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 
 	psy_signal_emit(&self->signal_dispose, self, 0);
 	psy_signal_dispose(&self->signal_dispose);
+	psy_signal_dispose(&self->signal_mousehook);
 	psy_ui_appzoom_dispose(&self->zoom);
 	if (self->imp) {
 		self->imp->vtable->dev_dispose(self->imp);

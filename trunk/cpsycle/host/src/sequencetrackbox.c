@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "sequencetrackbox.h"
+#include "uiapp.h"
 
 // SequenceTrackBox
 // prototypes
@@ -17,10 +18,13 @@ static void sequencetrackbox_onmutechanged(SequenceTrackBox*,
 static void sequencetrackbox_onlabelclick(SequenceTrackBox*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
 static void sequencetrackbox_editname(SequenceTrackBox*, psy_ui_Edit*);
+static void sequencetrackbox_updatetrackname(SequenceTrackBox*);
 static void sequencetrackbox_oneditchange(SequenceTrackBox*, psy_ui_Edit* sender);
 static void sequencetrackbox_oneditfocuslost(SequenceTrackBox*, psy_ui_Component* sender);
 static void sequencetrackbox_oneditkeydown(SequenceTrackBox*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
+static void sequencetrackbox_onmousehook(SequenceTrackBox*, psy_ui_App* sender,
+	psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable sequencetrackbox_vtable;
 static psy_ui_ComponentVtable sequencetrackbox_super_vtable;
@@ -52,7 +56,7 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	self->sequence = sequence;
 	self->trackidx = trackidx;
 	self->edit = edit;
-	self->preventedit = FALSE;
+	self->preventedit = TRUE;
 	trackbox_setindex(&self->trackbox, trackidx);	
 	if (self->sequence) {
 		psy_signal_connect(&self->sequence->signal_solochanged, self,
@@ -64,8 +68,12 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 		sequencetrackbox_onsolotrack);
 	psy_signal_connect(&self->trackbox.signal_mute, self,
 		sequencetrackbox_onmutetrack);
-	psy_signal_connect(&self->trackbox.desc.component.signal_mousedown,
-		self, sequencetrackbox_onlabelclick);
+	if (self->edit) {
+		psy_signal_connect(&self->trackbox.desc.component.signal_mousedown,
+		self, sequencetrackbox_onlabelclick);	
+		psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
+			sequencetrackbox_onmousehook);
+	}
 }
 
 void sequencetrackbox_ondestroy(SequenceTrackBox* self)
@@ -78,6 +86,8 @@ void sequencetrackbox_ondestroy(SequenceTrackBox* self)
 		psy_signal_disconnect(&self->sequence->signal_mutechanged, self,
 			sequencetrackbox_onmutechanged);
 	}
+	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
+		sequencetrackbox_onmousehook);
 	sequencetrackbox_super_vtable.ondestroy(&self->trackbox.component);
 }
 
@@ -196,6 +206,7 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 		sequencetrackbox_editname(self, self->edit);
 		psy_ui_component_show(&self->edit->component);
 		psy_ui_component_setfocus(&self->edit->component);
+
 	}	
 }
 
@@ -210,8 +221,9 @@ void sequencetrackbox_editname(SequenceTrackBox* self, psy_ui_Edit* edit)
 	psy_signal_connect(&edit->component.signal_keydown, self,
 		sequencetrackbox_oneditkeydown);
 	psy_signal_connect(&edit->component.signal_focuslost, self,
-		sequencetrackbox_oneditfocuslost);	
-	self->preventedit = FALSE;
+		sequencetrackbox_oneditfocuslost);		
+	self->preventedit = FALSE;	
+	psy_ui_edit_setsel(self->edit, 0, -1);
 }
 
 void sequencetrackbox_oneditkeydown(SequenceTrackBox* self, psy_ui_Component* sender,
@@ -227,15 +239,7 @@ void sequencetrackbox_oneditkeydown(SequenceTrackBox* self, psy_ui_Component* se
 		sequencetrackbox_showtrackname(self);
 		break;
 	case psy_ui_KEY_RETURN:
-		if (self->sequence) {
-			psy_audio_SequenceTrack* track;
-
-			track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
-			if (track) {
-				psy_audio_sequencetrack_setname(track, psy_ui_edit_text(self->edit));
-				sequencetrackbox_showtrackname(self);
-			}
-		}
+		sequencetrackbox_updatetrackname(self);		
 		psy_ui_component_hide(sender);
 		psy_ui_keyevent_preventdefault(ev);
 		psy_ui_component_invalidate(&self->trackbox.component);
@@ -255,7 +259,35 @@ void sequencetrackbox_oneditfocuslost(SequenceTrackBox* self, psy_ui_Component* 
 {
 	assert(self);
 
-	if (self->sequence && !self->preventedit) {
+	if (!self->preventedit) {
+		sequencetrackbox_updatetrackname(self);
+	}
+	psy_ui_component_hide(sender);
+	psy_ui_component_invalidate(&self->trackbox.component);
+	self->preventedit = TRUE;
+}
+
+void sequencetrackbox_onmousehook(SequenceTrackBox* self, psy_ui_App* sender,
+	psy_ui_MouseEvent* ev)
+{
+	if (psy_ui_component_visible(&self->edit->component)) {
+		psy_ui_RealRectangle position;
+		
+		position = psy_ui_component_screenposition(&self->edit->component);
+		if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
+			if (!self->preventedit) {
+				sequencetrackbox_updatetrackname(self);
+			}
+			psy_ui_component_hide(&self->edit->component);
+				psy_ui_component_invalidate(&self->trackbox.component);
+				self->preventedit = TRUE;
+		}
+	}	
+}
+
+void sequencetrackbox_updatetrackname(SequenceTrackBox* self)
+{
+	if (self->sequence) {
 		psy_audio_SequenceTrack* track;
 
 		track = psy_audio_sequence_track_at(self->sequence, self->trackidx);
@@ -264,5 +296,4 @@ void sequencetrackbox_oneditfocuslost(SequenceTrackBox* self, psy_ui_Component* 
 			sequencetrackbox_showtrackname(self);
 		}
 	}
-	psy_ui_component_hide(sender);
 }
