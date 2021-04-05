@@ -44,6 +44,18 @@
     <Filter Include="bitmaps">
       <UniqueIdentifier>{ddea50f9-39cc-4981-9ce8-a4352ed6d511}</UniqueIdentifier>
     </Filter>
+    <Filter Include="machine\instrument\instrumentview">
+      <UniqueIdentifier>{ee32c8d7-1c6b-4318-8023-c37e5835f2ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\instrument\samplesview">
+      <UniqueIdentifier>{5f132d68-1ecc-42b4-8fa9-ee1abc77d63c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview">
+      <UniqueIdentifier>{b988c842-be83-4eca-a454-585302bd8384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\paramview">
+      <UniqueIdentifier>{70aa1202-6ea4-4404-bd5d-cb96ea06c60c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mainframe.c">
@@ -100,34 +112,7 @@
     <ClCompile Include="src\defaultlang.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\machineeditorview.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineframe.c">
-      <Filter>machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\machinesbox.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineview.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineviewskin.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\paramlistbox.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\paramview.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\presetsbar.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\newmachine.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\newval.c">
       <Filter>machine</Filter>
     </ClCompile>
     <ClCompile Include="src\plugineditor.c">
@@ -229,27 +214,6 @@
     <ClCompile Include="src\interpolatecurveview.c">
       <Filter>pattern</Filter>
     </ClCompile>
-    <ClCompile Include="src\instnotemapview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentsbox.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sampleeditor.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\samplesbox.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\samplesview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wavebox.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="src\envelopeview.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
@@ -343,24 +307,6 @@
     <ClCompile Include="src\predefsconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\instrumentampview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentfilterview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentgenview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentpanview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentpitchview.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\adsrsliders.c">
-      <Filter>machine\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="src\sequencetrackbox.c">
       <Filter>sequence</Filter>
     </ClCompile>
@@ -382,17 +328,8 @@
     <ClCompile Include="src\styles.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\machinestackview.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machinewireview.c">
-      <Filter>machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\patternviewbar.c">
       <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineviewbar.c">
-      <Filter>machine</Filter>
     </ClCompile>
     <ClCompile Include="src\metronomebar.c">
       <Filter>toolbars</Filter>
@@ -408,9 +345,6 @@
     </ClCompile>
     <ClCompile Include="src\machinecombobox.c">
       <Filter>uicontrols\machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineproperties.c">
-      <Filter>machine</Filter>
     </ClCompile>
     <ClCompile Include="src\arrowui.c">
       <Filter>uicontrols\machine</Filter>
@@ -459,6 +393,84 @@
     </ClCompile>
     <ClCompile Include="src\sequencerbar.c">
       <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instnotemapview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentampview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentfilterview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentgenview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentpanview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentpitchview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentview.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentsbox.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplesview.c">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplesbox.c">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sampleeditor.c">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wavebox.c">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adsrsliders.c">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinestackview.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinewireview.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewbar.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewskin.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineview.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\newmachine.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineframe.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineeditorview.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramview.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\newval.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramlistbox.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\presetsbar.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineproperties.c">
+      <Filter>machine\machineview</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -512,34 +524,7 @@
     <ClInclude Include="src\defaultlang.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\presetsbar.h">
-      <Filter>machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\plugineditor.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineframe.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineeditorview.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineview.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineviewskin.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\newmachine.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\newval.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\paramlistbox.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\paramview.h">
       <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\gear.h">
@@ -638,24 +623,6 @@
     <ClInclude Include="src\patternproperties.h">
       <Filter>pattern</Filter>
     </ClInclude>
-    <ClInclude Include="src\samplesbox.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sampleeditor.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\samplesview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentsbox.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instnotemapview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="src\envelopeview.h">
       <Filter>machine\instrument</Filter>
     </ClInclude>
@@ -682,9 +649,6 @@
     </ClInclude>
     <ClInclude Include="src\stepsequencerview.h">
       <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wavebox.h">
-      <Filter>machine\instrument</Filter>
     </ClInclude>
     <ClInclude Include="src\about.h">
       <Filter>help</Filter>
@@ -770,24 +734,6 @@
     <ClInclude Include="src\predefsconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\instrumentampview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentfilterview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentgenview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentpanview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentpitchview.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="src\adsrsliders.h">
-      <Filter>machine\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="src\sequencetrackbox.h">
       <Filter>sequence</Filter>
     </ClInclude>
@@ -809,17 +755,8 @@
     <ClInclude Include="src\styles.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\machinestackview.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinewireview.h">
-      <Filter>machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\patternviewbar.h">
       <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineviewbar.h">
-      <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\metronomebar.h">
       <Filter>toolbars</Filter>
@@ -835,9 +772,6 @@
     </ClInclude>
     <ClInclude Include="src\machinecombobox.h">
       <Filter>uicontrols\machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineproperties.h">
-      <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\arrowui.h">
       <Filter>uicontrols\machine</Filter>
@@ -886,6 +820,84 @@
     </ClInclude>
     <ClInclude Include="src\sequencerbar.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instnotemapview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentampview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentfilterview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentgenview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentpanview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentpitchview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentview.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentsbox.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplesview.h">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplesbox.h">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sampleeditor.h">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wavebox.h">
+      <Filter>machine\instrument\samplesview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\adsrsliders.h">
+      <Filter>machine\instrument\instrumentview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinestackview.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinewireview.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewbar.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewskin.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineview.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\newmachine.h">
+      <Filter>machine\machineview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineframe.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineeditorview.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramview.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\newval.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramlistbox.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\presetsbar.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineproperties.h">
+      <Filter>machine\machineview</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1012,5 +1024,13 @@
     <Image Include="src\resources\power_dark.bmp">
       <Filter>bitmaps</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="en.ini">
+      <Filter>configuration</Filter>
+    </None>
+    <None Include="es.ini">
+      <Filter>configuration</Filter>
+    </None>
   </ItemGroup>
 </Project>

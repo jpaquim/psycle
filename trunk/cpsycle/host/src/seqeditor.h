@@ -10,6 +10,8 @@
 #include "patternviewskin.h"
 #include "workspace.h"
 #include "zoombox.h"
+// ui
+#include <uiedit.h>
 
 #include <uiscroller.h>
 
@@ -225,6 +227,7 @@ typedef struct SeqEditorTrackDesc {
 	PatternViewSkin* skin;
 	SeqEditorState* state;
 	Workspace* workspace;
+	psy_ui_Edit editname;
 } SeqEditorTrackDesc;
 
 void seqeditortrackdesc_init(SeqEditorTrackDesc*, psy_ui_Component* parent,
@@ -237,7 +240,7 @@ typedef struct SeqEditorTracks {
 	PatternViewSkin* skin;
 	SeqEditorPlayline* playline;
 	SeqEditorLine* cursorline;
-	SeqEditorLine* seqeditposline;
+	SeqEditorLine* seqeditposline;	
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,

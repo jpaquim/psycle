@@ -379,9 +379,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 	for (t = self->song->sequence.tracks, index = 0; t != NULL;
 			psy_list_next(&t), ++index) {
 		uint32_t sizepos;
-		psy_audio_SequenceTrack* track;
-		// This needs to be replaced to store the Multisequence.
-		static char* sequencename = "seq0";
+		psy_audio_SequenceTrack* track;		
 		psy_List* s;
 		
 		if (status = psyfile_writeheader(self->fp, "SEQD",
@@ -399,7 +397,10 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 			return status;
 		}
 		// sequence name
-		if (status = psyfile_writestring(self->fp, sequencename)) {
+		if (status = psyfile_writestring(self->fp,
+			(track->name)
+				? track->name
+				: "seq0")) {
 			return status;
 		}		
 		for (s = track->entries; s != NULL; psy_list_next(&s)) {

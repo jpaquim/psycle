@@ -402,6 +402,12 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "pan", "Pan");
 	psy_property_set_str(section, "filter", "Filter");
 	psy_property_set_str(section, "pitch", "Pitch");
+	psy_property_set_str(section, "add", "Add");
+	psy_property_set_str(section, "remove", "Remove");
+	psy_property_set_str(section, "smplidx", "Smpl Idx");
+	psy_property_set_str(section, "keylo", "Key Lo");
+	psy_property_set_str(section, "keyhi", "Key Hi");
+	psy_property_set_str(section, "keyfixed", "Key Fixed");
 	// machineview
 	section = psy_property_append_section(lang, "machineview");	
 	psy_property_set_str(section, "new-machine", "New Machine");

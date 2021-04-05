@@ -210,13 +210,14 @@ void view_dev_clear(psy_ui_ViewComponentImp* self)
 
 		component = (psy_ui_Component*)psy_list_entry(p);
 		deallocate = component->deallocate;
-		psy_ui_component_destroy(component);		
-		if (deallocate) {			
+		psy_ui_component_destroy(component);
+		if (deallocate) {
 			free(component);
 		}
 	}
 	psy_list_free(self->viewcomponents);
 	self->viewcomponents = NULL;
+
 }
 
 psy_ui_ViewComponentImp* psy_ui_viewcomponentimp_alloc(void)
@@ -254,29 +255,31 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 {
 	psy_ui_Component* component;
 	psy_List* p;	
+	psy_List* q;
 
 	component = self->component;
 	if (!component) {
 		return;
 	}
-	if (component) {		
+	if (component) {
 		psy_signal_emit(&component->signal_destroy,
 			self->component, 0);
-		component->vtable->ondestroy(component);
+		component->vtable->ondestroy(component);		
 	}
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* component;	
+	q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* component;
 		bool deallocate;
 
-		component = (psy_ui_Component*)psy_list_entry(p);
+		component = (psy_ui_Component*)psy_list_entry(p);		
 		deallocate = component->deallocate;
 		psy_ui_component_destroy(component);
 		if (deallocate) {
 			free(component);
 		}
 	}
-	psy_list_free(self->viewcomponents);
-	self->viewcomponents = NULL;	
+	psy_list_free(q);	
+	self->viewcomponents = NULL;
 	component->imp->vtable->dev_destroyed(component->imp);	
 }
 
@@ -394,7 +397,9 @@ void view_dev_setparent(psy_ui_ViewComponentImp* self, psy_ui_Component* parent)
 		psy_ui_component_erase(self->parent, self->component);
 	}
 	self->parent = parent;
-	psy_ui_component_insert(parent, self->component, NULL);
+	if (parent) {
+		psy_ui_component_insert(parent, self->component, NULL);
+	}
 }
 
 void view_dev_insert(psy_ui_ViewComponentImp* self, psy_ui_ViewComponentImp* child,
@@ -677,6 +682,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			r = psy_ui_component_position(child);
 			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
+				// ev->target = child;
 				child->imp->vtable->dev_mousedown(child->imp, ev);
 				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 				break;
@@ -685,6 +691,8 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 	}
 	if (ev->bubble) {
 		self->component->vtable->onmousedown(self->component, ev);
+		psy_signal_emit(&self->component->signal_mousedown,
+			self->component, 1, ev);
 	}
 }
 
@@ -773,6 +781,8 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 	}
 	if (ev->bubble) {
 		self->component->vtable->onmousedoubleclick(self->component, ev);
+		psy_signal_emit(&self->component->signal_mousedoubleclick,
+			self->component, 1, ev);
 	}
 }
 

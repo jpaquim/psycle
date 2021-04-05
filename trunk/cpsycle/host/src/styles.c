@@ -76,9 +76,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_weighted(&onprimary, medium),
 		surface);
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.3));
-	psy_ui_border_setradius_px(&style->border, 5.0);
+		psy_ui_colour_overlayed(&surface, &overlay, 0.07));
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON, style);
 	// seqview button::hover
 	style = psy_ui_style_allocinit();
@@ -100,14 +100,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&onprimary, medium),
 		psy_ui_colour_overlayed(&surface, &overlay, 0.05));
-	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
-		psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID);
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_border_setcolour(&style->border, 
-		psy_ui_colour_overlayed(&surface, &overlay, 0.05));
-	psy_ui_colour_set(&style->border.colour_right,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.07));
-	psy_ui_colour_set(&style->border.colour_bottom,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.07));
+		psy_ui_colour_overlayed(&surface, &overlay, 0.07));	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW, style);
 	// seqlistview::select
 	style = psy_ui_style_allocinit();
