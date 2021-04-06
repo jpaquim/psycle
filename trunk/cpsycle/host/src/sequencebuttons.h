@@ -36,13 +36,14 @@ typedef struct SequenceButtons {
 	psy_ui_Component row1;
 	psy_ui_Button newentry;		
 	psy_ui_Button delentry;
-	psy_ui_Button cloneentry;
+	psy_ui_Button cloneentry;	
 	psy_ui_Component expand;
 	psy_ui_Button toggle;
 	psy_ui_Component block;
 	psy_ui_Component row2;
 	psy_ui_Button clear;
 	psy_ui_Button rename;
+	psy_ui_Edit edit;
 	//psy_ui_Button cut;	
 	psy_ui_Button copy;
 	psy_ui_Component row3;

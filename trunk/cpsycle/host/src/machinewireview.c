@@ -67,7 +67,6 @@ static void machinewireview_ondisconnected(MachineWireView*,
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
 	int flag, psy_audio_Song*);
 static void machinewireview_buildmachineuis(MachineWireView*);
-static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
 static void machinewireview_destroywireframes(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
 static void machinewireview_onwireframedestroyed(MachineWireView*,
@@ -97,7 +96,6 @@ static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
 			machinewireview_ondestroy;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)machinewireview_ondraw;
-		vtable.ontimer = (psy_ui_fp_component_ontimer)machinewireview_ontimer;
 		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			machinewireview_onmousedown;
 		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
@@ -117,7 +115,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
-	Workspace* workspace)
+	ParamViews* paramviews, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
@@ -127,6 +125,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->component.scrollstepy = psy_ui_value_makepx(10);
 	self->statusbar = NULL;
 	self->machines = NULL;
+	self->paramviews = paramviews;
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;	
 	self->wireframes = 0;
@@ -147,8 +146,6 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinewireview_onsongchanged);	
-	psy_ui_edit_init(&self->editname, &self->component);
-	psy_ui_component_hide(&self->editname.component);
 	if (workspace_song(workspace)) {
 		machinewireview_setmachines(self,
 			psy_audio_song_machines(workspace_song(workspace)));
@@ -412,8 +409,6 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 
 void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_component_hide(&self->editname.component);
-	psy_ui_component_setfocus(&self->component);
 	self->dragpt = ev->pt;
 	self->mousemoved = FALSE;		
 	self->dragmode = MACHINEVIEW_DRAG_NONE;
@@ -996,6 +991,7 @@ void machinewireview_onmachineremoved(MachineWireView* self,
 	psy_audio_Machines* machines, uintptr_t slot)
 {
 	machineuis_remove(self, slot);
+	paramviews_remove(self->paramviews, slot);
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
 	++self->component.opcount;
@@ -1056,7 +1052,7 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
 	++self->component.opcount;
 }
 
-void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
+void machinewireview_idle(MachineWireView* self)
 {	
 	psy_TableIterator it;
 	bool updatevus;
@@ -1173,8 +1169,8 @@ psy_ui_Component* machineuis_insert(MachineWireView* self, uintptr_t slot)
 		}		
 		newui = machineui_create(
 			psy_audio_machines_at(self->machines, slot),
-			slot, self->skin, &self->component, &self->component, &self->editname,
-			TRUE, self->workspace);		
+			slot, self->skin, &self->component, &self->component,
+			self->paramviews, TRUE, self->workspace);		
 		if (newui) {			
 			psy_table_insert(&self->machineuis, slot, newui);
 			return newui;
@@ -1203,8 +1199,6 @@ void machineuis_removeall(MachineWireView* self)
 {
 	psy_ui_component_clear(&self->component);	
 	psy_table_clear(&self->machineuis);	
-	psy_ui_edit_init(&self->editname, &self->component);
-	psy_ui_component_hide(&self->editname.component);
 }
 
 void machinewireview_showvirtualgenerators(MachineWireView* self)

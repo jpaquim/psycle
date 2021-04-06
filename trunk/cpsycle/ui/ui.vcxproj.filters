@@ -393,5 +393,8 @@
     <ClInclude Include="src\uitabbar.h">
       <Filter>comps</Filter>
     </ClInclude>
+    <ClInclude Include="src\uicolours.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

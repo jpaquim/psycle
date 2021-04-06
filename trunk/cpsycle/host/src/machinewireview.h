@@ -12,6 +12,7 @@
 #include "machinestackview.h"
 #include "newmachine.h"
 #include "paramview.h"
+#include "paramviews.h"
 #include <uitabbar.h>
 #include "workspace.h"
 // ui
@@ -39,7 +40,6 @@ typedef struct MachineWireView {
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire hoverwire;	
 	psy_audio_PluginCatcher plugincatcher;	
-	psy_ui_Edit editname;
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
@@ -52,14 +52,17 @@ typedef struct MachineWireView {
 	psy_audio_Machines* machines;	
 	Workspace* workspace;	
 	MachineViewSkin* skin;
+	ParamViews* paramviews;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, MachineViewSkin*, Workspace*);
+	psy_ui_Component* tabbarparent, MachineViewSkin*, ParamViews*,
+	Workspace*);
 void machinewireview_centermaster(MachineWireView*);
 void machinewireview_showvirtualgenerators(MachineWireView*);
 void machinewireview_hidevirtualgenerators(MachineWireView*);
 void machinewireview_updateskin(MachineWireView*);
+void machinewireview_idle(MachineWireView*);
 
 INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 {

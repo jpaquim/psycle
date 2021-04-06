@@ -527,7 +527,8 @@ void machinestackcolumn_mute_normvalue(MachineStackColumn* self,
 static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
 	uintptr_t slot, uintptr_t prevslot, uintptr_t columnindex, bool first);
 // implementation
-void machinestackstate_init(MachineStackState* self, MachineViewBar* statusbar)
+void machinestackstate_init(MachineStackState* self, ParamViews* paramviews,
+	MachineViewBar* statusbar)
 {
 	psy_table_init(&self->columns);
 	self->statusbar = statusbar;
@@ -543,6 +544,8 @@ void machinestackstate_init(MachineStackState* self, MachineViewBar* statusbar)
 	self->effectinsertright = FALSE;
 	self->preventrebuild = FALSE;
 	self->rewire = FALSE;
+	self->paramviews = paramviews;
+	self->insertmachinemode = NEWMACHINE_APPENDSTACK;
 	psy_audio_wire_init(&self->oldwire);
 	psy_audio_wire_init(&self->newwire);
 }
@@ -887,9 +890,9 @@ void machinestackdesc_onpreferredsize(MachineStackDesc* self,
 static void machinestackinputs_onpreferredsize(MachineStackInputs*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void machinestackinputs_ondraw(MachineStackInputs*, psy_ui_Graphics*);
-static void machinestackinputs_onmousedoubleclick(MachineStackInputs*,
-	psy_ui_MouseEvent* ev);
 static void machinestackinputs_onmouseenter(MachineStackInputs*);	
+static void machinestackinputs_onmousedoubleclick(MachineStackInputs*,
+	psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable machinestackinputs_vtable;
 static bool machinestackinputs_vtable_initialized = FALSE;
@@ -901,12 +904,12 @@ static psy_ui_ComponentVtable* machinestackinputs_vtable_init(MachineStackInputs
 		machinestackinputs_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			machinestackinputs_onpreferredsize;
-		machinestackinputs_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
-			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable.onmouseenter =
 			(psy_ui_fp_component_onmouseenter)
 			machinestackinputs_onmouseenter;
+		machinestackinputs_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
+			machinestackinputs_onmousedoubleclick;
 		machinestackinputs_vtable_initialized = TRUE;
 	}
 	return &machinestackinputs_vtable;
@@ -962,8 +965,8 @@ void machinestackinputs_build(MachineStackInputs* self)
 			if (column && column->input != psy_INDEX_INVALID) {
 				component = machineui_create(
 					psy_audio_machines_at(self->state->machines, column->input),
-					column->input, self->skin, &self->component, &self->component, NULL,
-					FALSE, self->workspace);
+					column->input, self->skin, &self->component, &self->component,
+					self->state->paramviews, FALSE, self->workspace);
 			} else {
 				if (!column || column->offset != 0) {
 					component = psy_ui_component_allocinit(&self->component,
@@ -991,14 +994,6 @@ void machinestackinputs_build(MachineStackInputs* self)
 	psy_ui_component_align(&self->component);
 }
 
-void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
-	psy_ui_MouseEvent* ev)
-{
-	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-		SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPENDSTACK);
-	psy_ui_mouseevent_stoppropagation(ev);
-}
-
 void machinestackinputs_onmouseenter(MachineStackInputs* self)
 {	
 	// machineviewbar_settext(self->state->statusbar,
@@ -1013,6 +1008,12 @@ void machinestackinputs_updatevus(MachineStackInputs* self)
 	machineui_endvuupdate();
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_SETBACKGROUND);
 	psy_ui_component_update(&self->component);
+}
+
+void machinestackinputs_onmousedoubleclick(MachineStackInputs* self,
+	psy_ui_MouseEvent* ev)
+{
+	self->state->insertmachinemode = NEWMACHINE_APPENDSTACK;	
 }
 
 // MachineStackOutputs
@@ -1184,6 +1185,7 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 	MachineStackColumn* column;
 
 	self->state->columnselected = TRUE;
+	self->state->insertmachinemode = NEWMACHINE_ADDEFFECTSTACK;
 	column = machinestackstate_column(self->state, self->column);
 	if (column && column->chain) {
 		psy_List* p;
@@ -1213,14 +1215,14 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 			self->state->effectinsertright =
 				(ev->pt.x > psy_ui_value_px(&self->state->effectsize.width,
 					psy_ui_component_textmetric(&self->component)));
-			self->state->selected = self->column;
-			workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-				SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
-			psy_ui_mouseevent_stoppropagation(ev);
+			self->state->selected = self->column;			
 		} else {
 			self->state->effectinsertpos = psy_INDEX_INVALID;
-			self->state->effectinsertright = FALSE;
+			self->state->effectinsertright = FALSE;			
+			psy_ui_mouseevent_stoppropagation(ev);
 		}
+	} else {
+		psy_ui_mouseevent_stoppropagation(ev);
 	}
 }
 
@@ -1261,8 +1263,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 	self->vudrawupdate = FALSE;
 	self->opcount = 0;	
 	machinestackpane_updateskin(self);	
-	machinestackpane_build(self);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	machinestackpane_build(self);	
 }
 
 void machinestackpane_build(MachineStackPane* self)
@@ -1344,7 +1345,8 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 
 	rv =  machineui_create(
 		psy_audio_machines_at(self->state->machines, slot), slot, self->skin,
-		trackpane, &self->component, NULL, FALSE, self->workspace);
+		trackpane, &self->component, self->state->paramviews,
+		FALSE, self->workspace);
 	if (rv) {
 		psy_ui_component_setminimumsize(rv, self->state->effectsize);
 		rv->deallocate = TRUE;
@@ -1391,8 +1393,9 @@ void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 	if (!self->state->columnselected) {
 		machineviewbar_settext(self->state->statusbar,
 			"Add first input (Double click in Inputs)");
+		psy_ui_mouseevent_stoppropagation(ev);
 	}	
-	self->state->columnselected = FALSE;
+	self->state->columnselected = FALSE;	
 }
 
 // MachineStackVolumes
@@ -1484,7 +1487,6 @@ static void machinestackview_ondisconnected(MachineStackView*,
 	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void machinestackview_setmachines(MachineStackView*,
 	psy_audio_Machines*);
-static void machinestackview_ontimer(MachineStackView*, uintptr_t timerid);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -1497,8 +1499,6 @@ static psy_ui_ComponentVtable* vtable_init(MachineStackView* self)
 		vtable = *(self->component.vtable);		
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
 			machinestackview_destroy;
-		vtable.ontimer = (psy_ui_fp_component_ontimer)
-			machinestackview_ontimer;		
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -1506,14 +1506,15 @@ static psy_ui_ComponentVtable* vtable_init(MachineStackView* self)
 // implementation
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
-	MachineViewBar* statusbar, Workspace* workspace)
+	MachineViewBar* statusbar, ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	self->workspace = workspace;
-	machinestackstate_init(&self->state, statusbar);
+	self->paramviews = paramviews;
+	self->workspace = workspace;	
+	machinestackstate_init(&self->state, self->paramviews, statusbar);
 	machinestackdesc_init(&self->desc, &self->component, self);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);
@@ -1549,8 +1550,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 		? &workspace_song(workspace)->machines : NULL);
 	psy_ui_component_setfont(&self->desc.component, &skin->font);
 	psy_ui_component_setfont(&self->inputs.component, &skin->font);	
-	psy_ui_component_setfont(&self->pane.component, &skin->font);
-	psy_ui_component_starttimer(&self->component, 0, 60);
+	psy_ui_component_setfont(&self->pane.component, &skin->font);	
 }
 
 void machinestackview_destroy(MachineStackView* self)
@@ -1589,14 +1589,15 @@ void machinestackview_setmachines(MachineStackView* self,
 
 void machinestackview_onmachineinsert(MachineStackView* self,
 	psy_audio_Machines* sender, uintptr_t slot)
-{	
+{		
 	machinestackstate_rebuildview(&self->state);
 }
 
 void machinestackview_onmachineremoved(MachineStackView* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {	
-	machinestackstate_rebuildview(&self->state);
+	machinestackview_build(self);
+	// machinestackstate_rebuildview(&self->state);
 }
 
 void machinestackview_onconnected(MachineStackView* self,
@@ -1611,7 +1612,7 @@ void machinestackview_ondisconnected(MachineStackView* self,
 	machinestackstate_rebuildview(&self->state);
 }
 
-void machinestackview_ontimer(MachineStackView* self, uintptr_t timerid)
+void machinestackview_idle(MachineStackView* self)
 {
 	if (machinestackstate_rebuildingview(&self->state)) {
 		machinestackview_build(self);

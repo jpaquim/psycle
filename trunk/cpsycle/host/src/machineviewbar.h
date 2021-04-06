@@ -41,7 +41,6 @@ INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
 	return &self->component;
 }
 
-
 #ifdef __cplusplus
 }
 #endif

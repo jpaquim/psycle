@@ -27,18 +27,11 @@ static void effectui_drawbackground(EffectUi*, psy_ui_Graphics*);
 static void effectui_drawpanning(EffectUi*, psy_ui_Graphics*);
 static void effectui_drawmute(EffectUi*, psy_ui_Graphics*);
 static void effectui_drawbypassed(EffectUi*, psy_ui_Graphics*);
-static bool effectui_hittesteditname(EffectUi*, psy_ui_RealPoint);
-static void effectui_oneditchange(EffectUi*, psy_ui_Edit* sender);
-static void effectui_oneditfocuslost(EffectUi*, psy_ui_Component* sender);
 static psy_dsp_amp_t effectui_panvalue(EffectUi*, double dx, uintptr_t slot);
-static void effectui_editname(EffectUi*, psy_ui_Edit*,
-	psy_ui_RealPoint scrolloffset);
 static void effectui_onmousedown(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmouseup(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmousemove(EffectUi*, psy_ui_MouseEvent*);
 static void effectui_onmousedoubleclick(EffectUi*, psy_ui_MouseEvent*);
-static void effectui_oneditkeydown(EffectUi*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 static void effectui_drawvu(EffectUi*, psy_ui_Graphics*);
 static void effectui_onframedestroyed(EffectUi*, psy_ui_Component* sender);
 static void effectui_move(EffectUi*, psy_ui_Point topleft);
@@ -95,7 +88,7 @@ static psy_ui_ComponentVtable* effectui_vtable_init(EffectUi* self)
 // implementation
 void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
@@ -107,7 +100,8 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	self->component.vtable = &effectui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
-	machineuicommon_init(&self->intern, slot, skin, view, editname, workspace);
+	machineuicommon_init(&self->intern, slot, skin, view, paramviews,
+		workspace);
 	self->intern.coords = &skin->effect;	
 	self->intern.font = skin->effect_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x003E2f25);
@@ -119,18 +113,8 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 void effectui_dispose(EffectUi* self)
 {
 	assert(self);
-
-	if (self->intern.paramview) {
-		psy_ui_component_destroy(&self->intern.paramview->component);
-		free(self->intern.paramview);
-	}
-	if (self->intern.machineframe) {
-		psy_ui_component_destroy(&self->intern.machineframe->component);
-		free(self->intern.machineframe);
-	}
+	
 	free(self->intern.restorename);
-	psy_signal_disconnect(&self->intern.workspace->signal_showparameters, self,
-		effectui_onshowparameters);
 	effectui_super_vtable.dispose(&self->component);
 }
 
@@ -158,80 +142,6 @@ void effectui_move(EffectUi* self, psy_ui_Point topleft)
 
 	effectui_super_vtable.move(&self->component, topleft);
 	machineuicommon_move(&self->intern, topleft);	
-}
-
-void effectui_editname(EffectUi* self, psy_ui_Edit* edit,
-	psy_ui_RealPoint scroll)
-{
-	assert(self);
-
-	if (self->intern.machine) {
-		psy_ui_RealRectangle r;
-		psy_ui_RealRectangle position;
-
-		psy_strreset(&self->intern.restorename,
-			psy_audio_machine_editname(self->intern.machine));
-		psy_signal_disconnectall(&edit->component.signal_focuslost);
-		psy_signal_disconnectall(&edit->component.signal_keydown);
-		psy_signal_disconnectall(&edit->signal_change);
-		psy_signal_connect(&edit->signal_change, self, effectui_oneditchange);
-		psy_signal_connect(&edit->component.signal_keydown, self,
-			effectui_oneditkeydown);
-		psy_signal_connect(&edit->component.signal_focuslost, self,
-			effectui_oneditfocuslost);
-		psy_ui_edit_settext(edit, psy_audio_machine_editname(self->intern.machine));
-		position = psy_ui_component_position(&self->component);
-		r = self->intern.coords->name.dest;
-		psy_ui_realrectangle_move(&r, -scroll.x + position.left,
-			-scroll.y + position.top);
-		psy_ui_component_setposition(psy_ui_edit_base(edit),
-			psy_ui_rectangle_make_px(&r));
-		psy_ui_component_show(&edit->component);
-	}
-}
-
-void effectui_oneditkeydown(EffectUi* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
-{
-	assert(self);
-
-	switch (ev->keycode) {
-	case psy_ui_KEY_ESCAPE:
-		if (self->intern.machine) {
-			psy_audio_machine_seteditname(self->intern.machine, self->intern.restorename);
-			free(self->intern.restorename);
-			self->intern.restorename = NULL;
-		}
-		psy_ui_component_hide(sender);
-		psy_ui_keyevent_preventdefault(ev);
-		psy_ui_component_invalidate(&self->component);
-		break;
-	case psy_ui_KEY_RETURN:
-		psy_ui_component_hide(sender);
-		psy_ui_keyevent_preventdefault(ev);
-		psy_ui_component_invalidate(&self->component);
-		break;
-	default:
-		break;
-	}
-	psy_ui_keyevent_stoppropagation(ev);
-}
-
-void effectui_oneditchange(EffectUi* self, psy_ui_Edit* sender)
-{
-	assert(self);
-
-	if (self->intern.machine) {
-		psy_audio_machine_seteditname(self->intern.machine,
-			psy_ui_edit_text(sender));
-	}
-}
-
-void effectui_oneditfocuslost(EffectUi* self, psy_ui_Component* sender)
-{
-	assert(self);
-
-	psy_ui_component_hide(sender);
 }
 
 void effectui_ondraw(EffectUi* self, psy_ui_Graphics* g)
@@ -342,43 +252,9 @@ void effectui_updatevolumedisplay(EffectUi* self)
 
 void effectui_showparameters(EffectUi* self, psy_ui_Component* parent)
 {
-	if (self->intern.machine) {
-		if (!self->intern.machineframe) {
-			self->intern.machineframe = machineframe_alloc();
-			machineframe_init(self->intern.machineframe, parent, self->intern.workspace);
-			psy_signal_connect(&self->intern.machineframe->component.signal_destroy,
-				self, effectui_onframedestroyed);
-			if (psy_audio_machine_haseditor(self->intern.machine)) {
-				MachineEditorView* editorview;
-
-				editorview = machineeditorview_allocinit(
-					psy_ui_notebook_base(&self->intern.machineframe->notebook),
-					self->intern.machine, self->intern.workspace);
-				if (editorview) {
-					machineframe_setview(self->intern.machineframe,
-						&editorview->component, self->intern.machine);
-				}
-			} else {
-				ParamView* paramview;
-
-				paramview = paramview_allocinit(
-					&self->intern.machineframe->notebook.component,
-					self->intern.machine, self->intern.workspace);
-				if (paramview) {
-					machineframe_setparamview(self->intern.machineframe, paramview,
-						self->intern.machine);
-				}
-			}
-		}
-		if (self->intern.machineframe) {
-			psy_ui_component_show(&self->intern.machineframe->component);
-		}
-	}
-}
-
-void effectui_onframedestroyed(EffectUi* self, psy_ui_Component* sender)
-{
-	self->intern.machineframe = NULL;
+	if (self->intern.paramviews) {
+		paramviews_show(self->intern.paramviews, self->intern.slot);
+	}	
 }
 
 void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
@@ -411,11 +287,6 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 	if (!ev->bubble) {
 		psy_ui_component_invalidate(&self->component);
 	}
-}
-
-bool effectui_hittesteditname(EffectUi* self, psy_ui_RealPoint pt)
-{
-	return effectui_hittestcoord(self, pt, &self->intern.coords->name);
 }
 
 bool effectui_hittestcoord(EffectUi* self, psy_ui_RealPoint pt,
@@ -473,12 +344,7 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {
 		psy_ui_RealPoint dragpt;
 
-		if (effectui_hittesteditname(self, ev->pt)) {
-			if (self->intern.editname) {
-				effectui_editname(self, self->intern.editname,
-					psy_ui_component_scrollpx(self->intern.view));
-			}
-		} else if (effectui_hittestcoord(self, ev->pt,
+		if (effectui_hittestcoord(self, ev->pt,
 				&self->intern.skin->effect.bypass) ||
 			effectui_hittestcoord(self, ev->pt,
 				 &self->intern.skin->generator.mute) ||

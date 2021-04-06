@@ -67,9 +67,8 @@ SequenceListTrack* sequencelisttrack_allocinit(
 typedef struct SequenceListView {
 	// inherits
 	psy_ui_Component component;
-	// ui elements	
-	psy_ui_Edit rename;
-	// internal data	
+	// ui elements		
+	// internal	
 	int foundselected;	
 	double avgcharwidth;
 	bool showpatternnames;

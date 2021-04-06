@@ -8,6 +8,7 @@
 #include "machineeditorview.h" // vst view
 #include "machineframe.h"
 #include "machineviewskin.h"
+#include "paramviews.h"
 #include "workspace.h"
 // ui
 #include <uiedit.h>
@@ -63,10 +64,7 @@ typedef struct MachineUiCommon {
 	psy_ui_Colour font;
 	psy_ui_Colour bgcolour;
 	VuDisplay vu;
-	uintptr_t slot;
-	MachineFrame* machineframe;
-	ParamView* paramview;
-	MachineEditorView* editorview;
+	uintptr_t slot;	
 	char* restorename;
 	bool machinepos;
 	MachineViewDragMode dragmode;
@@ -75,24 +73,23 @@ typedef struct MachineUiCommon {
 	Workspace* workspace;
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;
-	psy_ui_Component* view;
-	psy_ui_Edit* editname;
+	psy_ui_Component* view;	
 	MachineCoords* coords;
 	MachineViewSkin* skin;
+	ParamViews* paramviews;
 } MachineUiCommon;
 
 void machineuicommon_init(MachineUiCommon*,  uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+	psy_ui_Component* view, ParamViews*, Workspace*);
 
 void machineuicommon_move(MachineUiCommon*, psy_ui_Point topleft);
 
 // global methods
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* parent,
-	psy_ui_Component* view, psy_ui_Edit* editname,
-	bool machinepos,
-	Workspace* workspace);
+	psy_ui_Component* parent, psy_ui_Component* view,
+	ParamViews* paramviews,
+	bool machinepos, Workspace* workspace);
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position);
 

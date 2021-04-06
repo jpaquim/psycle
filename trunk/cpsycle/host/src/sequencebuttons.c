@@ -9,7 +9,7 @@
 
 // SequenceButtons
 // prototypes
-static void sequencebuttons_ontoggleedit(SequenceButtons*,
+static void sequencebuttons_ontoggleblock(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onnewentry(SequenceButtons*,
 	psy_ui_Button* sender);
@@ -33,6 +33,10 @@ static void sequencebuttons_onmultiselection(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onclear(SequenceButtons*,
 	psy_ui_Button* sender);
+static void sequencebuttons_onrename(SequenceButtons*,
+	psy_ui_Button* sender);
+static void sequencebuttons_oneditaccept(SequenceButtons*, psy_ui_Edit* sender);
+static void sequencebuttons_oneditreject(SequenceButtons*, psy_ui_Edit* sender);
 // implementation
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	SequenceCmds* cmds)
@@ -102,6 +106,14 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	// psy_ui_button_settext(&self->cut, "");
 	psy_ui_button_init_text(&self->copy, &self->row2, NULL,
 		"sequencerview.copy");
+	// rename edit
+	psy_ui_edit_init(&self->edit, &self->block);
+	psy_ui_margin_init_all_em(&rowmargin, 0.5, 0.0, 1.0, 0.0);
+	psy_ui_component_setmargin(psy_ui_edit_base(&self->edit), &rowmargin);
+	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(psy_ui_edit_base(&self->edit));
+	// row3
 	psy_ui_component_init(&self->row3, &self->block, NULL);
 	psy_ui_component_setalign(&self->row3, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row3, psy_ui_ALIGN_LEFT,
@@ -150,10 +162,16 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->clear.signal_clicked, self,
 		sequencebuttons_onclear);
 	psy_signal_connect(&self->toggle.signal_clicked, self,
-		sequencebuttons_ontoggleedit);
+		sequencebuttons_ontoggleblock);
+	psy_signal_connect(&self->edit.signal_accept, self,
+		sequencebuttons_oneditaccept);
+	psy_signal_connect(&self->edit.signal_reject, self,
+		sequencebuttons_oneditreject);
+	psy_signal_connect(&self->rename.signal_clicked, self,
+		sequencebuttons_onrename);
 }
 
-void sequencebuttons_ontoggleedit(SequenceButtons* self,
+void sequencebuttons_ontoggleblock(SequenceButtons* self,
 	psy_ui_Button* sender)
 {
 	if (psy_ui_component_visible(&self->block)) {
@@ -231,4 +249,57 @@ void sequencebuttons_onclear(SequenceButtons* self, psy_ui_Button* sender)
 		workspace_selectview(self->cmds->workspace, VIEW_ID_CHECKUNSAVED, 0,
 			CONFIRM_SEQUENCECLEAR);
 	}
+}
+
+void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
+{
+	if (!psy_ui_component_visible(psy_ui_edit_base(&self->edit))) {
+		psy_audio_Pattern* pattern;
+
+		psy_ui_edit_enableinputfield(&self->edit);
+		
+		pattern = psy_audio_sequence_pattern(self->cmds->sequence,
+			self->cmds->workspace->sequenceselection.editposition);
+		if (pattern) {			
+			psy_ui_edit_settext(&self->edit, psy_audio_pattern_name(pattern));
+			psy_ui_edit_setsel(&self->edit, 0, -1);
+			psy_ui_component_show(psy_ui_edit_base(&self->edit));
+			psy_ui_component_align(psy_ui_component_parent(&self->component));
+			psy_ui_component_setfocus(psy_ui_edit_base(&self->edit));
+		} else {
+			workspace_outputstatus(self->cmds->workspace,
+				"No SequenceEntry selected");
+		}
+	}
+}
+
+void sequencebuttons_oneditaccept(SequenceButtons* self, psy_ui_Edit* sender)
+{
+	if (self->cmds->sequence) {
+		psy_audio_SequenceEntry* entry;
+
+		entry = (self->cmds->sequence)
+			? psy_audio_sequence_entry(self->cmds->sequence,
+				self->cmds->workspace->sequenceselection.editposition)
+			: NULL;
+		if (entry) {
+			psy_audio_Pattern* pattern;
+
+			pattern = psy_audio_patterns_at(
+				self->cmds->patterns,
+				entry->patternslot);
+			if (pattern) {
+				psy_audio_pattern_setname(pattern,
+					psy_ui_edit_text(&self->edit));
+			}
+		}
+	}
+	psy_ui_component_hide(&self->edit.component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));	
+}
+
+void sequencebuttons_oneditreject(SequenceButtons* self, psy_ui_Edit* sender)
+{
+	psy_ui_component_hide(&self->edit.component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }

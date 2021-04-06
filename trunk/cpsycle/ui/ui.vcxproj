@@ -297,6 +297,7 @@
     <ClInclude Include="src\uicheckbox.h" />
     <ClInclude Include="src\uicolordialog.h" />
     <ClInclude Include="src\uicolour.h" />
+    <ClInclude Include="src\uicolours.h" />
     <ClInclude Include="src\uicombobox.h" />
     <ClInclude Include="src\uicomponent.h" />
     <ClInclude Include="src\uicomponentstyle.h" />

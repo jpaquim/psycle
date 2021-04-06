@@ -53,35 +53,28 @@ void sequencerbar_init(SequencerBar* self,
 	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
 		"sequencerview.allow-notes-to_effect");	
-	{		
-		// seqedit buttons
-		psy_ui_component_init(&self->seqedit, &self->component, NULL);
-		psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);		
-		psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit, NULL,
-			"sequencerview.showseqeditor");
-		psy_ui_component_setalign(&self->toggleseqedit.component,
-			psy_ui_ALIGN_LEFT);
-		psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
-		// stepseq buttons
-		psy_ui_component_init(&self->stepseq, &self->component, NULL);
-		psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);		
-		psy_ui_button_init_text(&self->togglestepseq, &self->stepseq, NULL,
-			"sequencerview.showstepsequencer");
-		psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
-		psy_ui_component_setalign(&self->togglestepseq.component,
-			psy_ui_ALIGN_LEFT);		
-	}	
+				
+	psy_ui_component_init(&self->stepseq, &self->component, NULL);
+	psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);		
+	psy_ui_button_init_text(&self->togglestepseq, &self->stepseq, NULL,
+		"sequencerview.showstepsequencer");
+	psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
+	psy_ui_component_setalign(&self->togglestepseq.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_init(&self->seqedit, &self->component, NULL);
+	psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);
+	psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit, NULL,
+		"sequencerview.showseqeditor");
+	psy_ui_component_setalign(&self->toggleseqedit.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
+
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, &margin);
 	psy_signal_connect(&self->followsong.signal_clicked, self,
 		sequencerbar_onfollowsong);
 	psy_signal_connect(&workspace->signal_followsongchanged, self,
-		sequencerbar_onfollowsongchanged);
-	// if (self->listview.showpatternnames) {
-	//	psy_ui_checkbox_check(&self->shownames);
-	//} else {
-	//	psy_ui_checkbox_disablecheck(&self->shownames);
-	//}
+		sequencerbar_onfollowsongchanged);	
 	psy_signal_connect(&self->shownames.signal_clicked, self,
 		sequencerbar_onshowpatternnames);
 	psy_signal_connect(&self->recordnoteoff.signal_clicked, self,

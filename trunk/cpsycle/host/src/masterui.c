@@ -15,11 +15,8 @@ static void masterui_ondraw(MasterUi*, psy_ui_Graphics*);
 static void masterui_drawbackground(MasterUi*, psy_ui_Graphics*);
 static void masterui_onmousedoubleclick(MasterUi*, psy_ui_MouseEvent*);
 static void masterui_drawhighlight(MasterUi*, psy_ui_Graphics*);
-static void masterui_onframedestroyed(MasterUi*, psy_ui_Component* sender);
 static void masterui_move(MasterUi*, psy_ui_Point topleft);
 static void masterui_invalidate(MasterUi*);
-static void masterui_onshowparameters(MasterUi*, Workspace* sender,
-	uintptr_t slot);
 static void masterui_showparameters(MasterUi*, psy_ui_Component* parent);
 static void masterui_onpreferredsize(MasterUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -50,7 +47,7 @@ static psy_ui_ComponentVtable* masterui_vtable_init(MasterUi* self)
 }
 // implementation
 void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* skin,
-	psy_ui_Component* view, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
@@ -64,30 +61,18 @@ void masterui_init(MasterUi* self, psy_ui_Component* parent, MachineViewSkin* sk
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	machineuicommon_init(&self->intern, psy_audio_MASTER_INDEX, skin, view,
-		NULL, workspace);
+		paramviews, workspace);
 	self->intern.coords = &skin->master;
 	self->intern.font = skin->effect_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x00333333);
-	masterui_initsize(self);
-	psy_signal_connect(&workspace->signal_showparameters, self,
-		masterui_onshowparameters);
+	masterui_initsize(self);	
 }
 
 void masterui_dispose(MasterUi* self)
 {
 	assert(self);
-
-	if (self->intern.paramview) {
-		psy_ui_component_destroy(&self->intern.paramview->component);
-		free(self->intern.paramview);
-	}
-	if (self->intern.machineframe) {
-		psy_ui_component_destroy(&self->intern.machineframe->component);
-		free(self->intern.machineframe);
-	}
-	free(self->intern.restorename);
-	psy_signal_disconnect(&self->intern.workspace->signal_showparameters, self,
-		masterui_onshowparameters);
+	
+	free(self->intern.restorename);	
 	masterui_super_vtable.dispose(&self->component);
 }
 
@@ -157,44 +142,10 @@ void masterui_drawbackground(MasterUi* self, psy_ui_Graphics* g)
 }
 
 void masterui_showparameters(MasterUi* self, psy_ui_Component* parent)
-{
-	if (self->intern.machine) {
-		if (!self->intern.machineframe) {
-			self->intern.machineframe = machineframe_alloc();
-			machineframe_init(self->intern.machineframe, parent, self->intern.workspace);
-			psy_signal_connect(&self->intern.machineframe->component.signal_destroy,
-				self, masterui_onframedestroyed);
-			if (psy_audio_machine_haseditor(self->intern.machine)) {
-				MachineEditorView* editorview;
-
-				editorview = machineeditorview_allocinit(
-					psy_ui_notebook_base(&self->intern.machineframe->notebook),
-					self->intern.machine, self->intern.workspace);
-				if (editorview) {
-					machineframe_setview(self->intern.machineframe,
-						&editorview->component, self->intern.machine);
-				}
-			} else {
-				ParamView* paramview;
-
-				paramview = paramview_allocinit(
-					&self->intern.machineframe->notebook.component,
-					self->intern.machine, self->intern.workspace);
-				if (paramview) {
-					machineframe_setparamview(self->intern.machineframe, paramview,
-						self->intern.machine);
-				}
-			}
-		}
-		if (self->intern.machineframe) {
-			psy_ui_component_show(&self->intern.machineframe->component);
-		}
+{	
+	if (self->intern.paramviews) {
+		paramviews_show(self->intern.paramviews, self->intern.slot);
 	}
-}
-
-void masterui_onframedestroyed(MasterUi* self, psy_ui_Component* sender)
-{
-	self->intern.machineframe = NULL;
 }
 
 void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)

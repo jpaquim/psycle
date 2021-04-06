@@ -25,16 +25,32 @@ extern "C" {
 
 struct psy_ui_EditImp;
 
-typedef struct {
+typedef struct psy_ui_Edit {
+    // inherits
 	psy_ui_Component component;
+    // signals
+    // emits any change
+    psy_Signal signal_change;
+    // emits if edit is inputfield and
+    // - return pressed or
+    // - focus lost or
+    // - clicked outside
+    psy_Signal signal_accept;
+    // emits if edit is inputfield and
+    // - esc pressed
+    psy_Signal signal_reject;
+    // internal
     struct psy_ui_EditImp* imp;
 	int charnumber;
 	int linenumber;
-	psy_Signal signal_change;
+    bool isinputfield;
+    bool preventedit;
 } psy_ui_Edit;
 
 void psy_ui_edit_init(psy_ui_Edit*, psy_ui_Component* parent);
 void psy_ui_edit_multiline_init(psy_ui_Edit*, psy_ui_Component* parent);
+
+void psy_ui_edit_enableinputfield(psy_ui_Edit*);
 void psy_ui_edit_settext(psy_ui_Edit*, const char* text);
 const char* psy_ui_edit_text(psy_ui_Edit* self);
 void psy_ui_edit_setcharnumber(psy_ui_Edit*, int number);

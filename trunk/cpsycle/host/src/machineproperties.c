@@ -14,26 +14,23 @@ static void machineproperties_onsongchanged(MachineProperties*, Workspace*,
 static void machineproperties_connectsongsignals(MachineProperties*);
 static void machineproperties_ontogglebus(MachineProperties*,
 	psy_ui_Component* sender);
-static void machineproperties_onapply(MachineProperties*,
-	psy_ui_Component* sender);
 static void machineproperties_onremove(MachineProperties*,
 	psy_ui_Component* sender);
 static void machineproperties_onhide(MachineProperties*,
 	psy_ui_Component* sender);
-static void machineproperties_onkeydown(MachineProperties*, psy_ui_KeyEvent*);
-static void machineproperties_onkeyup(MachineProperties*, psy_ui_KeyEvent*);
-static void machineproperties_onfocus(MachineProperties*);
 static void machineproperties_updateskin(MachineProperties*);
 static void machineproperties_onmachineselected(MachineProperties*,
 	psy_audio_Machines*, uintptr_t slot);
-static void machineproperties_onmachineinsert(MachineProperties*,
-	psy_audio_Machines*, uintptr_t slot);
 static void machineproperties_onmachineremoved(MachineProperties*,
 	psy_audio_Machines*, uintptr_t slot);
-static void machineproperties_onconnected(MachineProperties*,
-	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-static void machineproperties_ondisconnected(MachineProperties*,
-	psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void machineproperties_oneditaccept(MachineProperties*,
+	psy_ui_Edit* sender);
+static void machineproperties_oneditreject(MachineProperties*,
+	psy_ui_Edit* sender);
+static void machineproperties_ontogglemute(MachineProperties*,
+	psy_ui_Button* sender);
+static void machineproperties_onsolobypass(MachineProperties*,
+	psy_ui_Button* sender);
 
 static psy_ui_ComponentVtable machineproperties_vtable;
 static bool machineproperties_vtable_initialized = FALSE;
@@ -42,12 +39,6 @@ static psy_ui_ComponentVtable* machineproperties_vtable_init(MachineProperties* 
 {
 	if (!machineproperties_vtable_initialized) {
 		machineproperties_vtable = *(self->component.vtable);
-		machineproperties_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
-			machineproperties_onkeydown;
-		machineproperties_vtable.onkeyup = (psy_ui_fp_component_onkeyevent)
-			machineproperties_onkeyup;
-		machineproperties_vtable.onfocus = (psy_ui_fp_component_onfocus)
-			machineproperties_onfocus;
 		machineproperties_vtable_initialized = TRUE;
 	}
 	return &machineproperties_vtable;
@@ -69,23 +60,24 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
 	machineproperties_updateskin(self);
-	psy_ui_button_init(&self->issolobypass, &self->component, NULL);
-	psy_ui_button_init_text(&self->ismute, &self->component, NULL,
-		"Mute");
-	psy_ui_button_init_text(&self->isbus, &self->component, NULL,
-		"Bus");
-	psy_signal_connect(&self->isbus.signal_clicked, self,
-		machineproperties_ontogglebus);
+	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
+		NULL, "machineview.pwr", self, machineproperties_onsolobypass);
+	psy_ui_button_init_text_connect(&self->ismute, &self->component,
+		NULL, "machineview.mute", self, machineproperties_ontogglemute);
+	psy_ui_button_init_text_connect(&self->isbus, &self->component, NULL,
+		"Bus", self, machineproperties_ontogglebus);
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
-		"Machine Name");	
+		"machineview.editname");	
 	psy_ui_edit_init(&self->nameedit, &self->component);
 	psy_ui_edit_settext(&self->nameedit, "No Machine");
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);	
-	psy_ui_button_init_connect(&self->applybutton, &self->component, NULL, self,
-		machineproperties_onapply);
-	psy_ui_button_settext(&self->applybutton, "Change");	
+	psy_ui_edit_enableinputfield(&self->nameedit);
+	psy_signal_connect(&self->nameedit.signal_accept, self,
+		machineproperties_oneditaccept);
+	psy_signal_connect(&self->nameedit.signal_reject, self,
+		machineproperties_oneditreject);
 	psy_ui_button_init_text_connect(&self->remove, &self->component, NULL,
-		"Delete", self, machineproperties_onremove);
+		"machineview.delete", self, machineproperties_onremove);
 	psy_ui_button_init_connect(&self->cancel, &self->component, NULL, self,
 		machineproperties_onhide);
 	psy_ui_button_preventtranslation(&self->cancel);
@@ -100,30 +92,23 @@ void machineproperties_setmachine(MachineProperties* self,
 {
 	self->machine = machine;
 	if (self->machine) {
-		psy_ui_edit_settext(&self->nameedit, psy_audio_machine_editname(machine));
-		if (psy_audio_machine_isbus(self->machine)) {
-			psy_ui_button_highlight(&self->isbus);
-		} else {
-			psy_ui_button_disablehighlight(&self->isbus);
-		}
-		if (psy_audio_machine_muted(machine)) {
-			psy_ui_button_highlight(&self->ismute);
-		} else {
-			psy_ui_button_disablehighlight(&self->ismute);
-		}
+		psy_ui_edit_settext(&self->nameedit,
+			psy_audio_machine_editname(machine));
 		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
-			psy_ui_button_settext(&self->issolobypass, "Solo");
-			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));			
+			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		} else {
-			psy_ui_button_settext(&self->issolobypass, "Bypass");
 			psy_ui_component_show_align(psy_ui_button_base(&self->isbus));
 		}
+		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	} else {
 		self->macid = psy_INDEX_INVALID;
 		psy_ui_edit_settext(&self->nameedit, "");
 		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
+		psy_ui_button_disablehighlight(&self->issolobypass);
 		psy_ui_button_disablehighlight(&self->isbus);
-		psy_ui_button_disablehighlight(&self->ismute);
+		psy_ui_button_disablehighlight(&self->ismute);		
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	}	
 }
 
@@ -132,28 +117,17 @@ void machineproperties_ontogglebus(MachineProperties* self,
 {
 	if (self->machine) {
 		if (psy_audio_machine_isbus(self->machine)) {
-			psy_audio_machine_unsetbus(self->machine);
-			psy_ui_button_disablehighlight(&self->isbus);
+			psy_audio_machine_unsetbus(self->machine);			
 		} else {
-			psy_audio_machine_setbus(self->machine);
-			psy_ui_button_highlight(&self->isbus);
+			psy_audio_machine_setbus(self->machine);			
 		}
 	}
 }
 
-void machineproperties_onapply(MachineProperties* self,
-	psy_ui_Component* sender)
-{
-	if (workspace_song(self->workspace) && self->machine) {
-		psy_audio_machine_seteditname(self->machine, 
-			psy_ui_edit_text(&self->nameedit));		
-	}
-}
 void machineproperties_onhide(MachineProperties* self,
 	psy_ui_Component* sender)
 {
 	psy_ui_component_hide_align(&self->component);
-
 }
 
 void machineproperties_onremove(MachineProperties* self,
@@ -168,28 +142,6 @@ void machineproperties_onremove(MachineProperties* self,
 	}
 }
 
-void machineproperties_onkeydown(MachineProperties* self, psy_ui_KeyEvent* ev)
-{
-	if (ev->keycode == psy_ui_KEY_RETURN) {
-		machineproperties_onapply(self, &self->component);
-		psy_ui_keyevent_preventdefault(ev);
-	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
-		psy_ui_edit_settext(&self->nameedit,
-			psy_audio_machine_editname(self->machine));
-		psy_ui_keyevent_preventdefault(ev);
-	}	
-	psy_ui_keyevent_stoppropagation(ev);
-}
-
-void machineproperties_onkeyup(MachineProperties* self, psy_ui_KeyEvent* ev)
-{
-	psy_ui_keyevent_stoppropagation(ev);
-}
-
-void machineproperties_onfocus(MachineProperties* self)
-{	
-}
-
 void machineproperties_onmachinenamechanged(MachineProperties* self,
 	psy_audio_Machines* machines, uintptr_t slot)
 {
@@ -202,12 +154,33 @@ void machineproperties_onmachinenamechanged(MachineProperties* self,
 	}
 }
 
+void machineproperties_oneditaccept(MachineProperties* self,
+	psy_ui_Edit* sender)
+{
+	if (workspace_song(self->workspace) && self->machine) {
+		psy_audio_machine_seteditname(self->machine,
+			psy_ui_edit_text(&self->nameedit));
+	}
+	psy_ui_component_setfocus(&self->component);	
+}
+
+void machineproperties_oneditreject(MachineProperties* self,
+	psy_ui_Edit* sender)
+{
+	if (self->machine) {
+		psy_ui_edit_settext(&self->nameedit,
+			psy_audio_machine_editname(self->machine));
+	}	
+	psy_ui_component_setfocus(&self->component);
+}
+
 void machineproperties_onsongchanged(MachineProperties* self, Workspace* workspace, int flag,
 	psy_audio_Song* song)
 {
 	self->machines = (workspace_song(workspace))
 		? &workspace_song(workspace)->machines
 		: NULL;
+	machineproperties_setmachine(self, NULL);
 	machineproperties_connectsongsignals(self);
 }
 
@@ -216,14 +189,8 @@ void machineproperties_connectsongsignals(MachineProperties* self)
 	if (workspace_song(self->workspace)) {
 		psy_signal_connect(&self->machines->signal_slotchange, self,
 			machineproperties_onmachineselected);		
-		psy_signal_connect(&self->machines->signal_insert, self,
-			machineproperties_onmachineinsert);
 		psy_signal_connect(&self->machines->signal_removed, self,
-			machineproperties_onmachineremoved);
-		psy_signal_connect(&self->machines->connections.signal_connected, self,
-			machineproperties_onconnected);
-		psy_signal_connect(&self->machines->connections.signal_disconnected, self,
-			machineproperties_ondisconnected);
+			machineproperties_onmachineremoved);	
 	}
 }
 
@@ -242,12 +209,6 @@ void machineproperties_onmachineselected(MachineProperties* self,
 	self->macid = slot;
 }
 
-void machineproperties_onmachineinsert(MachineProperties* self,
-	psy_audio_Machines* sender, uintptr_t slot)
-{
-
-}
-
 void machineproperties_onmachineremoved(MachineProperties* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
@@ -256,15 +217,47 @@ void machineproperties_onmachineremoved(MachineProperties* self,
 	}
 }
 
-void machineproperties_onconnected(MachineProperties* self,
-	psy_audio_Connections* sender, uintptr_t outputslot, uintptr_t inputslot)
+void machineproperties_idle(MachineProperties* self)
 {
-
+	if (self->machine) {
+		if (psy_audio_machine_muted(self->machine)) {
+			psy_ui_button_highlight(&self->ismute);
+		} else {
+			psy_ui_button_disablehighlight(&self->ismute);
+		}
+		if (psy_audio_machine_hasstandby(self->machine)) {
+			psy_ui_button_highlight(&self->issolobypass);
+		} else {
+			psy_ui_button_disablehighlight(&self->issolobypass);
+		}
+		if (psy_audio_machine_isbus(self->machine)) {
+			psy_ui_button_highlight(&self->isbus);
+		} else {
+			psy_ui_button_disablehighlight(&self->isbus);
+		}
+	}
 }
 
-void machineproperties_ondisconnected(MachineProperties* self,
-	psy_audio_Connections* sender, uintptr_t outputslot, uintptr_t inputslot)
+void machineproperties_ontogglemute(MachineProperties* self,
+	psy_ui_Button* sender)
 {
-	
+	if (self->machine) {
+		if (psy_audio_machine_muted(self->machine)) {
+			psy_audio_machine_unmute(self->machine);
+		} else {
+			psy_audio_machine_mute(self->machine);
+		}
+	}
 }
 
+void machineproperties_onsolobypass(MachineProperties* self,
+	psy_ui_Button* sender)
+{
+	if (self->machine) {
+		if (psy_audio_machine_hasstandby(self->machine)) {
+			psy_audio_machine_deactivatestandby(self->machine);
+		} else {
+			psy_audio_machine_standby(self->machine);
+		}
+	}
+}
