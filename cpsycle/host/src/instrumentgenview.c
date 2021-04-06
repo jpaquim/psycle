@@ -89,7 +89,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_setdefaultalign(&self->dct, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init_text(&self->dctheader, &self->dct, NULL,
-		"but if the same");
+		"instrumentview.same");
 	psy_ui_button_init_connect(&self->dctnone, &self->dct, NULL,
 		self, instrumentgeneralview_ondctnone);
 	psy_ui_button_settext(&self->dctnone, "instrumentview.none");
@@ -101,9 +101,11 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_button_settext(&self->dctsample, "Sample");
 	psy_ui_button_init_connect(&self->dctinstrument, &self->dct, NULL,
 		self, instrumentgeneralview_ondctinstrument);
-	psy_ui_button_settext(&self->dctinstrument, "Instrument");
+	psy_ui_button_settext(&self->dctinstrument,
+		"instrumentview.instrument");
 	// dca	
-	psy_ui_label_init_text(&self->dcaheader, &self->dct, NULL, "do");
+	psy_ui_label_init_text(&self->dcaheader, &self->dct, NULL,
+		"instrumentview.do");
 	psy_ui_button_init_connect(&self->dcacut, &self->dct, NULL,
 		self, instrumentgeneralview_ondcacut);
 	psy_ui_button_settext(&self->dcacut, "instrumentview.note-cut");

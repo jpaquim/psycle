@@ -113,20 +113,18 @@ static bool vuupdate = FALSE;
 // implementation
 void machineuicommon_init(MachineUiCommon* self,
 	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews,
+	Workspace* workspace)
 {
 	self->machines = &workspace->song->machines;
 	self->machine = psy_audio_machines_at(self->machines, slot);
+	self->paramviews = paramviews;
 	self->workspace = workspace;
 	self->view = view;
-	self->skin = skin;
-	self->editname = editname;
+	self->skin = skin;	
 	self->mode = psy_audio_machine_mode(self->machine);
 	self->coords = NULL;
-	self->slot = slot;
-	self->machineframe = NULL;
-	self->paramview = NULL;
-	self->editorview = NULL;
+	self->slot = slot;	
 	self->restorename = NULL;
 	self->machinepos = TRUE;
 	self->dragmode = MACHINEVIEW_DRAG_NONE;	
@@ -149,7 +147,6 @@ void machineuicommon_move(MachineUiCommon* self, psy_ui_Point topleft)
 }
 
 // static methods
-
 void machineui_beginvuupdate(void)
 {
 	vuupdate = TRUE;
@@ -167,8 +164,7 @@ bool machineui_vuupdate(void)
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
 	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* parent,
-	psy_ui_Component* view,
-	psy_ui_Edit* editname, bool machinepos, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews, bool machinepos, Workspace* workspace)
 {	
 	psy_ui_Component* newui;
 		
@@ -178,7 +174,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		masterui = (MasterUi*)malloc(sizeof(MasterUi));
 		if (masterui) {
-			masterui_init(masterui, parent, skin, view, workspace);
+			masterui_init(masterui, parent, skin, view, paramviews, workspace);
 			masterui->intern.machinepos = machinepos;
 			newui = &masterui->component;
 		}
@@ -187,7 +183,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		effectui = (EffectUi*)malloc(sizeof(EffectUi));
 		if (effectui) {
-			effectui_init(effectui, parent, slot, skin, view, editname, workspace);
+			effectui_init(effectui, parent, slot, skin, view, paramviews, workspace);
 			effectui->intern.machinepos = machinepos;
 			newui = &effectui->component;
 		}
@@ -196,7 +192,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 
 		generatorui = (GeneratorUi*)malloc(sizeof(GeneratorUi));
 		if (generatorui) {
-			generatorui_init(generatorui, parent, slot, skin, view, editname, workspace);
+			generatorui_init(generatorui, parent, slot, skin, view, paramviews, workspace);
 			generatorui->intern.machinepos = machinepos;
 			newui = &generatorui->component;
 		}
@@ -234,6 +230,8 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 	drawmachineline(g, dirs[0], edges[3]);
 	psy_ui_resetorigin(g);
 }
+
+
 
 void drawmachineline(psy_ui_Graphics* g, psy_ui_RealPoint dir,
 	psy_ui_RealPoint edge)

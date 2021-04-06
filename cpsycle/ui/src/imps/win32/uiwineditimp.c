@@ -239,6 +239,10 @@ void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam) {
 	switch (HIWORD(wParam))
 	{
+	case EN_SETFOCUS:		
+		self->component.vtable->onfocus(&self->component);
+		psy_signal_emit(&self->component.signal_focus, self, 0);
+		break;
 	case EN_CHANGE:
 	{
 		if (self->signal_change.slots) {

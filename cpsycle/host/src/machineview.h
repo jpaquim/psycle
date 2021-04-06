@@ -14,6 +14,7 @@
 #include "machineproperties.h"
 #include "newmachine.h"
 #include "paramview.h"
+#include "paramviews.h"
 #include <uitabbar.h>
 #include "workspace.h"
 // ui
@@ -60,6 +61,8 @@ typedef struct MachineView {
 	MachineStackView stackview;	
 	NewMachine newmachine;
 	MachineViewSkin skin;	
+	bool shownewmachine;
+	ParamViews paramviews;
 	// references
 	Workspace* workspace;	
 } MachineView;

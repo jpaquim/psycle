@@ -308,28 +308,30 @@ void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 
 void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_component_releasecapture(psy_ui_button_base(self));
-	if (psy_ui_component_inputprevented(&self->component)) {
-		psy_ui_mouseevent_stoppropagation(ev);
-		return;
-	}	
-	self->buttonstate = ev->button != 0;
-	if (self->allowrightclick || ev->button == 1) {
-		psy_ui_RealRectangle client_position;
-		psy_ui_RealSize size;
-		
-		size = psy_ui_component_sizepx(psy_ui_button_base(self));
-		client_position = psy_ui_realrectangle_make(
-			psy_ui_realpoint_zero(), size);
-		if (psy_ui_realrectangle_intersect(&client_position, ev->pt)) {				
-			self->shiftstate = ev->shift;
-			self->ctrlstate = ev->ctrl;
-			psy_signal_emit(&self->signal_clicked, self, 0);
-		}
-		if (self->stoppropagation) {
+	if (!psy_ui_component_inputprevented(&self->component)) {
+		psy_ui_component_releasecapture(psy_ui_button_base(self));
+		if (psy_ui_component_inputprevented(&self->component)) {
 			psy_ui_mouseevent_stoppropagation(ev);
+			return;
 		}
-	}	
+		self->buttonstate = ev->button != 0;
+		if (self->allowrightclick || ev->button == 1) {
+			psy_ui_RealRectangle client_position;
+			psy_ui_RealSize size;
+
+			size = psy_ui_component_sizepx(psy_ui_button_base(self));
+			client_position = psy_ui_realrectangle_make(
+				psy_ui_realpoint_zero(), size);
+			if (psy_ui_realrectangle_intersect(&client_position, ev->pt)) {
+				self->shiftstate = ev->shift;
+				self->ctrlstate = ev->ctrl;
+				psy_signal_emit(&self->signal_clicked, self, 0);
+			}
+			if (self->stoppropagation) {
+				psy_ui_mouseevent_stoppropagation(ev);
+			}
+		}
+	}
 }
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)

@@ -369,12 +369,18 @@ void make_translator_default(psy_Property* lang)
 	// instrumentview
 	section = psy_property_append_section(lang, "instrumentview");
 	psy_property_set_str(section,
+		"instrument", "Instrument");
+	psy_property_set_str(section,
 		"instrument-name", "Instrument Name");
 	psy_property_set_str(section, "new-note-action", "New Note Action");
+	psy_property_set_str(section, "same", "but if the same");
+	psy_property_set_str(section, "do", "do");
 	psy_property_set_str(section, "note-cut", "Note Cut");
 	psy_property_set_str(section, "note-release", "Note Release");
 	psy_property_set_str(section, "note-fadeout", "Note Fadeout");
 	psy_property_set_str(section, "none", "None");
+	psy_property_set_str(section,
+		"notemap", "Notemap");
 	psy_property_set_str(section,
 		"play-sample-to-fit", "Play sample to fit");
 	psy_property_set_str(section, "pattern-rows", "Pattern rows");
@@ -405,6 +411,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "add", "Add");
 	psy_property_set_str(section, "remove", "Remove");
 	psy_property_set_str(section, "smplidx", "Smpl Idx");
+	psy_property_set_str(section, "key", "Key");
 	psy_property_set_str(section, "keylo", "Key Lo");
 	psy_property_set_str(section, "keyhi", "Key Hi");
 	psy_property_set_str(section, "keyfixed", "Key Fixed");
@@ -419,6 +426,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"connect-to-mixer-send-return-input",
 		"Connect to Mixer-send/return-input");
+	psy_property_set_str(section, "delete", "Delete");
+	psy_property_set_str(section, "editname", "Editname");
+	psy_property_set_str(section, "mute", "Mute");
+	psy_property_set_str(section, "pwr", "Pwr");
 	section = psy_property_append_section(lang, "stackview");
 	psy_property_set_str(section, "inputs", "Inputs");
 	psy_property_set_str(section, "effects", "Effects");

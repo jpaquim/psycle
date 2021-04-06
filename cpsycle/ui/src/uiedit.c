@@ -9,16 +9,32 @@
 
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void psy_ui_edit_onkeydown(psy_ui_Edit*, psy_ui_KeyEvent*);
+static void psy_ui_edit_onfocus(psy_ui_Edit*);
+static void psy_ui_edit_onfocuslost(psy_ui_Edit*);
+static void psy_ui_edit_onmousehook(psy_ui_Edit*, psy_ui_App* sender,
+	psy_ui_MouseEvent*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_Edit* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
-	}	vtable_initialized = 1;
+		vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
+			onpreferredsize;
+		vtable.onfocus =
+			(psy_ui_fp_component_onfocus)
+			psy_ui_edit_onfocus;
+		vtable.onfocuslost =
+			(psy_ui_fp_component_onfocuslost)
+			psy_ui_edit_onfocuslost;
+		vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
+			psy_ui_edit_onkeydown;
+	}	vtable_initialized = TRUE;
 }
 
 void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
@@ -29,10 +45,14 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 		&self->imp->component_imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_signal_init(&self->signal_change);		
+	psy_signal_init(&self->signal_change);
+	psy_signal_init(&self->signal_accept);
+	psy_signal_init(&self->signal_reject);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	self->charnumber = 0;
-	self->linenumber = 1;	
+	self->linenumber = 1;
+	self->isinputfield = FALSE;
+	self->preventedit = TRUE;
 }
 
 void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
@@ -44,6 +64,8 @@ void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_init(&self->signal_change);
+	psy_signal_init(&self->signal_accept);
+	psy_signal_init(&self->signal_reject);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	self->charnumber = 0;
 	self->linenumber = 1;
@@ -52,6 +74,19 @@ void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 void ondestroy(psy_ui_Edit* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_change);
+	psy_signal_dispose(&self->signal_accept);
+	psy_signal_dispose(&self->signal_reject);
+	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
+		psy_ui_edit_onmousehook);
+}
+
+void psy_ui_edit_enableinputfield(psy_ui_Edit* self)
+{
+	self->isinputfield = TRUE;
+	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
+		psy_ui_edit_onmousehook);
+	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
+		psy_ui_edit_onmousehook);	
 }
 
 void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
@@ -116,6 +151,63 @@ void psy_ui_edit_preventedit(psy_ui_Edit* self)
 void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax)
 {
 	self->imp->vtable->dev_setsel(self->imp, cpmin, cpmax);
+}
+
+// signal_accept event handling
+void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyEvent* ev)
+{
+	assert(self);
+
+	if (self->isinputfield) {
+		switch (ev->keycode) {
+		case psy_ui_KEY_ESCAPE:
+			psy_ui_keyevent_preventdefault(ev);
+			psy_signal_emit(&self->signal_reject, self, 0);
+			break;
+		case psy_ui_KEY_RETURN:
+			psy_signal_emit(&self->signal_accept, self, 0);
+			psy_ui_keyevent_preventdefault(ev);
+			break;
+		default:
+			break;
+		}
+		psy_ui_keyevent_stoppropagation(ev);
+	}
+}
+
+void psy_ui_edit_onfocus(psy_ui_Edit* self)
+{	
+	if (self->isinputfield) {
+		self->preventedit = FALSE;
+	}
+}
+
+void psy_ui_edit_onfocuslost(psy_ui_Edit* self)
+{
+	assert(self);
+
+	if (self->isinputfield) {
+		self->preventedit = TRUE;
+		psy_signal_emit(&self->signal_accept, self, 0);		
+	}
+}
+
+void psy_ui_edit_onmousehook(psy_ui_Edit* self, psy_ui_App* sender,
+	psy_ui_MouseEvent* ev)
+{
+	if (self->isinputfield) {
+		if (psy_ui_component_visible(&self->component) && !self->preventedit) {
+			psy_ui_RealRectangle position;
+
+			position = psy_ui_component_screenposition(&self->component);
+			if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
+				if (!self->preventedit) {
+					psy_signal_emit(&self->signal_accept, self, 0);
+				}
+				self->preventedit = TRUE;
+			}
+		}
+	}
 }
 
 // psy_ui_EditImp vtable

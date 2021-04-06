@@ -23,7 +23,7 @@ typedef struct MasterUi {
 } MasterUi;
 
 void masterui_init(MasterUi*, psy_ui_Component* parent, MachineViewSkin*,
-	psy_ui_Component* view, Workspace*);
+	psy_ui_Component* view, ParamViews*, Workspace*);
 
 #ifdef __cplusplus
 }

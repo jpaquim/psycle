@@ -157,7 +157,6 @@ INLINE int psy_ui_equal_colour_weight(const psy_ui_Colour* self)
 	return rv;
 }
 
-
 INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weight)
 {	
 	if (psy_ui_equal_colour_weight(self) != weight) {

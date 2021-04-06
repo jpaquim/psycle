@@ -29,20 +29,12 @@ static void generatorui_drawbackground(GeneratorUi*, psy_ui_Graphics*);
 static void generatorui_drawpanning(GeneratorUi*, psy_ui_Graphics*);
 static void generatorui_drawmute(GeneratorUi*, psy_ui_Graphics*);
 static void generatorui_drawsoloed(GeneratorUi*, psy_ui_Graphics*);
-static bool generatorui_hittesteditname(GeneratorUi*, psy_ui_RealPoint);
-static void generatorui_oneditchange(GeneratorUi*, psy_ui_Edit* sender);
-static void generatorui_oneditfocuslost(GeneratorUi*, psy_ui_Component* sender);
 static psy_dsp_amp_t generatorui_panvalue(GeneratorUi*, double dx, uintptr_t slot);
-static void generatorui_editname(GeneratorUi*, psy_ui_Edit*,
-	psy_ui_RealPoint scrolloffset);
 static void generatorui_onmousedown(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_onmouseup(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_onmousemove(GeneratorUi*, psy_ui_MouseEvent*);
 static void generatorui_onmousedoubleclick(GeneratorUi*, psy_ui_MouseEvent*);
-static void generatorui_oneditkeydown(GeneratorUi*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 static void generatorui_drawvu(GeneratorUi*, psy_ui_Graphics*);
-static void generatorui_onframedestroyed(GeneratorUi*, psy_ui_Component* sender);
 static void generatorui_move(GeneratorUi*, psy_ui_Point topleft);
 static void generatorui_updatevolumedisplay(GeneratorUi*);
 static void generatorui_invalidate(GeneratorUi*);
@@ -89,7 +81,7 @@ static psy_ui_ComponentVtable* generatorui_vtable_init(GeneratorUi* self)
 // implementation
 void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin* skin,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
 	assert(workspace);
@@ -102,30 +94,19 @@ void generatorui_init(GeneratorUi* self, psy_ui_Component* parent,
 	self->component.vtable = &generatorui_vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
-	machineuicommon_init(&self->intern, slot, skin, view, editname, workspace);
+	machineuicommon_init(&self->intern, slot, skin, view, paramviews,
+		workspace);
 	self->intern.coords = &skin->generator;
 	self->intern.font = skin->generator_fontcolour;
 	self->intern.bgcolour = psy_ui_colour_make(0x002f3E25);
-	generatorui_initsize(self);
-	psy_signal_connect(&workspace->signal_showparameters, self,
-		generatorui_onshowparameters);	
+	generatorui_initsize(self);	
 }
 
 void generatorui_dispose(GeneratorUi* self)
 {
 	assert(self);
-
-	if (self->intern.paramview) {
-		psy_ui_component_destroy(&self->intern.paramview->component);
-		free(self->intern.paramview);
-	}
-	if (self->intern.machineframe) {
-		psy_ui_component_destroy(&self->intern.machineframe->component);
-		free(self->intern.machineframe);
-	}
-	free(self->intern.restorename);
-	psy_signal_disconnect(&self->intern.workspace->signal_showparameters, self,
-		generatorui_onshowparameters);
+	
+	free(self->intern.restorename);	
 	generatorui_super_vtable.dispose(&self->component);
 }
 
@@ -153,80 +134,6 @@ void generatorui_move(GeneratorUi* self, psy_ui_Point topleft)
 
 	generatorui_super_vtable.move(&self->component, topleft);
 	machineuicommon_move(&self->intern, topleft);	
-}
-
-void generatorui_editname(GeneratorUi* self, psy_ui_Edit* edit,
-	psy_ui_RealPoint scroll)
-{
-	assert(self);
-
-	if (self->intern.machine) {
-		psy_ui_RealRectangle r;
-		psy_ui_RealRectangle position;
-
-		psy_strreset(&self->intern.restorename,
-			psy_audio_machine_editname(self->intern.machine));
-		psy_signal_disconnectall(&edit->component.signal_focuslost);
-		psy_signal_disconnectall(&edit->component.signal_keydown);
-		psy_signal_disconnectall(&edit->signal_change);
-		psy_signal_connect(&edit->signal_change, self, generatorui_oneditchange);
-		psy_signal_connect(&edit->component.signal_keydown, self,
-			generatorui_oneditkeydown);
-		psy_signal_connect(&edit->component.signal_focuslost, self,
-			generatorui_oneditfocuslost);
-		psy_ui_edit_settext(edit, psy_audio_machine_editname(self->intern.machine));
-		position = psy_ui_component_position(&self->component);
-		r = self->intern.coords->name.dest;
-		psy_ui_realrectangle_move(&r, -scroll.x + position.left,
-			-scroll.y + position.top);
-		psy_ui_component_setposition(psy_ui_edit_base(edit),
-			psy_ui_rectangle_make_px(&r));
-		psy_ui_component_show(&edit->component);
-	}
-}
-
-void generatorui_oneditkeydown(GeneratorUi* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
-{
-	assert(self);
-
-	switch (ev->keycode) {
-	case psy_ui_KEY_ESCAPE:
-		if (self->intern.machine) {
-			psy_audio_machine_seteditname(self->intern.machine, self->intern.restorename);
-			free(self->intern.restorename);
-			self->intern.restorename = NULL;
-		}
-		psy_ui_component_hide(sender);
-		psy_ui_keyevent_preventdefault(ev);
-		psy_ui_component_invalidate(&self->component);
-		break;
-	case psy_ui_KEY_RETURN:
-		psy_ui_component_hide(sender);
-		psy_ui_keyevent_preventdefault(ev);
-		psy_ui_component_invalidate(&self->component);
-		break;
-	default:
-		break;
-	}
-	psy_ui_keyevent_stoppropagation(ev);
-}
-
-void generatorui_oneditchange(GeneratorUi* self, psy_ui_Edit* sender)
-{
-	assert(self);
-
-	if (self->intern.machine) {
-		psy_audio_machine_seteditname(self->intern.machine,
-			psy_ui_edit_text(sender));
-	}
-}
-
-void generatorui_oneditfocuslost(GeneratorUi* self, psy_ui_Component* sender)
-{
-	assert(self);
-
-	psy_ui_component_hide(sender);
 }
 
 void generatorui_ondraw(GeneratorUi* self, psy_ui_Graphics* g)
@@ -340,43 +247,9 @@ void generatorui_updatevolumedisplay(GeneratorUi* self)
 
 void generatorui_showparameters(GeneratorUi* self, psy_ui_Component* parent)
 {
-	if (self->intern.machine) {
-		if (!self->intern.machineframe) {
-			self->intern.machineframe = machineframe_alloc();
-			machineframe_init(self->intern.machineframe, parent, self->intern.workspace);
-			psy_signal_connect(&self->intern.machineframe->component.signal_destroy,
-				self, generatorui_onframedestroyed);
-			if (psy_audio_machine_haseditor(self->intern.machine)) {
-				MachineEditorView* editorview;
-
-				editorview = machineeditorview_allocinit(
-					psy_ui_notebook_base(&self->intern.machineframe->notebook),
-					self->intern.machine, self->intern.workspace);
-				if (editorview) {
-					machineframe_setview(self->intern.machineframe,
-						&editorview->component, self->intern.machine);
-				}
-			} else {
-				ParamView* paramview;
-
-				paramview = paramview_allocinit(
-					&self->intern.machineframe->notebook.component,
-					self->intern.machine, self->intern.workspace);
-				if (paramview) {
-					machineframe_setparamview(self->intern.machineframe, paramview,
-						self->intern.machine);
-				}
-			}
-		}
-		if (self->intern.machineframe) {
-			psy_ui_component_show(&self->intern.machineframe->component);
-		}
+	if (self->intern.paramviews) {
+		paramviews_show(self->intern.paramviews, self->intern.slot);
 	}
-}
-
-void generatorui_onframedestroyed(GeneratorUi* self, psy_ui_Component* sender)
-{
-	self->intern.machineframe = NULL;
 }
 
 void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
@@ -403,11 +276,6 @@ void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
 	if (!ev->bubble) {
 		psy_ui_component_invalidate(&self->component);
 	}
-}
-
-bool generatorui_hittesteditname(GeneratorUi* self, psy_ui_RealPoint pt)
-{
-	return generatorui_hittestcoord(self, pt, &self->intern.coords->name);	
 }
 
 bool generatorui_hittestcoord(GeneratorUi* self, psy_ui_RealPoint pt,
@@ -465,12 +333,7 @@ void generatorui_onmousedoubleclick(GeneratorUi* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {
 		psy_ui_RealPoint dragpt;
 
-		if (generatorui_hittesteditname(self, ev->pt)) {
-			if (self->intern.editname) {
-				generatorui_editname(self, self->intern.editname,
-					psy_ui_component_scrollpx(self->intern.view));
-			}
-		} else if (generatorui_hittestcoord(self, ev->pt,
+		if (generatorui_hittestcoord(self, ev->pt,
 				&self->intern.skin->generator.solo) ||
 			generatorui_hittestcoord(self, ev->pt,
 				&self->intern.skin->effect.bypass) ||

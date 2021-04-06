@@ -8,6 +8,7 @@
 #include "machineviewskin.h"
 #include "machineui.h"
 #include "headerui.h"
+#include "paramviews.h"
 #include "workspace.h"
 // ui
 #include <uiscroller.h>
@@ -100,11 +101,14 @@ typedef struct MachineStackState {
 	psy_audio_Wire newwire;
 	uintptr_t currlevel;
 	bool drawvirtualgenerators;
+	uintptr_t insertmachinemode;
 	// references
 	struct MachineViewBar* statusbar;
+	ParamViews* paramviews;
 } MachineStackState;
 
-void machinestackstate_init(MachineStackState*, struct MachineViewBar* statusbar);
+void machinestackstate_init(MachineStackState*, ParamViews*,
+	struct MachineViewBar* statusbar);
 void machinestackstate_dispose(MachineStackState*);
 
 void machinestackstate_buildcolumns(MachineStackState*);
@@ -269,17 +273,19 @@ typedef struct MachineStackView {
 	MachineStackState state;	
 	// references
 	Workspace* workspace;	
+	ParamViews* paramviews;
 } MachineStackView;
 
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin*,
-	struct MachineViewBar* statusbar, Workspace*);
+	struct MachineViewBar* statusbar, ParamViews*, Workspace*);
 
 void machinestackview_addeffect(MachineStackView*,
 	const psy_audio_MachineInfo*);
 void machinestackview_updateskin(MachineStackView*);
 void machinestackview_showvirtualgenerators(MachineStackView*);
 void machinestackview_hidevirtualgenerators(MachineStackView*);
+void machinestackview_idle(MachineStackView*);
 
 #ifdef __cplusplus
 }

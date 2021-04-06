@@ -6,6 +6,7 @@
 
 // host
 #include "machineui.h"
+#include "paramviews.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +22,7 @@ typedef struct EffectUi {
 
 void effectui_init(EffectUi*, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+	psy_ui_Component* view, ParamViews*, Workspace*);
 
 #ifdef __cplusplus
 }

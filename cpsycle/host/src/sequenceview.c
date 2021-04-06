@@ -21,6 +21,7 @@ void sequencelistviewstate_init(SequenceListViewState* self,
 	assert(cmds);
 
 	self->cmds = cmds;
+
 	self->trackwidth = psy_ui_value_makeew(16.0);
 	psy_ui_value_setroundmode(&self->trackwidth, psy_ui_ROUND_FLOOR);
 	self->lineheight = psy_ui_value_makeeh(1.2);	
@@ -469,11 +470,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setscrollmode(&self->component,
 		psy_ui_SCROLL_COMPONENTS);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	psy_ui_edit_init(&self->rename, &self->component);
-	psy_signal_connect(&self->rename.component.signal_keydown, self,
-		sequencelistview_oneditkeydown);
-	psy_ui_component_hide(&self->rename.component);		
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	self->lastplayposition = -1.f;
 	self->lastplayrow = psy_INDEX_INVALID;
 	self->showpatternnames = generalconfig_showingpatternnames(
@@ -532,58 +529,10 @@ void sequencelistview_showpatternslots(SequenceListView* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void sequencelistview_rename(SequenceListView* self)
-{		
-	psy_audio_Pattern* pattern;
-
-	pattern = psy_audio_sequence_pattern(self->state->cmds->sequence,
-		self->state->cmds->workspace->sequenceselection.editposition);
-	if (pattern) {
-		psy_ui_component_setposition(&self->rename.component,
-			psy_ui_rectangle_make(
-				psy_ui_point_zero(),
-				psy_ui_size_makeem(20.0, 1.0)));
-		psy_ui_edit_settext(&self->rename, psy_audio_pattern_name(pattern));
-		psy_ui_component_show(&self->rename.component);
-		psy_ui_component_setfocus(&self->rename.component);
-	}	
-}
-
-void sequencelistview_oneditkeydown(SequenceListView* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
-{
-	if (ev->keycode == psy_ui_KEY_RETURN) {
-		psy_audio_SequenceEntry* entry;
-
-		entry = (self->state->cmds->sequence)
-			? psy_audio_sequence_entry(self->state->cmds->sequence,
-				self->state->cmds->workspace->sequenceselection.editposition)
-			: NULL;		
-		if (entry) {
-			psy_audio_Pattern* pattern;
-
-			pattern = psy_audio_patterns_at(
-				self->state->cmds->patterns,
-				entry->patternslot);			
-			if (pattern) {
-				psy_audio_pattern_setname(pattern,
-					psy_ui_edit_text(&self->rename));
-			}
-		}
-		psy_ui_component_hide(&self->rename.component);
-		psy_ui_component_setfocus(&self->component);
-	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
-		psy_ui_component_hide(&self->rename.component);
-		psy_ui_component_setfocus(&self->component);
-	}
-}
 
 void sequencelistview_onmousedown(SequenceListView* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2) {
-		// sequenceview_toggleedit(self->view);		
-	}
 }
 
 void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
@@ -756,7 +705,6 @@ void sequenceduration_ontimer(SequenceViewDuration* self, psy_ui_Component* send
 
 // SequenceView
 // prototypes
-static void sequenceview_onrename(SequenceView*);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag,
 	psy_audio_Song* song);
 static void sequenceview_onsequenceselectionchanged(SequenceView*,
@@ -810,8 +758,6 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	// duration
 	sequenceduration_init(&self->duration, &self->component, workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&self->buttons.rename.signal_clicked, self,
-		sequenceview_onrename);		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		sequenceview_onsongchanged);
 	psy_signal_connect(&workspace->sequenceselection.signal_changed, self,
@@ -842,11 +788,6 @@ void sequenceview_onscroll(SequenceView* self, psy_ui_Component* sender)
 void sequenceview_clear(SequenceView* self)
 {
 	sequencecmds_clear(&self->cmds);	
-}
-
-void sequenceview_onrename(SequenceView* self)
-{
-	sequencelistview_rename(&self->listview);
 }
 
 void sequenceview_onsongchanged(SequenceView* self, Workspace* sender,
@@ -932,9 +873,19 @@ void sequenceview_onconfigure(SequenceView* self, GeneralConfig* config,
 	psy_Property* property)
 {
 	if (generalconfig_showingpatternnames(config)) {
-		self->state.showpatternnames = TRUE;		
+		self->state.showpatternnames = TRUE;
+		self->state.trackwidth = psy_ui_value_makeew(24.0);
+		psy_ui_value_setroundmode(&self->state.trackwidth, psy_ui_ROUND_FLOOR);
+		sequencetrackheaders_build(&self->trackheader);
+		psy_ui_component_align(&self->trackheader.component);
+		psy_ui_component_align(&self->listview.component);
 	} else {
-		self->state.showpatternnames = FALSE;		
-	}
+		self->state.showpatternnames = FALSE;
+		self->state.trackwidth = psy_ui_value_makeew(16.0);
+		psy_ui_value_setroundmode(&self->state.trackwidth, psy_ui_ROUND_FLOOR);
+		sequencetrackheaders_build(&self->trackheader);
+		psy_ui_component_align(&self->trackheader.component);
+		psy_ui_component_align(&self->listview.component);
+	}	
 	psy_ui_component_invalidate(&self->listview.component);	
 }

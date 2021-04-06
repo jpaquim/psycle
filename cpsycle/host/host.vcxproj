@@ -360,6 +360,7 @@
     <ClCompile Include="src\paramlistbox.c" />
     <ClCompile Include="src\paramtweak.c" />
     <ClCompile Include="src\paramview.c" />
+    <ClCompile Include="src\paramviews.c" />
     <ClCompile Include="src\patterncmds.c" />
     <ClCompile Include="src\patternheader.c" />
     <ClCompile Include="src\patternproperties.c" />
@@ -510,6 +511,7 @@
     <ClInclude Include="src\paramlistbox.h" />
     <ClInclude Include="src\paramtweak.h" />
     <ClInclude Include="src\paramview.h" />
+    <ClInclude Include="src\paramviews.h" />
     <ClInclude Include="src\patterncmds.h" />
     <ClInclude Include="src\patternheader.h" />
     <ClInclude Include="src\patternproperties.h" />

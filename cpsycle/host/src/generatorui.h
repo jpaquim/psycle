@@ -6,6 +6,7 @@
 
 // host
 #include "machineui.h"
+#include "paramviews.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,8 +21,8 @@ typedef struct GeneratorUi {
 } GeneratorUi;
 
 void generatorui_init(GeneratorUi*, psy_ui_Component* parent,
-	uintptr_t slot, MachineViewSkin*,
-	psy_ui_Component* view, psy_ui_Edit* editname, Workspace*);
+	uintptr_t slot, MachineViewSkin*, psy_ui_Component* view,
+	ParamViews* paramviews, Workspace*);
 
 #ifdef __cplusplus
 }

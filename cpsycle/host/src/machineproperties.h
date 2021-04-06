@@ -24,7 +24,6 @@ typedef struct {
 	psy_ui_Button isbus;
 	psy_ui_Label namelabel;	
 	psy_ui_Edit nameedit;	
-	psy_ui_Button applybutton;
 	psy_ui_Button remove;
 	psy_ui_Button cancel;
 	uintptr_t macid;
@@ -35,9 +34,16 @@ typedef struct {
 	struct MachineViewSkin* skin;
 } MachineProperties;
 
-void machineproperties_init(MachineProperties*, psy_ui_Component* parent, psy_audio_Machine*,
-	struct MachineViewSkin* skin, Workspace*);
-void machineproperties_setpattern(MachineProperties*, psy_audio_Machine*);
+void machineproperties_init(MachineProperties*, psy_ui_Component* parent,
+	psy_audio_Machine*, struct MachineViewSkin* skin, Workspace*);
+
+void machineproperties_idle(MachineProperties*);
+void machineproperties_setmachine(MachineProperties*, psy_audio_Machine*);
+
+INLINE psy_ui_Component* machineproperties_base(MachineProperties* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

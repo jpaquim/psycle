@@ -1647,6 +1647,7 @@ void seqeditor_onconfigure(SeqEditor* self, GeneralConfig* sender,
 void seqeditor_onzoomboxbeatchanged(SeqEditor* self, ZoomBox* sender)
 {
 	self->state.pxperbeat = sender->zoomrate * DEFAULT_PXPERBEAT;
+	psy_ui_component_align(&self->tracks.component);
 	seqeditor_updatescrollstep(self);
 	seqeditor_updateoverflow(self);
 	psy_ui_component_invalidate(&self->ruler.component);
@@ -1656,6 +1657,7 @@ void seqeditor_onzoomboxheightchanged(SeqEditor* self, ZoomBox* sender)
 {
 	self->state.lineheight = psy_ui_mul_value_real(
 		self->state.defaultlineheight, zoombox_rate(sender));
+	psy_ui_component_align(&self->tracks.component);	
 	seqeditor_updatescrollstep(self);
 	seqeditor_updateoverflow(self);
 }
