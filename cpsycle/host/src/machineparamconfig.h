@@ -81,6 +81,8 @@ bool machineparamconfig_showfloated(const MachineParamConfig*);
 const char* machineparamconfig_dialbpm(const MachineParamConfig*);
 void machineparamconfig_setdialbpm(MachineParamConfig*, const char* filename);
 
+psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig*);
+
 bool machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
 bool machineparamconfig_onthemechanged(MachineParamConfig*, psy_Property*);
 

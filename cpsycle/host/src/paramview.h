@@ -16,20 +16,19 @@ extern "C" {
 
 typedef struct ParamView {
    psy_ui_Component component;
-   psy_audio_Machine* machine;      
-   Workspace* workspace;
-   ParamSkin* skin;      
-   uintptr_t numparams;
+   psy_audio_Machine* machine;   
+   MachineParamConfig* config;
    int sizechanged;
    uintptr_t paramstrobe;
-   psy_ui_FontInfo fontinfo;   
+   psy_ui_FontInfo fontinfo; 
+   ParamSkin* skin;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
-	Workspace*);
+	MachineParamConfig*);
 ParamView* paramview_alloc(void);
 ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
-	Workspace*);
+	MachineParamConfig*);
 void paramview_setzoom(ParamView*, double zoomrate);
 
 #ifdef __cplusplus

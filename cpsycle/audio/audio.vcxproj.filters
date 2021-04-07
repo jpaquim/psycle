@@ -322,6 +322,9 @@
     <ClCompile Include="src\audioconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\paramtranslator.c">
+      <Filter>machine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -614,6 +617,9 @@
     </ClInclude>
     <ClInclude Include="src\audioconfig.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramtranslator.h">
+      <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

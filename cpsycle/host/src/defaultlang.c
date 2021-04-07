@@ -435,6 +435,20 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "effects", "Effects");
 	psy_property_set_str(section, "outputs", "Outputs");
 	psy_property_set_str(section, "volumes", "Volumes");
+	// machineframe
+	section = psy_property_append_section(lang, "machineframe");
+	psy_property_set_str(section, "about", "About");
+	psy_property_set_str(section, "pwr", "Pwr");	
+	psy_property_set_str(section, "parameters", "Parameters");
+	psy_property_set_str(section, "parammap", "Parammap");
+	psy_property_set_str(section, "command", "Command");
+	psy_property_set_str(section, "help", "Help");
+	psy_property_set_str(section, "bus", "Bus");
+	psy_property_set_str(section, "bank", "Bank");
+	psy_property_set_str(section, "program", "Program");
+	psy_property_set_str(section, "import", "Import");
+	psy_property_set_str(section, "export", "Export");
+	psy_property_set_str(section, "saveas", "Save as");
 	// PatternView
 	section = psy_property_append_section(lang, "patternview");
 	psy_property_set_str(section, "line", "Line");

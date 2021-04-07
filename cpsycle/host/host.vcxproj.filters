@@ -475,6 +475,9 @@
     <ClCompile Include="src\paramviews.c">
       <Filter>machine\machineview\paramview</Filter>
     </ClCompile>
+    <ClCompile Include="src\parammap.c">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -903,6 +906,9 @@
       <Filter>machine\machineview</Filter>
     </ClInclude>
     <ClInclude Include="src\paramviews.h">
+      <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parammap.h">
       <Filter>machine\machineview\paramview</Filter>
     </ClInclude>
   </ItemGroup>

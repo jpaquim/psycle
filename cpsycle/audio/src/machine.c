@@ -286,6 +286,11 @@ static psy_audio_MachineParam* tweakparameter(psy_audio_Machine* self,
 static uintptr_t paramselected(psy_audio_Machine* self) { return psy_INDEX_INVALID; }
 static void selectparam(psy_audio_Machine* self, uintptr_t index) { }
 static uintptr_t numparameters(psy_audio_Machine* self) { return 0; }
+static psy_audio_ParamTranslator* instparamtranslator(
+	psy_audio_Machine* self)
+{
+	return NULL;
+}
 static uintptr_t numtweakparameters(psy_audio_Machine* self) 
 {
 	return psy_audio_machine_numparameters(self);
@@ -604,6 +609,7 @@ static void vtable_init(void)
 		vtable.generateaudio = generateaudio;
 		vtable.numinputs = numinputs;
 		vtable.numoutputs = numoutputs;	
+		vtable.instparamtranslator = instparamtranslator;
 		vtable.numparameters = numparameters;
 		vtable.numtweakparameters = numtweakparameters;
 		vtable.paramselected = paramselected;

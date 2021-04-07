@@ -684,9 +684,19 @@ psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
 	return self->vtable->children(self, recursive);	
 }
 
-void psy_ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
+void psy_ui_component_setfont(psy_ui_Component* self, const psy_ui_Font* source)
 {	
 	self->vtable->setfont(self, source);
+}
+
+void psy_ui_component_setfontinfo(psy_ui_Component* self,
+	psy_ui_FontInfo fontinfo)
+{
+	psy_ui_Font font;
+
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_component_setfont(self, &font);	
+	psy_ui_font_dispose(&font);	
 }
 
 void psy_ui_component_preventdefault(psy_ui_Component* self)

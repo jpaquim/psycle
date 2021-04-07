@@ -103,6 +103,11 @@ static void selectauxcolumn(psy_audio_CustomMachine* self, uintptr_t index)
 	self->auxcolumnselected = index;
 }
 
+static psy_audio_ParamTranslator* machineproxy_instparamtranslator(psy_audio_CustomMachine* self)
+{
+	return &self->param_translator;
+}
+
 // vtable
 static MachineVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -144,6 +149,8 @@ static void vtable_init(psy_audio_CustomMachine* self)
 		vtable.auxcolumnselected = (fp_machine_auxcolumnselected)auxcolumnselected;
 		vtable.paramselected = (fp_machine_paramselected)paramselected;
 		vtable.selectparam = (fp_machine_selectparam)selectparam;
+		vtable.instparamtranslator = (fp_machine_instparamtranslator)
+			machineproxy_instparamtranslator;
 		vtable_initialized = TRUE;
 	}
 }
@@ -165,6 +172,7 @@ void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 	self->auxcolumnselected = 0;
 	self->paramselected = 0;
 	custommachine_init_memory(self, psy_audio_MAX_STREAM_SIZE);
+	psy_audio_paramtranslator_init(&self->param_translator);
 }
 
 void custommachine_init_memory(psy_audio_CustomMachine* self, uintptr_t numframes)
@@ -182,6 +190,7 @@ void psy_audio_custommachine_dispose(psy_audio_CustomMachine* self)
 	self->editname = 0;
 	custommachine_dispose_memory(self);
 	machine_base_dispose(&self->machine);
+	psy_audio_paramtranslator_dispose(&self->param_translator);
 }
 
 void custommachine_dispose_memory(psy_audio_CustomMachine* self)

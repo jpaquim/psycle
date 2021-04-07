@@ -227,6 +227,11 @@ void sequencelisttrack_init(SequenceListTrack* self, psy_ui_Component* parent,
 	psy_signal_connect(
 		&state->cmds->workspace->sequenceselection.signal_deselect,
 		self, sequencelisttrack_onsequenceselectiondeselect);
+	if (state->cmds->workspace->sequenceselection.editposition.track ==
+			trackindex) {
+		psy_ui_component_addstylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
+	}
 }
 
 SequenceListTrack* sequencelisttrack_alloc(void)

@@ -13,18 +13,15 @@ static void parameterlistbox_onlistboxselected(ParameterListBox*,
 	psy_ui_Component* sender, intptr_t slot);
 
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
-	psy_audio_Machine* machine, Workspace* workspace)
+	psy_audio_Machine* machine, MachineParamConfig* config)
 {	
-	uintptr_t paramindex;
-	psy_Property* theme;
+	uintptr_t paramindex;	
+	
+	assert(config);
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	theme = workspace->config.macparam.theme;
-	if (theme) {
-		psy_ui_component_setbackgroundcolour(&self->component, psy_ui_colour_make(
-			psy_property_at_colour(theme, "machineguititlecolour", 0x00292929)));
-	}
-	self->workspace = workspace;
+	psy_ui_component_setbackgroundcolour(&self->component,
+		machineparamconfig_skin(config)->titlecolour);	
 	self->machine = machine;
 	if (self->machine && psy_audio_machine_numtweakparameters(self->machine) > 0) {
 		paramindex = 0;
@@ -32,16 +29,14 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 		paramindex = psy_INDEX_INVALID;
 	}
 	knobui_init(&self->knob, &self->component, &self->component, machine, paramindex,
-		NULL, machineparamconfig_skin(
-			psycleconfig_macparam(workspace_conf(workspace))));
+		NULL, machineparamconfig_skin(config));
 	psy_ui_component_setalign(&self->knob.component, psy_ui_ALIGN_TOP);
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_listbox_setcharnumber(&self->listbox, 10.0);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		parameterlistbox_onlistboxselected);		
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);	
-	parameterlistbox_setmachine(self, self->machine);
-	
+	parameterlistbox_setmachine(self, self->machine);	
 }
 
 void parameterlistbox_build(ParameterListBox* self)

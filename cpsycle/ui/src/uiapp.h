@@ -44,7 +44,7 @@ typedef struct psy_ui_App {
 	psy_Signal signal_dispose;
 	psy_Signal signal_mousehook;
 	// internal data
-	struct psy_ui_AppImp* imp;	
+	struct psy_ui_AppImp* imp;
 	struct psy_ui_ImpFactory* imp_factory;
 	psy_ui_AppZoom zoom;
 	psy_ui_Defaults defaults;
@@ -65,6 +65,9 @@ struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);
 void psy_ui_app_close(psy_ui_App*);
+void psy_ui_app_startmousehook(psy_ui_App*);
+void psy_ui_app_stopmousehook(psy_ui_App*);
+
 void psy_ui_app_setzoomrate(psy_ui_App*, double rate);
 double psy_ui_app_zoomrate(const psy_ui_App*);
 psy_ui_AppZoom* psy_ui_app_zoom(psy_ui_App*);
@@ -95,6 +98,8 @@ typedef int (*psy_ui_fp_appimp_run)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stop)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_close)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_onappdefaultschange)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_startmousehook)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_stopmousehook)(struct psy_ui_AppImp*);
 
 typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_dispose dev_dispose;
@@ -102,6 +107,8 @@ typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_stop dev_stop;
 	psy_ui_fp_appimp_close dev_close;	
 	psy_ui_fp_appimp_onappdefaultschange dev_onappdefaultschange;
+	psy_ui_fp_appimp_startmousehook dev_startmousehook;
+	psy_ui_fp_appimp_stopmousehook dev_stopmousehook;
 } psy_ui_AppImpVTable;
 
 typedef struct psy_ui_AppImp {

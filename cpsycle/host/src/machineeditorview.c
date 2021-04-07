@@ -20,29 +20,33 @@ static void machineeditorview_onmachineeditresize(MachineEditorView*,
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
 {
-	return (psy_ui_win_ComponentImp*)self->imp;
+	return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
 }
 #endif
 
 static psy_ui_ComponentVtable machineeditorview_vtable;
-static int machineeditorview_vtable_initialized = 0;
+static bool machineeditorview_vtable_initialized = FALSE;
 
 static void machineeditorview_vtable_init(MachineEditorView* self)
 {
 	if (!machineeditorview_vtable_initialized) {
 		machineeditorview_vtable = *(self->component.vtable);
-		machineeditorview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		machineeditorview_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			machineeditorview_onpreferredsize;
-		machineeditorview_vtable.ontimer = (psy_ui_fp_component_ontimer)machineeditorview_ontimer;
+		machineeditorview_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			machineeditorview_ontimer;
+		machineeditorview_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &machineeditorview_vtable;
 }
 
 void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, Workspace* workspace)
-{			
+{
 	psy_ui_component_init(&self->component, parent, NULL);
-	machineeditorview_vtable_init(self);
-	self->component.vtable = &machineeditorview_vtable;
+	machineeditorview_vtable_init(self);	
 	self->machine = machine;
 	self->workspace = workspace;
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
@@ -52,8 +56,7 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machineeditorview_ondestroy);
 	psy_signal_connect(&workspace->signal_machineeditresize, self,
-		machineeditorview_onmachineeditresize);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+		machineeditorview_onmachineeditresize);	
 }
 
 void machineeditorview_ondestroy(MachineEditorView* self, psy_ui_Component* sender)
@@ -77,6 +80,7 @@ MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
 	rv = machineeditorview_alloc();
 	if (rv) {
 		machineeditorview_init(rv, parent, machine, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;	
 }

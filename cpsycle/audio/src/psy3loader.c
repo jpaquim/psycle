@@ -2408,6 +2408,7 @@ int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader* self,
 	uint8_t nummaps;
 	uint8_t i;
 	int status;
+	psy_audio_ParamTranslator* translator;
 
 	if (!psyfile_expect(self->fp, "PMAP", 4)) {
 		return PSY_ERRFILE;
@@ -2415,9 +2416,10 @@ int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader* self,
 	if (status = psyfile_read(self->fp, &nummaps, sizeof(uint8_t))) {
 		return status;
 	}
+	translator = psy_audio_machine_instparamtranslator(machine);
 	for (i = 0; i < nummaps; ++i) {
 		uint8_t idx;
-		uint16_t value;		
+		uint16_t value;
 
 		if (status = psyfile_read(self->fp, &idx, sizeof(idx))) {
 			return status;
@@ -2425,7 +2427,10 @@ int psy_audio_psy3loader_loadparammapping(psy_audio_PSY3Loader* self,
 		if (status = psyfile_read(self->fp, &value, sizeof(value))) {
 			return status;
 		}
-		//set_virtual_param_index(idx, value);
+		if (translator) {
+			psy_audio_paramtranslator_set_virtual_index(translator,
+				idx, value);
+		}
 	}
 	return PSY_OK;
 }

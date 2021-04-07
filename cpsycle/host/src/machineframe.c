@@ -5,7 +5,10 @@
 
 #include "machineframe.h"
 // host
+#include "paramviews.h"
 #include "resources/resource.h"
+#include "machineeditorview.h"
+#include "paramview.h"
 // ui
 #include <uiframe.h>
 // platform
@@ -54,19 +57,21 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->power, &self->buttons, NULL);
-	psy_ui_button_settext(&self->power, "Pwr");
+	psy_ui_button_settext(&self->power, "machineframe.pwr");
 	self->power.component.margin.left = psy_ui_value_makeew(1.0);
 	psy_ui_bitmap_loadresource(&self->power.bitmapicon, IDB_POWER_DARK);
 	psy_ui_bitmap_settransparency(&self->power.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init(&self->parameters, &self->buttons, NULL);
-	psy_ui_button_settext(&self->parameters, "Parameters");	
+	psy_ui_button_settext(&self->parameters, "machineframe.parameters");
+	psy_ui_button_init(&self->parammap, &self->buttons, NULL);
+	psy_ui_button_settext(&self->parammap, "machineframe.parammap");
 	psy_ui_button_init(&self->command, &self->buttons, NULL);
-	psy_ui_button_settext(&self->command, "Command");
+	psy_ui_button_settext(&self->command, "machineframe.command");
 	psy_ui_button_init(&self->help, &self->buttons, NULL);
-	psy_ui_button_settext(&self->help, "Help");	
+	psy_ui_button_settext(&self->help, "machineframe.help");	
 	psy_ui_button_init(&self->isbus, &self->buttons, NULL);
-	psy_ui_button_settext(&self->isbus, "Bus");	
+	psy_ui_button_settext(&self->isbus, "machineframe.bus");	
 	psy_ui_button_init(&self->more, &self->row0, NULL);
 	psy_ui_button_preventtranslation(&self->more);
 	psy_ui_button_settext(&self->more, ". . .");
@@ -104,9 +109,11 @@ void parameterbar_onalign(ParameterBar* self)
 
 // MachineFrame
 // prototypes
-static void machineframe_ondestroyed(MachineFrame* self,
-	psy_ui_Component* frame);
+static void machineframe_ondestroy(MachineFrame*);
+static void machineframe_initparamview(MachineFrame*, Workspace*);
 static void machineframe_toggleparameterbox(MachineFrame*,
+	psy_ui_Component* sender);
+static void machineframe_toggleparammap(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_oncommand(MachineFrame*,
 	psy_ui_Component* sender);
@@ -136,6 +143,9 @@ static void machineframe_vtable_init(MachineFrame* self)
 {
 	if (!machineframe_vtable_initialized) {
 		machineframe_vtable = *(self->component.vtable);
+		machineframe_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			machineframe_ondestroy;
 		machineframe_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			machineframe_ontimer;
@@ -145,13 +155,16 @@ static void machineframe_vtable_init(MachineFrame* self)
 }
 // implementation
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	psy_audio_Machine* machine, ParamViews* paramviews, Workspace* workspace)
 {
 	self->view = NULL;
 	self->paramview = NULL;
+	self->paramviews = paramviews;
 	self->machine = NULL;
 	self->machineview = parent;
 	self->showfullmenu = FALSE;
+	self->macid = psy_INDEX_INVALID;
+	self->machine = machine;
 	psy_ui_toolframe_init(&self->component, parent);
 	machineframe_vtable_init(self);
 	psy_ui_component_move(&self->component,
@@ -160,23 +173,30 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);		
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
-	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0, "new val", workspace);
+	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0,
+		"new val", workspace);
 	psy_ui_component_setalign(&self->newval.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->newval.component);
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	parameterlistbox_init(&self->parameterbox, &self->client, NULL, workspace);
+	psy_ui_component_setbackgroundmode(&self->client, psy_ui_NOBACKGROUND);
+	parammap_init(&self->parammap, &self->client, NULL,
+		psycleconfig_macparam(workspace_conf(workspace)));
+	psy_ui_component_setalign(&self->parammap.component,
+		psy_ui_ALIGN_RIGHT);
+	parameterlistbox_init(&self->parameterbox, &self->client, NULL,
+		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_setalign(&self->parameterbox.component,
-		psy_ui_ALIGN_RIGHT);	
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
-	psy_ui_editor_addtext(&self->help, "About");
-	psy_signal_connect(&self->component.signal_destroyed, self,
-		machineframe_ondestroyed);
+	psy_ui_editor_addtext(&self->help, "machineframe.about");
 	psy_signal_connect(&self->parameterbar.parameters.signal_clicked, self,
 		machineframe_toggleparameterbox);
+	psy_signal_connect(&self->parameterbar.parammap.signal_clicked, self,
+		machineframe_toggleparammap);
 	psy_signal_connect(&self->parameterbar.command.signal_clicked, self,
 		machineframe_oncommand);
 	psy_signal_connect(&self->parameterbar.help.signal_clicked, self,
@@ -192,8 +212,61 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_align, self,
 		machineframe_onalign);	
 	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
-		machineframe_onzoomboxchanged);
-	machineframe_updatepwr(self);	
+		machineframe_onzoomboxchanged);	
+	machineframe_initparamview(self, workspace);
+	machineframe_updatepwr(self);
+}
+
+void machineframe_ondestroy(MachineFrame* self)
+{	
+	// Paramview stores pointers of all machineframes
+	// erase the frame from paramviews
+	paramviews_erase(self->paramviews, self->macid);	
+}
+
+MachineFrame* machineframe_alloc(void)
+{
+	return (MachineFrame*)malloc(sizeof(MachineFrame));
+}
+
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent,
+	psy_audio_Machine* machine, struct ParamViews* paramviews,
+	Workspace* workspace)
+{
+	MachineFrame* rv;
+
+	rv = machineframe_alloc();
+	if (rv) {
+		machineframe_init(rv, parent, machine, paramviews, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
+}
+
+void machineframe_initparamview(MachineFrame* self, Workspace* workspace)
+{
+	if (!self->machine) {
+		return;
+	}
+	if (psy_audio_machine_haseditor(self->machine)) {
+		MachineEditorView* editorview;
+
+		editorview = machineeditorview_allocinit(
+			psy_ui_notebook_base(&self->notebook), self->machine, workspace);
+		if (editorview) {
+			machineframe_setview(self, &editorview->component,
+				self->machine);
+		}
+	} else {
+		ParamView* paramview;
+
+		paramview = paramview_allocinit(
+			psy_ui_notebook_base(&self->notebook), self->machine,
+			psycleconfig_macparam(workspace_conf(workspace)));
+		if (paramview) {
+			machineframe_setparamview(self, paramview, self->machine);
+		}
+	}
 }
 
 void machineframe_setparamview(MachineFrame* self, ParamView* view,
@@ -214,7 +287,14 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	psy_ui_component_setalign(self->view, psy_ui_ALIGN_CLIENT);	
 	parameterlistbox_setmachine(&self->parameterbox, machine);
 	psy_ui_component_hide(&self->parameterbox.component);
+	parammap_setmachine(&self->parammap, machine);
+	psy_ui_component_hide(&self->parammap.component);
 	presetsbar_setmachine(&self->parameterbar.presetsbar, machine);	
+	if (self->machine) {
+		self->macid = psy_audio_machine_slot(self->machine);
+	} else {
+		self->macid = psy_INDEX_INVALID;
+	}
 	if (self->machine &&
 			psy_audio_machine_mode(self->machine) == psy_audio_MACHMODE_GENERATOR) {
 		psy_ui_component_hide(&self->parameterbar.isbus.component);
@@ -255,32 +335,6 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
-{	
-	if (self->view) {
-		free(self->view);
-	}
-	//psy_signal_disconnect(&self->workspace->signal_defaultfontchanged, self,
-	//	ondefaultfontchanged);
-}
-
-MachineFrame* machineframe_alloc(void)
-{
-	return (MachineFrame*) malloc(sizeof(MachineFrame));
-}
-
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent,
-	Workspace* workspace)
-{
-	MachineFrame* rv;
-
-	rv = machineframe_alloc();
-	if (rv) {
-		machineframe_init(rv, parent, workspace);
-	}
-	return rv;	
-}
-
 void machineframe_toggleparameterbox(MachineFrame* self,
 	psy_ui_Component* sender)
 {
@@ -293,6 +347,23 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 	} else {
 		psy_ui_component_show(&self->parameterbox.component);		
 		psy_ui_button_highlight(&self->parameterbar.parameters);
+	}
+	machineframe_resize(self);
+	psy_ui_component_align(&self->client);
+}
+
+void machineframe_toggleparammap(MachineFrame* self,
+	psy_ui_Component* sender)
+{
+	psy_ui_Size viewsize;
+
+	viewsize = psy_ui_component_preferredsize(self->view, 0);
+	if (psy_ui_component_visible(&self->parammap.component)) {
+		psy_ui_component_hide(&self->parammap.component);
+		psy_ui_button_disablehighlight(&self->parameterbar.parammap);
+	} else {
+		psy_ui_component_show(&self->parammap.component);
+		psy_ui_button_highlight(&self->parameterbar.parammap);
 	}
 	machineframe_resize(self);
 	psy_ui_component_align(&self->client);
@@ -371,7 +442,7 @@ void machineframe_resize(MachineFrame* self)
 	tm = psy_ui_component_textmetric(&self->component);	
 	viewsize = psy_ui_component_preferredsize(self->view, NULL);	
 	if (psy_ui_component_visible(&self->parameterbox.component)) {
-		psy_ui_Size paramsize;
+		psy_ui_Size paramsize;		
 		uintptr_t numparams;
 
 		paramsize = psy_ui_component_preferredsize(
@@ -381,7 +452,19 @@ void machineframe_resize(MachineFrame* self)
 		numparams = psy_audio_machine_numtweakparameters(self->machine);
 		viewsize.height = psy_ui_max_values(viewsize.height,
 			psy_ui_value_makeeh(psy_min(numparams + 4.0, 8.0)), tm);
-	}		
+	}
+	if (psy_ui_component_visible(&self->parammap.component)) {
+		psy_ui_Size paramsize;
+		uintptr_t numparams;
+
+		paramsize = psy_ui_component_preferredsize(
+			&self->parammap.component, NULL);
+		viewsize.width = psy_ui_add_values(viewsize.width,
+			paramsize.width, tm);
+		numparams = psy_audio_machine_numtweakparameters(self->machine);
+		viewsize.height = psy_ui_max_values(viewsize.height,
+			psy_ui_value_makeeh(psy_min(numparams + 4.0, 8.0)), tm);
+	}
 	if (self->showfullmenu) {
 		bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 			NULL);
