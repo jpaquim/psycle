@@ -208,6 +208,24 @@ void psy_ui_app_close(psy_ui_App* self)
 	}
 }
 
+void psy_ui_app_startmousehook(psy_ui_App* self)
+{
+	assert(self);
+
+	if (self->imp) {
+		self->imp->vtable->dev_startmousehook(self->imp);
+	}
+}
+
+void psy_ui_app_stopmousehook(psy_ui_App* self)
+{
+	assert(self);
+
+	if (self->imp) {
+		self->imp->vtable->dev_stopmousehook(self->imp);
+	}
+}
+
 void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 {	
 	assert(self);
@@ -318,6 +336,8 @@ static int psy_ui_appimp_run(psy_ui_AppImp* self) { return PSY_ERRRUN; }
 static void psy_ui_appimp_stop(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_close(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_onappdefaultschange(psy_ui_AppImp* self) { }
+static void psy_ui_appimp_startmousehook(psy_ui_AppImp* self) { }
+static void psy_ui_appimp_stopmousehook(psy_ui_AppImp* self) { }
 
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -330,6 +350,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_stop = psy_ui_appimp_stop;
 		imp_vtable.dev_close = psy_ui_appimp_close;	
 		imp_vtable.dev_onappdefaultschange = psy_ui_appimp_onappdefaultschange;
+		imp_vtable.dev_startmousehook = psy_ui_appimp_startmousehook;
+		imp_vtable.dev_stopmousehook = psy_ui_appimp_stopmousehook;
 		imp_vtable_initialized = TRUE;
 	}
 }

@@ -63,7 +63,8 @@ void paramrackbox_init(ParamRackBox* self, psy_ui_Component* parent,
 	}
 	// Parameter List
 	parameterlistbox_init(&self->parameters, &self->component,
-		psy_audio_machines_at(&workspace->song->machines, slot), workspace);
+		psy_audio_machines_at(&workspace->song->machines, slot),
+		psycleconfig_macparam(workspace_conf(workspace)));
 	psy_ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(
 		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,

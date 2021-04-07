@@ -80,7 +80,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
-	machineview_initcomponent(&self->component, parent);
+	machineview_initcomponent(self, parent);
 	self->shownewmachine = FALSE;
 	self->workspace = workspace;
 	paramviews_init(&self->paramviews, &self->component, workspace);	

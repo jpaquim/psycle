@@ -64,6 +64,8 @@ static void psy_ui_winapp_dispose(psy_ui_WinApp*);
 static int psy_ui_winapp_run(psy_ui_WinApp*);
 static void psy_ui_winapp_stop(psy_ui_WinApp*);
 static void psy_ui_winapp_close(psy_ui_WinApp*);
+static void psy_ui_winapp_startmousehook(psy_ui_WinApp*);
+static void psy_ui_winapp_stopmousehook(psy_ui_WinApp*);
 
 // vtable
 static psy_ui_AppImpVTable imp_vtable;
@@ -83,6 +85,8 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 		imp_vtable.dev_onappdefaultschange =
 			(psy_ui_fp_appimp_onappdefaultschange)
 			psy_ui_winapp_onappdefaultschange;		
+		imp_vtable.dev_startmousehook = (psy_ui_fp_appimp_startmousehook)psy_ui_winapp_startmousehook;
+		imp_vtable.dev_stopmousehook = (psy_ui_fp_appimp_stopmousehook)psy_ui_winapp_stopmousehook;
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -108,6 +112,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	self->comwinproc = ui_com_winproc;
 	self->winid = 20000;
 	self->eventretarget = 0;
+	self->mousehook = 0;
 	psy_ui_winapp_registerclasses(self);
 	hr = CoInitialize(NULL);	
 	if (hr == S_FALSE) {
@@ -130,11 +135,12 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 
 void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 {
+	psy_ui_winapp_stopmousehook(self);
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
 	psy_list_free(self->targetids);
 	DeleteObject(self->defaultbackgroundbrush);
-	CoUninitialize();
+	CoUninitialize();	
 }
 
 void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
@@ -972,9 +978,7 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 int psy_ui_winapp_run(psy_ui_WinApp* self) 
 {
 	MSG msg;
-
-
-	HHOOK mousehook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, NULL, 0);
+	
 	// __try
 	// {
 		while (GetMessage(&msg, NULL, 0, 0)) {
@@ -986,6 +990,21 @@ int psy_ui_winapp_run(psy_ui_WinApp* self)
 	//		GetExceptionInformation())) {
 	// }
     return (int) msg.wParam ;
+}
+
+void psy_ui_winapp_startmousehook(psy_ui_WinApp* self)
+{
+	if (self->mousehook == 0) {
+		self->mousehook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, NULL, 0);
+	}
+}
+
+void psy_ui_winapp_stopmousehook(psy_ui_WinApp* self)
+{
+	if (self->mousehook) {
+		UnhookWindowsHookEx(self->mousehook);
+		self->mousehook = NULL;
+	}
 }
 
 void psy_ui_winapp_stop(psy_ui_WinApp* self)

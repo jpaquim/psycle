@@ -23,7 +23,8 @@
 
 // ParamView
 // Prototypes
-static void ontimer(ParamView*, uintptr_t timerid);
+static void paramview_updateskin(ParamView*);
+static void paramview_ontimer(ParamView*, uintptr_t timerid);
 static uintptr_t paramview_numrows(const ParamView*);
 static void paramview_build(ParamView*);
 // vtable
@@ -35,45 +36,26 @@ static void vtable_init(ParamView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
-			ontimer;
+			paramview_ontimer;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 // implementation
 void paramview_init(ParamView* self, psy_ui_Component* parent,
-	psy_audio_Machine* machine, Workspace* workspace)
-{
-	psy_Property* pv;
-
+	psy_audio_Machine* machine, MachineParamConfig* config)
+{	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	self->workspace = workspace;
-	self->machine = machine;
-	self->numparams = 0;
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);	
+	self->config = config;	
+	self->machine = machine;	
 	self->paramstrobe = 0;
-	pv = psy_property_findsection(&self->workspace->config.config, "visual.paramview");
-	if (pv) {
-		psy_ui_Font font;
-
-		psy_ui_fontinfo_init_string(&self->fontinfo,
-			psy_property_at_str(pv, "font", "tahoma;-16"));
-		psy_ui_font_init(&font, &self->fontinfo);
-		psy_ui_component_setfont(&self->component, &font);
-		psy_ui_font_dispose(&font);
-	} else {
-		psy_ui_fontinfo_init_string(&self->fontinfo, "tahoma;-16");
-	}	
-	self->skin = machineparamconfig_skin(
-		psycleconfig_macparam(workspace_conf(workspace)));
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->skin->bottomcolour);
-	self->sizechanged = 1;	
-	if (self->machine) {
-		paramview_build(self);
-	}	
+	self->sizechanged = 1;
+	paramview_updateskin(self);
+	paramview_build(self);		
 }
 
 ParamView* paramview_alloc(void)
@@ -82,18 +64,28 @@ ParamView* paramview_alloc(void)
 }
 
 ParamView* paramview_allocinit(psy_ui_Component* parent,
-	psy_audio_Machine* machine, Workspace* workspace)
+	psy_audio_Machine* machine, MachineParamConfig* config)
 {
 	ParamView* rv;
 
 	rv = paramview_alloc();
 	if (rv) {
-		paramview_init(rv, parent, machine, workspace);
+		paramview_init(rv, parent, machine, config);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
 }
 
-void ontimer(ParamView* self, uintptr_t timerid)
+void paramview_updateskin(ParamView* self)
+{
+	self->fontinfo = machineparamconfig_fontinfo(self->config);
+	psy_ui_component_setfontinfo(&self->component, self->fontinfo);
+	self->skin = machineparamconfig_skin(self->config);
+	psy_ui_component_setbackgroundcolour(&self->component,
+		self->skin->bottomcolour);
+}
+
+void paramview_ontimer(ParamView* self, uintptr_t timerid)
 {
 	if (self->machine && psy_audio_machine_paramstrobe(self->machine)
 			!= self->paramstrobe) {
@@ -136,12 +128,7 @@ void paramview_build(ParamView* self)
 				slider = FALSE;
 				checkinslidergroup = FALSE;
 				switch (psy_audio_machine_parameter_type(self->machine, machineparam) &
-					~MPF_SMALL) {
-				case MPF_NULL: {
-					component = psy_ui_component_allocinit(currcolumn, &self->component);
-					psy_ui_component_setminimumsize(component,
-						psy_ui_size_makeem(self->skin->paramwidth_small, 2.0));
-					break; }
+					~MPF_SMALL) {				
 				case MPF_HEADER: {
 					HeaderUi* header;
 
@@ -221,9 +208,14 @@ void paramview_build(ParamView* self)
 						component = &switchui->component;
 					}
 					break; }
-				default:
-					break;
-				}				
+				default: {
+					component = psy_ui_component_allocinit(currcolumn,
+						&self->component);
+					psy_ui_component_setpreferredsize(component,
+						psy_ui_size_makeem(self->skin->paramwidth_small, 2.0));
+					psy_ui_component_preventalign(component);
+					break; }
+				}
 				if (component) {					
 					psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);					
 					if (slider) {

@@ -11,6 +11,7 @@
 #include "machineinfo.h"
 #include "machineparam.h"
 #include "patternevent.h"
+#include "paramtranslator.h"
 
 #include <dsptypes.h>
 
@@ -184,6 +185,8 @@ typedef	psy_audio_MachineParam* (*fp_machine_parameter)(struct
 	psy_audio_Machine*, uintptr_t param);
 typedef	psy_audio_MachineParam* (*fp_machine_tweakparameter)(struct
 	psy_audio_Machine*, uintptr_t param);
+typedef	psy_audio_ParamTranslator* (*fp_machine_instparamtranslator)(struct
+	psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef uintptr_t(*fp_machine_paramselected)(struct psy_audio_Machine*);
@@ -368,7 +371,7 @@ typedef struct {
 	fp_machine_param_label parameter_label;	
 	fp_machine_param_tweak parameter_tweak;
 	fp_machine_param_reset parameter_reset;
-
+	fp_machine_instparamtranslator instparamtranslator;
 	// data
 	fp_machine_putdata putdata;
 	fp_machine_data data;
@@ -636,6 +639,12 @@ INLINE const char* psy_audio_machine_modulepath(psy_audio_Machine* self)
 INLINE uintptr_t psy_audio_machine_shellidx(psy_audio_Machine* self)
 {
 	return self->vtable->shellidx(self);
+}
+
+INLINE psy_audio_ParamTranslator* psy_audio_machine_instparamtranslator(
+	psy_audio_Machine* self)
+{
+	return self->vtable->instparamtranslator(self);
 }
 
 INLINE uintptr_t psy_audio_machine_numparametercols(psy_audio_Machine* self)

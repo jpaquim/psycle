@@ -82,6 +82,7 @@ static void machineproxy_deactivatestandby(psy_audio_MachineProxy*);
 static int machineproxy_hasstandby(psy_audio_MachineProxy*);
 static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
+static psy_audio_ParamTranslator* machineproxy_instparamtranslator(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_paramstrobe(const psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy*);
 static uintptr_t paramselected(psy_audio_MachineProxy*);
@@ -217,6 +218,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_tweakparameter;
 		vtable.numparameters = (fp_machine_numparameters)
 			machineproxy_numparameters;
+		vtable.instparamtranslator = (fp_machine_instparamtranslator)
+			machineproxy_instparamtranslator;
 		vtable.paramstrobe = (fp_machine_paramstrobe)
 			machineproxy_paramstrobe;
 		vtable.numtweakparameters = (fp_machine_numtweakparameters)
@@ -929,20 +932,20 @@ const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-uintptr_t machineproxy_numparameters(psy_audio_MachineProxy* self)
+psy_audio_ParamTranslator* machineproxy_instparamtranslator(psy_audio_MachineProxy* self)
 {
-	uintptr_t rv = 0;
+	psy_audio_ParamTranslator* rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			rv = psy_audio_machine_numparameters(self->client);
+			rv = psy_audio_machine_instparamtranslator(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
-		__except(FilterException(self, "numparameters", GetExceptionCode(),
-			GetExceptionInformation())) {			
+		__except (FilterException(self, "instparamtranslator", GetExceptionCode(),
+			GetExceptionInformation())) {
 		}
 #endif		
 	}
@@ -963,6 +966,26 @@ uintptr_t machineproxy_paramstrobe(const psy_audio_MachineProxy* self)
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(((psy_audio_MachineProxy*)self),
 			"paramstrobe", GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t machineproxy_numparameters(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numparameters(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "numparameters", GetExceptionCode(),
+			GetExceptionInformation())) {			
 		}
 #endif		
 	}

@@ -309,6 +309,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\paramtranslator.c" />
     <ClCompile Include="src\pattern.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -452,6 +453,7 @@
     <ClInclude Include="src\midiloader.h" />
     <ClInclude Include="src\midisongexport.h" />
     <ClInclude Include="src\mixer.h" />
+    <ClInclude Include="src\paramtranslator.h" />
     <ClInclude Include="src\pattern.h" />
     <ClInclude Include="src\patternentry.h" />
     <ClInclude Include="src\patternevent.h" />

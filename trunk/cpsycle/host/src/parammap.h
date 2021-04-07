@@ -1,14 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PARAMLISTBOX_H)
-#define PARAMLISTBOX_H
+#if !defined(PARAMMAP_H)
+#define PARAMMAP_H
 
 // host
 #include "workspace.h"
-#include "knobui.h"
 // ui
 #include <uilistbox.h>
+#include <uilabel.h>
 // audio
 #include <machine.h>
 
@@ -16,24 +16,21 @@
 extern "C" {
 #endif
 
-typedef struct ParameterListBox {
+typedef struct ParamMap {
 	// inherits
 	psy_ui_Component component;
-	// intern
-	psy_ui_ListBox listbox;
-	KnobUi knob;
-	psy_audio_Machine* machine;
-	psy_ui_Bitmap knobbitmap;
+	psy_ui_Label construction;
+	// intern	
 	// references
-	MachineParamConfig* config;
-} ParameterListBox;
+	psy_audio_Machine* machine;
+	MachineParamConfig* config;	
+} ParamMap;
 
-void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*,
+void parammap_init(ParamMap*, psy_ui_Component* parent, psy_audio_Machine*,
 	MachineParamConfig*);
-void parameterlistbox_setmachine(ParameterListBox*, psy_audio_Machine*);
-intptr_t parameterlistbox_selected(ParameterListBox*);
+void parammap_setmachine(ParamMap*, psy_audio_Machine*);
 
-INLINE psy_ui_Component* paramlistbox_base(ParameterListBox* self)
+INLINE psy_ui_Component* parammap_base(ParamMap* self)
 {
 	return &self->component;
 }
@@ -42,4 +39,4 @@ INLINE psy_ui_Component* paramlistbox_base(ParameterListBox* self)
 }
 #endif
 
-#endif
+#endif /* PARAMMAP_H */

@@ -131,7 +131,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {
 		double colwidth;
 
-		colwidth = 10.0;
+		colwidth = 12.0;
 		psy_ui_button_setcharnumber(buttons[i], colwidth);
 		psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 			STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,

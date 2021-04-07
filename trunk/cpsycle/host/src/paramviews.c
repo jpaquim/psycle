@@ -4,16 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "paramviews.h"
-// host
-#include "machineeditorview.h"
-#include "paramview.h"
 // platform
 #include "../../detail/portable.h"
 
 // prototypes
 static void paramviews_onsongchanged(ParamViews*, Workspace*, int flag,
 	psy_audio_Song*);
-static void paramviews_onframedestroyed(ParamViews*, psy_ui_Component* sender);
 static psy_audio_Machines* paramviews_machines(ParamViews*);
 // implementation
 void paramviews_init(ParamViews* self, psy_ui_Component* view,
@@ -24,8 +20,7 @@ void paramviews_init(ParamViews* self, psy_ui_Component* view,
 	assert(workspace);	
 
 	self->view = view;
-	self->workspace = workspace;
-	self->removingall = FALSE;
+	self->workspace = workspace;	
 	psy_table_init(&self->frames);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		paramviews_onsongchanged);
@@ -45,47 +40,32 @@ psy_audio_Machines* paramviews_machines(ParamViews* self)
 }
 
 void paramviews_show(ParamViews* self, uintptr_t macid)
-{	
-	psy_audio_Machine* machine;
-
+{
 	if (paramviews_machines(self)) {
+		psy_audio_Machine* machine;
+
 		machine = psy_audio_machines_at(paramviews_machines(self), macid);
-	} else {
-		machine = NULL;
-	}
-	if (machine) {
-		MachineFrame* frame;
+		if (machine) {
+			MachineFrame* frame;
 
-		frame = paramviews_frame(self, macid);
-		if (!frame) {
-			frame = machineframe_alloc();
-			psy_table_insert(&self->frames, macid, (void*)frame);
-			machineframe_init(frame, self->view, self->workspace);
-			psy_signal_connect(&frame->component.signal_destroy,
-				self, paramviews_onframedestroyed);
-			if (psy_audio_machine_haseditor(machine)) {
-				MachineEditorView* editorview;
-
-				editorview = machineeditorview_allocinit(
-					&frame->notebook.component, machine, self->workspace);
-				if (editorview) {
-					machineframe_setview(frame, &editorview->component,
-						machine);
-				}
-			} else {
-				ParamView* paramview;
-
-				paramview = paramview_allocinit(
-					&frame->notebook.component, machine, self->workspace);
-				if (paramview) {
-					machineframe_setparamview(frame, paramview, machine);
+			frame = paramviews_frame(self, macid);
+			if (!frame) {
+				frame = machineframe_allocinit(self->view, machine, self,
+					self->workspace);
+				if (frame) {
+					psy_table_insert(&self->frames, macid, (void*)frame);
 				}
 			}
-		}
-		if (frame) {
-			psy_ui_component_show(&frame->component);
+			if (frame) {
+				psy_ui_component_show(&frame->component);
+			}
 		}
 	}
+}
+
+void paramviews_erase(ParamViews* self, uintptr_t macid)
+{
+	psy_table_remove(&self->frames, macid);	
 }
 
 void paramviews_remove(ParamViews* self, uintptr_t macid)
@@ -102,36 +82,27 @@ void paramviews_remove(ParamViews* self, uintptr_t macid)
 void paramviews_removeall(ParamViews* self)
 {	
 	psy_TableIterator it;	
-
-	self->removingall = TRUE;
+	psy_List* frames;
+	psy_List* p;
+	
+	frames = NULL;
+	// copy machine frame pointers to a list to prevent traversing with invalid
+	// tableiterators after calling frame destroy
 	for (it = psy_table_begin(&self->frames);
 			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_ui_component_destroy(psy_tableiterator_value(&it));
+			psy_tableiterator_inc(&it)) {		
+		psy_list_append(&frames, psy_tableiterator_value(&it));
 	}
-	psy_table_clear(&self->frames);
-	self->removingall = FALSE;
-}
-
-void paramviews_onframedestroyed(ParamViews* self, psy_ui_Component* sender)
-{
-	if (!self->removingall) {
-		psy_TableIterator it;
-		uintptr_t macid;
-
-		macid = psy_INDEX_INVALID;
-		for (it = psy_table_begin(&self->frames);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			if (psy_tableiterator_value(&it) == sender) {
-				macid = psy_tableiterator_key(&it);
-				break;
-			}
-		}
-		if (macid != psy_INDEX_INVALID) {
-			psy_table_remove(&self->frames, macid);
-		}
+	// destroy frames	
+	for (p = frames; p != NULL; p = p->next) {
+		// a frame will erase themself from paramviews (calling paramviews_erase)
+		// in ondestroy
+		psy_ui_component_destroy((psy_ui_Component*)psy_list_entry(p));
 	}
+	psy_list_free(frames);
+	frames = NULL;
+	// assert if all frames were removed
+	assert(psy_table_size(&self->frames) == 0);
 }
 
 MachineFrame* paramviews_frame(ParamViews* self, uintptr_t macid)

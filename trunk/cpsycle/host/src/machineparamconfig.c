@@ -191,6 +191,18 @@ void machineparamconfig_setdialbpm(MachineParamConfig* self,
 	machineparamconfig_skin(self);
 }
 
+psy_ui_FontInfo machineparamconfig_fontinfo(const MachineParamConfig* self)
+{
+	psy_ui_FontInfo rv;
+
+	assert(self);
+	assert(self->paramview);
+	
+	psy_ui_fontinfo_init_string(&rv,
+		psy_property_at_str(self->paramview, "font", "tahoma;-16"));
+	return rv;
+}
+
 // events
 bool machineparamconfig_onchanged(MachineParamConfig* self, psy_Property*
 	property)

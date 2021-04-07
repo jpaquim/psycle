@@ -822,11 +822,17 @@ int psy_audio_psy3saver_saveparammapping(psy_audio_PSY3Saver* self,
 	uint8_t numMaps = 0;
 	int i;
 	int status;
+	psy_audio_ParamTranslator* translator;
 
+	translator = psy_audio_machine_instparamtranslator(machine);
 	for (i = 0; i < 256; ++i) {
 		uint32_t param;
 		
-		param = i; // translate_param(i);
+		if (translator) {
+			param = (uint32_t)psy_audio_paramtranslator_translate(translator, i);
+		} else {
+			param = i;
+		}
 		if (param < psy_audio_machine_numparameters(machine)) {
 			++numMaps;
 		}
@@ -836,11 +842,15 @@ int psy_audio_psy3saver_saveparammapping(psy_audio_PSY3Saver* self,
 	}
 	if (status = psyfile_write_uint8(self->fp, numMaps)) {
 		return status;
-	}
+	}	
 	for (i = 0; i < 256; ++i) {
 		uint32_t param;
 
-		param = i; // translate_param(i);
+		if (translator) {
+			param = (uint32_t)psy_audio_paramtranslator_translate(translator, i);
+		} else {
+			param = (uint32_t)i;
+		}		
 		if (param < psy_audio_machine_numparameters(machine)) {
 			uint8_t idx;
 			uint16_t value;			

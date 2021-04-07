@@ -15,9 +15,10 @@
 extern "C" {
 #endif
 
+// ParamViews is the container of all Machine Frames (Native/Vst/Internal)
+
 typedef struct ParamViews {
-	psy_Table frames;
-	bool removingall;
+	psy_Table frames;	
 	// references	
 	psy_ui_Component* view;
 	Workspace* workspace;
@@ -28,6 +29,7 @@ void paramviews_dispose(ParamViews*);
 
 void paramviews_show(ParamViews*, uintptr_t macid);
 MachineFrame* paramviews_frame(ParamViews*, uintptr_t macid);
+void paramviews_erase(ParamViews*, uintptr_t macid);
 void paramviews_remove(ParamViews*, uintptr_t macid);
 void paramviews_removeall(ParamViews*);
 

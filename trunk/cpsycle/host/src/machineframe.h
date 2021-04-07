@@ -7,6 +7,7 @@
 #include "newval.h"
 #include "paramview.h"
 #include "paramlistbox.h"
+#include "parammap.h"
 #include "presetsbar.h"
 #include "workspace.h"
 #include "zoombox.h"
@@ -30,7 +31,7 @@ extern "C" {
 //      can be docked at the bottom of the Machineview or floated to
 //      a window.
 
-typedef struct {
+typedef struct ParameterBar {
 	// inherits
 	psy_ui_Component component;
 	// ui elements	
@@ -39,17 +40,21 @@ typedef struct {
 	ZoomBox zoombox;		
 	psy_ui_Button power;
 	psy_ui_Button parameters;
+	psy_ui_Button parammap;
 	psy_ui_Button command;
 	psy_ui_Button help;
 	psy_ui_Button isbus;
 	psy_ui_Button more;
 	PresetsBar presetsbar;
 	// references
-	psy_audio_Machine* machine;
+	psy_audio_Machine* machine;	
 } ParameterBar;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace*);
 
+struct ParamViews;
+
+// MachineFrame
 typedef struct MachineFrame {
 	// inherits
 	psy_ui_Component component;
@@ -57,6 +62,7 @@ typedef struct MachineFrame {
 	ParameterBar parameterbar;
 	psy_ui_Component client;
 	ParameterListBox parameterbox;
+	ParamMap parammap;
 	psy_ui_Notebook notebook;
 	psy_ui_Editor help;
 	psy_ui_Component* view;
@@ -64,14 +70,18 @@ typedef struct MachineFrame {
 	psy_audio_Machine* machine;	
 	NewValView newval;
 	bool showfullmenu;
+	uintptr_t macid;
 	// references
-	ParamView* paramview;	
+	ParamView* paramview;
+	struct ParamViews* paramviews;
 } MachineFrame;
 
-void machineframe_init(MachineFrame*, psy_ui_Component* parent, Workspace*);
+void machineframe_init(MachineFrame*, psy_ui_Component* parent,
+	psy_audio_Machine*, struct ParamViews* paramviews, Workspace*);
 
 MachineFrame* machineframe_alloc(void);
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, Workspace*);
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent,
+	psy_audio_Machine*, struct ParamViews*, Workspace*);
 
 void machineframe_setview(MachineFrame*, psy_ui_Component* view, psy_audio_Machine*);
 void machineframe_setparamview(MachineFrame*, ParamView*, psy_audio_Machine*);
