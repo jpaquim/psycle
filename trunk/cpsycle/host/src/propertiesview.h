@@ -69,7 +69,8 @@ typedef struct PropertiesRenderer {
 	bool usefixedwidth;
 	PropertiesRenderLineState* linestate_clipstart;
 	uintptr_t currlinestatecount;
-	psy_Table linestates;	
+	psy_Table linestates;
+	psy_Table mainlinestates;
 	psy_ui_Colour valuecolour;
 	psy_ui_Colour sectioncolour;
 	psy_ui_Colour separatorcolour;
@@ -95,6 +96,9 @@ INLINE const psy_Property* propertiesrenderer_properties(const
 	return self->properties;
 }
 
+PropertiesRenderLineState* propertiesrenderer_findfirstmainlinestate(
+	PropertiesRenderer*, double y, int* pos);
+
 INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 {
 	return &self->component;
@@ -103,7 +107,10 @@ INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 typedef struct PropertiesView {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// signals
+	psy_Signal signal_changed;
+	psy_Signal signal_selected;
+	// intern
 	psy_ui_Notebook notebook;
 	psy_ui_Component client;
 	psy_ui_Component sectionfloated;
@@ -112,8 +119,7 @@ typedef struct PropertiesView {
 	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;
-	psy_Signal signal_changed;
-	psy_Signal signal_selected;
+	bool preventscrollupdate;
 	// references
 	Workspace* workspace;
 } PropertiesView;

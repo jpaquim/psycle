@@ -33,6 +33,8 @@ static void patternblockmenu_onexport(PatternBlockMenu*, psy_ui_Component* sende
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	PatternView* view, Workspace* workspace)
 {
+	psy_ui_Margin spacing;
+
 	assert(self);
 	assert(view);
 	assert(workspace);
@@ -41,9 +43,9 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->view = view;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
-		psy_ui_defaults_vmargin(psy_ui_defaults()));
+		psy_ui_margin_zero());	
 	psy_ui_button_init_text_connect(&self->cut, &self->component, NULL, "edit.cut",
-		self, patternblockmenu_oncut);
+		self, patternblockmenu_oncut);			
 	psy_ui_button_init_text_connect(&self->copy, &self->component, NULL, "edit.copy",
 		self, patternblockmenu_oncopy);
 	psy_ui_button_init_text_connect(&self->paste, &self->component, NULL, "edit.paste",
@@ -77,7 +79,9 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->import, &self->component, NULL, "Import (psb)",
 		self, patternblockmenu_onimport);
 	psy_ui_button_init_text_connect(&self->export, &self->component, NULL, "Export (psb)",
-		self, patternblockmenu_onexport);
+		self, patternblockmenu_onexport);	
+	spacing = psy_ui_margin_makeem(0.25, 0.25, 0.25, 0.25);
+	psy_ui_component_setspacing_children(&self->component, &spacing);
 	self->target = PATTERNVIEWTARGET_TRACKER;
 }
 

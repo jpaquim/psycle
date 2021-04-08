@@ -48,6 +48,8 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, MachineViewSkin* skin,
 	Workspace* workspace)
 {
+	psy_ui_Margin spacing;
+
 	self->workspace = workspace;
 	self->machine = machine;
 	self->machines = (workspace_song(workspace)) ? &workspace_song(workspace)->machines : NULL;
@@ -57,8 +59,9 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component,
 		machineproperties_vtable_init(self));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
-			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_margin_init_all_em(&spacing, 0.25, 0.25, 0.25, 1.0);
+	psy_ui_component_setspacing(&self->component, &spacing);		
 	machineproperties_updateskin(self);
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
 		NULL, "machineview.pwr", self, machineproperties_onsolobypass);

@@ -21,6 +21,7 @@ static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
+static psy_ui_RealSize spacingsize(psy_ui_Button*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -139,28 +140,44 @@ void onlanguagechanged(psy_ui_Button* self)
 	}
 }
 
+psy_ui_RealSize spacingsize(psy_ui_Button* self)
+{
+	psy_ui_RealSize size;
+	psy_ui_Size valsize;
+	const psy_ui_TextMetric* tm;
+
+	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
+	valsize = psy_ui_component_size(psy_ui_button_base(self));
+	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&self->component.spacing, tm), tm);
+	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&self->component.spacing, tm), tm);
+	size = psy_ui_realsize_make(
+		psy_ui_value_px(&valsize.width, tm),
+		psy_ui_value_px(&valsize.height, tm));
+	return size;
+}
+
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;	
 	psy_ui_RealRectangle r;
 	char* text;
-	double ident;
+	double ident;	
 	
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
 		text = self->text;
-	}
-	size = psy_ui_component_sizepx(psy_ui_button_base(self));
+	}		
+	size = spacingsize(self);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ident = 0.0;
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
+		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize srcbpmsize;
 		psy_ui_RealSize destbpmsize;
-		double vcenter;
-		const psy_ui_TextMetric* tm;
+		double vcenter;		
 		double ratio;
-
+		
 		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 		srcbpmsize = psy_ui_bitmap_size(&self->bitmapicon);		
 		ratio = (tm->tmAscent - tm->tmDescent) / srcbpmsize.height;
@@ -219,17 +236,17 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize)
 {
 	psy_ui_RealPoint rv;
-	psy_ui_RealSize sizepx;
+	psy_ui_RealSize size;
 	
-	sizepx = psy_ui_component_sizepx(psy_ui_button_base(self));
+	size = spacingsize(self);
 	rv = center;
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		rv.x = center.x + (sizepx.width - itemsize.width - center.x) / 2;
+		rv.x = center.x + (size.width - itemsize.width - center.x) / 2;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		rv.y = (sizepx.height - itemsize.height) / 2;
+		rv.y = (size.height - itemsize.height) / 2;
 	}
 	return rv;
 }
@@ -297,6 +314,8 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
 	rv->height = psy_ui_value_makeeh(self->linespacing);
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&self->component.spacing, tm), tm);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&self->component.spacing, tm), tm);
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
@@ -376,8 +395,7 @@ bool psy_ui_button_highlighted(const psy_ui_Button* self)
 
 void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
 {	
-	if (self->component.style.currstyle->colour.mode.set != colour.mode.set ||
-			self->component.style.currstyle->colour.mode.inherited != colour.mode.inherited ||
+	if (self->component.style.currstyle->colour.mode.set != colour.mode.set ||			
 			self->component.style.currstyle->colour.value != colour.value) {
 		psy_ui_colour_set(&self->component.style.currstyle->colour, colour);
 		psy_ui_component_invalidate(&self->component);

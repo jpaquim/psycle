@@ -61,20 +61,19 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		weak = 200;
 		minima = 50;
 	}
-	// Statusbar	
+	// statusbar	
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&onprimary, medium),
-		psy_ui_colour_overlayed(&surface, &overlay, 0.12));	
+		psy_ui_colour_make_overlay(12));		
 	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// seqview buttons
 	style = psy_ui_style_allocinit();	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTONS, style);
 	// seqview button
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style,
-		psy_ui_colour_weighted(&onprimary, medium),
-		surface);
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, medium));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_border_setcolour(&style->border,
@@ -82,9 +81,11 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON, style);
 	// seqview button::hover
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, onprimary, surface);
+	psy_ui_style_setcolours(style, onprimary,
+		psy_ui_colour_make_overlay(4));	
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, onprimary);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.11));
 	psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON_HOVER, style);
 	// seqview button::select
@@ -223,14 +224,14 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_colour_set(&style->colour,
 		psy_ui_colour_weighted(&primary, medium));
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.05));	
+		psy_ui_colour_make_overlay(7));
 	psy_ui_defaults_setstyle(defaults, STYLE_MACHINEBOX, style);
 	// zoombox
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->colour, 
 		psy_ui_colour_weighted(&primary, medium));
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.13));
+		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(defaults, STYLE_ZOOMBOX, style);
 	// machineview
 	style = psy_ui_style_allocinit();
@@ -275,7 +276,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// songproperties
 	style = psy_ui_style_allocinit();
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.09));
+		psy_ui_colour_make_overlay(9));
 	psy_ui_defaults_setstyle(defaults, STYLE_SONGPROPERTIES, style);
 	// songproperties-comments
 	style = psy_ui_style_allocinit();

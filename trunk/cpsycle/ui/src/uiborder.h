@@ -35,8 +35,7 @@ typedef struct {
 
 INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
 	psy_ui_BorderStyle right, psy_ui_BorderStyle bottom, psy_ui_BorderStyle left)
-{
-	self->mode.inherited = FALSE;
+{	
 	self->mode.set =
 		top != psy_ui_BORDER_NONE ||
 		right != psy_ui_BORDER_NONE ||

@@ -101,8 +101,7 @@ typedef struct {
 	bool row0;
 	bool row1;
 	bool row2;
-	bool trackscopes;
-	psy_ui_Value sequenceviewrestorewidth;
+	bool trackscopes;	
 	bool maximized;
 } MaximizedView;
 

@@ -305,6 +305,8 @@ void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_alignall(psy_ui_Component*);
 void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
+void psy_ui_component_setspacing_children(psy_ui_Component*,
+	const psy_ui_Margin*);
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
@@ -340,6 +342,7 @@ psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 	const psy_ui_Margin*);
 psy_List* psy_ui_components_setmargin(psy_List*, const psy_ui_Margin*);
 void psy_ui_component_close(psy_ui_Component*);
+
 
 // psy_ui_ComponentImp
 // flags

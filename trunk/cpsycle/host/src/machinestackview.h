@@ -11,6 +11,7 @@
 #include "paramviews.h"
 #include "workspace.h"
 // ui
+#include <uibutton.h>
 #include <uiscroller.h>
 
 #ifdef __cplusplus
@@ -92,6 +93,7 @@ typedef struct MachineStackState {
 	uintptr_t effectinsertpos;
 	bool effectinsertright;
 	psy_ui_Size effectsize;
+	psy_ui_Size effectsizesmall;
 	psy_ui_Size columnsize;
 	bool update;
 	bool columnselected;
@@ -102,6 +104,7 @@ typedef struct MachineStackState {
 	uintptr_t currlevel;
 	bool drawvirtualgenerators;
 	uintptr_t insertmachinemode;
+	bool drawsmalleffects;
 	// references
 	struct MachineViewBar* statusbar;
 	ParamViews* paramviews;
@@ -146,10 +149,10 @@ typedef struct MachineStackDesc {
 	// inherits
 	psy_ui_Component component;
 	// internal
-	psy_ui_Label inputs;
-	psy_ui_Label effects;
-	psy_ui_Label outputs;
-	psy_ui_Label volumes;
+	psy_ui_Label inputs;	
+	psy_ui_Button effects;
+	psy_ui_Button outputs;
+	psy_ui_Button volumes;
 	// references
 	struct MachineStackView* view;
 } MachineStackDesc;
@@ -265,12 +268,13 @@ typedef struct MachineStackView {
 	// internal
 	MachineStackDesc desc;
 	psy_ui_Component columns;
-	MachineStackInputs inputs;
-	MachineStackOutputs outputs;
+	MachineStackInputs inputs;	
 	MachineStackPane pane;
+	psy_ui_Component spacer;	
+	MachineStackOutputs outputs;
 	MachineStackVolumes volumes;	
 	psy_ui_Scroller scroller_columns;
-	MachineStackState state;	
+	MachineStackState state;
 	// references
 	Workspace* workspace;	
 	ParamViews* paramviews;
@@ -286,6 +290,8 @@ void machinestackview_updateskin(MachineStackView*);
 void machinestackview_showvirtualgenerators(MachineStackView*);
 void machinestackview_hidevirtualgenerators(MachineStackView*);
 void machinestackview_idle(MachineStackView*);
+void machinestackview_drawsmalleffects(MachineStackView*);
+void machinestackview_drawfulleffects(MachineStackView*);
 
 #ifdef __cplusplus
 }

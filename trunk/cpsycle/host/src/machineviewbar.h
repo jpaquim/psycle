@@ -26,7 +26,7 @@ typedef struct MachineViewBar {
 	psy_ui_Component component;
 	// internal
 	// ui elements
-	psy_ui_CheckBox mixersend;
+	psy_ui_CheckBox mixersend;	
 	psy_ui_Label status;
 	// references	
 	psy_audio_Machines* machines;

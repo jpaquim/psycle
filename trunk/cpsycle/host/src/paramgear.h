@@ -46,14 +46,14 @@ void paramrackbox_deselect(ParamRackBox*);
 
 // ParamRackMode
 typedef enum ParamRackMode {
-	PARAMRACK_ALL = 0,
-	PARAMRACK_INPUTS = 1,
-	PARAMRACK_OUTPUTS = 2,
-	PARAMRACK_INCHAIN = 3,
-	PARAMRACK_OUTCHAIN = 4,
-	PARAMRACK_LEVEL = 5
+	PARAMRACK_NONE,
+	PARAMRACK_ALL,
+	PARAMRACK_INPUTS,
+	PARAMRACK_OUTPUTS,
+	PARAMRACK_INCHAIN,
+	PARAMRACK_OUTCHAIN,
+	PARAMRACK_LEVEL
 } ParamRackMode;
-
 
 typedef struct ParamRackBatchBar {
 	// inherit
@@ -68,6 +68,24 @@ typedef struct ParamRackBatchBar {
 } ParamRackBatchBar;
 
 void paramrackbatchbar_init(ParamRackBatchBar*, psy_ui_Component* parent);
+
+typedef struct ParamRackModeBar {
+	// inherit
+	psy_ui_Component component;
+	// signals
+	psy_Signal signal_select;
+	// internal
+	// ui elements
+	psy_ui_Button all;
+	psy_ui_Button inputs;
+	psy_ui_Button outputs;
+	psy_ui_Button inchain;
+	psy_ui_Button outchain;
+	psy_ui_Button level;
+} ParamRackModeBar;
+
+void paramrackmodebar_init(ParamRackModeBar*, psy_ui_Component* parent);
+void paramrackmodebar_setmode(ParamRackModeBar*, ParamRackMode);
 
 // ParamRackPane
 typedef struct ParamRackPane {
@@ -97,7 +115,8 @@ typedef struct ParamRack {
 	ParamRackPane pane;
 	psy_ui_Component bottom;
 	ParamRackBatchBar batchbar;
-	psy_ui_TabBar modeselector;
+	ParamRackModeBar modebar;
+	// psy_ui_TabBar modeselector;
 	IntEdit leveledit;
 	psy_ui_Scroller scroller;
 	// references

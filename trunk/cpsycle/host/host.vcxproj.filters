@@ -322,9 +322,6 @@
     <ClCompile Include="src\machinebar.c">
       <Filter>toolbars</Filter>
     </ClCompile>
-    <ClCompile Include="src\machinedock.c">
-      <Filter>machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\styles.c">
       <Filter>configuration</Filter>
     </ClCompile>
@@ -477,6 +474,9 @@
     </ClCompile>
     <ClCompile Include="src\parammap.c">
       <Filter>machine\machineview\paramview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramgear.c">
+      <Filter>machine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -755,9 +755,6 @@
     <ClInclude Include="src\machinebar.h">
       <Filter>toolbars</Filter>
     </ClInclude>
-    <ClInclude Include="src\machinedock.h">
-      <Filter>machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\styles.h">
       <Filter>configuration</Filter>
     </ClInclude>
@@ -910,6 +907,9 @@
     </ClInclude>
     <ClInclude Include="src\parammap.h">
       <Filter>machine\machineview\paramview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramgear.h">
+      <Filter>machine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

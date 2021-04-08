@@ -1170,7 +1170,8 @@ psy_ui_Component* machineuis_insert(MachineWireView* self, uintptr_t slot)
 		newui = machineui_create(
 			psy_audio_machines_at(self->machines, slot),
 			slot, self->skin, &self->component, &self->component,
-			self->paramviews, TRUE, self->workspace);		
+			self->paramviews, TRUE, MACHINEUIMODE_BITMAP,
+			self->workspace);
 		if (newui) {			
 			psy_table_insert(&self->machineuis, slot, newui);
 			return newui;

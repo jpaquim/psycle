@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+#include "uicolours.h"
 #include "uistyle.h"
 #include "uicomponent.h"
 // platform
@@ -12,7 +13,9 @@ void psy_ui_style_init(psy_ui_Style* self)
 {
 	psy_ui_colour_init(&self->colour);
 	psy_ui_colour_init(&self->backgroundcolour);
-	psy_ui_border_init(&self->border);	
+	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
+	psy_ui_border_init(&self->border);
+	psy_ui_margin_init(&self->spacing);
 	self->use_font = 0;
 	self->dbgflag = 0;
 }
@@ -247,9 +250,8 @@ psy_ui_Colour psy_ui_styles_readcolour(psy_ui_Styles* self, psy_Property* parent
 		value = psy_property_at_colour(parent, key, 0x0);
 		rv = psy_ui_colour_make(value);
 	} else {
-		rv = psy_ui_colour_make(0);
-		rv.mode.inherited = 1;
-		rv.mode.set = 0;
+		rv = psy_ui_colour_make(0);		
+		rv.mode.set = FALSE;
 	}
 	free(colourset);
 	colourset = NULL;

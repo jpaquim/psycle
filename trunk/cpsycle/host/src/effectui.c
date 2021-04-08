@@ -110,6 +110,33 @@ void effectui_init(EffectUi* self, psy_ui_Component* parent,
 		effectui_onshowparameters);	
 }
 
+void effectui_setdrawmode(EffectUi* self, MachineUiMode drawmode)
+{
+	switch (drawmode) {
+		case MACHINEUIMODE_DRAW:
+			self->intern.drawmode = drawmode;
+			psy_ui_component_setbackgroundmode(&self->component,
+				psy_ui_SETBACKGROUND);
+			psy_ui_component_setbackgroundcolour(&self->component,
+				self->intern.bgcolour);
+			break;
+		case MACHINEUIMODE_DRAWSMALL:
+			self->intern.drawmode = drawmode;
+			psy_ui_component_setbackgroundmode(&self->component,
+				psy_ui_SETBACKGROUND);
+			psy_ui_component_setbackgroundcolour(&self->component,
+				self->intern.bgcolour);
+			break;
+		case MACHINEUIMODE_BITMAP:
+		default:
+			self->intern.drawmode = drawmode;
+			psy_ui_component_setbackgroundmode(&self->component,
+				psy_ui_NOBACKGROUND);					
+			self->intern.drawmode = MACHINEUIMODE_BITMAP;
+			break;
+	}
+}
+
 void effectui_dispose(EffectUi* self)
 {
 	assert(self);
@@ -164,15 +191,11 @@ void effectui_drawbackground(EffectUi* self, psy_ui_Graphics* g)
 {
 	assert(self);
 
-	if (!psy_ui_bitmap_empty(&self->intern.skin->skinbmp)) {
+	if (self->intern.drawmode == MACHINEUIMODE_BITMAP &&
+			!psy_ui_bitmap_empty(&self->intern.skin->skinbmp)) {
 		skin_blitcoord(g, &self->intern.skin->skinbmp, psy_ui_realpoint_zero(),
 			&self->intern.coords->background);
-	} else {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_component_position(&self->component);
-		psy_ui_drawsolidrectangle(g, r, self->intern.bgcolour);
-	}
+	}	
 }
 
 void effectui_draweditname(EffectUi* self, psy_ui_Graphics* g)
@@ -204,12 +227,14 @@ void effectui_drawpanning(EffectUi* self, psy_ui_Graphics* g)
 {
 	assert(self);
 
-	skin_blitcoord(g, &self->intern.skin->skinbmp,
-		psy_ui_realpoint_make(
-			skincoord_position(&self->intern.coords->pan,
-				psy_audio_machine_panning(self->intern.machine)),
-			0),
-		&self->intern.coords->pan);
+	if (self->intern.drawmode == MACHINEUIMODE_BITMAP) {
+		skin_blitcoord(g, &self->intern.skin->skinbmp,
+			psy_ui_realpoint_make(
+				skincoord_position(&self->intern.coords->pan,
+					psy_audio_machine_panning(self->intern.machine)),
+				0),
+			&self->intern.coords->pan);
+	}
 }
 
 void effectui_drawmute(EffectUi* self, psy_ui_Graphics* g)
@@ -217,9 +242,11 @@ void effectui_drawmute(EffectUi* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (psy_audio_machine_muted(self->intern.machine)) {
-		skin_blitcoord(g, &self->intern.skin->skinbmp,
-			psy_ui_realpoint_zero(),
-			&self->intern.coords->mute);
+		if (self->intern.drawmode == MACHINEUIMODE_BITMAP) {
+			skin_blitcoord(g, &self->intern.skin->skinbmp,
+				psy_ui_realpoint_zero(),
+				&self->intern.coords->mute);
+		}
 	}
 }
 
@@ -228,9 +255,11 @@ void effectui_drawbypassed(EffectUi* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (psy_audio_machine_bypassed(self->intern.machine)) {
-		skin_blitcoord(g, &self->intern.skin->skinbmp,
-			psy_ui_realpoint_zero(),
-			&self->intern.coords->bypass);
+		if (self->intern.drawmode == MACHINEUIMODE_BITMAP) {
+			skin_blitcoord(g, &self->intern.skin->skinbmp,
+				psy_ui_realpoint_zero(),
+				&self->intern.coords->bypass);
+		}
 	}
 }
 
@@ -239,7 +268,9 @@ void effectui_drawvu(EffectUi* self, psy_ui_Graphics* g)
 	assert(self);
 	
 	effectui_updatevolumedisplay(self);
-	vudisplay_draw(&self->intern.vu, g);	
+	if (self->intern.drawmode == MACHINEUIMODE_BITMAP) {
+		vudisplay_draw(&self->intern.vu, g);
+	}
 }
 
 void effectui_updatevolumedisplay(EffectUi* self)
@@ -383,7 +414,13 @@ void effectui_onshowparameters(EffectUi* self, Workspace* sender,
 void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	psy_ui_size_setreal(rv, 		
-		psy_ui_realrectangle_size(&
-		self->intern.coords->background.dest));
+	if (self->intern.drawmode == MACHINEUIMODE_DRAWSMALL) {
+		*rv = psy_ui_size_make(
+			psy_ui_value_makepx(self->intern.coords->background.dest.right),
+			psy_ui_value_makeeh(1.0));				
+	} else {
+		psy_ui_size_setreal(rv,
+			psy_ui_realrectangle_size(&
+				self->intern.coords->background.dest));
+	}
 }

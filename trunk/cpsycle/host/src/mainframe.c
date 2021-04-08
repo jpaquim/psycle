@@ -305,7 +305,7 @@ void mainframe_initterminal(MainFrame* self)
 		psy_ui_size_zero());
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
-		psy_ui_ALIGN_BOTTOM);	
+		psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
 	psy_signal_connect(&self->workspace.signal_terminal_out, self,
@@ -361,7 +361,7 @@ void mainframe_initviewstatusbars(MainFrame* self)
 
 void mainframe_initstatusbarlabel(MainFrame* self)
 {
-	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);
+	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
@@ -1022,30 +1022,19 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		}
 		if (self->workspace.maximizeview.trackscopes) {
 			psy_ui_component_show(&self->trackscopeview.component);
-		}
-		psy_ui_component_resize(&self->sequenceview.component,
-			psy_ui_size_make(
-			self->workspace.maximizeview.sequenceviewrestorewidth,
-			psy_ui_value_makeeh(0.0)));
+		}		
+		psy_ui_component_show(&self->left);		
 	} else {
-		psy_ui_Size sequenceviewsize;		
-
 		self->workspace.maximizeview.maximized = TRUE;
 		self->workspace.maximizeview.row0 = self->toprow0.visible;
 		self->workspace.maximizeview.row1 = self->toprow1.visible;
 		self->workspace.maximizeview.row2 = self->toprow2.visible;
 		self->workspace.maximizeview.trackscopes =
-			self->trackscopeview.component.visible;
-		sequenceviewsize = psy_ui_component_size(
-			&self->sequenceview.component);
-		self->workspace.maximizeview.sequenceviewrestorewidth =
-			sequenceviewsize.width;
+			self->trackscopeview.component.visible;		
 		psy_ui_component_hide(&self->toprow0);
 		psy_ui_component_hide(&self->toprow1);
 		psy_ui_component_hide(&self->trackscopeview.component);
-		self->sequenceview.component.preventpreferredsizeatalign = TRUE;
-		psy_ui_component_resize(&self->sequenceview.component,
-			psy_ui_size_zero());
+		psy_ui_component_hide(&self->left);		
 	}
 	psy_ui_component_align(mainframe_base(self));
 }
@@ -1417,7 +1406,7 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 void mainframe_onstatus(MainFrame* self, Workspace* sender,
 	const char* text)
 {	
-	psy_ui_label_settext(&self->statusbarlabel, text);
+	psy_ui_label_settext(&self->statusbarlabel, text);	
 	psy_ui_label_fadeout(&self->statusbarlabel);
 }
 

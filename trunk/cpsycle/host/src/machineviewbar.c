@@ -35,10 +35,10 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(machineviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_makeem(0.0, 4.0, 0.0, 0.0));
 	psy_ui_checkbox_init_text(&self->mixersend, machineviewbar_base(self),
-		"machineview.connect-to-mixer-send-return-input");		
+		"machineview.connect-to-mixer-send-return-input");
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
-		machineviewbar_onmixerconnectmodeclick);		
+		machineviewbar_onmixerconnectmodeclick);	
 	psy_ui_label_init(&self->status, machineviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 44.0);	

@@ -19,8 +19,10 @@ extern "C" {
 typedef struct psy_ui_Style {
 	psy_ui_Font font;
 	psy_ui_Colour colour;
-	psy_ui_Colour backgroundcolour;	
-	psy_ui_Border border;	
+	psy_ui_Colour backgroundcolour;
+	psy_ui_Colour overlaycolour;
+	psy_ui_Border border;
+	psy_ui_Margin spacing;
 	bool use_font;
 	int dbgflag;
 } psy_ui_Style;

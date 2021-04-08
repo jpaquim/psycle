@@ -263,21 +263,19 @@ void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 	if (tab) {
 		if (tab && tab->mode == psy_ui_TABMODE_LABEL) {
 			return;
-		}
-		if (tabindex != self->selected || tab->istoggle) {
-			if (!tab->istoggle) {
-				psy_ui_Tab* oldtab;
+		}		
+		if (!tab->istoggle) {
+			psy_ui_Tab* oldtab;
 
-				oldtab = psy_ui_tabbar_tab(self, self->selected);
-				if (oldtab) {
-					psy_ui_component_removestylestate(&oldtab->component,
-						psy_ui_STYLE_TAB_SELECT);
-				}
-				self->selected = tabindex;				
-				psy_ui_component_addstylestate(&tab->component,
-					psy_ui_STYLE_TAB_SELECT);				
-			}			
-		}
+			oldtab = psy_ui_tabbar_tab(self, self->selected);
+			if (oldtab) {
+				psy_ui_component_removestylestate(&oldtab->component,
+					psy_ui_STYLESTATE_SELECT);
+			}
+			self->selected = tabindex;				
+			psy_ui_component_addstylestate(&tab->component,
+				psy_ui_STYLESTATE_SELECT);
+		}		
 	}	
 	psy_signal_emit(&self->signal_change, self, 1, tabindex);	
 }

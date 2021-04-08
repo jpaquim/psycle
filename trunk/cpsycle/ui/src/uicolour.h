@@ -5,31 +5,36 @@
 #define psy_ui_COLOUR_H
 
 #include "../../detail/psydef.h"
+// std
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct psy_ui_ColourMode {
+	bool set;	
+} psy_ui_ColourMode;
+
 typedef struct psy_ui_Colour
 {
-	psy_ui_PropertyMode mode;
+	psy_ui_ColourMode mode;
 	uint32_t value;
+	uint8_t overlay;
 } psy_ui_Colour;
 
 INLINE void psy_ui_colour_init(psy_ui_Colour* self)
-{
-	self->mode.inherited = TRUE;
+{	
 	self->mode.set = FALSE;
 	self->value = 0x00000000;
+	self->overlay = 0;
 }
 
 INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
-{
-	self->mode.inherited = TRUE;
-	self->mode.set = TRUE;
-	self->mode.inherited = TRUE;
-	self->mode.set = TRUE;
+{	
+	self->mode.set = TRUE;	
 	self->value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
+	self->overlay = 0;
 }
 
 void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str);
@@ -37,22 +42,32 @@ void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str);
 INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
 {
 	psy_ui_Colour rv;
-
-	rv.mode.inherited = TRUE;
+	
 	rv.mode.set = TRUE;
 	rv.value = value;
+	rv.overlay = 0;
+	return rv;
+}
+
+INLINE psy_ui_Colour psy_ui_colour_make_overlay(uint8_t value)
+{
+	psy_ui_Colour rv;
+
+	rv.mode.set = TRUE;
+	rv.value = 0;
+	rv.overlay = value;
 	return rv;
 }
 
 INLINE psy_ui_Colour psy_ui_colour_make_argb(uint32_t value)
 {
 	psy_ui_Colour rv;
-
-	rv.mode.inherited = TRUE;
+	
 	rv.mode.set = TRUE;	
 	//0x00B6C5D1
 	rv.value = ((((value) << 16) & 0xFF0000)
 		| (((value) & 0xFF00)) | (((value >> 16) & 0xFF)));
+	rv.overlay = 0;
 	return rv;
 }
 
@@ -65,19 +80,19 @@ INLINE psy_ui_Colour psy_ui_colour_make_notset(void)
 }
 
 INLINE void psy_ui_colour_set(psy_ui_Colour* self, psy_ui_Colour colour)
-{
-	self->mode.inherited = TRUE;
-	self->mode.set = TRUE;
-	self->value = colour.value;
+{	
+	assert(self);
+
+	*self = colour;	
 }
 
 INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 	psy_ui_Colour rv;
-
-	rv.mode.inherited = TRUE;
+	
 	rv.mode.set = TRUE;
 	rv.value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
+	rv.overlay = 0;
 	return rv;
 }
 

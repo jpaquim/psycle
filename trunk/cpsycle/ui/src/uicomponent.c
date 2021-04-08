@@ -44,71 +44,31 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 
 	assert(self);
 
-	curr = self;
+	curr = self;	
 	while (curr) {
-		if (curr->style.currstyle->backgroundcolour.mode.set) {
-			break;
-		}
-		if (self->style.currstyle->backgroundcolour.mode.inherited == FALSE) {
-			curr = NULL;
+		if (curr->style.currstyle->backgroundcolour.mode.set) {			
+			base = curr->style.currstyle->backgroundcolour;
+			if (base.overlay != 0) {
+				uint8_t overlay;
+				psy_ui_Colour overlaycolour;
+
+				if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+					overlaycolour = psy_ui_colour_make(0xFFFFFF);
+				} else {
+					overlaycolour = psy_ui_colour_make(0x0000000);
+				}
+				overlay = base.overlay;
+				base = psy_ui_component_backgroundcolour(
+					psy_ui_component_parent(curr));
+				base = psy_ui_colour_overlayed(&base, &overlaycolour, overlay / 100.0);
+			}
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
-	if (curr) {
-		base = curr->style.currstyle->backgroundcolour;
-	} else {
+	if (!curr) {		
 		base = psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour;
-	}
-	if (self->uselevel) {		
-		psy_ui_Colour overlay;
-		int level;
-		double q;
-
-		if (psy_ui_app_hasdarktheme(psy_ui_app())) {
-			overlay = psy_ui_colour_make(0x00FFFFFF);
-		} else {
-			overlay = psy_ui_colour_make(0x00000000);
-		}
-		level = psy_ui_component_level(self);
-		switch (level) {
-		case 0:
-			q = 0.0;
-			break;
-		case 1:
-			q = 0.05;
-			break;
-		case 2:
-			q = 0.07;
-			break;
-		case 3:
-			q = 0.08;
-			break;
-		case 4:
-			q = 0.09;
-			break;
-		case 5:
-			q = 0.11;
-			break;
-		case 6:
-			q = 0.12;
-			break;
-		case 7:
-			q = 0.14;
-			break;
-		case 8:
-			q = 0.15;
-			break;
-		case 9:
-			q = 0.16;
-			break;
-		default:
-			q = 0.24;
-			break;
-		}		
-		psy_ui_colour_overlayed(&base, &overlay, q);
-		return base;
-	}
+	}	
 	return base;
 }
 
@@ -120,22 +80,36 @@ void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 {	
 	psy_ui_Component* curr;
+	psy_ui_Colour base;
+
+	assert(self);
 
 	curr = self;
 	while (curr) {
 		if (curr->style.currstyle->colour.mode.set) {
-			break;
-		}
-		if (self->style.currstyle->colour.mode.inherited == FALSE) {
-			curr = NULL;
+			base = curr->style.currstyle->colour;
+			if (base.overlay != 0) {
+				uint8_t overlay;
+				psy_ui_Colour overlaycolour;
+
+				if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+					overlaycolour = psy_ui_colour_make(0xFFFFFF);
+				} else {
+					overlaycolour = psy_ui_colour_make(0x0000000);
+				}
+				overlay = base.overlay;
+				base = psy_ui_component_colour(
+					psy_ui_component_parent(curr));
+				base = psy_ui_colour_overlayed(&base, &overlaycolour, overlay / 100.0);
+			}
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
-	if (curr) {
-		return curr->style.currstyle->colour;
+	if (!curr) {
+		base = psy_ui_style(psy_ui_STYLE_ROOT)->colour;
 	}
-	return psy_ui_style(psy_ui_STYLE_ROOT)->colour;
+	return base;
 }
 
 void psy_ui_component_setborder(psy_ui_Component* self,
@@ -807,6 +781,22 @@ void psy_ui_component_setspacing(psy_ui_Component* self,
 	} else {
 		memset(&self->spacing, 0, sizeof(psy_ui_Margin));
 	}
+}
+
+void psy_ui_component_setspacing_children(psy_ui_Component* self,
+	const psy_ui_Margin* spacing)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* child;
+
+		child = (psy_ui_Component*)p->entry;
+		psy_ui_component_setspacing(child, spacing);
+	}
+	psy_list_free(q);
 }
 
 void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)

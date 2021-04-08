@@ -57,6 +57,11 @@ void vudisplay_init(VuDisplay*,
 void vudisplay_update(VuDisplay*, psy_audio_Buffer*);
 void vudisplay_draw(VuDisplay*, psy_ui_Graphics*);
 
+typedef enum MachineUiMode {
+	MACHINEUIMODE_DRAW = 1,
+	MACHINEUIMODE_DRAWSMALL,
+	MACHINEUIMODE_BITMAP
+} MachineUiMode;
 
 typedef struct MachineUiCommon {
 	// internal
@@ -68,6 +73,7 @@ typedef struct MachineUiCommon {
 	char* restorename;
 	bool machinepos;
 	MachineViewDragMode dragmode;
+	MachineUiMode drawmode;
 	double mx;
 	// references
 	Workspace* workspace;
@@ -88,8 +94,8 @@ void machineuicommon_move(MachineUiCommon*, psy_ui_Point topleft);
 psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* parent, psy_ui_Component* view,
-	ParamViews* paramviews,
-	bool machinepos, Workspace* workspace);
+	ParamViews* paramviews, bool machinepos, MachineUiMode drawmode,
+	Workspace* workspace);
 
 void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position);
 
