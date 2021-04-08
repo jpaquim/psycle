@@ -94,6 +94,8 @@ IDB_VSPLIT_DARK         BITMAP                  "vsplit_dark.bmp"
 
 IDB_POWER_DARK          BITMAP                  "power_dark.bmp"
 
+IDB_SEARCH_DARK         BITMAP                  "search-dark.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
