@@ -7,6 +7,7 @@
 #include "machineviewskin.h"
 #include "workspace.h"
 #include <uibutton.h>
+#include <uiedit.h>
 #include <uiimage.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
@@ -21,8 +22,25 @@ extern "C" {
 
 // NewMachine
 // Adding machines
+		
+struct NewMachine;
 
-typedef struct {
+typedef struct NewMachineSearch {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Image image;
+	psy_ui_Edit edit;
+	bool hasdefaulttext;
+	// references
+	struct NewMachine* newmachine;
+} NewMachineSearch;
+
+void newmachinesearch_init(NewMachineSearch*, psy_ui_Component* parent,
+	struct NewMachine*);
+
+typedef struct NewMachineBar {
+	// inherits
 	psy_ui_Component component;	
 	psy_ui_Button rescan;
     psy_ui_Button selectdirectories;
@@ -33,10 +51,12 @@ typedef struct {
 	Workspace* workspace;
 } NewMachineBar;
 
-void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent, Workspace*);
+void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent,
+	Workspace*);
 
 typedef struct {
 	psy_ui_Component component;
+	NewMachineSearch search;
 	NewMachineBar bar;
 	psy_ui_Label desclabel;
     psy_ui_Label compatlabel;
@@ -46,7 +66,9 @@ typedef struct {
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
-	Workspace*);
+	struct NewMachine* newmachine, Workspace*);
+
+void newmachinedetail_reset(NewMachineDetail*);
 
 typedef struct PluginScanView {
 	// inherits

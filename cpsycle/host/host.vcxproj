@@ -608,6 +608,7 @@
     <Image Include="src\resources\pulse-dark.bmp" />
     <Image Include="src\resources\redo-dark.bmp" />
     <Image Include="src\resources\save-dark.bmp" />
+    <Image Include="src\resources\search-dark.bmp" />
     <Image Include="src\resources\settings-dark.bmp" />
     <Image Include="src\resources\splash_screen.bmp" />
     <Image Include="src\resources\stop-dark.bmp" />

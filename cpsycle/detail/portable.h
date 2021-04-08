@@ -47,7 +47,7 @@ INLINE char* psy_strdup(const char* str)
 }
 
 INLINE intptr_t psy_strlen(const char* str)
-{
+{	
 	return (str)
 		? strlen(str)
 		: 0;

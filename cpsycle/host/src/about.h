@@ -100,6 +100,7 @@ INLINE psy_ui_Component* about_base(About* self)
 	assert(self);
 
 	return &self->component;
+
 }
 
 #ifdef __cplusplus
