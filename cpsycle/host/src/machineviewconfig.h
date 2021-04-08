@@ -24,6 +24,7 @@ typedef struct MachineViewConfig {
 	psy_Signal signal_changed;
 	psy_Signal signal_themechanged;
 	psy_Property* machineview;
+	psy_Property* stackview;
 	psy_Property* theme;	
 	// references
 	psy_Property* parent;	
@@ -41,6 +42,7 @@ bool machineviewconfig_machineindexes(const MachineViewConfig*);
 bool machineviewconfig_wirehover(const MachineViewConfig*);
 bool machineviewconfig_vumeters(const MachineViewConfig*);
 bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
+bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig*);
 
 bool machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 bool machineviewconfig_onthemechanged(MachineViewConfig*, psy_Property*);

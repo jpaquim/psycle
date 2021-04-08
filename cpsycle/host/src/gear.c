@@ -75,7 +75,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setstyletypes(&self->titlebar,
-		psy_ui_STYLE_CONTAINERHEADER, psy_INDEX_INVALID, psy_INDEX_INVALID,
+		psy_ui_STYLE_HEADER, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->titlebar, &margin);

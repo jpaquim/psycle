@@ -3,7 +3,7 @@
 
 #include "../../detail/prefix.h"
 
-#include "machinedock.h"
+#include "paramgear.h"
 // audio
 #include <songio.h>
 #include <exclusivelock.h>
@@ -499,9 +499,111 @@ void paramrackbatchbar_init(ParamRackBatchBar* self, psy_ui_Component* parent)
 	psy_ui_button_init_text(&self->select, &self->component, NULL, "Select in Gear");
 }
 
+// ParamRackModeBar
+static void paramrackmodebar_ondestroy(ParamRackModeBar*);
+static void paramrackmodebar_onmodeselect(ParamRackModeBar*, psy_ui_Button* sender);
+// vtable
+static psy_ui_ComponentVtable paramrackmodebar_vtable;
+static bool paramrackmodebar_vtable_initialized = FALSE;
+
+static void paramrackmodebar_vtable_init(ParamRackModeBar* self)
+{
+	if (!paramrackmodebar_vtable_initialized) {
+		paramrackmodebar_vtable = *(self->component.vtable);
+		paramrackmodebar_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			paramrackmodebar_ondestroy;
+		paramrackmodebar_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &paramrackmodebar_vtable;
+}
+// implementation
+void paramrackmodebar_init(ParamRackModeBar* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	paramrackmodebar_vtable_init(self);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_signal_init(&self->signal_select);
+	psy_ui_button_init_text_connect(&self->all, &self->component, NULL,
+		"All", self, paramrackmodebar_onmodeselect);
+	psy_ui_button_init_text_connect(&self->inputs, &self->component, NULL,
+		"Inputs", self, paramrackmodebar_onmodeselect);
+	psy_ui_button_init_text_connect(&self->outputs, &self->component, NULL,
+		"Outputs", self, paramrackmodebar_onmodeselect);
+	psy_ui_button_init_text_connect(&self->inchain, &self->component, NULL,
+		"Inchain", self, paramrackmodebar_onmodeselect);
+	psy_ui_button_init_text_connect(&self->outchain, &self->component, NULL,
+		"Outchain", self, paramrackmodebar_onmodeselect);
+	psy_ui_button_init_text_connect(&self->level, &self->component, NULL,
+		"Level", self, paramrackmodebar_onmodeselect);
+}
+
+void paramrackmodebar_ondestroy(ParamRackModeBar* self)
+{
+	psy_signal_dispose(&self->signal_select);
+}
+
+void paramrackmodebar_onmodeselect(ParamRackModeBar* self, psy_ui_Button* sender)
+{
+	ParamRackMode mode;
+		
+	mode = PARAMRACK_NONE;
+	if (sender == &self->all) {		
+		mode = PARAMRACK_ALL;
+	} else if (sender == &self->inputs) {
+		mode = PARAMRACK_INPUTS;
+	} else if (sender == &self->outputs) {
+		mode = PARAMRACK_OUTPUTS;
+	} else if (sender == &self->inchain) {
+		mode = PARAMRACK_INCHAIN;
+	} else if (sender == &self->outchain) {
+		mode = PARAMRACK_OUTCHAIN;
+	} else if (sender == &self->level) {
+		mode = PARAMRACK_LEVEL;
+	}
+	paramrackmodebar_setmode(self, mode);
+}
+
+void paramrackmodebar_setmode(ParamRackModeBar* self, ParamRackMode mode)
+{
+	psy_ui_button_disablehighlight(&self->all);
+	psy_ui_button_disablehighlight(&self->inputs);
+	psy_ui_button_disablehighlight(&self->outputs);
+	psy_ui_button_disablehighlight(&self->inchain);
+	psy_ui_button_disablehighlight(&self->outchain);
+	psy_ui_button_disablehighlight(&self->level);
+	switch (mode) {
+	case PARAMRACK_ALL:
+		psy_ui_button_highlight(&self->all);
+		break;
+	case PARAMRACK_INPUTS:
+		psy_ui_button_highlight(&self->inputs);
+		break;
+	case PARAMRACK_OUTPUTS:
+		psy_ui_button_highlight(&self->outputs);
+		break;
+	case PARAMRACK_INCHAIN:
+		psy_ui_button_highlight(&self->inchain);
+		break;
+	case PARAMRACK_OUTCHAIN:
+		psy_ui_button_highlight(&self->outchain);
+		break;
+	case PARAMRACK_LEVEL:
+		psy_ui_button_highlight(&self->level);
+		break;
+	default:
+		break;
+	}
+	if (mode != PARAMRACK_NONE) {
+		psy_signal_emit(&self->signal_select, self, 1, mode);
+	}
+}
+
+
 // ParamRack
 // prototypes
-static void paramrack_onmodeselected(ParamRack*, psy_ui_TabBar* sender, intptr_t index);
+static void paramrack_onmodeselected(ParamRack*, ParamRackModeBar* sender, intptr_t index);
 static void paramrack_onalign(ParamRack*, psy_ui_Component* sender);
 static void paramrack_onlevelchanged(ParamRack*, IntEdit* sender);
 static void paramrack_onsolo(ParamRack*, psy_ui_Button* sender);
@@ -529,13 +631,11 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->leveledit.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->leveledit.signal_changed, self, paramrack_onlevelchanged);
 	// ChainMode
-	psy_ui_tabbar_init(&self->modeselector, &self->bottom);
-	psy_ui_tabbar_append_tabs(&self->modeselector,
-		"All", "Inputs", "Outputs", "Inchain", "Outchain", "Level", NULL);	
-	psy_signal_connect(&self->modeselector.signal_change, self,
-		paramrack_onmodeselected);	
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->modeselector),
+	paramrackmodebar_init(&self->modebar, &self->bottom);		
+	psy_ui_component_setalign(&self->modebar.component,
 		psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->modebar.signal_select, self,
+		paramrack_onmodeselected);
 	// BatchBar
 	paramrackbatchbar_init(&self->batchbar, &self->bottom);
 	psy_ui_component_setalign(&self->batchbar.component, psy_ui_ALIGN_RIGHT);
@@ -559,23 +659,23 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 		psy_ui_size_makeem(0.0, 10.0));
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_makeem(0.0, 10.0));
-	psy_ui_component_setscrollmode(&self->pane.component, psy_ui_SCROLL_COMPONENTS);
+	psy_ui_component_setscrollmode(&self->pane.component, psy_ui_SCROLL_COMPONENTS);	
 	// connect scrollbar
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->scroller.pane, psy_ui_SETBACKGROUND);
 	psy_signal_connect(&self->component.signal_align, self,
-		paramrack_onalign);	
-	psy_ui_tabbar_select(&self->modeselector, (uintptr_t)self->pane.mode);
+		paramrack_onalign);		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		paramrack_onsongchanged);
 	paramrack_connectsong(self);
+	paramrackmodebar_setmode(&self->modebar, self->pane.mode);
 }
 
-void paramrack_onmodeselected(ParamRack* self, psy_ui_TabBar* sender,
+void paramrack_onmodeselected(ParamRack* self, ParamRackModeBar* sender,
 	intptr_t index)
-{	
+{		
 	paramrackpane_setmode(&self->pane, (ParamRackMode)index);
 }
 

@@ -47,6 +47,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_Button* buttons[] = {
 		&self->incpattern, &self->insertentry, &self->decpattern,
 		&self->newentry, &self->delentry, &self->cloneentry,
+		&self->toggle,
 		&self->clear, &self->rename, &self->copy,
 		&self->paste, &self->singlesel, &self->multisel
 	};
@@ -133,11 +134,20 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 
 		colwidth = 12.0;
 		psy_ui_button_setcharnumber(buttons[i], colwidth);
-		psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
-			STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
-			STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
-		psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
-		psy_ui_button_setlinespacing(buttons[i], 1.4);
+		if (buttons[i] != &self->toggle) {
+			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
+				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
+				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
+				psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
+				psy_ui_button_setlinespacing(buttons[i], 1.4);
+		} else {
+			psy_ui_margin_init_all_em(&spacing, 0.25, 0.25, 0.25, 0.25);
+			psy_ui_component_setspacing(psy_ui_button_base(buttons[i]),
+				&spacing);
+			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
+				psy_ui_STYLE_BUTTON, psy_INDEX_INVALID, psy_INDEX_INVALID,
+				psy_INDEX_INVALID);
+		}
 	}
 	psy_signal_connect(&self->newentry.signal_clicked, self,
 		sequencebuttons_onnewentry);

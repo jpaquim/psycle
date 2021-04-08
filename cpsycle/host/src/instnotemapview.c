@@ -621,7 +621,7 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 {	
 	char text[64];
 	const char* notestr;
-	char* keydesc;
+	const char* keydesc;
 
 	keydesc = psy_ui_translate("instrumentview.key");
 	if (!keydesc) {

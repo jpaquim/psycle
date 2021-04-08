@@ -314,7 +314,12 @@ void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	} else {
 		machinewireview_hidevirtualgenerators(&self->wireview);
 		machinestackview_hidevirtualgenerators(&self->stackview);
-	}	
+	}
+	if (machineviewconfig_stackview_drawsmalleffects(sender)) {
+		machinestackview_drawsmalleffects(&self->stackview);
+	} else {
+		machinestackview_drawfulleffects(&self->stackview);
+	}
 }
 
 void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,

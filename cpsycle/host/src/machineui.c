@@ -77,7 +77,7 @@ void vudisplay_draw(VuDisplay* self, psy_ui_Graphics* g)
 }
 
 void vudisplay_drawdisplay(VuDisplay* self, psy_ui_Graphics* g)
-{	
+{		
 	psy_ui_drawbitmap(g, &self->skin->skinbmp,
 		psy_ui_realrectangle_make(
 			psy_ui_realrectangle_topleft(&self->coords->vu0.dest),
@@ -127,6 +127,7 @@ void machineuicommon_init(MachineUiCommon* self,
 	self->slot = slot;	
 	self->restorename = NULL;
 	self->machinepos = TRUE;
+	self->drawmode = MACHINEUIMODE_BITMAP;
 	self->dragmode = MACHINEVIEW_DRAG_NONE;	
 }
 
@@ -164,7 +165,8 @@ bool machineui_vuupdate(void)
 
 psy_ui_Component* machineui_create(psy_audio_Machine* machine, 
 	uintptr_t slot, MachineViewSkin* skin, psy_ui_Component* parent,
-	psy_ui_Component* view, ParamViews* paramviews, bool machinepos, Workspace* workspace)
+	psy_ui_Component* view, ParamViews* paramviews, bool machinepos,
+	MachineUiMode drawmode, Workspace* workspace)
 {	
 	psy_ui_Component* newui;
 		
@@ -185,8 +187,9 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 		if (effectui) {
 			effectui_init(effectui, parent, slot, skin, view, paramviews, workspace);
 			effectui->intern.machinepos = machinepos;
+			effectui_setdrawmode(effectui, drawmode);			
 			newui = &effectui->component;
-		}
+		}		
 	} else {
 		GeneratorUi* generatorui;
 
@@ -194,6 +197,7 @@ psy_ui_Component* machineui_create(psy_audio_Machine* machine,
 		if (generatorui) {
 			generatorui_init(generatorui, parent, slot, skin, view, paramviews, workspace);
 			generatorui->intern.machinepos = machinepos;
+			generatorui->intern.drawmode = drawmode;
 			newui = &generatorui->component;
 		}
 	}	

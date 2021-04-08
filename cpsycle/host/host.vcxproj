@@ -333,7 +333,6 @@
     <ClCompile Include="src\linesperbeatbar.c" />
     <ClCompile Include="src\machinebar.c" />
     <ClCompile Include="src\machinecombobox.c" />
-    <ClCompile Include="src\machinedock.c" />
     <ClCompile Include="src\machineeditorview.c" />
     <ClCompile Include="src\machineframe.c" />
     <ClCompile Include="src\machineparamconfig.c" />
@@ -357,6 +356,7 @@
     <ClCompile Include="src\newval.c" />
     <ClCompile Include="src\octavebar.c" />
     <ClCompile Include="src\oscilloscope.c" />
+    <ClCompile Include="src\paramgear.c" />
     <ClCompile Include="src\paramlistbox.c" />
     <ClCompile Include="src\parammap.c" />
     <ClCompile Include="src\paramtweak.c" />
@@ -485,7 +485,6 @@
     <ClInclude Include="src\linesperbeatbar.h" />
     <ClInclude Include="src\machinebar.h" />
     <ClInclude Include="src\machinecombobox.h" />
-    <ClInclude Include="src\machinedock.h" />
     <ClInclude Include="src\machineeditorview.h" />
     <ClInclude Include="src\machineframe.h" />
     <ClInclude Include="src\machineparamconfig.h" />
@@ -509,6 +508,7 @@
     <ClInclude Include="src\newval.h" />
     <ClInclude Include="src\octavebar.h" />
     <ClInclude Include="src\oscilloscope.h" />
+    <ClInclude Include="src\paramgear.h" />
     <ClInclude Include="src\paramlistbox.h" />
     <ClInclude Include="src\parammap.h" />
     <ClInclude Include="src\paramtweak.h" />

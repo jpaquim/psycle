@@ -24,6 +24,8 @@ void effectui_init(EffectUi*, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin*,
 	psy_ui_Component* view, ParamViews*, Workspace*);
 
+void effectui_setdrawmode(EffectUi*, MachineUiMode);
+
 #ifdef __cplusplus
 }
 #endif

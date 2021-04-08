@@ -9,6 +9,7 @@
 #include "checkui.h"
 #include "knobui.h"
 #include "machineviewbar.h"
+#include "resources/resource.h"
 #include "slidergroupui.h"
 // audio
 #include <plugin_interface.h>
@@ -534,8 +535,16 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews,
 	self->statusbar = statusbar;
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
-	self->effectsize = psy_ui_size_makepx(138.0, 52.0);
+	//self->effectsize = psy_ui_size_makepx(138.0, 52.0);
+	self->effectsize = psy_ui_size_make(
+		psy_ui_value_makepx(138.0),
+		psy_ui_value_makepx(52.0));
+	self->effectsizesmall = 
+		psy_ui_size_make(
+			psy_ui_value_makepx(138.0),
+			psy_ui_value_makeeh(2.0));
 	self->columnselected = FALSE;
+	self->drawsmalleffects = FALSE;
 	self->drawvirtualgenerators = FALSE;
 	// 20: right margin of column
 	self->columnsize = psy_ui_size_makepx(138.0 + 20, 52.0);
@@ -792,6 +801,13 @@ uintptr_t machinestackstate_maxnumcolumns(const MachineStackState* self)
 static void machinestackdesc_onalign(MachineStackDesc*);
 static void machinestackdesc_onpreferredsize(MachineStackDesc*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void machinestackdesc_ontoggleoutputs(MachineStackDesc*,
+	psy_ui_Button* sender);
+static void machinestackdesc_ontogglevolumes(MachineStackDesc*,
+	psy_ui_Button* sender);
+static void machinestackdesc_configureeffects(MachineStackDesc*,
+	psy_ui_Button* sender);
+
 // vtable
 static psy_ui_ComponentVtable machinestackdesc_vtable;
 static bool machinestackdesc_vtable_initialized = FALSE;
@@ -817,12 +833,21 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component,
 		machinestackdesc_vtable_init(self));
 	self->view = view;
-	psy_ui_label_init_text(&self->inputs, &self->component, NULL, "stackview.inputs");	
-	psy_ui_label_init_text(&self->effects, &self->component, NULL, "stackview.effects");
-	psy_ui_label_init_text(&self->outputs, &self->component, NULL, "stackview.outputs");
-	psy_ui_label_init_text(&self->volumes, &self->component, NULL, "stackview.volumes");
 	psy_ui_component_setcolour(&self->component,
-		psy_ui_colour_make(0x00AABBBB));
+		psy_ui_colour_make(0x00AABBBB));	
+	psy_ui_label_init_text(&self->inputs, &self->component, NULL,
+		"stackview.inputs");			
+	psy_ui_button_init_text_connect(&self->effects, &self->component, NULL,
+		"stackview.effects", self, machinestackdesc_configureeffects);	
+	psy_ui_bitmap_loadresource(&self->effects.bitmapicon, IDB_SETTINGS_DARK);
+	psy_ui_bitmap_settransparency(&self->effects.bitmapicon,
+		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_init_text_connect(&self->outputs, &self->component, NULL,
+		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);
+	psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
+	psy_ui_button_init_text_connect(&self->volumes, &self->component, NULL,
+		"stackview.volumes", self, machinestackdesc_ontogglevolumes);
+	psy_ui_button_seticon(&self->volumes, psy_ui_ICON_LESS);	
 }
 
 void machinestackdesc_onalign(MachineStackDesc* self)
@@ -853,11 +878,19 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	effectsize = psy_ui_component_preferredsize(&self->view->pane.component,
 		NULL);
 	effectsizepx = psy_ui_size_px(&effectsize, tm);
-	outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
-		NULL);
-	outsizepx = psy_ui_size_px(&outsize, tm);
-	volumesize = psy_ui_component_preferredsize(&self->view->volumes.component,
-		NULL);
+	if (psy_ui_component_visible(&self->view->outputs.component)) {
+		outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
+			NULL);
+	} else {
+		outsize = psy_ui_size_makeem(0.0, 1.0);
+	}
+	outsizepx = psy_ui_size_px(&outsize, tm);	
+	if (psy_ui_component_visible(&self->view->outputs.component)) {
+		volumesize = psy_ui_component_preferredsize(&self->view->volumes.component,
+			NULL);
+	} else {
+		volumesize = psy_ui_size_makeem(0.0, 1.0);
+	}
 	volumesizepx = psy_ui_size_px(&volumesize, tm);
 	volumesizepx.height = psy_max(182.0, volumesizepx.height);
 	psy_ui_component_setposition(&self->inputs.component,
@@ -882,7 +915,36 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 void machinestackdesc_onpreferredsize(MachineStackDesc* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_size_setem(rv, 15.0, 10.0);
+	psy_ui_size_setem(rv, 18.0, 10.0);
+}
+
+void machinestackdesc_ontoggleoutputs(MachineStackDesc* self,
+	psy_ui_Button* sender)
+{
+	psy_ui_component_togglevisibility(&self->view->outputs.component);
+	if (psy_ui_component_visible(&self->view->outputs.component)) {
+		psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
+	} else {
+		psy_ui_button_seticon(&self->outputs, psy_ui_ICON_MORE);
+	}
+}
+
+void machinestackdesc_ontogglevolumes(MachineStackDesc* self,
+	psy_ui_Button* sender)
+{
+	psy_ui_component_togglevisibility(&self->view->volumes.component);
+	if (psy_ui_component_visible(&self->view->volumes.component)) {
+		psy_ui_button_seticon(&self->volumes, psy_ui_ICON_LESS);
+	} else {
+		psy_ui_button_seticon(&self->volumes, psy_ui_ICON_MORE);
+	}
+}
+
+void machinestackdesc_configureeffects(MachineStackDesc* self,
+	psy_ui_Button* sender)
+{
+	workspace_selectview(self->view->workspace,
+		VIEW_ID_SETTINGSVIEW, 2, 1);
 }
 
 // MachineStackInputs
@@ -966,7 +1028,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 				component = machineui_create(
 					psy_audio_machines_at(self->state->machines, column->input),
 					column->input, self->skin, &self->component, &self->component,
-					self->state->paramviews, FALSE, self->workspace);
+					self->state->paramviews, FALSE, MACHINEUIMODE_BITMAP, self->workspace);
 			} else {
 				if (!column || column->offset != 0) {
 					component = psy_ui_component_allocinit(&self->component,
@@ -1342,13 +1404,23 @@ psy_ui_Component* machinestackpane_insert(MachineStackPane* self, uintptr_t slot
 	psy_ui_Component* trackpane)
 {	
 	psy_ui_Component* rv;
+	MachineUiMode drawmode;
 
+	if (self->state->drawsmalleffects) {
+		drawmode = MACHINEUIMODE_DRAWSMALL;
+	} else {
+		drawmode = MACHINEUIMODE_BITMAP;
+	}
 	rv =  machineui_create(
 		psy_audio_machines_at(self->state->machines, slot), slot, self->skin,
 		trackpane, &self->component, self->state->paramviews,
-		FALSE, self->workspace);
+		FALSE, drawmode, self->workspace);
 	if (rv) {
-		psy_ui_component_setminimumsize(rv, self->state->effectsize);
+		if (drawmode = MACHINEUIMODE_DRAWSMALL) {
+			psy_ui_component_setminimumsize(rv, self->state->effectsizesmall);
+		} else {
+			psy_ui_component_setminimumsize(rv, self->state->effectsize);
+		}
 		rv->deallocate = TRUE;
 		return rv;
 	}	
@@ -1542,6 +1614,11 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 		machineparamconfig_skin(
 			psycleconfig_macparam(workspace_conf(self->workspace))));
 	psy_ui_component_setalign(&self->outputs.component, psy_ui_ALIGN_BOTTOM);
+	// spacer
+	psy_ui_component_init(&self->spacer, &self->columns, NULL);
+	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_makeem(0.0, 0.5));
+	psy_ui_component_preventalign(&self->spacer);
+	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinestackview_onsongchanged);	
 	psy_signal_connect(&workspace->signal_buschanged, self,
@@ -1720,4 +1797,20 @@ void machinestackview_hidevirtualgenerators(MachineStackView* self)
 {
 	self->state.drawvirtualgenerators = FALSE;
 	machinestackstate_rebuildview(&self->state);
+}
+
+void machinestackview_drawsmalleffects(MachineStackView* self)
+{
+	if (!self->state.drawsmalleffects) {
+		self->state.drawsmalleffects = TRUE;
+		machinestackview_build(self);
+	}
+}
+
+void machinestackview_drawfulleffects(MachineStackView* self)
+{
+	if (self->state.drawsmalleffects) {
+		self->state.drawsmalleffects = FALSE;
+		machinestackview_build(self);
+	}
 }

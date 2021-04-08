@@ -77,6 +77,7 @@ static void propertiesrenderer_computecolumns(PropertiesRenderer* self,
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 static void propertiesrenderer_onpreferredsize(PropertiesRenderer*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void propertiesview_gotoproperty(PropertiesView*, psy_Property*);
 
 static psy_ui_ComponentVtable propertiesrenderer_vtable;
 static bool propertiesrenderer_vtable_initialized = FALSE;
@@ -130,6 +131,7 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	self->valueselcolour = psy_ui_colour_make(0x00FFFFFF);
 	self->valueselbackgroundcolour = psy_ui_colour_make(0x009B7800);
 	psy_table_init(&self->linestates);
+	psy_table_init(&self->mainlinestates);
 	psy_ui_edit_init(&self->edit, &self->component);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		propertiesrenderer_oneditkeydown);
@@ -147,6 +149,7 @@ void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* se
 {
 	psy_table_disposeall(&self->linestates, (psy_fp_disposefunc)
 		propertiesrenderlinestate_dispose);
+	psy_table_dispose(&self->mainlinestates);
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
 }
@@ -192,6 +195,7 @@ void propertiesrenderer_updatelinestates(PropertiesRenderer* self)
 	psy_table_disposeall(&self->linestates, (psy_fp_disposefunc)
 		propertiesrenderlinestate_dispose);
 	psy_table_init(&self->linestates);
+	psy_table_clear(&self->mainlinestates);	
 	propertiesrenderer_preparepropertiesenum(self);
 	self->currlinestatecount = 0;
 	psy_property_enumerate(self->properties, self,
@@ -220,6 +224,28 @@ PropertiesRenderLineState* propertiesrenderer_findfirstlinestate(
 	return rv;
 }
 
+PropertiesRenderLineState* propertiesrenderer_findfirstmainlinestate(
+	PropertiesRenderer* self, double y, int* pos)
+{
+	PropertiesRenderLineState* rv;
+	uintptr_t i;
+
+	rv = NULL;
+	for (i = 0; i < psy_table_size(&self->mainlinestates); ++i) {
+		PropertiesRenderLineState* linestate;
+
+		linestate = (PropertiesRenderLineState*)psy_table_at(&self->mainlinestates,
+			i);
+		if (linestate && linestate->cpy + (linestate->numlines + 1) *
+			self->lineheight >= y) {
+			rv = linestate;
+			break;
+		}
+	}
+	*pos = i;
+	return rv;
+}
+
 int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 	psy_Property* property, uintptr_t level)
 {	
@@ -235,6 +261,11 @@ int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 	linestate->properties = property;
 	psy_table_insert(&self->linestates, self->currlinestatecount,
 		(void*)linestate);
+	if (level == 0) {
+		psy_table_insert(&self->mainlinestates,
+			psy_table_size(&self->mainlinestates),			
+			(void*)linestate);
+	}
 	++self->currlinestatecount;	
 	propertiesrenderer_addremoveident(self, level);
 	if (self->cpy != 0.0 && level == 0 && psy_property_type(property) ==
@@ -1117,6 +1148,7 @@ static void propertiesview_onmousedown(PropertiesView*, psy_ui_Component* sender
 	psy_ui_MouseEvent*);
 static void propertiesview_onmouseup(PropertiesView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
+static void propertiesview_onscroll(PropertiesView*, psy_ui_Component* sender);
 
 // implementation
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
@@ -1169,7 +1201,10 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	propertiesview_initsectionfloated(self);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		propertiesview_ontabbarchange);
-	psy_ui_notebook_select(&self->notebook, 0);	
+	psy_ui_notebook_select(&self->notebook, 0);
+	psy_signal_connect(&self->renderer.component.signal_scroll, self,
+		propertiesview_onscroll);
+	self->preventscrollupdate = FALSE;
 }
 
 void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
@@ -1192,8 +1227,47 @@ void propertiesview_initsectionfloated(PropertiesView* self)
 
 void propertiesview_selectsection(PropertiesView* self,
 	psy_ui_Component* sender, uintptr_t section, uintptr_t options)
-{
-	psy_ui_tabbar_select(&self->tabbar, section);
+{	
+	if (options > 0) {
+		const psy_List* p;
+		uintptr_t c;
+		psy_Property* property;
+		
+		property = NULL;
+		for (c = 0, p = psy_property_begin_const(propertiesrenderer_properties(
+			&self->renderer)); p != NULL; psy_list_next_const(&p)) {			
+
+			property = (psy_Property*)psy_list_entry_const(p);
+			if (c == section) {
+				break;
+			}			
+			if (psy_property_hastype(property, PSY_PROPERTY_TYPE_SECTION)) {
+				++c;
+			}
+		}
+		if (p && !psy_property_empty(property)) {
+			uintptr_t c;
+
+			p = psy_property_begin_const(property);
+			for (c = 0; p != NULL; psy_list_next_const(&p)) {
+				property = (psy_Property*)psy_list_entry_const(p);
+				if (c == options) {
+					break;
+				}				
+				if (psy_property_hastype(property, PSY_PROPERTY_TYPE_SECTION)) {
+					++c;
+				}
+			}
+			if (p) {
+				propertiesview_gotoproperty(self, 
+					(psy_Property*)psy_list_entry_const(p));
+			}
+		}
+	} else {
+		self->preventscrollupdate = TRUE;
+		psy_ui_tabbar_select(&self->tabbar, section);
+		self->preventscrollupdate = FALSE;
+	}
 }
 
 void propertiesview_updatetabbarsections(PropertiesView* self)
@@ -1211,8 +1285,8 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 				psy_ui_tabbar_append(&self->tabbar, psy_property_text(property));
 			}
 		}
-	}
-	psy_ui_tabbar_select(&self->tabbar, 0);	
+	}	
+	psy_ui_tabbar_select(&self->tabbar, 0);		
 }
 
 void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sender,
@@ -1239,28 +1313,33 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 				property = NULL;
 				psy_list_next(&p);
 			}			
-		}
-		self->renderer.search = property;
-		if (self->renderer.search) {
-			double scrollposition;
-			intptr_t scrollmin;
-			intptr_t scrollmax;
-
-			propertiesrenderer_preparepropertiesenum(&self->renderer);
-			psy_property_enumerate(self->renderer.properties,
-				&self->renderer, (psy_PropertyCallback)
-				propertiesrenderer_onenumpropertyposition);
-			psy_ui_component_verticalscrollrange(&self->renderer.component,
-				&scrollmin, &scrollmax);
-			scrollposition = self->renderer.cpy / self->renderer.lineheight;
-			if (scrollposition > (double)scrollmax) {
-				scrollposition = (double)scrollmax;
-			}
-			psy_ui_component_setscrolltop(&self->renderer.component,
-				psy_ui_value_makepx(scrollposition * self->renderer.lineheight));	
-		}
-		psy_ui_component_invalidate(&self->renderer.component);
+			propertiesview_gotoproperty(self, property);
+		}		
 	}
+}
+
+void propertiesview_gotoproperty(PropertiesView* self, psy_Property* property)
+{
+	self->renderer.search = property;
+	if (self->renderer.search) {
+		double scrollposition;
+		intptr_t scrollmin;
+		intptr_t scrollmax;
+
+		propertiesrenderer_preparepropertiesenum(&self->renderer);
+		psy_property_enumerate(self->renderer.properties,
+			&self->renderer, (psy_PropertyCallback)
+			propertiesrenderer_onenumpropertyposition);
+		psy_ui_component_verticalscrollrange(&self->renderer.component,
+			&scrollmin, &scrollmax);
+		scrollposition = self->renderer.cpy / self->renderer.lineheight;
+		if (scrollposition > (double)scrollmax) {
+			scrollposition = (double)scrollmax;
+		}		
+		psy_ui_component_setscrolltop(&self->renderer.component,
+			psy_ui_value_makepx(scrollposition * self->renderer.lineheight));		
+	}
+	psy_ui_component_invalidate(&self->renderer.component);
 }
 
 void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
@@ -1440,4 +1519,28 @@ void propertiesview_dock(PropertiesView* self, uintptr_t section, psy_ui_Compone
 		psy_ui_notebook_select(&self->notebook, 0);
 		propertiesrenderer_updatelinestates(&self->renderer);
 //	}
+}
+
+void propertiesview_onscroll(PropertiesView* self, psy_ui_Component* sender)
+{
+	if (!self->preventscrollupdate) {
+		PropertiesRenderLineState* state;
+		int pos;
+
+		pos = 0;
+		state = propertiesrenderer_findfirstmainlinestate(&self->renderer,
+			psy_ui_component_scrolltoppx(sender), &pos);
+		if (state) {
+			if (pos > 0 && state->cpy > psy_ui_component_scrolltoppx(sender)) {
+				--pos;
+			}
+			if (psy_ui_tabbar_selected(&self->tabbar) != pos) {
+				psy_signal_prevent(&self->tabbar.signal_change, self,
+					propertiesview_ontabbarchange);
+				psy_ui_tabbar_select(&self->tabbar, pos);
+				psy_signal_enable(&self->tabbar.signal_change, self,
+					propertiesview_ontabbarchange);
+			}
+		}
+	}
 }

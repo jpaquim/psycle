@@ -5,10 +5,12 @@
 
 #include "machineviewconfig.h"
 
-static void machineviewconfig_makeview(MachineViewConfig*, psy_Property*
-	parent);
-static void machineviewconfig_maketheme(MachineViewConfig*, psy_Property*
-	parent);
+static void machineviewconfig_makeview(MachineViewConfig*,
+	psy_Property* parent);
+static void machineviewconfig_makestackview(MachineViewConfig*,
+	psy_Property* parent);
+static void machineviewconfig_maketheme(MachineViewConfig*,
+	psy_Property* parent);
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
@@ -53,7 +55,19 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 			"drawvirtualgenerators", FALSE),
 		"settingsview.draw-virtualgenerators"),
 		PROPERTY_ID_DRAWVIRTUALGENERATORS);
+	machineviewconfig_makestackview(self, self->machineview);
 	machineviewconfig_maketheme(self, self->machineview);
+}
+
+void machineviewconfig_makestackview(MachineViewConfig* self, psy_Property* parent)
+{
+	self->stackview = psy_property_settext(
+		psy_property_append_section(parent, "stackview"),
+		"settingsview.stackview");
+	psy_property_settext(
+		psy_property_append_bool(self->stackview,
+			"drawsmalleffects", FALSE),
+		"settingsview.stackview-draw-smalleffects");
 }
 
 void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
@@ -221,6 +235,14 @@ bool machineviewconfig_virtualgenerators(const MachineViewConfig* self)
 
 	return psy_property_at_bool(self->machineview, "drawvirtualgenerators", FALSE);
 }
+
+bool machineviewconfig_stackview_drawsmalleffects(const MachineViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->stackview, "drawsmalleffects", FALSE);
+}
+
 
 // events
 bool machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*

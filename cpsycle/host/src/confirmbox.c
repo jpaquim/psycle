@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void confirmbox_initalign(ConfirmBox*);
 static void confirmbox_onok(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_onno(ConfirmBox*, psy_ui_Component* sender);
 static void confirmbox_oncontinue(ConfirmBox*, psy_ui_Component* sender);
@@ -16,11 +15,15 @@ static void checkunsavedbox_ondestroy(ConfirmBox*, psy_ui_Component* sender);
 
 void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
+	psy_ui_Margin spacing;
+	
 	psy_ui_component_init(confirmbox_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->mode = CONFIRM_CLOSE;	
 	psy_ui_component_init_align(&self->view, confirmbox_base(self),
 		psy_ui_ALIGN_CENTER);
+	psy_ui_component_setdefaultalign(&self->view,
+		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
 	psy_ui_label_init_text(&self->title, &self->view, NULL, "msg.psyreq");
 	psy_ui_label_init_text(&self->header, &self->view, NULL, "");
 	psy_ui_button_init_text_connect(&self->yes, &self->view, NULL, "msg.yes",
@@ -29,8 +32,8 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 		self, confirmbox_onno);
 	psy_ui_button_init_text_connect(&self->cont, &self->view, NULL, "msg.cont",
 		self, confirmbox_oncontinue);	
-	psy_ui_component_align(&self->component);
-	confirmbox_initalign(self);
+	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_component_setspacing_children(&self->view, &spacing);
 	psy_signal_init(&self->signal_execute);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		checkunsavedbox_ondestroy);
@@ -39,19 +42,6 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 void checkunsavedbox_ondestroy(ConfirmBox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_execute);	
-}
-
-void confirmbox_initalign(ConfirmBox* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);		
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->view, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP,
-		&margin));
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 2.0, 0.0);		
-	psy_ui_component_setmargin(&self->header.component, &margin);
 }
 
 void confirmbox_setlabels(ConfirmBox* self, const char* title,
