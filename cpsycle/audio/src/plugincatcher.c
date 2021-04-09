@@ -60,6 +60,7 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 {
 	char inipath[_MAX_PATH];	
 
+	psy_audio_plugincategorylist_init(&self->categorydefaults);
 	self->plugins = psy_property_setcomment(
 	psy_property_allocinit_key(NULL),
 	"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
@@ -93,6 +94,7 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	self->nativeroot = NULL;
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_scanprogress);
+	psy_audio_plugincategorylist_dispose(&self->categorydefaults);
 }
 
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
@@ -170,6 +172,13 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 		psy_property_append_int(p, "apiversion", info->APIVersion, 0, 0);
 		psy_property_append_int(p, "plugversion", info->PlugVersion, 0, 0);
 		psy_property_append_int(p, "favorite", 0, 0, 0);
+		if (psy_strlen(info->category) == 0) {
+			psy_property_append_string(p, "category",
+				psy_audio_plugincategorylist_category(&self->categorydefaults,
+					name));
+		} else {			
+			psy_property_append_string(p, "category", info->category);
+		}
 	}
 }
 
@@ -495,5 +504,6 @@ void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio
 		psy_property_at_str(property, "path", ""),
 		psy_property_at_int(property, "shellidx", 0),
 		psy_property_at_str(property, "help", ""),
-		psy_property_at_str(property, "desc", ""));
+		psy_property_at_str(property, "desc", ""),
+		psy_property_at_str(property, "category", ""));
 }

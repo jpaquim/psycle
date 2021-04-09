@@ -39,12 +39,14 @@ void newmachinefilter_init(NewMachineFilter* self)
 	self->text = NULL;
 	self->gen = TRUE;
 	self->effect = TRUE;
-	newmachinefilter_setalltypes(self);	
+	psy_table_init(&self->categories);
+	newmachinefilter_setalltypes(self);		
 	psy_signal_init(&self->signal_changed);
 }
 
 void newmachinefilter_dispose(NewMachineFilter* self)
 {	
+	psy_table_disposeall(&self->categories, NULL);
 	psy_signal_dispose(&self->signal_changed);
 	free(self->text);
 }
@@ -60,6 +62,8 @@ void newmachinefilter_reset(NewMachineFilter* self)
 	self->effect = TRUE;
 	newmachinefilter_setalltypes(self);
 	psy_strreset(&self->text, "");
+	psy_table_disposeall(&self->categories, NULL);
+	psy_table_init(&self->categories);
 	newmachinefilter_notify(self);
 }
 
@@ -92,6 +96,55 @@ void newmachinefilter_cleartypes(NewMachineFilter* self)
 bool newmachinefilter_all(const NewMachineFilter* self)
 {
 	return (self->gen && self->effect);
+}
+
+void newmachinefilter_addcategory(NewMachineFilter* self, const char* category)
+{
+	if (psy_strlen(category) > 0) {
+		if (!psy_table_exists_strhash(&self->categories, category)) {
+			psy_table_insert_strhash(&self->categories, category,
+				(void*)psy_strdup(category));
+			newmachinefilter_notify(self);
+		}
+	}
+}
+
+void newmachinefilter_removecategory(NewMachineFilter* self, const char* category)
+{
+	if (psy_strlen(category) > 0) {
+		if (psy_table_exists_strhash(&self->categories, category)) {
+			char* item;
+			
+			item = psy_table_at(&self->categories, psy_strhash(category));
+			free(item);
+			psy_table_remove(&self->categories, psy_strhash(category));
+			newmachinefilter_notify(self);
+		}
+	}
+}
+
+void newmachinefilter_anycategory(NewMachineFilter* self)
+{
+	psy_table_disposeall(&self->categories, NULL);
+	psy_table_init(&self->categories);
+	newmachinefilter_notify(self);
+}
+
+bool newmachinefilter_useanycategory(const NewMachineFilter* self)
+{
+	return psy_table_size(&self->categories) == 0;	
+}
+
+bool newmachinefilter_hascategory(const NewMachineFilter* self,
+	const char* category)
+{
+	if (newmachinefilter_useanycategory(self)) {
+		return TRUE;
+	}
+	if (!category) {
+		return FALSE;
+	}
+	return psy_table_exists_strhash(&self->categories, category);
 }
 
 // NewMachineSearch
@@ -474,6 +527,158 @@ void newmachinefilterbar_update(NewMachineFilterBar* self)
 		}
 	}
 }
+
+// NewMachineCategoryBar
+// prototypes
+static void newmachinecategorybar_ondestroy(NewMachineCategoryBar*);
+static void newmachinecategorybar_findcategories(NewMachineCategoryBar*,
+	psy_Property* source);
+static void newmachinecategorybar_onclicked(NewMachineCategoryBar*,
+	psy_ui_Button* sender);
+// vtable
+static psy_ui_ComponentVtable newmachinecategorybar_vtable;
+static bool newmachinecategorybar_vtable_initialized = FALSE;
+
+static void newmachinecategorybar_vtable_init(NewMachineCategoryBar* self)
+{
+	if (!newmachinecategorybar_vtable_initialized) {
+		newmachinecategorybar_vtable = *(self->component.vtable);
+		newmachinecategorybar_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			newmachinecategorybar_ondestroy;
+		newmachinecategorybar_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &newmachinecategorybar_vtable;
+}
+// implementation
+void newmachinecategorybar_init(NewMachineCategoryBar* self, psy_ui_Component* parent,
+	NewMachineFilter* filter, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent, NULL);
+	newmachinecategorybar_vtable_init(self);
+	psy_ui_component_init(&self->client, &self->component, NULL);
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	self->workspace = workspace;
+	psy_table_init(&self->categories);
+}
+
+void newmachinecategorybar_ondestroy(NewMachineCategoryBar* self)
+{
+	psy_table_disposeall(&self->categories, NULL);
+}
+
+void newmachinecategorybar_build(NewMachineCategoryBar* self)
+{
+	psy_TableIterator it;
+	psy_ui_Button* button;
+
+	assert(self);
+
+	psy_ui_component_clear(&self->client);	
+
+	button = psy_ui_button_allocinit(&self->client, &self->client);
+	psy_ui_button_preventtranslation(button);
+	psy_ui_button_settext(button, "Any Category");
+	if (newmachinefilter_useanycategory(self->filters)) {
+		psy_ui_button_highlight(button);
+	} else {
+		psy_ui_button_disablehighlight(button);
+	}
+	psy_signal_connect(&button->signal_clicked, self,
+		newmachinecategorybar_onclicked);
+	newmachinecategorybar_findcategories(self, workspace_pluginlist(self->workspace));	
+	for (it = psy_table_begin(&self->categories);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		const char* category;
+
+		category = (const char*)psy_tableiterator_value(&it);		
+		if (category) {
+			psy_ui_Button* button;
+
+			button = psy_ui_button_allocinit(&self->client, &self->client);
+			psy_ui_button_preventtranslation(button);
+			psy_ui_button_settext(button, category);
+			if (!newmachinefilter_useanycategory(self->filters)) {
+				if (!newmachinefilter_hascategory(self->filters, category)) {
+					psy_ui_button_highlight(button);
+				}
+			}
+			psy_signal_connect(&button->signal_clicked, self,
+				newmachinecategorybar_onclicked);
+		}
+	}
+}
+
+void newmachinecategorybar_findcategories(NewMachineCategoryBar* self,
+	psy_Property* source)
+{	
+	psy_List* p;
+	uintptr_t num;
+	uintptr_t i;	
+		
+	psy_table_disposeall(&self->categories, NULL);
+	psy_table_init(&self->categories);
+	if (!source) {
+		return;
+	}		
+	num = psy_property_size(source);
+	p = psy_property_begin(source);	
+	for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
+		psy_Property* q;
+		psy_audio_MachineInfo machineinfo;
+
+		q = (psy_Property*)psy_list_entry(p);
+				
+		machineinfo_init(&machineinfo);
+		psy_audio_machineinfo_from_property(q, &machineinfo);
+		if (psy_strlen(machineinfo.category) > 0) {
+			if (!psy_table_exists_strhash(&self->categories, machineinfo.category)) {
+				psy_table_insert_strhash(&self->categories, machineinfo.category,
+					(void*)psy_strdup(machineinfo.category));
+			}
+		}
+		machineinfo_dispose(&machineinfo);
+	}	
+}
+
+void newmachinecategorybar_onclicked(NewMachineCategoryBar* self, psy_ui_Button* sender)
+{	
+	psy_List* p;
+	psy_List* q;
+
+	if (strcmp(psy_ui_button_text(sender), "Any Category") == 0) {
+		newmachinefilter_anycategory(self->filters);
+		q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
+		for (p = q; p != NULL; p = p->next) {
+			psy_ui_Button* button;
+		
+			button = (psy_ui_Button*)psy_list_entry(p);
+			psy_ui_button_disablehighlight(button);			
+		}
+		psy_list_free(q);
+		psy_ui_button_highlight(sender);
+		return;
+	}
+	if (!newmachinefilter_useanycategory(self->filters) &&
+			newmachinefilter_hascategory(self->filters, psy_ui_button_text(sender))) {
+		newmachinefilter_removecategory(self->filters, psy_ui_button_text(sender));
+		psy_ui_button_disablehighlight(sender);
+	} else {
+		newmachinefilter_addcategory(self->filters, psy_ui_button_text(sender));
+		psy_ui_button_highlight(sender);
+	}
+	q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
+	if (newmachinefilter_useanycategory(self->filters)) {
+		psy_ui_button_highlight((psy_ui_Button*)psy_list_entry(q));
+	} else {
+		psy_ui_button_disablehighlight((psy_ui_Button*)psy_list_entry(q));
+	}
+	psy_list_free(q);
+}
+
 
 // PluginScanView
 void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
@@ -986,7 +1191,7 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 		}
 	} else {
 		self->plugins = 0;
-	}
+	}	
 	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());	
 	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);	
@@ -1102,7 +1307,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
-	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// pluginview header
 	psy_ui_component_init(&self->pluginsheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
@@ -1123,9 +1328,15 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_label_settextalignment(&self->pluginslabel,
 		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	newmachinefilterbar_init(&self->filterbar, &self->pluginsheader, NULL);
+	newmachinecategorybar_init(&self->categorybar, &self->client, NULL,
+		workspace);
+	psy_ui_component_setalign(&self->categorybar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->categorybar.component,
+		psy_ui_margin_makeem(0.0, 0.0, 1.0, 0.0));
 	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->client, FALSE, workspace);
 	newmachinefilterbar_setfilters(&self->filterbar, &self->pluginsview.filters);
+	self->categorybar.filters = &self->pluginsview.filters;
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_main.component, 1);
@@ -1166,6 +1377,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onpluginscanprogress);
 	newmachine_updateskin(self);
 	psy_ui_notebook_select(&self->notebook, 0);
+	newmachinecategorybar_build(&self->categorybar);
+	psy_ui_component_align(&self->categorybar.component);
+	psy_ui_component_align(&self->client);
 }
 
 void newmachine_ondestroy(NewMachine* self, psy_ui_Component* component)
@@ -1218,8 +1432,13 @@ void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
 void newmachine_onplugincachechanged(NewMachine* self,
 	psy_audio_PluginCatcher* sender)
 {
+	newmachinefilter_reset(&self->pluginsview.filters);
 	newmachinedetail_reset(&self->detail);
 	self->selectedplugin = NULL;
+	newmachinecategorybar_build(&self->categorybar);
+	psy_ui_component_align(&self->categorybar.component);
+	psy_ui_component_align(&self->categorybar.client);
+	psy_ui_component_align(&self->client);
 }
 
 void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
@@ -1405,6 +1624,9 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 	default:
 		isintern = TRUE;
 		break;
+	}	
+	if (!newmachinefilter_hascategory(filter, machineinfo.category)) {
+		return;		
 	}
 	if (!filter->intern && isintern) {
 		return;

@@ -81,6 +81,7 @@ psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
 
 void psy_ui_button_settext(psy_ui_Button*, const char* text);
+const char* psy_ui_button_text(const psy_ui_Button*);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disablehighlight(psy_ui_Button*);

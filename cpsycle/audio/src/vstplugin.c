@@ -600,7 +600,8 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			filename,
 			shellidx,
 			"",
-			"VST");		
+			"VST",
+			"");		
 	}
 #if defined DIVERSALIS__OS__MICROSOFT        	
 	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		

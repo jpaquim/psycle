@@ -6,6 +6,7 @@
 
 #include "machinedefs.h"
 #include "machineinfo.h"
+#include "plugincategorylist.h"
 
 #include <propertiesio.h>
 #include <signal.h>
@@ -24,6 +25,7 @@ typedef struct psy_audio_PluginCatcher {
 	psy_Signal signal_scanprogress;
 	bool saveafterscan;
 	bool hasplugincache;
+	psy_audio_PluginCategoryList categorydefaults;
 } psy_audio_PluginCatcher;
 
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher*);

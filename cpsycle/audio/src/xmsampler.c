@@ -133,9 +133,10 @@ static psy_audio_MachineInfo const macinfo = {
 	psy_audio_XMSAMPLER,
 	NULL,		// NO MODULPATH
 	0,			// shellidx	
-	SAMPLERHELP	// help text
+	SAMPLERHELP,	// help text
+	"Sampler with the essence of FastTracker II and Impulse Tracker II.",	// desc
+	"Sampler"		// category
 };
-
 
 // prototypes
 static void dispose(psy_audio_XMSampler*);
