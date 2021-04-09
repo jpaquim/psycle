@@ -134,7 +134,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init_align(&self->top, &self->component,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->top, &margin);
+	psy_ui_component_setmargin(&self->top, margin);
 	cpuview_inittitle(self);
 	cpuview_initcoreinfo(self);	
 	cpuview_initresources(self);
@@ -156,7 +156,7 @@ void cpuview_inittitle(CPUView* self)
 		psy_ui_STYLE_HEADER,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 2.0);
-	psy_ui_component_setmargin(&self->titlebar, &margin);
+	psy_ui_component_setmargin(&self->titlebar, margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
 		"Psycle DSP/CPU Performance Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
@@ -165,7 +165,7 @@ void cpuview_inittitle(CPUView* self)
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, &margin);
+	psy_ui_component_setmargin(&self->hide.component, margin);
 }
 
 void cpuview_initcoreinfo(CPUView* self)
@@ -213,7 +213,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 2.0);
-	psy_ui_component_setmargin(&self->scroller.component, &margin);
+	psy_ui_component_setmargin(&self->scroller.component, margin);
 }
 
 void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,

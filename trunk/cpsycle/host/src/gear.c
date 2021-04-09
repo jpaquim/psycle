@@ -70,7 +70,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(&self->client, gear_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
-		psy_ui_defaults_pcmargin(psy_ui_defaults()));
+		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
@@ -78,7 +78,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_STYLE_HEADER, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->titlebar, &margin);
+	psy_ui_component_setmargin(&self->titlebar, margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL, "machinebar.gear");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
@@ -86,7 +86,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_component_setmargin(&self->hide.component, &margin);
+	psy_ui_component_setmargin(&self->hide.component, margin);
 	// client
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
@@ -103,7 +103,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	instrumentsbox_init(&self->instrumentsbox,
 		psy_ui_notebook_base(&self->notebook), 
 		&workspace->song->instruments, workspace);
-	psy_ui_component_setmargin(&self->instrumentsbox.groupheader, NULL);
+	psy_ui_component_setmargin(&self->instrumentsbox.groupheader, psy_ui_margin_zero());
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
 		&workspace->song->samples, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,

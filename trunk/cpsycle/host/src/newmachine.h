@@ -4,8 +4,11 @@
 #if !defined(NEWMACHINE_H)
 #define NEWMACHINE_H
 
+// host
 #include "machineviewskin.h"
 #include "workspace.h"
+#include "labelpair.h"
+// ui
 #include <uibutton.h>
 #include <uiedit.h>
 #include <uiimage.h>
@@ -23,6 +26,30 @@ extern "C" {
 // NewMachine
 // Adding machines
 		
+
+typedef struct NewMachineFilter {	
+	psy_Signal signal_changed;
+	bool gen;
+	bool effect;
+	bool intern;
+	bool native;
+	bool vst;
+	bool lua;
+	bool ladspa;
+	psy_audio_MachineType type;
+	char_dyn_t* text;
+} NewMachineFilter;
+
+void newmachinefilter_init(NewMachineFilter*);
+void newmachinefilter_dispose(NewMachineFilter*);
+
+void newmachinefilter_reset(NewMachineFilter*);
+bool newmachinefilter_all(const NewMachineFilter*);
+void newmachinefilter_notify(NewMachineFilter*);
+void newmachinefilter_settext(NewMachineFilter*, const char* text);
+void newmachinefilter_setalltypes(NewMachineFilter*);
+void newmachinefilter_cleartypes(NewMachineFilter*);
+
 struct NewMachine;
 
 typedef struct NewMachineSearch {
@@ -33,11 +60,11 @@ typedef struct NewMachineSearch {
 	psy_ui_Edit edit;
 	bool hasdefaulttext;
 	// references
-	struct NewMachine* newmachine;
+	NewMachineFilter* filter;
 } NewMachineSearch;
 
 void newmachinesearch_init(NewMachineSearch*, psy_ui_Component* parent,
-	struct NewMachine*);
+	NewMachineFilter* filter);
 
 typedef struct NewMachineBar {
 	// inherits
@@ -54,21 +81,56 @@ typedef struct NewMachineBar {
 void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent,
 	Workspace*);
 
-typedef struct {
+typedef struct NewMachineDetail {
+	// inherits
 	psy_ui_Component component;
+	// intern
 	NewMachineSearch search;
 	NewMachineBar bar;
 	psy_ui_Label desclabel;
+	LabelPair plugname;
+	LabelPair dllname;
+	LabelPair version;
+	LabelPair apiversion;
+	psy_ui_Component bottom;
     psy_ui_Label compatlabel;
     psy_ui_CheckBox compatblitzgamefx;
-    Workspace* workspace;
-	bool empty;
+	// references
+    Workspace* workspace;	
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
-	struct NewMachine* newmachine, Workspace*);
+	NewMachineFilter* filter, Workspace*);
 
 void newmachinedetail_reset(NewMachineDetail*);
+void newmachinedetail_update(NewMachineDetail*, psy_Property*);
+void newmachinedetail_setdescription(NewMachineDetail*, const char* text);
+void newmachinedetail_setplugname(NewMachineDetail*, const char* text);
+void newmachinedetail_setdllname(NewMachineDetail*, const char* text);
+void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version);
+void newmachinedetail_setapiversion(NewMachineDetail* self,
+	int16_t apiversion);
+
+typedef struct NewMachineFilterBar {
+	// inherits
+	psy_ui_Component component;	
+	// intern
+	psy_ui_Button gen;
+	psy_ui_Button effects;
+	psy_ui_Button intern;
+	psy_ui_Button native;
+	psy_ui_Button vst;
+	psy_ui_Button lua;
+	psy_ui_Button ladspa;
+	// references
+	NewMachineFilter* filters;
+} NewMachineFilterBar;
+
+void newmachinefilterbar_init(NewMachineFilterBar*, psy_ui_Component* parent,
+	NewMachineFilter*);
+
+void newmachinefilterbar_setfilters(NewMachineFilterBar*, NewMachineFilter*);
+void newmachinefilterbar_update(NewMachineFilterBar*);
 
 typedef struct PluginScanView {
 	// inherits
@@ -99,6 +161,7 @@ typedef struct {
 	bool onlyfavorites;
 	bool generatorsenabled;
 	bool effectsenabled;
+	NewMachineFilter filters;
 	int mode;
 } PluginsView;
 
@@ -120,6 +183,7 @@ typedef struct NewMachine {
 	psy_ui_Component pluginsheader;
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
+	NewMachineFilterBar filterbar;
 	PluginsView pluginsview;
 	NewMachineDetail detail;
 	PluginScanView scanview;
@@ -149,13 +213,12 @@ void newmachine_insertmode(NewMachine*);
 void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
 
-void newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
+bool newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {
 	return &self->component;
 }
-
 
 #ifdef __cplusplus
 }

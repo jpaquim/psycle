@@ -52,6 +52,9 @@ INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self
 	return self->hasplugincache;
 }
 
+
+void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv);
+
 #ifdef __cplusplus
 }
 #endif

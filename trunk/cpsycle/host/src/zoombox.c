@@ -67,10 +67,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_setstyletypes(&self->zoomin.component,
 		STYLE_ZOOMBOX, psy_ui_STYLE_BUTTON_HOVER, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(zoombox_base(self), psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		NULL));
+	psy_ui_component_setalign_children(zoombox_base(self), psy_ui_ALIGN_LEFT);		
 	// set defaults
 	self->zoomrate = 1.0;
 	self->zoomstep = 0.1;

@@ -20,6 +20,10 @@ typedef struct {
 } LabelPair;
 
 void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* desc);
+void labelpair_init_right(LabelPair*, psy_ui_Component* parent, const char* desc,
+	double desccharnumber);
+void labelpair_init_top(LabelPair*, psy_ui_Component* parent, const char* desc,
+	double charnumber);
 
 #ifdef __cplusplus
 }

@@ -599,7 +599,8 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			(mode == psy_audio_MACHMODE_GENERATOR) ? psy_audio_VST : psy_audio_VSTFX,
 			filename,
 			shellidx,
-			"");		
+			"",
+			"VST");		
 	}
 #if defined DIVERSALIS__OS__MICROSOFT        	
 	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		

@@ -50,6 +50,7 @@ void psy_ui_label_setlinespacing(psy_ui_Label*, double spacing);
 // void psy_ui_label_setstyle(psy_ui_Label*, int style);
 void psy_ui_label_settextalignment(psy_ui_Label*, psy_ui_Alignment alignment);
 void psy_ui_label_preventtranslation(psy_ui_Label*);
+void psy_ui_label_enabletranslation(psy_ui_Label*);
 void psy_ui_label_fadeout(psy_ui_Label*);
 
 INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)

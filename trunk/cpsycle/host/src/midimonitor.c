@@ -355,7 +355,7 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
-		psy_ui_defaults_pcmargin(psy_ui_defaults()));
+		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	midimonitor_inittitle(self);
 	psy_ui_component_init(&self->top, &self->client, NULL);
 	psy_ui_margin_init(&self->topmargin);
@@ -381,7 +381,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);	
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->titlebar, &margin);
+	psy_ui_component_setmargin(&self->titlebar, margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
 		"Psycle MIDI Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
@@ -396,7 +396,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, &margin);
+	psy_ui_component_setmargin(&self->hide.component, margin);
 }
 
 void midimonitor_initcorestatus(MidiMonitor* self)
@@ -422,7 +422,7 @@ void midimonitor_initcorestatusleft(MidiMonitor* self)
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->resources, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
-		&self->topmargin));
+		self->topmargin));
 }
 
 void midimonitor_initcorestatusright(MidiMonitor* self)
@@ -438,7 +438,7 @@ void midimonitor_initcorestatusright(MidiMonitor* self)
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->performance, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
-		&self->topmargin));
+		self->topmargin));
 }
 
 void midimonitor_initflags(MidiMonitor* self)

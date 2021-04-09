@@ -62,14 +62,14 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_setalign(&self->notemapview.samplesbox.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->notemapview.samplesbox.component,
-		&margin);
+		margin);
 	// nna
 	psy_ui_component_init(&self->nna, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->nna, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
-	psy_ui_component_setmargin(&self->nna, &margin);	
+	psy_ui_component_setmargin(&self->nna, margin);	
 	psy_ui_label_init_text(&self->nnaheader, &self->nna, NULL,
 		"instrumentview.new-note-action");
 	psy_ui_button_init_connect(&self->nnacut, &self->nna, NULL,
@@ -122,7 +122,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_init(&self->fitrow, &self->component, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
-	psy_ui_component_setmargin(&self->fitrow, &margin);
+	psy_ui_component_setmargin(&self->fitrow, margin);
 	psy_ui_component_setdefaultalign(&self->fitrow, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_checkbox_init(&self->fitrowcheck, &self->fitrow);

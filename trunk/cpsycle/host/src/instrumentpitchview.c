@@ -33,7 +33,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	margin.top = psy_ui_value_makeeh(1.0);		
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "instrumentview.pitch-envelope");
-	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
+	psy_ui_component_setmargin(&self->envelopeview.component, margin);	
 	adsrsliders_init(&self->adsrsliders, &self->component);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
 		instrumentpitchview_ontweaked);

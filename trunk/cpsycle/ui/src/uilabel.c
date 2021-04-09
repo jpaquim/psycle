@@ -207,6 +207,14 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - tm->tmHeight) / 2;
 	}	
+	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) == psy_ui_ALIGNMENT_RIGHT) {
+		psy_ui_Size textsize;
+		psy_ui_RealSize textsizepx;
+
+		textsize = psy_ui_textsize(g, text);
+		textsizepx = psy_ui_size_px(&textsize, tm);
+		centerx = (size.width - textsizepx.width);
+	}
 	string = malloc(strlen(text) + 1);
 	psy_snprintf(string, strlen(text) + 1, "%s", text);
 	token = strtok(string, seps);
@@ -265,6 +273,11 @@ void psy_ui_label_preventtranslation(psy_ui_Label* self)
 		free(self->translation);
 		self->translation = NULL;
 	}
+}
+
+void psy_ui_label_enabletranslation(psy_ui_Label* self)
+{
+	self->translate = TRUE;
 }
 
 char* strrchrpos(char* str, char c, uintptr_t pos)

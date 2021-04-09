@@ -80,9 +80,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 	psy_ui_button_settext(&self->ok, "Interpolate");
 	psy_ui_component_setalign(&self->ok.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_list_free(psy_ui_components_setmargin(
-		psy_ui_component_children(&self->component, 0),
-		&margin));
+	psy_ui_component_setmargin_children(&self->component, margin);
 }
 
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;

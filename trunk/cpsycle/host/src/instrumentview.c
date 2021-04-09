@@ -274,7 +274,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		view, workspace);		
 	tab = margin;
 	tab.right = psy_ui_value_makeew(4.0);
-	psy_ui_component_setmargin(&self->more, &tab);
+	psy_ui_component_setmargin(&self->more, tab);
 	psy_ui_component_hide(&self->more);
 }
 
@@ -434,12 +434,12 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);
 	psy_ui_component_setmargin(&self->header.component,
-		&leftmargin);
+		leftmargin);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->left, &leftmargin);
+	psy_ui_component_setmargin(&self->left, leftmargin);
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments, workspace);
 	psy_ui_component_setalign(&self->instrumentsbox.component,
@@ -456,7 +456,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 
 		psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 		psy_ui_component_setmargin(psy_ui_notebook_base(&self->clientnotebook),
-			&margin);
+			margin);
 	}
 	// empty
 	psy_ui_label_init_text(&self->empty,
@@ -467,7 +467,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->client,
 		psy_ui_notebook_base(&self->clientnotebook), NULL);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
-	psy_ui_component_setmargin(&self->client, &margin);
+	psy_ui_component_setmargin(&self->client, margin);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	

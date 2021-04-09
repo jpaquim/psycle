@@ -1,6 +1,7 @@
 #if !defined(STRCASESTR_H)
 #define STRCASESTR_H
 
+#include "psydef.h"
 #include "os.h"
 
 #ifdef DIVERSALIS__OS__MICROSOFT
@@ -11,6 +12,10 @@
 
 #include <string.h>
 #include <ctype.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 INLINE int strncasecmp(const char* _l, const char* _r, size_t n)
 {
@@ -26,6 +31,11 @@ INLINE char* strcasestr(const char* h, const char* n)
 	for (; *h; h++) if (!strncasecmp(h, n, l)) return (char*)h;
 	return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 #else
 #define _GNU_SOURCE
 #include <string.h>

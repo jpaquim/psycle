@@ -184,7 +184,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		psy_ui_style_allocinit_colours(onprimary, onprimary));
 	// splitter
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style,
+	psy_ui_style_setcolours(style,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.05),
 		surface);	
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SPLITTER, style);

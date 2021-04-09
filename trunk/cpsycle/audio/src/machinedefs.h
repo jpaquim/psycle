@@ -16,6 +16,7 @@ typedef enum {
 	psy_audio_MACHMODE_GENERATOR = 0,
 	psy_audio_MACHMODE_FX = 1,
 	psy_audio_MACHMODE_MASTER = 2,
+	psy_audio_MACHMODE_UNDEFINED = 3,
 } psy_audio_MachineMode;
 
 typedef enum  {

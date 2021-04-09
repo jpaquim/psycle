@@ -16,11 +16,12 @@
 #include "../../detail/portable.h"
 #include "../../detail/strcasestr.h"
 
-// newmachine
 static void plugindisplayname(psy_Property*, char* text);
 static uintptr_t plugintype(psy_Property*, char* text);
 static uintptr_t pluginmode(psy_Property*, char* text);
-static psy_Property* search(psy_Property* source, const char* text);
+static psy_Property* search(psy_Property* source, NewMachineFilter*);
+static void searchfilter(psy_Property* plugin, NewMachineFilter*,
+	psy_Property* parent);
 
 static void newmachinebar_onselectdirectories(NewMachineBar*, psy_ui_Component* sender);
 
@@ -31,6 +32,67 @@ static int newmachine_comp_name(psy_Property* p, psy_Property* q);
 static int newmachine_comp_type(psy_Property* p, psy_Property* q);
 static int newmachine_comp_mode(psy_Property* p, psy_Property* q);
 static int newmachine_isplugin(int type);
+
+// NewMachineFilter
+void newmachinefilter_init(NewMachineFilter* self)
+{
+	self->text = NULL;
+	self->gen = TRUE;
+	self->effect = TRUE;
+	newmachinefilter_setalltypes(self);	
+	psy_signal_init(&self->signal_changed);
+}
+
+void newmachinefilter_dispose(NewMachineFilter* self)
+{	
+	psy_signal_dispose(&self->signal_changed);
+	free(self->text);
+}
+
+void newmachinefilter_notify(NewMachineFilter* self)
+{
+	psy_signal_emit(&self->signal_changed, self, 0);
+}
+
+void newmachinefilter_reset(NewMachineFilter* self)
+{
+	self->gen = TRUE;
+	self->effect = TRUE;
+	newmachinefilter_setalltypes(self);
+	psy_strreset(&self->text, "");
+	newmachinefilter_notify(self);
+}
+
+void newmachinefilter_settext(NewMachineFilter* self, const char* text)
+{
+	psy_strreset(&self->text, text);
+	newmachinefilter_notify(self);
+}
+
+void newmachinefilter_setalltypes(NewMachineFilter* self)
+{
+	self->effect = TRUE;
+	self->intern = TRUE;
+	self->native = TRUE;
+	self->vst = TRUE;
+	self->lua = TRUE;
+	self->ladspa = TRUE;
+}
+
+void newmachinefilter_cleartypes(NewMachineFilter* self)
+{
+	self->effect = FALSE;
+	self->intern = FALSE;
+	self->native = FALSE;
+	self->vst = FALSE;
+	self->lua = FALSE;
+	self->ladspa = FALSE;
+}
+
+bool newmachinefilter_all(const NewMachineFilter* self)
+{
+	return (self->gen && self->effect);
+}
 
 // NewMachineSearch
 // prototypes
@@ -45,15 +107,15 @@ static void newmachinesearch_onreject(NewMachineSearch*,
 static void newmachinesearch_reset(NewMachineSearch*);
 // implementation
 void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
-	NewMachine* newmachine)
+	NewMachineFilter* filter)
 {
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	self->newmachine = newmachine;
-	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
-	psy_ui_component_setspacing(&self->component, &spacing);
+	self->filter = filter;
+	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.0);
+	psy_ui_component_setspacing(&self->component, spacing);
 	psy_ui_image_init(&self->image, &self->component);
 	psy_ui_image_setbitmapalignment(&self->image,
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
@@ -63,7 +125,7 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 		psy_ui_size_makepx(11, 11));
 	psy_ui_component_preventalign(psy_ui_image_base(&self->image));
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 1.0);
-	psy_ui_component_setmargin(psy_ui_image_base(&self->image), &margin);
+	psy_ui_component_setmargin(psy_ui_image_base(&self->image), margin);
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_SEARCH_DARK);
 	psy_ui_bitmap_settransparency(&self->image.bitmap, psy_ui_colour_make(psy_ui_RGB_WHITE));
 	psy_ui_edit_init(&self->edit, &self->component);
@@ -90,64 +152,48 @@ void newmachinesearch_oneditfocus(NewMachineSearch* self, psy_ui_Component* send
 
 void newmachinesearch_oneditchange(NewMachineSearch* self, psy_ui_Component* sender)
 {
-	psy_Property* curr;
-	psy_Property* properties;
-
 	self->hasdefaulttext = FALSE;
-	curr = self->newmachine->pluginsview.plugins;
-	properties = search(workspace_pluginlist(self->newmachine->workspace),
-		psy_ui_edit_text(&self->edit));
-	self->newmachine->pluginsview.plugins = properties;
-	if (curr) {
-		psy_property_deallocate(curr);
-	}	
-	newmachinedetail_reset(&self->newmachine->detail);
-	psy_ui_component_setscrolltop(&self->newmachine->component,
-		psy_ui_value_zero());
-	psy_ui_component_updateoverflow(&self->newmachine->component);
-	psy_ui_component_invalidate(&self->newmachine->component);
+	newmachinefilter_settext(self->filter, psy_ui_edit_text(&self->edit));
 }
 
 void newmachinesearch_onaccept(NewMachineSearch* self,
 	psy_ui_Component* sender)
 {
 	if (psy_strlen(psy_ui_edit_text(&self->edit)) == 0) {
-		newmachinesearch_reset(self);
-		psy_signal_emit(&self->newmachine->workspace->plugincatcher.signal_changed,
-			&self->newmachine->workspace->plugincatcher, 0);
-	}
-	psy_ui_component_setfocus(&self->newmachine->component);
+		newmachinesearch_reset(self);		
+	}	
 }
 
 void newmachinesearch_onreject(NewMachineSearch* self,
 	psy_ui_Component* sender)
 {	
 	newmachinesearch_reset(self);	
-	psy_signal_emit(&self->newmachine->workspace->plugincatcher.signal_changed,
-		&self->newmachine->workspace->plugincatcher, 0);
-	psy_ui_component_setfocus(&self->newmachine->component);
 }
 
 void newmachinesearch_reset(NewMachineSearch* self)
-{
+{		
 	psy_ui_edit_settext(&self->edit, "Search Plugin");
+	newmachinefilter_settext(self->filter, "");
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 	self->hasdefaulttext = TRUE;
 }
 
 // NewMachineBar
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{
-	psy_ui_Margin margin;
-			
+{	
+	psy_ui_Margin spacing;
+					
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_margin_init_all_em(&spacing, 0.0, 1.0, 1.0, 0.5);
+	psy_ui_component_setspacing(&self->component, spacing);
 	self->workspace = workspace;
 	psy_ui_button_init_text(&self->rescan, &self->component, NULL,
 		"newmachine.rescan");
-	psy_ui_button_setcharnumber(&self->rescan, 30);
+	psy_ui_button_setcharnumber(&self->rescan, 30.0);
 	psy_ui_button_init_text(&self->selectdirectories, &self->component, NULL,
 		"newmachine.select-plugin-directories");
-	psy_ui_button_setcharnumber(&self->rescan, 30);
+	psy_ui_button_setcharnumber(&self->rescan, 30.0);
 	psy_ui_button_init_text(&self->sortbyfavorite, &self->component, NULL,
 		"newmachine.sort-by-favorite");
 	psy_ui_button_init_text(&self->sortbyname, &self->component, NULL,
@@ -157,12 +203,10 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	psy_ui_button_init_text(&self->sortbymode, &self->component, NULL,
 		"newmachine.sort-by-mode");
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
-		newmachinebar_onselectdirectories);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP,
-		&margin));	
+		newmachinebar_onselectdirectories);	
+	psy_ui_margin_init_all_em(&spacing, 0.25, 0.0, 0.25, 0.0);
+	psy_ui_component_setspacing_children(&self->component, spacing);
+	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_TOP);	
 }
 
 void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* sender)
@@ -171,31 +215,43 @@ void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* se
 }
 
 // NewMachineDetail
-static void newmachinedetail_updatetext(NewMachineDetail*);
-static void newmachinedetail_onlanguagechanged(NewMachineDetail*, psy_ui_Component* sender);
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
-	struct NewMachine* newmachine, Workspace* workspace)
+	NewMachineFilter* filter, Workspace* workspace)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 2.0);
+	psy_ui_component_setspacing(&self->component, spacing);
 	self->workspace = workspace;
-	newmachinesearch_init(&self->search, &self->component, newmachine);
+	// search
+	newmachinesearch_init(&self->search, &self->component, filter);
 	psy_ui_component_setalign(&self->search.component, psy_ui_ALIGN_TOP);
+	// buttons
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->desclabel, &self->component, NULL,	
-		"newmachine.select-plugin-to-view-description");
-	psy_ui_label_settextalignment(&self->desclabel,
-		psy_ui_ALIGNMENT_TOP);
-	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_checkbox_init_text(&self->compatblitzgamefx, &self->component,	
-		"newmachine.jme-version-unknown");
-	//psy_ui_component_setmaximumsize(&self->compatblitzgamefx.component,
-	//	psy_ui_size_make(psy_ui_value_makeew(10),
-	//	psy_ui_value_makeeh(0)));
+	// plugin name
+	labelpair_init_right(&self->plugname, &self->component, "Name", 12.0);
+	psy_ui_component_setalign(&self->plugname.component, psy_ui_ALIGN_TOP);
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);
+	psy_ui_component_setmargin(&self->plugname.component, margin);
+	// description
+	psy_ui_label_init(&self->desclabel, &self->component, NULL);
+	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
+	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->dllname.component, psy_ui_ALIGN_BOTTOM);
+	// song loading compatibility
+	psy_ui_component_init(&self->bottom, &self->component, NULL);
+	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
+	psy_ui_margin_init_all_em(&spacing, 0.5, 1.0, 0.5, 0.0);	
+	psy_ui_component_setspacing(&self->bottom, spacing);
+	psy_ui_checkbox_init_multiline(&self->compatblitzgamefx, &self->bottom);
+	psy_ui_checkbox_settext(&self->compatblitzgamefx,
+		"newmachine.jme-version-unknown");	
+	self->compatblitzgamefx.multiline = TRUE;
 	if (compatconfig_loadnewblitz(psycleconfig_compat(
 			workspace_conf(self->workspace)))) {
 		psy_ui_checkbox_check(&self->compatblitzgamefx);
@@ -203,37 +259,50 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);
 	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_label_init_text(&self->compatlabel, &self->component, NULL,
+	psy_ui_label_init_text(&self->compatlabel, &self->bottom, NULL,
 		"newmachine.song-loading-compatibility");
-	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);	
+	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);
+	psy_ui_component_setmargin(psy_ui_label_base(&self->compatlabel), margin);
 	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 1.5, 0.0);
-	psy_list_free(psy_ui_components_setmargin(
-		psy_ui_component_children(&self->component, 0),
-		&margin));
-	newmachinedetail_updatetext(self);
-	psy_signal_connect(&self->component.signal_languagechanged, self,
-		newmachinedetail_onlanguagechanged);
-}
-
-void newmachinedetail_updatetext(NewMachineDetail* self)
-{	
-	if (self->empty) {
-		psy_ui_label_settext(&self->desclabel, psy_ui_translate(
-			"newmachine.select-plugin-to-view-description"));
-	}	
-}
-
-void newmachinedetail_onlanguagechanged(NewMachineDetail* self, psy_ui_Component* sender)
-{
-	newmachinedetail_updatetext(self);
+	// details
+	labelpair_init_right(&self->apiversion, &self->component, "API Version", 12.0);
+	labelpair_init_right(&self->version, &self->component, "Version", 12.0);	
+	labelpair_init_right(&self->dllname, &self->component, "DllName", 12.0);
+	newmachinedetail_reset(self);
 }
 
 void newmachinedetail_reset(NewMachineDetail* self)
 {
+	psy_ui_label_enabletranslation(&self->desclabel);
 	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
 		"newmachine.select-plugin-to-view-description"));
-	self->empty = TRUE;
+	newmachinedetail_setplugname(self, "");
+	newmachinedetail_setdllname(self, "");
+	newmachinedetail_setapiversion(self, 0);
+	newmachinedetail_setplugversion(self, 0);
+}
+
+void newmachinedetail_update(NewMachineDetail* self,
+	psy_Property* property)
+{
+	if (property) {						
+		psy_audio_MachineInfo machineinfo;
+		psy_Path path;
+
+		machineinfo_init(&machineinfo);
+		psy_audio_machineinfo_from_property(property, &machineinfo);		
+		newmachinedetail_setdescription(self, machineinfo.desc);		
+		psy_path_init(&path, machineinfo.modulepath);
+		newmachinedetail_setplugname(self, machineinfo.Name);
+		newmachinedetail_setdllname(self, psy_path_filename(&path));
+		psy_path_dispose(&path);
+		machineinfo_dispose(&machineinfo);
+		newmachinedetail_setapiversion(self, machineinfo.APIVersion);
+		newmachinedetail_setplugversion(self, machineinfo.PlugVersion);
+	} else {
+		newmachinedetail_reset(self);
+	}
 }
 
 void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* sender)
@@ -241,6 +310,169 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 	compatconfig_setloadnewblitz(
 		psycleconfig_compat(workspace_conf(self->workspace)),
 		psy_ui_checkbox_checked(&self->compatblitzgamefx) != FALSE);	
+}
+
+void newmachinedetail_setdescription(NewMachineDetail* self, const char* text)
+{
+	psy_ui_label_preventtranslation(&self->desclabel);
+	psy_ui_label_settext(&self->desclabel, text);
+}
+
+void newmachinedetail_setplugname(NewMachineDetail* self, const char* text)
+{
+	psy_ui_label_settext(&self->plugname.value, text);
+}
+
+void newmachinedetail_setdllname(NewMachineDetail* self, const char* text)
+{	
+	psy_ui_label_settext(&self->dllname.value, text);
+}
+
+void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)
+{
+	char valstr[64];
+
+	psy_snprintf(valstr, 64, "%d", (int)version);	
+	psy_ui_label_settext(&self->version.value, valstr);
+}
+
+void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
+{
+	char valstr[64];
+
+	psy_snprintf(valstr, 64, "%d", (int)apiversion);
+	psy_ui_label_settext(&self->apiversion.value, valstr);
+}
+
+// NewMachineFilterBar
+// prototypes
+static void newmachinefilterbar_onclicked(NewMachineFilterBar* self, psy_ui_Button* sender);
+// implementation
+void newmachinefilterbar_init(NewMachineFilterBar* self, psy_ui_Component* parent,
+	NewMachineFilter* filters)
+{	
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init_text_connect(&self->gen, &self->component, NULL,
+		"Generators", self, newmachinefilterbar_onclicked);
+	psy_ui_button_allowrightclick(&self->gen);
+	psy_ui_button_init_text_connect(&self->effects, &self->component, NULL,
+		"Effects", self, newmachinefilterbar_onclicked);
+	psy_ui_button_allowrightclick(&self->effects);
+	psy_ui_button_init_text_connect(&self->intern, &self->component, NULL,
+		"Intern", self, newmachinefilterbar_onclicked);	
+	psy_ui_button_allowrightclick(&self->intern);
+	psy_ui_button_init_text_connect(&self->native, &self->component, NULL,
+		"Native", self, newmachinefilterbar_onclicked);
+	psy_ui_button_allowrightclick(&self->native);
+	psy_ui_button_init_text_connect(&self->vst, &self->component, NULL,
+		"VST", self, newmachinefilterbar_onclicked);
+	psy_ui_button_allowrightclick(&self->vst);
+	psy_ui_button_init_text_connect(&self->lua, &self->component, NULL,
+		"LUA", self, newmachinefilterbar_onclicked);
+	psy_ui_button_allowrightclick(&self->lua);
+	psy_ui_button_init_text_connect(&self->ladspa, &self->component, NULL,
+		"LADSPA", self, newmachinefilterbar_onclicked);	
+	psy_ui_button_allowrightclick(&self->ladspa);
+	self->filters = filters;
+	newmachinefilterbar_update(self);
+}
+
+void newmachinefilterbar_setfilters(NewMachineFilterBar* self,
+	NewMachineFilter* filters)
+{
+	self->filters = filters;
+	newmachinefilterbar_update(self);
+}
+
+void newmachinefilterbar_onclicked(NewMachineFilterBar* self, psy_ui_Button* sender)
+{		
+	if (self->filters) {
+		if (sender->buttonstate == 1) {
+			if (sender == &self->effects) {
+				self->filters->effect = !self->filters->effect;
+			} else if (sender == &self->gen) {
+				self->filters->gen = !self->filters->gen;
+			} else if (sender == &self->intern) {
+				self->filters->intern = !self->filters->intern;
+			} else if (sender == &self->native) {
+				self->filters->native = !self->filters->native;
+			} else if (sender == &self->vst) {
+				self->filters->vst = !self->filters->vst;
+			} else if (sender == &self->lua) {
+				self->filters->lua = !self->filters->lua;
+			} else if (sender == &self->ladspa) {
+				self->filters->ladspa = !self->filters->ladspa;
+			}
+		} else {			
+			if (sender == &self->effects) {				
+				self->filters->effect = TRUE;
+				self->filters->gen = FALSE;				
+			} else if (sender == &self->gen) {								
+				self->filters->effect = FALSE;
+				self->filters->gen = TRUE;				
+			} else if (sender == &self->intern) {				
+				newmachinefilter_cleartypes(self->filters);
+				self->filters->intern = TRUE;				
+			} else if (sender == &self->native) {				
+				newmachinefilter_cleartypes(self->filters);
+				self->filters->native = TRUE;				
+			} else if (sender == &self->vst) {				
+				newmachinefilter_cleartypes(self->filters);
+				self->filters->vst = TRUE;				
+			} else if (sender == &self->lua) {				
+				newmachinefilter_cleartypes(self->filters);
+				self->filters->lua = TRUE;				
+			} else if (sender == &self->ladspa) {				
+				newmachinefilter_cleartypes(self->filters);
+				self->filters->ladspa = TRUE;				
+			}
+		}
+		newmachinefilterbar_update(self);
+		newmachinefilter_notify(self->filters);
+	}	
+}
+
+void newmachinefilterbar_update(NewMachineFilterBar* self)
+{
+	if (self->filters) {
+		if (self->filters->effect) {
+			psy_ui_button_highlight(&self->effects);
+		} else {
+			psy_ui_button_disablehighlight(&self->effects);
+		}
+		if (self->filters->gen) {
+			psy_ui_button_highlight(&self->gen);
+		} else {
+			psy_ui_button_disablehighlight(&self->gen);
+		}
+		if (self->filters->intern) {
+			psy_ui_button_highlight(&self->intern);
+		} else {
+			psy_ui_button_disablehighlight(&self->intern);
+		}
+		if (self->filters->native) {
+			psy_ui_button_highlight(&self->native);
+		} else {
+			psy_ui_button_disablehighlight(&self->native);
+		}
+		if (self->filters->vst) {
+			psy_ui_button_highlight(&self->vst);
+		} else {
+			psy_ui_button_disablehighlight(&self->vst);
+		}
+		if (self->filters->lua) {
+			psy_ui_button_highlight(&self->lua);
+		} else {
+			psy_ui_button_disablehighlight(&self->lua);
+		}
+		if (self->filters->ladspa) {
+			psy_ui_button_highlight(&self->ladspa);
+		} else {
+			psy_ui_button_disablehighlight(&self->ladspa);
+		}
+	}
 }
 
 // PluginScanView
@@ -276,6 +508,7 @@ static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
 static uintptr_t pluginsview_numlines(const PluginsView*);
 static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
+static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
 
 static psy_ui_ComponentVtable pluginsview_vtable;
 static int pluginsview_vtable_initialized = 0;
@@ -297,6 +530,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 			(psy_ui_fp_component_onpreferredsize)
 			pluginsview_onpreferredsize;		
 	}
+	self->component.vtable = &pluginsview_vtable;
 }
 
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
@@ -306,7 +540,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
-	self->component.vtable = &pluginsview_vtable;
+	newmachinefilter_init(&self->filters);
 	self->workspace = workspace;
 	self->onlyfavorites = favorites;
 	self->mode = NEWMACHINE_APPEND;
@@ -335,6 +569,8 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 		pluginsview_onplugincachechanged);
 	size = psy_ui_component_size(&self->component);
 	pluginsview_computetextsizes(self, &size);	
+	psy_signal_connect(&self->filters.signal_changed, self,
+		pluginsview_onfilterchanged);
 }
 
 void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
@@ -344,6 +580,7 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 	if (self->plugins) {
 		psy_property_deallocate(self->plugins);
 	}
+	newmachinefilter_dispose(&self->filters);
 }
 
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
@@ -752,6 +989,20 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 	}
 	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());	
 	psy_ui_component_updateoverflow(&self->component);
+	psy_ui_component_invalidate(&self->component);	
+}
+
+void pluginsview_onfilterchanged(PluginsView* self, NewMachineFilter* sender)
+{
+	self->selectedplugin = 0;
+	if (self->plugins) {
+		psy_property_deallocate(self->plugins);
+	}
+	self->plugins = search(workspace_pluginlist(self->workspace), &self->filters);
+	psy_signal_emit(&self->signal_changed, self, 1,
+		self->selectedplugin);
+	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
+	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -805,9 +1056,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->mode = NEWMACHINE_APPEND;
 	self->appendstack = FALSE;
 	self->restoresection = SECTION_ID_MACHINEVIEW_WIRES;
-	self->selectedplugin = NULL;
-	newmachinedetail_init(&self->detail, &self->component, self, workspace);
-	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
+	self->selectedplugin = NULL;	
+	// Notebook	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
@@ -827,9 +1077,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// favorite view
 	psy_ui_component_init(&self->favoriteheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->favoriteheader, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->favoriteheader, &margin);
+	psy_ui_component_setmargin(&self->favoriteheader, margin);
 	psy_ui_margin_init_all_em(&spacing, 1.0, 0.0, 0.0, 0.0);
-	psy_ui_component_setspacing(&self->favoriteheader, &spacing);
+	psy_ui_component_setspacing(&self->favoriteheader, spacing);
 	psy_ui_component_setdefaultalign(&self->favoriteheader, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->favoriteheader.style.style.border = sectionborder;
@@ -853,11 +1103,11 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
 	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);	
-	// plugin view
+	// pluginview header
 	psy_ui_component_init(&self->pluginsheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->pluginsheader, &margin);
-	psy_ui_component_setspacing(&self->pluginsheader, &spacing);
+	psy_ui_component_setmargin(&self->pluginsheader, margin);
+	psy_ui_component_setspacing(&self->pluginsheader, spacing);
 	psy_ui_component_setdefaultalign(&self->pluginsheader, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->pluginsheader.style.style.border = sectionborder;
@@ -869,16 +1119,24 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_size_makepx(16, 14));
 	psy_ui_component_preventalign(&self->pluginsicon.component);
 	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader, NULL,
-		"newmachine.all");	
+		"newmachine.all");
 	psy_ui_label_settextalignment(&self->pluginslabel,
-		psy_ui_ALIGNMENT_LEFT |
-		psy_ui_ALIGNMENT_CENTER_VERTICAL);
+		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	newmachinefilterbar_init(&self->filterbar, &self->pluginsheader, NULL);
 	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->client, FALSE, workspace);
+	newmachinefilterbar_setfilters(&self->filterbar, &self->pluginsview.filters);
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_main.component, 1);
 	psy_ui_component_setalign(&self->scroller_main.component, psy_ui_ALIGN_CLIENT);
+	// Details
+	newmachinedetail_init(&self->detail, &self->component, &self->pluginsview.filters,
+		self->workspace);
+	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmaximumsize(&self->detail.component,
+		psy_ui_size_makeem(40.0, 0.0));
+	// signals
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->pluginsview.signal_selected, self,
 		newmachine_onpluginselected);
@@ -923,23 +1181,9 @@ void newmachine_updateskin(NewMachine* self)
 
 void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	psy_Property* selected)
-{
-	const char* text;
-	char detail[1024];
-	psy_Property* sorted;
-
-	text = psy_property_at_str(selected, "name", "");
-	strcpy(detail, text);
-	// text = psy_property_at_str(selected, "desc", "");
-	// strcat(detail, "  ");
-	// strcat(detail, text);	
-	text = psy_property_at_str(selected, "author", "");
-	strcat(detail, "\n(");
-	strcat(detail, text);
-	strcat(detail, ")");
-	psy_ui_label_settext(&self->detail.desclabel, detail);
-	self->detail.empty = FALSE;
-	self->selectedplugin = selected;	
+{	
+	self->selectedplugin = selected;
+	newmachinedetail_update(&self->detail, selected);
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 	if (self->selectedplugin) {
 		intptr_t favorite;
@@ -952,6 +1196,8 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	pluginsview_onplugincachechanged(&self->favoriteview,
 		&self->favoriteview.workspace->plugincatcher);
 	if (self->favoriteview.plugins) {
+		psy_Property* sorted;
+
 		sorted = newmachine_sort(self->favoriteview.plugins,
 			newmachine_comp_favorite);
 		psy_property_deallocate(self->favoriteview.plugins);
@@ -965,24 +1211,8 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 
 void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
 	psy_Property* selected)
-{
-	const char* text;
-	char detail[1024];
-
-	if (selected) {
-		text = psy_property_at_str(selected, "name", "");
-		strcpy(detail, text);
-		text = psy_property_at_str(selected, "desc", "");
-		strcat(detail, "  ");
-		strcat(detail, text);
-		text = psy_property_at_str(selected, "author", "");
-		strcat(detail, "\n(");
-		strcat(detail, text);
-		strcat(detail, ")");
-	} else {
-		detail[0] = '\0';
-	}
-	psy_ui_label_settext(&self->detail.desclabel, detail);
+{	
+	newmachinedetail_update(&self->detail, selected);	
 }
 
 void newmachine_onplugincachechanged(NewMachine* self,
@@ -1113,30 +1343,78 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 	return rv;
 }
 
-psy_Property* search(psy_Property* source, const char* text)
+psy_Property* search(psy_Property* source, NewMachineFilter* filter)
 {
 	psy_Property* rv;
 	psy_List* p;
 	uintptr_t num;
 	uintptr_t i;
+	char* text;
+
+	assert(filter);
 
 	rv = psy_property_allocinit_key(NULL);
-	if (!source || !text) {
+	if (!source) {
 		return rv;
 	}	
 	num = psy_property_size(source);		
 	p = psy_property_begin(source);	
+	text = filter->text;
 	for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
 		psy_Property* q;
 		
 		q = (psy_Property*)psy_list_entry(p);
-		if (psy_property_text(q)) {
-			if (strcasestr(psy_property_text(q), text)) {
-				psy_property_append_property(rv, psy_property_clone(q));
-			}
+		if (psy_strlen(text) == 0) {			
+			searchfilter(q, filter, rv);			
+		} else if (psy_property_text(q) &&
+				strcasestr(psy_property_text(q), text)) {
+			searchfilter(q, filter, rv);			
 		}		
 	}
 	return rv;
+}
+
+void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
+	psy_Property* parent)
+{
+	psy_audio_MachineInfo machineinfo;
+	bool isintern;
+	
+	machineinfo_init(&machineinfo);
+	psy_audio_machineinfo_from_property(plugin, &machineinfo);	
+	if (!filter->vst && (machineinfo.type == psy_audio_VST || machineinfo.type == psy_audio_VSTFX)) {
+		return;
+	}
+	if (!filter->native && machineinfo.type == psy_audio_PLUGIN) {
+		return;
+	}
+	if (!filter->ladspa && machineinfo.type == psy_audio_LADSPA) {
+		return;
+	}
+	if (!filter->lua && machineinfo.type == psy_audio_LUA) {
+		return;
+	}
+	isintern = FALSE;
+	switch (machineinfo.type) {
+	case psy_audio_PLUGIN:
+	case psy_audio_LUA:						
+	case psy_audio_VST:			
+	case psy_audio_VSTFX:			
+	case psy_audio_LADSPA:
+		break;
+	default:
+		isintern = TRUE;
+		break;
+	}
+	if (!filter->intern && isintern) {
+		return;
+	}	
+	if (filter->effect && machineinfo.mode == psy_audio_MACHMODE_FX) {
+		psy_property_append_property(parent, psy_property_clone(plugin));
+	}
+	if (filter->gen && machineinfo.mode == psy_audio_MACHMODE_GENERATOR) {
+		psy_property_append_property(parent, psy_property_clone(plugin));
+	}	
 }
 
 int newmachine_comp_favorite(psy_Property* p, psy_Property* q)
@@ -1301,22 +1579,12 @@ void newmachine_addeffectmode(NewMachine* self)
 	self->favoriteview.mode = NEWMACHINE_ADDEFFECT;		
 }
 
-void newmachine_selectedmachineinfo(const NewMachine* self,
+bool newmachine_selectedmachineinfo(const NewMachine* self,
 	psy_audio_MachineInfo* rv)
 {
 	if (self->selectedplugin) {
-		machineinfo_set(rv,
-			psy_property_at_str(self->selectedplugin, "author", ""),
-			psy_property_at_str(self->selectedplugin, "command", ""),
-			psy_property_at_int(self->selectedplugin, "flags", 0),
-			psy_property_at_int(self->selectedplugin, "mode", 0),
-			psy_property_at_str(self->selectedplugin, "name", ""),
-			psy_property_at_str(self->selectedplugin, "shortname", ""),
-			(int16_t)psy_property_at_int(self->selectedplugin, "apiversion", 0),
-			(int16_t)psy_property_at_int(self->selectedplugin, "plugversion", 0),			
-			(psy_audio_MachineType)psy_property_at_int(self->selectedplugin, "type", psy_audio_UNDEFINED),
-			psy_property_at_str(self->selectedplugin, "path", ""),
-			psy_property_at_int(self->selectedplugin, "shellidx", 0),
-			psy_property_at_str(self->selectedplugin, "help", ""));
-	}	
+		psy_audio_machineinfo_from_property(self->selectedplugin, rv);
+		return TRUE;
+	}
+	return FALSE;
 }
