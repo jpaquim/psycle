@@ -26,8 +26,8 @@ extern "C" {
 // NewMachine
 // Adding machines
 		
-
-typedef struct NewMachineFilter {	
+// NewMachineFilter
+typedef struct NewMachineFilter {
 	psy_Signal signal_changed;
 	bool gen;
 	bool effect;
@@ -38,6 +38,8 @@ typedef struct NewMachineFilter {
 	bool ladspa;
 	psy_audio_MachineType type;
 	char_dyn_t* text;
+	psy_Table categories;
+	
 } NewMachineFilter;
 
 void newmachinefilter_init(NewMachineFilter*);
@@ -49,6 +51,10 @@ void newmachinefilter_notify(NewMachineFilter*);
 void newmachinefilter_settext(NewMachineFilter*, const char* text);
 void newmachinefilter_setalltypes(NewMachineFilter*);
 void newmachinefilter_cleartypes(NewMachineFilter*);
+void newmachinefilter_addcategory(NewMachineFilter*, const char* category);
+void newmachinefilter_removecategory(NewMachineFilter*, const char* category);
+void newmachinefilter_anycategory(NewMachineFilter*);
+bool newmachinefilter_useanycategory(const NewMachineFilter*);
 
 struct NewMachine;
 
@@ -111,6 +117,7 @@ void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version);
 void newmachinedetail_setapiversion(NewMachineDetail* self,
 	int16_t apiversion);
 
+// NewMachineFilterBar
 typedef struct NewMachineFilterBar {
 	// inherits
 	psy_ui_Component component;	
@@ -131,6 +138,23 @@ void newmachinefilterbar_init(NewMachineFilterBar*, psy_ui_Component* parent,
 
 void newmachinefilterbar_setfilters(NewMachineFilterBar*, NewMachineFilter*);
 void newmachinefilterbar_update(NewMachineFilterBar*);
+
+// NewMachineCategoryBar
+typedef struct NewMachineCategoryBar {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Component client;
+	psy_Table categories;
+	// references
+	NewMachineFilter* filters;
+	Workspace* workspace;
+} NewMachineCategoryBar;
+
+void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent,
+	NewMachineFilter*, Workspace*);
+
+void newmachinecategorybar_build(NewMachineCategoryBar*);
 
 typedef struct PluginScanView {
 	// inherits
@@ -184,6 +208,7 @@ typedef struct NewMachine {
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
 	NewMachineFilterBar filterbar;
+	NewMachineCategoryBar categorybar;
 	PluginsView pluginsview;
 	NewMachineDetail detail;
 	PluginScanView scanview;
@@ -200,7 +225,8 @@ typedef struct NewMachine {
 	psy_Property* selectedplugin;
 } NewMachine;
 
-void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
+void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*,
+	Workspace*);
 void newmachine_updateskin(NewMachine*);
 
 void newmachine_enableall(NewMachine*);

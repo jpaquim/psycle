@@ -42,7 +42,9 @@ static psy_audio_MachineInfo const macinfo = {
 	psy_audio_SAMPLER,
 	NULL,			// NO MODULPATH
 	0,				// shellidx	
-	PS1SAMPLERHELP	// help text
+	PS1SAMPLERHELP, // help text
+	"Stereo Sampler Unit. Inserts new sampler.",	// desc
+	"Sampler"		// category
 };
 
 const psy_audio_MachineInfo* psy_audio_sampler_info(void)

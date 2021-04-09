@@ -333,6 +333,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\plugincategorylist.c" />
     <ClCompile Include="src\plugin_interface.cpp">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -462,6 +463,7 @@
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\plugin.h" />
     <ClInclude Include="src\plugincatcher.h" />
+    <ClInclude Include="src\plugincategorylist.h" />
     <ClInclude Include="src\plugin_interface.h" />
     <ClInclude Include="src\preset.h" />
     <ClInclude Include="src\presetio.h" />

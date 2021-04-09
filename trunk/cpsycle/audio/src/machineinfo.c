@@ -24,6 +24,7 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->shellidx = 0;
 	self->helptext = strdup("");
 	self->desc = strdup("");
+	self->category = strdup("");
 }
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* src)
@@ -40,6 +41,7 @@ void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* s
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
 	self->desc = psy_strdup(src->desc);
+	self->category = psy_strdup(src->category);
 }
 
 void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* src)
@@ -57,6 +59,7 @@ void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* 
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
 	self->desc = psy_strdup(src->desc);
+	self->category = psy_strdup(src->category);
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,
@@ -72,7 +75,8 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		const char* modulepath,
 		uintptr_t shellidx,
 		const char* helptext,
-		const char* desc)
+		const char* desc,
+		const char* category)
 {		
 	psy_strreset(&self->Author, author);
 	psy_strreset(&self->Command, command);
@@ -87,6 +91,7 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	self->shellidx = shellidx;
 	psy_strreset(&self->helptext, helptext);
 	psy_strreset(&self->desc, desc);
+	psy_strreset(&self->category, category);
 }
 
 void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
@@ -114,7 +119,7 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 		psy_strreset(&self->desc, "Psycle instrument");
 	} else {
 		psy_strreset(&self->desc, "Psycle effect");
-	}	
+	}
 }
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
@@ -133,6 +138,8 @@ void machineinfo_dispose(psy_audio_MachineInfo* self)
 	self->helptext = NULL;
 	free(self->desc);
 	self->desc = NULL;
+	free(self->category);
+	self->category = NULL;
 }
 
 psy_audio_MachineInfo* machineinfo_alloc(void)
@@ -169,6 +176,7 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 		rv->shellidx = self->shellidx;
 		rv->helptext = psy_strdup(self->helptext);
 		rv->desc = psy_strdup(self->desc);
+		rv->category = psy_strdup(self->category);
 	}
 	return rv;
 }
