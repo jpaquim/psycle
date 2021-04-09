@@ -168,7 +168,7 @@ static void clientresize(psy_ui_Component*, psy_ui_Size);
 static void setposition(psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 static psy_ui_Size framesize(psy_ui_Component*);
 static void scrollto(psy_ui_Component*, intptr_t dx, intptr_t dy);
-static void setfont(psy_ui_Component*, psy_ui_Font*);
+static void setfont(psy_ui_Component*, const psy_ui_Font*);
 static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
@@ -273,7 +273,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_component_init_signals(self);
 	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
 		psy_ui_component_setalign(self, parent->insertaligntype);
-		psy_ui_component_setmargin(self, &parent->insertmargin);
+		psy_ui_component_setmargin(self, parent->insertmargin);
 	}
 }
 
@@ -301,7 +301,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	psy_ui_component_init_signals(self);
 	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
 		psy_ui_component_setalign(self, parent->insertaligntype);
-		psy_ui_component_setmargin(self, &parent->insertmargin);
+		psy_ui_component_setmargin(self, parent->insertmargin);
 	}
 }
 
@@ -411,7 +411,7 @@ void scrollto(psy_ui_Component* self, intptr_t dx, intptr_t dy)
 	self->imp->vtable->dev_scrollto(self->imp, dx, dy);
 }
 
-void setfont(psy_ui_Component* self, psy_ui_Font* font)
+void setfont(psy_ui_Component* self, const psy_ui_Font* font)
 {
 	if (font) {
 		int dispose;
@@ -741,15 +741,22 @@ void psy_ui_component_doublebuffer(psy_ui_Component* self)
 	self->doublebuffered = TRUE;
 }
 
-void psy_ui_component_setmargin(psy_ui_Component* self,
-	const psy_ui_Margin* margin)
-{	
-	if (margin) {
-		self->margin = *margin;		
-	} else {
-		memset(&self->margin, 0, sizeof(psy_ui_Margin));
+void psy_ui_component_setmargin_children(psy_ui_Component* self,
+	psy_ui_Margin margin)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_setmargin(component, margin);
 	}
+	psy_list_free(q);
 }
+
 
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
 {
@@ -773,28 +780,34 @@ psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setspacing(psy_ui_Component* self,
-	const psy_ui_Margin* spacing)
-{	
-	if (spacing) {
-		self->spacing = *spacing;
-	} else {
-		memset(&self->spacing, 0, sizeof(psy_ui_Margin));
-	}
-}
-
 void psy_ui_component_setspacing_children(psy_ui_Component* self,
-	const psy_ui_Margin* spacing)
+	psy_ui_Margin spacing)
 {
 	psy_List* p;
 	psy_List* q;
 
 	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
 	for (p = q; p != NULL; p = p->next) {
-		psy_ui_Component* child;
+		psy_ui_Component* component;
 
-		child = (psy_ui_Component*)p->entry;
-		psy_ui_component_setspacing(child, spacing);
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_setspacing(component, spacing);
+	}
+	psy_list_free(q);
+}
+
+void psy_ui_component_setalign_children(psy_ui_Component* self,
+	psy_ui_AlignType align)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_setalign(component, align);
 	}
 	psy_list_free(q);
 }
@@ -885,25 +898,23 @@ void psy_ui_component_setbackgroundmode(psy_ui_Component* self,
 }
 
 psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
-	const psy_ui_Margin* margin)
+	psy_ui_Margin margin)
 {
 	psy_List* p;
 
 	for (p = list; p != NULL; p = p->next) {
-		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);
-		if (margin) {
-			psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
-		}
+		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);		
+		psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);		
 	}
 	return list;
 }
 
-psy_List* psy_ui_components_setmargin(psy_List* list, const psy_ui_Margin* margin)
+psy_List* psy_ui_components_setmargin(psy_List* list, psy_ui_Margin margin)
 {
 	psy_List* p;
 
 	for (p = list; p != NULL; p = p->next) {
-		psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
+		psy_ui_component_setmargin((psy_ui_Component*)p->entry, margin);
 	}
 	return list;
 }

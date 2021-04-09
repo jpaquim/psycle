@@ -345,20 +345,15 @@ void psy_ui_tabbar_settabalignment(psy_ui_TabBar* self,
 }
 
 void psy_ui_tabbar_settabmargin(psy_ui_TabBar* self, uintptr_t tabindex,
-	const psy_ui_Margin* margin)
+	psy_ui_Margin margin)
 {
 	psy_ui_Tab* tab;	
 
 	assert(self);
 
 	tab = psy_ui_tabbar_tab(self, tabindex);
-	if (tab) {
-		if (margin) {
-			psy_ui_component_setmargin(&tab->component, margin);			
-		} else {
-			psy_ui_component_setmargin(&tab->component,
-				&self->component.insertmargin);
-		}
+	if (tab) {		
+		psy_ui_component_setmargin(&tab->component, margin);		
 	}
 }
 
@@ -391,20 +386,11 @@ const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar* self,
 }
 
 void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar* self,
-	const psy_ui_Margin* margin)
-{	
-	psy_List* q;	
-
+	psy_ui_Margin margin)
+{
 	assert(self);
-
-	if (margin) {
-		self->component.insertmargin = *margin;
-	} else {
-		self->component.insertmargin = psy_ui_margin_zero();
-	}	
-	psy_ui_tabbar_settabalignment(self, self->tabalignment);	
-	q = psy_ui_component_children(psy_ui_tabbar_base(self),
-		psy_ui_NONRECURSIVE);
-	psy_ui_components_setmargin(q, margin);
-	psy_list_free(q);	
+	
+	self->component.insertmargin = margin;	
+	psy_ui_tabbar_settabalignment(self, self->tabalignment);		
+	psy_ui_component_setmargin_children(psy_ui_tabbar_base(self), margin);	
 }

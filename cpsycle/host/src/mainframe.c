@@ -445,7 +445,7 @@ void mainframe_initbars(MainFrame* self)
 		workspace_conf(&self->workspace)))) {		
 	}
 	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
-	psy_ui_component_setmargin(&self->toprows, &toprowsmargin);
+	psy_ui_component_setmargin(&self->toprows, toprowsmargin);
 	psy_ui_component_setstyletypes(&self->toprows,
 		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
@@ -457,7 +457,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	psy_ui_component_setmargin(&self->toprow0, &row0margin);
+	psy_ui_component_setmargin(&self->toprow0, row0margin);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
 		margin);
@@ -470,7 +470,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_component_hide(&self->metronomebar.component);
 	}
 	margin.right = psy_ui_value_makepx(0);
-	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), &margin);
+	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow1, STYLE_TOPROW1,
@@ -493,7 +493,7 @@ void mainframe_initbars(MainFrame* self)
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
 	psy_ui_margin_init_all_em(&scopemargin, 0.0, 1.0, 0.0, 0.0);	
-	psy_ui_component_setmargin(&self->trackscopeview.component, &scopemargin);
+	psy_ui_component_setmargin(&self->trackscopeview.component, scopemargin);
 	psy_ui_component_init(&self->topspacer, &self->component, NULL);
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->topspacer);
@@ -525,7 +525,7 @@ void mainframe_initnavigation(MainFrame* self)
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
 	psy_ui_component_setalign(navigation_base(&self->navigation),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(navigation_base(&self->navigation), &margin);
+	psy_ui_component_setmargin(navigation_base(&self->navigation), margin);
 }
 
 void mainframe_initmaintabbar(MainFrame* self)

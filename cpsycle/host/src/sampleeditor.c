@@ -87,7 +87,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-		&margin));
+		margin));
 }
 
 void sampleeditorbar_setselection(SampleEditorBar* self, uintptr_t selectionstart,
@@ -166,7 +166,7 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.5);		
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, margin));
 }
 
 static void sampleeditoramplify_ontweak(SampleEditorAmplify*, psy_ui_Slider*, float value);
@@ -259,17 +259,17 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 1.0);		
-	psy_ui_component_setmargin(&self->client, &margin);
+	psy_ui_component_setmargin(&self->client, margin);
 	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->client, NULL);
 	psy_ui_button_settext(&self->process, "samplesview.process");
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all_em(&margin, 1.5, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->process.component, &margin);
+	psy_ui_component_setmargin(&self->process.component, margin);
 	psy_ui_listbox_init(&self->processors, &self->client);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->processors.component, &margin);	
+	psy_ui_component_setmargin(&self->processors.component, margin);	
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component, workspace);	
@@ -373,7 +373,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, margin));
 }
 
 // Header

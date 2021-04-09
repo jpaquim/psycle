@@ -90,9 +90,9 @@ INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 }
 
 void psy_ui_tabbar_settabalignment(psy_ui_TabBar*, psy_ui_AlignType);
-void psy_ui_tabbar_settabmargin(psy_ui_TabBar*, uintptr_t tab, const psy_ui_Margin*);
+void psy_ui_tabbar_settabmargin(psy_ui_TabBar*, uintptr_t tab, psy_ui_Margin);
 void psy_ui_tabbar_settabmode(psy_ui_TabBar*, uintptr_t tab, TabMode);
-void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar*, const psy_ui_Margin*);
+void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar*, psy_ui_Margin);
 psy_ui_Tab* psy_ui_tabbar_tab(psy_ui_TabBar*, uintptr_t tabindex);
 const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar*, uintptr_t tabindex);
 

@@ -201,12 +201,20 @@ int propertiesio_save(const psy_Property* self, const char* filename)
 {
 	FILE* fp;
 
+	assert(self);
+
 	fp = fopen(filename, "wb");
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;
 		choicelevel = 0;
 		lastsection = 0;
+		if (psy_strlen(psy_property_comment(self)) > 0) {			
+			fwrite("; ", sizeof(char), 2, fp);
+			fwrite(self->item.comment, sizeof(char),
+				strlen(self->item.comment), fp);
+			fwrite("\n", sizeof(char), 1, fp);			
+		}
 		psy_property_enumerate((psy_Property*)self, fp, (psy_PropertyCallback)
 			OnSaveIniEnum);
 		free(lastsection);

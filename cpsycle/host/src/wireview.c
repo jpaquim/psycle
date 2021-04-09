@@ -131,13 +131,11 @@ void wireview_inittabbar(WireView* self)
 
 void wireview_initvolumeslider(WireView* self)
 {
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_init(&self->slidergroup, wireview_base(self), NULL);
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setmargin(&self->slidergroup, &margin);
+	psy_ui_component_setmargin(&self->slidergroup,
+		psy_ui_margin_makeem(0.0, 0.0, 0.0, 2.0));
 	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_makeew(2),
 		//psy_ui_value_makepx(0));
 	psy_ui_button_init(&self->percvol, &self->slidergroup, NULL);
@@ -170,10 +168,10 @@ void wireview_initrategroup(WireView* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);		
+	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->rategroup, wireview_base(self), NULL);
 	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setmargin(&self->rategroup, &margin);
+	psy_ui_component_setmargin(&self->rategroup, margin);
 	psy_ui_button_init_connect(&self->hold, &self->rategroup, NULL,
 		self, wireview_onhold);
 	psy_ui_button_settext(&self->hold, "Hold");
@@ -181,7 +179,7 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_slider_init(&self->modeslider, &self->rategroup, NULL);
 	psy_ui_slider_showhorizontal(&self->modeslider);
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
-	psy_ui_component_setmargin(&self->modeslider.component, &margin);
+	psy_ui_component_setmargin(&self->modeslider.component, margin);
 	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->modeslider, self, NULL,
 		wireview_ontweakmode, wireview_onvaluemode);

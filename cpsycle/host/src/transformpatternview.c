@@ -162,7 +162,7 @@ void transformpatternview_init_actions(TransformPatternView* self)
 
 	psy_ui_component_init(&self->actions, transformpatternview_base(self), NULL);
 	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.0, 2.0);		
-	psy_ui_component_setmargin(&self->actions, &margin);
+	psy_ui_component_setmargin(&self->actions, margin);
 	psy_ui_component_setdefaultalign(&self->actions,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	// search

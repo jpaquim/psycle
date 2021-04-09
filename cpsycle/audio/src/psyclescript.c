@@ -256,7 +256,7 @@ int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_Machi
 	//    << result.vendor;
 	// result.desc = s.str();
 	machineinfo_set(rv, vendor, "", 0, mode, name, name, (short) apiversion, 
-		(short) version, psy_audio_LUA, "", 0, "");
+		(short) version, psy_audio_LUA, "", 0, "", "Lua");
 	free(name);
 	free(vendor);
 	return err;

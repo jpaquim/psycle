@@ -1201,7 +1201,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		&self->component, self->state);
 	if (self->playline) {
 		psy_ui_component_setalign(&self->playline->seqeditorline.component, psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->playline->seqeditorline.component, NULL);
+		psy_ui_component_setmargin(&self->playline->seqeditorline.component, psy_ui_margin_zero());
 		psy_ui_component_setbackgroundcolour(&self->playline->seqeditorline.component,
 			self->skin->playbar);
 		seqeditorplayline_update(self->playline);
@@ -1210,7 +1210,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		&self->component, self->state);
 	if (self->cursorline) {
 		psy_ui_component_setalign(&self->cursorline->component, psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->cursorline->component, NULL);
+		psy_ui_component_setmargin(&self->cursorline->component, psy_ui_margin_zero());
 		psy_ui_component_hide(&self->cursorline->component);
 		psy_ui_component_setbackgroundcolour(&self->cursorline->component,
 			self->skin->cursor);
@@ -1219,7 +1219,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		&self->component, self->state);
 	if (self->seqeditposline) {
 		psy_ui_component_setalign(&self->seqeditposline->component, psy_ui_ALIGN_NONE);
-		psy_ui_component_setmargin(&self->seqeditposline->component, NULL);		
+		psy_ui_component_setmargin(&self->seqeditposline->component, psy_ui_margin_zero());
 		psy_ui_component_setbackgroundcolour(&self->seqeditposline->component,
 			self->skin->rowbeat);
 		seqeditortracks_updateseqeditlineposition(self);
@@ -1382,7 +1382,7 @@ void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
 		"seqedit.reorder");
 	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_component_setspacing(&self->component, &spacing);	
+	psy_ui_component_setspacing(&self->component, spacing);	
 }
 
 void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)

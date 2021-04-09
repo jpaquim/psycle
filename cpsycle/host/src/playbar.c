@@ -56,7 +56,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setstyletypes(playbar_base(self),
 		STYLE_PLAYBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
-	psy_ui_component_setspacing(playbar_base(self), &spacing);
+	psy_ui_component_setspacing(playbar_base(self), spacing);
 	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(playbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));

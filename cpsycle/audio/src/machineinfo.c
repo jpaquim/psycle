@@ -23,6 +23,7 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->modulepath = strdup("");
 	self->shellidx = 0;
 	self->helptext = strdup("");
+	self->desc = strdup("");
 }
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* src)
@@ -38,6 +39,7 @@ void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* s
 	self->modulepath = psy_strdup(src->modulepath);
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
+	self->desc = psy_strdup(src->desc);
 }
 
 void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* src)
@@ -54,6 +56,7 @@ void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* 
 	self->modulepath = psy_strdup(src->modulepath);
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
+	self->desc = psy_strdup(src->desc);
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,
@@ -68,7 +71,8 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		int type,		
 		const char* modulepath,
 		uintptr_t shellidx,
-		const char* helptext)
+		const char* helptext,
+		const char* desc)
 {		
 	psy_strreset(&self->Author, author);
 	psy_strreset(&self->Command, command);
@@ -82,13 +86,14 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	psy_strreset(&self->modulepath, modulepath);
 	self->shellidx = shellidx;
 	psy_strreset(&self->helptext, helptext);
+	psy_strreset(&self->desc, desc);
 }
 
 void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
-		CMachineInfo* info,
-		int type,		
-		const char* modulepath,
-		int shellidx)
+	CMachineInfo* info,
+	int type,
+	const char* modulepath,
+	int shellidx)
 {
 	machineinfo_dispose(self);
 	psy_strreset(&self->Author, info->Author);
@@ -101,10 +106,15 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 	psy_strreset(&self->ShortName, info->ShortName);
 	self->APIVersion = info->APIVersion;
 	self->PlugVersion = info->PlugVersion;
-	self->type = type;	
+	self->type = type;
 	psy_strreset(&self->modulepath, modulepath);
 	self->shellidx = shellidx;
 	psy_strreset(&self->helptext, info->Command);
+	if (self->mode == psy_audio_MACHMODE_GENERATOR) {
+		psy_strreset(&self->desc, "Psycle instrument");
+	} else {
+		psy_strreset(&self->desc, "Psycle effect");
+	}	
 }
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
@@ -121,6 +131,8 @@ void machineinfo_dispose(psy_audio_MachineInfo* self)
 	self->modulepath = NULL;
 	free(self->helptext);
 	self->helptext = NULL;
+	free(self->desc);
+	self->desc = NULL;
 }
 
 psy_audio_MachineInfo* machineinfo_alloc(void)
@@ -156,6 +168,7 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 		rv->modulepath = psy_strdup(self->modulepath);
 		rv->shellidx = self->shellidx;
 		rv->helptext = psy_strdup(self->helptext);
+		rv->desc = psy_strdup(self->desc);
 	}
 	return rv;
 }

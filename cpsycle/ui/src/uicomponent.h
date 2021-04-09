@@ -62,14 +62,14 @@ typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_u
 typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
-typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, psy_ui_Font*);
+typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, const psy_ui_Font*);
 typedef void (*psy_ui_fp_component_sethorizontalscrollrange)(struct psy_ui_Component*, int min, int max);
-typedef void (*psy_ui_fp_component_horizontalscrollrange)(struct psy_ui_Component* self, int* scrollmin,
+typedef void (*psy_ui_fp_component_horizontalscrollrange)(struct psy_ui_Component*, int* scrollmin,
 	int* scrollmax);
 typedef void (*psy_ui_fp_component_showverticalscrollbar)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_hideverticalscrollbar)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_setverticalscrollrange)(struct psy_ui_Component*, int min, int max);
-typedef void (*psy_ui_fp_component_verticalscrollrange)(struct psy_ui_Component* self, int* scrollmin,
+typedef void (*psy_ui_fp_component_verticalscrollrange)(struct psy_ui_Component*, int* scrollmin,
 	int* scrollmax);
 typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component*, int recursive);
 typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
@@ -303,10 +303,24 @@ int psy_ui_component_visible(psy_ui_Component*);
 int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_alignall(psy_ui_Component*);
-void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
-void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
+
+INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
+{
+	self->margin = margin;
+}
+
+void psy_ui_component_setmargin_children(psy_ui_Component*,
+	psy_ui_Margin);
+
+INLINE void psy_ui_component_setspacing(psy_ui_Component* self, psy_ui_Margin spacing)
+{
+	self->spacing = spacing;
+}
+
 void psy_ui_component_setspacing_children(psy_ui_Component*,
-	const psy_ui_Margin*);
+	psy_ui_Margin);
+void psy_ui_component_setalign_children(psy_ui_Component*,
+	psy_ui_AlignType);
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
@@ -339,8 +353,8 @@ void psy_ui_component_doublebuffer(psy_ui_Component*);
 void psy_ui_component_setcursor(psy_ui_Component*, psy_ui_CursorStyle);
 
 psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
-	const psy_ui_Margin*);
-psy_List* psy_ui_components_setmargin(psy_List*, const psy_ui_Margin*);
+	psy_ui_Margin);
+psy_List* psy_ui_components_setmargin(psy_List*, psy_ui_Margin);
 void psy_ui_component_close(psy_ui_Component*);
 
 

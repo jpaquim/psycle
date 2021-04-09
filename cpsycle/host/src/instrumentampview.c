@@ -49,12 +49,12 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 		"instrumentview.swing");
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
-	psy_ui_component_setmargin(&self->randomvolume.component, &margin);	
+	psy_ui_component_setmargin(&self->randomvolume.component, margin);	
 	psy_ui_slider_init_text(&self->volumefadespeed, &self->component, NULL,
 		"instrumentview.fadeout");
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "instrumentview.amplitude-envelope");	
-	psy_ui_component_setmargin(&self->envelopeview.component, &margin);
+	psy_ui_component_setmargin(&self->envelopeview.component, margin);
 	adsrsliders_init(&self->adsrsliders, &self->component);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
 		instrumentvolumeview_ontweaked);

@@ -77,7 +77,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->more, ". . .");
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setmargin(psy_ui_button_base(&self->more), NULL);
+	psy_ui_component_setmargin(psy_ui_button_base(&self->more),
+		psy_ui_margin_zero());
 	//psy_ui_component_hide(psy_ui_button_base(&self->more));
 	// row1	
 	presetsbar_init(&self->presetsbar, &self->component, workspace);

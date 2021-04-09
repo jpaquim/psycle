@@ -385,30 +385,24 @@ void psy_ui_slider_setvaluecharnumber(psy_ui_Slider* self, double number)
 
 void psy_ui_slider_showvertical(psy_ui_Slider* self)
 {
-	psy_ui_Margin margin;
-
 	psy_ui_sliderpane_showvertical(&self->pane);
 	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setalign(psy_ui_label_base(&self->value),
-		psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 2.0);		
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_setmargin(psy_ui_sliderpane_base(&self->pane),
-		&margin);
+		psy_ui_margin_makeem(0.0, 2.0, 0.0, 2.0));		
 }
 
 void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
 {
-	psy_ui_Margin margin;
-
 	psy_ui_sliderpane_showhorizontal(&self->pane);
 	psy_ui_component_setalign(psy_ui_label_base(&self->desc),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalign(psy_ui_label_base(&self->value),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 2.0);
+		psy_ui_ALIGN_RIGHT);	
 	psy_ui_component_setmargin(psy_ui_sliderpane_base(&self->pane),
-		&margin);
+		psy_ui_margin_makeem(0.0, 2.0, 0.0, 2.0));		
 }
 
 void psy_ui_slider_showlabel(psy_ui_Slider* self)

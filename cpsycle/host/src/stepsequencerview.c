@@ -644,14 +644,14 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->stepsequencerbarselect.component, &margin);
+	psy_ui_component_setmargin(&self->stepsequencerbarselect.component, margin);
 	stepsequencerbar_init(&self->stepsequencerbar, &self->component,
 		&self->steptimer, workspace);
 	stepsequencerview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns,
 		0));
 	psy_ui_component_setalign(&self->stepsequencerbar.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->stepsequencerbar.component, &margin);
+	psy_ui_component_setmargin(&self->stepsequencerbar.component, margin);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stepsequencerview_onsongchanged);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,

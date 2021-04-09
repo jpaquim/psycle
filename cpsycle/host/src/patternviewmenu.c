@@ -81,7 +81,7 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->export, &self->component, NULL, "Export (psb)",
 		self, patternblockmenu_onexport);	
 	spacing = psy_ui_margin_makeem(0.25, 0.25, 0.25, 0.25);
-	psy_ui_component_setspacing_children(&self->component, &spacing);
+	psy_ui_component_setspacing_children(&self->component, spacing);
 	self->target = PATTERNVIEWTARGET_TRACKER;
 }
 

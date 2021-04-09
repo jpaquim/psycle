@@ -333,7 +333,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			psy_ui_mouseevent_stoppropagation(ev);
 			return;
 		}
-		self->buttonstate = ev->button != 0;
+		self->buttonstate = ev->button;
 		if (self->allowrightclick || ev->button == 1) {
 			psy_ui_RealRectangle client_position;
 			psy_ui_RealSize size;

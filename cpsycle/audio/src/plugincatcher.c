@@ -127,8 +127,8 @@ void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 		psy_audio_sampler_info());
 	plugincatcher_makeplugininfo(self, "dummy", "", psy_audio_DUMMY,
 		psy_audio_dummymachine_info());
-	plugincatcher_makeplugininfo(self, "master", "", psy_audio_MASTER,
-		psy_audio_master_info());
+	// plugincatcher_makeplugininfo(self, "master", "", psy_audio_MASTER,
+		// psy_audio_master_info());
 	plugincatcher_makeplugininfo(self, "mixer", "", psy_audio_MIXER,
 		psy_audio_mixer_info());
 	plugincatcher_makeplugininfo(self, "duplicator", "", psy_audio_DUPLICATOR,
@@ -167,6 +167,8 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 			psy_property_append_string(p, "desc", "");
 		}
 		psy_property_append_int(p, "shellidx", info->shellidx, 0, 0);
+		psy_property_append_int(p, "apiversion", info->APIVersion, 0, 0);
+		psy_property_append_int(p, "plugversion", info->PlugVersion, 0, 0);
 		psy_property_append_int(p, "favorite", 0, 0, 0);
 	}
 }
@@ -475,4 +477,23 @@ const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, co
 	psy_property_enumerate(self->plugins, self,
 		(psy_PropertyCallback)onpropertiesenum);
 	return psy_property_at_str(searchresult, "path", 0);
+}
+
+
+void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv)
+{
+	machineinfo_set(rv,
+		psy_property_at_str(property, "author", ""),
+		psy_property_at_str(property, "command", ""),
+		psy_property_at_int(property, "flags", 0),
+		psy_property_at_int(property, "mode", 0),
+		psy_property_at_str(property, "name", ""),
+		psy_property_at_str(property, "shortname", ""),
+		(int16_t)psy_property_at_int(property, "apiversion", 0),
+		(int16_t)psy_property_at_int(property, "plugversion", 0),
+		(psy_audio_MachineType)psy_property_at_int(property, "type", psy_audio_UNDEFINED),
+		psy_property_at_str(property, "path", ""),
+		psy_property_at_int(property, "shellidx", 0),
+		psy_property_at_str(property, "help", ""),
+		psy_property_at_str(property, "desc", ""));
 }
