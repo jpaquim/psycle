@@ -2571,8 +2571,8 @@ void maketrackercmds(psy_Property* parent)
 		"blockpaste", "paste");
 	setcmdall(cmds, CMD_BLOCKMIX, psy_ui_KEY_M, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockmix", "mix");
-	setcmd(cmds, CMD_BLOCKDELETE, 0, "blockdelete", "blkdel");
-
+	setcmdall(cmds, CMD_BLOCKDELETE, psy_ui_KEY_X, psy_SHIFT_ON, psy_CTRL_ON,
+		"blockdelete", "blkdel");
 	setcmdall(cmds, CMD_TRANSPOSEBLOCKINC,
 		psy_ui_KEY_F12, psy_SHIFT_OFF, psy_CTRL_ON,
 		"transposeblockinc", "Trsp+");

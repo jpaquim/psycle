@@ -1002,6 +1002,31 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		workspace_editquantizechange(&self->workspace, 1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
 		break;
+	case CMD_COLUMN_0:
+	case CMD_COLUMN_1:
+	case CMD_COLUMN_2:
+	case CMD_COLUMN_3:
+	case CMD_COLUMN_4:
+	case CMD_COLUMN_5:
+	case CMD_COLUMN_6:
+	case CMD_COLUMN_7:
+	case CMD_COLUMN_8:
+	case CMD_COLUMN_9:
+	case CMD_COLUMN_A:
+	case CMD_COLUMN_B:
+	case CMD_COLUMN_C:
+	case CMD_COLUMN_D:
+	case CMD_COLUMN_E:
+	case CMD_COLUMN_F:
+		if (workspace_song(&self->workspace) && psy_audio_song_numsongtracks(
+				workspace_song(&self->workspace)) >= (cmd.id - CMD_COLUMN_0)) {
+			psy_audio_PatternCursor cursor;
+
+			cursor = workspace_patterncursor(&self->workspace);
+			cursor.track = (cmd.id - CMD_COLUMN_0);
+			workspace_setpatterncursor(&self->workspace, cursor);
+		}
+		break;
 	default:
 		break;
 	}
@@ -1690,6 +1715,9 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 	psy_ui_KeyEvent* ev)
 {
+	if (ev->keycode == psy_ui_KEY_Q) {
+		self = self;
+	}
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl, ev->alt),

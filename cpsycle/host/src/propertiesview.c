@@ -43,8 +43,6 @@ static void propertiesrenderer_onmousedoubleclick(PropertiesRenderer*, psy_ui_Mo
 static void propertiesrenderer_oneditchange(PropertiesRenderer*, psy_ui_Edit* sender);
 static void propertiesrenderer_oneditkeydown(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
-static void propertiesrenderer_oninputdefinerchange(PropertiesRenderer*,
-	InputDefiner* sender);
 static void propertiesrenderer_ondestroy(PropertiesRenderer*, psy_ui_Component* sender);
 static void propertiesrenderer_onalign(PropertiesRenderer*, psy_ui_Component* sender);
 static void propertiesrenderer_setlinebackground(PropertiesRenderer*,psy_Property*);
@@ -74,6 +72,8 @@ static double propertiesrenderer_columnwidth(PropertiesRenderer*, intptr_t colum
 static double propertiesrenderer_columnstart(PropertiesRenderer*, intptr_t column);
 static void propertiesrenderer_computecolumns(PropertiesRenderer* self,
 	const psy_ui_Size*);
+static void propertiesrenderer_oninputdefineraccept(PropertiesRenderer*,
+	InputDefiner* sender);
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 static void propertiesrenderer_onpreferredsize(PropertiesRenderer*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -138,6 +138,8 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->component);
 	psy_ui_component_hide(&self->inputdefiner.component);
+	psy_signal_connect(&self->inputdefiner.signal_accept, self,
+		propertiesrenderer_oninputdefineraccept);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_align, self,
@@ -469,7 +471,10 @@ void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Property* proper
 	}
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT ||
 			psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
-			psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+			psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR ||
+			(psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT &&
+			psy_ui_component_visible(&self->inputdefiner.component) && 
+				property == self->selected)) {
 		propertiesrenderer_drawbutton(self, property, column + 1);
 	}
 }
@@ -533,9 +538,9 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* prop
 	char text[256];
 	
 	if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
-		inputdefiner_setinput(&self->inputdefiner,
-			(uint32_t)psy_property_item_int(property));
-		inputdefiner_text(&self->inputdefiner, text);
+		inputdefiner_inputtotext(
+			(uint32_t)psy_property_item_int(property),
+			text);		
 	} else
 	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITHEX) {
 		psy_snprintf(text, 20, "%X", psy_property_item_int(property));
@@ -587,39 +592,33 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(self->g, psy_ui_component_colour(&self->component));
 
-	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+	if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
+		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
+			self->cpy, "None", strlen("None"));
+		size = psy_ui_component_textsize(&self->component, "None");
+	} else if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 		psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
 			psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 				self->cpy, "...", 3);
-	} else
-	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
+		size = psy_ui_component_textsize(&self->component, "...");
+	} else if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
 		const char* choosefonttext;
 
 		choosefonttext = psy_ui_translate("settingsview.choose-font");
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy, choosefonttext, strlen(choosefonttext));
+		size = psy_ui_component_textsize(&self->component, choosefonttext);
 	} else {
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy, psy_property_translation(property),
-			strlen(psy_property_translation(property)));
-	}	
-	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
-		(psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR)) {
-		size = psy_ui_component_textsize(&self->component, "...");
-	} else
-	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
-		const char* choosefonttext;
-
-		choosefonttext = psy_ui_translate("settingsview.choose-font");
-		size = psy_ui_component_textsize(&self->component, choosefonttext);
-	} else {
+			strlen(psy_property_translation(property)));	
 		size = psy_ui_component_textsize(&self->component,
 			psy_property_translation(property));
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy;
-	r.right = r.left + psy_ui_value_px(&size.width, tm) + 6;
+	r.right = r.left + psy_ui_value_px(&size.width, tm) + tm->tmAveCharWidth;
 	r.bottom = r.top + psy_ui_value_px(&size.height, tm) + 2;
 	psy_ui_drawrectangle(self->g, r);
 }
@@ -687,10 +686,6 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 		propertiesrenderer_oneditchange(self, &self->edit);
 		psy_ui_component_hide(&self->edit.component);
 	}	
-	if (psy_ui_component_visible(&self->inputdefiner.component)) {
-		propertiesrenderer_oninputdefinerchange(self, &self->inputdefiner);
-		psy_ui_component_hide(&self->inputdefiner.component);
-	}	
 	self->selected = 0;
 	self->keyselected = 1;
 	self->mx = ev->pt.x;
@@ -702,6 +697,10 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 		(psy_PropertyCallback)propertiesrenderer_onpropertieshittestenum);
 	if (self->selected) {		
 		if (self->button && psy_property_hint(self->selected) ==
+				PSY_PROPERTY_HINT_SHORTCUT) {
+			// clear shortcut
+			psy_property_setitem_int(self->selected, 0);
+		} else if (self->button && psy_property_hint(self->selected) ==
 				PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;
 						
@@ -897,13 +896,14 @@ bool propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Property*
 		psy_ui_setrectangle(&r, propertiesrenderer_columnstart(self, column),
 			self->cpy,
 			propertiesrenderer_columnwidth(self, column), self->lineheight);
-		self->selrect = r;
+		self->selrect = r;		
 		rv = psy_ui_realrectangle_intersect(&r,
 			psy_ui_realpoint_make(self->mx, self->my));
 		if (!rv && (
 				psy_property_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 				psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR ||
-				psy_property_type(property) == PSY_PROPERTY_TYPE_FONT)) {
+				psy_property_type(property) == PSY_PROPERTY_TYPE_FONT ||
+				psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT)) {
 			psy_ui_setrectangle(&r,
 				(propertiesrenderer_columnstart(self, column + 1)),
 				self->cpy, propertiesrenderer_columnstart(self, column + 1),
@@ -981,19 +981,22 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 					self->textheight + 2)));
 			if (!psy_property_readonly(self->selected)) {				
 				psy_ui_component_show(edit);
+				psy_ui_component_invalidate(&self->component);
 				psy_ui_component_setfocus(edit);
 			}			
 		}
 	}
 }
 
-void propertiesrenderer_oninputdefinerchange(PropertiesRenderer* self,
+void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
 	InputDefiner* sender)
 {
 	if (self->selected && psy_property_type(self->selected) ==
-			PSY_PROPERTY_TYPE_INTEGER) {		
+		PSY_PROPERTY_TYPE_INTEGER) {
 		psy_property_setitem_int(self->selected,
 			inputdefiner_input(&self->inputdefiner));
+		psy_ui_component_hide(&self->inputdefiner.component);
+		psy_ui_component_invalidate(&self->component);
 	}
 	psy_signal_emit(&self->signal_changed, self, 1, self->selected);
 }

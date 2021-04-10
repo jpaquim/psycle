@@ -353,4 +353,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_weighted(&onprimary, medium),
 		psy_ui_colour_overlayed(&surface, &overlay, 0.15));
 	psy_ui_defaults_setstyle(defaults, STYLE_TABLEROW_SELECT, style);
+	// inputdefiner::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onprimary, medium),
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(defaults, STYLE_INPUTDEFINER_SELECT, style);
 }

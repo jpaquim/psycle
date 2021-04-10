@@ -19,9 +19,12 @@ extern "C" {
 typedef struct InputDefiner {
 	// inherits 
 	psy_ui_Component component;
-	// internal data
+	// signals
+	psy_Signal signal_accept;
+	// internal
 	uint32_t input;
-	int regularkey;   
+	int regularkey;
+	bool preventhook;
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
@@ -35,6 +38,7 @@ INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 }
 
 void inputdefiner_text(InputDefiner*, char* text);
+void inputdefiner_inputtotext(uint32_t input, char* text);
 
 INLINE psy_ui_Component* inputdefiner_base(InputDefiner* self)
 {

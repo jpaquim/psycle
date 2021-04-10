@@ -86,7 +86,7 @@ void psy_ui_edit_enableinputfield(psy_ui_Edit* self)
 	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
 		psy_ui_edit_onmousehook);
 	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
-		psy_ui_edit_onmousehook);	
+		psy_ui_edit_onmousehook);
 }
 
 void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
@@ -204,10 +204,8 @@ void psy_ui_edit_onmousehook(psy_ui_Edit* self, psy_ui_App* sender,
 			psy_ui_RealRectangle position;
 
 			position = psy_ui_component_screenposition(&self->component);
-			if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
-				if (!self->preventedit) {
-					psy_signal_emit(&self->signal_accept, self, 0);
-				}
+			if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {				
+				psy_signal_emit(&self->signal_accept, self, 0);				
 				psy_ui_app_stopmousehook(psy_ui_app());
 				self->preventedit = TRUE;
 			}
