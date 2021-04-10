@@ -2,14 +2,22 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
+// host
 #include "inputdefiner.h"
+#include "styles.h"
+// ui
+#include <uiapp.h>
+// container
+#include <hashtbl.h>
+// std
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <hashtbl.h>
+// driver
 #include "../../driver/eventdriver.h"
+// platform
+#include "../../detail/os.h"
 
 #if defined DIVERSALIS__OS__MICROSOFT
 
@@ -22,51 +30,79 @@
 
 #include "../../detail/portable.h"
 
-static void inputdefiner_ondestroy(InputDefiner*, psy_ui_Component* sender);
-static void ondraw(InputDefiner*, psy_ui_Graphics*);
-static void onkeydown(InputDefiner*, psy_ui_KeyEvent*);
-static void onkeyup(InputDefiner*, psy_ui_KeyEvent*);
-
-static bool validkeycode(uintptr_t keycode);
-
 static psy_Table keynames;
 static int count = 0;
 
+static bool validkeycode(uintptr_t keycode);
 static void keynames_init(void);
 static void keynames_release(void);
 static void keynames_dispose(void);
 static void keynames_add(uintptr_t keycode, const char* name);
 static const char* keynames_at(uintptr_t keycode);
 
+// InputDefiner
+// prototypes
+static void inputdefiner_ondestroy(InputDefiner*);
+static void inputdefiner_ondraw(InputDefiner*, psy_ui_Graphics*);
+static void inputdefiner_onkeydown(InputDefiner*, psy_ui_KeyEvent*);
+static void inputdefiner_onkeyup(InputDefiner*, psy_ui_KeyEvent*);
+static void inputdefiner_onfocus(InputDefiner*);
+static void inputdefiner_onfocuslost(InputDefiner*);
+static void inputdefiner_onmousehook(InputDefiner*, psy_ui_App* sender,
+	psy_ui_MouseEvent*);
+// vtable
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(InputDefiner* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);	
-		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
-		vtable.onkeydown = (psy_ui_fp_component_onkeyevent) onkeydown;
-		vtable.onkeyup = (psy_ui_fp_component_onkeyevent) onkeyup;
-		vtable_initialized = 1;
+		vtable = *(self->component.vtable);
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			inputdefiner_ondestroy;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			inputdefiner_ondraw;
+		vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
+			inputdefiner_onkeydown;
+		vtable.onkeyup = 
+			(psy_ui_fp_component_onkeyevent)
+			inputdefiner_onkeyup;
+		vtable.onfocus =
+			(psy_ui_fp_component_onfocus)
+			inputdefiner_onfocus;
+		vtable.onfocuslost =
+			(psy_ui_fp_component_onfocuslost)
+			inputdefiner_onfocuslost;
+		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
-
+// implementation
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_signal_connect(&self->component.signal_destroy, self,
-		inputdefiner_ondestroy);
+	psy_ui_component_setstyletypes(&self->component,
+		psy_INDEX_INVALID, psy_INDEX_INVALID, STYLE_INPUTDEFINER_SELECT,
+		psy_INDEX_INVALID);
+	psy_signal_init(&self->signal_accept);
 	keynames_init();
 	self->input = 0;
-	self->regularkey = 0;		
+	self->regularkey = 0;
+	self->preventhook = TRUE;
+	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
+		inputdefiner_onmousehook);
 }
 
-void inputdefiner_ondestroy(InputDefiner* self, psy_ui_Component* sender)
+void inputdefiner_ondestroy(InputDefiner* self)
 {	
+	psy_signal_dispose(&self->signal_accept);
 	keynames_release();
+	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
+		inputdefiner_onmousehook);
 }
 
 void inputdefiner_setinput(InputDefiner* self, uint32_t input)
@@ -76,33 +112,46 @@ void inputdefiner_setinput(InputDefiner* self, uint32_t input)
 
 void inputdefiner_text(InputDefiner* self, char* text)
 {	
+	inputdefiner_inputtotext(self->input, text);	
+}
+
+void inputdefiner_inputtotext(uint32_t input, char* text)
+{
 	uint32_t keycode;
 	bool shift;
 	bool ctrl;
 	bool alt;
-	
+
 	text[0] = '\0';
-	psy_audio_decodeinput(self->input, &keycode, &shift, &ctrl, &alt);
-	if (shift) {
-		strcat(text, "Shift + ");		
+	if (input == 0) {
+		return;
 	}
-	if (ctrl) {		
+	psy_audio_decodeinput(input, &keycode, &shift, &ctrl, &alt);
+	if (alt) {
+		strcat(text, "Alt + ");
+	}
+	if (shift) {
+		strcat(text, "Shift + ");
+	}
+	if (ctrl) {
 		strcat(text, "Ctrl + ");
-	}	
+	}
 	strcat(text, keynames_at(keycode));
 }
 
-void ondraw(InputDefiner* self, psy_ui_Graphics* g)
+void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
-	psy_ui_textout(g, 0, 0, text, strlen(text));
+	if (psy_strlen(text)) {
+		psy_ui_textout(g, 0, 0, text, strlen(text));
+	}
 }
 
-void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
+void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
 	bool shift;
 	bool ctrl;	
@@ -129,7 +178,7 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 	psy_ui_keyevent_stoppropagation(ev);
 }
 
-void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
+void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
 	bool shift;
 	bool ctrl;
@@ -159,6 +208,38 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	psy_ui_keyevent_stoppropagation(ev);
 }
 
+void inputdefiner_onfocus(InputDefiner* self)
+{
+	psy_ui_component_setstylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);
+	self->preventhook = FALSE;
+	psy_ui_app_startmousehook(psy_ui_app());
+}
+
+void inputdefiner_onfocuslost(InputDefiner* self)
+{
+	psy_ui_component_setstylestate(&self->component,
+		psy_INDEX_INVALID);
+	self->preventhook = TRUE;
+	psy_ui_app_stopmousehook(psy_ui_app());
+	psy_signal_emit(&self->signal_accept, self, 0);
+}
+
+void inputdefiner_onmousehook(InputDefiner* self, psy_ui_App* sender,
+	psy_ui_MouseEvent* ev)
+{
+	if (psy_ui_component_visible(&self->component) && !self->preventhook) {
+		psy_ui_RealRectangle position;
+
+		position = psy_ui_component_screenposition(&self->component);
+		if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {
+			self->preventhook = TRUE;
+			psy_signal_emit(&self->signal_accept, self, 0);
+			psy_ui_app_stopmousehook(psy_ui_app());
+		}
+	}
+}
+
 bool validkeycode(uintptr_t keycode)
 {
 	return (keycode >= 0x30 ||
@@ -171,7 +252,9 @@ bool validkeycode(uintptr_t keycode)
 		keycode == psy_ui_KEY_DELETE ||
 		keycode == psy_ui_KEY_HOME ||
 		keycode == psy_ui_KEY_END ||
-		keycode == psy_ui_KEY_RETURN);
+		keycode == psy_ui_KEY_RETURN ||
+		keycode == psy_ui_KEY_PRIOR ||
+		keycode == psy_ui_KEY_NEXT);
 }
 
 void keynames_init(void)
@@ -182,14 +265,17 @@ void keynames_init(void)
 		psy_table_init(&keynames);
 		keynames_add(psy_ui_KEY_LEFT,"LEFT");	
 		keynames_add(psy_ui_KEY_RIGHT, "RIGHT");	
-		keynames_add(psy_ui_KEY_UP,"UP");	
-		keynames_add(psy_ui_KEY_DOWN, "DOWN");	
+		keynames_add(psy_ui_KEY_UP,"UP");
+		keynames_add(psy_ui_KEY_DOWN, "DOWN");
+		keynames_add(psy_ui_KEY_PRIOR, "PGUP");
+		keynames_add(psy_ui_KEY_NEXT, "PGDOWN");		
 		keynames_add(psy_ui_KEY_TAB, "TAB");	
-		keynames_add(psy_ui_KEY_BACK, "BACK");	
+		keynames_add(psy_ui_KEY_BACK, "BACKSPACE");	
 		keynames_add(psy_ui_KEY_DELETE, "DELETE");	
 		keynames_add(psy_ui_KEY_HOME, "HOME");	
 		keynames_add(psy_ui_KEY_END, "END");
 		keynames_add(psy_ui_KEY_RETURN, "RETURN");
+		keynames_add(psy_ui_KEY_INSERT, "INSERT");		
 		for (key = psy_ui_KEY_F1; key <= psy_ui_KEY_F12; ++key) {	
 			char keystr[5];
 			psy_snprintf(keystr, 5, "F%d", key - psy_ui_KEY_F1 + 1);

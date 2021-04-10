@@ -303,7 +303,71 @@ void cmdproperties_makegeneral(psy_Property* self)
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_editquantizeinc",
 			psy_audio_encodeinput(221, 0, 0, 0), 0, 0), CMD_EDT_EDITQUANTIZEINC),
-		"lineskip+1"), "cmds.editquantizedec");	
+		"lineskip+1"), "cmds.editquantizedec");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_0",
+			psy_audio_encodeinput(psy_ui_KEY_Q, 0, 0, 1), 0, 0), CMD_COLUMN_0),
+		"column0"), "cmds.column0");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_1",
+			psy_audio_encodeinput(psy_ui_KEY_W, 0, 0, 1), 0, 0), CMD_COLUMN_1),
+		"column1"), "cmds.column1");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_2",
+			psy_audio_encodeinput(psy_ui_KEY_E, 0, 0, 1), 0, 0), CMD_COLUMN_2),
+		"column2"), "cmds.column2");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_3",
+			psy_audio_encodeinput(psy_ui_KEY_R, 0, 0, 1), 0, 0), CMD_COLUMN_3),
+		"column3"), "cmds.column3");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_4",
+			psy_audio_encodeinput(psy_ui_KEY_T, 0, 0, 1), 0, 0), CMD_COLUMN_4),
+		"column4"), "cmds.column4");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_5",
+			psy_audio_encodeinput(psy_ui_KEY_Y, 0, 0, 1), 0, 0), CMD_COLUMN_5),
+		"column5"), "cmds.column5");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_6",
+			psy_audio_encodeinput(psy_ui_KEY_U, 0, 0, 1), 0, 0), CMD_COLUMN_6),
+		"column6"), "cmds.column6");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_7",
+			psy_audio_encodeinput(psy_ui_KEY_I, 0, 0, 1), 0, 0), CMD_COLUMN_7),
+		"column7"), "cmds.column7");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_8",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_8),
+		"column8"), "cmds.column8");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_9",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_9),
+		"column9"), "cmds.column9");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_A",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_A),
+		"columnA"), "cmds.columnA");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_B",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_B),
+		"columnB"), "cmds.columnB");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_C",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_C),
+		"columnC"), "cmds.columnC");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_D",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_D),
+		"columnD"), "cmds.columnD");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_E",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_E),
+		"columnE"), "cmds.columnE");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_column_F",
+			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_F),
+		"columnF"), "cmds.columnF");
 	cmdproperties_setinput(general);
 }
 

@@ -81,7 +81,24 @@ enum {
 	CMD_DIGITC,
 	CMD_DIGITD,
 	CMD_DIGITE,
-	CMD_DIGITF
+	CMD_DIGITF,
+
+	CMD_COLUMN_0, // Jump To Track (0..7)
+	CMD_COLUMN_1, // FT2: ALT + Q .. I
+	CMD_COLUMN_2,
+	CMD_COLUMN_3,
+	CMD_COLUMN_4,
+	CMD_COLUMN_5,
+	CMD_COLUMN_6,
+	CMD_COLUMN_7,
+	CMD_COLUMN_8, // Jump To Track (8..F)
+	CMD_COLUMN_9, // have no key default settings atm
+	CMD_COLUMN_A, // because FT2 key defaults conflict
+	CMD_COLUMN_B, // with other psycle cmd-key mappings
+	CMD_COLUMN_C, // (FT2 is: ALT + A .. K)
+	CMD_COLUMN_D,
+	CMD_COLUMN_E,
+	CMD_COLUMN_F
 };
 
 typedef struct TrackColumnDef {
