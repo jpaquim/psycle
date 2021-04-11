@@ -16,4 +16,5 @@ void psy_ui_componentscroll_init(psy_ui_ComponentScroll* self)
 	psy_ui_intpoint_init(&self->hrange);
 	psy_ui_intpoint_init(&self->vrange);
 	self->wheel = 0;
+	self->overflow = psy_ui_OVERFLOW_HIDDEN;
 }

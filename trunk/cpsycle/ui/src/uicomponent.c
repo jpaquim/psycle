@@ -14,8 +14,20 @@
 // platform
 #include "../../detail/portable.h"
 
+void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints* self)
+{
+	psy_ui_margin_init(&self->margin);
+	psy_ui_size_init(&self->minsize);
+	psy_ui_size_init(&self->maxsize);
+	psy_ui_margin_init(&self->spacing);
+	psy_ui_size_init(&self->preferredsize);
+}
+
 static bool componentscroll_initialized = FALSE;
 static psy_ui_ComponentScroll componentscroll;
+
+static bool sizehints_initialized = FALSE;
+static psy_ui_ComponentSizeHints sizehints;
 
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
@@ -407,7 +419,7 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 		if (self->alignchildren) {
 			psy_ui_component_align(self);
 		}		
-		if (self->overflow != psy_ui_OVERFLOW_HIDDEN) {
+		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_updateoverflow(self);
 		}		
 	}
@@ -492,26 +504,25 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 		psy_ui_componentscroll_init(&componentscroll);
 		componentscroll_initialized = TRUE;
 	}
-	psy_ui_componentstyle_init(&self->style);
 	self->scroll = &componentscroll;
-	self->overflow = psy_ui_OVERFLOW_HIDDEN;		
+	if (!sizehints_initialized) {
+		psy_ui_componentsizehints_init(&sizehints);
+		sizehints_initialized = TRUE;
+	}
+	self->sizehints = &sizehints;
+	psy_ui_componentstyle_init(&self->style);
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;
-	self->uselevel = FALSE;
-	psy_ui_margin_init(&self->margin);		
+	self->uselevel = FALSE;		
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->insertaligntype = psy_ui_ALIGN_NONE;
 	psy_ui_margin_init(&self->insertmargin);
 	self->alignchildren = 1;
-	self->alignexpandmode = psy_ui_NOEXPAND;	
-	self->preferredsize = psy_ui_component_size(self);
-	self->maxsize = NULL;
-	self->minsize = NULL;
+	self->alignexpandmode = psy_ui_NOEXPAND;		
 	psy_ui_componentstyle_init(&self->style);	
-	psy_ui_margin_init(&self->spacing);	
 	self->debugflag = 0;
 	self->visible = 1;
 	self->doublebuffered = FALSE;	
@@ -529,19 +540,17 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 void psy_ui_component_dispose(psy_ui_Component* self)
 {
 	self->vtable->dispose(self);
-	psy_ui_component_dispose_signals(self);
-	free(self->minsize);
-	self->maxsize = NULL;
-	free(self->maxsize);
-	self->maxsize = NULL;
+	psy_ui_component_dispose_signals(self);	
 	if (psy_ui_app()->hover == self) {
 		psy_ui_app_sethover(psy_ui_app(), NULL);
 	}	
 	if (self->scroll != &componentscroll) {		
 		free(self->scroll);
 		self->scroll = NULL;
-	} else {
-		self = self;
+	}
+	if (self->sizehints != &sizehints) {
+		free(self->sizehints);
+		self->sizehints = NULL;
 	}
 }
 
@@ -935,7 +944,8 @@ psy_List* psy_ui_components_setmargin(psy_List* list, psy_ui_Margin margin)
 
 void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	self->preferredsize = size;
+	psy_ui_component_usesizehints(self);
+	self->sizehints->preferredsize = size;
 }
 
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
@@ -946,7 +956,7 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	} else {
 		psy_ui_Size rv;
 
-		rv = self->preferredsize;		
+		rv = self->sizehints->preferredsize;		
 		self->vtable->onpreferredsize(self, limit, &rv);
 		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
 		return rv;
@@ -965,40 +975,24 @@ void psy_ui_component_enablepreferredsize(psy_ui_Component* self)
 
 void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	if (self->maxsize) {
-		free(self->maxsize);
-		self->maxsize = NULL;
-	}
-	if (!psy_ui_size_iszero(&size)) {		
-		self->maxsize = malloc(sizeof(psy_ui_Size));
-		if (self->maxsize) {
-			*self->maxsize = size;
-		}
-	}
+	psy_ui_component_usesizehints(self);
+	self->sizehints->maxsize = size;
 }
 
-const psy_ui_Size* psy_ui_component_maximumsize(const psy_ui_Component* self)
+const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component* self)
 {
-	return self->maxsize;
+	return self->sizehints->maxsize;
 }
 
 void psy_ui_component_setminimumsize(psy_ui_Component* self, psy_ui_Size size)
 {
-	if (self->minsize) {
-		free(self->minsize);
-		self->minsize = NULL;
-	}
-	if (!psy_ui_size_iszero(&size)) {
-		self->minsize = malloc(sizeof(psy_ui_Size));
-		if (self->minsize) {
-			*self->minsize = size;
-		}
-	}
+	psy_ui_component_usesizehints(self);
+	self->sizehints->minsize = size;	
 }
 
-const psy_ui_Size* psy_ui_component_minimumsize(const psy_ui_Component* self)
+const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component* self)
 {
-	return self->minsize;	
+	return self->sizehints->minsize;
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
@@ -1287,7 +1281,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 
 void psy_ui_component_updateoverflow(psy_ui_Component* self)
 {		
-	if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
+	if ((self->scroll->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
 		psy_ui_Size preferredsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxlines;
@@ -1311,7 +1305,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		scrolltop = psy_ui_component_scrolltop(self);		
 		scrolltoppx = psy_ui_component_scrolltoppx(self);		
 		currline = (intptr_t)(scrolltoppx / scrollstepy_px);
-		if ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
+		if ((self->scroll->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
 				psy_ui_OVERFLOW_VSCROLLCENTER) {
 			psy_ui_component_setverticalscrollrange(self,
 				psy_ui_intpoint_make(-visilines / 2,
@@ -1331,7 +1325,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 			}
 		}		
 	}
-	if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
+	if ((self->scroll->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
 		psy_ui_Size preferredsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxrows;
@@ -1406,6 +1400,17 @@ void psy_ui_component_usescroll(psy_ui_Component* self)
 			sizeof(psy_ui_ComponentScroll));
 		if (self->scroll) {
 			psy_ui_componentscroll_init(self->scroll);
+		}
+	}
+}
+
+void psy_ui_component_usesizehints(psy_ui_Component* self)
+{
+	if (self->sizehints == &sizehints) {
+		self->sizehints = (psy_ui_ComponentSizeHints*)malloc(
+			sizeof(psy_ui_ComponentSizeHints));
+		if (self->sizehints) {
+			psy_ui_componentsizehints_init(self->sizehints);
 		}
 	}
 }

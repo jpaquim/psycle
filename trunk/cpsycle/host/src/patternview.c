@@ -294,7 +294,11 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 	}
 	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
 	if (tab) {
-		tab->component.margin.left = psy_ui_value_makeew(1.0);
+		psy_ui_Margin margin;
+		
+		margin = psy_ui_component_margin(&tab->component);
+		margin.left = psy_ui_value_makeew(1.0);
+		psy_ui_component_setmargin(&tab->component, margin);
 	}
 	tab = psy_ui_tabbar_tab(&self->tabbar, 5);
 	if (tab) {

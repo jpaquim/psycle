@@ -145,11 +145,13 @@ psy_ui_RealSize spacingsize(psy_ui_Button* self)
 	psy_ui_RealSize size;
 	psy_ui_Size valsize;
 	const psy_ui_TextMetric* tm;
+	psy_ui_Margin spacing;
 
 	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 	valsize = psy_ui_component_size(psy_ui_button_base(self));
-	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&self->component.spacing, tm), tm);
-	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&self->component.spacing, tm), tm);
+	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
+	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&spacing, tm), tm);
+	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&spacing, tm), tm);
 	size = psy_ui_realsize_make(
 		psy_ui_value_px(&valsize.width, tm),
 		psy_ui_value_px(&valsize.height, tm));
@@ -266,6 +268,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	char* text;
+	psy_ui_Margin spacing;	
 
 	if (self->translate && self->translation) {
 		text = self->translation;
@@ -314,8 +317,9 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
 	rv->height = psy_ui_value_makeeh(self->linespacing);
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&self->component.spacing, tm), tm);
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&self->component.spacing, tm), tm);
+	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)

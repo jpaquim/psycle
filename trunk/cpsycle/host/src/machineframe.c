@@ -58,7 +58,9 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->power, &self->buttons, NULL);
 	psy_ui_button_settext(&self->power, "machineframe.pwr");
-	self->power.component.margin.left = psy_ui_value_makeew(1.0);
+	margin = psy_ui_component_margin(&self->power.component);
+	margin.left = psy_ui_value_makeew(1.0);
+	psy_ui_component_setmargin(&self->power.component, margin);
 	psy_ui_bitmap_loadresource(&self->power.bitmapicon, IDB_POWER_DARK);
 	psy_ui_bitmap_settransparency(&self->power.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));
