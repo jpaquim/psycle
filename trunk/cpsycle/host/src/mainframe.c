@@ -263,7 +263,7 @@ void mainframe_initspacerleft(MainFrame* self)
 	psy_ui_component_init(&self->spacerleft, &self->component, NULL);
 	psy_ui_component_preventalign(&self->spacerleft);
 	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_makeem(2.0, 0.0));
+		psy_ui_size_make_em(2.0, 0.0));
 	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
 }
 
@@ -498,7 +498,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->topspacer);
 	psy_ui_component_setpreferredsize(&self->topspacer,
-		psy_ui_size_makeem(0.0, 0.5));
+		psy_ui_size_make_em(0.0, 0.5));
 	psy_ui_component_setstyletypes(&self->topspacer,
 		STYLE_TOP, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 }
@@ -514,7 +514,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->tabspacer);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
-		psy_ui_size_makeem(0.0, 0.4));
+		psy_ui_size_make_em(0.0, 0.4));
 }
 
 void mainframe_initnavigation(MainFrame* self)
@@ -621,7 +621,7 @@ void mainframe_initgear(MainFrame* self)
 	psy_ui_component_setalign(&self->gearspacer, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_preventalign(&self->gearspacer);
 	psy_ui_component_setpreferredsize(&self->gearspacer,
-		psy_ui_size_makeem(1.0, 0.0));
+		psy_ui_size_make_em(1.0, 0.0));
 	psy_ui_component_hide(&self->gearspacer);
 }
 

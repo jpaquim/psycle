@@ -72,7 +72,7 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_makeem(0.0, 2.0));
+		psy_ui_size_make_em(0.0, 2.0));
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->component,
@@ -752,7 +752,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_init_align(&self->spacer, &self->component,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->spacer,
-		psy_ui_size_makeem(0.0, 0.3));
+		psy_ui_size_make_em(0.0, 0.3));
 	psy_ui_component_preventalign(&self->spacer);	
 	// header
 	sequencetrackheaders_init(&self->trackheader, &self->component,

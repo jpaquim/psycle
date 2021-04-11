@@ -368,7 +368,7 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)
 {
-	return psy_ui_size_makepx(self->position.right - self->position.left,
+	return psy_ui_size_make_px(self->position.right - self->position.left,
 		self->position.bottom - self->position.top);
 }
 
@@ -378,7 +378,7 @@ void view_dev_updatesize(psy_ui_ViewComponentImp* self)
 
 psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp* self)
 {
-	return psy_ui_size_makepx(self->position.right - self->position.left,
+	return psy_ui_size_make_px(self->position.right - self->position.left,
 		self->position.bottom - self->position.top);
 }
 
@@ -567,7 +567,7 @@ psy_ui_Size view_dev_textsize(psy_ui_ViewComponentImp* self, const char* text,
 	if (self->view) {
 		return psy_ui_component_textsize(self->view, text);
 	}	
-	return psy_ui_size_makeem(1.0 * psy_strlen(text), 1.0);
+	return psy_ui_size_make_em(1.0 * psy_strlen(text), 1.0);
 }
 
 void view_dev_setbackgroundcolour(psy_ui_ViewComponentImp* self, psy_ui_Colour colour)

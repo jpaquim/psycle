@@ -278,7 +278,7 @@ void seqeditorline_init(SeqEditorLine* self,
 		seqeditorline_base(self),
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(-1.0, 0.0),
-			psy_ui_size_makepx(1.0, 100.0)));
+			psy_ui_size_make_px(1.0, 100.0)));
 }
 
 SeqEditorLine* seqeditorline_alloc(void)
@@ -1057,7 +1057,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 			if (sequencetrackbox) {				
 				psy_ui_component_setminimumsize(
 					sequencetrackbox_base(sequencetrackbox),
-					psy_ui_size_makeem(0.0, 2.0));
+					psy_ui_size_make_em(0.0, 2.0));
 				sequencetrackbox_showtrackname(sequencetrackbox);
 			}
 			if (sequencetrackbox) {				
@@ -1070,7 +1070,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 		if (newtrack) {
 			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
 			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),
-				psy_ui_size_makeem(0.0, 2.0));
+				psy_ui_size_make_em(0.0, 2.0));
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				seqeditortrackdesc_onnewtrack);
@@ -1129,6 +1129,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 			seqeditortracks_onmouseleave;		
 		seqeditortracks_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &seqeditortracks_vtable;
 }
 // implementation
 void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
@@ -1141,9 +1142,10 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	self->seqeditposline = NULL;
 	self->skin = skin;
 	psy_ui_component_init(&self->component, parent, NULL);
-	seqeditortracks_vtable_init(self);
-	self->component.vtable = &seqeditortracks_vtable;
+	seqeditortracks_vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setscrollstep(&self->component,
+		psy_ui_size_make_em(8.0, 0.0));
 	//psy_ui_component_setbackgroundcolour(&self->component,
 		//psy_ui_colour_make(0x00CACACA));
 	psy_ui_component_setwheelscroll(&self->component, 1);	
@@ -1195,7 +1197,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		}
 		spacer = psy_ui_component_allocinit(&self->component, &self->component);
 		psy_ui_component_setminimumsize(spacer,
-			psy_ui_size_makeem(10.0, 2.0));
+			psy_ui_size_make_em(10.0, 2.0));
 	}
 	self->playline = seqeditorplayline_allocinit(&self->component,
 		&self->component, self->state);
@@ -1552,14 +1554,16 @@ void seqeditor_updatescrollstep(SeqEditor* self)
 	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(&self->tracks.component);
-	self->tracks.component.scrollstep.height = psy_ui_add_values(
-		self->tracks.state->lineheight,
-		self->tracks.state->linemargin,
-		tm);
-	self->tracks.component.scrollstep.height = psy_ui_value_makepx(
-		(floor)(psy_ui_value_px(&self->tracks.component.scrollstep.height, tm)));	
-	self->trackdescriptions.component.scrollstep.height =
-		self->tracks.component.scrollstep.height;
+	psy_ui_component_setscrollstep_height(&self->tracks.component,
+		psy_ui_add_values(
+			self->tracks.state->lineheight,
+			self->tracks.state->linemargin,
+			tm));
+	psy_ui_component_setscrollstep_height(&self->tracks.component,
+		psy_ui_value_makepx(floor(
+			psy_ui_component_scrollstep_height_px(&self->tracks.component))));
+	psy_ui_component_setscrollstep_height(&self->trackdescriptions.component,
+		psy_ui_component_scrollstep_height(&self->tracks.component));
 }
 
 void seqeditor_updateoverflow(SeqEditor* self)

@@ -110,7 +110,7 @@ void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* d
 		psy_ui_component_insert(dest, &self->help.component, NULL);		
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);
 		psy_ui_component_setpreferredsize(&self->help.editor.component,
-			psy_ui_size_makeem(120, 40));
+			psy_ui_size_make_em(120, 40));
 		psy_ui_component_preventalign(&self->help.editor.component);
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);

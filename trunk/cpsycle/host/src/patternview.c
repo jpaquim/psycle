@@ -1143,14 +1143,14 @@ void patternview_updatescrollstep(PatternView* self)
 			trackergridstate_pxtotrack(&self->gridstate,
 				psy_ui_value_px(&scrollleft, tm)));
 	psy_ui_component_setscrollstep(trackergrid_base(&self->tracker),
-		psy_ui_size_makepx(
+		psy_ui_size_make_px(
 			scrollstepx,
 			trackerlinestate_lineheight(&self->linestate)));
-	psy_ui_component_setscrollstepx(trackergrid_base(&self->griddefaults),
+	psy_ui_component_setscrollstep_width(trackergrid_base(&self->griddefaults),
 		psy_ui_value_makepx(scrollstepx));
-	psy_ui_component_setscrollstepx(trackerheader_base(&self->header),
+	psy_ui_component_setscrollstep_width(trackerheader_base(&self->header),
 		psy_ui_value_makepx(scrollstepx));
-	psy_ui_component_setscrollstepy(&self->left.linenumbers.component,
+	psy_ui_component_setscrollstep_height(&self->left.linenumbers.component,
 		psy_ui_value_makepx(trackerlinestate_lineheight(&self->linestate)));
 }
 

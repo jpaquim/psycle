@@ -265,14 +265,16 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 				POINT pt_client;
 				const psy_ui_TextMetric* tm;
+				psy_ui_Point scrolloffset;
 
 				pt_client.x = (SHORT)LOWORD(lParam);
-				pt_client.y = (SHORT)HIWORD(lParam);
+				pt_client.y = (SHORT)HIWORD(lParam);				
 				ScreenToClient(imp->hwnd, &pt_client);				
 				tm = psy_ui_component_textmetric(imp->component);
+				scrolloffset = psy_ui_component_scrolloffset(imp->component);
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x + psy_ui_value_px(&imp->component->scroll.x, tm),
-					pt_client.y + psy_ui_value_px(&imp->component->scroll.y, tm),
+					pt_client.x + psy_ui_value_px(&scrolloffset.x, tm),
+					pt_client.y + psy_ui_value_px(&scrolloffset.y, tm),
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
@@ -320,7 +322,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (imp->component->alignchildren) {
 						psy_ui_component_align(imp->component);
 					}
-					size = psy_ui_size_makepx(LOWORD(lParam), (HIWORD(lParam)));
+					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));
 					imp->component->vtable->onsize(imp->component, &size);
 					if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
 						psy_ui_component_updateoverflow(imp->component);
@@ -656,50 +658,46 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
 				preventdefault = ev.preventdefault;
-				if (!preventdefault && imp->component->wheelscroll > 0) {
+				if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
 					if (deltaperline != 0) {
 						accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
 						while (accumwheeldelta >= deltaperline) {
 							double pos;
-							intptr_t scrollmin;
-							intptr_t scrollmax;
+							psy_ui_IntPoint scrollrange;							
 							double scrolltoppx;
 							const psy_ui_TextMetric* tm;
 
 							tm = psy_ui_component_textmetric(imp->component);
-							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);																					
+							scrollrange = psy_ui_component_verticalscrollrange(imp->component);																					
 							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
-							pos =  scrolltoppx / 
-								psy_ui_value_px(&imp->component->scrollstep.height, tm) -
-								imp->component->wheelscroll;
-							if (pos < (double)scrollmin) {
-								pos = (double)scrollmin;
+							pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
+								psy_ui_component_wheelscroll(imp->component);
+							if (pos < (double)scrollrange.x) {
+								pos = (double)scrollrange.x;
 							}														
 							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstep.height, pos));							
+								psy_ui_mul_value_real(
+									psy_ui_component_scrollstep_height(imp->component), pos));
 							accumwheeldelta -= deltaperline;
 						}
 						while (accumwheeldelta <= -deltaperline)
 						{
 							double pos;
-							intptr_t scrollmin;
-							intptr_t scrollmax;
+							psy_ui_IntPoint scrollrange;
 							double scrolltoppx;
 							const psy_ui_TextMetric* tm;
 
 							tm = psy_ui_component_textmetric(imp->component);
-							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);									
+							scrollrange = psy_ui_component_verticalscrollrange(imp->component);									
 							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
-							pos = scrolltoppx /
-								psy_ui_value_px(&imp->component->scrollstep.height, tm) +
-								imp->component->wheelscroll;
-							if (pos > (double)scrollmax) {
-								pos = (double)scrollmax;
+							pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
+								psy_ui_component_wheelscroll(imp->component);
+							if (pos > (double)scrollrange.y) {
+								pos = (double)scrollrange.y;
 							}							
 							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstep.height, pos));							
+								psy_ui_mul_value_real(
+									psy_ui_component_scrollstep_height(imp->component), pos));
 							accumwheeldelta += deltaperline;
 						}
 					}
@@ -769,11 +767,13 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 
 void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
 {		
+	psy_ui_Point offset;
 	const psy_ui_TextMetric* tm;
-	tm = psy_ui_component_textmetric(component);
 
-	*x += psy_ui_value_px(&component->scroll.x, tm);
-	*y += psy_ui_value_px(&component->scroll.y, tm);
+	tm = psy_ui_component_textmetric(component);	
+	offset = psy_ui_component_scrolloffset(component);
+	*x += psy_ui_value_px(&offset.x, tm);
+	*y += psy_ui_value_px(&offset.y, tm);
 	if (!psy_ui_margin_iszero(&component->spacing)) {				
 		*x -= psy_ui_value_px(&component->spacing.left, tm);
 		*y -= psy_ui_value_px(&component->spacing.top, tm);
@@ -883,8 +883,8 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_component_setscrolltop(imp->component,
 			psy_ui_value_makepx(
 				psy_ui_value_px(&scrolltop, tm) -
-				psy_ui_value_px(&imp->component->scrollstep.height, tm) *
-					(pos - si.nPos)));		
+				psy_ui_component_scrollstep_height_px(imp->component) *
+					(pos - si.nPos)));
 	}
 }
 void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -915,8 +915,8 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_component_setscrollleft(imp->component,
 			psy_ui_value_makepx(
 				psy_ui_value_px(&scrollleft, tm) -
-				psy_ui_value_px(&imp->component->scrollstep.width, tm) *
-					(pos - si.nPos)));				
+				psy_ui_component_scrollstep_width_px(imp->component) *
+					(pos - si.nPos)));
 	}
 }
 

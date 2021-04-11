@@ -109,7 +109,8 @@ void cpumoduleview_onpreferredsize(CPUModuleView* self, const psy_ui_Size* limit
 	}
 	size = psy_ui_component_size(&self->component);
 	
-	rv->height = psy_ui_mul_value_real(self->component.scrollstep.height, (double)currlines);
+	rv->height = psy_ui_mul_value_real(
+		psy_ui_component_scrollstep_height(&self->component), (double)currlines);
 	rv->width = size.width;	
 }
 

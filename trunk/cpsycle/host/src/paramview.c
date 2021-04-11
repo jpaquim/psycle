@@ -212,7 +212,7 @@ void paramview_build(ParamView* self)
 					component = psy_ui_component_allocinit(currcolumn,
 						&self->component);
 					psy_ui_component_setpreferredsize(component,
-						psy_ui_size_makeem(self->skin->paramwidth_small, 2.0));
+						psy_ui_size_make_em(self->skin->paramwidth_small, 2.0));
 					psy_ui_component_preventalign(component);
 					break; }
 				}
@@ -220,7 +220,7 @@ void paramview_build(ParamView* self)
 					psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);					
 					if (slider) {
 						psy_ui_component_setminimumsize(component,
-							psy_ui_size_makeem(20.0, 15.0));
+							psy_ui_size_make_em(20.0, 15.0));
 					}
 				}
 			}

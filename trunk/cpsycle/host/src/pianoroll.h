@@ -308,7 +308,7 @@ typedef struct PianoGridDraw {
 
 void pianogriddraw_init(PianoGridDraw*,
 	KeyboardState*, PianoGridState*,
-	psy_ui_Value scrollleft, psy_ui_Value scrolltop,	
+	psy_ui_Point scrolloffset,
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay,

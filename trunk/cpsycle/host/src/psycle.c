@@ -84,7 +84,7 @@ int psycle_run(uintptr_t instance, int options)
 			psy_ui_component_showstate(&mainframe->component, SW_MAXIMIZE);
 #else
 			psy_ui_component_resize(&mainframe->component,
-				psy_ui_size_makepx(1024.0, 768.0));	
+				psy_ui_size_make_px(1024.0, 768.0));	
 			psy_ui_component_showstate(&mainframe->component, 0);
 #endif		
 		} else {

@@ -129,7 +129,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 			component->preventpreferredsizeatalign = 1;				
 			if (orientation == psy_ui_VERTICAL) {
 				psy_ui_component_resize(component,
-					psy_ui_size_makepx(psy_ui_value_px(&size.width, tm) / 2, 0));
+					psy_ui_size_make_px(psy_ui_value_px(&size.width, tm) / 2, 0));
 				if (!self->split) {
 					psy_ui_splitbar_init(&self->splitbar, psy_ui_notebook_base(self));
 					self->split = 1;
@@ -139,7 +139,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 				psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_LEFT);
 			} else {
 				psy_ui_component_resize(component,
-					psy_ui_size_makepx(0, psy_ui_value_px(&size.height, tm) / 2));
+					psy_ui_size_make_px(0, psy_ui_value_px(&size.height, tm) / 2));
 				if (!self->split) {
 					psy_ui_splitbar_init(&self->splitbar, psy_ui_notebook_base(self));
 					self->split = 1;

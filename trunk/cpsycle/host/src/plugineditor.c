@@ -135,7 +135,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->fileselector.signal_selchanged, self,
 		plugineditor_onfileselected);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_makeem(80.0, 0.0));		
+		psy_ui_size_make_em(80.0, 0.0));		
 	psy_table_init(&self->pluginmappping);
 	plugineditor_buildpluginlist(self);
 	plugineditor_connectmachinesignals(self, workspace);

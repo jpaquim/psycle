@@ -240,7 +240,7 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 	psy_ui_editor_init(&self->console, &self->component);	
 	psy_ui_component_setalign(&self->console.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->console.component,
-		psy_ui_size_makeem(0.0, 10.0));
+		psy_ui_size_make_em(0.0, 10.0));
 }
 
 static void sampleprocessview_buildprocessorlist(SampleEditorProcessView*);
@@ -705,7 +705,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_onscrollzoom_customdraw);
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->zoom.component,
-		psy_ui_size_makeem(0.0, 2.0));	
+		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);	

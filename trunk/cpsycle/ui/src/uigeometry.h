@@ -371,7 +371,7 @@ INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
 	return rv;
 }
 
-INLINE psy_ui_Size psy_ui_size_makepx(double width, double height)
+INLINE psy_ui_Size psy_ui_size_make_px(double width, double height)
 {
 	psy_ui_Size rv;
 
@@ -380,7 +380,7 @@ INLINE psy_ui_Size psy_ui_size_makepx(double width, double height)
 	return rv;
 }
 
-INLINE psy_ui_Size psy_ui_size_makeem(double width, double height)
+INLINE psy_ui_Size psy_ui_size_make_em(double width, double height)
 {
 	psy_ui_Size rv;
 
@@ -418,7 +418,7 @@ INLINE void psy_ui_size_setem(psy_ui_Size* self, double width, double height)
 
 INLINE psy_ui_Size psy_ui_size_zero(void)
 {
-	return psy_ui_size_makeem(0.0, 0.0);
+	return psy_ui_size_make_em(0.0, 0.0);
 }
 
 INLINE bool psy_ui_size_iszero(const psy_ui_Size* self)

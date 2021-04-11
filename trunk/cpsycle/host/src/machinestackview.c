@@ -535,7 +535,7 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews,
 	self->statusbar = statusbar;
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
-	//self->effectsize = psy_ui_size_makepx(138.0, 52.0);
+	//self->effectsize = psy_ui_size_make_px(138.0, 52.0);
 	self->effectsize = psy_ui_size_make(
 		psy_ui_value_makepx(138.0),
 		psy_ui_value_makepx(52.0));
@@ -547,7 +547,7 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews,
 	self->drawsmalleffects = FALSE;
 	self->drawvirtualgenerators = FALSE;
 	// 20: right margin of column
-	self->columnsize = psy_ui_size_makepx(138.0 + 20, 52.0);
+	self->columnsize = psy_ui_size_make_px(138.0 + 20, 52.0);
 	self->update = FALSE;
 	self->effectinsertpos = psy_INDEX_INVALID;
 	self->effectinsertright = FALSE;
@@ -882,14 +882,14 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 		outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
 			NULL);
 	} else {
-		outsize = psy_ui_size_makeem(0.0, 1.0);
+		outsize = psy_ui_size_make_em(0.0, 1.0);
 	}
 	outsizepx = psy_ui_size_px(&outsize, tm);	
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
 		volumesize = psy_ui_component_preferredsize(&self->view->volumes.component,
 			NULL);
 	} else {
-		volumesize = psy_ui_size_makeem(0.0, 1.0);
+		volumesize = psy_ui_size_make_em(0.0, 1.0);
 	}
 	volumesizepx = psy_ui_size_px(&volumesize, tm);
 	volumesizepx.height = psy_max(182.0, volumesizepx.height);
@@ -1109,7 +1109,7 @@ void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_makeem(10.0, 2.0));
+		psy_ui_size_make_em(10.0, 2.0));
 	self->skin = skin;	
 	self->state = state;
 }
@@ -1182,7 +1182,7 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setwheelscroll(&self->component, 1);
 	psy_ui_component_setscrollmode(&self->component, psy_ui_SCROLL_COMPONENTS);
-	psy_ui_component_setscrollstepy(&self->component,
+	psy_ui_component_setscrollstep_height(&self->component,
 		state->effectsize.height);
 	self->state = state;
 	self->column = column;
@@ -1616,7 +1616,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->outputs.component, psy_ui_ALIGN_BOTTOM);
 	// spacer
 	psy_ui_component_init(&self->spacer, &self->columns, NULL);
-	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_makeem(0.0, 0.5));
+	psy_ui_component_setpreferredsize(&self->spacer, psy_ui_size_make_em(0.0, 0.5));
 	psy_ui_component_preventalign(&self->spacer);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -1711,7 +1711,7 @@ void machinestackview_build(MachineStackView* self)
 		machinestackinputs_build(&self->inputs);
 		machinestackoutputs_build(&self->outputs);
 		machinestackvolumes_build(&self->volumes);
-		psy_ui_component_setscrollstepx(&self->columns,
+		psy_ui_component_setscrollstep_width(&self->columns,
 			self->state.columnsize.width);
 		psy_ui_app()->alignvalid = FALSE;
 		psy_ui_component_align(&self->component);

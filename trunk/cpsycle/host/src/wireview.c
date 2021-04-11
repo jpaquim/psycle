@@ -153,7 +153,7 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
 	psy_ui_component_resize(&self->volslider.component,
-		psy_ui_size_makeem(2.0, 0.0));
+		psy_ui_size_make_em(2.0, 0.0));
 	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_slider_connect(&self->volslider, self,
 		(ui_slider_fpdescribe)wireview_ondescribevolume,
@@ -387,7 +387,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 	psy_ui_component_setposition(wireframe_base(self),
 		psy_ui_rectangle_make(
 		psy_ui_point_makepx(200.0, 150.0),
-		psy_ui_size_makeem(80.0, 25.0)));
+		psy_ui_size_make_em(80.0, 25.0)));
 }
 
 void wireframe_updatetitle(WireFrame* self, psy_audio_Machines* machines)

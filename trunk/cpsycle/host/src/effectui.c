@@ -159,7 +159,7 @@ void effectui_initsize(EffectUi* self)
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(topleft.x, topleft.y),
-			psy_ui_size_makepx(size.width, size.height)));
+			psy_ui_size_make_px(size.width, size.height)));
 	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);	
 }
 

@@ -524,7 +524,7 @@ psy_ui_Size dev_framesize(psy_ui_win_ComponentImp* self)
 	RECT rect;
 
 	GetWindowRect(self->hwnd, &rect);
-	return psy_ui_size_makepx(rect.right, rect.bottom);	
+	return psy_ui_size_make_px(rect.right, rect.bottom);	
 }
 
 void dev_scrollto(psy_ui_win_ComponentImp* self, intptr_t dx, intptr_t dy)
@@ -650,12 +650,14 @@ void dev_invalidaterect(psy_ui_win_ComponentImp* self,
 {
 	RECT rc;
 	const psy_ui_TextMetric* tm;
+	psy_ui_Point scrolloffset;
 
 	tm = psy_ui_component_textmetric(self->component);
-	rc.left = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, tm));
-	rc.top = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, tm));
-	rc.right = (int)(r->right - psy_ui_value_px(&self->component->scroll.x, tm));
-	rc.bottom = (int)(r->bottom - psy_ui_value_px(&self->component->scroll.y, tm));
+	scrolloffset = psy_ui_component_scrolloffset(self->component);
+	rc.left = (int)(r->left - psy_ui_value_px(&scrolloffset.x, tm));
+	rc.top = (int)(r->top - psy_ui_value_px(&scrolloffset.y, tm));
+	rc.right = (int)(r->right - psy_ui_value_px(&scrolloffset.x, tm));
+	rc.bottom = (int)(r->bottom - psy_ui_value_px(&scrolloffset.y, tm));
 	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 
@@ -1019,7 +1021,8 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	POINT origin;
 	POINT org;
 	psy_ui_RealRectangle clip;
-
+	psy_ui_Point offset;
+	
 	tm = psy_ui_component_textmetric(self->component);
 	// draw background						
 	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
@@ -1028,16 +1031,17 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	psy_ui_component_drawborder(self->component, g);
 	// prepare a clip rect that can be used by a component
 	// to optimize the draw amount
+	offset = psy_ui_component_scrolloffset(self->component);
 	psy_ui_realrectangle_settopleft(&g->clip,
 		psy_ui_realpoint_make(
-			g->clip.left + psy_ui_value_px(&self->component->scroll.x, tm),
-			g->clip.top + psy_ui_value_px(&self->component->scroll.y, tm)));
+			g->clip.left + psy_ui_value_px(&offset.x, tm),
+			g->clip.top + psy_ui_value_px(&offset.y, tm)));
 	// add scroll coords
 	tm = psy_ui_component_textmetric(self->component);
 	win_g = (psy_ui_win_GraphicsImp*)g->imp;
 	GetWindowOrgEx(win_g->hdc, &origin);
-	origin.x += (int)psy_ui_value_px(&self->component->scroll.x, tm);
-	origin.y += (int)psy_ui_value_px(&self->component->scroll.y, tm);
+	origin.x += (int)psy_ui_value_px(&offset.x, tm);
+	origin.y += (int)psy_ui_value_px(&offset.y, tm);
 	// set translation
 	SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
 	// spacing

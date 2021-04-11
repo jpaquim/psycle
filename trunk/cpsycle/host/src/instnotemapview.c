@@ -106,7 +106,7 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	self->entry.keyrange.high = 255;
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_makeem(0.0, 2.0));	
+		psy_ui_size_make_em(0.0, 2.0));	
 }
 
 void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
@@ -194,8 +194,8 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstep.height = psy_ui_value_makepx(
-		self->metrics.lineheight * 3);
+	psy_ui_component_setscrollstep_height(&self->component,
+		psy_ui_value_makepx(self->metrics.lineheight * 3));
 }
 
 // entry view
@@ -267,7 +267,8 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;	
 	self->state = state;
-	self->component.scrollstep.height = psy_ui_value_makepx(45);
+	psy_ui_component_setscrollstep_height(&self->component,
+		psy_ui_value_makepx(45));
 	instrumententryview_updatemetrics(self);	
 	psy_signal_connect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
@@ -442,7 +443,8 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstep.height = psy_ui_value_makepx(self->metrics.lineheight * 3);
+	psy_ui_component_setscrollstep_height(&self->component,
+		psy_ui_value_makepx(self->metrics.lineheight * 3));
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
@@ -869,7 +871,7 @@ void instrumententrytableviewheader_ondraw(InstrumentEntryTableViewHeader* self,
 void instrumententrytableviewheader_onpreferredsize(InstrumentEntryTableViewHeader* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	*rv = psy_ui_size_makeem(80.0, 1.0);
+	*rv = psy_ui_size_make_em(80.0, 1.0);
 }
 
 // InstrumentEntryRow
@@ -1245,10 +1247,10 @@ void instrumententrytableview_onpreferredsize(InstrumentEntryTableView* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (self->instrument) {		
-		*rv = psy_ui_size_makeem(80.0,
+		*rv = psy_ui_size_make_em(80.0,
 			psy_max(6.0, (double)psy_list_size(self->instrument->entries)));
 	} else {
-		*rv = psy_ui_size_makeem(80.0, 6.0);
+		*rv = psy_ui_size_make_em(80.0, 6.0);
 	}
 }
 
@@ -1385,7 +1387,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	psy_ui_component_init(&self->table, &self->component, NULL);
 	psy_ui_component_setalign(&self->table, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->table,
-		psy_ui_size_makeem(0.0, 6.0));
+		psy_ui_size_make_em(0.0, 6.0));
 	self->table.preventpreferredsizeatalign = 1;	
 	instrumententrytableviewheader_init(&self->tableheader,
 		&self->table, &self->state, workspace);

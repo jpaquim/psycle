@@ -125,7 +125,7 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_makeem(0.0, 10.0));
+		psy_ui_size_make_em(0.0, 10.0));
 }
 
 void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,

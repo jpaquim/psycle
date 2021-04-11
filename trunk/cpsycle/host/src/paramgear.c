@@ -176,7 +176,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.1),
 		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0)));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setscrollstepx(&self->component, psy_ui_value_makepx(100));
+	psy_ui_component_setscrollstep_width(&self->component, psy_ui_value_makepx(100));
 	if (workspace_song(workspace)) {
 		self->machines = &workspace->song->machines;
 	}
@@ -656,9 +656,9 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->pane.component,
 		psy_ui_OVERFLOW_HSCROLL);
 	psy_ui_component_setmaximumsize(&self->component,
-		psy_ui_size_makeem(0.0, 10.0));
+		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_makeem(0.0, 10.0));
+		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setscrollmode(&self->pane.component, psy_ui_SCROLL_COMPONENTS);	
 	// connect scrollbar
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
@@ -689,7 +689,7 @@ void paramrack_onalign(ParamRack* self, psy_ui_Component* sender)
 		limit = psy_ui_component_size(&self->component);
 		preferredboxsize = psy_ui_component_preferredsize(
 			psy_ui_component_at(&self->pane.component, 0), &limit);
-		psy_ui_component_setscrollstepx(&self->pane.component,
+		psy_ui_component_setscrollstep_width(&self->pane.component,
 			preferredboxsize.width);
 	}
 	psy_ui_component_updateoverflow(&self->pane.component);	
