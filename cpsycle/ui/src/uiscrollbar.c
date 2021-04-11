@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uiscrollbar.h"
+// local
+#include "uiapp.h"
 // std
 #include <math.h>
 // platform

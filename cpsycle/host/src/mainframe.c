@@ -1715,9 +1715,6 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 	psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_Q) {
-		self = self;
-	}
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl, ev->alt),

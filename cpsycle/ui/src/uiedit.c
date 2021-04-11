@@ -16,12 +16,14 @@ static void psy_ui_edit_onmousehook(psy_ui_Edit*, psy_ui_App* sender,
 	psy_ui_MouseEvent*);
 
 static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_Edit* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		super_vtable = *(self->component.vtable);
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			onpreferredsize;
@@ -49,6 +51,9 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_accept);
 	psy_signal_init(&self->signal_reject);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_EDIT, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype_focus(&self->component, psy_ui_STYLE_EDIT_FOCUS);
 	self->charnumber = 0;
 	self->linenumber = 1;
 	self->isinputfield = FALSE;
@@ -179,6 +184,7 @@ void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyEvent* ev)
 
 void psy_ui_edit_onfocus(psy_ui_Edit* self)
 {	
+	super_vtable.onfocus(&self->component);
 	if (self->isinputfield) {
 		psy_ui_app_startmousehook(psy_ui_app());
 		self->preventedit = FALSE;
@@ -189,6 +195,7 @@ void psy_ui_edit_onfocuslost(psy_ui_Edit* self)
 {
 	assert(self);
 
+	super_vtable.onfocuslost(&self->component);
 	if (self->isinputfield) {
 		self->preventedit = TRUE;
 		psy_ui_app_stopmousehook(psy_ui_app());

@@ -194,7 +194,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstepy = psy_ui_value_makepx(
+	self->component.scrollstep.height = psy_ui_value_makepx(
 		self->metrics.lineheight * 3);
 }
 
@@ -267,7 +267,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;	
 	self->state = state;
-	self->component.scrollstepy = psy_ui_value_makepx(45);
+	self->component.scrollstep.height = psy_ui_value_makepx(45);
 	instrumententryview_updatemetrics(self);	
 	psy_signal_connect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
@@ -442,7 +442,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
-	self->component.scrollstepy = psy_ui_value_makepx(self->metrics.lineheight * 3);
+	self->component.scrollstep.height = psy_ui_value_makepx(self->metrics.lineheight * 3);
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,

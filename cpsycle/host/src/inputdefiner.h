@@ -16,6 +16,20 @@
 extern "C" {
 #endif
 
+// InputDefinerKeyNames
+typedef struct InputDefinerKeyNames {
+	psy_Table container;
+} InputDefinerKeyNames;
+
+void inputdefinerkeynames_init(InputDefinerKeyNames*);
+void inputdefinerkeynames_dispose(InputDefinerKeyNames*);
+
+void inputdefinerkeynames_add(InputDefinerKeyNames*,
+	uintptr_t keycode, const char* name);
+const char* inputdefinerkeynames_at(const InputDefinerKeyNames*,
+	uintptr_t keycode);
+
+// InputDefiner
 typedef struct InputDefiner {
 	// inherits 
 	psy_ui_Component component;
@@ -28,6 +42,7 @@ typedef struct InputDefiner {
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
+
 void inputdefiner_setinput(InputDefiner*, uint32_t input);
 
 INLINE unsigned int inputdefiner_input(const InputDefiner* self)

@@ -10,35 +10,124 @@
 #include <uiapp.h>
 // container
 #include <hashtbl.h>
-// std
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 // driver
 #include "../../driver/eventdriver.h"
 // platform
-#include "../../detail/os.h"
-
-#if defined DIVERSALIS__OS__MICROSOFT
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
-#endif
-
 #include "../../detail/portable.h"
 
-static psy_Table keynames;
-static int count = 0;
+static bool validkeycode(uintptr_t keycode)
+{
+	return (keycode >= 0x30 ||
+		keycode == psy_ui_KEY_LEFT ||
+		keycode == psy_ui_KEY_RIGHT ||
+		keycode == psy_ui_KEY_UP ||
+		keycode == psy_ui_KEY_DOWN ||
+		keycode == psy_ui_KEY_TAB ||
+		keycode == psy_ui_KEY_BACK ||
+		keycode == psy_ui_KEY_DELETE ||
+		keycode == psy_ui_KEY_HOME ||
+		keycode == psy_ui_KEY_END ||
+		keycode == psy_ui_KEY_RETURN ||
+		keycode == psy_ui_KEY_PRIOR ||
+		keycode == psy_ui_KEY_NEXT);
+}
 
-static bool validkeycode(uintptr_t keycode);
+// InputDefinerKeyNames
+// prototypes
+static void inputdefinerkeynames_initkeys(InputDefinerKeyNames*);
+// implementation
+void inputdefinerkeynames_init(InputDefinerKeyNames* self)
+{
+	assert(self);
+
+	psy_table_init(&self->container);
+	inputdefinerkeynames_initkeys(self);
+}
+
+void inputdefinerkeynames_dispose(InputDefinerKeyNames* self)
+{
+	assert(self);
+
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)NULL);
+}
+
+void inputdefinerkeynames_initkeys(InputDefinerKeyNames* self)
+{
+	uintptr_t key;
+
+	assert(self);
+
+	psy_table_init(&self->container);
+	inputdefinerkeynames_add(self, psy_ui_KEY_LEFT, "LEFT");
+	inputdefinerkeynames_add(self, psy_ui_KEY_RIGHT, "RIGHT");
+	inputdefinerkeynames_add(self, psy_ui_KEY_UP, "UP");
+	inputdefinerkeynames_add(self, psy_ui_KEY_DOWN, "DOWN");
+	inputdefinerkeynames_add(self, psy_ui_KEY_PRIOR, "PGUP");
+	inputdefinerkeynames_add(self, psy_ui_KEY_NEXT, "PGDOWN");
+	inputdefinerkeynames_add(self, psy_ui_KEY_TAB, "TAB");
+	inputdefinerkeynames_add(self, psy_ui_KEY_BACK, "BACKSPACE");
+	inputdefinerkeynames_add(self, psy_ui_KEY_DELETE, "DELETE");
+	inputdefinerkeynames_add(self, psy_ui_KEY_HOME, "HOME");
+	inputdefinerkeynames_add(self, psy_ui_KEY_END, "END");
+	inputdefinerkeynames_add(self, psy_ui_KEY_RETURN, "RETURN");
+	inputdefinerkeynames_add(self, psy_ui_KEY_INSERT, "INSERT");
+	for (key = psy_ui_KEY_F1; key <= psy_ui_KEY_F12; ++key) {
+		char keystr[5];
+		psy_snprintf(keystr, 5, "F%d", key - psy_ui_KEY_F1 + 1);
+		inputdefinerkeynames_add(self, key, keystr);
+	}
+	for (key = 0x30 /*psy_ui_KEY_0*/; key <= 255 /*psy_ui_KEY_Z*/; ++key) {
+		char keystr[5];
+		psy_snprintf(keystr, 5, "%c", key);
+		if (strlen(keystr)) {
+			inputdefinerkeynames_add(self, key, keystr);
+		}
+	}
+}
+
+void inputdefinerkeynames_add(InputDefinerKeyNames* self,
+	uintptr_t keycode, const char* name)
+{
+	assert(self);
+
+	if (!psy_table_exists(&self->container, keycode)) {
+		psy_table_insert(&self->container, (uintptr_t)keycode,
+			psy_strdup(name));
+	}
+}
+
+const char* inputdefinerkeynames_at(const InputDefinerKeyNames* self,
+	uintptr_t keycode)
+{
+	assert(self);
+
+	return (psy_table_exists(&self->container, keycode))
+		? (const char*)psy_table_at_const(&self->container, keycode)
+		: "";
+}
+
+// static InputDefinerKeyNames definition
+static int refcount = 0;
+static InputDefinerKeyNames keynames;
+
 static void keynames_init(void);
 static void keynames_release(void);
-static void keynames_dispose(void);
-static void keynames_add(uintptr_t keycode, const char* name);
-static const char* keynames_at(uintptr_t keycode);
+
+void keynames_init(void)
+{	
+	if (refcount == 0) {
+		inputdefinerkeynames_init(&keynames);
+	}
+	++refcount;
+}
+
+void keynames_release(void)
+{
+	--refcount;
+	if (refcount == 0) {
+		inputdefinerkeynames_dispose(&keynames);
+	}
+}
 
 // InputDefiner
 // prototypes
@@ -52,12 +141,16 @@ static void inputdefiner_onmousehook(InputDefiner*, psy_ui_App* sender,
 	psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
 static void vtable_init(InputDefiner* self)
 {
+	assert(self);
+
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		super_vtable = *(self->component.vtable);
 		vtable.ondestroy =
 			(psy_ui_fp_component_ondestroy)
 			inputdefiner_ondestroy;
@@ -83,35 +176,42 @@ static void vtable_init(InputDefiner* self)
 // implementation
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
+	assert(self);
+
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setstyletypes(&self->component,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, STYLE_INPUTDEFINER_SELECT,
-		psy_INDEX_INVALID);
+	psy_ui_component_setstyletype_focus(&self->component,
+		STYLE_INPUTDEFINER_FOCUS);		
 	psy_signal_init(&self->signal_accept);
 	keynames_init();
 	self->input = 0;
 	self->regularkey = 0;
 	self->preventhook = TRUE;
 	psy_signal_connect(&psy_ui_app()->signal_mousehook, self,
-		inputdefiner_onmousehook);
+		inputdefiner_onmousehook);	
 }
 
 void inputdefiner_ondestroy(InputDefiner* self)
 {	
-	psy_signal_dispose(&self->signal_accept);
-	keynames_release();
+	assert(self);
+
+	psy_signal_dispose(&self->signal_accept);	
 	psy_signal_disconnect(&psy_ui_app()->signal_mousehook, self,
 		inputdefiner_onmousehook);
+	keynames_release();
 }
 
 void inputdefiner_setinput(InputDefiner* self, uint32_t input)
 {
+	assert(self);
+
 	self->input = input;
 }
 
 void inputdefiner_text(InputDefiner* self, char* text)
 {	
+	assert(self);
+
 	inputdefiner_inputtotext(self->input, text);	
 }
 
@@ -136,43 +236,45 @@ void inputdefiner_inputtotext(uint32_t input, char* text)
 	if (ctrl) {
 		strcat(text, "Ctrl + ");
 	}
-	strcat(text, keynames_at(keycode));
+	strcat(text, inputdefinerkeynames_at(&keynames, keycode));
 }
 
 void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
-	char text[40];	
+	char text[40];
+
+	assert(self);
 	
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
-	if (psy_strlen(text)) {
-		psy_ui_textout(g, 0, 0, text, strlen(text));
+	if (psy_strlen(text) > 0) {
+		psy_ui_textout(g, 0, 0, text, psy_strlen(text));
 	}
 }
 
 void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
+	bool alt;
 	bool shift;
-	bool ctrl;	
+	bool ctrl;
 
-#if defined DIVERSALIS__OS__MICROSOFT
-	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
-	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;	
-#else
-    shift = ev->shift;
-    ctrl = ev->ctrl;
-#endif    
-	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
+	assert(self);
+
+	shift = ev->shift;
+	ctrl = ev->ctrl;
+	alt = ev->alt;
+	if (ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL || 
+			ev->keycode == psy_ui_KEY_MENU) {
 		if (self->regularkey == 0) {
-			self->input = psy_audio_encodeinput(0, shift, ctrl, 0);
+			self->input = psy_audio_encodeinput(0, shift, ctrl, alt);
 		} else {
-			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, 0);
+			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt);
 		}
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = ev->keycode;
-		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, 0);
+		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyevent_stoppropagation(ev);
@@ -180,6 +282,7 @@ void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 
 void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
+	bool alt;
 	bool shift;
 	bool ctrl;
 	uint32_t inputkeycode;
@@ -187,39 +290,43 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	bool inputctrl;
 	bool inputalt;
 
-#if defined DIVERSALIS__OS__MICROSOFT
-	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
-	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;
-#else
+	assert(self);
+
+	alt = ev->alt;
     shift = ev->shift;
     ctrl = ev->ctrl;
-#endif        
-	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt);
-	if (self->regularkey) {		
-		self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, 0);
+	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt);	
+	if (self->regularkey) {
+		if (inputalt) {
+			self->input = psy_audio_encodeinput(inputkeycode, inputshift, inputctrl, inputalt);
+		} else {
+			self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, alt);
+		}
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = 0;
 	}
 	if (!validkeycode(inputkeycode)) {
-		self->input = psy_audio_encodeinput(0, shift, ctrl, 0);
+		self->input = psy_audio_encodeinput(0, shift, ctrl, alt);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyevent_stoppropagation(ev);
 }
 
 void inputdefiner_onfocus(InputDefiner* self)
-{
-	psy_ui_component_setstylestate(&self->component,
-		psy_ui_STYLESTATE_SELECT);
+{	
+	assert(self);
+
+	super_vtable.onfocus(&self->component);
 	self->preventhook = FALSE;
 	psy_ui_app_startmousehook(psy_ui_app());
 }
 
 void inputdefiner_onfocuslost(InputDefiner* self)
 {
-	psy_ui_component_setstylestate(&self->component,
-		psy_INDEX_INVALID);
+	assert(self);
+
+	super_vtable.onfocuslost(&self->component);
 	self->preventhook = TRUE;
 	psy_ui_app_stopmousehook(psy_ui_app());
 	psy_signal_emit(&self->signal_accept, self, 0);
@@ -228,6 +335,8 @@ void inputdefiner_onfocuslost(InputDefiner* self)
 void inputdefiner_onmousehook(InputDefiner* self, psy_ui_App* sender,
 	psy_ui_MouseEvent* ev)
 {
+	assert(self);
+
 	if (psy_ui_component_visible(&self->component) && !self->preventhook) {
 		psy_ui_RealRectangle position;
 
@@ -238,83 +347,4 @@ void inputdefiner_onmousehook(InputDefiner* self, psy_ui_App* sender,
 			psy_ui_app_stopmousehook(psy_ui_app());
 		}
 	}
-}
-
-bool validkeycode(uintptr_t keycode)
-{
-	return (keycode >= 0x30 ||
-		keycode == psy_ui_KEY_LEFT ||
-		keycode == psy_ui_KEY_RIGHT ||
-		keycode == psy_ui_KEY_UP ||
-		keycode == psy_ui_KEY_DOWN ||
-		keycode == psy_ui_KEY_TAB ||
-		keycode == psy_ui_KEY_BACK ||
-		keycode == psy_ui_KEY_DELETE ||
-		keycode == psy_ui_KEY_HOME ||
-		keycode == psy_ui_KEY_END ||
-		keycode == psy_ui_KEY_RETURN ||
-		keycode == psy_ui_KEY_PRIOR ||
-		keycode == psy_ui_KEY_NEXT);
-}
-
-void keynames_init(void)
-{
-	if (count == 0) {
-		uintptr_t key;
-		
-		psy_table_init(&keynames);
-		keynames_add(psy_ui_KEY_LEFT,"LEFT");	
-		keynames_add(psy_ui_KEY_RIGHT, "RIGHT");	
-		keynames_add(psy_ui_KEY_UP,"UP");
-		keynames_add(psy_ui_KEY_DOWN, "DOWN");
-		keynames_add(psy_ui_KEY_PRIOR, "PGUP");
-		keynames_add(psy_ui_KEY_NEXT, "PGDOWN");		
-		keynames_add(psy_ui_KEY_TAB, "TAB");	
-		keynames_add(psy_ui_KEY_BACK, "BACKSPACE");	
-		keynames_add(psy_ui_KEY_DELETE, "DELETE");	
-		keynames_add(psy_ui_KEY_HOME, "HOME");	
-		keynames_add(psy_ui_KEY_END, "END");
-		keynames_add(psy_ui_KEY_RETURN, "RETURN");
-		keynames_add(psy_ui_KEY_INSERT, "INSERT");		
-		for (key = psy_ui_KEY_F1; key <= psy_ui_KEY_F12; ++key) {	
-			char keystr[5];
-			psy_snprintf(keystr, 5, "F%d", key - psy_ui_KEY_F1 + 1);
-			keynames_add(key, keystr);
-		}		
-		for (key = 0x30 /*psy_ui_KEY_0*/; key <= 255 /*psy_ui_KEY_Z*/; ++key) {
-			char keystr[5];		
-			psy_snprintf(keystr, 5, "%c", key);
-			if (strlen(keystr)) {
-				keynames_add(key, keystr);
-			}
-		}
-	}
-	++count;
-}
-
-void keynames_release(void)
-{
-	--count;
-	if (count == 0) {
-		keynames_dispose();
-	}
-}
-
-void keynames_dispose(void)
-{			
-	psy_table_disposeall(&keynames, (psy_fp_disposefunc)NULL);	
-}
-
-void keynames_add(uintptr_t keycode, const char* name)
-{		
-	if (!psy_table_exists(&keynames, keycode)) {
-		psy_table_insert(&keynames, (uintptr_t) keycode, strdup(name));
-	}
-}
-
-const char* keynames_at(uintptr_t keycode)
-{
-	return psy_table_exists(&keynames, keycode)
-		? (const char*) psy_table_at(&keynames, keycode)
-		: "";
 }

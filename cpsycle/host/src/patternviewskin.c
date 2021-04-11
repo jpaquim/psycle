@@ -11,7 +11,8 @@
 // file
 #include <dir.h>
 // ui
-#include "uicomponent.h"
+#include <uiapp.h>
+#include <uicomponent.h>
 // platform
 #include "../../detail/os.h"
 #include "../../detail/portable.h"

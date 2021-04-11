@@ -1552,14 +1552,14 @@ void seqeditor_updatescrollstep(SeqEditor* self)
 	const psy_ui_TextMetric* tm;
 	
 	tm = psy_ui_component_textmetric(&self->tracks.component);
-	self->tracks.component.scrollstepy = psy_ui_add_values(
+	self->tracks.component.scrollstep.height = psy_ui_add_values(
 		self->tracks.state->lineheight,
 		self->tracks.state->linemargin,
 		tm);
-	self->tracks.component.scrollstepy = psy_ui_value_makepx(
-		(floor)(psy_ui_value_px(&self->tracks.component.scrollstepy, tm)));	
-	self->trackdescriptions.component.scrollstepy =
-		self->tracks.component.scrollstepy;
+	self->tracks.component.scrollstep.height = psy_ui_value_makepx(
+		(floor)(psy_ui_value_px(&self->tracks.component.scrollstep.height, tm)));	
+	self->trackdescriptions.component.scrollstep.height =
+		self->tracks.component.scrollstep.height;
 }
 
 void seqeditor_updateoverflow(SeqEditor* self)
