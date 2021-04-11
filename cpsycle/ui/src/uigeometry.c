@@ -252,3 +252,11 @@ void psy_ui_realpoint_floor(psy_ui_RealPoint* self)
 	self->x = floor(self->x);
 	self->y = floor(self->y);
 }
+
+void psy_ui_realmargin_floor(psy_ui_RealMargin* self)
+{
+	self->top = floor(self->top);
+	self->right = floor(self->right);
+	self->bottom = floor(self->bottom);
+	self->left = floor(self->left);
+}

@@ -140,6 +140,16 @@ typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
 
+typedef struct psy_ui_ComponentSizeHints {
+	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
+	psy_ui_Size preferredsize;
+	psy_ui_Size minsize;
+	psy_ui_Size maxsize;
+} psy_ui_ComponentSizeHints;
+
+void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints*);
+
 // psy_ui_Component
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
@@ -177,27 +187,22 @@ typedef struct psy_ui_Component {
 	psy_ui_AlignType align;
 	psy_ui_JustifyType justify;
 	int alignexpandmode;
-	int alignchildren;
-	psy_ui_Margin margin;
-	psy_ui_Margin spacing;	
+	int alignchildren;	
 	bool doublebuffered;
-	psy_ui_BackgroundMode backgroundmode;
-	bool preventdefault;
-	bool preventpreferredsize;
+	psy_ui_BackgroundMode backgroundmode;	
 	psy_ui_ComponentScroll* scroll;
 	intptr_t debugflag;	
 	bool visible;		
 	int cursor;	
 	uintptr_t opcount;
-	psy_ui_Size preferredsize;
-	psy_ui_Size* minsize;
-	psy_ui_Size* maxsize;	
-	psy_ui_Overflow overflow;
-	intptr_t tabindex;
+	psy_ui_ComponentSizeHints* sizehints;
+	bool preventdefault;
+	bool preventpreferredsize;
 	intptr_t preventpreferredsizeatalign;
 	psy_ui_AlignType insertaligntype;
 	psy_ui_Margin insertmargin;		
 	psy_ui_ComponentStyle style;
+	intptr_t tabindex;
 	bool deallocate;
 	bool uselevel;
 } psy_ui_Component;
@@ -245,6 +250,7 @@ void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_togglevisibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component* self);
+void psy_ui_component_usesizehints(psy_ui_Component* self);
 
 INLINE psy_ui_IntPoint psy_ui_component_horizontalscrollrange(
 	const psy_ui_Component* self)
@@ -302,7 +308,13 @@ void psy_ui_component_alignall(psy_ui_Component*);
 
 INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
 {
-	self->margin = margin;
+	psy_ui_component_usesizehints(self);
+	self->sizehints->margin = margin;
+}
+
+INLINE psy_ui_Margin psy_ui_component_margin(const psy_ui_Component* self)
+{
+	return self->sizehints->margin;
 }
 
 void psy_ui_component_setmargin_children(psy_ui_Component*,
@@ -310,7 +322,13 @@ void psy_ui_component_setmargin_children(psy_ui_Component*,
 
 INLINE void psy_ui_component_setspacing(psy_ui_Component* self, psy_ui_Margin spacing)
 {
-	self->spacing = spacing;
+	psy_ui_component_usesizehints(self);
+	self->sizehints->spacing = spacing;
+}
+
+INLINE psy_ui_Margin psy_ui_component_spacing(const psy_ui_Component* self)
+{	
+	return self->sizehints->spacing;
 }
 
 void psy_ui_component_setspacing_children(psy_ui_Component*,
@@ -339,9 +357,9 @@ void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
-const psy_ui_Size* psy_ui_component_maximumsize(const psy_ui_Component*);
+const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
-const psy_ui_Size* psy_ui_component_minimumsize(const psy_ui_Component*);
+const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component*);
 void psy_ui_component_preventpreferredsize(psy_ui_Component*);
 void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
@@ -727,8 +745,9 @@ void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {
-	if (self->overflow != overflow) {
-		self->overflow = overflow;
+	if (self->scroll->overflow != overflow) {
+		psy_ui_component_usescroll(self);
+		self->scroll->overflow = overflow;
 		if (overflow == psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_sethorizontalscrollrange(self, psy_ui_intpoint_zero());
 			psy_ui_component_setverticalscrollrange(self, psy_ui_intpoint_zero());
@@ -742,7 +761,7 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 {
 	assert(self);
 
-	return self->overflow;
+	return self->scroll->overflow;
 }
 
 INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self,
@@ -850,6 +869,25 @@ void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
+
+INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self)
+{
+	psy_ui_RealMargin rv;
+
+	psy_ui_realmargin_init_margin(&rv, &self->sizehints->margin,
+		psy_ui_component_textmetric(self));
+	return rv;
+}
+
+INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* self)
+{
+	psy_ui_RealMargin rv;
+
+	psy_ui_realmargin_init_margin(&rv, &self->sizehints->spacing,
+		psy_ui_component_textmetric(self));
+	return rv;
+}
+
 
 #ifdef __cplusplus
 }

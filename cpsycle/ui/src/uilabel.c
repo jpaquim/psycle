@@ -147,29 +147,31 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 {
 	const psy_ui_TextMetric* tm;
 	char* text;
+	psy_ui_Margin spacing;
 
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
 		text = self->text;
-	}	
-	tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
+	}
+	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
+	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
 	if (self->charnumber == 0) {		
 		if (psy_strlen(text) == 0) {
 			rv->width = psy_ui_value_makeew(0.0);
 		} else {
 			psy_ui_Size size;
-
+			
 			size = psy_ui_component_textsize(psy_ui_label_base(self),
-				text);
+				text);						
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4 +
-				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, tm));
+				psy_ui_margin_width_px(&spacing, tm));
 		}		
 	} else {
 		rv->width = psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
 	}
 	rv->height = psy_ui_value_makepx((tm->tmHeight * self->linespacing) +
-		psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, tm));
+		psy_ui_margin_height_px(&spacing, tm));
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)

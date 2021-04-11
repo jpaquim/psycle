@@ -27,6 +27,7 @@ typedef struct psy_ui_ComponentScroll {
 	psy_ui_IntPoint vrange;
 	psy_ui_IntPoint hrange;
 	int wheel;
+	psy_ui_Overflow overflow;
 } psy_ui_ComponentScroll;
 
 void psy_ui_componentscroll_init(psy_ui_ComponentScroll*);

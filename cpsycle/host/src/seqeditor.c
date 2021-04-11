@@ -1411,7 +1411,6 @@ static void seqeditor_onsongchanged(SeqEditor*, Workspace*, int flag,
 static void seqeditor_updatesong(SeqEditor*, psy_audio_Song*);
 static void seqeditor_build(SeqEditor*);
 static void seqeditor_ontracksscroll(SeqEditor*, psy_ui_Component* sender);
-static void seqeditor_onheaderscroll(SeqEditor*, psy_ui_Component* sender);
 static void seqeditor_onconfigure(SeqEditor*, GeneralConfig* sender,
 	psy_Property*);
 static void seqeditor_onzoomboxbeatchanged(SeqEditor*, ZoomBox* sender);
@@ -1510,9 +1509,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);
 	psy_signal_connect(&self->tracks.component.signal_scroll, self,
-		seqeditor_ontracksscroll);
-	//psy_signal_connect(&self->trackdescriptions.component.signal_scroll, self,
-		//seqeditor_onheaderscroll);
+		seqeditor_ontracksscroll);	
 	psy_signal_connect(&psycleconfig_general(workspace_conf(workspace))->signal_changed,
 		self, seqeditor_onconfigure);
 	psy_signal_connect(&self->bar.move.signal_clicked, self,
@@ -1620,21 +1617,11 @@ void seqeditor_build(SeqEditor* self)
 }
 
 void seqeditor_ontracksscroll(SeqEditor* self, psy_ui_Component* sender)
-{
-	psy_ui_RealRectangle tracksposition;
-	psy_ui_RealRectangle trackdescposition;
-
-	tracksposition = psy_ui_component_position(&self->tracks.component);
-	trackdescposition = psy_ui_component_position(&self->trackdescriptions.component);
-	psy_ui_component_move(&self->trackdescriptions.component,
-		psy_ui_point_makepx(trackdescposition.left, tracksposition.top));
-}
-
-void seqeditor_onheaderscroll(SeqEditor* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_setscrolltop(&self->tracks.component,
-		psy_ui_value_makepx(
-			-psy_ui_component_position(&self->trackdescriptions.component).top));
+	psy_ui_component_setscrolltop(&self->trackdescriptions.component,
+		psy_ui_component_scrolltop(&self->tracks.component));
+	psy_ui_component_setscrollleft(&self->ruler.component,
+		psy_ui_component_scrollleft(&self->tracks.component));
 }
 
 void seqeditor_onconfigure(SeqEditor* self, GeneralConfig* sender,

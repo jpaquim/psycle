@@ -1022,6 +1022,7 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	POINT org;
 	psy_ui_RealRectangle clip;
 	psy_ui_Point offset;
+	psy_ui_Margin spacing;
 	
 	tm = psy_ui_component_textmetric(self->component);
 	// draw background						
@@ -1045,11 +1046,12 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	// set translation
 	SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
 	// spacing
-	if (!psy_ui_margin_iszero(&self->component->spacing)) {
+	spacing = psy_ui_component_spacing(self->component);
+	if (!psy_ui_margin_iszero(&spacing)) {
 		tm = psy_ui_component_textmetric(self->component);
 
-		origin.x -= (int)psy_ui_value_px(&self->component->spacing.left, tm);
-		origin.y -= (int)psy_ui_value_px(&self->component->spacing.top, tm);
+		origin.x -= (int)psy_ui_value_px(&spacing.left, tm);
+		origin.y -= (int)psy_ui_value_px(&spacing.top, tm);
 		SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
 	}
 	// prepare colours

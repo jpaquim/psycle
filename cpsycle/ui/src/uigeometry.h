@@ -160,6 +160,12 @@ typedef struct psy_ui_RealSize {
 	double height;
 } psy_ui_RealSize;
 
+INLINE void psy_ui_realsize_init(psy_ui_RealSize* self)
+{
+	self->width = 0.0;
+	self->height = 0.0;
+}
+
 INLINE psy_ui_RealSize psy_ui_realsize_make(double width, double height)
 {
 	psy_ui_RealSize rv;
@@ -549,6 +555,37 @@ INLINE psy_ui_Margin psy_ui_margin_zero(void)
 	psy_ui_margin_init(&rv);
 	return rv;
 }
+
+
+typedef struct psy_ui_RealMargin {
+	double top;
+	double right;
+	double bottom;
+	double left;
+} psy_ui_RealMargin;
+
+INLINE void psy_ui_realmargin_init_margin(psy_ui_RealMargin* self,
+	const psy_ui_Margin* other,
+	const psy_ui_TextMetric* tm)
+{
+	self->top = psy_ui_value_px(&other->top, tm);
+	self->right = psy_ui_value_px(&other->right, tm);
+	self->bottom = psy_ui_value_px(&other->bottom, tm);
+	self->left = psy_ui_value_px(&other->left, tm);
+}
+
+void psy_ui_realmargin_floor(psy_ui_RealMargin* self);
+
+INLINE double psy_ui_realmargin_width(const psy_ui_RealMargin* self)
+{
+	return self->left + self->right;
+}
+
+INLINE double psy_ui_realmargin_height(const psy_ui_RealMargin* self)
+{
+	return self->top + self->bottom;
+}
+
 
 #ifdef __cplusplus
 }

@@ -570,7 +570,9 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)vibratoview_ontweak,
 			(ui_slider_fpvalue)vibratoview_onvalue);
 	}
-	sliders[0]->component.margin.top = psy_ui_value_makeew(2.0);	
+	margin = psy_ui_component_margin(&sliders[0]->component);
+	margin.top = psy_ui_value_makeew(2.0);	
+	psy_ui_component_setmargin(&sliders[0]->component, margin);
 }
 
 void vibratoview_setsample(SamplesVibratoView* self, psy_audio_Sample* sample)

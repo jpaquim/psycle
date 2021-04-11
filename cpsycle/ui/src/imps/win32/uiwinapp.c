@@ -324,7 +324,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));
 					imp->component->vtable->onsize(imp->component, &size);
-					if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
+					if (psy_ui_component_overflow(imp->component) != psy_ui_OVERFLOW_HIDDEN) {
 						psy_ui_component_updateoverflow(imp->component);
 					}
 					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
@@ -769,14 +769,16 @@ void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
 {		
 	psy_ui_Point offset;
 	const psy_ui_TextMetric* tm;
+	psy_ui_Margin spacing;
 
-	tm = psy_ui_component_textmetric(component);	
+	tm = psy_ui_component_textmetric(component);
+	spacing = psy_ui_component_spacing(component);
 	offset = psy_ui_component_scrolloffset(component);
 	*x += psy_ui_value_px(&offset.x, tm);
 	*y += psy_ui_value_px(&offset.y, tm);
-	if (!psy_ui_margin_iszero(&component->spacing)) {				
-		*x -= psy_ui_value_px(&component->spacing.left, tm);
-		*y -= psy_ui_value_px(&component->spacing.top, tm);
+	if (!psy_ui_margin_iszero(&spacing)) {				
+		*x -= psy_ui_value_px(&spacing.left, tm);
+		*y -= psy_ui_value_px(&spacing.top, tm);
 	}
 }
 

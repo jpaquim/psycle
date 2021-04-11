@@ -531,6 +531,7 @@ void mainframe_initnavigation(MainFrame* self)
 void mainframe_initmaintabbar(MainFrame* self)
 {	
 	psy_ui_Tab* tab;
+	psy_ui_Margin margin;	
 
 	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
 
@@ -546,13 +547,20 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_tabbar_append(&self->tabbar, "main.samples");
 	psy_ui_tabbar_append(&self->tabbar, "main.instruments");
 	psy_ui_tabbar_append(&self->tabbar, "main.properties");		
-	tab = psy_ui_tabbar_append(&self->tabbar, "main.settings");
-	tab->component.margin.left = psy_ui_value_makeew(4.0);
+	tab = psy_ui_tabbar_append(&self->tabbar, "main.settings");	
+	margin = psy_ui_component_margin(&tab->component);
+	margin.left = psy_ui_value_makeew(4.0);
+	psy_ui_component_setmargin(&tab->component, margin);
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.help");	
-	tab->component.margin.right = psy_ui_value_makeew(4.0);
-	psy_ui_tabbar_tab(&self->tabbar, 0)->component.margin.left = psy_ui_value_makeew(1.0);	
+	margin = psy_ui_component_margin(&tab->component);
+	margin.right = psy_ui_value_makeew(4.0);
+	psy_ui_component_setmargin(&tab->component, margin);
+	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
+	margin = psy_ui_component_margin(&tab->component);
+	margin.left = psy_ui_value_makeew(1.0);
+	psy_ui_component_setmargin(&tab->component, margin);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
 }
