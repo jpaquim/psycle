@@ -58,6 +58,7 @@ typedef struct psy_ui_App {
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
+const psy_ui_Style* psy_ui_style(uintptr_t styletype);
 
 void psy_ui_app_init(psy_ui_App*, bool dark, uintptr_t instance);
 void psy_ui_app_dispose(psy_ui_App*);

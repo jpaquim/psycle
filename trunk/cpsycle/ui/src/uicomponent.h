@@ -4,17 +4,19 @@
 #ifndef psy_ui_COMPONENT_H
 #define psy_ui_COMPONENT_H
 
+// local
+#include "uicomponentstyle.h"
 #include "uidef.h"
+#include "uidefaults.h"
 #include "uievents.h"
 #include "uigraphics.h"
-#include <signal.h>
 #include "uimenu.h"
 #include "uistyle.h"
-#include "uidefaults.h"
-#include "uicomponentstyle.h"
+// container
 #include <list.h>
+#include <signal.h>
 #include <translator.h>
-#include "../../detail/stdint.h"
+// std
 #include <math.h>
 
 // psy_ui_Component
@@ -94,7 +96,6 @@ typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
 typedef uintptr_t (*psy_ui_fp_component_section)(const struct psy_ui_Component*);
-
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -183,29 +184,28 @@ typedef struct psy_ui_Component {
 	int alignchildren;
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;	
-	bool doublebuffered;	
+	bool doublebuffered;
+	psy_ui_BackgroundMode backgroundmode;
 	bool preventdefault;
 	bool preventpreferredsize;
-	psy_ui_Value scrollstepx;
-	psy_ui_Value scrollstepy;
-	intptr_t debugflag;
-	psy_ui_BackgroundMode backgroundmode;
-	bool visible;	
-	int wheelscroll;	
+	psy_ui_Point scroll;
+	psy_ui_Size scrollstep;
+	psy_ui_IntPoint vscrollrange;
+	psy_ui_IntPoint hscrollrange;
+	psy_ui_ScrollMode scrollmode;
+	int wheelscroll;
+	intptr_t debugflag;	
+	bool visible;		
 	int cursor;	
 	uintptr_t opcount;
 	psy_ui_Size preferredsize;
 	psy_ui_Size* minsize;
-	psy_ui_Size* maxsize;
-	psy_ui_Point scroll;	
-	psy_ui_IntPoint vscrollrange;
-	psy_ui_IntPoint hscrollrange;
+	psy_ui_Size* maxsize;	
 	psy_ui_Overflow overflow;
 	intptr_t tabindex;
 	intptr_t preventpreferredsizeatalign;
 	psy_ui_AlignType insertaligntype;
-	psy_ui_Margin insertmargin;	
-	psy_ui_ScrollMode scrollmode;
+	psy_ui_Margin insertmargin;		
 	psy_ui_ComponentStyle style;
 	bool deallocate;
 	bool uselevel;
@@ -719,40 +719,41 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 	return self->overflow;
 }
 
-INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, psy_ui_Size step)
+INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self,
+	psy_ui_Size step)
 {
 	assert(self);
 
-	self->scrollstepx = step.width;
-	self->scrollstepy = step.height;
+	self->scrollstep = step;	
 }
 
-INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, psy_ui_Value step)
+INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self,
+	psy_ui_Value step)
 {
 	assert(self);
 
-	self->scrollstepx = step;
+	self->scrollstep.width = step;
 }
 
 INLINE psy_ui_Value psy_ui_component_scrollstepx(const psy_ui_Component* self)
 {
 	assert(self);
 
-	return self->scrollstepx;
+	return self->scrollstep.width;
 }
 
 INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, psy_ui_Value step)
 {
 	assert(self);
 
-	self->scrollstepy = step;
+	self->scrollstep.height = step;
 }
 
 INLINE psy_ui_Value psy_ui_component_scrollstepy(const psy_ui_Component* self)
 {
 	assert(self);
 
-	return self->scrollstepy;
+	return self->scrollstep.height;
 }
 
 INLINE void psy_ui_component_settabindex(psy_ui_Component* self, intptr_t index)
@@ -792,7 +793,6 @@ INLINE psy_ui_RealSize psy_ui_component_sizepx(const psy_ui_Component* self)
 }
 
 int psy_ui_component_level(const psy_ui_Component*);
-const psy_ui_Style* psy_ui_style(uintptr_t styletype);
 void psy_ui_component_setdefaultalign(psy_ui_Component*,
 	psy_ui_AlignType, psy_ui_Margin);
 
@@ -803,10 +803,11 @@ void psy_ui_component_setscrollmode(psy_ui_Component*, psy_ui_ScrollMode);
 
 void psy_ui_component_setstyletypes(psy_ui_Component*,
 	uintptr_t standard, uintptr_t hover, uintptr_t select, uintptr_t disabled);
+void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
+	uintptr_t focus);
 void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
-void psy_ui_component_updatestylestate(psy_ui_Component*);
 
 #ifdef __cplusplus
 }

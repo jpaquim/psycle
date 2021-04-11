@@ -4,9 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
-// std
-#include <stdlib.h>
-#include <string.h>
+// local
+#include "uiapp.h"
 // platform
 #include "../../detail/portable.h"
 

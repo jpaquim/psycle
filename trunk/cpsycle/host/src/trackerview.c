@@ -828,7 +828,7 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_makepx(
 				psy_ui_component_scrolltoppx(&self->component) -
-				psy_ui_value_px(&self->component.scrollstepy, tm) * dlines));
+				psy_ui_value_px(&self->component.scrollstep.height, tm) * dlines));
 		return FALSE;
 	}
 	return TRUE;
@@ -862,7 +862,7 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_makepx(
 				psy_ui_component_scrolltoppx(&self->component) +
-				psy_ui_value_px(&self->component.scrollstepy, tm) * dlines));
+				psy_ui_value_px(&self->component.scrollstep.height, tm) * dlines));
 		return FALSE;
 	}
 	return TRUE;

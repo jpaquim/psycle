@@ -671,13 +671,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 								&scrollmax);																					
 							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
 							pos =  scrolltoppx / 
-								psy_ui_value_px(&imp->component->scrollstepy, tm) -
+								psy_ui_value_px(&imp->component->scrollstep.height, tm) -
 								imp->component->wheelscroll;
 							if (pos < (double)scrollmin) {
 								pos = (double)scrollmin;
 							}														
 							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstepy, pos));							
+								psy_ui_mul_value_real(imp->component->scrollstep.height, pos));							
 							accumwheeldelta -= deltaperline;
 						}
 						while (accumwheeldelta <= -deltaperline)
@@ -693,13 +693,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 								&scrollmax);									
 							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
 							pos = scrolltoppx /
-								psy_ui_value_px(&imp->component->scrollstepy, tm) +
+								psy_ui_value_px(&imp->component->scrollstep.height, tm) +
 								imp->component->wheelscroll;
 							if (pos > (double)scrollmax) {
 								pos = (double)scrollmax;
 							}							
 							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(imp->component->scrollstepy, pos));							
+								psy_ui_mul_value_real(imp->component->scrollstep.height, pos));							
 							accumwheeldelta += deltaperline;
 						}
 					}
@@ -883,7 +883,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_component_setscrolltop(imp->component,
 			psy_ui_value_makepx(
 				psy_ui_value_px(&scrolltop, tm) -
-				psy_ui_value_px(&imp->component->scrollstepy, tm) *
+				psy_ui_value_px(&imp->component->scrollstep.height, tm) *
 					(pos - si.nPos)));		
 	}
 }
@@ -915,7 +915,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_component_setscrollleft(imp->component,
 			psy_ui_value_makepx(
 				psy_ui_value_px(&scrollleft, tm) -
-				psy_ui_value_px(&imp->component->scrollstepx, tm) *
+				psy_ui_value_px(&imp->component->scrollstep.width, tm) *
 					(pos - si.nPos)));				
 	}
 }

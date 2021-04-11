@@ -1119,7 +1119,7 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_property_enumerate(self->properties, self,
 		(psy_PropertyCallback)propertiesrenderer_onenumpropertyposition);
-	self->component.scrollstepy = psy_ui_value_makepx(self->lineheight);
+	self->component.scrollstep.height = psy_ui_value_makepx(self->lineheight);
 	rv->height = psy_ui_value_makepx(self->cpy);	
 	memcpy(self->col_perc, col_perc, sizeof(col_perc));
 	memcpy(self->col_width, col_width, sizeof(col_width));

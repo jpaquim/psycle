@@ -330,6 +330,12 @@ const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, uintptr_t styletype
 	return psy_ui_defaults_style_const(&self->defaults, styletype);
 }
 
+const psy_ui_Style* psy_ui_style(uintptr_t styletype)
+{
+	return psy_ui_app_style(psy_ui_app(), styletype);
+}
+
+
 // psy_ui_AppImp
 static void psy_ui_appimp_dispose(psy_ui_AppImp* self) { }
 static int psy_ui_appimp_run(psy_ui_AppImp* self) { return PSY_ERRRUN; }

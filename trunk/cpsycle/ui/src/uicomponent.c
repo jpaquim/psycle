@@ -191,6 +191,7 @@ static void onmouseenter(psy_ui_Component* self)
 {
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_HOVER);
 }
+
 static void onmouseleave(psy_ui_Component* self)
 {
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_HOVER);
@@ -200,10 +201,18 @@ static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
 static void onlanguagechanged(psy_ui_Component* self) { }
-static void onfocus(psy_ui_Component* self) { }
-static void onfocuslost(psy_ui_Component* self) { }
+
+static void onfocus(psy_ui_Component* self)
+{
+	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_FOCUS);
+}
+
+static void onfocuslost(psy_ui_Component* self)
+{
+	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_FOCUS);
+}
+
 static void onupdatestyles(psy_ui_Component* self) { }
-static void updatestyles(psy_ui_Component*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -477,8 +486,8 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
 	psy_ui_componentstyle_init(&self->style);
-	self->scrollstepx = psy_ui_value_makeew(8.0);
-	self->scrollstepy = psy_ui_value_makeeh(1.0);
+	self->scrollstep.width = psy_ui_value_makeew(8.0);
+	self->scrollstep.height = psy_ui_value_makeeh(1.0);
 	self->overflow = psy_ui_OVERFLOW_HIDDEN;	
 	self->vscrollrange.x = 0;
 	self->vscrollrange.y = 0;
@@ -601,9 +610,9 @@ void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
 {
 	if (stepy != 0 || stepx != 0) {		
 		self->vtable->scrollto(self,
-			(intptr_t)(psy_ui_value_px(&self->scrollstepx,
+			(intptr_t)(psy_ui_value_px(&self->scrollstep.width,
 				psy_ui_component_textmetric(self)) * stepx),
-			(intptr_t)(psy_ui_value_px(&self->scrollstepy,
+			(intptr_t)(psy_ui_value_px(&self->scrollstep.height,
 				psy_ui_component_textmetric(self)) * stepy));
 	}
 }
@@ -1211,7 +1220,7 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 			double oldscrollx;
 			double scrollstepx_px;
 
-			scrollstepx_px = psy_ui_value_px(&self->scrollstepx, tm);
+			scrollstepx_px = psy_ui_value_px(&self->scrollstep.width, tm);
 			oldscrollx = psy_ui_value_px(&self->scroll.x, tm);
 			self->scroll.x = left;
 			psy_signal_emit(&self->signal_scroll, self, 0);
@@ -1244,7 +1253,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 			double scrollstepy_px;
 			double step;
 
-			scrollstepy_px = psy_ui_value_px(&self->scrollstepy, tm);
+			scrollstepy_px = psy_ui_value_px(&self->scrollstep.height, tm);
 			oldscrolly = psy_ui_value_px(&self->scroll.y, tm);
 			self->scroll.y = top;
 			psy_signal_emit(&self->signal_scroll, self, 0);
@@ -1284,7 +1293,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		} else {
 			size = psy_ui_component_size(psy_ui_component_parent(self));
 		}
-		scrollstepy_px = (intptr_t)psy_ui_value_px(&self->scrollstepy, tm);
+		scrollstepy_px = (intptr_t)psy_ui_value_px(&self->scrollstep.height, tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxlines = (int)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
@@ -1325,7 +1334,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		} else {
 			size = psy_ui_component_size(psy_ui_component_parent(self));
 		}
-		scrollstepx_px = (intptr_t)psy_ui_value_px(&self->scrollstepx, tm);
+		scrollstepx_px = (intptr_t)psy_ui_value_px(&self->scrollstep.width, tm);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
 		maxrows = (int)(psy_ui_value_px(&preferredsize.width, tm) /
 			(double)scrollstepx_px + 0.5);
@@ -1487,11 +1496,6 @@ void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	self->insertmargin = margin;
 }
 
-const psy_ui_Style* psy_ui_style(uintptr_t styletype)
-{
-	return psy_ui_app_style(psy_ui_app(), styletype);
-}
-
 void psy_ui_component_updatelanguage(psy_ui_Component* self)
 {
 	assert(self);
@@ -1520,113 +1524,41 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 	uintptr_t disabled)
 {
 	self->style.style_id = standard;
+	self->style.focus_id = psy_INDEX_INVALID;
 	self->style.hover_id = hover;
 	self->style.select_id = select;
 	self->style.disabled_id = disabled;
-	updatestyles(self);	
+	psy_ui_componentstyle_readstyles(&self->style);
+}
+
+void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
+	uintptr_t focus)
+{
+	self->style.focus_id = focus;
+	psy_ui_componentstyle_readstyles(&self->style);
 }
 
 void psy_ui_component_setstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {		
-	if (state != self->style.state) {
-		self->style.state = state;
-		psy_ui_component_updatestylestate(self);
-	}
+	if (psy_ui_componentstyle_setcurrstate(&self->style, state)) {
+		psy_ui_component_invalidate(self);
+	}	
 }
 
 void psy_ui_component_addstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
-	uintptr_t newstate;
-
-	newstate = self->style.state | state;
-	if (newstate != self->style.state) {
-		self->style.state = newstate;
-		psy_ui_component_updatestylestate(self);
+	if (psy_ui_componentstyle_addstate(&self->style, state)) {
+		psy_ui_component_invalidate(self);
 	}
 }
 
 void psy_ui_component_removestylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
-	uintptr_t newstate;
-
-	newstate = self->style.state & (~state);
-	if (newstate != self->style.state) {
-		self->style.state = newstate;
-		psy_ui_component_updatestylestate(self);
-	}
-}
-
-void psy_ui_component_updatestylestate(psy_ui_Component* self)
-{
-	uintptr_t state;
-
-	if ((self->style.state & psy_ui_STYLESTATE_DISABLED) == psy_ui_STYLESTATE_DISABLED) {
-		state = psy_ui_STYLESTATE_DISABLED;
-	} else if ((self->style.state & psy_ui_STYLESTATE_SELECT) == psy_ui_STYLESTATE_SELECT) {
-		state = psy_ui_STYLESTATE_SELECT;
-	} else if ((self->style.state & psy_ui_STYLESTATE_HOVER) == psy_ui_STYLESTATE_HOVER) {
-		state = psy_ui_STYLESTATE_HOVER;
-	} else {
-		state = psy_ui_STYLESTATE_NONE;
-	}
-	switch (state) {
-	case psy_ui_STYLESTATE_NONE:
-		if (self->style.currstyle != &self->style.style) {
-			self->style.currstyle = &self->style.style;
-			psy_ui_component_invalidate(self);
-		}
-		break;
-	case psy_ui_STYLESTATE_HOVER:
-		if (self->style.hover_id != psy_INDEX_INVALID) {
-			self->style.currstyle = &self->style.hover;
-			psy_ui_component_invalidate(self);
-		}
-		break;
-	case psy_ui_STYLESTATE_SELECT:
-		if (self->style.select_id != psy_INDEX_INVALID) {
-			self->style.currstyle = &self->style.select;
-			psy_ui_component_invalidate(self);
-		}
-		break;
-	case psy_ui_STYLESTATE_DISABLED:
-		if (self->style.disabled_id != psy_INDEX_INVALID) {
-			self->style.currstyle = &self->style.disabled;
-			psy_ui_component_invalidate(self);
-		}
-		break;
-	default:
-		if (self->style.currstyle != &self->style.style) {
-			self->style.currstyle = &self->style.style;
-			psy_ui_component_invalidate(self);
-		}
-		break;
-	}	
-}
-
-void updatestyles(psy_ui_Component* self)
-{
-	if (self->style.style_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->style.style,
-			psy_ui_style(self->style.style_id));		
-	}
-	if (self->style.hover_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->style.hover,
-			psy_ui_style(self->style.hover_id));	
-	}
-	if (self->style.select_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->style.select,
-			psy_ui_style(self->style.select_id));
-	}
-	if (self->style.disabled_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->style.disabled,
-			psy_ui_style(self->style.disabled_id));
-	}
-	if (self->style.style.backgroundcolour.mode.set) {
-		psy_ui_component_setbackgroundcolour(self,
-			self->style.style.backgroundcolour);
+	if (psy_ui_componentstyle_removestate(&self->style, state)) {
+		psy_ui_component_invalidate(self);
 	}
 }
 
@@ -1637,13 +1569,13 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 		psy_List* q;
 
 		// merge		
-		updatestyles(main);
+		psy_ui_componentstyle_readstyles(&main->style);
 		main->vtable->onupdatestyles(main);
 		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; psy_list_next(&p)) {
 			psy_ui_Component* child;
 
 			child = (psy_ui_Component*)psy_list_entry(p);
-			updatestyles(child);			
+			psy_ui_componentstyle_readstyles(&child->style);
 			child->vtable->onupdatestyles(child);
 			if (child->imp) {
 				child->imp->vtable->dev_setbackgroundcolour(child->imp,

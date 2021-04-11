@@ -3,9 +3,11 @@
 
 #include "../../detail/prefix.h"
 
+// local
+#include "uiapp.h"
 #include "uicolours.h"
-#include "uistyle.h"
 #include "uicomponent.h"
+#include "uistyle.h"
 // platform
 #include "../../detail/portable.h"
 
