@@ -275,12 +275,12 @@ void dev_setposition(psy_ui_curses_ComponentImp* self, psy_ui_Point topleft, psy
 
 psy_ui_Size dev_size(const psy_ui_curses_ComponentImp* self)
 {
-	return psy_ui_size_makeem(0.0, 0.0);
+	return psy_ui_size_make_em(0.0, 0.0);
 }
 
 psy_ui_Size dev_framesize(psy_ui_curses_ComponentImp* self)
 {
-	return psy_ui_size_makeem(0.0, 0.0);
+	return psy_ui_size_make_em(0.0, 0.0);
 }
 
 void dev_scrollto(psy_ui_curses_ComponentImp* self, intptr_t dx, intptr_t dy)

@@ -71,8 +71,8 @@ void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	self->orientation = psy_ui_HORIZONTAL;
 	self->value = 0.0;	
 	self->rulerstep = 0.1;
-	self->hslidersize = psy_ui_size_makeem(1.0, 1.0);
-	self->vslidersize = psy_ui_size_makeem(1.0, 1.0);	
+	self->hslidersize = psy_ui_size_make_em(1.0, 1.0);
+	self->vslidersize = psy_ui_size_make_em(1.0, 1.0);	
 	self->slidersizepx = psy_ui_realsize_make(6.0, 6.0);
 	self->poll = FALSE;
 	self->hover = FALSE;

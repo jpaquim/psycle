@@ -75,7 +75,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	psy_ui_component_resize(psy_ui_label_base(&self->versioninfo),
-		psy_ui_size_makepx(500, 300));
+		psy_ui_size_make_px(500, 300));
 }
 
 // Version
@@ -92,7 +92,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_editor_init(&self->licenceinfo, &self->component);	
 	licence_setlanguage(self);
 	psy_ui_component_resize(&self->licenceinfo.component,
-		psy_ui_size_makepx(500.0, 300.0));	
+		psy_ui_size_make_px(500.0, 300.0));	
 	psy_ui_editor_preventedit(&self->licenceinfo);
 	psy_ui_editor_enablewrap(&self->licenceinfo);
 }
@@ -325,7 +325,7 @@ void about_onalign(About* self)
 	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(centerx ,centery),
-			psy_ui_size_makepx(bitmapsize.width, bitmapsize.height)));
+			psy_ui_size_make_px(bitmapsize.width, bitmapsize.height)));
 	do {
 		margin = tm->tmAveCharWidth * charmargin;
 		width = psy_ui_value_px(&contribbuttonsize.width, tm) +

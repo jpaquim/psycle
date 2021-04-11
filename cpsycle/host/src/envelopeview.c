@@ -78,7 +78,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->sustaincolour = psy_ui_colour_make(0x00516850);
 	self->rulercolour = psy_ui_colour_make(0x00434343);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_makeem(20.0, 15.0));
+		psy_ui_size_make_em(20.0, 15.0));
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		envelopebox_ondestroy);	

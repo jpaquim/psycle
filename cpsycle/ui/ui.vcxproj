@@ -237,6 +237,7 @@
     <ClCompile Include="src\uicolour.c" />
     <ClCompile Include="src\uicombobox.c" />
     <ClCompile Include="src\uicomponent.c" />
+    <ClCompile Include="src\uicomponentscroll.c" />
     <ClCompile Include="src\uicomponentstyle.c" />
     <ClCompile Include="src\uidef.c" />
     <ClCompile Include="src\uidefaults.c" />
@@ -300,6 +301,7 @@
     <ClInclude Include="src\uicolours.h" />
     <ClInclude Include="src\uicombobox.h" />
     <ClInclude Include="src\uicomponent.h" />
+    <ClInclude Include="src\uicomponentscroll.h" />
     <ClInclude Include="src\uicomponentstyle.h" />
     <ClInclude Include="src\uidef.h" />
     <ClInclude Include="src\uidefaults.h" />

@@ -61,14 +61,14 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->instpanenabled.signal_clicked, self,
 		instrumentpanview_oninstpanenabled);
 	psy_ui_checkbox_settext(&self->instpanenabled, "Instrument Pan");
-	psy_ui_component_setminimumsize(&self->instpanenabled.component, psy_ui_size_makeem(22, 1.0));
+	psy_ui_component_setminimumsize(&self->instpanenabled.component, psy_ui_size_make_em(22, 1.0));
 	psy_ui_slider_init(&self->instpanning, &self->instpan, NULL);
 	psy_ui_slider_connect(&self->instpanning, self,
 		(ui_slider_fpdescribe)instrumentpanview_ondescribe,
 		(ui_slider_fptweak)instrumentpanview_ontweak,
 		(ui_slider_fpvalue)instrumentpanview_onvalue);
 	psy_ui_component_setminimumsize(&self->instpanning.component,
-		psy_ui_size_makeem(50.0, 1.0));
+		psy_ui_size_make_em(50.0, 1.0));
 	psy_ui_slider_showhorizontal(&self->instpanning);
 
 	psy_ui_slider_init(&self->randompanning, &self->top, NULL);

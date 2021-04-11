@@ -976,7 +976,7 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 							psy_ui_component_scrollleftpx(&self->component),
 						self->selrect.top + self->centery -
 							psy_ui_component_scrolltoppx(&self->component)),
-				psy_ui_size_makepx(
+				psy_ui_size_make_px(
 					self->selrect.right - self->selrect.left,
 					self->textheight + 2)));
 			if (!psy_property_readonly(self->selected)) {				
@@ -1119,7 +1119,8 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_property_enumerate(self->properties, self,
 		(psy_PropertyCallback)propertiesrenderer_onenumpropertyposition);
-	self->component.scrollstep.height = psy_ui_value_makepx(self->lineheight);
+	psy_ui_component_setscrollstep_height(&self->component,
+		psy_ui_value_makepx(self->lineheight));
 	rv->height = psy_ui_value_makepx(self->cpy);	
 	memcpy(self->col_perc, col_perc, sizeof(col_perc));
 	memcpy(self->col_width, col_width, sizeof(col_width));
@@ -1326,18 +1327,16 @@ void propertiesview_gotoproperty(PropertiesView* self, psy_Property* property)
 	self->renderer.search = property;
 	if (self->renderer.search) {
 		double scrollposition;
-		intptr_t scrollmin;
-		intptr_t scrollmax;
-
+		psy_ui_IntPoint scrollrange;
+		
 		propertiesrenderer_preparepropertiesenum(&self->renderer);
 		psy_property_enumerate(self->renderer.properties,
 			&self->renderer, (psy_PropertyCallback)
 			propertiesrenderer_onenumpropertyposition);
-		psy_ui_component_verticalscrollrange(&self->renderer.component,
-			&scrollmin, &scrollmax);
+		scrollrange = psy_ui_component_verticalscrollrange(&self->renderer.component);
 		scrollposition = self->renderer.cpy / self->renderer.lineheight;
-		if (scrollposition > (double)scrollmax) {
-			scrollposition = (double)scrollmax;
+		if (scrollposition > (double)scrollrange.y) {
+			scrollposition = (double)scrollrange.y;
 		}		
 		psy_ui_component_setscrolltop(&self->renderer.component,
 			psy_ui_value_makepx(scrollposition * self->renderer.lineheight));		
@@ -1397,9 +1396,9 @@ void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* se
 			const psy_ui_TextMetric* tm;
 
 			tm = psy_ui_component_textmetric(&self->renderer.component);			
-			scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
+			scrollstepy = psy_ui_component_scrollstep_height(&self->renderer.component);
 			scrollstepypx = psy_ui_value_px(&scrollstepy, tm);
-			scrollstepx = psy_ui_component_scrollstepx(&self->renderer.component);
+			scrollstepx = psy_ui_component_scrollstep_width(&self->renderer.component);
 			scrollstepxpx = psy_ui_value_px(&scrollstepx, tm);
 			switch (cmd.id) {
 				case CMD_NAVTOP:
@@ -1452,19 +1451,13 @@ void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* se
 double propertiesview_checkrange(PropertiesView* self, double position)
 {
 	intptr_t steps;
-	double scrollstepypx;
-	psy_ui_Value scrollstepy;
-	intptr_t minval;
-	intptr_t maxval;
-	const psy_ui_TextMetric* tm;
-
-	tm = psy_ui_component_textmetric(&self->renderer.component);
-	psy_ui_component_verticalscrollrange(&self->renderer.component,
-		&minval, &maxval);
-	scrollstepy = psy_ui_component_scrollstepy(&self->renderer.component);
-	scrollstepypx = psy_ui_value_px(&scrollstepy, tm);
+	double scrollstepypx;	
+	psy_ui_IntPoint scrollrange;
+	
+	scrollrange = psy_ui_component_verticalscrollrange(&self->renderer.component);	
+	scrollstepypx = psy_ui_component_scrollstep_height_px(&self->renderer.component);
 	steps = (intptr_t)(position / scrollstepypx);
-	steps = psy_min(maxval, steps);
+	steps = psy_min(scrollrange.y, steps);
 	return (double)(steps * scrollstepypx);
 }
 

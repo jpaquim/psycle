@@ -175,7 +175,7 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(psy_ui_image_base(&self->image),
 		psy_ui_ALIGN_LEFT);	
 	psy_ui_component_setpreferredsize(&self->image.component,
-		psy_ui_size_makepx(11, 11));
+		psy_ui_size_make_px(11, 11));
 	psy_ui_component_preventalign(psy_ui_image_base(&self->image));
 	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_component_setmargin(psy_ui_image_base(&self->image), margin);
@@ -853,7 +853,8 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->identwidth = tm->tmAveCharWidth * 4;
 	self->numparametercols = 
 		(uintptr_t)psy_max(1, psy_ui_value_px(&size->width, tm) / self->columnwidth);
-	self->component.scrollstep.height = psy_ui_value_makepx(self->lineheight);
+	psy_ui_component_setscrollstep_height(&self->component,
+		psy_ui_value_makepx(self->lineheight));
 }
 
 void plugindisplayname(psy_Property* property, char* text)
@@ -1293,7 +1294,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_bitmap_settransparency(&self->favoriteicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_image_setbitmapalignment(&self->favoriteicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setpreferredsize(&self->favoriteicon.component,
-		psy_ui_size_makepx(16, 14));
+		psy_ui_size_make_px(16, 14));
 	psy_ui_component_preventalign(&self->favoriteicon.component);
 	psy_ui_label_init_text(&self->favoritelabel, &self->favoriteheader, NULL,
 		"newmachine.favorites");	
@@ -1303,7 +1304,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// Favorite View
 	pluginsview_init(&self->favoriteview, &self->client, TRUE, workspace);	
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
-		psy_ui_size_makeem(0.0, 4.0));
+		psy_ui_size_make_em(0.0, 4.0));
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
@@ -1321,7 +1322,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_bitmap_settransparency(&self->pluginsicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_image_setbitmapalignment(&self->pluginsicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setpreferredsize(&self->pluginsicon.component,
-		psy_ui_size_makepx(16, 14));
+		psy_ui_size_make_px(16, 14));
 	psy_ui_component_preventalign(&self->pluginsicon.component);
 	psy_ui_label_init_text(&self->pluginslabel, &self->pluginsheader, NULL,
 		"newmachine.all");
@@ -1346,7 +1347,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		self->workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmaximumsize(&self->detail.component,
-		psy_ui_size_makeem(40.0, 0.0));
+		psy_ui_size_make_em(40.0, 0.0));
 	// signals
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->pluginsview.signal_selected, self,

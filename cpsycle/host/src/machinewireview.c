@@ -121,7 +121,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	self->component.vtable = &vtable;	
 	self->opcount = 0;
-	self->component.scrollstep = psy_ui_size_makepx(10.0, 10.0);	
+	psy_ui_component_setscrollstep(&self->component,
+		psy_ui_size_make_px(10.0, 10.0));
 	self->statusbar = NULL;
 	self->machines = NULL;
 	self->paramviews = paramviews;

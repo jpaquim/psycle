@@ -211,6 +211,9 @@
     <ClCompile Include="src\uitabbar.c">
       <Filter>comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uicomponentscroll.c">
+      <Filter>comps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -395,6 +398,9 @@
     </ClInclude>
     <ClInclude Include="src\uicolours.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicomponentscroll.h">
+      <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

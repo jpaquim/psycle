@@ -90,7 +90,7 @@ void masterui_initsize(MasterUi* self)
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(topleft.x, topleft.y),
-			psy_ui_size_makepx(size.width, size.height)));	
+			psy_ui_size_make_px(size.width, size.height)));	
 }
 
 void masterui_move(MasterUi* self, psy_ui_Point topleft)
@@ -176,5 +176,5 @@ void masterui_onpreferredsize(MasterUi* self, const psy_ui_Size* limit,
 {
 	psy_ui_RealSize sizepx;
 	sizepx = psy_ui_realrectangle_size(&self->intern.coords->background.dest);
-	*rv = psy_ui_size_makepx(sizepx.width, sizepx.height);
+	*rv = psy_ui_size_make_px(sizepx.width, sizepx.height);
 }

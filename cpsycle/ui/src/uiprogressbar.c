@@ -31,7 +31,7 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 		psy_ui_STYLE_PROGRESSBAR,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_makeem(20.0, 0.0));	
+		psy_ui_size_make_em(20.0, 0.0));	
 	self->component.preventpreferredsize = TRUE;
 	self->progress = 0.0;	
 }

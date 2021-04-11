@@ -39,7 +39,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_bitmap_settransparency(&self->favicon.bitmap, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_image_setbitmapalignment(&self->favicon, psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setpreferredsize(&self->favicon.component,
-		psy_ui_size_makepx(16, 14));
+		psy_ui_size_make_px(16, 14));
 	psy_ui_component_preventalign(&self->favicon.component);
 	psy_ui_listbox_init(&self->greetz, &self->component);
 	psy_ui_component_setalign(&self->greetz.component, psy_ui_ALIGN_CLIENT);

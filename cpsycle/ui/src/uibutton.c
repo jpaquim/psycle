@@ -284,7 +284,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 				if (text) {
 					psy_ui_Size textsize;
 
-					textsize = psy_ui_size_makeem(2.0, 1.0);
+					textsize = psy_ui_size_make_em(2.0, 1.0);
 					psy_ui_value_add(&size.width, &textsize.width, tm);
 				} else {
 					size.width = psy_ui_value_makeew(1.0);
