@@ -23,10 +23,10 @@ typedef struct SequenceTrackBox {
 	// inherits
 	TrackBox trackbox;
 	uintptr_t trackidx;
+	bool preventedit;
 	// references
 	psy_audio_Sequence* sequence;
-	psy_ui_Edit* edit;
-	bool preventedit;
+	psy_ui_Edit* edit;	
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,

@@ -51,6 +51,7 @@ extern "C" {
 #define STYLE_TABLEROW_HOVER           6051
 #define STYLE_TABLEROW_SELECT          6052
 #define STYLE_INPUTDEFINER_FOCUS       6060
+#define STYLE_NEWMACHINE_SECTION_SELECTED  6080
 
 struct psy_ui_Defaults;
 

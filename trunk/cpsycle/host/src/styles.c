@@ -359,4 +359,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_weighted(&onprimary, medium),
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(defaults, STYLE_INPUTDEFINER_FOCUS, style);
+	// newmachine_section::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,		
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_SELECTED, style);
 }

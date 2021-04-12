@@ -621,8 +621,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 						self->pMac[i] = internalmachinesconvert_redirect(&self->converter,
 							self->songfile, &i, type, sDllName);
 					} else {
-						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
-							sDllName, plugincatchername, 0);
+						psy_audio_plugincatcher_catchername(sDllName, plugincatchername, 0);
 						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (self->pMac[i]) {
 							psy2loader_plugin_load(self, self->pMac[i], i);
@@ -668,9 +667,10 @@ void psy2loader_readmachines(PSY2Loader* self)
 						psy_audio_songfile_warn(self->songfile, sError);
 						psy_audio_songfile_warn(self->songfile, "\n");
 					} else {		
-						psy_audio_plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
+						psy_audio_plugincatcher_catchername(
 							self->vstL[instance].dllName, plugincatchername, shellIdx);
-						pVstPlugin = psy_audio_machinefactory_makemachine(factory, psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
+						pVstPlugin = psy_audio_machinefactory_makemachine(
+							factory, psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 						if (pVstPlugin) {
 							int c;
 							int numpars;

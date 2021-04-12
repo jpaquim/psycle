@@ -16,6 +16,22 @@
 extern "C" {
 #endif
 
+typedef struct psy_audio_PluginSections {
+	psy_Property* sections;
+	char* inipath;
+} psy_audio_PluginSections;
+
+void psy_audio_pluginsections_init(psy_audio_PluginSections*);
+void psy_audio_pluginsections_dispose(psy_audio_PluginSections*);
+
+void psy_audio_pluginsections_clear(psy_audio_PluginSections*);
+int psy_audio_pluginsections_load(psy_audio_PluginSections*);
+int psy_audio_pluginsections_save(psy_audio_PluginSections*);
+void psy_audio_pluginsections_add(psy_audio_PluginSections*,
+	const char* sectionkey, psy_audio_MachineInfo*);
+void psy_audio_pluginsections_remove(psy_audio_PluginSections*,
+	const char* sectionkey, psy_audio_MachineInfo*);
+
 typedef struct psy_audio_PluginCatcher {
 	psy_Property* plugins;
 	char* inipath;
@@ -42,7 +58,7 @@ char* psy_audio_plugincatcher_modulepath(psy_audio_PluginCatcher*, psy_audio_Mac
 	const char* path,
 	char* fullpath);
 uintptr_t psy_audio_plugincatcher_extractshellidx(const char* path);
-void psy_audio_plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path,
+void psy_audio_plugincatcher_catchername(const char* path,
 	char* name, uintptr_t shellidx);
 const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);

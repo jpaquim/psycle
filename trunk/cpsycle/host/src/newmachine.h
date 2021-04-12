@@ -15,6 +15,7 @@
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uiscroller.h>
+#include <uisplitbar.h>
 #include <uinotebook.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
@@ -81,6 +82,10 @@ typedef struct NewMachineBar {
 	psy_ui_Button sortbyname;
 	psy_ui_Button sortbytype;
 	psy_ui_Button sortbymode;
+	psy_ui_Button createsection;
+	psy_ui_Button addtosection;
+	psy_ui_Button removefromsection;
+	psy_ui_Button removesection;
 	Workspace* workspace;
 } NewMachineBar;
 
@@ -192,6 +197,29 @@ typedef struct {
 void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites,
 	Workspace*);
 
+struct NewMachine;
+
+typedef struct NewMachineSection {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Component header;
+	psy_ui_Label label;
+	PluginsView pluginview;
+	bool preventedit;
+	// references
+	psy_Property* property;
+	psy_ui_Edit* edit;
+	struct NewMachine* newmachine;
+} NewMachineSection;
+
+void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
+	psy_Property* property, psy_ui_Edit*, struct NewMachine*, Workspace*);
+
+NewMachineSection* newmachinesection_alloc(void);
+NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
+	psy_Property* property, psy_ui_Edit*, struct NewMachine*, Workspace*);
+
 typedef struct NewMachine {
 	// inherits
 	psy_ui_Component component;
@@ -200,29 +228,35 @@ typedef struct NewMachine {
 	// internal ui elements	
 	psy_ui_Notebook notebook;
 	psy_ui_Component client;
+	psy_ui_Component sections;
 	psy_ui_Component favoriteheader;
 	psy_ui_Image favoriteicon;
 	psy_ui_Label favoritelabel;
 	PluginsView favoriteview;
+	psy_ui_Component usersections;
+	psy_ui_Component all;
 	psy_ui_Component pluginsheader;
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
 	NewMachineFilterBar filterbar;
-	NewMachineCategoryBar categorybar;
+	NewMachineCategoryBar categorybar;	
 	PluginsView pluginsview;
 	NewMachineDetail detail;
 	PluginScanView scanview;
 	MachineViewSkin* skin;
 	psy_ui_Scroller scroller_fav;
 	psy_ui_Scroller scroller_main;	
+	psy_ui_Edit edit;
 	// internal data
 	bool scanending;
 	bool appendstack;
 	int mode;
+	uintptr_t newsectioncount;
 	// references
 	Workspace* workspace;
 	uintptr_t restoresection;
 	psy_Property* selectedplugin;
+	NewMachineSection* selectedsection;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*,

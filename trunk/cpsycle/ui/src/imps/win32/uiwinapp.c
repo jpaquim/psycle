@@ -317,6 +317,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					
 					imp->sizecachevalid = FALSE;					
 					if (imp->component->alignchildren) {
+						if (imp->component->debugflag == 800) {
+							imp = imp;
+						}
 						psy_ui_component_align(imp->component);
 					}
 					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));

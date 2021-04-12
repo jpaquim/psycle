@@ -849,6 +849,7 @@ psy_Property* psy_property_append_section(psy_Property* self, const char* name)
 
 	rv = (psy_Property*)malloc(sizeof(psy_Property));
 	if (rv) {
+
 		psy_property_init_type(rv, name, PSY_PROPERTY_TYPE_SECTION);
 	}
 	return psy_property_append_property(self, rv);
@@ -1024,6 +1025,13 @@ char* pathend(const char* path, char* section, char* key)
 
 	p = strrchr(path, '.');
 	return p;
+}
+
+void psy_property_change_key(psy_Property* self, const char* key)
+{
+	assert(self);
+
+	psy_strreset(&self->item.key, key);
 }
 
 const char* psy_property_key(const psy_Property* self)

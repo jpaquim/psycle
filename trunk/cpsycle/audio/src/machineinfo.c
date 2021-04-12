@@ -24,7 +24,7 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->shellidx = 0;
 	self->helptext = strdup("");
 	self->desc = strdup("");
-	self->category = strdup("");
+	self->category = strdup("");	
 }
 
 void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* src)
@@ -59,7 +59,7 @@ void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* 
 	self->shellidx = src->shellidx;
 	self->helptext = psy_strdup(src->helptext);
 	self->desc = psy_strdup(src->desc);
-	self->category = psy_strdup(src->category);
+	self->category = psy_strdup(src->category);	
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,

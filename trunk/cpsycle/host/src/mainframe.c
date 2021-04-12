@@ -225,7 +225,7 @@ void mainframe_initframe(MainFrame* self)
 }
 
 void mainframe_ondestroyed(MainFrame* self)
-{
+{	
 	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
 	interpreter_dispose(&self->interpreter);

@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_audio_MachineInfo {
 	/// API version. Use MI_VERSION
 	short APIVersion;
 	/// plug version. Your machine version. Shown in Hexadecimal.
@@ -34,7 +34,7 @@ typedef struct {
 	uintptr_t shellidx;
 	char* helptext;
 	char* desc;
-	char* category;
+	char* category;	
 } psy_audio_MachineInfo;
 
 void machineinfo_init(psy_audio_MachineInfo*);

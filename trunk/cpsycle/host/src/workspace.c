@@ -141,6 +141,9 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_plugincatcher_setdirectories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
 	psy_audio_plugincatcher_load(&self->plugincatcher);
+	if (psy_audio_pluginsections_load(&self->pluginsections) != PSY_OK) {
+		psy_audio_pluginsections_save(&self->pluginsections);
+	}
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);	
 	psy_audio_sequenceselection_init(&self->sequenceselection);	
@@ -157,12 +160,13 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 {
 	assert(self);
 
-	psy_audio_plugincatcher_init(&self->plugincatcher); 	
+	psy_audio_plugincatcher_init(&self->plugincatcher);
 	psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 		workspace_onscanprogress);	
 	psy_audio_machinefactory_init(&self->machinefactory,
 		&self->machinecallback, 
-		&self->plugincatcher);	
+		&self->plugincatcher);
+	psy_audio_pluginsections_init(&self->pluginsections);
 }
 
 void workspace_initsignals(Workspace* self)
@@ -201,6 +205,7 @@ void workspace_dispose(Workspace* self)
 {	
 	assert(self);
 	
+	psy_audio_pluginsections_save(&self->pluginsections);
 	workspace_save_styleconfiguration(self);
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
@@ -209,6 +214,7 @@ void workspace_dispose(Workspace* self)
 	free(self->filename);
 	self->filename = NULL;
 	psy_audio_plugincatcher_dispose(&self->plugincatcher);
+	psy_audio_pluginsections_dispose(&self->pluginsections);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 	psy_undoredo_dispose(&self->undoredo);
 	viewhistory_dispose(&self->viewhistory);
