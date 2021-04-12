@@ -134,7 +134,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->vudrawupdate = FALSE;
 	self->showwirehover = FALSE;
 	self->drawvirtualgenerators = FALSE;	
-	self->skin = skin;	
+	self->skin = skin;
+	psy_audio_wire_init(&self->dragwire);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_table_init(&self->machineuis);	
