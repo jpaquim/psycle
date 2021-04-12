@@ -1181,7 +1181,6 @@ void machinestackpanetrackclient_init(MachineStackPaneTrackClient* self,
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setwheelscroll(&self->component, 1);
-	psy_ui_component_setscrollmode(&self->component, psy_ui_SCROLL_COMPONENTS);
 	psy_ui_component_setscrollstep_height(&self->component,
 		state->effectsize.height);
 	self->state = state;
@@ -1591,8 +1590,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);
 	psy_ui_component_setalign(&self->columns, psy_ui_ALIGN_VCLIENT);
-	psy_ui_component_setoverflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);
-	psy_ui_component_setscrollmode(&self->columns, psy_ui_SCROLL_COMPONENTS);
+	psy_ui_component_setoverflow(&self->columns, psy_ui_OVERFLOW_HSCROLL);	
 	psy_ui_scroller_init(&self->scroller_columns, &self->columns,
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->columns, psy_ui_ALIGN_VCLIENT);

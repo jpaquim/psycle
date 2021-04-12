@@ -50,7 +50,9 @@ typedef struct PatternView {
 	psy_ui_TabBar tabbar;
 	psy_ui_Button contextbutton;
 	TrackerLineNumberBar left;
+	psy_ui_Component griddefaultspane;
 	TrackerGrid griddefaults;
+	psy_ui_Component headerpane;
 	TrackerHeader header;
 	psy_ui_Notebook notebook;
 	psy_ui_Notebook editnotebook;

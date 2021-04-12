@@ -133,12 +133,8 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	// reparent client
 	self->client = client;
 	if (self->client) {
-		psy_ui_component_setparent(client, &self->pane);
-		if (client->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-			psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
-		} else {
-			psy_ui_component_setalign(client, psy_ui_ALIGN_VCLIENT);
-		}				
+		psy_ui_component_setparent(client, &self->pane);		
+		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED_RESIZE);
 		self->component.style.style.border = self->client->style.style.border;
 		psy_ui_border_init(&self->client->style.style.border);
 	}
@@ -161,12 +157,8 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 	psy_signal_connect(&self->pane.signal_size, self,
 		psy_ui_scroller_onpanesize);
 	psy_signal_connect(&self->client->signal_scroll, self,
-		psy_ui_scroller_onscroll);	
-	if (self->client->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_component_setalign(self->client, psy_ui_ALIGN_CLIENT);
-	} else {		
-		psy_ui_component_setalign(self->client, psy_ui_ALIGN_VCLIENT);
-	}
+		psy_ui_scroller_onscroll);		
+	psy_ui_component_setalign(self->client, psy_ui_ALIGN_FIXED_RESIZE);	
 }
 
 void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,

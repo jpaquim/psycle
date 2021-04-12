@@ -521,7 +521,7 @@ void mainframe_initnavigation(MainFrame* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 2.0);		
+	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
 	psy_ui_component_setalign(navigation_base(&self->navigation),
 		psy_ui_ALIGN_LEFT);

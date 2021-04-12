@@ -5,8 +5,9 @@
 #define psy_ui_COMPONENT_H
 
 // local
-#include "uicomponentstyle.h"
 #include "uicomponentscroll.h"
+#include "uicomponentstyle.h"
+#include "uicomponentsizehints.h"
 #include "uidefaults.h"
 #include "uievents.h"
 #include "uigraphics.h"
@@ -140,16 +141,6 @@ typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
 
-typedef struct psy_ui_ComponentSizeHints {
-	psy_ui_Margin margin;
-	psy_ui_Margin spacing;
-	psy_ui_Size preferredsize;
-	psy_ui_Size minsize;
-	psy_ui_Size maxsize;
-} psy_ui_ComponentSizeHints;
-
-void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints*);
-
 // psy_ui_Component
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
@@ -176,35 +167,30 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_show;
 	psy_Signal signal_hide;	
 	psy_Signal signal_align;
-	psy_Signal signal_selectsection;
-	//psy_Signal signal_preferredsize;
+	psy_Signal signal_selectsection;	
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;	
 	psy_Signal signal_preferredsizechanged;
 	psy_Signal signal_scrollrangechanged;
-	psy_Signal signal_languagechanged;
-	psy_ui_AlignType align;
-	psy_ui_JustifyType justify;
-	int alignexpandmode;
-	int alignchildren;	
+	psy_Signal signal_languagechanged;	
 	bool doublebuffered;
-	psy_ui_BackgroundMode backgroundmode;	
-	psy_ui_ComponentScroll* scroll;
-	intptr_t debugflag;	
-	bool visible;		
-	int cursor;	
-	uintptr_t opcount;
+	psy_ui_BackgroundMode backgroundmode;		
 	psy_ui_ComponentSizeHints* sizehints;
-	bool preventdefault;
-	bool preventpreferredsize;
-	intptr_t preventpreferredsizeatalign;
-	psy_ui_AlignType insertaligntype;
-	psy_ui_Margin insertmargin;		
 	psy_ui_ComponentStyle style;
-	intptr_t tabindex;
+	psy_ui_ComponentScroll* scroll;
+	bool visible;
+	bool preventpreferredsize;
+	intptr_t preventpreferredsizeatalign;	
+	psy_ui_AlignType align;
+	int alignexpandmode;
+	int alignchildren;
+	psy_ui_AlignType insertaligntype;
+	psy_ui_Margin insertmargin;	
+	uintptr_t tabindex;
 	bool deallocate;
-	bool uselevel;
+	uintptr_t opcount;
+	intptr_t debugflag;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -224,7 +210,6 @@ psy_ui_Component* psy_ui_component_alloc(void);
 psy_ui_Component* psy_ui_component_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view);
 void psy_ui_component_deallocateafterdestroyed(psy_ui_Component*);
-void psy_ui_component_setheapmode(psy_ui_Component*);
 
 INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
 	psy_ui_ComponentVtable* vtable)
@@ -298,7 +283,6 @@ psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 void psy_ui_component_setfont(psy_ui_Component*, const psy_ui_Font*);
 void psy_ui_component_setfontinfo(psy_ui_Component*, psy_ui_FontInfo);
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
-void psy_ui_component_preventdefault(psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
 int psy_ui_component_visible(psy_ui_Component*);
@@ -648,95 +632,41 @@ INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t sec
 	psy_signal_emit(&self->signal_selectsection, self, 2, section, options);
 }
 
-INLINE psy_ui_Point psy_ui_component_scrolloffset(const psy_ui_Component* self)
-{
-	return psy_ui_componentscroll_offset(self->scroll);
-}
-
-INLINE void psy_ui_component_setscrolloffset(psy_ui_Component* self,
-	psy_ui_Point offset)
-{
-	psy_ui_component_usescroll(self);
-	psy_ui_componentscroll_setoffset(self->scroll, offset);
-}
-
-INLINE psy_ui_RealPoint psy_ui_component_scrollpx(psy_ui_Component* self)
-{
-	psy_ui_Point offset;
-
-	offset = psy_ui_component_scrolloffset(self);
-	return psy_ui_realpoint_make(
-		psy_ui_value_px(&offset.x,
-			psy_ui_component_textmetric(self)),
-		psy_ui_value_px(&offset.y,
-			psy_ui_component_textmetric(self)));
-}
-
 void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_Point);
 void psy_ui_component_setscrollleft(psy_ui_Component*, psy_ui_Value left);
 
 INLINE psy_ui_Value psy_ui_component_scrollleft(psy_ui_Component* self)
-{
-	if (self->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_Point offset;
+{	
+	psy_ui_RealRectangle position;
 
-		offset = psy_ui_component_scrolloffset(self);
-		return offset.x;
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self);
-		return psy_ui_value_makepx(-position.left);
-	}
+	position = psy_ui_component_position(self);
+	return psy_ui_value_makepx(-position.left);	
 }
 
 INLINE double psy_ui_component_scrollleftpx(psy_ui_Component* self)
-{	
-	if (self->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_Point offset;
+{		
+	psy_ui_RealRectangle position;
 
-		offset = psy_ui_component_scrolloffset(self);
-		return floor(psy_ui_value_px(&offset.x,
-			psy_ui_component_textmetric(self)));
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self);
-		return -floor(position.left);
-	}
+	position = psy_ui_component_position(self);
+	return -floor(position.left);
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component*, psy_ui_Value top);
 
 INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
-{	
-	if (self->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_Point offset;
+{		
+	psy_ui_RealRectangle position;
 
-		offset = psy_ui_component_scrolloffset(self);
-		return offset.y;
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self);
-		return psy_ui_value_makepx(-position.top);
-	}
+	position = psy_ui_component_position(self);
+	return psy_ui_value_makepx(-position.top);
 }
 
 INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
 {		
-	if (self->scroll->mode == psy_ui_SCROLL_GRAPHICS) {
-		psy_ui_Point offset;
+	psy_ui_RealRectangle position;
 
-		offset = psy_ui_component_scrolloffset(self);
-		return floor(psy_ui_value_px(&offset.y,
-			psy_ui_component_textmetric(self)));
-	} else {
-		psy_ui_RealRectangle position;
-
-		position = psy_ui_component_position(self);
-		return -floor(position.top);
-	}
+	position = psy_ui_component_position(self);
+	return -floor(position.top);	
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
@@ -782,8 +712,6 @@ INLINE void psy_ui_component_setscrollstep_width(psy_ui_Component* self,
 	self->scroll->step.width = step;
 }
 
-void psy_ui_component_setscrollmode(psy_ui_Component*, psy_ui_ScrollMode);
-
 INLINE psy_ui_Value psy_ui_component_scrollstep_width(const psy_ui_Component* self)
 {
 	assert(self);
@@ -808,7 +736,7 @@ INLINE void psy_ui_component_setscrollstep_height(psy_ui_Component* self,
 {
 	assert(self);
 
-	psy_ui_component_usescroll(self);
+	psy_ui_component_usescroll(self);	
 	self->scroll->step.height = step;
 }
 
@@ -819,14 +747,14 @@ INLINE psy_ui_Value psy_ui_component_scrollstep_height(const psy_ui_Component* s
 	return self->scroll->step.height;
 }
 
-INLINE void psy_ui_component_settabindex(psy_ui_Component* self, intptr_t index)
+INLINE void psy_ui_component_settabindex(psy_ui_Component* self, uintptr_t index)
 {
 	assert(self);
 
 	self->tabindex = index;
 }
 
-INLINE intptr_t psy_ui_component_tabindex(const psy_ui_Component* self)
+INLINE uintptr_t psy_ui_component_tabindex(const psy_ui_Component* self)
 {
 	assert(self);
 

@@ -77,6 +77,8 @@ static void patternview_onthemechanged(PatternView*, PatternViewConfig*,
 static void patternview_displaysinglepattern(PatternView*);
 static void patternview_displaysequencepatterns(PatternView*);
 static void patternview_updatestates(PatternView*);
+static void patternview_drawtrackerbackground(PatternView*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
 
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
@@ -163,15 +165,19 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->left.zoombox.signal_changed, self,
 		patternview_onzoomboxchanged);	
 	// header
-	trackerheader_init(&self->header, &self->component,
+	psy_ui_component_init(&self->headerpane, &self->component, NULL);
+	psy_ui_component_setalign(&self->headerpane, psy_ui_ALIGN_TOP);
+	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->gridstate, self->workspace);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_FIXED_RESIZE);
 	// pattern default line
-	trackergrid_init(&self->griddefaults, &self->component, &self->trackconfig,
+	psy_ui_component_init(&self->griddefaultspane, &self->component, NULL);
+	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
+	trackergrid_init(&self->griddefaults, &self->griddefaultspane, &self->trackconfig,
 		NULL, NULL, TRACKERGRID_EDITMODE_LOCAL, workspace);
 	self->griddefaults.defaultgridstate.skin = &self->skin;
 	self->griddefaults.defaultlinestate.skin = &self->skin;
-	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_FIXED_RESIZE);
 	self->griddefaults.columnresize = 1;
 	trackergrid_setpattern(&self->griddefaults,
 		&workspace_player(self->workspace)->patterndefaults);
@@ -181,15 +187,21 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	trackergrid_init(&self->tracker, &self->editnotebook.component,
 		&self->trackconfig, &self->gridstate, &self->linestate,
 		TRACKERGRID_EDITMODE_SONG, workspace);	
-	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);
+	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
 		&self->editnotebook.component, NULL);
-	psy_ui_component_setalign(&self->trackerscroller.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setbackgroundmode(&self->trackerscroller.pane, psy_ui_NOBACKGROUND);
+	psy_signal_connect(&self->trackerscroller.pane.signal_draw, self,
+		patternview_drawtrackerbackground);	
+	psy_ui_component_setalign(&self->trackerscroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->tracker.component, psy_ui_ALIGN_FIXED_RESIZE);
 	psy_signal_connect(&self->tracker.signal_colresize, self,
 		patternview_oncolresize);
 	// PianoRoll
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, &self->skin,
 		workspace);	
+	psy_signal_connect(&self->pianoroll.scroller.pane.signal_draw, self,
+		patternview_drawtrackerbackground);
 	patternview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns, 0));	
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
 		patternview_onpatternpropertiesapply);
@@ -654,7 +666,7 @@ void patternview_computemetrics(PatternView* self)
 	// const psy_ui_TextMetric* gridtm;
 	double trackwidth;
 
-	gridsize = psy_ui_component_size(trackergrid_base(&self->tracker));
+	gridsize = psy_ui_component_size(&self->trackerscroller.pane);
 	tm = psy_ui_component_textmetric(patternview_base(self));
 	//gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) + 2;
@@ -742,6 +754,8 @@ void patternview_onzoomboxchanged(PatternView* self, ZoomBox* sender)
 		psy_ui_component_invalidate(&self->header.component);
 		psy_ui_component_invalidate(&self->left.linenumbers.component);
 		psy_ui_component_invalidate(&self->left.linenumberslabel.component);
+		psy_ui_component_align(&self->trackerscroller.pane);
+		psy_ui_component_invalidate(&self->trackerscroller.pane);
 	}
 }
 
@@ -753,8 +767,8 @@ void patternview_setfont(PatternView* self, psy_ui_Font* font)
 	psy_ui_component_setfont(&self->component, font);
 	psy_ui_component_setfont(trackergrid_base(&self->tracker), font);		
 	self->linestate.gridfont = psy_ui_component_font(trackergrid_base(&self->tracker));
-	self->linestate.lineheightpx = psy_ui_value_px(
-		&self->linestate.lineheight, tm);
+	self->linestate.lineheightpx = psy_max(1.0, psy_ui_value_px(
+		&self->linestate.lineheight, tm));
 	self->griddefaults.linestate->lineheightpx = psy_ui_value_px(
 		&self->linestate.lineheight, tm);
 	psy_ui_component_setfont(trackerheader_base(&self->header), font);
@@ -1268,4 +1282,42 @@ void patternview_onappzoom(PatternView* self, psy_ui_AppZoom* sender)
 		patternview_setfont(self, &newfont);
 		psy_ui_font_dispose(&newfont);		
 	}	
+}
+
+void patternview_drawtrackerbackground(PatternView* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
+{
+	psy_ui_RealRectangle viewposition;
+	psy_ui_RealSize panesize;
+	psy_ui_Component* view;
+
+	view = psy_ui_component_at(sender, 0);
+	if (view) {
+		viewposition = psy_ui_component_position(view);
+		panesize = psy_ui_component_sizepx(sender);
+		if (viewposition.top > 0) {
+			psy_ui_RealRectangle top;
+
+			psy_ui_realrectangle_init_all(&top,
+				psy_ui_realpoint_make(0.0, 0.0),
+				psy_ui_realsize_make(panesize.width, viewposition.top));
+			psy_ui_drawsolidrectangle(g, top, psy_ui_component_backgroundcolour(sender));
+		}
+		if (panesize.width > viewposition.right) {
+			psy_ui_RealRectangle right;
+
+			psy_ui_realrectangle_init_all(&right,
+				psy_ui_realpoint_make(viewposition.right, 0.0),
+				psy_ui_realsize_make(panesize.width - viewposition.right, panesize.height));
+			psy_ui_drawsolidrectangle(g, right, psy_ui_component_backgroundcolour(sender));
+		}
+		if (panesize.height > viewposition.bottom) {
+			psy_ui_RealRectangle bottom;
+
+			psy_ui_realrectangle_init_all(&bottom,
+				psy_ui_realpoint_make(0.0, viewposition.bottom),
+				psy_ui_realsize_make(panesize.width, panesize.height - viewposition.bottom));
+			psy_ui_drawsolidrectangle(g, bottom, psy_ui_component_backgroundcolour(sender));
+		}
+	}
 }

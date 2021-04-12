@@ -922,8 +922,12 @@ uintptr_t pluginenabled(const PluginsView* self, psy_Property* property)
 void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	if (self->plugins) {
-		pluginsview_computetextsizes(self, limit);
+	if (self->plugins) {		
+		psy_ui_Size parentsize;
+		
+		parentsize = psy_ui_component_size(psy_ui_component_parent(&self->component));
+		pluginsview_computetextsizes(self, &parentsize);
+		rv->width = parentsize.width;
 		rv->height = psy_ui_value_makepx(self->lineheight *
 			pluginsview_numlines(self));
 	}
@@ -963,7 +967,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 					}
 					psy_audio_plugincatcher_save(&self->workspace->plugincatcher);
 					psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
-						&self->workspace->plugincatcher, 0);
+						&self->workspace->plugincatcher, 0);					
 				}
 				break;
 			case psy_ui_KEY_DOWN:
@@ -1233,7 +1237,7 @@ static void newmachine_ontimer(NewMachine*, uintptr_t timerid);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
-static int newmachine_vtable_initialized = 0;
+static bool newmachine_vtable_initialized = FALSE;
 
 static void newmachine_vtable_init(NewMachine* self)
 {
@@ -1243,7 +1247,9 @@ static void newmachine_vtable_init(NewMachine* self)
 			newmachine_onkeydown;		
 		newmachine_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			newmachine_ontimer;
+		newmachine_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &newmachine_vtable;
 }
 // implementation
 void newmachine_init(NewMachine* self, psy_ui_Component* parent,
@@ -1254,8 +1260,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_Border sectionborder;
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	newmachine_vtable_init(self);
-	self->component.vtable = &newmachine_vtable;
+	newmachine_vtable_init(self);	
 	self->skin = skin;
 	self->workspace = workspace;
 	self->scanending = FALSE;
@@ -1308,7 +1313,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
-	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);	
 	// pluginview header
 	psy_ui_component_init(&self->pluginsheader, &self->client, NULL);
 	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
@@ -1342,6 +1347,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		&self->client, NULL);
 	psy_ui_component_settabindex(&self->scroller_main.component, 1);
 	psy_ui_component_setalign(&self->scroller_main.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->pluginsview.component, psy_ui_ALIGN_HCLIENT);
 	// Details
 	newmachinedetail_init(&self->detail, &self->component, &self->pluginsview.filters,
 		self->workspace);
@@ -1418,6 +1424,7 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 		psy_property_deallocate(self->favoriteview.plugins);
 		self->favoriteview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
+		psy_ui_component_align(&self->component);
 		psy_ui_component_setscrolltop(&self->favoriteview.component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->favoriteview.component);
 		psy_ui_component_invalidate(&self->favoriteview.component);

@@ -1280,10 +1280,14 @@ psy_ui_RealRectangle machinewireview_updaterect(MachineWireView* self,
 void machinewireview_onpreferredsize(MachineWireView* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_RealRectangle bounds;
+	psy_ui_RealRectangle bounds;	
 
 	bounds = machinewireview_bounds(self);
 	psy_ui_size_setpx(rv, bounds.right, bounds.bottom);
+	if (limit) {
+		*rv = psy_ui_max_size(*rv, *limit,
+			psy_ui_component_textmetric(&self->component));
+	}
 }
 
 psy_ui_RealRectangle machinewireview_bounds(MachineWireView* self)

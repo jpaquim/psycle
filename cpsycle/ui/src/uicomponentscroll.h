@@ -13,17 +13,9 @@
 extern "C" {
 #endif
 
-typedef enum psy_ui_ScrollMode {
-	psy_ui_SCROLL_GRAPHICS = 1,
-	psy_ui_SCROLL_COMPONENTS
-} psy_ui_ScrollMode;
-
 // psy_ui_ComponentScroll
-typedef struct psy_ui_ComponentScroll {
-	psy_ui_ScrollMode mode;
-	psy_ui_Size step;
-	// psy_ui_SCROLL_GRAPHICS
-	psy_ui_Point offset;
+typedef struct psy_ui_ComponentScroll {	
+	psy_ui_Size step;		
 	psy_ui_IntPoint vrange;
 	psy_ui_IntPoint hrange;
 	int wheel;
@@ -31,18 +23,6 @@ typedef struct psy_ui_ComponentScroll {
 } psy_ui_ComponentScroll;
 
 void psy_ui_componentscroll_init(psy_ui_ComponentScroll*);
-
-INLINE void psy_ui_componentscroll_setoffset(psy_ui_ComponentScroll* self,
-	psy_ui_Point offset)
-{
-	self->offset = offset;
-}
-
-INLINE psy_ui_Point psy_ui_componentscroll_offset(
-	const psy_ui_ComponentScroll* self)
-{
-	return self->offset;
-}
 
 INLINE void psy_ui_componentscroll_sethrange(psy_ui_ComponentScroll* self,
 	psy_ui_IntPoint range)
@@ -78,18 +58,6 @@ INLINE int psy_ui_componentscroll_wheel(
 	const psy_ui_ComponentScroll* self)
 {
 	return self->wheel;
-}
-
-INLINE void psy_ui_componentscroll_setmode(psy_ui_ComponentScroll* self,
-	psy_ui_ScrollMode mode)
-{
-	self->mode = mode;
-}
-
-INLINE psy_ui_ScrollMode psy_ui_componentscroll_mode(
-	const psy_ui_ComponentScroll* self)
-{
-	return self->mode;
 }
 
 #ifdef __cplusplus

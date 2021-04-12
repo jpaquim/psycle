@@ -264,17 +264,14 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				int preventdefault = 0;
 				psy_ui_MouseEvent ev;
 				POINT pt_client;
-				const psy_ui_TextMetric* tm;
-				psy_ui_Point scrolloffset;
+				const psy_ui_TextMetric* tm;				
 
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);				
 				ScreenToClient(imp->hwnd, &pt_client);				
-				tm = psy_ui_component_textmetric(imp->component);
-				scrolloffset = psy_ui_component_scrolloffset(imp->component);
+				tm = psy_ui_component_textmetric(imp->component);				
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x + psy_ui_value_px(&scrolloffset.x, tm),
-					pt_client.y + psy_ui_value_px(&scrolloffset.y, tm),
+					pt_client.x, pt_client.y,
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
@@ -766,16 +763,12 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 }
 
 void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
-{		
-	psy_ui_Point offset;
+{			
 	const psy_ui_TextMetric* tm;
 	psy_ui_Margin spacing;
 
 	tm = psy_ui_component_textmetric(component);
-	spacing = psy_ui_component_spacing(component);
-	offset = psy_ui_component_scrolloffset(component);
-	*x += psy_ui_value_px(&offset.x, tm);
-	*y += psy_ui_value_px(&offset.y, tm);
+	spacing = psy_ui_component_spacing(component);	
 	if (!psy_ui_margin_iszero(&spacing)) {				
 		*x -= psy_ui_value_px(&spacing.left, tm);
 		*y -= psy_ui_value_px(&spacing.top, tm);
