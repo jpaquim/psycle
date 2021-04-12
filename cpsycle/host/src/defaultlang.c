@@ -517,6 +517,11 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "sort-by-name", "Sort by name");
 	psy_property_set_str(section, "sort-by-type", "Sort by type");
 	psy_property_set_str(section, "sort-by-mode", "Sort by mode");
+	psy_property_set_str(section, "sort-by-mode", "Sort by mode");
+	psy_property_set_str(section, "create-section", "Create Section");	
+	psy_property_set_str(section, "add-to-section", "Add To Section");
+	psy_property_set_str(section, "remove-from-section", "Remove From Section");
+	psy_property_set_str(section, "remove-section", "Remove Section");
 	psy_property_set_str(section,
 		"select-plugin-to-view-description",
 		"Select a plugin to view its description");

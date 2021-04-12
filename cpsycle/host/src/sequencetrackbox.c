@@ -203,7 +203,7 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 		psy_ui_edit_setsel(self->edit, 0, -1);
 		psy_ui_component_show(&self->edit->component);
 		psy_ui_component_setfocus(&self->edit->component);
-	}	
+	}
 }
 
 void sequencetrackbox_oneditaccept(SequenceTrackBox* self, psy_ui_Edit* sender)

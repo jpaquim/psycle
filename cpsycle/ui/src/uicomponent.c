@@ -1205,14 +1205,27 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 {	
-	psy_ui_RealRectangle position;
+	psy_ui_RealRectangle position;	
+	double newtop;
 
 	position = psy_ui_component_position(self);
+	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self));
+	/*if (psy_ui_component_overflow(self) == psy_ui_OVERFLOW_VSCROLL) {
+		psy_ui_IntPoint range;
+		double miny;
+		double maxy;
+
+		range = psy_ui_component_verticalscrollrange(self);
+		miny = range.x * psy_ui_component_scrollstep_width_px(self);
+		maxy = range.y * psy_ui_component_scrollstep_width_px(self);
+		if (newtop < miny) {
+			newtop = miny;
+		}
+	}*/	
 	psy_ui_component_move(self,
 		psy_ui_point_make(
 			psy_ui_value_makepx(position.left),
-			psy_ui_value_makepx(
-				-psy_ui_value_px(&top, psy_ui_component_textmetric(self)))));
+			psy_ui_value_makepx(newtop)));
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
 

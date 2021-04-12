@@ -139,6 +139,7 @@ typedef struct {
 	psy_audio_Song* song;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;
+	psy_audio_PluginSections pluginsections;
 	psy_audio_MachineFactory machinefactory;	
 	// Psycle settings	
 	PsycleConfig config;

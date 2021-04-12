@@ -196,8 +196,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	assert(convname);
 	psy_snprintf(sDllName, 256, "%s", convname);
 	psy_strlwr(sDllName);
-	psy_audio_plugincatcher_catchername(songfile->song->machinefactory->catcher,
-		sDllName, plugincatchername, 0);
+	psy_audio_plugincatcher_catchername(sDllName, plugincatchername, 0);
 	machine = psy_audio_machinefactory_makemachine(songfile->song->machinefactory,
 		psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
 

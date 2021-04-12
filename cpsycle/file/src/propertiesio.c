@@ -26,6 +26,27 @@ typedef enum {
 static int reallocstr(char** str, size_t size, size_t* cap);
 static int OnSaveIniEnum(FILE* file, psy_Property*, uintptr_t level);
 
+static char_dyn_t* lastkey(const char* key)
+{
+	char_dyn_t* rv;
+	char* text;
+	char seps[] = ".";
+	char* token;
+	char* lasttoken;
+
+	text = psy_strdup(key);
+	token = strtok(text, seps);
+	lasttoken = NULL;
+	while (token != 0) {
+		lasttoken = token;
+		token = strtok(0, seps);
+	}
+	rv = psy_strdup(lasttoken);
+	free(text);
+	return rv;
+}
+
+
 int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 {
 	FILE* fp;
@@ -149,8 +170,8 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 			} else
 			if (state == PROPERTIESIO_STATE_ADDSECTION) {
 				psy_Property* p;				
-				psy_Property* prev = 0;
-
+				psy_Property* prev = 0;				
+				
 				p = psy_property_findsectionex(self, key, &prev);				
 				if (p == self) {
 					curr = self;
@@ -163,9 +184,13 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 				if (ischoice) {
 					curr = choice;
 				} else
-				if ((strcmp(key, "root") != 0) && allowappend) {		
+				if ((strcmp(key, "root") != 0) && allowappend) {
+					char_dyn_t* trimkey;
+
 					ischoice = 0;
-					curr = psy_property_append_section(prev, key);
+					trimkey = lastkey(key);
+					curr = psy_property_append_section(prev, trimkey);
+					free(trimkey);
 				} else {
 					ischoice = 0;
 					curr = self;

@@ -172,6 +172,7 @@ psy_Property* psy_property_append_action(psy_Property*, const char* key);
 // Item setter/getter
 //
 // Definition
+void psy_property_change_key(psy_Property*, const char* key);
 const char* psy_property_key(const psy_Property*);
 int psy_property_type(const psy_Property*);
 psy_Property* psy_property_setreadonly(psy_Property*, bool on);
