@@ -79,8 +79,6 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setoverflow(&self->component,
 		psy_ui_OVERFLOW_HSCROLL);	
-	psy_ui_component_setscrollmode(&self->component,
-		psy_ui_SCROLL_COMPONENTS);
 	psy_signal_init(&self->signal_trackselected);
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_FIXED_RESIZE);
@@ -89,9 +87,7 @@ void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_component_setalignexpand(&self->client,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setoverflow(&self->client,
-		psy_ui_OVERFLOW_HSCROLL);
-	psy_ui_component_setscrollmode(&self->client,
-		psy_ui_SCROLL_COMPONENTS);
+		psy_ui_OVERFLOW_HSCROLL);	
 	sequencetrackheaders_build(self);
 }
 
@@ -276,8 +272,8 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 	uintptr_t endrow;		
 	double lineheightpx;	
 	
-	lineheightpx = floor(psy_ui_value_px(&self->state->lineheight,
-		psy_ui_component_textmetric(&self->component)));	
+	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
+		psy_ui_component_textmetric(&self->component))));	
 	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top / lineheightpx)));
 	endrow = (uintptr_t)(floor(g->clip.bottom / lineheightpx + 0.5));
 	size = psy_ui_component_sizepx(&self->component);
@@ -472,9 +468,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setscrollmode(&self->component,
-		psy_ui_SCROLL_COMPONENTS);
+		psy_ui_HORIZONTALEXPAND);	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	self->lastplayposition = -1.f;
 	self->lastplayrow = psy_INDEX_INVALID;

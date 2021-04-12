@@ -361,7 +361,9 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* l
 		numcols += 2;
 	}
 
-	rv->width = psy_ui_value_makepx(self->linestate->flatsize * numcols + margin);	
+	rv->width = psy_ui_value_makepx(self->linestate->flatsize * numcols + margin);
+	rv->height = psy_ui_value_makepx(trackerlinestate_numlines(self->linestate) *
+		trackerlinestate_lineheight(self->linestate));
 }
 
 void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers* self, bool showstate)
@@ -582,9 +584,11 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate,
 		workspace);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
-	trackerlinenumbers_init(&self->linenumbers, &self->component, linestate,
+	psy_ui_component_init(&self->linenumberpane, &self->component, NULL);
+	psy_ui_component_setalign(&self->linenumberpane, psy_ui_ALIGN_CLIENT);
+	trackerlinenumbers_init(&self->linenumbers, &self->linenumberpane, linestate,
 		workspace);
-	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_FIXED_RESIZE);
 	zoombox_init(&self->zoombox, &self->component);
 	psy_ui_component_setpreferredsize(&self->zoombox.component,
 		psy_ui_size_make_em(0.0, 1.0));

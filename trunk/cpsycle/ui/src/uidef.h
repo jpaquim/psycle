@@ -35,11 +35,6 @@ typedef enum psy_ui_Cursor {
 	psy_ui_CURSOR_COLRESIZE
 } psy_ui_Cursor;
 
-typedef enum psy_ui_JustifyType {
-	psy_ui_JUSTIFY_NONE,	
-	psy_ui_JUSTIFY_EXPAND	
-} psy_ui_JustifyType;
-
 typedef enum psy_ui_ExpandMode {
 	psy_ui_NOEXPAND = 1,	
 	psy_ui_HORIZONTALEXPAND = 2,

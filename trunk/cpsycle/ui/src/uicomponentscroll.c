@@ -10,9 +10,7 @@ static psy_ui_ComponentScroll componentscroll;
 
 void psy_ui_componentscroll_init(psy_ui_ComponentScroll* self)
 {
-	psy_ui_size_init(&self->step);
-	self->mode = psy_ui_SCROLL_GRAPHICS;
-	psy_ui_point_init(&self->offset);
+	psy_ui_size_init(&self->step);	
 	psy_ui_intpoint_init(&self->hrange);
 	psy_ui_intpoint_init(&self->vrange);
 	self->wheel = 0;

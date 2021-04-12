@@ -658,8 +658,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 	psy_ui_component_setmaximumsize(&self->component,
 		psy_ui_size_make_em(0.0, 10.0));
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_make_em(0.0, 10.0));
-	psy_ui_component_setscrollmode(&self->pane.component, psy_ui_SCROLL_COMPONENTS);	
+		psy_ui_size_make_em(0.0, 10.0));	
 	// connect scrollbar
 	psy_ui_scroller_init(&self->scroller, &self->pane.component,
 		&self->component, NULL);

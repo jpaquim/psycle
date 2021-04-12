@@ -741,8 +741,12 @@ void trackergrid_onpreferredsize(TrackerGrid* self, const psy_ui_Size* limit,
 	
 	rv->width = psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate,
 		trackergridstate_numsongtracks(self->gridstate)));
-	rv->height = psy_ui_value_makepx(trackerlinestate_numlines(self->linestate) *
-				self->linestate->lineheightpx);
+	if (self->editmode == TRACKERGRID_EDITMODE_LOCAL) {
+		rv->height = psy_ui_value_makepx(self->linestate->lineheightpx);
+		return;
+	}
+	rv->height = psy_ui_value_makepx((trackerlinestate_numlines(self->linestate) + 1) *
+				self->linestate->lineheightpx);	
 }
 
 void trackergrid_prevtrack(TrackerGrid* self)
@@ -2521,8 +2525,8 @@ void trackergrid_onalign(TrackerGrid* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	self->linestate->lineheightpx =
-		floor(psy_ui_value_px(&self->linestate->lineheight,
-			tm));
+		psy_max(1.0, floor(psy_ui_value_px(&self->linestate->lineheight,
+			tm)));
 	if (trackergrid_midline(self)) {
 		trackergrid_centeroncursor(self);
 	}

@@ -387,7 +387,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->playing = FALSE;
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		trackerheader_onpatterncursorchanged);	
-	trackerheader_build(self);
+	trackerheader_build(self);	
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 

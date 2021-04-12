@@ -118,6 +118,7 @@ typedef struct TrackerLineNumberBar {
 	psy_ui_Component component;
 	// ui elements
 	TrackerLineNumbersLabel linenumberslabel;
+	psy_ui_Component linenumberpane;
 	TrackerLineNumbers linenumbers;
 	ZoomBox zoombox;
 	// internal data

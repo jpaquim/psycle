@@ -190,11 +190,9 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 							floor(psy_ui_value_px(&c_margin.top, c_tm)))),
 					psy_ui_size_make(
 						componentsize.width,
-						psy_ui_value_makepx(component->justify ==
-							psy_ui_JUSTIFY_EXPAND
-						? cp_bottomright.y - cp_topleft.y - 		
-							floor(psy_ui_margin_height_px(&c_margin, c_tm))
-						: psy_ui_value_px(&componentsize.height, c_tm)))));
+						psy_ui_value_makepx(
+							cp_bottomright.y - cp_topleft.y - 		
+							floor(psy_ui_margin_height_px(&c_margin, c_tm))))));
 				cp_topleft.x += floor(psy_ui_value_px(&c_margin.right, c_tm));
 				cp_topleft.x += floor(psy_ui_value_px(&componentsize.width, c_tm));
 				if (cpymax < cp_topleft.y +

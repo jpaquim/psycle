@@ -85,7 +85,7 @@ void pianoruler_init(PianoRuler* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(pianoruler_base(self),
 		pianoruler_vtable_init(self));
 	psy_ui_component_doublebuffer(pianoruler_base(self));
-	pianoruler_setsharedgridstate(self, gridstate);			
+	pianoruler_setsharedgridstate(self, gridstate);	
 }
 
 void pianoruler_setsharedgridstate(PianoRuler* self, PianoGridState* gridstate)
@@ -206,6 +206,8 @@ static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
 static void pianokeyboard_drawuncoveredbottombackground(PianoKeyboard*,
 	psy_ui_Graphics*, psy_ui_RealSize);
 static void pianokeyboard_onmousedown(PianoKeyboard*, psy_ui_MouseEvent*);
+static void pianokeyboard_onpreferredsize(PianoKeyboard*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 // vtable
 static psy_ui_ComponentVtable pianokeyboard_vtable;
 static bool pianokeyboard_vtable_initialized = FALSE;
@@ -220,6 +222,8 @@ static psy_ui_ComponentVtable* pianokeyboard_vtable_init(PianoKeyboard* self)
 			pianokeyboard_ondraw;
 		pianokeyboard_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			pianokeyboard_onmousedown;
+		pianokeyboard_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			pianokeyboard_onpreferredsize;
 		pianokeyboard_vtable_initialized = TRUE;
 	}
 	return &pianokeyboard_vtable;
@@ -386,6 +390,13 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 	psy_ui_component_invalidate(pianokeyboard_base(self));	
 }
 
+void pianokeyboard_onpreferredsize(PianoKeyboard* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	*rv = psy_ui_size_make(psy_ui_value_makeew(10.0),
+		psy_ui_value_makepx(self->keyboardstate->keyboardheightpx));
+}
+
 // PianogridDraw
 // prototypes
 static void pianogriddraw_updatekeystate(PianoGridDraw*);
@@ -412,17 +423,14 @@ static psy_ui_Colour pianogriddraw_cellcolour(PianoGridDraw* self, uintptr_t ste
 bool pianogriddraw_testselection(PianoGridDraw* self, uint8_t key, double offset);
 
 void pianogriddraw_init(PianoGridDraw* self,
-	KeyboardState* keyboardstate, PianoGridState* gridstate,
-	psy_ui_Point scrolloffset,	
+	KeyboardState* keyboardstate, PianoGridState* gridstate,	
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay trackdisplay,
 	bool cursorchanging, bool cursoronnoterelease,
 	psy_audio_PatternSelection selection,
 	psy_ui_RealSize size, const psy_ui_TextMetric* tm, Workspace* workspace)
-{
-	self->scrollleft = scrolloffset.x;
-	self->scrolltop = scrolloffset.y;
+{	
 	self->keyboardstate = keyboardstate;
 	self->gridstate = gridstate;
 	self->size = size;
@@ -662,7 +670,6 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 		pianogrid_clipselection(self, g->clip));
 	pianogriddraw_init(&griddraw,
 		self->keyboardstate, self->gridstate,
-		psy_ui_component_scrolloffset(&self->component),
 		self->sequenceentryoffset,
 		self->hoverpatternentry,		
 		self->trackdisplay,
@@ -853,7 +860,7 @@ void pianogriddraw_drawstepseparators(PianoGridDraw* self, psy_ui_Graphics* g,
 
 		cpx = pianogridstate_beattopx(self->gridstate, c);
 		psy_ui_drawline(g,
-			psy_ui_realpoint_make(cpx, psy_ui_value_px(&self->scrolltop, self->tm)),
+			psy_ui_realpoint_make(cpx, 0.0),
 			psy_ui_realpoint_make(cpx, self->keyboardstate->keyboardheightpx));
 	}
 }
@@ -1772,9 +1779,8 @@ static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player*,
 static void pianoroll_onalign(Pianoroll*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
 static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender);
-static void pianoroll_oneventdriverinput(Pianoroll* self, psy_EventDriver* sender);
-static void pianoroll_onzoomboxbeatwidthchanged(Pianoroll*, ZoomBox* sender);
-static void pianoroll_onzoomboxkeyheightchanged(Pianoroll*, ZoomBox* sender);
+static void pianoroll_onbeatwidthchanged(Pianoroll*, ZoomBox* sender);
+static void pianoroll_onkeyheightchanged(Pianoroll*, ZoomBox* sender);
 static void pianoroll_onkeytypeselchange(Pianoroll*, psy_ui_Component* sender, int sel);
 static void pianoroll_ondisplayalltracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_ondisplaycurrenttrack(Pianoroll*, psy_ui_Button* sender);
@@ -1825,28 +1831,34 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	zoombox_init(&self->zoombox_beatwidth, &self->left);
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
-		pianoroll_onzoomboxbeatwidthchanged);
+		pianoroll_onbeatwidthchanged);
 	psy_ui_component_setalign(zoombox_base(&self->zoombox_beatwidth), psy_ui_ALIGN_TOP);
 	// Keyboard
-	pianokeyboard_init(&self->keyboard, &self->left, &self->keyboardstate);
-	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_init(&self->keyboardpane, &self->left, NULL);
+	psy_ui_component_setalign(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
+	pianokeyboard_init(&self->keyboard, &self->keyboardpane, &self->keyboardstate);
+	psy_ui_component_setalign(&self->keyboard.component,
+		psy_ui_ALIGN_FIXED_RESIZE);
 	// top area (beatruler)
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	pianoruler_init(&self->header, &self->top, &self->gridstate);
-	psy_ui_component_setalign(pianoruler_base(&self->header), psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(pianoruler_base(&self->header),
+		psy_ui_ALIGN_FIXED_RESIZE);
 	// client area (event grid)
 	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
 		&self->gridstate, self->workspace);
 	psy_ui_scroller_init(&self->scroller, pianogrid_base(&self->grid),
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED_RESIZE);
 	// bar
 	pianobar_init(&self->bar, &self->scroller.component, self->workspace);	
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->bar.zoombox_keyheight.signal_changed, self,
-		pianoroll_onzoomboxkeyheightchanged);
-	psy_ui_component_setalign(&self->bar.zoombox_keyheight.component, psy_ui_ALIGN_LEFT);
+		pianoroll_onkeyheightchanged);
+	psy_ui_component_setalign(&self->bar.zoombox_keyheight.component,
+		psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_onlpbchanged);
 	psy_signal_connect(&pianogrid_base(&self->grid)->signal_scroll, self,
@@ -1988,7 +2000,7 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 	}
 }
 
-void pianoroll_onzoomboxbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
+void pianoroll_onbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 {
 	assert(self);
 
@@ -2000,10 +2012,11 @@ void pianoroll_onzoomboxbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 		psy_ui_component_scrollleft(pianogrid_base(&self->grid)));
 	psy_ui_component_invalidate(pianoruler_base(&self->header));
 	psy_ui_component_update(pianoruler_base(&self->header));
-	psy_ui_component_invalidate(pianogrid_base(&self->grid));
+	psy_ui_component_align(&self->scroller.pane);
+	psy_ui_component_invalidate(&self->scroller.pane);
 }
 
-void pianoroll_onzoomboxkeyheightchanged(Pianoroll* self, ZoomBox* sender)
+void pianoroll_onkeyheightchanged(Pianoroll* self, ZoomBox* sender)
 {
 	assert(self);
 
@@ -2018,8 +2031,9 @@ void pianoroll_onzoomboxkeyheightchanged(Pianoroll* self, ZoomBox* sender)
 	psy_ui_component_setscrolltop(&self->keyboard.component,
 		psy_ui_component_scrolltop(pianogrid_base(&self->grid)));
 	psy_ui_component_invalidate(&self->keyboard.component);
-	psy_ui_component_update(&self->keyboard.component);
-	psy_ui_component_invalidate(pianogrid_base(&self->grid));
+	psy_ui_component_update(&self->keyboard.component);	
+	psy_ui_component_align(&self->scroller.pane);
+	psy_ui_component_invalidate(&self->scroller.pane);
 }
 
 void pianoroll_onkeytypeselchange(Pianoroll* self, psy_ui_Component* sender, int sel)

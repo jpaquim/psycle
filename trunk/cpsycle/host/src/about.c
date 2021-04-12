@@ -229,24 +229,27 @@ static void about_onalign(About*);
 static void about_onfocus(About*, psy_ui_Component* sender);
 // vtable
 static psy_ui_ComponentVtable about_vtable;
-static int about_vtable_initialized = 0;
+static bool about_vtable_initialized = FALSE;
 
 static void about_vtable_init(About* self)
 {
 	if (!about_vtable_initialized) {
 		about_vtable = *(self->component.vtable);
-		about_vtable.onalign = (psy_ui_fp_component_onalign)about_onalign;
-		about_vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+		about_vtable.onalign =
+			(psy_ui_fp_component_onalign)
+			about_onalign;
+		about_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
 			about_onmousedoubleclick;		
-		about_vtable_initialized = 1;
+		about_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &about_vtable;
 }
 // implementation
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
-	about_vtable_init(self);
-	self->component.vtable = &about_vtable;
+	about_vtable_init(self);	
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_ABOUT, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
@@ -254,7 +257,6 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
-	self->image.component.preventdefault = 0;
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
 	// psy_ui_bitmap_load(&self->image.bitmap,
 	//	"/home/user/cpsycle/host/src/resources/splash_screen.png");

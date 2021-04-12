@@ -141,8 +141,7 @@ void onlanguagechanged(psy_ui_Button* self)
 }
 
 psy_ui_RealSize spacingsize(psy_ui_Button* self)
-{
-	psy_ui_RealSize size;
+{	
 	psy_ui_Size valsize;
 	const psy_ui_TextMetric* tm;
 	psy_ui_Margin spacing;
@@ -152,10 +151,9 @@ psy_ui_RealSize spacingsize(psy_ui_Button* self)
 	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
 	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&spacing, tm), tm);
 	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&spacing, tm), tm);
-	size = psy_ui_realsize_make(
+	return psy_ui_realsize_make(
 		psy_ui_value_px(&valsize.width, tm),
-		psy_ui_value_px(&valsize.height, tm));
-	return size;
+		psy_ui_value_px(&valsize.height, tm));	
 }
 
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
@@ -270,6 +268,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	char* text;
 	psy_ui_Margin spacing;	
 
+	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
@@ -310,15 +309,16 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			rv->width = psy_ui_add_values(
 				psy_ui_value_makepx(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
 			rv->height = psy_ui_value_makeeh(self->linespacing);
+			rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
+			rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 			return;
 		}
 		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4);
 	} else {
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
-	rv->height = psy_ui_value_makeeh(self->linespacing);
-	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
+	rv->height = psy_ui_value_makeeh(self->linespacing);	
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);	
 	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 }
 

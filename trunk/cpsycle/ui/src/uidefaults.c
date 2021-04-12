@@ -168,11 +168,11 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	// scrollthumb
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SCROLLTHUMB,
 		psy_ui_style_allocinit_colours(
-			onsurface, psy_ui_colour_make_overlay(5)));
+			onsurface, psy_ui_colour_make_overlay(10)));
 	// scrollthumb::hover
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SCROLLTHUMB_HOVER,
 		psy_ui_style_allocinit_colours(
-			onsurface, psy_ui_colour_make_overlay(13)));
+			onsurface, psy_ui_colour_make_overlay(20)));
 	// sliderpane
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setbackgroundcolour(style,

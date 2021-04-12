@@ -417,6 +417,9 @@ void instrumententryview_onpreferredsize(InstrumentEntryView* self, psy_ui_Size*
 	psy_ui_Size* rv)
 {
 	if (self->instrument && self->instrument->entries) {		
+		if (limit) {
+			rv->width = limit->width;
+		}
 		rv->height = psy_ui_value_makepx(
 			(self->metrics.lineheight) * (double)psy_list_size(self->instrument->entries));
 	} else {
@@ -1204,8 +1207,7 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 		psy_INDEX_INVALID);
 	instrumententrytableview_build(self);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_ui_component_setscrollmode(&self->component, psy_ui_SCROLL_COMPONENTS);
+	psy_ui_component_setwheelscroll(&self->component, 4);	
 }
 
 void instrumententrytableview_ondestroy(InstrumentEntryTableView* self)
@@ -1368,10 +1370,9 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	instrumententryview_init(&self->entryview, &self->entries, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
 		&self->entries, NULL);
-	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	// todo: scroller here slows X11 down
-	// psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED_RESIZE);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->entryview.component, margin);	
 	instrumentkeyboardview_init(&self->keyboard, &self->entries);

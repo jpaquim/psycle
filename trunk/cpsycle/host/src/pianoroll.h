@@ -290,9 +290,7 @@ typedef struct PianoGridDraw {
 	bool cursorchanging;
 	bool cursoronnoterelease;
 	psy_dsp_big_beat_t sequenceentryoffset;	
-	PianoTrackDisplay trackdisplay;
-	psy_ui_Value scrolltop;
-	psy_ui_Value scrollleft;
+	PianoTrackDisplay trackdisplay;	
 	psy_audio_PatternSelection selection;
 	// references
 	KeyboardState* keyboardstate;
@@ -307,8 +305,7 @@ typedef struct PianoGridDraw {
 } PianoGridDraw;
 
 void pianogriddraw_init(PianoGridDraw*,
-	KeyboardState*, PianoGridState*,
-	psy_ui_Point scrolloffset,
+	KeyboardState*, PianoGridState*,	
 	psy_dsp_big_beat_t sequenceentryoffset,
 	psy_audio_PatternEntry* hoverpatternentry,	
 	PianoTrackDisplay,
@@ -440,6 +437,7 @@ typedef struct Pianoroll {
 	PianoBar bar;
 	// internal data
 	KeyboardState keyboardstate;
+	psy_ui_Component keyboardpane;
 	PianoKeyboard keyboard;
 	PianoGridState gridstate;	
 	uintptr_t opcount;
