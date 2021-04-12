@@ -769,7 +769,7 @@ uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self,
 		uintptr_t c;
 		uintptr_t maxnumoutputs;		
 						
-		maxnumoutputs = psy_table_maxsize(&sockets->outputs.sockets);
+		maxnumoutputs = psy_table_maxsize(&sockets->outputs.sockets);		
 		for (c = 0, i = 0; i < maxnumoutputs; ++i) {
 			psy_audio_WireSocket* socket;
 

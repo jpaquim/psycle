@@ -73,6 +73,8 @@ typedef struct NewMachineSearch {
 void newmachinesearch_init(NewMachineSearch*, psy_ui_Component* parent,
 	NewMachineFilter* filter);
 
+void newmachinesearch_setfilter(NewMachineSearch*, NewMachineFilter*);
+
 typedef struct NewMachineBar {
 	// inherits
 	psy_ui_Component component;	
@@ -92,11 +94,22 @@ typedef struct NewMachineBar {
 void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent,
 	Workspace*);
 
-typedef struct NewMachineDetail {
+typedef struct NewMachineSearchBar {
 	// inherits
 	psy_ui_Component component;
 	// intern
 	NewMachineSearch search;
+} NewMachineSearchBar;
+
+void newmachinesearchbar_init(NewMachineSearchBar*, psy_ui_Component* parent,
+	NewMachineFilter* filter);
+
+void newmachinesearchbar_setfilter(NewMachineSearchBar*, NewMachineFilter*);
+
+typedef struct NewMachineDetail {
+	// inherits
+	psy_ui_Component component;
+	// intern	
 	NewMachineBar bar;
 	psy_ui_Label desclabel;
 	LabelPair plugname;
@@ -187,7 +200,6 @@ typedef struct {
 	psy_Property* plugins;
 	psy_Property* selectedplugin;  
 	Workspace* workspace;	
-	bool onlyfavorites;
 	bool generatorsenabled;
 	bool effectsenabled;
 	NewMachineFilter filters;
@@ -196,6 +208,8 @@ typedef struct {
 
 void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites,
 	Workspace*);
+
+void pluginsview_setplugins(PluginsView*, const psy_Property*);
 
 struct NewMachine;
 
@@ -227,6 +241,7 @@ typedef struct NewMachine {
 	psy_Signal signal_selected;	
 	// internal ui elements	
 	psy_ui_Notebook notebook;
+	NewMachineSearchBar searchbar;
 	psy_ui_Component client;
 	psy_ui_Component sections;
 	psy_ui_Component favoriteheader;

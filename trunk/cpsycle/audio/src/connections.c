@@ -11,7 +11,9 @@
 void psy_audio_wire_init(psy_audio_Wire* self)
 {
 	self->src = psy_INDEX_INVALID;
+	self->src_id = psy_INDEX_INVALID;
 	self->dst = psy_INDEX_INVALID;
+	self->dst_id = psy_INDEX_INVALID;
 }
 
 bool psy_audio_wire_valid(const psy_audio_Wire* self)
@@ -22,7 +24,9 @@ bool psy_audio_wire_valid(const psy_audio_Wire* self)
 void psy_audio_wire_invalidate(psy_audio_Wire* self)
 {
 	self->src = psy_INDEX_INVALID;
+	self->src_id = psy_INDEX_INVALID;
 	self->dst = psy_INDEX_INVALID;
+	self->dst_id = psy_INDEX_INVALID;
 }
 
 static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t src,

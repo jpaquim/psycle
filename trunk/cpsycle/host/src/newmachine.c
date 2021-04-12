@@ -167,8 +167,11 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_NEWMACHINE_SEARCHFIELD, psy_INDEX_INVALID,
+		psy_INDEX_INVALID, psy_INDEX_INVALID);
 	self->filter = filter;
-	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.0);
+	psy_ui_margin_init_all_em(&spacing, 0.3, 0.3, 0.3, 0.0);
 	psy_ui_component_setspacing(&self->component, spacing);
 	psy_ui_image_init(&self->image, &self->component);
 	psy_ui_image_setbitmapalignment(&self->image,
@@ -183,6 +186,7 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_SEARCH_DARK);
 	psy_ui_bitmap_settransparency(&self->image.bitmap, psy_ui_colour_make(psy_ui_RGB_WHITE));
 	psy_ui_edit_init(&self->edit, &self->component);
+	psy_ui_edit_setcharnumber(&self->edit, 42.0);
 	newmachinesearch_reset(self);
 	psy_signal_connect(&self->edit.component.signal_focus,
 		self, newmachinesearch_oneditfocus);
@@ -195,6 +199,12 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 		self, newmachinesearch_onreject);
 	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
 		psy_ui_ALIGN_CLIENT);	
+}
+
+void newmachinesearch_setfilter(NewMachineSearch* self,
+	NewMachineFilter* filter)
+{
+	self->filter = filter;
 }
 
 void newmachinesearch_oneditfocus(NewMachineSearch* self, psy_ui_Component* sender)
@@ -227,9 +237,11 @@ void newmachinesearch_onreject(NewMachineSearch* self,
 void newmachinesearch_reset(NewMachineSearch* self)
 {		
 	psy_ui_edit_settext(&self->edit, "Search Plugin");
-	newmachinefilter_settext(self->filter, "");
-	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 	self->hasdefaulttext = TRUE;
+	if (self->filter) {
+		newmachinefilter_settext(self->filter, "");
+		psy_ui_component_setfocus(psy_ui_component_parent(&self->component));		
+	}
 }
 
 // NewMachineBar
@@ -276,6 +288,29 @@ void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* se
 	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 3, 0);
 }
 
+// NewMachineSearchBar
+void newmachinesearchbar_init(NewMachineSearchBar* self, psy_ui_Component* parent,
+	NewMachineFilter* filter)
+{
+	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
+
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.0, 0.0);
+	psy_ui_component_setspacing(&self->component, spacing);
+	// search field
+	newmachinesearch_init(&self->search, &self->component, filter);
+	psy_ui_component_setalign(&self->search.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_margin_init_all_em(&margin, 0.0, 8.0, 0.0, 0.0);
+	psy_ui_component_setmargin(&self->search.component, margin);	
+}
+
+void newmachinesearchbar_setfilter(NewMachineSearchBar* self,
+	NewMachineFilter* filter)
+{
+	newmachinesearch_setfilter(&self->search, filter);
+}
+
 // NewMachineDetail
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
@@ -288,10 +323,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 2.0);
 	psy_ui_component_setspacing(&self->component, spacing);
-	self->workspace = workspace;
-	// search
-	newmachinesearch_init(&self->search, &self->component, filter);
-	psy_ui_component_setalign(&self->search.component, psy_ui_ALIGN_TOP);
+	self->workspace = workspace;	
 	// buttons
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
@@ -715,8 +747,6 @@ static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, double x, double y);
 static void pluginsview_computetextsizes(PluginsView*, const psy_ui_Size*);
-static void pluginsview_onplugincachechanged(PluginsView*,
-	psy_audio_PluginCatcher* sender);
 static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
@@ -755,20 +785,9 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
 	newmachinefilter_init(&self->filters);
-	self->workspace = workspace;
-	self->onlyfavorites = favorites;
+	self->workspace = workspace;	
 	self->mode = NEWMACHINE_APPEND;
-	if (workspace_pluginlist(workspace)) {
-		if (favorites) {
-			self->plugins = newmachine_favorites(
-				workspace_pluginlist(workspace));
-		} else {
-			self->plugins = psy_property_clone(
-				workspace_pluginlist(workspace));
-		}
-	} else {
-		self->plugins = NULL;
-	}	
+	self->plugins = NULL;	
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);
@@ -776,9 +795,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	self->generatorsenabled = TRUE;
 	self->effectsenabled = TRUE;
 	psy_signal_init(&self->signal_selected);
-	psy_signal_init(&self->signal_changed);
-	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
-		pluginsview_onplugincachechanged);
+	psy_signal_init(&self->signal_changed);	
 	size = psy_ui_component_size(&self->component);
 	pluginsview_computetextsizes(self, &size);	
 	psy_signal_connect(&self->filters.signal_changed, self,
@@ -793,6 +810,15 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 		psy_property_deallocate(self->plugins);
 	}
 	newmachinefilter_dispose(&self->filters);
+}
+
+void pluginsview_setplugins(PluginsView* self, const psy_Property* property)
+{
+	if (self->plugins) {
+		psy_property_deallocate(self->plugins);
+	}
+	self->plugins = psy_property_clone(property);
+	self->selectedplugin = NULL;
 }
 
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
@@ -963,18 +989,18 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				break;
 			case psy_ui_KEY_DELETE:
 				if (self->selectedplugin) {
-					psy_Property* p;
-					p = psy_property_find(self->workspace->plugincatcher.plugins,
-							psy_property_key(self->selectedplugin),
-							PSY_PROPERTY_TYPE_NONE);
-					if (!self->onlyfavorites && p) {
-						psy_property_remove(self->workspace->plugincatcher.plugins, p);
-					} else {						
-						psy_property_set_int(p, "favorite", 0);
-					}
-					psy_audio_plugincatcher_save(&self->workspace->plugincatcher);
-					psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
-						&self->workspace->plugincatcher, 0);					
+					// psy_Property* p;
+					// p = psy_property_find(self->workspace->plugincatcher.plugins,
+					//		psy_property_key(self->selectedplugin),
+					// 		PSY_PROPERTY_TYPE_NONE);
+					// if (!self->onlyfavorites && p) {
+						// psy_property_remove(self->workspace->plugincatcher.plugins, p);
+					// } else {						
+						//psy_property_set_int(p, "favorite", 0);
+					// }
+					// psy_audio_plugincatcher_save(&self->workspace->plugincatcher);
+					// psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
+					//	&self->workspace->plugincatcher, 0);					
 				}
 				break;
 			case psy_ui_KEY_DOWN:
@@ -1186,28 +1212,6 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 	}	
 }
 
-void pluginsview_onplugincachechanged(PluginsView* self,
-	psy_audio_PluginCatcher* sender)
-{
-	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
-	self->selectedplugin = 0;
-	if (self->plugins) {
-		psy_property_deallocate(self->plugins);
-	}
-	if (sender->plugins) {
-		if (self->onlyfavorites) {
-			self->plugins = newmachine_favorites(sender->plugins);
-		} else {
-			self->plugins = psy_property_clone(sender->plugins);
-		}
-	} else {
-		self->plugins = 0;
-	}	
-	psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());	
-	psy_ui_component_updateoverflow(&self->component);
-	psy_ui_component_invalidate(&self->component);	
-}
-
 void pluginsview_onfilterchanged(PluginsView* self, NewMachineFilter* sender)
 {
 	self->selectedplugin = 0;
@@ -1224,7 +1228,6 @@ void pluginsview_onfilterchanged(PluginsView* self, NewMachineFilter* sender)
 
 // NewMachineSection
 // prototypes
-static void newmachinesection_ondestroy(NewMachineSection*, psy_ui_Component* sender);
 static void newmachinesection_findplugins(NewMachineSection*);
 static void newmachinesection_onlabelclick(NewMachineSection*, psy_ui_Label* sender,
 	psy_ui_MouseEvent*);
@@ -1243,9 +1246,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, 
 		psy_INDEX_INVALID, psy_INDEX_INVALID, STYLE_NEWMACHINE_SECTION_SELECTED,
-		psy_INDEX_INVALID);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		newmachinesection_ondestroy);
+		psy_INDEX_INVALID);	
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		newmachinesection_onmousedown);
 	self->property  = property;
@@ -1282,17 +1283,9 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	}
 }
 
-void newmachinesection_ondestroy(NewMachineSection* self, psy_ui_Component* sender)
-{	
-}
-
 void newmachinesection_findplugins(NewMachineSection* self)
 {
-	if (self->pluginview.plugins) {
-		psy_property_deallocate(self->pluginview.plugins);
-	}	
-	self->pluginview.plugins = psy_property_clone(self->property);
-	self->pluginview.selectedplugin = NULL;
+	pluginsview_setplugins(&self->pluginview, self->property);	
 }
 
 void newmachinesection_onlabelclick(NewMachineSection* self, psy_ui_Label* sender,
@@ -1401,6 +1394,7 @@ static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
 	int progress);
 static void newmachine_ontimer(NewMachine*, uintptr_t timerid);
 static void newmachine_buildsections(NewMachine*);
+static void newmachine_updateplugins(NewMachine*);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -1447,6 +1441,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->client, psy_ui_notebook_base(&self->notebook),
 		NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	// searchbar
+	newmachinesearchbar_init(&self->searchbar, &self->client, NULL);
+	psy_ui_component_setalign(&self->searchbar.component, psy_ui_ALIGN_TOP);
 	// scanview
 	pluginscanview_init(&self->scanview,
 		psy_ui_notebook_base(&self->notebook));
@@ -1545,6 +1542,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmaximumsize(&self->detail.component,
 		psy_ui_size_make_em(40.0, 0.0));
+	// filter
+	newmachinesearchbar_setfilter(&self->searchbar,
+		&self->pluginsview.filters);
 	// signals
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->pluginsview.signal_selected, self,
@@ -1586,7 +1586,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);
 	newmachine_buildsections(self);
-	psy_ui_component_align(&self->client);
+	newmachine_updateplugins(self);
 }
 
 void newmachine_ondestroy(NewMachine* self, psy_ui_Component* component)
@@ -1614,20 +1614,19 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	}
 	psy_property_sync(workspace_pluginlist(self->pluginsview.workspace), self->pluginsview.plugins);
 	psy_audio_plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
-	pluginsview_onplugincachechanged(&self->favoriteview,
-		&self->favoriteview.workspace->plugincatcher);
+	newmachine_updateplugins(self);	
 	if (self->favoriteview.plugins) {
 		psy_Property* sorted;
 
 		sorted = newmachine_sort(self->favoriteview.plugins,
 			newmachine_comp_favorite);
-		psy_property_deallocate(self->favoriteview.plugins);
-		self->favoriteview.plugins = sorted;
+		pluginsview_setplugins(&self->favoriteview, sorted);
+		if (sorted) {
+			psy_property_deallocate(sorted);
+		}		
 		newmachinedetail_reset(&self->detail);
-		psy_ui_component_align(&self->component);
-		psy_ui_component_setscrolltop(&self->favoriteview.component, psy_ui_value_zero());
-		psy_ui_component_updateoverflow(&self->favoriteview.component);
-		psy_ui_component_invalidate(&self->favoriteview.component);
+		psy_ui_component_align(&self->detail.component);
+		psy_ui_component_align(&self->scroller_fav.pane);
 	}	
 }
 
@@ -1641,9 +1640,9 @@ void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
 void newmachine_onplugincachechanged(NewMachine* self,
 	psy_audio_PluginCatcher* sender)
 {
+	newmachine_updateplugins(self);
 	newmachinefilter_reset(&self->pluginsview.filters);
-	newmachinedetail_reset(&self->detail);
-	self->selectedplugin = NULL;
+	newmachinedetail_reset(&self->detail);	
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);
 	psy_ui_component_align(&self->categorybar.client);
@@ -2127,4 +2126,21 @@ bool newmachine_selectedmachineinfo(const NewMachine* self,
 void newmachine_onmousedown(NewMachine* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_mouseevent_stoppropagation(ev);
+}
+
+void newmachine_updateplugins(NewMachine* self)
+{
+	psy_Property* favorites;
+
+	self->selectedplugin = NULL;
+	pluginsview_setplugins(&self->pluginsview,
+		workspace_pluginlist(self->workspace));
+	favorites = newmachine_favorites(workspace_pluginlist(self->workspace));
+	pluginsview_setplugins(&self->favoriteview,
+		favorites);
+	if (favorites) {
+		psy_property_deallocate(favorites);
+	}
+	psy_ui_component_align(&self->client);
+	
 }

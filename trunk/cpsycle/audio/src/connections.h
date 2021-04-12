@@ -120,11 +120,11 @@ INLINE void wiresockets_append(psy_audio_WireSockets* self, psy_audio_WireSocket
 {
 	if (psy_table_empty(&self->sockets)) {
 		psy_table_insert(&self->sockets, 0, socket);
-	} else {
+	} else {		
 		if (psy_table_exists(&self->sockets, psy_table_maxkey(&self->sockets) + 1)) {
 			psy_table_remove(&self->sockets, psy_table_maxkey(&self->sockets) + 1);
 		}
-		psy_table_insert(&self->sockets, psy_table_maxkey(&self->sockets) + 1, socket);
+		psy_table_insert(&self->sockets, psy_table_maxkey(&self->sockets) + 1, socket);		
 	}
 }
 
