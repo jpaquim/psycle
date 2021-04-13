@@ -478,6 +478,9 @@
     <ClCompile Include="src\paramgear.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\pluginsview.c">
+      <Filter>machine\machineview</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -910,6 +913,9 @@
     </ClInclude>
     <ClInclude Include="src\paramgear.h">
       <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pluginsview.h">
+      <Filter>machine\machineview</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

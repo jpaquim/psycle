@@ -510,18 +510,20 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"song-loading-compatibility", "Song loading compatibility");
 	psy_property_set_str(section, "rescan", "Rescan");
+	psy_property_set_str(section,"in", "in");
 	psy_property_set_str(section,
-		"select-plugin-directories", "Select plugin directories");
-	psy_property_set_str(section,
-		"sort-by-favorite", "Sort by favorite");
-	psy_property_set_str(section, "sort-by-name", "Sort by name");
-	psy_property_set_str(section, "sort-by-type", "Sort by type");
-	psy_property_set_str(section, "sort-by-mode", "Sort by mode");
-	psy_property_set_str(section, "sort-by-mode", "Sort by mode");
-	psy_property_set_str(section, "create-section", "Create Section");	
-	psy_property_set_str(section, "add-to-section", "Add To Section");
-	psy_property_set_str(section, "remove-from-section", "Remove From Section");
-	psy_property_set_str(section, "remove-section", "Remove Section");
+		"plugin-directories", "Plugin directories");	
+	psy_property_set_str(section, "filter", "Filter by");
+	psy_property_set_str(section, "sort", "Sort by");
+	psy_property_set_str(section, "favorite", "Favorite");
+	psy_property_set_str(section, "name", "Name");
+	psy_property_set_str(section, "type", "Type");
+	psy_property_set_str(section, "mode", "Mode");
+	psy_property_set_str(section, "section", "Section");
+	psy_property_set_str(section, "create", "Create");	
+	psy_property_set_str(section, "add-to", "Add To");
+	psy_property_set_str(section, "remove-from", "Remove From");
+	psy_property_set_str(section, "remove", "Remove");
 	psy_property_set_str(section,
 		"select-plugin-to-view-description",
 		"Select a plugin to view its description");

@@ -5,20 +5,19 @@
 #define NEWMACHINE_H
 
 // host
-#include "machineviewskin.h"
-#include "workspace.h"
+#include "pluginsview.h"
 #include "labelpair.h"
+#include "workspace.h"
+#include "machineviewskin.h"
 // ui
 #include <uibutton.h>
+#include <uicheckbox.h>
 #include <uiedit.h>
 #include <uiimage.h>
 #include <uilabel.h>
-#include <uicheckbox.h>
+#include <uinotebook.h>
 #include <uiscroller.h>
 #include <uisplitbar.h>
-#include <uinotebook.h>
-#include <plugincatcher.h>
-#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,36 +26,6 @@ extern "C" {
 // NewMachine
 // Adding machines
 		
-// NewMachineFilter
-typedef struct NewMachineFilter {
-	psy_Signal signal_changed;
-	bool gen;
-	bool effect;
-	bool intern;
-	bool native;
-	bool vst;
-	bool lua;
-	bool ladspa;
-	psy_audio_MachineType type;
-	char_dyn_t* text;
-	psy_Table categories;
-	
-} NewMachineFilter;
-
-void newmachinefilter_init(NewMachineFilter*);
-void newmachinefilter_dispose(NewMachineFilter*);
-
-void newmachinefilter_reset(NewMachineFilter*);
-bool newmachinefilter_all(const NewMachineFilter*);
-void newmachinefilter_notify(NewMachineFilter*);
-void newmachinefilter_settext(NewMachineFilter*, const char* text);
-void newmachinefilter_setalltypes(NewMachineFilter*);
-void newmachinefilter_cleartypes(NewMachineFilter*);
-void newmachinefilter_addcategory(NewMachineFilter*, const char* category);
-void newmachinefilter_removecategory(NewMachineFilter*, const char* category);
-void newmachinefilter_anycategory(NewMachineFilter*);
-bool newmachinefilter_useanycategory(const NewMachineFilter*);
-
 struct NewMachine;
 
 typedef struct NewMachineSearch {
@@ -75,25 +44,6 @@ void newmachinesearch_init(NewMachineSearch*, psy_ui_Component* parent,
 
 void newmachinesearch_setfilter(NewMachineSearch*, NewMachineFilter*);
 
-typedef struct NewMachineBar {
-	// inherits
-	psy_ui_Component component;	
-	psy_ui_Button rescan;
-    psy_ui_Button selectdirectories;
-	psy_ui_Button sortbyfavorite;
-	psy_ui_Button sortbyname;
-	psy_ui_Button sortbytype;
-	psy_ui_Button sortbymode;
-	psy_ui_Button createsection;
-	psy_ui_Button addtosection;
-	psy_ui_Button removefromsection;
-	psy_ui_Button removesection;
-	Workspace* workspace;
-} NewMachineBar;
-
-void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent,
-	Workspace*);
-
 typedef struct NewMachineSearchBar {
 	// inherits
 	psy_ui_Component component;
@@ -106,11 +56,62 @@ void newmachinesearchbar_init(NewMachineSearchBar*, psy_ui_Component* parent,
 
 void newmachinesearchbar_setfilter(NewMachineSearchBar*, NewMachineFilter*);
 
+// NewMachineRescanBar
+typedef struct NewMachineRescanBar {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Button rescan;
+	psy_ui_Label desc;
+	psy_ui_Button selectdirectories;
+	// references
+	Workspace* workspace;
+} NewMachineRescanBar;
+
+void newmachinerescanbar_init(NewMachineRescanBar*, psy_ui_Component* parent,
+	Workspace*);
+
+// NewMachineSectionBar
+typedef struct NewMachineSectionBar {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Label desc;
+	psy_ui_Button createsection;
+	psy_ui_Button removesection;
+	psy_ui_Label descitem;
+	psy_ui_Button addtosection;
+	psy_ui_Button removefromsection;
+	psy_ui_Label descsection;
+	// references
+	Workspace* workspace;
+} NewMachineSectionBar;
+
+void newmachinesectionbar_init(NewMachineSectionBar*, psy_ui_Component* parent,
+	Workspace*);
+
+// NewMachineSortBar
+typedef struct NewMachineSortBar {
+	// inherits
+	psy_ui_Component component;
+	// intern
+	psy_ui_Label desc;
+	psy_ui_Button sortbyfavorite;
+	psy_ui_Button sortbyname;
+	psy_ui_Button sortbytype;
+	psy_ui_Button sortbymode;
+	// references
+	Workspace* workspace;
+} NewMachineSortBar;
+
+void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
+	Workspace*);
+
+// NewMachineDetail
 typedef struct NewMachineDetail {
 	// inherits
 	psy_ui_Component component;
-	// intern	
-	NewMachineBar bar;
+	// intern
 	psy_ui_Label desclabel;
 	LabelPair plugname;
 	LabelPair dllname;
@@ -140,6 +141,7 @@ typedef struct NewMachineFilterBar {
 	// inherits
 	psy_ui_Component component;	
 	// intern
+	psy_ui_Label desc;
 	psy_ui_Button gen;
 	psy_ui_Button effects;
 	psy_ui_Button intern;
@@ -183,34 +185,6 @@ typedef struct PluginScanView {
 
 void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
 
-typedef struct {
-	// inherits
-	psy_ui_Component component;
-	// Signals
-	psy_Signal signal_selected;
-	psy_Signal signal_changed;
-	// internal data
-	intptr_t count;
-	double lineheight;
-	double columnwidth;
-	double identwidth;
-	intptr_t numparametercols;
-	double avgcharwidth;
-	intptr_t pluginpos;
-	psy_Property* plugins;
-	psy_Property* selectedplugin;  
-	Workspace* workspace;	
-	bool generatorsenabled;
-	bool effectsenabled;
-	NewMachineFilter filters;
-	int mode;
-} PluginsView;
-
-void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites,
-	Workspace*);
-
-void pluginsview_setplugins(PluginsView*, const psy_Property*);
-
 struct NewMachine;
 
 typedef struct NewMachineSection {
@@ -243,21 +217,21 @@ typedef struct NewMachine {
 	psy_ui_Notebook notebook;
 	NewMachineSearchBar searchbar;
 	psy_ui_Component client;
-	psy_ui_Component sections;
-	psy_ui_Component favoriteheader;
-	psy_ui_Image favoriteicon;
-	psy_ui_Label favoritelabel;
-	PluginsView favoriteview;
+	psy_ui_Component sectiongroup;
+	psy_ui_Component sections;	
 	psy_ui_Component usersections;
 	psy_ui_Component all;
 	psy_ui_Component pluginsheader;
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
 	NewMachineFilterBar filterbar;
+	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;	
 	PluginsView pluginsview;
 	NewMachineDetail detail;
 	PluginScanView scanview;
+	NewMachineRescanBar rescanbar;
+	NewMachineSectionBar sectionbar;
 	MachineViewSkin* skin;
 	psy_ui_Scroller scroller_fav;
 	psy_ui_Scroller scroller_main;	
@@ -299,4 +273,4 @@ INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 }
 #endif
 
-#endif
+#endif /* NEWMACHINE_H */

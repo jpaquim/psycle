@@ -77,10 +77,7 @@ void makeplugininfo(
 void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
 	char inipath[_MAX_PATH];
-
-	self->sections = psy_property_setcomment(
-		psy_property_allocinit_key(NULL),
-		"Psycle Plugin Sections created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
+	
 	strcpy(inipath, psy_dir_config());
 	strcpy(inipath, psy_dir_config());
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
@@ -89,6 +86,8 @@ void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 	strcat(inipath, "\\psycle-plugin-sections-64.ini");
 #endif
 	self->inipath = psy_strdup(inipath);
+	self->sections = NULL;
+	psy_audio_pluginsections_reset(self);
 }
 
 void psy_audio_pluginsections_dispose(psy_audio_PluginSections* self)
@@ -99,9 +98,18 @@ void psy_audio_pluginsections_dispose(psy_audio_PluginSections* self)
 	self->inipath = NULL;
 }
 
+void psy_audio_pluginsections_reset(psy_audio_PluginSections* self)
+{
+	psy_audio_pluginsections_clear(self);
+	// Add a default Favorite Section
+	psy_audio_pluginsections_add(self, "Favorites", NULL);
+}
+
 void psy_audio_pluginsections_clear(psy_audio_PluginSections* self)
 {
-	psy_property_deallocate(self->sections);
+	if (self->sections) {
+		psy_property_deallocate(self->sections);
+	}
 	self->sections = psy_property_setcomment(
 		psy_property_allocinit_key(NULL),
 		"Psycle Plugin Sections created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));		
@@ -114,7 +122,7 @@ int psy_audio_pluginsections_load(psy_audio_PluginSections* self)
 
 	printf("pluginsection-ini: %s\n", self->inipath);
 	psy_path_init(&path, self->inipath);
-	psy_audio_pluginsections_clear(self);
+	psy_audio_pluginsections_reset(self);	
 	rv = propertiesio_load(self->sections, &path, 1);
 	psy_path_dispose(&path);	
 	return rv;
@@ -157,8 +165,7 @@ void psy_audio_pluginsections_add(psy_audio_PluginSections* self,
 void psy_audio_pluginsections_remove(psy_audio_PluginSections* self,
 	const char* sectionkey, psy_audio_MachineInfo* macinfo)
 {
-	psy_Property* section;
-	psy_Property* property;
+	psy_Property* section;	
 	psy_List* p;
 	char name[_MAX_PATH];
 

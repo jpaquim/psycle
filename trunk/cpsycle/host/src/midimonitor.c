@@ -415,10 +415,10 @@ void midimonitor_initcorestatusleft(MidiMonitor* self)
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources, NULL,
 		"Core Status");		
-	labelpair_init(&self->resources_win, &self->resources, "Buffer Used (events)");
-	labelpair_init(&self->resources_mem, &self->resources, "Buffer capacity (events)");
-	labelpair_init(&self->resources_swap, &self->resources, "Events lost");
-	labelpair_init(&self->resources_vmem, &self->resources, "MIDI headroom (ms)");
+	labelpair_init(&self->resources_win, &self->resources, "Buffer Used (events)", 25.0);
+	labelpair_init(&self->resources_mem, &self->resources, "Buffer capacity (events)", 25.0);
+	labelpair_init(&self->resources_swap, &self->resources, "Events lost", 25.0);
+	labelpair_init(&self->resources_vmem, &self->resources, "MIDI headroom (ms)", 25.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->resources, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
@@ -431,10 +431,10 @@ void midimonitor_initcorestatusright(MidiMonitor* self)
 	psy_ui_component_setalign(&self->performance, psy_ui_ALIGN_LEFT);
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
 	psy_ui_checkbox_settext(&self->cpucheck, "");	
-	labelpair_init(&self->audiothreads, &self->performance, "Internal MIDI Version");
-	labelpair_init(&self->totaltime, &self->performance, "MIDI clock deviation (ms)");
-	labelpair_init(&self->machines, &self->performance, "Audio latency (sampl.)");
-	labelpair_init(&self->routing, &self->performance, "Sync Offset (ms)");
+	labelpair_init(&self->audiothreads, &self->performance, "Internal MIDI Version", 25.0);
+	labelpair_init(&self->totaltime, &self->performance, "MIDI clock deviation (ms)", 25.0);
+	labelpair_init(&self->machines, &self->performance, "Audio latency (sampl.)", 25.0);
+	labelpair_init(&self->routing, &self->performance, "Sync Offset (ms)", 25.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->performance, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,

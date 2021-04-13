@@ -19,11 +19,12 @@ typedef struct {
 	psy_ui_Label value;
 } LabelPair;
 
-void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* desc);
+void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* desc,
+	double desccharnumber);
 void labelpair_init_right(LabelPair*, psy_ui_Component* parent, const char* desc,
 	double desccharnumber);
 void labelpair_init_top(LabelPair*, psy_ui_Component* parent, const char* desc,
-	double charnumber);
+	double desccharnumber);
 
 #ifdef __cplusplus
 }
