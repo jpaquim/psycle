@@ -16,6 +16,7 @@ static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
+static psy_ui_RealSize spacingsize(psy_ui_Label*);
 
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 // vtable
@@ -164,14 +165,14 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 			
 			size = psy_ui_component_textsize(psy_ui_label_base(self),
 				text);						
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4 +
-				psy_ui_margin_width_px(&spacing, tm));
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4);
 		}		
 	} else {
 		rv->width = psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx((tm->tmHeight * self->linespacing) +
-		psy_ui_margin_height_px(&spacing, tm));
+	rv->height = psy_ui_value_makepx((tm->tmHeight * self->linespacing));
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
@@ -196,7 +197,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_sizepx(psy_ui_label_base(self));
+	size = size = spacingsize(self);
 		
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
@@ -339,4 +340,20 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}
+}
+
+psy_ui_RealSize spacingsize(psy_ui_Label* self)
+{
+	psy_ui_Size valsize;
+	const psy_ui_TextMetric* tm;
+	psy_ui_Margin spacing;
+
+	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
+	valsize = psy_ui_component_size(psy_ui_label_base(self));
+	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
+	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&spacing, tm), tm);
+	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&spacing, tm), tm);
+	return psy_ui_realsize_make(
+		psy_ui_value_px(&valsize.width, tm),
+		psy_ui_value_px(&valsize.height, tm));
 }

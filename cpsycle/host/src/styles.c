@@ -359,10 +359,21 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_weighted(&onprimary, medium),
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(defaults, STYLE_INPUTDEFINER_FOCUS, style);
+	// newmachine_section
+	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_all(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.20));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION, style);
 	// newmachine_section::select
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style,		
-		psy_ui_colour_make_overlay(4));
+		psy_ui_colour_make_overlay(2));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 6.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.30));
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_SELECTED, style);
 	// newmachine_searchfield	
 	style = psy_ui_style_allocinit();
@@ -373,4 +384,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.20));
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SEARCHFIELD, style);
+	// newmachine_sectionheader
+	style = psy_ui_style_allocinit();	
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);
 }

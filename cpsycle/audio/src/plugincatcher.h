@@ -24,6 +24,7 @@ typedef struct psy_audio_PluginSections {
 void psy_audio_pluginsections_init(psy_audio_PluginSections*);
 void psy_audio_pluginsections_dispose(psy_audio_PluginSections*);
 
+void psy_audio_pluginsections_reset(psy_audio_PluginSections*);
 void psy_audio_pluginsections_clear(psy_audio_PluginSections*);
 int psy_audio_pluginsections_load(psy_audio_PluginSections*);
 int psy_audio_pluginsections_save(psy_audio_PluginSections*);

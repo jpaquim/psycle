@@ -374,6 +374,7 @@
     <ClCompile Include="src\playbar.c" />
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
+    <ClCompile Include="src\pluginsview.c" />
     <ClCompile Include="src\predefsconfig.c" />
     <ClCompile Include="src\presetsbar.c" />
     <ClCompile Include="src\propertiesview.c" />
@@ -526,6 +527,7 @@
     <ClInclude Include="src\playbar.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
+    <ClInclude Include="src\pluginsview.h" />
     <ClInclude Include="src\predefsconfig.h" />
     <ClInclude Include="src\presetsbar.h" />
     <ClInclude Include="src\propertiesview.h" />
