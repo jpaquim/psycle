@@ -101,11 +101,12 @@ typedef struct NewMachineSortBar {
 	psy_ui_Button sortbytype;
 	psy_ui_Button sortbymode;
 	// references
+	NewMachineSort* sort;
 	Workspace* workspace;
 } NewMachineSortBar;
 
 void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
-	Workspace*);
+	NewMachineSort*, Workspace*);
 
 // NewMachineDetail
 typedef struct NewMachineDetail {
@@ -167,7 +168,7 @@ typedef struct NewMachineCategoryBar {
 	psy_ui_Component client;
 	psy_Table categories;
 	// references
-	NewMachineFilter* filters;
+	NewMachineFilter* filter;
 	Workspace* workspace;
 } NewMachineCategoryBar;
 
@@ -241,6 +242,8 @@ typedef struct NewMachine {
 	bool appendstack;
 	int mode;
 	uintptr_t newsectioncount;
+	NewMachineFilter filter;
+	NewMachineSort sort;
 	// references
 	Workspace* workspace;
 	uintptr_t restoresection;

@@ -183,10 +183,10 @@ void cpuview_initresources(CPUView* self)
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources, NULL,
 		"Available Resources");		
-	labelpair_init(&self->resources_win, &self->resources, "cpu.resources");
-	labelpair_init(&self->resources_mem, &self->resources, "cpu.ram");
-	labelpair_init(&self->resources_swap, &self->resources, "cpu.swap");
-	labelpair_init(&self->resources_vmem, &self->resources, "cpu.vram");	
+	labelpair_init(&self->resources_win, &self->resources, "cpu.resources", 25.0);
+	labelpair_init(&self->resources_mem, &self->resources, "cpu.ram", 25.0);
+	labelpair_init(&self->resources_swap, &self->resources, "cpu.swap", 25.0);
+	labelpair_init(&self->resources_vmem, &self->resources, "cpu.vram", 25.0);
 }
 
 void cpuview_initperformance(CPUView* self)
@@ -195,14 +195,14 @@ void cpuview_initperformance(CPUView* self)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setdefaultalign(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
-	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
-	psy_ui_checkbox_settext(&self->cpucheck, "CPU Performance");
+	psy_ui_checkbox_init_text(&self->cpucheck, &self->performance,
+		"CPU Performance");
 	psy_signal_connect(&self->cpucheck.signal_clicked, self,
 		cpuview_oncpuperf);
-	labelpair_init(&self->audiothreads, &self->performance, "Audio threads");
-	labelpair_init(&self->totaltime, &self->performance, "Total (time)");
-	labelpair_init(&self->machines, &self->performance, "Machines");
-	labelpair_init(&self->routing, &self->performance, "Routing");	
+	labelpair_init(&self->audiothreads, &self->performance, "Audio threads", 25.0);
+	labelpair_init(&self->totaltime, &self->performance, "Total (time)", 25.0);
+	labelpair_init(&self->machines, &self->performance, "Machines", 25.0);
+	labelpair_init(&self->routing, &self->performance, "Routing", 25.0);
 }
 
 void cpuview_initmodules(CPUView* self, Workspace* workspace)

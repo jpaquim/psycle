@@ -194,8 +194,10 @@ psy_Property* psy_property_clone(const psy_Property* self)
 
 			for (p = self->children; p != NULL; psy_list_next(&p)) {
 				psy_Property* q;
+				psy_Property* src;
 
-				q = psy_property_clone(p->entry);
+				src = (psy_Property*)p->entry;
+				q = psy_property_clone(src);
 				psy_list_append(&rv->children, q);
 				q->parent = rv;
 			}
