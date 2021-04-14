@@ -15,6 +15,24 @@ extern "C" {
 //
 // Displays plugin properties in a list. Used by NewMachine.
 
+typedef enum NewMachineSortMode {
+	NEWMACHINESORTMODE_NONE,
+	NEWMACHINESORTMODE_FAVORITE,
+	NEWMACHINESORTMODE_NAME,
+	NEWMACHINESORTMODE_TYPE,
+	NEWMACHINESORTMODE_MODE,
+} NewMachineSortMode;
+
+typedef struct NewMachineSort {
+ 	psy_Signal signal_changed;
+	NewMachineSortMode mode;
+} NewMachineSort;
+
+void newmachinesort_init(NewMachineSort*);
+void newmachinesort_dispose(NewMachineSort*);
+
+void newmachinesort_sort(NewMachineSort*, NewMachineSortMode);
+
 // NewMachineFilter
 typedef struct NewMachineFilter {
 	psy_Signal signal_changed;
@@ -50,35 +68,43 @@ bool newmachinefilter_hascategory(const NewMachineFilter*,
 typedef struct PluginsView {
 	// inherits
 	psy_ui_Component component;
-	// Signals
-	psy_Signal signal_selected;
+	// signals	
+	psy_Signal signal_selected;	
 	psy_Signal signal_changed;
-	// internal
-	intptr_t count;
+	// internal	
 	double lineheight;
 	double columnwidth;
 	double identwidth;
 	intptr_t numparametercols;
 	double avgcharwidth;
 	intptr_t pluginpos;
+	// ptr to unfiltered/filtered plugins
+	psy_Property* currplugins;
+	// Unfiltered Plugins
 	psy_Property* plugins;
-	psy_Property* selectedplugin;  
-	Workspace* workspace;	
+	// Filtered Plugins
+	psy_Property* filteredplugins;
+	psy_Property* selectedplugin;  	
 	bool generatorsenabled;
 	bool effectsenabled;
-	NewMachineFilter filters;
 	int mode;
+	// References
+	NewMachineFilter* filter;
+	NewMachineSort* sort;
+	Workspace* workspace;	
 } PluginsView;
 
-void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites,
-	Workspace*);
+void pluginsview_init(PluginsView*, psy_ui_Component* parent, Workspace*);
 
+void pluginsview_clear(PluginsView*);
+void pluginsview_clearfilter(PluginsView*);
 void pluginsview_setplugins(PluginsView*, const psy_Property*);
-
+void pluginsview_setfilter(PluginsView*, NewMachineFilter*);
+void pluginsview_setsort(PluginsView*, NewMachineSort*);
+void pluginsview_sort(PluginsView*, NewMachineSortMode);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* PLUGINSVIEW_H */
-
