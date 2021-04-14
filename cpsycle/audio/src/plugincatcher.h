@@ -32,6 +32,8 @@ void psy_audio_pluginsections_add(psy_audio_PluginSections*,
 	const char* sectionkey, psy_audio_MachineInfo*);
 void psy_audio_pluginsections_remove(psy_audio_PluginSections*,
 	const char* sectionkey, psy_audio_MachineInfo*);
+void psy_audio_pluginsections_clearsection(psy_audio_PluginSections*,
+	const char* sectionkey);
 
 typedef struct psy_audio_PluginCatcher {
 	psy_Property* plugins;

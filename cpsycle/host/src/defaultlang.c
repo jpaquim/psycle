@@ -520,10 +520,11 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "type", "Type");
 	psy_property_set_str(section, "mode", "Mode");
 	psy_property_set_str(section, "section", "Section");
-	psy_property_set_str(section, "create", "Create");	
+	psy_property_set_str(section, "create", "Create");
+	psy_property_set_str(section, "remove", "Remove");
+	psy_property_set_str(section, "clear", "Clear");
 	psy_property_set_str(section, "add-to", "Add To");
 	psy_property_set_str(section, "remove-from", "Remove From");
-	psy_property_set_str(section, "remove", "Remove");
 	psy_property_set_str(section,
 		"select-plugin-to-view-description",
 		"Select a plugin to view its description");

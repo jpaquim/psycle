@@ -27,7 +27,7 @@ void labelpair_init_right(LabelPair* self, psy_ui_Component* parent, const char*
 
 	labelpair_init(self, parent, desc, desccharnumber);
 	psy_ui_label_settextalignment(&self->desc,
-		psy_ui_ALIGNMENT_RIGHT);	
+		psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_setcharnumber(&self->value, 0.0);
 	psy_ui_component_setalign(&self->value.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_BOTTOM);

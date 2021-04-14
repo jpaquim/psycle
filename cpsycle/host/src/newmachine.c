@@ -202,7 +202,9 @@ void newmachinesectionbar_init(NewMachineSectionBar* self, psy_ui_Component* par
 	psy_ui_button_init_text(&self->createsection, &self->component, NULL,
 		"newmachine.create");
 	psy_ui_button_init_text(&self->removesection, &self->component, NULL,
-		"newmachine.remove");	
+		"newmachine.remove");
+	psy_ui_button_init_text(&self->clearsection, &self->component, NULL,
+		"newmachine.clear");
 	psy_ui_label_init_text(&self->descitem, &self->component, NULL,
 		"Plugin");
 	psy_ui_button_init_text(&self->addtosection, &self->component, NULL,
@@ -287,6 +289,26 @@ void newmachinesortbar_onsortbymode(NewMachineSortBar* self,
 // NewMachineDetail
 // prototypes
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
+static void newmachinedetail_oncategoryeditaccept(NewMachineDetail*,
+	psy_ui_Component* sender);
+static void newmachinedetail_oncategoryeditreject(NewMachineDetail*,
+	psy_ui_Component* sender);
+static void newmachinedetail_ondestroy(NewMachineDetail*);
+// vtable
+static psy_ui_ComponentVtable newmachinedetail_vtable;
+static bool newmachinedetail_vtable_initialized = FALSE;
+
+static void newmachinedetail_vtable_init(NewMachineDetail* self)
+{
+	if (!newmachinedetail_vtable_initialized) {
+		newmachinedetail_vtable = *(self->component.vtable);
+		newmachinedetail_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			newmachinedetail_ondestroy;
+		newmachinedetail_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &newmachinedetail_vtable;
+}
 // implementation
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	NewMachineFilter* filter, Workspace* workspace)
@@ -295,8 +317,11 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	newmachinedetail_vtable_init(self);
+	psy_signal_init(&self->signal_categorychanged);
 	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 2.0);
 	psy_ui_component_setspacing(&self->component, spacing);
+	self->plugin = NULL;
 	self->workspace = workspace;	
 	// plugin name
 	labelpair_init(&self->plugname, &self->component, "Name", 12.0);
@@ -310,7 +335,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setalign(&self->dllname.component, psy_ui_ALIGN_BOTTOM);
-	// song loading compatibility
+	// bottom
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_all_em(&spacing, 0.5, 1.0, 0.5, 0.0);	
@@ -325,18 +350,46 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);
-	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->compatlabel, &self->bottom, NULL,
 		"newmachine.song-loading-compatibility");
 	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->compatlabel), margin);
-	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
-	// details
-	labelpair_init_right(&self->apiversion, &self->component, "API Version", 12.0);
-	labelpair_init_right(&self->version, &self->component, "Version", 12.0);	
-	labelpair_init_right(&self->dllname, &self->component, "DllName", 12.0);
+	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_TOP);
+	// details	
+	psy_ui_component_init(&self->details, &self->component, NULL);
+	psy_ui_component_setalign(&self->details, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setdefaultalign(&self->details,
+		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
+	// category
+	psy_ui_component_init(&self->category, &self->details, NULL);	
+	psy_ui_label_init_text(&self->categorydesc, &self->category, NULL,
+		"Category");
+	psy_ui_label_settextalignment(&self->categorydesc,
+		psy_ui_ALIGNMENT_RIGHT);
+	psy_ui_label_setcharnumber(&self->categorydesc, 12.0);
+	psy_ui_component_setalign(psy_ui_label_base(&self->categorydesc),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_edit_init(& self->categoryedit, &self->category);
+	psy_ui_edit_enableinputfield(&self->categoryedit);	
+	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 1.5);
+	psy_ui_component_setmargin(psy_ui_edit_base(&self->categoryedit), margin);
+	psy_ui_component_setalign(psy_ui_edit_base(&self->categoryedit),
+		psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&self->categoryedit.signal_accept,
+		self, newmachinedetail_oncategoryeditaccept);
+	psy_signal_connect(&self->categoryedit.signal_reject,
+		self, newmachinedetail_oncategoryeditreject);
+	labelpair_init_right(&self->apiversion, &self->details, "API Version", 12.0);
+	labelpair_init_right(&self->version, &self->details, "Version", 12.0);
+	labelpair_init_right(&self->dllname, &self->details, "DllName", 12.0);
 	newmachinedetail_reset(self);
+}
+
+void newmachinedetail_ondestroy(NewMachineDetail* self)
+{
+	psy_signal_dispose(&self->signal_categorychanged);
 }
 
 void newmachinedetail_reset(NewMachineDetail* self)
@@ -346,28 +399,32 @@ void newmachinedetail_reset(NewMachineDetail* self)
 		"newmachine.select-plugin-to-view-description"));
 	newmachinedetail_setplugname(self, "");
 	newmachinedetail_setdllname(self, "");
+	newmachinedetail_setcategoryname(self, "");
 	newmachinedetail_setapiversion(self, 0);
-	newmachinedetail_setplugversion(self, 0);	
+	newmachinedetail_setplugversion(self, 0);
+	self->plugin = NULL;
 	psy_ui_component_align(&self->component);	
 }
 
 void newmachinedetail_update(NewMachineDetail* self,
 	psy_Property* property)
 {
-	if (property) {						
+	if (property) {		
 		psy_audio_MachineInfo machineinfo;
 		psy_Path path;
 
+		self->plugin = property;
 		machineinfo_init(&machineinfo);
 		psy_audio_machineinfo_from_property(property, &machineinfo);		
 		newmachinedetail_setdescription(self, machineinfo.desc);		
 		psy_path_init(&path, machineinfo.modulepath);
 		newmachinedetail_setplugname(self, machineinfo.Name);
 		newmachinedetail_setdllname(self, psy_path_filename(&path));
-		psy_path_dispose(&path);
-		machineinfo_dispose(&machineinfo);
 		newmachinedetail_setapiversion(self, machineinfo.APIVersion);
 		newmachinedetail_setplugversion(self, machineinfo.PlugVersion);
+		newmachinedetail_setcategoryname(self, machineinfo.category);		
+		psy_path_dispose(&path);
+		machineinfo_dispose(&machineinfo);
 	} else {
 		newmachinedetail_reset(self);
 	}
@@ -396,6 +453,15 @@ void newmachinedetail_setdllname(NewMachineDetail* self, const char* text)
 	psy_ui_label_settext(&self->dllname.value, text);
 }
 
+void newmachinedetail_setcategoryname(NewMachineDetail* self, const char* text)
+{
+	if (text) {
+		psy_ui_edit_settext(&self->categoryedit, text);
+	} else {
+		psy_ui_edit_settext(&self->categoryedit, "");
+	}
+}
+
 void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)
 {
 	char valstr[64];
@@ -410,6 +476,21 @@ void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
 
 	psy_snprintf(valstr, 64, "%d", (int)apiversion);
 	psy_ui_label_settext(&self->apiversion.value, valstr);
+}
+
+void newmachinedetail_oncategoryeditaccept(NewMachineDetail* self,
+	psy_ui_Component* sender)
+{
+	if (self->plugin) {		
+		psy_signal_emit(&self->signal_categorychanged, self, 0);	
+	}
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+}
+
+void newmachinedetail_oncategoryeditreject(NewMachineDetail* self,
+	psy_ui_Component* sender)
+{
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
 // NewMachineFilterBar
@@ -559,6 +640,7 @@ static void newmachinecategorybar_findcategories(NewMachineCategoryBar*,
 	psy_Property* source);
 static void newmachinecategorybar_onclicked(NewMachineCategoryBar*,
 	psy_ui_Button* sender);
+
 // vtable
 static psy_ui_ComponentVtable newmachinecategorybar_vtable;
 static bool newmachinecategorybar_vtable_initialized = FALSE;
@@ -875,9 +957,10 @@ static void newmachine_onpluginchanged(NewMachine*, psy_ui_Component* parent,
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onmousedown(NewMachine*, psy_ui_MouseEvent*);
 static void newmachine_oncreatesection(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onremovesection(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onclearsection(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onaddtosection(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onremovefromsection(NewMachine*, psy_ui_Component* sender);
-static void newmachine_onremovesection(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onrescan(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
@@ -885,6 +968,7 @@ static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
 static void newmachine_ontimer(NewMachine*, uintptr_t timerid);
 static void newmachine_buildsections(NewMachine*);
 static void newmachine_updateplugins(NewMachine*);
+static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail* sender);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -1025,6 +1109,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmaximumsize(&self->detail.component,
 		psy_ui_size_make_em(40.0, 0.0));
+	psy_signal_connect(&self->detail.signal_categorychanged, self,
+		newmachine_onplugincategorychanged);	
 	// Rescanbar
 	newmachinerescanbar_init(&self->rescanbar, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->rescanbar.component, psy_ui_ALIGN_BOTTOM);
@@ -1052,6 +1138,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onremovefromsection);
 	psy_signal_connect(&self->sectionbar.removesection.signal_clicked, self,
 		newmachine_onremovesection);
+	psy_signal_connect(&self->sectionbar.clearsection.signal_clicked, self,
+		newmachine_onclearsection);
 	psy_signal_connect(&workspace->signal_scanprogress, self,
 		newmachine_onpluginscanprogress);
 	newmachine_updateskin(self);
@@ -1221,6 +1309,23 @@ void newmachine_onremovesection(NewMachine* self, psy_ui_Component* sender)
 	}
 }
 
+void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
+{
+	if (!self->selectedsection) {
+		workspace_output(self->workspace, "Select/Create first a section");
+	} else {
+		self->selectedplugin = NULL;
+		psy_audio_pluginsections_clearsection(&self->workspace->pluginsections,
+			psy_property_key(self->selectedsection->property));
+		newmachine_buildsections(self);
+		psy_ui_app()->alignvalid = FALSE;
+		psy_ui_component_align(&self->client);
+		psy_ui_app()->alignvalid = TRUE;
+		psy_ui_component_invalidate(&self->client);
+	}
+}
+
+
 psy_Property* newmachine_favorites(psy_Property* source)
 {
 	psy_Property* rv = 0;
@@ -1366,4 +1471,24 @@ void newmachine_updateplugins(NewMachine* self)
 	pluginsview_setplugins(&self->pluginsview,
 		workspace_pluginlist(self->workspace));
 	psy_ui_component_align(&self->client);	
+}
+
+void newmachine_onplugincategorychanged(NewMachine* self, NewMachineDetail* sender)
+{
+	if (self->selectedplugin && workspace_pluginlist(self->workspace)) {
+		psy_Property* plugin;
+
+		plugin = psy_property_find(workspace_pluginlist(self->workspace),
+			psy_property_key(self->selectedplugin), PSY_PROPERTY_TYPE_SECTION);
+		if (plugin) {
+			psy_Property* category;
+
+			category = psy_property_at(plugin, "category", PSY_PROPERTY_TYPE_STRING);
+			if (category) {
+				psy_property_setitem_str(category, psy_ui_edit_text(&sender->categoryedit));
+			}
+			psy_audio_plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
+			newmachine_updateplugins(self);
+		}
+	}
 }

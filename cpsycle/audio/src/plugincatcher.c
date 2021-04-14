@@ -80,6 +80,10 @@ void makeplugininfo(
 }
 
 // psy_audio_PluginSections
+// prototypes
+static psy_Property* psy_audio_pluginsections_section(
+	psy_audio_PluginSections*, const char* sectionkey);
+// implementation
 void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
 	char inipath[_MAX_PATH];
@@ -142,55 +146,35 @@ int psy_audio_pluginsections_save(psy_audio_PluginSections* self)
 void psy_audio_pluginsections_add(psy_audio_PluginSections* self,
 	const char* sectionkey, psy_audio_MachineInfo* macinfo)
 {
-	psy_Property* section;
-	psy_List* p;
-	char name[_MAX_PATH];
+	psy_Property* section;	
 
-	if (!sectionkey) {
-		return;
-	}
-	section = NULL;
-	for (p = psy_property_begin(self->sections); p != NULL; p = p->next) {
-		psy_Property* property;
-
-		property = (psy_Property*)psy_list_entry(p);
-		if (strcmp(psy_property_key(property), sectionkey) == 0) {
-			section = property;
-			break;
-		}
-	}
+	section = psy_audio_pluginsections_section(self, sectionkey);
 	if (!section) {
 		section = psy_property_append_section(self->sections, sectionkey);
 	}
 	if (macinfo) {
-		psy_audio_plugincatcher_catchername(macinfo->modulepath, name, macinfo->shellidx);
-		makeplugininfo(section, name, macinfo->modulepath, macinfo->type, macinfo, NULL);
+		char name[_MAX_PATH];
+
+		psy_audio_plugincatcher_catchername(macinfo->modulepath,
+			name, macinfo->shellidx);
+		makeplugininfo(section, name, macinfo->modulepath, macinfo->type,
+			macinfo, NULL);
 	}
 }
 
 void psy_audio_pluginsections_remove(psy_audio_PluginSections* self,
 	const char* sectionkey, psy_audio_MachineInfo* macinfo)
 {
-	psy_Property* section;	
-	psy_List* p;
-	char name[_MAX_PATH];
+	psy_Property* section;		
 
-	if (!sectionkey) {
-		return;
-	}
-	section = NULL;
-	for (p = psy_property_begin(self->sections); p != NULL; p = p->next) {
-		psy_Property* property;
-
-		property = (psy_Property*)psy_list_entry(p);
-		if (strcmp(psy_property_key(property), sectionkey) == 0) {
-			section = property;
-			break;
-		}
-	}
-	if (section) {
+	section = psy_audio_pluginsections_section(self, sectionkey);
+	if (section) {		
 		if (macinfo) {
-			psy_audio_plugincatcher_catchername(macinfo->modulepath, name, macinfo->shellidx);
+			psy_List* p;
+			char name[_MAX_PATH];
+
+			psy_audio_plugincatcher_catchername(macinfo->modulepath, name,
+				macinfo->shellidx);
 			for (p = psy_property_begin(section); p != NULL; p = p->next) {
 				psy_Property* property;
 
@@ -204,6 +188,39 @@ void psy_audio_pluginsections_remove(psy_audio_PluginSections* self,
 			psy_property_remove(self->sections, section);
 		}
 	}
+}
+
+void psy_audio_pluginsections_clearsection(psy_audio_PluginSections* self,
+	const char* sectionkey)
+{	
+	psy_Property* section;		
+
+	section = psy_audio_pluginsections_section(self, sectionkey);
+	if (section) {		
+		psy_property_clear(section);		
+	}
+}
+
+psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections* self,
+	const char* sectionkey)
+{
+	if (psy_strlen(sectionkey) > 0) {
+		psy_Property* rv;
+		psy_List* p;
+
+		rv = NULL;
+		for (p = psy_property_begin(self->sections); p != NULL; p = p->next) {
+			psy_Property* property;
+
+			property = (psy_Property*)psy_list_entry(p);
+			if (strcmp(psy_property_key(property), sectionkey) == 0) {
+				rv = property;
+				break;
+			}
+		}
+		return rv;
+	}
+	return NULL;
 }
 
 // psy_audio_PluginCatcher

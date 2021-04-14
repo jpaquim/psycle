@@ -79,6 +79,7 @@ typedef struct NewMachineSectionBar {
 	psy_ui_Label desc;
 	psy_ui_Button createsection;
 	psy_ui_Button removesection;
+	psy_ui_Button clearsection;
 	psy_ui_Label descitem;
 	psy_ui_Button addtosection;
 	psy_ui_Button removefromsection;
@@ -112,17 +113,24 @@ void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
 typedef struct NewMachineDetail {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_categorychanged;
 	// intern
 	psy_ui_Label desclabel;
 	LabelPair plugname;
+	psy_ui_Component details;
 	LabelPair dllname;
 	LabelPair version;
 	LabelPair apiversion;
+	psy_ui_Component category;
+	psy_ui_Label categorydesc;
+	psy_ui_Edit categoryedit;
 	psy_ui_Component bottom;
     psy_ui_Label compatlabel;
     psy_ui_CheckBox compatblitzgamefx;
 	// references
-    Workspace* workspace;	
+	psy_Property* plugin;
+    Workspace* workspace;
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
@@ -133,6 +141,7 @@ void newmachinedetail_update(NewMachineDetail*, psy_Property*);
 void newmachinedetail_setdescription(NewMachineDetail*, const char* text);
 void newmachinedetail_setplugname(NewMachineDetail*, const char* text);
 void newmachinedetail_setdllname(NewMachineDetail*, const char* text);
+void newmachinedetail_setcategoryname(NewMachineDetail*, const char* text);
 void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version);
 void newmachinedetail_setapiversion(NewMachineDetail* self,
 	int16_t apiversion);
