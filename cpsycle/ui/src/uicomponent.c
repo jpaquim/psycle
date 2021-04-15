@@ -704,6 +704,13 @@ void psy_ui_component_align(psy_ui_Component* self)
 	self->vtable->onalign(self);
 }
 
+void psy_ui_component_align_full(psy_ui_Component* self)
+{
+	psy_ui_app()->alignvalid = FALSE;
+	psy_ui_component_align(self);
+	psy_ui_app()->alignvalid = TRUE;
+}
+
 void psy_ui_component_alignall(psy_ui_Component* self)
 {
 	psy_List* p;
