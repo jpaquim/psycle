@@ -206,17 +206,20 @@ typedef struct NewMachineSection {
 	PluginsView pluginview;
 	bool preventedit;
 	// references
-	psy_Property* property;
+	psy_Property* section;
 	psy_ui_Edit* edit;
 	struct NewMachine* newmachine;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* property, psy_ui_Edit*, struct NewMachine*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, struct NewMachine*, Workspace*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, psy_ui_Edit*, struct NewMachine*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, struct NewMachine*, Workspace*);
+
+const char* newmachinesection_key(const NewMachineSection*);
+const char* newmachinesection_name(const NewMachineSection*);
 
 typedef struct NewMachine {
 	// inherits

@@ -56,6 +56,9 @@
     <Filter Include="machine\machineview\paramview">
       <UniqueIdentifier>{70aa1202-6ea4-4404-bd5d-cb96ea06c60c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="machine\machineview\newmachine">
+      <UniqueIdentifier>{136b5d45-0d19-464e-ba52-949c6d9e0507}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\mainframe.c">
@@ -445,9 +448,6 @@
     <ClCompile Include="src\machineview.c">
       <Filter>machine\machineview</Filter>
     </ClCompile>
-    <ClCompile Include="src\newmachine.c">
-      <Filter>machine\machineview</Filter>
-    </ClCompile>
     <ClCompile Include="src\machineframe.c">
       <Filter>machine\machineview\paramview</Filter>
     </ClCompile>
@@ -478,8 +478,11 @@
     <ClCompile Include="src\paramgear.c">
       <Filter>machine</Filter>
     </ClCompile>
+    <ClCompile Include="src\newmachine.c">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClCompile>
     <ClCompile Include="src\pluginsview.c">
-      <Filter>machine\machineview</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -881,9 +884,6 @@
     <ClInclude Include="src\machineview.h">
       <Filter>machine\machineview</Filter>
     </ClInclude>
-    <ClInclude Include="src\newmachine.h">
-      <Filter>machine\machineview</Filter>
-    </ClInclude>
     <ClInclude Include="src\machineframe.h">
       <Filter>machine\machineview\paramview</Filter>
     </ClInclude>
@@ -914,8 +914,11 @@
     <ClInclude Include="src\paramgear.h">
       <Filter>machine</Filter>
     </ClInclude>
+    <ClInclude Include="src\newmachine.h">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClInclude>
     <ClInclude Include="src\pluginsview.h">
-      <Filter>machine\machineview</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

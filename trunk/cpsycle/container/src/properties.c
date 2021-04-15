@@ -1183,7 +1183,13 @@ psy_Property* psy_property_setitem_str(psy_Property* self, const char* str)
 	assert(self);
 
 	if (!self->item.readonly) {
-		psy_strreset(&self->item.value.s, str);		
+		if ((self->item.typ == PSY_PROPERTY_TYPE_STRING ||
+				self->item.typ == PSY_PROPERTY_TYPE_FONT)) {
+			psy_strreset(&self->item.value.s, str);
+		} else {
+			self->item.typ = PSY_PROPERTY_TYPE_STRING;
+			self->item.value.s = psy_strdup(str);
+		}
 	}
 	return self;
 }

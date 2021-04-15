@@ -100,6 +100,7 @@ void pluginsview_clear(PluginsView*);
 void pluginsview_clearfilter(PluginsView*);
 void pluginsview_setplugins(PluginsView*, const psy_Property*);
 void pluginsview_setfilter(PluginsView*, NewMachineFilter*);
+void pluginsview_filter(PluginsView*);
 void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);
 

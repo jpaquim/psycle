@@ -347,7 +347,7 @@ static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
 static void pluginsview_onsortchanged(PluginsView*, NewMachineSort* sender);
 
 static psy_ui_ComponentVtable pluginsview_vtable;
-static int pluginsview_vtable_initialized = 0;
+static bool pluginsview_vtable_initialized = FALSE;
 
 static void pluginsview_vtable_init(PluginsView* self)
 {
@@ -370,7 +370,8 @@ static void pluginsview_vtable_init(PluginsView* self)
 			pluginsview_onmousedoubleclick;
 		pluginsview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
-			pluginsview_onpreferredsize;		
+			pluginsview_onpreferredsize;
+		pluginsview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &pluginsview_vtable;
 }
@@ -387,7 +388,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_changed);
 	self->workspace = workspace;	
 	self->mode = NEWMACHINE_APPEND;
-	self->currplugins;
+	self->currplugins = NULL;
 	self->plugins = NULL;
 	self->filteredplugins = NULL;
 	self->selectedplugin = NULL;
@@ -837,6 +838,11 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 }
 
 void pluginsview_onfilterchanged(PluginsView* self, NewMachineFilter* sender)
+{
+	pluginsview_filter(self);	
+}
+
+void pluginsview_filter(PluginsView* self)
 {
 	if (self->filter && self->plugins) {
 		pluginsview_clearfilter(self);
