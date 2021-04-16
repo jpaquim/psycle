@@ -5,7 +5,7 @@
 #include "../../detail/os.h"
 
 #include "plugincatcher.h"
-
+// local
 #include "dummy.h"
 #include "duplicator.h"
 #include "duplicator2.h"
@@ -18,11 +18,9 @@
 #include "xmsampler.h"
 #include "vstplugin.h"
 #include "ladspaplugin.h"
-
+// file
 #include <dir.h>
-
-#include <stdlib.h>
-#include <string.h>
+// pltaform
 #include "../../detail/portable.h"
 #include "../../detail/cpu.h"
 
@@ -250,6 +248,64 @@ psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections* self,
 	return NULL;
 }
 
+// psy_audio_PluginCategories
+void psy_audio_plugincategories_init(psy_audio_PluginCategories* self,
+	psy_Property* plugins)
+{
+	assert(self);
+
+	psy_table_init(&self->container);
+	psy_audio_plugincategories_update(self, plugins);
+}
+
+void psy_audio_plugincategories_dispose(psy_audio_PluginCategories* self)
+{
+	assert(self);
+
+	psy_table_dispose(&self->container);
+}
+
+void psy_audio_plugincategories_update(psy_audio_PluginCategories* self,
+	psy_Property* plugins)
+{
+	psy_List* p;
+	uintptr_t num;
+	uintptr_t i;
+
+	psy_table_disposeall(&self->container, NULL);
+	psy_table_init(&self->container);
+	if (!plugins) {
+		return;
+	}
+	num = psy_property_size(plugins);
+	p = psy_property_begin(plugins);
+	for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
+		psy_Property* q;
+		psy_audio_MachineInfo machineinfo;
+
+		q = (psy_Property*)psy_list_entry(p);
+
+		machineinfo_init(&machineinfo);
+		psy_audio_machineinfo_from_property(q, &machineinfo);
+		if (psy_strlen(machineinfo.category) > 0) {
+			if (!psy_table_exists_strhash(&self->container,
+				machineinfo.category)) {
+				psy_table_insert_strhash(&self->container,
+					machineinfo.category,
+					(void*)psy_strdup(machineinfo.category));
+			}
+		}
+		machineinfo_dispose(&machineinfo);
+	}
+}
+
+psy_TableIterator psy_audio_plugincategories_begin(
+	psy_audio_PluginCategories* self)
+{
+	return psy_table_begin(&self->container);
+}
+
+
 // psy_audio_PluginCatcher
 static void plugincatcher_makeinternals(psy_audio_PluginCatcher*);
 static void plugincatcher_makesampler(psy_audio_PluginCatcher*);
@@ -294,7 +350,7 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 }
 
 void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
-{
+{	
 	psy_property_deallocate(self->plugins);
 	self->plugins = NULL;
 	free(self->inipath);

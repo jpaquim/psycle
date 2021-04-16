@@ -60,6 +60,14 @@ INLINE void psy_ui_border_init_style(psy_ui_Border* self, psy_ui_BorderStyle sty
 	psy_ui_border_init_all(self, style, style, style, style);
 }
 
+INLINE void psy_ui_border_init_top(psy_ui_Border* self, psy_ui_BorderStyle style,
+	psy_ui_Colour  colour)
+{
+	psy_ui_border_init_all(self, style, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE,
+		psy_ui_BORDER_NONE);
+	self->colour_top = colour;
+}
+
 INLINE void psy_ui_border_setcolour(psy_ui_Border* self, psy_ui_Colour colour)
 {
 	self->colour_top = colour;

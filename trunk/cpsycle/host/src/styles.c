@@ -234,8 +234,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(defaults, STYLE_ZOOMBOX, style);
 	// machineview
-	style = psy_ui_style_allocinit();
-	psy_ui_colour_set(&style->colour, primary);
+	style = psy_ui_style_allocinit();	
 	psy_ui_colour_set(&style->backgroundcolour,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.09));
 	psy_ui_defaults_setstyle(defaults, STYLE_MACHINEVIEW, style);

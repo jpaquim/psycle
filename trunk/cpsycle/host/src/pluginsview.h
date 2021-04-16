@@ -90,11 +90,10 @@ typedef struct PluginsView {
 	int mode;
 	// References
 	NewMachineFilter* filter;
-	NewMachineSort* sort;
-	Workspace* workspace;	
+	NewMachineSort* sort;	
 } PluginsView;
 
-void pluginsview_init(PluginsView*, psy_ui_Component* parent, Workspace*);
+void pluginsview_init(PluginsView*, psy_ui_Component* parent);
 
 void pluginsview_clear(PluginsView*);
 void pluginsview_clearfilter(PluginsView*);

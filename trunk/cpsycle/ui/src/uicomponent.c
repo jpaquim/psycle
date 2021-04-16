@@ -984,6 +984,26 @@ const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component* self)
 	return self->sizehints->minsize;
 }
 
+psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
+{
+	psy_ui_Size rv;
+	const psy_ui_TextMetric* tm;
+	psy_ui_Margin spacing;
+	psy_ui_Value spacing_width;
+	psy_ui_Value spacing_height;
+
+
+	rv = psy_ui_component_size(self);
+	spacing = psy_ui_component_spacing(self);
+	tm = psy_ui_component_textmetric(self);
+	spacing_width = psy_ui_margin_width(&spacing, tm);
+	psy_ui_value_sub(&rv.width, &spacing_width, tm);
+	spacing_height = psy_ui_margin_height(&spacing, tm);
+	psy_ui_value_sub(&rv.height, &spacing_height, tm);
+	return rv;
+}
+
+
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 {
 	self->imp->vtable->dev_seticonressource(self->imp, ressourceid);
@@ -1253,7 +1273,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		size = psy_ui_component_size(psy_ui_component_parent(self));		
 		scrollstepy_px = (intptr_t)psy_ui_component_scrollstep_height_px(self);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxlines = (int)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
+		maxlines = (intptr_t)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);		
 		scrolltoppx = psy_ui_component_scrolltoppx(self);		
@@ -1292,7 +1312,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		size = psy_ui_component_size(psy_ui_component_parent(self));		
 		scrollstepx_px = (intptr_t)psy_ui_component_scrollstep_width_px(self);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxrows = (int)(psy_ui_value_px(&preferredsize.width, tm) /
+		maxrows = (intptr_t)(psy_ui_value_px(&preferredsize.width, tm) /
 			(double)scrollstepx_px);
 		visirows = (intptr_t)(psy_ui_value_px(&size.width, tm) / scrollstepx_px);		
 		scrollleftpx = psy_ui_component_scrollleftpx(self);		

@@ -550,6 +550,16 @@ INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const
 		psy_ui_component_font(self));
 }
 
+psy_ui_Size psy_ui_component_innersize(const psy_ui_Component*);
+
+INLINE psy_ui_RealSize psy_ui_component_innersize_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+
+	size = psy_ui_component_innersize(self);
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
+}
+
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
 void psy_ui_component_setbackgroundcolour(psy_ui_Component*, psy_ui_Colour);

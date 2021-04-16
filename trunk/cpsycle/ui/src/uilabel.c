@@ -16,7 +16,6 @@ static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
-static psy_ui_RealSize spacingsize(psy_ui_Label*);
 
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 // vtable
@@ -197,7 +196,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = size = spacingsize(self);
+	size = psy_ui_component_innersize_px(self);
 		
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
@@ -254,8 +253,8 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, double number)
-{
-	self->charnumber = number;
+{	
+	self->charnumber = psy_max(0.0, number);
 }
 
 void psy_ui_label_setlinespacing(psy_ui_Label* self, double spacing)
@@ -340,20 +339,4 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}
-}
-
-psy_ui_RealSize spacingsize(psy_ui_Label* self)
-{
-	psy_ui_Size valsize;
-	const psy_ui_TextMetric* tm;
-	psy_ui_Margin spacing;
-
-	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
-	valsize = psy_ui_component_size(psy_ui_label_base(self));
-	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
-	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&spacing, tm), tm);
-	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&spacing, tm), tm);
-	return psy_ui_realsize_make(
-		psy_ui_value_px(&valsize.width, tm),
-		psy_ui_value_px(&valsize.height, tm));
 }

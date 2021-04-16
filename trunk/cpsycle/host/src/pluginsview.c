@@ -22,7 +22,6 @@ static int isplugin(int type);
 
 // Quicksort callbacks
 psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp);
-psy_Property* newmachine_favorites(psy_Property* source);
 static int newmachine_comp_favorite(psy_Property* p, psy_Property* q);
 static int newmachine_comp_name(psy_Property* p, psy_Property* q);
 static int newmachine_comp_type(psy_Property* p, psy_Property* q);
@@ -337,7 +336,7 @@ static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, double x, double y);
-static void pluginsview_computetextsizes(PluginsView*, const psy_ui_Size*);
+static void pluginsview_computetextsizes(PluginsView*, psy_ui_RealSize);
 static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
@@ -376,17 +375,13 @@ static void pluginsview_vtable_init(PluginsView* self)
 	self->component.vtable = &pluginsview_vtable;
 }
 
-void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
-	Workspace* workspace)
-{	
-	psy_ui_Size size;
-
+void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
+{
 	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_init(&self->signal_selected);
-	psy_signal_init(&self->signal_changed);
-	self->workspace = workspace;	
+	psy_signal_init(&self->signal_changed);	
 	self->mode = NEWMACHINE_APPEND;
 	self->currplugins = NULL;
 	self->plugins = NULL;
@@ -395,9 +390,9 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	self->filter = NULL;
 	self->sort = NULL;
 	self->generatorsenabled = TRUE;
-	self->effectsenabled = TRUE;	
-	size = psy_ui_component_size(&self->component);
-	pluginsview_computetextsizes(self, &size);	
+	self->effectsenabled = TRUE;		
+	pluginsview_computetextsizes(self, 
+		psy_ui_component_innersize_px(&self->component));	
 }
 
 void pluginsview_ondestroy(PluginsView* self)
@@ -471,22 +466,42 @@ void pluginsview_setsort(PluginsView* self, NewMachineSort* sort)
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 {	
 	if (self->plugins) {
-		psy_ui_Size size;
+		psy_ui_RealSize size;
 		psy_List* p;
-		psy_ui_RealPoint cp;		
+		psy_ui_RealPoint cp;
+		bool odd;		
+		psy_ui_Colour bgcolour;
+		psy_ui_Colour overlaycolour;
+		int overlay;
+		psy_ui_Colour oddlinebgcolour;
 		
-		size = psy_ui_component_size(&self->component);
-		pluginsview_computetextsizes(self, &size);
+		size = psy_ui_component_innersize_px(&self->component);
+		pluginsview_computetextsizes(self, size);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
+		odd = FALSE;
+		bgcolour = psy_ui_component_backgroundcolour(&self->component);
+		overlaycolour = psy_ui_colour_white();
+		overlay = 2;
+		oddlinebgcolour = psy_ui_colour_overlayed(&bgcolour, &overlaycolour,
+			overlay / 100.0);
 		for (p = psy_property_begin(self->currplugins);
-				p != NULL; psy_list_next(&p)) {
+				p != NULL; psy_list_next(&p)) {			
 			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
 				cp);
 			cp.x += self->columnwidth;
 			if (cp.x >= self->numparametercols * self->columnwidth) {
 				cp.x = 0.0;
 				cp.y += self->lineheight;
+				odd = !odd;
+				if (odd && p->next) {
+					psy_ui_RealRectangle r;
+
+					psy_ui_realrectangle_init_all(&r,
+						psy_ui_realpoint_make(0, cp.y),
+						psy_ui_realsize_make(size.width, self->lineheight));
+					psy_ui_drawsolidrectangle(g, r, oddlinebgcolour);
+				}
 			}
 		}
 	}
@@ -522,7 +537,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		topleft.y + 2, text, strlen(text));
 }
 
-void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
+void pluginsview_computetextsizes(PluginsView* self, psy_ui_RealSize size)
 {
 	const psy_ui_TextMetric* tm;
 	
@@ -530,9 +545,9 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->avgcharwidth = tm->tmAveCharWidth;
 	self->lineheight = floor(tm->tmHeight * 1.5);
 	self->columnwidth = tm->tmAveCharWidth * 45;
-	self->identwidth = tm->tmAveCharWidth * 4;
-	self->numparametercols = 
-		(uintptr_t)psy_max(1, psy_ui_value_px(&size->width, tm) / self->columnwidth);
+	self->identwidth = tm->tmAveCharWidth * 4;	
+	self->numparametercols = (uintptr_t)psy_max(1, size.width /
+		self->columnwidth);	
 	psy_ui_component_setscrollstep_height(&self->component,
 		psy_ui_value_makepx(self->lineheight));
 }
@@ -603,11 +618,11 @@ void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	if (self->currplugins) {		
-		psy_ui_Size parentsize;
+		psy_ui_RealSize parentsize;
 		
-		parentsize = psy_ui_component_size(psy_ui_component_parent(&self->component));
-		pluginsview_computetextsizes(self, &parentsize);
-		rv->width = parentsize.width;
+		parentsize = psy_ui_component_innersize_px(psy_ui_component_parent(&self->component));
+		pluginsview_computetextsizes(self, parentsize);
+		rv->width = psy_ui_value_makepx(parentsize.width);
 		rv->height = psy_ui_value_makepx(self->lineheight *
 			pluginsview_numlines(self));
 	}
@@ -628,9 +643,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 			case psy_ui_KEY_RETURN:
 				if (self->selectedplugin) {
 					psy_signal_emit(&self->signal_selected, self, 1,
-						self->selectedplugin);
-					workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-						SECTION_ID_MACHINEVIEW_WIRES, 0);
+						self->selectedplugin);					
 					psy_ui_keyevent_stoppropagation(ev);
 				}
 				break;
@@ -729,7 +742,7 @@ uintptr_t pluginsview_visilines(PluginsView* self)
 {
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	return (uintptr_t)(size.height / self->lineheight);
 }
 
@@ -756,11 +769,10 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 	intptr_t* col, intptr_t* row)
 {		
 	if (plugin && self->currplugins) {
-		psy_ui_Size size;
 		uintptr_t index;
 
-		size = psy_ui_component_size(&self->component);
-		pluginsview_computetextsizes(self, &size);
+		pluginsview_computetextsizes(self,
+			psy_ui_component_innersize_px(&self->component));
 		index = psy_property_index(plugin);
 		*row = index / self->numparametercols;
 		*col = index % self->numparametercols;
@@ -772,11 +784,9 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 
 psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col, intptr_t row)
 {				
-	if (self->plugins) {
-		psy_ui_Size size;
-
-		size = psy_ui_component_size(&self->component);
-		pluginsview_computetextsizes(self, &size);
+	if (self->plugins) {		
+		pluginsview_computetextsizes(self, 
+			psy_ui_component_innersize_px(&self->component));
 		return psy_property_at_index(self->currplugins,
 			self->numparametercols * row + col);
 	}
@@ -797,13 +807,12 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 void pluginsview_hittest(PluginsView* self, double x, double y)
 {				
 	if (self->plugins) {
-		psy_ui_Size size;
 		psy_List* p;
 		double cpx;
 		double cpy;
 
-		size = psy_ui_component_size(&self->component);
-		pluginsview_computetextsizes(self, &size);
+		pluginsview_computetextsizes(self,
+			psy_ui_component_innersize_px(&self->component));
 		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0;
 				p != NULL; psy_list_next(&p)) {
 			psy_ui_RealRectangle r;

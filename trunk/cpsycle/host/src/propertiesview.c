@@ -288,7 +288,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 {			
 	psy_ui_RealSize size;	
 
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	if (self->linestate_clipstart && self->linestate_clipstart->properties != property) {
 		if (self->lastlevel < level) {
 			self->lastlevel = level;

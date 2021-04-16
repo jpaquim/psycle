@@ -153,7 +153,7 @@ void machineview_initstackview(MachineView* self, psy_ui_Component* tabbarparent
 void machineview_initnewmachine(MachineView* self, psy_ui_Component* tabbarparent)
 {
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
-		&self->skin, self->workspace);
+		self->workspace);
 	psy_ui_component_setalign(&self->newmachine.component,
 		psy_ui_ALIGN_CLIENT);
 }
@@ -329,8 +329,7 @@ void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
 	machineviewskin_settheme(&self->skin, theme,
 		dirconfig_skins(&self->workspace->config.directories));
 	machinewireview_updateskin(&self->wireview);
-	machinestackpane_updateskin(&self->stackview.pane);
-	newmachine_updateskin(&self->newmachine);
+	machinestackpane_updateskin(&self->stackview.pane);	
 	psy_ui_component_invalidate(&self->component);
 }
 

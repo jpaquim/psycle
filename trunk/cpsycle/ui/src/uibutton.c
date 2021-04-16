@@ -21,7 +21,6 @@ static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
-static psy_ui_RealSize spacingsize(psy_ui_Button*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -140,22 +139,6 @@ void onlanguagechanged(psy_ui_Button* self)
 	}
 }
 
-psy_ui_RealSize spacingsize(psy_ui_Button* self)
-{	
-	psy_ui_Size valsize;
-	const psy_ui_TextMetric* tm;
-	psy_ui_Margin spacing;
-
-	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
-	valsize = psy_ui_component_size(psy_ui_button_base(self));
-	spacing = psy_ui_component_spacing(psy_ui_button_base(self));
-	valsize.height = psy_ui_sub_values(valsize.height, psy_ui_margin_height(&spacing, tm), tm);
-	valsize.width = psy_ui_sub_values(valsize.width, psy_ui_margin_width(&spacing, tm), tm);
-	return psy_ui_realsize_make(
-		psy_ui_value_px(&valsize.width, tm),
-		psy_ui_value_px(&valsize.height, tm));	
-}
-
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;	
@@ -168,7 +151,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	} else {
 		text = self->text;
 	}		
-	size = spacingsize(self);
+	size = psy_ui_component_innersize_px(psy_ui_button_base(self));
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ident = 0.0;
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
@@ -238,7 +221,7 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 	psy_ui_RealPoint rv;
 	psy_ui_RealSize size;
 	
-	size = spacingsize(self);
+	size = psy_ui_component_innersize_px(psy_ui_button_base(self));
 	rv = center;
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
@@ -253,7 +236,7 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 
 void psy_ui_button_setcharnumber(psy_ui_Button* self, double number)
 {
-	self->charnumber = number;
+	self->charnumber = psy_max(0.0, number);
 }
 
 void psy_ui_button_setlinespacing(psy_ui_Button* self, double spacing)
@@ -377,6 +360,18 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 {
 	self->icon = icon;
 	psy_ui_component_invalidate(psy_ui_button_base(self));
+}
+
+void psy_ui_button_setbitmapresource(psy_ui_Button* self, uintptr_t resourceid)
+{
+	psy_ui_bitmap_loadresource(&self->bitmapicon, resourceid);	
+}
+
+void psy_ui_button_setbitmaptransparency(psy_ui_Button* self,
+	psy_ui_Colour transparency)
+{
+	psy_ui_bitmap_settransparency(&self->bitmapicon,
+		psy_ui_colour_make(0x00FFFFFF));
 }
 
 void psy_ui_button_highlight(psy_ui_Button* self)
