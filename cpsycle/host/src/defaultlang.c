@@ -519,6 +519,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "name", "Name");
 	psy_property_set_str(section, "type", "Type");
 	psy_property_set_str(section, "mode", "Mode");
+	psy_property_set_str(section, "sections", "Sections");
 	psy_property_set_str(section, "section", "Section");
 	psy_property_set_str(section, "create", "Create");
 	psy_property_set_str(section, "remove", "Remove");
