@@ -22,19 +22,20 @@ extern "C" {
 
 // defines one key of the keybox
 typedef struct KbdBoxKey {
+	// inherits;
+	psy_ui_Component component;
+	// intern
 	char* label;
 	char* desc0; // row 0 keycode
 	char* desc1; // row 1 keycode with shift
 	char* desc2; // row 2 keycode with ctrl
-	bool marked;
-	psy_ui_RealRectangle position;
+	bool marked;	
 } KbdBoxKey;
 
-void kbdboxkey_init_all(KbdBoxKey*, int x, int y, int width, int height,
-	const char* label);
-void kbdboxkey_dispose(KbdBoxKey*);
-KbdBoxKey* kbdboxkey_allocinit_all(int x, int y, int width, int height,
-	const char* label);
+void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent, psy_ui_Component* view,
+	int x, int y, int width, int height, const char* label);
+KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent, psy_ui_Component* view, 
+	int x, int y, int width, int height, const char* label);
 
 typedef struct KbdBox{
 	// inherits

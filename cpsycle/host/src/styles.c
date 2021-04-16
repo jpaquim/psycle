@@ -322,13 +322,25 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_defaults_setstyle(defaults, STYLE_DURATION_TIME, style);
 	// key
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style,
-		psy_ui_colour_weighted(&onprimary, medium),
-		surface);	
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_make_rgb(46, 46, 54));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_rgb(112, 113, 105));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 4.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make_rgb(162, 163, 155));
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY, style);
 	// key::hover
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, onprimary, surface);	
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_make_rgb(56, 56, 64));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_rgb(152, 153, 145));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 4.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make_rgb(172, 173, 165));
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_HOVER, style);
 	// key::select
 	style = psy_ui_style_allocinit();
@@ -385,5 +397,5 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SEARCHFIELD, style);
 	// newmachine_sectionheader
 	style = psy_ui_style_allocinit();	
-	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);		
 }

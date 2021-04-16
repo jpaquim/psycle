@@ -98,7 +98,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						psy_ui_point_make(
 							psy_ui_value_makepx((double)centerx),
 							psy_ui_value_makepx((double)centery)),
-						componentsize));
+						componentsize));				
 			} else if (component->align == psy_ui_ALIGN_FILL) {
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
@@ -512,7 +512,8 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 								psy_ui_value_px(&componentsize.width, c_tm) +
 								psy_ui_margin_width_px(&c_margin, c_tm));
 						}
-					} else if (component->align == psy_ui_ALIGN_CLIENT) {
+					} else if (component->align == psy_ui_ALIGN_CLIENT ||
+							component->align == psy_ui_ALIGN_CENTER) {
 						if (psy_ui_value_px(&maxsize.height, tm) < cp.y +
 								psy_ui_value_px(&componentsize.height, c_tm) +
 							psy_ui_margin_height_px(&c_margin, c_tm))
