@@ -976,6 +976,7 @@ static void newmachine_ontimer(NewMachine*, uintptr_t timerid);
 static void newmachine_buildsections(NewMachine*);
 static void newmachine_updateplugins(NewMachine*);
 static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail* sender);
+static void newmachine_ontoggleexpandall(NewMachine*, psy_ui_Button* sender);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -1075,7 +1076,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->all, psy_ui_ALIGN_CLIENT);
 	// pluginview header
 	psy_ui_component_init(&self->pluginsheader, &self->all, NULL);
-	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->pluginsheader, margin);
 	psy_ui_margin_init_all_em(&spacing, 1.0, 0.0, 0.0, 0.0);
 	psy_ui_component_setspacing(&self->pluginsheader, spacing);
@@ -1083,8 +1084,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->pluginsheader.style.style.border = sectionborder;	
 	psy_ui_image_init_resource_transparency(&self->pluginsicon,
-		&self->pluginsheader, IDB_TRAY_DARK,
-		psy_ui_colour_make(psy_ui_RGB_WHITE));	
+		&self->pluginsheader, IDB_TRAY_DARK, psy_ui_colour_white());
 	psy_ui_component_setpreferredsize(&self->pluginsicon.component,
 		psy_ui_size_make_px(16, 14));
 	psy_ui_component_preventalign(&self->pluginsicon.component);
@@ -1092,6 +1092,15 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		"newmachine.all");
 	psy_ui_label_settextalignment(&self->pluginslabel,
 		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_button_init(&self->expandall, &self->pluginsheader, NULL);
+	psy_ui_button_setbitmapresource(&self->expandall, IDB_EXPAND_DARK);
+	psy_ui_button_setbitmaptransparency(&self->expandall,
+		psy_ui_colour_white());
+	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
+	psy_ui_component_setspacing(psy_ui_button_base(&self->expandall), spacing);
+	psy_signal_connect(&self->expandall.signal_clicked, self,
+		newmachine_ontoggleexpandall);
+	//psy_ui_component_setalign(&self->pluginsheader, psy_ui_ALIGN_LEFT);
 	// filter bar
 	newmachinefilterbar_init(&self->filterbar, &self->pluginsheader, &self->filter);
 	// sort bar
@@ -1467,5 +1476,19 @@ void newmachine_onplugincategorychanged(NewMachine* self, NewMachineDetail* send
 			psy_ui_component_align_full(&self->client);
 			psy_ui_component_invalidate(&self->client);
 		}
+	}
+}
+
+void newmachine_ontoggleexpandall(NewMachine* self, psy_ui_Button* sender)
+{	
+	if (psy_ui_component_visible(&self->sectiongroup)) {
+		psy_ui_component_hide(&self->sectiongroup);
+		psy_ui_component_align(&self->client);
+		psy_ui_component_updateoverflow(&self->pluginsview.component);
+	} else {
+		psy_ui_component_show(&self->sectiongroup);
+		psy_ui_component_align(&self->client);
+		psy_ui_component_updateoverflow(&self->sections);
+		psy_ui_component_updateoverflow(&self->pluginsview.component);
 	}
 }

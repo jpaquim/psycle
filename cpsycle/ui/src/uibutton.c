@@ -324,11 +324,17 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		if (self->allowrightclick || ev->button == 1) {
 			psy_ui_RealRectangle client_position;
 			psy_ui_RealSize size;
+			psy_ui_RealMargin spacing;
+			psy_ui_RealPoint pt;
 
 			size = psy_ui_component_sizepx(psy_ui_button_base(self));
 			client_position = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(), size);
-			if (psy_ui_realrectangle_intersect(&client_position, ev->pt)) {
+			pt = ev->pt;			
+			spacing = psy_ui_component_spacing_px(psy_ui_button_base(self));
+			pt.x += spacing.left;
+			pt.y += spacing.top;
+			if (psy_ui_realrectangle_intersect(&client_position, pt)) {
 				self->shiftstate = ev->shift;
 				self->ctrlstate = ev->ctrl;
 				psy_signal_emit(&self->signal_clicked, self, 0);

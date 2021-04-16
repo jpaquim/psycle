@@ -234,6 +234,7 @@ typedef struct NewMachine {
 	psy_ui_Component pluginsheader;
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
+	psy_ui_Button expandall;
 	NewMachineFilterBar filterbar;
 	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;	

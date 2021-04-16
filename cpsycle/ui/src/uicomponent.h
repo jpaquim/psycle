@@ -219,6 +219,7 @@ INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
 
 INLINE void psy_ui_component_show(psy_ui_Component* self)
 {
+	self->visible = 1;
 	self->vtable->show(self);
 }
 
