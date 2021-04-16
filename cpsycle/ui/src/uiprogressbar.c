@@ -39,11 +39,13 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 {	
 	psy_ui_RealSize size;	
-	psy_ui_RealRectangle r;
+	psy_ui_RealRectangle bar;
 				
-	size = psy_ui_component_sizepx(&self->component);	
-	psy_ui_setrectangle(&r, 0, 0, self->progress * size.width, size.height);
-	psy_ui_drawsolidrectangle(g, r,
+	size = psy_ui_component_innersize_px(&self->component);	
+	psy_ui_realrectangle_init_all(&bar,
+		psy_ui_realpoint_zero(),
+		psy_ui_realsize_make(self->progress * size.width, size.height));
+	psy_ui_drawsolidrectangle(g, bar,
 		psy_ui_component_colour(progressbar_base(self)));
 }
 

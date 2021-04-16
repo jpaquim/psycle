@@ -467,7 +467,7 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 	uintptr_t track;
 	double scrollleft;
 
-	size = psy_ui_component_sizepx(&self->component);		
+	size = psy_ui_component_innersize_px(&self->component);
 	scrollleft = psy_ui_component_scrollleftpx(&self->component);
 	psy_ui_drawsolidrectangle(g,
 		psy_ui_realrectangle_make(psy_ui_realpoint_make(scrollleft, 0.0),

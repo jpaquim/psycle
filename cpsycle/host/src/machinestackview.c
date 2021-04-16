@@ -838,9 +838,9 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->inputs, &self->component, NULL,
 		"stackview.inputs");			
 	psy_ui_button_init_text_connect(&self->effects, &self->component, NULL,
-		"stackview.effects", self, machinestackdesc_configureeffects);	
-	psy_ui_bitmap_loadresource(&self->effects.bitmapicon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&self->effects.bitmapicon,
+		"stackview.effects", self, machinestackdesc_configureeffects);
+	psy_ui_button_setbitmapresource(&self->effects, IDB_SETTINGS_DARK);
+	psy_ui_button_setbitmaptransparency(&self->effects,
 		psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init_text_connect(&self->outputs, &self->component, NULL,
 		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);

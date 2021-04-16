@@ -136,7 +136,7 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 	psy_dsp_big_beat_t currbeat;
 	psy_dsp_big_beat_t step;	
 	
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	baseline = size.height / 2 + 2;
 	textline = 0;

@@ -18,6 +18,12 @@ typedef struct {
 } psy_ui_Image;
 
 void psy_ui_image_init(psy_ui_Image*, psy_ui_Component* parent);
+void psy_ui_image_init_resource(psy_ui_Image*, psy_ui_Component* parent,
+	uintptr_t resourceid);
+void psy_ui_image_init_resource_transparency(psy_ui_Image*,
+	psy_ui_Component* parent, uintptr_t resourceid,
+	psy_ui_Colour transparency);
+
 void psy_ui_image_setbitmapalignment(psy_ui_Image*, psy_ui_Alignment);
 
 INLINE psy_ui_Component* psy_ui_image_base(psy_ui_Image* self)

@@ -37,16 +37,32 @@ psy_Property* psy_audio_pluginsections_addsection(psy_audio_PluginSections* self
 void psy_audio_pluginsections_clearplugins(psy_audio_PluginSections*,
 	const char* sectionkey);
 
+// psy_audio_PluginCategories
+typedef struct psy_audio_PluginCategories
+{
+	psy_Table container;
+} psy_audio_PluginCategories;
+
+void psy_audio_plugincategories_init(psy_audio_PluginCategories*,
+	psy_Property* plugins);
+void psy_audio_plugincategories_dispose(psy_audio_PluginCategories*);
+
+psy_TableIterator psy_audio_plugincategories_begin(
+	psy_audio_PluginCategories* self);
+void psy_audio_plugincategories_update(psy_audio_PluginCategories*,
+	psy_Property* plugins);
+
+// psy_audio_PluginCatcher
 typedef struct psy_audio_PluginCatcher {
 	psy_Property* plugins;
 	char* inipath;
 	char* nativeroot;
-	psy_Property* directories;
+	psy_Property* directories;	
 	psy_Signal signal_changed;
 	psy_Signal signal_scanprogress;
 	bool saveafterscan;
 	bool hasplugincache;
-	psy_audio_PluginCategoryList categorydefaults;
+	psy_audio_PluginCategoryList categorydefaults;	
 } psy_audio_PluginCatcher;
 
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher*);
@@ -75,6 +91,13 @@ INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self
 	return self->hasplugincache;
 }
 
+INLINE psy_Property* psy_audio_plugincatcher_plugins(psy_audio_PluginCatcher*
+	self)
+{
+	assert(self);
+
+	return self->plugins;
+}
 
 void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv);
 

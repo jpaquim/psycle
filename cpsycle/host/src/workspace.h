@@ -227,6 +227,7 @@ void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 void workspace_editquantizechange(Workspace*, int diff);
 int workspace_hasplugincache(const Workspace*);
+psy_audio_PluginCatcher* workspace_plugincatcher(Workspace*);
 psy_EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);
 void workspace_followsong(Workspace*);

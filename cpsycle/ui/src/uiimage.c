@@ -15,7 +15,21 @@ void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
-	self->alignment = psy_ui_ALIGNMENT_NONE;	
+	self->alignment = psy_ui_ALIGNMENT_CENTER_VERTICAL;
+}
+
+void psy_ui_image_init_resource(psy_ui_Image* self, psy_ui_Component* parent,
+	uintptr_t resourceid)
+{
+	psy_ui_image_init(self, parent);
+	psy_ui_bitmap_loadresource(&self->bitmap, resourceid);	
+}
+
+void psy_ui_image_init_resource_transparency(psy_ui_Image* self,
+	psy_ui_Component* parent, uintptr_t resourceid, psy_ui_Colour transparency)
+{
+	psy_ui_image_init_resource(self, parent, resourceid, transparency);
+	psy_ui_bitmap_settransparency(&self->bitmap, transparency);
 }
 
 void ondestroy(psy_ui_Image* self)

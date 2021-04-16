@@ -189,7 +189,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		TRACKERGRID_EDITMODE_SONG, workspace);	
 	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
-		&self->editnotebook.component, NULL);
+		&self->editnotebook.component, NULL);	
 	psy_ui_component_setbackgroundmode(&self->trackerscroller.pane, psy_ui_NOBACKGROUND);
 	psy_signal_connect(&self->trackerscroller.pane.signal_draw, self,
 		patternview_drawtrackerbackground);	

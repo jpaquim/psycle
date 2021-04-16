@@ -8,7 +8,6 @@
 #include "pluginsview.h"
 #include "labelpair.h"
 #include "workspace.h"
-#include "machineviewskin.h"
 // ui
 #include <uibutton.h>
 #include <uicheckbox.h>
@@ -102,12 +101,11 @@ typedef struct NewMachineSortBar {
 	psy_ui_Button sortbytype;
 	psy_ui_Button sortbymode;
 	// references
-	NewMachineSort* sort;
-	Workspace* workspace;
+	NewMachineSort* sort;	
 } NewMachineSortBar;
 
 void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
-	NewMachineSort*, Workspace*);
+	NewMachineSort*);
 
 // NewMachineDetail
 typedef struct NewMachineDetail {
@@ -174,15 +172,14 @@ typedef struct NewMachineCategoryBar {
 	// inherits
 	psy_ui_Component component;
 	// intern
-	psy_ui_Component client;
-	psy_Table categories;
+	psy_ui_Component client;	
 	// references
 	NewMachineFilter* filter;
-	Workspace* workspace;
+	psy_audio_PluginCatcher* plugincatcher;
 } NewMachineCategoryBar;
 
 void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent,
-	NewMachineFilter*, Workspace*);
+	NewMachineFilter*, psy_audio_PluginCatcher*);
 
 void newmachinecategorybar_build(NewMachineCategoryBar*);
 
@@ -244,10 +241,9 @@ typedef struct NewMachine {
 	NewMachineDetail detail;
 	PluginScanView scanview;
 	NewMachineRescanBar rescanbar;
-	NewMachineSectionBar sectionbar;
-	MachineViewSkin* skin;
-	psy_ui_Scroller scroller_fav;
-	psy_ui_Scroller scroller_main;	
+	NewMachineSectionBar sectionbar;	
+	psy_ui_Scroller scroller_sections;
+	psy_ui_Scroller scroller_all;	
 	psy_ui_Edit edit;
 	// internal data
 	bool scanending;
@@ -263,9 +259,7 @@ typedef struct NewMachine {
 	NewMachineSection* selectedsection;
 } NewMachine;
 
-void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*,
-	Workspace*);
-void newmachine_updateskin(NewMachine*);
+void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
 
 void newmachine_enableall(NewMachine*);
 void newmachine_enablegenerators(NewMachine*);

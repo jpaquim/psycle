@@ -304,7 +304,7 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 {	
 	if (orientation == psy_ui_VERTICAL) {
 		psy_ui_IntPoint vrange;
-
+		
 		vrange = psy_ui_component_verticalscrollrange(sender);
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			psy_ui_component_verticalscrollrange(sender));

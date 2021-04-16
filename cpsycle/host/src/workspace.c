@@ -1152,6 +1152,13 @@ int workspace_hasplugincache(const Workspace* self)
 	return psy_audio_plugincatcher_hascache(&self->plugincatcher);
 }
 
+psy_audio_PluginCatcher* workspace_plugincatcher(Workspace* self)
+{
+	assert(self);
+
+	return &self->plugincatcher;
+}
+
 void workspace_editquantizechange(Workspace* self, int diff) // User Called (Hotkey)
 {
 	const int total = 17;

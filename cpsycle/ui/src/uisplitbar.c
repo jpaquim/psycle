@@ -70,7 +70,7 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 	double thumbsize;
 	double ident;
 	
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	thumbsize = 30;
 	//psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 	if (self->component.align == psy_ui_ALIGN_LEFT ||

@@ -212,13 +212,14 @@ void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
 			psy_ui_realpoint_make(2.0, self->screenpos),
 			psy_ui_realsize_make(size.width - 4, thumbsize.height));
 	}
-	updateposition = psy_ui_component_position(&self->component);
+	updateposition = psy_ui_component_position(&self->component);	
 	psy_ui_component_setposition(psy_ui_scrollbarthumb_base(&self->thumb),
 		psy_ui_rectangle_make_px(&newposition));
 	psy_ui_realrectangle_union(&updateposition, &newposition);
 	psy_ui_component_invalidaterect(
 		psy_ui_component_parent(&self->component),
 		updateposition);	
+	
 }
 
 void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
@@ -298,13 +299,13 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 				size.height - thumbsize.height));
 		}
 		psy_ui_scrollbarpane_updatethumbposition(self);		
-		pos = self->scrollrange.x;
+		pos = (double)self->scrollrange.x;
 		step = psy_ui_scrollbarpane_step(self);
 		pos = ((self->screenpos) * step) + self->scrollrange.x;		
 		if (pos < self->scrollrange.x) {
-			pos = self->scrollrange.x;
+			pos = (double)self->scrollrange.x;
 		} else if (pos > self->scrollrange.y) {
-			pos = self->scrollrange.y;
+			pos = (double)self->scrollrange.y;
 		}
 		if (pos != self->pos) {
 			self->pos = pos;
@@ -321,10 +322,10 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self,
 	assert(self);
 
 	if (pos < self->scrollrange.x) {
-		pos = self->scrollrange.y;
+		pos = (double)self->scrollrange.y;
 	}
 	if (pos > self->scrollrange.y) {
-		pos = self->scrollrange.y;
+		pos = (double)self->scrollrange.y;
 	}
 	step = psy_ui_scrollbarpane_step(self);
 	if (step != 0.0) {
@@ -503,9 +504,9 @@ double psy_ui_scrollbar_position(psy_ui_ScrollBar* self)
 void psy_ui_scrollbar_setscrollrange(psy_ui_ScrollBar* self, psy_ui_IntPoint range)
 {
 	assert(self);
-
+	
 	self->pane.scrollrange = range;	
-	self->pane.pos = range.x;
+	self->pane.pos = (double)range.x;
 }
 
 psy_ui_IntPoint psy_ui_scrollbar_scrollrange(const psy_ui_ScrollBar* self)

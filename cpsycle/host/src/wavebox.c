@@ -345,7 +345,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	psy_dsp_amp_t lastframevalue = 0;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	if (!self->context.sample) {		
@@ -503,7 +503,7 @@ psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebe
 		
 	startx = wavebox_frametoscreen(self, framebegin);	
 	endx = wavebox_frametoscreen(self, frameend);	
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_innersize_px(&self->component);
 	return psy_ui_realrectangle_make(psy_ui_realpoint_make(startx, 0.0),
 		psy_ui_realsize_make(endx - startx, size.height));
 }
