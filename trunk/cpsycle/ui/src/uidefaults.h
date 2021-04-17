@@ -25,6 +25,7 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_BUTTON,
 	psy_ui_STYLE_BUTTON_HOVER,
 	psy_ui_STYLE_BUTTON_SELECT,
+	psy_ui_STYLE_BUTTON_ACTIVE,
 	psy_ui_STYLE_TABBAR,
 	psy_ui_STYLE_TAB,
 	psy_ui_STYLE_TAB_HOVER,

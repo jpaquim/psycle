@@ -110,13 +110,19 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	// button::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,		
-		psy_ui_colour_weighted(&onsurface, strong),
+		psy_ui_colour_weighted(&onsurface, accent),
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_HOVER, style);
 	// button::select
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onsecondary);
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_SELECT, style);
+	// button::active
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&onsurface, strong),
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_ACTIVE, style);
 	// combobox;
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,

@@ -47,6 +47,7 @@ extern "C" {
 #define STYLE_KEY                          6040
 #define STYLE_KEY_HOVER                    6041
 #define STYLE_KEY_SELECT                   6042
+#define STYLE_KEY_ACTIVE                   6043
 #define STYLE_TABLEROW                     6050
 #define STYLE_TABLEROW_HOVER               6051
 #define STYLE_TABLEROW_SELECT              6052

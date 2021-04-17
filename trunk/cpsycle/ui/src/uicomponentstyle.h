@@ -18,7 +18,8 @@ typedef enum psy_ui_StyleState {
 	psy_ui_STYLESTATE_HOVER = 1,
 	psy_ui_STYLESTATE_SELECT = 2,
 	psy_ui_STYLESTATE_FOCUS = 4,
-	psy_ui_STYLESTATE_DISABLED = 8
+	psy_ui_STYLESTATE_DISABLED = 8,
+	psy_ui_STYLESTATE_ACTIVE = 16
 } psy_ui_StyleState;
 
 typedef struct psy_ui_ComponentStyle {
@@ -28,11 +29,13 @@ typedef struct psy_ui_ComponentStyle {
 	psy_ui_Style focus;
 	psy_ui_Style select;
 	psy_ui_Style disabled;
+	psy_ui_Style active;
 	uintptr_t style_id;
 	uintptr_t focus_id;
 	uintptr_t hover_id;
 	uintptr_t select_id;
 	uintptr_t disabled_id;
+	uintptr_t active_id;
 	psy_ui_StyleState state;
 } psy_ui_ComponentStyle;
 

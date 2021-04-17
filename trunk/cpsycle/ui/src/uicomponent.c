@@ -187,10 +187,23 @@ static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
 static bool onclose(psy_ui_Component* self) { return TRUE; }
-static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
-static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+
+static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
+}
+
+static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+{	
+}
+
 static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
-static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+
+static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
+}
+
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseenter(psy_ui_Component* self)
@@ -1529,6 +1542,13 @@ void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {
 	self->style.focus_id = focus;
+	psy_ui_componentstyle_readstyles(&self->style);
+}
+
+void psy_ui_component_setstyletype_active(psy_ui_Component* self,
+	uintptr_t active)
+{
+	self->style.active_id = active;
 	psy_ui_componentstyle_readstyles(&self->style);
 }
 

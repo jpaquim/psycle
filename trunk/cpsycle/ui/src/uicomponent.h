@@ -806,6 +806,8 @@ void psy_ui_component_setstyletypes(psy_ui_Component*,
 	uintptr_t standard, uintptr_t hover, uintptr_t select, uintptr_t disabled);
 void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	uintptr_t focus);
+void psy_ui_component_setstyletype_active(psy_ui_Component* self,
+	uintptr_t active);
 void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);

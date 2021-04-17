@@ -23,12 +23,14 @@ static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
 // vtable
 static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_Button* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(psy_ui_button_base(self)->vtable);
+		super_vtable = *(psy_ui_button_base(self)->vtable);
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)ondestroy;		
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
@@ -70,6 +72,8 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletypes(psy_ui_button_base(self),
 		psy_ui_STYLE_BUTTON, psy_ui_STYLE_BUTTON_HOVER,
 		psy_ui_STYLE_BUTTON_SELECT, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype_active(psy_ui_button_base(self),
+		psy_ui_STYLE_BUTTON_ACTIVE);
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
@@ -307,6 +311,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
+	super_vtable.onmousedown(psy_ui_button_base(self), ev);
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_capture(psy_ui_button_base(self));
 	}
@@ -314,6 +319,7 @@ void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 
 void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {	
+	super_vtable.onmouseup(psy_ui_button_base(self), ev);
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_releasecapture(psy_ui_button_base(self));
 		if (psy_ui_component_inputprevented(&self->component)) {

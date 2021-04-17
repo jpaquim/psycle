@@ -16,12 +16,14 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 	psy_ui_style_init(&self->hover);
 	psy_ui_style_init(&self->select);
 	psy_ui_style_init(&self->disabled);
+	psy_ui_style_init(&self->active);
 	self->currstyle = &self->style;
 	self->style_id = psy_INDEX_INVALID;
 	self->focus_id = psy_INDEX_INVALID;
 	self->hover_id = psy_INDEX_INVALID;
 	self->select_id = psy_INDEX_INVALID;
 	self->disabled_id = psy_INDEX_INVALID;
+	self->active_id = psy_INDEX_INVALID;
 	self->state = psy_ui_STYLESTATE_NONE;
 }
 
@@ -32,6 +34,7 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 	psy_ui_style_dispose(&self->hover);
 	psy_ui_style_dispose(&self->select);	
 	psy_ui_style_dispose(&self->disabled);
+	psy_ui_style_dispose(&self->active);
 }
 
 bool psy_ui_componentstyle_hasstate(const psy_ui_ComponentStyle* self,
@@ -48,6 +51,8 @@ bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle* self)
 		state = psy_ui_STYLESTATE_DISABLED;
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_SELECT)) {
 		state = psy_ui_STYLESTATE_SELECT;
+	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_ACTIVE)) {
+		state = psy_ui_STYLESTATE_ACTIVE;	
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_FOCUS)) {
 		state = psy_ui_STYLESTATE_FOCUS;
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_HOVER)) {
@@ -91,6 +96,11 @@ bool psy_ui_componentstyle_setcurrstate(psy_ui_ComponentStyle* self,
 			self->currstyle = &self->disabled;		
 		}
 		break;
+	case psy_ui_STYLESTATE_ACTIVE:
+		if (self->active_id != psy_INDEX_INVALID) {
+			self->currstyle = &self->active;
+		}
+		break;
 	default:
 		if (self->currstyle != &self->style) {
 			self->currstyle = &self->style;		
@@ -121,7 +131,11 @@ void psy_ui_componentstyle_readstyles(psy_ui_ComponentStyle* self)
 	if (self->disabled_id != psy_INDEX_INVALID) {
 		psy_ui_style_copy(&self->disabled,
 			psy_ui_style(self->disabled_id));
-	}	
+	}
+	if (self->active_id != psy_INDEX_INVALID) {
+		psy_ui_style_copy(&self->active,
+			psy_ui_style(self->active_id));
+	}
 }
 
 bool psy_ui_componentstyle_addstate(psy_ui_ComponentStyle* self,
