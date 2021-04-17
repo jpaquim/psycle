@@ -29,6 +29,7 @@ typedef struct KbdBoxKey {
 	char* desc0; // row 0 keycode
 	char* desc1; // row 1 keycode with shift
 	char* desc2; // row 2 keycode with ctrl
+	char* desc3; // row 2 keycode with shift + ctrl
 	bool marked;	
 } KbdBoxKey;
 

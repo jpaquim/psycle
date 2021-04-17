@@ -45,15 +45,23 @@ void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Compon
 	psy_ui_component_init(&self->component, parent, view);
 	kbdboxkey_vtable_init(self);
 	psy_ui_setrectangle(&r, x, y, width, height);
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_KEY, STYLE_KEY_HOVER, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	if (strcmp(label, "EMPTY") != 0) {
+		psy_ui_component_setstyletypes(&self->component,
+			STYLE_KEY, STYLE_KEY_HOVER, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);
+		psy_ui_component_setstyletype_active(&self->component,
+			STYLE_KEY_ACTIVE);
+		self->label = strdup(label);
+	} else {
+		self->label = strdup("");
+	}
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make_px(&r));	
-	self->label = strdup(label);
+	
 	self->desc0 = strdup("");
 	self->desc1 = strdup("");
 	self->desc2 = strdup("");
+	self->desc3 = strdup("");
 	self->marked = FALSE;	
 }
 
@@ -63,6 +71,7 @@ void kbdboxkey_ondestroy(KbdBoxKey* self)
 	free(self->desc0);
 	free(self->desc1);
 	free(self->desc2);
+	free(self->desc3);
 }
 
 KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent, psy_ui_Component* view,
@@ -83,14 +92,15 @@ void kbdboxkey_ondraw(KbdBoxKey* self, psy_ui_Graphics* g)
 	const psy_ui_TextMetric* tm;
 	double cpx;
 	double cpy;
-	psy_ui_RealRectangle position;	
+	psy_ui_RealRectangle position;
+	psy_ui_Size descsize;
 	double descident;
-	
-	descident = 10.0;
+			
 	psy_ui_realrectangle_init_all(&position,
 		psy_ui_realpoint_zero(),
 		psy_ui_component_sizepx(&self->component));
 	tm = psy_ui_component_textmetric(&self->component);
+	descident = (tm->tmAveCharWidth * 2) * psy_strlen(self->label);
 	if (self->marked) {
 		psy_ui_setcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
 		psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
@@ -105,6 +115,8 @@ void kbdboxkey_ondraw(KbdBoxKey* self, psy_ui_Graphics* g)
 		self->desc1, psy_strlen(self->desc1));
 	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 2,
 		self->desc2, psy_strlen(self->desc2));
+	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 3,
+		self->desc3, psy_strlen(self->desc3));
 }
 
 // KbdBox
@@ -118,6 +130,10 @@ static void kbdbox_addsmallkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addmediumkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addlargerkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addlargekey(KbdBox*, uintptr_t keycode, const char* label);
+static void kbdbox_addwidekey(KbdBox*, uintptr_t keycode, const char* label);
+static void kbdbox_addemptykey(KbdBox*, uintptr_t keycode);
+static void kbdbox_addkey(KbdBox* self, uintptr_t keycode, const char* label,
+	double size);
 static void kbdbox_onpreferredsize(KbdBox*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 // vtable
@@ -166,22 +182,19 @@ void kbdbox_initfont(KbdBox* self)
 	
 	font = psy_ui_component_font(&self->component);
 	if (font) {
-		psy_ui_FontInfo fontinfo;
-		psy_ui_Font newfont;
+		psy_ui_FontInfo fontinfo;		
 
 		fontinfo = psy_ui_font_fontinfo(font);
-		fontinfo.lfHeight = (int)(fontinfo.lfHeight * 0.8);
-		psy_ui_font_init(&newfont, &fontinfo);
-		psy_ui_component_setfont(&self->component, &newfont);
-		psy_ui_font_dispose(&newfont);
+		fontinfo.lfHeight = (int)(fontinfo.lfHeight * 0.6);
+		psy_ui_component_setfontinfo(&self->component, fontinfo);		
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	self->corner.width = psy_ui_value_makepx(5);
 	self->corner.height = psy_ui_value_makepx(5);
 	self->descident = tm->tmAveCharWidth * 6;
 	self->ident = (int)(tm->tmHeight * 0.3);
-	self->keyheight = (int)(tm->tmHeight * 3.5);
-	self->keywidth = tm->tmAveCharWidth * 16;
+	self->keyheight = (int)(tm->tmHeight * 4.5);
+	self->keywidth = tm->tmAveCharWidth * 20;
 }
 
 void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
@@ -267,15 +280,16 @@ void kbdbox_makekeys(KbdBox* self)
 					}
 					if (size == 0) {
 						kbdbox_addsmallkey(self, keycode, label);
-					} else
-					if (size == 1) {
+					} else if (size == 1) {
 						kbdbox_addmediumkey(self, keycode, label);
-					} else
-					if (size == 2) {
+					} else if (size == 2) {
 						kbdbox_addlargerkey(self, keycode, label);
-					} else
-					if (size == 3) {
+					} else if (size == 3) {
 						kbdbox_addlargekey(self, keycode, label);
+					} else if (size == 4) {
+						kbdbox_addwidekey(self, keycode, label);
+					} else if (size == 5) {
+						kbdbox_addemptykey(self, keycode);
 					}
 				}				
 			}
@@ -307,6 +321,10 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F10, "F10", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F11, "F11", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F12, "F12", 0, 0);
+	kbdbox_addkeyproperties(self, main, kc++, "EMPTY", 5, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_INSERT, "INS", 0, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_HOME, "HOME", 0, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_PRIOR, "PGUP", 0, 0);
 	
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACKQUOTE, "`", 0, 1);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT1, "1", 0, 0);
@@ -321,8 +339,12 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT0, "0", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_MINUS, "-", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_EQUAL, "=", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACK, "BACK", 0, 0);
-	
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACK, "BACK", 1, 0);
+	kbdbox_addkeyproperties(self, main, kc++, "EMPTY", 5, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DELETE, "DEL", 0, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_END, "END", 0, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_NEXT, "PGDWN", 0, 0);
+
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_TAB, "TAB", 1, 1);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_Q, "Q", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_W, "W", 0, 0);
@@ -353,7 +375,7 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_QUOTE, "'", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_RETURN, "ENTER", 2, 0);
 	
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SHIFT, "SHIFT", 1, 1);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SHIFT, "SHIFT", 3, 1);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_Z, "Z", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_X, "X", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_C, "C", 0, 0);
@@ -364,14 +386,14 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_COMMA, ",", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_PERIOD, ".", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SLASH, "/", 0, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "SHIFT", 1, 0);
+	kbdbox_addkeyproperties(self, main, kc++, "SHIFT", 3, 0);	
 	
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_CONTROL, "CTRL", 2, 1);
 	kbdbox_addkeyproperties(self, main, kc++, "", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_MENU, "ALT", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SPACE, "Psycle", 3, 0);
+	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SPACE, "Psycle", 4, 0);
 	kbdbox_addkeyproperties(self, main, kc++, "ALT", 1, 0);	
-	kbdbox_addkeyproperties(self, main, kc++, "CTRL", 0, 0);
+	kbdbox_addkeyproperties(self, main, kc++, "CTRL", 1, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_LEFT, "Left", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_RIGHT, "Right", 0, 0);
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_UP, "Up", 0, 0);
@@ -392,53 +414,46 @@ void kbdbox_addkeyproperties(KbdBox* self, psy_Property* section,
 
 void kbdbox_addsmallkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	if (!psy_table_exists(&self->keys, keycode)) {
-		KbdBoxKey* key;
-
-		key = kbdboxkey_allocinit_all(&self->component, &self->component,
-			self->cpx, self->cpy, self->keywidth, self->keyheight, label);
-		psy_table_insert(&self->keys, keycode, key);
-		self->cpx += self->keywidth + self->ident;
-	}
+	kbdbox_addkey(self, keycode, label, 1.0);	
 }
 
 void kbdbox_addmediumkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	if (!psy_table_exists(&self->keys, keycode)) {
-		KbdBoxKey* key;
-
-		key = kbdboxkey_allocinit_all(&self->component, &self->component,
-			self->cpx, self->cpy,
-			(int)(self->keywidth * 1.3), self->keyheight, label);
-		psy_table_insert(&self->keys, keycode, key);
-		self->cpx += (int)(self->keywidth * 1.3) + self->ident;
-	}
+	kbdbox_addkey(self, keycode, label, 1.5);
 }
 
 void kbdbox_addlargerkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	if (!psy_table_exists(&self->keys, keycode)) {
-		KbdBoxKey* key;
-
-		key = kbdboxkey_allocinit_all(
-			&self->component, &self->component, self->cpx, self->cpy,
-			(int)(self->keywidth * 1.5), self->keyheight, label);
-		psy_table_insert(&self->keys, keycode, key);
-		self->cpx += (int)(self->keywidth * 1.5 + self->ident);
-	}
+	kbdbox_addkey(self, keycode, label, 1.78);	
 }
 
 void kbdbox_addlargekey(KbdBox* self, uintptr_t keycode, const char* label)
+{
+	kbdbox_addkey(self, keycode, label, 2.3);
+}
+
+void kbdbox_addwidekey(KbdBox* self, uintptr_t keycode, const char* label)
+{
+	kbdbox_addkey(self, keycode, label, 3.93);	
+}
+
+void kbdbox_addemptykey(KbdBox* self, uintptr_t keycode)
+{
+	kbdbox_addkey(self, keycode, "EMPTY", 0.25);
+}
+
+void kbdbox_addkey(KbdBox* self, uintptr_t keycode, const char* label, double size)
 {
 	if (!psy_table_exists(&self->keys, keycode)) {
 		KbdBoxKey* key;
 
 		key = kbdboxkey_allocinit_all(
 			&self->component, &self->component, self->cpx, self->cpy,
-			self->keywidth * 4, self->keyheight, label);
+			(int)(self->keywidth * size), self->keyheight, label);
 		psy_table_insert(&self->keys, keycode, key);
-		self->cpx += self->keywidth * 4 + self->ident;
+		self->cpx += (int)(self->keywidth * size + self->ident);
 	}
+
 }
 
 void kbdbox_markkey(KbdBox* self, uintptr_t keycode)
@@ -479,6 +494,7 @@ void kbdbox_cleardescriptions(KbdBox* self)
 		key->desc0 = strdup("");
 		key->desc1 = strdup("");
 		key->desc2 = strdup("");
+		key->marked = FALSE;
 	}
 	psy_ui_component_invalidate(kbdbox_base(self));
 }
@@ -494,10 +510,11 @@ void kbdbox_setdescription(KbdBox* self, uintptr_t keycode, int shift, int ctrl,
 		uintptr_t numchars;
 		char** desc;
 
-		if (shift) {
+		if (shift && ctrl) {
+			desc = &key->desc3;
+		} else if (shift) {
 			desc = &key->desc1;
-		} else 
-		if (ctrl) {
+		} else  if (ctrl) {
 			desc = &key->desc2;
 		} else {
 			desc = &key->desc0;
