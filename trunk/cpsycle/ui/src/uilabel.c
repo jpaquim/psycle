@@ -196,8 +196,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_innersize_px(self);
-		
+	size = psy_ui_component_innersize_px(psy_ui_label_base(self));		
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
 	if (size.height >= tm->tmHeight * 2) {
@@ -205,7 +204,8 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	} else {
 		numcolumnavgchars = UINTPTR_MAX;
 	}
-	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+			psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - tm->tmHeight) / 2;
 	}	
 	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) == psy_ui_ALIGNMENT_RIGHT) {

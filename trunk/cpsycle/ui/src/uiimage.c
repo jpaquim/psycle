@@ -28,7 +28,7 @@ void psy_ui_image_init_resource(psy_ui_Image* self, psy_ui_Component* parent,
 void psy_ui_image_init_resource_transparency(psy_ui_Image* self,
 	psy_ui_Component* parent, uintptr_t resourceid, psy_ui_Colour transparency)
 {
-	psy_ui_image_init_resource(self, parent, resourceid, transparency);
+	psy_ui_image_init_resource(self, parent, resourceid);
 	psy_ui_bitmap_settransparency(&self->bitmap, transparency);
 }
 

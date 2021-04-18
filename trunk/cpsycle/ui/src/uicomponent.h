@@ -798,7 +798,7 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 		psy_ui_component_textmetric(self));
 }
 
-INLINE psy_ui_RealSize psy_ui_component_offsetsizepx(const psy_ui_Component* self)
+INLINE psy_ui_RealSize psy_ui_component_offsetsize_px(const psy_ui_Component* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
@@ -842,6 +842,17 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	psy_ui_RealMargin rv;
 
 	psy_ui_realmargin_init_margin(&rv, &self->sizehints->spacing,
+		psy_ui_component_textmetric(self));
+	return rv;
+}
+
+INLINE psy_ui_RealMargin psy_ui_component_bordermargin_px(const psy_ui_Component* self)
+{
+	psy_ui_RealMargin rv;
+	psy_ui_Margin border;
+
+	border = psy_ui_component_bordermargin(self);
+	psy_ui_realmargin_init_margin(&rv, &border,
 		psy_ui_component_textmetric(self));
 	return rv;
 }

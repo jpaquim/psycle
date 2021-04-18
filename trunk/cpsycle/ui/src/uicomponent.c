@@ -1377,7 +1377,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
-			psy_ui_component_offsetsizepx(self)),
+			psy_ui_component_offsetsize_px(self)),
 		psy_ui_component_border(self));
 }
 
@@ -1392,7 +1392,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(),
-				psy_ui_component_offsetsizepx(self));			
+				psy_ui_component_offsetsize_px(self));			
 			psy_ui_drawsolidrectangle(g, r, // c);
 				psy_ui_component_backgroundcolour(
 					psy_ui_component_parent(self)));
@@ -1451,7 +1451,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 		psy_ui_realpoint_make(
 			psy_ui_component_scrollleftpx(self),
 			psy_ui_component_scrolltoppx(self)),
-		psy_ui_component_offsetsizepx(self));
+		psy_ui_component_offsetsize_px(self));
 }
 
 void psy_ui_component_focus_next(psy_ui_Component* self)

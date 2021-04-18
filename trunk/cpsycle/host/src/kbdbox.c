@@ -119,7 +119,7 @@ void kbdboxkey_ondraw(KbdBoxKey* self, psy_ui_Graphics* g)
 			
 	psy_ui_realrectangle_init_all(&position,
 		psy_ui_realpoint_zero(),
-		psy_ui_component_offsetsizepx(&self->component));
+		psy_ui_component_offsetsize_px(&self->component));
 	tm = psy_ui_component_textmetric(&self->component);
 	descident = (tm->tmAveCharWidth * 2) * psy_strlen(self->label);
 	if (self->marked) {

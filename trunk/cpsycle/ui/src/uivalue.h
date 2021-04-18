@@ -73,21 +73,18 @@ INLINE void psy_ui_value_setpx(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_PX;
 	self->quantity = value;
-	self->round = psy_ui_ROUND_NONE;
 }
 
 INLINE void psy_ui_value_setew(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_EW;
-	self->quantity = value;
-	self->round = psy_ui_ROUND_NONE;
+	self->quantity = value;	
 }
 
 INLINE void psy_ui_value_seteh(psy_ui_Value* self, double value)
 {
 	self->unit = psy_ui_UNIT_EH;
-	self->quantity = value;
-	self->round = psy_ui_ROUND_NONE;
+	self->quantity = value;	
 }
 
 INLINE psy_ui_Value psy_ui_value_makepx(double px)
@@ -96,7 +93,7 @@ INLINE psy_ui_Value psy_ui_value_makepx(double px)
 
 	rv.quantity = px;
 	rv.unit = psy_ui_UNIT_PX;
-	rv.round = psy_ui_ROUND_NONE;
+	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
 
@@ -106,7 +103,7 @@ INLINE psy_ui_Value psy_ui_value_makeew(double em)
 
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EW;
-	rv.round = psy_ui_ROUND_NONE;
+	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
 
@@ -116,7 +113,7 @@ INLINE psy_ui_Value psy_ui_value_makeeh(double em)
 
 	rv.quantity = em;
 	rv.unit = psy_ui_UNIT_EH;
-	rv.round = psy_ui_ROUND_NONE;
+	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
 
@@ -126,7 +123,7 @@ INLINE psy_ui_Value psy_ui_value_makepe(double pe)
 
 	rv.quantity = pe;
 	rv.unit = psy_ui_UNIT_PE;
-	rv.round = psy_ui_ROUND_NONE;
+	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
 

@@ -653,7 +653,7 @@ void patternview_onalign(PatternView* self)
 {
 	psy_ui_RealSize headersize;	
 
-	headersize = psy_ui_component_offsetsizepx(&self->header.component);	
+	headersize = psy_ui_component_offsetsize_px(&self->header.component);	
 	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
 		headersize.height);
 	patternview_computemetrics(self);
@@ -1294,7 +1294,7 @@ void patternview_drawtrackerbackground(PatternView* self, psy_ui_Component* send
 	view = psy_ui_component_at(sender, 0);
 	if (view) {
 		viewposition = psy_ui_component_position(view);
-		panesize = psy_ui_component_offsetsizepx(sender);
+		panesize = psy_ui_component_offsetsize_px(sender);
 		if (viewposition.top > 0) {
 			psy_ui_RealRectangle top;
 

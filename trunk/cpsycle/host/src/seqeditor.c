@@ -317,7 +317,7 @@ void seqeditorline_updateposition(SeqEditorLine* self,
 
 	position_px = floor(seqeditorstate_beattopx(self->state, position));
 	updateposition = psy_ui_component_position(&self->component);
-	parentsize = psy_ui_component_offsetsizepx(
+	parentsize = psy_ui_component_offsetsize_px(
 		psy_ui_component_parent(&self->component));
 	if (parentsize.height != psy_ui_realrectangle_height(&updateposition) ||
 			position_px != updateposition.left) {		
@@ -554,7 +554,7 @@ void seqeditorpatternentry_ondraw(SeqEditorPatternEntry* self,
 			char text[64];
 
 			tm = psy_ui_component_textmetric(&self->component);
-			size = psy_ui_component_offsetsizepx(&self->component);
+			size = psy_ui_component_offsetsize_px(&self->component);
 			size.width -= 4;
 			clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
 			topleft = psy_ui_realpoint_make(4, 2);
@@ -819,7 +819,7 @@ void seqeditortrack_onalign(SeqEditorTrack* self)
 	if (!self->currtrack) {
 		return;
 	}
-	size = psy_ui_component_offsetsizepx(&self->component);	
+	size = psy_ui_component_offsetsize_px(&self->component);	
 	p = self->patternentries;
 	for (p = self->patternentries; p != NULL; psy_list_next(&p)) {
 		SeqEditorPatternEntry* entry;
