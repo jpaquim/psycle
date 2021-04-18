@@ -66,7 +66,7 @@ void paramtweak_onmousedown(ParamTweak* self, psy_ui_MouseEvent* ev)
 				self->tweakval = psy_audio_machine_parameter_normvalue(
 					self->machine, self->param);
 				paramtype = psy_audio_machine_parameter_type(self->machine,
-					self->param) & ~MPF_SMALL;
+					self->param) & 0x1FF;
 			} else {
 				self->tweakval = psy_audio_machineparam_normvalue(self->param);
 				paramtype = psy_audio_machineparam_type(self->param)
@@ -109,7 +109,7 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 			paramtype = psy_audio_machine_parameter_type(self->machine,
 				self->param) & ~MPF_SMALL;
 		} else {
-			paramtype = psy_audio_machineparam_type(self->param) & ~MPF_SMALL;
+			paramtype = psy_audio_machineparam_type(self->param) & 0x1FF;
 		}
 		if ((paramtype != MPF_CHECK) && (paramtype != MPF_SWITCH)) {
 			// todo add fine/ultrafine tweak

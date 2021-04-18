@@ -1077,7 +1077,7 @@ void returnchannel_mute_normvalue(psy_audio_ReturnChannel* self,
 
 // Mixer
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 static fp_machine_work work_super = 0;
 static fp_machine_postload postload_super = 0;
 
@@ -1104,7 +1104,7 @@ static void vtable_init(psy_audio_Mixer* self)
 		vtable.savespecific = (fp_machine_savespecific)savespecific;
 		vtable.postload = (fp_machine_postload)postload;
 		vtable.amprange = (fp_machine_amprange)amprange;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -1137,6 +1137,11 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-", MPF_IGNORE | MPF_SMALL, 0, 0);
 	//psy_audio_custommachineparam_init(&self->route_param, "Route", "Route", MPF_SWITCH | MPF_SMALL, 0, 0);
 	psy_audio_custommachineparam_init(&self->routemaster_param, "Master", "Master", MPF_SWITCH | MPF_SMALL, 0, 0);
+	psy_audio_custommachineparam_init(&self->label_mix_param, "Mix", "Mix", MPF_INFOLABEL | MPF_SMALL, 0, 0);
+	psy_audio_custommachineparam_init(&self->label_gain_param, "Gain", "Gain", MPF_INFOLABEL | MPF_SMALL, 0, 0);
+	psy_audio_custommachineparam_init(&self->label_pan_param, "Pan", "Pan", MPF_INFOLABEL | MPF_SMALL, 0, 0);
+	psy_audio_custommachineparam_init(&self->label_ch_input_param, "Ch. Input", "Ch. Input",
+		MPF_INFOLABEL | MPF_SMALL | MPF_BOTTOM, 0, 0);
 }
 
 void psy_audio_mixer_dispose(psy_audio_Mixer* self)
@@ -1147,8 +1152,12 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 	psy_audio_mixer_dispose_legacywires(self);
 	psy_audio_custommachineparam_dispose(&self->blank_param);
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
-	psy_audio_custommachineparam_dispose(&self->routemaster_param);	
-	psy_audio_custommachine_dispose(&self->custommachine);	
+	psy_audio_custommachineparam_dispose(&self->routemaster_param);
+	psy_audio_custommachineparam_dispose(&self->label_mix_param);
+	psy_audio_custommachineparam_dispose(&self->label_gain_param);
+	psy_audio_custommachineparam_dispose(&self->label_pan_param);
+	psy_audio_custommachineparam_dispose(&self->label_ch_input_param);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 void psy_audio_mixer_dispose_channels(psy_audio_Mixer* self)
@@ -1602,7 +1611,18 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 			if (channel) {
 				return psy_audio_sendreturnlabelparam_base(&channel->sendlabel_param);
 			}
+		} else if (row > numreturncolumns(self) && row <= numreturncolumns(self) + 3) {
+			if (row == numreturncolumns(self) + 1) {
+				return &self->label_mix_param.machineparam;
+			} else if (row == numreturncolumns(self) + 2) {
+				return &self->label_gain_param.machineparam;
+			} else if (row == numreturncolumns(self) + 3) {
+				return &self->label_pan_param.machineparam;
+			}
 		} else if (row > numreturncolumns(self) + 3 && row < numreturncolumns(self) + 9) {
+			if (row == numreturncolumns(self) + 8) {				
+				return &self->label_ch_input_param.machineparam;
+			}
 			return &self->ignore_param.machineparam;
 		} else {
 			return &self->blank_param.machineparam;
@@ -1690,35 +1710,27 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 		if (channel) {
 			if (row == 0) {
 				return psy_audio_sendreturnlabelparam_base(&channel->returnlabel_param);
-			} else
-			if (row > 1 && row < numreturncolumns(self) + 1) {
+			} else if (row > 1 && row < numreturncolumns(self) + 1) {
 				if (index <= row - 2) {
 					channel->route_param.send = row - 1;
 					return &channel->route_param.machineparam;
 				} else {
 					return &self->blank_param.machineparam;
 				}
-			} else
-			if (row == numreturncolumns(self) + 1) {
+			} else if (row == numreturncolumns(self) + 1) {
 				channel->route_param.send = row - 1;
 				return &channel->route_param.machineparam;
-			} else
-			if (row == numreturncolumns(self) + 3) {
+			} else if (row == numreturncolumns(self) + 3) {
 				return &channel->pan_param.machineparam;
-			} else
-			if (row == numreturncolumns(self) + 4) {
+			} else if (row == numreturncolumns(self) + 4) {
 				return &channel->slider_param.machineparam;
-			} else
-			if (row == numreturncolumns(self) + 5) {
+			} else if (row == numreturncolumns(self) + 5) {
 				return &channel->level_param.machineparam;
-			} else
-			if (row == numreturncolumns(self) + 6) {
+			} else if (row == numreturncolumns(self) + 6) {
 				return &channel->solo_param.machineparam;
-			} else
-			if (row == numreturncolumns(self) + 7) {
+			} else if (row == numreturncolumns(self) + 7) {
 				return &channel->mute_param.machineparam;
-			} else
-			if (row >= numreturncolumns(self) + 8) {
+			} else if (row >= numreturncolumns(self) + 8) {
 				return &self->ignore_param.machineparam;
 			} else {
 				return &self->blank_param.machineparam;

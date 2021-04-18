@@ -215,6 +215,10 @@ typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachineParam blank_param;
 	psy_audio_CustomMachineParam ignore_param;	
 	psy_audio_CustomMachineParam routemaster_param;
+	psy_audio_CustomMachineParam label_mix_param;
+	psy_audio_CustomMachineParam label_gain_param;
+	psy_audio_CustomMachineParam label_pan_param;
+	psy_audio_CustomMachineParam label_ch_input_param;
 	psy_Table legacyreturn_;
 	psy_Table legacysend_;
 } psy_audio_Mixer;
