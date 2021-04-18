@@ -39,6 +39,7 @@ typedef unsigned long dword;
 #define MPF_SWITCH				7
 #define MPF_IGNORE				8
 #define MPF_SMALL				512
+#define MPF_BOTTOM				1024
 
 typedef struct {
 	char const *Name;		// Short name: "Cutoff"

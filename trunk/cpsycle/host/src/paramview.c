@@ -127,8 +127,7 @@ void paramview_build(ParamView* self)
 				component = NULL;
 				slider = FALSE;
 				checkinslidergroup = FALSE;
-				switch (psy_audio_machine_parameter_type(self->machine, machineparam) &
-					~MPF_SMALL) {				
+				switch (psy_audio_machine_parameter_type(self->machine, machineparam) & 0x1FF) {
 				case MPF_HEADER: {
 					HeaderUi* header;
 
@@ -218,8 +217,13 @@ void paramview_build(ParamView* self)
 					psy_ui_component_preventalign(component);
 					break; }
 				}
-				if (component) {					
-					psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);					
+				if (component) {
+					if ((psy_audio_machine_parameter_type(self->machine, machineparam) &
+							MPF_BOTTOM) == MPF_BOTTOM) {						
+						psy_ui_component_setalign(component, psy_ui_ALIGN_BOTTOM);						
+					} else {
+						psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);
+					}
 					if (slider) {
 						psy_ui_component_setminimumsize(component,
 							psy_ui_size_make_em(20.0, 15.0));
