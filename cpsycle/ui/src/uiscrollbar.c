@@ -42,12 +42,6 @@ static void psy_ui_scrollbarthumb_vtableinit_init(psy_ui_ScrollBarThumb* self)
 		psy_ui_scrollbarthumb_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			psy_ui_scrollbarthumb_onmousedown;
-		psy_ui_scrollbarthumb_vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
-			psy_ui_scrollbarthumb_onmouseenter;
-		psy_ui_scrollbarthumb_vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
-			psy_ui_scrollbarthumb_onmouseleave;
 		psy_ui_scrollbarthumb_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &psy_ui_scrollbarthumb_vtable;
@@ -75,22 +69,6 @@ void psy_ui_scrollbarthumb_onmousedown(psy_ui_ScrollBarThumb* self,
 	assert(self);
 
 	self->state->dragthumb = TRUE;
-}
-
-void psy_ui_scrollbarthumb_onmouseenter(psy_ui_ScrollBarThumb* self)
-{
-	assert(self);
-
-	self->component.style.currstyle = &self->component.style.hover;
-	psy_ui_component_invalidate(&self->component);
-}
-
-void psy_ui_scrollbarthumb_onmouseleave(psy_ui_ScrollBarThumb* self)
-{
-	assert(self);
-	
-	self->component.style.currstyle = &self->component.style.style;
-	psy_ui_component_invalidate(&self->component);	
 }
 
 // psy_ui_ScrollBarPane

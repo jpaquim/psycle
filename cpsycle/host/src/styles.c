@@ -325,7 +325,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_make_rgb(18, 18, 18));
 	psy_ui_style_setbackgroundcolour(style,
-		psy_ui_colour_make_rgb(52, 53, 50));
+		psy_ui_colour_make_rgb(89, 89, 89));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
@@ -336,7 +336,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_make_rgb(18, 18, 18));
 	psy_ui_style_setbackgroundcolour(style,
-		psy_ui_colour_make_rgb(62, 63, 59));
+		psy_ui_colour_make_rgb(69, 69, 69));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
@@ -346,7 +346,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, secondary);
 	psy_ui_style_setbackgroundcolour(style,
-		psy_ui_colour_make_rgb(57, 58, 55));
+		psy_ui_colour_make_rgb(79, 79, 79));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
@@ -362,6 +362,39 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_make_rgb(62, 63, 65));
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SELECT, style);
+	// shift key
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_make_rgb(18, 18, 18));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_rgb(128, 172, 131));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 4.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make_rgb(62, 63, 65));
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SHIFT, style);
+	// alt key
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_make_rgb(18, 18, 18));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_rgb(28, 138, 103));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 4.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make_rgb(62, 63, 65));
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_ALT, style);
+	// ctrl key
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_make_rgb(18, 18, 18));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_rgb(176, 173, 130));
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_setradius_px(&style->border, 4.0);
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_make_rgb(62, 63, 65));
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_CTRL, style);	
 	// table row
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,

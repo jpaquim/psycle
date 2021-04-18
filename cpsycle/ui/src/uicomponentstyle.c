@@ -11,35 +11,49 @@
 
 void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 {
+	assert(self);
+
+	psy_table_init(&self->styles);
 	psy_ui_style_init(&self->style);
-	psy_ui_style_init(&self->focus);
-	psy_ui_style_init(&self->hover);
-	psy_ui_style_init(&self->select);
-	psy_ui_style_init(&self->disabled);
-	psy_ui_style_init(&self->active);
-	self->currstyle = &self->style;
-	self->style_id = psy_INDEX_INVALID;
-	self->focus_id = psy_INDEX_INVALID;
-	self->hover_id = psy_INDEX_INVALID;
-	self->select_id = psy_INDEX_INVALID;
-	self->disabled_id = psy_INDEX_INVALID;
-	self->active_id = psy_INDEX_INVALID;
+	psy_table_init(&self->styleids);
 	self->state = psy_ui_STYLESTATE_NONE;
+	self->currstyle = &self->style;
 }
 
 void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 {
+	assert(self);
+
+	psy_table_dispose(&self->styleids);
+	psy_table_disposeall(&self->styles, (psy_fp_disposefunc)
+		psy_ui_style_dispose);
 	psy_ui_style_dispose(&self->style);
-	psy_ui_style_dispose(&self->focus);
-	psy_ui_style_dispose(&self->hover);
-	psy_ui_style_dispose(&self->select);	
-	psy_ui_style_dispose(&self->disabled);
-	psy_ui_style_dispose(&self->active);
+}
+
+bool psy_ui_componentstyle_hasstyle(const psy_ui_ComponentStyle* self,
+	psy_ui_StyleState state)
+{
+	assert(self);
+
+	return psy_table_exists(&self->styles, (uintptr_t)state);
+}
+
+psy_ui_Style* psy_ui_componentstyle_style(psy_ui_ComponentStyle* self,
+	psy_ui_StyleState state)
+{
+	assert(self);
+
+	if (state == psy_ui_STYLESTATE_NONE) {
+		return &self->style;
+	}
+	return psy_table_at(&self->styles, (uintptr_t)state);
 }
 
 bool psy_ui_componentstyle_hasstate(const psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
+	assert(self);
+
 	return ((self->state & state) == state);
 }
 
@@ -47,11 +61,15 @@ bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle* self)
 {
 	uintptr_t state;
 
+	assert(self);
+
 	if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_DISABLED)) {
 		state = psy_ui_STYLESTATE_DISABLED;
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_SELECT)) {
+	} else if (psy_ui_componentstyle_hasstate(self,
+			psy_ui_STYLESTATE_SELECT)) {
 		state = psy_ui_STYLESTATE_SELECT;
-	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_ACTIVE)) {
+	} else if (psy_ui_componentstyle_hasstate(self,
+			psy_ui_STYLESTATE_ACTIVE)) {
 		state = psy_ui_STYLESTATE_ACTIVE;	
 	} else if (psy_ui_componentstyle_hasstate(self, psy_ui_STYLESTATE_FOCUS)) {
 		state = psy_ui_STYLESTATE_FOCUS;
@@ -68,73 +86,65 @@ bool psy_ui_componentstyle_setcurrstate(psy_ui_ComponentStyle* self,
 {
 	psy_ui_Style* oldstyle;
 
-	oldstyle = self->currstyle;
-	switch (state) {
-	case psy_ui_STYLESTATE_NONE:
-		if (self->currstyle != &self->style) {
-			self->currstyle = &self->style;			
-		}
-		break;
-	case psy_ui_STYLESTATE_FOCUS:
-		if (self->focus_id != psy_INDEX_INVALID) {
-			self->currstyle = &self->focus;
+	assert(self);
 
-		}
-		break;
-	case psy_ui_STYLESTATE_HOVER:
-		if (self->hover_id != psy_INDEX_INVALID) {
-			self->currstyle = &self->hover;		
-		}
-		break;
-	case psy_ui_STYLESTATE_SELECT:
-		if (self->select_id != psy_INDEX_INVALID) {
-			self->currstyle = &self->select;		
-		}
-		break;
-	case psy_ui_STYLESTATE_DISABLED:
-		if (self->disabled_id != psy_INDEX_INVALID) {
-			self->currstyle = &self->disabled;		
-		}
-		break;
-	case psy_ui_STYLESTATE_ACTIVE:
-		if (self->active_id != psy_INDEX_INVALID) {
-			self->currstyle = &self->active;
-		}
-		break;
-	default:
-		if (self->currstyle != &self->style) {
-			self->currstyle = &self->style;		
-		}
-		break;
+	oldstyle = self->currstyle;
+	if (psy_ui_componentstyle_hasstyle(self, state)) {
+		self->currstyle = psy_ui_componentstyle_style(self, state);
+	} else {			
+		self->currstyle = &self->style;		
 	}
 	return self->currstyle != oldstyle;
 }
 
+void psy_ui_componentstyle_setstyle(psy_ui_ComponentStyle* self,
+	psy_ui_StyleState state, uintptr_t style_id)
+{
+	assert(self);
+
+	if (style_id != psy_INDEX_INVALID) {
+		psy_table_insert(&self->styleids, state, (void*)(uintptr_t)style_id);
+	} else {
+		psy_table_remove(&self->styleids, state);
+	}
+}
+
+void psy_ui_componentstyle_readstyle(psy_ui_ComponentStyle* self,
+	psy_ui_StyleState state, uintptr_t style_id)
+{
+	assert(self);
+
+	if (style_id != psy_INDEX_INVALID) {
+		psy_ui_Style* style;
+
+		if (state == psy_ui_STYLESTATE_NONE) {
+			style = &self->style;
+		} else {
+			style = psy_ui_componentstyle_style(self, state);
+			if (!style) {
+				style = psy_ui_style_allocinit();
+				psy_table_insert(&self->styles, state, (void*)style);
+			}			
+		}
+		psy_ui_style_copy(style, psy_ui_style(style_id));
+	}
+}
+
 void psy_ui_componentstyle_readstyles(psy_ui_ComponentStyle* self)
 {
-	if (self->style_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->style,
-			psy_ui_style(self->style_id));
-	}
-	if (self->focus_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->focus,
-			psy_ui_style(self->focus_id));
-	}
-	if (self->hover_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->hover,
-			psy_ui_style(self->hover_id));
-	}
-	if (self->select_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->select,
-			psy_ui_style(self->select_id));
-	}
-	if (self->disabled_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->disabled,
-			psy_ui_style(self->disabled_id));
-	}
-	if (self->active_id != psy_INDEX_INVALID) {
-		psy_ui_style_copy(&self->active,
-			psy_ui_style(self->active_id));
+	psy_TableIterator it;	
+
+	assert(self);
+	
+	for (it = psy_table_begin(&self->styleids);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_ui_StyleState state;
+		uintptr_t id;
+		
+		state = (psy_ui_StyleState)psy_tableiterator_key(&it);
+		id = (uintptr_t)psy_tableiterator_value(&it);
+		psy_ui_componentstyle_readstyle(self, state, id);
 	}
 }
 
@@ -142,6 +152,8 @@ bool psy_ui_componentstyle_addstate(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
 	uintptr_t newstate;
+
+	assert(self);
 
 	newstate = self->state | state;
 	if (newstate != self->state) {
@@ -155,6 +167,8 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
 	psy_ui_StyleState state)
 {
 	uintptr_t newstate;
+
+	assert(self);
 
 	newstate = self->state & (~state);
 	if (newstate != self->state) {

@@ -1530,26 +1530,33 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 	uintptr_t standard, uintptr_t hover, uintptr_t select,
 	uintptr_t disabled)
 {
-	self->style.style_id = standard;
-	self->style.focus_id = psy_INDEX_INVALID;
-	self->style.hover_id = hover;
-	self->style.select_id = select;
-	self->style.disabled_id = disabled;
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_NONE, standard);		
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_HOVER, hover);
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_SELECT, select);
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_DISABLED, disabled);	
 	psy_ui_componentstyle_readstyles(&self->style);
 }
 
 void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {
-	self->style.focus_id = focus;
-	psy_ui_componentstyle_readstyles(&self->style);
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_FOCUS, focus);
+	psy_ui_componentstyle_readstyle(&self->style,
+		psy_ui_STYLESTATE_FOCUS, focus);
 }
 
 void psy_ui_component_setstyletype_active(psy_ui_Component* self,
 	uintptr_t active)
 {
-	self->style.active_id = active;
-	psy_ui_componentstyle_readstyles(&self->style);
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_ACTIVE, active);
+	psy_ui_componentstyle_readstyle(&self->style,
+		psy_ui_STYLESTATE_ACTIVE, active);
 }
 
 void psy_ui_component_setstylestate(psy_ui_Component* self,

@@ -318,7 +318,10 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			}
-			psy_ui_settextcolour(g, self->component.style.select.colour);
+			if (psy_ui_componentstyle_style(&self->component.style, psy_ui_STYLESTATE_SELECT)) {
+				psy_ui_settextcolour(g, psy_ui_componentstyle_style(
+					&self->component.style, psy_ui_STYLESTATE_SELECT)->colour);
+			}
 			//self->foundselected = 1;
 		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));

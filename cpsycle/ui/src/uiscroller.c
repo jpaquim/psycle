@@ -370,8 +370,10 @@ void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender)
 
 void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
 {
-	if (self->client) {		
+	if (self->client) {
+		assert(self->client->style.currstyle);
+
 		self->component.style.style.border =
-			psy_ui_style(self->client->style.style_id)->border;		
+			self->client->style.currstyle->border;
 	}
 }

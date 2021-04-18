@@ -1155,13 +1155,13 @@ void instrumententryrow_onentryupdate(
 
 void instrumententryrow_updatestyles(InstrumentEntryRow* self)
 {		
-	if (self->selected) {
-		self->component.style.currstyle = &self->component.style.select;
-	} else if (self->hover) {
-		self->component.style.currstyle = &self->component.style.hover;
-	} else {
+	// if (self->selected) {
+	//	self->component.style.currstyle = &self->component.style.select;
+	// } else if (self->hover) {
+	//	self->component.style.currstyle = &self->component.style.hover;
+	// } else {
 		self->component.style.currstyle = &self->component.style.style;
-	}
+	// }
 	psy_ui_component_invalidate(&self->component);
 }
 
