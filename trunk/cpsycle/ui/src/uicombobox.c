@@ -161,7 +161,7 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 
 	assert(self);
 	
-	size = psy_ui_component_sizepx(&self->component);	
+	size = psy_ui_component_offsetsizepx(&self->component);	
 	varrowcenter = (size.height - 10) / 2;	
 	sel = psy_ui_combobox_cursel(self);	
 	if (sel != -1) {
@@ -211,7 +211,7 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 	
 	assert(self);
 
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_offsetsizepx(&self->component);
 	if (ev->pt.x >= (size.width - 40) && (ev->pt.x < size.width - 25)) {
 		intptr_t index;
 		
@@ -243,7 +243,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 		psy_ui_ComboBoxHover hover;
 		psy_ui_RealSize size;
 				
-		size = psy_ui_component_sizepx(&self->component);
+		size = psy_ui_component_offsetsizepx(&self->component);
 		hover = self->hover;
 		if (ev->pt.x >= (size.width - 40) && ev->pt.x < (size.width - 25)) {
 			intptr_t index = psy_ui_combobox_cursel(self);

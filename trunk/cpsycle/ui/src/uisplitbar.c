@@ -99,32 +99,32 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 			if (prev->align == psy_ui_ALIGN_LEFT ||
 					prev->align == psy_ui_ALIGN_RIGHT) {
 				if (!self->hasrestore) {
-					self->restoresize = psy_ui_component_size(prev);
+					self->restoresize = psy_ui_component_offsetsize(prev);
 					self->hasrestore = TRUE;
 					psy_ui_component_resize(prev,
 						psy_ui_size_make(psy_ui_value_makeew(0),
-							psy_ui_component_size(prev).height));
+							psy_ui_component_offsetsize(prev).height));
 				} else {
 					self->hasrestore = FALSE;
 					psy_ui_component_resize(prev,
 						psy_ui_size_make(self->restoresize.width,
-						psy_ui_component_size(prev).height));
+						psy_ui_component_offsetsize(prev).height));
 				}
 			} else
 			if (prev->align == psy_ui_ALIGN_TOP ||
 					prev->align == psy_ui_ALIGN_BOTTOM) {
 				if (!self->hasrestore) {
 					self->hasrestore = TRUE;
-					self->restoresize = psy_ui_component_size(prev);					
+					self->restoresize = psy_ui_component_offsetsize(prev);					
 					psy_ui_component_resize(prev,
 						psy_ui_size_make(
-							psy_ui_component_size(prev).width,
+							psy_ui_component_offsetsize(prev).width,
 							psy_ui_value_makepx(0)));
 				} else {
 					self->hasrestore = FALSE;
 					psy_ui_component_resize(prev,
 						psy_ui_size_make(
-							psy_ui_component_size(prev).width,
+							psy_ui_component_offsetsize(prev).width,
 							self->restoresize.height));
 				}
 			}
@@ -255,7 +255,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					psy_ui_size_make(
 						psy_ui_value_makepx(position.left -
 							prev_position.left),
-						psy_ui_component_size(prev).height));
+						psy_ui_component_offsetsize(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_RIGHT) {
 					psy_ui_RealRectangle prev_position;
 
@@ -265,12 +265,12 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					psy_ui_size_make(
 						psy_ui_value_makepx(
 							prev_position.right - position.right),
-						psy_ui_component_size(prev).height));
+						psy_ui_component_offsetsize(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_TOP) {
 				prev->preventpreferredsizeatalign = TRUE;
 				psy_ui_component_resize(prev,
 					psy_ui_size_make(
-						psy_ui_component_size(prev).width,
+						psy_ui_component_offsetsize(prev).width,
 						psy_ui_value_makepx(position.top)));
 			} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
 				psy_ui_RealRectangle prev_position;
@@ -279,7 +279,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				prev_position = psy_ui_component_position(prev);
 				psy_ui_component_resize(prev,
 					psy_ui_size_make(
-						psy_ui_component_size(prev).width,
+						psy_ui_component_offsetsize(prev).width,
 						psy_ui_value_makepx(prev_position.bottom -
 							position.bottom)));
 			}

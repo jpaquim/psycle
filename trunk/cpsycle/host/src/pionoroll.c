@@ -155,7 +155,7 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_sizepx(&self->component);	
+	size = psy_ui_component_offsetsizepx(&self->component);	
 	baseline = size.height - 1;
 	baselinetop = baseline - tm->tmHeight / 3;
 	scrollleft = psy_ui_component_scrollleftpx(&self->component);
@@ -263,7 +263,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 
 	assert(self);
 
-	size = psy_ui_component_sizepx(pianokeyboard_base(self));
+	size = psy_ui_component_offsetsizepx(pianokeyboard_base(self));
 	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(self->keyboardstate, tm);
 	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm);
@@ -675,7 +675,7 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 		self->trackdisplay,
 		self->cursorchanging, self->cursoronnoterelease,		
 		self->selection,
-		psy_ui_component_sizepx(pianogrid_base(self)),
+		psy_ui_component_offsetsizepx(pianogrid_base(self)),
 		psy_ui_component_textmetric(&self->component),
 		self->workspace);
 	pianogriddraw_ondraw(&griddraw, g);
@@ -717,7 +717,7 @@ void pianogrid_drawbackground(Pianogrid* self, psy_ui_Graphics* g,
 	assert(self);
 	assert(pianogridstate_pattern(self->gridstate));
 
-	size = psy_ui_component_sizepx(pianogrid_base(self));
+	size = psy_ui_component_offsetsizepx(pianogrid_base(self));
 	pianogrid_drawuncoveredrightbackground(self, g, size);
 	pianogrid_drawuncoveredbottombackground(self, g, size);
 }
@@ -1708,7 +1708,7 @@ void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t position)
 		double scrolltoppx;
 				
 		scrolltoppx = psy_ui_component_scrolltoppx(pianogrid_base(self));
-		size =  psy_ui_component_sizepx(&self->component);
+		size =  psy_ui_component_offsetsizepx(&self->component);
 		psy_ui_component_invalidaterect(&self->component,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(

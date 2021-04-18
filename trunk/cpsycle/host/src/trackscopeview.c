@@ -240,7 +240,7 @@ void trackscopes_onalign(TrackScopes* self)
 	psy_ui_Size size;	
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size(&self->component);	
+	size = psy_ui_component_offsetsize(&self->component);	
 	self->trackheight = (int)(tm->tmHeight * 2.75f);
 	self->textheight = tm->tmHeight;
 	if (workspace_song(self->workspace)) {
@@ -288,7 +288,7 @@ void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 		
 		numtracks = psy_audio_song_numsongtracks(workspace_song(self->workspace));
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
-		size = psy_ui_component_size(&self->component);
+		size = psy_ui_component_offsetsize(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		trackwidth = psy_ui_value_px(&size.width, tm) / columns;		
 		track = (uintptr_t)((ev->pt.x / trackwidth) + floor(ev->pt.y / self->trackheight) * columns);
