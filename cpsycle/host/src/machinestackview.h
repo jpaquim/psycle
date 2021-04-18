@@ -104,14 +104,11 @@ typedef struct MachineStackState {
 	uintptr_t currlevel;
 	bool drawvirtualgenerators;
 	uintptr_t insertmachinemode;
-	bool drawsmalleffects;
-	// references
-	struct MachineViewBar* statusbar;
+	bool drawsmalleffects;		
 	ParamViews* paramviews;
 } MachineStackState;
 
-void machinestackstate_init(MachineStackState*, ParamViews*,
-	struct MachineViewBar* statusbar);
+void machinestackstate_init(MachineStackState*, ParamViews*);
 void machinestackstate_dispose(MachineStackState*);
 
 void machinestackstate_buildcolumns(MachineStackState*);
@@ -282,7 +279,7 @@ typedef struct MachineStackView {
 
 void machinestackview_init(MachineStackView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin*,
-	struct MachineViewBar* statusbar, ParamViews*, Workspace*);
+	ParamViews*, Workspace*);
 
 void machinestackview_addeffect(MachineStackView*,
 	const psy_audio_MachineInfo*);

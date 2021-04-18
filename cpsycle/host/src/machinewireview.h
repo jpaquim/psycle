@@ -47,8 +47,7 @@ typedef struct MachineWireView {
 	bool vudrawupdate;
 	bool drawvirtualgenerators;
 	uintptr_t opcount;
-	// references
-	struct MachineViewBar* statusbar;
+	// references	
 	psy_audio_Machines* machines;	
 	Workspace* workspace;	
 	MachineViewSkin* skin;

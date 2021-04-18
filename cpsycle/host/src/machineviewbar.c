@@ -32,16 +32,15 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(machineviewbar_base(self), parent, NULL);
+	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(machineviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_makeem(0.0, 4.0, 0.0, 0.0));
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_checkbox_init_text(&self->mixersend, machineviewbar_base(self),
 		"machineview.connect-to-mixer-send-return-input");
 	psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);	
-	psy_ui_label_init(&self->status, machineviewbar_base(self), NULL);
-	psy_ui_label_preventtranslation(&self->status);
-	psy_ui_label_setcharnumber(&self->status, 44.0);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
 	if (workspace_song(workspace)) {
@@ -50,12 +49,6 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	} else {
 		machineviewbar_setmachines(self, NULL);
 	}
-}
-
-void machineviewbar_settext(MachineViewBar* self, const char* text)
-{	
-	psy_ui_label_settext(&self->status, text);
-	psy_ui_label_fadeout(&self->status);
 }
 
 void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self,
@@ -105,7 +98,9 @@ void machineviewbar_onmachineinsert(MachineViewBar* self,
 	psy_audio_Machines* sender, uintptr_t slot)
 {
 	if (psy_audio_machines_hasmixer(sender)) {		
-		psy_ui_component_show_align(psy_ui_checkbox_base(&self->mixersend));
+		psy_ui_component_show(psy_ui_checkbox_base(&self->mixersend));
+		psy_ui_component_align(psy_ui_component_parent(
+			psy_ui_component_parent(&self->component)));
 	}
 	if (psy_audio_machines_at(sender, slot)) {
 		char text[128];
@@ -113,7 +108,7 @@ void machineviewbar_onmachineinsert(MachineViewBar* self,
 		psy_snprintf(text, 128, "%s inserted at slot %u",
 			psy_audio_machine_editname(psy_audio_machines_at(sender, slot)),
 			(unsigned int)slot);
-		machineviewbar_settext(self, text);
+		workspace_outputstatus(self->workspace, text);		
 	}	
 }
 
@@ -123,9 +118,11 @@ void machineviewbar_onmachineremoved(MachineViewBar* self,
 	char text[128];
 
 	if (!psy_audio_machines_hasmixer(sender)) {		
-		psy_ui_component_hide_align(psy_ui_checkbox_base(&self->mixersend));
+		psy_ui_component_hide(psy_ui_checkbox_base(&self->mixersend));
+		psy_ui_component_align(psy_ui_component_parent(
+			psy_ui_component_parent(&self->component)));
 	}		
 	psy_snprintf(text, 128, "Machine removed from slot %u",
 		(unsigned int)slot);
-	machineviewbar_settext(self, text);	
+	workspace_outputstatus(self->workspace, text);
 }
