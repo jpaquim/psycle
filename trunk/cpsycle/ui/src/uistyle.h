@@ -25,6 +25,7 @@ typedef struct psy_ui_Style {
 	psy_ui_Margin spacing;
 	bool use_font;
 	int dbgflag;
+	uintptr_t id;
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);

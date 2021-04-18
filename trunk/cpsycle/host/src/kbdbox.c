@@ -45,7 +45,28 @@ void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Compon
 	psy_ui_component_init(&self->component, parent, view);
 	kbdboxkey_vtable_init(self);
 	psy_ui_setrectangle(&r, x, y, width, height);
-	if (strcmp(label, "EMPTY") != 0) {
+	if (strcmp(label, "SHIFT") == 0) {
+		psy_ui_component_setstyletypes(&self->component,
+			STYLE_KEY_SHIFT, STYLE_KEY_HOVER, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);
+		psy_ui_component_setstyletype_active(&self->component,
+			STYLE_KEY_ACTIVE);
+		self->label = strdup(label);
+	} else if (strcmp(label, "ALT") == 0) {
+		psy_ui_component_setstyletypes(&self->component,
+			STYLE_KEY_ALT, STYLE_KEY_HOVER, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);
+		psy_ui_component_setstyletype_active(&self->component,
+			STYLE_KEY_ACTIVE);
+		self->label = strdup(label);
+	} else if (strcmp(label, "CTRL") == 0) {
+		psy_ui_component_setstyletypes(&self->component,
+			STYLE_KEY_CTRL, STYLE_KEY_HOVER, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);
+		psy_ui_component_setstyletype_active(&self->component,
+			STYLE_KEY_ACTIVE);
+		self->label = strdup(label);
+	} else  if (strcmp(label, "EMPTY") != 0) {
 		psy_ui_component_setstyletypes(&self->component,
 			STYLE_KEY, STYLE_KEY_HOVER, psy_INDEX_INVALID,
 			psy_INDEX_INVALID);
@@ -108,13 +129,15 @@ void kbdboxkey_ondraw(KbdBoxKey* self, psy_ui_Graphics* g)
 	cpx = 4;
 	cpy = 4;
 	psy_ui_textout(g, cpx, cpy,
-		self->label, psy_strlen(self->label));
+		self->label, psy_strlen(self->label));	
 	psy_ui_textout(g, cpx + descident, cpy,
 		self->desc0, psy_strlen(self->desc0));
+	psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_SHIFT)->backgroundcolour);	
 	psy_ui_textout(g, cpx, cpy + tm->tmHeight,
 		self->desc1, psy_strlen(self->desc1));
+	psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_CTRL)->backgroundcolour);
 	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 2,
-		self->desc2, psy_strlen(self->desc2));
+		self->desc2, psy_strlen(self->desc2));	
 	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 3,
 		self->desc3, psy_strlen(self->desc3));
 }

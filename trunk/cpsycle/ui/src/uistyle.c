@@ -20,6 +20,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_margin_init(&self->spacing);
 	self->use_font = 0;
 	self->dbgflag = 0;
+	self->id = psy_INDEX_INVALID;
 }
 
 void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)

@@ -22,12 +22,14 @@ static void splitbar_onpreferredsize(psy_ui_SplitBar*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_SplitBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		super_vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_component_ondraw)splitbar_ondraw;
 		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
 			splitbar_onmousedown;
@@ -143,8 +145,8 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		splitbar_setcursor(self);
 	}
 	if (self->resize) {
-		self->component.style.currstyle = &self->component.style.select;		
-		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_addstylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
 	}
 }
 
@@ -299,20 +301,21 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		}
 		psy_ui_component_invalidate(&self->component);
 	}	
-	self->resize = 0;	
-	self->component.style.currstyle = &self->component.style.hover;
+	self->resize = 0;
+	psy_ui_component_removestylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);	
 }
 
 void splitbar_onmouseenter(psy_ui_SplitBar* self)
 {		
-	splitbar_setcursor(self);
-	self->component.style.currstyle = &self->component.style.hover;
+	super_vtable.onmouseenter(psy_ui_splitbar_base(self));
+	splitbar_setcursor(self);	
 	self->hover = 1;
 }
 
 void splitbar_onmouseleave(psy_ui_SplitBar* self)
-{			
-	self->component.style.currstyle = &self->component.style.style;
+{	
+	super_vtable.onmouseleave(psy_ui_splitbar_base(self));	
 	self->hover = 0;
 }
 
