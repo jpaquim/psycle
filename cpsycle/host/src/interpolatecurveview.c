@@ -156,7 +156,7 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		double scalex;
 		uintptr_t i;
 		
-		size = psy_ui_component_offsetsizepx(&self->component);
+		size = psy_ui_component_offsetsize_px(&self->component);
 		lines = (uintptr_t)(self->range / self->bpl);
 		scalex = size.width / self->range;
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
@@ -200,7 +200,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	val3 = entry->value;
 	lastcurveval = (double)entry->value;
 	lastoffset = entry->offset;
-	size = psy_ui_component_offsetsizepx(&self->component);
+	size = psy_ui_component_offsetsize_px(&self->component);
 	lines = (uintptr_t)(self->range / self->bpl);
 	scalex = size.width / self->range;
 	scaley = size.height / 0xFF;

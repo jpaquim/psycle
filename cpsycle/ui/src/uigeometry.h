@@ -297,7 +297,8 @@ INLINE psy_ui_RealSize psy_ui_realrectangle_size(const psy_ui_RealRectangle* sel
 		psy_ui_realrectangle_height(self));
 }
 
-void psy_ui_setrectangle(psy_ui_RealRectangle*, double left, double top, double width, double height);
+void psy_ui_setrectangle(psy_ui_RealRectangle*,
+	double left, double top, double width, double height);
 
 INLINE bool psy_ui_realrectangle_intersect(const psy_ui_RealRectangle* self,
 	psy_ui_RealPoint pt)
@@ -314,13 +315,16 @@ void psy_ui_realrectangle_union(psy_ui_RealRectangle*,
 	const psy_ui_RealRectangle* other);
 bool psy_ui_realrectangle_intersection(psy_ui_RealRectangle*,
 	const psy_ui_RealRectangle* other);
-void psy_ui_realrectangle_expand(psy_ui_RealRectangle*, double top, double right, double bottom, double left);
+void psy_ui_realrectangle_expand(psy_ui_RealRectangle*,
+	double top, double right, double bottom, double left);
 void psy_ui_realrectangle_move(psy_ui_RealRectangle*, double dx, double dy);
-void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*, psy_ui_RealPoint topleft);
+void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle*,
+	psy_ui_RealPoint topleft);
 
 void psy_ui_error(const char* err, const char* shorterr);
 
-INLINE bool psy_ui_realrectangle_equal(psy_ui_RealRectangle* self, psy_ui_RealRectangle* other)
+INLINE bool psy_ui_realrectangle_equal(psy_ui_RealRectangle* self,
+	psy_ui_RealRectangle* other)
 {
 	return memcmp(self, other, sizeof(psy_ui_RealRectangle)) == 0;
 }
@@ -344,13 +348,21 @@ typedef struct psy_ui_Size {
 	psy_ui_Value height;
 } psy_ui_Size;
 
+INLINE void psy_ui_size_setroundmode(psy_ui_Size* self, psy_ui_Round round)
+{
+	psy_ui_value_setroundmode(&self->width, round);
+	psy_ui_value_setroundmode(&self->height, round);
+}
+
 INLINE void psy_ui_size_init(psy_ui_Size* self)
 {
 	psy_ui_value_init(&self->width);
 	psy_ui_value_init(&self->height);
+	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
-INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width, psy_ui_Value height)
+INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width,
+	psy_ui_Value height)
 {
 	self->width = width;
 	self->height = height;
@@ -360,12 +372,14 @@ INLINE void psy_ui_size_init_em(psy_ui_Size* self, double width, double height)
 {
 	self->width = psy_ui_value_makeew(width);
 	self->height = psy_ui_value_makeeh(height);
+	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
 INLINE void psy_ui_size_init_px(psy_ui_Size* self, double width, double height)
 {
 	self->width = psy_ui_value_makepx(width);
 	self->height = psy_ui_value_makepx(height);
+	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
 INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
@@ -381,8 +395,7 @@ INLINE psy_ui_Size psy_ui_size_make_px(double width, double height)
 {
 	psy_ui_Size rv;
 
-	rv.width = psy_ui_value_makepx(width);
-	rv.height = psy_ui_value_makepx(height);
+	psy_ui_size_init_px(&rv, width, height);
 	return rv;
 }
 
@@ -390,8 +403,7 @@ INLINE psy_ui_Size psy_ui_size_make_em(double width, double height)
 {
 	psy_ui_Size rv;
 
-	rv.width = psy_ui_value_makeew(width);
-	rv.height = psy_ui_value_makeeh(height);
+	psy_ui_size_init_em(&rv, width, height);
 	return rv;
 }
 
@@ -401,25 +413,26 @@ INLINE psy_ui_Size psy_ui_size_makereal(psy_ui_RealSize size)
 
 	rv.width = psy_ui_value_makeew(size.width);
 	rv.height = psy_ui_value_makeeh(size.height);
+	psy_ui_size_setroundmode(&rv, psy_ui_ROUND_FLOOR);
 	return rv;
 }
 
 INLINE void psy_ui_size_setpx(psy_ui_Size* self, double width, double height)
 {
-	self->width = psy_ui_value_makepx(width);
-	self->height = psy_ui_value_makepx(height);
+	psy_ui_value_setpx(&self->width, width);
+	psy_ui_value_setpx(&self->height, height);	
 }
 
 INLINE void psy_ui_size_setreal(psy_ui_Size* self, psy_ui_RealSize size)
 {	
-	self->width = psy_ui_value_makepx(size.width);
-	self->height = psy_ui_value_makepx(size.height);	
+	psy_ui_value_setpx(&self->width, size.width);
+	psy_ui_value_setpx(&self->height, size.height);	
 }
 
 INLINE void psy_ui_size_setem(psy_ui_Size* self, double width, double height)
 {
-	self->width = psy_ui_value_makeew(width);
-	self->height = psy_ui_value_makeeh(height);
+	psy_ui_value_setew(&self->width, width);
+	psy_ui_value_seteh(&self->height, height);
 }
 
 INLINE psy_ui_Size psy_ui_size_zero(void)
@@ -556,6 +569,13 @@ INLINE psy_ui_Margin psy_ui_margin_zero(void)
 	return rv;
 }
 
+INLINE void psy_ui_margin_setroundmode(psy_ui_Margin* self, psy_ui_Round round)
+{
+	psy_ui_value_setroundmode(&self->top, round);
+	psy_ui_value_setroundmode(&self->right, round);
+	psy_ui_value_setroundmode(&self->bottom, round);
+	psy_ui_value_setroundmode(&self->left, round);
+}
 
 typedef struct psy_ui_RealMargin {
 	double top;

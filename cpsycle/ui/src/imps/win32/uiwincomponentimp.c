@@ -476,7 +476,7 @@ psy_ui_RealRectangle dev_screenposition(psy_ui_win_ComponentImp* self)
 	ClientToScreen(self->hwnd, &pt);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(pt.x, pt.y),
-		psy_ui_component_offsetsizepx(self->component));
+		psy_ui_component_offsetsize_px(self->component));
 }
 
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
@@ -502,8 +502,8 @@ psy_ui_Size dev_size(const psy_ui_win_ComponentImp* self)
 		RECT rect;
 
 		GetClientRect(self->hwnd, &rect);
-		rv.width = psy_ui_value_makepx(rect.right);
-		rv.height = psy_ui_value_makepx(rect.bottom);		
+		psy_ui_size_init_px(&rv,
+			rect.right, rect.bottom);		
 		((psy_ui_win_ComponentImp*)self)->sizecache = rv;
 		((psy_ui_win_ComponentImp*)self)->sizecachevalid = TRUE;		
 	}
