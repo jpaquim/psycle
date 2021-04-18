@@ -189,7 +189,7 @@ void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 		double centery;
 
 		position = psy_ui_component_position(&self->trackbox.component);
-		size = psy_ui_component_sizepx(&self->trackbox.component);
+		size = psy_ui_component_offsetsizepx(&self->trackbox.component);
 		labelposition = psy_ui_component_position(&self->trackbox.desc.component);
 		tm = psy_ui_component_textmetric(&self->trackbox.component);
 		centery = (size.height - tm->tmHeight) / 2;

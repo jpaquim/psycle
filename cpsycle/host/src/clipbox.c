@@ -139,7 +139,7 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 	psy_ui_Colour currbackground;
 	psy_ui_Colour currborder;
 
-	size = psy_ui_component_size(&self->component);
+	size = psy_ui_component_offsetsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (psy_ui_value_px(&size.height, tm) > 40) {
 		size.height = psy_ui_value_makepx(40);

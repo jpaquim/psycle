@@ -84,7 +84,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 
 	str[0] = '\0';
 	labelui_updateparam(self);
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_offsetsizepx(&self->component);
 	half = size.height / 2;
 	psy_ui_setrectangle(&r, 0.0, 0.0, size.width, half);
 	psy_ui_setbackgroundcolour(g, self->skin->titlecolour);

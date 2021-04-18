@@ -52,7 +52,7 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
 		
-	switchsize = psy_ui_component_size(&self->component);
+	switchsize = psy_ui_component_offsetsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	size.width = psy_ui_value_makeew(4);
 	size.height = psy_ui_value_makeeh(1);

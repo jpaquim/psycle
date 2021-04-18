@@ -108,6 +108,9 @@ void psy_audio_mixersend_dispose(psy_audio_MixerSend*, uintptr_t slot);
 psy_audio_MixerSend* psy_audio_mixersend_alloc(void);
 psy_audio_MixerSend* psy_audio_mixersend_allocinit(uintptr_t slot);
 
+struct psy_audio_Mixer;
+
+// psy_audio_MasterChannel
 typedef struct psy_audio_MasterChannel {
 	struct psy_audio_Mixer* mixer;
 	psy_Table sendvols;
@@ -125,15 +128,16 @@ typedef struct psy_audio_MasterChannel {
 	psy_audio_GainMachineParam gain_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_IntMachineParam level_param;
-	psy_audio_IntMachineParam solo_param;
-	psy_audio_IntMachineParam mute_param;
-	psy_audio_IntMachineParam dryonly_param;
-	psy_audio_IntMachineParam wetonly_param;
+	psy_audio_IntMachineParam level_param;	
 	psy_audio_DryWetMixMachineParam drywetmix_param;
 } psy_audio_MasterChannel;
 
-struct psy_audio_Mixer;
+void masterchannel_init(psy_audio_MasterChannel*, struct psy_audio_Mixer*,
+	const char* name, const char* label);
+void masterchannel_dispose(psy_audio_MasterChannel*);
+
+psy_audio_MasterChannel* masterchannel_allocinit(struct psy_audio_Mixer*,
+	const char* name, const char* label);
 
 typedef struct psy_audio_InputChannel {
 	uintptr_t id;
@@ -162,6 +166,16 @@ typedef struct psy_audio_InputChannel {
 	psy_audio_DryWetMixMachineParam drywetmix_param;
 	struct psy_audio_Mixer* mixer;
 } psy_audio_InputChannel;
+
+void inputchannel_init(psy_audio_InputChannel*, uintptr_t id,
+	struct psy_audio_Mixer*, uintptr_t inputslot);
+void inputchannel_dispose(psy_audio_InputChannel*);
+
+psy_audio_InputChannel* inputchannel_allocinit(struct psy_audio_Mixer*,
+	uintptr_t id, uintptr_t inputslot);
+
+psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel*);
+
 
 typedef struct psy_audio_ReturnChannel {
 	uintptr_t id;
@@ -214,7 +228,7 @@ INLINE psy_audio_InputChannel* psy_audio_mixer_Channel(psy_audio_Mixer* self,
 	return (psy_audio_InputChannel*) psy_table_at(&self->inputs, i);
 }
 
-INLINE psy_audio_ReturnChannel* psy_audio_mixer_Return(psy_audio_Mixer* self,
+INLINE psy_audio_ReturnChannel* psy_audio_mixer_return(psy_audio_Mixer* self,
 uintptr_t i)
 {
 	return (psy_audio_ReturnChannel*) psy_table_at(&self->returns, i);

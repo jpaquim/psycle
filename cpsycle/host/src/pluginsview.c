@@ -326,7 +326,7 @@ static void pluginsview_ondestroy(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	psy_ui_RealPoint topleft);
-static void pluginsview_onpreferredsize(PluginsView*, const psy_ui_Size* limit,
+static void pluginsview_onpreferredscrollsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
 static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
@@ -368,8 +368,8 @@ static void pluginsview_vtable_init(PluginsView* self)
 			(psy_ui_fp_component_onmouseevent)
 			pluginsview_onmousedoubleclick;
 		pluginsview_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			pluginsview_onpreferredsize;
+			(psy_ui_fp_component_onpreferredscrollsize)
+			pluginsview_onpreferredscrollsize;
 		pluginsview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &pluginsview_vtable;
@@ -614,7 +614,7 @@ uintptr_t pluginenabled(const PluginsView* self, psy_Property* property)
 	return FALSE;
 }
 
-void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
+void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	if (self->currplugins) {		

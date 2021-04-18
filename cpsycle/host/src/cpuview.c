@@ -52,7 +52,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_intsize_init_size(
-			psy_ui_component_size(&self->component), tm);
+			psy_ui_component_offsetsize(&self->component), tm);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
@@ -107,7 +107,7 @@ void cpumoduleview_onpreferredsize(CPUModuleView* self, const psy_ui_Size* limit
 	} else {
 		currlines = 0;
 	}
-	size = psy_ui_component_size(&self->component);
+	size = psy_ui_component_offsetsize(&self->component);
 	
 	rv->height = psy_ui_mul_value_real(
 		psy_ui_component_scrollstep_height(&self->component), (double)currlines);

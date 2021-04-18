@@ -1053,7 +1053,7 @@ void propertiesrenderer_onalign(PropertiesRenderer* self, psy_ui_Component*
 {	
 	psy_ui_Size size;
 
-	size = psy_ui_component_size(&self->component);
+	size = psy_ui_component_offsetsize(&self->component);
 	propertiesrenderer_computecolumns(self, &size);
 	propertiesrenderer_updatelinestates(self);	
 }

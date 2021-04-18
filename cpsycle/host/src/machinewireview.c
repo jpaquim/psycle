@@ -371,8 +371,8 @@ void machinewireview_centermaster(MachineWireView* self)
 		psy_ui_RealSize machinesize;
 		psy_ui_RealSize size;
 						
-		size = psy_ui_component_sizepx(&self->component);
-		machinesize = psy_ui_component_sizepx(machineui);
+		size = psy_ui_component_offsetsizepx(&self->component);
+		machinesize = psy_ui_component_offsetsizepx(machineui);
 		psy_ui_component_move(machineui,
 			psy_ui_point_make(
 				psy_ui_value_makepx((size.width - machinesize.width) / 2),
@@ -924,8 +924,8 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, psy_ui_RealPoi
 
 						inposition = psy_ui_component_position(inmachineui);
 						outposition = psy_ui_component_position(outmachineui);
-						out = psy_ui_component_sizepx(outmachineui);
-						in = psy_ui_component_sizepx(inmachineui);
+						out = psy_ui_component_offsetsizepx(outmachineui);
+						in = psy_ui_component_offsetsizepx(inmachineui);
 						psy_ui_setrectangle(&r, pt.x - d, pt.y - d, 2 * d,
 							2 * d);
 						if (psy_ui_realrectangle_intersect_segment(&r,
@@ -975,7 +975,7 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 		if (machineui && !self->randominsert) {
 			psy_ui_RealSize size;			
 
-			size = psy_ui_component_sizepx(machineui);
+			size = psy_ui_component_offsetsizepx(machineui);
 			psy_ui_component_move(machineui,
 				psy_ui_point_make(
 					psy_ui_value_makepx(psy_max(0.0, self->dragpt.x - size.width / 2)),

@@ -79,6 +79,8 @@ typedef void (*psy_ui_fp_component_ondestroyed)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onalign)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onpreferredsize)(struct psy_ui_Component*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
+typedef void (*psy_ui_fp_component_onpreferredscrollsize)(struct psy_ui_Component*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_component_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_component_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
 typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
@@ -121,6 +123,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onclose onclose;
 	psy_ui_fp_component_onalign onalign;
 	psy_ui_fp_component_onpreferredsize onpreferredsize;
+	psy_ui_fp_component_onpreferredscrollsize onpreferredscrollsize;
 	psy_ui_fp_component_onmouseevent onmousedown;
 	psy_ui_fp_component_onmouseevent onmousemove;
 	psy_ui_fp_component_onmouseevent onmousewheel;
@@ -342,6 +345,7 @@ bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
+psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
@@ -510,7 +514,8 @@ INLINE void psy_ui_component_clear(psy_ui_Component* self)
 	self->imp->vtable->dev_clear(self->imp);
 }
 
-INLINE psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
+// returns the element’s size that includes padding and border
+INLINE psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self)
 {	
 	return self->imp->vtable->dev_size(self->imp);	
 }
@@ -558,6 +563,17 @@ INLINE psy_ui_RealSize psy_ui_component_innersize_px(const psy_ui_Component* sel
 	psy_ui_Size size;
 
 	size = psy_ui_component_innersize(self);
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
+}
+
+// returns the element’s size that include padding but without the border
+psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component*);
+
+INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+
+	size = psy_ui_component_clientsize(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
 }
 
@@ -778,17 +794,17 @@ void psy_ui_component_focus_prev(psy_ui_Component*);
 
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {	
-	return psy_ui_intsize_init_size(psy_ui_component_size(self),
+	return psy_ui_intsize_init_size(psy_ui_component_offsetsize(self),
 		psy_ui_component_textmetric(self));
 }
 
-INLINE psy_ui_RealSize psy_ui_component_sizepx(const psy_ui_Component* self)
+INLINE psy_ui_RealSize psy_ui_component_offsetsizepx(const psy_ui_Component* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 
 	tm = psy_ui_component_textmetric(self);
-	size = psy_ui_component_size(self);
+	size = psy_ui_component_offsetsize(self);
 	return psy_ui_realsize_make(
 		psy_ui_value_px(&size.width, tm),
 		psy_ui_value_px(&size.height, tm));		

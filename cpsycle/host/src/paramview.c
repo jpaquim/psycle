@@ -208,6 +208,8 @@ void paramview_build(ParamView* self)
 						component = &switchui->component;
 					}
 					break; }
+				case MPF_IGNORE:
+					break;
 				default: {
 					component = psy_ui_component_allocinit(currcolumn,
 						&self->component);

@@ -179,7 +179,7 @@ void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
 
 	assert(self);
 
-	size = psy_ui_component_sizepx(&self->component);
+	size = psy_ui_component_offsetsizepx(&self->component);
 	thumbsize = psy_ui_realsize_make(20.0, 20.0);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		newposition = psy_ui_realrectangle_make(
@@ -266,8 +266,8 @@ void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
 		psy_ui_RealSize size;	
 		psy_ui_RealSize thumbsize;
 		
-		size = psy_ui_component_sizepx(&self->component);
-		thumbsize = psy_ui_component_sizepx(
+		size = psy_ui_component_offsetsizepx(&self->component);
+		thumbsize = psy_ui_component_offsetsizepx(
 			psy_ui_scrollbarthumb_base(&self->thumb));
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->screenpos = psy_max(0, psy_min(ev->pt.x - self->dragoffset,
@@ -321,8 +321,8 @@ double psy_ui_scrollbarpane_step(psy_ui_ScrollBarPane* self)
 
 	assert(self);
 	
-	panesize = psy_ui_component_sizepx(&self->component);
-	size = psy_ui_component_sizepx(psy_ui_scrollbarthumb_base(&self->thumb));
+	panesize = psy_ui_component_offsetsizepx(&self->component);
+	size = psy_ui_component_offsetsizepx(psy_ui_scrollbarthumb_base(&self->thumb));
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		rv = (self->scrollrange.y - self->scrollrange.x) /
 			(panesize.width - size.width);

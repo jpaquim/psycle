@@ -186,6 +186,7 @@ static void ondestroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
+static void onpreferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
 static bool onclose(psy_ui_Component* self) { return TRUE; }
 
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
@@ -261,6 +262,7 @@ static void vtable_init(void)
 		vtable.ondraw = 0;
 		vtable.onalign = onalign;
 		vtable.onpreferredsize = onpreferredsize;
+		vtable.onpreferredscrollsize = onpreferredscrollsize;
 		vtable.onsize = onsize;
 		vtable.onclose = onclose;
 		vtable.onmousedown = onmousedown;
@@ -756,9 +758,15 @@ void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	} else {
 		psy_ui_Size size;
 		
-		size = psy_ui_component_size(self);
+		size = psy_ui_component_offsetsize(self);
 		*rv = size;
 	}
+}
+
+void onpreferredscrollsize(psy_ui_Component* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	onpreferredsize(self, limit, rv);
 }
 
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
@@ -954,7 +962,7 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {
 	if (self->preventpreferredsize) {
-		return psy_ui_component_size(self);
+		return psy_ui_component_offsetsize(self);
 	} else {
 		psy_ui_Size rv;
 
@@ -963,6 +971,12 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
 		return rv;
 	}
+}
+
+psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component* self,
+	const psy_ui_Size* limit)
+{
+	return psy_ui_component_preferredsize(self, limit);	
 }
 
 void psy_ui_component_preventpreferredsize(psy_ui_Component* self)
@@ -1006,7 +1020,7 @@ psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
 	psy_ui_Value spacing_height;
 
 
-	rv = psy_ui_component_size(self);
+	rv = psy_ui_component_offsetsize(self);
 	spacing = psy_ui_component_spacing(self);
 	tm = psy_ui_component_textmetric(self);
 	spacing_width = psy_ui_margin_width(&spacing, tm);
@@ -1016,6 +1030,24 @@ psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
 	return rv;
 }
 
+psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component* self)
+{
+	psy_ui_Size rv;
+	const psy_ui_TextMetric* tm;
+	psy_ui_Margin border;
+	psy_ui_Value border_width;
+	psy_ui_Value border_height;
+
+
+	rv = psy_ui_component_offsetsize(self);
+	border = psy_ui_component_spacing(self);
+	tm = psy_ui_component_textmetric(self);
+	border_width = psy_ui_margin_width(&border, tm);
+	psy_ui_value_sub(&rv.width, &border_width, tm);
+	border_height = psy_ui_margin_height(&border, tm);
+	psy_ui_value_sub(&rv.height, &border_height, tm);
+	return rv;
+}
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 {
@@ -1272,7 +1304,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 void psy_ui_component_updateoverflow(psy_ui_Component* self)
 {		
 	if ((self->scroll->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
-		psy_ui_Size preferredsize;
+		psy_ui_Size preferredscrollsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxlines;
 		intptr_t visilines;
@@ -1283,10 +1315,10 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		double scrolltoppx;
 
 		tm = psy_ui_component_textmetric(self);		
-		size = psy_ui_component_size(psy_ui_component_parent(self));		
+		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));		
 		scrollstepy_px = (intptr_t)psy_ui_component_scrollstep_height_px(self);
-		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxlines = (intptr_t)(psy_ui_value_px(&preferredsize.height, tm) / (double)scrollstepy_px);
+		preferredscrollsize = psy_ui_component_preferredscrollsize(self, &size);
+		maxlines = (intptr_t)(psy_ui_value_px(&preferredscrollsize.height, tm) / (double)scrollstepy_px);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);		
 		scrolltoppx = psy_ui_component_scrolltoppx(self);		
@@ -1312,7 +1344,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		}		
 	}
 	if ((self->scroll->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
-		psy_ui_Size preferredsize;
+		psy_ui_Size preferredscrollsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxrows;
 		intptr_t visirows;
@@ -1322,10 +1354,10 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		double scrollleftpx;
 
 		tm = psy_ui_component_textmetric(self);					
-		size = psy_ui_component_size(psy_ui_component_parent(self));		
+		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));		
 		scrollstepx_px = (intptr_t)psy_ui_component_scrollstep_width_px(self);
-		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxrows = (intptr_t)(psy_ui_value_px(&preferredsize.width, tm) /
+		preferredscrollsize = psy_ui_component_preferredsize(self, &size);
+		maxrows = (intptr_t)(psy_ui_value_px(&preferredscrollsize.width, tm) /
 			(double)scrollstepx_px);
 		visirows = (intptr_t)(psy_ui_value_px(&size.width, tm) / scrollstepx_px);		
 		scrollleftpx = psy_ui_component_scrollleftpx(self);		
@@ -1345,7 +1377,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
-			psy_ui_component_sizepx(self)),
+			psy_ui_component_offsetsizepx(self)),
 		psy_ui_component_border(self));
 }
 
@@ -1360,7 +1392,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(),
-				psy_ui_component_sizepx(self));			
+				psy_ui_component_offsetsizepx(self));			
 			psy_ui_drawsolidrectangle(g, r, // c);
 				psy_ui_component_backgroundcolour(
 					psy_ui_component_parent(self)));
@@ -1419,7 +1451,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 		psy_ui_realpoint_make(
 			psy_ui_component_scrollleftpx(self),
 			psy_ui_component_scrolltoppx(self)),
-		psy_ui_component_sizepx(self));
+		psy_ui_component_offsetsizepx(self));
 }
 
 void psy_ui_component_focus_next(psy_ui_Component* self)
@@ -1432,9 +1464,9 @@ void psy_ui_component_focus_next(psy_ui_Component* self)
 			psy_ui_Component* focus;
 			psy_List* p;
 			psy_List* q;
-			intptr_t tabindex;
+			uintptr_t tabindex;
 
-			tabindex = psy_ui_component_tabindex(self);
+			tabindex = psy_ui_component_tabindex(self);			
 			focus = NULL;
 			for (q = p = psy_ui_component_children(parent, 0); p != NULL;
 					psy_list_next(&p)) {
@@ -1464,7 +1496,7 @@ void psy_ui_component_focus_prev(psy_ui_Component* self)
 			psy_ui_Component* focus;
 			psy_List* p;
 			psy_List* q;
-			intptr_t tabindex;
+			uintptr_t tabindex;
 
 			tabindex = psy_ui_component_tabindex(self);
 			focus = NULL;

@@ -38,7 +38,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_List* q;
 	psy_List* wrap = 0;		
 	
-	size = psy_ui_component_size(self->component);
+	size = psy_ui_component_offsetsize(self->component);
 	tm = psy_ui_component_textmetric(self->component);
 	psy_ui_realpoint_init(&cp_topleft);
 	psy_ui_realpoint_init_all(&cp_bottomright,
@@ -65,7 +65,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);
 			} else {
-				componentsize = psy_ui_component_size(component);
+				componentsize = psy_ui_component_offsetsize(component);
 			}
 			psy_ui_aligner_adjustminmaxsize(self, component, tm, &componentsize);
 			c_tm = psy_ui_component_textmetric(component);
@@ -223,7 +223,7 @@ void psy_ui_aligner_resizewrapline(psy_ui_Aligner* self, psy_List* wrap, double 
 		c_margin = psy_ui_component_margin(c);
 		psy_ui_component_resize(c,
 			psy_ui_size_make(
-				psy_ui_component_size(c).width,
+				psy_ui_component_offsetsize(c).width,
 				psy_ui_value_makepx(cpymax - cpy -
 					floor(psy_ui_margin_height_px(&c_margin,
 						psy_ui_component_textmetric(c))))));
@@ -320,7 +320,7 @@ void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
 					psy_ui_Size limit;
 
 					position = psy_ui_component_position(component);
-					limit = psy_ui_component_size(self->component);
+					limit = psy_ui_component_offsetsize(self->component);
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
@@ -347,7 +347,7 @@ void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
 					psy_ui_Size limit;
 
 					position = psy_ui_component_position(component);
-					limit = psy_ui_component_size(self->component);
+					limit = psy_ui_component_offsetsize(self->component);
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
