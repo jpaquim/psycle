@@ -74,8 +74,7 @@ void paramviews_remove(ParamViews* self, uintptr_t macid)
 
 	frame = paramviews_frame(self, macid);
 	if (frame) {	
-		psy_ui_component_destroy(&frame->component);
-		free(frame);
+		psy_ui_component_destroy(&frame->component);		
 	}
 }
 

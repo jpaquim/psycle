@@ -217,9 +217,9 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 		TRUE));	
 	if (slot == self->maxindex) {
 		self->selected = machines_findmaxindex(self);
-	}	
-	psy_signal_emit(&self->signal_removed, self, 1, slot);	
-	psy_audio_exclusivelock_leave();	
+	}		
+	psy_signal_emit(&self->signal_removed, self, 1, slot);
+	psy_audio_exclusivelock_leave();
 }
 
 uintptr_t machines_findmaxindex(psy_audio_Machines* self)
