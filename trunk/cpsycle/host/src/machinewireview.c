@@ -122,8 +122,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;	
 	self->opcount = 0;
 	psy_ui_component_setscrollstep(&self->component,
-		psy_ui_size_make_px(10.0, 10.0));
-	self->statusbar = NULL;
+		psy_ui_size_make_px(10.0, 10.0));	
 	self->machines = NULL;
 	self->paramviews = paramviews;
 	self->workspace = workspace;
@@ -607,7 +606,7 @@ bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
 
 void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
 {
-	if (self->statusbar && psy_audio_machines_at(self->machines, slot)) {
+	if (psy_audio_machines_at(self->machines, slot)) {
 		psy_audio_Machine* machine;
 		char txt[128];
 
@@ -627,7 +626,7 @@ void machinewireview_setdragstatus(MachineWireView* self, uintptr_t slot)
 		} else {
 			psy_snprintf(txt, 128, "(-, -)");
 		}
-		machineviewbar_settext(self->statusbar, txt);
+		workspace_outputstatus(self->workspace, txt);
 	}
 }
 

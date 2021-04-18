@@ -330,22 +330,24 @@ void psy_audio_machines_connect(psy_audio_Machines* self, psy_audio_Wire wire)
 {
 	assert(self);
 
-	if (self->preventundoredo || self->filemode) {
-		int rv;
+	if (psy_audio_wire_valid(&wire)) {
+		if (self->preventundoredo || self->filemode) {
+			int rv;
 
-		if (!self->filemode) {
-			psy_audio_exclusivelock_enter();
+			if (!self->filemode) {
+				psy_audio_exclusivelock_enter();
+			}
+			rv = psy_audio_connections_connect(&self->connections, wire);
+			if (!self->filemode) {
+				machines_setpath(self, psy_audio_compute_path(self,
+					psy_audio_MASTER_INDEX, TRUE));
+				psy_audio_exclusivelock_leave();
+			}
+		} else {
+			psy_undoredo_execute(&self->undoredo,
+				&connectmachinecommand_allocinit(self, wire)
+				->command);
 		}
-		rv = psy_audio_connections_connect(&self->connections, wire);
-		if (!self->filemode) {
-			machines_setpath(self, psy_audio_compute_path(self,
-				psy_audio_MASTER_INDEX, TRUE));
-			psy_audio_exclusivelock_leave();
-		}		
-	} else {		
-		psy_undoredo_execute(&self->undoredo,
-			&connectmachinecommand_allocinit(self, wire)
-			->command);
 	}
 }
 

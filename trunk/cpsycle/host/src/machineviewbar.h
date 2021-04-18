@@ -27,14 +27,12 @@ typedef struct MachineViewBar {
 	// internal
 	// ui elements
 	psy_ui_CheckBox mixersend;	
-	psy_ui_Label status;
 	// references	
 	psy_audio_Machines* machines;
+	Workspace* workspace;
 } MachineViewBar;
 
 void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
-
-void machineviewbar_settext(MachineViewBar*, const char* text);
 
 INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
 {

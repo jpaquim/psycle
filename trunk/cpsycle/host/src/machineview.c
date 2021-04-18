@@ -147,7 +147,7 @@ void machineview_initstackview(MachineView* self, psy_ui_Component* tabbarparent
 {
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
-		&self->skin, NULL, &self->paramviews, self->workspace);
+		&self->skin, &self->paramviews, self->workspace);
 }
 
 void machineview_initnewmachine(MachineView* self, psy_ui_Component* tabbarparent)

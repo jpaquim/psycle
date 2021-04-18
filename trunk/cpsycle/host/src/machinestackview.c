@@ -8,7 +8,6 @@
 #include "arrowui.h"
 #include "checkui.h"
 #include "knobui.h"
-#include "machineviewbar.h"
 #include "resources/resource.h"
 #include "slidergroupui.h"
 // audio
@@ -528,11 +527,9 @@ void machinestackcolumn_mute_normvalue(MachineStackColumn* self,
 static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
 	uintptr_t slot, uintptr_t prevslot, uintptr_t columnindex, bool first);
 // implementation
-void machinestackstate_init(MachineStackState* self, ParamViews* paramviews,
-	MachineViewBar* statusbar)
+void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 {
-	psy_table_init(&self->columns);
-	self->statusbar = statusbar;
+	psy_table_init(&self->columns);	
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
 	//self->effectsize = psy_ui_size_make_px(138.0, 52.0);
@@ -1057,9 +1054,7 @@ void machinestackinputs_build(MachineStackInputs* self)
 }
 
 void machinestackinputs_onmouseenter(MachineStackInputs* self)
-{	
-	// machineviewbar_settext(self->state->statusbar,
-	//	"Double click mouse to insert a generator");	
+{		
 }
 
 void machinestackinputs_updatevus(MachineStackInputs* self)
@@ -1462,7 +1457,7 @@ void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 	psy_ui_MouseEvent* ev)
 {
 	if (!self->state->columnselected) {
-		machineviewbar_settext(self->state->statusbar,
+		workspace_outputstatus(self->workspace,
 			"Add first input (Double click in Inputs)");
 		psy_ui_mouseevent_stoppropagation(ev);
 	}	
@@ -1577,7 +1572,7 @@ static psy_ui_ComponentVtable* vtable_init(MachineStackView* self)
 // implementation
 void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, MachineViewSkin* skin,
-	MachineViewBar* statusbar, ParamViews* paramviews, Workspace* workspace)
+	ParamViews* paramviews, Workspace* workspace)
 {
 	assert(self);
 
@@ -1585,7 +1580,7 @@ void machinestackview_init(MachineStackView* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	self->paramviews = paramviews;
 	self->workspace = workspace;	
-	machinestackstate_init(&self->state, self->paramviews, statusbar);
+	machinestackstate_init(&self->state, self->paramviews);
 	machinestackdesc_init(&self->desc, &self->component, self);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->columns, &self->component, NULL);

@@ -1146,6 +1146,15 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 
 void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 {
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(psy_audio_mixer_base(self));
+	if (machines) {
+		psy_signal_disconnect(&machines->connections.signal_connected, self,
+			onconnected);
+		psy_signal_disconnect(&machines->connections.signal_disconnected, self,
+			ondisconnected);
+	}
 	psy_audio_mixer_dispose_channels(self);
 	psy_audio_mixer_dispose_sends(self);
 	psy_audio_mixer_dispose_returns(self);
@@ -1368,37 +1377,38 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 
 			machines = psy_audio_machine_machines(base);
 			machine = psy_audio_machines_at(machines, outputslot);
-			if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
+			if (machine) {
+				if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR ||
 					!psy_audio_machines_isconnectasmixersend(machines)) {
-				uintptr_t inputnum;
-				
-				inputnum = freeinputchannel(self);				
-				psy_audio_mixer_insertchannel(self, inputnum,
-					inputchannel_allocinit(self, inputnum, outputslot));				
-			}
-			else {
-				MachineList* path;				
-				psy_audio_MixerSend* send;
-				
-				send = psy_audio_mixer_insertsend(self, numreturncolumns(self),
-					psy_audio_mixersend_allocinit(outputslot));
-				psy_audio_mixer_insertreturn(self, numreturncolumns(self),
-					returnchannel_allocinit(self, numreturncolumns(self), outputslot));
-				path = psy_audio_compute_path(machines, outputslot, FALSE);
-				if (path) {
-					// work fx chain
-					for (; path != 0; path = path->next) {
-						uintptr_t slot;
+					uintptr_t inputnum;
 
-						slot = (size_t)path->entry;
-						if (slot == psy_INDEX_INVALID) {
-							// delimits the machines that could be processed parallel
-							// todo: add thread functions
-							continue;
+					inputnum = freeinputchannel(self);
+					psy_audio_mixer_insertchannel(self, inputnum,
+						inputchannel_allocinit(self, inputnum, outputslot));
+				} else {
+					MachineList* path;
+					psy_audio_MixerSend* send;
+
+					send = psy_audio_mixer_insertsend(self, numreturncolumns(self),
+						psy_audio_mixersend_allocinit(outputslot));
+					psy_audio_mixer_insertreturn(self, numreturncolumns(self),
+						returnchannel_allocinit(self, numreturncolumns(self), outputslot));
+					path = psy_audio_compute_path(machines, outputslot, FALSE);
+					if (path) {
+						// work fx chain
+						for (; path != 0; path = path->next) {
+							uintptr_t slot;
+
+							slot = (size_t)path->entry;
+							if (slot == psy_INDEX_INVALID) {
+								// delimits the machines that could be processed parallel
+								// todo: add thread functions
+								continue;
+							}
+							psy_audio_machines_addmixersend(machines, slot);
 						}
-						psy_audio_machines_addmixersend(machines, slot);
+						psy_list_free(path);
 					}
-					psy_list_free(path);
 				}
 			}
 		}

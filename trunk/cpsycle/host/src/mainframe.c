@@ -343,9 +343,7 @@ void mainframe_initviewstatusbars(MainFrame* self)
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	machineviewbar_init(&self->machineviewbar,
 		psy_ui_notebook_base(&self->viewstatusbars),
-		&self->workspace);
-	self->machineview.wireview.statusbar = &self->machineviewbar;
-	self->machineview.stackview.state.statusbar = &self->machineviewbar;
+		&self->workspace);	
 	patternviewbar_init(&self->patternbar,
 		psy_ui_notebook_base(&self->viewstatusbars), &self->workspace);
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
@@ -364,7 +362,7 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 45);
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
