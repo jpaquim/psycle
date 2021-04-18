@@ -409,6 +409,9 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 
 void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
+	if (!psy_ui_component_hasfocus(&self->component)) {
+		psy_ui_component_setfocus(&self->component);
+	}
 	self->dragpt = ev->pt;
 	self->mousemoved = FALSE;		
 	self->dragmode = MACHINEVIEW_DRAG_NONE;
