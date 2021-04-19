@@ -6,19 +6,26 @@
 #include "kbdbox.h"
 // host
 #include "styles.h"
-// audio
-#include <player.h>
-// platform
-#include "../../detail/portable.h"
 
-static void kbdbox_makekeyproperties(KbdBox*);
-static void kbdbox_addkeyproperties(KbdBox*, psy_Property* section,
-	uintptr_t keycode, const char* label, int size, int cr);
-static psy_ui_RealRectangle kbdbox_bounds(KbdBox*);
+static double keyheight = 4.5;
+static double keybasewidth = 20.0;
+static double keywidths[] = { 1.0, 1.5, 1.75, 2.27, 3.8, 0.25 };
 
+void kbdboxstate_init(KbdBoxState* self)
+{
+	self->pressedkey = 0;
+	self->shift = FALSE;
+	self->ctrl = FALSE;
+	self->alt = FALSE;
+}
+
+// KbdBoxKey
 // prototypes
-static void kbdboxkey_ondestroy(KbdBoxKey*);
-static void kbdboxkey_ondraw(KbdBoxKey*, psy_ui_Graphics*);
+static void kbdboxkey_initlabel(KbdBoxKey*, psy_ui_Component* view,
+	psy_ui_Label* button, const char* label);
+static void kbdboxkey_onpreferredsize(KbdBoxKey*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void kbdboxkey_onmousedown(KbdBoxKey*, psy_ui_MouseEvent* ev);
 // vtable
 static psy_ui_ComponentVtable kbdboxkey_vtable;
 static bool kbdboxkey_vtable_initialized = FALSE;
@@ -27,138 +34,171 @@ static void kbdboxkey_vtable_init(KbdBoxKey* self)
 {
 	if (!kbdboxkey_vtable_initialized) {
 		kbdboxkey_vtable = *(self->component.vtable);
-		kbdboxkey_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
-			kbdboxkey_ondestroy;
-		kbdboxkey_vtable.ondraw =
-			(psy_ui_fp_component_ondraw)
-			kbdboxkey_ondraw;
+		kbdboxkey_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
+			kbdboxkey_onpreferredsize;
+		kbdboxkey_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			kbdboxkey_onmousedown;
 		kbdboxkey_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &kbdboxkey_vtable;
 }
+// implementation
 void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Component* view, 
-	int x, int y, int width, int height, const char* label)
+	int size, uint32_t keycode, const char* label, Workspace* workspace, KbdBoxState* state)
 {
-	psy_ui_RealRectangle r;
-
 	psy_ui_component_init(&self->component, parent, view);
 	kbdboxkey_vtable_init(self);
-	psy_ui_setrectangle(&r, x, y, width, height);
-	if (strcmp(label, "SHIFT") == 0) {
-		psy_ui_component_setstyletypes(&self->component,
-			STYLE_KEY_SHIFT, STYLE_KEY_HOVER, psy_INDEX_INVALID,
-			psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(&self->component,
-			STYLE_KEY_ACTIVE);
-		self->label = strdup(label);
-	} else if (strcmp(label, "ALT") == 0) {
-		psy_ui_component_setstyletypes(&self->component,
-			STYLE_KEY_ALT, STYLE_KEY_HOVER, psy_INDEX_INVALID,
-			psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(&self->component,
-			STYLE_KEY_ACTIVE);
-		self->label = strdup(label);
-	} else if (strcmp(label, "CTRL") == 0) {
-		psy_ui_component_setstyletypes(&self->component,
-			STYLE_KEY_CTRL, STYLE_KEY_HOVER, psy_INDEX_INVALID,
-			psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(&self->component,
-			STYLE_KEY_ACTIVE);
-		self->label = strdup(label);
-	} else  if (strcmp(label, "EMPTY") != 0) {
-		psy_ui_component_setstyletypes(&self->component,
-			STYLE_KEY, STYLE_KEY_HOVER, psy_INDEX_INVALID,
-			psy_INDEX_INVALID);
-		psy_ui_component_setstyletype_active(&self->component,
-			STYLE_KEY_ACTIVE);
-		self->label = strdup(label);
-	} else {
-		self->label = strdup("");
-	}
-	psy_ui_component_setposition(&self->component,
-		psy_ui_rectangle_make_px(&r));	
-	
-	self->desc0 = strdup("");
-	self->desc1 = strdup("");
-	self->desc2 = strdup("");
-	self->desc3 = strdup("");
-	self->marked = FALSE;	
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_margin_zero());
+	self->size = size;
+	self->keycode = keycode;
+	self->state = state;
+	self->workspace = workspace;			
+	kbdboxkey_initlabel(self, view, &self->label, label);
+	kbdboxkey_initlabel(self, view, &self->desc0, "");
+	kbdboxkey_initlabel(self, view, &self->desc1, "");
+	kbdboxkey_initlabel(self, view, &self->desc2, "");
+	kbdboxkey_initlabel(self, view, &self->desc3, "");
+	if (size != 5) { // if not empty key
+		if (keycode == psy_ui_KEY_SHIFT) {
+			psy_ui_component_setstyletypes(&self->component,
+				STYLE_KEY, psy_INDEX_INVALID, STYLE_KEY_SHIFT_SELECT,
+				psy_INDEX_INVALID);
+		} else if (keycode == psy_ui_KEY_MENU) {
+			psy_ui_component_setstyletypes(&self->component,
+				STYLE_KEY, psy_INDEX_INVALID, STYLE_KEY_ALT_SELECT,
+				psy_INDEX_INVALID);
+		} else if (keycode == psy_ui_KEY_CONTROL) {
+			psy_ui_component_setstyletypes(&self->component,
+				STYLE_KEY, psy_INDEX_INVALID, STYLE_KEY_CTRL_SELECT,
+				psy_INDEX_INVALID);
+		} else {
+			psy_ui_component_setstyletypes(&self->component,
+				STYLE_KEY, STYLE_KEY_HOVER, STYLE_KEY_SELECT,
+				psy_INDEX_INVALID);
+
+		}		
+	} 
+	if (size >= 0 && size < 6) {
+		self->keywidth = keybasewidth * keywidths[size];
+	}	
 }
 
-void kbdboxkey_ondestroy(KbdBoxKey* self)
-{
-	free(self->label);
-	free(self->desc0);
-	free(self->desc1);
-	free(self->desc2);
-	free(self->desc3);
-}
-
-KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent, psy_ui_Component* view,
-	int x, int y, int width, int height, const char* label)
+KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
+	psy_ui_Component* view, int size, uint32_t keycode, const char* label,
+	Workspace* workspace, KbdBoxState* state)
 {
 	KbdBoxKey* rv;
 
 	rv = (KbdBoxKey*)malloc(sizeof(KbdBoxKey));
 	if (rv) {
-		kbdboxkey_init_all(rv, parent, view, x, y, width, height, label);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
+		kbdboxkey_init_all(rv, parent, view, size, keycode, label, workspace, state);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);		
 	}
 	return rv;
 }
 
-void kbdboxkey_ondraw(KbdBoxKey* self, psy_ui_Graphics* g)
+void kbdboxkey_initlabel(KbdBoxKey* self, psy_ui_Component* view,
+	psy_ui_Label* label, const char* text)
 {
-	const psy_ui_TextMetric* tm;
-	double cpx;
-	double cpy;
-	psy_ui_RealRectangle position;
-	psy_ui_Size descsize;
-	double descident;
-			
-	psy_ui_realrectangle_init_all(&position,
-		psy_ui_realpoint_zero(),
-		psy_ui_component_offsetsize_px(&self->component));
-	tm = psy_ui_component_textmetric(&self->component);
-	descident = (tm->tmAveCharWidth * 2) * psy_strlen(self->label);
-	if (self->marked) {
-		psy_ui_setcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
-		psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_SELECT)->colour);
-	}	
-	cpx = 4;
-	cpy = 4;
-	psy_ui_textout(g, cpx, cpy,
-		self->label, psy_strlen(self->label));	
-	psy_ui_textout(g, cpx + descident, cpy,
-		self->desc0, psy_strlen(self->desc0));
-	psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_SHIFT)->backgroundcolour);	
-	psy_ui_textout(g, cpx, cpy + tm->tmHeight,
-		self->desc1, psy_strlen(self->desc1));
-	psy_ui_settextcolour(g, psy_ui_style(STYLE_KEY_CTRL)->backgroundcolour);
-	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 2,
-		self->desc2, psy_strlen(self->desc2));	
-	psy_ui_textout(g, cpx, cpy + tm->tmHeight * 3,
-		self->desc3, psy_strlen(self->desc3));
+	psy_ui_label_init(label, &self->component, view);
+	psy_ui_label_preventtranslation(label);
+	psy_ui_label_setcharnumber(label, 8.0);
+	psy_ui_label_settextalignment(label, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_settext(label, text);
 }
 
+void kbdboxkey_cleardescriptions(KbdBoxKey* self)
+{
+	psy_ui_label_settext(&self->desc0, "");
+	psy_ui_label_settext(&self->desc1, "");
+	psy_ui_label_settext(&self->desc2, "");
+	psy_ui_label_settext(&self->desc3, "");	
+}
+
+void kbdboxkey_setdescription(KbdBoxKey* self, uint32_t keycode,
+	const char* text)
+{		
+	bool shift;
+	bool ctrl;
+	bool alt;
+	
+	psy_audio_decodeinput((uint32_t)keycode, &keycode, &shift, &ctrl, &alt);
+	if (shift && ctrl) {
+		psy_ui_label_settext(&self->desc3, text);
+	} else if (shift) {
+		psy_ui_label_settext(&self->desc1, text);
+	} else  if (ctrl) {
+		psy_ui_label_settext(&self->desc2, text);
+	} else {
+		psy_ui_label_settext(&self->desc0, text);
+	}	
+}
+
+void kbdboxkey_onpreferredsize(KbdBoxKey* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{		
+	psy_ui_size_setem(rv, self->keywidth, keyheight);
+}
+
+void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
+{
+	self->state->pressedkey = self->keycode;
+	if (self->keycode == psy_ui_KEY_SHIFT) {
+		self->state->shift = !self->state->shift;		
+		if (self->state->shift) {
+			psy_ui_component_addstylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);			
+		} else {
+			psy_ui_component_removestylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);
+		}		
+		psy_ui_mouseevent_stoppropagation(ev);
+	} else if (self->keycode == psy_ui_KEY_CONTROL) {
+		self->state->ctrl = !self->state->ctrl;
+		if (self->state->ctrl) {
+			psy_ui_component_addstylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);
+		} else {
+			psy_ui_component_removestylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);
+		}
+		psy_ui_mouseevent_stoppropagation(ev);
+	} else if (self->keycode == psy_ui_KEY_MENU) {
+		self->state->alt = !self->state->alt;
+		if (self->state->alt) {
+			psy_ui_component_addstylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);
+		} else {
+			psy_ui_component_removestylestate(&self->component,
+				psy_ui_STYLESTATE_SELECT);
+		}
+		psy_ui_mouseevent_stoppropagation(ev);
+	} else {
+		psy_ui_component_addstylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);		
+	}
+}
+
+
 // KbdBox
+static void kbdbox_ondestroy(KbdBox*);
+static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);
+static void kbdbox_onmouseup(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_initfont(KbdBox*);
 static void kbdbox_makekeys(KbdBox*);
-static void kbdbox_ondestroy(KbdBox*, psy_ui_Component* sender);
-static void kbdbox_ondraw(KbdBox*, psy_ui_Graphics*);
-static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);
-static void kbdbox_drawkey(KbdBox*, psy_ui_Graphics*, KbdBoxKey*);
-static void kbdbox_addsmallkey(KbdBox*, uintptr_t keycode, const char* label);
-static void kbdbox_addmediumkey(KbdBox*, uintptr_t keycode, const char* label);
-static void kbdbox_addlargerkey(KbdBox*, uintptr_t keycode, const char* label);
-static void kbdbox_addlargekey(KbdBox*, uintptr_t keycode, const char* label);
-static void kbdbox_addwidekey(KbdBox*, uintptr_t keycode, const char* label);
-static void kbdbox_addemptykey(KbdBox*, uintptr_t keycode);
-static void kbdbox_addkey(KbdBox* self, uintptr_t keycode, const char* label,
-	double size);
-static void kbdbox_onpreferredsize(KbdBox*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
+static psy_Property* kbdbox_definekeys(KbdBox*);
+static void kbdbox_definekey(KbdBox*, psy_Property* section,
+	uintptr_t keycode, const char* label, int size, int cr);
+
+static void kbdbox_addrow(KbdBox*);
+static void kbdbox_addkey(KbdBox*, uint32_t keycode, int size,
+	const char* label);
+static void kbdbox_resetmodstates(KbdBox*);
+static void kbdbox_oninput(KbdBox*, psy_EventDriver* sender);
+static void kbdbox_setkeyselect(KbdBox*, uint32_t keycode, bool select);
 // vtable
 static psy_ui_ComponentVtable kbdbox_vtable;
 static bool kbdbox_vtable_initialized = FALSE;
@@ -167,33 +207,38 @@ static void kbdbox_vtable_init(KbdBox* self)
 {
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
+		kbdbox_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			kbdbox_ondestroy;
 		kbdbox_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			kbdbox_onmousedown;
-		kbdbox_vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			kbdbox_onpreferredsize;
+		kbdbox_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			kbdbox_onmouseup;
 		kbdbox_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &kbdbox_vtable;
 }
 
 void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
-{
+{	
 	psy_ui_component_init(kbdbox_base(self), parent, NULL);
-	kbdbox_vtable_init(self);	
-	self->workspace = workspace;	
+	kbdbox_vtable_init(self);
+	psy_ui_component_setdefaultalign(kbdbox_base(self), psy_ui_ALIGN_TOP,
+		psy_ui_margin_makeem(0.0, 0.0, 0.3, 0.0));
+	self->workspace = workspace;
+	kbdboxstate_init(&self->state);
 	psy_ui_component_doublebuffer(kbdbox_base(self));
-	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
-		kbdbox_ondestroy);
-	psy_table_init(&self->keys);
-	self->keyset = NULL;
+	psy_table_init(&self->keys);	
 	kbdbox_initfont(self);
-	kbdbox_makekeyproperties(self);	
-	kbdbox_makekeys(self);
+	kbdbox_definekeys(self);	
+	kbdbox_makekeys(self);	
+	psy_signal_connect(&workspace_kbddriver(self->workspace)->signal_input,
+		self, kbdbox_oninput);
 }
 
-void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
+void kbdbox_ondestroy(KbdBox* self)
 {
 	psy_table_dispose(&self->keys);
 }
@@ -201,7 +246,6 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 void kbdbox_initfont(KbdBox* self)
 {
 	const psy_ui_Font* font;
-	const psy_ui_TextMetric* tm;
 	
 	font = psy_ui_component_font(&self->component);
 	if (font) {
@@ -211,219 +255,140 @@ void kbdbox_initfont(KbdBox* self)
 		fontinfo.lfHeight = (int)(fontinfo.lfHeight * 0.6);
 		psy_ui_component_setfontinfo(&self->component, fontinfo);		
 	}
-	tm = psy_ui_component_textmetric(&self->component);
-	self->corner.width = psy_ui_value_makepx(5);
-	self->corner.height = psy_ui_value_makepx(5);
-	self->descident = tm->tmAveCharWidth * 6;
-	self->ident = (int)(tm->tmHeight * 0.3);
-	self->keyheight = (int)(tm->tmHeight * 4.5);
-	self->keywidth = tm->tmAveCharWidth * 20;
-}
-
-void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
-{
-	psy_TableIterator it;
-	psy_ui_RealRectangle position;
-	
-	for (it = psy_table_begin(&self->keys);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		KbdBoxKey* key;
-
-		key = (KbdBoxKey*)psy_tableiterator_value(&it);
-		position = psy_ui_component_position(&key->component);
-		if (psy_ui_realrectangle_intersect(&position,
-				psy_ui_realpoint_make(ev->pt.x, ev->pt.y))) {
-			psy_EventDriver* kbd;
-			psy_EventDriverInput input;
-			double rowheight;
-			double pos;
-			bool shift = FALSE;
-			bool ctrl = FALSE;
-			
-			rowheight = (position.bottom - position.top) / 3;
-			pos = ev->pt.y - position.top;
-			if (pos < rowheight) {
-				shift = FALSE;
-				ctrl = FALSE;
-			} else if (pos < rowheight * 2) {
-				if (strlen(key->desc1) != 0) {
-					shift = TRUE;
-				}
-				ctrl = FALSE;
-			} else if (pos < rowheight * 3) {
-				shift = FALSE;
-				if (strlen(key->desc2) != 0) {
-					ctrl = TRUE;
-				}
-			}			
-			input.message = psy_EVENTDRIVER_KEYDOWN;
-			kbd = workspace_kbddriver(self->workspace);
-			input.param1 = psy_audio_encodeinput(
-				(uint32_t)psy_tableiterator_key(&it), shift, ctrl, 0);
-			input.param2 = workspace_octave(self->workspace) * 12;
-			psy_eventdriver_write(kbd, input);
-			break;
-		}
-	}
 }
 
 void kbdbox_makekeys(KbdBox* self)
 {
-	if (self->keyset) {
-		psy_Property* mainsection;
+	psy_Property* keyset;
 
-		self->cpx = 0;
-		self->cpy = 0;
+	psy_ui_component_clear(&self->component);
+	keyset = kbdbox_definekeys(self);	
+	if (keyset) {		
+		psy_List* p;
+				
+		kbdbox_addrow(self);
+		for (p = psy_property_begin(keyset); p != NULL; p = p->next) {				
+			psy_Property* property;
+			intptr_t keycode;
 
-		mainsection = psy_property_find(self->keyset, "main", PSY_PROPERTY_TYPE_SECTION);
-		if (mainsection) {
-			psy_List* p;
-			int currrow = 0;
-
-			for (p = psy_property_begin(mainsection); p != NULL;
-					psy_list_next(&p)) {
-				psy_Property* property;
-				intptr_t keycode;
-
-				property = (psy_Property*)p->entry;				
-				keycode = psy_property_at_int(property, "keycode", -1);
-				if (keycode != -1) {
-					const char* label;
-					intptr_t size;
-					intptr_t cr;
-
-					label = psy_property_at_str(property, "label", "");
-					size = psy_property_at_int(property, "size", 0);
-					cr = psy_property_at_int(property, "cr", 0);
-
-					if (cr) {
-						self->cpy += self->keyheight + self->ident;
-						self->cpx = 0;
-					}
-					if (size == 0) {
-						kbdbox_addsmallkey(self, keycode, label);
-					} else if (size == 1) {
-						kbdbox_addmediumkey(self, keycode, label);
-					} else if (size == 2) {
-						kbdbox_addlargerkey(self, keycode, label);
-					} else if (size == 3) {
-						kbdbox_addlargekey(self, keycode, label);
-					} else if (size == 4) {
-						kbdbox_addwidekey(self, keycode, label);
-					} else if (size == 5) {
-						kbdbox_addemptykey(self, keycode);
-					}
+			property = (psy_Property*)p->entry;				
+			keycode = psy_property_at_int(property, "keycode", -1);
+			if (keycode != -1) {				
+				if (psy_property_at_int(property, "cr", 0)) {
+					kbdbox_addrow(self);
 				}				
-			}
-		}
+				kbdbox_addkey(self, keycode,
+					psy_property_at_int(property, "size", 0),
+					psy_property_at_str(property, "label", ""));
+			}				
+		}	
+		psy_property_deallocate(keyset);
+		keyset = NULL;
 	}
 }
 	
-void kbdbox_makekeyproperties(KbdBox* self)
+psy_Property* kbdbox_definekeys(KbdBox* self)
 {
-	psy_Property* main;
-	int kc;
-	int col = 0;
+	psy_Property* rv;	
+	uintptr_t kc;	
 
-	self->keyset = psy_property_allocinit_key(NULL);
-	main = psy_property_append_section(self->keyset, "main");
-		
+	rv = psy_property_allocinit_key(NULL);	
 	kc = 0x1000;
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_ESCAPE, "ESC", 1, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F1, "F1", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F2, "F2", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F3, "F3", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F4, "F4", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F5, "F5", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F6, "F6", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F7, "F7", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F8, "F8", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F9, "F9", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F10, "F10", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F11, "F11", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F12, "F12", 0, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "EMPTY", 5, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_INSERT, "INS", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_HOME, "HOME", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_PRIOR, "PGUP", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_ESCAPE, "ESC", 1, 0);
+	kbdbox_definekey(self, rv, kc++, "", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F1, "F1", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F2, "F2", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F3, "F3", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F4, "F4", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F5, "F5", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F6, "F6", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F7, "F7", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F8, "F8", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F9, "F9", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F10, "F10", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F11, "F11", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F12, "F12", 0, 0);
+	kbdbox_definekey(self, rv, kc++, "", 5, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_INSERT, "INS", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_HOME, "HOME", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_PRIOR, "PGUP", 0, 0);
 	
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACKQUOTE, "`", 0, 1);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT1, "1", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT2, "2", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT3, "3", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT4, "4", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT5, "5", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT6, "6", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT7, "7", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT8, "8", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT9, "9", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DIGIT0, "0", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_MINUS, "-", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_EQUAL, "=", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACK, "BACK", 1, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "EMPTY", 5, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DELETE, "DEL", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_END, "END", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_NEXT, "PGDWN", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BACKQUOTE, "`", 0, 1);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT1, "1", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT2, "2", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT3, "3", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT4, "4", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT5, "5", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT6, "6", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT7, "7", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT8, "8", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT9, "9", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DIGIT0, "0", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_MINUS, "-", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_EQUAL, "=", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BACK, "BACK", 1, 0);
+	kbdbox_definekey(self, rv, kc++, "", 5, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DELETE, "DEL", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_END, "END", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_NEXT, "PGDWN", 0, 0);
 
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_TAB, "TAB", 1, 1);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_Q, "Q", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_W, "W", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_E, "E", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_R, "R", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_T, "T", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_Y, "Y", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_U, "U", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_I, "I", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_O, "O", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_P, "P", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BRACKETLEFT, "[", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BRACKETRIGHT, "]", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACKSLASH, "\\", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_TAB, "TAB", 1, 1);
+	kbdbox_definekey(self, rv, psy_ui_KEY_Q, "Q", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_W, "W", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_E, "E", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_R, "R", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_T, "T", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_Y, "Y", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_U, "U", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_I, "I", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_O, "O", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_P, "P", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BRACKETLEFT, "[", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BRACKETRIGHT, "]", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BACKSLASH, "\\", 0, 0);
 	
-	kbdbox_addkeyproperties(self, main, kc++, "CAPS", 2, 1);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_A, "A", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_S, "S", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_D, "D", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_F, "F", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_G, "G", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_H, "H", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_J, "J", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_K, "K", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_L, "L", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SEMICOLON, ";", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_BACKSLASH, "\"", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_QUOTE, "'", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_RETURN, "ENTER", 2, 0);
+	kbdbox_definekey(self, rv, kc++, "CAPS", 2, 1);
+	kbdbox_definekey(self, rv, psy_ui_KEY_A, "A", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_S, "S", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_D, "D", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_F, "F", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_G, "G", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_H, "H", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_J, "J", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_K, "K", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_L, "L", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_SEMICOLON, ";", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_BACKSLASH, "\"", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_QUOTE, "'", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_RETURN, "ENTER", 2, 0);
 	
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SHIFT, "SHIFT", 3, 1);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_Z, "Z", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_X, "X", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_C, "C", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_V, "V", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_B, "B", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_N, "N", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_M, "M", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_COMMA, ",", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_PERIOD, ".", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SLASH, "/", 0, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "SHIFT", 3, 0);	
+	kbdbox_definekey(self, rv, psy_ui_KEY_SHIFT, "SHIFT", 3, 1);
+	kbdbox_definekey(self, rv, psy_ui_KEY_Z, "Z", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_X, "X", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_C, "C", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_V, "V", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_B, "B", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_N, "N", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_M, "M", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_COMMA, ",", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_PERIOD, ".", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_SLASH, "/", 0, 0);
+	kbdbox_definekey(self, rv, kc++, "SHIFT", 3, 0);
 	
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_CONTROL, "CTRL", 2, 1);
-	kbdbox_addkeyproperties(self, main, kc++, "", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_MENU, "ALT", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_SPACE, "Psycle", 4, 0);
-	kbdbox_addkeyproperties(self, main, kc++, "ALT", 1, 0);	
-	kbdbox_addkeyproperties(self, main, kc++, "CTRL", 1, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_LEFT, "Left", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_RIGHT, "Right", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_UP, "Up", 0, 0);
-	kbdbox_addkeyproperties(self, main, psy_ui_KEY_DOWN, "Down", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_CONTROL, "CTRL", 2, 1);
+	kbdbox_definekey(self, rv, kc++, "", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_MENU, "ALT", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_SPACE, "Psycle", 4, 0);
+	kbdbox_definekey(self, rv, kc++, "ALT", 1, 0);	
+	kbdbox_definekey(self, rv, kc++, "CTRL", 1, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_LEFT, "Left", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_RIGHT, "Right", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_UP, "Up", 0, 0);
+	kbdbox_definekey(self, rv, psy_ui_KEY_DOWN, "Down", 0, 0);
+	return rv;
 }
 
-void kbdbox_addkeyproperties(KbdBox* self, psy_Property* section,
+void kbdbox_definekey(KbdBox* self, psy_Property* section,
 	uintptr_t keycode, const char* label, int size, int cr)
 {
 	psy_Property* key;
@@ -435,69 +400,28 @@ void kbdbox_addkeyproperties(KbdBox* self, psy_Property* section,
 	psy_property_append_int(key, "cr", cr, 0, 0);
 }
 
-void kbdbox_addsmallkey(KbdBox* self, uintptr_t keycode, const char* label)
+void kbdbox_addrow(KbdBox* self)
 {
-	kbdbox_addkey(self, keycode, label, 1.0);	
-}
-
-void kbdbox_addmediumkey(KbdBox* self, uintptr_t keycode, const char* label)
-{
-	kbdbox_addkey(self, keycode, label, 1.5);
-}
-
-void kbdbox_addlargerkey(KbdBox* self, uintptr_t keycode, const char* label)
-{
-	kbdbox_addkey(self, keycode, label, 1.78);	
-}
-
-void kbdbox_addlargekey(KbdBox* self, uintptr_t keycode, const char* label)
-{
-	kbdbox_addkey(self, keycode, label, 2.3);
-}
-
-void kbdbox_addwidekey(KbdBox* self, uintptr_t keycode, const char* label)
-{
-	kbdbox_addkey(self, keycode, label, 3.93);	
-}
-
-void kbdbox_addemptykey(KbdBox* self, uintptr_t keycode)
-{
-	kbdbox_addkey(self, keycode, "EMPTY", 0.25);
-}
-
-void kbdbox_addkey(KbdBox* self, uintptr_t keycode, const char* label, double size)
-{
-	if (!psy_table_exists(&self->keys, keycode)) {
-		KbdBoxKey* key;
-
-		key = kbdboxkey_allocinit_all(
-			&self->component, &self->component, self->cpx, self->cpy,
-			(int)(self->keywidth * size), self->keyheight, label);
-		psy_table_insert(&self->keys, keycode, key);
-		self->cpx += (int)(self->keywidth * size + self->ident);
-	}
-
-}
-
-void kbdbox_markkey(KbdBox* self, uintptr_t keycode)
-{
-	KbdBoxKey* key;
-
-	key = psy_table_at(&self->keys, keycode);
-	if (key) {
-		key->marked = TRUE;
-		psy_ui_component_invalidate(kbdbox_base(self));
+	self->currrow = psy_ui_component_allocinit(&self->component,
+		&self->component);
+	if (self->currrow) {
+		psy_ui_component_setdefaultalign(self->currrow, psy_ui_ALIGN_LEFT,
+			psy_ui_margin_makeem(0.0, 0.3, 0.0, 0.0));
+		psy_ui_component_setalignexpand(self->currrow, psy_ui_HORIZONTALEXPAND);
 	}
 }
 
-void kbdbox_unmarkkey(KbdBox* self, uintptr_t keycode)
-{
-	KbdBoxKey* key;
+void kbdbox_addkey(KbdBox* self, uint32_t keycode, int size, 
+	const char* label)
+{	
+	if (self->currrow && !psy_table_exists(&self->keys, keycode)) {
+		KbdBoxKey* key;	
 
-	key = psy_table_at(&self->keys, keycode);
-	if (key) {
-		key->marked = FALSE;
-		psy_ui_component_invalidate(kbdbox_base(self));
+		key = kbdboxkey_allocinit_all(self->currrow, &self->component, size,
+			keycode, label, self->workspace, &self->state);
+		if (key) {
+			psy_table_insert(&self->keys, keycode, key);																		
+		}
 	}
 }
 
@@ -506,78 +430,121 @@ void kbdbox_cleardescriptions(KbdBox* self)
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&self->keys);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		KbdBoxKey* key;
-
-		key = (KbdBoxKey*)psy_tableiterator_value(&it);
-		free(key->desc0);
-		free(key->desc1);
-		free(key->desc2);
-		key->desc0 = strdup("");
-		key->desc1 = strdup("");
-		key->desc2 = strdup("");
-		key->marked = FALSE;
-	}
-	psy_ui_component_invalidate(kbdbox_base(self));
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
+		kbdboxkey_cleardescriptions((KbdBoxKey*)psy_tableiterator_value(&it));
+	}	
 }
 
-void kbdbox_setdescription(KbdBox* self, uintptr_t keycode, int shift, int ctrl,
-	const char* text)
+void kbdbox_setdescription(KbdBox* self, uint32_t keycode, const char* text)
 {
 	KbdBoxKey* key;
+	uint32_t keycode_decoded;
+	bool shift;
+	bool ctrl;
+	bool alt;
 
-	key = psy_table_at(&self->keys, keycode);
-	if (key) {
-		uintptr_t maxchars;
-		uintptr_t numchars;
-		char** desc;
-
-		if (shift && ctrl) {
-			desc = &key->desc3;
-		} else if (shift) {
-			desc = &key->desc1;
-		} else  if (ctrl) {
-			desc = &key->desc2;
-		} else {
-			desc = &key->desc0;
-		}		
-		free(*desc);
-		maxchars = 12;
-		numchars = psy_min(strlen(text), maxchars);
-		if (numchars < strlen(text)) {
-			*desc = strdup(text + (strlen(text) - maxchars));
-		} else {
-			*desc = strdup(text);
-		}
-		psy_ui_component_invalidate(kbdbox_base(self));
+	psy_audio_decodeinput((uint32_t)keycode, &keycode_decoded, &shift, &ctrl, &alt);
+	key = psy_table_at(&self->keys, keycode_decoded);
+	if (key) {		
+		kbdboxkey_setdescription(key, keycode, text);		
 	}
 }
 
-void kbdbox_onpreferredsize(KbdBox* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
+void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_RealRectangle bounds;
+	if (self->state.pressedkey != 0) {
+		psy_EventDriverInput input;
 
-	bounds = kbdbox_bounds(self);
-	psy_ui_size_setpx(rv, bounds.right, bounds.bottom);	
+		input.message = psy_EVENTDRIVER_KEYDOWN;
+		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
+			self->state.shift, self->state.ctrl, self->state.alt);
+		input.param2 = workspace_octave(self->workspace) * 12;
+		psy_eventdriver_write(workspace_kbddriver(self->workspace), input);		
+		kbdbox_resetmodstates(self);
+	}
 }
 
-psy_ui_RealRectangle kbdbox_bounds(KbdBox* self)
+void kbdbox_onmouseup(KbdBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_RealRectangle rv;
+	bool ismod;
+
+	ismod = (self->state.pressedkey == psy_ui_KEY_SHIFT) ||
+		(self->state.pressedkey == psy_ui_KEY_CONTROL) ||
+		(self->state.pressedkey == psy_ui_KEY_MENU);
+	if (self->state.pressedkey != 0 && !ismod) {
+		psy_EventDriverInput input;
+
+		input.message = psy_EVENTDRIVER_KEYUP;
+		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
+			self->state.shift, self->state.ctrl, self->state.alt);
+		input.param2 = workspace_octave(self->workspace) * 12;
+		psy_eventdriver_write(workspace_kbddriver(self->workspace), input);		
+		self->state.pressedkey = 0;
+	}	
+}
+
+void kbdbox_resetmodstates(KbdBox* self)
+{
 	psy_TableIterator it;
 
-	rv = psy_ui_realrectangle_zero();
 	for (it = psy_table_begin(&self->keys);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		psy_ui_RealRectangle r;
+		KbdBoxKey* key;
 
-		r = psy_ui_component_position(
-			((psy_ui_Component*)psy_tableiterator_value(&it)));
-		psy_ui_realrectangle_union(&rv, &r);
+		key = (KbdBoxKey*)psy_tableiterator_value(&it);
+		if (key->keycode == psy_ui_KEY_SHIFT || key->keycode == psy_ui_KEY_CONTROL
+				|| key->keycode == psy_ui_KEY_MENU) {
+			psy_ui_component_removestylestate(kbdboxkey_base(key),
+				psy_ui_STYLESTATE_SELECT);
+		}
 	}	
-	psy_ui_realrectangle_expand(&rv, 0.0, 0.0, 0.0, 0.0);
-	return rv;
+}
+
+void kbdbox_oninput(KbdBox* self, psy_EventDriver* sender)
+{
+	if (psy_ui_component_drawvisible(&self->component)) {
+		psy_EventDriverInput input;
+
+		input = psy_eventdriver_input(sender);
+		if (input.message == psy_EVENTDRIVER_KEYDOWN) {
+			kbdbox_setkeyselect(self, (uint32_t)input.param1, TRUE);
+		} else if (input.message == psy_EVENTDRIVER_KEYUP) {
+			kbdbox_setkeyselect(self, (uint32_t)input.param1, FALSE);			
+		}
+	}
+}
+
+void kbdbox_setkeyselect(KbdBox* self, uint32_t keycode, bool select)
+{
+	KbdBoxKey* key;
+	uint32_t keycode_decoded;
+	bool shift;
+	bool ctrl;
+	bool alt;
+
+	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt);
+	key = psy_table_at(&self->keys, keycode_decoded);
+	if (key) {
+		if (select) {
+			psy_ui_component_addstylestate(&key->component,
+				psy_ui_STYLESTATE_SELECT);
+			if (shift) {
+				self->state.shift = shift;			
+			}
+			if (ctrl) {
+				self->state.shift = ctrl;
+			}
+			if (alt) {
+				self->state.alt = alt;
+			}
+		} else {
+			psy_ui_component_removestylestate(&key->component,
+				psy_ui_STYLESTATE_SELECT);			
+			self->state.shift = FALSE;						
+			self->state.ctrl = FALSE;						
+			self->state.alt = FALSE;			
+		}
+	}
 }

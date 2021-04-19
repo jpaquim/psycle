@@ -59,11 +59,18 @@ static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static const char* driver_target(psy_EventDriver*);
 static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
+
+static psy_EventDriverInput driver_input(psy_EventDriver* context)
+{
+	KbdDriver* self = (KbdDriver*)context;
+	return self->lastinput;
+}
+
 static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
 
 static psy_EventDriverVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -83,7 +90,8 @@ static void vtable_init(void)
 		vtable.target = driver_target;
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
-		vtable_initialized = 1;
+		vtable.input = driver_input;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -194,9 +202,13 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	// patternview chordmode
 	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
+		self->lastinput = input;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
 		return;
 	}
 	if (input.message == psy_EVENTDRIVER_KEYUP && keycode == 0x10 /* psy_ui_KEY_SHIFT */) {
+		self->lastinput = input;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
 		return;
 	}
 	if (input.message == psy_EVENTDRIVER_KEYDOWN) {

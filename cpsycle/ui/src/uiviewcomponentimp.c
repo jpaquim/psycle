@@ -748,11 +748,15 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			psy_ui_Component* hover;
 
 			hover = psy_ui_app()->hover;
-			if (hover) {				
+			psy_ui_app_sethover(psy_ui_app(), self->component);
+			if (hover) {			
 				hover->vtable->onmouseleave(hover);
+				psy_signal_emit(&hover->signal_mouseleave,
+					self->component, 0);
 			}						
 			self->component->vtable->onmouseenter(self->component);
-			psy_ui_app_sethover(psy_ui_app(), self->component);
+			psy_signal_emit(&self->component->signal_mouseenter,
+				self->component, 0);			
 		}		
 	}
 	if (ev->bubble) {
@@ -790,11 +794,17 @@ void view_dev_mouseenter(psy_ui_ViewComponentImp* self)
 {
 	if (psy_ui_app()->hover) {
 		psy_ui_app()->hover->vtable->onmouseleave(psy_ui_app()->hover);
+		psy_signal_emit(&psy_ui_app()->hover->signal_mouseleave,
+			self->component, 0);
 	}
 	psy_ui_app_sethover(psy_ui_app(), self->component);	
+	psy_signal_emit(&self->component->signal_mouseenter,
+		self->component, 0);
 }
 
 void view_dev_mouseleave(psy_ui_ViewComponentImp* self)
 {
 	psy_ui_app_sethover(psy_ui_app(), NULL);	
+	psy_signal_emit(&self->component->signal_mouseleave,
+		self->component, 0);
 }

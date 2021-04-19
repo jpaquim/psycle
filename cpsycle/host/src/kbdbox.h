@@ -7,7 +7,8 @@
 // host
 #include "workspace.h"
 // ui
-#include "uicomponent.h"
+#include <uibutton.h>
+#include <uilabel.h>
 // container
 #include <hashtbl.h>
 #include <properties.h>
@@ -20,47 +21,64 @@ extern "C" {
 //
 // Shows a keyboard with annotations
 
+typedef struct KbdBoxState {
+	uint32_t pressedkey;
+	bool shift;
+	bool ctrl;
+	bool alt;
+} KbdBoxState;
+
+void kbdboxstate_init(KbdBoxState*);
+
 // defines one key of the keybox
 typedef struct KbdBoxKey {
 	// inherits;
 	psy_ui_Component component;
 	// intern
-	char* label;
-	char* desc0; // row 0 keycode
-	char* desc1; // row 1 keycode with shift
-	char* desc2; // row 2 keycode with ctrl
-	char* desc3; // row 2 keycode with shift + ctrl
-	bool marked;	
+	psy_ui_Label label;
+	psy_ui_Label desc0; // row 0 keycode
+	psy_ui_Label desc1; // row 1 keycode with shift
+	psy_ui_Label desc2; // row 2 keycode with ctrl
+	psy_ui_Label desc3; // row 3 keycode with shift + ctrl	
+	int size;
+	uint32_t keycode;
+	double keywidth;	
+	// references
+	KbdBoxState* state;
+	Workspace* workspace;	
 } KbdBoxKey;
 
-void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent, psy_ui_Component* view,
-	int x, int y, int width, int height, const char* label);
-KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent, psy_ui_Component* view, 
-	int x, int y, int width, int height, const char* label);
+void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent,
+	psy_ui_Component* view, int size, uint32_t keycode, const char* label,
+	Workspace*, KbdBoxState* state);
 
-typedef struct KbdBox{
+KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
+	psy_ui_Component* view, int size, uint32_t keycode, const char* label,
+	Workspace*, KbdBoxState* state);
+
+void kbdboxkey_cleardescriptions(KbdBoxKey*);
+void kbdboxkey_setdescription(KbdBoxKey*, uint32_t keycode, const char* text);
+
+INLINE psy_ui_Component* kbdboxkey_base(KbdBoxKey* self)
+{
+	return &self->component;
+}
+
+// KbdBox
+typedef struct KbdBox {
 	// inherits
 	psy_ui_Component component;
-	// internal data
-	psy_Table keys;
-	int cpx;
-	int cpy;
-	int ident;
-	int descident;
-	int keyheight;
-	int keywidth;
-	psy_ui_Size corner;
-	psy_Property* keyset;
+	// intern
+	psy_Table keys;		
+	psy_ui_Component* currrow;
+	KbdBoxState state;
 	// references	
 	Workspace* workspace;
 } KbdBox;
 
 void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
-void kbdbox_markkey(KbdBox*, uintptr_t keycode);
-void kbdbox_unmarkkey(KbdBox*, uintptr_t keycode);
 void kbdbox_cleardescriptions(KbdBox*);
-void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl,
-	const char* desc);
+void kbdbox_setdescription(KbdBox*, uint32_t keycode, const char* text);
 
 INLINE psy_ui_Component* kbdbox_base(KbdBox* self)
 {

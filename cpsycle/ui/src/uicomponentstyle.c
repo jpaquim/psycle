@@ -170,6 +170,9 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
 
 	assert(self);
 
+	if (self->state & psy_ui_STYLESTATE_SELECT) {
+		self = self;
+	}
 	newstate = self->state & (~state);
 	if (newstate != self->state) {
 		self->state = newstate;

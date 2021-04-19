@@ -99,6 +99,7 @@ typedef psy_EventDriverCmd(*psy_eventdriver_fp_getcmd)(struct psy_EventDriver*, 
 typedef const char*(*psy_eventdriver_fp_target)(struct psy_EventDriver*);
 typedef void (*psy_eventdriver_fp_setcmddef)(struct psy_EventDriver*, const psy_Property*);
 typedef void (*psy_eventdriver_fp_idle)(struct psy_EventDriver*);
+typedef psy_EventDriverInput (*psy_eventdriver_fp_input)(struct psy_EventDriver*);
 
 typedef struct psy_EventDriverVTable {
 	psy_eventdriver_fp_open open;
@@ -115,6 +116,7 @@ typedef struct psy_EventDriverVTable {
 	psy_eventdriver_fp_target target;
 	psy_eventdriver_fp_setcmddef setcmddef;
 	psy_eventdriver_fp_idle idle;
+	psy_eventdriver_fp_input input;
 } psy_EventDriverVTable;
 
 typedef struct psy_EventDriver {
@@ -247,6 +249,11 @@ INLINE void psy_eventdriver_connect(psy_EventDriver* self, void* context,
 {
 	self->callbackcontext = context;
 	self->callback = callback;
+}
+
+INLINE psy_EventDriverInput psy_eventdriver_input(psy_EventDriver* self)
+{
+	return self->vtable->input(self);
 }
 
 INLINE int psy_eventdriver_hostevent(psy_EventDriver* self, int msg, int param1, int param2)

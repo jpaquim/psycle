@@ -372,7 +372,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_make_rgb(62, 63, 65));
-	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SHIFT, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SHIFT_SELECT, style);
 	// alt key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -383,7 +383,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_make_rgb(62, 63, 65));
-	psy_ui_defaults_setstyle(defaults, STYLE_KEY_ALT, style);
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_ALT_SELECT, style);
 	// ctrl key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -394,7 +394,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_setradius_px(&style->border, 4.0);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_make_rgb(62, 63, 65));
-	psy_ui_defaults_setstyle(defaults, STYLE_KEY_CTRL, style);	
+	psy_ui_defaults_setstyle(defaults, STYLE_KEY_CTRL_SELECT, style);	
 	// table row
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
