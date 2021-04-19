@@ -219,10 +219,10 @@ void cmdproperties_makegeneral(psy_Property* self)
 		psy_property_setid(psy_property_append_int(general, "cmd_playfrompos",
 			psy_audio_encodeinput(psy_ui_KEY_F7, 0, 0, 0), 0, 0), CMD_IMM_PLAYFROMPOS),
 		"playp"), "cmds.playfrompos");
-	psy_property_settext(
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_playstop",
 			psy_audio_encodeinput(psy_ui_KEY_F8, 0, 0, 0), 0, 0), CMD_IMM_PLAYSTOP),
-		"cmds.playstop");
+		"stop"), "cmds.playstop");
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_patterndec",
 			psy_audio_encodeinput(psy_ui_KEY_DOWN, 1, 0, 0), 0, 0), CMD_IMM_PATTERNDEC),
@@ -248,14 +248,14 @@ void cmdproperties_makegeneral(psy_Property* self)
 		psy_property_setid(psy_property_append_int(general, "cmd_maxpattern",
 			psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 1, 0), 0, 0), CMD_IMM_MAXPATTERN),
 		"maxpat"), "cmds.maxpattern");	
-	psy_property_settext(
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_infopattern",
 			psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 1, 0), 0, 0), CMD_IMM_INFOPATTERN),
-		"cmds.infopattern");
-	psy_property_settext(
+		"pat info"), "cmds.infopattern");
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_infomachine",
 			psy_audio_encodeinput(psy_ui_KEY_RETURN, 1, 0, 0), 0, 0), CMD_IMM_INFOMACHINE),
-		"cmds.infomachine");
+		"mac info"), "cmds.infomachine");
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_editinstr",			
 			psy_audio_encodeinput(psy_ui_KEY_F10, 0, 0, 0), 0, 0), CMD_IMM_EDITINSTR),

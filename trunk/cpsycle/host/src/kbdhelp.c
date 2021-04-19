@@ -55,17 +55,11 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 			for (p = psy_property_begin_const(section); p != NULL;
 					psy_list_next_const(&p)) {
 				const psy_Property* property;
-				uint32_t keycode;
-				bool shift;
-				bool ctrl;
-				bool alt;
 
-				property = (const psy_Property*)psy_list_entry_const(p);
-				psy_audio_decodeinput((uint32_t)psy_property_item_int(property),
-					&keycode, &shift, &ctrl, &alt);
-				kbdbox_markkey(&self->kbdbox, keycode);
-				kbdbox_setdescription(&self->kbdbox, keycode, shift,
-					ctrl, psy_property_shorttext(property));
+				property = (const psy_Property*)psy_list_entry_const(p);				
+				kbdbox_setdescription(&self->kbdbox,
+					(uint32_t)psy_property_item_int(property),
+					psy_property_shorttext(property));
 			}
 		}
 	}
