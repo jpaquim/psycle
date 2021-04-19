@@ -22,7 +22,7 @@ static int accumwheeldelta = 0;
 static psy_ui_WinApp* winapp = NULL;
 
 static psy_ui_Component* eventtarget(psy_ui_Component* component);
-static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
+static bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
 	WPARAM wparam, LPARAM lparam);
 static bool handle_keyevent(psy_ui_Component*,
 	psy_ui_win_ComponentImp*,
@@ -605,19 +605,26 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_mouseevent(imp->component, imp,
 					hwnd, message, wParam, lParam, MK_RBUTTON,
 					imp->component->vtable->onmousedoubleclick,
-					&imp->component->signal_mousedoubleclick);				
+					&imp->component->signal_mousedoubleclick);
 				return 0;
 				break;
 			case WM_MOUSEMOVE: {
-				psy_ui_MouseEvent ev;
+				if (psy_ui_app()->dragevent.active) {
+					handle_mouseevent(imp->component, imp,
+						hwnd, message, wParam, lParam, WM_MOUSEMOVE,
+						imp->component->vtable->onmousemove,
+						&imp->component->signal_mousemove);
+				} else {
+					psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
-					wParam, 0, GetKeyState(VK_SHIFT) < 0,
-					GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
-				// psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
-				imp->imp.vtable->dev_mousemove(&imp->imp, &ev);					
+					psy_ui_mouseevent_init(&ev,
+						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+						wParam, 0, GetKeyState(VK_SHIFT) < 0,
+						GetKeyState(VK_CONTROL) < 0);
+					adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
+					// psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
+					imp->imp.vtable->dev_mousemove(&imp->imp, &ev);			
+				}			
 				return 0;
 				break; }
 			case WM_SETTINGCHANGE: {
@@ -748,18 +755,21 @@ psy_ui_Component* eventtarget(psy_ui_Component* component)
 	return component;
 }
 
-void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
+bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
 {
 	if (psy_table_at(&winapp->selfmap,
 			(uintptr_t)GetParent(imp->hwnd))) {
 		psy_list_append(&winapp->targetids, imp->hwnd);
 		winapp->eventretarget = imp->component;
 		SendMessage(GetParent(imp->hwnd), (UINT)message, wparam, lparam);
+		winapp->eventretarget = 0;
+		return TRUE;
 	} else {
 		psy_list_free(winapp->targetids);
-		winapp->targetids = NULL;
+		winapp->targetids = NULL;		
 	}
 	winapp->eventretarget = 0;
+	return FALSE;
 }
 
 void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
@@ -810,6 +820,7 @@ void handle_mouseevent(psy_ui_Component* component,
 	psy_Signal* signal)
 {
 	psy_ui_MouseEvent ev;	
+	bool up;	
 
 	psy_ui_mouseevent_init(&ev,
 		(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
@@ -817,10 +828,12 @@ void handle_mouseevent(psy_ui_Component* component,
 		GetKeyState(VK_CONTROL) < 0);
 	adjustcoordinates(component, &ev.pt.x, &ev.pt.y);
 	psy_ui_mouseevent_settarget(&ev, eventtarget(component));
+	up = FALSE;
 	switch (message) {
 	case WM_LBUTTONUP:
 	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
+		up = TRUE;
 		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);
 		break;
 	case WM_LBUTTONDOWN:
@@ -844,8 +857,24 @@ void handle_mouseevent(psy_ui_Component* component,
 		psy_signal_emit(signal, component, 1, &ev);
 	}
 	if (ev.bubble != FALSE) {
-		sendmessagetoparent(winimp, message, wParam, lParam);
-	}	
+		bool bubble;
+		
+		bubble = sendmessagetoparent(winimp, message, wParam, lParam);
+		if (up && !bubble) {
+			psy_ui_app_stopdrag(psy_ui_app());
+		} else if (message == WM_MOUSEMOVE && !bubble) {
+			if (!psy_ui_app()->dragevent.preventdefault) {
+				psy_ui_component_setcursor(psy_ui_app()->main,
+					psy_ui_CURSORSTYLE_NODROP);
+			} else {
+				psy_ui_component_setcursor(psy_ui_app()->main,
+					psy_ui_CURSORSTYLE_GRAB);
+			}
+			psy_ui_app()->dragevent.preventdefault = FALSE;
+		}
+	} else if (up) {		
+		psy_ui_app_stopdrag(psy_ui_app());
+	}
 	
 }
 

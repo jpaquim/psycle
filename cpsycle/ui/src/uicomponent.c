@@ -192,10 +192,26 @@ static bool onclose(psy_ui_Component* self) { return TRUE; }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
+	if (self->draggable) {		
+		psy_ui_app()->dragevent.target = self;		
+		psy_ui_app_startdrag(psy_ui_app());		
+		self->vtable->ondragstart(self, &psy_ui_app()->dragevent);
+	}
 }
 
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
-{	
+{
+	if (psy_ui_app()->dragevent.active) {		
+		psy_ui_app()->dragevent.preventdefault = FALSE;
+		if (self->debugflag == 100) {
+			self = self;
+		}
+		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
+		if (psy_ui_app()->dragevent.preventdefault) {
+			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
+	}
 }
 
 static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
@@ -203,6 +219,12 @@ static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
+	if (psy_ui_app()->dragevent.active) {				
+		self->vtable->ondrop(self, &psy_ui_app()->dragevent);
+		if (ev->preventdefault) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
+	}
 }
 
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
@@ -233,6 +255,9 @@ static void onfocuslost(psy_ui_Component* self)
 }
 
 static void onupdatestyles(psy_ui_Component* self) { }
+static void ondragstart(psy_ui_Component* self, psy_ui_DragEvent* ev) { }
+static void ondragover(psy_ui_Component* self, psy_ui_DragEvent* ev) { }
+static void ondrop(psy_ui_Component* self, psy_ui_DragEvent* ev) { }
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -283,6 +308,9 @@ static void vtable_init(void)
 		vtable.onfocuslost = onfocuslost;
 		vtable.onupdatestyles = onupdatestyles;
 		vtable.invalidate = invalidate;
+		vtable.ondragstart = ondragstart;
+		vtable.ondragover = ondragover;
+		vtable.ondrop = ondrop;
 		vtable_initialized = TRUE;
 	}
 }
@@ -531,7 +559,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->doublebuffered = FALSE;	
 	self->backgroundmode = psy_ui_SETBACKGROUND;	
 	self->tabindex = psy_INDEX_INVALID;
-	self->opcount = 0;	
+	self->opcount = 0;
+	self->draggable = FALSE;
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,

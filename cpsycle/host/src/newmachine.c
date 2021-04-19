@@ -785,6 +785,26 @@ static void newmachinesection_onmousedown(NewMachineSection*, psy_ui_Component* 
 	psy_ui_MouseEvent*);
 static void newmachinesection_oneditaccept(NewMachineSection*, psy_ui_Edit* sender);
 static void newmachinesection_oneditreject(NewMachineSection*, psy_ui_Edit* sender);
+static void newmachinesection_ondragover(NewMachineSection*, psy_ui_DragEvent*);
+static void newmachinesection_ondrop(NewMachineSection*, psy_ui_DragEvent*);
+// vtable
+static psy_ui_ComponentVtable newmachinesection_vtable;
+static bool newmachinesection_vtable_initialized = FALSE;
+
+static void newmachinesection_vtable_init(NewMachineSection* self)
+{
+	if (!newmachinesection_vtable_initialized) {
+		newmachinesection_vtable = *(self->component.vtable);
+		newmachinesection_vtable.ondragover =
+			(psy_ui_fp_component_ondragover)
+			newmachinesection_ondragover;
+		newmachinesection_vtable.ondrop =
+			(psy_ui_fp_component_ondrop)
+			newmachinesection_ondrop;
+		newmachinesection_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &newmachinesection_vtable;
+}
 // implementation
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_Property* section, psy_ui_Edit* edit, NewMachine* newmachine, Workspace* workspace)
@@ -793,6 +813,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_Margin spacing;	
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	newmachinesection_vtable_init(self);
 	psy_ui_component_setstyletypes(&self->component, 
 		STYLE_NEWMACHINE_SECTION, psy_INDEX_INVALID, STYLE_NEWMACHINE_SECTION_SELECTED,
 		psy_INDEX_INVALID);	
@@ -819,7 +840,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->label, newmachinesection_name(self));
 	psy_ui_label_settextalignment(&self->label,
 		psy_ui_ALIGNMENT_LEFT |
-		psy_ui_ALIGNMENT_CENTER_VERTICAL);
+		psy_ui_ALIGNMENT_CENTER_VERTICAL);	
 	pluginsview_init(&self->pluginview, &self->component);
 	psy_ui_component_setalign(&self->pluginview.component, psy_ui_ALIGN_TOP);
 	newmachinesection_findplugins(self);
@@ -950,6 +971,42 @@ NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
+}
+
+void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
+{
+	if (ev->dataTransfer) {
+		psy_audio_MachineInfo macinfo;
+
+		machineinfo_init(&macinfo);
+		psy_audio_machineinfo_from_property(ev->dataTransfer, &macinfo);
+		if (!psy_audio_pluginsections_pluginexists(&self->newmachine->workspace->pluginsections,
+				self->section, &macinfo)) {
+			ev->preventdefault = TRUE;
+		}
+		machineinfo_dispose(&macinfo);
+	}
+}
+
+void newmachinesection_ondrop(NewMachineSection* self, psy_ui_DragEvent* ev)
+{	
+	ev->preventdefault = TRUE;
+	if (ev->dataTransfer) {
+		psy_audio_MachineInfo macinfo;
+
+		machineinfo_init(&macinfo);
+		psy_audio_machineinfo_from_property(ev->dataTransfer, &macinfo);		
+		if (!psy_audio_pluginsections_pluginexists(&self->newmachine->workspace->pluginsections,
+				self->section, &macinfo)) {
+			psy_audio_pluginsections_add(&self->newmachine->workspace->pluginsections,
+				psy_property_key(self->section), &macinfo);
+			self->newmachine->selectedplugin = NULL;
+			newmachinesection_findplugins(self);			
+			psy_ui_component_align_full(&self->newmachine->client);
+			psy_ui_component_invalidate(&self->newmachine->client);
+		}
+		machineinfo_dispose(&macinfo);
+	}
 }
 
 // NewMachine

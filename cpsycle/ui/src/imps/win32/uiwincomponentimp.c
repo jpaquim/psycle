@@ -832,7 +832,7 @@ void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle
 		hc = LoadCursor(NULL, IDC_SIZEALL);
 		break;
 	case psy_ui_CURSORSTYLE_NODROP:
-		hc = LoadCursor(NULL, IDC_SIZEWE);
+		hc = LoadCursor(NULL, IDC_NO);
 		break;
 	case psy_ui_CURSORSTYLE_COL_RESIZE:
 		hc = LoadCursor(NULL, IDC_SIZEWE);
@@ -893,6 +893,9 @@ void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle
 		break;
 	case psy_ui_CURSORSTYLE_SW_RESIZE:
 		hc = LoadCursor(NULL, IDC_SIZEWE);
+		break;
+	case psy_ui_CURSORSTYLE_GRAB:
+		hc = LoadCursor(NULL, IDC_HAND);
 		break;
 	default:
 		hc = 0;

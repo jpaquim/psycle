@@ -109,6 +109,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_translator_init(&self->translator);
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
 		psy_ui_app_onlanguagechanged);
+	psy_ui_dragevent_init(&self->dragevent);
 }
 
 void ui_app_initimpfactory(psy_ui_App* self)
@@ -171,6 +172,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	}
 	psy_ui_defaults_dispose(&self->defaults);
 	psy_translator_dispose(&self->translator);
+	psy_ui_dragevent_dispose(&self->dragevent);
 }
 
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
@@ -442,4 +444,21 @@ void psy_ui_app_updatesyles(psy_ui_App* self)
 void psy_ui_app_sethover(psy_ui_App* self, psy_ui_Component* hover)
 {
 	self->hover = hover;
+}
+
+void psy_ui_app_startdrag(psy_ui_App* self)
+{
+	self->dragevent.active = TRUE;
+	psy_ui_component_setcursor(self->main, psy_ui_CURSORSTYLE_GRAB);
+}
+
+void psy_ui_app_stopdrag(psy_ui_App* self)
+{
+	if (self->dragevent.active) {
+		self->dragevent.active = FALSE;
+		if (self->dragevent.dataTransfer) {
+			psy_property_deallocate(self->dragevent.dataTransfer);
+			self->dragevent.dataTransfer = NULL;
+		}
+	}
 }
