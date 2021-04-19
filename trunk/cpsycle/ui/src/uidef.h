@@ -94,7 +94,8 @@ typedef enum psy_ui_CursorStyle {
 	psy_ui_CURSORSTYLE_INHERIT,
 	psy_ui_CURSORSTYLE_WAIT,
 	psy_ui_CURSORSTYLE_W_RESIZE,
-	psy_ui_CURSORSTYLE_SW_RESIZE
+	psy_ui_CURSORSTYLE_SW_RESIZE,
+	psy_ui_CURSORSTYLE_GRAB,
 } psy_ui_CursorStyle;
 
 typedef enum psy_ui_Key {

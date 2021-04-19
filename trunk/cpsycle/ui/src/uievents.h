@@ -4,8 +4,12 @@
 #ifndef psy_ui_EVENTS_H
 #define psy_ui_EVENTS_H
 
+// local
 #include "uigraphics.h"
+//container
 #include <signal.h>
+#include <properties.h>
+
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
@@ -57,6 +61,18 @@ INLINE void psy_ui_mouseevent_preventdefault(psy_ui_MouseEvent* self)
 {
 	self->preventdefault = TRUE;
 }
+
+struct psy_ui_Component;
+
+typedef struct psy_ui_DragEvent {
+	struct psy_ui_Component* target;
+	bool active;
+	psy_Property* dataTransfer;
+	bool preventdefault;
+} psy_ui_DragEvent;
+
+void psy_ui_dragevent_init(psy_ui_DragEvent*);
+void psy_ui_dragevent_dispose(psy_ui_DragEvent*);
 
 #ifdef __cplusplus
 }

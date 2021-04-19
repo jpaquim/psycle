@@ -94,6 +94,9 @@ typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onupdatestyles)(struct psy_ui_Component*);
 typedef uintptr_t (*psy_ui_fp_component_section)(const struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_ondragstart)(struct psy_ui_Component*, psy_ui_DragEvent*);
+typedef void (*psy_ui_fp_component_ondragover)(struct psy_ui_Component*, psy_ui_DragEvent*);
+typedef void (*psy_ui_fp_component_ondrop)(struct psy_ui_Component*, psy_ui_DragEvent*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -137,7 +140,10 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 	psy_ui_fp_component_onfocus onfocus;
 	psy_ui_fp_component_onfocus onfocuslost;
-	psy_ui_fp_component_onupdatestyles onupdatestyles;	
+	psy_ui_fp_component_onupdatestyles onupdatestyles;
+	psy_ui_fp_component_ondragstart ondragstart;
+	psy_ui_fp_component_ondragover ondragover;
+	psy_ui_fp_component_ondrop ondrop;
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
@@ -194,6 +200,7 @@ typedef struct psy_ui_Component {
 	bool deallocate;
 	uintptr_t opcount;
 	intptr_t debugflag;
+	bool draggable;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);

@@ -5,6 +5,7 @@
 
 #include "uievents.h"
 
+// psy_ui_KeyEvent
 void psy_ui_keyevent_init(psy_ui_KeyEvent* self, uint32_t keycode, intptr_t keydata,
 	bool shift, bool ctrl, bool alt, int repeat)
 {
@@ -29,6 +30,7 @@ void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
 	self->preventdefault = TRUE;
 }
 
+// psy_ui_MouseEvent
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y, intptr_t button,
 	intptr_t delta, bool shift, bool ctrl)
 {
@@ -55,4 +57,21 @@ struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent* self)
 void psy_ui_mouseevent_settarget(psy_ui_MouseEvent* self, struct psy_ui_Component* target)
 {
 	self->target = target;
+}
+
+// psy_ui_DragEvent
+void psy_ui_dragevent_init(psy_ui_DragEvent* self)
+{
+	self->target = NULL;
+	self->active = FALSE;
+	self->preventdefault = TRUE;
+	self->dataTransfer = NULL;
+}
+
+void psy_ui_dragevent_dispose(psy_ui_DragEvent* self)
+{
+	if (self->dataTransfer) {
+		psy_property_deallocate(self->dataTransfer);
+		self->dataTransfer = NULL;
+	}
 }

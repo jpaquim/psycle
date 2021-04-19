@@ -344,14 +344,17 @@ static uintptr_t pluginsview_numlines(const PluginsView*);
 static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
 static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
 static void pluginsview_onsortchanged(PluginsView*, NewMachineSort* sender);
+static void pluginsview_ondragstart(PluginsView*, psy_ui_DragEvent*);
 
 static psy_ui_ComponentVtable pluginsview_vtable;
+static psy_ui_ComponentVtable pluginsview_super_vtable;
 static bool pluginsview_vtable_initialized = FALSE;
 
 static void pluginsview_vtable_init(PluginsView* self)
 {
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);
+		pluginsview_super_vtable = pluginsview_vtable;
 		pluginsview_vtable.ondestroy =
 			(psy_ui_fp_component_ondestroy)
 			pluginsview_ondestroy;
@@ -370,6 +373,9 @@ static void pluginsview_vtable_init(PluginsView* self)
 		pluginsview_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredscrollsize)
 			pluginsview_onpreferredscrollsize;
+		pluginsview_vtable.ondragstart =
+			(psy_ui_fp_component_ondragstart)
+			pluginsview_ondragstart;
 		pluginsview_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &pluginsview_vtable;
@@ -379,7 +385,8 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_doublebuffer(&self->component);
+	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);	
 	self->mode = NEWMACHINE_APPEND;
@@ -794,7 +801,7 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col
 }
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
-{
+{	
 	if (ev->button == 1) {		
 		pluginsview_hittest(self, ev->pt.x, ev->pt.y);
 		psy_ui_component_invalidate(&self->component);
@@ -802,6 +809,7 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 			self->selectedplugin);		
 		psy_ui_component_setfocus(&self->component);		
 	}
+	pluginsview_super_vtable.onmousedown(&self->component, ev);
 }
 
 void pluginsview_hittest(PluginsView* self, double x, double y)
@@ -899,5 +907,12 @@ void pluginsview_sort(PluginsView* self, NewMachineSortMode mode)
 			psy_signal_emit(&self->signal_changed, self, 1,
 				self->selectedplugin);
 		}
+	}
+}
+
+void pluginsview_ondragstart(PluginsView* self, psy_ui_DragEvent* ev)
+{
+	if (self->selectedplugin) {		
+		ev->dataTransfer = psy_property_clone(self->selectedplugin);
 	}
 }
