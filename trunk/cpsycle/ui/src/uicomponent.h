@@ -193,7 +193,7 @@ typedef struct psy_ui_Component {
 	intptr_t preventpreferredsizeatalign;	
 	psy_ui_AlignType align;
 	int alignexpandmode;
-	int alignchildren;
+	int containeralign;
 	psy_ui_AlignType insertaligntype;
 	psy_ui_Margin insertmargin;	
 	uintptr_t tabindex;
@@ -343,7 +343,8 @@ INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_component_init(self, parent, NULL);
 	psy_ui_component_setalign(self, aligntype);
 }
-void psy_ui_component_enablealign(psy_ui_Component*);
+void psy_ui_component_setcontaineralign(psy_ui_Component*,
+	psy_ui_ContainerAlignType);
 void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
