@@ -127,7 +127,8 @@ void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* de
 		psy_ui_component_setparent(&self->sectionfloated, &self->component);		
 		psy_ui_component_insert(&self->notebook.component,
 			&self->help.component, NULL);
-		psy_ui_component_enablealign(&self->help.editor.component);
+		psy_ui_component_setcontaineralign(&self->help.editor.component,
+			psy_ui_CONTAINER_ALIGN_NONE);
 		psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_CLIENT);			
 		psy_ui_component_show_align(&self->help.component);
 		psy_ui_component_align(&self->help.component);

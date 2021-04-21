@@ -921,8 +921,7 @@ void propertiesview_dock(PropertiesView* self, uintptr_t section, psy_ui_Compone
 		self->renderer.floated = FALSE;
 		psy_ui_component_hide(&self->sectionfloated);	
 		psy_ui_component_insert(&self->notebook.component,
-			&self->client, NULL);
-		psy_ui_component_enablealign(&self->client);
+			&self->client, NULL);		
 		psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 		psy_ui_component_show_align(&self->client);
 		psy_ui_component_align(&self->client);

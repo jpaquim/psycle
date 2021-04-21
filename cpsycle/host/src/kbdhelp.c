@@ -21,8 +21,7 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_Margin margin;
 
 	self->workspace = workspace;
-	psy_ui_component_init(kbdhelp_base(self), parent, NULL);
-	psy_ui_component_enablealign(kbdhelp_base(self));
+	psy_ui_component_init(kbdhelp_base(self), parent, NULL);	
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);	
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CENTER);

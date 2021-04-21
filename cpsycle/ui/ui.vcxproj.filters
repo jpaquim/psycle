@@ -29,11 +29,11 @@
     <Filter Include="common">
       <UniqueIdentifier>{ccaf32a1-7751-4ad3-b15d-15e2f1c5d979}</UniqueIdentifier>
     </Filter>
+    <Filter Include="aligner">
+      <UniqueIdentifier>{a102b3ac-7317-418f-9243-580490031b94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\uialigner.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uiapp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -217,6 +217,12 @@
     <ClCompile Include="src\uicomponentsizehints.c">
       <Filter>comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uialigner.c">
+      <Filter>aligner</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uilclaligner.c">
+      <Filter>aligner</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -360,9 +366,6 @@
     <ClInclude Include="src\uiimpfactory.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\uialigner.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\uievents.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -407,6 +410,12 @@
     </ClInclude>
     <ClInclude Include="src\uicomponentsizehints.h">
       <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uialigner.h">
+      <Filter>aligner</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uilclaligner.h">
+      <Filter>aligner</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

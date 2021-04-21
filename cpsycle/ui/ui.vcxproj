@@ -255,6 +255,7 @@
     <ClCompile Include="src\uiimage.c" />
     <ClCompile Include="src\uiimpfactory.c" />
     <ClCompile Include="src\uilabel.c" />
+    <ClCompile Include="src\uilclaligner.c" />
     <ClCompile Include="src\uilistbox.c" />
     <ClCompile Include="src\uinotebook.c" />
     <ClCompile Include="src\uiopendialog.c" />
@@ -320,6 +321,7 @@
     <ClInclude Include="src\uiimage.h" />
     <ClInclude Include="src\uiimpfactory.h" />
     <ClInclude Include="src\uilabel.h" />
+    <ClInclude Include="src\uilclaligner.h" />
     <ClInclude Include="src\uilistbox.h" />
     <ClInclude Include="src\uinotebook.h" />
     <ClInclude Include="src\uiopendialog.h" />

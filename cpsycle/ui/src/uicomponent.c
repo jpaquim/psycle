@@ -5,7 +5,7 @@
 
 #include "uicomponent.h"
 // local
-#include "uialigner.h"
+#include "uilclaligner.h"
 #include "uiapp.h"
 #include "uiimpfactory.h"
 #include "uiviewcomponentimp.h"
@@ -447,7 +447,7 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 	if (!psy_ui_app()->alignvalid || 
 		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {		
-		if (self->alignchildren) {
+		if (self->containeralign) {
 			psy_ui_component_align(self);
 		}		
 		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
@@ -549,7 +549,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->deallocate = FALSE;		
 	self->insertaligntype = psy_ui_ALIGN_NONE;
 	psy_ui_margin_init(&self->insertmargin);
-	self->alignchildren = 1;
+	self->containeralign = psy_ui_CONTAINER_ALIGN_LCL;
 	self->alignexpandmode = psy_ui_NOEXPAND;		
 	psy_ui_componentstyle_init(&self->style);	
 	self->debugflag = 0;
@@ -738,10 +738,10 @@ int psy_ui_component_drawvisible(psy_ui_Component* self)
 
 void psy_ui_component_align(psy_ui_Component* self)
 {		
-	psy_ui_Aligner aligner;
+	psy_ui_LCLAligner aligner;
 
-	psy_ui_aligner_init(&aligner, self);
-	psy_ui_aligner_align(&aligner);
+	psy_ui_lclaligner_init(&aligner, self);
+	psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
 	psy_signal_emit(&self->signal_align, self, 0);
 	self->vtable->onalign(self);
 }
@@ -759,10 +759,10 @@ void psy_ui_component_alignall(psy_ui_Component* self)
 	psy_List* q;
 
 	// align
-	psy_ui_Aligner aligner;
+	psy_ui_LCLAligner aligner;
 
-	psy_ui_aligner_init(&aligner, self);
-	psy_ui_aligner_align(&aligner);
+	psy_ui_lclaligner_init(&aligner, self);
+	psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
 	psy_signal_emit(&self->signal_align, self, 0);
 	self->vtable->onalign(self);
 	for (p = q = psy_ui_component_children(self, 1); p != NULL; psy_list_next(&p)) {
@@ -778,10 +778,10 @@ void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
 	if (!self->preventpreferredsize) {
-		psy_ui_Aligner aligner;
+		psy_ui_LCLAligner aligner;
 
-		psy_ui_aligner_init(&aligner, self);
-		psy_ui_aligner_preferredsize(&aligner, limit, rv);
+		psy_ui_lclaligner_init(&aligner, self);
+		psy_ui_aligner_preferredsize(psy_ui_lclaligner_base(&aligner), limit, rv);		
 	} else {
 		psy_ui_Size size;
 		
@@ -906,14 +906,15 @@ void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 	}
 }
 
-void psy_ui_component_enablealign(psy_ui_Component* self)
+void psy_ui_component_setcontaineralign(psy_ui_Component* self, 
+	psy_ui_ContainerAlignType containeralign)
 {
-	self->alignchildren = 1;	
+	self->containeralign = containeralign;
 }
 
 void psy_ui_component_preventalign(psy_ui_Component* self)
 {
-	self->alignchildren = 0;
+	self->containeralign = psy_ui_CONTAINER_ALIGN_NONE;
 }
 
 void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)

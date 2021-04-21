@@ -4,20 +4,53 @@
 #ifndef psy_ui_ALIGNER_H
 #define psy_ui_ALIGNER_H
 
-#include "uicomponent.h"
+// local
+#include "uidef.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-	psy_ui_Component* component;
+struct psy_ui_Aligner;
+
+typedef void (*psy_ui_fp_aligner_dispose)(struct psy_ui_Aligner*);
+typedef void (*psy_ui_fp_aligner_align)(struct psy_ui_Aligner*);
+typedef void (*psy_ui_fp_aligner_preferredsize)(struct psy_ui_Aligner*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
+
+typedef struct psy_ui_AlignerVTable {
+	psy_ui_fp_aligner_dispose dispose;
+	psy_ui_fp_aligner_align align;
+	psy_ui_fp_aligner_preferredsize preferredsize;
+} psy_ui_AlignerVTable;
+
+typedef struct psy_ui_Aligner {
+	psy_ui_AlignerVTable* vtable;
 } psy_ui_Aligner;
 
-void psy_ui_aligner_init(psy_ui_Aligner*, psy_ui_Component*);
-void psy_ui_aligner_align(psy_ui_Aligner*);
-void psy_ui_aligner_preferredsize(psy_ui_Aligner*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
+void psy_ui_aligner_init(psy_ui_Aligner*);
+
+INLINE void psy_ui_aligner_dispose(psy_ui_Aligner* self)
+{
+	assert(self);
+
+	self->vtable->dispose(self);
+}
+
+INLINE void psy_ui_aligner_align(psy_ui_Aligner* self)
+{
+	assert(self);
+
+	self->vtable->align(self);
+}
+
+INLINE void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
+	const psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	assert(self);
+
+	self->vtable->preferredsize(self, limit, rv);
+}
 
 #ifdef __cplusplus
 }
