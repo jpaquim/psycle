@@ -236,7 +236,9 @@ void inputdefiner_inputtotext(uint32_t input, char* text)
 	if (ctrl) {
 		strcat(text, "Ctrl + ");
 	}
-	strcat(text, inputdefinerkeynames_at(&keynames, keycode));
+	keynames_init();
+	strcat(text, inputdefinerkeynames_at(&keynames, keycode));	
+	keynames_release();
 }
 
 void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)

@@ -66,10 +66,10 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->dragrelative = 1;	
 	self->dragpointindex = psy_INDEX_INVALID;
 	psy_ui_margin_init_all(&self->spacing,
-		psy_ui_value_makepx(5),
-		psy_ui_value_makepx(5),
-		psy_ui_value_makepx(5),
-		psy_ui_value_makepx(5));
+		psy_ui_value_make_px(5),
+		psy_ui_value_make_px(5),
+		psy_ui_value_make_px(5),
+		psy_ui_value_make_px(5));
 	psy_ui_size_init_px(&self->ptsize, 5.0, 5.0);
 	psy_ui_size_init_px(&self->ptsize2, 2.5, 2.5);
 	self->pointcolour = psy_ui_colour_make(0x00B1C8B0);
@@ -616,7 +616,7 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 	scrollzoom_init(&self->zoom, envelopeview_base(self));
 	psy_ui_component_setalign(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(scrollzoom_base(&self->zoom),
-		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_size_make(psy_ui_value_make_px(0),
 		psy_ui_value_makeeh(1)));
 	psy_signal_connect(&self->zoom.signal_zoom, self,
 		envelopeview_onzoom);

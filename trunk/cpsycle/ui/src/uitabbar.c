@@ -176,7 +176,7 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 		tm = psy_ui_component_textmetric(&self->component);
 		bpmsize = psy_ui_bitmap_size(&self->icon);
 		textsizepx = psy_ui_size_px(rv, tm);				
-		rv->width = psy_ui_value_makepx(textsizepx.width + bpmsize.width
+		rv->width = psy_ui_value_make_px(textsizepx.width + bpmsize.width
 			+ tm->tmAveCharWidth * self->bitmapident);
 	}	
 }

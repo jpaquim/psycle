@@ -195,7 +195,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 		psy_ui_component_offsetsize(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_setscrollstep_height(&self->component,
-		psy_ui_value_makepx(self->metrics.lineheight * 3));
+		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
 // entry view
@@ -261,19 +261,22 @@ void instrumententryview_init(InstrumentEntryView* self,
 	instrumententryview_vtable_init(self);
 	self->component.vtable = &instrumententryview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 1);
+	psy_ui_component_setwheelscroll(&self->component, 1);	
+	psy_ui_component_setscrollstep(&self->component,
+		psy_ui_size_make_em(0.0, 1.0));
 	self->instrument = 0;
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;	
 	self->state = state;
 	psy_ui_component_setscrollstep_height(&self->component,
-		psy_ui_value_makepx(45));
+		psy_ui_value_make_px(45));
 	instrumententryview_updatemetrics(self);	
 	psy_signal_connect(&self->state->signal_select, self,
 		instrumententryview_onentryselected);
 	psy_signal_connect(&self->state->signal_entrychanged, self,
 		instrumententryview_onentryupdate);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void instrumententryview_ondestroy(InstrumentEntryView* self)
@@ -420,7 +423,7 @@ void instrumententryview_onpreferredsize(InstrumentEntryView* self, psy_ui_Size*
 		if (limit) {
 			rv->width = limit->width;
 		}
-		rv->height = psy_ui_value_makepx(
+		rv->height = psy_ui_value_make_px(
 			(self->metrics.lineheight) * (double)psy_list_size(self->instrument->entries));
 	} else {
 		*rv = psy_ui_size_zero();
@@ -447,7 +450,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 		psy_ui_component_offsetsize(&self->component), tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_setscrollstep_height(&self->component,
-		psy_ui_value_makepx(self->metrics.lineheight * 3));
+		psy_ui_value_make_px(self->metrics.lineheight * 3));
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
@@ -1205,9 +1208,11 @@ void instrumententrytableview_init(InstrumentEntryTableView* self,
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_TABLEROW, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
-	instrumententrytableview_build(self);
+	instrumententrytableview_build(self);	
+	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setscrollstep(&self->component,
+		psy_ui_size_make_em(0.0, 1.0));
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-	psy_ui_component_setwheelscroll(&self->component, 4);	
 }
 
 void instrumententrytableview_ondestroy(InstrumentEntryTableView* self)
@@ -1369,8 +1374,7 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	instrumententryview_init(&self->entryview, &self->entries, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
-		&self->entries, NULL);
-	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);	
+		&self->entries, NULL);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED_RESIZE);
 	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
@@ -1417,6 +1421,8 @@ void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
 	} else {
 		samplesbox_select(&self->samplesbox, psy_audio_sampleindex_make(0, 0));
 	}
+	psy_ui_component_align(&self->scroller.pane);
+	psy_ui_component_align(&self->scroller_table.pane);
 }
 
 void instrumentnotemapview_setmetrics(InstrumentNoteMapView* self,
@@ -1435,6 +1441,8 @@ void instrumentnotemapview_update(InstrumentNoteMapView* self)
 		&self->entryview));
 	psy_ui_component_updateoverflow(&self->tableview.component);
 	psy_ui_component_invalidate(instrumentnotemapview_base(self));
+	psy_ui_component_align(&self->scroller.pane);
+	psy_ui_component_align(&self->scroller_table.pane);
 }
 
 void instrumentnotemapview_onaddentry(InstrumentNoteMapView* self,

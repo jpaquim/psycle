@@ -594,11 +594,11 @@ double trackerheader_centerx(const TrackerHeader* self, uintptr_t track)
 void trackerheader_onpreferredsize(TrackerHeader* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(
+	rv->width = psy_ui_value_make_px(
 		trackergridstate_tracktopx(self->gridstate,
 			trackergridstate_numsongtracks(self->gridstate)));
 	if (self->usebitmapskin) {
-		rv->height = psy_ui_value_makepx(
+		rv->height = psy_ui_value_make_px(
 			psy_ui_realrectangle_height(
 				&self->coords->background.dest));
 	} else {

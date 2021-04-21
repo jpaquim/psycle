@@ -34,8 +34,7 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 
 	self->key = NULL;
 	self->text = NULL;
-	self->shorttext = NULL;
-	self->translation = NULL;
+	self->shorttext = NULL;	
 	self->comment = NULL;
 	self->typ = PSY_PROPERTY_TYPE_INTEGER;
 	self->value.i = 0;
@@ -56,8 +55,7 @@ void psy_propertyitem_dispose(psy_PropertyItem* self)
 
 	free(self->key);
 	free(self->text);
-	free(self->shorttext);
-	free(self->translation);
+	free(self->shorttext);	
 	free(self->comment);
 	if (self->typ == PSY_PROPERTY_TYPE_STRING ||
 		self->typ == PSY_PROPERTY_TYPE_FONT) {
@@ -76,8 +74,7 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	psy_propertyitem_dispose(self);
 	self->key = psy_strdup(source->key);
 	self->text = psy_strdup(source->text);
-	self->shorttext = psy_strdup(source->shorttext);
-	self->translation = psy_strdup(source->translation);
+	self->shorttext = psy_strdup(source->shorttext);	
 	self->comment = psy_strdup(source->comment);
 	if (source->typ == PSY_PROPERTY_TYPE_STRING ||
 			source->typ == PSY_PROPERTY_TYPE_FONT) {
@@ -93,8 +90,7 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	self->save = source->save;
 	self->id = source->id;
 	self->readonly = source->readonly;
-	self->save = source->save;
-	self->translate = source->translate;
+	self->save = source->save;	
 }
 
 // psy_Property
@@ -829,6 +825,30 @@ bool psy_property_ischoiceitem(const psy_Property* self)
 		(self->parent->item.typ == PSY_PROPERTY_TYPE_CHOICE);
 }
 
+intptr_t psy_property_choiceitem_index(const psy_Property* self)
+{
+	psy_List* p;
+	uintptr_t rv;
+	psy_Property* choice;
+	
+	assert(self);
+
+	choice = psy_property_parent(self);
+	rv = 0;
+	if (choice) {
+		
+		p = psy_property_begin(choice);
+		while (p != NULL) {
+			if (psy_list_entry(p) == self) {
+				break;
+			}
+			++rv;
+			p = p->next;
+		}
+	}
+	return rv;
+}
+
 psy_Property* psy_property_append_property(psy_Property* self, psy_Property* property)
 {
 	assert(self);
@@ -1276,23 +1296,6 @@ const char* psy_property_text(const psy_Property* self)
 		: (psy_strlen(self->item.key) != 0)
 			? self->item.key
 			: "";
-}
-
-psy_Property* psy_property_settranslation(psy_Property* self, const char* text)
-{
-	assert(self);
-
-	psy_strreset(&self->item.translation, text);	
-	return self;
-}
-
-const char* psy_property_translation(const psy_Property* self)
-{
-	assert(self);
-
-	return (psy_strlen(self->item.translation) != 0)
-		? self->item.translation
-		: psy_property_text(self);
 }
 
 psy_Property* psy_property_setshorttext(psy_Property* self, const char* text)

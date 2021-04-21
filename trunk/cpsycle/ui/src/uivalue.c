@@ -9,7 +9,7 @@
 
 void psy_ui_value_init(psy_ui_Value* self)
 {
-	*self = psy_ui_value_makepx(0.0);
+	*self = psy_ui_value_make_px(0.0);
 }
 
 void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,

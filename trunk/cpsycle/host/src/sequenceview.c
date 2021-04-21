@@ -359,7 +359,7 @@ void sequencelisttrack_onpreferredsize(SequenceListTrack* self,
 		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
-		rv->height = psy_ui_value_makepx(
+		rv->height = psy_ui_value_make_px(
 			floor(psy_ui_value_px(&self->state->lineheight, tm) *
 			(double)psy_list_size(self->track->entries)));		
 	} else {
@@ -837,12 +837,12 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self,
 			psy_ui_component_textmetric(&self->component));
 	if ((double)c < listviewtop) {
 		psy_ui_component_setscrolltop(&self->listview.component,
-			psy_ui_value_makepx(c *
+			psy_ui_value_make_px(c *
 				psy_ui_value_px(&self->state.lineheight,
 					psy_ui_component_textmetric(&self->component))));				
 	} else if ((double)c > listviewtop + visilines - 1) {
 		psy_ui_component_setscrolltop(&self->listview.component,
-			psy_ui_value_makepx((c - visilines + 1) * 
+			psy_ui_value_make_px((c - visilines + 1) * 
 				psy_ui_value_px(&self->state.lineheight,
 					psy_ui_component_textmetric(&self->component))));
 	}

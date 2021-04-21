@@ -116,7 +116,7 @@ psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_button_alloc();
 	if (rv) {
 		psy_ui_button_init(rv, parent, view);
-		rv->component.deallocate = TRUE;
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
 }
@@ -294,13 +294,13 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 				ratio = 1.0;
 			}			
 			rv->width = psy_ui_add_values(
-				psy_ui_value_makepx(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
+				psy_ui_value_make_px(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
 			rv->height = psy_ui_value_makeeh(self->linespacing);
 			rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
 			rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 			return;
 		}
-		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4);
+		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 4);
 	} else {
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}

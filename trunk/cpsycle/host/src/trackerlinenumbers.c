@@ -361,8 +361,8 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* l
 		numcols += 2;
 	}
 
-	rv->width = psy_ui_value_makepx(self->linestate->flatsize * numcols + margin);
-	rv->height = psy_ui_value_makepx(trackerlinestate_numlines(self->linestate) *
+	rv->width = psy_ui_value_make_px(self->linestate->flatsize * numcols + margin);
+	rv->height = psy_ui_value_make_px(trackerlinestate_numlines(self->linestate) *
 		trackerlinestate_lineheight(self->linestate));
 }
 
@@ -511,7 +511,7 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	if (self->showdefaultline) {		
 		height += self->linestate->lineheightpx;
 	}	
-	rv->height = psy_ui_value_makepx(height);
+	rv->height = psy_ui_value_make_px(height);
 	rv->width = (self->showbeatoffset)
 		? psy_ui_value_makeew(10.0)
 		: psy_ui_value_makeew(0.0);

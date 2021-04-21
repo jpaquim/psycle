@@ -84,7 +84,7 @@ static psy_ui_RealPoint  machinewireview_centerposition(psy_ui_RealRectangle);
 static bool machinewireview_dragmachine(MachineWireView*, uintptr_t slot,
 	double x, double y);
 static void machinewireview_setdragstatus(MachineWireView*, uintptr_t slot);
-
+static void machinewireview_onalign(MachineWireView*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -108,6 +108,8 @@ static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 			machinewireview_onkeydown;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			machinewireview_onpreferredsize;
+		vtable.onalign = (psy_ui_fp_component_onalign)
+			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -121,6 +123,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	self->component.vtable = &vtable;	
 	self->opcount = 0;
+	self->centermaster = TRUE;
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_px(10.0, 10.0));	
 	self->machines = NULL;
@@ -374,8 +377,8 @@ void machinewireview_centermaster(MachineWireView* self)
 		machinesize = psy_ui_component_offsetsize_px(machineui);
 		psy_ui_component_move(machineui,
 			psy_ui_point_make(
-				psy_ui_value_makepx((size.width - machinesize.width) / 2),
-				psy_ui_value_makepx((size.height - machinesize.height) / 2)));
+				psy_ui_value_make_px((size.width - machinesize.width) / 2),
+				psy_ui_value_make_px((size.height - machinesize.height) / 2)));
 		psy_ui_component_invalidate(machinewireview_base(self));
 	}
 }
@@ -595,8 +598,8 @@ bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
 		topleft = psy_ui_realpoint_make(psy_max(0.0, x), psy_max(0.0, y));
 		psy_ui_component_move(machineui,
 			psy_ui_point_make(
-				psy_ui_value_makepx(topleft.x),
-				psy_ui_value_makepx(topleft.y)));		
+				psy_ui_value_make_px(topleft.x),
+				psy_ui_value_make_px(topleft.y)));		
 		machinewireview_setdragstatus(self, slot);		
 		r_new = machinewireview_updaterect(self, self->dragslot);
 		psy_ui_realrectangle_union(&r_new, &r_old);
@@ -980,8 +983,8 @@ void machinewireview_onmachineinsert(MachineWireView* self,
 			size = psy_ui_component_offsetsize_px(machineui);
 			psy_ui_component_move(machineui,
 				psy_ui_point_make(
-					psy_ui_value_makepx(psy_max(0.0, self->dragpt.x - size.width / 2)),
-					psy_ui_value_makepx(psy_max(0.0, self->dragpt.y - size.height / 2))));
+					psy_ui_value_make_px(psy_max(0.0, self->dragpt.x - size.width / 2)),
+					psy_ui_value_make_px(psy_max(0.0, self->dragpt.y - size.height / 2))));
 		}
 		psy_ui_component_updateoverflow(&self->component);
 		psy_ui_component_invalidate(&self->component);
@@ -1310,4 +1313,12 @@ psy_ui_RealRectangle machinewireview_bounds(MachineWireView* self)
 	}
 	psy_ui_realrectangle_expand(&rv, 0.0, 10.0, 10.0, 0.0);
 	return rv;
+}
+
+void machinewireview_onalign(MachineWireView* self)
+{
+	if (self->centermaster) {
+		machinewireview_centermaster(self);
+		self->centermaster = FALSE;
+	}
 }

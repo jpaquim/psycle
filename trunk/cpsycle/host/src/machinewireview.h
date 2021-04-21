@@ -47,6 +47,7 @@ typedef struct MachineWireView {
 	bool vudrawupdate;
 	bool drawvirtualgenerators;
 	uintptr_t opcount;
+	bool centermaster;
 	// references	
 	psy_audio_Machines* machines;	
 	Workspace* workspace;	

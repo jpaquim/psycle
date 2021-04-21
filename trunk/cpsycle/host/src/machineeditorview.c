@@ -97,8 +97,8 @@ void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* lim
 	double height;
 
 	psy_audio_machine_editorsize(self->machine, &width, &height);
-	rv->width = psy_ui_value_makepx(width);
-	rv->height = psy_ui_value_makepx(height);	
+	rv->width = psy_ui_value_make_px(width);
+	rv->height = psy_ui_value_make_px(height);	
 }
 
 void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* sender,

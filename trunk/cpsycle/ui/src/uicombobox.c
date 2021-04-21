@@ -146,7 +146,7 @@ void onpreferredsize(psy_ui_ComboBox* self, const psy_ui_Size* limit,
 		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
-		rv->width = psy_ui_value_makepx(
+		rv->width = psy_ui_value_make_px(
 			self->charnumber * tm->tmAveCharWidth + 40);
 	}
 	rv->height = psy_ui_value_makeeh(1.0);	

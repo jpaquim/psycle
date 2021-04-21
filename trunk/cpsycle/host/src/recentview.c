@@ -12,7 +12,7 @@ void recentbar_init(RecentBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_CLIENT,
 		psy_ui_margin_make(
-			psy_ui_value_makepx(0), psy_ui_value_makeew(0.5),
+			psy_ui_value_make_px(0), psy_ui_value_makeew(0.5),
 			psy_ui_value_makeeh(0.5), psy_ui_value_makeeh(0.5)));
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
@@ -78,12 +78,9 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->bar.down.signal_clicked, self,
 		recentview_onmovedown);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
-		workspace_recentsongs(workspace), workspace);
-	self->view.renderer.showkeyselection = TRUE;
-	propertiesview_setcolumnwidth(&self->view, 1.f, 0.f, 0.f);
-	psy_ui_component_hide(&self->view.tabbar.component);
-	propertiesrenderer_setfixedwidth(&self->view.renderer,
-		psy_ui_value_makeew(40));	
+		workspace_recentsongs(workspace), 1, workspace);
+	self->view.renderer.showkeyselection = TRUE;	
+	psy_ui_component_hide(&self->view.tabbar.component);	
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->view.signal_selected, self,
 		recentview_onselected);

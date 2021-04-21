@@ -171,8 +171,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_toolframe_init(&self->component, parent);
 	machineframe_vtable_init(self);
 	psy_ui_component_move(&self->component,
-		psy_ui_point_make(psy_ui_value_makepx(200),
-			psy_ui_value_makepx(150)));	
+		psy_ui_point_make(psy_ui_value_make_px(200),
+			psy_ui_value_make_px(150)));	
 	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);		
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);

@@ -177,10 +177,10 @@ void psy_ui_realrectangle_settopleft(psy_ui_RealRectangle* self, psy_ui_RealPoin
 
 void psy_ui_margin_init(psy_ui_Margin* self)
 {
-	self->top = psy_ui_value_makepx(0);
-	self->right = psy_ui_value_makepx(0);
-	self->bottom = psy_ui_value_makepx(0);
-	self->left = psy_ui_value_makepx(0);
+	self->top = psy_ui_value_make_px(0);
+	self->right = psy_ui_value_make_px(0);
+	self->bottom = psy_ui_value_make_px(0);
+	self->left = psy_ui_value_make_px(0);
 	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 

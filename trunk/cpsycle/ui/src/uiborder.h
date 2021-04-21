@@ -68,6 +68,14 @@ INLINE void psy_ui_border_init_top(psy_ui_Border* self, psy_ui_BorderStyle style
 	self->colour_top = colour;
 }
 
+INLINE void psy_ui_border_init_bottom(psy_ui_Border* self, psy_ui_BorderStyle style,
+	psy_ui_Colour  colour)
+{
+	psy_ui_border_init_all(self, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, style,
+		psy_ui_BORDER_NONE);
+	self->colour_bottom = colour;
+}
+
 INLINE void psy_ui_border_setcolour(psy_ui_Border* self, psy_ui_Colour colour)
 {
 	self->colour_top = colour;
@@ -78,7 +86,7 @@ INLINE void psy_ui_border_setcolour(psy_ui_Border* self, psy_ui_Colour colour)
 
 INLINE void psy_ui_border_setradius_px(psy_ui_Border* self, double radius)
 {
-	self->border_top_left_radius = psy_ui_value_makepx(radius);
+	self->border_top_left_radius = psy_ui_value_make_px(radius);
 	self->border_top_right_radius = self->border_top_left_radius;
 	self->border_bottom_right_radius = self->border_top_left_radius;
 	self->border_bottom_left_radius = self->border_top_left_radius;

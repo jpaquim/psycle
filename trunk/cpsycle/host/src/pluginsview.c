@@ -275,50 +275,54 @@ psy_Property* search(psy_Property* source, NewMachineFilter* filter)
 	return rv;
 }
 
+static bool isinternalplugin(int type)
+{
+	return !(type == psy_audio_PLUGIN ||
+		type == psy_audio_LUA ||
+		type == psy_audio_VST ||
+		type == psy_audio_VSTFX ||
+		type == psy_audio_LADSPA);
+}
+
 void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 	psy_Property* parent)
 {
 	psy_audio_MachineInfo machineinfo;
 	bool isintern;
+	int mactype;
+	int macmode;
 
 	machineinfo_init(&machineinfo);
 	psy_audio_machineinfo_from_property(plugin, &machineinfo);
-	if (!filter->vst && (machineinfo.type == psy_audio_VST || machineinfo.type == psy_audio_VSTFX)) {
-		return;
-	}
-	if (!filter->native && machineinfo.type == psy_audio_PLUGIN) {
-		return;
-	}
-	if (!filter->ladspa && machineinfo.type == psy_audio_LADSPA) {
-		return;
-	}
-	if (!filter->lua && machineinfo.type == psy_audio_LUA) {
-		return;
-	}
-	isintern = FALSE;
-	switch (machineinfo.type) {
-	case psy_audio_PLUGIN:
-	case psy_audio_LUA:
-	case psy_audio_VST:
-	case psy_audio_VSTFX:
-	case psy_audio_LADSPA:
-		break;
-	default:
-		isintern = TRUE;
-		break;
-	}
+	isintern = isinternalplugin(machineinfo.type);
+	mactype = machineinfo.type;
+	macmode = machineinfo.mode;
 	if (!newmachinefilter_hascategory(filter, machineinfo.category)) {
+		machineinfo_dispose(&machineinfo);
 		return;
 	}
+	machineinfo_dispose(&machineinfo);
+	if (!filter->vst && (mactype == psy_audio_VST || mactype == psy_audio_VSTFX)) {
+		return;
+	}
+	if (!filter->native && mactype == psy_audio_PLUGIN) {
+		return;
+	}
+	if (!filter->ladspa && mactype == psy_audio_LADSPA) {
+		return;
+	}
+	if (!filter->lua && mactype == psy_audio_LUA) {
+		return;
+	}		
 	if (!filter->intern && isintern) {
 		return;
 	}
-	if (filter->effect && machineinfo.mode == psy_audio_MACHMODE_FX) {
+	if (filter->effect && macmode == psy_audio_MACHMODE_FX) {
 		psy_property_append_property(parent, psy_property_clone(plugin));
 	}
-	if (filter->gen && machineinfo.mode == psy_audio_MACHMODE_GENERATOR) {
+	if (filter->gen && macmode == psy_audio_MACHMODE_GENERATOR) {
 		psy_property_append_property(parent, psy_property_clone(plugin));
-	}
+	}	
 }
 
 // PluginsView
@@ -336,7 +340,7 @@ static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, double x, double y);
-static void pluginsview_computetextsizes(PluginsView*, psy_ui_RealSize);
+static void pluginsview_computetextsizes(PluginsView*, double width);
 static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
 static void pluginsview_settopline(PluginsView*, intptr_t line);
@@ -398,8 +402,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 	self->sort = NULL;
 	self->generatorsenabled = TRUE;
 	self->effectsenabled = TRUE;		
-	pluginsview_computetextsizes(self, 
-		psy_ui_component_innersize_px(&self->component));	
+	pluginsview_computetextsizes(self, 1024.0);
 }
 
 void pluginsview_ondestroy(PluginsView* self)
@@ -483,7 +486,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_Colour oddlinebgcolour;
 		
 		size = psy_ui_component_innersize_px(&self->component);
-		pluginsview_computetextsizes(self, size);
+		pluginsview_computetextsizes(self, size.width);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
 		odd = FALSE;
@@ -544,7 +547,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		topleft.y + 2, text, strlen(text));
 }
 
-void pluginsview_computetextsizes(PluginsView* self, psy_ui_RealSize size)
+void pluginsview_computetextsizes(PluginsView* self, double width)
 {
 	const psy_ui_TextMetric* tm;
 	
@@ -553,10 +556,10 @@ void pluginsview_computetextsizes(PluginsView* self, psy_ui_RealSize size)
 	self->lineheight = floor(tm->tmHeight * 1.5);
 	self->columnwidth = tm->tmAveCharWidth * 45;
 	self->identwidth = tm->tmAveCharWidth * 4;	
-	self->numparametercols = (uintptr_t)psy_max(1, size.width /
+	self->numparametercols = (uintptr_t)psy_max(1, width /
 		self->columnwidth);	
 	psy_ui_component_setscrollstep_height(&self->component,
-		psy_ui_value_makepx(self->lineheight));
+		psy_ui_value_make_px(self->lineheight));
 }
 
 void plugindisplayname(psy_Property* property, char* text)
@@ -625,12 +628,14 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 	psy_ui_Size* rv)
 {
 	if (self->currplugins) {		
-		psy_ui_RealSize parentsize;
-		
-		parentsize = psy_ui_component_innersize_px(psy_ui_component_parent(&self->component));
-		pluginsview_computetextsizes(self, parentsize);
-		rv->width = psy_ui_value_makepx(parentsize.width);
-		rv->height = psy_ui_value_makepx(self->lineheight *
+		if (limit) {
+			rv->width = limit->width;			
+		} else {
+			rv->width = psy_ui_value_make_px(65535.0);
+		}
+		pluginsview_computetextsizes(self, psy_ui_value_px(&rv->width,
+			psy_ui_component_textmetric(&self->component)));		
+		rv->height = psy_ui_value_make_px(self->lineheight *
 			pluginsview_numlines(self));
 	}
 }
@@ -769,7 +774,7 @@ void pluginsview_settopline(PluginsView* self, intptr_t line)
 {
 	
 	psy_ui_component_setscrolltop(&self->component,
-		psy_ui_value_makepx(line * self->lineheight));
+		psy_ui_value_make_px(line * self->lineheight));
 }
 
 void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
@@ -777,9 +782,10 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 {		
 	if (plugin && self->currplugins) {
 		uintptr_t index;
+		psy_ui_RealSize size;
 
-		pluginsview_computetextsizes(self,
-			psy_ui_component_innersize_px(&self->component));
+		size = psy_ui_component_innersize_px(&self->component);
+		pluginsview_computetextsizes(self, size.width);
 		index = psy_property_index(plugin);
 		*row = index / self->numparametercols;
 		*col = index % self->numparametercols;
@@ -791,9 +797,11 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 
 psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col, intptr_t row)
 {				
-	if (self->plugins) {		
-		pluginsview_computetextsizes(self, 
-			psy_ui_component_innersize_px(&self->component));
+	if (self->plugins) {	
+		psy_ui_RealSize size;
+
+		size = psy_ui_component_innersize_px(&self->component);
+		pluginsview_computetextsizes(self, size.width);
 		return psy_property_at_index(self->currplugins,
 			self->numparametercols * row + col);
 	}
@@ -818,9 +826,10 @@ void pluginsview_hittest(PluginsView* self, double x, double y)
 		psy_List* p;
 		double cpx;
 		double cpy;
+		psy_ui_RealSize size;
 
-		pluginsview_computetextsizes(self,
-			psy_ui_component_innersize_px(&self->component));
+		size = psy_ui_component_innersize_px(&self->component);
+		pluginsview_computetextsizes(self, size.width);
 		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0;
 				p != NULL; psy_list_next(&p)) {
 			psy_ui_RealRectangle r;

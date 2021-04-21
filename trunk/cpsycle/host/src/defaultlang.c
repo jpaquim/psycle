@@ -365,6 +365,14 @@ void make_translator_default(psy_Property* lang)
 		"Record Mouse Tweaks as tws (Smooth tweaks)");
 	psy_property_set_str(section,
 		"advance-line-on-record", "Advance Line On Record");
+	// settingsview 
+	section = psy_property_append_section(section, "global");
+	psy_property_set_str(section,
+		"configuration", "Configuration");
+	psy_property_set_str(section,
+		"enable-audio", "Enable Audio");
+	psy_property_set_str(section,
+		"regenerate-plugincache", "Regenerate the plugin cache");
 	// instrumentsbox
 	section = psy_property_append_section(lang, "instrumentsbox");
 	psy_property_set_str(section,

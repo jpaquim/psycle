@@ -416,7 +416,7 @@ void effectui_onpreferredsize(EffectUi* self, const psy_ui_Size* limit,
 {	
 	if (self->intern.drawmode == MACHINEUIMODE_DRAWSMALL) {
 		*rv = psy_ui_size_make(
-			psy_ui_value_makepx(self->intern.coords->background.dest.right),
+			psy_ui_value_make_px(self->intern.coords->background.dest.right),
 			psy_ui_value_makeeh(1.0));				
 	} else {
 		psy_ui_size_setreal(rv,

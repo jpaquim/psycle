@@ -202,10 +202,7 @@ static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	if (psy_ui_app()->dragevent.active) {		
-		psy_ui_app()->dragevent.preventdefault = FALSE;
-		if (self->debugflag == 100) {
-			self = self;
-		}
+		psy_ui_app()->dragevent.preventdefault = FALSE;		
 		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
 		if (psy_ui_app()->dragevent.preventdefault) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
@@ -367,7 +364,7 @@ void dispose(psy_ui_Component* self)
 {	
 	self->imp->vtable->dev_dispose(self->imp);
 	free(self->imp);
-	self->imp = 0;
+	self->imp = 0;	
 	psy_ui_componentstyle_dispose(&self->style);	
 }
 
@@ -548,6 +545,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preventpreferredsize = 0;
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
+	self->alignsorted = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;		
 	self->insertaligntype = psy_ui_ALIGN_NONE;
 	psy_ui_margin_init(&self->insertmargin);
@@ -569,7 +567,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 }
 
 void psy_ui_component_dispose(psy_ui_Component* self)
-{
+{	
 	self->vtable->dispose(self);
 	psy_ui_component_dispose_signals(self);	
 	if (psy_ui_app()->hover == self) {
@@ -828,16 +826,16 @@ psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
 	psy_ui_margin_init(&rv);
 	border = psy_ui_component_border(self);
 	if (border->left == psy_ui_BORDER_SOLID) {		
-		rv.left = psy_ui_value_makepx(1);
+		rv.left = psy_ui_value_make_px(1);
 	}
 	if (border->top == psy_ui_BORDER_SOLID) {
-		rv.top = psy_ui_value_makepx(1);		
+		rv.top = psy_ui_value_make_px(1);		
 	}
 	if (border->right == psy_ui_BORDER_SOLID) {
-		rv.right = psy_ui_value_makepx(1);
+		rv.right = psy_ui_value_make_px(1);
 	}
 	if (border->bottom == psy_ui_BORDER_SOLID) {
-		rv.bottom = psy_ui_value_makepx(1);
+		rv.bottom = psy_ui_value_make_px(1);
 	}
 	return rv;
 }
@@ -874,9 +872,38 @@ void psy_ui_component_setalign_children(psy_ui_Component* self,
 	psy_list_free(q);
 }
 
+void psy_ui_component_checksortedalign(psy_ui_Component* self,
+	psy_ui_AlignType align)
+{
+	if (self->alignsorted != align) {
+		psy_List* p;
+		psy_List* q;
+
+		q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+		for (p = q; p != NULL; p = p->next) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)p->entry;
+			if (component->align != align) {
+				self->alignsorted = psy_ui_ALIGN_NONE;
+				break;
+			}
+		}
+		if (p == NULL) {
+			self->alignsorted = align;
+		}
+		psy_list_free(q);
+	}
+}
+
 void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 {
+	psy_ui_Component* parent;
+
 	self->align = align;
+	if (parent = psy_ui_component_parent(self)) {
+		psy_ui_component_checksortedalign(parent, align);
+	}
 }
 
 void psy_ui_component_enablealign(psy_ui_Component* self)
@@ -985,19 +1012,24 @@ void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 {
 	psy_ui_component_usesizehints(self);
 	self->sizehints->preferredsize = size;
+	self->sizehints->preferredwidthset = TRUE;
+	self->sizehints->preferredheightset = TRUE;
 }
 
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
-{
+{	
 	if (self->preventpreferredsize) {
 		return psy_ui_component_offsetsize(self);
 	} else {
 		psy_ui_Size rv;
 
-		rv = self->sizehints->preferredsize;		
-		self->vtable->onpreferredsize(self, limit, &rv);
-		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);		
+		rv = self->sizehints->preferredsize;
+		if (self->sizehints->preferredwidthset &&
+			self->sizehints->preferredheightset) {
+			return rv;
+		}
+		self->vtable->onpreferredsize(self, limit, &rv);		
 		return rv;
 	}
 }
@@ -1298,18 +1330,19 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 	position = psy_ui_component_position(self);
 	psy_ui_component_move(self,
 		psy_ui_point_make(
-			psy_ui_value_makepx(
+			psy_ui_value_make_px(
 				-psy_ui_value_px(&left, psy_ui_component_textmetric(self))),
-			psy_ui_value_makepx(position.top)));
+			psy_ui_value_make_px(position.top)));
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 {	
-	psy_ui_RealRectangle position;	
+	psy_ui_RealRectangle position;
+	psy_ui_RealSize parentsize;
 	double newtop;
 
-	position = psy_ui_component_position(self);
+	position = psy_ui_component_position(self);	
 	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self));
 	/*if (psy_ui_component_overflow(self) == psy_ui_OVERFLOW_VSCROLL) {
 		psy_ui_IntPoint range;
@@ -1325,14 +1358,45 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 	}*/	
 	psy_ui_component_move(self,
 		psy_ui_point_make(
-			psy_ui_value_makepx(position.left),
-			psy_ui_value_makepx(newtop)));
+			psy_ui_value_make_px(position.left),
+			psy_ui_value_make_px(newtop)));
+	parentsize = psy_ui_component_offsetsize_px(psy_ui_component_parent(self));
+	position = psy_ui_component_position(self);
+	if (parentsize.height > position.bottom) {
+		psy_ui_RealPoint translate;
+		psy_ui_Component* bgcomponent;
+
+		bgcomponent = psy_ui_component_parent(self);
+		psy_ui_realpoint_init(&translate);
+		while (bgcomponent && bgcomponent->backgroundmode == psy_ui_NOBACKGROUND) {
+			bgcomponent = psy_ui_component_parent(bgcomponent);
+			if (bgcomponent) {
+				psy_ui_RealRectangle position;
+
+				position = psy_ui_component_position(bgcomponent);
+				translate.x += position.left;
+				translate.y += position.top;
+			}
+		}
+		if (bgcomponent) {			
+			psy_ui_component_invalidaterect(
+				bgcomponent,
+				psy_ui_realrectangle_make(
+					psy_ui_realpoint_make(
+						position.left + translate.x,
+						position.bottom + translate.y),
+					psy_ui_realsize_make(
+						position.right - position.left,
+						parentsize.height - position.bottom)));
+		}
+	}
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component* self)
 {		
-	if ((self->scroll->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
+	if ((self->scroll->overflow & psy_ui_OVERFLOW_VSCROLL) ==
+			psy_ui_OVERFLOW_VSCROLL) {
 		psy_ui_Size preferredscrollsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxlines;
@@ -1347,8 +1411,10 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));		
 		scrollstepy_px = (intptr_t)psy_ui_component_scrollstep_height_px(self);
 		preferredscrollsize = psy_ui_component_preferredscrollsize(self, &size);
-		maxlines = (intptr_t)(psy_ui_value_px(&preferredscrollsize.height, tm) / (double)scrollstepy_px);
-		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) / scrollstepy_px);
+		maxlines = (intptr_t)(psy_ui_value_px(&preferredscrollsize.height, tm) /
+			(double)scrollstepy_px);
+		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) /
+			scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);		
 		scrolltoppx = psy_ui_component_scrolltoppx(self);		
 		currline = (intptr_t)(scrolltoppx / scrollstepy_px);
@@ -1360,7 +1426,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 			if (currline > maxlines - visilines / 2) {
 				currline = psy_max(-visilines / 2, maxlines -visilines / 2);
 				psy_ui_component_setscrolltop(self,
-					psy_ui_value_makepx((double)(currline * scrollstepy_px)));
+					psy_ui_value_make_px((double)(currline * scrollstepy_px)));
 			}
 		} else {		
 			psy_ui_component_setverticalscrollrange(self,
@@ -1368,11 +1434,12 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 			if (currline > maxlines - visilines) {
 				currline = psy_max(0, maxlines - visilines);
 				psy_ui_component_setscrolltop(self,
-					psy_ui_value_makepx((double)(currline * scrollstepy_px)));
+					psy_ui_value_make_px((double)(currline * scrollstepy_px)));
 			}
 		}		
 	}
-	if ((self->scroll->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
+	if ((self->scroll->overflow & psy_ui_OVERFLOW_HSCROLL) ==
+			psy_ui_OVERFLOW_HSCROLL) {
 		psy_ui_Size preferredscrollsize;
 		const psy_ui_TextMetric* tm;
 		intptr_t maxrows;
@@ -1396,7 +1463,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		if (currrow > maxrows - visirows) {
 			currrow = psy_max(0, maxrows - visirows);
 			psy_ui_component_setscrollleft(self,
-				psy_ui_value_makepx((double)(currrow * scrollstepx_px)));
+				psy_ui_value_make_px((double)(currrow * scrollstepx_px)));
 		}		
 	}
 }
@@ -1407,10 +1474,12 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
 			psy_ui_component_offsetsize_px(self)),
-		psy_ui_component_border(self));
+		psy_ui_component_border(self),
+		psy_ui_component_textmetric(self));
 }
 
-void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
+void psy_ui_component_drawbackground(psy_ui_Component* self,
+	psy_ui_Graphics* g)
 {
 	if (self->backgroundmode == psy_ui_SETBACKGROUND) {				
 		const psy_ui_Border* b;
@@ -1418,16 +1487,19 @@ void psy_ui_component_drawbackground(psy_ui_Component* self, psy_ui_Graphics* g)
 		b = psy_ui_component_border(self);
 		if (psy_ui_border_isround(b)) {
 			psy_ui_RealRectangle r;
+			const psy_ui_TextMetric* tm;
 
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(),
-				psy_ui_component_offsetsize_px(self));			
+				psy_ui_component_offsetsize_px(self));
+			tm = psy_ui_component_textmetric(self);
 			psy_ui_drawsolidrectangle(g, r, // c);
 				psy_ui_component_backgroundcolour(
 					psy_ui_component_parent(self)));
 			psy_ui_drawsolidroundrectangle(g, r,
-				psy_ui_size_make(b->border_bottom_left_radius,
-					b->border_bottom_left_radius),
+				psy_ui_realsize_make(
+					psy_ui_value_px(&b->border_bottom_left_radius, tm),
+					psy_ui_value_px(&b->border_bottom_left_radius, tm)),
 				psy_ui_component_backgroundcolour(self));
 		} else {			
 			psy_ui_drawsolidrectangle(g, g->clip,
@@ -1592,13 +1664,21 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 	uintptr_t disabled)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_NONE, standard);		
+		psy_ui_STYLESTATE_NONE, standard);
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_HOVER, hover);
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_SELECT, select);
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_DISABLED, disabled);	
+	psy_ui_componentstyle_readstyles(&self->style);
+}
+
+void psy_ui_component_setstyletype(psy_ui_Component* self,
+	uintptr_t standard)
+{
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_NONE, standard);
 	psy_ui_componentstyle_readstyles(&self->style);
 }
 
@@ -1668,4 +1748,54 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 		}
 	}
 	psy_ui_component_invalidate(main);
+}
+
+void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
+	psy_List* children)
+{
+	if (children) {
+		psy_List* p;
+		psy_ui_RealRectangle clip;
+
+		clip = g->clip;
+		for (p = children; p != NULL; p = p->next) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);			
+			if ((component->imp->vtable->dev_flags(component->imp)
+				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+				psy_ui_RealRectangle position;
+				psy_ui_RealRectangle intersection;
+
+				position = psy_ui_component_position(component);				
+				if ((self->alignsorted == psy_ui_ALIGN_TOP && position.bottom < clip.top) ||
+					(self->alignsorted == psy_ui_ALIGN_LEFT && position.right < clip.left)) {
+					continue;
+				}
+				intersection = clip;
+				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
+					psy_ui_RealPoint origin;
+
+					// translate graphics clip and origin
+					psy_ui_realrectangle_settopleft(&intersection,
+						psy_ui_realpoint_make(
+							intersection.left - position.left,
+							intersection.top - position.top));
+					g->clip = intersection;
+					origin = psy_ui_origin(g);
+					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
+						-position.top + origin.y));					
+					component->imp->vtable->dev_draw(component->imp, g);
+					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
+					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||						
+					    (self->alignsorted == psy_ui_ALIGN_LEFT && position.left > clip.right)) {
+						break;
+					}
+				}
+			}
+		}
+		g->clip = clip;		
+		psy_ui_resetorigin(g);
+	}
 }

@@ -12,6 +12,7 @@
 // ui
 #include <uiedit.h>
 #include <uilabel.h>
+#include <uiswitch.h>
 #include <uiscroller.h>
 #include <uinotebook.h>
 // container
@@ -22,82 +23,84 @@
 extern "C" {
 #endif
 
-// aim: Displays psy_Property and allows to edit them.
+// Displays psy_Property and allows to edit them.
 
-#define PROPERTIESRENDERER_NUMCOLS 3
 
-typedef struct PropertiesRenderLineState {
-	double cpy;
-	double cpx;
-	uintptr_t level;
-	uintptr_t numlines;
-	psy_Property* properties;
-} PropertiesRenderLineState;
+struct PropertiesRenderLine;
 
-void propertiesrenderlinestate_init(PropertiesRenderLineState*);
-void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
+typedef struct PropertiesRenderState {
+	psy_Property* property;
+	psy_Property* selected;
+	psy_ui_Component* dummy;
+	struct PropertiesRenderLine* line;
+} PropertiesRenderState;
+
+void propertiesrenderstate_init(PropertiesRenderState*);
+
+typedef struct PropertiesRenderLine {
+	// inherits
+	psy_ui_Component component;
+	psy_ui_Component col0;	
+	psy_ui_Component col1;
+	psy_ui_Component col2;
+	psy_ui_Label key;
+	psy_ui_Switch* check;
+	uintptr_t level;	
+	psy_Property* property;
+	uintptr_t numcols;
+	PropertiesRenderState* state;
+} PropertiesRenderLine;
+
+void propertiesrenderline_init(PropertiesRenderLine*,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	PropertiesRenderState*, psy_Property*,
+	uintptr_t level, uintptr_t numcols);
+
+PropertiesRenderLine* propertiesrenderline_alloc(void);
+PropertiesRenderLine* propertiesrenderline_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	PropertiesRenderState*, psy_Property*,
+	uintptr_t level, uintptr_t numcols);
 
 typedef struct PropertiesRenderer {
 	// inherits
 	psy_ui_Component component;
+	psy_ui_Component client;
 	// internal data
 	// dummy used to calculate font size
-	psy_ui_Component dummy;
-	psy_ui_Graphics* g;
-	psy_ui_RealRectangle selrect;
-	uintptr_t lastlevel;
-	int keyselected;
-	int button;	
-	double mx;
-	double my;
-	double cpy;
-	double cpx;
-	double lineheight;
-	double textheight;
-	double centery;
-	uintptr_t numblocklines;
-	double identwidth;
+	psy_ui_Component dummy;			
+	int keyselected;		
 	bool showkeyselection;
-	double col_perc[PROPERTIESRENDERER_NUMCOLS];	
-	double col_width[PROPERTIESRENDERER_NUMCOLS];
-	double col_start[PROPERTIESRENDERER_NUMCOLS];
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
-	psy_Signal signal_selected;
-	psy_ui_Value fixedwidth;
-	bool usefixedwidth;
-	PropertiesRenderLineState* linestate_clipstart;
-	uintptr_t currlinestatecount;
-	psy_Table linestates;
-	psy_Table mainlinestates;
+	psy_Signal signal_selected;	
+	uintptr_t numcols;
+	uintptr_t currlinestatecount;		
 	psy_ui_Colour valuecolour;
 	psy_ui_Colour sectioncolour;
 	psy_ui_Colour separatorcolour;
 	psy_ui_Colour valueselcolour;
 	psy_ui_Colour valueselbackgroundcolour;
 	bool floated;
+	psy_ui_Component* currsection;
+	psy_Table sections;
 	// references
 	psy_Property* properties;
-	psy_Property* selected;
-	psy_Property* search;
-	psy_Property* choiceproperty;
+	psy_Property* selected;	
+	// psy_Property* choiceproperty;
 	Workspace* workspace;
+	PropertiesRenderState state;	
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Property*, Workspace*);
-
-void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
+	psy_Property*, uintptr_t numcols, Workspace*);
 
 INLINE const psy_Property* propertiesrenderer_properties(const
 	PropertiesRenderer* self)
 {
 	return self->properties;
 }
-
-PropertiesRenderLineState* propertiesrenderer_findfirstmainlinestate(
-	PropertiesRenderer*, double y, int* pos);
 
 INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 {
@@ -119,26 +122,19 @@ typedef struct PropertiesView {
 	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;
-	bool preventscrollupdate;
+	bool preventscrollupdate;	
 	// references
 	Workspace* workspace;
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Property*, Workspace*);
+	psy_ui_Component* tabbarparent, psy_Property*,
+	uintptr_t numcols, Workspace*);
 
 // float to side bar (see helpview, too)
 // todo make it more general
 void propertiesview_float(PropertiesView*, uintptr_t section, psy_ui_Component* dest);
 void propertiesview_dock(PropertiesView*, uintptr_t section, psy_ui_Component* src);
-
-INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
-	float col0_perc, float col1_perc, float col2_perc)
-{
-	self->renderer.col_perc[0] = col0_perc;
-	self->renderer.col_perc[1] = col1_perc;
-	self->renderer.col_perc[2] = col2_perc;	
-}
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

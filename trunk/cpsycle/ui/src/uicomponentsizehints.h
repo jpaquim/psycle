@@ -11,6 +11,8 @@ typedef struct psy_ui_ComponentSizeHints {
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;
 	psy_ui_Size preferredsize;
+	bool preferredwidthset;
+	bool preferredheightset;
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;
 } psy_ui_ComponentSizeHints;
