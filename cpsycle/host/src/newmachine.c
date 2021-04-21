@@ -339,8 +339,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	// description
 	psy_ui_label_init(&self->desclabel, &self->component, NULL);
 	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
-	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setalign(&self->dllname.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	// bottom
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
@@ -389,7 +388,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		self, newmachinedetail_oncategoryeditreject);
 	labelpair_init_right(&self->apiversion, &self->details, "API Version", 12.0);
 	labelpair_init_right(&self->version, &self->details, "Version", 12.0);
-	labelpair_init_right(&self->dllname, &self->details, "DllName", 12.0);
+	labelpair_init_right(&self->dllname, &self->details, "DllName", 12.0);	
 	newmachinedetail_reset(self);
 }
 
@@ -1328,7 +1327,7 @@ void newmachine_buildsections(NewMachine* self)
 
 		property = (psy_Property*)psy_list_entry(p);
 		section = newmachinesection_allocinit(&self->usersections, property,
-			&self->edit, self, self->workspace);
+			&self->edit, self, self->workspace);		
 		if (section) {
 			psy_signal_connect(&section->pluginview.signal_selected, self,
 				newmachine_onpluginselected);

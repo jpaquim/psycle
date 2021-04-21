@@ -20,12 +20,12 @@ static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, double x,
 	psy_ui_RealRectangle r, const char* text, uintptr_t len);
 static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle);
 static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle,
-	psy_ui_Size cornersize);
+	psy_ui_RealSize cornersize);
 static psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp*, const char*);
 static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
 static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_RealRectangle r,
-	psy_ui_Size cornersize, psy_ui_Colour colour);
+	psy_ui_RealSize cornersize, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_RealPoint*,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
 static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, double x1, double y1, double x2, double y2);
@@ -184,11 +184,11 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 		SIZE size;
 				
 		GetTextExtentPoint(self->hdc, text, (int)strlen(text), &size) ;	
-		rv.width = psy_ui_value_makepx(size.cx);
-		rv.height = psy_ui_value_makepx(size.cy);
+		rv.width = psy_ui_value_make_px(size.cx);
+		rv.height = psy_ui_value_make_px(size.cy);
 	} else {
-		rv.width = psy_ui_value_makepx(0);
-		rv.height = psy_ui_value_makepx(0);
+		rv.width = psy_ui_value_make_px(0);
+		rv.height = psy_ui_value_make_px(0);
 	}
 	return rv;
 }
@@ -204,7 +204,8 @@ void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_R
 	SelectObject(self->hdc, hOldBrush);
 }
 
-void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r, psy_ui_Size cornersize)
+void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
+	const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -216,12 +217,12 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
 	RoundRect(self->hdc, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom,
-		(int)psy_ui_value_px(&cornersize.width, &tm),
-		(int)psy_ui_value_px(&cornersize.height, &tm));
+		(int)cornersize.width, (int)cornersize.height);
 	SelectObject(self->hdc, hOldBrush);
 }
 
-void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r, psy_ui_Colour colour)
+void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
+	const psy_ui_RealRectangle r, psy_ui_Colour colour)
 {
      HBRUSH hBrush;     
      RECT   rect;	 
@@ -232,8 +233,9 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy
      DeleteObject (hBrush) ;
 }
 
-void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r,
-	psy_ui_Size cornersize, psy_ui_Colour colour)
+void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
+	const psy_ui_RealRectangle r, psy_ui_RealSize cornersize,
+	psy_ui_Colour colour)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -249,8 +251,7 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
 	RoundRect(self->hdc, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom,
-		(int)psy_ui_value_px(&cornersize.width, &tm),
-		(int)psy_ui_value_px(&cornersize.height, &tm));
+		(int)cornersize.width, (int)cornersize.height);
 	SelectObject(self->hdc, hOldBrush);
 	SelectObject(self->hdc, hOldPen);
 	DeleteObject(hBrush) ;

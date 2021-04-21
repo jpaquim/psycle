@@ -145,9 +145,9 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm->tmAveCharWidth * 40) // tm.tmAveCharWidth
-		: psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber); // 
-	rv->height = psy_ui_value_makepx((tm->tmHeight * 1.2) *
+		? psy_ui_value_make_px(tm->tmAveCharWidth * 40) // tm.tmAveCharWidth
+		: psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber); // 
+	rv->height = psy_ui_value_make_px((tm->tmHeight * 1.2) *
 		psy_ui_listbox_count(self));	
 }
 
@@ -263,7 +263,7 @@ void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self, const psy_ui_Size* 
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	self->component.scrollstepy = 
-		psy_ui_value_makepx(lineheight);
+		psy_ui_value_make_px(lineheight);
 }
 
 void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
@@ -306,9 +306,9 @@ void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient* self,
 
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm->tmAveCharWidth * 40)
-		: psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
-	rv->height = psy_ui_value_makepx((int)(tm->tmHeight * 1.2) *
+		? psy_ui_value_make_px(tm->tmAveCharWidth * 40)
+		: psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
+	rv->height = psy_ui_value_make_px((int)(tm->tmHeight * 1.2) *
 		psy_ui_listboxclient_count(self));
 }
 

@@ -319,7 +319,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (imp->component->alignchildren) {						
 						psy_ui_component_align(imp->component);
 					}
-					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));
+					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));					
 					imp->component->vtable->onsize(imp->component, &size);
 					if (psy_ui_component_overflow(imp->component) != psy_ui_OVERFLOW_HIDDEN) {
 						psy_ui_component_updateoverflow(imp->component);
@@ -905,7 +905,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		tm = psy_ui_component_textmetric(imp->component);
 		scrolltop = psy_ui_component_scrolltop(imp->component);
 		psy_ui_component_setscrolltop(imp->component,
-			psy_ui_value_makepx(
+			psy_ui_value_make_px(
 				psy_ui_value_px(&scrolltop, tm) -
 				psy_ui_component_scrollstep_height_px(imp->component) *
 					(pos - si.nPos)));
@@ -937,7 +937,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		tm = psy_ui_component_textmetric(imp->component);
 		scrollleft = psy_ui_component_scrollleft(imp->component);
 		psy_ui_component_setscrollleft(imp->component,
-			psy_ui_value_makepx(
+			psy_ui_value_make_px(
 				psy_ui_value_px(&scrollleft, tm) -
 				psy_ui_component_scrollstep_width_px(imp->component) *
 					(pos - si.nPos)));

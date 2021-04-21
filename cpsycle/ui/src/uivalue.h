@@ -87,7 +87,7 @@ INLINE void psy_ui_value_seteh(psy_ui_Value* self, double value)
 	self->quantity = value;	
 }
 
-INLINE psy_ui_Value psy_ui_value_makepx(double px)
+INLINE psy_ui_Value psy_ui_value_make_px(double px)
 {
 	psy_ui_Value rv;
 
@@ -206,7 +206,7 @@ INLINE psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
 
 INLINE psy_ui_Value psy_ui_value_zero(void)
 {
-	return psy_ui_value_makepx(0);
+	return psy_ui_value_make_px(0);
 }
 
 INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)

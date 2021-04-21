@@ -54,7 +54,7 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 	psy_audio_patternselection_init(&self->patternselection);
 	psy_ui_margin_init_all_em(&self->sectionmargin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setdefaultalign(transformpatternview_base(self),
-		psy_ui_ALIGN_TOP, psy_ui_margin_make(psy_ui_value_makepx(0),
+		psy_ui_ALIGN_TOP, psy_ui_margin_make(psy_ui_value_make_px(0),
 			psy_ui_value_makeew(0), psy_ui_value_makeeh(0.5),
 			psy_ui_value_makeew(2.0)));
 	transformpatternview_init_search(self);

@@ -314,7 +314,7 @@ void psy_audio_plugincategories_dispose(psy_audio_PluginCategories* self)
 {
 	assert(self);
 
-	psy_table_dispose(&self->container);
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)NULL);
 }
 
 void psy_audio_plugincategories_update(psy_audio_PluginCategories* self,

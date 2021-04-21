@@ -447,4 +447,25 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// newmachine_sectionheader
 	style = psy_ui_style_allocinit();	
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);		
+	// propertyview_mainsection
+	style = psy_ui_style_allocinit();
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);		
+	psy_ui_border_setradius_px(&style->border, 6.0);
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, medium));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(4));
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.06));
+	psy_ui_defaults_setstyle(defaults, STYLE_PROPERTYVIEW_MAINSECTION, style);
+	// propertyview_mainsectionheader
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, weak));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(1));
+	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.06));
+	psy_ui_defaults_setstyle(defaults,
+		STYLE_PROPERTYVIEW_MAINSECTIONHEADER, style);
 }

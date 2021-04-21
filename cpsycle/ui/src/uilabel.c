@@ -90,7 +90,7 @@ psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
 	rv = psy_ui_label_alloc();
 	if (rv) {
 		psy_ui_label_init(rv, parent, view);
-		rv->component.deallocate = TRUE;
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
 }
@@ -101,6 +101,7 @@ void psy_ui_label_ondestroy(psy_ui_Label* self)
 	
 	free(self->text);
 	free(self->translation);
+	free(self->defaulttext);
 }
 
 void psy_ui_label_onlanguagechanged(psy_ui_Label* self)
@@ -164,12 +165,12 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 			
 			size = psy_ui_component_textsize(psy_ui_label_base(self),
 				text);						
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 4);
+			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 4);
 		}		
 	} else {
-		rv->width = psy_ui_value_makepx(tm->tmAveCharWidth * self->charnumber);
+		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx((tm->tmHeight * self->linespacing));
+	rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
 	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
 	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 }

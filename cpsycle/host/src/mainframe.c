@@ -449,7 +449,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
-			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+			psy_ui_value_make_px(0), psy_ui_value_make_px(0),
 			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5)));
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
@@ -467,7 +467,7 @@ void mainframe_initbars(MainFrame* self)
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(&self->metronomebar.component);
 	}
-	margin.right = psy_ui_value_makepx(0);
+	margin.right = psy_ui_value_make_px(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
@@ -587,8 +587,8 @@ void mainframe_initmainviews(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars),
-		&self->workspace.config.config,
-		&self->workspace);
+		&self->workspace.config.config, 3,
+		&self->workspace);	
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
@@ -702,7 +702,7 @@ void mainframe_initrecentview(MainFrame* self)
 	// recent song view/playlist
 	recentview_init(&self->recentview, mainframe_base(self),
 		psy_ui_notebook_base(&self->viewtabbars),
-		&self->workspace);
+		&self->workspace);	
 	psy_ui_component_setalign(recentview_base(&self->recentview),
 		psy_ui_ALIGN_LEFT);
 	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
@@ -1299,8 +1299,7 @@ void mainframe_onexport(MainFrame* self, psy_ui_Component* sender)
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
 	if (self->startup && psy_ui_component_visible(mainframe_base(self))) {		
-		mainframe_onstartup(self);		
-		machinewireview_centermaster(&self->machineview.wireview);
+		mainframe_onstartup(self);				
 		self->startup = FALSE;
 	}
 	workspace_idle(&self->workspace);
@@ -1337,6 +1336,7 @@ void mainframe_onstartup(MainFrame* self)
 	// the preferredsize of the sequenceview was used to size it at start
 	// prevent it from now on and let further set the size by the splitbar
 	self->sequenceview.component.preventpreferredsize = TRUE;
+	machinewireview_centermaster(&self->machineview.wireview);
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,
@@ -1656,7 +1656,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 		mainframe_updateterminalbutton(self);		
 	} else {
 		psy_ui_component_resize(&self->terminal.component,
-			psy_ui_size_make(psy_ui_value_makepx(0),
+			psy_ui_size_make(psy_ui_value_make_px(0),
 				psy_ui_value_makeeh(10.0)));		
 	}
 	psy_ui_component_align(mainframe_base(self));

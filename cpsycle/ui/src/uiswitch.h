@@ -13,9 +13,19 @@ extern "C" {
 typedef struct {
 	psy_ui_Component component;
 	psy_Signal signal_clicked;
+	bool state;
 } psy_ui_Switch;
 
-void psy_ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent);
+void psy_ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent, psy_ui_Component* view);
+
+psy_ui_Switch* psy_ui_switch_alloc(void);
+psy_ui_Switch* psy_ui_switch_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view);
+
+void psy_ui_switch_check(psy_ui_Switch*);
+void psy_ui_switch_uncheck(psy_ui_Switch*);
+bool psy_ui_switch_checked(const psy_ui_Switch*);
+
 
 #ifdef __cplusplus
 }

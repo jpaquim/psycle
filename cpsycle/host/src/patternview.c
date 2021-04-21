@@ -1165,11 +1165,11 @@ void patternview_updatescrollstep(PatternView* self)
 			scrollstepx,
 			trackerlinestate_lineheight(&self->linestate)));
 	psy_ui_component_setscrollstep_width(trackergrid_base(&self->griddefaults),
-		psy_ui_value_makepx(scrollstepx));
+		psy_ui_value_make_px(scrollstepx));
 	psy_ui_component_setscrollstep_width(trackerheader_base(&self->header),
-		psy_ui_value_makepx(scrollstepx));
+		psy_ui_value_make_px(scrollstepx));
 	psy_ui_component_setscrollstep_height(&self->left.linenumbers.component,
-		psy_ui_value_makepx(trackerlinestate_lineheight(&self->linestate)));
+		psy_ui_value_make_px(trackerlinestate_lineheight(&self->linestate)));
 }
 
 intptr_t patternview_currpgupdownstep(const PatternView* self)

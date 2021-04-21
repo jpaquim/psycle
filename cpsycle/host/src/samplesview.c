@@ -62,9 +62,9 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make(psy_ui_value_makepx(0),
+		psy_ui_margin_make(psy_ui_value_make_px(0),
 			psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
-			psy_ui_value_makepx(0)));
+			psy_ui_value_make_px(0)));
 	psy_ui_label_init_text(&self->label, &self->header, NULL, "Source");
 	psy_ui_label_init_text(&self->songname, &self->header, NULL,
 		"No song loaded");

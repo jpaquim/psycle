@@ -125,7 +125,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 		} else {			
 			size = psy_ui_component_textsize(&self->component,
 				self->translation);
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width,
+			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width,
 				psy_ui_component_textmetric(&self->component)) + 20);
 			rv->height = size.height;
 		}
@@ -293,7 +293,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 
 		text = psy_ui_checkbox_text(self);
 		size = psy_ui_component_textsize(&self->component, text);
-		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, tm) + 20);
+		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 20);
 		rv->height = size.height;
 	}
 }

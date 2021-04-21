@@ -142,7 +142,7 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 	size = psy_ui_component_offsetsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (psy_ui_value_px(&size.height, tm) > 40) {
-		size.height = psy_ui_value_makepx(40);
+		size.height = psy_ui_value_make_px(40);
 	}
 	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, tm) - 1,
 		psy_ui_value_px(&size.height, tm) - 5);

@@ -250,8 +250,8 @@ psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* l
 	DrawText(hdc, text, -1, &rect, DT_LEFT | DT_WORDBREAK | DT_CALCRECT);	
 	psy_ui_graphics_dispose(&g);	
 	ReleaseDC(NULL, hdc);
-	rv.width = psy_ui_value_makepx(rect.right);
-	rv.height = psy_ui_value_makepx(rect.bottom);
+	rv.width = psy_ui_value_make_px(rect.right);
+	rv.height = psy_ui_value_make_px(rect.bottom);
 	return rv;
 }
 

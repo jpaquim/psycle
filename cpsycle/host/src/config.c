@@ -89,14 +89,14 @@ void psycleconfig_makeglobal(PsycleConfig* self)
 
 	self->global = psy_property_settext(
 		psy_property_append_section(&self->config, "global"),
-		"Configuration");
+		"settingsview.global.configuration");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->global, "enableaudio", TRUE),
-		"Enable audio"),
+		"settingsview.global.enable-audio"),
 		PROPERTY_ID_ENABLEAUDIO);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->global, "regenerateplugincache"),
-		"Regenerate the plugin cache"),
+		"settingsview.global.regenerate-plugincache"),
 		PROPERTY_ID_REGENERATEPLUGINCACHE);
 	languageconfig_init(&self->language, self->global, psy_ui_translator());
 }

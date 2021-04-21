@@ -46,12 +46,12 @@ typedef void (*psy_ui_fp_graphics_textoutrectangle)(struct psy_ui_Graphics*, dou
 	psy_ui_RealRectangle r, const char* text, uintptr_t len);
 typedef void (*psy_ui_fp_graphics_drawrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle);
 typedef void (*psy_ui_fp_graphics_drawroundrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
-	psy_ui_Size cornersize);
+	psy_ui_RealSize cornersize);
 typedef psy_ui_Size (*psy_ui_fp_graphics_textsize)(struct psy_ui_Graphics*, const char*);
 typedef void (*psy_ui_fp_graphics_drawsolidrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_drawsolidroundrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
-	psy_ui_Size cornersize, psy_ui_Colour colour);
+	psy_ui_RealSize cornersize, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_drawsolidpolygon)(struct psy_ui_Graphics*, psy_ui_RealPoint*,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
 typedef void (*psy_ui_fp_graphics_drawline)(struct psy_ui_Graphics*, double x1, double y1, double x2, double y2);
@@ -148,7 +148,7 @@ INLINE void psy_ui_drawrectangle(psy_ui_Graphics* self, const psy_ui_RealRectang
 	self->vtable->drawrectangle(self, r);	
 }
 
-INLINE void psy_ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r, psy_ui_Size cornersize)
+INLINE void psy_ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {
 	self->vtable->drawroundrectangle(self, r, cornersize);	
 }
@@ -159,7 +159,7 @@ INLINE void psy_ui_drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_RealRe
 }
 
 INLINE void psy_ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,
-	psy_ui_Size cornersize, psy_ui_Colour colour)
+	psy_ui_RealSize cornersize, psy_ui_Colour colour)
 {
 	self->vtable->drawsolidroundrectangle(self, r, cornersize, colour);
 }
@@ -277,8 +277,8 @@ INLINE void psy_ui_resetorigin(psy_ui_Graphics* self)
 	self->vtable->setorigin(self, 0.0, 0.0);
 }
 
-void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
-	const psy_ui_Border*);
+void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle,
+	const psy_ui_Border*, const psy_ui_TextMetric*);
 
 // psy_ui_GraphicsImp
 
@@ -288,12 +288,12 @@ typedef void (*psy_ui_fp_graphicsimp_dev_textoutrectangle)(struct psy_ui_Graphic
 	psy_ui_RealRectangle r, const char* text, uintptr_t len);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle,
-	psy_ui_Size cornersize);
+	psy_ui_RealSize cornersize);
 typedef psy_ui_Size (*psy_ui_fp_graphicsimp_dev_textsize)(struct psy_ui_GraphicsImp*, const char*);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle r,
-	psy_ui_Size cornersize, psy_ui_Colour colour);
+	psy_ui_RealSize cornersize, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidpolygon)(struct psy_ui_GraphicsImp*, psy_ui_RealPoint*,
 	uintptr_t numpoints,  uint32_t inner, uint32_t outter);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawline)(struct psy_ui_GraphicsImp*, double x1, double y1, double x2, double y2);

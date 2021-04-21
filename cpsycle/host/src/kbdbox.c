@@ -232,7 +232,6 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_doublebuffer(kbdbox_base(self));
 	psy_table_init(&self->keys);	
 	kbdbox_initfont(self);
-	kbdbox_definekeys(self);	
 	kbdbox_makekeys(self);	
 	psy_signal_connect(&workspace_kbddriver(self->workspace)->signal_input,
 		self, kbdbox_oninput);

@@ -85,8 +85,7 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) ==
 					PSY_PROPERTY_TYPE_SECTION) {
-					psy_ui_tabbar_append(&self->tabbar,
-						psy_property_translation(property));
+					psy_ui_tabbar_append(&self->tabbar, psy_property_text(property));
 				}
 			}
 		}
@@ -118,7 +117,7 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 			while (p) {
 				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
-					if (strcmp(psy_property_translation(property), tab->text) == 0) {
+					if (strcmp(psy_ui_translate(psy_property_text(property)), tab->text) == 0) {
 						break;
 					}
 				}

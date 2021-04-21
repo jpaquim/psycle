@@ -30,7 +30,7 @@ void exportview_init(ExportView* self, psy_ui_Component* parent,
 		self, exportview_onfocus);
 	exportview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
-		self->properties, workspace);
+		self->properties, 3, workspace);
 	psy_signal_connect(&self->view.signal_changed, self,
 		exportview_onsettingsviewchanged);
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);	

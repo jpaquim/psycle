@@ -63,12 +63,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settingsview.play-song-after-load");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
-		"sequencerview.show-pattern-names");
-	psy_property_setid(psy_property_settext(
-		psy_property_append_bool(self->general,
-			"showminiview", FALSE),
-		"settingsview.showminiview"),
-		PROPERTY_ID_SHOWMINIVIEW);
+		"sequencerview.show-pattern-names");	
 }
 
 bool generalconfig_showsonginfoonload(const GeneralConfig* self)

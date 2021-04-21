@@ -364,8 +364,8 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(instrumentsviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
-			psy_ui_value_makepx(0), psy_ui_value_makeew(4),
-			psy_ui_value_makepx(0), psy_ui_value_makepx(0)));		
+			psy_ui_value_make_px(0), psy_ui_value_makeew(4),
+			psy_ui_value_make_px(0), psy_ui_value_make_px(0)));		
 	psy_ui_label_init(&self->status, instrumentsviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 44);	

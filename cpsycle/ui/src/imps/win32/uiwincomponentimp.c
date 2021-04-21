@@ -170,18 +170,26 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)dev_clear;
-		vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)dev_draw;
-		vtable.dev_mousedown = (psy_ui_fp_componentimp_dev_mousedown)
+		vtable.dev_draw =
+			(psy_ui_fp_componentimp_dev_draw)
+			dev_draw;
+		vtable.dev_mousedown =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			dev_mousedown;
-		vtable.dev_mouseup = (psy_ui_fp_componentimp_dev_mouseup)
+		vtable.dev_mouseup =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			dev_mouseup;
-		vtable.dev_mousemove = (psy_ui_fp_componentimp_dev_mousemove)
+		vtable.dev_mousemove =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			dev_mousemove;
-		vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
+		vtable.dev_mousedoubleclick =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			dev_mousedoubleclick;
-		vtable.dev_mouseenter = (psy_ui_fp_componentimp_dev_mouseenter)
+		vtable.dev_mouseenter =
+			(psy_ui_fp_componentimp_dev_mouseenter)
 			dev_mouseenter;
-		vtable.dev_mouseleave = (psy_ui_fp_componentimp_dev_mouseleave)
+		vtable.dev_mouseleave =
+			(psy_ui_fp_componentimp_dev_mouseleave)
 			dev_mouseleave;
 		vtable_initialized = TRUE;
 	}
@@ -444,8 +452,8 @@ void dev_clientresize(psy_ui_win_ComponentImp* self, intptr_t width, intptr_t he
 		windowexstyle(self));
 	dev_resize(self,
 		psy_ui_size_make(
-			psy_ui_value_makepx((double)rc.right - (double)rc.left),
-			psy_ui_value_makepx((double)rc.bottom - (double)rc.top)));
+			psy_ui_value_make_px((double)rc.right - (double)rc.left),
+			psy_ui_value_make_px((double)rc.bottom - (double)rc.top)));
 }
 
 
@@ -693,7 +701,7 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 			imp = psy_table_at(&winapp->selfmap, hwnd);
 			child = imp ? imp->component : 0;
 			if (child) {
-				rv = psy_list_create(child);
+				psy_list_append(&rv, child);
 				if (recursive == psy_ui_RECURSIVE) {
 					psy_List* r;
 					psy_List* q;
@@ -1015,13 +1023,10 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 
 void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 {
-	psy_List* p;
-	psy_List* q;
 	const psy_ui_TextMetric* tm;
 	psy_ui_win_GraphicsImp* win_g;
 	POINT origin;
 	POINT org;
-	psy_ui_RealRectangle clip;	
 	psy_ui_Margin spacing;
 	
 	tm = psy_ui_component_textmetric(self->component);
@@ -1062,36 +1067,7 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	}
 	psy_signal_emit(&self->component->signal_draw,
 		self->component, 1, g);
-	q = self->viewcomponents;
-	clip = g->clip;
-	for (p = q; p != NULL; psy_list_next(&p)) {		
-		psy_ui_Component* component;
-		
-		component = (psy_ui_Component*)psy_list_entry(p);		
-		if ((component->imp->vtable->dev_flags(component->imp) &
-				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-			psy_ui_RealRectangle position;
-			psy_ui_RealRectangle intersection;
-			
-			position = psy_ui_component_position(component);
-			intersection = clip;
-			if (psy_ui_realrectangle_intersection(&intersection, &position)) {
-				// translate graphics clip and origin
-				psy_ui_realrectangle_settopleft(&intersection,
-					psy_ui_realpoint_make(
-						intersection.left - position.left,
-						intersection.top - position.top));
-				g->clip = intersection;				
-				psy_ui_setorigin(g,
-					psy_ui_realpoint_make(-position.left, -position.top));
-				component->imp->vtable->dev_draw(component->imp, g);
-			}
-		}
-	}
-	// graphics clip and origin
-	g->clip = clip;
-	psy_ui_resetorigin(g);
+	psy_ui_component_drawchildren(self->component, g, self->viewcomponents);			
 }
 
 void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
@@ -1107,7 +1083,7 @@ void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			r = psy_ui_component_position(child);
 			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;
+				ev->pt.y -= r.top;				
 				child->imp->vtable->dev_mousedown(child->imp, ev);
 				ev->pt.x += r.left;
 				ev->pt.y += r.top;

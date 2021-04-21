@@ -21,7 +21,7 @@ extern "C" {
 //
 // psy_PropertyItem has a key value pair and additional fields
 // to define the type and additional information for the ui to
-// show a description, translation or short text.
+// show a description or short text.
 
 // Variant types
 typedef enum {
@@ -55,8 +55,7 @@ typedef enum {
 typedef struct psy_PropertyItem {
 	char* key;
 	char* text;
-	char* shorttext;
-	char* translation;
+	char* shorttext;	
 	char* comment;
 	union {
 		char* s;
@@ -155,6 +154,7 @@ psy_Property* psy_property_set_font(psy_Property*, const char* key, const char* 
 psy_Property* psy_property_set_choice(psy_Property*, const char* key, intptr_t value);
 psy_Property* psy_property_at_choice(psy_Property*);
 bool psy_property_ischoiceitem(const psy_Property*);
+intptr_t psy_property_choiceitem_index(const psy_Property*);
 // Appends a property. If source typ is root, it changes to section.
 psy_Property* psy_property_append_property(psy_Property*, psy_Property*);
 // Creates and appends a a new property
@@ -207,8 +207,6 @@ psy_Property* psy_property_setid(psy_Property*, intptr_t id);
 intptr_t psy_property_id(const psy_Property* self);
 psy_Property* psy_property_settext(psy_Property*, const char* text);
 const char* psy_property_text(const psy_Property*);
-psy_Property* psy_property_settranslation(psy_Property*, const char* text);
-const char* psy_property_translation(const psy_Property*);
 psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
 const char* psy_property_shorttext(const psy_Property*);
 psy_Property* psy_property_setcomment(psy_Property*, const char* text);

@@ -241,9 +241,9 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 		duration = psy_audio_sequence_duration(
 			&workspace_song(self->workspace)->sequence);
 		linewidth = duration * self->state->pxperbeat;
-		rv->width = psy_ui_value_makepx(linewidth);
+		rv->width = psy_ui_value_make_px(linewidth);
 	} else {
-		rv->width = psy_ui_value_makepx(0);
+		rv->width = psy_ui_value_make_px(0);
 	}
 	rv->height = psy_ui_value_makeeh(2.0);
 }
@@ -303,7 +303,7 @@ SeqEditorLine* seqeditorline_allocinit(
 void seqeditorline_onpreferredsize(SeqEditorLine* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(1.0);
+	rv->width = psy_ui_value_make_px(1.0);
 	rv->height = psy_ui_value_makeeh(10.0);
 }
 
@@ -584,7 +584,7 @@ void seqeditorpatternentry_onpreferredsize(SeqEditorPatternEntry* self,
 			duration = psy_audio_pattern_length(pattern);
 		}
 	}
-	rv->width = psy_ui_value_makepx(self->state->pxperbeat *
+	rv->width = psy_ui_value_make_px(self->state->pxperbeat *
 		duration);
 	rv->height = self->state->lineheight;
 }
@@ -837,10 +837,10 @@ void seqeditortrack_onalign(SeqEditorTrack* self)
 								entry->sequenceentry->offset),
 							0.0),
 						psy_ui_size_make(
-							psy_ui_value_makepx(
+							psy_ui_value_make_px(
 								seqeditorstate_beattopx(self->state,
 									psy_audio_pattern_length(pattern))),
-							psy_ui_value_makepx(size.height))));
+							psy_ui_value_make_px(size.height))));
 			}
 		}
 	}	
@@ -857,7 +857,7 @@ void seqeditortrack_onpreferredsize(SeqEditorTrack* self,
 			&workspace_song(self->workspace)->patterns);
 	}
 	trackduration += 400.0;
-	rv->width = psy_ui_value_makepx(self->state->pxperbeat *
+	rv->width = psy_ui_value_make_px(self->state->pxperbeat *
 		trackduration);
 	rv->height = self->state->lineheight;
 }
@@ -1555,7 +1555,7 @@ void seqeditor_updatescrollstep(SeqEditor* self)
 			self->tracks.state->linemargin,
 			tm));
 	psy_ui_component_setscrollstep_height(&self->tracks.component,
-		psy_ui_value_makepx(floor(
+		psy_ui_value_make_px(floor(
 			psy_ui_component_scrollstep_height_px(&self->tracks.component))));
 	psy_ui_component_setscrollstep_height(&self->trackdescriptions.component,
 		psy_ui_component_scrollstep_height(&self->tracks.component));

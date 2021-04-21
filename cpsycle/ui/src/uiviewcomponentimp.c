@@ -85,81 +85,157 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 {
 	if (!view_imp_vtable_initialized) {
 		view_imp_vtable = *self->imp.vtable;
-		view_imp_vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)view_dev_destroy;
-		view_imp_vtable.dev_destroyed = (psy_ui_fp_componentimp_dev_destroyed)view_dev_destroyed;
-		view_imp_vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)view_dev_dispose;		
-		view_imp_vtable.dev_clear = (psy_ui_fp_componentimp_dev_clear)view_dev_clear;
-		view_imp_vtable.dev_show = (psy_ui_fp_componentimp_dev_show)view_dev_show;
-		view_imp_vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
+		view_imp_vtable.dev_destroy =
+			(psy_ui_fp_componentimp_dev_destroy)
+			view_dev_destroy;
+		view_imp_vtable.dev_destroyed =
+			(psy_ui_fp_componentimp_dev_destroyed)
+			view_dev_destroyed;
+		view_imp_vtable.dev_dispose =
+			(psy_ui_fp_componentimp_dev_dispose)
+			view_dev_dispose;
+		view_imp_vtable.dev_clear =
+			(psy_ui_fp_componentimp_dev_clear)
+			view_dev_clear;
+		view_imp_vtable.dev_show =
+			(psy_ui_fp_componentimp_dev_show)
+			view_dev_show;
+		view_imp_vtable.dev_showstate =
+			(psy_ui_fp_componentimp_dev_showstate)
 			view_dev_showstate;
-		view_imp_vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide)view_dev_hide;
-		view_imp_vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible)view_dev_visible;
-		view_imp_vtable.dev_drawvisible = (psy_ui_fp_componentimp_dev_drawvisible)view_dev_drawvisible;
-		view_imp_vtable.dev_move = (psy_ui_fp_componentimp_dev_move)view_dev_move;
-		view_imp_vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)view_dev_resize;
-		view_imp_vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
+		view_imp_vtable.dev_hide =
+			(psy_ui_fp_componentimp_dev_hide)
+			view_dev_hide;
+		view_imp_vtable.dev_visible =
+			(psy_ui_fp_componentimp_dev_visible)
+			view_dev_visible;
+		view_imp_vtable.dev_drawvisible =
+			(psy_ui_fp_componentimp_dev_drawvisible)
+			view_dev_drawvisible;
+		view_imp_vtable.dev_move =
+			(psy_ui_fp_componentimp_dev_move)
+			view_dev_move;
+		view_imp_vtable.dev_resize =
+			(psy_ui_fp_componentimp_dev_resize)
+			view_dev_resize;
+		view_imp_vtable.dev_clientresize =
+			(psy_ui_fp_componentimp_dev_clientresize)
 			view_dev_clientresize;
-		view_imp_vtable.dev_position = (psy_ui_fp_componentimp_dev_position)view_dev_position;
-		view_imp_vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)
+		view_imp_vtable.dev_position =
+			(psy_ui_fp_componentimp_dev_position)view_dev_position;
+		view_imp_vtable.dev_setposition =
+			(psy_ui_fp_componentimp_dev_setposition)
 			view_dev_setposition;
-		view_imp_vtable.dev_size = (psy_ui_fp_componentimp_dev_size)view_dev_size;
-		view_imp_vtable.dev_updatesize = (psy_ui_fp_componentimp_dev_size)view_dev_updatesize;
-		view_imp_vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)
+		view_imp_vtable.dev_size =
+			(psy_ui_fp_componentimp_dev_size)
+			view_dev_size;
+		view_imp_vtable.dev_updatesize =
+			(psy_ui_fp_componentimp_dev_size)
+			view_dev_updatesize;
+		view_imp_vtable.dev_framesize =
+			(psy_ui_fp_componentimp_dev_framesize)
 			view_dev_framesize;
-		view_imp_vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto)view_dev_scrollto;
-		view_imp_vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent)view_dev_parent;
-		view_imp_vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
+		view_imp_vtable.dev_scrollto =
+			(psy_ui_fp_componentimp_dev_scrollto)
+			view_dev_scrollto;
+		view_imp_vtable.dev_parent =
+			(psy_ui_fp_componentimp_dev_parent)
+			view_dev_parent;
+		view_imp_vtable.dev_setparent =
+			(psy_ui_fp_componentimp_dev_setparent)
 			view_dev_setparent;
-		view_imp_vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)view_dev_insert;
-		view_imp_vtable.dev_remove = (psy_ui_fp_componentimp_dev_remove)view_dev_remove;
-		view_imp_vtable.dev_erase = (psy_ui_fp_componentimp_dev_erase)view_dev_erase;
-		view_imp_vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)view_dev_capture;
-		view_imp_vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
+		view_imp_vtable.dev_insert =
+			(psy_ui_fp_componentimp_dev_insert)
+			view_dev_insert;
+		view_imp_vtable.dev_remove =
+			(psy_ui_fp_componentimp_dev_remove)
+			view_dev_remove;
+		view_imp_vtable.dev_erase =
+			(psy_ui_fp_componentimp_dev_erase)
+			view_dev_erase;
+		view_imp_vtable.dev_capture =
+			(psy_ui_fp_componentimp_dev_capture)
+			view_dev_capture;
+		view_imp_vtable.dev_releasecapture =
+			(psy_ui_fp_componentimp_dev_releasecapture)
 			view_dev_releasecapture;
-		view_imp_vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate)
+		view_imp_vtable.dev_invalidate =
+			(psy_ui_fp_componentimp_dev_invalidate)
 			view_dev_invalidate;
-		view_imp_vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect)
+		view_imp_vtable.dev_invalidaterect =
+			(psy_ui_fp_componentimp_dev_invalidaterect)
 			view_dev_invalidaterect;
-		view_imp_vtable.dev_update = (psy_ui_fp_componentimp_dev_update)view_dev_update;
-		view_imp_vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont)view_dev_setfont;
-		view_imp_vtable.dev_children = (psy_ui_fp_componentimp_dev_children)view_dev_children;
-		view_imp_vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)
+		view_imp_vtable.dev_update =
+			(psy_ui_fp_componentimp_dev_update)
+			view_dev_update;
+		view_imp_vtable.dev_setfont =
+			(psy_ui_fp_componentimp_dev_setfont)
+			view_dev_setfont;
+		view_imp_vtable.dev_children =
+			(psy_ui_fp_componentimp_dev_children)
+			view_dev_children;
+		view_imp_vtable.dev_enableinput =
+			(psy_ui_fp_componentimp_dev_enableinput)
 			view_dev_enableinput;
-		view_imp_vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
+		view_imp_vtable.dev_preventinput =
+			(psy_ui_fp_componentimp_dev_preventinput)
 			view_dev_preventinput;
-		view_imp_vtable.dev_inputprevented = (psy_ui_fp_componentimp_dev_inputprevented)
+		view_imp_vtable.dev_inputprevented =
+			(psy_ui_fp_componentimp_dev_inputprevented)
 			view_dev_inputprevented;
-		view_imp_vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
+		view_imp_vtable.dev_setcursor =
+			(psy_ui_fp_componentimp_dev_setcursor)
 			view_dev_setcursor;
-		view_imp_vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
+		view_imp_vtable.dev_starttimer =
+			(psy_ui_fp_componentimp_dev_starttimer)
 			view_dev_starttimer;
-		view_imp_vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)
+		view_imp_vtable.dev_stoptimer =
+			(psy_ui_fp_componentimp_dev_stoptimer)
 			view_dev_stoptimer;
 		view_imp_vtable.dev_seticonressource =
-			(psy_ui_fp_componentimp_dev_seticonressource)view_dev_seticonressource;
-		view_imp_vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)
+			(psy_ui_fp_componentimp_dev_seticonressource)
+			view_dev_seticonressource;
+		view_imp_vtable.dev_textmetric =
+			(psy_ui_fp_componentimp_dev_textmetric)
 			view_dev_textmetric;
-		view_imp_vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)
+		view_imp_vtable.dev_textsize =
+			(psy_ui_fp_componentimp_dev_textsize)
 			view_dev_textsize;
 		view_imp_vtable.dev_setbackgroundcolour =
 			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
 			view_dev_setbackgroundcolour;
-		view_imp_vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)view_dev_settitle;
-		view_imp_vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)view_dev_setfocus;
-		view_imp_vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)view_dev_hasfocus;
-		view_imp_vtable.dev_flags = (psy_ui_fp_componentimp_dev_flags)view_dev_flags;
-		view_imp_vtable.dev_draw = (psy_ui_fp_componentimp_dev_draw)view_dev_draw;
-		view_imp_vtable.dev_mousedown = (psy_ui_fp_componentimp_dev_mousedown)
+		view_imp_vtable.dev_settitle =
+			(psy_ui_fp_componentimp_dev_settitle)
+			view_dev_settitle;
+		view_imp_vtable.dev_setfocus =
+			(psy_ui_fp_componentimp_dev_setfocus)
+			view_dev_setfocus;
+		view_imp_vtable.dev_hasfocus =
+			(psy_ui_fp_componentimp_dev_hasfocus)
+			view_dev_hasfocus;
+		view_imp_vtable.dev_flags =
+			(psy_ui_fp_componentimp_dev_flags)
+			view_dev_flags;
+		view_imp_vtable.dev_draw =
+			(psy_ui_fp_componentimp_dev_draw)
+			view_dev_draw;
+		view_imp_vtable.dev_mousedown =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			view_dev_mousedown;
-		view_imp_vtable.dev_mouseup = (psy_ui_fp_componentimp_dev_mouseup)
+		view_imp_vtable.dev_mouseup =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			view_dev_mouseup;
-		view_imp_vtable.dev_mousemove = (psy_ui_fp_componentimp_dev_mousemove)
+		view_imp_vtable.dev_mousemove =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			view_dev_mousemove;
-		view_imp_vtable.dev_mousedoubleclick = (psy_ui_fp_componentimp_dev_mousedoubleclick)
+		view_imp_vtable.dev_mousedoubleclick =
+			(psy_ui_fp_componentimp_dev_mouseevent)
 			view_dev_mousedoubleclick;
-		view_imp_vtable.dev_mouseenter = (psy_ui_fp_componentimp_dev_mouseenter)
+		view_imp_vtable.dev_mouseenter =
+			(psy_ui_fp_componentimp_dev_mouseenter)
 			view_dev_mouseenter;
-		view_imp_vtable.dev_mouseleave = (psy_ui_fp_componentimp_dev_mouseleave)
+		view_imp_vtable.dev_mouseleave =
+			(psy_ui_fp_componentimp_dev_mouseleave)
 			view_dev_mouseleave;
 		view_imp_vtable_initialized = TRUE;
 	}
@@ -279,7 +355,8 @@ void view_dev_destroy(psy_ui_ViewComponentImp* self)
 		}
 	}
 	psy_list_free(q);	
-	self->viewcomponents = NULL;
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;	
 	component->imp->vtable->dev_destroyed(component->imp);	
 }
 
@@ -594,11 +671,7 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {
-	if (self->visible) {
-		psy_List* p;
-		psy_List* q;
-		psy_ui_RealRectangle clip;
-
+	if (self->visible) {		
 		// draw background		
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
 			psy_ui_component_drawbackground(self->component, g);
@@ -611,40 +684,23 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			self->component));
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		if (self->component->vtable->ondraw) {
+			psy_ui_Margin spacing;
+			const psy_ui_TextMetric* tm;
+			psy_ui_RealPoint origin;
+
+			origin = psy_ui_origin(g);
+			// spacing
+			spacing = psy_ui_component_spacing(self->component);
+			if (!psy_ui_margin_iszero(&spacing)) {
+				tm = psy_ui_component_textmetric(self->component);							
+				psy_ui_setorigin(g, psy_ui_realpoint_make(
+					origin.x - (int)psy_ui_value_px(&spacing.left, tm),
+					origin.y - (int)psy_ui_value_px(&spacing.top, tm)));
+			}			
 			self->component->vtable->ondraw(self->component, g);
+			psy_ui_setorigin(g, origin);
 		}
-		q = self->viewcomponents;
-		clip = g->clip;
-		for (p = q; p != NULL; psy_list_next(&p)) {
-			psy_ui_Component* component;
-
-			component = (psy_ui_Component*)psy_list_entry(p);
-			if ((component->imp->vtable->dev_flags(component->imp)
-				& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-				psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
-				psy_ui_RealRectangle position;
-				psy_ui_RealRectangle intersection;
-
-				position = psy_ui_component_position(component);
-				intersection = clip;
-				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
-					psy_ui_RealPoint origin;
-
-					// translate graphics clip and origin
-					psy_ui_realrectangle_settopleft(&intersection,
-						psy_ui_realpoint_make(
-							intersection.left - position.left,
-							intersection.top - position.top));
-					g->clip = intersection;
-					origin = psy_ui_origin(g);
-					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-						-position.top + origin.y));
-					component->imp->vtable->dev_draw(component->imp, g);
-					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
-				}
-			}
-		}
-		g->clip = clip;
+		psy_ui_component_drawchildren(self->component, g, self->viewcomponents);		
 	}
 }
 

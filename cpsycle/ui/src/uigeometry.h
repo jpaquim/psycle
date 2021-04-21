@@ -43,8 +43,8 @@ INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
 {
 	psy_ui_Point rv;
 
-	rv.x = psy_ui_value_makepx(x);
-	rv.y = psy_ui_value_makepx(y);
+	rv.x = psy_ui_value_make_px(x);
+	rv.y = psy_ui_value_make_px(y);
 	return rv;
 }
 
@@ -377,8 +377,8 @@ INLINE void psy_ui_size_init_em(psy_ui_Size* self, double width, double height)
 
 INLINE void psy_ui_size_init_px(psy_ui_Size* self, double width, double height)
 {
-	self->width = psy_ui_value_makepx(width);
-	self->height = psy_ui_value_makepx(height);
+	self->width = psy_ui_value_make_px(width);
+	self->height = psy_ui_value_make_px(height);
 	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
@@ -509,8 +509,8 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make_px(const psy_ui_RealRectangle* r)
 
 	rv.topleft = psy_ui_point_makepx(r->left, r->top);	
 	rv.size = psy_ui_size_make(
-		psy_ui_value_makepx(psy_ui_realrectangle_width(r)),
-		psy_ui_value_makepx(psy_ui_realrectangle_height(r)));
+		psy_ui_value_make_px(psy_ui_realrectangle_width(r)),
+		psy_ui_value_make_px(psy_ui_realrectangle_height(r)));
 	return rv;
 }
 

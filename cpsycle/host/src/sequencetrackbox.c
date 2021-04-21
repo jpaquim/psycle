@@ -46,7 +46,7 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 {
 	assert(self);
 
-	trackbox_init(&self->trackbox, parent, view);
+	trackbox_init(&self->trackbox, parent, view);	
 	sequencetrackbox_vtable_init(self);
 	self->sequence = sequence;
 	self->trackidx = trackidx;
