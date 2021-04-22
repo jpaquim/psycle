@@ -59,7 +59,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_init(&self->power, &self->buttons, NULL);
 	psy_ui_button_settext(&self->power, "machineframe.pwr");
 	margin = psy_ui_component_margin(&self->power.component);
-	margin.left = psy_ui_value_makeew(1.0);
+	margin.left = psy_ui_value_make_ew(1.0);
 	psy_ui_component_setmargin(&self->power.component, margin);
 	psy_ui_bitmap_loadresource(&self->power.bitmapicon, IDB_POWER_DARK);
 	psy_ui_bitmap_settransparency(&self->power.bitmapicon,
@@ -455,7 +455,7 @@ void machineframe_resize(MachineFrame* self)
 			paramsize.width, tm);
 		numparams = psy_audio_machine_numtweakparameters(self->machine);
 		viewsize.height = psy_ui_max_values(viewsize.height,
-			psy_ui_value_makeeh(psy_min(numparams + 4.0, 8.0)), tm);
+			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm);
 	}
 	if (psy_ui_component_visible(&self->parammap.component)) {
 		psy_ui_Size paramsize;
@@ -467,7 +467,7 @@ void machineframe_resize(MachineFrame* self)
 			paramsize.width, tm);
 		numparams = psy_audio_machine_numtweakparameters(self->machine);
 		viewsize.height = psy_ui_max_values(viewsize.height,
-			psy_ui_value_makeeh(psy_min(numparams + 4.0, 8.0)), tm);
+			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm);
 	}
 	if (self->showfullmenu) {
 		bar = psy_ui_component_preferredsize(&self->parameterbar.component,

@@ -86,7 +86,7 @@ static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
-	psy_Property*);
+	psy_Property*, uintptr_t* rebuild);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
@@ -301,7 +301,7 @@ void mainframe_initterminal(MainFrame* self)
 	psy_ui_terminal_init(&self->terminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_terminal_base(&self->terminal),
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(psy_ui_terminal_base(&self->terminal),
+	psy_ui_component_setpreferredsize(psy_ui_terminal_base(&self->terminal),
 		psy_ui_size_zero());
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
@@ -450,7 +450,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_make(
 			psy_ui_value_make_px(0), psy_ui_value_make_px(0),
-			psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5)));
+			psy_ui_value_make_eh(0.5), psy_ui_value_make_ew(0.5)));
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
 	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
@@ -547,17 +547,17 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_tabbar_append(&self->tabbar, "main.properties");		
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.settings");	
 	margin = psy_ui_component_margin(&tab->component);
-	margin.left = psy_ui_value_makeew(4.0);
+	margin.left = psy_ui_value_make_ew(4.0);
 	psy_ui_component_setmargin(&tab->component, margin);
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.help");	
 	margin = psy_ui_component_margin(&tab->component);
-	margin.right = psy_ui_value_makeew(4.0);
+	margin.right = psy_ui_value_make_ew(4.0);
 	psy_ui_component_setmargin(&tab->component, margin);
 	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
 	margin = psy_ui_component_margin(&tab->component);
-	margin.left = psy_ui_value_makeew(1.0);
+	margin.left = psy_ui_value_make_ew(1.0);
 	psy_ui_component_setmargin(&tab->component, margin);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
@@ -1236,7 +1236,7 @@ void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
-	psy_Property* property)
+	psy_Property* property, uintptr_t* rebuild)
 {
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_SHOWSEQUENCEEDIT:
@@ -1281,7 +1281,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		}
 		break;	
 	default:
-		workspace_configurationchanged(&self->workspace, property);
+		*rebuild = workspace_configurationchanged(&self->workspace, property);
 		break;
 	}
 }
@@ -1334,8 +1334,7 @@ void mainframe_onstartup(MainFrame* self)
 	workspace_selectpatterndisplay(&self->workspace,
 		workspace_patterndisplaytype(&self->workspace));
 	// the preferredsize of the sequenceview was used to size it at start
-	// prevent it from now on and let further set the size by the splitbar
-	self->sequenceview.component.preventpreferredsize = TRUE;
+	// prevent it from now on and let further set the size by the splitbar	
 	machinewireview_centermaster(&self->machineview.wireview);
 }
 
@@ -1650,14 +1649,14 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 {
 	if (!psy_ui_isvaluezero(psy_ui_component_offsetsize(
 		&self->terminal.component).height)) {
-		psy_ui_component_resize(&self->terminal.component,
+		psy_ui_component_setpreferredsize(&self->terminal.component,
 			psy_ui_size_zero());
 		self->terminalmsgtype = TERMINALMSGTYPE_NONE;
 		mainframe_updateterminalbutton(self);		
 	} else {
-		psy_ui_component_resize(&self->terminal.component,
+		psy_ui_component_setpreferredsize(&self->terminal.component,
 			psy_ui_size_make(psy_ui_value_make_px(0),
-				psy_ui_value_makeeh(10.0)));		
+				psy_ui_value_make_eh(10.0)));		
 	}
 	psy_ui_component_align(mainframe_base(self));
 }

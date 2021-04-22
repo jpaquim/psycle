@@ -262,8 +262,8 @@ void trackscopes_onpreferredsize(TrackScopes* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {			
 	
-	rv->width = psy_ui_value_makeew(2 * 30);
-	rv->height = psy_ui_value_makeeh(trackscopes_numrows(self) * 2.75);
+	rv->width = psy_ui_value_make_ew(2 * 30);
+	rv->height = psy_ui_value_make_eh(trackscopes_numrows(self) * 2.75);
 }
 
 uintptr_t trackscopes_numrows(const TrackScopes* self)

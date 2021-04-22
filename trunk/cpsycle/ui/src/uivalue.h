@@ -97,7 +97,7 @@ INLINE psy_ui_Value psy_ui_value_make_px(double px)
 	return rv;
 }
 
-INLINE psy_ui_Value psy_ui_value_makeew(double em)
+INLINE psy_ui_Value psy_ui_value_make_ew(double em)
 {	
 	psy_ui_Value rv;
 
@@ -107,7 +107,7 @@ INLINE psy_ui_Value psy_ui_value_makeew(double em)
 	return rv;
 }
 
-INLINE psy_ui_Value psy_ui_value_makeeh(double em)
+INLINE psy_ui_Value psy_ui_value_make_eh(double em)
 {
 	psy_ui_Value rv;
 

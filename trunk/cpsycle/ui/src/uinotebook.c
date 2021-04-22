@@ -128,8 +128,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 			const psy_ui_TextMetric* tm;
 				
 			size = psy_ui_component_offsetsize(psy_ui_notebook_base(self));
-			tm = psy_ui_component_textmetric(psy_ui_notebook_base(self));
-			component->preventpreferredsizeatalign = 1;				
+			tm = psy_ui_component_textmetric(psy_ui_notebook_base(self));			
 			if (orientation == psy_ui_VERTICAL) {
 				psy_ui_component_resize(component,
 					psy_ui_size_make_px(psy_ui_value_px(&size.width, tm) / 2, 0));

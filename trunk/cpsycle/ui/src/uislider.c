@@ -333,11 +333,11 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 	psy_ui_Size* rv)
 {	
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		rv->width = psy_ui_value_makeew(20);
-		rv->height = psy_ui_value_makeeh(1.3);
+		rv->width = psy_ui_value_make_ew(20);
+		rv->height = psy_ui_value_make_eh(1.3);
 	} else {
-		rv->width = psy_ui_value_makeew(4.0);
-		rv->height = psy_ui_value_makeeh(20.0);
+		rv->width = psy_ui_value_make_ew(4.0);
+		rv->height = psy_ui_value_make_eh(20.0);
 	}
 }
 

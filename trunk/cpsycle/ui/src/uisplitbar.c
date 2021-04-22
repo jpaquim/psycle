@@ -102,7 +102,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					self->restoresize = psy_ui_component_offsetsize(prev);
 					self->hasrestore = TRUE;
 					psy_ui_component_resize(prev,
-						psy_ui_size_make(psy_ui_value_makeew(0),
+						psy_ui_size_make(psy_ui_value_make_ew(0),
 							psy_ui_component_offsetsize(prev).height));
 				} else {
 					self->hasrestore = FALSE;
@@ -249,35 +249,32 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 			if (prev->align == psy_ui_ALIGN_LEFT) {
 				psy_ui_RealRectangle prev_position;
 
-				prev->preventpreferredsizeatalign = TRUE;
 				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_resize(prev,
+				psy_ui_component_setpreferredsize(prev,
 					psy_ui_size_make(
 						psy_ui_value_make_px(position.left -
 							prev_position.left),
 						psy_ui_component_offsetsize(prev).height));
 			} else if (prev->align == psy_ui_ALIGN_RIGHT) {
-					psy_ui_RealRectangle prev_position;
+				psy_ui_RealRectangle prev_position;
 
-				prev->preventpreferredsizeatalign = TRUE;
 				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_resize(prev,
+				psy_ui_component_setpreferredsize(prev,
 					psy_ui_size_make(
 						psy_ui_value_make_px(
 							prev_position.right - position.right),
 						psy_ui_component_offsetsize(prev).height));
-			} else if (prev->align == psy_ui_ALIGN_TOP) {
-				prev->preventpreferredsizeatalign = TRUE;
-				psy_ui_component_resize(prev,
+			} else if (prev->align == psy_ui_ALIGN_TOP) {				
+				psy_ui_component_setpreferredsize(prev,
 					psy_ui_size_make(
 						psy_ui_component_offsetsize(prev).width,
 						psy_ui_value_make_px(position.top)));
 			} else if (prev->align == psy_ui_ALIGN_BOTTOM) {
 				psy_ui_RealRectangle prev_position;
-
-				prev->preventpreferredsizeatalign = TRUE;
+				
 				prev_position = psy_ui_component_position(prev);
-				psy_ui_component_resize(prev,
+				prev->debugflag = 600;
+				psy_ui_component_setpreferredsize(prev,
 					psy_ui_size_make(
 						psy_ui_component_offsetsize(prev).width,
 						psy_ui_value_make_px(prev_position.bottom -

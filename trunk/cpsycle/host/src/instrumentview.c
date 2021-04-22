@@ -273,7 +273,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	instrumentpredefsbar_init(&self->predefs, &self->more, NULL,
 		view, workspace);		
 	tab = margin;
-	tab.right = psy_ui_value_makeew(4.0);
+	tab.right = psy_ui_value_make_ew(4.0);
 	psy_ui_component_setmargin(&self->more, tab);
 	psy_ui_component_hide(&self->more);
 }
@@ -364,7 +364,7 @@ void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(instrumentsviewbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
-			psy_ui_value_make_px(0), psy_ui_value_makeew(4),
+			psy_ui_value_make_px(0), psy_ui_value_make_ew(4),
 			psy_ui_value_make_px(0), psy_ui_value_make_px(0)));		
 	psy_ui_label_init(&self->status, instrumentsviewbar_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->status);

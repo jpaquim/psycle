@@ -169,11 +169,12 @@ void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyEvent* ev)
 			psy_ui_keyevent_preventdefault(ev);
 			psy_ui_app_stopmousehook(psy_ui_app());
 			psy_signal_emit(&self->signal_reject, self, 0);
+			psy_ui_keyevent_preventdefault(ev);			
 			break;
 		case psy_ui_KEY_RETURN:
 			psy_ui_app_stopmousehook(psy_ui_app());
 			psy_signal_emit(&self->signal_accept, self, 0);
-			psy_ui_keyevent_preventdefault(ev);
+			psy_ui_keyevent_preventdefault(ev);			
 			break;
 		default:
 			break;
@@ -213,7 +214,6 @@ void psy_ui_edit_onmousehook(psy_ui_Edit* self, psy_ui_App* sender,
 			position = psy_ui_component_screenposition(&self->component);
 			if (!psy_ui_realrectangle_intersect(&position, ev->pt)) {				
 				psy_signal_emit(&self->signal_accept, self, 0);				
-				psy_ui_app_stopmousehook(psy_ui_app());
 				self->preventedit = TRUE;
 			}
 		}

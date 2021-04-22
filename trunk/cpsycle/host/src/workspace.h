@@ -215,7 +215,7 @@ void workspace_save_recentsongs(Workspace*);
 void workspace_clearrecentsongs(Workspace*);
 void workspace_setoctave(Workspace*, int octave);
 uintptr_t workspace_octave(Workspace*);
-void workspace_configurationchanged(Workspace*, psy_Property*);
+uintptr_t workspace_configurationchanged(Workspace*, psy_Property*);
 void workspace_onconfigurationchanged(Workspace*, psy_Property*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);

@@ -539,7 +539,7 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 	self->effectsizesmall = 
 		psy_ui_size_make(
 			psy_ui_value_make_px(138.0),
-			psy_ui_value_makeeh(2.0));
+			psy_ui_value_make_eh(2.0));
 	self->columnselected = FALSE;
 	self->drawsmalleffects = FALSE;
 	self->drawvirtualgenerators = FALSE;
@@ -893,20 +893,20 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	psy_ui_component_setposition(&self->inputs.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(margin_left, 0.0),
-			psy_ui_size_make(size.width, psy_ui_value_makeeh(1.0))));
+			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->effects.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(margin_left, insizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_makeeh(1.0))));
+			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->outputs.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(margin_left, sizepx.height - volumesizepx.height -
 				outsizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_makeeh(1.0))));
+			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->volumes.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_makepx(margin_left, sizepx.height - volumesizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_makeeh(1.0))));
+			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 }
 
 void machinestackdesc_onpreferredsize(MachineStackDesc* self,
@@ -999,7 +999,7 @@ void machinestackinputs_onpreferredsize(MachineStackInputs* self,
 	psy_ui_Value spacing;
 	
 	rv->height = self->state->effectsize.height;
-	spacing = psy_ui_value_makeeh(1.0);
+	spacing = psy_ui_value_make_eh(1.0);
 	psy_ui_value_add(&rv->height, &spacing,
 		psy_ui_component_textmetric(&self->component));
 	rv->width = self->state->columnsize.width;
@@ -1131,7 +1131,7 @@ void machinestackoutputs_build(MachineStackOutputs* self)
 			if (knobui) {
 				psy_ui_component_setminimumsize(&knobui->component,
 					psy_ui_size_make(self->state->columnsize.width,
-						psy_ui_value_makeeh(1.0)));
+						psy_ui_value_make_eh(1.0)));
 				psy_ui_component_setalign(&knobui->component,
 					psy_ui_ALIGN_LEFT);
 			}
@@ -1527,8 +1527,8 @@ void machinestackvolumes_build(MachineStackVolumes* self)
 				psy_ui_value_make_px(138.0 + 19),
 				psy_ui_value_make_px(182.0)));
 			margin = psy_ui_margin_make(
-				psy_ui_value_makeeh(0.0), psy_ui_value_make_px(1.0),
-				psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0));
+				psy_ui_value_make_eh(0.0), psy_ui_value_make_px(1.0),
+				psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0));
 			psy_ui_component_setmargin(component, margin);	
 		}
 	}

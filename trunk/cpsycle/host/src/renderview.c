@@ -14,7 +14,7 @@
 static void renderview_ondestroy(RenderView*, psy_ui_Component* sender);
 static void renderview_makeproperties(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*, PropertiesView* sender,
-	psy_Property*);
+	psy_Property*, uintptr_t* rebuild);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
 static void renderview_onfocus(RenderView*, psy_ui_Component* sender);
@@ -181,7 +181,7 @@ void renderview_makeproperties(RenderView* self)
 }
 
 void renderview_onsettingsviewchanged(RenderView* self, PropertiesView* sender,
-	psy_Property* property)
+	psy_Property* property, uintptr_t* rebuild)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		if (strcmp(psy_property_key(property), "savewave") == 0) {

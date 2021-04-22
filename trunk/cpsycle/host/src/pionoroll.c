@@ -25,7 +25,7 @@ void keyboardstate_init(KeyboardState* self, PatternViewSkin* skin)
 
 	self->keymin = 0;
 	self->keymax = 119;	
-	self->defaultkeyheight = psy_ui_value_makeeh(1.0);
+	self->defaultkeyheight = psy_ui_value_make_eh(1.0);
 	self->keyheight = self->defaultkeyheight;
 	self->keyheightpx = 13;
 	self->keyboardheightpx = 13 * (self->keymax - self->keymin);
@@ -109,7 +109,7 @@ void pianoruler_onpreferredsize(PianoRuler* self, const psy_ui_Size* limit,
 		? psy_ui_value_make_px(pianogridstate_beattopx(self->gridstate,
 		  psy_audio_pattern_length(pianogridstate_pattern(self->gridstate))))
 		: psy_ui_value_make_px(0);
-	rv->height = psy_ui_value_makeeh(1.0);
+	rv->height = psy_ui_value_make_eh(1.0);
 }
 
 void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
@@ -393,7 +393,7 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 void pianokeyboard_onpreferredsize(PianoKeyboard* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	*rv = psy_ui_size_make(psy_ui_value_makeew(10.0),
+	*rv = psy_ui_size_make(psy_ui_value_make_ew(10.0),
 		psy_ui_value_make_px(self->keyboardstate->keyboardheightpx));
 }
 
@@ -1747,8 +1747,8 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 		
 	psy_ui_component_init(&self->component, parent, NULL);
 	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
-	psy_ui_margin_setleft(&margin, psy_ui_value_makeew(1.0));
-	psy_ui_margin_setbottom(&margin, psy_ui_value_makeew(0.5));
+	psy_ui_margin_setleft(&margin, psy_ui_value_make_ew(1.0));
+	psy_ui_margin_setbottom(&margin, psy_ui_value_make_ew(0.5));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		margin);
 	self->workspace = workspace;

@@ -19,6 +19,10 @@ typedef struct psy_ui_ComponentSizeHints {
 
 void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints*);
 
+psy_ui_ComponentSizeHints* psy_ui_componentsizehints_alloc(void);
+psy_ui_ComponentSizeHints* psy_ui_componentsizehints_allocinit(void);
+void psy_ui_componentsizehints_deallocate(psy_ui_ComponentSizeHints*);
+
 #ifdef __cplusplus
 }
 #endif

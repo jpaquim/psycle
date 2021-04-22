@@ -513,8 +513,8 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	}	
 	rv->height = psy_ui_value_make_px(height);
 	rv->width = (self->showbeatoffset)
-		? psy_ui_value_makeew(10.0)
-		: psy_ui_value_makeew(0.0);
+		? psy_ui_value_make_ew(10.0)
+		: psy_ui_value_make_ew(0.0);
 }
 
 void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,

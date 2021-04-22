@@ -246,7 +246,7 @@ void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 			psy_ui_component_updatelanguage(component);
 		}
 		psy_list_free(q);
-		psy_ui_component_alignall(self->main);
+		psy_ui_component_align_full(self->main);		
 	}	
 }
 

@@ -425,7 +425,7 @@ void sampleeditorheader_onpreferredsize(SampleEditorHeader* self,
 {
 	if (rv) {
 		rv->width = limit->width;
-		rv->height = psy_ui_value_makeeh(1.5);
+		rv->height = psy_ui_value_make_eh(1.5);
 	}
 }
 

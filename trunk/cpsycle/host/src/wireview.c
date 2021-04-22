@@ -136,7 +136,7 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setmargin(&self->slidergroup,
 		psy_ui_margin_makeem(0.0, 0.0, 0.0, 2.0));
-	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_makeew(2),
+	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_make_ew(2),
 		//psy_ui_value_make_px(0));
 	psy_ui_button_init(&self->percvol, &self->slidergroup, NULL);
 	psy_ui_button_settext(&self->percvol, "100%");

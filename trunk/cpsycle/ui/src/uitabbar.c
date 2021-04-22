@@ -167,7 +167,7 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 		text = self->text;
 	}	
 	*rv = psy_ui_component_textsize(&self->component, text);
-	rv->height = psy_ui_value_makeeh(1.8);
+	rv->height = psy_ui_value_make_eh(1.8);
 	if (!psy_ui_bitmap_empty(&self->icon)) {
 		psy_ui_RealSize bpmsize;				
 		psy_ui_RealSize textsizepx;
@@ -201,7 +201,8 @@ void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
 
 void psy_ui_tab_onlanguagechanged(psy_ui_Tab* self)
 {	
-	psy_strreset(&self->translation, psy_ui_translate(self->text));	
+	psy_strreset(&self->translation, psy_ui_translate(self->text));
+	psy_ui_component_invalidate(&self->component);
 }
 
 // psy_ui_TabBar
@@ -334,7 +335,7 @@ void psy_ui_tabbar_settabalignment(psy_ui_TabBar* self,
 		align = psy_ui_ALIGN_LEFT;		
 	}
 	psy_ui_component_setdefaultalign(&self->component, align,
-		self->component.insertmargin);
+		self->component.containeralign->insertmargin);
 	q = psy_ui_component_children(psy_ui_tabbar_base(self),
 		psy_ui_NONRECURSIVE);
 	for (p = q; p != NULL; p = p->next) {
@@ -390,7 +391,8 @@ void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar* self,
 {
 	assert(self);
 	
-	self->component.insertmargin = margin;	
+	psy_ui_component_usecontaineralign(&self->component);
+	self->component.containeralign->insertmargin = margin;	
 	psy_ui_tabbar_settabalignment(self, self->tabalignment);		
 	psy_ui_component_setmargin_children(psy_ui_tabbar_base(self), margin);	
 }

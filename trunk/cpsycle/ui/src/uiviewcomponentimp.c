@@ -25,6 +25,7 @@ static void view_dev_move(psy_ui_ViewComponentImp*, psy_ui_Point origin);
 static void view_dev_resize(psy_ui_ViewComponentImp*, psy_ui_Size);
 static void view_dev_clientresize(psy_ui_ViewComponentImp*, intptr_t width, intptr_t height);
 static psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp*);
+static psy_ui_RealRectangle view_dev_screenposition(psy_ui_ViewComponentImp*);
 static void view_dev_setposition(psy_ui_ViewComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
 static psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp*);
@@ -122,7 +123,11 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			(psy_ui_fp_componentimp_dev_clientresize)
 			view_dev_clientresize;
 		view_imp_vtable.dev_position =
-			(psy_ui_fp_componentimp_dev_position)view_dev_position;
+			(psy_ui_fp_componentimp_dev_position)
+			view_dev_position;
+		view_imp_vtable.dev_screenposition =
+			(psy_ui_fp_componentimp_dev_position)
+			view_dev_screenposition;
 		view_imp_vtable.dev_setposition =
 			(psy_ui_fp_componentimp_dev_setposition)
 			view_dev_setposition;
@@ -426,6 +431,24 @@ void view_dev_clientresize(psy_ui_ViewComponentImp* self, intptr_t width,
 psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp* self)
 {
 	return self->position;
+}
+
+psy_ui_RealRectangle view_dev_screenposition(psy_ui_ViewComponentImp* self)
+{
+	psy_ui_RealPoint translation;
+	psy_ui_RealRectangle position;
+	psy_ui_RealRectangle viewscreenposition;
+
+	assert(self->view);
+
+	translation = translatecoords(self, self->component, self->view);
+	position = psy_ui_component_position(self->component);
+	viewscreenposition = psy_ui_component_screenposition(self->view);
+	return psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			viewscreenposition.left + position.left + translation.x,
+			viewscreenposition.top + position.top + translation.y),
+		psy_ui_realrectangle_size(&position));	
 }
 
 void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
@@ -737,8 +760,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		if (psy_ui_component_visible(child)) {
 			r = psy_ui_component_position(child);
 			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
-				// ev->target = child;
+				psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));				
 				child->imp->vtable->dev_mousedown(child->imp, ev);
 				psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
 				break;
@@ -746,6 +768,9 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 		}
 	}
 	if (ev->bubble) {
+		if (!self->viewcomponents) {
+			ev->target = self->component;
+		}
 		self->component->vtable->onmousedown(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousedown,
 			self->component, 1, ev);

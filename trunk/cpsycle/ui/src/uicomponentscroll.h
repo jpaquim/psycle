@@ -24,6 +24,11 @@ typedef struct psy_ui_ComponentScroll {
 
 void psy_ui_componentscroll_init(psy_ui_ComponentScroll*);
 
+psy_ui_ComponentScroll* psy_ui_componentscroll_alloc(void);
+psy_ui_ComponentScroll* psy_ui_componentscroll_allocinit(void);
+void psy_ui_componentscroll_deallocate(psy_ui_ComponentScroll*);
+
+
 INLINE void psy_ui_componentscroll_sethrange(psy_ui_ComponentScroll* self,
 	psy_ui_IntPoint range)
 {

@@ -48,7 +48,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self,
 	psy_ui_slider_init_text(&self->randomvolume, &self->component, NULL,
 		"instrumentview.swing");
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
-	margin.top = psy_ui_value_makeeh(1.0);
+	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_setmargin(&self->randomvolume.component, margin);	
 	psy_ui_slider_init_text(&self->volumefadespeed, &self->component, NULL,
 		"instrumentview.fadeout");

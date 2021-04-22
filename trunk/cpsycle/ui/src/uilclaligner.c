@@ -86,13 +86,9 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
-				cp_bottomright.y - cp_topleft.y);			
-			if (!component->preventpreferredsizeatalign) {
-				componentsize = psy_ui_component_preferredsize(component,
-					&limit);
-			} else {
-				componentsize = psy_ui_component_offsetsize(component);
-			}			
+				cp_bottomright.y - cp_topleft.y);						
+			componentsize = psy_ui_component_preferredsize(component,
+				&limit);			
 			psy_ui_lclaligner_adjustminmaxsize(self, component, tm, &componentsize);
 			c_tm = psy_ui_component_textmetric(component);
 			c_margin = psy_ui_component_margin(component);			
@@ -138,7 +134,10 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						componentsize.height)));
 				cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm);
 				cp_topleft.y += psy_ui_value_px(&componentsize.height, c_tm);
-			} else if (component->align == psy_ui_ALIGN_BOTTOM) {				
+			} else if (component->align == psy_ui_ALIGN_BOTTOM) {
+				if (component->debugflag == 600) {
+					self = self;
+				}
 				cp_bottomright.y -= psy_ui_value_px(&c_margin.bottom, c_tm);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
@@ -172,7 +171,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
 							psy_ui_margin_height_px(&c_margin, c_tm)))));
 			} else if (component->align == psy_ui_ALIGN_LEFT) {								
-				if ((self->component->alignexpandmode & psy_ui_HORIZONTALEXPAND)
+				if ((self->component->containeralign->alignexpandmode & psy_ui_HORIZONTALEXPAND)
 						== psy_ui_HORIZONTALEXPAND) {
 				} else {
 					double requiredcomponentwidth;
@@ -448,12 +447,11 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 		psy_ui_Component* client;
 		psy_ui_Margin margin;		
 				
-		size = *rv;
+		size = *rv;		
 		client = NULL;
 		tm = psy_ui_component_textmetric(self->component);
 		margin = psy_ui_component_margin(self->component);
-		if (self->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE &&
-				!self->component->preventpreferredsize) {
+		if (self->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
 			psy_List* p;
 			psy_List* q;
 			psy_ui_RealPoint cp;
@@ -465,7 +463,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 			psy_ui_size_init(&maxsize);			
 			psy_ui_realpoint_init(&cp_topleft);
 			psy_ui_realpoint_init(&cp_bottomright);			
-			size.width = (!limit || (self->component->alignexpandmode &
+			size.width = (!limit || (self->component->containeralign->alignexpandmode &
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
 				? psy_ui_value_make_px(0)
 				: limit->width;			
@@ -478,11 +476,9 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 					psy_ui_Size componentsize;
 					psy_ui_Size limit;
 					const psy_ui_TextMetric* c_tm;
-					psy_ui_Margin c_margin;
-					psy_ui_Margin c_spacing;
+					psy_ui_Margin c_margin;					
 
-					c_margin = psy_ui_component_margin(component);
-					c_spacing = psy_ui_component_spacing(component);
+					c_margin = psy_ui_component_margin(component);					
 					limit.width = psy_ui_value_make_px(psy_ui_value_px(
 						&size.width, tm) - cp_topleft.x - cp_bottomright.x);
 					limit.height = size.height;

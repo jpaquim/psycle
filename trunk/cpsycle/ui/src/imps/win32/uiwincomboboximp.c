@@ -299,7 +299,7 @@ void dev_showdropdown(psy_ui_win_ComboBoxImp* self)
 
 	size = dev_size(self);	
 	self->win_combo_imp.imp.vtable->dev_resize(&self->win_combo_imp.imp,
-		psy_ui_size_make(size.width, psy_ui_value_makeeh(10)));
+		psy_ui_size_make(size.width, psy_ui_value_make_eh(10)));
 	SendMessage(self->win_combo_imp.hwnd, CB_SHOWDROPDOWN,
 		(WPARAM)TRUE, (LPARAM)0);
 }

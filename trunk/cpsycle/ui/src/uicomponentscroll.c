@@ -4,9 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uicomponentscroll.h"
-
-static bool componentscroll_initialized = FALSE;
-static psy_ui_ComponentScroll componentscroll;
+// std
+#include <stdlib.h>
 
 void psy_ui_componentscroll_init(psy_ui_ComponentScroll* self)
 {
@@ -15,4 +14,26 @@ void psy_ui_componentscroll_init(psy_ui_ComponentScroll* self)
 	psy_ui_intpoint_init(&self->vrange);
 	self->wheel = 0;
 	self->overflow = psy_ui_OVERFLOW_HIDDEN;
+}
+
+psy_ui_ComponentScroll* psy_ui_componentscroll_alloc(void)
+{
+	return (psy_ui_ComponentScroll*)malloc(sizeof(
+		psy_ui_ComponentScroll));
+}
+
+psy_ui_ComponentScroll* psy_ui_componentscroll_allocinit(void)
+{
+	psy_ui_ComponentScroll* rv;
+
+	rv = psy_ui_componentscroll_alloc();
+	if (rv) {
+		psy_ui_componentscroll_init(rv);
+	}
+	return rv;
+}
+
+void psy_ui_componentscroll_deallocate(psy_ui_ComponentScroll* self)
+{
+	free(self);
 }

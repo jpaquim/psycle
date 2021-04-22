@@ -21,6 +21,7 @@ void propertiesrenderstate_init(PropertiesRenderState* self)
 	self->property = NULL;
 	self->selected = NULL;
 	self->line = NULL;
+	self->dialogbutton = FALSE;
 }
 
 // PropertiesRenderLine
@@ -29,7 +30,6 @@ static void propertiesrenderline_onpreferredsize(PropertiesRenderLine*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void propertiesrenderline_onmousedown(PropertiesRenderLine*,
 	psy_ui_MouseEvent*);
-static void propertiesrenderline_updatecheck(PropertiesRenderLine*);
 
 // vtable
 static psy_ui_ComponentVtable propertiesrenderline_vtable;
@@ -65,34 +65,35 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->property = property;
 	self->level = level;
 	self->check = NULL;
+	self->colour = NULL;
+	self->label = NULL;	
+	self->dialogbutton = NULL;
 	self->state = state;
 	self->numcols = numcols;
 	assert(self->property);
 	// column 0
-	psy_ui_component_init(&self->col0, &self->component, view);
-	psy_ui_component_setdefaultalign(&self->col0, psy_ui_ALIGN_CLIENT,
-		psy_ui_margin_zero());
+	psy_ui_component_init(&self->col0, &self->component, view);	
 	psy_ui_component_setpreferredsize(&self->col0,
 		psy_ui_size_make_em(80.0, 1.0));
 	psy_ui_label_init(&self->key, &self->col0, view);
+	psy_ui_component_setalign(&self->key.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setmargin(psy_ui_label_base(&self->key),
+		psy_ui_margin_makeem(0.0, 0.0, 0.0, self->level * 4.0));
 	if (!property->item.translate) {
 		psy_ui_label_preventtranslation(&self->key);
 	}
 	psy_ui_label_settext(&self->key, psy_property_text(self->property));	
-	//psy_ui_label_setcharnumber(&self->key, 60.0 - self->level * 4.0);
-	psy_ui_component_setmargin(psy_ui_label_base(&self->key),
-		psy_ui_margin_makeem(0.0, 0.0, 0.0, self->level * 4.0));	
 	if (numcols > 1) {
 		// col1
 		psy_ui_component_init(&self->col1, &self->component, view);
 		psy_ui_component_setalign(&self->col1, psy_ui_ALIGN_CLIENT);
-		psy_ui_component_setdefaultalign(&self->col1, psy_ui_ALIGN_LEFT,
-			psy_ui_margin_zero());		
 		if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_BOOL) {
 			self->check = psy_ui_switch_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->check->component, psy_ui_ALIGN_LEFT);
 			propertiesrenderline_updatecheck(self);
 		} else if (psy_property_ischoiceitem(self->property)) {
 			self->check = psy_ui_switch_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->check->component, psy_ui_ALIGN_LEFT);
 			propertiesrenderline_updatecheck(self);
 		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_ACTION) {
 			psy_ui_Button* button;
@@ -101,60 +102,41 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			psy_ui_button_settext(button, psy_property_text(self->property));
 		} else if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
 			char str[256];
-			psy_ui_Label* label;
 
 			inputdefiner_inputtotext(
 				(uint32_t)psy_property_item_int(property),
 				str);
-			label = psy_ui_label_allocinit(&self->col1, view);
-			psy_ui_label_preventtranslation(label);
-			psy_ui_label_settext(label, str);
-			psy_ui_label_setcharnumber(label, 40.0);
+			self->label = psy_ui_label_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);
+			psy_ui_label_preventtranslation(self->label);
+			psy_ui_label_setcharnumber(self->label, 40.0);					
 		} else if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITCOLOR) {
-			char str[128];
-			psy_ui_Label* label;
-			psy_ui_Component* colour;
-
-			label = psy_ui_label_allocinit(&self->col1, view);
-			psy_ui_label_preventtranslation(label);
-			psy_snprintf(str, 128, "0x%d", psy_property_item_int(property));
-			psy_ui_label_settext(label, str);
-			psy_ui_label_setcharnumber(label, 40.0);
-			colour = psy_ui_component_allocinit(&self->col1, view);
-			psy_ui_component_setminimumsize(colour,
-				psy_ui_size_make_em(4.0, 1.0));
-			psy_ui_component_setbackgroundcolour(colour,
-				psy_ui_colour_make(psy_property_item_int(property)));
+			self->label = psy_ui_label_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);
+			psy_ui_label_preventtranslation(self->label);			
+			psy_ui_label_setcharnumber(self->label, 40.0);
+			self->colour = psy_ui_component_allocinit(&self->col1, view);
+			psy_ui_component_setalign(self->colour, psy_ui_ALIGN_LEFT);
+			psy_ui_component_setminimumsize(self->colour,
+				psy_ui_size_make_em(4.0, 1.0));			
 		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_INTEGER) {
-			psy_ui_Label* value;
-			char text[64];
-
-			value = psy_ui_label_allocinit(&self->col1, view);
-			psy_ui_label_preventtranslation(value);
-			if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITHEX) {
-				psy_snprintf(text, 64, "%X", (int)psy_property_item_int(property));
-			} else {
-				psy_snprintf(text, 64, "%d", (int)psy_property_item_int(self->property));
-			}
-			psy_ui_label_settext(value, text);
+			self->label = psy_ui_label_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);
+			psy_ui_label_preventtranslation(self->label);			
 		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_STRING) {
-			psy_ui_Label* label;
-
-			label = psy_ui_label_allocinit(&self->col1, view);
-			// if (!property->item.translate) {
-			psy_ui_label_preventtranslation(label);
-			//}
-			psy_ui_label_settext(label, psy_property_item_str(self->property));
-		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {
-			psy_ui_Label* label;
+			self->label = psy_ui_label_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);			
+			psy_ui_label_preventtranslation(self->label);			
+		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {			
 			char str[128];
 			psy_ui_FontInfo fontinfo;
 			psy_ui_Font font;
 			int pt;
 			const psy_ui_TextMetric* tm;
 
-			label = psy_ui_label_allocinit(&self->col1, view);
-			psy_ui_label_preventtranslation(label);
+			self->label = psy_ui_label_allocinit(&self->col1, view);
+			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);
+			psy_ui_label_preventtranslation(self->label);
 			psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
 			psy_ui_font_init(&font, &fontinfo);
 			psy_ui_component_setfont(self->state->dummy, &font);
@@ -166,7 +148,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 				pt = tm->tmHeight;
 			}
 			psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);
-			psy_ui_label_settext(label, str);
+			psy_ui_label_settext(self->label, str);
 		}
 	}
 	if (numcols > 2) {
@@ -174,37 +156,37 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 		psy_ui_component_init(&self->col2, &self->component, view);		
 		psy_ui_component_setalign(&self->col2, psy_ui_ALIGN_RIGHT);
 		psy_ui_component_setpreferredsize(&self->col2,
-			psy_ui_size_make_em(40.0, 1.0));
-		psy_ui_component_setdefaultalign(&self->col2, psy_ui_ALIGN_CLIENT,
-			psy_ui_margin_zero());
+			psy_ui_size_make_em(40.0, 1.0));		
 		if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITDIR ||
-			psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITCOLOR) {
-			psy_ui_Button* button;
-
-			button = psy_ui_button_allocinit(&self->col2, view);
-			psy_ui_button_preventtranslation(button);
-			psy_ui_button_settext(button, "...");
+			psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITCOLOR) {			
+			self->dialogbutton = psy_ui_button_allocinit(&self->col2, view);
+			psy_ui_component_setalign(&self->dialogbutton->component, psy_ui_ALIGN_CLIENT);
+			psy_ui_button_preventtranslation(self->dialogbutton);
+			psy_ui_button_settext(self->dialogbutton, "...");
 		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {
 			psy_ui_Button* button;
 
 			button = psy_ui_button_allocinit(&self->col2, view);
+			psy_ui_component_setalign(&button->component, psy_ui_ALIGN_CLIENT);
 			psy_ui_button_settext(button, "settingsview.choose-font");
 		} else if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
-			psy_ui_Button* button;
-
-			button = psy_ui_button_allocinit(&self->col2, view);
-			psy_ui_button_preventtranslation(button);
-			psy_ui_button_settext(button, "None");
+			self->dialogbutton = psy_ui_button_allocinit(&self->col2, view);
+			psy_ui_component_setalign(&self->dialogbutton->component,
+				psy_ui_ALIGN_CLIENT);
+			psy_ui_button_preventtranslation(self->dialogbutton);
+			psy_ui_button_settext(self->dialogbutton, "None");
 		} else if (psy_property_int_hasrange(property) && !psy_property_readonly(property)) {
 			char text[256];
 			psy_ui_Label* label;
 
 			psy_snprintf(text, 256, "from %d to %d", property->item.min, property->item.max);
 			label = psy_ui_label_allocinit(&self->col2, view);
+			psy_ui_component_setalign(&label->component, psy_ui_ALIGN_CLIENT);
 			psy_ui_label_preventtranslation(label);
 			psy_ui_label_settext(label, text);
 		}
-	}	
+	}
+	propertiesrenderline_update(self);
 }
 
 PropertiesRenderLine* propertiesrenderline_alloc(void)
@@ -231,6 +213,11 @@ PropertiesRenderLine* propertiesrenderline_allocinit(
 void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	psy_ui_MouseEvent* ev)
 {
+	if (self->dialogbutton && ev->target == &self->dialogbutton->component) {
+		self->state->dialogbutton = TRUE;
+	} else {
+		self->state->dialogbutton = FALSE;
+	}
 	self->state->property = NULL;
 	self->state->selected = self->property;
 	self->state->line = self;
@@ -248,7 +235,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	}
 }
 
-void propertiesrenderline_updatecheck(PropertiesRenderLine* self)
+bool propertiesrenderline_updatecheck(PropertiesRenderLine* self)
 {
 	if (self->check && psy_property_type(self->property) ==
 			PSY_PROPERTY_TYPE_BOOL) {
@@ -256,15 +243,74 @@ void propertiesrenderline_updatecheck(PropertiesRenderLine* self)
 			psy_ui_switch_check(self->check);
 		} else {
 			psy_ui_switch_uncheck(self->check);
-		}		
+		}
+		return TRUE;
 	} else if (self->check && psy_property_ischoiceitem(self->property)) {
 		if (psy_property_at_choice(psy_property_parent(self->property)) ==
 				self->property) {
 			psy_ui_switch_check(self->check);
 		} else {		
 			psy_ui_switch_uncheck(self->check);
-		}		
+		}
+		return TRUE;
 	}
+	return FALSE;
+}
+
+bool propertiesrenderline_updateintegerlabel(PropertiesRenderLine* self)
+{
+	char text[64];
+
+	if (self->label && psy_property_type(self->property) == PSY_PROPERTY_TYPE_INTEGER) {
+		if (psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITHEX) {
+			psy_snprintf(text, 64, "%X", (int)psy_property_item_int(self->property));
+		} else {
+			psy_snprintf(text, 64, "%d", (int)psy_property_item_int(self->property));
+		}
+		psy_ui_label_settext(self->label, text);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+bool propertiesrenderline_updatestringlabel(PropertiesRenderLine* self)
+{
+	if (self->label && psy_property_type(self->property) == PSY_PROPERTY_TYPE_STRING) {
+		psy_ui_label_settext(self->label,
+			psy_property_item_str(self->property));
+		return TRUE;
+	}
+	return FALSE;
+}
+
+bool propertiesrenderline_updateshortcut(PropertiesRenderLine* self)
+{
+	if (self->label && psy_property_hint(self->property) == PSY_PROPERTY_HINT_SHORTCUT) {
+		char str[256];
+
+		inputdefiner_inputtotext(
+			(uint32_t)psy_property_item_int(self->property),
+			str);
+		psy_ui_label_settext(self->label, str);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+bool propertiesrenderline_updatecolour(PropertiesRenderLine* self)
+{
+	if (self->colour && self->label &&
+		psy_property_hint(self->property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+		char str[128];
+		
+		psy_snprintf(str, 128, "0x%d", psy_property_item_int(self->property));
+		psy_ui_label_settext(self->label, str);
+		psy_ui_label_setcharnumber(self->label, 40.0);
+		psy_ui_component_setbackgroundcolour(self->colour,
+			psy_ui_colour_make(psy_property_item_int(self->property)));
+		return TRUE;
+	}
+	return FALSE;
 }
 
 void propertiesrenderline_onpreferredsize(PropertiesRenderLine* self,
@@ -277,27 +323,55 @@ void propertiesrenderline_onpreferredsize(PropertiesRenderLine* self,
 	}
 }
 
+void propertiesrenderline_update(PropertiesRenderLine* self)
+{
+	if (self->numcols < 2) {
+		return;
+	}
+	if (propertiesrenderline_updatecheck(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}
+	if (propertiesrenderline_updatecolour(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}
+	if (propertiesrenderline_updateshortcut(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}
+	if (propertiesrenderline_updatestringlabel(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}
+	if (propertiesrenderline_updateintegerlabel(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}		
+}
+
 // PropertiesRenderer
 // prototypes
+static void propertiesrenderer_ondestroy(PropertiesRenderer*,
+	psy_ui_Component* sender);
 static void propertiesrenderer_build(PropertiesRenderer*);
-static void propertiesrenderer_ondraw(PropertiesRenderer*, psy_ui_Graphics*);
 int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
 void propertiesrenderer_buildsection(PropertiesRenderer*,
 	psy_Property* section);
 static void propertiesrenderer_onmousedown(PropertiesRenderer*,
 	psy_ui_MouseEvent*);
-static void propertiesrenderer_oneditchange(PropertiesRenderer*,
-	psy_ui_Edit* sender);
-static void propertiesrenderer_oneditkeydown(PropertiesRenderer*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
-static void propertiesrenderer_ondestroy(PropertiesRenderer*,
-	psy_ui_Component* sender);
 static void propertiesrenderer_oninputdefineraccept(PropertiesRenderer*,
 	InputDefiner* sender);
+static void propertiesrenderer_oneditkeydown(PropertiesRenderer*,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev);
+static void propertiesrenderer_oneditaccept(PropertiesRenderer*,
+	psy_ui_Edit* sender);
+static void propertiesrenderer_oneditreject(PropertiesRenderer*,
+	psy_ui_Edit* sender);
 static void propertiesview_gotosection(PropertiesView*, const char* section);
 static void propertiesrenderer_showedit(PropertiesRenderer*,
-	psy_ui_Component* line, psy_ui_Component* edit);
+	PropertiesRenderLine*, psy_ui_Component* edit);
 // vtable
 static psy_ui_ComponentVtable propertiesrenderer_vtable;
 static bool propertiesrenderer_vtable_initialized = FALSE;
@@ -321,7 +395,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	self->workspace = workspace;
 	self->properties = properties;
 	self->numcols = numcols;
-	self->currsection = NULL;
+	self->currsection = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesrenderer_vtable_init(self);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
@@ -336,8 +410,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_init(&self->dummy, &self->component, NULL);
 	psy_ui_component_hide(&self->dummy);
 	propertiesrenderstate_init(&self->state);
-	self->state.dummy = &self->dummy;
-	self->selected = 0;
+	self->state.dummy = &self->dummy;	
 	self->keyselected = 0;	
 	self->floated = 0;
 	self->showkeyselection = FALSE;	
@@ -347,8 +420,13 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	self->valueselcolour = psy_ui_colour_make(0x00FFFFFF);
 	self->valueselbackgroundcolour = psy_ui_colour_make(0x009B7800);
 	psy_ui_edit_init(&self->edit, &self->component);
+	psy_ui_edit_enableinputfield(&self->edit);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		propertiesrenderer_oneditkeydown);
+	psy_signal_connect(&self->edit.signal_accept, self,
+		propertiesrenderer_oneditaccept);
+	psy_signal_connect(&self->edit.signal_reject, self,
+		propertiesrenderer_oneditreject);
 	psy_ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->component);
 	psy_ui_component_hide(&self->inputdefiner.component);
@@ -372,7 +450,7 @@ void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* se
 
 void propertiesrenderer_build(PropertiesRenderer* self)
 {
-	self->currsection = NULL;
+	self->currsection = NULL;	
 	psy_table_clear(&self->sections);
 	psy_ui_component_clear(&self->client);
 	psy_property_enumerate(self->properties, self,
@@ -383,6 +461,9 @@ void propertiesrenderer_build(PropertiesRenderer* self)
 int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 	psy_Property* property, uintptr_t level)
 {
+	if (psy_property_hint(property) == PSY_PROPERTY_HINT_HIDE) {
+		return 2;
+	}
 	if (level == 0) {
 		propertiesrenderer_buildsection(self, property);
 	} else {
@@ -401,173 +482,155 @@ void propertiesrenderer_buildsection(PropertiesRenderer* self,
 	psy_Property* section)
 {
 	if (psy_property_type(section) == PSY_PROPERTY_TYPE_SECTION) {
+		psy_ui_Component* currsection;
+		psy_ui_Component* lines;
 		psy_ui_Label* label;
 
-		self->currsection = psy_ui_component_allocinit(&self->client,
+		currsection = psy_ui_component_allocinit(&self->client,
 			&self->client);		
-		psy_ui_component_setdefaultalign(self->currsection, psy_ui_ALIGN_TOP,
+		psy_ui_component_setdefaultalign(currsection, psy_ui_ALIGN_TOP,
 			psy_ui_margin_zero());
-		psy_ui_component_setstyletype(self->currsection,
-			STYLE_PROPERTYVIEW_MAINSECTION);	
-		label = psy_ui_label_allocinit(self->currsection, &self->client);		
+		psy_ui_component_setstyletype(currsection,
+			STYLE_PROPERTYVIEW_MAINSECTION);
+		label = psy_ui_label_allocinit(currsection, &self->client);		
 		psy_ui_component_setmargin(psy_ui_label_base(label),
 			psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.0));
 		psy_ui_component_setspacing(psy_ui_label_base(label),
 			psy_ui_margin_makeem(0.5, 0.0, 0.5, 1.0));
 		psy_ui_component_setstyletype(psy_ui_label_base(label),
-			STYLE_PROPERTYVIEW_MAINSECTIONHEADER);		
+			STYLE_PROPERTYVIEW_MAINSECTIONHEADER);
+		lines = psy_ui_component_allocinit(currsection,
+			&self->client);
+		psy_ui_component_setdefaultalign(lines, psy_ui_ALIGN_TOP,
+			psy_ui_margin_zero());
 		psy_ui_label_settext(label, psy_property_text(section));
 		psy_table_insert_strhash(&self->sections, psy_property_text(section),
-			self->currsection);
+			currsection);
+		self->currsection = lines;
 	}
 }
 
 void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->state.selected) {
-		self->selected = self->state.selected;
+	if (self->state.selected) {		
 		psy_signal_emit(&self->signal_selected, self, 1,
-			self->selected);
+			self->state.selected);
 	}
 	if (self->state.property) {
-		self->selected = self->state.property;		
-		if (psy_property_ischoiceitem(self->selected)) {
+		self->state.selected = self->state.property;
+		if (psy_property_ischoiceitem(self->state.selected)) {
 			psy_signal_emit(&self->signal_changed, self, 1,
-				self->selected);
-		} else if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITCOLOR) {
-			psy_ui_ColourDialog colourdialog;
+				self->state.selected);
+		} else if (psy_property_type(self->state.selected) == PSY_PROPERTY_TYPE_INTEGER) {
+			if (psy_property_hint(self->state.selected) == PSY_PROPERTY_HINT_SHORTCUT) {				
+				if (self->state.line) {
+					if (self->state.dialogbutton) {
+						psy_property_setitem_int(self->state.property, 0);
+						psy_signal_emit(&self->signal_changed, self, 1,
+							self->state.selected);
+					} else {
+						inputdefiner_setinput(&self->inputdefiner, (uint32_t)
+							psy_property_item_int(self->state.selected));
+						propertiesrenderer_showedit(self, self->state.line,
+							&self->inputdefiner.component);
+					}
+				}
+			} else if (psy_property_hint(self->state.selected) == PSY_PROPERTY_HINT_EDITCOLOR) {
+				psy_ui_ColourDialog colourdialog;
 
-			psy_ui_colourdialog_init(&colourdialog, &self->component);
-			psy_ui_colourdialog_setcolour(&colourdialog,
-				psy_ui_colour_make((uint32_t)psy_property_item_int(self->selected)));
-			if (psy_ui_colourdialog_execute(&colourdialog)) {
-				psy_ui_Colour colour;
+				psy_ui_colourdialog_init(&colourdialog, &self->component);
+				psy_ui_colourdialog_setcolour(&colourdialog,
+					psy_ui_colour_make((uint32_t)psy_property_item_int(self->state.selected)));
+				if (psy_ui_colourdialog_execute(&colourdialog)) {
+					psy_ui_Colour colour;
 
-				colour = psy_ui_colourdialog_colour(&colourdialog);
-				psy_property_set_int(self->selected->parent,
-					self->selected->item.key,
-					colour.value);
-				psy_signal_emit(&self->signal_changed, self, 1,
-					self->selected);
-			}
-			psy_ui_colourdialog_dispose(&colourdialog);
-		} else if (psy_property_hint(self->state.property) == PSY_PROPERTY_HINT_SHORTCUT) {
-			if (self->state.line) {
-				inputdefiner_setinput(&self->inputdefiner, (uint32_t)
-					psy_property_item_int(self->state.property));
-				propertiesrenderer_showedit(self, &self->state.line->component,
-					&self->inputdefiner.component);
-			}		
-		} else if (psy_property_type(self->selected) == PSY_PROPERTY_TYPE_INTEGER) {
-			if (self->state.line) {
+					colour = psy_ui_colourdialog_colour(&colourdialog);
+					psy_property_set_int(self->state.selected->parent,
+						self->state.selected->item.key,
+						colour.value);
+					psy_signal_emit(&self->signal_changed, self, 1,
+						self->state.selected);
+				}
+				psy_ui_colourdialog_dispose(&colourdialog);
+			} else {
 				char text[40];
-				if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
+
+				if (psy_property_hint(self->state.selected) == PSY_PROPERTY_HINT_EDITHEX) {
 					psy_snprintf(text, 40, "%X",
-						psy_property_item_int(self->selected));
+						psy_property_item_int(self->state.selected));
 				} else {
 					psy_snprintf(text, 40, "%d",
-						psy_property_item_int(self->selected));
+						psy_property_item_int(self->state.selected));
 				}
 				psy_ui_edit_settext(&self->edit, text);
-				propertiesrenderer_showedit(self, &self->state.line->component,
+				propertiesrenderer_showedit(self, self->state.line,
 					&self->edit.component);
 			}
 		} else if (psy_property_hint(self->state.property) == PSY_PROPERTY_HINT_EDITDIR) {
-			psy_ui_FolderDialog dialog;
+			if (self->state.dialogbutton) {
+				psy_ui_FolderDialog dialog;
 
-			psy_ui_folderdialog_init_all(&dialog, 0, psy_ui_translate(
-				psy_property_text(self->selected)), "");
-			if (psy_ui_folderdialog_execute(&dialog)) {
-				psy_property_set_str(self->selected->parent,
-					self->selected->item.key, psy_ui_folderdialog_path(&dialog));
-				psy_signal_emit(&self->signal_changed, self, 1,
-					self->selected);
-			}		
-		} else if (psy_property_type(self->selected) == PSY_PROPERTY_TYPE_STRING) {
-			if (!psy_property_readonly(self->selected)) {
+				psy_ui_folderdialog_init_all(&dialog, 0, psy_ui_translate(
+					psy_property_text(self->state.selected)), "");
+				if (psy_ui_folderdialog_execute(&dialog)) {
+					psy_property_set_str(self->state.selected->parent,
+						self->state.selected->item.key, psy_ui_folderdialog_path(&dialog));
+					psy_signal_emit(&self->signal_changed, self, 1,
+						self->state.selected);
+				}
+			} else {				
+				psy_ui_edit_settext(&self->edit,
+					psy_property_item_str(self->state.selected));
+				propertiesrenderer_showedit(self, self->state.line,
+					&self->edit.component);
+			}
+		} else if (psy_property_type(self->state.selected) == PSY_PROPERTY_TYPE_STRING) {
+			if (!psy_property_readonly(self->state.selected)) {
 				psy_ui_edit_settext(&self->edit, psy_property_item_str(
-					self->selected));
-				propertiesrenderer_showedit(self, &self->state.line->component,
+					self->state.selected));
+				propertiesrenderer_showedit(self, self->state.line,
 					&self->edit.component);
 			}
 		} else {
 			psy_signal_emit(&self->signal_changed, self, 1,
-				self->selected);
+				self->state.selected);
 		}		
-		psy_ui_component_invalidate(&self->component);
 	}
 	self->state.property = NULL;
-	self->state.line = NULL;
-	self->state.selected = NULL;
 }
 
 void propertiesrenderer_showedit(PropertiesRenderer* self,
-	psy_ui_Component* line, psy_ui_Component* edit)
+	PropertiesRenderLine* line, psy_ui_Component* edit)
 {	
-	psy_ui_RealRectangle position;
-	psy_ui_Value colwidth;
+	psy_ui_RealRectangle colscreenposition;
+	psy_ui_RealRectangle screenposition;
+	const psy_ui_TextMetric* tm;
 
-	position = psy_ui_component_position(line);
-	colwidth = psy_ui_value_makeew(60.0);
+	colscreenposition = psy_ui_component_screenposition(&line->col1);
+	screenposition = psy_ui_component_screenposition(&self->client);
+	tm = psy_ui_component_textmetric(&line->col1);
 	psy_ui_component_setposition(edit,
 		psy_ui_rectangle_make(
-			psy_ui_point_make(colwidth, psy_ui_value_make_px(position.top)),
-			psy_ui_size_make_em(80.0, 1.5)));				
+			psy_ui_point_make(
+				psy_ui_value_make_px(colscreenposition.left - screenposition.left),
+				psy_ui_value_make_px(colscreenposition.top - screenposition.top +
+					(colscreenposition.bottom - colscreenposition.top - tm->tmHeight) / 2.0)),
+			psy_ui_size_make(
+				psy_ui_value_make_px(colscreenposition.right - colscreenposition.left),
+				psy_ui_value_make_eh(1.0))));
 	psy_ui_component_show(edit);
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->client);
 	psy_ui_component_setfocus(edit);
-}
-
-void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
-	InputDefiner* sender)
-{
-	if (self->selected && psy_property_type(self->selected) ==
-			PSY_PROPERTY_TYPE_INTEGER) {
-		psy_property_setitem_int(self->selected,
-			inputdefiner_input(&self->inputdefiner));
-		psy_ui_component_hide(&self->inputdefiner.component);
-		psy_ui_component_invalidate(&self->component);
-	}
-	psy_signal_emit(&self->signal_changed, self, 1, self->selected);
-}
-
-void propertiesrenderer_oneditchange(PropertiesRenderer* self, psy_ui_Edit* sender)
-{
-	if (self->selected) {
-		switch (psy_property_type(self->selected)) {
-			case PSY_PROPERTY_TYPE_INTEGER:
-				if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
-					psy_property_setitem_int(self->selected,
-						strtol(psy_ui_edit_text(&self->edit), NULL, 16));
-				} else {
-					psy_property_setitem_int(self->selected,
-						atoi(psy_ui_edit_text(&self->edit)));
-				}
-			break;
-			case PSY_PROPERTY_TYPE_STRING:
-				psy_property_setitem_str(self->selected,
-					psy_ui_edit_text(&self->edit));
-				break;		
-			default:
-				break;
-		}		
-		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
-		self->selected = NULL;
-	}
 }
 
 void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_RETURN) {
-		psy_ui_component_hide(&self->edit.component);
-		psy_ui_component_setfocus(&self->component);
-		propertiesrenderer_oneditchange(self, &self->edit);
-	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
-		psy_ui_component_hide(&self->edit.component);
-		psy_ui_component_setfocus(&self->component);		
-	} else if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
+	if (!self->state.selected) {
+		return;
+	}
+	if (psy_property_hint(self->state.selected) == PSY_PROPERTY_HINT_EDITHEX) {
 		if ((ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) ||
 			(ev->keycode >= psy_ui_KEY_A && ev->keycode <= psy_ui_KEY_F) ||
 			(ev->keycode < psy_ui_KEY_HELP)) {
@@ -577,6 +640,53 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 		}
 	}
 	psy_ui_keyevent_stoppropagation(ev);
+}
+
+void propertiesrenderer_oneditaccept(PropertiesRenderer* self,
+	psy_ui_Edit* sender)
+{
+	psy_ui_component_hide(&self->edit.component);
+	psy_ui_component_setfocus(&self->component);
+	if (self->state.selected) {
+		switch (psy_property_type(self->state.selected)) {
+		case PSY_PROPERTY_TYPE_INTEGER:
+			if (psy_property_hint(self->state.selected) == PSY_PROPERTY_HINT_EDITHEX) {
+				psy_property_setitem_int(self->state.selected,
+					strtol(psy_ui_edit_text(&self->edit), NULL, 16));
+			} else {
+				psy_property_setitem_int(self->state.selected,
+					atoi(psy_ui_edit_text(&self->edit)));
+			}
+			break;
+		case PSY_PROPERTY_TYPE_STRING:
+			psy_property_setitem_str(self->state.selected,
+				psy_ui_edit_text(&self->edit));
+			break;
+		default:
+			break;
+		}
+		psy_signal_emit(&self->signal_changed, self, 1, self->state.selected);		
+	}
+}
+
+void propertiesrenderer_oneditreject(PropertiesRenderer* self,
+	psy_ui_Edit* sender)
+{
+	psy_ui_component_hide(&self->edit.component);
+	psy_ui_component_setfocus(&self->component);
+}
+
+void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
+	InputDefiner* sender)
+{
+	if (self->state.selected && psy_property_type(self->state.selected) ==
+			PSY_PROPERTY_TYPE_INTEGER) {
+		psy_property_setitem_int(self->state.selected,
+			inputdefiner_input(&self->inputdefiner));
+		psy_ui_component_hide(&self->inputdefiner.component);
+		psy_ui_component_invalidate(&self->client);
+		psy_signal_emit(&self->signal_changed, self, 1, self->state.selected);
+	}	
 }
 
 // PropertiesView
@@ -783,12 +893,36 @@ void propertiesview_gotosection(PropertiesView* self, const char* sectionkey)
 void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
 	PropertiesRenderer* sender, psy_Property* selected)
 {	
-	psy_ui_component_invalidate(&self->renderer.client);
-	psy_ui_component_update(&self->renderer.client);
-	psy_signal_emit(&self->signal_changed, self, 1, selected);
-	propertiesrenderer_build(&self->renderer);
-	psy_ui_component_align(&self->renderer.client);
-	psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
+	uintptr_t rebuild;
+	
+	rebuild = FALSE;
+	psy_signal_emit(&self->signal_changed, self, 2, selected, &rebuild);
+	if (rebuild != FALSE) {
+		propertiesrenderer_build(&self->renderer);
+		psy_ui_component_align(&self->renderer.client);
+		psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
+		psy_ui_component_invalidate(&self->renderer.client);
+	} else if (self->renderer.state.line) {
+		if (psy_property_ischoiceitem(selected)) {
+			psy_ui_Component* lines;
+			psy_List* q;
+			psy_List* p;
+
+			lines = psy_ui_component_parent(&self->renderer.state.line->component);
+			if (lines) {
+				q = psy_ui_component_children(lines, psy_ui_NONRECURSIVE);
+				for (p = q; p != NULL; p = p->next) {
+					PropertiesRenderLine* line;
+
+					line = (PropertiesRenderLine*)p->entry;
+					propertiesrenderline_update(line);
+				}
+				psy_list_free(q);
+			}
+		} else {
+			propertiesrenderline_update(self->renderer.state.line);			
+		}		
+	}
 }
 
 void propertiesview_onpropertiesrendererselected(PropertiesView* self,

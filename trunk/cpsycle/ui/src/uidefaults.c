@@ -100,7 +100,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	// edit::focus
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onsurface, accent));
-	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(4));
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(6));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_EDIT_FOCUS, style);
 	// button
 	style = psy_ui_style_allocinit();

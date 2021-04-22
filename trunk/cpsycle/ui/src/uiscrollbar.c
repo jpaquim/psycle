@@ -419,8 +419,8 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(
 		psy_ui_scrollbarpane_base(&self->pane),
 		psy_ui_size_make(
-			psy_ui_value_makeew(2.0),
-			psy_ui_value_makeeh(1.0)));	
+			psy_ui_value_make_ew(2.0),
+			psy_ui_value_make_eh(1.0)));	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->pane.signal_changed, self,

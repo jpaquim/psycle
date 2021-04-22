@@ -30,7 +30,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
-	margin.top = psy_ui_value_makeeh(1.0);		
+	margin.top = psy_ui_value_make_eh(1.0);		
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "instrumentview.pitch-envelope");
 	psy_ui_component_setmargin(&self->envelopeview.component, margin);	

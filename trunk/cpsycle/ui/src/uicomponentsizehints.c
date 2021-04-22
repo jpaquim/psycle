@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uicomponentsizehints.h"
+// std
+#include <stdlib.h>
 
 void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints* self)
 {
@@ -16,4 +18,26 @@ void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints* self)
 	psy_ui_size_init(&self->preferredsize);
 	self->preferredwidthset = FALSE;
 	self->preferredheightset = FALSE;
+}
+
+psy_ui_ComponentSizeHints* psy_ui_componentsizehints_alloc(void)
+{
+	return (psy_ui_ComponentSizeHints*)malloc(sizeof(
+		psy_ui_ComponentSizeHints));
+}
+
+psy_ui_ComponentSizeHints* psy_ui_componentsizehints_allocinit(void)
+{
+	psy_ui_ComponentSizeHints* rv;
+
+	rv = psy_ui_componentsizehints_alloc();
+	if (rv) {
+		psy_ui_componentsizehints_init(rv);
+	}
+	return rv;
+}
+
+void psy_ui_componentsizehints_deallocate(psy_ui_ComponentSizeHints* self)
+{
+	free(self);
 }

@@ -144,8 +144,8 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_component_setvtable(&self->component,
 		patternproperties_vtable_init(self));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_makeew(2.0),
-			psy_ui_value_makeeh(1.0), psy_ui_value_make_px(0)));
+		psy_ui_margin_make(psy_ui_value_make_px(0), psy_ui_value_make_ew(2.0),
+			psy_ui_value_make_eh(1.0), psy_ui_value_make_px(0)));
 	patternproperties_updateskin(self);
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
 		"patternview.patname");

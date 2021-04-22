@@ -33,6 +33,7 @@ typedef struct PropertiesRenderState {
 	psy_Property* selected;
 	psy_ui_Component* dummy;
 	struct PropertiesRenderLine* line;
+	bool dialogbutton;
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*);
@@ -45,6 +46,9 @@ typedef struct PropertiesRenderLine {
 	psy_ui_Component col2;
 	psy_ui_Label key;
 	psy_ui_Switch* check;
+	psy_ui_Label* label;
+	psy_ui_Button* dialogbutton;
+	psy_ui_Component* colour;
 	uintptr_t level;	
 	psy_Property* property;
 	uintptr_t numcols;
@@ -61,6 +65,13 @@ PropertiesRenderLine* propertiesrenderline_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	PropertiesRenderState*, psy_Property*,
 	uintptr_t level, uintptr_t numcols);
+
+void propertiesrenderline_update(PropertiesRenderLine*);
+bool propertiesrenderline_updatecheck(PropertiesRenderLine*);
+bool propertiesrenderline_updateintegerlabel(PropertiesRenderLine*);
+bool propertiesrenderline_updatestringlabel(PropertiesRenderLine*);
+bool propertiesrenderline_updateshortcut(PropertiesRenderLine*);
+bool propertiesrenderline_updatecolour(PropertiesRenderLine*);
 
 typedef struct PropertiesRenderer {
 	// inherits
@@ -83,14 +94,12 @@ typedef struct PropertiesRenderer {
 	psy_ui_Colour valueselcolour;
 	psy_ui_Colour valueselbackgroundcolour;
 	bool floated;
-	psy_ui_Component* currsection;
+	psy_ui_Component* currsection;	
 	psy_Table sections;
+	PropertiesRenderState state;
 	// references
-	psy_Property* properties;
-	psy_Property* selected;	
-	// psy_Property* choiceproperty;
-	Workspace* workspace;
-	PropertiesRenderState state;	
+	psy_Property* properties;	
+	Workspace* workspace;	
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,

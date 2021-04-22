@@ -251,6 +251,7 @@
     <ClCompile Include="src\uiframe.c" />
     <ClCompile Include="src\uigeometry.c" />
     <ClCompile Include="src\uigraphics.c" />
+    <ClCompile Include="src\uigridaligner.c" />
     <ClCompile Include="src\uiicondraw.c" />
     <ClCompile Include="src\uiimage.c" />
     <ClCompile Include="src\uiimpfactory.c" />
@@ -317,6 +318,7 @@
     <ClInclude Include="src\uiframe.h" />
     <ClInclude Include="src\uigeometry.h" />
     <ClInclude Include="src\uigraphics.h" />
+    <ClInclude Include="src\uigridaligner.h" />
     <ClInclude Include="src\uiicondraw.h" />
     <ClInclude Include="src\uiimage.h" />
     <ClInclude Include="src\uiimpfactory.h" />

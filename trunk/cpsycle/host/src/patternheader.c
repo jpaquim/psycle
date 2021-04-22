@@ -602,7 +602,7 @@ void trackerheader_onpreferredsize(TrackerHeader* self,
 			psy_ui_realrectangle_height(
 				&self->coords->background.dest));
 	} else {
-		rv->height = psy_ui_value_makeeh(1.5);
+		rv->height = psy_ui_value_make_eh(1.5);
 	}
 }
 
