@@ -170,19 +170,22 @@ void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,
 
 void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
-	double nPosX;
-	double nPosY;
-	double scrollstepx_px;
-	double scrollstepy_px;
-	const psy_ui_TextMetric* tm;
-	
-	tm = psy_ui_component_textmetric(self->client);
-	scrollstepy_px = psy_ui_component_scrollstep_height_px(self->client);
-	nPosY = floor(psy_ui_component_scrolltoppx(self->client) / scrollstepy_px);	
-	psy_ui_scrollbar_setthumbposition(&self->vscroll, nPosY);	
-	scrollstepx_px = scrollstepy_px = psy_ui_component_scrollstep_width_px(self->client);
-	nPosX = floor(psy_ui_component_scrollleftpx(self->client) / scrollstepx_px);	
-	psy_ui_scrollbar_setthumbposition(&self->hscroll, nPosX);	
+	if (self->client) {
+		double nPosX;
+		double nPosY;
+		double scrollstepx_px;
+		double scrollstepy_px;
+		const psy_ui_TextMetric* tm;
+
+		psy_ui_component_updateoverflow(self->client);
+		tm = psy_ui_component_textmetric(self->client);
+		scrollstepy_px = psy_ui_component_scrollstep_height_px(self->client);
+		nPosY = floor(psy_ui_component_scrolltoppx(self->client) / scrollstepy_px);
+		psy_ui_scrollbar_setthumbposition(&self->vscroll, nPosY);
+		scrollstepx_px = scrollstepy_px = psy_ui_component_scrollstep_width_px(self->client);
+		nPosX = floor(psy_ui_component_scrollleftpx(self->client) / scrollstepx_px);
+		psy_ui_scrollbar_setthumbposition(&self->hscroll, nPosX);
+	}
 }
 
 void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller* self, psy_ui_ScrollBar* sender)
@@ -303,12 +306,13 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 	psy_ui_Orientation orientation)
 {	
 	if (orientation == psy_ui_VERTICAL) {
-		psy_ui_IntPoint vrange;
+		psy_ui_IntPoint vrange;		
 		
 		vrange = psy_ui_component_verticalscrollrange(sender);
 		psy_ui_scrollbar_setscrollrange(&self->vscroll,
 			psy_ui_component_verticalscrollrange(sender));
 		vrange = psy_ui_component_verticalscrollrange(sender);
+				
 		if (vrange.y - vrange.x <= 0) {
 			if (psy_ui_component_visible(&self->vscroll.component)) {
 				psy_ui_component_hide(&self->vscroll.component);

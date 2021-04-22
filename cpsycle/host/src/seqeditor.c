@@ -239,7 +239,7 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 		psy_dsp_big_beat_t duration;
 		
 		duration = psy_audio_sequence_duration(
-			&workspace_song(self->workspace)->sequence);
+			&workspace_song(self->workspace)->sequence) + 400.0;
 		linewidth = duration * self->state->pxperbeat;
 		rv->width = psy_ui_value_make_px(linewidth);
 	} else {
@@ -1481,10 +1481,11 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->zoombox_height.signal_changed, self,
 		seqeditor_onzoomboxheightchanged);
 	// ruler
-	seqeditorruler_init(&self->ruler, &self->component, &self->state,
-		skin, workspace);	
-	psy_ui_component_setalign(seqeditorruler_base(&self->ruler),
-		psy_ui_ALIGN_TOP);	
+	psy_ui_component_init(&self->rulerpane, &self->component, NULL);
+	psy_ui_component_setalign(&self->rulerpane, psy_ui_ALIGN_TOP);
+	seqeditorruler_init(&self->ruler, &self->rulerpane, &self->state,
+		skin, workspace);
+	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);	
 	seqeditortracks_init(&self->tracks, &self->component,		
 		&self->state, skin, workspace);
 	self->tracks.skin = skin;	
@@ -1688,6 +1689,6 @@ void seqeditor_onmousemove(SeqEditor* self, psy_ui_MouseEvent* ev)
 {
 	if (self->state.updatecursorposition) {
 		psy_ui_component_invalidate(&self->ruler.component);
-		self->state.updatecursorposition = FALSE;
+		self->state.updatecursorposition = FALSE;		
 	}
 }

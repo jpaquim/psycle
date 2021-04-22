@@ -141,7 +141,7 @@ static int driver_init(psy_AudioDriver*);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Property*);
+static void driver_configure(psy_AudioDriver*, const psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static psy_dsp_big_hz_t samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
@@ -340,7 +340,7 @@ static void init_properties(psy_AudioDriver* driver)
 	}
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Property* config)
+void driver_configure(psy_AudioDriver* driver, const psy_Property* config)
 {
 	MmeDriver* self;
 	psy_Property* property;

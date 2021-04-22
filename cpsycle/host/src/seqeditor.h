@@ -266,6 +266,7 @@ typedef struct SeqEditor {
 	// inherits
 	psy_ui_Component component;
 	// internal	
+	psy_ui_Component rulerpane;
 	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
 	psy_ui_Component left;

@@ -22,6 +22,7 @@ void propertiesrenderstate_init(PropertiesRenderState* self)
 	self->selected = NULL;
 	self->line = NULL;
 	self->dialogbutton = FALSE;
+	self->edit = NULL;
 }
 
 // PropertiesRenderLine
@@ -213,26 +214,35 @@ PropertiesRenderLine* propertiesrenderline_allocinit(
 void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->dialogbutton && ev->target == &self->dialogbutton->component) {
-		self->state->dialogbutton = TRUE;
-	} else {
-		self->state->dialogbutton = FALSE;
-	}
-	self->state->property = NULL;
-	self->state->selected = self->property;
+	self->state->property = NULL;	
 	self->state->line = self;
-	if (psy_property_readonly(self->property)) {
+	if (psy_ui_component_visible(self->state->edit)) {		
 		return;
 	}
-	self->state->property = self->property;
-	if (psy_property_ischoiceitem(self->property)) {		
-		psy_property_setitem_int(psy_property_parent(self->property), 
-			psy_property_choiceitem_index(self->property));	
-	} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_BOOL) {
-		psy_property_setitem_bool(self->property,
-			!psy_property_item_bool(self->property));			
-		propertiesrenderline_updatecheck(self);		
+	if (ev->button == 1) {
+		if (self->dialogbutton && ev->target == &self->dialogbutton->component) {
+			self->state->dialogbutton = TRUE;
+		} else {
+			self->state->dialogbutton = FALSE;
+		}
+		self->state->property = NULL;
+		self->state->selected = self->property;
+		self->state->line = self;
+		if (psy_property_readonly(self->property)) {
+			return;
+		}
+		self->state->property = self->property;
+		if (psy_property_ischoiceitem(self->property)) {
+			psy_property_setitem_int(psy_property_parent(self->property),
+				psy_property_choiceitem_index(self->property));
+		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_BOOL) {
+			psy_property_setitem_bool(self->property,
+				!psy_property_item_bool(self->property));
+			propertiesrenderline_updatecheck(self);
+		}
+		return;
 	}
+	psy_ui_mouseevent_stoppropagation(ev);
 }
 
 bool propertiesrenderline_updatecheck(PropertiesRenderLine* self)
@@ -355,7 +365,7 @@ void propertiesrenderline_update(PropertiesRenderLine* self)
 static void propertiesrenderer_ondestroy(PropertiesRenderer*,
 	psy_ui_Component* sender);
 static void propertiesrenderer_build(PropertiesRenderer*);
-int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
+static int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
 void propertiesrenderer_buildsection(PropertiesRenderer*,
 	psy_Property* section);
@@ -398,7 +408,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	self->currsection = NULL;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesrenderer_vtable_init(self);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);	
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesrenderer_ondestroy);
@@ -410,9 +420,9 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_init(&self->dummy, &self->component, NULL);
 	psy_ui_component_hide(&self->dummy);
 	propertiesrenderstate_init(&self->state);
-	self->state.dummy = &self->dummy;	
+	self->state.dummy = &self->dummy;
+	self->state.edit = &self->edit;
 	self->keyselected = 0;	
-	self->floated = 0;
 	self->showkeyselection = FALSE;	
 	self->valuecolour = psy_ui_colour_make(0x00CACACA);
 	self->sectioncolour = psy_ui_colour_make(0x00CACACA);
@@ -513,6 +523,9 @@ void propertiesrenderer_buildsection(PropertiesRenderer* self,
 void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 	psy_ui_MouseEvent* ev)
 {
+	if (psy_ui_component_visible(&self->edit.component)) {
+		return;
+	}
 	if (self->state.selected) {		
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->state.selected);
@@ -692,7 +705,6 @@ void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
 // PropertiesView
 // prototypes
 static void propertiesview_ondestroy(PropertiesView*, psy_ui_Component* sender);
-static void propertiesview_initsectionfloated(PropertiesView*);
 static void propertiesview_selectsection(PropertiesView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
 static void propertiesview_updatetabbarsections(PropertiesView*);
@@ -718,33 +730,27 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Margin tabmargin;
 
 	self->workspace = workspace;	
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
-	psy_ui_notebook_init(&self->notebook, propertiesview_base(self));
-	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesview_ondestroy);
 	psy_signal_connect(&self->component.signal_focus,
 		self, propertiesview_onfocus);	
-	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
-	psy_ui_component_init(&self->client,
-		psy_ui_notebook_base(&self->notebook), NULL);
-	psy_signal_connect(&self->client.signal_mousedown,
+	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
+	psy_signal_connect(&self->component.signal_mousedown,
 		self, propertiesview_onmousedown);
-	psy_signal_connect(&self->client.signal_mouseup,
-		self, propertiesview_onmouseup);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	propertiesrenderer_init(&self->renderer, &self->client, properties,
+	psy_signal_connect(&self->component.signal_mouseup,
+		self, propertiesview_onmouseup);	
+	propertiesrenderer_init(&self->renderer, &self->component, properties,
 		numcols, workspace);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
-		&self->client, NULL);	
+		&self->component, NULL);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);	
-	psy_ui_tabbar_init(&self->tabbar, &self->client);
+	psy_ui_tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);		
@@ -756,10 +762,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_onpropertiesrendererselected);	
 	psy_signal_connect(&workspace_player(self->workspace)->eventdrivers.signal_input,
 		self, propertiesview_oneventdriverinput);
-	propertiesview_initsectionfloated(self);
 	psy_signal_connect(&self->tabbar.signal_change, self,
-		propertiesview_ontabbarchange);
-	psy_ui_notebook_select(&self->notebook, 0);
+		propertiesview_ontabbarchange);	
 	psy_signal_connect(&self->renderer.component.signal_scroll, self,
 		propertiesview_onscroll);
 	self->preventscrollupdate = FALSE;
@@ -769,18 +773,6 @@ void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
-}
-
-void propertiesview_initsectionfloated(PropertiesView* self)
-{
-	psy_ui_component_init(&self->sectionfloated,
-		psy_ui_notebook_base(&self->notebook), NULL);
-	psy_ui_component_hide(&self->sectionfloated);
-	psy_ui_label_init(&self->floatdesc, &self->sectionfloated, NULL);
-	psy_ui_label_preventtranslation(&self->floatdesc);
-	psy_ui_label_settext(&self->floatdesc, "This view is floated.");
-	psy_ui_component_setalign(&self->floatdesc.component,
-		psy_ui_ALIGN_CENTER);
 }
 
 void propertiesview_selectsection(PropertiesView* self,
@@ -1019,48 +1011,17 @@ void propertiesview_onfocus(PropertiesView* self, psy_ui_Component* sender)
 void propertiesview_onmousedown(PropertiesView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	//psy_ui_component_setfocus(&self->renderer.component);
-	if (ev->button == 2) {
-		if (psy_ui_component_visible(&self->sectionfloated)) {
-			workspace_docksection(self->workspace, VIEW_ID_SETTINGSVIEW, 0);			
-		} else {
-			workspace_floatsection(self->workspace, VIEW_ID_SETTINGSVIEW, 0);
-		}		
-		psy_ui_mouseevent_stoppropagation(ev);
+	if (psy_ui_component_visible(&self->renderer.edit.component)) {
+		return;
 	}
+	psy_ui_mouseevent_stoppropagation(ev);
+	//psy_ui_component_setfocus(&self->renderer.component);	
 }
 
 void propertiesview_onmouseup(PropertiesView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_mouseevent_stoppropagation(ev);
-}
-
-void propertiesview_float(PropertiesView* self, uintptr_t section, psy_ui_Component* dest)
-{
-//	if (section == HELPVIEWSECTION_HELP) {		
-		psy_ui_component_hide(&self->client);		
-		psy_ui_component_insert(dest, &self->client, NULL);
-		psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);		
-		self->renderer.floated = TRUE;
-		//psy_ui_component_preventalign(&self->renderer.component);		
-		psy_ui_component_show_align(&self->client);		
-		psy_ui_notebook_select(&self->notebook, 0);				
-//	}
-}
-
-void propertiesview_dock(PropertiesView* self, uintptr_t section, psy_ui_Component* dest)
-{
-//	if (section == HELPVIEWSECTION_HELP) {
-		self->renderer.floated = FALSE;
-		psy_ui_component_hide(&self->sectionfloated);	
-		psy_ui_component_insert(&self->notebook.component,
-			&self->client, NULL);		
-		psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-		psy_ui_component_show_align(&self->client);
-		psy_ui_component_align(&self->client);
-		psy_ui_notebook_select(&self->notebook, 0);		
-//	}
 }
 
 void propertiesview_onscroll(PropertiesView* self, psy_ui_Component* sender)

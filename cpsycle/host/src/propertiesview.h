@@ -32,6 +32,7 @@ typedef struct PropertiesRenderState {
 	psy_Property* property;
 	psy_Property* selected;
 	psy_ui_Component* dummy;
+	psy_ui_Edit* edit;
 	struct PropertiesRenderLine* line;
 	bool dialogbutton;
 } PropertiesRenderState;
@@ -93,7 +94,6 @@ typedef struct PropertiesRenderer {
 	psy_ui_Colour separatorcolour;
 	psy_ui_Colour valueselcolour;
 	psy_ui_Colour valueselbackgroundcolour;
-	bool floated;
 	psy_ui_Component* currsection;	
 	psy_Table sections;
 	PropertiesRenderState state;
@@ -123,8 +123,6 @@ typedef struct PropertiesView {
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	// intern
-	psy_ui_Notebook notebook;
-	psy_ui_Component client;
 	psy_ui_Component sectionfloated;
 	psy_ui_Label floatdesc;
 	psy_ui_Component viewtabbar;	
@@ -139,11 +137,6 @@ typedef struct PropertiesView {
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property*,
 	uintptr_t numcols, Workspace*);
-
-// float to side bar (see helpview, too)
-// todo make it more general
-void propertiesview_float(PropertiesView*, uintptr_t section, psy_ui_Component* dest);
-void propertiesview_dock(PropertiesView*, uintptr_t section, psy_ui_Component* src);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

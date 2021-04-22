@@ -436,6 +436,7 @@ uintptr_t workspace_configurationchanged(Workspace* self, psy_Property* property
 			&self->player.midiinput.midiconfig, group);
 		midiviewconfig_makecontrollers(
 			psycleconfig_midi(&self->config));
+		rebuild = TRUE;
 		break; }
 	case PROPERTY_ID_REMOVECONTROLLERMAP: {
 		psy_Property* group;
@@ -451,6 +452,7 @@ uintptr_t workspace_configurationchanged(Workspace* self, psy_Property* property
 					psycleconfig_midi(&self->config));
 				midiviewconfig_makecontrollers(
 					psycleconfig_midi(&self->config));
+				rebuild = TRUE;
 			}
 		}
 		break; }
@@ -482,7 +484,7 @@ uintptr_t workspace_configurationchanged(Workspace* self, psy_Property* property
 				audioconfig_oneditaudiodriverconfiguration(&self->config.audio,
 					psycleconfig_audioenabled(&self->config));
 				audioconfig_driverconfigure_section(&self->config.audio);
-				return TRUE;
+				rebuild = TRUE;
 			} else if (psy_property_insection(property,
 					self->config.input.eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
@@ -621,13 +623,15 @@ void workspace_onediteventdriverconfiguration(Workspace* self)
 
 void workspace_setdefaultfont(Workspace* self, psy_Property* property)
 {
-	psy_ui_Font font;
-	psy_ui_FontInfo fontinfo;
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
+		psy_ui_Font font;
+		psy_ui_FontInfo fontinfo;
 
-	psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
-	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_app_setdefaultfont(psy_ui_app(), &font);
-	psy_ui_font_dispose(&font);
+		psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
+		psy_ui_font_init(&font, &fontinfo);
+		psy_ui_app_setdefaultfont(psy_ui_app(), &font);
+		psy_ui_font_dispose(&font);
+	}
 }
 
 void workspace_setapptheme(Workspace* self, psy_Property* property)

@@ -443,7 +443,6 @@
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />
-    <ClInclude Include="src\cmdsnotes.h" />
     <ClInclude Include="src\compatconfig.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\confirmbox.h" />

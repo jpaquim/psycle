@@ -17,7 +17,7 @@ extern "C" {
 // Configures and selects the language of a psy_Translator
 
 enum {
-	PROPERTY_ID_LANG = 3000
+	PROPERTY_ID_LANG = 40000
 };
 
 typedef struct LanguageConfig {

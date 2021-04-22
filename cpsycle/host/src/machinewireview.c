@@ -121,11 +121,10 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));	
-	self->component.vtable = &vtable;	
 	self->opcount = 0;
 	self->centermaster = TRUE;
 	psy_ui_component_setscrollstep(&self->component,
-		psy_ui_size_make_px(10.0, 10.0));	
+		psy_ui_size_make_px(10.0, 1.0));	
 	self->machines = NULL;
 	self->paramviews = paramviews;
 	self->workspace = workspace;
