@@ -644,9 +644,6 @@
     <ClInclude Include="src\cmdsgeneral.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\cmdsnotes.h">
-      <Filter>configuration</Filter>
-    </ClInclude>
     <ClInclude Include="src\propertiesview.h">
       <Filter>uicontrols</Filter>
     </ClInclude>

@@ -21,7 +21,7 @@ static const psy_AudioDriverInfo* driverinfo(void);
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(SilentDriver*);
 static int driver_open(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Property*);
+static void driver_configure(psy_AudioDriver*, const psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
@@ -121,7 +121,7 @@ int driver_close(psy_AudioDriver* driver)
 	return 0;
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Property* config)
+void driver_configure(psy_AudioDriver* driver, const psy_Property* config)
 {
 
 }

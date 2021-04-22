@@ -16,7 +16,7 @@ extern "C" {
 //
 
 enum {
-	PROPERTY_ID_DEFAULTLINES = 10000
+	PROPERTY_ID_DEFAULTLINES = 30000
 };
 
 typedef struct KeyboardMiscConfig {	

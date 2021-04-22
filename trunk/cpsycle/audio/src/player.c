@@ -757,7 +757,7 @@ void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path,
 }
 
 void psy_audio_player_restartdriver(psy_audio_Player* self,
-	psy_Property* config)
+	const psy_Property* config)
 {
 	assert(self);
 

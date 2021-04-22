@@ -1421,7 +1421,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		double scrolltoppx;
 
 		tm = psy_ui_component_textmetric(self);		
-		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));		
+		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));
 		scrollstepy_px = psy_ui_component_scrollstep_height_px(self);
 		preferredscrollsize = psy_ui_component_preferredscrollsize(self, &size);
 		maxlines = (intptr_t)(psy_ui_value_px(&preferredscrollsize.height, tm) /

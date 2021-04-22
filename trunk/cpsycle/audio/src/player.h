@@ -203,7 +203,7 @@ psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player*);
 void psy_audio_player_loaddriver(psy_audio_Player*, const char* path, psy_Property* config, bool open);
 void psy_audio_player_unloaddriver(psy_audio_Player*);
 void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path, psy_Property* config);
-void psy_audio_player_restartdriver(psy_audio_Player*, psy_Property* config);
+void psy_audio_player_restartdriver(psy_audio_Player*, const psy_Property* config);
 // event recording
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);

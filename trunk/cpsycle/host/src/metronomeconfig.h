@@ -14,7 +14,7 @@ extern "C" {
 // MetronomeConfig
 
 enum {
-	PROPERTY_ID_METRONOME = 12000,
+	PROPERTY_ID_METRONOME = 60000,
 	PROPERTY_ID_SHOWMETRONOME
 };
 

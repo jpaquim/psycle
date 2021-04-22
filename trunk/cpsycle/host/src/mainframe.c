@@ -1475,9 +1475,6 @@ void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 			helpview_float(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
 		}
-	} else if (view == VIEW_ID_SETTINGSVIEW) {
-		propertiesview_float(&self->settingsview, section, &self->right);
-		psy_ui_component_align(&self->client);
 	}
 }
 
@@ -1489,9 +1486,6 @@ void mainframe_ondocksection(MainFrame* self, Workspace* sender,
 			helpview_dock(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
 		}
-	} else if (view == VIEW_ID_SETTINGSVIEW) {
-		propertiesview_dock(&self->settingsview, section, &self->right);
-		psy_ui_component_align(&self->client);
 	}
 }
 
