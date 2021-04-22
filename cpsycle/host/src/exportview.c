@@ -14,7 +14,7 @@
 static void exportview_ondestroy(ExportView*, psy_ui_Component* sender);
 static void exportview_makeproperties(ExportView*);
 static void exportview_onsettingsviewchanged(ExportView*, PropertiesView* sender,
-	psy_Property*);
+	psy_Property*, uintptr_t* rebuild);
 static void exportview_exportmodule(ExportView*);
 static void exportview_exportmidifile(ExportView*);
 static void exportview_onfocus(ExportView*, psy_ui_Component* sender);
@@ -58,7 +58,7 @@ void exportview_makeproperties(ExportView* self)
 }
 
 void exportview_onsettingsviewchanged(ExportView* self, PropertiesView* sender,
-	psy_Property* property)
+	psy_Property* property, uintptr_t* rebuild)
 {
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		if (strcmp(psy_property_key(property), "exportmodule") == 0) {

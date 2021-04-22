@@ -159,7 +159,7 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 	spacing = psy_ui_component_spacing(psy_ui_label_base(self));
 	if (self->charnumber == 0) {		
 		if (psy_strlen(text) == 0) {
-			rv->width = psy_ui_value_makeew(0.0);
+			rv->width = psy_ui_value_make_ew(0.0);
 		} else {
 			psy_ui_Size size;
 			

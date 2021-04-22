@@ -33,8 +33,8 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	psy_ui_editor_init(&self->output, &self->component);	
 	psy_ui_editor_enablewrap(&self->output);
 	psy_ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_resize(&self->component, psy_ui_size_make_em(20.0, 20.0));
-	psy_ui_component_preventpreferredsize(&self->component);	
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_em(20.0, 20.0));	
 	// psy_ui_component_starttimer(&self->component, 0, 50);
 }
 

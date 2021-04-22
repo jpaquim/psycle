@@ -141,7 +141,7 @@ void onpreferredsize(psy_ui_ComboBox* self, const psy_ui_Size* limit,
 	assert(self);
 	
 	if (self->charnumber == 0) {
-		rv->width = psy_ui_value_makeew(9.0);
+		rv->width = psy_ui_value_make_ew(9.0);
 	} else {
 		const psy_ui_TextMetric* tm;
 
@@ -149,7 +149,7 @@ void onpreferredsize(psy_ui_ComboBox* self, const psy_ui_Size* limit,
 		rv->width = psy_ui_value_make_px(
 			self->charnumber * tm->tmAveCharWidth + 40);
 	}
-	rv->height = psy_ui_value_makeeh(1.0);	
+	rv->height = psy_ui_value_make_eh(1.0);	
 }
 
 void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)

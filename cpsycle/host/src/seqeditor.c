@@ -28,9 +28,9 @@ void seqeditorstate_init(SeqEditorState* self, Workspace* workspace,
 	self->cmds = cmds;
 	psy_signal_init(&self->signal_cursorchanged);
 	self->pxperbeat = DEFAULT_PXPERBEAT;
-	self->defaultlineheight = psy_ui_value_makeeh(2.0);	
+	self->defaultlineheight = psy_ui_value_make_eh(2.0);	
 	self->lineheight = self->defaultlineheight;
-	self->linemargin = psy_ui_value_makeeh(0.2);	
+	self->linemargin = psy_ui_value_make_eh(0.2);	
 	self->cursorposition = (psy_dsp_big_beat_t)0.0;
 	self->drawcursor = TRUE;
 	self->drawpatternevents = TRUE;	
@@ -245,7 +245,7 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 	} else {
 		rv->width = psy_ui_value_make_px(0);
 	}
-	rv->height = psy_ui_value_makeeh(2.0);
+	rv->height = psy_ui_value_make_eh(2.0);
 }
 
 // SeqEditorLine
@@ -304,7 +304,7 @@ void seqeditorline_onpreferredsize(SeqEditorLine* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	rv->width = psy_ui_value_make_px(1.0);
-	rv->height = psy_ui_value_makeeh(10.0);
+	rv->height = psy_ui_value_make_eh(10.0);
 }
 
 void seqeditorline_updateposition(SeqEditorLine* self,
@@ -1497,12 +1497,9 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->scroller.component,
 		psy_ui_ALIGN_CLIENT);
 	seqeditorbar_setdragmode(&self->bar, self->state.dragmode);	
-	// align
-	psy_ui_component_resize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(20.0),
-			psy_ui_value_makeeh(6 * 1.4 + 2.5)));
-	// use splitbar
-	psy_ui_component_preventpreferredsize(&self->component);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_make_ew(20.0),
+			psy_ui_value_make_eh(6 * 1.4 + 2.5)));	
 	seqeditor_updatesong(self, workspace->song);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);

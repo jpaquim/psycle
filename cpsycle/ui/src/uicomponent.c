@@ -5,20 +5,54 @@
 
 #include "uicomponent.h"
 // local
-#include "uilclaligner.h"
 #include "uiapp.h"
+#include "uigridaligner.h"
 #include "uiimpfactory.h"
+#include "uilclaligner.h"
 #include "uiviewcomponentimp.h"
 // std
 #include <math.h>
 // platform
 #include "../../detail/portable.h"
 
+void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign* self)
+{
+	self->alignexpandmode = psy_ui_NOEXPAND;
+	self->containeralign = psy_ui_CONTAINER_ALIGN_LCL;
+	self->insertaligntype = psy_ui_ALIGN_NONE;	
+	psy_ui_margin_init(&self->insertmargin);
+}
+
+psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_alloc(void)
+{
+	return (psy_ui_ComponentContainerAlign*)malloc(sizeof(
+		psy_ui_ComponentContainerAlign));
+}
+
+psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_allocinit(void)
+{
+	psy_ui_ComponentContainerAlign* rv;
+
+	rv = psy_ui_componentcontaineralign_alloc();
+	if (rv) {
+		psy_ui_componentcontaineralign_init(rv);
+	}
+	return rv;
+}
+
+void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign* self)
+{
+	free(self);
+}
+
 static bool componentscroll_initialized = FALSE;
 static psy_ui_ComponentScroll componentscroll;
 
 static bool sizehints_initialized = FALSE;
 static psy_ui_ComponentSizeHints sizehints;
+
+static bool containeralign_initialized = FALSE;
+static psy_ui_ComponentContainerAlign containeralign;
 
 static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
@@ -326,9 +360,9 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	self->imp = imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
-	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_setalign(self, parent->insertaligntype);
-		psy_ui_component_setmargin(self, parent->insertmargin);
+	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
+		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
 	}
 }
 
@@ -354,9 +388,9 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	}
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
-	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
-		psy_ui_component_setalign(self, parent->insertaligntype);
-		psy_ui_component_setmargin(self, parent->insertmargin);
+	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
+		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
 	}
 }
 
@@ -446,10 +480,8 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 	self->imp->vtable->dev_setposition(self->imp, topleft, size);
 	if (!psy_ui_app()->alignvalid || 
 		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {		
-		if (self->containeralign) {
-			psy_ui_component_align(self);
-		}		
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {				
+		psy_ui_component_align(self);				
 		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_updateoverflow(self);
 		}		
@@ -531,6 +563,11 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {
+	if (!containeralign_initialized) {
+		psy_ui_componentcontaineralign_init(&containeralign);
+		containeralign_initialized = TRUE;
+	}
+	self->containeralign = &containeralign;
 	if (!componentscroll_initialized) {
 		psy_ui_componentscroll_init(&componentscroll);
 		componentscroll_initialized = TRUE;
@@ -542,15 +579,9 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	}
 	self->sizehints = &sizehints;
 	psy_ui_componentstyle_init(&self->style);	
-	self->preventpreferredsize = 0;
-	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
 	self->alignsorted = psy_ui_ALIGN_NONE;
-	self->deallocate = FALSE;		
-	self->insertaligntype = psy_ui_ALIGN_NONE;
-	psy_ui_margin_init(&self->insertmargin);
-	self->containeralign = psy_ui_CONTAINER_ALIGN_LCL;
-	self->alignexpandmode = psy_ui_NOEXPAND;		
+	self->deallocate = FALSE;	
 	psy_ui_componentstyle_init(&self->style);	
 	self->debugflag = 0;
 	self->visible = 1;
@@ -580,6 +611,10 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	if (self->sizehints != &sizehints) {
 		free(self->sizehints);
 		self->sizehints = NULL;
+	}
+	if (self->containeralign != &containeralign) {
+		free(self->containeralign);
+		self->containeralign = NULL;
 	}
 }
 
@@ -737,13 +772,29 @@ int psy_ui_component_drawvisible(psy_ui_Component* self)
 
 
 void psy_ui_component_align(psy_ui_Component* self)
-{		
-	psy_ui_LCLAligner aligner;
+{
+	switch (self->containeralign->containeralign) {
+	case psy_ui_CONTAINER_ALIGN_LCL: {
+		psy_ui_LCLAligner aligner;
 
-	psy_ui_lclaligner_init(&aligner, self);
-	psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
-	psy_signal_emit(&self->signal_align, self, 0);
-	self->vtable->onalign(self);
+		psy_ui_lclaligner_init(&aligner, self);
+		psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
+		psy_signal_emit(&self->signal_align, self, 0);
+		self->vtable->onalign(self);
+		psy_ui_aligner_dispose(psy_ui_lclaligner_base(&aligner));
+		break; }
+	case psy_ui_CONTAINER_ALIGN_GRID: {
+		psy_ui_GridAligner aligner;
+
+		psy_ui_gridaligner_init(&aligner, self);
+		psy_ui_aligner_align(psy_ui_gridaligner_base(&aligner));
+		psy_signal_emit(&self->signal_align, self, 0);
+		self->vtable->onalign(self);
+		psy_ui_aligner_dispose(psy_ui_gridaligner_base(&aligner));
+		break; }
+	default:
+		break;
+	}
 }
 
 void psy_ui_component_align_full(psy_ui_Component* self)
@@ -753,41 +804,13 @@ void psy_ui_component_align_full(psy_ui_Component* self)
 	psy_ui_app()->alignvalid = TRUE;
 }
 
-void psy_ui_component_alignall(psy_ui_Component* self)
-{
-	psy_List* p;
-	psy_List* q;
-
-	// align
+void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{		
 	psy_ui_LCLAligner aligner;
 
 	psy_ui_lclaligner_init(&aligner, self);
-	psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
-	psy_signal_emit(&self->signal_align, self, 0);
-	self->vtable->onalign(self);
-	for (p = q = psy_ui_component_children(self, 1); p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-
-		child = (psy_ui_Component*)psy_list_entry(p);
-		psy_ui_component_align(child);
-	}	
-	psy_list_free(q);
-}
-
-void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{	
-	if (!self->preventpreferredsize) {
-		psy_ui_LCLAligner aligner;
-
-		psy_ui_lclaligner_init(&aligner, self);
-		psy_ui_aligner_preferredsize(psy_ui_lclaligner_base(&aligner), limit, rv);		
-	} else {
-		psy_ui_Size size;
-		
-		size = psy_ui_component_offsetsize(self);
-		*rv = size;
-	}
+	psy_ui_aligner_preferredsize(psy_ui_lclaligner_base(&aligner), limit, rv);	
 }
 
 void onpreferredscrollsize(psy_ui_Component* self, const psy_ui_Size* limit,
@@ -909,17 +932,20 @@ void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 void psy_ui_component_setcontaineralign(psy_ui_Component* self, 
 	psy_ui_ContainerAlignType containeralign)
 {
-	self->containeralign = containeralign;
+	psy_ui_component_usecontaineralign(self);
+	self->containeralign->containeralign = containeralign;
 }
 
 void psy_ui_component_preventalign(psy_ui_Component* self)
 {
-	self->containeralign = psy_ui_CONTAINER_ALIGN_NONE;
+	psy_ui_component_usecontaineralign(self);
+	self->containeralign->containeralign = psy_ui_CONTAINER_ALIGN_NONE;
 }
 
 void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
 {
-	self->alignexpandmode = mode;
+	psy_ui_component_usecontaineralign(self);
+	self->containeralign->alignexpandmode = mode;
 }
 
 void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
@@ -1019,36 +1045,22 @@ void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
-{	
-	if (self->preventpreferredsize) {
-		return psy_ui_component_offsetsize(self);
-	} else {
-		psy_ui_Size rv;
+{		
+	psy_ui_Size rv;
 
-		rv = self->sizehints->preferredsize;
-		if (self->sizehints->preferredwidthset &&
-			self->sizehints->preferredheightset) {
-			return rv;
-		}
-		self->vtable->onpreferredsize(self, limit, &rv);		
+	rv = self->sizehints->preferredsize;
+	if (self->sizehints->preferredwidthset &&
+		self->sizehints->preferredheightset) {
 		return rv;
 	}
+	self->vtable->onpreferredsize(self, limit, &rv);		
+	return rv;	
 }
 
 psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {
 	return psy_ui_component_preferredsize(self, limit);	
-}
-
-void psy_ui_component_preventpreferredsize(psy_ui_Component* self)
-{
-	self->preventpreferredsize = TRUE;
-}
-
-void psy_ui_component_enablepreferredsize(psy_ui_Component* self)
-{
-	self->preventpreferredsize = FALSE;
 }
 
 void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
@@ -1404,16 +1416,16 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		intptr_t visilines;
 		intptr_t currline;
 		psy_ui_Size size;		
-		intptr_t scrollstepy_px;
+		double scrollstepy_px;
 		psy_ui_Value scrolltop;
 		double scrolltoppx;
 
 		tm = psy_ui_component_textmetric(self);		
 		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));		
-		scrollstepy_px = (intptr_t)psy_ui_component_scrollstep_height_px(self);
+		scrollstepy_px = psy_ui_component_scrollstep_height_px(self);
 		preferredscrollsize = psy_ui_component_preferredscrollsize(self, &size);
 		maxlines = (intptr_t)(psy_ui_value_px(&preferredscrollsize.height, tm) /
-			(double)scrollstepy_px);
+			(double)scrollstepy_px + 0.5);
 		visilines = (intptr_t)(psy_ui_value_px(&size.height, tm) /
 			scrollstepy_px);
 		scrolltop = psy_ui_component_scrolltop(self);		
@@ -1494,7 +1506,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 				psy_ui_realpoint_zero(),
 				psy_ui_component_offsetsize_px(self));
 			tm = psy_ui_component_textmetric(self);
-			psy_ui_drawsolidrectangle(g, r, // c);
+			psy_ui_drawsolidrectangle(g, r,
 				psy_ui_component_backgroundcolour(
 					psy_ui_component_parent(self)));
 			psy_ui_drawsolidroundrectangle(g, r,
@@ -1502,7 +1514,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 					psy_ui_value_px(&b->border_bottom_left_radius, tm),
 					psy_ui_value_px(&b->border_bottom_left_radius, tm)),
 				psy_ui_component_backgroundcolour(self));
-		} else {			
+		} else {
 			psy_ui_drawsolidrectangle(g, g->clip,
 				psy_ui_component_backgroundcolour(self));			
 		}
@@ -1512,22 +1524,21 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 void psy_ui_component_usescroll(psy_ui_Component* self)
 {
 	if (self->scroll == &componentscroll) {
-		self->scroll = (psy_ui_ComponentScroll*)malloc(
-			sizeof(psy_ui_ComponentScroll));
-		if (self->scroll) {
-			psy_ui_componentscroll_init(self->scroll);
-		}
+		self->scroll = psy_ui_componentscroll_allocinit();
 	}
 }
 
 void psy_ui_component_usesizehints(psy_ui_Component* self)
 {
 	if (self->sizehints == &sizehints) {
-		self->sizehints = (psy_ui_ComponentSizeHints*)malloc(
-			sizeof(psy_ui_ComponentSizeHints));
-		if (self->sizehints) {
-			psy_ui_componentsizehints_init(self->sizehints);
-		}
+		self->sizehints = psy_ui_componentsizehints_allocinit();
+	}
+}
+
+void psy_ui_component_usecontaineralign(psy_ui_Component* self)
+{
+	if (self->containeralign == &containeralign) {
+		self->containeralign = psy_ui_componentcontaineralign_allocinit();
 	}
 }
 
@@ -1638,8 +1649,9 @@ int psy_ui_component_level(const psy_ui_Component* self)
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType aligntype, psy_ui_Margin margin)
 {
-	self->insertaligntype = aligntype;
-	self->insertmargin = margin;
+	psy_ui_component_usecontaineralign(self);
+	self->containeralign->insertaligntype = aligntype;
+	self->containeralign->insertmargin = margin;
 }
 
 void psy_ui_component_updatelanguage(psy_ui_Component* self)

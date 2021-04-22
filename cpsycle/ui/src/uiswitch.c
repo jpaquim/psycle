@@ -120,8 +120,8 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 void onpreferredsize(psy_ui_Switch* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {				
-		rv->height = psy_ui_value_makeeh(1.5);
-		rv->width = psy_ui_value_makeew(4);
+		rv->height = psy_ui_value_make_eh(1.5);
+		rv->width = psy_ui_value_make_ew(4);
 	}
 }
 
@@ -168,12 +168,12 @@ bool psy_ui_switch_checked(const psy_ui_Switch* self)
 	psy_ui_Size knobsize;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size.width = psy_ui_value_makeew(4);
-	size.height = psy_ui_value_makeeh(1);
-	knobsize.width = psy_ui_value_makeew(2);
-	knobsize.height = psy_ui_value_makeeh(0.7);
-	cornersize.width = psy_ui_value_makeew(0.6);
-	cornersize.height = psy_ui_value_makeeh(0.6);
+	size.width = psy_ui_value_make_ew(4);
+	size.height = psy_ui_value_make_eh(1);
+	knobsize.width = psy_ui_value_make_ew(2);
+	knobsize.height = psy_ui_value_make_eh(0.7);
+	cornersize.width = psy_ui_value_make_ew(0.6);
+	cornersize.height = psy_ui_value_make_eh(0.6);
 	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy + (self->lineheight -
 		psy_ui_value_px(&size.height, tm)) / 2;

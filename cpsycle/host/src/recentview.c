@@ -12,8 +12,8 @@ void recentbar_init(RecentBar* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_CLIENT,
 		psy_ui_margin_make(
-			psy_ui_value_make_px(0), psy_ui_value_makeew(0.5),
-			psy_ui_value_makeeh(0.5), psy_ui_value_makeeh(0.5)));
+			psy_ui_value_make_px(0), psy_ui_value_make_ew(0.5),
+			psy_ui_value_make_eh(0.5), psy_ui_value_make_eh(0.5)));
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -105,12 +105,12 @@ void recentview_onselected(RecentView* self, PropertiesView* sender,
 
 void recentview_ondelete(RecentView* self, psy_ui_Button* sender)
 {
-	if (self->view.renderer.selected &&
-			self->view.renderer.selected->parent ==
+	if (self->view.renderer.state.selected &&
+			self->view.renderer.state.selected->parent ==
 			self->workspace->playlist.recentfiles) {
-		psy_property_remove(self->view.renderer.selected->parent,
-			self->view.renderer.selected);
-		self->view.renderer.selected = NULL;
+		psy_property_remove(self->view.renderer.state.selected->parent,
+			self->view.renderer.state.selected);
+		self->view.renderer.state.selected = NULL;
 		psy_playlist_save(&self->workspace->playlist);
 		psy_ui_component_invalidate(&self->view.component);
 	}
@@ -118,7 +118,7 @@ void recentview_ondelete(RecentView* self, psy_ui_Button* sender)
 
 void recentview_onclear(RecentView* self, psy_ui_Button* sender)
 {
-	self->view.renderer.selected = NULL;
+	self->view.renderer.state.selected = NULL;
 	workspace_clearrecentsongs(self->workspace);
 	psy_ui_component_align(&self->view.component);
 	psy_ui_component_invalidate(&self->view.component);
@@ -145,7 +145,7 @@ void recentview_ontimer(RecentView* self, uintptr_t timerid)
 		
 		next = recentview_next(self);
 		if (next) {						
-			self->view.renderer.selected = next;
+			self->view.renderer.state.selected = next;
 			workspace_loadsong(self->workspace, psy_property_item_str(next), FALSE);			
 			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
 			psy_audio_player_setposition(workspace_player(self->workspace), 0);
@@ -162,14 +162,15 @@ void recentview_ontimer(RecentView* self, uintptr_t timerid)
 
 psy_Property* recentview_next(RecentView* self)
 {
-	if (self->view.renderer.properties && self->view.renderer.selected) {
+	if (self->view.renderer.properties && self->view.renderer.state.selected) {
 		psy_Property* parent;
 
-		parent = self->view.renderer.selected->parent;
+		parent = self->view.renderer.state.selected->parent;
 		if (parent) {
 			psy_List* node;
 			
-			node = psy_list_findentry(parent->children, self->view.renderer.selected);
+			node = psy_list_findentry(parent->children,
+				self->view.renderer.state.selected);
 			if (node) {
 				if (!self->starting) {
 					psy_list_next(&node);
@@ -203,8 +204,8 @@ void recentview_onup(RecentView* self, psy_ui_Button* sender)
 
 void recentview_onmoveup(RecentView* self, psy_ui_Button* sender)
 {
-	if (self->view.renderer.properties && self->view.renderer.selected) {
-		psy_property_moveup(self->view.renderer.selected);
+	if (self->view.renderer.properties && self->view.renderer.state.selected) {
+		psy_property_moveup(self->view.renderer.state.selected);
 		psy_playlist_save(&self->workspace->playlist);
 		psy_ui_component_invalidate(&self->view.renderer.component);
 	}
@@ -212,8 +213,8 @@ void recentview_onmoveup(RecentView* self, psy_ui_Button* sender)
 
 void recentview_onmovedown(RecentView* self, psy_ui_Button* sender)
 {
-	if (self->view.renderer.properties && self->view.renderer.selected) {
-		psy_property_movedown(self->view.renderer.selected);
+	if (self->view.renderer.properties && self->view.renderer.state.selected) {
+		psy_property_movedown(self->view.renderer.state.selected);
 		psy_playlist_save(&self->workspace->playlist);
 		psy_ui_component_invalidate(&self->view.renderer.component);
 	}

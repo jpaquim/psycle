@@ -223,6 +223,9 @@
     <ClCompile Include="src\uilclaligner.c">
       <Filter>aligner</Filter>
     </ClCompile>
+    <ClCompile Include="src\uigridaligner.c">
+      <Filter>aligner</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -415,6 +418,9 @@
       <Filter>aligner</Filter>
     </ClInclude>
     <ClInclude Include="src\uilclaligner.h">
+      <Filter>aligner</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uigridaligner.h">
       <Filter>aligner</Filter>
     </ClInclude>
   </ItemGroup>

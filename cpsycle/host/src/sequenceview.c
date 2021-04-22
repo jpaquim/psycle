@@ -22,9 +22,9 @@ void sequencelistviewstate_init(SequenceListViewState* self,
 
 	self->cmds = cmds;
 
-	self->trackwidth = psy_ui_value_makeew(16.0);
+	self->trackwidth = psy_ui_value_make_ew(16.0);
 	psy_ui_value_setroundmode(&self->trackwidth, psy_ui_ROUND_FLOOR);
-	self->lineheight = psy_ui_value_makeeh(1.2);	
+	self->lineheight = psy_ui_value_make_eh(1.2);	
 	psy_ui_value_setroundmode(&self->lineheight, psy_ui_ROUND_FLOOR);
 	self->cmd = SEQLVCMD_NONE;
 	self->cmd_orderindex = psy_audio_orderindex_zero();
@@ -876,14 +876,14 @@ void sequenceview_onconfigure(SequenceView* self, GeneralConfig* config,
 {
 	if (generalconfig_showingpatternnames(config)) {
 		self->state.showpatternnames = TRUE;
-		self->state.trackwidth = psy_ui_value_makeew(24.0);
+		self->state.trackwidth = psy_ui_value_make_ew(24.0);
 		psy_ui_value_setroundmode(&self->state.trackwidth, psy_ui_ROUND_FLOOR);
 		sequencetrackheaders_build(&self->trackheader);
 		psy_ui_component_align(&self->trackheader.component);
 		psy_ui_component_align(&self->listview.component);
 	} else {
 		self->state.showpatternnames = FALSE;
-		self->state.trackwidth = psy_ui_value_makeew(16.0);
+		self->state.trackwidth = psy_ui_value_make_ew(16.0);
 		psy_ui_value_setroundmode(&self->state.trackwidth, psy_ui_ROUND_FLOOR);
 		sequencetrackheaders_build(&self->trackheader);
 		psy_ui_component_align(&self->trackheader.component);

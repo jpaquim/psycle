@@ -54,11 +54,11 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	double lineheight;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	colew = psy_ui_value_makeew(4);
+	colew = psy_ui_value_make_ew(4);
 	headercolw_px = psy_ui_value_px(&colew, tm);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0, "Ch:", strlen("Ch:"));
-	colew = psy_ui_value_makeew(3.5);
+	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm);
 	for (ch = 0, cpx = headercolw_px; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
 			cpx += colw_px) {
@@ -77,8 +77,8 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 void midiactivechannelbox_onpreferredsize(MidiActiveChannelBox* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makeew(3.5 * 16 + 4);
-	rv->height = psy_ui_value_makeeh(2.4);
+	rv->width = psy_ui_value_make_ew(3.5 * 16 + 4);
+	rv->height = psy_ui_value_make_eh(2.4);
 }
 
 // MidiActiveClockBox
@@ -121,9 +121,9 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 	double lineheight;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	colew = psy_ui_value_makeew(20);
+	colew = psy_ui_value_make_ew(20);
 	headercolw_px = psy_ui_value_px(&colew, tm);
-	colew = psy_ui_value_makeew(3.5);
+	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", strlen("MIDI Sync: START"));
@@ -143,8 +143,8 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 void midiactiveclockbox_onpreferredsize(MidiActiveClockBox* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makeew(22);
-	rv->height = psy_ui_value_makeeh(3 * 1.2);
+	rv->width = psy_ui_value_make_ew(22);
+	rv->height = psy_ui_value_make_eh(3 * 1.2);
 }
 
 // MidiFlagsView
@@ -193,10 +193,10 @@ void midichannelmappingview_init(MidiChannelMappingView* self,
 	vtable_init(self);
 	self->component.vtable = &midichannelmappingview_vtable;
 	self->workspace = workspace;
-	self->colx[0] = psy_ui_value_makeew(0.0);
-	self->colx[1] = psy_ui_value_makeew(10.0);
-	self->colx[2] = psy_ui_value_makeew(30.0);
-	self->colx[3] = psy_ui_value_makeew(50.0);
+	self->colx[0] = psy_ui_value_make_ew(0.0);
+	self->colx[1] = psy_ui_value_make_ew(10.0);
+	self->colx[2] = psy_ui_value_make_ew(30.0);
+	self->colx[3] = psy_ui_value_make_ew(50.0);
 }
 
 void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics* g)
@@ -309,8 +309,8 @@ void midichannelmappingview_drawheader(MidiChannelMappingView* self,
 void midichannelmappingview_onpreferredsize(MidiChannelMappingView* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makeew(62.0);
-	rv->height = psy_ui_value_makeeh(20.0);
+	rv->width = psy_ui_value_make_ew(62.0);
+	rv->height = psy_ui_value_make_eh(20.0);
 }
 
 // MidiMonitor

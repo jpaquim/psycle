@@ -52,8 +52,8 @@ INLINE psy_ui_Point psy_ui_point_makeem(double x, double y)
 {
 	psy_ui_Point rv;
 
-	rv.x = psy_ui_value_makeew(x);
-	rv.y = psy_ui_value_makeeh(y);
+	rv.x = psy_ui_value_make_ew(x);
+	rv.y = psy_ui_value_make_eh(y);
 	return rv;
 }
 
@@ -370,8 +370,8 @@ INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width,
 
 INLINE void psy_ui_size_init_em(psy_ui_Size* self, double width, double height)
 {
-	self->width = psy_ui_value_makeew(width);
-	self->height = psy_ui_value_makeeh(height);
+	self->width = psy_ui_value_make_ew(width);
+	self->height = psy_ui_value_make_eh(height);
 	psy_ui_size_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
@@ -411,8 +411,8 @@ INLINE psy_ui_Size psy_ui_size_makereal(psy_ui_RealSize size)
 {
 	psy_ui_Size rv;
 
-	rv.width = psy_ui_value_makeew(size.width);
-	rv.height = psy_ui_value_makeeh(size.height);
+	rv.width = psy_ui_value_make_ew(size.width);
+	rv.height = psy_ui_value_make_eh(size.height);
 	psy_ui_size_setroundmode(&rv, psy_ui_ROUND_FLOOR);
 	return rv;
 }

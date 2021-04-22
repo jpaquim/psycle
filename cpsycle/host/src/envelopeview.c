@@ -531,7 +531,7 @@ void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin tab;
 	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
-	tab.right = psy_ui_value_makeew(4.0);
+	tab.right = psy_ui_value_make_ew(4.0);
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -617,7 +617,7 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(scrollzoom_base(&self->zoom),
 		psy_ui_size_make(psy_ui_value_make_px(0),
-		psy_ui_value_makeeh(1)));
+		psy_ui_value_make_eh(1)));
 	psy_signal_connect(&self->zoom.signal_zoom, self,
 		envelopeview_onzoom);
 	psy_signal_connect(&self->bar.adsr.signal_clicked, self,

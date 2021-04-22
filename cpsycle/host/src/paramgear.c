@@ -173,8 +173,8 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 	self->level = 2;	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
-		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.1),
-		psy_ui_value_makeeh(0.0), psy_ui_value_makeew(0.0)));	
+		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.1),
+		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0)));	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setscrollstep_width(&self->component, psy_ui_value_make_px(100));
 	if (workspace_song(workspace)) {

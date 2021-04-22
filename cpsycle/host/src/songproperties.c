@@ -101,7 +101,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->label_speed, charnum);
 	psy_ui_component_setdefaultalign(&self->speedbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0),
-			psy_ui_value_makeew(1.0), psy_ui_value_make_px(0),
+			psy_ui_value_make_ew(1.0), psy_ui_value_make_px(0),
 			psy_ui_value_make_px(0)));		
 	// Tempo
 	intedit_init_connect(&self->tempo, &self->speedbar, "songproperties.tempo",

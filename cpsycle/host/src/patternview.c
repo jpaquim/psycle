@@ -309,7 +309,7 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 		psy_ui_Margin margin;
 		
 		margin = psy_ui_component_margin(&tab->component);
-		margin.left = psy_ui_value_makeew(1.0);
+		margin.left = psy_ui_value_make_ew(1.0);
 		psy_ui_component_setmargin(&tab->component, margin);
 	}
 	tab = psy_ui_tabbar_tab(&self->tabbar, 5);
@@ -641,7 +641,7 @@ void patternview_readfont(PatternView* self)
 			psy_property_at_str(pv, "font", "tahoma;-16"));		
 		factor = (double)fontinfo.lfHeight / self->baselfheight *
 			psy_ui_app_zoomrate(psy_ui_app());
-		self->linestate.lineheight = psy_ui_value_makeeh(factor);		
+		self->linestate.lineheight = psy_ui_value_make_eh(factor);		
 		fontinfo.lfHeight = (int)(-16 * factor);
 		psy_ui_font_init(&font, &fontinfo);
 		patternview_setfont(self, &font);

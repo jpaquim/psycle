@@ -46,6 +46,19 @@ typedef enum {
 
 struct psy_ui_Component;
 
+typedef struct psy_ui_ComponentContainerAlign {
+	int alignexpandmode;
+	int containeralign;
+	psy_ui_AlignType insertaligntype;
+	psy_ui_Margin insertmargin;
+} psy_ui_ComponentContainerAlign;
+
+void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign*);
+
+psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_alloc(void);
+psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_allocinit(void);
+void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign*);
+
 // vtable function pointers
 typedef void (*psy_ui_fp_component_dispose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_destroy)(struct psy_ui_Component*);
@@ -189,19 +202,14 @@ typedef struct psy_ui_Component {
 	psy_ui_ComponentStyle style;
 	psy_ui_ComponentScroll* scroll;
 	bool visible;
-	bool preventpreferredsize;
-	intptr_t preventpreferredsizeatalign;	
 	psy_ui_AlignType align;
-	int alignexpandmode;
-	int containeralign;
-	psy_ui_AlignType insertaligntype;
-	psy_ui_Margin insertmargin;	
+	psy_ui_AlignType alignsorted;
+	psy_ui_ComponentContainerAlign* containeralign;
 	uintptr_t tabindex;
 	bool deallocate;
 	uintptr_t opcount;
 	intptr_t debugflag;
-	bool draggable;
-	psy_ui_AlignType alignsorted;
+	bool draggable;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -246,8 +254,9 @@ void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_togglevisibility(psy_ui_Component*);
 
-void psy_ui_component_usescroll(psy_ui_Component* self);
-void psy_ui_component_usesizehints(psy_ui_Component* self);
+void psy_ui_component_usescroll(psy_ui_Component*);
+void psy_ui_component_usesizehints(psy_ui_Component*);
+void psy_ui_component_usecontaineralign(psy_ui_Component*);
 
 INLINE psy_ui_IntPoint psy_ui_component_horizontalscrollrange(
 	const psy_ui_Component* self)
@@ -301,7 +310,6 @@ int psy_ui_component_visible(psy_ui_Component*);
 int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
-void psy_ui_component_alignall(psy_ui_Component*);
 
 INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
 {
@@ -358,8 +366,6 @@ void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
 const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component*);
-void psy_ui_component_preventpreferredsize(psy_ui_Component*);
-void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
 void psy_ui_component_setcursor(psy_ui_Component*, psy_ui_CursorStyle);

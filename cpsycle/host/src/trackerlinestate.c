@@ -31,7 +31,7 @@ void trackerlinestate_init(TrackerLineState* self)
 {
 	assert(self);
 
-	self->defaultlineheight = psy_ui_value_makeeh(1.0);
+	self->defaultlineheight = psy_ui_value_make_eh(1.0);
 	self->lineheight = self->defaultlineheight;
 	self->lineheightpx = 13.0;
 	self->flatsize = 8;

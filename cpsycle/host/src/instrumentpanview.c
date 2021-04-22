@@ -53,7 +53,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->instpan, &self->top, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
-	margin.top = psy_ui_value_makeeh(1.0);
+	margin.top = psy_ui_value_make_eh(1.0);
 	psy_ui_component_setmargin(&self->instpan, margin);
 	psy_ui_component_setdefaultalign(&self->instpan, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -86,7 +86,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->envelopeview.component,
 		psy_ui_ALIGN_CLIENT);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
-	margin.top = psy_ui_value_makeeh(1.0);
+	margin.top = psy_ui_value_make_eh(1.0);
 	adsrsliders_init(&self->adsrsliders, &self->component);
 	psy_ui_component_setalign(&self->adsrsliders.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->adsrsliders.component, margin);

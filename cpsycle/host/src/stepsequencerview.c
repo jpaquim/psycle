@@ -312,7 +312,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		psy_ui_Value width;
 		double stepwidth;
 
-		width = psy_ui_value_makeew(4.0);
+		width = psy_ui_value_make_ew(4.0);
 		stepwidth = psy_ui_value_px(&width,
 			psy_ui_component_textmetric(&self->component));
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(self->workspace));
@@ -573,8 +573,8 @@ void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
 void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	rv->width = psy_ui_value_makeew(16);
-	rv->height = psy_ui_value_makeeh(1.6);
+	rv->width = psy_ui_value_make_ew(16);
+	rv->height = psy_ui_value_make_eh(1.6);
 }
 
 void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,

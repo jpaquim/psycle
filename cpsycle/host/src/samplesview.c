@@ -63,7 +63,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make(psy_ui_value_make_px(0),
-			psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
+			psy_ui_value_make_ew(0.5), psy_ui_value_make_eh(1.0),
 			psy_ui_value_make_px(0)));
 	psy_ui_label_init_text(&self->label, &self->header, NULL, "Source");
 	psy_ui_label_init_text(&self->songname, &self->header, NULL,
@@ -338,7 +338,7 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_slider_init(&self->defaultvolume, &self->component, NULL);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
-	psy_ui_margin_settop(&margin, psy_ui_value_makeeh(1.0));
+	psy_ui_margin_settop(&margin, psy_ui_value_make_eh(1.0));
 	psy_ui_component_setmargin(&self->defaultvolume.component, margin);
 	psy_ui_slider_init(&self->globalvolume, &self->component, NULL);
 	psy_ui_slider_init(&self->panposition, &self->component, NULL);
@@ -571,7 +571,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			(ui_slider_fpvalue)vibratoview_onvalue);
 	}
 	margin = psy_ui_component_margin(&sliders[0]->component);
-	margin.top = psy_ui_value_makeew(2.0);	
+	margin.top = psy_ui_value_make_ew(2.0);	
 	psy_ui_component_setmargin(&sliders[0]->component, margin);
 }
 

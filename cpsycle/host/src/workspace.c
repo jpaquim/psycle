@@ -371,13 +371,14 @@ void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender,
 	psy_signal_emit(&self->signal_scanprogress, self, 1, progress);
 }
 
-void workspace_configurationchanged(Workspace* self, psy_Property* property)
+uintptr_t workspace_configurationchanged(Workspace* self, psy_Property* property)
 {
+	uintptr_t rebuild;
 	bool worked;
 	assert(self && property);
 	
-
 	worked = TRUE;
+	rebuild = FALSE;
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_REGENERATEPLUGINCACHE:
 		workspace_scanplugins(self);
@@ -462,8 +463,8 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 			if (choice && psy_property_id(choice) == PROPERTY_ID_APPTHEME) {
 				workspace_setapptheme(self, property);
 				worked = TRUE;
-			} else if (audioconfig_onpropertychanged(&self->config.audio, property)) {
-				worked = TRUE;
+			} else if (audioconfig_onpropertychanged(&self->config.audio, property, &rebuild)) {
+				worked = TRUE;				
 			} else if (languageconfig_onchanged(
 				&self->config.language, property)) {
 				worked = TRUE;
@@ -471,6 +472,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
 					eventdriverconfig_showactiveeventdriverconfig(
 						&self->config.input, psy_property_item_int(choice));
+					rebuild = TRUE;
 			} else if (choice && (psy_property_id(choice) ==
 					PROPERTY_ID_PATTERNDISPLAY)) {
 				workspace_selectpatterndisplay(self,
@@ -480,7 +482,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 				audioconfig_oneditaudiodriverconfiguration(&self->config.audio,
 					psycleconfig_audioenabled(&self->config));
 				audioconfig_driverconfigure_section(&self->config.audio);
-				return;
+				return TRUE;
 			} else if (psy_property_insection(property,
 					self->config.input.eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
@@ -489,6 +491,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 					self->config.midi.controllers, FALSE);
 				midiviewconfig_makecontrollersave(
 					psycleconfig_midi(&self->config));
+				rebuild = TRUE;
 			} else if (psy_property_insection(property, self->config.metronome.metronome)) {
 				workspace_updatemetronome(self);
 			} else {
@@ -500,13 +503,14 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 	if (!worked) {
 		psycleconfig_notify_changed(&self->config, property);
 		psy_signal_emit(&self->signal_configchanged, self, 1, property);
-	}	
+	}
+	return rebuild;
 }
 
 void workspace_onpatternviewconfigurationchanged(Workspace* self, PatternViewConfig* sender)
 {
-	self->patternsinglemode =
-		patternviewconfig_issinglepatterndisplay(&self->config.patview);
+	self->patternsinglemode = patternviewconfig_issinglepatterndisplay(
+		&self->config.patview);
 }
 
 void workspace_onloadskin(Workspace* self)

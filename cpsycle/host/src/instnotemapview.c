@@ -650,7 +650,7 @@ void instrumententryview_outputstatus(InstrumentEntryView* self, uint8_t key)
 void instrumententrytablecolumn_init(InstrumentEntryTableColumn* self,
 	const char* label)
 {	
-	self->width = psy_ui_value_makeew(COLWIDTH);
+	self->width = psy_ui_value_make_ew(COLWIDTH);
 	self->label = psy_strdup(label);
 	self->translation = NULL;
 }
@@ -1392,8 +1392,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	psy_ui_component_init(&self->table, &self->component, NULL);
 	psy_ui_component_setalign(&self->table, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->table,
-		psy_ui_size_make_em(0.0, 6.0));
-	self->table.preventpreferredsizeatalign = 1;	
+		psy_ui_size_make_em(0.0, 6.0));	
 	instrumententrytableviewheader_init(&self->tableheader,
 		&self->table, &self->state, workspace);
 	psy_ui_component_setalign(&self->tableheader.component, psy_ui_ALIGN_TOP);
