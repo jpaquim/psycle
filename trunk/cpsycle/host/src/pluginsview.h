@@ -64,6 +64,23 @@ bool newmachinefilter_useanycategory(const NewMachineFilter*);
 bool newmachinefilter_hascategory(const NewMachineFilter*,
 	const char* category);
 
+typedef struct NewMachineSelection {
+	psy_List* items;
+} NewMachineSelection;
+
+void newmachineselection_init(NewMachineSelection*);
+void newmachineselection_dispose(NewMachineSelection*);
+
+void newmachineselection_clear(NewMachineSelection*);
+void newmachineselection_select(NewMachineSelection*, uintptr_t index);
+void newmachineselection_singleselect(NewMachineSelection*, uintptr_t index);
+void newmachineselection_selectall(NewMachineSelection*, uintptr_t size);
+void newmachineselection_deselect(NewMachineSelection*, uintptr_t index);
+void newmachineselection_toggle(NewMachineSelection*, uintptr_t index);
+bool newmachineselection_isselected(const NewMachineSelection*,
+	uintptr_t index);
+uintptr_t newmachineselection_first(const NewMachineSelection*);
+
 // PluginsView
 typedef struct PluginsView {
 	// inherits
@@ -84,10 +101,13 @@ typedef struct PluginsView {
 	psy_Property* plugins;
 	// Filtered Plugins
 	psy_Property* filteredplugins;
-	psy_Property* selectedplugin;  	
 	bool generatorsenabled;
 	bool effectsenabled;
 	int mode;
+	psy_ui_RealPoint dragpt;
+	bool multidrag;
+	uintptr_t dragindex;
+	NewMachineSelection selection;
 	// References
 	NewMachineFilter* filter;
 	NewMachineSort* sort;	
@@ -102,6 +122,8 @@ void pluginsview_setfilter(PluginsView*, NewMachineFilter*);
 void pluginsview_filter(PluginsView*);
 void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);
+psy_Property* pluginsview_selectedplugin(PluginsView*);
+
 
 #ifdef __cplusplus
 }

@@ -102,7 +102,84 @@ int newmachine_comp_mode(psy_Property* p, psy_Property* q)
 		(int)psy_property_at_int(q, "mode", 128);
 }
 
+// NewMachineSelection
+void newmachineselection_init(NewMachineSelection* self)
+{
+	self->items = NULL;
+}
 
+void newmachineselection_dispose(NewMachineSelection* self)
+{
+	psy_list_free(self->items);
+	self->items = NULL;
+}
+
+void newmachineselection_clear(NewMachineSelection* self)
+{
+	psy_list_free(self->items);
+	self->items = NULL;
+}
+
+void newmachineselection_select(NewMachineSelection* self, uintptr_t index)
+{
+	if (!psy_list_findentry(self->items, (void*)index)) {
+		psy_list_append(&self->items, (void*)index);
+	}
+}
+
+void newmachineselection_singleselect(NewMachineSelection* self, uintptr_t index)
+{
+	newmachineselection_clear(self);
+	psy_list_append(&self->items, (void*)index);
+}
+
+void newmachineselection_selectall(NewMachineSelection* self, uintptr_t size)
+{
+	uintptr_t i;
+
+	newmachineselection_clear(self);
+	for (i = 0; i < size; ++i) {
+		psy_list_append(&self->items, (void*)i);
+	}	
+}
+
+void newmachineselection_deselect(NewMachineSelection* self, uintptr_t index)
+{
+	psy_List* p;
+
+	p = psy_list_findentry(self->items, (void*)index);
+	if (p) {
+		psy_list_remove(&self->items, p);
+	}	
+}
+
+void newmachineselection_toggle(NewMachineSelection* self, uintptr_t index)
+{
+	psy_List* p;
+
+	p = psy_list_findentry(self->items, (void*)index);
+	if (p) {
+		psy_list_remove(&self->items, p);
+	} else {
+		psy_list_append(&self->items, (void*)index);
+	}
+}
+
+bool newmachineselection_isselected(const NewMachineSelection* self,
+	uintptr_t index)
+{
+	return psy_list_findentry(self->items, (void*)index) != NULL;
+}
+
+uintptr_t newmachineselection_first(const NewMachineSelection* self)
+{
+	if (self->items) {
+		return (uintptr_t)self->items->entry;
+	}
+	return psy_INDEX_INVALID;
+}
+
+// NewMachineSort
 void newmachinesort_init(NewMachineSort* self)
 {
 	self->mode = NEWMACHINESORTMODE_NONE;
@@ -329,7 +406,7 @@ void searchfilter(psy_Property* plugin, NewMachineFilter* filter,
 static void pluginsview_ondestroy(PluginsView*);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
-	psy_ui_RealPoint topleft);
+	psy_ui_RealPoint topleft, bool sel);
 static void pluginsview_onpreferredscrollsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
@@ -338,8 +415,9 @@ static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
 static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 	intptr_t col, intptr_t row);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
+static void pluginsview_onmouseup(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
-static void pluginsview_hittest(PluginsView*, double x, double y);
+static uintptr_t pluginsview_hittest(PluginsView*, double x, double y);
 static void pluginsview_computetextsizes(PluginsView*, double width);
 static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
@@ -371,6 +449,9 @@ static void pluginsview_vtable_init(PluginsView* self)
 		pluginsview_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			pluginsview_onmousedown;
+		pluginsview_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			pluginsview_onmouseup;
 		pluginsview_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			pluginsview_onmousedoubleclick;
@@ -396,12 +477,12 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 	self->mode = NEWMACHINE_APPEND;
 	self->currplugins = NULL;
 	self->plugins = NULL;
-	self->filteredplugins = NULL;
-	self->selectedplugin = NULL;
+	self->filteredplugins = NULL;	
 	self->filter = NULL;
 	self->sort = NULL;
 	self->generatorsenabled = TRUE;
-	self->effectsenabled = TRUE;		
+	self->effectsenabled = TRUE;
+	newmachineselection_init(&self->selection);
 	pluginsview_computetextsizes(self, 1024.0);
 }
 
@@ -414,6 +495,7 @@ void pluginsview_ondestroy(PluginsView* self)
 		psy_signal_disconnect(&self->filter->signal_changed, self,
 			pluginsview_onfilterchanged);
 	}
+	newmachineselection_dispose(&self->selection);
 }
 
 void pluginsview_clear(PluginsView* self)
@@ -423,14 +505,14 @@ void pluginsview_clear(PluginsView* self)
 		self->filteredplugins = NULL;
 		psy_property_deallocate(self->plugins);		
 		self->plugins = NULL;
-		self->selectedplugin = NULL;
+		newmachineselection_clear(&self->selection);		
 		self->currplugins = NULL;
 	}				
 }
 
 void pluginsview_clearfilter(PluginsView* self)
 {
-	self->selectedplugin = NULL;
+	newmachineselection_clear(&self->selection);
 	self->currplugins = self->plugins;
 	if (self->filteredplugins) {
 		psy_property_deallocate(self->filteredplugins);
@@ -484,6 +566,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_Colour overlaycolour;
 		int overlay;
 		psy_ui_Colour oddlinebgcolour;
+		uintptr_t i;
 		
 		size = psy_ui_component_innersize_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
@@ -495,10 +578,10 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		overlay = 2;
 		oddlinebgcolour = psy_ui_colour_overlayed(&bgcolour, &overlaycolour,
 			overlay / 100.0);
-		for (p = psy_property_begin(self->currplugins);
-				p != NULL; psy_list_next(&p)) {			
+		for (p = psy_property_begin(self->currplugins), i = 0;
+				p != NULL; psy_list_next(&p), ++i) {			
 			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
-				cp);
+				cp, newmachineselection_isselected(&self->selection, i));
 			cp.x += self->columnwidth;
 			if (cp.x >= self->numparametercols * self->columnwidth) {
 				cp.x = 0.0;
@@ -518,12 +601,16 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 }
 
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
-	psy_Property* property, psy_ui_RealPoint topleft)
+	psy_Property* property, psy_ui_RealPoint topleft, bool sel)
 {
 	char text[128];
 
-	if (property == self->selectedplugin) {
-		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));		
+	if (sel) {		
+		psy_ui_drawsolidrectangle(g, 
+			psy_ui_realrectangle_make(
+				topleft,
+				psy_ui_realsize_make(self->columnwidth - 5, self->lineheight)),
+			psy_ui_colour_make(0x009B7800));
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	} else {
 		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
@@ -642,7 +729,24 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 
 void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 {
-	if (self->selectedplugin) {
+	psy_Property* selected;
+
+	if (ev->keycode == psy_ui_KEY_CONTROL) {
+		psy_ui_keyevent_stoppropagation(ev);
+		return;
+	}
+	if (ev->ctrl && ev->keycode == psy_ui_KEY_A) {
+		if (self->plugins) {
+			newmachineselection_selectall(&self->selection,
+				psy_property_size(self->currplugins));
+			psy_ui_component_invalidate(&self->component);
+			psy_signal_emit(&self->signal_changed, self, 0);
+		}
+		psy_ui_keyevent_stoppropagation(ev);
+		return;
+	}
+	selected = pluginsview_selectedplugin(self);
+	if (selected) {
 		psy_Property* plugin;
 		uintptr_t col;
 		uintptr_t row;
@@ -650,17 +754,16 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 		col = 0;
 		row = 0;
 		plugin = NULL;
-		pluginsview_cursorposition(self, self->selectedplugin, &col, &row);
+		pluginsview_cursorposition(self, selected, &col, &row);
 		switch (ev->keycode) {
 			case psy_ui_KEY_RETURN:
-				if (self->selectedplugin) {
-					psy_signal_emit(&self->signal_selected, self, 1,
-						self->selectedplugin);					
+				if (selected) {
+					psy_signal_emit(&self->signal_selected, self, 0);
 					psy_ui_keyevent_stoppropagation(ev);
 				}
 				break;
 			case psy_ui_KEY_DELETE:
-				if (self->selectedplugin) {
+				if (selected) {
 					// psy_Property* p;
 					// p = psy_property_find(self->workspace->plugincatcher.plugins,
 					//		psy_property_key(self->selectedplugin),
@@ -734,17 +837,16 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 		}		
 		plugin = pluginsview_pluginbycursorposition(self, col, row);
 		if (plugin) {
-			self->selectedplugin = plugin;
-			psy_signal_emit(&self->signal_changed, self, 1,
-				self->selectedplugin);
+			newmachineselection_singleselect(&self->selection,
+				row * self->numparametercols + col);
+			psy_signal_emit(&self->signal_changed, self, 0);
 			psy_ui_component_invalidate(&self->component);
 		}
 	} else
 	if (ev->keycode >= psy_ui_KEY_LEFT && ev->keycode <= psy_ui_KEY_DOWN) {
 		if (self->currplugins && !psy_property_empty(self->currplugins)) {
-			self->selectedplugin = psy_property_first(self->currplugins);
-			psy_signal_emit(&self->signal_changed, self, 1,
-				self->selectedplugin);
+			newmachineselection_singleselect(&self->selection, 0);			
+			psy_signal_emit(&self->signal_changed, self, 0);
 			psy_ui_component_invalidate(&self->component);
 		}
 	}	
@@ -810,37 +912,65 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {	
+	self->multidrag = FALSE;
 	if (ev->button == 1) {		
-		pluginsview_hittest(self, ev->pt.x, ev->pt.y);
+		uintptr_t index;
+
+		index = pluginsview_hittest(self, ev->pt.x, ev->pt.y);
+		if (index != psy_INDEX_INVALID) {			
+			if (ev->ctrl) {
+				newmachineselection_toggle(&self->selection, index);
+			} else {
+				if (psy_list_size(self->selection.items) > 1 &&
+					newmachineselection_isselected(&self->selection, index)) {
+					self->dragpt = ev->pt;
+					self->multidrag = TRUE;
+					self->dragindex = index;
+				} else {
+					newmachineselection_singleselect(&self->selection, index);
+				}
+			}
+		}
 		psy_ui_component_invalidate(&self->component);
-		psy_signal_emit(&self->signal_changed, self, 1,
-			self->selectedplugin);		
-		psy_ui_component_setfocus(&self->component);		
+		psy_signal_emit(&self->signal_changed, self, 0);
+		psy_ui_component_setfocus(&self->component);
 	}
 	pluginsview_super_vtable.onmousedown(&self->component, ev);
 }
 
-void pluginsview_hittest(PluginsView* self, double x, double y)
+void pluginsview_onmouseup(PluginsView* self, psy_ui_MouseEvent* ev)
+{
+	if (self->multidrag && psy_ui_realpoint_equal(&self->dragpt, &ev->pt)) {
+		newmachineselection_singleselect(&self->selection, self->dragindex);
+		psy_ui_component_invalidate(&self->component);
+		psy_signal_emit(&self->signal_changed, self, 0);
+		psy_ui_component_setfocus(&self->component);
+	}
+}
+
+
+uintptr_t pluginsview_hittest(PluginsView* self, double x, double y)
 {				
 	if (self->plugins) {
 		psy_List* p;
 		double cpx;
 		double cpy;
 		psy_ui_RealSize size;
+		uintptr_t i;
 
 		size = psy_ui_component_innersize_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
-		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0;
-				p != NULL; psy_list_next(&p)) {
+		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0, i = 0;
+				p != NULL; psy_list_next(&p), ++i) {
 			psy_ui_RealRectangle r;
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
 			if (psy_ui_realrectangle_intersect(&r,
 					psy_ui_realpoint_make(x, y))) {
-				if (pluginenabled(self, (psy_Property*)psy_list_entry(p))) {
-					self->selectedplugin = (psy_Property*)psy_list_entry(p);
-				}
+				// if (pluginenabled(self, (psy_Property*)psy_list_entry(p))) {
+				//	self->selectedplugin = (psy_Property*)psy_list_entry(p);
+				//}
 				break;
 			}		
 			cpx += self->columnwidth;
@@ -849,14 +979,17 @@ void pluginsview_hittest(PluginsView* self, double x, double y)
 				cpy += self->lineheight;
 			}
 		}
+		if (p) {
+			return i;
+		}
 	}
+	return psy_INDEX_INVALID;
 }
 
 void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 {
-	if (self->selectedplugin) {		
-		psy_signal_emit(&self->signal_selected, self, 1,
-			self->selectedplugin);
+	if (newmachineselection_first(&self->selection) != psy_INDEX_INVALID) {		
+		psy_signal_emit(&self->signal_selected, self, 0);
 //		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
 //			SECTION_ID_MACHINEVIEW_WIRES, 0);
 		psy_ui_mouseevent_stoppropagation(ev);		
@@ -874,8 +1007,7 @@ void pluginsview_filter(PluginsView* self)
 		pluginsview_clearfilter(self);
 		self->filteredplugins = search(self->plugins, self->filter);
 		self->currplugins = self->filteredplugins;
-		psy_signal_emit(&self->signal_changed, self, 1,
-			self->selectedplugin);
+		psy_signal_emit(&self->signal_changed, self, 0);
 		psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
 		psy_ui_component_updateoverflow(&self->component);
 		psy_ui_component_invalidate(&self->component);
@@ -913,19 +1045,38 @@ void pluginsview_sort(PluginsView* self, NewMachineSortMode mode)
 		if (fp_compare) {
 			sorted = newmachine_sort(self->plugins, fp_compare);
 			pluginsview_setplugins(self, sorted);
-			psy_signal_emit(&self->signal_changed, self, 1,
-				self->selectedplugin);
+			psy_signal_emit(&self->signal_changed, self, 0);
 		}
 	}
 }
 
+psy_Property* pluginsview_selectedplugin(PluginsView* self)
+{
+	uintptr_t first;
+
+	first = newmachineselection_first(&self->selection);
+	if (first != psy_INDEX_INVALID) {
+		return psy_property_at_index(self->currplugins, first);
+	}
+	return NULL;
+}
+
 void pluginsview_ondragstart(PluginsView* self, psy_ui_DragEvent* ev)
 {
-	if (self->plugins && self->selectedplugin) {		
-		ev->dataTransfer = psy_property_allocinit_key(NULL);
-		psy_property_append_str(ev->dataTransfer, "text",
-			psy_property_key(self->selectedplugin));
-		psy_property_append_str(ev->dataTransfer, "section",
-			psy_property_key(self->plugins));
+	if (self->plugins && self->selection.items) {		
+		psy_List* p;
+
+		ev->dataTransfer = psy_property_allocinit_key(NULL);		
+		for (p = self->selection.items; p != NULL; p = p->next) {
+			psy_Property* plugin;
+
+			plugin = psy_property_at_index(self->currplugins, (uintptr_t)p->entry);
+			if (plugin) {				
+				plugin = psy_property_append_section(ev->dataTransfer,
+					psy_property_key(plugin));
+				psy_property_append_str(plugin, "section",
+					psy_property_key(self->plugins));
+			}
+		}
 	}
 }
