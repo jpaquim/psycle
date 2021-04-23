@@ -130,7 +130,7 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 	self->theme = psy_property_settext(
 		psy_property_append_section(parent, "theme"),
 		"settingsview.theme");
-	psy_property_append_string(self->theme,
+	psy_property_append_str(self->theme,
 		"pattern_fontface", "Tahoma");
 	psy_property_append_int(self->theme, "pattern_font_point", 0x00000050, 0, 0),
 		psy_property_append_int(self->theme, "pattern_font_flags", 0x00000001, 0, 0);
@@ -142,7 +142,7 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 		psy_property_append_int(self->theme,
 			"pattern_font_y", 0x0000000B, 0, 0),
 		"Point Y");
-	psy_property_append_string(self->theme, "pattern_header_skin", "");
+	psy_property_append_str(self->theme, "pattern_header_skin", "");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"pvc_separator", 0x00292929, 0, 0),

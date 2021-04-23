@@ -35,6 +35,8 @@ void seqeditorstate_init(SeqEditorState* self, Workspace* workspace,
 	self->drawcursor = TRUE;
 	self->drawpatternevents = TRUE;	
 	self->dragstatus = FALSE;
+	self->dragstart = FALSE;
+	self->dragstartoffset = 0.0;
 	self->dragpt = psy_ui_realpoint_zero();
 	self->dragseqpos = psy_audio_orderindex_zero();	
 	self->dragmode = SEQEDITORDRAG_MOVE;
@@ -609,12 +611,20 @@ void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry* self,
 		position =
 			(intptr_t)(position * psy_audio_player_lpb(workspace_player(self->state->workspace))) /
 			(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->state->workspace));
+		self->state->dragstartoffset = self->sequenceentry->offset + position;
 		cursor.offset = position;
 		workspace_setpatterncursor(self->state->workspace, cursor);
 		cursor = self->state->workspace->patterneditposition;
 		workspace_gotocursor(self->state->workspace, cursor);
+		if (workspace_currview(self->state->workspace).id != VIEW_ID_PATTERNVIEW) {
+			workspace_selectview(self->state->workspace,
+				VIEW_ID_PATTERNVIEW,
+				workspace_currview(self->state->workspace).section,
+				0);
+		}		
 		//self->itemdragposition = self->sequenceentry->offset;
 		self->state->dragstatus = TRUE;
+		self->state->dragstart = TRUE;
 		self->state->dragseqpos = self->seqpos;
 		self->state->sequenceentry = self->sequenceentry;		
 	}
@@ -893,8 +903,24 @@ void seqeditortrack_onmousedown(SeqEditorTrack* self, psy_ui_MouseEvent* ev)
 
 void seqeditortrack_onmousemove(SeqEditorTrack* self, psy_ui_MouseEvent* ev)
 {
+	if (self->state->dragstart) {
+		psy_dsp_big_beat_t dragposition;		
+		psy_dsp_big_beat_t bpl;
+
+		dragposition = seqeditorstate_pxtobeat(self->state, ev->pt.x);
+		bpl = (1.0 / (psy_dsp_big_beat_t)
+			psy_audio_player_lpb(workspace_player(self->workspace)));
+		// start drag only if a difference of one line exists if only the
+		// pattern cursor (done in seqeditor_patternentry) wanted to be changed
+		// and prevent moving the sequencentry
+		if (fabs(dragposition - self->state->dragstartoffset) >= bpl) {
+			self->state->dragstart = FALSE;
+		}
+		return;
+	}
 	if (self->state->dragstatus && self->state->sequenceentry) {
-		if (self->state->dragmode == SEQEDITORDRAG_MOVE) {
+		if ((self->state->dragmode & SEQEDITORDRAG_MOVE) ==
+				SEQEDITORDRAG_MOVE) {
 			psy_dsp_big_beat_t dragposition;
 
 			dragposition = seqeditorstate_pxtobeat(self->state, ev->pt.x);
@@ -913,7 +939,8 @@ void seqeditortrack_onmousemove(SeqEditorTrack* self, psy_ui_MouseEvent* ev)
 			self->state->sequenceentry->offset = dragposition;			
 			psy_audio_sequence_reposition_track(
 				&workspace_song(self->workspace)->sequence, self->currtrack);			
-		} else if (self->dragline && self->state->dragmode == SEQEDITORDRAG_REORDER) {
+		} else if (self->dragline &&
+				((self->state->dragmode & SEQEDITORDRAG_REORDER) == SEQEDITORDRAG_REORDER)) {
 			psy_dsp_big_beat_t dragposition;
 
 			dragposition = seqeditorstate_pxtobeat(self->state, ev->pt.x);			
@@ -1320,7 +1347,7 @@ void seqeditortracks_onupdatestyles(SeqEditorTracks* self)
 void seqeditortracks_onmousedown(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->state->dragmode == SEQEDITORDRAG_REORDER) {
+	if ((self->state->dragmode & SEQEDITORDRAG_REORDER) == SEQEDITORDRAG_REORDER) {
 		if (self->cursorline) {
 			psy_ui_component_hide(&self->cursorline->component);
 			psy_ui_component_invalidate(&self->component);
@@ -1331,7 +1358,7 @@ void seqeditortracks_onmousedown(SeqEditorTracks* self,
 void seqeditortracks_onmousemove(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
-	if (self->state->dragstatus && self->state->dragmode == SEQEDITORDRAG_MOVE) {
+	if (self->state->dragstatus && (self->state->dragmode & SEQEDITORDRAG_MOVE) == SEQEDITORDRAG_MOVE) {
 		seqeditortracks_updateseqeditlineposition(self);
 	}
 	seqeditortracks_outputstatusposition(self, ev->pt.x);

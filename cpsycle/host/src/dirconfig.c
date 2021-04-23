@@ -46,12 +46,12 @@ void dirconfig_make(DirConfig* self)
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
 	psy_property_sethint(
 		psy_property_settext(
-			psy_property_append_string(self->directories,
+			psy_property_append_str(self->directories,
 				"app", PSYCLE_APP_DIR), "App directory"),
 #else
 	psy_property_sethint(
 		psy_property_settext(
-			psy_property_append_string(self->directories,
+			psy_property_append_str(self->directories,
 				"app", PSYCLE_APP64_DIR), "App directory"),
 #endif
 		PSY_PROPERTY_HINT_HIDE);
@@ -105,7 +105,7 @@ void dirconfig_append(DirConfig* self, const char* key,
 
 	psy_property_sethint(
 		psy_property_settext(
-			psy_property_append_string(self->directories, key, defaultdir),
+			psy_property_append_str(self->directories, key, defaultdir),
 			label),
 		PSY_PROPERTY_HINT_EDITDIR);
 }

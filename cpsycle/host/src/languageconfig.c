@@ -63,7 +63,7 @@ int languageconfig_enumlanguagedir(LanguageConfig* self, const char* path,
 	assert(self);
 
 	if (psy_translator_test(self->translator, path, lang)) {
-		psy_property_settext(psy_property_append_string(
+		psy_property_settext(psy_property_append_str(
 			self->languagechoice, lang, path), lang);
 	}
 	return TRUE;

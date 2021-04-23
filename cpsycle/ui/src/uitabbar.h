@@ -81,6 +81,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label);
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
 void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tabindex);
+void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tabindex);
 
 INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 {	

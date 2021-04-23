@@ -254,17 +254,17 @@ void tabbar_ontabclicked(psy_ui_TabBar* self, psy_ui_Tab* sender)
 	psy_ui_tabbar_select(self, sender->index);	
 }
 
-void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
+void psy_ui_tabbar_mark(psy_ui_TabBar* self, uintptr_t tabindex)
 {
-	psy_ui_Tab* tab;	
+	psy_ui_Tab* tab;
 
 	assert(self);
-		
-	tab = psy_ui_tabbar_tab(self, tabindex);	
+
+	tab = psy_ui_tabbar_tab(self, tabindex);
 	if (tab) {
 		if (tab && tab->mode == psy_ui_TABMODE_LABEL) {
 			return;
-		}		
+		}
 		if (!tab->istoggle) {
 			psy_ui_Tab* oldtab;
 
@@ -273,11 +273,16 @@ void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 				psy_ui_component_removestylestate(&oldtab->component,
 					psy_ui_STYLESTATE_SELECT);
 			}
-			self->selected = tabindex;				
+			self->selected = tabindex;
 			psy_ui_component_addstylestate(&tab->component,
 				psy_ui_STYLESTATE_SELECT);
-		}		
-	}	
+		}
+	}
+}
+
+void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
+{
+	psy_ui_tabbar_mark(self, tabindex);
 	psy_signal_emit(&self->signal_change, self, 1, tabindex);	
 }
 

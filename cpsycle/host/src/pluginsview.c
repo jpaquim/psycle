@@ -921,7 +921,11 @@ void pluginsview_sort(PluginsView* self, NewMachineSortMode mode)
 
 void pluginsview_ondragstart(PluginsView* self, psy_ui_DragEvent* ev)
 {
-	if (self->selectedplugin) {		
-		ev->dataTransfer = psy_property_clone(self->selectedplugin);
+	if (self->plugins && self->selectedplugin) {		
+		ev->dataTransfer = psy_property_allocinit_key(NULL);
+		psy_property_append_str(ev->dataTransfer, "text",
+			psy_property_key(self->selectedplugin));
+		psy_property_append_str(ev->dataTransfer, "section",
+			psy_property_key(self->plugins));
 	}
 }

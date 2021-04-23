@@ -160,7 +160,7 @@ int propertiesio_load(psy_Property* self, const psy_Path* path, int allowappend)
 
 					intval = strtol(value, &stopstring, 10);
 					if (errno == ERANGE || strcmp(stopstring, "") != 0) {
-						psy_property_append_string(curr, key, value);	
+						psy_property_append_str(curr, key, value);	
 					} else {
 						psy_property_append_int(curr, key, intval, 0, 0);											
 					}

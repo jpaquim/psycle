@@ -158,10 +158,10 @@ void init_properties(psy_EventDriver* context)
 		"guid", PSY_EVENTDRIVER_CMD_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
-		psy_property_append_string(self->configuration, "name", "cmd"),
+		psy_property_append_str(self->configuration, "name", "cmd"),
 		"settingsview.name");
 	psy_property_settext(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		"settingsview.version");
 	self->cmddef = psy_property_settext(
 		psy_property_append_section(self->configuration, "cmds"),

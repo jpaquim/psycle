@@ -77,7 +77,7 @@ typedef struct PluginsView {
 	double identwidth;
 	intptr_t numparametercols;
 	double avgcharwidth;
-	intptr_t pluginpos;
+	intptr_t pluginpos;	
 	// ptr to unfiltered/filtered plugins
 	psy_Property* currplugins;
 	// Unfiltered Plugins

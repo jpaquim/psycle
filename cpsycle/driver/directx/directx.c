@@ -360,17 +360,17 @@ static void init_properties(psy_AudioDriver* driver)
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
 		psy_property_setreadonly(
-			psy_property_append_string(self->configuration, "name", "DirectSound"),
+			psy_property_append_str(self->configuration, "name", "DirectSound"),
 				TRUE),
 			"Name");
 	psy_property_settext(
 		psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
+		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 			TRUE),
 			"Vendor");
 	psy_property_settext(
 		psy_property_setreadonly(
-			psy_property_append_string(self->configuration, "version", "1.0"),
+			psy_property_append_str(self->configuration, "version", "1.0"),
 			TRUE),
 			"Version");
 	psy_property_settext(

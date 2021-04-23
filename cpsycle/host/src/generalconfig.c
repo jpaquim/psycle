@@ -31,7 +31,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		psy_property_append_section(parent, "general"),
 		"settingsview.general");
 	psy_property_sethint(psy_property_settext(
-		psy_property_append_string(self->general, "version", "alpha"),
+		psy_property_append_str(self->general, "version", "alpha"),
 		"settingsview.version"),
 		PSY_PROPERTY_HINT_HIDE);	
 	psy_property_settext(

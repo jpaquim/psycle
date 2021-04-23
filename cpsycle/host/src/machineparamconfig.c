@@ -69,7 +69,7 @@ void machineparamconfig_maketheme(MachineParamConfig* self, psy_Property* parent
 		psy_property_append_section(parent, "theme"),
 		"theme");
 	psy_property_settext(
-		psy_property_sethint(psy_property_append_string(self->theme,
+		psy_property_sethint(psy_property_append_str(self->theme,
 			"machinedialbmp", ""),
 			PSY_PROPERTY_HINT_EDIT),
 		"settingsview.machinedialbmp");

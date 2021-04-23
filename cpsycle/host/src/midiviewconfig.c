@@ -40,16 +40,16 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 			"macselect", 0),
 		"settingsview.midi-controllers-macselect");
 	psy_property_settext(
-		psy_property_append_string(choice, "inpsycle", ""),
+		psy_property_append_str(choice, "inpsycle", ""),
 		"settingsview.midi-controllers-select-inpsycle");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-bybank");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-byprogram");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-bychannel");
 	// auxselect
 	choice = psy_property_settext(
@@ -57,16 +57,16 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 			"auxselect", 0),
 		"settingsview.midi-controllers-auxselect");
 	psy_property_settext(
-		psy_property_append_string(choice, "inpsycle", ""),
+		psy_property_append_str(choice, "inpsycle", ""),
 		"settingsview.midi-controllers-select-inpsycle");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-bybank");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-byprogram");
 	psy_property_settext(
-		psy_property_append_string(choice, "bybank", ""),
+		psy_property_append_str(choice, "bybank", ""),
 		"settingsview.midi-controllers-select-bychannel");
 	psy_property_settext(
 		psy_property_append_bool(self->controllers,
@@ -78,7 +78,7 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 			"addcontroller"),
 		"settingsview.midi-controllers-add"),
 		PROPERTY_ID_ADDCONTROLLERMAP);
-	psy_property_sethint(psy_property_append_string(self->controllers,
+	psy_property_sethint(psy_property_append_str(self->controllers,
 		"controllerdata", ""),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_preventsave(psy_property_settext(
@@ -133,10 +133,10 @@ void midiviewconfig_makecontrollers(MidiViewConfig* self)
 				choice = psy_property_settext(
 					psy_property_append_choice(group, "type", midigroup->type),
 					"to");
-				psy_property_append_string(choice, "cmd", "");
-				psy_property_append_string(choice, "twk", "");
-				psy_property_append_string(choice, "tws", "");
-				psy_property_append_string(choice, "mcm", "");
+				psy_property_append_str(choice, "cmd", "");
+				psy_property_append_str(choice, "twk", "");
+				psy_property_append_str(choice, "tws", "");
+				psy_property_append_str(choice, "mcm", "");
 			}
 			psy_property_sethint(psy_property_settext(psy_property_append_int(
 				group, "cmd", midigroup->command, 0, 0xF), "value"),

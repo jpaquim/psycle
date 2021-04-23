@@ -39,7 +39,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "pattern_fontface", q);
+					psy_property_append_str(properties, "pattern_fontface", q);
 				}
 			}
 		} else
@@ -54,7 +54,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0] = 0;
-					psy_property_append_string(properties, "machineguibitmap", q);
+					psy_property_append_str(properties, "machineguibitmap", q);
 				}
 			}
 		}
@@ -101,7 +101,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "pattern_header_skin", q);
+					psy_property_append_str(properties, "pattern_header_skin", q);
 				}
 			}
 		}
@@ -116,7 +116,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "generator_fontface", q);
+					psy_property_append_str(properties, "generator_fontface", q);
 				}
 			}
 		}
@@ -147,7 +147,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "effect_fontface", q);
+					psy_property_append_str(properties, "effect_fontface", q);
 				}
 			}
 		}
@@ -178,7 +178,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "machine_skin", q);
+					psy_property_append_str(properties, "machine_skin", q);
 				}
 			}
 		}
@@ -193,7 +193,7 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "machine_background", q);
+					psy_property_append_str(properties, "machine_background", q);
 					// check for no \ in which case search for it?
 					//bBmpBkg = TRUE;
 				}
@@ -525,8 +525,8 @@ int skin_load(psy_Property* properties, const psy_Path* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_property_append_string(properties, "generator_fontface", q);	
-					psy_property_append_string(properties, "effect_fontface", q);
+					psy_property_append_str(properties, "generator_fontface", q);	
+					psy_property_append_str(properties, "effect_fontface", q);
 				}
 			}
 		}
@@ -676,7 +676,7 @@ int skin_loadpsh(psy_Property* properties, const char* path)
 					value =  &twodots[1];
 				}
 			}			
-			psy_property_append_string(properties, key, value);			
+			psy_property_append_str(properties, key, value);			
 			loaded = 1;
 		}
 	}
@@ -724,7 +724,7 @@ int skin_loadpsc(psy_Property* self, const char* path)
 	success = skinio_loadproperties(hfile, &props);
 	strvalue = psy_property_at_str(&props, "machinedial_bmp", "Psycle_110_knobs.bmp");
 	if (strvalue) {
-		psy_property_append_string(self, "machinedialbmp", strvalue);
+		psy_property_append_str(self, "machinedialbmp", strvalue);
 	}
 	psy_property_dispose(&props);
 	if (hfile) {

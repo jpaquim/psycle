@@ -164,7 +164,7 @@ void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
 	psy_ui_Colour transparencycolour;
 
 	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
 	transparencycolour = psy_ui_colour_make_argb(psy_ui_RGB_WHITE);
 	tab = psy_ui_tabbar_append(&self->tabbar, "machineview.wires");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_WIRES_DARK);

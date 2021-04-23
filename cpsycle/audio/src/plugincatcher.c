@@ -50,37 +50,35 @@ static void makeplugininfo(
 		psy_property_append_int(p, "type", type, 0, 0);
 		psy_property_append_int(p, "flags", info->Flags, 0, 0);
 		psy_property_append_int(p, "mode", info->mode, 0, 0);
-		psy_property_append_string(p, "name", info->Name);
-		psy_property_append_string(p, "shortname", info->ShortName);
-		psy_property_append_string(p, "author", info->Author);
-		psy_property_append_string(p, "command", info->Command);
-		psy_property_append_string(p, "path", path);
+		psy_property_append_str(p, "name", info->Name);
+		psy_property_append_str(p, "shortname", info->ShortName);
+		psy_property_append_str(p, "author", info->Author);
+		psy_property_append_str(p, "command", info->Command);
+		psy_property_append_str(p, "path", path);
 		if (type == psy_audio_PLUGIN) {
 			char text[256];
 			psy_snprintf(text, 256, "Psycle %s by %s ",
 				info->mode == psy_audio_MACHMODE_FX ? "effect" : "instrument",
 				info->Author);
-			psy_property_append_string(p, "desc", text);
+			psy_property_append_str(p, "desc", text);
 		} else {
-			psy_property_append_string(p, "desc", "");
+			psy_property_append_str(p, "desc", "");
 		}
 		psy_property_append_int(p, "shellidx", info->shellidx, 0, 0);
 		psy_property_append_int(p, "apiversion", info->APIVersion, 0, 0);
 		psy_property_append_int(p, "plugversion", info->PlugVersion, 0, 0);
 		psy_property_append_int(p, "favorite", 0, 0, 0);
 		if (categories && psy_strlen(info->category) == 0) {
-			psy_property_append_string(p, "category",			
+			psy_property_append_str(p, "category",			
 				psy_audio_plugincategorylist_category(categories, name));
 		} else {
-			psy_property_append_string(p, "category", info->category);
+			psy_property_append_str(p, "category", info->category);
 		}
 	}
 }
 
 // psy_audio_PluginSections
 // prototypes
-static psy_Property* psy_audio_pluginsections_section(
-	psy_audio_PluginSections*, const char* sectionkey);
 // implementation
 void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
@@ -148,8 +146,8 @@ psy_Property* psy_audio_pluginsections_addsection(psy_audio_PluginSections* self
 	
 	rv = psy_audio_pluginsections_section(self, sectionkey);
 	if (!rv) {
-		rv = psy_property_append_section(self->sections, sectionkey);				
-		psy_property_append_string(rv, "name", sectionkey);
+		rv = psy_property_append_section(self->sections, sectionkey);
+		psy_property_append_str(rv, "name", sectionkey);
 		psy_property_append_section(rv, "plugins");
 	}
 	return rv;
@@ -184,40 +182,45 @@ void psy_audio_pluginsections_add(psy_audio_PluginSections* self,
 	}
 }
 
-void psy_audio_pluginsections_remove(psy_audio_PluginSections* self,
-	const char* sectionkey, psy_audio_MachineInfo* macinfo)
+psy_Property* psy_audio_pluginsections_add_property(psy_audio_PluginSections* self,
+	psy_Property* section, psy_Property* macinfo)
 {
-	psy_Property* section;		
+	psy_Property* plugins;	
 
-	section = psy_audio_pluginsections_section(self, sectionkey);
-	if (section) {		
-		if (macinfo) {
-			psy_List* p;
-			char name[_MAX_PATH];
-			psy_Property* plugins;
+	if (!section || !macinfo || psy_audio_pluginsections_pluginbyid(self,
+			section, psy_property_key(macinfo))) {
+		return NULL;
+	}
+	plugins = psy_property_at(section, "plugins",
+		PSY_PROPERTY_TYPE_SECTION);
+	if (plugins) {
+		psy_Property* rv;
 
-			plugins = psy_property_at(section, "plugins",
-				PSY_PROPERTY_TYPE_SECTION);
-			if (plugins) {
-				psy_audio_plugincatcher_catchername(
-					psy_strlen(macinfo->modulepath) > 0
-					? macinfo->modulepath
-					: macinfo->ShortName,
-					name,
-					macinfo->shellidx);
-				for (p = psy_property_begin(plugins); p != NULL; p = p->next) {
-					psy_Property* property;
+		rv = psy_property_clone(macinfo);
+		psy_property_append_property(plugins, rv);
+		return rv;
+	}
+	return NULL;
+}
 
-					property = (psy_Property*)psy_list_entry(p);
-					if (strcmp(psy_property_key(property), name) == 0) {
-						psy_property_remove(plugins, property);
-						break;
-					}
-				}
-			}
-		} else {
-			psy_property_remove(self->sections, section);
+void psy_audio_pluginsections_remove(psy_audio_PluginSections* self,
+	psy_Property* section, const char* id)
+{	
+	if (section) {				
+		psy_Property* plugin;
+
+		plugin = psy_audio_pluginsections_pluginbyid(self, section, id);
+		if (plugin && psy_property_parent(plugin)) {
+			psy_property_remove(psy_property_parent(plugin), plugin);
 		}
+	}
+}
+
+void psy_audio_pluginsections_removesection(psy_audio_PluginSections* self,
+	psy_Property* section)
+{
+	if (section) {
+		psy_property_remove(self->sections, section);
 	}
 }
 
@@ -256,6 +259,34 @@ psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections* self,
 			}
 		}
 		return rv;
+	}
+	return NULL;
+}
+
+psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections* self,
+	psy_Property* section, const char* id)
+{
+	if (section && (psy_strlen(id) > 0)) {
+		psy_Property* plugins;
+
+		plugins = psy_property_at(section, "plugins",
+			PSY_PROPERTY_TYPE_SECTION);
+		if (plugins) {
+			psy_Property* rv;
+			psy_List* p;
+
+			rv = NULL;
+			for (p = psy_property_begin(plugins); p != NULL; p = p->next) {
+				psy_Property* property;
+
+				property = (psy_Property*)psy_list_entry(p);
+				if (strcmp(psy_property_key(property), id) == 0) {
+					rv = property;
+					break;
+				}
+			}
+			return rv;
+		}
 	}
 	return NULL;
 }
@@ -770,6 +801,27 @@ const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher* self, co
 	psy_property_enumerate(self->plugins, self,
 		(psy_PropertyCallback)onpropertiesenum);
 	return psy_property_at_str(searchresult, "path", 0);
+}
+
+psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id)
+{
+	psy_Property* rv;
+	psy_List* p;
+
+	if (!self->plugins) {
+		return NULL;
+	}
+	rv = NULL;
+	for (p = psy_property_begin(self->plugins); p != NULL; p = p->next) {
+		psy_Property* property;
+
+		property = (psy_Property*)psy_list_entry(p);
+		if (strcmp(psy_property_key(property), id) == 0) {
+			rv = property;
+			break;
+		}
+	}
+	return rv;
 }
 
 

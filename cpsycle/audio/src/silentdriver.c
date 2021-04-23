@@ -140,13 +140,13 @@ void init_properties(SilentDriver* self)
 	self->configuration = psy_property_preventtranslate(psy_property_settext(
 		psy_property_allocinit_key(key), "Silent"));
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "name", "Silent AudioDriver"),
+		psy_property_append_str(self->configuration, "name", "Silent AudioDriver"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
+		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE);
 }
 
