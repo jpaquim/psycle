@@ -1053,7 +1053,13 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 		self->sizehints->preferredheightset) {
 		return rv;
 	}
-	self->vtable->onpreferredsize(self, limit, &rv);		
+	self->vtable->onpreferredsize(self, limit, &rv);
+	if (self->sizehints->preferredwidthset) {
+		rv.width = self->sizehints->preferredsize.width;
+	}
+	if (self->sizehints->preferredheightset) {
+		rv.height = self->sizehints->preferredsize.height;
+	}
 	return rv;	
 }
 

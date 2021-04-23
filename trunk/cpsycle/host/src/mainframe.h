@@ -85,6 +85,8 @@ typedef struct MainFrame {
 	psy_ui_Component toprow0;
 	psy_ui_Component toprow1;
 	psy_ui_Component toprow2;
+	psy_ui_Component maximize;
+	psy_ui_Button maximizebtn;
 	psy_ui_Component tabbars;
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;

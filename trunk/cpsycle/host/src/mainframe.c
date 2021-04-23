@@ -74,6 +74,7 @@ static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontoggleparamrack(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhideparamrack(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onmaximizeorminimizeview(MainFrame*, psy_ui_Button* sender);
 static void mainframe_onhidemidimonitor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidecpu(MainFrame*, psy_ui_Component* sender);
@@ -158,15 +159,26 @@ static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onclose = (psy_ui_fp_component_onclose)mainframe_onclose;
-		vtable.ondestroyed = (psy_ui_fp_component_ondestroyed)
+		vtable.onclose =
+			(psy_ui_fp_component_onclose)
+			mainframe_onclose;
+		vtable.ondestroyed =
+			(psy_ui_fp_component_ondestroyed)
 			mainframe_ondestroyed;
-		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)mainframe_onkeydown;
-		vtable.onkeyup = (psy_ui_fp_component_onkeyevent)mainframe_onkeyup;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
+			mainframe_onkeydown;
+		vtable.onkeyup =
+			(psy_ui_fp_component_onkeyevent)
+			mainframe_onkeyup;
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			mainframe_onmousedown;
-		vtable.ontimer = (psy_ui_fp_component_ontimer)mainframe_ontimer;
-		vtable.onupdatestyles = (psy_ui_fp_component_onupdatestyles)
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			mainframe_ontimer;
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
 			mainframe_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
@@ -218,7 +230,7 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	psy_ui_component_setvtable(mainframe_base(self), vtable_init(self));
-	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);	
+	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	initdarkstyles(psy_ui_appdefaults());
 	self->startup = TRUE;
 	self->pluginscanprogress = -1;	
@@ -502,12 +514,18 @@ void mainframe_initbars(MainFrame* self)
 }
 
 void mainframe_inittabbars(MainFrame* self)
-{
-	psy_ui_Margin spacing;
-
-	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.5, 0.0);
-	psy_ui_component_init(&self->tabbars, &self->client, NULL);
-	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
+{	
+	psy_ui_component_init(&self->maximize, &self->client, NULL);
+	psy_ui_component_setalign(&self->maximize, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->tabbars, &self->maximize, NULL);
+	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init_connect(&self->maximizebtn, &self->maximize, NULL,
+		self, mainframe_onmaximizeorminimizeview);
+	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_button_setbitmapresource(&self->maximizebtn, IDB_EXPAND_DARK);
+	psy_ui_button_setbitmaptransparency(&self->maximizebtn,
+		psy_ui_colour_white());
 	psy_ui_component_init(&self->tabspacer, &self->client, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->tabspacer);
@@ -531,17 +549,15 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_Tab* tab;
 	psy_ui_Margin margin;	
 
-	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
-
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalignexpand(psy_ui_tabbar_base(&self->tabbar),
-		psy_ui_HORIZONTALEXPAND);	
+	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);		
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+		psy_ui_ALIGN_LEFT);	
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.machines");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_MACHINES_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.patterns");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_NOTES_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));	
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "main.samples");
 	psy_ui_tabbar_append(&self->tabbar, "main.instruments");
 	psy_ui_tabbar_append(&self->tabbar, "main.properties");		
@@ -550,7 +566,7 @@ void mainframe_initmaintabbar(MainFrame* self)
 	margin.left = psy_ui_value_make_ew(4.0);
 	psy_ui_component_setmargin(&tab->component, margin);
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.help");	
 	margin = psy_ui_component_margin(&tab->component);
 	margin.right = psy_ui_value_make_ew(4.0);
@@ -1167,6 +1183,11 @@ void mainframe_ontoggleparamrack(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onhideparamrack(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.dock);
+}
+
+void mainframe_onmaximizeorminimizeview(MainFrame* self, psy_ui_Button* sender)
+{
+	mainframe_maximizeorminimizeview(self);
 }
 
 void mainframe_onhidemidimonitor(MainFrame* self, psy_ui_Component* sender)

@@ -69,25 +69,25 @@ void renderview_makeproperties(RenderView* self)
 		psy_property_append_section(self->properties, "filesave"),
 		"render.file");
 	psy_property_settext(
-		psy_property_append_string(filesave, "outputpath", "Untitled.wav"),
+		psy_property_append_str(filesave, "outputpath", "Untitled.wav"),
 		"render.output-path");
 	savechoice = psy_property_settext(
 		psy_property_append_choice(filesave, "filesave-choice", 0),
 		"render.save-each-unmuted");
 	psy_property_settext(
-		psy_property_append_string(savechoice, "filesave-channel", ""),
+		psy_property_append_str(savechoice, "filesave-channel", ""),
 		"input to master as a separated wav (wire number"
 		" will be appended to filename)"
 	);
 	psy_property_settext(
-		psy_property_append_string(savechoice, "filesave-track", ""),
+		psy_property_append_str(savechoice, "filesave-track", ""),
 		"track as a separated"
 		"wav (track number will be appended to filename) ** may suffer from"
 		"'delay bleed' - insert silence at the end of your file if this is a "
 		"problem"
 	);
 	psy_property_settext(
-		psy_property_append_string(savechoice, "filesave-generator", ""),
+		psy_property_append_str(savechoice, "filesave-generator", ""),
 		"generator as a separated wav (generator number will"
 		"be appended to filename) ** may suffer from 'delay bleed' - insert"
 		" silence at the end of your file if this is a problem"
@@ -99,11 +99,11 @@ void renderview_makeproperties(RenderView* self)
 		psy_property_append_choice(record, "record", 0),
 		"render.record");
 	psy_property_settext(
-		psy_property_append_string(recordchoice, "record-entiresong", ""),
+		psy_property_append_str(recordchoice, "record-entiresong", ""),
 		"render.entire-song"
 	);
 	recordpatnum = psy_property_settext(
-		psy_property_append_string(recordchoice, "record-pattern", ""),
+		psy_property_append_str(recordchoice, "record-pattern", ""),
 		"render.pattern"
 	);
 	psy_property_settext(
@@ -111,7 +111,7 @@ void renderview_makeproperties(RenderView* self)
 		"render.number"
 	);
 	recordseqpos = psy_property_settext(
-		psy_property_append_string(recordchoice, "record-seqpos", ""),
+		psy_property_append_str(recordchoice, "record-seqpos", ""),
 		"render.sequence-positions"
 	);
 	psy_property_settext(
@@ -139,16 +139,16 @@ void renderview_makeproperties(RenderView* self)
 		"render.channels"
 	);
 	psy_property_settext(
-		psy_property_append_string(channelchoice, "mono_mix", ""),
+		psy_property_append_str(channelchoice, "mono_mix", ""),
 		"Mono (Mix)");
 	psy_property_settext(
-		psy_property_append_string(channelchoice, "mono_left", ""),
+		psy_property_append_str(channelchoice, "mono_left", ""),
 		"Mono (Left");
 	psy_property_settext(
-		psy_property_append_string(channelchoice, "mono_right", ""),
+		psy_property_append_str(channelchoice, "mono_right", ""),
 		"Mono (Right)");
 	psy_property_settext(
-		psy_property_append_string(channelchoice, "stereo", ""),
+		psy_property_append_str(channelchoice, "stereo", ""),
 		"Stereo");
 	dither = psy_property_settext(
 		psy_property_append_section(self->properties, "dither"),
@@ -161,22 +161,22 @@ void renderview_makeproperties(RenderView* self)
 		psy_property_append_choice(dither, "pdf", 0),
 		"render.pdf");
 	psy_property_settext(
-		psy_property_append_string(ditherpdf, "triangular", ""),
+		psy_property_append_str(ditherpdf, "triangular", ""),
 		"render.triangular");
 	psy_property_settext(
-		psy_property_append_string(ditherpdf, "rectangular", ""),
+		psy_property_append_str(ditherpdf, "rectangular", ""),
 		"render.rectangular");
 	psy_property_settext(
-		psy_property_append_string(ditherpdf, "gaussian", ""),
+		psy_property_append_str(ditherpdf, "gaussian", ""),
 		"render.gaussian");
 	dithernoiseshape = psy_property_settext(
 		psy_property_append_choice(dither, "noiseshape", 0),
 		"render.noise-shaping");
 	psy_property_settext(
-		psy_property_append_string(dithernoiseshape, "none", ""),
+		psy_property_append_str(dithernoiseshape, "none", ""),
 		"render.none");
 	psy_property_settext(
-		psy_property_append_string(dithernoiseshape, "highpass", ""),
+		psy_property_append_str(dithernoiseshape, "highpass", ""),
 		"render.high-pass-contour");
 }
 

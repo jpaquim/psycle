@@ -117,18 +117,18 @@ void audioconfig_makedriverlist(AudioConfig* self)
 		self->inputoutput, "audiodrivers", 1),
 		"settingsview.audio-drivers");
 #endif		
-	psy_property_append_string(self->drivers, "silent", "silentdriver");
+	psy_property_append_str(self->drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	// output target for the audio driver dlls is {solutiondir}/Debug or 
 	// {solutiondir}/Release
 	// if they aren't found, check if direcories fit and if
 	// dlls are compiled
-	psy_property_append_string(self->drivers, "mme", ".\\mme.dll");
-	psy_property_append_string(self->drivers, "directx", ".\\directx.dll");
-	psy_property_append_string(self->drivers, "wasapi", ".\\wasapi.dll");
-	psy_property_append_string(self->drivers, "asio", ".\\asiodriver.dll");
+	psy_property_append_str(self->drivers, "mme", ".\\mme.dll");
+	psy_property_append_str(self->drivers, "directx", ".\\directx.dll");
+	psy_property_append_str(self->drivers, "wasapi", ".\\wasapi.dll");
+	psy_property_append_str(self->drivers, "asio", ".\\asiodriver.dll");
 #elif defined(DIVERSALIS__OS__LINUX)
-	psy_property_append_string(self->drivers, "alsa",
+	psy_property_append_str(self->drivers, "alsa",
 		"../../driver/alsa/libpsyalsa.so");
 #endif
 }

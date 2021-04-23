@@ -58,10 +58,10 @@ void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 	self->installeddriver = psy_property_settext(
 		psy_property_append_choice(self->eventinputs, "installeddriver", 0),
 		"Input Drivers");
-	psy_property_append_string(self->installeddriver, "kbd", "kbd");
+	psy_property_append_str(self->installeddriver, "kbd", "kbd");
 #if defined(DIVERSALIS__OS__MICROSOFT)
-	psy_property_append_string(self->installeddriver, "mmemidi", ".\\mmemidi.dll");
-	psy_property_append_string(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll");
+	psy_property_append_str(self->installeddriver, "mmemidi", ".\\mmemidi.dll");
+	psy_property_append_str(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll");
 #endif
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->eventinputs, "addeventdriver"),

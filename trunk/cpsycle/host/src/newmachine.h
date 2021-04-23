@@ -14,6 +14,7 @@
 #include <uiedit.h>
 #include <uiimage.h>
 #include <uilabel.h>
+#include <uitabbar.h>
 #include <uinotebook.h>
 #include <uiscroller.h>
 #include <uisplitbar.h>
@@ -217,6 +218,7 @@ NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
 
 const char* newmachinesection_key(const NewMachineSection*);
 const char* newmachinesection_name(const NewMachineSection*);
+void newmachinesection_mark(NewMachineSection*);
 
 typedef struct NewMachine {
 	// inherits
@@ -228,18 +230,18 @@ typedef struct NewMachine {
 	NewMachineSearchBar searchbar;
 	psy_ui_Component client;	
 	psy_ui_Component sectiongroup;
-	psy_ui_Component sectionsheader;
-	psy_ui_Label sectionslabel;
+	psy_ui_Component sectionsheader;	
 	psy_ui_Button expandsections;
+	psy_ui_TabBar navsections;
 	psy_ui_Image sectionsicon;
 	psy_ui_Component sections;	
 	psy_ui_Component usersections;
 	psy_ui_Component all;
+	psy_ui_Component pluginsheaderbars;
 	psy_ui_Component pluginsheader;
 	psy_ui_Image pluginsicon;
 	psy_ui_Label pluginslabel;
-	psy_ui_Button expandall;
-	psy_ui_Component bars;
+	psy_ui_Button expandall;	
 	NewMachineFilterBar filterbar;
 	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;	
@@ -263,6 +265,7 @@ typedef struct NewMachine {
 	uintptr_t restoresection;
 	psy_Property* selectedplugin;
 	NewMachineSection* selectedsection;
+	psy_Table newmachinesections;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
@@ -278,6 +281,7 @@ void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
 
 bool newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
+void newmachine_buildnavsections(NewMachine*);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {

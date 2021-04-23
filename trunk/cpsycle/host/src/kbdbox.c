@@ -394,7 +394,7 @@ void kbdbox_definekey(KbdBox* self, psy_Property* section,
 
 	key = psy_property_append_section(section, "key");
 	psy_property_append_int(key, "keycode", keycode, 0, 0);	
-	psy_property_append_string(key, "label", label);
+	psy_property_append_str(key, "label", label);
 	psy_property_append_int(key, "size", size, 0, 0);
 	psy_property_append_int(key, "cr", cr, 0, 0);
 }

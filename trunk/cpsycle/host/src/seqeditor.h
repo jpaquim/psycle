@@ -20,9 +20,9 @@ extern "C" {
 #endif
 
 typedef enum {
-	SEQEDITORDRAG_NONE,
-	SEQEDITORDRAG_MOVE,
-	SEQEDITORDRAG_REORDER
+	SEQEDITORDRAG_NONE = 0,
+	SEQEDITORDRAG_MOVE = 1,
+	SEQEDITORDRAG_REORDER = 2
 } SeqEditorDragMode;
 
 typedef enum {
@@ -50,6 +50,8 @@ typedef struct SeqEditorState {
 	// drag
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
+	bool dragstart;
+	psy_dsp_big_beat_t dragstartoffset;
 	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;
 	psy_audio_OrderIndex dragseqpos;

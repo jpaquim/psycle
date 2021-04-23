@@ -240,8 +240,8 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(pianokeyboard_base(self),
 		psy_ui_NOBACKGROUND);
 	psy_ui_component_setpreferredsize(pianokeyboard_base(self),
-		psy_ui_size_make_em(8.0, 0.0));
-	psy_ui_component_preventalign(pianokeyboard_base(self));
+		psy_ui_size_make_em(10.0, 0.0));
+	pianokeyboard_base(self)->sizehints->preferredheightset = FALSE;	
 }
 
 void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
@@ -367,7 +367,7 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 
 	assert(self);
 
-	width_em = 8.0;
+	width_em = 10.0;
 	switch (keyboardtype) {
 		case KEYBOARDTYPE_KEYS:
 			self->keyboardstate->drawpianokeys = TRUE;
@@ -387,6 +387,7 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 	}
 	psy_ui_component_setpreferredsize(pianokeyboard_base(self),
 		psy_ui_size_make_em(width_em, 0.0));
+	self->component.sizehints->preferredheightset = FALSE;
 	psy_ui_component_invalidate(pianokeyboard_base(self));	
 }
 
@@ -1832,13 +1833,14 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	zoombox_init(&self->zoombox_beatwidth, &self->left);
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
 		pianoroll_onbeatwidthchanged);
-	psy_ui_component_setalign(zoombox_base(&self->zoombox_beatwidth), psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(zoombox_base(&self->zoombox_beatwidth),
+		psy_ui_ALIGN_TOP);
 	// Keyboard
 	psy_ui_component_init(&self->keyboardpane, &self->left, NULL);
 	psy_ui_component_setalign(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
 	pianokeyboard_init(&self->keyboard, &self->keyboardpane, &self->keyboardstate);
 	psy_ui_component_setalign(&self->keyboard.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED_RESIZE);	
 	// top area (beatruler)
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);

@@ -93,7 +93,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.onclip");
 	psy_property_settext(
-		psy_property_append_string(self->theme,
+		psy_property_append_str(self->theme,
 			"generator_fontface", "Tahoma"),
 		"settingsview.generators-font-face");
 	psy_property_settext(
@@ -106,7 +106,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			"generator_font_flags", 0x00000000, 0, 0),
 		PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.generator_font_flags");
-	psy_property_settext(psy_property_append_string(self->theme,
+	psy_property_settext(psy_property_append_str(self->theme,
 		"effect_fontface", "Tahoma"),
 		"settingsview.effect_fontface");
 	psy_property_settext(
@@ -169,7 +169,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 			"mv_triangle_size", 0x0A, 0, 0),//
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.polygon-size");
-	psy_property_append_string(self->theme, "machine_skin", "");//	
+	psy_property_append_str(self->theme, "machine_skin", "");//	
 }
 
 void machineviewconfig_resettheme(MachineViewConfig* self)

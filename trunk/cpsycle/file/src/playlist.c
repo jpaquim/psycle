@@ -64,7 +64,7 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 		
 		psy_path_init(&path, filename);		
 		psy_property_preventtranslate(psy_property_settext(
-			psy_property_setreadonly(psy_property_append_string(
+			psy_property_setreadonly(psy_property_append_str(
 				self->recentfiles, hashkey, filename), TRUE),
 			psy_path_name(&path)));
 		psy_playlist_save(self);

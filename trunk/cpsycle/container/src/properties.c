@@ -754,7 +754,7 @@ psy_Property* psy_property_set_str(psy_Property* self, const char* key,
 	if (rv) {
 		psy_property_setitem_str(rv, str);
 	} else {
-		rv = psy_property_append_string(self, key, str);
+		rv = psy_property_append_str(self, key, str);
 	}
 	return rv;
 }
@@ -889,7 +889,7 @@ psy_Property* psy_property_create_string(const char* key, const char* value)
 	return property;
 }
 
-psy_Property* psy_property_append_string(psy_Property* self, const char* key,
+psy_Property* psy_property_append_str(psy_Property* self, const char* key,
 	const char* value)
 {
 	assert(self);

@@ -469,13 +469,13 @@ static void init_properties(psy_AudioDriver* driver)
 		"guid", PSY_AUDIODRIVER_WASAPI_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "name", "Windows WASAPI Driver"),
+		psy_property_append_str(self->configuration, "name", "Windows WASAPI Driver"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
+		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE);
 	devices = psy_property_append_choice(self->configuration, "device", -1);	
 	psy_property_append_int(self->configuration, "bitdepth", 16, 0, 32);

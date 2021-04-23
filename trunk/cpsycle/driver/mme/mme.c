@@ -290,15 +290,15 @@ static void init_properties(psy_AudioDriver* driver)
 		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "name", "Windows Wave MME"),
+		psy_property_append_str(self->configuration, "name", "Windows Wave MME"),
 		TRUE),
 		"Driver");
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
+		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 		TRUE),
 		"Vendor");
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE),
 		"Version");
 	psy_property_settext(

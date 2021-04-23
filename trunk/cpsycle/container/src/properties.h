@@ -159,7 +159,7 @@ intptr_t psy_property_choiceitem_index(const psy_Property*);
 psy_Property* psy_property_append_property(psy_Property*, psy_Property*);
 // Creates and appends a a new property
 psy_Property* psy_property_append_section(psy_Property*, const char* key);
-psy_Property* psy_property_append_string(psy_Property*, const char* key, const char* value);
+psy_Property* psy_property_append_str(psy_Property*, const char* key, const char* value);
 psy_Property* psy_property_append_font(psy_Property*, const char* key, const char* value);
 psy_Property* psy_property_append_choice(psy_Property*, const char* key, intptr_t value);
 psy_Property* psy_property_append_userdata(psy_Property*, const char* key,

@@ -197,16 +197,16 @@ void init_properties(FileOutDriver* self)
 	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key("FileOut Driver"));
 	psy_property_settext(
 		psy_property_setreadonly(
-			psy_property_append_string(self->configuration, "name", "FileOut Driver"),
+			psy_property_append_str(self->configuration, "name", "FileOut Driver"),
 			TRUE),
 		"Name");
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
+		psy_property_append_str(self->configuration, "vendor", "Psycledelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE);
-	psy_property_append_string(self->configuration, "outputpath", "Untitled.wav");
+	psy_property_append_str(self->configuration, "outputpath", "Untitled.wav");
 	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
 	psy_property_append_int(self->configuration, "samplerate",

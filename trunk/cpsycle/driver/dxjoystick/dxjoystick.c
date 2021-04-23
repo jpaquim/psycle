@@ -182,8 +182,8 @@ void init_properties(psy_EventDriver* context)
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_property_append_string(self->configuration, "name", "directx joystick");
-	psy_property_append_string(self->configuration, "version", "1.0");
+	psy_property_append_str(self->configuration, "name", "directx joystick");
+	psy_property_append_str(self->configuration, "version", "1.0");
 	self->devices = psy_property_append_choice(self->configuration, "device", 0);
 	psy_property_append_int(self->devices, "0:None", 0, 0, 0);
 	self->count = 0;

@@ -31,13 +31,13 @@ void predefsconfig_make(PredefsConfig* self)
 {
 	self->predefs = psy_property_append_section(self->parent, "Predefs");
 
-	psy_property_append_string(self->predefs, "adsr", "2 0.0 0.0 1.0 1.0 2.0 0.5 3.0 0.0");
-	psy_property_append_string(self->predefs, "def1", "");
-	psy_property_append_string(self->predefs, "def2", "");
-	psy_property_append_string(self->predefs, "def3", "");
-	psy_property_append_string(self->predefs, "def4", "");
-	psy_property_append_string(self->predefs, "def5", "");
-	psy_property_append_string(self->predefs, "def6", "");
+	psy_property_append_str(self->predefs, "adsr", "2 0.0 0.0 1.0 1.0 2.0 0.5 3.0 0.0");
+	psy_property_append_str(self->predefs, "def1", "");
+	psy_property_append_str(self->predefs, "def2", "");
+	psy_property_append_str(self->predefs, "def3", "");
+	psy_property_append_str(self->predefs, "def4", "");
+	psy_property_append_str(self->predefs, "def5", "");
+	psy_property_append_str(self->predefs, "def6", "");
 }
 
 void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_Envelope* rv)

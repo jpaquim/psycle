@@ -30,14 +30,22 @@ int psy_audio_pluginsections_load(psy_audio_PluginSections*);
 int psy_audio_pluginsections_save(psy_audio_PluginSections*);
 void psy_audio_pluginsections_add(psy_audio_PluginSections*,
 	const char* sectionkey, psy_audio_MachineInfo*);
+psy_Property* psy_audio_pluginsections_add_property(psy_audio_PluginSections*,
+	psy_Property* section, psy_Property* macinfo);
 void psy_audio_pluginsections_remove(psy_audio_PluginSections*,
-	const char* sectionkey, psy_audio_MachineInfo*);
+	psy_Property* section, const char* id);
+void psy_audio_pluginsections_removesection(psy_audio_PluginSections*,
+	psy_Property* section);
 psy_Property* psy_audio_pluginsections_addsection(psy_audio_PluginSections*,
 	const char* sectionkey);
 void psy_audio_pluginsections_clearplugins(psy_audio_PluginSections*,
 	const char* sectionkey);
 psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections*,
 	psy_Property* section, psy_audio_MachineInfo* macinfo);
+psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections*,
+	psy_Property* section, const char* id);
+psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections*,
+	const char* sectionkey);
 
 // psy_audio_PluginCategories
 typedef struct psy_audio_PluginCategories
@@ -85,6 +93,7 @@ void psy_audio_plugincatcher_catchername(const char* path,
 	char* name, uintptr_t shellidx);
 const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);
+psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id);
 
 INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self)
 {

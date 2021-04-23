@@ -193,21 +193,21 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 		psy_property_append_section(self->config, "directories"),
 		"Directories");
 	psy_property_sethint(psy_property_settext(
-		psy_property_append_string(
+		psy_property_append_str(
 			self->directories,
 			"song",
 			"C:\\Programme\\Psycle\\Songs"),
 		"Song directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
 	psy_property_sethint(psy_property_settext(
-		psy_property_append_string(
+		psy_property_append_str(
 			self->directories,
 			"plugins",
 			"C:\\Programme\\Psycle\\PsyclePlugins"),
 		"Plug-in directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
 	psy_property_sethint(psy_property_settext(
-		psy_property_append_string(
+		psy_property_append_str(
 			self->directories,
 			"vst",			
 			"C:\\Programme\\Psycle\\VstPlugins"),
