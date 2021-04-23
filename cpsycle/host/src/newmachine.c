@@ -1005,54 +1005,74 @@ NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
 
 void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 {	
-	ev->preventdefault = (ev->dataTransfer && !psy_audio_pluginsections_pluginbyid(
-		&self->newmachine->workspace->pluginsections, self->section,
-		psy_property_at_str(ev->dataTransfer, "text", "")));	
+	if (ev->dataTransfer) {
+		psy_List* p;
+
+		for (p = psy_property_begin(ev->dataTransfer); p != NULL; p = p->next) {
+			psy_Property* plugin;
+
+			plugin = (psy_Property*)p->entry;
+			if (!psy_audio_pluginsections_pluginbyid(
+					&self->newmachine->workspace->pluginsections, self->section,
+					psy_property_key(plugin))) {
+				ev->preventdefault = TRUE;				
+				break;
+			}
+		}
+	}
 }
 
 void newmachinesection_ondrop(NewMachineSection* self, psy_ui_DragEvent* ev)
 {	
 	ev->preventdefault = TRUE;
-	if (ev->dataTransfer) {
+	if (ev->dataTransfer) {		
+		psy_List* p;
 		psy_audio_PluginSections* sections;
-		const char* plugid;
+		bool drop;
 
+		drop = FALSE;
 		sections = &self->newmachine->workspace->pluginsections;
-		plugid = psy_property_at_str(ev->dataTransfer, "text", "");
-		if (!psy_audio_pluginsections_pluginbyid(sections, self->section, plugid)) {
-			psy_Property* section;
-			psy_Property* plugin;
+		for (p = psy_property_begin(ev->dataTransfer); p != NULL; p = p->next) {
+			psy_Property* plugindrag;
+			const char* plugid;
 
-			section = psy_audio_pluginsections_section(sections,
-				psy_property_at_str(ev->dataTransfer, "section", ""));
-			if (section) {
-				plugin = psy_audio_pluginsections_pluginbyid(sections, section,
+			plugindrag = (psy_Property*)p->entry;
+			plugid = psy_property_key(plugindrag);
+			if (!psy_audio_pluginsections_pluginbyid(
+					&self->newmachine->workspace->pluginsections, self->section,
+					plugid)) {									
+				psy_Property* section;
+				psy_Property* plugin;
+
+				section = psy_audio_pluginsections_section(sections,
+				psy_property_at_str(plugindrag, "section", ""));
+				if (section) {
+					plugin = psy_audio_pluginsections_pluginbyid(sections, section,
+						plugid);
+				} else {
+					plugin = psy_audio_plugincatcher_at(&self->newmachine->workspace->plugincatcher,
 					plugid);
-			} else {
-				plugin = psy_audio_plugincatcher_at(&self->newmachine->workspace->plugincatcher,
-					plugid);
-			}
-			if (plugin) {
-				plugin = psy_audio_pluginsections_add_property(sections,
-					self->section, plugin);
+				}
 				if (plugin) {
-					self->newmachine->selectedplugin = plugin;
-					newmachinesection_findplugins(self);
-					psy_ui_component_align_full(&self->newmachine->sectiongroup);
-					psy_ui_component_invalidate(&self->newmachine->sectiongroup);
+					plugin = psy_audio_pluginsections_add_property(sections,
+						self->section, plugin);
+					drop = TRUE;
 				}
 			}			
-		}					
+		}
+		if (drop) {			
+			newmachinesection_findplugins(self);
+			psy_ui_component_align_full(&self->newmachine->sectiongroup);
+			psy_ui_component_invalidate(&self->newmachine->sectiongroup);
+		}
 	}
 }
 
 // NewMachine
 // prototypes
 static void newmachine_ondestroy(NewMachine*);
-static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
-	psy_Property*);
-static void newmachine_onpluginchanged(NewMachine*, psy_ui_Component* parent,
-	psy_Property*);
+static void newmachine_onpluginselected(NewMachine*, PluginsView* sender);
+static void newmachine_onpluginchanged(NewMachine*, PluginsView* parent);
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onmousedown(NewMachine*, psy_ui_MouseEvent*);
 static void newmachine_oncreatesection(NewMachine*, psy_ui_Component* sender);
@@ -1314,12 +1334,11 @@ void newmachine_ondestroy(NewMachine* self)
 	psy_table_dispose(&self->newmachinesections);
 }
 
-void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
-	psy_Property* selected)
+void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
 {		
-	self->selectedplugin = selected;
-	newmachinedetail_update(&self->detail, selected);
-	psy_signal_emit(&self->signal_selected, self, 1, selected);
+	self->selectedplugin = pluginsview_selectedplugin(sender);
+	newmachinedetail_update(&self->detail, self->selectedplugin);
+	psy_signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
 	if (self->selectedplugin) {
 		intptr_t favorite;
 
@@ -1331,11 +1350,10 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	newmachine_updateplugins(self);
 }
 
-void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
-	psy_Property* selected)
+void newmachine_onpluginchanged(NewMachine* self, PluginsView* sender)
 {	
-	self->selectedplugin = selected;
-	newmachinedetail_update(&self->detail, selected);		
+	self->selectedplugin = pluginsview_selectedplugin(sender);
+	newmachinedetail_update(&self->detail, self->selectedplugin);
 }
 
 void newmachine_onplugincachechanged(NewMachine* self,
