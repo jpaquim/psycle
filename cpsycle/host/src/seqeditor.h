@@ -268,6 +268,7 @@ typedef struct SeqEditor {
 	// inherits
 	psy_ui_Component component;
 	// internal	
+	psy_ui_Component header;
 	psy_ui_Component rulerpane;
 	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
@@ -278,7 +279,9 @@ typedef struct SeqEditor {
 	SeqEditorTrackDesc trackdescriptions;
 	SeqEditorTracks tracks;	
 	SeqEditorState state;
-	SequenceCmds cmds;	
+	SequenceCmds cmds;
+	psy_ui_Button expand;
+	bool expanded;
 	// references
 	Workspace* workspace;
 } SeqEditor;

@@ -7,7 +7,8 @@
 
 void make_translator_default(psy_Property* lang)
 {
-	psy_Property* section;	
+	psy_Property* section;
+	psy_Property* subsection;
 
 	assert(lang);
 
@@ -34,6 +35,13 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "record-notes", "Record Notes");
 	psy_property_set_str(section, "play", "Play");
 	psy_property_set_str(section, "stop", "Stop");
+	// playlist
+	section = psy_property_append_section(lang, "playlist");
+	psy_property_set_str(section, "play", "Play");
+	psy_property_set_str(section, "stop", "Stop");
+	psy_property_set_str(section, "delete", "Delete");
+	psy_property_set_str(section, "clear", "Clear");
+	psy_property_set_str(section, "recent-songs", "Recent Songs");	 
 	// metronomebar
 	section = psy_property_append_section(lang, "metronome");	
 	psy_property_set_str(section, "configure", "(Configure)");
@@ -174,7 +182,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "realtpb", "Real Ticks Per Beat");
 	psy_property_set_str(section, "extcomments", "Extended Comments");	
 	// settingsview
-	section = psy_property_append_section(lang, "settingsview");
+	section = psy_property_append_section(lang, "settingsview");	
 	// Metronome	
 	psy_property_set_str(section, "metronome", "Metronome");
 	psy_property_set_str(section, "general", "General");
@@ -226,29 +234,32 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "en", "english");
 	psy_property_set_str(section, "es", "spanish");
 	// settingsview/metronome
-	psy_property_set_str(section, "metronome-show", "Show Metronome Bar");	
-	psy_property_set_str(section, "metronome-machine", "Machine");	
-	psy_property_set_str(section, "metronome-note", "Note");	
+	subsection = psy_property_append_section(section, "metronome");
+	psy_property_set_str(subsection, "show", "Show Metronome Bar");	
+	psy_property_set_str(subsection, "machine", "Machine");
+	psy_property_set_str(subsection, "note", "Note");
 	// settingsview/directories
-	psy_property_set_str(section,
-		"directories", "Directories");
-	psy_property_set_str(section, "song-directory",
+	subsection = psy_property_append_section(section, "dirs");
+	psy_property_set_str(subsection,
+		"dirs", "Directories");
+	psy_property_set_str(subsection, "song",
 		"Song directory");
-	psy_property_set_str(section, "samples-directory",
+	psy_property_set_str(subsection, "samples",
 		"Samples directory");
-	psy_property_set_str(section, "plug-in32-directory",
+	psy_property_set_str(subsection, "plugin32",
 		"Plug-in32 directory");
-	psy_property_set_str(section, "plug-in64-directory",
+	psy_property_set_str(subsection, "plugin64",
 		"Plug-in64 directory");
-	psy_property_set_str(section, "lua-scripts-directory",
+	psy_property_set_str(subsection, "lua",
 		"Lua-scripts directory");
-	psy_property_set_str(section, "vst-directories",
-		"Vst directories");
-	psy_property_set_str(section, "vst64-directories",
+	psy_property_set_str(subsection, "vst32",
+		"Vst32 directories");
+	psy_property_set_str(subsection, "vst64",
 		"Vst64 directories");
-	psy_property_set_str(section, "ladspa-directories",
+	psy_property_set_str(subsection, "ladspa",
 		"Ladspa directories");
-	psy_property_set_str(section, "skin-directory", "Skin directory");
+	psy_property_set_str(subsection, "skin", "Skin directory");
+	// settingsview/theme
 	psy_property_set_str(section, "theme", "Theme");	
 	psy_property_set_str(section, "background", "Background");
 	psy_property_set_str(section, "font", "Font");

@@ -30,6 +30,7 @@ static void mainframe_initemptystatusbar(MainFrame*);
 static void mainframe_initspacerleft(MainFrame*);
 static void mainframe_inittoparea(MainFrame*);
 static void mainframe_initclientarea(MainFrame*);
+static void mainframe_initmainviewarea(MainFrame*); 
 static void mainframe_initleftarea(MainFrame*);
 static void mainframe_initrightarea(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
@@ -195,6 +196,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initkbdhelp(self);
 	mainframe_inittoparea(self);
 	mainframe_initclientarea(self);	
+	mainframe_initmainviewarea(self);
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);
@@ -267,7 +269,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 		STYLE_STATUSBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_makeem(0.25, 1.0, 0.25, 0.0));
+		psy_ui_margin_make_em(0.25, 1.0, 0.25, 0.0));
 }
 
 void mainframe_initspacerleft(MainFrame* self)
@@ -284,7 +286,7 @@ void mainframe_inittoparea(MainFrame* self)
 	psy_ui_component_init_align(&self->top, mainframe_base(self),
 		psy_ui_ALIGN_TOP);	
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
-		psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.0));
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 }
 
 void mainframe_initclientarea(MainFrame* self)
@@ -293,6 +295,14 @@ void mainframe_initclientarea(MainFrame* self)
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client,
 		psy_ui_NOBACKGROUND);	
+}
+
+void mainframe_initmainviewarea(MainFrame* self)
+{
+	psy_ui_component_init_align(&self->mainviews, &self->client,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setbackgroundmode(&self->mainviews,
+		psy_ui_NOBACKGROUND);
 }
 
 void mainframe_initleftarea(MainFrame* self)
@@ -515,10 +525,10 @@ void mainframe_initbars(MainFrame* self)
 
 void mainframe_inittabbars(MainFrame* self)
 {	
-	psy_ui_component_init(&self->maximize, &self->client, NULL);
+	psy_ui_component_init(&self->maximize, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->maximize, psy_ui_ALIGN_TOP);
-	psy_ui_component_init(&self->tabbars, &self->maximize, NULL);
-	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init_align(&self->tabbars, &self->maximize,
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_button_init_connect(&self->maximizebtn, &self->maximize, NULL,
 		self, mainframe_onmaximizeorminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
@@ -526,7 +536,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_button_setbitmapresource(&self->maximizebtn, IDB_EXPAND_DARK);
 	psy_ui_button_setbitmaptransparency(&self->maximizebtn,
 		psy_ui_colour_white());
-	psy_ui_component_init(&self->tabspacer, &self->client, NULL);
+	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->tabspacer);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
@@ -581,7 +591,7 @@ void mainframe_initmaintabbar(MainFrame* self)
 
 void mainframe_initmainviews(MainFrame* self)
 {
-	psy_ui_notebook_init(&self->notebook, &self->client);
+	psy_ui_notebook_init(&self->notebook, &self->mainviews);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_notebook_connectcontroller(&self->notebook,

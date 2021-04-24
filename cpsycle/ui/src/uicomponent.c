@@ -1701,6 +1701,14 @@ void psy_ui_component_setstyletype(psy_ui_Component* self,
 	psy_ui_componentstyle_readstyles(&self->style);
 }
 
+void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
+	uintptr_t hover)
+{
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_HOVER, hover);
+	psy_ui_componentstyle_readstyles(&self->style);
+}
+
 void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {

@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "recentview.h"
+// host
+#include "styles.h"
+// audio
 #include <songio.h>
-#include <string.h>
 
 void recentbar_init(RecentBar* self, psy_ui_Component* parent)
 {
@@ -21,12 +23,15 @@ void recentbar_init(RecentBar* self, psy_ui_Component* parent)
 	psy_ui_button_seticon(&self->up, psy_ui_ICON_UP);
 	psy_ui_button_init(&self->down, &self->client, NULL);
 	psy_ui_button_seticon(&self->down, psy_ui_ICON_DOWN);
-	psy_ui_button_init_text(&self->play, &self->client, NULL, "Play");
-	psy_ui_button_init_text(&self->stop, &self->client, NULL, "Stop");
-	psy_ui_button_init_text(&self->del, &self->client, NULL, "Delete");
-	psy_ui_button_init_text(&self->clear, &self->client, NULL, "Clear");
+	psy_ui_button_init_text(&self->play, &self->client, NULL, "playlist.play");
+	psy_ui_button_init_text(&self->stop, &self->client, NULL, "playlist.stop");
+	psy_ui_button_init_text(&self->del, &self->client, NULL,
+		"playlist.delete");
+	psy_ui_button_init_text(&self->clear, &self->client, NULL,
+		"playlist.clear");
 }
 
+// RecentView
 static psy_Property* recentview_next(RecentView*);
 static void recentview_onselected(RecentView*, PropertiesView* sender,
 	psy_Property*);
@@ -40,9 +45,10 @@ static void recentview_ontimer(RecentView*, uintptr_t timerid);
 static void recentview_onmousedown(RecentView*, psy_ui_MouseEvent*);
 static void recentview_onsongchanged(RecentView*, Workspace* sender,
 	int flag, psy_audio_Song*);
+static void recentview_onplaylistchanged(RecentView*, psy_Playlist* sender);
 // vtable
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(RecentView* self)
 {
@@ -52,19 +58,21 @@ static void vtable_init(RecentView* self)
 			recentview_onmousedown;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
 			recentview_ontimer;
+		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 
 void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	self->component.vtable = &vtable;	
-	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	vtable_init(self);	
+	psy_ui_component_setspacing(&self->component,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));	
 	self->workspace = workspace;
 	recentbar_init(&self->bar, &self->component);
-	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);	
 	psy_signal_connect(&self->bar.clear.signal_clicked, self,
 		recentview_onclear);
 	psy_signal_connect(&self->bar.play.signal_clicked, self,
@@ -79,7 +87,16 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 		recentview_onmovedown);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
 		workspace_recentsongs(workspace), 1, workspace);
+	psy_ui_component_setbackgroundmode(&self->view.scroller.pane,
+		psy_ui_SETBACKGROUND);	
+	propertiesrenderer_setstyle(&self->view.renderer,
+		STYLE_RECENTVIEW_MAINSECTION,
+		STYLE_RECENTVIEW_MAINSECTIONHEADER,
+		psy_INDEX_INVALID,
+		psy_ui_STYLE_BUTTON_HOVER);
 	self->view.renderer.showkeyselection = TRUE;	
+	psy_ui_component_setpreferredsize(&self->view.component,
+		psy_ui_size_make_em(50.0, 0.0));
 	psy_ui_component_hide(&self->view.tabbar.component);	
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->view.signal_selected, self,
@@ -87,6 +104,8 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	self->starting = FALSE;
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		recentview_onsongchanged);
+	psy_signal_connect(&workspace->playlist.signal_changed, self,
+		recentview_onplaylistchanged);
 }
 
 void recentview_onselected(RecentView* self, PropertiesView* sender,
@@ -193,13 +212,12 @@ void recentview_onmousedown(RecentView* self, psy_ui_MouseEvent* ev)
 
 void recentview_onsongchanged(RecentView* self, Workspace* sender,
 	int flag, psy_audio_Song* song)
-{	
-	psy_ui_component_invalidate(&self->view.renderer.component);	
+{		
 }
 
-void recentview_onup(RecentView* self, psy_ui_Button* sender)
+void recentview_onplaylistchanged(RecentView* self, psy_Playlist* sender)
 {
-
+	propertiesview_reload(&self->view);	
 }
 
 void recentview_onmoveup(RecentView* self, psy_ui_Button* sender)

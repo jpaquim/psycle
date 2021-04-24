@@ -91,6 +91,7 @@ typedef struct MainFrame {
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
 	psy_ui_Component client;
+	psy_ui_Component mainviews;
 	psy_ui_Component spacerleft;
 	psy_ui_Terminal terminal;
 	psy_ui_SplitBar splitbar;

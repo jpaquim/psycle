@@ -34,7 +34,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(machineviewbar_base(self), parent, NULL);
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(machineviewbar_base(self),
-		psy_ui_ALIGN_LEFT, psy_ui_margin_makeem(0.0, 4.0, 0.0, 0.0));
+		psy_ui_ALIGN_LEFT, psy_ui_margin_make_em(0.0, 4.0, 0.0, 0.0));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_checkbox_init_text(&self->mixersend, machineviewbar_base(self),
 		"machineview.connect-to-mixer-send-return-input");
