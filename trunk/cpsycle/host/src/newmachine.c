@@ -855,6 +855,25 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	}
 }
 
+NewMachineSection* newmachinesection_alloc(void)
+{
+	return (NewMachineSection*)malloc(sizeof(NewMachineSection));
+}
+
+NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
+	psy_Property* property, psy_ui_Edit* edit, NewMachine* newmachine,
+	Workspace* workspace)
+{
+	NewMachineSection* rv;
+
+	rv = newmachinesection_alloc();
+	if (rv) {
+		newmachinesection_init(rv, parent, property, edit, newmachine, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
+}
+
 void newmachinesection_findplugins(NewMachineSection* self)
 {
 	if (self->section) {
@@ -984,23 +1003,9 @@ void newmachinesection_mark(NewMachineSection* self)
 	psy_ui_tabbar_mark(&self->newmachine->navsections, selidx);
 }
 
-NewMachineSection* newmachinesection_alloc(void)
+void newmachinsection_clearselection(NewMachineSection* self)
 {
-	return (NewMachineSection*)malloc(sizeof(NewMachineSection));
-}
-
-NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, psy_ui_Edit* edit, NewMachine* newmachine,
-	Workspace* workspace)
-{
-	NewMachineSection* rv;
-
-	rv = newmachinesection_alloc();
-	if (rv) {
-		newmachinesection_init(rv, parent, property, edit, newmachine, workspace);
-		psy_ui_component_deallocateafterdestroyed(&rv->component);
-	}
-	return rv;
+	pluginsview_clearselection(&self->pluginview);
 }
 
 void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
@@ -1092,6 +1097,7 @@ static void newmachine_ontoggleexpandsections(NewMachine*, psy_ui_Button* sender
 static void newmachine_ontoggleexpandall(NewMachine*, psy_ui_Button* sender);
 static void newmachine_ontabbarchanged(NewMachine*, psy_ui_TabBar* sender,
 	uintptr_t index);
+static void newmachine_checkselections(NewMachine*, PluginsView* sender);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -1257,7 +1263,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars, &self->filter);
 	psy_ui_component_setalign(&self->filterbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->filterbar.component,
-		psy_ui_margin_makeem(0.0, 0.0, 0.0, 2.0));
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
 	// sort bar
 	newmachinesortbar_init(&self->sortbar, &self->pluginsheaderbars, &self->sort);
 	psy_ui_component_setalign(&self->sortbar.component, psy_ui_ALIGN_LEFT);	
@@ -1266,7 +1272,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		workspace_plugincatcher(self->workspace));
 	psy_ui_component_setalign(&self->categorybar.component, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setmargin(&self->categorybar.component,
-		psy_ui_margin_makeem(0.0, 0.0, 1.0, 0.0));
+		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
 	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->all);
 	pluginsview_setfilter(&self->pluginsview, &self->filter);
@@ -1292,7 +1298,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinerescanbar_init(&self->rescanbar, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->rescanbar.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->rescanbar.component,
-		psy_ui_margin_makeem(0.3, 0.0, 0.0, 0.0));
+		psy_ui_margin_make_em(0.3, 0.0, 0.0, 0.0));
 	// filter
 	newmachinesearchbar_setfilter(&self->searchbar, &self->filter);
 	// signals
@@ -1338,6 +1344,7 @@ void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
 {		
 	self->selectedplugin = pluginsview_selectedplugin(sender);
 	newmachinedetail_update(&self->detail, self->selectedplugin);
+	newmachine_checkselections(self, sender);
 	psy_signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
 	if (self->selectedplugin) {
 		intptr_t favorite;
@@ -1353,7 +1360,29 @@ void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
 void newmachine_onpluginchanged(NewMachine* self, PluginsView* sender)
 {	
 	self->selectedplugin = pluginsview_selectedplugin(sender);
+	newmachine_checkselections(self, sender);
 	newmachinedetail_update(&self->detail, self->selectedplugin);
+}
+
+void newmachine_checkselections(NewMachine* self, PluginsView* sender)
+{
+	psy_TableIterator it;
+
+	assert(self);
+
+	for (it = psy_table_begin(&self->newmachinesections);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		NewMachineSection* section;
+
+		section = (NewMachineSection*)psy_tableiterator_value(&it);
+		if (&section->pluginview != sender) {
+			newmachinsection_clearselection(section);
+		}
+	}
+	if (sender != &self->pluginsview) {
+		pluginsview_clearselection(&self->pluginsview);
+	}
 }
 
 void newmachine_onplugincachechanged(NewMachine* self,
@@ -1372,6 +1401,10 @@ void newmachine_oncreatesection(NewMachine* self, psy_ui_Component* sender)
 	char sectionkey[64];
 
 	psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
+	while (psy_audio_pluginsections_section(&self->workspace->pluginsections, sectionkey)) {
+		++self->newsectioncount;
+		psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
+	}		
 	psy_audio_pluginsections_add(&self->workspace->pluginsections,
 		sectionkey, NULL);
 	++self->newsectioncount;

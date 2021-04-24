@@ -930,10 +930,10 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 					newmachineselection_singleselect(&self->selection, index);
 				}
 			}
+			psy_ui_component_invalidate(&self->component);
+			psy_signal_emit(&self->signal_changed, self, 0);
+			psy_ui_component_setfocus(&self->component);
 		}
-		psy_ui_component_invalidate(&self->component);
-		psy_signal_emit(&self->signal_changed, self, 0);
-		psy_ui_component_setfocus(&self->component);
 	}
 	pluginsview_super_vtable.onmousedown(&self->component, ev);
 }
@@ -1059,6 +1059,14 @@ psy_Property* pluginsview_selectedplugin(PluginsView* self)
 		return psy_property_at_index(self->currplugins, first);
 	}
 	return NULL;
+}
+
+void pluginsview_clearselection(PluginsView* self)
+{
+	if (!newmachineselection_empty(&self->selection)) {
+		newmachineselection_clear(&self->selection);
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void pluginsview_ondragstart(PluginsView* self, psy_ui_DragEvent* ev)

@@ -226,7 +226,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(kbdbox_base(self), parent, NULL);
 	kbdbox_vtable_init(self);
 	psy_ui_component_setdefaultalign(kbdbox_base(self), psy_ui_ALIGN_TOP,
-		psy_ui_margin_makeem(0.0, 0.0, 0.3, 0.0));
+		psy_ui_margin_make_em(0.0, 0.0, 0.3, 0.0));
 	self->workspace = workspace;
 	kbdboxstate_init(&self->state);
 	psy_ui_component_doublebuffer(kbdbox_base(self));
@@ -405,7 +405,7 @@ void kbdbox_addrow(KbdBox* self)
 		&self->component);
 	if (self->currrow) {
 		psy_ui_component_setdefaultalign(self->currrow, psy_ui_ALIGN_LEFT,
-			psy_ui_margin_makeem(0.0, 0.3, 0.0, 0.0));
+			psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
 		psy_ui_component_setalignexpand(self->currrow, psy_ui_HORIZONTALEXPAND);
 	}
 }

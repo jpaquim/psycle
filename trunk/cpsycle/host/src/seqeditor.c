@@ -6,9 +6,10 @@
 #include "seqeditor.h"
 // host
 #include "cmdsgeneral.h"
+#include "pianoroll.h"
+#include "resources/resource.h"
 #include "sequencetrackbox.h"
 #include "styles.h"
-#include "pianoroll.h"
 // audio
 #include <exclusivelock.h>
 #include <sequencecmds.h>
@@ -1453,6 +1454,7 @@ static void seqeditor_onsequencetrackremove(SeqEditor*, psy_audio_Sequence*,
 	uintptr_t trackidx);
 static void seqeditor_onmouseup(SeqEditor*, psy_ui_MouseEvent*);
 static void seqeditor_onmousemove(SeqEditor*, psy_ui_MouseEvent*);
+static void seqeditor_ontoggleexpand(SeqEditor*, psy_ui_Button* sender);
 // vtable
 static psy_ui_ComponentVtable seqeditor_vtable;
 static bool seqeditor_vtable_initialized = FALSE;
@@ -1507,12 +1509,28 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->zoombox_height.signal_changed, self,
 		seqeditor_onzoomboxheightchanged);
+	// header
+	psy_ui_component_init_align(&self->header, &self->component,
+		psy_ui_ALIGN_TOP);
 	// ruler
-	psy_ui_component_init(&self->rulerpane, &self->component, NULL);
-	psy_ui_component_setalign(&self->rulerpane, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->rulerpane, &self->header,
+		psy_ui_ALIGN_CLIENT);
 	seqeditorruler_init(&self->ruler, &self->rulerpane, &self->state,
 		skin, workspace);
-	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);	
+	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);
+	// expand
+	psy_ui_button_init(&self->expand, &self->header, NULL);
+	psy_ui_button_setbitmapresource(&self->expand, IDB_EXPAND_DARK);
+	psy_ui_button_setbitmaptransparency(&self->expand,
+		psy_ui_colour_white());		
+	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
+	psy_signal_connect(&self->expand.signal_clicked, self,
+		seqeditor_ontoggleexpand);
+	self->expanded = FALSE;
+	// tracks
 	seqeditortracks_init(&self->tracks, &self->component,		
 		&self->state, skin, workspace);
 	self->tracks.skin = skin;	
@@ -1718,4 +1736,20 @@ void seqeditor_onmousemove(SeqEditor* self, psy_ui_MouseEvent* ev)
 		psy_ui_component_invalidate(&self->ruler.component);
 		self->state.updatecursorposition = FALSE;		
 	}
+}
+
+void seqeditor_ontoggleexpand(SeqEditor* self, psy_ui_Button* sender)
+{
+	psy_ui_RealRectangle position;
+	position = psy_ui_component_position(&self->component);
+
+	self->expanded = !self->expanded;
+	if (self->expanded) {
+		psy_ui_component_setpreferredsize(&self->component,
+			psy_ui_size_make_px(0.0, position.bottom * 3 / 4.0 - 20));
+	} else {
+		psy_ui_component_setpreferredsize(&self->component,
+			psy_ui_size_make_px(0.0, position.bottom * 1 / 4.0 - 20));
+	}
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }

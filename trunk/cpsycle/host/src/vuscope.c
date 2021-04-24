@@ -173,7 +173,7 @@ void vuscope_drawlabel_right(VuScope* self, psy_ui_Graphics* g, const char* text
 	psy_ui_Size size;
 	const psy_ui_TextMetric* tm;
 
-	size = psy_ui_textsize(g, text);
+	size = psy_ui_textsize(g, text, psy_strlen(text));
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_textout(g, x + (width - psy_ui_value_px(&size.width, tm)), y - height / 2,text, strlen(text));
 }

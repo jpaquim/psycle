@@ -949,7 +949,7 @@ psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,
 	SaveDC(hdc);
 	psy_ui_graphics_init(&g, hdc);
 	psy_ui_setfont(&g, font);
-	rv = psy_ui_textsize(&g, text);
+	rv = psy_ui_textsize(&g, text, psy_strlen(text));
 	psy_ui_graphics_dispose(&g);
 	RestoreDC(hdc, -1);
 	ReleaseDC(self->hwnd, hdc);

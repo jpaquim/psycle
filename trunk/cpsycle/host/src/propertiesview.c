@@ -79,7 +79,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	psy_ui_label_init(&self->key, &self->col0, view);
 	psy_ui_component_setalign(&self->key.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->key),
-		psy_ui_margin_makeem(0.0, 0.0, 0.0, self->level * 4.0));
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, self->level * 4.0));
 	if (!property->item.translate) {
 		psy_ui_label_preventtranslation(&self->key);
 	}
@@ -216,15 +216,12 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 {
 	self->state->property = NULL;	
 	self->state->line = self;
-	if (psy_ui_component_visible(self->state->edit)) {		
+	if (psy_ui_component_visible(psy_ui_edit_base(self->state->edit))) {
 		return;
 	}
 	if (ev->button == 1) {
-		if (self->dialogbutton && ev->target == &self->dialogbutton->component) {
-			self->state->dialogbutton = TRUE;
-		} else {
-			self->state->dialogbutton = FALSE;
-		}
+		self->state->dialogbutton = (self->dialogbutton &&
+			ev->target == &self->dialogbutton->component);			
 		self->state->property = NULL;
 		self->state->selected = self->property;
 		self->state->line = self;
@@ -327,9 +324,9 @@ void propertiesrenderline_onpreferredsize(PropertiesRenderLine* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (self->numcols == 1) {
-		psy_ui_size_setem(rv, 40.0, 1.5);
+		psy_ui_size_setem(rv, 40.0, 1.3);
 	} else {
-		psy_ui_size_setem(rv, 190.0, 1.5);
+		psy_ui_size_setem(rv, 190.0, 1.3);
 	}
 }
 
@@ -405,7 +402,11 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	self->workspace = workspace;
 	self->properties = properties;
 	self->numcols = numcols;
-	self->currsection = NULL;	
+	self->currsection = NULL;
+	self->mainsectionstyle = STYLE_PROPERTYVIEW_MAINSECTION;
+	self->mainsectionheaderstyle = STYLE_PROPERTYVIEW_MAINSECTIONHEADER;
+	self->keystyle = psy_INDEX_INVALID;
+	self->keystyle_hover = psy_INDEX_INVALID;
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesrenderer_vtable_init(self);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
@@ -416,7 +417,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_doublebuffer(&self->client);	
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setdefaultalign(&self->client,
-		psy_ui_ALIGN_TOP, psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.0));
+		psy_ui_ALIGN_TOP, psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 	psy_ui_component_init(&self->dummy, &self->component, NULL);
 	psy_ui_component_hide(&self->dummy);
 	propertiesrenderstate_init(&self->state);
@@ -458,6 +459,19 @@ void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* se
 	psy_table_dispose(&self->sections);
 }
 
+void propertiesrenderer_setstyle(PropertiesRenderer* self,
+	uintptr_t mainsection,
+	uintptr_t mainsectionheader,
+	uintptr_t linestyle,
+	uintptr_t linestyle_hover)
+{
+	self->mainsectionstyle = mainsection;
+	self->mainsectionheaderstyle = mainsectionheader;
+	self->keystyle = linestyle;
+	self->keystyle_hover = linestyle_hover;
+	propertiesrenderer_build(self);
+}
+
 void propertiesrenderer_build(PropertiesRenderer* self)
 {
 	self->currsection = NULL;	
@@ -481,8 +495,14 @@ int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 			self->currsection = &self->client;
 		}
 		if (psy_property_hint(property) != PSY_PROPERTY_HINT_HIDE) {
-			propertiesrenderline_allocinit(self->currsection, &self->client,
+			PropertiesRenderLine* line;
+
+			line = propertiesrenderline_allocinit(self->currsection, &self->client,
 				&self->state, property, level, self->numcols);
+			psy_ui_component_setstyletype(&line->key.component,
+				self->keystyle);
+			psy_ui_component_setstyletype_hover(&line->key.component,
+				self->keystyle_hover);
 		}
 	}
 	return 1;
@@ -501,14 +521,14 @@ void propertiesrenderer_buildsection(PropertiesRenderer* self,
 		psy_ui_component_setdefaultalign(currsection, psy_ui_ALIGN_TOP,
 			psy_ui_margin_zero());
 		psy_ui_component_setstyletype(currsection,
-			STYLE_PROPERTYVIEW_MAINSECTION);
+			self->mainsectionstyle);
 		label = psy_ui_label_allocinit(currsection, &self->client);		
 		psy_ui_component_setmargin(psy_ui_label_base(label),
-			psy_ui_margin_makeem(0.0, 0.0, 0.5, 0.0));
+			psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
 		psy_ui_component_setspacing(psy_ui_label_base(label),
-			psy_ui_margin_makeem(0.5, 0.0, 0.5, 1.0));
+			psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 		psy_ui_component_setstyletype(psy_ui_label_base(label),
-			STYLE_PROPERTYVIEW_MAINSECTIONHEADER);
+			self->mainsectionheaderstyle);
 		lines = psy_ui_component_allocinit(currsection,
 			&self->client);
 		psy_ui_component_setdefaultalign(lines, psy_ui_ALIGN_TOP,
@@ -882,6 +902,16 @@ void propertiesview_gotosection(PropertiesView* self, const char* sectionkey)
 	}
 }
 
+void propertiesview_reload(PropertiesView* self)
+{
+	propertiesrenderer_build(&self->renderer);
+	psy_ui_component_align_full(&self->component);
+	// psy_ui_component_align(&self->scroller);
+	// psy_ui_component_align(&self->component);
+	psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
+	//psy_ui_component_invalidate(&self->renderer);
+}
+
 void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
 	PropertiesRenderer* sender, psy_Property* selected)
 {	
@@ -890,10 +920,7 @@ void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
 	rebuild = FALSE;
 	psy_signal_emit(&self->signal_changed, self, 2, selected, &rebuild);
 	if (rebuild != FALSE) {
-		propertiesrenderer_build(&self->renderer);
-		psy_ui_component_align(&self->renderer.client);
-		psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
-		psy_ui_component_invalidate(&self->renderer.client);
+		propertiesview_reload(self);
 	} else if (self->renderer.state.line) {
 		if (psy_property_ischoiceitem(selected)) {
 			psy_ui_Component* lines;

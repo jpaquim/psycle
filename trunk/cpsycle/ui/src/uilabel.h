@@ -43,7 +43,7 @@ psy_ui_Label* psy_ui_label_allocinit(psy_ui_Component* parent,
     psy_ui_Component* view);
 
 void psy_ui_label_settext(psy_ui_Label*, const char* text);
-void psy_ui_label_text(psy_ui_Label*, char* text);
+const char* psy_ui_label_text(const psy_ui_Label*);
 void psy_ui_label_setdefaulttext(psy_ui_Label*, const char* text);
 void psy_ui_label_setcharnumber(psy_ui_Label*, double number);
 void psy_ui_label_setlinespacing(psy_ui_Label*, double spacing);

@@ -47,7 +47,7 @@ typedef void (*psy_ui_fp_graphics_textoutrectangle)(struct psy_ui_Graphics*, dou
 typedef void (*psy_ui_fp_graphics_drawrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle);
 typedef void (*psy_ui_fp_graphics_drawroundrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_RealSize cornersize);
-typedef psy_ui_Size (*psy_ui_fp_graphics_textsize)(struct psy_ui_Graphics*, const char*);
+typedef psy_ui_Size (*psy_ui_fp_graphics_textsize)(struct psy_ui_Graphics*, const char*, uintptr_t count);
 typedef void (*psy_ui_fp_graphics_drawsolidrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_drawsolidroundrectangle)(struct psy_ui_Graphics*, const psy_ui_RealRectangle,
@@ -138,9 +138,9 @@ INLINE void psy_ui_textoutrectangle(psy_ui_Graphics* self, psy_ui_RealPoint dest
 	self->vtable->textoutrectangle(self, dest.x, dest.y, options, r, text, len);
 }
 
-INLINE psy_ui_Size psy_ui_textsize(psy_ui_Graphics* self, const char* text)
+INLINE psy_ui_Size psy_ui_textsize(psy_ui_Graphics* self, const char* text, uintptr_t count)
 {
-	return self->vtable->textsize(self, text);	
+	return self->vtable->textsize(self, text, count);	
 }
 
 INLINE void psy_ui_drawrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r)
@@ -289,7 +289,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_textoutrectangle)(struct psy_ui_Graphic
 typedef void (*psy_ui_fp_graphicsimp_dev_drawrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle,
 	psy_ui_RealSize cornersize);
-typedef psy_ui_Size (*psy_ui_fp_graphicsimp_dev_textsize)(struct psy_ui_GraphicsImp*, const char*);
+typedef psy_ui_Size (*psy_ui_fp_graphicsimp_dev_textsize)(struct psy_ui_GraphicsImp*, const char*, uintptr_t count);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_RealRectangle r,

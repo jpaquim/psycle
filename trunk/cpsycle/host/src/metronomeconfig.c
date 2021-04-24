@@ -32,13 +32,13 @@ void metronomeconfig_make(MetronomeConfig* self, psy_Property* parent)
 		"settingsview.metronome"), PROPERTY_ID_METRONOME);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->metronome, "showmetronome", FALSE),
-		"settingsview.metronome-show"), PROPERTY_ID_SHOWMETRONOME);
+		"settingsview.metronome.show"), PROPERTY_ID_SHOWMETRONOME);
 	psy_property_settext(
 		psy_property_append_int(self->metronome, "machine", 0x3F, 0, 0x40),
-		"settingsview.metronome-machine");
+		"settingsview.metronome.machine");
 	psy_property_settext(
 		psy_property_append_int(self->metronome, "note", 48, 0, 119),
-		"settingsview.metronome-note");
+		"settingsview.metronome.note");
 }
 
 // Properties

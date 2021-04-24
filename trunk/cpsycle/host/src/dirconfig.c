@@ -42,7 +42,7 @@ void dirconfig_make(DirConfig* self)
 	
 	self->directories = psy_property_settext(
 		psy_property_append_section(self->parent, "directories"),
-		"settingsview.directories");
+		"settingsview.dirs.dirs");
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
 	psy_property_sethint(
 		psy_property_settext(
@@ -56,31 +56,31 @@ void dirconfig_make(DirConfig* self)
 #endif
 		PSY_PROPERTY_HINT_HIDE);
 #if defined(DIVERSALIS__OS__MICROSOFT)		
-	dirconfig_append(self, "songs", "settingsview.song-directory",
+	dirconfig_append(self, "songs", "settingsview.dirs.song",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #else
 	psy_snprintf(path, 4096, "%s", psy_dir_home());
 	printf("path %s\n", path);
-	//dirconfig_makedirectory(self, "songs", "settingsview.song-directory",
+	//dirconfig_makedirectory(self, "songs", "settingsview.dirs.song",
 		//path);
-	dirconfig_append(self, "songs", "settingsview.song-directory",
+	dirconfig_append(self, "songs", "settingsview.dirs.song",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #endif		
-	dirconfig_append(self, "samples", "settingsview.samples-directory",
+	dirconfig_append(self, "samples", "settingsview.dirs.samples",
 		PSYCLE_SAMPLES_DEFAULT_DIR);
-	dirconfig_append(self, "plugins32", "settingsview.plug-in32-directory",
+	dirconfig_append(self, "plugins32", "settingsview.dirs.plugin32",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
-	dirconfig_append(self, "plugins64", "settingsview.plug-in64-directory",
+	dirconfig_append(self, "plugins64", "settingsview.dirs.plugin64",
 		PSYCLE_PLUGINS64_DEFAULT_DIR);
-	dirconfig_append(self, "luascripts", "settingsview.lua-scripts-directory",
+	dirconfig_append(self, "luascripts", "settingsview.dirs.lua",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
-	dirconfig_append(self, "vsts32", "settingsview.vst-directories",
+	dirconfig_append(self, "vsts32", "settingsview.dirs.vst32",
 		PSYCLE_VSTS32_DEFAULT_DIR);
-	dirconfig_append(self, "vsts64", "settingsview.vst64-directories",
+	dirconfig_append(self, "vsts64", "settingsview.dirs.vst64",
 		PSYCLE_VSTS64_DEFAULT_DIR);
-	dirconfig_append(self, "ladspas", "settingsview.ladspa-directories",
+	dirconfig_append(self, "ladspas", "settingsview.dirs.ladspa",
 		PSYCLE_LADSPAS_DEFAULT_DIR);
-	dirconfig_append(self, "skin", "settingsview.skin-directory",
+	dirconfig_append(self, "skin", "settingsview.dirs.skin",
 		"C:\\Programme\\Psycle\\Skins");
 	dirconfig_makedefaultuserpresets(self);
 }

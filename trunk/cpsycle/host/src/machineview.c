@@ -113,7 +113,7 @@ void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 		psy_ui_NOBACKGROUND);
 	psy_ui_component_setstyletypes(&self->component,
 		STYLE_MACHINEVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+		psy_INDEX_INVALID);	
 }
 
 void machineview_initpropertiesview(MachineView* self)

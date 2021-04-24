@@ -71,6 +71,11 @@ typedef struct NewMachineSelection {
 void newmachineselection_init(NewMachineSelection*);
 void newmachineselection_dispose(NewMachineSelection*);
 
+INLINE bool newmachineselection_empty(const NewMachineSelection* self)
+{
+	return self->items == NULL;
+}
+
 void newmachineselection_clear(NewMachineSelection*);
 void newmachineselection_select(NewMachineSelection*, uintptr_t index);
 void newmachineselection_singleselect(NewMachineSelection*, uintptr_t index);
@@ -123,6 +128,7 @@ void pluginsview_filter(PluginsView*);
 void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);
 psy_Property* pluginsview_selectedplugin(PluginsView*);
+void pluginsview_clearselection(PluginsView*);
 
 
 #ifdef __cplusplus

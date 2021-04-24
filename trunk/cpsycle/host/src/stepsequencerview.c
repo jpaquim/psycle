@@ -175,7 +175,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_margin_makeem(0.0, 1.0, 0.0, 0.0));
+		psy_ui_ALIGN_LEFT, psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,

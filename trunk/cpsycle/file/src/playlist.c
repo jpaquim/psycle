@@ -26,8 +26,9 @@ void psy_playlist_init(psy_Playlist* self)
 		"Psycle Recent Song ViewHistory created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->recentfiles = psy_property_settext(
 		psy_property_append_section(self->recentsongs, "files"),
-		"Recent Songs");
+		"playlist.recent-songs");
 	playlist_initpath(self);
+	psy_signal_init(&self->signal_changed);
 }
 
 void playlist_initpath(psy_Playlist* self)
@@ -40,7 +41,7 @@ void playlist_initpath(psy_Playlist* self)
 	psy_path_setprefix(&path, psy_dir_config());
 	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);
 	self->path = psy_strdup(psy_path_full(&path));
-	psy_path_dispose(&path);
+	psy_path_dispose(&path);	
 }
 
 void psy_playlist_dispose(psy_Playlist* self)
@@ -49,6 +50,8 @@ void psy_playlist_dispose(psy_Playlist* self)
 
 	psy_property_deallocate(self->recentsongs);	
 	free(self->path);
+	self->path = NULL;
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void psy_playlist_add(psy_Playlist* self, const char* filename)
@@ -69,6 +72,7 @@ void psy_playlist_add(psy_Playlist* self, const char* filename)
 			psy_path_name(&path)));
 		psy_playlist_save(self);
 		psy_path_dispose(&path);
+		psy_signal_emit(&self->signal_changed, self, 0);
 	}
 }
 
@@ -77,7 +81,8 @@ void psy_playlist_clear(psy_Playlist* self)
 	assert(self);
 	
 	psy_property_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, self->path);	
+	propertiesio_save(self->recentsongs, self->path);
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_playlist_load(psy_Playlist* self)
@@ -101,6 +106,7 @@ void psy_playlist_load(psy_Playlist* self)
 			psy_property_preventtranslate(property);
 			psy_path_dispose(&path);
 		}
+		psy_signal_emit(&self->signal_changed, self, 0);
 	}
 }
 

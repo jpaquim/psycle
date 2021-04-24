@@ -219,6 +219,7 @@ NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
 const char* newmachinesection_key(const NewMachineSection*);
 const char* newmachinesection_name(const NewMachineSection*);
 void newmachinesection_mark(NewMachineSection*);
+void newmachinsection_clearselection(NewMachineSection*);
 
 typedef struct NewMachine {
 	// inherits

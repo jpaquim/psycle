@@ -239,7 +239,7 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	self->selected = 0;
 	self->tabalignment = psy_ui_ALIGN_TOP;	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_makeem(0.0, 2.0, 0.0, 0.0));
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
 }
 
 void tabbar_ondestroy(psy_ui_TabBar* self)

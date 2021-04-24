@@ -97,6 +97,10 @@ typedef struct PropertiesRenderer {
 	psy_ui_Component* currsection;	
 	psy_Table sections;
 	PropertiesRenderState state;
+	uintptr_t mainsectionstyle;
+	uintptr_t mainsectionheaderstyle;
+	uintptr_t keystyle;
+	uintptr_t keystyle_hover;
 	// references
 	psy_Property* properties;	
 	Workspace* workspace;	
@@ -104,6 +108,12 @@ typedef struct PropertiesRenderer {
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
 	psy_Property*, uintptr_t numcols, Workspace*);
+
+void propertiesrenderer_setstyle(PropertiesRenderer*,
+	uintptr_t mainsection,
+	uintptr_t mainsectionheader,
+	uintptr_t keystyle,
+	uintptr_t keystyle_hover);
 
 INLINE const psy_Property* propertiesrenderer_properties(const
 	PropertiesRenderer* self)
@@ -137,6 +147,8 @@ typedef struct PropertiesView {
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property*,
 	uintptr_t numcols, Workspace*);
+
+void propertiesview_reload(PropertiesView*);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

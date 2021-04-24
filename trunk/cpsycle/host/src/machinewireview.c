@@ -191,7 +191,7 @@ void machinewireview_ondestroy(MachineWireView* self)
 }
 
 void machinewireview_updateskin(MachineWireView* self)
-{
+{	
 	psy_ui_component_setbackgroundcolour(&self->component,
 		self->skin->colour);
 	machinewireview_buildmachineuis(self);

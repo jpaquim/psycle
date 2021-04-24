@@ -19,7 +19,7 @@ static void textoutrectangle(psy_ui_Graphics*, double x, double y, uintptr_t opt
 static void drawrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle);
 static void drawroundrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_RealSize cornersize);
-static psy_ui_Size textsize(psy_ui_Graphics*, const char* text);
+static psy_ui_Size textsize(psy_ui_Graphics*, const char* text, uintptr_t count);
 static void drawsolidrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
 	psy_ui_Colour colour);
 static void drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_RealRectangle,
@@ -132,9 +132,9 @@ void drawroundrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,
 		self->imp->vtable->dev_drawroundrectangle(self->imp, r, cornersize);
 }
 
-psy_ui_Size textsize(psy_ui_Graphics* self, const char* text)
+psy_ui_Size textsize(psy_ui_Graphics* self, const char* text, uintptr_t count)
 {
-	return self->imp->vtable->dev_textsize(self->imp, text);
+	return self->imp->vtable->dev_textsize(self->imp, text, count);
 }
 
 void drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_RealRectangle r,

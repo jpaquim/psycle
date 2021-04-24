@@ -980,7 +980,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 {
 	psy_ui_Margin margin;
 
-	margin = psy_ui_margin_makeem(0.5, 0.0, 0.5, 0.0);		
+	margin = psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setvtable(&self->component,
 		machinestackinputs_vtable_init(self));

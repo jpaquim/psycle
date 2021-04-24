@@ -6,12 +6,14 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct psy_Playlist {
+	psy_Signal signal_changed;
 	psy_Property* recentsongs;
 	psy_Property* recentfiles;
 	char* path;

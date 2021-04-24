@@ -132,15 +132,11 @@ void psy_ui_label_setdefaulttext(psy_ui_Label* self, const char* text)
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
-void psy_ui_label_text(psy_ui_Label* self, char* text)
+const char* psy_ui_label_text(const psy_ui_Label* self)
 {
 	assert(self);
 
-	if (self->text) {
-		psy_snprintf(self->text, 256, "%s", text);
-	} else {
-		text[0] = '\0';
-	}
+	return self->text;		
 }
 
 void psy_ui_label_onpreferredsize(psy_ui_Label* self,
@@ -201,10 +197,10 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 	//return;
 	if (size.height >= tm->tmHeight * 2) {
-		numcolumnavgchars = (int)(size.width / tm->tmAveCharWidth);
+		numcolumnavgchars = (uintptr_t)(size.width / tm->tmAveCharWidth);		
 	} else {
-		numcolumnavgchars = UINTPTR_MAX;
-	}
+		numcolumnavgchars = UINTPTR_MAX;		
+	}	
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 			psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - tm->tmHeight) / 2;
@@ -213,7 +209,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		psy_ui_Size textsize;
 		psy_ui_RealSize textsizepx;
 
-		textsize = psy_ui_textsize(g, text);
+		textsize = psy_ui_textsize(g, text, psy_strlen(text));
 		textsizepx = psy_ui_size_px(&textsize, tm);
 		centerx = (size.width - textsizepx.width);
 	}
@@ -225,6 +221,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		while (count > 0) {
 			uintptr_t numoutput;
 			char* wrap;
+			psy_ui_Size currlinesize;
 
 			numoutput = psy_min(numcolumnavgchars, count);
 			if (numoutput < count) {
@@ -237,15 +234,25 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			if (numoutput == 0) {
 				break;
 			}
-			if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) == psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+			if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+					psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 				centerx = (size.width - psy_strlen(token) * tm->tmAveCharWidth) / 2;
 			}
-			psy_ui_textout(g, centerx, centery, token, numoutput);
-			centery += tm->tmHeight;
-			count -= numoutput;
-			token += numoutput;
-			if (centery + tm->tmHeight >= size.height) {
-				numcolumnavgchars = UINTPTR_MAX;
+			currlinesize = psy_ui_textsize(g, token, numoutput);
+			while (numoutput > 0 && psy_ui_value_px(&currlinesize.width, tm) > size.width) {
+				numoutput--;				
+				if (numoutput > 0) {
+					currlinesize = psy_ui_textsize(g, token, numoutput);
+				}
+			}
+			if (numoutput > 0) {
+				psy_ui_textout(g, centerx, centery, token, numoutput);
+				centery += tm->tmHeight;
+				count -= numoutput;
+				token += numoutput;
+				if (centery + tm->tmHeight >= size.height) {
+					numcolumnavgchars = UINTPTR_MAX;
+				}
 			}
 		}
 		token = strtok(NULL, seps);
