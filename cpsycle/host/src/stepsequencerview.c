@@ -632,7 +632,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 2.0);		
+	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.5, 2.0);		
 	self->workspace = workspace;	
 	psy_ui_component_init(&self->component, parent, NULL);
 	stepsequencerview_vtable_init(self);

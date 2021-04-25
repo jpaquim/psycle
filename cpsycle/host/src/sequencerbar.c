@@ -31,7 +31,7 @@ void sequencerbar_init(SequencerBar* self,
 	assert(workspace);
 	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.25, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.25, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		margin);
 	self->workspace = workspace;
@@ -69,7 +69,7 @@ void sequencerbar_init(SequencerBar* self,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, margin);
 	psy_signal_connect(&self->followsong.signal_clicked, self,
 		sequencerbar_onfollowsong);

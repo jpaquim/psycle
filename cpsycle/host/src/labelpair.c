@@ -31,7 +31,7 @@ void labelpair_init_right(LabelPair* self, psy_ui_Component* parent, const char*
 	psy_ui_label_setcharnumber(&self->value, 0.0);
 	psy_ui_component_setalign(&self->value.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->value.component, margin);
 }
 
@@ -44,6 +44,6 @@ void labelpair_init_top(LabelPair* self, psy_ui_Component* parent, const char* d
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_TOP);	
 	psy_ui_label_setcharnumber(&self->value, 0.0);
 	psy_ui_component_setalign(&self->value.component, psy_ui_ALIGN_TOP);	
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->value.component, margin);
 }

@@ -18,6 +18,8 @@ void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 	psy_table_init(&self->styleids);
 	self->state = psy_ui_STYLESTATE_NONE;
 	self->currstyle = &self->style;
+	psy_ui_margin_init(&self->margin);
+	psy_ui_margin_init(&self->spacing);
 }
 
 void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)

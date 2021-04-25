@@ -33,50 +33,50 @@ void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
 
 	self->controllers = psy_property_settext(
 		psy_property_append_section(parent, "controllers"),
-		"settingsview.controllers");
+		"settingsview.midicontrollers.controllers");
 	// macselect
 	choice = psy_property_settext(
 		psy_property_append_choice(self->controllers,
 			"macselect", 0),
-		"settingsview.midi-controllers-macselect");
+		"settingsview.midicontrollers.macselect");
 	psy_property_settext(
 		psy_property_append_str(choice, "inpsycle", ""),
-		"settingsview.midi-controllers-select-inpsycle");
+		"settingsview.midicontrollers.select-inpsycle");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-bybank");
+		"settingsview.midicontrollers.select-bybank");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-byprogram");
+		"settingsview.midicontrollers.select-byprogram");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-bychannel");
+		"settingsview.midicontrollers.select-bychannel");
 	// auxselect
 	choice = psy_property_settext(
 		psy_property_append_choice(self->controllers,
 			"auxselect", 0),
-		"settingsview.midi-controllers-auxselect");
+		"settingsview.midicontrollers.auxselect");
 	psy_property_settext(
 		psy_property_append_str(choice, "inpsycle", ""),
-		"settingsview.midi-controllers-select-inpsycle");
+		"settingsview.midicontrollers.select-inpsycle");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-bybank");
+		"settingsview.midicontrollers.select-bybank");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-byprogram");
+		"settingsview.midicontrollers.select-byprogram");
 	psy_property_settext(
 		psy_property_append_str(choice, "bybank", ""),
-		"settingsview.midi-controllers-select-bychannel");
+		"settingsview.midicontrollers.select-bychannel");
 	psy_property_settext(
 		psy_property_append_bool(self->controllers,
 			"recordrawmidiasmcm", TRUE),
-		"settingsview.midi-controllers-recordrawmidiasmcm");
-	// Map Controllers	
+		"settingsview.midicontrollers.recordrawmidiasmcm");
+	// Map Controllers
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->controllers,
 			"addcontroller"),
-		"settingsview.midi-controllers-add"),
+		"settingsview.midicontrollers.add"),
 		PROPERTY_ID_ADDCONTROLLERMAP);
 	psy_property_sethint(psy_property_append_str(self->controllers,
 		"controllerdata", ""),

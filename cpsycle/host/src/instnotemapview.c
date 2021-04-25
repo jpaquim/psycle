@@ -1328,10 +1328,10 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 		"instrumentview.notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	samplesbox_init(&self->samplesbox, &self->component, NULL, workspace);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->samplesbox.component, margin);
 	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);	
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 1.5, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.5, 0.0);
 	psy_ui_component_setmargin(&self->label.component, margin);
 	instrumentnotemapbuttons_init(&self->buttons, &self->component);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
@@ -1371,18 +1371,18 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 
 	psy_ui_component_init(&self->entries, &self->component, NULL);
 	psy_ui_component_setalign(&self->entries, psy_ui_ALIGN_CLIENT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	instrumententryview_init(&self->entryview, &self->entries, &self->state);
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
 		&self->entries, NULL);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED_RESIZE);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->entryview.component, margin);	
 	instrumentkeyboardview_init(&self->keyboard, &self->entries);
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->keyboard.component, margin);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->keyboard.component, margin);
 }
 

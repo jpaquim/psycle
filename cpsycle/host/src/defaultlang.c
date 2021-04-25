@@ -183,56 +183,56 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "extcomments", "Extended Comments");	
 	// settingsview
 	section = psy_property_append_section(lang, "settingsview");	
-	// Metronome	
 	psy_property_set_str(section, "metronome", "Metronome");
-	psy_property_set_str(section, "general", "General");
-	psy_property_set_str(section, "visual", "Visual");
 	psy_property_set_str(section, "machineview", "Machine View");
 	psy_property_set_str(section, "patternview", "Pattern View");
 	psy_property_set_str(section, "keyboard-and-misc", "Keyboard and misc");
 	psy_property_set_str(section, "compatibility", "Compatibility");
-	psy_property_set_str(section, "controllers", "MIDI Controllers");
-	psy_property_set_str(section, "midi-controllers-add",
+	// settingsview/midicontrollers
+	subsection = psy_property_append_section(section, "midicontrollers");
+	psy_property_set_str(subsection, "controllers", "MIDI Controllers");
+	psy_property_set_str(subsection, "add",
 		"Add Controller Map");
-	psy_property_set_str(section, "midi=controllers-remove",
+	psy_property_set_str(subsection, "remove",
 		"Remove");
-	psy_property_set_str(section, "midi-controllers-mapping",
+	psy_property_set_str(subsection, "mapping",
 		"Midi controllers mapping");
-	psy_property_set_str(section, "midi-controllers-macselect",
+	psy_property_set_str(subsection, "macselect",
 		"Select Generator/Instrument with");
-	psy_property_set_str(section, "midi-controllers-auxselect",
+	psy_property_set_str(subsection, "auxselect",
 		"Select Instrument/Aux with");
-	psy_property_set_str(section, "midi-controllers-select-inpsycle",
+	psy_property_set_str(subsection, "select-inpsycle",
 		"Currently selected in Psycle");
-	psy_property_set_str(section, "midi-controllers-select-bybank",
+	psy_property_set_str(subsection, "select-bybank",
 		"Selected by bank change");
-	psy_property_set_str(section, "midi-controllers-select-byprogram",
+	psy_property_set_str(subsection, "select-byprogram",
 		"Selected by program change");
-	psy_property_set_str(section, "midi-controllers-select-bychannel",
+	psy_property_set_str(subsection, "select-bychannel",
 		"Selected by MIDI channel index");
-	psy_property_set_str(section, "midi-controllers-recordrawmidiasmcm",
+	psy_property_set_str(subsection, "recordrawmidiasmcm",
 		"Record Raw MIDI as MCM");
-	psy_property_set_str(section, "midi-controllers-mapping-map-velocity",
+	psy_property_set_str(subsection, "mapping-map-velocity",
 		"Map Velocity");
-	psy_property_set_str(section, "midi-controllers-mapping-map-pitchwheel",
+	psy_property_set_str(subsection, "mapping-map-pitchwheel",
 		"Map Pitch Wheel");
-	psy_property_set_str(section, "midi-controllers-mapping-map-controller",
+	psy_property_set_str(subsection, "mapping-map-controller",
 		"Map Controller");
-	psy_property_set_str(section, "midi-controllers-mapping-map-active",
+	psy_property_set_str(subsection, "mapping-map-active",
 		"active");
+	// settingsview	
 	psy_property_set_str(section, "language", "Language");
 	psy_property_set_str(section, "event-input", "Event Input");
 	psy_property_set_str(section, "audio-drivers", "Audio Drivers");
 	psy_property_set_str(section, "configure", "Configure");
 	psy_property_set_str(section, "jme-version-unknown",
 		"Load new gamefx and blitz if version is unknown");	
-	psy_property_set_str(section, "apptheme", "App Theme");
 	psy_property_set_str(section, "showminiview", "Show Miniview");
-	// settingsview/general
-	psy_property_set_str(section, "language", "Language");
-	psy_property_set_str(section, "de", "german");
-	psy_property_set_str(section, "en", "english");
-	psy_property_set_str(section, "es", "spanish");
+	// settingsview/config
+	subsection = psy_property_append_section(section, "config");
+	psy_property_set_str(subsection, "language", "Language");
+	psy_property_set_str(subsection, "de", "german");
+	psy_property_set_str(subsection, "en", "english");
+	psy_property_set_str(subsection, "es", "spanish");
 	// settingsview/metronome
 	subsection = psy_property_append_section(section, "metronome");
 	psy_property_set_str(subsection, "show", "Show Metronome Bar");	
@@ -263,35 +263,46 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "theme", "Theme");	
 	psy_property_set_str(section, "background", "Background");
 	psy_property_set_str(section, "font", "Font");
-	psy_property_set_str(section, "name", "Name");
-	psy_property_set_str(section, "version", "Version");
-	psy_property_set_str(section,
+	psy_property_set_str(section, "name", "Name");	
+	// settingsview/general
+	subsection = psy_property_append_section(section, "general");
+	psy_property_set_str(subsection, "general", "General");
+	psy_property_set_str(subsection, "version", "Version");	
+	psy_property_set_str(subsection,
 		"show-about-at-startup", "Show About At Startup");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-song-info-on-load", "Show Song Info On Load");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-maximized-at-startup", "Show maximized at startup");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-playlist", "Show Playlist/Recentsongs");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-sequenceedit", "Show Sequenceeditor");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-sequencestepbar", "Show Sequencestepbar");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"save-recent-songs", "Save recent songs");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"play-song-after-load", "Play Song After Load");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"move-cursor-when-paste", "Move Cursor When Paste");
-	psy_property_set_str(section,
+	psy_property_set_str(subsection,
 		"show-as-window", "Show as Window");	
-	psy_property_set_str(section, "load-skin", "Load skin");
-	psy_property_set_str(section, "default-skin", "Default skin");
-	psy_property_set_str(section, "default-font", "Default Font");
-	psy_property_set_str(section, "default-line", "Default Line");
-	psy_property_set_str(section, "load-dial-bitmap", "Load dial bitmap");
-	psy_property_set_str(section, "choose-font", "Choose Font");
+	psy_property_set_str(subsection,
+		"show-pattern-names", "Show Pattern Names");
+	// settingsview/visual
+	subsection = psy_property_append_section(section, "visual");
+	psy_property_set_str(subsection, "visual", "Visual");
+	psy_property_set_str(subsection, "load-skin", "Load skin");
+	psy_property_set_str(subsection, "default-skin", "Default skin");
+	psy_property_set_str(subsection, "default-font", "Default Font");
+	psy_property_set_str(subsection, "default-line", "Default Line");
+	psy_property_set_str(subsection, "load-dial-bitmap", "Load dial bitmap");
+	psy_property_set_str(subsection, "apptheme", "App Theme");
+	psy_property_set_str(subsection, "light", "light");
+	psy_property_set_str(subsection, "dark", "dark");
 	// settingsview/patternview
+	psy_property_set_str(section, "choose-font", "Choose Font");
 	psy_property_set_str(section, "draw-empty-data", "Draw empty data");
 	psy_property_set_str(section, "smoothscroll", "Scroll smooth");
 	psy_property_set_str(section, "default-entries", "Default entries");
@@ -548,6 +559,11 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section,
 		"select-plugin-to-view-description",
 		"Select a plugin to view its description");
+	psy_property_set_str(section,
+		"select-first-section", "Select/Create first a section");
+	psy_property_set_str(section,
+		"select-first-plugin", "Select first a plugin");
+	// samplesview
 	section = psy_property_append_section(lang, "samplesview");
 	psy_property_set_str(section, "samplename", "Samplename");
 	psy_property_set_str(section, "samplerate", "Samplerate");

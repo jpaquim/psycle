@@ -100,7 +100,8 @@ typedef struct MainFrame {
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;	
 	Navigation navigation;
-	psy_ui_TabBar tabbar;	
+	psy_ui_TabBar tabbar;
+	psy_ui_TabBar helpsettingstabbar;
 	psy_ui_Notebook notebook;
 	FileBar filebar;
 	UndoRedoBar undoredobar;

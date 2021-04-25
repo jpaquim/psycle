@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "cpuview.h"
+// host
+#include "styles.h"
 
 #if defined(DIVERSALIS__OS__MICROSOFT)
 #include <windows.h>
@@ -129,8 +131,10 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 {	
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 2.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 2.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init_align(&self->top, &self->component,
@@ -148,16 +152,11 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 void cpuview_inittitle(CPUView* self)
 {
-	psy_ui_Margin margin;
+	psy_ui_Margin margin;	
 	
-	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->component,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyletypes(&self->titlebar,
-		psy_ui_STYLE_HEADER,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 2.0);
-	psy_ui_component_setmargin(&self->titlebar, margin);
+	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);	
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
 		"Psycle DSP/CPU Performance Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
@@ -165,7 +164,7 @@ void cpuview_inittitle(CPUView* self)
 		self, cpuview_onhide);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->hide.component, margin);
 }
 
@@ -213,7 +212,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 	psy_ui_scroller_init(&self->scroller, &self->modules.component,
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 2.0);
+	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->scroller.component, margin);
 }
 

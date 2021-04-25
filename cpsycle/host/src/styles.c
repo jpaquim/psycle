@@ -419,18 +419,33 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_weighted(&onprimary, medium),
 		psy_ui_colour_make_overlay(6));
 	psy_ui_defaults_setstyle(defaults, STYLE_INPUTDEFINER_FOCUS, style);
+	// newmachine
 	// newmachine_section
-	style = psy_ui_style_allocinit();		
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.5, 1.0, 1.0));
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION, style);
 	// newmachine_section::select
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style,		
 		psy_ui_colour_make_overlay(2));
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.5, 1.0, 1.0));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_overlayed(&surface, &secondary, 0.30));
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_SELECTED, style);
+	// newmachine_sectionheader
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);
+	// newmachine_searchbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));	
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SEARCHBAR, style);
 	// newmachine_searchfield	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -438,11 +453,48 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.20));
+		psy_ui_colour_overlayed(&surface, &overlay, 0.20));	
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.3, 0.3, 0.3, 0.0));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 8.0, 0.0, 0.0));	
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SEARCHFIELD, style);
-	// newmachine_sectionheader
-	style = psy_ui_style_allocinit();	
-	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_HEADER, style);		
+	// newmachine_rescanbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.2, 0.0, 0.2, 0.0));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.3, 0.0, 0.0, 0.0));	
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_RESCANBAR, style);
+	// newmachine_sectionbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.2, 0.0, 0.2, 0.0));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTIONBAR, style);		
+	// newmachine_sortbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.2, 0.0, 0.2, 0.0));	
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 3.0));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SORTBAR, style);
+	// newmachine_filterbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.2, 0.0, 0.2, 0.0));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 3.0));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_FILTERBAR, style);
+	// newmachine_detail
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.5, 0.5, 2.0));	
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_DETAIL, style);
+	// propertyview
 	// propertyview_mainsection
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);		
@@ -462,6 +514,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_make_overlay(1));
 	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.06));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 	psy_ui_defaults_setstyle(defaults,
 		STYLE_PROPERTYVIEW_MAINSECTIONHEADER, style);
 	// recentview_mainsection
@@ -481,6 +537,24 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_make_overlay(1));
 	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.06));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 	psy_ui_defaults_setstyle(defaults,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER, style);
+	// header	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, weak));
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(1));
+	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.06));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
+	psy_ui_defaults_setstyle(defaults,
+		STYLE_HEADER, style);
 }

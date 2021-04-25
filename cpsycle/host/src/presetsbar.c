@@ -61,7 +61,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 		"machineframe.saveas");
 	psy_ui_edit_init(&self->savename, &self->component);
 	psy_ui_edit_setcharnumber(&self->savename, 12);
-	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, margin));

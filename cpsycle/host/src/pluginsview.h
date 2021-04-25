@@ -130,7 +130,6 @@ void pluginsview_sort(PluginsView*, NewMachineSortMode);
 psy_Property* pluginsview_selectedplugin(PluginsView*);
 void pluginsview_clearselection(PluginsView*);
 
-
 #ifdef __cplusplus
 }
 #endif

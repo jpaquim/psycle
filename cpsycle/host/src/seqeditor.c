@@ -1409,7 +1409,7 @@ void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 		"seqedit.move");
 	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
 		"seqedit.reorder");
-	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 1.0, 0.0);
+	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setspacing(&self->component, spacing);	
 }
 
@@ -1479,7 +1479,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 {		
 	psy_ui_Margin topmargin;	
 	
-	psy_ui_margin_init_all_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);	
 	psy_ui_component_setstyletypes(&self->component,

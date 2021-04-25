@@ -29,6 +29,8 @@ typedef struct psy_ui_ComponentStyle {
 	psy_ui_Style* currstyle;
 	psy_ui_Style style;
 	psy_ui_StyleState state;
+	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
 } psy_ui_ComponentStyle;
 
 void psy_ui_componentstyle_init(psy_ui_ComponentStyle*);
@@ -50,6 +52,32 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle*, psy_ui_StyleState
 bool psy_ui_componentstyle_updatestate(psy_ui_ComponentStyle*);
 bool psy_ui_componentstyle_setcurrstate(psy_ui_ComponentStyle*,
 	psy_ui_StyleState);
+
+INLINE void psy_ui_componentstyle_setmargin(psy_ui_ComponentStyle* self, psy_ui_Margin margin)
+{
+	self->margin = margin;
+}
+
+INLINE psy_ui_Margin psy_ui_componentstyle_margin(const psy_ui_ComponentStyle* self)
+{
+	if (self->currstyle->marginset) {
+		return self->currstyle->margin;
+	} 
+	return self->margin;
+}
+
+INLINE void psy_ui_componentstyle_setspacing(psy_ui_ComponentStyle* self, psy_ui_Margin spacing)
+{
+	self->spacing = spacing;
+}
+
+INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle * self)
+{
+	if (self->currstyle->spacingset) {
+		return self->currstyle->spacing;
+	}
+	return self->spacing;
+}
 
 #ifdef __cplusplus
 }

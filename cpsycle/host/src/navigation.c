@@ -23,9 +23,9 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_bitmap_loadresource(&self->prev.bitmapicon, IDB_ARROW_BACK_DARK);
 	psy_ui_bitmap_settransparency(&self->prev.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_component_setalign(&self->prev.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->prev.component, margin);
-	psy_ui_margin_init_all_em(&spacing, 0.0, 0.0, 0.0, 1.0);
+	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_component_setspacing(&self->prev.component, spacing);	
 	psy_signal_connect(&self->prev.signal_clicked, self, navigation_onprev);
 	psy_ui_button_init(&self->next, &self->component, NULL);	

@@ -38,7 +38,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);	
-	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin_children(&self->component, margin);		
 }

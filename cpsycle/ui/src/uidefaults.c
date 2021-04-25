@@ -20,9 +20,9 @@ void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 		psy_ui_defaults_initlighttheme(self);
 	}			
 	// group
-	psy_ui_margin_init_all_em(&self->hmargin, 0.0, 1.0, 0.0, 0.0);		
-	psy_ui_margin_init_all_em(&self->vmargin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_margin_init_all_em(&self->cmargin, 0.0, 0.5, 0.5, 0.5);		
+	psy_ui_margin_init_em(&self->hmargin, 0.0, 1.0, 0.0, 0.0);		
+	psy_ui_margin_init_em(&self->vmargin, 0.0, 0.0, 0.5, 0.0);		
+	psy_ui_margin_init_em(&self->cmargin, 0.0, 0.5, 0.5, 0.5);		
 }
 
 void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
@@ -146,13 +146,17 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&primary, medium));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB, style);
 	// tab::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onprimary);	
 	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
-	psy_ui_border_setcolour(&style->border, onsecondary);	
+	psy_ui_border_setcolour(&style->border, onsecondary);
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);
 	// tab::select
 	style = psy_ui_style_allocinit();	
@@ -160,6 +164,8 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
 	psy_ui_border_setcolour(&style->border, onsecondary);
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT, style);
 	// header;
 	style = psy_ui_style_allocinit();

@@ -50,7 +50,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_Margin spacing;
 
-	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.5, 1.0);
+	psy_ui_margin_init_em(&spacing, 0.5, 0.0, 0.5, 1.0);
 	psy_ui_component_init(playbar_base(self), parent, NULL);
 	psy_ui_component_setvtable(playbar_base(self), vtable_init(self));
 	psy_ui_component_setstyletypes(playbar_base(self),

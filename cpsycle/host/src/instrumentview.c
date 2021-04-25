@@ -246,7 +246,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_Margin margin;
 	psy_ui_Margin tab;	
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.5, 0.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.5, 0.0);		
 	self->view = view;
 	self->instrument = NULL;
 	self->instruments = instruments;
@@ -428,8 +428,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	self->statusbar = NULL;
 	self->player = &workspace->player;
 	self->workspace = workspace;
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_margin_init_all_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
+	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self, workspace);
@@ -454,7 +454,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	{
 		psy_ui_Margin margin;
 
-		psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
+		psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 		psy_ui_component_setmargin(psy_ui_notebook_base(&self->clientnotebook),
 			margin);
 	}
@@ -466,7 +466,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	// client
 	psy_ui_component_init(&self->client,
 		psy_ui_notebook_base(&self->clientnotebook), NULL);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);
 	psy_ui_component_setmargin(&self->client, margin);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_tabbar_init(&self->tabbar, &self->client);

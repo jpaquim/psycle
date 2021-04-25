@@ -69,7 +69,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_Margin margin;
 
 	self->workspace = workspace;
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);			
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);			
 	self->selchange = 0;	
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;

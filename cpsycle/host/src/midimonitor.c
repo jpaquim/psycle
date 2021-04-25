@@ -6,6 +6,7 @@
 #include "midimonitor.h"
 // host
 #include "resources/resource.h"
+#include "styles.h"
 // audio
 #include <patterns.h>
 #include <songio.h>
@@ -352,6 +353,7 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_init(&self->component, parent, NULL);
 	midimonitor_vtable_init(self);
 	psy_ui_component_setvtable(midimonitor_base(self), midimonitor_vtable_init(self));
+	psy_ui_component_setstyletype(&self->component, STYLE_RECENTVIEW_MAINSECTION);
 	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
@@ -373,15 +375,10 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 void midimonitor_inittitle(MidiMonitor* self)
 {
 	psy_ui_Margin margin;
-	
-	// titlebar
+		
 	psy_ui_component_init(&self->titlebar, &self->client, NULL);
-	psy_ui_component_setstyletypes(&self->titlebar,
-		psy_ui_STYLE_HEADER,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);	
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->titlebar, margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
 		"Psycle MIDI Monitor");	
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
@@ -395,7 +392,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_ui_button_settext(&self->hide, "X");
 	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->hide.component, margin);
 }
 

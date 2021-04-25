@@ -107,27 +107,31 @@ void psycleconfig_makevisual(PsycleConfig* self)
 
 	self->visual = psy_property_settext(
 		psy_property_append_section(&self->config, "visual"),
-		"settingsview.visual");
+		"settingsview.visual.visual");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->visual, "loadskin"),
-		"settingsview.load-skin"),
+		"settingsview.visual.load-skin"),
 		PROPERTY_ID_LOADSKIN);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->visual, "defaultskin"),
-		"settingsview.default-skin"),
+		"settingsview.visual.default-skin"),
 		PROPERTY_ID_DEFAULTSKIN);
 	self->defaultfont = psy_property_setid(psy_property_settext(
 		psy_property_append_font(self->visual, "defaultfont",
 			PSYCLE_DEFAULT_FONT),
-		"settingsview.default-font"),
+		"settingsview.visual.default-font"),
 		PROPERTY_ID_DEFAULTFONT);
 	self->apptheme = psy_property_setid(psy_property_settext(
 		psy_property_append_choice(self->visual,
 			"apptheme", 1),
-		"settingsview.apptheme"),
+		"settingsview.visual.apptheme"),
 		PROPERTY_ID_APPTHEME);
-		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 1);
-		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 1);	
+	psy_property_settext(
+		psy_property_append_int(self->apptheme, "light", psy_ui_LIGHTTHEME, 0, 1),
+		"settingsview.visual.light");
+	psy_property_settext(
+		psy_property_append_int(self->apptheme, "dark", psy_ui_DARKTHEME, 0, 1),
+		"settingsview.visual.dark");
 	patternviewconfig_init(&self->patview, self->visual);
 	machineviewconfig_init(&self->macview, self->visual);
 	machineparamconfig_init(&self->macparam, self->visual);

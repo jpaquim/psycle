@@ -63,7 +63,7 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		"instrumentview.filter-type");	
 	psy_ui_component_setalign(&self->filtertypeheader.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
 	psy_ui_component_setmargin(&self->filtertypeheader.component, margin);
 	psy_ui_combobox_init(&self->filtertype, &self->filter, NULL);
 	psy_ui_combobox_setcharnumber(&self->filtertype, 20);

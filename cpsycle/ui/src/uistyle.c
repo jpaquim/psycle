@@ -17,10 +17,12 @@ void psy_ui_style_init(psy_ui_Style* self)
 	psy_ui_colour_init(&self->backgroundcolour);
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
 	psy_ui_border_init(&self->border);
+	psy_ui_margin_init(&self->margin);
+	self->marginset = FALSE;
 	psy_ui_margin_init(&self->spacing);
+	self->spacingset = FALSE;
 	self->use_font = 0;
-	self->dbgflag = 0;
-	self->id = psy_INDEX_INVALID;
+	self->dbgflag = 0;	
 }
 
 void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
@@ -40,8 +42,13 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 {
 	self->colour = colour;
 	self->backgroundcolour = background;
-	psy_ui_border_init(&self->border);	
-	self->use_font = 0;	
+	psy_ui_border_init(&self->border);
+	psy_ui_margin_init(&self->margin);
+	self->marginset = FALSE;
+	psy_ui_margin_init(&self->spacing);
+	self->spacingset = FALSE;
+	self->use_font = 0;
+	self->dbgflag = 0;	
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
@@ -56,6 +63,10 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->colour = other->colour;
 	self->backgroundcolour = other->backgroundcolour;
 	self->border = other->border;
+	self->margin = other->margin;
+	self->marginset = other->marginset;
+	self->spacing = other->spacing;
+	self->spacingset = other->spacingset;
 	if (other->use_font) {
 		if (self->use_font) {
 			psy_ui_font_dispose(&self->font);

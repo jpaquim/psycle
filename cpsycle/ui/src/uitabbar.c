@@ -61,8 +61,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = psy_ui_TABMODE_SINGLESEL;
-	self->checkstate = 0;
-	self->position = psy_ui_realpoint_make(0.0, 0.0);
+	self->checkstate = 0;	
 	self->index = index;	
 	self->bitmapident = 1.0;	
 }
@@ -239,7 +238,7 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	self->selected = 0;
 	self->tabalignment = psy_ui_ALIGN_TOP;	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
+		psy_ui_margin_zero());
 }
 
 void tabbar_ondestroy(psy_ui_TabBar* self)

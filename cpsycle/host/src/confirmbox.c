@@ -32,7 +32,7 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 		self, confirmbox_onno);
 	psy_ui_button_init_text_connect(&self->cont, &self->view, NULL, "msg.cont",
 		self, confirmbox_oncontinue);	
-	psy_ui_margin_init_all_em(&spacing, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&spacing, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setspacing_children(&self->view, spacing);
 	psy_signal_init(&self->signal_execute);
 	psy_signal_connect(&self->component.signal_destroy, self,
