@@ -24,7 +24,6 @@ extern "C" {
 #endif
 
 // NewMachine
-// Adding machines
 		
 struct NewMachine;
 

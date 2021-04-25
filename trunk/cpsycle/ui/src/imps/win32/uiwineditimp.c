@@ -199,8 +199,8 @@ psy_ui_win_EditImp* psy_ui_win_editimp_multiline_allocinit(
 }
 
 void dev_settext(psy_ui_win_EditImp* self, const char* text)
-{	
-	SetWindowText(self->win_component_imp.hwnd, text);		
+{		
+	SetWindowText(self->win_component_imp.hwnd, (text) ? text : "");
 }
 
 void dev_setstyle(psy_ui_win_EditImp* self, int style)

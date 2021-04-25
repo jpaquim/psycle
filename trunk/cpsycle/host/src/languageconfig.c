@@ -40,7 +40,7 @@ void languageconfig_makelanguagechoice(LanguageConfig* self)
 {
 	self->languagechoice = psy_property_append_choice(self->parent, "lang", 0);
 	psy_property_setid(self->languagechoice, PROPERTY_ID_LANG);
-	psy_property_settext(self->languagechoice, "settingsview.language");
+	psy_property_settext(self->languagechoice, "settingsview.config.language");
 }
 
 void languageconfig_makelanguagelist(LanguageConfig* self)

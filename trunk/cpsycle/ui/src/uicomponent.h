@@ -312,28 +312,26 @@ void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
 
 INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
-{
-	psy_ui_component_usesizehints(self);
-	self->sizehints->margin = margin;
+{	
+	psy_ui_componentstyle_setmargin(&self->style, margin);	
 }
 
 INLINE psy_ui_Margin psy_ui_component_margin(const psy_ui_Component* self)
 {
-	return self->sizehints->margin;
+	return psy_ui_componentstyle_margin(&self->style);	
 }
 
 void psy_ui_component_setmargin_children(psy_ui_Component*,
 	psy_ui_Margin);
 
 INLINE void psy_ui_component_setspacing(psy_ui_Component* self, psy_ui_Margin spacing)
-{
-	psy_ui_component_usesizehints(self);
-	self->sizehints->spacing = spacing;
+{	
+	psy_ui_componentstyle_setspacing(&self->style, spacing);	
 }
 
 INLINE psy_ui_Margin psy_ui_component_spacing(const psy_ui_Component* self)
 {	
-	return self->sizehints->spacing;
+	return psy_ui_componentstyle_spacing(&self->style);
 }
 
 void psy_ui_component_setspacing_children(psy_ui_Component*, psy_ui_Margin);
@@ -842,8 +840,10 @@ void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
 INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self)
 {
 	psy_ui_RealMargin rv;
+	psy_ui_Margin margin;
 
-	psy_ui_realmargin_init_margin(&rv, &self->sizehints->margin,
+	margin = psy_ui_component_margin(self);
+	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self));
 	return rv;
 }
@@ -851,8 +851,10 @@ INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self
 INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* self)
 {
 	psy_ui_RealMargin rv;
+	psy_ui_Margin margin;
 
-	psy_ui_realmargin_init_margin(&rv, &self->sizehints->spacing,
+	margin = psy_ui_component_spacing(self);
+	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self));
 	return rv;
 }

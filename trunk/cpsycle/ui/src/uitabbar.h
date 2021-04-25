@@ -49,7 +49,6 @@ typedef struct psy_ui_Tab {
 	TabMode mode;		
 	bool istoggle;	
 	psy_ui_TabCheckState checkstate;
-	psy_ui_RealPoint position;
 	psy_ui_Bitmap icon;
 	double bitmapident;
 	uintptr_t index;	

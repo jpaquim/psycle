@@ -168,7 +168,7 @@ void wireview_initrategroup(WireView* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->rategroup, wireview_base(self), NULL);
 	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->rategroup, margin);

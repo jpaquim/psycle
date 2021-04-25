@@ -7,6 +7,7 @@
 // local
 #include "uifont.h"
 #include "uidef.h"
+#include "uistyle.h"
 // container
 #include <hashtbl.h>
 #include <properties.h>
@@ -22,10 +23,12 @@ typedef struct psy_ui_Style {
 	psy_ui_Colour backgroundcolour;
 	psy_ui_Colour overlaycolour;
 	psy_ui_Border border;
+	psy_ui_Margin margin;
+	bool marginset;
 	psy_ui_Margin spacing;
+	bool spacingset;
 	bool use_font;
 	int dbgflag;
-	uintptr_t id;
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
@@ -63,6 +66,18 @@ INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
 
 void psy_ui_style_setfont(psy_ui_Style*, const char* family, int size);
 
+INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
+{
+	self->margin = margin;
+	self->marginset = TRUE;
+}
+
+INLINE void psy_ui_style_setspacing(psy_ui_Style* self,
+	psy_ui_Margin spacing)
+{
+	self->spacing = spacing;
+	self->spacingset = TRUE;
+}
 
 // psy_ui_Styles
 typedef struct psy_ui_Styles {

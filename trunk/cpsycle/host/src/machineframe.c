@@ -40,7 +40,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	// row0

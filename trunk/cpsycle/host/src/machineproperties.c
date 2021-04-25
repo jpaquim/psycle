@@ -60,7 +60,7 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 		machineproperties_vtable_init(self));
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_margin_init_all_em(&spacing, 0.25, 0.25, 0.25, 1.0);
+	psy_ui_margin_init_em(&spacing, 0.25, 0.25, 0.25, 1.0);
 	psy_ui_component_setspacing(&self->component, spacing);		
 	machineproperties_updateskin(self);
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,

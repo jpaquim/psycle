@@ -29,41 +29,41 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 
 	self->general = psy_property_settext(
 		psy_property_append_section(parent, "general"),
-		"settingsview.general");
+		"settingsview.general.general");
 	psy_property_sethint(psy_property_settext(
 		psy_property_append_str(self->general, "version", "alpha"),
-		"settingsview.version"),
+		"settingsview.general.version"),
 		PSY_PROPERTY_HINT_HIDE);	
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showaboutatstart", TRUE),
-		"settingsview.show-about-at-startup");
+		"settingsview.general.show-about-at-startup");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showsonginfoonload", TRUE),
-		"settingsview.show-song-info-on-load");
+		"settingsview.general.show-song-info-on-load");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
-		"settingsview.show-maximized-at-startup");
+		"settingsview.general.show-maximized-at-startup");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showsequenceedit", FALSE),
-		"settingsview.show-sequenceedit"),
+		"settingsview.general.show-sequenceedit"),
 		PROPERTY_ID_SHOWSEQUENCEEDIT);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
-		"settingsview.show-sequencestepbar"),
+		"settingsview.general.show-sequencestepbar"),
 		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showplaylist", FALSE),
-		"settingsview.show-playlist"),
+		"settingsview.general.show-playlist"),
 		PROPERTY_ID_SHOWPLAYLIST);
 	psy_property_settext(
 		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
-		"settingsview.save-recent-songs");
+		"settingsview.general.save-recent-songs");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "playsongafterload", TRUE),
-		"settingsview.play-song-after-load");
+		"settingsview.general.play-song-after-load");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
-		"sequencerview.show-pattern-names");	
+		"settingsview.general.show-pattern-names");	
 }
 
 bool generalconfig_showsonginfoonload(const GeneralConfig* self)

@@ -253,7 +253,7 @@ static void dev_textoutrectangle(psy_ui_GraphicsImp* self, double x, double y, u
 static void dev_drawrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r) { }
 static void dev_drawroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_RealRectangle r,
 	psy_ui_RealSize cornersize) { }
-static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text)
+static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text, uintptr_t count)
 {
 	psy_ui_Size rv = {0, 0};
 

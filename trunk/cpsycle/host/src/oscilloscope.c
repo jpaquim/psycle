@@ -338,7 +338,7 @@ void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* par
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);		
 	psy_ui_component_init(&self->component, parent, NULL);
 	self->oscilloscope = oscilloscope;
 	psy_ui_label_init_text(&self->channellbl, &self->component, NULL,

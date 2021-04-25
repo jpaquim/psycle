@@ -9,12 +9,9 @@
 
 void psy_ui_componentsizehints_init(psy_ui_ComponentSizeHints* self)
 {
-	psy_ui_margin_init(&self->margin);
-	psy_ui_size_init(&self->minsize);
-	psy_ui_size_setroundmode(&self->minsize, psy_ui_ROUND_FLOOR);
-	psy_ui_size_init(&self->maxsize);
-	psy_ui_size_setroundmode(&self->maxsize, psy_ui_ROUND_FLOOR);
-	psy_ui_margin_init(&self->spacing);	
+	
+	psy_ui_size_init(&self->minsize);	
+	psy_ui_size_init(&self->maxsize);		
 	psy_ui_size_init(&self->preferredsize);
 	self->preferredwidthset = FALSE;
 	self->preferredheightset = FALSE;

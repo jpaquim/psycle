@@ -45,6 +45,8 @@ static void mainframe_initprogressbar(MainFrame*);
 static void mainframe_inittabbars(MainFrame*);
 static void mainframe_initnavigation(MainFrame*);
 static void mainframe_initmaintabbar(MainFrame*);
+static void mainframe_inithelpsettingstabbar(MainFrame*);
+static void mainframe_initviewtabbars(MainFrame*);
 static void mainframe_initmainviews(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
@@ -90,6 +92,8 @@ static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
+	uintptr_t tabindex);
+static void mainframe_onsettingshelptabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
@@ -201,6 +205,8 @@ void mainframe_init(MainFrame* self)
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);
 	mainframe_initmaintabbar(self);	
+	mainframe_inithelpsettingstabbar(self);
+	mainframe_initviewtabbars(self);
 	mainframe_initmainviews(self);
 	mainframe_initrightarea(self);
 	mainframe_initgear(self);	
@@ -452,7 +458,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin row0margin;	
 	psy_ui_Margin scopemargin;
 
-	psy_ui_margin_init_all_em(&row0margin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&row0margin, 0.5, 0.0, 0.5, 0.0);
 	// Vugroup
 	psy_ui_component_init(&self->topright, &self->top, NULL);
 	psy_ui_component_setalign(&self->topright, psy_ui_ALIGN_RIGHT);
@@ -464,7 +470,7 @@ void mainframe_initbars(MainFrame* self)
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {		
 	}
-	psy_ui_margin_init_all_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
+	psy_ui_margin_init_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
 	psy_ui_component_setmargin(&self->toprows, toprowsmargin);
 	psy_ui_component_setstyletypes(&self->toprows,
 		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
@@ -478,7 +484,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setmargin(&self->toprow0, row0margin);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
 		margin);
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);
@@ -512,7 +518,7 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopes_stop(&self->trackscopeview.scopes);
 	}
-	psy_ui_margin_init_all_em(&scopemargin, 0.0, 1.0, 0.0, 0.0);	
+	psy_ui_margin_init_em(&scopemargin, 0.0, 1.0, 0.0, 0.0);	
 	psy_ui_component_setmargin(&self->trackscopeview.component, scopemargin);
 	psy_ui_component_init(&self->topspacer, &self->component, NULL);
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
@@ -547,7 +553,7 @@ void mainframe_initnavigation(MainFrame* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 1.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
 	psy_ui_component_setalign(navigation_base(&self->navigation),
 		psy_ui_ALIGN_LEFT);
@@ -556,8 +562,7 @@ void mainframe_initnavigation(MainFrame* self)
 
 void mainframe_initmaintabbar(MainFrame* self)
 {	
-	psy_ui_Tab* tab;
-	psy_ui_Margin margin;	
+	psy_ui_Tab* tab;	
 
 	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);		
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
@@ -570,23 +575,30 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
 	psy_ui_tabbar_append(&self->tabbar, "main.samples");
 	psy_ui_tabbar_append(&self->tabbar, "main.instruments");
-	psy_ui_tabbar_append(&self->tabbar, "main.properties");		
-	tab = psy_ui_tabbar_append(&self->tabbar, "main.settings");	
-	margin = psy_ui_component_margin(&tab->component);
-	margin.left = psy_ui_value_make_ew(4.0);
-	psy_ui_component_setmargin(&tab->component, margin);
+	psy_ui_tabbar_append(&self->tabbar, "main.properties");
+}
+
+void mainframe_inithelpsettingstabbar(MainFrame* self)
+{
+	psy_ui_Tab* tab;
+	psy_ui_Margin margin;
+	
+	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_margin_init_em(&margin, 0.0, 4.0, 0.0, 4.0);
+	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
+		margin);
+	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings");	
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
 	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
-	tab = psy_ui_tabbar_append(&self->tabbar, "main.help");	
-	margin = psy_ui_component_margin(&tab->component);
-	margin.right = psy_ui_value_make_ew(4.0);
-	psy_ui_component_setmargin(&tab->component, margin);
-	tab = psy_ui_tabbar_tab(&self->tabbar, 0);
-	margin = psy_ui_component_margin(&tab->component);
-	margin.left = psy_ui_value_make_ew(1.0);
-	psy_ui_component_setmargin(&tab->component, margin);
+	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.help");	
+}
+
+void mainframe_initviewtabbars(MainFrame* self)
+{
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
-	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
 }
 
 void mainframe_initmainviews(MainFrame* self)
@@ -638,6 +650,8 @@ void mainframe_initmainviews(MainFrame* self)
 		&self->workspace);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
+	psy_signal_connect(&self->helpsettingstabbar.signal_change, self,
+		mainframe_onsettingshelptabbarchanged);
 }
 
 void mainframe_initgear(MainFrame* self)
@@ -1417,7 +1431,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
 		self->startpage = 0;
 	}			
-	psy_ui_notebook_select(&self->viewstatusbars, tabindex);	
+	psy_ui_notebook_select(&self->viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {
@@ -1430,6 +1444,39 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);	
+}
+
+void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* sender,
+	uintptr_t tabindex)
+{
+	uintptr_t viewid;
+	psy_ui_Component* component;
+
+	switch (tabindex) {
+		case 0:
+			viewid = VIEW_ID_SETTINGSVIEW;
+			break;
+		case 1:
+			viewid = VIEW_ID_HELPVIEW;
+			break;		
+		default:
+			viewid = VIEW_ID_SETTINGSVIEW;
+			break;
+	}
+	psy_ui_notebook_select(&self->notebook, viewid);
+	psy_ui_notebook_select(&self->viewstatusbars, viewid);
+	psy_ui_notebook_select(&self->viewtabbars, viewid);
+	component = psy_ui_notebook_activepage(&self->notebook);
+	if (component) {
+		ViewHistoryEntry viewentry;
+
+		viewentry.id = viewid;
+		viewentry.section = psy_ui_component_section(component);
+		viewentry.seqpos = psy_INDEX_INVALID;
+		workspace_onviewchanged(&self->workspace, viewentry);
+		psy_ui_component_setfocus(component);
+	}
+	psy_ui_component_align(&self->component);
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,

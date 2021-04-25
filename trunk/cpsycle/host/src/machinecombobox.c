@@ -32,7 +32,7 @@ void machinecombobox_init(MachineComboBox* self, psy_ui_Component* parent,
 	self->sync_machines_select = TRUE;
 	self->showmaster = showmaster;
 	self->column = psy_INDEX_INVALID;
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);	
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);	
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;	
 	psy_table_init(&self->comboboxslots);

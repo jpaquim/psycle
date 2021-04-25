@@ -524,7 +524,7 @@ typedef struct psy_ui_Margin {
 void psy_ui_margin_init(psy_ui_Margin*);
 void psy_ui_margin_init_all(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
 	psy_ui_Value bottom, psy_ui_Value left);
-void psy_ui_margin_init_all_em(psy_ui_Margin*, double top,
+void psy_ui_margin_init_em(psy_ui_Margin*, double top,
 	double right, double bottom, double left);
 void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
@@ -557,7 +557,7 @@ INLINE psy_ui_Margin psy_ui_margin_make_em(double top,
 {
 	psy_ui_Margin rv;
 
-	psy_ui_margin_init_all_em(&rv, top, right, bottom, left);
+	psy_ui_margin_init_em(&rv, top, right, bottom, left);
 	return rv;
 }
 

@@ -25,13 +25,13 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);	
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CENTER);
-	psy_ui_margin_init_all_em(&margin, 1.0, 0.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 1.0, 0.0, 0.0, 0.0);
 	psy_ui_component_setmargin(kbdbox_base(&self->kbdbox),
 		margin);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_all_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);
+	psy_ui_margin_init_em(&tabmargin, 0.0, 1.0, 0.5, 2.0);
 	psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
 	kbdhelp_markpatterncmds(self, "notes");
 	kbdhelp_appendtabbarsections(self);	

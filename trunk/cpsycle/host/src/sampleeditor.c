@@ -83,7 +83,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcursel(&self->visualrepresentation,
 		psy_dsp_RESAMPLERQUALITY_SPLINE);	
 	sampleeditorbar_clearselection(self);
-	psy_ui_margin_init_all_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
@@ -163,7 +163,7 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.5);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.5);		
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, margin));
@@ -258,14 +258,14 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	self->workspace = workspace;
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 1.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 1.0);		
 	psy_ui_component_setmargin(&self->client, margin);
 	sampleeditoroperations_init(&self->copypaste, &self->client, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->client, NULL);
 	psy_ui_button_settext(&self->process, "samplesview.process");
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init_all_em(&margin, 1.5, 0.0, 0.5, 0.0);		
+	psy_ui_margin_init_em(&margin, 1.5, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->process.component, margin);
 	psy_ui_listbox_init(&self->processors, &self->client);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
@@ -368,7 +368,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.5, 0.0, 0.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.0, 0.0);		
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
@@ -674,7 +674,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_margin_init_all_em(&margin, 0.0, 0.0, 0.0, 2.0);		
+	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);		
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);

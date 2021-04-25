@@ -56,7 +56,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletypes(&self->component, STYLE_SEQVIEW_BUTTONS,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	psy_ui_margin_init_all_em(&spacing, 0.25, 0.5, 0.5, 0.5);
+	psy_ui_margin_init_em(&spacing, 0.25, 0.5, 0.5, 0.5);
 	psy_ui_component_setspacing(&self->component, spacing);
 	psy_ui_component_init(&self->standard, &self->component, NULL);
 	psy_ui_component_setalign(&self->standard, psy_ui_ALIGN_TOP);
@@ -64,7 +64,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row0, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_margin_init_all_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&rowmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->row0, rowmargin);
 	psy_ui_button_init(&self->incpattern, &self->row0, NULL);
 	psy_ui_button_preventtranslation(&self->incpattern);
@@ -94,7 +94,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->block, &self->component, NULL);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->row2, &self->block, NULL);
-	psy_ui_margin_init_all_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->row2, rowmargin);
 	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row2, psy_ui_ALIGN_LEFT,
@@ -109,7 +109,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		"sequencerview.copy");
 	// rename edit
 	psy_ui_edit_init(&self->edit, &self->block);
-	psy_ui_margin_init_all_em(&rowmargin, 0.5, 0.0, 1.0, 0.0);
+	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 1.0, 0.0);
 	psy_ui_component_setmargin(psy_ui_edit_base(&self->edit), rowmargin);
 	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
 		psy_ui_ALIGN_TOP);
@@ -138,10 +138,10 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
 				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
-				psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.5, 0.5);
+				psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.5, 0.5);
 				psy_ui_button_setlinespacing(buttons[i], 1.4);
 		} else {
-			psy_ui_margin_init_all_em(&spacing, 0.25, 0.25, 0.25, 0.25);
+			psy_ui_margin_init_em(&spacing, 0.25, 0.25, 0.25, 0.25);
 			psy_ui_component_setspacing(psy_ui_button_base(buttons[i]),
 				spacing);
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),

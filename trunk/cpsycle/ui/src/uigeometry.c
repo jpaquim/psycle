@@ -193,7 +193,7 @@ void psy_ui_margin_init_all(psy_ui_Margin* self, psy_ui_Value top,
    self->left = left;
 }
 
-void psy_ui_margin_init_all_em(psy_ui_Margin* self, double top,
+void psy_ui_margin_init_em(psy_ui_Margin* self, double top,
 	double right, double bottom, double left)
 {
 	psy_ui_value_seteh(&self->top, top);

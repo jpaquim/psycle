@@ -610,7 +610,7 @@ void sequenceduration_init(SequenceViewDuration* self,
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	self->duration_bts = 0.0;
-	psy_ui_margin_init_all_em(&margin, 0.5, 2.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&margin, 0.5, 2.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_label_init_text(&self->desc, &self->component, NULL,
 		"sequencerview.duration");
@@ -621,7 +621,7 @@ void sequenceduration_init(SequenceViewDuration* self,
 	psy_ui_component_setmargin(&self->desc.component, margin);	
 	psy_ui_label_init(&self->duration, &self->component, NULL);	
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_all_em(&margin, 0.5, 0.0, 0.5, 0.0);
+	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.5, 0.0);
 	psy_ui_component_setmargin(&self->duration.component, margin);
 	psy_ui_label_setcharnumber(&self->duration, 18);
 	psy_ui_label_preventtranslation(&self->duration);
@@ -735,7 +735,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		&self->state, self);	
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
 		&self->component, NULL);	
-	psy_ui_margin_init_all_em(&spacing, 0.5, 0.5, 0.0, 1.0);
+	psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.0, 1.0);
 	psy_ui_component_setspacing(&self->scroller.component, spacing);
 	psy_ui_scroller_setbackgroundmode(&self->scroller,
 		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);
