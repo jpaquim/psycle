@@ -94,6 +94,7 @@ void psy_audio_plugincatcher_catchername(const char* path,
 const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);
 psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id);
+void plugincatcher_incfavorite(psy_audio_PluginCatcher*, const char* id);
 
 INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self)
 {

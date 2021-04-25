@@ -252,7 +252,7 @@ INLINE void psy_ui_component_hide(psy_ui_Component* self)
 
 void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
-void psy_ui_component_togglevisibility(psy_ui_Component*);
+bool psy_ui_component_togglevisibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component*);
 void psy_ui_component_usesizehints(psy_ui_Component*);
@@ -299,6 +299,7 @@ void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_clientresize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Rectangle position);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
+uintptr_t psy_ui_component_index(psy_ui_Component*);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 void psy_ui_component_setfont(psy_ui_Component*, const psy_ui_Font*);
@@ -836,6 +837,8 @@ void psy_ui_component_setstyletype_active(psy_ui_Component*, uintptr_t active);
 void psy_ui_component_setstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_addstylestate(psy_ui_Component*, psy_ui_StyleState);
 void psy_ui_component_removestylestate(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_addstylestate_children(psy_ui_Component*, psy_ui_StyleState);
+void psy_ui_component_removestylestate_children(psy_ui_Component*, psy_ui_StyleState);
 
 INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self)
 {

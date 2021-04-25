@@ -278,8 +278,7 @@ void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 				newmachine_insertmode(&self->newmachine);
 			} else if (options & NEWMACHINE_APPEND) {
 				newmachine_appendmode(&self->newmachine);
-			} else if (options & NEWMACHINE_APPENDSTACK) {
-				self->newmachine.appendstack = TRUE;				
+			} else if (options & NEWMACHINE_APPENDSTACK) {				
 				newmachine_appendmode(&self->newmachine);
 			} else if (options & NEWMACHINE_ADDEFFECT) {
 				self->wireview.addeffect = 1;

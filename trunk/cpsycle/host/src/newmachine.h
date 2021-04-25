@@ -197,6 +197,10 @@ struct NewMachine;
 typedef struct NewMachineSection {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_selected;
+	psy_Signal signal_changed;
+	psy_Signal signal_renamed;	
 	// intern
 	psy_ui_Component header;
 	psy_ui_Label label;
@@ -205,20 +209,32 @@ typedef struct NewMachineSection {
 	// references
 	psy_Property* section;
 	psy_ui_Edit* edit;
-	struct NewMachine* newmachine;
+	Workspace* workspace;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, struct NewMachine*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, Workspace*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, struct NewMachine*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, Workspace*);
 
 const char* newmachinesection_key(const NewMachineSection*);
 const char* newmachinesection_name(const NewMachineSection*);
 void newmachinesection_mark(NewMachineSection*);
 void newmachinsection_clearselection(NewMachineSection*);
+
+
+typedef struct NewMachineSectionsHeader {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	psy_ui_Image icon;
+	psy_ui_Button expand;	
+} NewMachineSectionsHeader;
+
+void newmachinesectionsheader_init(NewMachineSectionsHeader*,
+	psy_ui_Component* parent, uintptr_t iconresourceid);
 
 typedef struct NewMachine {
 	// inherits
@@ -230,18 +246,13 @@ typedef struct NewMachine {
 	NewMachineSearchBar searchbar;
 	psy_ui_Component client;	
 	psy_ui_Component sectiongroup;
-	psy_ui_Component sectionsheader;	
-	psy_ui_Button expandsections;
-	psy_ui_TabBar navsections;
-	psy_ui_Image sectionsicon;
+	NewMachineSectionsHeader sectionsheader;	
+	psy_ui_TabBar navsections;	
 	psy_ui_Component sections;	
-	psy_ui_Component usersections;
 	psy_ui_Component all;
-	psy_ui_Component pluginsheaderbars;
-	psy_ui_Component pluginsheader;
-	psy_ui_Image pluginsicon;
-	psy_ui_Label pluginslabel;
-	psy_ui_Button expandall;	
+	NewMachineSectionsHeader pluginsheader;
+	psy_ui_Component pluginsheaderbars;	
+	psy_ui_Label pluginslabel;	
 	NewMachineFilterBar filterbar;
 	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;	

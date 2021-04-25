@@ -50,7 +50,6 @@ typedef struct psy_ui_Button {
 	psy_Signal signal_clicked;
 	// internal
 	char_dyn_t* text;	
-	int highlight;
 	psy_ui_ButtonIcon icon;
 	psy_ui_Bitmap bitmapicon;
 	double charnumber;

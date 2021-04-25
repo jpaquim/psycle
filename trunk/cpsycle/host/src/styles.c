@@ -420,6 +420,15 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_make_overlay(6));
 	psy_ui_defaults_setstyle(defaults, STYLE_INPUTDEFINER_FOCUS, style);
 	// newmachine
+	// newmachine_sectionsheader
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
+	psy_ui_border_init_top(&style->border, psy_ui_BORDER_SOLID,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.3));
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTIONS_HEADER, style);		
 	// newmachine_section
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setspacing(style,
@@ -468,6 +477,11 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setbackgroundcolour(style,
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_RESCANBAR, style);
+	// newmachine_categorybar
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));	
+	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_CATEGORYBAR, style);
 	// newmachine_sectionbar
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setspacing(style,
@@ -556,5 +570,5 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setspacing(style,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 	psy_ui_defaults_setstyle(defaults,
-		STYLE_HEADER, style);
+		STYLE_HEADER, style);	
 }

@@ -470,11 +470,10 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	pluginsview_vtable_init(self);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);	
 	self->component.draggable = TRUE;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);	
-	self->mode = NEWMACHINE_APPEND;
 	self->currplugins = NULL;
 	self->plugins = NULL;
 	self->filteredplugins = NULL;	
@@ -1067,6 +1066,37 @@ void pluginsview_clearselection(PluginsView* self)
 		newmachineselection_clear(&self->selection);
 		psy_ui_component_invalidate(&self->component);
 	}
+}
+
+void pluginsview_enableall(PluginsView* self)
+{
+	self->effectsenabled = TRUE;
+	self->generatorsenabled = TRUE;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void pluginsview_enablegenerators(PluginsView* self)
+{
+	self->generatorsenabled = TRUE;	
+	psy_ui_component_invalidate(&self->component);
+}
+
+void pluginsview_preventgenerators(PluginsView* self)
+{
+	self->generatorsenabled = FALSE;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void pluginsview_enableeffects(PluginsView* self)
+{
+	self->effectsenabled = TRUE;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void pluginsview_preventeffects(PluginsView* self)
+{
+	self->effectsenabled = FALSE;
+	psy_ui_component_invalidate(&self->component);
 }
 
 void pluginsview_ondragstart(PluginsView* self, psy_ui_DragEvent* ev)

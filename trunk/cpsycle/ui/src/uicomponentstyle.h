@@ -79,6 +79,11 @@ INLINE psy_ui_Margin psy_ui_componentstyle_spacing(const psy_ui_ComponentStyle *
 	return self->spacing;
 }
 
+INLINE psy_ui_StyleState psy_ui_componentstyle_state(const psy_ui_ComponentStyle* self)
+{
+	return self->state;
+}
+
 #ifdef __cplusplus
 }
 #endif
