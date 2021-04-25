@@ -879,6 +879,29 @@ void psy_ui_component_setspacing_children(psy_ui_Component* self,
 	psy_list_free(q);
 }
 
+uintptr_t psy_ui_component_index(psy_ui_Component* self)
+{
+	uintptr_t rv;
+	uintptr_t i;
+	psy_List* p;
+	psy_List* q;
+
+	rv = psy_INDEX_INVALID;
+	q = psy_ui_component_children(psy_ui_component_parent(self),
+		psy_ui_NONRECURSIVE);
+	for (i = 0, p = q; p != NULL; p = p->next, ++i) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (component == self) {
+			rv = i;
+			break;
+		}
+	}
+	psy_list_free(q);
+	return rv;
+}
+
 void psy_ui_component_setalign_children(psy_ui_Component* self,
 	psy_ui_AlignType align)
 {
@@ -1548,20 +1571,23 @@ void psy_ui_component_usecontaineralign(psy_ui_Component* self)
 	}
 }
 
-void psy_ui_component_togglevisibility(psy_ui_Component* self)
+bool psy_ui_component_togglevisibility(psy_ui_Component* self)
 {
 	assert(self);
 	if (psy_ui_component_parent(self)) {
 		if (psy_ui_component_visible(self)) {
 			psy_ui_component_hide(self);
 			psy_ui_component_align(psy_ui_component_parent(self));
+			return FALSE;
 		} else {
 			psy_ui_component_hide(self);
 			self->visible = 1;
 			psy_ui_component_align(psy_ui_component_parent(self));
 			psy_ui_component_show(self);
+			return TRUE;
 		}
 	}
+	return FALSE;
 }
 
 psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
@@ -1749,6 +1775,38 @@ void psy_ui_component_removestylestate(psy_ui_Component* self,
 	if (psy_ui_componentstyle_removestate(&self->style, state)) {
 		psy_ui_component_invalidate(self);
 	}
+}
+
+void psy_ui_component_addstylestate_children(psy_ui_Component* self,
+	psy_ui_StyleState state)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_addstylestate(component, state);
+	}
+	psy_list_free(q);
+}
+
+void psy_ui_component_removestylestate_children(psy_ui_Component* self,
+	psy_ui_StyleState state)
+{
+	psy_List* p;
+	psy_List* q;
+
+	q = psy_ui_component_children(self, psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_removestylestate(component, state);
+	}
+	psy_list_free(q);
 }
 
 void psy_ui_notifystyleupdate(psy_ui_Component* main)

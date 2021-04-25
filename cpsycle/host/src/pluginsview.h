@@ -107,8 +107,7 @@ typedef struct PluginsView {
 	// Filtered Plugins
 	psy_Property* filteredplugins;
 	bool generatorsenabled;
-	bool effectsenabled;
-	int mode;
+	bool effectsenabled;	
 	psy_ui_RealPoint dragpt;
 	bool multidrag;
 	uintptr_t dragindex;
@@ -129,6 +128,11 @@ void pluginsview_setsort(PluginsView*, NewMachineSort*);
 void pluginsview_sort(PluginsView*, NewMachineSortMode);
 psy_Property* pluginsview_selectedplugin(PluginsView*);
 void pluginsview_clearselection(PluginsView*);
+void pluginsview_enableall(PluginsView*);
+void pluginsview_enablegenerators(PluginsView*);
+void pluginsview_preventgenerators(PluginsView*);
+void pluginsview_enableeffects(PluginsView*);
+void pluginsview_preventeffects(PluginsView*);
 
 #ifdef __cplusplus
 }

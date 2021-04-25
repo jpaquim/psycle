@@ -50,8 +50,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(psy_ui_button_base(self), parent, view);	
 	vtable_init(self);
-	psy_ui_component_doublebuffer(psy_ui_button_base(self));	
-	self->highlight = FALSE;
+	psy_ui_component_doublebuffer(psy_ui_button_base(self));
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0.0;
 	self->linespacing = 1.0;
@@ -388,8 +387,7 @@ void psy_ui_button_setbitmaptransparency(psy_ui_Button* self,
 
 void psy_ui_button_highlight(psy_ui_Button* self)
 {
-	if (!psy_ui_button_highlighted(self)) {				
-		self->highlight = TRUE;
+	if (!psy_ui_button_highlighted(self)) {		
 		psy_ui_component_addstylestate(psy_ui_button_base(self),
 			psy_ui_STYLESTATE_SELECT);		
 	}
@@ -397,8 +395,7 @@ void psy_ui_button_highlight(psy_ui_Button* self)
 
 void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
-	if (psy_ui_button_highlighted(self)) {
-		self->highlight = FALSE;
+	if (psy_ui_button_highlighted(self)) {		
 		psy_ui_component_removestylestate(psy_ui_button_base(self),
 			psy_ui_STYLESTATE_SELECT);		
 	}
@@ -406,7 +403,8 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 
 bool psy_ui_button_highlighted(const psy_ui_Button* self)
 {
-	return self->highlight != FALSE;
+	return (psy_ui_componentstyle_state(&self->component.style) &
+		psy_ui_STYLESTATE_SELECT) == psy_ui_STYLESTATE_SELECT;
 }
 
 void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)

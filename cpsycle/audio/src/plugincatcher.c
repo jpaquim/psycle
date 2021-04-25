@@ -824,6 +824,19 @@ psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const ch
 	return rv;
 }
 
+void plugincatcher_incfavorite(psy_audio_PluginCatcher* self, const char* id)
+{
+	psy_Property* plugin;
+
+	plugin = psy_audio_plugincatcher_at(self, id);
+	if (plugin) {
+		intptr_t favorite;
+
+		favorite = psy_property_at_int(plugin, "favorite", 0);
+		psy_property_set_int(plugin, "favorite", ++favorite);		
+		psy_audio_plugincatcher_save(self);		
+	}
+}
 
 void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv)
 {
