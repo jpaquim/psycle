@@ -42,13 +42,14 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 {
 	self->colour = colour;
 	self->backgroundcolour = background;
+	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
 	psy_ui_margin_init(&self->spacing);
 	self->spacingset = FALSE;
 	self->use_font = 0;
-	self->dbgflag = 0;	
+	self->dbgflag = 0;
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
@@ -103,6 +104,20 @@ psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour colour,
 		psy_ui_style_init_colours(rv, colour, background);
 	}
 	return rv;
+}
+
+psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other)
+{
+	if (other) {
+		psy_ui_Style* rv;
+
+		rv = psy_ui_style_allocinit();
+		if (rv) {
+			psy_ui_style_copy(rv, other);
+		}
+		return rv;
+	}
+	return NULL;
 }
 
 void psy_ui_style_deallocate(psy_ui_Style* self)

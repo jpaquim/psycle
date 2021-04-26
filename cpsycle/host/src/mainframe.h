@@ -79,10 +79,10 @@ typedef struct MainFrame {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_Component top;
-	psy_ui_Component topright;
+	psy_ui_Component top;	
 	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
+	psy_ui_Component toprow0_client;
 	psy_ui_Component toprow1;
 	psy_ui_Component toprow2;
 	psy_ui_Component maximize;
