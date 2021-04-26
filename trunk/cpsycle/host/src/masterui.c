@@ -6,6 +6,8 @@
 #include "masterui.h"
 // host
 #include "skingraphics.h"
+// platform
+#include "../../detail/portable.h"
 
 // MasterUi
 // prototypes
@@ -89,7 +91,7 @@ void masterui_initsize(MasterUi* self)
 	}
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(topleft.x, topleft.y),
+			psy_ui_point_make_px(topleft.x, topleft.y),
 			psy_ui_size_make_px(size.width, size.height)));	
 }
 
@@ -137,7 +139,7 @@ void masterui_drawbackground(MasterUi* self, psy_ui_Graphics* g)
 		psy_ui_textoutrectangle(g,
 			psy_ui_realrectangle_topleft(&self->intern.coords->name.dest),
 			psy_ui_ETO_CLIPPED, self->intern.coords->name.dest, "Master",
-			strlen("Master"));		
+			psy_strlen("Master"));
 	}
 }
 

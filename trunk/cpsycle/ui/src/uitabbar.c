@@ -157,7 +157,9 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 
 void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{		
+{	
+	psy_ui_Margin spacing;
+	const psy_ui_TextMetric* tm;
 	char* text;	
 	
 	if (self->translation) {
@@ -167,17 +169,19 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 	}	
 	*rv = psy_ui_component_textsize(&self->component, text);
 	rv->height = psy_ui_value_make_eh(1.8);
+	tm = psy_ui_component_textmetric(psy_ui_tab_base(self));
 	if (!psy_ui_bitmap_empty(&self->icon)) {
 		psy_ui_RealSize bpmsize;				
 		psy_ui_RealSize textsizepx;
-		const psy_ui_TextMetric* tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
+		
 		bpmsize = psy_ui_bitmap_size(&self->icon);
 		textsizepx = psy_ui_size_px(rv, tm);				
 		rv->width = psy_ui_value_make_px(textsizepx.width + bpmsize.width
 			+ tm->tmAveCharWidth * self->bitmapident);
 	}	
+	spacing = psy_ui_component_spacing(psy_ui_tab_base(self));
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
 }
 
 void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
@@ -349,19 +353,6 @@ void psy_ui_tabbar_settabalignment(psy_ui_TabBar* self,
 	psy_list_free(q);
 }
 
-void psy_ui_tabbar_settabmargin(psy_ui_TabBar* self, uintptr_t tabindex,
-	psy_ui_Margin margin)
-{
-	psy_ui_Tab* tab;	
-
-	assert(self);
-
-	tab = psy_ui_tabbar_tab(self, tabindex);
-	if (tab) {		
-		psy_ui_component_setmargin(&tab->component, margin);		
-	}
-}
-
 void psy_ui_tabbar_settabmode(psy_ui_TabBar* self, uintptr_t tabindex,
 	TabMode mode)
 {
@@ -388,15 +379,4 @@ const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar* self,
 	assert(self);
 
 	return psy_ui_tabbar_tab((psy_ui_TabBar*)self, tabindex);
-}
-
-void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar* self,
-	psy_ui_Margin margin)
-{
-	assert(self);
-	
-	psy_ui_component_usecontaineralign(&self->component);
-	self->component.containeralign->insertmargin = margin;	
-	psy_ui_tabbar_settabalignment(self, self->tabalignment);		
-	psy_ui_component_setmargin_children(psy_ui_tabbar_base(self), margin);	
 }

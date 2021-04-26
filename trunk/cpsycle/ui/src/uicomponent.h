@@ -361,6 +361,8 @@ void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
+psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,
+	const psy_ui_Size* limit);
 void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
 const psy_ui_Size psy_ui_component_maximumsize(const psy_ui_Component*);
 void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);

@@ -361,7 +361,7 @@ void log_workevents(psy_List* events)
 			
 			entry = psy_audio_patternnode_entry(p);
 			psy_snprintf(text, 256, "Trk %d \n", (int)entry->track);
-			psyfile_write(&logfile, text, strlen(text));
+			psyfile_write(&logfile, text, psy_strlen(text));
 		}		
 	}
 }

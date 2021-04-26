@@ -139,6 +139,7 @@ void masterchannel_dispose(psy_audio_MasterChannel*);
 psy_audio_MasterChannel* masterchannel_allocinit(struct psy_audio_Mixer*,
 	const char* name, const char* label);
 
+// psy_audio_InputChannel
 typedef struct psy_audio_InputChannel {
 	uintptr_t id;
 	psy_Table sendvols;
@@ -173,7 +174,8 @@ psy_audio_InputChannel* inputchannel_allocinit(struct psy_audio_Mixer*,
 	uintptr_t id, uintptr_t inputslot);
 
 psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel*);
-
+bool inputchannel_issoloed(const psy_audio_InputChannel*);
+bool psy_audio_inputchannel_active(const psy_audio_InputChannel*);
 
 typedef struct psy_audio_ReturnChannel {
 	uintptr_t id;
@@ -197,6 +199,9 @@ typedef struct psy_audio_ReturnChannel {
 	psy_audio_IntMachineParam level_param;	
 } psy_audio_ReturnChannel;
 
+bool psy_audio_returnchannel_active(const psy_audio_ReturnChannel*);
+
+// psy_audio_Mixer
 typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachine custommachine;
 	psy_Table inputs;

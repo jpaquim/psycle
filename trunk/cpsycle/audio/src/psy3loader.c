@@ -150,7 +150,7 @@ int psy_audio_psy3loader_readversion(psy_audio_PSY3Loader* self)
 
 		psyfile_readstring(self->fp, trackername, 256);
 		psyfile_readstring(self->fp, trackervers, 256);
-		bytesread = 4 + strlen(trackername) + strlen(trackervers) + 2;
+		bytesread = 4 + psy_strlen(trackername) + psy_strlen(trackervers) + 2;
 		// Size of the current Header DATA
 		// This ensures that any extra data is skipped.
 		if (self->fp->filesize > bytesread) {

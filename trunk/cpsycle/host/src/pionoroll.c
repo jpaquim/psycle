@@ -12,7 +12,6 @@
 #include "../../detail/trace.h"
 
 #define PIANOROLL_REFRESHRATE 50
-
 #define CMD_ENTER 1100
 
 static void setcmdall(psy_Property* cmds, uintptr_t cmd, uint32_t keycode,
@@ -195,7 +194,7 @@ void pianoruler_drawbeat(PianoRuler* self, psy_ui_Graphics* g, intptr_t beat,
 	psy_ui_drawline(g, psy_ui_realpoint_make(x, baseline),
 		psy_ui_realpoint_make(x, baseline - tmheight / 2));
 	psy_snprintf(txt, 40, "%d", beat);
-	psy_ui_textout(g, x + 3, baseline - tmheight, txt, strlen(txt));
+	psy_ui_textout(g, x + 3, baseline - tmheight, txt, psy_strlen(txt));
 	psy_ui_setcolour(g, patternviewskin_rowbeatcolour(self->gridstate->skin,
 		0, 0));
 }
@@ -311,7 +310,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 						psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r),
 							psy_ui_ETO_CLIPPED, r,
 							psy_dsp_notetostr(key, self->keyboardstate->notemode),
-							strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+							psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
 					}
 				}
 			}
@@ -324,7 +323,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 			psy_ui_textoutrectangle(g,
 				psy_ui_realrectangle_topleft(&r), psy_ui_ETO_CLIPPED, r,
 				psy_dsp_notetostr(key, self->keyboardstate->notemode),
-				strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+				psy_strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(0, cpy + self->keyboardstate->keyheightpx),
 				psy_ui_realpoint_make(size.width, cpy + self->keyboardstate->keyheightpx));

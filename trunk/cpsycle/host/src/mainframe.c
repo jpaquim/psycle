@@ -484,14 +484,13 @@ void mainframe_initbars(MainFrame* self)
 		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
-		psy_ui_margin_make(
-			psy_ui_value_make_px(0), psy_ui_value_make_px(0),
-			psy_ui_value_make_eh(0.5), psy_ui_value_make_ew(0.5)));
+		psy_ui_margin_zero()); // make(
+			//psy_ui_value_make_px(0), psy_ui_value_make_px(0),
+			//psy_ui_value_make_eh(0.5), psy_ui_value_make_ew(0.5)));
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
-	psy_ui_component_setstyletypes(&self->toprow0, STYLE_TOPROW0,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	psy_ui_component_setmargin(&self->toprow0, row0margin);
+	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);		
+	//psy_ui_component_setmargin(&self->toprow0, row0margin);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
 		margin);
@@ -507,8 +506,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
-	psy_ui_component_setstyletypes(&self->toprow1, STYLE_TOPROW1,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->toprow1, STYLE_TOPROW1);		
 	psy_ui_component_setdefaultalign(&self->toprow1, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
@@ -516,8 +514,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_init(&self->toprow2, &self->toprows, NULL);
 	psy_ui_component_setdefaultalign(&self->toprow2, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());	
-	psy_ui_component_setstyletypes(&self->toprow2, STYLE_TOPROW2,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->toprow2, STYLE_TOPROW2);
 	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);		
 	// scopebar
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);	
@@ -540,6 +537,7 @@ void mainframe_initbars(MainFrame* self)
 void mainframe_inittabbars(MainFrame* self)
 {	
 	psy_ui_component_init(&self->maximize, &self->mainviews, NULL);
+	psy_ui_component_setstyletype(&self->maximize, STYLE_MAINVIEWTOPBAR);
 	psy_ui_component_setalign(&self->maximize, psy_ui_ALIGN_TOP);
 	psy_ui_component_init_align(&self->tabbars, &self->maximize,
 		psy_ui_ALIGN_CLIENT);	
@@ -550,6 +548,8 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_button_setbitmapresource(&self->maximizebtn, IDB_EXPAND_DARK);
 	psy_ui_button_setbitmaptransparency(&self->maximizebtn,
 		psy_ui_colour_white());
+	psy_ui_component_setspacing(psy_ui_button_base(&self->maximizebtn),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->tabspacer);

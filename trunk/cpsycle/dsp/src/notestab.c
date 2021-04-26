@@ -85,24 +85,20 @@ char* hex_tab[16] = {
 };
 
 const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
-{
-	const char* rv;
-
+{	
 	switch (mode) {
-		case psy_dsp_NOTESTAB_A440:
-			rv = notes_psy_ui_taba440[note];
-		break;
-		case psy_dsp_NOTESTAB_A220:
-			rv = notes_psy_ui_taba220[note];
-		break;
-		case psy_dsp_NOTESTAB_GMPERCUSSION:
-			rv = notes_psy_ui_tabgmpercussion[note];
-			break;
-		default:
-			rv = notes_psy_ui_taba220[255];
-		break;
-	}
-	return rv;
+	case psy_dsp_NOTESTAB_A440:
+		return notes_psy_ui_taba440[note];
+	break;
+	case psy_dsp_NOTESTAB_A220:
+		return notes_psy_ui_taba220[note];
+	break;
+	case psy_dsp_NOTESTAB_GMPERCUSSION:
+		return notes_psy_ui_tabgmpercussion[note];			
+	default:
+		return notes_psy_ui_taba220[255];
+	break;
+	}	
 }
 
 const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)

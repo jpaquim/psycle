@@ -5,9 +5,8 @@
 
 #include "../../detail/psydef.h"
 #include "skinio.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+// platform
+#include "../../detail/portable.h"
 
 static int skinio_loadproperties(FILE* hfile, psy_Property* props);
 
@@ -662,7 +661,7 @@ int skin_loadpsh(psy_Property* properties, const char* path)
 			} else { strcpy(key, buf);	}
 
 			value = &equal[1];
-			length = strlen(value);
+			length = psy_strlen(value);
 			if(value[0] == '"')
 			{
 				length-=2;
@@ -765,7 +764,7 @@ int skinio_loadproperties(FILE* hfile, psy_Property* props)
 			} else { key = buf; }
 
 			value = &equal[1];
-			length = strlen(value);
+			length = psy_strlen(value);
 			if (value[0] == '"')
 			{
 				length -= 2;

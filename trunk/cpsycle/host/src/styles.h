@@ -72,6 +72,8 @@ extern "C" {
 #define STYLE_RECENTVIEW_MAINSECTION         6340
 #define STYLE_RECENTVIEW_MAINSECTIONHEADER   6360
 #define STYLE_HEADER                         6380
+#define STYLE_MAINVIEWTOPBAR                 6400
+#define STYLE_NAVBAR                         6420
 
 struct psy_ui_Defaults;
 

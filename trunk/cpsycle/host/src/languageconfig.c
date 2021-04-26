@@ -161,8 +161,7 @@ const char* languageconfig_chooselang(LanguageConfig* self, int id)
 	case 0x2c09:	// ENT	ENU	English(Trinidad)
 	case 0x3009:	// ENW	ENU	Windows 98 / ME, Windows 2000 / XP: English(Zimbabwe)
 	case 0x3409:	// ENP	ENU	Windows 98 / ME, Windows 2000 / XP : English(Philippines)
-		return "en";
-		break;
+		return "en";		
 	default:
 		break;
 	}

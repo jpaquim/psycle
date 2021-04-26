@@ -39,7 +39,7 @@ INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
 	return rv;
 }
 
-INLINE psy_ui_Point psy_ui_point_makepx(double x, double y)
+INLINE psy_ui_Point psy_ui_point_make_px(double x, double y)
 {
 	psy_ui_Point rv;
 
@@ -507,7 +507,7 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make_px(const psy_ui_RealRectangle* r)
 {
 	psy_ui_Rectangle rv;
 
-	rv.topleft = psy_ui_point_makepx(r->left, r->top);	
+	rv.topleft = psy_ui_point_make_px(r->left, r->top);	
 	rv.size = psy_ui_size_make(
 		psy_ui_value_make_px(psy_ui_realrectangle_width(r)),
 		psy_ui_value_make_px(psy_ui_realrectangle_height(r)));

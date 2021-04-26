@@ -126,7 +126,7 @@ int xmsongexport_writesongheader(XMSongExport* self)
 	modulename[0] = 'P';
 	modulename[1] = 'E';
 	modulename[2] = ':';
-	for (i = 3; i < 20 && i < strlen(psy_audio_song_title(self->song)); ++i) {
+	for (i = 3; i < 20 && i < psy_strlen(psy_audio_song_title(self->song)); ++i) {
 		modulename[i] = psy_audio_song_title(self->song)[i];
 	}	
 	if (status = psyfile_write(self->fp, modulename, sizeof(modulename))) {

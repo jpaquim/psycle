@@ -7,9 +7,8 @@
 
 // dsp
 #include <operations.h>
-// std
-#include <stdlib.h>
-#include <string.h>
+// platform
+#include "../../detail/portable.h"
 
 static void waveboxselection_swap(WaveBoxSelection*);
 
@@ -352,9 +351,9 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		psy_ui_textout(g,
-			(size.width - tm->tmAveCharWidth * strlen(self->nowavetext)) / 2,
+			(size.width - tm->tmAveCharWidth * psy_strlen(self->nowavetext)) / 2,
 			(size.height - tm->tmHeight) / 2,
-			self->nowavetext, strlen(self->nowavetext));
+			self->nowavetext, psy_strlen(self->nowavetext));
 	} else {
 		double scaley;		
 		double x;

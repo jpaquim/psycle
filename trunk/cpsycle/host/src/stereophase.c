@@ -320,7 +320,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	// bufDC.SetTextColour(0x505050);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
-	psy_ui_textout(g, 4, 128 - 14, buf, strlen(buf));
+	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
 	// bufDC.TextOut(4, 128 - 14, buf);
 	// bufDC.SelectObject(oldFont);
 }

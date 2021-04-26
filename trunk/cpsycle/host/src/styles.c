@@ -10,11 +10,13 @@ static void initstyles(psy_ui_Defaults*, bool dark);
 void initdarkstyles(psy_ui_Defaults* defaults)
 {
 	initstyles(defaults, TRUE);
+	defaults->hasdarktheme = TRUE;
 }
 
 void initlightstyles(psy_ui_Defaults* defaults)
 {
 	initstyles(defaults, FALSE);
+	defaults->hasdarktheme = FALSE;
 }
 
 void initstyles(psy_ui_Defaults* defaults, bool dark)
@@ -48,9 +50,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		weak = 400;	
 		minima = 900;
 	} else {
-		surface = psy_ui_colour_make_argb(0x00FFFFFF);
+		surface = psy_ui_colour_make_argb(0x00FAFAFA);
 		onsurface = psy_ui_colour_make_argb(0x00000000);
-		primary = psy_ui_colour_make(0x00121212);
+		primary = psy_ui_colour_make(0x00FFFFFF);
 		onprimary = psy_ui_colour_make(0x00000000);
 		secondary = psy_ui_colour_make(0x00FAD481);
 		onsecondary = psy_ui_colour_make(0x1b8ff2);
@@ -256,17 +258,22 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_overlayed(&surface, &overlay, 0.05));
 	psy_ui_defaults_setstyle(defaults, STYLE_TOP, style);	
 	// toprows
-	style = psy_ui_style_allocinit();
-	psy_ui_colour_set(&style->backgroundcolour, surface);	
+	style = psy_ui_style_allocinit();	
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROWS, style);
 	// toprow0
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
+	psy_ui_colour_set(&style->backgroundcolour,
+		psy_ui_colour_overlayed(&surface, &overlay, 0.08));
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW0, style);
 	// toprow1
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));	
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW1, style);
 	// toprow2
 	style = psy_ui_style_allocinit();	
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));	
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW2, style);
 	// trackscopes
 	style = psy_ui_style_allocinit();
@@ -299,8 +306,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_defaults_setstyle(defaults, STYLE_INSTRUMENTVIEW, style);
 	// playbar
 	style = psy_ui_style_allocinit();
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 	psy_ui_colour_set(&style->backgroundcolour,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.09));
+		psy_ui_colour_overlayed(&surface, &overlay, 0.14));
 	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.10));
@@ -571,4 +580,15 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 	psy_ui_defaults_setstyle(defaults,
 		STYLE_HEADER, style);	
+	// mainviewtopbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		psy_ui_colour_make_overlay(4));
+	psy_ui_defaults_setstyle(defaults,
+		STYLE_MAINVIEWTOPBAR, style);
+	// mainviewnavbar
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, surface);
+	psy_ui_defaults_setstyle(defaults,
+		STYLE_NAVBAR, style);
 }

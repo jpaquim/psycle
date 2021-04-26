@@ -77,7 +77,7 @@ void psy_library_setenv(psy_Library* self, const char* path, const char* root)
 	if (p) {
 		uintptr_t dest;
 
-		p = path + strlen(root);
+		p = path + psy_strlen(root);
 		dest = 0;
 		while (*p != '\0') {
 			if (*p == '\\') {

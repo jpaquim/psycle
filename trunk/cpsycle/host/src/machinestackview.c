@@ -892,20 +892,20 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	volumesizepx.height = psy_max(182.0, volumesizepx.height);
 	psy_ui_component_setposition(&self->inputs.component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(margin_left, 0.0),
+			psy_ui_point_make_px(margin_left, 0.0),
 			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->effects.component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(margin_left, insizepx.height),
+			psy_ui_point_make_px(margin_left, insizepx.height),
 			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->outputs.component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(margin_left, sizepx.height - volumesizepx.height -
+			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height -
 				outsizepx.height),
 			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 	psy_ui_component_setposition(&self->volumes.component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(margin_left, sizepx.height - volumesizepx.height),
+			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height),
 			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
 }
 

@@ -294,7 +294,7 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 					psy_ui_realsize_make(size.width, lineheight));
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
 		}
-		psy_ui_textout(g, cpx, cpy, itemtext, strlen(itemtext));
+		psy_ui_textout(g, cpx, cpy, itemtext, psy_strlen(itemtext));
 		cpy += lineheight;
 	}
 }

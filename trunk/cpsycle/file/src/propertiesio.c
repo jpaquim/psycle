@@ -237,7 +237,7 @@ int propertiesio_save(const psy_Property* self, const char* filename)
 		if (psy_strlen(psy_property_comment(self)) > 0) {			
 			fwrite("; ", sizeof(char), 2, fp);
 			fwrite(self->item.comment, sizeof(char),
-				strlen(self->item.comment), fp);
+				psy_strlen(self->item.comment), fp);
 			fwrite("\n", sizeof(char), 1, fp);			
 		}
 		psy_property_enumerate((psy_Property*)self, fp, (psy_PropertyCallback)
@@ -267,7 +267,7 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 		fwrite("\n", sizeof(char), 1, fp);
 		fwrite("[", sizeof(char), 1, fp);
 		if (sections[0] != '\0') {
-			fwrite(sections, sizeof(char), strlen(sections), fp);
+			fwrite(sections, sizeof(char), psy_strlen(sections), fp);
 		}
 		fwrite("]", sizeof(char), 1, fp);
 		fwrite("\n", sizeof(char), 1, fp);
@@ -279,7 +279,7 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 		if (property->item.comment) {
 			fwrite("; ", sizeof(char), 2, fp);
 			fwrite(property->item.comment, sizeof(char),
-				strlen(property->item.comment), fp);
+				psy_strlen(property->item.comment), fp);
 			fwrite("\n", sizeof(char), 1, fp);
 		}
 		if (property->item.typ == PSY_PROPERTY_TYPE_ROOT) {
@@ -292,7 +292,7 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 			psy_strreset(&lastsection, sections);			
 			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
-				fwrite(sections, sizeof(char), strlen(sections), fp);
+				fwrite(sections, sizeof(char), psy_strlen(sections), fp);
 			}			
 			fwrite("]", sizeof(char), 1, fp);
 			free(sections);
@@ -305,19 +305,19 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 				}
 			}
 			fwrite(psy_property_key(property), sizeof(char),
-				strlen(psy_property_key(property)), fp);
+				psy_strlen(psy_property_key(property)), fp);
 			fwrite("=", sizeof(char), 1, fp);
 			switch (property->item.typ) {				
 				case PSY_PROPERTY_TYPE_INTEGER:
 					psy_snprintf(text, 40, "%d", psy_property_item_int(property));
 					text[39] = '\0';
-					fwrite(text, sizeof(char), strlen(text), fp);					
+					fwrite(text, sizeof(char), psy_strlen(text), fp);					
 				break;
 				case PSY_PROPERTY_TYPE_BOOL:
 					psy_snprintf(text, 40, "%d", (int)psy_property_item_bool(
 						property));
 					text[39] = '\0';
-					fwrite(text, sizeof(char), strlen(text), fp);
+					fwrite(text, sizeof(char), psy_strlen(text), fp);
 				break;				
 				case PSY_PROPERTY_TYPE_CHOICE: {
 					char_dyn_t* sections;
@@ -326,24 +326,24 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, uintptr_t level)
 					psy_snprintf(text, 40, "%d", psy_property_item_int(
 						property));
 					text[39] = '\0';
-					fwrite(text, sizeof(char), strlen(text), fp);
+					fwrite(text, sizeof(char), psy_strlen(text), fp);
 
 					sections = psy_property_sections(property);
 					fwrite("\n", sizeof(char), 1, fp);
 					fwrite("[", sizeof(char), 1, fp);
 					if (sections[0] != '\0') {
-						fwrite(sections, sizeof(char), strlen(sections), fp);
+						fwrite(sections, sizeof(char), psy_strlen(sections), fp);
 					}
 					fwrite(".", sizeof(char), 1, fp);
 					fwrite(property->item.key, sizeof(char),
-						strlen(property->item.key), fp);
+						psy_strlen(property->item.key), fp);
 					fwrite("]", sizeof(char), 1, fp);
 					free(sections);
 					break; }
 				case PSY_PROPERTY_TYPE_STRING:
 				case PSY_PROPERTY_TYPE_FONT:
 					fwrite(psy_property_item_str(property), sizeof(char),
-						strlen(psy_property_item_str(property)), fp);
+						psy_strlen(psy_property_item_str(property)), fp);
 				break;						
 				default:
 				break;

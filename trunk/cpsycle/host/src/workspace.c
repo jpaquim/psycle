@@ -647,7 +647,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		islight = psy_property_item_int(choice) == psy_ui_LIGHTTHEME;
 		// reset host styles
 		if (islight) {
-			initlightstyles(psy_ui_appdefaults());
+			initlightstyles(psy_ui_appdefaults());			
 		} else {
 			initdarkstyles(psy_ui_appdefaults());
 		}

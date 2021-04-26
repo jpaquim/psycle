@@ -64,6 +64,11 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent, psy_ui_Component* vie
 void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
 void psy_ui_tab_setmode(psy_ui_Tab*, TabMode);
 
+INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
+{
+	return &self->component;
+}
+
 typedef struct psy_ui_TabBar {
 	// inherits
 	psy_ui_Component component;
@@ -90,9 +95,7 @@ INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 }
 
 void psy_ui_tabbar_settabalignment(psy_ui_TabBar*, psy_ui_AlignType);
-void psy_ui_tabbar_settabmargin(psy_ui_TabBar*, uintptr_t tab, psy_ui_Margin);
 void psy_ui_tabbar_settabmode(psy_ui_TabBar*, uintptr_t tab, TabMode);
-void psy_ui_tabbar_setdefaulttabmargin(psy_ui_TabBar*, psy_ui_Margin);
 psy_ui_Tab* psy_ui_tabbar_tab(psy_ui_TabBar*, uintptr_t tabindex);
 const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar*, uintptr_t tabindex);
 

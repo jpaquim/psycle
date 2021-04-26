@@ -138,8 +138,8 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* filename)
 			midiloader_dispose(&midifile);			
 		} else {
 #ifdef PSYCLE_USE_XM
-			psyfile_read(self->file, header + 8, (uint32_t)(strlen(XM_HEADER) - 8));
-			header[strlen(XM_HEADER)] = '\0';
+			psyfile_read(self->file, header + 8, (uint32_t)(psy_strlen(XM_HEADER) - 8));
+			header[psy_strlen(XM_HEADER)] = '\0';
 			if (strcmp(header, XM_HEADER) == 0) {
 				XMSongLoader loader;
 

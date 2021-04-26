@@ -185,14 +185,14 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		switch (self->component.align) {
 			case psy_ui_ALIGN_LEFT:
 				psy_ui_component_move(&self->component,
-					psy_ui_point_makepx(psy_max(prevposition.left, psy_min(
+					psy_ui_point_make_px(psy_max(prevposition.left, psy_min(
 							nextposition.right - (position.right - position.left),
 							position.left + ev->pt.x - self->dragoffset)),
 						position.top));
 				break;
 			case psy_ui_ALIGN_RIGHT:				
 				psy_ui_component_move(&self->component,
-					psy_ui_point_makepx(
+					psy_ui_point_make_px(
 							psy_max(nextposition.left,
 								psy_min(prevposition.right -
 										psy_ui_realrectangle_width(&position),
@@ -202,14 +202,14 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				break;
 			case psy_ui_ALIGN_TOP:
 				psy_ui_component_move(&self->component,
-					psy_ui_point_makepx(
+					psy_ui_point_make_px(
 						position.left, psy_max(prevposition.top, psy_min(
 							nextposition.bottom - (position.bottom - position.top),
 						position.top + ev->pt.y - self->dragoffset))));
 				break;
 			case psy_ui_ALIGN_BOTTOM:				
 				psy_ui_component_move(&self->component,
-					psy_ui_point_makepx(
+					psy_ui_point_make_px(
 						position.left,
 						psy_max(0.0, psy_min(prevposition.bottom -
 							psy_ui_realrectangle_height(&position),

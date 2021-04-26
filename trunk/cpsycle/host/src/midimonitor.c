@@ -58,7 +58,7 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	colew = psy_ui_value_make_ew(4);
 	headercolw_px = psy_ui_value_px(&colew, tm);
 	lineheight = (int)(tm->tmHeight * 1.2);
-	psy_ui_textout(g, 0, 0, "Ch:", strlen("Ch:"));
+	psy_ui_textout(g, 0, 0, "Ch:", psy_strlen("Ch:"));
 	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm);
 	for (ch = 0, cpx = headercolw_px; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
@@ -67,10 +67,10 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 		bool active;
 
 		psy_snprintf(text, 256, "%d", (ch + 1));
-		psy_ui_textout(g, cpx, 0, text, strlen(text));
+		psy_ui_textout(g, cpx, 0, text, psy_strlen(text));
 		active = (*self->channelmap) & (0x01 << ch);
 		if (active) {
-			psy_ui_textout(g, cpx, lineheight, ".", strlen("."));
+			psy_ui_textout(g, cpx, lineheight, ".", psy_strlen("."));
 		}
 	}
 }
@@ -127,17 +127,17 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 	colew = psy_ui_value_make_ew(3.5);
 	colw_px = psy_ui_value_px(&colew, tm);
 	lineheight = (int)(tm->tmHeight * 1.2);
-	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", strlen("MIDI Sync: START"));
-	psy_ui_textout(g, 0, lineheight, "MIDI Sync: CLOCK", strlen("MIDI Sync: CLOCK"));
-	psy_ui_textout(g, 0, lineheight * 2, "MIDI Sync: STOP", strlen("MIDI Sync: STOP"));
+	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", psy_strlen("MIDI Sync: START"));
+	psy_ui_textout(g, 0, lineheight, "MIDI Sync: CLOCK", psy_strlen("MIDI Sync: CLOCK"));
+	psy_ui_textout(g, 0, lineheight * 2, "MIDI Sync: STOP", psy_strlen("MIDI Sync: STOP"));
 	if ((*self->flags & FSTAT_FASTART) == FSTAT_FASTART) {
-		psy_ui_textout(g, headercolw_px, 0, ".", strlen("."));
+		psy_ui_textout(g, headercolw_px, 0, ".", psy_strlen("."));
 	}
 	if ((*self->flags & FSTAT_F8CLOCK) == FSTAT_F8CLOCK) {
-		psy_ui_textout(g, headercolw_px, lineheight, ".", strlen("."));
+		psy_ui_textout(g, headercolw_px, lineheight, ".", psy_strlen("."));
 	}
 	if ((*self->flags & FSTAT_FCSTOP) == FSTAT_FCSTOP) {
-		psy_ui_textout(g, headercolw_px, lineheight * 2, ".", strlen("."));
+		psy_ui_textout(g, headercolw_px, lineheight * 2, ".", psy_strlen("."));
 	}
 }
 
@@ -231,7 +231,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
 		}
 		psy_snprintf(text, 256, "Ch %d", (ch + 1));
-		psy_ui_textout(g, colx_px[0], cpy, text, strlen(text));
+		psy_ui_textout(g, colx_px[0], cpy, text, psy_strlen(text));
 		//Generator/effect selector
 		selidx = psy_INDEX_INVALID;
 		switch (midiinput->midiconfig.gen_select_with) {
@@ -257,12 +257,12 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 			if (machine) {
 				psy_ui_textout(g, colx_px[1], cpy,
 					psy_audio_machine_editname(machine),
-					strlen(psy_audio_machine_editname(machine)));
+					psy_strlen(psy_audio_machine_editname(machine)));
 			} else {
-				psy_ui_textout(g, colx_px[1], cpy, "-", strlen("-"));
+				psy_ui_textout(g, colx_px[1], cpy, "-", psy_strlen("-"));
 			}
 		} else {
-			psy_ui_textout(g, colx_px[1], cpy, "-", strlen("-"));
+			psy_ui_textout(g, colx_px[1], cpy, "-", psy_strlen("-"));
 		}
 		//instrument selection
 		inst = -1;
@@ -293,18 +293,18 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				selidx >= 0 && selidx < MAX_INSTRUMENTS) { // pMachine->NumAuxColumnIndexes())		
 			psy_snprintf(text, 256, "%02X", selidx);
 		} else { psy_snprintf(text, 256, "-"); }
-		psy_ui_textout(g, colx_px[2], cpy, text, strlen(text));
-		psy_ui_textout(g, colx_px[3], cpy, "Yes", strlen("Yes"));
+		psy_ui_textout(g, colx_px[2], cpy, text, psy_strlen(text));
+		psy_ui_textout(g, colx_px[3], cpy, "Yes", psy_strlen("Yes"));
 	}
 }
 
 void midichannelmappingview_drawheader(MidiChannelMappingView* self,
 	psy_ui_Graphics* g, double colx_px[4], double y)
 {
-	psy_ui_textout(g, colx_px[0], y, "Channel", strlen("Channel"));
-	psy_ui_textout(g, colx_px[1], y, "Generator/Effect", strlen("Generator/Effect"));
-	psy_ui_textout(g, colx_px[2], y, "Instrument", strlen("Instrument"));
-	psy_ui_textout(g, colx_px[3], y, "Note Off", strlen("Note Off"));
+	psy_ui_textout(g, colx_px[0], y, "Channel", psy_strlen("Channel"));
+	psy_ui_textout(g, colx_px[1], y, "Generator/Effect", psy_strlen("Generator/Effect"));
+	psy_ui_textout(g, colx_px[2], y, "Instrument", psy_strlen("Instrument"));
+	psy_ui_textout(g, colx_px[3], y, "Note Off", psy_strlen("Note Off"));
 }
 
 void midichannelmappingview_onpreferredsize(MidiChannelMappingView* self,

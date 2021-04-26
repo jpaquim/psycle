@@ -74,11 +74,11 @@ int newmachine_comp_name(psy_Property* p, psy_Property* q)
 	const char* right;
 
 	left = psy_property_at_str(p, "name", "");
-	if (strlen(left) == 0) {
+	if (psy_strlen(left) == 0) {
 		left = psy_property_key(p);
 	}
 	right = psy_property_at_str(q, "name", "");
-	if (strlen(right) == 0) {
+	if (psy_strlen(right) == 0) {
 		right = psy_property_key(q);
 	}
 	return strcmp(left, right);
@@ -620,17 +620,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		}
 	}		
 	plugindisplayname(property, text);	
-	psy_ui_textout(g, topleft.x, topleft.y + 2, text, strlen(text));
+	psy_ui_textout(g, topleft.x, topleft.y + 2, text, psy_strlen(text));
 	plugintype(property, text);
 	psy_ui_textout(g, topleft.x + self->columnwidth - self->avgcharwidth * 7,
-		topleft.y + 2, text, strlen(text));
+		topleft.y + 2, text, psy_strlen(text));
 	if (pluginmode(property, text) == psy_audio_MACHMODE_FX) {
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
 	psy_ui_textout(g, topleft.x + self->columnwidth - 10 * self->avgcharwidth,
-		topleft.y + 2, text, strlen(text));
+		topleft.y + 2, text, psy_strlen(text));
 }
 
 void pluginsview_computetextsizes(PluginsView* self, double width)

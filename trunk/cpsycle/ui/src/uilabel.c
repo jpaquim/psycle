@@ -194,7 +194,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_innersize_px(psy_ui_label_base(self));		
-	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
+	//psy_ui_textout(g, 0, 0, self->text, psy_strlen(self->text));
 	//return;
 	if (size.height >= tm->tmHeight * 2) {
 		numcolumnavgchars = (uintptr_t)(size.width / tm->tmAveCharWidth);		
@@ -213,11 +213,11 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		textsizepx = psy_ui_size_px(&textsize, tm);
 		centerx = (size.width - textsizepx.width);
 	}
-	string = malloc(strlen(text) + 1);
-	psy_snprintf(string, strlen(text) + 1, "%s", text);
+	string = malloc(psy_strlen(text) + 1);
+	psy_snprintf(string, psy_strlen(text) + 1, "%s", text);
 	token = strtok(string, seps);
 	while (token != NULL) {
-		count = strlen(token);
+		count = psy_strlen(token);
 		while (count > 0) {
 			uintptr_t numoutput;
 			char* wrap;
@@ -293,7 +293,7 @@ char* strrchrpos(char* str, char c, uintptr_t pos)
 {
 	uintptr_t count;
 
-	if (pos >= strlen(str)) {
+	if (pos >= psy_strlen(str)) {
 		return 0;
 	}
 	count = pos;
