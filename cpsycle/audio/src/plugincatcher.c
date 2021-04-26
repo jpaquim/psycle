@@ -84,8 +84,7 @@ void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
 	char inipath[_MAX_PATH];
 	
-	strcpy(inipath, psy_dir_config());
-	strcpy(inipath, psy_dir_config());
+	strcpy(inipath, psy_dir_config());	
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 	strcat(inipath, "\\psycle-plugin-sections-32.ini");
 #else

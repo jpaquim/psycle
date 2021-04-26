@@ -77,7 +77,6 @@ bool machineparamconfig_hasthemeproperty(const MachineParamConfig*,
 	psy_Property*);
 bool machineparamconfig_hasproperty(const MachineParamConfig*, psy_Property*);
 
-bool machineparamconfig_showfloated(const MachineParamConfig*);
 const char* machineparamconfig_dialbpm(const MachineParamConfig*);
 void machineparamconfig_setdialbpm(MachineParamConfig*, const char* filename);
 

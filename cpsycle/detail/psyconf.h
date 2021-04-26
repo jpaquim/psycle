@@ -73,8 +73,15 @@
 
 #define PSYCLE_USE_MACHINEPROXY
 
+#define PSYCLE_DEFAULT_LANG_USER
 // #define PSYCLE_DEFAULT_LANG_ES
-#define PSYCLE_DEFAULT_LANG_EN
+// #define PSYCLE_DEFAULT_LANG_EN
+
+// outcomment this to create the english language dictionary and an empty one
+// only with keys. It will be saved in the user dir. It needs then to be copied
+// to the host dir
+
+// #define PSYCLE_MAKE_DEFAULT_LANG
 
 /* #define PSYCLE_LOG_WORKEVENTS */
 

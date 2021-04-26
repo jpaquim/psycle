@@ -43,21 +43,18 @@ void machineparamconfig_makeview(MachineParamConfig* self, psy_Property* parent)
 
 	self->paramview = psy_property_settext(
 		psy_property_append_section(parent, "paramview"),
-		"settingsview.native-machine-parameter-window");
+		"settingsview.paramview.native-machine-parameter-window");
 	psy_property_settext(
 		psy_property_append_font(self->paramview, "font", PSYCLE_DEFAULT_FONT),
-		"settingsview.font");
+		"settingsview.paramview.font");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->paramview, "loadcontrolskin"),
-		"settingsview.load-dial-bitmap"),
+		"settingsview.paramview.load-dial-bitmap"),
 		PROPERTY_ID_LOADCONTROLSKIN);
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->paramview, "defaultskin"),
-		"settingsview.default-skin"),
-		PROPERTY_ID_DEFAULTCONTROLSKIN);
-	psy_property_settext(
-		psy_property_append_bool(self->paramview, "showaswindow", 1),
-		"settingsview.show-as-window");
+		"settingsview.paramview.default-skin"),
+		PROPERTY_ID_DEFAULTCONTROLSKIN);	
 	machineparamconfig_maketheme(self, self->paramview);
 }
 
@@ -67,62 +64,62 @@ void machineparamconfig_maketheme(MachineParamConfig* self, psy_Property* parent
 
 	self->theme = psy_property_settext(
 		psy_property_append_section(parent, "theme"),
-		"theme");
+		"settingsview.paramview.theme.theme");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_str(self->theme,
 			"machinedialbmp", ""),
 			PSY_PROPERTY_HINT_EDIT),
-		"settingsview.machinedialbmp");
+		"settingsview.paramview.theme.machinedialbmp");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguititlecolour", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.title-background");
+		"settingsview.paramview.theme.title-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguititlefontcolour", 0x00B4B4B4, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.title-font");
+		"settingsview.paramview.theme.title-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguitopcolour", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.param-background");
+		"settingsview.paramview.theme.param-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguifonttopcolour", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.param-font");
+		"settingsview.paramview.theme.param-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguibottomcolour", 0x00444444, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.value-background");
+		"settingsview.paramview.theme.value-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguifontbottomcolour", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.value-font");
+		"settingsview.paramview.theme.value-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguihtopcolour", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.selparam-background");
+		"settingsview.paramview.theme.selparam-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguihfonttopcolour", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.selparam-font");
+		"settingsview.paramview.theme.selparam-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguihbottomcolour", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.selvalue-background");
+		"settingsview.paramview.theme.selvalue-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"machineguihfontbottomcolour", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-		"settingsview.selvalue-font");
+		"settingsview.paramview.theme.selvalue-font");
 }
 
 void machineparamconfig_resettheme(MachineParamConfig* self)
@@ -164,13 +161,6 @@ bool machineparamconfig_hasproperty(const MachineParamConfig* self,
 	assert(self && self->paramview);
 
 	return psy_property_insection(property, self->paramview);
-}
-
-bool machineparamconfig_showfloated(const MachineParamConfig* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(self->paramview, "showaswindow", TRUE);
 }
 
 const char* machineparamconfig_dialbpm(const MachineParamConfig* self)

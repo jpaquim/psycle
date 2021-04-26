@@ -159,12 +159,10 @@ typedef struct psy_audio_InputChannel {
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
 	psy_audio_IntMachineParam level_param;
-	psy_audio_IntMachineParam solo_param;
-	psy_audio_IntMachineParam mute_param;
 	psy_audio_IntMachineParam dryonly_param;
 	psy_audio_IntMachineParam wetonly_param;
 	psy_audio_DryWetMixMachineParam drywetmix_param;
-	struct psy_audio_Mixer* mixer;
+	struct psy_audio_Mixer* mixer;	
 } psy_audio_InputChannel;
 
 void inputchannel_init(psy_audio_InputChannel*, uintptr_t id,
@@ -189,7 +187,6 @@ typedef struct psy_audio_ReturnChannel {
 	psy_audio_Buffer* buffer;
 	psy_audio_Machine* fx;
 	psy_List* path;
-
 	psy_audio_CustomMachineParam send_param;
 	psy_audio_SendReturnLabelParam sendlabel_param;
 	psy_audio_SendReturnLabelParam returnlabel_param;	
@@ -197,9 +194,7 @@ typedef struct psy_audio_ReturnChannel {
 	psy_audio_CustomMachineParam info_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_IntMachineParam level_param;
-	psy_audio_IntMachineParam solo_param;
-	psy_audio_IntMachineParam mute_param;
+	psy_audio_IntMachineParam level_param;	
 } psy_audio_ReturnChannel;
 
 typedef struct psy_audio_Mixer {
@@ -209,7 +204,8 @@ typedef struct psy_audio_Mixer {
 	psy_Table sends;
 	psy_Table returns;
 	uintptr_t maxreturn;
-	uintptr_t solocolumn;
+	uintptr_t inputsolo;
+	uintptr_t returnsolo;
 	uintptr_t strobe;
 	psy_audio_MasterChannel master;
 	psy_audio_CustomMachineParam blank_param;
@@ -219,6 +215,10 @@ typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachineParam label_gain_param;
 	psy_audio_CustomMachineParam label_pan_param;
 	psy_audio_CustomMachineParam label_ch_input_param;
+	psy_audio_IntMachineParam solo_param;
+	psy_audio_IntMachineParam solo_tweak_param;
+	psy_audio_IntMachineParam mute_param;
+	psy_audio_IntMachineParam mute_tweak_param;
 	psy_Table legacyreturn_;
 	psy_Table legacysend_;
 } psy_audio_Mixer;
@@ -226,7 +226,7 @@ typedef struct psy_audio_Mixer {
 void psy_audio_mixer_init(psy_audio_Mixer*, psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_mixer_info(void);
 
-INLINE psy_audio_InputChannel* psy_audio_mixer_Channel(psy_audio_Mixer* self,
+INLINE psy_audio_InputChannel* psy_audio_mixer_channel(psy_audio_Mixer* self,
 	uintptr_t i)
 {
 	return (psy_audio_InputChannel*) psy_table_at(&self->inputs, i);

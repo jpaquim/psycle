@@ -30,11 +30,12 @@ void compatconfig_make(CompatConfig* self, psy_Property* parent)
 	assert(self);
 
 	self->compatibility = psy_property_settext(
-		psy_property_append_section(parent, "compatibility"),
+		psy_property_append_section(parent,
+		"compatibility"),
 		"settingsview.compatibility");	
 	psy_property_settext(
 		psy_property_append_bool(self->compatibility, "loadnewgamefxblitz", 0),
-		"settingsview.jme-version-unknown");
+		"newmachine.jme-version-unknown");
 }
 
 void compatconfig_setloadnewblitz(CompatConfig* self, bool mode)

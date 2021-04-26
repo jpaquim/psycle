@@ -5,653 +5,877 @@
 
 #include "defaultlang.h"
 
+// container
+#include <propertiesio.h>
+// std
+#include <string.h>
+
+static psy_Property* currsection = NULL;
+
+static psy_Property* setsection(psy_Property* section)
+{
+	currsection = section;
+	return section;
+}
+
+static void add(const char* key, const char* translation)
+{
+	assert(currsection);
+
+	psy_property_set_str(currsection, key, translation);
+}
+
+// prototypes
+static void make_translator_make_filebar(psy_Property* parent);
+static void make_translator_make_undobar(psy_Property* parent);
+static void make_translator_make_playbar(psy_Property* parent);
+static void make_translator_make_playlist(psy_Property* parent);
+static void make_translator_make_metronomebar(psy_Property* parent);
+static void make_translator_make_mainview(psy_Property* parent);
+static void make_translator_make_help(psy_Property* parent);
+static void make_translator_make_greetings(psy_Property* parent);
+static void make_translator_make_machinebar(psy_Property* parent);
+static void make_translator_make_trackbar(psy_Property* parent);
+static void make_translator_make_octavebar(psy_Property* parent);
+static void make_translator_make_edit(psy_Property* parent);
+static void make_translator_make_timebar(psy_Property* parent);
+static void make_translator_make_linesperbeatbar(psy_Property* parent);
+static void make_translator_make_channelmapping(psy_Property* parent);
+static void make_translator_make_renderbar(psy_Property* parent);
+static void make_translator_make_export(psy_Property* parent);
+static void make_translator_make_gear(psy_Property* parent);
+static void make_translator_make_cpu(psy_Property* parent);
+static void make_translator_make_songproperties(psy_Property* parent);
+static void make_translator_make_settingsview(psy_Property* parent);
+static void make_translator_make_instrumentsbox(psy_Property* parent);
+static void make_translator_make_instrumentview(psy_Property* parent);
+static void make_translator_make_machineview(psy_Property* parent);
+static void make_translator_make_machineframe(psy_Property* parent);
+static void make_translator_make_patternview(psy_Property* parent);
+static void make_translator_make_sequenceview(psy_Property* parent);
+static void make_translator_make_seqedit(psy_Property* parent);
+static void make_translator_make_newmachine(psy_Property* parent);
+static void make_translator_make_samplesview(psy_Property* parent);
+static void make_translator_make_general(psy_Property* parent);
+static void make_translator_make_tracker(psy_Property* parent);
+static void make_translator_make_messages(psy_Property* parent);
+// implementation
 void make_translator_default(psy_Property* lang)
+{
+	psy_Property* section;
+	// psy_Property* subsection;
+
+	assert(lang);
+
+	section = setsection(lang);
+	add("lang", "en");
+	make_translator_make_filebar(lang);
+	make_translator_make_undobar(lang);
+	make_translator_make_playbar(lang);
+	make_translator_make_playlist(lang);
+	make_translator_make_metronomebar(lang);	
+	make_translator_make_mainview(lang);
+	make_translator_make_help(lang);
+	make_translator_make_greetings(lang);
+	make_translator_make_machinebar(lang);
+	make_translator_make_trackbar(lang);
+	make_translator_make_octavebar(lang);
+	make_translator_make_edit(lang);
+	make_translator_make_timebar(lang);
+	make_translator_make_linesperbeatbar(lang);
+	make_translator_make_channelmapping(lang);
+	make_translator_make_renderbar(lang);
+	make_translator_make_export(lang);
+	make_translator_make_gear(lang);
+	make_translator_make_cpu(lang);
+	make_translator_make_songproperties(lang);
+	make_translator_make_settingsview(lang);
+	make_translator_make_instrumentsbox(lang);
+	make_translator_make_instrumentview(lang);
+	make_translator_make_machineview(lang);
+	make_translator_make_machineframe(lang);
+	make_translator_make_patternview(lang);
+	make_translator_make_sequenceview(lang);
+	make_translator_make_seqedit(lang);
+	make_translator_make_newmachine(lang);
+	make_translator_make_samplesview(lang);
+	make_translator_make_general(lang);
+	make_translator_make_tracker(lang);
+	make_translator_make_messages(lang);
+}
+
+void make_translator_make_filebar(psy_Property* parent)
+{	
+	setsection(psy_property_append_section(parent, "file"));
+	add("song", "Song");
+	add("load", "Load");
+	add("save", "Save");
+	add("export", "Export");
+	add("new", "New");
+	add("render", "Render");
+	add("loadsong", "Load Song");
+	add("savesong", "Save Song");
+	add("plugin-filesave", "Plugin File Load");
+	add("plugin-fileload", "Plugin File Save");
+}
+
+void make_translator_make_undobar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "undo"));
+	add("undo", "Undo");
+	add("redo", "Redo");
+}
+
+void make_translator_make_playbar(psy_Property* parent)
+{	
+	setsection(psy_property_append_section(parent, "play"));
+	add("loop", "Loop");
+	add("record-notes", "Record Notes");
+	add("play", "Play");
+	add("stop", "Stop");
+}
+
+void make_translator_make_playlist(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "playlist"));
+	add("play", "Play");
+	add("stop", "Stop");
+	add("delete", "Delete");
+	add("clear", "Clear");
+	add("recent-songs", "Recent Songs");
+}
+
+void make_translator_make_metronomebar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "metronome"));
+	add("metronome", "Metronome");
+	add("configure", "(Configure)");	
+	add("precount", "Precount");
+}
+
+void make_translator_make_mainview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "main"));	
+	add("machines", "Machines");
+	add("patterns", "Patterns");
+	add("pattern", "Pattern");
+	add("samples", "Samples");
+	add("instrument", "Instrument");
+	add("instruments", "Instruments");
+	add("help", "Help");
+	add("settings", "Settings");
+	add("properties", "Properties");
+	add("kbd", "Kbd");
+	add("terminal", "Terminal");
+}
+
+void make_translator_make_help(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "help"));
+	add("help", "Help");
+	add("about", "About");
+	add("greetings", "Greetings");
+	add("licence", "Licence");
+	add("contributors-credits", "Contributors / Credits");
+	add("ok", "OK");
+	add("extract", "Extract Help");
+	add("combine", "Combine Help");
+}
+
+void make_translator_make_greetings(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "greetings"));
+	add("thanks", "Thanks! / ");
+	add("wantstothank",
+		"Psycledelics, the Community, wants to thank the following people "
+		"for their contributions in the developement of Psycle");
+	add("showargurus", "Show Original Arguru's Greetings");
+	add("showcurrent", "Show Current Greetings");
+}
+
+void make_translator_make_machinebar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "machinebar"));
+	add("gear", "Gear Rack");
+	add("dock", "Param Rack");
+	add("editor", "Editor");
+	add("cpu", "CPU");
+	add("midi", "MIDI");
+}
+
+void make_translator_make_trackbar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "trackbar"));
+	add("tracks", "Tracks");
+}
+
+void make_translator_make_octavebar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "octavebar"));
+	add("octave", "Octave");
+}
+
+void make_translator_make_edit(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "edit"));
+	add("cut", "Cut");
+	add("copy", "Copy");
+	add("crop", "Crop");
+	add("delete", "Delete");
+	add("paste", "Paste");
+	add("mixpaste", "MixPaste");
+	add("clear", "Clear");
+	add("duplicate", "Duplicate");
+	add("clone", "Clone");
+}
+
+void make_translator_make_timebar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "timebar"));
+	add("tempo", "Tempo");
+}
+
+void make_translator_make_linesperbeatbar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "lpb"));
+	add("lines-per-beat", "Lines per beat");
+}
+
+void make_translator_make_channelmapping(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "channelmapping"));
+	add("autowire", "Autowire");
+	add("unselect-all", "Unselect all");
+	add("remove-connection-with-right-click",
+		"Remove connection with right click");
+}
+
+void make_translator_make_renderbar(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "render"));
+	add("render", "Render");
+	add("file", "File");
+	add("sequence-positions", "Sequence positions");
+	add("quality", "Quality");
+	add("dither", "Dither");
+	add("selection", "Selection");
+	add("record", "Record");
+	add("enable", "enable");
+	add("from", "from");
+	add("to", "to");
+	add("number", "Number");
+	add("save-wave", "Save Wave");
+	add("entire-song", "The Entire Song");
+	add("samplerate", "Samplerate");
+	add("bitdepth", "Bit depth");
+	add("none", "none");
+	add("pdf", "Prob. Distribution");
+	add("triangular", "Triangular");
+	add("rectangular", "Rectangular");
+	add("gaussian", "gaussian");
+	add("noise-shaping", "noise-shaping");
+	add("high-pass-contour", "High-Pass Contour");
+	add("none", "none");
+	add("output-path", "Output path");
+	add("save-each-unmuted", "Save each unmuted");
+}
+
+void make_translator_make_export(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "export"));
+	add("export-module", "Export Module");
+	add("export-midifile", "Export Midi File");
+}
+
+void make_translator_make_gear(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "gear"));
+	add("clone", "Clone");
+	add("delete", "Delete");
+	add("properties", "Properties");
+	add("parameters", "Parameters");
+	add("exchange", "Exchange");
+	add("show-master", "Show Master");
+	add("connecttomaster", "Connect To Master");
+	add("create-replace", "Create/Replace");
+	add("mute-unmute", "Mute/Unmute");
+	add("effects", "Effects");
+	add("instruments", "Instruments");
+	add("generators", "Generators");
+	add("waves", "Waves");
+}
+
+void make_translator_make_cpu(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "cpu"));
+	add("resources", "Windows Resources");
+	add("ram", "Physical Memory(RAM)");
+	add("ram", "Memoria fisica");
+	add("swap", "Page File (Swap)");
+	add("vram", "Virtual Memory");
+}
+
+void make_translator_make_songproperties(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "songproperties"));
+	add("title", "Song Title");
+	add("credits", "Credits");
+	add("speed", "Speed");
+	add("tempo", "Tempo");
+	add("lpb", "Lines Per Beat");
+	add("tpb", "Ticks Per Beat");
+	add("etpb", "Extra Ticks Per Beat");
+	add("realtempo", "Real Tempo");
+	add("realtpb", "Real Ticks Per Beat");
+	add("extcomments", "Extended Comments");
+}
+
+void make_translator_make_settingsview(psy_Property* parent)
 {
 	psy_Property* section;
 	psy_Property* subsection;
 
-	assert(lang);
-
-	psy_property_set_str(lang, "lang", "en");			
-	// common file operations and filebar
-	section = psy_property_append_section(lang, "file");
-	psy_property_set_str(section, "song", "Song");
-	psy_property_set_str(section, "load", "Load");
-	psy_property_set_str(section, "save", "Save");
-	psy_property_set_str(section, "export", "Export");
-	psy_property_set_str(section, "new", "New");
-	psy_property_set_str(section, "render", "Render");
-	psy_property_set_str(section, "loadsong", "Load Song");
-	psy_property_set_str(section, "savesong", "Save Song");
-	psy_property_set_str(section, "plugin-filesave", "Plugin File Load");
-	psy_property_set_str(section, "plugin-fileload", "Plugin File Save");
-	// undobar
-	section = psy_property_append_section(lang, "undo");
-	psy_property_set_str(section, "undo", "Undo");
-	psy_property_set_str(section, "redo", "Redo");
-	// playbar
-	section = psy_property_append_section(lang, "play");
-	psy_property_set_str(section, "loop", "Loop");
-	psy_property_set_str(section, "record-notes", "Record Notes");
-	psy_property_set_str(section, "play", "Play");
-	psy_property_set_str(section, "stop", "Stop");
-	// playlist
-	section = psy_property_append_section(lang, "playlist");
-	psy_property_set_str(section, "play", "Play");
-	psy_property_set_str(section, "stop", "Stop");
-	psy_property_set_str(section, "delete", "Delete");
-	psy_property_set_str(section, "clear", "Clear");
-	psy_property_set_str(section, "recent-songs", "Recent Songs");	 
-	// metronomebar
-	section = psy_property_append_section(lang, "metronome");	
-	psy_property_set_str(section, "configure", "(Configure)");
-	psy_property_set_str(section, "metronome", "Metronome");
-	psy_property_set_str(section, "precount", "Precount");	
-	// mainview
-	section = psy_property_append_section(lang, "main");
-	psy_property_set_str(section, "machines", "Machines");
-	psy_property_set_str(section, "patterns", "Patterns");
-	psy_property_set_str(section, "pattern", "Pattern");
-	psy_property_set_str(section, "samples", "Samples");
-	psy_property_set_str(section, "instrument", "Instrument");
-	psy_property_set_str(section, "instruments", "Instruments");
-	psy_property_set_str(section, "help", "Help");
-	psy_property_set_str(section, "settings", "Settings");
-	psy_property_set_str(section, "properties", "Properties");
-	psy_property_set_str(section, "kbd", "Kbd");
-	psy_property_set_str(section, "terminal", "Terminal");	
-	// Help
-	section = psy_property_append_section(lang, "help");
-	psy_property_set_str(section, "help", "Help");
-	psy_property_set_str(section, "about", "About");
-	psy_property_set_str(section, "greetings", "Greetings");
-	psy_property_set_str(section, "licence", "Licence");	
-	psy_property_set_str(section, "contributors-credits", "Contributors / Credits");
-	psy_property_set_str(section, "ok", "OK");
-	psy_property_set_str(section, "extract", "Extract Help");
-	psy_property_set_str(section, "combine", "Combine Help");
-	// Greetings
-	section = psy_property_append_section(lang, "greetings");
-	psy_property_set_str(section, "thanks", "Thanks! / ");
-	psy_property_set_str(section, "wantstothank",
-		"Psycledelics, the Community, wants to thank the following people "
-		"for their contributions in the developement of Psycle");
-	psy_property_set_str(section, "showargurus",
-		"Show Original Arguru's Greetings");
-	psy_property_set_str(section, "showcurrent",
-		"Show Current Greetings");	
-	// Machinebar
-	section = psy_property_append_section(lang, "machinebar");
-	psy_property_set_str(section, "gear", "Gear Rack");
-	psy_property_set_str(section, "dock", "Param Rack");
-	psy_property_set_str(section, "editor", "Editor");
-	psy_property_set_str(section, "cpu", "CPU");
-	psy_property_set_str(section, "midi", "MIDI");
-	// Trackbar
-	section = psy_property_append_section(lang, "trackbar");
-	psy_property_set_str(section, "tracks", "Tracks");
-	// Octave
-	section = psy_property_append_section(lang, "octavebar");
-	psy_property_set_str(section, "octave", "Octave");
-	// edit operations
-	section = psy_property_append_section(lang, "edit");
-	psy_property_set_str(section, "cut", "Cut");
-	psy_property_set_str(section, "copy", "Copy");
-	psy_property_set_str(section, "crop", "Crop");
-	psy_property_set_str(section, "delete", "Delete");
-	psy_property_set_str(section, "paste", "Paste");
-	psy_property_set_str(section, "mixpaste", "MixPaste");
-	psy_property_set_str(section, "clear", "Clear");
-	psy_property_set_str(section, "duplicate", "Duplicate");
-	psy_property_set_str(section, "clone", "Clone");
-	// Timebar
-	section = psy_property_append_section(lang, "timebar");
-	psy_property_set_str(section, "tempo", "Tempo");
-	// Lines per beat bar
-	section = psy_property_append_section(lang, "lpb");
-	psy_property_set_str(section, "lines-per-beat", "Lines per beat");
-	section = psy_property_append_section(section, "channelmapping");
-	psy_property_set_str(section, "autowire", "Autowire");
-	psy_property_set_str(section, "unselect-all", "Unselect all");
-	psy_property_set_str(section, "remove-connection-with-right-click",
-		"Remove connection with right click");	
-	// Render
-	section = psy_property_append_section(lang, "render");
-	psy_property_set_str(section, "render", "Render");
-	psy_property_set_str(section, "file", "File");
-	psy_property_set_str(section,
-		"sequence-positions", "Sequence positions");
-	psy_property_set_str(section, "quality", "Quality");
-	psy_property_set_str(section, "dither", "Dither");
-	psy_property_set_str(section, "selection", "Selection");
-	psy_property_set_str(section, "record", "Record");
-	psy_property_set_str(section, "enable", "enable");
-	psy_property_set_str(section, "from", "from");
-	psy_property_set_str(section, "to", "to");
-	psy_property_set_str(section, "number", "Number");
-	psy_property_set_str(section, "save-wave", "Save Wave");
-	psy_property_set_str(section, "entire-song", "The Entire Song");
-	psy_property_set_str(section, "samplerate", "Samplerate");
-	psy_property_set_str(section, "bitdepth", "Bit depth");
-	psy_property_set_str(section, "none", "none");
-	psy_property_set_str(section, "pdf", "Prob. Distribution");
-	psy_property_set_str(section, "triangular", "Triangular");
-	psy_property_set_str(section, "rectangular", "Rectangular");
-	psy_property_set_str(section, "gaussian", "gaussian");
-	psy_property_set_str(section, "noise-shaping", "noise-shaping");
-	psy_property_set_str(section, "high-pass-contour", "High - Pass Contour");
-	psy_property_set_str(section, "none", "none");
-	psy_property_set_str(section, "output-path", "Output path");
-	psy_property_set_str(section,
-		"save-each-unmuted", "Save each unmuted");	
-	section = psy_property_append_section(lang, "export");
-	psy_property_set_str(section, "export-module", "Export Module");
-	psy_property_set_str(section, "export-midifile", "Export Midi File");
-	// gear
-	section = psy_property_append_section(lang, "gear");
-	psy_property_set_str(section, "clone", "Clone");
-	psy_property_set_str(section, "delete", "Delete");
-	psy_property_set_str(section, "properties", "Properties");
-	psy_property_set_str(section, "parameters", "Parameters");
-	psy_property_set_str(section, "exchange", "Exchange");
-	psy_property_set_str(section, "show-master", "Show Master");
-	psy_property_set_str(section, "connecttomaster", "Connect To Master");
-	psy_property_set_str(section, "create-replace", "Create/Replace");
-	psy_property_set_str(section, "mute-unmute", "Mute/Unmute");
-	psy_property_set_str(section, "effects", "Effects");
-	psy_property_set_str(section, "instruments", "Instruments");
-	psy_property_set_str(section, "generators", "Generators");
-	psy_property_set_str(section, "waves", "Waves");
-	// cpu
-	section = psy_property_append_section(lang, "cpu");
-	psy_property_set_str(section, "resources", "Windows Resources");
-	psy_property_set_str(section, "ram", "Physical Memory(RAM)");
-	psy_property_set_str(section, "ram", "Memoria fisica");
-	psy_property_set_str(section, "swap", "Page File (Swap)");
-	psy_property_set_str(section, "vram", "Virtual Memory");
-	// song properties
-	section = psy_property_append_section(lang, "songproperties");
-	psy_property_set_str(section, "title", "Song Title");
-	psy_property_set_str(section, "credits", "Credits");
-	psy_property_set_str(section, "speed", "Speed");
-	psy_property_set_str(section, "tempo", "Tempo");
-	psy_property_set_str(section, "lpb", "Lines Per Beat");
-	psy_property_set_str(section, "tpb", "Ticks Per Beat");
-	psy_property_set_str(section, "etpb", "Extra Ticks Per Beat");
-	psy_property_set_str(section, "realtempo", "Real Tempo");
-	psy_property_set_str(section, "realtpb", "Real Ticks Per Beat");
-	psy_property_set_str(section, "extcomments", "Extended Comments");	
+	section = setsection(psy_property_append_section(parent, "settingsview"));
 	// settingsview
-	section = psy_property_append_section(lang, "settingsview");	
-	psy_property_set_str(section, "metronome", "Metronome");
-	psy_property_set_str(section, "machineview", "Machine View");
-	psy_property_set_str(section, "patternview", "Pattern View");
-	psy_property_set_str(section, "keyboard-and-misc", "Keyboard and misc");
-	psy_property_set_str(section, "compatibility", "Compatibility");
-	// settingsview/midicontrollers
-	subsection = psy_property_append_section(section, "midicontrollers");
-	psy_property_set_str(subsection, "controllers", "MIDI Controllers");
-	psy_property_set_str(subsection, "add",
-		"Add Controller Map");
-	psy_property_set_str(subsection, "remove",
-		"Remove");
-	psy_property_set_str(subsection, "mapping",
-		"Midi controllers mapping");
-	psy_property_set_str(subsection, "macselect",
-		"Select Generator/Instrument with");
-	psy_property_set_str(subsection, "auxselect",
-		"Select Instrument/Aux with");
-	psy_property_set_str(subsection, "select-inpsycle",
-		"Currently selected in Psycle");
-	psy_property_set_str(subsection, "select-bybank",
-		"Selected by bank change");
-	psy_property_set_str(subsection, "select-byprogram",
-		"Selected by program change");
-	psy_property_set_str(subsection, "select-bychannel",
-		"Selected by MIDI channel index");
-	psy_property_set_str(subsection, "recordrawmidiasmcm",
-		"Record Raw MIDI as MCM");
-	psy_property_set_str(subsection, "mapping-map-velocity",
-		"Map Velocity");
-	psy_property_set_str(subsection, "mapping-map-pitchwheel",
-		"Map Pitch Wheel");
-	psy_property_set_str(subsection, "mapping-map-controller",
-		"Map Controller");
-	psy_property_set_str(subsection, "mapping-map-active",
-		"active");
-	// settingsview	
-	psy_property_set_str(section, "language", "Language");
-	psy_property_set_str(section, "event-input", "Event Input");
-	psy_property_set_str(section, "audio-drivers", "Audio Drivers");
-	psy_property_set_str(section, "configure", "Configure");
-	psy_property_set_str(section, "jme-version-unknown",
-		"Load new gamefx and blitz if version is unknown");	
-	psy_property_set_str(section, "showminiview", "Show Miniview");
-	// settingsview/config
-	subsection = psy_property_append_section(section, "config");
-	psy_property_set_str(subsection, "language", "Language");
-	psy_property_set_str(subsection, "de", "german");
-	psy_property_set_str(subsection, "en", "english");
-	psy_property_set_str(subsection, "es", "spanish");
+	add("event-input", "Event Input");
+	add("audio-drivers", "Audio Drivers");
+	add("configure", "Configure");	
+	add("compatibility", "Compatibility");
+	add("choose-font", "Choose Font");	
+	add("none", "None");
+	add("from", "from");
+	add("to", "to");
+	// settingsview global
+	setsection(psy_property_append_section(section, "global"));
+	add("configuration", "Configuration");
+	add("enable-audio", "Enable Audio");
+	add("regenerate-plugincache", "Regenerate the plugin cache");		
+	add("language", "Language");
+	add("de", "german");
+	add("en", "english");
+	add("es", "spanish");
+	// settingsview/midicontrollers	
+	setsection(psy_property_append_section(section, "midicontrollers"));
+	add("controllers", "MIDI Controllers");
+	add("add", "Add Controller Map");
+	add("remove", "Remove");
+	add("mapping", "Midi controllers mapping");
+	add("macselect", "Select Generator/Instrument with");
+	add("auxselect", "Select Instrument/Aux with");
+	add("select-inpsycle", "Currently selected in Psycle");
+	add("select-bybank", "Selected by bank change");
+	add("select-byprogram", "Selected by program change");
+	add("select-bychannel", "Selected by MIDI channel index");
+	add("recordrawmidiasmcm", "Record Raw MIDI as MCM");
+	add("mapping-map-velocity", "Map Velocity");
+	add("mapping-map-pitchwheel", "Map Pitch Wheel");
+	add("mapping-map-controller", "Map Controller");
+	add("mapping-map-active", "active");	
+	
 	// settingsview/metronome
-	subsection = psy_property_append_section(section, "metronome");
-	psy_property_set_str(subsection, "show", "Show Metronome Bar");	
-	psy_property_set_str(subsection, "machine", "Machine");
-	psy_property_set_str(subsection, "note", "Note");
+	setsection(psy_property_append_section(section, "metronome"));
+	add("metronome", "Metronome");
+	add("show", "Show Metronome Bar");
+	add("machine", "Machine");
+	add("note", "Note");
 	// settingsview/directories
-	subsection = psy_property_append_section(section, "dirs");
-	psy_property_set_str(subsection,
-		"dirs", "Directories");
-	psy_property_set_str(subsection, "song",
-		"Song directory");
-	psy_property_set_str(subsection, "samples",
-		"Samples directory");
-	psy_property_set_str(subsection, "plugin32",
-		"Plug-in32 directory");
-	psy_property_set_str(subsection, "plugin64",
-		"Plug-in64 directory");
-	psy_property_set_str(subsection, "lua",
-		"Lua-scripts directory");
-	psy_property_set_str(subsection, "vst32",
-		"Vst32 directories");
-	psy_property_set_str(subsection, "vst64",
-		"Vst64 directories");
-	psy_property_set_str(subsection, "ladspa",
-		"Ladspa directories");
-	psy_property_set_str(subsection, "skin", "Skin directory");
+	setsection(psy_property_append_section(section, "dirs"));
+	add("dirs", "Directories");
+	add("song", "Song directory");
+	add("samples", "Samples directory");
+	add("plugin32", "Plug-in32 directory");
+	add("plugin64", "Plug-in64 directory");
+	add("lua", "Lua-scripts directory");
+	add("vst32", "Vst32 directories");
+	add("vst64", "Vst64 directories");
+	add("ladspa", "Ladspa directories");
+	add("skin", "Skin directory");
 	// settingsview/theme
-	psy_property_set_str(section, "theme", "Theme");	
-	psy_property_set_str(section, "background", "Background");
-	psy_property_set_str(section, "font", "Font");
-	psy_property_set_str(section, "name", "Name");	
+	setsection(section);
+	add("theme", "Theme");
+	add("background", "Background");
+	add("font", "Font");
+	add("name", "Name");
 	// settingsview/general
-	subsection = psy_property_append_section(section, "general");
-	psy_property_set_str(subsection, "general", "General");
-	psy_property_set_str(subsection, "version", "Version");	
-	psy_property_set_str(subsection,
-		"show-about-at-startup", "Show About At Startup");
-	psy_property_set_str(subsection,
-		"show-song-info-on-load", "Show Song Info On Load");
-	psy_property_set_str(subsection,
-		"show-maximized-at-startup", "Show maximized at startup");
-	psy_property_set_str(subsection,
-		"show-playlist", "Show Playlist/Recentsongs");
-	psy_property_set_str(subsection,
-		"show-sequenceedit", "Show Sequenceeditor");
-	psy_property_set_str(subsection,
-		"show-sequencestepbar", "Show Sequencestepbar");
-	psy_property_set_str(subsection,
-		"save-recent-songs", "Save recent songs");
-	psy_property_set_str(subsection,
-		"play-song-after-load", "Play Song After Load");
-	psy_property_set_str(subsection,
-		"move-cursor-when-paste", "Move Cursor When Paste");
-	psy_property_set_str(subsection,
-		"show-as-window", "Show as Window");	
-	psy_property_set_str(subsection,
-		"show-pattern-names", "Show Pattern Names");
+	setsection(psy_property_append_section(section, "general"));
+	add("general", "General");
+	add("version", "Version");
+	add("show-about-at-startup", "Show About At Startup");
+	add("show-song-info-on-load", "Show Song Info On Load");
+	add("show-maximized-at-startup", "Show maximized at startup");
+	add("show-playlist", "Show Playlist/Recentsongs");
+	add("show-sequenceedit", "Show Sequenceeditor");
+	add("show-sequencestepbar", "Show Sequencestepbar");
+	add("save-recent-songs", "Save recent songs");
+	add("play-song-after-load", "Play Song After Load");	
+	add("show-pattern-names", "Show Pattern Names");
 	// settingsview/visual
-	subsection = psy_property_append_section(section, "visual");
-	psy_property_set_str(subsection, "visual", "Visual");
-	psy_property_set_str(subsection, "load-skin", "Load skin");
-	psy_property_set_str(subsection, "default-skin", "Default skin");
-	psy_property_set_str(subsection, "default-font", "Default Font");
-	psy_property_set_str(subsection, "default-line", "Default Line");
-	psy_property_set_str(subsection, "load-dial-bitmap", "Load dial bitmap");
-	psy_property_set_str(subsection, "apptheme", "App Theme");
-	psy_property_set_str(subsection, "light", "light");
-	psy_property_set_str(subsection, "dark", "dark");
+	setsection(psy_property_append_section(section, "visual"));
+	add("visual", "Visual");
+	add("load-skin", "Load skin");
+	add("default-skin", "Default skin");
+	add("default-font", "Default Font");
+	add("default-line", "Default Line");
+	add("load-dial-bitmap", "Load dial bitmap");
+	add("apptheme", "App Theme");
+	add("light", "light");
+	add("dark", "dark");
 	// settingsview/patternview
-	psy_property_set_str(section, "choose-font", "Choose Font");
-	psy_property_set_str(section, "draw-empty-data", "Draw empty data");
-	psy_property_set_str(section, "smoothscroll", "Scroll smooth");
-	psy_property_set_str(section, "default-entries", "Default entries");
-	psy_property_set_str(section, "displaysinglepattern", "Display Single Pattern");
-	psy_property_set_str(section, "useheaderbitmap", "Use Pattern Header Bitmap");
-	psy_property_set_str(section, "line-numbers", "Line numbers");
-	psy_property_set_str(section, "beat-offset", "Beat offset");
-	psy_property_set_str(section,
-		"line-numbers-cursor", "Line numbers cursor");
-	psy_property_set_str(section,
-		"line-numbers-in-hex", "Line numbers in HEX");
-	psy_property_set_str(section,
-		"wide-instrument-column",
-		"Wide instrument column");
-	psy_property_set_str(section,
-		"pattern-track-scopes", "Pattern track scopes");
-	psy_property_set_str(section, "wrap-around", "Wrap Around");
-	psy_property_set_str(section,
-		"center-cursor-on-screen", "Center cursor on screen");
-	psy_property_set_str(section,
-		"bar-highlighting", "Bar highlighting: (beats/bar)");
-	psy_property_set_str(section,
-		"a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
-	psy_property_set_str(section, "patterndisplay", "Display pattern in");
-	psy_property_set_str(section, "tracker", "Tracker");
-	psy_property_set_str(section, "piano", "Pianoroll"),
-	psy_property_set_str(section, "splitvertical", "both side by side"),
-	psy_property_set_str(section, "splithorizontal", "both one below the other"),
-	// settingsview/machineview
-	psy_property_set_str(section,
-		"draw-machine-indexes", "Draw Machine Indexes");
-	psy_property_set_str(section, "draw-vumeters", "Draw VU Meters");
-	psy_property_set_str(section, "draw-wirehover", "Draw Wire Hover");
-	psy_property_set_str(section, "draw-virtualgenerators", "Draw Virtual Generators");
-	psy_property_set_str(section, "stackview", "Stackview");
-	// settingsview/machineview/stackview
-	psy_property_set_str(section, "stackview-draw-smalleffects", "Draw Small Effects");
+	subsection = setsection(psy_property_append_section(section, "pv"));
+	add("patternview", "Pattern View");
+	add("font", "Font");
+	add("choose-font", "Choose Font");
+	add("draw-empty-data", "Draw empty data");
+	add("smoothscroll", "Scroll smooth");
+	add("default-entries", "Default entries");
+	add("displaysinglepattern", "Display Single Pattern");
+	add("useheaderbitmap", "Use Pattern Header Bitmap");
+	add("line-numbers", "Line numbers");
+	add("beat-offset", "Beat offset");
+	add("line-numbers-cursor", "Line numbers cursor");
+	add("line-numbers-in-hex", "Line numbers in HEX");
+	add("wide-instrument-column", "Wide instrument column");
+	add("pattern-track-scopes", "Pattern track scopes");
+	add("wrap-around", "Wrap Around");
+	add("center-cursor-on-screen", "Center cursor on screen");
+	add("bar-highlighting", "Bar highlighting: (beats/bar)");
+	add("a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
+	add("patterndisplay", "Display pattern in");
+	add("tracker", "Tracker");
+	add("piano", "Pianoroll");
+	add("splitvertical", "both side by side");
+	add("splithorizontal", "both one below the other");
+	add("move-cursor-when-paste", "Move Cursor When Paste");	
+	setsection(psy_property_append_section(subsection, "theme"));
+	// settingsview/patternview/theme
+	add("theme", "Theme");
+	add("fontface", "Pattern Fontface");
+	add("fontpoint", "Pattern Fontpoint");
+	add("fontflags", "Pattern Fontflags");
+	add("font_x", "Point X");
+	add("font_y", "Point Y");
+	add("headerskin", "Pattern Header Skin");
+	add("separator", "Separator Left");
+	add("separator2", "Separator Right");
+	add("background", "BackGnd Left");
+	add("background2", "BackGnd Right");	
+	add("font", "Font Left");
+	add("font2", "Font Right");
+	add("fontcur", "Font Cur Left");
+	add("fontcur2", "Font Cur Right");
+	add("fontsel", "Font Sel Left");
+	add("fontsel2", "Font Sel Right");
+	add("fontplay", "Font Play Left");
+	add("fontplay2", "Font Play Right");
+	add("row", "Row Left");
+	add("row2", "Row Right");
+	add("rowbeat", "Beat Left");
+	add("rowbeat2", "Beat Right");
+	add("row4beat", "Bar Left");
+	add("row4beat2", "Bar Right");
+	add("selection", "Selection Left");
+	add("selection2", "Selection Right");
+	add("playbar", "Playbar Left");
+	add("playbar2", "Playbar Right");
+	add("cursor", "Cursor Left");
+	add("cursor2", "Cursor Right");
+	add("midline", "Midline Left");
+	add("midline2", "Midline Right");
+	// settingsview/machineview		
+	subsection = setsection(psy_property_append_section(section, "mv"));
+	add("machineview", "Machine View");
+	add("draw-machine-indexes", "Draw Machine Indexes");
+	add("draw-vumeters", "Draw VU Meters");
+	add("draw-wirehover", "Draw Wire Hover");
+	add("draw-virtualgenerators", "Draw Virtual Generators");
+	add("stackview", "Stackview");
+	add("stackview-draw-smalleffects", "Draw Small Effects");
+	// settingsview/machineview/stackview	
+	setsection(psy_property_append_section(subsection, "theme"));
 	// settingsview/machineview/theme
-	psy_property_set_str(section, "vu-background", "Vu BackGround");
-	psy_property_set_str(section, "vu-bar", "Vu Bar");
-	psy_property_set_str(section, "onclip", "OnClip");
-	psy_property_set_str(section,
-		"generators-font-face", "Generators Font Face");
-	psy_property_set_str(section,
-		"generators-font-point", "Generators Font Point");
-	psy_property_set_str(section,
-		"effect-fontface", "effect_fontface");
-	psy_property_set_str(section,
-		"effect-font-flags", "effect_font_flags");
-	psy_property_set_str(section, "background", "Background");
-	psy_property_set_str(section, "wirecolour", "Wires");
-	psy_property_set_str(section, "wirecolour2", "wirecolour2");
-	psy_property_set_str(section, "polygons", "Polygons");
-	psy_property_set_str(section, "generators-font", "Generators Font");
-	psy_property_set_str(section, "effects-font", "Effects Font");
-	psy_property_set_str(section, "wire-width", "Wire width");
-	psy_property_set_str(section, "antialias-halo", "AntiAlias halo");
-	psy_property_set_str(section,
-		"machine-background", "Machine Background");
-	psy_property_set_str(section, "polygon-size", "Polygon size");
+	add("theme", "Theme");
+	add("vu-background", "Vu BackGround");
+	add("vu-bar", "Vu Bar");
+	add("onclip", "OnClip");
+	add("generators-font-face", "Generators Font Face");
+	add("generators-font-point", "Generators Font Point");
+	add("effect-fontface", "Effect Fontface");
+	add("effect-font-point", "Effect Font Point");
+	add("effect-font-flags", "Effect Font Flags");	
+	add("background", "Background");
+	add("wirecolour", "Wires Left");
+	add("wirecolour2", "Wires Right");
+	add("polygons", "Polygons");
+	add("generators-font", "Generators Font");
+	add("effects-font", "Effects Font");
+	add("wire-width", "Wire width");
+	add("antialias-halo", "AntiAlias halo");
+	add("machine-background", "Machine Background");
+	add("polygon-size", "Polygon size");
+	add("machineskin", "Machineskin");
 	// settingsview/paramview
-	psy_property_set_str(section,
-		"native-machine-parameter-window",
+	subsection = setsection(psy_property_append_section(section, "paramview"));
+	add("native-machine-parameter-window",
 		"Native Machine Parameter Window");
-	psy_property_set_str(section, "load-dial-bitmap", "Load Dial Bitmap");
+	add("font", "Font");
+	add("load-dial-bitmap", "Load Dial Bitmap");
+	add("default-skin", "Default skin");
 	// settingsview/paramview-theme
-	psy_property_set_str(section, "title-background", "Title Background");
-	psy_property_set_str(section, "title-font", "Title Font");
-	psy_property_set_str(section, "param-background", "Param Background");
-	psy_property_set_str(section, "param-font", "Param Font");
-	psy_property_set_str(section, "value-background", "Value Background");
-	psy_property_set_str(section, "value-font", "Value Font");
-	psy_property_set_str(section,
-		"selparam-background", "SelParam Background");
-	psy_property_set_str(section, "selparam-font", "SelParam Font");
-	psy_property_set_str(section,
-		"selvalue-background", "SelValue Background");
-	psy_property_set_str(section, "selvalue-font", "SelValue Font");
+	setsection(psy_property_append_section(subsection, "theme"));
+	add("theme", "Theme");
+	add("title-background", "Title Background");
+	add("title-font", "Title Font");
+	add("param-background", "Param Background");
+	add("param-font", "Param Font");
+	add("value-background", "Value Background");
+	add("value-font", "Value Font");
+	add("selparam-background", "SelParam Background");
+	add("selparam-font", "SelParam Font");
+	add("selvalue-background", "SelValue Background");
+	add("selvalue-font", "SelValue Font");
+	add("machinedialbmp", "Machine Dial Bitmap");
 	// settingsview/keyboard/misc	
-	psy_property_set_str(section,
-		"record-tws",
+	setsection(psy_property_append_section(section, "kbd"));
+	add("kbd-misc", "Keyboard and misc");
+	add("record-tws",
 		"Record Mouse Tweaks as tws (Smooth tweaks)");
-	psy_property_set_str(section,
-		"advance-line-on-record", "Advance Line On Record");
-	// settingsview 
-	section = psy_property_append_section(section, "global");
-	psy_property_set_str(section,
-		"configuration", "Configuration");
-	psy_property_set_str(section,
-		"enable-audio", "Enable Audio");
-	psy_property_set_str(section,
-		"regenerate-plugincache", "Regenerate the plugin cache");
-	// instrumentsbox
-	section = psy_property_append_section(lang, "instrumentsbox");
-	psy_property_set_str(section,
-		"instrument-groups", "Instrument Groups");
-	psy_property_set_str(section, "group-instruments", "Group Instruments");
-	// instrumentview
-	section = psy_property_append_section(lang, "instrumentview");
-	psy_property_set_str(section,
-		"instrument", "Instrument");
-	psy_property_set_str(section,
-		"instrument-name", "Instrument Name");
-	psy_property_set_str(section, "new-note-action", "New Note Action");
-	psy_property_set_str(section, "same", "but if the same");
-	psy_property_set_str(section, "do", "do");
-	psy_property_set_str(section, "note-cut", "Note Cut");
-	psy_property_set_str(section, "note-release", "Note Release");
-	psy_property_set_str(section, "note-fadeout", "Note Fadeout");
-	psy_property_set_str(section, "none", "None");
-	psy_property_set_str(section,
-		"notemap", "Notemap");
-	psy_property_set_str(section,
-		"play-sample-to-fit", "Play sample to fit");
-	psy_property_set_str(section, "pattern-rows", "Pattern rows");
-	psy_property_set_str(section, "global-volume", "Global volume");
-	psy_property_set_str(section,
-		"amplitude-envelope", "Amplitude envelope");
-	psy_property_set_str(section,
-		"pan-envelope", "Pan envelope");
-	psy_property_set_str(section,
-		"pitch-envelope", "Pitch envelope");
-	psy_property_set_str(section, "swing", "Swing (Randomize)");
-	psy_property_set_str(section, "fadeout", "Fadeout");
-	psy_property_set_str(section, "attack", "Attack");
-	psy_property_set_str(section, "decay", "Decay");
-	psy_property_set_str(section, "sustain-level", "Sustain level");
-	psy_property_set_str(section, "release", "Release");
-	psy_property_set_str(section, "filter-type", "Filter type");
-	psy_property_set_str(section, "filter-envelope", "Filter envelope");
-	psy_property_set_str(section, "cut-off", "Cut-off");
-	psy_property_set_str(section, "res", "Res/bandw.");
-	psy_property_set_str(section, "mod", "Mod. Amount");
-	psy_property_set_str(section, "random-panning", "Random panning");
-	psy_property_set_str(section, "general", "General");
-	psy_property_set_str(section, "volume", "Volume");
-	psy_property_set_str(section, "pan", "Pan");
-	psy_property_set_str(section, "filter", "Filter");
-	psy_property_set_str(section, "pitch", "Pitch");
-	psy_property_set_str(section, "add", "Add");
-	psy_property_set_str(section, "remove", "Remove");
-	psy_property_set_str(section, "smplidx", "Smpl Idx");
-	psy_property_set_str(section, "key", "Key");
-	psy_property_set_str(section, "keylo", "Key Lo");
-	psy_property_set_str(section, "keyhi", "Key Hi");
-	psy_property_set_str(section, "keyfixed", "Key Fixed");
-	// machineview
-	section = psy_property_append_section(lang, "machineview");	
-	psy_property_set_str(section, "new-machine", "New Machine");
-	psy_property_set_str(section, "wires", "Wires");
-	psy_property_set_str(section, "stack", "Stack");
-	psy_property_set_str(section,
-		"no-machines-loaded", "No Machines Loaded");
-	psy_property_set_str(section, "no-machine", "No Machine");
-	psy_property_set_str(section,
-		"connect-to-mixer-send-return-input",
-		"Connect to Mixer-send/return-input");
-	psy_property_set_str(section, "delete", "Delete");
-	psy_property_set_str(section, "editname", "Editname");
-	psy_property_set_str(section, "mute", "Mute");
-	psy_property_set_str(section, "pwr", "Pwr");
-	section = psy_property_append_section(lang, "stackview");
-	psy_property_set_str(section, "inputs", "Inputs");
-	psy_property_set_str(section, "effects", "Effects");
-	psy_property_set_str(section, "outputs", "Outputs");
-	psy_property_set_str(section, "volumes", "Volumes");
-	// machineframe
-	section = psy_property_append_section(lang, "machineframe");
-	psy_property_set_str(section, "about", "About");
-	psy_property_set_str(section, "pwr", "Pwr");	
-	psy_property_set_str(section, "parameters", "Parameters");
-	psy_property_set_str(section, "parammap", "Parammap");
-	psy_property_set_str(section, "command", "Command");
-	psy_property_set_str(section, "help", "Help");
-	psy_property_set_str(section, "bus", "Bus");
-	psy_property_set_str(section, "bank", "Bank");
-	psy_property_set_str(section, "program", "Program");
-	psy_property_set_str(section, "import", "Import");
-	psy_property_set_str(section, "export", "Export");
-	psy_property_set_str(section, "saveas", "Save as");
-	// PatternView
-	section = psy_property_append_section(lang, "patternview");
-	psy_property_set_str(section, "line", "Line");
-	psy_property_set_str(section, "defaults", "Defaults");
-	psy_property_set_str(section, "step", "Step");
-	psy_property_set_str(section, "patname", "Pattern Name");
-	psy_property_set_str(section, "nopattern", "No Pattern");
-	psy_property_set_str(section, "length", "Length");
-	psy_property_set_str(section, "apply", "Apply");
-	psy_property_set_str(section, "tracker", "Tracker");
-	psy_property_set_str(section, "roll", "Pianoroll");
-	psy_property_set_str(section, "horz", "Horizontal");
-	psy_property_set_str(section, "vert", "Vertical");
-	psy_property_set_str(section, "split", "Split");
-	psy_property_set_str(section, "properties", "Properties");	
-	// SequenceView
-	section = psy_property_append_section(lang, "sequencerview");
-	psy_property_set_str(section, "follow-song", "Follow Song");
-	psy_property_set_str(section, "show-playlist", "Show Playlist");
-	psy_property_set_str(section,
-		"show-pattern-names", "Show Pattern Names");
-	psy_property_set_str(section, "record-noteoff", "Record note-off");
-	psy_property_set_str(section, "record-tweak", "Record tweak");
-	psy_property_set_str(section, "allow-notes-to_effect", "Allow notes to effect");
-	psy_property_set_str(section,
-		"multichannel-audition", "Multitrack playback on keypress");
-	psy_property_set_str(section, "duration", "Duration");
-	psy_property_set_str(section, "ins", "Ins");
-	psy_property_set_str(section, "new", "New");
-	psy_property_set_str(section, "clone", "Clone");
-	psy_property_set_str(section, "del", "Delete");
-	psy_property_set_str(section, "new-trk", "+ New Track");
-	psy_property_set_str(section, "del-trk", "Del Track");
-	psy_property_set_str(section, "clear", "Clear");
-	psy_property_set_str(section, "rename", "Rename");
-	psy_property_set_str(section, "copy", "Copy");
-	psy_property_set_str(section, "paste", "Paste");
-	psy_property_set_str(section, "singlesel", "SingleSel");
-	psy_property_set_str(section, "multisel", "MultiSel");
-	psy_property_set_str(section, "showseqeditor", "Show SequenceEditor");
-	psy_property_set_str(section, "hideseqeditor", "Hide SequenceEditor");
-	psy_property_set_str(section, "showstepsequencer", "Show Stepsequencer");
-	psy_property_set_str(section, "hidestepsequencer", "Hide Stepsequencer");
-	// SeqEdit
-	section = psy_property_append_section(lang, "seqedit");
-	psy_property_set_str(section, "move", "Move");
-	psy_property_set_str(section, "reorder", "Reorder");
-    // NewMachine	
-	section = psy_property_append_section(lang, "newmachine");
-	psy_property_set_str(section, "all", "All");
-	psy_property_set_str(section, "favorites", "Favorites");
-	psy_property_set_str(section,
-		"jme-version-unknown",
-		"Load new gamefx and blitz if version is unknown");
-	psy_property_set_str(section,
-		"song-loading-compatibility", "Song loading compatibility");
-	psy_property_set_str(section, "rescan", "Rescan");
-	psy_property_set_str(section,"in", "in");
-	psy_property_set_str(section,
-		"plugin-directories", "Plugin directories");	
-	psy_property_set_str(section, "filter", "Filter by");
-	psy_property_set_str(section, "sort", "Sort by");
-	psy_property_set_str(section, "favorite", "Favorite");
-	psy_property_set_str(section, "name", "Name");
-	psy_property_set_str(section, "type", "Type");
-	psy_property_set_str(section, "mode", "Mode");
-	psy_property_set_str(section, "sections", "Sections");
-	psy_property_set_str(section, "section", "Section");
-	psy_property_set_str(section, "create", "Create");
-	psy_property_set_str(section, "remove", "Remove");
-	psy_property_set_str(section, "clear", "Clear");
-	psy_property_set_str(section, "add-to", "Add To");
-	psy_property_set_str(section, "remove-from", "Remove From");
-	psy_property_set_str(section,
-		"select-plugin-to-view-description",
-		"Select a plugin to view its description");
-	psy_property_set_str(section,
-		"select-first-section", "Select/Create first a section");
-	psy_property_set_str(section,
-		"select-first-plugin", "Select first a plugin");
-	// samplesview
-	section = psy_property_append_section(lang, "samplesview");
-	psy_property_set_str(section, "samplename", "Samplename");
-	psy_property_set_str(section, "samplerate", "Samplerate");
-	psy_property_set_str(section, "samples", "Samples");
-	psy_property_set_str(section, "groupsamples", "Group Samples");
-	psy_property_set_str(section,
-		"groupsfirstsample", "Groups first sample");
-	psy_property_set_str(section, "default-volume", "Default volume");
-	psy_property_set_str(section, "global-volume", "Global volume");
-	psy_property_set_str(section, "pan-position", "Pan Position");
-	psy_property_set_str(section, "sampled-note", "Sampled note");
-	psy_property_set_str(section, "pitch-finetune", "Pitch finetune");
-	psy_property_set_str(section, "process", "Process");
-	psy_property_set_str(section, "no-wave-loaded", "No wave loaded");	
-	section = psy_property_append_section(lang, "cmds");
-	psy_property_set_str(section, "keymap", "Keymap");	
-	// General
-	psy_property_set_str(section, "help", "Help");
-	psy_property_set_str(section, "helpshortcut", "Kbd Help");
-	psy_property_set_str(section, "editmachine", "Machines" );
-	psy_property_set_str(section, "editpattern", "Patterns");
-	psy_property_set_str(section, "addmachine", "Add Machine");
-	psy_property_set_str(section, "playsong", "Play Song");
-	psy_property_set_str(section, "playstart", "Play Start");
-	psy_property_set_str(section, "playfrompos", "Play Pos");
-	psy_property_set_str(section, "playstop", "stop");
-	psy_property_set_str(section, "songposdec", "Seqpos dec");
-	psy_property_set_str(section, "songposinc", "Seqpos Inc");
-	psy_property_set_str(section, "maxpattern", "Max Pattern");
-	psy_property_set_str(section, "infomachine", "gear");
-	psy_property_set_str(section, "editinstr", "Instruments");
-	psy_property_set_str(section, "editsample", "Samples");
-	psy_property_set_str(section, "editwave", "Wave Edit");
-	psy_property_set_str(section, "terminal", "Terminal");
-	psy_property_set_str(section, "instrdec", "Current Instrument -1");
-	psy_property_set_str(section, "instrinc", "Current Instrument +1");
-	// Tracker
-	psy_property_set_str(section, "navup", "Nav Up");
-	psy_property_set_str(section, "navdown", "Nav Down");
-	psy_property_set_str(section, "navleft", "Nav Left");
-	psy_property_set_str(section, "navright", "Nav Right");
-	psy_property_set_str(section, "navpageup", "Nav Up 16");
-	psy_property_set_str(section, "navpagedown", "Nav Down 16");
-	psy_property_set_str(section, "navtop", "Nav Top");
-	psy_property_set_str(section, "navbottom", "Nav Bottom");
-	psy_property_set_str(section, "columnprev", "Prev column");
-	psy_property_set_str(section, "columnnext", "Next column");
-
-	psy_property_set_str(section, "rowinsert", "Insert row");
-	psy_property_set_str(section, "rowdelete", "Delete row");
-	psy_property_set_str(section, "rowclear", "Clear row");
-
-	psy_property_set_str(section, "blockstart", "Block Start");
-	psy_property_set_str(section, "blockend", "Block End");
-	psy_property_set_str(section, "blockunmark", "Block Unmark");
-	psy_property_set_str(section, "blockcut", "Block cut");
-	psy_property_set_str(section, "blockcopy", "Block copy");
-	psy_property_set_str(section, "blockpaste", "Block paste");
-	psy_property_set_str(section, "blockmix", "Block Mix");
-
-	psy_property_set_str(section, "transposeblockinc", "Transpose Block +1");
-	psy_property_set_str(section, "transposeblockdec", "Transpose Block -1");
-	psy_property_set_str(section, "transposeblockinc12", "Transpose Block +12");
-	psy_property_set_str(section, "transposeblockdec12", "Transpose Block -12");
-
-	psy_property_set_str(section, "selectall", "Block Select All");
-	psy_property_set_str(section, "selectcol", "Block Select Column");
-	psy_property_set_str(section, "selectbar", "Block Select Bar");
-
-	psy_property_set_str(section, "selectmachine",
-		"Select Mac/Ins in Cursor Pos");
-	psy_property_set_str(section, "undo", "Edit Undo");
-	psy_property_set_str(section, "redo", "Edit Redo");
-	psy_property_set_str(section, "followsong", "Follow Song");	
-	// Messages
-	section = psy_property_append_section(lang, "msg");
-	psy_property_set_str(section, "psyreq", "Psycle Request");
-	psy_property_set_str(section, "seqclear", "Sequence Clear Request! Do you really want clear the sequenceand pattern data?");
-	psy_property_set_str(section, "yes", "Yes");
-	psy_property_set_str(section, "no", "No");	
-	psy_property_set_str(section, "cont", "Continue");
-	psy_property_set_str(section, "psyexit", "Exit Psycle Request, but your Song is not saved!");
-	psy_property_set_str(section, "saveexit", "Save and Exit");
-	psy_property_set_str(section, "nosaveexit", "Exit (no save)");
-	psy_property_set_str(section, "newsong", "New Song Request, but your Song is not saved!");
-	psy_property_set_str(section, "savenew", "Save and Create New Song");
-	psy_property_set_str(section, "nosavenew", "Create New Song (no save)");
-	psy_property_set_str(section, "loadsong", "New Load Request, but your Song is not saved!");
-	psy_property_set_str(section, "saveload", "Save and Load Song");
-	psy_property_set_str(section, "nosaveload", "Load Song (no save)");
+	add("advance-line-on-record", "Advance Line On Record");
+	add("ctrl-play", "Right CTRL = play; Edit Toggle = stop");
+	add("ft2-home", "FT2 Style Home / End Behaviour");
+	add("ft2-delete", "FT2 Style Delete Behaviour");
+	add("cursoralwayssdown", "Cursor always moves down in Effect Column");
+	add("force-patstep1", "Force pattern step 1 when moving with cursors");
+	add("pgupdowntype", "Page Up / Page Down step by");
+	add("pgupdowntype", "Page Up / Page Down step by");
+	add("pgupdowntype-one-beat", "one beat");
+	add("pgupdowntype-one-bar", "one bar");
+	add("pgupdowntype-lines", "lines");
+	add("pgupdowntype-step-lines", "Page Up / Page Down step lines");
+	add("misc", "Miscellaneous options");
+	add("savereminder", "\"Save file?\" reminders on Load, New or Exit");
+	add("numdefaultlines", "Default lines on new pattern");
+	add("allowmultiinstances", "Allow multiple instances of Psycle");
 }
+
+void make_translator_make_instrumentsbox(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "instrumentsbox"));
+	add("instrument-groups", "Instrument Groups");
+	add("group-instruments", "Group Instruments");
+}
+
+void make_translator_make_instrumentview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "instrumentview"));
+	add("instrument", "Instrument");
+	add("instrument-name", "Instrument Name");
+	add("new-note-action", "New Note Action");
+	add("same", "but if the same");
+	add("do", "do");
+	add("note-cut", "Note Cut");
+	add("note-release", "Note Release");
+	add("note-fadeout", "Note Fadeout");
+	add("none", "None");
+	add("notemap", "Notemap");
+	add("play-sample-to-fit", "Play sample to fit");
+	add("pattern-rows", "Pattern rows");
+	add("global-volume", "Global volume");
+	add("amplitude-envelope", "Amplitude envelope");
+	add("pan-envelope", "Pan envelope");
+	add("pitch-envelope", "Pitch envelope");
+	add("swing", "Swing (Randomize)");
+	add("fadeout", "Fadeout");
+	add("attack", "Attack");
+	add("decay", "Decay");
+	add("sustain-level", "Sustain level");
+	add("release", "Release");
+	add("filter-type", "Filter type");
+	add("filter-envelope", "Filter envelope");
+	add("cut-off", "Cut-off");
+	add("res", "Res/bandw.");
+	add("mod", "Mod. Amount");
+	add("random-panning", "Random panning");
+	add("general", "General");
+	add("volume", "Volume");
+	add("pan", "Pan");
+	add("filter", "Filter");
+	add("pitch", "Pitch");
+	add("add", "Add");
+	add("remove", "Remove");
+	add("smplidx", "Smpl Idx");
+	add("key", "Key");
+	add("keylo", "Key Lo");
+	add("keyhi", "Key Hi");
+	add("keyfixed", "Key Fixed");
+}
+
+void make_translator_make_machineview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "machineview"));
+	add("new-machine", "New Machine");
+	add("wires", "Wires");
+	add("stack", "Stack");
+	add("no-machines-loaded", "No Machines Loaded");
+	add("no-machine", "No Machine");
+	add("connect-to-mixer-send-return-input",
+		"Connect to Mixer-send/return-input");
+	add("delete", "Delete");
+	add("editname", "Editname");
+	add("mute", "Mute");
+	add("pwr", "Pwr");
+	setsection(psy_property_append_section(parent, "stackview"));
+	add("inputs", "Inputs");
+	add("effects", "Effects");
+	add("outputs", "Outputs");
+	add("volumes", "Volumes");
+}
+
+void make_translator_make_machineframe(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "machineframe"));
+	add("about", "About");
+	add("pwr", "Pwr");
+	add("parameters", "Parameters");
+	add("parammap", "Parammap");
+	add("command", "Command");
+	add("help", "Help");
+	add("bus", "Bus");
+	add("bank", "Bank");
+	add("program", "Program");
+	add("import", "Import");
+	add("export", "Export");
+	add("saveas", "Save as");
+}
+
+void make_translator_make_patternview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "patternview"));
+	add("line", "Line");
+	add("defaults", "Defaults");
+	add("step", "Step");
+	add("patname", "Pattern Name");
+	add("nopattern", "No Pattern");
+	add("length", "Length");
+	add("apply", "Apply");
+	add("tracker", "Tracker");
+	add("roll", "Pianoroll");
+	add("horz", "Horizontal");
+	add("vert", "Vertical");
+	add("split", "Split");
+	add("properties", "Properties");
+}
+
+void make_translator_make_sequenceview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "sequencerview"));
+	add("follow-song", "Follow Song");
+	add("show-playlist", "Show Playlist");
+	add("show-pattern-names", "Show Pattern Names");
+	add("record-noteoff", "Record note-off");
+	add("record-tweak", "Record tweak");
+	add("allow-notes-to_effect", "Allow notes to effect");
+	add("multichannel-audition", "Multitrack playback on keypress");
+	add("duration", "Duration");
+	add("ins", "Ins");
+	add("new", "New");
+	add("clone", "Clone");
+	add("del", "Delete");
+	add("new-trk", "+ New Track");
+	add("del-trk", "Del Track");
+	add("clear", "Clear");
+	add("rename", "Rename");
+	add("copy", "Copy");
+	add("paste", "Paste");
+	add("singlesel", "SingleSel");
+	add("multisel", "MultiSel");
+	add("showseqeditor", "Show SequenceEditor");
+	add("hideseqeditor", "Hide SequenceEditor");
+	add("showstepsequencer", "Show Stepsequencer");
+	add("hidestepsequencer", "Hide Stepsequencer");
+}
+
+void make_translator_make_seqedit(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "seqedit"));
+	add("move", "Move");
+	add("reorder", "Reorder");
+}
+
+void make_translator_make_newmachine(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "newmachine"));
+	add("all", "All");
+	add("favorites", "Favorites");
+	add("jme-version-unknown",
+		"Load new gamefx and blitz if version is unknown");
+	add("song-loading-compatibility", "Song loading compatibility");
+	add("rescan", "Rescan");
+	add("in", "in");
+	add("plugin-directories", "Plugin directories");
+	add("filter", "Filter by");
+	add("sort", "Sort by");
+	add("favorite", "Favorite");
+	add("name", "Name");
+	add("type", "Type");
+	add("mode", "Mode");
+	add("sections", "Sections");
+	add("section", "Section");
+	add("create", "Create");
+	add("remove", "Remove");
+	add("clear", "Clear");
+	add("add-to", "Add To");
+	add("remove-from", "Remove From");
+	add("select-plugin-to-view-description",
+		"Select a plugin to view its description");
+	add("select-first-section", "Select/Create first a section");
+	add("select-first-plugin", "Select first a plugin");
+}
+
+void make_translator_make_samplesview(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "samplesview"));
+	add("samplename", "Samplename");
+	add("samplerate", "Samplerate");
+	add("samples", "Samples");
+	add("groupsamples", "Group Samples");
+	add("groupsfirstsample", "Groups first sample");
+	add("default-volume", "Default volume");
+	add("global-volume", "Global volume");
+	add("pan-position", "Pan Position");
+	add("sampled-note", "Sampled note");
+	add("pitch-finetune", "Pitch finetune");
+	add("process", "Process");
+	add("no-wave-loaded", "No wave loaded");
+	setsection(psy_property_append_section(parent, "cmds"));
+	add("keymap", "Keymap");
+}
+
+void make_translator_make_general(psy_Property* parent)
+{
+	add("help", "Help");
+	add("helpshortcut", "Kbd Help");
+	add("editmachine", "Machines");
+	add("editpattern", "Patterns");
+	add("addmachine", "Add Machine");
+	add("playsong", "Play Song");
+	add("playstart", "Play Start");
+	add("playfrompos", "Play Pos");
+	add("playstop", "stop");
+	add("songposdec", "Seqpos dec");
+	add("songposinc", "Seqpos Inc");
+	add("maxpattern", "Max Pattern");
+	add("infomachine", "gear");
+	add("editinstr", "Instruments");
+	add("editsample", "Samples");
+	add("editwave", "Wave Edit");
+	add("terminal", "Terminal");
+	add("instrdec", "Current Instrument -1");
+	add("instrinc", "Current Instrument +1");
+}
+
+void make_translator_make_tracker(psy_Property* parent)
+{
+	add("navup", "Nav Up");
+	add("navdown", "Nav Down");
+	add("navleft", "Nav Left");
+	add("navright", "Nav Right");
+	add("navpageup", "Nav Up 16");
+	add("navpagedown", "Nav Down 16");
+	add("navtop", "Nav Top");
+	add("navbottom", "Nav Bottom");
+	add("columnprev", "Prev column");
+	add("columnnext", "Next column");
+
+	add("rowinsert", "Insert row");
+	add("rowdelete", "Delete row");
+	add("rowclear", "Clear row");
+
+	add("blockstart", "Block Start");
+	add("blockend", "Block End");
+	add("blockunmark", "Block Unmark");
+	add("blockcut", "Block cut");
+	add("blockcopy", "Block copy");
+	add("blockpaste", "Block paste");
+	add("blockmix", "Block Mix");
+
+	add("transposeblockinc", "Transpose Block +1");
+	add("transposeblockdec", "Transpose Block -1");
+	add("transposeblockinc12", "Transpose Block +12");
+	add("transposeblockdec12", "Transpose Block -12");
+
+	add("selectall", "Block Select All");
+	add("selectcol", "Block Select Column");
+	add("selectbar", "Block Select Bar");
+
+	add("selectmachine",
+		"Select Mac/Ins in Cursor Pos");
+	add("undo", "Edit Undo");
+	add("redo", "Edit Redo");
+	add("followsong", "Follow Song");
+}
+
+void make_translator_make_messages(psy_Property* parent)
+{
+	setsection(psy_property_append_section(parent, "msg"));
+	add("psyreq", "Psycle Request");
+	add("seqclear", "Sequence Clear Request! Do you really want clear the sequenceand pattern data?");
+	add("yes", "Yes");
+	add("no", "No");
+	add("cont", "Continue");
+	add("psyexit", "Exit Psycle Request, but your Song is not saved!");
+	add("saveexit", "Save and Exit");
+	add("nosaveexit", "Exit (no save)");
+	add("newsong", "New Song Request, but your Song is not saved!");
+	add("savenew", "Save and Create New Song");
+	add("nosavenew", "Create New Song (no save)");
+	add("loadsong", "New Load Request, but your Song is not saved!");
+	add("saveload", "Save and Load Song");
+	add("nosaveload", "Load Song (no save)");
+}
+
+#ifdef PSYCLE_MAKE_DEFAULT_LANG
+static int onenumproperties(void* context, psy_Property* property, uintptr_t level);
+
+void save_translator_default(void)
+{
+	psy_Property* lang;
+	char path[4096];
+
+	strcpy(path, psy_dir_config());	
+	strcat(path, "\\en.ini");
+
+	lang = psy_property_allocinit_key(NULL);
+	psy_property_setcomment(lang,
+		"Psycle English Dictionary created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
+	make_translator_default(lang);
+	propertiesio_save(lang, path);
+	psy_property_deallocate(lang);
+}
+
+void save_translator_template(void)
+{
+	psy_Property* lang;
+	char path[4096];
+
+	strcpy(path, psy_dir_config());
+	strcat(path, "\\lang.ini");
+
+	lang = psy_property_allocinit_key(NULL);
+	psy_property_setcomment(lang,
+		"Psycle Template Dictionary created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
+	make_translator_default(lang);
+	psy_property_enumerate((psy_Property*)lang, NULL,
+		(psy_PropertyCallback)onenumproperties);
+	propertiesio_save(lang, path);
+	psy_property_deallocate(lang);
+}
+
+int onenumproperties(void* context, psy_Property* property, uintptr_t level)
+{
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
+		psy_property_setitem_str(property, "");
+	}
+	return 1;
+}
+
+#endif

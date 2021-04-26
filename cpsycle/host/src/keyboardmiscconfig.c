@@ -31,71 +31,71 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 
 	self->keyboard = psy_property_settext(
 		psy_property_append_section(parent, "keyboard"),
-		"settingsview.keyboard-and-misc");
+		"settingsview.kbd.kbd-misc");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"playstartwithrctrl", TRUE),
-		"Right CTRL = play; Edit Toggle = stop");
+		"settingsview.kbd.ctrl-play");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"ft2home", TRUE),
-		"FT2 Style Home/End Behaviour");
+		"settingsview.kbd.ft2-home");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"ft2delete", TRUE),
-		"FT2 Style Delete Behaviour");
+		"settingsview.kbd.ft2-delete");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"effcursoralwayssdown", FALSE),
-		"Cursor always moves down in Effect Column");
+		"settingsview.kbd.cursoralwayssdown");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"recordtweaksastws", 0),
-		"settingsview.record-tws");
+		"settingsview.kbd.record-tws");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"advancelineonrecordtweak", 0),
-		"settingsview.advance-line-on-record");
+		"settingsview.kbd.advance-line-on-record");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard,
 			"movecursoronestep", 0),
-		"Force pattern step 1 when moving with cursors");
+		"settingsview.kbd.force-patstep1");
 	choice = psy_property_settext(
 		psy_property_append_choice(self->keyboard,
 			"pgupdowntype", 0),
-		"Page Up / Page Down step by");
+		"settingsview.kbd.pgupdowntype");
 	psy_property_settext(
 		psy_property_append_int(choice, "beat",
 			0, 0, 0),
-		"one beat");
+		"settingsview.kbd.pgupdowntype-one-beat");
 	psy_property_settext(
 		psy_property_append_int(choice, "bar",
 			0, 0, 0),
-		"one bar");
+		"settingsview.kbd.pgupdowntype-one-bar");
 	psy_property_settext(
 		psy_property_append_int(choice, "lines",
 			0, 0, 0),
-		"lines");
+		"settingsview.kbd.pgupdowntype-lines");
 	psy_property_settext(
 		psy_property_append_int(self->keyboard, "pgupdownstep",
 			4, 0, 32),
-		"Page Up / Page Down step lines");
+		"settingsview.kbd.pgupdowntype-step-lines");
 	self->keyboard_misc = psy_property_settext(
 		psy_property_append_section(self->keyboard, "misc"),
-		"Miscellaneous options");
+		"settingsview.kbd.misc");
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard_misc,
 			"savereminder", TRUE),
-		"\"Save file?\" reminders on Load, New or Exit");
+		"settingsview.kbd.savereminder");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_int(self->keyboard_misc,
 			"numdefaultlines", 64, 1, 1024),
-		"Default lines on new pattern"),
+		"settingsview.kbd.numdefaultlines"),
 		PROPERTY_ID_DEFAULTLINES);
 	psy_property_settext(
 		psy_property_append_bool(self->keyboard_misc,
 			"allowmultiinstances", FALSE),
-		"Allow multiple instances of Psycle");
+		"settingsview.kbd.allowmultiinstances");
 }
 
 bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig* self)

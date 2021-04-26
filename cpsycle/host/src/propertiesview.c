@@ -173,15 +173,21 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 		} else if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
 			self->dialogbutton = psy_ui_button_allocinit(&self->col2, view);
 			psy_ui_component_setalign(&self->dialogbutton->component,
-				psy_ui_ALIGN_CLIENT);
-			psy_ui_button_preventtranslation(self->dialogbutton);
-			psy_ui_button_settext(self->dialogbutton, "None");
+				psy_ui_ALIGN_CLIENT);			
+			psy_ui_button_settext(self->dialogbutton, "settingsview.none");
 		} else if (psy_property_int_hasrange(property) && !psy_property_readonly(property)) {
 			char text[256];
 			psy_ui_Label* label;
 
-			psy_snprintf(text, 256, "from %d to %d", property->item.min, property->item.max);
-			label = psy_ui_label_allocinit(&self->col2, view);
+			// todo: psy_ui_translate translates only at build
+			// use onlanguageupdate when the language is later changed in the
+			// settingsview
+			psy_snprintf(text, 256, "%s %d %s %d",
+				psy_ui_translate("settingsview.from"),
+				property->item.min,
+				psy_ui_translate("settingsview.to"),
+				property->item.max);
+			label = psy_ui_label_allocinit(&self->col2, view);			
 			psy_ui_component_setalign(&label->component, psy_ui_ALIGN_CLIENT);
 			psy_ui_label_preventtranslation(label);
 			psy_ui_label_settext(label, text);

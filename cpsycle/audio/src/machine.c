@@ -769,7 +769,7 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 
 		ev = (psy_audio_PatternEvent*)psy_list_entry(p);
 		if (ev->note == psy_audio_NOTECOMMANDS_TWEAK) {
-			if (ev->inst < psy_audio_machine_numparameters(self)) {
+			if (ev->inst < psy_audio_machine_numtweakparameters(self)) {
 				psy_audio_MachineParam* param;				
 				
 				param = psy_audio_machine_tweakparameter(self, ev->inst);
