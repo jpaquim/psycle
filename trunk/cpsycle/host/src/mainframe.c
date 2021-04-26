@@ -20,6 +20,10 @@
 // platform
 #include "../../detail/portable.h"
 
+#ifdef PSYCLE_MAKE_DEFAULT_LANG
+#include "defaultlang.h"
+#endif
+
 // MainFrame
 // prototypes
 // build
@@ -232,6 +236,10 @@ void mainframe_init(MainFrame* self)
 	mainframe_updateseqeditorbuttons(self);
 	mainframe_connectseqeditorbuttons(self);
 	mainframe_updatethemes(self);	
+#ifdef PSYCLE_MAKE_DEFAULT_LANG
+	save_translator_default(self);
+	save_translator_template(self);
+#endif
 }
 
 void mainframe_initframe(MainFrame* self)

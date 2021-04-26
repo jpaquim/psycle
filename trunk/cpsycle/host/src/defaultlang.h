@@ -4,6 +4,8 @@
 #if !defined(DEFAULTLANG_H)
 #define DEFAULTLANG
 
+#include "../../detail/psyconf.h"
+
 // container
 #include <properties.h>
 
@@ -13,6 +15,14 @@ extern "C" {
 
 // Defines a default dictionary in english.
 void make_translator_default(psy_Property* lang);
+
+#ifdef PSYCLE_MAKE_DEFAULT_LANG
+// Saves the eng default dictionary (psy_dir_config() + en.ini)
+void save_translator_default(void);
+// Saves the keys of the default dictionary (empty translation)
+// in (psy_dir_config() + lang.ini)
+void save_translator_template(void);
+#endif
 
 #ifdef __cplusplus
 }

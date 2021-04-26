@@ -30,14 +30,14 @@ static void cpumoduleview_vtable_init(CPUModuleView* self)
 			cpumoduleview_onpreferredsize;
 		cpumoduleview_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &cpumoduleview_vtable;
 }
 // implementation
 void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	cpumoduleview_vtable_init(self);	
-	self->component.vtable = &cpumoduleview_vtable;
+	cpumoduleview_vtable_init(self);		
 	self->workspace = workspace;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);

@@ -90,6 +90,8 @@ void psy_audio_machineparam_init(psy_audio_MachineParam* self)
 	psy_signal_init(&self->signal_name);
 	psy_signal_init(&self->signal_label);
 	self->isslidergroup = FALSE;
+	self->param0 = psy_INDEX_INVALID;
+	self->param1 = psy_INDEX_INVALID;
 }
 
 void psy_audio_machineparam_dispose(psy_audio_MachineParam* self)

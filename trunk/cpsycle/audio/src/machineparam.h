@@ -58,6 +58,8 @@ typedef struct psy_audio_MachineParam {
 	psy_Signal signal_label;
 	int crashed;
 	bool isslidergroup;
+	uintptr_t param0;
+	uintptr_t param1;
 } psy_audio_MachineParam;
 
 void psy_audio_machineparam_init(psy_audio_MachineParam*);

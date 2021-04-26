@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "gear.h"
+// host
+#include "styles.h"
 // audio
 #include <songio.h>
 
@@ -13,6 +15,8 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(gearbuttons_base(self), parent, NULL);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_RECENTVIEW_MAINSECTION);
 	psy_ui_component_setdefaultalign(gearbuttons_base(self), psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->createreplace, gearbuttons_base(self), NULL,
@@ -74,9 +78,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	// titlebar
 	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyletypes(&self->titlebar,
-		psy_ui_STYLE_HEADER, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);	
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.0);		
 	psy_ui_component_setmargin(&self->titlebar, margin);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL, "machinebar.gear");	
