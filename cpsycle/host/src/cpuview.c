@@ -74,19 +74,19 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 					info = psy_audio_machine_info(machine);
 					if (info) {						
 						psy_snprintf(text, 20, "%d", (int)slot);
-						psy_ui_textout(g, 0, cpy, text, strlen(text));
+						psy_ui_textout(g, 0, cpy, text, psy_strlen(text));
 						psy_ui_textout(g, tm->tmAveCharWidth * 5, cpy,
 							psy_audio_machine_editname(machine),
-							psy_min(strlen(psy_audio_machine_editname(machine)), 14));
+							psy_min(psy_strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm->tmAveCharWidth * 21, cpy,
-							info->Name, strlen(info->Name));
+							info->Name, psy_strlen(info->Name));
 						if (psy_audio_player_measuring_cpu_usage(workspace_player(self->workspace))) {
 							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
 						} else {
 							psy_snprintf(text, 40, "N/A");
 						}
 						psy_ui_textout(g, tm->tmAveCharWidth * 60, cpy, text,
-							strlen(text));
+							psy_strlen(text));
 					}
 					if ((cpy - psy_ui_value_px(&scrolltop, tm)) > size.height) {
 						break;

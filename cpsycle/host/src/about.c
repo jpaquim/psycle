@@ -326,7 +326,7 @@ void about_onalign(About* self)
 	}
 	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(centerx ,centery),
+			psy_ui_point_make_px(centerx ,centery),
 			psy_ui_size_make_px(bitmapsize.width, bitmapsize.height)));
 	do {
 		margin = tm->tmAveCharWidth * charmargin;
@@ -339,17 +339,17 @@ void about_onalign(About* self)
 	cpx = (psy_ui_value_px(&size.width, tm) - width) / 2;
 	psy_ui_component_setposition(&self->contribbutton.component,
 		psy_ui_rectangle_make(
-		psy_ui_point_makepx(cpx, centery + bitmapsize.height),
+		psy_ui_point_make_px(cpx, centery + bitmapsize.height),
 		contribbuttonsize));
 	psy_ui_component_setposition(&self->versionbutton.component,
 		psy_ui_rectangle_make(
-		psy_ui_point_makepx(
+		psy_ui_point_make_px(
 			cpx + psy_ui_value_px(&contribbuttonsize.width, tm) + margin,
 			centery + bitmapsize.height),
 		versionbuttonsize));
 	psy_ui_component_setposition(&self->licencebutton.component,
 		psy_ui_rectangle_make(
-		psy_ui_point_makepx(
+		psy_ui_point_make_px(
 			cpx + psy_ui_value_px(&contribbuttonsize.width, tm)
 				+ psy_ui_value_px(&versionbuttonsize.width, tm) +
 				margin * 2,
@@ -357,7 +357,7 @@ void about_onalign(About* self)
 		licencebuttonsize));
 	psy_ui_component_setposition(&self->okbutton.component,
 		psy_ui_rectangle_make(
-		psy_ui_point_makepx(			
+		psy_ui_point_make_px(			
 			cpx + psy_ui_value_px(&contribbuttonsize.width, tm) +
 				psy_ui_value_px(&versionbuttonsize.width, tm) +
 				psy_ui_value_px(&licencebuttonsize.width, tm) + 

@@ -240,9 +240,9 @@ void trackplaindraw_drawnumber(TrackPlainDraw* self, psy_ui_Graphics* g)
 	digit0x.dest = realrectangle_zoom(digit0x.dest, self->zoom);
 	psy_ui_settextcolour(g, self->gridstate->skin->font);
 	psy_snprintf(str, 2, "%X", (int)trackx0);
-	psy_ui_textout(g, digitx0.dest.left, digitx0.dest.top, str, strlen(str));
+	psy_ui_textout(g, digitx0.dest.left, digitx0.dest.top, str, psy_strlen(str));
 	psy_snprintf(str, 2, "%X", (int)track0x);
-	psy_ui_textout(g, digit0x.dest.left + 2, digit0x.dest.top, str, strlen(str));
+	psy_ui_textout(g, digit0x.dest.left + 2, digit0x.dest.top, str, psy_strlen(str));
 }
 
 void trackplaindraw_drawleds(TrackPlainDraw* self, psy_ui_Graphics* g)

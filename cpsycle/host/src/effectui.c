@@ -158,7 +158,7 @@ void effectui_initsize(EffectUi* self)
 	}
 	psy_ui_component_setposition(&self->component,
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(topleft.x, topleft.y),
+			psy_ui_point_make_px(topleft.x, topleft.y),
 			psy_ui_size_make_px(size.width, size.height)));
 	vudisplay_init(&self->intern.vu, self->intern.skin, self->intern.coords);	
 }
@@ -219,7 +219,7 @@ void effectui_draweditname(EffectUi* self, psy_ui_Graphics* g)
 		psy_ui_textoutrectangle(g,
 			psy_ui_realrectangle_topleft(&self->intern.coords->name.dest),
 			psy_ui_ETO_CLIPPED, self->intern.coords->name.dest, editname,
-			strlen(editname));
+			psy_strlen(editname));
 	}	
 }
 

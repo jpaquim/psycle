@@ -27,7 +27,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin margin;
 	psy_ui_Margin leftmargin;
-	psy_ui_Margin tabmargin;
+	//psy_ui_Margin tabmargin;
 
 	psy_ui_component_init(help_base(self), parent, NULL);
 	self->workspace = workspace;
@@ -37,8 +37,8 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), margin);
-	psy_ui_margin_init_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
+	// psy_ui_margin_init_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);		
+	// psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_component_setmargin(&self->editor.component, leftmargin);
@@ -128,19 +128,19 @@ void help_loadpage(Help* self, uintptr_t index)
 void help_onalign(Help* self, psy_ui_Component* sender)
 {
 	if (self->lastalign != psy_ui_component_parent(sender)->align) {
-		psy_ui_Margin tabmargin;
+		// psy_ui_Margin tabmargin;
 
 		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {			
 			psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_TOP);
 			psy_ui_component_setalign(&self->tabbar.component, psy_ui_ALIGN_TOP);
-			psy_ui_margin_init_em(&tabmargin, 0.0, 1.5, 0.0, 0.0);				
-			psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
+			// psy_ui_margin_init_em(&tabmargin, 0.0, 1.5, 0.0, 0.0);				
+			// psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
 			psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));
 		} else {
 			psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 			psy_ui_tabbar_settabalignment(&self->tabbar, psy_ui_ALIGN_RIGHT);
-			psy_ui_margin_init_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);				
-			psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
+			// psy_ui_margin_init_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);				
+			// psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
 			psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));
 		}
 		self->lastalign = psy_ui_component_parent(sender)->align;

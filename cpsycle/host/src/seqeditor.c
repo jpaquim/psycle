@@ -193,7 +193,7 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 			}
 		}
 		psy_snprintf(txt, 40, "%d", (int)(currbeat));
-		psy_ui_textout(g, cpx, textline, txt, strlen(txt));
+		psy_ui_textout(g, cpx, textline, txt, psy_strlen(txt));
 	}
 	if (self->state->drawcursor && self->state->cursoractive) {
 		double cpx;
@@ -280,7 +280,7 @@ void seqeditorline_init(SeqEditorLine* self,
 	psy_ui_component_setposition(
 		seqeditorline_base(self),
 		psy_ui_rectangle_make(
-			psy_ui_point_makepx(-1.0, 0.0),
+			psy_ui_point_make_px(-1.0, 0.0),
 			psy_ui_size_make_px(1.0, 100.0)));
 }
 
@@ -568,7 +568,7 @@ void seqeditorpatternentry_ondraw(SeqEditorPatternEntry* self,
 					(int)psy_audio_sequenceentry_patternslot(self->sequenceentry));				
 			}
 			psy_ui_textoutrectangle(g, topleft,
-				psy_ui_ETO_CLIPPED, clip, text, strlen(text));
+				psy_ui_ETO_CLIPPED, clip, text, psy_strlen(text));
  		}
 	}
 }
@@ -843,7 +843,7 @@ void seqeditortrack_onalign(SeqEditorTrack* self)
 			if (pattern) {				
 				psy_ui_component_setposition(&entry->component,
 					psy_ui_rectangle_make(
-						psy_ui_point_makepx(
+						psy_ui_point_make_px(
 							seqeditorstate_beattopx(self->state,
 								entry->sequenceentry->offset),
 							0.0),

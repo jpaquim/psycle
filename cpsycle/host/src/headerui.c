@@ -104,7 +104,7 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 	// todo font_bold
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, quarter),
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r, str,
-		strlen(str));
+		psy_strlen(str));
 }
 
 void headerui_onpreferredsize(HeaderUi* self, const psy_ui_Size* limit,

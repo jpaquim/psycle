@@ -132,7 +132,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 			(((((self->wirecolour.value & 0x00ff))
 				+ ((self->colour.value & 0x00ff))) / 2) & 0x00ff));
 	
-	if (machine_skin_name && strlen(machine_skin_name)) {
+	if (machine_skin_name && psy_strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
 		char filename[_MAX_PATH];
 

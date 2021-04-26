@@ -117,7 +117,7 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 	if (self->param) {
 		psy_ui_textoutrectangle(g, psy_ui_realpoint_make(20, centery),
 			psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-			r, label, strlen(label));
+			r, label, psy_strlen(label));
 	}
 }
 

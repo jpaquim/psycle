@@ -584,7 +584,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 		self->linestate->lineheightpx - 1);
 	notestr = trackergrid_notestr(self, *event);
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(r.left, r.top), psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
-		notestr, strlen(notestr));
+		notestr, psy_strlen(notestr));
 	cpx += trackdef_columnwidth(trackdef, 0, self->gridstate->trackconfig->textwidth);
 	// draw digit columns
 	for (column = 1; column < trackdef_numcolumns(trackdef); ++column) {
@@ -731,7 +731,7 @@ void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g,
 			psy_ui_realsize_make(
 				self->gridstate->trackconfig->textwidth,
 				self->linestate->lineheightpx - 1)),
-		text, strlen(text));	
+		text, psy_strlen(text));	
 }
 
 void trackergrid_onpreferredsize(TrackerGrid* self, const psy_ui_Size* limit,

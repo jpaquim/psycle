@@ -6,6 +6,8 @@
 #include "instnotemapview.h"
 // host
 #include "styles.h"
+// dsp
+#include <notestab.h>
 // std
 #include <math.h>
 // platform
@@ -13,14 +15,6 @@
 
 #define COLWIDTH 12.0
 
-static int isblack(int key)
-{
-	int offset = key % 12;
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// c   d   e f   g   a    h 
-	return (offset == 1 || offset == 3 || offset == 6 || offset == 8
-		|| offset == 10);
-}
 
 static int numwhitekey(int key)
 {
@@ -30,7 +24,7 @@ static int numwhitekey(int key)
 	int i;
 
 	for (i = 1; i <= offset; ++i) {
-		if (!isblack(i)) ++c;
+		if (!psy_dsp_isblack(i)) ++c;
 	}
 	return octave * 7 + c;
 }
@@ -126,7 +120,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));
 	// draw white keys
 	for (key = keymin; key < keymax; ++key) {
-		if (!isblack(key)) {
+		if (!psy_dsp_isblack(key)) {
 			psy_ui_RealRectangle r;
 			psy_ui_Colour colour;
 
@@ -147,7 +141,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 	// draw black keys
 	for (cp = 0, key = keymin; key < keymax; ++key) {							
-		if (!isblack(key)) {			
+		if (!psy_dsp_isblack(key)) {
 			cp += self->metrics.keysize;
 		} else {
 			psy_ui_RealRectangle r;
@@ -186,7 +180,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 
 	numwhitekeys = 0;
 	for (key = keymin; key < keymax; ++key) {
-		if (!isblack(key)) {
+		if (!psy_dsp_isblack(key)) {
 			++numwhitekeys;
 		}
 	}
@@ -311,7 +305,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 
 		numwhitekeys = 0;
 		for (key = keymin; key < keymax;  ++key) {
-			if (!isblack(key)) {
+			if (!psy_dsp_isblack(key)) {
 				++numwhitekeys;
 			}
 		}
@@ -336,22 +330,22 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 				keylo_startx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.low) /
 					numwhitekeys * size.width) +
-					(int)(isblack((uint8_t)entry->keyrange.low)
+					(int)(psy_dsp_isblack((uint8_t)entry->keyrange.low)
 						? self->metrics.keysize / 2 : 0);
 				keylo_endx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.low + 1) /
 					numwhitekeys * size.width) +
-					(int)(isblack((uint8_t)entry->keyrange.low + 1)
+					(int)(psy_dsp_isblack((uint8_t)entry->keyrange.low + 1)
 						? self->metrics.keysize / 2 : 0);								
 				keyhi_startx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.high) /
 					numwhitekeys * size.width) +
-					(int)(isblack((uint8_t)entry->keyrange.high)
+					(int)(psy_dsp_isblack((uint8_t)entry->keyrange.high)
 						? self->metrics.keysize / 2 : 0);
 				keyhi_endx = (int)(
 					(float)numwhitekey((uint8_t)entry->keyrange.high + 1) /
 					numwhitekeys * size.width) +
-					(int)(isblack((uint8_t)entry->keyrange.high + 1)
+					(int)(psy_dsp_isblack((uint8_t)entry->keyrange.high + 1)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r,
 					keylo_startx, scrolltop,
@@ -371,12 +365,12 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			startx = (int)(
 				(float)numwhitekey((uint8_t)entry->keyrange.low) /
 				numwhitekeys * size.width) +
-				(int)(isblack((uint8_t)entry->keyrange.low)
+				(int)(psy_dsp_isblack((uint8_t)entry->keyrange.low)
 					? self->metrics.keysize / 2 : 0);
 			endx = (int)(
 				(float)numwhitekey((uint8_t)entry->keyrange.high + 1) /
 				numwhitekeys * size.width) +
-				(int)(isblack((uint8_t)entry->keyrange.high + 1)
+				(int)(psy_dsp_isblack((uint8_t)entry->keyrange.high + 1)
 					? self->metrics.keysize / 2 : 0) - 1;
 			if (entry == self->state->selectedentry) {
 				colour = psy_ui_colour_make(0x00FF2288);
@@ -393,9 +387,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			static const char* nomapping = "No Instrument Mapping";
 
 			psy_ui_textout(g, 
-				(size.width - tm->tmAveCharWidth * strlen(nomapping)) / 2,
+				(size.width - tm->tmAveCharWidth * psy_strlen(nomapping)) / 2,
 				(size.height - tm->tmHeight) / 2,
-				nomapping, strlen(nomapping));
+				nomapping, psy_strlen(nomapping));
 		}
 	} else {
 		const psy_ui_TextMetric* tm;
@@ -405,9 +399,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_innersize_px(&self->component);
 		psy_ui_textout(g,
-			(size.width - tm->tmAveCharWidth * strlen(noinst)) / 2,
+			(size.width - tm->tmAveCharWidth * psy_strlen(noinst)) / 2,
 			(size.height - tm->tmHeight) / 2,
-			noinst, strlen(noinst));		
+			noinst, psy_strlen(noinst));
 	}
 }
 
@@ -441,7 +435,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 
 	numwhitekeys = 0;
 	for (key = keymin; key < keymax; ++key) {
-		if (!isblack(key)) {
+		if (!psy_dsp_isblack(key)) {
 			++numwhitekeys;
 		}
 	}
@@ -512,7 +506,7 @@ double instrumententryview_keysize(InstrumentEntryView* self)
 
 	numwhitekeys = 0;
 	for (key = keymin; key < keymax; ++key) {
-		if (!isblack(key)) {
+		if (!psy_dsp_isblack(key)) {
 			++numwhitekeys;
 		}
 	}
@@ -1024,7 +1018,7 @@ void instrumententryrow_ondraw(InstrumentEntryRow* self, psy_ui_Graphics* g)
 			text[0] = '\0';
 			break;
 		}
-		psy_ui_textout(g, cpx, cpy, text, strlen(text));
+		psy_ui_textout(g, cpx, cpy, text, psy_strlen(text));
 		cpx += psy_ui_value_px(&columndef->width,
 			psy_ui_component_textmetric(&self->component));
 	}
@@ -1106,7 +1100,7 @@ psy_ui_Rectangle instrumententryrow_editposition(InstrumentEntryRow* self,
 	size = psy_ui_component_offsetsize(&self->component);
 	position = psy_ui_component_position(&self->component);
 	return psy_ui_rectangle_make(
-		psy_ui_point_makepx(			
+		psy_ui_point_make_px(			
 			instrumententrystate_columnpx(self->state, column,
 				psy_ui_component_textmetric(&self->component)), 0.0),
 		psy_ui_size_make(columndef->width, size.height));

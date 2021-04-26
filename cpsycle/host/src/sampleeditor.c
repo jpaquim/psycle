@@ -462,7 +462,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 					psy_ui_realpoint_make(cpx, baseline - tm->tmHeight / 3));
 				psy_snprintf(txt, 40, "%d", (int)waveboxcontext_realframe(self->metric, frame));
 				psy_ui_textout(g, (int)cpx + (int)(tm->tmAveCharWidth * 0.75),
-					baseline - tm->tmHeight - tm->tmHeight / 6, txt, strlen(txt));
+					baseline - tm->tmHeight - tm->tmHeight / 6, txt, psy_strlen(txt));
 			}
 		}
 	}
@@ -485,8 +485,8 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-			psy_ui_textout(g, (size.width - tm->tmAveCharWidth * strlen(txt)) / 2,
-				(size.height - tm->tmHeight) / 2, txt, strlen(txt));
+			psy_ui_textout(g, (size.width - tm->tmAveCharWidth * psy_strlen(txt)) / 2,
+				(size.height - tm->tmHeight) / 2, txt, psy_strlen(txt));
 		} else {
 			double x;
 			double centery;

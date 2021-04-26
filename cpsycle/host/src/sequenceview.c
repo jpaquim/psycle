@@ -330,7 +330,7 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, self->component.style.style.colour);
 		}
-		psy_ui_textout(g, 0, cpy, text, strlen(text));
+		psy_ui_textout(g, 0, cpy, text, psy_strlen(text));
 	}
 }
 
@@ -784,7 +784,7 @@ void sequenceview_onscroll(SequenceView* self, psy_ui_Component* sender)
 
 	position = psy_ui_component_position(&self->listview.component);
 	psy_ui_component_move(&self->trackheader.client,
-		psy_ui_point_makepx(position.left, 0.0));
+		psy_ui_point_make_px(position.left, 0.0));
 }
 
 void sequenceview_clear(SequenceView* self)

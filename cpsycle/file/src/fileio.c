@@ -4,9 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "fileio.h"
-#include <string.h> 
-#include <stdio.h>
+// std
 #include <assert.h>
+// platform
+#include "../../detail/portable.h"
 
 #define VERSION_MAJOR_ZERO			0x00000000
 #define VERSION_MAJOR_ONE			0x00010000
@@ -243,9 +244,9 @@ int psyfile_writeheader(PsyFile* file, char* data, uint32_t version,
 int psyfile_writestring(PsyFile* file, const char* str)
 {
 	if (str == NULL) {
-		return psyfile_write(file, "", strlen("") + 1);
+		return psyfile_write(file, "", psy_strlen("") + 1);
 	}
-	return psyfile_write(file, str, strlen(str) + 1);
+	return psyfile_write(file, str, psy_strlen(str) + 1);
 }
 
 int psyfile_updatesize(PsyFile* file, uint32_t startpos, uint32_t* rv_size)

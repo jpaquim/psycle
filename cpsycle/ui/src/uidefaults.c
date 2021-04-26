@@ -66,7 +66,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		self->hasdarktheme = TRUE;
 		self->errorcolour = 0x007966CF;
 	} else {
-		surface = psy_ui_colour_make_argb(0x00FFFFFF);
+		surface = psy_ui_colour_make_argb(0x00FAFAFA);
 		onsurface = psy_ui_colour_make_argb(0x00000000);
 		primary = psy_ui_colour_make(0x00121212);
 		onprimary = psy_ui_colour_make(0x00000000);
@@ -140,32 +140,40 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);	
 	// tabbar
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(4));
+	// psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);	
 	// tab
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&primary, medium));
+		psy_ui_colour_weighted(&primary, medium));	
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.0, 1.9, 0.0, 1.0));
 	psy_ui_style_setmargin(style,
-		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
+		psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB, style);
 	// tab::hover
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, onprimary);	
-	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
-		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
-	psy_ui_border_setcolour(&style->border, onsecondary);
+	psy_ui_style_setcolour(style, onprimary);
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(4));
+	// psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
+	//	psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
+	// psy_ui_border_setcolour(&style->border, onsecondary);
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.0, 1.9, 0.0, 1.0));
 	psy_ui_style_setmargin(style,
-		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
+		psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_HOVER, style);
 	// tab::select
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_setcolour(style, onprimary);
+	psy_ui_style_setcolour(style, onprimary);	
+	psy_ui_style_setspacing(style,
+		psy_ui_margin_make_em(0.0, 1.9, 0.0, 1.0));
+	psy_ui_style_setmargin(style,
+		psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
 	psy_ui_border_init_all(&style->border, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
-	psy_ui_border_setcolour(&style->border, onsecondary);
-	psy_ui_style_setmargin(style,
-		psy_ui_margin_make_em(0.0, 2.0, 0.0, 0.0));
+	psy_ui_border_setcolour(&style->border,
+		psy_ui_colour_weighted(&onsecondary, weak));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT, style);
 	// header;
 	style = psy_ui_style_allocinit();

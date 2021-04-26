@@ -6,6 +6,7 @@
 #include "navigation.h"
 // host
 #include "resources/resource.h"
+#include "styles.h"
 
 static void navigation_onprev(Navigation*, psy_ui_Component* sender);
 static void navigation_onnext(Navigation*, psy_ui_Component* sender);
@@ -16,6 +17,7 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component, STYLE_NAVBAR);
 	self->workspace = workspace;	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);

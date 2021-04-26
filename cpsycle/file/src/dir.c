@@ -77,8 +77,8 @@ void psy_path_update(psy_Path* self)
 	static const char* path_delim = "\\";
 	free(self->path);
 
-	self->path = malloc(strlen(self->prefix) + 1 + strlen(self->name) + 1 +
-		strlen(self->ext) + 1);
+	self->path = malloc(psy_strlen(self->prefix) + 1 + psy_strlen(self->name) + 1 +
+		psy_strlen(self->ext) + 1);
 	self->path[0] = '\0';
 	if (psy_path_hasprefix(self)) {
 		strcat(self->path, self->prefix);
@@ -129,8 +129,8 @@ void psy_path_extract_path(psy_Path* self)
 	p = strrchr(self->name, '.');
 	if (p) {
 		free(self->ext);
-		self->ext = malloc(strlen(self->name) - (p - self->name) + 1);
-		self->ext = strncpy(self->ext, p + 1, strlen(self->name) -
+		self->ext = malloc(psy_strlen(self->name) - (p - self->name) + 1);
+		self->ext = strncpy(self->ext, p + 1, psy_strlen(self->name) -
 			(p - self->name));
 		self->name[p - self->name] = '\0';
 	} else {
@@ -417,7 +417,7 @@ void insertpathenv(const char* path)
 		char* newenvpath;
 		size_t size;
 
-		size = strlen(path) + strlen(envpath) + 3;
+		size = psy_strlen(path) + psy_strlen(envpath) + 3;
 		newenvpath = (char*)malloc(size);
 		newenvpath[0] = '\0';
 
@@ -435,7 +435,7 @@ void setpathenv(const char* path)
 		char* newenv;
 		size_t size;
 
-		size = strlen(path) + strlen(pathenvvarname) + 3;
+		size = psy_strlen(path) + psy_strlen(pathenvvarname) + 3;
 		newenv = (char*)malloc(size);
 		if (newenv) {
 			newenv[0] = '\0';
@@ -502,7 +502,7 @@ psy_List* psy_drives(void)
 		char* szSingleDrive = szLogicalDrives;
 		while (*szSingleDrive) {
 			psy_list_append(&rv, strdup(szSingleDrive));
-			szSingleDrive += strlen(szSingleDrive) + 1;
+			szSingleDrive += psy_strlen(szSingleDrive) + 1;
 		}
 	}
 	return rv;
@@ -629,7 +629,7 @@ void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext)
 	}
 	p = strrchr(name, '.');
 	if (p) {
-		ext = strncpy(ext, p + 1, strlen(name) - (p - name));
+		ext = strncpy(ext, p + 1, psy_strlen(name) - (p - name));
 		name[p - name] = '\0';
 	} else {
 		ext = '\0';

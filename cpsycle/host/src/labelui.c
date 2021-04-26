@@ -98,7 +98,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	}
 	psy_ui_textoutrectangle(g,
 		psy_ui_realpoint_zero(), psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, str, strlen(str));
+		r, str, psy_strlen(str));
 	if (self->param && psy_audio_machineparam_describe(self->param, str) == FALSE) {
 		psy_snprintf(str, 128, "%s", "");
 	}
@@ -107,7 +107,7 @@ void labelui_ondraw(LabelUi* self, psy_ui_Graphics* g)
 	psy_ui_setrectangle(&r, 0, half, size.width, half);
 	psy_ui_textoutrectangle(g, psy_ui_realpoint_make(0, half),
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
-		r, str, strlen(str));
+		r, str, psy_strlen(str));
 }
 
 void labelui_onpreferredsize(LabelUi* self, const psy_ui_Size* limit,

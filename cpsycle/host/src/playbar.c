@@ -12,17 +12,21 @@
 // platform
 #include "../../detail/portable.h"
 
+#define PLAYBAR_TIMERINTERVAL 100
+
+// combobox index
 enum {
-	PLAY_SONG,
-	PLAY_SEL,
-	PLAY_BEATS
+	PLAY_SONG  = 0,
+	PLAY_SEL   = 1,
+	PLAY_BEATS = 2
 };
 
+// prototypes
 static void playbar_updatetext(PlayBar*);
 static void playbar_onloopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
-static void playbar_onplaymodeselchanged(PlayBar*,
-	psy_ui_ComboBox* sender, int sel);
+static void playbar_onplaymodeselchanged(PlayBar*, psy_ui_ComboBox* sender,
+	int sel);
 static void playbar_onnumplaybeatsless(PlayBar*, psy_ui_Button* sender);
 static void playbar_onnumplaybeatsmore(PlayBar*, psy_ui_Button* sender);
 static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
@@ -30,6 +34,7 @@ static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_ontimer(PlayBar*, uintptr_t timerid);
 static void playbar_onlanguagechanged(PlayBar*);
+static psy_audio_SequencerPlayMode playbar_comboboxplaymode(const PlayBar*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -38,49 +43,43 @@ static psy_ui_ComponentVtable* vtable_init(PlayBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)playbar_ontimer;
-		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			playbar_ontimer;
+		vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
 			playbar_onlanguagechanged;
 		vtable_initialized = TRUE;
 	}
+	psy_ui_component_setvtable(playbar_base(self), &vtable);
 	return &vtable;
 }
 // implementation
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
-{				
-	psy_ui_Margin spacing;
-
-	psy_ui_margin_init_em(&spacing, 0.5, 0.0, 0.5, 1.0);
+{					
 	psy_ui_component_init(playbar_base(self), parent, NULL);
-	psy_ui_component_setvtable(playbar_base(self), vtable_init(self));
-	psy_ui_component_setstyletypes(playbar_base(self),
-		STYLE_PLAYBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
-	psy_ui_component_setspacing(playbar_base(self), spacing);
-	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	vtable_init(self);
+	psy_ui_component_setstyletype(playbar_base(self), STYLE_PLAYBAR);	
 	psy_ui_component_setdefaultalign(playbar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
-	self->player = &workspace->player;
+	self->player = workspace_player(workspace);
 	// loop
-	psy_ui_button_init_connect(&self->loop, playbar_base(self), NULL,
-		self, playbar_onloopclicked);
-	psy_ui_button_settext(&self->loop, "play.loop");
-	psy_ui_bitmap_loadresource(&self->loop.bitmapicon, IDB_LOOP_DARK);
-	psy_ui_bitmap_settransparency(&self->loop.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_init_text_connect(&self->loop, playbar_base(self), NULL,
+		"play.loop", self, playbar_onloopclicked);	
+	psy_ui_button_setbitmapresource(&self->loop, IDB_LOOP_DARK);
+	psy_ui_button_setbitmaptransparency(&self->loop, psy_ui_colour_white());
 	// record
-	psy_ui_button_init_connect(&self->recordnotes, playbar_base(self), NULL,
-		self, playbar_onrecordnotesclicked);
-	psy_ui_button_settext(&self->recordnotes, "play.record-notes");
+	psy_ui_button_init_text_connect(&self->recordnotes, playbar_base(self),
+		NULL, "play.record-notes", self, playbar_onrecordnotesclicked);
 	// play
-	psy_ui_button_init_connect(&self->play, playbar_base(self), NULL,
-		self, playbar_onplayclicked);
-	psy_ui_button_settext(&self->play, "play.play");
-	psy_ui_bitmap_loadresource(&self->play.bitmapicon, IDB_PLAY_DARK);
-	psy_ui_bitmap_settransparency(&self->play.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_init_text_connect(&self->play, playbar_base(self), NULL,
+		"play.play", self, playbar_onplayclicked);
+	psy_ui_button_setbitmapresource(&self->play, IDB_PLAY_DARK);	
+	psy_ui_button_setbitmaptransparency(&self->play, psy_ui_colour_white());
 	// playmode
 	psy_ui_combobox_init(&self->playmode, playbar_base(self), NULL);
-	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
+	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);
 	// play beat num
 	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
@@ -92,16 +91,15 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 		self, playbar_onnumplaybeatsmore);
 	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
 	// stop
-	psy_ui_button_init_connect(&self->stop, playbar_base(self), NULL,
-		self, playbar_onstopclicked);
-	psy_ui_button_settext(&self->stop, "play.stop");
-	psy_ui_bitmap_loadresource(&self->stop.bitmapicon, IDB_STOP_DARK);
-	psy_ui_bitmap_settransparency(&self->stop.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_init_text_connect(&self->stop, playbar_base(self), NULL,
+		"play.stop", self, playbar_onstopclicked);	
+	psy_ui_button_setbitmapresource(&self->stop, IDB_STOP_DARK);
+	psy_ui_button_setbitmaptransparency(&self->stop, psy_ui_colour_white());
 	playbar_updatetext(self);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		playbar_onplaymodeselchanged);	
-	psy_ui_component_starttimer(playbar_base(self), 0, 100);
+	psy_ui_component_starttimer(playbar_base(self), 0, PLAYBAR_TIMERINTERVAL);
 }
 
 void playbar_updatetext(PlayBar* self)
@@ -115,31 +113,10 @@ void playbar_updatetext(PlayBar* self)
 void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 {
 	psy_audio_exclusivelock_enter();
-	switch (psy_ui_combobox_cursel(&self->playmode)) {
-		case PLAY_SONG:
-			psy_audio_player_stop(self->player);
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYALL);			
-		break;
-		case PLAY_SEL:
-			psy_audio_player_stop(self->player);
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYSEL);
-			playbar_startplay(self);
-		break;
-		case PLAY_BEATS:
-			psy_audio_player_stop(self->player);
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-			playbar_startplay(self);
-		break;
-		default:
-			psy_audio_player_stop(self->player);
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
-			playbar_startplay(self);
-		break;
-	}
+	psy_audio_player_stop(self->player);
+	psy_audio_sequencer_setplaymode(&self->player->sequencer,
+		playbar_comboboxplaymode(self));
+	playbar_startplay(self);	
 	psy_audio_exclusivelock_leave();
 }
 
@@ -171,27 +148,25 @@ void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 
 void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {
-	switch (psy_ui_combobox_cursel(&self->playmode)) {
-		case PLAY_SONG:
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
-		break;
-		case PLAY_SEL:
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYSEL);
-		break;
-		case PLAY_BEATS:
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-		break;
-		default:
-			psy_audio_sequencer_setplaymode(&self->player->sequencer,
-				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
-		break;
-	};	
+	psy_audio_sequencer_setplaymode(&self->player->sequencer,
+		playbar_comboboxplaymode(self));
 	if (!psy_audio_player_playing(self->player)) {
 		playbar_startplay(self);
 	}
+}
+
+psy_audio_SequencerPlayMode playbar_comboboxplaymode(const PlayBar* self)
+{
+	switch (psy_ui_combobox_cursel(&self->playmode)) {
+	case PLAY_SONG:
+		return psy_audio_SEQUENCERPLAYMODE_PLAYALL;		
+	case PLAY_SEL:
+		return psy_audio_SEQUENCERPLAYMODE_PLAYSEL;		
+	case PLAY_BEATS:
+		return psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS;		
+	default:
+		return psy_audio_SEQUENCERPLAYMODE_PLAYALL;
+	}	
 }
 
 void playbar_startplay(PlayBar* self)

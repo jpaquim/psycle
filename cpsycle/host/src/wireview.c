@@ -386,7 +386,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent,
 		psy_audio_song_machines(workspace_song(workspace)));
 	psy_ui_component_setposition(wireframe_base(self),
 		psy_ui_rectangle_make(
-		psy_ui_point_makepx(200.0, 150.0),
+		psy_ui_point_make_px(200.0, 150.0),
 		psy_ui_size_make_em(80.0, 25.0)));
 }
 

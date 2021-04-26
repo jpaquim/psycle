@@ -144,13 +144,13 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 			psy_ui_settextcolour(g, self->skin->fonttopcolour);
 		}
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_top),
-			psy_ui_ETO_OPAQUE, r_top, label, strlen(label));
+			psy_ui_ETO_OPAQUE, r_top, label, psy_strlen(label));
 		psy_ui_setbackgroundcolour(g, (paramtweak_active(&self->paramtweak))
 			? self->skin->hbottomcolour : self->skin->bottomcolour);
 		psy_ui_settextcolour(g, (paramtweak_active(&self->paramtweak))
 			? self->skin->fonthbottomcolour : self->skin->fontbottomcolour);
 		psy_ui_textoutrectangle(g, psy_ui_realrectangle_topleft(&r_bottom),
-			psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
+			psy_ui_ETO_OPAQUE, r_bottom, str, psy_strlen(str));
 		if (!psy_ui_bitmap_empty(&self->skin->knobbitmap)) {
 			intptr_t knob_frame;
 

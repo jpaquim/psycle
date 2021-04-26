@@ -4,15 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "channelmappingview.h"
-
+// audio
 #include <exclusivelock.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
+// PinEdit
+// prototypes
 static void pinedit_ondraw(PinEdit*, psy_ui_Graphics*);
 static void pinedit_drawsockets(PinEdit*, psy_ui_Graphics*);
 static void pinedit_drawconnections(PinEdit*, psy_ui_Graphics*);
@@ -29,7 +27,7 @@ static bool pinedit_screentopin(PinEdit*, double x, double y, uintptr_t* pin, bo
 static psy_audio_PinMapping* pinedit_mapping(PinEdit*);
 static uintptr_t pinedit_numinputs(PinEdit*);
 static uintptr_t pinedit_numoutputs(PinEdit*);
-
+// vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -37,20 +35,28 @@ static void vtable_init(PinEdit* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw)pinedit_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)pinedit_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)pinedit_onmousemove;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)pinedit_onmouseup;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			pinedit_ondraw;
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			pinedit_onmousedown;
+		vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
+			pinedit_onmousemove;
+		vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			pinedit_onmouseup;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
-
+// implementation
 void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->workspace = workspace;
@@ -118,7 +124,7 @@ void pinedit_drawpinoutput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "Out %.02d", (int)pin);
-	psy_ui_textout(g, 0, cpy + centery, text, strlen(text));
+	psy_ui_textout(g, 0, cpy + centery, text, psy_strlen(text));
 	psy_ui_setrectangle(&r, pinwidth + tm->tmAveCharWidth * numchars, cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	psy_ui_drawrectangle(g, r);
 }
@@ -147,8 +153,10 @@ void pinedit_drawpininput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "In %.02d", (int)pin);
-	psy_ui_textout(g, psy_ui_value_px(&size.width, tm) - tm->tmAveCharWidth * 8, cpy + centery, text, strlen(text));
-	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) - (pinwidth + tm->tmAveCharWidth * numchars),
+	psy_ui_textout(g, psy_ui_value_px(&size.width, tm) - tm->tmAveCharWidth * 8,
+		cpy + centery, text, psy_strlen(text));
+	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) -
+		(pinwidth + tm->tmAveCharWidth * numchars),
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	psy_ui_drawrectangle(g, r);
 }

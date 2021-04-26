@@ -248,11 +248,11 @@ void envelopebox_drawruler(EnvelopeBox* self, psy_ui_Graphics* g)
 			}
 			if (step < numsteps) {
 				psy_ui_textout(g, cpx + 4, self->cy - (tm->tmHeight * 1.5),
-					text, strlen(text));
+					text, psy_strlen(text));
 			} else {
 				psy_ui_textout(g,
 					cpx - 3.5 * (double)tm->tmAveCharWidth, self->cy - (tm->tmHeight * 1.5),
-					text, strlen(text));
+					text, psy_strlen(text));
 			}			
 			psy_ui_drawline(g,
 				psy_ui_realpoint_make(cpx, self->spacing.top.quantity),

@@ -813,7 +813,7 @@ void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver* self, const ch
 			psy_path_ext(&path), idxtext);
 		psy_path_dispose(&path);
 	}
-	psyfile_write(self->fp, str, ((uint32_t)(strlen(str) + 1)));
+	psyfile_write(self->fp, str, ((uint32_t)(psy_strlen(str) + 1)));
 }
 
 int psy_audio_psy3saver_saveparammapping(psy_audio_PSY3Saver* self,

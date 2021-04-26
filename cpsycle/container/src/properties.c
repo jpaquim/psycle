@@ -524,7 +524,7 @@ char_dyn_t* psy_property_sections(const psy_Property* self)
 	while (p != NULL) {
 		if (psy_property_type(p) == PSY_PROPERTY_TYPE_SECTION) {
 			psy_list_insert(&tokens, NULL, (void*)psy_property_key(p));
-			size += strlen(psy_property_key(p));
+			size += psy_strlen(psy_property_key(p));
 			if (p->parent) {
 				++size;
 			}

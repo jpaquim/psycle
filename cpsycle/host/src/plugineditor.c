@@ -328,7 +328,7 @@ void writetext(const char* path, const char* text)
 		uintptr_t lengthdoc;
 		uintptr_t i;
 
-		lengthdoc = strlen(text);
+		lengthdoc = psy_strlen(text);
 		for (i = 0; i < lengthdoc; i += BLOCKSIZE) {
 			uintptr_t grabsize;
 

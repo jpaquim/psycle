@@ -1189,7 +1189,7 @@ int savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 
 		for (i = 0; i < count; i++) {
 			const char* id = luaplugin_id(self, i);
-			size += (uint32_t)strlen(id) + 1;
+			size += (uint32_t)psy_strlen(id) + 1;
 		}
 		if (status = psyfile_write(songfile->file, &size, sizeof(size))) {
 			return status;
