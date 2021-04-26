@@ -464,14 +464,8 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin margin;
 	psy_ui_Margin toprowsmargin;
 	psy_ui_Margin row0margin;	
-	psy_ui_Margin scopemargin;
 
-	psy_ui_margin_init_em(&row0margin, 0.5, 0.0, 0.5, 0.0);
-	// Vugroup
-	psy_ui_component_init(&self->topright, &self->top, NULL);
-	psy_ui_component_setalign(&self->topright, psy_ui_ALIGN_RIGHT);
-	vubar_init(&self->vubar, &self->topright, &self->workspace);	
-	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_TOP);
+	psy_ui_margin_init_em(&row0margin, 0.5, 0.0, 0.5, 0.0);	
 	// rows
 	psy_ui_component_init_align(&self->toprows, &self->top,
 		psy_ui_ALIGN_TOP);
@@ -484,26 +478,28 @@ void mainframe_initbars(MainFrame* self)
 		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
-		psy_ui_margin_zero()); // make(
-			//psy_ui_value_make_px(0), psy_ui_value_make_px(0),
-			//psy_ui_value_make_eh(0.5), psy_ui_value_make_ew(0.5)));
+		psy_ui_margin_zero());			
 	// row0
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
-	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);		
-	//psy_ui_component_setmargin(&self->toprow0, row0margin);
+	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);
+	psy_ui_component_init(&self->toprow0_client, &self->toprow0, NULL);
+	psy_ui_component_setalign(&self->toprow0_client, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setdefaultalign(&self->toprow0, psy_ui_ALIGN_LEFT,
+	psy_ui_component_setdefaultalign(&self->toprow0_client, psy_ui_ALIGN_LEFT,
 		margin);
-	filebar_init(&self->filebar, &self->toprow0, &self->workspace);
-	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);
-	playbar_init(&self->playbar, &self->toprow0, &self->workspace);
-	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace);			
-	metronomebar_init(&self->metronomebar, &self->toprow0, &self->workspace);
+	filebar_init(&self->filebar, &self->toprow0_client, &self->workspace);
+	undoredobar_init(&self->undoredobar, &self->toprow0_client, &self->workspace);
+	playbar_init(&self->playbar, &self->toprow0_client, &self->workspace);
+	playposbar_init(&self->playposbar, &self->toprow0_client, &self->workspace);
+	metronomebar_init(&self->metronomebar, &self->toprow0_client, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(&self->metronomebar.component);
 	}
 	margin.right = psy_ui_value_make_px(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
+	// Vugroup		
+	vubar_init(&self->vubar, &self->toprow0, &self->workspace);
+	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_setstyletype(&self->toprow1, STYLE_TOPROW1);		
@@ -517,21 +513,18 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setstyletype(&self->toprow2, STYLE_TOPROW2);
 	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);		
 	// scopebar
-	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);	
+	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopes_stop(&self->trackscopeview.scopes);
-	}
-	psy_ui_margin_init_em(&scopemargin, 0.0, 1.0, 0.0, 0.0);	
-	psy_ui_component_setmargin(&self->trackscopeview.component, scopemargin);
+	}	
 	psy_ui_component_init(&self->topspacer, &self->component, NULL);
 	psy_ui_component_setalign(&self->topspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_preventalign(&self->topspacer);
 	psy_ui_component_setpreferredsize(&self->topspacer,
 		psy_ui_size_make_em(0.0, 0.5));
-	psy_ui_component_setstyletypes(&self->topspacer,
-		STYLE_TOP, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->topspacer, STYLE_TOP);
 }
 
 void mainframe_inittabbars(MainFrame* self)
@@ -1028,14 +1021,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	case CMD_IMM_SETTINGS:			
 		workspace_selectview(&self->workspace, VIEW_ID_SETTINGSVIEW, 0, 0);
 		break;
-	case CMD_IMM_ENABLEAUDIO: {
-		if (psycleconfig_audioenabled(workspace_conf(&self->workspace))) {
-			psycleconfig_enableaudio(workspace_conf(&self->workspace),
-				FALSE);
-		} else {
-			psycleconfig_enableaudio(workspace_conf(&self->workspace),
-				TRUE);
-		}
+	case CMD_IMM_ENABLEAUDIO: {		
+		psycleconfig_enableaudio(workspace_conf(&self->workspace),
+			!psycleconfig_audioenabled(workspace_conf(&self->workspace)));		
 		break; }
 	case CMD_IMM_LOADSONG:
 		if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
@@ -1073,7 +1061,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	case CMD_COLUMN_E:
 	case CMD_COLUMN_F:
 		if (workspace_song(&self->workspace) && psy_audio_song_numsongtracks(
-				workspace_song(&self->workspace)) >= (cmd.id - CMD_COLUMN_0)) {
+				workspace_song(&self->workspace)) >= (uintptr_t)(cmd.id - CMD_COLUMN_0)) {
 			psy_audio_PatternCursor cursor;
 
 			cursor = workspace_patterncursor(&self->workspace);

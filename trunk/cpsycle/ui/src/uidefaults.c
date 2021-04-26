@@ -53,7 +53,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	
 	if (dark) {
 		surface = psy_ui_colour_make(0x00121212);
-		onsurface = psy_ui_colour_make(0x00FFFFFF);
+		onsurface = psy_ui_colour_make(0x00EEFFFF);
 		primary = psy_ui_colour_make(0x00121212);
 		onprimary = psy_ui_colour_make(0x00EEFFFF);
 		secondary = psy_ui_colour_make(0x00FAD481);
@@ -238,7 +238,9 @@ void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 void psy_ui_defaults_setstyle(psy_ui_Defaults* self, uintptr_t styletype,
 	psy_ui_Style* style)
 {
-	psy_ui_styles_setstyle(&self->styles, styletype, style);
+	if (style) {
+		psy_ui_styles_setstyle(&self->styles, styletype, style);
+	}
 }
 
 psy_ui_Style* psy_ui_defaults_style(psy_ui_Defaults* self, uintptr_t type)

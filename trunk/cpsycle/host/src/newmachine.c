@@ -30,6 +30,8 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_SEARCHFIELD);
+	psy_ui_component_setstyletype_select(&self->component,
+		STYLE_NEWMACHINE_SEARCHFIELD_SELECT);
 	self->filter = filter;
 	psy_ui_image_init(&self->image, &self->component);
 	psy_ui_image_setbitmapalignment(&self->image,
@@ -67,6 +69,7 @@ void newmachinesearch_setfilter(NewMachineSearch* self,
 
 void newmachinesearch_oneditfocus(NewMachineSearch* self, psy_ui_Component* sender)
 {
+	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
 	if (self->hasdefaulttext) {
 		psy_ui_edit_settext(&self->edit, "");
 	}
@@ -82,7 +85,7 @@ void newmachinesearch_onaccept(NewMachineSearch* self,
 	psy_ui_Component* sender)
 {
 	if (psy_strlen(psy_ui_edit_text(&self->edit)) == 0) {
-		newmachinesearch_reset(self);		
+		newmachinesearch_reset(self);
 	}	
 }
 
@@ -98,7 +101,9 @@ void newmachinesearch_reset(NewMachineSearch* self)
 	self->hasdefaulttext = TRUE;
 	if (self->filter) {
 		newmachinefilter_settext(self->filter, "");
-		psy_ui_component_setfocus(psy_ui_component_parent(&self->component));		
+		psy_ui_component_removestylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
+		psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 	}
 }
 

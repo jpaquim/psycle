@@ -1750,6 +1750,15 @@ void psy_ui_component_setstyletype_active(psy_ui_Component* self,
 		psy_ui_STYLESTATE_ACTIVE, active);
 }
 
+void psy_ui_component_setstyletype_select(psy_ui_Component* self,
+	uintptr_t select)
+{
+	psy_ui_componentstyle_setstyle(&self->style,
+		psy_ui_STYLESTATE_SELECT, select);
+	psy_ui_componentstyle_readstyle(&self->style,
+		psy_ui_STYLESTATE_SELECT, select);
+}
+
 void psy_ui_component_setstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {		

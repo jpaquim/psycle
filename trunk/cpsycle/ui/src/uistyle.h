@@ -43,6 +43,7 @@ psy_ui_Style* psy_ui_style_alloc(void);
 psy_ui_Style* psy_ui_style_allocinit(void);
 psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
 	psy_ui_Colour background);
+psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
 // Properties
@@ -55,6 +56,12 @@ INLINE void psy_ui_style_setbackgroundcolour(psy_ui_Style* self,
 	psy_ui_Colour colour)
 {
 	self->backgroundcolour = colour;
+}
+
+INLINE void psy_ui_style_setbackgroundoverlay(psy_ui_Style* self,
+	int overlay)
+{
+	self->backgroundcolour = psy_ui_colour_make_overlay(overlay);
 }
 
 INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
@@ -72,11 +79,25 @@ INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 	self->marginset = TRUE;
 }
 
+INLINE void psy_ui_style_setmargin_em(psy_ui_Style* self,
+	double top, double right, double bottom, double left)
+{
+	psy_ui_style_setmargin(self,
+		psy_ui_margin_make_em(top, right, bottom, left));
+}
+
 INLINE void psy_ui_style_setspacing(psy_ui_Style* self,
 	psy_ui_Margin spacing)
 {
 	self->spacing = spacing;
 	self->spacingset = TRUE;
+}
+
+INLINE void psy_ui_style_setspacing_em(psy_ui_Style* self,
+	double top, double right, double bottom, double left)
+{
+	psy_ui_style_setspacing(self,
+		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
 // psy_ui_Styles
