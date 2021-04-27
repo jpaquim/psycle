@@ -60,23 +60,6 @@ INLINE psy_audio_MachineParam* psy_audio_sendreturnlabelparam_base(
 	return &(self->machineparam);
 }
 
-typedef struct psy_audio_DryWetMixMachineParam {
-	psy_audio_MachineParam machineparam;
-	int32_t* mute;
-	int32_t* dryonly;
-	int32_t* wetonly;
-} psy_audio_DryWetMixMachineParam;
-
-void psy_audio_drywetmixmachineparam_init(psy_audio_DryWetMixMachineParam*,
-	int32_t* mute, int32_t* dryonly, int32_t* wetonly);
-void psy_audio_drywetmixmachineparam_dispose(psy_audio_DryWetMixMachineParam*);
-
-INLINE psy_audio_MachineParam* psy_audio_drywetmixmachineparam_base(
-	psy_audio_DryWetMixMachineParam* self)
-{
-	return &(self->machineparam);
-}
-
 struct psy_audio_ReturnChannel;
 
 typedef struct psy_audio_RouteMachineParam {
@@ -129,7 +112,6 @@ typedef struct psy_audio_MasterChannel {
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
 	psy_audio_IntMachineParam level_param;	
-	psy_audio_DryWetMixMachineParam drywetmix_param;
 } psy_audio_MasterChannel;
 
 void masterchannel_init(psy_audio_MasterChannel*, struct psy_audio_Mixer*,
@@ -159,10 +141,7 @@ typedef struct psy_audio_InputChannel {
 	psy_audio_CustomMachineParam gain_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_IntMachineParam level_param;
-	psy_audio_IntMachineParam dryonly_param;
-	psy_audio_IntMachineParam wetonly_param;
-	psy_audio_DryWetMixMachineParam drywetmix_param;
+	psy_audio_IntMachineParam level_param;	
 	struct psy_audio_Mixer* mixer;	
 } psy_audio_InputChannel;
 
@@ -220,10 +199,16 @@ typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachineParam label_gain_param;
 	psy_audio_CustomMachineParam label_pan_param;
 	psy_audio_CustomMachineParam label_ch_input_param;
+	// ui
 	psy_audio_IntMachineParam solo_param;
-	psy_audio_IntMachineParam solo_tweak_param;
 	psy_audio_IntMachineParam mute_param;
+	psy_audio_IntMachineParam dry_param;
+	psy_audio_IntMachineParam wet_param;
+	// pattern tweak
+	psy_audio_IntMachineParam solo_tweak_param;
 	psy_audio_IntMachineParam mute_tweak_param;
+	psy_audio_IntMachineParam dry_tweak_param;	
+	psy_audio_IntMachineParam returngrid_tweak_param;
 	psy_Table legacyreturn_;
 	psy_Table legacysend_;
 } psy_audio_Mixer;
