@@ -75,6 +75,8 @@ extern "C" {
 #define STYLE_HEADER                         6380
 #define STYLE_MAINVIEWTOPBAR                 6400
 #define STYLE_NAVBAR                         6420
+#define STYLE_CLIPBOX                        6440
+#define STYLE_CLIPBOX_SELECT                 6441
 
 struct psy_ui_Defaults;
 

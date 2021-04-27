@@ -236,7 +236,22 @@ INLINE psy_ui_Colour psy_ui_colour_white(void)
 
 INLINE psy_ui_Colour psy_ui_colour_black(void)
 {
-	return psy_ui_colour_make(0x00000000);
+	return psy_ui_colour_make(0x000000);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_red(void)
+{
+	return psy_ui_colour_make(0x000000FF);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_green(void)
+{
+	return psy_ui_colour_make(0x0000FF00);
+}
+
+INLINE psy_ui_Colour psy_ui_colour_blue(void)
+{
+	return psy_ui_colour_make(0x00FF0000);
 }
 
 #ifdef __cplusplus

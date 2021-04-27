@@ -28,13 +28,19 @@ typedef struct psy_ui_SplitBar {
 	psy_ui_Component component;
 	// internal
 	double dragoffset;	
-	bool hover;
 	bool resize;
 	psy_ui_Size restoresize;
 	bool hasrestore;
+	double thumbsize;
+	bool isvertical;
 } psy_ui_SplitBar;
 
 void psy_ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);
+
+INLINE bool psy_ui_splitbar_isvertical(const psy_ui_SplitBar* self)
+{
+	return self->isvertical;
+}
 
 INLINE psy_ui_Component* psy_ui_splitbar_base(psy_ui_SplitBar* self)
 {

@@ -17,3 +17,8 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setalign(volslider_base(&self->volslider),
 		psy_ui_ALIGN_TOP);
 }
+
+void vubar_reset(VuBar* self)
+{
+	clipbox_deactivate(&self->clipbox);
+}

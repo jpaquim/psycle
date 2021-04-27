@@ -224,6 +224,8 @@ static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
 static void invalidate(psy_ui_Component*);
 static uintptr_t section(const psy_ui_Component* self) { return 0; }
+static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
+
 // events
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
@@ -322,6 +324,7 @@ static void vtable_init(void)
 		vtable.setfont = setfont;		
 		vtable.children = children;
 		vtable.section = section;
+		vtable.setalign = setalign;
 		// events
 		vtable.ondestroy = ondestroy;
 		vtable.ondestroyed = ondestroyed;
@@ -932,6 +935,7 @@ void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 	if (parent = psy_ui_component_parent(self)) {
 		psy_ui_component_checksortedalign(parent, align);
 	}
+	self->vtable->setalign(self, align);
 }
 
 void psy_ui_component_setcontaineralign(psy_ui_Component* self, 
@@ -1105,7 +1109,7 @@ const psy_ui_Size psy_ui_component_minimumsize(const psy_ui_Component* self)
 	return self->sizehints->minsize;
 }
 
-psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
+psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 {
 	psy_ui_Size rv;
 	const psy_ui_TextMetric* tm;
@@ -1124,14 +1128,14 @@ psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
 	return rv;
 }
 
-psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component* self)
+
+psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
 {
 	psy_ui_Size rv;
 	const psy_ui_TextMetric* tm;
 	psy_ui_Margin border;
 	psy_ui_Value border_width;
 	psy_ui_Value border_height;
-
 
 	rv = psy_ui_component_offsetsize(self);
 	border = psy_ui_component_spacing(self);
@@ -1141,6 +1145,11 @@ psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component* self)
 	border_height = psy_ui_margin_height(&border, tm);
 	psy_ui_value_sub(&rv.height, &border_height, tm);
 	return rv;
+}
+
+psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component* self)
+{
+	return psy_ui_component_innersize(self);
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)

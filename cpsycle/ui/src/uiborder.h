@@ -147,6 +147,13 @@ INLINE bool psy_ui_border_isround(const psy_ui_Border* self)
 			psy_ui_value_px(&self->border_bottom_left_radius, 0));
 }
 
+INLINE void psy_ui_border_init_solid(psy_ui_Border* self, psy_ui_Colour colour)
+{
+	psy_ui_border_init_all(self, psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID,
+		psy_ui_BORDER_SOLID, psy_ui_BORDER_SOLID);
+	psy_ui_border_setcolour(self, colour);
+}
+
 #ifdef __cplusplus
 }
 #endif

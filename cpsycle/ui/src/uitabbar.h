@@ -74,7 +74,6 @@ typedef struct psy_ui_TabBar {
 	psy_ui_Component component;
 	// internal	
 	uintptr_t selected;	
-	psy_ui_AlignType tabalignment;	
 	uintptr_t numtabs;
 	// Signals
 	psy_Signal signal_change;	
@@ -86,6 +85,7 @@ void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
 void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tabindex);
 void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tabindex);
+void psy_ui_tabbar_settabalign(psy_ui_TabBar*, psy_ui_AlignType align);
 
 INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 {	
@@ -94,7 +94,6 @@ INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 	return self->selected;	
 }
 
-void psy_ui_tabbar_settabalignment(psy_ui_TabBar*, psy_ui_AlignType);
 void psy_ui_tabbar_settabmode(psy_ui_TabBar*, uintptr_t tab, TabMode);
 psy_ui_Tab* psy_ui_tabbar_tab(psy_ui_TabBar*, uintptr_t tabindex);
 const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar*, uintptr_t tabindex);

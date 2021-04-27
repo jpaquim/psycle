@@ -437,7 +437,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	uintptr_t frame;
 	uintptr_t step;
 
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	baseline = size.height - 1;
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));
@@ -476,7 +476,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize size;
 		
-		size = psy_ui_component_innersize_px(&sender->component);
+		size = psy_ui_component_size_px(&sender->component);
 		tm = psy_ui_component_textmetric(&sender->component);
 		psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));

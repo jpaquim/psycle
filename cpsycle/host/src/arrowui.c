@@ -83,7 +83,7 @@ void arrowui_ondraw(ArrowUi* self, psy_ui_Graphics* g)
 	} else {
 		psy_ui_setcolour(g, self->skin->wireaacolour2);
 	}
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	psy_ui_drawline(g, 
 		psy_ui_realpoint_make(0, size.height / 2),
 		psy_ui_realpoint_make(size.width / 2, size.height / 2));

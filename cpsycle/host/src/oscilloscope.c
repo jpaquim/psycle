@@ -123,7 +123,7 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 		uintptr_t numsamples;
 		bool active = FALSE;
 
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		centery = size.height / 2;
 		buffer = oscilloscope_buffer(self, &numsamples);
 		if (buffer && numsamples > 0) {

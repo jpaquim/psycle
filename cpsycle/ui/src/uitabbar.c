@@ -130,7 +130,7 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 		
 	textident = 0.0;
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_innersize_px(&self->component);	
+	size = psy_ui_component_size_px(&self->component);	
 	if (!psy_ui_bitmap_empty(&self->icon)) {
 		psy_ui_RealSize bpmsize;
 		double vcenter;
@@ -221,9 +221,10 @@ static void vtable_init(psy_ui_TabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)tabbar_ondestroy;		
+		vtable.ondestroy = (psy_ui_fp_component_ondestroy)tabbar_ondestroy;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 // implementation
 void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
@@ -232,15 +233,11 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 
 	psy_ui_component_init(psy_ui_tabbar_base(self), parent, NULL);
 	vtable_init(self);
-	self->component.vtable = &vtable;	
 	psy_ui_component_doublebuffer(psy_ui_tabbar_base(self));	
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_TABBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);	
+	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_TABBAR);
 	psy_signal_init(&self->signal_change);
 	self->numtabs = 0;
 	self->selected = 0;
-	self->tabalignment = psy_ui_ALIGN_TOP;	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 }
@@ -250,6 +247,24 @@ void tabbar_ondestroy(psy_ui_TabBar* self)
 	assert(self);
 	
 	psy_signal_dispose(&self->signal_change);
+}
+
+void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
+{	
+	psy_List* p;
+	psy_List* q;
+
+	assert(self);
+	
+	psy_ui_component_setdefaultalign(&self->component, align,
+		self->component.containeralign->insertmargin);
+	q = psy_ui_component_children(psy_ui_tabbar_base(self),
+		psy_ui_NONRECURSIVE);
+	for (p = q; p != NULL; p = p->next) {
+		psy_ui_component_setalign((psy_ui_Component*)psy_list_entry(p),
+			align);
+	}
+	psy_list_free(q);	
 }
 
 void tabbar_ontabclicked(psy_ui_TabBar* self, psy_ui_Tab* sender)
@@ -324,33 +339,6 @@ void psy_ui_tabbar_clear(psy_ui_TabBar* self)
 	self->selected = 0;	
 	psy_ui_component_clear(&self->component);
 	self->numtabs = 0;
-}
-
-void psy_ui_tabbar_settabalignment(psy_ui_TabBar* self,
-	psy_ui_AlignType alignment)
-{
-	psy_ui_AlignType align;
-	psy_List* p;
-	psy_List* q;
-
-	assert(self);	
-
-	self->tabalignment = alignment;
-	if (self->tabalignment == psy_ui_ALIGN_LEFT ||
-			self->tabalignment == psy_ui_ALIGN_RIGHT) {
-		align = psy_ui_ALIGN_TOP;		
-	} else {
-		align = psy_ui_ALIGN_LEFT;		
-	}
-	psy_ui_component_setdefaultalign(&self->component, align,
-		self->component.containeralign->insertmargin);
-	q = psy_ui_component_children(psy_ui_tabbar_base(self),
-		psy_ui_NONRECURSIVE);
-	for (p = q; p != NULL; p = p->next) {
-		psy_ui_component_setalign((psy_ui_Component*)psy_list_entry(p),
-			align);
-	}
-	psy_list_free(q);
 }
 
 void psy_ui_tabbar_settabmode(psy_ui_TabBar* self, uintptr_t tabindex,

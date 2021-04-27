@@ -95,37 +95,32 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// seqview button
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onprimary_medium);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 6.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_7p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_7p);
+	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON, style);
 	// seqview button::hover
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundoverlay(style, 4);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_11p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_11p);	
 	psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON_HOVER, style);
 	// seqview button::select
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onsecondary);
 	psy_ui_style_setbackgroundoverlay(style, 4);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);	
 	psy_ui_border_setradius_px(&style->border, 5.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQVIEW_BUTTON_SELECT, style);
 	// seqlistview
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_medium, surface_overlay_5p);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 6.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_7p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_7p);
+	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW, style);
 	// seqlistview::select
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_strong, surface_overlay_5p);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_7p);	
+	psy_ui_border_init_solid(&style->border, surface_overlay_7p);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQLISTVIEW_SELECT, style);
 	// seqlistview_track
 	style = psy_ui_style_allocinit();
@@ -154,8 +149,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_set(&style->backgroundcolour,
 			psy_ui_colour_weighted(&secondary, 800));
 	}
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_11p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_11p);	
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM, style);
 	// sequenceeditor item::hover	
@@ -171,8 +165,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_set(&style->backgroundcolour,
 			psy_ui_colour_weighted(&secondary, 800));
 	}
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_11p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_11p);	
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_HOVER, style);
 	// sequenceeditor item::selected	
@@ -188,8 +181,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 		psy_ui_colour_set(&style->backgroundcolour,
 			psy_ui_colour_weighted(&secondary, 800));
 	}
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_11p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_11p);	
 	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_SEQEDT_ITEM_SELECTED, style);
 	// sequencetrackbox tab
@@ -232,8 +224,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// stepsequencer
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, primary, surface_overlay_9p);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_9p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_9p);	
 	psy_ui_border_setradius_px(&style->border, 10.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_STEPSEQUENCER, style);
 	// top
@@ -285,33 +276,28 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setspacing_em(style, 0.6, 0.0, 0.6, 1.0);
 	psy_ui_style_setbackgroundoverlay(style, 6);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border,
-		psy_ui_colour_overlayed(&surface, &overlay, 0.10));
+	psy_ui_border_init_solid(&style->border, surface_overlay_11p);	
 	psy_ui_border_setradius_px(&style->border, 10.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_PLAYBAR, style);
 	// duration
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onprimary_weak);
 	psy_ui_style_setbackgroundoverlay(style, 2);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setcolour(&style->border, surface_overlay_5p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_5p);	
 	psy_ui_border_setradius_px(&style->border, 6);
 	psy_ui_style_setspacing_em(style, 0.3, 0.3, 0.3, 0.3);
 	psy_ui_defaults_setstyle(defaults, STYLE_DURATION_TIME, style);
 	// key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_weak, surface_overlay_16p);		
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
+	psy_ui_border_setradius_px(&style->border, 4.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY, style);
 	// key::active
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_medium, surface_overlay_12p);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
+	psy_ui_border_setradius_px(&style->border, 4.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_ACTIVE, style);
 	// key::hover
 	style = psy_ui_style_clone(psy_ui_defaults_style(defaults, STYLE_KEY));	
@@ -320,33 +306,29 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, secondary,	
 		psy_ui_colour_make_rgb(52, 53, 50));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
+	psy_ui_border_setradius_px(&style->border, 4.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SELECT, style);
 	// shift key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_weak,
-		psy_ui_colour_make_rgb(128, 172, 131));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+		psy_ui_colour_make_rgb(128, 172, 131));		
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
 	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_SHIFT_SELECT, style);
 	// alt key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_weak,
 		psy_ui_colour_make_rgb(28, 138, 103));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
 	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_ALT_SELECT, style);
 	// ctrl key
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, onprimary_weak,
 		psy_ui_colour_make_rgb(176, 173, 130));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 4.0);
-	psy_ui_border_setcolour(&style->border, surface_overlay_16p);
+	psy_ui_border_init_solid(&style->border, surface_overlay_16p);
+	psy_ui_border_setradius_px(&style->border, 4.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_KEY_CTRL_SELECT, style);	
 	// table row
 	style = psy_ui_style_allocinit();
@@ -381,10 +363,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundoverlay(style, 2);	
 	psy_ui_style_setspacing_em(style, 0.5, 0.5, 1.0, 1.0);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 6.0);
-	psy_ui_border_setcolour(&style->border,
+	psy_ui_border_init_solid(&style->border,
 		psy_ui_colour_overlayed(&surface, &secondary, 0.30));
+	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SECTION_SELECTED, style);
 	// newmachine_sectionheader
 	style = psy_ui_style_allocinit();	
@@ -397,10 +378,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// newmachine_searchfield	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onprimary_medium);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
-	psy_ui_border_setradius_px(&style->border, 6.0);
-	psy_ui_border_setcolour(&style->border,
+	psy_ui_border_init_solid(&style->border,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.20));
+	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_style_setspacing_em(style, 0.3, 0.3, 0.3, 0.0);
 	psy_ui_style_setmargin_em(style, 0.0, 8.0, 0.0, 0.0);	
 	psy_ui_defaults_setstyle(defaults, STYLE_NEWMACHINE_SEARCHFIELD, style);
@@ -436,11 +416,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// propertyview
 	// propertyview_mainsection
 	style = psy_ui_style_allocinit();
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_init_solid(&style->border, surface_overlay_7p);
 	psy_ui_border_setradius_px(&style->border, 6.0);
 	psy_ui_style_setcolour(style, onprimary_medium);
-	psy_ui_style_setbackgroundoverlay(style, 4);		
-	psy_ui_border_setcolour(&style->border, surface_overlay_7p);
+	psy_ui_style_setbackgroundoverlay(style, 4);	
 	psy_ui_defaults_setstyle(defaults, STYLE_PROPERTYVIEW_MAINSECTION, style);
 	// propertyview_mainsectionheader
 	style = psy_ui_style_allocinit();
@@ -455,9 +434,8 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// recentview_mainsection
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, onprimary_medium);
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
+	psy_ui_border_init_solid(&style->border, surface_overlay_7p);
 	psy_ui_border_setradius_px(&style->border, 6.0);	
-	psy_ui_border_setcolour(&style->border, surface_overlay_7p);
 	psy_ui_defaults_setstyle(defaults, STYLE_RECENTVIEW_MAINSECTION, style);
 	// recentview_mainsectionheader
 	style = psy_ui_style_allocinit();
@@ -486,4 +464,13 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID, surface);
 	psy_ui_defaults_setstyle(defaults, STYLE_NAVBAR, style);
+	// clipbox
+	style = psy_ui_style_allocinit();
+	psy_ui_border_init_solid(&style->border, psy_ui_colour_make(0x00333333));
+	psy_ui_defaults_setstyle(defaults, STYLE_CLIPBOX, style);
+	// clipbox::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_red());
+	psy_ui_border_init_solid(&style->border, psy_ui_colour_make(0x00333333));	
+	psy_ui_defaults_setstyle(defaults, STYLE_CLIPBOX_SELECT, style);
 }

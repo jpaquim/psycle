@@ -4,40 +4,17 @@
 #include "../../detail/prefix.h"
 
 #include "clipbox.h"
+// host
+#include "styles.h"
 // dsp
-#include <rms.h>
-// audio
-#include <songio.h>
+#include <operations.h>
 
-#define TIMER_ID_CLIPBOX 700
+static bool checkpeak(float peak);
 
 // prototypes
-static void clipbox_ondestroy(ClipBox*, psy_ui_Component* sender);
-static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
-static void clipbox_currclipcolours(ClipBox*, psy_ui_Colour* currbackground,
-	psy_ui_Colour* currborder);
 static void clipbox_ontimer(ClipBox*, uintptr_t timerid);
 static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
-static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
-	psy_audio_BufferContext*);
-static bool clipbox_clipoccurred(ClipBox* self, psy_audio_Machine*);
-static void clipbox_onsongchanged(ClipBox*, Workspace*, int flag, psy_audio_Song*);
-static void clipbox_connectmachinessignals(ClipBox*, Workspace*);
-
-static ClipBoxSkin clipboxdefaultskin;
-static int clipboxdefaultskin_initialized = 0;
-
-static void clipboxdefaultskin_init(ClipBox* self)
-{
-	if (!clipboxdefaultskin_initialized) {
-		clipboxdefaultskin.on = psy_ui_colour_make(0x000000FF);
-		clipboxdefaultskin.off = psy_ui_colour_make(0x00232323);
-		clipboxdefaultskin.borderon = psy_ui_colour_make(0x00333333);
-		clipboxdefaultskin.borderoff = psy_ui_colour_make(0x00333333);
-		clipboxdefaultskin_initialized = 1;
-	}
-	self->skin = clipboxdefaultskin;
-}
+static bool clipbox_check(ClipBox*, psy_audio_Machine*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -45,121 +22,68 @@ static bool vtable_initialized = FALSE;
 static void vtable_init(ClipBox* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw)clipbox_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)clipbox_onmousedown;
-		vtable.ontimer = (psy_ui_fp_component_ontimer)clipbox_ontimer;
+		vtable = *(self->component.vtable);		
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			clipbox_onmousedown;
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			clipbox_ontimer;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 // implementation
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
-{	
+{
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	self->workspace = workspace;
-	self->isclipon = FALSE;
-	clipboxdefaultskin_init(self);
+	psy_ui_component_setstyletype(&self->component, STYLE_CLIPBOX);
+	psy_ui_component_setstyletype_select(&self->component,
+		STYLE_CLIPBOX_SELECT);
+	self->workspace = workspace;	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(2.0, 1.5));
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		clipbox_onsongchanged);	
-	clipbox_connectmachinessignals(self, workspace);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		clipbox_ondestroy);
-}
-
-void clipbox_ondestroy(ClipBox* self, psy_ui_Component* sender)
-{
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		clipbox_onsongchanged);
-	if (workspace_song(self->workspace)) {
-		psy_signal_disconnect(&psy_audio_machines_master(
-			&workspace_song(self->workspace)->machines)->signal_worked, self,
-			clipbox_onmasterworked);
-	}
+	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
 void clipbox_ontimer(ClipBox* self, uintptr_t timerid)
 {	
-	if (clipbox_isclipon(self)) {
-		psy_ui_component_stoptimer(&self->component, TIMER_ID_CLIPBOX);
-		psy_ui_component_invalidate(&self->component);		
+	if (!clipbox_ison(self) && workspace_song(self->workspace)) {
+		psy_audio_Machine* master;
+
+		master = psy_audio_machines_master(
+			&workspace_song(self->workspace)->machines);
+		if (master && clipbox_check(self, master)) {
+			clipbox_activate(self);
+		}				
 	}
 }
 
-void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master,
-	uintptr_t slot, psy_audio_BufferContext* bc)
-{		
-	if (clipbox_clipoccurred(self, master)) {
-		clipbox_activate(self);
-		psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);		
-	}
-}
-
-bool clipbox_clipoccurred(ClipBox* self, psy_audio_Machine* machine)
+bool clipbox_check(ClipBox* self, psy_audio_Machine* machine)
 {
-	psy_audio_Buffer * memory;
+	psy_audio_Buffer * memory;	
 
 	memory = psy_audio_machine_buffermemory(machine);
-	return (memory && memory->rms &&
-		(memory->rms->data.previousLeft >= 32767.f ||
-		memory->rms->data.previousLeft < -32768.f ||
-		memory->rms->data.previousRight >= 32767.f ||
-		memory->rms->data.previousRight < -32768.f));
+	if (memory && memory->numsamples > 0) {
+		if (memory->numchannels > 0 &&
+			checkpeak(dsp.maxvol(memory->samples[0], memory->numsamples))) {
+			return TRUE;
+		}
+		if (memory->numchannels > 1 &&
+			checkpeak(dsp.maxvol(memory->samples[1], memory->numsamples))) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+bool checkpeak(float peak)
+{
+	return (peak >= 32767.f || peak < -32768.f || peak >= 32767.f || peak < -32768.f);
 }
 
 void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)
 {
-	clipbox_deactivate(self);
-	psy_ui_component_invalidate(&self->component);
-}
-
-void clipbox_onsongchanged(ClipBox* self, Workspace* workspace, int flag, psy_audio_Song* song)
-{
-	clipbox_connectmachinessignals(self, workspace);	
-}
-
-void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
-{
-	if (workspace && workspace->song &&
-			psy_audio_machines_master(&workspace->song->machines)) {
-		psy_signal_connect(&psy_audio_machines_master(
-			&workspace->song->machines)->signal_worked, self,
-			clipbox_onmasterworked);
-	}
-}
-
-void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
-{	
-	psy_ui_Size size;
-	const psy_ui_TextMetric* tm;
-	psy_ui_RealRectangle rc;
-	psy_ui_Colour currbackground;
-	psy_ui_Colour currborder;
-
-	size = psy_ui_component_offsetsize(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	if (psy_ui_value_px(&size.height, tm) > 40) {
-		size.height = psy_ui_value_make_px(40);
-	}
-	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, tm) - 1,
-		psy_ui_value_px(&size.height, tm) - 5);
-	clipbox_currclipcolours(self, &currbackground, &currborder);
-	psy_ui_drawsolidrectangle(g, rc, currbackground);
-	psy_ui_setcolour(g, currborder);			
-	psy_ui_drawrectangle(g, rc);
-}
-
-void clipbox_currclipcolours(ClipBox* self, psy_ui_Colour* currbackground,
-	psy_ui_Colour* currborder)
-{
-	if (clipbox_isclipon(self)) {
-		*currbackground = self->skin.on;
-		*currborder = self->skin.borderon;
-	} else {
-		*currbackground = self->skin.off;
-		*currborder = self->skin.borderoff;
-	}
+	clipbox_deactivate(self);	
 }

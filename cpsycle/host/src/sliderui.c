@@ -93,7 +93,7 @@ void sliderui_ondraw(SliderUi* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 
 	sliderui_updateparam(self);
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	// todo: make the slider scalable	
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);

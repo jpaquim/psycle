@@ -40,7 +40,7 @@ void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;	
 	psy_ui_RealRectangle bar;
 				
-	size = psy_ui_component_innersize_px(&self->component);	
+	size = psy_ui_component_size_px(&self->component);	
 	psy_ui_realrectangle_init_all(&bar,
 		psy_ui_realpoint_zero(),
 		psy_ui_realsize_make(self->progress * size.width, size.height));

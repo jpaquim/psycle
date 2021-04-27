@@ -193,7 +193,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_innersize_px(psy_ui_label_base(self));		
+	size = psy_ui_component_size_px(psy_ui_label_base(self));		
 	//psy_ui_textout(g, 0, 0, self->text, psy_strlen(self->text));
 	//return;
 	if (size.height >= tm->tmHeight * 2) {
