@@ -605,25 +605,22 @@ static void sequenceduration_ondestroy(SequenceViewDuration* self,
 void sequenceduration_init(SequenceViewDuration* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
 	
 	self->workspace = workspace;
 	self->duration_ms = 0;
-	self->duration_bts = 0.0;
-	psy_ui_margin_init_em(&margin, 0.5, 2.0, 0.5, 0.0);
-	psy_ui_component_init(&self->component, parent, NULL);	
+	self->duration_bts = 0.0;	
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setspacing(&self->component,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.5));
 	psy_ui_label_init_text(&self->desc, &self->component, NULL,
 		"sequencerview.duration");
-	psy_ui_label_setcharnumber(&self->desc, 10.0);	
-	psy_ui_label_settextalignment(&self->desc,
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+	psy_ui_component_setspacing(&self->desc.component,
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->desc.component, margin);	
 	psy_ui_label_init(&self->duration, &self->component, NULL);	
-	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init_em(&margin, 0.5, 0.0, 0.5, 0.0);
-	psy_ui_component_setmargin(&self->duration.component, margin);
-	psy_ui_label_setcharnumber(&self->duration, 18);
+	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_label_setcharnumber(&self->duration, 18.0);
 	psy_ui_label_preventtranslation(&self->duration);
 	psy_ui_component_setstyletypes(psy_ui_label_base(&self->duration),
 		STYLE_DURATION_TIME, psy_INDEX_INVALID, psy_INDEX_INVALID,
@@ -775,7 +772,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(
 		&psycleconfig_general(workspace_conf(workspace))->signal_changed,
-		self, sequenceview_onconfigure);
+		self, sequenceview_onconfigure);	
 }
 
 void sequenceview_onscroll(SequenceView* self, psy_ui_Component* sender)

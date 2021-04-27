@@ -213,6 +213,7 @@ void psy_ui_tab_onlanguagechanged(psy_ui_Tab* self)
 static void tabbar_ondestroy(psy_ui_TabBar*);
 static void tabbar_build(psy_ui_TabBar*);
 static void tabbar_ontabclicked(psy_ui_TabBar*, psy_ui_Tab* sender);
+static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -221,7 +222,12 @@ static void vtable_init(psy_ui_TabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)tabbar_ondestroy;
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			tabbar_ondestroy;
+		vtable.onmousewheel =
+			(psy_ui_fp_component_onmouseevent)
+			tabbar_onmousewheel;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -367,4 +373,20 @@ const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar* self,
 	assert(self);
 
 	return psy_ui_tabbar_tab((psy_ui_TabBar*)self, tabindex);
+}
+
+void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
+{
+	assert(self);
+
+	if (ev->delta > 0) {
+		if (self->selected + 1 < self->numtabs) {
+			psy_ui_tabbar_select(self, self->selected + 1);
+		}
+	} else if (ev->delta < 0) {
+		if (self->selected > 0) {
+			psy_ui_tabbar_select(self, self->selected - 1);
+		}
+	}		
+	psy_ui_mouseevent_preventdefault(ev);
 }
