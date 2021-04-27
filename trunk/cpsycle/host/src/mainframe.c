@@ -32,6 +32,7 @@ static void mainframe_ondestroyed(MainFrame*);
 static void mainframe_initworkspace(MainFrame*);
 static void mainframe_initemptystatusbar(MainFrame*);
 static void mainframe_initspacerleft(MainFrame*);
+static void mainframe_initspacerright(MainFrame*);
 static void mainframe_inittoparea(MainFrame*);
 static void mainframe_initclientarea(MainFrame*);
 static void mainframe_initmainviewarea(MainFrame*); 
@@ -198,12 +199,13 @@ void mainframe_init(MainFrame* self)
 {			
 	mainframe_initframe(self);	
 	mainframe_initworkspace(self);
-	mainframe_initemptystatusbar(self);
-	mainframe_initspacerleft(self);
+	mainframe_initemptystatusbar(self);	
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
-	mainframe_inittoparea(self);
-	mainframe_initclientarea(self);	
+	mainframe_inittoparea(self);	
+	mainframe_initclientarea(self);
+	mainframe_initspacerleft(self);
+	mainframe_initspacerright(self);
 	mainframe_initmainviewarea(self);
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
@@ -287,20 +289,29 @@ void mainframe_initemptystatusbar(MainFrame* self)
 }
 
 void mainframe_initspacerleft(MainFrame* self)
-{	
+{
 	psy_ui_component_init(&self->spacerleft, &self->component, NULL);
 	psy_ui_component_preventalign(&self->spacerleft);
 	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_make_em(2.0, 0.0));
+		psy_ui_size_make_em(0.5, 0.0));
 	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
+}
+
+void mainframe_initspacerright(MainFrame* self)
+{	
+	psy_ui_component_init(&self->spacerright, &self->client, NULL);
+	psy_ui_component_preventalign(&self->spacerright);
+	psy_ui_component_setpreferredsize(&self->spacerright,
+	 	psy_ui_size_make_em(0.5, 0.0));
+	psy_ui_component_setalign(&self->spacerright, psy_ui_ALIGN_RIGHT);	
 }
 
 void mainframe_inittoparea(MainFrame* self)
 {	
 	psy_ui_component_init_align(&self->top, mainframe_base(self),
-		psy_ui_ALIGN_TOP);	
+		psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
-		psy_ui_margin_make_em(0.0, 0.0, 0.5, 0.0));
+		psy_ui_margin_zero());	
 }
 
 void mainframe_initclientarea(MainFrame* self)
@@ -323,6 +334,8 @@ void mainframe_initleftarea(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->left, mainframe_base(self),
 		psy_ui_ALIGN_LEFT);
+	psy_ui_component_setbackgroundmode(&self->left,
+		psy_ui_NOBACKGROUND);
 	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
 }
 
@@ -461,19 +474,14 @@ void mainframe_initprogressbar(MainFrame* self)
 
 void mainframe_initbars(MainFrame* self)
 {
-	psy_ui_Margin margin;
-	psy_ui_Margin toprowsmargin;
-	psy_ui_Margin row0margin;	
-
-	psy_ui_margin_init_em(&row0margin, 0.5, 0.0, 0.5, 0.0);	
+	psy_ui_Margin margin;	
+	
 	// rows
 	psy_ui_component_init_align(&self->toprows, &self->top,
 		psy_ui_ALIGN_TOP);
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {		
-	}
-	psy_ui_margin_init_em(&toprowsmargin, 0.0, 1.0, 0.0, 0.0);	
-	psy_ui_component_setmargin(&self->toprows, toprowsmargin);
+	}	
 	psy_ui_component_setstyletypes(&self->toprows,
 		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
@@ -606,7 +614,7 @@ void mainframe_initmainviews(MainFrame* self)
 {
 	psy_ui_notebook_init(&self->notebook, &self->mainviews);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook),

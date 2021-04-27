@@ -88,6 +88,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setcolour(style, onprimary_medium);
 	psy_ui_style_setbackgroundoverlay(style, 12);
+	psy_ui_style_setspacing_em(style, 0.2, 1.0, 0.2, 1.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_STATUSBAR, style);
 	// seqview buttons
 	style = psy_ui_style_allocinit();
@@ -238,19 +239,20 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	// toprow0
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, surface_overlay_8p);
+	psy_ui_style_setspacing_em(style, 0.0, 2.0, 0.0, 2.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW0, style);
 	// toprow1
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setspacing_em(style, 0.5, 0.0, 0.5, 0.0);	
+	psy_ui_style_setspacing_em(style, 0.5, 2.0, 0.5, 2.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW1, style);
 	// toprow2
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_setspacing_em(style, 0.5, 0.0, 0.0, 0.0);	
+	psy_ui_style_setspacing_em(style, 0.5, 2.0, 0.0, 2.0);
 	psy_ui_defaults_setstyle(defaults, STYLE_TOPROW2, style);
 	// trackscopes
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, surface);
-	psy_ui_style_setspacing_em(style, 1.0, 0.0, 0.0, 0.0);	
+	psy_ui_style_setspacing_em(style, 1.0, 0.5, 0.0, 0.5);	
 	psy_ui_defaults_setstyle(defaults, STYLE_TRACKSCOPES, style);
 	// songproperties
 	style = psy_ui_style_allocinit();

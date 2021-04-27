@@ -579,17 +579,19 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 void view_dev_invalidaterect(psy_ui_ViewComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	if (r) {		
+	if (psy_ui_component_drawvisible(self->view) && r) {
 		psy_ui_RealPoint translation;
 		psy_ui_RealRectangle position;
+		psy_ui_RealMargin spacing;
 		
 		translation = translatecoords(self, self->component, self->view);
 		position = psy_ui_component_position(self->component);
+		spacing = psy_ui_component_spacing_px(self->view);
 		psy_ui_component_invalidaterect(self->view,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
-					position.left + r->left + translation.x,
-					position.top + r->top + translation.y),
+					position.left + r->left + translation.x + spacing.left,
+					position.top + r->top + translation.y + spacing.top),
 				psy_ui_realrectangle_size(r)));
 	}
 }
