@@ -473,4 +473,14 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_red());
 	psy_ui_border_init_solid(&style->border, psy_ui_colour_make(0x00333333));	
 	psy_ui_defaults_setstyle(defaults, STYLE_CLIPBOX_SELECT, style);
+	// labelpair
+	style = psy_ui_style_allocinit();	
+	psy_ui_defaults_setstyle(defaults, STYLE_LABELPAIR, style);
+	// labelpair_first
+	style = psy_ui_style_allocinit();	
+	psy_ui_defaults_setstyle(defaults, STYLE_LABELPAIR_FIRST, style);
+	// labelpair_second
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setbackgroundoverlay(style, 2);
+	psy_ui_defaults_setstyle(defaults, STYLE_LABELPAIR_SECOND, style);
 }

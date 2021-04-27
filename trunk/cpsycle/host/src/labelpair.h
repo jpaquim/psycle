@@ -15,16 +15,16 @@ extern "C" {
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_Label desc;
-	psy_ui_Label value;
+	psy_ui_Label first;
+	psy_ui_Label second;
 } LabelPair;
 
-void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* desc,
-	double desccharnumber);
-void labelpair_init_right(LabelPair*, psy_ui_Component* parent, const char* desc,
-	double desccharnumber);
-void labelpair_init_top(LabelPair*, psy_ui_Component* parent, const char* desc,
-	double desccharnumber);
+void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* first,
+	double charnumber);
+void labelpair_init_right(LabelPair*, psy_ui_Component* parent, const char* first,
+	double charnumber);
+void labelpair_init_top(LabelPair*, psy_ui_Component* parent, const char* first,
+	double charnumber);
 
 #ifdef __cplusplus
 }

@@ -42,31 +42,23 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	// init base
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(zoombox_base(self), vtable_init(self));
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_ZOOMBOX, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setstyletype(&self->component, STYLE_ZOOMBOX);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	// init ui elements
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self), NULL,
-		self, zoombox_onzoomout);
-	psy_ui_component_setstyletypes(&self->zoomout.component,
-		STYLE_ZOOMBOX, psy_ui_STYLE_BUTTON_HOVER, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
-	psy_ui_button_settext(&self->zoomout, "-");
+		self, zoombox_onzoomout);	
+	psy_ui_button_preventtranslation(&self->zoomout);
+	psy_ui_button_settext(&self->zoomout, "-");	
 	psy_ui_button_setcharnumber(&self->zoomout, 2);
 	psy_ui_label_init(&self->label, zoombox_base(self), NULL);
+	psy_ui_label_preventtranslation(&self->label);
 	psy_ui_label_settext(&self->label, "100%");
-	psy_ui_label_setcharnumber(&self->label, 6);	
-	//psy_ui_component_setstyletypes(&self->label.component,
-		//STYLE_ZOOMBOX, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_label_setcharnumber(&self->label, 6);
 	psy_ui_button_init_connect(&self->zoomin, zoombox_base(self), NULL,
 		self, zoombox_onzoomin);
+	psy_ui_button_preventtranslation(&self->zoomin);
 	psy_ui_button_settext(&self->zoomin, "+");	
-	psy_ui_button_setcharnumber(&self->zoomin, 2);	
-	psy_ui_component_setstyletypes(&self->zoomin.component,
-		STYLE_ZOOMBOX, psy_ui_STYLE_BUTTON_HOVER, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	psy_ui_button_setcharnumber(&self->zoomin, 2);		
 	psy_ui_component_setalign_children(zoombox_base(self), psy_ui_ALIGN_LEFT);		
 	// set defaults
 	self->zoomrate = 1.0;

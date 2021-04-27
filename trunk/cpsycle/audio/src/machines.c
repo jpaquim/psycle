@@ -49,7 +49,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 		self->numsamplebuffers, sizeof(psy_dsp_amp_t));
 	assert(self->samplebuffers);
 	self->currsamplebuffer = 0;
-	self->selected = 0;
+	self->selected = psy_INDEX_INVALID;
 	self->paramselected = 0;	
 	self->soloed = psy_INDEX_INVALID;
 	self->buffers = 0;
