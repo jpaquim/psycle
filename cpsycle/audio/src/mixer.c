@@ -140,99 +140,6 @@ int sendreturnlabelparam_describe(psy_audio_SendReturnLabelParam* self, char* te
 	return 1;
 }
 
-// DryWetMixParam
-static void drywetmixmachineparam_tweak(psy_audio_DryWetMixMachineParam*, float val);
-static float drywetmixmachineparam_normvalue(psy_audio_DryWetMixMachineParam*);
-static void drywetmixmachineparam_range(psy_audio_DryWetMixMachineParam*,
-	intptr_t* minval, intptr_t* maxval);
-
-static MachineParamVtable drywetmixmachineparam_vtable;
-static int drywetmixmachineparam_vtable_initialized = 0;
-
-static void drywetmixmachineparam_vtable_init(psy_audio_DryWetMixMachineParam* self)
-{
-	if (!drywetmixmachineparam_vtable_initialized) {
-		drywetmixmachineparam_vtable = *(self->machineparam.vtable);
-		drywetmixmachineparam_vtable.tweak = (fp_machineparam_tweak)
-			drywetmixmachineparam_tweak;
-		drywetmixmachineparam_vtable.normvalue = (fp_machineparam_normvalue)
-			drywetmixmachineparam_normvalue;
-		drywetmixmachineparam_vtable.range = (fp_machineparam_range)
-			drywetmixmachineparam_range;
-		drywetmixmachineparam_vtable_initialized = 1;
-	}
-}
-
-void psy_audio_drywetmixmachineparam_init(psy_audio_DryWetMixMachineParam* self,
-	int32_t* mute, int32_t* dryonly, int32_t* wetonly)
-{
-	psy_audio_machineparam_init(&self->machineparam);
-	drywetmixmachineparam_vtable_init(self);
-	self->machineparam.vtable = &drywetmixmachineparam_vtable;
-	self->mute = mute;
-	self->dryonly = dryonly;
-	self->wetonly = wetonly;
-}
-
-void psy_audio_drywetmixmachineparam_dispose(psy_audio_DryWetMixMachineParam* self)
-{
-	psy_audio_machineparam_dispose(&self->machineparam);
-}
-
-void drywetmixmachineparam_tweak(psy_audio_DryWetMixMachineParam* self, float val)
-{
-	// drywetmix. (0 normal, 1 dryonly, 2 wetonly  3 mute)
-	int scaled;
-
-	scaled = (int)(val * 3);
-	switch (scaled) {
-	case 0:
-		*self->mute = 0;
-		*self->dryonly = 0;
-		*self->wetonly = 0;
-		break;
-	case 1:
-		*self->dryonly = 1;
-		*self->mute = 0;
-		*self->wetonly = 0;
-		break;
-	case 2:
-		*self->wetonly = 1;
-		*self->mute = 0;
-		*self->dryonly = 0;
-		break;
-	case 3:
-		*self->mute = 1;
-		*self->dryonly = 0;
-		*self->wetonly = 0;
-		break;
-	default:
-		break;
-	}
-}
-
-float drywetmixmachineparam_normvalue(psy_audio_DryWetMixMachineParam* self)
-{
-	// drywetmix. (0 normal, 1 dryonly, 2 wetonly  3 mute)	
-	if (*self->mute == 0 && *self->dryonly == 1 && *self->wetonly == 0) {
-		return 1.f / 3;
-	} else
-		if (*self->mute == 0 && *self->dryonly == 0 && *self->wetonly == 1) {
-			return 2.f / 3;
-		} else
-			if (*self->mute == 1 && *self->dryonly == 0 && *self->wetonly == 0) {
-				return 3.f / 3;
-			}
-		return 0.f;
-}
-
-void drywetmixmachineparam_range(psy_audio_DryWetMixMachineParam* self,
-	intptr_t* minval, intptr_t* maxval)
-{
-	*minval = 0;
-	*maxval = 3;
-}
-
 // RouteMachineParam
 static int routemachineparam_type(psy_audio_RouteMachineParam* self) { return MPF_SWITCH | MPF_SMALL; }
 static void routemachineparam_tweak(psy_audio_RouteMachineParam* self, float val);
@@ -521,8 +428,6 @@ void masterchannel_init(psy_audio_MasterChannel* self, psy_audio_Mixer* mixer, c
 		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		masterchannel_level_normvalue);	
-	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
-		&self->dryonly, &self->wetonly);	
 }
 
 void masterchannel_dispose(psy_audio_MasterChannel* self)
@@ -533,7 +438,6 @@ void masterchannel_dispose(psy_audio_MasterChannel* self)
 	psy_audio_floatmachineparam_dispose(&self->pan_param);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
 	psy_audio_intmachineparam_dispose(&self->level_param);
-	psy_audio_drywetmixmachineparam_dispose(&self->drywetmix_param);
 	psy_table_dispose(&self->sendvols);
 }
 
@@ -630,15 +534,6 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id,
 		"Level", "Level", MPF_LEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		inputchannel_level_normvalue);	
-	psy_audio_intmachineparam_init(&self->dryonly_param,
-		"D", "D", MPF_CHECK | MPF_SMALL, &self->dryonly, 0, 1);
-	self->dryonly_param.machineparam.isslidergroup = TRUE;
-	psy_audio_intmachineparam_init(&self->wetonly_param,
-		"W", "W", MPF_CHECK | MPF_SMALL, &self->wetonly, 0, 1);
-	self->wetonly_param.machineparam.isslidergroup = TRUE;
-	psy_audio_drywetmixmachineparam_init(&self->drywetmix_param, &self->mute,
-		&self->dryonly, &self->wetonly);
-	
 }
 
 void inputchannel_dispose(psy_audio_InputChannel* self)
@@ -651,10 +546,7 @@ void inputchannel_dispose(psy_audio_InputChannel* self)
 	psy_audio_custommachineparam_dispose(&self->gain_param);
 	psy_audio_floatmachineparam_dispose(&self->pan_param);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
-	psy_audio_intmachineparam_dispose(&self->level_param);	
-	psy_audio_intmachineparam_dispose(&self->dryonly_param);
-	psy_audio_intmachineparam_dispose(&self->wetonly_param);
-	psy_audio_drywetmixmachineparam_dispose(&self->drywetmix_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);		
 	psy_table_dispose(&self->sendvols);
 }
 
@@ -950,6 +842,7 @@ void returnchannel_level_normvalue(psy_audio_ReturnChannel* self,
 }
 
 // Mixer
+// paramview
 static void mixer_solo_tweak(psy_audio_Mixer*,
 	psy_audio_IntMachineParam* sender, float value);
 static void mixer_solo_normvalue(psy_audio_Mixer*,
@@ -958,6 +851,23 @@ static void mixer_mute_tweak(psy_audio_Mixer*,
 	psy_audio_IntMachineParam* sender, float value);
 static void mixer_mute_normvalue(psy_audio_Mixer*,
 	psy_audio_IntMachineParam* sender, float* rv);
+static void mixer_dry_tweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
+static void mixer_dry_normvalue(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float* rv);
+static void mixer_wet_tweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
+static void mixer_wet_normvalue(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float* rv);
+// pattern
+static void mixer_solo_patterntweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
+static void mixer_mute_patterntweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
+static void mixer_dry_patterntweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
+static void mixer_returngrid_tweak(psy_audio_Mixer*,
+	psy_audio_IntMachineParam* sender, float value);
 
 static MachineVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -1060,28 +970,52 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	psy_audio_custommachineparam_init(&self->label_pan_param, "Pan", "Pan", MPF_INFOLABEL | MPF_SMALL, 0, 0);
 	psy_audio_custommachineparam_init(&self->label_ch_input_param, "Ch. Input", "Ch. Input",
 		MPF_INFOLABEL | MPF_SMALL | MPF_BOTTOM, 0, 0);
+	// paramview parameters
+	// solo
 	psy_audio_intmachineparam_init(&self->solo_param, "S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	self->solo_param.machineparam.isslidergroup = TRUE;
 	psy_signal_connect(&self->solo_param.machineparam.signal_tweak, self,
 		mixer_solo_tweak);
 	psy_signal_connect(&self->solo_param.machineparam.signal_normvalue, self,
-		mixer_solo_normvalue);
-	psy_audio_intmachineparam_init(&self->solo_tweak_param, "S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 0xFF);
-	psy_signal_connect(&self->solo_tweak_param.machineparam.signal_tweak, self,
-		mixer_solo_tweak);
-	psy_signal_connect(&self->solo_tweak_param.machineparam.signal_normvalue, self,
-		mixer_solo_normvalue);
+		mixer_solo_normvalue);	
+	// mute
 	psy_audio_intmachineparam_init(&self->mute_param, "M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
 	psy_signal_connect(&self->mute_param.machineparam.signal_tweak, self,
 		mixer_mute_tweak);
 	psy_signal_connect(&self->mute_param.machineparam.signal_normvalue, self,
 		mixer_mute_normvalue);
-	self->mute_param.machineparam.isslidergroup = TRUE;
+	self->mute_param.machineparam.isslidergroup = TRUE;	
+	// dry
+ 	psy_audio_intmachineparam_init(&self->dry_param, "D", "D", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
+	self->dry_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->dry_param.machineparam.signal_tweak, self,
+		mixer_dry_tweak);
+	psy_signal_connect(&self->dry_param.machineparam.signal_normvalue, self,
+		mixer_dry_normvalue);
+	// wet
+	psy_audio_intmachineparam_init(&self->wet_param, "W", "W", MPF_CHECK | MPF_SMALL, NULL, 0, 1);
+	self->wet_param.machineparam.isslidergroup = TRUE;
+	psy_signal_connect(&self->wet_param.machineparam.signal_tweak, self,
+		mixer_wet_tweak);
+	psy_signal_connect(&self->wet_param.machineparam.signal_normvalue, self,
+		mixer_wet_normvalue);
+	// pattern tweak
+	// solo
+	psy_audio_intmachineparam_init(&self->solo_tweak_param, "S", "S", MPF_CHECK | MPF_SMALL, NULL, 0, 0xFF);
+	psy_signal_connect(&self->solo_tweak_param.machineparam.signal_tweak, self,
+		mixer_solo_patterntweak);
+	// mute
 	psy_audio_intmachineparam_init(&self->mute_tweak_param, "M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 0xFF);
 	psy_signal_connect(&self->mute_tweak_param.machineparam.signal_tweak, self,
-		mixer_mute_tweak);
-	psy_signal_connect(&self->mute_tweak_param.machineparam.signal_normvalue, self,
-		mixer_mute_normvalue);
+		mixer_mute_patterntweak);
+	// dry
+	psy_audio_intmachineparam_init(&self->dry_tweak_param, "D", "D", MPF_CHECK | MPF_SMALL, NULL, 0, 0xFF);
+	psy_signal_connect(&self->dry_tweak_param.machineparam.signal_tweak, self,
+		mixer_dry_patterntweak);	
+	// returngrid
+	psy_audio_intmachineparam_init(&self->returngrid_tweak_param, "M", "M", MPF_CHECK | MPF_SMALL, NULL, 0, 0xFF);
+	psy_signal_connect(&self->returngrid_tweak_param.machineparam.signal_tweak, self,
+		mixer_returngrid_tweak);
 }
 
 void psy_audio_mixer_dispose(psy_audio_Mixer* self)
@@ -1107,9 +1041,13 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 	psy_audio_custommachineparam_dispose(&self->label_pan_param);
 	psy_audio_custommachineparam_dispose(&self->label_ch_input_param);
 	psy_audio_intmachineparam_dispose(&self->solo_param);
-	psy_audio_intmachineparam_dispose(&self->solo_tweak_param);
 	psy_audio_intmachineparam_dispose(&self->mute_param);
+	psy_audio_intmachineparam_dispose(&self->dry_param);
+	psy_audio_intmachineparam_dispose(&self->wet_param);
+	psy_audio_intmachineparam_dispose(&self->solo_tweak_param);	
 	psy_audio_intmachineparam_dispose(&self->mute_tweak_param);
+	psy_audio_intmachineparam_dispose(&self->dry_tweak_param);	
+	psy_audio_intmachineparam_dispose(&self->returngrid_tweak_param);
 	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
@@ -1191,13 +1129,18 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		psy_TableIterator sendvol_iter;
 
 		input = (psy_audio_InputChannel*)psy_tableiterator_value(&input_iter);
-		if (input && psy_audio_inputchannel_active(input)) {
+		if (input && psy_audio_inputchannel_active(input)) {			
+			input->buffer = psy_audio_machines_outputs(machines, input->inputslot);
 			// mix input to master
-			input->buffer = psy_audio_machines_outputs(machines, input->inputslot);			
-			psy_audio_buffer_addsamples(self->master.buffer, input->buffer,
-				amount, input->volume * input->drymix *
-				inputchannel_wirevolume(input));			
+			if (!input->wetonly) {
+				psy_audio_buffer_addsamples(self->master.buffer, input->buffer,
+					amount, input->volume * input->drymix *
+					inputchannel_wirevolume(input));
+			}
 			// mix input to return channel chain start
+			if (input->dryonly) {
+				continue;
+			}
 			for (sendvol_iter = psy_table_begin(&input->sendvols);
 					!psy_tableiterator_equal(&sendvol_iter, psy_table_end());
 					psy_tableiterator_inc(&sendvol_iter)) {
@@ -1646,9 +1589,13 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 			self->mute_param.machineparam.param1 = psy_INDEX_INVALID;
 			return &self->mute_param.machineparam;
 		} else if (row == numreturncolumns(self) + 8) {
-			return &channel->dryonly_param.machineparam;
+			self->dry_param.machineparam.param0 = index;
+			self->dry_param.machineparam.param1 = psy_INDEX_INVALID;
+			return &self->dry_param.machineparam;			
 		} else if (row == numreturncolumns(self) + 9) {
-			return &channel->wetonly_param.machineparam;
+			self->wet_param.machineparam.param0 = index;
+			self->wet_param.machineparam.param1 = psy_INDEX_INVALID;
+			return &self->wet_param.machineparam;			
 		} else if (row == numreturncolumns(self) + 10) {
 			return &self->ignore_param.machineparam;
 		} else {
@@ -1766,7 +1713,8 @@ psy_audio_MachineParam* tweakparameter(psy_audio_Mixer* self, uintptr_t param)
 				rv = psy_audio_custommachineparam_base(&channel->sendvol_param);
 			} else if (digit0x == 0xD) {
 				// D->input drywetmix. (0 normal, 1 dryonly, 2 wetonly  3 mute)
-				rv = psy_audio_drywetmixmachineparam_base(&channel->drywetmix_param);
+				self->dry_tweak_param.machineparam.param0 = digitx0 - 1;
+				rv = &self->dry_tweak_param.machineparam;				
 			} else if (digit0x == 0xE) {
 				// E->input gain.
 				rv = psy_audio_custommachineparam_base(&channel->gain_param);
@@ -1779,7 +1727,8 @@ psy_audio_MachineParam* tweakparameter(psy_audio_Mixer* self, uintptr_t param)
 		if (digit0x == 0) {
 			return &self->solo_tweak_param.machineparam;
 		} else {
-			return &self->mute_tweak_param.machineparam;
+			self->returngrid_tweak_param.machineparam.param0 = digit0x;
+			return &self->returngrid_tweak_param.machineparam;
 		}
 	} else if (digitx0 == 0xE) {
 		// 1..C -> return volumes
@@ -2445,34 +2394,17 @@ void psy_audio_mixer_discardsend(psy_audio_Mixer* self, uintptr_t idx)
 	}
 }
 
+// tweak invoked by the paramview ui
 void mixer_solo_tweak(psy_audio_Mixer* self,
 	psy_audio_IntMachineParam* sender, float value)
-{
-	if (sender == &self->solo_tweak_param) {
-		// tweak invoked by the pattern
-		uintptr_t scaled;
-
-		scaled = (uintptr_t)(value * 0xFF);
-		if (scaled == 0) {
-			self->inputsolo = psy_INDEX_INVALID;
-			self->returnsolo = psy_INDEX_INVALID;
-		} else if (scaled < 0xD) {
-			self->inputsolo = scaled - 1;
-			self->returnsolo = psy_INDEX_INVALID;
-		} else {
-			self->inputsolo = psy_INDEX_INVALID;
-			self->returnsolo = scaled - 0xD;
-		}
-	} else {
-		// tweak invoked by the paramview ui
-		if (value == 0) {
-			self->inputsolo = psy_INDEX_INVALID;
-			self->returnsolo = psy_INDEX_INVALID;
-		} else {			
-			self->inputsolo = sender->machineparam.param0;
-			self->returnsolo = sender->machineparam.param1;			
-		}
-	}
+{	
+	if (value == 0) {
+		self->inputsolo = psy_INDEX_INVALID;
+		self->returnsolo = psy_INDEX_INVALID;
+	} else {			
+		self->inputsolo = sender->machineparam.param0;
+		self->returnsolo = sender->machineparam.param1;			
+	}	
 }
 
 void mixer_solo_normvalue(psy_audio_Mixer* self,
@@ -2489,75 +2421,206 @@ void mixer_solo_normvalue(psy_audio_Mixer* self,
 	*rv = 0.f;
 }
 
+// tweak invoked by the paramview ui
 void mixer_mute_tweak(psy_audio_Mixer* self,
 	psy_audio_IntMachineParam* sender, float value)
-{
-	if (sender == &self->mute_tweak_param) {
-		// tweak invoked by the pattern
-		uintptr_t scaled;
+{		
+	if (sender->machineparam.param0 != psy_INDEX_INVALID) {
+		psy_audio_InputChannel* channel;
 
-		scaled = (uintptr_t)(value * 0xFF);
-		if (scaled == 0) {
-		
-		} else if (scaled < 0xD) {			
-		
-		} else {
-		
+		channel = psy_audio_mixer_channel(self, 
+			sender->machineparam.param0);
+		if (channel) {
+			channel->mute = value != 0.0;
 		}
 	} else {
-		// tweak invoked by the paramview ui		
-		if (sender->machineparam.param0 != psy_INDEX_INVALID) {
-			psy_audio_InputChannel* channel;
+		psy_audio_ReturnChannel* channel;
 
-			channel = psy_audio_mixer_channel(self, 
-				sender->machineparam.param0);
+		channel = psy_audio_mixer_return(self,
+			sender->machineparam.param1);
+		if (channel) {
 			channel->mute = value != 0.0;
-		} else {
-			psy_audio_ReturnChannel* channel;
+		}
+	}	
+}
 
-			channel = psy_audio_mixer_return(self,
-				sender->machineparam.param0);
+void mixer_mute_normvalue(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{	
+	if (sender->machineparam.param0 != psy_INDEX_INVALID) {
+		psy_audio_InputChannel* channel;
+
+		channel = psy_audio_mixer_channel(self,
+			sender->machineparam.param0);
+		if (channel) {
+			if (self->returnsolo != psy_INDEX_INVALID) {
+				*rv = 1.f;
+			} else if (self->inputsolo == psy_INDEX_INVALID) {
+				*rv = (channel->mute) ? 1.f : 0.f;
+			} else if (self->inputsolo == sender->machineparam.param0) {					
+				*rv = 0.f;
+			} else if (self->inputsolo != sender->machineparam.param0) {
+				*rv = 1.f;
+			}
+		}
+	} else if (sender->machineparam.param1 != psy_INDEX_INVALID) {
+		psy_audio_ReturnChannel* channel;
+
+		channel = psy_audio_mixer_return(self,
+			sender->machineparam.param1);
+		if (channel) {				
+			if (self->returnsolo == psy_INDEX_INVALID) {
+				*rv = (channel->mute) ? 1.f : 0.f;
+			} else if (self->returnsolo == sender->machineparam.param1) {
+				*rv = 0.f;
+			} else if (self->returnsolo != sender->machineparam.param1) {
+				*rv = 1.f;
+			}
+		}
+	}		
+	return;
+}
+
+void mixer_dry_tweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	psy_audio_InputChannel* channel;
+
+	channel = psy_audio_mixer_channel(self, sender->machineparam.param0);
+	if (channel) {		
+		channel->dryonly = value != 0.f;
+		if (channel->dryonly) {
+			channel->wetonly = FALSE;
+			channel->mute = FALSE;
+		}
+	}
+}
+
+void mixer_dry_normvalue(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	psy_audio_InputChannel* channel;
+
+	channel = psy_audio_mixer_channel(self,
+		sender->machineparam.param0);
+	if (channel) {
+		*rv = (channel->dryonly) ? 1.f : 0.f;
+		return;
+	}
+	*rv = 0.f;
+}
+
+void mixer_wet_tweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	psy_audio_InputChannel* channel;
+
+	channel = psy_audio_mixer_channel(self, sender->machineparam.param0);
+	if (channel) {
+		channel->wetonly = value != 0.f;
+		if (channel->wetonly) {
+			channel->dryonly = FALSE;
+			channel->mute = FALSE;
+		}
+	}
+}
+
+void mixer_wet_normvalue(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float* rv)
+{
+	psy_audio_InputChannel* channel;
+
+	channel = psy_audio_mixer_channel(self,
+		sender->machineparam.param0);
+	if (channel) {		
+		*rv = (channel->wetonly) ? 1.f : 0.f;
+		return;
+	}
+	*rv = 0.f;	
+}
+
+// pattern tweak
+void mixer_solo_patterntweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
+{	
+	// tweak invoked by the pattern
+	uintptr_t scaled;
+
+	scaled = (uintptr_t)(value * 0xFF);
+	if (scaled == 0) {
+		self->inputsolo = psy_INDEX_INVALID;
+		self->returnsolo = psy_INDEX_INVALID;
+	} else if (scaled < 0xD) {
+		self->inputsolo = scaled - 1;
+		self->returnsolo = psy_INDEX_INVALID;
+	} else {
+		self->inputsolo = psy_INDEX_INVALID;
+		self->returnsolo = scaled - 0xD;
+	}
+}
+
+void mixer_mute_patterntweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
+{	
+	if (sender->machineparam.param0 != psy_INDEX_INVALID) {
+		psy_audio_InputChannel* channel;
+
+		channel = psy_audio_mixer_channel(self,
+			sender->machineparam.param0);
+		if (channel) {
+			channel->mute = value != 0.0;
+		}
+	} else {
+		psy_audio_ReturnChannel* channel;
+
+		channel = psy_audio_mixer_return(self,
+			sender->machineparam.param1);
+		if (channel) {
 			channel->mute = value != 0.0;
 		}
 	}
 }
 
-void mixer_mute_normvalue(psy_audio_Mixer* self,
-	psy_audio_IntMachineParam* sender, float* rv)
+void mixer_dry_patterntweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
 {
-	if (sender == &self->mute_param) {
-		if (sender->machineparam.param0 != psy_INDEX_INVALID) {
-			psy_audio_InputChannel* channel;
+	psy_audio_InputChannel* channel;
+	uintptr_t scaled;
 
-			channel = psy_audio_mixer_channel(self,
-				sender->machineparam.param0);
-			if (channel) {
-				if (self->returnsolo != psy_INDEX_INVALID) {
-					*rv = 1.f;
-				} else if (self->inputsolo == psy_INDEX_INVALID) {
-					*rv = (channel->mute) ? 1.f : 0.f;
-				} else if (self->inputsolo == sender->machineparam.param0) {					
-					*rv = 0.f;
-				} else if (self->inputsolo != sender->machineparam.param0) {
-					*rv = 1.f;
-				}
-			}
-		} else if (sender->machineparam.param1 != psy_INDEX_INVALID) {
-			psy_audio_ReturnChannel* channel;
-
-			channel = psy_audio_mixer_return(self,
-				sender->machineparam.param1);
-			if (channel) {				
-				if (self->returnsolo == psy_INDEX_INVALID) {
-					*rv = (channel->mute) ? 1.f : 0.f;
-				} else if (self->returnsolo == sender->machineparam.param1) {
-					*rv = 0.f;
-				} else if (self->returnsolo != sender->machineparam.param1) {
-					*rv = 1.f;
-				}
-			}
-		}
-		return;
+	scaled = (uintptr_t)(value * 0xFF);
+	channel = psy_audio_mixer_channel(self,
+		sender->machineparam.param0);
+	if (channel) {
+		channel->dryonly = FALSE;
+		channel->wetonly = FALSE;
+		channel->mute = FALSE;
+		if (scaled == 0) {			
+		} else if (scaled == 1) {
+			channel->dryonly = TRUE;
+		} else if (scaled == 2) {
+			channel->wetonly = TRUE;
+		} else if (scaled == 3) {
+			channel->mute = TRUE;
+		}		
 	}
-	*rv = 0.f;
+}
+
+void mixer_returngrid_tweak(psy_audio_Mixer* self,
+	psy_audio_IntMachineParam* sender, float value)
+{
+	// tweak invoked by the pattern
+	psy_audio_ReturnChannel* channel;
+	uintptr_t scaled;
+
+	scaled = (uintptr_t)(value * 0xFF);	
+	channel = psy_audio_mixer_return(self, sender->machineparam.param0 - 1);
+	if (channel) {
+		channel->mute = (scaled & 1) ? TRUE : FALSE;			
+		// for (int i(param); i < numreturns(); i++)
+		// {
+		//	Return(param - 1).SendsTo(i, (value & (2 << i)) ? true : false);
+		//}
+		// Return(param - 1).MasterSend() = (value & (1 << 13)) ? true : false;
+		//RecalcReturn(param - 1);
+	}	
 }
