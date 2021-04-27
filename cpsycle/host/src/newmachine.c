@@ -307,7 +307,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	// plugin name
 	labelpair_init(&self->plugname, &self->component, "Name", 12.0);
-	psy_ui_component_setalign(&self->plugname.value.component,
+	psy_ui_component_setalign(&self->plugname.second.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->plugname.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
@@ -426,12 +426,12 @@ void newmachinedetail_setdescription(NewMachineDetail* self, const char* text)
 
 void newmachinedetail_setplugname(NewMachineDetail* self, const char* text)
 {
-	psy_ui_label_settext(&self->plugname.value, text);
+	psy_ui_label_settext(&self->plugname.second, text);
 }
 
 void newmachinedetail_setdllname(NewMachineDetail* self, const char* text)
 {	
-	psy_ui_label_settext(&self->dllname.value, text);
+	psy_ui_label_settext(&self->dllname.second, text);
 }
 
 void newmachinedetail_setcategoryname(NewMachineDetail* self, const char* text)
@@ -444,7 +444,7 @@ void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version)
 	char valstr[64];
 
 	psy_snprintf(valstr, 64, "%d", (int)version);	
-	psy_ui_label_settext(&self->version.value, valstr);
+	psy_ui_label_settext(&self->version.second, valstr);
 }
 
 void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
@@ -452,7 +452,7 @@ void newmachinedetail_setapiversion(NewMachineDetail* self, int16_t apiversion)
 	char valstr[64];
 
 	psy_snprintf(valstr, 64, "%d", (int)apiversion);
-	psy_ui_label_settext(&self->apiversion.value, valstr);
+	psy_ui_label_settext(&self->apiversion.second, valstr);
 }
 
 void newmachinedetail_oncategoryeditaccept(NewMachineDetail* self,

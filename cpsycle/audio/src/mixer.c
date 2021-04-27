@@ -2605,22 +2605,28 @@ void mixer_dry_patterntweak(psy_audio_Mixer* self,
 	}
 }
 
+// tweak invoked by the pattern
 void mixer_returngrid_tweak(psy_audio_Mixer* self,
 	psy_audio_IntMachineParam* sender, float value)
 {
-	// tweak invoked by the pattern
 	psy_audio_ReturnChannel* channel;
 	uintptr_t scaled;
 
 	scaled = (uintptr_t)(value * 0xFF);	
 	channel = psy_audio_mixer_return(self, sender->machineparam.param0 - 1);
 	if (channel) {
-		channel->mute = (scaled & 1) ? TRUE : FALSE;			
-		// for (int i(param); i < numreturns(); i++)
-		// {
-		//	Return(param - 1).SendsTo(i, (value & (2 << i)) ? true : false);
-		//}
-		// Return(param - 1).MasterSend() = (value & (1 << 13)) ? true : false;
-		//RecalcReturn(param - 1);
+		uintptr_t i;		
+		psy_audio_ReturnChannel* returnchannel;
+
+		// the return grid array grid represents:
+		// bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
+		channel->mute = (scaled & 1) ? TRUE : FALSE;
+		psy_table_clear(&channel->sendsto);		
+		for (i = sender->machineparam.param0; i < 11; ++i) {
+			if (scaled & (2 << i)) {
+				psy_table_insert(&channel->sendsto, i, (void*)(uintptr_t)TRUE);
+			}				
+		}
+		channel->mastersend = (scaled & (1 << 13)) ? TRUE : FALSE;		
 	}	
 }

@@ -195,13 +195,13 @@ void cpuview_initperformance(CPUView* self)
 	psy_ui_component_setdefaultalign(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
 	psy_ui_checkbox_init_text(&self->cpucheck, &self->performance,
-		"CPU Performance");
+		"cpu.performance");
 	psy_signal_connect(&self->cpucheck.signal_clicked, self,
 		cpuview_oncpuperf);
-	labelpair_init(&self->audiothreads, &self->performance, "Audio threads", 25.0);
-	labelpair_init(&self->totaltime, &self->performance, "Total (time)", 25.0);
-	labelpair_init(&self->machines, &self->performance, "Machines", 25.0);
-	labelpair_init(&self->routing, &self->performance, "Routing", 25.0);
+	labelpair_init(&self->audiothreads, &self->performance, "cpu.audio-threads", 25.0);
+	labelpair_init(&self->totaltime, &self->performance, "cpu.total", 25.0);
+	labelpair_init(&self->machines, &self->performance, "cpu.machines", 25.0);
+	labelpair_init(&self->routing, &self->performance, "cpu.routing", 25.0);
 }
 
 void cpuview_initmodules(CPUView* self, Workspace* workspace)
@@ -231,17 +231,17 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	GlobalMemoryStatusEx(&lpBuffer);
 
 	psy_snprintf(buffer, 128, "%d%%", 100 - lpBuffer.dwMemoryLoad);
-	psy_ui_label_settext(&self->resources_win.value, buffer);
+	psy_ui_label_settext(&self->resources_win.second, buffer);
 
 	psy_snprintf(buffer, 128, "%.0fM (of %.0fM)",
 		lpBuffer.ullAvailPhys / (float)(1 << 20),
 		lpBuffer.ullTotalPhys / (float)(1 << 20));
-	psy_ui_label_settext(&self->resources_mem.value, buffer);
+	psy_ui_label_settext(&self->resources_mem.second, buffer);
 
 	psy_snprintf(buffer, 128, "%.0fM (of %.0fM)",
 		(lpBuffer.ullAvailPageFile / (float)(1 << 20)),
 		(lpBuffer.ullTotalPageFile / (float)(1 << 20)));
-	psy_ui_label_settext(&self->resources_swap.value, buffer);
+	psy_ui_label_settext(&self->resources_swap.second, buffer);
 #if defined _WIN64
 	psy_snprintf(buffer, 128, "%.0fG (of %.0fG)",
 		(lpBuffer.ullAvailVirtual / (float)(1 << 30)),
@@ -251,7 +251,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 		(lpBuffer.ullAvailVirtual / (float)(1 << 20)),
 		(lpBuffer.ullTotalVirtual / (float)(1 << 20)));
 #endif
-	psy_ui_label_settext(&self->resources_vmem.value, buffer);
+	psy_ui_label_settext(&self->resources_vmem.second, buffer);
 #endif
 	if (workspace_song(self->workspace)) {
 		nummachines = psy_audio_machines_size(&workspace_song(self->workspace)->machines);
@@ -267,8 +267,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 
 void cpuview_onhide(CPUView* self)
 {
-	psy_ui_component_hide(&self->component);
-	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_hide_align(&self->component);	
 }
 
 void cpuview_oncpuperf(CPUView* self, psy_ui_CheckBox* sender)

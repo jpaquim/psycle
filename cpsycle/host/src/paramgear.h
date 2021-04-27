@@ -7,7 +7,6 @@
 // host
 #include "workspace.h"
 #include "paramlistbox.h"
-#include <uitabbar.h>
 #include "intedit.h"
 // ui
 #include <uibutton.h>
@@ -33,7 +32,7 @@ typedef struct ParamRackBox {
 	ParameterListBox parameters;	
 	psy_ui_Colour restorebgcolour;
 	uintptr_t slot;
-	// referenced
+	// references
 	Workspace* workspace;
 	struct ParamRackBox* nextbox;
 } ParamRackBox;
@@ -56,10 +55,9 @@ typedef enum ParamRackMode {
 } ParamRackMode;
 
 typedef struct ParamRackBatchBar {
-	// inherit
+	// inherits
 	psy_ui_Component component;
-	// internal
-	// ui elements
+	// internal	
 	psy_ui_Button solo;
 	psy_ui_Button mute;
 	psy_ui_Button remove;
@@ -70,12 +68,11 @@ typedef struct ParamRackBatchBar {
 void paramrackbatchbar_init(ParamRackBatchBar*, psy_ui_Component* parent);
 
 typedef struct ParamRackModeBar {
-	// inherit
+	// inherits
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_select;
-	// internal
-	// ui elements
+	// internal	
 	psy_ui_Button all;
 	psy_ui_Button inputs;
 	psy_ui_Button outputs;
@@ -91,15 +88,15 @@ void paramrackmodebar_setmode(ParamRackModeBar*, ParamRackMode);
 typedef struct ParamRackPane {
 	// inherit
 	psy_ui_Component component;	
-	// internal data
+	// internal
 	psy_Table boxes;
 	uintptr_t lastselected;
 	ParamRackMode mode;
+	uintptr_t level;
 	// references
 	Workspace* workspace;
 	psy_audio_Machines* machines;	
-	ParamRackBox* lastinserted;
-	uintptr_t level;
+	ParamRackBox* lastinserted;	
 } ParamRackPane;
 
 void paramrackpane_init(ParamRackPane*, psy_ui_Component* parent, Workspace*);
@@ -111,12 +108,10 @@ typedef struct ParamRack {
 	// inherit
 	psy_ui_Component component;
 	// internal
-	// ui elements
 	ParamRackPane pane;
 	psy_ui_Component bottom;
 	ParamRackBatchBar batchbar;
-	ParamRackModeBar modebar;
-	// psy_ui_TabBar modeselector;
+	ParamRackModeBar modebar;	
 	IntEdit leveledit;
 	psy_ui_Scroller scroller;
 	// references

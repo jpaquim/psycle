@@ -308,11 +308,16 @@ void make_translator_make_gear(psy_Property* parent)
 void make_translator_make_cpu(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "cpu"));
+	add("performance", "CPU Performance");
 	add("resources", "Windows Resources");
 	add("ram", "Physical Memory(RAM)");
 	add("ram", "Memoria fisica");
 	add("swap", "Page File (Swap)");
 	add("vram", "Virtual Memory");
+	add("audio-threads", "Audio threads");
+	add("total", "Total (time)");
+	add("machines", "Machines");
+	add("routing", "Routing");	
 }
 
 void make_translator_make_songproperties(psy_Property* parent)
