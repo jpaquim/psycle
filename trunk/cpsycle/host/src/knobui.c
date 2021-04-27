@@ -94,7 +94,7 @@ void knobui_ondraw(KnobUi* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle r_bottom;
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	knobui_updateparam(self);
 	if (self->param) {
 		psy_ui_setrectangle(&r_top,

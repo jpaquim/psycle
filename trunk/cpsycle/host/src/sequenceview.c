@@ -276,7 +276,7 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 		psy_ui_component_textmetric(&self->component))));	
 	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top / lineheightpx)));
 	endrow = (uintptr_t)(floor(g->clip.bottom / lineheightpx + 0.5));
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0));
 	cpy = lineheightpx * startrow;
@@ -341,7 +341,7 @@ void sequencelisttrack_drawprogressbar(SequenceListTrack* self,
 	psy_ui_RealRectangle r;
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(x, y),
 		psy_ui_realsize_make(
@@ -587,7 +587,7 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 	psy_ui_RealSize size;
 	double lineheightpx;
 	
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	lineheightpx = psy_ui_value_px(&self->state->lineheight,
 		psy_ui_component_textmetric(&self->component));
 	return psy_ui_realrectangle_make(

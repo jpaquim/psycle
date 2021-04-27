@@ -86,6 +86,7 @@ typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component*, int 
 typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_invalidate)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_setalign)(struct psy_ui_Component*, psy_ui_AlignType);
 // vtable events function pointers 
 typedef void (*psy_ui_fp_component_ondestroy)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_ondestroyed)(struct psy_ui_Component*);
@@ -131,6 +132,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_preventinput preventinput;
 	psy_ui_fp_component_invalidate invalidate;
 	psy_ui_fp_component_section section;
+	psy_ui_fp_component_setalign setalign;
 	// events
 	psy_ui_fp_component_ondestroy ondestroy;
 	psy_ui_fp_component_ondestroyed ondestroyed;
@@ -343,7 +345,9 @@ psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setborder(psy_ui_Component* self,
 	const psy_ui_Border* border);
-void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType);
+
+void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType);
+
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
 	psy_ui_Component* parent, psy_ui_AlignType aligntype)
 {
@@ -568,13 +572,25 @@ INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const
 		psy_ui_component_font(self));
 }
 
+// returns the content's size(excludes padding and border)
+psy_ui_Size psy_ui_component_size(const psy_ui_Component* self);
+
+INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(self);
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
+}
+
+// returns the inner size(excludes border but includes padding)
 psy_ui_Size psy_ui_component_innersize(const psy_ui_Component*);
 
 INLINE psy_ui_RealSize psy_ui_component_innersize_px(const psy_ui_Component* self)
 {
 	psy_ui_Size size;
 
-	size = psy_ui_component_innersize(self);
+	size = psy_ui_component_size(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
 }
 

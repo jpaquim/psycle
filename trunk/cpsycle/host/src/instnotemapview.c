@@ -114,7 +114,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self,
 	double bottom = 1 - top;	
 	psy_ui_RealSize size;
 	
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x00333333));
@@ -310,7 +310,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			}
 		}
 		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		cpy = 0;
 		if (self->state->selectedentry && self->instrument &&
 				self->instrument->entries) {
@@ -397,7 +397,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		static const char* noinst = "No Instrument";
 
 		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		psy_ui_textout(g,
 			(size.width - tm->tmAveCharWidth * psy_strlen(noinst)) / 2,
 			(size.height - tm->tmHeight) / 2,

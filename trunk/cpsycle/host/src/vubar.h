@@ -12,8 +12,8 @@
 
 // VuBar
 //
-// The VU Bar combines a Vumeter, a VolumeSlider and a ClipBox
-// to display and control the Master volume
+// Composite of Vumeter, VolumeSlider and ClipBox. Displays and controls the
+// Master volume and displays a clip warning if the amp range overflows
 //
 // Structure:
 // psy_ui_ComponentImp
@@ -37,6 +37,8 @@ typedef struct VuBar {
 } VuBar;
 
 void vubar_init(VuBar*, psy_ui_Component* parent, Workspace*);
+
+void vubar_reset(VuBar*);
 
 INLINE psy_ui_Component* vubar_base(VuBar* self)
 {

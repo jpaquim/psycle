@@ -23,43 +23,34 @@ extern "C" {
 //  psy_ui_ComponentImp
 //          ^
 //          |        <<send>>
-//       ClipBox  -------------> psy_audio_Machine (signal_worked)
-//                |
-//                |  <<send>>
-//                -------------> Workspace (signal_songchanged)
-
-typedef struct {
-	psy_ui_Colour on;
-	psy_ui_Colour off;
-	psy_ui_Colour borderon;
-	psy_ui_Colour borderoff;
-} ClipBoxSkin;
+//       ClipBox  -------------> psy_audio_Machine (buffermemory)
 
 typedef struct ClipBox {
 	// inherits
 	psy_ui_Component component;
-	// internal data
-	ClipBoxSkin skin;
-	bool isclipon;
+	// internal data	
 	// references
 	Workspace* workspace;
 } ClipBox;
 
 void clipbox_init(ClipBox*, psy_ui_Component* parent, Workspace* workspace);
 
-INLINE bool clipbox_isclipon(ClipBox* self)
-{
-	return self->isclipon;
-}
-
 INLINE void clipbox_activate(ClipBox* self)
 {
-	self->isclipon = TRUE;
+	psy_ui_component_addstylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);
 }
 
 INLINE void clipbox_deactivate(ClipBox* self)
 {
-	self->isclipon = FALSE;
+	psy_ui_component_removestylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);
+}
+
+INLINE bool clipbox_ison(const ClipBox* self)
+{
+	return ((psy_ui_componentstyle_state(&self->component.style) &
+		psy_ui_STYLESTATE_SELECT) == psy_ui_STYLESTATE_SELECT);
 }
 
 INLINE psy_ui_Component* clipbox_base(ClipBox* self)

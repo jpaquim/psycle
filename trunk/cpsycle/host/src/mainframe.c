@@ -1123,7 +1123,7 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 	psy_audio_Song* song)
-{		
+{			
 	if (flag == WORKSPACE_LOADSONG) {		
 		if (generalconfig_showsonginfoonload(psycleconfig_general(
 				workspace_conf(sender)))) {
@@ -1139,7 +1139,8 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 		psy_signal_connect(
 			&workspace_song(&self->workspace)->patterns.signal_numsongtrackschanged,
 			self, mainframe_onsongtrackschanged);
-	}	
+	}
+	vubar_reset(&self->vubar);
 	psy_ui_component_align(mainframe_base(self));
 }
 

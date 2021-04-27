@@ -86,7 +86,7 @@ void headerui_ondraw(HeaderUi* self, psy_ui_Graphics* g)
 	psy_ui_RealSize size;
 
 	headerui_updateparam(self);
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	half = size.height / 2;
 	quarter = half / 2;
 	psy_ui_realrectangle_init_all(&r, psy_ui_realpoint_zero(), size);

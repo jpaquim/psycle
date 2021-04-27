@@ -567,7 +567,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_Colour oddlinebgcolour;
 		uintptr_t i;
 		
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
@@ -855,7 +855,7 @@ uintptr_t pluginsview_visilines(PluginsView* self)
 {
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_innersize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	return (uintptr_t)(size.height / self->lineheight);
 }
 
@@ -885,7 +885,7 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 		uintptr_t index;
 		psy_ui_RealSize size;
 
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
 		index = psy_property_index(plugin);
 		*row = index / self->numparametercols;
@@ -901,7 +901,7 @@ psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col
 	if (self->plugins) {	
 		psy_ui_RealSize size;
 
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
 		return psy_property_at_index(self->currplugins,
 			self->numparametercols * row + col);
@@ -957,7 +957,7 @@ uintptr_t pluginsview_hittest(PluginsView* self, double x, double y)
 		psy_ui_RealSize size;
 		uintptr_t i;
 
-		size = psy_ui_component_innersize_px(&self->component);
+		size = psy_ui_component_size_px(&self->component);
 		pluginsview_computetextsizes(self, size.width);
 		for (p = psy_property_begin(self->currplugins), cpx = 0, cpy = 0, i = 0;
 				p != NULL; psy_list_next(&p), ++i) {

@@ -154,7 +154,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	} else {
 		text = self->text;
 	}		
-	size = psy_ui_component_innersize_px(psy_ui_button_base(self));
+	size = psy_ui_component_size_px(psy_ui_button_base(self));
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ident = 0.0;
 	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
@@ -224,7 +224,7 @@ psy_ui_RealPoint psy_ui_button_center(psy_ui_Button* self,
 	psy_ui_RealPoint rv;
 	psy_ui_RealSize size;
 	
-	size = psy_ui_component_innersize_px(psy_ui_button_base(self));
+	size = psy_ui_component_size_px(psy_ui_button_base(self));
 	rv = center;
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
