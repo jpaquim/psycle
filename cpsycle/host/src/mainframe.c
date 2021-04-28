@@ -239,8 +239,8 @@ void mainframe_init(MainFrame* self)
 	mainframe_connectseqeditorbuttons(self);
 	mainframe_updatethemes(self);	
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
-	save_translator_default(self);
-	save_translator_template(self);
+	save_translator_default();
+	save_translator_template();
 #endif
 }
 
@@ -281,9 +281,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setstyletypes(&self->statusbar,
-		STYLE_STATUSBAR, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->statusbar, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.25, 1.0, 0.25, 0.0));
 }
@@ -390,6 +388,8 @@ void mainframe_initviewstatusbars(MainFrame* self)
 	psy_ui_component_setdefaultalign(
 		psy_ui_notebook_base(&self->viewstatusbars),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
+		psy_ui_ALIGN_CLIENT);
 	machineviewbar_init(&self->machineviewbar,
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->workspace);	
@@ -411,7 +411,8 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);	
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 45);
+	psy_ui_label_preventwrap(&self->statusbarlabel);
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -488,26 +489,28 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());			
 	// row0
-	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
+	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);	
+	// Vugroup		
+	vubar_init(&self->vubar, &self->toprow0, &self->workspace);
+	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);
 	psy_ui_component_init(&self->toprow0_client, &self->toprow0, NULL);
-	psy_ui_component_setalign(&self->toprow0_client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->toprow0_client, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->toprow0_bars, &self->toprow0_client, NULL);
+	psy_ui_component_setalign(&self->toprow0_bars, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setdefaultalign(&self->toprow0_client, psy_ui_ALIGN_LEFT,
+	psy_ui_component_setdefaultalign(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
 		margin);
-	filebar_init(&self->filebar, &self->toprow0_client, &self->workspace);
-	undoredobar_init(&self->undoredobar, &self->toprow0_client, &self->workspace);
-	playbar_init(&self->playbar, &self->toprow0_client, &self->workspace);
-	playposbar_init(&self->playposbar, &self->toprow0_client, &self->workspace);
-	metronomebar_init(&self->metronomebar, &self->toprow0_client, &self->workspace);
+	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
+	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
+	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);
+	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);
+	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(&self->metronomebar.component);
 	}
 	margin.right = psy_ui_value_make_px(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
-	// Vugroup		
-	vubar_init(&self->vubar, &self->toprow0, &self->workspace);
-	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	// row1
 	psy_ui_component_init(&self->toprow1, &self->toprows, NULL);
 	psy_ui_component_setstyletype(&self->toprow1, STYLE_TOPROW1);		
@@ -1435,7 +1438,8 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	if (self->startpage) {
 		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
 		self->startpage = 0;
-	}			
+	}
+	psy_ui_tabbar_unmark(&self->helpsettingstabbar);
 	psy_ui_notebook_select(&self->viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
@@ -1457,6 +1461,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 	uintptr_t viewid;
 	psy_ui_Component* component;
 
+	psy_ui_tabbar_unmark(&self->tabbar);
 	switch (tabindex) {
 		case 0:
 			viewid = VIEW_ID_SETTINGSVIEW;

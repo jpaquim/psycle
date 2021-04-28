@@ -58,6 +58,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	psy_ui_bitmap_init(&self->icon);
 	self->text = psy_strdup(text);
 	self->translation = NULL;
+	self->preventtranslation = FALSE;
 	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = psy_ui_TABMODE_SINGLESEL;
@@ -101,7 +102,12 @@ void psy_ui_tab_settext(psy_ui_Tab* self, const char* text)
 	assert(self);
 
 	psy_strreset(&self->text, text);	
-	psy_strreset(&self->translation, psy_ui_translate(text));
+	if (self->preventtranslation) {
+		free(self->translation);
+		self->translation = NULL;
+	} else {
+		psy_strreset(&self->translation, psy_ui_translate(text));
+	}
 }
 
 void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
@@ -116,6 +122,13 @@ void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
 			psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
 			psy_INDEX_INVALID);
 	}
+}
+
+void psy_ui_tab_preventtranslation(psy_ui_Tab* self)
+{
+	self->preventtranslation = TRUE;
+	free(self->translation);
+	self->translation = NULL;
 }
 
 void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
@@ -244,6 +257,7 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_change);
 	self->numtabs = 0;
 	self->selected = 0;
+	self->preventtranslation = FALSE;
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
 }
@@ -271,6 +285,11 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 			align);
 	}
 	psy_list_free(q);	
+}
+
+void psy_ui_tabbar_preventtranslation(psy_ui_TabBar* self)
+{
+	self->preventtranslation = TRUE;
 }
 
 void tabbar_ontabclicked(psy_ui_TabBar* self, psy_ui_Tab* sender)
@@ -304,6 +323,12 @@ void psy_ui_tabbar_mark(psy_ui_TabBar* self, uintptr_t tabindex)
 	}
 }
 
+void psy_ui_tabbar_unmark(psy_ui_TabBar* self, uintptr_t tabindex)
+{
+	psy_ui_component_removestylestate_children(&self->component,
+		psy_ui_STYLESTATE_SELECT);
+}
+
 void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 {
 	psy_ui_tabbar_mark(self, tabindex);
@@ -318,6 +343,9 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label)
 
 	tab = psy_ui_tab_allocinit(&self->component, &self->component,
 		label, self->numtabs);
+	if (self->preventtranslation) {
+		psy_ui_tab_preventtranslation(tab);
+	}
 	++self->numtabs;
 	psy_signal_connect(&tab->signal_clicked, self,
 		tabbar_ontabclicked);	

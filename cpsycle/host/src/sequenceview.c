@@ -604,9 +604,7 @@ static void sequenceduration_ondestroy(SequenceViewDuration* self,
 // implementation
 void sequenceduration_init(SequenceViewDuration* self,
 	psy_ui_Component* parent, Workspace* workspace)
-{
-	psy_ui_Margin spacing;
-	
+{	
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	self->duration_bts = 0.0;	

@@ -91,9 +91,6 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 			psy_ui_size_init_px(&limit,
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);			
-			if (component->debugflag == 100) {
-				self = self;
-			}
 			componentsize = psy_ui_component_preferredsize(component,
 				&limit);			
 			psy_ui_lclaligner_adjustminmaxsize(self, component, tm, &componentsize);
@@ -475,7 +472,13 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 		size.width = (!limit || (self->component->containeralign->alignexpandmode &
 			psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
 			? psy_ui_value_make_px(0)
-			: limit->width;			
+			: limit->width;	
+		if (limit && !((self->component->containeralign->alignexpandmode &
+				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)) {
+			psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
+			size.width = psy_ui_value_make_px(psy_ui_value_px(
+				&limit->width, tm) - cp_topleft.x - cp_bottomright.x);
+		}
 		for (p = q = psy_ui_component_children(self->component, 0);
 				p != NULL; p = p->next) {
 			psy_ui_Component* component;

@@ -21,12 +21,12 @@ typedef struct {
 	psy_ui_Component component;		
 	psy_ui_Button issolobypass;
 	psy_ui_Button ismute;
-	psy_ui_Button isbus;
-	psy_ui_Label namelabel;	
+	psy_ui_Button isbus;	
 	psy_ui_Edit nameedit;	
 	psy_ui_Button remove;
 	psy_ui_Button cancel;
 	uintptr_t macid;
+	bool hasdefaulttext;
 	// references
 	psy_audio_Machine* machine;
 	psy_audio_Machines* machines;

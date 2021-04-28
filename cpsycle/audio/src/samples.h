@@ -116,7 +116,9 @@ psy_TableIterator psy_audio_samples_begin(psy_audio_Samples*);
 /// Iterator of the samples pointing to the start of the group of the slot
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples*,
 	uintptr_t slot);
-
+// Return first free main group slot starting at startslot limiting maxslots
+uintptr_t psy_audio_samples_freeslot(psy_audio_Samples* self, uintptr_t startslot,
+	uintptr_t maxslots);
 #ifdef __cplusplus
 }
 #endif

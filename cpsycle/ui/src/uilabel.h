@@ -30,6 +30,7 @@ typedef struct {
     char* translation;    
     bool translate;
     bool fadeout;
+    bool preventwrap;
     uintptr_t fadeoutcounter;
 } psy_ui_Label;
 
@@ -52,6 +53,7 @@ void psy_ui_label_settextalignment(psy_ui_Label*, psy_ui_Alignment alignment);
 void psy_ui_label_preventtranslation(psy_ui_Label*);
 void psy_ui_label_enabletranslation(psy_ui_Label*);
 void psy_ui_label_fadeout(psy_ui_Label*);
+void psy_ui_label_preventwrap(psy_ui_Label*);
 
 INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
 {

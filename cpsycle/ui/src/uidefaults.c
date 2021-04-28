@@ -139,8 +139,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		psy_ui_colour_weighted(&onprimary, strong));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);	
 	// tabbar
-	style = psy_ui_style_allocinit();
-	// psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make_overlay(4));
+	style = psy_ui_style_allocinit();	
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TABBAR, style);	
 	// tab
 	style = psy_ui_style_allocinit();

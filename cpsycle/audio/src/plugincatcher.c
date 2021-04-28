@@ -107,7 +107,7 @@ void psy_audio_pluginsections_reset(psy_audio_PluginSections* self)
 {
 	psy_audio_pluginsections_clear(self);
 	// Add a default Favorite Section	
-	psy_audio_pluginsections_addsection(self, "Favorites");
+	psy_audio_pluginsections_addsection(self, "favorites");
 }
 
 void psy_audio_pluginsections_clear(psy_audio_PluginSections* self)

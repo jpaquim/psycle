@@ -154,6 +154,13 @@ INLINE void psy_ui_border_init_solid(psy_ui_Border* self, psy_ui_Colour colour)
 	psy_ui_border_setcolour(self, colour);
 }
 
+INLINE void psy_ui_border_init_solid_radius(psy_ui_Border* self,
+	psy_ui_Colour colour, double r)
+{
+	psy_ui_border_init_solid(self, colour);
+	psy_ui_border_setradius_px(self, r);
+}
+
 #ifdef __cplusplus
 }
 #endif

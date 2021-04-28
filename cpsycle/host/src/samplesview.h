@@ -189,6 +189,7 @@ typedef struct SamplesView {
 	SamplesBox samplesbox;
 	psy_ui_Component left;
 	SamplesViewButtons buttons;	
+	psy_ui_Component right;
 	psy_ui_Component client;
 	SamplesSongImportView songimport;
 	SampleEditor sampleeditor;

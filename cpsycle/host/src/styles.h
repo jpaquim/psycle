@@ -30,6 +30,7 @@ extern "C" {
 #define STYLE_MACHINEBOX                     2020
 #define STYLE_ZOOMBOX                        2040
 #define STYLE_MACHINEVIEW                    2060
+#define STYLE_MACHINEVIEW_PROPERTIES         2061
 #define STYLE_STEPSEQUENCER                  2080
 #define STYLE_TOP                            3020
 #define STYLE_TOPROWS                        3060
@@ -40,8 +41,12 @@ extern "C" {
 #define STYLE_SONGPROPERTIES                 5020
 #define STYLE_SONGPROPERTIES_COMMENTS        5021
 #define STYLE_SAMPLESVIEW                    5040
+#define STYLE_SAMPLESVIEW_HEADER             5041
+#define STYLE_SAMPLESVIEW_BUTTONS            5042
 #define STYLE_ABOUT					         5060
-#define STYLE_INSTRUMENTVIEW		         5080
+#define STYLE_INSTRVIEW		                 5080
+#define STYLE_INSTRVIEW_HEADER               5081
+#define STYLE_INSTRVIEW_BUTTONS              5082
 #define STYLE_PLAYBAR				         6000
 #define STYLE_DURATION_TIME			         6020
 #define STYLE_KEY                            6040
