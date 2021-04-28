@@ -9,15 +9,15 @@
 #include <dir.h>
 #include <propertiesio.h>
 
-static void psy_ui_defaults_inittheme(psy_ui_Defaults*, bool dark);
+static void psy_ui_defaults_inittheme(psy_ui_Defaults*, bool dark, bool keepfont);
 
 void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 {		
 	psy_ui_styles_init(&self->styles);
 	if (dark) {
-		psy_ui_defaults_initdarktheme(self);
+		psy_ui_defaults_initdarktheme(self, FALSE);
 	} else {
-		psy_ui_defaults_initlighttheme(self);
+		psy_ui_defaults_initlighttheme(self, FALSE);
 	}			
 	// group
 	psy_ui_margin_init_em(&self->hmargin, 0.0, 1.0, 0.0, 0.0);		
@@ -25,17 +25,17 @@ void psy_ui_defaults_init(psy_ui_Defaults* self, bool dark)
 	psy_ui_margin_init_em(&self->cmargin, 0.0, 0.5, 0.5, 0.5);		
 }
 
-void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self)
+void psy_ui_defaults_initdarktheme(psy_ui_Defaults* self, bool keepfont)
 {
-	psy_ui_defaults_inittheme(self, TRUE);
+	psy_ui_defaults_inittheme(self, TRUE, keepfont);
 }
 
-void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self)
+void psy_ui_defaults_initlighttheme(psy_ui_Defaults* self, bool keepfont)
 {
-	psy_ui_defaults_inittheme(self, FALSE);
+	psy_ui_defaults_inittheme(self, FALSE, keepfont);
 }
 
-void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
+void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 {
 	psy_ui_Style* style;
 	psy_ui_Colour surface;
@@ -50,6 +50,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 	int accent;
 	int medium;
 	int weak;
+	psy_ui_Font oldfont;
 	
 	if (dark) {
 		surface = psy_ui_colour_make(0x00121212);
@@ -63,8 +64,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		accent = 100;
 		medium = 200;
 		weak = 400;		
-		self->hasdarktheme = TRUE;
-		self->errorcolour = 0x007966CF;
+		self->hasdarktheme = TRUE;		
 	} else {
 		surface = psy_ui_colour_make_argb(0x00FAFAFA);
 		onsurface = psy_ui_colour_make_argb(0x00000000);
@@ -79,11 +79,29 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark)
 		weak = 200;
 	}
 	// root
+	if (keepfont) {
+		style = psy_ui_defaults_style(self, psy_ui_STYLE_ROOT);
+		if (style) {
+			psy_ui_font_init(&oldfont, NULL);
+			psy_ui_font_copy(&oldfont, &style->font);
+		} else {
+			keepfont = FALSE;
+		}
+	}
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, 
 		psy_ui_colour_weighted(&onsurface, accent),
 		surface);
-	psy_ui_style_setfont(style, "Tahoma", -16);
+	if (keepfont) {		
+		psy_ui_font_init(&style->font, NULL);
+		psy_ui_font_copy(&style->font, &oldfont);
+		style->use_font = TRUE;
+	} else {
+		psy_ui_style_setfont(style, "Tahoma", -16);
+	}
+	if (keepfont) {
+		psy_ui_font_dispose(&oldfont);
+	}
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_ROOT, style);	
 	// label
 	style = psy_ui_style_allocinit();
@@ -256,9 +274,9 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* configdir, boo
 	}	
 	// reset to defaults
 	if (isdark) {
-		psy_ui_defaults_initdarktheme(self);
+		psy_ui_defaults_initdarktheme(self, TRUE);
 	}  else {
-		psy_ui_defaults_initlighttheme(self);
+		psy_ui_defaults_initlighttheme(self, TRUE);
 	}
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));

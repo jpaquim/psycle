@@ -38,6 +38,7 @@ extern "C" {
 #define STYLE_TOPROW1                        4040
 #define STYLE_TOPROW2                        4080
 #define STYLE_TRACKSCOPES                    5000
+#define STYLE_TRACKSCOPE                     5010
 #define STYLE_SONGPROPERTIES                 5020
 #define STYLE_SONGPROPERTIES_COMMENTS        5021
 #define STYLE_SAMPLESVIEW                    5040
@@ -85,6 +86,9 @@ extern "C" {
 #define STYLE_LABELPAIR                      6460
 #define STYLE_LABELPAIR_FIRST                6461
 #define STYLE_LABELPAIR_SECOND               6462
+#define STYLE_TERM_BUTTON                    6480
+#define STYLE_TERM_BUTTON_WARNING            6485
+#define STYLE_TERM_BUTTON_ERROR              6490
 
 struct psy_ui_Defaults;
 

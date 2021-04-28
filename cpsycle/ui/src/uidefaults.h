@@ -46,8 +46,7 @@ typedef enum psy_ui_StyleTypes {
 	psy_ui_STYLE_PROGRESSBAR
 } psy_ui_StyleTypes;
 
-typedef struct psy_ui_Defaults {
-	uint32_t errorcolour;	
+typedef struct psy_ui_Defaults {	
 	psy_ui_Styles styles;
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
@@ -101,8 +100,8 @@ INLINE psy_ui_Font* psy_ui_defaults_font(psy_ui_Defaults* self)
 	return &psy_ui_defaults_style(self, psy_ui_STYLE_ROOT)->font;	
 }
 
-void psy_ui_defaults_initdarktheme(psy_ui_Defaults*);
-void psy_ui_defaults_initlighttheme(psy_ui_Defaults*);
+void psy_ui_defaults_initdarktheme(psy_ui_Defaults*, bool keepfont);
+void psy_ui_defaults_initlighttheme(psy_ui_Defaults*, bool keepfont);
 void psy_ui_defaults_loadtheme(psy_ui_Defaults*, const char* path, bool isdark);
 
 #ifdef __cplusplus

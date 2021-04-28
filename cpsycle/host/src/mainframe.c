@@ -8,8 +8,8 @@
 #include "cmdsgeneral.h"
 #include "paramview.h"
 #include "resources/resource.h"
-#include "styles.h"
 #include "sequencecmds.h"
+#include "styles.h"
 // audio
 #include <exclusivelock.h>
 #include <songio.h>
@@ -45,7 +45,6 @@ static void mainframe_initviewstatusbars(MainFrame*);
 static void mainframe_initstatusbarlabel(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
 static void mainframe_initterminalbutton(MainFrame*);
-static void mainframe_initterminalcolours(MainFrame*);
 static void mainframe_initprogressbar(MainFrame*);
 static void mainframe_inittabbars(MainFrame*);
 static void mainframe_initnavigation(MainFrame*);
@@ -74,9 +73,6 @@ static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_delegatekeyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyEvent*);
-static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
-static void mainframe_onsequenceselchange(MainFrame*,
-	psy_audio_SequenceEntry*);
 static void mainframe_ontogglegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
@@ -113,6 +109,8 @@ static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
+static void mainframe_maximize(MainFrame*);
+static void mainframe_minimize(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
@@ -145,8 +143,6 @@ static void mainframe_ondocksection(MainFrame*, Workspace* sender,
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, ConfirmBox* sender,
 	int option, int mode);
-//static void mainframe_onconfirm(MainFrame*, Confirm* sender,
-//	int option, int mode);
 static void mainframe_onstartup(MainFrame*);
 // EventDriverCallback
 static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
@@ -156,16 +152,14 @@ static void mainframe_onfileload(MainFrame*, FileView* sender);
 #endif
 static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
-static void mainframe_onthemechanged(MainFrame*, MachineViewConfig* sender,
-	psy_Property*);
-static void mainframe_updatethemes(MainFrame* self);
-static void mainframe_onupdatestyles(MainFrame* self);
+
+static void updateshowstate(psy_Property*, psy_ui_Component*);
 
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
+static void vtable_init(MainFrame* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
@@ -180,19 +174,13 @@ static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
 			mainframe_onkeydown;
 		vtable.onkeyup =
 			(psy_ui_fp_component_onkeyevent)
-			mainframe_onkeyup;
-		vtable.onmousedown =
-			(psy_ui_fp_component_onmouseevent)
-			mainframe_onmousedown;
+			mainframe_onkeyup;		
 		vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			mainframe_ontimer;
-		vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
-			mainframe_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(mainframe_base(self), &vtable);
 }
 // implementation
 void mainframe_init(MainFrame* self)
@@ -236,8 +224,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_updatestepsequencerbuttons(self);	
 	mainframe_connectstepsequencerbuttons(self);
 	mainframe_updateseqeditorbuttons(self);
-	mainframe_connectseqeditorbuttons(self);
-	mainframe_updatethemes(self);	
+	mainframe_connectseqeditorbuttons(self);	
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 	save_translator_default();
 	save_translator_template();
@@ -247,11 +234,11 @@ void mainframe_init(MainFrame* self)
 void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	psy_ui_component_setvtable(mainframe_base(self), vtable_init(self));
+	vtable_init(self);	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	initdarkstyles(psy_ui_appdefaults());
 	self->startup = TRUE;
-	self->pluginscanprogress = -1;	
+	self->pluginscanprogress = -1;
 }
 
 void mainframe_ondestroyed(MainFrame* self)
@@ -288,20 +275,18 @@ void mainframe_initemptystatusbar(MainFrame* self)
 
 void mainframe_initspacerleft(MainFrame* self)
 {
-	psy_ui_component_init(&self->spacerleft, &self->component, NULL);
-	psy_ui_component_preventalign(&self->spacerleft);
+	psy_ui_component_init_align(&self->spacerleft, &self->component,
+		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_make_em(0.5, 0.0));
-	psy_ui_component_setalign(&self->spacerleft, psy_ui_ALIGN_LEFT);
+		psy_ui_size_make_em(0.5, 0.0));	
 }
 
 void mainframe_initspacerright(MainFrame* self)
 {	
-	psy_ui_component_init(&self->spacerright, &self->client, NULL);
-	psy_ui_component_preventalign(&self->spacerright);
+	psy_ui_component_init_align(&self->spacerright, &self->client,
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setpreferredsize(&self->spacerright,
-	 	psy_ui_size_make_em(0.5, 0.0));
-	psy_ui_component_setalign(&self->spacerright, psy_ui_ALIGN_RIGHT);	
+	 	psy_ui_size_make_em(0.5, 0.0));	
 }
 
 void mainframe_inittoparea(MainFrame* self)
@@ -316,24 +301,21 @@ void mainframe_initclientarea(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->client, mainframe_base(self),
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->client,
-		psy_ui_NOBACKGROUND);	
+	psy_ui_component_setbackgroundmode(&self->client, psy_ui_NOBACKGROUND);
 }
 
 void mainframe_initmainviewarea(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->mainviews, &self->client,
 		psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setbackgroundmode(&self->mainviews,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
 }
 
 void mainframe_initleftarea(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->left, mainframe_base(self),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setbackgroundmode(&self->left,
-		psy_ui_NOBACKGROUND);
+	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
 	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
 }
 
@@ -432,34 +414,10 @@ void mainframe_initterminalbutton(MainFrame* self)
 	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar, NULL,
 		"Terminal", self, mainframe_ontoggleterminal);
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
-		psy_ui_ALIGN_RIGHT);
-	mainframe_initterminalcolours(self);	
+		psy_ui_ALIGN_RIGHT);	
 	psy_ui_bitmap_loadresource(&self->toggleterminal.bitmapicon, IDB_TERM);
 	psy_ui_bitmap_settransparency(&self->toggleterminal.bitmapicon,
 		psy_ui_colour_make(0x00FFFFFF));	
-}
-
-void mainframe_initterminalcolours(MainFrame* self)
-{
-	self->terminalbutton_colours[TERMINALMSGTYPE_NONE] =
-		psy_ui_component_colour(psy_ui_button_base(&self->toggleterminal));
-	self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
-		psy_ui_colour_make(psy_ui_app()->defaults.errorcolour);
-	if (psy_ui_defaults()->hasdarktheme) {		
-		self->terminalbutton_colours[TERMINALMSGTYPE_WARNING] =
-			psy_ui_colour_make_argb(0x00f6b87f);
-		self->terminalbutton_colours[TERMINALMSGTYPE_MESSAGE] =
-			psy_ui_colour_make_argb(0x009ff6e2);
-	} else {
-		self->terminalbutton_colours[TERMINALMSGTYPE_NONE] =
-			psy_ui_colour_make(0x00808080);
-		self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
-			psy_ui_colour_make(0x00000080);
-		self->terminalbutton_colours[TERMINALMSGTYPE_WARNING] =
-			psy_ui_colour_make(0x0000A0A0);
-		self->terminalbutton_colours[TERMINALMSGTYPE_MESSAGE] =
-			psy_ui_colour_make(0x00008000);
-	}
 }
 
 void mainframe_initprogressbar(MainFrame* self)
@@ -563,13 +521,9 @@ void mainframe_inittabbars(MainFrame* self)
 
 void mainframe_initnavigation(MainFrame* self)
 {
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 0.0);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
 	psy_ui_component_setalign(navigation_base(&self->navigation),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(navigation_base(&self->navigation), margin);
 }
 
 void mainframe_initmaintabbar(MainFrame* self)
@@ -751,7 +705,6 @@ void mainframe_initseqeditor(MainFrame* self)
 
 void mainframe_initrecentview(MainFrame* self)
 {
-	// recent song view/playlist
 	recentview_init(&self->recentview, mainframe_base(self),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace);	
@@ -818,8 +771,6 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_oncheckunsaved);	
-//	psy_signal_connect(&self->confirm.signal_execute, self,
-//		mainframe_onconfirm);
 	psy_signal_connect(&self->workspace.signal_selectpatterndisplay, self,
 		mainframe_onselectpatterndisplay);
 	psy_signal_connect(&self->workspace.signal_floatsection, self,
@@ -834,10 +785,7 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_ongearselect);
 	psy_signal_connect(&workspace_song(
 		&self->workspace)->patterns.signal_numsongtrackschanged,
-		self, mainframe_onsongtrackschanged);
-	psy_signal_connect(
-		&psycleconfig_macview(workspace_conf(&self->workspace))->signal_themechanged,
-		self, mainframe_onthemechanged);
+		self, mainframe_onsongtrackschanged);	
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -863,11 +811,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	psy_EventDriverCmd cmd;
 
 	cmd = psy_eventdriver_getcmd(sender, "general");
-	switch (cmd.id) {
-	case CMD_IMM_HELP:
-		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
-		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
-		break;
+	switch (cmd.id) {	
 	case CMD_IMM_HELPSHORTCUT:
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
 		break;
@@ -883,104 +827,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 					SECTION_ID_MACHINEVIEW_WIRES, 0);
 			}
 		}
-		break;
-	case CMD_IMM_EDITPATTERN:
-		psy_ui_tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
-		break;
-	case CMD_IMM_ADDMACHINE:						
-		workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
-			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
-		break;
-	case CMD_IMM_PLAYSONG:
-		psy_audio_player_setposition(&self->workspace.player, 0);
-		psy_audio_player_start(&self->workspace.player);
-		break;
-	case CMD_IMM_PLAYROWTRACK: {
-		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
-
-		psy_audio_exclusivelock_enter();
-		psy_audio_player_stop(&self->workspace.player);
-		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-		playposition = (entry ? entry->offset : 0) +
-			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
-		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
-		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
-		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
-		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
-			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
-			psy_audio_player_bpl(&self->workspace.player));
-		self->workspace.player.sequencer.playtrack = self->workspace.patterneditposition.track;
-		psy_audio_player_setposition(&self->workspace.player, playposition);
-		psy_audio_player_start(&self->workspace.player);
-		self->playrow = TRUE;
-		psy_audio_exclusivelock_leave();
-		break; */ }
-	case CMD_IMM_PLAYROWPATTERN: {
-		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
-
-		psy_audio_exclusivelock_enter();
-		psy_audio_player_stop(&self->workspace.player);			
-		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-		playposition = (entry ? entry->offset : 0) +
-			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
-		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
-		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
-		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
-		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
-			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
-		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
-			psy_audio_player_bpl(&self->workspace.player));
-		psy_audio_player_setposition(&self->workspace.player, playposition);
-		psy_audio_player_start(&self->workspace.player);
-		self->playrow = TRUE;
-		psy_audio_exclusivelock_leave();
-		break; */ }
-	case CMD_IMM_PLAYSTART:
-		workspace_playstart(&self->workspace);
-		break;
-	case CMD_IMM_PLAYFROMPOS: {
-		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
-
-		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-		playposition = (entry ? entry->offset : 0) +
-			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
-		psy_audio_player_setposition(&self->workspace.player, playposition);
-		psy_audio_player_start(&self->workspace.player);
-		break; */}
-	case CMD_IMM_PLAYSTOP:
-		psy_audio_player_stop(&self->workspace.player);
-		break;
-	case CMD_IMM_FOLLOWSONG:		
-		if (workspace_followingsong(&self->workspace)) {
-			workspace_stopfollowsong(&self->workspace);
-		} else {
-			workspace_followsong(&self->workspace);
-		}
-		break;
-	case CMD_IMM_PATTERNINC: {
-		SequenceCmds cmds;
-
-		sequencecmds_init(&cmds, &self->workspace);
-		sequencecmds_incpattern(&cmds);
-		break; }
-	case CMD_IMM_PATTERNDEC: {
-		SequenceCmds cmds;
-
-		sequencecmds_init(&cmds, &self->workspace);
-		sequencecmds_decpattern(&cmds);
-		break; }
-	case CMD_IMM_SONGPOSDEC:
-		workspace_songposdec(&self->workspace);			
-		break;
-	case CMD_IMM_SONGPOSINC:
-		workspace_songposinc(&self->workspace);
-		break;
+		break;	
 	case CMD_IMM_INFOPATTERN:
 		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
 			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
@@ -999,54 +846,10 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		break;
 	case CMD_IMM_MAXPATTERN:
 		mainframe_maximizeorminimizeview(self);
-		break;
-	case CMD_IMM_INFOMACHINE:
-		workspace_showparameters(&self->workspace,
-			psy_audio_machines_selected(&self->workspace.song->machines));
-		break;
-	case CMD_IMM_EDITINSTR:
-		workspace_selectview(&self->workspace, VIEW_ID_INSTRUMENTSVIEW, 0,
-			0);
-		break;
-	case CMD_IMM_EDITSAMPLE:
-		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-		psy_ui_tabbar_select(&self->samplesview.clienttabbar, 0);
-		break;
-	case CMD_IMM_EDITWAVE:
-		workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
-		psy_ui_tabbar_select(&self->samplesview.clienttabbar, 2);
-		break;
+		break;		
 	case CMD_IMM_TERMINAL:
 		mainframe_ontoggleterminal(self, mainframe_base(self));
-		break;
-	case CMD_IMM_INSTRDEC:
-		if (self->workspace.song) {
-			psy_audio_instruments_dec(&self->workspace.song->instruments);				
-		}
-		break;
-	case CMD_IMM_INSTRINC:
-		if (self->workspace.song) {
-			psy_audio_instruments_inc(&self->workspace.song->instruments);
-		}
-		break;
-	case CMD_IMM_SETTINGS:			
-		workspace_selectview(&self->workspace, VIEW_ID_SETTINGSVIEW, 0, 0);
-		break;
-	case CMD_IMM_ENABLEAUDIO: {		
-		psycleconfig_enableaudio(workspace_conf(&self->workspace),
-			!psycleconfig_audioenabled(workspace_conf(&self->workspace)));		
-		break; }
-	case CMD_IMM_LOADSONG:
-		if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
-				workspace_songmodified(&self->workspace)) {				
-			workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
-		} else {
-			workspace_loadsong_fileselect(&self->workspace);				
-		}
-		break;
-	case CMD_IMM_SAVESONG:			
-		workspace_savesong_fileselect(&self->workspace);			
-		break;
+		break;	
 	case CMD_EDT_EDITQUANTIZEDEC:
 		workspace_editquantizechange(&self->workspace, -1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
@@ -1054,66 +857,53 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	case CMD_EDT_EDITQUANTIZEINC:
 		workspace_editquantizechange(&self->workspace, 1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
-		break;
-	case CMD_COLUMN_0:
-	case CMD_COLUMN_1:
-	case CMD_COLUMN_2:
-	case CMD_COLUMN_3:
-	case CMD_COLUMN_4:
-	case CMD_COLUMN_5:
-	case CMD_COLUMN_6:
-	case CMD_COLUMN_7:
-	case CMD_COLUMN_8:
-	case CMD_COLUMN_9:
-	case CMD_COLUMN_A:
-	case CMD_COLUMN_B:
-	case CMD_COLUMN_C:
-	case CMD_COLUMN_D:
-	case CMD_COLUMN_E:
-	case CMD_COLUMN_F:
-		if (workspace_song(&self->workspace) && psy_audio_song_numsongtracks(
-				workspace_song(&self->workspace)) >= (uintptr_t)(cmd.id - CMD_COLUMN_0)) {
-			psy_audio_PatternCursor cursor;
-
-			cursor = workspace_patterncursor(&self->workspace);
-			cursor.track = (cmd.id - CMD_COLUMN_0);
-			workspace_setpatterncursor(&self->workspace, cursor);
-		}
-		break;
-	default:
-		break;
+		break;		
 	}
 }
 
 void mainframe_maximizeorminimizeview(MainFrame* self)
 {
 	if (self->workspace.maximizeview.maximized) {
-		self->workspace.maximizeview.maximized = 0;
-		if (self->workspace.maximizeview.row0) {
-			psy_ui_component_show(&self->toprow0);
-		}
-		if (self->workspace.maximizeview.row1) {
-			psy_ui_component_show(&self->toprow1);
-		}
-		if (self->workspace.maximizeview.row2) {
-			psy_ui_component_show(&self->toprow2);
-		}
-		if (self->workspace.maximizeview.trackscopes) {
-			psy_ui_component_show(&self->trackscopeview.component);
-		}		
-		psy_ui_component_show(&self->left);		
+		mainframe_minimize(self);
 	} else {
-		self->workspace.maximizeview.maximized = TRUE;
-		self->workspace.maximizeview.row0 = self->toprow0.visible;
-		self->workspace.maximizeview.row1 = self->toprow1.visible;
-		self->workspace.maximizeview.row2 = self->toprow2.visible;
-		self->workspace.maximizeview.trackscopes =
-			self->trackscopeview.component.visible;		
-		psy_ui_component_hide(&self->toprow0);
-		psy_ui_component_hide(&self->toprow1);
-		psy_ui_component_hide(&self->trackscopeview.component);
-		psy_ui_component_hide(&self->left);		
+		mainframe_maximize(self);
+	}	
+}
+
+void mainframe_maximize(MainFrame* self)
+{
+	self->workspace.maximizeview.maximized = TRUE;
+	self->workspace.maximizeview.row0 =
+		psy_ui_component_visible(&self->toprow0);
+	self->workspace.maximizeview.row1 =
+		psy_ui_component_visible(&self->toprow1);
+	self->workspace.maximizeview.row2 =
+		psy_ui_component_visible(&self->toprow2);
+	self->workspace.maximizeview.trackscopes =
+		psy_ui_component_visible(&self->trackscopeview.component);
+	psy_ui_component_hide(&self->toprow0);
+	psy_ui_component_hide(&self->toprow1);
+	psy_ui_component_hide(&self->trackscopeview.component);
+	psy_ui_component_hide(&self->left);
+	psy_ui_component_align(mainframe_base(self));
+}
+
+void mainframe_minimize(MainFrame* self)
+{
+	self->workspace.maximizeview.maximized = 0;
+	if (self->workspace.maximizeview.row0) {
+		psy_ui_component_show(&self->toprow0);
 	}
+	if (self->workspace.maximizeview.row1) {
+		psy_ui_component_show(&self->toprow1);
+	}
+	if (self->workspace.maximizeview.row2) {
+		psy_ui_component_show(&self->toprow2);
+	}
+	if (self->workspace.maximizeview.trackscopes) {
+		psy_ui_component_show(&self->trackscopeview.component);
+	}
+	psy_ui_component_show(&self->left);
 	psy_ui_component_align(mainframe_base(self));
 }
 
@@ -1293,33 +1083,17 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 {
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_SHOWSEQUENCEEDIT:
-		if (psy_property_item_bool(property) != psy_ui_component_visible(
-			seqeditor_base(&self->seqeditor))) {
-			psy_ui_component_togglevisibility(
-				seqeditor_base(&self->seqeditor));
-		}
+		updateshowstate(property, seqeditor_base(&self->seqeditor));		
 		break;
 	case PROPERTY_ID_SHOWSTEPSEQUENCER:
-		if (psy_property_item_bool(property) != psy_ui_component_visible(
-				stepsequencerview_base(&self->stepsequencerview))) {
-			psy_ui_component_togglevisibility(
-				stepsequencerview_base(&self->stepsequencerview));
-		}			
+		updateshowstate(property,
+			stepsequencerview_base(&self->stepsequencerview));				
 		break;
 	case PROPERTY_ID_SHOWPLAYLIST:
-		if (psy_property_item_bool(property) != psy_ui_component_visible(
-			recentview_base(&self->recentview))) {
-			psy_ui_component_togglevisibility(
-				recentview_base(&self->recentview));
-		}
+		updateshowstate(property, recentview_base(&self->recentview));		
 		break;
 	case PROPERTY_ID_TRACKSCOPES:
-		if (psy_property_item_bool(property) != psy_ui_component_visible(
-				trackscopeview_base(&self->trackscopeview))) {
-			psy_ui_component_togglevisibility(
-				trackscopeview_base(&self->trackscopeview));
-			psy_ui_component_align(mainframe_base(self));
-		}
+		updateshowstate(property, trackscopeview_base(&self->trackscopeview));
 		if (psy_property_item_bool(property)) {				
 			trackscopes_start(&self->trackscopeview.scopes);
 		} else {
@@ -1327,15 +1101,20 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		}
 		break;
 	case PROPERTY_ID_SHOWMETRONOME:
-		if (metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
-			psy_ui_component_show_align(&self->metronomebar.component);			
-		} else {
-			psy_ui_component_hide_align(&self->metronomebar.component);
-		}
+		updateshowstate(property, metronomebar_base(&self->metronomebar));		
 		break;	
 	default:
 		*rebuild = workspace_configurationchanged(&self->workspace, property);
 		break;
+	}
+}
+
+void updateshowstate(psy_Property* property, psy_ui_Component* component)
+{	
+	if (psy_property_item_bool(property)) {
+		psy_ui_component_show_align(component);			
+	} else {
+		psy_ui_component_hide_align(component);
 	}
 }
 
@@ -1385,9 +1164,7 @@ void mainframe_onstartup(MainFrame* self)
 	// The pattern display type is only now set, because the host needs to know
 	// the view size to divide a splitted display correctly
 	workspace_selectpatterndisplay(&self->workspace,
-		workspace_patterndisplaytype(&self->workspace));
-	// the preferredsize of the sequenceview was used to size it at start
-	// prevent it from now on and let further set the size by the splitbar	
+		workspace_patterndisplaytype(&self->workspace));	
 	machinewireview_centermaster(&self->machineview.wireview);
 }
 
@@ -1443,13 +1220,9 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	psy_ui_notebook_select(&self->viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
-	if (component) {
-		ViewHistoryEntry viewentry;
-
-		viewentry.id = tabindex;
-		viewentry.section = psy_ui_component_section(component);
-		viewentry.seqpos = psy_INDEX_INVALID;
-		workspace_onviewchanged(&self->workspace, viewentry);
+	if (component) {				
+		workspace_onviewchanged(&self->workspace, viewhistoryentry_make(
+			tabindex, psy_ui_component_section(component), psy_INDEX_INVALID));
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);	
@@ -1477,13 +1250,9 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 	psy_ui_notebook_select(&self->viewstatusbars, viewid);
 	psy_ui_notebook_select(&self->viewtabbars, viewid);
 	component = psy_ui_notebook_activepage(&self->notebook);
-	if (component) {
-		ViewHistoryEntry viewentry;
-
-		viewentry.id = viewid;
-		viewentry.section = psy_ui_component_section(component);
-		viewentry.seqpos = psy_INDEX_INVALID;
-		workspace_onviewchanged(&self->workspace, viewentry);
+	if (component) {		
+		workspace_onviewchanged(&self->workspace, viewhistoryentry_make(viewid,
+			psy_ui_component_section(component), psy_INDEX_INVALID));
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
@@ -1530,8 +1299,22 @@ void mainframe_onstatus(MainFrame* self, Workspace* sender,
 
 void mainframe_updateterminalbutton(MainFrame* self)
 {
-	psy_ui_button_settextcolour(&self->toggleterminal,
-		self->terminalbutton_colours[self->terminalmsgtype]);
+	uintptr_t styleid;
+
+	switch (self->terminalmsgtype) {
+	case TERMINALMSGTYPE_WARNING:
+		styleid = STYLE_TERM_BUTTON_WARNING;		
+		break;
+	case TERMINALMSGTYPE_ERROR:
+		styleid = STYLE_TERM_BUTTON_ERROR;		
+		break;
+	default:
+		styleid = STYLE_TERM_BUTTON;		
+		break;
+	}
+	psy_ui_component_setstyletype(psy_ui_button_base(&self->toggleterminal),
+		styleid);
+	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
@@ -1558,30 +1341,18 @@ void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
-	if (view == VIEW_ID_HELPVIEW) {
-		if (section == HELPVIEWSECTION_HELP) {
-			helpview_float(&self->helpview, section, &self->right);
-			psy_ui_component_align(&self->client);
-		}
+	if (view == VIEW_ID_HELPVIEW && section == HELPVIEWSECTION_HELP) {
+		helpview_float(&self->helpview, section, &self->right);
+		psy_ui_component_align(&self->client);		
 	}
 }
 
 void mainframe_ondocksection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
-	if (view == VIEW_ID_HELPVIEW) {
-		if (section == HELPVIEWSECTION_HELP) {
-			helpview_dock(&self->helpview, section, &self->right);
-			psy_ui_component_align(&self->client);
-		}
-	}
-}
-
-void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
-{
-	if (ev->button == 2 && psy_ui_mouseevent_target(ev) ==
-			&self->recentview.component) {
-		mainframe_onrecentsongs(self, mainframe_base(self));
+	if (view == VIEW_ID_HELPVIEW && section == HELPVIEWSECTION_HELP) {
+		helpview_dock(&self->helpview, section, &self->right);
+		psy_ui_component_align(&self->client);		
 	}
 }
 
@@ -1755,7 +1526,6 @@ void mainframe_onselectpatterndisplay(MainFrame* self, psy_ui_Component* sender,
 		workspace_patterndisplaytype(&self->workspace));
 }
 
-
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 void mainframe_onfileload(MainFrame* self, FileView* sender)
 {
@@ -1778,7 +1548,7 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyEvent* ev)
 	if (keyboardmiscconfig_playstartwithrctrl(
 			&self->workspace.config.misc)) {
 		if (ev->keycode == psy_ui_KEY_CONTROL) {
-			// todo: this win32 detection obly
+			// todo: this win32 detection only
 			int extended = (ev->keydata & 0x01000000) != 0;
 			if (extended) {
 				// right ctrl
@@ -1813,34 +1583,34 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	int param2)
 {
 	switch (msg) {
-		case PSY_EVENTDRIVER_PATTERNEDIT:
-			return psy_ui_component_hasfocus(
-				&self->patternview.tracker.component) ||
-				psy_ui_component_hasfocus(
-					&self->patternview.pianoroll.grid.component) ||
-				psy_ui_component_hasfocus(
-					&self->patternview.griddefaults.component);
-			break;
-		case PSY_EVENTDRIVER_NOTECOLUMN:
-			return self->patternview.gridstate.cursor.column == 0;
-			break;
-		case PSY_EVENTDRIVER_SETCHORDMODE:
-			if (param1 == 1) {
-				self->patternview.tracker.chordbegin =
-					self->patternview.gridstate.cursor.track;
-				self->patternview.tracker.chordmode = TRUE;
-			}
-			break;
-		case PSY_EVENTDRIVER_INSERTNOTEOFF:
-			trackergrid_inputnote(&self->patternview.tracker,
-				psy_audio_NOTECOMMANDS_RELEASE,
-				self->patternview.tracker.chordmode);
-			break;
-		case PSY_EVENTDRIVER_SECTION:
-			trackergrid_inputnote(&self->patternview.tracker,
-				psy_audio_NOTECOMMANDS_RELEASE,
-				self->patternview.tracker.chordmode);
-			break;
+	case PSY_EVENTDRIVER_PATTERNEDIT:
+		return psy_ui_component_hasfocus(
+			&self->patternview.tracker.component) ||
+			psy_ui_component_hasfocus(
+				&self->patternview.pianoroll.grid.component) ||
+			psy_ui_component_hasfocus(
+				&self->patternview.griddefaults.component);
+		break;
+	case PSY_EVENTDRIVER_NOTECOLUMN:
+		return self->patternview.gridstate.cursor.column == 0;
+		break;
+	case PSY_EVENTDRIVER_SETCHORDMODE:
+		if (param1 == 1) {
+			self->patternview.tracker.chordbegin =
+				self->patternview.gridstate.cursor.track;
+			self->patternview.tracker.chordmode = TRUE;
+		}
+		break;
+	case PSY_EVENTDRIVER_INSERTNOTEOFF:
+		trackergrid_inputnote(&self->patternview.tracker,
+			psy_audio_NOTECOMMANDS_RELEASE,
+			self->patternview.tracker.chordmode);
+		break;
+	case PSY_EVENTDRIVER_SECTION:
+		trackergrid_inputnote(&self->patternview.tracker,
+			psy_audio_NOTECOMMANDS_RELEASE,
+			self->patternview.tracker.chordmode);
+		break;
 	}
 	return 0;
 }
@@ -1849,22 +1619,4 @@ void mainframe_ongearselect(MainFrame* self, Workspace* sender,
 	psy_List* machinelist)
 {
 	gear_select(&self->gear, machinelist);
-}
-
-void mainframe_onthemechanged(MainFrame* self, MachineViewConfig* sender,
-	psy_Property* theme)
-{
-}
-
-void mainframe_updatethemes(MainFrame* self)
-{	
-}
-
-void mainframe_onupdatestyles(MainFrame* self)
-{
-	self->terminalbutton_colours[TERMINALMSGTYPE_ERROR] =
-		psy_ui_colour_make(psy_ui_app()->defaults.errorcolour);
-	if (!self->startup) {
-		mainframe_updateterminalbutton(self);		
-	}	
 }

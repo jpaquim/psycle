@@ -304,7 +304,7 @@ void psy_ui_app_lighttheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initlighttheme(&self->defaults);
+	psy_ui_defaults_initlighttheme(&self->defaults, TRUE);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}
@@ -314,7 +314,7 @@ void psy_ui_app_darktheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initdarktheme(&self->defaults);
+	psy_ui_defaults_initdarktheme(&self->defaults, TRUE);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}

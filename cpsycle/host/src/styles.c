@@ -28,6 +28,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_Colour surface_overlay_11p;
 	psy_ui_Colour surface_overlay_12p;
 	psy_ui_Colour surface_overlay_16p;
+	psy_ui_Colour surface_overlay_24p;
 	psy_ui_Colour primary;
 	psy_ui_Colour secondary;
 	psy_ui_Colour overlay;
@@ -89,6 +90,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	surface_overlay_11p = psy_ui_colour_overlayed(&surface, &overlay, 0.11);
 	surface_overlay_12p = psy_ui_colour_overlayed(&surface, &overlay, 0.12);
 	surface_overlay_16p = psy_ui_colour_overlayed(&surface, &overlay, 0.16);
+	surface_overlay_24p = psy_ui_colour_overlayed(&surface, &overlay, 0.24);
 	// relative overlays
 	overlay_1p = psy_ui_colour_make_overlay(1);
 	overlay_4p = psy_ui_colour_make_overlay(4);
@@ -236,6 +238,10 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	psy_ui_style_setbackgroundcolour(style, surface);
 	psy_ui_style_setspacing_em(style, 1.0, 0.5, 0.0, 0.5);
 	psy_ui_defaults_setstyle(defaults, STYLE_TRACKSCOPES, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, surface_overlay_24p, surface);
+	psy_ui_defaults_setstyle(defaults, STYLE_TRACKSCOPE, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundoverlay(style, 9);
@@ -480,4 +486,16 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setbackgroundoverlay(style, 2);
 	psy_ui_defaults_setstyle(defaults, STYLE_LABELPAIR_SECOND, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_defaults_setstyle(defaults, STYLE_TERM_BUTTON, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make_argb(0x00F6B87F));
+	psy_ui_defaults_setstyle(defaults, STYLE_TERM_BUTTON_WARNING, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_make(0x007966CF));
+	psy_ui_defaults_setstyle(defaults, STYLE_TERM_BUTTON_ERROR, style);
 }
+

@@ -71,6 +71,7 @@ void propertiesrenderline_update(PropertiesRenderLine*);
 bool propertiesrenderline_updatecheck(PropertiesRenderLine*);
 bool propertiesrenderline_updateintegerlabel(PropertiesRenderLine*);
 bool propertiesrenderline_updatestringlabel(PropertiesRenderLine*);
+bool propertiesrenderline_updatefontlabel(PropertiesRenderLine*);
 bool propertiesrenderline_updateshortcut(PropertiesRenderLine*);
 bool propertiesrenderline_updatecolour(PropertiesRenderLine*);
 

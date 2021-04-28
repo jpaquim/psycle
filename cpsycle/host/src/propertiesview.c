@@ -128,28 +128,10 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			self->label = psy_ui_label_allocinit(&self->col1, view);
 			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);			
 			psy_ui_label_preventtranslation(self->label);			
-		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {			
-			char str[128];
-			psy_ui_FontInfo fontinfo;
-			psy_ui_Font font;
-			int pt;
-			const psy_ui_TextMetric* tm;
-
+		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {
 			self->label = psy_ui_label_allocinit(&self->col1, view);
 			psy_ui_component_setalign(&self->label->component, psy_ui_ALIGN_LEFT);
-			psy_ui_label_preventtranslation(self->label);
-			psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(property));
-			psy_ui_font_init(&font, &fontinfo);
-			psy_ui_component_setfont(self->state->dummy, &font);
-			tm = psy_ui_component_textmetric(self->state->dummy);
-			psy_ui_font_dispose(&font);
-			if (fontinfo.lfHeight < 0) {
-				pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) / psy_ui_logpixelsy();
-			} else {
-				pt = tm->tmHeight;
-			}
-			psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);
-			psy_ui_label_settext(self->label, str);
+			psy_ui_label_preventtranslation(self->label);			
 		}
 	}
 	if (numcols > 2) {
@@ -165,11 +147,9 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			psy_ui_button_preventtranslation(self->dialogbutton);
 			psy_ui_button_settext(self->dialogbutton, "...");
 		} else if (psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {
-			psy_ui_Button* button;
-
-			button = psy_ui_button_allocinit(&self->col2, view);
-			psy_ui_component_setalign(&button->component, psy_ui_ALIGN_CLIENT);
-			psy_ui_button_settext(button, "settingsview.choose-font");
+			self->dialogbutton = psy_ui_button_allocinit(&self->col2, view);
+			psy_ui_component_setalign(&self->dialogbutton->component, psy_ui_ALIGN_CLIENT);
+			psy_ui_button_settext(self->dialogbutton, "settingsview.choose-font");
 		} else if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
 			self->dialogbutton = psy_ui_button_allocinit(&self->col2, view);
 			psy_ui_component_setalign(&self->dialogbutton->component,
@@ -296,6 +276,32 @@ bool propertiesrenderline_updatestringlabel(PropertiesRenderLine* self)
 	return FALSE;
 }
 
+bool propertiesrenderline_updatefontlabel(PropertiesRenderLine* self)
+{
+	if (self->label && psy_property_type(self->property) == PSY_PROPERTY_TYPE_FONT) {
+		char str[128];
+		psy_ui_FontInfo fontinfo;
+		psy_ui_Font font;
+		int pt;
+		const psy_ui_TextMetric* tm;
+				
+		psy_ui_fontinfo_init_string(&fontinfo, psy_property_item_str(self->property));
+		psy_ui_font_init(&font, &fontinfo);
+		psy_ui_component_setfont(self->state->dummy, &font);
+		tm = psy_ui_component_textmetric(self->state->dummy);
+		psy_ui_font_dispose(&font);
+		if (fontinfo.lfHeight < 0) {
+			pt = ((tm->tmHeight - tm->tmInternalLeading) * 72) / psy_ui_logpixelsy();
+		} else {
+			pt = tm->tmHeight;
+		}
+		psy_snprintf(str, 128, "%s %d pt", fontinfo.lfFaceName, (int)pt);
+		psy_ui_label_settext(self->label, str);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 bool propertiesrenderline_updateshortcut(PropertiesRenderLine* self)
 {
 	if (self->label && psy_property_hint(self->property) == PSY_PROPERTY_HINT_SHORTCUT) {
@@ -353,6 +359,10 @@ void propertiesrenderline_update(PropertiesRenderLine* self)
 		psy_ui_component_invalidate(&self->component);
 		return;
 	}
+	if (propertiesrenderline_updatefontlabel(self)) {
+		psy_ui_component_invalidate(&self->component);
+		return;
+	}
 	if (propertiesrenderline_updatestringlabel(self)) {
 		psy_ui_component_invalidate(&self->component);
 		return;
@@ -365,8 +375,7 @@ void propertiesrenderline_update(PropertiesRenderLine* self)
 
 // PropertiesRenderer
 // prototypes
-static void propertiesrenderer_ondestroy(PropertiesRenderer*,
-	psy_ui_Component* sender);
+static void propertiesrenderer_ondestroy(PropertiesRenderer*);
 static void propertiesrenderer_build(PropertiesRenderer*);
 static int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
@@ -393,6 +402,9 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 {
 	if (!propertiesrenderer_vtable_initialized) {
 		propertiesrenderer_vtable = *(self->component.vtable);
+		propertiesrenderer_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			propertiesrenderer_ondestroy;
 		propertiesrenderer_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			propertiesrenderer_onmousedown;
@@ -416,9 +428,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesrenderer_vtable_init(self);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
-	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		propertiesrenderer_ondestroy);
+	psy_ui_component_setwheelscroll(&self->component, 4);	
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_doublebuffer(&self->client);	
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
@@ -458,7 +468,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 	propertiesrenderer_build(self);	
 }
 
-void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* sender)
+void propertiesrenderer_ondestroy(PropertiesRenderer* self)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
@@ -623,6 +633,27 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 					psy_property_item_str(self->state.selected));
 				propertiesrenderer_showedit(self, self->state.line,
 					&self->edit.component);
+			}
+		} else if (psy_property_type(self->state.selected) == PSY_PROPERTY_TYPE_FONT) {
+			if (self->state.dialogbutton) {
+				psy_ui_FontDialog fontdialog;
+				psy_ui_FontInfo fontinfo;
+
+				psy_ui_fontdialog_init(&fontdialog, &self->component);
+				psy_ui_fontinfo_init_string(&fontinfo,
+					psy_property_item_str(self->state.selected));
+				psy_ui_fontdialog_setfontinfo(&fontdialog, fontinfo);
+				if (psy_ui_fontdialog_execute(&fontdialog)) {
+					psy_ui_FontInfo fontinfo;
+
+					fontinfo = psy_ui_fontdialog_fontinfo(&fontdialog);
+					psy_property_set_font(self->state.selected->parent,
+						self->state.selected->item.key,
+						psy_ui_fontinfo_string(&fontinfo));
+				}
+				psy_ui_fontdialog_dispose(&fontdialog);
+				psy_signal_emit(&self->signal_changed, self, 1,
+					self->state.selected);
 			}
 		} else if (psy_property_type(self->state.selected) == PSY_PROPERTY_TYPE_STRING) {
 			if (!psy_property_readonly(self->state.selected)) {
