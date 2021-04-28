@@ -14,18 +14,17 @@
 #include "../../detail/portable.h"
 
 // prototypes
-static void songpropertiesview_initalign(SongPropertiesView*);
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*,
 	int flag, psy_audio_Song*);
 static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
-static void songpropertiesview_ontitlechanged(SongPropertiesView*,
-	psy_ui_Component* sender);
+static void songpropertiesview_oneditaccept(SongPropertiesView*,
+	psy_ui_Edit* sender);
+static void songpropertiesview_oneditreject(SongPropertiesView*,
+	psy_ui_Edit* sender);
 static void songpropertiesview_onfilterkeys(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
-static void songpropertiesview_oncreditschanged(SongPropertiesView*,
-	psy_ui_Component* sender);
 static void songpropertiesview_ontempoeditchange(SongPropertiesView*,
 	IntEdit* sender);
 static void songpropertiesview_onlpbeditchange(SongPropertiesView*,
@@ -56,12 +55,12 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	self->song = workspace->song;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_margin_zero());
+	psy_ui_component_setstyletype(&self->component, STYLE_SONGPROPERTIES);
 	psy_ui_component_init(&self->tabbar, tabbarparent, NULL);
 	// title
-	psy_ui_component_init(&self->title, &self->component, NULL);
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SONGPROPERTIES,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_init(&self->title, &self->component, NULL);	
 	psy_ui_label_init(&self->label_title, &self->title, NULL);
 	psy_ui_label_settextalignment(&self->label_title, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_label_settext(&self->label_title, "songproperties.title");
@@ -69,10 +68,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->label_title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->label_title.component, margin);
 	psy_ui_edit_init(&self->edit_title, &self->title);
+	psy_ui_edit_enableinputfield(&self->edit_title);
 	psy_ui_component_setalign(&self->edit_title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_title.component, margin);
-	psy_signal_connect(&self->edit_title.signal_change, self,
-		songpropertiesview_ontitlechanged);
+	psy_signal_connect(&self->edit_title.signal_accept, self,
+		songpropertiesview_oneditaccept);
+	psy_signal_connect(&self->edit_title.signal_reject, self,
+		songpropertiesview_oneditreject);
 	psy_signal_connect(&self->edit_title.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	// credits
@@ -84,10 +86,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->label_credits.component, margin);
 	psy_ui_label_settextalignment(&self->label_credits, psy_ui_ALIGNMENT_RIGHT);
 	psy_ui_edit_init(&self->edit_credits, &self->credits);
+	psy_ui_edit_enableinputfield(&self->edit_credits);
 	psy_ui_component_setalign(&self->edit_credits.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_credits.component, margin);
-	psy_signal_connect(&self->edit_credits.signal_change, self,
-		songpropertiesview_oncreditschanged);
+	psy_signal_connect(&self->edit_credits.signal_accept, self,
+		songpropertiesview_oneditaccept);
+	psy_signal_connect(&self->edit_credits.signal_reject, self,
+		songpropertiesview_oneditreject);
 	psy_signal_connect(&self->edit_credits.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	// Speed
@@ -139,6 +144,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_comments.component, margin);
+	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);
 	psy_signal_connect(&self->edit_comments.component.signal_keydown, self,
@@ -151,15 +157,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_keydown, self,
 		songpropertiesview_onkeydown);
 	psy_signal_connect(&self->component.signal_keyup, self,
-		songpropertiesview_onkeyup);
-	songpropertiesview_initalign(self);	
-}
-
-void songpropertiesview_initalign(SongPropertiesView* self)
-{
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_component_setalign_children(&self->component, psy_ui_ALIGN_TOP);		
-	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
+		songpropertiesview_onkeyup);	
 }
 
 void songpropertiesview_read(SongPropertiesView* self)
@@ -216,11 +214,39 @@ void songpropertiesview_onhide(SongPropertiesView* self,
 	songpropertiesview_enableedit(self);
 }
 
-void songpropertiesview_ontitlechanged(SongPropertiesView* self,
-	psy_ui_Component* sender)
+void songpropertiesview_oneditaccept(SongPropertiesView* self,
+	psy_ui_Edit* sender)
 {
-	free(self->song->properties.title);
-	self->song->properties.title = strdup(psy_ui_edit_text(&self->edit_title));
+	if (self->song) {
+		if (psy_strlen(psy_ui_edit_text(sender)) == 0) {
+			if (sender == &self->edit_title) {
+				psy_ui_edit_settext(sender, "Untitled");
+			}
+		}
+		if (sender == &self->edit_title) {
+			psy_audio_song_settitle(self->song, psy_ui_edit_text(sender));
+		} else if (sender == &self->edit_credits) {
+			psy_audio_song_setcredits(self->song, psy_ui_edit_text(sender));
+		}
+	}
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+}
+
+void songpropertiesview_oneditreject(SongPropertiesView* self,
+	psy_ui_Edit* sender)
+{	
+	if (self->song) {
+		if (sender == &self->edit_title) {
+			psy_ui_edit_settext(&self->edit_title,
+				psy_audio_song_title(self->song));
+		} else if (sender == &self->edit_credits) {
+			psy_ui_edit_settext(&self->edit_credits,
+				psy_audio_song_credits(self->song));
+		}
+	} else {
+		psy_ui_edit_settext(&self->edit_title, "");
+	}	
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
 void songpropertiesview_onfilterkeys(SongPropertiesView* self,
@@ -234,14 +260,6 @@ void songpropertiesview_onfilterkeys(SongPropertiesView* self,
 		psy_ui_component_setfocus(&self->component);
 		psy_ui_keyevent_preventdefault(ev);
 	}	
-}
-
-void songpropertiesview_oncreditschanged(SongPropertiesView* self,
-	psy_ui_Component* sender)
-{
-	free(self->song->properties.credits);
-	self->song->properties.credits = strdup(psy_ui_edit_text(
-		&self->edit_credits));
 }
 
 void songpropertiesview_ontempoeditchange(SongPropertiesView* self,

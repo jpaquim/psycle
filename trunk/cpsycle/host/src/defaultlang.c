@@ -720,6 +720,7 @@ void make_translator_make_newmachine(psy_Property* parent)
 	add("filter", "Filter by");
 	add("sort", "Sort by");
 	add("favorite", "Favorite");
+	add("favorites", "Favorites");
 	add("name", "Name");
 	add("type", "Type");
 	add("mode", "Mode");
@@ -734,6 +735,13 @@ void make_translator_make_newmachine(psy_Property* parent)
 		"Select a plugin to view its description");
 	add("select-first-section", "Select/Create first a section");
 	add("select-first-plugin", "Select first a plugin");
+	add("search-plugin", "Search in All");
+	add("category", "Category");
+	add("apiversion", "API Version");
+	add("version", "Version");
+	add("dllname", "DllName");
+	add("anycategory", "Any Category");
+	add("scanning", "Scanning");
 }
 
 void make_translator_make_samplesview(psy_Property* parent)
@@ -751,8 +759,24 @@ void make_translator_make_samplesview(psy_Property* parent)
 	add("pitch-finetune", "Pitch finetune");
 	add("process", "Process");
 	add("no-wave-loaded", "No wave loaded");
+	add("cont-loop", "Continuous Loop");
+	add("disabled", "Disabled");
+	add("forward", "Forward");
+	add("bidirection", "Bidirection");
+	add("start", "Start");
+	add("end", "End");
+	add("sustain-loop", "Sustain Loop");
+	add("play", "Play");
+	add("stop", "Stop");
+	add("select-together", "Select Channels Together");
+	add("selstart", "Selection Start");
+	add("selend", "Selection End");
+	add("visual", "Visual");
+	add("doublecont", "Double Cont Loop");
+	add("doublesus", "Double Sus Loop");
+	add("lines", "Lines");
 	setsection(psy_property_append_section(parent, "cmds"));
-	add("keymap", "Keymap");
+	add("keymap", "Keymap");	
 }
 
 void make_translator_make_general(psy_Property* parent)

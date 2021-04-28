@@ -21,6 +21,23 @@ static void newmachinesearch_onaccept(NewMachineSearch*,
 static void newmachinesearch_onreject(NewMachineSearch*,
 	psy_ui_Component* sender);
 static void newmachinesearch_reset(NewMachineSearch*);
+static void newmachinesearch_onlanguagechanged(NewMachineSearch*);
+
+// vtable
+static psy_ui_ComponentVtable newmachinesearch_vtable;
+static bool newmachinesearch_vtable_initialized = FALSE;
+
+static void newmachinesearch_vtable_init(NewMachineSearch* self)
+{
+	if (!newmachinesearch_vtable_initialized) {
+		newmachinesearch_vtable = *(self->component.vtable);
+		newmachinesearch_vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
+			newmachinesearch_onlanguagechanged;
+		newmachinesearch_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &newmachinesearch_vtable;
+}
 // implementation
 void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	NewMachineFilter* filter)
@@ -28,6 +45,7 @@ void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;	
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	newmachinesearch_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_SEARCHFIELD);
 	psy_ui_component_setstyletype_select(&self->component,
@@ -97,13 +115,23 @@ void newmachinesearch_onreject(NewMachineSearch* self,
 
 void newmachinesearch_reset(NewMachineSearch* self)
 {		
-	psy_ui_edit_settext(&self->edit, "Search Plugin");
+	psy_ui_edit_settext(&self->edit,
+		psy_ui_translate("newmachine.search-plugin"));
 	self->hasdefaulttext = TRUE;
 	if (self->filter) {
 		newmachinefilter_settext(self->filter, "");
 		psy_ui_component_removestylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);
 		psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+	}
+}
+
+void newmachinesearch_onlanguagechanged(NewMachineSearch* self)
+{
+	if (self->hasdefaulttext) {
+		psy_ui_edit_settext(&self->edit,
+			psy_ui_translate("newmachine.search-plugin"));
+		self->hasdefaulttext = TRUE;
 	}
 }
 
@@ -294,6 +322,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;
+	double numcol0;
 
 	// component
 	psy_ui_component_init(&self->component, parent, NULL);
@@ -305,8 +334,9 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_categorychanged);	
 	self->plugin = NULL;
 	self->workspace = workspace;
+	numcol0 = 12;
 	// plugin name
-	labelpair_init(&self->plugname, &self->component, "Name", 12.0);
+	labelpair_init(&self->plugname, &self->component, "newmachine.name", numcol0);
 	psy_ui_component_setalign(&self->plugname.second.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->plugname.component, psy_ui_ALIGN_TOP);
@@ -319,7 +349,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	// bottom
 	psy_ui_component_init(&self->bottom, &self->component, NULL);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init_em(&spacing, 0.5, 1.0, 0.5, 0.0);	
+	psy_ui_margin_init_em(&spacing, 0.5, 1.0, 0.5, 0.0);
 	psy_ui_component_setspacing(&self->bottom, spacing);
 	psy_ui_component_setdefaultalign(&self->bottom,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
@@ -346,10 +376,10 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	// category
 	psy_ui_component_init(&self->category, &self->details, NULL);	
 	psy_ui_label_init_text(&self->categorydesc, &self->category, NULL,
-		"Category");
+		"newmachine.category");
 	psy_ui_label_settextalignment(&self->categorydesc,
 		psy_ui_ALIGNMENT_RIGHT);
-	psy_ui_label_setcharnumber(&self->categorydesc, 12.0);
+	psy_ui_label_setcharnumber(&self->categorydesc, numcol0);
 	psy_ui_component_setalign(psy_ui_label_base(&self->categorydesc),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_edit_init(& self->categoryedit, &self->category);
@@ -362,9 +392,9 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 		self, newmachinedetail_oncategoryeditaccept);
 	psy_signal_connect(&self->categoryedit.signal_reject,
 		self, newmachinedetail_oncategoryeditreject);
-	labelpair_init_right(&self->apiversion, &self->details, "API Version", 12.0);
-	labelpair_init_right(&self->version, &self->details, "Version", 12.0);
-	labelpair_init_right(&self->dllname, &self->details, "DllName", 12.0);	
+	labelpair_init_right(&self->apiversion, &self->details, "newmachine.apiversion", numcol0);
+	labelpair_init_right(&self->version, &self->details, "newmachine.version", numcol0);
+	labelpair_init_right(&self->dllname, &self->details, "newmachine.dllname", numcol0);
 	newmachinedetail_reset(self);
 }
 
@@ -636,9 +666,8 @@ void newmachinecategorybar_build(NewMachineCategoryBar* self)
 	assert(self);
 
 	psy_ui_component_clear(&self->client);	
-	button = psy_ui_button_allocinit(&self->client, &self->client);
-	psy_ui_button_preventtranslation(button);
-	psy_ui_button_settext(button, "Any Category");
+	button = psy_ui_button_allocinit(&self->client, &self->client);	
+	psy_ui_button_settext(button, "newmachine.anycategory");	
 	if (self->filter) {
 		psy_audio_PluginCategories categories;
 
@@ -715,7 +744,7 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_label_init_text(&self->scan, &self->component, NULL,
-		"Scanning");	
+		"newmachine.scanning");	
 	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
 		psy_ui_ALIGN_CENTER);
 }
@@ -732,6 +761,7 @@ static void newmachinesection_oneditaccept(NewMachineSection*, psy_ui_Edit* send
 static void newmachinesection_oneditreject(NewMachineSection*, psy_ui_Edit* sender);
 static void newmachinesection_ondragover(NewMachineSection*, psy_ui_DragEvent*);
 static void newmachinesection_ondrop(NewMachineSection*, psy_ui_DragEvent*);
+static void newmachinesection_onlanguagechanged(NewMachineSection*);
 // vtable
 static psy_ui_ComponentVtable newmachinesection_vtable;
 static bool newmachinesection_vtable_initialized = FALSE;
@@ -749,6 +779,9 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 		newmachinesection_vtable.ondrop =
 			(psy_ui_fp_component_ondrop)
 			newmachinesection_ondrop;
+		newmachinesection_vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
+			newmachinesection_onlanguagechanged;
 		newmachinesection_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &newmachinesection_vtable;
@@ -777,7 +810,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_label_init(&self->label, &self->header, NULL);
 	psy_ui_label_preventtranslation(&self->label);
-	psy_ui_label_settext(&self->label, newmachinesection_name(self));	
+	psy_ui_label_settext(&self->label, newmachinesection_name(self));
 	pluginsview_init(&self->pluginview, &self->component);
 	psy_ui_component_setalign(&self->pluginview.component, psy_ui_ALIGN_TOP);
 	newmachinesection_findplugins(self);
@@ -840,10 +873,23 @@ const char* newmachinesection_key(const NewMachineSection* self)
 const char* newmachinesection_name(const NewMachineSection* self)
 {
 	if (self->section) {
+		if (strcmp(psy_property_key(self->section), "favorites") == 0) {
+			return psy_ui_translate("newmachine.favorites");
+		}
 		return psy_property_at_str(self->section, "name",
 			psy_property_key(self->section));		
 	}
 	return "";	
+}
+
+void newmachinesection_onlanguagechanged(NewMachineSection* self)
+{
+	if (self->section) {
+		if (strcmp(psy_property_key(self->section), "favorites") == 0) {
+			psy_ui_label_settext(&self->label,
+				psy_ui_translate("newmachine.favorites"));
+		}
+	}
 }
 
 void newmachinesection_onlabelclick(NewMachineSection* self, psy_ui_Label* sender,
@@ -1049,6 +1095,7 @@ static void newmachine_onsectionchanged(NewMachine*,
 	NewMachineSection* sender);
 static void newmachine_onsectionrenamed(NewMachine*, NewMachineSection* sender);
 static void newmachine_alignsections(NewMachine*);
+static void newmachine_onlanguagechanged(NewMachine*);
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
@@ -1066,6 +1113,9 @@ static void newmachine_vtable_init(NewMachine* self)
 		newmachine_vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
 			newmachine_ontimer;
+		newmachine_vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
+			newmachine_onlanguagechanged;
 		newmachine_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &newmachine_vtable;
@@ -1344,6 +1394,16 @@ void newmachine_buildsections(NewMachine* self)
 	newmachine_alignsections(self);
 }
 
+void newmachine_onlanguagechanged(NewMachine* self)
+{	
+	psy_ui_Tab* first;
+
+	first = psy_ui_tabbar_tab(&self->navsections, 0);
+	if (first) {		
+		psy_ui_tab_settext(first, psy_ui_translate("newmachine.favorites"));
+	}
+}
+
 void newmachine_buildnavsections(NewMachine* self)
 {
 	psy_List* p;
@@ -1351,14 +1411,20 @@ void newmachine_buildnavsections(NewMachine* self)
 
 	selidx = psy_ui_tabbar_selected(&self->navsections);
 	psy_ui_tabbar_clear(&self->navsections);
+	psy_ui_tabbar_preventtranslation(&self->navsections);
 	self->selectedsection = NULL;	
 	p = psy_property_begin(self->workspace->pluginsections.sections);
 	for (; p != 0; p = p->next) {
 		psy_Property* section;		
 
 		section = (psy_Property*)psy_list_entry(p);
-		psy_ui_tabbar_append(&self->navsections, psy_property_at_str(section,
-			"name", psy_property_key(section)));
+		if (strcmp(psy_property_key(section), "favorites") == 0) {
+			psy_ui_tabbar_append(&self->navsections,
+				psy_ui_translate("newmachine.favorites"));
+		} else {
+			psy_ui_tabbar_append(&self->navsections,
+				psy_property_at_str(section, "name", psy_property_key(section)));
+		}
 	}
 	psy_ui_tabbar_mark(&self->navsections, selidx);
 }
@@ -1423,7 +1489,7 @@ void newmachine_onremovesection(NewMachine* self, psy_ui_Component* sender)
 {
 	if (newmachine_checksection(self)) {		
 		self->selectedplugin = NULL;
-		if (strcmp(psy_property_key(self->selectedsection->section), "Favorites") == 0) {
+		if (strcmp(psy_property_key(self->selectedsection->section), "favorites") == 0) {
 			newmachine_onclearsection(self, sender);
 			return;
 		}

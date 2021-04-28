@@ -66,14 +66,22 @@ void psy_audio_inputlabelparam_dispose(psy_audio_InputLabelParam* self)
 
 int inputlabelparam_name(psy_audio_InputLabelParam* self, char* text)
 {
-	psy_snprintf(text, 128, "Input %d", (int)self->channel->id + 1);	
+	if (self->channel) {
+		psy_snprintf(text, 128, "Input %d", (int)self->channel->id + 1);
+	} else {
+		psy_snprintf(text, 128, "Input %d", (int)self->machineparam.param0);
+	}
 	return 1;
 }
 
 int inputlabelparam_describe(psy_audio_InputLabelParam* self, char* text)
 {
-	mixer_describeeditname(self->channel->mixer, text,
-		self->channel->inputslot);
+	if (self->channel) {
+		mixer_describeeditname(self->channel->mixer, text,
+			self->channel->inputslot);
+	} else {
+		psy_snprintf(text, 128, "inactive");
+	}
 	return 1;
 }
 
@@ -962,6 +970,7 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	masterchannel_init(&self->master, self, "Master Out", "");
 	psy_audio_machine_seteditname(base, "Mixer");
 	psy_audio_custommachineparam_init(&self->blank_param, "", "", MPF_NULL | MPF_SMALL, 0, 0);
+	psy_audio_inputlabelparam_init(&self->blank_inputinfo_param, NULL);
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-", MPF_IGNORE | MPF_SMALL, 0, 0);
 	//psy_audio_custommachineparam_init(&self->route_param, "Route", "Route", MPF_SWITCH | MPF_SMALL, 0, 0);
 	psy_audio_custommachineparam_init(&self->routemaster_param, "Master", "Master", MPF_SWITCH | MPF_SMALL, 0, 0);
@@ -1034,6 +1043,7 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 	psy_audio_mixer_dispose_returns(self);
 	psy_audio_mixer_dispose_legacywires(self);
 	psy_audio_custommachineparam_dispose(&self->blank_param);
+	psy_audio_inputlabelparam_dispose(&self->blank_inputinfo_param);
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
 	psy_audio_custommachineparam_dispose(&self->routemaster_param);
 	psy_audio_custommachineparam_dispose(&self->label_mix_param);
@@ -1562,6 +1572,10 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 			if (row > numreturncolumns(self) + 3 && row < numreturncolumns(self) + 9) {
 				return &self->ignore_param.machineparam;
 			} else {
+				if (row == 0) {
+					self->blank_inputinfo_param.machineparam.param0 = index + 1;
+					return &self->blank_inputinfo_param.machineparam;
+				}
 				return &self->blank_param.machineparam;
 			}			
 		}
@@ -2615,9 +2629,7 @@ void mixer_returngrid_tweak(psy_audio_Mixer* self,
 	scaled = (uintptr_t)(value * 0xFF);	
 	channel = psy_audio_mixer_return(self, sender->machineparam.param0 - 1);
 	if (channel) {
-		uintptr_t i;		
-		psy_audio_ReturnChannel* returnchannel;
-
+		uintptr_t i;
 		// the return grid array grid represents:
 		// bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
 		channel->mute = (scaled & 1) ? TRUE : FALSE;

@@ -40,6 +40,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;	
 	psy_ui_label_init(&self->position, &self->component, NULL);
+	psy_ui_label_preventwrap(&self->position);
 	psy_ui_label_preventtranslation(&self->position);
 	psy_ui_label_setcharnumber(&self->position, 20);	
 	playposbar_updatelabel(self);

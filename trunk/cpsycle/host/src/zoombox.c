@@ -53,6 +53,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->label, zoombox_base(self), NULL);
 	psy_ui_label_preventtranslation(&self->label);
 	psy_ui_label_settext(&self->label, "100%");
+	psy_ui_label_preventwrap(&self->label);
 	psy_ui_label_setcharnumber(&self->label, 6);
 	psy_ui_button_init_connect(&self->zoomin, zoombox_base(self), NULL,
 		self, zoombox_onzoomin);

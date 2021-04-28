@@ -51,7 +51,8 @@ typedef struct psy_ui_Tab {
 	psy_ui_TabCheckState checkstate;
 	psy_ui_Bitmap icon;
 	double bitmapident;
-	uintptr_t index;	
+	uintptr_t index;
+	bool preventtranslation;
 } psy_ui_Tab;
 
 void psy_ui_tab_init(psy_ui_Tab*, psy_ui_Component* parent, psy_ui_Component* view,
@@ -63,6 +64,7 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent, psy_ui_Component* vie
 
 void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
 void psy_ui_tab_setmode(psy_ui_Tab*, TabMode);
+void psy_ui_tab_preventtranslation(psy_ui_Tab*);
 
 INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 {
@@ -72,11 +74,12 @@ INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 typedef struct psy_ui_TabBar {
 	// inherits
 	psy_ui_Component component;
+	// Signals
+	psy_Signal signal_change;
 	// internal	
 	uintptr_t selected;	
 	uintptr_t numtabs;
-	// Signals
-	psy_Signal signal_change;	
+	bool preventtranslation;
 } psy_ui_TabBar;
 
 void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
@@ -85,7 +88,9 @@ void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);
 void psy_ui_tabbar_select(psy_ui_TabBar*, uintptr_t tabindex);
 void psy_ui_tabbar_mark(psy_ui_TabBar*, uintptr_t tabindex);
+void psy_ui_tabbar_unmark(psy_ui_TabBar*);
 void psy_ui_tabbar_settabalign(psy_ui_TabBar*, psy_ui_AlignType align);
+void psy_ui_tabbar_preventtranslation(psy_ui_TabBar*);
 
 INLINE uintptr_t psy_ui_tabbar_selected(const psy_ui_TabBar* self)
 {	

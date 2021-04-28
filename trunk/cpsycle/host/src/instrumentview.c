@@ -237,28 +237,29 @@ void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* s
 // prototypes
 static void instrumentheaderview_onprevinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void instrumentheaderview_onnextinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
-static void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView*, psy_ui_Edit* sender);
+static void instrumentheaderview_oneditaccept(InstrumentHeaderView*, psy_ui_Edit* sender);
+static void instrumentheaderview_oneditreject(InstrumentHeaderView*, psy_ui_Edit* sender);
 // implementation
 void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, InstrumentView* view,
 	Workspace* workspace)
-{	
-	psy_ui_Margin margin;
-	psy_ui_Margin tab;	
-
-	psy_ui_margin_init_em(&margin, 0.0, 0.5, 0.5, 0.0);		
+{
 	self->view = view;
 	self->instrument = NULL;
 	self->instruments = instruments;
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW_HEADER);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		margin);
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
 		"instrumentview.instrument-name");
 	psy_ui_edit_init(&self->nameedit, &self->component);
+	psy_ui_edit_enableinputfield(&self->nameedit);
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
-	psy_signal_connect(&self->nameedit.signal_change, self,
-		instrumentheaderview_oneditinstrumentname);
+	psy_signal_connect(&self->nameedit.signal_accept, self,
+		instrumentheaderview_oneditaccept);	
+	psy_signal_connect(&self->nameedit.signal_reject, self,
+		instrumentheaderview_oneditreject);
 	psy_ui_button_init_connect(&self->prevbutton, &self->component, NULL,
 		self, instrumentheaderview_onprevinstrument);
 	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);
@@ -272,25 +273,21 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		workspace);
 	instrumentpredefsbar_init(&self->predefs, &self->more, NULL,
 		view, workspace);		
-	tab = margin;
-	tab.right = psy_ui_value_make_ew(4.0);
-	psy_ui_component_setmargin(&self->more, tab);
-	psy_ui_component_hide(&self->more);
+	// tab = margin;
+	//tab.right = psy_ui_value_make_ew(4.0);
+	//psy_ui_component_setmargin(&self->more, tab);
+	psy_ui_component_hide(&self->more);	
 }
 
 void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	self->predefs.instrument = instrument;
-	psy_signal_prevent(&self->nameedit.signal_change, self,
-		instrumentheaderview_oneditinstrumentname);
+	self->predefs.instrument = instrument;	
 	psy_ui_edit_settext(&self->nameedit,
 		(instrument)
 		? instrument->name
-		: "");
-	psy_signal_enable(&self->nameedit.signal_change, self,
-		instrumentheaderview_oneditinstrumentname);
+		: "");	
 	if (instrument) {
 		psy_ui_component_show_align(&self->more);
 	} else {
@@ -298,7 +295,7 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	}
 }
 
-void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView* self,
+void instrumentheaderview_oneditaccept(InstrumentHeaderView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->instrument) {
@@ -306,12 +303,43 @@ void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView* self,
 		psy_audio_InstrumentIndex index;
 		
 		index = instrumentsbox_selected(&self->view->instrumentsbox);
+		if (psy_strlen(psy_ui_edit_text(sender)) == 0) {
+			psy_ui_edit_settext(sender, "Untitled");
+		}
 		psy_audio_instrument_setname(self->instrument, psy_ui_edit_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.subslot, psy_audio_instrument_name(self->instrument));
 		psy_ui_listbox_settext(&self->view->instrumentsbox.instrumentlist, text,
-			index.subslot);
+			index.subslot);		
+	} else if (psy_strlen(psy_ui_edit_text(sender)) > 0) {
+		if (workspace_song(self->view->workspace)) {
+			psy_audio_Instrument* instrument;
+			psy_audio_InstrumentIndex selected;
+
+			selected = instrumentsbox_selected(&self->view->instrumentsbox);
+			instrument = psy_audio_instrument_allocinit();
+			psy_audio_instrument_setname(instrument, psy_ui_edit_text(sender));
+			psy_audio_instrument_setindex(instrument, selected.subslot);
+			psy_audio_exclusivelock_enter();
+			psy_audio_instruments_insert(&workspace_song(self->view->workspace)->instruments, instrument,
+				selected);
+			psy_audio_instruments_select(&workspace_song(self->view->workspace)->instruments, selected);
+			psy_audio_exclusivelock_leave();
+		}
 	}
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
+}
+
+void instrumentheaderview_oneditreject(InstrumentHeaderView* self,
+	psy_ui_Edit* sender)
+{
+	if (self->instrument) {
+		psy_ui_edit_settext(&self->nameedit,
+			(self->instrument)
+			? self->instrument->name
+			: "");
+	}
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
 void instrumentheaderview_onprevinstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
@@ -345,7 +373,7 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW_BUTTONS);	
 	psy_ui_button_init_text(&self->create, &self->component, NULL, "file.new");
 	psy_ui_button_init_text(&self->load, &self->component, NULL, "file.load");
 	psy_ui_button_init_text(&self->save, &self->component, NULL, "file.save");
@@ -417,29 +445,22 @@ static void instrumentview_onstatuschanged(InstrumentView*,
 void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
-	psy_ui_Margin margin;
-	psy_ui_Margin leftmargin;
+	psy_ui_Margin margin;	
 
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_INSTRUMENTVIEW,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->component, STYLE_INSTRVIEW);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);
 	self->statusbar = NULL;
 	self->player = &workspace->player;
 	self->workspace = workspace;
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);			
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
-		&workspace->song->instruments, self, workspace);
-	psy_ui_component_setmargin(&self->header.component,
-		leftmargin);
+		&workspace->song->instruments, self, workspace);	
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
 	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->left, leftmargin);
+	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments, workspace);
 	psy_ui_component_setalign(&self->instrumentsbox.component,

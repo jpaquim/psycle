@@ -43,28 +43,28 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	self->editor = editor;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
-	psy_ui_checkbox_settext(&self->selecttogether, "Select Channels Together");
+	psy_ui_checkbox_settext(&self->selecttogether, "samplesview.select-together");
 	psy_ui_checkbox_check(&self->selecttogether);
 	psy_ui_label_init_text(&self->selstartlabel, &self->component, NULL,
-		"Selection Start");
+		"samplesview.selstart");
 	psy_ui_edit_init(&self->selstartedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selstartedit, 10);			
 	psy_ui_label_init_text(&self->selendlabel, &self->component, NULL,
-		"Selection End");
+		"samplesview.selend");
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
 	psy_ui_label_init_text(&self->visualrepresentationdesc, &self->component,
-		NULL, "Visual");
+		NULL, "samplesview.visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop");		
+	psy_ui_checkbox_settext(&self->doublecontloop, "samplesview.doublecont");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
 		sampleeditorbar_ondoublecontloop);
 	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sus Loop");
+	psy_ui_checkbox_settext(&self->doublesustainloop, "samplesview.doublesus");
 	psy_signal_connect(&self->doublesustainloop.signal_clicked, self,
 		sampleeditorbar_ondoublesustainloop);	
 	psy_ui_checkbox_init(&self->drawlines, &self->component);
-	psy_ui_checkbox_settext(&self->drawlines, "Lines");
+	psy_ui_checkbox_settext(&self->drawlines, "samplesview.lines");
 	psy_signal_connect(&self->drawlines.signal_clicked, self,
 		sampleeditorbar_ondrawlines);
 	{	// resampling methods
@@ -353,13 +353,15 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self, psy_ui_Component* paren
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setspacing(&self->component,
+		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.0));
 	// psy_ui_button_init(&self->loop, &self->component);
 	// psy_ui_button_settext(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
 	psy_ui_button_init(&self->play, &self->component, NULL);
-	psy_ui_button_settext(&self->play, "play");	
+	psy_ui_button_settext(&self->play, "samplesview.play");	
 	psy_ui_button_init(&self->stop, &self->component, NULL);
-	psy_ui_button_settext(&self->stop, "stop");
+	psy_ui_button_settext(&self->stop, "samplesview.stop");
 	// psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);	
 	sampleeditorplaybar_initalign(self);	
 }
@@ -666,15 +668,12 @@ void samplebox_onselectionchanged(SampleBox* self, WaveBox* sender)
 
 void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{						
-	psy_ui_Margin margin;
-
+{
 	self->sample = 0;
 	self->samplerevents = 0;
 	self->workspace = workspace;
 	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.0, 2.0);		
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);

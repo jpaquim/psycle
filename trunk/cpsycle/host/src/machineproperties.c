@@ -6,6 +6,7 @@
 #include "machineproperties.h"
 // host
 #include "machineviewskin.h"
+#include "styles.h"
 // platform
 #include "../../detail/portable.h"
 
@@ -58,21 +59,19 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component,
 		machineproperties_vtable_init(self));
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_MACHINEVIEW_PROPERTIES);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_margin_init_em(&spacing, 0.25, 0.25, 0.25, 1.0);
-	psy_ui_component_setspacing(&self->component, spacing);		
+		psy_ui_defaults_hmargin(psy_ui_defaults()));			
 	machineproperties_updateskin(self);
 	psy_ui_button_init_text_connect(&self->issolobypass, &self->component,
 		NULL, "machineview.pwr", self, machineproperties_onsolobypass);
 	psy_ui_button_init_text_connect(&self->ismute, &self->component,
 		NULL, "machineview.mute", self, machineproperties_ontogglemute);
 	psy_ui_button_init_text_connect(&self->isbus, &self->component, NULL,
-		"Bus", self, machineproperties_ontogglebus);
-	psy_ui_label_init_text(&self->namelabel, &self->component, NULL,
-		"machineview.editname");	
+		"Bus", self, machineproperties_ontogglebus);	
 	psy_ui_edit_init(&self->nameedit, &self->component);
-	psy_ui_edit_settext(&self->nameedit, "No Machine");
+	psy_ui_edit_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);	
 	psy_ui_edit_enableinputfield(&self->nameedit);
 	psy_signal_connect(&self->nameedit.signal_accept, self,
@@ -88,6 +87,10 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineproperties_onsongchanged);
 	machineproperties_connectsongsignals(self);
+	psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
+	psy_ui_component_enableinput(&self->component, psy_ui_NONRECURSIVE);
+	psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
+		psy_ui_NONRECURSIVE);
 }
 
 void machineproperties_setmachine(MachineProperties* self,
@@ -95,21 +98,27 @@ void machineproperties_setmachine(MachineProperties* self,
 {
 	self->machine = machine;
 	if (self->machine) {
+		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
+		psy_ui_component_enableinput(&self->component, psy_ui_RECURSIVE);
 		psy_ui_edit_settext(&self->nameedit,
 			psy_audio_machine_editname(machine));
 		if (psy_audio_machine_mode(machine) == psy_audio_MACHMODE_GENERATOR) {
 			psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		} else {
 			psy_ui_component_show_align(psy_ui_button_base(&self->isbus));
-		}
+		}		
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	} else {
 		self->macid = psy_INDEX_INVALID;
-		psy_ui_edit_settext(&self->nameedit, "");
+		psy_ui_edit_settext(&self->nameedit, psy_ui_translate("machineview.editname"));
 		psy_ui_component_hide_align(psy_ui_button_base(&self->isbus));
 		psy_ui_button_disablehighlight(&self->issolobypass);
 		psy_ui_button_disablehighlight(&self->isbus);
 		psy_ui_button_disablehighlight(&self->ismute);		
+		psy_ui_component_preventinput(&self->component, psy_ui_RECURSIVE);
+		psy_ui_component_enableinput(psy_ui_button_base(&self->cancel),
+			psy_ui_NONRECURSIVE);
+		psy_ui_component_enableinput(&self->component, psy_ui_NONRECURSIVE);
 		psy_ui_component_align(&self->component);
 		psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 	}	
@@ -164,7 +173,8 @@ void machineproperties_oneditaccept(MachineProperties* self,
 		psy_audio_machine_seteditname(self->machine,
 			psy_ui_edit_text(&self->nameedit));
 	}
-	psy_ui_component_setfocus(&self->component);	
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
 void machineproperties_oneditreject(MachineProperties* self,
@@ -174,7 +184,7 @@ void machineproperties_oneditreject(MachineProperties* self,
 		psy_ui_edit_settext(&self->nameedit,
 			psy_audio_machine_editname(self->machine));
 	}	
-	psy_ui_component_setfocus(&self->component);
+	psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
 }
 
 void machineproperties_onsongchanged(MachineProperties* self, Workspace* workspace, int flag,
@@ -198,9 +208,7 @@ void machineproperties_connectsongsignals(MachineProperties* self)
 }
 
 void machineproperties_updateskin(MachineProperties* self)
-{
-	psy_ui_component_setbackgroundcolour(&self->component,
-		self->skin->colour);
+{	
 	psy_ui_component_setcolour(&self->component,
 		self->skin->wirecolour);
 }

@@ -193,6 +193,7 @@ typedef struct psy_audio_Mixer {
 	uintptr_t strobe;
 	psy_audio_MasterChannel master;
 	psy_audio_CustomMachineParam blank_param;
+	psy_audio_InputLabelParam blank_inputinfo_param;
 	psy_audio_CustomMachineParam ignore_param;	
 	psy_audio_CustomMachineParam routemaster_param;
 	psy_audio_CustomMachineParam label_mix_param;

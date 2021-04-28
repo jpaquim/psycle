@@ -293,3 +293,24 @@ psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples* self,
 	}
 	return tableend;
 }
+
+uintptr_t psy_audio_samples_freeslot(psy_audio_Samples* self, uintptr_t startslot,
+	uintptr_t maxslots)
+{
+	uintptr_t rv = startslot;
+	int first = startslot != 0;
+
+	while (psy_audio_samples_at(self,
+		psy_audio_sampleindex_make(rv, 0)) != 0) {
+		if (rv == maxslots) {
+			if (first) {
+				rv = 0;
+			} else {
+				rv = maxslots;
+				break;
+			}
+		}
+		++rv;
+	}	
+	return rv;
+}
