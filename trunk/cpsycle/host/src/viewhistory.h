@@ -19,6 +19,17 @@ typedef struct ViewHistoryEntry {
 	uintptr_t seqpos;
 } ViewHistoryEntry;
 
+INLINE ViewHistoryEntry viewhistoryentry_make(uintptr_t id, uintptr_t section,
+	uintptr_t seqpos)
+{
+	ViewHistoryEntry rv;
+
+	rv.id = id;
+	rv.section = section;
+	rv.seqpos = seqpos;
+	return rv;
+}
+
 typedef struct {
 	psy_List* container;
 	bool prevented;

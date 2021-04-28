@@ -970,6 +970,8 @@ static void samplesview_onconfigure(SamplesView*, Workspace*,
 	psy_Property*);
 static void samplesview_onresamplermethodchanged(SamplesView*,
 	psy_ui_Component* sender, int index);
+static void samplesview_onselectsection(SamplesView*, psy_ui_Component* sender,
+	uintptr_t section, uintptr_t options);
 // implementation
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -1068,6 +1070,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
 		samplesview_onconfigure);	
 	psy_ui_tabbar_select(&self->tabbar, 0);
+	psy_signal_connect(&samplesview_base(self)->signal_selectsection, self,
+		samplesview_onselectsection);
 }
 
 void samplesview_onconfigure(SamplesView* self, Workspace* sender,
@@ -1274,4 +1278,10 @@ void samplesview_onresamplermethodchanged(SamplesView* self,
 {
 	wavebox_setquality(&self->wavebox, (psy_dsp_ResamplerQuality)index);
 	sampleeditor_setquality(&self->sampleeditor, (psy_dsp_ResamplerQuality)index);
+}
+
+void samplesview_onselectsection(SamplesView* self, psy_ui_Component* sender,
+	uintptr_t section, uintptr_t options)
+{
+	psy_ui_tabbar_select(&self->clienttabbar, section);
 }

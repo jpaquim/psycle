@@ -49,11 +49,12 @@ void machineproperties_init(MachineProperties* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine, MachineViewSkin* skin,
 	Workspace* workspace)
 {
-	psy_ui_Margin spacing;
-
 	self->workspace = workspace;
 	self->machine = machine;
-	self->machines = (workspace_song(workspace)) ? &workspace_song(workspace)->machines : NULL;
+	self->machines =
+		(workspace_song(workspace))
+		? &workspace_song(workspace)->machines
+		: NULL;
 	self->skin = skin;
 	self->macid = psy_INDEX_INVALID;
 	psy_ui_component_init(&self->component, parent, NULL);

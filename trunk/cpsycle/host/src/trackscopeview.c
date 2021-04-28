@@ -51,8 +51,9 @@ static psy_ui_ComponentVtable* vtable_init(TrackScopes* self)
 void trackscopes_init(TrackScopes* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component, vtable_init(self));	
+	psy_ui_component_init(&self->component, parent, NULL);	
+	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_setstyletype(&self->component, STYLE_TRACKSCOPE);
 	psy_ui_component_doublebuffer(&self->component);	
 	self->workspace = workspace;
 	self->trackwidth = 90;
@@ -72,10 +73,7 @@ void trackscopes_ondraw(TrackScopes* self, psy_ui_Graphics* g)
 		uintptr_t currtrack;
 		double cpx;
 		double cpy;
-				
-		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
-		psy_ui_setcolour(g, psy_ui_colour_make(0x00777777));
+								
 		currtrack = 0;
 		for (c = 0, cpx = cpy = 0; c < numtracks; ++c) {
 			trackscopes_drawtrackindex(self, g, cpx, cpy, c);

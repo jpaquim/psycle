@@ -7,7 +7,10 @@
 #include "workspace.h"
 // local
 #include "cmdproperties.h"
+#include "cmdsgeneral.h"
+#include "sequencehostcmds.h"
 #include "styles.h"
+#include "trackergridstate.h"
 // file
 #include <dir.h>
 // dsp
@@ -77,6 +80,8 @@ static void workspace_onterminaloutput(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
+// EventDriver Input Handler
+static void workspace_oneventdriverinput(Workspace*, psy_EventDriver* sender);
 
 // MachineCallback VTable
 static psy_audio_MachineCallbackVtable machinecallback_vtable;
@@ -153,7 +158,9 @@ void workspace_init(Workspace* self, void* mainhandle)
 	workspace_initplayer(self);
 	eventdriverconfig_registereventdrivers(&self->config.input);
 	psy_audio_patterncursor_init(&self->patterneditposition);
-	psy_audio_pattern_init(&self->patternpaste);	
+	psy_audio_pattern_init(&self->patternpaste);
+	psy_signal_connect(&self->player.eventdrivers.signal_input, self,
+		workspace_oneventdriverinput);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -967,9 +974,9 @@ void workspace_load_configuration(Workspace* self)
 	} else {
 		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
 			&self->machinefactory);
-	}
+	}	
 	workspace_setdefaultfont(self, self->config.defaultfont);
-	workspace_setapptheme(self, self->config.apptheme);
+	workspace_setapptheme(self, self->config.apptheme);	
 	psycleconfig_notifyall_changed(&self->config);
 	psy_path_dispose(&path);
 	self->patternsinglemode =
@@ -1688,4 +1695,181 @@ psy_audio_MachineFactory* onmachinefactory(Workspace* self)
 void workspace_multiselectgear(Workspace* self, psy_List* machinelist)
 {
 	psy_signal_emit(&self->signal_gearselect, self, 1, machinelist);
+}
+
+void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
+{
+	psy_EventDriverCmd cmd;
+
+	cmd = psy_eventdriver_getcmd(sender, "general");	
+	switch (cmd.id) {
+	case CMD_IMM_ADDMACHINE:
+		workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
+		break;
+	case CMD_IMM_HELP:
+		workspace_selectview(self, VIEW_ID_HELPVIEW, 0, 0);
+		break;
+	case CMD_IMM_EDITPATTERN:
+		workspace_selectview(self, VIEW_ID_PATTERNVIEW, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_EDITINSTR:
+		workspace_selectview(self, VIEW_ID_INSTRUMENTSVIEW, 0, 0);
+		break;
+	case CMD_IMM_EDITSAMPLE:
+		workspace_selectview(self, VIEW_ID_SAMPLESVIEW, 0, 0);
+		break;
+	case CMD_IMM_EDITWAVE:
+		workspace_selectview(self, VIEW_ID_SAMPLESVIEW, 2, 0);
+		break;
+	case CMD_IMM_INSTRDEC:
+		if (self->song) {
+			psy_audio_instruments_dec(&self->song->instruments);				
+		}
+		break;
+	case CMD_IMM_INSTRINC:
+		if (self->song) {
+			psy_audio_instruments_inc(&self->song->instruments);
+		}
+		break;
+	case CMD_IMM_ENABLEAUDIO:
+		psycleconfig_enableaudio(&self->config,
+			!psycleconfig_audioenabled(&self->config));
+		break;
+	case CMD_IMM_SETTINGS:
+		workspace_selectview(self, VIEW_ID_SETTINGSVIEW, 0, 0);
+		break;
+	case CMD_IMM_LOADSONG:
+		if (keyboardmiscconfig_savereminder(&self->config.misc) &&
+				workspace_songmodified(self)) {
+			workspace_selectview(self, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
+		} else {
+			workspace_loadsong_fileselect(self);
+		}
+		break;
+	case CMD_IMM_INFOMACHINE:
+		if (self->song) {
+			workspace_showparameters(self,
+				psy_audio_machines_selected(&self->song->machines));
+		}
+		break;
+	case CMD_IMM_PATTERNINC: {
+		SequenceCmds cmds;
+
+		sequencecmds_init(&cmds, self);
+		sequencecmds_incpattern(&cmds);
+		break; }
+	case CMD_IMM_PATTERNDEC: {
+		SequenceCmds cmds;
+
+		sequencecmds_init(&cmds, self);
+		sequencecmds_decpattern(&cmds);
+		break; }
+	case CMD_IMM_SONGPOSDEC:
+		workspace_songposdec(self);
+		break;
+	case CMD_IMM_SONGPOSINC:
+		workspace_songposinc(self);
+		break;
+	case CMD_IMM_PLAYSONG:
+		psy_audio_player_setposition(&self->player, 0);
+		psy_audio_player_start(&self->player);
+		break;
+	case CMD_IMM_PLAYSTART:
+		workspace_playstart(self);
+		break;
+	case CMD_IMM_PLAYSTOP:
+		psy_audio_player_stop(&self->player);
+		break;
+	case CMD_IMM_PLAYROWTRACK: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
+
+		psy_audio_exclusivelock_enter();
+		psy_audio_player_stop(&self->workspace.player);
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+			psy_audio_player_bpl(&self->workspace.player));
+		self->workspace.player.sequencer.playtrack = self->workspace.patterneditposition.track;
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		self->playrow = TRUE;
+		psy_audio_exclusivelock_leave();
+		break; */ }
+	case CMD_IMM_PLAYROWPATTERN: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
+
+		psy_audio_exclusivelock_enter();
+		psy_audio_player_stop(&self->workspace.player);
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+		self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+		self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+		psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+			psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+			psy_audio_player_bpl(&self->workspace.player));
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		self->playrow = TRUE;
+		psy_audio_exclusivelock_leave();
+		break; */ }
+	case CMD_IMM_PLAYFROMPOS: {
+		/*psy_dsp_big_beat_t playposition = 0;
+		psy_audio_SequenceEntry* entry;
+
+		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) +
+			(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
+		break; */}
+	case CMD_IMM_SAVESONG:
+		workspace_savesong_fileselect(self);
+		break;
+	case CMD_IMM_FOLLOWSONG:
+		if (workspace_followingsong(self)) {
+			workspace_stopfollowsong(self);
+		} else {
+			workspace_followsong(self);
+		}
+		break;
+	case CMD_COLUMN_0:
+	case CMD_COLUMN_1:
+	case CMD_COLUMN_2:
+	case CMD_COLUMN_3:
+	case CMD_COLUMN_4:
+	case CMD_COLUMN_5:
+	case CMD_COLUMN_6:
+	case CMD_COLUMN_7:
+	case CMD_COLUMN_8:
+	case CMD_COLUMN_9:
+	case CMD_COLUMN_A:
+	case CMD_COLUMN_B:
+	case CMD_COLUMN_C:
+	case CMD_COLUMN_D:
+	case CMD_COLUMN_E:
+	case CMD_COLUMN_F:
+		if (self->song && psy_audio_song_numsongtracks(self->song) >=
+				(uintptr_t)(cmd.id - CMD_COLUMN_0)) {			
+			self->patterneditposition.track = (cmd.id - CMD_COLUMN_0);
+			workspace_setpatterncursor(self, self->patterneditposition);
+		}
+		break;
+	default:
+		break;
+	}
 }
