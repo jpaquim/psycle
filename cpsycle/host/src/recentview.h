@@ -32,7 +32,7 @@ typedef struct {
 	RecentBar bar;	
 	PropertiesView view;
 	Workspace* workspace;
-	bool starting;
+	bool starting;	
 } RecentView;
 
 void recentview_init(RecentView*, psy_ui_Component* parent,

@@ -146,6 +146,18 @@ void psy_signal_prevent(psy_Signal* self, void* context, void* fp)
 	}
 }
 
+void psy_signal_preventall(psy_Signal* self)
+{
+	psy_List* p;
+
+	for (p = self->slots; p != NULL; p = p->next) {
+		psy_Slot* slot;
+
+		slot = (psy_Slot*)psy_list_entry(p);
+		slot->prevented = TRUE;
+	}
+}
+
 void psy_signal_enable(psy_Signal* self, void* context, void* fp)
 {
 	psy_Slot* slot;
@@ -158,6 +170,17 @@ void psy_signal_enable(psy_Signal* self, void* context, void* fp)
 	}
 }
 
+void psy_signal_enableall(psy_Signal* self)
+{
+	psy_List* p;
+
+	for (p = self->slots; p != NULL; p = p->next) {
+		psy_Slot* slot;
+
+		slot = (psy_Slot*)psy_list_entry(p);
+		slot->prevented = FALSE;
+	}
+}
 
 psy_Slot* psy_signal_findslot(psy_Signal* self, void* context, void* fp)
 {
