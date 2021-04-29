@@ -15,26 +15,26 @@
 #include <uiswitch.h>
 #include <uiscroller.h>
 #include <uinotebook.h>
-// container
-#include <hashtbl.h>
-#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Displays psy_Property and allows to edit them.
-
+// Displays and edits properties
 
 struct PropertiesRenderLine;
 
-typedef struct PropertiesRenderState {
-	psy_Property* property;
-	psy_Property* selected;
-	psy_ui_Component* dummy;
-	psy_ui_Edit* edit;
-	struct PropertiesRenderLine* line;
+typedef struct PropertiesRenderState {	
 	bool dialogbutton;
+	psy_ui_Size size_col0;
+	psy_ui_Size size_col2;
+	uintptr_t numcols;
+	// references
+	psy_Property* property; /* event bubble target property */
+	psy_Property* selected; /* selected property*/
+	struct PropertiesRenderLine* line; /* event bubble target line */
+	psy_ui_Edit* edit;
+	psy_ui_Component* dummy; /* used to calculate font pt size */		
 } PropertiesRenderState;
 
 void propertiesrenderstate_init(PropertiesRenderState*);
@@ -42,30 +42,25 @@ void propertiesrenderstate_init(PropertiesRenderState*);
 typedef struct PropertiesRenderLine {
 	// inherits
 	psy_ui_Component component;
-	psy_ui_Component col0;	
-	psy_ui_Component col1;
-	psy_ui_Component col2;
+	// internal
 	psy_ui_Label key;
 	psy_ui_Switch* check;
 	psy_ui_Label* label;
 	psy_ui_Button* dialogbutton;
-	psy_ui_Component* colour;
-	uintptr_t level;	
-	psy_Property* property;
-	uintptr_t numcols;
+	psy_ui_Component* colour;	
+	psy_Property* property;	
 	PropertiesRenderState* state;
 } PropertiesRenderLine;
 
 void propertiesrenderline_init(PropertiesRenderLine*,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	PropertiesRenderState*, psy_Property*,
-	uintptr_t level, uintptr_t numcols);
+	uintptr_t level);
 
 PropertiesRenderLine* propertiesrenderline_alloc(void);
 PropertiesRenderLine* propertiesrenderline_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
-	PropertiesRenderState*, psy_Property*,
-	uintptr_t level, uintptr_t numcols);
+	PropertiesRenderState*, psy_Property*, uintptr_t level);
 
 void propertiesrenderline_update(PropertiesRenderLine*);
 bool propertiesrenderline_updatecheck(PropertiesRenderLine*);
@@ -79,36 +74,30 @@ typedef struct PropertiesRenderer {
 	// inherits
 	psy_ui_Component component;
 	psy_ui_Component client;
-	// internal data
-	// dummy used to calculate font size
-	psy_ui_Component dummy;			
+	// signals
+	psy_Signal signal_changed;
+	psy_Signal signal_selected;
+	// internal	
+	psy_ui_Component dummy;	/* used to calculate font pt size */
 	int keyselected;		
 	bool showkeyselection;
 	psy_ui_Edit edit;
-	InputDefiner inputdefiner;
-	psy_Signal signal_changed;
-	psy_Signal signal_selected;	
-	uintptr_t numcols;
+	InputDefiner inputdefiner;	
 	uintptr_t currlinestatecount;		
-	psy_ui_Colour valuecolour;
-	psy_ui_Colour sectioncolour;
-	psy_ui_Colour separatorcolour;
-	psy_ui_Colour valueselcolour;
-	psy_ui_Colour valueselbackgroundcolour;
 	psy_ui_Component* currsection;	
-	psy_Table sections;
+	psy_Table sections;	
 	PropertiesRenderState state;
 	uintptr_t mainsectionstyle;
 	uintptr_t mainsectionheaderstyle;
 	uintptr_t keystyle;
 	uintptr_t keystyle_hover;
+	uintptr_t rebuild_level;
 	// references
 	psy_Property* properties;	
-	Workspace* workspace;	
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Property*, uintptr_t numcols, Workspace*);
+	psy_Property*, uintptr_t numcols);
 
 void propertiesrenderer_setstyle(PropertiesRenderer*,
 	uintptr_t mainsection,
@@ -139,10 +128,7 @@ typedef struct PropertiesView {
 	psy_ui_Component viewtabbar;	
 	psy_ui_TabBar tabbar;
 	PropertiesRenderer renderer;
-	psy_ui_Scroller scroller;
-	bool preventscrollupdate;	
-	// references
-	Workspace* workspace;
+	psy_ui_Scroller scroller;	
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
@@ -150,6 +136,8 @@ void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	uintptr_t numcols, Workspace*);
 
 void propertiesview_reload(PropertiesView*);
+void propertiesview_reload_mainsection(PropertiesView*,
+	psy_Property* mainsection);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

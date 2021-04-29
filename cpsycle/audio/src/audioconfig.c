@@ -263,7 +263,8 @@ void audioconfig_enableaudio(AudioConfig* self, bool enable)
 	}
 }
 
-bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property, uintptr_t* rebuild)
+bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property,
+	uintptr_t* rebuild_level)
 {	
 	psy_Property* choice;
 
@@ -276,7 +277,7 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property, ui
 	choice = psy_property_item_choice_parent(property);		
 	if (choice && psy_property_hasid(choice, PROPERTY_ID_AUDIODRIVERS)) {
 		audioconfig_onaudiodriverselect(self, self->audioenabled);
-		*rebuild = TRUE;
+		*rebuild_level = 1;
 		return TRUE;				
 	}
 	return FALSE;

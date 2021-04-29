@@ -323,7 +323,7 @@ void psy_ui_tabbar_mark(psy_ui_TabBar* self, uintptr_t tabindex)
 	}
 }
 
-void psy_ui_tabbar_unmark(psy_ui_TabBar* self, uintptr_t tabindex)
+void psy_ui_tabbar_unmark(psy_ui_TabBar* self)
 {
 	psy_ui_component_removestylestate_children(&self->component,
 		psy_ui_STYLESTATE_SELECT);

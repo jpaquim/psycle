@@ -1079,7 +1079,7 @@ void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
-	psy_Property* property, uintptr_t* rebuild)
+	psy_Property* property, uintptr_t* rebuild_level)
 {
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_SHOWSEQUENCEEDIT:
@@ -1104,7 +1104,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		updateshowstate(property, metronomebar_base(&self->metronomebar));		
 		break;	
 	default:
-		*rebuild = workspace_configurationchanged(&self->workspace, property);
+		workspace_configurationchanged(&self->workspace, property, rebuild_level);
 		break;
 	}
 }

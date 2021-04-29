@@ -43,7 +43,8 @@ void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_oneditaudiodriverconfiguration(AudioConfig*, bool enabled);
 
-bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*, uintptr_t* rebuild);
+bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*,
+	uintptr_t* rebuild_level);
 
 const char* audioconfig_driverpath(AudioConfig*);
 const char* audioconfig_driverkey(AudioConfig*);

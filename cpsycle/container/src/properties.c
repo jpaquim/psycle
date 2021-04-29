@@ -284,11 +284,44 @@ psy_Property* psy_property_first(psy_Property* self)
 	return NULL;
 }
 
-psy_Property* psy_property_parent(const psy_Property* self)
+psy_Property* psy_property_parent(psy_Property* self)
 {
 	assert(self);
 
 	return self->parent;
+}
+
+const psy_Property* psy_property_parent_const(const psy_Property* self)
+{
+	assert(self);
+
+	return self->parent;
+}
+
+psy_Property* psy_property_parent_level(psy_Property* self, uintptr_t level)
+{
+	psy_Property* rv;
+	psy_Property* p;
+	psy_List* q;
+	psy_List* r;
+
+	assert(self);
+
+	rv = NULL;
+	q = NULL;
+	p = self;
+	while (psy_property_parent(p)) {
+		p = psy_property_parent(p);
+		psy_list_append(&q, p);
+	}
+	if (level < psy_list_size(q)) {
+		r = psy_list_at(q, psy_list_size(q) - level - 1);
+		if (r) {
+			rv = (psy_Property*)r->entry;
+		}
+	}
+	psy_list_free(q);
+	return rv;
 }
 
 psy_Property* psy_property_remove(psy_Property* self, psy_Property* property)
@@ -529,7 +562,7 @@ char_dyn_t* psy_property_sections(const psy_Property* self)
 				++size;
 			}
 		}
-		p = psy_property_parent(p);
+		p = psy_property_parent_const(p);
 	}
 	rv = (char_dyn_t*)malloc(size);
 	*rv = '\0';
@@ -617,7 +650,7 @@ uintptr_t psy_property_index(const psy_Property* self)
 {
 	assert(self);
 
-	if (psy_property_parent(self)) {
+	if (psy_property_parent_const(self)) {
 		return psy_list_entry_index(self->parent->children, self);
 	}
 	return psy_INDEX_INVALID;
@@ -827,19 +860,19 @@ bool psy_property_ischoiceitem(const psy_Property* self)
 
 intptr_t psy_property_choiceitem_index(const psy_Property* self)
 {
-	psy_List* p;
+	const psy_List* p;
 	uintptr_t rv;
-	psy_Property* choice;
+	const psy_Property* choice;
 	
 	assert(self);
 
-	choice = psy_property_parent(self);
+	choice = psy_property_parent_const(self);
 	rv = 0;
 	if (choice) {
 		
-		p = psy_property_begin(choice);
+		p = psy_property_begin_const(choice);
 		while (p != NULL) {
-			if (psy_list_entry(p) == self) {
+			if (psy_list_entry_const(p) == self) {
 				break;
 			}
 			++rv;
@@ -1165,6 +1198,50 @@ psy_Property* psy_property_setitem_int(psy_Property* self, intptr_t value)
 		self->item.value.i = value;
 	}
 	return self;
+}
+
+bool psy_property_ishex(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_isint(self) &&
+		(psy_property_hint(self) == PSY_PROPERTY_HINT_EDITHEX);
+}
+
+bool psy_property_isbool(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_BOOL;
+}
+
+bool psy_property_isint(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_INTEGER;
+}
+
+bool psy_property_isstr(const psy_Property* self)
+{
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_STRING;
+}
+
+bool psy_property_isfont(const psy_Property* self)
+{
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_FONT;
+}
+
+bool psy_property_isaction(const psy_Property* self)
+{
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_ACTION;
+}
+
+bool psy_property_issection(const psy_Property* self)
+{
+	assert(self);
+
+	return psy_property_type(self) == PSY_PROPERTY_TYPE_SECTION;
 }
 
 intptr_t psy_property_item_int(const psy_Property* self)
