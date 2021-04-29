@@ -7,6 +7,7 @@
 // host
 #include "styles.h"
 // audio
+#include <exclusivelock.h>
 #include <songio.h>
 
 void recentbar_init(RecentBar* self, psy_ui_Component* parent)
@@ -93,8 +94,8 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 		STYLE_RECENTVIEW_MAINSECTION,
 		STYLE_RECENTVIEW_MAINSECTIONHEADER,
 		psy_INDEX_INVALID,
-		psy_ui_STYLE_BUTTON_HOVER);
-	self->view.renderer.showkeyselection = TRUE;	
+		psy_ui_STYLE_BUTTON_HOVER,
+		psy_ui_STYLE_BUTTON_SELECT);
 	psy_ui_component_setpreferredsize(&self->view.component,
 		psy_ui_size_make_em(50.0, 0.0));
 	psy_ui_component_hide(&self->view.tabbar.component);	
@@ -110,14 +111,18 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 
 void recentview_onselected(RecentView* self, PropertiesView* sender,
 	psy_Property* property)
-{
+{	
 	if (psy_property_insection(property, self->workspace->playlist.recentfiles)) {
-		if (!self->workspace->filename || strcmp(self->workspace->filename,
+		if (self->starting || !self->workspace->filename || strcmp(self->workspace->filename,
 				psy_property_item_str(property)) != 0) {						
 			workspace_loadsong(self->workspace, psy_property_item_str(property),
 				generalconfig_playsongafterload(psycleconfig_general(
 					workspace_conf(self->workspace))));			
-			psy_ui_component_invalidate(&self->view.renderer.component);
+			psy_audio_exclusivelock_enter();
+			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
+			psy_audio_player_setposition(workspace_player(self->workspace), 0);
+			psy_audio_player_start(workspace_player(self->workspace));
+			psy_audio_exclusivelock_leave();			
 		}
 	}
 }
@@ -163,18 +168,12 @@ void recentview_ontimer(RecentView* self, uintptr_t timerid)
 		psy_Property* next;
 		
 		next = recentview_next(self);
-		if (next) {						
-			self->view.renderer.state.selected = next;
-			workspace_loadsong(self->workspace, psy_property_item_str(next), FALSE);			
-			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
-			psy_audio_player_setposition(workspace_player(self->workspace), 0);
-			psy_audio_player_start(workspace_player(self->workspace));
-			self->starting = FALSE;
-			psy_ui_component_invalidate(&self->view.renderer.component);
+		if (next) {
+			propertiesview_select(&self->view, next);								
+			self->starting = FALSE;			
 		} else {
 			psy_audio_player_stop(workspace_player(self->workspace));
-			psy_ui_component_stoptimer(&self->component, 0);
-			psy_ui_component_invalidate(&self->view.renderer.component);
+			psy_ui_component_stoptimer(&self->component, 0);			
 		}		
 	}
 }
@@ -222,18 +221,31 @@ void recentview_onplaylistchanged(RecentView* self, psy_Playlist* sender)
 
 void recentview_onmoveup(RecentView* self, psy_ui_Button* sender)
 {
-	if (self->view.renderer.properties && self->view.renderer.state.selected) {
-		psy_property_moveup(self->view.renderer.state.selected);
+	psy_Property* selected;
+
+	selected = self->view.renderer.state.selected;
+	if (self->view.renderer.properties && selected) {
+		
+		psy_property_moveup(selected);
 		psy_playlist_save(&self->workspace->playlist);
-		psy_ui_component_invalidate(&self->view.renderer.component);
+		propertiesview_reload(&self->view);
+		psy_signal_preventall(&self->view.signal_selected);
+		propertiesview_select(&self->view, selected);
+		psy_signal_enableall(&self->view.signal_selected);
 	}
 }
 
 void recentview_onmovedown(RecentView* self, psy_ui_Button* sender)
 {
-	if (self->view.renderer.properties && self->view.renderer.state.selected) {
-		psy_property_movedown(self->view.renderer.state.selected);
+	psy_Property* selected;
+
+	selected = self->view.renderer.state.selected;
+	if (self->view.renderer.properties && selected) {
+		psy_property_movedown(selected);		
 		psy_playlist_save(&self->workspace->playlist);
-		psy_ui_component_invalidate(&self->view.renderer.component);
+		propertiesview_reload(&self->view);
+		psy_signal_preventall(&self->view.signal_selected);
+		propertiesview_select(&self->view, selected);
+		psy_signal_enableall(&self->view.signal_selected);
 	}
 }

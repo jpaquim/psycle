@@ -32,12 +32,13 @@ typedef struct PropertiesRenderState {
 	// references
 	psy_Property* property; /* event bubble target property */
 	psy_Property* selected; /* selected property*/
-	struct PropertiesRenderLine* line; /* event bubble target line */
+	struct PropertiesRenderLine* selectedline;
 	psy_ui_Edit* edit;
-	psy_ui_Component* dummy; /* used to calculate font pt size */		
+	psy_ui_Component* dummy; /* used to calculate font pt size */
 } PropertiesRenderState;
 
-void propertiesrenderstate_init(PropertiesRenderState*);
+void propertiesrenderstate_init(PropertiesRenderState*, uintptr_t numcols,
+	psy_ui_Edit* edit, psy_ui_Component* dummy);
 
 typedef struct PropertiesRenderLine {
 	// inherits
@@ -54,8 +55,7 @@ typedef struct PropertiesRenderLine {
 
 void propertiesrenderline_init(PropertiesRenderLine*,
 	psy_ui_Component* parent, psy_ui_Component* view,
-	PropertiesRenderState*, psy_Property*,
-	uintptr_t level);
+	PropertiesRenderState*, psy_Property*, uintptr_t level);
 
 PropertiesRenderLine* propertiesrenderline_alloc(void);
 PropertiesRenderLine* propertiesrenderline_allocinit(
@@ -78,9 +78,7 @@ typedef struct PropertiesRenderer {
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	// internal	
-	psy_ui_Component dummy;	/* used to calculate font pt size */
-	int keyselected;		
-	bool showkeyselection;
+	psy_ui_Component dummy;	/* used to calculate font pt size */	
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;	
 	uintptr_t currlinestatecount;		
@@ -91,6 +89,7 @@ typedef struct PropertiesRenderer {
 	uintptr_t mainsectionheaderstyle;
 	uintptr_t keystyle;
 	uintptr_t keystyle_hover;
+	uintptr_t linestyle_select;
 	uintptr_t rebuild_level;
 	// references
 	psy_Property* properties;	
@@ -103,13 +102,19 @@ void propertiesrenderer_setstyle(PropertiesRenderer*,
 	uintptr_t mainsection,
 	uintptr_t mainsectionheader,
 	uintptr_t keystyle,
-	uintptr_t keystyle_hover);
+	uintptr_t keystyle_hover,
+	uintptr_t linestyle_select);
 
 INLINE const psy_Property* propertiesrenderer_properties(const
 	PropertiesRenderer* self)
 {
 	return self->properties;
 }
+
+void propertiesrenderer_updateline(PropertiesRenderer*, PropertiesRenderLine*);
+void propertiesrenderer_build(PropertiesRenderer*);
+void propertiesrenderer_rebuild(PropertiesRenderer*,
+	psy_Property* mainsection);
 
 INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 {
@@ -136,8 +141,7 @@ void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	uintptr_t numcols, Workspace*);
 
 void propertiesview_reload(PropertiesView*);
-void propertiesview_reload_mainsection(PropertiesView*,
-	psy_Property* mainsection);
+void propertiesview_select(PropertiesView*, psy_Property*);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {
