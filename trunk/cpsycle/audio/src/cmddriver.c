@@ -61,6 +61,13 @@ static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
+static psy_EventDriverInput driver_input(CmdDriver* context)
+{
+	psy_EventDriverInput input;
+
+	CmdDriver* self = (CmdDriver*)context;
+	return self->lastinput;
+}
 
 static psy_EventDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -83,6 +90,7 @@ static void vtable_init(void)
 		vtable.target = driver_target;
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
+		vtable.input = driver_input;
 		vtable_initialized = 1;
 	}
 }

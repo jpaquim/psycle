@@ -118,7 +118,9 @@ bool psy_property_empty(const psy_Property*);
 psy_List* psy_property_begin(psy_Property*);
 const psy_List* psy_property_begin_const(const psy_Property*);
 psy_Property* psy_property_first(psy_Property*);
-psy_Property* psy_property_parent(const psy_Property*);
+psy_Property* psy_property_parent(psy_Property*);
+const psy_Property* psy_property_parent_const(const psy_Property*);
+psy_Property* psy_property_parent_level(psy_Property*, uintptr_t level);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
 psy_Property* psy_property_moveup(psy_Property*);
 psy_Property* psy_property_movedown(psy_Property*);
@@ -201,6 +203,13 @@ psy_Property* psy_property_item_choice_parent(psy_Property*);
 bool psy_property_haskey(const psy_Property*, const char* key);
 bool psy_property_hastype(const psy_Property*, psy_PropertyType);
 uint32_t psy_property_item_colour(const psy_Property*);
+bool psy_property_ishex(const psy_Property*);
+bool psy_property_isbool(const psy_Property*);
+bool psy_property_isint(const psy_Property*);
+bool psy_property_isstr(const psy_Property*);
+bool psy_property_isfont(const psy_Property*);
+bool psy_property_isaction(const psy_Property*);
+bool psy_property_issection(const psy_Property*);
 
 // Description
 psy_Property* psy_property_setid(psy_Property*, intptr_t id);

@@ -32,7 +32,8 @@ void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {
 	vtable_init();
 	self->vtable = &vtable;
-    self->imp = psy_ui_impfactory_allocinit_fontimp(psy_ui_app_impfactory(psy_ui_app()), fontinfo);	
+    self->imp = psy_ui_impfactory_allocinit_fontimp(
+		psy_ui_app_impfactory(psy_ui_app()), fontinfo);	
 }
 
 // Delegation Methods to FontImp

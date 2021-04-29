@@ -41,6 +41,17 @@ static const char* driver_target(psy_EventDriver*);
 static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 
+static psy_EventDriverInput driver_input(psy_EventDriver* context)
+{
+	psy_EventDriverInput input;
+
+	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*)context;
+	input.message = self->lastinput.midi.byte0;
+	input.param1 = self->lastinput.midi.byte1;
+	input.param2 = self->lastinput.midi.byte2;
+	return input;
+}
+
 static void init_properties(psy_EventDriver* self);
 static int clearcmddefenum(psy_MmeMidiDriver*, psy_Property*, int level);
 static int onerror(int err, const char* msg);
@@ -49,7 +60,7 @@ static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
 	DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
 
 static psy_EventDriverVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -68,7 +79,8 @@ static void vtable_init(void)
 		vtable.target = driver_target;
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
-		vtable_initialized = 1;
+		vtable.input = driver_input;
+		vtable_initialized = TRUE;
 	}
 }
 

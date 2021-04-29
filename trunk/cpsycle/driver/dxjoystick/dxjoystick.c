@@ -61,6 +61,14 @@ static void driver_setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self);
 
+static psy_EventDriverInput driver_input(DXJoystickDriver* context)
+{
+	psy_EventDriverInput input;
+
+	DXJoystickDriver* self = (DXJoystickDriver*)context;
+	return self->lastinput;
+}
+
 static void init_properties(psy_EventDriver* self);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
@@ -97,6 +105,7 @@ static void vtable_init(void)
 		vtable.target = driver_target;
 		vtable.setcmddef = driver_setcmddef;
 		vtable.idle = driver_idle;
+		vtable.input = driver_input;
 		vtable_initialized = 1;
 	}
 }
