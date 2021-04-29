@@ -137,7 +137,8 @@ typedef struct MainFrame {
 	VuBar vubar;
 	CPUView cpuview;
 	MidiMonitor midimonitor;
-	RecentView recentview;
+	PlaylistView playlist;
+	psy_ui_SplitBar playlistsplitter;
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;
 #endif
