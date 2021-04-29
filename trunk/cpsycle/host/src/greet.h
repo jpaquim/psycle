@@ -32,6 +32,7 @@ typedef struct Greet {
 	psy_ui_ListBox greetz;
 	psy_ui_Button original;
 	psy_ui_Image favicon;
+	psy_ui_Bitmap bgmain;
 	// internal data
 	int current;
 } Greet;

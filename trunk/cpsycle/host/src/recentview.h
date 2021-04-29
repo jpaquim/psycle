@@ -12,33 +12,48 @@
 extern "C" {
 #endif
 
-// aim: shows recently opened songs
+// PlaylistBar
+// 
+// Displays recently opened songs
 
-typedef struct RecentBar {
+// PlaylistBar
+typedef struct PlaylistBar {
+	// inherits
 	psy_ui_Component component;
-	psy_ui_Component client;
+	// internal	
 	psy_ui_Button clear;
 	psy_ui_Button play;
 	psy_ui_Button stop;
 	psy_ui_Button del;
 	psy_ui_Button up;
 	psy_ui_Button down;
-} RecentBar;
+} PlaylistBar;
 
-void recentbar_init(RecentBar*, psy_ui_Component* parent);
+void playlistbar_init(PlaylistBar*, psy_ui_Component* parent);
 
-typedef struct {	
-	psy_ui_Component component;	
-	RecentBar bar;	
+INLINE psy_ui_Component* playlistbar_base(PlaylistBar* self)
+{
+	return &self->component;
+}
+
+// PlaylistView
+typedef struct PlaylistView {
+	// inherits
+	psy_ui_Component component;
+	// internal
+	PlaylistBar bar;	
 	PropertiesView view;
 	Workspace* workspace;
-	bool starting;	
-} RecentView;
+	bool starting;
+	bool running;
+} PlaylistView;
 
-void recentview_init(RecentView*, psy_ui_Component* parent,
+void playlistview_init(PlaylistView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
-INLINE psy_ui_Component* recentview_base(RecentView* self)
+psy_Property* playlistview_currfiles(PlaylistView*);
+
+INLINE psy_ui_Component* playlistview_base(PlaylistView* self)
 {
 	return &self->component;
 }

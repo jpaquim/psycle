@@ -124,6 +124,8 @@ psy_Property* psy_property_parent_level(psy_Property*, uintptr_t level);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
 psy_Property* psy_property_moveup(psy_Property*);
 psy_Property* psy_property_movedown(psy_Property*);
+psy_Property* psy_property_prev(psy_Property*);
+psy_Property* psy_property_next(psy_Property*);
 void psy_property_clear(psy_Property*);
 bool psy_property_insection(const psy_Property*, psy_Property* section);
 void psy_property_enumerate(psy_Property*, void* target, psy_PropertyCallback);

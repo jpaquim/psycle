@@ -29,6 +29,7 @@ typedef struct PropertiesRenderState {
 	psy_ui_Size size_col0;
 	psy_ui_Size size_col2;
 	uintptr_t numcols;
+	bool preventmousepropagation;
 	// references
 	psy_Property* property; /* event bubble target property */
 	psy_Property* selected; /* selected property*/
@@ -141,7 +142,10 @@ void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	uintptr_t numcols, Workspace*);
 
 void propertiesview_reload(PropertiesView*);
+void propertiesview_mark(PropertiesView*, psy_Property*);
 void propertiesview_select(PropertiesView*, psy_Property*);
+psy_Property* propertiesview_selected(PropertiesView*);
+void propertiesview_enablemousepropagation(PropertiesView*);
 
 INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
 {

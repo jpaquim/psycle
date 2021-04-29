@@ -705,13 +705,17 @@ void mainframe_initseqeditor(MainFrame* self)
 
 void mainframe_initrecentview(MainFrame* self)
 {
-	recentview_init(&self->recentview, mainframe_base(self),
+	playlistview_init(&self->playlist, mainframe_base(self),
 		psy_ui_notebook_base(&self->viewtabbars),
-		&self->workspace);	
-	psy_ui_component_setalign(recentview_base(&self->recentview),
+		&self->workspace);
+	psy_ui_component_setalign(playlistview_base(&self->playlist),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_splitbar_init(&self->playlistsplitter, mainframe_base(self));
+	psy_ui_component_setalign(psy_ui_splitbar_base(&self->playlistsplitter),
 		psy_ui_ALIGN_LEFT);
 	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
-		psy_ui_component_hide(recentview_base(&self->recentview));
+		psy_ui_component_hide(playlistview_base(&self->playlist));
+		psy_ui_component_hide(psy_ui_splitbar_base(&self->playlistsplitter));
 	}
 	psy_signal_connect(&self->filebar.recentbutton.signal_clicked, self,
 		mainframe_onrecentsongs);	
@@ -1044,13 +1048,20 @@ void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_button_seticon(&self->filebar.recentbutton,
-		(psy_ui_component_visible(recentview_base(&self->recentview)))
-		? psy_ui_ICON_MORE
-		: psy_ui_ICON_LESS);
-	psy_ui_component_togglevisibility(recentview_base(&self->recentview));
+	if (psy_ui_component_visible(playlistview_base(&self->playlist))) {
+		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_MORE);
+		psy_ui_component_hide(playlistview_base(&self->playlist));
+		psy_ui_component_hide_align(psy_ui_splitbar_base(&self->playlistsplitter));
+	} else {
+		psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_LESS);
+		playlistview_base(&self->playlist)->visible = 1;		
+		psy_ui_splitbar_base(&self->playlistsplitter)->visible = 1;
+		psy_ui_component_align(&self->component);
+		psy_ui_component_show(playlistview_base(&self->playlist));
+		psy_ui_component_show(psy_ui_splitbar_base(&self->playlistsplitter));		
+	}		
 	generalconfig_setplaylistshowstate(&self->workspace.config.general,
-		psy_ui_component_visible(recentview_base(&self->recentview)));	
+		psy_ui_component_visible(playlistview_base(&self->playlist)));	
 }
 
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
@@ -1090,7 +1101,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 			stepsequencerview_base(&self->stepsequencerview));				
 		break;
 	case PROPERTY_ID_SHOWPLAYLIST:
-		updateshowstate(property, recentview_base(&self->recentview));		
+		updateshowstate(property, playlistview_base(&self->playlist));		
 		break;
 	case PROPERTY_ID_TRACKSCOPES:
 		updateshowstate(property, trackscopeview_base(&self->trackscopeview));

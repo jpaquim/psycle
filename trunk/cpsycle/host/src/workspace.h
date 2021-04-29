@@ -210,6 +210,7 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 
 psy_Property* workspace_pluginlist(Workspace*);
 psy_Property* workspace_recentsongs(Workspace*);
+psy_Playlist* workspace_playlist(Workspace*);
 void workspace_load_recentsongs(Workspace*);
 void workspace_save_recentsongs(Workspace*);
 void workspace_clearrecentsongs(Workspace*);

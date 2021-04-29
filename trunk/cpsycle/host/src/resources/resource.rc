@@ -98,6 +98,8 @@ IDB_SEARCH_DARK         BITMAP                  "search-dark.bmp"
 
 IDB_EXPAND_DARK         BITMAP                  "expand-dark.bmp"
 
+IDB_BGMAIN_1            BITMAP                  "bgmain-1.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

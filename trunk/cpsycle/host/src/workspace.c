@@ -921,6 +921,13 @@ psy_Property* workspace_pluginlist(Workspace* self)
 	return self->plugincatcher.plugins;
 }
 
+psy_Playlist* workspace_playlist(Workspace* self)
+{
+	assert(self);
+
+	return &self->playlist;
+}
+
 void workspace_load_configuration(Workspace* self)
 {
 	psy_Path path;

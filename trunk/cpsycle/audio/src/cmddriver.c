@@ -61,7 +61,7 @@ static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
-static psy_EventDriverInput driver_input(CmdDriver* context)
+static psy_EventDriverInput driver_input(psy_EventDriver* context)
 {
 	psy_EventDriverInput input;
 

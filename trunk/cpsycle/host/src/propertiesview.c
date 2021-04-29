@@ -24,7 +24,8 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
 	self->edit = edit;
 	self->dialogbutton = FALSE;
 	self->numcols = numcols;
-	self->dummy = dummy;	
+	self->dummy = dummy;
+	self->preventmousepropagation = TRUE;
 	psy_ui_size_init_em(&self->size_col0, 80.0, 1.3);
 	psy_ui_size_init_em(&self->size_col2, 40.0, 1.3);	
 }
@@ -74,11 +75,16 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	assert(self->property);
 	// column 0	
 	psy_ui_label_init(&self->key, &self->component, view);
-	psy_ui_component_setpreferredsize(psy_ui_label_base(&self->key),
-		self->state->size_col0);
-	psy_ui_component_setalign(&self->key.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_label_preventwrap(&self->key);
 	psy_ui_component_setspacing(psy_ui_label_base(&self->key),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, psy_min(level, 5.0) * 4.0));
+	psy_ui_component_setpreferredsize(psy_ui_label_base(&self->key),
+		self->state->size_col0);
+	if (state->numcols == 1) {
+		psy_ui_component_setalign(&self->key.component, psy_ui_ALIGN_CLIENT);
+	} else {
+		psy_ui_component_setalign(&self->key.component, psy_ui_ALIGN_LEFT);		
+	}	
 	if (!property->item.translate) {
 		psy_ui_label_preventtranslation(&self->key);
 	}
@@ -230,7 +236,9 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 		/* bubble to propertiesrenderer_onmousedown */
 		return;
 	}
-	psy_ui_mouseevent_stoppropagation(ev);
+	if (self->state->preventmousepropagation) {
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
 
 bool propertiesrenderline_updatecheck(PropertiesRenderLine* self)
@@ -482,6 +490,7 @@ void propertiesrenderer_build(PropertiesRenderer* self)
 {
 	self->currsection = NULL;	
 	self->rebuild_level = 0;
+	self->state.selected = NULL;
 	self->state.selectedline = NULL;
 	psy_table_clear(&self->sections);
 	psy_ui_component_clear(&self->client);
@@ -606,20 +615,32 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 {
 	psy_Property* selected;
 
+	if (ev->button != 1) {
+		if (self->state.preventmousepropagation) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
+		return;
+	}
 	selected = self->state.selected;
-	if (!selected || psy_ui_component_visible(&self->edit.component)) {
-		psy_ui_mouseevent_stoppropagation(ev);
+	if (!selected || psy_ui_component_visible(psy_ui_edit_base(&self->edit))) {
+		if (self->state.preventmousepropagation) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
 		return;
 	}	
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 	if (!self->state.property || psy_property_readonly(selected)) {
-		psy_ui_mouseevent_stoppropagation(ev);
+		if (self->state.preventmousepropagation) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
 		return;
 	}
 	if (psy_property_isaction(selected) || psy_property_isbool(selected) ||
 			psy_property_ischoiceitem(selected)) {
 		psy_signal_emit(&self->signal_changed, self, 1, selected);
-		psy_ui_mouseevent_stoppropagation(ev);
+		if (self->state.preventmousepropagation) {
+			psy_ui_mouseevent_stoppropagation(ev);
+		}
 		return;
 	}
 	if (self->state.dialogbutton) {
@@ -627,7 +648,9 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 	} else {
 		propertiesrenderer_checkedit(self, selected);
 	}
-	psy_ui_mouseevent_stoppropagation(ev);
+	if (self->state.preventmousepropagation) {
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
 
 void propertiesrenderer_checkdialog(PropertiesRenderer* self,
@@ -959,21 +982,23 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 	psy_ui_Component* section;
 	uintptr_t idx;
 
-	line = NULL;
-	/* todo: this works only for one section (recentview)
-	         add a line to property map to find any property */
-	section = psy_table_at(&self->renderer.sections, 0);
-	if (section) {
-		psy_ui_Component* clients;
+	line = NULL;	
+	if (property) {
+		/* todo: this works only for one section (recentview)
+				 add a line to property map to find any property */
+		section = psy_table_at(&self->renderer.sections, 0);
+		if (section) {
+			psy_ui_Component* clients;
 
-		clients = psy_ui_component_at(section, 1);
-		if (clients) {
-			idx = psy_property_index(property);
-			if (idx != psy_INDEX_INVALID) {
-				line = psy_ui_component_at(clients, idx);
+			clients = psy_ui_component_at(section, 1);
+			if (clients) {
+				idx = psy_property_index(property);
+				if (idx != psy_INDEX_INVALID) {
+					line = psy_ui_component_at(clients, idx);
+				}
 			}
 		}
-	}	
+	}
 	if (self->renderer.state.selectedline) {
 		psy_ui_component_removestylestate(
 			&self->renderer.state.selectedline->component,
@@ -990,6 +1015,23 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 			&self->renderer.state.selectedline->component,
 			psy_ui_STYLESTATE_SELECT);
 	}
+}
+
+void propertiesview_mark(PropertiesView* self, psy_Property* property)
+{
+	psy_signal_preventall(&self->signal_selected);
+	propertiesview_select(self, property);
+	psy_signal_enableall(&self->signal_selected);
+}
+
+psy_Property* propertiesview_selected(PropertiesView* self)
+{
+	return self->renderer.state.selected;
+}
+
+void propertiesview_enablemousepropagation(PropertiesView* self)
+{
+	self->renderer.state.preventmousepropagation = FALSE;
 }
 
 void propertiesview_onpropertiesrendererselected(PropertiesView* self,
@@ -1066,10 +1108,14 @@ void propertiesview_onfocus(PropertiesView* self)
 
 void propertiesview_onmousedown(PropertiesView* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_mouseevent_stoppropagation(ev);
+	if (self->renderer.state.preventmousepropagation) {
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
 
 void propertiesview_onmouseup(PropertiesView* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_mouseevent_stoppropagation(ev);
+	if (self->renderer.state.preventmousepropagation) {
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
