@@ -204,9 +204,10 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 	return;	
 }
 
-void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
+int psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
 	psy_fp_findfile enumproc)
 {
+	return 0;
  	// todo
 }
 
@@ -339,7 +340,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard, in
 	}
 }
 
-void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
+int psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
 	psy_fp_findfile enumproc)
 {
 	HANDLE hFind;
@@ -358,24 +359,29 @@ void psy_dir_enumerate_recursive(void* context, const char* root, const char* wi
 					(strncmp("..", wfd.cFileName, 2) != 0) ) {
 				if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
 					psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-					enumproc(context, path, flag);				
+					if (enumproc(context, path, flag) == 0) {
+						if (FindClose(hFind) == FALSE) {
+							SetLastError(0);							
+						}
+						return 0;
+					}
 				}
 			}		
 		} while (FindNextFile(hFind, &wfd));
 		if (GetLastError() != ERROR_NO_MORE_FILES) {
 			SetLastError(0);		   				   
-			return;
+			return 1;
 		}
 		if (FindClose(hFind) == FALSE) {
 			SetLastError(0);		   					 
-			return;
+			return 1;
 		}
 	}
 	// Secondly, find and emumerate all subdirectories with their subdirectories
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		SetLastError(0);	   		   
-		return;
+		return 1;
 	}	
 	do {
 		if ((strncmp(".", wfd.cFileName, 1) != 0) && 
@@ -383,19 +389,25 @@ void psy_dir_enumerate_recursive(void* context, const char* root, const char* wi
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 				// enumerate subdirectory with its subdirectories
 				psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc);
+				if (psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc) == 0) {
+					if (FindClose(hFind) == FALSE) {
+						SetLastError(0);						
+					}					
+					return 0;
+				}
 			}			
 		}		
 	} while (FindNextFile(hFind, &wfd));
 	if (GetLastError() != ERROR_NO_MORE_FILES) {
 		SetLastError(0);
-		return;
+		return 1;
 	}
 	if (FindClose(hFind) == FALSE) {
 	 	SetLastError(0);
-		return;
+		return 1;
 	}
 	SetLastError(0);
+	return 1;
 }
 
 char* workdir(char* buffer)
