@@ -61,9 +61,9 @@ static void driver_setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self);
 
-static psy_EventDriverInput driver_input(DXJoystickDriver* context)
+static psy_EventDriverInput driver_input(psy_EventDriver* context)
 {
-	psy_EventDriverInput input;
+	// psy_EventDriverInput input;
 
 	DXJoystickDriver* self = (DXJoystickDriver*)context;
 	return self->lastinput;

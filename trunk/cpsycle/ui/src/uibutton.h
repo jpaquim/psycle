@@ -58,7 +58,7 @@ typedef struct psy_ui_Button {
 	psy_ui_Alignment textalignment;	
 	bool shiftstate;
 	bool ctrlstate;
-	bool buttonstate;
+	uintptr_t buttonstate;
 	bool allowrightclick;
 	char* translation;
 	bool translate;	
@@ -102,7 +102,7 @@ INLINE bool psy_ui_button_hasctrl(const psy_ui_Button* self)
 	return self->ctrlstate;
 }
 
-INLINE bool psy_ui_button_clickstate(const psy_ui_Button* self)
+INLINE uintptr_t psy_ui_button_clickstate(const psy_ui_Button* self)
 {
 	assert(self);
 

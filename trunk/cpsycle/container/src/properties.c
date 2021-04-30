@@ -673,6 +673,18 @@ const psy_Property* psy_property_at_const(const psy_Property* self,
 	return psy_property_at((psy_Property*)self, key, typ);
 }
 
+psy_Property* psy_property_at_section(psy_Property* self, const char* key)
+{
+	return psy_property_at(self, key, PSY_PROPERTY_TYPE_SECTION);
+}
+
+const psy_Property* psy_property_at_section_const(const psy_Property* self,
+	const char* key)
+{
+	return psy_property_at((psy_Property*)self, key,
+		PSY_PROPERTY_TYPE_SECTION);
+}
+
 psy_Property* psy_property_at_index(psy_Property* self, intptr_t index)
 {
 	assert(self);
@@ -686,6 +698,12 @@ psy_Property* psy_property_at_index(psy_Property* self, intptr_t index)
 		}
 	}
 	return NULL;
+}
+
+const psy_Property* psy_property_at_index_const(const psy_Property* self,
+	intptr_t index)
+{
+	return psy_property_at_index((psy_Property*)self, index);
 }
 
 uintptr_t psy_property_index(const psy_Property* self)

@@ -13,56 +13,6 @@ extern "C" {
 
 void psy_ui_geometry_init(void);
 
-typedef struct psy_ui_Point {
-	psy_ui_Value x;
-	psy_ui_Value y;
-} psy_ui_Point;
-
-INLINE void psy_ui_point_init(psy_ui_Point* self)
-{
-	self->x = psy_ui_value_zero();
-	self->y = psy_ui_value_zero();
-}
-
-INLINE void psy_ui_point_init_all(psy_ui_Point* self, psy_ui_Value x, psy_ui_Value y)
-{	
-	self->x = x;
-	self->y = y;	
-}
-
-INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
-{
-	psy_ui_Point rv;
-
-	rv.x = x;
-	rv.y = y;
-	return rv;
-}
-
-INLINE psy_ui_Point psy_ui_point_make_px(double x, double y)
-{
-	psy_ui_Point rv;
-
-	rv.x = psy_ui_value_make_px(x);
-	rv.y = psy_ui_value_make_px(y);
-	return rv;
-}
-
-INLINE psy_ui_Point psy_ui_point_makeem(double x, double y)
-{
-	psy_ui_Point rv;
-
-	rv.x = psy_ui_value_make_ew(x);
-	rv.y = psy_ui_value_make_eh(y);
-	return rv;
-}
-
-INLINE psy_ui_Point psy_ui_point_zero(void)
-{
-	extern psy_ui_Point psy_ui_internal_point_zero;
-
-	return psy_ui_internal_point_zero;
-}
 
 typedef struct psy_ui_IntPoint {
 	intptr_t x;
@@ -343,6 +293,58 @@ INLINE psy_ui_IntSize psy_ui_intsize_make(intptr_t width, intptr_t height)
 	return rv;
 }
 
+
+typedef struct psy_ui_Point {
+	psy_ui_Value x;
+	psy_ui_Value y;
+} psy_ui_Point;
+
+INLINE void psy_ui_point_init(psy_ui_Point* self)
+{
+	self->x = psy_ui_value_zero();
+	self->y = psy_ui_value_zero();
+}
+
+INLINE void psy_ui_point_init_all(psy_ui_Point* self, psy_ui_Value x, psy_ui_Value y)
+{
+	self->x = x;
+	self->y = y;
+}
+
+INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
+{
+	psy_ui_Point rv;
+
+	rv.x = x;
+	rv.y = y;
+	return rv;
+}
+
+INLINE psy_ui_Point psy_ui_point_make_px(double x, double y)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_make_px(x);
+	rv.y = psy_ui_value_make_px(y);
+	return rv;
+}
+
+INLINE psy_ui_Point psy_ui_point_makeem(double x, double y)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_make_ew(x);
+	rv.y = psy_ui_value_make_eh(y);
+	return rv;
+}
+
+INLINE psy_ui_Point psy_ui_point_zero(void)
+{
+	extern psy_ui_Point psy_ui_internal_point_zero;
+
+	return psy_ui_internal_point_zero;
+}
+
 typedef struct psy_ui_Size {
 	psy_ui_Value width;
 	psy_ui_Value height;
@@ -526,6 +528,8 @@ void psy_ui_margin_init_all(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right
 	psy_ui_Value bottom, psy_ui_Value left);
 void psy_ui_margin_init_em(psy_ui_Margin*, double top,
 	double right, double bottom, double left);
+void psy_ui_margin_init_px(psy_ui_Margin*, double top,
+	double right, double bottom, double left);
 void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
@@ -558,6 +562,15 @@ INLINE psy_ui_Margin psy_ui_margin_make_em(double top,
 	psy_ui_Margin rv;
 
 	psy_ui_margin_init_em(&rv, top, right, bottom, left);
+	return rv;
+}
+
+INLINE psy_ui_Margin psy_ui_margin_make_px(double top,
+	double right, double bottom, double left)
+{
+	psy_ui_Margin rv;
+
+	psy_ui_margin_init_px(&rv, top, right, bottom, left);
 	return rv;
 }
 

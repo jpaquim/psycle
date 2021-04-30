@@ -12,7 +12,7 @@
 // VTable Prototypes
 static void dispose(psy_ui_Bitmap*);
 static int load(psy_ui_Bitmap*, const char* path);
-static int loadresource(psy_ui_Bitmap*, int resourceid);
+static int loadresource(psy_ui_Bitmap*, uintptr_t resourceid);
 static psy_ui_RealSize size(const psy_ui_Bitmap*);
 static bool empty(const psy_ui_Bitmap*);
 static void settransparency(psy_ui_Bitmap*, psy_ui_Colour);
@@ -64,7 +64,7 @@ int load(psy_ui_Bitmap* self, const char* path)
 	return self->imp->vtable->dev_load(self->imp, path);
 }
 
-int loadresource(psy_ui_Bitmap* self, int resourceid)
+int loadresource(psy_ui_Bitmap* self, uintptr_t resourceid)
 {
 	return self->imp->vtable->dev_loadresource(self->imp, resourceid);
 }
