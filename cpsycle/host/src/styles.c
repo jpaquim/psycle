@@ -2,6 +2,8 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "styles.h"
+// host
+#include "resources/resource.h"
 // ui
 #include <uidefaults.h>
 
@@ -254,6 +256,9 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, surface_overlay_5p);
+	psy_ui_style_setbackgroundid(style, IDB_ABOUT);
+	style->backgroundrepeat = psy_ui_NOREPEAT;
+	style->backgroundposition = psy_ui_ALIGNMENT_CENTER;
 	psy_ui_defaults_setstyle(defaults, STYLE_ABOUT, style);
 	
 	style = psy_ui_style_allocinit();
@@ -497,5 +502,8 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, psy_ui_colour_make(0x007966CF));
 	psy_ui_defaults_setstyle(defaults, STYLE_TERM_BUTTON_ERROR, style);
-}
 
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundid(style, IDB_BGMAIN_1);
+	psy_ui_defaults_setstyle(defaults, STYLE_GREET, style);
+}

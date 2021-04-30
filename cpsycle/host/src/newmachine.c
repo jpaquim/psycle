@@ -42,27 +42,19 @@ static void newmachinesearch_vtable_init(NewMachineSearch* self)
 void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
 	NewMachineFilter* filter)
 {
-	psy_ui_Margin margin;	
-
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinesearch_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_SEARCHFIELD);
 	psy_ui_component_setstyletype_select(&self->component,
-		STYLE_NEWMACHINE_SEARCHFIELD_SELECT);
+		STYLE_NEWMACHINE_SEARCHFIELD_SELECT);	
 	self->filter = filter;
-	psy_ui_image_init(&self->image, &self->component);
-	psy_ui_image_setbitmapalignment(&self->image,
-		psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_image_init_resource_transparency(&self->image, &self->component,
+		IDB_SEARCH_DARK, psy_ui_colour_white());	
 	psy_ui_component_setalign(psy_ui_image_base(&self->image),
-		psy_ui_ALIGN_LEFT);	
-	psy_ui_component_setpreferredsize(&self->image.component,
-		psy_ui_size_make_px(11, 11));
-	psy_ui_component_preventalign(psy_ui_image_base(&self->image));
-	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.0);
-	psy_ui_component_setmargin(psy_ui_image_base(&self->image), margin);
-	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_SEARCH_DARK);
-	psy_ui_bitmap_settransparency(&self->image.bitmap, psy_ui_colour_white());
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(psy_ui_image_base(&self->image),
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
 	psy_ui_edit_init(&self->edit, &self->component);
 	psy_ui_edit_setcharnumber(&self->edit, 42);
 	newmachinesearch_reset(self);
@@ -145,7 +137,8 @@ void newmachinesearchbar_init(NewMachineSearchBar* self, psy_ui_Component* paren
 		STYLE_NEWMACHINE_SEARCHBAR);	
 	// search field
 	newmachinesearch_init(&self->search, &self->component, filter);
-	psy_ui_component_setalign(&self->search.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(newmachinesearch_base(&self->search),
+		psy_ui_ALIGN_RIGHT);
 }
 
 void newmachinesearchbar_setfilter(NewMachineSearchBar* self,
@@ -1423,7 +1416,8 @@ void newmachine_buildnavsections(NewMachine* self)
 				psy_ui_translate("newmachine.favorites"));
 		} else {
 			psy_ui_tabbar_append(&self->navsections,
-				psy_property_at_str(section, "name", psy_property_key(section)));
+				psy_property_at_str(section, "name",
+					psy_property_key(section)));
 		}
 	}
 	psy_ui_tabbar_mark(&self->navsections, selidx);

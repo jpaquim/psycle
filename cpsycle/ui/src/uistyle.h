@@ -16,11 +16,19 @@
 extern "C" {
 #endif
 
+typedef enum {
+	psy_ui_REPEAT,
+	psy_ui_NOREPEAT	
+} psy_ui_BackgroundRepeat;
+
 // psy_ui_Style
 typedef struct psy_ui_Style {
 	psy_ui_Font font;
 	psy_ui_Colour colour;
 	psy_ui_Colour backgroundcolour;
+	uintptr_t backgroundid;
+	psy_ui_BackgroundRepeat backgroundrepeat;
+	psy_ui_Alignment backgroundposition;
 	psy_ui_Colour overlaycolour;
 	psy_ui_Border border;
 	psy_ui_Margin margin;
@@ -28,7 +36,7 @@ typedef struct psy_ui_Style {
 	psy_ui_Margin spacing;
 	bool spacingset;
 	bool use_font;
-	int dbgflag;
+	int dbgflag;	
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
@@ -62,6 +70,12 @@ INLINE void psy_ui_style_setbackgroundoverlay(psy_ui_Style* self,
 	int overlay)
 {
 	self->backgroundcolour = psy_ui_colour_make_overlay(overlay);
+}
+
+INLINE void psy_ui_style_setbackgroundid(psy_ui_Style* self,
+	uintptr_t id)
+{
+	self->backgroundid = id;
 }
 
 INLINE void psy_ui_style_setcolours(psy_ui_Style* self,

@@ -15,6 +15,9 @@ void psy_ui_style_init(psy_ui_Style* self)
 {
 	psy_ui_colour_init(&self->colour);
 	psy_ui_colour_init(&self->backgroundcolour);
+	self->backgroundid = psy_INDEX_INVALID;
+	self->backgroundrepeat = psy_ui_REPEAT;
+	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
@@ -42,6 +45,9 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 {
 	self->colour = colour;
 	self->backgroundcolour = background;
+	self->backgroundid = psy_INDEX_INVALID;
+	self->backgroundrepeat = psy_ui_REPEAT;
+	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
@@ -63,6 +69,9 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 {
 	self->colour = other->colour;
 	self->backgroundcolour = other->backgroundcolour;
+	self->backgroundid = other->backgroundid;
+	self->backgroundrepeat = other->backgroundrepeat;
+	self->backgroundposition = other->backgroundposition;
 	self->border = other->border;
 	self->margin = other->margin;
 	self->marginset = other->marginset;
@@ -190,6 +199,11 @@ void psy_ui_styles_mixstyle(psy_ui_Styles* self, uintptr_t styletype,
 		if (!style->backgroundcolour.mode.set) {
 			style->backgroundcolour = currstyle->backgroundcolour;
 		}
+		if (style->backgroundid == psy_INDEX_INVALID) {
+			style->backgroundid = currstyle->backgroundid;
+			style->backgroundid = currstyle->backgroundrepeat;
+			style->backgroundposition = currstyle->backgroundposition;
+		}		
 		if (!style->border.colour_top.mode.set) {
 			style->border.colour_top = currstyle->border.colour_top;
 		}
@@ -317,7 +331,7 @@ void psy_ui_styles_addstyletoconfig(psy_ui_Styles* self, psy_ui_Style* style,
 	section = psy_property_append_section(&self->config, key);
 	psy_ui_styles_addcolourtoconfig(self, section, "color", style->colour);
 	psy_ui_styles_addcolourtoconfig(self, section, "background-color",
-		style->backgroundcolour);
+		style->backgroundcolour);	
 }
 
 void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,

@@ -184,7 +184,6 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-
 // KbdBox
 static void kbdbox_ondestroy(KbdBox*);
 static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);

@@ -26,7 +26,7 @@ extern "C" {
 typedef struct Contrib {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
 	psy_ui_Label asio;
 	psy_ui_Edit	sourceforge;
 	psy_ui_Edit	psycledelics;
@@ -47,7 +47,7 @@ INLINE psy_ui_Component* contrib_base(Contrib* self)
 typedef struct Version{
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
 	psy_ui_Label versioninfo;
 } Version;
 
@@ -63,7 +63,7 @@ INLINE psy_ui_Component* version_base(Version* self)
 typedef struct Licence {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
 	psy_ui_Editor licenceinfo;
 } Licence;
 
@@ -79,9 +79,8 @@ INLINE psy_ui_Component* licence_base(Licence* self)
 typedef struct About {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
 	psy_ui_Notebook notebook;
-	psy_ui_Image image;
 	Contrib contrib;
 	Version version;
 	Licence licence;

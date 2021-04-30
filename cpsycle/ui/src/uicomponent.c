@@ -180,6 +180,11 @@ const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
 	return &psy_ui_style(psy_ui_STYLE_ROOT)->border;
 }
 
+uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component* self)
+{
+	return self->style.currstyle->backgroundid;		
+}
+
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
@@ -599,7 +604,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->debugflag = 0;
 	self->visible = 1;
 	self->doublebuffered = FALSE;	
-	self->backgroundmode = psy_ui_SETBACKGROUND;	
+	self->backgroundmode = psy_ui_SETBACKGROUND;
 	self->tabindex = psy_INDEX_INVALID;
 	self->opcount = 0;
 	self->draggable = FALSE;
@@ -1526,6 +1531,42 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 		psy_ui_component_textmetric(self));
 }
 
+void psy_ui_component_drawbackgroundimage(psy_ui_Component* self,
+	psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, psy_ui_BackgroundRepeat repeat,
+	psy_ui_Alignment alignment)
+{
+	if (bitmap && !psy_ui_bitmap_empty(bitmap)) {
+		psy_ui_RealSize size;
+		psy_ui_RealPoint cp;
+		psy_ui_RealSize bmpsize;
+		psy_ui_RealRectangle position;
+
+		size = psy_ui_component_size_px(self);
+		psy_ui_realpoint_init(&cp);
+		bmpsize = psy_ui_bitmap_size(bitmap);
+		if (repeat == psy_ui_REPEAT) {
+			while (cp.y < size.height) {
+				position = psy_ui_realrectangle_make(cp, bmpsize);
+				psy_ui_drawbitmap(g, bitmap, position, psy_ui_realpoint_zero());
+				cp.x += bmpsize.width;
+				if (cp.x >= size.width) {
+					cp.x = 0.0;
+					cp.y += bmpsize.height;
+				}
+			}
+		} else {
+			if (alignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+				cp.x = (size.width - bmpsize.width) / 2.0;
+			}
+			if (alignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+				cp.y = (size.height - bmpsize.height) / 2.0;
+			}
+			position = psy_ui_realrectangle_make(cp, bmpsize);
+			psy_ui_drawbitmap(g, bitmap, position, psy_ui_realpoint_zero());
+		}
+	}
+}
+
 void psy_ui_component_drawbackground(psy_ui_Component* self,
 	psy_ui_Graphics* g)
 {
@@ -1549,9 +1590,31 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 					psy_ui_value_px(&b->border_bottom_left_radius, tm),
 					psy_ui_value_px(&b->border_bottom_left_radius, tm)),
 				psy_ui_component_backgroundcolour(self));
-		} else {
-			psy_ui_drawsolidrectangle(g, g->clip,
-				psy_ui_component_backgroundcolour(self));			
+		} else {		
+			uintptr_t image_id;
+			bool success;
+			
+			success = FALSE;
+			image_id = psy_ui_component_backgroundimageid(self);
+			if (image_id != psy_INDEX_INVALID) {
+				psy_ui_Bitmap bitmap;
+
+				psy_ui_bitmap_init(&bitmap);
+				psy_ui_bitmap_loadresource(&bitmap, image_id);
+				success = !psy_ui_bitmap_empty(&bitmap);
+				if (success && self->style.currstyle->backgroundrepeat == psy_ui_NOREPEAT) {
+					psy_ui_drawsolidrectangle(g, g->clip,
+						psy_ui_component_backgroundcolour(self));
+				}
+				psy_ui_component_drawbackgroundimage(self, g, &bitmap,
+					self->style.currstyle->backgroundrepeat,
+					self->style.currstyle->backgroundposition);
+				psy_ui_bitmap_dispose(&bitmap);
+			}
+			if (!success) {
+				psy_ui_drawsolidrectangle(g, g->clip,
+					psy_ui_component_backgroundcolour(self));
+			}
 		}
 	}
 }

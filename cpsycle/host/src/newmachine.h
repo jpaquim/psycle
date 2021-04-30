@@ -43,6 +43,11 @@ void newmachinesearch_init(NewMachineSearch*, psy_ui_Component* parent,
 
 void newmachinesearch_setfilter(NewMachineSearch*, NewMachineFilter*);
 
+INLINE psy_ui_Component* newmachinesearch_base(NewMachineSearch* self)
+{
+	return &self->component;
+}
+
 typedef struct NewMachineSearchBar {
 	// inherits
 	psy_ui_Component component;

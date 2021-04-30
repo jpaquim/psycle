@@ -92,7 +92,7 @@ static int psy_ui_bitmap_imp_load(psy_ui_BitmapImp* self, const char* path)
 }
 
 static int psy_ui_bitmap_imp_loadresource(psy_ui_BitmapImp* self,
-	int resourceid)
+	uintptr_t resourceid)
 {
 	return 0;
 }
