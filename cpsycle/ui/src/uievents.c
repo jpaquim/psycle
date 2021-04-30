@@ -31,8 +31,8 @@ void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
 }
 
 // psy_ui_MouseEvent
-void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y, intptr_t button,
-	intptr_t delta, bool shift, bool ctrl)
+void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y,
+	uintptr_t button, intptr_t delta, bool shift, bool ctrl)
 {
 	self->pt = psy_ui_realpoint_make(x, y);	
 	self->button = button;

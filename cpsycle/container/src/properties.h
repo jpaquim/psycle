@@ -143,7 +143,11 @@ char_dyn_t* psy_property_sections(const psy_Property*);
 psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
 const psy_Property* psy_property_at_const(const psy_Property*, const char* key,
 	psy_PropertyType);
+psy_Property* psy_property_at_section(psy_Property*, const char* key);
+const psy_Property* psy_property_at_section_const(const psy_Property*, const char* key);
 psy_Property* psy_property_at_index(psy_Property*, intptr_t index);
+const psy_Property* psy_property_at_index_const(const psy_Property*,
+	intptr_t index);
 uintptr_t psy_property_index(const psy_Property*);
 psy_Property* psy_property_set_bool(psy_Property*, const char* key, bool value);
 bool psy_property_at_bool(const psy_Property*, const char* key, bool defaultvalue);

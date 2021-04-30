@@ -29,6 +29,7 @@ typedef struct KbdBoxState {
 } KbdBoxState;
 
 void kbdboxstate_init(KbdBoxState*);
+void kbdboxstate_clearmodifier(KbdBoxState*);
 
 // defines one key of the keybox
 typedef struct KbdBoxKey {
@@ -40,20 +41,19 @@ typedef struct KbdBoxKey {
 	psy_ui_Label desc1; // row 1 keycode with shift
 	psy_ui_Label desc2; // row 2 keycode with ctrl
 	psy_ui_Label desc3; // row 3 keycode with shift + ctrl	
-	int size;
+	// int size;
 	uint32_t keycode;
-	double keywidth;	
 	// references
 	KbdBoxState* state;
 	Workspace* workspace;	
 } KbdBoxKey;
 
 void kbdboxkey_init_all(KbdBoxKey*, psy_ui_Component* parent,
-	psy_ui_Component* view, int size, uint32_t keycode, const char* label,
+	psy_ui_Component* view, uintptr_t size, uint32_t keycode, const char* label,
 	Workspace*, KbdBoxState* state);
 
 KbdBoxKey* kbdboxkey_allocinit_all(psy_ui_Component* parent,
-	psy_ui_Component* view, int size, uint32_t keycode, const char* label,
+	psy_ui_Component* view, uintptr_t size, uint32_t keycode, const char* label,
 	Workspace*, KbdBoxState* state);
 
 void kbdboxkey_cleardescriptions(KbdBoxKey*);
@@ -79,6 +79,8 @@ typedef struct KbdBox {
 void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
 void kbdbox_cleardescriptions(KbdBox*);
 void kbdbox_setdescription(KbdBox*, uint32_t keycode, const char* text);
+void kbdbox_presskey(KbdBox*, uint32_t keycode);
+void kbdbox_releasekey(KbdBox*, uint32_t keycode);
 
 INLINE psy_ui_Component* kbdbox_base(KbdBox* self)
 {

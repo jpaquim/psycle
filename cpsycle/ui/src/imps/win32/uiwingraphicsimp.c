@@ -233,8 +233,8 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 
 	if (text) {
 		SIZE size;
-				
-		GetTextExtentPoint(self->hdc, text, count, &size) ;
+						
+		GetTextExtentPoint(self->hdc, text, (int)count, &size);
 		rv.width = psy_ui_value_make_px(size.cx);
 		rv.height = psy_ui_value_make_px(size.cy);
 	} else {

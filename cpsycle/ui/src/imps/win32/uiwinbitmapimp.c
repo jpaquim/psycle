@@ -13,7 +13,7 @@
 // VTable Prototypes
 static void dev_dispose(psy_ui_win_BitmapImp*);
 static int dev_load(psy_ui_win_BitmapImp*, const char* path);
-static int dev_loadresource(psy_ui_win_BitmapImp*, int resourceid);
+static int dev_loadresource(psy_ui_win_BitmapImp*, uintptr_t resourceid);
 static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
 static void dev_settransparency(psy_ui_win_BitmapImp*, psy_ui_Colour);
@@ -95,7 +95,7 @@ int dev_load(psy_ui_win_BitmapImp* self, const char* path)
 	return bitmap == 0;
 }
 
-int dev_loadresource(psy_ui_win_BitmapImp* self, int resourceid)
+int dev_loadresource(psy_ui_win_BitmapImp* self, uintptr_t resourceid)
 {
 	HBITMAP bitmap;
 	psy_ui_WinApp* winapp;

@@ -8,19 +8,21 @@
 #include <uitabbar.h>
 #include "workspace.h"
 
-#include <uieditor.h>
-#include <uinotebook.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: keyboard shortcut helpview for general and note commands.
+// KbdHelp
+// 
+// Keyboard shortcut helpview
 
 typedef struct KbdHelp {
+	// inherits
 	psy_ui_Component component;
+	// internal
 	psy_ui_TabBar tabbar;
-	KbdBox kbdbox;	
+	KbdBox kbdbox;
+	// references
 	Workspace* workspace;
 } KbdHelp;
 

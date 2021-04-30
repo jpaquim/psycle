@@ -203,6 +203,16 @@ void psy_ui_margin_init_em(psy_ui_Margin* self, double top,
 	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
 }
 
+void psy_ui_margin_init_px(psy_ui_Margin* self, double top,
+	double right, double bottom, double left)
+{
+	psy_ui_value_setpx(&self->top, top);
+	psy_ui_value_setpx(&self->right, right);
+	psy_ui_value_setpx(&self->bottom, bottom);
+	psy_ui_value_setpx(&self->left, left);
+	psy_ui_margin_setroundmode(self, psy_ui_ROUND_FLOOR);
+}
+
 void psy_ui_margin_settop(psy_ui_Margin* self, psy_ui_Value value)
 {
 	self->top = value;
