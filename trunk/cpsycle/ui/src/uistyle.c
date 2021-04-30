@@ -19,6 +19,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 	self->backgroundrepeat = psy_ui_REPEAT;
 	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
+	psy_ui_bitmapanimate_init(&self->backgroundanimation);
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
 	self->marginset = FALSE;
@@ -48,6 +49,7 @@ void psy_ui_style_init_colours(psy_ui_Style* self, psy_ui_Colour colour,
 	self->backgroundid = psy_INDEX_INVALID;
 	self->backgroundrepeat = psy_ui_REPEAT;
 	self->backgroundposition = psy_ui_ALIGNMENT_NONE;
+	psy_ui_bitmapanimate_init(&self->backgroundanimation);
 	self->overlaycolour = psy_ui_colour_make(psy_ui_RGB_WHITE);
 	psy_ui_border_init(&self->border);
 	psy_ui_margin_init(&self->margin);
@@ -72,6 +74,7 @@ void psy_ui_style_copy(psy_ui_Style* self, const psy_ui_Style* other)
 	self->backgroundid = other->backgroundid;
 	self->backgroundrepeat = other->backgroundrepeat;
 	self->backgroundposition = other->backgroundposition;
+	self->backgroundanimation = other->backgroundanimation;
 	self->border = other->border;
 	self->margin = other->margin;
 	self->marginset = other->marginset;
@@ -203,6 +206,7 @@ void psy_ui_styles_mixstyle(psy_ui_Styles* self, uintptr_t styletype,
 			style->backgroundid = currstyle->backgroundid;
 			style->backgroundid = currstyle->backgroundrepeat;
 			style->backgroundposition = currstyle->backgroundposition;
+			style->backgroundanimation = currstyle->backgroundanimation;
 		}		
 		if (!style->border.colour_top.mode.set) {
 			style->border.colour_top = currstyle->border.colour_top;

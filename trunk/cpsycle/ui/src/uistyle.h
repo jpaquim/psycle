@@ -5,6 +5,7 @@
 #define psy_ui_STYLE_H
 
 // local
+#include "uibitmap.h"
 #include "uifont.h"
 #include "uidef.h"
 #include "uistyle.h"
@@ -29,6 +30,7 @@ typedef struct psy_ui_Style {
 	uintptr_t backgroundid;
 	psy_ui_BackgroundRepeat backgroundrepeat;
 	psy_ui_Alignment backgroundposition;
+	psy_ui_BitmapAnimate backgroundanimation;
 	psy_ui_Colour overlaycolour;
 	psy_ui_Border border;
 	psy_ui_Margin margin;

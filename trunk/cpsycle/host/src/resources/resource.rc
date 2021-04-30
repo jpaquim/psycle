@@ -100,6 +100,8 @@ IDB_EXPAND_DARK         BITMAP                  "expand-dark.bmp"
 
 IDB_BGMAIN_1            BITMAP                  "bgmain-1.bmp"
 
+IDB_BGMAIN              BITMAP                  "bgmain.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

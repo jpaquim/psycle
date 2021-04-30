@@ -9,7 +9,15 @@
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
-// VTable Prototypes
+void psy_ui_bitmapanimate_init(psy_ui_BitmapAnimate* self)
+{
+	self->animate = FALSE;
+	self->animatetime = 0;
+	psy_ui_realsize_init(&self->framesize);
+	self->horizontalframes = FALSE;
+}
+
+// prototypes
 static void dispose(psy_ui_Bitmap*);
 static int load(psy_ui_Bitmap*, const char* path);
 static int loadresource(psy_ui_Bitmap*, uintptr_t resourceid);
@@ -40,7 +48,7 @@ void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 	self->vtable = &vtable;
 	self->imp = psy_ui_impfactory_allocinit_bitmapimp(
 		psy_ui_app_impfactory(psy_ui_app()),
-		psy_ui_realsize_zero());
+		psy_ui_realsize_zero());	
 }
 
 void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_RealSize size)
