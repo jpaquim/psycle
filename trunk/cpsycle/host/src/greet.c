@@ -6,6 +6,7 @@
 #include "greet.h"
 // host
 #include "resources/resource.h"
+#include "styles.h"
 
 // prototypes
 static void greet_ondestroy(Greet*);
@@ -14,8 +15,6 @@ static void greet_addstring(Greet*, const char* text);
 static void greet_build(Greet*);
 static void greet_buildoriginal(Greet*);
 static void greet_onoriginal(Greet*, psy_ui_Component* sender);
-// prototypes
-static void greet_ondraw(Greet*, psy_ui_Graphics*);
 
 // vtable
 static psy_ui_ComponentVtable greet_vtable;
@@ -24,16 +23,10 @@ static bool greet_vtable_initialized = FALSE;
 static void greet_vtable_init(Greet* self)
 {
 	if (!greet_vtable_initialized) {
-		greet_vtable = *(self->component.vtable);
-		greet_vtable.ondestroy =
-			(psy_ui_fp_component_ondestroy)
-			greet_ondestroy;
+		greet_vtable = *(self->component.vtable);		
 		greet_vtable.onalign =
 			(psy_ui_fp_component_onalign)
-			greet_onalign;
-		greet_vtable.ondraw =
-			(psy_ui_fp_component_ondraw)
-			greet_ondraw;
+			greet_onalign;		
 		greet_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &greet_vtable;
@@ -42,10 +35,11 @@ static void greet_vtable_init(Greet* self)
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component, STYLE_GREET);
 	greet_vtable_init(self);	
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
-	psy_ui_label_init(&self->headerlabel, &self->component, NULL);	
+	psy_ui_label_init(&self->headerlabel, &self->component, NULL);
 	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
 	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_init(&self->header, &self->component, NULL);	
@@ -64,8 +58,6 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 		self, greet_onoriginal);
 	psy_ui_button_settext(&self->original, "greetings.showargurus");
 	psy_ui_component_setalign(&self->original.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_bitmap_init(&self->bgmain);
-	psy_ui_bitmap_loadresource(&self->bgmain, IDB_BGMAIN_1);
 /*
 	//Original Arguru's Greetings.
 	m_greetz.AddString("Hamarr Heylen 'Hymax' [Logo design]");
@@ -93,11 +85,6 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 
 */
 	greet_build(self);
-}
-
-void greet_ondestroy(Greet* self)
-{
-	psy_ui_bitmap_dispose(&self->bgmain);
 }
 
 void greet_build(Greet* self)
@@ -216,27 +203,4 @@ void greet_onalign(Greet* self)
 		psy_ui_realsize_make(lvsize.width, tm->tmHeight * 1.0));
 	psy_ui_component_setposition(&self->header,
 		psy_ui_rectangle_make_px(&h_position));
-}
-
-void greet_ondraw(Greet* self, psy_ui_Graphics* g)
-{
-	if (!psy_ui_bitmap_empty(&self->bgmain)) {
-		psy_ui_RealSize size;
-		psy_ui_RealPoint cp;
-		psy_ui_RealSize bpmsize;
-		psy_ui_RealRectangle position;		
-	
-		size = psy_ui_component_size_px(&self->component);
-		psy_ui_realpoint_init(&cp);
-		bpmsize = psy_ui_bitmap_size(&self->bgmain);
-		while (cp.y < size.height) {			
-			position = psy_ui_realrectangle_make(cp, bpmsize);
-			psy_ui_drawbitmap(g, &self->bgmain, position, psy_ui_realpoint_zero());
-			cp.x += bpmsize.width;
-			if (cp.x >= size.width) {
-				cp.x = 0.0;
-				cp.y += bpmsize.height;
-			}
-		}
-	}
 }

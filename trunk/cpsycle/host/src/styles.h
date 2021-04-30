@@ -89,6 +89,7 @@ extern "C" {
 #define STYLE_TERM_BUTTON                    6480
 #define STYLE_TERM_BUTTON_WARNING            6485
 #define STYLE_TERM_BUTTON_ERROR              6490
+#define STYLE_GREET                          6500
 
 struct psy_ui_Defaults;
 

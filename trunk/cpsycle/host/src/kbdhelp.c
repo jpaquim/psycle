@@ -5,13 +5,14 @@
 
 #include "kbdhelp.h"
 
-static void kbdhelp_appendtabbarsections(KbdHelp*);
+static void kbdhelp_buildtabbar(KbdHelp*);
 static void kbdhelp_ontabbarchange(KbdHelp*, psy_ui_Component* sender,
 	int tabindex);
 static void kbdhelp_setcmdsection(KbdHelp* self, uintptr_t index);
 static const psy_Property* kbdhelp_cmds(const KbdHelp*);
 
-void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
+void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {	
 	psy_ui_component_init(kbdhelp_base(self), parent, NULL);
 	psy_ui_component_setspacing(&self->component,
@@ -27,10 +28,10 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_tabbar_preventtranslation(&self->tabbar);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		kbdhelp_ontabbarchange);	
-	kbdhelp_appendtabbarsections(self);
+	kbdhelp_buildtabbar(self);
 }
 
-void kbdhelp_appendtabbarsections(KbdHelp* self)
+void kbdhelp_buildtabbar(KbdHelp* self)
 {		
 	const psy_Property* cmds;
 	const psy_List* p;
@@ -54,18 +55,6 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	int tabindex)
 {	
 	kbdhelp_setcmdsection(self, tabindex);
-}
-
-const psy_Property* kbdhelp_cmds(const KbdHelp* self)
-{
-	psy_EventDriver* kbd;		
-
-	kbd = workspace_kbddriver(self->workspace);
-	if (kbd && psy_eventdriver_configuration(kbd)) {
-		return psy_property_at_section_const(
-			psy_eventdriver_configuration(kbd), "cmds");
-	}
-	return NULL;
 }
 
 void kbdhelp_setcmdsection(KbdHelp* self, uintptr_t index)
@@ -92,4 +81,16 @@ void kbdhelp_setcmdsection(KbdHelp* self, uintptr_t index)
 				psy_property_shorttext(property));
 		}
 	}
+}
+
+const psy_Property* kbdhelp_cmds(const KbdHelp* self)
+{
+	psy_EventDriver* kbd;
+
+	kbd = workspace_kbddriver(self->workspace);
+	if (kbd && psy_eventdriver_configuration(kbd)) {
+		return psy_property_at_section_const(
+			psy_eventdriver_configuration(kbd), "cmds");
+	}
+	return NULL;
 }

@@ -341,10 +341,9 @@ void psy_ui_component_setspacing_children(psy_ui_Component*, psy_ui_Margin);
 void psy_ui_component_setalign_children(psy_ui_Component*, psy_ui_AlignType);
 void psy_ui_component_checksortedalign(psy_ui_Component*, psy_ui_AlignType);
 psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
-
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
-void psy_ui_component_setborder(psy_ui_Component* self,
-	const psy_ui_Border* border);
+void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
+uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
 
 void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType);
 
@@ -728,6 +727,8 @@ INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
 void psy_ui_component_updateoverflow(psy_ui_Component*);
 void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
 void psy_ui_component_drawbackground(psy_ui_Component*, psy_ui_Graphics*);
+void psy_ui_component_drawbackgroundimage(psy_ui_Component*, psy_ui_Graphics*,
+	psy_ui_Bitmap*, psy_ui_BackgroundRepeat, psy_ui_Alignment);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {
