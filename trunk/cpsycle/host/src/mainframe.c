@@ -270,7 +270,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setstyletype(&self->statusbar, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.25, 1.0, 0.25, 0.0));
+		psy_ui_margin_make_em(0.0, 1.0, 0.25, 0.0));
 }
 
 void mainframe_initspacerleft(MainFrame* self)
@@ -366,12 +366,12 @@ void mainframe_initstatusbar(MainFrame* self)
 
 void mainframe_initviewstatusbars(MainFrame* self)
 {
-	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);	
+	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setdefaultalign(
 		psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_CLIENT);
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	machineviewbar_init(&self->machineviewbar,
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->workspace);	

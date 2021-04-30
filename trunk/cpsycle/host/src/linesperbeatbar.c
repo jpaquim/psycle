@@ -62,8 +62,10 @@ void linesperbeatbar_onlessclicked(LinesPerBeatBar* self, psy_ui_Component* send
 {
 	assert(self);
 
-	psy_audio_player_setlpb(workspace_player(self->workspace),
-		psy_audio_player_lpb(workspace_player(self->workspace)) - 1);
+	if (psy_audio_player_lpb(workspace_player(self->workspace)) > 1) {
+		psy_audio_player_setlpb(workspace_player(self->workspace),
+			psy_audio_player_lpb(workspace_player(self->workspace)) - 1);
+	}
 }
 
 void linesperbeatbar_onmoreclicked(LinesPerBeatBar* self, psy_ui_Component* sender)
