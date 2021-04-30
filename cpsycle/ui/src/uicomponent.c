@@ -191,15 +191,15 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_Style* common;		
 
 		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);		
-		psy_ui_font_dispose(&common->font);
-		psy_ui_font_init(&common->font, NULL);
-		psy_ui_font_copy(&common->font, font);
-		psy_ui_app_updatesyles(psy_ui_app());
+psy_ui_font_dispose(&common->font);
+psy_ui_font_init(&common->font, NULL);
+psy_ui_font_copy(&common->font, font);
+psy_ui_app_updatesyles(psy_ui_app());
 	}
 }
 
 void psy_ui_component_capture(psy_ui_Component* self)
-{	
+{
 	self->imp->vtable->dev_capture(self->imp);
 }
 
@@ -208,6 +208,8 @@ void psy_ui_component_releasecapture(psy_ui_Component* self)
 	psy_ui_app()->capture = NULL;
 	self->imp->vtable->dev_releasecapture(self->imp);
 }
+
+static void psy_ui_component_checkbackgroundanimation(psy_ui_Component*);
 
 // vtable
 static void dispose(psy_ui_Component*);
@@ -243,17 +245,17 @@ static bool onclose(psy_ui_Component* self) { return TRUE; }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
-	if (self->draggable) {		
-		psy_ui_app()->dragevent.target = self;		
-		psy_ui_app_startdrag(psy_ui_app());		
+	if (self->draggable) {
+		psy_ui_app()->dragevent.target = self;
+		psy_ui_app_startdrag(psy_ui_app());
 		self->vtable->ondragstart(self, &psy_ui_app()->dragevent);
 	}
 }
 
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
-	if (psy_ui_app()->dragevent.active) {		
-		psy_ui_app()->dragevent.preventdefault = FALSE;		
+	if (psy_ui_app()->dragevent.active) {
+		psy_ui_app()->dragevent.preventdefault = FALSE;
 		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
 		if (psy_ui_app()->dragevent.preventdefault) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
@@ -267,7 +269,7 @@ static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
-	if (psy_ui_app()->dragevent.active) {				
+	if (psy_ui_app()->dragevent.active) {
 		self->vtable->ondrop(self, &psy_ui_app()->dragevent);
 		if (ev->preventdefault) {
 			psy_ui_mouseevent_stoppropagation(ev);
@@ -289,7 +291,19 @@ static void onmouseleave(psy_ui_Component* self)
 
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
-static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
+static void ontimer(psy_ui_Component* self, uintptr_t timerid)
+{
+	if (self->style.currstyle->backgroundid &&
+		self->style.currstyle->backgroundanimation.animate) {
+		self->bgframetimer++;
+		if (self->bgframetimer == self->style.currstyle->backgroundanimation.animatetime) {
+			psy_ui_component_invalidate(self);			
+			self->currbgframe++;
+			self->bgframetimer = 0;
+		}		
+	}
+	
+}
 static void onlanguagechanged(psy_ui_Component* self) { }
 
 static void onfocus(psy_ui_Component* self)
@@ -608,6 +622,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->tabindex = psy_INDEX_INVALID;
 	self->opcount = 0;
 	self->draggable = FALSE;
+	self->bgframetimer = FALSE;
+	self->currbgframe = 0;
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,
@@ -1540,14 +1556,28 @@ void psy_ui_component_drawbackgroundimage(psy_ui_Component* self,
 		psy_ui_RealPoint cp;
 		psy_ui_RealSize bmpsize;
 		psy_ui_RealRectangle position;
+		psy_ui_RealPoint src;
 
 		size = psy_ui_component_size_px(self);
 		psy_ui_realpoint_init(&cp);
 		bmpsize = psy_ui_bitmap_size(bitmap);
+		if (self->style.currstyle->backgroundanimation.animate) {
+			src = psy_ui_realpoint_make(
+				self->currbgframe *
+				self->style.currstyle->backgroundanimation.framesize.width,
+				0);
+			if (src.x >= bmpsize.width) {
+				src.x = 0;
+				self->currbgframe = 0;
+			}
+			bmpsize.width = self->style.currstyle->backgroundanimation.framesize.width;
+		} else {
+			src = psy_ui_realpoint_zero();
+		}
 		if (repeat == psy_ui_REPEAT) {
 			while (cp.y < size.height) {
 				position = psy_ui_realrectangle_make(cp, bmpsize);
-				psy_ui_drawbitmap(g, bitmap, position, psy_ui_realpoint_zero());
+				psy_ui_drawbitmap(g, bitmap, position, src);
 				cp.x += bmpsize.width;
 				if (cp.x >= size.width) {
 					cp.x = 0.0;
@@ -1562,7 +1592,7 @@ void psy_ui_component_drawbackgroundimage(psy_ui_Component* self,
 				cp.y = (size.height - bmpsize.height) / 2.0;
 			}
 			position = psy_ui_realrectangle_make(cp, bmpsize);
-			psy_ui_drawbitmap(g, bitmap, position, psy_ui_realpoint_zero());
+			psy_ui_drawbitmap(g, bitmap, position, src);
 		}
 	}
 }
@@ -1786,6 +1816,16 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_DISABLED, disabled);	
 	psy_ui_componentstyle_readstyles(&self->style);
+	psy_ui_component_checkbackgroundanimation(self);
+}
+
+void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
+{
+	if (self->style.currstyle->backgroundanimation.animate) {
+		psy_ui_component_starttimer(self, 65535, 50);
+	} else {
+		psy_ui_component_stoptimer(self, 65535);
+	}
 }
 
 void psy_ui_component_setstyletype(psy_ui_Component* self,
@@ -1794,6 +1834,7 @@ void psy_ui_component_setstyletype(psy_ui_Component* self,
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_NONE, standard);
 	psy_ui_componentstyle_readstyles(&self->style);
+	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
@@ -1802,6 +1843,7 @@ void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_HOVER, hover);
 	psy_ui_componentstyle_readstyles(&self->style);
+	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
@@ -1811,6 +1853,7 @@ void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 		psy_ui_STYLESTATE_FOCUS, focus);
 	psy_ui_componentstyle_readstyle(&self->style,
 		psy_ui_STYLESTATE_FOCUS, focus);
+	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_setstyletype_active(psy_ui_Component* self,
@@ -1820,6 +1863,7 @@ void psy_ui_component_setstyletype_active(psy_ui_Component* self,
 		psy_ui_STYLESTATE_ACTIVE, active);
 	psy_ui_componentstyle_readstyle(&self->style,
 		psy_ui_STYLESTATE_ACTIVE, active);
+	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_setstyletype_select(psy_ui_Component* self,
@@ -1829,12 +1873,14 @@ void psy_ui_component_setstyletype_select(psy_ui_Component* self,
 		psy_ui_STYLESTATE_SELECT, select);
 	psy_ui_componentstyle_readstyle(&self->style,
 		psy_ui_STYLESTATE_SELECT, select);
+	psy_ui_component_checkbackgroundanimation(self);
 }
 
 void psy_ui_component_setstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {		
 	if (psy_ui_componentstyle_setcurrstate(&self->style, state)) {
+		psy_ui_component_checkbackgroundanimation(self);
 		psy_ui_component_invalidate(self);
 	}	
 }
@@ -1843,6 +1889,7 @@ void psy_ui_component_addstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
 {
 	if (psy_ui_componentstyle_addstate(&self->style, state)) {
+		psy_ui_component_checkbackgroundanimation(self);
 		psy_ui_component_invalidate(self);
 	}
 }

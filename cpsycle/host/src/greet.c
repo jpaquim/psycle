@@ -35,6 +35,7 @@ static void greet_vtable_init(Greet* self)
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setstyletype(&self->component, STYLE_GREET);
 	greet_vtable_init(self);	
 	self->current = 1;

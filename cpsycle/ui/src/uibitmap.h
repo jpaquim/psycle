@@ -47,9 +47,18 @@ typedef struct psy_ui_BitmapVTable {
 
 struct psy_ui_BitmapImp;
 
+typedef struct psy_ui_BitmapAnimate {
+	bool animate;
+	int animatetime;
+	psy_ui_RealSize framesize;
+	bool horizontalframes;
+} psy_ui_BitmapAnimate;
+
+void psy_ui_bitmapanimate_init(psy_ui_BitmapAnimate*);
+
 typedef struct psy_ui_Bitmap {
 	psy_ui_BitmapVTable* vtable;
-	struct psy_ui_BitmapImp* imp;
+	struct psy_ui_BitmapImp* imp;		
 } psy_ui_Bitmap;
 
 void psy_ui_bitmap_init(psy_ui_Bitmap*);
