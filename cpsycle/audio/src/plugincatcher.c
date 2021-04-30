@@ -427,8 +427,11 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 #endif
 	self->saveafterscan = TRUE;
 	self->hasplugincache = FALSE;
+	self->scanning = FALSE;
+	self->abort = FALSE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_scanprogress);
+	psy_signal_init(&self->signal_scanfile);	
 }
 
 void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
@@ -442,6 +445,7 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	self->nativeroot = NULL;
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_scanprogress);
+	psy_signal_dispose(&self->signal_scanfile);
 	psy_audio_plugincategorylist_dispose(&self->categorydefaults);
 }
 
@@ -508,6 +512,8 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 
 void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 {
+	self->abort = FALSE;
+	self->scanning = TRUE;
 	psy_audio_plugincatcher_clear(self);
 	if (self->directories) {
 		const char* path;
@@ -523,7 +529,7 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 				(psy_fp_findfile)onenumdir);
 		}
 		path = psy_property_at_str(self->directories, "luascripts", NULL);
-		if (path) {
+		if (path && !self->abort) {
 			psy_dir_enumerate(self, path, "*.lua", psy_audio_LUA,
 				(psy_fp_findfile)onenumdir);
 		}
@@ -532,11 +538,11 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 #else
 		path = psy_property_at_str(self->directories, "vsts64", NULL);
 #endif
-		if (path) {
+		if (path && !self->abort) {
 			plugincatcher_scan_multipath(self, path, "*"MODULEEXT, psy_audio_VST);
 		}
 		path = psy_property_at_str(self->directories, "ladspas", NULL);
-		if (path) {
+		if (path && !self->abort) {
 			plugincatcher_scan_multipath(self, path, "*"MODULEEXT,
 				psy_audio_LADSPA);
 		}
@@ -546,6 +552,12 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 	}
 	psy_signal_emit(&self->signal_changed, self, 0);
 	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
+	self->scanning = FALSE;
+}
+
+void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher* self)
+{
+	self->abort = TRUE;
 }
 
 int isplugin(int type)
@@ -561,6 +573,7 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	psy_audio_MachineInfo macinfo;
 	char name[_MAX_PATH];
 
+	psy_signal_emit(&self->signal_scanfile, self, 2, path, type);
 	machineinfo_init(&macinfo);
 	switch (type) {
 		case psy_audio_PLUGIN:
@@ -603,6 +616,9 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 			break;
 	}
 	machineinfo_dispose(&macinfo);
+	if (self->abort) {
+		return 0;
+	}
 	return 1;
 }
 
@@ -835,6 +851,10 @@ void plugincatcher_incfavorite(psy_audio_PluginCatcher* self, const char* id)
 		psy_property_set_int(plugin, "favorite", ++favorite);		
 		psy_audio_plugincatcher_save(self);		
 	}
+}
+bool psy_audio_plugincatcher_scanning(const psy_audio_PluginCatcher* self)
+{
+	return self->scanning;
 }
 
 void psy_audio_machineinfo_from_property(const psy_Property* property, psy_audio_MachineInfo* rv)

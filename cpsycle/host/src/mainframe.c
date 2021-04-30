@@ -1177,6 +1177,10 @@ void mainframe_onstartup(MainFrame* self)
 	workspace_selectpatterndisplay(&self->workspace,
 		workspace_patterndisplaytype(&self->workspace));	
 	machinewireview_centermaster(&self->machineview.wireview);
+	if (self->workspace.plugincatcher.scanning) {
+		psy_ui_component_starttimer(&self->machineview.newmachine.component, 0, 50);
+		psy_ui_notebook_select(&self->machineview.newmachine.notebook, 1);
+	}
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,

@@ -193,9 +193,16 @@ typedef struct PluginScanView {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Label scan;
+	psy_ui_Label scanfile;
+	psy_ui_Label scantype;
+	psy_ui_Component abortbar;
+	psy_ui_Button abort;
+	// references
+	Workspace* workspace;
 } PluginScanView;
 
-void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
+void pluginscanview_init(PluginScanView*, psy_ui_Component* parent,
+	Workspace*);
 
 struct NewMachine;
 
@@ -270,7 +277,6 @@ typedef struct NewMachine {
 	psy_ui_Scroller scroller_all;	
 	psy_ui_Edit edit;
 	// internal data
-	bool scanending;
 	bool appendstack;
 	int mode;
 	uintptr_t newsectioncount;

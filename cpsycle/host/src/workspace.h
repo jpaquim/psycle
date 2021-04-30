@@ -20,6 +20,8 @@
 // ui
 #include <uicomponent.h>
 #include <uiapp.h>
+// audio
+#include <lock.h>
 // file
 #include <playlist.h>
 #include <propertiesio.h>
@@ -118,6 +120,7 @@ typedef struct {
 	// psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
+	psy_Signal signal_scanfile;
 	psy_Signal signal_beforesavesong;
 	psy_Signal signal_showparameters;
 	psy_Signal signal_viewselected;
@@ -167,11 +170,14 @@ typedef struct {
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
+	psy_audio_Lock pluginscanlock;
+	int filescanned;
+	char* scanfilename;
+	int scanplugintype;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
-
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_clearsequencepaste(Workspace*);

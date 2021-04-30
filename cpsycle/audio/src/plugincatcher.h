@@ -68,17 +68,21 @@ typedef struct psy_audio_PluginCatcher {
 	char* inipath;
 	char* nativeroot;
 	psy_Property* directories;	
-	psy_Signal signal_changed;
+	psy_Signal signal_changed;	
 	psy_Signal signal_scanprogress;
+	psy_Signal signal_scanfile;
 	bool saveafterscan;
 	bool hasplugincache;
 	psy_audio_PluginCategoryList categorydefaults;	
+	bool scanning;
+	bool abort;
 } psy_audio_PluginCatcher;
 
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher*);
+void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher*, psy_Property*);
@@ -95,6 +99,7 @@ const char* psy_audio_plugincatcher_searchpath(psy_audio_PluginCatcher*, const c
 	int type);
 psy_Property* psy_audio_plugincatcher_at(psy_audio_PluginCatcher* self, const char* id);
 void plugincatcher_incfavorite(psy_audio_PluginCatcher*, const char* id);
+bool psy_audio_plugincatcher_scanning(const psy_audio_PluginCatcher* self);
 
 INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self)
 {
