@@ -121,6 +121,7 @@ typedef struct {
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_scanfile;
+	psy_Signal signal_scantaskstart;
 	psy_Signal signal_beforesavesong;
 	psy_Signal signal_showparameters;
 	psy_Signal signal_viewselected;
@@ -173,6 +174,8 @@ typedef struct {
 	psy_audio_Lock pluginscanlock;
 	int filescanned;
 	char* scanfilename;
+	int scantaskstart;
+	psy_audio_PluginScanTask lastscantask;
 	int scanplugintype;
 } Workspace;
 

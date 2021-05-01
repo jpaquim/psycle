@@ -305,9 +305,9 @@ static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid)
 {
 	if (self->style.currstyle->backgroundid &&
-		self->style.currstyle->backgroundanimation.animate) {
+		self->style.currstyle->backgroundanimation.enabled) {
 		self->bgframetimer++;
-		if (self->bgframetimer == self->style.currstyle->backgroundanimation.animatetime) {
+		if (self->bgframetimer == self->style.currstyle->backgroundanimation.interval) {
 			psy_ui_component_invalidate(self);			
 			self->currbgframe++;
 			self->bgframetimer = 0;
@@ -1603,7 +1603,7 @@ void psy_ui_component_drawbackgroundimage(psy_ui_Component* self,
 		size = psy_ui_component_size_px(self);
 		psy_ui_realpoint_init(&cp);
 		bmpsize = psy_ui_bitmap_size(bitmap);
-		if (self->style.currstyle->backgroundanimation.animate) {
+		if (self->style.currstyle->backgroundanimation.enabled) {
 			src = psy_ui_realpoint_make(
 				self->currbgframe *
 				self->style.currstyle->backgroundanimation.framesize.width,
@@ -1863,7 +1863,7 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 
 void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
 {
-	if (self->style.currstyle->backgroundanimation.animate) {
+	if (self->style.currstyle->backgroundanimation.enabled) {
 		psy_ui_component_starttimer(self, 65535, 50);
 	} else {
 		psy_ui_component_stoptimer(self, 65535);

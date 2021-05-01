@@ -835,6 +835,7 @@ void newmachinecategorybar_ondrop(NewMachineCategoryBar* self, psy_ui_DragEvent*
 
 // PluginScanView
 // prototypes
+void pluginscanview_inittasklist(PluginScanView*);
 void pluginscanview_onabort(PluginScanView*, psy_ui_Button* sender);
 // implementation
 void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent, Workspace* workspace)
@@ -847,36 +848,85 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent, Workspa
 		"newmachine.scanning");
 	psy_ui_component_setalign(psy_ui_label_base(&self->scan),
 		psy_ui_ALIGN_TOP);
-	// plugintype
-	psy_ui_label_init(&self->scantype, &self->component, NULL);
-	psy_ui_label_preventtranslation(&self->scantype);
-	psy_ui_label_preventwrap(&self->scantype);
-	psy_ui_component_setalign(psy_ui_label_base(&self->scantype),
-		psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(psy_ui_label_base(&self->scantype),
-		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
+	psy_ui_component_setmargin(psy_ui_label_base(&self->scan),
+		psy_ui_margin_make_em(2.0, 0.0, 2.0, 0.0));
+	psy_ui_component_init_align(&self->left, &self->component,
+		psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setspacing(&self->left,
+		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
+	psy_ui_component_init_align(&self->right, &self->component,
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_init_align(&self->client, &self->component,
+		psy_ui_ALIGN_CLIENT);	
 	// filename
-	psy_ui_label_init(&self->scanfile, &self->component, NULL);
+	psy_ui_label_init(&self->scanfile, &self->client, NULL);
 	psy_ui_label_preventtranslation(&self->scanfile);
 	psy_ui_label_preventwrap(&self->scanfile);
 	psy_ui_component_setalign(psy_ui_label_base(&self->scanfile),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->scanfile),
-		psy_ui_margin_make_em(1.0, 0.0, 0.0, 0.0));
-	psy_ui_component_init(&self->abortbar, &self->component, NULL);
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.0));
+	psy_ui_component_init(&self->abortbar, &self->client, NULL);
 	psy_ui_component_setmargin(&self->abortbar,
-		psy_ui_margin_make_em(2.0, 0.0, 0.0, 0.0));
+		psy_ui_margin_make_em(2.0, 0.0, 0.0, 20.0));
 	psy_ui_component_setalign(&self->abortbar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init_text_connect(&self->abort, &self->abortbar, NULL,
 		"Stop", self, pluginscanview_onabort);
 	psy_ui_component_setalign(psy_ui_button_base(&self->abort),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_preventtranslation(&self->abort);
+	pluginscanview_inittasklist(self);
+}
+
+void pluginscanview_inittasklist(PluginScanView* self)
+{
+	psy_List* p;
+
+	for (p = self->workspace->plugincatcher.scantasks; p != NULL; p = p->next) {
+		psy_audio_PluginScanTask* task;
+		psy_ui_Label* label;
+		
+		task = (psy_audio_PluginScanTask*)p->entry;
+		label = psy_ui_label_allocinit(&self->left, NULL);
+		psy_ui_label_preventtranslation(label);
+		psy_ui_label_settext(label, task->label);
+		psy_ui_component_setstyletype_select(&label->component,
+			psy_ui_STYLE_BUTTON_SELECT);
+		psy_ui_component_setmargin(psy_ui_label_base(label),
+			psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0));
+		psy_ui_component_setalign(&label->component, psy_ui_ALIGN_TOP);
+	}
 }
 
 void pluginscanview_onabort(PluginScanView* self, psy_ui_Button* sender)
 {
 	psy_audio_plugincatcher_abort(&self->workspace->plugincatcher);
+}
+
+void pluginscanview_selecttask(PluginScanView* self, psy_audio_PluginScanTask* task)
+{
+	uintptr_t index;
+	psy_List* p;
+
+	index = 0;
+	for (p = self->workspace->plugincatcher.scantasks; p != NULL; p = p->next, ++index) {
+		psy_audio_PluginScanTask* curr;
+
+		curr = (psy_audio_PluginScanTask*)p->entry;
+		if (strcmp(curr->label, task->label) == 0) {
+			break;
+		}
+	}
+	if (p) {
+		psy_ui_Component* component;
+
+		psy_ui_component_removestylestate_children(&self->left,
+			psy_ui_STYLESTATE_SELECT);
+		component = psy_ui_component_at(&self->left, index);
+		if (component) {
+			psy_ui_component_addstylestate(component, psy_ui_STYLESTATE_SELECT);
+		}
+	}
 }
 
 // NewMachineSection
@@ -1227,6 +1277,8 @@ static void newmachine_onsectionrenamed(NewMachine*, NewMachineSection* sender);
 static void newmachine_alignsections(NewMachine*);
 static void newmachine_onlanguagechanged(NewMachine*);
 static void newmachine_onscanfile(NewMachine*, psy_audio_PluginCatcher* sender, const char* path, int type);
+static void newmachine_onscantaskstart(NewMachine*, psy_audio_PluginCatcher* sender,
+	psy_audio_PluginScanTask*);
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
@@ -1393,6 +1445,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onclearsection);
 	psy_signal_connect(&workspace->signal_scanprogress, self,
 		newmachine_onpluginscanprogress);
+	psy_signal_connect(&workspace->signal_scantaskstart, self,
+		newmachine_onscantaskstart);
 	psy_signal_connect(&workspace->signal_scanfile, self,
 		newmachine_onscanfile);
 	psy_ui_notebook_select(&self->notebook, 0);
@@ -1660,8 +1714,7 @@ void newmachine_onfocus(NewMachine* self, psy_ui_Component* sender)
 void newmachine_onrescan(NewMachine* self, psy_ui_Component* sender)
 {	
 	if (!psy_audio_plugincatcher_scanning(&self->workspace->plugincatcher)) {
-		psy_ui_label_settext(&self->scanview.scanfile, "");
-		psy_ui_label_settext(&self->scanview.scantype, "");
+		psy_ui_label_settext(&self->scanview.scanfile, "");		
 		psy_ui_component_starttimer(newmachine_base(self), 0, 50);
 		psy_ui_notebook_select(&self->notebook, 1);
 		workspace_scanplugins(self->workspace);
@@ -1835,23 +1888,11 @@ void newmachine_alignsections(NewMachine* self)
 void newmachine_onscanfile(NewMachine* self, psy_audio_PluginCatcher* sender,
 	const char* path, int type)
 {
-	psy_ui_label_settext(&self->scanview.scanfile, path);
-	switch (type) {
-	case psy_audio_PLUGIN:
-		psy_ui_label_settext(&self->scanview.scantype, "Native");
-		break;
-	case psy_audio_LUA:
-		psy_ui_label_settext(&self->scanview.scantype, "Lua");
-		break;
-	case psy_audio_VST:
-	case psy_audio_VSTFX:
-		psy_ui_label_settext(&self->scanview.scantype, "Vst");
-		break;
-	case psy_audio_LADSPA: {
-		psy_ui_label_settext(&self->scanview.scantype, "LADSPA");
-		break; }
-	default:
-		psy_ui_label_settext(&self->scanview.scantype, "");
-		break;
-	}
+	psy_ui_label_settext(&self->scanview.scanfile, path);	
+}
+
+void newmachine_onscantaskstart(NewMachine* self, psy_audio_PluginCatcher* sender,
+	psy_audio_PluginScanTask* task)
+{
+	pluginscanview_selecttask(&self->scanview, task);
 }

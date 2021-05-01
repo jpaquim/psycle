@@ -84,6 +84,8 @@ static void workspace_onterminalerror(Workspace*,
 static void workspace_oneventdriverinput(Workspace*, psy_EventDriver* sender);
 static void workspace_onscanfile(Workspace*, psy_audio_PluginCatcher* sender,
 	const char* path, int type);
+static void workspace_onscantaskstart(Workspace*, psy_audio_PluginCatcher* sender,
+	psy_audio_PluginScanTask*);
 
 // MachineCallback VTable
 static psy_audio_MachineCallbackVtable machinecallback_vtable;
@@ -175,11 +177,14 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 		workspace_onscanprogress);
 	psy_signal_connect(&self->plugincatcher.signal_scanfile, self,
 		workspace_onscanfile);
+	psy_signal_connect(&self->plugincatcher.signal_taskstart, self,
+		workspace_onscantaskstart);
 	psy_audio_machinefactory_init(&self->machinefactory,
 		&self->machinecallback, 
 		&self->plugincatcher);
 	psy_audio_pluginsections_init(&self->pluginsections);
 	self->filescanned = 0;
+	self->scantaskstart = 0;
 	self->scanfilename = NULL;
 	self->scanplugintype = psy_audio_UNDEFINED;
 }
@@ -199,6 +204,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_scanprogress);
 	psy_signal_init(&self->signal_scanfile);
+	psy_signal_init(&self->signal_scantaskstart);
 	psy_signal_init(&self->signal_beforesavesong);
 	psy_signal_init(&self->signal_showparameters);
 	psy_signal_init(&self->signal_viewselected);
@@ -279,6 +285,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
 	psy_signal_dispose(&self->signal_scanfile);
+	psy_signal_dispose(&self->signal_scantaskstart);
 	psy_signal_dispose(&self->signal_beforesavesong);
 	psy_signal_dispose(&self->signal_showparameters);
 	psy_signal_dispose(&self->signal_viewselected);
@@ -373,6 +380,7 @@ static void pluginscanthread(void* context)
 	self = context;
 	psy_audio_plugincatcher_scan(&self->plugincatcher);
 	self->filescanned = 0;
+	self->scantaskstart = 0;
 }
 #endif
 
@@ -383,6 +391,7 @@ void workspace_scanplugins(Workspace* self)
 	if (!psy_audio_plugincatcher_scanning(&self->plugincatcher)) {
 #ifdef DIVERSALIS__OS__MICROSOFT
 		self->filescanned = 0;
+		self->scantaskstart = 0;
 		free(self->scanfilename);
 		self->scanplugintype = psy_audio_UNDEFINED;
 		_beginthread(pluginscanthread, 0, self);
@@ -1300,6 +1309,12 @@ void workspace_idle(Workspace* self)
 			self->lastentry = 0;
 		}		
 	}
+	if (self->scantaskstart) {
+		psy_audio_lock_enter(&self->pluginscanlock);
+		psy_signal_emit(&self->signal_scantaskstart, self, 1, &self->lastscantask);
+		self->scantaskstart = 0;
+		psy_audio_lock_leave(&self->pluginscanlock);
+	}
 	if (self->filescanned) {
 		psy_audio_lock_enter(&self->pluginscanlock);
 		psy_signal_emit(&self->signal_scanfile, self, 2, self->scanfilename,
@@ -1920,5 +1935,16 @@ void workspace_onscanfile(Workspace* self, psy_audio_PluginCatcher* sender,
 	self->filescanned = 1;
 	psy_strreset(&self->scanfilename, path);
 	self->scanplugintype = type;	
+	psy_audio_lock_leave(&self->pluginscanlock);
+}
+
+static void workspace_onscantaskstart(Workspace* self, psy_audio_PluginCatcher* sender,
+	psy_audio_PluginScanTask* task)
+{
+	assert(task);
+
+	psy_audio_lock_enter(&self->pluginscanlock);
+	self->scantaskstart = 1;
+	self->lastscantask = *task;
 	psy_audio_lock_leave(&self->pluginscanlock);
 }
