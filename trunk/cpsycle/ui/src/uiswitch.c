@@ -88,7 +88,7 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	psy_ui_RealRectangle knobrect;
 	psy_ui_RealSize corner;	
 		
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	switchsize = psy_ui_realsize_make(
 		floor(5.0 * tm->tmAveCharWidth), 1.0 * tm->tmHeight);

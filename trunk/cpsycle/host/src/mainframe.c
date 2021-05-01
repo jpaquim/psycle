@@ -1515,7 +1515,7 @@ void mainframe_connectstepsequencerbuttons(MainFrame* self)
 
 void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 {
-	if (!psy_ui_isvaluezero(psy_ui_component_offsetsize(
+	if (!psy_ui_isvaluezero(psy_ui_component_scrollsize(
 		&self->terminal.component).height)) {
 		psy_ui_component_setpreferredsize(&self->terminal.component,
 			psy_ui_size_zero());

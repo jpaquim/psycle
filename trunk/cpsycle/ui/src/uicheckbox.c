@@ -238,7 +238,7 @@ void psy_ui_checkbox_ondraw(psy_ui_CheckBox* self, psy_ui_Graphics* g)
 
 
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_offsetsize_px(&self->component);		
+	size = psy_ui_component_scrollsize_px(&self->component);		
 	checksize = psy_ui_realsize_make(15.0, tm->tmHeight);
 	r = psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(0.0, (size.height - checksize.height) / 2),

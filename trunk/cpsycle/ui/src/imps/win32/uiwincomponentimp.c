@@ -484,7 +484,7 @@ psy_ui_RealRectangle dev_screenposition(psy_ui_win_ComponentImp* self)
 	ClientToScreen(self->hwnd, &pt);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(pt.x, pt.y),
-		psy_ui_component_offsetsize_px(self->component));
+		psy_ui_component_scrollsize_px(self->component));
 }
 
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,

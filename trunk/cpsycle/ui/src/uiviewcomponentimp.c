@@ -569,7 +569,7 @@ void view_dev_invalidate(psy_ui_ViewComponentImp* self)
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle r;
 
-	size = psy_ui_component_offsetsize_px(self->component);
+	size = psy_ui_component_scrollsize_px(self->component);
 	r = psy_ui_realrectangle_make(
 		psy_ui_realpoint_zero(),
 		size);	

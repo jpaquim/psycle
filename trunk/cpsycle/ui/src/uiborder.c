@@ -5,3 +5,23 @@
 
 #include "uiborder.h"
 
+psy_ui_Size psy_ui_border_size(const psy_ui_Border* self)
+{
+	psy_ui_Size rv;
+	psy_ui_RealSize maxsize;
+
+	psy_ui_realsize_init(&maxsize);
+	if (self->left == psy_ui_BORDER_SOLID) {
+		++(maxsize.width);
+	}
+	if (self->top == psy_ui_BORDER_SOLID) {
+		++(maxsize.height);
+	}
+	if (self->right == psy_ui_BORDER_SOLID) {
+		++(maxsize.width);
+	}
+	if (self->bottom == psy_ui_BORDER_SOLID) {
+		++(maxsize.height);
+	}
+	return psy_ui_size_makereal(maxsize);	
+}

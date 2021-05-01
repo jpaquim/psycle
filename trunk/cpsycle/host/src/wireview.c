@@ -444,7 +444,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	pSamplesR = buffer->samples[1];
 
 	pane = sender;
-	size = psy_ui_component_offsetsize(pane);
+	size = psy_ui_component_scrollsize(pane);
 	tm = psy_ui_component_textmetric(pane);
 	right = psy_ui_value_px(&size.width, tm);
 	centerx = psy_ui_value_px(&size.width, tm) / 2;

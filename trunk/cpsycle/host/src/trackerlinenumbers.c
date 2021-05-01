@@ -116,7 +116,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		offset = clip.topleft.offset;
 		line = clip.topleft.line;
 		cpy = trackerlinestate_beattopx(self->linestate, offset);
-		size = psy_ui_component_offsetsize_px(&self->component);				
+		size = psy_ui_component_scrollsize_px(&self->component);				
 		cursor = workspace_patterncursor(self->workspace);
 		ite.pattern = self->linestate->pattern;
 		ite.patternnode = NULL;
@@ -311,7 +311,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	psy_ui_RealSize size;
 	intptr_t line;
 		
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	line = trackerlinestate_beattoline(self->linestate,
 		cursor->offset + cursor->seqoffset);
 	psy_ui_component_invalidaterect(&self->component,
@@ -327,7 +327,7 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 		psy_ui_RealSize size;		
 		intptr_t line;
 
-		size = psy_ui_component_offsetsize_px(&self->component);		
+		size = psy_ui_component_scrollsize_px(&self->component);		
 		line = trackerlinestate_beattoline(self->linestate,
 			offset - ((self->linestate->singlemode)
 				? self->linestate->sequenceentryoffset
@@ -479,7 +479,7 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_RealSize size;
 	psy_ui_RealRectangle r;	
 	
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);

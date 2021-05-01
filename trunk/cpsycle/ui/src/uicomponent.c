@@ -210,6 +210,8 @@ void psy_ui_component_releasecapture(psy_ui_Component* self)
 }
 
 static void psy_ui_component_checkbackgroundanimation(psy_ui_Component*);
+static psy_ui_Size psy_ui_component_sub_border(const psy_ui_Component*,
+	psy_ui_Size);
 
 // vtable
 static void dispose(psy_ui_Component*);
@@ -1139,7 +1141,7 @@ psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 	psy_ui_Value spacing_height;
 
 
-	rv = psy_ui_component_offsetsize(self);
+	rv = psy_ui_component_scrollsize(self);
 	spacing = psy_ui_component_spacing(self);
 	tm = psy_ui_component_textmetric(self);
 	spacing_width = psy_ui_margin_width(&spacing, tm);
@@ -1149,28 +1151,48 @@ psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 	return rv;
 }
 
-
-psy_ui_Size psy_ui_component_innersize(const psy_ui_Component* self)
+psy_ui_Size psy_ui_component_sub_border(const psy_ui_Component* self,
+	psy_ui_Size size)
 {
 	psy_ui_Size rv;
+	const psy_ui_Border* border;
+	psy_ui_Size bordersize;
 	const psy_ui_TextMetric* tm;
-	psy_ui_Margin border;
-	psy_ui_Value border_width;
-	psy_ui_Value border_height;
 
-	rv = psy_ui_component_offsetsize(self);
-	border = psy_ui_component_spacing(self);
+	rv = size;
+	border = psy_ui_component_border(self);
+	bordersize = psy_ui_border_size(border);
 	tm = psy_ui_component_textmetric(self);
-	border_width = psy_ui_margin_width(&border, tm);
-	psy_ui_value_sub(&rv.width, &border_width, tm);
-	border_height = psy_ui_margin_height(&border, tm);
-	psy_ui_value_sub(&rv.height, &border_height, tm);
+	psy_ui_value_sub(&rv.width, &bordersize.width, tm);	
+	psy_ui_value_sub(&rv.height, &bordersize.height, tm);
 	return rv;
 }
 
 psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component* self)
-{
-	return psy_ui_component_innersize(self);
+{		
+	if (self->scroll->overflow == psy_ui_OVERFLOW_HIDDEN) {		
+		return psy_ui_component_sub_border(self,
+			self->imp->vtable->dev_size(self->imp));
+	} else {		
+		psy_ui_Size rv;
+		psy_ui_Size size;
+		psy_ui_Size scrollpane;
+
+		scrollpane = self->imp->vtable->dev_size(
+			psy_ui_component_parent_const(self)->imp);
+		size = self->imp->vtable->dev_size(self->imp);		
+		if (self->scroll->overflow & psy_ui_OVERFLOW_HSCROLL) {
+			rv.width = scrollpane.width;
+		} else {
+			rv.width = size.width;
+		}
+		if (self->scroll->overflow & psy_ui_OVERFLOW_VSCROLL) {
+			rv.height = scrollpane.height;
+		} else {
+			rv.height = size.height;
+		}
+		return rv;
+	}
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
@@ -1181,6 +1203,17 @@ void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 void psy_ui_component_clientresize(psy_ui_Component* self, psy_ui_Size size)
 {
 	self->vtable->clientresize(self, size);
+}
+
+psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_size(self->imp);
+}
+
+psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_size(
+		psy_ui_component_parent_const(self)->imp);	
 }
 
 void psy_ui_component_setcursor(psy_ui_Component* self, psy_ui_CursorStyle style)
@@ -1420,7 +1453,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 		}
 	}*/	
 	psy_ui_component_move(self, psy_ui_point_make_px(position.left, newtop));
-	parentsize = psy_ui_component_offsetsize_px(psy_ui_component_parent(self));
+	parentsize = psy_ui_component_scrollsize_px(psy_ui_component_parent(self));
 	position = psy_ui_component_position(self);
 	if (parentsize.height > position.bottom) {
 		psy_ui_RealPoint translate;
@@ -1465,7 +1498,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		psy_ui_Size size;		
 		double scrollstepy_px;		
 		
-		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));
+		size = psy_ui_component_scrollsize(psy_ui_component_parent(self));
 		scrollsize = psy_ui_component_preferredscrollsize(self, &size);
 		scrollstepy_px = psy_ui_component_scrollstep_height_px(self);
 		tm = psy_ui_component_textmetric(self);
@@ -1507,7 +1540,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		psy_ui_Size size;
 		double scrollstepx_px;		
 		
-		size = psy_ui_component_offsetsize(psy_ui_component_parent(self));
+		size = psy_ui_component_scrollsize(psy_ui_component_parent(self));
 		scrollsize = psy_ui_component_preferredscrollsize(self, &size);
 		scrollstepx_px = floor(psy_ui_component_scrollstep_width_px(self));
 		tm = psy_ui_component_textmetric(self);
@@ -1542,7 +1575,7 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_zero(),
-			psy_ui_component_offsetsize_px(self)),
+			psy_ui_component_scrollsize_px(self)),
 		psy_ui_component_border(self),
 		psy_ui_component_textmetric(self));
 }
@@ -1610,7 +1643,7 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 
 			r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(),
-				psy_ui_component_offsetsize_px(self));
+				psy_ui_component_scrollsize_px(self));
 			tm = psy_ui_component_textmetric(self);
 			psy_ui_drawsolidrectangle(g, r,
 				psy_ui_component_backgroundcolour(
@@ -1695,7 +1728,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 		psy_ui_realpoint_make(
 			psy_ui_component_scrollleftpx(self),
 			psy_ui_component_scrolltoppx(self)),
-		psy_ui_component_offsetsize_px(self));
+		psy_ui_component_scrollsize_px(self));
 }
 
 void psy_ui_component_focus_next(psy_ui_Component* self)

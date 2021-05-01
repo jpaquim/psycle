@@ -276,7 +276,7 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 	int lineheight;
 		
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_intsize_init_size(psy_ui_component_offsetsize(&self->component),
+	size = psy_ui_intsize_init_size(psy_ui_component_scrollsize(&self->component),
 		tm);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	for (it = psy_table_begin(&self->items);

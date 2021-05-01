@@ -97,7 +97,7 @@ void checkui_ondraw(CheckUi* self, psy_ui_Graphics* g)
 
 	label[0] = '\0';
 	checkui_updateparam(self);
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	centery = (size.height - psy_ui_realrectangle_height(&self->skin->checkoff.dest)) / 2;
 	if (!self->param || psy_audio_machineparam_normvalue(self->param) == 0.f) {
 		skin_blitcoord(g, &self->skin->mixerbitmap,

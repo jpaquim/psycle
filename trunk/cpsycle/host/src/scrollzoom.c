@@ -67,7 +67,7 @@ void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
 	double zoomleftpx;
 	double zoomrightpx;
 
-	size = psy_ui_component_offsetsize_px(&self->component);	
+	size = psy_ui_component_scrollsize_px(&self->component);	
 	zoomleftpx = size.width * self->start;
 	zoomrightpx = size.width * self->end;
 	if (zoomleftpx == zoomrightpx) {
@@ -86,7 +86,7 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 	double zoomleftpx;
 	double zoomrightpx;
 	
-	size = psy_ui_component_offsetsize_px(&self->component);	
+	size = psy_ui_component_scrollsize_px(&self->component);	
 	zoomrightpx = size.width * self->end;
 	if (ev->pt.x >= zoomrightpx - 5.0 && ev->pt.x < zoomrightpx + 5.0) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
@@ -111,7 +111,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_offsetsize_px(&self->component);	
+	size = psy_ui_component_scrollsize_px(&self->component);	
 	if (self->dragmode == SCROLLZOOM_DRAG_NONE) {
 		double zoomleftpx;
 		double zoomrightpx;

@@ -532,10 +532,7 @@ INLINE void psy_ui_component_clear(psy_ui_Component* self)
 }
 
 // returns the element’s size that includes padding and border
-INLINE psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self)
-{	
-	return self->imp->vtable->dev_size(self->imp);	
-}
+psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self);
 
 INLINE psy_ui_RealRectangle psy_ui_component_position(const psy_ui_Component* self)
 {
@@ -574,20 +571,9 @@ INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const
 }
 
 // returns the content's size(excludes padding and border)
-psy_ui_Size psy_ui_component_size(const psy_ui_Component* self);
+psy_ui_Size psy_ui_component_size(const psy_ui_Component*);
 
 INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
-{
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
-}
-
-// returns the inner size(excludes border but includes padding)
-psy_ui_Size psy_ui_component_innersize(const psy_ui_Component*);
-
-INLINE psy_ui_RealSize psy_ui_component_innersize_px(const psy_ui_Component* self)
 {
 	psy_ui_Size size;
 
@@ -603,6 +589,18 @@ INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* se
 	psy_ui_Size size;
 
 	size = psy_ui_component_clientsize(self);
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
+}
+
+// returns the element’s entire size that includes padding but
+// not border, not margin and not scrollbars
+psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component*);
+
+INLINE psy_ui_RealSize psy_ui_component_scrollsize_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+
+	size = psy_ui_component_scrollsize(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
 }
 
@@ -825,7 +823,7 @@ void psy_ui_component_focus_prev(psy_ui_Component*);
 
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {	
-	return psy_ui_intsize_init_size(psy_ui_component_offsetsize(self),
+	return psy_ui_intsize_init_size(psy_ui_component_scrollsize(self),
 		psy_ui_component_textmetric(self));
 }
 

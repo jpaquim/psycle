@@ -64,7 +64,7 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 	psy_List* wrap = 0;	
 	uintptr_t currcol = 0;
 	
-	size = psy_ui_component_offsetsize(self->component);
+	size = psy_ui_component_scrollsize(self->component);
 	tm = psy_ui_component_textmetric(self->component);
 	psy_ui_realpoint_init(&cp_topleft);
 	psy_ui_realpoint_init_all(&cp_bottomright,

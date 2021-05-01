@@ -177,7 +177,7 @@ void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 {
 	psy_ui_RealSize size;	
 
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		self->tweakbase = (ev->pt.x) -
 			self->value * (size.width - self->slidersizepx.width);
@@ -198,7 +198,7 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 		float value;
 		float* pvalue;		
 		
-		size = psy_ui_component_offsetsize_px(&self->component);
+		size = psy_ui_component_scrollsize_px(&self->component);
 		if (self->orientation == psy_ui_HORIZONTAL) {			
 			self->value = psy_max(0.0, psy_min(1.0,
 				(ev->pt.x - self->tweakbase) / (size.width - self->slidersizepx.width)));
@@ -462,7 +462,7 @@ psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* s
 {
 	psy_ui_RealSize size;
 
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		return psy_ui_realrectangle_make(psy_ui_realpoint_make(
 			floor((size.width - self->slidersizepx.width) * self->value), 2.0),
