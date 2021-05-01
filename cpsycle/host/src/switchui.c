@@ -95,7 +95,7 @@ void switchui_ondraw(SwitchUi* self, psy_ui_Graphics* g)
 	char label[128];
 	
 	switchui_updateparam(self);
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolour);
 	

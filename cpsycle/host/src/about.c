@@ -305,7 +305,7 @@ void about_onalign(About* self)
 	double margin;
 	double cpx;
 	
-	size = psy_ui_component_offsetsize(&self->component);
+	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	bitmapsize.width = tm->tmAveCharWidth * 72;
 	bitmapsize.height = tm->tmHeight * 24;

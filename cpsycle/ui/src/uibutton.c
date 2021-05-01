@@ -186,7 +186,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		const psy_ui_TextMetric* tm;
 		psy_ui_RealSize buttonsize;
 
-		buttonsize = psy_ui_component_offsetsize_px(psy_ui_button_base(self));		
+		buttonsize = psy_ui_component_scrollsize_px(psy_ui_button_base(self));		
 		psy_ui_icondraw_init(&icondraw, self->icon,
 			self->component.style.currstyle);
 		psy_ui_icondraw_draw(&icondraw, g,
@@ -332,7 +332,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			psy_ui_RealMargin spacing;
 			psy_ui_RealPoint pt;
 
-			size = psy_ui_component_offsetsize_px(psy_ui_button_base(self));
+			size = psy_ui_component_scrollsize_px(psy_ui_button_base(self));
 			client_position = psy_ui_realrectangle_make(
 				psy_ui_realpoint_zero(), size);
 			pt = ev->pt;			

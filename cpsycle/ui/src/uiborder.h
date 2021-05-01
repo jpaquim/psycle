@@ -6,7 +6,7 @@
 
 // local
 #include "uicolour.h"
-#include "uivalue.h"
+#include "uigeometry.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -160,6 +160,8 @@ INLINE void psy_ui_border_init_solid_radius(psy_ui_Border* self,
 	psy_ui_border_init_solid(self, colour);
 	psy_ui_border_setradius_px(self, r);
 }
+
+psy_ui_Size psy_ui_border_size(const psy_ui_Border* self);
 
 #ifdef __cplusplus
 }

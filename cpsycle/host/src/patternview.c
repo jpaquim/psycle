@@ -448,7 +448,7 @@ void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
 void patternview_onpreferredsize(PatternView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
-	*rv = psy_ui_component_offsetsize(&self->component);
+	*rv = psy_ui_component_scrollsize(&self->component);
 }
 
 void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
@@ -653,7 +653,7 @@ void patternview_onalign(PatternView* self)
 {
 	psy_ui_RealSize headersize;	
 
-	headersize = psy_ui_component_offsetsize_px(&self->header.component);	
+	headersize = psy_ui_component_scrollsize_px(&self->header.component);	
 	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
 		headersize.height);
 	patternview_computemetrics(self);
@@ -666,7 +666,7 @@ void patternview_computemetrics(PatternView* self)
 	// const psy_ui_TextMetric* gridtm;
 	double trackwidth;
 
-	gridsize = psy_ui_component_offsetsize(&self->trackerscroller.pane);
+	gridsize = psy_ui_component_scrollsize(&self->trackerscroller.pane);
 	tm = psy_ui_component_textmetric(patternview_base(self));
 	//gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) + 2;
@@ -1294,7 +1294,7 @@ void patternview_drawtrackerbackground(PatternView* self, psy_ui_Component* send
 	view = psy_ui_component_at(sender, 0);
 	if (view) {
 		viewposition = psy_ui_component_position(view);
-		panesize = psy_ui_component_offsetsize_px(sender);
+		panesize = psy_ui_component_scrollsize_px(sender);
 		if (viewposition.top > 0) {
 			psy_ui_RealRectangle top;
 

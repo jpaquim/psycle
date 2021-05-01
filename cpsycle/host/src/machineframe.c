@@ -97,7 +97,7 @@ void parameterbar_onalign(ParameterBar* self)
 	preferredsize = psy_ui_component_preferredsize(&self->component, NULL);
 	preferredsize_more = psy_ui_component_preferredsize(
 		psy_ui_button_base(&self->more), NULL);
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (size.width < psy_ui_value_px(&preferredsize.width, tm)) {
 		if (!psy_ui_component_visible(psy_ui_button_base(&self->more))) {

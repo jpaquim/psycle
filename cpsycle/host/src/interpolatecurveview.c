@@ -156,7 +156,7 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		double scalex;
 		uintptr_t i;
 		
-		size = psy_ui_component_offsetsize_px(&self->component);
+		size = psy_ui_component_scrollsize_px(&self->component);
 		lines = (uintptr_t)(self->range / self->bpl);
 		scalex = size.width / self->range;
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
@@ -200,7 +200,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	val3 = entry->value;
 	lastcurveval = (double)entry->value;
 	lastoffset = entry->offset;
-	size = psy_ui_component_offsetsize_px(&self->component);
+	size = psy_ui_component_scrollsize_px(&self->component);
 	lines = (uintptr_t)(self->range / self->bpl);
 	scalex = size.width / self->range;
 	scaley = size.height / 0xFF;
@@ -325,7 +325,7 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, double x, dou
 	psy_dsp_big_beat_t offset;
 	const psy_ui_TextMetric* tm;
 	
-	size = psy_ui_component_offsetsize(&self->component);
+	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	scalex = psy_ui_value_px(&size.width, tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
@@ -383,7 +383,7 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 		double scaley;
 		const psy_ui_TextMetric* tm;
 
-		size = psy_ui_component_offsetsize(&self->component);
+		size = psy_ui_component_scrollsize(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
@@ -413,7 +413,7 @@ psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, double x, doubl
 	double scaley;
 	intptr_t half = 4;
 
-	size = psy_ui_component_offsetsize(&self->component);
+	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	scalex = psy_ui_value_px(&size.width, tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;

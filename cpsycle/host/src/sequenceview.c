@@ -823,7 +823,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self,
 	if (c == psy_INDEX_INVALID) {
 		c = 0;
 	}
-	listviewsize = psy_ui_component_offsetsize_px(&self->listview.component);
+	listviewsize = psy_ui_component_scrollsize_px(&self->listview.component);
 	visilines = (listviewsize.height) /
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component));
