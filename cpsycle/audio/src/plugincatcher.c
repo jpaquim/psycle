@@ -517,7 +517,6 @@ void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
 	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
 		"*"MODULEEXT, "Vsts 32bit", "vsts32", TRUE);
 #else	
-	psy_list_append(&self->scantasks, task);
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
 		"*"MODULEEXT, "Vsts 64bit", "vsts64", TRUE);
