@@ -1455,41 +1455,6 @@ void pianogrid_setcursor(Pianogrid* self, psy_audio_PatternCursor cursor)
 	}
 }
 
-bool pianogrid_scrollright(Pianogrid* self, psy_audio_PatternCursor cursor)
-{
-	intptr_t line;
-	intptr_t visilines;
-	psy_ui_IntSize size;
-
-	assert(self);
-
-	size = psy_ui_component_intsize(&self->component);
-	visilines = (intptr_t)((size.width /
-		(psy_dsp_big_beat_t)self->gridstate->pxperbeat) * self->gridstate->lpb);
-	//if (self->midline) {
-		//visilines /= 2;
-	//} else {
-	--visilines;
-	//}
-	line = pianogridstate_beattosteps(self->gridstate, cursor.offset);
-	if (visilines < line - psy_ui_component_scrollleftpx(&self->component) /
-			pianogridstate_steppx(self->gridstate) + 2) {
-		intptr_t dlines;
-		const psy_ui_TextMetric* tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		dlines = (intptr_t)((line - psy_ui_component_scrollleftpx(&self->component) /
-			pianogridstate_steppx(self->gridstate) - visilines + 16));
-		self->cursorchanging = TRUE;
-		psy_ui_component_setscrollleft(&self->component,
-			psy_ui_value_make_px(
-				psy_max(0.0, psy_ui_component_scrollleftpx(&self->component) +
-				psy_ui_component_scrollstep_width_px(&self->component) * dlines)));
-		return FALSE;
-	}
-	return TRUE;
-}
-
 void pianogrid_prevline(Pianogrid* self)
 {
 	assert(self);
@@ -1599,35 +1564,53 @@ void pianogrid_advancekeys(Pianogrid* self, uint8_t lines, bool wrap)
 }
 
 bool pianogrid_scrollleft(Pianogrid* self, psy_audio_PatternCursor cursor)
+{	
+	assert(self);
+	
+	if (pianogridstate_pxtobeat(self->gridstate, psy_ui_component_scrollleftpx(&self->component)) > cursor.offset) {
+		psy_ui_component_setscrollleft(&self->component,
+			psy_ui_value_make_px(pianogridstate_quantizebeattopx(self->gridstate,
+				cursor.offset)));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool pianogrid_scrollright(Pianogrid* self, psy_audio_PatternCursor cursor)
 {
 	intptr_t line;
-	intptr_t topline;
-	psy_ui_RealRectangle r;
-	const psy_ui_TextMetric* tm;	
+	intptr_t visilines;
+	psy_ui_RealSize size;
 
 	assert(self);
 
-	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_offsetsize_px(psy_ui_component_parent(&self->component));
+	visilines = (intptr_t)((size.width /
+		(psy_dsp_big_beat_t)self->gridstate->pxperbeat) * self->gridstate->lpb);
+	//if (self->midline) {
+		//visilines /= 2;
+	//} else {
+	--visilines;
+	//}
 	line = pianogridstate_beattosteps(self->gridstate, cursor.offset);
-	psy_ui_setrectangle(&r,
-		pianogridstate_steppx(self->gridstate) * line, 0,
-		pianogridstate_steppx(self->gridstate), 200);
-	
-	topline = 0;
-	if (psy_ui_component_scrollleftpx(&self->component) + topline * pianogridstate_steppx(self->gridstate) > r.left) {
+	if (visilines < line - psy_ui_component_scrollleftpx(&self->component) /
+		pianogridstate_steppx(self->gridstate) + 2) {
 		intptr_t dlines;
+		const psy_ui_TextMetric* tm;
 
-		dlines = (intptr_t)((psy_ui_component_scrollleftpx(&self->component) + topline * pianogridstate_steppx(self->gridstate) - r.left) /
-			(pianogridstate_steppx(self->gridstate)));
+		tm = psy_ui_component_textmetric(&self->component);
+		dlines = (intptr_t)((line - psy_ui_component_scrollleftpx(&self->component) /
+			pianogridstate_steppx(self->gridstate) - visilines + 16));
 		self->cursorchanging = TRUE;
-		psy_ui_component_setscrollleft (&self->component,
+		psy_ui_component_setscrollleft(&self->component,
 			psy_ui_value_make_px(
-				psy_max(0, psy_ui_component_scrollleftpx(&self->component) -
+				psy_max(0.0, psy_ui_component_scrollleftpx(&self->component) +
 					psy_ui_component_scrollstep_width_px(&self->component) * dlines)));
 		return FALSE;
 	}
 	return TRUE;
 }
+
 
 bool pianogrid_scrollup(Pianogrid* self, psy_audio_PatternCursor cursor)
 {
@@ -1663,38 +1646,36 @@ bool pianogrid_scrollup(Pianogrid* self, psy_audio_PatternCursor cursor)
 }
 
 bool pianogrid_scrolldown(Pianogrid* self, psy_audio_PatternCursor cursor)
-{
+{	
+	psy_ui_RealSize scrollsize;	
+	intptr_t topline;
 	intptr_t line;
 	intptr_t visilines;
-	psy_ui_IntSize size;
 	const psy_ui_TextMetric* tm;
 
 	assert(self);
 
-	tm = psy_ui_component_textmetric(&self->component);
-	pianogrid_updatekeystate(self);
-	size = psy_ui_component_intsize(&self->component);
-	visilines = (intptr_t)((size.height /
-		(psy_dsp_big_beat_t)self->keyboardstate->keyheightpx));
-	//if (self->midline) {
-		//visilines /= 2;
-	//} else {
-	//}
-	line = self->keyboardstate->keymax - self->gridstate->cursor.key - 1;
-	if (visilines < line - psy_ui_component_scrolltoppx(&self->component) /
-		self->keyboardstate->keyheightpx + 2) {
+	scrollsize = psy_ui_component_offsetsize_px(
+		psy_ui_component_parent(&self->component));
+	tm = psy_ui_component_textmetric(&self->component);	
+	visilines = (intptr_t)floor(scrollsize.height / (psy_dsp_big_beat_t)self->keyboardstate->keyheightpx);
+	topline = (intptr_t)ceil(psy_ui_component_scrolltoppx(&self->component) /
+		self->keyboardstate->keyheightpx);
+	line = self->keyboardstate->keymax - self->gridstate->cursor.key;
+	if (visilines < line - topline) {
 		intptr_t dlines;
 
-		dlines = (intptr_t)(line - psy_ui_component_scrolltoppx(&self->component) /
-			self->keyboardstate->keyheightpx - visilines + 1);
+		dlines = (intptr_t)(line - topline - visilines);
 		self->cursorchanging = TRUE;
 		psy_ui_component_setscrolltop(&self->component,
 			psy_ui_value_make_px(
-			psy_max(0, psy_ui_component_scrolltoppx(&self->component) +
-				psy_ui_component_scrollstep_height_px(&self->component) * dlines)));
+				psy_ui_component_scrolltoppx(&self->component) +
+				psy_ui_component_scrollstep_height_px(&self->component) *
+				dlines));
 		return FALSE;
 	}
 	return TRUE;
+
 }
 
 void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t position)
