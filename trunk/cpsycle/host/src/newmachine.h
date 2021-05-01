@@ -192,9 +192,11 @@ typedef struct PluginScanView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
+	psy_ui_Component left;
+	psy_ui_Component right;
+	psy_ui_Component client;
 	psy_ui_Label scan;
 	psy_ui_Label scanfile;
-	psy_ui_Label scantype;
 	psy_ui_Component abortbar;
 	psy_ui_Button abort;
 	// references
@@ -203,6 +205,8 @@ typedef struct PluginScanView {
 
 void pluginscanview_init(PluginScanView*, psy_ui_Component* parent,
 	Workspace*);
+
+void pluginscanview_selecttask(PluginScanView*, psy_audio_PluginScanTask*);
 
 struct NewMachine;
 

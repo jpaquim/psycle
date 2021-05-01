@@ -80,6 +80,15 @@ INLINE void psy_ui_style_setbackgroundid(psy_ui_Style* self,
 	self->backgroundid = id;
 }
 
+INLINE void psy_ui_style_animatebackground(psy_ui_Style* self,
+	uintptr_t interval, psy_ui_RealSize framesize, bool horizontal)
+{
+	self->backgroundanimation.enabled = TRUE;
+	self->backgroundanimation.interval = interval;
+	self->backgroundanimation.framesize = framesize;
+	self->backgroundanimation.horizontal = horizontal;
+}
+
 INLINE void psy_ui_style_setcolours(psy_ui_Style* self,
 	psy_ui_Colour colour, psy_ui_Colour background)
 {

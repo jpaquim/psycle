@@ -169,16 +169,18 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->headerpane, psy_ui_ALIGN_TOP);
 	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->gridstate, self->workspace);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->header.component,
+		psy_ui_ALIGN_FIXED_RESIZE);
 	// pattern default line
 	psy_ui_component_init(&self->griddefaultspane, &self->component, NULL);
 	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
 	trackergrid_init(&self->griddefaults, &self->griddefaultspane, &self->trackconfig,
 		NULL, NULL, TRACKERGRID_EDITMODE_LOCAL, workspace);
-	psy_ui_component_setwheelscroll(&self->griddefaults, 0);
+	psy_ui_component_setwheelscroll(trackergrid_base(&self->griddefaults), 0);
 	self->griddefaults.defaultgridstate.skin = &self->skin;
 	self->griddefaults.defaultlinestate.skin = &self->skin;
-	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->griddefaults.component,
+		psy_ui_ALIGN_FIXED_RESIZE);
 	self->griddefaults.columnresize = 1;
 	trackergrid_setpattern(&self->griddefaults,
 		&workspace_player(self->workspace)->patterndefaults);

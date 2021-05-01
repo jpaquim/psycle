@@ -47,6 +47,19 @@ psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections*,
 psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections*,
 	const char* sectionkey);
 
+
+typedef struct psy_audio_PluginScanTask {
+	psy_audio_MachineType type;
+	char wildcard[256];
+	char label[256];	
+	char key[256];
+	bool recursive;
+} psy_audio_PluginScanTask;
+
+void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask*,
+	psy_audio_MachineType type, const char* wildcard, const char* label, const char* key,
+	bool recursive);
+
 // psy_audio_PluginCategories
 typedef struct psy_audio_PluginCategories
 {
@@ -71,17 +84,20 @@ typedef struct psy_audio_PluginCatcher {
 	psy_Signal signal_changed;	
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_scanfile;
+	psy_Signal signal_taskstart;
 	bool saveafterscan;
 	bool hasplugincache;
 	psy_audio_PluginCategoryList categorydefaults;	
 	bool scanning;
 	bool abort;
+	psy_List* scantasks;
 } psy_audio_PluginCatcher;
 
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher*);
-void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
+
 void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher*);
+void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher*);
 void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_load(psy_audio_PluginCatcher*);
 int psy_audio_plugincatcher_save(psy_audio_PluginCatcher*);

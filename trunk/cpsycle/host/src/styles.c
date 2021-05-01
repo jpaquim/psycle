@@ -505,9 +505,7 @@ void initstyles(psy_ui_Defaults* defaults, bool dark)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundid(style, IDB_BGMAIN);
-	style->backgroundanimation.animate = TRUE;
-	style->backgroundanimation.framesize =
-		psy_ui_realsize_make(96, 192);
-	style->backgroundanimation.animatetime = 20;
+	psy_ui_style_animatebackground(style, 20,
+		psy_ui_realsize_make(96, 192), TRUE);
 	psy_ui_defaults_setstyle(defaults, STYLE_GREET, style);
 }

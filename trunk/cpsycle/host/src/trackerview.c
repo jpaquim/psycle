@@ -1640,10 +1640,18 @@ void trackergrid_clearmidline(TrackerGrid* self)
 		psy_ui_realrectangle_make(
 			psy_ui_realpoint_make(
 				psy_ui_component_scrollleftpx(&self->component),
-				self->linestate->visilines / 2 * self->linestate->lineheightpx +
+				((self->linestate->visilines) / 2 - 1) * self->linestate->lineheightpx +
 					psy_ui_component_scrolltoppx(&self->component)),
-			psy_ui_realsize_make(size.width, self->linestate->lineheightpx * 2)));
-	self->midline = TRUE;
+			psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));
+	psy_ui_component_update(&self->component);
+	self->midline = TRUE;	
+	psy_ui_component_invalidaterect(&self->component,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_component_scrollleftpx(&self->component),
+				(self->linestate->visilines / 2 - 2) * self->linestate->lineheightpx +
+				psy_ui_component_scrolltoppx(&self->component)),
+			psy_ui_realsize_make(size.width, self->linestate->lineheightpx * 4)));		
 }
 
 void trackergrid_centeroncursor(TrackerGrid* self)

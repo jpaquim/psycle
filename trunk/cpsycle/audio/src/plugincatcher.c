@@ -330,6 +330,17 @@ psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections* se
 	return NULL;
 }
 
+void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask* self,
+	psy_audio_MachineType type, const char* wildcard, const char* label,
+	const char* key, bool recursive)
+{
+	self->type = type;
+	psy_snprintf(self->wildcard, 255, "%s", wildcard);
+	psy_snprintf(self->label, 255, "%s", label);
+	psy_snprintf(self->key, 255, "%s", key);	
+	self->recursive = recursive;
+}
+
 // psy_audio_PluginCategories
 void psy_audio_plugincategories_init(psy_audio_PluginCategories* self,
 	psy_Property* plugins)
@@ -389,6 +400,7 @@ psy_TableIterator psy_audio_plugincategories_begin(
 
 
 // psy_audio_PluginCatcher
+static void plugincatcher_initscantasks(psy_audio_PluginCatcher*);
 static void plugincatcher_makeinternals(psy_audio_PluginCatcher*);
 static void plugincatcher_makesampler(psy_audio_PluginCatcher*);
 static void plugincatcher_makeduplicator(psy_audio_PluginCatcher*);
@@ -397,7 +409,8 @@ static int onenumdir(psy_audio_PluginCatcher*, const char* path, int flag);
 static int onpropertiesenum(psy_audio_PluginCatcher*, psy_Property*, int level);
 static int pathhasextension(const char* path);
 static void plugincatcher_scan_multipath(psy_audio_PluginCatcher*,
-	const char* multipath, const char* wildcard, int option);
+	const char* multipath, const char* wildcard, int option,
+	bool recursive);
 
 static const char* searchname;
 static int searchtype;
@@ -429,9 +442,12 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 	self->hasplugincache = FALSE;
 	self->scanning = FALSE;
 	self->abort = FALSE;
+	self->scantasks = NULL;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_scanprogress);
-	psy_signal_init(&self->signal_scanfile);	
+	psy_signal_init(&self->signal_scanfile);
+	psy_signal_init(&self->signal_taskstart);	
+	plugincatcher_initscantasks(self);
 }
 
 void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
@@ -446,7 +462,9 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_scanprogress);
 	psy_signal_dispose(&self->signal_scanfile);
+	psy_signal_dispose(&self->signal_taskstart);
 	psy_audio_plugincategorylist_dispose(&self->categorydefaults);
+	psy_list_free(self->scantasks);
 }
 
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
@@ -473,6 +491,45 @@ void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher* self)
 	self->hasplugincache = FALSE;
 }
 
+void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
+{
+	psy_audio_PluginScanTask* task;
+
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	// natives
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+	psy_audio_pluginscantask_init_all(task, psy_audio_PLUGIN,
+		"*"MODULEEXT, "Natives 32bit", "plugins32", TRUE);
+#else	
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_PLUGIN,
+		"*"MODULEEXT, "Natives 64bit", "plugins64", TRUE);
+#endif
+	psy_list_append(&self->scantasks, task);
+	// lua
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_LUA,
+		"*.lua", "Luas", "luascripts", FALSE);
+	psy_list_append(&self->scantasks, task);
+	// vsts
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
+		"*"MODULEEXT, "Vsts 32bit", "vsts32", TRUE);
+#else	
+	psy_list_append(&self->scantasks, task);
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
+		"*"MODULEEXT, "Vsts 64bit", "vsts64", TRUE);
+#endif
+	psy_list_append(&self->scantasks, task);
+	// ladspas
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+	psy_audio_pluginscantask_init_all(task, psy_audio_LADSPA,
+		"*"MODULEEXT, "Ladspas", "ladspas", TRUE);
+	psy_list_append(&self->scantasks, task);
+}
+
 void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 {			
 	makeplugininfo(self->plugins, "sampulse", "", psy_audio_XMSAMPLER,
@@ -495,7 +552,8 @@ void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 
 
 void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
-	const char* multipath, const char* wildcard, int option)
+	const char* multipath, const char* wildcard, int option,
+	bool recursive)
 {
 	char text[4096];
 	char seps[] = ";,";
@@ -503,9 +561,14 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 		
 	strcpy(text, multipath);
 	token = strtok(text, seps);
-	while (token != NULL) {
-		psy_dir_enumerate_recursive(self, token, wildcard, option,
-			(psy_fp_findfile)onenumdir);
+	while (token != NULL && !self->abort) {
+		if (recursive) {
+			psy_dir_enumerate_recursive(self, token, wildcard, option,
+				(psy_fp_findfile)onenumdir);
+		} else {
+			psy_dir_enumerate(self, token, wildcard, option,
+				(psy_fp_findfile)onenumdir);
+		}
 		token = strtok(0, seps );
 	}
 }
@@ -516,35 +579,22 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 	self->scanning = TRUE;
 	psy_audio_plugincatcher_clear(self);
 	if (self->directories) {
-		const char* path;
+		psy_List* p;
 
-#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
-		path = psy_property_at_str(self->directories, "plugins32", NULL);
-#else
-		path = psy_property_at_str(self->directories, "plugins64", NULL);
-#endif
+		for (p = self->scantasks; p != NULL; p = p->next) {
+			psy_audio_PluginScanTask* task;
+			const char* path;
 
-		if (path) {			
-			psy_dir_enumerate_recursive(self, path, "*"MODULEEXT, psy_audio_PLUGIN,
-				(psy_fp_findfile)onenumdir);
-		}
-		path = psy_property_at_str(self->directories, "luascripts", NULL);
-		if (path && !self->abort) {
-			psy_dir_enumerate(self, path, "*.lua", psy_audio_LUA,
-				(psy_fp_findfile)onenumdir);
-		}
-#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
-		path = psy_property_at_str(self->directories, "vsts32", NULL);
-#else
-		path = psy_property_at_str(self->directories, "vsts64", NULL);
-#endif
-		if (path && !self->abort) {
-			plugincatcher_scan_multipath(self, path, "*"MODULEEXT, psy_audio_VST);
-		}
-		path = psy_property_at_str(self->directories, "ladspas", NULL);
-		if (path && !self->abort) {
-			plugincatcher_scan_multipath(self, path, "*"MODULEEXT,
-				psy_audio_LADSPA);
+			task = (psy_audio_PluginScanTask*)p->entry;
+			psy_signal_emit(&self->signal_taskstart, self, 1, task);
+			path = psy_property_at_str(self->directories, task->key, NULL);
+			if (path) {				
+				plugincatcher_scan_multipath(self, path, task->wildcard,
+					task->type, task->recursive);				
+			}
+			if (self->abort) {
+				break;
+			}
 		}
 	}
 	if (self->saveafterscan) {

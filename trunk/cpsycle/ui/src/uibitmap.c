@@ -11,10 +11,10 @@
 
 void psy_ui_bitmapanimate_init(psy_ui_BitmapAnimate* self)
 {
-	self->animate = FALSE;
-	self->animatetime = 0;
+	self->enabled = FALSE;
+	self->interval = 0;
 	psy_ui_realsize_init(&self->framesize);
-	self->horizontalframes = FALSE;
+	self->horizontal = FALSE;
 }
 
 // prototypes
