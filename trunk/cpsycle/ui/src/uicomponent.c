@@ -246,9 +246,12 @@ static bool onclose(psy_ui_Component* self) { return TRUE; }
 
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
+	assert(ev);
+
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
 	if (self->draggable) {
 		psy_ui_app()->dragevent.target = self;
+		psy_ui_app()->dragevent.mouse = *ev;
 		psy_ui_app_startdrag(psy_ui_app());
 		self->vtable->ondragstart(self, &psy_ui_app()->dragevent);
 	}
@@ -256,8 +259,11 @@ static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
+	assert(ev);
+
 	if (psy_ui_app()->dragevent.active) {
 		psy_ui_app()->dragevent.preventdefault = FALSE;
+		psy_ui_app()->dragevent.mouse = *ev;
 		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
 		if (psy_ui_app()->dragevent.preventdefault) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
@@ -270,8 +276,11 @@ static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
+	assert(ev);
+
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
 	if (psy_ui_app()->dragevent.active) {
+		psy_ui_app()->dragevent.mouse = *ev;
 		self->vtable->ondrop(self, &psy_ui_app()->dragevent);
 		if (ev->preventdefault) {
 			psy_ui_mouseevent_stoppropagation(ev);

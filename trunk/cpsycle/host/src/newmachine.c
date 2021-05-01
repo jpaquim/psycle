@@ -632,6 +632,26 @@ void newmachinefilterbar_update(NewMachineFilterBar* self)
 // prototypes
 static void newmachinecategorybar_onclicked(NewMachineCategoryBar*,
 	psy_ui_Button* sender);
+static void newmachinecategorybar_ondragover(NewMachineCategoryBar*, psy_ui_DragEvent*);
+static void newmachinecategorybar_ondrop(NewMachineCategoryBar*, psy_ui_DragEvent*);
+// vtable
+static psy_ui_ComponentVtable newmachinecategorybar_vtable;
+static bool newmachinecategorybar_vtable_initialized = FALSE;
+
+static void newmachinecategorybar_vtable_init(NewMachineCategoryBar* self)
+{
+	if (!newmachinecategorybar_vtable_initialized) {
+		newmachinecategorybar_vtable = *(self->component.vtable);		
+		newmachinecategorybar_vtable.ondragover =
+			(psy_ui_fp_component_ondragover)
+			newmachinecategorybar_ondragover;
+		newmachinecategorybar_vtable.ondrop =
+			(psy_ui_fp_component_ondrop)
+			newmachinecategorybar_ondrop;		
+		newmachinecategorybar_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &newmachinecategorybar_vtable;
+}
 // implementation
 void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	psy_ui_Component* parent, NewMachineFilter* filter,
@@ -641,6 +661,7 @@ void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	assert(plugincatcher);
 
 	psy_ui_component_init(&self->component, parent, NULL);
+	newmachinecategorybar_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_CATEGORYBAR);
 	psy_ui_component_init_align(&self->client, &self->component,
@@ -660,7 +681,8 @@ void newmachinecategorybar_build(NewMachineCategoryBar* self)
 
 	psy_ui_component_clear(&self->client);	
 	button = psy_ui_button_allocinit(&self->client, &self->client);	
-	psy_ui_button_settext(button, "newmachine.anycategory");	
+	psy_ui_button_settext(button, "newmachine.anycategory");
+	button->stoppropagation = FALSE;
 	if (self->filter) {
 		psy_audio_PluginCategories categories;
 
@@ -685,6 +707,7 @@ void newmachinecategorybar_build(NewMachineCategoryBar* self)
 				button = psy_ui_button_allocinit(&self->client, &self->client);
 				psy_ui_button_preventtranslation(button);
 				psy_ui_button_settext(button, category);
+				button->stoppropagation = FALSE;
 				if (!newmachinefilter_useanycategory(self->filter) &&
 						(newmachinefilter_hascategory(self->filter, category))) {
 					psy_ui_button_highlight(button);					
@@ -704,7 +727,7 @@ void newmachinecategorybar_onclicked(NewMachineCategoryBar* self, psy_ui_Button*
 	if (self->filter) {		
 		psy_ui_Component* first;
 
-		if (strcmp(psy_ui_button_text(sender), "Any Category") == 0) {
+		if (strcmp(psy_ui_button_text(sender), "newmachine.anycategory") == 0) {
 			newmachinefilter_anycategory(self->filter);
 			psy_ui_component_removestylestate_children(&self->client,
 				psy_ui_STYLESTATE_SELECT);				
@@ -730,6 +753,84 @@ void newmachinecategorybar_onclicked(NewMachineCategoryBar* self, psy_ui_Button*
 			}
 		}
 	}
+}
+
+void newmachinecategorybar_ondragover(NewMachineCategoryBar* self, psy_ui_DragEvent* ev)
+{
+	psy_List* p;
+	psy_List* q;
+	psy_ui_Button* button;	
+
+	button = NULL;
+	for (p = q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
+		p != NULL; p = p->next) {
+		psy_ui_Component* component;
+		psy_ui_RealRectangle position;
+
+		component = (psy_ui_Component*)p->entry;
+		position = psy_ui_component_position(component);
+		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
+			ev->preventdefault = TRUE;
+			break;
+		}
+	}	
+}
+
+void newmachinecategorybar_ondrop(NewMachineCategoryBar* self, psy_ui_DragEvent* ev)
+{
+	psy_List* p;
+	psy_List* q;
+	psy_ui_Button* button;
+	bool changed;
+
+	button = NULL;
+	for (p = q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
+			p != NULL; p = p->next) {
+		psy_ui_Component* component;
+		psy_ui_RealRectangle position;
+
+		component = (psy_ui_Component*)p->entry;
+		position = psy_ui_component_position(component);
+		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
+			/* todo avoid downcast */
+			button = (psy_ui_Button*)component;
+			break;
+		}
+	}
+	if (button) {
+		psy_List* p;
+		const char* categoryname;
+		
+		if (strcmp(psy_ui_button_text(button), "newmachine.anycategory") == 0) {
+			categoryname = "";
+		} else {
+			categoryname = psy_ui_button_text(button);
+		}
+		changed = FALSE;
+		for (p = psy_property_begin(ev->dataTransfer); p != NULL; p = p->next) {
+			psy_Property* plugindrag;
+			const char* plugid;			
+			psy_Property* plugin;
+
+			plugindrag = (psy_Property*)p->entry;
+			plugid = psy_property_key(plugindrag);
+			plugin = psy_audio_plugincatcher_at(self->plugincatcher, plugid);
+			if (plugin) {
+				psy_Property* category;
+
+				category = psy_property_at(plugin, "category",
+					PSY_PROPERTY_TYPE_NONE);
+				if (category) {
+					psy_property_setitem_str(category, categoryname);
+				}
+				changed = TRUE;
+			}
+		}
+		if (changed) {
+			psy_audio_plugincatcher_save(self->plugincatcher);
+			psy_audio_plugincatcher_notifychange(self->plugincatcher);
+		}			
+	}	
 }
 
 // PluginScanView

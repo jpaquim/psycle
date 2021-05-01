@@ -65,6 +65,7 @@ INLINE void psy_ui_mouseevent_preventdefault(psy_ui_MouseEvent* self)
 struct psy_ui_Component;
 
 typedef struct psy_ui_DragEvent {
+	psy_ui_MouseEvent mouse;
 	struct psy_ui_Component* target;
 	bool active;
 	psy_Property* dataTransfer;
