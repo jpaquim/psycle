@@ -155,7 +155,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		workspace_player(self->workspace)));
 	self->linestate.skin = &self->skin;
 	trackergridstate_init(&self->gridstate, &self->trackconfig);
-	self->gridstate.skin = &self->skin;
+	self->gridstate.skin = &self->skin;	
 	psy_signal_connect(&self->gridstate.signal_cursorchanged, self,
 		patternview_ontrackercursorchanged);
 	// linenumbers
@@ -175,6 +175,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
 	trackergrid_init(&self->griddefaults, &self->griddefaultspane, &self->trackconfig,
 		NULL, NULL, TRACKERGRID_EDITMODE_LOCAL, workspace);
+	psy_ui_component_setwheelscroll(&self->griddefaults, 0);
 	self->griddefaults.defaultgridstate.skin = &self->skin;
 	self->griddefaults.defaultlinestate.skin = &self->skin;
 	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_FIXED_RESIZE);

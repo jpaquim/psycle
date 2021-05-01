@@ -1371,6 +1371,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
+	psy_ui_component_invalidate(&self->component);
 }
 
 psy_audio_PatternCursor pianogrid_makecursor(Pianogrid* self, double x, double y)
@@ -2255,7 +2256,7 @@ void pianoroll_navup(Pianoroll* self)
 		workspace_setpatterncursor(self->workspace,
 			self->gridstate.cursor);
 		pianogrid_invalidatecursor(&self->grid);
-	}
+	} 
 }
 
 void pianoroll_navdown(Pianoroll* self)

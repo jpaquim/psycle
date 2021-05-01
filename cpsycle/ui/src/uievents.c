@@ -62,6 +62,7 @@ void psy_ui_mouseevent_settarget(psy_ui_MouseEvent* self, struct psy_ui_Componen
 // psy_ui_DragEvent
 void psy_ui_dragevent_init(psy_ui_DragEvent* self)
 {
+	psy_ui_mouseevent_init(&self->mouse, 0, 0, 0, 0, 0, 0);
 	self->target = NULL;
 	self->active = FALSE;
 	self->preventdefault = TRUE;
