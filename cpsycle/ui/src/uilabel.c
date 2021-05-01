@@ -20,6 +20,7 @@ static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 // vtable
 static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
 static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
@@ -28,6 +29,7 @@ static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
 
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		super_vtable = *(self->component.vtable);
 		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
 			psy_ui_label_ondestroy;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)
@@ -328,6 +330,7 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 
 void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 {
+	super_vtable.ontimer(&self->component, timerid);
 	if (self->fadeoutcounter > 0) {
 		psy_ui_Colour colour;
 		float fadeoutstep;

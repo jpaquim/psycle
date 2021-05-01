@@ -112,6 +112,7 @@ typedef struct PluginsView {
 	bool multidrag;
 	uintptr_t dragindex;
 	NewMachineSelection selection;
+	bool readonly;
 	// References
 	NewMachineFilter* filter;
 	NewMachineSort* sort;	

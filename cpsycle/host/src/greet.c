@@ -41,10 +41,16 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
 	psy_ui_label_init(&self->headerlabel, &self->component, NULL);
+	psy_ui_component_setstyletype(psy_ui_label_base(&self->headerlabel),
+		STYLE_GREET_TOP);
 	psy_ui_label_settext(&self->headerlabel, "greetings.wantstothank");
-	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_settextalignment(&self->headerlabel, psy_ui_ALIGNMENT_CENTER_VERTICAL);
+	psy_ui_component_setspacing(psy_ui_label_base(&self->headerlabel),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
 	psy_ui_component_init(&self->header, &self->component, NULL);	
 	psy_ui_label_init_text(&self->thanks, &self->header, NULL, "greetings.thanks");
+	psy_ui_component_setmargin(psy_ui_label_base(&self->thanks),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_LEFT);
 	psy_ui_image_init(&self->favicon, &self->header);
 	psy_ui_component_setalign(&self->favicon.component, psy_ui_ALIGN_LEFT);
@@ -194,14 +200,15 @@ void greet_onalign(Greet* self)
 	psy_ui_component_setposition(psy_ui_listbox_base(&self->greetz),
 		psy_ui_rectangle_make_px(&lv_position));			
 	hlbl_position = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(marginwidth, lv_position.top - tm->tmHeight * 7.0),
-		psy_ui_realsize_make(lvsize.width, tm->tmHeight * 4.0));
+		psy_ui_realpoint_make(marginwidth, lv_position.top -
+			psy_max(128.0, tm->tmHeight * 10.0)),
+		psy_ui_realsize_make(lvsize.width, psy_max(128.0, tm->tmHeight * 4.0)));
 	psy_ui_component_setposition(&self->headerlabel.component,
 		psy_ui_rectangle_make_px(&hlbl_position));
 	h_position = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(marginwidth,
-			lv_position.top - tm->tmHeight * 2.0),
-		psy_ui_realsize_make(lvsize.width, tm->tmHeight * 1.0));
+			lv_position.top - tm->tmHeight * 2.5),
+		psy_ui_realsize_make(lvsize.width, tm->tmHeight * 2.0));
 	psy_ui_component_setposition(&self->header,
 		psy_ui_rectangle_make_px(&h_position));
 }
