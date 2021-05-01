@@ -303,7 +303,7 @@ static void onmouseleave(psy_ui_Component* self)
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid)
-{
+{	
 	if (self->style.currstyle->backgroundid &&
 		self->style.currstyle->backgroundanimation.enabled) {
 		self->bgframetimer++;
@@ -1862,10 +1862,10 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 }
 
 void psy_ui_component_checkbackgroundanimation(psy_ui_Component* self)
-{
+{	
 	if (self->style.currstyle->backgroundanimation.enabled) {
 		psy_ui_component_starttimer(self, 65535, 50);
-	} else {
+	} else {		
 		psy_ui_component_stoptimer(self, 65535);
 	}
 }

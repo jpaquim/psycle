@@ -1399,6 +1399,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->categorybar.component, psy_ui_ALIGN_TOP);	
 	// Plugins View
 	pluginsview_init(&self->pluginsview, &self->all);
+	self->pluginsview.readonly = TRUE;
 	pluginsview_setfilter(&self->pluginsview, &self->filter);
 	pluginsview_setsort(&self->pluginsview, &self->sort);
 	psy_ui_component_setwheelscroll(&self->pluginsview.component, 1);

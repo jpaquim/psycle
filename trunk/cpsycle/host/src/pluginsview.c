@@ -481,6 +481,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 	self->sort = NULL;
 	self->generatorsenabled = TRUE;
 	self->effectsenabled = TRUE;
+	self->readonly = FALSE;
 	newmachineselection_init(&self->selection);
 	pluginsview_computetextsizes(self, 1024.0);
 }
@@ -745,7 +746,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 		return;
 	}
 	selected = pluginsview_selectedplugin(self);
-	if (selected) {
+	if (self->selection.items || selected) {
 		psy_Property* plugin;
 		uintptr_t col;
 		uintptr_t row;
@@ -762,19 +763,23 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				}
 				break;
 			case psy_ui_KEY_DELETE:
-				if (selected) {
-					// psy_Property* p;
-					// p = psy_property_find(self->workspace->plugincatcher.plugins,
-					//		psy_property_key(self->selectedplugin),
-					// 		PSY_PROPERTY_TYPE_NONE);
-					// if (!self->onlyfavorites && p) {
-						// psy_property_remove(self->workspace->plugincatcher.plugins, p);
-					// } else {						
-						//psy_property_set_int(p, "favorite", 0);
-					// }
-					// psy_audio_plugincatcher_save(&self->workspace->plugincatcher);
-					// psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
-					//	&self->workspace->plugincatcher, 0);
+				if (self->plugins && self->selection.items && !self->readonly) {	
+					psy_List* p;
+
+					for (p = self->selection.items; p != NULL; p = p->next) {
+						uintptr_t index;
+						psy_Property* plugin;
+
+						index = (uintptr_t)p->entry;
+						plugin = psy_property_at_index(self->plugins, index);
+						if (plugin) {
+							psy_property_remove(self->plugins, plugin);
+						}						
+					}					
+					newmachineselection_clear(&self->selection);
+					psy_ui_component_align(psy_ui_component_parent(
+						psy_ui_component_parent(&self->component)));
+					psy_ui_component_invalidate(&self->component);
 					psy_ui_keyevent_stoppropagation(ev);
 				}
 				break;

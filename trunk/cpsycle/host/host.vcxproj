@@ -586,6 +586,7 @@
     <Image Include="src\resources\arrow-forward-dark.bmp" />
     <Image Include="src\resources\bgmain-1.bmp" />
     <Image Include="src\resources\bgmain.bmp" />
+    <Image Include="src\resources\bgtop.bmp" />
     <Image Include="src\resources\conf-general.bmp" />
     <Image Include="src\resources\earth-dark.bmp" />
     <Image Include="src\resources\expand-dark.bmp" />

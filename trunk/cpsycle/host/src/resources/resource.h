@@ -42,14 +42,15 @@
 #define IDB_SEARCH_DARK                 156
 #define IDB_EXPAND_DARK                 157
 #define IDB_BGMAIN_1                    158
-#define IDB_BITMAP1                     159
 #define IDB_BGMAIN                      159
+#define IDB_BITMAP1                     160
+#define IDB_BGTOP                       160
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        160
+#define _APS_NEXT_RESOURCE_VALUE        161
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
