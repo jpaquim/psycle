@@ -491,6 +491,15 @@ INLINE psy_ui_Size psy_ui_max_size(psy_ui_Size lhs, psy_ui_Size rhs,
 	return rv;
 }
 
+INLINE bool psy_ui_size_has_percent(const psy_ui_Size* size)
+{
+	return (size->width.unit == psy_ui_UNIT_PW ||
+		size->width.unit == psy_ui_UNIT_PH ||
+		size->height.unit == psy_ui_UNIT_PH ||
+		size->height.unit == psy_ui_UNIT_PW);
+}
+
+// psy_ui_Rectangle
 typedef struct psy_ui_Rectangle {
 	psy_ui_Point topleft;
 	psy_ui_Size size;
@@ -629,7 +638,6 @@ INLINE bool psy_ui_realmargin_iszero(const psy_ui_RealMargin* self)
 		self->right == 0.0 &&
 		self->bottom == 0.0);
 }
-
 
 #ifdef __cplusplus
 }

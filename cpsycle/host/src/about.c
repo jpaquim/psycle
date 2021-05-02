@@ -22,7 +22,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Josep Mª Antolín. [JAZ]/JosepMa\tDeveloper since release 1.5" "\r\n"
 		"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
 		"Stefan Nattkemper\t\t\tDeveloper of the LUA host in release 1.12" "\r\n"
-		"James Redfern [alk]\t\tDeveloper and plugin coder" "\r\n"
+		"James Redfern [alk]\t\t\tDeveloper and plugin coder" "\r\n"
 		"Magnus Jonsson [zealmange]\t\tDeveloper during 1.7.x and 1.9alpha" "\r\n"
 		"Jeremy Evers [pooplog]\t\tDeveloper in releases 1.7.x" "\r\n"
 		"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
@@ -89,12 +89,12 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_signal_connect(&psy_ui_app()->translator.signal_languagechanged,
 		self, licence_onlanguagechanged);
-	psy_ui_editor_init(&self->licenceinfo, &self->component);	
-	licence_setlanguage(self);
-	psy_ui_component_resize(&self->licenceinfo.component,
-		psy_ui_size_make_px(500.0, 300.0));	
+	psy_ui_editor_init(&self->licenceinfo, &self->component);
+	psy_ui_component_setalign(psy_ui_editor_base(&self->licenceinfo),
+		psy_ui_ALIGN_CLIENT);
+	licence_setlanguage(self);	
 	psy_ui_editor_preventedit(&self->licenceinfo);
-	psy_ui_editor_enablewrap(&self->licenceinfo);
+	psy_ui_editor_enablewrap(&self->licenceinfo);	
 }
 
 void licence_set_en(Licence* self)
@@ -216,6 +216,7 @@ void licence_setlanguage(Licence* self)
 	} else {
 		licence_set_en(self);
 	}
+	psy_ui_editor_gotoline(&self->licenceinfo, 0);
 }
 
 // About
@@ -255,8 +256,9 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
+	self->notebook.component.debugflag = 200;
 	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
-		psy_ui_size_make_em(72.0, 15.0));
+		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_make_ph(0.5)));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CENTER);
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));

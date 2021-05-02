@@ -122,6 +122,9 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 			} else if (component->align == psy_ui_ALIGN_CENTER) {
 				psy_ui_RealPoint center;				
 				
+				if (component->debugflag == 200) {
+					self = self;
+				}
 				center.x = cp_topleft.x + floor((cp_bottomright.x - cp_topleft.x -
 						psy_ui_margin_width_px(&c_margin, c_tm, &size) -
 						psy_ui_value_px(&componentsize.width, tm, &size)) / 2.0) +
@@ -312,18 +315,22 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 				c_margin = psy_ui_component_margin(component);				
 				if (component->align == psy_ui_ALIGN_CLIENT) {
 					const psy_ui_TextMetric* c_tm;
+					psy_ui_Size parentsize;
 
+					parentsize = psy_ui_size_make_px(
+						cp_bottomright.x - cp_topleft.x,
+						cp_bottomright.y - cp_topleft.y);
 					c_tm = psy_ui_component_textmetric(self->component);
-					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
+					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, &parentsize);
 					psy_ui_component_setposition(component,
 						psy_ui_rectangle_make(
 							psy_ui_point_make_px(
-								cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm, NULL),
-								cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm, NULL)),
+								cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm, &parentsize),
+								cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm, &parentsize)),
 							psy_ui_size_make_px(
-								cp_bottomright.x - cp_topleft.x - psy_ui_margin_width_px(&c_margin, c_tm, NULL),
-								(int)height - psy_ui_margin_height_px(&c_margin, c_tm, NULL))));
-					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, NULL);
+								cp_bottomright.x - cp_topleft.x - psy_ui_margin_width_px(&c_margin, c_tm, &parentsize),
+								(int)height - psy_ui_margin_height_px(&c_margin, c_tm, &parentsize))));
+					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, &parentsize);
 					cp_topleft.y += (int)height;
 					++curr;
 				} else if (component->align == psy_ui_ALIGN_VCLIENT) {
