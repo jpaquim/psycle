@@ -1596,7 +1596,7 @@ void seqeditor_updatescrollstep(SeqEditor* self)
 		psy_ui_add_values(
 			self->tracks.state->lineheight,
 			self->tracks.state->linemargin,
-			tm));
+			tm, NULL));
 	psy_ui_component_setscrollstep_height(&self->tracks.component,
 		psy_ui_value_make_px(floor(
 			psy_ui_component_scrollstep_height_px(&self->tracks.component))));

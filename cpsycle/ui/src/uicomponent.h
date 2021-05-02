@@ -573,36 +573,12 @@ INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const
 // returns the content's size(excludes padding and border)
 psy_ui_Size psy_ui_component_size(const psy_ui_Component*);
 
-INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
-{
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
-}
-
 // returns the element’s size that include padding but without the border
 psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component*);
-
-INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* self)
-{
-	psy_ui_Size size;
-
-	size = psy_ui_component_clientsize(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
-}
 
 // returns the element’s entire size that includes padding but
 // not border, not margin and not scrollbars
 psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component*);
-
-INLINE psy_ui_RealSize psy_ui_component_scrollsize_px(const psy_ui_Component* self)
-{
-	psy_ui_Size size;
-
-	size = psy_ui_component_scrollsize(self);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
-}
 
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component*);
@@ -777,15 +753,15 @@ INLINE psy_ui_Value psy_ui_component_scrollstep_width(const psy_ui_Component* se
 }
 
 INLINE double psy_ui_component_scrollstep_width_px(const psy_ui_Component* self)
-{
+{	
 	return psy_ui_value_px(&self->scroll->step.width,
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), NULL);
 }
 
 INLINE double psy_ui_component_scrollstep_height_px(const psy_ui_Component* self)
-{
+{	
 	return psy_ui_value_px(&self->scroll->step.height,
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), NULL);
 }
 
 INLINE void psy_ui_component_setscrollstep_height(psy_ui_Component* self,
@@ -824,20 +800,69 @@ void psy_ui_component_focus_prev(psy_ui_Component*);
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {	
 	return psy_ui_intsize_init_size(psy_ui_component_scrollsize(self),
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), NULL);
+}
+
+INLINE psy_ui_RealSize psy_ui_component_scrollsize_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+	psy_ui_Size parentsize;
+
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
+	size = psy_ui_component_scrollsize(self);	
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+}
+
+INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+	psy_ui_Size parentsize;
+
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
+	size = psy_ui_component_clientsize(self);
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
 
 INLINE psy_ui_RealSize psy_ui_component_offsetsize_px(const psy_ui_Component* self)
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
+	psy_ui_Size parentsize;
 
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
 	tm = psy_ui_component_textmetric(self);
 	size = psy_ui_component_offsetsize(self);
 	return psy_ui_realsize_make(
-		psy_ui_value_px(&size.width, tm),
-		psy_ui_value_px(&size.height, tm));		
+		psy_ui_value_px(&size.width, tm, &parentsize),
+		psy_ui_value_px(&size.height, tm, &parentsize));
 }
+
+INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
+{
+	psy_ui_Size size;
+	psy_ui_Size parentsize;
+
+	size = psy_ui_component_size(self);
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
+}
+
 
 int psy_ui_component_level(const psy_ui_Component*);
 void psy_ui_component_setdefaultalign(psy_ui_Component*,
@@ -864,10 +889,16 @@ INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self
 {
 	psy_ui_RealMargin rv;
 	psy_ui_Margin margin;
+	psy_ui_Size parentsize;
 
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
 	margin = psy_ui_component_margin(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
 }
 
@@ -875,10 +906,16 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 {
 	psy_ui_RealMargin rv;
 	psy_ui_Margin margin;
+	psy_ui_Size parentsize;
 
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
 	margin = psy_ui_component_spacing(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
 }
 
@@ -886,10 +923,16 @@ INLINE psy_ui_RealMargin psy_ui_component_bordermargin_px(const psy_ui_Component
 {
 	psy_ui_RealMargin rv;
 	psy_ui_Margin border;
+	psy_ui_Size parentsize;
 
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self);
+	}
 	border = psy_ui_component_bordermargin(self);
 	psy_ui_realmargin_init_margin(&rv, &border,
-		psy_ui_component_textmetric(self));
+		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
 }
 

@@ -139,9 +139,9 @@ void machineuicommon_move(MachineUiCommon* self, psy_ui_Point topleft)
 		psy_ui_RealPoint topleftpx;
 
 		topleftpx.x = psy_ui_value_px(&topleft.x,
-			psy_ui_component_textmetric(self->view));
+			psy_ui_component_textmetric(self->view), NULL);
 		topleftpx.y = psy_ui_value_px(&topleft.y,
-			psy_ui_component_textmetric(self->view));
+			psy_ui_component_textmetric(self->view), NULL);
 		psy_audio_machine_setposition(self->machine,
 			topleftpx.x, topleftpx.y);
 	}	

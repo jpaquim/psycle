@@ -253,7 +253,7 @@ void trackscopes_onalign(TrackScopes* self)
 	} else {
 		self->maxcolumns = 16;
 	}
-	self->trackwidth = psy_ui_value_px(&size.width, tm) / self->maxcolumns;
+	self->trackwidth = psy_ui_value_px(&size.width, tm, NULL) / self->maxcolumns;
 }
 
 void trackscopes_onpreferredsize(TrackScopes* self, psy_ui_Size* limit,
@@ -288,7 +288,7 @@ void trackscopes_onmousedown(TrackScopes* self, psy_ui_MouseEvent* ev)
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
 		size = psy_ui_component_scrollsize(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		trackwidth = psy_ui_value_px(&size.width, tm) / columns;		
+		trackwidth = psy_ui_value_px(&size.width, tm, NULL) / columns;
 		track = (uintptr_t)((ev->pt.x / trackwidth) + floor(ev->pt.y / self->trackheight) * columns);
 		if (ev->button == 1) {
 			if (!psy_audio_trackstate_istrackmuted(

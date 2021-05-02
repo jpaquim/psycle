@@ -273,7 +273,7 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 	double lineheightpx;	
 	
 	lineheightpx = psy_max(1.0, floor(psy_ui_value_px(&self->state->lineheight,
-		psy_ui_component_textmetric(&self->component))));	
+		psy_ui_component_textmetric(&self->component), NULL)));
 	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top / lineheightpx)));
 	endrow = (uintptr_t)(floor(g->clip.bottom / lineheightpx + 0.5));
 	size = psy_ui_component_size_px(&self->component);
@@ -347,7 +347,7 @@ void sequencelisttrack_drawprogressbar(SequenceListTrack* self,
 		psy_ui_realsize_make(
 			psy_audio_player_playlist_rowprogress(self->state->cmds->player) * size.width,
 			psy_ui_value_px(&self->state->lineheight,
-				psy_ui_component_textmetric(&self->component))));
+				psy_ui_component_textmetric(&self->component), NULL)));
 	psy_ui_drawsolidrectangle(g, r, psy_ui_style(STYLE_SEQ_PROGRESS)->backgroundcolour);
 }
 
@@ -360,7 +360,7 @@ void sequencelisttrack_onpreferredsize(SequenceListTrack* self,
 
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->height = psy_ui_value_make_px(
-			floor(psy_ui_value_px(&self->state->lineheight, tm) *
+			floor(psy_ui_value_px(&self->state->lineheight, tm, NULL) *
 			(double)psy_list_size(self->track->entries)));		
 	} else {
 		rv->height = psy_ui_value_zero();		
@@ -374,7 +374,7 @@ void sequencelisttrack_onmousedown(SequenceListTrack* self,
 		if (self->track->entries) {
 			self->state->cmd_orderindex.order = psy_min((uintptr_t)((ev->pt.y) /
 				psy_ui_value_px(&self->state->lineheight,
-					psy_ui_component_textmetric(&self->component))),
+					psy_ui_component_textmetric(&self->component), NULL)),
 				psy_list_size(self->track->entries) - 1);
 			self->state->cmd_orderindex.track = self->trackindex;
 			workspace_setsequenceeditposition(self->state->cmds->workspace,
@@ -395,7 +395,7 @@ void sequencelisttrack_onmousedoubleclick(SequenceListTrack* self,
 			psy_audio_sequence_width(self->state->cmds->sequence)) {		
 		self->state->cmd_orderindex.order = (uintptr_t)(ev->pt.y /
 			psy_ui_value_px(&self->state->lineheight,
-				psy_ui_component_textmetric(&self->component)));		
+				psy_ui_component_textmetric(&self->component), NULL));
 		workspace_setsequenceeditposition(self->state->cmds->workspace,
 			self->state->cmd_orderindex);
 		sequencecmds_changeplayposition(self->state->cmds);		
@@ -516,7 +516,7 @@ void sequencelistview_onpreferredsize(SequenceListView* self,
 {
 	sequencelistview_super_vtable.onpreferredsize(&self->component, limit, rv);	
 	psy_ui_value_add(&rv->width, &self->state->trackwidth,
-		psy_ui_component_textmetric(&self->component));
+		psy_ui_component_textmetric(&self->component), NULL);
 }
 
 void sequencelistview_showpatternnames(SequenceListView* self)
@@ -589,7 +589,7 @@ psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView* self,
 	
 	size = psy_ui_component_size_px(&self->component);
 	lineheightpx = psy_ui_value_px(&self->state->lineheight,
-		psy_ui_component_textmetric(&self->component));
+		psy_ui_component_textmetric(&self->component), NULL);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, lineheightpx * row),		
 		psy_ui_realsize_make(size.width, lineheightpx));

@@ -265,7 +265,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	size = psy_ui_component_scrollsize_px(pianokeyboard_base(self));
 	tm = psy_ui_component_textmetric(pianokeyboard_base(self));
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(self->keyboardstate, tm);
-	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm);
+	self->keyboardstate->keyheightpx = psy_ui_value_px(&self->keyboardstate->keyheight, tm, NULL);
 	psy_ui_setcolour(g, patternviewskin_keyseparatorcolour(self->keyboardstate->skin));
 	if (self->keyboardstate->drawpianokeys) {
 		psy_ui_settextcolour(g, patternviewskin_keyseparatorcolour(self->keyboardstate->skin));
@@ -454,7 +454,7 @@ void pianogriddraw_updatekeystate(PianoGridDraw* self)
 	assert(self);
 
 	self->keyboardstate->keyheightpx = psy_ui_value_px(
-		&self->keyboardstate->keyheight, self->tm);
+		&self->keyboardstate->keyheight, self->tm, NULL);
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(
 		self->keyboardstate, self->tm);
 }
@@ -689,7 +689,7 @@ void pianogrid_updatekeystate(Pianogrid* self)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	self->keyboardstate->keyheightpx = psy_ui_value_px(
-		&self->keyboardstate->keyheight, tm);
+		&self->keyboardstate->keyheight, tm, NULL);
 	self->keyboardstate->keyboardheightpx = keyboardstate_height(
 		self->keyboardstate, tm);
 }

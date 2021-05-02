@@ -59,6 +59,7 @@ void psy_ui_lclaligner_init(psy_ui_LCLAligner* self, psy_ui_Component* component
 void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 {	
 	psy_ui_Size size;
+	psy_ui_Size parentsize;
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealPoint cp_topleft;
 	psy_ui_RealPoint cp_topleft_wrapstart;
@@ -68,12 +69,20 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 	psy_List* q;
 	psy_List* wrap = 0;	
 	
+	assert(self->component);
+
 	size = psy_ui_component_scrollsize(self->component);
+	if (psy_ui_component_parent(self->component)) {
+		parentsize = psy_ui_component_scrollsize(
+			psy_ui_component_parent(self->component));
+	} else {
+		parentsize = size;
+	}
 	tm = psy_ui_component_textmetric(self->component);
 	psy_ui_realpoint_init(&cp_topleft);
 	psy_ui_realpoint_init_all(&cp_bottomright,
-		psy_ui_value_px(&size.width, tm),
-		psy_ui_value_px(&size.height, tm));
+		psy_ui_value_px(&size.width, tm, &parentsize),
+		psy_ui_value_px(&size.height, tm, &parentsize));
 	psy_ui_lclaligner_adjustborder(self, &cp_topleft, &cp_bottomright);
 	psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
 	cp_topleft_wrapstart = cp_topleft;	
@@ -114,60 +123,60 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				psy_ui_RealPoint center;				
 				
 				center.x = cp_topleft.x + floor((cp_bottomright.x - cp_topleft.x -
-						psy_ui_margin_width_px(&c_margin, c_tm) -
-						psy_ui_value_px(&componentsize.width, tm)) / 2.0) +
-						psy_ui_value_px(&c_margin.left, c_tm);
+						psy_ui_margin_width_px(&c_margin, c_tm, &size) -
+						psy_ui_value_px(&componentsize.width, tm, &size)) / 2.0) +
+						psy_ui_value_px(&c_margin.left, c_tm, &size);
 				center.y = cp_topleft.y + floor((cp_bottomright.y - cp_topleft.y -
-					psy_ui_margin_height_px(&c_margin, c_tm) -
-					psy_ui_value_px(&componentsize.height, tm)) / 2.0) +
-					psy_ui_value_px(&c_margin.top, c_tm);
+					psy_ui_margin_height_px(&c_margin, c_tm, &size) -
+					psy_ui_value_px(&componentsize.height, tm, &size)) / 2.0) +
+					psy_ui_value_px(&c_margin.top, c_tm, &size);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 						psy_ui_point_make_px(center.x, center.y),
 						componentsize));
 			} else if (component->align == psy_ui_ALIGN_TOP) {
-				cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm);
+				cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, &size);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 						psy_ui_point_make(
 							psy_ui_value_make_px(cp_topleft.x + psy_ui_value_px(
-								&c_margin.left, c_tm)),
+								&c_margin.left, c_tm, &size)),
 							psy_ui_value_make_px(cp_topleft.y)),
 					psy_ui_size_make(
 						psy_ui_value_make_px(cp_bottomright.x - cp_topleft.x -
-							psy_ui_margin_width_px(&c_margin, c_tm)),
+							psy_ui_margin_width_px(&c_margin, c_tm, &size)),
 						componentsize.height)));
-				cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm);
-				cp_topleft.y += psy_ui_value_px(&componentsize.height, c_tm);				
+				cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, &size);
+				cp_topleft.y += psy_ui_value_px(&componentsize.height, c_tm, &size);
 			} else if (component->align == psy_ui_ALIGN_BOTTOM) {				
-				cp_bottomright.y -= psy_ui_value_px(&c_margin.bottom, c_tm);
+				cp_bottomright.y -= psy_ui_value_px(&c_margin.bottom, c_tm, &size);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 					psy_ui_point_make_px(
-						cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm),
-						cp_bottomright.y - psy_ui_value_px(&componentsize.height, c_tm)),
+						cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm, &size),
+						cp_bottomright.y - psy_ui_value_px(&componentsize.height, c_tm, &size)),
 					psy_ui_size_make(
 						psy_ui_value_make_px(cp_bottomright.x - cp_topleft.x -
-							psy_ui_margin_width_px(&c_margin, c_tm)),
+							psy_ui_margin_width_px(&c_margin, c_tm, &size)),
 						componentsize.height)));
-				cp_bottomright.y -= psy_ui_value_px(&c_margin.top, c_tm);
-				cp_bottomright.y -= psy_ui_value_px(&componentsize.height, c_tm);				
+				cp_bottomright.y -= psy_ui_value_px(&c_margin.top, c_tm, &size);
+				cp_bottomright.y -= psy_ui_value_px(&componentsize.height, c_tm, &size);
 			} else if (component->align == psy_ui_ALIGN_RIGHT) {
 				double requiredcomponentwidth;
 
 				requiredcomponentwidth =
-					psy_ui_value_px(&componentsize.width, c_tm) +
-					psy_ui_margin_width_px(&c_margin, c_tm);
+					psy_ui_value_px(&componentsize.width, c_tm, &size) +
+					psy_ui_margin_width_px(&c_margin, c_tm, &size);
 				cp_bottomright.x -= requiredcomponentwidth;
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 					psy_ui_point_make_px(
-							cp_bottomright.x + psy_ui_value_px(&c_margin.left, c_tm),
-							cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm)),
+							cp_bottomright.x + psy_ui_value_px(&c_margin.left, c_tm, &size),
+							cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm, &size)),
 					psy_ui_size_make(
 						componentsize.width,
 						psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
-							psy_ui_margin_height_px(&c_margin, c_tm)))));
+							psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
 			} else if (component->align == psy_ui_ALIGN_LEFT) {								
 				if ((self->component->containeralign->alignexpandmode & psy_ui_HORIZONTALEXPAND)
 						== psy_ui_HORIZONTALEXPAND) {
@@ -175,10 +184,10 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 					double requiredcomponentwidth;
 										
 					requiredcomponentwidth =
-						psy_ui_value_px(&componentsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, tm);
+						psy_ui_value_px(&componentsize.width, c_tm, &size) +
+						psy_ui_margin_width_px(&c_margin, tm, &size);
 					if (cp_topleft.x + requiredcomponentwidth >
-							psy_ui_value_px(&size.width, c_tm)) {
+							psy_ui_value_px(&size.width, c_tm, &size)) {
 						cp_topleft.x = cp_topleft_wrapstart.x;
 						psy_ui_lclaligner_resizewrapline(self, wrap, cp_topleft.y,
 							cpymax);
@@ -193,23 +202,23 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 					}		
 					psy_list_append(&wrap, component);					
 				}
-				cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm);
+				cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm, &size);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 						psy_ui_point_make_px(cp_topleft.x,
-							cp_topleft.y +	psy_ui_value_px(&c_margin.top, c_tm)),
+							cp_topleft.y +	psy_ui_value_px(&c_margin.top, c_tm, &size)),
 						psy_ui_size_make(
 							componentsize.width,
 							psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
-								psy_ui_margin_height_px(&c_margin, c_tm)))));
-				cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm);
-				cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm);
+								psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
+				cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm, &size);
+				cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm, &size);
 				if (cpymax < cp_topleft.y +
-						psy_ui_value_px(&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm)) {
+						psy_ui_value_px(&componentsize.height, c_tm, &size) +
+						psy_ui_margin_height_px(&c_margin, c_tm, &size)) {
 					cpymax = cp_topleft.y + psy_ui_value_px(
-						&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm);
+						&componentsize.height, c_tm, &size) +
+						psy_ui_margin_height_px(&c_margin, c_tm, &size);
 				}
 			} 
 		}
@@ -235,7 +244,7 @@ void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner* self, psy_List* wrap, d
 				psy_ui_component_scrollsize(c).width,
 				psy_ui_value_make_px(cpymax - cpy -
 					psy_ui_margin_height_px(&c_margin,
-						psy_ui_component_textmetric(c)))));
+						psy_ui_component_textmetric(c), NULL))));
 	}
 }
 
@@ -251,13 +260,13 @@ void psy_ui_lclaligner_adjustminmaxsize(psy_ui_LCLAligner* self,
 	if (!psy_ui_size_iszero(&maxsize)) {
 		if (!psy_ui_value_iszero(&maxsize.width)) {
 			if (psy_ui_value_comp(&maxsize.width,
-					&componentsize->width, tm) < 0) {				
+					&componentsize->width, tm, NULL) < 0) {				
 				componentsize->width = maxsize.width;
 			}
 		}	
 		if (!psy_ui_value_iszero(&maxsize.height)) {
 			if (psy_ui_value_comp(&maxsize.height,
-					&componentsize->height, tm) < 0) {
+					&componentsize->height, tm, NULL) < 0) {
 				componentsize->height = maxsize.height;
 			}
 		}
@@ -265,13 +274,13 @@ void psy_ui_lclaligner_adjustminmaxsize(psy_ui_LCLAligner* self,
 	if (!psy_ui_size_iszero(&minsize)) {
 		if (!psy_ui_value_iszero(&minsize.width)) {
 			if (psy_ui_value_comp(&minsize.width,
-					&componentsize->width, tm) > 0) {
+					&componentsize->width, tm, NULL) > 0) {
 				componentsize->width = minsize.width;
 			}
 		}
 		if (!psy_ui_value_iszero(&minsize.height)) {
 			if (psy_ui_value_comp(&minsize.height,
-					&componentsize->height, tm) > 0) {
+					&componentsize->height, tm, NULL) > 0) {
 				componentsize->height = minsize.height;
 			}
 		}
@@ -305,16 +314,16 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 					const psy_ui_TextMetric* c_tm;
 
 					c_tm = psy_ui_component_textmetric(self->component);
-					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm);
+					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
 					psy_ui_component_setposition(component,
 						psy_ui_rectangle_make(
 							psy_ui_point_make_px(
-								cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm),
-								cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm)),
+								cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm, NULL),
+								cp_topleft.y + psy_ui_value_px(&c_margin.top, c_tm, NULL)),
 							psy_ui_size_make_px(
-								cp_bottomright.x - cp_topleft.x - psy_ui_margin_width_px(&c_margin, c_tm),
-								(int)height - psy_ui_margin_height_px(&c_margin, c_tm))));
-					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm);
+								cp_bottomright.x - cp_topleft.x - psy_ui_margin_width_px(&c_margin, c_tm, NULL),
+								(int)height - psy_ui_margin_height_px(&c_margin, c_tm, NULL))));
+					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, NULL);
 					cp_topleft.y += (int)height;
 					++curr;
 				} else if (component->align == psy_ui_ALIGN_VCLIENT) {
@@ -328,17 +337,17 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
-					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm);
+					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
 					psy_ui_component_setposition(component,
 						psy_ui_rectangle_make(
 							psy_ui_point_make_px(
-								position.left + psy_ui_value_px(&c_margin.left, c_tm),
+								position.left + psy_ui_value_px(&c_margin.left, c_tm, NULL),
 								cp_topleft.y),
 							psy_ui_size_make_px(
-								(int)(psy_ui_value_px(&componentsize.width, c_tm)) -
-									psy_ui_margin_width_px(&c_margin, c_tm),
+								(int)(psy_ui_value_px(&componentsize.width, c_tm, NULL)) -
+									psy_ui_margin_width_px(&c_margin, c_tm, NULL),
 								(int)height)));
-					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm);
+					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, NULL);
 					cp_topleft.y += (int)height;
 					++curr;
 				} else if (component->align == psy_ui_ALIGN_HCLIENT) {
@@ -352,20 +361,20 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 					c_tm = psy_ui_component_textmetric(self->component);
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);
-					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm);
+					cp_topleft.y += psy_ui_value_px(&c_margin.top, c_tm, NULL);
 					psy_ui_component_setposition(component,
 						psy_ui_rectangle_make(
 							psy_ui_point_make_px(
 								cp_topleft.x,
 								position.top + psy_ui_value_px(
-									&c_margin.top, c_tm)),
+									&c_margin.top, c_tm, NULL)),
 							psy_ui_size_make_px(
 								(int)width,
 								(int)(
-									psy_ui_value_px(&componentsize.height, c_tm)) -
-									psy_ui_margin_height_px(&c_margin, c_tm))));
+									psy_ui_value_px(&componentsize.height, c_tm, NULL)) -
+									psy_ui_margin_height_px(&c_margin, c_tm, NULL))));
 					cp_topleft.x += (int)width;
-					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm);
+					cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, NULL);
 					++curr;
 				}
 			}
@@ -400,14 +409,14 @@ void psy_ui_lclaligner_adjustspacing(psy_ui_LCLAligner* self,
 
 	spacing = psy_ui_component_spacing(self->component);
 	cp_topleft->x += psy_ui_value_px(&spacing.left, 
-		psy_ui_component_textmetric(self->component));
+		psy_ui_component_textmetric(self->component), NULL);
 	cp_topleft->y += psy_ui_value_px(&spacing.top,
-		psy_ui_component_textmetric(self->component));
+		psy_ui_component_textmetric(self->component), NULL);
 	cp_bottomright->x -= psy_ui_value_px(&spacing.right,
-		psy_ui_component_textmetric(self->component));
+		psy_ui_component_textmetric(self->component), NULL);
 	cp_bottomright->x = psy_max(0.0, cp_bottomright->x);
 	cp_bottomright->y -= psy_ui_value_px(&spacing.bottom,
-		psy_ui_component_textmetric(self->component));
+		psy_ui_component_textmetric(self->component), NULL);
 	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
 }
 
@@ -467,7 +476,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)) {
 			psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
 			size.width = psy_ui_value_make_px(psy_ui_value_px(
-				&limit->width, tm) - cp_topleft.x - cp_bottomright.x);
+				&limit->width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 		}
 		for (p = q = psy_ui_component_children(self->component, 0);
 				p != NULL; p = p->next) {
@@ -482,7 +491,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 
 				c_margin = psy_ui_component_margin(component);					
 				limit.width = psy_ui_value_make_px(psy_ui_value_px(
-					&size.width, tm) - cp_topleft.x - cp_bottomright.x);
+					&size.width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 				limit.height = size.height;
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);					
@@ -492,107 +501,106 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 					psy_ui_RealRectangle position;
 
 					position = psy_ui_component_position(component);
-					if (psy_ui_value_px(&maxsize.height, tm) <
+					if (psy_ui_value_px(&maxsize.height, tm, NULL) <
 						position.top +
-						psy_ui_value_px(&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm))
+						psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+						psy_ui_margin_height_px(&c_margin, c_tm, NULL))
 					{
 						maxsize.height = psy_ui_value_make_px(position.top +
 							psy_ui_value_px(&componentsize.height,
-								c_tm) +
+								c_tm, NULL) +
 							psy_ui_margin_height_px(&c_margin,
-								c_tm));
+								c_tm, NULL));
 					}
-					if (psy_ui_value_px(&maxsize.width, tm) <
+					if (psy_ui_value_px(&maxsize.width, tm, NULL) <
 							position.left +
-							psy_ui_value_px(&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin, c_tm)) {
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+							psy_ui_margin_width_px(&c_margin, c_tm, NULL)) {
 						maxsize.width = psy_ui_value_make_px(
 							position.left +
-							psy_ui_value_px(&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin, c_tm));
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+							psy_ui_margin_width_px(&c_margin, c_tm, NULL));
 					}
 				} else if (component->align == psy_ui_ALIGN_CLIENT ||
 						component->align == psy_ui_ALIGN_CENTER) {
-					if (psy_ui_value_px(&maxsize.height, tm) < cp.y +
-							psy_ui_value_px(&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm))
+					if (psy_ui_value_px(&maxsize.height, tm, NULL) < cp.y +
+							psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+						psy_ui_margin_height_px(&c_margin, c_tm, NULL))
 					{
 						maxsize.height = psy_ui_value_make_px(cp.y +
 								psy_ui_value_px(&componentsize.height,
-								c_tm) +
+								c_tm, NULL) +
 							psy_ui_margin_height_px(&c_margin,
-								c_tm));
+								c_tm, NULL));
 					}
-					if (psy_ui_value_px(&maxsize.width, tm) <
-							psy_ui_value_px(&componentsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm)) {
+					if (psy_ui_value_px(&maxsize.width, tm, NULL) <
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, NULL)) {
 						maxsize.width = psy_ui_value_make_px(
-							psy_ui_value_px(&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin, c_tm));
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+							psy_ui_margin_width_px(&c_margin, c_tm, NULL));
 					}
 				} else if (component->align == psy_ui_ALIGN_TOP ||
 						component->align == psy_ui_ALIGN_BOTTOM) {
-					cp.y += psy_ui_value_px(&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm);
-					if (psy_ui_value_px(&maxsize.height, c_tm) < cp.y) {
+					cp.y += psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+						psy_ui_margin_height_px(&c_margin, c_tm, NULL);
+					if (psy_ui_value_px(&maxsize.height, c_tm, NULL) < cp.y) {
 						maxsize.height = psy_ui_value_make_px(cp.y);
 					}
-					if (psy_ui_value_px(&maxsize.width, tm) <
-							psy_ui_value_px(&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin,
-								c_tm)) {
+					if (psy_ui_value_px(&maxsize.width, tm, NULL) <
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+							psy_ui_margin_width_px(&c_margin, c_tm, NULL)) {
 						maxsize.width = psy_ui_value_make_px(
-							psy_ui_value_px(&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin, c_tm));
+							psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+							psy_ui_margin_width_px(&c_margin, c_tm, NULL));
 					}
 				} else if (component->align == psy_ui_ALIGN_RIGHT) {
-					cp.x += psy_ui_value_px(&componentsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm);
+					cp.x += psy_ui_value_px(&componentsize.width, c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, NULL);
 					cp_bottomright.x += (intptr_t)(psy_ui_value_px(
-						&componentsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm));
-					if (psy_ui_value_px(&maxsize.width, c_tm) < cp.x) {
+						&componentsize.width, c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, NULL));
+					if (psy_ui_value_px(&maxsize.width, c_tm, NULL) < cp.x) {
 						maxsize.width = psy_ui_value_make_px(cp.x);
 					}
-					if (psy_ui_value_px(&maxsize.height, c_tm) < cp.y +
-							psy_ui_value_px(&componentsize.height, c_tm) +
-							psy_ui_margin_height_px(&c_margin, c_tm)) {
+					if (psy_ui_value_px(&maxsize.height, c_tm, NULL) < cp.y +
+							psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+							psy_ui_margin_height_px(&c_margin, c_tm, NULL)) {
 						maxsize.height = psy_ui_value_make_px(
 							cp.y + psy_ui_value_px(&componentsize.height,
-								c_tm) +
-							psy_ui_margin_height_px(&c_margin, c_tm));
+								c_tm, NULL) +
+							psy_ui_margin_height_px(&c_margin, c_tm, NULL));
 					}												
 				} else if (component->align == psy_ui_ALIGN_LEFT) {
-					if (psy_ui_value_px(&size.width, tm) != 0) {
+					if (psy_ui_value_px(&size.width, tm, NULL) != 0) {
 						double requiredcomponentwidth;
 
 						requiredcomponentwidth = psy_ui_value_px(
-							&componentsize.width, c_tm) +
-							psy_ui_margin_width_px(&c_margin, tm);
+							&componentsize.width, c_tm, &size) +
+							psy_ui_margin_width_px(&c_margin, tm, &size);
 						if (cp.x + requiredcomponentwidth >
-								psy_ui_value_px(&size.width, c_tm)) {
-							cp.y = psy_ui_value_px(&maxsize.height, tm);
+								psy_ui_value_px(&size.width, c_tm, &size)) {
+							cp.y = psy_ui_value_px(&maxsize.height, tm, &size);
 							cp.x = 0;
 							cp_topleft.x = 0;	
 							componentsize = psy_ui_component_preferredsize(component,
 								&size);
 						}						
 					}						
-					cp.x += psy_ui_value_px(&componentsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm);
+					cp.x += psy_ui_value_px(&componentsize.width, c_tm, &size) +
+						psy_ui_margin_width_px(&c_margin, c_tm, &size);
 					cp_topleft.x += (intptr_t)psy_ui_value_px(&componentsize.width,
-						c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm);
-					if (psy_ui_value_px(&maxsize.width, tm) < cp.x) {
+						c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, &size);
+					if (psy_ui_value_px(&maxsize.width, tm, &size) < cp.x) {
 						maxsize.width = psy_ui_value_make_px((double)cp.x);
 					}
-					if (psy_ui_value_px(&maxsize.height, tm) < cp.y +
-							psy_ui_value_px(&componentsize.height, c_tm) +
-							psy_ui_margin_height_px(&c_margin, c_tm)) {
+					if (psy_ui_value_px(&maxsize.height, tm, &size) < cp.y +
+							psy_ui_value_px(&componentsize.height, c_tm, &size) +
+							psy_ui_margin_height_px(&c_margin, c_tm, &size)) {
 						maxsize.height = psy_ui_value_make_px(cp.y +
-							psy_ui_value_px(&componentsize.height, c_tm) +
-							psy_ui_margin_height_px(&c_margin, c_tm));
+							psy_ui_value_px(&componentsize.height, c_tm, &size) +
+							psy_ui_margin_height_px(&c_margin, c_tm, &size));
 					}
 				}				
 			}
@@ -616,10 +624,10 @@ void psy_ui_lclaligner_adjustpreferredsize(psy_ui_LCLAligner* self,
 	spacing = psy_ui_component_spacing_px(self->component);	
 	border = psy_ui_component_bordermargin_px(self->component);
 	psy_ui_size_setpx(rv,
-		psy_ui_value_px(&rv->width, tm) +
+		psy_ui_value_px(&rv->width, tm, NULL) +
 			psy_ui_realmargin_width(&spacing) +
 			psy_ui_realmargin_width(&border),
-		psy_ui_value_px(&rv->height, tm) +
+		psy_ui_value_px(&rv->height, tm, NULL) +
 			psy_ui_realmargin_height(&spacing) +
 			psy_ui_realmargin_height(&border));	
 }

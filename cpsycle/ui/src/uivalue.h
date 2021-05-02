@@ -48,8 +48,11 @@ typedef enum {
 	psy_ui_UNIT_EH,
 	psy_ui_UNIT_EW,
 	psy_ui_UNIT_PX,
-	psy_ui_UNIT_PE
+	psy_ui_UNIT_PW,
+	psy_ui_UNIT_PH
 } psy_ui_Unit;
+
+struct psy_ui_Size;
 
 typedef struct {
 	double quantity;
@@ -117,74 +120,40 @@ INLINE psy_ui_Value psy_ui_value_make_eh(double em)
 	return rv;
 }
 
-INLINE psy_ui_Value psy_ui_value_makepe(double pe)
+INLINE psy_ui_Value psy_ui_value_make_pw(double pw)
 {
 	psy_ui_Value rv;
 
-	rv.quantity = pe;
-	rv.unit = psy_ui_UNIT_PE;
+	rv.quantity = pw;
+	rv.unit = psy_ui_UNIT_PW;
 	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
 
-INLINE double psy_ui_value_px(const psy_ui_Value* self,
-	const psy_ui_TextMetric* tm)
+INLINE psy_ui_Value psy_ui_value_make_ph(double ph)
 {
-	double rv;
+	psy_ui_Value rv;
 
-	if (tm) {
-		switch (self->unit) {
-		case psy_ui_UNIT_EW:			
-			rv = self->quantity * tm->tmAveCharWidth;			
-			break;
-		case psy_ui_UNIT_EH:			
-			rv = self->quantity * tm->tmHeight;			
-			break;
-		default:
-			rv = self->quantity;
-			break;
-		}
-	} else {
-		rv = self->quantity;
-	}
-	if (self->round == psy_ui_ROUND_NONE) {
-		return rv;
-	} else if (self->round == psy_ui_ROUND_FLOOR) {
-		return floor(rv);
-	} else if (self->round == psy_ui_ROUND_CEIL) {
-		return ceil(rv);
-	}
+	rv.quantity = ph;
+	rv.unit = psy_ui_UNIT_PH;
+	rv.round = psy_ui_ROUND_FLOOR;
 	return rv;
 }
+
+double psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*,
+	const struct psy_ui_Size*);
 
 void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
-	const psy_ui_TextMetric*);
+	const psy_ui_TextMetric*, const struct psy_ui_Size* pesize);
 void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
-	const psy_ui_TextMetric*);
+	const psy_ui_TextMetric*, const struct psy_ui_Size* pesize);
 void psy_ui_value_mul_real(psy_ui_Value*, double factor);
 int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
-	const psy_ui_TextMetric* tm);
-
-INLINE psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{	
-	psy_ui_Value rv;
-
-	rv = lhs;
-	psy_ui_value_add(&rv, &rhs, tm);
-	return rv;
-}
-
-INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{
-	psy_ui_Value rv;
-
-	rv = lhs;
-	psy_ui_value_sub(&rv, &rhs, tm);
-	return rv;
-}
-
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
+psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
+psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 
 INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
 {
@@ -195,14 +164,8 @@ INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
 	return rv;
 }
 
-INLINE psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
-	const psy_ui_TextMetric* tm)
-{	
-	if (psy_ui_value_comp(&lhs, &rhs, tm) > 0) {
-		return lhs;
-	}	
-	return rhs;
-}
+psy_ui_Value psy_ui_max_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* pesize);
 
 INLINE psy_ui_Value psy_ui_value_zero(void)
 {
@@ -218,7 +181,6 @@ INLINE bool psy_ui_isvaluezero(psy_ui_Value value)
 {
 	return psy_ui_value_iszero(&value);
 }
-
 
 
 #ifdef __cplusplus

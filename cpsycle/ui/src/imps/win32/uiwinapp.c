@@ -281,7 +281,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel,
 					imp->component, 1, &ev);
-				preventdefault = ev.preventdefault;				
+				preventdefault = ev.event.preventdefault;				
 			}
 			break;
 			default:
@@ -664,7 +664,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
-				preventdefault = ev.preventdefault;
+				preventdefault = ev.event.preventdefault;
 				if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
 					if (deltaperline != 0) {
 						accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
@@ -776,15 +776,13 @@ bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 }
 
 void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
-{			
-	const psy_ui_TextMetric* tm;
-	psy_ui_Margin spacing;
-
-	tm = psy_ui_component_textmetric(component);
-	spacing = psy_ui_component_spacing(component);	
-	if (!psy_ui_margin_iszero(&spacing)) {				
-		*x -= psy_ui_value_px(&spacing.left, tm);
-		*y -= psy_ui_value_px(&spacing.top, tm);
+{	
+	psy_ui_RealMargin spacing;
+	
+	spacing = psy_ui_component_spacing_px(component);	
+	if (!psy_ui_realmargin_iszero(&spacing)) {				
+		*x -= spacing.left;
+		*y -= spacing.top;
 	}
 }
 
@@ -803,13 +801,13 @@ bool handle_keyevent(psy_ui_Component* component,
 	psy_ui_keyevent_settarget(&ev, eventtarget(component));
 	fp(component, &ev);
 	psy_signal_emit(signal, component, 1, &ev);
-	if (ev.bubble != FALSE) {
+	if (ev.event.bubble != FALSE) {
 		sendmessagetoparent(winimp, message, wParam, lParam);
 	} else {
 		psy_list_free(winapp->targetids);
 		winapp->targetids = NULL;
 	}
-	preventdefault = ev.preventdefault;
+	preventdefault = ev.event.preventdefault;
 	if (preventdefault) {
 		winimp->preventwmchar = 1;
 	}
@@ -855,25 +853,25 @@ void handle_mouseevent(psy_ui_Component* component,
 	default:
 		break;
 	}
-	if (ev.bubble != FALSE) {
+	if (ev.event.bubble != FALSE) {
 		fp(component, &ev);
 		psy_signal_emit(signal, component, 1, &ev);
 	}
-	if (ev.bubble != FALSE) {
+	if (ev.event.bubble != FALSE) {
 		bool bubble;
 		
 		bubble = sendmessagetoparent(winimp, message, wParam, lParam);
 		if (up && !bubble) {
 			psy_ui_app_stopdrag(psy_ui_app());
 		} else if (message == WM_MOUSEMOVE && !bubble) {
-			if (!psy_ui_app()->dragevent.preventdefault) {
+			if (!psy_ui_app()->dragevent.mouse.event.preventdefault) {
 				psy_ui_component_setcursor(psy_ui_app()->main,
 					psy_ui_CURSORSTYLE_NODROP);
 			} else {
 				psy_ui_component_setcursor(psy_ui_app()->main,
 					psy_ui_CURSORSTYLE_GRAB);
 			}
-			psy_ui_app()->dragevent.preventdefault = FALSE;
+			psy_ui_app()->dragevent.mouse.event.preventdefault = FALSE;
 		}
 	} else if (up) {		
 		psy_ui_app_stopdrag(psy_ui_app());
@@ -909,7 +907,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		scrolltop = psy_ui_component_scrolltop(imp->component);
 		psy_ui_component_setscrolltop(imp->component,
 			psy_ui_value_make_px(
-				psy_ui_value_px(&scrolltop, tm) -
+				psy_ui_value_px(&scrolltop, tm, NULL) -
 				psy_ui_component_scrollstep_height_px(imp->component) *
 					(pos - si.nPos)));
 	}
@@ -941,7 +939,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		scrollleft = psy_ui_component_scrollleft(imp->component);
 		psy_ui_component_setscrollleft(imp->component,
 			psy_ui_value_make_px(
-				psy_ui_value_px(&scrollleft, tm) -
+				psy_ui_value_px(&scrollleft, tm, NULL) -
 				psy_ui_component_scrollstep_width_px(imp->component) *
 					(pos - si.nPos)));
 	}

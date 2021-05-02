@@ -56,11 +56,11 @@ void midiactivechannelbox_ondraw(MidiActiveChannelBox* self,
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_make_ew(4);
-	headercolw_px = psy_ui_value_px(&colew, tm);
+	headercolw_px = psy_ui_value_px(&colew, tm, NULL);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0, "Ch:", psy_strlen("Ch:"));
 	colew = psy_ui_value_make_ew(3.5);
-	colw_px = psy_ui_value_px(&colew, tm);
+	colw_px = psy_ui_value_px(&colew, tm, NULL);
 	for (ch = 0, cpx = headercolw_px; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
 			cpx += colw_px) {
 		char text[256];
@@ -123,9 +123,9 @@ void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
 
 	tm = psy_ui_component_textmetric(&self->component);
 	colew = psy_ui_value_make_ew(20);
-	headercolw_px = psy_ui_value_px(&colew, tm);
+	headercolw_px = psy_ui_value_px(&colew, tm, NULL);
 	colew = psy_ui_value_make_ew(3.5);
-	colw_px = psy_ui_value_px(&colew, tm);
+	colw_px = psy_ui_value_px(&colew, tm, NULL);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", psy_strlen("MIDI Sync: START"));
 	psy_ui_textout(g, 0, lineheight, "MIDI Sync: CLOCK", psy_strlen("MIDI Sync: CLOCK"));
@@ -212,7 +212,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 
 	tm = psy_ui_component_textmetric(&self->component);
 	for (i = 0; i < 4; ++i) {
-		colx_px[i] = psy_ui_value_px(&self->colx[i], tm);
+		colx_px[i] = psy_ui_value_px(&self->colx[i], tm, NULL);
 	}
 	lineheight = (int)(tm->tmHeight * 1.2);
 	midichannelmappingview_drawheader(self, g, colx_px, 0);

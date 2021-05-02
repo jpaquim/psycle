@@ -426,7 +426,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 			self->selectedslot = self->dragslot;			
 		}
 		if (self->dragmachineui) {			
-			if (ev->bubble) {
+			if (ev->event.bubble) {
 				psy_ui_RealRectangle position;
 
 				self->dragmode = MACHINEVIEW_DRAG_MACHINE;
@@ -499,7 +499,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 		}
 	}	
 	if (self->dragslot != psy_INDEX_INVALID) {		
-		if (!ev->bubble) {
+		if (!ev->event.bubble) {
 			return;
 		}		
 		if (machinewireview_dragging_machine(self)) {
@@ -1291,7 +1291,7 @@ void machinewireview_onpreferredsize(MachineWireView* self,
 	psy_ui_size_setpx(rv, bounds.right, bounds.bottom);
 	if (limit) {
 		*rv = psy_ui_max_size(*rv, *limit,
-			psy_ui_component_textmetric(&self->component));
+			psy_ui_component_textmetric(&self->component), NULL);
 	}
 }
 

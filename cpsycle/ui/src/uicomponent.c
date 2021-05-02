@@ -262,10 +262,10 @@ static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	assert(ev);
 
 	if (psy_ui_app()->dragevent.active) {
-		psy_ui_app()->dragevent.preventdefault = FALSE;
+		psy_ui_app()->dragevent.mouse.event.preventdefault = FALSE;
 		psy_ui_app()->dragevent.mouse = *ev;
 		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
-		if (psy_ui_app()->dragevent.preventdefault) {
+		if (psy_ui_app()->dragevent.mouse.event.preventdefault) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
 			psy_ui_mouseevent_stoppropagation(ev);
 		}
@@ -282,7 +282,7 @@ static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 	if (psy_ui_app()->dragevent.active) {
 		psy_ui_app()->dragevent.mouse = *ev;
 		self->vtable->ondrop(self, &psy_ui_app()->dragevent);
-		if (ev->preventdefault) {
+		if (ev->event.preventdefault) {
 			psy_ui_mouseevent_stoppropagation(ev);
 		}
 	}
@@ -512,9 +512,9 @@ void clientresize(psy_ui_Component* self, psy_ui_Size size)
 {	
 	self->imp->vtable->dev_clientresize(self->imp,
 		(intptr_t)psy_ui_value_px(&size.width,
-			psy_ui_component_textmetric(self)),
+			psy_ui_component_textmetric(self), NULL),
 		(intptr_t)psy_ui_value_px(&size.height,
-			psy_ui_component_textmetric(self)));
+			psy_ui_component_textmetric(self), NULL));
 }
 
 void setposition(psy_ui_Component* self, psy_ui_Point topleft,
@@ -1116,7 +1116,7 @@ psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,
 	psy_ui_Size size;
 	
 	size = psy_ui_component_preferredscrollsize(self, limit);
-	return psy_ui_size_px(&size, psy_ui_component_textmetric(self));
+	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), NULL);
 }
 
 void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
@@ -1153,10 +1153,10 @@ psy_ui_Size psy_ui_component_size(const psy_ui_Component* self)
 	rv = psy_ui_component_scrollsize(self);
 	spacing = psy_ui_component_spacing(self);
 	tm = psy_ui_component_textmetric(self);
-	spacing_width = psy_ui_margin_width(&spacing, tm);
-	psy_ui_value_sub(&rv.width, &spacing_width, tm);
-	spacing_height = psy_ui_margin_height(&spacing, tm);
-	psy_ui_value_sub(&rv.height, &spacing_height, tm);
+	spacing_width = psy_ui_margin_width(&spacing, tm, NULL);
+	psy_ui_value_sub(&rv.width, &spacing_width, tm, NULL);
+	spacing_height = psy_ui_margin_height(&spacing, tm, NULL);
+	psy_ui_value_sub(&rv.height, &spacing_height, tm, NULL);
 	return rv;
 }
 
@@ -1172,8 +1172,8 @@ psy_ui_Size psy_ui_component_sub_border(const psy_ui_Component* self,
 	border = psy_ui_component_border(self);
 	bordersize = psy_ui_border_size(border);
 	tm = psy_ui_component_textmetric(self);
-	psy_ui_value_sub(&rv.width, &bordersize.width, tm);	
-	psy_ui_value_sub(&rv.height, &bordersize.height, tm);
+	psy_ui_value_sub(&rv.width, &bordersize.width, tm, NULL);
+	psy_ui_value_sub(&rv.height, &bordersize.height, tm, NULL);
 	return rv;
 }
 
@@ -1436,7 +1436,7 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, psy_ui_Value left)
 	psy_ui_component_move(self,
 		psy_ui_point_make(
 			psy_ui_value_make_px(
-				-psy_ui_value_px(&left, psy_ui_component_textmetric(self))),
+				-psy_ui_value_px(&left, psy_ui_component_textmetric(self), NULL)),
 			psy_ui_value_make_px(position.top)));
 	psy_signal_emit(&self->signal_scroll, self, 0);	
 }
@@ -1448,7 +1448,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, psy_ui_Value top)
 	double newtop;
 
 	position = psy_ui_component_position(self);	
-	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self));
+	newtop = -psy_ui_value_px(&top, psy_ui_component_textmetric(self), NULL);
 	/*if (psy_ui_component_overflow(self) == psy_ui_OVERFLOW_VSCROLL) {
 		psy_ui_IntPoint range;
 		double miny;
@@ -1513,8 +1513,8 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		tm = psy_ui_component_textmetric(self);
 		curr = lines(
 			psy_ui_component_scrolltoppx(self),
-			psy_ui_value_px(&size.height, tm),
-			psy_ui_value_px(&scrollsize.height, tm),			
+			psy_ui_value_px(&size.height, tm, NULL),
+			psy_ui_value_px(&scrollsize.height, tm, NULL),
 			scrollstepy_px,
 			TRUE, /* round */
 			&scrollmax,
@@ -1555,8 +1555,8 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		tm = psy_ui_component_textmetric(self);
 		currrow = lines(
 			psy_ui_component_scrollleftpx(self),
-			psy_ui_value_px(&size.width, tm),
-			psy_ui_value_px(&scrollsize.width, tm),			
+			psy_ui_value_px(&size.width, tm, NULL),
+			psy_ui_value_px(&scrollsize.width, tm, NULL),
 			scrollstepx_px,
 			FALSE, /* no round */
 			&scrollmax,
@@ -1659,8 +1659,8 @@ void psy_ui_component_drawbackground(psy_ui_Component* self,
 					psy_ui_component_parent(self)));
 			psy_ui_drawsolidroundrectangle(g, r,
 				psy_ui_realsize_make(
-					psy_ui_value_px(&b->border_bottom_left_radius, tm),
-					psy_ui_value_px(&b->border_bottom_left_radius, tm)),
+					psy_ui_value_px(&b->border_bottom_left_radius, tm, NULL),
+					psy_ui_value_px(&b->border_bottom_left_radius, tm, NULL)),
 				psy_ui_component_backgroundcolour(self));
 		} else {		
 			uintptr_t image_id;

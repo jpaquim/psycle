@@ -62,8 +62,8 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 
 	size = psy_ui_component_scrollsize(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
-	width = psy_ui_value_px(&size.width, tm);
-	height = psy_ui_value_px(&size.height, tm);
+	width = psy_ui_value_px(&size.width, tm, NULL);
+	height = psy_ui_value_px(&size.height, tm, NULL);
 	bmpsize = psy_ui_bitmap_size(&self->bitmap);	
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
 		x = (width - bmpsize.width) / 2;

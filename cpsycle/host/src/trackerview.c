@@ -815,7 +815,7 @@ bool trackergrid_scrollup(TrackerGrid* self, psy_audio_PatternCursor cursor)
 
 		tm = psy_ui_component_textmetric(&self->component);
 		gridsize = psy_ui_component_scrollsize(&self->component);
-		topline = (intptr_t)(psy_ui_value_px(&gridsize.height, tm) / self->linestate->lineheightpx / 2);
+		topline = (intptr_t)(psy_ui_value_px(&gridsize.height, tm, NULL) / self->linestate->lineheightpx / 2);
 	} else {
 		topline = 0;
 	}
@@ -905,7 +905,7 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	trackleft = trackergridstate_pxtotrack(self->gridstate,
 		psy_ui_component_scrollleftpx(&self->component));
 	trackright = trackergridstate_pxtotrack(self->gridstate,
-		psy_ui_value_px(&size.width, tm) +
+		psy_ui_value_px(&size.width, tm, NULL) +
 		psy_ui_component_scrollleftpx(&self->component));	
 	visitracks = trackright - trackleft;
 	tracks = cursor.track + 1;
@@ -2529,7 +2529,7 @@ void trackergrid_onalign(TrackerGrid* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	self->linestate->lineheightpx =
 		psy_max(1.0, floor(psy_ui_value_px(&self->linestate->lineheight,
-			tm)));
+			tm, NULL)));
 	if (trackergrid_midline(self)) {
 		trackergrid_centeroncursor(self);
 	}

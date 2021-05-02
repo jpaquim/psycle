@@ -196,7 +196,7 @@ void waveboxcontext_updateoffsetstep(WaveBoxContext* self)
 	tm = psy_ui_component_textmetric(self->component);
 	if (self->zoomright - self->zoomleft >= 0) {
 		self->offsetstep = (double)waveboxcontext_numframes(self) /
-			psy_ui_value_px(&self->size.width, tm) *
+			psy_ui_value_px(&self->size.width, tm, NULL) *
 			(self->zoomright - self->zoomleft);
 	} else {
 		self->offsetstep = 1.f;

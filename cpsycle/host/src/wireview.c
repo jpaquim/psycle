@@ -446,9 +446,9 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	pane = sender;
 	size = psy_ui_component_scrollsize(pane);
 	tm = psy_ui_component_textmetric(pane);
-	right = psy_ui_value_px(&size.width, tm);
-	centerx = psy_ui_value_px(&size.width, tm) / 2;
-	step = psy_ui_value_px(&size.height, tm) / 7;
+	right = psy_ui_value_px(&size.width, tm, NULL);
+	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;
+	step = psy_ui_value_px(&size.height, tm, NULL) / 7;
 
 	maxL = dsp.maxvol(buffer->samples[0], scopesamples) / 32768.f;
 	maxR = dsp.maxvol(buffer->samples[1], scopesamples) / 32768.f;
@@ -484,7 +484,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 
 	rect.top = (int)maxL;
 	rect.bottom = centerx;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -493,7 +493,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	rect.left = centerx + 6;
 	rect.right = rect.left + 24;
 	rect.top = rmsL;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -510,7 +510,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 		psy_ui_realpoint_make(rect.right - 1, self->vuscope.peakR));
 
 	rect.top = (int)maxR;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -519,7 +519,7 @@ void wireview_ondrawslidervu(WireView* self, psy_ui_Component* sender, psy_ui_Gr
 	rect.left = centerx + 36;
 	rect.right = rect.left + 24;
 	rect.top = rmsR;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}

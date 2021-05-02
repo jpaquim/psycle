@@ -54,7 +54,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_intsize_init_size(
-			psy_ui_component_scrollsize(&self->component), tm);
+			psy_ui_component_scrollsize(&self->component), tm, NULL);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
@@ -67,7 +67,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 				psy_ui_Value scrolltop;
 
 				scrolltop = psy_ui_component_scrolltop(&self->component);
-				if ((cpy - psy_ui_value_px(&scrolltop, tm)) >= 0) {
+				if ((cpy - psy_ui_value_px(&scrolltop, tm, NULL)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;					
 
@@ -88,7 +88,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						psy_ui_textout(g, tm->tmAveCharWidth * 60, cpy, text,
 							psy_strlen(text));
 					}
-					if ((cpy - psy_ui_value_px(&scrolltop, tm)) > size.height) {
+					if ((cpy - psy_ui_value_px(&scrolltop, tm, NULL)) > size.height) {
 						break;
 					}
 				}

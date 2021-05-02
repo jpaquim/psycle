@@ -101,9 +101,9 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	charwidth = tm->tmAveCharWidth * 8;
 	size = psy_ui_component_scrollsize(&self->component);
-	right = psy_ui_value_px(&size.width, tm);
-	centerx = psy_ui_value_px(&size.width, tm) / 2;
-	step = psy_ui_value_px(&size.height, tm) / 7;
+	right = psy_ui_value_px(&size.width, tm, NULL);
+	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;
+	step = psy_ui_value_px(&size.height, tm, NULL) / 7;
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
 
@@ -119,16 +119,16 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	rect.top = 2 * step;
 	rect.bottom = rect.top + 1;
 	rect.left = charwidth + tm->tmAveCharWidth;
-	rect.right = psy_ui_value_px(&size.width, tm) - charwidth - tm->tmAveCharWidth;
+	rect.right = psy_ui_value_px(&size.width, tm, NULL) - charwidth - tm->tmAveCharWidth;
 	vuscope_drawlabel_right(self, g, " 0 db", 0, rect.top, charwidth, tm->tmHeight);
-	vuscope_drawlabel(self, g, " 0 db", psy_ui_value_px(&size.width, tm) - charwidth, rect.top,
+	vuscope_drawlabel(self, g, " 0 db", psy_ui_value_px(&size.width, tm, NULL) - charwidth, rect.top,
 		charwidth, tm->tmHeight);
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
 	rect.top = 2 * step - step;
 	rect.bottom = rect.top + 1;
 	vuscope_drawlabel_right(self, g, "+6 db", 0, rect.top, charwidth, tm->tmHeight);
-	vuscope_drawlabel(self, g, "+6 db", psy_ui_value_px(&size.width, tm) - charwidth, rect.top,
+	vuscope_drawlabel(self, g, "+6 db", psy_ui_value_px(&size.width, tm, NULL) - charwidth, rect.top,
 		charwidth, tm->tmHeight);		
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
@@ -136,21 +136,21 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	rect.top = 2 * step + step;
 	rect.bottom = rect.top + 1;
 	vuscope_drawlabel_right(self, g, "-6 db", 0, rect.top, charwidth, tm->tmHeight);
-	vuscope_drawlabel(self, g, "-6 db", psy_ui_value_px(&size.width, tm) - charwidth, rect.top,
+	vuscope_drawlabel(self, g, "-6 db", psy_ui_value_px(&size.width, tm, NULL) - charwidth, rect.top,
 		charwidth, tm->tmHeight);
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
 	rect.top = 4 * step;
 	rect.bottom = rect.top + 1;
 	vuscope_drawlabel_right(self, g, "-12 db", 0, rect.top, charwidth, tm->tmHeight);
-	vuscope_drawlabel(self, g, "-12 db", psy_ui_value_px(&size.width, tm) - charwidth, rect.top,
+	vuscope_drawlabel(self, g, "-12 db", psy_ui_value_px(&size.width, tm, NULL) - charwidth, rect.top,
 		charwidth, tm->tmHeight);
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
 	rect.top = 6 * step;
 	rect.bottom = rect.top + 1;
 	vuscope_drawlabel_right(self, g, "-24 db", 0, rect.top, charwidth, tm->tmHeight);
-	vuscope_drawlabel(self, g, "-24 db", psy_ui_value_px(&size.width, tm) - charwidth, rect.top,
+	vuscope_drawlabel(self, g, "-24 db", psy_ui_value_px(&size.width, tm, NULL) - charwidth, rect.top,
 		charwidth, tm->tmHeight);
 	psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(0x00606060));
 
@@ -158,7 +158,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	//oldFont = bufDC.SelectObject(&font);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
-	psy_ui_textout(g, tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm) - tm->tmHeight, buf, psy_strlen(buf));
+	psy_ui_textout(g, tm->tmAveCharWidth, psy_ui_value_px(&size.height, tm, NULL) - tm->tmHeight, buf, psy_strlen(buf));
 }
 
 void vuscope_drawlabel(VuScope* self, psy_ui_Graphics* g, const char* text,
@@ -175,7 +175,7 @@ void vuscope_drawlabel_right(VuScope* self, psy_ui_Graphics* g, const char* text
 
 	size = psy_ui_textsize(g, text, psy_strlen(text));
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_textout(g, x + (width - psy_ui_value_px(&size.width, tm)),
+	psy_ui_textout(g, x + (width - psy_ui_value_px(&size.width, tm, NULL)),
 		y - height / 2,text, psy_strlen(text));
 }
 
@@ -217,9 +217,9 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 
 	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	right = psy_ui_value_px(&size.width, tm);
-	centerx = psy_ui_value_px(&size.width, tm) / 2;
-	step = psy_ui_value_px(&size.height, tm) / 7;
+	right = psy_ui_value_px(&size.width, tm, NULL);
+	centerx = psy_ui_value_px(&size.width, tm, NULL) / 2;
+	step = psy_ui_value_px(&size.height, tm, NULL) / 7;
 
 	maxL = dsp.maxvol(buffer->samples[0], scopesamples) / 32768.f;
 	maxR = dsp.maxvol(buffer->samples[1], scopesamples) / 32768.f;
@@ -256,7 +256,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 
 	rect.top = (int) maxL;
 	rect.bottom = centerx;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -265,7 +265,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	rect.left = centerx + 6;
 	rect.right = rect.left + 24;
 	rect.top = rmsL;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -283,7 +283,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 		psy_ui_realpoint_make(rect.right - 1, self->peakR));
 
 	rect.top = (int) maxR;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
@@ -292,7 +292,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	rect.left = centerx + 36;
 	rect.right = rect.left + 24;
 	rect.top = rmsR;
-	rect.bottom = psy_ui_value_px(&size.height, tm);
+	rect.bottom = psy_ui_value_px(&size.height, tm, NULL);
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}

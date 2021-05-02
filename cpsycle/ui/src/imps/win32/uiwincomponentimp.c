@@ -420,8 +420,8 @@ int dev_drawvisible(psy_ui_win_ComponentImp* self)
 void dev_move(psy_ui_win_ComponentImp* self, psy_ui_Point topleft)
 {
 	SetWindowPos(self->hwnd, NULL,
-		(int)psy_ui_value_px(&topleft.x, dev_textmetric(self)),
-		(int)psy_ui_value_px(&topleft.y, dev_textmetric(self)),
+		(int)psy_ui_value_px(&topleft.x, dev_textmetric(self), NULL),
+		(int)psy_ui_value_px(&topleft.y, dev_textmetric(self), NULL),
 		0, 0,
 		SWP_NOZORDER | SWP_NOSIZE);	
 }
@@ -431,8 +431,8 @@ void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, NULL,
 		0, 0,
-		(int)psy_ui_value_px(&size.width, dev_textmetric(self)),
-		(int)psy_ui_value_px(&size.height, dev_textmetric(self)),
+		(int)psy_ui_value_px(&size.width, dev_textmetric(self), NULL),
+		(int)psy_ui_value_px(&size.height, dev_textmetric(self), NULL),
 		SWP_NOZORDER | SWP_NOMOVE);
 	
 	self->sizecache = size;
@@ -495,10 +495,10 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, 0,
-		(int)psy_ui_value_px(&topleft.x, tm),
-		(int)psy_ui_value_px(&topleft.y, tm),
-		(int)(psy_ui_value_px(&size.width, tm)),
-		(int)(psy_ui_value_px(&size.height, tm)),
+		(int)psy_ui_value_px(&topleft.x, tm, NULL),
+		(int)psy_ui_value_px(&topleft.y, tm, NULL),
+		(int)(psy_ui_value_px(&size.width, tm, NULL)),
+		(int)(psy_ui_value_px(&size.height, tm, NULL)),
 		SWP_NOZORDER);	
 	dev_updatesize(self);	
 }
@@ -1027,7 +1027,7 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	psy_ui_win_GraphicsImp* win_g;
 	POINT origin;
 	POINT org;
-	psy_ui_Margin spacing;
+	psy_ui_RealMargin spacing;
 	
 	tm = psy_ui_component_textmetric(self->component);
 	// draw background						
@@ -1043,12 +1043,12 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(self->component);
 	win_g = (psy_ui_win_GraphicsImp*)g->imp;			
 	// spacing
-	spacing = psy_ui_component_spacing(self->component);
-	if (!psy_ui_margin_iszero(&spacing)) {
+	spacing = psy_ui_component_spacing_px(self->component);
+	if (!psy_ui_realmargin_iszero(&spacing)) {
 		tm = psy_ui_component_textmetric(self->component);
 		
-		origin.x = -(int)psy_ui_value_px(&spacing.left, tm);
-		origin.y = -(int)psy_ui_value_px(&spacing.top, tm);
+		origin.x = -(int)spacing.left;
+		origin.y = -(int)spacing.top;
 		SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
 	}
 	// prepare colours
@@ -1224,7 +1224,7 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->bubble) {
+	if (ev->event.bubble) {
 		self->component->vtable->onmousemove(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousemove,
 			self->component, 1, ev);

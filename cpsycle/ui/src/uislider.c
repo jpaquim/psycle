@@ -170,7 +170,7 @@ void psy_ui_sliderpane_onalign(psy_ui_SliderPane* self)
 		(self->orientation == psy_ui_HORIZONTAL)
 			? &self->hslidersize
 			: &self->vslidersize,
-		psy_ui_component_textmetric(psy_ui_sliderpane_base(self)));
+		psy_ui_component_textmetric(psy_ui_sliderpane_base(self)), NULL);
 }
 
 void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)

@@ -188,13 +188,13 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 		psy_ui_RealSize textsizepx;
 		
 		bpmsize = psy_ui_bitmap_size(&self->icon);
-		textsizepx = psy_ui_size_px(rv, tm);				
+		textsizepx = psy_ui_size_px(rv, tm, NULL);
 		rv->width = psy_ui_value_make_px(textsizepx.width + bpmsize.width
 			+ tm->tmAveCharWidth * self->bitmapident);
 	}	
 	spacing = psy_ui_component_spacing(psy_ui_tab_base(self));
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void psy_ui_tab_onmousedown(psy_ui_Tab* self, psy_ui_MouseEvent* ev)
@@ -224,7 +224,6 @@ void psy_ui_tab_onlanguagechanged(psy_ui_Tab* self)
 // psy_ui_TabBar
 // prototypes
 static void tabbar_ondestroy(psy_ui_TabBar*);
-static void tabbar_build(psy_ui_TabBar*);
 static void tabbar_ontabclicked(psy_ui_TabBar*, psy_ui_Tab* sender);
 static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
 // vtable

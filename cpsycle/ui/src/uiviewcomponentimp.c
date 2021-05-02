@@ -405,8 +405,8 @@ void view_dev_move(psy_ui_ViewComponentImp* self, psy_ui_Point origin)
 	tm = view_dev_textmetric(self);
 	psy_ui_realrectangle_settopleft(&self->position,
 		psy_ui_realpoint_make(
-			psy_ui_value_px(&origin.x, tm),
-			psy_ui_value_px(&origin.y, tm)));
+			psy_ui_value_px(&origin.x, tm, NULL),
+			psy_ui_value_px(&origin.y, tm, NULL)));
 }
 
 void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
@@ -419,8 +419,8 @@ void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
 	self->position = psy_ui_realrectangle_make(
 		topleft,
 		psy_ui_realsize_make(
-			psy_ui_value_px(&size.width, tm),
-			psy_ui_value_px(&size.height, tm)));
+			psy_ui_value_px(&size.width, tm, NULL),
+			psy_ui_value_px(&size.height, tm, NULL)));
 }
 
 void view_dev_clientresize(psy_ui_ViewComponentImp* self, intptr_t width,
@@ -459,11 +459,11 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	tm = view_dev_textmetric(self);
 	self->position = psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
-			psy_ui_value_px(&topleft.x, tm),
-			psy_ui_value_px(&topleft.y, tm)),
+			psy_ui_value_px(&topleft.x, tm, NULL),
+			psy_ui_value_px(&topleft.y, tm, NULL)),
 		psy_ui_realsize_make(
-			psy_ui_value_px(&size.width, tm),
-			psy_ui_value_px(&size.height, tm)));
+			psy_ui_value_px(&size.width, tm, NULL),
+			psy_ui_value_px(&size.height, tm, NULL)));
 }
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)
@@ -719,8 +719,8 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			if (!psy_ui_margin_iszero(&spacing)) {
 				tm = psy_ui_component_textmetric(self->component);							
 				psy_ui_setorigin(g, psy_ui_realpoint_make(
-					origin.x - (int)psy_ui_value_px(&spacing.left, tm),
-					origin.y - (int)psy_ui_value_px(&spacing.top, tm)));
+					origin.x - (int)psy_ui_value_px(&spacing.left, tm, NULL),
+					origin.y - (int)psy_ui_value_px(&spacing.top, tm, NULL)));
 			}			
 			self->component->vtable->ondraw(self->component, g);
 			psy_ui_setorigin(g, origin);
@@ -769,7 +769,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->bubble) {
+	if (ev->event.bubble) {
 		if (!self->viewcomponents) {
 			ev->target = self->component;
 		}
@@ -798,7 +798,7 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->bubble) {
+	if (ev->event.bubble) {
 		self->component->vtable->onmouseup(self->component, ev);
 	}
 }
@@ -842,7 +842,7 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 				self->component, 0);			
 		}		
 	}
-	if (ev->bubble) {
+	if (ev->event.bubble) {
 		self->component->vtable->onmousemove(self->component, ev);
 	}
 }
@@ -866,7 +866,7 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 			}
 		}
 	}
-	if (ev->bubble) {
+	if (ev->event.bubble) {
 		self->component->vtable->onmousedoubleclick(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousedoubleclick,
 			self->component, 1, ev);

@@ -164,14 +164,14 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 			
 			size = psy_ui_component_textsize(psy_ui_label_base(self),
 				text);						
-			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 4);
+			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL) + 4);
 		}		
 	} else {
 		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
 	}
 	rv->height = psy_ui_value_make_px((tm->tmHeight * self->linespacing));
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
@@ -213,7 +213,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		psy_ui_RealSize textsizepx;
 
 		textsize = psy_ui_textsize(g, text, psy_strlen(text));
-		textsizepx = psy_ui_size_px(&textsize, tm);
+		textsizepx = psy_ui_size_px(&textsize, tm, NULL);
 		centerx = (size.width - textsizepx.width);
 	}
 	string = malloc(psy_strlen(text) + 1);
@@ -244,7 +244,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			if (!self->preventwrap) {
 				currlinesize = psy_ui_textsize(g, token, numoutput);
 				while ((numoutput > 0) &&
-					psy_ui_value_px(&currlinesize.width, tm) > size.width) {
+					psy_ui_value_px(&currlinesize.width, tm, NULL) > size.width) {
 					numoutput--;
 					if (numoutput > 0) {
 						currlinesize = psy_ui_textsize(g, token, numoutput);

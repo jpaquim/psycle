@@ -157,11 +157,11 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
 		psy_ui_setrectangle(&r,
-			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&self->ptsize2.width, tm),
+			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&self->ptsize2.width, tm, NULL),
 			envelopebox_pxvalue(self, pt->value * self->modamount) -
-				psy_ui_value_px(&self->ptsize2.height, tm),
-			psy_ui_value_px(&self->ptsize.width, tm),
-			psy_ui_value_px(&self->ptsize.height, tm));
+				psy_ui_value_px(&self->ptsize2.height, tm, NULL),
+			psy_ui_value_px(&self->ptsize.width, tm, NULL),
+			psy_ui_value_px(&self->ptsize.height, tm, NULL));
 		psy_ui_drawsolidrectangle(g, r, self->pointcolour);
 		q = pt;
 	}
@@ -266,10 +266,10 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 	const psy_ui_TextMetric* tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	self->cx = psy_ui_value_px(&size->width, tm) - psy_ui_value_px(&self->spacing.left, tm) -
-		psy_ui_value_px(&self->spacing.right, tm);
-	self->cy = psy_ui_value_px(&size->height, tm) - psy_ui_value_px(&self->spacing.top, tm) -
-		psy_ui_value_px(&self->spacing.bottom, tm);
+	self->cx = psy_ui_value_px(&size->width, tm, NULL) - psy_ui_value_px(&self->spacing.left, tm, NULL) -
+		psy_ui_value_px(&self->spacing.right, tm, NULL);
+	self->cy = psy_ui_value_px(&size->height, tm, NULL) - psy_ui_value_px(&self->spacing.top, tm, NULL) -
+		psy_ui_value_px(&self->spacing.bottom, tm, NULL);
 }
 
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)

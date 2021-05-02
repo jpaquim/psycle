@@ -453,36 +453,37 @@ INLINE bool psy_ui_issizezero(psy_ui_Size size)
 	return psy_ui_size_iszero(&size);
 }
 
-INLINE psy_ui_RealSize psy_ui_size_px(psy_ui_Size* self, const psy_ui_TextMetric* tm)
+INLINE psy_ui_RealSize psy_ui_size_px(psy_ui_Size* self,
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
 {
 	psy_ui_RealSize rv;
 
-	rv.width = psy_ui_value_px(&self->width, tm);
-	rv.height = psy_ui_value_px(&self->height, tm);
+	rv.width = psy_ui_value_px(&self->width, tm, pesize);
+	rv.height = psy_ui_value_px(&self->height, tm, pesize);
 	return rv;
 }
 
 INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
-	const psy_ui_TextMetric* tm)
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
 {
 	psy_ui_IntSize rv;
 
-	rv.width = (intptr_t)psy_ui_value_px(&size.width, tm);
-	rv.height = (intptr_t)psy_ui_value_px(&size.height, tm);
+	rv.width = (intptr_t)psy_ui_value_px(&size.width, tm, pesize);
+	rv.height = (intptr_t)psy_ui_value_px(&size.height, tm, pesize);
 	return rv;
 }
 
 INLINE psy_ui_Size psy_ui_max_size(psy_ui_Size lhs, psy_ui_Size rhs,
-	const psy_ui_TextMetric* tm)
+	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
 {
 	psy_ui_Size rv;
 
-	if (psy_ui_value_comp(&lhs.width, &rhs.width, tm) > 0) {
+	if (psy_ui_value_comp(&lhs.width, &rhs.width, tm, pesize) > 0) {
 		rv.width = lhs.width;
 	} else {
 		rv.width = rhs.width;
 	}
-	if (psy_ui_value_comp(&lhs.height, &rhs.height, tm) > 0) {
+	if (psy_ui_value_comp(&lhs.height, &rhs.height, tm, pesize) > 0) {
 		rv.height = lhs.height;
 	} else {
 		rv.height = rhs.height;
@@ -534,10 +535,11 @@ void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
-psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*);
-double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
-psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
-double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
+psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
+double psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
+psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*,
+	const psy_ui_Size* pesize);
+double psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*, const psy_ui_Size* pesize);
 
 INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
 {
@@ -599,12 +601,13 @@ typedef struct psy_ui_RealMargin {
 
 INLINE void psy_ui_realmargin_init_margin(psy_ui_RealMargin* self,
 	const psy_ui_Margin* other,
-	const psy_ui_TextMetric* tm)
+	const psy_ui_TextMetric* tm,
+	const psy_ui_Size* pesize)
 {
-	self->top = psy_ui_value_px(&other->top, tm);
-	self->right = psy_ui_value_px(&other->right, tm);
-	self->bottom = psy_ui_value_px(&other->bottom, tm);
-	self->left = psy_ui_value_px(&other->left, tm);
+	self->top = psy_ui_value_px(&other->top, tm, pesize);
+	self->right = psy_ui_value_px(&other->right, tm, pesize);
+	self->bottom = psy_ui_value_px(&other->bottom, tm, pesize);
+	self->left = psy_ui_value_px(&other->left, tm, pesize);
 }
 
 void psy_ui_realmargin_floor(psy_ui_RealMargin* self);
@@ -617,6 +620,14 @@ INLINE double psy_ui_realmargin_width(const psy_ui_RealMargin* self)
 INLINE double psy_ui_realmargin_height(const psy_ui_RealMargin* self)
 {
 	return self->top + self->bottom;
+}
+
+INLINE bool psy_ui_realmargin_iszero(const psy_ui_RealMargin* self)
+{
+	return (self->left == 0.0 &&
+		self->top == 0.0 &&
+		self->right == 0.0 &&
+		self->bottom == 0.0);
 }
 
 

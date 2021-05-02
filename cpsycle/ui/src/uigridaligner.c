@@ -54,6 +54,7 @@ void psy_ui_gridaligner_init(psy_ui_GridAligner* self, psy_ui_Component* compone
 void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 {	
 	psy_ui_Size size;
+	psy_ui_Size parentsize;
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealPoint cp_topleft;
 	psy_ui_RealPoint cp_bottomright;
@@ -64,12 +65,19 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 	psy_List* wrap = 0;	
 	uintptr_t currcol = 0;
 	
+	assert(self->component);
+
 	size = psy_ui_component_scrollsize(self->component);
+	if (psy_ui_component_parent_const(self)) {
+		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+	} else {
+		parentsize = psy_ui_component_scrollsize(self->component);
+	}
 	tm = psy_ui_component_textmetric(self->component);
 	psy_ui_realpoint_init(&cp_topleft);
 	psy_ui_realpoint_init_all(&cp_bottomright,
-		psy_ui_value_px(&size.width, tm),
-		psy_ui_value_px(&size.height, tm));
+		psy_ui_value_px(&size.width, tm, &parentsize),
+		psy_ui_value_px(&size.height, tm, &parentsize));
 	psy_ui_gridaligner_adjustborder(self, &cp_topleft, &cp_bottomright);
 	psy_ui_gridaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
 	colsize.width = (cp_bottomright.x - cp_topleft.x) / (double) self->numcols;
@@ -80,7 +88,7 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 			
 		component = (psy_ui_Component*)psy_list_entry(p);
 		if (component->visible) {
-			psy_ui_Size componentsize;
+			psy_ui_Size componentsize;			
 			psy_ui_Size limit;
 			psy_ui_Margin c_margin;			
 			const psy_ui_TextMetric* c_tm;
@@ -94,26 +102,26 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 			componentsize.width = psy_ui_value_make_px(colsize.width);
 			c_tm = psy_ui_component_textmetric(component);
 			c_margin = psy_ui_component_margin(component);			
-			cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm);
+			cp_topleft.x += psy_ui_value_px(&c_margin.left, c_tm, &size);
 			psy_ui_component_setposition(component,
 				psy_ui_rectangle_make(
 					psy_ui_point_make(
 						psy_ui_value_make_px(cp_topleft.x),
 						psy_ui_value_make_px(cp_topleft.y +
-							psy_ui_value_px(&c_margin.top, c_tm))),
+							psy_ui_value_px(&c_margin.top, c_tm, &size))),
 					psy_ui_size_make(
 						componentsize.width,
 						psy_ui_value_make_px(
 							cp_bottomright.y - cp_topleft.y -
-							psy_ui_margin_height_px(&c_margin, c_tm)))));
-			cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm);
-			cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm);
+							psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
+			cp_topleft.x += psy_ui_value_px(&c_margin.right, c_tm, &size);
+			cp_topleft.x += psy_ui_value_px(&componentsize.width, c_tm, &size);
 			if (cpymax < cp_topleft.y +
-				psy_ui_value_px(&componentsize.height, c_tm) +
-				psy_ui_margin_height_px(&c_margin, c_tm)) {
+				psy_ui_value_px(&componentsize.height, c_tm, &size) +
+				psy_ui_margin_height_px(&c_margin, c_tm, &size)) {
 				cpymax = cp_topleft.y + psy_ui_value_px(
-					&componentsize.height, c_tm) +
-					psy_ui_margin_height_px(&c_margin, c_tm);
+					&componentsize.height, c_tm, &size) +
+					psy_ui_margin_height_px(&c_margin, c_tm, &size);
 			}		
 			++currcol;
 			if (currcol == self->numcols) {
@@ -139,13 +147,13 @@ void psy_ui_gridaligner_adjustminmaxsize(psy_ui_GridAligner* self,
 	if (!psy_ui_size_iszero(&maxsize)) {
 		if (!psy_ui_value_iszero(&maxsize.width)) {
 			if (psy_ui_value_comp(&maxsize.width,
-					&componentsize->width, tm) < 0) {				
+					&componentsize->width, tm, NULL) < 0) {				
 				componentsize->width = maxsize.width;
 			}
 		}	
 		if (!psy_ui_value_iszero(&maxsize.height)) {
 			if (psy_ui_value_comp(&maxsize.height,
-					&componentsize->height, tm) < 0) {
+					&componentsize->height, tm, NULL) < 0) {
 				componentsize->height = maxsize.height;
 			}
 		}
@@ -153,13 +161,13 @@ void psy_ui_gridaligner_adjustminmaxsize(psy_ui_GridAligner* self,
 	if (!psy_ui_size_iszero(&minsize)) {
 		if (!psy_ui_value_iszero(&minsize.width)) {
 			if (psy_ui_value_comp(&minsize.width,
-					&componentsize->width, tm) > 0) {
+					&componentsize->width, tm, NULL) > 0) {
 				componentsize->width = minsize.width;
 			}
 		}
 		if (!psy_ui_value_iszero(&minsize.height)) {
 			if (psy_ui_value_comp(&minsize.height,
-					&componentsize->height, tm) > 0) {
+					&componentsize->height, tm, NULL) > 0) {
 				componentsize->height = minsize.height;
 			}
 		}
@@ -189,18 +197,14 @@ void psy_ui_gridaligner_adjustborder(psy_ui_GridAligner* self,
 void psy_ui_gridaligner_adjustspacing(psy_ui_GridAligner* self,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
 {
-	psy_ui_Margin spacing;
+	psy_ui_RealMargin spacing;
 
-	spacing = psy_ui_component_spacing(self->component);
-	cp_topleft->x += psy_ui_value_px(&spacing.left, 
-		psy_ui_component_textmetric(self->component));
-	cp_topleft->y += psy_ui_value_px(&spacing.top,
-		psy_ui_component_textmetric(self->component));
-	cp_bottomright->x -= psy_ui_value_px(&spacing.right,
-		psy_ui_component_textmetric(self->component));
+	spacing = psy_ui_component_spacing_px(self->component);
+	cp_topleft->x += spacing.left;
+	cp_topleft->y += spacing.top;
+	cp_bottomright->x -= spacing.right;
 	cp_bottomright->x = psy_max(0.0, cp_bottomright->x);
-	cp_bottomright->y -= psy_ui_value_px(&spacing.bottom,
-		psy_ui_component_textmetric(self->component));
+	cp_bottomright->y -= spacing.bottom;
 	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
 }
 
@@ -250,27 +254,27 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 
 					c_margin = psy_ui_component_margin(component);					
 					limit.width = psy_ui_value_make_px(psy_ui_value_px(
-						&size.width, tm) - cp_topleft.x - cp_bottomright.x);
+						&size.width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 					limit.height = size.height;
 					componentsize = psy_ui_component_preferredsize(component,
 						&limit);					
 					psy_ui_gridaligner_adjustminmaxsize(self, component, tm,
 						&componentsize);
 					c_tm = psy_ui_component_textmetric(component);	
-					cp.x += psy_ui_value_px(&colsize.width, c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm);
+					cp.x += psy_ui_value_px(&colsize.width, c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, NULL);
 					cp_topleft.x += (intptr_t)psy_ui_value_px(&colsize.width,
-						c_tm) +
-						psy_ui_margin_width_px(&c_margin, c_tm);
-					if (psy_ui_value_px(&maxsize.width, tm) < cp.x) {
+						c_tm, NULL) +
+						psy_ui_margin_width_px(&c_margin, c_tm, NULL);
+					if (psy_ui_value_px(&maxsize.width, tm, NULL) < cp.x) {
 						maxsize.width = psy_ui_value_make_px((double)cp.x);
 					}
-					if (psy_ui_value_px(&maxsize.height, tm) < cp.y +
-						psy_ui_value_px(&componentsize.height, c_tm) +
-						psy_ui_margin_height_px(&c_margin, c_tm)) {
+					if (psy_ui_value_px(&maxsize.height, tm, NULL) < cp.y +
+						psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+						psy_ui_margin_height_px(&c_margin, c_tm, NULL)) {
 						maxsize.height = psy_ui_value_make_px(cp.y +
-							psy_ui_value_px(&componentsize.height, c_tm) +
-							psy_ui_margin_height_px(&c_margin, c_tm));
+							psy_ui_value_px(&componentsize.height, c_tm, NULL) +
+							psy_ui_margin_height_px(&c_margin, c_tm, NULL));
 					}
 				}
 			}
@@ -294,10 +298,10 @@ void psy_ui_gridaligner_adjustpreferredsize(psy_ui_GridAligner* self,
 	spacing = psy_ui_component_spacing_px(self->component);	
 	border = psy_ui_component_bordermargin_px(self->component);
 	psy_ui_size_setpx(rv,
-		psy_ui_value_px(&rv->width, tm) +
+		psy_ui_value_px(&rv->width, tm, NULL) +
 			psy_ui_realmargin_width(&spacing) +
 			psy_ui_realmargin_width(&border),
-		psy_ui_value_px(&rv->height, tm) +
+		psy_ui_value_px(&rv->height, tm, NULL) +
 			psy_ui_realmargin_height(&spacing) +
 			psy_ui_realmargin_height(&border));	
 }

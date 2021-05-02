@@ -99,7 +99,7 @@ void parameterbar_onalign(ParameterBar* self)
 		psy_ui_button_base(&self->more), NULL);
 	size = psy_ui_component_scrollsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	if (size.width < psy_ui_value_px(&preferredsize.width, tm)) {
+	if (size.width < psy_ui_value_px(&preferredsize.width, tm, NULL)) {
 		if (!psy_ui_component_visible(psy_ui_button_base(&self->more))) {
 			// psy_ui_component_show(psy_ui_button_base(&self->more));
 		}
@@ -452,10 +452,10 @@ void machineframe_resize(MachineFrame* self)
 		paramsize = psy_ui_component_preferredsize(
 			&self->parameterbox.component, NULL);
 		viewsize.width = psy_ui_add_values(viewsize.width, 
-			paramsize.width, tm);
+			paramsize.width, tm, NULL);
 		numparams = psy_audio_machine_numtweakparameters(self->machine);
 		viewsize.height = psy_ui_max_values(viewsize.height,
-			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm);
+			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm, NULL);
 	}
 	if (psy_ui_component_visible(&self->parammap.component)) {
 		psy_ui_Size paramsize;
@@ -464,23 +464,23 @@ void machineframe_resize(MachineFrame* self)
 		paramsize = psy_ui_component_preferredsize(
 			&self->parammap.component, NULL);
 		viewsize.width = psy_ui_add_values(viewsize.width,
-			paramsize.width, tm);
+			paramsize.width, tm, NULL);
 		numparams = psy_audio_machine_numtweakparameters(self->machine);
 		viewsize.height = psy_ui_max_values(viewsize.height,
-			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm);
+			psy_ui_value_make_eh(psy_min(numparams + 4.0, 8.0)), tm, NULL);
 	}
 	if (self->showfullmenu) {
 		bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 			NULL);
-		viewsize.width = psy_ui_max_values(viewsize.width, bar.width, tm);
+		viewsize.width = psy_ui_max_values(viewsize.width, bar.width, tm, NULL);
 	}
 	newval = psy_ui_component_preferredsize(&self->newval.component,
 		&viewsize);
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);
-	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, tm);
+	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, tm, NULL);
 	if (self->newval.component.visible) {
-		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, tm);
+		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, tm, NULL);
 	}	
 	psy_ui_component_clientresize(&self->component, viewsize);	
 }
