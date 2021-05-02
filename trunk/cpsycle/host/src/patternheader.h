@@ -1,70 +1,53 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PATTERNHEADER)
-#define PATTERNHEADER
+#if !defined(PATTERNHEADER_H)
+#define PATTERNHEADER_H
 
 // host
 #include "trackergridstate.h"
 #include "workspace.h"
 
+
+typedef struct PatternTrackBox {
+	// inherits
+	psy_ui_Component component;
+	uintptr_t index;
+	bool playon;
+	// references
+	TrackerGridState* state;
+} PatternTrackBox;
+
+void patterntrackbox_init(PatternTrackBox*, psy_ui_Component* parent,
+	psy_ui_Component* view, uintptr_t index, TrackerGridState*);
+
+PatternTrackBox* patterntrackbox_alloc(void);
+PatternTrackBox* patterntrackbox_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, uintptr_t index, TrackerGridState*);
+
+void patterntrackbox_playon(PatternTrackBox*);
+void patterntrackbox_playoff(PatternTrackBox*);
+
+INLINE psy_ui_Component* patterntrackbox_base(PatternTrackBox* self)
+{
+	return &self->component;
+}
+
 // TrackerHeader
-
-// It displays the a header for each track (Tracker Numb
-
-typedef struct TrackerHeaderTrackState {
-	bool playon;
-} TrackerHeaderTrackState;
-
-typedef struct TrackDraw {
-	uintptr_t track;
-	TrackerGridState* gridstate;
-	double height;
-	bool playon;
-} TrackDraw;
-
-void trackdraw_init(TrackDraw*, TrackerGridState*, uintptr_t index,
-	double height, bool playon);
-void trackdraw_draw(TrackDraw*, psy_ui_Graphics*, double cpx,
-	psy_ui_RealPoint dest);
-
-typedef struct TrackPlainDraw {
-	uintptr_t track;
-	TrackerGridState* gridstate;
-	double height;
-	bool playon;
-	psy_ui_RealPoint zoom;
-	const TrackerHeaderCoords* coords;
-} TrackPlainDraw;
-
-void trackplaindraw_init(TrackPlainDraw*, TrackerGridState*,
-	psy_ui_RealPoint zoom, uintptr_t index,
-	double height, bool playon);
-void trackplaindraw_draw(TrackPlainDraw*, psy_ui_Graphics*, double cpx,
-	psy_ui_RealPoint dest);
-
-
+//
 typedef struct TrackerHeader {
 	// inherits
 	psy_ui_Component component;
-	// internal data	
-	TrackerGridState defaultgridstate;
-	bool classic;			
-	uintptr_t currtrack;
-	bool playing;
-	bool usebitmapskin;
-	psy_Table trackstates;
+	// internal
+	uintptr_t currtrack;		
+	psy_Table boxes;
 	// references
-	TrackerGridState* gridstate;
+	TrackerGridState* state;
 	Workspace* workspace;
-	const TrackerHeaderCoords* coords;
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent, TrackConfig*,
 	TrackerGridState*, Workspace*);
-void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*,
-	TrackConfig*);
-void trackerheader_updatecoords(TrackerHeader*);
 void trackerheader_build(TrackerHeader*);
 
 INLINE psy_ui_Component* trackerheader_base(TrackerHeader* self)
@@ -72,4 +55,4 @@ INLINE psy_ui_Component* trackerheader_base(TrackerHeader* self)
 	return &self->component;
 }
 
-#endif /* PATTERNHEADER */
+#endif /* PATTERNHEADER_H */

@@ -248,15 +248,13 @@ static void about_vtable_init(About* self)
 	self->component.vtable = &about_vtable;
 }
 // implementation
-void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
+void about_init(About* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
 	about_vtable_init(self);	
-	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);
-	self->workspace = workspace;	
+	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
-	self->notebook.component.debugflag = 200;
 	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
 		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_make_ph(0.5)));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),

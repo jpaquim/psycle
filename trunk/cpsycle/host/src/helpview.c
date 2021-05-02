@@ -67,9 +67,8 @@ void helpview_initsections(HelpView* self, Workspace* workspace)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	help_init(&self->help, psy_ui_notebook_base(&self->notebook), workspace);
-	about_init(&self->about, psy_ui_notebook_base(&self->notebook), workspace);
-	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));
-	
+	about_init(&self->about, psy_ui_notebook_base(&self->notebook));
+	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 }
 
 void helpview_initsectionfloated(HelpView* self)
