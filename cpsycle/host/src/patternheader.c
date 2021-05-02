@@ -266,6 +266,7 @@ static void trackerheader_ondestroy(TrackerHeader*);
 static void trackerheader_onpatterncursorchanged(TrackerHeader*, Workspace*);
 static void trackerheader_ontimer(TrackerHeader*, uintptr_t timerid);
 static void trackerheader_updateplayons(TrackerHeader*);
+static void trackerheader_onmousewheel(TrackerHeader*, psy_ui_MouseEvent*);
 
 // vtable
 static psy_ui_ComponentVtable trackerheader_vtable;
@@ -278,7 +279,11 @@ static void trackerheader_vtable_init(TrackerHeader* self)
 		trackerheader_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
 			trackerheader_ondestroy;
 		trackerheader_vtable.ontimer = (psy_ui_fp_component_ontimer)
-			trackerheader_ontimer;		
+			trackerheader_ontimer;
+		trackerheader_vtable.onmousewheel =
+			(psy_ui_fp_component_onmouseevent)
+			trackerheader_onmousewheel;
+
 		trackerheader_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &trackerheader_vtable;
@@ -362,5 +367,16 @@ void trackerheader_updateplayons(TrackerHeader* self)
 		} else {
 			patterntrackbox_playoff(trackbox);
 		}
+	}
+}
+
+void trackerheader_onmousewheel(TrackerHeader* self, psy_ui_MouseEvent* ev)
+{
+	if (ev->delta > 0) {
+		psy_audio_player_sendcmd(workspace_player(self->workspace),
+			"tracker", psy_eventdrivercmd_makeid(CMD_COLUMNNEXT));		
+	} else {		
+		psy_audio_player_sendcmd(workspace_player(self->workspace),
+			"tracker", psy_eventdrivercmd_makeid(CMD_COLUMNPREV));		
 	}
 }
