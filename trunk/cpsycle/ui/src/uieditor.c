@@ -42,7 +42,7 @@ static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 static void psy_ui_editor_getrange(psy_ui_Editor*, intptr_t start, intptr_t end, char* text);
 static void setstyle(psy_ui_Editor*, int style, COLORREF fore, COLORREF back,
 	int size, const char* face);
-static void psy_ui_editor_onstylesupdate(psy_ui_Editor* self);
+static void psy_ui_editor_onstylesupdate(psy_ui_Editor*);
 
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -344,6 +344,11 @@ void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
 	psy_ui_editor_setbackgroundcolour(self,
 		psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour);
 	psy_ui_editor_setfont(self, NULL);
+}
+
+void psy_ui_editor_gotoline(psy_ui_Editor* self, uintptr_t line)
+{
+	sci(self, SCI_GOTOLINE, line, 0);
 }
 
 #else

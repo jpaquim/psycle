@@ -32,6 +32,12 @@ void psy_ui_editor_enableedit(psy_ui_Editor*);
 void psy_ui_editor_preventedit(psy_ui_Editor*);
 void psy_ui_editor_enablewrap(psy_ui_Editor*);
 void psy_ui_editor_disablewrap(psy_ui_Editor*);
+void psy_ui_editor_gotoline(psy_ui_Editor*, uintptr_t line);
+
+INLINE psy_ui_Component* psy_ui_editor_base(psy_ui_Editor* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

@@ -490,16 +490,32 @@ psy_ui_RealRectangle dev_screenposition(psy_ui_win_ComponentImp* self)
 void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
-	const psy_ui_TextMetric* tm;
-		
+	const psy_ui_TextMetric* tm;	
+	
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
-	SetWindowPos(self->hwnd, 0,
-		(int)psy_ui_value_px(&topleft.x, tm, NULL),
-		(int)psy_ui_value_px(&topleft.y, tm, NULL),
-		(int)(psy_ui_value_px(&size.width, tm, NULL)),
-		(int)(psy_ui_value_px(&size.height, tm, NULL)),
-		SWP_NOZORDER);	
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		if (psy_ui_component_parent_const(self->component)) {
+			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+		} else {
+			parentsize = psy_ui_component_scrollsize(self->component);
+		}
+		SetWindowPos(self->hwnd, 0,
+			(int)psy_ui_value_px(&topleft.x, tm, &parentsize),
+			(int)psy_ui_value_px(&topleft.y, tm, &parentsize),
+			(int)(psy_ui_value_px(&size.width, tm, &parentsize)),
+			(int)(psy_ui_value_px(&size.height, tm, &parentsize)),
+			SWP_NOZORDER);
+	} else {
+		SetWindowPos(self->hwnd, 0,
+			(int)psy_ui_value_px(&topleft.x, tm, NULL),
+			(int)psy_ui_value_px(&topleft.y, tm, NULL),
+			(int)(psy_ui_value_px(&size.width, tm, NULL)),
+			(int)(psy_ui_value_px(&size.height, tm, NULL)),
+			SWP_NOZORDER);
+	}
 	dev_updatesize(self);	
 }
 
