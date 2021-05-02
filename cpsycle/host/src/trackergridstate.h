@@ -163,7 +163,8 @@ typedef struct TrackerGridState {
 	bool singlemode;
 } TrackerGridState;
 
-void trackergridstate_init(TrackerGridState*, TrackConfig*);
+void trackergridstate_init(TrackerGridState*, TrackConfig*,
+	psy_audio_Patterns*, psy_audio_Sequence*);
 void trackergridstate_dispose(TrackerGridState*);
 double trackergridstate_trackwidth(const TrackerGridState*, uintptr_t track);
 double trackergridstate_defaulttrackwidth(const TrackerGridState* self);

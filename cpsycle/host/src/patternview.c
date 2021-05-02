@@ -154,7 +154,13 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	trackerlinestate_setlpb(&self->linestate, psy_audio_player_lpb(
 		workspace_player(self->workspace)));
 	self->linestate.skin = &self->skin;
-	trackergridstate_init(&self->gridstate, &self->trackconfig);
+	if (workspace->song) {
+		trackergridstate_init(&self->gridstate, &self->trackconfig,
+			&workspace->song->patterns,
+			&workspace->song->sequence);
+	} else {
+		trackergridstate_init(&self->gridstate, &self->trackconfig, NULL, NULL);
+	}
 	self->gridstate.skin = &self->skin;	
 	psy_signal_connect(&self->gridstate.signal_cursorchanged, self,
 		patternview_ontrackercursorchanged);
@@ -361,7 +367,7 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	self->linestate.trackidx = workspace_sequenceeditposition(
 		self->workspace).track;
 	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
-	trackergrid_setpattern(&self->tracker, pattern);	
+	trackergrid_setpattern(&self->tracker, pattern);
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);	
 	psy_ui_component_invalidate(&self->header.component);
@@ -388,6 +394,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 		patternview_setpattern(self, NULL);
 		pianoroll_setpattern(&self->pianoroll, NULL);
 	}
+	trackerheader_build(&self->header);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -528,9 +535,9 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* config,
 	psy_Property* property)
 {	
-	self->header.usebitmapskin = patternviewconfig_useheaderbitmap(config);
-	trackerheader_updatecoords(&self->header);
-	self->left.linenumberslabel.useheaderbitmap = self->header.usebitmapskin;
+	// self->header.usebitmapskin = patternviewconfig_useheaderbitmap(config);	
+	self->left.linenumberslabel.useheaderbitmap = TRUE;
+		// patternviewconfig_useheaderbitmap(config); // self->header.usebitmapskin;
 	if (patternviewconfig_linenumbers(config)) {
 		patternview_showlinenumbers(self);
 	} else {
@@ -907,8 +914,7 @@ void patternview_updateksin(PatternView* self)
 	psy_ui_component_setbackgroundcolour(&self->blockmenu.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->blockmenu.component,
-		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
-	trackerheader_updatecoords(&self->header);
+		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_invalidate(&self->component);
 }
 

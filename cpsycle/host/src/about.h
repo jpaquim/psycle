@@ -10,10 +10,8 @@
 #include <uibutton.h>
 #include <uiedit.h>
 #include <uieditor.h>
-#include <uiimage.h>
 #include <uilabel.h>
 #include <uinotebook.h>
-#include <uiscroller.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +21,7 @@ extern "C" {
 //
 // Shows information about Psycle.
 
+// Contrib
 typedef struct Contrib {
 	// inherits
 	psy_ui_Component component;
@@ -44,7 +43,8 @@ INLINE psy_ui_Component* contrib_base(Contrib* self)
 	return &self->component;
 }
 
-typedef struct Version{
+// Version
+typedef struct Version {
 	// inherits
 	psy_ui_Component component;
 	// internal
@@ -60,6 +60,7 @@ INLINE psy_ui_Component* version_base(Version* self)
 	return &self->component;
 }
 
+// Licence
 typedef struct Licence {
 	// inherits
 	psy_ui_Component component;
@@ -76,6 +77,7 @@ INLINE psy_ui_Component* licence_base(Licence* self)
 	return &self->component;
 }
 
+// About
 typedef struct About {
 	// inherits
 	psy_ui_Component component;
@@ -83,16 +85,14 @@ typedef struct About {
 	psy_ui_Notebook notebook;
 	Contrib contrib;
 	Version version;
-	Licence licence;
+	Licence licence;	
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
-	psy_ui_Button okbutton;
-	// references
-	Workspace* workspace;
+	psy_ui_Button okbutton;	
 } About;
 
-void about_init(About*, psy_ui_Component* parent, Workspace*);
+void about_init(About*, psy_ui_Component* parent);
 
 INLINE psy_ui_Component* about_base(About* self)
 {

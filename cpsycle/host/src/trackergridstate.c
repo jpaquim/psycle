@@ -45,15 +45,16 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // implementation
-void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
+void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
+	psy_audio_Patterns* patterns, psy_audio_Sequence* sequence)
 {
 	// init signals
 	psy_signal_init(&self->signal_cursorchanged);
 	// set references
 	self->trackconfig = trackconfig;
 	self->pattern = NULL;
-	self->patterns = NULL;
-	self->sequence = NULL;
+	self->patterns = patterns;
+	self->sequence = sequence;
 	self->skin = NULL;	
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
