@@ -273,7 +273,7 @@ void generatorui_onmousedown(GeneratorUi* self, psy_ui_MouseEvent* ev)
 		self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
 		psy_ui_mouseevent_stoppropagation(ev);
 	}
-	if (!ev->bubble) {
+	if (!ev->event.bubble) {
 		psy_ui_component_invalidate(&self->component);
 	}
 }

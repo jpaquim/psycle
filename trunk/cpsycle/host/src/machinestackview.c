@@ -871,24 +871,24 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	}
 	insize = psy_ui_component_preferredsize(&self->view->inputs.component,
 		NULL);
-	insizepx = psy_ui_size_px(&insize, tm);
+	insizepx = psy_ui_size_px(&insize, tm, NULL);
 	effectsize = psy_ui_component_preferredsize(&self->view->pane.component,
 		NULL);
-	effectsizepx = psy_ui_size_px(&effectsize, tm);
+	effectsizepx = psy_ui_size_px(&effectsize, tm, NULL);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
 		outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
 			NULL);
 	} else {
 		outsize = psy_ui_size_make_em(0.0, 1.0);
 	}
-	outsizepx = psy_ui_size_px(&outsize, tm);	
+	outsizepx = psy_ui_size_px(&outsize, tm, NULL);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
 		volumesize = psy_ui_component_preferredsize(&self->view->volumes.component,
 			NULL);
 	} else {
 		volumesize = psy_ui_size_make_em(0.0, 1.0);
 	}
-	volumesizepx = psy_ui_size_px(&volumesize, tm);
+	volumesizepx = psy_ui_size_px(&volumesize, tm, NULL);
 	volumesizepx.height = psy_max(182.0, volumesizepx.height);
 	psy_ui_component_setposition(&self->inputs.component,
 		psy_ui_rectangle_make(
@@ -1001,7 +1001,7 @@ void machinestackinputs_onpreferredsize(MachineStackInputs* self,
 	rv->height = self->state->effectsize.height;
 	spacing = psy_ui_value_make_eh(1.0);
 	psy_ui_value_add(&rv->height, &spacing,
-		psy_ui_component_textmetric(&self->component));
+		psy_ui_component_textmetric(&self->component), NULL);
 	rv->width = self->state->columnsize.width;
 	// +1 : empty space to add new generator
 	psy_ui_value_mul_real(&rv->width, 
@@ -1270,7 +1270,7 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 			self->state->effectinsertpos = c - column->offset;
 			self->state->effectinsertright =
 				(ev->pt.x > psy_ui_value_px(&self->state->effectsize.width,
-					psy_ui_component_textmetric(&self->component)));
+					psy_ui_component_textmetric(&self->component), NULL));
 			self->state->selected = self->column;			
 		} else {
 			self->state->effectinsertpos = psy_INDEX_INVALID;
@@ -1356,7 +1356,7 @@ void machinestackpane_build(MachineStackPane* self)
 
 						psy_ui_margin_init_all(&levelmargin,
 							psy_ui_value_make_px((column->offset - 1) *
-								(psy_ui_value_px(&self->state->columnsize.height, NULL) + 20.0) + 20.0),
+								(psy_ui_value_px(&self->state->columnsize.height, NULL, NULL) + 20.0) + 20.0),
 							psy_ui_value_zero(), psy_ui_value_zero(), psy_ui_value_zero());						
 						psy_ui_component_setmargin(&arrow->component, levelmargin);
 						psy_ui_component_setalign(&trackpane->component, psy_ui_ALIGN_TOP);

@@ -721,7 +721,7 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 			rv->width = psy_ui_value_make_px(65535.0);
 		}
 		pluginsview_computetextsizes(self, psy_ui_value_px(&rv->width,
-			psy_ui_component_textmetric(&self->component)));		
+			psy_ui_component_textmetric(&self->component), NULL));
 		rv->height = psy_ui_value_make_px(self->lineheight *
 			pluginsview_numlines(self));
 	}

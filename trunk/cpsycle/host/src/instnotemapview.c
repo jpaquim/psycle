@@ -186,7 +186,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_scrollsize(&self->component), tm);
+		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_setscrollstep_height(&self->component,
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
@@ -441,7 +441,7 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_scrollsize(&self->component), tm);
+		psy_ui_component_scrollsize(&self->component), tm, NULL);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 	psy_ui_component_setscrollstep_height(&self->component,
 		psy_ui_value_make_px(self->metrics.lineheight * 3));
@@ -512,7 +512,7 @@ double instrumententryview_keysize(InstrumentEntryView* self)
 	}
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scrollsize(&self->component);
-	return psy_ui_value_px(&size.width, tm) / numwhitekeys;
+	return psy_ui_value_px(&size.width, tm, NULL) / numwhitekeys;
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,
@@ -768,7 +768,7 @@ double instrumententrystate_columnpx(
 
 			column = instrumententrystate_at(self, i);
 			if (column) {
-				rv += psy_ui_value_px(&column->width, tm);
+				rv += psy_ui_value_px(&column->width, tm, NULL);
 			}
 		}
 		return rv;
@@ -794,7 +794,7 @@ uintptr_t instrumententrystate_pxtocolumn(
 			
 			column = instrumententrystate_at(self, i);
 			if (column) {
-				cpx += psy_ui_value_px(&column->width, tm);
+				cpx += psy_ui_value_px(&column->width, tm, NULL);
 			}
 			if (cpx >= x) {
 				rv = i;
@@ -864,7 +864,7 @@ void instrumententrytableviewheader_ondraw(InstrumentEntryTableViewHeader* self,
 			}			
 			psy_ui_textout(g, cpx, 0, label, psy_strlen(label));
 		}
-		cpx += psy_ui_value_px(&column->width, tm);
+		cpx += psy_ui_value_px(&column->width, tm, NULL);
 	}
 }
 
@@ -1020,7 +1020,7 @@ void instrumententryrow_ondraw(InstrumentEntryRow* self, psy_ui_Graphics* g)
 		}
 		psy_ui_textout(g, cpx, cpy, text, psy_strlen(text));
 		cpx += psy_ui_value_px(&columndef->width,
-			psy_ui_component_textmetric(&self->component));
+			psy_ui_component_textmetric(&self->component), NULL);
 	}
 }
 

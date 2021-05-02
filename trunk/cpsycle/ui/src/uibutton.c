@@ -211,7 +211,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		}
 		psy_ui_textoutrectangle(g,
 			psy_ui_button_center(self, psy_ui_realpoint_make(ident, 0.0),
-				psy_ui_realsize_make(psy_ui_value_px(&textsize.width, tm),
+				psy_ui_realsize_make(psy_ui_value_px(&textsize.width, tm, NULL),
 				tm->tmHeight)),
 			psy_ui_ETO_CLIPPED, r, text, strlen(text));
 	}
@@ -273,7 +273,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 					psy_ui_Size textsize;
 
 					textsize = psy_ui_size_make_em(2.0, 1.0);
-					psy_ui_value_add(&size.width, &textsize.width, tm);
+					psy_ui_value_add(&size.width, &textsize.width, tm, NULL);
 				} else {
 					size.width = psy_ui_value_make_ew(1.0);
 				}
@@ -293,19 +293,19 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 				ratio = 1.0;
 			}			
 			rv->width = psy_ui_add_values(
-				psy_ui_value_make_px(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm);
+				psy_ui_value_make_px(srcbpmsize.width * ratio + tm->tmAveCharWidth * self->bitmapident), size.width, tm, NULL);
 			rv->height = psy_ui_value_make_eh(self->linespacing);
-			rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);
-			rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
+			rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
+			rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 			return;
 		}
-		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 4);
+		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL) + 4);
 	} else {
 		rv->width = psy_ui_value_make_ew(self->charnumber);
 	}
 	rv->height = psy_ui_value_make_eh(self->linespacing);	
-	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm), tm);	
-	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm), tm);
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);	
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)

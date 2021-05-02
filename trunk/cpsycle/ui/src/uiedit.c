@@ -129,7 +129,7 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			size = psy_ui_component_textsize(&self->component,
 				psy_ui_edit_text(self));
 			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width,
-				psy_ui_component_textmetric(&self->component)) + 2);
+				psy_ui_component_textmetric(&self->component), NULL) + 2);
 			rv->height = psy_ui_value_make_px((int)(tm->tmHeight * self->linenumber));
 		} else {				
 			rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber + 2);

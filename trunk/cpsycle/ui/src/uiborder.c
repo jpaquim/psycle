@@ -6,8 +6,7 @@
 #include "uiborder.h"
 
 psy_ui_Size psy_ui_border_size(const psy_ui_Border* self)
-{
-	psy_ui_Size rv;
+{	
 	psy_ui_RealSize maxsize;
 
 	psy_ui_realsize_init(&maxsize);

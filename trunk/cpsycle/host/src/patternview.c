@@ -675,7 +675,7 @@ void patternview_computemetrics(PatternView* self)
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) + 2;
 	self->linestate.lineheightpx = 
 		psy_max(1.0,
-		floor(psy_ui_value_px(&self->linestate.lineheight, tm)));
+		floor(psy_ui_value_px(&self->linestate.lineheight, tm, NULL)));
 	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;
 	trackwidth = psy_max(
 		trackergridstate_preferredtrackwidth(&self->gridstate),
@@ -686,7 +686,7 @@ void patternview_computemetrics(PatternView* self)
 		self->trackconfig.patterntrackident = 0;
 	}
 	self->trackconfig.headertrackident = 0;
-	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, tm) /
+	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, tm, NULL) /
 		self->linestate.lineheightpx);
 }
 
@@ -771,9 +771,9 @@ void patternview_setfont(PatternView* self, psy_ui_Font* font)
 	psy_ui_component_setfont(trackergrid_base(&self->tracker), font);		
 	self->linestate.gridfont = psy_ui_component_font(trackergrid_base(&self->tracker));
 	self->linestate.lineheightpx = psy_max(1.0, psy_ui_value_px(
-		&self->linestate.lineheight, tm));
+		&self->linestate.lineheight, tm, NULL));
 	self->griddefaults.linestate->lineheightpx = psy_ui_value_px(
-		&self->linestate.lineheight, tm);
+		&self->linestate.lineheight, tm, NULL);
 	psy_ui_component_setfont(trackerheader_base(&self->header), font);
 	psy_ui_component_setfont(trackergrid_base(&self->griddefaults), font);
 	psy_ui_component_setfont(trackerlinenumbers_base(&self->left.linenumbers), font);	
@@ -1162,7 +1162,7 @@ void patternview_updatescrollstep(PatternView* self)
 	scrollleft = psy_ui_component_scrollleft(trackergrid_base(&self->tracker));
 	scrollstepx = trackergridstate_trackwidth(&self->gridstate,
 			trackergridstate_pxtotrack(&self->gridstate,
-				psy_ui_value_px(&scrollleft, tm)));
+				psy_ui_value_px(&scrollleft, tm, NULL)));
 	psy_ui_component_setscrollstep(trackergrid_base(&self->tracker),
 		psy_ui_size_make_px(
 			scrollstepx,

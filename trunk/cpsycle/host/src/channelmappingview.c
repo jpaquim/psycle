@@ -153,9 +153,9 @@ void pinedit_drawpininput(PinEdit* self, psy_ui_Graphics* g, uintptr_t pin)
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
 	psy_snprintf(text, 40, "In %.02d", (int)pin);
-	psy_ui_textout(g, psy_ui_value_px(&size.width, tm) - tm->tmAveCharWidth * 8,
+	psy_ui_textout(g, psy_ui_value_px(&size.width, tm, NULL) - tm->tmAveCharWidth * 8,
 		cpy + centery, text, psy_strlen(text));
-	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) -
+	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm, NULL) -
 		(pinwidth + tm->tmAveCharWidth * numchars),
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	psy_ui_drawrectangle(g, r);
@@ -210,7 +210,7 @@ psy_ui_RealRectangle pinedit_pinposition_input(PinEdit* self, uintptr_t pin)
 	numchars = 10;
 	pinwidth = (int)(tm->tmAveCharWidth * 1.5);
 	pinheight = (int)(tm->tmHeight * 0.75);
-	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm) - (pinwidth + tm->tmAveCharWidth * numchars),
+	psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, tm, NULL) - (pinwidth + tm->tmAveCharWidth * numchars),
 		cpy + height2 - pinheight / 2, pinwidth, pinheight);
 	return r;
 }
@@ -317,7 +317,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 				self->drag_src = pinconnection->src;
 				size = psy_ui_component_scrollsize(&self->component);
 				tm = psy_ui_component_textmetric(&self->component);
-				if (ev->pt.x < psy_ui_value_px(&size.width, tm) / 2) {
+				if (ev->pt.x < psy_ui_value_px(&size.width, tm, NULL) / 2) {
 					self->dragmode = PINEDIT_DRAG_SRC;
 				} else {
 					self->dragmode = PINEDIT_DRAG_DST;

@@ -218,7 +218,7 @@ void newmachinesectionbar_init(NewMachineSectionBar* self, psy_ui_Component* par
 	psy_ui_label_init_text(&self->descsection, &self->component, NULL,
 		"newmachine.section");	
 	psy_ui_margin_init_em(&spacing, 0.2, 0.2, 0.2, 0.2);
-	psy_ui_component_setspacing_children(&self->component, spacing);
+	psy_ui_component_setspacing_children(&self->component, spacing);	
 }
 
 // NewMachineSortBar
@@ -770,7 +770,7 @@ void newmachinecategorybar_ondragover(NewMachineCategoryBar* self, psy_ui_DragEv
 		component = (psy_ui_Component*)p->entry;
 		position = psy_ui_component_position(component);
 		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
-			ev->preventdefault = TRUE;
+			ev->mouse.event.preventdefault = TRUE;
 			break;
 		}
 	}	
@@ -1170,7 +1170,7 @@ void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 			if (!psy_audio_pluginsections_pluginbyid(
 					&self->workspace->pluginsections, self->section,
 					psy_property_key(plugin))) {
-				ev->preventdefault = TRUE;				
+				ev->mouse.event.preventdefault = TRUE;
 				break;
 			}
 		}
@@ -1179,7 +1179,7 @@ void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 
 void newmachinesection_ondrop(NewMachineSection* self, psy_ui_DragEvent* ev)
 {	
-	ev->preventdefault = TRUE;
+	ev->mouse.event.preventdefault = TRUE;
 	if (ev->dataTransfer) {		
 		psy_List* p;
 		psy_audio_PluginSections* sections;

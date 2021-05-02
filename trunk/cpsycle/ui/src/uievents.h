@@ -18,15 +18,19 @@ extern "C" {
 
 struct psy_ui_Component;
 
-typedef struct {
+typedef struct psy_ui_Event {
+	bool bubble;
+	bool preventdefault;
+} psy_ui_Event;
+
+typedef struct psy_ui_KeyEvent {
+	psy_ui_Event event;
 	uint32_t keycode;
 	intptr_t keydata;
 	bool shift;
 	bool ctrl;
 	bool alt;
-	int repeat;
-	bool bubble;
-	bool preventdefault;
+	int repeat;	
 	struct psy_ui_Component* target;
 } psy_ui_KeyEvent;
 
@@ -41,13 +45,12 @@ INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Compo
 }
 
 typedef struct psy_ui_MouseEvent {
+	psy_ui_Event event;
 	psy_ui_RealPoint pt;
 	uintptr_t button;
 	intptr_t delta;
 	bool shift;
-	bool ctrl;
-	bool bubble;
-	bool preventdefault;
+	bool ctrl;	
 	struct psy_ui_Component* target;
 } psy_ui_MouseEvent;
 
@@ -59,7 +62,7 @@ void psy_ui_mouseevent_settarget(psy_ui_MouseEvent*, struct psy_ui_Component* ta
 
 INLINE void psy_ui_mouseevent_preventdefault(psy_ui_MouseEvent* self)
 {
-	self->preventdefault = TRUE;
+	self->event.preventdefault = TRUE;
 }
 
 struct psy_ui_Component;
@@ -69,7 +72,6 @@ typedef struct psy_ui_DragEvent {
 	struct psy_ui_Component* target;
 	bool active;
 	psy_Property* dataTransfer;
-	bool preventdefault;
 } psy_ui_DragEvent;
 
 void psy_ui_dragevent_init(psy_ui_DragEvent*);

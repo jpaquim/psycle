@@ -344,7 +344,8 @@ bool propertiesrenderline_updatecolour(PropertiesRenderLine* self)
 		psy_snprintf(str, 64, "0x%d", psy_property_item_int(self->property));
 		psy_ui_label_settext(self->label, str);		
 		psy_ui_component_setbackgroundcolour(self->colour,
-			psy_ui_colour_make(psy_property_item_int(self->property)));
+			psy_ui_colour_make((uint32_t)psy_property_item_int(
+				self->property)));
 		return TRUE;
 	}
 	return FALSE;

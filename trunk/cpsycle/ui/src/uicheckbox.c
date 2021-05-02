@@ -126,7 +126,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 			size = psy_ui_component_textsize(&self->component,
 				self->translation);
 			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width,
-				psy_ui_component_textmetric(&self->component)) + 20);
+				psy_ui_component_textmetric(&self->component), NULL) + 20);
 			rv->height = size.height;
 		}
 	}

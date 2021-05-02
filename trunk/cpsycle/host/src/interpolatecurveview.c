@@ -327,12 +327,12 @@ void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, double x, dou
 	
 	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	scalex = psy_ui_value_px(&size.width, tm) / self->range;
-	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
+	scalex = psy_ui_value_px(&size.width, tm, NULL) / self->range;
+	scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
 
 	offset = x / scalex;
 	offset = (intptr_t)(offset / 0.25) * 0.25;
-	value = (psy_dsp_big_amp_t)(psy_ui_value_px(&size.height, tm) - y) / scaley;
+	value = (psy_dsp_big_amp_t)(psy_ui_value_px(&size.height, tm, NULL) - y) / scaley;
 	
 	kf = self->keyframes;
 	while (kf != 0) {
@@ -385,9 +385,9 @@ void interpolatecurvebox_onmousemove(InterpolateCurveBox* self, psy_ui_MouseEven
 
 		size = psy_ui_component_scrollsize(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
+		scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
 		entry = (KeyFrame*)self->dragkeyframe->entry;
-		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm) - ev->pt.y) * 1 / scaley);
+		entry->value = (intptr_t)((psy_ui_value_px(&size.height, tm, NULL) - ev->pt.y) * 1 / scaley);
 		if (entry->value < self->minval) {
 			entry->value = self->minval;
 		} else 
@@ -415,8 +415,8 @@ psy_List* interpolatecurvebox_hittest(InterpolateCurveBox* self, double x, doubl
 
 	size = psy_ui_component_scrollsize(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	scalex = psy_ui_value_px(&size.width, tm) / self->range;
-	scaley = psy_ui_value_px(&size.height, tm) / (double)0xFF;
+	scalex = psy_ui_value_px(&size.width, tm, NULL) / self->range;
+	scaley = psy_ui_value_px(&size.height, tm, NULL) / (double)0xFF;
 	kf = self->keyframes;
 	while (kf != 0) {
 		KeyFrame* entry;

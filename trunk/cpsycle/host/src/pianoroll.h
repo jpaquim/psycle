@@ -60,7 +60,7 @@ INLINE double keyboardstate_height(KeyboardState* self,
 	assert(self);
 
 	return keyboardstate_numkeys(self) *
-		psy_ui_value_px(&self->keyheight, tm);
+		psy_ui_value_px(&self->keyheight, tm, NULL);
 }
 
 INLINE double keyboardstate_keytopx(KeyboardState* self, intptr_t key)

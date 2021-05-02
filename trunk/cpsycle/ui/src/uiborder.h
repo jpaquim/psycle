@@ -139,12 +139,12 @@ INLINE bool psy_ui_border_monochrome(const psy_ui_Border* self)
 INLINE bool psy_ui_border_isround(const psy_ui_Border* self)
 {
 	return self->border_top_left_radius.quantity != 0 &&
-		(psy_ui_value_px(&self->border_top_left_radius, 0) ==
-			psy_ui_value_px(&self->border_top_right_radius, 0)) &&
-		(psy_ui_value_px(&self->border_top_right_radius, 0) ==
-			psy_ui_value_px(&self->border_bottom_right_radius, 0)) &&
-		(psy_ui_value_px(&self->border_bottom_right_radius, 0) ==
-			psy_ui_value_px(&self->border_bottom_left_radius, 0));
+		(psy_ui_value_px(&self->border_top_left_radius, 0, NULL) ==
+			psy_ui_value_px(&self->border_top_right_radius, 0, NULL)) &&
+		(psy_ui_value_px(&self->border_top_right_radius, 0, NULL) ==
+			psy_ui_value_px(&self->border_bottom_right_radius, 0, NULL)) &&
+		(psy_ui_value_px(&self->border_bottom_right_radius, 0, NULL) ==
+			psy_ui_value_px(&self->border_bottom_left_radius, 0, NULL));
 }
 
 INLINE void psy_ui_border_init_solid(psy_ui_Border* self, psy_ui_Colour colour)
