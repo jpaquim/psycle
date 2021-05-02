@@ -796,7 +796,8 @@ void patternview_onpatterncursorchanged(PatternView* self, Workspace* sender)
 	oldcursor = self->gridstate.cursor;	
 	self->gridstate.cursor = workspace_patterncursor(sender);
 	if (!psy_audio_patterncursor_equal(&self->gridstate.cursor, &oldcursor)) {
-		if (self->gridstate.pattern && psy_audio_player_playing(&sender->player) && workspace_followingsong(sender)) {
+		if (self->gridstate.pattern && psy_audio_player_playing(&sender->player) &&
+				workspace_followingsong(sender)) {
 			bool scrolldown;
 
 			scrolldown = self->linestate.lastplayposition <
@@ -825,7 +826,7 @@ void patternview_onpatterncursorchanged(PatternView* self, Workspace* sender)
 		}
 	}	
 	trackergrid_invalidateinternalcursor(&self->tracker,
-		oldcursor);
+		oldcursor);		
 }
 
 void patternview_onlpbchanged(PatternView* self, psy_audio_Player* sender,
@@ -908,6 +909,8 @@ void patternview_updateksin(PatternView* self)
 	psy_ui_component_setcolour(&self->trackerscroller.vscroll.pane.component,
 		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->left.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->header.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->left.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
@@ -1091,23 +1094,33 @@ void patternview_oneventdriverinput(PatternView* self, psy_EventDriver* sender)
 		target = patternview_target(self, sender);
 		if (target == PATTERNVIEWTARGET_TRACKER) {
 			cmd = psy_eventdriver_getcmd(sender, "tracker");
-			if (cmd.id != -1) {
-				if (psy_ui_component_hasfocus(trackergrid_base(
-						&self->tracker))) {
+			if (cmd.id != -1) {			
+				if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
+					trackergrid_handlecommand(&self->tracker, cmd.id);					
+					psy_ui_component_invalidate(&self->header.component);
+				} else if (psy_ui_component_hasfocus(trackergrid_base(
+					&self->tracker))) {
 					trackergrid_handlecommand(&self->tracker, cmd.id);
-				}				
+				}
 			}
 		} else if (target == PATTERNVIEWTARGET_DEFAULTLINE) {
 			cmd = psy_eventdriver_getcmd(sender, "tracker");
 			if (cmd.id != -1 && (psy_ui_component_hasfocus(trackergrid_base(
 					&self->griddefaults)))) {
+				if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
+					psy_ui_component_invalidate(&self->header.component);
+				}
 				trackergrid_handlecommand(&self->griddefaults, cmd.id);
 			}
 		} else if (target == PATTERNVIEWTARGET_PIANOROLL) {
-			cmd = psy_eventdriver_getcmd(sender, "pianoroll");
+			cmd = psy_eventdriver_getcmd(sender, "tracker");
 			if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
 				trackergrid_handlecommand(&self->tracker, cmd.id);
+				workspace_setpatterncursor(self->workspace,
+					self->workspace->patterneditposition);
+				psy_ui_component_invalidate(&self->header.component);
 			} else {
+				cmd = psy_eventdriver_getcmd(sender, "pianoroll");			
 				pianoroll_handlecommand(&self->pianoroll, cmd.id);
 			}
 		}
