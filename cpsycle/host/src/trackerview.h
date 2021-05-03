@@ -43,7 +43,34 @@ typedef enum {
 	PATTERNCURSOR_STEP_LINES
 } PatternCursorStepMode;
 
-typedef struct {
+// TrackerGridColumn
+typedef struct TrackerGridColumn {
+	// inherits
+	psy_ui_Component component;
+	uintptr_t index;
+	uintptr_t editmode;	
+	// internal	
+	TrackerGridState* gridstate;
+	TrackerLineState* linestate;
+	Workspace* workspace;
+} TrackerGridColumn;
+
+void trackergridcolumn_init(TrackerGridColumn*, psy_ui_Component* parent,
+	psy_ui_Component* view, uintptr_t index, TrackerGridState*,
+	TrackerLineState*, TrackerGridEditMode, Workspace*);
+
+TrackerGridColumn* trackergridcolumn_alloc(void);
+TrackerGridColumn* trackergridcolumn_allocinit(psy_ui_Component* parent,
+	psy_ui_Component* view, uintptr_t index,
+	TrackerGridState* gridstate, TrackerLineState* linestate,
+	TrackerGridEditMode editmode, Workspace* workspace);
+
+INLINE psy_ui_Component* trackergridcolumn_base(TrackerGridColumn* self)
+{
+	return &self->component;
+}
+
+typedef struct TrackerGrid {
 	// inherits
 	psy_ui_Component component;
 	// signals	
@@ -52,11 +79,9 @@ typedef struct {
 	TrackerGridState defaultgridstate;	
 	TrackerLineState defaultlinestate;	
 	psy_dsp_NotesTabMode notestabmode;   
-	psy_audio_PatternCursor oldcursor;
-	psy_audio_PatternSelection selection;
+	psy_audio_PatternCursor oldcursor;	
 	psy_audio_PatternCursor dragselectionbase;
-	psy_audio_PatternCursor lastdragcursor;
-	bool midline;
+	psy_audio_PatternCursor lastdragcursor;	
 	int chordmodestarting;
 	bool chordmode;
 	uintptr_t chordbegin;
@@ -66,8 +91,7 @@ typedef struct {
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
 	bool syncpattern;
-	bool wraparound;
-	bool showemptydata;
+	bool wraparound;	
 	TrackerGridEditMode editmode;	
 	bool ft2home;
 	bool ft2delete;
@@ -75,6 +99,7 @@ typedef struct {
 	bool movecursoronestep;
 	intptr_t pgupdownstep;
 	bool preventscrolltop;
+	psy_Table columns;
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
@@ -83,6 +108,8 @@ typedef struct {
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
 	TrackerGridState*, TrackerLineState*, TrackerGridEditMode, Workspace*);
+
+void trackergrid_build(TrackerGrid*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,
 	TrackConfig*);
 void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
@@ -106,7 +133,7 @@ void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
 INLINE const psy_audio_PatternSelection* trackergrid_selection(
 	const TrackerGrid* self)
 {
-	return &self->selection;
+	return &self->gridstate->selection;
 }
 
 INLINE void trackergrid_enableft2home(TrackerGrid* self)
@@ -173,7 +200,7 @@ void trackergrid_blocktransposedown12(TrackerGrid*);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
-	return self->midline;
+	return self->gridstate->midline;
 }
 
 INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)

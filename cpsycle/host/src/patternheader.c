@@ -7,12 +7,8 @@
 // local
 #include "patterncmds.h"
 #include "skingraphics.h"
-#include "trackbox.h"
-// std
-#include <math.h>
 // platform
 #include "../../detail/portable.h"
-#include "../../detail/trace.h"
 
 // prototypes
 static void patterntrackbox_ondraw(PatternTrackBox*, psy_ui_Graphics*);
@@ -28,7 +24,6 @@ static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onmousedown(PatternTrackBox*, psy_ui_MouseEvent*);
 static void patterntrackbox_onpreferredsize(PatternTrackBox*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-
 // vtable
 static psy_ui_ComponentVtable patterntrackbox_vtable;
 static bool patterntrackbox_vtable_initialized = FALSE;
@@ -329,7 +324,7 @@ void trackerheader_build(TrackerHeader* self)
 			psy_ui_ALIGN_LEFT);		
 		psy_table_insert(&self->boxes, index, (void*)trackbox);
 	}
-	psy_ui_component_align(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }
 
 void trackerheader_onpatterncursorchanged(TrackerHeader* self,

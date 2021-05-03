@@ -423,7 +423,7 @@ void dev_move(psy_ui_win_ComponentImp* self, psy_ui_Point topleft)
 		(int)psy_ui_value_px(&topleft.x, dev_textmetric(self), NULL),
 		(int)psy_ui_value_px(&topleft.y, dev_textmetric(self), NULL),
 		0, 0,
-		SWP_NOZORDER | SWP_NOSIZE);	
+		SWP_NOZORDER | SWP_NOSIZE);
 }
 
 void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)

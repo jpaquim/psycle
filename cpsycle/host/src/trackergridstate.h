@@ -149,6 +149,21 @@ void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
 void trackconfig_initcolumns(TrackConfig*, bool wideinst);
 
+// TrackerEventTable
+typedef struct TrackerEventTable {
+	psy_Table tracks;
+	double seqoffset;
+	psy_audio_PatternSelection clip;
+} TrackerEventTable;
+
+void trackereventtable_init(TrackerEventTable*);
+void trackereventtable_dispose(TrackerEventTable*);
+
+void trackereventtable_clearevents(TrackerEventTable*);
+psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
+
+
+// TrackerGridState
 typedef struct TrackerGridState {
 	// signals
 	psy_Signal signal_cursorchanged;
@@ -161,6 +176,10 @@ typedef struct TrackerGridState {
 	PatternViewSkin* skin;
 	TrackConfig* trackconfig;
 	bool singlemode;
+	TrackerEventTable trackevents;
+	psy_audio_PatternSelection selection;
+	bool showemptydata;
+	bool midline;
 } TrackerGridState;
 
 void trackergridstate_init(TrackerGridState*, TrackConfig*,
