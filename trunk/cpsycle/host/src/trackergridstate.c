@@ -43,6 +43,62 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 	}
 }
 
+// TrackerEventTable
+void trackereventtable_init(TrackerEventTable* self)
+{
+	psy_table_init(&self->tracks);
+}
+
+void trackereventtable_dispose(TrackerEventTable* self)
+{
+	psy_TableIterator it;
+
+	assert(self);
+
+	for (it = psy_table_begin(&self->tracks);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_List** track;
+
+		track = psy_tableiterator_value(&it);
+		psy_list_free(*track);
+		free(psy_tableiterator_value(&it));
+	}
+	psy_table_dispose(&self->tracks);
+}
+
+void trackereventtable_clearevents(TrackerEventTable* self)
+{
+	psy_TableIterator it;
+
+	assert(self);	
+	
+	for (it = psy_table_begin(&self->tracks);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_List** track;
+
+		track = psy_tableiterator_value(&it);
+		psy_list_free(*track);
+		*track = NULL;		
+	}	
+}
+
+psy_List** trackereventtable_track(TrackerEventTable* self, uintptr_t index)
+{
+	psy_List** rv;
+
+	rv = (psy_List**)psy_table_at(&self->tracks, index);
+	if (!rv) {
+		rv = (psy_List**)malloc(sizeof(psy_List**));
+		assert(rv);
+		*rv = NULL;
+		psy_table_insert(&self->tracks, index, (void*)rv);
+	}
+	return rv;
+}
+
+
 // TrackerGridState
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
@@ -59,11 +115,15 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
 	self->singlemode = TRUE;
+	self->showemptydata = FALSE;
+	self->midline = FALSE;
+	trackereventtable_init(&self->trackevents);
 }
 
 void trackergridstate_dispose(TrackerGridState* self)
 {
 	psy_signal_dispose(&self->signal_cursorchanged);
+	trackereventtable_dispose(&self->trackevents);
 }
 
 uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
