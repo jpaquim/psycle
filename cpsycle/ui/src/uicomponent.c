@@ -291,7 +291,7 @@ static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseenter(psy_ui_Component* self)
-{
+{	
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_HOVER);
 }
 

@@ -129,6 +129,14 @@ void psy_ui_componentstyle_readstyle(psy_ui_ComponentStyle* self,
 			}			
 		}
 		psy_ui_style_copy(style, psy_ui_style(style_id));
+	} else {
+		psy_ui_Style* style;
+
+		style = psy_table_at(&self->styles, (uintptr_t)state);
+		if (style) {
+			psy_ui_style_dispose(style);
+			psy_table_remove(&self->styles, (uintptr_t)state);
+		}
 	}
 }
 
@@ -137,7 +145,10 @@ void psy_ui_componentstyle_readstyles(psy_ui_ComponentStyle* self)
 	psy_TableIterator it;	
 
 	assert(self);
-	
+		
+	psy_table_disposeall(&self->styles, (psy_fp_disposefunc)
+		psy_ui_style_dispose);
+	psy_table_init(&self->styles);
 	for (it = psy_table_begin(&self->styleids);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
