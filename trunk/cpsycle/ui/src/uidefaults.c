@@ -183,6 +183,13 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_weighted(&onsecondary, weak));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_SELECT, style);
+	// tab_label
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&primary, weak));
+	psy_ui_style_setspacing_em(style, 0.0, 1.9, 0.0, 1.0);
+	psy_ui_style_setmargin_em(style, 0.0, 0.3, 0.0, 0.0);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_TAB_LABEL, style);
 	// header;
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,

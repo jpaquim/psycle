@@ -115,8 +115,8 @@ void psy_ui_tab_setmode(psy_ui_Tab* self, TabMode mode)
 	self->mode = mode;	
 	if (mode == psy_ui_TABMODE_LABEL) {
 		psy_ui_component_setstyletypes(&self->component,
-			psy_ui_STYLE_LABEL, psy_INDEX_INVALID, psy_INDEX_INVALID,
-			psy_INDEX_INVALID);
+			psy_ui_STYLE_TAB_LABEL, psy_INDEX_INVALID, psy_INDEX_INVALID,
+			psy_INDEX_INVALID);		
 	} else {
 		psy_ui_component_setstyletypes(&self->component,
 			psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
