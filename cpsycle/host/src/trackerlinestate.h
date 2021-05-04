@@ -38,6 +38,7 @@ typedef struct TrackerLineState {
 	PatternViewSkin* skin;
 	const psy_ui_Font* gridfont;
 	bool singlemode;
+	uintptr_t maxlines;
 } TrackerLineState;
 
 void trackerlinestate_init(TrackerLineState*);
@@ -135,7 +136,7 @@ INLINE double trackerlinestate_lineheight(TrackerLineState* self)
 }
 
 // quantized
-INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(TrackerLineState* self,
+INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(const TrackerLineState* self,
 	double px)
 {
 	assert(self);
@@ -165,6 +166,13 @@ INLINE bool trackerlinestate_testplayposition(TrackerLineState* self,
 
 void trackerlinestate_clip(TrackerLineState*, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv);
+
+INLINE uintptr_t trackerlinestate_midline(const TrackerLineState* self,
+	double scrolltop_px)
+{
+	return trackerlinestate_beattoline(self, trackerlinestate_pxtobeat(
+		self, scrolltop_px) + self->visilines / 2);
+}
 
 #ifdef __cplusplus
 }

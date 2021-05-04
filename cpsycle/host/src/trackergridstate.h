@@ -104,14 +104,14 @@ enum {
 typedef struct TrackColumnDef {
 	uintptr_t numdigits;
 	uintptr_t numchars;
-	uintptr_t marginright;
+	double marginright;
 	int wrapeditcolumn;
 	int wrapclearcolumn;
 	uintptr_t emptyvalue;
 } TrackColumnDef;
 
 void trackcolumndef_init(TrackColumnDef* self, int numdigits, int numchars,
-	int marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue);
+	double marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue);
 
 typedef struct TrackDef {
 	TrackColumnDef note;
@@ -135,6 +135,7 @@ double trackdef_width(TrackDef*, double textwidth);
 double trackdef_basewidth(TrackDef* self, double textwidth);
 TrackColumnDef* trackdef_columndef(TrackDef* self, intptr_t column);
 double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth);
+double trackdef_marginright(TrackDef* self, intptr_t column);
 
 typedef struct TrackConfig {
 	psy_Table trackconfigs;
@@ -154,6 +155,8 @@ typedef struct TrackerEventTable {
 	psy_Table tracks;
 	double seqoffset;
 	psy_audio_PatternSelection clip;
+	uintptr_t currcursorline;
+	uintptr_t currplaybarline;	
 } TrackerEventTable;
 
 void trackereventtable_init(TrackerEventTable*);
@@ -161,7 +164,6 @@ void trackereventtable_dispose(TrackerEventTable*);
 
 void trackereventtable_clearevents(TrackerEventTable*);
 psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
-
 
 // TrackerGridState
 typedef struct TrackerGridState {
@@ -180,6 +182,12 @@ typedef struct TrackerGridState {
 	psy_audio_PatternSelection selection;
 	bool showemptydata;
 	bool midline;
+	bool playbar;
+	bool drawbeathighlights;
+	bool synccursor;
+	bool colresize;
+	uintptr_t resizetrack;
+	psy_audio_PatternEntry empty;
 } TrackerGridState;
 
 void trackergridstate_init(TrackerGridState*, TrackConfig*,
@@ -268,5 +276,20 @@ void trackergridstate_synccursor(TrackerGridState*);
 void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor);
 void trackergridstate_clip(TrackerGridState*, const psy_ui_RealRectangle* clip,
 	psy_audio_PatternSelection* rv);
+
+INLINE void trackergridstate_enableplaybar(TrackerGridState* self)
+{
+	self->playbar = TRUE;
+}
+
+INLINE void trackergridstate_preventplaybar(TrackerGridState* self)
+{
+	self->playbar = FALSE;
+}
+
+INLINE bool trackergridstate_hasplaybar(const TrackerGridState* self)
+{
+	return self->playbar;
+}
 
 #endif /* TRACKERGRIDSTATE */
