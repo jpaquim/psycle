@@ -44,8 +44,7 @@ typedef struct TrackerGridColumn {
 	psy_ui_Component component;
 	uintptr_t index;
 	psy_ui_RealSize digitsize;	
-	psy_ui_RealSize resizestartsize;
-	psy_ui_RealSize resizesize;
+	psy_ui_RealSize resizestartsize;	
 	// internal			
 	// references
 	TrackerGridState* gridstate;

@@ -25,6 +25,9 @@ void trackconfig_init(TrackConfig* self, bool wideinst)
 	self->textleftedge = 2;
 	self->patterntrackident = 0;
 	self->headertrackident = 0;
+	self->colresize = FALSE;
+	self->resizetrack = psy_INDEX_INVALID;
+	psy_ui_realsize_init(&self->resizesize);
 	psy_table_init(&self->trackconfigs);
 	trackconfig_initcolumns(self, wideinst);
 }
@@ -116,8 +119,7 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
 	self->skin = NULL;	
 	self->drawbeathighlights = TRUE;
 	self->synccursor = TRUE;
-	self->colresize = FALSE;
-	self->resizetrack = psy_INDEX_INVALID;
+	self->showresizecursor = TRUE;
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
 	self->singlemode = TRUE;

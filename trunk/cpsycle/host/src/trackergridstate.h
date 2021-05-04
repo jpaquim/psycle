@@ -144,6 +144,9 @@ typedef struct TrackConfig {
 	double textleftedge;
 	double patterntrackident;
 	double headertrackident;
+	bool colresize;
+	uintptr_t resizetrack;
+	psy_ui_RealSize resizesize;
 } TrackConfig;
 
 void trackconfig_init(TrackConfig*, bool wideinst);
@@ -184,9 +187,8 @@ typedef struct TrackerGridState {
 	bool midline;
 	bool playbar;
 	bool drawbeathighlights;
-	bool synccursor;
-	bool colresize;
-	uintptr_t resizetrack;
+	bool synccursor;	
+	bool showresizecursor;
 	psy_audio_PatternEntry empty;
 } TrackerGridState;
 
