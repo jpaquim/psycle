@@ -148,7 +148,7 @@ void psy_ui_componentstyle_readstyles(psy_ui_ComponentStyle* self)
 		
 	psy_table_disposeall(&self->styles, (psy_fp_disposefunc)
 		psy_ui_style_dispose);
-	psy_table_init(&self->styles);
+	psy_table_init(&self->styles);	
 	for (it = psy_table_begin(&self->styleids);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -159,6 +159,7 @@ void psy_ui_componentstyle_readstyles(psy_ui_ComponentStyle* self)
 		id = (uintptr_t)psy_tableiterator_value(&it);
 		psy_ui_componentstyle_readstyle(self, state, id);
 	}
+	self->currstyle = &self->style;
 }
 
 bool psy_ui_componentstyle_addstate(psy_ui_ComponentStyle* self,

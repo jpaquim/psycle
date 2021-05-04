@@ -121,10 +121,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						componentsize));	
 			} else if (component->align == psy_ui_ALIGN_CENTER) {
 				psy_ui_RealPoint center;				
-				
-				if (component->debugflag == 200) {
-					self = self;
-				}
+								
 				center.x = cp_topleft.x + floor((cp_bottomright.x - cp_topleft.x -
 						psy_ui_margin_width_px(&c_margin, c_tm, &size) -
 						psy_ui_value_px(&componentsize.width, tm, &size)) / 2.0) +
