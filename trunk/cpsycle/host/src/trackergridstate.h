@@ -121,6 +121,7 @@ typedef struct TrackDef {
 	TrackColumnDef cmd;
 	TrackColumnDef param;
 	intptr_t numfx;
+	intptr_t numnotes;
 } TrackDef;
 
 void trackdef_init(TrackDef*);
@@ -145,8 +146,9 @@ typedef struct TrackConfig {
 	double patterntrackident;
 	double headertrackident;
 	bool colresize;
+	bool noteresize;
 	uintptr_t resizetrack;
-	psy_ui_RealSize resizesize;
+	psy_ui_RealSize resizesize;	
 } TrackConfig;
 
 void trackconfig_init(TrackConfig*, bool wideinst);
@@ -203,9 +205,6 @@ TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
 double trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_pxtotrack(const TrackerGridState*, double x);
 double trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track,
-	double x);
-
 
 INLINE void trackergridstate_setsequence(TrackerGridState* self,
 	psy_audio_Sequence* sequence)

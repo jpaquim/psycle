@@ -26,6 +26,7 @@ void trackconfig_init(TrackConfig* self, bool wideinst)
 	self->patterntrackident = 0;
 	self->headertrackident = 0;
 	self->colresize = FALSE;
+	self->noteresize = FALSE;
 	self->resizetrack = psy_INDEX_INVALID;
 	psy_ui_realsize_init(&self->resizesize);
 	psy_table_init(&self->trackconfigs);
@@ -103,7 +104,6 @@ psy_List** trackereventtable_track(TrackerEventTable* self, uintptr_t index)
 	return rv;
 }
 
-
 // TrackerGridState
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
@@ -138,22 +138,6 @@ void trackergridstate_dispose(TrackerGridState* self)
 	psy_audio_patternentry_dispose(&self->empty);
 }
 
-uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
-	double x)
-{	
-	uintptr_t rv;
-	double trackx;
-	double maincolumnwidth;
-	TrackDef* trackdef;
-
-	trackdef = trackergridstate_trackdef(self, track);
-	trackx = trackergridstate_tracktopx(self, track);
-	maincolumnwidth = trackergridstate_basewidth(self, track);
-	rv = (uintptr_t)((x - (trackx + maincolumnwidth)) / (4 * self->trackconfig->textwidth));
-	return rv;
-}
-
-
 // TrackColumnDef
 // implementation
 void trackcolumndef_init(TrackColumnDef* self, int numdigits, int numchars,
@@ -183,6 +167,7 @@ void trackdef_init(TrackDef* self)
 	trackcolumndef_init(&self->param, 2, 2, 1,
 		TRACKER_COLUMN_CMD, TRACKER_COLUMN_PARAM, 0x00);
 	self->numfx = 1;
+	self->numnotes = 1;
 }
 
 
@@ -420,10 +405,11 @@ double trackdef_width(TrackDef* self, double textwidth)
 {
 	double rv = 0;
 	uintptr_t column;
-
+	
 	for (column = 0; column < trackdef_numcolumns(self); ++column) {
-		rv += trackdef_columnwidth(self, column, textwidth);
+		rv += trackdef_columnwidth(self, column, textwidth);		
 	}
+	rv = self->numnotes * rv;
 	return rv;
 }
 
