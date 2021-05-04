@@ -249,8 +249,15 @@ void patterntrackbox_onmousedown(PatternTrackBox* self,
 void patterntrackbox_onpreferredsize(PatternTrackBox* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	*rv = psy_ui_size_make_px(		
-		trackergridstate_trackwidth(self->state, self->index),
+	if (self->state->trackconfig->colresize &&
+			self->state->trackconfig->resizetrack == self->index) {
+		rv->width = psy_ui_value_make_px(
+			self->state->trackconfig->resizesize.width);
+	} else {
+		rv->width = psy_ui_value_make_px(trackergridstate_trackwidth(
+			self->state, self->index));
+	}
+	rv->height = psy_ui_value_make_px(
 		self->state->skin->headercoords.background.dest.bottom -
 		self->state->skin->headercoords.background.dest.top);
 }

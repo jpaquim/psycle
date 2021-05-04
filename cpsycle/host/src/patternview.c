@@ -193,6 +193,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->griddefaults.gridstate->drawbeathighlights = FALSE;
 	self->griddefaults.preventeventdriver = TRUE;
 	self->griddefaults.gridstate->synccursor = FALSE;
+	self->griddefaults.gridstate->showresizecursor = TRUE;
 	trackergrid_setpattern(&self->griddefaults,
 		&workspace_player(self->workspace)->patterndefaults);
 	trackergrid_build(&self->griddefaults);
@@ -1172,10 +1173,13 @@ PatternViewTarget patternview_target(PatternView* self, psy_EventDriver* sender)
 void patternview_oncolresize(PatternView* self, TrackerGrid* sender)
 {
 	if (sender == &self->griddefaults) {
+		psy_ui_component_align(trackergrid_base(&self->tracker));
 		psy_ui_component_invalidate(trackergrid_base(&self->tracker));
 	} else {
-		psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));
+		psy_ui_component_align(trackergrid_base(&self->griddefaults));
+		psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));		
 	}
+	psy_ui_component_align(trackerheader_base(&self->header));
 	psy_ui_component_invalidate(trackerheader_base(&self->header));
 }
 

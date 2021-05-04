@@ -182,7 +182,8 @@ TrackerGridColumn* trackergridcolumn_allocinit(psy_ui_Component* parent,
 void trackergridcolumn_ondraw(TrackerGridColumn* self, psy_ui_Graphics* g)
 {	
 	trackergridcolumn_drawtrackevents(self, g);
-	if (self->gridstate->colresize && self->gridstate->resizetrack == self->index) {
+	if (self->gridstate->trackconfig->colresize &&
+			self->gridstate->trackconfig->resizetrack == self->index) {
 		trackergridcolumn_drawresizebar(self, g);		
 	}
 }
@@ -361,10 +362,10 @@ void trackergridcolumn_onmousedown(TrackerGridColumn* self, psy_ui_MouseEvent* e
 
 	size = psy_ui_component_size_px(&self->component);
 	if (ev->pt.x > size.width - 5) {
-		self->gridstate->resizetrack = self->index;
-		self->gridstate->colresize = TRUE;		
+		self->gridstate->trackconfig->resizetrack = self->index;
+		self->gridstate->trackconfig->colresize = TRUE;
 		self->resizestartsize = size;
-		self->resizesize = size;
+		self->gridstate->trackconfig->resizesize = size;
 		psy_ui_component_invalidate(&self->component);
 		psy_ui_component_capture(&self->component);
 	}
@@ -372,30 +373,41 @@ void trackergridcolumn_onmousedown(TrackerGridColumn* self, psy_ui_MouseEvent* e
 
 void trackergridcolumn_onmousemove(TrackerGridColumn* self, psy_ui_MouseEvent* ev)
 {
-	if (self->gridstate->colresize) {
+	psy_ui_RealSize size;
+
+	size = psy_ui_component_size_px(&self->component);
+	if (self->gridstate->trackconfig->colresize) {
 		double basewidth;
 
-		self->trackdef = trackergridstate_trackdef(self->gridstate, self->index);
-		basewidth = trackdef_basewidth(self->trackdef, self->gridstate->trackconfig->textwidth);
+		self->trackdef = trackergridstate_trackdef(self->gridstate,
+			self->index);
+		basewidth = trackdef_basewidth(self->trackdef,
+			self->gridstate->trackconfig->textwidth);
 		if (ev->pt.x > basewidth) {
-			self->resizesize.width = ev->pt.x;
+			self->gridstate->trackconfig->resizesize.width = ev->pt.x;
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
-			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
+			psy_ui_component_invalidate(psy_ui_component_parent(
+				&self->component));
 		}
+	} else if (self->gridstate->showresizecursor &&
+			(ev->pt.x > size.width - 5)) {
+		psy_ui_component_setcursor(&self->component,
+			psy_ui_CURSORSTYLE_COL_RESIZE);
 	}
 }
 
 void trackergridcolumn_onmouseup(TrackerGridColumn* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_releasecapture(&self->component);
-	if (self->gridstate->colresize && self->resizesize.width > 0.0) {
+	if (self->gridstate->trackconfig->colresize &&
+			self->gridstate->trackconfig->resizesize.width > 0.0) {
 		double basewidth;
 		uintptr_t numfx;
 
 		self->trackdef = trackergridstate_trackdef(self->gridstate, self->index);
 		basewidth = trackdef_basewidth(self->trackdef, self->gridstate->trackconfig->textwidth);		
 		numfx = (uintptr_t)psy_max(1.0, 
-			(psy_max(0.0, self->resizesize.width - basewidth)) /
+			(psy_max(0.0, self->gridstate->trackconfig->resizesize.width - basewidth)) /
 			(self->gridstate->trackconfig->textwidth * 4.0));		
 		if (self->trackdef != &self->gridstate->trackconfig->trackdef) {
 			self->trackdef->numfx = numfx;
@@ -409,7 +421,7 @@ void trackergridcolumn_onmouseup(TrackerGridColumn* self, psy_ui_MouseEvent* ev)
 			}
 		}				
 	}	
-	self->gridstate->resizetrack = psy_INDEX_INVALID;
+	self->gridstate->trackconfig->resizetrack = psy_INDEX_INVALID;
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
@@ -417,11 +429,12 @@ void trackergridcolumn_onmouseup(TrackerGridColumn* self, psy_ui_MouseEvent* ev)
 void trackergridcolumn_onpreferredsize(TrackerGridColumn* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	if (self->gridstate->colresize && self->gridstate->resizetrack == self->index) {
-		rv->width = psy_ui_value_make_px(self->resizesize.width);		
+	if (self->gridstate->trackconfig->colresize &&
+			self->gridstate->trackconfig->resizetrack == self->index) {
+		rv->width = psy_ui_value_make_px(self->gridstate->trackconfig->resizesize.width);
 	} else {
 		rv->width = psy_ui_value_make_px(trackergridstate_trackwidth(
-			self->gridstate, self->index));
+			self->gridstate, self->index));		
 	}
 	if (self->linestate->maxlines == psy_INDEX_INVALID) {
 		rv->height = psy_ui_value_make_px(
@@ -1851,34 +1864,34 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate) && ev->button == 1) {		
-		if (!self->gridstate->colresize) {
-			if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-				psy_audio_patternselection_disable(&self->gridstate->selection);
-				psy_ui_component_invalidate(&self->component);
-			}
-			self->dragselectionbase = trackergrid_makecursor(self, ev->pt.x, ev->pt.y);
-			if (!self->linestate->singlemode) {
-				psy_audio_OrderIndex index;
-
-				index = trackergrid_checkupdatecursorseqoffset(self,
-					&self->dragselectionbase);
-				if (psy_audio_orderindex_valid(&index)) {
-					self->preventscrolltop = TRUE;
-					workspace_setsequenceeditposition(self->workspace,
-						index);
-					self->preventscrolltop = FALSE;
-				}
-			}
-			self->lastdragcursor = self->dragselectionbase;
-			psy_audio_patternselection_init_all(&self->gridstate->selection,
-				self->dragselectionbase, self->dragselectionbase);
+	if (self->gridstate->trackconfig->colresize) {
+		psy_signal_emit(&self->signal_colresize, self, 0);
+	} else if (trackergridstate_pattern(self->gridstate) && ev->button == 1) {		
+		if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
 			psy_audio_patternselection_disable(&self->gridstate->selection);
-			if (!psy_ui_component_hasfocus(&self->component)) {
-				psy_ui_component_setfocus(&self->component);
-			}
-			psy_ui_component_capture(&self->component);
+			psy_ui_component_invalidate(&self->component);
 		}
+		self->dragselectionbase = trackergrid_makecursor(self, ev->pt.x, ev->pt.y);
+		if (!self->linestate->singlemode) {
+			psy_audio_OrderIndex index;
+
+			index = trackergrid_checkupdatecursorseqoffset(self,
+				&self->dragselectionbase);
+			if (psy_audio_orderindex_valid(&index)) {
+				self->preventscrolltop = TRUE;
+				workspace_setsequenceeditposition(self->workspace,
+					index);
+				self->preventscrolltop = FALSE;
+			}
+		}
+		self->lastdragcursor = self->dragselectionbase;
+		psy_audio_patternselection_init_all(&self->gridstate->selection,
+			self->dragselectionbase, self->dragselectionbase);
+		psy_audio_patternselection_disable(&self->gridstate->selection);
+		if (!psy_ui_component_hasfocus(&self->component)) {
+			psy_ui_component_setfocus(&self->component);
+		}
+		psy_ui_component_capture(&self->component);		
 	}
 }
 
@@ -1889,7 +1902,9 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (ev->button == 1) {
-		if (!self->gridstate->colresize) {			
+		if (self->gridstate->trackconfig->colresize) {
+			psy_signal_emit(&self->signal_colresize, self, 0);
+		} else {		
 			cursor = trackergrid_checkcursorbounds(self,
 				trackergrid_makecursor(self, ev->pt.x, ev->pt.y));
 			if (!psy_audio_patterncursor_equal(&cursor,
@@ -1976,8 +1991,9 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	if (ev->button != 1) {
 		return;
 	}	
-	if (self->gridstate->colresize) {
-		self->gridstate->colresize = FALSE;		
+	if (self->gridstate->trackconfig->colresize) {
+		self->gridstate->trackconfig->colresize = FALSE;
+		psy_signal_emit(&self->signal_colresize, self, 0);		
 	} else if (!psy_audio_patternselection_valid(&self->gridstate->selection)) {
 		// set cursor only, if no selection was made
 		if (!self->linestate->singlemode) {
