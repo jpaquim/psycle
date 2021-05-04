@@ -224,10 +224,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					imp->component->vtable->ondestroy(imp->component);
 				}								
 				break;			
-			case WM_TIMER:
-				if (imp->component->debugflag == 200) {
-					imp = imp;
-				}
+			case WM_TIMER:				
 				imp->component->vtable->ontimer(imp->component,
 					(uintptr_t)wParam);				
 				psy_signal_emit(&imp->component->signal_timer,

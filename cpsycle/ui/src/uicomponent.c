@@ -460,7 +460,7 @@ void invalidate(psy_ui_Component* self)
 void psy_ui_component_updatefont(psy_ui_Component* self)
 {
 	// assert(self->imp);   
-	if (self->imp) {
+	if (self->imp) {		
 		self->imp->vtable->dev_setfont(self->imp,
 			psy_ui_component_font(self));
 		if (self->vtable->setfont != setfont) {

@@ -76,8 +76,7 @@ typedef struct TrackerGrid {
 	TrackerGridState defaultgridstate;	
 	TrackerLineState defaultlinestate;	
 	psy_dsp_NotesTabMode notestabmode;   
-	psy_audio_PatternCursor oldcursor;	
-	psy_audio_PatternCursor dragselectionbase;
+	psy_audio_PatternCursor oldcursor;
 	psy_audio_PatternCursor lastdragcursor;	
 	int chordmodestarting;
 	bool chordmode;

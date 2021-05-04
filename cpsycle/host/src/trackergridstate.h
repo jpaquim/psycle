@@ -189,6 +189,8 @@ typedef struct TrackerGridState {
 	bool drawbeathighlights;
 	bool synccursor;	
 	bool showresizecursor;
+	psy_audio_PatternCursor dragselectionbase;
+	psy_audio_PatternCursor dragcursor;
 	psy_audio_PatternEntry empty;
 } TrackerGridState;
 
@@ -293,5 +295,12 @@ INLINE bool trackergridstate_hasplaybar(const TrackerGridState* self)
 {
 	return self->playbar;
 }
+
+void trackergridstate_startdragselection(TrackerGridState*,
+	psy_audio_PatternCursor, double bpl);
+void trackergridstate_dragselection(TrackerGridState*,
+	psy_audio_PatternCursor, double bpl);
+psy_audio_PatternCursor trackergridstate_checkcursorbounds(TrackerGridState*,
+	psy_audio_PatternCursor);
 
 #endif /* TRACKERGRIDSTATE */

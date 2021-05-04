@@ -121,7 +121,8 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
 	self->synccursor = TRUE;
 	self->showresizecursor = TRUE;
 	// init internal data
-	psy_audio_patterncursor_init(&self->cursor);	
+	psy_audio_patterncursor_init(&self->cursor);
+	psy_audio_patterncursor_init(&self->dragcursor);
 	self->singlemode = TRUE;
 	self->showemptydata = FALSE;
 	self->midline = FALSE;
@@ -507,4 +508,76 @@ void trackergridstate_clip(TrackerGridState* self, const psy_ui_RealRectangle* c
 	}
 	rv->bottomright.column = 0;
 	rv->bottomright.digit = 0;	
+}
+
+void trackergridstate_startdragselection(TrackerGridState* self,
+	psy_audio_PatternCursor cursor, double bpl)
+{
+	assert(self);
+
+	psy_audio_patternselection_enable(&self->selection);
+	self->selection.topleft = cursor;
+	self->selection.bottomright = cursor;
+	if (cursor.track >= self->dragselectionbase.track) {
+		self->selection.topleft.track = self->dragselectionbase.track;
+		self->selection.bottomright.track = cursor.track;
+	} else {
+		self->selection.topleft.track = cursor.track;
+		self->selection.bottomright.track = self->dragselectionbase.track;
+	}
+	if (cursor.offset >= self->dragselectionbase.offset) {
+		self->selection.topleft.offset = self->dragselectionbase.offset;
+		self->selection.bottomright.offset = cursor.offset + bpl;
+	} else {
+		self->selection.topleft.offset = cursor.offset;
+		self->selection.bottomright.offset = self->dragselectionbase.offset +
+			bpl;
+	}
+	self->selection.bottomright.track += 1;
+}
+
+void trackergridstate_dragselection(TrackerGridState* self, psy_audio_PatternCursor cursor,
+	double bpl)
+{
+	assert(self);
+
+	if (cursor.track >= self->dragselectionbase.track) {
+		self->selection.topleft.track = self->dragselectionbase.track;
+		self->selection.bottomright.track = cursor.track + 1;
+	} else {
+		self->selection.topleft.track = cursor.track;
+		self->selection.bottomright.track = self->dragselectionbase.track + 1;
+	}
+	if (cursor.offset >= self->dragselectionbase.offset) {
+		self->selection.topleft.offset = self->dragselectionbase.offset;
+		self->selection.bottomright.offset = cursor.offset + bpl;
+	} else {
+		self->selection.topleft.offset = cursor.offset;
+		self->selection.bottomright.offset = self->dragselectionbase.offset + bpl;
+	}	
+}
+
+psy_audio_PatternCursor trackergridstate_checkcursorbounds(TrackerGridState* self,
+	psy_audio_PatternCursor cursor)
+{
+	psy_audio_PatternCursor rv;
+
+	rv = cursor;
+	if (rv.offset < 0) {
+		rv.offset = 0;
+	} else {
+		if (self->pattern) {
+			if (rv.offset >= psy_audio_pattern_length(self->pattern)) {
+				rv.offset = psy_audio_pattern_length(self->pattern);
+			}
+		} else {
+			rv.offset = 0;
+		}
+	}
+	if (rv.track < 0) {
+		rv.track = 0;
+	} else if (rv.track >= trackergridstate_numsongtracks(self)) {
+		rv.track = trackergridstate_numsongtracks(self);
+	}
+	return rv;
 }
