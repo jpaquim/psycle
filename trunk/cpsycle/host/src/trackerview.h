@@ -33,11 +33,6 @@ typedef struct {
 } TrackerColumnFlags;
 
 typedef enum {
-	TRACKERGRID_EDITMODE_LOCAL,
-	TRACKERGRID_EDITMODE_SONG
-} TrackerGridEditMode;
-
-typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
 	PATTERNCURSOR_STEP_4BEAT,
 	PATTERNCURSOR_STEP_LINES
@@ -48,22 +43,25 @@ typedef struct TrackerGridColumn {
 	// inherits
 	psy_ui_Component component;
 	uintptr_t index;
-	uintptr_t editmode;	
-	// internal	
+	psy_ui_RealSize digitsize;	
+	psy_ui_RealSize resizestartsize;
+	psy_ui_RealSize resizesize;
+	// internal			
+	// references
 	TrackerGridState* gridstate;
-	TrackerLineState* linestate;
+	TrackerLineState* linestate;	
+	TrackDef* trackdef;
 	Workspace* workspace;
 } TrackerGridColumn;
 
 void trackergridcolumn_init(TrackerGridColumn*, psy_ui_Component* parent,
 	psy_ui_Component* view, uintptr_t index, TrackerGridState*,
-	TrackerLineState*, TrackerGridEditMode, Workspace*);
+	TrackerLineState*, Workspace*);
 
 TrackerGridColumn* trackergridcolumn_alloc(void);
 TrackerGridColumn* trackergridcolumn_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index,
-	TrackerGridState* gridstate, TrackerLineState* linestate,
-	TrackerGridEditMode editmode, Workspace* workspace);
+	psy_ui_Component* view, uintptr_t index, TrackerGridState* gridstate,
+	TrackerLineState* linestate, Workspace* workspace);
 
 INLINE psy_ui_Component* trackergridcolumn_base(TrackerGridColumn* self)
 {
@@ -85,14 +83,10 @@ typedef struct TrackerGrid {
 	int chordmodestarting;
 	bool chordmode;
 	uintptr_t chordbegin;
-	int columnresize;
-	uintptr_t dragcolumn;
-	double dragcolumnbase;
 	uintptr_t dragtrack;
 	uintptr_t dragparamcol;
 	bool syncpattern;
 	bool wraparound;	
-	TrackerGridEditMode editmode;	
 	bool ft2home;
 	bool ft2delete;
 	bool effcursoralwaysdown;
@@ -100,6 +94,7 @@ typedef struct TrackerGrid {
 	intptr_t pgupdownstep;
 	bool preventscrolltop;
 	psy_Table columns;
+	bool preventeventdriver;
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
@@ -107,7 +102,7 @@ typedef struct TrackerGrid {
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
-	TrackerGridState*, TrackerLineState*, TrackerGridEditMode, Workspace*);
+	TrackerGridState*, TrackerLineState*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,

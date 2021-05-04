@@ -182,13 +182,17 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->griddefaultspane, &self->component, NULL);
 	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
 	trackergrid_init(&self->griddefaults, &self->griddefaultspane, &self->trackconfig,
-		NULL, NULL, TRACKERGRID_EDITMODE_LOCAL, workspace);
+		NULL, NULL, workspace);
 	psy_ui_component_setwheelscroll(trackergrid_base(&self->griddefaults), 0);
 	self->griddefaults.defaultgridstate.skin = &self->skin;
 	self->griddefaults.defaultlinestate.skin = &self->skin;
+	trackergridstate_preventplaybar(self->griddefaults.gridstate);
 	psy_ui_component_setalign(&self->griddefaults.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
-	self->griddefaults.columnresize = 1;
+		psy_ui_ALIGN_FIXED_RESIZE);	
+	self->griddefaults.linestate->maxlines = 1;
+	self->griddefaults.gridstate->drawbeathighlights = FALSE;
+	self->griddefaults.preventeventdriver = TRUE;
+	self->griddefaults.gridstate->synccursor = FALSE;
 	trackergrid_setpattern(&self->griddefaults,
 		&workspace_player(self->workspace)->patterndefaults);
 	trackergrid_build(&self->griddefaults);
@@ -197,7 +201,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	// TrackerView	
 	trackergrid_init(&self->tracker, &self->editnotebook.component,
 		&self->trackconfig, &self->gridstate, &self->linestate,
-		TRACKERGRID_EDITMODE_SONG, workspace);	
+		workspace);	
 	psy_ui_component_setwheelscroll(&self->tracker.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
@@ -214,7 +218,11 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		workspace);	
 	psy_signal_connect(&self->pianoroll.scroller.pane.signal_draw, self,
 		patternview_drawtrackerbackground);
-	patternview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns, 0));	
+	if (workspace->song) {
+		patternview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns, 0));
+	} else {
+		patternview_setpattern(self, NULL);
+	}
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
 		patternview_onpatternpropertiesapply);
 	// blockmenu

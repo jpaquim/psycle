@@ -47,6 +47,8 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 void trackereventtable_init(TrackerEventTable* self)
 {
 	psy_table_init(&self->tracks);
+	self->currcursorline = 0;
+	self->currplaybarline = 0;
 }
 
 void trackereventtable_dispose(TrackerEventTable* self)
@@ -112,18 +114,25 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig,
 	self->patterns = patterns;
 	self->sequence = sequence;
 	self->skin = NULL;	
+	self->drawbeathighlights = TRUE;
+	self->synccursor = TRUE;
+	self->colresize = FALSE;
+	self->resizetrack = psy_INDEX_INVALID;
 	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);	
 	self->singlemode = TRUE;
 	self->showemptydata = FALSE;
 	self->midline = FALSE;
+	self->playbar = TRUE;
 	trackereventtable_init(&self->trackevents);
+	psy_audio_patternentry_init(&self->empty);
 }
 
 void trackergridstate_dispose(TrackerGridState* self)
 {
 	psy_signal_dispose(&self->signal_cursorchanged);
 	trackereventtable_dispose(&self->trackevents);
+	psy_audio_patternentry_dispose(&self->empty);
 }
 
 uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
@@ -145,7 +154,7 @@ uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track,
 // TrackColumnDef
 // implementation
 void trackcolumndef_init(TrackColumnDef* self, int numdigits, int numchars,
-	int marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue)
+	double marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue)
 {
 	self->numdigits = numdigits;
 	self->numchars = numchars;
@@ -421,6 +430,14 @@ double trackdef_columnwidth(TrackDef* self, intptr_t column, double textwidth)
 
 	coldef = trackdef_columndef(self, column);
 	return coldef ? coldef->numchars * textwidth + coldef->marginright : 0;
+}
+
+double trackdef_marginright(TrackDef* self, intptr_t column)
+{
+	TrackColumnDef* coldef;
+
+	coldef = trackdef_columndef(self, column);
+	return coldef ? coldef->marginright : 0;
 }
 
 TrackColumnDef* trackdef_columndef(TrackDef* self, intptr_t column)

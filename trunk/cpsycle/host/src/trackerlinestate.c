@@ -48,6 +48,7 @@ void trackerlinestate_init(TrackerLineState* self)
 	self->gridfont = NULL;
 	self->singlemode = TRUE;
 	self->trackidx = 0;
+	self->maxlines = psy_INDEX_INVALID;
 }
 
 void trackerlinestate_dispose(TrackerLineState* self)
