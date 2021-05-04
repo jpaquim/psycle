@@ -5,12 +5,14 @@
 #define psy_audio_TRACKSTATE_H
 
 #include <hashtbl.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_audio_TrackState {
+	psy_Signal signal_changed;
 	psy_Table mute;	
 	psy_Table record;
 	bool soloactive;

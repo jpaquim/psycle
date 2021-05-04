@@ -7,6 +7,7 @@
 
 void psy_audio_trackstate_init(psy_audio_TrackState* self)
 {	
+	psy_signal_init(&self->signal_changed);
 	psy_table_init(&self->mute);
 	psy_table_init(&self->record);
 	self->soloactive = 0;	
@@ -15,6 +16,7 @@ void psy_audio_trackstate_init(psy_audio_TrackState* self)
 
 void psy_audio_trackstate_dispose(psy_audio_TrackState* self)
 {
+	psy_signal_dispose(&self->signal_changed);
 	psy_table_dispose(&self->mute);
 	psy_table_dispose(&self->record);
 	self->soloactive = 0;	
@@ -26,6 +28,7 @@ void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState* self, uintptr_
 	psy_audio_trackstate_setsolotrack(self, track);
 	psy_table_clear(&self->mute);
 	psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_audio_trackstate_setsolotrack(psy_audio_TrackState* self, uintptr_t track)
@@ -38,6 +41,7 @@ void psy_audio_trackstate_deactivatesolotrack(psy_audio_TrackState* self)
 {
 	self->soloactive = FALSE;
 	psy_table_clear(&self->mute);
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_audio_trackstate_mutetrack(psy_audio_TrackState* self, uintptr_t track)
@@ -47,6 +51,7 @@ void psy_audio_trackstate_mutetrack(psy_audio_TrackState* self, uintptr_t track)
 	} else {
 		psy_table_remove(&self->mute, track);
 	}
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_audio_trackstate_unmutetrack(psy_audio_TrackState* self, uintptr_t track)
@@ -56,6 +61,7 @@ void psy_audio_trackstate_unmutetrack(psy_audio_TrackState* self, uintptr_t trac
 	} else {
 		psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
 	}
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 bool psy_audio_trackstate_istrackmuted(const psy_audio_TrackState* self, uintptr_t track)
@@ -80,12 +86,14 @@ uintptr_t psy_audio_trackstate_tracksoloed(const psy_audio_TrackState* self)
 
 void psy_audio_trackstate_armtrack(psy_audio_TrackState* self, uintptr_t track)
 {	
-	psy_table_insert(&self->record, track, (void*)(uintptr_t)TRUE);	
+	psy_table_insert(&self->record, track, (void*)(uintptr_t)TRUE);
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void psy_audio_trackstate_unarmtrack(psy_audio_TrackState* self, uintptr_t track)
 {	
 	psy_table_remove(&self->record, track);
+	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 bool psy_audio_trackstate_istrackarmed(const psy_audio_TrackState* self, uintptr_t track)

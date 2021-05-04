@@ -80,6 +80,7 @@ static void patternview_displaysequencepatterns(PatternView*);
 static void patternview_updatestates(PatternView*);
 static void patternview_drawtrackerbackground(PatternView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
+static void patternview_ontrackstatechanged(PatternView*, psy_audio_TrackState* sender);
 
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
@@ -221,6 +222,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_drawtrackerbackground);
 	if (workspace->song) {
 		patternview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns, 0));
+		psy_signal_connect(&workspace->song->patterns.trackstate.signal_changed, self,
+			patternview_ontrackstatechanged);
 	} else {
 		patternview_setpattern(self, NULL);
 	}
@@ -260,7 +263,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->contextbutton.signal_clicked,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		patternview_onsongchanged);
+		patternview_onsongchanged);	
 	psy_signal_connect(&workspace->sequenceselection.signal_changed,
 		self, patternview_onsequenceselectionchanged);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
@@ -391,7 +394,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 	psy_audio_Pattern* pattern;
 	
 	patternview_updatestates(self);
-	if (workspace->song) {		
+	if (workspace->song) {
 		pattern = psy_audio_sequence_pattern(
 			&workspace->song->sequence,
 			workspace->sequenceselection.editposition);
@@ -401,6 +404,10 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 			self, patternview_onsequencechanged);
 		psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
 			patternview_numtrackschanged);
+		psy_signal_connect(&workspace->song->patterns.trackstate.signal_changed, self,
+			patternview_ontrackstatechanged);
+		psy_signal_connect(&workspace->signal_songchanged, self,
+			patternview_onsongchanged);
 	} else {		
 		patternview_setpattern(self, NULL);
 		pianoroll_setpattern(&self->pianoroll, NULL);
@@ -1171,15 +1178,12 @@ PatternViewTarget patternview_target(PatternView* self, psy_EventDriver* sender)
 }
 
 void patternview_oncolresize(PatternView* self, TrackerGrid* sender)
-{
-	if (sender == &self->griddefaults) {
-		psy_ui_component_align(trackergrid_base(&self->tracker));
-		psy_ui_component_invalidate(trackergrid_base(&self->tracker));
-	} else {
-		psy_ui_component_align(trackergrid_base(&self->griddefaults));
-		psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));		
-	}
-	psy_ui_component_align(trackerheader_base(&self->header));
+{	
+	psy_ui_component_align(&self->trackerscroller.pane);
+	psy_ui_component_align(&self->griddefaultspane);
+	psy_ui_component_align(&self->headerpane);
+	psy_ui_component_invalidate(trackergrid_base(&self->griddefaults));
+	psy_ui_component_invalidate(trackergrid_base(&self->tracker));	
 	psy_ui_component_invalidate(trackerheader_base(&self->header));
 }
 
@@ -1203,9 +1207,7 @@ void patternview_updatescrollstep(PatternView* self)
 
 	tm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
 	scrollleft = psy_ui_component_scrollleft(trackergrid_base(&self->tracker));
-	scrollstepx = trackergridstate_trackwidth(&self->gridstate,
-			trackergridstate_pxtotrack(&self->gridstate,
-				psy_ui_value_px(&scrollleft, tm, NULL)));
+	scrollstepx = trackergridstate_defaulttrackwidth(&self->gridstate);
 	psy_ui_component_setscrollstep(trackergrid_base(&self->tracker),
 		psy_ui_size_make_px(
 			scrollstepx,
@@ -1367,4 +1369,9 @@ void patternview_drawtrackerbackground(PatternView* self, psy_ui_Component* send
 			psy_ui_drawsolidrectangle(g, bottom, psy_ui_component_backgroundcolour(sender));
 		}
 	}
+}
+
+void patternview_ontrackstatechanged(PatternView* self, psy_audio_TrackState* sender)
+{
+	psy_ui_component_invalidate(&self->header.component);
 }
