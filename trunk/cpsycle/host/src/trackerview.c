@@ -291,6 +291,7 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 			patternviewskin_separatorcolour(self->gridstate->skin, track,
 				trackergridstate_numsongtracks(self->gridstate)));
 	}
+	psy_list_free(q);
 }
 
 
