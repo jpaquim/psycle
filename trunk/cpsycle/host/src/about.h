@@ -89,10 +89,12 @@ typedef struct About {
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
-	psy_ui_Button okbutton;	
+	psy_ui_Button okbutton;
+	// references
+	Workspace* workspace;
 } About;
 
-void about_init(About*, psy_ui_Component* parent);
+void about_init(About*, psy_ui_Component* parent, Workspace*);
 
 INLINE psy_ui_Component* about_base(About* self)
 {

@@ -140,7 +140,11 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->navigating = FALSE;	
 	self->restoreview.id = VIEW_ID_MACHINEVIEW;
 	self->restoreview.section = SECTION_ID_MACHINEVIEW_WIRES;
-	self->patternsinglemode = TRUE;	
+	self->patternsinglemode = TRUE;
+	self->playrow = FALSE;
+	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
+	self->restorenumplaybeats = 4.0;
+	self->restoreloop = TRUE;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -1324,7 +1328,20 @@ void workspace_idle(Workspace* self)
 		self->scanfilename = NULL;
 		psy_audio_lock_leave(&self->pluginscanlock);
 	}
-	psy_audio_player_idle(&self->player);	
+	psy_audio_player_idle(&self->player);
+	if (self->playrow && !psy_audio_player_playing(&self->player)) {
+		self->playrow = FALSE;
+		psy_audio_sequencer_setplaymode(&self->player.sequencer,
+			self->restoreplaymode);
+		psy_audio_sequencer_setnumplaybeats(&self->player.sequencer,
+			self->restorenumplaybeats);
+		if (self->restoreloop) {
+			psy_audio_sequencer_loop(&self->player.sequencer);
+		} else {
+			psy_audio_sequencer_stoploop(&self->player.sequencer);
+		}
+		self->player.sequencer.playtrack = psy_INDEX_INVALID;
+	}
 }
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)
@@ -1751,6 +1768,29 @@ void workspace_multiselectgear(Workspace* self, psy_List* machinelist)
 	psy_signal_emit(&self->signal_gearselect, self, 1, machinelist);
 }
 
+void workspace_connectterminal(Workspace* self,
+	void* context,
+	fp_workspace_output out,
+	fp_workspace_output warning,
+	fp_workspace_output error)
+{
+	psy_signal_connect(&self->signal_terminal_out, context, out);
+	psy_signal_connect(&self->signal_terminal_warning, context, warning);
+	psy_signal_connect(&self->signal_terminal_error, context, error);
+}
+
+void workspace_connectstatus(Workspace* self,
+	void* context, fp_workspace_output status)
+{
+	psy_signal_connect(&self->signal_status_out, context, status);
+}
+
+void workspace_connectloadprogress(Workspace* self, void* context,
+	fp_workspace_songloadprogress fp)
+{
+	psy_signal_connect(&self->signal_loadprogress, context, fp);		
+}
+
 void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
 {
 	psy_EventDriverCmd cmd;
@@ -1760,6 +1800,20 @@ void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
 	case CMD_IMM_ADDMACHINE:
 		workspace_selectview(self, VIEW_ID_MACHINEVIEW,
 			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
+		break;
+	case CMD_IMM_EDITMACHINE:
+		if (workspace_currview(self).id != VIEW_ID_MACHINEVIEW) {
+			workspace_selectview(self, VIEW_ID_MACHINEVIEW, psy_INDEX_INVALID,
+				0);
+		} else {
+			if (workspace_currview(self).section == SECTION_ID_MACHINEVIEW_WIRES) {
+				workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_STACK, 0);
+			} else {
+				workspace_selectview(self, VIEW_ID_MACHINEVIEW,
+					SECTION_ID_MACHINEVIEW_WIRES, 0);
+			}
+		}
 		break;
 	case CMD_IMM_HELP:
 		workspace_selectview(self, VIEW_ID_HELPVIEW, 0, 0);

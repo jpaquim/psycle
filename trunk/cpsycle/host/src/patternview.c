@@ -81,7 +81,6 @@ static void patternview_updatestates(PatternView*);
 static void patternview_drawtrackerbackground(PatternView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
 static void patternview_ontrackstatechanged(PatternView*, psy_audio_TrackState* sender);
-
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
 static bool patternview_vtable_initialized = FALSE;
@@ -182,8 +181,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	// pattern default line
 	psy_ui_component_init(&self->griddefaultspane, &self->component, NULL);
 	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
-	trackergrid_init(&self->griddefaults, &self->griddefaultspane, &self->trackconfig,
-		NULL, NULL, workspace);
+	trackergrid_init(&self->griddefaults, &self->griddefaultspane, NULL,
+		&self->trackconfig, NULL, NULL, workspace);
 	psy_ui_component_setwheelscroll(trackergrid_base(&self->griddefaults), 0);
 	self->griddefaults.defaultgridstate.skin = &self->skin;
 	self->griddefaults.defaultlinestate.skin = &self->skin;
@@ -202,15 +201,17 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_oncolresize);
 	// TrackerView	
 	trackergrid_init(&self->tracker, &self->editnotebook.component,
+		NULL, // &self->editnotebook.component,
 		&self->trackconfig, &self->gridstate, &self->linestate,
 		workspace);	
 	psy_ui_component_setwheelscroll(&self->tracker.component, 4);
 	psy_ui_component_setoverflow(trackergrid_base(&self->tracker), psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
-		&self->editnotebook.component, NULL);	
+		&self->editnotebook.component,
+		NULL); // &self->editnotebook.component);
 	psy_ui_component_setbackgroundmode(&self->trackerscroller.pane, psy_ui_NOBACKGROUND);
 	psy_signal_connect(&self->trackerscroller.pane.signal_draw, self,
-		patternview_drawtrackerbackground);	
+		patternview_drawtrackerbackground);
 	psy_ui_component_setalign(&self->trackerscroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->tracker.component, psy_ui_ALIGN_FIXED_RESIZE);
 	psy_signal_connect(&self->tracker.signal_colresize, self,

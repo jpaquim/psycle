@@ -81,7 +81,9 @@ typedef struct psy_audio_PluginCatcher {
 	char* inipath;
 	char* nativeroot;
 	psy_Property* directories;	
-	psy_Signal signal_changed;	
+	psy_Signal signal_changed;
+	psy_Signal signal_scanstart;
+	psy_Signal signal_scanend;
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_scanfile;
 	psy_Signal signal_taskstart;

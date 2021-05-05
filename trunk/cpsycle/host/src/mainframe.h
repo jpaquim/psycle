@@ -78,7 +78,7 @@ typedef enum {
 typedef struct MainFrame {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
 	psy_ui_Component top;	
 	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
@@ -154,18 +154,12 @@ typedef struct MainFrame {
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;	
-	ConfirmBox checkunsavedbox;
-	//Confirm confirm;
-	TerminalMsgType terminalmsgtype;
-	Interpreter interpreter;
-	// internal data
+	ConfirmBox checkunsavedbox;	
+	uintptr_t terminalstyleid;
+	Interpreter interpreter;	
 	int startup;
-	bool startpage;
-	bool playrow;
-	int pluginscanprogress;
-	psy_audio_SequencerPlayMode restoreplaymode;
-	psy_dsp_big_beat_t restorenumplaybeats;
-	bool restoreloop;	
+	bool startpage;	
+	int pluginscanprogress;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);

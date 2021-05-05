@@ -681,12 +681,13 @@ void view_dev_settitle(psy_ui_ViewComponentImp* self, const char* title)
 }
 
 void view_dev_setfocus(psy_ui_ViewComponentImp* self)
-{	
+{
+	psy_ui_component_setfocus(self->view);
 }
 
 int view_dev_hasfocus(psy_ui_ViewComponentImp* self)
 {
-	return FALSE;
+	return psy_ui_component_hasfocus(self->view);
 }
 
 uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)

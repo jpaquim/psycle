@@ -353,6 +353,8 @@
     <ClCompile Include="src\midiviewconfig.c" />
     <ClCompile Include="src\navigation.c" />
     <ClCompile Include="src\newmachine.c" />
+    <ClCompile Include="src\newmachinedetail.c" />
+    <ClCompile Include="src\newmachinesection.c" />
     <ClCompile Include="src\newval.c" />
     <ClCompile Include="src\octavebar.c" />
     <ClCompile Include="src\oscilloscope.c" />
@@ -374,6 +376,7 @@
     <ClCompile Include="src\playbar.c" />
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
+    <ClCompile Include="src\pluginscanview.c" />
     <ClCompile Include="src\pluginsview.c" />
     <ClCompile Include="src\predefsconfig.c" />
     <ClCompile Include="src\presetsbar.c" />
@@ -505,6 +508,8 @@
     <ClInclude Include="src\midiviewconfig.h" />
     <ClInclude Include="src\navigation.h" />
     <ClInclude Include="src\newmachine.h" />
+    <ClInclude Include="src\newmachinedetail.h" />
+    <ClInclude Include="src\newmachinesection.h" />
     <ClInclude Include="src\newval.h" />
     <ClInclude Include="src\octavebar.h" />
     <ClInclude Include="src\oscilloscope.h" />
@@ -526,6 +531,7 @@
     <ClInclude Include="src\playbar.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
+    <ClInclude Include="src\pluginscanview.h" />
     <ClInclude Include="src\pluginsview.h" />
     <ClInclude Include="src\predefsconfig.h" />
     <ClInclude Include="src\presetsbar.h" />

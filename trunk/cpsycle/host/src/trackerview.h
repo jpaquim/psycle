@@ -96,11 +96,13 @@ typedef struct TrackerGrid {
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
+	psy_ui_Component* view;
 	Workspace* workspace;
 } TrackerGrid;
 
-void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
-	TrackerGridState*, TrackerLineState*, Workspace*);
+void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
+	psy_ui_Component* view, TrackConfig*, TrackerGridState*,
+	TrackerLineState*, Workspace*);
 
 void trackergrid_build(TrackerGrid*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,

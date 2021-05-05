@@ -742,6 +742,8 @@ void make_translator_make_newmachine(psy_Property* parent)
 	add("dllname", "DllName");
 	add("anycategory", "Any Category");
 	add("scanning", "Scanning");
+	add("stop", "Stop");
+	add("stopping", "Stopping");
 }
 
 void make_translator_make_samplesview(psy_Property* parent)

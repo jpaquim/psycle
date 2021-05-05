@@ -15,7 +15,8 @@ static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseup(psy_ui_Button*, psy_ui_MouseEvent*);
-static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
@@ -73,6 +74,8 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 		psy_ui_STYLE_BUTTON_SELECT, psy_INDEX_INVALID);
 	psy_ui_component_setstyletype_active(psy_ui_button_base(self),
 		psy_ui_STYLE_BUTTON_ACTIVE);
+	psy_ui_component_setstyletype_focus(psy_ui_button_base(self),
+		psy_ui_STYLE_BUTTON_FOCUS);
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,

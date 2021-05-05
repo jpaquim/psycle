@@ -74,7 +74,8 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(psy_ui_label_base(&self->versioninfo),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_preventtranslation(&self->versioninfo);
-	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+	psy_ui_label_settextalignment(&self->versioninfo,
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 }
 
@@ -222,9 +223,7 @@ void licence_setlanguage(Licence* self)
 // About
 // prototypes
 static void about_initbuttons(About*);
-static void about_oncontributors(About*, psy_ui_Component* sender);
-static void about_onversion(About*, psy_ui_Component* sender);
-static void about_onlicence(About*, psy_ui_Component* sender);
+static void about_onbutton(About*, psy_ui_Button* sender);
 static void about_selectinfobox(About*, uintptr_t index);
 static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
 static void about_onalign(About*);
@@ -248,10 +247,11 @@ static void about_vtable_init(About* self)
 	self->component.vtable = &about_vtable;
 }
 // implementation
-void about_init(About* self, psy_ui_Component* parent)
+void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
 	about_vtable_init(self);	
+	self->workspace = workspace;
 	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -269,24 +269,17 @@ void about_init(About* self, psy_ui_Component* parent)
 }
 
 void about_initbuttons(About* self)
-{
-	// contrib
-	psy_ui_button_init_connect(&self->contribbutton, &self->component, NULL,
-		self, about_oncontributors);
-	psy_ui_button_settext(&self->contribbutton,
-		"help.contributors-credits");
-	// version
+{	
+	psy_ui_button_init_text_connect(&self->contribbutton, &self->component,
+		NULL, "help.contributors-credits", self, about_onbutton);
 	psy_ui_button_init_connect(&self->versionbutton, &self->component, NULL,
-		self, about_onversion);
+		self, about_onbutton);
 	psy_ui_button_preventtranslation(&self->versionbutton);
 	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
-	// licence
-	psy_ui_button_init_connect(&self->licencebutton, &self->component, NULL,
-		self, about_onlicence);	
-	psy_ui_button_settext(&self->licencebutton, "help.licence");
-	// ok
-	psy_ui_button_init(&self->okbutton, &self->component, NULL);
-	psy_ui_button_settext(&self->okbutton, "help.ok");
+	psy_ui_button_init_text_connect(&self->licencebutton, &self->component,
+		NULL, "help.licence", self, about_onbutton);
+	psy_ui_button_init_text_connect(&self->okbutton, &self->component, NULL,
+		"help.ok", self, about_onbutton);
 }
 
 void about_onalign(About* self)
@@ -364,19 +357,18 @@ void about_onfocus(About* self, psy_ui_Component* sender)
 	psy_ui_component_setfocus(&self->okbutton.component);
 }
 
-void about_oncontributors(About* self, psy_ui_Component* sender) 
-{	
-	about_selectinfobox(self, 0);
-}
-
-void about_onversion(About* self, psy_ui_Component* sender) 
-{	
-	about_selectinfobox(self, 1);
-}
-
-void about_onlicence(About* self, psy_ui_Component* sender)
-{	
-	about_selectinfobox(self, 2);
+void about_onbutton(About* self, psy_ui_Button* sender) 
+{		
+	if (sender == &self->contribbutton) {
+		about_selectinfobox(self, 0);
+	} else if (sender == &self->versionbutton) {
+		about_selectinfobox(self, 1);
+	} else if (sender == &self->licencebutton) {
+		about_selectinfobox(self, 2);
+	} else {
+		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+			psy_INDEX_INVALID, 0);
+	}	
 }
 
 void about_selectinfobox(About* self, uintptr_t index)
@@ -390,10 +382,10 @@ void about_selectinfobox(About* self, uintptr_t index)
 			psy_INDEX_INVALID);
 	}
 	psy_ui_component_togglevisibility(psy_ui_notebook_base(&self->notebook));
-	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onmousedoubleclick(About* self, psy_ui_MouseEvent* ev)
 {
-	psy_signal_emit(&self->okbutton.signal_clicked, self, 0);
+	workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
+		psy_INDEX_INVALID, 0);
 }

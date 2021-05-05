@@ -88,7 +88,6 @@ static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
 #endif
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
@@ -98,7 +97,7 @@ static void mainframe_onsettingshelptabbarchanged(MainFrame*, psy_ui_Component* 
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
-static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
+static void mainframe_onsongloadprogress(MainFrame*, Workspace*, intptr_t progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
@@ -229,6 +228,9 @@ void mainframe_init(MainFrame* self)
 	save_translator_default();
 	save_translator_template();
 #endif
+	if (!workspace_hasplugincache(&self->workspace)) {
+		workspace_scanplugins(&self->workspace);
+	}
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -251,17 +253,10 @@ void mainframe_ondestroyed(MainFrame* self)
 
 void mainframe_initworkspace(MainFrame* self)
 {	
-	self->startpage = FALSE;
-	self->playrow = FALSE;
-	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
-	self->restorenumplaybeats = 4.0;
-	self->restoreloop = TRUE;
+	self->startpage = FALSE;		
 	workspace_init(&self->workspace, mainframe_base(self));
 	workspace_load_configuration(&self->workspace);
-	workspace_load_recentsongs(&self->workspace);
-	if (!workspace_hasplugincache(&self->workspace)) {
-		workspace_scanplugins(&self->workspace);
-	}	
+	workspace_load_recentsongs(&self->workspace);	
 }
 
 void mainframe_initemptystatusbar(MainFrame* self)
@@ -335,14 +330,11 @@ void mainframe_initterminal(MainFrame* self)
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
-	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
-		mainframe_onterminalwarning);
-	psy_signal_connect(&self->workspace.signal_terminal_out, self,
-		mainframe_onterminaloutput);
-	psy_signal_connect(&self->workspace.signal_terminal_error, self,
+	workspace_connectterminal(&self->workspace, self,	
+		mainframe_onterminaloutput,
+		mainframe_onterminalwarning,
 		mainframe_onterminalerror);
-	psy_signal_connect(&self->workspace.signal_status_out, self,
-		mainframe_onstatus);
+	workspace_connectstatus(&self->workspace, self, mainframe_onstatus);
 }
 
 void mainframe_initkbdhelp(MainFrame* self)
@@ -399,25 +391,25 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
 {	
-	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar, NULL,
-		"main.kbd", self, mainframe_ontogglekbdhelp);
+	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
+		NULL, "main.kbd", self, mainframe_ontogglekbdhelp);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_bitmap_loadresource(&self->togglekbdhelp.bitmapicon, IDB_KBD);
-	psy_ui_bitmap_settransparency(&self->togglekbdhelp.bitmapicon,
-		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_setbitmapresource(&self->togglekbdhelp, IDB_KBD);
+	psy_ui_button_setbitmaptransparency(&self->togglekbdhelp,
+		psy_ui_colour_white());	
 }
 
 void mainframe_initterminalbutton(MainFrame* self)
 {	
-	self->terminalmsgtype = TERMINALMSGTYPE_NONE;
-	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar, NULL,
-		"Terminal", self, mainframe_ontoggleterminal);
+	self->terminalstyleid = STYLE_TERM_BUTTON;	
+	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar,
+		NULL, "Terminal", self, mainframe_ontoggleterminal);
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_bitmap_loadresource(&self->toggleterminal.bitmapicon, IDB_TERM);
-	psy_ui_bitmap_settransparency(&self->toggleterminal.bitmapicon,
-		psy_ui_colour_make(0x00FFFFFF));	
+	psy_ui_button_setbitmapresource(&self->toggleterminal, IDB_TERM);
+	psy_ui_button_setbitmaptransparency(&self->toggleterminal,
+		psy_ui_colour_white());
 }
 
 void mainframe_initprogressbar(MainFrame* self)
@@ -425,7 +417,7 @@ void mainframe_initprogressbar(MainFrame* self)
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar, NULL);
 	psy_ui_component_setalign(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);
-	psy_signal_connect(&self->workspace.signal_loadprogress, self,
+	workspace_connectloadprogress(&self->workspace, self,
 		mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self,
 		mainframe_onpluginscanprogress);
@@ -597,8 +589,6 @@ void mainframe_initmainviews(MainFrame* self)
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
-	psy_signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
-		mainframe_onaboutok);
 	renderview_init(&self->renderview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
@@ -818,19 +808,6 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	switch (cmd.id) {	
 	case CMD_IMM_HELPSHORTCUT:
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
-		break;
-	case CMD_IMM_EDITMACHINE:
-		if (workspace_currview(&self->workspace).id != VIEW_ID_MACHINEVIEW) {
-			psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
-		} else {
-			if (workspace_currview(&self->workspace).section == SECTION_ID_MACHINEVIEW_WIRES) {
-				workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_STACK, 0);
-			} else {
-				workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_WIRES, 0);
-			}
-		}
 		break;	
 	case CMD_IMM_INFOPATTERN:
 		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
@@ -912,7 +889,7 @@ void mainframe_minimize(MainFrame* self)
 }
 
 void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace,
-	int progress)
+	intptr_t progress)
 {	
 	if (progress == -1) {
 		psy_ui_terminal_output(&self->terminal, "\n");
@@ -935,18 +912,18 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 			psy_ui_tabbar_select(&self->tabbar, VIEW_ID_SONGPROPERTIES);
 		}		
 	}	
-	mainframe_updatesongtitle(self);
-	psy_ui_component_align(&self->client);
-	if (flag == WORKSPACE_NEWSONG) {
-		machinewireview_centermaster(&self->machineview.wireview);
-	}
+	mainframe_updatesongtitle(self);	
 	if (workspace_song(&self->workspace)) {
 		psy_signal_connect(
 			&workspace_song(&self->workspace)->patterns.signal_numsongtrackschanged,
 			self, mainframe_onsongtrackschanged);
 	}
 	vubar_reset(&self->vubar);
+	psy_ui_component_align(&self->client);	
 	psy_ui_component_align(mainframe_base(self));
+	if (flag == WORKSPACE_NEWSONG) {
+		machinewireview_centermaster(&self->machineview.wireview);
+	}
 }
 
 void mainframe_updatesongtitle(MainFrame* self)
@@ -1077,16 +1054,10 @@ void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_button_disablehighlight(&self->machinebar.editor);
 		psy_ui_component_hide(&self->splitbarplugineditor.component);
 	} else {						
-		psy_ui_button_highlight(&self->machinebar.editor);
-		self->splitbarplugineditor.component.visible = 1;
+		psy_ui_button_highlight(&self->machinebar.editor);		
 		psy_ui_component_show(&self->splitbarplugineditor.component);
 	}
 	psy_ui_component_togglevisibility(&self->plugineditor.component);
-}
-
-void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
-{
-	psy_ui_tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
@@ -1145,20 +1116,7 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 		mainframe_onstartup(self);				
 		self->startup = FALSE;
 	}
-	workspace_idle(&self->workspace);
-	if (self->playrow && !psy_audio_player_playing(&self->workspace.player)) {
-		self->playrow = FALSE;
-		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
-			self->restoreplaymode);
-		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
-			self->restorenumplaybeats);
-		if (self->restoreloop) {
-			psy_audio_sequencer_loop(&self->workspace.player.sequencer);
-		} else {
-			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
-		}
-		self->workspace.player.sequencer.playtrack = psy_INDEX_INVALID;
-	}
+	workspace_idle(&self->workspace);	
 	if (self->pluginscanprogress != -1) {
 		if (self->pluginscanprogress == 0) {
 			psy_ui_progressbar_setprogress(&self->progressbar, 0);
@@ -1173,13 +1131,11 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 void mainframe_onstartup(MainFrame* self)
 {
 	// The pattern display type is only now set, because the host needs to know
-	// the view size to divide a splitted display correctly
+	// the view size to divide a splitted display correctly	
 	workspace_selectpatterndisplay(&self->workspace,
-		workspace_patterndisplaytype(&self->workspace));	
-	machinewireview_centermaster(&self->machineview.wireview);
-	if (self->workspace.plugincatcher.scanning) {
-		psy_ui_component_starttimer(&self->machineview.newmachine.component, 0, 50);
-		psy_ui_notebook_select(&self->machineview.newmachine.notebook, 1);
+		workspace_patterndisplaytype(&self->workspace));
+	if (psy_ui_component_visible(machineview_base(&self->machineview))) {
+		machineview_centermaster(&self->machineview);
 	}
 }
 
@@ -1208,8 +1164,10 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 		}
 	}
 	view = psy_ui_notebook_page(&self->notebook, index);		
-	if (view) {		
-		psy_ui_component_selectsection(view, section, options);
+	if (view) {
+		if (section != psy_INDEX_INVALID) {
+			psy_ui_component_selectsection(view, section, options);
+		}
 		psy_ui_tabbar_select(&self->tabbar, index);
 		psy_ui_component_setfocus(view);
 	}	
@@ -1276,8 +1234,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (self->terminalmsgtype == TERMINALMSGTYPE_NONE) {
-		self->terminalmsgtype = TERMINALMSGTYPE_MESSAGE;
+	if (self->terminalstyleid == STYLE_TERM_BUTTON) {		
 		mainframe_updateterminalbutton(self);
 	}
 	psy_ui_terminal_output(&self->terminal, text);	
@@ -1286,8 +1243,8 @@ void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (self->terminalmsgtype != TERMINALMSGTYPE_ERROR) {
-		self->terminalmsgtype = TERMINALMSGTYPE_WARNING;
+	if (self->terminalstyleid != STYLE_TERM_BUTTON_ERROR) {
+		self->terminalstyleid = STYLE_TERM_BUTTON_WARNING;
 		mainframe_updateterminalbutton(self);
 	}
 	psy_ui_terminal_output(&self->terminal, (text)
@@ -1301,7 +1258,7 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 	psy_ui_terminal_output(&self->terminal, (text)
 		? text
 		: "unknown error\n");
-	self->terminalmsgtype = TERMINALMSGTYPE_ERROR;
+	self->terminalstyleid = STYLE_TERM_BUTTON_ERROR;
 	mainframe_updateterminalbutton(self);
 }
 
@@ -1313,22 +1270,9 @@ void mainframe_onstatus(MainFrame* self, Workspace* sender,
 }
 
 void mainframe_updateterminalbutton(MainFrame* self)
-{
-	uintptr_t styleid;
-
-	switch (self->terminalmsgtype) {
-	case TERMINALMSGTYPE_WARNING:
-		styleid = STYLE_TERM_BUTTON_WARNING;		
-		break;
-	case TERMINALMSGTYPE_ERROR:
-		styleid = STYLE_TERM_BUTTON_ERROR;		
-		break;
-	default:
-		styleid = STYLE_TERM_BUTTON;		
-		break;
-	}
+{	
 	psy_ui_component_setstyletype(psy_ui_button_base(&self->toggleterminal),
-		styleid);
+		self->terminalstyleid);
 	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 }
 
@@ -1519,7 +1463,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 		&self->terminal.component).height)) {
 		psy_ui_component_setpreferredsize(&self->terminal.component,
 			psy_ui_size_zero());
-		self->terminalmsgtype = TERMINALMSGTYPE_NONE;
+		self->terminalstyleid = STYLE_TERM_BUTTON;
 		mainframe_updateterminalbutton(self);		
 	} else {
 		psy_ui_component_setpreferredsize(&self->terminal.component,

@@ -52,7 +52,7 @@ static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_EventDriver*);
-static void driver_write(psy_EventDriver*, psy_EventDriverInput input);
+static void driver_write(psy_EventDriver*, psy_EventDriverInput);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput,
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
@@ -63,14 +63,12 @@ static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
 static psy_EventDriverInput driver_input(psy_EventDriver* context)
 {
-	psy_EventDriverInput input;
-
 	CmdDriver* self = (CmdDriver*)context;
 	return self->lastinput;
 }
 
 static psy_EventDriverVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -91,7 +89,7 @@ static void vtable_init(void)
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
 		vtable.input = driver_input;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
