@@ -136,7 +136,9 @@ typedef struct MainFrame {
 	psy_ui_SplitBar splitbarplugineditor;
 	VuBar vubar;
 	CPUView cpuview;
+	psy_ui_SplitBar cpusplitter;
 	MidiMonitor midimonitor;
+	psy_ui_SplitBar midisplitter;
 	PlaylistView playlist;
 	psy_ui_SplitBar playlistsplitter;
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN

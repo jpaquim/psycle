@@ -646,6 +646,10 @@ void mainframe_initcpuview(MainFrame* self)
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
 	psy_ui_component_setalign(cpuview_base(&self->cpuview), psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(cpuview_base(&self->cpuview));
+	psy_ui_splitbar_init(&self->cpusplitter, &self->client);
+	psy_ui_component_setalign(psy_ui_splitbar_base(&self->cpusplitter),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(psy_ui_splitbar_base(&self->cpusplitter));
 	psy_signal_connect(&self->machinebar.cpu.signal_clicked, self,
 		mainframe_oncpu);
 	psy_signal_connect(&cpuview_base(&self->cpuview)->signal_hide, self,
@@ -657,6 +661,10 @@ void mainframe_initmidimonitor(MainFrame* self)
 	midimonitor_init(&self->midimonitor, &self->client, &self->workspace);
 	psy_ui_component_setalign(midimonitor_base(&self->midimonitor), psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(midimonitor_base(&self->midimonitor));
+	psy_ui_splitbar_init(&self->midisplitter, &self->client);
+	psy_ui_component_setalign(psy_ui_splitbar_base(&self->midisplitter),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(psy_ui_splitbar_base(&self->midisplitter));
 	psy_signal_connect(&self->machinebar.midi.signal_clicked, self,
 		mainframe_onmidi);
 	psy_signal_connect(&midimonitor_base(&self->midimonitor)->signal_hide, self,
@@ -995,6 +1003,7 @@ void mainframe_onmaximizeorminimizeview(MainFrame* self, psy_ui_Button* sender)
 void mainframe_onhidemidimonitor(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.midi);
+	psy_ui_component_hide_align(psy_ui_splitbar_base(&self->midisplitter));
 }
 
 void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
@@ -1003,13 +1012,16 @@ void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_button_disablehighlight(&self->machinebar.cpu);
 	} else {
 		psy_ui_button_highlight(&self->machinebar.cpu);		
+	}	
+	if (psy_ui_component_togglevisibility(&self->cpuview.component)) {
+		psy_ui_component_show_align(psy_ui_splitbar_base(&self->cpusplitter));
 	}
-	psy_ui_component_togglevisibility(&self->cpuview.component);
 }
 
 void mainframe_onhidecpu(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.cpu);
+	psy_ui_component_hide_align(psy_ui_splitbar_base(&self->cpusplitter));
 }
 
 void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
@@ -1019,7 +1031,9 @@ void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
 	} else {
 		psy_ui_button_highlight(&self->machinebar.midi);		
 	}
-	psy_ui_component_togglevisibility(&self->midimonitor.component);
+	if (psy_ui_component_togglevisibility(&self->midimonitor.component)) {	
+		psy_ui_component_show_align(psy_ui_splitbar_base(&self->midisplitter));
+	}
 }
 
 void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)

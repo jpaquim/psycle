@@ -126,7 +126,7 @@ void gear_inittitle(Gear* self)
 	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
-		"Psycle MIDI Monitor");
+		"machinebar.gear");
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);					
 	psy_ui_button_init(&self->hide, &self->titlebar, NULL);
 	psy_ui_button_settext(&self->hide, "X");
