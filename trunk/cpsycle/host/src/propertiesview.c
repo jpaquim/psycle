@@ -1056,7 +1056,7 @@ void propertiesview_oneventdriverinput(PropertiesView* self,
 		}					
 		step = psy_ui_component_scrollstep_height_px(
 			&self->renderer.component);
-		top = psy_ui_component_scrolltoppx(&self->renderer.component);
+		top = psy_ui_component_scrolltop_px(&self->renderer.component);
 		newtop = -1.0;
 		switch (cmd.id) {
 		case CMD_NAVTOP:

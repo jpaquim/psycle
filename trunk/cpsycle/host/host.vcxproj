@@ -412,6 +412,8 @@
     <ClCompile Include="src\switchui.c" />
     <ClCompile Include="src\timebar.c" />
     <ClCompile Include="src\trackbox.c" />
+    <ClCompile Include="src\trackercmds.c" />
+    <ClCompile Include="src\trackercolumn.c" />
     <ClCompile Include="src\trackergridstate.c" />
     <ClCompile Include="src\trackerlinenumbers.c" />
     <ClCompile Include="src\trackerlinestate.c" />
@@ -567,6 +569,8 @@
     <ClInclude Include="src\switchui.h" />
     <ClInclude Include="src\timebar.h" />
     <ClInclude Include="src\trackbox.h" />
+    <ClInclude Include="src\trackercmds.h" />
+    <ClInclude Include="src\trackercolumn.h" />
     <ClInclude Include="src\trackergridstate.h" />
     <ClInclude Include="src\trackerlinenumbers.h" />
     <ClInclude Include="src\trackerlinestate.h" />

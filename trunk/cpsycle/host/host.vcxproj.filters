@@ -493,6 +493,12 @@
     <ClCompile Include="src\newmachinedetail.c">
       <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
+    <ClCompile Include="src\trackercolumn.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackercmds.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -934,6 +940,12 @@
     </ClInclude>
     <ClInclude Include="src\newmachinedetail.h">
       <Filter>machine\machineview\newmachine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackercolumn.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackercmds.h">
+      <Filter>pattern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

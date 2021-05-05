@@ -5,6 +5,7 @@
 #define TRACKERVIEW
 
 // host
+#include "trackercolumn.h"
 #include "trackergridstate.h"
 #include "trackerlinestate.h"
 #include "workspace.h"
@@ -22,50 +23,11 @@ extern "C" {
 // The TrackerView is where you enter notes. It displays a Pattern selected by
 // the SequenceView as a tracker grid.
 
-typedef struct {
-	int playbar;
-	int cursor;
-	int selection;
-	int beat;
-	int beat4;
-	int mid;
-	int focus;
-} TrackerColumnFlags;
-
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
 	PATTERNCURSOR_STEP_4BEAT,
 	PATTERNCURSOR_STEP_LINES
 } PatternCursorStepMode;
-
-// TrackerGridColumn
-typedef struct TrackerGridColumn {
-	// inherits
-	psy_ui_Component component;
-	uintptr_t index;
-	psy_ui_RealSize digitsize;	
-	psy_ui_RealSize resizestartsize;	
-	// internal			
-	// references
-	TrackerGridState* gridstate;
-	TrackerLineState* linestate;	
-	TrackDef* trackdef;
-	Workspace* workspace;
-} TrackerGridColumn;
-
-void trackergridcolumn_init(TrackerGridColumn*, psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState*,
-	TrackerLineState*, Workspace*);
-
-TrackerGridColumn* trackergridcolumn_alloc(void);
-TrackerGridColumn* trackergridcolumn_allocinit(psy_ui_Component* parent,
-	psy_ui_Component* view, uintptr_t index, TrackerGridState* gridstate,
-	TrackerLineState* linestate, Workspace* workspace);
-
-INLINE psy_ui_Component* trackergridcolumn_base(TrackerGridColumn* self)
-{
-	return &self->component;
-}
 
 typedef struct TrackerGrid {
 	// inherits
@@ -204,8 +166,6 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 
 	return &self->component;
 }
-
-void maketrackercmds(psy_Property* parent);
 
 #ifdef __cplusplus
 }

@@ -827,7 +827,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self,
 	visilines = (listviewsize.height) /
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component));
-	listviewtop = psy_ui_component_scrolltoppx(&self->listview.component) /
+	listviewtop = psy_ui_component_scrolltop_px(&self->listview.component) /
 		psy_ui_value_px(&self->state.lineheight,
 			psy_ui_component_textmetric(&self->component));
 	if ((double)c < listviewtop) {

@@ -1512,7 +1512,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		scrollstepy_px = psy_ui_component_scrollstep_height_px(self);
 		tm = psy_ui_component_textmetric(self);
 		curr = lines(
-			psy_ui_component_scrolltoppx(self),
+			psy_ui_component_scrolltop_px(self),
 			psy_ui_value_px(&size.height, tm, NULL),
 			psy_ui_value_px(&scrollsize.height, tm, NULL),
 			scrollstepy_px,
@@ -1736,7 +1736,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(
 			psy_ui_component_scrollleftpx(self),
-			psy_ui_component_scrolltoppx(self)),
+			psy_ui_component_scrolltop_px(self)),
 		psy_ui_component_scrollsize_px(self));
 }
 

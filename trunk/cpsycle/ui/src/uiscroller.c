@@ -180,7 +180,7 @@ void psy_ui_scroller_onpanesize(psy_ui_Scroller* self, psy_ui_Component* sender,
 		psy_ui_component_updateoverflow(self->client);
 		tm = psy_ui_component_textmetric(self->client);
 		scrollstepy_px = psy_ui_component_scrollstep_height_px(self->client);
-		nPosY = floor(psy_ui_component_scrolltoppx(self->client) / scrollstepy_px);
+		nPosY = floor(psy_ui_component_scrolltop_px(self->client) / scrollstepy_px);
 		psy_ui_scrollbar_setthumbposition(&self->vscroll, nPosY);
 		scrollstepx_px = scrollstepy_px = psy_ui_component_scrollstep_width_px(self->client);
 		nPosX = floor(psy_ui_component_scrollleftpx(self->client) / scrollstepx_px);
@@ -238,7 +238,7 @@ void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller* self,
 
 	tm = psy_ui_component_textmetric(self->client);
 	scrollstepy_px = psy_ui_component_scrollstep_height_px(self->client);
-	scrolltoppx = psy_ui_component_scrolltoppx(self->client);
+	scrolltoppx = psy_ui_component_scrolltop_px(self->client);
 	iPos = scrolltoppx / scrollstepy_px;	
 	nPos = psy_ui_scrollbar_position(sender);
 	if (self->vanimate.counter > 0 && self->vanimate.steppx / (iPos - nPos) > 0) {
@@ -292,7 +292,7 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 
 		tm = psy_ui_component_textmetric(self->client);
 		// vertical
-		pos = floor(psy_ui_component_scrolltoppx(self->client) /
+		pos = floor(psy_ui_component_scrolltop_px(self->client) /
 			psy_ui_component_scrollstep_height_px(self->client));
 		psy_ui_scrollbar_setthumbposition(&self->vscroll, pos);
 		// horizontal

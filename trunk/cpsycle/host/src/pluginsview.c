@@ -866,7 +866,7 @@ uintptr_t pluginsview_visilines(PluginsView* self)
 
 uintptr_t pluginsview_topline(PluginsView* self)
 {
-	return (uintptr_t)(psy_ui_component_scrolltoppx(&self->component)
+	return (uintptr_t)(psy_ui_component_scrolltop_px(&self->component)
 		/ self->lineheight);
 }
 

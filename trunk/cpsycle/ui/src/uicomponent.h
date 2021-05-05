@@ -692,7 +692,7 @@ INLINE psy_ui_Value psy_ui_component_scrolltop(psy_ui_Component* self)
 	return psy_ui_value_make_px(-position.top);
 }
 
-INLINE double psy_ui_component_scrolltoppx(psy_ui_Component* self)
+INLINE double psy_ui_component_scrolltop_px(psy_ui_Component* self)
 {		
 	psy_ui_RealRectangle position;
 
