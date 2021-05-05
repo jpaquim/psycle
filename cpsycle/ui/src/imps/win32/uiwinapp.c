@@ -672,7 +672,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 							tm = psy_ui_component_textmetric(imp->component);
 							scrollrange = psy_ui_component_verticalscrollrange(imp->component);																					
-							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
+							scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
 							pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
 								psy_ui_component_wheelscroll(imp->component);
 							if (pos < (double)scrollrange.x) {
@@ -692,7 +692,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 							tm = psy_ui_component_textmetric(imp->component);
 							scrollrange = psy_ui_component_verticalscrollrange(imp->component);									
-							scrolltoppx = psy_ui_component_scrolltoppx(imp->component);							
+							scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
 							pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
 								psy_ui_component_wheelscroll(imp->component);
 							if (pos > (double)scrollrange.y) {

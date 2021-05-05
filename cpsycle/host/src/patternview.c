@@ -723,8 +723,8 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 		psy_ui_component_setscrollleft(&self->griddefaults.component,
 			psy_ui_component_scrollleft(&self->tracker.component));
 	}
-	if (psy_ui_component_scrolltoppx(&self->tracker.component) !=
-			psy_ui_component_scrolltoppx(&self->left.linenumbers.component)) {
+	if (psy_ui_component_scrolltop_px(&self->tracker.component) !=
+			psy_ui_component_scrolltop_px(&self->left.linenumbers.component)) {
 		psy_ui_component_setscrolltop(&self->left.linenumbers.component,
 			psy_ui_component_scrolltop(&self->tracker.component));
 	}

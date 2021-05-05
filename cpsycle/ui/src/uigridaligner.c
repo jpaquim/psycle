@@ -67,9 +67,10 @@ void psy_ui_gridaligner_align(psy_ui_GridAligner* self)
 	
 	assert(self->component);
 
-	size = psy_ui_component_scrollsize(self->component);
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+	size = psy_ui_component_scrollsize(self->component);	
+	if (psy_ui_component_parent_const(self->component)) {
+		parentsize = psy_ui_component_scrollsize(
+			psy_ui_component_parent_const(self->component));
 	} else {
 		parentsize = psy_ui_component_scrollsize(self->component);
 	}

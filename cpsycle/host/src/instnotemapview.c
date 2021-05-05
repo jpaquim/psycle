@@ -324,7 +324,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			double scrolltop;
 
 			scrollleft = psy_ui_component_scrollleftpx(&self->component);
-			scrolltop = psy_ui_component_scrolltoppx(&self->component);
+			scrolltop = psy_ui_component_scrolltop_px(&self->component);
 			entry = self->state->selectedentry;
 			if (entry) {
 				keylo_startx = (int)(

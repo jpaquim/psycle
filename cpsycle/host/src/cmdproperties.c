@@ -6,7 +6,7 @@
 #include "cmdproperties.h"
 #include "cmdsgeneral.h"
 #include "uidef.h"
-#include "trackerview.h"
+#include "trackercmds.h"
 #include "pianoroll.h"
 
 #include <cmdsnotes.h>
@@ -23,7 +23,7 @@ psy_Property* cmdproperties_create(void)
 	if (rv) {
 		cmdproperties_makenotes(rv);
 		cmdproperties_makegeneral(rv);
-		maketrackercmds(rv);
+		trackercmds_make(rv);
 		pianoroll_makecmds(rv);
 	}
 	return rv;
