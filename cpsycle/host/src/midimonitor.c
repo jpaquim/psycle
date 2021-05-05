@@ -26,9 +26,11 @@ static void midiactivechannelbox_vtable_init(MidiActiveChannelBox* self)
 {
 	if (!midiactivechannelbox_vtable_initialized) {
 		midiactivechannelbox_vtable = *(self->component.vtable);
-		midiactivechannelbox_vtable.ondraw = (psy_ui_fp_component_ondraw)
+		midiactivechannelbox_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
 			midiactivechannelbox_ondraw;
-		midiactivechannelbox_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		midiactivechannelbox_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			midiactivechannelbox_onpreferredsize;
 		midiactivechannelbox_vtable_initialized = TRUE;
 	}

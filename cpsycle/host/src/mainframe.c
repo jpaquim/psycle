@@ -619,12 +619,10 @@ void mainframe_initgear(MainFrame* self)
 		mainframe_ontogglegear);	
 	psy_signal_connect(&gear_base(&self->gear)->signal_hide, self,
 		mainframe_onhidegear);
-	psy_ui_component_init(&self->gearspacer, &self->client, NULL);
-	psy_ui_component_setalign(&self->gearspacer, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_preventalign(&self->gearspacer);
-	psy_ui_component_setpreferredsize(&self->gearspacer,
-		psy_ui_size_make_em(1.0, 0.0));
-	psy_ui_component_hide(&self->gearspacer);
+	psy_ui_splitbar_init(&self->gearsplitter, &self->client);
+	psy_ui_component_setalign(psy_ui_splitbar_base(&self->gearsplitter),
+		psy_ui_ALIGN_RIGHT);		
+	psy_ui_component_hide(psy_ui_splitbar_base(&self->gearsplitter));
 }
 
 void mainframe_initparamrack(MainFrame* self)
@@ -948,13 +946,14 @@ void mainframe_ontogglegear(MainFrame* self, psy_ui_Component* sender)
 {
 	if (!psy_ui_component_visible(&self->gear.component)) {
 		psy_ui_button_highlight(&self->machinebar.gear);		
-	}
-	psy_ui_component_togglevisibility(&self->gearspacer);
+	}	
 	psy_ui_component_togglevisibility(&self->gear.component);	
 	if (!psy_ui_component_visible(&self->gear.component) &&
 			psy_ui_notebook_activepage(&self->notebook)) {
 		psy_ui_component_setfocus(psy_ui_notebook_activepage(
 			&self->notebook));
+	} else {
+		psy_ui_component_show_align(psy_ui_splitbar_base(&self->gearsplitter));
 	}
 }
 
@@ -966,7 +965,7 @@ void mainframe_ontogglegearworkspace(MainFrame* self, Workspace* sender)
 void mainframe_onhidegear(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.gear);
-	psy_ui_component_hide_align(&self->gearspacer);
+	psy_ui_component_hide_align(psy_ui_splitbar_base(&self->gearsplitter));
 }
 
 void mainframe_ontoggleparamrack(MainFrame* self, psy_ui_Component* sender)

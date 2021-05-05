@@ -131,7 +131,7 @@ typedef struct MainFrame {
 	HelpView helpview;	
 	KbdHelp kbdhelp;
 	Gear gear;
-	psy_ui_Component gearspacer;
+	psy_ui_SplitBar gearsplitter;
 	PluginEditor plugineditor;
 	psy_ui_SplitBar splitbarplugineditor;
 	VuBar vubar;

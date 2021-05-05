@@ -254,11 +254,15 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		prev = splitbar_prev(self);
 		next = splitbar_next(self);
 		if (prev) {
+			psy_signal_preventall(&prev->signal_hide);
 			psy_ui_component_hide(prev);
+			psy_signal_enableall(&prev->signal_hide);
 			prev->visible = 1;
 		}
 		if (next) {
+			psy_signal_preventall(&next->signal_hide);
 			psy_ui_component_hide(next);
+			psy_signal_enableall(&next->signal_hide);
 			next->visible = 1;
 		}
 		if (prev) {
