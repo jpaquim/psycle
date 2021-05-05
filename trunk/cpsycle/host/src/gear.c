@@ -41,6 +41,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent,
 
 // Gear
 // prototypes
+static void gear_inittitle(Gear*);
 static void gear_oncreate(Gear*, psy_ui_Component* sender);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
 static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_Song*);
@@ -61,13 +62,11 @@ static void gear_showeffects(Gear*);
 // implementation
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
-	psy_ui_Margin margin;
-		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
 	psy_ui_component_init(gear_base(self), parent, NULL);
-	//psy_ui_component_setstyletypes(&self->component,
-		//psy_ui_STYLE_SIDEMENU, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	// client
@@ -76,19 +75,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setmargin(&self->client,
 		psy_ui_defaults_cmargin(psy_ui_defaults()));
 	// titlebar
-	psy_ui_component_init_align(&self->titlebar, &self->client,
-		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);	
-	psy_ui_margin_init_em(&margin, 0.0, 0.0, 0.5, 0.0);		
-	psy_ui_component_setmargin(&self->titlebar, margin);
-	psy_ui_label_init_text(&self->title, &self->titlebar, NULL, "machinebar.gear");	
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
-		self, gear_onhide);
-	psy_ui_button_settext(&self->hide, "X");
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);		
-	psy_ui_component_setmargin(&self->hide.component, margin);
+	gear_inittitle(self);	
 	// client
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
@@ -129,6 +116,24 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->buttons.muteunmute.signal_clicked, self,
 		gear_onmuteunmute);
 	gear_connectsongsignals(self);
+}
+
+void gear_inittitle(Gear* self)
+{
+	psy_ui_Margin margin;
+
+	psy_ui_component_init(&self->titlebar, &self->component, NULL);
+	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);
+	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
+		"Psycle MIDI Monitor");
+	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);					
+	psy_ui_button_init(&self->hide, &self->titlebar, NULL);
+	psy_ui_button_settext(&self->hide, "X");
+	psy_signal_connect(&self->hide.signal_clicked, self, gear_onhide);
+	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
+	psy_ui_component_setmargin(&self->hide.component, margin);
 }
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)
