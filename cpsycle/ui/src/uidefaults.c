@@ -141,6 +141,12 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 		psy_ui_colour_weighted(&onsurface, strong),
 		psy_ui_colour_make_overlay(4));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_ACTIVE, style);
+	// button::focus
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onsurface, medium));
+	psy_ui_border_init_solid_radius(&style->border, onsecondary, 6.0);
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_BUTTON_FOCUS, style);
 	// combobox;
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
@@ -212,7 +218,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setbackgroundcolour(style,
 		psy_ui_colour_make_overlay(5));
-	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);	
+	psy_ui_border_init_style(&style->border, psy_ui_BORDER_SOLID);
 	psy_ui_border_setcolour(&style->border,
 		psy_ui_colour_overlayed(&surface, &overlay, 0.08));
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SLIDERPANE, style);	

@@ -484,6 +484,15 @@
     <ClCompile Include="src\pluginsview.c">
       <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
+    <ClCompile Include="src\pluginscanview.c">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\newmachinesection.c">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\newmachinedetail.c">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -915,6 +924,15 @@
       <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\pluginsview.h">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pluginscanview.h">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\newmachinesection.h">
+      <Filter>machine\machineview\newmachine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\newmachinedetail.h">
       <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
   </ItemGroup>

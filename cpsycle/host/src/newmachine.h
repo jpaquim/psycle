@@ -5,7 +5,10 @@
 #define NEWMACHINE_H
 
 // host
+#include "newmachinesection.h"
+#include "newmachinedetail.h"
 #include "pluginsview.h"
+#include "pluginscanview.h"
 #include "labelpair.h"
 #include "workspace.h"
 // ui
@@ -112,43 +115,6 @@ typedef struct NewMachineSortBar {
 void newmachinesortbar_init(NewMachineSortBar*, psy_ui_Component* parent,
 	NewMachineSort*);
 
-// NewMachineDetail
-typedef struct NewMachineDetail {
-	// inherits
-	psy_ui_Component component;
-	// signals
-	psy_Signal signal_categorychanged;
-	// intern
-	psy_ui_Label desclabel;
-	LabelPair plugname;
-	psy_ui_Component details;
-	LabelPair dllname;
-	LabelPair version;
-	LabelPair apiversion;
-	psy_ui_Component category;
-	psy_ui_Label categorydesc;
-	psy_ui_Edit categoryedit;
-	psy_ui_Component bottom;
-    psy_ui_Label compatlabel;
-    psy_ui_CheckBox compatblitzgamefx;
-	// references
-	psy_Property* plugin;
-    Workspace* workspace;
-} NewMachineDetail;
-
-void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
-	NewMachineFilter* filter, Workspace*);
-
-void newmachinedetail_reset(NewMachineDetail*);
-void newmachinedetail_update(NewMachineDetail*, psy_Property*);
-void newmachinedetail_setdescription(NewMachineDetail*, const char* text);
-void newmachinedetail_setplugname(NewMachineDetail*, const char* text);
-void newmachinedetail_setdllname(NewMachineDetail*, const char* text);
-void newmachinedetail_setcategoryname(NewMachineDetail*, const char* text);
-void newmachinedetail_setplugversion(NewMachineDetail* self, int16_t version);
-void newmachinedetail_setapiversion(NewMachineDetail* self,
-	int16_t apiversion);
-
 // NewMachineFilterBar
 typedef struct NewMachineFilterBar {
 	// inherits
@@ -187,59 +153,6 @@ void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent
 	NewMachineFilter*, psy_audio_PluginCatcher*);
 
 void newmachinecategorybar_build(NewMachineCategoryBar*);
-
-typedef struct PluginScanView {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	psy_ui_Component left;
-	psy_ui_Component right;
-	psy_ui_Component client;
-	psy_ui_Label scan;
-	psy_ui_Label scanfile;
-	psy_ui_Component abortbar;
-	psy_ui_Button abort;
-	// references
-	Workspace* workspace;
-} PluginScanView;
-
-void pluginscanview_init(PluginScanView*, psy_ui_Component* parent,
-	Workspace*);
-
-void pluginscanview_selecttask(PluginScanView*, psy_audio_PluginScanTask*);
-
-struct NewMachine;
-
-typedef struct NewMachineSection {
-	// inherits
-	psy_ui_Component component;
-	// signals
-	psy_Signal signal_selected;
-	psy_Signal signal_changed;
-	psy_Signal signal_renamed;	
-	// intern
-	psy_ui_Component header;
-	psy_ui_Label label;
-	PluginsView pluginview;
-	bool preventedit;
-	// references
-	psy_Property* section;
-	psy_ui_Edit* edit;
-	Workspace* workspace;
-} NewMachineSection;
-
-void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, Workspace*);
-
-NewMachineSection* newmachinesection_alloc(void);
-NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, Workspace*);
-
-const char* newmachinesection_key(const NewMachineSection*);
-const char* newmachinesection_name(const NewMachineSection*);
-void newmachinesection_mark(NewMachineSection*);
-void newmachinsection_clearselection(NewMachineSection*);
-
 
 typedef struct NewMachineSectionsHeader {
 	// inherits

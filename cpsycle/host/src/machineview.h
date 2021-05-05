@@ -70,6 +70,11 @@ typedef struct MachineView {
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
+INLINE void machineview_centermaster(MachineView* self)
+{
+	machinewireview_centermaster(&self->wireview);
+}
+
 INLINE psy_ui_Component* machineview_base(MachineView* self)
 {
 	return &self->component;

@@ -154,8 +154,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	} else {
 		machinewireview_setmachines(self, NULL);
 	}	
-	machinewireview_updateskin(self);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	machinewireview_updateskin(self);	
 }
 
 void machinewireview_setmachines(MachineWireView* self,
@@ -372,7 +371,7 @@ void machinewireview_centermaster(MachineWireView* self)
 		psy_ui_RealSize machinesize;
 		psy_ui_RealSize size;
 						
-		size = psy_ui_component_scrollsize_px(&self->component);
+		size = psy_ui_component_scrollsize_px(psy_ui_component_parent(&self->component));
 		machinesize = psy_ui_component_scrollsize_px(machineui);
 		psy_ui_component_move(machineui,
 			psy_ui_point_make(
@@ -1044,16 +1043,20 @@ void machinewireview_buildmachineuis(MachineWireView* self)
 
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* sender,
 	int flag, psy_audio_Song* song)
-{	
+{		
 	self->machines = &sender->song->machines;	
 	if (song) {
 		machinewireview_setmachines(self, psy_audio_song_machines(song));
-	} else {
+	} else {		
 		machinewireview_setmachines(self, NULL);
 	}	
-	psy_ui_component_setscroll(&self->component, psy_ui_point_zero());	
+	psy_ui_component_setscroll(&self->component, psy_ui_point_zero());
+	self->centermaster = (flag == WORKSPACE_NEWSONG);		
+	if (psy_ui_component_drawvisible(&self->component)) {		
+		psy_ui_component_invalidate(&self->component);
+	}	
+	psy_ui_component_align(&self->component);
 	psy_ui_component_updateoverflow(&self->component);
-	psy_ui_component_invalidate(&self->component);
 	++self->component.opcount;
 }
 

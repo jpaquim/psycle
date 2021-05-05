@@ -444,9 +444,11 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 	self->abort = FALSE;
 	self->scantasks = NULL;
 	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_scanstart);
+	psy_signal_init(&self->signal_scanend);
 	psy_signal_init(&self->signal_scanprogress);
 	psy_signal_init(&self->signal_scanfile);
-	psy_signal_init(&self->signal_taskstart);	
+	psy_signal_init(&self->signal_taskstart);
 	plugincatcher_initscantasks(self);
 }
 
@@ -460,6 +462,8 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	free(self->nativeroot);
 	self->nativeroot = NULL;
 	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_scanstart);
+	psy_signal_dispose(&self->signal_scanend);
 	psy_signal_dispose(&self->signal_scanprogress);
 	psy_signal_dispose(&self->signal_scanfile);
 	psy_signal_dispose(&self->signal_taskstart);
@@ -576,6 +580,7 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 {
 	self->abort = FALSE;
 	self->scanning = TRUE;
+	psy_signal_emit(&self->signal_scanstart, self, 0);
 	psy_audio_plugincatcher_clear(self);
 	if (self->directories) {
 		psy_List* p;
@@ -602,6 +607,7 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 	psy_signal_emit(&self->signal_changed, self, 0);
 	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
 	self->scanning = FALSE;
+	psy_signal_emit(&self->signal_scanend, self, 0);
 }
 
 void psy_audio_plugincatcher_abort(psy_audio_PluginCatcher* self)

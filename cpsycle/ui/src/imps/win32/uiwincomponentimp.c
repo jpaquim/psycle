@@ -1040,9 +1040,7 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 {
 	const psy_ui_TextMetric* tm;
-	psy_ui_win_GraphicsImp* win_g;
-	POINT origin;
-	POINT org;
+	psy_ui_win_GraphicsImp* win_g;	
 	psy_ui_RealMargin spacing;
 	
 	tm = psy_ui_component_textmetric(self->component);
@@ -1060,23 +1058,16 @@ void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
 	win_g = (psy_ui_win_GraphicsImp*)g->imp;			
 	// spacing
 	spacing = psy_ui_component_spacing_px(self->component);
-	if (!psy_ui_realmargin_iszero(&spacing)) {
-		tm = psy_ui_component_textmetric(self->component);
-		
-		origin.x = -(int)spacing.left;
-		origin.y = -(int)spacing.top;
-		SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);
+	if (!psy_ui_realmargin_iszero(&spacing)) {						
+		win_g->org.x = -(int)spacing.left;
+		win_g->org.y = -(int)spacing.top;
 	}
 	// prepare colours
 	psy_ui_setcolour(g, psy_ui_component_colour(
 		self->component));
 	psy_ui_settextcolour(g, psy_ui_component_colour(
 		self->component));
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	// update graphics origin
-	GetWindowOrgEx(win_g->hdc, &org);
-	win_g->orgx = org.x;
-	win_g->orgy = org.y;
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
 	// call specialization methods (vtable, then signals)			
 	if (self->component->vtable->ondraw) {
 		self->component->vtable->ondraw(self->component, g);

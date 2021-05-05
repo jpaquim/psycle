@@ -107,7 +107,14 @@ typedef struct {
 	bool maximized;
 } MaximizedView;
 
-typedef struct {
+struct Workspace;
+
+typedef void (*fp_workspace_output)(void* context,
+	struct Workspace* sender, const char* text);
+typedef void (*fp_workspace_songloadprogress)(void* context,
+	struct Workspace* sender, intptr_t progress);
+
+typedef struct Workspace {
 	// implements
 	psy_audio_MachineCallback machinecallback;
 	// Signals
@@ -177,6 +184,10 @@ typedef struct {
 	int scantaskstart;
 	psy_audio_PluginScanTask lastscantask;
 	int scanplugintype;
+	bool playrow;
+	psy_audio_SequencerPlayMode restoreplaymode;
+	psy_dsp_big_beat_t restorenumplaybeats;
+	bool restoreloop;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -282,6 +293,13 @@ void workspace_gotocursor(Workspace*, psy_audio_PatternCursor);
 PatternDisplayMode workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayMode);
 void workspace_multiselectgear(Workspace*, psy_List* slotlist);
+void workspace_connectterminal(Workspace*, void* context,
+	fp_workspace_output out,
+	fp_workspace_output warning,
+	fp_workspace_output error);
+void workspace_connectstatus(Workspace*, void* context, fp_workspace_output);
+void workspace_connectloadprogress(Workspace*, void* context,
+	fp_workspace_songloadprogress);
 
 #ifdef __cplusplus
 }

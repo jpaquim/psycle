@@ -405,7 +405,7 @@ void trackergridcolumn_onmousedown(TrackerGridColumn* self, psy_ui_MouseEvent* e
 		} else {
 			if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
 				psy_audio_patternselection_disable(&self->gridstate->selection);
-				psy_ui_component_invalidate(&self->component);
+				psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 			}
 			self->gridstate->dragselectionbase = trackergridcolumn_makecursor(
 				self, ev->pt);
@@ -661,17 +661,18 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 	return &vtable;
 }
 // implementation
-void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
+void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Component* view,
 	TrackConfig* trackconfig, TrackerGridState* gridstate, TrackerLineState* linestate,
 	Workspace* workspace)
 {
 	assert(self);
 
 	// init base component
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	// set references
 	self->workspace = workspace;
+	self->view = view;
 	psy_table_init(&self->columns);
 	trackergrid_setsharedgridstate(self, gridstate, trackconfig);
 	trackergrid_setsharedlinestate(self, linestate);
@@ -2581,8 +2582,9 @@ void trackergrid_build(TrackerGrid* self)
 	psy_table_clear(&self->columns);
 	for (t = 0; t < trackergridstate_numsongtracks(self->gridstate); ++t) {
 		psy_table_insert(&self->columns, t, (void*)
-			trackergridcolumn_allocinit(&self->component, &self->component,
-				t, self->gridstate, self->linestate, self->workspace));
+			trackergridcolumn_allocinit(&self->component,
+				(self->view) ? self->view : &self->component, t,
+				self->gridstate, self->linestate, self->workspace));
 	}
 }
 

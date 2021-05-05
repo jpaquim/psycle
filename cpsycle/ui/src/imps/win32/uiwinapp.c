@@ -453,7 +453,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_setrectangle(&g.clip,
 							ps.rcPaint.left, ps.rcPaint.top,
 							clipsize.x, clipsize.y);
-						SetWindowOrgEx(win_g->hdc, origin.x, origin.y, NULL);												
+						win_g->org.x = origin.x;
+						win_g->org.y = origin.y;						
 						// draw						
 						imp->imp.vtable->dev_draw(&imp->imp, &g);
 						// clean up font
@@ -463,9 +464,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						if (imp->component->doublebuffered) {
 							// copy the double buffer bitmap to the paint hdc
 							win_g->hdc = hdc;
-							// DPtoLP ?
-							SetWindowOrgEx(bufferDC, 0, 0, NULL);
-							SetWindowOrgEx(hdc, 0, 0, NULL);
+							// DPtoLP ?							
 							BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top,
 								clipsize.x, clipsize.y, bufferDC, 0, 0,
 								SRCCOPY);
