@@ -6,6 +6,7 @@
 
 // host
 #include "labelpair.h"
+#include "titlebar.h"
 #include "workspace.h"
 // ui
 #include <uicheckbox.h>
@@ -38,9 +39,7 @@ typedef struct CPUView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_Component titlebar;
-	psy_ui_Label title;
-	psy_ui_Button hide;
+	TitleBar titlebar;
 	psy_ui_Label coreinfo;
 	psy_ui_Component top;
 	psy_ui_Margin topmargin;

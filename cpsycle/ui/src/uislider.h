@@ -26,6 +26,7 @@ typedef struct psy_ui_SliderPane {
 	psy_Signal signal_customdraw;
 	// internal
 	double value;
+	double defaultvalue;
 	double rulerstep;
 	double tweakbase;	
 	float step;
@@ -47,6 +48,7 @@ typedef void (*ui_slider_fpvalue)(void*, struct psy_ui_Slider*, float* value);
 void psy_ui_sliderpane_init(psy_ui_SliderPane*, psy_ui_Component* parent,
 	psy_ui_Component* view);
 void psy_ui_sliderpane_setvalue(psy_ui_SliderPane*, double value);
+void psy_ui_sliderpane_setdefaultvalue(psy_ui_SliderPane*, double value);
 double psy_ui_sliderpane_value(psy_ui_SliderPane*);
 void psy_ui_sliderpane_showvertical(psy_ui_SliderPane*);
 void psy_ui_sliderpane_showhorizontal(psy_ui_SliderPane*);
@@ -89,6 +91,7 @@ void psy_ui_slider_describevalue(psy_ui_Slider*);
 void psy_ui_slider_startpoll(psy_ui_Slider*);
 void psy_ui_slider_stoppoll(psy_ui_Slider*);
 void psy_ui_slider_update(psy_ui_Slider*);
+void psy_ui_slider_setdefaultvalue(psy_ui_Slider*, double value);
 
 INLINE psy_ui_Component* psy_ui_slider_base(psy_ui_Slider* self)
 {

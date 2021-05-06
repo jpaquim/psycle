@@ -544,7 +544,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		instrumentview_onstatuschanged);
 	psy_signal_connect(&self->filter.signal_status, self,
 		instrumentview_onstatuschanged);
-	psy_ui_notebook_select(&self->clientnotebook, 0);
+	psy_ui_tabbar_select(&self->tabbar, 0);
 }
 
 void instrumentview_oninstrumentinsert(InstrumentView* self, psy_audio_Instruments* sender,

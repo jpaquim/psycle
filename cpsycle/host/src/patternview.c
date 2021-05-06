@@ -315,7 +315,7 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 {
 	psy_ui_Tab* tab;
 
-	psy_ui_component_init_align(&self->sectionbar, tabbarparent,
+	psy_ui_component_init_align(&self->sectionbar, tabbarparent, NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);

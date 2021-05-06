@@ -165,6 +165,7 @@ void make_translator_make_mainview(psy_Property* parent)
 	add("help", "Help");
 	add("settings", "Settings");
 	add("properties", "Properties");
+	add("exit", "-> Exit");
 	add("kbd", "Kbd");
 	add("terminal", "Terminal");
 }

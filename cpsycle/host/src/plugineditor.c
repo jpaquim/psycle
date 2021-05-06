@@ -7,14 +7,15 @@
 
 #include "plugineditor.h"
 
-#include <string.h>
+// host
+#include "styles.h"
+// file
 #include <dir.h>
-
+// audio
 #include <luaplugin.h>
 #include <exclusivelock.h>
-
 #include <songio.h>
-
+// platform
 #include "../../detail/portable.h"
 
 static const char* pluginsource =
@@ -61,6 +62,9 @@ void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);	
 }
 
+// PluginEditor
+// prototypes
+static void plugineditor_inittitlebar(PluginEditor*);
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace*, int flag,
@@ -82,9 +86,12 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_RECENTVIEW_MAINSECTION);
+	plugineditor_inittitlebar(self);
 	self->workspace = workspace;
 	self->basepath = 0;	
-	self->instanceidx = psy_INDEX_INVALID;
+	self->instanceidx = psy_INDEX_INVALID;	
 	psy_ui_component_init(&self->bar, &self->component, NULL);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar, NULL);
@@ -144,6 +151,13 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 void plugineditor_ondestroy(PluginEditor* self, psy_ui_Component* sender)
 {
 	psy_table_dispose(&self->pluginmappping);
+}
+
+void plugineditor_inittitlebar(PluginEditor* self)
+{
+	titlebar_init(&self->titlebar, &self->component, NULL,
+		"Plugin Editor");
+	titlebar_hideonclose(&self->titlebar);
 }
 
 void plugineditor_onmachineschangeslot(PluginEditor* self,

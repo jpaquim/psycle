@@ -50,6 +50,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 	int accent;
 	int medium;
 	int weak;
+	int pale;
 	psy_ui_Font oldfont;
 	
 	if (dark) {
@@ -63,7 +64,8 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 		strong = 50;
 		accent = 100;
 		medium = 200;
-		weak = 400;		
+		weak = 400;	
+		pale = 800;
 		self->hasdarktheme = TRUE;		
 	} else {
 		surface = psy_ui_colour_make_argb(0x00FAFAFA);
@@ -77,6 +79,7 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 		accent = 800;
 		medium = 600;
 		weak = 200;
+		pale = 100;
 	}
 	// root
 	if (keepfont) {
@@ -247,6 +250,20 @@ void psy_ui_defaults_inittheme(psy_ui_Defaults* self, bool dark, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, secondary);
 	psy_ui_defaults_setstyle(self, psy_ui_STYLE_PROGRESSBAR, style);
+	// switch
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, pale));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SWITCH, style);
+	// switch::hover
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&onprimary, pale));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SWITCH_HOVER, style);
+	// switch::select
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&onprimary, medium));
+	psy_ui_defaults_setstyle(self, psy_ui_STYLE_SWITCH_SELECT, style);
 }
 
 void psy_ui_defaults_dispose(psy_ui_Defaults* self)

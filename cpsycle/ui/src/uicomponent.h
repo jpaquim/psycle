@@ -350,11 +350,13 @@ uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType);
 
 INLINE void psy_ui_component_init_align(psy_ui_Component* self,
-	psy_ui_Component* parent, psy_ui_AlignType aligntype)
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_ui_AlignType aligntype)
 {
-	psy_ui_component_init(self, parent, NULL);
+	psy_ui_component_init(self, parent, view);
 	psy_ui_component_setalign(self, aligntype);
 }
+
 void psy_ui_component_setcontaineralign(psy_ui_Component*,
 	psy_ui_ContainerAlignType);
 void psy_ui_component_preventalign(psy_ui_Component*);

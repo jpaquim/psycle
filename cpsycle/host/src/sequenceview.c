@@ -741,7 +741,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequencebuttons_init(&self->buttons, &self->component, &self->cmds);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	// spacer
-	psy_ui_component_init_align(&self->spacer, &self->component,
+	psy_ui_component_init_align(&self->spacer, &self->component, NULL,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make_em(0.0, 0.3));

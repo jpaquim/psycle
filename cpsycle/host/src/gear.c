@@ -119,21 +119,9 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 }
 
 void gear_inittitle(Gear* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_component_init(&self->titlebar, &self->component, NULL);
-	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);
-	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
-		"machinebar.gear");
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);					
-	psy_ui_button_init(&self->hide, &self->titlebar, NULL);
-	psy_ui_button_settext(&self->hide, "X");
-	psy_signal_connect(&self->hide.signal_clicked, self, gear_onhide);
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, margin);
+{	
+	titlebar_init(&self->titlebar, &self->component, NULL, "machinebar.gear");
+	titlebar_hideonclose(&self->titlebar);
 }
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)

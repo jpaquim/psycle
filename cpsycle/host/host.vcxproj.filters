@@ -499,6 +499,9 @@
     <ClCompile Include="src\trackercmds.c">
       <Filter>pattern</Filter>
     </ClCompile>
+    <ClCompile Include="src\titlebar.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -946,6 +949,9 @@
     </ClInclude>
     <ClInclude Include="src\trackercmds.h">
       <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\titlebar.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

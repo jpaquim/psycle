@@ -43,6 +43,7 @@ static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initviewstatusbars(MainFrame*);
 static void mainframe_initstatusbarlabel(MainFrame*);
+static void mainframe_initturnoffbutton(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
 static void mainframe_initterminalbutton(MainFrame*);
 static void mainframe_initprogressbar(MainFrame*);
@@ -119,6 +120,7 @@ static void mainframe_updateseqeditorbuttons(MainFrame*);
 static void mainframe_connectseqeditorbuttons(MainFrame*);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onexit(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onselectpatterndisplay(MainFrame*,
 	psy_ui_Component* sender, PatternDisplayMode);
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
@@ -186,7 +188,7 @@ void mainframe_init(MainFrame* self)
 {			
 	mainframe_initframe(self);	
 	mainframe_initworkspace(self);
-	mainframe_initemptystatusbar(self);	
+	mainframe_initemptystatusbar(self);
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
 	mainframe_inittoparea(self);	
@@ -262,7 +264,7 @@ void mainframe_initworkspace(MainFrame* self)
 void mainframe_initemptystatusbar(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
-		psy_ui_ALIGN_BOTTOM);
+		NULL, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setstyletype(&self->statusbar, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.25, 0.0));
@@ -271,7 +273,7 @@ void mainframe_initemptystatusbar(MainFrame* self)
 void mainframe_initspacerleft(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->spacerleft, &self->component,
-		psy_ui_ALIGN_LEFT);
+		NULL, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->spacerleft,
 		psy_ui_size_make_em(0.5, 0.0));	
 }
@@ -279,7 +281,7 @@ void mainframe_initspacerleft(MainFrame* self)
 void mainframe_initspacerright(MainFrame* self)
 {	
 	psy_ui_component_init_align(&self->spacerright, &self->client,
-		psy_ui_ALIGN_RIGHT);
+		NULL, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setpreferredsize(&self->spacerright,
 	 	psy_ui_size_make_em(0.5, 0.0));	
 }
@@ -287,28 +289,28 @@ void mainframe_initspacerright(MainFrame* self)
 void mainframe_inittoparea(MainFrame* self)
 {	
 	psy_ui_component_init_align(&self->top, mainframe_base(self),
-		psy_ui_ALIGN_TOP);
+		NULL, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());	
 }
 
 void mainframe_initclientarea(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->client, mainframe_base(self),
+	psy_ui_component_init_align(&self->client, mainframe_base(self), NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client, psy_ui_NOBACKGROUND);
 }
 
 void mainframe_initmainviewarea(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->mainviews, &self->client,
+	psy_ui_component_init_align(&self->mainviews, &self->client, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
 }
 
 void mainframe_initleftarea(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->left, mainframe_base(self),
+	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
 	psy_ui_splitbar_init(&self->splitbar, mainframe_base(self));
@@ -316,7 +318,7 @@ void mainframe_initleftarea(MainFrame* self)
 
 void mainframe_initrightarea(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->right, &self->client,
+	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
 }
 
@@ -351,6 +353,7 @@ void mainframe_initstatusbar(MainFrame* self)
 		self, mainframe_onzoomboxchanged);	
 	mainframe_initstatusbarlabel(self);	
 	mainframe_initviewstatusbars(self);
+	mainframe_initturnoffbutton(self);
 	mainframe_initkbdhelpbutton(self);
 	mainframe_initterminalbutton(self);	
 	mainframe_initprogressbar(self);
@@ -387,6 +390,18 @@ void mainframe_initstatusbarlabel(MainFrame* self)
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_preventwrap(&self->statusbarlabel);
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
+}
+
+void mainframe_initturnoffbutton(MainFrame* self)
+{
+	psy_ui_button_init_text_connect(&self->turnoff, &self->statusbar,
+		NULL, "main.exit", self, mainframe_onexit);
+	psy_ui_component_setalign(psy_ui_button_base(&self->turnoff),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setmargin(psy_ui_button_base(&self->turnoff),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 4.0));
+	psy_ui_component_setspacing(psy_ui_button_base(&self->turnoff),
+		psy_ui_margin_make_em(0.0, 0.0, 0.25, 0.0));
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
@@ -428,7 +443,7 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin margin;	
 	
 	// rows
-	psy_ui_component_init_align(&self->toprows, &self->top,
+	psy_ui_component_init_align(&self->toprows, &self->top, NULL,
 		psy_ui_ALIGN_TOP);
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {		
@@ -493,7 +508,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_init(&self->maximize, &self->mainviews, NULL);
 	psy_ui_component_setstyletype(&self->maximize, STYLE_MAINVIEWTOPBAR);
 	psy_ui_component_setalign(&self->maximize, psy_ui_ALIGN_TOP);
-	psy_ui_component_init_align(&self->tabbars, &self->maximize,
+	psy_ui_component_init_align(&self->tabbars, &self->maximize, NULL,
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_button_init_connect(&self->maximizebtn, &self->maximize, NULL,
 		self, mainframe_onmaximizeorminimizeview);
@@ -1489,6 +1504,11 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_togglevisibility(kbdhelp_base(&self->kbdhelp));	
+}
+
+void mainframe_onexit(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_app_close(psy_ui_app());
 }
 
 void mainframe_onselectpatterndisplay(MainFrame* self, psy_ui_Component* sender,

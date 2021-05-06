@@ -28,13 +28,13 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->scan),
 		psy_ui_margin_make_em(2.0, 0.0, 2.0, 0.0));
-	psy_ui_component_init_align(&self->left, &self->component,
+	psy_ui_component_init_align(&self->left, &self->component, NULL,
 		psy_ui_ALIGN_LEFT);	
 	psy_ui_component_setspacing(&self->left,
 		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
-	psy_ui_component_init_align(&self->right, &self->component,
+	psy_ui_component_init_align(&self->right, &self->component, NULL,
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_init_align(&self->client, &self->component,
+	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);	
 	// filename
 	psy_ui_label_init(&self->scanfile, &self->client, NULL);

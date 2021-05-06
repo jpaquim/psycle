@@ -83,6 +83,8 @@ typedef struct About {
 	psy_ui_Component component;
 	// internal
 	psy_ui_Notebook notebook;
+	psy_ui_Component bottom;
+	psy_ui_Component buttons;
 	Contrib contrib;
 	Version version;
 	Licence licence;	
@@ -101,7 +103,6 @@ INLINE psy_ui_Component* about_base(About* self)
 	assert(self);
 
 	return &self->component;
-
 }
 
 #ifdef __cplusplus

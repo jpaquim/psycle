@@ -405,8 +405,8 @@ void dev_move(psy_ui_x11_ComponentImp* self, psy_ui_Point origin)
 
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
     XMoveWindow(x11app->dpy, self->hwnd,		
-		(int)psy_ui_value_px(&origin.x, dev_textmetric(self)),
-		(int)psy_ui_value_px(&origin.y, dev_textmetric(self)));		
+		(int)psy_ui_value_px(&origin.x, dev_textmetric(self), NULL),
+		(int)psy_ui_value_px(&origin.y, dev_textmetric(self), NULL));		
 }
 
 void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
@@ -418,11 +418,11 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 	tm = dev_textmetric(self);	
 	self->sizecachevalid = FALSE;	
 	XResizeWindow(x11app->dpy, self->hwnd,
-		(psy_ui_value_px(&size.width, tm) > 0)
-			? psy_ui_value_px(&size.width, tm)
+		(psy_ui_value_px(&size.width, tm, NULL) > 0)
+			? psy_ui_value_px(&size.width, tm, NULL)
 			: 1,
-		(psy_ui_value_px(&size.height, tm) > 0)
-			? psy_ui_value_px(&size.height, tm)
+		(psy_ui_value_px(&size.height, tm, NULL) > 0)
+			? psy_ui_value_px(&size.height, tm, NULL)
 			: 1);	
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;	
@@ -460,13 +460,13 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;		
 	XMoveResizeWindow(x11app->dpy, self->hwnd,
-		psy_ui_value_px(&topleft.x, tm),
-		psy_ui_value_px(&topleft.y, tm),		
-		(psy_ui_value_px(&size.width, tm) > 0)
-			? psy_ui_value_px(&size.width, tm)
+		psy_ui_value_px(&topleft.x, tm, NULL),
+		psy_ui_value_px(&topleft.y, tm, NULL),		
+		(psy_ui_value_px(&size.width, tm, NULL) > 0)
+			? psy_ui_value_px(&size.width, tm, NULL)
 			: 1,
-		(psy_ui_value_px(&size.height, tm) > 0)
-			? psy_ui_value_px(&size.height, tm)
+		(psy_ui_value_px(&size.height, tm, NULL) > 0)
+			? psy_ui_value_px(&size.height, tm, NULL)
 			: 1);	
 	dev_updatesize(self);	
 }
@@ -504,11 +504,11 @@ psy_ui_Size dev_size(psy_ui_x11_ComponentImp* self)
 		
 		x11app = (psy_ui_X11App*)psy_ui_app()->imp;
         XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);       
-        rv.width = psy_ui_value_makepx(win_attr.width);
-        rv.height = psy_ui_value_makepx(win_attr.height);
+        rv.width = psy_ui_value_make_px(win_attr.width);
+        rv.height = psy_ui_value_make_px(win_attr.height);
     } else {
-        rv.width = psy_ui_value_makepx(0);
-        rv.height = psy_ui_value_makepx(0);
+        rv.width = psy_ui_value_make_px(0);
+        rv.height = psy_ui_value_make_px(0);
     }
 	return rv;
 }
@@ -525,8 +525,8 @@ void dev_updatesize(psy_ui_x11_ComponentImp* self)
 		
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
 	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 	
-    size.width = psy_ui_value_makepx(win_attr.width);
-    size.height = psy_ui_value_makepx(win_attr.height);	
+    size.width = psy_ui_value_make_px(win_attr.width);
+    size.height = psy_ui_value_make_px(win_attr.height);	
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;
 }
@@ -545,11 +545,11 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
 		
 		x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
         XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 
-        rv.width = psy_ui_value_makepx(win_attr.width);
-        rv.height = psy_ui_value_makepx(win_attr.height);
+        rv.width = psy_ui_value_make_px(win_attr.width);
+        rv.height = psy_ui_value_make_px(win_attr.height);
     } else {
-        rv.width = psy_ui_value_makepx(0);
-        rv.height = psy_ui_value_makepx(0);
+        rv.width = psy_ui_value_make_px(0);
+        rv.height = psy_ui_value_make_px(0);
     }
 	return rv;
 }
@@ -705,8 +705,8 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;	
-	xev.x  = (int)(r->left - psy_ui_value_px(&self->component->scroll.x, tm));
-	xev.y = (int)(r->top - psy_ui_value_px(&self->component->scroll.y, tm));	
+	xev.x  = (int)(r->left - psy_ui_component_scrollleftpx(self->component));
+	xev.y = (int)(r->top - psy_ui_component_scrolltop_px(self->component));		
 	xev.width = r->right - r->left; 
 	xev.height = r->bottom - r->top;		
 	XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
@@ -988,7 +988,7 @@ psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	xgc.visual = x11app->visual;    
 	xgc.gc = gc;
 	psy_ui_graphics_init(&g, &xgc);
-	rv = psy_ui_textsize(&g, text);
+	rv = psy_ui_textsize(&g, text, psy_strlen(text));
 	psy_ui_graphics_dispose(&g);        
 	return rv;
 }

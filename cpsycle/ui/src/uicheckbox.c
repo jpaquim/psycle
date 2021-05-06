@@ -199,7 +199,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 
 void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -293,7 +293,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 
 		text = psy_ui_checkbox_text(self);
 		size = psy_ui_component_textsize(&self->component, text);
-		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm) + 20);
+		rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL) + 20);
 		rv->height = size.height;
 	}
 }

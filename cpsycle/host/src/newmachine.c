@@ -457,7 +457,7 @@ void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	newmachinecategorybar_vtable_init(self);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_CATEGORYBAR);
-	psy_ui_component_init_align(&self->client, &self->component,
+	psy_ui_component_init_align(&self->client, &self->component, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -772,7 +772,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->scroller_sections.pane,
 		psy_ui_SETBACKGROUND);
 	// all	
-	psy_ui_component_init_align(&self->all, &self->client,
+	psy_ui_component_init_align(&self->all, &self->client, NULL,
 		psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setmargin(&self->all, 
 		psy_ui_margin_make_em(0.5, 0.0, 1.0, 0.0));

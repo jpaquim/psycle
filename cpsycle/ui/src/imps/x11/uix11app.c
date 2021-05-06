@@ -944,13 +944,14 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 					gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 					psy_ui_x11_graphicsimp_updatexft(gx11);
 				}
-				if (imp->component->alignchildren) {
+				// if (imp->component->alignchildren) {
 					psy_ui_component_align(imp->component);
-				}
-				size.width = psy_ui_value_makepx(xce.width);
-				size.height = psy_ui_value_makepx(xce.height);				
+				// }
+				size.width = psy_ui_value_make_px(xce.width);
+				size.height = psy_ui_value_make_px(xce.height);				
 				imp->component->vtable->onsize(imp->component, &size);
-				if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
+				if (psy_ui_component_overflow(imp->component) !=
+						psy_ui_OVERFLOW_HIDDEN) {
 					psy_ui_component_updateoverflow(imp->component);						
 				}
 				psy_signal_emit(&imp->component->signal_size, imp->component, 1,
@@ -994,7 +995,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			imp->component->vtable->onkeydown(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_keydown, imp->component,
 				1, &ev);
-			if (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+			if (ev.event.bubble != FALSE && imp->parent && imp->parent->hwnd) {
 				XKeyEvent xkevent;
 
 				xkevent = event->xkey;
@@ -1014,7 +1015,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			imp->component->vtable->onkeyup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_keyup, imp->component,
 				1, &ev);
-			if (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+			if (ev.event.bubble != FALSE && imp->parent && imp->parent->hwnd) {
 				XKeyEvent xkevent;
 
 				xkevent = event->xkey;
@@ -1074,7 +1075,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 					imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 						&ev);
-					while (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+					while (ev.event.bubble != FALSE && imp->parent && imp->parent->hwnd) {
 						imp = imp->parent;
 						imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 						psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
@@ -1175,10 +1176,10 @@ void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
 	// translate coordinates			
 	gx11->dx = -psy_ui_component_scrollleftpx(imp->component);
-	gx11->dy = -psy_ui_component_scrolltoppx(imp->component);
+	gx11->dy = -psy_ui_component_scrolltop_px(imp->component);
 	psy_ui_setrectangle(&imp->g.clip,
 		x + psy_ui_component_scrollleftpx(imp->component),
-		y + psy_ui_component_scrolltoppx(imp->component),
+		y + psy_ui_component_scrolltop_px(imp->component),
 		width, height);
 	// call draw handlers			
 	if (imp->component->vtable->ondraw) {				
@@ -1208,14 +1209,17 @@ void dispose_window(psy_ui_X11App* self, Window window)
 
 void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
 {		
+	psy_ui_Margin spacing;
+	
 	*x += psy_ui_component_scrollleftpx(component);
-	*y += psy_ui_component_scrolltoppx(component);
-	if (!psy_ui_margin_iszero(&component->spacing)) {
+	*y += psy_ui_component_scrolltop_px(component);
+	spacing = psy_ui_component_spacing(component);
+	if (!psy_ui_margin_iszero(&spacing)) {
 		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(component);
-		*x -= psy_ui_value_px(&component->spacing.left, tm);
-		*y -= psy_ui_value_px(&component->spacing.top, tm);
+		*x -= psy_ui_value_px(&spacing.left, tm, NULL);
+		*y -= psy_ui_value_px(&spacing.top, tm, NULL);
 	}
 }
 

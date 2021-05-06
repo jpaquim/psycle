@@ -11,6 +11,7 @@
 // platform
 #include "../../detail/portable.h"
 
+// prototypes
 static void psy_ui_sliderpane_initsignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_ondraw(psy_ui_SliderPane*, psy_ui_Graphics*);
@@ -30,7 +31,7 @@ static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
-
+// vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -57,19 +58,20 @@ static void vtable_init(psy_ui_SliderPane* self)
 			psy_ui_sliderpane_onmouseleave;	
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
-
+// implementation
 void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {	
 	psy_ui_component_init(&self->component, parent, view);
-	vtable_init(self);
-	self->component.vtable = &vtable;	
+	vtable_init(self);	
 	self->slider = NULL;
 	psy_ui_component_doublebuffer(&self->component);
 	self->tweakbase = -1;
 	self->orientation = psy_ui_HORIZONTAL;
-	self->value = 0.0;	
+	self->value = 0.0;
+	self->defaultvalue = 0.5;
 	self->rulerstep = 0.1;
 	self->hslidersize = psy_ui_size_make_em(1.0, 1.0);
 	self->vslidersize = psy_ui_size_make_em(1.0, 1.0);	
@@ -114,6 +116,11 @@ void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane* self)
 void psy_ui_sliderpane_setvalue(psy_ui_SliderPane* self, double value)
 {
 	self->value = value;
+}
+
+void psy_ui_sliderpane_setdefaultvalue(psy_ui_SliderPane* self, double value)
+{
+	self->defaultvalue = value;
 }
 
 double psy_ui_sliderpane_value(psy_ui_SliderPane* self)
@@ -175,20 +182,42 @@ void psy_ui_sliderpane_onalign(psy_ui_SliderPane* self)
 
 void psy_ui_sliderpane_onmousedown(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_RealSize size;	
+	if (ev->button == 1) {
+		psy_ui_RealSize size;
 
-	size = psy_ui_component_scrollsize_px(&self->component);
-	if (self->orientation == psy_ui_HORIZONTAL) {
-		self->tweakbase = (ev->pt.x) -
-			self->value * (size.width - self->slidersizepx.width);
-	} else if (self->orientation == psy_ui_VERTICAL) {
-		self->tweakbase = ev->pt.y -
-			((1.0 - self->value) * (size.height - self->slidersizepx.width));
+		size = psy_ui_component_scrollsize_px(&self->component);
+		if (self->orientation == psy_ui_HORIZONTAL) {
+			self->tweakbase = (ev->pt.x) -
+				self->value * (size.width - self->slidersizepx.width);
+		} else if (self->orientation == psy_ui_VERTICAL) {
+			self->tweakbase = ev->pt.y -
+				((1.0 - self->value) * (size.height - self->slidersizepx.width));
+		}
+		if (self->poll) {
+			psy_ui_component_stoptimer(&self->component, 0);
+		}
+		psy_ui_component_capture(&self->component);
+	} else {
+		float value;
+		float* pvalue;
+
+		self->value = self->defaultvalue;
+		psy_signal_emit_float(&self->signal_tweakvalue,
+			self->slider, (float)self->value);
+		value = (float)self->value;
+		pvalue = &value;
+		if (self->slider) {
+			psy_signal_emit(&self->signal_value, self->slider, 1, pvalue);
+		}
+		if (self->value != value) {
+			self->value = value;
+			if (self->slider) {
+				psy_signal_emit(&self->signal_changed, self->slider, 0);
+			}
+		}		
+		psy_ui_sliderpane_describevalue(self);
+		psy_ui_component_invalidate(&self->component);
 	}
-	if (self->poll) {
-		psy_ui_component_stoptimer(&self->component, 0);
-	}
-	psy_ui_component_capture(&self->component);
 }
 
 void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
@@ -220,19 +249,21 @@ void psy_ui_sliderpane_onmousemove(psy_ui_SliderPane* self, psy_ui_MouseEvent* e
 			if (self->slider) {
 				psy_signal_emit(&self->signal_changed, self->slider, 0);
 			}
-		}		
-		psy_ui_component_invalidate(&self->component);
+		}				
 		psy_ui_sliderpane_describevalue(self);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
 void psy_ui_sliderpane_onmouseup(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
 {
-	self->tweakbase = -1;
-	psy_ui_component_releasecapture(&self->component);
-	if (self->poll) {
-		psy_ui_component_starttimer(&self->component, 0, 50);
-	}	
+	if (self->tweakbase != -1) {
+		self->tweakbase = -1;
+		psy_ui_component_releasecapture(&self->component);
+		if (self->poll) {
+			psy_ui_component_starttimer(&self->component, 0, 50);
+		}
+	}
 }
 
 void psy_ui_sliderpane_onmousewheel(psy_ui_SliderPane* self, psy_ui_MouseEvent* ev)
@@ -456,6 +487,11 @@ void psy_ui_slider_update(psy_ui_Slider* self)
 {	
 	psy_ui_sliderpane_updatevalue(&self->pane);
 	psy_ui_sliderpane_describevalue(&self->pane);	
+}
+
+void psy_ui_slider_setdefaultvalue(psy_ui_Slider* self, double value)
+{
+	psy_ui_sliderpane_setdefaultvalue(&self->pane, value);
 }
 
 psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane* self)

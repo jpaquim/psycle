@@ -20,7 +20,7 @@ void confirmbox_init(ConfirmBox* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_component_init(confirmbox_base(self), parent, NULL);
 	self->workspace = workspace;
 	self->mode = CONFIRM_CLOSE;	
-	psy_ui_component_init_align(&self->view, confirmbox_base(self),
+	psy_ui_component_init_align(&self->view, confirmbox_base(self), NULL,
 		psy_ui_ALIGN_CENTER);
 	psy_ui_component_setdefaultalign(&self->view,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());

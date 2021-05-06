@@ -235,7 +235,7 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_listboxclient_vtable_init(self);
 	self->component.vtable = &psy_ui_listboxclient_vtable;
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -262,8 +262,8 @@ void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient* self, const psy_ui_Size* 
 
 	tm = psy_ui_component_textmetric(&self->component);
 	lineheight = (int)(tm->tmHeight * 1.2);
-	self->component.scrollstepy = 
-		psy_ui_value_make_px(lineheight);
+	psy_ui_component_setscrollstep_height(&self->component,	
+		psy_ui_value_make_px(lineheight));
 }
 
 void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
@@ -276,8 +276,9 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 	int lineheight;
 		
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_intsize_init_size(psy_ui_component_scrollsize(&self->component),
-		tm);
+	size = psy_ui_intsize_init_size(
+		psy_ui_component_scrollsize(&self->component),
+		tm, NULL);
 	lineheight = (int)(tm->tmHeight * 1.2);
 	for (it = psy_table_begin(&self->items);
 			!psy_tableiterator_equal(&it, psy_table_end());
@@ -376,10 +377,10 @@ static void psy_ui_listbox_onselchanged(psy_ui_ListBox*, psy_ui_ListBoxClient*
 
 void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_listboxclient_init(&self->client, &self->component);
 	psy_ui_scroller_init(&self->scroller, &self->client.component,
-		&self->component);
+		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);

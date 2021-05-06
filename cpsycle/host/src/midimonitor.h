@@ -6,6 +6,7 @@
 
 // host
 #include "labelpair.h"
+#include "titlebar.h"
 #include "workspace.h"
 // ui
 #include <uibutton.h>
@@ -85,10 +86,8 @@ typedef struct MidiMonitor {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Component client;
-	psy_ui_Component titlebar;
-	psy_ui_Label title;
-	psy_ui_Button configure;
-	psy_ui_Button hide;
+	TitleBar titlebar;	
+	psy_ui_Button configure;	
 	psy_ui_Label coretitle;
 	psy_ui_Component top;
 	psy_ui_Component resources;

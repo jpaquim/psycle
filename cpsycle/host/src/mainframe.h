@@ -100,7 +100,8 @@ typedef struct MainFrame {
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
 	psy_ui_Button toggleterminal;	
-	psy_ui_Button togglekbdhelp;	
+	psy_ui_Button togglekbdhelp;
+	psy_ui_Button turnoff;
 	Navigation navigation;
 	psy_ui_TabBar tabbar;
 	psy_ui_TabBar helpsettingstabbar;

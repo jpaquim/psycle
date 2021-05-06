@@ -12,7 +12,7 @@ extern "C" {
 
 typedef uint8_t psy_dsp_note_t;
 
-INLINE static bool psy_dsp_isblack(psy_dsp_note_t key)
+INLINE bool psy_dsp_isblack(psy_dsp_note_t key)
 {
 	intptr_t offset = key % 12;
 	// 0 1 2 3 4 5 6 7 8 9 10 11
@@ -21,12 +21,12 @@ INLINE static bool psy_dsp_isblack(psy_dsp_note_t key)
 		|| offset == 10);
 }
 
-INLINE static bool psy_dsp_iskey_c(psy_dsp_note_t key)
+INLINE bool psy_dsp_iskey_c(psy_dsp_note_t key)
 {
 	return (key % 12) == 0;
 }
 
-INLINE static bool psy_dsp_iskey_e(psy_dsp_note_t key)
+INLINE bool psy_dsp_iskey_e(psy_dsp_note_t key)
 {
 	return (key % 12) == 5;
 }
