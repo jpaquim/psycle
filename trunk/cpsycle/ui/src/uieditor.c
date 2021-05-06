@@ -129,7 +129,7 @@ int loadscilexer(void)
 {
 #ifdef SCI_ENABLED
 	if (scimodule == 0) {
-		scimodule = LoadLibrary ("SciLexer.dll");
+		scimodule = LoadLibrary ("scintilla.dll");
 		if (scimodule != NULL) {		
 			psy_signal_connect(&psy_ui_app()->signal_dispose, 0, onappdestroy);
 		}		
