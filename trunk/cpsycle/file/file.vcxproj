@@ -210,6 +210,8 @@
     <ClCompile Include="src\playlist.c" />
     <ClCompile Include="src\propertiesio.c" />
     <ClCompile Include="src\translator.c" />
+    <ClCompile Include="src\zipreader.c" />
+    <ClCompile Include="src\zipwriter.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\datacompression.h" />
@@ -218,6 +220,10 @@
     <ClInclude Include="src\playlist.h" />
     <ClInclude Include="src\propertiesio.h" />
     <ClInclude Include="src\translator.h" />
+    <ClInclude Include="src\zconf.h" />
+    <ClInclude Include="src\zipreader.h" />
+    <ClInclude Include="src\zipwriter.h" />
+    <ClInclude Include="src\zlib.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

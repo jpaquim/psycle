@@ -9,6 +9,7 @@
 // ui
 #include <uiapp.h>
 // std
+#include <stdio.h>
 #include <stdlib.h>
 // file
 #include <dir.h>
@@ -62,7 +63,7 @@ int psycle_run(uintptr_t instance, int options)
 	char workpath[_MAX_PATH];
 	const char* env = 0;
 	psy_ui_App app;
-	MainFrame* mainframe;
+	MainFrame* mainframe;	
 	
 	// Adds the app path to the environment path to find some
 	// modules (scilexer ...)
