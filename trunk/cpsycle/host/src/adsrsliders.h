@@ -34,6 +34,7 @@ void adsrsliders_init(AdsrSliders*, psy_ui_Component* parent);
 void adsrsliders_setenvelope(AdsrSliders*,
 	psy_dsp_Envelope*);
 void adsrsliders_update(AdsrSliders*);
+psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders*);
 
 INLINE psy_ui_Component* adsrsliders_base(AdsrSliders* self)
 {

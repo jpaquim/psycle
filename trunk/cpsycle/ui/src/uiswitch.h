@@ -26,6 +26,10 @@ void psy_ui_switch_check(psy_ui_Switch*);
 void psy_ui_switch_uncheck(psy_ui_Switch*);
 bool psy_ui_switch_checked(const psy_ui_Switch*);
 
+INLINE psy_ui_Component* psy_ui_switch_base(psy_ui_Switch* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

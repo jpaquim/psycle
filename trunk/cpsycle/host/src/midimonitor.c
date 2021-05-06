@@ -319,7 +319,7 @@ void midichannelmappingview_onpreferredsize(MidiChannelMappingView* self,
 // MidiMonitor
 // prototypes
 static void midimonitor_initcorestatus(MidiMonitor*);
-static void midimonitor_inittitle(MidiMonitor*);
+static void midimonitor_inittitlebar(MidiMonitor*);
 static void midimonitor_initcorestatus(MidiMonitor*);
 static void midimonitor_initcorestatusleft(MidiMonitor*);
 static void midimonitor_initcorestatusright(MidiMonitor*);
@@ -355,12 +355,13 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_init(&self->component, parent, NULL);
 	midimonitor_vtable_init(self);
 	psy_ui_component_setvtable(midimonitor_base(self), midimonitor_vtable_init(self));
-	psy_ui_component_setstyletype(&self->component, STYLE_RECENTVIEW_MAINSECTION);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_RECENTVIEW_MAINSECTION);
+	midimonitor_inittitlebar(self);
 	psy_ui_component_init(&self->client, midimonitor_base(self), NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->client,
-		psy_ui_defaults_cmargin(psy_ui_defaults()));
-	midimonitor_inittitle(self);
+		psy_ui_defaults_cmargin(psy_ui_defaults()));	
 	psy_ui_component_init(&self->top, &self->client, NULL);
 	psy_ui_margin_init(&self->topmargin);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
@@ -374,28 +375,18 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void midimonitor_inittitle(MidiMonitor* self)
-{
-	psy_ui_Margin margin;
-		
-	psy_ui_component_init(&self->titlebar, &self->client, NULL);
-	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);
-	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);	
-	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
-		"Psycle MIDI Monitor");	
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
-	psy_ui_button_init_text(&self->configure, &self->titlebar, NULL,
+void midimonitor_inittitlebar(MidiMonitor* self)
+{		
+	titlebar_init(&self->titlebar, &self->component, NULL,
+		"Psycle MIDI Monitor");		
+	titlebar_hideonclose(&self->titlebar);
+	psy_ui_button_init_text(&self->configure, &self->titlebar.client, NULL,
 		"Devices");
-	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&self->configure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_setbitmapresource(&self->configure, IDB_SETTINGS_DARK);
+	psy_ui_button_setbitmaptransparency(&self->configure,
+		psy_ui_colour_white());
 	psy_ui_component_setalign(&self->configure.component, psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);
-	psy_ui_button_init(&self->hide, &self->titlebar, NULL);
-	psy_ui_button_settext(&self->hide, "X");
-	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, margin);
+	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);			
 }
 
 void midimonitor_initcorestatus(MidiMonitor* self)

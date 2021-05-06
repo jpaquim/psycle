@@ -334,10 +334,12 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_slider_init(&self->defaultvolume, &self->component, NULL);
+	psy_ui_slider_setdefaultvalue(&self->defaultvolume, 1.0);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());	
 	psy_ui_slider_init(&self->globalvolume, &self->component, NULL);
 	psy_ui_slider_init(&self->panposition, &self->component, NULL);
 	psy_ui_slider_init(&self->samplednote, &self->component, NULL);
+	psy_ui_slider_setdefaultvalue(&self->samplednote, 60.0 / 119.0);
 	psy_ui_slider_init(&self->pitchfinetune, &self->component, NULL);
 	for (i = 0; sliders[i] != 0; ++i) {		
 		psy_ui_slider_setcharnumber(sliders[i], 16);
@@ -560,6 +562,7 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	psy_ui_slider_settext(&self->depth, "Depth");	
 	for (i = 0; i < 3; ++i) {		
 		psy_ui_slider_setcharnumber(sliders[i], 16);
+		psy_ui_slider_setdefaultvalue(sliders[i], 0.0);
 		psy_ui_slider_connect(sliders[i], self,
 			(ui_slider_fpdescribe)vibratoview_ondescribe,
 			(ui_slider_fptweak)vibratoview_ontweak,

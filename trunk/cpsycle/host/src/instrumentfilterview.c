@@ -74,7 +74,9 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		instrumentfilterview_onfiltercomboboxchanged);
 	psy_ui_slider_init(&self->randomcutoff, &self->top, NULL);
 	psy_ui_slider_settext(&self->randomcutoff, "Random Cutoff");
+	psy_ui_slider_setdefaultvalue(&self->randomcutoff, 0.0);
 	psy_ui_slider_init(&self->randomresonance, &self->top, NULL);
+	psy_ui_slider_setdefaultvalue(&self->randomresonance, 0.0);
 	psy_ui_slider_settext(&self->randomresonance, "Random Res");
 	envelopeview_init(&self->envelopeview, &self->component);
 	psy_ui_component_setalign(&self->envelopeview.component,
@@ -89,17 +91,25 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_component_setmargin(&self->bottom, margin);
 	psy_ui_component_setdefaultalign(&self->bottom, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	adsrsliders_init(&self->adsrsliders, &self->bottom);
+	adsrsliders_init(&self->adsrsliders, &self->bottom);	
+	psy_ui_slider_setdefaultvalue(&self->adsrsliders.decay, 0.370 /
+		adsrsliders_maxtime(&self->adsrsliders));
+	psy_ui_slider_setdefaultvalue(&self->adsrsliders.sustain, 0.5);
+	psy_ui_slider_setdefaultvalue(&self->adsrsliders.release, 0.370 /
+		adsrsliders_maxtime(&self->adsrsliders));	
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
 		instrumentfilterview_ontweaked);
 	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
 		instrumentfilterview_ontweaked);
 	psy_ui_slider_init(&self->cutoff, &self->bottom, NULL);
+	psy_ui_slider_setdefaultvalue(&self->cutoff, 1.0);
 	psy_ui_slider_settext(&self->cutoff, "instrumentview.cut-off");
 	psy_ui_slider_init(&self->res, &self->bottom, NULL);
+	psy_ui_slider_setdefaultvalue(&self->res, 0.0);
 	psy_ui_slider_settext(&self->res, "instrumentview.res");	
 	psy_ui_slider_init(&self->modamount, &self->bottom, NULL);
-	psy_ui_slider_settext(&self->modamount, "instrumentview.mod");	
+	psy_ui_slider_settext(&self->modamount, "instrumentview.mod");
+	psy_ui_slider_setdefaultvalue(&self->modamount, 1.0);
 	for (i = 0; i < 5; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 18);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);

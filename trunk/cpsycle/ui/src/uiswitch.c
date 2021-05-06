@@ -4,17 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "uiswitch.h"
-
+// std
 #include <stdlib.h>
-#include <string.h>
 
+// prototypes
 static void ondestroy(psy_ui_Switch*);
 static void ondraw(psy_ui_Switch*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_Switch*, psy_ui_MouseEvent*);
-static void onmouseenter(psy_ui_Switch*);
-static void onmouseleave(psy_ui_Switch*);
-static void onpreferredsize(psy_ui_Switch*, psy_ui_Size* limit, psy_ui_Size* size);
-
+// vtable
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = FALSE;
 
@@ -24,34 +21,30 @@ static void vtable_init(psy_ui_Switch* self)
 		vtable = *(self->component.vtable);
 		vtable.ondestroy =
 			(psy_ui_fp_component_ondestroy)
-			ondestroy;
-		vtable.onpreferredsize =
-			(psy_ui_fp_component_onpreferredsize)
-			onpreferredsize;
+			ondestroy;		
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			ondraw;
 		vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			onmousedown;
-		vtable.onmouseenter =
-			(psy_ui_fp_component_onmouseenter)
-			onmouseenter;
-		vtable.onmouseleave =
-			(psy_ui_fp_component_onmouseleave)
-			onmouseleave;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
 }
-
+// implementation
 void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {		
 	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_SWITCH, psy_ui_STYLE_SWITCH_HOVER, psy_ui_STYLE_SWITCH_SELECT,
+		psy_INDEX_INVALID);
 	vtable_init(self);			
 	psy_signal_init(&self->signal_clicked);	
-	self->state = FALSE;	
+	self->state = FALSE;
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_em(4.0, 1.5));
 }
 
 void ondestroy(psy_ui_Switch* self)
@@ -104,24 +97,15 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 		knobsize);
 	corner = psy_ui_realsize_make(6.0, 6.0);
 	psy_ui_realrectangle_expand(&knobrect, -2.0, -1.0, -2.0, -1.0);	
-	psy_ui_setcolour(g, psy_ui_colour_make(0x00555555));
 	psy_ui_drawroundrectangle(g, switchrect, corner);
 	if (self->state == FALSE) {		
 		psy_ui_drawsolidroundrectangle(g, knobrect, corner,
-			psy_ui_colour_make(0x00555555));
+			psy_ui_component_colour(&self->component));
 	} else {
 		psy_ui_realrectangle_settopleft(&knobrect,
 			psy_ui_realpoint_make(switchsize.width - knobsize.width, knobrect.top));
 		psy_ui_drawsolidroundrectangle(g, knobrect, corner,
-			psy_ui_colour_make(0x00CACACA));
-	}
-}
-
-void onpreferredsize(psy_ui_Switch* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{		
-	if (rv) {				
-		rv->height = psy_ui_value_make_eh(1.5);
-		rv->width = psy_ui_value_make_ew(4);
+			psy_ui_component_colour(&self->component));
 	}
 }
 
@@ -130,82 +114,21 @@ void onmousedown(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(psy_ui_Switch* self)
-{
-	// psy_ui_component_invalidate(&self->component);
-}
-
-void onmouseleave(psy_ui_Switch* self)
-{
-	// psy_ui_component_invalidate(&self->component);
-}
-
 void psy_ui_switch_check(psy_ui_Switch* self)
 {
 	self->state = TRUE;
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_addstylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);	
 }
 
 void psy_ui_switch_uncheck(psy_ui_Switch* self)
 {
 	self->state = FALSE;
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_removestylestate(&self->component,
+		psy_ui_STYLESTATE_SELECT);	
 }
 
 bool psy_ui_switch_checked(const psy_ui_Switch* self)
 {
 	return self->state != FALSE;
 }
-
-/*void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* property,
-	uintptr_t column)
-{
-	psy_ui_RealRectangle r;
-	int checked = 0;
-	const psy_ui_TextMetric* tm;
-	psy_ui_Size size;
-	psy_ui_Size cornersize;
-	psy_ui_Size knobsize;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	size.width = psy_ui_value_make_ew(4);
-	size.height = psy_ui_value_make_eh(1);
-	knobsize.width = psy_ui_value_make_ew(2);
-	knobsize.height = psy_ui_value_make_eh(0.7);
-	cornersize.width = psy_ui_value_make_ew(0.6);
-	cornersize.height = psy_ui_value_make_eh(0.6);
-	r.left = propertiesrenderer_columnstart(self, column);
-	r.top = self->cpy + (self->lineheight -
-		psy_ui_value_px(&size.height, tm)) / 2;
-	r.right = r.left + (int)(tm->tmAveCharWidth * 4.8);
-	r.bottom = r.top + psy_ui_value_px(&size.height, tm);
-	psy_ui_setcolour(self->g, psy_ui_colour_make(0x00555555));
-	psy_ui_drawroundrectangle(self->g, r, cornersize);
-	if (psy_property_ischoiceitem(property)) {
-		if (psy_property_parent(property)) {
-			checked = psy_property_at_choice(psy_property_parent(property)) ==
-				property;
-		} else {
-			checked = FALSE;
-		}
-	} else {
-		checked = psy_property_item_int(property) != 0;
-	}
-	if (!checked) {
-		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm->tmAveCharWidth * 0.4);
-		r.top = self->cpy + (self->lineheight -
-			psy_ui_value_px(&knobsize.height, tm)) / 2;
-		r.right = r.left + (int)(tm->tmAveCharWidth * 2.5);
-		r.bottom = r.top + psy_ui_value_px(&knobsize.height, tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
-			psy_ui_colour_make(0x00555555));
-	} else {
-		r.left = propertiesrenderer_columnstart(self, column) + tm->tmAveCharWidth * 2;
-		r.top = self->cpy + (self->lineheight -
-			psy_ui_value_px(&knobsize.height, tm)) / 2;
-		r.right = r.left + (int)(tm->tmAveCharWidth * 2.5);
-		r.bottom = r.top + psy_ui_value_px(&knobsize.height, tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
-			psy_ui_colour_make(0x00CACACA));
-	}	
-}*/

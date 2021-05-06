@@ -6,11 +6,9 @@
 #include "../../detail/os.h"
 // host
 #include "uiframe.h"
-#include "tabbar.h"
+#include "uilabel.h"
 // ui
 #include <uiapp.h>
-#include <uilabel.h>
-#include <uiscrollbar.h>
 // file
 #include <dir.h>
 #include <signal.h>
@@ -66,12 +64,9 @@ int psycle_run(uintptr_t instance, int options)
 	int err = 0;
 	char workpath[_MAX_PATH];
 	const char* env = 0;
-	extern psy_ui_App app;
+	psy_ui_App app;
 	psy_ui_Frame mainframe;
 	psy_ui_Label label;
-	psy_ui_Label label1;
-	psy_ui_ScrollBar scrollbar;
-	TabBar tabbar;
 	
 	// Adds the app path to the environment path to find some
 	// modules (scilexer ...)
@@ -82,41 +77,15 @@ int psycle_run(uintptr_t instance, int options)
 		insertpathenv(workdir(workpath));
 	}
 	// Initialize the ui
-	psy_ui_app_init(&app, instance);
+	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
 	// Creates the mainframe
 	psy_ui_frame_init(&mainframe, NULL);
-	psy_ui_component_enablealign(&mainframe);
-	psy_ui_component_setbackgroundmode(&mainframe,
-		psy_ui_BACKGROUND_SET);
-	psy_ui_component_setbackgroundcolor(&mainframe,
-		psy_ui_color_make(0x00FFFFFF));
-	psy_ui_component_settitle(&mainframe, "psycle ui test");
-	psy_ui_label_init(&label, &mainframe);
-	psy_ui_label_settext(&label, "Label");	
-	psy_ui_component_setbackgroundcolor(&label.component,
-		psy_ui_color_make(0x00232323));
-	psy_ui_component_setalign(&label.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&label1, &mainframe);
-	psy_ui_label_settext(&label1, "Label1");	
-	psy_ui_component_setbackgroundcolor(&label1.component,
-		psy_ui_color_make(0x00666666));
-	psy_ui_component_setalign(&label1.component, psy_ui_ALIGN_TOP);
-	//tabbar_init(&tabbar, &mainframe);
-	//tabbar_append(&tabbar, "Tab1");
-	//tabbar_append(&tabbar, "Tab2");
-	//tabbar_append(&tabbar, "Tab3");
-	//tabbar_append(&tabbar, "Tab4");
-	//psy_ui_component_setalign(&tabbar.component, psy_ui_ALIGN_TOP);		
-	//psy_ui_scrollbar_init(&scrollbar, &mainframe);
-	//psy_ui_component_setalign(&scrollbar.component, psy_ui_ALIGN_RIGHT);
-	// The mainframe has been initialized, so show it.
-	//if (mainframe_showmaximizedatstart(&mainframe)) {
-	//	psy_ui_component_showstate(&mainframe, SW_MAXIMIZE);
-	//} else {
-		psy_ui_component_showstate(&mainframe, options);
-	//}
-	// Starts the app event loop
-	printf("mapped: %d\n", psy_ui_component_visible(&label.component));
+	psy_ui_label_init(&label, &mainframe, NULL);
+	psy_ui_label_settext(&label, "Hello Psycle");
+	psy_ui_label_settextalignment(&label, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_component_setalign(psy_ui_label_base(&label), psy_ui_ALIGN_CLIENT);
+	psy_ui_component_showstate(&mainframe, options);	
+	// Starts the app event loop	
 	err = psy_ui_app_run(&app);
 	printf("Loop finished\n");
 	// The event loop has finished, dispose any global ui resources

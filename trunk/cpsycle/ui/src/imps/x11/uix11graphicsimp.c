@@ -232,11 +232,11 @@ psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp* self,
 		strlen(str),
 		&extents);
 						
-		rv.width = psy_ui_value_makepx(extents.width); 
-		rv.height = psy_ui_value_makepx(extents.height);
+		rv.width = psy_ui_value_make_px(extents.width); 
+		rv.height = psy_ui_value_make_px(extents.height);
 	} else {
-		rv.width = psy_ui_value_makepx(0); 
-		rv.height = psy_ui_value_makepx(0);
+		rv.width = psy_ui_value_make_px(0); 
+		rv.height = psy_ui_value_make_px(0);
 	}
 	return rv;
 }
@@ -256,8 +256,8 @@ void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp* self,
 		self->window, self->gc,
 		r.left + self->dx, r.top + self->dy,
 		r.right - r.left, r.bottom - r.top,
-		psy_ui_value_px(&cornersize.width, NULL),
-		psy_ui_value_px(&cornersize.height, NULL));	
+		psy_ui_value_px(&cornersize.width, NULL, NULL),
+		psy_ui_value_px(&cornersize.height, NULL, NULL));	
 }
 
 void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp* self,
@@ -290,8 +290,8 @@ void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp* self,
 	XmuFillRoundedRectangle(self->display,
 		self->window, self->gc,
 		r.left + self->dx, r.top + self->dy, r.right - r.left, r.bottom - r.top,
-		psy_ui_value_px(&cornersize.width, NULL),
-		psy_ui_value_px(&cornersize.height, NULL));
+		psy_ui_value_px(&cornersize.width, NULL, NULL),
+		psy_ui_value_px(&cornersize.height, NULL, NULL));
 	XChangeGC(self->display, self->gc, GCForeground | GCBackground,
 			&xgcv);
 }

@@ -268,10 +268,10 @@ void dev_showdropdown(psy_ui_x11_ComboBoxImp* self)
 	psy_ui_component_setposition(&self->x11_combo.component,
 		psy_ui_rectangle_make(
 		psy_ui_point_make(
-			psy_ui_value_makepx(x), psy_ui_value_makepx(y + xwa.height)),
+			psy_ui_value_make_px(x), psy_ui_value_make_px(y + xwa.height)),
 		psy_ui_size_make(
-			psy_ui_value_makepx(xwa.width),
-			psy_ui_value_makeeh(10))));	
+			psy_ui_value_make_px(xwa.width),
+			psy_ui_value_make_eh(10))));	
 	psy_ui_x11app_startgrab(x11app, x11_combo_imp->hwnd);
 	psy_ui_component_show(&self->x11_combo.component);	
 }

@@ -1510,10 +1510,10 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->zoombox_height.signal_changed, self,
 		seqeditor_onzoomboxheightchanged);
 	// header
-	psy_ui_component_init_align(&self->header, &self->component,
+	psy_ui_component_init_align(&self->header, &self->component, NULL,
 		psy_ui_ALIGN_TOP);
 	// ruler
-	psy_ui_component_init_align(&self->rulerpane, &self->header,
+	psy_ui_component_init_align(&self->rulerpane, &self->header, NULL,
 		psy_ui_ALIGN_CLIENT);
 	seqeditorruler_init(&self->ruler, &self->rulerpane, &self->state,
 		skin, workspace);

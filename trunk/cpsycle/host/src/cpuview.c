@@ -137,7 +137,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 		STYLE_RECENTVIEW_MAINSECTION);
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
-	psy_ui_component_init_align(&self->top, &self->component,
+	psy_ui_component_init_align(&self->top, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->top, margin);
 	cpuview_inittitle(self);
@@ -151,21 +151,10 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 }
 
 void cpuview_inittitle(CPUView* self)
-{
-	psy_ui_Margin margin;	
-	
-	psy_ui_component_init_align(&self->titlebar, &self->component,
-		psy_ui_ALIGN_TOP);
-	psy_ui_component_setstyletype(&self->titlebar, STYLE_HEADER);	
-	psy_ui_label_init_text(&self->title, &self->titlebar, NULL,
-		"Psycle DSP/CPU Performance Monitor");	
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init_connect(&self->hide, &self->titlebar, NULL,
-		self, cpuview_onhide);
-	psy_ui_button_settext(&self->hide, "X");
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
-	psy_ui_component_setmargin(&self->hide.component, margin);
+{	
+	titlebar_init(&self->titlebar, &self->component, NULL,
+		"Psycle DSP/CPU Performance Monitor");		
+	titlebar_hideonclose(&self->titlebar);
 }
 
 void cpuview_initcoreinfo(CPUView* self)
@@ -190,7 +179,7 @@ void cpuview_initresources(CPUView* self)
 
 void cpuview_initperformance(CPUView* self)
 {	
-	psy_ui_component_init_align(&self->performance, &self->top,
+	psy_ui_component_init_align(&self->performance, &self->top, NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setdefaultalign(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
@@ -267,7 +256,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 
 void cpuview_onhide(CPUView* self)
 {
-	psy_ui_component_hide_align(&self->component);	
+	psy_ui_component_hide_align(&self->component);
 }
 
 void cpuview_oncpuperf(CPUView* self, psy_ui_CheckBox* sender)

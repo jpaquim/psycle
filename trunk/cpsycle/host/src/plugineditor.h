@@ -5,6 +5,7 @@
 #define PLUGINEDITOR_H
 
 // host
+#include "titlebar.h"
 #include "workspace.h"
 // ui
 #include <uibutton.h>
@@ -24,7 +25,7 @@ extern "C" {
 typedef struct PluginEditorCreateBar {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal	
 	psy_ui_Label desc;
 	psy_ui_Edit name;
 	psy_ui_Button create;
@@ -38,7 +39,8 @@ void plugineditorcreatebar_init(PluginEditorCreateBar*, psy_ui_Component*
 typedef struct PluginEditor {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// internal
+	TitleBar titlebar;
 	psy_ui_Editor editor;
 	psy_ui_Component bar;
 	psy_ui_Button newplugin;

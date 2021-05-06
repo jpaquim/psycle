@@ -38,7 +38,7 @@ void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(psy_ui_label_base(&self->title),
 		psy_ui_ALIGN_TOP);
 	// init edit
-	psy_ui_component_init_align(&self->editbar, newvalview_base(self),
+	psy_ui_component_init_align(&self->editbar, newvalview_base(self), NULL,
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->editbar,
 		psy_ui_HORIZONTALEXPAND);

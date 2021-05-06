@@ -619,7 +619,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 		psy_ui_size_make_em(0.0, 10.0));
 	self->workspace = workspace;
 	// Bottom
-	psy_ui_component_init_align(&self->bottom, &self->component,
+	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	
 	// IntEdit
 	intedit_init(&self->leveledit, &self->bottom, "", 2, 0, INT32_MAX);

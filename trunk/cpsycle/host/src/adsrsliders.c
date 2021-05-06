@@ -19,7 +19,6 @@ static void adsrsliders_onvolumeviewtweak(AdsrSliders*,
 	psy_ui_Slider*, float value);
 static void adsrsliders_onvolumeviewvalue(AdsrSliders*,
 	psy_ui_Slider*, float* value);
-static psy_dsp_big_seconds_t adsrsliders_maxtime(const AdsrSliders*);
 // implementation
 void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 {	
@@ -42,8 +41,16 @@ void adsrsliders_init(AdsrSliders* self, psy_ui_Component* parent)
 	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
 	psy_ui_slider_init(&self->sustain, &self->component, NULL);
 	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
+	psy_ui_slider_setdefaultvalue(&self->sustain, 1.0);
 	psy_ui_slider_init(&self->release, &self->component, NULL);
-	psy_ui_slider_settext(&self->release, "instrumentview.release");	
+	psy_ui_slider_settext(&self->release, "instrumentview.release");
+	psy_ui_slider_setdefaultvalue(&self->attack, 0.005 /
+		adsrsliders_maxtime(self));
+	psy_ui_slider_setdefaultvalue(&self->decay, 0.005 /
+		adsrsliders_maxtime(self));
+	psy_ui_slider_setdefaultvalue(&self->sustain, 1.0);
+	psy_ui_slider_setdefaultvalue(&self->release, 0.005 /
+		adsrsliders_maxtime(self));
 	for (i = 0; i < 4; ++i) {				
 		psy_ui_slider_setcharnumber(sliders[i], 21);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);

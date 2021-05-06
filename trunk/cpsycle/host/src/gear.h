@@ -8,6 +8,7 @@
 #include "instrumentsbox.h"
 #include "machinesbox.h"
 #include "samplesbox.h"
+#include "titlebar.h"
 #include <uitabbar.h>
 #include "workspace.h"
 // ui
@@ -52,9 +53,7 @@ typedef struct Gear {
 	// ui elements
 	psy_ui_Component client;
 	psy_ui_TabBar tabbar;
-	psy_ui_Component titlebar;
-	psy_ui_Label title;
-	psy_ui_Button hide;
+	TitleBar titlebar;
 	psy_ui_Notebook notebook;
 	psy_ui_ListBox listbox;	
 	MachinesBox machinesboxgen;

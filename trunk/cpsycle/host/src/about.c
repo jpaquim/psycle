@@ -226,8 +226,7 @@ static void about_initbuttons(About*);
 static void about_onbutton(About*, psy_ui_Button* sender);
 static void about_selectinfobox(About*, uintptr_t index);
 static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
-static void about_onalign(About*);
-static void about_onfocus(About*, psy_ui_Component* sender);
+static void about_onfocus(About*);
 // vtable
 static psy_ui_ComponentVtable about_vtable;
 static bool about_vtable_initialized = FALSE;
@@ -235,13 +234,13 @@ static bool about_vtable_initialized = FALSE;
 static void about_vtable_init(About* self)
 {
 	if (!about_vtable_initialized) {
-		about_vtable = *(self->component.vtable);
-		about_vtable.onalign =
-			(psy_ui_fp_component_onalign)
-			about_onalign;
+		about_vtable = *(self->component.vtable);		
 		about_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
-			about_onmousedoubleclick;		
+			about_onmousedoubleclick;
+		about_vtable.onfocus =
+			(psy_ui_fp_component_onfocus)
+			about_onfocus;
 		about_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &about_vtable;
@@ -250,19 +249,19 @@ static void about_vtable_init(About* self)
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_component_init(&self->component, parent, NULL);
-	about_vtable_init(self);	
-	self->workspace = workspace;
-	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);	
+	about_vtable_init(self);
+	psy_ui_component_setstyletype(&self->component, STYLE_ABOUT);
+	self->workspace = workspace;	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
+	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setpreferredsize(psy_ui_notebook_base(&self->notebook),
 		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_make_ph(0.5)));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CENTER);
+		psy_ui_ALIGN_CENTER);	
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));
-	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));
-	psy_ui_component_hide(psy_ui_notebook_base(&self->notebook));
+	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));	
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->component.signal_focus, self,
 		about_onfocus);
@@ -270,91 +269,33 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 
 void about_initbuttons(About* self)
 {	
-	psy_ui_button_init_text_connect(&self->contribbutton, &self->component,
+	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setmargin(&self->bottom,
+		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
+			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));
+	psy_ui_component_init_align(&self->buttons, &self->bottom, NULL,
+		psy_ui_ALIGN_CENTER);
+	psy_ui_component_setdefaultalign(&self->buttons, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_make_ew(20.0),
+			psy_ui_value_zero(), psy_ui_value_zero()));
+	psy_ui_button_init_text_connect(&self->contribbutton, &self->buttons,
 		NULL, "help.contributors-credits", self, about_onbutton);
-	psy_ui_button_init_connect(&self->versionbutton, &self->component, NULL,
+	psy_ui_button_init_connect(&self->versionbutton, &self->buttons, NULL,
 		self, about_onbutton);
 	psy_ui_button_preventtranslation(&self->versionbutton);
 	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
-	psy_ui_button_init_text_connect(&self->licencebutton, &self->component,
+	psy_ui_button_init_text_connect(&self->licencebutton, &self->buttons,
 		NULL, "help.licence", self, about_onbutton);
-	psy_ui_button_init_text_connect(&self->okbutton, &self->component, NULL,
+	psy_ui_button_init_text_connect(&self->okbutton, &self->buttons, NULL,
 		"help.ok", self, about_onbutton);
+	psy_ui_component_setmargin(psy_ui_button_base(&self->okbutton),
+		psy_ui_margin_zero());
 }
 
-void about_onalign(About* self)
+void about_onfocus(About* self)
 {
-	psy_ui_Size size;
-	psy_ui_RealSize bitmapsize;
-	const psy_ui_TextMetric* tm;
-	double centerx;
-	double centery;
-	psy_ui_Size contribbuttonsize;
-	psy_ui_Size versionbuttonsize;
-	psy_ui_Size licencebuttonsize;
-	psy_ui_Size okbuttonsize;
-	double charmargin = 25;
-	double width = 0;
-	double margin;
-	double cpx;
-	
-	size = psy_ui_component_scrollsize(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);	
-	bitmapsize.width = tm->tmAveCharWidth * 72;
-	bitmapsize.height = tm->tmHeight * 24;
-	centerx = (psy_ui_value_px(&size.width, tm, NULL) - bitmapsize.width) / 2;
-	centery = (psy_ui_value_px(&size.height, tm, NULL) - bitmapsize.height) / 2;
-	contribbuttonsize = psy_ui_component_preferredsize(&self->contribbutton.component, &size);
-	versionbuttonsize = psy_ui_component_preferredsize(&self->versionbutton.component, &size);
-	licencebuttonsize = psy_ui_component_preferredsize(&self->licencebutton.component, &size);
-	okbuttonsize = psy_ui_component_preferredsize(&self->okbutton.component, &size);
-	if (centery + bitmapsize.height +
-		psy_ui_value_px(&okbuttonsize.height, tm, NULL) > psy_ui_value_px(&size.height, tm, NULL)) {
-		bitmapsize.height = psy_ui_value_px(&size.height, tm, NULL) -
-			psy_ui_value_px(&okbuttonsize.height, tm, NULL) * 2;
-		centery = (psy_ui_value_px(&size.height, tm, NULL) - bitmapsize.height) / 2;
-	}	
-	do {
-		margin = tm->tmAveCharWidth * charmargin;
-		width = psy_ui_value_px(&contribbuttonsize.width, tm, NULL) +
-			psy_ui_value_px(&versionbuttonsize.width, tm, NULL) +
-			psy_ui_value_px(&licencebuttonsize.width, tm, NULL) +
-			psy_ui_value_px(&okbuttonsize.width, tm, NULL) + margin * 3;
-		--charmargin;
-	} while (width > psy_ui_value_px(&size.width, tm, NULL) && charmargin > 0);
-	cpx = (psy_ui_value_px(&size.width, tm, NULL) - width) / 2;
-	psy_ui_component_setposition(&self->contribbutton.component,
-		psy_ui_rectangle_make(
-		psy_ui_point_make_px(cpx, centery + bitmapsize.height),
-		contribbuttonsize));
-	psy_ui_component_setposition(&self->versionbutton.component,
-		psy_ui_rectangle_make(
-		psy_ui_point_make_px(
-			cpx + psy_ui_value_px(&contribbuttonsize.width, tm, NULL) + margin,
-			centery + bitmapsize.height),
-		versionbuttonsize));
-	psy_ui_component_setposition(&self->licencebutton.component,
-		psy_ui_rectangle_make(
-		psy_ui_point_make_px(
-			cpx + psy_ui_value_px(&contribbuttonsize.width, tm, NULL)
-				+ psy_ui_value_px(&versionbuttonsize.width, tm, NULL) +
-				margin * 2,
-			centery + bitmapsize.height),
-		licencebuttonsize));
-	psy_ui_component_setposition(&self->okbutton.component,
-		psy_ui_rectangle_make(
-		psy_ui_point_make_px(			
-			cpx + psy_ui_value_px(&contribbuttonsize.width, tm, NULL) +
-				psy_ui_value_px(&versionbuttonsize.width, tm, NULL) +
-				psy_ui_value_px(&licencebuttonsize.width, tm, NULL) +
-				margin * 3,
-			centery + bitmapsize.height),
-		okbuttonsize));
-}
-
-void about_onfocus(About* self, psy_ui_Component* sender)
-{
-	psy_ui_component_setfocus(&self->okbutton.component);
+	psy_ui_component_setfocus(psy_ui_button_base(&self->okbutton));
 }
 
 void about_onbutton(About* self, psy_ui_Button* sender) 
@@ -382,6 +323,7 @@ void about_selectinfobox(About* self, uintptr_t index)
 			psy_INDEX_INVALID);
 	}
 	psy_ui_component_togglevisibility(psy_ui_notebook_base(&self->notebook));
+	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onmousedoubleclick(About* self, psy_ui_MouseEvent* ev)

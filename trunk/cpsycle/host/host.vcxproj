@@ -411,6 +411,7 @@
     <ClCompile Include="src\swingfillview.c" />
     <ClCompile Include="src\switchui.c" />
     <ClCompile Include="src\timebar.c" />
+    <ClCompile Include="src\titlebar.c" />
     <ClCompile Include="src\trackbox.c" />
     <ClCompile Include="src\trackercmds.c" />
     <ClCompile Include="src\trackercolumn.c" />
@@ -568,6 +569,7 @@
     <ClInclude Include="src\swingfillview.h" />
     <ClInclude Include="src\switchui.h" />
     <ClInclude Include="src\timebar.h" />
+    <ClInclude Include="src\titlebar.h" />
     <ClInclude Include="src\trackbox.h" />
     <ClInclude Include="src\trackercmds.h" />
     <ClInclude Include="src\trackercolumn.h" />
