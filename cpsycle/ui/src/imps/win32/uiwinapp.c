@@ -712,7 +712,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;				
 			break;
 			case WM_MOUSELEAVE:							
-				imp->imp.vtable->dev_mouseleave(&imp->imp);				
+				imp->imp.vtable->dev_mouseleave(&imp->imp);
 				return 0;			
 				break;
 			case WM_VSCROLL:				

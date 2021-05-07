@@ -28,22 +28,24 @@ typedef struct psy_ui_x11_ComponentImp {
 	psy_ui_ComponentImp imp;
 	struct psy_ui_Component* component;
 	Window hwnd;
-	XdbeBackBuffer d_backBuf;
-    //Widget bulletin;
 	uintptr_t winid;
+	psy_ui_Colour backgroundcolor;
+	// winproc wndproc;
+	// int preventwmchar;	
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
-	int prev_w; // used to detect change with ConfigureNotify that can be
-	int prev_h; // triggered for other reasons than resize
+	int dbg;
 	psy_ui_TextMetric tm;
 	bool tmcachevalid;
-	psy_ui_Colour backgroundcolor;
+	bool visible;
+	psy_List* viewcomponents;
+	int prev_w; // used to detect change with ConfigureNotify that can be
+	int prev_h; // triggered for other reasons than resize		
 	bool mapped;
 	psy_ui_Graphics g;
 	psy_List* children_nonrec_cache;
 	struct psy_ui_x11_ComponentImp* parent;
-//	HBRUSH background;
-//	winproc wndproc;
+	XdbeBackBuffer d_backBuf;
 } psy_ui_x11_ComponentImp;
 
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,

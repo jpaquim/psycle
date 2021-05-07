@@ -48,7 +48,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	psy_ui_Component* view, const char* text, uintptr_t index)
 {
 	assert(self);
-
+	
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_tab_vtable_init(self);
 	psy_ui_component_setstyletypes(&self->component,

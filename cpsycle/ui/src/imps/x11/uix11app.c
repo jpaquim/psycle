@@ -904,9 +904,44 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//event->xgraphicsexpose.x, event->xgraphicsexpose.y,
 				//event->xgraphicsexpose.width, event->xgraphicsexpose.height);
 			break;
-		case Expose: {					
-			expose_window(self, imp, event->xexpose.x, event->xexpose.y,
-				event->xexpose.width, event->xexpose.height);
+		case Expose: {	
+			const psy_ui_Border* border;							
+
+			border = psy_ui_component_border(imp->component);
+			if (imp->component->vtable->ondraw ||
+					imp->component->signal_draw.slots ||
+					imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+					psy_ui_border_isset(border)) {
+				psy_ui_x11_GraphicsImp* gx11;
+				XRectangle rectangle;
+				psy_ui_RealMargin spacing;
+				
+				if (!psy_ui_component_visible(imp->component)) {
+					return;
+				}												
+				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+				// reset scroll origin
+				gx11->org.x = 0;
+				gx11->org.y = 0;			
+				// prepare a clip rect that can be used by a component to
+				// optimize the draw amount
+				psy_ui_setrectangle(&imp->g.clip, event->xexpose.x,
+					event->xexpose.y, event->xexpose.width,
+					event->xexpose.height);
+				// set gc/xfd clip
+				rectangle.x = (short)event->xexpose.x;
+				rectangle.y = (short)event->xexpose.y;
+				rectangle.width = (unsigned short)event->xexpose.width;
+				rectangle.height = (unsigned short)event->xexpose.height;
+				XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
+				XSetRegion(self->dpy, gx11->gc, gx11->region);
+				XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
+				XDestroyRegion(gx11->region);
+				gx11->region = XCreateRegion();	
+				// draw						
+				imp->imp.vtable->dev_draw(&imp->imp, &imp->g);					
+			
+			}							
 			if (self->dbe) {
 				psy_ui_x11_GraphicsImp* gx11;
 										
@@ -1127,7 +1162,13 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 					&ev);
 			return 0;
-			break; }				
+			break; }	
+		case EnterNotify: {
+			imp->imp.vtable->dev_mouseenter(&imp->imp);
+		break; }
+		case LeaveNotify: {
+			imp->imp.vtable->dev_mouseleave(&imp->imp);
+		break; }
 		  default:
 			break;
 	  }
@@ -1146,20 +1187,21 @@ void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 {
 	psy_ui_x11_GraphicsImp* gx11;
 	XRectangle rectangle;
+	psy_ui_RealMargin spacing;
 	
 	if (!psy_ui_component_visible(imp->component)) {
 		return;
 	}												
 	gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 	// reset scroll origin
-	gx11->dx = 0;
-	gx11->dy = 0;			
+	gx11->org.x = 0;
+	gx11->org.y = 0;			
 	// prepare a clip rect that can be used by a component to
 	// optimize the draw amount
 	psy_ui_setrectangle(&imp->g.clip, x, y, width, height);
 	// set gc/xfd clip
-	rectangle.x = (short) x;
-	rectangle.y = (short) y;
+	rectangle.x = (short)x;
+	rectangle.y = (short)y;
 	rectangle.width = (unsigned short) width;
 	rectangle.height = (unsigned short) height;
 	XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
@@ -1174,9 +1216,12 @@ void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	psy_ui_setcolour(&imp->g, psy_ui_component_colour(imp->component));
 	psy_ui_settextcolour(&imp->g, psy_ui_component_colour(imp->component));
 	psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
-	// translate coordinates			
-	gx11->dx = -psy_ui_component_scrollleftpx(imp->component);
-	gx11->dy = -psy_ui_component_scrolltop_px(imp->component);
+	// spacing
+	spacing = psy_ui_component_spacing_px(imp->component);
+	if (!psy_ui_realmargin_iszero(&spacing)) {						
+		gx11->org.x = -(int)spacing.left;
+		gx11->org.y = -(int)spacing.top;
+	}
 	psy_ui_setrectangle(&imp->g.clip,
 		x + psy_ui_component_scrollleftpx(imp->component),
 		y + psy_ui_component_scrolltop_px(imp->component),

@@ -6,7 +6,7 @@
 #include "../../detail/os.h"
 // host
 #include "uiframe.h"
-#include "uilabel.h"
+#include "uitabbar.h"
 // ui
 #include <uiapp.h>
 // file
@@ -66,7 +66,7 @@ int psycle_run(uintptr_t instance, int options)
 	const char* env = 0;
 	psy_ui_App app;
 	psy_ui_Frame mainframe;
-	psy_ui_Label label;
+	psy_ui_TabBar tabbar;
 	
 	// Adds the app path to the environment path to find some
 	// modules (scilexer ...)
@@ -80,10 +80,11 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
 	// Creates the mainframe
 	psy_ui_frame_init(&mainframe, NULL);
-	psy_ui_label_init(&label, &mainframe, NULL);
-	psy_ui_label_settext(&label, "Hello Psycle");
-	psy_ui_label_settextalignment(&label, psy_ui_ALIGNMENT_CENTER);
-	psy_ui_component_setalign(psy_ui_label_base(&label), psy_ui_ALIGN_CLIENT);
+	psy_ui_tabbar_init(&tabbar, &mainframe);
+	psy_ui_tabbar_append_tabs(&tabbar, "tab1", 
+	"tab2", "tab3", NULL);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&tabbar), psy_ui_ALIGN_TOP);
+	psy_ui_tabbar_select(&tabbar, 0);
 	psy_ui_component_showstate(&mainframe, options);	
 	// Starts the app event loop	
 	err = psy_ui_app_run(&app);

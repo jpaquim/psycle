@@ -23,12 +23,12 @@ static void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp*, double x,
 	psy_ui_RealRectangle r, const char* text, uintptr_t len);
 static void psy_ui_x11_g_imp_drawrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle);
 static void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle,
-	psy_ui_Size cornersize);
+	psy_ui_RealSize cornersize);
 static psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp*, const char*);
 static void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
 static void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle r,
-	psy_ui_Size cornersize, psy_ui_Colour colour);
+	psy_ui_RealSize cornersize, psy_ui_Colour colour);
 static void psy_ui_x11_g_imp_drawsolidpolygon(psy_ui_x11_GraphicsImp*, psy_ui_RealPoint*,
 	uintptr_t numpoints, uint32_t inner, uint32_t outter);
 static void psy_ui_x11_g_imp_drawline(psy_ui_x11_GraphicsImp*, double x1, double y1, double x2, double y2);
@@ -51,6 +51,7 @@ static void psy_ui_x11_g_imp_devdrawarc(psy_ui_x11_GraphicsImp*,
 static void psy_ui_x11_g_devsetlinewidth(psy_ui_x11_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_x11_g_devlinewidth(psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp*, double x, double y);
+static psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp*);
 
 	
 static int psy_ui_x11_g_imp_colourindex(psy_ui_x11_GraphicsImp*, psy_ui_Colour);
@@ -88,7 +89,10 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_drawarc = (psy_ui_fp_graphicsimp_dev_drawarc) psy_ui_x11_g_imp_devdrawarc;
 		x11_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_x11_g_devsetlinewidth;
 		x11_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_x11_g_devlinewidth;
-		x11_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_setorigin)psy_ui_x11_g_devsetorigin;
+		x11_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_setorigin)psy_ui_x11_g_devsetorigin;			
+		x11_imp_vtable.dev_origin =
+			(psy_ui_fp_graphicsimp_dev_origin)
+			psy_ui_x11_g_devorigin;
 		x11_imp_vtable_initialized = 1;
 	}
 }
@@ -128,8 +132,8 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->textcolor.color.alpha = 0xFFFF;
 	self->textbackgroundcolor = psy_ui_colour_make(0x00232323);
 	self->backgroundmode = psy_ui_OPAQUE;
-	self->dx = 0;
-	self->dy = 0;
+	psy_ui_realpoint_init(&self->org);
+	psy_ui_realpoint_init(&self->dorg);
 	self->region = XCreateRegion();
 }
 
@@ -164,7 +168,7 @@ void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 void psy_ui_x11_g_imp_textout(psy_ui_x11_GraphicsImp* self, double x, double y,
 	const char* str, size_t len)
 {	
-	if (!str) {
+	if (!str || len == 0) {
 		return;
 	}
 	if (self->backgroundmode  == psy_ui_OPAQUE) {
@@ -175,16 +179,19 @@ void psy_ui_x11_g_imp_textout(psy_ui_x11_GraphicsImp* self, double x, double y,
 			(const FcChar8*)str,
 			strlen(str),
 			&extents);
-		r.left = x;
-		r.top = y;
+		r.left = x - (int)(self->dorg.x + self->org.x),
+		r.top = y - (int)(self->dorg.y + self->org.y);
 		r.right = extents.width;
 		r.bottom = extents.height;
 		psy_ui_x11_g_imp_drawsolidrectangle(self, r,
 			self->textbackgroundcolor);		
-	}
+	}	
 	XftDrawStringUtf8(self->xfd, &self->textcolor, 
-		self->xftfont, x + self->dx,
-		y + self->dy + self->xftfont->ascent, (const FcChar8*)str,
+		self->xftfont,
+		x - (int)(self->dorg.x + self->org.x),
+		y - (int)(self->dorg.y + self->org.y)
+		+ self->xftfont->ascent,
+		(const FcChar8*)str,
 		(int) len);
 }
 
@@ -196,15 +203,18 @@ void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp* self,
 			((options & psy_ui_ETO_OPAQUE) == psy_ui_ETO_OPAQUE)) {
 		psy_ui_RealRectangle temp;
 		
-		temp.left = x;
-		temp.top = y;
+		temp.left = x - (int)(self->dorg.x + self->org.x);
+		temp.top = y - (int)(self->dorg.y + self->org.y);
 		temp.right = r.right;
 		temp.bottom = r.bottom;
 		psy_ui_x11_g_imp_drawsolidrectangle(self, r,
 			self->textbackgroundcolor);	
 	}
 	XftDrawStringUtf8(self->xfd, &self->textcolor, 
-		self->xftfont, x + self->dx, y + self->dy + self->xftfont->ascent,
+		self->xftfont,
+		x - (int)(self->dorg.x + self->org.x),
+		y - (int)(self->dorg.y + self->org.y) +
+		self->xftfont->ascent,
 		(const FcChar8*)str, (int) len);
 //	RECT rect;
 //	int woptions = 0;
@@ -245,19 +255,20 @@ void psy_ui_x11_g_imp_drawrectangle(psy_ui_x11_GraphicsImp* self,
     const psy_ui_RealRectangle r)
 {
 	XDrawRectangle(self->display, self->window, self->gc,
-		r.left + self->dx, r.top + self->dy,
+		r.left - (int)(self->dorg.x + self->org.x),
+		r.top - (int)(self->dorg.y + self->org.y),
 		r.right - r.left - 1, r.bottom - r.top - 1);
 }
 
 void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp* self,
-    const psy_ui_RealRectangle r, psy_ui_Size cornersize)
+    const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {	
 	XmuDrawRoundedRectangle(self->display,
 		self->window, self->gc,
-		r.left + self->dx, r.top + self->dy,
+		r.left - (int)(self->dorg.x + self->org.x),
+		r.top - (int)(self->dorg.y + self->org.y),
 		r.right - r.left, r.bottom - r.top,
-		psy_ui_value_px(&cornersize.width, NULL, NULL),
-		psy_ui_value_px(&cornersize.height, NULL, NULL));	
+		cornersize.width, cornersize.height);	
 }
 
 void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp* self,
@@ -271,14 +282,15 @@ void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp* self,
 	XSetForeground(self->display, self->gc,
 		psy_ui_x11app_colourindex(x11app, color));
 	XFillRectangle(self->display, self->window, self->gc,
-		r.left + self->dx, r.top + self->dy,
+		r.left - (int)(self->dorg.x + self->org.x),
+		r.top - (int)(self->dorg.y + self->org.y),
 		r.right- r.left, r.bottom - r.top);
 	XChangeGC(self->display, self->gc, GCForeground | GCBackground,
 			&xgcv);
 }
 
 void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp* self,
-    const psy_ui_RealRectangle r, psy_ui_Size cornersize, psy_ui_Colour color)
+    const psy_ui_RealRectangle r, psy_ui_RealSize cornersize, psy_ui_Colour color)
 {
 	XGCValues xgcv;
 	psy_ui_X11App* x11app;		
@@ -289,9 +301,10 @@ void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp* self,
 		psy_ui_x11app_colourindex(x11app, color));		
 	XmuFillRoundedRectangle(self->display,
 		self->window, self->gc,
-		r.left + self->dx, r.top + self->dy, r.right - r.left, r.bottom - r.top,
-		psy_ui_value_px(&cornersize.width, NULL, NULL),
-		psy_ui_value_px(&cornersize.height, NULL, NULL));
+		r.left - (int)(self->dorg.x + self->org.x),
+		r.top - (int)(self->dorg.y + self->org.y),
+		r.right - r.left, r.bottom - r.top,
+		cornersize.width, cornersize.height);
 	XChangeGC(self->display, self->gc, GCForeground | GCBackground,
 			&xgcv);
 }
@@ -308,8 +321,8 @@ void psy_ui_x11_g_imp_drawsolidpolygon(psy_ui_x11_GraphicsImp* self,
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	xpts = (XPoint*)malloc(sizeof(XPoint) * numpoints);
 	for (i = 0; i < numpoints; ++i) {
-		xpts[i].x = pts[i].x + self->dx;
-		xpts[i].y = pts[i].y + self->dy;
+		xpts[i].x = pts[i].x - (int)(self->dorg.x + self->org.x);
+		xpts[i].y = pts[i].y - (int)(self->dorg.y + self->org.y);
 	} 	
 	XGetGCValues(self->display, self->gc, GCForeground | GCBackground, &xgcv);
 	XSetForeground(self->display, self->gc, psy_ui_x11app_colourindex(x11app,
@@ -339,7 +352,8 @@ void psy_ui_x11_g_imp_drawfullbitmap(psy_ui_x11_GraphicsImp* self,
         size = psy_ui_bitmap_size(bitmap);
         XCopyArea(self->display, xtbitmap, self->window, self->gc,
             0, 0, size.width, size.height,
-            x, y);
+            x - (int)(self->dorg.x + self->org.x),
+            y - (int)(self->dorg.y + self->org.y));
     }
 }
 
@@ -353,7 +367,8 @@ void psy_ui_x11_g_imp_drawbitmap(psy_ui_x11_GraphicsImp* self,
     if (xtbitmap) {        
         XCopyArea(self->display, xtbitmap, self->window, self->gc,
             xsrc, ysrc, width, height,
-            x, y);
+            x - (int)(self->dorg.x + self->org.x),
+            y - (int)(self->dorg.y + self->org.y));
     }
 }
 
@@ -419,8 +434,10 @@ void psy_ui_x11_g_imp_drawline(psy_ui_x11_GraphicsImp* self,
 	double x1, double y1, double x2, double y2)
 {
 	XDrawLine(self->display, self->window, self->gc,
-		x1 + self->dx, y1 + self->dy,
-		x2 + self->dx, y2 + self->dy);
+		x1  - (int)(self->dorg.x + self->org.x),
+		y1  - (int)(self->dorg.y + self->org.y),
+		x2 - (int)(self->dorg.x + self->org.x),
+		y2  - (int)(self->dorg.y + self->org.y));
 }
 
 void psy_ui_x11_g_imp_moveto(psy_ui_x11_GraphicsImp* self, psy_ui_RealPoint pt)
@@ -461,8 +478,15 @@ unsigned int psy_ui_x11_g_devlinewidth(psy_ui_x11_GraphicsImp* self)
 }
 
 void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp* self, double x, double y)
-{
-	
+{	
+	self->dorg.x = x;
+	self->dorg.y = y;	
 }
+
+psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp* self)
+{
+	return self->dorg;
+}
+
 
 #endif
