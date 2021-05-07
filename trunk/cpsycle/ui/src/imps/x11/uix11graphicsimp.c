@@ -64,32 +64,81 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 {
 	if (!x11_imp_vtable_initialized) {
 		x11_imp_vtable = *self->imp.vtable;		
-		x11_imp_vtable.dev_dispose = (psy_ui_fp_graphicsimp_dev_dispose)
+		x11_imp_vtable.dev_dispose =
+			(psy_ui_fp_graphicsimp_dev_dispose)
 			psy_ui_x11_g_imp_dispose;
-		x11_imp_vtable.dev_textout = (psy_ui_fp_graphicsimp_dev_textout) psy_ui_x11_g_imp_textout;
-		x11_imp_vtable.dev_textoutrectangle = (psy_ui_fp_graphicsimp_dev_textoutrectangle) psy_ui_x11_g_imp_textoutrectangle;
-		x11_imp_vtable.dev_drawrectangle = (psy_ui_fp_graphicsimp_dev_drawrectangle) psy_ui_x11_g_imp_drawrectangle;
-		x11_imp_vtable.dev_drawroundrectangle = (psy_ui_fp_graphicsimp_dev_drawroundrectangle) psy_ui_x11_g_imp_drawroundrectangle;
-		x11_imp_vtable.dev_textsize = (psy_ui_fp_graphicsimp_dev_textsize) psy_ui_x11_g_imp_textsize;
-		x11_imp_vtable.dev_drawsolidrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidrectangle) psy_ui_x11_g_imp_drawsolidrectangle;
-		x11_imp_vtable.dev_drawsolidroundrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle) psy_ui_x11_g_imp_drawsolidroundrectangle;
-		x11_imp_vtable.dev_drawsolidpolygon = (psy_ui_fp_graphicsimp_dev_drawsolidpolygon) psy_ui_x11_g_imp_drawsolidpolygon;
-		x11_imp_vtable.dev_drawline = (psy_ui_fp_graphicsimp_dev_drawline) psy_ui_x11_g_imp_drawline;
-		x11_imp_vtable.dev_drawfullbitmap = (psy_ui_fp_graphicsimp_dev_drawfullbitmap) psy_ui_x11_g_imp_drawfullbitmap;
-		x11_imp_vtable.dev_drawbitmap = (psy_ui_fp_graphicsimp_dev_drawbitmap) psy_ui_x11_g_imp_drawbitmap;
-		x11_imp_vtable.dev_drawstretchedbitmap = (psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)psy_ui_x11_g_imp_drawstretchedbitmap;
-		x11_imp_vtable.dev_setbackgroundcolour = (psy_ui_fp_graphicsimp_dev_setbackgroundcolour) psy_ui_x11_g_imp_setbackgroundcolour;
-		x11_imp_vtable.dev_setbackgroundmode = (psy_ui_fp_graphicsimp_dev_setbackgroundmode) psy_ui_x11_g_imp_setbackgroundmode;
-		x11_imp_vtable.dev_settextcolour = (psy_ui_fp_graphicsimp_dev_settextcolour) psy_ui_x11_g_imp_settextcolour;
-		x11_imp_vtable.dev_settextalign = (psy_ui_fp_graphicsimp_dev_settextalign)psy_ui_x11_g_imp_settextalign;
-		x11_imp_vtable.dev_setcolour = (psy_ui_fp_graphicsimp_dev_setcolour) psy_ui_x11_g_imp_setcolour;
-		x11_imp_vtable.dev_setfont = (psy_ui_fp_graphicsimp_dev_setfont) psy_ui_x11_g_imp_setfont;
-		x11_imp_vtable.dev_moveto = (psy_ui_fp_graphicsimp_dev_moveto) psy_ui_x11_g_imp_moveto;
-		x11_imp_vtable.dev_curveto = (psy_ui_fp_graphicsimp_dev_curveto) psy_ui_x11_g_imp_devcurveto;
-		x11_imp_vtable.dev_drawarc = (psy_ui_fp_graphicsimp_dev_drawarc) psy_ui_x11_g_imp_devdrawarc;
-		x11_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_x11_g_devsetlinewidth;
-		x11_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_x11_g_devlinewidth;
-		x11_imp_vtable.dev_setorigin = (psy_ui_fp_graphicsimp_dev_setorigin)psy_ui_x11_g_devsetorigin;			
+		x11_imp_vtable.dev_textout =
+			(psy_ui_fp_graphicsimp_dev_textout)
+			psy_ui_x11_g_imp_textout;
+		x11_imp_vtable.dev_textoutrectangle =
+			(psy_ui_fp_graphicsimp_dev_textoutrectangle)
+			psy_ui_x11_g_imp_textoutrectangle;
+		x11_imp_vtable.dev_drawrectangle =
+			(psy_ui_fp_graphicsimp_dev_drawrectangle)
+			psy_ui_x11_g_imp_drawrectangle;
+		x11_imp_vtable.dev_drawroundrectangle =
+			(psy_ui_fp_graphicsimp_dev_drawroundrectangle)
+			psy_ui_x11_g_imp_drawroundrectangle;
+		x11_imp_vtable.dev_textsize =
+			(psy_ui_fp_graphicsimp_dev_textsize)
+			psy_ui_x11_g_imp_textsize;
+		x11_imp_vtable.dev_drawsolidrectangle =
+			(psy_ui_fp_graphicsimp_dev_drawsolidrectangle)
+			psy_ui_x11_g_imp_drawsolidrectangle;
+		x11_imp_vtable.dev_drawsolidroundrectangle =
+			(psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)
+			psy_ui_x11_g_imp_drawsolidroundrectangle;
+		x11_imp_vtable.dev_drawsolidpolygon =
+			(psy_ui_fp_graphicsimp_dev_drawsolidpolygon)
+			psy_ui_x11_g_imp_drawsolidpolygon;
+		x11_imp_vtable.dev_drawline =
+			(psy_ui_fp_graphicsimp_dev_drawline)
+			psy_ui_x11_g_imp_drawline;
+		x11_imp_vtable.dev_drawfullbitmap =
+			(psy_ui_fp_graphicsimp_dev_drawfullbitmap)
+			psy_ui_x11_g_imp_drawfullbitmap;
+		x11_imp_vtable.dev_drawbitmap =
+			(psy_ui_fp_graphicsimp_dev_drawbitmap)
+			psy_ui_x11_g_imp_drawbitmap;
+		x11_imp_vtable.dev_drawstretchedbitmap =
+			(psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)
+			psy_ui_x11_g_imp_drawstretchedbitmap;
+		x11_imp_vtable.dev_setbackgroundcolour =
+			(psy_ui_fp_graphicsimp_dev_setbackgroundcolour)
+			psy_ui_x11_g_imp_setbackgroundcolour;
+		x11_imp_vtable.dev_setbackgroundmode =
+			(psy_ui_fp_graphicsimp_dev_setbackgroundmode)
+			psy_ui_x11_g_imp_setbackgroundmode;
+		x11_imp_vtable.dev_settextcolour =
+			(psy_ui_fp_graphicsimp_dev_settextcolour)
+			psy_ui_x11_g_imp_settextcolour;
+		x11_imp_vtable.dev_settextalign =
+			(psy_ui_fp_graphicsimp_dev_settextalign)
+			psy_ui_x11_g_imp_settextalign;
+		x11_imp_vtable.dev_setcolour =
+			(psy_ui_fp_graphicsimp_dev_setcolour)
+			psy_ui_x11_g_imp_setcolour;
+		x11_imp_vtable.dev_setfont =
+			(psy_ui_fp_graphicsimp_dev_setfont)
+			psy_ui_x11_g_imp_setfont;
+		x11_imp_vtable.dev_moveto =
+			(psy_ui_fp_graphicsimp_dev_moveto)
+			psy_ui_x11_g_imp_moveto;
+		x11_imp_vtable.dev_curveto =
+			(psy_ui_fp_graphicsimp_dev_curveto)
+			psy_ui_x11_g_imp_devcurveto;
+		x11_imp_vtable.dev_drawarc =
+			(psy_ui_fp_graphicsimp_dev_drawarc)
+			psy_ui_x11_g_imp_devdrawarc;
+		x11_imp_vtable.dev_setlinewidth =
+			(psy_ui_fp_graphicsimp_dev_setlinewidth)
+			psy_ui_x11_g_devsetlinewidth;
+		x11_imp_vtable.dev_linewidth =
+			(psy_ui_fp_graphicsimp_dev_linewidth)
+			psy_ui_x11_g_devlinewidth;
+		x11_imp_vtable.dev_setorigin =
+			(psy_ui_fp_graphicsimp_dev_setorigin)
+			psy_ui_x11_g_devsetorigin;
 		x11_imp_vtable.dev_origin =
 			(psy_ui_fp_graphicsimp_dev_origin)
 			psy_ui_x11_g_devorigin;

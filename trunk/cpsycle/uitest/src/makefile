@@ -1,6 +1,6 @@
 CC = gcc
-INC = -I../../ui/src -I../../container/src -I../../file/src -I../../diversalis/src -I../../src -I../../audio/src -I../../dsp/src -I../../lua53/src
-LIBDIRS = -L ../../container/src -L ../../dsp/src -L ../../audio/src -L ../../file/src -L ../../src -L ../../ui/src
+INC = -I../../ui/src -I../../container/src -I../../file/src -I../../diversalis/src -I../../src -I../../lua53/src
+LIBDIRS = -L ../../container/src -L ../../file/src -L ../../src -L ../../ui/src
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
