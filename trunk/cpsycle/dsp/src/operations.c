@@ -6,3 +6,13 @@
 #include "operations.h"
 
 psy_dsp_Operations dsp;
+
+
+void psy_dsp_init(void)
+{
+#ifdef PSYCLE_USE_SSE
+	psy_dsp_sse2_init(&dsp);
+#else
+	psy_dsp_noopt_init(&dsp);
+#endif
+}

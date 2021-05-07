@@ -252,6 +252,18 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 				self->lastcmd = cmd;
 				self->lastcmdsection = trackersection;
 			}
+		} else {
+			psy_EventDriverCmd cmd;
+			psy_EventDriverInput testnote;
+
+			cmd.id = -1;
+			testnote = input;
+			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
+			driver_cmd(driver, "notes", testnote, &cmd);
+			if (cmd.id != -1 && cmd.id < psy_audio_NOTECOMMANDS_RELEASE &&
+					input.param2 == TRUE /* repeat */) {
+				return;
+			}
 		}
 	}
 	if (!self->shift) {

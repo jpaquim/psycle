@@ -26,8 +26,6 @@
 #include <hashtbl.h>
 #include "../../detail/portable.h"
 
-static psy_dsp_Operations dsp;
-
 #undef KSDATAFORMAT_SUBTYPE_PCM
 const GUID KSDATAFORMAT_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,
 {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };

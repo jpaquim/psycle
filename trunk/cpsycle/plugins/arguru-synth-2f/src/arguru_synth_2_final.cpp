@@ -15,7 +15,7 @@
 
 #include <operations.h>
 
-extern "C" psy_dsp_Operations dsp;
+psy_dsp_Operations dsp;
 
 /******************************************************************************************/
 /// C1999 *round* - converts a floating point number to an integer by rounding to the nearest integer.
@@ -161,11 +161,7 @@ class mi : public CMachineInterface {
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-#ifdef PSYCLE_USE_SSE
-	psy_dsp_sse2_init(&dsp);
-#else
-	psy_dsp_noopt_init(&dsp);	
-#endif
+	psy_dsp_init();
 	Vals = new int[MacInfo.numParameters];
 	//Initialize here only those things that don't depend on
 	//external values (like sampling rate)

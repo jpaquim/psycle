@@ -5,6 +5,7 @@
 #define psy_dsp_OPERATIONS_H
 
 #include "../../detail/psydef.h"
+#include "../../detail/os.h"
 
 #include "dsptypes.h"
 
@@ -32,13 +33,16 @@ typedef struct {
 		const psy_dsp_amp_t* __restrict pSamplesL,
 		const psy_dsp_amp_t* __restrict pSamplesR,
 		int count);
-	void (*reverse)(psy_dsp_amp_t* dst, uintptr_t num);
+	void (*reverse)(psy_dsp_amp_t* dst, uintptr_t num);	
 } psy_dsp_Operations;
 
 extern psy_dsp_Operations dsp;
 
 void psy_dsp_noopt_init(psy_dsp_Operations*);
 void psy_dsp_sse2_init(psy_dsp_Operations*);
+
+void psy_dsp_init(void);
+
 
 // (Fideloop's)
 INLINE void psy_dsp_normalize(psy_dsp_Operations* self, psy_dsp_amp_t* dst,
