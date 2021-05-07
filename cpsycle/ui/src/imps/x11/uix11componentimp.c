@@ -147,7 +147,7 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 			(psy_ui_fp_componentimp_dev_size)
 			dev_size;
 		vtable.dev_updatesize =
-			(psy_ui_fp_componentimp_dev_size)
+			(psy_ui_fp_componentimp_dev_updatesize)
 			dev_updatesize;
 		vtable.dev_framesize =
 			(psy_ui_fp_componentimp_dev_framesize)
@@ -1012,17 +1012,18 @@ void dev_rec_children(psy_ui_x11_ComponentImp* self,
 
 psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 {	
-	psy_List* children = NULL;
+	psy_List* rv = NULL;
+	psy_List* p = 0;
 	
 	if (recursive == psy_ui_RECURSIVE) {		
-		dev_rec_children(self, &children);
+		dev_rec_children(self, &rv);
 	} else {
 		if (self->children_nonrec_cache) {
 			psy_List* p;
 			
 			for (p = self->children_nonrec_cache; p != NULL;
 				psy_list_next(&p)) {
-					psy_list_append(&children, (psy_ui_Component*)
+					psy_list_append(&rv, (psy_ui_Component*)
 						psy_list_entry(p));
 			}
 		} else {			
@@ -1048,15 +1049,28 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 				imp = psy_table_at(&x11app->selfmap, hwnd);
 				child = imp ? imp->component : 0;
 				if (child) {
-					psy_list_append(&children, child);
+					psy_list_append(&rv, child);
 					psy_list_append(&self->children_nonrec_cache, child);
 				}
 			}                                                   
 			XFree(child_windows);			
 			
 		}
+	}
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(p));
+		if (recursive == psy_ui_RECURSIVE) {
+			psy_List* r;
+			psy_List* q;
+
+			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p), recursive);
+			for (r = q; r != NULL; psy_list_next(&r)) {
+				psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
+			}
+			psy_list_free(q);
+		}
 	}	
-	return children;	
+	return rv;	
 }
 
 void dev_enableinput(psy_ui_x11_ComponentImp* self)
@@ -1364,6 +1378,25 @@ void dev_draw(psy_ui_x11_ComponentImp* self, psy_ui_Graphics* g)
 
 void dev_mousedown(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
+	psy_List* p;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_visible(child)) {
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;				
+				child->imp->vtable->dev_mousedown(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;
+				break;
+			}
+		}
+	}	
 }
 
 void dev_mouseup(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)

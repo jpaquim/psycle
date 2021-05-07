@@ -42,6 +42,10 @@ static void psy_ui_x11app_close(psy_ui_X11App*);
 
 
 static int handleevent(psy_ui_X11App*, XEvent*);
+static void handle_mouseevent(psy_ui_Component* component,
+	psy_ui_x11_ComponentImp* x11imp,
+	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
+	int button, psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
 static void dispose_window(psy_ui_X11App*, Window);
 static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int x, int y, int width, int height);	
@@ -917,7 +921,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				psy_ui_RealMargin spacing;
 				
 				if (!psy_ui_component_visible(imp->component)) {
-					return;
+					return 0;
 				}												
 				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 				// reset scroll origin
@@ -1079,8 +1083,13 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 					return 0;
 				}			
 			}							
-			
-			psy_ui_mouseevent_init(&ev,
+			handle_mouseevent(imp->component, imp,
+					event->xany.window, ButtonPress, event->xbutton.x,
+					translate_x11button(event->xbutton.button),
+					event->xbutton.button,
+					imp->component->vtable->onmousedown,
+					&imp->component->signal_mousedown);
+			/*psy_ui_mouseevent_init(&ev,
 				event->xbutton.x,
 				event->xbutton.y,
 				translate_x11button(event->xbutton.button),
@@ -1089,9 +1098,9 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);*/
 			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
-			if (buttonclicks == 0) {
+			/*if (buttonclicks == 0) {
 				buttonpressevent = ev;										
 				buttonpress_single(self, imp, &ev);
 				buttonclicks = 1;				
@@ -1117,7 +1126,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 							&ev);
 					}
 				}			
-			}					
+			}*/					
 			return 0;			
 			break; }
 		case ButtonRelease: {			
@@ -1181,59 +1190,6 @@ void buttonpress_single(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	imp->component->vtable->onmousedown(imp->component, ev);
 	psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1, ev);
 }
-
-void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
-	int x, int y, int width, int height)
-{
-	psy_ui_x11_GraphicsImp* gx11;
-	XRectangle rectangle;
-	psy_ui_RealMargin spacing;
-	
-	if (!psy_ui_component_visible(imp->component)) {
-		return;
-	}												
-	gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-	// reset scroll origin
-	gx11->org.x = 0;
-	gx11->org.y = 0;			
-	// prepare a clip rect that can be used by a component to
-	// optimize the draw amount
-	psy_ui_setrectangle(&imp->g.clip, x, y, width, height);
-	// set gc/xfd clip
-	rectangle.x = (short)x;
-	rectangle.y = (short)y;
-	rectangle.width = (unsigned short) width;
-	rectangle.height = (unsigned short) height;
-	XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
-	XSetRegion(self->dpy, gx11->gc, gx11->region);
-	XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
-	XDestroyRegion(gx11->region);
-	gx11->region = XCreateRegion();
-	// draw background					
-	psy_ui_drawsolidrectangle(&imp->g, imp->g.clip,
-		psy_ui_component_backgroundcolour(imp->component));			
-	// prepare colors
-	psy_ui_setcolour(&imp->g, psy_ui_component_colour(imp->component));
-	psy_ui_settextcolour(&imp->g, psy_ui_component_colour(imp->component));
-	psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
-	// spacing
-	spacing = psy_ui_component_spacing_px(imp->component);
-	if (!psy_ui_realmargin_iszero(&spacing)) {						
-		gx11->org.x = -(int)spacing.left;
-		gx11->org.y = -(int)spacing.top;
-	}
-	psy_ui_setrectangle(&imp->g.clip,
-		x + psy_ui_component_scrollleftpx(imp->component),
-		y + psy_ui_component_scrolltop_px(imp->component),
-		width, height);
-	// call draw handlers			
-	if (imp->component->vtable->ondraw) {				
-		imp->component->vtable->ondraw(imp->component, &imp->g);
-	}
-	psy_signal_emit(&imp->component->signal_draw, imp->component, 1,
-		&imp->g);	
-}
-
 
 void dispose_window(psy_ui_X11App* self, Window window)
 {
@@ -1410,6 +1366,52 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 		repeat);
 	return rv;
 }
+
+void handle_mouseevent(psy_ui_Component* component,
+	psy_ui_x11_ComponentImp* x11imp,
+	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam, int button,
+	psy_ui_fp_component_onmouseevent fp,
+	psy_Signal* signal)
+{
+	psy_ui_MouseEvent ev;	
+	bool up;	
+
+	psy_ui_mouseevent_init(&ev,
+		wParam, lParam,
+		button, 0, 0, 0); /* GetKeyState(VK_SHIFT) < 0 */
+		//GetKeyState(VK_CONTROL) < 0);
+	adjustcoordinates(component, &ev.pt.x, &ev.pt.y);
+	psy_ui_mouseevent_settarget(&ev, component); // eventtarget(component));
+	up = FALSE;
+	if (message == ButtonPress) {
+		x11imp->imp.vtable->dev_mousedown(&x11imp->imp, &ev);
+	}	
+	if (ev.event.bubble != FALSE) {
+		fp(component, &ev);
+		psy_signal_emit(signal, component, 1, &ev);
+	}
+	/*if (ev.event.bubble != FALSE) {
+		bool bubble;
+		
+		bubble = sendmessagetoparent(winimp, message, wParam, lParam);
+		if (up && !bubble) {
+			psy_ui_app_stopdrag(psy_ui_app());
+		} else if (message == WM_MOUSEMOVE && !bubble) {
+			if (!psy_ui_app()->dragevent.mouse.event.preventdefault) {
+				psy_ui_component_setcursor(psy_ui_app()->main,
+					psy_ui_CURSORSTYLE_NODROP);
+			} else {
+				psy_ui_component_setcursor(psy_ui_app()->main,
+					psy_ui_CURSORSTYLE_GRAB);
+			}
+			psy_ui_app()->dragevent.mouse.event.preventdefault = FALSE;
+		}
+	} else if (up) {		
+		psy_ui_app_stopdrag(psy_ui_app());
+	}*/
+	
+}
+
 
 void sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	int mask,

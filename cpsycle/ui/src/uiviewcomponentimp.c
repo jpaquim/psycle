@@ -135,7 +135,7 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 			(psy_ui_fp_componentimp_dev_size)
 			view_dev_size;
 		view_imp_vtable.dev_updatesize =
-			(psy_ui_fp_componentimp_dev_size)
+			(psy_ui_fp_componentimp_dev_updatesize)
 			view_dev_updatesize;
 		view_imp_vtable.dev_framesize =
 			(psy_ui_fp_componentimp_dev_framesize)
@@ -696,10 +696,10 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 }
 
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
-{
+{	
 	if (self->visible) {		
 		// draw background		
-		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
+		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
 			psy_ui_component_drawbackground(self->component, g);
 		}
 		psy_ui_component_drawborder(self->component, g);

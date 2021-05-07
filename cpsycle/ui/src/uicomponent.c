@@ -2021,7 +2021,7 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 					g->clip = intersection;
 					origin = psy_ui_origin(g);
 					psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left + origin.x,
-						-position.top + origin.y));					
+						-position.top + origin.y));								
 					component->imp->vtable->dev_draw(component->imp, g);
 					psy_ui_setorigin(g, psy_ui_realpoint_make(origin.x, origin.y));
 					if ((self->alignsorted == psy_ui_ALIGN_TOP && position.top > clip.bottom) ||						
