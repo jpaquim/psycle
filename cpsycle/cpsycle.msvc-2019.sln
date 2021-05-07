@@ -81,6 +81,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "alk_muter", "plugins\alk_muter\alk_muter.vcxproj", "{C2A7826B-7A3D-411E-93F7-77268D30E4A2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "arguru-synth-2f", "plugins\arguru-synth-2f\arguru-synth-2f.vcxproj", "{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B03D2A93-90C0-4FD7-9E41-D72CC990FA3B} = {B03D2A93-90C0-4FD7-9E41-D72CC990FA3B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -219,19 +222,13 @@ Global
 		{27FB78D1-279A-4003-97A0-518FF0772BFA}.Release|x64.ActiveCfg = Release|x64
 		{27FB78D1-279A-4003-97A0-518FF0772BFA}.Release|x64.Build.0 = Release|x64
 		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Debug|Win32.Build.0 = Debug|Win32
 		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Debug|x64.ActiveCfg = Debug|x64
 		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Release|Win32.ActiveCfg = Release|Win32
-		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Release|Win32.Build.0 = Release|Win32
 		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Release|x64.ActiveCfg = Release|x64
-		{C2A7826B-7A3D-411E-93F7-77268D30E4A2}.Release|x64.Build.0 = Release|x64
 		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Debug|Win32.Build.0 = Debug|Win32
 		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Debug|x64.ActiveCfg = Debug|x64
 		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Release|Win32.ActiveCfg = Release|Win32
-		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Release|Win32.Build.0 = Release|Win32
 		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Release|x64.ActiveCfg = Release|x64
-		{19AF485D-12C8-49EA-8BB3-07FF7B985BF2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

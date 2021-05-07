@@ -65,7 +65,7 @@ CSynthTrack::CSynthTrack()
 	VcfEnvStage=0;
 	VcfEnvValue=0.0f;
 	Stage5AmpVal=0.0f;
-	vibrato=false;	
+	vibrato=false;
 	// resampler.quality(dsp::resampler::quality::spline);
 }
 

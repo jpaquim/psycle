@@ -1567,7 +1567,7 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl, ev->alt),
-				0, workspace_currview(&self->workspace).id));
+				ev->repeat, workspace_currview(&self->workspace).id));
 }
 
 // eventdriver callback to handle chordmode, patternedit noterelease

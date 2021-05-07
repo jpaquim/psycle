@@ -27,11 +27,7 @@
 void psy_audio_init(void)
 {	
 	psy_audio_exclusivelock_init();	
-#ifdef PSYCLE_USE_SSE
-	psy_dsp_sse2_init(&dsp);
-#else
-	psy_dsp_noopt_init(&dsp);
-#endif
+	psy_dsp_init();
 }
 
 void psy_audio_dispose(void)
