@@ -31,38 +31,44 @@ static void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp*,
 	uint32_t dwStyle,
 	int usecommand);
 
-// VTable Prototypes
+// prototypes
 static void dev_dispose(psy_ui_x11_ComponentImp*);
 static void dev_destroy(psy_ui_x11_ComponentImp*);
 static void dev_show(psy_ui_x11_ComponentImp*);
 static void dev_showstate(psy_ui_x11_ComponentImp*, int state);
 static void dev_hide(psy_ui_x11_ComponentImp*);
 static int dev_visible(psy_ui_x11_ComponentImp*);
+static int dev_drawvisible(psy_ui_x11_ComponentImp*);
 static void dev_move(psy_ui_x11_ComponentImp*, psy_ui_Point origin);
 static void dev_resize(psy_ui_x11_ComponentImp*, psy_ui_Size);
-static void dev_clientresize(psy_ui_x11_ComponentImp*, int width, int height);
-static psy_ui_RealRectangle dev_position(psy_ui_x11_ComponentImp*);
+static void dev_clientresize(psy_ui_x11_ComponentImp*, intptr_t width, intptr_t height);
+static psy_ui_RealRectangle dev_position(const psy_ui_x11_ComponentImp*);
+static psy_ui_RealRectangle dev_screenposition(const psy_ui_x11_ComponentImp*);
 static void dev_setposition(psy_ui_x11_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
-static psy_ui_Size dev_size(psy_ui_x11_ComponentImp*);
+static psy_ui_Size dev_size(const psy_ui_x11_ComponentImp*);
 static void dev_updatesize(psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp*);
 static void dev_scrollto(psy_ui_x11_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp*);
-static void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component*
-	parent);
-static void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp*
-	child, psy_ui_x11_ComponentImp* insertafter);
+static void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent);
+static void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
+	psy_ui_x11_ComponentImp* insertafter);
+static void dev_remove(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp* child);
+static void dev_erase(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp* child);
+static void dev_setorder(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp*
+	insertafter);
 static void dev_capture(psy_ui_x11_ComponentImp*);
 static void dev_releasecapture(psy_ui_x11_ComponentImp*);
 static void dev_invalidate(psy_ui_x11_ComponentImp*);
-static void dev_invalidaterect(psy_ui_x11_ComponentImp*, const
+static void dev_invalidaterect(psy_ui_x11_ComponentImp*,
 	const psy_ui_RealRectangle*);
 static void dev_update(psy_ui_x11_ComponentImp*);
 static void dev_setfont(psy_ui_x11_ComponentImp*, psy_ui_Font*);
 static psy_List* dev_children(psy_ui_x11_ComponentImp*, int recursive);
 static void dev_enableinput(psy_ui_x11_ComponentImp*);
 static void dev_preventinput(psy_ui_x11_ComponentImp*);
+static bool dev_inputprevented(const psy_ui_x11_ComponentImp* self);
 static void dev_setcursor(psy_ui_x11_ComponentImp*, psy_ui_CursorStyle);
 static void dev_starttimer(psy_ui_x11_ComponentImp*, uintptr_t id, uintptr_t
 	interval);
@@ -71,75 +77,184 @@ static void dev_seticonressource(psy_ui_x11_ComponentImp*, int ressourceid);
 static const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text,
 	psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_x11_ComponentImp*, psy_ui_Colour);
+static void dev_setbackgroundcolour(psy_ui_x11_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
 
+static void dev_clear(psy_ui_x11_ComponentImp*);
+static void dev_draw(psy_ui_x11_ComponentImp*, psy_ui_Graphics*);
+static void dev_mousedown(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mouseup(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mousemove(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mousedoubleclick(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
+static void dev_mouseenter(psy_ui_x11_ComponentImp*);
+static void dev_mouseleave(psy_ui_x11_ComponentImp*);
+
+static psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp*, psy_ui_Component* src,
+	psy_ui_Component* dst);
+static psy_ui_RealPoint mapcoords(psy_ui_x11_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst);
+
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
-		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
-		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
-		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
-		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
+		vtable.dev_dispose =
+			(psy_ui_fp_componentimp_dev_dispose)
+			dev_dispose;
+		vtable.dev_destroy =
+			(psy_ui_fp_componentimp_dev_destroy)
+			dev_destroy;
+		vtable.dev_show =
+			(psy_ui_fp_componentimp_dev_show)
+			dev_show;
+		vtable.dev_showstate =
+			(psy_ui_fp_componentimp_dev_showstate)
 			dev_showstate;
-		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide)dev_hide;
-		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible)dev_visible;
-		vtable.dev_move = (psy_ui_fp_componentimp_dev_move)dev_move;
-		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)dev_resize;
-		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
+		vtable.dev_hide =
+			(psy_ui_fp_componentimp_dev_hide)
+			dev_hide;
+		vtable.dev_visible =
+			(psy_ui_fp_componentimp_dev_visible)
+			dev_visible;
+		vtable.dev_drawvisible =
+			(psy_ui_fp_componentimp_dev_drawvisible)
+			dev_drawvisible;
+		vtable.dev_move =
+			(psy_ui_fp_componentimp_dev_move)
+			dev_move;
+		vtable.dev_resize =
+			(psy_ui_fp_componentimp_dev_resize)
+			dev_resize;
+		vtable.dev_clientresize =
+			(psy_ui_fp_componentimp_dev_clientresize)
 			dev_clientresize;
-		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
-		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)
+		vtable.dev_position =
+			(psy_ui_fp_componentimp_dev_position)
+			dev_position;
+		vtable.dev_screenposition =
+			(psy_ui_fp_componentimp_dev_screenposition)
+			dev_screenposition;
+		vtable.dev_setposition =
+			(psy_ui_fp_componentimp_dev_setposition)
 			dev_setposition;
-		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
-		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)
+		vtable.dev_size =
+			(psy_ui_fp_componentimp_dev_size)
+			dev_size;
+		vtable.dev_updatesize =
+			(psy_ui_fp_componentimp_dev_size)
+			dev_updatesize;
+		vtable.dev_framesize =
+			(psy_ui_fp_componentimp_dev_framesize)
 			dev_framesize;
-		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto)dev_scrollto;
-		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent)dev_parent;
-		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
+		vtable.dev_scrollto =
+			(psy_ui_fp_componentimp_dev_scrollto)
+			dev_scrollto;
+		vtable.dev_parent =
+			(psy_ui_fp_componentimp_dev_parent)
+			dev_parent;
+		vtable.dev_setparent =
+			(psy_ui_fp_componentimp_dev_setparent)
 			dev_setparent;
-		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)dev_insert;
-		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
-		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
+		vtable.dev_insert =
+			(psy_ui_fp_componentimp_dev_insert)
+			dev_insert;
+		vtable.dev_remove =
+			(psy_ui_fp_componentimp_dev_remove)
+			dev_remove;
+		vtable.dev_erase =
+			(psy_ui_fp_componentimp_dev_erase)
+			dev_erase;
+		vtable.dev_capture =
+			(psy_ui_fp_componentimp_dev_capture)
+			dev_capture;
+		vtable.dev_releasecapture =
+			(psy_ui_fp_componentimp_dev_releasecapture)
 			dev_releasecapture;
-		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate)
+		vtable.dev_invalidate =
+			(psy_ui_fp_componentimp_dev_invalidate)
 			dev_invalidate;
-		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect)
+		vtable.dev_invalidaterect =
+			(psy_ui_fp_componentimp_dev_invalidaterect)
 			dev_invalidaterect;
-		vtable.dev_update = (psy_ui_fp_componentimp_dev_update)dev_update;
-		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont)dev_setfont;
-		vtable.dev_children = (psy_ui_fp_componentimp_dev_children)dev_children;
-		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)
+		vtable.dev_update =
+			(psy_ui_fp_componentimp_dev_update)
+			dev_update;
+		vtable.dev_setfont =
+			(psy_ui_fp_componentimp_dev_setfont)
+			dev_setfont;
+		vtable.dev_children =
+			(psy_ui_fp_componentimp_dev_children)
+			dev_children;
+		vtable.dev_enableinput =
+			(psy_ui_fp_componentimp_dev_enableinput)
 			dev_enableinput;
-		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
+		vtable.dev_preventinput =
+			(psy_ui_fp_componentimp_dev_preventinput)
 			dev_preventinput;
-		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
+		vtable.dev_inputprevented =
+			(psy_ui_fp_componentimp_dev_inputprevented)
+			dev_inputprevented;
+		vtable.dev_setcursor =
+			(psy_ui_fp_componentimp_dev_setcursor)
 			dev_setcursor;
-		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
+		vtable.dev_starttimer =
+			(psy_ui_fp_componentimp_dev_starttimer)
 			dev_starttimer;
-		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)
+		vtable.dev_stoptimer =
+			(psy_ui_fp_componentimp_dev_stoptimer)
 			dev_stoptimer;
 		vtable.dev_seticonressource =
 			(psy_ui_fp_componentimp_dev_seticonressource)
 			dev_seticonressource;
-		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)
+		vtable.dev_textmetric =
+			(psy_ui_fp_componentimp_dev_textmetric)
 			dev_textmetric;
-		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)
+		vtable.dev_textsize =
+			(psy_ui_fp_componentimp_dev_textsize)
 			dev_textsize;
 		vtable.dev_setbackgroundcolour =
 			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
-			dev_setbackgroundcolor;
-		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
-		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
-		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
-		vtable_initialized = 1;
+			dev_setbackgroundcolour;
+		vtable.dev_settitle =
+			(psy_ui_fp_componentimp_dev_settitle)
+			dev_settitle;
+		vtable.dev_setfocus =
+			(psy_ui_fp_componentimp_dev_setfocus)
+			dev_setfocus;
+		vtable.dev_hasfocus =
+			(psy_ui_fp_componentimp_dev_hasfocus)
+			dev_hasfocus;
+		vtable.dev_clear =
+			(psy_ui_fp_componentimp_dev_clear)
+			dev_clear;
+		vtable.dev_draw =
+			(psy_ui_fp_componentimp_dev_draw)
+			dev_draw;
+		vtable.dev_mousedown =
+			(psy_ui_fp_componentimp_dev_mouseevent)
+			dev_mousedown;
+		vtable.dev_mouseup =
+			(psy_ui_fp_componentimp_dev_mouseevent)
+			dev_mouseup;
+		vtable.dev_mousemove =
+			(psy_ui_fp_componentimp_dev_mouseevent)
+			dev_mousemove;
+		vtable.dev_mousedoubleclick =
+			(psy_ui_fp_componentimp_dev_mouseevent)
+			dev_mousedoubleclick;
+		vtable.dev_mouseenter =
+			(psy_ui_fp_componentimp_dev_mouseenter)
+			dev_mouseenter;
+		vtable.dev_mouseleave =
+			(psy_ui_fp_componentimp_dev_mouseleave)
+			dev_mouseleave;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -157,16 +272,21 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	xt_imp_vtable_init(self);
 	self->imp.vtable = &vtable;
 	self->component = component;
-	self->hwnd = 0;
+	self->backgroundcolor = psy_ui_colour_make(0);
 	self->winid = -1;
+	self->hwnd = 0;
+	// self->wndproc = 0;
+	// self->preventwmchar = 0;
 	self->sizecachevalid = FALSE;
 	self->tmcachevalid = FALSE;
-	self->backgroundcolor = psy_ui_colour_make(0);
-//	self->wndproc = 0;
-//	self->background = 0;
-	parent_imp = parent ? (psy_ui_x11_ComponentImp*)parent : 0;	
-	psy_ui_x11_component_create_window(self, parent_imp, classname, x, y, width,
-		height, dwStyle, usecommand);			
+	self->dbg = 0;
+	self->visible = parent ? TRUE : FALSE;
+	self->viewcomponents = NULL;
+	parent_imp = parent
+		? (psy_ui_x11_ComponentImp*)parent
+		: NULL;	
+	psy_ui_x11_component_create_window(self, parent_imp, classname, x, y,
+		width, height, dwStyle, usecommand);
 	if (self->hwnd) {
 //		psy_ui_x11_component_init_wndproc(self, classname);
 	}
@@ -179,10 +299,11 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand)
 {	
-	int err = 0;
 	psy_ui_X11App* x11app;
-		
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	//
+	int err = 0;
+			
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
 	self->prev_w = width;
 	self->prev_h = height;
 	self->d_backBuf = 0;
@@ -201,7 +322,8 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		//		x, y, width, height, 4, 0, 0x00232323);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
-			StructureNotifyMask);
+			StructureNotifyMask |
+			EnterWindowMask | LeaveWindowMask);
 		self->mapped = FALSE;
     } else {   
 		XSetWindowAttributes xAttr;
@@ -218,7 +340,8 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			XSelectInput(x11app->dpy, self->hwnd,
 				KeyPressMask | KeyReleaseMask |
 				ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-				ExposureMask | StructureNotifyMask);
+				ExposureMask | StructureNotifyMask |
+				EnterWindowMask | LeaveWindowMask);
 			self->mapped = TRUE;        
     }
     self->parent = parent;    
@@ -320,12 +443,42 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 
 // xt implementation method for psy_ui_Component
 void dev_dispose(psy_ui_x11_ComponentImp* self)
-{
-	//if (self->background) {
-		//DeleteObject(self->background);
-	//}
+{	
 	psy_ui_componentimp_dispose(&self->imp);
 	psy_ui_graphics_dispose(&self->g);
+	dev_clear(self);	
+	psy_list_free(self->children_nonrec_cache);
+	self->children_nonrec_cache = NULL;
+}
+
+void dev_clear(psy_ui_x11_ComponentImp* self)
+{
+	psy_List* p;
+	psy_List* q;
+
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+		bool deallocate;
+
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		psy_ui_component_destroy(component);
+		if (deallocate) {
+			free(component);
+		}
+	}
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
+	if (self->component) {
+		q = psy_ui_component_children(self->component, psy_ui_NONRECURSIVE);
+		for (p = q; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			psy_ui_component_destroy(component);
+		}
+		psy_list_free(q);
+	}
 	psy_list_free(self->children_nonrec_cache);
 	self->children_nonrec_cache = NULL;
 }
@@ -371,15 +524,17 @@ void dev_show(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;		
 
+	self->visible = TRUE;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;        
 	XMapWindow(x11app->dpy, self->hwnd);
-	self->mapped = TRUE;
+	self->mapped = TRUE;	
 }
 
 void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
 {
 	psy_ui_X11App* x11app;		
 
+	self->visible = TRUE;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XMapWindow(x11app->dpy, self->hwnd);
 	self->mapped = TRUE;
@@ -389,6 +544,7 @@ void dev_hide(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;		
 
+	self->visible = FALSE;
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	XUnmapWindow(x11app->dpy, self->hwnd);
 	self->mapped = FALSE;
@@ -396,6 +552,12 @@ void dev_hide(psy_ui_x11_ComponentImp* self)
 
 int dev_visible(psy_ui_x11_ComponentImp* self)
 {
+	return self->mapped;
+}
+
+int dev_drawvisible(psy_ui_x11_ComponentImp* self)
+{
+	/* TODO */
 	return self->mapped;
 }
 
@@ -428,7 +590,7 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 	self->sizecachevalid = TRUE;	
 }
 
-void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)
+void dev_clientresize(psy_ui_x11_ComponentImp* self, intptr_t width, intptr_t height)
 {
 	//RECT rc;
 
@@ -450,6 +612,46 @@ void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)
 	self->sizecachevalid = FALSE;
 }
 
+psy_ui_RealRectangle dev_position(const psy_ui_x11_ComponentImp* self)
+{
+	psy_ui_RealRectangle rv;
+	psy_ui_Size size;
+
+	Window root;
+	unsigned int temp;
+	XWindowAttributes win_attr;
+	psy_ui_X11App* x11app;
+
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
+	rv.left = win_attr.x;
+	rv.top = win_attr.y;
+	rv.right = win_attr.x + win_attr.width;
+	rv.bottom = win_attr.y + win_attr.height;
+	return rv;
+}
+
+psy_ui_RealRectangle dev_screenposition(const psy_ui_x11_ComponentImp* self)
+{
+	psy_ui_RealRectangle rv;
+	psy_ui_Size size;
+
+	/* todo */
+	Window root;
+	unsigned int temp;
+	XWindowAttributes win_attr;
+	psy_ui_X11App* x11app;
+
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
+	rv.left = win_attr.x;
+	rv.top = win_attr.y;
+	rv.right = win_attr.x + win_attr.width;
+	rv.bottom = win_attr.y + win_attr.height;
+	return rv;
+}
+
+
 void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
@@ -458,39 +660,39 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 		
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	tm = dev_textmetric(self);
-	self->sizecachevalid = FALSE;		
-	XMoveResizeWindow(x11app->dpy, self->hwnd,
-		psy_ui_value_px(&topleft.x, tm, NULL),
-		psy_ui_value_px(&topleft.y, tm, NULL),		
-		(psy_ui_value_px(&size.width, tm, NULL) > 0)
+	self->sizecachevalid = FALSE;	
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		if (psy_ui_component_parent_const(self->component)) {
+			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+		} else {
+			parentsize = psy_ui_component_scrollsize(self->component);
+		}
+		XMoveResizeWindow(x11app->dpy, self->hwnd,
+			psy_ui_value_px(&topleft.x, tm, &parentsize),
+			psy_ui_value_px(&topleft.y, tm, &parentsize),
+			(psy_ui_value_px(&size.width, tm, &parentsize) > 0)
+			? psy_ui_value_px(&size.width, tm, &parentsize)
+			: 1,
+			(psy_ui_value_px(&size.height, tm, &parentsize) > 0)
+			? psy_ui_value_px(&size.height, tm, &parentsize)
+			: 1);
+	} else {
+		XMoveResizeWindow(x11app->dpy, self->hwnd,
+			psy_ui_value_px(&topleft.x, tm, NULL),
+			psy_ui_value_px(&topleft.y, tm, NULL),
+			(psy_ui_value_px(&size.width, tm, NULL) > 0)
 			? psy_ui_value_px(&size.width, tm, NULL)
 			: 1,
-		(psy_ui_value_px(&size.height, tm, NULL) > 0)
+			(psy_ui_value_px(&size.height, tm, NULL) > 0)
 			? psy_ui_value_px(&size.height, tm, NULL)
-			: 1);	
+			: 1);
+	}
 	dev_updatesize(self);	
 }
 
-psy_ui_RealRectangle dev_position(psy_ui_x11_ComponentImp* self)
-{
-	psy_ui_RealRectangle rv;
-    psy_ui_Size size;
-    
-    Window root;
-    unsigned int temp;    
-    XWindowAttributes win_attr;	
-	psy_ui_X11App* x11app;
-		
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-    XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
-    rv.left = win_attr.x;
-	rv.top = win_attr.y;
-	rv.right = win_attr.x + win_attr.width;
-	rv.bottom = win_attr.y + win_attr.height;
-	return rv;
-}
-
-psy_ui_Size dev_size(psy_ui_x11_ComponentImp* self)
+psy_ui_Size dev_size(const psy_ui_x11_ComponentImp* self)
 {    
 	psy_ui_Size rv;
  
@@ -635,7 +837,14 @@ void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent)
 void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 	psy_ui_x11_ComponentImp* insertafter)
 {
-	dev_setparent(child, self->component);
+	assert(child);
+
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_list_append(&self->viewcomponents, child->component);
+	} else {
+	  dev_setparent(child, self->component);
+	}
 	//SetParent(child->hwnd, self->hwnd);
 	//SetWindowPos(
 		//child->hwnd,
@@ -643,6 +852,49 @@ void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 		//0, 0, 0, 0,
 		//SWP_NOMOVE | SWP_NOSIZE
 	//);
+}
+
+void dev_remove(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child)
+{
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {
+			psy_list_remove(&self->viewcomponents, p);
+			if (child->component->deallocate) {
+				psy_ui_component_deallocate(child->component);
+			} else {
+				psy_ui_component_dispose(child->component);
+			}
+		}
+	} else {
+		assert(0);
+		// todo
+	}
+}
+
+void dev_erase(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child)
+{
+	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+		psy_List* p;
+
+		p = psy_list_findentry(self->viewcomponents, child->component);
+		if (p) {
+			psy_list_remove(&self->viewcomponents, p);
+		}
+	} else {
+		assert(0);
+		// todo
+	}
+}
+
+void dev_setorder(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp*
+	insertafter)
+{
+	/* TODO */
 }
 
 void dev_capture(psy_ui_x11_ComponentImp* self)
@@ -809,12 +1061,18 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 
 void dev_enableinput(psy_ui_x11_ComponentImp* self)
 {
-//	EnableWindow(self->hwnd, 1);
+	/* TODO */
 }
 
 void dev_preventinput(psy_ui_x11_ComponentImp* self)
 {
-//	EnableWindow(self->hwnd, 0);
+	/* TODO */
+}
+
+bool dev_inputprevented(const psy_ui_x11_ComponentImp* self)
+{
+	/* TODO */
+	return FALSE;
 }
 
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp* self)
@@ -845,7 +1103,6 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp* self)
 		rv.tmDescent = gx11->xftfont->descent;
 		rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
 		rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
-		// printf("avcharwidth %d\n", rv.tmAveCharWidth);
 		psy_ui_graphics_dispose(&g);		
 		// mutable
 		((psy_ui_x11_ComponentImp*)(self))->tm = rv;
@@ -993,7 +1250,7 @@ psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	return rv;
 }
 
-void dev_setbackgroundcolor(psy_ui_x11_ComponentImp* self, psy_ui_Colour colour)
+void dev_setbackgroundcolour(psy_ui_x11_ComponentImp* self, psy_ui_Colour colour)
 {
 	self->backgroundcolor = colour;
 }
@@ -1063,6 +1320,118 @@ int windowexstyle(psy_ui_x11_ComponentImp* self)
 #endif 
 */
 	return rv;
+}
+
+void dev_draw(psy_ui_x11_ComponentImp* self, psy_ui_Graphics* g)
+{		
+	const psy_ui_TextMetric* tm;
+	psy_ui_x11_GraphicsImp* win_g;	
+	psy_ui_RealMargin spacing;
+	
+	tm = psy_ui_component_textmetric(self->component);
+	// draw background						
+	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
+		psy_ui_component_drawbackground(self->component, g);
+	}
+	psy_ui_component_drawborder(self->component, g);
+	// prepare a clip rect that can be used by a component
+	// to optimize the draw amount	
+	psy_ui_realrectangle_settopleft(&g->clip,
+		psy_ui_realpoint_make(g->clip.left, g->clip.top));
+	// add scroll coords
+	tm = psy_ui_component_textmetric(self->component);
+	win_g = (psy_ui_x11_GraphicsImp*)g->imp;			
+	// spacing
+	spacing = psy_ui_component_spacing_px(self->component);
+	if (!psy_ui_realmargin_iszero(&spacing)) {						
+		win_g->org.x = -(int)spacing.left;
+		win_g->org.y = -(int)spacing.top;
+	}
+	// prepare colours
+	psy_ui_setcolour(g, psy_ui_component_colour(
+		self->component));
+	psy_ui_settextcolour(g, psy_ui_component_colour(
+		self->component));
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
+	// call specialization methods (vtable, then signals)			
+	if (self->component->vtable->ondraw) {
+		self->component->vtable->ondraw(self->component, g);
+	}
+	psy_signal_emit(&self->component->signal_draw,
+		self->component, 1, g);
+	psy_ui_component_drawchildren(self->component, g, self->viewcomponents);		
+}
+
+void dev_mousedown(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+}
+
+void dev_mouseup(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+}
+
+psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = psy_ui_component_parent(src);
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
+}
+
+psy_ui_RealPoint mapcoords(psy_ui_x11_ComponentImp* self, psy_ui_Component* src,
+	psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = src;
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
+}
+
+void dev_mousemove(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+}
+
+void dev_mousedoubleclick(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
+{
+}
+
+void dev_mouseenter(psy_ui_x11_ComponentImp* self)
+{
+	self->component->vtable->onmouseenter(self->component);
+	psy_signal_emit(&self->component->signal_mouseenter,
+		self->component, 0);
+}
+
+void dev_mouseleave(psy_ui_x11_ComponentImp* self)
+{
+	psy_ui_app()->mousetracking = FALSE;
+	if (psy_ui_app()->hover) {
+		psy_ui_Component* hover;
+
+		hover = psy_ui_app()->hover;
+		hover->vtable->onmouseleave(hover);
+		psy_signal_emit(&hover->signal_mouseleave, hover, 0);
+		psy_ui_app_sethover(psy_ui_app(), NULL);		
+	}
+	self->component->vtable->onmouseleave(self->component);		
+	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);
 }
 
 #endif

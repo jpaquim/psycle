@@ -4,8 +4,8 @@
 #include "../../detail/psyconf.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_XT
-#ifndef psy_ui_XTAPP_H
-#define psy_ui_XTAPP_H
+#ifndef psy_ui_X11APP_H
+#define psy_ui_X11APP_H
 
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
@@ -24,7 +24,9 @@ extern "C" {
 
 //typedef LRESULT (CALLBACK *psy_ui_fp_winproc)(HWND hwnd, UINT message,
 	//WPARAM wParam, LPARAM lParam);
-	
+
+struct psy_ui_Component;
+
 typedef struct
 {	
 	uintptr_t hwnd;
@@ -34,17 +36,22 @@ typedef struct
 	bool doubleclick;
 } psy_ui_X11TickCounter;
 
-typedef struct {
+typedef struct psy_ui_X11App {
 	// implements
 	psy_ui_AppImp imp;
 	// internal
 	int reserved;	
 	Display * dpy;	
 	const char* appclass;
-	const char* componentclass;	
+	const char* componentclass;
+	// winproc
+	// comwinproc
 	psy_Table selfmap;
 	psy_Table winidmap;
 	uintptr_t winid;
+	// defaultbackgroundbrush
+	struct psy_ui_Component* eventretarget;
+	// mousehook
 	Atom wmDeleteMessage;
 	bool running;
 	psy_List* timers;
@@ -77,5 +84,5 @@ INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 }
 #endif
 
-#endif /* psy_ui_XTAPP_H */
+#endif /* psy_ui_X11APP_H */
 #endif /* PSYCLE_TK_XT */

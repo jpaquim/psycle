@@ -38,8 +38,8 @@ typedef struct psy_ui_x11_GraphicsImp {
 	XftColor textcolor;
 	psy_ui_Colour textbackgroundcolor;
 	unsigned int backgroundmode;
-	int dx;
-	int dy;
+	psy_ui_RealPoint org;
+	psy_ui_RealPoint dorg;
 	/*HDC hdc;  
 	HFONT hfont;
 	HFONT hFontPrev;	
