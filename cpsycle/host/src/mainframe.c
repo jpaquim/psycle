@@ -44,6 +44,7 @@ static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initviewstatusbars(MainFrame*);
 static void mainframe_initstatusbarlabel(MainFrame*);
 static void mainframe_initturnoffbutton(MainFrame*);
+static void mainframe_initclockbar(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
 static void mainframe_initterminalbutton(MainFrame*);
 static void mainframe_initprogressbar(MainFrame*);
@@ -354,6 +355,7 @@ void mainframe_initstatusbar(MainFrame* self)
 	mainframe_initstatusbarlabel(self);	
 	mainframe_initviewstatusbars(self);
 	mainframe_initturnoffbutton(self);
+	mainframe_initclockbar(self);
 	mainframe_initkbdhelpbutton(self);
 	mainframe_initterminalbutton(self);	
 	mainframe_initprogressbar(self);
@@ -397,17 +399,26 @@ void mainframe_initturnoffbutton(MainFrame* self)
 	psy_ui_button_init_text_connect(&self->turnoff, &self->statusbar,
 		NULL, "main.exit", self, mainframe_onexit);
 	psy_ui_component_setalign(psy_ui_button_base(&self->turnoff),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setmargin(psy_ui_button_base(&self->turnoff),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 4.0));
-	psy_ui_component_setspacing(psy_ui_button_base(&self->turnoff),
-		psy_ui_margin_make_em(0.0, 0.0, 0.25, 0.0));
+		psy_ui_ALIGN_RIGHT);		
+}
+
+void mainframe_initclockbar(MainFrame* self)
+{
+	clockbar_init(&self->clockbar, &self->statusbar, &self->workspace);
+	psy_ui_component_setalign(clockbar_base(&self->clockbar),
+		psy_ui_ALIGN_RIGHT);		
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
 {	
+	psy_ui_Margin margin;
+
 	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
 		NULL, "main.kbd", self, mainframe_ontogglekbdhelp);
+	margin = psy_ui_component_margin(psy_ui_button_base(&self->togglekbdhelp));
+	margin.right = psy_ui_value_make_ew(4.0);
+	psy_ui_component_setmargin(psy_ui_button_base(&self->togglekbdhelp),
+		 margin);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
 	psy_ui_button_setbitmapresource(&self->togglekbdhelp, IDB_KBD);

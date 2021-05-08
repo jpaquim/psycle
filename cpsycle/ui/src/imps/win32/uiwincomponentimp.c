@@ -1106,100 +1106,18 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 }
 
 void dev_draw(psy_ui_win_ComponentImp* self, psy_ui_Graphics* g)
-{
-	const psy_ui_TextMetric* tm;
-	psy_ui_win_GraphicsImp* win_g;	
-	psy_ui_RealMargin spacing;
-	
-	tm = psy_ui_component_textmetric(self->component);
-	// draw background						
-	if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {
-		psy_ui_component_drawbackground(self->component, g);
-	}
-	psy_ui_component_drawborder(self->component, g);
-	// prepare a clip rect that can be used by a component
-	// to optimize the draw amount	
-	psy_ui_realrectangle_settopleft(&g->clip,
-		psy_ui_realpoint_make(g->clip.left, g->clip.top));
-	// add scroll coords
-	tm = psy_ui_component_textmetric(self->component);
-	win_g = (psy_ui_win_GraphicsImp*)g->imp;			
-	// spacing
-	spacing = psy_ui_component_spacing_px(self->component);
-	if (!psy_ui_realmargin_iszero(&spacing)) {						
-		win_g->org.x = -(int)spacing.left;
-		win_g->org.y = -(int)spacing.top;
-	}
-	// prepare colours
-	psy_ui_setcolour(g, psy_ui_component_colour(
-		self->component));
-	psy_ui_settextcolour(g, psy_ui_component_colour(
-		self->component));
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
-	// call specialization methods (vtable, then signals)			
-	if (self->component->vtable->ondraw) {
-		self->component->vtable->ondraw(self->component, g);
-	}
-	psy_signal_emit(&self->component->signal_draw,
-		self->component, 1, g);
-	psy_ui_component_drawchildren(self->component, g, self->viewcomponents);
+{		
+	psy_ui_component_draw(self->component, g, self->viewcomponents);
 }
 
 void dev_mousedown(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
-	psy_List* p;
-
-	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-		psy_ui_Component* child;
-		psy_ui_RealRectangle r;
-
-		child = (psy_ui_Component*)p->entry;
-		if (psy_ui_component_visible(child)) {
-			r = psy_ui_component_position(child);
-			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;				
-				child->imp->vtable->dev_mousedown(child->imp, ev);
-				ev->pt.x += r.left;
-				ev->pt.y += r.top;
-				break;
-			}
-		}
-	}	
+	psy_ui_component_mousedown(self->component, ev, self->viewcomponents);
 }
 
 void dev_mouseup(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 {
-	if (psy_ui_app()->capture) {
-		psy_ui_RealPoint translation;
-
-		translation = mapcoords(self, psy_ui_app()->capture,
-			self->component);
-		psy_ui_realpoint_sub(&ev->pt, translation);
-		psy_ui_app()->capture->vtable->onmouseup(psy_ui_app()->capture, ev);
-		psy_ui_realpoint_add(&ev->pt, translation);
-	} else {
-		psy_List* p;
-
-		for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
-			psy_ui_Component* child;
-			psy_ui_RealRectangle r;
-
-			child = (psy_ui_Component*)p->entry;
-			if (psy_ui_component_visible(child)) {
-				r = psy_ui_component_position(child);
-				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
-					ev->pt.x -= r.left;
-					ev->pt.y -= r.top;
-					child->imp->vtable->dev_mouseup(child->imp, ev);
-					ev->pt.x += r.left;
-					ev->pt.y += r.top;
-					break;
-				}
-			}
-		}
-	}
-	psy_ui_app()->mousetracking = FALSE;
+	psy_ui_component_mouseup(self->component, ev, self->viewcomponents);
 }
 
 psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,

@@ -83,7 +83,7 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_tabbar_init(&tabbar, &mainframe);
 	psy_ui_tabbar_append_tabs(&tabbar, "tab1", 
 	"tab2", "tab3", NULL);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&tabbar), psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_tabbar_select(&tabbar, 0);
 	psy_ui_component_showstate(&mainframe, options);	
 	// Starts the app event loop	

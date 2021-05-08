@@ -940,6 +940,12 @@ INLINE psy_ui_RealMargin psy_ui_component_bordermargin_px(const psy_ui_Component
 
 void psy_ui_component_drawchildren(psy_ui_Component*, psy_ui_Graphics*,
 	psy_List* children);
+void psy_ui_component_draw(psy_ui_Component*, psy_ui_Graphics*,
+	psy_List* viewcomponents);
+void psy_ui_component_mousedown(psy_ui_Component*, psy_ui_MouseEvent*,
+	psy_List* viewcomponents);
+void psy_ui_component_mouseup(psy_ui_Component*, psy_ui_MouseEvent*,
+	psy_List* viewcomponents);
 
 #ifdef __cplusplus
 }

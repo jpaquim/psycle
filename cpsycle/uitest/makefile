@@ -1,4 +1,4 @@
-SUBDIRS := ../container/src ../file/src ../audio/src ../ui/src ../uitest/src
+SUBDIRS := ../container/src ../file/src ../ui/src ../uitest/src
 
 all: $(SUBDIRS)
 $(SUBDIRS):
