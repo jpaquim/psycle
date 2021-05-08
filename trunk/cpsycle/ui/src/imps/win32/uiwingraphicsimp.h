@@ -29,8 +29,7 @@ typedef struct psy_ui_win_GraphicsImp {
 	HBRUSH hBrushPrev;
 	HBITMAP oldbmp;
 	bool shareddc;	
-	psy_ui_RealPoint org;
-	psy_ui_RealPoint dorg;
+	psy_ui_RealPoint org;	
 } psy_ui_win_GraphicsImp;
 
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc);

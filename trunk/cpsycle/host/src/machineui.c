@@ -214,6 +214,7 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 		{ 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, -1.0 }
 	};
 	psy_ui_RealPoint edges[4];
+	psy_ui_RealPoint origin;
 	double width;
 	double height;
 	
@@ -223,6 +224,7 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 	edges[1] = psy_ui_realpoint_make(width + d, -d);
 	edges[2] = psy_ui_realpoint_make(width + d, height + d);
 	edges[3] = psy_ui_realpoint_make(-d, height + d);
+	origin = psy_ui_origin(g);
 	psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
 	drawmachineline(g, dirs[0], edges[0]);
 	drawmachineline(g, dirs[1], edges[0]);
@@ -232,7 +234,7 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 	drawmachineline(g, dirs[3], edges[2]);
 	drawmachineline(g, dirs[3], edges[3]);
 	drawmachineline(g, dirs[0], edges[3]);
-	psy_ui_resetorigin(g);
+	psy_ui_setorigin(g, origin);
 }
 
 

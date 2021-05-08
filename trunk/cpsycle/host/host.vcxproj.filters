@@ -502,6 +502,9 @@
     <ClCompile Include="src\titlebar.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\clockbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -952,6 +955,9 @@
     </ClInclude>
     <ClInclude Include="src\titlebar.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\clockbar.h">
+      <Filter>toolbars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

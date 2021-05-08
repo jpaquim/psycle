@@ -36,7 +36,7 @@ static void handle_mouseevent(psy_ui_Component*,
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
-static void adjustcoordinates(psy_ui_Component*, double* x, double* y);
+static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
 static void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
@@ -620,7 +620,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 						wParam, 0, GetKeyState(VK_SHIFT) < 0,
 						GetKeyState(VK_CONTROL) < 0);
-					adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
+					adjustcoordinates(imp->component, &ev.pt);
 					// psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 					imp->imp.vtable->dev_mousemove(&imp->imp, &ev);			
 				}			
@@ -656,7 +656,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-				adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
+				adjustcoordinates(imp->component, &ev.pt);
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
@@ -771,14 +771,14 @@ bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 	return FALSE;
 }
 
-void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
+void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
 {	
 	psy_ui_RealMargin spacing;
 	
 	spacing = psy_ui_component_spacing_px(component);	
 	if (!psy_ui_realmargin_iszero(&spacing)) {				
-		*x -= spacing.left;
-		*y -= spacing.top;
+		pt->x -= spacing.left;
+		pt->y -= spacing.top;
 	}
 }
 
@@ -823,7 +823,7 @@ void handle_mouseevent(psy_ui_Component* component,
 		(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 		button, 0, GetKeyState(VK_SHIFT) < 0,
 		GetKeyState(VK_CONTROL) < 0);
-	adjustcoordinates(component, &ev.pt.x, &ev.pt.y);
+	adjustcoordinates(component, &ev.pt);
 	psy_ui_mouseevent_settarget(&ev, eventtarget(component));
 	up = FALSE;
 	switch (message) {

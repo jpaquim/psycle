@@ -9,6 +9,7 @@
 // host
 #include "confirmbox.h"
 #include "cpuview.h"
+#include "clockbar.h"
 #include "filebar.h"
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 #include "fileview.h"
@@ -102,6 +103,7 @@ typedef struct MainFrame {
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;
 	psy_ui_Button turnoff;
+	ClockBar clockbar;
 	Navigation navigation;
 	psy_ui_TabBar tabbar;
 	psy_ui_TabBar helpsettingstabbar;

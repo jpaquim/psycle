@@ -24,6 +24,8 @@ static void psy_ui_component_traverse_margin(psy_ui_Component*,
 	psy_fp_margin fp, psy_ui_Margin value);
 static double lines(double pos, double size, double scrollsize, double step,
 	bool round, double* rv_max, double* rv_visi);
+static psy_ui_RealPoint mapcoords(psy_ui_Component* src,
+	psy_ui_Component* dst);
 
 void psy_ui_componentcontaineralign_init(psy_ui_ComponentContainerAlign* self)
 {
@@ -1986,14 +1988,55 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 	psy_ui_component_invalidate(main);
 }
 
+void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
+	psy_List* viewcomponents)
+{
+	psy_ui_RealMargin spacing;
+	psy_ui_RealPoint restoreorigin;
+	psy_ui_RealPoint origin;
+
+	// draw background						
+	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
+		psy_ui_component_drawbackground(self, g);
+	}
+	psy_ui_component_drawborder(self, g);
+	// prepare a clip rect that can be used by a component
+	// to optimize the draw amount	
+	psy_ui_realrectangle_settopleft(&g->clip,
+		psy_ui_realpoint_make(g->clip.left, g->clip.top));
+	// add scroll coords	
+	// spacing
+	restoreorigin = psy_ui_origin(g);
+	spacing = psy_ui_component_spacing_px(self);
+	if (!psy_ui_realmargin_iszero(&spacing)) {
+		origin = restoreorigin;
+		origin.x -= (int)spacing.left;
+		origin.y -= (int)spacing.top;
+		psy_ui_setorigin(g, origin);
+	}
+	// prepare colours
+	psy_ui_setcolour(g, psy_ui_component_colour(self));
+	psy_ui_settextcolour(g, psy_ui_component_colour(self));
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	// call specialization methods (vtable, then signals)			
+	if (self->vtable->ondraw) {
+		self->vtable->ondraw(self, g);
+	}
+	psy_signal_emit(&self->signal_draw, self, 1, g);
+	psy_ui_component_drawchildren(self, g, viewcomponents);
+	psy_ui_setorigin(g, restoreorigin);
+}
+
 void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 	psy_List* children)
 {
 	if (children) {
 		psy_List* p;
 		psy_ui_RealRectangle clip;
+		psy_ui_RealPoint restoreorigin;
 
 		clip = g->clip;
+		restoreorigin = psy_ui_origin(g);
 		for (p = children; p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
@@ -2032,8 +2075,66 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 			}
 		}
 		g->clip = clip;		
-		psy_ui_resetorigin(g);
+		psy_ui_setorigin(g, restoreorigin);
 	}
+}
+
+void psy_ui_component_mousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev,
+	psy_List* viewcomponents)
+{
+	psy_List* p;
+
+	for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+		psy_ui_RealRectangle r;
+
+		child = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_visible(child)) {
+			r = psy_ui_component_position(child);
+			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+				ev->pt.x -= r.left;
+				ev->pt.y -= r.top;
+				child->imp->vtable->dev_mousedown(child->imp, ev);
+				ev->pt.x += r.left;
+				ev->pt.y += r.top;
+				break;
+			}
+		}
+	}
+}
+
+void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
+	psy_List* viewcomponents)
+{
+	if (psy_ui_app()->capture) {
+		psy_ui_RealPoint translation;
+
+		translation = mapcoords(psy_ui_app()->capture, self);
+		psy_ui_realpoint_sub(&ev->pt, translation);
+		psy_ui_app()->capture->vtable->onmouseup(psy_ui_app()->capture, ev);
+		psy_ui_realpoint_add(&ev->pt, translation);
+	} else {
+		psy_List* p;
+
+		for (p = viewcomponents; p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* child;
+			psy_ui_RealRectangle r;
+
+			child = (psy_ui_Component*)p->entry;
+			if (psy_ui_component_visible(child)) {
+				r = psy_ui_component_position(child);
+				if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
+					ev->pt.x -= r.left;
+					ev->pt.y -= r.top;
+					child->imp->vtable->dev_mouseup(child->imp, ev);
+					ev->pt.x += r.left;
+					ev->pt.y += r.top;
+					break;
+				}
+			}
+		}
+	}
+	psy_ui_app()->mousetracking = FALSE;
 }
 
 void psy_ui_component_traverse_int(psy_ui_Component* self,
@@ -2060,4 +2161,20 @@ void psy_ui_component_traverse_margin(psy_ui_Component* self,
 		fp((psy_ui_Component*)p->entry, value);
 	}
 	psy_list_free(q);
+}
+
+psy_ui_RealPoint mapcoords(psy_ui_Component* src, psy_ui_Component* dst)
+{
+	psy_ui_RealPoint rv;
+	psy_ui_Component* curr;
+	psy_ui_RealRectangle r;
+
+	curr = src;
+	psy_ui_realpoint_init(&rv);
+	while (dst != curr && curr != NULL) {
+		r = psy_ui_component_position(curr);
+		psy_ui_realpoint_add(&rv, psy_ui_realrectangle_topleft(&r));
+		curr = psy_ui_component_parent(curr);
+	}
+	return rv;
 }
