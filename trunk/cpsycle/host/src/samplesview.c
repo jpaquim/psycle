@@ -877,6 +877,10 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 
 void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 {
+#if PSYCLE_USE_TK == PSYCLE_TK_XT
+	/* todo seqfault in psy_ui_component_inputprevented X11 Imp */
+	return;	
+#endif
 	if (self->sample) {
 		if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_component_preventinput(&self->loopstartedit.component, 0);

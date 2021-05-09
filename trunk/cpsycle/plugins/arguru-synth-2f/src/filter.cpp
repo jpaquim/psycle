@@ -1,3 +1,4 @@
+#include "../detail/prefix.h"
 #include "filter.hpp"
 ///\file arguru_synth_2_final/filter.cpp
 ///\brief implementation of the filter class.

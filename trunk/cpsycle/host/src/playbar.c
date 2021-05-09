@@ -76,10 +76,10 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_text_connect(&self->play, playbar_base(self), NULL,
 		"play.play", self, playbar_onplayclicked);
 	psy_ui_button_setbitmapresource(&self->play, IDB_PLAY_DARK);	
-	psy_ui_button_setbitmaptransparency(&self->play, psy_ui_colour_white());
+	psy_ui_button_setbitmaptransparency(&self->play, psy_ui_colour_white());	
 	// playmode
 	psy_ui_combobox_init(&self->playmode, playbar_base(self), NULL);
-	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);
+	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);	
 	// play beat num
 	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");

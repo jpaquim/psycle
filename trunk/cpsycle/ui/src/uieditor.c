@@ -411,5 +411,9 @@ void psy_ui_editor_disablewrap(psy_ui_Editor* self)
 	
 }
 
-#endif
+void psy_ui_editor_gotoline(psy_ui_Editor* self, uintptr_t line)
+{
+	
+}
 
+#endif

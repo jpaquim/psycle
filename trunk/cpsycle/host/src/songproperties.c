@@ -40,7 +40,7 @@ static void songpropertiesview_onkeydown(SongPropertiesView*,
 static void songpropertiesview_onkeyup(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
 static bool songpropertiesview_haseditfocus(SongPropertiesView*);
-static songpropertiesview_realbpm(SongPropertiesView*);
+static int songpropertiesview_realbpm(SongPropertiesView*);
 static uintptr_t songpropertiesview_realtpb(SongPropertiesView*);
 static void songpropertiesview_updaterealspeed(SongPropertiesView*);
 // implementation

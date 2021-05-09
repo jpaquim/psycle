@@ -49,6 +49,7 @@ typedef struct {
     psy_Signal signal_clicked;
     char* text;
     char* translation;
+    int multiline;
     int state;
 } psy_ui_CheckBox;
 

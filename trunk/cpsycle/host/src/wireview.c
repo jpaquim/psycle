@@ -182,16 +182,20 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
 	psy_ui_component_setmargin(&self->modeslider.component, margin);
 	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
-	psy_ui_slider_connect(&self->modeslider, self, NULL,
-		wireview_ontweakmode, wireview_onvaluemode);
+	psy_ui_slider_connect(&self->modeslider, self,
+		(ui_slider_fpdescribe)NULL,
+		(ui_slider_fptweak)wireview_ontweakmode,
+		(ui_slider_fpvalue)wireview_onvaluemode);
 	psy_ui_slider_init(&self->rateslider, &self->rategroup, NULL);
 	psy_ui_slider_setdefaultvalue(&self->rateslider, 0.0);
 	psy_ui_slider_showhorizontal(&self->rateslider);	
 	psy_ui_slider_showhorizontal(&self->rateslider);
 	psy_ui_slider_hidevaluelabel(&self->rateslider);
 	psy_ui_component_setalign(&self->rateslider.component, psy_ui_ALIGN_TOP);
-	psy_ui_slider_connect(&self->rateslider, self, NULL,
-		wireview_ontweakrate, wireview_onvaluerate);
+	psy_ui_slider_connect(&self->rateslider, self,
+		(ui_slider_fpdescribe)NULL,		
+		(ui_slider_fptweak)wireview_ontweakrate,
+		(ui_slider_fpvalue)wireview_onvaluerate);
 	psy_ui_slider_update(&self->rateslider);
 	psy_ui_slider_update(&self->modeslider);
 }

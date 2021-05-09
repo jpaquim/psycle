@@ -925,43 +925,39 @@ void dev_releasecapture(psy_ui_x11_ComponentImp* self)
 
 void dev_invalidate(psy_ui_x11_ComponentImp* self)
 {
-	XExposeEvent xev;
-	Window root;
-	unsigned int temp;	
-    XWindowAttributes win_attr;			
 	psy_ui_X11App* x11app;
+	XWindowAttributes win_attr;
+	XExposeEvent xev;	
 		
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;    
     XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);	
-	xev.type    = Expose ;
+	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;
 	xev.x = 0;
 	xev.y = 0;
 	xev.width = win_attr.width; 
-	xev.height = win_attr.height;	
-	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
+	xev.height = win_attr.height;
+	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
 }
 
-void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const
+void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {	
-	XExposeEvent xev;	
 	psy_ui_X11App* x11app;
-	const psy_ui_TextMetric* tm;
-
-	tm = psy_ui_component_textmetric(self->component);		
+	XExposeEvent xev;	
+	
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;	
-	xev.x  = (int)(r->left - psy_ui_component_scrollleftpx(self->component));
-	xev.y = (int)(r->top - psy_ui_component_scrolltop_px(self->component));		
-	xev.width = r->right - r->left; 
-	xev.height = r->bottom - r->top;		
-	XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
+	xev.x = (int)r->left;
+	xev.y = (int)r->top;		
+	xev.width = (int)r->right - (int)r->left; 
+	xev.height = (int)r->bottom - (int)r->top;		
+	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);	
 }
 
 void dev_update(psy_ui_x11_ComponentImp* self)

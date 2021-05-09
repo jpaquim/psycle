@@ -167,10 +167,10 @@ void psy_ui_x11_comboboximp_init(psy_ui_x11_ComboBoxImp* self,
 		0);
     imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;
-	psy_ui_listbox_init(&self->x11_combo, 0);
+	psy_ui_listbox_init(&self->x11_combo, NULL);
 	psy_signal_connect(&self->x11_combo.signal_selchanged, self,
 		onlistbox_selected);	
-	x11_combo_imp = (psy_ui_x11_ComponentImp*)self->x11_combo.component.imp;
+		x11_combo_imp = (psy_ui_x11_ComponentImp*)self->x11_combo.component.imp;
 	xattr.override_redirect = True;
 	XChangeWindowAttributes(x11app->dpy, x11_combo_imp->hwnd, xattrmask,
 		&xattr);
@@ -215,7 +215,7 @@ void dev_setstyle(psy_ui_x11_ComboBoxImp* self, int style)
 void dev_text(psy_ui_x11_ComboBoxImp* self, char* text)
 {
 	psy_ui_listbox_text(&self->x11_combo, text,
-		psy_ui_listbox_cursel(&self->x11_combo));
+	 		psy_ui_listbox_cursel(&self->x11_combo));	
 }
 
 void dev_clear(psy_ui_x11_ComboBoxImp* self)
@@ -226,12 +226,12 @@ void dev_clear(psy_ui_x11_ComboBoxImp* self)
 void dev_setcursel(psy_ui_x11_ComboBoxImp* self, intptr_t index)
 {	
 	psy_ui_listbox_setcursel(&self->x11_combo, index);
-	dev_invalidate(self);
+	 dev_invalidate(self);
 }
 
 intptr_t dev_cursel(psy_ui_x11_ComboBoxImp* self)
 {
-	return psy_ui_listbox_cursel(&self->x11_combo);
+	return psy_ui_listbox_cursel(&self->x11_combo);	
 }
 
 intptr_t dev_count(psy_ui_x11_ComboBoxImp* self)
