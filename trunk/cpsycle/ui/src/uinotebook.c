@@ -42,8 +42,11 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 			} else {
 				if (c == pageindex) {
 					component->visible = 1;
+					// psy_ui_app()->setpositioncacheonly = TRUE;
 					psy_ui_component_setposition(component,
 						psy_ui_rectangle_make(psy_ui_point_zero(), size));
+					// psy_ui_component_applyposition(component, FALSE);
+					// psy_ui_app()->setpositioncacheonly = FALSE;
 					psy_ui_component_show(component);					
 				} else {
 					psy_ui_component_hide(component);

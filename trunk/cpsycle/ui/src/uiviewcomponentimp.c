@@ -30,6 +30,7 @@ static void view_dev_setposition(psy_ui_ViewComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
 static psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp*);
 static void view_dev_updatesize(psy_ui_ViewComponentImp*);
+static void view_dev_applyposition(psy_ui_ViewComponentImp* self) { }
 static psy_ui_Size view_dev_framesize(psy_ui_ViewComponentImp*);
 static void view_dev_scrollto(psy_ui_ViewComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* view_dev_parent(psy_ui_ViewComponentImp*);
@@ -137,6 +138,9 @@ static void view_imp_vtable_init(psy_ui_ViewComponentImp* self)
 		view_imp_vtable.dev_updatesize =
 			(psy_ui_fp_componentimp_dev_updatesize)
 			view_dev_updatesize;
+		view_imp_vtable.dev_applyposition =
+			(psy_ui_fp_componentimp_dev_applyposition)
+			view_dev_applyposition;
 		view_imp_vtable.dev_framesize =
 			(psy_ui_fp_componentimp_dev_framesize)
 			view_dev_framesize;

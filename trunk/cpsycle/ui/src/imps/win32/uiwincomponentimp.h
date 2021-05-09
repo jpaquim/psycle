@@ -29,6 +29,8 @@ typedef struct psy_ui_win_ComponentImp {
 	HBRUSH background;
 	winproc wndproc;	
 	int preventwmchar;
+	psy_ui_Point topleftcache;
+	bool topleftcachevalid;
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
 	int dbg;
