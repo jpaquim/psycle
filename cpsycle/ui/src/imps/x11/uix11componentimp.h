@@ -46,6 +46,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	psy_List* children_nonrec_cache;
 	struct psy_ui_x11_ComponentImp* parent;
 	XdbeBackBuffer d_backBuf;
+	psy_ui_RealRectangle exposearea;
 } psy_ui_x11_ComponentImp;
 
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,

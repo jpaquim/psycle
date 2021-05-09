@@ -80,6 +80,7 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
 	// Creates the mainframe
 	psy_ui_frame_init(&mainframe, NULL);
+	app.main = &mainframe;
 	psy_ui_tabbar_init(&tabbar, &mainframe);
 	psy_ui_tabbar_append_tabs(&tabbar, "tab1", 
 	"tab2", "tab3", NULL);

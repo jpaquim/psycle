@@ -745,6 +745,7 @@ void psy_ui_component_show_align(psy_ui_Component* self)
 			psy_ui_component_align(psy_ui_component_parent(self));
 		}
 		self->vtable->show(self);
+		psy_ui_component_invalidate(psy_ui_component_parent(self));
 	}
 }
 
@@ -756,6 +757,7 @@ void psy_ui_component_hide_align(psy_ui_Component* self)
 		self->vtable->hide(self);
 		if (psy_ui_component_parent(self)) {
 			psy_ui_component_align(psy_ui_component_parent(self));
+			psy_ui_component_invalidate(psy_ui_component_parent(self));
 		}
 	}
 }
@@ -1724,6 +1726,7 @@ bool psy_ui_component_togglevisibility(psy_ui_Component* self)
 			psy_ui_component_show(self);
 			return TRUE;
 		}
+		psy_ui_component_invalidate(psy_ui_component_parent(self));
 	}
 	return FALSE;
 }

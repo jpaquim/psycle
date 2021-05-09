@@ -80,6 +80,7 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_app_init(&app, psy_ui_DARKTHEME, instance);
 	// Creates the mainframe
 	psy_ui_frame_init(&mainframe, NULL);
+	app.main = &mainframe;
 	psy_ui_button_init(&button, &mainframe, NULL);
 	psy_ui_button_settext(&button, "Hello Psycle");		
 	psy_ui_component_setalign(psy_ui_button_base(&button), psy_ui_ALIGN_CLIENT);

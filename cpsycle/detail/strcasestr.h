@@ -37,7 +37,6 @@ INLINE char* strcasestr(const char* h, const char* n)
 #endif
 
 #else
-#define _GNU_SOURCE
 #include <string.h>
 #endif
 

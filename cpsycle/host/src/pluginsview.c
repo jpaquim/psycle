@@ -45,7 +45,7 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 			for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
 				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
 			}
-			psy_qsort(propertiesptr, 0, (int)(num - 1), comp);
+			psy_qsort((void **)propertiesptr, 0, (int)(num - 1), comp);
 			rv = psy_property_allocinit_key(NULL);
 			for (i = 0; i < num; ++i) {
 				psy_property_append_property(rv, psy_property_clone(
@@ -1032,16 +1032,16 @@ void pluginsview_sort(PluginsView* self, NewMachineSortMode mode)
 		fp_compare = NULL;
 		switch (mode) {
 		case NEWMACHINESORTMODE_FAVORITE:
-			fp_compare = newmachine_comp_favorite;
+			fp_compare = (psy_fp_comp)newmachine_comp_favorite;
 			break;
 		case NEWMACHINESORTMODE_NAME:
-			fp_compare = newmachine_comp_name;
+			fp_compare = (psy_fp_comp)newmachine_comp_name;
 			break;
 		case NEWMACHINESORTMODE_TYPE:
-			fp_compare = newmachine_comp_type;
+			fp_compare = (psy_fp_comp)newmachine_comp_type;
 			break;
 		case NEWMACHINESORTMODE_MODE:
-			fp_compare = newmachine_comp_mode;
+			fp_compare = (psy_fp_comp)newmachine_comp_mode;
 			break;
 		default:
 			break;

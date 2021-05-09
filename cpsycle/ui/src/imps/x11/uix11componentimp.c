@@ -282,6 +282,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->dbg = 0;
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
+	psy_ui_realrectangle_init(&self->exposearea);
 	parent_imp = parent
 		? (psy_ui_x11_ComponentImp*)parent
 		: NULL;	
@@ -678,7 +679,7 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 			(psy_ui_value_px(&size.height, tm, &parentsize) > 0)
 			? psy_ui_value_px(&size.height, tm, &parentsize)
 			: 1);
-	} else {
+	} else {	
 		XMoveResizeWindow(x11app->dpy, self->hwnd,
 			psy_ui_value_px(&topleft.x, tm, NULL),
 			psy_ui_value_px(&topleft.y, tm, NULL),
@@ -688,7 +689,7 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 			(psy_ui_value_px(&size.height, tm, NULL) > 0)
 			? psy_ui_value_px(&size.height, tm, NULL)
 			: 1);
-	}
+	}	
 	dev_updatesize(self);	
 }
 
