@@ -47,26 +47,23 @@ extern "C" {
 
 // The view id belongs to a component of the client notebook of the mainframe
 // view_id = component insert order
-enum {
-	VIEW_ID_MACHINEVIEW			= 0,
-	VIEW_ID_PATTERNVIEW			= 1,
-	VIEW_ID_SAMPLESVIEW			= 2,
-	VIEW_ID_INSTRUMENTSVIEW		= 3,
-	VIEW_ID_SONGPROPERTIES		= 4,
-	VIEW_ID_SETTINGSVIEW		= 5,
-	VIEW_ID_HELPVIEW			= 6,
-	VIEW_ID_RENDERVIEW			= 7,
-	VIEW_ID_EXPORTVIEW			= 8,
-	VIEW_ID_CHECKUNSAVED		= 9,
-	VIEW_ID_CONFIRM				= 10,
-	VIEW_NUM
-};
 
-enum {
-	SECTION_ID_MACHINEVIEW_WIRES = 0,
-	SECTION_ID_MACHINEVIEW_STACK = 1,
-	SECTION_ID_MACHINEVIEW_NEWMACHINE = 2
-};
+#define	VIEW_ID_MACHINEVIEW		0
+#define	VIEW_ID_PATTERNVIEW		1
+#define	VIEW_ID_SAMPLESVIEW		2
+#define VIEW_ID_INSTRUMENTSVIEW	3
+#define	VIEW_ID_SONGPROPERTIES	4
+#define	VIEW_ID_SETTINGSVIEW	5
+#define	VIEW_ID_HELPVIEW		6
+#define	VIEW_ID_RENDERVIEW		7
+#define	VIEW_ID_EXPORTVIEW		8
+#define	VIEW_ID_CHECKUNSAVED	9
+#define	VIEW_ID_CONFIRM			10
+#define	VIEW_NUM				11
+
+#define SECTION_ID_MACHINEVIEW_WIRES		0
+#define	SECTION_ID_MACHINEVIEW_STACK		1
+#define	SECTION_ID_MACHINEVIEW_NEWMACHINE	2
 
 typedef enum {
 	GENERATORS_ENABLED = 1,
@@ -256,7 +253,8 @@ void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_selectview(Workspace*, uintptr_t view, uintptr_t section, int option);
+void workspace_selectview(Workspace*, uintptr_t view, uintptr_t section,
+	uintptr_t option);
 void workspace_focusview(Workspace*);
 void workspace_saveview(Workspace*);
 void workspace_restoreview(Workspace*);

@@ -4,14 +4,15 @@ LIBDIRS = -L ../../container/src -L ../../dsp/src -L ../../audio/src -L ../../fi
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-LDFLAGS = -no-pie -lncurses -laudio -lcontainer -ldsp -lfile -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lpsyui
+LDFLAGS = -no-pie -lncurses -laudio -lcontainer -ldsp -laudio -lfile -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lpsyui
 
-psycle: $(obj)
+psycle: $(obj)	
 	$(CC) -g -O2 -o $@ $^ $(LIBDIRS) $(LDFLAGS)	
 		
 %.o: %.c
 	$(CC) -g $(INC) -c $(src)
+	
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) psycle
+	rm -f $(obj) psycle	

@@ -146,6 +146,8 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				}
 			}
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
+			psy_ui_component_invalidate(psy_ui_component_parent(
+				&self->component));
 		}
 	} else {
 		psy_ui_RealRectangle position;
@@ -301,6 +303,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 							position.bottom)));
 			}
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
+			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 		}
 		if (prev) {
 			psy_ui_component_show(prev);

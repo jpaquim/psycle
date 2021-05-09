@@ -38,7 +38,7 @@ typedef struct SequenceButtons {
 	psy_ui_Button delentry;
 	psy_ui_Button cloneentry;	
 	psy_ui_Component expand;
-	psy_ui_Button toggle;
+	psy_ui_Button more;
 	psy_ui_Component block;
 	psy_ui_Component row2;
 	psy_ui_Button clear;

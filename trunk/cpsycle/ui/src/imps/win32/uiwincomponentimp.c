@@ -575,6 +575,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 			(int)psy_ui_value_px(&topleft.y, tm, &parentsize),
 			(int)(psy_ui_value_px(&size.width, tm, &parentsize)),
 			(int)(psy_ui_value_px(&size.height, tm, &parentsize)),
+			// SWP_NOREDRAW | SWP_NOZORDER);
 			SWP_NOZORDER);
 	} else {
 		SetWindowPos(self->hwnd, 0,
@@ -582,6 +583,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 			(int)psy_ui_value_px(&topleft.y, tm, NULL),
 			(int)(psy_ui_value_px(&size.width, tm, NULL)),
 			(int)(psy_ui_value_px(&size.height, tm, NULL)),
+			// SWP_NOREDRAW | SWP_NOZORDER);
 			SWP_NOZORDER);
 	}
 	dev_updatesize(self);	

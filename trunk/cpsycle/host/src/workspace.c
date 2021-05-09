@@ -1367,7 +1367,7 @@ void workspace_restoreview(Workspace* self)
 }
 
 void workspace_selectview(Workspace* self, uintptr_t view, uintptr_t section,
-	int option)
+	uintptr_t option)
 {
 	assert(self);	
 

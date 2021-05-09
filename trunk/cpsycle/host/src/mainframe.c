@@ -345,11 +345,12 @@ void mainframe_initterminal(MainFrame* self)
 	psy_ui_splitbar_init(&self->splitbarterminal, mainframe_base(self));
 	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
-	workspace_connectterminal(&self->workspace, self,	
-		mainframe_onterminaloutput,
-		mainframe_onterminalwarning,
-		mainframe_onterminalerror);
-	workspace_connectstatus(&self->workspace, self, mainframe_onstatus);
+	workspace_connectterminal(&self->workspace, self,
+		(fp_workspace_output)mainframe_onterminaloutput,
+		(fp_workspace_output)mainframe_onterminalwarning,
+		(fp_workspace_output)mainframe_onterminalerror);
+	workspace_connectstatus(&self->workspace, self,
+		(fp_workspace_output)mainframe_onstatus);
 }
 
 void mainframe_initkbdhelp(MainFrame* self)
@@ -456,7 +457,7 @@ void mainframe_initprogressbar(MainFrame* self)
 	psy_ui_component_setalign(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);
 	workspace_connectloadprogress(&self->workspace, self,
-		mainframe_onsongloadprogress);
+		(fp_workspace_songloadprogress)mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self,
 		mainframe_onpluginscanprogress);
 }
@@ -826,7 +827,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_docksection, self,
 		mainframe_ondocksection);
 	psy_audio_eventdrivers_setcallback(&self->workspace.player.eventdrivers,
-		mainframe_eventdrivercallback, self);
+		(EVENTDRIVERWORKFN)mainframe_eventdrivercallback, self);
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
 	psy_signal_connect(&self->workspace.signal_gearselect, self,
@@ -1069,7 +1070,7 @@ void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onhidecpu(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_button_disablehighlight(&self->machinebar.cpu);
-	psy_ui_component_hide_align(psy_ui_splitbar_base(&self->cpusplitter));
+	psy_ui_component_hide_align(psy_ui_splitbar_base(&self->cpusplitter));	
 }
 
 void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
@@ -1081,7 +1082,9 @@ void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
 	}
 	if (psy_ui_component_togglevisibility(&self->midimonitor.component)) {	
 		psy_ui_component_show_align(psy_ui_splitbar_base(&self->midisplitter));
-	}
+		psy_ui_component_invalidate(psy_ui_component_parent(
+			psy_ui_splitbar_base(&self->midisplitter)));
+	}	
 }
 
 void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
@@ -1097,7 +1100,8 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_align(&self->component);
 		psy_ui_component_show(playlistview_base(&self->playlist));
 		psy_ui_component_show(psy_ui_splitbar_base(&self->playlistsplitter));		
-	}		
+	}
+	psy_ui_component_invalidate(mainframe_base(self));
 	generalconfig_setplaylistshowstate(&self->workspace.config.general,
 		psy_ui_component_visible(playlistview_base(&self->playlist)));	
 }
@@ -1532,6 +1536,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 				psy_ui_value_make_eh(10.0)));		
 	}
 	psy_ui_component_align(mainframe_base(self));
+	psy_ui_component_invalidate(mainframe_base(self));	
 }
 
 void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)

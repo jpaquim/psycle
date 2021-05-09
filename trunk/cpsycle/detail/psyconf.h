@@ -4,6 +4,10 @@
 #if !defined(psy_CONF_H)
 #define psy_CONF_H
 
+#if defined __unix__
+#define _GNU_SOURCE
+#endif
+
 #include "cpu.h"
 #include "os.h"
 

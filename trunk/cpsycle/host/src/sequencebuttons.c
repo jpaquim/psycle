@@ -9,7 +9,7 @@
 
 // SequenceButtons
 // prototypes
-static void sequencebuttons_ontoggleblock(SequenceButtons*,
+static void sequencebuttons_onmore(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onnewentry(SequenceButtons*,
 	psy_ui_Button* sender);
@@ -48,7 +48,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_Button* buttons[] = {
 		&self->incpattern, &self->insertentry, &self->decpattern,
 		&self->newentry, &self->delentry, &self->cloneentry,
-		&self->toggle,
+		&self->more,
 		&self->clear, &self->rename, &self->copy,
 		&self->paste, &self->singlesel, &self->multisel
 	};
@@ -86,10 +86,10 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		"sequencerview.del");
 	psy_ui_component_init(&self->expand, &self->component, view);
 	psy_ui_component_setalign(&self->expand, psy_ui_ALIGN_TOP);
-	psy_ui_button_init(&self->toggle, &self->expand, view);
-	psy_ui_button_preventtranslation(&self->toggle);
-	psy_ui_button_settext(&self->toggle, ". . .");
-	psy_ui_component_setalign(psy_ui_button_base(&self->toggle),
+	psy_ui_button_init(&self->more, &self->expand, view);
+	psy_ui_button_preventtranslation(&self->more);
+	psy_ui_button_settext(&self->more, ". . .");
+	psy_ui_component_setalign(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->block, &self->component, view);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
@@ -136,7 +136,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 
 		colwidth = 12.0;
 		psy_ui_button_setcharnumber(buttons[i], colwidth);
-		if (buttons[i] != &self->toggle) {
+		if (buttons[i] != &self->more) {
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
 				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
@@ -173,8 +173,8 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		sequencebuttons_onmultiselection);
 	psy_signal_connect(&self->clear.signal_clicked, self,
 		sequencebuttons_onclear);
-	psy_signal_connect(&self->toggle.signal_clicked, self,
-		sequencebuttons_ontoggleblock);
+	psy_signal_connect(&self->more.signal_clicked, self,
+		sequencebuttons_onmore);
 	psy_signal_connect(&self->edit.signal_accept, self,
 		sequencebuttons_oneditaccept);
 	psy_signal_connect(&self->edit.signal_reject, self,
@@ -183,19 +183,20 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		sequencebuttons_onrename);
 }
 
-void sequencebuttons_ontoggleblock(SequenceButtons* self,
+void sequencebuttons_onmore(SequenceButtons* self,
 	psy_ui_Button* sender)
 {
 	if (psy_ui_component_visible(&self->block)) {
 		psy_ui_component_hide(&self->block);
-		psy_ui_button_seticon(&self->toggle, psy_ui_ICON_NONE);
-		psy_ui_button_settext(&self->toggle, ". . .");
+		psy_ui_button_seticon(&self->more, psy_ui_ICON_NONE);
+		psy_ui_button_settext(&self->more, ". . .");
 		psy_ui_component_align(psy_ui_component_parent(&self->component));
 	} else {
-		psy_ui_button_settext(&self->toggle, "-");
+		psy_ui_button_settext(&self->more, "-");
 		psy_ui_component_show(&self->block);
 		psy_ui_component_align(psy_ui_component_parent(&self->component));
 	}
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
 void sequencebuttons_onnewentry(SequenceButtons* self, psy_ui_Button* sender)
@@ -277,6 +278,7 @@ void sequencebuttons_onrename(SequenceButtons* self, psy_ui_Button* sender)
 			psy_ui_edit_setsel(&self->edit, 0, -1);
 			psy_ui_component_show(psy_ui_edit_base(&self->edit));
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
+			psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 			psy_ui_component_setfocus(psy_ui_edit_base(&self->edit));
 		} else {
 			workspace_outputstatus(self->cmds->workspace,
@@ -307,11 +309,13 @@ void sequencebuttons_oneditaccept(SequenceButtons* self, psy_ui_Edit* sender)
 		}
 	}
 	psy_ui_component_hide(&self->edit.component);
-	psy_ui_component_align(psy_ui_component_parent(&self->component));	
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
 void sequencebuttons_oneditreject(SequenceButtons* self, psy_ui_Edit* sender)
 {
 	psy_ui_component_hide(&self->edit.component);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
+	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
