@@ -74,6 +74,19 @@ INLINE void psy_dsp_fade(psy_dsp_Operations* self, psy_dsp_amp_t* dst,
 	}
 }
 
+INLINE void dsp_erase_all_nans_infinities_and_denormals_double(
+	psy_dsp_Operations* self, double* dst, uintptr_t num)
+{
+	uintptr_t i;
+
+	for (i = 0; i < num; ++i) {
+		float val;
+
+		val = (float)dst[i];
+		dsp.erase_all_nans_infinities_and_denormals(&val, 1);
+		dst[i] = val;
+	}
+}
 #ifdef __cplusplus
 }
 #endif
