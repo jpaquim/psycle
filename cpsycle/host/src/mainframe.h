@@ -7,9 +7,9 @@
 // platform
 #include "../../detail/os.h"
 // host
+#include "mainstatusbar.h"
 #include "confirmbox.h"
 #include "cpuview.h"
-#include "clockbar.h"
 #include "filebar.h"
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 #include "fileview.h"
@@ -68,14 +68,6 @@ extern "C" {
 // workspace. First component created after program start by psycle.c and
 // last destroyed at program termination.
 
-typedef enum {	
-	TERMINALMSGTYPE_ERROR,
-	TERMINALMSGTYPE_WARNING,
-	TERMINALMSGTYPE_MESSAGE,
-	TERMINALMSGTYPE_NONE,
-	TERMINALMSGTYPE_NUM
-} TerminalMsgType;
-
 typedef struct MainFrame {
 	// inherits
 	psy_ui_Component component;
@@ -99,11 +91,6 @@ typedef struct MainFrame {
 	psy_ui_Terminal terminal;
 	psy_ui_SplitBar splitbar;
 	psy_ui_SplitBar splitbarterminal;
-	psy_ui_ProgressBar progressbar;
-	psy_ui_Button toggleterminal;	
-	psy_ui_Button togglekbdhelp;
-	psy_ui_Button turnoff;
-	ClockBar clockbar;
 	Navigation navigation;
 	psy_ui_TabBar tabbar;
 	psy_ui_TabBar helpsettingstabbar;
@@ -147,20 +134,18 @@ typedef struct MainFrame {
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;
 #endif
-	psy_ui_Component statusbar;
-	psy_ui_Notebook viewtabbars;
-	psy_ui_Notebook viewstatusbars;
+	MainStatusBar statusbar;
+	psy_ui_Notebook viewtabbars;	
 	ZoomBox zoombox;
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;
 	psy_ui_Label label;	
-	psy_ui_Label statusbarlabel;
+	
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;	
-	ConfirmBox checkunsavedbox;	
-	uintptr_t terminalstyleid;
+	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
 	int startup;
 	bool startpage;	

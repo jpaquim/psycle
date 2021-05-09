@@ -126,7 +126,6 @@ void trackergridstate_dispose(TrackerGridState*);
 double trackergridstate_trackwidth(const TrackerGridState*, uintptr_t track);
 double trackergridstate_defaulttrackwidth(const TrackerGridState*);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
-double trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_pxtotrack(const TrackerGridState*, double x);
 double trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
 

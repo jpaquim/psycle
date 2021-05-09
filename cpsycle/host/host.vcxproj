@@ -347,6 +347,7 @@
     <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\machinewireview.c" />
     <ClCompile Include="src\mainframe.c" />
+    <ClCompile Include="src\mainstatusbar.c" />
     <ClCompile Include="src\masterui.c" />
     <ClCompile Include="src\metronomebar.c" />
     <ClCompile Include="src\metronomeconfig.c" />
@@ -506,6 +507,7 @@
     <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\machinewireview.h" />
     <ClInclude Include="src\mainframe.h" />
+    <ClInclude Include="src\mainstatusbar.h" />
     <ClInclude Include="src\masterui.h" />
     <ClInclude Include="src\metronomebar.h" />
     <ClInclude Include="src\metronomeconfig.h" />

@@ -317,9 +317,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					
 					imp->sizecachevalid = FALSE;					
 					if (imp->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
-						psy_ui_component_align(imp->component);
+						psy_ui_component_align(imp->component);						
 					}
-					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));					
+					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));
 					imp->component->vtable->onsize(imp->component, &size);
 					if (psy_ui_component_overflow(imp->component) != psy_ui_OVERFLOW_HIDDEN) {
 						psy_ui_component_updateoverflow(imp->component);

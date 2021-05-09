@@ -36,6 +36,7 @@ static void dev_releasecapture(psy_ui_win_CheckBoxImp* self) { self->win_compone
 static void dev_invalidate(psy_ui_win_CheckBoxImp* self) { self->win_component_imp.imp.vtable->dev_invalidate(&self->win_component_imp.imp); }
 static void dev_invalidaterect(psy_ui_win_CheckBoxImp* self, const psy_ui_RealRectangle* r) { self->win_component_imp.imp.vtable->dev_invalidaterect(&self->win_component_imp.imp, r); }
 static void dev_update(psy_ui_win_CheckBoxImp* self) { self->win_component_imp.imp.vtable->dev_update(&self->win_component_imp.imp); }
+static void dev_applyposition(psy_ui_win_CheckBoxImp* self) { self->win_component_imp.imp.vtable->dev_applyposition(&self->win_component_imp.imp); }
 static void dev_setfont(psy_ui_win_CheckBoxImp* self, psy_ui_Font* font) { self->win_component_imp.imp.vtable->dev_setfont(&self->win_component_imp.imp, font); }
 static psy_List* dev_children(psy_ui_win_CheckBoxImp* self, int recursive) { return self->win_component_imp.imp.vtable->dev_children(&self->win_component_imp.imp, recursive); }
 static void dev_enableinput(psy_ui_win_CheckBoxImp* self) { self->win_component_imp.imp.vtable->dev_enableinput(&self->win_component_imp.imp); }
@@ -82,6 +83,7 @@ static void imp_vtable_init(void)
 		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
 		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect) dev_invalidaterect;
 		vtable.dev_update = (psy_ui_fp_componentimp_dev_update) dev_update;
+		vtable.dev_applyposition = (psy_ui_fp_componentimp_dev_applyposition)dev_applyposition;
 		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;
 		vtable.dev_children = (psy_ui_fp_componentimp_dev_children) dev_children;
 		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput) dev_enableinput;

@@ -193,10 +193,10 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 		psy_ui_Style* common;		
 
 		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);		
-psy_ui_font_dispose(&common->font);
-psy_ui_font_init(&common->font, NULL);
-psy_ui_font_copy(&common->font, font);
-psy_ui_app_updatesyles(psy_ui_app());
+		psy_ui_font_dispose(&common->font);
+		psy_ui_font_init(&common->font, NULL);
+		psy_ui_font_copy(&common->font, font);
+		psy_ui_app_updatesyles(psy_ui_app());
 	}
 }
 
@@ -782,6 +782,23 @@ void psy_ui_component_setposition(psy_ui_Component* self, psy_ui_Rectangle posit
 	self->vtable->setposition(self, position.topleft, position.size);	
 }
 
+void psy_ui_component_applyposition(psy_ui_Component* component, bool children)
+{	
+	psy_List* p;
+	psy_List* q;
+		
+	if (!children) {
+		component->imp->vtable->dev_applyposition(component->imp);
+	}
+	for (p = q = psy_ui_component_children(component, psy_ui_RECURSIVE); p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+
+		child = (psy_ui_Component*)psy_list_entry(p);		
+		child->imp->vtable->dev_applyposition(child->imp);		
+	}
+	psy_list_free(q);	
+}
+
 psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
 {	
 	return self->vtable->children(self, recursive);	
@@ -811,7 +828,6 @@ int psy_ui_component_drawvisible(psy_ui_Component* self)
 {
 	return self->vtable->drawvisible(self);
 }
-
 
 void psy_ui_component_align(psy_ui_Component* self)
 {
@@ -844,6 +860,14 @@ void psy_ui_component_align_full(psy_ui_Component* self)
 	psy_ui_app()->alignvalid = FALSE;
 	psy_ui_component_align(self);
 	psy_ui_app()->alignvalid = TRUE;
+}
+
+void psy_ui_component_align_cached(psy_ui_Component* self)
+{
+	psy_ui_app()->setpositioncacheonly = TRUE;
+	psy_ui_component_align(self);		
+	psy_ui_component_applyposition(self, TRUE);
+	psy_ui_app()->setpositioncacheonly = FALSE;
 }
 
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
@@ -1259,6 +1283,7 @@ static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy
 static psy_ui_Size dev_size(const psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp* self, const psy_ui_Size* limit) { return psy_ui_size_zero(); }
 static void dev_updatesize(psy_ui_ComponentImp* self) { }
+static void dev_applyposition(psy_ui_ComponentImp* self) { }
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
@@ -1347,6 +1372,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_size = dev_size;
 		imp_vtable.dev_preferredsize = dev_preferredsize;
 		imp_vtable.dev_updatesize = dev_updatesize;
+		imp_vtable.dev_applyposition = dev_applyposition;
 		imp_vtable.dev_framesize = dev_framesize;
 		imp_vtable.dev_scrollto = dev_scrollto;
 		imp_vtable.dev_parent = dev_parent;
@@ -1417,6 +1443,34 @@ psy_ui_Component* psy_ui_component_at(psy_ui_Component* self, uintptr_t index)
 		++c;
 	}
 	psy_list_free(q);
+	return rv;
+}
+
+psy_ui_Component* psy_ui_component_intersect(psy_ui_Component* self, psy_ui_RealPoint pt, uintptr_t* index)
+{
+	psy_ui_Component* rv = 0;
+	psy_List* p;
+	psy_List* q;
+	uintptr_t c = 0;
+
+	p = q = psy_ui_component_children(self, 0);
+	while (p) {
+		psy_ui_RealRectangle position;
+		
+		position = psy_ui_component_position((psy_ui_Component*)p->entry);
+		if (psy_ui_realrectangle_intersect(&position, pt)) {
+			rv = (psy_ui_Component*)p->entry;
+			break;
+		}
+		p = p->next;
+		++c;
+	}
+	psy_list_free(q);
+	if (rv) {
+		*index = c;
+	} else {
+		*index = psy_INDEX_INVALID;
+	}
 	return rv;
 }
 

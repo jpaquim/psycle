@@ -42,9 +42,7 @@ static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initviewstatusbars(MainFrame*);
-static void mainframe_initstatusbarlabel(MainFrame*);
 static void mainframe_initturnoffbutton(MainFrame*);
-static void mainframe_initclockbar(MainFrame*);
 static void mainframe_initkbdhelpbutton(MainFrame*);
 static void mainframe_initterminalbutton(MainFrame*);
 static void mainframe_initprogressbar(MainFrame*);
@@ -276,11 +274,9 @@ void mainframe_initworkspace(MainFrame* self)
 
 void mainframe_initemptystatusbar(MainFrame* self)
 {
-	psy_ui_component_init_align(&self->statusbar, mainframe_base(self),
-		NULL, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setstyletype(&self->statusbar, STYLE_STATUSBAR);
-	psy_ui_component_setdefaultalign(&self->statusbar, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.0, 1.0, 0.25, 0.0));
+	mainstatusbar_init(&self->statusbar, mainframe_base(self),
+		&self->workspace);
+	psy_ui_component_setalign(&self->statusbar.component, psy_ui_ALIGN_BOTTOM);
 }
 
 void mainframe_initspacerleft(MainFrame* self)
@@ -362,100 +358,51 @@ void mainframe_initkbdhelp(MainFrame* self)
 }
 
 void mainframe_initstatusbar(MainFrame* self)
-{	
-	zoombox_init_connect(&self->zoombox, &self->statusbar,
-		self, mainframe_onzoomboxchanged);	
-	mainframe_initstatusbarlabel(self);	
+{			
 	mainframe_initviewstatusbars(self);
-	mainframe_initturnoffbutton(self);
-	mainframe_initclockbar(self);
+	mainframe_initturnoffbutton(self);	
 	mainframe_initkbdhelpbutton(self);
 	mainframe_initterminalbutton(self);	
 	mainframe_initprogressbar(self);
 }
 
 void mainframe_initviewstatusbars(MainFrame* self)
-{
-	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setdefaultalign(
-		psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));	
+{		
 	machineviewbar_init(&self->machineviewbar,
-		psy_ui_notebook_base(&self->viewstatusbars),
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->workspace);	
 	patternviewbar_init(&self->patternbar,
-		psy_ui_notebook_base(&self->viewstatusbars), &self->workspace);
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars), &self->workspace);
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
-		psy_ui_notebook_base(&self->viewstatusbars),
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars),
 		&self->samplesview.sampleeditor, &self->workspace);
 	samplesview_connectstatusbar(&self->samplesview);
 	instrumentsviewbar_init(&self->instrumentsviewbar,
-		psy_ui_notebook_base(&self->viewstatusbars), &self->workspace);
+		psy_ui_notebook_base(&self->statusbar.viewstatusbars), &self->workspace);
 	instrumentsview_setstatusbar(&self->instrumentsview,
 		&self->instrumentsviewbar);
-	psy_ui_notebook_select(&self->viewstatusbars, 0);
-}
-
-void mainframe_initstatusbarlabel(MainFrame* self)
-{
-	psy_ui_label_init(&self->statusbarlabel, &self->statusbar, NULL);	
-	psy_ui_label_preventtranslation(&self->statusbarlabel);
-	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_preventwrap(&self->statusbarlabel);
-	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
+	psy_ui_notebook_select(&self->statusbar.viewstatusbars, 0);
 }
 
 void mainframe_initturnoffbutton(MainFrame* self)
 {
-	psy_ui_button_init_text_connect(&self->turnoff, &self->statusbar,
-		NULL, "main.exit", self, mainframe_onexit);
-	psy_ui_component_setalign(psy_ui_button_base(&self->turnoff),
-		psy_ui_ALIGN_RIGHT);		
-}
-
-void mainframe_initclockbar(MainFrame* self)
-{
-	clockbar_init(&self->clockbar, &self->statusbar, &self->workspace);
-	psy_ui_component_setalign(clockbar_base(&self->clockbar),
-		psy_ui_ALIGN_RIGHT);		
+	psy_signal_connect(&self->statusbar.turnoff.signal_clicked, self, mainframe_onexit);
 }
 
 void mainframe_initkbdhelpbutton(MainFrame* self)
 {	
-	psy_ui_Margin margin;
-
-	psy_ui_button_init_text_connect(&self->togglekbdhelp, &self->statusbar,
-		NULL, "main.kbd", self, mainframe_ontogglekbdhelp);
-	margin = psy_ui_component_margin(psy_ui_button_base(&self->togglekbdhelp));
-	margin.right = psy_ui_value_make_ew(4.0);
-	psy_ui_component_setmargin(psy_ui_button_base(&self->togglekbdhelp),
-		 margin);
-	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
-		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_setbitmapresource(&self->togglekbdhelp, IDB_KBD);
-	psy_ui_button_setbitmaptransparency(&self->togglekbdhelp,
-		psy_ui_colour_white());	
+	psy_signal_connect(&self->statusbar.togglekbdhelp.signal_clicked, self,
+		mainframe_ontogglekbdhelp);	
 }
 
 void mainframe_initterminalbutton(MainFrame* self)
 {	
-	self->terminalstyleid = STYLE_TERM_BUTTON;	
-	psy_ui_button_init_text_connect(&self->toggleterminal, &self->statusbar,
-		NULL, "Terminal", self, mainframe_ontoggleterminal);
-	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
-		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_setbitmapresource(&self->toggleterminal, IDB_TERM);
-	psy_ui_button_setbitmaptransparency(&self->toggleterminal,
-		psy_ui_colour_white());
+	psy_signal_connect(&self->statusbar.toggleterminal.signal_clicked,
+		self, mainframe_ontoggleterminal);
 }
 
 void mainframe_initprogressbar(MainFrame* self)
-{
-	psy_ui_progressbar_init(&self->progressbar, &self->statusbar, NULL);
-	psy_ui_component_setalign(progressbar_base(&self->progressbar),
-		psy_ui_ALIGN_RIGHT);
+{		
 	workspace_connectloadprogress(&self->workspace, self,
 		(fp_workspace_songloadprogress)mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self,
@@ -949,7 +896,7 @@ void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace,
 	if (progress == -1) {
 		psy_ui_terminal_output(&self->terminal, "\n");
 	}
-	psy_ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
+	psy_ui_progressbar_setprogress(&self->statusbar.progressbar, progress / 100.f);
 }
 
 void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
@@ -991,9 +938,9 @@ void mainframe_updatesongtitle(MainFrame* self)
 		psy_path_name(&path), psy_path_ext(&path));
 	psy_ui_component_settitle(mainframe_base(self), title);
 	if (workspace_song(&self->workspace)) {
-		psy_ui_label_settext(&self->statusbarlabel,
+		psy_ui_label_settext(&self->statusbar.statusbarlabel,
 			psy_audio_song_title(workspace_song(&self->workspace)));
-		psy_ui_label_setdefaulttext(&self->statusbarlabel,
+		psy_ui_label_setdefaulttext(&self->statusbar.statusbarlabel,
 			psy_audio_song_title(workspace_song(&self->workspace)));
 	}
 	psy_path_dispose(&path);
@@ -1184,10 +1131,10 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 	workspace_idle(&self->workspace);	
 	if (self->pluginscanprogress != -1) {
 		if (self->pluginscanprogress == 0) {
-			psy_ui_progressbar_setprogress(&self->progressbar, 0);
+			psy_ui_progressbar_setprogress(&self->statusbar.progressbar, 0);
 			self->pluginscanprogress = -1;
 		} else {
-			psy_ui_progressbar_tick(&self->progressbar);
+			psy_ui_progressbar_tick(&self->statusbar.progressbar);
 		}
 	}	
 }
@@ -1255,7 +1202,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		self->startpage = 0;
 	}
 	psy_ui_tabbar_unmark(&self->helpsettingstabbar);
-	psy_ui_notebook_select(&self->viewstatusbars, tabindex);
+	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
 	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {				
@@ -1285,7 +1232,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 			break;
 	}
 	psy_ui_notebook_select(&self->notebook, viewid);
-	psy_ui_notebook_select(&self->viewstatusbars, viewid);
+	psy_ui_notebook_select(&self->statusbar.viewstatusbars, viewid);
 	psy_ui_notebook_select(&self->viewtabbars, viewid);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {		
@@ -1299,7 +1246,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (self->terminalstyleid == STYLE_TERM_BUTTON) {		
+	if (self->statusbar.terminalstyleid == STYLE_TERM_BUTTON) {
 		mainframe_updateterminalbutton(self);
 	}
 	psy_ui_terminal_output(&self->terminal, text);	
@@ -1308,8 +1255,8 @@ void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (self->terminalstyleid != STYLE_TERM_BUTTON_ERROR) {
-		self->terminalstyleid = STYLE_TERM_BUTTON_WARNING;
+	if (self->statusbar.terminalstyleid != STYLE_TERM_BUTTON_ERROR) {
+		self->statusbar.terminalstyleid = STYLE_TERM_BUTTON_WARNING;
 		mainframe_updateterminalbutton(self);
 	}
 	psy_ui_terminal_output(&self->terminal, (text)
@@ -1323,26 +1270,27 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 	psy_ui_terminal_output(&self->terminal, (text)
 		? text
 		: "unknown error\n");
-	self->terminalstyleid = STYLE_TERM_BUTTON_ERROR;
+	self->statusbar.terminalstyleid = STYLE_TERM_BUTTON_ERROR;
 	mainframe_updateterminalbutton(self);
 }
 
 void mainframe_onstatus(MainFrame* self, Workspace* sender,
 	const char* text)
 {	
-	psy_ui_label_settext(&self->statusbarlabel, text);	
-	psy_ui_label_fadeout(&self->statusbarlabel);
+	psy_ui_label_settext(&self->statusbar.statusbarlabel, text);
+	psy_ui_label_fadeout(&self->statusbar.statusbarlabel);
 }
 
 void mainframe_updateterminalbutton(MainFrame* self)
 {	
-	psy_ui_component_setstyletype(psy_ui_button_base(&self->toggleterminal),
-		self->terminalstyleid);
-	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
+	psy_ui_component_setstyletype(psy_ui_button_base(&self->statusbar.toggleterminal),
+		self->statusbar.terminalstyleid);
+	psy_ui_component_invalidate(psy_ui_button_base(&self->statusbar.toggleterminal));
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 {	
+	// psy_ui_app()->setpositioncacheonly = TRUE;
 	psy_ui_app_setzoomrate(psy_ui_app(), zoombox_rate(sender));	
 }
 
@@ -1528,7 +1476,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 		&self->terminal.component).height)) {
 		psy_ui_component_setpreferredsize(&self->terminal.component,
 			psy_ui_size_zero());
-		self->terminalstyleid = STYLE_TERM_BUTTON;
+		self->statusbar.terminalstyleid = STYLE_TERM_BUTTON;
 		mainframe_updateterminalbutton(self);		
 	} else {
 		psy_ui_component_setpreferredsize(&self->terminal.component,

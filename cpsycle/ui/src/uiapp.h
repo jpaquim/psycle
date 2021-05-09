@@ -52,6 +52,7 @@ typedef struct psy_ui_App {
 	psy_Translator translator;	
 	bool alignvalid;
 	bool mousetracking;
+	bool setpositioncacheonly;	
 	// references
 	struct psy_ui_Component* main;
 	struct psy_ui_Component* capture;	

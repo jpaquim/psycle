@@ -199,17 +199,6 @@ double trackergridstate_defaulttrackwidth(const TrackerGridState* self)
 	return trackergridstate_preferredtrackwidth(self);
 }
 
-double trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
-{
-	double rv = 0;
-	uintptr_t t;
-
-	for (t = 0; t < track; ++t) {
-		rv += trackergridstate_trackwidth(self, t);
-	}
-	return rv;
-}
-
 uintptr_t trackergridstate_pxtotrack(const TrackerGridState* self, double x)
 {
 	double currx = 0;

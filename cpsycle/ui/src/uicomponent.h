@@ -303,10 +303,13 @@ void psy_ui_component_move(psy_ui_Component*, psy_ui_Point origin);
 void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_clientresize(psy_ui_Component*, psy_ui_Size);
 void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Rectangle position);
+void psy_ui_component_applyposition(psy_ui_Component*, bool children);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 uintptr_t psy_ui_component_index(psy_ui_Component*);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
+psy_ui_Component* psy_ui_component_intersect(psy_ui_Component*, psy_ui_RealPoint,
+	uintptr_t* index);
 void psy_ui_component_setfont(psy_ui_Component*, const psy_ui_Font*);
 void psy_ui_component_setfontinfo(psy_ui_Component*, psy_ui_FontInfo);
 const psy_ui_Font* psy_ui_component_font(const psy_ui_Component*);
@@ -316,6 +319,7 @@ int psy_ui_component_visible(psy_ui_Component*);
 int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
+void psy_ui_component_align_cached(psy_ui_Component*);
 
 INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
 {	
@@ -411,6 +415,7 @@ typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(const struct psy_ui_Compo
 typedef psy_ui_Size(*psy_ui_fp_componentimp_dev_preferredsize)(struct psy_ui_ComponentImp*, const psy_ui_Size* limits);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_updatesize)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_applyposition)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
 typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
@@ -466,6 +471,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_size dev_size;
 	psy_ui_fp_componentimp_dev_preferredsize dev_preferredsize;
 	psy_ui_fp_componentimp_dev_updatesize dev_updatesize;
+	psy_ui_fp_componentimp_dev_applyposition dev_applyposition;
 	psy_ui_fp_componentimp_dev_framesize dev_framesize;
 	psy_ui_fp_componentimp_dev_scrollto dev_scrollto;
 	psy_ui_fp_componentimp_dev_parent dev_parent;
