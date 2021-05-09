@@ -5,6 +5,7 @@
 #include "../detail/prefix.h"
 #include "./303/303_voice.h"
 #include "./lib/chorus.h"
+#include <operations.h>
 #include <psycle/plugin_interface.hpp>
 #include <psycle/clip.hpp>
 #include <cstdlib>
@@ -122,6 +123,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
+	psy_dsp_init();
 	Vals=new int[MacInfo.numParameters];
 }
 
