@@ -55,7 +55,7 @@ static int translate_x11button(int button);
 static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
-static void adjustcoordinates(psy_ui_Component*, double* x, double* y);
+static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
 static int timertick(psy_ui_X11App*);
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
 
@@ -1083,12 +1083,12 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 					return 0;
 				}			
 			}							
-			handle_mouseevent(imp->component, imp,
-					event->xany.window, ButtonPress, event->xbutton.x,
-					translate_x11button(event->xbutton.button),
-					event->xbutton.button,
-					imp->component->vtable->onmousedown,
-					&imp->component->signal_mousedown);
+			handle_mouseevent(
+				imp->component, imp, event->xany.window,
+				ButtonPress, event->xbutton.x, event->xbutton.y,
+				translate_x11button(event->xbutton.button),					
+				imp->component->vtable->onmousedown,
+				&imp->component->signal_mousedown);									
 			/*psy_ui_mouseevent_init(&ev,
 				event->xbutton.x,
 				event->xbutton.y,
@@ -1099,7 +1099,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);*/
-			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);
+			adjustcoordinates(imp->component, &ev.pt);
 			/*if (buttonclicks == 0) {
 				buttonpressevent = ev;										
 				buttonpress_single(self, imp, &ev);
@@ -1142,7 +1142,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);		
+			adjustcoordinates(imp->component, &ev.pt);
 			imp->component->vtable->onmouseup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);			
@@ -1166,7 +1166,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.pt.x, &ev.pt.y);			
+			adjustcoordinates(imp->component, &ev.pt);
 			imp->component->vtable->onmousemove(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 					&ev);
@@ -1208,19 +1208,14 @@ void dispose_window(psy_ui_X11App* self, Window window)
 	}
 }
 
-void adjustcoordinates(psy_ui_Component* component, double* x, double* y)
-{		
-	psy_ui_Margin spacing;
+void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
+{	
+	psy_ui_RealMargin spacing;
 	
-	*x += psy_ui_component_scrollleftpx(component);
-	*y += psy_ui_component_scrolltop_px(component);
-	spacing = psy_ui_component_spacing(component);
-	if (!psy_ui_margin_iszero(&spacing)) {
-		const psy_ui_TextMetric* tm;
-
-		tm = psy_ui_component_textmetric(component);
-		*x -= psy_ui_value_px(&spacing.left, tm, NULL);
-		*y -= psy_ui_value_px(&spacing.top, tm, NULL);
+	spacing = psy_ui_component_spacing_px(component);	
+	if (!psy_ui_realmargin_iszero(&spacing)) {				
+		pt->x -= spacing.left;
+		pt->y -= spacing.top;
 	}
 }
 
@@ -1379,11 +1374,12 @@ void handle_mouseevent(psy_ui_Component* component,
 	psy_ui_mouseevent_init(&ev,
 		wParam, lParam,
 		button, 0, 0, 0); /* GetKeyState(VK_SHIFT) < 0 */
-		//GetKeyState(VK_CONTROL) < 0);
-	adjustcoordinates(component, &ev.pt.x, &ev.pt.y);
+		//GetKeyState(VK_CONTROL) < 0);	
+	adjustcoordinates(component, &ev.pt);
 	psy_ui_mouseevent_settarget(&ev, component); // eventtarget(component));
 	up = FALSE;
 	if (message == ButtonPress) {
+		
 		x11imp->imp.vtable->dev_mousedown(&x11imp->imp, &ev);
 	}	
 	if (ev.event.bubble != FALSE) {

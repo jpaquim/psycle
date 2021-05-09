@@ -78,7 +78,7 @@ int psycle_run(uintptr_t instance, int options)
 	// Creates the mainframe
 	mainframe = (MainFrame*)malloc(sizeof(MainFrame));
 	if (mainframe) {
-		mainframe_init(mainframe);
+		mainframe_init(mainframe);		
 		// The mainframe has been initialized, so show it.
 		if (mainframe_showmaximizedatstart(mainframe)) {
 #ifdef DIVERSALIS__OS__MICROSOFT

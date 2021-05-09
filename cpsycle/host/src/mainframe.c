@@ -187,22 +187,22 @@ static void vtable_init(MainFrame* self)
 // implementation
 void mainframe_init(MainFrame* self)
 {			
-	mainframe_initframe(self);	
-	mainframe_initworkspace(self);
-	mainframe_initemptystatusbar(self);
+	mainframe_initframe(self);		
+	mainframe_initworkspace(self);	
+	mainframe_initemptystatusbar(self);	
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
 	mainframe_inittoparea(self);	
 	mainframe_initclientarea(self);
 	mainframe_initspacerleft(self);
 	mainframe_initspacerright(self);
-	mainframe_initmainviewarea(self);
+	mainframe_initmainviewarea(self);	
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
-	mainframe_initnavigation(self);
-	mainframe_initmaintabbar(self);	
+	mainframe_initnavigation(self);	
+	mainframe_initmaintabbar(self);		
 	mainframe_inithelpsettingstabbar(self);
-	mainframe_initviewtabbars(self);
+	mainframe_initviewtabbars(self);	
 	mainframe_initmainviews(self);
 	mainframe_initrightarea(self);
 	mainframe_initgear(self);	
@@ -215,7 +215,11 @@ void mainframe_init(MainFrame* self)
 	mainframe_initsequenceview(self);
 	mainframe_initsequencerbar(self);
 	mainframe_initstepsequencerview(self);
+#if PSYCLE_USE_TK == PSYCLE_TK_XT
+	/* todo segfault X11 imp */
+#else
 	mainframe_initseqeditor(self);	
+#endif
 	mainframe_initplugineditor(self);
 	mainframe_initstatusbar(self);
 	mainframe_setstartpage(self);
@@ -225,21 +229,29 @@ void mainframe_init(MainFrame* self)
 	mainframe_connectworkspace(self);
 	mainframe_updatestepsequencerbuttons(self);	
 	mainframe_connectstepsequencerbuttons(self);
+#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#else
 	mainframe_updateseqeditorbuttons(self);
 	mainframe_connectseqeditorbuttons(self);	
+#endif	
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 	save_translator_default();
 	save_translator_template();
 #endif
 	if (!workspace_hasplugincache(&self->workspace)) {
+#if PSYCLE_USE_TK == PSYCLE_TK_XT
+		/* todo dir enum linux */
+#else
 		workspace_scanplugins(&self->workspace);
+#endif
 	}
 }
 
 void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
-	vtable_init(self);	
+	vtable_init(self);
+	psy_ui_app()->main = mainframe_base(self);	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	initdarkstyles(psy_ui_appdefaults());
 	self->startup = TRUE;
@@ -476,11 +488,11 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_component_setalign(&self->toprow0_bars, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setdefaultalign(&self->toprow0_bars, psy_ui_ALIGN_LEFT,
-		margin);
+		margin);		
 	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
-	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
+	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);
-	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);
+	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);	
 	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(&self->metronomebar.component);
@@ -593,32 +605,40 @@ void mainframe_initmainviews(MainFrame* self)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook),
-		&self->viewtabbars.component, &self->workspace);
+		&self->viewtabbars.component, &self->workspace);	
+	printf("machineview initalized\n");
 	patternview_init(&self->patternview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
+	 printf("patternview initalized\n");
 	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
+	printf("samplesview initalized\n");
 	instrumentview_init(&self->instrumentsview,
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace);
+	printf("instrumentview initalized\n");
 	songpropertiesview_init(&self->songpropertiesview,
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace);
+	printf("songproperties initalized\n");
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars),
 		&self->workspace.config.config, 3,
 		&self->workspace);	
+	printf("propertiesview initalized\n");
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
+	printf("helpview initalized\n");
 	renderview_init(&self->renderview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
+	printf("renderview initalized\n");
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
-		mainframe_onrender);
+		mainframe_onrender);	
 	exportview_init(&self->exportview, psy_ui_notebook_base(&self->notebook),
 		psy_ui_notebook_base(&self->viewtabbars), &self->workspace);
 	psy_signal_connect(&self->filebar.exportbutton.signal_clicked, self,
@@ -627,9 +647,11 @@ void mainframe_initmainviews(MainFrame* self)
 		mainframe_onviewselected);
 	psy_signal_connect(&self->workspace.signal_focusview, self,
 		mainframe_onfocusview);	
+	printf("exportview initalized\n");
 	confirmbox_init(&self->checkunsavedbox,
 		psy_ui_notebook_base(&self->notebook),
 		&self->workspace);
+	printf("confirmbox initalized\n");
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
 	psy_signal_connect(&self->helpsettingstabbar.signal_change, self,

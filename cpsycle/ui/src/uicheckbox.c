@@ -205,6 +205,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(&self->component);
 	self->text = strdup("");
 	self->translation = NULL;
+	self->multiline = 0;
 	self->state = 0;
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->component.signal_destroy, self,

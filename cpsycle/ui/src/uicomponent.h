@@ -19,6 +19,7 @@
 #include <translator.h>
 // std
 #include <math.h>
+#include <stdio.h>
 
 // psy_ui_Component
 // Bridge
@@ -513,8 +514,15 @@ typedef struct psy_ui_ComponentImp {
 void psy_ui_componentimp_init(psy_ui_ComponentImp*);
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
+psy_ui_Component* psy_ui_mainwindow(void);
+
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	
+#if PSYCLE_USE_TK == PSYCLE_TK_XT	
+	if (!psy_ui_mainwindow()->visible) {
+		return;
+	}
+#endif	
 	self->vtable->invalidate(self);	
 }
 
@@ -550,7 +558,7 @@ psy_ui_RealRectangle psy_ui_component_scrolledposition(psy_ui_Component*);
 
 INLINE void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
 	uintptr_t interval)
-{
+{	
 	self->imp->vtable->dev_starttimer(self->imp, id, interval);
 }
 

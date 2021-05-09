@@ -740,10 +740,8 @@ void dev_invalidate(psy_ui_win_ComponentImp* self)
 void dev_invalidaterect(psy_ui_win_ComponentImp* self,
 	const psy_ui_RealRectangle* r)
 {
-	RECT rc;
-	const psy_ui_TextMetric* tm;	
-
-	tm = psy_ui_component_textmetric(self->component);	
+	RECT rc;	
+	
 	rc.left = (int)(r->left);
 	rc.top = (int)(r->top);
 	rc.right = (int)(r->right);

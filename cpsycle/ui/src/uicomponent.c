@@ -398,10 +398,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	assert(self != parent);
 
 	vtable_init();
-	self->vtable = &vtable;
-	if (!parent) {
-		psy_ui_app()->main = self;
-	}
+	self->vtable = &vtable;	
 	self->imp = imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
@@ -417,11 +414,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	assert(self != parent);
 
 	vtable_init();
-
-	self->vtable = &vtable;
-	if (!parent) {
-		psy_ui_app()->main = self;
-	}
+	self->vtable = &vtable;	
 	if (view) {
 		self->imp = (psy_ui_ComponentImp*)
 			psy_ui_viewcomponentimp_allocinit(
@@ -1046,8 +1039,10 @@ static void preventinput(psy_ui_Component* self)
 }
 
 bool psy_ui_component_inputprevented(const psy_ui_Component* self)
-{
-	return self->imp->vtable->dev_inputprevented(self->imp);
+{	
+	assert(self->imp);
+	
+	return self->imp->vtable->dev_inputprevented(self->imp);	
 }
 
 void psy_ui_component_setbackgroundmode(psy_ui_Component* self,
@@ -2091,9 +2086,12 @@ void psy_ui_component_mousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 		child = (psy_ui_Component*)p->entry;
 		if (psy_ui_component_visible(child)) {
 			r = psy_ui_component_position(child);
+			printf("%d,%d,%d, %d\n", (int)r.left, (int)r.top,
+					(int)ev->pt.x,
+					(int)ev->pt.y);
 			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 				ev->pt.x -= r.left;
-				ev->pt.y -= r.top;
+				ev->pt.y -= r.top;				
 				child->imp->vtable->dev_mousedown(child->imp, ev);
 				ev->pt.x += r.left;
 				ev->pt.y += r.top;
@@ -2177,4 +2175,9 @@ psy_ui_RealPoint mapcoords(psy_ui_Component* src, psy_ui_Component* dst)
 		curr = psy_ui_component_parent(curr);
 	}
 	return rv;
+}
+
+psy_ui_Component* psy_ui_mainwindow(void)
+{
+	return psy_ui_app()->main;
 }

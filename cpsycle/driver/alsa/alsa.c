@@ -210,14 +210,14 @@ void init_properties(psy_AudioDriver* driver)
 		"guid", PSY_AUDIODRIVER_ALSA_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "name", "alsa"),
+		psy_property_append_str(self->configuration, "name", "alsa"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "vendor",
+		psy_property_append_str(self->configuration, "vendor",
 		"Psycedelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(self->configuration, "version", "1.0"),
+		psy_property_append_str(self->configuration, "version", "1.0"),
 		TRUE);
 	property = psy_property_append_choice(self->configuration, "device", -1);	
 	psy_property_append_int(self->configuration, "bitdepth", 16, 0, 32);

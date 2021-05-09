@@ -65,7 +65,12 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 	self->translate = TRUE;
 	self->fadeoutcounter = 0;
 	self->fadeout = FALSE;
+#if PSYCLE_USE_TK == PSYCLE_TK_XT
+	/* todo: wrap hangs with X11 imp */
+	self->preventwrap = TRUE;	
+#else
 	self->preventwrap = FALSE;
+#endif	
 	psy_ui_component_setstyletypes(psy_ui_label_base(self),
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_ui_STYLE_LABEL_DISABLED);
@@ -123,7 +128,7 @@ void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 	if (self->translate) {
 		psy_strreset(&self->translation, psy_translator_translate(
 			psy_ui_translator(), text));
-	}
+	}	
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
