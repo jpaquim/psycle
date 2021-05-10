@@ -148,7 +148,8 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->imp.vtable = &win_imp_vtable;
 	self->hdc = hdc;
 	self->shareddc = TRUE;
-	self->pen = CreatePen(PS_SOLID, 1, psy_ui_style(psy_ui_STYLE_ROOT)->colour.value);
+	self->pen = CreatePen(PS_SOLID, 1,
+		psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->colour));
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->oldbmp = 0;
@@ -175,7 +176,8 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	ReleaseDC(NULL, hdc);
 	imp = (psy_ui_win_BitmapImp*)bitmap->imp;
 	self->oldbmp = SelectObject(self->hdc, imp->bitmap);		
-	self->pen = CreatePen(PS_SOLID, 1, psy_ui_style(psy_ui_STYLE_ROOT)->colour.value);
+	self->pen = CreatePen(PS_SOLID, 1,
+		psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->colour));
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
@@ -297,7 +299,7 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self,
 		 (int)r.top - (int)(self->org.y),
 		 (int)r.right - (int)(self->org.x),
 		 (int)r.bottom - (int)(self->org.y));
-     hBrush = CreateSolidBrush(colour.value);
+     hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
      FillRect (self->hdc, &rect, hBrush);     
      DeleteObject (hBrush) ;
 }
@@ -313,9 +315,9 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
 	psy_ui_TextMetric tm;
 	TEXTMETRIC win_tm;
 
-	hBrush = CreateSolidBrush(colour.value);
+	hBrush = CreateSolidBrush(psy_ui_colour_colorref(&colour));
 	hOldBrush = SelectObject (self->hdc, hBrush);
-	hPen = CreatePen(PS_SOLID, 1, colour.value);
+	hPen = CreatePen(PS_SOLID, 1, psy_ui_colour_colorref(&colour));
 	hOldPen = SelectObject(self->hdc, hPen);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
@@ -462,7 +464,7 @@ void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colo
 	HPEN pen;
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
-	currpen.lopnColor = colour.value;
+	currpen.lopnColor = psy_ui_colour_colorref(&colour);
 	pen = CreatePenIndirect(&currpen);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {
@@ -483,12 +485,12 @@ void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, uintptr_t 
 
 void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colour)
 {
-	SetBkColor(self->hdc, colour.value);
+	SetBkColor(self->hdc, psy_ui_colour_colorref(&colour));
 }
 
 void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colour)
 {
-	SetTextColor(self->hdc, colour.value);
+	SetTextColor(self->hdc, psy_ui_colour_colorref(&colour));
 }
 
 void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, uintptr_t align)

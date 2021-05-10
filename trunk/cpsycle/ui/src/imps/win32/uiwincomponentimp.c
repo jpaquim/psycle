@@ -1116,7 +1116,7 @@ void dev_setbackgroundcolour(psy_ui_win_ComponentImp* self, psy_ui_Colour colour
 	if (self->background) {
 		DeleteObject(self->background);
 	}
-	self->background = CreateSolidBrush(colour.value);
+	self->background = CreateSolidBrush(psy_ui_colour_colorref(&colour));
 }
 
 void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)

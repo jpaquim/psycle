@@ -413,7 +413,8 @@ bool psy_ui_button_highlighted(const psy_ui_Button* self)
 void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
 {	
 	if (self->component.style.currstyle->colour.mode.set != colour.mode.set ||			
-			self->component.style.currstyle->colour.value != colour.value) {
+			psy_ui_colour_colorref(&self->component.style.currstyle->colour) !=
+			psy_ui_colour_colorref(&colour)) {
 		psy_ui_colour_set(&self->component.style.currstyle->colour, colour);
 		psy_ui_component_invalidate(&self->component);
 	}

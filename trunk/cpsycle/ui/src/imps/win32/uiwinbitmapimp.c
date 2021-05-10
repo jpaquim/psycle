@@ -163,7 +163,7 @@ void dev_preparemask(psy_ui_win_BitmapImp* self, psy_ui_Colour clrtrans)
 	hbmsrct = SelectObject(hdcsrc, (HGDIOBJ)self->bitmap);
 	hbmdstt = SelectObject(hdcdst, (HGDIOBJ)self->mask);
 	// Change the background to trans color
-	SetBkColor(hdcsrc, clrtrans.value);	
+	SetBkColor(hdcsrc, psy_ui_colour_colorref(&clrtrans));
 	// This call sets up the mask bitmap.
 	BitBlt(hdcdst, 0, 0, bm.bmWidth, bm.bmHeight, hdcsrc, 0, 0, SRCCOPY);
 	// Now, we need to paint onto the original image, making

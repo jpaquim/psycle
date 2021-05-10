@@ -338,15 +338,17 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 	super_vtable.ontimer(&self->component, timerid);
 	if (self->fadeoutcounter > 0) {
 		psy_ui_Colour colour;
+		psy_ui_Colour bgcolour;
 		float fadeoutstep;
 
 		--self->fadeoutcounter;
 		if (self->fadeoutcounter <= 80) {
 			colour = psy_ui_style(psy_ui_STYLE_ROOT)->colour;
+			bgcolour = psy_ui_component_backgroundcolour(
+				psy_ui_label_base(self));
 			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
 			psy_ui_colour_mul_rgb(&colour, fadeoutstep, fadeoutstep, fadeoutstep);
-			if (colour.value > psy_ui_component_backgroundcolour(
-					psy_ui_label_base(self)).value) {
+			if (psy_ui_colour_colorref(&colour) > psy_ui_colour_colorref(&bgcolour)) {
 				psy_ui_component_setcolour(psy_ui_label_base(self), colour);
 			}
 			psy_ui_component_invalidate(psy_ui_label_base(self));

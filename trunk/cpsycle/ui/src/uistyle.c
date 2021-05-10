@@ -345,7 +345,7 @@ void psy_ui_styles_addcolourtoconfig(psy_ui_Styles* self, psy_Property* parent,
 	char_dyn_t* colourset;
 
 	if (colour.mode.set) {
-		p = psy_property_append_int(parent, key, colour.value, 0, 0);
+		p = psy_property_append_int(parent, key, psy_ui_colour_colorref(&colour), 0, 0);
 	} else {
 		psy_property_preventsave(
 			psy_property_append_int(parent, key, 0, 0, 0));

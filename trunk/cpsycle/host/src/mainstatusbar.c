@@ -28,6 +28,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_make_em(0.0, 1.0, 0.25, 0.0));
+	zoombox_init(&self->zoombox, &self->component);
 	mainstatusbar_initstatuslabel(self);
 	mainstatusbar_initviewstatusbars(self);
 	mainstatusbar_initturnoffbutton(self);
