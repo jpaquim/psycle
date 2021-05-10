@@ -209,7 +209,7 @@ typedef struct InstrumentNoteMapView {
 	psy_ui_Component entries;
 	InstrumentKeyboardView keyboard;
 	InstrumentEntryView entryview;
-	psy_ui_SplitBar splitter;
+	psy_ui_Splitter splitter;
 	psy_ui_Component table;
 	InstrumentEntryState state;
 	InstrumentEntryTableViewHeader tableheader;

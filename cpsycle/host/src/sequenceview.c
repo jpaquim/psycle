@@ -433,7 +433,7 @@ static psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView*,
 	uintptr_t row);
 static void sequencelistview_invalidaterow(SequenceListView*, uintptr_t row);
 static void sequencelistview_oneditkeydown(SequenceListView*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void sequencelistview_build(SequenceListView*);
 static void sequencelistview_changeplayposition(SequenceListView*);
 // vtable

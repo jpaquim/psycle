@@ -102,7 +102,7 @@ typedef bool (*psy_ui_fp_component_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onmouseevent)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_component_onmouseenter)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onmouseleave)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_onkeyevent)(struct psy_ui_Component*, psy_ui_KeyEvent*);
+typedef void (*psy_ui_fp_component_onkeyevent)(struct psy_ui_Component*, psy_ui_KeyboardEvent*);
 typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);

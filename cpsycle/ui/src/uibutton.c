@@ -19,7 +19,7 @@ static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
-static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
+static void button_onkeydown(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
 // vtable
@@ -325,7 +325,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 	if (!psy_ui_component_inputprevented(&self->component)) {
 		psy_ui_component_releasecapture(psy_ui_button_base(self));
 		if (psy_ui_component_inputprevented(&self->component)) {
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 			return;
 		}
 		self->buttonstate = ev->button;
@@ -343,12 +343,12 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 			pt.x += spacing.left;
 			pt.y += spacing.top;
 			if (psy_ui_realrectangle_intersect(&client_position, pt)) {
-				self->shiftstate = ev->shift;
-				self->ctrlstate = ev->ctrl;
+				self->shiftstate = ev->shift_key;
+				self->ctrlstate = ev->ctrl_key;
 				psy_signal_emit(&self->signal_clicked, self, 0);
 			}
 			if (self->stoppropagation) {
-				psy_ui_mouseevent_stoppropagation(ev);
+				psy_ui_mouseevent_stop_propagation(ev);
 			}
 		}
 	}
@@ -434,11 +434,11 @@ void psy_ui_button_preventtranslation(psy_ui_Button* self)
 	}
 }
 
-void button_onkeydown(psy_ui_Button* self, psy_ui_KeyEvent* ev)
+void button_onkeydown(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN &&
 			!psy_ui_component_inputprevented(&self->component)) {
 		psy_signal_emit(&self->signal_clicked, self, 0);
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }

@@ -407,7 +407,7 @@ void seqeditorplayline_onmousedown(SeqEditorPlayline* self, psy_ui_MouseEvent* e
 	psy_ui_component_capture(seqeditorline_base(&self->seqeditorline));
 	psy_ui_component_setcursor(seqeditorline_base(&self->seqeditorline),
 		psy_ui_CURSORSTYLE_COL_RESIZE);
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void seqeditorplayline_onmousemove(SeqEditorPlayline* self,
@@ -429,7 +429,7 @@ void seqeditorplayline_onmousemove(SeqEditorPlayline* self,
 		self->dragbase = psy_ui_component_position(
 			seqeditorline_base(&self->seqeditorline)).left;		
 	}
-	psy_ui_mouseevent_stoppropagation(ev);	
+	psy_ui_mouseevent_stop_propagation(ev);	
 }
 
 void seqeditorplayline_onmouseup(SeqEditorPlayline* self, psy_ui_MouseEvent* ev)
@@ -437,7 +437,7 @@ void seqeditorplayline_onmouseup(SeqEditorPlayline* self, psy_ui_MouseEvent* ev)
 	self->drag = FALSE;
 	self->dragbase = 0.0;
 	psy_ui_component_releasecapture(seqeditorline_base(&self->seqeditorline));
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void seqeditorplayline_update(SeqEditorPlayline* self)
@@ -635,7 +635,7 @@ void seqeditorpatternentry_onmousedoubleclick(SeqEditorPatternEntry* self,
 	psy_ui_MouseEvent* ev)
 {
 	sequencecmds_changeplayposition(self->state->cmds);
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void seqeditorpatternentry_onsequenceselectionselect(SeqEditorPatternEntry* self,

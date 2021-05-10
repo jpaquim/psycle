@@ -685,7 +685,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		sampleeditor_oncrop);
 	psy_signal_connect(&self->processview.copypaste.del.signal_clicked, self,
 		sampleeditor_ondelete);
-	psy_ui_splitbar_init(&self->splitbar, &self->component);
+	psy_ui_splitter_init(&self->splitbar, &self->component);
 	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_RIGHT);
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self,

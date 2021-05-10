@@ -96,14 +96,6 @@ enum {
 	WORKSPACE_LOADSONG
 };
 
-typedef struct {
-	bool row0;
-	bool row1;
-	bool row2;
-	bool trackscopes;	
-	bool maximized;
-} MaximizedView;
-
 struct Workspace;
 
 typedef void (*fp_workspace_output)(void* context,
@@ -167,7 +159,6 @@ typedef struct Workspace {
 	int navigating;
 	bool patternsinglemode;
 	// ui
-	MaximizedView maximizeview;
 	int fontheight;	
 	bool hasnewline;
 	bool gearvisible;	
@@ -298,6 +289,8 @@ void workspace_connectterminal(Workspace*, void* context,
 void workspace_connectstatus(Workspace*, void* context, fp_workspace_output);
 void workspace_connectloadprogress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
+void workspace_apptitle(Workspace*, char* rv_title);
+const char* workspace_songtitle(const Workspace*);
 
 #ifdef __cplusplus
 }

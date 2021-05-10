@@ -122,6 +122,7 @@ void gear_inittitle(Gear* self)
 {	
 	titlebar_init(&self->titlebar, &self->component, NULL, "machinebar.gear");
 	titlebar_hideonclose(&self->titlebar);
+	titlebar_enabledrag(&self->titlebar, "gear");
 }
 
 void gear_oncreate(Gear* self, psy_ui_Component* sender)

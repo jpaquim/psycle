@@ -106,8 +106,8 @@ static void patternproperties_onpatternlengthchanged(PatternProperties*,
 	psy_audio_Patterns*, uintptr_t slot);
 static void patternproperties_onapply(PatternProperties*,
 	psy_ui_Component* sender);
-static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyEvent*);
-static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyEvent*);
+static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyboardEvent*);
+static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyboardEvent*);
 static void patternproperties_onfocus(PatternProperties*);
 static void patternproperties_updateskin(PatternProperties*);
 
@@ -203,21 +203,21 @@ void patternproperties_onapply(PatternProperties* self,
 	}
 }
 
-void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyEvent* ev)
+void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		patternproperties_onapply(self, &self->component);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		workspace_selectview(self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	}
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void patternproperties_onkeyup(PatternProperties* self, psy_ui_KeyEvent* ev)
+void patternproperties_onkeyup(PatternProperties* self, psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void patternproperties_onfocus(PatternProperties* self)

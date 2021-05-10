@@ -11,9 +11,9 @@ static void newvalview_updateedit(NewValView*);
 static void onapply(NewValView*, psy_ui_Button* sender);
 static void oncancel(NewValView*, psy_ui_Button* sender);
 static void oneditkeydown(NewValView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 static void oneditkeyup(NewValView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 
 void newvalview_init(NewValView* self, psy_ui_Component* parent,
 	uintptr_t mindex, uintptr_t pindex, intptr_t vval, intptr_t vmin, intptr_t vmax, char* title,
@@ -123,22 +123,22 @@ void oncancel(NewValView* self, psy_ui_Button* sender)
 }
 
 void oneditkeydown(NewValView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
 	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE ||
 			ev->keycode == psy_ui_KEY_RETURN) {
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
 }
 
 void oneditkeyup(NewValView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
 	newvalview_updateedit(self);
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		self->doapply = TRUE;
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		psy_ui_component_hide_align(newvalview_base(self));
 	}
 }

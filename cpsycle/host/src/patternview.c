@@ -38,7 +38,7 @@ static void patternview_onpatternpropertiesapply(PatternView*,
 static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
 static void patternview_onmousedown(PatternView*, psy_ui_MouseEvent*);
 static void  patternview_onmouseup(PatternView*, psy_ui_MouseEvent*);
-static void patternview_onkeydown(PatternView*, psy_ui_KeyEvent*);
+static void patternview_onkeydown(PatternView*, psy_ui_KeyboardEvent*);
 static void patternview_oncontextmenu(PatternView*,
 	psy_ui_Component* sender);
 static void patternview_initbasefontsize(PatternView*);
@@ -1045,7 +1045,7 @@ void  patternview_onmouseup(PatternView* self, psy_ui_MouseEvent* ev)
 		trackergrid_selection(&self->tracker));
 }
 
-void patternview_onkeydown(PatternView* self, psy_ui_KeyEvent* ev)
+void patternview_onkeydown(PatternView* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_visible(patternblockmenu_base(
@@ -1056,7 +1056,7 @@ void patternview_onkeydown(PatternView* self, psy_ui_KeyEvent* ev)
 				&self->interpolatecurveview))) {
 			patternview_toggleinterpolatecurve(self, patternview_base(self));
 		}
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }
 

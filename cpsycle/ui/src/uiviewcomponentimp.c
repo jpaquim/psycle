@@ -774,7 +774,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->event.bubble) {
+	if (ev->event.bubbles) {
 		if (!self->viewcomponents) {
 			ev->target = self->component;
 		}
@@ -803,7 +803,7 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->event.bubble) {
+	if (ev->event.bubbles) {
 		self->component->vtable->onmouseup(self->component, ev);
 	}
 }
@@ -847,7 +847,7 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 				self->component, 0);			
 		}		
 	}
-	if (ev->event.bubble) {
+	if (ev->event.bubbles) {
 		self->component->vtable->onmousemove(self->component, ev);
 	}
 }
@@ -871,7 +871,7 @@ void view_dev_mousedoubleclick(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent*
 			}
 		}
 	}
-	if (ev->event.bubble) {
+	if (ev->event.bubbles) {
 		self->component->vtable->onmousedoubleclick(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousedoubleclick,
 			self->component, 1, ev);

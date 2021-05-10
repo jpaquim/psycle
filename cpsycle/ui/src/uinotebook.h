@@ -15,7 +15,7 @@ typedef struct psy_ui_Notebook {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_SplitBar splitbar;
+	psy_ui_Splitter splitbar;
 	// internal data;
 	uintptr_t pageindex;
 	int split;

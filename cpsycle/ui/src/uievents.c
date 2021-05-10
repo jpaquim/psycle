@@ -1,71 +1,65 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "uievents.h"
 
-// psy_ui_KeyEvent
-void psy_ui_keyevent_init(psy_ui_KeyEvent* self, uint32_t keycode, intptr_t keydata,
-	bool shift, bool ctrl, bool alt, int repeat)
+#include "uievents.h"
+/* container */
+#include <properties.h>
+
+/* psy_ui_Event */
+void psy_ui_event_init(psy_ui_Event* self)
 {
+	self->bubbles = TRUE;
+	self->default_prevented = FALSE;
+	self->target = NULL;
+}
+
+/* psy_ui_KeyboardEvent */
+void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent* self)
+{
+	psy_ui_keyboardevent_init_all(self, 0, 0, 0, 0, 0, 0);
+}
+
+void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent* self, uint32_t keycode,
+	intptr_t keydata, bool shift, bool ctrl, bool alt, bool repeat)
+{
+	psy_ui_event_init(&self->event);
 	self->keycode = keycode;
 	self->keydata = keydata;
-	self->shift = shift;
-	self->ctrl = ctrl;
-	self->alt = alt;
-	self->repeat = repeat;
-	self->event.bubble = 1;
-	self->event.preventdefault = FALSE;
-	self->target = NULL;
+	self->shift_key = shift;
+	self->ctrl_key = ctrl;
+	self->alt_key = alt;
+	self->repeat = repeat;	
 }
 
-void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent* self)
+/* psy_ui_MouseEvent */
+void psy_ui_mouseevent_init(psy_ui_MouseEvent* self)
 {
-	self->event.bubble = 0;
+	psy_ui_mouseevent_init_all(self, psy_ui_realpoint_zero(),
+		0, 0, 0, 0);
 }
 
-void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
-{
-	self->event.preventdefault = TRUE;
-}
-
-// psy_ui_MouseEvent
-void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, double x, double y,
+void psy_ui_mouseevent_init_all(psy_ui_MouseEvent* self, psy_ui_RealPoint pt,
 	uintptr_t button, intptr_t delta, bool shift, bool ctrl)
 {
-	self->pt = psy_ui_realpoint_make(x, y);	
+	psy_ui_event_init(&self->event);
+	self->pt = pt;
 	self->button = button;
-	self->delta = delta;
-	self->event.bubble = 1;
-	self->shift = shift;
-	self->ctrl = ctrl;
-	self->event.preventdefault = 0;
-	self->target = 0;
+	self->delta = delta;	
+	self->shift_key = shift;
+	self->ctrl_key = ctrl;
 }
 
-void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent* self)
-{
-	self->event.bubble = 0;
-}
-
-struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent* self)
-{
-	return self->target;
-}
-
-void psy_ui_mouseevent_settarget(psy_ui_MouseEvent* self, struct psy_ui_Component* target)
-{
-	self->target = target;
-}
-
-// psy_ui_DragEvent
+/* psy_ui_DragEvent */
 void psy_ui_dragevent_init(psy_ui_DragEvent* self)
 {
-	psy_ui_mouseevent_init(&self->mouse, 0, 0, 0, 0, 0, 0);
-	self->target = NULL;
-	self->active = FALSE;
-	self->mouse.event.preventdefault = TRUE;
+	psy_ui_mouseevent_init(&self->mouse);
+	self->mouse.event.default_prevented = TRUE;	
+	self->active = FALSE;	
 	self->dataTransfer = NULL;
 }
 

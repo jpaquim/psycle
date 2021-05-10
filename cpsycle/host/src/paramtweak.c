@@ -126,7 +126,7 @@ void paramtweak_onmousemove(ParamTweak* self, psy_ui_MouseEvent* ev)
 				psy_audio_machineparam_tweak(self->param, val);
 			}
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}	
 }
 

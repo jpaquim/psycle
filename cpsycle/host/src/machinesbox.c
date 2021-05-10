@@ -20,8 +20,8 @@ static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sende
 static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, uintptr_t slot);
 static void machinesbox_onlistboxselected(MachinesBox*, psy_ui_Component* sender,
 	intptr_t slot);
-static void machinesbox_onkeydown(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
-static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyEvent*);
+static void machinesbox_onkeydown(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
+static void machinesbox_onkeyup(MachinesBox*, psy_ui_Component*, psy_ui_KeyboardEvent*);
 static bool machinesbox_testmachinemode(const MachinesBox*, uintptr_t index);
 
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
@@ -411,17 +411,17 @@ void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 		machinesbox_onmachineselected);
 }
 
-void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+void machinesbox_onkeydown(MachinesBox* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		workspace_togglegear(self->workspace);		
 	}
 }
 
-void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_KeyEvent* ev)
+void machinesbox_onkeyup(MachinesBox* self, psy_ui_Component* sender , psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void machinesbox_addsel(MachinesBox* self, uintptr_t slot)

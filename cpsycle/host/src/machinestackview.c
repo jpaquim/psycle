@@ -1275,10 +1275,10 @@ void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 		} else {
 			self->state->effectinsertpos = psy_INDEX_INVALID;
 			self->state->effectinsertright = FALSE;			
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 	} else {
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 
@@ -1459,7 +1459,7 @@ void machinestackpane_onmousedoubleclick(MachineStackPane* self,
 	if (!self->state->columnselected) {
 		workspace_outputstatus(self->workspace,
 			"Add first input (Double click in Inputs)");
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}	
 	self->state->columnselected = FALSE;	
 }

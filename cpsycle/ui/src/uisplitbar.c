@@ -11,51 +11,62 @@
 #include "../../detail/portable.h"
 
 // prototypes
-static void splitbar_setalign(psy_ui_SplitBar*, psy_ui_AlignType);
-static void splitbar_ondraw(psy_ui_SplitBar*, psy_ui_Graphics*);
-static void splitbar_onmousedown(psy_ui_SplitBar*, psy_ui_MouseEvent*);
-static void splitbar_onmousemove(psy_ui_SplitBar*, psy_ui_MouseEvent*);
-static void splitbar_onmouseup(psy_ui_SplitBar*, psy_ui_MouseEvent*);
-static void splitbar_onmouseenter(psy_ui_SplitBar*);
-static psy_ui_Component* splitbar_prev(psy_ui_SplitBar*);
-static psy_ui_Component* splitbar_next(psy_ui_SplitBar*);
-static void splitbar_setcursor(psy_ui_SplitBar*);
-static psy_ui_RealPoint splitbar_vthumbcenter(const psy_ui_SplitBar*);
-static psy_ui_RealPoint splitbar_hthumbcenter(const psy_ui_SplitBar*);
+static void splitter_setalign(psy_ui_Splitter*, psy_ui_AlignType);
+static void splitter_ondraw(psy_ui_Splitter*, psy_ui_Graphics*);
+static void splitter_onmousedown(psy_ui_Splitter*, psy_ui_MouseEvent*);
+static void splitter_onmousemove(psy_ui_Splitter*, psy_ui_MouseEvent*);
+static void splitter_onmouseup(psy_ui_Splitter*, psy_ui_MouseEvent*);
+static void splitter_onmouseenter(psy_ui_Splitter*);
+static void splitter_onhide(psy_ui_Splitter*);
+static void splitter_onshow(psy_ui_Splitter*);
+static psy_ui_Component* splitter_prev(psy_ui_Splitter*);
+static psy_ui_Component* splitter_next(psy_ui_Splitter*);
+static void splitter_setcursor(psy_ui_Splitter*);
+static psy_ui_RealPoint splitter_vthumbcenter(const psy_ui_Splitter*);
+static psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter*);
+static void psy_ui_splitter_onbutton(psy_ui_Splitter*);
+static void psy_ui_splitter_onshowtoggle(psy_ui_Splitter*, psy_ui_Component* sender);
+static void psy_ui_splitter_onhidetoggle(psy_ui_Splitter*, psy_ui_Component* sender);
 // vtable
 static psy_ui_ComponentVtable vtable;
-static psy_ui_ComponentVtable super_vtable;
+static psy_ui_ComponentVtable super;
 static bool vtable_initialized = FALSE;
 
-static void vtable_init(psy_ui_SplitBar* self)
+static void vtable_init(psy_ui_Splitter* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		super_vtable = *(self->component.vtable);
+		super = *(self->component.vtable);
 		vtable.setalign =
 			(psy_ui_fp_component_setalign)
-			splitbar_setalign;
+			splitter_setalign;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			splitbar_ondraw;
+			splitter_ondraw;
 		vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
-			splitbar_onmousedown;
+			splitter_onmousedown;
 		vtable.onmousemove =
 			(psy_ui_fp_component_onmouseevent)
-			splitbar_onmousemove;
+			splitter_onmousemove;
 		vtable.onmouseup =
 			(psy_ui_fp_component_onmouseevent)
-			splitbar_onmouseup;
+			splitter_onmouseup;
 		vtable.onmouseenter =
 			(psy_ui_fp_component_onmouseenter)
-			splitbar_onmouseenter;
+			splitter_onmouseenter;
+		vtable.hide =
+			(psy_ui_fp_component_hide)
+			splitter_onhide;
+		vtable.show =
+			(psy_ui_fp_component_show)
+			splitter_onshow;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
 }
 // implementation
-void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
+void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
@@ -64,6 +75,8 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 	self->hasrestore = FALSE;
 	self->thumbsize = 30.0;
 	self->isvertical = TRUE;
+	self->toggle = NULL;
+	self->button = NULL;
 	psy_ui_size_init(&self->restoresize);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setstyletypes(&self->component,
@@ -71,24 +84,24 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 		psy_ui_STYLE_SPLITTER_SELECT, psy_INDEX_INVALID);	
 }
 
-void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
+void splitter_ondraw(psy_ui_Splitter* self, psy_ui_Graphics* g)
 {		
-	if (psy_ui_splitbar_isvertical(self)) {
+	if (psy_ui_splitter_isvertical(self)) {
 		psy_ui_RealPoint center;
 
-		center = splitbar_vthumbcenter(self);
+		center = splitter_vthumbcenter(self);
 		psy_ui_drawline(g, center, psy_ui_realpoint_make(center.x,
 			center.y + self->thumbsize));
 	} else {
 		psy_ui_RealPoint center;
 
-		center = splitbar_hthumbcenter(self);
+		center = splitter_hthumbcenter(self);
 		psy_ui_drawline(g, center,
 			psy_ui_realpoint_make(center.x + self->thumbsize, center.y));
 	}
 }
 
-psy_ui_RealPoint splitbar_vthumbcenter(const psy_ui_SplitBar* self)
+psy_ui_RealPoint splitter_vthumbcenter(const psy_ui_Splitter* self)
 {	
 	psy_ui_RealSize size;
 
@@ -97,7 +110,7 @@ psy_ui_RealPoint splitbar_vthumbcenter(const psy_ui_SplitBar* self)
 		size.height / 2 - self->thumbsize / 2);
 }
 
-psy_ui_RealPoint splitbar_hthumbcenter(const psy_ui_SplitBar* self)
+psy_ui_RealPoint splitter_hthumbcenter(const psy_ui_Splitter* self)
 {
 	psy_ui_RealSize size;
 
@@ -106,12 +119,12 @@ psy_ui_RealPoint splitbar_hthumbcenter(const psy_ui_SplitBar* self)
 		size.height / 2);
 }
 
-void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
+void splitter_onmousedown(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {	
 	if (ev->button == 2) {		
 		psy_ui_Component* prev;
 
-		prev = splitbar_prev(self);
+		prev = splitter_prev(self);
 		if (prev) {
 			if (prev->align == psy_ui_ALIGN_LEFT ||
 					prev->align == psy_ui_ALIGN_RIGHT) {
@@ -161,7 +174,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		} else {
 			self->dragoffset = ev->pt.y;
 		}		
-		splitbar_setcursor(self);
+		splitter_setcursor(self);
 	}
 	if (self->resize) {
 		psy_ui_component_addstylestate(&self->component,
@@ -169,7 +182,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
+void splitter_onmousemove(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {
 	if (self->resize == 1) {		
 		psy_ui_RealRectangle position;
@@ -187,14 +200,14 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		} else {
 			parentposition = position;
 		}
-		prev = splitbar_prev(self);
+		prev = splitter_prev(self);
 		if (prev) {
 			prevposition = psy_ui_component_position(prev);
 		} else {
 			prevposition = psy_ui_component_position(
 				psy_ui_component_parent(&self->component));
 		}
-		next = splitbar_next(self);
+		next = splitter_next(self);
 		if (next) {
 			nextposition = psy_ui_component_position(next);
 		} else {
@@ -242,10 +255,10 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	} else {
 		psy_ui_component_invalidate(&self->component);
 	}
-	splitbar_setcursor(self);
+	splitter_setcursor(self);
 }
 
-void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
+void splitter_onmouseup(psy_ui_Splitter* self, psy_ui_MouseEvent* ev)
 {			
 	if (ev->button == 1) {
 		psy_ui_RealRectangle position;
@@ -253,8 +266,8 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* next;
 
 		psy_ui_component_releasecapture(&self->component);
-		prev = splitbar_prev(self);
-		next = splitbar_next(self);
+		prev = splitter_prev(self);
+		next = splitter_next(self);
 		if (prev) {
 			psy_signal_preventall(&prev->signal_hide);
 			psy_ui_component_hide(prev);
@@ -311,7 +324,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		if (next) {
 			psy_ui_component_show(next);
 		}
-		splitbar_setcursor(self);		
+		splitter_setcursor(self);		
 		if (prev) {
 			psy_ui_component_invalidate(prev);
 		}
@@ -325,13 +338,13 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		psy_ui_STYLESTATE_SELECT);	
 }
 
-void splitbar_onmouseenter(psy_ui_SplitBar* self)
+void splitter_onmouseenter(psy_ui_Splitter* self)
 {		
-	super_vtable.onmouseenter(psy_ui_splitbar_base(self));
-	splitbar_setcursor(self);	
+	super.onmouseenter(psy_ui_splitter_base(self));
+	splitter_setcursor(self);	
 }
 
-psy_ui_Component* splitbar_prev(psy_ui_SplitBar* self)
+psy_ui_Component* splitter_prev(psy_ui_Splitter* self)
 {
 	psy_ui_Component* rv;
 	psy_List* c;
@@ -358,7 +371,7 @@ psy_ui_Component* splitbar_prev(psy_ui_SplitBar* self)
 	return rv;
 }
 
-psy_ui_Component* splitbar_next(psy_ui_SplitBar* self)
+psy_ui_Component* splitter_next(psy_ui_Splitter* self)
 {
 	psy_ui_Component* rv;
 	psy_List* c;
@@ -385,20 +398,96 @@ psy_ui_Component* splitbar_next(psy_ui_SplitBar* self)
 	return rv;
 }
 
-void splitbar_setcursor(psy_ui_SplitBar* self)
+void splitter_setcursor(psy_ui_Splitter* self)
 {	
 	psy_ui_component_setcursor(&self->component,
-		(psy_ui_splitbar_isvertical(self))
+		(psy_ui_splitter_isvertical(self))
 		? psy_ui_CURSORSTYLE_COL_RESIZE
 		: psy_ui_CURSORSTYLE_ROW_RESIZE);
 }
 
-void splitbar_setalign(psy_ui_SplitBar* self, psy_ui_AlignType align)
+void splitter_setalign(psy_ui_Splitter* self, psy_ui_AlignType align)
 {	
 	self->isvertical = (self->component.align == psy_ui_ALIGN_LEFT ||
 		self->component.align == psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setpreferredsize(&self->component,
-		(psy_ui_splitbar_isvertical(self))
+		(psy_ui_splitter_isvertical(self))
 		? psy_ui_size_make_em(1.3, 1.5)
 		: psy_ui_size_make_em(1.5, 0.5));
+}
+
+void splitter_onhide(psy_ui_Splitter* self)
+{
+	super.hide(&self->component);
+	if (self->toggle) {
+		psy_signal_prevent(&self->toggle->signal_hide, self,
+			psy_ui_splitter_onhidetoggle);
+		psy_ui_component_hide_align(self->toggle);
+		psy_signal_enable(&self->toggle->signal_hide, self,
+			psy_ui_splitter_onhidetoggle);
+	}
+	if (self->button) {
+		psy_ui_button_disablehighlight(self->button);
+	}
+}
+
+void splitter_onshow(psy_ui_Splitter* self)
+{
+	super.show(&self->component);
+	if (self->toggle) {
+		psy_signal_prevent(&self->toggle->signal_show, self,
+			psy_ui_splitter_onshowtoggle);
+		psy_ui_component_show_align(self->toggle);
+		psy_signal_enable(&self->toggle->signal_show, self,
+			psy_ui_splitter_onshowtoggle);
+	}
+	if (self->button) {
+		psy_ui_button_highlight(self->button);
+	}
+}
+
+void psy_ui_splitter_settoggle(psy_ui_Splitter* self, psy_ui_Component* toggle)
+{
+	if (self->toggle) {
+		psy_signal_disconnect(&self->toggle->signal_hide, self,
+			psy_ui_splitter_onhidetoggle);
+		psy_signal_disconnect(&self->toggle->signal_show, self,
+			psy_ui_splitter_onshowtoggle);
+	}
+	self->toggle = toggle;
+	psy_signal_connect(&self->toggle->signal_hide, self,
+		psy_ui_splitter_onhidetoggle);
+	psy_signal_connect(&self->toggle->signal_show, self,
+		psy_ui_splitter_onshowtoggle);
+}
+
+void psy_ui_splitter_setbutton(psy_ui_Splitter* self, psy_ui_Button* button)
+{	
+	if (self->button) {
+		psy_signal_disconnect(&self->button->signal_clicked, self,
+			psy_ui_splitter_onbutton);
+	}
+	self->button = button;
+	psy_signal_connect(&self->button->signal_clicked, self,
+		psy_ui_splitter_onbutton);
+}
+
+
+void psy_ui_splitter_onbutton(psy_ui_Splitter* self)
+{
+	if (psy_ui_component_visible(&self->component)) {
+		psy_ui_component_hide(&self->component);
+	} else {
+		psy_ui_component_show(&self->component);
+	}
+}
+
+void psy_ui_splitter_onshowtoggle(psy_ui_Splitter* self, psy_ui_Component* sender)
+{	
+	psy_ui_component_show(&self->component);
+}
+
+void psy_ui_splitter_onhidetoggle(psy_ui_Splitter* self, psy_ui_Component* sender)
+{
+	psy_ui_component_hide(&self->component);
 }

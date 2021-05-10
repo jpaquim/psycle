@@ -1332,8 +1332,8 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setmargin(&self->buttons.component, margin);
 	instrumentnotemapview_initentries(self, workspace);	
 	instrumentnotemapview_inittable(self, workspace);
-	psy_ui_splitbar_init(&self->splitter, &self->component);
-	psy_ui_component_setalign(psy_ui_splitbar_base(&self->splitter),
+	psy_ui_splitter_init(&self->splitter, &self->component);
+	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitter),
 		psy_ui_ALIGN_BOTTOM);
 	instrumentnotemapview_setmetrics(self, self->metrics);
 	psy_signal_connect(&self->buttons.add.signal_clicked, self,

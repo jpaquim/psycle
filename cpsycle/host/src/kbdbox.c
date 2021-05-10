@@ -157,7 +157,7 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_removestylestate(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}		
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (self->keycode == psy_ui_KEY_CONTROL) {
 		self->state->ctrl = !self->state->ctrl;
 		if (self->state->ctrl) {
@@ -167,7 +167,7 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_removestylestate(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (self->keycode == psy_ui_KEY_MENU) {
 		self->state->alt = !self->state->alt;
 		if (self->state->alt) {
@@ -177,7 +177,7 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_removestylestate(&self->component,
 				psy_ui_STYLESTATE_SELECT);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	} else {
 		psy_ui_component_addstylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);		

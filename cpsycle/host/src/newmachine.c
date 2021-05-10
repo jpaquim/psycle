@@ -563,7 +563,7 @@ void newmachinecategorybar_ondragover(NewMachineCategoryBar* self, psy_ui_DragEv
 		component = (psy_ui_Component*)p->entry;
 		position = psy_ui_component_position(component);
 		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
-			ev->mouse.event.preventdefault = TRUE;
+			ev->mouse.event.default_prevented = TRUE;
 			break;
 		}
 	}	
@@ -1215,7 +1215,7 @@ bool newmachine_selectedmachineinfo(const NewMachine* self,
 
 void newmachine_onmousedown(NewMachine* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void newmachine_updateplugins(NewMachine* self)

@@ -300,7 +300,7 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 		} else {
 			psy_audio_machine_bypass(self->intern.machine);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (effectui_hittestcoord(self, ev->pt,
 			&self->intern.skin->generator.mute) ||
 		effectui_hittestcoord(self, ev->pt,
@@ -310,12 +310,12 @@ void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 		} else {
 			psy_audio_machine_mute(self->intern.machine);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	} else if (effectui_hittestpan(self, ev->pt, &self->intern.mx)) {
 		self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
-	if (!ev->event.bubble) {
+	if (!ev->event.bubbles) {
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -385,7 +385,7 @@ void effectui_onmousedoubleclick(EffectUi* self, psy_ui_MouseEvent* ev)
 		} else {
 			effectui_showparameters(self, self->intern.view);
 		}
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 

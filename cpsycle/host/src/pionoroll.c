@@ -356,7 +356,7 @@ void pianokeyboard_onmousedown(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 {	
 	assert(self);
 
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
