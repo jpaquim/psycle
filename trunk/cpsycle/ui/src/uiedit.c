@@ -9,7 +9,7 @@
 
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
-static void psy_ui_edit_onkeydown(psy_ui_Edit*, psy_ui_KeyEvent*);
+static void psy_ui_edit_onkeydown(psy_ui_Edit*, psy_ui_KeyboardEvent*);
 static void psy_ui_edit_onfocus(psy_ui_Edit*);
 static void psy_ui_edit_onfocuslost(psy_ui_Edit*);
 static void psy_ui_edit_onmousehook(psy_ui_Edit*, psy_ui_App* sender,
@@ -159,29 +159,29 @@ void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax)
 }
 
 // signal_accept event handling
-void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyEvent* ev)
+void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyboardEvent* ev)
 {
 	assert(self);
 
 	if (self->isinputfield) {
 		switch (ev->keycode) {
 		case psy_ui_KEY_ESCAPE:
-			psy_ui_keyevent_preventdefault(ev);
+			psy_ui_keyboardevent_prevent_default(ev);
 			self->preventedit = TRUE;
 			psy_ui_app_stopmousehook(psy_ui_app());
 			psy_signal_emit(&self->signal_reject, self, 0);
-			psy_ui_keyevent_preventdefault(ev);			
+			psy_ui_keyboardevent_prevent_default(ev);
 			break;
 		case psy_ui_KEY_RETURN:
 			self->preventedit = TRUE;
 			psy_ui_app_stopmousehook(psy_ui_app());
 			psy_signal_emit(&self->signal_accept, self, 0);
-			psy_ui_keyevent_preventdefault(ev);			
+			psy_ui_keyboardevent_prevent_default(ev);
 			break;
 		default:
 			break;
 		}
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }
 

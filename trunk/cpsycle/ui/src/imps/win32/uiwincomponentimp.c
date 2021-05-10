@@ -1288,7 +1288,7 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
-	if (ev->event.bubble) {
+	if (ev->event.bubbles) {
 		self->component->vtable->onmousemove(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousemove,
 			self->component, 1, ev);

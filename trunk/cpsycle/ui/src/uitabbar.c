@@ -415,5 +415,5 @@ void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
 			psy_ui_tabbar_select(self, self->selected - 1);
 		}
 	}		
-	psy_ui_mouseevent_preventdefault(ev);
+	psy_ui_mouseevent_prevent_default(ev);
 }

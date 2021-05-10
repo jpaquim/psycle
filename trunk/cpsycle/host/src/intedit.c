@@ -17,9 +17,9 @@ static void intedit_ondestroy(IntEdit*, psy_ui_Component* sender);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender);
 
 // implementation
@@ -134,18 +134,18 @@ void intedit_onmoreclicked(IntEdit* self, psy_ui_Component* sender)
 }
 
 void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
 	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE) {
 		intedit_setvalue(self, self->restore);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		int value;
 
 		psy_ui_component_setfocus(&self->component);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		value = intedit_value(self);
 		if (self->maxval != 0 && self->minval != 0) {
 			value = psy_min(psy_max(value, self->minval), self->maxval);
@@ -153,13 +153,13 @@ void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
 		intedit_setvalue(self, value);
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void intedit_oneditkeyup(IntEdit* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void intedit_oneditfocuslost(IntEdit* self , psy_ui_Component* sender)

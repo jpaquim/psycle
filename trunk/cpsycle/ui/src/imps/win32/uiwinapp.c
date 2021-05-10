@@ -270,15 +270,15 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				pt_client.y = (SHORT)HIWORD(lParam);				
 				ScreenToClient(imp->hwnd, &pt_client);				
 				tm = psy_ui_component_textmetric(imp->component);				
-				psy_ui_mouseevent_init(&ev,
-					pt_client.x, pt_client.y,
+				psy_ui_mouseevent_init_all(&ev,
+					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel,
 					imp->component, 1, &ev);
-				preventdefault = ev.event.preventdefault;				
+				preventdefault = ev.event.default_prevented;
 			}
 			break;
 			default:
@@ -616,8 +616,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				} else {
 					psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev,
-						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+					psy_ui_mouseevent_init_all(&ev,
+						psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
 						wParam, 0, GetKeyState(VK_SHIFT) < 0,
 						GetKeyState(VK_CONTROL) < 0);
 					adjustcoordinates(imp->component, &ev.pt);
@@ -650,9 +650,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);
 				ScreenToClient(imp->hwnd, &pt_client);				
-				psy_ui_mouseevent_init(&ev,
-					pt_client.x,
-					pt_client.y,
+				psy_ui_mouseevent_init_all(&ev,
+					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
@@ -660,7 +659,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
-				preventdefault = ev.event.preventdefault;
+				preventdefault = ev.event.default_prevented;
 				if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
 					if (deltaperline != 0) {
 						accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
@@ -788,22 +787,22 @@ bool handle_keyevent(psy_ui_Component* component,
 	psy_ui_fp_component_onkeyevent fp,
 	psy_Signal* signal)
 {
-	psy_ui_KeyEvent ev;
+	psy_ui_KeyboardEvent ev;
 	bool preventdefault;
 
-	psy_ui_keyevent_init(&ev, (int)wParam, lParam,
+	psy_ui_keyboardevent_init_all(&ev, (int)wParam, lParam,
 		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 		(lParam & 0x40000000) == 0x40000000);
-	psy_ui_keyevent_settarget(&ev, eventtarget(component));
+	ev.event.target = eventtarget(component);
 	fp(component, &ev);
 	psy_signal_emit(signal, component, 1, &ev);
-	if (ev.event.bubble != FALSE) {
+	if (ev.event.bubbles != FALSE) {
 		sendmessagetoparent(winimp, message, wParam, lParam);
 	} else {
 		psy_list_free(winapp->targetids);
 		winapp->targetids = NULL;
 	}
-	preventdefault = ev.event.preventdefault;
+	preventdefault = ev.event.default_prevented;
 	if (preventdefault) {
 		winimp->preventwmchar = 1;
 	}
@@ -819,12 +818,12 @@ void handle_mouseevent(psy_ui_Component* component,
 	psy_ui_MouseEvent ev;	
 	bool up;	
 
-	psy_ui_mouseevent_init(&ev,
-		(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+	psy_ui_mouseevent_init_all(&ev,
+		psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
 		button, 0, GetKeyState(VK_SHIFT) < 0,
 		GetKeyState(VK_CONTROL) < 0);
 	adjustcoordinates(component, &ev.pt);
-	psy_ui_mouseevent_settarget(&ev, eventtarget(component));
+	ev.target = eventtarget(component);
 	up = FALSE;
 	switch (message) {
 	case WM_LBUTTONUP:
@@ -849,25 +848,25 @@ void handle_mouseevent(psy_ui_Component* component,
 	default:
 		break;
 	}
-	if (ev.event.bubble != FALSE) {
+	if (ev.event.bubbles != FALSE) {
 		fp(component, &ev);
 		psy_signal_emit(signal, component, 1, &ev);
 	}
-	if (ev.event.bubble != FALSE) {
+	if (ev.event.bubbles != FALSE) {
 		bool bubble;
 		
 		bubble = sendmessagetoparent(winimp, message, wParam, lParam);
 		if (up && !bubble) {
 			psy_ui_app_stopdrag(psy_ui_app());
 		} else if (message == WM_MOUSEMOVE && !bubble) {
-			if (!psy_ui_app()->dragevent.mouse.event.preventdefault) {
+			if (!psy_ui_app()->dragevent.mouse.event.default_prevented) {
 				psy_ui_component_setcursor(psy_ui_app()->main,
 					psy_ui_CURSORSTYLE_NODROP);
 			} else {
 				psy_ui_component_setcursor(psy_ui_app()->main,
 					psy_ui_CURSORSTYLE_GRAB);
 			}
-			psy_ui_app()->dragevent.mouse.event.preventdefault = FALSE;
+			psy_ui_app()->dragevent.mouse.event.default_prevented = FALSE;
 		}
 	} else if (up) {		
 		psy_ui_app_stopdrag(psy_ui_app());
@@ -976,8 +975,8 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			psy_ui_MouseEvent ev;
 			MOUSEHOOKSTRUCT* pMouseStruct = (MOUSEHOOKSTRUCT*)lParam;
 
-			psy_ui_mouseevent_init(&ev,
-				pMouseStruct->pt.x, pMouseStruct->pt.y,
+			psy_ui_mouseevent_init_all(&ev,
+				psy_ui_realpoint_make(pMouseStruct->pt.x, pMouseStruct->pt.y),
 				0, 0, GetKeyState(VK_SHIFT) < 0,
 				GetKeyState(VK_CONTROL) < 0);
 			psy_signal_emit(&winapp->app->signal_mousehook, winapp->app,
@@ -985,8 +984,8 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		} else if (wParam == WM_RBUTTONDOWN) {
 			psy_ui_MouseEvent ev;
 
-			psy_ui_mouseevent_init(&ev,
-				(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
+			psy_ui_mouseevent_init_all(&ev,
+				psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
 				1, 0, GetKeyState(VK_SHIFT) < 0,
 				GetKeyState(VK_CONTROL) < 0);
 			psy_signal_emit(&winapp->app->signal_mousehook, winapp->app,

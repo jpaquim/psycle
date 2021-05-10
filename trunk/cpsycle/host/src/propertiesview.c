@@ -237,7 +237,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 		return;
 	}
 	if (self->state->preventmousepropagation) {
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 
@@ -388,7 +388,7 @@ static void propertiesrenderer_onmousedown(PropertiesRenderer*,
 static void propertiesrenderer_oninputdefineraccept(PropertiesRenderer*,
 	InputDefiner* sender);
 static void propertiesrenderer_oneditkeydown(PropertiesRenderer*,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev);
 static void propertiesrenderer_oneditaccept(PropertiesRenderer*,
 	psy_ui_Edit* sender);
 static void propertiesrenderer_oneditreject(PropertiesRenderer*,
@@ -618,21 +618,21 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 
 	if (ev->button != 1) {
 		if (self->state.preventmousepropagation) {
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 		return;
 	}
 	selected = self->state.selected;
 	if (!selected || psy_ui_component_visible(psy_ui_edit_base(&self->edit))) {
 		if (self->state.preventmousepropagation) {
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 		return;
 	}	
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 	if (!self->state.property || psy_property_readonly(selected)) {
 		if (self->state.preventmousepropagation) {
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 		return;
 	}
@@ -640,7 +640,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 			psy_property_ischoiceitem(selected)) {
 		psy_signal_emit(&self->signal_changed, self, 1, selected);
 		if (self->state.preventmousepropagation) {
-			psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
 		return;
 	}
@@ -650,7 +650,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self,
 		propertiesrenderer_checkedit(self, selected);
 	}
 	if (self->state.preventmousepropagation) {
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 
@@ -771,7 +771,7 @@ void propertiesrenderer_showedit(PropertiesRenderer* self,
 }
 
 void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {	
 	if (self->state.selected && psy_property_ishex(self->state.selected)) {
 		if ((ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) ||
@@ -779,9 +779,9 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 			(ev->keycode < psy_ui_KEY_HELP)) {
 			return;
 		}
-		psy_ui_keyevent_preventdefault(ev);		
+		psy_ui_keyboardevent_prevent_default(ev);		
 	}
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void propertiesrenderer_oneditaccept(PropertiesRenderer* self,
@@ -1110,13 +1110,13 @@ void propertiesview_onfocus(PropertiesView* self)
 void propertiesview_onmousedown(PropertiesView* self, psy_ui_MouseEvent* ev)
 {	
 	if (self->renderer.state.preventmousepropagation) {
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 
 void propertiesview_onmouseup(PropertiesView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->renderer.state.preventmousepropagation) {
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }

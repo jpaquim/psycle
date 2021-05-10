@@ -32,7 +32,7 @@ static void presetsbar_onimport(PresetsBar*, psy_ui_Component* sender);
 static void presetsbar_onexport(PresetsBar*, psy_ui_Component* sender);
 static void presetsbar_onsavepresets(PresetsBar*, psy_ui_Component* sender);
 static void presetsbar_onsavenameeditkeydown(PresetsBar*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void presetsbar_updatesavename(PresetsBar*);
 
 void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
@@ -269,7 +269,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 }
 
 void presetsbar_onsavenameeditkeydown(PresetsBar* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		intptr_t index;
@@ -279,11 +279,11 @@ void presetsbar_onsavenameeditkeydown(PresetsBar* self,
 		presetsbar_buildprograms(self);
 		psy_ui_combobox_setcursel(&self->programbox, index);		
 		psy_ui_component_setfocus(&self->component);		
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		presetsbar_updatesavename(self);
 		psy_ui_component_setfocus(&self->component);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	}
 }
 

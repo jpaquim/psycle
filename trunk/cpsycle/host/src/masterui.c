@@ -154,7 +154,7 @@ void masterui_onmousedoubleclick(MasterUi* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {				
 		masterui_showparameters(self, self->intern.view);		
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }
 

@@ -133,8 +133,8 @@ void keynames_release(void)
 // prototypes
 static void inputdefiner_ondestroy(InputDefiner*);
 static void inputdefiner_ondraw(InputDefiner*, psy_ui_Graphics*);
-static void inputdefiner_onkeydown(InputDefiner*, psy_ui_KeyEvent*);
-static void inputdefiner_onkeyup(InputDefiner*, psy_ui_KeyEvent*);
+static void inputdefiner_onkeydown(InputDefiner*, psy_ui_KeyboardEvent*);
+static void inputdefiner_onkeyup(InputDefiner*, psy_ui_KeyboardEvent*);
 static void inputdefiner_onfocus(InputDefiner*);
 static void inputdefiner_onfocuslost(InputDefiner*);
 static void inputdefiner_onmousehook(InputDefiner*, psy_ui_App* sender,
@@ -255,7 +255,7 @@ void inputdefiner_ondraw(InputDefiner* self, psy_ui_Graphics* g)
 	}
 }
 
-void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
+void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 {
 	bool alt;
 	bool shift;
@@ -263,9 +263,9 @@ void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 
 	assert(self);
 
-	shift = ev->shift;
-	ctrl = ev->ctrl;
-	alt = ev->alt;
+	shift = ev->shift_key;
+	ctrl = ev->ctrl_key;
+	alt = ev->alt_key;
 	if (ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL || 
 			ev->keycode == psy_ui_KEY_MENU) {
 		if (self->regularkey == 0) {
@@ -279,10 +279,10 @@ void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt);
 	}
 	psy_ui_component_invalidate(&self->component);
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
-void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
+void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 {
 	bool alt;
 	bool shift;
@@ -294,9 +294,9 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 
 	assert(self);
 
-	alt = ev->alt;
-    shift = ev->shift;
-    ctrl = ev->ctrl;
+	alt = ev->alt_key;
+    shift = ev->shift_key;
+    ctrl = ev->ctrl_key;
 	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt);	
 	if (self->regularkey) {
 		if (inputalt) {
@@ -312,7 +312,7 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 		self->input = psy_audio_encodeinput(0, shift, ctrl, alt);
 	}
 	psy_ui_component_invalidate(&self->component);
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void inputdefiner_onfocus(InputDefiner* self)

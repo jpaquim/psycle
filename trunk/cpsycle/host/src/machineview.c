@@ -36,7 +36,7 @@ static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
-static void machineview_onkeydown(MachineView*, psy_ui_KeyEvent*);
+static void machineview_onkeydown(MachineView*, psy_ui_KeyboardEvent*);
 static void machineview_onfocus(MachineView*);
 static void machineview_selectsection(MachineView*, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options);
@@ -203,12 +203,12 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 	} else {
 		self->shownewmachine = FALSE;
 	}
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_mouseevent_stoppropagation(ev);
+	psy_ui_mouseevent_stop_propagation(ev);
 }
 
 void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
@@ -229,7 +229,7 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 				NEWMACHINE_APPEND);
 		}
 		self->shownewmachine = FALSE;
-		psy_ui_mouseevent_stoppropagation(ev);
+		psy_ui_mouseevent_stop_propagation(ev);
 	}	else if (ev->button == 2) {
 		if (psy_ui_tabbar_selected(&self->tabbar) ==
 				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
@@ -242,7 +242,7 @@ void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void machineview_onkeydown(MachineView* self, psy_ui_KeyEvent* ev)
+void machineview_onkeydown(MachineView* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_section(&self->component) ==
@@ -256,7 +256,7 @@ void machineview_onkeydown(MachineView* self, psy_ui_KeyEvent* ev)
 		} else if (self->workspace->gearvisible) {
 			workspace_togglegear(self->workspace);
 		}
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	} 
 }
 

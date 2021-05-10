@@ -130,10 +130,6 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->mainhandle = mainhandle;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
-	self->maximizeview.maximized = 0;
-	self->maximizeview.row0 = 1;
-	self->maximizeview.row1 = 1;
-	self->maximizeview.row2 = 1;	
 	self->undosavepoint = 0;
 	self->gearvisible = FALSE;
 	self->machines_undosavepoint = 0;
@@ -2001,4 +1997,22 @@ static void workspace_onscantaskstart(Workspace* self, psy_audio_PluginCatcher* 
 	self->scantaskstart = 1;
 	self->lastscantask = *task;
 	psy_audio_lock_leave(&self->pluginscanlock);
+}
+
+void workspace_apptitle(Workspace* self, char* rv_title)
+{
+	psy_Path path;
+
+	rv_title[0] = '\n';
+	psy_path_init(&path, self->filename);
+	psy_snprintf(rv_title, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
+		psy_path_name(&path), psy_path_ext(&path));	
+}
+
+const char* workspace_songtitle(const Workspace* self)
+{
+	if (self->song) {		
+		return psy_audio_song_title(self->song);
+	}
+	return "";
 }

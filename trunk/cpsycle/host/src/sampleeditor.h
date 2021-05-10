@@ -149,7 +149,7 @@ typedef struct SampleEditor {
 	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
-	psy_ui_SplitBar splitbar;
+	psy_ui_Splitter splitbar;
 	SampleEditorProcessView processview;
 	SampleBox samplebox;	
 	ScrollZoom zoom;

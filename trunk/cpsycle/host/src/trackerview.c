@@ -73,8 +73,8 @@ static void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 static void trackergrid_updatetrackevents(TrackerGrid*,
 	const psy_audio_PatternSelection* clip);
 static void trackergrid_onalign(TrackerGrid*);
-static void trackergrid_onkeydown(TrackerGrid*, psy_ui_KeyEvent*);
-static void trackergrid_onkeyup(TrackerGrid*, psy_ui_KeyEvent*);
+static void trackergrid_onkeydown(TrackerGrid*, psy_ui_KeyboardEvent*);
+static void trackergrid_onkeyup(TrackerGrid*, psy_ui_KeyboardEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
@@ -809,7 +809,7 @@ void trackergrid_end(TrackerGrid* self)
 	trackergrid_invalidatecursor(self);
 }
 
-void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
+void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyboardEvent* ev)
 {	
 	assert(self);
 
@@ -821,7 +821,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		kbd = workspace_kbddriver(self->workspace);
 		input.message = psy_EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(ev->keycode,
-			self->chordmode ? 0 : ev->shift, ev->ctrl, ev->alt);
+			self->chordmode ? 0 : ev->shift_key, ev->ctrl_key, ev->alt_key);
 		input.param2 = workspace_octave(self->workspace) * 12;
 		psy_eventdriver_cmd(kbd, "tracker", input, &cmd);
 		if (cmd.id >= CMD_DIGIT0 && cmd.id <= CMD_DIGITF) {
@@ -830,26 +830,26 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 				if (digit != -1) {
 					trackergrid_inputvalue(self, digit, 1);
 					psy_ui_component_invalidate(&self->component);
-					psy_ui_keyevent_stoppropagation(ev);
+					psy_ui_keyboardevent_stop_propagation(ev);
 					return;
 				}
 			}
 		}
 		cmd.id = -1;
 		input.message = psy_EVENTDRIVER_KEYDOWN;
-		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl, ev->alt);
+		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl_key, ev->alt_key);
 		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 		if (cmd.id != -1) {
 			trackergrid_inputnote(self,
 				(psy_dsp_note_t)(cmd.id + workspace_octave(self->workspace) * 12),
 				1);
 			psy_ui_component_invalidate(&self->component);
-			psy_ui_keyevent_stoppropagation(ev);
+			psy_ui_keyboardevent_stop_propagation(ev);
 		}				
 	}	
 }
 
-void trackergrid_onkeyup(TrackerGrid* self, psy_ui_KeyEvent* ev)
+void trackergrid_onkeyup(TrackerGrid* self, psy_ui_KeyboardEvent* ev)
 {
 	assert(self);
 
@@ -858,7 +858,7 @@ void trackergrid_onkeyup(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		self->gridstate->cursor.track = self->chordbegin;
 		trackergrid_scrollleft(self, self->gridstate->cursor);
 		trackergrid_advanceline(self);
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }
 

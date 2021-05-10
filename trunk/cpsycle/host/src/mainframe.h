@@ -89,8 +89,8 @@ typedef struct MainFrame {
 	psy_ui_Component spacerleft;
 	psy_ui_Component spacerright;
 	psy_ui_Terminal terminal;
-	psy_ui_SplitBar splitbar;
-	psy_ui_SplitBar splitbarterminal;
+	psy_ui_Splitter splitbar;
+	psy_ui_Splitter splitbarterminal;
 	Navigation navigation;
 	psy_ui_TabBar tabbar;
 	psy_ui_TabBar helpsettingstabbar;
@@ -106,9 +106,9 @@ typedef struct MainFrame {
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
 	SequencerBar sequencerbar;
-	psy_ui_SplitBar splitbarparamrack;
+	psy_ui_Splitter splitbarparamrack;
 	ParamRack paramrack;
-	psy_ui_SplitBar splitseqeditor;
+	psy_ui_Splitter splitseqeditor;
 	SeqEditor seqeditor;
 	MachineView machineview;
 	PatternView patternview;		
@@ -121,16 +121,16 @@ typedef struct MainFrame {
 	HelpView helpview;	
 	KbdHelp kbdhelp;
 	Gear gear;
-	psy_ui_SplitBar gearsplitter;
+	psy_ui_Splitter gearsplitter;
 	PluginEditor plugineditor;
-	psy_ui_SplitBar splitbarplugineditor;
+	psy_ui_Splitter splitbarplugineditor;
 	VuBar vubar;
 	CPUView cpuview;
-	psy_ui_SplitBar cpusplitter;
+	psy_ui_Splitter cpusplitter;
 	MidiMonitor midimonitor;
-	psy_ui_SplitBar midisplitter;
+	psy_ui_Splitter midisplitter;
 	PlaylistView playlist;
-	psy_ui_SplitBar playlistsplitter;
+	psy_ui_Splitter playlistsplitter;
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;
 #endif
@@ -149,7 +149,8 @@ typedef struct MainFrame {
 	Interpreter interpreter;	
 	int startup;
 	bool startpage;	
-	int pluginscanprogress;	
+	int pluginscanprogress;
+	psy_List* minmaximize;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

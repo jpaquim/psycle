@@ -409,7 +409,7 @@ static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	psy_ui_RealPoint topleft, bool sel);
 static void pluginsview_onpreferredscrollsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
+static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyboardEvent*);
 static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
 	intptr_t* col, intptr_t* row);
 static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
@@ -417,7 +417,7 @@ static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmouseup(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
-static uintptr_t pluginsview_hittest(PluginsView*, double x, double y);
+static uintptr_t pluginsview_hittest(PluginsView*, psy_ui_RealPoint);
 static void pluginsview_computetextsizes(PluginsView*, double width);
 static uintptr_t pluginsview_visilines(PluginsView*);
 static uintptr_t pluginsview_topline(PluginsView*);
@@ -727,22 +727,22 @@ void pluginsview_onpreferredscrollsize(PluginsView* self, const psy_ui_Size* lim
 	}
 }
 
-void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
+void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyboardEvent* ev)
 {
 	psy_Property* selected;
 
 	if (ev->keycode == psy_ui_KEY_CONTROL) {
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 		return;
 	}
-	if (ev->ctrl && ev->keycode == psy_ui_KEY_A) {
+	if (ev->ctrl_key && ev->keycode == psy_ui_KEY_A) {
 		if (self->plugins) {
 			newmachineselection_selectall(&self->selection,
 				psy_property_size(self->currplugins));
 			psy_ui_component_invalidate(&self->component);
 			psy_signal_emit(&self->signal_changed, self, 0);
 		}
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 		return;
 	}
 	selected = pluginsview_selectedplugin(self);
@@ -759,7 +759,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 			case psy_ui_KEY_RETURN:
 				if (selected) {
 					psy_signal_emit(&self->signal_selected, self, 0);
-					psy_ui_keyevent_stoppropagation(ev);
+					psy_ui_keyboardevent_stop_propagation(ev);
 				}
 				break;
 			case psy_ui_KEY_DELETE:
@@ -780,7 +780,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 					psy_ui_component_align(psy_ui_component_parent(
 						psy_ui_component_parent(&self->component)));
 					psy_ui_component_invalidate(&self->component);
-					psy_ui_keyevent_stoppropagation(ev);
+					psy_ui_keyboardevent_stop_propagation(ev);
 				}
 				break;
 			case psy_ui_KEY_DOWN:
@@ -792,7 +792,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				} else {
 					psy_ui_component_focus_next(psy_ui_component_parent(&self->component));
 				}
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;		
 			case psy_ui_KEY_UP:
 				if (row > 0) {
@@ -804,7 +804,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 					psy_ui_component_focus_prev(psy_ui_component_parent(
 						&self->component));
 				}
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;
 			case psy_ui_KEY_PRIOR:
 				if (row > 0) {
@@ -813,7 +813,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 						pluginsview_settopline(self, row);
 					}
 				}
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;
 			case psy_ui_KEY_NEXT:
 				row += 4;
@@ -823,17 +823,17 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				if (row > pluginsview_topline(self) + pluginsview_visilines(self)) {
 					pluginsview_settopline(self, row - pluginsview_visilines(self));
 				}
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;
 			case psy_ui_KEY_LEFT:			
 				if (col > 0) {
 					--col;		
 				}
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;
 			case psy_ui_KEY_RIGHT: {					
 				++col;				
-				psy_ui_keyevent_stoppropagation(ev);
+				psy_ui_keyboardevent_stop_propagation(ev);
 				break;
 			}
 			default:			
@@ -920,9 +920,9 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 	if (ev->button == 1) {		
 		uintptr_t index;
 
-		index = pluginsview_hittest(self, ev->pt.x, ev->pt.y);
+		index = pluginsview_hittest(self, ev->pt);
 		if (index != psy_INDEX_INVALID) {			
-			if (ev->ctrl) {
+			if (ev->ctrl_key) {
 				newmachineselection_toggle(&self->selection, index);
 			} else {
 				if (psy_list_size(self->selection.items) > 1 &&
@@ -953,7 +953,7 @@ void pluginsview_onmouseup(PluginsView* self, psy_ui_MouseEvent* ev)
 }
 
 
-uintptr_t pluginsview_hittest(PluginsView* self, double x, double y)
+uintptr_t pluginsview_hittest(PluginsView* self, psy_ui_RealPoint pt)
 {				
 	if (self->plugins) {
 		psy_List* p;
@@ -970,11 +970,7 @@ uintptr_t pluginsview_hittest(PluginsView* self, double x, double y)
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
-			if (psy_ui_realrectangle_intersect(&r,
-					psy_ui_realpoint_make(x, y))) {
-				// if (pluginenabled(self, (psy_Property*)psy_list_entry(p))) {
-				//	self->selectedplugin = (psy_Property*)psy_list_entry(p);
-				//}
+			if (psy_ui_realrectangle_intersect(&r, pt)) {				
 				break;
 			}		
 			cpx += self->columnwidth;
@@ -996,7 +992,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 		psy_signal_emit(&self->signal_selected, self, 0);
 //		workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
 //			SECTION_ID_MACHINEVIEW_WIRES, 0);
-		psy_ui_mouseevent_stoppropagation(ev);		
+		psy_ui_mouseevent_stop_propagation(ev);		
 	}	
 }
 

@@ -24,7 +24,7 @@ static void songpropertiesview_oneditaccept(SongPropertiesView*,
 static void songpropertiesview_oneditreject(SongPropertiesView*,
 	psy_ui_Edit* sender);
 static void songpropertiesview_onfilterkeys(SongPropertiesView*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void songpropertiesview_ontempoeditchange(SongPropertiesView*,
 	IntEdit* sender);
 static void songpropertiesview_onlpbeditchange(SongPropertiesView*,
@@ -36,9 +36,9 @@ static void songpropertiesview_onetpbeditchange(SongPropertiesView*,
 static void songpropertiesview_oncommentschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_onkeydown(SongPropertiesView*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void songpropertiesview_onkeyup(SongPropertiesView*,
-	psy_ui_Component* sender, psy_ui_KeyEvent*);
+	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static bool songpropertiesview_haseditfocus(SongPropertiesView*);
 static int songpropertiesview_realbpm(SongPropertiesView*);
 static uintptr_t songpropertiesview_realtpb(SongPropertiesView*);
@@ -250,15 +250,15 @@ void songpropertiesview_oneditreject(SongPropertiesView* self,
 }
 
 void songpropertiesview_onfilterkeys(SongPropertiesView* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN && sender != &self->edit_comments.component) {
 		psy_ui_component_setfocus(&self->component);		
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	} else
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		psy_ui_component_setfocus(&self->component);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 	}	
 }
 
@@ -301,10 +301,10 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 }
 
 void songpropertiesview_onkeydown(SongPropertiesView* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
 	if (songpropertiesview_haseditfocus(self)) {		
-		psy_ui_keyevent_stoppropagation(ev);
+		psy_ui_keyboardevent_stop_propagation(ev);
 	}
 }
 
@@ -317,9 +317,9 @@ bool songpropertiesview_haseditfocus(SongPropertiesView* self)
 }
 
 void songpropertiesview_onkeyup(SongPropertiesView* self,
-	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+	psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 int songpropertiesview_realbpm(SongPropertiesView* self)

@@ -17,11 +17,11 @@ static void realedit_ondestroy(RealEdit*, psy_ui_Component* sender);
 static void realedit_onlessclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_onmoreclicked(RealEdit*, psy_ui_Component* sender);
 static void realedit_oneditkeydown(RealEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 static void realedit_oneditkeyup(RealEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 static void realedit_oneditfocuslost(RealEdit*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+	psy_ui_KeyboardEvent*);
 
 // implementation
 void realedit_init(RealEdit* self, psy_ui_Component* parent,
@@ -119,18 +119,18 @@ void realedit_onmoreclicked(RealEdit* self, psy_ui_Component* sender)
 }
 
 void realedit_oneditkeydown(RealEdit* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
 	if (isalpha(ev->keycode) || ev->keycode == psy_ui_KEY_ESCAPE) {
 		realedit_setvalue(self, self->restore);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		return;
 	}
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		realedit_real_t value;
 
 		psy_ui_component_setfocus(&self->component);
-		psy_ui_keyevent_preventdefault(ev);
+		psy_ui_keyboardevent_prevent_default(ev);
 		value = realedit_value(self);
 		if (self->maxval != 0 && self->minval != 0) {
 			value = psy_min(psy_max(value, self->minval), self->maxval);
@@ -138,21 +138,21 @@ void realedit_oneditkeydown(RealEdit* self, psy_ui_Component* sender,
 		realedit_setvalue(self, value);
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void realedit_oneditkeyup(RealEdit* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	psy_ui_keyboardevent_stop_propagation(ev);
 }
 
 void realedit_oneditfocuslost(RealEdit* self , psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+	psy_ui_KeyboardEvent* ev)
 {
 	realedit_real_t value;
 
-	psy_ui_keyevent_preventdefault(ev);
+	psy_ui_keyboardevent_prevent_default(ev);
 	value = realedit_value(self);
 	realedit_setvalue(self, value);
 	psy_signal_emit(&self->signal_changed, self, 0);

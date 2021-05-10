@@ -155,6 +155,7 @@ void cpuview_inittitle(CPUView* self)
 	titlebar_init(&self->titlebar, &self->component, NULL,
 		"Psycle DSP/CPU Performance Monitor");		
 	titlebar_hideonclose(&self->titlebar);
+	titlebar_enabledrag(&self->titlebar, "cpu");
 }
 
 void cpuview_initcoreinfo(CPUView* self)

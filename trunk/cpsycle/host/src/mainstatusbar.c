@@ -16,6 +16,9 @@ static void mainstatusbar_initclockbar(MainStatusBar*);
 static void mainstatusbar_initkbdhelpbutton(MainStatusBar*);
 static void mainstatusbar_initterminalbutton(MainStatusBar*);
 static void mainstatusbar_initprogressbar(MainStatusBar*);
+// events
+static void mainstatusbar_onstatus(MainStatusBar*, Workspace* sender,
+	const char* text);
 // implementation
 void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -41,6 +44,8 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_preventwrap(&self->statusbarlabel);
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
+	workspace_connectstatus(self->workspace, self,
+		(fp_workspace_output)mainstatusbar_onstatus);
 }
 
 void mainstatusbar_initviewstatusbars(MainStatusBar* self)
@@ -102,4 +107,26 @@ void mainstatusbar_initprogressbar(MainStatusBar* self)
 	psy_ui_progressbar_init(&self->progressbar, &self->component, NULL);
 	psy_ui_component_setalign(progressbar_base(&self->progressbar),
 		psy_ui_ALIGN_RIGHT);	
+}
+
+void mainstatusbar_onstatus(MainStatusBar* self, Workspace* sender,
+	const char* text)
+{
+	psy_ui_label_settext(&self->statusbarlabel, text);
+	psy_ui_label_fadeout(&self->statusbarlabel);
+}
+
+void mainstatusbar_updateterminalbutton(MainStatusBar* self)
+{
+	psy_ui_component_setstyletype(
+		psy_ui_button_base(&self->toggleterminal),
+		self->terminalstyleid);
+	psy_ui_component_invalidate(
+		psy_ui_button_base(&self->toggleterminal));
+}
+
+void mainstatusbar_setdefaultstatustext(MainStatusBar* self, const char* text)
+{
+	psy_ui_label_settext(&self->statusbarlabel,text);
+	psy_ui_label_setdefaulttext(&self->statusbarlabel, text);
 }
