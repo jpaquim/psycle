@@ -297,14 +297,14 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	float deltaColR;
 	float deltaColG;
 	float deltaColB;
-	unsigned int polyInnards;
+	psy_ui_Colour polyInnards;
 	double phi;
 	
-	deltaColR = ((self->skin->polycolour.value & 0xFF) / 510.0f) + .45f;
-	deltaColG = ((self->skin->polycolour.value >> 8 & 0xFF) / 510.0f) + .45f;
-	deltaColB = ((self->skin->polycolour.value >> 16 & 0xFF) / 510.0f) + .45f;
+	deltaColR = ((self->skin->polycolour.r) / 510.0f) + .45f;
+	deltaColG = ((self->skin->polycolour.g) / 510.0f) + .45f;
+	deltaColB = ((self->skin->polycolour.b) / 510.0f) + .45f;
 	polyInnards = psy_ui_colour_make_rgb((uint8_t)(192 * deltaColR),
-		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB)).value;
+		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB));
 			
 	center.x = (p2.x - p1.x) / 2 + p1.x;
 	center.y = (p2.y - p1.y) / 2 + p1.y;
@@ -324,7 +324,8 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	tri[2] = move_point(rotate_point(c, phi), center);
 	tri[3] = tri[0];
 	
-	psy_ui_drawsolidpolygon(g, tri, 4, polyInnards, self->skin->wireaacolour.value);
+	psy_ui_drawsolidpolygon(g, tri, 4, psy_ui_colour_colorref(&polyInnards),
+		psy_ui_colour_colorref(&self->skin->wireaacolour));
 }
 
 psy_ui_RealPoint rotate_point(psy_ui_RealPoint pt, double phi)

@@ -274,12 +274,12 @@ void psy_ui_editor_clear(psy_ui_Editor* self)
 
 void psy_ui_editor_setcolour(psy_ui_Editor* self, psy_ui_Colour colour)
 {
-	sci(self, SCI_STYLESETFORE, STYLE_DEFAULT, colour.value);  
+	sci(self, SCI_STYLESETFORE, STYLE_DEFAULT, psy_ui_colour_colorref(&colour));
 }
 
 void psy_ui_editor_setbackgroundcolour(psy_ui_Editor* self, psy_ui_Colour colour)
 {
-	sci(self, SCI_STYLESETBACK, STYLE_DEFAULT, colour.value);  
+	sci(self, SCI_STYLESETBACK, STYLE_DEFAULT, psy_ui_colour_colorref(&colour));
 }
 
 void psy_ui_editor_styleclearall(psy_ui_Editor* self)
@@ -289,7 +289,7 @@ void psy_ui_editor_styleclearall(psy_ui_Editor* self)
 
 void psy_ui_editor_setcaretcolour(psy_ui_Editor* self, psy_ui_Colour colour)
 {
-	sci(self, SCI_SETCARETFORE, colour.value, 0);	
+	sci(self, SCI_SETCARETFORE, psy_ui_colour_colorref(&colour), 0);
 }
 
 void psy_ui_editor_preventedit(psy_ui_Editor* self)

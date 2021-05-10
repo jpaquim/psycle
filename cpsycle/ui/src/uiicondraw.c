@@ -48,8 +48,8 @@ void psy_ui_icondraw_drawarrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, p
 	uint32_t arrowcolour;
 	uint32_t arrowhighlightcolour;
 
-	arrowcolour = self->style->colour.value;
-	arrowhighlightcolour = self->style->colour.value;	
+	arrowcolour = psy_ui_colour_colorref(&self->style->colour);
+	arrowhighlightcolour = psy_ui_colour_colorref(&self->style->colour);
 	psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
 		arrowhighlightcolour);	
 }

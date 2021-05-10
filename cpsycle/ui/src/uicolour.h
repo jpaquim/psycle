@@ -1,11 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_COLOUR_H
 #define psy_ui_COLOUR_H
 
+/* platform */
 #include "../../detail/psydef.h"
-// std
+/* std */
 #include <assert.h>
 
 #ifdef __cplusplus
@@ -19,33 +22,48 @@ typedef struct psy_ui_ColourMode {
 typedef struct psy_ui_Colour
 {
 	psy_ui_ColourMode mode;
-	uint32_t value;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;	
 	uint8_t overlay;
 } psy_ui_Colour;
 
 INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 {	
 	self->mode.set = FALSE;
-	self->value = 0x00000000;
 	self->overlay = 0;
+	self->r = self->g = self->b = self->a;
 }
 
 INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
 {	
-	self->mode.set = TRUE;	
-	self->value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
+	self->mode.set = TRUE;
 	self->overlay = 0;
+	self->a = 0;
+	self->r = r;
+	self->g = g;
+	self->b = b;	
 }
 
 void psy_ui_colour_init_str(psy_ui_Colour* self, const char* str);
 
-INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
+INLINE psy_ui_Colour psy_ui_colour_make(uint32_t colorref)
 {
-	psy_ui_Colour rv;
-	
-	rv.mode.set = TRUE;
-	rv.value = value;
-	rv.overlay = 0;
+	psy_ui_Colour rv;	
+
+	psy_ui_colour_init_rgb(&rv,
+		(uint8_t)((colorref >> 16) & 0xFF),
+		(uint8_t)((colorref >> 8) & 0xFF),
+		(uint8_t)(colorref & 0xFF));	
+	return rv;
+}
+
+INLINE uint32_t psy_ui_colour_colorref(const psy_ui_Colour* self)
+{
+	uint32_t rv;
+
+	rv = (self->r << 16) | (self->g << 8) | (self->b);
 	return rv;
 }
 
@@ -54,20 +72,20 @@ INLINE psy_ui_Colour psy_ui_colour_make_overlay(uint8_t value)
 	psy_ui_Colour rv;
 
 	rv.mode.set = TRUE;
-	rv.value = 0;
 	rv.overlay = value;
+	rv.r = rv.b = rv.g = 0;	
 	return rv;
 }
 
-INLINE psy_ui_Colour psy_ui_colour_make_argb(uint32_t value)
+INLINE psy_ui_Colour psy_ui_colour_make_argb(uint32_t argb)
 {
 	psy_ui_Colour rv;
 	
-	rv.mode.set = TRUE;	
-	//0x00B6C5D1
-	rv.value = ((((value) << 16) & 0xFF0000)
-		| (((value) & 0xFF00)) | (((value >> 16) & 0xFF)));
-	rv.overlay = 0;
+	psy_ui_colour_init_rgb(&rv,		
+		(uint8_t)(argb & 0xFF),
+		(uint8_t)((argb >> 8) & 0xFF),		
+		(uint8_t)((argb >> 16) & 0xFF));
+	rv.a = (uint8_t)((argb >> 24) & 0xFF);
 	return rv;
 }
 
@@ -90,23 +108,16 @@ INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 	psy_ui_Colour rv;
 	
-	rv.mode.set = TRUE;
-	rv.value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
-	rv.overlay = 0;
+	psy_ui_colour_init_rgb(&rv, r, g, b);	
 	return rv;
 }
 
 INLINE void psy_ui_colour_rgb(const psy_ui_Colour* self,
 	uint8_t* r, uint8_t* g, uint8_t* b)
 {
-	uint32_t temp;
-		
-	temp = (self->value & 0xFF);
-	*r = (uint8_t) temp;	
-	temp = ((self->value >> 8) & 0xFF);
-	*g = (uint8_t) temp;	
-	temp = ((self->value >> 16) & 0xFF);
-	*b = (uint8_t) temp;
+	*r = self->r;
+	*g = self->g;
+	*b = self->b;
 }
 
 psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
@@ -116,7 +127,11 @@ psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
 
 INLINE bool psy_ui_equal_colours(const psy_ui_Colour* lhs, const psy_ui_Colour* rhs)
 {
-	return lhs->mode.set && rhs->mode.set && lhs->value == rhs->value;
+	return lhs->mode.set && rhs->mode.set &&
+		(lhs->r == rhs->r) &&
+		(lhs->g == rhs->g) &&
+		(lhs->b == rhs->b) &&		
+		(lhs->a == rhs->a);
 }
 INLINE psy_ui_Colour psy_ui_colour_overlayed(psy_ui_Colour* self,
 	const psy_ui_Colour* colour, double p)
@@ -194,25 +209,25 @@ INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weigh
 		g_p = g / 255.f;
 		b_p = b / 255.f;
 		if (weight < 100) {
-			perc = 0.9; // 50
+			perc = 0.9;				/* 50 */
 		} else if (weight < 200) {
-			perc = 0.86; // 100
+			perc = 0.86;			/* 100 */
 		} else if (weight < 300) {
-			perc = 0.77; // 200
+			perc = 0.77;			/* 200 */
 		} else if (weight < 400) {
-			perc = 0.68; // 300
+			perc = 0.68;			/* 300 */
 		} else if (weight < 500) {
-			perc = 0.61; // 400
+			perc = 0.61;			/* 400 */
 		} else if (weight < 600) {
-			perc = 0.54; // 500
+			perc = 0.54;			/* 500 */
 		} else if (weight < 700) {
-			perc = 0.51; // 600
+			perc = 0.51;			/* 600 */
 		} else if (weight < 800) {
-			perc = 0.46; // 700
+			perc = 0.46;			/* 700 */
 		} else if (weight < 900) {
-			perc = 0.42; // 800
+			perc = 0.42;			/* 800 */
 		} else {
-			perc = 0.34;  // 900
+			perc = 0.34;			/* 900 */
 		}
 		s = (r_p * 0.40) + (g_p * 0.20) + (b_p * 0.40);
 		gain = perc / s;		
@@ -227,31 +242,31 @@ INLINE psy_ui_Colour psy_ui_colour_weighted(const psy_ui_Colour* self, int weigh
 	return *self;
 }
 
-// standard colours
+/* standard colours */
 
 INLINE psy_ui_Colour psy_ui_colour_white(void)
 {
-	return psy_ui_colour_make(0x00FFFFFF);
+	return psy_ui_colour_make_argb(0x00FFFFFF);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_black(void)
 {
-	return psy_ui_colour_make(0x000000);
+	return psy_ui_colour_make_argb(0x00000000);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_red(void)
 {
-	return psy_ui_colour_make(0x000000FF);
+	return psy_ui_colour_make_argb(0x00FF0000);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_green(void)
 {
-	return psy_ui_colour_make(0x0000FF00);
+	return psy_ui_colour_make_argb(0x0000FF00);
 }
 
 INLINE psy_ui_Colour psy_ui_colour_blue(void)
 {
-	return psy_ui_colour_make(0x00FF0000);
+	return psy_ui_colour_make_argb(0x000000FF);
 }
 
 #ifdef __cplusplus

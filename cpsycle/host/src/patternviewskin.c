@@ -165,7 +165,7 @@ void patternviewskin_filleventcolourstable(PatternViewSkin* self)
 		}
 		overlay = psy_ui_colour_make(0x00000000);
 		colour = psy_ui_colour_overlayed(&base, &overlay, (track % 4) * 0.15);
-		psy_table_insert(&self->eventcolours, track, (void*)(uintptr_t)colour.value);
+		psy_table_insert(&self->eventcolours, track, (void*)(uintptr_t)psy_ui_colour_colorref(&colour));
 	}
 }
 
@@ -313,7 +313,7 @@ psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_
 	if (!psy_table_exists(table, track) || (psy_table_size(table) !=
 			numtracks)) {
 		rv = patternviewskin_calculatetrackcolour(track, numtracks, source1, source2);
-		psy_table_insert(table, track, (void*)(uintptr_t)rv.value);
+		psy_table_insert(table, track, (void*)(uintptr_t)psy_ui_colour_colorref(&rv));
 	} else {
 		rv = psy_ui_colour_make((uint32_t)(uintptr_t)psy_table_at(table, track));
 	}
@@ -324,13 +324,13 @@ psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t nu
 	psy_ui_Colour source1, psy_ui_Colour source2)
 {
 	psy_ui_Colour rv;
-	float p0 = (float)((source1.value >> 16) & 0xff);
-	float p1 = (float)((source1.value >> 8) & 0xff);
-	float p2 = (float)(source1.value & 0xff);
+	float p0 = (float)(source1.b);
+	float p1 = (float)(source1.g);
+	float p2 = (float)(source1.r);
 
-	float d0 = (float)((source2.value >> 16) & 0xff);
-	float d1 = (float)((source2.value >> 8) & 0xff);
-	float d2 = (float)(source2.value & 0xff);
+	float d0 = (float)(source2.b);
+	float d1 = (float)(source2.g);
+	float d2 = (float)(source2.r);
 
 	uintptr_t len = numtracks + 1;
 

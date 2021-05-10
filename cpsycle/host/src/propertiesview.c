@@ -672,7 +672,7 @@ void propertiesrenderer_checkdialog(PropertiesRenderer* self,
 			psy_ui_Colour colour;
 
 			colour = psy_ui_colourdialog_colour(&dialog);
-			psy_property_setitem_int(selected, colour.value);
+			psy_property_setitem_int(selected, psy_ui_colour_colorref(&colour));
 			psy_signal_emit(&self->signal_changed, self, 1, selected);
 		}
 		psy_ui_colourdialog_dispose(&dialog);
@@ -699,10 +699,11 @@ void propertiesrenderer_checkdialog(PropertiesRenderer* self,
 			psy_ui_fontdialog_setfontinfo(&dialog, fontinfo);
 			if (psy_ui_fontdialog_execute(&dialog)) {
 				psy_ui_FontInfo fontinfo;
+				char fontstr[256];
 
 				fontinfo = psy_ui_fontdialog_fontinfo(&dialog);
-				psy_property_setitem_font(selected,
-					psy_ui_fontinfo_string(&fontinfo));
+				psy_ui_fontinfo_string(&fontinfo, fontstr, 256);
+				psy_property_setitem_font(selected, fontstr);
 				psy_signal_emit(&self->signal_changed, self, 1, selected);
 			}
 			psy_ui_fontdialog_dispose(&dialog);

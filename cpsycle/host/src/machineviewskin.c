@@ -117,21 +117,14 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 		self->triangle_size = 10;
 		machine_skin_name = NULL;
 	}
-	self->wireaacolour =
-		psy_ui_colour_make(((((self->wirecolour.value & 0x00ff0000)
-			+ ((self->colour.value & 0x00ff0000) * 4)) / 5) & 0x00ff0000) +
-			((((self->wirecolour.value & 0x00ff00)
-				+ ((self->colour.value & 0x00ff00) * 4)) / 5) & 0x00ff00) +
-			((((self->wirecolour.value & 0x00ff)
-				+ ((self->colour.value & 0x00ff) * 4)) / 5) & 0x00ff));
-	self->wireaacolour2 =
-		psy_ui_colour_make((((((self->wirecolour.value & 0x00ff0000))
-			+ ((self->colour.value & 0x00ff0000))) / 2) & 0x00ff0000) +
-			(((((self->wirecolour.value & 0x00ff00))
-				+ ((self->colour.value & 0x00ff00))) / 2) & 0x00ff00) +
-			(((((self->wirecolour.value & 0x00ff))
-				+ ((self->colour.value & 0x00ff))) / 2) & 0x00ff));
-	
+	self->wireaacolour = self->wirecolour;
+	//	psy_ui_colour_make((((self->wirecolour.r + ((self->colour.r * 4)) / 5) +
+	//		((self->wirecolour.g) + ((self->colour.g) * 4)) / 5) +
+	//		((self->wirecolour.b) + ((self->colour.b) * 4)) / 5));
+	self->wireaacolour2 = self->wirecolour;
+	//	psy_ui_colour_make(self->wirecolour.r + (self->colour.r / 2) +
+	//		(self->wirecolour.g) + (self->colour.g / 2) +
+	//		(self->wirecolour.b) + (self->colour.b / 2));	
 	if (machine_skin_name && psy_strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
 		char filename[_MAX_PATH];

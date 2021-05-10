@@ -338,25 +338,29 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLOREDIT: {
-				uint32_t colour;
-				uint32_t bgcolour;
+				uint32_t colorref;
+				uint32_t bgcolorref;
 				HBRUSH brush;
 
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t)lParam);
 				if (imp && imp->component) {
-					colour = psy_ui_component_colour(imp->component).value;
-					bgcolour = psy_ui_component_backgroundcolour(imp->component).value;
+					psy_ui_Colour colour;
+
+					colour = psy_ui_component_colour(imp->component);
+					colorref = psy_ui_colour_colorref(&colour);
+					colour = psy_ui_component_backgroundcolour(imp->component);
+					bgcolorref = psy_ui_colour_colorref(&colour);
 					brush = ((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
 							== psy_ui_SETBACKGROUND)
 						? psy_ui_win_component_details(imp->component)->background
 						: (HBRUSH)GetStockObject(NULL_BRUSH);
 				} else {
-					colour = psy_ui_style(psy_ui_STYLE_ROOT)->colour.value;
-					bgcolour = psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour.value;
+					colorref = psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+					bgcolorref = psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour);
 					brush = winapp->defaultbackgroundbrush;
 				}
-				SetTextColor((HDC)wParam, colour);					
-				SetBkColor((HDC)wParam, bgcolour);					
+				SetTextColor((HDC)wParam, colorref);
+				SetBkColor((HDC)wParam, bgcolorref);
 				return (LRESULT)brush;
 				break; }
 			case WM_ERASEBKGND:
@@ -1049,7 +1053,7 @@ void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
 {
 	DeleteObject(self->defaultbackgroundbrush);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour.value);
+		psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour));
 }
 
 #endif /* PSYCLE_TK_WIN32 */

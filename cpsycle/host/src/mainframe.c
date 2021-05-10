@@ -383,9 +383,12 @@ void mainframe_initviewstatusbars(MainFrame* self)
 
 void mainframe_connectstatusbar(MainFrame* self)
 {	
+	psy_signal_connect(&self->statusbar.zoombox.signal_changed,
+		self, mainframe_onzoomboxchanged);
 	psy_signal_connect(&self->statusbar.toggleterminal.signal_clicked,
 		self, mainframe_ontoggleterminal);
-	psy_signal_connect(&self->statusbar.turnoff.signal_clicked, self, mainframe_onexit);
+	psy_signal_connect(&self->statusbar.turnoff.signal_clicked, self,
+		mainframe_onexit);
 	psy_signal_connect(&self->statusbar.togglekbdhelp.signal_clicked, self,
 		mainframe_ontogglekbdhelp);
 	workspace_connectloadprogress(&self->workspace, self,
