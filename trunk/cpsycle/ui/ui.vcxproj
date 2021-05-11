@@ -229,6 +229,7 @@
     <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c" />
     <ClCompile Include="src\uialigner.c" />
     <ClCompile Include="src\uiapp.c" />
+    <ClCompile Include="src\uiappstyles.c" />
     <ClCompile Include="src\uibitmap.c" />
     <ClCompile Include="src\uiborder.c" />
     <ClCompile Include="src\uibutton.c" />
@@ -258,6 +259,7 @@
     <ClCompile Include="src\uilabel.c" />
     <ClCompile Include="src\uilclaligner.c" />
     <ClCompile Include="src\uilistbox.c" />
+    <ClCompile Include="src\uimaterial.c" />
     <ClCompile Include="src\uinotebook.c" />
     <ClCompile Include="src\uiopendialog.c" />
     <ClCompile Include="src\uiprogressbar.c" />
@@ -295,6 +297,7 @@
     <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h" />
     <ClInclude Include="src\uialigner.h" />
     <ClInclude Include="src\uiapp.h" />
+    <ClInclude Include="src\uiappstyles.h" />
     <ClInclude Include="src\uibitmap.h" />
     <ClInclude Include="src\uiborder.h" />
     <ClInclude Include="src\uibutton.h" />
@@ -325,6 +328,7 @@
     <ClInclude Include="src\uilabel.h" />
     <ClInclude Include="src\uilclaligner.h" />
     <ClInclude Include="src\uilistbox.h" />
+    <ClInclude Include="src\uimaterial.h" />
     <ClInclude Include="src\uinotebook.h" />
     <ClInclude Include="src\uiopendialog.h" />
     <ClInclude Include="src\uiprogressbar.h" />

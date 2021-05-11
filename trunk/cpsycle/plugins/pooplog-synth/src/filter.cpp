@@ -2,6 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include "../detail/prefix.h"
+
+
 #include "filter.h"
 
 #define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))

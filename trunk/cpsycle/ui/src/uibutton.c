@@ -102,7 +102,7 @@ void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
 	assert(self);
 
 	psy_ui_button_init_connect(self, parent, view, context, fp);
-	psy_ui_button_settext(self, text);
+	psy_ui_button_settext(self, text);	
 }
 
 psy_ui_Button* psy_ui_button_alloc(void)
@@ -412,12 +412,7 @@ bool psy_ui_button_highlighted(const psy_ui_Button* self)
 
 void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
 {	
-	if (self->component.style.currstyle->colour.mode.set != colour.mode.set ||			
-			psy_ui_colour_colorref(&self->component.style.currstyle->colour) !=
-			psy_ui_colour_colorref(&colour)) {
-		psy_ui_colour_set(&self->component.style.currstyle->colour, colour);
-		psy_ui_component_invalidate(&self->component);
-	}
+	psy_ui_component_setcolour(&self->component, colour);	
 }
 
 void psy_ui_button_settextalignment(psy_ui_Button* self,

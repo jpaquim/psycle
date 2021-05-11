@@ -1,15 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "signal.h"
-// std
+/* std */
 #include <stdlib.h>
 #include <stdarg.h>          
 
-// psy_Slot
-// implementation
+/*
+** psy_Slot
+** implementation
+*/
 void psy_slot_init_all(psy_Slot* self, void* context, void* fp)
 {
 	assert(self);
@@ -35,8 +39,10 @@ psy_Slot* psy_slot_allocinit_all(void* context, void* fp)
 	return rv;
 }
 
-// psy_Signal
-// prototypes
+/*
+** psy_Signal
+** prototypes
+*/
 static void psy_signal_notify(psy_Signal*, void* sender);
 static void psy_signal_notify1(psy_Signal*, void* sender, void* param1);
 static void psy_signal_notify2(psy_Signal*, void* sender, void* param1,
@@ -56,7 +62,7 @@ typedef void (*signalcallback1)(void*, void*, void*);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
 typedef void (*signalcallback3)(void*, void*, void*, void*, void*);
 typedef void (*signalcallback4)(void*, void*, void*, void*, void*, void*);
-// implementation
+/* implementation */
 void psy_signal_init(psy_Signal* self)
 {
 	assert(self);

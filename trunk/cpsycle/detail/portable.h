@@ -46,7 +46,7 @@ INLINE char* psy_strdup(const char* str)
 #pragma warning(pop)
 }
 
-INLINE intptr_t psy_strlen(const char* str)
+INLINE uintptr_t psy_strlen(const char* str)
 {	
 	return (str)
 		? strlen(str)

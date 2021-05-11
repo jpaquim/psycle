@@ -419,7 +419,7 @@ void splitter_setalign(psy_ui_Splitter* self, psy_ui_AlignType align)
 void splitter_onhide(psy_ui_Splitter* self)
 {
 	super.hide(&self->component);
-	if (self->toggle) {
+	if (self->toggle && psy_ui_component_visible(self->toggle)) {
 		psy_signal_prevent(&self->toggle->signal_hide, self,
 			psy_ui_splitter_onhidetoggle);
 		psy_ui_component_hide_align(self->toggle);
@@ -434,7 +434,7 @@ void splitter_onhide(psy_ui_Splitter* self)
 void splitter_onshow(psy_ui_Splitter* self)
 {
 	super.show(&self->component);
-	if (self->toggle) {
+	if (self->toggle && !psy_ui_component_visible(self->toggle)) {
 		psy_signal_prevent(&self->toggle->signal_show, self,
 			psy_ui_splitter_onshowtoggle);
 		psy_ui_component_show_align(self->toggle);

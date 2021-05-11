@@ -262,7 +262,7 @@ void workspace_save_styleconfiguration(Workspace* self)
 	if (styleconfig && !psy_property_empty(styleconfig)) {
 		psy_path_init(&path, NULL);
 		psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
-		if (psy_ui_defaults()->hasdarktheme) {
+		if (psy_ui_defaults()->styles.theme == psy_ui_DARKTHEME) {
 			psy_path_setname(&path, PSYCLE_DARKSTYLES_INI);
 		} else {
 			psy_path_setname(&path, PSYCLE_LIGHTSTYLES_INI);
@@ -681,18 +681,22 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 				
 	choice = psy_property_at_choice(self->config.apptheme);
 	if (choice) {				
-		bool islight;		
+		psy_ui_ThemeMode theme;		
 		
-		islight = psy_property_item_int(choice) == psy_ui_LIGHTTHEME;
-		// reset host styles
-		if (islight) {
-			initlightstyles(psy_ui_appdefaults());			
-		} else {
-			initdarkstyles(psy_ui_appdefaults());
-		}
+		switch (psy_property_item_int(choice)) {
+		case psy_ui_LIGHTTHEME:
+			theme = psy_ui_LIGHTTHEME;
+			break;
+		case psy_ui_DARKTHEME:
+		default:
+			theme = psy_ui_DARKTHEME;
+			break;
+		}		
+		// reset host styles		
+		inithoststyles(&psy_ui_appdefaults()->styles, theme);		
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_config(&self->config.directories),
-			!islight);		
+			theme);		
 		if (psy_ui_app()->imp) {
 			psy_ui_app()->imp->vtable->dev_onappdefaultschange(psy_ui_app()->imp);		
 		}

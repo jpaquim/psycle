@@ -930,7 +930,7 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 
 void propertiesview_ontabbarchange(PropertiesView* self,
 	psy_ui_Component* sender, uintptr_t tabindex)
-{	
+{		
 	propertiesview_gotosection(self, tabindex);	
 }
 
@@ -941,7 +941,7 @@ void propertiesview_gotosection(PropertiesView* self, uintptr_t index)
 	section = psy_table_at(&self->renderer.sections, index);
 	if (section) {
 		psy_ui_RealRectangle position;
-
+		
 		position = psy_ui_component_position(section);
 		psy_ui_component_setscrolltop(&self->renderer.component,
 			psy_ui_value_make_px(position.top));

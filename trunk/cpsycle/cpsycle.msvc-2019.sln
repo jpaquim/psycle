@@ -173,6 +173,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "surround", "plugins\surroun
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "graue_softsat", "plugins\graue_softsat\graue_softsat.vcxproj", "{59260443-07A3-4C0E-B8BC-2A1EE25C4134}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zephod_super_fm", "plugins\zephod_super_fm\zephod_super_fm.vcxproj", "{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -605,6 +607,14 @@ Global
 		{59260443-07A3-4C0E-B8BC-2A1EE25C4134}.Release|Win32.Build.0 = Release|Win32
 		{59260443-07A3-4C0E-B8BC-2A1EE25C4134}.Release|x64.ActiveCfg = Release|x64
 		{59260443-07A3-4C0E-B8BC-2A1EE25C4134}.Release|x64.Build.0 = Release|x64
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Debug|Win32.Build.0 = Debug|Win32
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Debug|x64.ActiveCfg = Debug|x64
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Debug|x64.Build.0 = Debug|x64
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Release|Win32.ActiveCfg = Release|Win32
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Release|Win32.Build.0 = Release|Win32
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Release|x64.ActiveCfg = Release|x64
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -660,6 +670,7 @@ Global
 		{3AC62D82-0BA5-4047-A105-6B1FFE7AF6AC} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
 		{44F9CCED-42C0-40A0-A615-3B61B6028722} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{59260443-07A3-4C0E-B8BC-2A1EE25C4134} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
+		{8B5CE29E-9938-424E-BCB2-2ABEE248EC06} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {857CDAD7-2863-45E6-99D0-FFFC1BC81AAB}

@@ -1,8 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(STYLES_H)
 #define STYLES_H
+
+/* ui */
+#include <uistyle.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,10 +97,7 @@ extern "C" {
 #define STYLE_GREET                          6500
 #define STYLE_GREET_TOP                      6501
 
-struct psy_ui_Defaults;
-
-void initdarkstyles(struct psy_ui_Defaults*);
-void initlightstyles(struct psy_ui_Defaults*);
+void inithoststyles(psy_ui_Styles*, psy_ui_ThemeMode);
 
 #ifdef __cplusplus
 }
