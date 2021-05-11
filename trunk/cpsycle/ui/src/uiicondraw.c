@@ -8,14 +8,13 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon icon, double x, double y);
+static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon, double x, double y);
 static void psy_ui_icondraw_drawarrow(psy_ui_IconDraw*, psy_ui_RealPoint*,
-psy_ui_Graphics*);
+psy_ui_Graphics*, psy_ui_Colour);
 
 void psy_ui_icondraw_init(psy_ui_IconDraw* self, psy_ui_ButtonIcon icon)
 {
-	assert(self);
-	assert(style);
+	assert(self);	
 
 	self->icon = icon;
 }
