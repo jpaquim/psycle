@@ -5,8 +5,8 @@ Work is now done to reach the point of releasing a 1.0 version fixing some
 incompatibilities in XMSampler and the psy fileformat and cleaning the code.
 
 If anyone wants to try it, it should be easier to compile with visual studio
-2019 than Psycle, but at this point it still requires Psycle plugins and some
-manual changes to code for correct configuration.
+2019 than Psycle, but at this point it still requires some Psycle (around 50 can
+now be compiled) and some manual changes to code for correct configuration.
 
 The audio core is sequencer based and completly separated from the ui and makes
 it possbile to build the command line player under linux. Audio and event input
@@ -51,8 +51,9 @@ updated. VC6/2008 are not updated or tested at every commit but if so it will
 compile with VC6 x86 (win98), VC2008(x86 XP SP1), too. Install on older
 platforms the DirectX SDK and add the include/lib sdk directories
 (Tools/Options/Directories).
-At this point the host will run, but for loading the native plugins you need
-some modules from an existing psycle mfc installation.
+At this point the host will run. Around 50 plugins can now be compiled but for
+loading all natives you need some modules from an existing psycle mfc 
+installation.
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
 installation to the output dir(cpsycle/debug and cpsycle/release).
 Only in VC6 set the working dir (host project settings) to
