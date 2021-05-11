@@ -27,6 +27,8 @@ typedef struct {
 void clockbar_init(ClockBar*, psy_ui_Component* parent,
 	Workspace* workspace);
 
+void clockbar_idle(ClockBar*);
+
 INLINE psy_ui_Component* clockbar_base(ClockBar* self)
 {
 	return &self->component;

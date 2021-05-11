@@ -522,7 +522,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_SYSKEYDOWN:
 				if (imp->component &&
 						(wParam >= VK_F10 && wParam <= VK_F12 ||
-						wParam >= 0x41 && wParam <= psy_ui_KEY_Z)) {
+						wParam >= 0x41 && wParam <= psy_ui_KEY_Z ||
+						wParam >= psy_ui_KEY_DIGIT0 && wParam <= psy_ui_KEY_DIGIT9)) {
 					handle_keyevent(imp->component, imp,
 						hwnd, message, wParam, lParam, 0,
 						imp->component->vtable->onkeydown,

@@ -137,8 +137,7 @@ typedef struct psy_ui_DragEvent {
 void psy_ui_dragevent_init(psy_ui_DragEvent*);
 void psy_ui_dragevent_dispose(psy_ui_DragEvent*);
 
-INLINE void psy_ui_mouseevent_dragevent_prevent_default(
-	psy_ui_DragEvent* self)
+INLINE void psy_ui_dragevent_prevent_default(psy_ui_DragEvent* self)
 {
 	psy_ui_mouseevent_prevent_default(&self->mouse);
 }

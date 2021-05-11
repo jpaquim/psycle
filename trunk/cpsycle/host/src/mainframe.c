@@ -86,9 +86,6 @@ static void mainframe_onsettingshelptabbarchanged(MainFrame*, psy_ui_Component* 
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
-static void mainframe_onsongloadprogress(MainFrame*, Workspace*, intptr_t progress);
-static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
-	int progress);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
 	uintptr_t section, int option);
 static void mainframe_onfocusview(MainFrame*, Workspace*);
@@ -96,7 +93,6 @@ static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
-static void mainframe_maxminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
@@ -115,7 +111,6 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
-static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Patterns* sender,
 	uintptr_t numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
@@ -192,8 +187,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initmaintabbar(self);
 	mainframe_inithelpsettingstabbar(self);	
 	mainframe_initviewtabbars(self);
-	mainframe_initmainviews(self);
-	mainframe_initrightarea(self);
+	mainframe_initmainviews(self);	
 	mainframe_initgear(self);	
 	mainframe_initparamrack(self);
 	mainframe_initcpuview(self);
@@ -245,14 +239,12 @@ void mainframe_initframe(MainFrame* self)
 	psy_ui_app()->main = mainframe_base(self);	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
-	self->startup = TRUE;
-	self->pluginscanprogress = -1;
+	self->startup = TRUE;	
 }
 
 void mainframe_ondestroyed(MainFrame* self)
 {		
-	psy_list_free(self->minmaximize);
-	self->minmaximize = NULL;
+	minmaximize_dispose(&self->minmaximize);	
 	workspace_dispose(&self->workspace);
 	interpreter_dispose(&self->interpreter);
 	psy_ui_app_stop(psy_ui_app());
@@ -357,11 +349,11 @@ void mainframe_initstatusbar(MainFrame* self)
 
 void mainframe_initminmaximize(MainFrame* self)
 {
-	self->minmaximize = NULL;
-	psy_list_append(&self->minmaximize, &self->left);
-	psy_list_append(&self->minmaximize, &self->toprow1);
-	psy_list_append(&self->minmaximize, &self->toprow2);
-	psy_list_append(&self->minmaximize, &self->trackscopeview.component);
+	minmaximize_init(&self->minmaximize);
+	minmaximize_add(&self->minmaximize, &self->left);
+	minmaximize_add(&self->minmaximize, &self->toprow1);
+	minmaximize_add(&self->minmaximize, &self->toprow2);
+	minmaximize_add(&self->minmaximize, &self->trackscopeview.component);
 }
 
 void mainframe_initviewstatusbars(MainFrame* self)
@@ -383,19 +375,13 @@ void mainframe_initviewstatusbars(MainFrame* self)
 }
 
 void mainframe_connectstatusbar(MainFrame* self)
-{	
-	psy_signal_connect(&self->statusbar.zoombox.signal_changed,
-		self, mainframe_onzoomboxchanged);
+{		
 	psy_signal_connect(&self->statusbar.toggleterminal.signal_clicked,
 		self, mainframe_ontoggleterminal);
 	psy_signal_connect(&self->statusbar.turnoff.signal_clicked, self,
 		mainframe_onexit);
 	psy_signal_connect(&self->statusbar.togglekbdhelp.signal_clicked, self,
-		mainframe_ontogglekbdhelp);
-	workspace_connectloadprogress(&self->workspace, self,
-		(fp_workspace_songloadprogress)mainframe_onsongloadprogress);
-	psy_signal_connect(&self->workspace.signal_scanprogress, self,
-		mainframe_onpluginscanprogress);
+		mainframe_ontogglekbdhelp);	
 }
 
 void mainframe_initbars(MainFrame* self)
@@ -501,11 +487,9 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);	
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.machines");
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_MACHINES_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
+	psy_ui_tab_loadresource(tab, IDB_MACHINES_DARK, psy_ui_colour_white());
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.patterns");
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_NOTES_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
+	psy_ui_tab_loadresource(tab, IDB_NOTES_DARK, psy_ui_colour_white());	
 	psy_ui_tabbar_append_tabs(&self->tabbar, "main.samples",
 		"main.instruments", "main.properties", NULL);
 }
@@ -520,8 +504,7 @@ void mainframe_inithelpsettingstabbar(MainFrame* self)
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
 	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings");	
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, psy_ui_colour_white());
+	psy_ui_tab_loadresource(tab, IDB_SETTINGS_DARK, psy_ui_colour_white());		
 	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.help");	
 }
 
@@ -804,7 +787,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		psy_ui_component_setfocus(&self->patternview.properties.component);
 		break;
 	case CMD_IMM_MAXPATTERN:
-		mainframe_maxminimizeview(self);
+		minmaximize_toggle(&self->minmaximize);
 		break;		
 	case CMD_IMM_TERMINAL:
 		mainframe_ontoggleterminal(self, mainframe_base(self));
@@ -818,45 +801,6 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
 		break;		
 	}
-}
-
-void mainframe_maxminimizeview(MainFrame* self)
-{
-	if (self->minmaximize) {
-		psy_List* p;
-		bool show;
-
-		show = TRUE;
-		for (p = self->minmaximize; p != NULL; p = p->next) {
-			psy_ui_Component* component;
-
-			component = (psy_ui_Component*)p->entry;
-			if (p == self->minmaximize) {
-				show = !psy_ui_component_visible(component);
-			}
-			if (show) {
-				psy_ui_component_show(component);
-			} else {
-				psy_ui_component_hide(component);
-			}
-		}
-		psy_ui_component_align(&self->component);
-	}	
-}
-
-void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace,
-	intptr_t progress)
-{	
-	if (progress == -1) {
-		psy_ui_terminal_output(&self->terminal, "\n");
-	}
-	psy_ui_progressbar_setprogress(&self->statusbar.progressbar, progress / 100.f);
-}
-
-void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
-	int progress)
-{	
-	self->pluginscanprogress = progress;	
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
@@ -886,7 +830,7 @@ void mainframe_updatesongtitle(MainFrame* self)
 {		
 	char title[512];
 
-	workspace_apptitle(&self->workspace, title);	
+	workspace_apptitle(&self->workspace, title, 512);	
 	psy_ui_component_settitle(mainframe_base(self), title);	
 	mainstatusbar_setdefaultstatustext(&self->statusbar,
 		workspace_songtitle(&self->workspace));
@@ -912,7 +856,7 @@ void mainframe_resetfocus(MainFrame* self)
 
 void mainframe_onmaxminimizeview(MainFrame* self, psy_ui_Button* sender)
 {
-	mainframe_maxminimizeview(self);
+	minmaximize_toggle(&self->minmaximize);
 }
 
 void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
@@ -1009,15 +953,8 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 		mainframe_onstartup(self);				
 		self->startup = FALSE;
 	}
-	workspace_idle(&self->workspace);	
-	if (self->pluginscanprogress != -1) {
-		if (self->pluginscanprogress == 0) {
-			psy_ui_progressbar_setprogress(&self->statusbar.progressbar, 0);
-			self->pluginscanprogress = -1;
-		} else {
-			psy_ui_progressbar_tick(&self->statusbar.progressbar);
-		}
-	}
+	workspace_idle(&self->workspace);
+	mainstatusbar_idle(&self->statusbar);	
 }
 
 // event is called when mainframe has its final size and is visible on screen
@@ -1056,9 +993,15 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
 	}
-	view = psy_ui_notebook_page(&self->notebook, index);		
-	if (view) {				
-		psy_ui_tabbar_select(&self->tabbar, index);
+	if (index == psy_INDEX_INVALID) {
+		view = psy_ui_notebook_activepage(&self->notebook);
+	} else {
+		view = psy_ui_notebook_page(&self->notebook, index);
+	}
+	if (view) {	
+		if (index != psy_INDEX_INVALID) {
+			psy_ui_tabbar_select(&self->tabbar, index);
+		}
 		if (section != psy_INDEX_INVALID) {
 			psy_ui_component_selectsection(view, section, options);
 		}
@@ -1153,12 +1096,6 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 		: "unknown error\n");
 	self->statusbar.terminalstyleid = STYLE_TERM_BUTTON_ERROR;	
 	mainstatusbar_updateterminalbutton(&self->statusbar);
-}
-
-void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
-{	
-	// psy_ui_app()->setpositioncacheonly = TRUE;
-	psy_ui_app_setzoomrate(psy_ui_app(), zoombox_rate(sender));	
 }
 
 void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Patterns* sender,
@@ -1476,7 +1413,7 @@ void mainframe_ondragover(MainFrame* self, psy_ui_DragEvent* ev)
 		if (p) {
 			p = psy_property_at(p, "dragview", PSY_PROPERTY_TYPE_STRING);
 			if (p) {
-				ev->mouse.event.default_prevented = TRUE;
+				psy_ui_dragevent_prevent_default(ev);
 			}
 		}
 	}
@@ -1516,8 +1453,8 @@ void mainframe_ondrop(MainFrame* self, psy_ui_DragEvent* ev)
 					}
 					psy_ui_component_align(psy_ui_component_parent(view));
 					psy_ui_component_invalidate(psy_ui_component_parent(view));
-				}				
-				ev->mouse.event.default_prevented = TRUE;
+				}
+				psy_ui_dragevent_prevent_default(ev);
 			}
 		}
 	}
