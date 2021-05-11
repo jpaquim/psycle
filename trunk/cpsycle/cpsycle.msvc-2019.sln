@@ -188,6 +188,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "druttis_feedme", "plugins\d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "druttis_phantom", "plugins\druttis_phantom\druttis_phantom.vcxproj", "{8AE3F075-A7BC-4A37-BE52-99FB643B9F0A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "druttis_pluckedstring", "plugins\druttis_pluckedstring\druttis_pluckedstring.vcxproj", "{76726B56-D116-4135-9D70-58848E25BBB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -668,6 +670,14 @@ Global
 		{8AE3F075-A7BC-4A37-BE52-99FB643B9F0A}.Release|Win32.Build.0 = Release|Win32
 		{8AE3F075-A7BC-4A37-BE52-99FB643B9F0A}.Release|x64.ActiveCfg = Release|x64
 		{8AE3F075-A7BC-4A37-BE52-99FB643B9F0A}.Release|x64.Build.0 = Release|x64
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Debug|Win32.Build.0 = Debug|Win32
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Debug|x64.ActiveCfg = Debug|x64
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Debug|x64.Build.0 = Debug|x64
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Release|Win32.ActiveCfg = Release|Win32
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Release|Win32.Build.0 = Release|Win32
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Release|x64.ActiveCfg = Release|x64
+		{76726B56-D116-4135-9D70-58848E25BBB8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -729,6 +739,7 @@ Global
 		{8FABD74C-C4C1-4116-A5D7-25990D2CEF47} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{F5C4CE48-9D43-475D-8551-68C9ABF00C29} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{8AE3F075-A7BC-4A37-BE52-99FB643B9F0A} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
+		{76726B56-D116-4135-9D70-58848E25BBB8} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {857CDAD7-2863-45E6-99D0-FFFC1BC81AAB}
