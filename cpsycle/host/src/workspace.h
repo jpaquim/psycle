@@ -176,6 +176,7 @@ typedef struct Workspace {
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;
+	bool startpage;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -291,6 +292,7 @@ void workspace_connectloadprogress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
 void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
+void workspace_setstartpage(Workspace*);
 
 #ifdef __cplusplus
 }

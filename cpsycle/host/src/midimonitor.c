@@ -382,8 +382,7 @@ void midimonitor_inittitlebar(MidiMonitor* self)
 	titlebar_hideonclose(&self->titlebar);
 	psy_ui_button_init_text(&self->configure, &self->titlebar.client, NULL,
 		"Devices");
-	psy_ui_button_setbitmapresource(&self->configure, IDB_SETTINGS_DARK);
-	psy_ui_button_setbitmaptransparency(&self->configure,
+	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_DARK,
 		psy_ui_colour_white());
 	psy_ui_component_setalign(&self->configure.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);			

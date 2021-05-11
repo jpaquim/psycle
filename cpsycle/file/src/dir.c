@@ -158,7 +158,7 @@ void psy_path_extract_path(psy_Path* self)
 
 static int wildcardmatch(const char *str, const char *match);
 
-char* workdir(char* buffer)
+char* psy_workdir(char* buffer)
 {
     return getcwd(buffer, 4096);
 }
@@ -168,7 +168,7 @@ const char* pathenv(void)
 	return 0;
 }
 
-void insertpathenv(const char* path)
+void psy_insertpathenv(const char* path)
 {
  	 // todo		
 }
@@ -410,7 +410,7 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 	return 1;
 }
 
-char* workdir(char* buffer)
+char* psy_workdir(char* buffer)
 {
 	return _getcwd(buffer, _MAX_PATH);
 }
@@ -420,7 +420,7 @@ const char* pathenv(void)
 	return getenv(pathenvvarname);	
 }
 
-void insertpathenv(const char* path)
+void psy_insertpathenv(const char* path)
 {	
 	const char* envpath;		
 	
@@ -570,7 +570,7 @@ void psy_dir_enumerate_recursive(void* context, const char* root, const char* wi
 {	
 }
 
-char* workdir(char* buffer)
+char* psy_workdir(char* buffer)
 {
 	return 0;
 }
@@ -580,7 +580,7 @@ const char* pathenv(void)
 	return 0;
 }
 
-void insertpathenv(const char* path)
+void psy_insertpathenv(const char* path)
 {		
 }
 

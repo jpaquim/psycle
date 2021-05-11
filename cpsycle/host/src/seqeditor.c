@@ -1095,7 +1095,7 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 		}
 		newtrack = psy_ui_button_allocinit(&self->component, &self->component);
 		if (newtrack) {
-			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
+			psy_ui_button_settext(newtrack, "seqview.new-trk");
 			psy_ui_component_setminimumsize(psy_ui_button_base(newtrack),
 				psy_ui_size_make_em(0.0, 2.0));
 			newtrack->stoppropagation = FALSE;
@@ -1520,9 +1520,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);
 	// expand
 	psy_ui_button_init(&self->expand, &self->header, NULL);
-	psy_ui_button_setbitmapresource(&self->expand, IDB_EXPAND_DARK);
-	psy_ui_button_setbitmaptransparency(&self->expand,
-		psy_ui_colour_white());		
+	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
+		psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),

@@ -15,6 +15,15 @@
 // platform
 #include "../../detail/portable.h"
 
+/* todo: includes for SW_MAXIMIZE */
+#ifdef DIVERSALIS__OS__MICROSOFT
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <objbase.h>
+#endif
+
 typedef void (*psy_fp_int)(psy_ui_Component*, uintptr_t);
 typedef void (*psy_fp_margin)(psy_ui_Component*, psy_ui_Margin);
 
@@ -764,6 +773,17 @@ void psy_ui_component_hide_align(psy_ui_Component* self)
 void psy_ui_component_showstate(psy_ui_Component* self, int state)
 {
 	self->vtable->showstate(self, state);	
+}
+
+void psy_ui_component_showmaximized(psy_ui_Component* self)
+{
+#ifdef DIVERSALIS__OS__MICROSOFT	
+	psy_ui_component_showstate(self, SW_MAXIMIZE);
+#else
+	psy_ui_component_resize(&mainframe->component,
+		psy_ui_size_make_px(1024.0, 768.0));
+	psy_ui_component_showstate(&mainframe->component, 0);
+#endif	
 }
 
 void psy_ui_component_move(psy_ui_Component* self, psy_ui_Point topleft)

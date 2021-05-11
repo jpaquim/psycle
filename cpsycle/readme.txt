@@ -5,8 +5,8 @@ Work is now done to reach the point of releasing a 1.0 version fixing some
 incompatibilities in XMSampler and the psy fileformat and cleaning the code.
 
 If anyone wants to try it, it should be easier to compile with visual studio
-2019 than Psycle, but at this point it still requires some Psycle (around 50 can
-now be compiled) and some manual changes to code for correct configuration.
+2019 than Psycle, but at this point it still requires some Psycle Plugins and
+some manual changes to code for correct configuration.
 
 The audio core is sequencer based and completly separated from the ui and makes
 it possbile to build the command line player under linux. Audio and event input

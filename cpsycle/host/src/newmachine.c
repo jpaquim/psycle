@@ -174,9 +174,7 @@ void newmachinerescanbar_init(NewMachineRescanBar* self, psy_ui_Component* paren
 		"newmachine.plugin-directories");
 	psy_ui_component_setspacing(psy_ui_button_base(&self->selectdirectories),
 		spacing);
-	psy_ui_button_setbitmapresource(&self->selectdirectories,
-		IDB_SETTINGS_DARK);
-	psy_ui_button_setbitmaptransparency(&self->selectdirectories,
+	psy_ui_button_loadresource(&self->selectdirectories, IDB_SETTINGS_DARK,
 		psy_ui_colour_white());
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinerescanbar_onselectdirectories);
@@ -638,8 +636,8 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 	psy_ui_image_init_resource_transparency(&self->icon,
 		&self->component, iconresourceid, psy_ui_colour_white());	
 	psy_ui_button_init(&self->expand, &self->component, NULL);	
-	psy_ui_button_setbitmapresource(&self->expand, IDB_EXPAND_DARK);
-	psy_ui_button_setbitmaptransparency(&self->expand, psy_ui_colour_white());	
+	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
+		psy_ui_colour_white());	
 	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),

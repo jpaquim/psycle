@@ -66,6 +66,8 @@ const psy_ui_Style* psy_ui_style(uintptr_t styletype);
 
 void psy_ui_app_init(psy_ui_App*, bool dark, uintptr_t instance);
 void psy_ui_app_dispose(psy_ui_App*);
+
+void psy_ui_app_setmain(psy_ui_App*, struct psy_ui_Component* main);
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);

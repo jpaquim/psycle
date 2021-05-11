@@ -376,16 +376,12 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void psy_ui_button_setbitmapresource(psy_ui_Button* self, uintptr_t resourceid)
-{
-	psy_ui_bitmap_loadresource(&self->bitmapicon, resourceid);	
-}
-
-void psy_ui_button_setbitmaptransparency(psy_ui_Button* self,
+void psy_ui_button_loadresource(psy_ui_Button* self, uintptr_t resourceid,
 	psy_ui_Colour transparency)
 {
+	psy_ui_bitmap_loadresource(&self->bitmapicon, resourceid);
 	psy_ui_bitmap_settransparency(&self->bitmapicon,
-		psy_ui_colour_make(0x00FFFFFF));
+		transparency);
 }
 
 void psy_ui_button_highlight(psy_ui_Button* self)

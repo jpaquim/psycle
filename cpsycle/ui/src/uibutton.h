@@ -82,9 +82,8 @@ psy_ui_Button* psy_ui_button_allocinit(psy_ui_Component* parent,
 void psy_ui_button_settext(psy_ui_Button*, const char* text);
 const char* psy_ui_button_text(const psy_ui_Button*);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
-void psy_ui_button_setbitmapresource(psy_ui_Button*, uintptr_t resourceid);
-void psy_ui_button_setbitmaptransparency(psy_ui_Button*,
-	psy_ui_Colour transparency);
+void psy_ui_button_loadresource(psy_ui_Button*, uintptr_t resourceid,
+	psy_ui_Colour);
 void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disablehighlight(psy_ui_Button*);
 bool psy_ui_button_highlighted(const psy_ui_Button*);

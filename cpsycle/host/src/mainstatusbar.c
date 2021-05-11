@@ -100,9 +100,8 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 		 margin);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_setbitmapresource(&self->togglekbdhelp, IDB_KBD);
-	psy_ui_button_setbitmaptransparency(&self->togglekbdhelp,
-		psy_ui_colour_white());	
+	psy_ui_button_loadresource(&self->togglekbdhelp, IDB_KBD,
+		psy_ui_colour_white());
 }
 
 void mainstatusbar_initterminalbutton(MainStatusBar* self)
@@ -112,8 +111,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 		NULL, "Terminal");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_setbitmapresource(&self->toggleterminal, IDB_TERM);
-	psy_ui_button_setbitmaptransparency(&self->toggleterminal,
+	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM,
 		psy_ui_colour_white());
 }
 

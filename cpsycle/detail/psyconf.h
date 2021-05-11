@@ -1,8 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-#if !defined(psy_CONF_H)
-#define psy_CONF_H
+#if !defined(psy_PSYCONF_H)
+#define psy_PSYCONF_H
 
 #if defined __unix__
 #define _GNU_SOURCE
@@ -98,4 +100,4 @@
 
 /* #define PSYCLE_TIMEBAR_OLD */
 
-#endif /* psy_CONF_H */
+#endif /* psy_PSYCONF_H */
