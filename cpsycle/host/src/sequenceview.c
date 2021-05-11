@@ -328,7 +328,7 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_PROGRESS)->colour);
 		} else {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, self->component.style.overridestyle.colour);
+			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW)->colour);
 		}
 		psy_ui_textout(g, 0, cpy, text, psy_strlen(text));
 	}

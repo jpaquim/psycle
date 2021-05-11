@@ -12,46 +12,40 @@ static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon icon, double x, doubl
 static void psy_ui_icondraw_drawarrow(psy_ui_IconDraw*, psy_ui_RealPoint*,
 psy_ui_Graphics*);
 
-void psy_ui_icondraw_init(psy_ui_IconDraw* self, psy_ui_ButtonIcon icon,
-	const psy_ui_Style* style)
+void psy_ui_icondraw_init(psy_ui_IconDraw* self, psy_ui_ButtonIcon icon)
 {
 	assert(self);
 	assert(style);
 
 	self->icon = icon;
-	self->style = style;
 }
 
 void psy_ui_icondraw_draw(psy_ui_IconDraw* self, psy_ui_Graphics* g,
-	psy_ui_RealPoint pt)
+	psy_ui_RealPoint pt, psy_ui_Colour colour)
 {
 	psy_ui_RealPoint arrow[4];	
 	
 	if (self->icon == psy_ui_ICON_LESSLESS) {
 		makearrow(arrow, psy_ui_ICON_LESS, pt.x - 4, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g);
+		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 		makearrow(arrow, psy_ui_ICON_LESS, pt.x + 4, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g);
+		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 	} else if (self->icon == psy_ui_ICON_MOREMORE) {
 		makearrow(arrow, psy_ui_ICON_MORE, pt.x - 6, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g);
+		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 		makearrow(arrow, psy_ui_ICON_MORE, pt.x + 2, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g);
+		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 	} else {
 		makearrow(arrow, self->icon, pt.x - 2, pt.y);
-		psy_ui_icondraw_drawarrow(self, arrow, g);
+		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 	}
 }
 
-void psy_ui_icondraw_drawarrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g)
-{
-	uint32_t arrowcolour;
-	uint32_t arrowhighlightcolour;
-
-	arrowcolour = psy_ui_colour_colorref(&self->style->colour);
-	arrowhighlightcolour = psy_ui_colour_colorref(&self->style->colour);
-	psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
-		arrowhighlightcolour);	
+void psy_ui_icondraw_drawarrow(psy_ui_IconDraw* self, psy_ui_RealPoint* arrow, psy_ui_Graphics* g,
+	psy_ui_Colour colour)
+{	
+	psy_ui_drawsolidpolygon(g, arrow, 4, psy_ui_colour_colorref(&colour),
+		psy_ui_colour_colorref(&colour));
 }
 
 void makearrow(psy_ui_RealPoint* arrow, psy_ui_ButtonIcon icon, double x, double y)
