@@ -11,30 +11,15 @@
 
 #include "../../detail/portable.h"
 
-static void clockbar_ontimer(ClockBar*, uintptr_t timerid);
 static void clockbar_updatelabel(ClockBar*);
 static void clockbar_onsongchanged(ClockBar*, Workspace*,
 	int flag, psy_audio_Song*);
-// vtable
-static psy_ui_ComponentVtable vtable;
-static bool vtable_initialized = FALSE;
-
-static psy_ui_ComponentVtable* vtable_init(ClockBar* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)clockbar_ontimer;
-		vtable_initialized = TRUE;
-	}
-	return &vtable;
-}
 
 void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->start = time(NULL);
-	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
@@ -47,10 +32,9 @@ void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	clockbar_updatelabel(self);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		clockbar_onsongchanged);
-	psy_ui_component_starttimer(&self->component, 0, 1000);
 }
 
-void clockbar_ontimer(ClockBar* self, uintptr_t timerid)
+void clockbar_idle(ClockBar* self)
 {	
 	clockbar_updatelabel(self);	
 }

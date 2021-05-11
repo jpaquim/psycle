@@ -353,6 +353,7 @@
     <ClCompile Include="src\metronomeconfig.c" />
     <ClCompile Include="src\midimonitor.c" />
     <ClCompile Include="src\midiviewconfig.c" />
+    <ClCompile Include="src\minmaximize.c" />
     <ClCompile Include="src\navigation.c" />
     <ClCompile Include="src\newmachine.c" />
     <ClCompile Include="src\newmachinedetail.c" />
@@ -513,6 +514,7 @@
     <ClInclude Include="src\metronomeconfig.h" />
     <ClInclude Include="src\midimonitor.h" />
     <ClInclude Include="src\midiviewconfig.h" />
+    <ClInclude Include="src\minmaximize.h" />
     <ClInclude Include="src\navigation.h" />
     <ClInclude Include="src\newmachine.h" />
     <ClInclude Include="src\newmachinedetail.h" />

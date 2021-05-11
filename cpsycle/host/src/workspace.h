@@ -289,7 +289,7 @@ void workspace_connectterminal(Workspace*, void* context,
 void workspace_connectstatus(Workspace*, void* context, fp_workspace_output);
 void workspace_connectloadprogress(Workspace*, void* context,
 	fp_workspace_songloadprogress);
-void workspace_apptitle(Workspace*, char* rv_title);
+void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
 
 #ifdef __cplusplus

@@ -44,6 +44,8 @@ typedef struct MainStatusBar {
 	psy_ui_Label statusbarlabel;
 	ZoomBox zoombox;
 	uintptr_t terminalstyleid;
+	intptr_t pluginscanprogress;
+	uintptr_t clockcounter;
 	// references
 	Workspace* workspace;
 } MainStatusBar;
@@ -53,6 +55,7 @@ void mainstatusbar_init(MainStatusBar*, psy_ui_Component* parent,
 
 void mainstatusbar_updateterminalbutton(MainStatusBar*);
 void mainstatusbar_setdefaultstatustext(MainStatusBar*, const char* text);
+void mainstatusbar_idle(MainStatusBar*);
 
 INLINE psy_ui_Component* mainstatusbar_base(MainStatusBar* self)
 {

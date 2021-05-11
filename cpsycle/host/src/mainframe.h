@@ -8,6 +8,7 @@
 #include "../../detail/os.h"
 // host
 #include "mainstatusbar.h"
+#include "minmaximize.h"
 #include "confirmbox.h"
 #include "cpuview.h"
 #include "filebar.h"
@@ -46,14 +47,10 @@
 #include "undoredobar.h"
 #include "vubar.h"
 #include "workspace.h"
-#include "zoombox.h"
 // ui
-#include <uilabel.h>
-#include <uibutton.h>
 #include <uiframe.h>
 #include <uiterminal.h>
 #include <uinotebook.h>
-#include <uiprogressbar.h>
 #include <uisplitbar.h>
 // container
 #include <properties.h>
@@ -84,7 +81,7 @@ typedef struct MainFrame {
 	psy_ui_Component tabbars;
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
-	psy_ui_Component client;
+	psy_ui_Component client;	
 	psy_ui_Component mainviews;
 	psy_ui_Component spacerleft;
 	psy_ui_Component spacerright;
@@ -135,13 +132,12 @@ typedef struct MainFrame {
 	FileView fileloadview;
 #endif
 	MainStatusBar statusbar;
-	psy_ui_Notebook viewtabbars;	
-	ZoomBox zoombox;
+	MinMaximize minmaximize;
+	psy_ui_Notebook viewtabbars;
 	psy_ui_Component left;
 	psy_ui_Component right;
 	Workspace workspace;
-	psy_ui_Label label;	
-	
+	psy_ui_Label label;		
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	InstrumentsViewBar instrumentsviewbar;	
@@ -149,8 +145,6 @@ typedef struct MainFrame {
 	Interpreter interpreter;	
 	int startup;
 	bool startpage;	
-	int pluginscanprogress;
-	psy_List* minmaximize;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

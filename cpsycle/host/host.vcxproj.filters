@@ -508,6 +508,9 @@
     <ClCompile Include="src\mainstatusbar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\minmaximize.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -964,6 +967,9 @@
     </ClInclude>
     <ClInclude Include="src\mainstatusbar.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\minmaximize.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

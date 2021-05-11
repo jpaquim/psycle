@@ -131,6 +131,13 @@ void psy_ui_tab_preventtranslation(psy_ui_Tab* self)
 	self->translation = NULL;
 }
 
+void psy_ui_tab_loadresource(psy_ui_Tab* self, uintptr_t resourceid,
+	psy_ui_Colour transparency)
+{
+	psy_ui_bitmap_loadresource(&self->icon, resourceid);
+	psy_ui_bitmap_settransparency(&self->icon, transparency);
+}
+
 void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 {
 	char* text;

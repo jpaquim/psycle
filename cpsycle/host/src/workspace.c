@@ -1977,6 +1977,33 @@ void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
 			workspace_setpatterncursor(self, self->patterneditposition);
 		}
 		break;
+	case CMD_IMM_TAB1:
+		workspace_selectview(self, 0, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB2:
+		workspace_selectview(self, 1, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB3:
+		workspace_selectview(self, 2, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB4:
+		workspace_selectview(self, 3, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB5:
+		workspace_selectview(self, 4, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB6:
+		workspace_selectview(self, psy_INDEX_INVALID, 0, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB7:
+		workspace_selectview(self, psy_INDEX_INVALID, 1, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB8:
+		workspace_selectview(self, psy_INDEX_INVALID, 2, psy_INDEX_INVALID);
+		break;
+	case CMD_IMM_TAB9:
+		workspace_selectview(self, psy_INDEX_INVALID, 3, psy_INDEX_INVALID);
+		break;
 	default:
 		break;
 	}
@@ -2003,13 +2030,13 @@ static void workspace_onscantaskstart(Workspace* self, psy_audio_PluginCatcher* 
 	psy_audio_lock_leave(&self->pluginscanlock);
 }
 
-void workspace_apptitle(Workspace* self, char* rv_title)
+void workspace_apptitle(Workspace* self, char* rv_title, uintptr_t max_len)
 {
 	psy_Path path;
 
 	rv_title[0] = '\n';
 	psy_path_init(&path, self->filename);
-	psy_snprintf(rv_title, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
+	psy_snprintf(rv_title, max_len, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		psy_path_name(&path), psy_path_ext(&path));	
 }
 

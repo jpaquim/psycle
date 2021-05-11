@@ -65,6 +65,8 @@ psy_ui_Tab* psy_ui_tab_allocinit(psy_ui_Component* parent, psy_ui_Component* vie
 void psy_ui_tab_settext(psy_ui_Tab*, const char* text);
 void psy_ui_tab_setmode(psy_ui_Tab*, TabMode);
 void psy_ui_tab_preventtranslation(psy_ui_Tab*);
+void psy_ui_tab_loadresource(psy_ui_Tab*, uintptr_t resourceid,
+	psy_ui_Colour transparency);
 
 INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 {

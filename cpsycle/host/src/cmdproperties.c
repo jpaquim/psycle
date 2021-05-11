@@ -368,6 +368,52 @@ void cmdproperties_makegeneral(psy_Property* self)
 		psy_property_setid(psy_property_append_int(general, "cmd_column_F",
 			psy_audio_encodeinput(0, 0, 0, 0), 0, 0), CMD_COLUMN_F),
 		"Trk F"), "cmds.columnF");
+
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab1",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT1, 0, 0, TRUE), 0, 0),
+				CMD_IMM_TAB1),
+		"tab1"), "cmds.tab1");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab2",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT2, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB2),
+		"tab2"), "cmds.tab2");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab3",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT3, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB3),
+		"tab3"), "cmds.tab3");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab4",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT4, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB4),
+		"tab4"), "cmds.tab4");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab5",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT5, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB5),
+		"tab5"), "cmds.tab5");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab6",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT6, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB6),
+		"tab6"), "cmds.tab6");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab7",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT7, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB7),
+		"tab7"), "cmds.tab7");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab8",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT8, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB8),
+		"tab8"), "cmds.tab8");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_tab9",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT9, 0, 0, TRUE), 0, 0),
+			CMD_IMM_TAB9),
+		"tab9"), "cmds.tab9");
 	cmdproperties_setinput(general);
 }
 
