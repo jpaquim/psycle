@@ -673,7 +673,7 @@ void make_translator_make_patternview(psy_Property* parent)
 
 void make_translator_make_sequenceview(psy_Property* parent)
 {
-	setsection(psy_property_append_section(parent, "sequencerview"));
+	setsection(psy_property_append_section(parent, "seqview"));
 	add("follow-song", "Follow Song");
 	add("show-playlist", "Show Playlist");
 	add("show-pattern-names", "Show Pattern Names");

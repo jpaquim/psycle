@@ -37,34 +37,34 @@ void sequencerbar_init(SequencerBar* self,
 	self->workspace = workspace;
 	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);	
 	psy_ui_checkbox_settext(&self->followsong,
-		"sequencerview.follow-song");
+		"seqview.follow-song");
 	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);	
 	psy_ui_checkbox_settext(&self->shownames,
-		"sequencerview.show-pattern-names");			
+		"seqview.show-pattern-names");			
 	psy_ui_checkbox_init_multiline(&self->recordnoteoff, &self->component);
 	psy_ui_checkbox_settext(&self->recordnoteoff,
-		"sequencerview.record-noteoff");	
+		"seqview.record-noteoff");	
 	psy_ui_checkbox_init_multiline(&self->recordtweak, &self->component);
 	psy_ui_checkbox_settext(&self->recordtweak,
-		"sequencerview.record-tweak");	
+		"seqview.record-tweak");	
 	psy_ui_checkbox_init_multiline(&self->multichannelaudition, &self->component);
 	psy_ui_checkbox_settext(&self->multichannelaudition,
-		"sequencerview.multichannel-audition");			
+		"seqview.multichannel-audition");			
 	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
-		"sequencerview.allow-notes-to_effect");	
+		"seqview.allow-notes-to_effect");	
 				
 	psy_ui_component_init(&self->stepseq, &self->component, NULL);
 	psy_ui_component_setalign(&self->stepseq, psy_ui_ALIGN_BOTTOM);		
 	psy_ui_button_init_text(&self->togglestepseq, &self->stepseq, NULL,
-		"sequencerview.showstepsequencer");
+		"seqview.showstepsequencer");
 	psy_ui_button_seticon(&self->togglestepseq, psy_ui_ICON_MORE);
 	psy_ui_component_setalign(&self->togglestepseq.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_init(&self->seqedit, &self->component, NULL);
 	psy_ui_component_setalign(&self->seqedit, psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_init_text(&self->toggleseqedit, &self->seqedit, NULL,
-		"sequencerview.showseqeditor");
+		"seqview.showseqeditor");
 	psy_ui_component_setalign(&self->toggleseqedit.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);

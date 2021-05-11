@@ -6,19 +6,8 @@
 #include "mainframe.h"
 // host
 #include "cmdsgeneral.h"
-#include "paramview.h"
 #include "resources/resource.h"
-#include "sequencecmds.h"
 #include "styles.h"
-// audio
-#include <exclusivelock.h>
-#include <songio.h>
-// ui
-#include <uiapp.h>
-// file
-#include <dir.h>
-// platform
-#include "../../detail/portable.h"
 
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 #include "defaultlang.h"
@@ -30,14 +19,7 @@ static void updateshowstate(psy_Property*, psy_ui_Component*);
 static void mainframe_initframe(MainFrame*);
 static void mainframe_ondestroyed(MainFrame*);
 static void mainframe_initworkspace(MainFrame*);
-static void mainframe_initemptystatusbar(MainFrame*);
-static void mainframe_initspacerleft(MainFrame*);
-static void mainframe_initspacerright(MainFrame*);
-static void mainframe_inittoparea(MainFrame*);
-static void mainframe_initclientarea(MainFrame*);
-static void mainframe_initmainviewarea(MainFrame*); 
-static void mainframe_initleftarea(MainFrame*);
-static void mainframe_initrightarea(MainFrame*);
+static void mainframe_initlayout(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
@@ -77,13 +59,12 @@ static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
 #endif
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
-static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
-static void mainframe_onsettingshelptabbarchanged(MainFrame*, psy_ui_Component* sender,
-	uintptr_t tabindex);
+static void mainframe_onsettingshelptabbarchanged(MainFrame*,
+	psy_ui_Component* sender, uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void mainframe_onviewselected(MainFrame*, Workspace*, uintptr_t view,
@@ -131,7 +112,6 @@ static void mainframe_onfileload(MainFrame*, FileView* sender);
 #endif
 static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
-static void mainframe_resetfocus(MainFrame*);
 static void mainframe_ondragover(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_ondrop(MainFrame*, psy_ui_DragEvent*);
 
@@ -173,14 +153,9 @@ void mainframe_init(MainFrame* self)
 {			
 	mainframe_initframe(self);		
 	mainframe_initworkspace(self);	
-	mainframe_initemptystatusbar(self);	
+	mainframe_initlayout(self);	
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
-	mainframe_inittoparea(self);	
-	mainframe_initclientarea(self);
-	mainframe_initspacerleft(self);
-	mainframe_initspacerright(self);
-	mainframe_initmainviewarea(self);	
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);	
@@ -192,8 +167,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initparamrack(self);
 	mainframe_initcpuview(self);
 	mainframe_initmidimonitor(self);	
-	mainframe_initrecentview(self);
-	mainframe_initleftarea(self);
+	mainframe_initrecentview(self);	
 	mainframe_initfileview(self);
 	mainframe_initsequenceview(self);
 	mainframe_initsequencerbar(self);
@@ -205,8 +179,7 @@ void mainframe_init(MainFrame* self)
 #endif
 	mainframe_initplugineditor(self);
 	mainframe_initstatusbar(self);
-	mainframe_initminmaximize(self);
-	mainframe_setstartpage(self);
+	mainframe_initminmaximize(self);	
 	mainframe_updatesongtitle(self);
 	mainframe_initinterpreter(self);
 	mainstatusbar_updateterminalbutton(&self->statusbar);
@@ -229,6 +202,7 @@ void mainframe_init(MainFrame* self)
 		workspace_scanplugins(&self->workspace);
 #endif
 	}
+	workspace_setstartpage(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;
 }
 
@@ -236,7 +210,7 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	vtable_init(self);
-	psy_ui_app()->main = mainframe_base(self);	
+	psy_ui_app_setmain(psy_ui_app(), self);	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
 	self->startup = TRUE;	
@@ -250,69 +224,58 @@ void mainframe_ondestroyed(MainFrame* self)
 	psy_ui_app_stop(psy_ui_app());
 }
 
+MainFrame* mainframe_alloc(void)
+{
+	return (MainFrame*)malloc(sizeof(MainFrame));
+}
+
+MainFrame* mainframe_allocinit(void)
+{
+	MainFrame* rv;
+
+	rv = mainframe_alloc();
+	if (rv) {
+		mainframe_init(rv);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
+}
+
 void mainframe_initworkspace(MainFrame* self)
-{	
-	self->startpage = FALSE;		
+{
 	workspace_init(&self->workspace, mainframe_base(self));
 	workspace_load_configuration(&self->workspace);
 	workspace_load_recentsongs(&self->workspace);	
 }
 
-void mainframe_initemptystatusbar(MainFrame* self)
+void mainframe_initlayout(MainFrame* self)
 {
 	mainstatusbar_init(&self->statusbar, mainframe_base(self),
 		&self->workspace);
-	psy_ui_component_setalign(&self->statusbar.component, psy_ui_ALIGN_BOTTOM);
-}
-
-void mainframe_initspacerleft(MainFrame* self)
-{
-	psy_ui_component_init_align(&self->spacerleft, &self->component,
-		NULL, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setpreferredsize(&self->spacerleft,
-		psy_ui_size_make_em(0.5, 0.0));	
-}
-
-void mainframe_initspacerright(MainFrame* self)
-{	
-	psy_ui_component_init_align(&self->spacerright, &self->client,
-		NULL, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setpreferredsize(&self->spacerright,
-	 	psy_ui_size_make_em(0.5, 0.0));	
-}
-
-void mainframe_inittoparea(MainFrame* self)
-{	
-	psy_ui_component_init_align(&self->top, mainframe_base(self),
-		NULL, psy_ui_ALIGN_TOP);
-	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
-		psy_ui_margin_zero());	
-}
-
-void mainframe_initclientarea(MainFrame* self)
-{
+	psy_ui_component_setalign(mainstatusbar_base(&self->statusbar),
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_init_align(&self->client, mainframe_base(self), NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->client, psy_ui_NOBACKGROUND);
-}
-
-void mainframe_initmainviewarea(MainFrame* self)
-{
+	psy_ui_component_init_align(&self->spacerleft, &self->component,
+		NULL, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setpreferredsize(&self->spacerleft,
+		psy_ui_size_make_em(0.5, 0.0));
+	psy_ui_component_init_align(&self->spacerright, &self->client,
+		NULL, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setpreferredsize(&self->spacerright,
+		psy_ui_size_make_em(0.5, 0.0));
+	psy_ui_component_init_align(&self->top, mainframe_base(self),
+		NULL, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
+		psy_ui_margin_zero());
 	psy_ui_component_init_align(&self->mainviews, &self->client, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
-}
-
-void mainframe_initleftarea(MainFrame* self)
-{
 	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
 	psy_ui_splitter_init(&self->splitbar, mainframe_base(self));
-}
-
-void mainframe_initrightarea(MainFrame* self)
-{
 	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
 }
@@ -353,7 +316,8 @@ void mainframe_initminmaximize(MainFrame* self)
 	minmaximize_add(&self->minmaximize, &self->left);
 	minmaximize_add(&self->minmaximize, &self->toprow1);
 	minmaximize_add(&self->minmaximize, &self->toprow2);
-	minmaximize_add(&self->minmaximize, &self->trackscopeview.component);
+	minmaximize_add(&self->minmaximize,
+		trackscopeview_base(&self->trackscopeview));
 }
 
 void mainframe_initviewstatusbars(MainFrame* self)
@@ -394,9 +358,7 @@ void mainframe_initbars(MainFrame* self)
 	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
 		workspace_conf(&self->workspace)))) {		
 	}	
-	psy_ui_component_setstyletypes(&self->toprows,
-		STYLE_TOPROWS, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->toprows, STYLE_TOPROWS);
 	psy_ui_component_setdefaultalign(&self->toprows, psy_ui_ALIGN_TOP,
 		psy_ui_margin_zero());			
 	// row0
@@ -418,7 +380,7 @@ void mainframe_initbars(MainFrame* self)
 	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);	
 	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
-		psy_ui_component_hide(&self->metronomebar.component);
+		psy_ui_component_hide(metronomebar_base(&self->metronomebar));
 	}
 	margin.right = psy_ui_value_make_px(0);
 	psy_ui_component_setmargin(metronomebar_base(&self->metronomebar), margin);
@@ -460,14 +422,12 @@ void mainframe_inittabbars(MainFrame* self)
 		self, mainframe_onmaxminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_setbitmapresource(&self->maximizebtn, IDB_EXPAND_DARK);
-	psy_ui_button_setbitmaptransparency(&self->maximizebtn,
+	psy_ui_button_loadresource(&self->maximizebtn, IDB_EXPAND_DARK,	
 		psy_ui_colour_white());
 	psy_ui_component_setspacing(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
-	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
-	psy_ui_component_preventalign(&self->tabspacer);
+	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setpreferredsize(&self->tabspacer,
 		psy_ui_size_make_em(0.0, 0.4));
 }
@@ -573,8 +533,7 @@ void mainframe_initgear(MainFrame* self)
 	psy_ui_splitter_init(&self->gearsplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->gearsplitter),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_settoggle(&self->gearsplitter,
-		gear_base(&self->gear));
+	psy_ui_splitter_settoggle(&self->gearsplitter, gear_base(&self->gear));
 	psy_ui_splitter_setbutton(&self->gearsplitter,
 		&self->machinebar.gear);
 	psy_ui_component_hide(psy_ui_splitter_base(&self->gearsplitter));
@@ -750,17 +709,6 @@ void mainframe_initinterpreter(MainFrame* self)
 	interpreter_start(&self->interpreter);
 }
 
-void mainframe_setstartpage(MainFrame* self)
-{		
-	if (generalconfig_showaboutatstart(psycleconfig_general(
-			workspace_conf(&self->workspace)))) {
-		workspace_selectview(&self->workspace, VIEW_ID_HELPVIEW, 1, 0);
-	} else {
-		workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW, 0, 0);
-	}
-	self->startpage = TRUE;
-}
-
 void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 {
 	psy_EventDriverCmd cmd;
@@ -842,15 +790,6 @@ void mainframe_ontogglegearworkspace(MainFrame* self, Workspace* sender)
 		psy_ui_component_hide(&self->gearsplitter.component);
 	} else {
 		psy_ui_component_show(&self->gearsplitter.component);
-	}
-}
-
-void mainframe_resetfocus(MainFrame* self)
-{
-	if (!psy_ui_component_visible(&self->paramrack.component) &&
-		psy_ui_notebook_activepage(&self->notebook)) {
-		psy_ui_component_setfocus(psy_ui_notebook_activepage(
-			&self->notebook));
 	}
 }
 
@@ -1021,9 +960,9 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 {
 	psy_ui_Component* component;
 
-	if (self->startpage) {
+	if (self->workspace.startpage) {
 		psy_ui_tabbar_select(&self->helpview.tabbar, 0);
-		self->startpage = 0;
+		self->workspace.startpage = FALSE;
 	}
 	psy_ui_tabbar_unmark(&self->helpsettingstabbar);
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
@@ -1208,13 +1147,13 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 	if (generalconfig_showsequenceedit(psycleconfig_general(
 		workspace_conf(&self->workspace)))) {
 		psy_ui_button_settext(&self->sequencerbar.toggleseqedit,
-			"sequencerview.hideseqeditor");
+			"seqview.hideseqeditor");
 		psy_ui_button_highlight(&self->sequencerbar.toggleseqedit);
 		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequencerbar.toggleseqedit,
-			"sequencerview.showseqeditor");
+			"seqview.showseqeditor");
 		psy_ui_button_disablehighlight(
 			&self->sequencerbar.toggleseqedit);
 		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
@@ -1250,13 +1189,13 @@ void mainframe_updatestepsequencerbuttons(MainFrame* self)
 	if (generalconfig_showstepsequencer(psycleconfig_general(
 			workspace_conf(&self->workspace)))) {
 		psy_ui_button_settext(&self->sequencerbar.togglestepseq,
-			"sequencerview.hidestepsequencer");
+			"seqview.hidestepsequencer");
 		psy_ui_button_highlight(&self->sequencerbar.togglestepseq);
 		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
 			psy_ui_ICON_LESS);
 	} else {
 		psy_ui_button_settext(&self->sequencerbar.togglestepseq,
-			"sequencerview.showstepsequencer");
+			"seqview.showstepsequencer");
 		psy_ui_button_disablehighlight(
 			&self->sequencerbar.togglestepseq);
 		psy_ui_button_seticon(&self->sequencerbar.togglestepseq,
@@ -1322,6 +1261,7 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {	
+	/* TODO add immediate mode */
 	mainframe_checkplaystartwithrctrl(self, ev);
 	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYDOWN, ev);
 }

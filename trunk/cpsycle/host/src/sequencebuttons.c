@@ -70,7 +70,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_preventtranslation(&self->incpattern);
 	psy_ui_button_settext(&self->incpattern, "+");
 	psy_ui_button_init_text(&self->insertentry, &self->row0, view,
-		"sequencerview.ins");	
+		"seqview.ins");	
 	psy_ui_button_init(&self->decpattern, &self->row0, view);
 	psy_ui_button_preventtranslation(&self->decpattern);
 	psy_ui_button_settext(&self->decpattern, "-");
@@ -79,11 +79,11 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->row1, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_text(&self->newentry, &self->row1, view,
-		"sequencerview.new");
+		"seqview.new");
 	psy_ui_button_init_text(&self->cloneentry, &self->row1, view,
-		"sequencerview.clone");
+		"seqview.clone");
 	psy_ui_button_init_text(&self->delentry, &self->row1, view,
-		"sequencerview.del");
+		"seqview.del");
 	psy_ui_component_init(&self->expand, &self->component, view);
 	psy_ui_component_setalign(&self->expand, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->more, &self->expand, view);
@@ -102,13 +102,13 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->row2, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_text(&self->clear, &self->row2, view,
-		"sequencerview.clear");	
+		"seqview.clear");	
 	psy_ui_button_init_text(&self->rename, &self->row2, view,
-		"sequencerview.rename");
+		"seqview.rename");
 	// psy_ui_button_init(&self->cut, &self->component);
 	// psy_ui_button_settext(&self->cut, "");
 	psy_ui_button_init_text(&self->copy, &self->row2, view,
-		"sequencerview.copy");
+		"seqview.copy");
 	// rename edit
 	psy_ui_edit_init(&self->edit, view);// &self->block);
 	psy_ui_margin_init_em(&rowmargin, 0.5, 0.0, 1.0, 0.0);
@@ -122,11 +122,11 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->row3, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init_text(&self->paste, &self->row3, view,
-		"sequencerview.paste");
+		"seqview.paste");
 	psy_ui_button_init_text(&self->singlesel, &self->row3, view,
-		"sequencerview.singlesel");
+		"seqview.singlesel");
 	psy_ui_button_init_text(&self->multisel, &self->row3, view,
-		"sequencerview.multisel");
+		"seqview.multisel");
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
 	psy_ui_component_hide(&self->block);

@@ -257,6 +257,7 @@ INLINE void psy_ui_component_hide(psy_ui_Component* self)
 
 void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
+void psy_ui_component_showmaximized(psy_ui_Component*);
 bool psy_ui_component_togglevisibility(psy_ui_Component*);
 
 void psy_ui_component_usescroll(psy_ui_Component*);

@@ -179,6 +179,11 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_ui_dragevent_dispose(&self->dragevent);
 }
 
+void psy_ui_app_setmain(psy_ui_App* self, psy_ui_Component* main)
+{
+	self->main = main;
+}
+
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
 {
 	assert(self);
@@ -439,3 +444,44 @@ void psy_ui_app_stopdrag(psy_ui_App* self)
 		}
 	}
 }
+
+/*
+** Initial entry point for the startup of psycle
+**
+** Normally, main is the c entry point, but win32 uses WinMain, so we have
+** to define for win32 a different entry point as the usual main method.
+** We split the startup call with os defines of diversalis and call then
+** psycle_run as main method
+*/
+
+#ifdef DIVERSALIS__OS__MICROSOFT
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <objbase.h>
+
+int psycle_run(uintptr_t instance, int options);
+
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
+	_In_ PSTR szCmdLine, _In_ int iCmdShow)
+{
+	int err;
+
+	/* calls the platform independend startup code */
+	err = psycle_run((uintptr_t)hInstance, iCmdShow);
+#if defined _CRTDBG_MAP_ALLOC
+	_CrtDumpMemoryLeaks();
+#endif
+	return err;
+}
+
+#else
+#define _MAX_PATH 4096
+
+int main(int argc, char** argv)
+{
+	return psycle_run(0, 0);
+}
+#endif

@@ -143,17 +143,18 @@ typedef struct MainFrame {
 	InstrumentsViewBar instrumentsviewbar;	
 	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
-	int startup;
-	bool startpage;	
+	int startup;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);
 
+MainFrame* mainframe_alloc(void);
+MainFrame* mainframe_allocinit(void);	
+
 INLINE int mainframe_showmaximizedatstart(MainFrame* self)
-{
-	return TRUE;
-	// return generalconfig_showmaximizedatstart(
-	//	psycleconfig_general(workspace_conf(&self->workspace)));
+{	
+	return generalconfig_showmaximizedatstart(
+		psycleconfig_general(workspace_conf(&self->workspace)));
 }
 
 INLINE psy_ui_Component* mainframe_base(MainFrame* self)

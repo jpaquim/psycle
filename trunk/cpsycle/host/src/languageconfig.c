@@ -57,7 +57,7 @@ void languageconfig_makelanguagelist(LanguageConfig* self)
 	
 	assert(self);
 	
-	if (workdir(currdir)) {
+	if (psy_workdir(currdir)) {
 		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
 			languageconfig_enumlanguagedir);
 	}

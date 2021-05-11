@@ -127,6 +127,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->cursorstep = 1;
 	self->followsong = 0;
 	self->recordtweaks = 0;	
+	self->startpage = FALSE;
 	self->mainhandle = mainhandle;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
@@ -2046,4 +2047,15 @@ const char* workspace_songtitle(const Workspace* self)
 		return psy_audio_song_title(self->song);
 	}
 	return "";
+}
+
+void workspace_setstartpage(Workspace* self)
+{
+	if (generalconfig_showaboutatstart(psycleconfig_general(
+		workspace_conf(self)))) {
+		workspace_selectview(self, VIEW_ID_HELPVIEW, 1, 0);
+	} else {
+		workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
+	}
+	self->startpage = TRUE;
 }

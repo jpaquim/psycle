@@ -67,10 +67,10 @@ int psy_dir_enumerate_recursive(void* self, const char* path, const char* wildca
 void psy_dir_findfile(const char* searchpath, const char* wildcard, char* filepath);
 const char* psy_dir_config(void);
 const char* psy_dir_home(void);
-char* workdir(char* buffer);
+char* psy_workdir(char* buffer);
 const char* pathenv(void);
 void setpathenv(const char* path);
-void insertpathenv(const char* path);
+void psy_insertpathenv(const char* path);
 void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext);
 void psy_mkdir(const char* path);
 bool psy_direxists(const char* path);

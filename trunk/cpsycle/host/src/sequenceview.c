@@ -125,7 +125,7 @@ void sequencetrackheaders_build(SequenceTrackHeaders* self)
 		}
 		newtrack = psy_ui_button_allocinit(&self->client, &self->component);
 		if (newtrack) {
-			psy_ui_button_settext(newtrack, "sequencerview.new-trk");
+			psy_ui_button_settext(newtrack, "seqview.new-trk");
 			newtrack->stoppropagation = FALSE;
 			psy_signal_connect(&newtrack->signal_clicked, self,
 				sequencetrackheaders_onnewtrack);
@@ -514,7 +514,7 @@ void sequencelistview_onpreferredsize(SequenceListView* self,
 {
 	sequencelistview_super_vtable.onpreferredsize(&self->component, limit, rv);	
 	psy_ui_value_add(&rv->width, &self->state->trackwidth,
-		psy_ui_component_textmetric(&self->component), NULL);
+		psy_ui_component_textmetric(&self->component), NULL);	
 }
 
 void sequencelistview_showpatternnames(SequenceListView* self)
@@ -610,7 +610,7 @@ void sequenceduration_init(SequenceViewDuration* self,
 	psy_ui_component_setspacing(&self->component,
 		psy_ui_margin_make_em(0.5, 0.0, 0.5, 0.5));
 	psy_ui_label_init_text(&self->desc, &self->component, NULL,
-		"sequencerview.duration");
+		"seqview.duration");
 	psy_ui_component_setspacing(&self->desc.component,
 		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));	
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
