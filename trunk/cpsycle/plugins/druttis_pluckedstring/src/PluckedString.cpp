@@ -7,6 +7,7 @@
 //============================================================================
 #include "../detail/prefix.h"
 
+
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
@@ -108,6 +109,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 //============================================================================
 mi::mi()
 {
+	psy_dsp_init();
 	Vals = new int[MacInfo.numParameters];
 	working = false;
 	initialized = false;

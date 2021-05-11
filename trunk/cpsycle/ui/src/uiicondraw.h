@@ -23,15 +23,12 @@ typedef enum {
 
 typedef struct psy_ui_IconDraw {
 	// internal
-	psy_ui_ButtonIcon icon;
-	// references
-	const psy_ui_Style* style;
+	psy_ui_ButtonIcon icon;		
 } psy_ui_IconDraw;
 
-void psy_ui_icondraw_init(psy_ui_IconDraw*, psy_ui_ButtonIcon,
-	const psy_ui_Style*);
+void psy_ui_icondraw_init(psy_ui_IconDraw*, psy_ui_ButtonIcon);
 void psy_ui_icondraw_draw(psy_ui_IconDraw*, psy_ui_Graphics*,
-	psy_ui_RealPoint);
+	psy_ui_RealPoint, psy_ui_Colour);
 
 #ifdef __cplusplus
 }
