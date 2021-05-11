@@ -1,15 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_STYLE_H
 #define psy_ui_STYLE_H
 
-// local
+/* local */
+#include "uicolour.h"
 #include "uibitmap.h"
 #include "uifont.h"
 #include "uidef.h"
 #include "uistyle.h"
-// container
+/* container */
 #include <hashtbl.h>
 #include <properties.h>
 
@@ -17,12 +20,17 @@
 extern "C" {
 #endif
 
+typedef enum psy_ui_ThemeMode {
+	psy_ui_LIGHTTHEME = 0,
+	psy_ui_DARKTHEME  = 1
+} psy_ui_ThemeMode;
+
 typedef enum {
 	psy_ui_REPEAT,
 	psy_ui_NOREPEAT	
 } psy_ui_BackgroundRepeat;
 
-// psy_ui_Style
+/* psy_ui_Style */
 typedef struct psy_ui_Style {
 	psy_ui_Font font;
 	psy_ui_Colour colour;
@@ -46,6 +54,7 @@ void psy_ui_style_init_default(psy_ui_Style*, uintptr_t styletype);
 void psy_ui_style_init_copy(psy_ui_Style*, const psy_ui_Style* other);
 void psy_ui_style_init_colours(psy_ui_Style*, psy_ui_Colour,
 	psy_ui_Colour background);
+void psy_ui_styles_init_property(psy_ui_Style*, psy_Property* style);
 void psy_ui_style_dispose(psy_ui_Style*);
 void psy_ui_style_copy(psy_ui_Style*, const psy_ui_Style* other);
 
@@ -56,7 +65,7 @@ psy_ui_Style* psy_ui_style_allocinit_colours(psy_ui_Colour,
 psy_ui_Style* psy_ui_style_clone(const psy_ui_Style* other);
 void psy_ui_style_deallocate(psy_ui_Style*);
 
-// Properties
+/* Properties */
 INLINE void psy_ui_style_setcolour(psy_ui_Style* self, psy_ui_Colour colour)
 {
 	self->colour = colour;
@@ -125,23 +134,22 @@ INLINE void psy_ui_style_setspacing_em(psy_ui_Style* self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
-// psy_ui_Styles
+/* psy_ui_Styles */
 typedef struct psy_ui_Styles {
 	psy_Table styles;
 	psy_Property config;
+	psy_ui_ThemeMode theme;
 } psy_ui_Styles;
 
 void psy_ui_styles_init(psy_ui_Styles*);
 void psy_ui_styles_dispose(psy_ui_Styles*);
 
 void psy_ui_styles_setstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
-void psy_ui_styles_mixstyle(psy_ui_Styles*, uintptr_t styletype, psy_ui_Style*);
 psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype);
 const psy_ui_Style* psy_ui_styles_at_const(const psy_ui_Styles*,
 	uintptr_t styletype);
 void psy_ui_styles_configure(psy_ui_Styles*, psy_Property*);
 const psy_Property* psy_ui_styles_configuration(const psy_ui_Styles*);
-
 
 #ifdef __cplusplus
 }

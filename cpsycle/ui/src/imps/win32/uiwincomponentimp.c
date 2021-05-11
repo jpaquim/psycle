@@ -558,7 +558,7 @@ psy_ui_RealRectangle dev_position(const psy_ui_win_ComponentImp* self)
 	rv.top = pt.y;
 	rv.right = rv.left + rc.right;
 	rv.bottom = rv.top + rc.bottom;
-	dev_updatetopleft(self);
+	dev_updatetopleft((psy_ui_win_ComponentImp*)self);
 	return rv;		
 }
 

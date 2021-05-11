@@ -184,14 +184,14 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	psy_ui_icondraw_init(&icondraw, psy_ui_ICON_DOWN,		
 		// (self->hover == psy_ui_COMBOBOXHOVER_DOWN)
 		//? &self->component.style.hover
-		&self->component.style.style);
+		&self->component.style.overridestyle);
 	psy_ui_icondraw_draw(&icondraw, g,
 		psy_ui_realpoint_make(size.width - 10, 4 + varrowcenter));
 	if (hasnextentry(self)) {		
 		psy_ui_icondraw_init(&icondraw, psy_ui_ICON_MORE,
 			// (self->hover == psy_ui_COMBOBOXHOVER_MORE)
 			// ? &self->component.style.hover
-			&self->component.style.style);
+			&self->component.style.overridestyle);
 		psy_ui_icondraw_draw(&icondraw, g,
 			psy_ui_realpoint_make(size.width - 25, 2 + varrowcenter));
 	}
@@ -199,7 +199,7 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 		psy_ui_icondraw_init(&icondraw, psy_ui_ICON_LESS,
 			// (self->hover == psy_ui_COMBOBOXHOVER_LESS)
 			// ? &self->component.style.hover
-			&self->component.style.style);
+			&self->component.style.overridestyle);
 		psy_ui_icondraw_draw(&icondraw, g,
 			psy_ui_realpoint_make(size.width - 40, 2 + varrowcenter));
 	}
@@ -324,7 +324,7 @@ void updatestyles(psy_ui_ComboBox* self)
 	// if (self->hover != psy_ui_COMBOBOXHOVER_NONE) {
 		// self->component.style.currstyle = &self->component.style.hover;
 	// } else {
-		self->component.style.currstyle = &self->component.style.style;
+		self->component.style.currstyle = &self->component.style.overridestyle;
 	// }
 }
 

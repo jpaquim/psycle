@@ -270,7 +270,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 void about_initbuttons(About* self)
 {	
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
-		psy_ui_ALIGN_BOTTOM);
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_setmargin(&self->bottom,
 		psy_ui_margin_make(psy_ui_value_zero(), psy_ui_value_zero(),
 			psy_ui_value_make_ph(0.15), psy_ui_value_zero()));

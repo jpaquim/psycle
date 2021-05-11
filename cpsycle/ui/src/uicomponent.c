@@ -86,7 +86,7 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
 	psy_ui_Colour colour)
 {		
-	self->style.currstyle->backgroundcolour = colour;	
+	psy_ui_componentstyle_setbackgroundcolour(&self->style, colour);
 }
 
 psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
@@ -95,11 +95,14 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 	psy_ui_Colour base;
 
 	assert(self);
-
-	curr = self;	
+	
+	curr = self;		
 	while (curr) {
-		if (curr->style.currstyle->backgroundcolour.mode.set) {			
-			base = curr->style.currstyle->backgroundcolour;
+		psy_ui_Colour colour;
+		
+		colour = psy_ui_componentstyle_backgroundcolour(&curr->style);		
+		if (colour.mode.set) {
+			base = colour;
 			if (base.overlay != 0) {
 				uint8_t overlay;
 				psy_ui_Colour overlaycolour;
@@ -126,7 +129,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 
 void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
 {
-	psy_ui_colour_set(&self->style.currstyle->colour, colour);
+	psy_ui_componentstyle_setcolour(&self->style, colour);	
 }
 
 psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
@@ -138,8 +141,11 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 
 	curr = self;
 	while (curr) {
-		if (curr->style.currstyle->colour.mode.set) {
-			base = curr->style.currstyle->colour;
+		psy_ui_Colour colour;
+
+		colour = psy_ui_componentstyle_colour(&curr->style);
+		if (colour.mode.set) {
+			base = colour;
 			if (base.overlay != 0) {
 				uint8_t overlay;
 				psy_ui_Colour overlaycolour;
@@ -167,19 +173,12 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 void psy_ui_component_setborder(psy_ui_Component* self,
 	const psy_ui_Border* border)
 {
-	if (border) {
-		self->style.currstyle->border = *border;
-	} else {
-		self->style.currstyle->border = self->style.style.border;
-	}
+	psy_ui_componentstyle_setborder(&self->style, border);	
 }
 
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component* self)
-{
-	if (self->style.currstyle->border.mode.set) {
-		return &self->style.currstyle->border;
-	}
-	return &psy_ui_style(psy_ui_STYLE_ROOT)->border;
+{	
+	return psy_ui_componentstyle_border(&self->style);	
 }
 
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component* self)
@@ -190,13 +189,13 @@ uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component* self)
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
-		psy_ui_Style* common;		
+		psy_ui_Style* root;		
 
-		common = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);		
-		psy_ui_font_dispose(&common->font);
-		psy_ui_font_init(&common->font, NULL);
-		psy_ui_font_copy(&common->font, font);
-		psy_ui_app_updatesyles(psy_ui_app());
+		root = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);
+		psy_ui_font_dispose(&root->font);
+		psy_ui_font_init(&root->font, NULL);
+		psy_ui_font_copy(&root->font, font);
+		psy_ui_notifystyleupdate(psy_ui_mainwindow());		
 	}
 }
 
@@ -293,7 +292,7 @@ static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseenter(psy_ui_Component* self)
-{	
+{		
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_HOVER);
 }
 
@@ -1911,7 +1910,6 @@ void psy_ui_component_setstyletypes(psy_ui_Component* self,
 		psy_ui_STYLESTATE_SELECT, select);
 	psy_ui_componentstyle_setstyle(&self->style,
 		psy_ui_STYLESTATE_DISABLED, disabled);	
-	psy_ui_componentstyle_readstyles(&self->style);
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1928,8 +1926,7 @@ void psy_ui_component_setstyletype(psy_ui_Component* self,
 	uintptr_t standard)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_NONE, standard);
-	psy_ui_componentstyle_readstyles(&self->style);
+		psy_ui_STYLESTATE_NONE, standard);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1937,8 +1934,7 @@ void psy_ui_component_setstyletype_hover(psy_ui_Component* self,
 	uintptr_t hover)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_HOVER, hover);
-	psy_ui_componentstyle_readstyles(&self->style);
+		psy_ui_STYLESTATE_HOVER, hover);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1946,9 +1942,7 @@ void psy_ui_component_setstyletype_focus(psy_ui_Component* self,
 	uintptr_t focus)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_FOCUS, focus);
-	psy_ui_componentstyle_readstyle(&self->style,
-		psy_ui_STYLESTATE_FOCUS, focus);
+		psy_ui_STYLESTATE_FOCUS, focus);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1956,9 +1950,7 @@ void psy_ui_component_setstyletype_active(psy_ui_Component* self,
 	uintptr_t active)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_ACTIVE, active);
-	psy_ui_componentstyle_readstyle(&self->style,
-		psy_ui_STYLESTATE_ACTIVE, active);
+		psy_ui_STYLESTATE_ACTIVE, active);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1966,9 +1958,7 @@ void psy_ui_component_setstyletype_select(psy_ui_Component* self,
 	uintptr_t select)
 {
 	psy_ui_componentstyle_setstyle(&self->style,
-		psy_ui_STYLESTATE_SELECT, select);
-	psy_ui_componentstyle_readstyle(&self->style,
-		psy_ui_STYLESTATE_SELECT, select);
+		psy_ui_STYLESTATE_SELECT, select);	
 	psy_ui_component_checkbackgroundanimation(self);
 }
 
@@ -1983,7 +1973,7 @@ void psy_ui_component_setstylestate(psy_ui_Component* self,
 
 void psy_ui_component_addstylestate(psy_ui_Component* self,
 	psy_ui_StyleState state)
-{
+{	
 	if (psy_ui_componentstyle_addstate(&self->style, state)) {
 		psy_ui_component_checkbackgroundanimation(self);
 		psy_ui_component_invalidate(self);
@@ -2020,24 +2010,25 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 		psy_List* p;
 		psy_List* q;
 
-		// merge		
-		psy_ui_componentstyle_readstyles(&main->style);
+		psy_ui_componentstyle_updatecurrstate(&main->style);
 		main->vtable->onupdatestyles(main);
-		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; psy_list_next(&p)) {
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
 			psy_ui_Component* child;
 
-			child = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_componentstyle_readstyles(&child->style);
+			child = (psy_ui_Component*)psy_list_entry(p);			
+			psy_ui_componentstyle_updatecurrstate(&child->style);
 			child->vtable->onupdatestyles(child);
 			if (child->imp) {
 				child->imp->vtable->dev_setbackgroundcolour(child->imp,
 					psy_ui_component_backgroundcolour(child));
 				psy_ui_component_updatefont(child);
 			}
-
 		}
+		psy_list_free(q);
 	}
-	psy_ui_component_invalidate(main);
+	// align				
+	psy_ui_component_align_full(main);	
+	psy_ui_component_invalidate(main);	
 }
 
 void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
@@ -2050,7 +2041,7 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 	// draw background						
 	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self, g);
-	}
+	}	
 	psy_ui_component_drawborder(self, g);
 	// prepare a clip rect that can be used by a component
 	// to optimize the draw amount	

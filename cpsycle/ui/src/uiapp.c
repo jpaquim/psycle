@@ -1,15 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiapp.h"
-// local
+/* local */
 #include "uicomponent.h"
-// std
+/* std */
 #include <stdlib.h>
 #include <stdio.h>
-// platform
+/* platform */
 #include "../../detail/psyconf.h"
 #include "../../detail/os.h"
 
@@ -29,10 +32,10 @@
 	#error "Platform not supported"
 #endif
 
-// global app reference set by app_init
+/* global app reference set by app_init */
 static psy_ui_App* app = NULL;
 
-// psy_ui_AppZoom
+/* psy_ui_AppZoom */
 
 void psy_ui_appzoom_init(psy_ui_AppZoom* self)
 {
@@ -73,7 +76,7 @@ void psy_ui_appzoom_updatebasefontsize(psy_ui_AppZoom* self, psy_ui_Font* basefo
 	self->basefontsize = fontinfo.lfHeight;
 }
 
-// psy_ui_App
+/* psy_ui_App */
 static void psy_ui_app_changedefaultfontsize(psy_ui_App*, int size);
 static void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
 
@@ -104,7 +107,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_ui_appzoom_init(&self->zoom);
 	ui_app_initimpfactory(self);
 	ui_app_initimp(self, instance);
-	psy_ui_defaults_init(&self->defaults, dark);
+	psy_ui_defaults_init(&self->defaults, psy_ui_DARKTHEME);
 	psy_ui_appzoom_updatebasefontsize(&self->zoom,
 		psy_ui_defaults_font(&self->defaults));	
 	psy_translator_init(&self->translator);
@@ -121,11 +124,11 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	self->imp_factory = (psy_ui_ImpFactory*)
 		psy_ui_win_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
-	// todo
-	//initscr();
-	//refresh();
-	//self->imp_factory = (psy_ui_ImpFactory*)
-		//psy_ui_curses_impfactory_allocinit();
+	/* todo
+	   initscr();
+	   refresh();
+	   self->imp_factory = (psy_ui_ImpFactory*)
+		  psy_ui_curses_impfactory_allocinit(); */
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
 	printf("Create X11 Impfactory\n");
 	self->imp_factory = (psy_ui_ImpFactory*)
@@ -237,7 +240,7 @@ void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
 		psy_List* p;
 		psy_List* q;
 
-		// notify all components language changed
+		/* notify all components language changed */
 		psy_ui_component_updatelanguage(self->main);
 		for (p = q = psy_ui_component_children(self->main, psy_ui_RECURSIVE);
 				p != NULL; psy_list_next(&p)) {
@@ -305,7 +308,7 @@ void psy_ui_app_lighttheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initlighttheme(&self->defaults, TRUE);
+	psy_ui_defaults_inittheme(&self->defaults, psy_ui_LIGHTTHEME, TRUE);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}
@@ -315,7 +318,7 @@ void psy_ui_app_darktheme(psy_ui_App* self)
 {
 	assert(self);
 
-	psy_ui_defaults_initdarktheme(&self->defaults, TRUE);
+	psy_ui_defaults_inittheme(&self->defaults, psy_ui_DARKTHEME, TRUE);
 	if (self->imp) {
 		self->imp->vtable->dev_onappdefaultschange(self->imp);
 	}
@@ -325,7 +328,7 @@ bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 {
 	assert(self);
 
-	return psy_ui_defaults()->hasdarktheme;
+	return psy_ui_defaults()->styles.theme == psy_ui_DARKTHEME;
 }
 
 const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, uintptr_t styletype)
@@ -338,8 +341,7 @@ const psy_ui_Style* psy_ui_style(uintptr_t styletype)
 	return psy_ui_app_style(psy_ui_app(), styletype);
 }
 
-
-// psy_ui_AppImp
+/* psy_ui_AppImp */
 static void psy_ui_appimp_dispose(psy_ui_AppImp* self) { }
 static int psy_ui_appimp_run(psy_ui_AppImp* self) { return PSY_ERRRUN; }
 static void psy_ui_appimp_stop(psy_ui_AppImp* self) { }
@@ -414,33 +416,6 @@ int psy_ui_logpixelsy(void)
 	return rv;
 #endif
 	return 72;
-}
-
-void psy_ui_app_updatesyles(psy_ui_App* self)
-{		
-	if (self->main) {
-		psy_List* p;
-		psy_List* q;
-
-		// merge
-		psy_ui_component_updatefont(self->main);
-		for (p = q = psy_ui_component_children(self->main, psy_ui_RECURSIVE);
-				p != NULL;
-				psy_list_next(&p)) {
-			psy_ui_Component* child;
-
-			child = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_updatefont(child);
-		}
-		// align
-		// call align even if position has not changed
-		self->alignvalid = FALSE;
-		psy_ui_component_align(self->main);
-		// reset to normal align
-		self->alignvalid = TRUE;
-		psy_list_free(q);
-		psy_ui_component_invalidate(self->main);
-	}
 }
 
 void psy_ui_app_sethover(psy_ui_App* self, psy_ui_Component* hover)

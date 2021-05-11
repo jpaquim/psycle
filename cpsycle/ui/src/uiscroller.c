@@ -87,6 +87,7 @@ static void vtable_init(psy_ui_Scroller* self)
 			psy_ui_scroller_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 // implementation
 void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
@@ -94,7 +95,6 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 {	
 	psy_ui_component_init(&self->component, parent, view);
 	vtable_init(self);
-	self->component.vtable = &vtable;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
 	// bottom
@@ -133,10 +133,15 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	// reparent client
 	self->client = client;
 	if (self->client) {
+		const psy_ui_Style* style;
+
 		psy_ui_component_setparent(client, &self->pane);		
 		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED_RESIZE);
-		self->component.style.style.border = self->client->style.style.border;
-		psy_ui_border_init(&self->client->style.style.border);
+		style = psy_ui_app_style(psy_ui_app(),
+			psy_ui_componentstyle_currstyleid(&self->client->style));
+		if (style) {
+			psy_ui_component_setborder(&self->component, &style->border);
+		}
 	}
 	psy_signal_connect(&self->vscroll.signal_changed, self,
 		psy_ui_scroller_vertical_onchanged);
@@ -374,10 +379,13 @@ void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender)
 
 void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
 {
-	if (self->client) {
-		assert(self->client->style.currstyle);
-
-		self->component.style.style.border =
-			self->client->style.currstyle->border;
+	if (self->client) {		
+		const psy_ui_Style* style;
+		
+		style = psy_ui_app_style(psy_ui_app(),
+			psy_ui_componentstyle_currstyleid(&self->client->style));
+		if (style) {
+			psy_ui_component_setborder(&self->component, &style->border);			
+		}
 	}
 }

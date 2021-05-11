@@ -328,7 +328,7 @@ void sequencelisttrack_ondraw(SequenceListTrack* self, psy_ui_Graphics* g)
 			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_PROGRESS)->colour);
 		} else {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, self->component.style.style.colour);
+			psy_ui_settextcolour(g, self->component.style.overridestyle.colour);
 		}
 		psy_ui_textout(g, 0, cpy, text, psy_strlen(text));
 	}
@@ -432,8 +432,6 @@ static void sequencelistview_onpatternnamechanged(SequenceListView*,
 static psy_ui_RealRectangle sequencelistview_rowrectangle(SequenceListView*,
 	uintptr_t row);
 static void sequencelistview_invalidaterow(SequenceListView*, uintptr_t row);
-static void sequencelistview_oneditkeydown(SequenceListView*,
-	psy_ui_Component* sender, psy_ui_KeyboardEvent*);
 static void sequencelistview_build(SequenceListView*);
 static void sequencelistview_changeplayposition(SequenceListView*);
 // vtable
@@ -457,14 +455,14 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 			sequencelistview_onpreferredsize;
 		sequencelistview_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &sequencelistview_vtable;
 }
 // implementation
 void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	SequenceListViewState* state, SequenceView* view)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
-	sequencelistview_vtable_init(self);
-	self->component.vtable = &sequencelistview_vtable;
+	sequencelistview_vtable_init(self);	
 	self->state = state;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 1);	
@@ -485,12 +483,12 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	}
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	psy_ui_component_starttimer(&self->component, 0, 200);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQLISTVIEW, psy_INDEX_INVALID, STYLE_SEQLISTVIEW_SELECT,
+		STYLE_SEQLISTVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_INDEX_INVALID);
 	sequencelistview_build(self);
+	psy_ui_component_starttimer(&self->component, 0, 200); //STYLE_SEQLISTVIEW	
 }
 
 void sequencelistview_build(SequenceListView* self)

@@ -226,6 +226,12 @@
     <ClCompile Include="src\uigridaligner.c">
       <Filter>aligner</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiappstyles.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uimaterial.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\imps\win32\uiwinapp.h">
@@ -422,6 +428,12 @@
     </ClInclude>
     <ClInclude Include="src\uigridaligner.h">
       <Filter>aligner</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiappstyles.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uimaterial.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -189,9 +189,9 @@ void mainframe_init(MainFrame* self)
 	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);	
-	mainframe_initmaintabbar(self);		
-	mainframe_inithelpsettingstabbar(self);
-	mainframe_initviewtabbars(self);	
+	mainframe_initmaintabbar(self);
+	mainframe_inithelpsettingstabbar(self);	
+	mainframe_initviewtabbars(self);
 	mainframe_initmainviews(self);
 	mainframe_initrightarea(self);
 	mainframe_initgear(self);	
@@ -235,6 +235,7 @@ void mainframe_init(MainFrame* self)
 		workspace_scanplugins(&self->workspace);
 #endif
 	}
+	self->machineview.wireview.centermaster = TRUE;
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -243,7 +244,7 @@ void mainframe_initframe(MainFrame* self)
 	vtable_init(self);
 	psy_ui_app()->main = mainframe_base(self);	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
-	initdarkstyles(psy_ui_appdefaults());
+	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
 	self->startup = TRUE;
 	self->pluginscanprogress = -1;
 }
@@ -584,7 +585,8 @@ void mainframe_initmainviews(MainFrame* self)
 void mainframe_initgear(MainFrame* self)
 {		
 	gear_init(&self->gear, &self->client, &self->workspace);
-	psy_ui_component_setalign(gear_base(&self->gear), psy_ui_ALIGN_RIGHT);		
+	psy_ui_component_hide(gear_base(&self->gear));
+	psy_ui_component_setalign(gear_base(&self->gear), psy_ui_ALIGN_RIGHT);	
 	psy_ui_splitter_init(&self->gearsplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->gearsplitter),
 		psy_ui_ALIGN_RIGHT);
@@ -598,6 +600,7 @@ void mainframe_initgear(MainFrame* self)
 void mainframe_initparamrack(MainFrame* self)
 {	
 	paramrack_init(&self->paramrack, &self->client, &self->workspace);
+	psy_ui_component_hide(paramrack_base(&self->paramrack));
 	psy_ui_component_setalign(&self->paramrack.component,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_splitter_init(&self->splitbarparamrack, &self->client);
@@ -613,6 +616,7 @@ void mainframe_initparamrack(MainFrame* self)
 void mainframe_initcpuview(MainFrame* self)
 {
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
+	psy_ui_component_hide(cpuview_base(&self->cpuview));
 	psy_ui_component_setalign(cpuview_base(&self->cpuview), psy_ui_ALIGN_RIGHT);	
 	psy_ui_splitter_init(&self->cpusplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->cpusplitter),
@@ -627,6 +631,7 @@ void mainframe_initcpuview(MainFrame* self)
 void mainframe_initmidimonitor(MainFrame* self)
 {
 	midimonitor_init(&self->midimonitor, &self->client, &self->workspace);
+	psy_ui_component_hide(midimonitor_base(&self->midimonitor));
 	psy_ui_component_setalign(midimonitor_base(&self->midimonitor), psy_ui_ALIGN_RIGHT);	
 	psy_ui_splitter_init(&self->midisplitter, &self->client);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->midisplitter),
@@ -1052,11 +1057,11 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 		}
 	}
 	view = psy_ui_notebook_page(&self->notebook, index);		
-	if (view) {
+	if (view) {				
+		psy_ui_tabbar_select(&self->tabbar, index);
 		if (section != psy_INDEX_INVALID) {
 			psy_ui_component_selectsection(view, section, options);
 		}
-		psy_ui_tabbar_select(&self->tabbar, index);
 		psy_ui_component_setfocus(view);
 	}	
 }

@@ -1157,7 +1157,7 @@ void instrumententryrow_updatestyles(InstrumentEntryRow* self)
 	// } else if (self->hover) {
 	//	self->component.style.currstyle = &self->component.style.hover;
 	// } else {
-		self->component.style.currstyle = &self->component.style.style;
+		self->component.style.currstyle = &self->component.style.overridestyle;
 	// }
 	psy_ui_component_invalidate(&self->component);
 }
