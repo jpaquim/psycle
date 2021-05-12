@@ -101,7 +101,7 @@ typedef struct MainFrame {
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;	
 	StepsequencerView stepsequencerview;
-	SequenceView sequenceview;
+	SeqView sequenceview;
 	SequencerBar sequencerbar;
 	psy_ui_Splitter splitbarparamrack;
 	ParamRack paramrack;

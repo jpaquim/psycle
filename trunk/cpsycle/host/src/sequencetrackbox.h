@@ -17,7 +17,7 @@ extern "C" {
 
 // SequenceTrackBox
 //
-// Discribes and controls a sequence track(used by SequenceView and SeqEditor).
+// Discribes and controls a sequence track(used by SeqView and SeqEditor).
 
 typedef struct SequenceTrackBox {
 	// inherits
