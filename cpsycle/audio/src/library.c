@@ -179,9 +179,9 @@ void* psy_library_functionpointer(psy_Library* self, const char* name)
 void psy_library_dispose(psy_Library* self)
 {
 	if (self->module) {
-		FreeLibrary(self->module);
+		FreeLibrary(self->module);		
 		self->err = GetLastError();
-		self->module = NULL;
+		self->module = NULL;		
 	}
 	free(self->path);
 	self->path = NULL;

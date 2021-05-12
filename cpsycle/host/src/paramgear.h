@@ -40,6 +40,10 @@ typedef struct ParamRackBox {
 void paramrackbox_init(ParamRackBox*, psy_ui_Component* parent,
 	uintptr_t slot, Workspace*);
 
+ParamRackBox* paramrackbox_alloc(void);
+ParamRackBox* paramrackbox_allocinit(psy_ui_Component* parent, uintptr_t slot,
+	Workspace*);
+
 void paramrackbox_select(ParamRackBox*);
 void paramrackbox_deselect(ParamRackBox*);
 

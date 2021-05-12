@@ -500,9 +500,11 @@ void pluginsview_ondestroy(PluginsView* self)
 
 void pluginsview_clear(PluginsView* self)
 {
-	if (self->plugins) {
+	if (self->filteredplugins) {
 		psy_property_deallocate(self->filteredplugins);
 		self->filteredplugins = NULL;
+	}
+	if (self->plugins) {		
 		psy_property_deallocate(self->plugins);		
 		self->plugins = NULL;
 		newmachineselection_clear(&self->selection);		

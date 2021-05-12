@@ -75,6 +75,24 @@ void paramrackbox_ondestroy(ParamRackBox* self, psy_ui_Component* sender)
 		workspace_conf(self->workspace))->signal_themechanged, self);
 }
 
+ParamRackBox* paramrackbox_alloc(void)
+{
+	return(ParamRackBox*)malloc(sizeof(ParamRackBox));
+}
+
+ParamRackBox* paramrackbox_allocinit(psy_ui_Component* parent, uintptr_t slot,
+	Workspace* workspace)
+{
+	ParamRackBox* rv;
+	
+	rv = paramrackbox_alloc();
+	if (rv) {
+		paramrackbox_init(rv, parent, slot, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
+}
+
 void paramrackbox_select(ParamRackBox* self)
 {
 	psy_ui_component_invalidate(&self->header);
@@ -386,9 +404,8 @@ void paramrackpane_buildlevel(ParamRackPane* self, uintptr_t level)
 		if (psy_table_exists(&self->boxes, slot)) {
 			paramrackpane_removebox(self, slot);
 		}
-		box = (ParamRackBox*)malloc(sizeof(ParamRackBox));
-		if (box) {			
-			paramrackbox_init(box, &self->component, slot, self->workspace);
+		box = paramrackbox_allocinit(&self->component, slot, self->workspace);
+		if (box) {												
 			if (self->lastinserted) {
 				self->lastinserted->nextbox = box;
 			}

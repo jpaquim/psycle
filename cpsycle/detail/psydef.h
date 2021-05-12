@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(psy_DEF_H)
 #define psy_DEF_H
@@ -29,15 +31,17 @@ typedef uint8_t bool;
 #define psy_max(a, b)  (((a) > (b)) ? (a) : (b)) 
 #endif
 
-// psycle status
+/* psycle status */
 
 #define PSY_OK 0
 #define PSY_ERRFILE 1
 #define PSY_ERRRUN	2
 #define PSY_ERRFILEFORMAT 3
 
-/// Invalid index. Used to indicate index is disabled, or an out of range index.
-/// BEWARE!!! UINTPTR_T, not minus one.
+/*
+** Invalid index. Used to indicate index is disabled, or an out of range index.
+** BEWARE!!! UINTPTR_T, not minus one.
+*/
 #define psy_INDEX_INVALID UINTPTR_MAX
 
 #ifndef INLINE

@@ -120,8 +120,7 @@ void psy_dsp_envelope_init_dispose(psy_dsp_Envelope* self)
 {
 	assert(self);
 
-	psy_list_free(self->points);
-	self->points = NULL;
+	psy_list_deallocate(&self->points, (psy_fp_disposefunc)NULL);	
 	free(self->str);
 	self->str = NULL;
 }
