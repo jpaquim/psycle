@@ -1202,7 +1202,7 @@ static psy_ui_ComponentVtable* machinestackpanetrack_vtable_init(
 }
 
 void machinestackpanetrack_init(MachineStackPaneTrack* self,
-	psy_ui_Component* parent, uintptr_t column, psy_ui_Component* view,
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
 	MachineStackState* state, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, view);	
@@ -1233,6 +1233,26 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	self->state = state;
 	self->workspace = workspace;
 }
+
+MachineStackPaneTrack* machinestackpanetrack_alloc(void)
+{
+	return (MachineStackPaneTrack*)malloc(sizeof(MachineStackPaneTrack));
+}
+
+MachineStackPaneTrack* machinestackpanetrack_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	MachineStackState* state, Workspace* workspace)
+{
+	MachineStackPaneTrack* rv;
+
+	rv = machinestackpanetrack_alloc();
+	if (rv) {
+		machinestackpanetrack_init(rv, parent, view, column, state, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
+	}
+	return rv;
+}
+
 
 void machinestackpanetrack_onmousedoubleclick(MachineStackPaneTrack* self,
 	psy_ui_MouseEvent* ev)
@@ -1332,16 +1352,14 @@ void machinestackpane_build(MachineStackPane* self)
 		for (i = 0; i < maxnumcolumns; ++i) {
 			MachineStackPaneTrack* trackpane;
 
-			trackpane = (MachineStackPaneTrack*)malloc(sizeof(MachineStackPaneTrack));
+			trackpane = machinestackpanetrack_allocinit(&self->component,
+				&self->component, i, self->state, self->workspace);			
 			if (trackpane) {
 				MachineStackColumn* column;
 				bool insert;				
 
 				insert = FALSE;
-				column = machinestackstate_column(self->state, i);
-				machinestackpanetrack_init(trackpane, &self->component, i,
-					&self->component, self->state, self->workspace);
-				trackpane->component.deallocate = TRUE;						
+				column = machinestackstate_column(self->state, i);				
 				if (column && column->offset > 0) {
 					ArrowUi* arrow;
 					uintptr_t first;

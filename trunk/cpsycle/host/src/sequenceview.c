@@ -809,34 +809,33 @@ void seqview_rebuild(SeqView* self)
 void seqview_onselectionchanged(SeqView* self,
 	psy_audio_SequenceSelection* sender)
 {		
-	/*uintptr_t c = 0;
+	uintptr_t c = 0;
 	double visilines;
 	double listviewtop;
-	psy_ui_RealSize listviewsize;
+	psy_ui_RealSize clientsize;
 	
 	c = sender->editposition.order;
 	if (c == psy_INDEX_INVALID) {
 		c = 0;
 	}
-	listviewsize = psy_ui_component_scrollsize_px(&self->listview.component);
-	visilines = (listviewsize.height) /
+	clientsize = psy_ui_component_clientsize_px(&self->listview.component);
+	visilines = (clientsize.height) /
 		psy_ui_value_px(&self->state.lineheight,
-			psy_ui_component_textmetric(&self->component));
+			psy_ui_component_textmetric(&self->component), NULL);
 	listviewtop = psy_ui_component_scrolltop_px(&self->listview.component) /
 		psy_ui_value_px(&self->state.lineheight,
-			psy_ui_component_textmetric(&self->component));
+			psy_ui_component_textmetric(&self->component), NULL);
 	if ((double)c < listviewtop) {
 		psy_ui_component_setscrolltop(&self->listview.component,
 			psy_ui_value_make_px(c *
 				psy_ui_value_px(&self->state.lineheight,
-					psy_ui_component_textmetric(&self->component))));				
+					psy_ui_component_textmetric(&self->component), NULL)));				
 	} else if ((double)c > listviewtop + visilines - 1) {
 		psy_ui_component_setscrolltop(&self->listview.component,
 			psy_ui_value_make_px((c - visilines + 1) * 
 				psy_ui_value_px(&self->state.lineheight,
-					psy_ui_component_textmetric(&self->component))));
-	}
-	*/
+					psy_ui_component_textmetric(&self->component), NULL)));
+	}	
 	psy_ui_component_invalidate(&self->listview.component);
 	psy_ui_component_invalidate(&self->trackheader.component);
 }

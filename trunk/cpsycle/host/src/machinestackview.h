@@ -254,8 +254,13 @@ typedef struct MachineStackPaneTrack {
 	Workspace* workspace;	
 } MachineStackPaneTrack;
 
-void machinestackpanetrack_init(MachineStackPaneTrack*, psy_ui_Component* parent,
-	uintptr_t column, psy_ui_Component* view,
+void machinestackpanetrack_init(MachineStackPaneTrack*,
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
+	MachineStackState*, Workspace*);
+
+MachineStackPaneTrack* machinestackpanetrack_alloc(void);
+MachineStackPaneTrack* machinestackpanetrack_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view, uintptr_t column,
 	MachineStackState*, Workspace*);
 
 // MachineStackView
