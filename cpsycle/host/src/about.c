@@ -71,6 +71,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(version_base(self), parent, NULL);
 	psy_ui_label_init(&self->versioninfo, version_base(self), NULL);
+	psy_ui_label_enablewrap(&self->versioninfo);
 	psy_ui_component_setalign(psy_ui_label_base(&self->versioninfo),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_label_preventtranslation(&self->versioninfo);

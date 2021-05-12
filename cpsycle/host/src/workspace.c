@@ -2039,6 +2039,7 @@ void workspace_apptitle(Workspace* self, char* rv_title, uintptr_t max_len)
 	psy_path_init(&path, self->filename);
 	psy_snprintf(rv_title, max_len, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		psy_path_name(&path), psy_path_ext(&path));	
+	psy_path_dispose(&path);
 }
 
 const char* workspace_songtitle(const Workspace* self)

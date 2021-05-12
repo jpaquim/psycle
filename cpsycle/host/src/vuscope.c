@@ -111,9 +111,9 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	rect.right = right - 32 - 24;
 	rect.top = 2;
 	rect.bottom = rect.top + 1;
-	sprintf(buf, "Peak");
+	psy_snprintf(buf, 128, "%s", "Peak");
 	psy_ui_textout(g, centerx - 42, rect.top, buf, psy_strlen(buf));
-	sprintf(buf, "RMS");
+	psy_snprintf(buf, 128, "%s", "RMS");
 	psy_ui_textout(g, centerx + 25, rect.top, buf, psy_strlen(buf));
 	
 	rect.top = 2 * step;

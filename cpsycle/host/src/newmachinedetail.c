@@ -63,6 +63,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	// description
 	psy_ui_label_init(&self->desclabel, &self->component, NULL);
 	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_TOP);
+	psy_ui_label_enablewrap(&self->desclabel);
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	// bottom
 	psy_ui_component_init(&self->bottom, &self->component, NULL);

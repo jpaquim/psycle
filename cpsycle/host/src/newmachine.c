@@ -238,9 +238,9 @@ void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	self->sort = sort;
 	psy_ui_label_init_text(&self->desc, &self->component, NULL,
-		"newmachine.sort");
+		"newmachine.sort");	
 	psy_ui_button_init_text_connect(&self->sortbyfavorite, &self->component, NULL,
-		"newmachine.favorite", self, newmachinesortbar_onsortbyfavorite);
+		"newmachine.favorite", self, newmachinesortbar_onsortbyfavorite);	
 	psy_ui_button_init_text_connect(&self->sortbyname, &self->component, NULL,
 		"newmachine.name", self, newmachinesortbar_onsortbyname);
 	psy_ui_button_init_text_connect(&self->sortbytype, &self->component, NULL,
@@ -297,7 +297,7 @@ void newmachinefilterbar_init(NewMachineFilterBar* self,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->desc, &self->component, NULL,
-		"newmachine.filter");
+		"newmachine.filter");	
 	psy_ui_button_init_text_connect(&self->gen, &self->component, NULL,
 		"Generators", self, newmachinefilterbar_onclicked);
 	psy_ui_button_allowrightclick(&self->gen);

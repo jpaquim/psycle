@@ -53,10 +53,13 @@ INLINE uintptr_t psy_strlen(const char* str)
 		: 0;
 }
 
-INLINE char* psy_strreset(char** dest, const char* text) {
+INLINE char* psy_strreset(char** dest, const char* text)
+{
 	assert(dest);
 
-	if (text != *dest) {
+	if (*dest == NULL) {
+		*dest = psy_strdup(text);
+	} else if (text != *dest) {
 		free(*dest);
 		*dest = psy_strdup(text);
 	}
