@@ -1,16 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SEQUENCERVIEW_H)
 #define SEQUENCERVIEW_H
 
-// host
+/* host */
 #include "sequencetrackbox.h"
 #include "sequencebuttons.h"
-// audio
+/* audio */
 #include <patterns.h>
 #include <sequence.h>
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uiedit.h>
@@ -29,133 +31,136 @@ typedef enum {
 	SEQLVCMD_DELTRACK = 2
 } SeqLVCmd;
 
-typedef struct SequenceListViewState {
-	// public data	
+/* SeqViewState */
+typedef struct SeqViewState {
+	/* public */
 	psy_ui_Value trackwidth;
 	psy_ui_Value lineheight;
+	double colwidth;
 	SeqLVCmd cmd;
 	psy_audio_OrderIndex cmd_orderindex;
 	bool showpatternnames;
-	// references	
+	/* references */
 	SequenceCmds* cmds;
-} SequenceListViewState;
+} SeqViewState;
 
-void sequencelistviewstate_init(SequenceListViewState*, SequenceCmds*);
+void seqviewstate_init(SeqViewState*, SequenceCmds*);
 
-void sequencelistviewstate_update(SequenceListViewState*);
+void sequencelistviewstate_update(SeqViewState*);
 
-struct SequenceView;
+struct SeqView;
 
-typedef struct SequenceListTrack {
-	// inherits
+/* SeqViewTrack */
+typedef struct SeqViewTrack {
+	/* inherits */
 	psy_ui_Component component;
 	uintptr_t trackindex;
-	// references
-	SequenceListViewState* state;
+	/* references */
+	SeqViewState* state;
 	psy_audio_SequenceTrack* track;	
-} SequenceListTrack;
+} SeqViewTrack;
 
-void sequencelisttrack_init(SequenceListTrack*, psy_ui_Component* parent,
+void seqviewtrack_init(SeqViewTrack*, psy_ui_Component* parent,
 	psy_ui_Component* view, uintptr_t trackindex, psy_audio_SequenceTrack*,
-	SequenceListViewState*);
+	SeqViewState*);
 
-SequenceListTrack* sequencelisttrack_alloc(void);
-SequenceListTrack* sequencelisttrack_allocinit(
+SeqViewTrack* seqviewtrack_alloc(void);
+SeqViewTrack* seqviewtrack_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
-	uintptr_t trackindex, psy_audio_SequenceTrack*, SequenceListViewState*);
+	uintptr_t trackindex, psy_audio_SequenceTrack*, SeqViewState*);
 
-typedef struct SequenceListView {
-	// inherits
-	psy_ui_Component component;
-	// ui elements		
-	// internal	
+/* SeqviewList */
+typedef struct SeqviewList {
+	/* inherits */
+	psy_ui_Component component;	
+	/* internal */
 	int foundselected;	
 	double avgcharwidth;
 	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;	
 	int refreshcount;
 	uintptr_t lastplayrow;			
-	// references
-	SequenceListViewState* state;	
-} SequenceListView;
+	/* references */
+	SeqViewState* state;	
+} SeqviewList;
 
-void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
-	SequenceListViewState*, struct SequenceView*);
-void sequencelistview_showpatternnames(SequenceListView*);
-void sequencelistview_showpatternslots(SequenceListView*);
-void sequencelistview_rename(SequenceListView*);
-void sequencelistview_computetextsizes(SequenceListView*);
+void seqviewlist_init(SeqviewList*, psy_ui_Component* parent, SeqViewState*);
+void seqviewlist_showpatternnames(SeqviewList*);
+void seqviewlist_showpatternslots(SeqviewList*);
+void seqviewlist_rename(SeqviewList*);
+void seqviewlist_computetextsizes(SeqviewList*);
 
-INLINE psy_ui_Component* sequencelistview_base(SequenceListView* self)
+INLINE psy_ui_Component* seqviewlist_base(SeqviewList* self)
 {
 	return &self->component;
 }
 
-typedef struct SequenceViewDuration {
-	// inherits
+/* SeqviewDuration */
+typedef struct SeqviewDuration {
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	psy_ui_Label desc;
 	psy_ui_Label duration;			
 	psy_dsp_big_seconds_t duration_ms;
 	psy_dsp_big_beat_t duration_bts;
 	bool calcduration;
-	// references		
+	/* references */
 	Workspace* workspace;
-} SequenceViewDuration;
+} SeqviewDuration;
 
-void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
+void seqviewduration_init(SeqviewDuration*, psy_ui_Component* parent,
 	Workspace*);
-void sequenceduration_update(SequenceViewDuration*, bool force);
-void sequenceduration_stopdurationcalc(SequenceViewDuration*);
+void seqviewduration_update(SeqviewDuration*, bool force);
+void seqviewduration_stopdurationcalc(SeqviewDuration*);
 
-INLINE psy_ui_Component* sequenceduration_base(SequenceViewDuration* self)
+INLINE psy_ui_Component* seqviewduration_base(SeqviewDuration* self)
 {
 	return &self->component;
 }
 
-// SequenceTrackHeaders
-typedef struct SequenceTrackHeaders {
-	// inherits
+/* SeqviewTrackHeaders */
+typedef struct SeqviewTrackHeaders {
+	/* inherits */
 	psy_ui_Component component;
-	// signals	
+	/* signals */
 	psy_Signal signal_trackselected;	
-	// internal
+	/* internal */
 	psy_ui_Component client;	
-	// references
-	SequenceListViewState* state;	
-} SequenceTrackHeaders;
+	/* references */
+	SeqViewState* state;	
+} SeqviewTrackHeaders;
 
-void sequencetrackheaders_init(SequenceTrackHeaders* self,
-	psy_ui_Component* parent, SequenceListViewState*);
+void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
+	psy_ui_Component* parent, SeqViewState*);
 
-void sequencetrackheaders_build(SequenceTrackHeaders*);
+void seqviewtrackheaders_build(SeqviewTrackHeaders*);
 
-INLINE psy_ui_Component* sequencetrackheader_base(
-	SequenceTrackHeaders* self)
+INLINE psy_ui_Component* seqviewtrackheader_base(SeqviewTrackHeaders* self)
 {
 	return &self->component;
 }
 
-typedef struct SequenceView {
-	// inherits
+/* SeqView */
+typedef struct SeqView {
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements	
-	SequenceListView listview;
+	/* ui elements */
+	SeqviewList listview;
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
 	psy_ui_Component spacer;
-	SequenceTrackHeaders trackheader;
-	SequenceViewDuration duration;
-	// internal
-	SequenceListViewState state;
+	SeqviewTrackHeaders trackheader;
+	SeqviewDuration duration;
+	/* internal */
+	SeqViewState state;
 	SequenceCmds cmds;		
-} SequenceView;
+} SeqView;
 
-void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
-void sequenceview_clear(SequenceView*);
+void seqview_init(SeqView*, psy_ui_Component* parent, Workspace*);
+void seqview_clear(SeqView*);
 
-INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
+INLINE psy_ui_Component* seqview_base(SeqView* self)
 {
 	return &self->component;
 }

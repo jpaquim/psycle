@@ -167,7 +167,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initparamrack(self);
 	mainframe_initcpuview(self);
 	mainframe_initmidimonitor(self);	
-	mainframe_initrecentview(self);	
+	mainframe_initrecentview(self);
 	mainframe_initfileview(self);
 	mainframe_initsequenceview(self);
 	mainframe_initsequencerbar(self);
@@ -210,7 +210,7 @@ void mainframe_initframe(MainFrame* self)
 {
 	psy_ui_frame_init_main(mainframe_base(self));
 	vtable_init(self);
-	psy_ui_app_setmain(psy_ui_app(), self);	
+	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
 	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
 	self->startup = TRUE;	
@@ -272,10 +272,6 @@ void mainframe_initlayout(MainFrame* self)
 	psy_ui_component_init_align(&self->mainviews, &self->client, NULL,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
-	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
-		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
-	psy_ui_splitter_init(&self->splitbar, mainframe_base(self));
 	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
 }
@@ -648,8 +644,12 @@ void mainframe_initfileview(MainFrame* self)
 
 void mainframe_initsequenceview(MainFrame* self)
 {
-	sequenceview_init(&self->sequenceview, &self->left, &self->workspace);
-	psy_ui_component_setalign(sequenceview_base(&self->sequenceview),
+	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_splitter_init(&self->splitbar, mainframe_base(self));
+	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
+	seqview_init(&self->sequenceview, &self->left, &self->workspace);
+	psy_ui_component_setalign(seqview_base(&self->sequenceview),
 		psy_ui_ALIGN_CLIENT);	
 }
 
@@ -1081,7 +1081,7 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 		case CONFIRM_YES:
 			if (mode == CONFIRM_SEQUENCECLEAR) {
 				workspace_restoreview(&self->workspace);
-				sequenceview_clear(&self->sequenceview);				
+				seqview_clear(&self->sequenceview);				
 			} else if (workspace_savesong_fileselect(&self->workspace)) {				
 				if (mode == CONFIRM_CLOSE) {
 					psy_ui_app_close(psy_ui_app());

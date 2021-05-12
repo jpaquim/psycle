@@ -22,7 +22,7 @@ extern "C" {
 // Pianoroll
 //
 // The Pianoroll is another way than the normal tracker view to enter notes.
-// It displays a Pattern selected by the SequenceView in a roll with a piano
+// It displays a Pattern selected by the SeqView in a roll with a piano
 // keyboard at the left and the time line to the right.
 
 typedef enum {

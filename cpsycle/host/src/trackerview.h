@@ -21,7 +21,7 @@ extern "C" {
 // TrackerView
 //
 // The TrackerView is where you enter notes. It displays a Pattern selected by
-// the SequenceView as a tracker grid.
+// the SeqView as a tracker grid.
 
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
