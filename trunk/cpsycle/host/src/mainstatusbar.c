@@ -56,8 +56,7 @@ void mainstatusbar_initstatuslabel(MainStatusBar* self)
 {
 	psy_ui_label_init(&self->statusbarlabel, &self->component, NULL);
 	psy_ui_label_preventtranslation(&self->statusbarlabel);
-	psy_ui_label_settext(&self->statusbarlabel, "Ready");
-	psy_ui_label_preventwrap(&self->statusbarlabel);
+	psy_ui_label_settext(&self->statusbarlabel, "Ready");	
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 40.0);
 	workspace_connectstatus(self->workspace, self,
 		(fp_workspace_output)mainstatusbar_onstatus);

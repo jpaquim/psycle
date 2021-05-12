@@ -1,24 +1,28 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/* This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uilabel.h"
-// local
+/* local */
 #include "uiapp.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void psy_ui_label_ondestroy(psy_ui_Label*);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
-
-static char* strrchrpos(char* str, char c, uintptr_t pos);
-// vtable
+psy_List* psy_ui_label_lines(psy_ui_Label*, const char* text, double width);
+psy_List* psy_ui_label_eols(psy_ui_Label*);
+psy_List* psy_ui_label_wraps(psy_ui_Label*, const char* text, uintptr_t num,
+	double width);
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
@@ -46,7 +50,7 @@ static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
 	}
 	return &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {
@@ -65,12 +69,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 	self->translate = TRUE;
 	self->fadeoutcounter = 0;
 	self->fadeout = FALSE;
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
-	/* todo: wrap hangs with X11 imp */
-	self->preventwrap = TRUE;	
-#else
-	self->preventwrap = FALSE;
-#endif	
+	self->preventwrap = TRUE;
 	psy_ui_component_setstyletypes(psy_ui_label_base(self),
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID,
 		psy_ui_STYLE_LABEL_DISABLED);
@@ -167,9 +166,8 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 		} else {
 			psy_ui_Size size;
 			
-			size = psy_ui_component_textsize(psy_ui_label_base(self),
-				text);						
-			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL) + 4);
+			size = psy_ui_component_textsize(psy_ui_label_base(self), text);						
+			rv->width = psy_ui_value_make_px(psy_ui_value_px(&size.width, tm, NULL));
 		}		
 	} else {
 		rv->width = psy_ui_value_make_px(tm->tmAveCharWidth * self->charnumber);
@@ -182,16 +180,16 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self,
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
 	psy_ui_RealSize size;
-	const psy_ui_TextMetric* tm;	
-	double centerx = 0.0;
-	double centery = 0.0;
-	uintptr_t count;
-	char seps[] = "\n";
-	char* token;
-	char* string;
-	uintptr_t numcolumnavgchars;
-	char* text;	
-		
+	const psy_ui_TextMetric* tm;
+	double centerx;
+	double centery;	
+	double cpy;
+	char* text;
+	uintptr_t cp;
+	psy_List* p;
+	psy_List* lines;
+	uintptr_t linestart;
+
 	if (self->translate && self->translation) {
 		text = self->translation;
 	} else {
@@ -201,19 +199,10 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		return;
 	}
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size_px(psy_ui_label_base(self));		
-	//psy_ui_textout(g, 0, 0, self->text, psy_strlen(self->text));
-	//return;
-	if (!self->preventwrap || (size.height >= tm->tmHeight * 2)) {
-		numcolumnavgchars = (uintptr_t)(size.width / tm->tmAveCharWidth);		
-	} else {
-		numcolumnavgchars = UINTPTR_MAX;		
-	}	
-	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
-			psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (size.height - tm->tmHeight) / 2;
-	}	
-	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) == psy_ui_ALIGNMENT_RIGHT) {
+	size = psy_ui_component_size_px(psy_ui_label_base(self));
+	centerx = 0.0;
+	if ((self->textalignment & psy_ui_ALIGNMENT_RIGHT) ==
+			psy_ui_ALIGNMENT_RIGHT) {
 		psy_ui_Size textsize;
 		psy_ui_RealSize textsizepx;
 
@@ -221,54 +210,143 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		textsizepx = psy_ui_size_px(&textsize, tm, NULL);
 		centerx = (size.width - textsizepx.width);
 	}
-	string = malloc(psy_strlen(text) + 1);
-	psy_snprintf(string, psy_strlen(text) + 1, "%s", text);
-	token = strtok(string, seps);
-	while (token != NULL) {
-		count = psy_strlen(token);
-		while (count > 0) {
-			uintptr_t numoutput;
-			char* wrap;
-			psy_ui_Size currlinesize;
+	lines = psy_ui_label_lines(self, text, size.width);
+	if (!lines) {
+		return;
+	}
+	centery = 0.0;
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+			psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+		centery = (size.height - tm->tmHeight * psy_list_size(lines)) / 2;
+	}
+	cpy = centery;
+	linestart = 0;
+	for (p = lines; p != NULL; p = p->next) {
+		cp = (uintptr_t)p->entry;		
+		if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+				psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+			centerx = (size.width - (cp - linestart) * tm->tmAveCharWidth) / 2;
+		}
+		psy_ui_textout(g, centerx, cpy, text + linestart, cp - linestart);
+		linestart = cp + 1;
+		cpy += tm->tmHeight;
+	}
+	psy_list_free(lines);
+}
 
-			numoutput = psy_min(numcolumnavgchars, count);
-			if (numoutput < count) {
-				wrap = strrchrpos((char*)token, ' ', numoutput);
-				if (wrap) {
-					++wrap;					
-					numoutput = wrap - token;
+psy_List* psy_ui_label_lines(psy_ui_Label* self, const char* text, double width)
+{
+	psy_List* rv;
+	psy_List* eols;	
+
+	rv = NULL;
+	if (!self->preventwrap) {
+		psy_List* p;
+		uintptr_t cp;		
+
+		eols = psy_ui_label_eols(self);
+		psy_list_append(&eols, (void*)psy_strlen(text));
+		cp = 0;
+		for (p = eols; p != NULL; p = p->next) {
+			uintptr_t eol;
+			uintptr_t numout;
+			psy_List* wraps;
+			psy_List* q;
+
+			eol = (uintptr_t)p->entry;
+			numout = eol - cp;
+			if (!self->preventwrap) {
+				uintptr_t wp;
+
+				wraps = psy_ui_label_wraps(self, text + cp, numout, width);
+				wp = 0;
+				for (q = wraps; q != NULL; q = q->next) {
+					uintptr_t wrap;
+
+					wrap = (uintptr_t)q->entry;
+					numout = wrap - wp;
+					psy_list_append(&rv, (void*)(cp + wp + numout));
+					wp = wrap + 1;
 				}
+				psy_list_free(wraps);
+			} else {
+				psy_list_append(&rv, (void*)(cp + numout));
 			}
-			if (numoutput == 0) {
+			cp = eol;
+		}
+		psy_list_free(eols);
+		eols = NULL;		
+	}
+	if (!rv) {
+		psy_list_append(&rv, (void*)psy_strlen(text));
+	}
+	return rv;
+}
+
+psy_List* psy_ui_label_eols(psy_ui_Label* self)
+{
+	psy_List* rv;
+	char* text;	
+	uintptr_t num;
+	uintptr_t cp;
+		
+	rv = NULL;
+	if (self->translate && self->translation) {
+		text = self->translation;
+	} else {
+		text = self->text;
+	}
+	num = psy_strlen(text);
+	if (num == 0) {
+		return NULL;
+	}
+	for (cp = 0; cp < num; ++cp) {
+		if (text[cp] == '\n') {
+			psy_list_append(&rv, (void*)cp);
+		}
+	}		
+	return rv;
+}
+
+psy_List* psy_ui_label_wraps(psy_ui_Label* self, const char* text,
+	uintptr_t num, double width)
+{
+	psy_List* rv;
+	const psy_ui_TextMetric* tm;
+	uintptr_t numavgchars;
+	uintptr_t cp;	
+
+	rv = NULL;
+	tm = psy_ui_component_textmetric(&self->component);
+	numavgchars = (uintptr_t)(width / (tm->tmAveCharWidth * 1.4));
+	if (numavgchars == 0) {
+		return rv;
+	}
+	cp = 0;		
+	while (cp < num) {
+		uintptr_t linestart;
+
+		linestart = cp;
+		cp += numavgchars;
+		if (cp > num - linestart) {
+			psy_list_append(&rv, (void*)num);
+			return rv;
+		}		
+		while (cp > linestart + 1) {
+			if (text[cp] == ' ') {				
 				break;
 			}
-			if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
-					psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-				centerx = (size.width - psy_strlen(token) * tm->tmAveCharWidth) / 2;
-			}
-			if (!self->preventwrap) {
-				currlinesize = psy_ui_textsize(g, token, numoutput);
-				while ((numoutput > 0) &&
-					psy_ui_value_px(&currlinesize.width, tm, NULL) > size.width) {
-					numoutput--;
-					if (numoutput > 0) {
-						currlinesize = psy_ui_textsize(g, token, numoutput);
-					}
-				}
-			}
-			if (numoutput > 0) {
-				psy_ui_textout(g, centerx, centery, token, numoutput);
-				centery += tm->tmHeight;
-				count -= numoutput;
-				token += numoutput;
-				if (centery + tm->tmHeight >= size.height) {
-					numcolumnavgchars = UINTPTR_MAX;
-				}
-			}
+			--cp;
 		}
-		token = strtok(NULL, seps);
+		if (cp > linestart + 1) {
+			psy_list_append(&rv, (void*)cp);
+		} else {
+			cp += numavgchars;
+			cp = psy_min(num, cp);
+			psy_list_append(&rv, (void*)cp);
+		}				
 	}
-	free(string);
+	return rv;
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, double number)
@@ -289,10 +367,7 @@ void psy_ui_label_settextalignment(psy_ui_Label* self, psy_ui_Alignment alignmen
 void psy_ui_label_preventtranslation(psy_ui_Label* self)
 {
 	self->translate = FALSE;
-	if (self->translation) {
-		free(self->translation);
-		self->translation = NULL;
-	}
+	psy_strreset(&self->translation, NULL);	
 }
 
 void psy_ui_label_enabletranslation(psy_ui_Label* self)
@@ -300,33 +375,15 @@ void psy_ui_label_enabletranslation(psy_ui_Label* self)
 	self->translate = TRUE;
 }
 
-char* strrchrpos(char* str, char c, uintptr_t pos)
-{
-	uintptr_t count;
-
-	if (pos >= psy_strlen(str)) {
-		return 0;
-	}
-	count = pos;
-	while (1) {
-		if (str[count] == c) {
-			return str + count;
-		}
-		if (count == 0) {
-			break;
-		}
-		--count;
-	}
-	return 0;
-}
-
 void psy_ui_label_fadeout(psy_ui_Label* self)
 {
 	self->fadeout = TRUE;
-	// Keep new message 5secs active (Timer interval(50ms) * 100). The counter
-	// is decremented each timer tick (ontimer). The first 20 ticks the colour 
-	// stays full and then starts to fadeout. At zero the label text is reset
-	// to the default text
+	/*
+	** Keeps new message 5secs active (Timer interval(50ms) * 100). The counter
+	** is decremented each timer tick (ontimer). The first 20 ticks the colour 
+	** stays full and then starts to fadeout. At zero the label text is reset
+	** to the default text
+	*/
 	self->fadeoutcounter = 100;
 	psy_ui_component_setcolour(psy_ui_label_base(self),
 		psy_ui_style(psy_ui_STYLE_ROOT)->colour);
@@ -354,7 +411,7 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 			psy_ui_component_invalidate(psy_ui_label_base(self));
 		}
 		if (self->fadeoutcounter == 0) {
-			// reset statusbar label to song title
+			/* reset to default text */
 			psy_ui_label_settext(self, self->defaulttext);
 			psy_ui_component_setcolour(psy_ui_label_base(self),
 				psy_ui_style(psy_ui_STYLE_ROOT)->colour);
@@ -366,4 +423,9 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 void psy_ui_label_preventwrap(psy_ui_Label* self)
 {
 	self->preventwrap = TRUE;
+}
+
+void psy_ui_label_enablewrap(psy_ui_Label* self)
+{
+	self->preventwrap = FALSE;
 }

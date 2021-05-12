@@ -38,8 +38,7 @@ void pluginscanview_init(PluginScanView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);	
 	// filename
 	psy_ui_label_init(&self->scanfile, &self->client, NULL);
-	psy_ui_label_preventtranslation(&self->scanfile);
-	psy_ui_label_preventwrap(&self->scanfile);
+	psy_ui_label_preventtranslation(&self->scanfile);	
 	psy_ui_component_setalign(psy_ui_label_base(&self->scanfile),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->scanfile),

@@ -74,8 +74,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->state = state;	
 	assert(self->property);
 	// column 0	
-	psy_ui_label_init(&self->key, &self->component, view);
-	psy_ui_label_preventwrap(&self->key);
+	psy_ui_label_init(&self->key, &self->component, view);	
 	psy_ui_component_setspacing(psy_ui_label_base(&self->key),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, psy_min(level, 5.0) * 4.0));
 	psy_ui_component_setpreferredsize(psy_ui_label_base(&self->key),
@@ -132,7 +131,6 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			psy_ui_component_setalign(&self->check->component, psy_ui_ALIGN_CLIENT);
 		}
 		if (self->label) {
-			psy_ui_label_preventwrap(self->label);
 			psy_ui_label_preventtranslation(self->label);
 		}						
 	}
@@ -169,7 +167,6 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 				property->item.max);
 			label = psy_ui_label_allocinit(&self->component, view);
 			col2 = &label->component;
-			psy_ui_label_preventwrap(label);
 			psy_ui_label_preventtranslation(label);
 			psy_ui_label_settext(label, text);
 		}

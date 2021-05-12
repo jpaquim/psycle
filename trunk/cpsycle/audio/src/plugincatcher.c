@@ -2,6 +2,8 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+
+
 #include "../../detail/os.h"
 
 #include "plugincatcher.h"
@@ -468,7 +470,7 @@ void psy_audio_plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	psy_signal_dispose(&self->signal_scanfile);
 	psy_signal_dispose(&self->signal_taskstart);
 	psy_audio_plugincategorylist_dispose(&self->categorydefaults);
-	psy_list_free(self->scantasks);
+	psy_list_deallocate(&self->scantasks, (psy_fp_disposefunc)NULL);
 }
 
 void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
@@ -499,34 +501,35 @@ void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
 {
 	psy_audio_PluginScanTask* task;
 
-	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
-	// natives
+	/* natives */
+	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));	
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
 	psy_audio_pluginscantask_init_all(task, psy_audio_PLUGIN,
 		"*"MODULEEXT, "Natives 32bit", "plugins32", TRUE);
 #else	
-	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 	psy_audio_pluginscantask_init_all(task, psy_audio_PLUGIN,
 		"*"MODULEEXT, "Natives 64bit", "plugins64", TRUE);
 #endif
 	psy_list_append(&self->scantasks, task);
-	// lua
+
+	/* lua */
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 	psy_audio_pluginscantask_init_all(task, psy_audio_LUA,
 		"*.lua", "Luas", "luascripts", FALSE);
 	psy_list_append(&self->scantasks, task);
-	// vsts
-#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
+
+	/* vsts */
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+#if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
 	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
 		"*"MODULEEXT, "Vsts 32bit", "vsts32", TRUE);
-#else	
-	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
+#else		
 	psy_audio_pluginscantask_init_all(task, psy_audio_VST,
 		"*"MODULEEXT, "Vsts 64bit", "vsts64", TRUE);
 #endif
 	psy_list_append(&self->scantasks, task);
-	// ladspas
+
+	/* ladspas */
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));
 	psy_audio_pluginscantask_init_all(task, psy_audio_LADSPA,
 		"*"MODULEEXT, "Ladspas", "ladspas", TRUE);

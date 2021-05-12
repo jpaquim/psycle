@@ -283,6 +283,8 @@ void view_dev_dispose(psy_ui_ViewComponentImp* self)
 	}
 	psy_ui_componentimp_dispose(&self->imp);
 	self->parent = NULL;
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
 }
 
 void view_dev_clear(psy_ui_ViewComponentImp* self)

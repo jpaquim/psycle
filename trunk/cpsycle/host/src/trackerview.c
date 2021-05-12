@@ -167,6 +167,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->workspace = workspace;
 	self->view = view;
 	psy_table_init(&self->columns);
+	trackergridstate_init(&self->defaultgridstate, trackconfig, NULL, NULL);
+	trackerlinestate_init(&self->defaultlinestate);
 	trackergrid_setsharedgridstate(self, gridstate, trackconfig);
 	trackergrid_setsharedlinestate(self, linestate);
 	trackergrid_storecursor(self);
@@ -209,6 +211,8 @@ void trackergrid_ondestroy(TrackerGrid* self)
 
 	trackergrid_dispose_signals(self);
 	psy_table_dispose(&self->columns);
+	trackergridstate_dispose(&self->defaultgridstate);
+	trackerlinestate_dispose(&self->defaultlinestate);
 }
 
 void trackergrid_init_signals(TrackerGrid* self)
@@ -229,11 +233,10 @@ void trackergrid_setsharedgridstate(TrackerGrid* self, TrackerGridState*
 	gridstate, TrackConfig* trackconfig)
 {
 	assert(self);
-
+	
 	if (gridstate) {
 		self->gridstate = gridstate;
-	} else {
-		trackergridstate_init(&self->defaultgridstate, trackconfig, NULL, NULL);
+	} else {		
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -245,8 +248,7 @@ void trackergrid_setsharedlinestate(TrackerGrid* self, TrackerLineState*
 
 	if (linestate) {
 		self->linestate = linestate;
-	} else {
-		trackerlinestate_init(&self->defaultlinestate);
+	} else {		
 		self->linestate = &self->defaultlinestate;
 	}
 }

@@ -16,7 +16,7 @@ void psy_audio_patternentry_init(psy_audio_PatternEntry* self)
 	assert(self);
 	memset(self, 0, sizeof(psy_audio_PatternEntry));
 	psy_audio_patternevent_clear(&first);
-	psy_audio_patternentry_addevent(self,	&first);
+	psy_audio_patternentry_addevent(self, &first);
 }
 
 void psy_audio_patternentry_init_all(psy_audio_PatternEntry* self,
