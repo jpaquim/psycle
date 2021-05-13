@@ -32,7 +32,7 @@ void psy_ui_materialtheme_init(psy_ui_MaterialTheme* self, psy_ui_ThemeMode mode
 		self->onsurface = psy_ui_colour_make_argb(0x00000000);
 		self->primary = psy_ui_colour_make_argb(0x00FFFFFF);
 		self->onprimary = psy_ui_colour_make_argb(0x00000000);
-		self->secondary = psy_ui_colour_make(0x00FAD481);
+		self->secondary = psy_ui_colour_make(0x00EAC471);
 		self->onsecondary = psy_ui_colour_make(0x1b8ff2);
 		self->overlay = psy_ui_colour_make_argb(0x00000000);
 		self->strong = 900;
