@@ -197,23 +197,17 @@ void newmachinesectionbar_init(NewMachineSectionBar* self, psy_ui_Component* par
 		STYLE_NEWMACHINE_SECTIONBAR);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	self->workspace = workspace;
-	psy_ui_label_init_text(&self->desc, &self->component, NULL,
-		"newmachine.section");
-	psy_ui_button_init_text(&self->createsection, &self->component, NULL,
-		"newmachine.create");
+	self->workspace = workspace;	
 	psy_ui_button_init_text(&self->removesection, &self->component, NULL,
 		"newmachine.remove");
 	psy_ui_button_init_text(&self->clearsection, &self->component, NULL,
-		"newmachine.clear");
-	psy_ui_label_init_text(&self->descitem, &self->component, NULL,
-		"Plugin");
+		"newmachine.clear");	
 	psy_ui_button_init_text(&self->addtosection, &self->component, NULL,
-		"newmachine.add-to");
+		"newmachine.copy");
+	psy_ui_button_init_text(&self->createsection, &self->component, NULL,
+		"newmachine.mksection");
 	psy_ui_button_init_text(&self->removefromsection, &self->component, NULL,
-		"newmachine.remove-from");	
-	psy_ui_label_init_text(&self->descsection, &self->component, NULL,
-		"newmachine.section");	
+		"newmachine.delete");	
 	psy_ui_margin_init_em(&spacing, 0.2, 0.2, 0.2, 0.2);
 	psy_ui_component_setspacing_children(&self->component, spacing);	
 }
@@ -632,9 +626,11 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_SECTIONS_HEADER);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_defaults_hmargin(psy_ui_appdefaults()));	
-	psy_ui_image_init_resource_transparency(&self->icon,
-		&self->component, iconresourceid, psy_ui_colour_white());	
+		psy_ui_defaults_hmargin(psy_ui_appdefaults()));
+	if (iconresourceid != psy_INDEX_INVALID) {
+		psy_ui_image_init_resource_transparency(&self->icon,
+			&self->component, iconresourceid, psy_ui_colour_white());
+	}
 	psy_ui_button_init(&self->expand, &self->component, NULL);	
 	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
 		psy_ui_colour_white());	
@@ -651,16 +647,8 @@ static void newmachinesectionspane_ontabbarchanged(NewMachineSectionsPane*,
 	psy_ui_TabBar* sender, uintptr_t index);
 static void newmachinesectionspane_buildnavsections(NewMachineSectionsPane*);
 static void newmachinesectionspane_alignsections(NewMachineSectionsPane*);
-static void newmachinesectionspane_oncreatesection(NewMachineSectionsPane*,
-	psy_ui_Component* sender);
-static void newmachinesectionspane_onremovesection(NewMachineSectionsPane*, psy_ui_Component* sender);
-static void newmachinesectionspane_onclearsection(NewMachineSectionsPane*, psy_ui_Component* sender);
-static void newmachinesectionspane_onaddtosection(NewMachineSectionsPane*, psy_ui_Component* sender);
-static void newmachinesectionspane_onremovefromsection(NewMachineSectionsPane*, psy_ui_Component* sender);
 static void newmachinesectionspane_onsectionrenamed(NewMachineSectionsPane*, NewMachineSection* sender);
 static void newmachinesectionspane_onsectionchanged(NewMachineSectionsPane*, NewMachineSection* sender);
-static bool newmachinesectionspane_checkplugin(NewMachineSectionsPane*);
-static bool newmachinesectionspane_checksection(NewMachineSectionsPane*);
 static void newmachinesectionspane_onlanguagechanged(NewMachineSectionsPane*);
 static void newmachinesectionpane_onmousedown(NewMachineSectionsPane*, psy_ui_MouseEvent*);
 /* vtable */
@@ -695,7 +683,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_table_init(&self->newmachinesections);
 	newmachinefilter_init(&self->filter);
 	// sectionsheader
-	newmachinesectionsheader_init(&self->sectionsheader, &self->component, IDB_HEART_DARK);
+	newmachinesectionsheader_init(&self->sectionsheader, &self->component, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->sectionsheader.component, psy_ui_ALIGN_TOP);
 	// navbar
 	psy_ui_tabbar_init(&self->navsections, &self->sectionsheader.component);
@@ -719,22 +707,7 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	psy_ui_component_setalign(&self->scroller_sections.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(&self->scroller_sections.pane,
-		psy_ui_SETBACKGROUND);
-	// sectionbar
-	newmachinesectionbar_init(&self->sectionbar, &self->component,
-		self->workspace);
-	psy_ui_component_setalign(&self->sectionbar.component, psy_ui_ALIGN_BOTTOM);	
-	/* connecct signals */
-	psy_signal_connect(&self->sectionbar.createsection.signal_clicked, self,
-		newmachinesectionspane_oncreatesection);
-	psy_signal_connect(&self->sectionbar.addtosection.signal_clicked, self,
-		newmachinesectionspane_onaddtosection);
-	psy_signal_connect(&self->sectionbar.removefromsection.signal_clicked, self,
-		newmachinesectionspane_onremovefromsection);
-	psy_signal_connect(&self->sectionbar.removesection.signal_clicked, self,
-		newmachinesectionspane_onremovesection);
-	psy_signal_connect(&self->sectionbar.clearsection.signal_clicked, self,
-		newmachinesectionspane_onclearsection);
+		psy_ui_SETBACKGROUND);	
 }
 
 void newmachinesectionspane_ondestroy(NewMachineSectionsPane* self)
@@ -857,103 +830,6 @@ void newmachinesectionspane_alignsections(NewMachineSectionsPane* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void newmachinesectionspane_oncreatesection(NewMachineSectionsPane* self, psy_ui_Component* sender)
-{
-	char sectionkey[64];
-
-	psy_snprintf(sectionkey, 64, "section%d", (int)self->newmachine->newsectioncount);
-	while (psy_audio_pluginsections_section(&self->workspace->plugincatcher.sections,
-		sectionkey)) {
-		++self->newmachine->newsectioncount;
-		psy_snprintf(sectionkey, 64, "section%d", (int)self->newmachine->newsectioncount);
-	}
-	psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
-		sectionkey, NULL);
-	++self->newmachine->newsectioncount;
-	newmachinesectionspane_buildsections(self);
-}
-
-void newmachinesectionspane_onaddtosection(NewMachineSectionsPane* self, psy_ui_Component* sender)
-{
-	if (newmachinesectionspane_checkplugin(self)) {
-		psy_audio_MachineInfo macinfo;
-
-		machineinfo_init(&macinfo);
-		newmachine_selectedmachineinfo(self->newmachine, &macinfo);
-		psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
-			psy_property_key(self->newmachine->selectedsection->section), &macinfo);
-		self->newmachine->selectedplugin = NULL;
-		newmachinesection_findplugins(self->newmachine->selectedsection);
-		machineinfo_dispose(&macinfo);
-		newmachinesectionspane_alignsections(self);
-	}
-}
-
-void newmachinesectionspane_onremovefromsection(NewMachineSectionsPane* self, psy_ui_Component* sender)
-{
-	if (newmachinesectionspane_checkplugin(self)) {
-		psy_audio_pluginsections_remove(&self->workspace->plugincatcher.sections,
-			self->newmachine->selectedsection->section,
-			psy_property_key(self->newmachine->selectedplugin));
-		self->newmachine->selectedplugin = NULL;
-		newmachinesection_findplugins(self->newmachine->selectedsection);
-		newmachinesectionspane_alignsections(self);
-	}
-}
-
-bool newmachinesectionspane_checkplugin(NewMachineSectionsPane* self)
-{
-	if (!newmachinesectionspane_checksection(self)) {
-		return FALSE;
-	}
-	if (!self->newmachine->selectedplugin) {
-		workspace_outputstatus(self->workspace,
-			psy_ui_translate("newmachine.select-first-plugin"));
-		return FALSE;
-	}
-	return TRUE;
-}
-
-void newmachinesectionspane_onremovesection(NewMachineSectionsPane* self, psy_ui_Component* sender)
-{
-	if (newmachinesectionspane_checksection(self)) {
-		self->newmachine->selectedplugin = NULL;
-		if (strcmp(psy_property_key(self->newmachine->selectedsection->section),
-				"all") == 0) {			
-			return;
-		}
-		if (strcmp(psy_property_key(self->newmachine->selectedsection->section),
-			"favorites") == 0) {
-			newmachinesectionspane_onclearsection(self, sender);
-			return;
-		}
-		psy_audio_pluginsections_removesection(
-			&self->workspace->plugincatcher.sections,
-			self->newmachine->selectedsection->section);
-		newmachinesectionspane_buildsections(self);
-	}
-}
-
-void newmachinesectionspane_onclearsection(NewMachineSectionsPane* self, psy_ui_Component* sender)
-{
-	if (newmachinesectionspane_checksection(self)) {
-		self->newmachine->selectedplugin = NULL;
-		psy_audio_pluginsections_clearplugins(
-			&self->workspace->plugincatcher.sections,
-			newmachinesection_key(self->newmachine->selectedsection));
-		newmachinesectionspane_buildsections(self);
-	}
-}
-
-bool newmachinesectionspane_checksection(NewMachineSectionsPane* self)
-{
-	if (!self->newmachine->selectedsection || !self->newmachine->selectedsection->section) {
-		workspace_outputstatus(self->workspace,
-			psy_ui_translate("newmachine.select-first-section"));
-		return FALSE;
-	}
-	return TRUE;
-}
 
 void newmachinesectionspane_onsectionrenamed(NewMachineSectionsPane* self,
 	NewMachineSection* sender)
@@ -1006,6 +882,16 @@ static void newmachine_onscantaskstart(NewMachine*, psy_audio_PluginCatcher* sen
 	psy_audio_PluginScanTask*);
 static void newmachine_onhorizontal(NewMachine*, psy_ui_Button* sender);
 static void newmachine_onvertical(NewMachine*, psy_ui_Button* sender);
+// sectionbar
+static void newmachine_oncreatesection(NewMachine*,
+	psy_ui_Component* sender);
+static void newmachine_onremovesection(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onclearsection(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onaddtosection(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onremovefromsection(NewMachine*, psy_ui_Component* sender);
+static bool newmachine_checksection(NewMachine*);
+static bool newmachine_checkplugin(NewMachine*);
+
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
@@ -1056,10 +942,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->pluginsheaderbars, &self->searchbar.component, NULL);
 	psy_ui_component_setalign(&self->pluginsheaderbars, psy_ui_ALIGN_CLIENT);
 	// filter bar
-	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars, &self->sectionspane1.filter);
-	psy_ui_component_setalign(&self->filterbar.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->filterbar.component,
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 2.0));
+	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars,
+		&self->sectionspane1.filter);
+	psy_ui_component_setalign(&self->filterbar.component, psy_ui_ALIGN_LEFT);	
 	// sort bar
 	newmachinesortbar_init(&self->sortbar, &self->pluginsheaderbars, &self->sort);
 	psy_ui_component_setalign(&self->sortbar.component, psy_ui_ALIGN_LEFT);
@@ -1071,7 +956,13 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinesectionspane_init(&self->sectionspane0, &self->client, self, workspace);
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->sectionspane0.sectionsheader.expand.signal_clicked, self,
-		newmachine_ontoggleexpandpane0);	
+		newmachine_ontoggleexpandpane0);
+	// vspacer
+	psy_ui_component_init(&self->spacer, &self->client, NULL);
+	psy_ui_component_setpreferredsize(&self->spacer,
+		psy_ui_size_make(psy_ui_value_make_pw(0.01), psy_ui_value_zero()));
+	psy_ui_component_hide(&self->spacer);
+	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_LEFT);
 	// sectionpane1
 	newmachinesectionspane_init(&self->sectionspane1, &self->client, self, workspace);
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_CLIENT);
@@ -1082,10 +973,25 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinedetail_init(&self->detail, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	
 	psy_signal_connect(&self->detail.signal_categorychanged, self,
-		newmachine_onplugincategorychanged);	
+		newmachine_onplugincategorychanged);
 	// Rescanbar
 	newmachinerescanbar_init(&self->rescanbar, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->rescanbar.component, psy_ui_ALIGN_BOTTOM);
+	// sectionbar
+	newmachinesectionbar_init(&self->sectionbar, &self->component,
+		self->workspace);
+	psy_ui_component_setalign(&self->sectionbar.component, psy_ui_ALIGN_BOTTOM);
+	/* connect signals */
+	psy_signal_connect(&self->sectionbar.createsection.signal_clicked, self,
+		newmachine_oncreatesection);
+	psy_signal_connect(&self->sectionbar.addtosection.signal_clicked, self,
+		newmachine_onaddtosection);
+	psy_signal_connect(&self->sectionbar.removefromsection.signal_clicked, self,
+		newmachine_onremovefromsection);
+	psy_signal_connect(&self->sectionbar.removesection.signal_clicked, self,
+		newmachine_onremovesection);
+	psy_signal_connect(&self->sectionbar.clearsection.signal_clicked, self,
+		newmachine_onclearsection);	
 	// layout
 	psy_ui_button_init_text_connect(&self->horizontal, &self->rescanbar.component, NULL, "Horizontal",
 		self, newmachine_onhorizontal);
@@ -1117,13 +1023,14 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);	
 	newmachine_updateplugins(self);	
-	/* show horizontal */
+	/* show vertical */
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->sectionspane0.component,
-		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+		psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->sectionspane1.component,
-		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+		psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
+	psy_ui_component_show(&self->spacer);
 }
 
 void newmachine_ondestroy(NewMachine* self)
@@ -1151,8 +1058,7 @@ void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
 	if (selected) {
 		plugincatcher_incfavorite(workspace_plugincatcher(self->workspace),
 			psy_property_key(selected));		
-	}	
-	newmachine_updateplugins(self);
+	}
 }
 
 void newmachine_onpluginchanged(NewMachine* self, PluginsView* sender)
@@ -1328,11 +1234,13 @@ void newmachine_ontoggleexpandpane0(NewMachine* self, psy_ui_Button* sender)
 	if (self->sectionspane0.component.align == psy_ui_ALIGN_LEFT) {
 		if (psy_ui_component_visible(&self->sectionspane1.component)) {
 			psy_ui_component_setpreferredsize(&self->sectionspane0.component,
-				psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+				psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
+				psy_ui_component_show(&self->spacer);
 
 		} else {
 			psy_ui_component_setpreferredsize(&self->sectionspane0.component,
 				psy_ui_size_make(psy_ui_value_make_pw(1.0), psy_ui_value_zero()));
+				psy_ui_component_hide(&self->spacer);
 		}
 		psy_ui_component_align(&self->client);
 		psy_ui_component_invalidate(&self->client);
@@ -1345,11 +1253,13 @@ void newmachine_ontoggleexpandpane1(NewMachine* self, psy_ui_Button* sender)
 	if (self->sectionspane1.component.align == psy_ui_ALIGN_LEFT) {
 		if (psy_ui_component_visible(&self->sectionspane0.component)) {
 			psy_ui_component_setpreferredsize(&self->sectionspane1.component,
-				psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+				psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
+				psy_ui_component_show(&self->spacer);
 			
 		} else {
 			psy_ui_component_setpreferredsize(&self->sectionspane1.component,
 				psy_ui_size_make(psy_ui_value_make_pw(1.0), psy_ui_value_zero()));
+			psy_ui_component_hide(&self->spacer);
 		}
 		psy_ui_component_align(&self->client);
 		psy_ui_component_invalidate(&self->client);
@@ -1377,20 +1287,130 @@ void newmachine_onscantaskstart(NewMachine* self,
 
 void newmachine_onhorizontal(NewMachine* self, psy_ui_Button* sender)
 {
+	psy_ui_component_show(&self->sectionspane0.component);
+	psy_ui_component_show(&self->sectionspane1.component);
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->sectionspane0.component,
-		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+		psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->sectionspane1.component,
-		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+		psy_ui_size_make(psy_ui_value_make_pw(0.49), psy_ui_value_zero()));
+	psy_ui_component_show(&self->spacer);
 	psy_ui_component_align_full(&self->client);
 	psy_ui_component_invalidate(&self->client);
 }
 
 void newmachine_onvertical(NewMachine* self, psy_ui_Button* sender)
 {
+	psy_ui_component_show(&self->sectionspane0.component);
+	psy_ui_component_show(&self->sectionspane1.component);
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_hide(&self->spacer);
 	psy_ui_component_align_full(&self->client);
 	psy_ui_component_invalidate(&self->client);
+}
+
+// sectionbar
+void newmachine_oncreatesection(NewMachine* self, psy_ui_Component* sender)
+{
+	char sectionkey[64];
+
+	psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
+	while (psy_audio_pluginsections_section(&self->workspace->plugincatcher.sections,
+		sectionkey)) {
+		++self->newsectioncount;
+		psy_snprintf(sectionkey, 64, "section%d", (int)self->newsectioncount);
+	}
+	psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
+		sectionkey, NULL);
+	++self->newsectioncount;
+	newmachinesectionspane_buildsections(&self->sectionspane0);
+	newmachinesectionspane_buildsections(&self->sectionspane1);
+}
+
+void newmachine_onaddtosection(NewMachine* self, psy_ui_Component* sender)
+{
+	if (newmachine_checkplugin(self)) {
+		psy_audio_MachineInfo macinfo;
+
+		machineinfo_init(&macinfo);
+		newmachine_selectedmachineinfo(self, &macinfo);
+		psy_audio_pluginsections_add(&self->workspace->plugincatcher.sections,
+			psy_property_key(self->selectedsection->section), &macinfo);
+		self->selectedplugin = NULL;
+		newmachinesection_findplugins(self->selectedsection);
+		machineinfo_dispose(&macinfo);
+		newmachinesectionspane_alignsections(&self->sectionspane0);
+		newmachinesectionspane_alignsections(&self->sectionspane1);
+	}
+}
+
+void newmachine_onremovefromsection(NewMachine* self, psy_ui_Component* sender)
+{
+	if (newmachine_checkplugin(self)) {
+		psy_audio_pluginsections_remove(&self->workspace->plugincatcher.sections,
+			self->selectedsection->section,
+			psy_property_key(self->selectedplugin));
+		self->selectedplugin = NULL;
+		newmachinesection_findplugins(self->selectedsection);
+		newmachinesectionspane_alignsections(&self->sectionspane0);
+		newmachinesectionspane_alignsections(&self->sectionspane1);
+	}
+}
+
+void newmachine_onremovesection(NewMachine* self, psy_ui_Component* sender)
+{
+	if (newmachine_checksection(self)) {
+		self->selectedplugin = NULL;
+		if (strcmp(psy_property_key(self->selectedsection->section),
+			"all") == 0) {
+			return;
+		}
+		if (strcmp(psy_property_key(self->selectedsection->section),
+			"favorites") == 0) {
+			newmachine_onclearsection(self, sender);
+			return;
+		}
+		psy_audio_pluginsections_removesection(
+			&self->workspace->plugincatcher.sections,
+			self->selectedsection->section);
+		newmachinesectionspane_buildsections(&self->sectionspane0);
+		newmachinesectionspane_buildsections(&self->sectionspane1);
+	}
+}
+
+void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
+{
+	if (newmachine_checksection(self)) {
+		self->selectedplugin = NULL;
+		psy_audio_pluginsections_clearplugins(
+			&self->workspace->plugincatcher.sections,
+			newmachinesection_key(self->selectedsection));
+		newmachinesectionspane_buildsections(&self->sectionspane0);
+		newmachinesectionspane_buildsections(&self->sectionspane1);
+	}
+}
+
+bool newmachine_checksection(NewMachine* self)
+{
+	if (!self->selectedsection || !self->selectedsection->section) {
+		workspace_outputstatus(self->workspace,
+			psy_ui_translate("newmachine.select-first-section"));
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool newmachine_checkplugin(NewMachine* self)
+{
+	if (!newmachine_checksection(self)) {
+		return FALSE;
+	}
+	if (!self->selectedplugin) {
+		workspace_outputstatus(self->workspace,
+			psy_ui_translate("newmachine.select-first-plugin"));
+		return FALSE;
+	}
+	return TRUE;
 }
