@@ -1,28 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-#if !defined(psy_ui_TABBAR_H)
+#ifndef psy_ui_TABBAR_H
 #define psy_ui_TABBAR_H
 
-// ui
+/* local */
 #include "uicomponent.h"
-// container
+/* container */
 #include "list.h"
 
-// psy_ui_TabBar
-//
-// Shows tabs in a bar. Can be used with a psy_ui_Notebook or independently.
-//
-// Structure:
-// 
-// psy_ui_Component <>----<> psy_ui_ComponentImp
-//        ^
-//        |                         
-//        |            psy_ui_Component <>----<> psy_ui_ViewComponentImp
-//        |                    ^
-//        |                    |  
-// psy_ui_TabBar <@>------ psy_ui_Tab
-//                       *                              
+/*
+** psy_ui_TabBar
+**
+**  Shows tabs in a bar. Can be used with a psy_ui_Notebook or independently.
+**
+**  Structure:
+**
+**  psy_ui_Component <>----<> psy_ui_ComponentImp
+**        ^
+**         |
+**         |            psy_ui_Component <>----<> psy_ui_ViewComponentImp
+**         |                    ^
+**         |                    |
+**  psy_ui_TabBar <@>------ psy_ui_Tab
+**                       *
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,12 +42,13 @@ typedef enum {
 	TABCHECKSTATE_ON = 1
 } psy_ui_TabCheckState;
 
+/* psy_ui_Tab */
 typedef struct psy_ui_Tab {	
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// Signals
+	/* Signals */
 	psy_Signal signal_clicked;
-	// internal
+	/* internal */
 	char* text;
 	char* translation;
 	TabMode mode;		
@@ -73,18 +78,20 @@ INLINE psy_ui_Component* psy_ui_tab_base(psy_ui_Tab* self)
 	return &self->component;
 }
 
+/* psy_ui_TabBar */
 typedef struct psy_ui_TabBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// Signals
+	/* Signals */
 	psy_Signal signal_change;
-	// internal	
+	/* internal	*/
 	uintptr_t selected;	
 	uintptr_t numtabs;
 	bool preventtranslation;
 } psy_ui_TabBar;
 
 void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);
+
 psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar*, const char* label);
 void psy_ui_tabbar_append_tabs(psy_ui_TabBar*, const char* label, ...);
 void psy_ui_tabbar_clear(psy_ui_TabBar*);

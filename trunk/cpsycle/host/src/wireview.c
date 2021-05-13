@@ -91,10 +91,11 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, 0.2f);
 	psy_ui_component_setalign(&self->oscilloscopeview.component, psy_ui_ALIGN_CLIENT);
-	spectrumanalyzer_init(&self->spectrumanalyzer,
-		psy_ui_notebook_base(&self->notebook), wire,
-		workspace);
-	psy_ui_component_setalign(&self->spectrumanalyzer.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init(&self->spectrumpane,
+		psy_ui_notebook_base(&self->notebook), NULL);
+	spectrumanalyzer_init(&self->spectrumanalyzer, &self->spectrumpane,
+		wire, workspace);
+	psy_ui_component_setalign(&self->spectrumanalyzer.component, psy_ui_ALIGN_CENTER);
 	stereophase_init(&self->stereophase, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
 	psy_ui_component_setalign(&self->stereophase.component, psy_ui_ALIGN_CLIENT);

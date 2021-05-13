@@ -1,9 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_SCROLLER_H
 #define psy_ui_SCROLLER_H
 
+/* local */
 #include "uiscrollbar.h"
 
 typedef struct {	
@@ -14,17 +17,15 @@ typedef struct {
 } psy_ui_ScrollAnimate;
 
 typedef struct psy_ui_Scroller {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	// internal
+	/* inherits */
+	psy_ui_Component component;	
+	/* internal */
 	psy_ui_ScrollBar vscroll;
 	psy_ui_Component bottom;
 	psy_ui_ScrollBar hscroll;
 	psy_ui_Component spacer;
 	psy_ui_Component pane;
-	psy_ui_Component* client;
-	// internal data
+	psy_ui_Component* client;	
 	psy_ui_ScrollAnimate hanimate;
 	psy_ui_ScrollAnimate vanimate;
 	bool smooth;

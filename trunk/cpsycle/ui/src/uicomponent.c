@@ -622,14 +622,14 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	if (!sizehints_initialized) {
 		psy_ui_componentsizehints_init(&sizehints);
 		sizehints_initialized = TRUE;
-	}
+	}	
 	self->sizehints = &sizehints;
+	self->id = psy_INDEX_INVALID;
 	psy_ui_componentstyle_init(&self->style);	
 	self->align = psy_ui_ALIGN_NONE;
 	self->alignsorted = psy_ui_ALIGN_NONE;
 	self->deallocate = FALSE;	
 	psy_ui_componentstyle_init(&self->style);	
-	self->debugflag = 0;
 	self->visible = 1;
 	self->doublebuffered = FALSE;	
 	self->backgroundmode = psy_ui_SETBACKGROUND;
@@ -647,7 +647,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 
 void psy_ui_component_dispose(psy_ui_Component* self)
 {	
-	self->vtable->dispose(self);
+	self->vtable->dispose(self);	
 	psy_ui_component_dispose_signals(self);	
 	if (psy_ui_app()->hover == self) {
 		psy_ui_app_sethover(psy_ui_app(), NULL);
@@ -2248,4 +2248,54 @@ psy_ui_RealPoint mapcoords(psy_ui_Component* src, psy_ui_Component* dst)
 psy_ui_Component* psy_ui_mainwindow(void)
 {
 	return psy_ui_app()->main;
+}
+
+void psy_ui_component_setid(psy_ui_Component* self, uintptr_t id)
+{
+	self->id = id;
+}
+
+uintptr_t psy_ui_component_id(const psy_ui_Component* self)
+{
+	return self->id;
+}
+
+psy_ui_Component* psy_ui_component_byid(psy_ui_Component* self, uintptr_t id)
+{
+	psy_ui_Component* rv;
+	psy_List* p;
+	psy_List* q;
+
+	rv = NULL;
+	/* is id from self? */
+	if (self->id != psy_INDEX_INVALID && (self->id == id)) {
+		return self;		
+	}
+	/* is id from direct children */
+	for (p = q = psy_ui_component_children(self, psy_ui_NONRECURSIVE); p != NULL; p = p->next) {
+		psy_ui_Component* component;
+		
+		component = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_id(component) == psy_INDEX_INVALID) {
+			continue;
+		}
+		if (psy_ui_component_id(component) == id) {
+			rv = component;
+			break;
+		}
+	}	
+	if (rv == NULL) {
+		/* search recursive */
+		for (p = q; p != NULL; p = p->next) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)p->entry;
+			rv = psy_ui_component_byid(component, id);
+			if (rv) {
+				break;
+			}			
+		}
+	}
+	psy_list_free(q);
+	return rv;
 }

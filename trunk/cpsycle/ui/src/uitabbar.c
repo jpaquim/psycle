@@ -1,22 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "uitabbar.h"
 
-// platform
+#include "uitabbar.h"
+/* platform */
 #include "../../detail/portable.h"
 
-// psy_ui_Tab
-// protoypes
+/* psy_ui_Tab */
+/* protoypes */
 static void psy_ui_tab_ondestroy(psy_ui_Tab*);
 static void psy_ui_tab_onmousedown(psy_ui_Tab*, psy_ui_MouseEvent*);
 static void psy_ui_tab_ondraw(psy_ui_Tab*, psy_ui_Graphics*);
 static void psy_ui_tab_onpreferredsize(psy_ui_Tab*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_tab_onlanguagechanged(psy_ui_Tab*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable psy_ui_tab_vtable;
 static bool psy_ui_tab_vtable_initialized = FALSE;
 
@@ -43,7 +45,7 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 	}
 	self->component.vtable = &psy_ui_tab_vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	psy_ui_Component* view, const char* text, uintptr_t index)
 {
@@ -228,12 +230,12 @@ void psy_ui_tab_onlanguagechanged(psy_ui_Tab* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-// psy_ui_TabBar
-// prototypes
+/* psy_ui_TabBar */
+/* prototypes */
 static void tabbar_ondestroy(psy_ui_TabBar*);
 static void tabbar_ontabclicked(psy_ui_TabBar*, psy_ui_Tab* sender);
 static void tabbar_onmousewheel(psy_ui_TabBar*, psy_ui_MouseEvent*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -251,7 +253,7 @@ static void vtable_init(psy_ui_TabBar* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 {
 	assert(self);

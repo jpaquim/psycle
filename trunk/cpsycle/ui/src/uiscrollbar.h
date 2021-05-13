@@ -1,39 +1,43 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http:/*psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_SCROLLBAR_H
 #define psy_ui_SCROLLBAR_H
 
+/* local */
 #include "uibutton.h"
 
-// Scrollbar
-//
-// displays a scrollbar
-//
-//                              psy_ui_Component 
-//                                     ^
-//                                     |
-//      -------------------------------------------------------------
-//      |                              |                            |
-// psy_ui_Scrollbar <>----- psy_ui_ScrollBarPane <>----- psy_ui_ScrollBarThumb
+/* Scrollbar
+**
+** displays a scrollbar
+**
+**                              psy_ui_Component
+**                                     ^
+**                                     |
+**      -------------------------------------------------------------
+**      |                              |                            |
+** psy_ui_Scrollbar <>----- psy_ui_ScrollBarPane <>----- psy_ui_ScrollBarThumb
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// psy_ui_ScrollBarState
+/* psy_ui_ScrollBarState */
 typedef struct psy_ui_ScrollBarState {
     bool dragthumb;
 } psy_ui_ScrollBarState;
 
 void psy_ui_scrollbarstate_init(psy_ui_ScrollBarState*);
 
-// psy_ui_ScrollBarThumb
+/* psy_ui_ScrollBarThumb */
 typedef struct psy_ui_ScrollBarThumb {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // internal
-    // references
+    /* internal */
+    /* references */
     psy_ui_ScrollBarState* state;
 } psy_ui_ScrollBarThumb;
 
@@ -46,14 +50,15 @@ INLINE psy_ui_Component* psy_ui_scrollbarthumb_base(
     return &self->component;
 }
 
-// todo combine with sliderpane
+/* psy_ui_ScrollBarPane */
+/* todo combine with sliderpane */
 typedef struct psy_ui_ScrollBarPane {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // signals
+    /* signals */
     psy_Signal signal_changed;
     psy_Signal signal_clicked;
-    // internal
+    /* internal */
     psy_ui_ScrollBarThumb thumb;
     double pos;
     double screenpos;
@@ -63,7 +68,7 @@ typedef struct psy_ui_ScrollBarPane {
     int repeat;
     int repeatdelaycounter;
     psy_ui_Orientation orientation; 
-    // references
+    /* references */
     psy_ui_ScrollBarState* state;
 } psy_ui_ScrollBarPane;
 
@@ -78,14 +83,14 @@ INLINE psy_ui_Component* psy_ui_scrollbarpane_base(
     return &self->component;
 }
 
+/* psy_ui_ScrollBar */
 typedef struct psy_ui_ScrollBar {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // signals
+    /* signals */
     psy_Signal signal_changed;
     psy_Signal signal_clicked;
-    /// internal
-    // ui elements
+    /* internal */    
     psy_ui_Button less;
     psy_ui_Button more;
     psy_ui_ScrollBarPane pane;    
