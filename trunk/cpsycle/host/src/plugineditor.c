@@ -232,14 +232,17 @@ void plugineditor_onsave(PluginEditor* self, psy_ui_Component* sender)
 
 void plugineditor_buildpluginlist(PluginEditor* self)
 {	
+	psy_Property* all;
+
+	all = psy_audio_pluginsections_section_plugins(
+		&self->workspace->plugincatcher.sections, "all");
 	psy_table_clear(&self->pluginmappping);
 	psy_ui_combobox_clear(&self->pluginselector);
-	if (workspace_pluginlist(self->workspace)) {
+	if (all) {
 		psy_List* p;
 		int c;
 
-		for (p = psy_property_begin(workspace_pluginlist(self->workspace)), c = 0;
-				p != NULL; psy_list_next(&p)) {
+		for (p = psy_property_begin(all), c = 0; p != NULL; p = p->next) {
 			psy_Property* property;
 
 			property = (psy_Property*)psy_list_entry(p);

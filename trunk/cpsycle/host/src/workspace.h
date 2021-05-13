@@ -118,6 +118,7 @@ typedef struct Workspace {
 	psy_Signal signal_scanprogress;
 	psy_Signal signal_scanfile;
 	psy_Signal signal_scantaskstart;
+	psy_Signal signal_plugincachechanged;
 	psy_Signal signal_beforesavesong;
 	psy_Signal signal_showparameters;
 	psy_Signal signal_viewselected;
@@ -138,8 +139,7 @@ typedef struct Workspace {
 	// audio
 	psy_audio_Song* song;
 	psy_audio_Player player;
-	psy_audio_PluginCatcher plugincatcher;
-	psy_audio_PluginSections pluginsections;
+	psy_audio_PluginCatcher plugincatcher;	
 	psy_audio_MachineFactory machinefactory;	
 	// Psycle settings	
 	PsycleConfig config;
@@ -170,6 +170,9 @@ typedef struct Workspace {
 	int filescanned;
 	char* scanfilename;
 	int scantaskstart;
+	int plugincachechanged;
+	int scanprogress;
+	int scanprogresschanged;
 	psy_audio_PluginScanTask lastscantask;
 	int scanplugintype;
 	bool playrow;
@@ -217,7 +220,6 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 	return &self->player;
 }
 
-psy_Property* workspace_pluginlist(Workspace*);
 psy_Property* workspace_recentsongs(Workspace*);
 psy_Playlist* workspace_playlist(Workspace*);
 void workspace_load_recentsongs(Workspace*);

@@ -33,14 +33,15 @@ typedef struct NewMachineSection {
 	psy_Property* section;
 	psy_ui_Edit* edit;
 	Workspace* workspace;
+	NewMachineFilter* filter;
 } NewMachineSection;
 
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, NewMachineFilter* filter, Workspace*);
 
 NewMachineSection* newmachinesection_alloc(void);
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit*, Workspace*);
+	psy_Property* section, psy_ui_Edit*, NewMachineFilter* filter, Workspace*);
 
 void newmachinesection_findplugins(NewMachineSection*);
 const char* newmachinesection_key(const NewMachineSection*);

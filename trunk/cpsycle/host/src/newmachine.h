@@ -55,7 +55,7 @@ typedef struct NewMachineSearchBar {
 	// inherits
 	psy_ui_Component component;
 	// intern
-	NewMachineSearch search;
+	NewMachineSearch search;	
 } NewMachineSearchBar;
 
 void newmachinesearchbar_init(NewMachineSearchBar*, psy_ui_Component* parent,
@@ -165,6 +165,31 @@ typedef struct NewMachineSectionsHeader {
 void newmachinesectionsheader_init(NewMachineSectionsHeader*,
 	psy_ui_Component* parent, uintptr_t iconresourceid);
 
+struct NewMachine;
+
+typedef struct NewMachineSectionsPane {
+	// inherits
+	psy_ui_Component component;
+	// internal	
+	NewMachineSectionsHeader sectionsheader;
+	psy_ui_TabBar navsections;
+	psy_ui_Component sections;
+	NewMachineSectionBar sectionbar;
+	psy_ui_Edit edit;
+	psy_ui_Scroller scroller_sections;
+	Workspace* workspace;
+	psy_Table newmachinesections;
+	NewMachineFilter filter;
+	// references
+	struct NewMachine* newmachine;
+} NewMachineSectionsPane;
+
+void newmachinesectionspane_init(NewMachineSectionsPane*,
+	psy_ui_Component* parent, struct NewMachine*, Workspace*);
+
+void newmachinesectionspane_checkselections(NewMachineSectionsPane*,
+	PluginsView* sender);
+
 typedef struct NewMachine {
 	// inherits
 	psy_ui_Component component;
@@ -174,37 +199,28 @@ typedef struct NewMachine {
 	psy_ui_Notebook notebook;
 	NewMachineSearchBar searchbar;
 	psy_ui_Component client;	
-	psy_ui_Component sectiongroup;
-	NewMachineSectionsHeader sectionsheader;	
-	psy_ui_TabBar navsections;	
-	psy_ui_Component sections;	
-	psy_ui_Component all;
-	NewMachineSectionsHeader pluginsheader;
-	psy_ui_Component pluginsheaderbars;	
-	psy_ui_Label pluginslabel;	
+	psy_ui_Component pluginsheaderbars;
+	psy_ui_Label pluginslabel;
 	NewMachineFilterBar filterbar;
 	NewMachineSortBar sortbar;
-	NewMachineCategoryBar categorybar;	
-	PluginsView pluginsview;
+	NewMachineCategoryBar categorybar;
+	NewMachineSectionsPane sectionspane0;
+	NewMachineSectionsPane sectionspane1;	
 	NewMachineDetail detail;
 	PluginScanView scanview;
-	NewMachineRescanBar rescanbar;
-	NewMachineSectionBar sectionbar;	
-	psy_ui_Scroller scroller_sections;
+	NewMachineRescanBar rescanbar;		
 	psy_ui_Scroller scroller_all;	
-	psy_ui_Edit edit;
 	// internal data
 	bool appendstack;
 	int mode;
-	uintptr_t newsectioncount;
-	NewMachineFilter filter;
+	uintptr_t newsectioncount;	
 	NewMachineSort sort;
 	// references
 	Workspace* workspace;
 	uintptr_t restoresection;
 	psy_Property* selectedplugin;
-	NewMachineSection* selectedsection;
-	psy_Table newmachinesections;
+	NewMachineFilter* currfilter;
+	NewMachineSection* selectedsection;	
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
@@ -220,7 +236,12 @@ void newmachine_appendmode(NewMachine*);
 void newmachine_addeffectmode(NewMachine*);
 
 bool newmachine_selectedmachineinfo(const NewMachine*, psy_audio_MachineInfo* rv);
-void newmachine_buildnavsections(NewMachine*);
+
+void newmachine_onpluginselected(NewMachine*, PluginsView* sender);
+void newmachine_onsectionselected(NewMachine*,
+	NewMachineSection* sender);
+void newmachine_onpluginchanged(NewMachine*, PluginsView* parent);
+void newmachine_setfilter(NewMachine*, NewMachineFilter*);
 
 INLINE psy_ui_Component* newmachine_base(NewMachine* self)
 {

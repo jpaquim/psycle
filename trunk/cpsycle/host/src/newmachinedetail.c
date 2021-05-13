@@ -36,7 +36,7 @@ static void newmachinedetail_vtable_init(NewMachineDetail* self)
 }
 // implementation
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
-	NewMachineFilter* filter, Workspace* workspace)
+	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;

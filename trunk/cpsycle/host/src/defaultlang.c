@@ -736,7 +736,7 @@ void make_translator_make_newmachine(psy_Property* parent)
 		"Select a plugin to view its description");
 	add("select-first-section", "Select/Create first a section");
 	add("select-first-plugin", "Select first a plugin");
-	add("search-plugin", "Search in All");
+	add("search-plugin", "Search Plugin");
 	add("category", "Category");
 	add("apiversion", "API Version");
 	add("version", "Version");

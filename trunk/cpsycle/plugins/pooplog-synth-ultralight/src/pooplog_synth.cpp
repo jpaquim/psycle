@@ -177,6 +177,8 @@ TODO LIST
 #include "../detail/prefix.h"
 
 
+#define SYNTH_LIGHT
+#define SYNTH_ULTRALIGHT
 #include "../detail/psydef.h"
 #include <psycle/plugin_interface.hpp>
 #include "SynthTrack.h"

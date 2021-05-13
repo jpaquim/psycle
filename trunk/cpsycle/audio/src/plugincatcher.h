@@ -45,7 +45,9 @@ psy_Property* psy_audio_pluginsections_pluginexists(psy_audio_PluginSections*,
 psy_Property* psy_audio_pluginsections_pluginbyid(psy_audio_PluginSections*,
 	psy_Property* section, const char* id);
 psy_Property* psy_audio_pluginsections_section(psy_audio_PluginSections*,
-	const char* sectionkey);
+	const char* key);
+psy_Property* psy_audio_pluginsections_section_plugins(psy_audio_PluginSections*,
+	const char* key);
 
 
 typedef struct psy_audio_PluginScanTask {
@@ -77,8 +79,7 @@ void psy_audio_plugincategories_update(psy_audio_PluginCategories*,
 
 // psy_audio_PluginCatcher
 typedef struct psy_audio_PluginCatcher {
-	psy_Property* plugins;
-	char* inipath;
+	psy_audio_PluginSections sections;	
 	char* nativeroot;
 	psy_Property* directories;	
 	psy_Signal signal_changed;
@@ -93,6 +94,8 @@ typedef struct psy_audio_PluginCatcher {
 	bool scanning;
 	bool abort;
 	psy_List* scantasks;
+	// refercences
+	psy_Property* all;
 } psy_audio_PluginCatcher;
 
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher*);
@@ -131,7 +134,8 @@ INLINE psy_Property* psy_audio_plugincatcher_plugins(psy_audio_PluginCatcher*
 {
 	assert(self);
 
-	return self->plugins;
+	self->all = psy_audio_pluginsections_section_plugins(&self->sections, "all");
+	return self->all;
 }
 
 INLINE void psy_audio_plugincatcher_notifychange(psy_audio_PluginCatcher* self)
