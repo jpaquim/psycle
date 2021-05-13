@@ -1,15 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uibutton.h"
-// platform
+/* platform */
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-// psy_ui_Button
-// prototypes
+/* psy_ui_Button */
+/* prototypes */
 static void ondestroy(psy_ui_Button*);
 static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
@@ -22,7 +25,7 @@ static void preventinput(psy_ui_Button*);
 static void button_onkeydown(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
@@ -45,7 +48,7 @@ static void vtable_init(psy_ui_Button* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {

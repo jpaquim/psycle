@@ -1,14 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyvscroll 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiscroller.h"
-// local
+/* local */
 #include "uiapp.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -63,6 +66,8 @@ static bool psy_ui_scrollanimate_tick(psy_ui_ScrollAnimate* self)
 	return self->counter == 0;
 }
 
+/* psy_ui_Scroller */
+/* prototypes */
 static void psy_ui_scroller_onpanesize(psy_ui_Scroller*, psy_ui_Component* sender, psy_ui_Size*);
 static void psy_ui_scroller_onscroll(psy_ui_Scroller*, psy_ui_Component* sender);
 static void psy_ui_scroller_onscrollbarclicked(psy_ui_Scroller*, psy_ui_Component* sender);
@@ -70,10 +75,10 @@ static void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller*, psy_ui_Scroll
 static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*, psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Component* sender,
 	psy_ui_Orientation);
-static void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender);
-static void psy_ui_scroller_ontimer(psy_ui_Scroller* self, uintptr_t timerid);
+static void psy_ui_scroller_onfocus(psy_ui_Scroller*, psy_ui_Component* sender);
+static void psy_ui_scroller_ontimer(psy_ui_Scroller*, uintptr_t timerid);
 static void psy_ui_scroller_onupdatestyles(psy_ui_Scroller*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -89,7 +94,7 @@ static void vtable_init(psy_ui_Scroller* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_Component* parent, psy_ui_Component* view)
 {	
@@ -97,24 +102,24 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	vtable_init(self);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);	
-	// bottom
+	/* bottom */
 	psy_ui_component_init(&self->bottom, &self->component, view);
 	psy_ui_component_setalign(&self->bottom, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->bottom);
-	// spacer
+	/* spacer */
 	psy_ui_component_init(&self->spacer, &self->bottom, view);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->spacer);
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make_em(2.5, 1.0));
 	psy_ui_component_preventalign(&self->spacer);
-	// horizontal scrollbar
+	/* horizontal scrollbar */
 	psy_ui_scrollbar_init(&self->hscroll, &self->bottom, view);
 	psy_ui_scrollbar_setorientation(&self->hscroll, psy_ui_HORIZONTAL);	
 	psy_ui_component_setalign(&self->hscroll.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);
-	// vertical scrollbar
+	/* vertical scrollbar */
 	psy_ui_scrollbar_init(&self->vscroll, &self->component, view);
 	psy_ui_scrollbar_setorientation(&self->vscroll, psy_ui_VERTICAL);
 	psy_ui_component_setalign(&self->vscroll.component, psy_ui_ALIGN_RIGHT);
@@ -122,15 +127,15 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_signal_connect(&self->hscroll.signal_clicked, self,
 		psy_ui_scroller_onscrollbarclicked);	
 	self->thumbmove = FALSE;
-	// pane
+	/* pane */
 	psy_ui_component_init(&self->pane, &self->component, view);
 	psy_ui_component_setbackgroundmode(&self->pane, psy_ui_NOBACKGROUND);
 	psy_ui_component_setalign(&self->pane, psy_ui_ALIGN_CLIENT);
-	// scroll animate
+	/* scroll animate */
 	self->smooth = FALSE;
 	psy_ui_scrollanimate_init(&self->hanimate);
 	psy_ui_scrollanimate_init(&self->vanimate);	
-	// reparent client
+	/* reparent client */
 	self->client = client;
 	if (self->client) {
 		const psy_ui_Style* style;
@@ -296,11 +301,11 @@ void psy_ui_scroller_onscroll(psy_ui_Scroller* self, psy_ui_Component* sender)
 		const psy_ui_TextMetric* tm;
 
 		tm = psy_ui_component_textmetric(self->client);
-		// vertical
+		/* vertical */
 		pos = floor(psy_ui_component_scrolltop_px(self->client) /
 			psy_ui_component_scrollstep_height_px(self->client));
 		psy_ui_scrollbar_setthumbposition(&self->vscroll, pos);
-		// horizontal
+		/* horizontal */
 		pos = floor(psy_ui_component_scrollleftpx(self->client) /
 			psy_ui_component_scrollstep_width_px(self->client));
 		psy_ui_scrollbar_setthumbposition(&self->hscroll, pos);

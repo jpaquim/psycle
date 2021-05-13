@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiprogressbar.h"
 
-// prototypes
+/* prototypes */
 static void ondraw(psy_ui_ProgressBar*, psy_ui_Graphics*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -20,19 +23,19 @@ static void vtable_init(psy_ui_ProgressBar* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	psy_ui_Component* parent, psy_ui_Component* view)
 {	
 	psy_ui_component_init(&self->component, parent, view);	
 	vtable_init(self);
+	self->progress = 0.0;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setstyletypes(&self->component,
 		psy_ui_STYLE_PROGRESSBAR,
 		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(20.0, 0.0));	
-	self->progress = 0.0;	
 }
 
 void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)

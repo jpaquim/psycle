@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_SPLITTER_H
 #define psy_ui_SPLITTER_H
@@ -11,23 +13,26 @@
 extern "C" {
 #endif
 
-// psy_ui_Splitter
-//
-// The Splitter divides a component into resizable panes and is itself
-// implemented as a component. The aligntype defines if the splitter is
-// vertical or horizontal. More then one splitter in the parent component are
-// possible.
-//
-// psy_ui_Component <>----<> psy_ui_ComponentImp
-//        ^
-//        |                         
-//        |
-// psy_ui_Splitter
+/*
+** psy_ui_Splitter
+** 
+**  The Splitter divides a component into resizable panes and is itself
+**  implemented as a component. The aligntype defines if the splitter is
+**  vertical or horizontal. More then one splitter in the parent component are
+**  possible.
+**
+**  psy_ui_Component <>----<> psy_ui_ComponentImp
+**         ^
+**         |
+**         |
+**  psy_ui_Splitter
+*/
 
+/* psy_ui_Splitter */
 typedef struct psy_ui_Splitter {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	double dragoffset;	
 	bool resize;
 	psy_ui_Size restoresize;

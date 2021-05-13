@@ -1,18 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uilclaligner.h"
-// ui
+/* local */
 #include "uicomponent.h"
-// std
+/* std */
 #include <math.h>
 #include <stdio.h>
-// platform
+/* platform */
 #include "../../detail/trace.h"
 
-// prototypes
+/* prototypes */
 static void psy_ui_lclaligner_align(psy_ui_LCLAligner*);
 static void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -30,7 +33,7 @@ static void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner*, psy_List* wrap,
 	double cpy, double cpymax);
 static void psy_ui_lclaligner_adjustpreferredsize(psy_ui_LCLAligner* self,
 	psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_AlignerVTable lclaligner_vtable;
 static bool lclaligner_vtable_initialized = FALSE;
 
@@ -48,7 +51,7 @@ static void lclaligner_vtable_init(psy_ui_LCLAligner* self)
 	}
 	self->aligner.vtable = &lclaligner_vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_lclaligner_init(psy_ui_LCLAligner* self, psy_ui_Component* component)
 {
 	psy_ui_aligner_init(&self->aligner);

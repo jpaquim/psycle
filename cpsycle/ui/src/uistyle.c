@@ -241,7 +241,7 @@ psy_ui_Style* psy_ui_styles_at(psy_ui_Styles* self, uintptr_t styletype)
 
 	rv = (psy_ui_Style*)psy_table_at(&self->styles, styletype);
 	if (!rv) {
-		rv = (psy_ui_Style*)psy_table_at(&self->styles, 0);
+		rv = (psy_ui_Style*)psy_table_at(&self->styles, psy_ui_STYLE_ROOT);
 		assert(rv);
 	}
 	return rv;

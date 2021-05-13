@@ -1,17 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uislider.h"
-// local
+/* local */
 #include "uiapp.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* psy_ui_SliderPane */
+/* prototypes */
 static void psy_ui_sliderpane_initsignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_disposesignals(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_ondraw(psy_ui_SliderPane*, psy_ui_Graphics*);
@@ -31,7 +35,7 @@ static void psy_ui_sliderpane_describevalue(psy_ui_SliderPane*);
 static void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_ui_RealRectangle psy_ui_sliderpane_sliderposition(const psy_ui_SliderPane*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -60,7 +64,7 @@ static void vtable_init(psy_ui_SliderPane* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_sliderpane_init(psy_ui_SliderPane* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {	
@@ -372,7 +376,7 @@ void psy_ui_sliderpane_onpreferredsize(psy_ui_SliderPane* self, psy_ui_Size* lim
 	}
 }
 
-// psy_ui_Slider
+/* psy_ui_Slider */
 void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {

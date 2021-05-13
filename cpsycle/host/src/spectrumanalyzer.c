@@ -40,24 +40,33 @@ static psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer*,
 	uintptr_t* numsamples);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(SpectrumAnalyzer* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw)spectrumanalyzer_ondraw;
-		vtable_initialized = 1;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			spectrumanalyzer_ondraw;		
+		vtable_initialized = TRUE;
 	}
 }
 
 void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
-{					
+{
+	psy_ui_Font font;
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Graphics g;
+
 	psy_ui_component_init(&self->component, parent, NULL);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_ui_component_doublebuffer(&self->component);
+	// psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_px(256.0, 128.0));
 	self->wire = wire;	
 	self->invol = 1.0f;
 	self->mult = 1.0f;
@@ -79,7 +88,17 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	fftclass_init(&self->fftSpec);
 	fftclass_setup(&self->fftSpec, hann, self->scope_spec_samples, SCOPE_SPEC_BANDS);
 	spectrumanalyzer_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);	
+	psy_ui_bitmap_init_size(&self->bg, psy_ui_realsize_make(256.0, 128.0));
+	psy_ui_graphics_init_bitmap(&g, &self->bg);	
+	psy_ui_fontinfo_init(&fontinfo, "tahoma", 12);
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_setfont(&g, &font);	
+	psy_ui_font_dispose(&font);
+	spectrumanalyzer_drawbackground(self, &g);
+	psy_ui_graphics_dispose(&g);
+	psy_dsp_noopt_init(&self->dsp_noopt);
+
 }
 
 void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
@@ -88,12 +107,13 @@ void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
 		spectrumanalyzer_onsongchanged);
 	spectrumanalyzer_disconnectmachinessignals(self, self->workspace);
 	fftclass_dispose(&self->fftSpec);
+	psy_ui_bitmap_dispose(&self->bg);
 }
 
 void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Graphics* g)
-{
-	spectrumanalyzer_drawbackground(self, g);
-	spectrumanalyzer_drawspectrum(self, g);
+{		
+	psy_ui_drawfullbitmap(g, &self->bg, psy_ui_realpoint_zero());	
+	spectrumanalyzer_drawspectrum(self, g);	
 }
 
 void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
@@ -102,7 +122,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	char buf[64];
 	int i;
 	float invlog2;
-	float thebar;
+	float thebar;		
 
 	for (i = 0; i < SCOPE_SPEC_BANDS; i++)
 	{
@@ -135,7 +155,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, 256 - 16, rect.top - 10, buf, psy_strlen(buf));
 
 	rect.top = 0;
-	rect.bottom = 256;
+	rect.bottom = 128;
 	invlog2 = (float)(1.0 / log10(2.0));
 	thebar = 440.f * 2.f * 256.f / (float)psy_audio_player_samplerate(workspace_player(self->workspace));
 	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
@@ -166,6 +186,12 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	sprintf(buf, "16K");
 	psy_ui_textout(g, rect.left, 0, buf, psy_strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, psy_strlen(buf));
+	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz",
+		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
+	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
+	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
 }
 
 void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
@@ -175,14 +201,14 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	uintptr_t scopesamples;
 	psy_audio_Buffer* buffer;
 	int DCBar;
-	psy_ui_RealRectangle rect;
-	char buf[64];
+	psy_ui_RealRectangle rect;	
 	uintptr_t writepos;
 	float temp[SCOPE_BUF_SIZE];
 	float tempout[SCOPE_BUF_SIZE >> 1];	
 	int i;
 	
 	buffer = spectrumanalyzer_buffer(self, &scopesamples);
+	//self->scope_spec_samples = scopesamples;
 	if (!buffer) {
 		return;
 	}	
@@ -300,13 +326,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		rect.top = self->bar_heights[i];
 		rect.bottom = self->bar_heights[i] + 1;
 		psy_ui_drawsolidrectangle(g, rect, psy_ui_colour_make(CLBARPEAK));
-	}
-	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz",
-		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
-	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x505050));
-	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
+	}	
 }
 
 void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, uintptr_t timerid)
@@ -373,11 +393,11 @@ void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], floa
 {
 	psy_audio_Buffer* buffer;
 	uintptr_t buffersize;
-
-	buffer = spectrumanalyzer_buffer(self, &buffersize);
-	if (buffer) {
+	
+	buffer = spectrumanalyzer_buffer(self, &buffersize);	
+	if (buffer) {		
 		uintptr_t index;
-
+		
 		if (writepos > (uintptr_t) self->scope_spec_samples) {
 			index = writepos - self->scope_spec_samples;
 		} else {
@@ -385,7 +405,7 @@ void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], floa
 		}
 		//scopeBufferIndex is the position where it will write new data. 
 		if (index + self->scope_spec_samples < buffersize) {
-			dsp.movmul(inBuffer + index, outBuffer, self->scope_spec_samples, vol);
+			self->dsp_noopt.movmul(inBuffer + index, outBuffer, self->scope_spec_samples, vol);
 		} else {
 			uintptr_t tail;
 			uintptr_t front;
@@ -393,10 +413,10 @@ void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], floa
 			tail = buffersize - index;
 			front = self->scope_spec_samples - tail;
 			if (tail > 0) {
-				dsp.movmul(inBuffer + index, outBuffer, tail, vol);
+				self->dsp_noopt.movmul(inBuffer + index, outBuffer, tail, vol);
 			}
 			if (front > 0) {
-				dsp.movmul(inBuffer, outBuffer, front, vol);
+				self->dsp_noopt.movmul(inBuffer, outBuffer, front, vol);
 			}
 		}		
 	}

@@ -42,6 +42,7 @@ typedef struct WireView {
 	// Scopes
 	VuScope vuscope;
 	OscilloscopeView oscilloscopeview;
+	psy_ui_Component spectrumpane;
 	SpectrumAnalyzer spectrumanalyzer;
 	StereoPhase stereophase;
 	ChannelMappingView channelmappingview;

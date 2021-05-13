@@ -7,6 +7,7 @@
 #include "uicomponent.h"
 #include "workspace.h"
 #include <fft.h>
+#include <operations.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,8 @@ typedef struct {
 	Workspace* workspace;
 	uintptr_t lastprocessed;
 	uintptr_t lastwritepos;
+	psy_ui_Bitmap bg;
+	psy_dsp_Operations dsp_noopt;
 } SpectrumAnalyzer;
 
 void spectrumanalyzer_init(SpectrumAnalyzer*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);

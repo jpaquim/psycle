@@ -170,6 +170,7 @@ struct psy_ui_ComponentImp;
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
 	struct psy_ui_ComponentImp* imp;
+	/* signals */
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
 	psy_Signal signal_timer;
@@ -198,7 +199,9 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_focus;	
 	psy_Signal signal_preferredsizechanged;
 	psy_Signal signal_scrollrangechanged;
-	psy_Signal signal_languagechanged;	
+	psy_Signal signal_languagechanged;
+	/* internal */
+	uintptr_t id;
 	bool doublebuffered;
 	psy_ui_BackgroundMode backgroundmode;		
 	psy_ui_ComponentSizeHints* sizehints;
@@ -210,11 +213,10 @@ typedef struct psy_ui_Component {
 	psy_ui_ComponentContainerAlign* containeralign;
 	uintptr_t tabindex;
 	bool deallocate;
-	uintptr_t opcount;
-	intptr_t debugflag;
+	uintptr_t opcount;	
 	bool draggable;	
 	uintptr_t bgframetimer;
-	uintptr_t currbgframe;
+	uintptr_t currbgframe;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -389,6 +391,9 @@ psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 psy_List* psy_ui_components_setmargin(psy_List*, psy_ui_Margin);
 void psy_ui_component_close(psy_ui_Component*);
 
+void psy_ui_component_setid(psy_ui_Component*, uintptr_t id);
+uintptr_t psy_ui_component_id(const psy_ui_Component*);
+psy_ui_Component* psy_ui_component_byid(psy_ui_Component*, uintptr_t id);
 
 // psy_ui_ComponentImp
 // flags
