@@ -180,8 +180,7 @@ int mi::instances = 0;
 //
 //////////////////////////////////////////////////////////////////////
 mi::mi()
-{
-	psy_dsp_init();
+{	
 	Vals = new int[MacInfo.numParameters];
 	if (mi::instances == 0)
 		Load();

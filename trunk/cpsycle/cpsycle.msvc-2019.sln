@@ -176,9 +176,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zephod_super_fm", "plugins\zephod_super_fm\zephod_super_fm.vcxproj", "{8B5CE29E-9938-424E-BCB2-2ABEE248EC06}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "druttis_eq3", "plugins\druttis_eq3\druttis_eq3.vcxproj", "{9C2A9E66-4CD5-4194-AC4E-C88119B70E1E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B03D2A93-90C0-4FD7-9E41-D72CC990FA3B} = {B03D2A93-90C0-4FD7-9E41-D72CC990FA3B}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "druttis_koruz", "plugins\druttis_koruz\druttis_koruz.vcxproj", "{07443D3E-1C25-46AB-8611-2EFADD6F284C}"
 EndProject
@@ -209,6 +206,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pooplog-synth-light", "plugins\pooplog-synth-light\pooplog-synth-light.vcxproj", "{7ABDE439-C017-4A22-9A81-F08499A109A7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pooplog-synth-ultralight", "plugins\pooplog-synth-ultralight\pooplog-synth-ultralight.vcxproj", "{18DBBB08-DC7F-4CBD-A500-5D159A289093}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "phaser", "plugins\phaser\phaser.vcxproj", "{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wahwah", "plugins\wahwah\wahwah.vcxproj", "{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compressor", "plugins\compressor\compressor.vcxproj", "{CE15725E-9A01-4DFF-B083-4A0192435227}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -754,6 +757,30 @@ Global
 		{18DBBB08-DC7F-4CBD-A500-5D159A289093}.Release|Win32.Build.0 = Release|Win32
 		{18DBBB08-DC7F-4CBD-A500-5D159A289093}.Release|x64.ActiveCfg = Release|x64
 		{18DBBB08-DC7F-4CBD-A500-5D159A289093}.Release|x64.Build.0 = Release|x64
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Debug|Win32.Build.0 = Debug|Win32
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Debug|x64.ActiveCfg = Debug|x64
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Debug|x64.Build.0 = Debug|x64
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Release|Win32.ActiveCfg = Release|Win32
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Release|Win32.Build.0 = Release|Win32
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Release|x64.ActiveCfg = Release|x64
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA}.Release|x64.Build.0 = Release|x64
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Debug|Win32.Build.0 = Debug|Win32
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Debug|x64.ActiveCfg = Debug|x64
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Debug|x64.Build.0 = Debug|x64
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Release|Win32.ActiveCfg = Release|Win32
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Release|Win32.Build.0 = Release|Win32
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Release|x64.ActiveCfg = Release|x64
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F}.Release|x64.Build.0 = Release|x64
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Debug|Win32.Build.0 = Debug|Win32
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Debug|x64.ActiveCfg = Debug|x64
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Debug|x64.Build.0 = Debug|x64
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Release|Win32.ActiveCfg = Release|Win32
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Release|Win32.Build.0 = Release|Win32
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Release|x64.ActiveCfg = Release|x64
+		{CE15725E-9A01-4DFF-B083-4A0192435227}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -823,6 +850,9 @@ Global
 		{EB14E5FA-2612-4809-AE8A-AE5C285D3563} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{7ABDE439-C017-4A22-9A81-F08499A109A7} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
 		{18DBBB08-DC7F-4CBD-A500-5D159A289093} = {C84ADEF5-2ED0-4569-ACD6-04619BC009F1}
+		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
+		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
+		{CE15725E-9A01-4DFF-B083-4A0192435227} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {857CDAD7-2863-45E6-99D0-FFFC1BC81AAB}

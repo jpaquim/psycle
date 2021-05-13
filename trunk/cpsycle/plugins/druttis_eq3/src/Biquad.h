@@ -12,10 +12,9 @@
 //============================================================================
 #pragma once
 
-// #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
-// using namespace psycle::helpers::math;
+#include <psycle/helpers/math/math.hpp>
+using namespace psycle::helpers::math;
 
-#include <operations.h>
 
 class Biquad
 {
@@ -79,14 +78,14 @@ public:
 //------------------------------------------------------------------------
 inline float Biquad::Work(float sample)
 {
-	dsp.erase_all_nans_infinities_and_denormals(&sample, 1);
+	erase_all_nans_infinities_and_denormals(sample);
 	float lastOutput = 
 		  sample * inCoeffs[0]
 		+ inputs[0] * inCoeffs[1]
 		+ inputs[1] * inCoeffs[2]
 		- outputs[0] * outCoeffs[0]
 		- outputs[1] * outCoeffs[1];
-	dsp.erase_all_nans_infinities_and_denormals(&lastOutput, 1);
+	erase_all_nans_infinities_and_denormals(lastOutput);
 
 	inputs[1] = inputs[0];
 	inputs[0] = sample;
