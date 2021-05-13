@@ -1011,8 +1011,11 @@ void pluginsview_filter(PluginsView* self)
 		self->currplugins = self->filteredplugins;
 		psy_signal_emit(&self->signal_changed, self, 0);
 		psy_ui_component_setscrolltop(&self->component, psy_ui_value_zero());
-		psy_ui_component_updateoverflow(&self->component);
-		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_align_full(psy_ui_component_parent(
+			psy_ui_component_parent(&self->component)));
+		psy_ui_component_updateoverflow(psy_ui_component_parent(
+			psy_ui_component_parent(&self->component)));		
+		psy_ui_component_invalidate(psy_ui_component_parent(psy_ui_component_parent(&self->component)));
 	}
 }
 

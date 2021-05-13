@@ -43,7 +43,7 @@ typedef struct NewMachineDetail {
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
-	NewMachineFilter* filter, Workspace*);
+	Workspace*);
 
 void newmachinedetail_reset(NewMachineDetail*);
 void newmachinedetail_update(NewMachineDetail*, psy_Property*);

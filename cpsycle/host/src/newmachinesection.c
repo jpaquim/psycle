@@ -52,7 +52,8 @@ static void newmachinesection_vtable_init(NewMachineSection* self)
 }
 // implementation
 void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
-	psy_Property* section, psy_ui_Edit* edit, Workspace* workspace)
+	psy_Property* section, psy_ui_Edit* edit, NewMachineFilter* filter,
+	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	newmachinesection_vtable_init(self);	
@@ -66,6 +67,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	self->edit = edit;
 	self->preventedit = TRUE;
 	self->workspace = workspace;
+	self->filter = filter;
 	psy_ui_component_init(&self->header, &self->component, NULL);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_component_setstyletype(&self->header,
@@ -78,6 +80,7 @@ void newmachinesection_init(NewMachineSection* self, psy_ui_Component* parent,
 	pluginsview_init(&self->pluginview, &self->component);
 	psy_ui_component_setalign(&self->pluginview.component, psy_ui_ALIGN_TOP);
 	newmachinesection_findplugins(self);
+	pluginsview_setfilter(&self->pluginview, filter);
 	if (self->edit) {
 		psy_signal_connect(&self->edit->signal_accept, self,
 			newmachinesection_oneditaccept);
@@ -101,13 +104,14 @@ NewMachineSection* newmachinesection_alloc(void)
 }
 
 NewMachineSection* newmachinesection_allocinit(psy_ui_Component* parent,
-	psy_Property* property, psy_ui_Edit* edit, Workspace* workspace)
+	psy_Property* property, psy_ui_Edit* edit, NewMachineFilter* filter,
+	Workspace* workspace)
 {
 	NewMachineSection* rv;
 
 	rv = newmachinesection_alloc();
 	if (rv) {
-		newmachinesection_init(rv, parent, property, edit, workspace);
+		newmachinesection_init(rv, parent, property, edit, filter, workspace);
 		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
@@ -118,8 +122,7 @@ void newmachinesection_findplugins(NewMachineSection* self)
 	psy_Property* plugins;
 	
 	if (self->section) {
-		plugins = psy_property_at(self->section, "plugins",
-			PSY_PROPERTY_TYPE_SECTION);		
+		plugins = psy_property_at_section(self->section, "plugins");		
 	} else {
 		plugins = NULL;
 	}
@@ -137,6 +140,9 @@ const char* newmachinesection_key(const NewMachineSection* self)
 const char* newmachinesection_name(const NewMachineSection* self)
 {
 	if (self->section) {
+		if (strcmp(psy_property_key(self->section), "all") == 0) {
+			return psy_ui_translate("newmachine.all");
+		}
 		if (strcmp(psy_property_key(self->section), "favorites") == 0) {
 			return psy_ui_translate("newmachine.favorites");
 		}
@@ -149,6 +155,10 @@ const char* newmachinesection_name(const NewMachineSection* self)
 void newmachinesection_onlanguagechanged(NewMachineSection* self)
 {
 	if (self->section) {
+		if (strcmp(psy_property_key(self->section), "all") == 0) {
+			psy_ui_label_settext(&self->label,
+				psy_ui_translate("newmachine.all"));
+		}
 		if (strcmp(psy_property_key(self->section), "favorites") == 0) {
 			psy_ui_label_settext(&self->label,
 				psy_ui_translate("newmachine.favorites"));
@@ -231,6 +241,9 @@ void newmachinesection_onmousedown(NewMachineSection* self,
 
 void newmachinesection_mark(NewMachineSection* self)
 {
+	psy_ui_Component* parent;
+	
+	parent = psy_ui_component_parent(&self->component);
 	psy_ui_component_removestylestate_children(
 		psy_ui_component_parent(&self->component),
 		psy_ui_STYLESTATE_SELECT);	
@@ -252,7 +265,7 @@ void newmachinesection_ondragover(NewMachineSection* self, psy_ui_DragEvent* ev)
 
 			plugin = (psy_Property*)p->entry;
 			if (!psy_audio_pluginsections_pluginbyid(
-					&self->workspace->pluginsections, self->section,
+					&self->workspace->plugincatcher.sections, self->section,
 					psy_property_key(plugin))) {
 				ev->mouse.event.default_prevented = TRUE;
 				break;
@@ -270,16 +283,14 @@ void newmachinesection_ondrop(NewMachineSection* self, psy_ui_DragEvent* ev)
 		bool drop;
 
 		drop = FALSE;
-		sections = &self->workspace->pluginsections;
+		sections = &self->workspace->plugincatcher.sections;
 		for (p = psy_property_begin(ev->dataTransfer); p != NULL; p = p->next) {
 			psy_Property* plugindrag;
 			const char* plugid;
 
 			plugindrag = (psy_Property*)p->entry;
 			plugid = psy_property_key(plugindrag);
-			if (!psy_audio_pluginsections_pluginbyid(
-					&self->workspace->pluginsections, self->section,
-					plugid)) {									
+			if (!psy_audio_pluginsections_pluginbyid(sections, self->section, plugid)) {									
 				psy_Property* section;
 				psy_Property* plugin;
 

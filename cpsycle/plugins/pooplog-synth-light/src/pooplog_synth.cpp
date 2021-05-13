@@ -175,7 +175,7 @@ TODO LIST
 /////////////////////////////////////////////////////////////////////
 */
 #include "../detail/prefix.h"
-
+#define SYNTH_LIGHT
 
 #include "../detail/psydef.h"
 #include <psycle/plugin_interface.hpp>
