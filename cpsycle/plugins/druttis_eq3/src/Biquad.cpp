@@ -91,7 +91,7 @@ void Biquad::SetFreqAndQ(float infreq, float inq, float insrate)
 	freq = infreq;
 	q = inq;
 	srate = insrate;
-	double w0 = 2*psy_dsp_PI * freq/srate;
+	double w0 = 2*pi * freq/srate;
 	double cosw = cos(w0);
 	double sinw = sin(w0);
 
