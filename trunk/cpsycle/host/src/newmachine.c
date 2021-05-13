@@ -735,7 +735,6 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 		newmachinesectionspane_onremovesection);
 	psy_signal_connect(&self->sectionbar.clearsection.signal_clicked, self,
 		newmachinesectionspane_onclearsection);
-
 }
 
 void newmachinesectionspane_ondestroy(NewMachineSectionsPane* self)
@@ -1001,11 +1000,12 @@ static void newmachine_updateplugins(NewMachine*);
 static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail* sender);
 static void newmachine_ontoggleexpandpane0(NewMachine*, psy_ui_Button* sender);
 static void newmachine_ontoggleexpandpane1(NewMachine*, psy_ui_Button* sender);
-static void newmachine_ontoggleexpandall(NewMachine*, psy_ui_Button* sender);
 static void newmachine_checkselections(NewMachine*, PluginsView* sender);
 static void newmachine_onscanfile(NewMachine*, psy_audio_PluginCatcher* sender, const char* path, int type);
 static void newmachine_onscantaskstart(NewMachine*, psy_audio_PluginCatcher* sender,
 	psy_audio_PluginScanTask*);
+static void newmachine_onhorizontal(NewMachine*, psy_ui_Button* sender);
+static void newmachine_onvertical(NewMachine*, psy_ui_Button* sender);
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
@@ -1086,6 +1086,13 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	// Rescanbar
 	newmachinerescanbar_init(&self->rescanbar, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->rescanbar.component, psy_ui_ALIGN_BOTTOM);
+	// layout
+	psy_ui_button_init_text_connect(&self->horizontal, &self->rescanbar.component, NULL, "Horizontal",
+		self, newmachine_onhorizontal);
+	psy_ui_component_setalign(&self->horizontal.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_init_text_connect(&self->vertical, &self->rescanbar.component, NULL, "Vertical",
+		self, newmachine_onvertical);
+	psy_ui_component_setalign(&self->vertical.component, psy_ui_ALIGN_RIGHT);
 	// filter
 	newmachinesearchbar_setfilter(&self->searchbar, &self->sectionspane1.filter);
 	// connect to signals
@@ -1110,6 +1117,13 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);	
 	newmachine_updateplugins(self);	
+	/* show horizontal */
+	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setpreferredsize(&self->sectionspane0.component,
+		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setpreferredsize(&self->sectionspane1.component,
+		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
 }
 
 void newmachine_ondestroy(NewMachine* self)
@@ -1311,24 +1325,35 @@ void newmachine_onplugincategorychanged(NewMachine* self, NewMachineDetail* send
 void newmachine_ontoggleexpandpane0(NewMachine* self, psy_ui_Button* sender)
 {	
 	psy_ui_component_togglevisibility(&self->sectionspane1.component);	
+	if (self->sectionspane0.component.align == psy_ui_ALIGN_LEFT) {
+		if (psy_ui_component_visible(&self->sectionspane1.component)) {
+			psy_ui_component_setpreferredsize(&self->sectionspane0.component,
+				psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+
+		} else {
+			psy_ui_component_setpreferredsize(&self->sectionspane0.component,
+				psy_ui_size_make(psy_ui_value_make_pw(1.0), psy_ui_value_zero()));
+		}
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
+	}
 }
 
 void newmachine_ontoggleexpandpane1(NewMachine* self, psy_ui_Button* sender)
 {
 	psy_ui_component_togglevisibility(&self->sectionspane0.component);
-}
-
-void newmachine_ontoggleexpandall(NewMachine* self, psy_ui_Button* sender)
-{
-	/*psy_ui_Margin margin;
-
-	if (psy_ui_component_visible(&self->sectionspane.component)) {
-		margin = psy_ui_margin_make_em(0.0, 0.0, 1.0, 0.0);		
-	} else {
-		margin = psy_ui_margin_make_em(0.5, 0.0, 1.0, 0.0);		
+	if (self->sectionspane1.component.align == psy_ui_ALIGN_LEFT) {
+		if (psy_ui_component_visible(&self->sectionspane0.component)) {
+			psy_ui_component_setpreferredsize(&self->sectionspane1.component,
+				psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+			
+		} else {
+			psy_ui_component_setpreferredsize(&self->sectionspane1.component,
+				psy_ui_size_make(psy_ui_value_make_pw(1.0), psy_ui_value_zero()));
+		}
+		psy_ui_component_align(&self->client);
+		psy_ui_component_invalidate(&self->client);
 	}
-	psy_ui_component_setmargin(&self->all, margin);
-	psy_ui_component_togglevisibility(&self->sectionspane.component);*/
 }
 
 void newmachine_onsectionselected(NewMachine* self, NewMachineSection* sender)
@@ -1348,4 +1373,24 @@ void newmachine_onscantaskstart(NewMachine* self,
 	psy_audio_PluginCatcher* sender, psy_audio_PluginScanTask* task)
 {
 	pluginscanview_selecttask(&self->scanview, task);
+}
+
+void newmachine_onhorizontal(NewMachine* self, psy_ui_Button* sender)
+{
+	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setpreferredsize(&self->sectionspane0.component,
+		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setpreferredsize(&self->sectionspane1.component,
+		psy_ui_size_make(psy_ui_value_make_pw(0.5), psy_ui_value_zero()));
+	psy_ui_component_align_full(&self->client);
+	psy_ui_component_invalidate(&self->client);
+}
+
+void newmachine_onvertical(NewMachine* self, psy_ui_Button* sender)
+{
+	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_align_full(&self->client);
+	psy_ui_component_invalidate(&self->client);
 }

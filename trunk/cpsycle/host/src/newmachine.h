@@ -198,6 +198,8 @@ typedef struct NewMachine {
 	// internal ui elements	
 	psy_ui_Notebook notebook;
 	NewMachineSearchBar searchbar;
+	psy_ui_Button horizontal;
+	psy_ui_Button vertical;	
 	psy_ui_Component client;	
 	psy_ui_Component pluginsheaderbars;
 	psy_ui_Label pluginslabel;
