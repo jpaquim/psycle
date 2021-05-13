@@ -727,11 +727,11 @@ void make_translator_make_newmachine(psy_Property* parent)
 	add("mode", "Mode");
 	add("sections", "Sections");
 	add("section", "Section");
-	add("create", "Create");
+	add("mksection", "Mksection");
 	add("remove", "Remove");
 	add("clear", "Clear");
-	add("add-to", "Add To");
-	add("remove-from", "Remove From");
+	add("copy", "Copy");
+	add("delete", "Delete");
 	add("select-plugin-to-view-description",
 		"Select a plugin to view its description");
 	add("select-first-section", "Select/Create first a section");

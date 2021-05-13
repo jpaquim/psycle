@@ -82,15 +82,12 @@ void newmachinerescanbar_init(NewMachineRescanBar*, psy_ui_Component* parent,
 typedef struct NewMachineSectionBar {
 	// inherits
 	psy_ui_Component component;
-	// intern
-	psy_ui_Label desc;
+	// intern	
 	psy_ui_Button createsection;
 	psy_ui_Button removesection;
 	psy_ui_Button clearsection;
-	psy_ui_Label descitem;
 	psy_ui_Button addtosection;
 	psy_ui_Button removefromsection;
-	psy_ui_Label descsection;
 	// references
 	Workspace* workspace;
 } NewMachineSectionBar;
@@ -173,8 +170,7 @@ typedef struct NewMachineSectionsPane {
 	// internal	
 	NewMachineSectionsHeader sectionsheader;
 	psy_ui_TabBar navsections;
-	psy_ui_Component sections;
-	NewMachineSectionBar sectionbar;
+	psy_ui_Component sections;	
 	psy_ui_Edit edit;
 	psy_ui_Scroller scroller_sections;
 	Workspace* workspace;
@@ -207,9 +203,11 @@ typedef struct NewMachine {
 	NewMachineSortBar sortbar;
 	NewMachineCategoryBar categorybar;
 	NewMachineSectionsPane sectionspane0;
-	NewMachineSectionsPane sectionspane1;	
+	NewMachineSectionsPane sectionspane1;
+	psy_ui_Component spacer;
 	NewMachineDetail detail;
 	PluginScanView scanview;
+	NewMachineSectionBar sectionbar;
 	NewMachineRescanBar rescanbar;		
 	psy_ui_Scroller scroller_all;	
 	// internal data
