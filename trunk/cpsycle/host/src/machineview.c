@@ -47,6 +47,7 @@ static void machineview_onthemechanged(MachineView*, MachineViewConfig*,
 static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
 static void machineview_ontimer(MachineView*, uintptr_t timerid);
+static void machineview_onshow(MachineView*);
 // vtable
 static psy_ui_ComponentVtable machineview_vtable;
 static bool machineview_vtable_initialized = FALSE;
@@ -72,6 +73,8 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 			machineview_ontimer;
 		machineview_vtable.onfocus = (psy_ui_fp_component_onfocus)
 			machineview_onfocus;
+		machineview_vtable.show = (psy_ui_fp_component_show)
+			machineview_onshow;
 		machineview_vtable_initialized = TRUE;
 	}
 	return &machineview_vtable;
@@ -412,4 +415,12 @@ void machineview_ontimer(MachineView* self, uintptr_t timerid)
 	machinewireview_idle(&self->wireview);
 	machinestackview_idle(&self->stackview);
 	machineproperties_idle(&self->properties);
+}
+
+void machineview_onshow(MachineView* self)
+{
+	if (self->wireview.centermaster) {
+		machinewireview_centermaster(&self->wireview);
+		self->wireview.centermaster = FALSE;
+	}
 }

@@ -143,7 +143,6 @@ typedef struct MainFrame {
 	InstrumentsViewBar instrumentsviewbar;	
 	ConfirmBox checkunsavedbox;		
 	Interpreter interpreter;	
-	int startup;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);

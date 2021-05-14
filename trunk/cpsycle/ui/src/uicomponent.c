@@ -474,8 +474,7 @@ void psy_ui_component_updatefont(psy_ui_Component* self)
 
 void show(psy_ui_Component* self)
 {
-	self->visible = 1;
-	self->imp->vtable->dev_show(self->imp);	
+	
 }
 
 void showstate(psy_ui_Component* self, int state)
@@ -486,9 +485,7 @@ void showstate(psy_ui_Component* self, int state)
 }
 
 void hide(psy_ui_Component* self)
-{
-	self->visible = 0;
-	self->imp->vtable->dev_hide(self->imp);	
+{	
 }
 
 int visible(psy_ui_Component* self)
@@ -743,6 +740,14 @@ void psy_ui_component_scrollstep(psy_ui_Component* self, double stepx,
 	}
 }
 
+void psy_ui_component_show(psy_ui_Component* self)
+{
+	self->visible = 1;
+	self->imp->vtable->dev_show(self->imp);
+	self->vtable->show(self);
+}
+
+
 void psy_ui_component_show_align(psy_ui_Component* self)
 {
 	assert(self);
@@ -752,9 +757,16 @@ void psy_ui_component_show_align(psy_ui_Component* self)
 			self->visible = 1;
 			psy_ui_component_align(psy_ui_component_parent(self));
 		}
-		self->vtable->show(self);
+		psy_ui_component_show(self);
 		psy_ui_component_invalidate(psy_ui_component_parent(self));
 	}
+}
+
+INLINE void psy_ui_component_hide(psy_ui_Component* self)
+{
+	self->visible = 0;	
+	self->imp->vtable->dev_hide(self->imp);
+	self->vtable->hide(self);
 }
 
 void psy_ui_component_hide_align(psy_ui_Component* self)
@@ -762,7 +774,7 @@ void psy_ui_component_hide_align(psy_ui_Component* self)
 	assert(self);
 
 	if (psy_ui_component_visible(self)) {
-		self->vtable->hide(self);
+		psy_ui_component_hide(self);
 		if (psy_ui_component_parent(self)) {
 			psy_ui_component_align(psy_ui_component_parent(self));
 			psy_ui_component_invalidate(psy_ui_component_parent(self));

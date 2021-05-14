@@ -64,6 +64,7 @@ bool patternviewconfig_showtrackscopes(const PatternViewConfig*);
 void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
 bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
+uintptr_t patternviewconfig_patterndisplay(const PatternViewConfig*);
 // events
 bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 bool patternviewconfig_onthemechanged(PatternViewConfig*, psy_Property*);
