@@ -16,7 +16,7 @@ void slidergroupui_init(SliderGroupUi* self, psy_ui_Component* parent,
 	assert(skin);
 	
 	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setbackgroundcolour(&self->component,
 		skin->bottomcolour);		
 	sliderui_init(&self->slider, &self->component, view, machine, volumeparamidx,

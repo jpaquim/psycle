@@ -59,7 +59,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	propertiesrenderline_vtable_init(self);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_TOP);	
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	if (state->numcols == 1) {
 		psy_ui_component_setpreferredsize(&self->component, state->size_col0);
 	} else {
@@ -106,7 +106,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 
 			col1 = psy_ui_component_allocinit(&self->component, view);
 			psy_ui_component_setalign(col1, psy_ui_ALIGN_CLIENT);
-			psy_ui_component_setalignexpand(col1, psy_ui_HORIZONTALEXPAND);
+			psy_ui_component_setalignexpand(col1, psy_ui_HEXPAND);
 			self->label = psy_ui_label_allocinit(col1, view);
 			psy_ui_component_setalign(psy_ui_label_base(self->label),
 				psy_ui_ALIGN_LEFT);			

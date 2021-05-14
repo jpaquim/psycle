@@ -237,7 +237,7 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 			psy_ui_realpoint_init(&cp_topleft);
 			psy_ui_realpoint_init(&cp_bottomright);			
 			size.width = (!limit || (self->component->containeralign->alignexpandmode &
-				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
+				psy_ui_HEXPAND) == psy_ui_HEXPAND)
 				? psy_ui_value_make_px(0)
 				: limit->width;
 			colsize.width = psy_ui_mul_value_real(size.width, 1.0 / (double)self->numcols);

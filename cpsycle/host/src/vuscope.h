@@ -37,7 +37,8 @@ typedef struct VuScope {
 void vuscope_init(VuScope*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
 void vuscope_start(VuScope*);
 void vuscope_stop(VuScope*);
-void vuscope_disconnect(VuScope*);
+
+void vuscope_idle(VuScope*);
 
 INLINE psy_ui_Component* vuscope_base(VuScope* self)
 {

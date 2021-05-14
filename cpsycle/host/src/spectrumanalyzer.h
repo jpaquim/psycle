@@ -47,6 +47,8 @@ void spectrumanalyzer_hold(SpectrumAnalyzer*);
 void spectrumanalyzer_continue(SpectrumAnalyzer*);
 bool spectrumanalyzer_stopped(SpectrumAnalyzer*);
 
+void spectrumanalyzer_idle(SpectrumAnalyzer*);
+
 #ifdef __cplusplus
 }
 #endif

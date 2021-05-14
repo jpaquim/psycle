@@ -181,8 +181,8 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
 							psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
 			} else if (component->align == psy_ui_ALIGN_LEFT) {								
-				if ((self->component->containeralign->alignexpandmode & psy_ui_HORIZONTALEXPAND)
-						== psy_ui_HORIZONTALEXPAND) {
+				if ((self->component->containeralign->alignexpandmode & psy_ui_HEXPAND)
+						== psy_ui_HEXPAND) {
 				} else {
 					double requiredcomponentwidth;
 										
@@ -476,11 +476,11 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 		psy_ui_realpoint_init(&cp_topleft);
 		psy_ui_realpoint_init(&cp_bottomright);			
 		size.width = (!limit || (self->component->containeralign->alignexpandmode &
-			psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)
+			psy_ui_HEXPAND) == psy_ui_HEXPAND)
 			? psy_ui_value_make_px(0)
 			: limit->width;	
 		if (limit && !((self->component->containeralign->alignexpandmode &
-				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND)) {
+				psy_ui_HEXPAND) == psy_ui_HEXPAND)) {
 			psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
 			size.width = psy_ui_value_make_px(psy_ui_value_px(
 				&limit->width, tm, NULL) - cp_topleft.x - cp_bottomright.x);

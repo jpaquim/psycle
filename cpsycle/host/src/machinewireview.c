@@ -93,22 +93,32 @@ static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
 			machinewireview_ondestroy;
-		vtable.ondraw = (psy_ui_fp_component_ondraw)machinewireview_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			machinewireview_ondraw;
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			machinewireview_onmousedown;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			machinewireview_onmouseup;
-		vtable.onmousemove = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
 			machinewireview_onmousemove;
-		vtable.onmousedoubleclick = (psy_ui_fp_component_onmouseevent)
+		vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
 			machinewireview_onmousedoubleclick;
-		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
+		vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
 			machinewireview_onkeydown;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			machinewireview_onpreferredsize;
-		vtable.onalign = (psy_ui_fp_component_onalign)
+		vtable.onalign =
+			(psy_ui_fp_component_onalign)
 			machinewireview_onalign;
 		vtable_initialized = TRUE;
 	}
@@ -202,7 +212,6 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 		machinewireview_drawwires(self, g);
 	}	
 	if (!self->vudrawupdate) {
-		machinewireview_drawdragwire(self, g);
 		if (self->machines) {
 			psy_ui_RealRectangle position;
 			psy_ui_Component* machineui;
@@ -215,7 +224,8 @@ void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
 				psy_ui_setcolour(g, self->skin->wirecolour);
 				machineui_drawhighlight(g, position);
 			}
-		}		
+		}
+		machinewireview_drawdragwire(self, g);				
 	}
 }
 

@@ -225,7 +225,10 @@ void machineui_drawhighlight(psy_ui_Graphics* g, psy_ui_RealRectangle position)
 	edges[2] = psy_ui_realpoint_make(width + d, height + d);
 	edges[3] = psy_ui_realpoint_make(-d, height + d);
 	origin = psy_ui_origin(g);
-	psy_ui_setorigin(g, psy_ui_realpoint_make(-position.left, -position.top));
+	psy_ui_setorigin(g,
+		psy_ui_realpoint_make(
+			origin.x - position.left,
+			origin.y - position.top));
 	drawmachineline(g, dirs[0], edges[0]);
 	drawmachineline(g, dirs[1], edges[0]);
 	drawmachineline(g, dirs[1], edges[1]);

@@ -68,7 +68,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	psy_ui_component_setoverflow(&self->component,
 		psy_ui_OVERFLOW_HSCROLL);	
 	psy_signal_init(&self->signal_trackselected);
@@ -77,7 +77,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->client,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	psy_ui_component_setoverflow(&self->client,
 		psy_ui_OVERFLOW_HSCROLL);	
 	seqviewtrackheaders_build(self);
@@ -484,7 +484,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_setwheelscroll(&self->component, 1);	
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_margin_zero());
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	if (self->state->cmds->sequence && self->state->cmds->sequence->patterns) {
 		psy_signal_connect(

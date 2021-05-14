@@ -1,18 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "wireview.h"
-// local
+/* local */
 #include "resources/resource.h"
-// audio
+/* audio */
 #include <operations.h>
-// ui
+/* ui */
 #include <uiframe.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define SCOPE_SPEC_BANDS 256
@@ -38,14 +40,11 @@ enum {
 	WIREVIEW_TAB_PHASE
 };
 // prototypes
-static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView*);
 static void wireview_initrategroup(WireView*);
 static void wireview_initbottomgroup(WireView*);
 static void wireview_updatetext(WireView*, psy_Translator*);
-static void wireview_onsongchanged(WireView*, Workspace*);
-static void wireview_connectmachinessignals(WireView*, Workspace*);
 static void wireview_ondescribevolume(WireView*, psy_ui_Slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, psy_ui_Slider*, float value);
 static void wireview_onvaluevolume(WireView*, psy_ui_Slider*, float* value);
@@ -56,49 +55,67 @@ static void wireview_onvaluerate(WireView*, psy_ui_Slider*, float* value);
 static void wireview_onhold(WireView*, psy_ui_Component* sender);
 static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
 static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
-static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static psy_ui_Component* wireview_scope(WireView*, int index);
 static uintptr_t wireview_currscope(WireView*);
 static void wireview_ondrawslidervu(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void wireview_ontimer(WireView*, psy_ui_Component* sender, uintptr_t timerid);
+static void wireview_ontimer(WireView*, uintptr_t timerid);
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
-// implementation
+static void vtable_init(WireView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			wireview_ontimer;
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
+/* implementation */
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
-{					
-	self->wire = wire;	
+{						
+	psy_ui_component_init(wireview_base(self), parent, NULL);
+	vtable_init(self);
+	self->wire = wire;
 	self->workspace = workspace;
 	self->scope_spec_mode = 0.2f;
 	self->scope_spec_rate = 0.f;
-	psy_ui_component_init(wireview_base(self), parent, NULL);
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(wireview_base(self),
-		psy_ui_ALIGN_CLIENT);
-	psy_signal_connect(&wireview_base(self)->signal_destroy, self,
-		wireview_ondestroy);
+		psy_ui_ALIGN_CLIENT);	
 	wireview_initvolumeslider(self);
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
 	wireview_inittabbar(self);	
 	psy_ui_notebook_init(&self->notebook, wireview_base(self));	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);	
-	wireview_connectmachinessignals(self, workspace);	
+		psy_ui_ALIGN_CLIENT);
+	/* Vuscope */
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
-		workspace);
-	psy_ui_component_setalign(&self->vuscope.component, psy_ui_ALIGN_CLIENT);
+		workspace);	
+	/* Oscilloscope */
 	oscilloscopeview_init(&self->oscilloscopeview,
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
-	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, 0.2f);
-	psy_ui_component_setalign(&self->oscilloscopeview.component, psy_ui_ALIGN_CLIENT);
+	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, 0.2f);	
+	/* Spectrum */
 	psy_ui_component_init(&self->spectrumpane,
 		psy_ui_notebook_base(&self->notebook), NULL);
 	spectrumanalyzer_init(&self->spectrumanalyzer, &self->spectrumpane,
 		wire, workspace);
-	psy_ui_component_setalign(&self->spectrumanalyzer.component, psy_ui_ALIGN_CENTER);
-	stereophase_init(&self->stereophase, psy_ui_notebook_base(&self->notebook), wire,
+	psy_ui_component_setalign(&self->spectrumanalyzer.component,
+		psy_ui_ALIGN_CENTER);
+	/* Stereophase */
+	psy_ui_component_init(&self->stereophasepane,
+		psy_ui_notebook_base(&self->notebook), NULL);	
+	stereophase_init(&self->stereophase, &self->stereophasepane, wire,
 		workspace);
-	psy_ui_component_setalign(&self->stereophase.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->stereophase.component,
+		psy_ui_ALIGN_CENTER);
+	/* Channel Mapping */
 	channelmappingview_init(&self->channelmappingview,
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
@@ -108,22 +125,11 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void wireview_ondestroy(WireView* self)
-{
-	if (self->workspace && workspace_song(self->workspace)) {
-		psy_signal_disconnect(
-			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
-			self, wireview_ondisconnected);
-		psy_signal_disconnect(&self->volslider.pane.signal_customdraw,
-			self, wireview_ondrawslidervu);
-	}
-}
-
 void wireview_inittabbar(WireView* self)
 {
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);	
+	psy_ui_component_setalignexpand(&self->top, psy_ui_HEXPAND);	
 	psy_ui_tabbar_init(&self->tabbar, &self->top);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);
@@ -213,11 +219,6 @@ void wireview_initbottomgroup(WireView* self)
 	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup, NULL,
 		self, wireview_onaddeffect);	
 	psy_ui_button_settext(&self->addeffect, "Add Effect");
-}
-
-void wireview_onsongchanged(WireView* self, Workspace* workspace)
-{		
-	wireview_connectmachinessignals(self, workspace);
 }
 
 void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
@@ -323,27 +324,12 @@ void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 	}
 }
 
-void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
-		uintptr_t outputslot, uintptr_t inputslot)
-{
-	vuscope_disconnect(&self->vuscope);
-}
-
 bool wireview_wireexists(const WireView* self)
 {
 	return workspace_song(self->workspace) &&
 		psy_audio_machines_connected(
 			psy_audio_song_machines(workspace_song(self->workspace)),
 			self->wire);
-}
-
-void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
-{	
-	if (workspace_song(self->workspace)) {
-		psy_signal_connect(
-			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
-			self, wireview_ondisconnected);
-	}
 }
 
 psy_ui_Component* wireview_scope(WireView* self, int index)
@@ -554,7 +540,24 @@ psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
 	return (psy_dsp_amp_t)(20.0 * log10(amplitude));
 }
 
-void wireview_ontimer(WireView* self, psy_ui_Component* sender, uintptr_t timerid)
-{
+void wireview_ontimer(WireView* self, uintptr_t timerid)
+{	
+	switch (psy_ui_notebook_pageindex(&self->notebook)) {
+	case 0:		
+		/* slider vu needs vuscope values */
+		break;
+	case 1:		
+		oscilloscopeview_idle(&self->oscilloscopeview);		
+		break;
+	case 2:
+		spectrumanalyzer_idle(&self->spectrumanalyzer);
+		break;
+	case 3:
+		stereophase_idle(&self->stereophase);
+		break;
+	default:
+		break;
+	}
+	vuscope_idle(&self->vuscope);
 	psy_ui_component_invalidate(&self->volslider.pane.component);
 }

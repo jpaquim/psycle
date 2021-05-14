@@ -53,11 +53,41 @@
     <Filter Include="machine\machineview">
       <UniqueIdentifier>{b988c842-be83-4eca-a454-585302bd8384}</UniqueIdentifier>
     </Filter>
-    <Filter Include="machine\machineview\paramview">
-      <UniqueIdentifier>{70aa1202-6ea4-4404-bd5d-cb96ea06c60c}</UniqueIdentifier>
+    <Filter Include="machine\paramgear">
+      <UniqueIdentifier>{cc4dbdd6-0512-41f9-8364-40c309718aff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="machine\machineview\newmachine">
+    <Filter Include="machine\gear">
+      <UniqueIdentifier>{eed26dec-cf5b-44a3-bf2b-f3bdef2018bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\plugineditor">
+      <UniqueIdentifier>{a145b49d-3ea3-4483-bd9e-b2f9173aa910}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\common">
+      <UniqueIdentifier>{208b62b4-b5e7-42a2-975e-ffa644ae17dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pattern\tracker">
+      <UniqueIdentifier>{4932eff1-2440-446e-95c0-314e159b7195}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pattern\pianoroll">
+      <UniqueIdentifier>{592e1a62-68f2-4c48-a40e-a3fca1e89cc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pattern\block">
+      <UniqueIdentifier>{b4134282-1d56-429a-8aeb-47858609d6a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pattern\common">
+      <UniqueIdentifier>{d8a521b8-4d5b-45e6-978b-0b7f1e71cd54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\stack">
+      <UniqueIdentifier>{10283f14-42cf-4cb5-980f-1490fc387c83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\wires">
+      <UniqueIdentifier>{2de79152-4acf-4a9f-a8d1-c95ae4a9b934}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\new">
       <UniqueIdentifier>{136b5d45-0d19-464e-ba52-949c6d9e0507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\params">
+      <UniqueIdentifier>{70aa1202-6ea4-4404-bd5d-cb96ea06c60c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -79,50 +109,11 @@
     <ClCompile Include="src\languageconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\patternheader.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternviewmenu.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternviewskin.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\pionoroll.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackergridstate.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerlinenumbers.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerlinestate.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerview.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\transformpatternview.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="src\patternview.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patterncmds.c">
       <Filter>pattern</Filter>
     </ClCompile>
     <ClCompile Include="src\defaultlang.c">
       <Filter>configuration</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machinesbox.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\plugineditor.c">
-      <Filter>machine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gear.c">
-      <Filter>machine</Filter>
     </ClCompile>
     <ClCompile Include="src\stereophase.c">
       <Filter>monitors</Filter>
@@ -211,12 +202,6 @@
     <ClCompile Include="src\scrollzoom.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
-    <ClCompile Include="src\patternproperties.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\interpolatecurveview.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="src\envelopeview.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
@@ -298,9 +283,6 @@
     <ClCompile Include="src\dirconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\swingfillview.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="src\intedit.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
@@ -327,9 +309,6 @@
     </ClCompile>
     <ClCompile Include="src\styles.c">
       <Filter>configuration</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternviewbar.c">
-      <Filter>pattern</Filter>
     </ClCompile>
     <ClCompile Include="src\metronomebar.c">
       <Filter>toolbars</Filter>
@@ -433,12 +412,6 @@
     <ClCompile Include="src\adsrsliders.c">
       <Filter>machine\instrument\instrumentview</Filter>
     </ClCompile>
-    <ClCompile Include="src\machinestackview.c">
-      <Filter>machine\machineview</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machinewireview.c">
-      <Filter>machine\machineview</Filter>
-    </ClCompile>
     <ClCompile Include="src\machineviewbar.c">
       <Filter>machine\machineview</Filter>
     </ClCompile>
@@ -449,55 +422,46 @@
       <Filter>machine\machineview</Filter>
     </ClCompile>
     <ClCompile Include="src\machineframe.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\machineeditorview.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\paramview.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\newval.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\paramlistbox.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\presetsbar.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\machineproperties.c">
       <Filter>machine\machineview</Filter>
     </ClCompile>
     <ClCompile Include="src\paramviews.c">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\parammap.c">
-      <Filter>machine\machineview\paramview</Filter>
-    </ClCompile>
-    <ClCompile Include="src\paramgear.c">
-      <Filter>machine</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachine.c">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClCompile>
     <ClCompile Include="src\pluginsview.c">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClCompile>
     <ClCompile Include="src\pluginscanview.c">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachinesection.c">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachinedetail.c">
-      <Filter>machine\machineview\newmachine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackercolumn.c">
-      <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackercmds.c">
-      <Filter>pattern</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClCompile>
     <ClCompile Include="src\titlebar.c">
       <Filter>uicontrols</Filter>
@@ -510,6 +474,72 @@
     </ClCompile>
     <ClCompile Include="src\minmaximize.c">
       <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinewireview.c">
+      <Filter>machine\machineview\wires</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinestackview.c">
+      <Filter>machine\machineview\stack</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramgear.c">
+      <Filter>machine\paramgear</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gear.c">
+      <Filter>machine\gear</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugineditor.c">
+      <Filter>machine\plugineditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinesbox.c">
+      <Filter>machine\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackercolumn.c">
+      <Filter>pattern\tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackergridstate.c">
+      <Filter>pattern\tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinenumbers.c">
+      <Filter>pattern\tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinestate.c">
+      <Filter>pattern\tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerview.c">
+      <Filter>pattern\tracker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pionoroll.c">
+      <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewmenu.c">
+      <Filter>pattern\block</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swingfillview.c">
+      <Filter>pattern\block</Filter>
+    </ClCompile>
+    <ClCompile Include="src\transformpatternview.c">
+      <Filter>pattern\block</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpolatecurveview.c">
+      <Filter>pattern\block</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternproperties.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternheader.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patterncmds.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewskin.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewbar.c">
+      <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackercmds.c">
+      <Filter>pattern\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -530,44 +560,8 @@
     <ClInclude Include="src\patternview.h">
       <Filter>pattern</Filter>
     </ClInclude>
-    <ClInclude Include="src\patternviewmenu.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternviewskin.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pianoroll.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerlinenumbers.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackergridstate.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerlinestate.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerview.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\transformpatternview.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternheader.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patterncmds.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
     <ClInclude Include="src\defaultlang.h">
       <Filter>configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="src\plugineditor.h">
-      <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gear.h">
-      <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\channelmappingview.h">
       <Filter>monitors</Filter>
@@ -656,12 +650,6 @@
     <ClInclude Include="src\fileview.h">
       <Filter>file</Filter>
     </ClInclude>
-    <ClInclude Include="src\interpolatecurveview.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternproperties.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
     <ClInclude Include="src\envelopeview.h">
       <Filter>machine\instrument</Filter>
     </ClInclude>
@@ -673,9 +661,6 @@
     </ClInclude>
     <ClInclude Include="src\propertiesview.h">
       <Filter>uicontrols</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinesbox.h">
-      <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\sequenceview.h">
       <Filter>sequence</Filter>
@@ -758,9 +743,6 @@
     <ClInclude Include="src\dirconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\swingfillview.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
     <ClInclude Include="src\intedit.h">
       <Filter>uicontrols</Filter>
     </ClInclude>
@@ -787,9 +769,6 @@
     </ClInclude>
     <ClInclude Include="src\styles.h">
       <Filter>configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternviewbar.h">
-      <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="src\metronomebar.h">
       <Filter>toolbars</Filter>
@@ -893,12 +872,6 @@
     <ClInclude Include="src\adsrsliders.h">
       <Filter>machine\instrument\instrumentview</Filter>
     </ClInclude>
-    <ClInclude Include="src\machinestackview.h">
-      <Filter>machine\machineview</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinewireview.h">
-      <Filter>machine\machineview</Filter>
-    </ClInclude>
     <ClInclude Include="src\machineviewbar.h">
       <Filter>machine\machineview</Filter>
     </ClInclude>
@@ -909,55 +882,46 @@
       <Filter>machine\machineview</Filter>
     </ClInclude>
     <ClInclude Include="src\machineframe.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\machineeditorview.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\paramview.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\newval.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\paramlistbox.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\presetsbar.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\machineproperties.h">
       <Filter>machine\machineview</Filter>
     </ClInclude>
     <ClInclude Include="src\paramviews.h">
-      <Filter>machine\machineview\paramview</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\parammap.h">
-      <Filter>machine\machineview\paramview</Filter>
-    </ClInclude>
-    <ClInclude Include="src\paramgear.h">
-      <Filter>machine</Filter>
+      <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachine.h">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClInclude>
     <ClInclude Include="src\pluginsview.h">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClInclude>
     <ClInclude Include="src\pluginscanview.h">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachinesection.h">
-      <Filter>machine\machineview\newmachine</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachinedetail.h">
-      <Filter>machine\machineview\newmachine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackercolumn.h">
-      <Filter>pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackercmds.h">
-      <Filter>pattern</Filter>
+      <Filter>machine\machineview\new</Filter>
     </ClInclude>
     <ClInclude Include="src\titlebar.h">
       <Filter>uicontrols</Filter>
@@ -970,6 +934,72 @@
     </ClInclude>
     <ClInclude Include="src\minmaximize.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinewireview.h">
+      <Filter>machine\machineview\wires</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinestackview.h">
+      <Filter>machine\machineview\stack</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramgear.h">
+      <Filter>machine\paramgear</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gear.h">
+      <Filter>machine\gear</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugineditor.h">
+      <Filter>machine\plugineditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinesbox.h">
+      <Filter>machine\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackercolumn.h">
+      <Filter>pattern\tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackergridstate.h">
+      <Filter>pattern\tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinenumbers.h">
+      <Filter>pattern\tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinestate.h">
+      <Filter>pattern\tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerview.h">
+      <Filter>pattern\tracker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianoroll.h">
+      <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewmenu.h">
+      <Filter>pattern\block</Filter>
+    </ClInclude>
+    <ClInclude Include="src\swingfillview.h">
+      <Filter>pattern\block</Filter>
+    </ClInclude>
+    <ClInclude Include="src\transformpatternview.h">
+      <Filter>pattern\block</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interpolatecurveview.h">
+      <Filter>pattern\block</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternproperties.h">
+      <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternheader.h">
+      <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patterncmds.h">
+      <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewskin.h">
+      <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewbar.h">
+      <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackercmds.h">
+      <Filter>pattern\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -45,7 +45,7 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 0.0, 1.0);
 	psy_ui_component_setspacing(trackbox_base(self), spacing);
 	psy_ui_component_setalignexpand(trackbox_base(self),
-		psy_ui_HORIZONTALEXPAND);	
+		psy_ui_HEXPAND);	
 	psy_ui_label_init(&self->track, trackbox_base(self), view);
 	psy_ui_label_preventtranslation(&self->track);	
 	psy_ui_label_setcharnumber(&self->track, 3);

@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "spectrumanalyzer.h"
 
@@ -23,22 +26,16 @@ static const uint32_t CLLEFT = 0xC06060;
 static const uint32_t CLRIGHT = 0x60C060;
 static const uint32_t CLBOTH = 0xC0C060;
 
+static void spectrumanalyzer_initbackground(SpectrumAnalyzer*);
 static void spectrumanalyzer_ondestroy(SpectrumAnalyzer*);
 static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawbackground(SpectrumAnalyzer*, psy_ui_Graphics*);
-static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);
-static void spectrumanalyzer_ontimer(SpectrumAnalyzer*, psy_ui_Component* sender, uintptr_t timerid);
-static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*,
-	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
-static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
-	int flag, psy_audio_Song* song);
-static void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer*, Workspace*);
-static void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer*, Workspace*);
+static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);	
 static void FillLinearFromCircularBuffer(SpectrumAnalyzer*,
 	float inBuffer[], float outBuffer[], float vol, uintptr_t writepos);
 static psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer*,
 	uintptr_t* numsamples);
-
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -46,24 +43,22 @@ static void vtable_init(SpectrumAnalyzer* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			spectrumanalyzer_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
 			spectrumanalyzer_ondraw;		
 		vtable_initialized = TRUE;
 	}
-}
-
-void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy_audio_Wire wire,
-	Workspace* workspace)
-{
-	psy_ui_Font font;
-	psy_ui_FontInfo fontinfo;
-	psy_ui_Graphics g;
-
-	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
 	self->component.vtable = &vtable;
-	// psy_ui_component_doublebuffer(&self->component);
+}
+/* implementation */
+void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent,
+	psy_audio_Wire wire, Workspace* workspace)
+{	
+	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);		
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_px(256.0, 128.0));
@@ -80,34 +75,35 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	memset(self->db_left, 0, sizeof(self->db_left));
 	memset(self->db_right, 0, sizeof(self->db_right));
 	self->lastwritepos = 0;
-	self->lastprocessed = 0;
-	psy_signal_connect(&self->component.signal_destroy, self, spectrumanalyzer_ondestroy);
-	psy_signal_connect(&self->component.signal_timer, self, spectrumanalyzer_ontimer);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		spectrumanalyzer_onsongchanged);
+	self->lastprocessed = 0;	
 	fftclass_init(&self->fftSpec);
-	fftclass_setup(&self->fftSpec, hann, self->scope_spec_samples, SCOPE_SPEC_BANDS);
-	spectrumanalyzer_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, 0, 50);	
-	psy_ui_bitmap_init_size(&self->bg, psy_ui_realsize_make(256.0, 128.0));
-	psy_ui_graphics_init_bitmap(&g, &self->bg);	
-	psy_ui_fontinfo_init(&fontinfo, "tahoma", 12);
-	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_setfont(&g, &font);	
-	psy_ui_font_dispose(&font);
-	spectrumanalyzer_drawbackground(self, &g);
-	psy_ui_graphics_dispose(&g);
-	psy_dsp_noopt_init(&self->dsp_noopt);
-
+	fftclass_setup(&self->fftSpec, hann, self->scope_spec_samples,
+		SCOPE_SPEC_BANDS);
+	/* create background */
+	spectrumanalyzer_initbackground(self);
+	psy_dsp_noopt_init(&self->dsp_noopt);	
 }
 
 void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
-{
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		spectrumanalyzer_onsongchanged);
-	spectrumanalyzer_disconnectmachinessignals(self, self->workspace);
+{	
 	fftclass_dispose(&self->fftSpec);
 	psy_ui_bitmap_dispose(&self->bg);
+}
+
+void spectrumanalyzer_initbackground(SpectrumAnalyzer* self)
+{
+	psy_ui_Font font;
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Graphics g;
+
+	psy_ui_bitmap_init_size(&self->bg, psy_ui_realsize_make(256.0, 128.0));
+	psy_ui_graphics_init_bitmap(&g, &self->bg);
+	psy_ui_fontinfo_init(&fontinfo, "tahoma", 12);
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_setfont(&g, &font);
+	psy_ui_font_dispose(&font);
+	spectrumanalyzer_drawbackground(self, &g);
+	psy_ui_graphics_dispose(&g);
 }
 
 void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Graphics* g)
@@ -329,67 +325,23 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	}	
 }
 
-void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, uintptr_t timerid)
-{	
-	psy_ui_component_invalidate(&self->component);	
-}
 
-void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
-	psy_audio_Machine* machine, uintptr_t slot,
-	psy_audio_BufferContext* bc)
-{	
-	self->invol = psy_audio_connections_wirevolume(&workspace_song(self->workspace)->machines.connections,
-		self->wire);	
-}
-
-void spectrumanalyzer_onsongchanged(SpectrumAnalyzer* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
-{		
-	spectrumanalyzer_connectmachinessignals(self, workspace);	
-}
-
-void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer* self, Workspace* workspace)
+void spectrumanalyzer_idle(SpectrumAnalyzer* self)
 {
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_connect(&srcmachine->signal_worked, self,
-				spectrumanalyzer_onsrcmachineworked);
-		}
-	}
-}
-
-void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				spectrumanalyzer_onsrcmachineworked);
-		}
+	if (!self->hold) {				
+		self->invol = psy_audio_connections_wirevolume(
+			&workspace_song(self->workspace)->machines.connections,
+			self->wire);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
 void spectrumanalyzer_stop(SpectrumAnalyzer* self)
 {
-	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
-			self->wire.src);
-		if (srcmachine) {
-			psy_audio_exclusivelock_enter();
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				spectrumanalyzer_onsrcmachineworked);
-			psy_audio_exclusivelock_leave();			
-		}
-	}
 }
 
-void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], float outBuffer[], float vol, uintptr_t writepos)
+void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], float outBuffer[],
+	float vol, uintptr_t writepos)
 {
 	psy_audio_Buffer* buffer;
 	uintptr_t buffersize;

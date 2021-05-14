@@ -24,34 +24,33 @@ static const uint32_t CLBOTH = 0xC0C060;
 static void oscilloscope_init_memory(Oscilloscope*);
 static void oscilloscope_ondestroy(Oscilloscope*);
 static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
-static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, uintptr_t timerid);
-static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*,
-	uintptr_t slot, psy_audio_BufferContext*);
-static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag,
-	psy_audio_Song*);
-static void oscilloscope_connectmachinessignals(Oscilloscope*, Workspace*);
-static void oscilloscope_disconnectmachinessignals(Oscilloscope*, Workspace*);
-static psy_audio_Buffer* oscilloscope_buffer(Oscilloscope*, uintptr_t* numsamples);
+static psy_audio_Buffer* oscilloscope_buffer(Oscilloscope*,
+	uintptr_t* numsamples);
 static uintptr_t oscilloscope_channel(Oscilloscope*);
-
+/* vtable */
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(Oscilloscope* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw)oscilloscope_ondraw;
-		vtable_initialized = 1;
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			oscilloscope_ondestroy;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			oscilloscope_ondraw;
+		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
-
+/* implementation */
 void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->invol = (psy_dsp_amp_t)1.0f;
@@ -66,16 +65,8 @@ void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_W
 	self->hold_buffer = 0;
 	self->channelmode = OSCILLOSCOPE_CHMODE_LEFT;
 	self->ampzoom = (psy_dsp_amp_t)1.0f;
-	self->running = TRUE;
-	psy_signal_connect(&self->component.signal_destroy, self,
-		oscilloscope_ondestroy);	
-	psy_signal_connect(&self->component.signal_timer, self,
-		oscilloscope_ontimer);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		oscilloscope_onsongchanged);
-	oscilloscope_connectmachinessignals(self, workspace);
-	oscilloscope_init_memory(self);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	self->running = TRUE;			
+	oscilloscope_init_memory(self);	
 }
 
 void oscilloscope_init_memory(Oscilloscope* self)
@@ -96,8 +87,7 @@ void oscilloscope_init_memory(Oscilloscope* self)
 
 void oscilloscope_ondestroy(Oscilloscope* self)
 {
-	psy_signal_disconnect_context(&self->workspace->signal_songchanged, self);
-	oscilloscope_disconnectmachinessignals(self, self->workspace);
+	psy_signal_disconnect_context(&self->workspace->signal_songchanged, self);	
 	if (self->hold_buffer) {
 		psy_audio_buffer_deallocate(self->hold_buffer);
 	}
@@ -204,75 +194,15 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 	return buffer;
 }
 
-void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender,
-	uintptr_t timerid)
+void oscilloscope_idle(Oscilloscope* self)
 {	
-	psy_ui_component_invalidate(&self->component);	
-}
-
-void oscilloscope_onsrcmachineworked(Oscilloscope* self,
-	psy_audio_Machine* machine, uintptr_t slot,
-	psy_audio_BufferContext* bc)
-{	
-	assert(self);
-	assert(machine);
-
-	if (self->hold_buffer == NULL && self->hold == TRUE &&
-			psy_audio_machine_buffermemory(machine)) {		
-		self->hold_buffer = psy_audio_buffer_clone(
-			psy_audio_machine_buffermemory(machine));
-	}
 	self->invol = psy_audio_connections_wirevolume(
 		&workspace_song(self->workspace)->machines.connections, self->wire);
-}
-
-
-void oscilloscope_onsongchanged(Oscilloscope* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
-{	
-	self->invol = 1.f;
-	oscilloscope_connectmachinessignals(self, workspace);	
-}
-
-void oscilloscope_connectmachinessignals(Oscilloscope* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_connect(&srcmachine->signal_worked, self,
-				oscilloscope_onsrcmachineworked);
-		}
-	}
-}
-
-void oscilloscope_disconnectmachinessignals(Oscilloscope* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				oscilloscope_onsrcmachineworked);
-		}
-	}
+	psy_ui_component_invalidate(&self->component);
 }
 
 void oscilloscope_stop(Oscilloscope* self)
 {
-	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
-			self->wire.src);
-		if (srcmachine) {
-			psy_audio_exclusivelock_enter();
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				oscilloscope_onsrcmachineworked);
-			psy_audio_exclusivelock_leave();			
-		}
-	}
 }
 
 void oscilloscope_setzoom(Oscilloscope* self, float rate)
@@ -393,6 +323,8 @@ void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	oscilloscope_init(&self->oscilloscope, &self->component, wire,
 		workspace);
 	psy_ui_component_setalign(&self->oscilloscope.component,

@@ -177,7 +177,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		stepsequencerbar_onlpbchanged);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,

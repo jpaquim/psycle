@@ -178,7 +178,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	psy_ui_component_doublebuffer(&self->component);	
 	trackergrid_init_signals(self);
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	// init internal data	
 	self->syncpattern = TRUE;	
 	self->gridstate->midline = FALSE;	

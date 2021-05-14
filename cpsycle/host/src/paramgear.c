@@ -190,7 +190,7 @@ void paramrackpane_init(ParamRackPane* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.1),
 		psy_ui_value_make_eh(0.0), psy_ui_value_make_ew(0.0)));	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setscrollstep_width(&self->component, psy_ui_value_make_px(100));	
 	self->mode = PARAMRACK_OUTCHAIN;
 	self->workspace = workspace;

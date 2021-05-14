@@ -29,28 +29,38 @@ static const uint32_t linepenbR = 0x00507050;
 static const uint32_t linepenL = 0x00c08080;
 static const uint32_t linepenR = 0x0080c080;
 
-static void vuscope_ondestroy(VuScope*);
-static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*);
+/* prototypes */
+static void vuscope_ondraw(VuScope*, psy_ui_Graphics*);
 static void vuscope_drawscale(VuScope*, psy_ui_Graphics*);
 static void vuscope_drawbars(VuScope*, psy_ui_Graphics*);
-static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, uintptr_t timerid);
-static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*,
-	uintptr_t slot, psy_audio_BufferContext*);
-static void vuscope_onsongchanged(VuScope*, Workspace*, int flag,
-	psy_audio_Song*);
-static void vuscope_connectmachinessignals(VuScope*, Workspace*);
-static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 static psy_dsp_amp_t vuscope_wirevolume(VuScope*);
 static void vuscope_drawlabel(VuScope*, psy_ui_Graphics*, const char* text,
 	double x, double y, double width, double height);
 static void vuscope_drawlabel_right(VuScope*, psy_ui_Graphics*, const char* text,
 	double x, double y, double width, double height);
+static psy_audio_Buffer* vuscope_buffer(VuScope*, uintptr_t* numsamples);
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
+static void vtable_init(VuScope* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);		
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			vuscope_ondraw;
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
+/* implementation */
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
+	vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->workspace = workspace;
@@ -63,23 +73,9 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->peakL = self->peakR = (psy_dsp_amp_t) INT16_MAX;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->running = TRUE;
-	psy_signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
-	psy_signal_connect(&self->component.signal_timer, self, vuscope_ontimer);
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		vuscope_onsongchanged);
-	vuscope_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void vuscope_ondestroy(VuScope* self)
-{
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		vuscope_onsongchanged);
-	vuscope_disconnectmachinessignals(self, self->workspace);
-}
-
-void vuscope_ondraw(VuScope* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void vuscope_ondraw(VuScope* self, psy_ui_Graphics* g)
 {		
 	vuscope_drawscale(self, g);
 	if (self->running) {
@@ -312,68 +308,43 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	// bufDC.SelectObject(oldFont);
 }
 
-void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, uintptr_t timerid)
-{	
-	psy_ui_component_invalidate(&self->component);	
+void vuscope_idle(VuScope* self)
+{
+	if (self->running) {		
+		psy_audio_Buffer* buffer;
+		uintptr_t numsamples;
+
+		buffer = vuscope_buffer(self, &numsamples);
+		if (buffer && buffer->rms) {						
+			self->leftavg = buffer->rms->data.previousLeft / 32768;
+			self->rightavg =buffer->rms->data.previousRight / 32768;
+			self->invol = vuscope_wirevolume(self);
+		}
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
-void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master,
-	uintptr_t slot, psy_audio_BufferContext* bc)
-{	
-	if (self->running) {
-		psy_audio_Machine* machine;
-		psy_audio_Buffer* memory;
+psy_audio_Buffer* vuscope_buffer(VuScope* self, uintptr_t* numsamples)
+{
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* buffer;
 
-		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
-		if (machine) {
-			memory = psy_audio_machine_buffermemory(machine);
-			if (memory && memory->rms) {
-				self->leftavg = memory->rms->data.previousLeft / 32768;
-				self->rightavg = memory->rms->data.previousRight / 32768;
-				self->invol = vuscope_wirevolume(self);
-			}
-		}
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
+		self->wire.src);
+	if (!machine) {
+		*numsamples = 0;
+		return NULL;
 	}
+	buffer = psy_audio_machine_buffermemory(machine);
+	*numsamples = psy_audio_machine_buffermemorysize(machine);
+	return buffer;
 }
 
 psy_dsp_amp_t vuscope_wirevolume(VuScope* self)
 {
-	return psy_audio_connections_wirevolume(&workspace_song(self->workspace)->machines.connections,
+	return psy_audio_connections_wirevolume(
+		&workspace_song(self->workspace)->machines.connections,
 		self->wire);
-}
-
-void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag,
-	psy_audio_Song* song)
-{	
-	self->leftavg = 0;
-	self->rightavg = 0;
-	vuscope_connectmachinessignals(self, workspace);	
-}
-
-void vuscope_connectmachinessignals(VuScope* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_connect(&srcmachine->signal_worked, self,
-				vuscope_onsrcmachineworked);
-		}
-	}
-}
-
-void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				vuscope_onsrcmachineworked);
-		}
-	}
 }
 
 void vuscope_start(VuScope* self)
@@ -384,21 +355,6 @@ void vuscope_start(VuScope* self)
 void vuscope_stop(VuScope* self)
 {
 	self->running = FALSE;
-}
-
-void vuscope_disconnect(VuScope* self)
-{
-	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_Machine* srcmachine;
-		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
-			self->wire.src);
-		if (srcmachine) {
-			psy_audio_exclusivelock_enter();
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				vuscope_onsrcmachineworked);
-			psy_audio_exclusivelock_leave();
-		}
-	}
 }
 
 /// linear -> deciBell
