@@ -27,7 +27,7 @@ static void patternview_onsongchanged(PatternView*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void patternview_onsequenceselectionchanged(PatternView*,
 	psy_audio_SequenceSelection* sender);
-static void patternview_onpatternviewconfigure(PatternView*,
+static void patternview_onconfigurepatternview(PatternView*,
 	PatternViewConfig*, psy_Property*);
 static void patternview_onmiscconfigure(PatternView*, KeyboardMiscConfig*,
 	psy_Property*);
@@ -81,6 +81,8 @@ static void patternview_updatestates(PatternView*);
 static void patternview_drawtrackerbackground(PatternView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
 static void patternview_ontrackstatechanged(PatternView*, psy_audio_TrackState* sender);
+static uintptr_t patternview_display(const PatternView*);
+static void patternview_onshow(PatternView*);
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
 static bool patternview_vtable_initialized = FALSE;
@@ -88,7 +90,7 @@ static bool patternview_vtable_initialized = FALSE;
 static void patternview_vtable_init(PatternView* self)
 {
 	if (!patternview_vtable_initialized) {
-		patternview_vtable = *(self->component.vtable);
+		patternview_vtable = *(self->component.vtable);		
 		patternview_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			patternview_ontimer;
 		patternview_vtable.onalign = (psy_ui_fp_component_onalign)
@@ -101,6 +103,8 @@ static void patternview_vtable_init(PatternView* self)
 			patternview_onmouseup;
 		patternview_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
 			patternview_onkeydown;
+		patternview_vtable.show = (psy_ui_fp_component_show)
+			patternview_onshow;
 		patternview_vtable_initialized = TRUE;
 	}
 }
@@ -117,6 +121,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
 	self->pgupdownstep = 4;
 	self->trackmodeswingfill = TRUE;
+	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
+	self->aligndisplay = TRUE;
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
@@ -139,7 +145,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		self, patternview_onthemechanged);
 	psy_signal_connect(
 		&psycleconfig_patview(workspace_conf(self->workspace))->signal_changed,
-		self, patternview_onpatternviewconfigure);
+		self, patternview_onconfigurepatternview);
 	psy_signal_connect(&psycleconfig_misc(workspace_conf(self->workspace))->signal_changed,
 		self, patternview_onmiscconfigure);
 	// Pattern Properties
@@ -480,6 +486,9 @@ void patternview_onpreferredsize(PatternView* self, psy_ui_Size* limit,
 
 void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 {	
+	if (self->display == display) {
+		return;
+	}
 	int tabindex;
 
 	switch (display) {
@@ -499,6 +508,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 			tabindex = 0;
 			break;
 	}
+	self->display = display;
 	if (tabindex < 2) {
 		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_full(&self->editnotebook);
@@ -549,7 +559,12 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 	}
 }
 
-void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* config,
+uintptr_t patternview_display(const PatternView* self)
+{
+	return self->display;	
+}
+
+void patternview_onconfigurepatternview(PatternView* self, PatternViewConfig* config,
 	psy_Property* property)
 {	
 	// self->header.usebitmapskin = patternviewconfig_useheaderbitmap(config);	
@@ -605,7 +620,9 @@ void patternview_onpatternviewconfigure(PatternView* self, PatternViewConfig* co
 	}
 	if (patternviewconfig_centercursoronscreen(config)) {
 		trackergrid_centeroncursor(&self->tracker);
-	}
+	}	
+	patternview_selectdisplay(self,
+		patternviewconfig_patterndisplay(config));	
 	if (patternviewconfig_issmoothscrolling(config)) {
 		psy_ui_scroller_scrollsmooth(&self->trackerscroller);
 		psy_ui_scroller_scrollsmooth(&self->pianoroll.scroller);
@@ -859,8 +876,21 @@ void patternview_onlpbchanged(PatternView* self, psy_audio_Player* sender,
 		&self->left.linenumbers));
 }
 
+void patternview_onshow(PatternView* self)
+{	
+	/* center splitview when first displayed */
+	if (self->aligndisplay && self->display > PATTERN_DISPLAYMODE_PIANOROLL) {
+		uintptr_t display;
+
+		self->aligndisplay = FALSE;
+		display = self->display;
+		self->display = PATTERN_DISPLAYMODE_TRACKER;
+		patternview_selectdisplay(self, display);		
+	}	
+}
+
 void patternview_ontimer(PatternView* self, uintptr_t timerid)
-{
+{	
 	if (trackergridstate_pattern(&self->gridstate)) {
 		if (psy_audio_player_playing(workspace_player(self->workspace))) {			
 			if (!workspace_followingsong(self->workspace)) {				

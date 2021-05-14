@@ -68,7 +68,7 @@ void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent*);
 void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent*, uint32_t keycode, intptr_t keydata,
 	bool shift, bool ctrl, bool alt, bool repeat);
 
-INLINE bool psy_ui_keyboardevent_prevent_default(psy_ui_KeyboardEvent* self)
+INLINE void psy_ui_keyboardevent_prevent_default(psy_ui_KeyboardEvent* self)
 {
 	psy_ui_event_prevent_default(&self->event);
 }

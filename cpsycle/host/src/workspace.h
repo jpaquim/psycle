@@ -130,7 +130,6 @@ typedef struct Workspace {
 	psy_Signal signal_status_out;
 	psy_Signal signal_followsongchanged;	
 	psy_Signal signal_togglegear;
-	psy_Signal signal_selectpatterndisplay;
 	psy_Signal signal_floatsection;
 	psy_Signal signal_docksection;
 	psy_Signal signal_machineeditresize;

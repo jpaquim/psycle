@@ -84,8 +84,6 @@ static void mainframe_connectseqeditorbuttons(MainFrame*);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onexit(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onselectpatterndisplay(MainFrame*,
-	psy_ui_Component* sender, PatternDisplayMode);
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
@@ -103,7 +101,6 @@ static void mainframe_ondocksection(MainFrame*, Workspace* sender,
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, ConfirmBox* sender,
 	int option, int mode);
-static void mainframe_onstartup(MainFrame*);
 // EventDriverCallback
 static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
 	int param2);
@@ -212,8 +209,7 @@ void mainframe_initframe(MainFrame* self)
 	vtable_init(self);
 	psy_ui_app_setmain(psy_ui_app(), mainframe_base(self));	
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
-	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);
-	self->startup = TRUE;	
+	inithoststyles(&psy_ui_appdefaults()->styles, psy_ui_defaults()->styles.theme);	
 }
 
 void mainframe_ondestroyed(MainFrame* self)
@@ -685,8 +681,6 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_oncheckunsaved);	
-	psy_signal_connect(&self->workspace.signal_selectpatterndisplay, self,
-		mainframe_onselectpatterndisplay);
 	psy_signal_connect(&self->workspace.signal_floatsection, self,
 		mainframe_onfloatsection);
 	psy_signal_connect(&self->workspace.signal_docksection, self,
@@ -888,24 +882,8 @@ void mainframe_onexport(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
-	if (self->startup && psy_ui_component_visible(mainframe_base(self))) {		
-		mainframe_onstartup(self);				
-		self->startup = FALSE;
-	}
 	workspace_idle(&self->workspace);
 	mainstatusbar_idle(&self->statusbar);	
-}
-
-// event is called when mainframe has its final size and is visible on screen
-void mainframe_onstartup(MainFrame* self)
-{
-	// The pattern display type is only now set, because the host needs to know
-	// the view size to divide a splitted display correctly	
-	workspace_selectpatterndisplay(&self->workspace,
-		workspace_patterndisplaytype(&self->workspace));
-	if (psy_ui_component_visible(machineview_base(&self->machineview))) {
-		machineview_centermaster(&self->machineview);
-	}
 }
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t index,
@@ -1239,13 +1217,6 @@ void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onexit(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_app_close(psy_ui_app());
-}
-
-void mainframe_onselectpatterndisplay(MainFrame* self, psy_ui_Component* sender,
-	PatternDisplayMode display)
-{	
-	patternview_selectdisplay(&self->patternview,
-		workspace_patterndisplaytype(&self->workspace));
 }
 
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN

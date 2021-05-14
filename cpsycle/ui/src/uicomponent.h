@@ -243,20 +243,9 @@ INLINE void psy_ui_component_setvtable(psy_ui_Component* self,
 	self->vtable = vtable;
 }
 
-INLINE void psy_ui_component_show(psy_ui_Component* self)
-{
-	self->visible = 1;
-	self->vtable->show(self);
-}
-
+void psy_ui_component_show(psy_ui_Component* self);
 void psy_ui_component_show_align(psy_ui_Component* self);
-
-INLINE void psy_ui_component_hide(psy_ui_Component* self)
-{
-	self->visible = 0;
-	self->vtable->hide(self);
-}
-
+void psy_ui_component_hide(psy_ui_Component* self);
 void psy_ui_component_hide_align(psy_ui_Component* self);
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_showmaximized(psy_ui_Component*);
