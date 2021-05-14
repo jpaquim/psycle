@@ -23,7 +23,7 @@ typedef struct psy_TableHashEntry {
 } psy_TableHashEntry;
 
 typedef struct {
-	psy_TableHashEntry* keys[psy_TABLEKEYS];
+	psy_TableHashEntry** keys;
 	uintptr_t arraysize;
 	uintptr_t count;
 } psy_Table;
@@ -46,6 +46,7 @@ int psy_tableiterator_strhash_equals(psy_TableIterator*, const char* str);
 void* psy_tableiterator_value(psy_TableIterator*);
 
 void psy_table_init(psy_Table*);
+void psy_table_init_keysize(psy_Table*, uintptr_t keysize);
 void psy_table_dispose(psy_Table*);
 void psy_table_insert(psy_Table*, uintptr_t key, void* value);
 void psy_table_insert_strhash(psy_Table*, const char* strkey, void* value);

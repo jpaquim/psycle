@@ -9,12 +9,14 @@
 #include "uicomponentstyle.h"
 /* local */
 #include "uiapp.h"
+/* std */
+#include <stdlib.h>
 
 void psy_ui_componentstyle_init(psy_ui_ComponentStyle* self)
 {
 	assert(self);
 
-	psy_table_init(&self->styles);	
+	self->styles = NULL;	
 	psy_ui_style_init(&self->overridestyle);
 	self->currstyle = &self->overridestyle;	
 	self->states = psy_ui_STYLESTATE_NONE;	
@@ -26,7 +28,10 @@ void psy_ui_componentstyle_dispose(psy_ui_ComponentStyle* self)
 	assert(self);
 	
 	self->currstyle = NULL;	
-	psy_table_dispose(&self->styles);	
+	if (self->styles) {
+		psy_table_dispose(self->styles);
+		free(self->styles);
+	}
 	psy_ui_style_dispose(&self->overridestyle);
 }
 
@@ -35,7 +40,10 @@ bool psy_ui_componentstyle_hasstyle(const psy_ui_ComponentStyle* self,
 {
 	assert(self);
 
-	return psy_table_exists(&self->styles, (uintptr_t)state);
+	if (!self->styles) {
+		FALSE;
+	}
+	return psy_table_exists(self->styles, (uintptr_t)state);
 }
 
 psy_ui_Style* psy_ui_componentstyle_style(psy_ui_ComponentStyle* self,
@@ -47,16 +55,19 @@ psy_ui_Style* psy_ui_componentstyle_style(psy_ui_ComponentStyle* self,
 	assert(self);
 	
 	rv = NULL;
+	if (!self->styles) {
+		return &self->overridestyle;
+	}
 	styleid = psy_INDEX_INVALID;
-	if (psy_table_exists(&self->styles, state)) {
-		styleid = (uintptr_t)psy_table_at_const(&self->styles, (uintptr_t)state);
+	if (psy_table_exists(self->styles, state)) {
+		styleid = (uintptr_t)psy_table_at_const(self->styles, (uintptr_t)state);
 	}
 	if (styleid != psy_INDEX_INVALID) {
 		rv = psy_ui_style(styleid);
 	}
 	if (!rv) {
-		if (psy_table_exists(&self->styles, (uintptr_t)psy_ui_STYLESTATE_NONE)) {
-			styleid = (uintptr_t)psy_table_at_const(&self->styles,
+		if (psy_table_exists(self->styles, (uintptr_t)psy_ui_STYLESTATE_NONE)) {
+			styleid = (uintptr_t)psy_table_at_const(self->styles,
 				(uintptr_t)psy_ui_STYLESTATE_NONE);
 			rv = psy_ui_style(styleid);
 		}
@@ -117,9 +128,13 @@ void psy_ui_componentstyle_setstyle(psy_ui_ComponentStyle* self,
 	assert(self);
 
 	if (style_id != psy_INDEX_INVALID) {		
-		psy_table_insert(&self->styles, state, (void*)(uintptr_t)style_id);
-	} else {
-		psy_table_remove(&self->styles, state);
+		if (!self->styles) {
+			self->styles = (psy_Table*)malloc(sizeof(psy_Table));			
+			psy_table_init_keysize(self->styles, 16);
+		}
+		psy_table_insert(self->styles, state, (void*)(uintptr_t)style_id);
+	} else if (self->styles) {
+		psy_table_remove(self->styles, state);
 	}
 	psy_ui_componentstyle_setcurrstate(self, self->states);
 }
@@ -157,8 +172,11 @@ bool psy_ui_componentstyle_removestate(psy_ui_ComponentStyle* self,
 uintptr_t psy_ui_componentstyle_currstyleid(const psy_ui_ComponentStyle* self)
 {
 	/* todo works only if one state is set */
-	if (psy_table_exists(&self->styles, self->states)) {
-		return (uintptr_t)psy_table_at_const(&self->styles, self->states);
+	if (!self->styles) {
+		return psy_INDEX_INVALID;
+	}
+	if (psy_table_exists(self->styles, self->states)) {
+		return (uintptr_t)psy_table_at_const(self->styles, self->states);
 	}
 	return psy_INDEX_INVALID;
 }

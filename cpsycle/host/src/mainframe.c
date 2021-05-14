@@ -1095,6 +1095,11 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 	}	
 }
 
+void mainframe_onexit(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_app_close(psy_ui_app());
+}
+
 bool mainframe_onclose(MainFrame* self)
 {
 	workspace_save_configuration(&self->workspace);
@@ -1212,11 +1217,6 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_togglevisibility(kbdhelp_base(&self->kbdhelp));	
-}
-
-void mainframe_onexit(MainFrame* self, psy_ui_Component* sender)
-{
-	psy_ui_app_close(psy_ui_app());
 }
 
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
