@@ -180,6 +180,7 @@ typedef struct Workspace {
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;
 	bool startpage;
+	psy_List* errorstrs;	
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);

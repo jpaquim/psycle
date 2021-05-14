@@ -435,7 +435,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
-{		
+{
 	mi_work(self->mi,
 		psy_audio_buffer_at(bc->output, 0),
 		psy_audio_buffer_at(bc->output, 1),
