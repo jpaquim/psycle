@@ -372,19 +372,19 @@ psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy* self, uintptr_t slot,
 
 void machineproxy_work(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc)
 {
-//	if (self->crashed == 0) {
+	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
-	//	__try
+		__try
 #endif				
 		{
 			psy_audio_machine_work(self->client, bc);			
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
-		//__except(FilterException(self, "work", GetExceptionCode(),
-		//	GetExceptionInformation())) {
-		//}
+		__except(FilterException(self, "work", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
 #endif		
-	//}
+	}
 }
 
 void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc)

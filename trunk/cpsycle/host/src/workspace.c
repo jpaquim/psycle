@@ -101,18 +101,26 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 	if (!machinecallback_vtable_initialized) {
 		machinecallback_vtable = *self->machinecallback.vtable;
 		machinecallback_vtable.machinefactory =
-			(fp_mcb_machinefactory)onmachinefactory;
+			(fp_mcb_machinefactory)
+			onmachinefactory;
 		machinecallback_vtable.fileselect_load =
-			(fp_mcb_fileselect_load)onmachinefileselectload;
+			(fp_mcb_fileselect_load)
+			onmachinefileselectload;
 		machinecallback_vtable.fileselect_save =
-			(fp_mcb_fileselect_save)onmachinefileselectsave;
+			(fp_mcb_fileselect_save)
+			onmachinefileselectsave;
 		machinecallback_vtable.fileselect_directory =
-			(fp_mcb_fileselect_directory)onmachinefileselectdirectory;
+			(fp_mcb_fileselect_directory)
+			onmachinefileselectdirectory;
 		machinecallback_vtable.editresize =
-			(fp_mcb_editresize)onmachineeditresize;
+			(fp_mcb_editresize)
+			onmachineeditresize;
 		machinecallback_vtable.buschanged =
-			(fp_mcb_buschanged)onmachinebuschanged;
-		machinecallback_vtable.output = (fp_mcb_output)onmachineterminaloutput;
+			(fp_mcb_buschanged)
+			onmachinebuschanged;
+		machinecallback_vtable.output = 
+			(fp_mcb_output)
+			onmachineterminaloutput;
 		machinecallback_vtable_initialized = TRUE;
 	}
 }
@@ -145,6 +153,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
 	self->restorenumplaybeats = 4.0;
 	self->restoreloop = TRUE;
+	self->errorstrs = NULL;	
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -253,6 +262,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_dispose();
 	psy_audio_lock_dispose(&self->pluginscanlock);
 	free(self->scanfilename);
+	psy_list_deallocate(&self->errorstrs, NULL);
 }
 
 void workspace_save_styleconfiguration(Workspace* self)
@@ -1349,6 +1359,16 @@ void workspace_idle(Workspace* self)
 		}
 		self->player.sequencer.playtrack = psy_INDEX_INVALID;
 	}
+	if (self->errorstrs) {
+		psy_List* p;
+		psy_audio_exclusivelock_enter();
+		for (p = self->errorstrs; p != NULL; p = p->next) {
+			psy_signal_emit(&self->signal_terminal_error, self, 1,
+				(const char*)p->entry);
+		}
+		psy_list_deallocate(&self->errorstrs, NULL);
+		psy_audio_exclusivelock_leave();
+	}
 }
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)
@@ -1701,7 +1721,9 @@ void onmachineterminaloutput(Workspace* self, const char* text)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
+	psy_audio_exclusivelock_enter();
+	psy_list_append(&self->errorstrs, psy_strdup(text));
+	psy_audio_exclusivelock_leave();	
 }
 
 static bool onmachineeditresize(Workspace* self, psy_audio_Machine* sender, intptr_t w, intptr_t h)
