@@ -762,7 +762,7 @@ void psy_ui_component_show_align(psy_ui_Component* self)
 	}
 }
 
-INLINE void psy_ui_component_hide(psy_ui_Component* self)
+void psy_ui_component_hide(psy_ui_Component* self)
 {
 	self->visible = 0;	
 	self->imp->vtable->dev_hide(self->imp);

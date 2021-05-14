@@ -15,9 +15,20 @@ static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 void psy_table_init(psy_Table* self)
 {
 	assert(self);
-	self->arraysize = psy_TABLEKEYS;
-	memset(self->keys, 0, sizeof(self->keys));
-	self->count = 0; 
+
+	psy_table_init_keysize(self, psy_TABLEKEYS);	
+}
+
+void psy_table_init_keysize(psy_Table* self, uintptr_t keysize)
+{
+	assert(self);
+
+	self->arraysize = keysize;
+	self->keys = (psy_TableHashEntry**)malloc(sizeof(psy_TableHashEntry*) * self->arraysize);
+	if (self->keys) {		
+		memset(self->keys, 0, sizeof(psy_TableHashEntry*) * self->arraysize);
+		self->count = 0;
+	}
 }
 
 void psy_table_dispose(psy_Table* self)
@@ -35,6 +46,8 @@ void psy_table_dispose(psy_Table* self)
     self->keys[i] = 0;
   }
   self->count = 0;
+  free(self->keys);
+  self->keys = NULL;
 }
 
 void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
@@ -58,9 +71,12 @@ void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
 	}
 	psy_table_dispose(self);
 }
+
 void psy_table_clear(psy_Table * self)
 {
 	assert(self);
+	assert(self->keys);
+
 	psy_table_dispose(self);
 	psy_table_init(self);
 }
@@ -255,7 +271,7 @@ const psy_TableIterator* psy_table_end(void)
 
 void psy_tableiterator_init(psy_TableIterator* self, psy_Table* table)
 {
-	assert(table);
+	assert(table);	
 	self->table = table;
 	if (table->count == 0) {
 		self->curr = 0;

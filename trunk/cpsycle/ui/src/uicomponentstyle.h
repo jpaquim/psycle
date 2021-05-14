@@ -33,7 +33,7 @@ typedef enum psy_ui_StyleState {
 } psy_ui_StyleState;
 
 typedef struct psy_ui_ComponentStyle {	
-	psy_Table styles;			/* StyleState X StyleId */	
+	psy_Table* styles;			/* StyleState X StyleId */	
 	psy_ui_Style* currstyle;	/* 
 								** Style for the current style state 
 								** - if no state available points to the style

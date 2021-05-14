@@ -264,7 +264,7 @@ void paramrackpane_onsongchanged(ParamRackPane* self, Workspace* sender,
 void paramrackpane_clear(ParamRackPane* self)
 {
 	psy_ui_component_clear(&self->component);
-	psy_table_dispose(&self->boxes);
+	psy_table_clear(&self->boxes);
 }
 
 void paramrackpane_buildall(ParamRackPane* self)
