@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "stereophase.h"
 
@@ -30,28 +33,39 @@ static const uint32_t linepenbR = 0x507050;
 static const uint32_t linepenL = 0xc08080;
 static const uint32_t linepenR = 0x80c080;
 
-static void stereophase_ondestroy(StereoPhase*);
-static void stereophase_ondraw(StereoPhase*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void stereophase_initbackground(StereoPhase*);
+static void stereophase_ondraw(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawbackground(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawphase(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawscale(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawbars(StereoPhase*, psy_ui_Graphics*);
-static void stereophase_ontimer(StereoPhase*, psy_ui_Component* sender, uintptr_t timerid);
-static void stereophase_onsrcmachineworked(StereoPhase*, psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
-static void stereophase_onsongchanged(StereoPhase*, Workspace*, int flag,
-	psy_audio_Song*);
-static void stereophase_connectmachinessignals(StereoPhase*, Workspace*);
-static void stereophase_disconnectmachinessignals(StereoPhase*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
+static void vtable_init(StereoPhase* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);		
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			stereophase_ondraw;
+		vtable_initialized = TRUE;
+	}
+	self->component.vtable = &vtable;
+}
+/* implementation */
 void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_doublebuffer(&self->component);
-	self->wire = wire;
-	self->leftavg = 0;
-	self->rightavg = 0;
+	vtable_init(self);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_px(256.0, 128.0));
+	self->wire = wire;	
 	self->invol = 1.0f;
 	self->mult = 1.0f;
 	self->scope_peak_rate = 20;
@@ -71,38 +85,35 @@ void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wir
 	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
-	// self->pSamplesL = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
-	// self->pSamplesR = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
-	// dsp.clear(self->pSamplesL, SCOPE_BUF_SIZE);
-	// dsp.clear(self->pSamplesR, SCOPE_BUF_SIZE);
-	psy_signal_connect(&self->component.signal_destroy, self, stereophase_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self, stereophase_ondraw);	
-	psy_signal_connect(&self->component.signal_timer, self, stereophase_ontimer);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		stereophase_onsongchanged);
-	stereophase_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	stereophase_initbackground(self);	
 }
 
-void stereophase_ondestroy(StereoPhase* self)
+void stereophase_initbackground(StereoPhase* self)
 {
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		stereophase_onsongchanged);
-	stereophase_disconnectmachinessignals(self, self->workspace);
-	// dsp.memory_dealloc(self->pSamplesL);
-	// dsp.memory_dealloc(self->pSamplesR);
-	// self->pSamplesL = 0;
-	// self->pSamplesR = 0;
+	psy_ui_Font font;
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Graphics g;
+
+	psy_ui_bitmap_init_size(&self->bg, psy_ui_realsize_make(256.0, 128.0));
+	psy_ui_graphics_init_bitmap(&g, &self->bg);
+	psy_ui_fontinfo_init(&fontinfo, "tahoma", 12);
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_setfont(&g, &font);
+	psy_ui_font_dispose(&font);
+	stereophase_drawbackground(self, &g);
+	psy_ui_graphics_dispose(&g);
 }
 
-void stereophase_ondraw(StereoPhase* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void stereophase_ondraw(StereoPhase* self, psy_ui_Graphics* g)
 {
-	stereophase_drawbackground(self, g);
+	psy_ui_drawfullbitmap(g, &self->bg, psy_ui_realpoint_zero());
 	stereophase_drawphase(self, g);
 }
 
 void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 {
+	char buf[64];
+
 	psy_ui_setlinewidth(g, 8);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 
@@ -121,6 +132,16 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(128, 0));
 	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(256 - 32, 32));
 	psy_ui_setlinewidth(g, 1);
+
+	sprintf(buf, "Refresh %.2fhz", 1000.0f / self->scope_phase_rate);
+	// oldFont = bufDC.SelectObject(&font);
+	// bufDC.SetBkMode(TRANSPARENT);
+	// bufDC.SetTextColour(0x505050);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
+	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
+	// bufDC.TextOut(4, 128 - 14, buf);
+	// bufDC.SelectObject(oldFont);
 }
 
 void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
@@ -141,8 +162,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
 	const float multleft = self->invol * self->mult; //  *self->lsrcMachine._lVol;
 	const float multright = self->invol * self->mult; //* srcMachine._rVol;
-	uintptr_t sr;
-	char buf[64];
+	uintptr_t sr;	
 	int x, y;
 	float* pSamplesL;
 	float* pSamplesR;
@@ -311,89 +331,19 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 		self->o_mvl -= rate;
 		self->o_mvc -= rate;
 		self->o_mvr -= rate;
-	}
-	//bufDC.SelectObject(oldpen);
-
-	sprintf(buf, "Refresh %.2fhz", 1000.0f / self->scope_phase_rate);
-	// oldFont = bufDC.SelectObject(&font);
-	// bufDC.SetBkMode(TRANSPARENT);
-	// bufDC.SetTextColour(0x505050);
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x606060));
-	psy_ui_textout(g, 4, 128 - 14, buf, psy_strlen(buf));
-	// bufDC.TextOut(4, 128 - 14, buf);
-	// bufDC.SelectObject(oldFont);
+	}		
 }
 
-void stereophase_ontimer(StereoPhase* self, psy_ui_Component* sender, uintptr_t timerid)
-{	
-	psy_ui_component_invalidate(&self->component);	
-}
-
-void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machine,
-	uintptr_t slot, psy_audio_BufferContext* bc)
-{	
-	if (bc->output->rms) {
-		psy_audio_Connections* connections;
-		psy_audio_WireSocket* input;	
-
-		connections = &workspace_song(self->workspace)->machines.connections;
-		input = psy_audio_connections_input(connections, self->wire);
-		if (input) {					
-			self->leftavg = bc->output->rms->data.previousLeft / 32768;
-			self->rightavg = bc->output->rms->data.previousRight / 32768;
-			self->invol = input->volume;			
-		}
-	}
-}
-
-void stereophase_onsongchanged(StereoPhase* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
-{	
-	self->leftavg = 0;
-	self->rightavg = 0;
-	stereophase_connectmachinessignals(self, workspace);	
-}
-
-void stereophase_connectmachinessignals(StereoPhase* self, Workspace* workspace)
+void stereophase_idle(StereoPhase* self)
 {
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_connect(&srcmachine->signal_worked, self,
-				stereophase_onsrcmachineworked);
-		}
-	}
-}
-
-void stereophase_disconnectmachinessignals(StereoPhase* self, Workspace* workspace)
-{
-	if (workspace->song) {
-		psy_audio_Machine* srcmachine;
-
-		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
-		if (srcmachine) {
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				stereophase_onsrcmachineworked);
-		}
-	}
+	self->invol = psy_audio_connections_wirevolume(
+		&workspace_song(self->workspace)->machines.connections,
+		self->wire);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stereophase_stop(StereoPhase* self)
-{
-	if (self->workspace && workspace_song(self->workspace)) {
-		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
-			self->wire.src);
-		if (srcmachine) {
-			psy_audio_exclusivelock_enter();
-			psy_signal_disconnect(&srcmachine->signal_worked, self,
-				stereophase_onsrcmachineworked);
-			psy_audio_exclusivelock_leave();			
-		}
-	}
+{	
 }
 
 /// linear -> deciBell

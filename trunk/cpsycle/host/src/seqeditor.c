@@ -717,7 +717,7 @@ void seqeditortrack_init(SeqEditorTrack* self,
 	seqeditortrack_vtable_init(self);		
 	self->component.vtable = &seqeditortrack_vtable;
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	self->state = state;
 	self->workspace = workspace;	
 	self->currtrack = NULL;

@@ -42,7 +42,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	self->workspace = workspace;
 	self->machine = NULL;	
 	self->userpreset = FALSE;

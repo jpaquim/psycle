@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(WIREVIEW_H)
 #define WIREVIEW_H
 
-// host
+/* host */
 #include "channelmappingview.h"
 #include "oscilloscope.h"
 #include "spectrumanalyzer.h"
@@ -12,51 +14,54 @@
 #include <uitabbar.h>
 #include "vuscope.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>
 
-// WireView
-//
-// Displays the connection volume, signal analyser and channel mappings
+/*
+** WireView
+**
+** Composite of connection volume, signal analyser and channel mappings
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct WireView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	// Scope select
+	/* internal */
+	/* Scope select */
 	psy_ui_Component top;	
 	psy_ui_TabBar tabbar;
 	psy_ui_Notebook notebook;
-	// Volume
+	/* Volume */
 	psy_ui_Component slidergroup;
 	psy_ui_Slider volslider;
 	psy_ui_Button dbvol;
 	psy_ui_Button percvol;
-	// Scopes
+	/* Scopes */
 	VuScope vuscope;
 	OscilloscopeView oscilloscopeview;
 	psy_ui_Component spectrumpane;
 	SpectrumAnalyzer spectrumanalyzer;
+	psy_ui_Component stereophasepane;
 	StereoPhase stereophase;
 	ChannelMappingView channelmappingview;
-	// Scope Control
+	/* Scope Control */
 	psy_ui_Component rategroup;
 	psy_ui_Slider modeslider;
 	psy_ui_Slider rateslider;
 	psy_ui_Button hold;
-	// Toolbar
+	/* Toolbar */
 	psy_ui_Component bottomgroup;
 	psy_ui_Button addeffect;
 	psy_ui_Button deletewire;
 	psy_audio_Wire wire;	
-	// data members
+	/* data members */
 	float scope_spec_rate;
 	float scope_spec_mode;	
 	Workspace* workspace;

@@ -49,7 +49,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent,
 	vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);	
+		psy_ui_HEXPAND);	
 	self->config = config;	
 	self->machine = machine;	
 	self->paramstrobe = 0;

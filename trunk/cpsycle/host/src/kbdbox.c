@@ -405,7 +405,7 @@ void kbdbox_addrow(KbdBox* self)
 	if (self->currrow) {
 		psy_ui_component_setdefaultalign(self->currrow, psy_ui_ALIGN_LEFT,
 			psy_ui_margin_make_em(0.0, 0.3, 0.0, 0.0));
-		psy_ui_component_setalignexpand(self->currrow, psy_ui_HORIZONTALEXPAND);
+		psy_ui_component_setalignexpand(self->currrow, psy_ui_HEXPAND);
 	}
 }
 

@@ -39,7 +39,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	self->lpb = 0;
 	self->workspace = workspace;
 	psy_ui_component_setalignexpand(linesperbeatbar_base(self),
-		psy_ui_HORIZONTALEXPAND);
+		psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(linesperbeatbar_base(self),
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->lpbdesclabel, linesperbeatbar_base(self),

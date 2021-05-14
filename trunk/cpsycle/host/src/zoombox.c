@@ -43,7 +43,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(zoombox_base(self), vtable_init(self));
 	psy_ui_component_setstyletype(&self->component, STYLE_ZOOMBOX);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	// init ui elements
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self), NULL,
 		self, zoombox_onzoomout);	

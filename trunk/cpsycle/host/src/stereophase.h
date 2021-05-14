@@ -21,9 +21,7 @@ typedef struct StereoPhase {
 	// inherits
 	psy_ui_Component component;
 	// internal data
-	psy_audio_Wire wire;
-	psy_dsp_amp_t leftavg;
-	psy_dsp_amp_t rightavg;
+	psy_audio_Wire wire;	
 	float invol;
 	float mult;
 	// float* pSamplesL;
@@ -36,12 +34,15 @@ typedef struct StereoPhase {
 	int peakLifeL, peakLifeR;
 	//Memories for phase
 	float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
+	psy_ui_Bitmap bg;
 	// references
 	Workspace* workspace;	
 } StereoPhase;
 
 void stereophase_init(StereoPhase*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
 void stereophase_stop(StereoPhase*);
+
+void stereophase_idle(StereoPhase*);
 
 INLINE psy_ui_Component* stereophase__base(StereoPhase* self)
 {

@@ -48,7 +48,7 @@ void oscilloscope_setbegin(Oscilloscope*, float begin);
 void oscilloscope_hold(Oscilloscope*);
 void oscilloscope_continue(Oscilloscope*);
 bool oscilloscope_stopped(Oscilloscope*);
-
+void oscilloscope_idle(Oscilloscope*);
 
 typedef struct OscilloscopeControls {
 	psy_ui_Component component;
@@ -72,6 +72,11 @@ void oscilloscopeview_init(OscilloscopeView*, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace*);
 void oscilloscopeview_start(OscilloscopeView*);
 void oscilloscopeview_stop(OscilloscopeView*);
+
+INLINE void oscilloscopeview_idle(OscilloscopeView* self)
+{
+	oscilloscope_idle(&self->oscilloscope);
+}
 
 #ifdef __cplusplus
 }

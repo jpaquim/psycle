@@ -42,7 +42,7 @@ void timebar_init(TimeBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 	psy_ui_component_init(timebar_base(self), parent, NULL);
 	psy_ui_component_setvtable(timebar_base(self), vtable_init(self));
-	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;	

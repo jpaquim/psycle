@@ -984,7 +984,7 @@ void machinestackinputs_init(MachineStackInputs* self,
 	psy_ui_component_setvtable(&self->component,
 		machinestackinputs_vtable_init(self));
 	psy_ui_component_doublebuffer(&self->component);	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		margin);	
 	self->skin = skin;
@@ -1101,7 +1101,7 @@ void machinestackoutputs_init(MachineStackOutputs* self,
 	psy_ui_component_setvtable(&self->component,
 		machinestackoutputs_vtable_init(self));
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 	psy_ui_component_setminimumsize(&self->component,
 		psy_ui_size_make_em(10.0, 2.0));
 	self->skin = skin;	
@@ -1210,7 +1210,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 		machinestackpanetrack_vtable_init(self));	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_NOBACKGROUND);
 	psy_ui_component_setcolour(&self->component, psy_ui_colour_make(0x00CACACA));
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	machinestackpanetrackclient_init(&self->client, &self->component, view,
 		column, state);	
 	psy_ui_component_setwheelscroll(&self->client.component, 4);
@@ -1331,7 +1331,7 @@ void machinestackpane_init(MachineStackPane* self, psy_ui_Component* parent,
 		machinestackpane_vtable_init(self));	
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	self->workspace = workspace;
 	self->skin = skin;
 	self->state = state;	
@@ -1490,7 +1490,7 @@ void machinestackvolumes_init(MachineStackVolumes* self, psy_ui_Component* paren
 	psy_ui_component_doublebuffer(&self->component);
 	self->state = state;	
 	self->skin = skin;
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
 }
 
 void machinestackvolumes_build(MachineStackVolumes* self)

@@ -37,7 +37,7 @@ typedef enum psy_ui_Cursor {
 
 typedef enum psy_ui_ExpandMode {
 	psy_ui_NOEXPAND = 1,	
-	psy_ui_HORIZONTALEXPAND = 2,
+	psy_ui_HEXPAND = 2,
 	psy_ui_VERTICALEXPAND = 4	
 } psy_ui_ExpandMode;
 
