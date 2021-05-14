@@ -52,7 +52,7 @@ static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 void buttonpress_single(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	psy_ui_MouseEvent*);
 static int translate_x11button(int button);	
-static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
+static psy_ui_KeyboardEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
 static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
@@ -456,13 +456,13 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			}		
             break;
         case KeyPress: {
-			psy_ui_KeyEvent ev;
+			psy_ui_KeyboardEvent ev;
 			
 			ev = translate_keyevent(&event->xkey);			
 			imp->component->vtable->onkeydown(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_keydown, imp->component,
 				1, &ev);
-			if (ev.event.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+			if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
 				XKeyEvent xkevent;
 
 				xkevent = event->xkey;
@@ -473,7 +473,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			return 0;
 			break; }
         case KeyRelease: {
-			psy_ui_KeyEvent ev;
+			psy_ui_KeyboardEvent ev;
 							
 			ev = translate_keyevent(&event->xkey);		
 			//(int)wParam, lParam, 
@@ -482,7 +482,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			imp->component->vtable->onkeyup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_keyup, imp->component,
 				1, &ev);
-			if (ev.event.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+			if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
 				XKeyEvent xkevent;
 
 				xkevent = event->xkey;
@@ -559,14 +559,12 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			break; }
 		case ButtonRelease: {			
 			psy_ui_MouseEvent ev;
-																								
-			psy_ui_mouseevent_init(&ev,
-				event->xbutton.x,
-				event->xbutton.y,
+
+			psy_ui_mouseevent_init_all(
+				&ev,
+				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 				translate_x11button(event->xbutton.button),
-				0,
-				0,
-				0);
+				0, 0, 0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
@@ -584,9 +582,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				buttonclicks = 0;
 			}
 			xme = event->xmotion;
-			psy_ui_mouseevent_init(&ev,
-				xme.x,
-				xme.y,
+			psy_ui_mouseevent_init_all(&ev,
+				psy_ui_realpoint_make(xme.x, xme.y),
 				0, // button
 				0,
 				0,
@@ -668,9 +665,9 @@ int translate_x11button(int button)
 	return rv;
 }	
 
-psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
+psy_ui_KeyboardEvent translate_keyevent(XKeyEvent* event)
 {
-	psy_ui_KeyEvent rv;
+	psy_ui_KeyboardEvent rv;
 	KeySym keysym = NoSymbol;
 	int repeat = 0;					
 	static unsigned char buf[64];
@@ -780,7 +777,7 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 	// } else {
 	// 	printf("no lookup %d\n", keysym);
 	// }	
-	psy_ui_keyevent_init(&rv,
+	psy_ui_keyboardevent_init_all(&rv,
 		keysym,
 		0,
 		shift,
@@ -799,18 +796,18 @@ void handle_mouseevent(psy_ui_Component* component,
 	psy_ui_MouseEvent ev;	
 	bool up;	
 
-	psy_ui_mouseevent_init(&ev,
-		wParam, lParam,
+	psy_ui_mouseevent_init_all(&ev,
+		psy_ui_realpoint_make(wParam, lParam),
 		button, 0, 0, 0); /* GetKeyState(VK_SHIFT) < 0 */
 		//GetKeyState(VK_CONTROL) < 0);	
 	adjustcoordinates(component, &ev.pt);
-	psy_ui_mouseevent_settarget(&ev, component); // eventtarget(component));
+	ev.event.target = component; // eventtarget(component));
 	up = FALSE;
 	if (message == ButtonPress) {
 		
 		x11imp->imp.vtable->dev_mousedown(&x11imp->imp, &ev);
 	}	
-	if (ev.event.bubble != FALSE) {
+	if (ev.event.bubbles != FALSE) {
 		fp(component, &ev);
 		psy_signal_emit(signal, component, 1, &ev);
 	}
@@ -868,9 +865,9 @@ int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour color)
 	uint8_t b;
 	
 	if (psy_table_exists(&self->colormap,
-			(uintptr_t)color.value)) {
+			(uintptr_t)psy_ui_colour_colorref(&color))) {
 		rv = (int)(intptr_t)psy_table_at(&self->colormap,
-			(uintptr_t)color.value);
+			(uintptr_t)psy_ui_colour_colorref(&color));
 	} else {				
 		psy_ui_colour_rgb(&color, &r, &g, &b);
 		xcolor.red = r * 256;
@@ -883,7 +880,8 @@ int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour color)
 			rv = BlackPixel(self->dpy, DefaultScreen(self->dpy));
 			printf("Warning: can't allocate requested colour\n");
 		}
-		psy_table_insert(&self->colormap, (uintptr_t)color.value,
+		psy_table_insert(&self->colormap,
+			(uintptr_t)psy_ui_colour_colorref(&color),
 			(void*)(uintptr_t)rv);
 	}
 	return rv;

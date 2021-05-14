@@ -480,6 +480,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 #else
 #define _MAX_PATH 4096
 
+int psycle_run(uintptr_t instance, int options);
+
 int main(int argc, char** argv)
 {
 	return psycle_run(0, 0);

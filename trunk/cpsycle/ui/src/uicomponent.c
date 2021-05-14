@@ -780,9 +780,9 @@ void psy_ui_component_showmaximized(psy_ui_Component* self)
 #ifdef DIVERSALIS__OS__MICROSOFT	
 	psy_ui_component_showstate(self, SW_MAXIMIZE);
 #else
-	psy_ui_component_resize(&mainframe->component,
+	psy_ui_component_resize(self,
 		psy_ui_size_make_px(1024.0, 768.0));
-	psy_ui_component_showstate(&mainframe->component, 0);
+	psy_ui_component_showstate(self, 0);
 #endif	
 }
 
