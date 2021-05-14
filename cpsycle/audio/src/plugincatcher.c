@@ -437,8 +437,7 @@ void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 	char inipath[_MAX_PATH];
 
 	psy_audio_pluginsections_init(&self->sections);
-	self->all = psy_audio_pluginsections_section_plugins(&self->sections,
-		"all");
+	self->all = NULL;
 	psy_audio_plugincategorylist_init(&self->categorydefaults);	
 	plugincatcher_makeinternals(self);	
 	strcpy(inipath, psy_dir_config());
@@ -495,13 +494,14 @@ void psy_audio_plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_P
 void psy_audio_plugincatcher_clear(psy_audio_PluginCatcher* self)
 {
 	psy_audio_pluginsections_clearplugins(&self->sections, "all");
+	plugincatcher_makeinternals(self);
 	self->hasplugincache = FALSE;
 }
 
 void plugincatcher_initscantasks(psy_audio_PluginCatcher* self)
 {
 	psy_audio_PluginScanTask* task;
-
+	
 	/* natives */
 	task = (psy_audio_PluginScanTask*)malloc(sizeof(psy_audio_PluginScanTask));	
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)

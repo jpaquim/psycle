@@ -13,6 +13,12 @@
 /* file */
 #include <dir.h>
 
+#ifdef DIVERSALIS__OS__MICROSOFT
+
+#else
+#define _MAX_PATH 4096
+#endif
+
 int psycle_run(uintptr_t instance, int options)
 {
 	int err = 0;
