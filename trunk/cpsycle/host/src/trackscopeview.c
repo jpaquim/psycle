@@ -19,9 +19,9 @@ static void trackscopes_ondraw(TrackScopes*, psy_ui_Graphics*);
 static void trackscopes_onmousedown(TrackScopes*, psy_ui_MouseEvent*);
 static void trackscopes_drawtrack(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
-void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
+static void trackscopes_drawtrackindex(TrackScopes*, psy_ui_Graphics*,
 	double x, double y, uintptr_t track);
-void trackscopes_drawtrackmuted(TrackScopes*, psy_ui_Graphics*, double x,
+static void trackscopes_drawtrackmuted(TrackScopes*, psy_ui_Graphics*, double x,
 	double y, uintptr_t track);
 static void trackscopes_ontimer(TrackScopes*, uintptr_t timerid);
 static void trackscopes_onalign(TrackScopes*);

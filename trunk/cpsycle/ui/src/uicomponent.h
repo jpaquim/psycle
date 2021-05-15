@@ -312,6 +312,7 @@ int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_align_full(psy_ui_Component*);
 void psy_ui_component_align_cached(psy_ui_Component*);
+psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component*);
 
 INLINE void psy_ui_component_setmargin(psy_ui_Component* self, psy_ui_Margin margin)
 {	

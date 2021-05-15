@@ -17,22 +17,13 @@
 
 /* prototypes */
 static void psy_ui_lclaligner_align(psy_ui_LCLAligner*);
-static void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner*, const psy_ui_Size* limit,
-	psy_ui_Size* rv);
-static void psy_ui_lclaligner_adjustminmaxsize(psy_ui_LCLAligner*,
-	psy_ui_Component*, const psy_ui_TextMetric*,
-	psy_ui_Size*);
+static void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 static uintptr_t psy_ui_lclaligner_numclients(psy_ui_LCLAligner*);
 static void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner*, psy_List* children,
 	psy_ui_RealPoint cp_topleft, psy_ui_RealPoint cp_bottomright);
-static void psy_ui_lclaligner_adjustborder(psy_ui_LCLAligner*,
-	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
-static void psy_ui_lclaligner_adjustspacing(psy_ui_LCLAligner*,
-	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
 static void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner*, psy_List* wrap,
 	double cpy, double cpymax);
-static void psy_ui_lclaligner_adjustpreferredsize(psy_ui_LCLAligner* self,
-	psy_ui_Size* rv);
 /* vtable */
 static psy_ui_AlignerVTable lclaligner_vtable;
 static bool lclaligner_vtable_initialized = FALSE;
@@ -86,8 +77,10 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 	psy_ui_realpoint_init_all(&cp_bottomright,
 		psy_ui_value_px(&size.width, tm, &parentsize),
 		psy_ui_value_px(&size.height, tm, &parentsize));
-	psy_ui_lclaligner_adjustborder(self, &cp_topleft, &cp_bottomright);
-	psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
+	psy_ui_aligner_adjustborder(self->component, &cp_topleft,
+		&cp_bottomright);
+	psy_ui_aligner_adjustspacing(self->component, &cp_topleft,
+		&cp_bottomright);
 	cp_topleft_wrapstart = cp_topleft;	
 	for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
 			psy_list_next(&p)) {
@@ -105,7 +98,8 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				cp_bottomright.y - cp_topleft.y);			
 			componentsize = psy_ui_component_preferredsize(component,
 				&limit);			
-			psy_ui_lclaligner_adjustminmaxsize(self, component, tm, &componentsize);
+			psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
+				&size);
 			c_tm = psy_ui_component_textmetric(component);
 			c_margin = psy_ui_component_margin(component);			
 			if (component->align == psy_ui_ALIGN_CLIENT ||
@@ -251,45 +245,6 @@ void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner* self, psy_List* wrap, d
 	}
 }
 
-void psy_ui_lclaligner_adjustminmaxsize(psy_ui_LCLAligner* self,
-	psy_ui_Component* component, const psy_ui_TextMetric* tm,
-	psy_ui_Size* componentsize)
-{	
-	psy_ui_Size minsize;
-	psy_ui_Size maxsize;
-
-	minsize = psy_ui_component_minimumsize(component);
-	maxsize = psy_ui_component_maximumsize(component);
-	if (!psy_ui_size_iszero(&maxsize)) {
-		if (!psy_ui_value_iszero(&maxsize.width)) {
-			if (psy_ui_value_comp(&maxsize.width,
-					&componentsize->width, tm, NULL) < 0) {				
-				componentsize->width = maxsize.width;
-			}
-		}	
-		if (!psy_ui_value_iszero(&maxsize.height)) {
-			if (psy_ui_value_comp(&maxsize.height,
-					&componentsize->height, tm, NULL) < 0) {
-				componentsize->height = maxsize.height;
-			}
-		}
-	}
-	if (!psy_ui_size_iszero(&minsize)) {
-		if (!psy_ui_value_iszero(&minsize.width)) {
-			if (psy_ui_value_comp(&minsize.width,
-					&componentsize->width, tm, NULL) > 0) {
-				componentsize->width = minsize.width;
-			}
-		}
-		if (!psy_ui_value_iszero(&minsize.height)) {
-			if (psy_ui_value_comp(&minsize.height,
-					&componentsize->height, tm, NULL) > 0) {
-				componentsize->height = minsize.height;
-			}
-		}
-	}
-}
-
 void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 	psy_ui_RealPoint cp_topleft, psy_ui_RealPoint cp_bottomright)
 {
@@ -389,44 +344,6 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 	}
 }
 
-void psy_ui_lclaligner_adjustborder(psy_ui_LCLAligner* self,
-	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
-{
-	const psy_ui_Border* border;
-
-	border = psy_ui_component_border(self->component);
-	if (border->left == psy_ui_BORDER_SOLID) {
-		cp_topleft->x += 1;		
-	}
-	if (border->top == psy_ui_BORDER_SOLID) {
-		cp_topleft->y += 1;		
-	}
-	if (border->right == psy_ui_BORDER_SOLID) {
-		cp_bottomright->x -= 1;
-	}
-	if (border->bottom == psy_ui_BORDER_SOLID) {
-		cp_bottomright->y -= 1;
-	}
-}
-
-void psy_ui_lclaligner_adjustspacing(psy_ui_LCLAligner* self,
-	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
-{
-	psy_ui_Margin spacing;
-
-	spacing = psy_ui_component_spacing(self->component);
-	cp_topleft->x += psy_ui_value_px(&spacing.left, 
-		psy_ui_component_textmetric(self->component), NULL);
-	cp_topleft->y += psy_ui_value_px(&spacing.top,
-		psy_ui_component_textmetric(self->component), NULL);
-	cp_bottomright->x -= psy_ui_value_px(&spacing.right,
-		psy_ui_component_textmetric(self->component), NULL);
-	cp_bottomright->x = psy_max(0.0, cp_bottomright->x);
-	cp_bottomright->y -= psy_ui_value_px(&spacing.bottom,
-		psy_ui_component_textmetric(self->component), NULL);
-	cp_bottomright->y = psy_max(0.0, cp_bottomright->y);
-}
-
 uintptr_t psy_ui_lclaligner_numclients(psy_ui_LCLAligner* self)
 {
 	uintptr_t rv = 0;
@@ -481,7 +398,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 			: limit->width;	
 		if (limit && !((self->component->containeralign->alignexpandmode &
 				psy_ui_HEXPAND) == psy_ui_HEXPAND)) {
-			psy_ui_lclaligner_adjustspacing(self, &cp_topleft, &cp_bottomright);
+			psy_ui_aligner_adjustspacing(self->component, &cp_topleft, &cp_bottomright);
 			size.width = psy_ui_value_make_px(psy_ui_value_px(
 				&limit->width, tm, NULL) - cp_topleft.x - cp_bottomright.x);
 		}
@@ -502,7 +419,8 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 				limit.height = size.height;
 				componentsize = psy_ui_component_preferredsize(component,
 					&limit);					
-				psy_ui_lclaligner_adjustminmaxsize(self, component, tm, &componentsize);
+				psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
+					NULL);
 				c_tm = psy_ui_component_textmetric(component);		
 				if (component->align == psy_ui_ALIGN_FIXED_RESIZE) {
 					psy_ui_RealRectangle position;
@@ -617,24 +535,5 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 	} else {
 		*rv = size;			
 	}
-	psy_ui_lclaligner_adjustpreferredsize(self, rv);
-}
-
-void psy_ui_lclaligner_adjustpreferredsize(psy_ui_LCLAligner* self,
-	psy_ui_Size* rv)
-{
-	const psy_ui_TextMetric* tm;
-	psy_ui_RealMargin border;
-	psy_ui_RealMargin spacing;
-
-	tm = psy_ui_component_textmetric(self->component);
-	spacing = psy_ui_component_spacing_px(self->component);	
-	border = psy_ui_component_bordermargin_px(self->component);
-	psy_ui_size_setpx(rv,
-		psy_ui_value_px(&rv->width, tm, NULL) +
-			psy_ui_realmargin_width(&spacing) +
-			psy_ui_realmargin_width(&border),
-		psy_ui_value_px(&rv->height, tm, NULL) +
-			psy_ui_realmargin_height(&spacing) +
-			psy_ui_realmargin_height(&border));	
+	psy_ui_aligner_addspacingandborder(self->component, rv);
 }

@@ -14,7 +14,12 @@
 extern "C" {
 #endif
 
-#define psy_TABLEKEYS 256
+/*
+** hash function method: mod
+** default keysize prime not too close to an exact power of 2 and above old
+** MAX_MACHINE limit of 256
+*/
+#define psy_TABLEKEYS 401
 
 typedef struct psy_TableHashEntry {
 	uintptr_t key;

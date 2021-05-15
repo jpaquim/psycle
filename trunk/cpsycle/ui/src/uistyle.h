@@ -113,6 +113,11 @@ INLINE void psy_ui_style_setmargin(psy_ui_Style* self, psy_ui_Margin margin)
 	self->marginset = TRUE;
 }
 
+INLINE psy_ui_Margin psy_ui_style_margin(const psy_ui_Style* self)
+{
+	return self->margin;	
+}
+
 INLINE void psy_ui_style_setmargin_em(psy_ui_Style* self,
 	double top, double right, double bottom, double left)
 {
@@ -132,6 +137,11 @@ INLINE void psy_ui_style_setspacing_em(psy_ui_Style* self,
 {
 	psy_ui_style_setspacing(self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
+}
+
+INLINE psy_ui_Margin psy_ui_style_spacing(const psy_ui_Style* self)
+{
+	return self->spacing;
 }
 
 /* psy_ui_Styles */

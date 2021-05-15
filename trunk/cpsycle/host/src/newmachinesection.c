@@ -126,7 +126,7 @@ void newmachinesection_findplugins(NewMachineSection* self)
 	} else {
 		plugins = NULL;
 	}
-	pluginsview_setplugins(&self->pluginview, plugins);
+	pluginsview_setplugins(&self->pluginview, plugins);	
 }
 
 const char* newmachinesection_key(const NewMachineSection* self)

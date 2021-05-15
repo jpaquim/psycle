@@ -901,6 +901,27 @@ void psy_ui_component_align_cached(psy_ui_Component* self)
 	psy_ui_app()->setpositioncacheonly = FALSE;
 }
 
+psy_ui_Component* psy_ui_component_preferredsize_parent(psy_ui_Component* self)
+{
+	psy_ui_Component* curr;	
+
+	assert(self);
+
+	curr = self;
+	while (curr) {		
+		if (curr->align == psy_ui_ALIGN_CLIENT || curr->align == psy_ui_ALIGN_NONE) {
+			if (curr == self) {
+				return self;
+			}
+			break;
+		}		
+		if (psy_ui_component_parent(curr)) {
+			curr = psy_ui_component_parent(curr);
+		}
+	}	
+	return curr;
+}
+
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		

@@ -189,13 +189,13 @@ void sequencebuttons_onmore(SequenceButtons* self,
 	if (psy_ui_component_visible(&self->block)) {
 		psy_ui_component_hide(&self->block);
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_NONE);
-		psy_ui_button_settext(&self->more, ". . .");
-		psy_ui_component_align(psy_ui_component_parent(&self->component));
+		psy_ui_button_settext(&self->more, ". . .");		
 	} else {
 		psy_ui_button_settext(&self->more, "-");
-		psy_ui_component_show(&self->block);
-		psy_ui_component_align(psy_ui_component_parent(&self->component));
+		psy_ui_component_show(&self->block);		
 	}
+	psy_ui_component_align_full(
+		psy_ui_component_preferredsize_parent(&self->component));
 	psy_ui_component_invalidate(psy_ui_component_parent(&self->component));
 }
 
