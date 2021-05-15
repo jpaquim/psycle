@@ -130,7 +130,7 @@ void psy_ui_componentstyle_setstyle(psy_ui_ComponentStyle* self,
 	if (style_id != psy_INDEX_INVALID) {		
 		if (!self->styles) {
 			self->styles = (psy_Table*)malloc(sizeof(psy_Table));			
-			psy_table_init_keysize(self->styles, 16);
+			psy_table_init_keysize(self->styles, 11);
 		}
 		psy_table_insert(self->styles, state, (void*)(uintptr_t)style_id);
 	} else if (self->styles) {

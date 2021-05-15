@@ -21,6 +21,8 @@
 #define _MAX_PATH 4096
 #endif
 
+#define HFN_KEYSIZE 79
+
 static bool coords_default_classic_initialized = FALSE;
 static TrackerHeaderCoords coords_default_classic;
 
@@ -56,23 +58,23 @@ static void patternviewskin_filleventcolourstable(PatternViewSkin*);
 // implementation
 void patternviewskin_init(PatternViewSkin* self)
 {
-	psy_table_init(&self->trackseparatorcolours);
-	psy_table_init(&self->row4beatcolours);
-	psy_table_init(&self->rowbeatcolours);
-	psy_table_init(&self->rowcolours);
-	psy_table_init(&self->fontcolours);
-	psy_table_init(&self->fontplaycolours);
-	psy_table_init(&self->fontcurcolours);
-	psy_table_init(&self->fontselcolours);
-	psy_table_init(&self->selectioncolours);
-	psy_table_init(&self->selectionbeatcolours);
-	psy_table_init(&self->selection4beatcolours);
-	psy_table_init(&self->playbarcolours);
-	psy_table_init(&self->cursorcolours);
-	psy_table_init(&self->midlinecolours);	
-	psy_table_init(&self->eventcolours);
-	psy_table_init(&self->eventhovercolours);
-	psy_table_init(&self->eventcurrchannelcolours);
+	psy_table_init_keysize(&self->trackseparatorcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->row4beatcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->rowbeatcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->rowcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->fontcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->fontplaycolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->fontcurcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->fontselcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->selectioncolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->selectionbeatcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->selection4beatcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->playbarcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->cursorcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->midlinecolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->eventcolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->eventhovercolours, HFN_KEYSIZE);
+	psy_table_init_keysize(&self->eventcurrchannelcolours, HFN_KEYSIZE);
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
 	patternviewskin_setclassicheadercoords(self);

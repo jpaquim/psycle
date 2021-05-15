@@ -1,12 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MAINFRAME_H)
 #define MAINFRAME_H
 
-// platform
-#include "../../detail/os.h"
-// host
+/* host */
 #include "mainstatusbar.h"
 #include "minmaximize.h"
 #include "confirmbox.h"
@@ -47,28 +47,30 @@
 #include "undoredobar.h"
 #include "vubar.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uiframe.h>
 #include <uiterminal.h>
 #include <uinotebook.h>
 #include <uisplitbar.h>
-// container
+/* container */
 #include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// MainFrame
-//
-// The root component of all other components of psycle. Initializes the
-// workspace. First component created after program start by psycle.c and
-// last destroyed at program termination.
+/*
+** MainFrame
+**
+**  The root component of all other components of psycle. Initializes the
+**  workspace. First component created after program start by psycle.c and
+**  last destroyed at program termination.
+*/
 
 typedef struct MainFrame {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Component top;	
 	psy_ui_Component toprows;
 	psy_ui_Component toprow0;
@@ -82,7 +84,8 @@ typedef struct MainFrame {
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
 	psy_ui_Component client;	
-	psy_ui_Component mainviews;
+	psy_ui_Component mainviews; /* includes tabbar */
+	psy_ui_Component mainpane;  /* excludes tabbar and includes bottom views */
 	psy_ui_Component spacerleft;
 	psy_ui_Component spacerright;
 	psy_ui_Terminal terminal;

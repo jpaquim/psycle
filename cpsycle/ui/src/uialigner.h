@@ -58,6 +58,20 @@ INLINE void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 	self->vtable->preferredsize(self, limit, rv);
 }
 
+/* helper functions */
+
+struct psy_ui_Component;
+
+void psy_ui_aligner_adjustminmaxsize(
+	struct psy_ui_Component*, const psy_ui_TextMetric*,
+	psy_ui_Size*, psy_ui_Size* parentsize);
+void psy_ui_aligner_addspacingandborder(struct psy_ui_Component*,
+	psy_ui_Size* rv);
+void psy_ui_aligner_adjustspacing(struct psy_ui_Component*,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
+void psy_ui_aligner_adjustborder(struct psy_ui_Component*,
+	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright);
+
 #ifdef __cplusplus
 }
 #endif
