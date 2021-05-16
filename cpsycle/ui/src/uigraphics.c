@@ -1,17 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
+
 
 #include "uigraphics.h"
-// local
+/* local */
 #include "uiapp.h"
 #include "uiimpfactory.h"
-// std
+/* std */
 #include <stdlib.h>
+/* platform */
+#include "../../detail/os.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dispose(psy_ui_Graphics*);
 static void textout(psy_ui_Graphics*, double x, double y,  const char* text, uintptr_t len);
 static void textoutrectangle(psy_ui_Graphics*, double x, double y, uintptr_t options,
@@ -47,8 +51,7 @@ static void setlinewidth(psy_ui_Graphics*, uintptr_t width);
 static uintptr_t linewidth(psy_ui_Graphics*);
 static void setorigin(psy_ui_Graphics* self, double x, double y);
 static psy_ui_RealPoint origin(const psy_ui_Graphics* self);
-
-// VTable init
+/* vtable */
 static psy_ui_GraphicsVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -102,7 +105,7 @@ void psy_ui_graphics_init_bitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap)
 	self->clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), bpmsize);
 }
 
-// Delegation Methods to GraphicsImp
+/* Delegation Methods to GraphicsImp */
 void dispose(psy_ui_Graphics* self)
 {
 	self->imp->vtable->dev_dispose(self->imp);
@@ -332,38 +335,37 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 	const psy_ui_Border* border, const psy_ui_TextMetric* tm)
 {	
 	if (psy_ui_border_isrect(border) && psy_ui_border_monochrome(border)) {
-		psy_ui_setcolour(self, border->colour_top);
+		psy_ui_setcolour(self, border->top.colour);
 		if (psy_ui_border_isround(border)) {			
 			psy_ui_drawroundrectangle(self, r,
 				psy_ui_realsize_make(
-					psy_ui_value_px(&border->border_bottom_left_radius, tm, NULL),
-					psy_ui_value_px(&border->border_bottom_left_radius, tm, NULL)));
+					psy_ui_value_px(&border->left.radius, tm, NULL),
+					psy_ui_value_px(&border->left.radius, tm, NULL)));
 		} else {			
-			psy_ui_setcolour(self, border->colour_top);
+			psy_ui_setcolour(self, border->top.colour);
 			psy_ui_drawrectangle(self, r);
 		}
 	} else {
-		if (border->top != psy_ui_BORDER_NONE && border->colour_top.mode.set) {
-			psy_ui_setcolour(self, border->colour_top);
-			//border_top_left_radius
+		if (border->top.style != psy_ui_BORDER_NONE && border->top.colour.mode.set) {
+			psy_ui_setcolour(self, border->top.colour);			
 			psy_ui_drawline(self,
 				psy_ui_realpoint_make(
-					r.left + psy_ui_value_px(&border->border_top_left_radius, tm, NULL),
+					r.left + psy_ui_value_px(&border->top.radius, tm, NULL),
 					r.top),
 				psy_ui_realpoint_make(r.right - 1, r.top));
 		}
-		if (border->right != psy_ui_BORDER_NONE && border->colour_right.mode.set) {
-			psy_ui_setcolour(self, border->colour_right);
+		if (border->right.style != psy_ui_BORDER_NONE && border->right.colour.mode.set) {
+			psy_ui_setcolour(self, border->right.colour);
 			psy_ui_drawline(self, psy_ui_realpoint_make(r.right - 1, r.top),
 				psy_ui_realpoint_make(r.right - 1, r.bottom - 1));
 		}
-		if (border->bottom != psy_ui_BORDER_NONE && border->colour_bottom.mode.set) {
-			psy_ui_setcolour(self, border->colour_bottom);
+		if (border->bottom.style != psy_ui_BORDER_NONE && border->bottom.colour.mode.set) {
+			psy_ui_setcolour(self, border->bottom.colour);
 			psy_ui_drawline(self, psy_ui_realpoint_make(r.left, r.bottom - 1),
 				psy_ui_realpoint_make(r.right, r.bottom - 1));
 		}
-		if (border->left != psy_ui_BORDER_NONE && border->colour_left.mode.set) {
-			psy_ui_setcolour(self, border->colour_left);
+		if (border->left.style != psy_ui_BORDER_NONE && border->left.colour.mode.set) {
+			psy_ui_setcolour(self, border->left.colour);
 			psy_ui_drawline(self, psy_ui_realrectangle_topleft(&r),
 				psy_ui_realpoint_make(r.left, r.bottom - 1));
 		}

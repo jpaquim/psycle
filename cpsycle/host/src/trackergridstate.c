@@ -22,9 +22,7 @@ void trackconfig_init(TrackConfig* self, bool wideinst)
 {	
 	self->textwidth = 9;
 	self->textleftedge = 2;
-	self->textleftedge = 2;
-	self->patterntrackident = 0;
-	self->headertrackident = 0;
+	self->textleftedge = 2;	
 	self->colresize = FALSE;
 	self->noteresize = FALSE;
 	self->resizetrack = psy_INDEX_INVALID;

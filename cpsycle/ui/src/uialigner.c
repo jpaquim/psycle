@@ -123,16 +123,16 @@ void psy_ui_aligner_adjustborder(psy_ui_Component* component,
 	const psy_ui_Border* border;
 
 	border = psy_ui_component_border(component);
-	if (border->left == psy_ui_BORDER_SOLID) {
+	if (border->left.style == psy_ui_BORDER_SOLID) {
 		cp_topleft->x += 1;
 	}
-	if (border->top == psy_ui_BORDER_SOLID) {
+	if (border->top.style == psy_ui_BORDER_SOLID) {
 		cp_topleft->y += 1;
 	}
-	if (border->right == psy_ui_BORDER_SOLID) {
+	if (border->right.style == psy_ui_BORDER_SOLID) {
 		cp_bottomright->x -= 1;
 	}
-	if (border->bottom == psy_ui_BORDER_SOLID) {
+	if (border->bottom.style == psy_ui_BORDER_SOLID) {
 		cp_bottomright->y -= 1;
 	}
 }

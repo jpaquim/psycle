@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "sequencerbar.h"
-// host
+/* host */
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// prototypes
+/* prototypes */
 static void sequencerbar_onshowpatternnames(SequencerBar*,
 	psy_ui_CheckBox* sender);
 static void sequencerbar_onfollowsong(SequencerBar*, psy_ui_Button* sender);
@@ -21,7 +24,7 @@ static void sequencerbar_onmultichannelaudition(SequencerBar*,
 	psy_ui_Button* sender);
 static void sequencerbar_onconfigure(SequencerBar*, GeneralConfig*,
 	psy_Property*);
-// implementation
+/* implementation */
 void sequencerbar_init(SequencerBar* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {

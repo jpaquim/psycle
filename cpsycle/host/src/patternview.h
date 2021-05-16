@@ -68,8 +68,7 @@ typedef struct PatternView {
 	TrackerLineState linestate;
 	TrackConfig trackconfig;
 	TrackerGridState gridstate;
-	PatternViewSkin skin;
-	bool showlinenumbers;
+	PatternViewSkin skin;	
 	bool showdefaultline;
 	PatternCursorStepMode pgupdownstepmode;
 	intptr_t pgupdownstep;
