@@ -28,11 +28,14 @@
 
 
 #if defined DIVERSALIS__OS__MICROSOFT
+#define SLASH "\\"
 #define MODULEEXT ".dll"
 #elif defined DIVERSALIS__OS__APPLE
+#define SLASH "/"
 #define	".dylib"
 #define _MAX_PATH 4096
 #else
+#define SLASH "/"
 #define MODULEEXT ".so"
 #define _MAX_PATH 4096
 #endif
@@ -88,9 +91,9 @@ void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 	
 	strcpy(inipath, psy_dir_config());	
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)
-	strcat(inipath, "\\psycle-plugin-scanner-cache32.ini");
+	strcat(inipath, SLASH "psycle-plugin-scanner-cache32.ini");
 #else
-	strcat(inipath, "\\psycle-plugin-scanner-cache64.ini");
+	strcat(inipath, SLASH "psycle-plugin-scanner-cache64.ini");
 #endif
 	self->inipath = psy_strdup(inipath);
 	self->sections = NULL;
@@ -607,7 +610,8 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 			task = (psy_audio_PluginScanTask*)p->entry;
 			psy_signal_emit(&self->signal_taskstart, self, 1, task);
 			path = psy_property_at_str(self->directories, task->key, NULL);
-			if (path) {				
+			if (path) {		
+				printf("scan path: %s\n", path);
 				plugincatcher_scan_multipath(self, path, task->wildcard,
 					task->type, task->recursive);				
 			}
