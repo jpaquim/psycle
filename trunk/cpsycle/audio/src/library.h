@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_LIBRARY_H
 #define psy_audio_LIBRARY_H
@@ -8,8 +10,8 @@
 extern "C" {
 #endif
 
-typedef struct {
-  void* module; // psycore (///\todo should not be void* on _WIN64)
+typedef struct psy_Library {	
+  void* module;
   int err;
   char* path;
   char* root;

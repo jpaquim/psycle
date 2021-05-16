@@ -588,25 +588,29 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_amplitudeenvelope(voice),
-					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+					parameter * psy_audio_machine_samplespertick(
+						psy_audio_xmsampler_base(self->m_pSampler)));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_panenvelope(voice));
 			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_panenvelope(voice),
-					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+					parameter * psy_audio_machine_samplespertick(
+						psy_audio_xmsampler_base(self->m_pSampler)));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_pitchenvelope(voice));
 			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_pitchenvelope(voice),
-					parameter * psy_audio_machine_samplespertick(self->m_pSampler));
+					parameter * psy_audio_machine_samplespertick(
+						psy_audio_xmsampler_base(self->m_pSampler)));
 			}
 			env = xmenvelopecontroller_envelope(psy_audio_xmsamplervoice_filterenvelope(voice));
 			if (psy_dsp_envelope_isenabled(env)) {
 				xmenvelopecontroller_setpositioninsamples(
 					psy_audio_xmsamplervoice_filterenvelope(voice),
-					(int)(parameter * psy_audio_machine_samplespertick(self->m_pSampler)));
+					(int)(parameter * psy_audio_machine_samplespertick(
+						psy_audio_xmsampler_base(self->m_pSampler))));
 			}			
 			break; }
 		case XM_SAMPLER_CMD_EXTENDED:

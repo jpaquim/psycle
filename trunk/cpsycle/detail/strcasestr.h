@@ -6,9 +6,11 @@
 
 #ifdef DIVERSALIS__OS__MICROSOFT
 
-// musl as a whole is licensed under the following standard MIT license :
-// Copyright © 2005-2012 Rich Felker
-// https://github.com/BlankOn/musl
+/*
+** musl as a whole is licensed under the following standard MIT license :
+** Copyright © 2005-2012 Rich Felker
+** https://github.com/BlankOn/musl
+*/
 
 #include <string.h>
 #include <ctype.h>
@@ -40,4 +42,4 @@ INLINE char* strcasestr(const char* h, const char* n)
 #include <string.h>
 #endif
 
-#endif
+#endif /* STRCASESTR_H */

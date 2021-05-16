@@ -1,14 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
+
 
 #include "uibitmap.h"
+/* local */
 #include "uiapp.h"
 #include "uiimpfactory.h"
+/* std */
 #include <stdlib.h>
+/* platform */
+#include "../../detail/os.h"
 
+/* psy_ui_BitmapAnimate */
 void psy_ui_bitmapanimate_init(psy_ui_BitmapAnimate* self)
 {
 	self->enabled = FALSE;
@@ -17,15 +24,14 @@ void psy_ui_bitmapanimate_init(psy_ui_BitmapAnimate* self)
 	self->horizontal = FALSE;
 }
 
-// prototypes
+/* prototypes */
 static void dispose(psy_ui_Bitmap*);
 static int load(psy_ui_Bitmap*, const char* path);
 static int loadresource(psy_ui_Bitmap*, uintptr_t resourceid);
 static psy_ui_RealSize size(const psy_ui_Bitmap*);
 static bool empty(const psy_ui_Bitmap*);
 static void settransparency(psy_ui_Bitmap*, psy_ui_Colour);
-
-// VTable init
+/* vtable */
 static psy_ui_BitmapVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -41,7 +47,7 @@ static void vtable_init(void)
 		vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	vtable_init();
@@ -59,7 +65,6 @@ void psy_ui_bitmap_init_size(psy_ui_Bitmap* self, psy_ui_RealSize size)
 		psy_ui_app_impfactory(psy_ui_app()), size);
 }
 
-// Delegation Methods to psy_ui_BitmapImp
 void dispose(psy_ui_Bitmap* self)
 {
 	self->imp->vtable->dev_dispose(self->imp);
@@ -119,6 +124,8 @@ static void psy_ui_bitmap_imp_settransparency(psy_ui_BitmapImp* self,
 	psy_ui_Colour colour)
 { }
 
+/* psy_ui_BitmapImp */
+/* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -134,7 +141,7 @@ static void imp_vtable_init(void)
 		imp_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void psy_ui_bitmap_imp_init(psy_ui_BitmapImp* self)
 {
 	imp_vtable_init();

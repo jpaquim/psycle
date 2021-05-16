@@ -7,6 +7,7 @@
 
 
 #include "uidefaults.h"
+/* local */
 #include "uifont.h"
 /* file */
 #include <dir.h>

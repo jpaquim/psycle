@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_IMPFACTORY_H
 #define psy_ui_IMPFACTORY_H
@@ -7,25 +9,27 @@
 #include "../../detail/psydef.h"
 #include "uidef.h"
 
-// AbstractFactory
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// AbstractFactory     psy_ui_ImpFactory
-// ConcreteFactory     psy_ui_win_ImpFactory, psy_ui_curses_ImpFactory
-// AbstractProducts    ui implementors
-// ConcreteProducts    win implementors, curses implementors
-// psy_ui_app_init     creates concrete impfactory defined with PSY_USES_TK in
-//                     psyconf.h
-//
-//                 psy_ui_ImpFactory --------------------<> psy_ui_App
-//                        ^   allocinit_componentimp          <>
-//                        |   ...                             |
-//          ------------------------  psy_ui_Component/Graphics/...
-//          |                      |     init: imp = app->impfactory->
-//          |                      |             allocinit_componentimp
-//		    |                      |
-// psy_ui_win_ImpFactory        psy_ui_curses_ImpFactory
-//   allocinit_componentimp       allocinit_componentimp
-//   ...                          ...
+/*
+** AbstractFactory
+**  Aim: avoid coupling to one platform (win32, xt/motif, etc)
+**  AbstractFactory     psy_ui_ImpFactory
+** ConcreteFactory     psy_ui_win_ImpFactory, psy_ui_curses_ImpFactory
+** AbstractProducts    ui implementors
+** ConcreteProducts    win implementors, curses implementors
+** psy_ui_app_init     creates concrete impfactory defined with PSY_USES_TK in
+**                     psyconf.h
+**
+**                 psy_ui_ImpFactory --------------------<> psy_ui_App
+**                        ^   allocinit_componentimp          <>
+**                        |   ...                             |
+**          ------------------------  psy_ui_Component/Graphics/...
+**          |                      |     init: imp = app->impfactory->
+**          |                      |             allocinit_componentimp
+**		    |                      |
+** psy_ui_win_ImpFactory        psy_ui_curses_ImpFactory
+**   allocinit_componentimp       allocinit_componentimp
+**   ...                          ...
+*/
 
 #ifdef __cplusplus
 extern "C" {
