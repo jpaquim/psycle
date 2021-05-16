@@ -1,22 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "metronomebar.h"
-// host
+/* host */
 #include "resources/resource.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void metronomebar_fillprecount(MetronomeBar*);
 static void metronomebar_ontogglemetronomestate(MetronomeBar*);
 static void metronomebar_onconfigure(MetronomeBar*, psy_ui_Button* sender);
 static void metronomebar_onprecountchanged(MetronomeBar*,
 	psy_ui_Component* sender, int index);
 
-// implementation
+/* implementation */
 void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {				
@@ -25,10 +27,11 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;
-	// activated
-	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self), NULL,
-		"metronome.metronome", self, metronomebar_ontogglemetronomestate);
-	// precount
+	/* activated */
+	psy_ui_button_init_text_connect(&self->activated, metronomebar_base(self),
+		NULL, "metronome.metronome",
+		self, metronomebar_ontogglemetronomestate);
+	/* precount */
 	psy_ui_label_init_text(&self->desc, metronomebar_base(self), NULL,
 		"metronome.precount");
 	psy_ui_combobox_init(&self->precount, metronomebar_base(self), NULL);
@@ -37,11 +40,10 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcursel(&self->precount, 0);
 	psy_signal_connect(&self->precount.signal_selchanged, self,
 		metronomebar_onprecountchanged);
-	// configure
+	/* configure */
 	psy_ui_button_init_connect(&self->configure, metronomebar_base(self), NULL,
 		self, metronomebar_onconfigure);
-	psy_ui_bitmap_loadresource(&self->configure.bitmapicon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&self->configure.bitmapicon,
+	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_DARK,
 		psy_ui_colour_white());
 }
 
@@ -62,10 +64,10 @@ void metronomebar_ontogglemetronomestate(MetronomeBar* self)
 {
 	if (psy_ui_button_highlighted(&self->activated)) {
 		psy_ui_button_disablehighlight(&self->activated);
-		self->workspace->player.sequencer.metronome.active = FALSE;
+		psy_audio_player_deactivatemetronome(self->player);		
 	} else {
 		psy_ui_button_highlight(&self->activated);
-		self->workspace->player.sequencer.metronome.active = TRUE;
+		psy_audio_player_activatemetronome(self->player);		
 	}
 }
 

@@ -1,24 +1,31 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_GRAPHICS_H
 #define psy_ui_GRAPHICS_H
 
+/* platform */
 #include "../../detail/psydef.h"
+/* local */
 #include "uibitmap.h"
 #include "uifont.h"
 
-// Graphics Device Interface
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_Graphics
-// Implementor			psy_ui_GraphicsImp
-// Concrete Implementor	psy_ui_win_GraphicsImp
-//
-// psy_ui_Graphics <>-------- psy_ui_GraphicsImp
-//     imp->dev_draw                 ^
-//     ...                           |
-//                          psy_ui_win_GraphicsImp
+/*
+** Graphics Device Interface
+**
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_Graphics
+** Implementor			psy_ui_GraphicsImp
+** Concrete Implementor	psy_ui_win_GraphicsImp
+** 
+** psy_ui_Graphics <>-------- psy_ui_GraphicsImp
+**     imp->dev_draw                  ^
+**     ...                            |
+**                          psy_ui_win_GraphicsImp
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,7 +123,7 @@ typedef struct psy_ui_Graphics {
 void psy_ui_graphics_init(psy_ui_Graphics*, void* hdc);
 void psy_ui_graphics_init_bitmap(psy_ui_Graphics*, psy_ui_Bitmap*);
 
-// vtable calls
+/* vtable calls */
 INLINE void psy_ui_graphics_dispose(psy_ui_Graphics* self)
 {
 	self->vtable->dispose(self);	
@@ -169,17 +176,21 @@ INLINE void psy_ui_drawsolidpolygon(psy_ui_Graphics* self, psy_ui_RealPoint* pts
 {
 	self->vtable->drawsolidpolygon(self, pts, numpoints, inner, outter);	
 }
-// blits a bitmap with its full size to the device context
-// dest: topleft point of the destination rectangle
+/*
+** blits a bitmap with its full size to the device context
+**  dest: topleft point of the destination rectangle
+*/
 INLINE void psy_ui_drawfullbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap,
 	psy_ui_RealPoint dest)
 {	
 	self->vtable->drawfullbitmap(self, bitmap, dest.x, dest.y);
 }
-// blits a bitmap to the device context
-// dest: destination rectangle of the blitted bitmap and size of the source
-//       bitmap part to be copied
-// src: topleft position of the source rectangle
+/*
+** blits a bitmap to the device context
+**  dest: destination rectangle of the blitted bitmap and size of the source
+**        bitmap part to be copied
+**  src: topleft position of the source rectangle
+*/
 INLINE void psy_ui_drawbitmap(psy_ui_Graphics* self,
 	psy_ui_Bitmap* bitmap,
 	psy_ui_RealRectangle dest,
@@ -189,11 +200,13 @@ INLINE void psy_ui_drawbitmap(psy_ui_Graphics* self,
 		psy_ui_realrectangle_width(&dest), psy_ui_realrectangle_height(&dest),
 		src.x, src.y);
 }
-// blits a bitmap to the device context
-// dest: destination rectangle of the blitted bitmap
-//       srcsize will be sized to the destination size
-// src: topleft position of the source rectangle
-// srcsize: part of the source bitmap to be copied
+/*
+** blits a bitmap to the device context
+**  dest: destination rectangle of the blitted bitmap
+**        srcsize will be sized to the destination size
+**  src: topleft position of the source rectangle
+**  srcsize: part of the source bitmap to be copied
+*/
 INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self,
 	psy_ui_Bitmap* bitmap,
 	psy_ui_RealRectangle dest,
@@ -275,7 +288,7 @@ INLINE psy_ui_RealPoint psy_ui_origin(const psy_ui_Graphics* self)
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle,
 	const psy_ui_Border*, const psy_ui_TextMetric*);
 
-// psy_ui_GraphicsImp
+/* psy_ui_GraphicsImp */
 
 typedef void (*psy_ui_fp_graphicsimp_dev_dispose)(struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_textout)(struct psy_ui_GraphicsImp*, double x, double y,  const char*, uintptr_t len);

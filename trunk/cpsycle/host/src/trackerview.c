@@ -1303,7 +1303,7 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 
 	if (!trackergridstate_pattern(self->gridstate)) {
 		return;
-	}
+	}	
 	if (!self->gridstate->singlemode ||
 			psy_dsp_testrange(position, self->linestate->sequenceentryoffset,
 			psy_audio_pattern_length(trackergridstate_pattern(
@@ -1316,7 +1316,8 @@ void trackergrid_invalidateline(TrackerGrid* self, psy_dsp_big_beat_t position)
 				psy_ui_realpoint_make(					
 					psy_ui_component_scrollleftpx(&self->component),
 					trackerlinestate_beattopx(self->linestate,
-						position - ((self->gridstate->singlemode)
+						position -
+						((self->gridstate->singlemode)
 						? self->linestate->sequenceentryoffset
 						: 0.0))),
 				psy_ui_realsize_make(size.width, self->linestate->lineheightpx)));

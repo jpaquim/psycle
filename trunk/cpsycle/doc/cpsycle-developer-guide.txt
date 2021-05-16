@@ -3,7 +3,7 @@ C-Version, Feb 2021 (unfinished)
 
 Introduction
 
-C-Psycle is a remake of Psycle in "C" language (instead of C++) with a slightly different concept. It is located under the "cpsycle" folder in the SVN.
+C-Psycle is a variant of Psycle in "C" language (instead of C++) with a slightly different concept. It is located under the "cpsycle" folder in the SVN.
 This new version has the goal of being compatible with mfc-psycle and sharing as much features as possible, at the same time than adding new features, like scopes and pianoroll, and a "rack" view rather than a wire view.
 Work is done to reach the point of releasing a 1.0 version, although it is not there yet.
 If anyone wants to try it, it should be easier to compile with visual studio 2019 than Psycle, but at this point it still requires Psycle plugins and some manual changes to code for correct configuration.
@@ -25,7 +25,7 @@ The audio and event drivers will be loaded by the audio engine at runtime.
 The Host
 
 The host is the application the user starts. The program begins in psycle.c, first, initializing the ui, creating the mainframe and starting the ui event loop and finally leaves the program, if a close event occurs.
-Depending on the platform the main entry point differs. Windows uses WinMain as entry point, other toolkits will use int main(int argc, char** argv)
+Depending on the platform the main entry point differs. Windows uses WinMain as entry point, other toolkits will use int main(int argc, char** argv). They are defined in uiapp.c.
 DIVERSALIS, a collection of platform specific defines, is used to detect the platform and needed main entry. To leave the platform dependend startup, psycle_run is called as platform independed main entry point.
 psycle_run:
 1. The app is added to the enviremont path, that the scilexer module can be found.
@@ -39,7 +39,7 @@ Psycle is displayed.
 5. Now the app main loop is started:
 err = psy_ui_app_run(&app);
 The main loop waits for an event (mouse, keyevent..) and triggers callbacks to the host. In case of a close event the main loop will be terminated.
-6. The heap storage of the mainframe is cleaned up and the env path is restored
+6. The heap storage of the mainframe is cleaned up
 7. The app returns the status to the operation system and the process is terminated.
 
 
@@ -344,6 +344,35 @@ Base implementation component of the implementation side of the bridge. Receives
 psy_ui_CheckBoxImp: Displays a checkbox
 
 psy_ui_ListBoxImp: Displays a listbox
+
+
+The Host Ui
+
+Host Ui Controls
+
+Parameter Ui Controls (host/uicontrols/machineparam)
+
+They display and control MachineParameters. Besides the usual ui component initialization additional construction parameters are psy_audio_Machine*, uintptr_t paramidx,struct psy_audio_MachineParam* and struct ParamSkin*. Either machine and paramidx or machineparam needs to be set. The machineparam is used only if machine or paramidx are not valid. The SliderGroupUi takes additional parameters  for the level display.
+Currently the MachineParamView, the ParamGear and the MachineStackView using these components:
+- CheckUi
+
+- HeaderUi
+- 
+- KnobUi
+- 
+- LabelUi
+- 
+- LevelUi
+- 
+- SliderUi
+- 
+- SliderGroupUi
+(Composite of Slider Level and dB/Name Label and a panel for
+additional components like CheckUi?s)
+- 
+- SwitchUi
+- 
+
 
 
 

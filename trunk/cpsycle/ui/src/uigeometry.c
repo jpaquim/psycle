@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uigeometry.h"
-// std
+/* std */
 #include <math.h>
 
-// extern
+/* extern */
 psy_ui_Point psy_ui_internal_point_zero;
 psy_ui_RealPoint psy_ui_internal_realpoint_zero;
 
@@ -35,12 +38,14 @@ int psy_ui_realrectangle_intersect_rectangle(const psy_ui_RealRectangle* self,
 		other->bottom < self->top);
 }
 
-// from stackoverflow by metamal
-// todo: use liang-barsky algorithm
+/*
+** from stackoverflow by metamal
+** todo: use liang-barsky algorithm
+*/
 bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 	double a_p1x, double a_p1y, double a_p2x, double a_p2y)
 {
-	// Find min and max X for the segment
+	/* Find min and max X for the segment */
 	double a_rectangleMinX = self->left;
 	double a_rectangleMinY = self->top;
 	double a_rectangleMaxX = self->right;
@@ -57,7 +62,7 @@ bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 		maxX = (double)a_p1x;
 	}
 
-	// Find the intersection of the segment's and rectangle's x-projections
+	/* Find the intersection of the segment's and rectangle's x-projections */
 
 	if (maxX > (double)a_rectangleMaxX)
 	{
@@ -69,12 +74,12 @@ bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 		minX = (double)a_rectangleMinX;
 	}
 
-	if (minX > maxX) // If their projections do not intersect return false
+	if (minX > maxX) /* If their projections do not intersect return false */
 	{
 		return FALSE;
 	}
 
-	// Find corresponding min and max Y for min and max X we found before
+	/* Find corresponding min and max Y for min and max X we found before */
 
 	minY = (double)a_p1y;
 	maxY = (double)a_p2y;
@@ -96,7 +101,7 @@ bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 		minY = tmp;
 	}
 
-	// Find the intersection of the segment's and rectangle's y-projections
+	/* Find the intersection of the segment's and rectangle's y-projections */
 
 	if (maxY > (double)a_rectangleMaxY)
 	{
@@ -108,7 +113,7 @@ bool psy_ui_realrectangle_intersect_segment(const psy_ui_RealRectangle* self,
 		minY = (double)a_rectangleMinY;
 	}
 
-	if (minY > maxY) // If Y-projections do not intersect return false
+	if (minY > maxY) /* If Y-projections do not intersect return false */
 	{
 		return FALSE;
 	}
@@ -272,4 +277,3 @@ void psy_ui_realmargin_floor(psy_ui_RealMargin* self)
 	self->bottom = floor(self->bottom);
 	self->left = floor(self->left);
 }
-

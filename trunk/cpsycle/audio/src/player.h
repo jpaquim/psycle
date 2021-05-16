@@ -246,6 +246,16 @@ void psy_audio_player_midiconfigure(psy_audio_Player*, psy_Property*
 void psy_audio_player_idle(psy_audio_Player*);
 void psy_audio_player_sendcmd(psy_audio_Player*, const char* section,
 	psy_EventDriverCmd cmd);
+/* metronome */
+INLINE void psy_audio_player_activatemetronome(psy_audio_Player* self)
+{
+	self->sequencer.metronome.active = TRUE;
+}
+
+INLINE void psy_audio_player_deactivatemetronome(psy_audio_Player* self)
+{
+	self->sequencer.metronome.active = FALSE;
+}
 
 #ifdef __cplusplus
 }

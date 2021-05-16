@@ -66,9 +66,7 @@ typedef struct TrackConfig {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
 	double textwidth;
-	double textleftedge;
-	double patterntrackident;
-	double headertrackident;
+	double textleftedge;	
 	bool colresize;
 	bool noteresize;
 	uintptr_t resizetrack;

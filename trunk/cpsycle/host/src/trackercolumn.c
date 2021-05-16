@@ -257,8 +257,7 @@ void trackercolumn_drawentry(TrackerColumn* self, psy_ui_Graphics* g,
 	uintptr_t i;
 	psy_ui_RealPoint cp;	
 
-	cp = psy_ui_realpoint_make(
-		self->gridstate->trackconfig->patterntrackident, y);
+	cp = psy_ui_realpoint_make(0.0, y);
 	for (i = 0; i < self->trackdef->numnotes; ++i) {
 		psy_audio_PatternEvent* event;
 		TrackerColumnFlags currcolumnflags;

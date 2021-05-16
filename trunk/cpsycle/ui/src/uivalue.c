@@ -1,15 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
+/* local */
 #include "uivalue.h"
 #include "uigeometry.h"
-
+/* std */
+#include <assert.h>
 #include <math.h>
 
 void psy_ui_value_init(psy_ui_Value* self)
 {
+	assert(self);
+
 	*self = psy_ui_value_make_px(0.0);
 }
 

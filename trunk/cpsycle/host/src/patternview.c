@@ -22,7 +22,7 @@ static void patternview_inittabbar(PatternView*, psy_ui_Component* tabbarparent)
 static void patternview_initblockmenu(PatternView*);
 static void patternview_connectplayer(PatternView*, psy_audio_Player*);
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
-	int tabindex);
+	uintptr_t tabindex);
 static void patternview_onsongchanged(PatternView*, Workspace* sender,
 	int flag, psy_audio_Song*);
 static void patternview_onsequenceselectionchanged(PatternView*,
@@ -115,8 +115,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	patternview_vtable_init(self);
 	self->component.vtable = &patternview_vtable;	
-	self->workspace = workspace;
-	self->showlinenumbers = TRUE;
+	self->workspace = workspace;	
 	self->showdefaultline = TRUE;
 	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
 	self->pgupdownstep = 4;
@@ -354,7 +353,7 @@ void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 }
 
 void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
-	int tabindex)
+	uintptr_t tabindex)
 {	
 	if (tabindex == 5) {
 		// Properties
@@ -706,27 +705,15 @@ void patternview_onalign(PatternView* self)
 void patternview_computemetrics(PatternView* self)
 {
 	psy_ui_Size gridsize;
-	const psy_ui_TextMetric* tm;
-	// const psy_ui_TextMetric* gridtm;
-	double trackwidth;
+	const psy_ui_TextMetric* tm;		
 
 	gridsize = psy_ui_component_scrollsize(&self->trackerscroller.pane);
-	tm = psy_ui_component_textmetric(patternview_base(self));
-	//gridtm = psy_ui_component_textmetric(trackergrid_base(&self->tracker));
+	tm = psy_ui_component_textmetric(patternview_base(self));	
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) + 2;
 	self->linestate.lineheightpx = 
 		psy_max(1.0,
-		floor(psy_ui_value_px(&self->linestate.lineheight, tm, NULL)));
-	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;
-	trackwidth = psy_max(
-		trackergridstate_preferredtrackwidth(&self->gridstate),
-		trackergridstate_preferredtrackwidth(&self->gridstate));
-	self->trackconfig.patterntrackident = (trackwidth -
-		trackergridstate_preferredtrackwidth(&self->gridstate)) / 2;
-	if (self->trackconfig.patterntrackident < 0) {
-		self->trackconfig.patterntrackident = 0;
-	}
-	self->trackconfig.headertrackident = 0;
+		psy_ui_value_px(&self->linestate.lineheight, tm, NULL));
+	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;	
 	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, tm, NULL) /
 		self->linestate.lineheightpx);
 }
@@ -749,14 +736,12 @@ void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
 
 void patternview_showlinenumbers(PatternView* self)
 {		
-	psy_ui_component_show_align(&self->left.component);
-	self->showlinenumbers = TRUE;	
+	psy_ui_component_show_align(&self->left.component);	
 }
 
 void patternview_hidelinenumbers(PatternView* self)
-{	
+{		
 	psy_ui_component_hide_align(&self->left.component);
-	self->showlinenumbers = FALSE;	
 }
 
 void patternview_showbeatnumbers(PatternView* self)
@@ -1309,15 +1294,15 @@ void patternview_displaysequencepatterns(PatternView* self)
 
 void patternview_updatestates(PatternView* self)
 {
+	self->pianoroll.grid.sequenceentryoffset = 0.f;
+	self->linestate.sequenceentryoffset = 0.f;
 	if (self->workspace->song) {
 		psy_audio_Pattern* pattern;
 
 		trackergridstate_setsequence(&self->gridstate,
-			&self->workspace->song->sequence);
-		self->pianoroll.grid.sequenceentryoffset = 0.f;
+			&self->workspace->song->sequence);		
 		trackerlinestate_setsequence(&self->linestate,
-			&self->workspace->song->sequence);
-		self->linestate.sequenceentryoffset = 0.f;
+			&self->workspace->song->sequence);		
 		pattern = psy_audio_sequence_pattern(
 			&self->workspace->song->sequence,
 			self->workspace->sequenceselection.editposition);
@@ -1327,17 +1312,13 @@ void patternview_updatestates(PatternView* self)
 			&self->workspace->song->patterns);
 		trackergridstate_setpatterns(self->griddefaults.gridstate,
 			&self->workspace->song->patterns);
-		trackerlinestate_setpattern(&self->linestate,
-			pattern);		
+		trackerlinestate_setpattern(&self->linestate, pattern);
 	} else {
-		trackergridstate_setsequence(&self->gridstate, NULL);
-		self->pianoroll.grid.sequenceentryoffset = 0.f;
-		trackerlinestate_setsequence(&self->linestate, NULL);
-		self->linestate.sequenceentryoffset = 0.f;
+		trackergridstate_setsequence(&self->gridstate, NULL);		
+		trackerlinestate_setsequence(&self->linestate, NULL);		
 		trackergridstate_setpattern(&self->gridstate, NULL);
 		trackergridstate_setpatterns(&self->gridstate, NULL);
-		trackergridstate_setpatterns(self->griddefaults.gridstate,
-			NULL);
+		trackergridstate_setpatterns(self->griddefaults.gridstate, NULL);
 		trackerlinestate_setpattern(&self->linestate, NULL);
 	}
 	patternview_rebuild(self);
@@ -1402,7 +1383,8 @@ void patternview_drawtrackerbackground(PatternView* self, psy_ui_Component* send
 	}
 }
 
-void patternview_ontrackstatechanged(PatternView* self, psy_audio_TrackState* sender)
+void patternview_ontrackstatechanged(PatternView* self,
+	psy_audio_TrackState* sender)
 {
 	psy_ui_component_invalidate(&self->header.component);
 }
