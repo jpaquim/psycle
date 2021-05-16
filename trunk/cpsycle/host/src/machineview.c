@@ -56,24 +56,32 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 {
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
-		machineview_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+		machineview_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
 			machineview_ondestroy;
-		machineview_vtable.onmousedown = (psy_ui_fp_component_onmouseevent)
+		machineview_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
 			machineview_onmousedown;
-		machineview_vtable.onmouseup = (psy_ui_fp_component_onmouseevent)
+		machineview_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
 			machineview_onmouseup;
 		machineview_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			machineview_onmousedoubleclick;
-		machineview_vtable.onkeydown = (psy_ui_fp_component_onkeyevent)
+		machineview_vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
 			machineview_onkeydown;
-		machineview_vtable.section = (psy_ui_fp_component_section)
+		machineview_vtable.section =
+			(psy_ui_fp_component_section)
 			machineview_section;
-		machineview_vtable.ontimer = (psy_ui_fp_component_ontimer)
+		machineview_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
 			machineview_ontimer;
-		machineview_vtable.onfocus = (psy_ui_fp_component_onfocus)
+		machineview_vtable.onfocus =
+			(psy_ui_fp_component_onfocus)
 			machineview_onfocus;
-		machineview_vtable.show = (psy_ui_fp_component_show)
+		machineview_vtable.show =
+			(psy_ui_fp_component_show)
 			machineview_onshow;
 		machineview_vtable_initialized = TRUE;
 	}
@@ -141,19 +149,22 @@ void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 		&self->paramviews, self->workspace);
 	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
 		psy_ui_notebook_base(&self->notebook), NULL);
-	psy_ui_component_setalign(&self->wireview.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->wireview.component,
+		psy_ui_ALIGN_FIXED_RESIZE);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 
 }
 
-void machineview_initstackview(MachineView* self, psy_ui_Component* tabbarparent)
+void machineview_initstackview(MachineView* self,
+	psy_ui_Component* tabbarparent)
 {
 	machinestackview_init(&self->stackview,
 		psy_ui_notebook_base(&self->notebook), tabbarparent,
 		&self->skin, &self->paramviews, self->workspace);
 }
 
-void machineview_initnewmachine(MachineView* self, psy_ui_Component* tabbarparent)
+void machineview_initnewmachine(MachineView* self,
+	psy_ui_Component* tabbarparent)
 {
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
 		self->workspace);
@@ -167,7 +178,8 @@ void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
 	psy_ui_Colour transparencycolour;
 
 	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+		psy_ui_ALIGN_LEFT);	
 	transparencycolour = psy_ui_colour_make_argb(psy_ui_RGB_WHITE);
 	tab = psy_ui_tabbar_append(&self->tabbar, "machineview.wires");
 	psy_ui_bitmap_loadresource(&tab->icon, IDB_WIRES_DARK);
@@ -200,8 +212,10 @@ void machineview_connectsignals(MachineView* self)
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 {			
-	if (psy_ui_component_section(&self->component) != SECTION_ID_MACHINEVIEW_NEWMACHINE) {		
-		self->newmachine.restoresection = psy_ui_component_section(&self->component);		
+	if (psy_ui_component_section(&self->component) !=
+			SECTION_ID_MACHINEVIEW_NEWMACHINE) {		
+		self->newmachine.restoresection = psy_ui_component_section(
+			&self->component);		
 		self->shownewmachine = TRUE;		
 	} else {
 		self->shownewmachine = FALSE;

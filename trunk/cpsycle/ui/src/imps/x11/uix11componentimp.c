@@ -445,18 +445,37 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 // xt implementation method for psy_ui_Component
 void dev_dispose(psy_ui_x11_ComponentImp* self)
 {	
+	psy_ui_X11App* x11app;		
+	psy_List* p;
+	psy_List* q;	
+	
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;    
 	psy_ui_componentimp_dispose(&self->imp);
-	psy_ui_graphics_dispose(&self->g);
-	dev_clear(self);	
+	psy_ui_graphics_dispose(&self->g);    
+	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+		bool deallocate;
+
+		component = (psy_ui_Component*)psy_list_entry(p);
+		deallocate = component->deallocate;
+		psy_ui_component_destroy(component);
+		if (deallocate) {
+			free(component);
+		}
+	}
+	psy_list_free(self->viewcomponents);
+	self->viewcomponents = NULL;
 	psy_list_free(self->children_nonrec_cache);
-	self->children_nonrec_cache = NULL;
+	self->children_nonrec_cache = NULL;	
 }
 
 void dev_clear(psy_ui_x11_ComponentImp* self)
 {
 	psy_List* p;
 	psy_List* q;
+	psy_ui_X11App* x11app;		
 
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {
 		psy_ui_Component* component;
 		bool deallocate;
@@ -475,7 +494,7 @@ void dev_clear(psy_ui_x11_ComponentImp* self)
 		for (p = q; p != NULL; psy_list_next(&p)) {
 			psy_ui_Component* component;
 
-			component = (psy_ui_Component*)psy_list_entry(p);
+			component = (psy_ui_Component*)psy_list_entry(p);			
 			psy_ui_component_destroy(component);
 		}
 		psy_list_free(q);
@@ -517,7 +536,9 @@ void dev_destroy(psy_ui_x11_ComponentImp* self)
 {	
 	psy_ui_X11App* x11app;		
 
-    x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+    x11app = (psy_ui_X11App*)psy_ui_app()->imp;    
+	self->mapped = FALSE;
+	self->visible = FALSE;
 	XDestroyWindow(x11app->dpy, self->hwnd);
 }
 

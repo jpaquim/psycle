@@ -11,8 +11,8 @@ libpsyui.a: $(obj)
 	ar rsv $@ *.o
 	
 %.o: %.c
-	$(CC) $(cflags) $(inc) -c $(src);
-	$(CC) $(cflags) $(inc) -c $(srcimp);
+	$(CC) $(cflags) $(inc) -g -c $(src);
+	$(CC) $(cflags) $(inc) -g -c $(srcimp);
 
 .PHONY: clean	
 clean:
