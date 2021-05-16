@@ -5,6 +5,7 @@
 #include "../../detail/os.h"
 
 #include <stdio.h>
+#include <string.h>
 // audio
 #include <audioconfig.h>
 #include <machinefactory.h>
@@ -14,7 +15,7 @@
 #include <exclusivelock.h>
 // file
 #include <dir.h>
-#ifdef _WIN32
+#ifdef DIVERSALIS__OS__MICROSOFT
 #include <windows.h>
 #include <conio.h>
 #else
@@ -49,6 +50,8 @@ static void cmdplayer_run(CmdPlayer*);
 static void cmdplayer_scanplugins(CmdPlayer*);
 static void cmdplayer_makedirectories(CmdPlayer*);
 static void cmdplayer_loadsong(CmdPlayer*, const char*);
+static void cmdplayer_onscanfile(CmdPlayer*, psy_audio_PluginCatcher* sender,
+	const char* path, int type);
 static void cmdplayer_applysongproperties(CmdPlayer*);
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(CmdPlayer*);
@@ -133,9 +136,11 @@ void cmdplayer_init(CmdPlayer* self)
 	cmdplayer_makedirectories(self);	
 	cmdplayer_initplugincatcherandmachinefactory(self);
 	self->song = NULL;	
-	psy_audio_player_init(&self->player, self->song, (void*)0);
+	psy_audio_player_init(&self->player, self->song, (void*)0);	
 	psy_audio_machinecallback_setplayer(&self->machinecallback, &self->player);	
+	printf("init\n");
 	audioconfig_init(&self->audioconfig, self->config, &self->player);
+	printf("init\n");
 }
 
 void cmdplayer_restartdriver(CmdPlayer* self)
@@ -144,11 +149,12 @@ void cmdplayer_restartdriver(CmdPlayer* self)
 
 	driversection = NULL;
 	// load
-	// printf("load driver \n");
+	printf("load driver %s:\n",
+		audioconfig_driverpath(&self->audioconfig));
 	psy_audio_player_loaddriver(&self->player,
 		audioconfig_driverpath(&self->audioconfig),
 		NULL /*no config*/, FALSE /*do not open yet*/);
-	// configure
+	// configure	
 	if (psy_audiodriver_configuration(self->player.driver)) {
 		driversection = psy_property_find(self->audioconfig.driverconfigurations,
 			psy_property_key(
@@ -167,8 +173,8 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
 	psy_audio_plugincatcher_init(&self->plugincatcher);
 	psy_audio_plugincatcher_setdirectories(&self->plugincatcher, self->directories);
-	// psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
-	//	workspace_onscanprogress);
+	psy_signal_connect(&self->plugincatcher.signal_scanfile, self,
+		cmdplayer_onscanfile);
 	if (psy_audio_plugincatcher_load(&self->plugincatcher) == PSY_ERRFILE) {
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
@@ -183,7 +189,8 @@ void cmdplayer_scanplugins(CmdPlayer* self)
 
 	psy_audio_plugincatcher_scan(&self->plugincatcher);
 	if (status = psy_audio_plugincatcher_save(&self->plugincatcher)) {
-		printf("Error saving plugin scanner list\n");
+		printf("Error saving plugin scanner list:\n");
+		printf("%s\n",  self->plugincatcher.sections.inipath);
 	}
 }
 
@@ -191,7 +198,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 {	
 	self->directories = psy_property_settext(
 		psy_property_append_section(self->config, "directories"),
-		"Directories");
+		"Directories");		
 	psy_property_sethint(psy_property_settext(
 		psy_property_append_str(
 			self->directories,
@@ -199,13 +206,23 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 			"C:\\Programme\\Psycle\\Songs"),
 		"Song directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
+#ifdef DIVERSALIS__OS__MICROSOFT		
 	psy_property_sethint(psy_property_settext(
 		psy_property_append_str(
 			self->directories,
-			"plugins",
+			"plugins64",
 			"C:\\Programme\\Psycle\\PsyclePlugins"),
-		"Plug-in directory"),
+		"Plug-in directory"),		
 		PSY_PROPERTY_HINT_EDITDIR);
+#else
+	psy_property_sethint(psy_property_settext(
+		psy_property_append_str(
+			self->directories,
+			"plugins64",
+			"../../plugins/build"),
+		"Plug-in directory"),		
+		PSY_PROPERTY_HINT_EDITDIR);
+#endif		
 	psy_property_sethint(psy_property_settext(
 		psy_property_append_str(
 			self->directories,
@@ -318,6 +335,7 @@ void cmdplayer_printoutputdriverlist(CmdPlayer* self)
 {
 	psy_Property* drivers;
 
+	printf("Output driver list:\n");
 	drivers = audioconfig_drivers(&self->audioconfig);
 	if (drivers) {
 		psy_List* p;
@@ -413,6 +431,12 @@ void cmdplayer_idle(CmdPlayer* self)
 #else
 	usleep(20000);
 #endif
+}
+
+void cmdplayer_onscanfile(CmdPlayer* self, psy_audio_PluginCatcher* sender,
+	const char* path, int type)
+{
+	printf("scan: %s\n", path);
 }
 
 // machine callback interface implementation

@@ -130,7 +130,7 @@ const char* dirconfig_plugins32(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "plugins",
+	return psy_property_at_str(self->directories, "plugins32",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 }
 
@@ -138,7 +138,7 @@ const char* dirconfig_plugins64(const DirConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_str(self->directories, "plugins",
+	return psy_property_at_str(self->directories, "plugins64",
 		PSYCLE_PLUGINS32_DEFAULT_DIR);
 }
 

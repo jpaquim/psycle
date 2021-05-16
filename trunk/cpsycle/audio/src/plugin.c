@@ -261,7 +261,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 	const char* path, const char* root)
 {
 	GETINFO GetInfo;
-			
+		
 	psy_audio_custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_plugin_base(self)->vtable = &vtable;
@@ -270,7 +270,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 	psy_library_init(&self->library);
 	psy_library_setenv(&self->library, path, root);
 	psy_library_load(&self->library, path);
-	psy_library_restoreenv(&self->library);
+	psy_library_restoreenv(&self->library);	
 	self->mi = 0;
 	self->plugininfo = 0;
 	self->preventnewline = 0;
@@ -285,14 +285,14 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 			psy_library_dispose(&self->library);			
 		} else {						
 			CMachineInfo* pInfo = GetInfo();
-			if (pInfo) {
+			if (pInfo) {				
 				mi_resetcallback(self->mi);
 				mi_setcallback(self->mi, callback);
 				mi_init(self->mi);
 				tweakdefaults(self, pInfo);
-				self->plugininfo = machineinfo_allocinit();				
+				self->plugininfo = machineinfo_allocinit();												
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, psy_audio_PLUGIN,
-					self->library.path, 0);				
+					self->library.path, 0);								
 				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
 					pInfo->ShortName);
 				if (strcmp(self->plugininfo->ShortName, "BexPhase!") == 0) {

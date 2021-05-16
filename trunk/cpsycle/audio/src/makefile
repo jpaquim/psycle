@@ -4,7 +4,7 @@ src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
 libaudio.a: $(obj)
-	g++ -c $(inc) plugin_interface.cpp
+	g++ -g -c $(inc) plugin_interface.cpp
 	ar rsv $@ $^ plugin_interface.o
 
 %.o: %.c

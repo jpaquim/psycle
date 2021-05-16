@@ -44,7 +44,8 @@ int psy_library_empty(psy_Library* self)
 #include <windows.h>
 #include <excpt.h>
 
-static int FilterException(const char* path, int code, struct _EXCEPTION_POINTERS *ep) 
+static int FilterException(const char* path, int code,
+	struct _EXCEPTION_POINTERS *ep) 
 {	
 	char txt[512];	
 		
@@ -59,6 +60,21 @@ void psy_library_init(psy_Library* self)
 	self->err = 0;
 	self->path = strdup("");
 	self->env = NULL;
+	self->root = NULL;
+}
+
+void psy_library_dispose(psy_Library* self)
+{
+	if (self->module) {
+		FreeLibrary(self->module);		
+		self->err = GetLastError();
+		self->module = NULL;		
+	}
+	free(self->path);
+	self->path = NULL;
+	free(self->env);
+	self->env = NULL;
+	free(self->root);
 	self->root = NULL;
 }
 
@@ -176,29 +192,17 @@ void* psy_library_functionpointer(psy_Library* self, const char* name)
 	return GetProcAddress(self->module, name);
 }
 
-void psy_library_dispose(psy_Library* self)
-{
-	if (self->module) {
-		FreeLibrary(self->module);		
-		self->err = GetLastError();
-		self->module = NULL;		
-	}
-	free(self->path);
-	self->path = NULL;
-	free(self->env);
-	self->env = NULL;
-	free(self->root);
-	self->root = NULL;
-}
-
 #elif defined(DIVERSALIS__OS__APPLE)
 
 #include <CoreFoundation/CoreFoundation.h>
 
 void psy_library_init(psy_Library* self)
 {
-	self->module = 0;
+	self->module = NULL;
 	self->err = 0;
+	self->path = strdup("");
+	self->env = NULL;
+	self->root = NULL;
 }
 
 void psy_library_load(psy_Library* self, const char* path)
@@ -242,9 +246,27 @@ void psy_library_restoreenv(psy_Library* self)
 
 void psy_library_init(psy_Library* self)
 {
-	self->module = 0;
+	self->module = NULL;
 	self->err = 0;
+	self->path = strdup("");
+	self->env = NULL;
+	self->root = NULL;
 }
+
+void psy_library_dispose(psy_Library* self)
+{	
+	if (self->module) {
+		dlclose(self->module);
+		self->module = 0;
+		self->err = 0;
+	}
+	free(self->path);
+	self->path = NULL;
+	free(self->env);
+	self->env = NULL;
+	free(self->root);
+	self->root = NULL;
+}		
 
 void psy_library_load(psy_Library* self, const char* path)
 {	
@@ -268,14 +290,6 @@ void* psy_library_functionpointer(psy_Library* self, const char* name)
 {
 	return dlsym(self->module, name);
 }
-
-void psy_library_dispose(psy_Library* self)
-{
-	if (self->module) {
-		dlclose(self->module);
-		self->module = 0;
-	}
-}		
 
 void psy_library_setenv(psy_Library* self, const char* path, const char* root)
 {
