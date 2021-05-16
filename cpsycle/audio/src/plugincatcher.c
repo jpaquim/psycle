@@ -1,13 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 
-#include "../../detail/os.h"
-
 #include "plugincatcher.h"
-// local
+/* local */
 #include "dummy.h"
 #include "duplicator.h"
 #include "duplicator2.h"
@@ -20,11 +20,12 @@
 #include "xmsampler.h"
 #include "vstplugin.h"
 #include "ladspaplugin.h"
-// file
+/* file */
 #include <dir.h>
-// pltaform
+/* platform*/
 #include "../../detail/portable.h"
 #include "../../detail/cpu.h"
+#include "../../detail/os.h"
 
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -82,9 +83,11 @@ static void makeplugininfo(
 	}
 }
 
-// psy_audio_PluginSections
-// prototypes
-// implementation
+/*
+** psy_audio_PluginSections
+**  prototypes
+**  implementation
+*/
 void psy_audio_pluginsections_init(psy_audio_PluginSections* self)
 {
 	char inipath[_MAX_PATH];
@@ -111,9 +114,9 @@ void psy_audio_pluginsections_dispose(psy_audio_PluginSections* self)
 void psy_audio_pluginsections_reset(psy_audio_PluginSections* self)
 {
 	psy_audio_pluginsections_clear(self);
-	// All scanned plugins	
+	/* will contain all scanned plugins	*/
 	psy_audio_pluginsections_addsection(self, "all");
-	// Add a default Favorite Section
+	/* add a default favorite section */
 	psy_audio_pluginsections_addsection(self, "favorites");
 }
 
@@ -360,7 +363,7 @@ void psy_audio_pluginscantask_init_all(psy_audio_PluginScanTask* self,
 	self->recursive = recursive;
 }
 
-// psy_audio_PluginCategories
+/* psy_audio_PluginCategories */
 void psy_audio_plugincategories_init(psy_audio_PluginCategories* self,
 	psy_Property* plugins)
 {
@@ -418,7 +421,7 @@ psy_TableIterator psy_audio_plugincategories_begin(
 }
 
 
-// psy_audio_PluginCatcher
+/* psy_audio_PluginCatcher */
 static void plugincatcher_initscantasks(psy_audio_PluginCatcher*);
 static void plugincatcher_makeinternals(psy_audio_PluginCatcher*);
 static void plugincatcher_makesampler(psy_audio_PluginCatcher*);
@@ -434,7 +437,7 @@ static void plugincatcher_scan_multipath(psy_audio_PluginCatcher*,
 static const char* searchname;
 static int searchtype;
 static psy_Property* searchresult;
-
+/* implementation */
 void psy_audio_plugincatcher_init(psy_audio_PluginCatcher* self)
 {
 	char inipath[_MAX_PATH];

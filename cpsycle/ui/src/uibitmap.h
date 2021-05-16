@@ -1,26 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_BITMAP_H
 #define psy_ui_BITMAP_H
 
 #include "../../detail/psydef.h"
-// local
+/* local */
 #include "uidef.h"
-// std
+/* std */
 #include <assert.h>
 
-// Graphics Bitmap Interface
-// Pattern: Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_Bitmap
-// Implementor			psy_ui_BitmapImp
-// Concrete Implementor	psy_ui_win_BitmapImp
-//
-// psy_ui_Bitmap <>-------- psy_ui_BitmapImp
-//                                ^
-//      ...                       |
-//                          psy_ui_win_Bitmap
+/*
+** Graphics Bitmap Interface
+** Pattern: Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_Bitmap
+** Implementor			psy_ui_BitmapImp
+** Concrete Implementor	psy_ui_win_BitmapImp
+**
+** psy_ui_Bitmap <>-------- psy_ui_BitmapImp
+**                                ^
+**      ...                       |
+**                          psy_ui_win_Bitmap
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +68,7 @@ typedef struct psy_ui_Bitmap {
 void psy_ui_bitmap_init(psy_ui_Bitmap*);
 void psy_ui_bitmap_init_size(psy_ui_Bitmap*, psy_ui_RealSize);
 
-// vtable calls	
+/* vtable calls	*/
 INLINE void psy_ui_bitmap_dispose(psy_ui_Bitmap* self)
 {
 	self->vtable->dispose(self);
@@ -97,7 +101,7 @@ INLINE void psy_ui_bitmap_settransparency(psy_ui_Bitmap* self, psy_ui_Colour col
 	self->vtable->settransparency(self, colour);
 }
 
-// psy_ui_BitmapImp	
+/* psy_ui_BitmapImp	*/
 typedef void (*psy_ui_bitmap_imp_fp_dispose)(struct psy_ui_BitmapImp*);
 typedef int (*psy_ui_bitmap_imp_fp_load)(struct psy_ui_BitmapImp*, const char* path);
 typedef int (*psy_ui_bitmap_imp_fp_loadresource)(struct psy_ui_BitmapImp*, uintptr_t resourceid);

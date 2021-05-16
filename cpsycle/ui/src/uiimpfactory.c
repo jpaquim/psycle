@@ -1,9 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiimpfactory.h"
+/* std */
 #include <stdlib.h>
 
 struct psy_ui_AppImp* psy_ui_impfactory_allocinit_appimp(psy_ui_ImpFactory* self,
@@ -178,9 +182,9 @@ struct psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(psy_ui_ImpFactory* 
 }
 struct psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
 
-// VTable init
+/* vtable */
 static psy_ui_ImpFactoryVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -208,7 +212,7 @@ static void vtable_init(void)
 		vtable.allocinit_folderdialogimp = allocinit_folderdialogimp;
 		vtable.allocinit_all_folderdialogimp = allocinit_all_folderdialogimp;
 		vtable.allocinit_fontdialogimp = allocinit_fontdialogimp;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 

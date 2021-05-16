@@ -24,7 +24,7 @@
 // platform
 #include "../../detail/portable.h"
 
-int32_t twos_complement(value, bits)
+int32_t twos_complement(int32_t value, uint32_t bits)
 {
 	// if sign bit is set(128 - 255 for 8 bit)
 	if ((value & (1 << (bits - 1))) != 0) {

@@ -213,6 +213,23 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wahwah", "plugins\wahwah\wa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compressor", "plugins\compressor\compressor.vcxproj", "{CE15725E-9A01-4DFF-B083-4A0192435227}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "detail", "detail", "{CFC05A8D-1173-43E7-9ABB-60BC1CB71645}"
+	ProjectSection(SolutionItems) = preProject
+		detail\compiler.h = detail\compiler.h
+		detail\cpu.h = detail\cpu.h
+		detail\miunit.h = detail\miunit.h
+		detail\os.h = detail\os.h
+		detail\portable.h = detail\portable.h
+		detail\prefix.h = detail\prefix.h
+		detail\psyconf.h = detail\psyconf.h
+		detail\psydef.h = detail\psydef.h
+		detail\psyversion.h = detail\psyversion.h
+		detail\stdint.h = detail\stdint.h
+		detail\strcasestr.h = detail\strcasestr.h
+		detail\stringize.h = detail\stringize.h
+		detail\trace.h = detail\trace.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
