@@ -61,6 +61,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua54", "lua54\lua54.vcxproj", "{732187D7-642C-474D-8080-323009F5EB17}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dxjoystick", "driver\dxjoystick\dxjoystick.vcxproj", "{F7B06178-15A8-4CA9-8BEC-E7AC2D60CE2C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B03D2A93-90C0-4FD7-9E41-D72CC990FA3B} = {B03D2A93-90C0-4FD7-9E41-D72CC990FA3B}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "psycle-plugins", "psycle-plugins", "{00C4F927-CA1B-4765-A326-EA959FBDB93C}"
 EndProject
@@ -147,9 +150,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crasher", "plugins\crasher\crasher.vcxproj", "{02220277-C0E8-4762-856B-D4D91753DBA8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delay", "plugins\delay\delay.vcxproj", "{202E4456-BC0F-464D-9123-45B8F57BFFA6}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B03D2A93-90C0-4FD7-9E41-D72CC990FA3B} = {B03D2A93-90C0-4FD7-9E41-D72CC990FA3B}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "distortion", "plugins\distortion\distortion.vcxproj", "{13167956-D169-4340-BBC5-D508EF077490}"
 EndProject

@@ -1,5 +1,9 @@
+#include "../detail/prefix.h"
+
+
 #include "AllPass.hpp"
 #include <algorithm>
+#include <operations.h>
 // #include <universalis/os/aligned_alloc.hpp>
 // #include <psycle/helpers/dsp.hpp>
 

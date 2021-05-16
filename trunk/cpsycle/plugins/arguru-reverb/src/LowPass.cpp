@@ -1,3 +1,6 @@
+#include "../detail/prefix.h"
+
+
 #include "LowPass.hpp"
 
 CLowpass::CLowpass(): cutoff(1.0f), o1(0.0f) {}

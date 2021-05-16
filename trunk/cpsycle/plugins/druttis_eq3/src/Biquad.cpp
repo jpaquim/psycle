@@ -14,7 +14,7 @@
 #include "../detail/prefix.h"
 
 #include "Biquad.h"
-// #include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/math.hpp>
 const double ln2half = 0.34657359027997265470861606072909; // ln(2)/2
 
 //============================================================================

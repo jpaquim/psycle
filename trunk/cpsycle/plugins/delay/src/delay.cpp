@@ -5,13 +5,15 @@
 /// \file
 /// \brief delay
 #include "../detail/prefix.h"
+
+
 #include "plugin.hpp"
-//#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
-#include <operations.h>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
-//	using namespace psycle::helpers::math;
+	using namespace psycle::helpers::math;
+
 
 class Delay : public Plugin
 {
@@ -81,7 +83,7 @@ public:
 		}
 	}
 
-	Delay() : Plugin(information()) { psy_dsp_init(); }
+	Delay() : Plugin(information()) { }
 	/*override*/ void init();
 	/*override*/ void Work(Sample l [], Sample r [], int samples, int);
 	/*override*/ void parameter(const int &);
@@ -154,13 +156,9 @@ inline void Delay::Work(std::vector<Real> & buffer, std::vector<Real>::iterator 
 {
 	const Real read(*buffer_iterator);
 	Real newval = input + feedback * read;
-	float fNewval;
-	fNewval = (float)newval;
-	dsp.erase_all_nans_infinities_and_denormals(&fNewval, 1);
-	newval = fNewval;
-	// erase_all_nans_infinities_and_denormals(newval);
+	erase_all_nans_infinities_and_denormals(newval);
 	*buffer_iterator = newval;
-	if(++buffer_iterator == buffer.end()) buffer_iterator = buffer.begin();
+	if (++buffer_iterator == buffer.end()) buffer_iterator = buffer.begin();
 	input = static_cast<Sample>((*this)(dry) * input + (*this)(wet) * read);
 }
 

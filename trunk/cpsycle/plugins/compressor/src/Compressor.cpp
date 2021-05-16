@@ -23,7 +23,7 @@ Based on svn revision 10189
 
 
 #include "Compressor.h"
-#include <psycle/helpers/math/math.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cmath>
 
 EffectCompressor::EffectCompressor():
