@@ -12,7 +12,7 @@
 //============================================================================
 #pragma once
 
-#include <psycle/helpers/math/math.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 using namespace psycle::helpers::math;
 
 

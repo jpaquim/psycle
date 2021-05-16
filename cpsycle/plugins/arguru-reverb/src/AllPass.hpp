@@ -1,7 +1,6 @@
 #pragma once
 
-// #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
-#include <operations.h>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 
 class CAllPass
 {
@@ -39,8 +38,8 @@ inline void CAllPass::Work(float l_input,float r_input,float g)
 	float tmpleft = l_input+left_output_*g;
 	float tmpright = r_input+right_output_*g;
 
-	dsp.erase_all_nans_infinities_and_denormals(&tmpleft, 1);
-	dsp.erase_all_nans_infinities_and_denormals(&tmpright, 1);
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpleft);
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpright);
 	
 	leftBuffer[Counter] = tmpleft;
 	rightBuffer[Counter] = tmpright;
