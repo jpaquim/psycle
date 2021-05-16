@@ -309,7 +309,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 	}
 	switch (event->type) {
 		case DestroyNotify:
-		dispose_window(self, imp->hwnd);
+			dispose_window(self, imp->hwnd);
 			break;
 		case NoExpose:
 			//expose_window(self, imp,
@@ -622,8 +622,8 @@ void dispose_window(psy_ui_X11App* self, Window window)
 	
 	printf("dispose: %u\n", (unsigned int)window);	
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
-		&self->selfmap, (uintptr_t) window);
-	if (imp) {	
+		&self->selfmap, (uintptr_t) window);	
+	if (imp) {		
 		if (imp->component) {
 			psy_ui_component_dispose(imp->component);
 		} else {

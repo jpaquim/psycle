@@ -159,11 +159,9 @@ void generatorui_drawbackground(GeneratorUi* self, psy_ui_Graphics* g)
 	if (!psy_ui_bitmap_empty(&self->intern.skin->skinbmp)) {
 		skin_blitcoord(g, &self->intern.skin->skinbmp, psy_ui_realpoint_zero(),
 			&self->intern.coords->background);
-	} else {
-		psy_ui_RealRectangle r;
-
-		r = psy_ui_component_position(&self->component);
-		psy_ui_drawsolidrectangle(g, r, self->intern.bgcolour);		
+	} else {		
+		psy_ui_drawsolidrectangle(g, self->intern.coords->background.dest,
+			self->intern.bgcolour);		
 	}
 }
 
