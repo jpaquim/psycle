@@ -396,7 +396,7 @@ static void vtable_init(void)
 		vtable.invalidate = invalidate;
 		vtable.ondragstart = ondragstart;
 		vtable.ondragover = ondragover;
-		vtable.ondrop = ondrop;
+		vtable.ondrop = ondrop;		
 		vtable_initialized = TRUE;
 	}
 }
@@ -416,6 +416,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
 		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
 	}
+	self->imp->vtable->dev_initialized(self->imp);
 }
 
 void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_Component* view)
@@ -440,6 +441,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
 		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
 	}
+	self->imp->vtable->dev_initialized(self->imp);
 }
 
 void dispose(psy_ui_Component* self)
@@ -1399,6 +1401,7 @@ static void dev_mousemove(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 static void dev_mousedoubleclick(psy_ui_ComponentImp* self, psy_ui_MouseEvent* ev) { }
 static void dev_mouseenter(psy_ui_ComponentImp* self) { }
 static void dev_mouseleave(psy_ui_ComponentImp* self) { }
+static void dev_initialized(psy_ui_ComponentImp* self) { }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -1462,6 +1465,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_mousedoubleclick = dev_mousedoubleclick;
 		imp_vtable.dev_mouseenter = dev_mouseenter;
 		imp_vtable.dev_mouseleave = dev_mouseleave;
+		imp_vtable.dev_initialized = dev_initialized;
+		imp_vtable_initialized = TRUE;
 	}
 }
 
@@ -1470,6 +1475,8 @@ void psy_ui_componentimp_init(psy_ui_ComponentImp* self)
 	imp_vtable_init();
 	self->vtable = &imp_vtable;
 	psy_signal_init(&self->signal_command);
+	self->extended_vtable = NULL;
+	self->extended_imp = NULL;
 }
 
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp* self)

@@ -38,9 +38,9 @@ void sequencerbar_init(SequencerBar* self,
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		margin);
 	self->workspace = workspace;
-	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);	
+	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);
 	psy_ui_checkbox_settext(&self->followsong,
-		"seqview.follow-song");
+		"seqview.follow-song");	
 	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);	
 	psy_ui_checkbox_settext(&self->shownames,
 		"seqview.show-pattern-names");			

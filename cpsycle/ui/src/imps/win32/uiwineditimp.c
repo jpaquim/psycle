@@ -58,9 +58,10 @@ static void* dev_platform(psy_ui_win_EditImp* self) { return (void*) &self->win_
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
 
-static void imp_vtable_init(void)
+static void imp_vtable_init(psy_ui_win_EditImp* self)
 {
-	if (!vtable_initialized) {		
+	if (!vtable_initialized) {
+		vtable = *self->win_component_imp.imp.vtable;
 		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
 		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
 		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
@@ -141,7 +142,7 @@ void psy_ui_win_editimp_init(psy_ui_win_EditImp* self,
 		0, 0, 100, 20,		
 		WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT,
 		1);	
-	imp_vtable_init();
+	imp_vtable_init(self);
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_editimp_init(&self->imp);
 	editimp_imp_vtable_init(self);
@@ -161,7 +162,7 @@ void psy_ui_win_editimp_multiline_init(psy_ui_win_EditImp* self,
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_LEFT,
 		1);
-	imp_vtable_init();
+	imp_vtable_init(self);
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_editimp_init(&self->imp);
 	editimp_imp_vtable_init(self);

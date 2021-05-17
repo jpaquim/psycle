@@ -3,9 +3,11 @@ inc = -I ../src -I../../container/src -I../../file/src -I../../../diversalis/src
 cflags = -Wfatal-errors
 src = $(wildcard *.c)
 srcimp = $(wildcard imps/x11/*.c)
+srcnativeimp = $(wildcard imps/natives/*.c)
 obj = $(src:.c=.o)
 objimp = $(srcimp:.c=.o)
-objall = $(obj) $(objimp)
+objnativeimp = $(srcnativeimp:.c=.o)
+objall = $(obj) $(objimp) $(objnativeimp)
 
 libpsyui.a: $(obj)
 	ar rsv $@ *.o
@@ -13,7 +15,8 @@ libpsyui.a: $(obj)
 %.o: %.c
 	$(CC) $(cflags) $(inc) -g -c $(src);
 	$(CC) $(cflags) $(inc) -g -c $(srcimp);
+	$(CC) $(cflags) $(inc) -g -c $(srcnativeimp);
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) $(objimp) libpsyui.a	
+	rm -f $(obj) $(objimp) $(objnativeimp) libpsyui.a	

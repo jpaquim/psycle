@@ -97,6 +97,7 @@ static void dev_mousemove(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
 static void dev_mousedoubleclick(psy_ui_win_ComponentImp*, psy_ui_MouseEvent*);
 static void dev_mouseenter(psy_ui_win_ComponentImp*);
 static void dev_mouseleave(psy_ui_win_ComponentImp*);
+static void dev_initialized(psy_ui_win_ComponentImp* self) { }
 
 static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Component* src,
 	psy_ui_Component* dst);
@@ -264,6 +265,9 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_mouseleave =
 			(psy_ui_fp_componentimp_dev_mouseleave)
 			dev_mouseleave;
+		vtable.dev_initialized =
+			(psy_ui_fp_componentimp_dev_initialized)
+			dev_initialized;
 		vtable_initialized = TRUE;
 	}
 }

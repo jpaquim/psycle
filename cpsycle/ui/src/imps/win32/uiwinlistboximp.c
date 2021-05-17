@@ -60,9 +60,10 @@ static int windowstyle(HWND hwnd);
 static psy_ui_ComponentImpVTable vtable;
 static int vtable_initialized = 0;
 
-static void imp_vtable_init(void)
+static void imp_vtable_init(psy_ui_win_ListBoxImp* self)
 {
 	if (!vtable_initialized) {		
+		vtable = *self->win_component_imp.imp.vtable;
 		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
 		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
 		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
@@ -155,7 +156,7 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 		0, 0, 100, 200,
 		(WS_CHILD | WS_VISIBLE | LBS_STANDARD & ~LBS_SORT | LBS_NOTIFY) & ~WS_BORDER,
 		1);
-	imp_vtable_init();
+	imp_vtable_init(self);
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);
@@ -176,7 +177,7 @@ void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
 		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL & ~LBS_SORT | LBS_NOTIFY)
 		& ~WS_BORDER,
 		1);
-	imp_vtable_init();
+	imp_vtable_init(self);
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);

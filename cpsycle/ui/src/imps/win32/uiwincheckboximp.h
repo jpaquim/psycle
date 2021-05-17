@@ -18,25 +18,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct psy_ui_win_CheckBoxImp {
-	psy_ui_CheckBoxImp imp;
-	psy_ui_win_ComponentImp win_component_imp;	
-	struct psy_ui_Component* component;	
-} psy_ui_win_CheckBoxImp;
-
-void psy_ui_win_checkboximp_init(psy_ui_win_CheckBoxImp*,
+	
+void psy_ui_win_checkboximp_init(psy_ui_win_ComponentImp*,
 	struct psy_ui_Component*,
 	struct psy_ui_ComponentImp* parent);
-void psy_ui_win_checkboximp_init_multiline(psy_ui_win_CheckBoxImp*,
+void psy_ui_win_checkboximp_init_multiline(psy_ui_win_ComponentImp*,
 	psy_ui_Component*,
 	psy_ui_ComponentImp*);
 
-psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_alloc(void);
-psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit(
+psy_ui_win_ComponentImp* psy_ui_win_checkboximp_alloc(void);
+psy_ui_win_ComponentImp* psy_ui_win_checkboximp_allocinit(
 	struct psy_ui_Component* component,
 	psy_ui_ComponentImp* parent);
-psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit_multiline(
+psy_ui_win_ComponentImp* psy_ui_win_checkboximp_allocinit_multiline(
 	struct psy_ui_Component* component,
 	psy_ui_ComponentImp* parent);
 

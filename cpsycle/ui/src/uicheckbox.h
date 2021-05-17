@@ -6,9 +6,8 @@
 #ifndef psy_ui_CHECKBOX_H
 #define psy_ui_CHECKBOX_H
 
-
+/* local */
 #include "uicomponent.h"
-#include "../../detail/psyconf.h"
 
 /* CheckBox */
 
@@ -16,23 +15,23 @@
 extern "C" {
 #endif
 
-#ifdef PSY_USE_PLATFORM_CHECKBOX
-
 /*
+** psy_ui_CheckBox
+**
 ** Bridge
 ** Aim: avoid coupling to one platform (win32, xt/motif, etc)
-** Abstraction/Refined  psy_ui_Label
-** Implementor			psy_ui_LabelImp
-** Concrete Implementor	psy_ui_win_LabelImp
+** Abstraction/Refined  psy_ui_CheckBox
+** Implementor			psy_ui_ComponentImp
+** Concrete Implementor	psy_ui_win_CheckBoxImp, psy_ui_native_CheckBoxImp
 **
 ** psy_ui_Component <>----<> psy_ui_ComponentImp <---- psy_ui_win_ComponentImp
 **      ^                               ^                        |
 **      |                               |                        | 
 **      |                               |                        <> 
-** psy_ui_CheckBox            psy_ui_CheckBoxImp <-- psy_ui_WinCheckBoxImp
+** psy_ui_CheckBox            psy_ui_ComponentImp <-- psy_ui_WinCheckBoxImp
 */
 
-struct psy_ui_CheckBoxImp;
+struct psy_ui_ComponentImp;
 
 typedef struct psy_ui_CheckBox {
    /* inherits */
@@ -40,24 +39,10 @@ typedef struct psy_ui_CheckBox {
    /* signals */
    psy_Signal signal_clicked;
    /* internal */
-   struct psy_ui_CheckBoxImp* imp;
    char* text;
    char* translation;
    int multiline;   
 } psy_ui_CheckBox;
-
-#else
-
-typedef struct {
-    psy_ui_Component component;    
-    psy_Signal signal_clicked;
-    char* text;
-    char* translation;
-    int multiline;
-    int state;
-} psy_ui_CheckBox;
-
-#endif
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_init_multiline(psy_ui_CheckBox*, psy_ui_Component* parent);
@@ -75,13 +60,13 @@ INLINE psy_ui_Component* psy_ui_checkbox_base(psy_ui_CheckBox* self)
 }
 
 /* uicheckboximp */
-struct psy_ui_CheckBoxImp;
+struct psy_ui_ComponentImp;
 /* vtable function pointers */
-typedef void (*psy_ui_fp_checkboximp_dev_settext)(struct psy_ui_CheckBoxImp*, const char* text);
-typedef void (*psy_ui_fp_checkboximp_dev_text)(struct psy_ui_CheckBoxImp*, char* text);
-typedef void (*psy_ui_fp_checkboximp_dev_check)(struct psy_ui_CheckBoxImp*);
-typedef void (*psy_ui_fp_checkboximp_dev_disablecheck)(struct psy_ui_CheckBoxImp*);
-typedef int (*psy_ui_fp_checkboximp_dev_checked)(struct psy_ui_CheckBoxImp*);
+typedef void (*psy_ui_fp_checkboximp_dev_settext)(struct psy_ui_ComponentImp*, const char* text);
+typedef void (*psy_ui_fp_checkboximp_dev_text)(struct psy_ui_ComponentImp*, char* text);
+typedef void (*psy_ui_fp_checkboximp_dev_check)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_checkboximp_dev_disablecheck)(struct psy_ui_ComponentImp*);
+typedef int (*psy_ui_fp_checkboximp_dev_checked)(struct psy_ui_ComponentImp*);
 
 typedef struct {
     psy_ui_fp_checkboximp_dev_settext dev_settext;    
@@ -91,12 +76,12 @@ typedef struct {
     psy_ui_fp_checkboximp_dev_checked dev_checked;
 } psy_ui_CheckBoxImpVTable;
 
-typedef struct psy_ui_CheckBoxImp {
-    psy_ui_ComponentImp component_imp;    
-    psy_ui_CheckBoxImpVTable* vtable;
-} psy_ui_CheckBoxImp;
+void psy_ui_checkboximp_extend(psy_ui_ComponentImp*);
 
-void psy_ui_checkboximp_init(psy_ui_CheckBoxImp*);
+INLINE psy_ui_CheckBoxImpVTable* psy_ui_checkboximp_vtable(psy_ui_ComponentImp* self)
+{
+    return (psy_ui_CheckBoxImpVTable*)self->extended_vtable;
+}
 
 #ifdef __cplusplus
 }
