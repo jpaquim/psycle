@@ -283,7 +283,7 @@ void psy_ui_app_changedefaultfontsize(psy_ui_App* self, int size)
 
 	assert(self);
 
-	fontinfo = psy_ui_font_fontinfo(&psy_ui_style(psy_ui_STYLE_ROOT)->font);	
+	fontinfo = psy_ui_font_fontinfo(&psy_ui_style_const(psy_ui_STYLE_ROOT)->font);	
 	fontinfo.lfHeight = size;	
 	psy_ui_font_init(&font, &fontinfo);
 	psy_ui_replacedefaultfont(self->main, &font);
@@ -336,14 +336,24 @@ bool psy_ui_app_hasdarktheme(const psy_ui_App* self)
 	return psy_ui_defaults()->styles.theme == psy_ui_DARKTHEME;
 }
 
-const psy_ui_Style* psy_ui_app_style(const psy_ui_App* self, uintptr_t styletype)
+psy_ui_Style* psy_ui_app_style(psy_ui_App* self, uintptr_t styletype)
+{
+	return psy_ui_defaults_style(&self->defaults, styletype);
+}
+
+const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App* self, uintptr_t styletype)
 {
 	return psy_ui_defaults_style_const(&self->defaults, styletype);
 }
 
-const psy_ui_Style* psy_ui_style(uintptr_t styletype)
+psy_ui_Style* psy_ui_style(uintptr_t styletype)
 {
 	return psy_ui_app_style(psy_ui_app(), styletype);
+}
+
+const psy_ui_Style* psy_ui_style_const(uintptr_t styletype)
+{
+	return psy_ui_app_style_const(psy_ui_app(), styletype);
 }
 
 /* psy_ui_AppImp */

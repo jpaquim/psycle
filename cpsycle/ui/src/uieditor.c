@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uieditor.h"
 
@@ -9,12 +12,14 @@
 
 #define BLOCKSIZE 128 * 1024
 
+/* local */
 #include "uiapp.h"
 #include "uilabel.h"
 #include "imps/win32/uiwincomponentimp.h"
 #include "uiimpfactory.h"
+/* external libs */
 #include "scintilla/include/scintilla.h"
-// std
+/* std */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,7 +66,7 @@ static void vtable_init(psy_ui_Editor* self)
 	}
 	self->component.vtable = &vtable;
 }
-// implementation
+/* implementation */
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  					
 	printf("Init Editor\n");
@@ -84,11 +89,11 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			if (imp->hwnd) {
 				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
 				vtable_init(self);				
-				psy_ui_editor_setcolour(self, psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+				psy_ui_editor_setcolour(self, psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 				psy_ui_editor_setcaretcolour(self,
-					psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+					psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 				psy_ui_editor_setbackgroundcolour(self,
-					psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour);
+					psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
 				psy_ui_editor_setfont(self, NULL);
 				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
@@ -96,7 +101,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 				sci(self, SCI_SETMARGINWIDTHN, 3, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 4, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 5, 0);
-				// sci(self, SCI_SETCARETSTYLE, CARETSTYLE_BLOCK, 0);
+				/* sci(self, SCI_SETCARETSTYLE, CARETSTYLE_BLOCK, 0); */
 				psy_ui_editor_styleclearall(self);				
 			}
 		}
@@ -105,7 +110,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	{	
 		printf("Init Editor\n");
 		psy_ui_component_init(&self->component, parent, NULL);
-		/*psy_ui_LabelImp* imp;
+		/* psy_ui_LabelImp* imp;
 		
 		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 		psy_ui_component_init_imp(&self->component, parent, &imp->component_imp);
@@ -121,7 +126,8 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 #else
 		imp->vtable->dev_settext(imp,
 			"Editor can't be used. Scintilla disabled in build\n");
-#endif*/
+#endif
+*/
 	}
 }
 
@@ -338,11 +344,11 @@ void psy_ui_editor_disablewrap(psy_ui_Editor* self)
 
 void psy_ui_editor_onstylesupdate(psy_ui_Editor* self)
 {
-	psy_ui_editor_setcolour(self, psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+	psy_ui_editor_setcolour(self, psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 	psy_ui_editor_setcaretcolour(self,
-		psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+		psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 	psy_ui_editor_setbackgroundcolour(self,
-		psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour);
+		psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
 	psy_ui_editor_setfont(self, NULL);
 }
 

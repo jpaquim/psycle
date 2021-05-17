@@ -1,14 +1,18 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uiimage.h"
 
+/* prototypes */
 static void ondestroy(psy_ui_Image*);
 static void ondraw(psy_ui_Image*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
-
+/* implementation */
 void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
     psy_ui_component_init(&self->component, parent, NULL);

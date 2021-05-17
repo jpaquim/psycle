@@ -194,11 +194,7 @@ void mainframe_init(MainFrame* self)
 	save_translator_template();
 #endif
 	if (!workspace_hasplugincache(&self->workspace)) {
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
-		/* todo dir enum linux */
-#else
 		workspace_scanplugins(&self->workspace);
-#endif
 	}
 	workspace_setstartpage(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;

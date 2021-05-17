@@ -1,18 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uicomponent.h"
-// local
+/* local */
 #include "uiapp.h"
 #include "uigridaligner.h"
 #include "uiimpfactory.h"
 #include "uilclaligner.h"
 #include "uiviewcomponentimp.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 /* todo: includes for SW_MAXIMIZE */
@@ -83,11 +86,11 @@ const psy_ui_Font* psy_ui_component_font(const psy_ui_Component* self)
 	const psy_ui_Font* rv;
 	const psy_ui_Style* common;	
 
-	common = psy_ui_style(psy_ui_STYLE_ROOT);
+	common = psy_ui_style_const(psy_ui_STYLE_ROOT);
 	if (self->style.currstyle->use_font) {
 		rv = &self->style.currstyle->font;
 	} else {
-		rv = &psy_ui_style(psy_ui_STYLE_ROOT)->font;
+		rv = &psy_ui_style_const(psy_ui_STYLE_ROOT)->font;
 	}
 	return rv;
 }
@@ -131,7 +134,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 		curr = psy_ui_component_parent(curr);
 	}
 	if (!curr) {		
-		base = psy_ui_style(psy_ui_STYLE_ROOT)->backgroundcolour;
+		base = psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour;
 	}	
 	return base;
 }
@@ -174,7 +177,7 @@ psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 		curr = psy_ui_component_parent(curr);
 	}
 	if (!curr) {
-		base = psy_ui_style(psy_ui_STYLE_ROOT)->colour;
+		base = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
 	}
 	return base;
 }
@@ -200,7 +203,7 @@ void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 	if (main) {
 		psy_ui_Style* root;		
 
-		root = (psy_ui_Style*)psy_ui_style(psy_ui_STYLE_ROOT);
+		root = (psy_ui_Style*)psy_ui_style_const(psy_ui_STYLE_ROOT);
 		psy_ui_font_dispose(&root->font);
 		psy_ui_font_init(&root->font, NULL);
 		psy_ui_font_copy(&root->font, font);
@@ -223,7 +226,7 @@ static void psy_ui_component_checkbackgroundanimation(psy_ui_Component*);
 static psy_ui_Size psy_ui_component_sub_border(const psy_ui_Component*,
 	psy_ui_Size);
 
-// vtable
+/* vtable */
 static void dispose(psy_ui_Component*);
 static void destroy(psy_ui_Component*);
 static void show(psy_ui_Component*);
@@ -244,8 +247,7 @@ static void preventinput(psy_ui_Component*);
 static void invalidate(psy_ui_Component*);
 static uintptr_t section(const psy_ui_Component* self) { return 0; }
 static void setalign(psy_ui_Component* self, psy_ui_AlignType align) {  }
-
-// events
+/* events */
 static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
@@ -365,7 +367,7 @@ static void vtable_init(void)
 		vtable.children = children;
 		vtable.section = section;
 		vtable.setalign = setalign;
-		// events
+		/* events */
 		vtable.ondestroy = ondestroy;
 		vtable.ondestroyed = ondestroyed;
 		vtable.ondraw = 0;
@@ -461,8 +463,7 @@ void invalidate(psy_ui_Component* self)
 }
 
 void psy_ui_component_updatefont(psy_ui_Component* self)
-{
-	// assert(self->imp);   
+{	
 	if (self->imp) {		
 		self->imp->vtable->dev_setfont(self->imp,
 			psy_ui_component_font(self));
@@ -597,7 +598,6 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_focus);
 	psy_signal_init(&self->signal_focuslost);
 	psy_signal_init(&self->signal_align);
-//	psy_signal_init(&self->signal_preferredsize);	
 	psy_signal_init(&self->signal_preferredsizechanged);
 	psy_signal_init(&self->signal_command);
 	psy_signal_init(&self->signal_selectsection);
@@ -687,8 +687,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_hide);
 	psy_signal_dispose(&self->signal_focus);
 	psy_signal_dispose(&self->signal_focuslost);
-	psy_signal_dispose(&self->signal_align);
-	// psy_signal_dispose(self->signal_preferredsize);	
+	psy_signal_dispose(&self->signal_align);	
 	psy_signal_dispose(&self->signal_command);
 	psy_signal_dispose(&self->signal_preferredsizechanged);
 	psy_signal_dispose(&self->signal_selectsection);
@@ -1308,7 +1307,7 @@ void psy_ui_component_setcursor(psy_ui_Component* self, psy_ui_CursorStyle style
 static psy_ui_TextMetric default_tm;
 static bool default_tm_initialized = FALSE;
 
-// psy_ui_ComponentImp vtable
+/* psy_ui_ComponentImp vtable */
 static void dev_dispose(psy_ui_ComponentImp* self) { }
 static void dev_destroy(psy_ui_ComponentImp* self) { }
 static void dev_destroyed(psy_ui_ComponentImp* self) { }
@@ -2079,7 +2078,7 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 		}
 		psy_list_free(q);
 	}
-	// align				
+	/* align */
 	psy_ui_component_align_full(main);	
 	psy_ui_component_invalidate(main);	
 }
@@ -2091,17 +2090,21 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 	psy_ui_RealPoint restoreorigin;
 	psy_ui_RealPoint origin;
 
-	// draw background						
+	/* draw background */
 	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self, g);
 	}	
 	psy_ui_component_drawborder(self, g);
-	// prepare a clip rect that can be used by a component
-	// to optimize the draw amount	
+	/*
+	** prepare a clip rect that can be used by a component
+	** to optimize the draw amount
+	*/
 	psy_ui_realrectangle_settopleft(&g->clip,
 		psy_ui_realpoint_make(g->clip.left, g->clip.top));
-	// add scroll coords	
-	// spacing
+	/*
+	** add scroll coords	
+	**  spacing
+	*/
 	restoreorigin = psy_ui_origin(g);
 	spacing = psy_ui_component_spacing_px(self);
 	if (!psy_ui_realmargin_iszero(&spacing)) {
@@ -2110,11 +2113,11 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 		origin.y -= (int)spacing.top;
 		psy_ui_setorigin(g, origin);
 	}
-	// prepare colours
+	/* prepare colours */
 	psy_ui_setcolour(g, psy_ui_component_colour(self));
 	psy_ui_settextcolour(g, psy_ui_component_colour(self));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	// call specialization methods (vtable, then signals)			
+	/* call specialization methods (vtable, then signals) */
 	if (self->vtable->ondraw) {
 		self->vtable->ondraw(self, g);
 	}
@@ -2152,7 +2155,7 @@ void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
 				if (psy_ui_realrectangle_intersection(&intersection, &position)) {
 					psy_ui_RealPoint origin;
 
-					// translate graphics clip and origin
+					/* translate graphics clip and origin */
 					psy_ui_realrectangle_settopleft(&intersection,
 						psy_ui_realpoint_make(
 							intersection.left - position.left,

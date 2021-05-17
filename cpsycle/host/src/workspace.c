@@ -1043,6 +1043,7 @@ void workspace_save_configuration(Workspace* self)
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
 	midiviewconfig_makecontrollersave(
 		psycleconfig_midi(&self->config));
+	printf("save psycle configuration: %s\n", psy_path_full(&path));
 	propertiesio_save(&self->config.config, psy_path_full(&path));
 	psy_path_dispose(&path);
 }

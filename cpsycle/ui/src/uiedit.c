@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -158,7 +160,7 @@ void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax)
 	self->imp->vtable->dev_setsel(self->imp, cpmin, cpmax);
 }
 
-// signal_accept event handling
+/* signal_accept event handling */
 void psy_ui_edit_onkeydown(psy_ui_Edit* self, psy_ui_KeyboardEvent* ev)
 {
 	assert(self);
@@ -224,7 +226,7 @@ void psy_ui_edit_onmousehook(psy_ui_Edit* self, psy_ui_App* sender,
 }
 
 
-// psy_ui_EditImp vtable
+/* psy_ui_EditImp vtable */
 static void dev_settext(psy_ui_EditImp* self, const char* title) { }
 static void dev_text(psy_ui_EditImp* self, char* text) { }
 static void dev_setstyle(psy_ui_EditImp* self, int style) { }

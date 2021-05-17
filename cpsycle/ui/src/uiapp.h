@@ -62,7 +62,6 @@ typedef struct psy_ui_App {
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
-const psy_ui_Style* psy_ui_style(uintptr_t styletype);
 
 void psy_ui_app_init(psy_ui_App*, bool dark, uintptr_t instance);
 void psy_ui_app_dispose(psy_ui_App*);
@@ -82,7 +81,8 @@ void psy_ui_app_setdefaultfont(psy_ui_App*, psy_ui_Font*);
 void psy_ui_app_lighttheme(psy_ui_App*);
 void psy_ui_app_darktheme(psy_ui_App*);
 bool psy_ui_app_hasdarktheme(const psy_ui_App*);
-const psy_ui_Style* psy_ui_app_style(const psy_ui_App*, uintptr_t styletype);
+psy_ui_Style* psy_ui_app_style(psy_ui_App*, uintptr_t styletype);
+const psy_ui_Style* psy_ui_app_style_const(const psy_ui_App*, uintptr_t styletype);
 void psy_ui_app_sethover(psy_ui_App*, struct psy_ui_Component* hover);
 void psy_ui_app_startdrag(psy_ui_App*);
 void psy_ui_app_stopdrag(psy_ui_App*);
@@ -99,6 +99,10 @@ INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 
 	return self->imp_factory;
 }
+
+psy_ui_Style* psy_ui_style(uintptr_t styletype);
+const psy_ui_Style* psy_ui_style_const(uintptr_t styletype);
+
 
 /* psy_ui_AppImp */
 typedef void (*psy_ui_fp_appimp_dispose)(struct psy_ui_AppImp*);

@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_COMPONENT_H
 #define psy_ui_COMPONENT_H
 
-// local
+/* local */
 #include "uicomponentscroll.h"
 #include "uicomponentstyle.h"
 #include "uicomponentsizehints.h"
@@ -13,27 +15,29 @@
 #include "uigraphics.h"
 #include "uimenu.h"
 #include "uistyle.h"
-// container
+/* container */
 #include <list.h>
 #include <signal.h>
 #include <translator.h>
-// std
+/* std */
 #include <math.h>
 #include <stdio.h>
 
-// psy_ui_Component
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_Component
-// Implementor			psy_ui_ComponentImp
-// Concrete Implementor	psy_ui_win_ComponentImp
-//
-// Backreference imp to component for imp/component mapping and events
-//
-// psy_ui_Component <>--------<> psy_ui_ComponentImp
-//     imp->dev_invalidate                ^
-//     ...                                |
-//                             psy_ui_win_ComponentImp
+/*
+** psy_ui_Component
+**  Bridge
+**  Aim: avoid coupling to one platform (win32, xt/motif, etc)
+**  Abstraction/Refined  psy_ui_Component
+**  Implementor			psy_ui_ComponentImp
+**  Concrete Implementor	psy_ui_win_ComponentImp
+**
+** Backreference imp to component for imp/component mapping and events
+**
+** psy_ui_Component <>--------<> psy_ui_ComponentImp
+**     imp->dev_invalidate                ^
+**     ...                                |
+**                             psy_ui_win_ComponentImp
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +64,7 @@ psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_alloc(void);
 psy_ui_ComponentContainerAlign* psy_ui_componentcontaineralign_allocinit(void);
 void psy_ui_componentcontaineralign_deallocate(psy_ui_ComponentContainerAlign*);
 
-// vtable function pointers
+/* vtable function pointers */
 typedef void (*psy_ui_fp_component_dispose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_destroy)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_show)(struct psy_ui_Component*);
@@ -88,7 +92,7 @@ typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_invalidate)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_setalign)(struct psy_ui_Component*, psy_ui_AlignType);
-// vtable events function pointers 
+/* vtable events function pointers */
 typedef void (*psy_ui_fp_component_ondestroy)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_ondestroyed)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onalign)(struct psy_ui_Component*);
@@ -134,7 +138,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_invalidate invalidate;
 	psy_ui_fp_component_section section;
 	psy_ui_fp_component_setalign setalign;
-	// events
+	/* events */
 	psy_ui_fp_component_ondestroy ondestroy;
 	psy_ui_fp_component_ondestroyed ondestroyed;
 	psy_ui_fp_component_ondraw ondraw;
@@ -166,7 +170,7 @@ typedef void* psy_ui_ComponentDetails;
 
 struct psy_ui_ComponentImp;
 
-// psy_ui_Component
+/* psy_ui_Component */
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
 	struct psy_ui_ComponentImp* imp;
@@ -385,14 +389,14 @@ void psy_ui_component_setid(psy_ui_Component*, uintptr_t id);
 uintptr_t psy_ui_component_id(const psy_ui_Component*);
 psy_ui_Component* psy_ui_component_byid(psy_ui_Component*, uintptr_t id);
 
-// psy_ui_ComponentImp
-// flags
+/* psy_ui_ComponentImp */
+/* flags */
 typedef enum psy_ui_ComponentImpFlags {
 	psy_ui_COMPONENTIMPFLAGS_NONE = 0,
 	psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN = 1
 } psy_ui_ComponentImpFlags;
 
-// vtable function pointers
+/* vtable function pointers */
 typedef void (*psy_ui_fp_componentimp_dev_dispose)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_destroy)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_destroyed)(struct psy_ui_ComponentImp*);
@@ -543,7 +547,7 @@ INLINE void psy_ui_component_clear(psy_ui_Component* self)
 	self->imp->vtable->dev_clear(self->imp);
 }
 
-// returns the element’s size that includes padding and border
+/* returns the element’s size that includes padding and border */
 psy_ui_Size psy_ui_component_offsetsize(const psy_ui_Component* self);
 
 INLINE psy_ui_RealRectangle psy_ui_component_position(const psy_ui_Component* self)
@@ -582,14 +586,16 @@ INLINE psy_ui_Size psy_ui_component_textsize(const psy_ui_Component* self, const
 		psy_ui_component_font(self));
 }
 
-// returns the content's size(excludes padding and border)
+/* returns the content's size(excludes padding and border) */
 psy_ui_Size psy_ui_component_size(const psy_ui_Component*);
 
-// returns the element’s size that include padding but without the border
+/* returns the element’s size that include padding but without the border */
 psy_ui_Size psy_ui_component_clientsize(const psy_ui_Component*);
 
-// returns the element’s entire size that includes padding but
-// not border, not margin and not scrollbars
+/*
+** returns the element’s entire size that includes padding but
+** not border, not margin and not scrollbars
+*/
 psy_ui_Size psy_ui_component_scrollsize(const psy_ui_Component*);
 
 void psy_ui_component_setcolour(psy_ui_Component*, psy_ui_Colour);

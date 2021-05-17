@@ -293,10 +293,10 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 			}			
 		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQ_PROGRESS)->colour);
+			psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
 		} else {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW)->colour);
+			psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 		}
 		seqviewtrack_drawentry(self, g, sequenceentry, c, cp);
 	}
@@ -366,7 +366,7 @@ void seqviewtrack_drawprogressbar(SeqViewTrack* self, psy_ui_Graphics* g,
 		psy_ui_value_px(&self->state->lineheight,
 			psy_ui_component_textmetric(&self->component), NULL)));
 	psy_ui_drawsolidrectangle(g, r,
-		psy_ui_style(STYLE_SEQ_PROGRESS)->backgroundcolour);
+		psy_ui_style_const(STYLE_SEQ_PROGRESS)->backgroundcolour);
 }
 
 void seqviewtrack_onpreferredsize(SeqViewTrack* self,

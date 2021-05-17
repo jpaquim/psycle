@@ -1,23 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/* 
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_EDIT_H
 #define psy_ui_EDIT_H
 
 #include "uicomponent.h"
 
-// Edit
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_Edit
-// Implementor			psy_ui_EditImp
-// Concrete Implementor	psy_ui_win_EditImp
-//
-// psy_ui_Component <>----<> psy_ui_ComponentImp  <---- psy_ui_win_ComponentImp
-//      ^                               ^                         |
-//      |                               |                         | 
-//      |                               |                        <> 
-// psy_ui_Edit                   psy_ui_EditImp <------ psy_ui_WinEditImp
+/*
+** Edit
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_Edit
+** Implementor			psy_ui_EditImp
+** Concrete Implementor	psy_ui_win_EditImp
+**
+** psy_ui_Component <>----<> psy_ui_ComponentImp  <---- psy_ui_win_ComponentImp
+**      ^                               ^                         |
+**      |                               |                         |
+**      |                               |                        <>
+** psy_ui_Edit                   psy_ui_EditImp <------ psy_ui_WinEditImp
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,18 +30,22 @@ extern "C" {
 struct psy_ui_EditImp;
 
 typedef struct psy_ui_Edit {
-    // inherits
+    /* inherits */
 	psy_ui_Component component;
-    // signals
-    // emits any change
+    /* signals */
+    /* emits any change */
     psy_Signal signal_change;
-    // emits if edit is inputfield and
-    // - return pressed or
-    // - focus lost or
-    // - clicked outside
+    /*
+    ** emits if edit is inputfield and
+    ** - return pressed or
+    ** - focus lost or
+    ** - clicked outside
+    */
     psy_Signal signal_accept;
-    // emits if edit is inputfield and
-    // - esc pressed
+    /*
+    ** emits if edit is inputfield and
+    ** - esc pressed
+    */
     psy_Signal signal_reject;
     // internal
     struct psy_ui_EditImp* imp;
@@ -65,8 +73,8 @@ INLINE psy_ui_Component* psy_ui_edit_base(psy_ui_Edit* self)
     return &self->component;
 }
 
-// uieditimp
-// vtable function pointers
+/* uieditimp */
+/* vtable function pointers */
 typedef void (*psy_ui_fp_editimp_dev_settext)(struct psy_ui_EditImp*, const char* text);
 typedef void (*psy_ui_fp_editimp_dev_text)(struct psy_ui_EditImp*, char* text);
 typedef void (*psy_ui_fp_editimp_dev_enableedit)(struct psy_ui_EditImp*);

@@ -1,12 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uilistbox.h"
+/* local */
 #include "uiimpfactory.h"
 #include "uiapp.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -153,7 +157,7 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 
 #endif
 
-// psy_ui_ListBoxImp vtable
+/* psy_ui_ListBoxImp vtable */
 static int dev_addtext(psy_ui_ListBoxImp* self, const char* text) { return -1; }
 static void dev_settext(psy_ui_ListBoxImp* self, const char* text,
 	intptr_t index)
@@ -198,7 +202,7 @@ void psy_ui_listboximp_init(psy_ui_ListBoxImp* self)
 
 #ifndef PSY_USE_PLATFORM_LISTBOX
 
-// ListBoxClient
+/* ListBoxClient */
 
 static void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient*,
 	psy_ui_Component* sender);
@@ -370,7 +374,7 @@ intptr_t  psy_ui_listboxclient_count(psy_ui_ListBoxClient* self)
 	return psy_table_size(&self->items);
 }
 
-// ListBox
+/* ListBox */
 static void ondestroy(psy_ui_ListBox*, psy_ui_Component* sender);
 static void psy_ui_listbox_onselchanged(psy_ui_ListBox*, psy_ui_ListBoxClient*
 	sender);

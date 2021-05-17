@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uicombobox.h"
-// local
+/* local */
 #include "uiapp.h"
 #include "uiicondraw.h"
 #include "uiimpfactory.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void onpreferredsize(psy_ui_ComboBox*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void ondestroy(psy_ui_ComboBox*, psy_ui_Component* sender);
@@ -24,7 +27,7 @@ static bool haspreventry(const psy_ui_ComboBox*);
 static bool hasnextentry(const psy_ui_ComboBox*);
 static void onupdatestyles(psy_ui_ComboBox*);
 static void updatestyles(psy_ui_ComboBox*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -44,7 +47,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 		vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view)
 {
@@ -315,15 +318,15 @@ void updatestyles(psy_ui_ComboBox* self)
 {
 	assert(self);
 
-	// if (self->hover != psy_ui_COMBOBOXHOVER_NONE) {
-		// self->component.style.currstyle = &self->component.style.hover;
-	// } else {
+	/* if (self->hover != psy_ui_COMBOBOXHOVER_NONE) {
+		 self->component.style.currstyle = &self->component.style.hover;
+	   } else {
 		self->component.style.currstyle = &self->component.style.overridestyle;
-	// }
+	   } */
 }
 
-// psy_ui_ComboBoxImp
-// fallbacks
+/* psy_ui_ComboBoxImp */
+/* fallbacks */
 static int dev_addtext(psy_ui_ComboBoxImp* self, const char* text)
 {
 	return -1;
@@ -348,7 +351,7 @@ static void dev_selitems(psy_ui_ComboBoxImp* self, intptr_t* items,
 static intptr_t dev_count(psy_ui_ComboBoxImp* self) { return 0; }
 static intptr_t dev_selcount(psy_ui_ComboBoxImp* self) { return 0; }
 static void dev_showdropdown(psy_ui_ComboBoxImp* self) { }
-// vtable
+/* vtable */
 static psy_ui_ComboBoxImpVTable combobox_imp_vtable;
 static bool combobox_imp_vtable_initialized = FALSE;
 
@@ -369,7 +372,7 @@ static void combobox_imp_vtable_init(void)
 		combobox_imp_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void psy_ui_comboboximp_init(psy_ui_ComboBoxImp* self)
 {
 	assert(self);
