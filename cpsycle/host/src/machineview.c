@@ -1,34 +1,41 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "machineview.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "skingraphics.h"
 #include "styles.h"
 #include "wireview.h"
-// ui
+/* ui */
 #include <uicolours.h>
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// MachineView
-// prototypes
+/* MachineView */
+/* prototypes */
 static void machineview_ondestroy(MachineView*);
 static void machineview_initcomponent(MachineView*, psy_ui_Component* parent);
 static void machineview_initpropertiesview(MachineView*);
-static void machineview_initnotebook(MachineView*, psy_ui_Component* tabbarparent);
-static void machineview_initwireview(MachineView*, psy_ui_Component* tabbarparent);
-static void machineview_initstackview(MachineView*, psy_ui_Component* tabbarparent);
-static void machineview_initnewmachine(MachineView*, psy_ui_Component* tabbarparent);
-static void machineview_inittabbar(MachineView*, psy_ui_Component* tabbarparent);
+static void machineview_initnotebook(MachineView*,
+	psy_ui_Component* tabbarparent);
+static void machineview_initwireview(MachineView*,
+	psy_ui_Component* tabbarparent);
+static void machineview_initstackview(MachineView*,
+	psy_ui_Component* tabbarparent);
+static void machineview_initnewmachine(MachineView*,
+	psy_ui_Component* tabbarparent);
+static void machineview_inittabbar(MachineView*,
+	psy_ui_Component* tabbarparent);
 static void machineview_connectsignals(MachineView*);
 static uintptr_t machineview_section(const MachineView*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag,
@@ -48,7 +55,7 @@ static void machineview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Property*);
 static void machineview_ontimer(MachineView*, uintptr_t timerid);
 static void machineview_onshow(MachineView*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable machineview_vtable;
 static bool machineview_vtable_initialized = FALSE;
 
@@ -87,7 +94,7 @@ static psy_ui_ComponentVtable* machineview_vtable_init(MachineView* self)
 	}
 	return &machineview_vtable;
 }
-// implementation
+/* implementation */
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
@@ -231,11 +238,14 @@ void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
 void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->shownewmachine) {
-		if (psy_ui_component_section(&self->component) == SECTION_ID_MACHINEVIEW_STACK) {
+		if (psy_ui_component_section(&self->component) ==
+				SECTION_ID_MACHINEVIEW_STACK) {
 			self->newmachine.restoresection = SECTION_ID_MACHINEVIEW_STACK;
-			if (self->stackview.state.insertmachinemode == NEWMACHINE_ADDEFFECTSTACK) {
+			if (self->stackview.state.insertmachinemode ==
+					NEWMACHINE_ADDEFFECTSTACK) {
 				workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
-					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_ADDEFFECTSTACK);
+					SECTION_ID_MACHINEVIEW_NEWMACHINE,
+					NEWMACHINE_ADDEFFECTSTACK);
 			} else {
 				workspace_selectview(self->workspace, VIEW_ID_MACHINEVIEW,
 					SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPENDSTACK);
@@ -358,7 +368,8 @@ void machineview_onnewmachineselected(MachineView* self,
 	machineinfo_init(&machineinfo);
 	newmachine_selectedmachineinfo(&self->newmachine, &machineinfo);
 	if (self->newmachine.restoresection == SECTION_ID_MACHINEVIEW_STACK &&
-			self->stackview.state.insertmachinemode == NEWMACHINE_ADDEFFECTSTACK) {
+			self->stackview.state.insertmachinemode ==
+			NEWMACHINE_ADDEFFECTSTACK) {
 		self->newmachine.restoresection = psy_INDEX_INVALID;
 		machinestackview_addeffect(&self->stackview, &machineinfo);
 		machineinfo_dispose(&machineinfo);
@@ -380,9 +391,11 @@ void machineview_onnewmachineselected(MachineView* self,
 			psy_audio_machines_disconnect(self->wireview.machines,
 				psy_audio_machines_selectedwire(self->wireview.machines));				
 			psy_audio_machines_connect(self->wireview.machines,
-				psy_audio_wire_make(psy_audio_machines_selectedwire(self->wireview.machines).src, slot));
+				psy_audio_wire_make(psy_audio_machines_selectedwire(
+					self->wireview.machines).src, slot));
 			psy_audio_machines_connect(self->wireview.machines,
-				psy_audio_wire_make(slot, psy_audio_machines_selectedwire(self->wireview.machines).dst));
+				psy_audio_wire_make(slot, psy_audio_machines_selectedwire(
+					self->wireview.machines).dst));
 			psy_audio_machines_select(self->wireview.machines, slot);
 			self->wireview.addeffect = 0;
 		} else if (self->newmachine.mode == NEWMACHINE_INSERT) {
