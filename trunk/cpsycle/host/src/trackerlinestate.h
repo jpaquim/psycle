@@ -57,7 +57,7 @@ INLINE intptr_t trackerlinestate_beattoline(const TrackerLineState* self,
 }
 
 INLINE void trackerlinestate_setlpb(TrackerLineState* self, uintptr_t lpb)
-{
+{	
 	self->lpb = lpb;
 	self->bpl = 1.0 / lpb;
 }
@@ -136,8 +136,8 @@ INLINE double trackerlinestate_lineheight(TrackerLineState* self)
 }
 
 // quantized
-INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(const TrackerLineState* self,
-	double px)
+INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(
+	const TrackerLineState* self, double px)
 {
 	assert(self);
 
@@ -145,7 +145,8 @@ INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(const TrackerLineState* self
 		(px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl);
 }
 
-INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeatnotquantized(TrackerLineState* self, double px)
+INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeatnotquantized(
+	TrackerLineState* self, double px)
 {
 	assert(self);
 

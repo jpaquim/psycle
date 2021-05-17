@@ -61,7 +61,8 @@ typedef struct psy_audio_Player {
 } psy_audio_Player;
 
 // init dispose
-void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*, void* systemhandle);
+void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,
+	void* systemhandle);
 void psy_audio_player_dispose(psy_audio_Player*);
 // general
 void psy_audio_player_setsong(psy_audio_Player*, psy_audio_Song*);
@@ -74,8 +75,6 @@ INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)
 {
 	return &self->midiinput.midiconfig;
 }
-
-
 
 void psy_audio_player_setoctave(psy_audio_Player*, uint8_t octave);
 
@@ -116,7 +115,8 @@ INLINE uintptr_t psy_audio_player_playlist_position(const psy_audio_Player*
 	return psy_audio_sequencer_playlist_position(&self->sequencer);
 }
 
-INLINE void psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_big_beat_t bpm)
+INLINE void psy_audio_player_setbpm(psy_audio_Player* self,
+	psy_dsp_big_beat_t bpm)
 {	
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 	if (self->song) {
@@ -130,7 +130,8 @@ INLINE psy_dsp_big_beat_t psy_audio_player_bpm(psy_audio_Player* self)
 	return psy_audio_sequencer_bpm(&self->sequencer);
 }
 
-INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self, uintptr_t ticks)
+INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self,
+	uintptr_t ticks)
 {
 	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
 	if (self->song) {
@@ -143,7 +144,8 @@ INLINE psy_dsp_big_beat_t psy_audio_player_ticksperbeat(psy_audio_Player* self)
 	return (psy_dsp_big_beat_t)self->sequencer.tpb;
 }
 
-INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self, uintptr_t ticks)
+INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self,
+	uintptr_t ticks)
 {
 	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
 	if (self->song) {
@@ -151,7 +153,8 @@ INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self, uintpt
 	}
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(psy_audio_Player* self)
+INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(
+	psy_audio_Player* self)
 {
 	return (psy_dsp_big_beat_t)self->sequencer.extraticks;
 }
@@ -176,7 +179,8 @@ INLINE psy_dsp_big_beat_t psy_audio_player_samplerate(psy_audio_Player* self)
 	return psy_audio_sequencer_samplerate(&self->sequencer);
 }
 
-INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(psy_audio_Player* self)
+INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(
+	psy_audio_Player* self)
 {
 	return psy_audio_sequencer_playlist_rowprogress(&self->sequencer);
 }
@@ -200,10 +204,13 @@ INLINE bool psy_audio_player_measuring_cpu_usage(const psy_audio_Player* self)
 // audio driver
 void psy_audio_player_setaudiodriver(psy_audio_Player*, psy_AudioDriver*);
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player*);
-void psy_audio_player_loaddriver(psy_audio_Player*, const char* path, psy_Property* config, bool open);
+void psy_audio_player_loaddriver(psy_audio_Player*, const char* path,
+	psy_Property* config, bool open);
 void psy_audio_player_unloaddriver(psy_audio_Player*);
-void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path, psy_Property* config);
-void psy_audio_player_restartdriver(psy_audio_Player*, const psy_Property* config);
+void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path,
+	psy_Property* config);
+void psy_audio_player_restartdriver(psy_audio_Player*,
+	const psy_Property* config);
 // event recording
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);
@@ -224,20 +231,23 @@ INLINE bool psy_audio_player_recordingnoteoff(const psy_audio_Player* self)
 	return self->recordnoteoff;
 }
 
-INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(psy_audio_Player* self)
+INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(
+	psy_audio_Player* self)
 {
 	return &self->sequencer.seqtime;
 }
 
 // event driver
-psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*, const char* path);
+psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*,
+	const char* path);
 void psy_audio_player_removeeventdriver(psy_audio_Player*, intptr_t id);
 void psy_audio_player_restarteventdriver(psy_audio_Player*, intptr_t id,
 	psy_Property* configuration);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, intptr_t id);
 uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player*);
-void psy_audio_player_write_eventdrivers(psy_audio_Player*, psy_EventDriverInput input);
+void psy_audio_player_write_eventdrivers(psy_audio_Player*,
+	psy_EventDriverInput input);
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
 	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);

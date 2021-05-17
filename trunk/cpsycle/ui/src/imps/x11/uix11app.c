@@ -647,23 +647,16 @@ void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
 
 int translate_x11button(int button)
 {
-	int rv;
-	
 	switch (button) {
-		case 1: // left button
-			rv = 1;
-			break;
-		case 2: // middle button
-			rv = 3;
-			break;
-		case 3: // right button
-			rv = 2;
-			break;
+		case 1: /* left button */
+			return 1;			
+		case 2: /* middle button */
+			return 3;			
+		case 3: /* right button */
+			return 2;			
 		default:
-			rv = 1;
-			break;
-	}
-	return rv;
+			return 1;			
+	}	
 }	
 
 psy_ui_KeyboardEvent translate_keyevent(XKeyEvent* event)
