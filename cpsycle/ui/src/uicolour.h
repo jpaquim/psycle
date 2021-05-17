@@ -82,9 +82,9 @@ INLINE psy_ui_Colour psy_ui_colour_make_argb(uint32_t argb)
 	psy_ui_Colour rv;
 	
 	psy_ui_colour_init_rgb(&rv,		
-		(uint8_t)(argb & 0xFF),
+		(uint8_t)(argb >> 16) & 0xFF,
 		(uint8_t)((argb >> 8) & 0xFF),		
-		(uint8_t)((argb >> 16) & 0xFF));
+		(uint8_t)((argb) & 0xFF));
 	rv.a = (uint8_t)((argb >> 24) & 0xFF);
 	return rv;
 }
