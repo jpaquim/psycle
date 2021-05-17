@@ -25,7 +25,7 @@ static struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_curses_ImpFacto
 static struct psy_ui_LabelImp* allocinit_labelimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 
 // VTable init
 static psy_ui_ImpFactoryVTable vtable;
@@ -133,7 +133,7 @@ struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFact
 	return 0;
 }
 
-struct psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return 0;
 }

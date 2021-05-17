@@ -52,6 +52,7 @@ static void dev_settitle(psy_ui_x11_ComboBoxImp* self, const char* title) { self
 static void dev_setfocus(psy_ui_x11_ComboBoxImp* self) { self->x11_component_imp.imp.vtable->dev_setfocus(&self->x11_component_imp.imp); }
 static int dev_hasfocus(psy_ui_x11_ComboBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_hasfocus(&self->x11_component_imp.imp); }
 static void* dev_platform(psy_ui_x11_ComboBoxImp* self) { return (void*)&self->x11_component_imp; }
+static void dev_initialized(psy_ui_x11_ComboBoxImp* self) { self->x11_component_imp.imp.vtable->dev_initialized(&self->x11_component_imp.imp);  }
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
@@ -95,6 +96,7 @@ static void imp_vtable_init(void)
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable.dev_platform = (psy_ui_fp_componentimp_dev_platform)dev_platform;
+		vtable.dev_initialized = (psy_ui_fp_componentimp_dev_initialized)dev_initialized;
 		vtable_initialized = 1;
 	}
 }

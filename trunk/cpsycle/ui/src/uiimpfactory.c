@@ -76,12 +76,12 @@ struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_ImpF
 	return self->vtable->allocinit_editimp_multiline(self, component, parent);
 }
 
-struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_checkboximp(self, component, parent);
 }
 
-struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_checkboximp_multiline(self, component, parent);
 }
@@ -152,8 +152,8 @@ static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self
 static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view) { return NULL; }
-static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
-static struct psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }
 struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }
 struct psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,

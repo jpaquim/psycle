@@ -452,6 +452,7 @@ typedef void (*psy_ui_fp_componentimp_dev_draw)(struct psy_ui_ComponentImp*, psy
 typedef void (*psy_ui_fp_componentimp_dev_mouseevent)(struct psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseenter)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_mouseleave)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_initialized)(struct psy_ui_ComponentImp*);
 
 typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
@@ -510,11 +511,14 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_mouseevent dev_mousedoubleclick;
 	psy_ui_fp_componentimp_dev_mouseenter dev_mouseenter;
 	psy_ui_fp_componentimp_dev_mouseleave dev_mouseleave;
+	psy_ui_fp_componentimp_dev_initialized dev_initialized;
 } psy_ui_ComponentImpVTable;
 
 typedef struct psy_ui_ComponentImp {
 	psy_ui_ComponentImpVTable* vtable;
 	psy_Signal signal_command;
+	void* extended_vtable;
+	void* extended_imp;
 } psy_ui_ComponentImp;
 
 void psy_ui_componentimp_init(psy_ui_ComponentImp*);

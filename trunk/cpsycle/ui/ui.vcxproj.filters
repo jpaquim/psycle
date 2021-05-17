@@ -32,6 +32,9 @@
     <Filter Include="aligner">
       <UniqueIdentifier>{a102b3ac-7317-418f-9243-580490031b94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imps\natives">
+      <UniqueIdentifier>{d3bf2daf-f870-47fb-8123-cdbe0c609149}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\uiapp.c">
@@ -231,6 +234,9 @@
     </ClCompile>
     <ClCompile Include="src\uimaterial.c">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\natives\uinativecheckboximp.c">
+      <Filter>imps\natives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -434,6 +440,9 @@
     </ClInclude>
     <ClInclude Include="src\uimaterial.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\natives\uinativecheckboximp.h">
+      <Filter>imps\natives</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
