@@ -1,26 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_COMBOBOX_H
 #define psy_ui_COMBOBOX_H
 
-// local
+/* local */
 #include "uicomponent.h"
-// container
+/* container */
 #include <hashtbl.h>
 
-// ComboBox
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_ComboBox
-// Implementor			psy_ui_ComboBoxImp
-// Concrete Implementor	psy_ui_win_ComboBoxImp
-//
-// psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
-//      ^                               ^                         |
-//      |                               |                         | 
-//      |                               |                        <> 
-// psy_ui_ComboBox             psy_ui_ComboBoxImp <------ psy_ui_WinComboBoxImp
+/*
+** ComboBox
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_ComboBox
+** Implementor			psy_ui_ComboBoxImp
+** Concrete Implementor	psy_ui_win_ComboBoxImp
+**
+** psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
+**      ^                               ^                         |
+**      |                               |                         |
+**      |                               |                        <>
+** psy_ui_ComboBox             psy_ui_ComboBoxImp <------ psy_ui_WinComboBoxImp
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,11 +40,11 @@ typedef enum psy_ui_ComboBoxHover {
 } psy_ui_ComboBoxHover;
 
 typedef struct psy_ui_ComboBox {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // signals
+    /* signals */
     psy_Signal signal_selchanged;
-    // internal
+    /* internal */
     struct psy_ui_ComboBoxImp* imp;       
     int ownerdrawn;   
     psy_ui_ComboBoxHover hover;
@@ -63,8 +67,8 @@ INLINE psy_ui_Component* psy_psy_ui_combobox_base(psy_ui_ComboBox* self)
     return &self->component;
 }
 
-// uicomboboximp
-// vtable function pointers
+/* uicomboboximp */
+/* vtable function pointers */
 typedef int (*psy_ui_fp_comboboximp_dev_addtext)(struct psy_ui_ComboBoxImp*,
     const char* text);
 typedef void (*psy_ui_fp_comboboximp_dev_settext)(struct psy_ui_ComboBoxImp*,

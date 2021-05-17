@@ -194,7 +194,7 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 	XEvent event;	
 	int x11_fd;
 	fd_set in_fds;
-	struct timeval tv;
+	struct timeval tv;	
 	
 	x11_fd = ConnectionNumber(self->dpy);
 	
@@ -307,7 +307,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 	if (!imp) {
 		return 0;
 	}
-	switch (event->type) {
+	switch (event->type) {		
 		case DestroyNotify:
 			dispose_window(self, imp->hwnd);
 			break;
@@ -429,17 +429,19 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 		case ClientMessage:
             if (event->xclient.data.l[0] == self->wmDeleteMessage) {
 				XEvent e;
+				
+				printf("close request\n");
 				uintptr_t hwnd;
-                //bool close;
+                bool close;
 
-				//close = imp->component->vtable->onclose(imp->component);
-				//if (imp->component->signal_close.slots) {
-				//	psy_signal_emit(&imp->component->signal_close,
-				//		imp->component, 1, (void*)&close);
-				//}
-				//if (!close) {
-				//	return 0;
-				//}
+				close = imp->component->vtable->onclose(imp->component);
+				if (imp->component->signal_close.slots) {
+					psy_signal_emit(&imp->component->signal_close,
+						imp->component, 1, (void*)&close);
+				}
+				if (!close) {
+					return 0;
+				}
 				hwnd = event->xclient.window;
 				XDestroyWindow(self->dpy, event->xclient.window);
 				while (TRUE) {
@@ -619,8 +621,7 @@ void buttonpress_single(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 void dispose_window(psy_ui_X11App* self, Window window)
 {
 	psy_ui_x11_ComponentImp* imp;
-	
-	printf("dispose: %u\n", (unsigned int)window);	
+		
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
 		&self->selfmap, (uintptr_t) window);	
 	if (imp) {		
@@ -868,7 +869,7 @@ int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour color)
 			(uintptr_t)psy_ui_colour_colorref(&color))) {
 		rv = (int)(intptr_t)psy_table_at(&self->colormap,
 			(uintptr_t)psy_ui_colour_colorref(&color));
-	} else {				
+	} else {					
 		psy_ui_colour_rgb(&color, &r, &g, &b);
 		xcolor.red = r * 256;
 		xcolor.green = g * 256;

@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_CHECKBOX_H
 #define psy_ui_CHECKBOX_H
@@ -8,7 +10,7 @@
 #include "uicomponent.h"
 #include "../../detail/psyconf.h"
 
-// CheckBox
+/* CheckBox */
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,30 +18,32 @@ extern "C" {
 
 #ifdef PSY_USE_PLATFORM_CHECKBOX
 
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_Label
-// Implementor			psy_ui_LabelImp
-// Concrete Implementor	psy_ui_win_LabelImp
-//
-// psy_ui_Component <>----<> psy_ui_ComponentImp <---- psy_ui_win_ComponentImp
-//      ^                               ^                        |
-//      |                               |                        | 
-//      |                               |                        <> 
-// psy_ui_CheckBox            psy_ui_CheckBoxImp <-- psy_ui_WinCheckBoxImp
+/*
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_Label
+** Implementor			psy_ui_LabelImp
+** Concrete Implementor	psy_ui_win_LabelImp
+**
+** psy_ui_Component <>----<> psy_ui_ComponentImp <---- psy_ui_win_ComponentImp
+**      ^                               ^                        |
+**      |                               |                        | 
+**      |                               |                        <> 
+** psy_ui_CheckBox            psy_ui_CheckBoxImp <-- psy_ui_WinCheckBoxImp
+*/
 
 struct psy_ui_CheckBoxImp;
 
 typedef struct psy_ui_CheckBox {
-    // inherits
-   psy_ui_Component component;
+   /* inherits */
+   psy_ui_Component component;   
+   /* signals */
+   psy_Signal signal_clicked;
+   /* internal */
    struct psy_ui_CheckBoxImp* imp;
-   // internal data
    char* text;
    char* translation;
-   int multiline;
-   // signals
-   psy_Signal signal_clicked;   
+   int multiline;   
 } psy_ui_CheckBox;
 
 #else
@@ -70,9 +74,9 @@ INLINE psy_ui_Component* psy_ui_checkbox_base(psy_ui_CheckBox* self)
     return &self->component;
 }
 
-// uicheckboximp
+/* uicheckboximp */
 struct psy_ui_CheckBoxImp;
-// vtable function pointers
+/* vtable function pointers */
 typedef void (*psy_ui_fp_checkboximp_dev_settext)(struct psy_ui_CheckBoxImp*, const char* text);
 typedef void (*psy_ui_fp_checkboximp_dev_text)(struct psy_ui_CheckBoxImp*, char* text);
 typedef void (*psy_ui_fp_checkboximp_dev_check)(struct psy_ui_CheckBoxImp*);

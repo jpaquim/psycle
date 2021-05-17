@@ -33,7 +33,7 @@ INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 {	
 	self->mode.set = FALSE;
 	self->overlay = 0;
-	self->r = self->g = self->b = self->a;
+	self->r = self->g = self->b = self->a = 0;
 }
 
 INLINE void psy_ui_colour_init_rgb(psy_ui_Colour* self, uint8_t r, uint8_t g, uint8_t b)
@@ -53,9 +53,9 @@ INLINE psy_ui_Colour psy_ui_colour_make(uint32_t colorref)
 	psy_ui_Colour rv;	
 
 	psy_ui_colour_init_rgb(&rv,
-		(uint8_t)((colorref >> 16) & 0xFF),
+		(uint8_t)((colorref) & 0xFF),
 		(uint8_t)((colorref >> 8) & 0xFF),
-		(uint8_t)(colorref & 0xFF));	
+		(uint8_t)((colorref >> 16) & 0xFF));	
 	return rv;
 }
 
@@ -63,7 +63,7 @@ INLINE uint32_t psy_ui_colour_colorref(const psy_ui_Colour* self)
 {
 	uint32_t rv;
 
-	rv = (self->r << 16) | (self->g << 8) | (self->b);
+	rv = (self->r) | (self->g << 8) | (self->b << 16);
 	return rv;
 }
 

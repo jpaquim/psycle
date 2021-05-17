@@ -1,9 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "uinotebook.h"
+/* local */
 #include "uiapp.h"
 
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
@@ -41,12 +45,9 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 				psy_ui_component_show(component);
 			} else {
 				if (c == pageindex) {
-					component->visible = 1;
-					// psy_ui_app()->setpositioncacheonly = TRUE;
+					component->visible = 1;					
 					psy_ui_component_setposition(component,
-						psy_ui_rectangle_make(psy_ui_point_zero(), size));
-					// psy_ui_component_applyposition(component, FALSE);
-					// psy_ui_app()->setpositioncacheonly = FALSE;
+						psy_ui_rectangle_make(psy_ui_point_zero(), size));					
 					psy_ui_component_show(component);					
 				} else {
 					psy_ui_component_hide(component);
@@ -125,7 +126,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 		if (component == &self->splitbar.component) {
 			continue;
 		}
-		//psy_ui_component_hide(component);
+		/* psy_ui_component_hide(component); */
 		if (c == 0) {
 			psy_ui_Size size;
 			const psy_ui_TextMetric* tm;

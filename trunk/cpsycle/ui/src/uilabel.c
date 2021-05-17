@@ -387,7 +387,7 @@ void psy_ui_label_fadeout(psy_ui_Label* self)
 	*/
 	self->fadeoutcounter = 100;
 	psy_ui_component_setcolour(psy_ui_label_base(self),
-		psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+		psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -401,7 +401,7 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 
 		--self->fadeoutcounter;
 		if (self->fadeoutcounter <= 80) {
-			colour = psy_ui_style(psy_ui_STYLE_ROOT)->colour;
+			colour = psy_ui_style_const(psy_ui_STYLE_ROOT)->colour;
 			bgcolour = psy_ui_component_backgroundcolour(
 				psy_ui_label_base(self));
 			fadeoutstep = self->fadeoutcounter * 1 / 80.f;
@@ -415,7 +415,7 @@ void psy_ui_label_ontimer(psy_ui_Label* self, uintptr_t timerid)
 			/* reset to default text */
 			psy_ui_label_settext(self, self->defaulttext);
 			psy_ui_component_setcolour(psy_ui_label_base(self),
-				psy_ui_style(psy_ui_STYLE_ROOT)->colour);
+				psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}

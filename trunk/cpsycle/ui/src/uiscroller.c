@@ -142,7 +142,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 
 		psy_ui_component_setparent(client, &self->pane);		
 		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED_RESIZE);
-		style = psy_ui_app_style(psy_ui_app(),
+		style = psy_ui_app_style_const(psy_ui_app(),
 			psy_ui_componentstyle_currstyleid(&self->client->style));
 		if (style) {
 			psy_ui_component_setborder(&self->component, &style->border);
@@ -387,7 +387,7 @@ void psy_ui_scroller_onupdatestyles(psy_ui_Scroller* self)
 	if (self->client) {		
 		const psy_ui_Style* style;
 		
-		style = psy_ui_app_style(psy_ui_app(),
+		style = psy_ui_app_style_const(psy_ui_app(),
 			psy_ui_componentstyle_currstyleid(&self->client->style));
 		if (style) {
 			psy_ui_component_setborder(&self->component, &style->border);			

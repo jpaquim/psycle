@@ -149,13 +149,13 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->hdc = hdc;
 	self->shareddc = TRUE;
 	self->pen = CreatePen(PS_SOLID, 1,
-		psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->colour));
+		psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour));
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->oldbmp = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
-		((psy_ui_win_FontImp*) psy_ui_style(psy_ui_STYLE_ROOT)->font.imp)->hfont);	
+		((psy_ui_win_FontImp*) psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);	
 	psy_ui_realpoint_init(&self->org);	
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
 }
@@ -177,12 +177,12 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	imp = (psy_ui_win_BitmapImp*)bitmap->imp;
 	self->oldbmp = SelectObject(self->hdc, imp->bitmap);		
 	self->pen = CreatePen(PS_SOLID, 1,
-		psy_ui_colour_colorref(&psy_ui_style(psy_ui_STYLE_ROOT)->colour));
+		psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour));
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
-		((psy_ui_win_FontImp*)psy_ui_style(psy_ui_STYLE_ROOT)->font.imp)->hfont);
+		((psy_ui_win_FontImp*)psy_ui_style_const(psy_ui_STYLE_ROOT)->font.imp)->hfont);
 	psy_ui_realpoint_init(&self->org);	
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);	
 }

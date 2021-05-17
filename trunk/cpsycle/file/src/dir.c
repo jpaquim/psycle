@@ -74,7 +74,7 @@ void psy_path_setext(psy_Path* self, const char* ext)
 
 void psy_path_update(psy_Path* self)
 {
-	static const char* path_delim = "\\";
+	static const char* path_delim = psy_SLASHSTR;
 	free(self->path);
 
 	self->path = malloc(psy_strlen(self->prefix) + 1 + psy_strlen(self->name) + 1 +
@@ -114,7 +114,7 @@ void psy_path_extract_path(psy_Path* self)
 {
 	char* p;
 	
-	p = strrchr(self->path, '\\');
+	p = strrchr(self->path, psy_SLASH);
 	if (p) {
 		free(self->prefix);
 		self->prefix = (char*)malloc(p - self->path + 1);
@@ -238,7 +238,7 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
  		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0) &&
  		  	 dir_ptr->d_type == DT_DIR) {
 					// enumerate subdirectory with its subdirectories
-				psy_snprintf(path, 4096, "%s\\%s", root, (*dir_ptr).d_name);				
+				psy_snprintf(path, 4096, "%s" psy_SLASHSTR "%s", root, (*dir_ptr).d_name);				
 				if (psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc) == 0) {
 					closedir(dir);				
 					return 0;

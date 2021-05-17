@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-// local
-#include "uiapp.h"
+
 #include "uicheckbox.h"
+/* local */
+#include "uiapp.h"
 #include "uiimpfactory.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #ifdef PSY_USE_PLATFORM_CHECKBOX
@@ -120,7 +123,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 					
 			preferredsize = self->imp->component_imp.vtable->dev_preferredsize(
 				&self->imp->component_imp, limit);
-			//rv->width = limit->width;
+			/* rv->width = limit->width; */
 			rv->height = preferredsize.height;
 		} else {			
 			size = psy_ui_component_textsize(&self->component,
@@ -143,7 +146,7 @@ void psy_ui_checkbox_onlanguagechanged(psy_ui_CheckBox* self)
 
 #endif
 
-// psy_ui_CheckBoxImp vtable
+/* psy_ui_CheckBoxImp vtable */
 static void dev_settext(psy_ui_CheckBoxImp* self, const char* title) { }
 static void dev_text(psy_ui_CheckBoxImp* self, char* text) { }
 static void dev_check(psy_ui_CheckBoxImp* self) { }

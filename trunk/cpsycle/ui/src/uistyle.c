@@ -59,7 +59,7 @@ void psy_ui_style_init(psy_ui_Style* self)
 
 void psy_ui_style_init_default(psy_ui_Style* self, uintptr_t styletype)
 {	
-	psy_ui_style_init_copy(self, psy_ui_style(styletype));	
+	psy_ui_style_init_copy(self, psy_ui_style_const(styletype));	
 }
 
 void psy_ui_style_init_copy(psy_ui_Style* self, const psy_ui_Style* other)

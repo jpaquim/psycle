@@ -148,11 +148,11 @@ void psy_ui_sliderpane_ondraw(psy_ui_SliderPane* self, psy_ui_Graphics* g)
 		styletype = psy_ui_STYLE_SLIDERTHUMB;
 	}	
 	psy_ui_drawsolidrectangle(g, psy_ui_sliderpane_sliderposition(self),
-		psy_ui_style(styletype)->backgroundcolour);
+		psy_ui_style_const(styletype)->backgroundcolour);
 	size = psy_ui_component_size_px(&self->component);
 	psy_ui_drawborder(g,
 		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size),
-		&psy_ui_style(psy_ui_STYLE_SLIDERPANE)->border,
+		&psy_ui_style_const(psy_ui_STYLE_SLIDERPANE)->border,
 		psy_ui_component_textmetric(&self->component));
 }
 
@@ -162,7 +162,7 @@ void psy_ui_sliderpane_drawverticalruler(psy_ui_SliderPane* self, psy_ui_Graphic
 	double markwidth = 5;
 	psy_ui_RealSize size;
 
-	psy_ui_setcolour(g, psy_ui_style(psy_ui_STYLE_ROOT)->border.top.colour);
+	psy_ui_setcolour(g, psy_ui_style_const(psy_ui_STYLE_ROOT)->border.top.colour);
 	size = psy_ui_component_size_px(&self->component);
 	for (step = 0; step <= 1.0; step += self->rulerstep) {
 		double cpy;

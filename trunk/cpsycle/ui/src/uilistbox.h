@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_ui_LISTBOX_H
 #define psy_ui_LISTBOX_H
@@ -13,7 +15,7 @@
 #include <hashtbl.h>
 #endif
 
-// ListBox
+/* ListBox */
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,27 +23,29 @@ extern "C" {
 
 #ifdef PSY_USE_PLATFORM_LISTBOX
 
-// PSY_USE_PLATFORM_LISTBOX
-// Bridge
-// Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_ListBox
-// Implementor			psy_ui_ListBoxImp
-// Concrete Implementor	psy_ui_win_ListBoxImp
-//
-// psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
-//      ^                               ^                         |
-//      |                               |                         | 
-//      |                               |                        <> 
-// psy_ui_ListBox             psy_ui_ListBoxImp <------ psy_ui_WinListBoxImp
+/*
+** PSY_USE_PLATFORM_LISTBOX
+** Bridge
+** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Abstraction/Refined  psy_ui_ListBox
+** Implementor			psy_ui_ListBoxImp
+** Concrete Implementor	psy_ui_win_ListBoxImp
+**
+** psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
+**      ^                               ^                         |
+**      |                               |                         |
+**      |                               |                        <>
+** psy_ui_ListBox             psy_ui_ListBoxImp <------ psy_ui_WinListBoxImp
+*/
 
 struct psy_ui_ListBoxImp;
 
 typedef struct {
-    // inherits
+    /* inherits */
     psy_ui_Component component;
-    // signals
+    /* signals */
     psy_Signal signal_selchanged;
-    // internal
+    /* internal */
     struct psy_ui_ListBoxImp* imp;    
     double charnumber;
 } psy_ui_ListBox;
@@ -49,11 +53,11 @@ typedef struct {
 #else
 
 typedef struct psy_ui_ListBoxClient {
-	// inherits
+    /* inherits */
     psy_ui_Component component;
-    // signals
+    /* signals */
     psy_Signal signal_selchanged;
-    // internal
+    /* internal */
     psy_Table items;
     intptr_t selindex;    
     double charnumber;
@@ -93,10 +97,10 @@ INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)
     return &self->component;
 }
 
-// uilistboximp
+/* uilistboximp */
 struct psy_ui_ListBoxImp;
 
-// vtable function pointers
+/* vtable function pointers */
 typedef int (*psy_ui_fp_listboximp_dev_addtext)(struct psy_ui_ListBoxImp*,
     const char* text);
 typedef void (*psy_ui_fp_listboximp_dev_settext)(struct psy_ui_ListBoxImp*,

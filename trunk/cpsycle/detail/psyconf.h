@@ -33,7 +33,12 @@
 #define PSYCLE_USE_TK PSYCLE_TK_CURSES  
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER > 1200
+#if defined(DIVERSALIS__OS__UNIX)
+#define PSYCLE_APP_DIR "../../../cpsycle"
+#define PSYCLE_APP64_DIR "../../../cpsycle"
+#define PSYCLE_USER_DIR "../../../cpsycle"
+#define PSYCLE_USER64_DIR "../../../cpsycle"
+#elif defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_APP64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
@@ -45,6 +50,7 @@
 #define PSYCLE_USER64_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 #endif
 
+#if defined(DIVERSALIS__OS__MICROSOFT)
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"
 #define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_USER_DIR "\\PsyclePlugins"
@@ -52,14 +58,23 @@
 #define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_USER_DIR "\\LuaScripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR PSYCLE_USER_DIR "\\VstPlugins"
 #define PSYCLE_VSTS64_DEFAULT_DIR PSYCLE_USER_DIR "\\Vst64Plugins"
-#if defined __unix__ || defined __APPLE__
-#define PSYCLE_LADSPAS_DEFAULT_DIR "/usr/lib/ladspa/"
-#else
 #define PSYCLE_LADSPAS_DEFAULT_DIR "C:\\Program Files (x86)\\Audacity\\Plug-Ins"
-#endif
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "\\Skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
 #define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "\\Presets"
+#else
+#define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "/songs"
+#define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "/samples"
+#define PSYCLE_PLUGINS32_DEFAULT_DIR PSYCLE_USER_DIR "/plugins/build"
+#define PSYCLE_PLUGINS64_DEFAULT_DIR PSYCLE_USER64_DIR "/plugins/build"
+#define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_USER_DIR "/luascripts"
+#define PSYCLE_VSTS32_DEFAULT_DIR PSYCLE_USER_DIR "/vst32"
+#define PSYCLE_VSTS64_DEFAULT_DIR PSYCLE_USER_DIR "/vst64"
+#define PSYCLE_LADSPAS_DEFAULT_DIR "/usr/lib/ladspa/"
+#define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "/Skins"
+#define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "/docs"
+#define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "/Presets"
+#endif
 
 #if defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_DEFAULT_FONT "Tahoma;-16"

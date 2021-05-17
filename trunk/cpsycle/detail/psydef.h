@@ -62,4 +62,12 @@ typedef struct psy_ui_PropertyMode {
 	bool set;
 } psy_ui_PropertyMode;
 
+#if _MSC_VER
+#define psy_SLASHSTR "\\"
+#define psy_SLASH '\\'
+#else
+#define psy_SLASHSTR  "/"
+#define psy_SLASH '/'
+#endif
+
 #endif

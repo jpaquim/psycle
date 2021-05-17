@@ -40,8 +40,7 @@ static void imp_vtable_init(psy_ui_x11_FontImp* self)
 
 void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
 	fontinfo)
-{
-	printf("Create x11 fontimp \n");
+{	
 	psy_ui_font_imp_init(&self->imp);
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
