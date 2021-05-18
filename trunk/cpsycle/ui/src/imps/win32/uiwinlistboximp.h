@@ -19,26 +19,19 @@
 extern "C" {
 #endif
 
-typedef struct psy_ui_win_ListBoxImp {
-	psy_ui_ListBoxImp imp;
-	psy_ui_win_ComponentImp win_component_imp;	
-	struct psy_ui_Component* component;	
-} psy_ui_win_ListBoxImp;
-
-void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
+void psy_ui_win_listboximp_init(psy_ui_win_ComponentImp*,
 	struct psy_ui_Component* component,
 	struct psy_ui_ComponentImp* parent);
 
-void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
+void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ComponentImp*,
 	struct psy_ui_Component* component,
 	struct psy_ui_ComponentImp* parent);
 
-psy_ui_win_ListBoxImp* psy_ui_win_listboximp_alloc(void);
-psy_ui_win_ListBoxImp* psy_ui_win_listboximp_allocinit(
+psy_ui_win_ComponentImp* psy_ui_win_listboximp_alloc(void);
+psy_ui_win_ComponentImp* psy_ui_win_listboximp_allocinit(
 	struct psy_ui_Component* component,
 	psy_ui_ComponentImp* parent);
-
-psy_ui_win_ListBoxImp* psy_ui_win_listboximp_multiselect_allocinit(
+psy_ui_win_ComponentImp* psy_ui_win_listboximp_multiselect_allocinit(
 	struct psy_ui_Component* component,
 	psy_ui_ComponentImp* parent);
 

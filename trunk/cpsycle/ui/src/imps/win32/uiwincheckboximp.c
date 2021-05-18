@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwincheckboximp.h"
 
@@ -15,7 +18,7 @@
 
 static psy_ui_Size dev_preferredsize(psy_ui_win_ComponentImp*,
 	const psy_ui_Size* limits);
-// vtable
+/* vtable */
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -26,7 +29,7 @@ static void vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_preferredsize =
 			(psy_ui_fp_componentimp_dev_preferredsize)
 			dev_preferredsize;
-		vtable_initialized = 0;
+		vtable_initialized = TRUE;
 	}
 	self->imp.vtable = &vtable;
 }
@@ -34,7 +37,7 @@ static void vtable_init(psy_ui_win_ComponentImp* self)
 static void oncommand(psy_ui_CheckBox*, psy_ui_Component*,
 	WPARAM wParam, LPARAM lParam);
 
-// CheckBoxImp VTable
+/* CheckBoxImp VTable */
 static void dev_settext(psy_ui_win_ComponentImp*, const char* text);
 static void dev_text(psy_ui_win_ComponentImp*, char* text);
 static void dev_check(psy_ui_win_ComponentImp*);
@@ -179,11 +182,11 @@ psy_ui_Size dev_preferredsize(psy_ui_win_ComponentImp* self, const psy_ui_Size* 
 	hwnd = self->hwnd;
 	hdc = GetDC(NULL);	
 	psy_ui_graphics_init(&g, hdc);
-	// psy_ui_setfont(&g, psy_ui_component_font(self->win_component_imp.component));
+	/* psy_ui_setfont(&g, psy_ui_component_font(self->win_component_imp.component)); */
 	dev_text(self, text);	
 	tm = psy_ui_component_textmetric(self->component);
 	rect.left = 0;
-	// todo: 30 only estimated (size of the checkbox)
+	/* todo: 30 is only an estimated size of the checkbox */
 	rect.right = (int)psy_ui_value_px(&limits->width, tm, NULL) - 30;
 	DrawText(hdc, text, -1, &rect, DT_LEFT | DT_WORDBREAK | DT_CALCRECT);	
 	psy_ui_graphics_dispose(&g);	
@@ -210,4 +213,4 @@ void oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
 	}
 }
 
-#endif
+#endif /* TK_WIN32 */

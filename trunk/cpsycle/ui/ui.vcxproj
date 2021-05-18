@@ -213,6 +213,8 @@
     <ClCompile Include="src\imps\curses\uicursesgraphicsimp.c" />
     <ClCompile Include="src\imps\curses\uicursesimpfactory.c" />
     <ClCompile Include="src\imps\natives\uinativecheckboximp.c" />
+    <ClCompile Include="src\imps\natives\uinativeeditimp.c" />
+    <ClCompile Include="src\imps\natives\uinativelistboximp.c" />
     <ClCompile Include="src\imps\win32\uiwinapp.c" />
     <ClCompile Include="src\imps\win32\uiwinbitmapimp.c" />
     <ClCompile Include="src\imps\win32\uiwincheckboximp.c" />
@@ -282,6 +284,8 @@
     <ClInclude Include="src\imps\curses\uicursesgraphicsimp.h" />
     <ClInclude Include="src\imps\curses\uicursesimpfactory.h" />
     <ClInclude Include="src\imps\natives\uinativecheckboximp.h" />
+    <ClInclude Include="src\imps\natives\uinativeeditimp.h" />
+    <ClInclude Include="src\imps\natives\uinativelistboximp.h" />
     <ClInclude Include="src\imps\win32\uiwinapp.h" />
     <ClInclude Include="src\imps\win32\uiwinbitmapimp.h" />
     <ClInclude Include="src\imps\win32\uiwincheckboximp.h" />
