@@ -1420,8 +1420,9 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setvtable(&self->component, pianoroll_vtable_init(self));
 	self->workspace = workspace;
+	patterncmds_init(&self->cmds, workspace);
 	self->opcount = 0;
-	self->syncpattern = 1;	
+	self->syncpattern = 1;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);		
 	/* shared states */
@@ -1486,6 +1487,7 @@ void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 {
 	assert(self);
 
+	patterncmds_setpattern(&self->cmds, pattern);
 	pianogridstate_setpattern(&self->gridstate, pattern);
 	pianogrid_onpatternchange(&self->grid, pattern);
 	psy_ui_component_setscroll(pianogrid_base(&self->grid),
@@ -1920,43 +1922,32 @@ void pianoroll_rowclear(Pianoroll* self)
 void pianoroll_blockcut(Pianoroll* self)
 {
 	assert(self);
-
-	if (self->gridstate.pattern && psy_audio_patternselection_valid(&self->grid.selection)) {
-		pianoroll_blockcopy(self);
-		pianoroll_blockdelete(self);
-	}
+	
+	pianoroll_blockcopy(self);
+	pianoroll_blockdelete(self);	
 }
 
 void pianoroll_blockcopy(Pianoroll* self)
 {
 	assert(self);
 
-	if (self->gridstate.pattern && psy_audio_patternselection_valid(&self->grid.selection)) {
-		psy_audio_pattern_blockcopy(&self->workspace->patternpaste,
-			self->gridstate.pattern, self->grid.selection);
-	}
+	patterncmds_blockcopy(&self->cmds, self->grid.selection);	
 }
 
 void pianoroll_blockpaste(Pianoroll* self)
 {
-	psy_undoredo_execute(&self->workspace->undoredo,
-		&blockpastecommand_alloc(self->gridstate.pattern,
-			&self->workspace->patternpaste, self->gridstate.cursor,
-			1.0 / self->gridstate.lpb, FALSE, self->workspace)->command);
+	assert(self);
+
+	patterncmds_blockpaste(&self->cmds, self->gridstate.cursor, FALSE);
 	psy_ui_component_invalidate(&self->component);	
 }
 
 void pianoroll_blockdelete(Pianoroll* self)
 {
-	if (psy_audio_patternselection_valid(&self->grid.selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blockremovecommand_alloc(self->gridstate.pattern,
-				self->grid.selection,
-				self->workspace)->command);
-		/*		sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
-					node);*/
-		psy_ui_component_invalidate(&self->grid.component);
-	}
+	assert(self);
+
+	patterncmds_blockdelete(&self->cmds, self->grid.selection);	
+	psy_ui_component_invalidate(&self->grid.component);	
 }
 
 void pianoroll_selectall(Pianoroll* self)

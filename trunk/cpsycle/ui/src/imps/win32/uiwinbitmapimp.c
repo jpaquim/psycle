@@ -1,16 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinbitmapimp.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 
+/* local */
 #include "../../uiapp.h"
 #include "uiwinapp.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_BitmapImp*);
 static int dev_load(psy_ui_win_BitmapImp*, const char* path);
 static int dev_loadresource(psy_ui_win_BitmapImp*, uintptr_t resourceid);
@@ -18,8 +22,7 @@ static psy_ui_RealSize dev_size(const psy_ui_win_BitmapImp*);
 static bool dev_empty(const psy_ui_win_BitmapImp*);
 static void dev_settransparency(psy_ui_win_BitmapImp*, psy_ui_Colour);
 static void dev_preparemask(psy_ui_win_BitmapImp*, psy_ui_Colour clrtrans);
-
-// VTable init
+/* vtable */
 static psy_ui_BitmapImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -40,7 +43,7 @@ static void imp_vtable_init(psy_ui_win_BitmapImp* self)
 		imp_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self, psy_ui_RealSize size)
 {
 	assert(self);
@@ -97,8 +100,8 @@ int dev_load(psy_ui_win_BitmapImp* self, const char* path)
 
 int dev_loadresource(psy_ui_win_BitmapImp* self, uintptr_t resourceid)
 {
-	HBITMAP bitmap;
 	psy_ui_WinApp* winapp;
+	HBITMAP bitmap;
 
 	assert(self);
 
@@ -144,45 +147,48 @@ void dev_preparemask(psy_ui_win_BitmapImp* self, psy_ui_Colour clrtrans)
 	HBITMAP hbmsrct;
 	HBITMAP hbmdstt;
 
-	// Get the dimensions of the source bitmap
+	/* Get the dimensions of the source bitmap */
 	GetObject(self->bitmap, sizeof(BITMAP), &bm);	
-	// Create the mask bitmap
+	/* Create the mask bitmap */
 	if (self->mask) {
 		DeleteObject(self->mask);
 	}
 	self->mask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);		
-	// We will need two DCs to work with. One to hold the Image
-	// (the source), and one to hold the mask (destination).
-	// When blitting onto a monochrome bitmap from a color, pixels
-	// in the source color bitmap that are equal to the background
-	// color are blitted as white. All the remaining pixels are
-	// blitted as black.
+	/*
+	** We will need two DCs to work with. One to hold the Image
+	** (the source), and one to hold the mask (destination).
+	** When blitting onto a monochrome bitmap from a color, pixels
+	** in the source color bitmap that are equal to the background
+	** color are blitted as white. All the remaining pixels are
+	** blitted as black.
+	*/
 	hdcsrc = CreateCompatibleDC(NULL);	
 	hdcdst = CreateCompatibleDC(NULL);
-	// Load the bitmaps into memory DC
+	/* Load the bitmaps into memory DC */
 	hbmsrct = SelectObject(hdcsrc, (HGDIOBJ)self->bitmap);
 	hbmdstt = SelectObject(hdcdst, (HGDIOBJ)self->mask);
-	// Change the background to trans color
+	/* Change the background to trans color */
 	SetBkColor(hdcsrc, psy_ui_colour_colorref(&clrtrans));
-	// This call sets up the mask bitmap.
+	/* This call sets up the mask bitmap. */
 	BitBlt(hdcdst, 0, 0, bm.bmWidth, bm.bmHeight, hdcsrc, 0, 0, SRCCOPY);
-	// Now, we need to paint onto the original image, making
-	// sure that the "transparent" area is set to black. What
-	// we do is AND the monochrome image onto the color Image
-	// first. When blitting from mono to color, the monochrome
-	// pixel is first transformed as follows:
-	// if  1 (black) it is mapped to the color set by SetTextColor().
-	// if  0 (white) is is mapped to the color set by SetBkColor().
-	// Only then is the raster operation performed.
+	/*
+	** Now, we need to paint onto the original image, making
+	** sure that the "transparent" area is set to black. What
+	** we do is AND the monochrome image onto the color Image
+	** first. When blitting from mono to color, the monochrome
+	** pixel is first transformed as follows:
+	** if  1 (black) it is mapped to the color set by SetTextColor().
+	** if  0 (white) is is mapped to the color set by SetBkColor().
+	** Only then is the raster operation performed.
+	*/
 	SetTextColor(hdcsrc, RGB(255, 255, 255));
 	SetBkColor(hdcsrc, RGB(0, 0, 0));
 	BitBlt(hdcsrc, 0, 0, bm.bmWidth, bm.bmHeight, hdcdst, 0, 0, SRCAND);
-	// Clean up by deselecting any objects, and delete the
-	// DC's.
+	/* Clean up by deselecting any objects, and delete the DC's. */
 	SelectObject(hdcsrc, hbmsrct);
 	SelectObject(hdcdst, hbmdstt);
 	DeleteDC(hdcsrc);
 	DeleteDC(hdcdst);
 }	
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

@@ -369,6 +369,7 @@
     <ClCompile Include="src\paramviews.c" />
     <ClCompile Include="src\patterncmds.c" />
     <ClCompile Include="src\patternheader.c" />
+    <ClCompile Include="src\patternhostcmds.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
     <ClCompile Include="src\patternviewbar.c" />
@@ -534,6 +535,7 @@
     <ClInclude Include="src\paramviews.h" />
     <ClInclude Include="src\patterncmds.h" />
     <ClInclude Include="src\patternheader.h" />
+    <ClInclude Include="src\patternhostcmds.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
     <ClInclude Include="src\patternviewbar.h" />

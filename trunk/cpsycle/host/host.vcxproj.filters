@@ -553,6 +553,9 @@
     <ClCompile Include="src\pionoroll.c">
       <Filter>pattern\pianoroll</Filter>
     </ClCompile>
+    <ClCompile Include="src\patternhostcmds.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -1024,6 +1027,9 @@
     </ClInclude>
     <ClInclude Include="src\pianokeyboardstate.h">
       <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternhostcmds.h">
+      <Filter>pattern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

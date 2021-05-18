@@ -166,6 +166,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	// set references
 	self->workspace = workspace;
 	self->view = view;
+	patterncmds_init(&self->cmds, workspace);
 	psy_table_init(&self->columns);
 	trackergridstate_init(&self->defaultgridstate, trackconfig, NULL, NULL);
 	trackerlinestate_init(&self->defaultlinestate);
@@ -173,8 +174,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	trackergrid_setsharedlinestate(self, linestate);
 	trackergrid_storecursor(self);
 	// setup base component
-	// psy_ui_component_setbackgroundmode(&self->component,
-	//	psy_ui_NOBACKGROUND);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	psy_ui_component_doublebuffer(&self->component);	
 	trackergrid_init_signals(self);
 	psy_ui_component_setalignexpand(&self->component,
@@ -592,20 +593,19 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 {
 	uintptr_t visitracks;
 	uintptr_t tracks;
-	psy_ui_Size size;	
+	psy_ui_RealSize size;	
 	const psy_ui_TextMetric* tm;	
 	intptr_t trackright;
 	intptr_t trackleft;
 
 	assert(self);
 
-	size = psy_ui_component_scrollsize(
-		psy_ui_component_parent(&self->component));
+	size = psy_ui_component_clientsize_px(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);	
 	trackleft = trackergridstate_pxtotrack(self->gridstate,
 		psy_ui_component_scrollleftpx(&self->component));
 	trackright = trackergridstate_pxtotrack(self->gridstate,
-		psy_ui_value_px(&size.width, tm, NULL) +
+		size.width +
 		psy_ui_component_scrollleftpx(&self->component));	
 	visitracks = trackright - trackleft;
 	tracks = cursor.track + 1;
@@ -1520,6 +1520,7 @@ void trackergrid_setpattern(TrackerGrid* self, psy_audio_Pattern* pattern)
 {
 	assert(self);
 		
+	patterncmds_setpattern(&self->cmds, pattern);
 	trackergridstate_setpattern(self->gridstate, pattern);	
 	trackerlinestate_setpattern(self->linestate, pattern);
 	trackergrid_resetpatternsync(self);
@@ -1623,39 +1624,25 @@ void trackergrid_blockcopy(TrackerGrid* self)
 {
 	assert(self);
 
-	if (trackergridstate_pattern(self->gridstate) &&
-			psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_audio_pattern_blockcopy(&self->workspace->patternpaste,
-			trackergridstate_pattern(self->gridstate), self->gridstate->selection);
-	}	
+	patterncmds_blockcopy(&self->cmds, self->gridstate->selection);
 }
 
 void trackergrid_blockpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	if (!psy_audio_pattern_empty(&self->workspace->patternpaste)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
-				&self->workspace->patternpaste, self->gridstate->cursor,
-				trackerlinestate_bpl(self->linestate), FALSE, self->workspace)->command);
-		trackergrid_movecursorwhenpaste(self);
-		psy_ui_component_invalidate(&self->component);
-	}
+	patterncmds_blockpaste(&self->cmds,	self->gridstate->cursor, FALSE);
+	trackergrid_movecursorwhenpaste(self);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void trackergrid_blockmixpaste(TrackerGrid* self)
 {
 	assert(self);
 
-	if (!psy_audio_pattern_empty(&self->workspace->patternpaste)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blockpastecommand_alloc(trackergridstate_pattern(self->gridstate),
-				&self->workspace->patternpaste, self->gridstate->cursor,
-				trackerlinestate_bpl(self->linestate), TRUE, self->workspace)->command);
-		trackergrid_movecursorwhenpaste(self);
-		psy_ui_component_invalidate(&self->component);
-	}
+	patterncmds_blockpaste(&self->cmds,	self->gridstate->cursor, TRUE);
+	trackergrid_movecursorwhenpaste(self);
+	psy_ui_component_invalidate(&self->component);	
 }
 
 bool trackergrid_movecursorwhenpaste(TrackerGrid* self)
@@ -1686,16 +1673,9 @@ bool trackergrid_movecursorwhenpaste(TrackerGrid* self)
 void trackergrid_blockdelete(TrackerGrid* self)
 {
 	assert(self);
-
-	if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blockremovecommand_alloc(trackergridstate_pattern(self->gridstate),
-				self->gridstate->selection,
-				self->workspace)->command);		
-		//		sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
-		//			node);
-		psy_ui_component_invalidate(&self->component);
-	}
+	
+	patterncmds_blockdelete(&self->cmds, self->gridstate->selection);
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void trackergrid_blockstart(TrackerGrid* self)
@@ -1728,49 +1708,33 @@ void trackergrid_blockunmark(TrackerGrid* self)
 void trackergrid_blocktransposeup(TrackerGrid* self)
 {
 	assert(self);
-
-	if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blocktransposecommand_alloc(trackergridstate_pattern(self->gridstate),
-				self->gridstate->selection,
-				self->gridstate->cursor, +1, self->workspace)->command);
-	}
+	
+	patterncmds_blocktranspose(&self->cmds, self->gridstate->selection,
+		self->gridstate->cursor, +1);
 }
 
 void trackergrid_blocktransposedown(TrackerGrid* self)
 {
 	assert(self);
 
-	if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blocktransposecommand_alloc(trackergridstate_pattern(self->gridstate),
-				self->gridstate->selection,
-				self->gridstate->cursor, -1, self->workspace)->command);
-	}
+	patterncmds_blocktranspose(&self->cmds, self->gridstate->selection,
+		self->gridstate->cursor, -1);
 }
 
 void trackergrid_blocktransposeup12(TrackerGrid* self)
 {
 	assert(self);
 
-	if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blocktransposecommand_alloc(trackergridstate_pattern(self->gridstate),
-				self->gridstate->selection,
-				self->gridstate->cursor, 12, self->workspace)->command);
-	}
+	patterncmds_blocktranspose(&self->cmds,	self->gridstate->selection,
+		self->gridstate->cursor, 12);
 }
 
 void trackergrid_blocktransposedown12(TrackerGrid* self)
 {
 	assert(self);
 
-	if (psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		psy_undoredo_execute(&self->workspace->undoredo,
-			&blocktransposecommand_alloc(trackergridstate_pattern(self->gridstate),
-				self->gridstate->selection,
-				self->gridstate->cursor, -12, self->workspace)->command);
-	}
+	patterncmds_blocktranspose(&self->cmds,	self->gridstate->selection,
+		self->gridstate->cursor, -12);
 }
 
 void trackergrid_enterdigitcolumn(TrackerGrid* self,
