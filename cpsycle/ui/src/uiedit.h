@@ -13,21 +13,19 @@
 ** Bridge
 ** Aim: avoid coupling to one platform (win32, xt/motif, etc)
 ** Abstraction/Refined  psy_ui_Edit
-** Implementor			psy_ui_EditImp
-** Concrete Implementor	psy_ui_win_EditImp
+** Implementor			psy_ui_ComponentImp
+** Concrete Implementor	psy_ui_win_ComponentImp
 **
 ** psy_ui_Component <>----<> psy_ui_ComponentImp  <---- psy_ui_win_ComponentImp
 **      ^                               ^                         |
 **      |                               |                         |
 **      |                               |                        <>
-** psy_ui_Edit                   psy_ui_EditImp <------ psy_ui_WinEditImp
+** psy_ui_Edit                   psy_ui_ComponentImp <------ psy_ui_WinEditImp
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct psy_ui_EditImp;
 
 typedef struct psy_ui_Edit {
     /* inherits */
@@ -47,8 +45,7 @@ typedef struct psy_ui_Edit {
     ** - esc pressed
     */
     psy_Signal signal_reject;
-    // internal
-    struct psy_ui_EditImp* imp;
+    // internal    
 	int charnumber;
 	int linenumber;
     bool isinputfield;
@@ -75,12 +72,12 @@ INLINE psy_ui_Component* psy_ui_edit_base(psy_ui_Edit* self)
 
 /* uieditimp */
 /* vtable function pointers */
-typedef void (*psy_ui_fp_editimp_dev_settext)(struct psy_ui_EditImp*, const char* text);
-typedef void (*psy_ui_fp_editimp_dev_text)(struct psy_ui_EditImp*, char* text);
-typedef void (*psy_ui_fp_editimp_dev_enableedit)(struct psy_ui_EditImp*);
-typedef void (*psy_ui_fp_editimp_dev_preventedit)(struct psy_ui_EditImp*);
-typedef void (*psy_ui_fp_editimp_dev_setstyle)(struct psy_ui_EditImp*, int style);
-typedef void (*psy_ui_fp_editimp_dev_setsel)(struct psy_ui_EditImp*, intptr_t cpmin, intptr_t cpmax);
+typedef void (*psy_ui_fp_editimp_dev_settext)(struct psy_ui_ComponentImp*, const char* text);
+typedef void (*psy_ui_fp_editimp_dev_text)(struct psy_ui_ComponentImp*, char* text);
+typedef void (*psy_ui_fp_editimp_dev_enableedit)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_editimp_dev_preventedit)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_editimp_dev_setstyle)(struct psy_ui_ComponentImp*, int style);
+typedef void (*psy_ui_fp_editimp_dev_setsel)(struct psy_ui_ComponentImp*, intptr_t cpmin, intptr_t cpmax);
 
 typedef struct {
     psy_ui_fp_editimp_dev_settext dev_settext;
@@ -91,12 +88,12 @@ typedef struct {
     psy_ui_fp_editimp_dev_setsel dev_setsel;
 } psy_ui_EditImpVTable;
 
-typedef struct psy_ui_EditImp {
-    psy_ui_ComponentImp component_imp;
-    psy_ui_EditImpVTable* vtable;
-} psy_ui_EditImp;
+void psy_ui_editimp_extend(psy_ui_ComponentImp*);
 
-void psy_ui_editimp_init(psy_ui_EditImp*);
+INLINE psy_ui_EditImpVTable* psy_ui_editimp_vtable(psy_ui_ComponentImp* self)
+{
+    return (psy_ui_EditImpVTable*)self->extended_vtable;
+}
 
 #ifdef __cplusplus
 }

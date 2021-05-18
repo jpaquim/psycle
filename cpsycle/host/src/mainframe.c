@@ -1114,6 +1114,7 @@ bool mainframe_onclose(MainFrame* self)
 			CONFIRM_CLOSE);		
 		return FALSE;
 	}
+	psy_ui_component_stoptimer(mainframe_base(self), 0);
 	return TRUE;
 }
 

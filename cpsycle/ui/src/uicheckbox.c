@@ -45,7 +45,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	imp = psy_ui_impfactory_allocinit_checkboximp(
 		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
 #else
-	imp = psy_ui_native_checkboximp_allocinit(&self->component, parent)->imp;	
+	imp = psy_ui_native_checkboximp_allocinit(&self->component, parent)->imp;
 #endif
 	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent, imp);
 	vtable_init(self);
@@ -134,9 +134,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 	if (rv) {
 		psy_ui_Size size;		
 		
-		if (self->multiline) {
-			psy_ui_Size preferredsize;
-					
+		if (self->multiline) {					
 			*rv = self->component.imp->vtable->dev_preferredsize(
 				self->component.imp, limit);			
 		} else {			
@@ -168,7 +166,7 @@ static void dev_disablecheck(psy_ui_ComponentImp* self) { }
 static int dev_checked(psy_ui_ComponentImp* self) { return 0;  }
 
 static psy_ui_CheckBoxImpVTable checkbox_imp_vtable;
-static int checkbox_imp_vtable_initialized = 0;
+static bool checkbox_imp_vtable_initialized = FALSE;
 
 static void checkbox_imp_vtable_init(void)
 {
@@ -178,7 +176,7 @@ static void checkbox_imp_vtable_init(void)
 		checkbox_imp_vtable.dev_check = dev_check;
 		checkbox_imp_vtable.dev_disablecheck = dev_disablecheck;
 		checkbox_imp_vtable.dev_checked = dev_checked;
-		checkbox_imp_vtable_initialized = 1;
+		checkbox_imp_vtable_initialized = TRUE;
 	}
 }
 

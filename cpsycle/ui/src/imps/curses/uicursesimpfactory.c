@@ -20,11 +20,11 @@ static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_curses_ImpFactory*);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_curses_ImpFactory*, uintptr_t* platformdc);
 static struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_EditImp* allocinit_editimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_LabelImp* allocinit_labelimp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_listboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_curses_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 
 // VTable init
@@ -108,12 +108,12 @@ struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_curses_ImpFactory* self, s
 	return (psy_ui_ComponentImp*)rv;
 }
 
-struct psy_ui_EditImp* allocinit_editimp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return 0;
 }
 
-struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return 0;
 }
@@ -123,12 +123,12 @@ struct psy_ui_LabelImp* allocinit_labelimp(psy_ui_curses_ImpFactory* self, struc
 	return 0;
 }
 
-struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* allocinit_listboximp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return 0;
 }
 
-struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return 0;
 }

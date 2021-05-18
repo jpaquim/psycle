@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -12,7 +14,7 @@
 /* portable */
 #include "../../detail/portable.h"
 
-// CheckBoxImp VTable
+/* CheckBoxImp VTable */
 static void dev_settext(psy_ui_native_CheckBoxImp*, const char* text);
 static void dev_text(psy_ui_native_CheckBoxImp*, char* text);
 static void dev_check(psy_ui_native_CheckBoxImp*);
@@ -51,7 +53,7 @@ static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp*,
 static void dev_draw(psy_ui_ComponentImp*, psy_ui_Graphics*);
 static void dev_mousedown(psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 static void dev_dispose(psy_ui_ComponentImp*);
-// vtable
+/* vtable */
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -157,8 +159,12 @@ void dev_settext(psy_ui_native_CheckBoxImp* self, const char* text)
 }
 
 void dev_text(psy_ui_native_CheckBoxImp* self, char* text)
-{	
-	psy_snprintf(self->text, 256, "%s", text);
+{
+	if (self->text) {
+		psy_snprintf(text, 256, "%s", self->text);
+	} else {
+		text = '\0';
+	}
 }
 
 void dev_check(psy_ui_native_CheckBoxImp* self)

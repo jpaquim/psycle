@@ -7,7 +7,12 @@
 
 #include "uiedit.h"
 #include "uiapp.h"
+#ifdef PSY_USE_PLATFORM_EDIT
 #include "uiimpfactory.h"
+#else
+#include "imps/natives/uinativeeditimp.h"
+#endif
+#include "../../detail/portable.h"
 
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
@@ -44,10 +49,15 @@ static void vtable_init(psy_ui_Edit* self)
 
 void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 { 
-	self->imp = psy_ui_impfactory_allocinit_editimp(
+	psy_ui_ComponentImp* imp;
+
+#ifdef PSY_USE_PLATFORM_EDIT
+	imp = psy_ui_impfactory_allocinit_editimp(
 		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
-	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
-		&self->imp->component_imp);
+#else
+	imp = psy_ui_native_editimp_allocinit(&self->component, parent)->imp;
+#endif
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, imp);
 	vtable_init(self);	
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
@@ -64,10 +74,15 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 
 void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 {
-	self->imp = psy_ui_impfactory_allocinit_editimp_multiline(
+	psy_ui_ComponentImp* imp;
+
+#ifdef PSY_USE_PLATFORM_EDIT
+	imp = psy_ui_impfactory_allocinit_editimp_multiline(
 		psy_ui_app_impfactory(psy_ui_app()), &self->component, parent);
-	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
-		&self->imp->component_imp);
+#else
+	imp = psy_ui_native_editimp_allocinit_multiline(&self->component, parent)->imp;
+#endif
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_init(&self->signal_change);
@@ -97,15 +112,17 @@ void psy_ui_edit_enableinputfield(psy_ui_Edit* self)
 }
 
 void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
-{
-	self->imp->vtable->dev_settext(self->imp, text);
+{	
+	psy_ui_editimp_vtable(self->component.imp)->dev_settext(
+		self->component.imp->extended_imp, text);
 }
 
  const char* psy_ui_edit_text(psy_ui_Edit* self)
 {
 	static char text[256];
-
-	self->imp->vtable->dev_text(self->imp, text);
+	
+	psy_ui_editimp_vtable(self->component.imp)->dev_text(
+		self->component.imp->extended_imp, text);	
 	return text;
 }
 
@@ -142,22 +159,26 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void psy_ui_edit_setstyle(psy_ui_Edit* self, int style)
 {
-	self->imp->vtable->dev_setstyle(self->imp, style);
+	psy_ui_editimp_vtable(self->component.imp)->dev_setstyle(
+		self->component.imp->extended_imp, style);
 }
 
 void psy_ui_edit_enableedit(psy_ui_Edit* self)
 {
-	self->imp->vtable->dev_enableedit(self->imp);
+	psy_ui_editimp_vtable(self->component.imp)->dev_enableedit(
+		self->component.imp->extended_imp);
 }
 
 void psy_ui_edit_preventedit(psy_ui_Edit* self)
 {
-	self->imp->vtable->dev_preventedit(self->imp);
+	psy_ui_editimp_vtable(self->component.imp)->dev_preventedit(
+		self->component.imp->extended_imp);	
 }
 
 void psy_ui_edit_setsel(psy_ui_Edit* self, intptr_t cpmin, intptr_t cpmax)
 {
-	self->imp->vtable->dev_setsel(self->imp, cpmin, cpmax);
+	psy_ui_editimp_vtable(self->component.imp)->dev_setsel(
+		self->component.imp->extended_imp, cpmin, cpmax);
 }
 
 /* signal_accept event handling */
@@ -226,13 +247,13 @@ void psy_ui_edit_onmousehook(psy_ui_Edit* self, psy_ui_App* sender,
 }
 
 
-/* psy_ui_EditImp vtable */
-static void dev_settext(psy_ui_EditImp* self, const char* title) { }
-static void dev_text(psy_ui_EditImp* self, char* text) { }
-static void dev_setstyle(psy_ui_EditImp* self, int style) { }
-static void dev_enableedit(psy_ui_EditImp* self) { }
-static void dev_preventedit(psy_ui_EditImp* self) { }
-static void dev_setsel(psy_ui_EditImp* self, intptr_t cpmin, intptr_t cpmax) { }
+/* psy_ui_ComponentImp vtable */
+static void dev_settext(psy_ui_ComponentImp* self, const char* title) { }
+static void dev_text(psy_ui_ComponentImp* self, char* text) { }
+static void dev_setstyle(psy_ui_ComponentImp* self, int style) { }
+static void dev_enableedit(psy_ui_ComponentImp* self) { }
+static void dev_preventedit(psy_ui_ComponentImp* self) { }
+static void dev_setsel(psy_ui_ComponentImp* self, intptr_t cpmin, intptr_t cpmax) { }
 
 static psy_ui_EditImpVTable edit_imp_vtable;
 static bool edit_imp_vtable_initialized = FALSE;
@@ -250,8 +271,8 @@ static void edit_imp_vtable_init(void)
 	}
 }
 
-void psy_ui_editimp_init(psy_ui_EditImp* self)
-{
+void psy_ui_editimp_extend(psy_ui_ComponentImp* self)
+{		
 	edit_imp_vtable_init();
-	self->vtable = &edit_imp_vtable;
+	self->extended_vtable = &edit_imp_vtable;
 }

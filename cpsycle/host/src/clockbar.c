@@ -17,7 +17,7 @@ static void clockbar_onsongchanged(ClockBar*, Workspace*,
 
 void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{
+{	
 	self->start = time(NULL);
 	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setalignexpand(&self->component,
