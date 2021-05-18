@@ -40,6 +40,18 @@ psy_audio_PatternCursor psy_audio_patterncursor_make(
 	return rv;
 }
 
+psy_audio_PatternCursor psy_audio_patterncursor_make_all(
+	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key)
+{
+	psy_audio_PatternCursor rv;
+
+	psy_audio_patterncursor_init(&rv);
+	rv.track = track;
+	rv.offset = offset;
+	rv.key = key;
+	return rv;
+}
+
 int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 	psy_audio_PatternCursor* rhs)
 {

@@ -683,8 +683,11 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 {
 	const psy_ui_TextMetric* tm;
 	psy_ui_X11App* x11app;
+	XWindowAttributes win_attr;
+	psy_ui_RealRectangle r;
 		
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
+	XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr);
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;	
 	if (psy_ui_size_has_percent(&size)) {
@@ -705,15 +708,30 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 			? psy_ui_value_px(&size.height, tm, &parentsize)
 			: 1);
 	} else {	
-		XMoveResizeWindow(x11app->dpy, self->hwnd,
-			psy_ui_value_px(&topleft.x, tm, NULL),
-			psy_ui_value_px(&topleft.y, tm, NULL),
-			(psy_ui_value_px(&size.width, tm, NULL) > 0)
+		int left;
+		int top;
+		int width;
+		int height;
+		
+		left = psy_ui_value_px(&topleft.x, tm, NULL);
+		top = psy_ui_value_px(&topleft.y, tm, NULL);
+		width = (psy_ui_value_px(&size.width, tm, NULL) > 0)
 			? psy_ui_value_px(&size.width, tm, NULL)
-			: 1,
-			(psy_ui_value_px(&size.height, tm, NULL) > 0)
+			: 1;
+		height = (psy_ui_value_px(&size.height, tm, NULL) > 0)
 			? psy_ui_value_px(&size.height, tm, NULL)
-			: 1);
+			: 1;		
+		if (win_attr.x != left || win_attr.y != top ||
+				win_attr.width != width || win_attr.height != height) {
+			if (win_attr.width == width && win_attr.height == height) {
+				XMoveWindow(x11app->dpy, self->hwnd, left, top);
+			} else if (win_attr.x == left && win_attr.y == top) {
+				XResizeWindow(x11app->dpy, self->hwnd, width, height);							
+			} else {
+				XMoveResizeWindow(x11app->dpy, self->hwnd, left, top, width,
+					height);
+			}
+		}
 	}	
 	dev_updatesize(self);	
 }

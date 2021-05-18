@@ -37,6 +37,8 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor*);
 
 psy_audio_PatternCursor psy_audio_patterncursor_make(
 	uintptr_t track, psy_dsp_big_beat_t offset);
+psy_audio_PatternCursor psy_audio_patterncursor_make_all(
+	uintptr_t track, psy_dsp_big_beat_t offset, uint8_t key);
 
 INLINE psy_dsp_big_beat_t psy_audio_patterncursor_offset(
 	const psy_audio_PatternCursor* self)

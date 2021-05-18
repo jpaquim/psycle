@@ -375,6 +375,10 @@
     <ClCompile Include="src\patternviewconfig.c" />
     <ClCompile Include="src\patternviewmenu.c" />
     <ClCompile Include="src\patternviewskin.c" />
+    <ClCompile Include="src\pianogridstate.c" />
+    <ClCompile Include="src\pianokeyboard.c" />
+    <ClCompile Include="src\pianokeyboardstate.c" />
+    <ClCompile Include="src\pianoruler.c" />
     <ClCompile Include="src\pionoroll.c" />
     <ClCompile Include="src\playbar.c" />
     <ClCompile Include="src\playposbar.c" />
@@ -536,7 +540,11 @@
     <ClInclude Include="src\patternviewconfig.h" />
     <ClInclude Include="src\patternviewmenu.h" />
     <ClInclude Include="src\patternviewskin.h" />
+    <ClInclude Include="src\pianogridstate.h" />
+    <ClInclude Include="src\pianokeyboard.h" />
+    <ClInclude Include="src\pianokeyboardstate.h" />
     <ClInclude Include="src\pianoroll.h" />
+    <ClInclude Include="src\pianoruler.h" />
     <ClInclude Include="src\playbar.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
