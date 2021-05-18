@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -14,9 +16,7 @@
 #include <stdlib.h>
 #include <X11/Xmu/Drawing.h>
 
-extern psy_ui_App app;
-
-// VTable Prototypes
+/* prototypes */
 static void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_imp_textout(psy_ui_x11_GraphicsImp*, double x, double y, const char*, uintptr_t len);
 static void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp*, double x, double y, uintptr_t options,
@@ -52,13 +52,10 @@ static void psy_ui_x11_g_devsetlinewidth(psy_ui_x11_GraphicsImp*, uintptr_t widt
 static unsigned int psy_ui_x11_g_devlinewidth(psy_ui_x11_GraphicsImp*);
 static void psy_ui_x11_g_devsetorigin(psy_ui_x11_GraphicsImp*, double x, double y);
 static psy_ui_RealPoint psy_ui_x11_g_devorigin(const psy_ui_x11_GraphicsImp*);
-
-	
 static int psy_ui_x11_g_imp_colourindex(psy_ui_x11_GraphicsImp*, psy_ui_Colour);
-
-// VTable init
+/* vtable */
 static psy_ui_GraphicsImpVTable x11_imp_vtable;
-static int x11_imp_vtable_initialized = 0;
+static bool x11_imp_vtable_initialized = FALSE;
 
 static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 {
@@ -142,38 +139,37 @@ static void x11_imp_vtable_init(psy_ui_x11_GraphicsImp* self)
 		x11_imp_vtable.dev_origin =
 			(psy_ui_fp_graphicsimp_dev_origin)
 			psy_ui_x11_g_devorigin;
-		x11_imp_vtable_initialized = 1;
+		x11_imp_vtable_initialized = TRUE;
 	}
+	self->imp.vtable = &x11_imp_vtable;
 }
 
 void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self, 
 	PlatformXtGC* platformgc)
 {
-	int s;
+	int screen;
 	
 	psy_ui_graphics_imp_init(&self->imp);
-	x11_imp_vtable_init(self);
-	self->imp.vtable = &x11_imp_vtable;
+	x11_imp_vtable_init(self);	
 	self->display = platformgc->display;
 	self->window = platformgc->window;
 	self->visual = platformgc->visual;
 	self->gc = platformgc->gc;
-	s = DefaultScreen(self->display);
+	screen = DefaultScreen(self->display);
 	self->xfd = XftDrawCreate(
 		self->display,
 		self->window,
 		self->visual,
-	    DefaultColormap(self->display, s));
+	    DefaultColormap(self->display, screen));
 	self->defaultfont = XftFontOpenXlfd(self->display,
-		s, "arial");
+		screen, "arial");
 	if (!self->defaultfont) {
-		self->defaultfont = XftFontOpenName(self->display,
-			s, "arial");
+		self->defaultfont = XftFontOpenName(self->display, screen, "arial");
 	}
 	self->xftfont = self->defaultfont;
 	XftColorAllocName(self->display,
 		self->visual,
-		DefaultColormap(self->display, s),
+		DefaultColormap(self->display, screen),
 		"black", &self->black);
 	self->textcolor.color.red   = 0xFFFF;
 	self->textcolor.color.green = 0xFFFF;
@@ -186,7 +182,8 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->region = XCreateRegion();
 }
 
-void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self, psy_ui_Bitmap* bitmap)
+void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self,
+	psy_ui_Bitmap* bitmap)
 {
 	psy_ui_x11_graphicsimp_init(self, NULL);
 }
@@ -316,7 +313,7 @@ void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp* self,
 		self->window, self->gc,
 		r.left - (int)(self->dorg.x + self->org.x),
 		r.top - (int)(self->dorg.y + self->org.y),
-		r.right - r.left, r.bottom - r.top,
+		r.right - r.left - 1, r.bottom - r.top - 1,
 		cornersize.width, cornersize.height);	
 }
 

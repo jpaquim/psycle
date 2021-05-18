@@ -508,9 +508,6 @@
     <ClCompile Include="src\trackerview.c">
       <Filter>pattern\tracker</Filter>
     </ClCompile>
-    <ClCompile Include="src\pionoroll.c">
-      <Filter>pattern\pianoroll</Filter>
-    </ClCompile>
     <ClCompile Include="src\patternviewmenu.c">
       <Filter>pattern\block</Filter>
     </ClCompile>
@@ -540,6 +537,21 @@
     </ClCompile>
     <ClCompile Include="src\trackercmds.c">
       <Filter>pattern\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pianokeyboardstate.c">
+      <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pianogridstate.c">
+      <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pianokeyboard.c">
+      <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pianoruler.c">
+      <Filter>pattern\pianoroll</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pionoroll.c">
+      <Filter>pattern\pianoroll</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1000,6 +1012,18 @@
     </ClInclude>
     <ClInclude Include="src\trackercmds.h">
       <Filter>pattern\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianogridstate.h">
+      <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianoruler.h">
+      <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianokeyboard.h">
+      <Filter>pattern\pianoroll</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianokeyboardstate.h">
+      <Filter>pattern\pianoroll</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
