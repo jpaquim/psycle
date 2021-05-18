@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinsavedialogimp.h"
 
@@ -13,15 +16,15 @@
 #include <shlobj.h>
 #include "uiwincomponentimp.h"
 #include <commdlg.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_SaveDialogImp*);
 static int dev_execute(psy_ui_win_SaveDialogImp*);
 static const psy_Path* dev_path(psy_ui_win_SaveDialogImp*);
 
-// VTable init
+/* vtable */
 static psy_ui_SaveDialogImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -35,7 +38,7 @@ static void imp_vtable_init(psy_ui_win_SaveDialogImp* self)
 		imp_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void psy_ui_win_savedialogimp_init(psy_ui_win_SaveDialogImp* self, psy_ui_Component* parent)
 {
 	psy_ui_savedialogimp_init(&self->imp);
@@ -67,7 +70,6 @@ void psy_ui_win_savedialogimp_init_all(psy_ui_win_SaveDialogImp* self,
 	psy_path_init(&self->path, NULL);
 }
 
-// win32 implementation method for psy_ui_SaveDialog
 void dev_dispose(psy_ui_win_SaveDialogImp* self)
 {
 	free(self->title);
@@ -100,7 +102,7 @@ int dev_execute(psy_ui_win_SaveDialogImp* self)
 	}
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = 0; //  self->parent ? (HWND)psy_ui_win_component_details(self->parent)->hwnd : (HWND)0;
+	ofn.hwndOwner = 0; /*  self->parent ? (HWND)psy_ui_win_component_details(self->parent)->hwnd : (HWND)0; */
 	ofn.lpstrFilter = (LPSTR)filter;
 	ofn.lpstrCustomFilter = (LPSTR)NULL;
 	ofn.nMaxCustFilter = 0L;
@@ -117,8 +119,10 @@ int dev_execute(psy_ui_win_SaveDialogImp* self)
 	ofn.lpstrDefExt = (LPSTR)defextension;
 	rv = GetSaveFileName(&ofn);
 	if (psy_ui_app_main(psy_ui_app())) {
-		// InvalidateRect((HWND)psy_ui_win_component_details(app.main)->hwnd, 0, FALSE);
-		// UpdateWindow((HWND)psy_ui_win_component_details(app.main)->hwnd);
+		/*
+		** InvalidateRect((HWND)psy_ui_win_component_details(app.main)->hwnd, 0, FALSE);
+		**  UpdateWindow((HWND)psy_ui_win_component_details(app.main)->hwnd);
+		*/
 	}
 	if (rv) {
 		psy_path_setpath(&self->path, filename);
@@ -130,4 +134,5 @@ const psy_Path* dev_path(psy_ui_win_SaveDialogImp* self)
 {
 	return &self->path;
 }
-#endif
+
+#endif /* PSYCLE_TK_WIN32 */

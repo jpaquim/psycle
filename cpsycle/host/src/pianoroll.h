@@ -7,6 +7,7 @@
 #define PIANOROLL_H
 
 /* host */
+#include "patternhostcmds.h"
 #include "pianokeyboard.h"
 #include "pianoruler.h"
 #include "workspace.h"
@@ -122,7 +123,7 @@ typedef struct Pianogrid {
 	psy_audio_PatternSelection selection;
 	psy_audio_PatternCursor dragselectionbase;
 	psy_audio_PatternCursor lastdragcursor;
-	intptr_t pgupdownstep;
+	intptr_t pgupdownstep;	
 	/* references */
 	KeyboardState* keyboardstate;
 	PianoGridState* gridstate;
@@ -209,6 +210,7 @@ typedef struct Pianoroll {
 	PianoGridState gridstate;	
 	uintptr_t opcount;
 	bool syncpattern;
+	PatternCmds cmds;
 	/* references */
 	Workspace* workspace;
 } Pianoroll;

@@ -8,7 +8,7 @@
 #include "trackercolumn.h"
 #include "trackergridstate.h"
 #include "trackerlinestate.h"
-#include "workspace.h"
+#include "patternhostcmds.h"
 // ui
 #include <uibutton.h>
 #include <uilabel.h>
@@ -55,6 +55,7 @@ typedef struct TrackerGrid {
 	bool preventscrolltop;
 	psy_Table columns;
 	bool preventeventdriver;
+	PatternCmds cmds;
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;

@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinfontdialogimp.h"
 
@@ -13,10 +16,10 @@
 #include <shlobj.h>
 #include "uiwincomponentimp.h"
 #include <commdlg.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_FontDialogImp*);
 static int dev_execute(psy_ui_win_FontDialogImp*);
 static const char* dev_path(psy_ui_win_FontDialogImp*);
@@ -25,8 +28,7 @@ static void dev_setfontinfo(psy_ui_win_FontDialogImp*,
 psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontDialogImp*);
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT);
 static LOGFONT logfont(psy_ui_FontInfo);
-
-// VTable init
+/* vtable */
 static psy_ui_FontDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
@@ -41,7 +43,7 @@ static void imp_vtable_init(psy_ui_win_FontDialogImp* self)
 		imp_vtable_initialized = 1;
 	}
 }
-
+/* implementation */
 void psy_ui_win_fontdialogimp_init(psy_ui_win_FontDialogImp* self)
 {
 	psy_ui_fontdialogimp_init(&self->imp);
@@ -50,7 +52,6 @@ void psy_ui_win_fontdialogimp_init(psy_ui_win_FontDialogImp* self)
 	psy_ui_fontinfo_init(&self->fontinfo, "arial", 8);
 }
 
-// win32 implementation method for psy_ui_FontDialog
 void dev_dispose(psy_ui_win_FontDialogImp* self)
 {
 }
@@ -63,7 +64,7 @@ int dev_execute(psy_ui_win_FontDialogImp* self)
 
 	lf = logfont(self->fontinfo);	
 	cf.lStructSize = sizeof(CHOOSEFONT);
-	cf.hwndOwner = 0; // hwnd;
+	cf.hwndOwner = 0;
 	cf.hDC = NULL;
 	cf.lpLogFont = &lf;
 	cf.iPointSize = 0;
@@ -74,7 +75,7 @@ int dev_execute(psy_ui_win_FontDialogImp* self)
 	cf.lpTemplateName = NULL;
 	cf.hInstance = NULL;
 	cf.lpszStyle = NULL;
-	cf.nFontType = 0;               // Returned from ChooseFont
+	cf.nFontType = 0;               /* Returned from ChooseFont */
 	cf.nSizeMin = 0;
 	cf.nSizeMax = 0;
 	rv = ChooseFont(&cf);
@@ -112,7 +113,7 @@ psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
 	rv.lfClipPrecision = lf.lfClipPrecision;
 	rv.lfQuality = lf.lfQuality;
 	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
-	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
+	memcpy(rv.lfFaceName, lf.lfFaceName, 32); /* TODO UNICODE */
 	return rv;
 }
 
@@ -133,8 +134,8 @@ LOGFONT logfont(psy_ui_FontInfo lf)
 	rv.lfClipPrecision = lf.lfClipPrecision;
 	rv.lfQuality = lf.lfQuality;
 	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
-	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
+	memcpy(rv.lfFaceName, lf.lfFaceName, 32); /* TODO UNICODE */
 	return rv;
 }
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

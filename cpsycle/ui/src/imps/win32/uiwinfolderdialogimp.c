@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinfolderdialogimp.h"
 
@@ -14,12 +17,11 @@
 #include <commdlg.h>
 #include "../../detail/portable.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_FolderDialogImp*);
 static int dev_execute(psy_ui_win_FolderDialogImp*);
 static const char* dev_path(psy_ui_win_FolderDialogImp*);
-
-// VTable init
+/* vtable */
 static psy_ui_FolderDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
 
@@ -33,7 +35,7 @@ static void imp_vtable_init(psy_ui_win_FolderDialogImp* self)
 		imp_vtable_initialized = 1;
 	}
 }
-
+/* implementation */
 void psy_ui_win_folderdialogimp_init(psy_ui_win_FolderDialogImp* self)
 {
 	psy_ui_folderdialogimp_init(&self->imp);
@@ -55,7 +57,6 @@ void psy_ui_win_folderdialogimp_init_all(psy_ui_win_FolderDialogImp* self,
 	self->path = strdup("");
 }
 
-// win32 implementation method for psy_ui_FolderDialog
 void dev_dispose(psy_ui_win_FolderDialogImp* self)
 {
 	free(self->title);
@@ -68,15 +69,17 @@ void dev_dispose(psy_ui_win_FolderDialogImp* self)
 
 int dev_execute(psy_ui_win_FolderDialogImp* self)
 {
-	///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
-		// SHCreateItemFromParsingName(	
+	/*
+	** \todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
+	** SHCreateItemFromParsingName
+	*/
 	char title[MAX_PATH];
-	// char initialdir[MAX_PATH];		
+	/* char initialdir[MAX_PATH]; */
 	int val = 0;
 	LPMALLOC pMalloc;
 
 	psy_snprintf(title, MAX_PATH, "%s", self->title);
-	// Gets the Shell's default allocator		
+	/* Gets the Shell's default allocator */
 	if (SHGetMalloc(&pMalloc) == NOERROR)
 	{
 		char pszBuffer[MAX_PATH];
@@ -84,9 +87,10 @@ int dev_execute(psy_ui_win_FolderDialogImp* self)
 		LPITEMIDLIST pidl;
 
 		pszBuffer[0] = '\0';
-		// Get help on BROWSEINFO struct - it's got all the bit settings.
-		//
-		bi.hwndOwner = (HWND)0; // psy_ui_win_component_details(self)->hwnd;
+		/*
+		** Get help on BROWSEINFO struct - it's got all the bit settings.
+		*/
+		bi.hwndOwner = (HWND)0; /* psy_ui_win_component_details(self)->hwnd; */
 		bi.pidlRoot = NULL;
 		bi.pszDisplayName = pszBuffer;
 		bi.lpszTitle = title;
@@ -97,22 +101,26 @@ int dev_execute(psy_ui_win_FolderDialogImp* self)
 #endif
 		bi.lpfn = NULL;
 		bi.lParam = 0;
-		// This next call issues the dialog box.
-		//
+		/*
+		** This next call issues the dialog box.
+		*/
 		if ((pidl = SHBrowseForFolder(&bi)) != NULL) {
 			if (SHGetPathFromIDList(pidl, pszBuffer)) {
-				// At this point pszBuffer contains the selected path
-				//
+				/*
+				** At this point pszBuffer contains the selected path
+				*/
 				val = 1;
 				free(self->path);
 				self->path = strdup(pszBuffer);
 			}
-			// Free the PIDL allocated by SHBrowseForFolder.
-			//
+			/*
+			** Free the PIDL allocated by SHBrowseForFolder.
+			*/
 			pMalloc->lpVtbl->Free(pMalloc, pidl);
 		}
-		// Release the shell's allocator.
-		//
+		/*
+		** Release the shell's allocator.
+		*/
 		pMalloc->lpVtbl->Release(pMalloc);
 	}
 	return val;
@@ -123,4 +131,4 @@ const char* dev_path(psy_ui_win_FolderDialogImp* self)
 	return self->path;
 }
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwincolordialogimp.h"
 
@@ -16,14 +19,13 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-// VTable Prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_ColourDialogImp*);
 static int dev_execute(psy_ui_win_ColourDialogImp*);
 static const char* dev_path(psy_ui_win_ColourDialogImp*);
 static psy_ui_Colour dev_colour(psy_ui_win_ColourDialogImp*);
 static void dev_setcolour(psy_ui_win_ColourDialogImp*, psy_ui_Colour);
-
-// VTable init
+/* vtable */
 static psy_ui_ColourDialogImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -39,7 +41,7 @@ static psy_ui_ColourDialogImpVTable* imp_vtable_init(psy_ui_win_ColourDialogImp*
 	}
 	return &imp_vtable;
 }
-
+/* implementation */
 void psy_ui_win_colourdialogimp_init(psy_ui_win_ColourDialogImp* self)
 {
 	psy_ui_colourdialogimp_init(&self->imp);
@@ -47,7 +49,6 @@ void psy_ui_win_colourdialogimp_init(psy_ui_win_ColourDialogImp* self)
 	self->colour = psy_ui_colour_make_rgb(0x80, 0x80, 0x80);
 }
 
-// win32 implementation method for psy_ui_ColourDialog
 void dev_dispose(psy_ui_win_ColourDialogImp* self)
 {
 }
@@ -91,4 +92,4 @@ void dev_setcolour(psy_ui_win_ColourDialogImp* self, psy_ui_Colour colour)
 	self->colour = colour;
 }
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

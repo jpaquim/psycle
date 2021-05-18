@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwingraphicsimp.h"
 
@@ -13,7 +16,7 @@
 #include "../../uicomponent.h"
 #include <stdlib.h>
 
-// VTable Prototypes
+/* prototypes */
 static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, double x, double y, const char*, uintptr_t len);
 static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, double x, double y, uintptr_t options,
@@ -51,7 +54,7 @@ static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double 
 static psy_ui_RealPoint psy_ui_win_g_devorigin(const psy_ui_win_GraphicsImp*);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
-// vtable
+/* vtable */
 static psy_ui_GraphicsImpVTable win_imp_vtable;
 static bool win_imp_vtable_initialized = FALSE;
 
@@ -140,7 +143,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 {
 	psy_ui_graphics_imp_init(&self->imp);
@@ -187,7 +190,6 @@ void psy_ui_win_graphicsimp_init_bitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bit
 	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);	
 }
 
-// win32 implementation method for psy_ui_Graphics
 void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 {
 	SelectObject(self->hdc, self->penprev);
@@ -252,7 +254,8 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 	return rv;
 }
 
-void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_RealRectangle r)
+void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self,
+	const psy_ui_RealRectangle r)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -271,14 +274,10 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self,
 	const psy_ui_RealRectangle r, psy_ui_RealSize cornersize)
 {
 	HBRUSH hBrush;
-	HBRUSH hOldBrush;
-	psy_ui_TextMetric tm;
-	TEXTMETRIC win_tm;
+	HBRUSH hOldBrush;	
 	
 	hBrush = GetStockObject (NULL_BRUSH);
-	hOldBrush = SelectObject(self->hdc, hBrush);
-	GetTextMetrics(self->hdc, &win_tm);
-	tm = converttextmetric(&win_tm);
+	hOldBrush = SelectObject(self->hdc, hBrush);	
 	RoundRect(self->hdc,
 		(int)r.left - (int)(self->org.x),
 		(int)r.top - (int)(self->org.y),
@@ -333,8 +332,9 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self,
 	DeleteObject(hPen) ;
 }
 
-void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_RealPoint* pts,
-	uintptr_t numpoints, uint32_t inner, uint32_t outter)
+void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self,
+	psy_ui_RealPoint* pts, uintptr_t numpoints, uint32_t inner,
+	uint32_t outter)
 {
 	HBRUSH hBrush;     
 	HBRUSH hBrushPrev;
@@ -360,7 +360,8 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_Real
 	free(wpts);
 }
 
-void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, double x, double y)
+void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self,
+	psy_ui_Bitmap* bitmap, double x, double y)
 {
 	HDC hdcmem;
 	psy_ui_RealSize size;
@@ -398,18 +399,20 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	if (winimp->mask) {
 		uint32_t restoretextcolour;
 
-		// We are going to paint the two DDB's in sequence to the destination.
-		// 1st the monochrome bitmap will be blitted using an AND operation to
-		// cut a hole in the destination. The color image will then be ORed
-		// with the destination, filling it into the hole, but leaving the
-		// surrounding area untouched.
+		/*
+		** We are going to paint the two DDB's in sequence to the destination.
+		** 1st the monochrome bitmap will be blitted using an AND operation to
+		** cut a hole in the destination. The color image will then be ORed
+		** with the destination, filling it into the hole, but leaving the
+		** surrounding area untouched.
+		*/
 		SelectObject(hdcmem, winimp->mask);
 		restoretextcolour = GetTextColor(self->hdc);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
 		SetBkColor(self->hdc, RGB(255, 255, 255));
 		BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCAND);
 		SelectObject(hdcmem, wbitmap);
-		// Also note the use of SRCPAINT rather than SRCCOPY.
+		/* Also note the use of SRCPAINT rather than SRCCOPY. */
 		BitBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCPAINT);
 		SetTextColor(self->hdc, restoretextcolour);
 	} else {
@@ -434,11 +437,13 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 	hdcmem = CreateCompatibleDC(self->hdc);
 	if (winimp->mask) {
 		uint32_t restoretextcolour;
-		// We are going to paint the two DDB's in sequence to the destination.
-		// 1st the monochrome bitmap will be blitted using an AND operation to
-		// cut a hole in the destination. The color image will then be ORed
-		// with the destination, filling it into the hole, but leaving the
-		// surrounding area untouched.
+		/*
+		** We are going to paint the two DDB's in sequence to the destination.
+		**  1st the monochrome bitmap will be blitted using an AND operation to
+		**  cut a hole in the destination. The color image will then be ORed
+		**  with the destination, filling it into the hole, but leaving the
+		**  surrounding area untouched.
+		*/
 		restoretextcolour = GetTextColor(self->hdc);
 		SelectObject(hdcmem, winimp->mask);
 		SetTextColor(self->hdc, RGB(0, 0, 0));
@@ -446,7 +451,7 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
 			SRCAND);
 		SelectObject(hdcmem, wbitmap);
-		// Also note the use of SRCPAINT rather than SRCCOPY.		
+		/* Also note the use of SRCPAINT rather than SRCCOPY. */
 		StretchBlt(self->hdc, (int)x - (int)(self->org.x), (int)y - (int)(self->org.y), (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
 			SRCPAINT);
 		SetTextColor(self->hdc, restoretextcolour);
