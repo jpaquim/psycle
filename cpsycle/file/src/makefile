@@ -7,7 +7,7 @@ libfile.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
-	$(CC) $(inc) -c $(src)
+	$(CC) -g3 $(inc) -c $(src)
 
 .PHONY: clean	
 clean:

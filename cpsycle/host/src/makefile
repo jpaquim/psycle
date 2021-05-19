@@ -7,10 +7,10 @@ obj = $(src:.c=.o)
 LDFLAGS = -no-pie -lncurses -laudio -lcontainer -ldsp -laudio -lfile -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lpsyui
 
 psycle: $(obj)	
-	$(CC) -g -O2 -o $@ $^ $(LIBDIRS) $(LDFLAGS)	
+	$(CC) -g3 -O2 -o $@ $^ $(LIBDIRS) $(LDFLAGS)	
 		
 %.o: %.c
-	$(CC) -g $(INC) -c $(src)
+	$(CC) -g3 $(INC) -c $(src)
 	
 
 .PHONY: clean	
