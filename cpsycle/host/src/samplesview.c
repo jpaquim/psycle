@@ -877,7 +877,7 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 
 void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 {
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 	/* todo seqfault in psy_ui_component_inputprevented X11 Imp */
 	return;	
 #endif

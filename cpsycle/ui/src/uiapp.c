@@ -19,15 +19,9 @@
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #include "imps/win32/uiwinimpfactory.h"
 #include <Windows.h>
-#elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
-#include <curses.h>
-#include "imps/curses/uicursesimpfactory.h"
-#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+#elif PSYCLE_USE_TK == PSYCLE_TK_X11
 #include "imps/x11/uix11app.h"
 #include "imps/x11/uix11impfactory.h"
-#elif PSYCLE_USE_TK == PSYCLE_TK_GTK
-#include "imps/gtk/uigtkapp.h"
-#include "imps/gtk/uigtkimpfactory.h"
 #else
 	#error "Platform not supported"
 #endif
@@ -129,7 +123,7 @@ void ui_app_initimpfactory(psy_ui_App* self)
 	   refresh();
 	   self->imp_factory = (psy_ui_ImpFactory*)
 		  psy_ui_curses_impfactory_allocinit(); */
-#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+#elif PSYCLE_USE_TK == PSYCLE_TK_X11
 	printf("Create X11 Impfactory\n");
 	self->imp_factory = (psy_ui_ImpFactory*)
 		psy_ui_x11_impfactory_allocinit();	

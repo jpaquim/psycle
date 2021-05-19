@@ -3,7 +3,7 @@
 
 #include "../../detail/psyconf.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 #ifndef psy_ui_x11_COLORDIALOGIMP_H
 #define psy_ui_x11_COLORDIALOGIMP_H
 
@@ -26,4 +26,4 @@ void psy_ui_x11_colordialogimp_init(psy_ui_x11_ColorDialogImp*);
 #endif
 
 #endif /* psy_ui_x11_COLORDIALOGIMP_H */
-#endif /* PSYCLE_TK_XT */
+#endif /* PSYCLE_TK_X11 */

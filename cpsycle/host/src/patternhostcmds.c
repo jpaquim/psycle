@@ -89,3 +89,29 @@ void patterncmds_blockpaste(PatternCmds* self, psy_audio_PatternCursor cursor,
 				1.0 / (double)cursor.lpb, mix, self->workspace)->command);		
 	}
 }
+
+void patterncmds_changeinstrument(PatternCmds* self,
+	psy_audio_PatternSelection selection)
+{
+	assert(self);
+
+	if (self->pattern && workspace_song(self->workspace)) {
+		psy_audio_pattern_changeinstrument(self->pattern,
+			selection.topleft, selection.bottomright,
+			psy_audio_instruments_selected(&workspace_song(
+				self->workspace)->instruments).subslot);
+	}
+}
+
+void patterncmds_changemachine(PatternCmds* self,
+	psy_audio_PatternSelection selection)
+{
+	assert(self);
+
+	if (self->pattern && workspace_song(self->workspace)) {
+		psy_audio_pattern_changemachine(self->pattern,
+			selection.topleft, selection.bottomright,
+			psy_audio_machines_selected(&workspace_song(
+				self->workspace)->machines));
+	}
+}

@@ -6,6 +6,7 @@
 #include <multiresampler.h>
 // #include <psycle/helpers/math.hpp>
 // #include <psycle/helpers/resampler.hpp>
+#include <cstdlib>
 
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.

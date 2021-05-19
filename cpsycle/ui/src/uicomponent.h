@@ -528,7 +528,7 @@ psy_ui_Component* psy_ui_mainwindow(void);
 
 INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {	
-#if PSYCLE_USE_TK == PSYCLE_TK_XT	
+#if PSYCLE_USE_TK == PSYCLE_TK_X11	
 	if (!psy_ui_mainwindow()->visible) {
 		return;
 	}
@@ -720,6 +720,12 @@ INLINE double psy_ui_component_scrolltop_px(psy_ui_Component* self)
 
 	position = psy_ui_component_position(self);
 	return -floor(position.top);	
+}
+
+INLINE void psy_ui_component_setscrolltop_px(psy_ui_Component* self,
+	double top)
+{
+	psy_ui_component_setscrolltop(self, psy_ui_value_make_px(top));
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);

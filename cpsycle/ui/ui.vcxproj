@@ -208,10 +208,6 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\imps\curses\uicursescomponentimp.c" />
-    <ClCompile Include="src\imps\curses\uicursesdef.c" />
-    <ClCompile Include="src\imps\curses\uicursesgraphicsimp.c" />
-    <ClCompile Include="src\imps\curses\uicursesimpfactory.c" />
     <ClCompile Include="src\imps\natives\uinativecheckboximp.c" />
     <ClCompile Include="src\imps\natives\uinativeeditimp.c" />
     <ClCompile Include="src\imps\natives\uinativelistboximp.c" />
@@ -279,10 +275,6 @@
     <ClCompile Include="src\uiviewcomponentimp.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\imps\curses\uicursescomponentimp.h" />
-    <ClInclude Include="src\imps\curses\uicursesdef.h" />
-    <ClInclude Include="src\imps\curses\uicursesgraphicsimp.h" />
-    <ClInclude Include="src\imps\curses\uicursesimpfactory.h" />
     <ClInclude Include="src\imps\natives\uinativecheckboximp.h" />
     <ClInclude Include="src\imps\natives\uinativeeditimp.h" />
     <ClInclude Include="src\imps\natives\uinativelistboximp.h" />

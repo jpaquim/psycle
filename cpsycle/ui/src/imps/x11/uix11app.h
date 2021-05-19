@@ -3,7 +3,7 @@
 
 #include "../../detail/psyconf.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 #ifndef psy_ui_X11APP_H
 #define psy_ui_X11APP_H
 
@@ -60,6 +60,7 @@ typedef struct psy_ui_X11App {
 	bool dbe;
 	bool dograb;
 	Window grabwin;
+	psy_List* targetids;
 	// references
 	psy_ui_App* app;
 } psy_ui_X11App;
@@ -85,4 +86,4 @@ INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 #endif
 
 #endif /* psy_ui_X11APP_H */
-#endif /* PSYCLE_TK_XT */
+#endif /* PSYCLE_TK_X11 */

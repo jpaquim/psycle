@@ -5,7 +5,7 @@
 
 #include "uix11folderdialogimp.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 
 #include "uiapp.h"
 #include <stdlib.h>

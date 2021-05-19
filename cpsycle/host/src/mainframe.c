@@ -10,6 +10,8 @@
 #include "cmdsgeneral.h"
 #include "resources/resource.h"
 #include "styles.h"
+/* platform */
+#include "../../detail/portable.h"
 
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 #include "defaultlang.h"
@@ -170,11 +172,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initsequenceview(self);
 	mainframe_initsequencerbar(self);
 	mainframe_initstepsequencerview(self);
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
-	/* todo segfault X11 imp */
-#else
-	mainframe_initseqeditor(self);	
-#endif
+	mainframe_initseqeditor(self);
 	mainframe_initplugineditor(self);
 	mainframe_initstatusbar(self);
 	mainframe_initminmaximize(self);	
@@ -184,11 +182,8 @@ void mainframe_init(MainFrame* self)
 	mainframe_connectworkspace(self);
 	mainframe_updatestepsequencerbuttons(self);	
 	mainframe_connectstepsequencerbuttons(self);
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
-#else
 	mainframe_updateseqeditorbuttons(self);
-	mainframe_connectseqeditorbuttons(self);	
-#endif	
+	mainframe_connectseqeditorbuttons(self);
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 	save_translator_default();
 	save_translator_template();
@@ -1061,42 +1056,61 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 	int option, int mode)
 {	
 	switch (option) {			
-		case CONFIRM_YES:
-			if (mode == CONFIRM_SEQUENCECLEAR) {
-				workspace_restoreview(&self->workspace);
-				seqview_clear(&self->sequenceview);				
-			} else if (workspace_savesong_fileselect(&self->workspace)) {				
-				if (mode == CONFIRM_CLOSE) {
-					psy_ui_app_close(psy_ui_app());
-				} else if (mode == CONFIRM_LOAD) {
-					workspace_loadsong_fileselect(&self->workspace);
-				} else if (mode == CONFIRM_NEW) {										
-					workspace_newsong(&self->workspace);					
-				}
-			}			
-			break;
-		case CONFIRM_NO: {
-			if (mode == CONFIRM_SEQUENCECLEAR) {
-				workspace_restoreview(&self->workspace);
-			} else {
-				self->workspace.undosavepoint = psy_list_size(
-					self->workspace.undoredo.undo);
-				self->workspace.machines_undosavepoint = psy_list_size(
-					self->workspace.song->machines.undoredo.undo);
-				if (mode == CONFIRM_CLOSE) {
-					psy_ui_app_close(psy_ui_app());
-				} else if (mode == CONFIRM_LOAD) {
-					workspace_loadsong_fileselect(&self->workspace);
-				} else if (mode == CONFIRM_NEW) {
-					workspace_newsong(&self->workspace);
-				}
-			}
-			break; }
-		case CONFIRM_CONTINUE:
+	case CONFIRM_YES:
+		if (mode == CONFIRM_SEQUENCECLEAR) {
 			workspace_restoreview(&self->workspace);
-			break;		
-		default:		
-			break;
+			seqview_clear(&self->sequenceview);				
+		} else if (workspace_savesong_fileselect(&self->workspace)) {				
+			if (mode == CONFIRM_CLOSE) {
+				psy_ui_app_close(psy_ui_app());
+			} else if (mode == CONFIRM_LOAD) {
+#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
+				workspace_loadsong_fileselect(&self->workspace);
+#else				
+				const char* path;
+				path = fileview_path(&self->fileloadview);
+				workspace_loadsong(&self->workspace,
+					path,
+					generalconfig_playsongafterload(psycleconfig_general(
+						workspace_conf(&self->workspace))));
+#endif				
+			} else if (mode == CONFIRM_NEW) {										
+				workspace_newsong(&self->workspace);					
+			}
+		}			
+		break;
+	case CONFIRM_NO: {
+		if (mode == CONFIRM_SEQUENCECLEAR) {
+			workspace_restoreview(&self->workspace);
+		} else {
+			self->workspace.undosavepoint = psy_list_size(
+				self->workspace.undoredo.undo);
+			self->workspace.machines_undosavepoint = psy_list_size(
+				self->workspace.song->machines.undoredo.undo);
+			if (mode == CONFIRM_CLOSE) {
+				psy_ui_app_close(psy_ui_app());
+			} else if (mode == CONFIRM_LOAD) {
+#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
+					workspace_loadsong_fileselect(&self->workspace);
+#else				
+					const char* path;
+
+					path = fileview_path(&self->fileloadview);
+					workspace_loadsong(&self->workspace,
+						path,
+						generalconfig_playsongafterload(psycleconfig_general(
+							workspace_conf(&self->workspace))));
+#endif								
+			} else if (mode == CONFIRM_NEW) {
+				workspace_newsong(&self->workspace);
+			}
+		}
+		break; }
+	case CONFIRM_CONTINUE:
+		workspace_restoreview(&self->workspace);
+		break;		
+	default:		
+		break;
 	}	
 }
 
@@ -1231,8 +1245,19 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 	const char* path;
 
 	path = fileview_path(sender);
-	/* workspace_loadsong(&self->workspace, path,
-		workspace_playsongafterload(&self->workspace)); */
+	if (psy_strlen(path) == 0) {
+		return;
+	}
+	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
+			workspace_songmodified(&self->workspace)) {
+		workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, SECTION_ID_FILEVIEW,
+			CONFIRM_LOAD);
+	} else {
+		workspace_loadsong(&self->workspace,
+			path,
+			generalconfig_playsongafterload(psycleconfig_general(
+				workspace_conf(&self->workspace))));
+	}
 }
 #endif
 

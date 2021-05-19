@@ -3,7 +3,7 @@
 
 #include "../../detail/psyconf.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 
 #ifndef psy_ui_x11_SAVEDIALOGIMP_H
 #define psy_ui_x11_SAVEDIALOGIMP_H
@@ -37,6 +37,6 @@ void psy_ui_x11_savedialogimp_init_all(psy_ui_x11_SaveDialogImp*,
 #endif
 
 #endif /* psy_ui_x11_SAVEDIALOGIMP_H */
-#endif /* PSYCLE_TK_XT */
+#endif /* PSYCLE_TK_X11 */
 
 

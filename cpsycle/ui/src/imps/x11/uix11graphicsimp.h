@@ -3,7 +3,7 @@
 
 #include "../../detail/psyconf.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 #ifndef psy_ui_x11_GRAPHICSIMP_H
 #define psy_ui_x11_GRAPHICSIMP_H
 
@@ -62,4 +62,4 @@ void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp*,
 #endif
 
 #endif /* psy_ui_x11_GRAPHICSIMP_H */
-#endif /* PSYCLE_TK_XT */
+#endif /* PSYCLE_TK_X11 */
