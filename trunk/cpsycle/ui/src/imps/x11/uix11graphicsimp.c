@@ -7,7 +7,7 @@
 
 #include "uix11graphicsimp.h"
 
-#if PSYCLE_USE_TK == PSYCLE_TK_XT
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
 
 #include "uix11app.h"
 #include "uix11fontimp.h"

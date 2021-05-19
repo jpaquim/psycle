@@ -7,7 +7,9 @@
 #define psy_PSYCONF_H
 
 #if defined __unix__
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #endif
 
 #include "cpu.h"
@@ -18,20 +20,16 @@
 #endif
 
 #define PSYCLE_TK_WIN32 1
-#define PSYCLE_TK_CURSES 2
-#define PSYCLE_TK_XT 3
-#define PSYCLE_TK_GTK 4
+#define PSYCLE_TK_X11 3
 
 #if defined(DIVERSALIS__OS__UNIX)
-#define PSYCLE_USE_TK PSYCLE_TK_XT
+#define PSYCLE_USE_TK PSYCLE_TK_X11
 #elif defined(DIVERSALIS__OS__MICROSOFT)
 #define PSYCLE_USE_TK PSYCLE_TK_WIN32
 #define PSY_USE_PLATFORM_CHECKBOX
 #define PSY_USE_PLATFORM_LISTBOX
 #define PSY_USE_PLATFORM_EDIT
-#define PSYCLE_USE_PLATFORM_FILEOPEN
-#else
-#define PSYCLE_USE_TK PSYCLE_TK_CURSES  
+// #define PSYCLE_USE_PLATFORM_FILEOPEN
 #endif
 
 #if defined(DIVERSALIS__OS__UNIX)

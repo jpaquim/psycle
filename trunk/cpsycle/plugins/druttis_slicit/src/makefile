@@ -2,7 +2,7 @@ CC = g++
 INC = -I ../../ -I ../../psycle
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = blitz12.so
+OUTPUTFILE = slicit.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

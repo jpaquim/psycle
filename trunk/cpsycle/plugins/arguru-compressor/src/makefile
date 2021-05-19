@@ -1,8 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../psycle
+INC = -I ../../ -I ../../../dsp/src
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = blitz12.so
+OUTPUTFILE = arguru-compressor.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

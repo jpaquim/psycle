@@ -14,6 +14,13 @@
 // The TrackerView is where you enter notes. It displays a Pattern selected by
 // the SeqView as a tracker grid.
 
+
+typedef enum {
+	SCROLL_DIR_NONE,
+	SCROLL_DIR_LEFT,
+	SCROLL_DIR_RIGHT
+} ScrollDir;
+
 enum {
 	TRACKER_COLUMN_NONE = -1,
 	TRACKER_COLUMN_NOTE = 0,
@@ -222,5 +229,10 @@ void trackergridstate_dragselection(TrackerGridState*,
 	psy_audio_PatternCursor, double bpl);
 psy_audio_PatternCursor trackergridstate_checkcursorbounds(TrackerGridState*,
 	psy_audio_PatternCursor);
+void trackergridstate_selectcol(TrackerGridState*);
+void trackergridstate_selectbar(TrackerGridState*);
+void trackergridstate_selectall(TrackerGridState*);
+ScrollDir trackergridstate_nextcol(TrackerGridState*, bool wrap);
+ScrollDir trackergridstate_prevcol(TrackerGridState*, bool wrap);
 
 #endif /* TRACKERGRIDSTATE_H */

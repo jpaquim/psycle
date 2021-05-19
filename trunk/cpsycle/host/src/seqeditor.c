@@ -1016,8 +1016,11 @@ void seqeditortrackdesc_init(SeqEditorTrackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
+#if PSYCLE_USE_TK != PSYCLE_TK_X11
+	/* todo segfault X11 imp */			
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
+#endif	
 	seqeditortrackdesc_build(self);	
 	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
 		seqeditortrackdesc_onsequenceselectionselect);
@@ -1066,8 +1069,11 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 	psy_audio_Sequence* sequence;
 
 	psy_ui_component_clear(&self->component);
+#if PSYCLE_USE_TK != PSYCLE_TK_X11
+	/* todo segfault X11 imp */	
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
+#endif
 	sequence = &self->state->workspace->song->sequence;
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
@@ -1565,7 +1571,7 @@ void seqeditor_ondestroy(SeqEditor* self)
 
 void seqeditor_onsongchanged(SeqEditor* self, Workspace* workspace, int flag,
 	psy_audio_Song* song)
-{
+{	
 	seqeditor_updatesong(self, workspace->song);
 }
 
@@ -1645,9 +1651,9 @@ void seqeditor_onsequencetrackremove(SeqEditor* self, psy_audio_Sequence* sender
 }
 
 void seqeditor_build(SeqEditor* self)
-{	
-	seqeditortracks_build(&self->tracks);
-	seqeditortrackdesc_build(&self->trackdescriptions);
+{		
+	seqeditortracks_build(&self->tracks);	
+	seqeditortrackdesc_build(&self->trackdescriptions);	
 	psy_ui_component_align(&self->scroller.pane);
 	psy_ui_component_align(&self->tracks.component);
 	psy_ui_component_align(&self->trackdescpane);

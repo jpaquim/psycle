@@ -1,8 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../psycle
-LIBDIRS =
+INC = -I ../../ -I ../../../dsp/src
+LIBDIRS = -L ../../../dsp/src -l dsp
 LDFLAGS = -shared
-OUTPUTFILE = blitz12.so
+OUTPUTFILE = arguru-reverb.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

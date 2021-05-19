@@ -2197,9 +2197,6 @@ void psy_ui_component_mousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 		child = (psy_ui_Component*)p->entry;
 		if (psy_ui_component_visible(child)) {
 			r = psy_ui_component_position(child);
-			printf("%d,%d,%d, %d\n", (int)r.left, (int)r.top,
-					(int)ev->pt.x,
-					(int)ev->pt.y);
 			if (psy_ui_realrectangle_intersect(&r, ev->pt)) {
 				ev->pt.x -= r.left;
 				ev->pt.y -= r.top;				

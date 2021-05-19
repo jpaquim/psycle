@@ -37,6 +37,8 @@ void patterncmds_blocktranspose(PatternCmds*, psy_audio_PatternSelection,
 void patterncmds_blockdelete(PatternCmds*, psy_audio_PatternSelection);
 void patterncmds_blockpaste(PatternCmds*, psy_audio_PatternCursor, bool mix);
 void patterncmds_blockcopy(PatternCmds*, psy_audio_PatternSelection);
+void patterncmds_changeinstrument(PatternCmds*, psy_audio_PatternSelection);
+void patterncmds_changemachine(PatternCmds*, psy_audio_PatternSelection);
 
 #ifdef __cplusplus
 }

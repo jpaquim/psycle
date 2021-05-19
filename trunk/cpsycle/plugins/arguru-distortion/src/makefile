@@ -1,8 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../psycle
+INC = -I ../../
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = blitz12.so
+OUTPUTFILE = arguru-distortion.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

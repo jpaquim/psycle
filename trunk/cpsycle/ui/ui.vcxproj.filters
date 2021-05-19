@@ -11,9 +11,6 @@
     <Filter Include="imps\win32">
       <UniqueIdentifier>{e0e669fd-2fd7-4711-8664-695d8261b780}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imps\curses">
-      <UniqueIdentifier>{b6b4f55e-d741-4a46-85b5-f52464b889b8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="comps">
       <UniqueIdentifier>{5713747d-7657-4e70-a30a-c189d855f15d}</UniqueIdentifier>
     </Filter>
@@ -51,18 +48,6 @@
   <ItemGroup>
     <ClCompile Include="src\uiapp.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\curses\uicursescomponentimp.c">
-      <Filter>imps\curses</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\curses\uicursesdef.c">
-      <Filter>imps\curses</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\curses\uicursesgraphicsimp.c">
-      <Filter>imps\curses</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\curses\uicursesimpfactory.c">
-      <Filter>imps\curses</Filter>
     </ClCompile>
     <ClCompile Include="src\uibutton.c">
       <Filter>comps</Filter>
@@ -258,18 +243,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\imps\curses\uicursescomponentimp.h">
-      <Filter>imps\curses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\curses\uicursesdef.h">
-      <Filter>imps\curses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\curses\uicursesgraphicsimp.h">
-      <Filter>imps\curses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\curses\uicursesimpfactory.h">
-      <Filter>imps\curses</Filter>
-    </ClInclude>
     <ClInclude Include="src\uibutton.h">
       <Filter>comps</Filter>
     </ClInclude>

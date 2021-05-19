@@ -553,3 +553,124 @@ psy_audio_PatternCursor trackergridstate_checkcursorbounds(TrackerGridState* sel
 	}
 	return rv;
 }
+
+void trackergridstate_selectcol(TrackerGridState* self)
+{
+	assert(self);
+
+	if (trackergridstate_pattern(self)) {
+		self->selection.topleft.offset = 0;
+		self->selection.topleft.track = self->cursor.track;
+		self->selection.bottomright.offset = trackergridstate_pattern(self)->length;
+		self->selection.bottomright.track = self->cursor.track + 1;
+		psy_audio_patternselection_enable(&self->selection);		
+	}
+}
+
+void trackergridstate_selectbar(TrackerGridState* self)
+{
+	assert(self);
+
+	if (trackergridstate_pattern(self)) {
+		self->selection.topleft.offset = self->cursor.offset;
+		self->selection.topleft.track = self->cursor.track;
+		self->selection.bottomright.offset = self->cursor.offset + 4.0;
+		if (self->cursor.offset > trackergridstate_pattern(self)->length) {
+			self->cursor.offset = trackergridstate_pattern(self)->length;
+		}
+		self->selection.bottomright.track = self->cursor.track + 1;
+		psy_audio_patternselection_enable(&self->selection);		
+	}
+}
+
+void trackergridstate_selectall(TrackerGridState* self)
+{
+	assert(self);
+
+	if (trackergridstate_pattern(self)) {
+		psy_audio_patternselection_init(&self->selection);		
+		self->selection.topleft.key = psy_audio_NOTECOMMANDS_B9;
+		self->selection.bottomright.offset = psy_audio_pattern_length(
+			trackergridstate_pattern(self));
+		self->selection.bottomright.track =
+			trackergridstate_numsongtracks(self);
+		psy_audio_patternselection_enable(&self->selection);
+	}
+}
+
+ScrollDir trackergridstate_nextcol(TrackerGridState* self, bool wrap)
+{
+	if (self->pattern) {
+		TrackDef* trackdef;
+		int invalidate = 1;
+
+		assert(self);
+
+		trackdef = trackergridstate_trackdef(self, self->cursor.track);
+		if (self->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
+			self->cursor.digit == trackdef_numdigits(trackdef,
+				self->cursor.column) - 1) {
+			if (self->cursor.track < trackergridstate_numsongtracks(self) - 1) {
+				self->cursor.column = 0;
+				self->cursor.digit = 0;
+				++self->cursor.track;
+				return SCROLL_DIR_RIGHT;				
+			} else if (wrap) {
+				self->cursor.column = 0;
+				self->cursor.digit = 0;
+				self->cursor.track = 0;
+				return SCROLL_DIR_LEFT;				
+			}
+		} else {
+			++self->cursor.digit;
+			if (self->cursor.digit >=
+				trackdef_numdigits(trackdef, self->cursor.column)) {
+				++self->cursor.column;
+				self->cursor.digit = 0;
+			}
+		}		
+	}
+	return SCROLL_DIR_NONE;
+}
+
+ScrollDir trackergridstate_prevcol(TrackerGridState* self, bool wrap)
+{
+	int invalidate = 1;
+
+	assert(self);
+
+	if (self->cursor.column == 0 && self->cursor.digit == 0) {
+		if (self->cursor.track > 0) {
+			TrackDef* trackdef;
+
+			--self->cursor.track;
+			trackdef = trackergridstate_trackdef(self, self->cursor.track);
+			self->cursor.column = trackdef_numcolumns(trackdef) - 1;
+			self->cursor.digit = trackdef_numdigits(trackdef,
+				self->cursor.column) - 1;
+			return SCROLL_DIR_LEFT;			
+		} else if (wrap) {
+			TrackDef* trackdef;
+
+			self->cursor.track = trackergridstate_numsongtracks(self) - 1;
+			trackdef = trackergridstate_trackdef(self, self->cursor.track);
+			self->cursor.column = trackdef_numcolumns(trackdef) - 1;
+			self->cursor.digit = trackdef_numdigits(trackdef,
+				self->cursor.column) - 1;
+			return SCROLL_DIR_RIGHT;			
+		}
+	} else {
+		if (self->cursor.digit > 0) {
+			--self->cursor.digit;
+		} else {
+			TrackDef* trackdef;
+
+			trackdef = trackergridstate_trackdef(self,
+				self->cursor.track);
+			--self->cursor.column;
+			self->cursor.digit = trackdef_numdigits(trackdef,
+				self->cursor.column) - 1;
+		}
+	}
+	return SCROLL_DIR_NONE;
+}
