@@ -59,11 +59,11 @@ void psy_ui_listboxclient_init(psy_ui_ListBoxClient* self, psy_ui_Component*
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_listboxclient_ondestroy);
 	psy_table_init(&self->items);
-	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	self->selindex = -1;
 	self->charnumber = 0;
 	psy_signal_init(&self->signal_selchanged);
+	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void psy_ui_listboxclient_ondestroy(psy_ui_ListBoxClient* self,

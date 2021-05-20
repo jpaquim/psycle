@@ -231,10 +231,10 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	psy_audio_sequencer_clearinputevents(self);
 	psy_audio_sequencer_clearcurrtracks(self);
 	psy_audio_sequencer_makecurrtracks(self, (psy_dsp_big_beat_t)0.0);
-	psy_audio_sequencer_compute_beatspersample(self);
 	psy_audio_sequencerjump_init(&self->jump);
 	psy_audio_sequencerrowdelay_init(&self->rowdelay);
 	psy_audio_sequencerloop_init(&self->loop);
+	psy_audio_sequencer_compute_beatspersample(self);	
 }
 
 void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,

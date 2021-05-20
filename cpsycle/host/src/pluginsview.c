@@ -210,9 +210,7 @@ int isplugin(int type)
 // NewMachineFilter
 void newmachinefilter_init(NewMachineFilter* self)
 {
-	self->text = NULL;
-	self->gen = TRUE;
-	self->effect = TRUE;
+	self->text = NULL;	
 	psy_table_init(&self->categories);
 	newmachinefilter_setalltypes(self);		
 	psy_signal_init(&self->signal_changed);
@@ -226,14 +224,12 @@ void newmachinefilter_dispose(NewMachineFilter* self)
 }
 
 void newmachinefilter_notify(NewMachineFilter* self)
-{
+{	
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
 void newmachinefilter_reset(NewMachineFilter* self)
-{
-	self->gen = TRUE;
-	self->effect = TRUE;
+{	
 	newmachinefilter_setalltypes(self);
 	psy_strreset(&self->text, "");
 	psy_table_disposeall(&self->categories, NULL);
@@ -487,7 +483,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 }
 
 void pluginsview_ondestroy(PluginsView* self)
-{
+{	
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
 	pluginsview_clear(self);
@@ -495,7 +491,7 @@ void pluginsview_ondestroy(PluginsView* self)
 		psy_signal_disconnect(&self->filter->signal_changed, self,
 			pluginsview_onfilterchanged);
 	}
-	newmachineselection_dispose(&self->selection);
+	newmachineselection_dispose(&self->selection);	
 }
 
 void pluginsview_clear(PluginsView* self)

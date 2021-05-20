@@ -126,13 +126,13 @@ typedef struct NewMachineFilterBar {
 	psy_ui_Button lua;
 	psy_ui_Button ladspa;
 	// references
-	NewMachineFilter* filters;
+	NewMachineFilter* filter;
 } NewMachineFilterBar;
 
 void newmachinefilterbar_init(NewMachineFilterBar*, psy_ui_Component* parent,
 	NewMachineFilter*);
 
-void newmachinefilterbar_setfilters(NewMachineFilterBar*, NewMachineFilter*);
+void newmachinefilterbar_setfilter(NewMachineFilterBar*, NewMachineFilter*);
 void newmachinefilterbar_update(NewMachineFilterBar*);
 
 // NewMachineCategoryBar
@@ -148,6 +148,8 @@ typedef struct NewMachineCategoryBar {
 
 void newmachinecategorybar_init(NewMachineCategoryBar*, psy_ui_Component* parent,
 	NewMachineFilter*, psy_audio_PluginCatcher*);
+
+void newmachinecategorybar_setfilter(NewMachineCategoryBar*, NewMachineFilter*);
 
 void newmachinecategorybar_build(NewMachineCategoryBar*);
 
@@ -225,6 +227,7 @@ typedef struct NewMachine {
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
 
+void newmachine_updateplugins(NewMachine*);
 void newmachine_enableall(NewMachine*);
 void newmachine_enablegenerators(NewMachine*);
 void newmachine_preventgenerators(NewMachine*);
