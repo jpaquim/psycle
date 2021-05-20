@@ -2,7 +2,7 @@ CC = g++
 INC = -I ../../ -I ../../psycle
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = distortion.so
+OUTPUTFILE = ring-modulator.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
