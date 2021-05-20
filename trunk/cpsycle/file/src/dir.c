@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
@@ -150,6 +152,7 @@ void psy_path_extract_path(psy_Path* self)
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <pwd.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -170,12 +173,12 @@ const char* pathenv(void)
 
 void psy_insertpathenv(const char* path)
 {
- 	 // todo		
+ 	 /* todo */
 }
 
 void setpathenv(const char* path)
 {
- 	 // todo
+ 	 /* todo */
 }
 
 void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
@@ -211,7 +214,7 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 	struct dirent *dir_ptr;
 	char path[4096];
 	
-	// First, enumerate all files using the wildcard in the current directory
+	/* First, enumerate all files using the wildcard in the current directory */
 	if ((dir=opendir(root)) == NULL) {
 	   return 0;
     }    
@@ -228,7 +231,9 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
     if(closedir(dir) == -1) {
       return 0;
     }
-    // Secondly, find and emumerate all subdirectories with their subdirectories
+    /* 
+    ** Secondly, find and emumerate all subdirectories with their subdirectories
+    */
     if ((dir=opendir(root)) == NULL) {
 	   return 0;
     }    
@@ -237,9 +242,11 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
  		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0) &&
  		  	 dir_ptr->d_type == DT_DIR) {
-					// enumerate subdirectory with its subdirectories
-				psy_snprintf(path, 4096, "%s" psy_SLASHSTR "%s", root, (*dir_ptr).d_name);				
-				if (psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc) == 0) {
+				/* enumerate subdirectory with its subdirectories */
+				psy_snprintf(path, 4096, "%s" psy_SLASHSTR "%s", root,
+					(*dir_ptr).d_name);				
+				if (psy_dir_enumerate_recursive(context, path, wildcard, flag,
+						enumproc) == 0) {
 					closedir(dir);				
 					return 0;
 				}									   
@@ -252,9 +259,11 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 	return 1;	
 }
 
-// modified version from Dezhi Zao, codeproject
-// a simple wildcard matching function
-// modification: replaced TCHAR with char
+/*
+** modified version from Dezhi Zao, codeproject
+** a simple wildcard matching function
+** modification: replaced TCHAR with char
+*/
 int wildcardmatch(const char *pszString, const char *pszMatch)
 {
 	const char *mp;
@@ -291,17 +300,42 @@ int wildcardmatch(const char *pszString, const char *pszMatch)
 
 const char* psy_dir_config(void)
 {
-    return "/home/user";
+	const char *rv;
+		
+	if ((rv = getenv("XDG_CONFIG_HOME")) == NULL) {
+		static char config[4096];
+		
+		if (psy_dir_home()) {
+			psy_snprintf(config, 4096, "%s/.config", psy_dir_home());
+			rv = config;
+		}
+	}	
+	return rv;    
 }
 
 const char* psy_dir_home(void)
 {
-	return "/home/user";
+	const char *rv;
+	
+	if ((rv = getenv("HOME")) == NULL) {
+		rv = getpwuid(getuid())->pw_dir;
+	}	
+	return rv;
 }
 
 psy_List* psy_drives(void)
 {
-	return NULL;
+	psy_List* rv;
+	
+	rv = NULL;
+	psy_list_append(&rv, strdup("/"));
+	/*if (psy_dir_home()) {
+		char tmp[4096];
+				
+		psy_snprintf(tmp, 4096, "%s/", psy_dir_home());
+		psy_list_append(&rv, strdup(tmp));
+	}*/
+	return rv;	
 }
 
 psy_List* psy_directories(const char* path)
@@ -314,7 +348,9 @@ psy_List* psy_directories(const char* path)
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {			
 			if (dir->d_type == DT_DIR) {
-				psy_list_append(&rv, strdup(dir->d_name));
+				if (dir->d_name) {
+					psy_list_append(&rv, strdup(dir->d_name));
+				}
 			}
 		}
 		closedir(d);
@@ -341,7 +377,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard, in
 	char path[MAX_PATH];	
 	BOOL cont;
   
-	// First, enumerate all files using the wildcard in the current directory
+	/* First, enumerate all files using the wildcard in the current directory */
 	psy_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
  	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		
@@ -365,7 +401,9 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard, in
 			return;
 		}
 	}
-	// Secondly, find and emumerate all subdirectories with their subdirectories
+	/*
+	** Secondly, find and emumerate all subdirectories with their subdirectories
+	*/
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		SetLastError(0);	   		   
@@ -389,7 +427,9 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 	char path[MAX_PATH];	
 	BOOL cont;
   
-	// First, enumerate all files using the wildcard in the current directory
+	/*
+	** First, enumerate all files using the wildcard in the current directory
+	*/
 	psy_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
  	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		
@@ -418,7 +458,9 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 			return 1;
 		}
 	}
-	// Secondly, find and emumerate all subdirectories with their subdirectories
+	/*
+	** Secondly, find and emumerate all subdirectories with their subdirectories
+	*/
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		SetLastError(0);	   		   
@@ -428,9 +470,10 @@ int psy_dir_enumerate_recursive(void* context, const char* root, const char* wil
 		if ((strncmp(".", wfd.cFileName, 1) != 0) && 
 				(strncmp("..", wfd.cFileName, 2) != 0) ) {
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-				// enumerate subdirectory with its subdirectories
+				/* enumerate subdirectory with its subdirectories */
 				psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				if (psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc) == 0) {
+				if (psy_dir_enumerate_recursive(context, path, wildcard, flag,
+						enumproc) == 0) {
 					if (FindClose(hFind) == FALSE) {
 						SetLastError(0);						
 					}					
@@ -507,15 +550,19 @@ const char* psy_dir_config(void)
 	static TCHAR achDevice[MAX_PATH];	
 #if WINVER >= 0x600
 	HRESULT  hr;
-	// include file ShlObj.h contains list of CSIDL defines however only a subset
-	// are supported with Windows 7 and later.
-	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
-	// a user other than the current user. Using NULL gives us the current user.
+	/*
+	** include file ShlObj.h contains list of CSIDL defines however only a subset
+	** are supported with Windows 7 and later.
+	** for the 3rd argument, hToken, can be a specified Access Token or SSID for
+	** a user other than the current user. Using NULL gives us the current user.
+	*/
 
 	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
-		// append a folder name to the user's Documents directory.
-		// the Path Handling functions are pretty handy.
-		// PathAppend(achDevice, L"xxx");
+		/*
+		** append a folder name to the user's Documents directory.
+		** the Path Handling functions are pretty handy.
+		** PathAppend(achDevice, L"xxx");
+		*/
 	}
 #else	
 	strcpy(achDevice, PSYCLE_APP_DIR);
@@ -528,15 +575,20 @@ const char* psy_dir_home(void)
 	static TCHAR achDevice[MAX_PATH];
 #if WINVER >= 0x600
 	HRESULT  hr;
-	// include file ShlObj.h contains list of CSIDL defines however only a subset
-	// are supported with Windows 7 and later.
-	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
-	// a user other than the current user. Using NULL gives us the current user.
+	/*
+	** include file ShlObj.h contains list of CSIDL defines however only a
+	** subset are supported with Windows 7 and later.
+	** for the 3rd argument, hToken, can be a specified Access Token or SSID for
+	** a user other than the current user. Using NULL gives us the current user.
+	*/
 
-	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
-		// append a folder name to the user's Documents directory.
-		// the Path Handling functions are pretty handy.
-		// PathAppend(achDevice, L"xxx");
+	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0,
+		achDevice))) {
+		/*
+		** append a folder name to the user's Documents directory.
+		** the Path Handling functions are pretty handy.
+		** PathAppend(achDevice, L"xxx");
+		*/
 	}
 #else	
 	strcpy(achDevice, PSYCLE_APP_DIR);
@@ -569,20 +621,20 @@ psy_List* psy_directories(const char* root)
 	char path[MAX_PATH];
 	BOOL cont;
 
-	// First, enumerate all files using the wildcard in the current directory
+	/* First, enumerate all files using the wildcard in the current directory */
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {
 
 	} else {
 		cont = TRUE;
 		do {
-			//if ((strncmp(".", wfd.cFileName, 1) != 0) &&
-				//(strncmp("..", wfd.cFileName, 2) != 0)) {
+			/* if ((strncmp(".", wfd.cFileName, 1) != 0) &&
+				  (strncmp("..", wfd.cFileName, 2) != 0)) { */
 				if ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 					psy_snprintf(path, MAX_PATH, "\\%s", wfd.cFileName);
 					psy_list_append(&rv, strdup(path));
 				}
-			//}
+			/* } */
 		} while (FindNextFile(hFind, &wfd));
 		if (GetLastError() != ERROR_NO_MORE_FILES) {
 			SetLastError(0);
