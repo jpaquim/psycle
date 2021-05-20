@@ -159,6 +159,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_signal_dispose(&self->signal_dispose);
 	psy_signal_dispose(&self->signal_mousehook);
 	psy_ui_appzoom_dispose(&self->zoom);
+	psy_ui_defaults_dispose(&self->defaults);
 	if (self->imp) {
 		self->imp->vtable->dev_dispose(self->imp);
 		free(self->imp);
@@ -167,8 +168,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	if (self->imp_factory) {
 		free(self->imp_factory);
 		self->imp_factory = NULL;
-	}
-	psy_ui_defaults_dispose(&self->defaults);
+	}	
 	psy_translator_dispose(&self->translator);
 	psy_ui_dragevent_dispose(&self->dragevent);
 }

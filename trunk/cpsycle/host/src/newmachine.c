@@ -282,7 +282,7 @@ static void newmachinefilterbar_onclicked(NewMachineFilterBar* self,
 	psy_ui_Button* sender);
 // implementation
 void newmachinefilterbar_init(NewMachineFilterBar* self,
-	psy_ui_Component* parent, NewMachineFilter* filters)
+	psy_ui_Component* parent, NewMachineFilter* filter)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component,
@@ -312,99 +312,99 @@ void newmachinefilterbar_init(NewMachineFilterBar* self,
 	psy_ui_button_init_text_connect(&self->ladspa, &self->component, NULL,
 		"LADSPA", self, newmachinefilterbar_onclicked);	
 	psy_ui_button_allowrightclick(&self->ladspa);
-	self->filters = filters;
+	self->filter = filter;
 	newmachinefilterbar_update(self);
 }
 
-void newmachinefilterbar_setfilters(NewMachineFilterBar* self,
-	NewMachineFilter* filters)
+void newmachinefilterbar_setfilter(NewMachineFilterBar* self,
+	NewMachineFilter* filter)
 {
-	self->filters = filters;
+	self->filter = filter;
 	newmachinefilterbar_update(self);
 }
 
 void newmachinefilterbar_onclicked(NewMachineFilterBar* self, psy_ui_Button* sender)
 {		
-	if (self->filters) {
+	if (self->filter) {
 		if (sender->buttonstate == 1) {
 			if (sender == &self->effects) {
-				self->filters->effect = !self->filters->effect;
+				self->filter->effect = !self->filter->effect;
 			} else if (sender == &self->gen) {
-				self->filters->gen = !self->filters->gen;
+				self->filter->gen = !self->filter->gen;
 			} else if (sender == &self->intern) {
-				self->filters->intern = !self->filters->intern;
+				self->filter->intern = !self->filter->intern;
 			} else if (sender == &self->native) {
-				self->filters->native = !self->filters->native;
+				self->filter->native = !self->filter->native;
 			} else if (sender == &self->vst) {
-				self->filters->vst = !self->filters->vst;
+				self->filter->vst = !self->filter->vst;
 			} else if (sender == &self->lua) {
-				self->filters->lua = !self->filters->lua;
+				self->filter->lua = !self->filter->lua;
 			} else if (sender == &self->ladspa) {
-				self->filters->ladspa = !self->filters->ladspa;
+				self->filter->ladspa = !self->filter->ladspa;
 			}
 		} else {			
 			if (sender == &self->effects) {				
-				self->filters->effect = TRUE;
-				self->filters->gen = FALSE;				
+				self->filter->effect = TRUE;
+				self->filter->gen = FALSE;				
 			} else if (sender == &self->gen) {								
-				self->filters->effect = FALSE;
-				self->filters->gen = TRUE;				
+				self->filter->effect = FALSE;
+				self->filter->gen = TRUE;				
 			} else if (sender == &self->intern) {				
-				newmachinefilter_cleartypes(self->filters);
-				self->filters->intern = TRUE;				
+				newmachinefilter_cleartypes(self->filter);
+				self->filter->intern = TRUE;				
 			} else if (sender == &self->native) {				
-				newmachinefilter_cleartypes(self->filters);
-				self->filters->native = TRUE;				
+				newmachinefilter_cleartypes(self->filter);
+				self->filter->native = TRUE;				
 			} else if (sender == &self->vst) {				
-				newmachinefilter_cleartypes(self->filters);
-				self->filters->vst = TRUE;				
+				newmachinefilter_cleartypes(self->filter);
+				self->filter->vst = TRUE;				
 			} else if (sender == &self->lua) {				
-				newmachinefilter_cleartypes(self->filters);
-				self->filters->lua = TRUE;				
+				newmachinefilter_cleartypes(self->filter);
+				self->filter->lua = TRUE;				
 			} else if (sender == &self->ladspa) {				
-				newmachinefilter_cleartypes(self->filters);
-				self->filters->ladspa = TRUE;				
-			}
-		}
+				newmachinefilter_cleartypes(self->filter);
+				self->filter->ladspa = TRUE;				
+			}			
+		}	
 		newmachinefilterbar_update(self);
-		newmachinefilter_notify(self->filters);
+		newmachinefilter_notify(self->filter);
 	}	
 }
 
 void newmachinefilterbar_update(NewMachineFilterBar* self)
 {
-	if (self->filters) {
-		if (self->filters->effect) {
+	if (self->filter) {
+		if (self->filter->effect) {
 			psy_ui_button_highlight(&self->effects);
 		} else {
 			psy_ui_button_disablehighlight(&self->effects);
 		}
-		if (self->filters->gen) {
+		if (self->filter->gen) {
 			psy_ui_button_highlight(&self->gen);
 		} else {
 			psy_ui_button_disablehighlight(&self->gen);
 		}
-		if (self->filters->intern) {
+		if (self->filter->intern) {
 			psy_ui_button_highlight(&self->intern);
 		} else {
 			psy_ui_button_disablehighlight(&self->intern);
 		}
-		if (self->filters->native) {
+		if (self->filter->native) {
 			psy_ui_button_highlight(&self->native);
 		} else {
 			psy_ui_button_disablehighlight(&self->native);
 		}
-		if (self->filters->vst) {
+		if (self->filter->vst) {
 			psy_ui_button_highlight(&self->vst);
 		} else {
 			psy_ui_button_disablehighlight(&self->vst);
 		}
-		if (self->filters->lua) {
+		if (self->filter->lua) {
 			psy_ui_button_highlight(&self->lua);
 		} else {
 			psy_ui_button_disablehighlight(&self->lua);
 		}
-		if (self->filters->ladspa) {
+		if (self->filter->ladspa) {
 			psy_ui_button_highlight(&self->ladspa);
 		} else {
 			psy_ui_button_disablehighlight(&self->ladspa);
@@ -453,6 +453,11 @@ void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	psy_ui_component_setdefaultalign(&self->client, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->plugincatcher = plugincatcher;
+	self->filter = filter;
+}
+
+void newmachinecategorybar_setfilter(NewMachineCategoryBar* self, NewMachineFilter* filter)
+{
 	self->filter = filter;
 }
 
@@ -766,9 +771,9 @@ void newmachinesectionspane_buildsections(NewMachineSectionsPane* self)
 		psy_Property* property;
 		NewMachineSection* section;
 
-		property = (psy_Property*)psy_list_entry(p);
+		property = (psy_Property*)psy_list_entry(p);			
 		section = newmachinesection_allocinit(&self->sections, property,
-			&self->edit, &self->filter, self->workspace);
+			&self->edit, &self->filter, self->workspace);		
 		if (section) {
 			psy_signal_connect(&section->pluginview.signal_selected, self->newmachine,
 				newmachine_onpluginselected);
@@ -872,7 +877,6 @@ static void newmachine_onscanstart(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onscanend(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
 	int progress);
-static void newmachine_updateplugins(NewMachine*);
 static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail* sender);
 static void newmachine_ontoggleexpandpane0(NewMachine*, psy_ui_Button* sender);
 static void newmachine_ontoggleexpandpane1(NewMachine*, psy_ui_Button* sender);
@@ -922,7 +926,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->restoresection = SECTION_ID_MACHINEVIEW_WIRES;
 	self->selectedplugin = NULL;
 	self->selectedsection = NULL;
-	self->newsectioncount = 0;		
+	self->newsectioncount = 0;
+	self->currfilter = NULL;
 	newmachinesort_init(&self->sort);
 	// Notebook	(switches scanprogress/pluginselectview)
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -942,14 +947,13 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->pluginsheaderbars, &self->searchbar.component, NULL);
 	psy_ui_component_setalign(&self->pluginsheaderbars, psy_ui_ALIGN_CLIENT);
 	// filter bar
-	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars,
-		&self->sectionspane1.filter);
+	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars, NULL);
 	psy_ui_component_setalign(&self->filterbar.component, psy_ui_ALIGN_LEFT);	
 	// sort bar
 	newmachinesortbar_init(&self->sortbar, &self->pluginsheaderbars, &self->sort);
 	psy_ui_component_setalign(&self->sortbar.component, psy_ui_ALIGN_LEFT);
 	// all categeory bar
-	newmachinecategorybar_init(&self->categorybar, &self->client, &self->sectionspane1.filter,
+	newmachinecategorybar_init(&self->categorybar, &self->client, NULL,
 		workspace_plugincatcher(self->workspace));
 	psy_ui_component_setalign(&self->categorybar.component, psy_ui_ALIGN_TOP);
 	// sectionpane0
@@ -967,8 +971,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	newmachinesectionspane_init(&self->sectionspane1, &self->client, self, workspace);
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->sectionspane1.sectionsheader.expand.signal_clicked, self,
-		newmachine_ontoggleexpandpane1);
-	self->currfilter = &self->sectionspane1.filter;
+		newmachine_ontoggleexpandpane1);		
 	// Details
 	newmachinedetail_init(&self->detail, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	
@@ -1000,7 +1003,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		self, newmachine_onvertical);
 	psy_ui_component_setalign(&self->vertical.component, psy_ui_ALIGN_RIGHT);
 	// filter
-	newmachinesearchbar_setfilter(&self->searchbar, &self->sectionspane1.filter);
+	newmachine_setfilter(self, &self->sectionspane1.filter);	
 	// connect to signals
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&workspace->signal_plugincachechanged, self,
@@ -1022,7 +1025,6 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_notebook_select(&self->notebook, 0);
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);	
-	newmachine_updateplugins(self);	
 	/* show vertical */
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setpreferredsize(&self->sectionspane0.component,
@@ -1040,10 +1042,11 @@ void newmachine_ondestroy(NewMachine* self)
 }
 
 void newmachine_setfilter(NewMachine* self, NewMachineFilter* filter)
-{
+{	
 	self->currfilter = filter;
-	newmachinesearch_setfilter(&self->searchbar.search, filter);
-	newmachinefilterbar_setfilters(&self->filterbar, filter);
+	newmachinesearchbar_setfilter(&self->searchbar, self->currfilter);
+	newmachinefilterbar_setfilter(&self->filterbar, self->currfilter);
+	newmachinecategorybar_setfilter(&self->categorybar, self->currfilter);
 }
 
 void newmachine_onpluginselected(NewMachine* self, PluginsView* sender)
@@ -1076,12 +1079,12 @@ void newmachine_checkselections(NewMachine* self, PluginsView* sender)
 
 void newmachine_onplugincachechanged(NewMachine* self,
 	Workspace* sender)
-{
+{	
 	newmachine_updateplugins(self);
-	newmachinefilter_reset(&self->sectionspane0.filter);
+	newmachinefilter_reset(&self->sectionspane0.filter);	
 	newmachinefilter_reset(&self->sectionspane1.filter);
-	newmachinedetail_reset(&self->detail);	
-	newmachinecategorybar_build(&self->categorybar);
+	newmachinedetail_reset(&self->detail);		
+	newmachinecategorybar_build(&self->categorybar);	
 	psy_ui_component_align_full(&self->client);
 	psy_ui_component_invalidate(&self->client);
 }
@@ -1090,9 +1093,9 @@ void newmachine_onplugincachechanged(NewMachine* self,
 void newmachine_updateplugins(NewMachine* self)
 {		
 	self->selectedplugin = NULL;
-	self->selectedsection = NULL;
-	newmachinesectionspane_buildsections(&self->sectionspane0);
-	newmachinesectionspane_buildsections(&self->sectionspane1);
+	self->selectedsection = NULL;	
+	newmachinesectionspane_buildsections(&self->sectionspane0);	
+	newmachinesectionspane_buildsections(&self->sectionspane1);	
 	psy_ui_component_align(&self->client);
 }
 

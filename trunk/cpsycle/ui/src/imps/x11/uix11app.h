@@ -56,6 +56,7 @@ typedef struct psy_ui_X11App {
 	bool running;
 	psy_List* timers;
 	psy_Table colormap;
+	XVisualInfo* vinfo;
 	Visual* visual;
 	bool dbe;
 	bool dograb;
@@ -74,6 +75,7 @@ void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Colour);
+void psy_ui_x11app_destroy_window(psy_ui_X11App*, Window);
 
 INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
 {
