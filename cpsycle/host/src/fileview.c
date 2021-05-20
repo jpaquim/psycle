@@ -1,29 +1,29 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 
 #include "fileview.h"
-
+/* file */
 #include <dir.h>
-
-#include <stdlib.h>
-#include <string.h>
-
+/* platform */
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void fileview_ondestroy(FileView*, psy_ui_Component* sender);
 static void fileview_build(FileView*);
 static void fileview_builddrives(FileView*);
 static void fileview_builddirectories(FileView*);
 static int fileview_onenumdir(FileView*, const char* path, int flag);
-static void fileview_onfileboxselected(FileView*, psy_ui_ListBox* sender, intptr_t index);
+static void fileview_onfileboxselected(FileView*, psy_ui_ListBox* sender,
+	intptr_t index);
 static void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index);
 
-// implementation
+/* implementation */
 void fileview_init(FileView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
@@ -31,7 +31,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_ui_tabbar_init(&self->drives, fileview_base(self));
 	psy_ui_tabbar_settabalign(&self->drives, psy_ui_ALIGN_TOP);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives), psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives),
+		psy_ui_ALIGN_LEFT);	
 	psy_ui_listbox_init(&self->filebox, &self->component);
 	psy_ui_listbox_setcharnumber(&self->filebox, 40);
 	psy_ui_component_setalign(psy_ui_listbox_base(&self->filebox),
@@ -40,8 +41,8 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	self->curr = strdup("");
 	self->drive = strdup("C:\\");
 #else	
-	self->curr = strdup(""); //workspace_songs_directory(workspace));
-	self->drive = strdup("");
+	self->curr = strdup(""); /* workspace_songs_directory(workspace)); */
+	self->drive = strdup("/");
 #endif
 	fileview_builddrives(self);	
 	self->files = NULL;
@@ -69,7 +70,7 @@ void fileview_build(FileView* self)
 
 	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);
 	psy_dir_enumerate(self, path, "*.psy", 0,
-		(psy_fp_findfile)fileview_onenumdir);
+		(psy_fp_findfile)fileview_onenumdir);	
 }
 
 void fileview_builddirectories(FileView* self)
@@ -78,15 +79,16 @@ void fileview_builddirectories(FileView* self)
 	psy_List* q;
 	char path[4096];
 
-	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);
+	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);	
 	for (q = p = psy_directories(path); p != NULL; psy_list_next(&p)) {
 		psy_ui_listbox_addtext(&self->filebox, (char*)psy_list_entry(p));
-		psy_snprintf(path, 4096, "%s%s%s", self->drive, self->curr,
+		psy_snprintf(path, 4096, "%s%s%s%s", self->drive, self->curr,
+			psy_SLASHSTR,
 			(char*)psy_list_entry(p));
-		psy_list_append(&self->files, strdup(path));
+		psy_list_append(&self->files, strdup(path));		
 		++self->numdirectories;
 	}
-	psy_list_deallocate(&q, NULL);
+	psy_list_deallocate(&q, NULL);	
 }
 
 void fileview_builddrives(FileView* self)
@@ -111,13 +113,14 @@ int fileview_onenumdir(FileView* self, const char* filename, int flag)
 	return 1;
 }
 
-void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender, intptr_t index)
+void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender,
+	intptr_t index)
 {
 	if (psy_ui_listbox_cursel(&self->filebox) != -1) {
 		if (psy_ui_listbox_cursel(&self->filebox) < self->numdirectories) {
 			const char* path = fileview_path(self);
 			while (*path != '\0') {
-				if (*path == '\\') {
+				if (*path == psy_SLASH) {
 					++path;
 					break;
 				}
@@ -129,12 +132,13 @@ void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender, intptr_t
 				psy_list_deallocate(&self->files, NULL);
 				psy_ui_listbox_clear(&self->filebox);
 				fileview_builddirectories(self);
-				fileview_build(self);
+				fileview_build(self);		
+				psy_ui_component_align_full(&self->filebox.component);		
 			}
 		} else {
 			psy_signal_emit(&self->signal_selected, self, 0);
 		}
-	}
+	}	
 }
 
 const char* fileview_path(FileView* self)
@@ -165,5 +169,6 @@ void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index)
 		psy_ui_listbox_clear(&self->filebox);
 		fileview_builddirectories(self);
 		fileview_build(self);
+		psy_ui_component_align_full(&self->filebox.component);
 	}
 }
