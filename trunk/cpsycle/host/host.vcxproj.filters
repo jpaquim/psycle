@@ -556,6 +556,9 @@
     <ClCompile Include="src\patternhostcmds.c">
       <Filter>pattern</Filter>
     </ClCompile>
+    <ClCompile Include="src\searchfield.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -1030,6 +1033,9 @@
     </ClInclude>
     <ClInclude Include="src\patternhostcmds.h">
       <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\searchfield.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
