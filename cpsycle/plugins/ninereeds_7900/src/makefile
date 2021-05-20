@@ -2,7 +2,7 @@ CC = g++
 INC = -I ../../ -I ../../psycle
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = distortion.so
+OUTPUTFILE = nrs-7900-fractal.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

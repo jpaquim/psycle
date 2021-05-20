@@ -1,8 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../psycle
-LIBDIRS =
+INC = -I ../../ -I ../../psycle -I ../../../dsp/src
+LIBDIRS = -L ../../../dsp/src -l dsp
 LDFLAGS = -shared
-OUTPUTFILE = distortion.so
+OUTPUTFILE = filter-2-poles.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)

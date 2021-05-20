@@ -17,7 +17,8 @@
 #endif
 
 #if defined DIVERSALIS__COMPILER__GNU
-#define UNIVERSALIS__COMPILER__CONST_FUNCTION UNIVERSALIS__COMPILER__ATTRIBUTE(__const__)
+#define UNIVERSALIS__COMPILER__CONST_FUNCTION
+//#define UNIVERSALIS__COMPILER__CONST_FUNCTION UNIVERSALIS__COMPILER__ATTRIBUTE(__const__)
 #elif defined DIVERSALIS__COMPILER__INTEL
 	///\todo supported.. check the doc
 #define UNIVERSALIS__COMPILER__CONST_FUNCTION
@@ -28,6 +29,16 @@
 namespace psycle { namespace helpers { namespace math {
 
 // using universalis::stdlib::rint;
+	/******************************************************************************************/
+	/// C1999 *rint* - converts a floating point number to an integer by rounding in an unspecified way.
+	/// This function has the same semantic as C1999's *rint* series of functions,
+	/// but with C++ overload support, we don't need different names for each type.
+	/// On C1999, the rounding mode may be set with fesetround, but msvc does not support it, so the mode is unspecified.
+	/// Because the rounding mode is left as is, this is faster than using static_cast (trunc), floor, ceil, or round, which need to change it temporarily.
+	template<typename IntegralResult, typename Real> // UNIVERSALIS__COMPILER__CONST_FUNCTION
+	IntegralResult inline rint(Real x) noexcept {
+		return x;
+	}
 
 /// ensures a value stays between two bounds by clamping it
 template<typename X> UNIVERSALIS__COMPILER__CONST_FUNCTION

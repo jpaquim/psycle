@@ -1,8 +1,8 @@
 CC = g++
-INC = -I ../../ -I ../../psycle
+INC = -I ../../
 LIBDIRS =
 LDFLAGS = -shared
-OUTPUTFILE = distortion.so
+OUTPUTFILE = dw-iopan.so
 OUTPUTDIR = ../../build/
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
