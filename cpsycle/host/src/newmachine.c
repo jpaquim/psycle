@@ -1,158 +1,59 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "newmachine.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// NewMachineSearch
-// prototypes
-static void newmachinesearch_oneditfocus(NewMachineSearch*,
-	psy_ui_Component* sender);
-static void newmachinesearch_oneditchange(NewMachineSearch*,
-	psy_ui_Component* sender);
-static void newmachinesearch_onaccept(NewMachineSearch*,
-	psy_ui_Component* sender);
-static void newmachinesearch_onreject(NewMachineSearch*,
-	psy_ui_Component* sender);
-static void newmachinesearch_reset(NewMachineSearch*);
-static void newmachinesearch_onlanguagechanged(NewMachineSearch*);
-// vtable
-static psy_ui_ComponentVtable newmachinesearch_vtable;
-static bool newmachinesearch_vtable_initialized = FALSE;
+/* NewMachineSearchBar */
+/* implementation */
+static void newmachinesearchbar_onsearchfieldchange(NewMachineSearchBar*,
+	SearchField* sender);
 
-static void newmachinesearch_vtable_init(NewMachineSearch* self)
-{
-	if (!newmachinesearch_vtable_initialized) {
-		newmachinesearch_vtable = *(self->component.vtable);
-		newmachinesearch_vtable.onlanguagechanged =
-			(psy_ui_fp_component_onlanguagechanged)
-			newmachinesearch_onlanguagechanged;
-		newmachinesearch_vtable_initialized = TRUE;
-	}
-	self->component.vtable = &newmachinesearch_vtable;
-}
-// implementation
-void newmachinesearch_init(NewMachineSearch* self, psy_ui_Component* parent,
-	NewMachineFilter* filter)
-{
-	psy_ui_component_init(&self->component, parent, NULL);
-	newmachinesearch_vtable_init(self);
-	psy_ui_component_setstyletype(&self->component,
-		STYLE_NEWMACHINE_SEARCHFIELD);
-	psy_ui_component_setstyletype_select(&self->component,
-		STYLE_NEWMACHINE_SEARCHFIELD_SELECT);	
-	self->filter = filter;
-	psy_ui_image_init_resource_transparency(&self->image, &self->component,
-		IDB_SEARCH_DARK, psy_ui_colour_white());	
-	psy_ui_component_setalign(psy_ui_image_base(&self->image),
-		psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(psy_ui_image_base(&self->image),
-		psy_ui_margin_make_em(0.0, 1.0, 0.0, 1.0));	
-	psy_ui_edit_init(&self->edit, &self->component);
-	psy_ui_edit_setcharnumber(&self->edit, 42);
-	newmachinesearch_reset(self);
-	psy_signal_connect(&self->edit.component.signal_focus,
-		self, newmachinesearch_oneditfocus);
-	psy_signal_connect(&self->edit.signal_change,
-		self, newmachinesearch_oneditchange);
-	psy_ui_edit_enableinputfield(&self->edit);
-	psy_signal_connect(&self->edit.signal_accept,
-		self, newmachinesearch_onaccept);
-	psy_signal_connect(&self->edit.signal_reject,
-		self, newmachinesearch_onreject);
-	psy_ui_component_setalign(psy_ui_edit_base(&self->edit),
-		psy_ui_ALIGN_CLIENT);	
-}
-
-void newmachinesearch_setfilter(NewMachineSearch* self,
-	NewMachineFilter* filter)
-{
-	self->filter = filter;
-}
-
-void newmachinesearch_oneditfocus(NewMachineSearch* self, psy_ui_Component* sender)
-{
-	psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
-	if (self->hasdefaulttext) {
-		psy_ui_edit_settext(&self->edit, "");
-	}
-}
-
-void newmachinesearch_oneditchange(NewMachineSearch* self, psy_ui_Component* sender)
-{
-	self->hasdefaulttext = FALSE;
-	newmachinefilter_settext(self->filter, psy_ui_edit_text(&self->edit));
-}
-
-void newmachinesearch_onaccept(NewMachineSearch* self,
-	psy_ui_Component* sender)
-{
-	if (psy_strlen(psy_ui_edit_text(&self->edit)) == 0) {
-		newmachinesearch_reset(self);
-	}	
-}
-
-void newmachinesearch_onreject(NewMachineSearch* self,
-	psy_ui_Component* sender)
-{	
-	newmachinesearch_reset(self);	
-}
-
-void newmachinesearch_reset(NewMachineSearch* self)
-{		
-	psy_ui_edit_settext(&self->edit,
-		psy_ui_translate("newmachine.search-plugin"));
-	self->hasdefaulttext = TRUE;
-	if (self->filter) {
-		newmachinefilter_settext(self->filter, "");
-		psy_ui_component_removestylestate(&self->component,
-			psy_ui_STYLESTATE_SELECT);
-		psy_ui_component_setfocus(psy_ui_component_parent(&self->component));
-	}
-}
-
-void newmachinesearch_onlanguagechanged(NewMachineSearch* self)
-{
-	if (self->hasdefaulttext) {
-		psy_ui_edit_settext(&self->edit,
-			psy_ui_translate("newmachine.search-plugin"));
-		self->hasdefaulttext = TRUE;
-	}
-}
-
-// NewMachineSearchBar
-// implementation
-void newmachinesearchbar_init(NewMachineSearchBar* self, psy_ui_Component* parent,
-	NewMachineFilter* filter)
+void newmachinesearchbar_init(NewMachineSearchBar* self,
+	psy_ui_Component* parent, NewMachineFilter* filter)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_NEWMACHINE_SEARCHBAR);	
-	// search field
-	newmachinesearch_init(&self->search, &self->component, filter);
-	psy_ui_component_setalign(newmachinesearch_base(&self->search),
+	self->filter = filter;	
+	searchfield_init(&self->search, &self->component);
+	psy_ui_component_setalign(searchfield_base(&self->search),
 		psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->search.signal_changed, self,
+		newmachinesearchbar_onsearchfieldchange);
+	searchfield_setdefaulttext(&self->search, "newmachine.search-plugin");
 }
 
 void newmachinesearchbar_setfilter(NewMachineSearchBar* self,
 	NewMachineFilter* filter)
 {
-	newmachinesearch_setfilter(&self->search, filter);
+	self->filter = filter;	
 }
 
-// NewMachineRescanBar
-// prototypes
+void newmachinesearchbar_onsearchfieldchange(NewMachineSearchBar* self,
+	SearchField* sender)
+{
+	if (self->filter) {
+		newmachinefilter_settext(self->filter, searchfield_text(sender));
+	}
+}
+
+/* NewMachineRescanBar */
+/* prototypes */
 static void newmachinerescanbar_onselectdirectories(NewMachineRescanBar*,
 	psy_ui_Component* sender);
-// implementation
-void newmachinerescanbar_init(NewMachineRescanBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+/* implementation */
+void newmachinerescanbar_init(NewMachineRescanBar* self,
+	psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin spacing;	
 
@@ -185,10 +86,10 @@ void newmachinerescanbar_onselectdirectories(NewMachineRescanBar* self,
 	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 4, 0);
 }
 
-// NewMachineSectionBar
-// implementation
-void newmachinesectionbar_init(NewMachineSectionBar* self, psy_ui_Component* parent,
-	Workspace* workspace)
+/* NewMachineSectionBar */
+/* implementation */
+void newmachinesectionbar_init(NewMachineSectionBar* self,
+	psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_Margin spacing;
 
@@ -212,13 +113,17 @@ void newmachinesectionbar_init(NewMachineSectionBar* self, psy_ui_Component* par
 	psy_ui_component_setspacing_children(&self->component, spacing);	
 }
 
-// NewMachineSortBar
-// prototypes
-static void newmachinesortbar_onsortbyfavorite(NewMachineSortBar*, psy_ui_Component* sender);
-static void newmachinesortbar_onsortbyname(NewMachineSortBar*, psy_ui_Component* sender);
-static void newmachinesortbar_onsortbytype(NewMachineSortBar*, psy_ui_Component* sender);
-static void newmachinesortbar_onsortbymode(NewMachineSortBar*, psy_ui_Component* sender);
-// implementation
+/* NewMachineSortBar */
+/* prototypes */
+static void newmachinesortbar_onsortbyfavorite(NewMachineSortBar*,
+	psy_ui_Component* sender);
+static void newmachinesortbar_onsortbyname(NewMachineSortBar*,
+	psy_ui_Component* sender);
+static void newmachinesortbar_onsortbytype(NewMachineSortBar*,
+	psy_ui_Component* sender);
+static void newmachinesortbar_onsortbymode(NewMachineSortBar*,
+	psy_ui_Component* sender);
+/* implementation */
 void newmachinesortbar_init(NewMachineSortBar* self, psy_ui_Component* parent,
 	NewMachineSort* sort)
 {
@@ -276,11 +181,11 @@ void newmachinesortbar_onsortbymode(NewMachineSortBar* self,
 	}
 }
 
-// NewMachineFilterBar
-// prototypes
+/* NewMachineFilterBar */
+/* prototypes */
 static void newmachinefilterbar_onclicked(NewMachineFilterBar* self,
 	psy_ui_Button* sender);
-// implementation
+/* implementation */
 void newmachinefilterbar_init(NewMachineFilterBar* self,
 	psy_ui_Component* parent, NewMachineFilter* filter)
 {	
@@ -412,13 +317,13 @@ void newmachinefilterbar_update(NewMachineFilterBar* self)
 	}
 }
 
-// NewMachineCategoryBar
-// prototypes
+/* NewMachineCategoryBar */
+/* prototypes */
 static void newmachinecategorybar_onclicked(NewMachineCategoryBar*,
 	psy_ui_Button* sender);
 static void newmachinecategorybar_ondragover(NewMachineCategoryBar*, psy_ui_DragEvent*);
 static void newmachinecategorybar_ondrop(NewMachineCategoryBar*, psy_ui_DragEvent*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable newmachinecategorybar_vtable;
 static bool newmachinecategorybar_vtable_initialized = FALSE;
 
@@ -436,7 +341,7 @@ static void newmachinecategorybar_vtable_init(NewMachineCategoryBar* self)
 	}
 	self->component.vtable = &newmachinecategorybar_vtable;
 }
-// implementation
+/* implementation */
 void newmachinecategorybar_init(NewMachineCategoryBar* self,
 	psy_ui_Component* parent, NewMachineFilter* filter,
 	psy_audio_PluginCatcher* plugincatcher)
@@ -552,14 +457,14 @@ void newmachinecategorybar_ondragover(NewMachineCategoryBar* self, psy_ui_DragEv
 
 	button = NULL;
 	for (p = q = psy_ui_component_children(&self->client, psy_ui_NONRECURSIVE);
-		p != NULL; p = p->next) {
+			p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		psy_ui_RealRectangle position;
 
 		component = (psy_ui_Component*)p->entry;
 		position = psy_ui_component_position(component);
 		if (psy_ui_realrectangle_intersect(&position, ev->mouse.pt)) {
-			ev->mouse.event.default_prevented = TRUE;
+			psy_ui_dragevent_prevent_default(ev);			
 			break;
 		}
 	}	
@@ -687,21 +592,21 @@ void newmachinesectionspane_init(NewMachineSectionsPane* self, psy_ui_Component*
 	self->newmachine = newmachine;
 	psy_table_init(&self->newmachinesections);
 	newmachinefilter_init(&self->filter);
-	// sectionsheader
+	/* sectionsheader */
 	newmachinesectionsheader_init(&self->sectionsheader, &self->component, psy_INDEX_INVALID);
 	psy_ui_component_setalign(&self->sectionsheader.component, psy_ui_ALIGN_TOP);
-	// navbar
+	/* navbar */
 	psy_ui_tabbar_init(&self->navsections, &self->sectionsheader.component);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->navsections), psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->navsections.signal_change, self,
 		newmachinesectionspane_ontabbarchanged);	
-	// sections
+	/* sections */
 	psy_ui_component_init(&self->sections, &self->component, NULL);
-	// Edit
+	/* edit */
 	psy_ui_edit_init(&self->edit, &self->component);
 	psy_ui_edit_enableinputfield(&self->edit);
 	psy_ui_component_hide(&self->edit.component);
-	// section scroll
+	/* section scroll */
 	psy_ui_component_setoverflow(&self->sections, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setscrollstep(&self->sections,
 		psy_ui_size_make_em(0.0, 1.0));
@@ -859,15 +764,16 @@ void newmachinesectionspane_onlanguagechanged(NewMachineSectionsPane* self)
 	}
 }
 
-void newmachinesectionpane_onmousedown(NewMachineSectionsPane* self, psy_ui_MouseEvent* ev)
+void newmachinesectionpane_onmousedown(NewMachineSectionsPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->newmachine->currfilter != &self->filter) {
 		newmachine_setfilter(self->newmachine, &self->filter);
 	}
 }
 
-// NewMachine
-// prototypes
+/* NewMachine */
+/* prototypes */
 static void newmachine_ondestroy(NewMachine*);
 static void newmachine_onplugincachechanged(NewMachine*, Workspace*);
 static void newmachine_onmousedown(NewMachine*, psy_ui_MouseEvent*);
@@ -886,7 +792,7 @@ static void newmachine_onscantaskstart(NewMachine*, psy_audio_PluginCatcher* sen
 	psy_audio_PluginScanTask*);
 static void newmachine_onhorizontal(NewMachine*, psy_ui_Button* sender);
 static void newmachine_onvertical(NewMachine*, psy_ui_Button* sender);
-// sectionbar
+/* sectionbar */
 static void newmachine_oncreatesection(NewMachine*,
 	psy_ui_Component* sender);
 static void newmachine_onremovesection(NewMachine*, psy_ui_Component* sender);
@@ -895,8 +801,7 @@ static void newmachine_onaddtosection(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onremovefromsection(NewMachine*, psy_ui_Component* sender);
 static bool newmachine_checksection(NewMachine*);
 static bool newmachine_checkplugin(NewMachine*);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable newmachine_vtable;
 static bool newmachine_vtable_initialized = FALSE;
 
@@ -914,7 +819,7 @@ static void newmachine_vtable_init(NewMachine* self)
 	}
 	self->component.vtable = &newmachine_vtable;
 }
-// implementation
+/* implementation */
 void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -929,58 +834,58 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->newsectioncount = 0;
 	self->currfilter = NULL;
 	newmachinesort_init(&self->sort);
-	// Notebook	(switches scanprogress/pluginselectview)
+	/* Notebook	(switches scanprogress/pluginselectview) */
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
-	// client
+	/* client */
 	psy_ui_component_init(&self->client, psy_ui_notebook_base(&self->notebook),
 		NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	// searchbar
+	/* searchbar */
 	newmachinesearchbar_init(&self->searchbar, &self->client, NULL);
 	psy_ui_component_setalign(&self->searchbar.component, psy_ui_ALIGN_TOP);
-	// scanview
+	/* scanview */
 	pluginscanview_init(&self->scanview,
 		psy_ui_notebook_base(&self->notebook), self->workspace);	
-	// header bars
+	/* header bars */
 	psy_ui_component_init(&self->pluginsheaderbars, &self->searchbar.component, NULL);
 	psy_ui_component_setalign(&self->pluginsheaderbars, psy_ui_ALIGN_CLIENT);
-	// filter bar
+	/* filter bar */
 	newmachinefilterbar_init(&self->filterbar, &self->pluginsheaderbars, NULL);
 	psy_ui_component_setalign(&self->filterbar.component, psy_ui_ALIGN_LEFT);	
-	// sort bar
+	/* sort bar */
 	newmachinesortbar_init(&self->sortbar, &self->pluginsheaderbars, &self->sort);
 	psy_ui_component_setalign(&self->sortbar.component, psy_ui_ALIGN_LEFT);
-	// all categeory bar
+	/* all categeory bar */
 	newmachinecategorybar_init(&self->categorybar, &self->client, NULL,
 		workspace_plugincatcher(self->workspace));
 	psy_ui_component_setalign(&self->categorybar.component, psy_ui_ALIGN_TOP);
-	// sectionpane0
+	/* sectionpane0 */
 	newmachinesectionspane_init(&self->sectionspane0, &self->client, self, workspace);
 	psy_ui_component_setalign(&self->sectionspane0.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->sectionspane0.sectionsheader.expand.signal_clicked, self,
 		newmachine_ontoggleexpandpane0);
-	// vspacer
+	/* vspacer */
 	psy_ui_component_init(&self->spacer, &self->client, NULL);
 	psy_ui_component_setpreferredsize(&self->spacer,
 		psy_ui_size_make(psy_ui_value_make_pw(0.01), psy_ui_value_zero()));
 	psy_ui_component_hide(&self->spacer);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_LEFT);
-	// sectionpane1
+	/* sectionpane1 */
 	newmachinesectionspane_init(&self->sectionspane1, &self->client, self, workspace);
 	psy_ui_component_setalign(&self->sectionspane1.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->sectionspane1.sectionsheader.expand.signal_clicked, self,
 		newmachine_ontoggleexpandpane1);		
-	// Details
+	/* Details */
 	newmachinedetail_init(&self->detail, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	
 	psy_signal_connect(&self->detail.signal_categorychanged, self,
 		newmachine_onplugincategorychanged);
-	// Rescanbar
+	/* Rescanbar */
 	newmachinerescanbar_init(&self->rescanbar, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->rescanbar.component, psy_ui_ALIGN_BOTTOM);
-	// sectionbar
+	/* sectionbar */
 	newmachinesectionbar_init(&self->sectionbar, &self->component,
 		self->workspace);
 	psy_ui_component_setalign(&self->sectionbar.component, psy_ui_ALIGN_BOTTOM);
@@ -995,16 +900,16 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onremovesection);
 	psy_signal_connect(&self->sectionbar.clearsection.signal_clicked, self,
 		newmachine_onclearsection);	
-	// layout
+	/* layout */
 	psy_ui_button_init_text_connect(&self->horizontal, &self->rescanbar.component, NULL, "Horizontal",
 		self, newmachine_onhorizontal);
 	psy_ui_component_setalign(&self->horizontal.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init_text_connect(&self->vertical, &self->rescanbar.component, NULL, "Vertical",
 		self, newmachine_onvertical);
 	psy_ui_component_setalign(&self->vertical.component, psy_ui_ALIGN_RIGHT);
-	// filter
+	/* filter */
 	newmachine_setfilter(self, &self->sectionspane1.filter);	
-	// connect to signals
+	/* connect to signals */
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&workspace->signal_plugincachechanged, self,
 		newmachine_onplugincachechanged);
@@ -1130,27 +1035,27 @@ void newmachine_onscanend(NewMachine* self, psy_audio_PluginCatcher* sender)
 
 void newmachine_enableall(NewMachine* self)
 {
-//	pluginsview_enableall(&self->pluginsview);	
+/*	pluginsview_enableall(&self->pluginsview);	*/
 }
 
 void newmachine_enablegenerators(NewMachine* self)
 {	
-//	pluginsview_enablegenerators(&self->pluginsview);
+/*	pluginsview_enablegenerators(&self->pluginsview); */
 }
 
 void newmachine_preventgenerators(NewMachine* self)
 {
-//	pluginsview_preventgenerators(&self->pluginsview);
+/*	pluginsview_preventgenerators(&self->pluginsview); */
 }
 
 void newmachine_enableeffects(NewMachine* self)
 {
-//	pluginsview_enableeffects(&self->pluginsview);
+/*	pluginsview_enableeffects(&self->pluginsview); */
 }
 
 void newmachine_preventeffects(NewMachine* self)
 {
-//	pluginsview_preventeffects(&self->pluginsview);
+/*	pluginsview_preventeffects(&self->pluginsview); */
 }
 
 void newmachine_insertmode(NewMachine* self)
@@ -1272,8 +1177,8 @@ void newmachine_ontoggleexpandpane1(NewMachine* self, psy_ui_Button* sender)
 void newmachine_onsectionselected(NewMachine* self, NewMachineSection* sender)
 {
 	self->selectedsection = sender;	
-	// psy_ui_tabbar_mark(&self->sectionspane.navsections,
-	//	psy_ui_component_index(&sender->component));
+	/* psy_ui_tabbar_mark(&self->sectionspane.navsections,
+		psy_ui_component_index(&sender->component)); */
 }
 
 void newmachine_onscanfile(NewMachine* self, psy_audio_PluginCatcher* sender,
@@ -1314,7 +1219,6 @@ void newmachine_onvertical(NewMachine* self, psy_ui_Button* sender)
 	psy_ui_component_invalidate(&self->client);
 }
 
-// sectionbar
 void newmachine_oncreatesection(NewMachine* self, psy_ui_Component* sender)
 {
 	char sectionkey[64];
@@ -1398,8 +1302,8 @@ void newmachine_onclearsection(NewMachine* self, psy_ui_Component* sender)
 bool newmachine_checksection(NewMachine* self)
 {
 	if (!self->selectedsection || !self->selectedsection->section) {
-		workspace_outputstatus(self->workspace,
-			psy_ui_translate("newmachine.select-first-section"));
+		workspace_outputstatus(self->workspace, psy_ui_translate(
+			"newmachine.select-first-section"));
 		return FALSE;
 	}
 	return TRUE;
@@ -1411,8 +1315,8 @@ bool newmachine_checkplugin(NewMachine* self)
 		return FALSE;
 	}
 	if (!self->selectedplugin) {
-		workspace_outputstatus(self->workspace,
-			psy_ui_translate("newmachine.select-first-plugin"));
+		workspace_outputstatus(self->workspace, psy_ui_translate(
+			"newmachine.select-first-plugin"));
 		return FALSE;
 	}
 	return TRUE;

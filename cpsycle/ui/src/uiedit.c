@@ -117,7 +117,7 @@ void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
 		self->component.imp->extended_imp, text);
 }
 
- const char* psy_ui_edit_text(psy_ui_Edit* self)
+ const char* psy_ui_edit_text(const psy_ui_Edit* self)
 {
 	static char text[256];
 	

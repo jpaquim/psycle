@@ -337,11 +337,11 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_border_setradius_px(&style->border, 6.0);	
 	psy_ui_style_setspacing_em(style, 0.3, 0.3, 0.3, 0.0);
 	psy_ui_style_setmargin_em(style, 0.0, 8.0, 0.0, 0.0);	
-	psy_ui_styles_setstyle(self, STYLE_NEWMACHINE_SEARCHFIELD, style);
+	psy_ui_styles_setstyle(self, STYLE_SEARCHFIELD, style);
 	
 	style = psy_ui_style_clone(style);	
 	psy_ui_border_setcolour(&style->border, material.secondary);
-	psy_ui_styles_setstyle(self, STYLE_NEWMACHINE_SEARCHFIELD_SELECT,
+	psy_ui_styles_setstyle(self, STYLE_SEARCHFIELD_SELECT,
 		style);	
 	
 	style = psy_ui_style_allocinit();

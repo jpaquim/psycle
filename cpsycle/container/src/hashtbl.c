@@ -41,7 +41,8 @@ void psy_table_dispose(psy_Table* self)
   psy_TableHashEntry* q;
 
   assert(self);
-  assert(self->keys);
+  /* double deletion */
+  assert(self->keys);  
 
   for (i = 0; i < self->arraysize; ++i) {
     for (p = self->keys[i]; p != NULL; p = q) {      
