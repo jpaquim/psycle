@@ -502,17 +502,18 @@ psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_allocinit(
 void dev_destroy(psy_ui_x11_ComponentImp* self)
 {
 	psy_ui_X11App* x11app;
-	XEvent* event;
-	
+	XEvent event;
+
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->mapped = FALSE;
 	self->visible = FALSE;
+	XFlush(x11app->dpy);
 	XDestroyWindow(x11app->dpy, self->hwnd);
-	while (TRUE) {					
-		XNextEvent(x11app->dpy, event);
-		if (event->type ==  DestroyNotify) {
-			psy_ui_x11app_destroy_window(x11app, event->xany.window);
-			if (self->hwnd == event->xany.window) {
+	while (TRUE) {
+		XNextEvent(x11app->dpy, &event);
+		if (event.type ==  DestroyNotify) {
+			psy_ui_x11app_destroy_window(x11app, event.xany.window);
+			if (self->hwnd == event.xany.window) {
 				printf("cleaned up\n");
 				break;
 			}

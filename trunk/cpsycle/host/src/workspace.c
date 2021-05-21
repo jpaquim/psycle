@@ -1387,7 +1387,6 @@ void workspace_idle(Workspace* self)
 	}
 	if (self->plugincachechanged) {
 		psy_audio_lock_enter(&self->pluginscanlock);
-		/* todo X11 second call segfaults in newmachinesectionpane rebuild */
 		psy_signal_emit(&self->signal_plugincachechanged, self, 0);
 		self->plugincachechanged = 0;
 		psy_audio_lock_leave(&self->pluginscanlock);
