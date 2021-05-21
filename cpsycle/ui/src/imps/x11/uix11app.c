@@ -111,12 +111,12 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	} else {
 		self->visual = DefaultVisual(self->dpy,
 			DefaultScreen(self->dpy));
-	}	
+	}
 	psy_ui_x11colours_init(&self->colourmap, self->dpy);
 	self->dograb = FALSE;
 	self->grabwin = 0;
 	self->targetids = NULL;
-	psy_timers_init(&self->wintimers);	
+	psy_timers_init(&self->wintimers);
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -127,11 +127,11 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 	self->visual = 0;
 	if (XdbeQueryExtension(self->dpy, &major, &minor)) {
 		XVisualInfo xvisinfo_templ;
-		
+
 		printf("Xdbe (%d.%d) supported, using double buffering\n", major, minor);
 		int numScreens = 1;
 		int matches;
-		
+
 		Drawable screens[] = { DefaultRootWindow(self->dpy) };
 		XdbeScreenVisualInfo *info = XdbeGetVisualInfo(self->dpy, screens, &numScreens);
 		if (!info || numScreens < 1 || info->count < 1) {
@@ -150,7 +150,7 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 		*/
 		xvisinfo_templ.screen = 0;
 		xvisinfo_templ.depth = info->visinfo[0].depth;
-		XdbeFreeVisualInfo(info);		
+		XdbeFreeVisualInfo(info);
 		self->vinfo = XGetVisualInfo(self->dpy,
 			VisualIDMask|VisualScreenMask|VisualDepthMask, &xvisinfo_templ,
 			&matches);
@@ -185,7 +185,7 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	}
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
-	XCloseDisplay(self->dpy);	
+	XCloseDisplay(self->dpy);
 	psy_ui_x11colours_dispose(&self->colourmap);
 	psy_list_free(self->targetids);
 	psy_timers_dispose(&self->wintimers);
@@ -198,7 +198,7 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 	fd_set in_fds;
 	struct timeval tv;
 
-	x11_fd = ConnectionNumber(self->dpy);	
+	x11_fd = ConnectionNumber(self->dpy);
 	tv.tv_usec = 10000;
     tv.tv_sec = 0;
     FD_ZERO(&in_fds);
@@ -208,13 +208,13 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 		if (XPending(self->dpy) == 0) {
 			if (select(x11_fd + 1, &in_fds, NULL, NULL, &tv) > 0) {
 				XNextEvent(self->dpy, &event);
-				psy_ui_x11app_handle_event(self, &event);	
+				psy_ui_x11app_handle_event(self, &event);
 			} else {
-				timertick(self);  
+				timertick(self);
 			}
 		} else {
 		XNextEvent(self->dpy, &event);
-		psy_ui_x11app_handle_event(self, &event);	
+		psy_ui_x11app_handle_event(self, &event);
 		}
     }
     return 0;
@@ -232,7 +232,7 @@ void psy_ui_x11app_close(psy_ui_X11App* self)
 }
 
 int timertick(psy_ui_X11App* self)
-{	
+{
 	if (buttonclicks == 1 && buttonclickcounter > 0) {
 		--buttonclickcounter;
 	} else {
@@ -245,11 +245,11 @@ void psy_ui_x11app_starttimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id,
 	uintptr_t interval)
 {
 	psy_ui_x11_ComponentImp* imp;
-	
+
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap, hwnd);
 	if (!imp && !imp->component) {
 		return;
-	}	
+	}
 	psy_timers_addtimer(&self->wintimers, hwnd, imp->component,
 		(psy_fp_timerwork)imp->component->vtable->ontimer, id, interval);
 }
@@ -271,15 +271,15 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		return 0;
 	}
 	switch (event->type) {
-	case DestroyNotify: {		   
+	case DestroyNotify: {
 		psy_ui_x11app_destroy_window(self, imp->hwnd);
 		break; }
 	case NoExpose:
 		/* expose_window(self, imp,
 		   event->xnoexpose.x, event->xnoexpose.y,
-		   event->xnoexpose.width, event->xnoexpose.height); */		  
+		   event->xnoexpose.width, event->xnoexpose.height); */
 		break;
-	case GraphicsExpose:		
+	case GraphicsExpose:
 		/* expose_window(self, imp,
 		   event->xgraphicsexpose.x, event->xgraphicsexpose.y,
 		   event->xgraphicsexpose.width, event->xgraphicsexpose.height); */
@@ -378,8 +378,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 
 				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 				psy_ui_x11_graphicsimp_updatexft(gx11);
-			}			
-			psy_ui_component_align(imp->component);			
+			}
+			psy_ui_component_align(imp->component);
 			size.width = psy_ui_value_make_px(xce.width);
 			size.height = psy_ui_value_make_px(xce.height);
 			imp->component->vtable->onsize(imp->component, &size);
@@ -410,9 +410,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			}
 			hwnd = event->xclient.window;
 			XDestroyWindow(self->dpy, event->xclient.window);
-			while (TRUE) {					
+			while (TRUE) {
 				XNextEvent(self->dpy, event);
-				if (event->type ==  DestroyNotify) {						
+				if (event->type ==  DestroyNotify) {
 					psy_ui_x11app_destroy_window(self, event->xany.window);
 					if (hwnd == event->xany.window) {
 						printf("cleaned up\n");
@@ -443,7 +443,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
     case KeyRelease: {
 		psy_ui_KeyboardEvent ev;
 
-		ev = psy_ui_x11_keyboardevent_make(&event->xkey);		
+		ev = psy_ui_x11_keyboardevent_make(&event->xkey);
 		imp->component->vtable->onkeyup(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keyup, imp->component,
 			1, &ev);
@@ -487,7 +487,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				translate_x11button(event->xbutton.button),
 				imp->component->vtable->onmousedown,
 				&imp->component->signal_mousedown);
-		} else { /* second click */			
+		} else { /* second click */
 			buttonclicks = 0;
 			/* check distance */
 			if (ev.pt.x != buttonpressevent.pt.x ||
@@ -499,7 +499,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 					translate_x11button(event->xbutton.button),
 					imp->component->vtable->onmousedown,
 					&imp->component->signal_mousedown);
-			} else { /* double click */				
+			} else { /* double click */
 				handle_mouseevent(self, imp->component, imp,
 					event, ButtonPressMask, event->xany.window,
 					ButtonPress, event->xbutton.x, event->xbutton.y,
@@ -516,7 +516,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
 			translate_x11button(event->xbutton.button),
-			0, 0, 0); /* todo keystate */			
+			0, 0, 0); /* todo keystate */
 		adjustcoordinates(imp->component, &ev.pt);
 		handle_mouseevent(self, imp->component, imp,
 			event, ButtonReleaseMask, event->xany.window,
@@ -544,7 +544,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),
-			button, 0, 0, 0); /* todo keystate */			
+			button, 0, 0, 0); /* todo keystate */
 		adjustcoordinates(imp->component, &ev.pt);
 		imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
 		return 0;
@@ -630,7 +630,7 @@ void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(wParam, lParam),
-		button, 0, 0, 0); /* todo GetKeyState */		
+		button, 0, 0, 0); /* todo GetKeyState */
 	adjustcoordinates(component, &ev.pt);
 	ev.event.target = component; /* eventtarget(component)); */
 	up = FALSE;
