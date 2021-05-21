@@ -190,8 +190,6 @@ void mainframe_init(MainFrame* self)
 #endif
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
-	} else {
-		newmachine_updateplugins(&self->machineview.newmachine);
 	}
 	workspace_setstartpage(&self->workspace);
 	self->machineview.wireview.centermaster = TRUE;

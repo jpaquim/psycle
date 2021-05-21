@@ -779,8 +779,8 @@ static void newmachine_onplugincachechanged(NewMachine*, Workspace*);
 static void newmachine_onmousedown(NewMachine*, psy_ui_MouseEvent*);
 static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onrescan(NewMachine*, psy_ui_Component* sender);
-static void newmachine_onscanstart(NewMachine*, psy_audio_PluginCatcher*);
-static void newmachine_onscanend(NewMachine*, psy_audio_PluginCatcher*);
+static void newmachine_onscanstart(NewMachine*, Workspace*);
+static void newmachine_onscanend(NewMachine*, Workspace*);
 static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
 	int progress);
 static void newmachine_onplugincategorychanged(NewMachine*, NewMachineDetail* sender);
@@ -917,16 +917,16 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onfocus);	
 	psy_signal_connect(&self->rescanbar.rescan.signal_clicked, self,
 		newmachine_onrescan);
+	psy_signal_connect(&workspace->signal_scanstart, self,
+		newmachine_onscanstart);
+	psy_signal_connect(&workspace->signal_scanend, self,
+		newmachine_onscanend);
 	psy_signal_connect(&workspace->signal_scanprogress, self,
 		newmachine_onpluginscanprogress);
 	psy_signal_connect(&workspace->signal_scantaskstart, self,
 		newmachine_onscantaskstart);
 	psy_signal_connect(&workspace->signal_scanfile, self,
-		newmachine_onscanfile);
-	psy_signal_connect(&workspace->plugincatcher.signal_scanstart, self,
-		newmachine_onscanstart);
-	psy_signal_connect(&workspace->plugincatcher.signal_scanend, self,
-		newmachine_onscanend);
+		newmachine_onscanfile);	
 	psy_ui_notebook_select(&self->notebook, 0);
 	newmachinecategorybar_build(&self->categorybar);
 	psy_ui_component_align(&self->categorybar.component);	
@@ -1022,13 +1022,13 @@ void newmachine_onpluginscanprogress(NewMachine* self, Workspace* workspace,
 {	
 }
 
-void newmachine_onscanstart(NewMachine* self, psy_audio_PluginCatcher* sender)
+void newmachine_onscanstart(NewMachine* self, Workspace* sender)
 {
 	pluginscanview_reset(&self->scanview);
 	psy_ui_notebook_select(&self->notebook, 1);	
 }
 
-void newmachine_onscanend(NewMachine* self, psy_audio_PluginCatcher* sender)
+void newmachine_onscanend(NewMachine* self, Workspace* sender)
 {
 	psy_ui_notebook_select(&self->notebook, 0);
 }
@@ -1184,7 +1184,7 @@ void newmachine_onsectionselected(NewMachine* self, NewMachineSection* sender)
 void newmachine_onscanfile(NewMachine* self, psy_audio_PluginCatcher* sender,
 	const char* path, int type)
 {
-	psy_ui_label_settext(&self->scanview.scanfile, path);	
+	psy_ui_label_settext(&self->scanview.scanfile, path);
 }
 
 void newmachine_onscantaskstart(NewMachine* self,
