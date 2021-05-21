@@ -1,4 +1,4 @@
-DSPDIR := ../dsp/src
+HELPERDIRS := ../container/src ../dsp/src
 PLUGDIRS :=\
 			alk_muter/src\
 			arguru-compressor/src\
@@ -42,7 +42,7 @@ PLUGDIRS :=\
 			ring_modulator/src\
 			yezar_freeverb/src\
 			zephod_super_fm/src
-SUBDIRS := $(DSPDIR) $(PLUGDIRS)
+SUBDIRS := $(HELPERDIRS) $(PLUGDIRS)
 
 all: $(SUBDIRS)
 $(SUBDIRS):
