@@ -9,6 +9,8 @@
 #include "fileview.h"
 /* file */
 #include <dir.h>
+// container
+#include <qsort.h>
 /* platform */
 #include "../../detail/os.h"
 #include "../../detail/portable.h"
@@ -22,6 +24,8 @@ static int fileview_onenumdir(FileView*, const char* path, int flag);
 static void fileview_onfileboxselected(FileView*, psy_ui_ListBox* sender,
 	intptr_t index);
 static void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index);
+static psy_List* fileview_sort(psy_List* source, psy_fp_comp comp);
+static int fileview_comp_filename(psy_List* p, psy_List* q);
 
 /* implementation */
 void fileview_init(FileView* self, psy_ui_Component* parent,
@@ -67,10 +71,39 @@ void fileview_ondestroy(FileView* self, psy_ui_Component* sender)
 void fileview_build(FileView* self)
 {	
 	char path[4096];
+	psy_List* sorted;
 
-	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);
-	psy_dir_enumerate(self, path, "*.psy", 0,
-		(psy_fp_findfile)fileview_onenumdir);	
+	psy_ui_listbox_clear(&self->filebox);
+	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);	
+	psy_dir_enumerate(self, path, "*.psy", 0, (psy_fp_findfile)
+		fileview_onenumdir);
+#if defined(DIVERSALIS__OS__UNIX)
+	sorted = fileview_sort(self->files, (psy_fp_comp)fileview_comp_filename);
+	psy_list_deallocate(&self->files, (psy_fp_disposefunc)NULL);
+	self->files = sorted;
+#endif		
+	if (self->files) {
+		psy_List* p;
+		
+		for (p = self->files; p != NULL; p = p->next) {
+			if (p->entry) {
+				psy_Path path;
+
+				psy_path_init(&path, (const char*)p->entry);	
+				psy_ui_listbox_addtext(&self->filebox,
+					psy_path_filename(&path));
+				psy_path_dispose(&path);
+			}
+		}		
+	}
+}
+
+int fileview_onenumdir(FileView* self, const char* filename, int flag)
+{
+	if (filename) {			
+		psy_list_append(&self->files, psy_strdup(filename));		
+	}
+	return 1;
 }
 
 void fileview_builddirectories(FileView* self)
@@ -101,16 +134,6 @@ void fileview_builddrives(FileView* self)
 		psy_ui_tabbar_append(&self->drives, (char*)psy_list_entry(p));
 	}
 	psy_list_deallocate(&q, NULL);
-}
-
-int fileview_onenumdir(FileView* self, const char* filename, int flag)
-{
-	psy_Path path;
-
-	psy_path_init(&path, filename);
-	psy_ui_listbox_addtext(&self->filebox, psy_path_name(&path));
-	psy_list_append(&self->files, strdup(filename));
-	return 1;
 }
 
 void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender,
@@ -171,4 +194,48 @@ void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index)
 		fileview_build(self);
 		psy_ui_component_align_full(&self->filebox.component);
 	}
+}
+
+psy_List* fileview_sort(psy_List* source, psy_fp_comp comp)
+{
+	psy_List* rv;
+
+	rv = NULL;
+	if (source) {		
+		uintptr_t num;		
+		psy_List** arrayptr;
+
+		num = psy_list_size(source);
+		if (num == 0) {
+			return NULL;
+		}
+		arrayptr = malloc(sizeof(char*) * num);
+		if (arrayptr) {
+			psy_List* p;
+			uintptr_t i;
+			
+			p = source;
+			for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+				arrayptr[i] = p;
+			}
+			psy_qsort((void **)arrayptr, 0, (int)(num - 1), comp);
+			for (i = 0; i < num; ++i) {
+				psy_list_append(&rv,
+					psy_strdup((const char*)(arrayptr[i]->entry)));
+			}			
+			free(arrayptr);
+			arrayptr = NULL;
+		}
+	}
+	return rv;
+}
+
+int fileview_comp_filename(psy_List* p, psy_List* q)
+{
+	const char* left;
+	const char* right;
+
+	left = (const char*)p->entry;	
+	right = (const char*)q->entry;	
+	return strcmp(left, right);
 }

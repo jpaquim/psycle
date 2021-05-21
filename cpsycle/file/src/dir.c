@@ -4,16 +4,16 @@
 */
 
 #include "../../detail/prefix.h"
+
+
 #include "../../detail/os.h"
 #include "../../detail/compiler.h"
 
 #include "dir.h"
-
+/* std */
 #include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-
+/* platform */
 #include "../../detail/portable.h"
 
 static void psy_path_extract_path(psy_Path*);
@@ -79,8 +79,8 @@ void psy_path_update(psy_Path* self)
 	static const char* path_delim = psy_SLASHSTR;
 	free(self->path);
 
-	self->path = malloc(psy_strlen(self->prefix) + 1 + psy_strlen(self->name) + 1 +
-		psy_strlen(self->ext) + 1);
+	self->path = malloc(psy_strlen(self->prefix) + 1 + psy_strlen(self->name) +
+		1 + psy_strlen(self->ext) + 1);
 	self->path[0] = '\0';
 	if (psy_path_hasprefix(self)) {
 		strcat(self->path, self->prefix);
@@ -129,12 +129,25 @@ void psy_path_extract_path(psy_Path* self)
 		psy_strreset(&self->name, self->path);		
 	}
 	p = strrchr(self->name, '.');
-	if (p) {
-		free(self->ext);
-		self->ext = malloc(psy_strlen(self->name) - (p - self->name) + 1);
-		self->ext = strncpy(self->ext, p + 1, psy_strlen(self->name) -
-			(p - self->name));
-		self->name[p - self->name] = '\0';
+	if (p) {			
+		if (*(p + 1) == '\0' && (p == self->name)) {
+			free(self->ext);
+			self->ext = strdup("");
+			free(self->name);
+			self->name = strdup(".");
+		} else if (*(p + 1) == '\0' && (*(p - 1) == '.' &&
+				(p - 1) == self->name)) {
+			free(self->ext);
+			self->ext = strdup("");
+			free(self->name);
+			self->name = strdup("..");
+		} else {
+			free(self->ext);
+			self->ext = malloc(psy_strlen(self->name) - (p - self->name) + 1);
+			self->ext = strncpy(self->ext, p + 1, psy_strlen(self->name) -
+				(p - self->name));
+			self->name[p - self->name] = '\0';
+		}
 	} else {
 		free(self->ext);
 		self->ext = strdup("");
