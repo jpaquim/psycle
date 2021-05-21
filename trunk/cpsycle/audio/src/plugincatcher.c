@@ -601,7 +601,7 @@ void psy_audio_plugincatcher_scan(psy_audio_PluginCatcher* self)
 	if (!self->all) {
 		return;
 	}
-	psy_signal_emit(&self->signal_scanstart, self, 0);
+	psy_signal_emit(&self->signal_scanstart, self, 0);	
 	psy_audio_plugincatcher_clear(self);
 	if (self->directories) {
 		psy_List* p;

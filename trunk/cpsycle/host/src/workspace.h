@@ -119,6 +119,8 @@ typedef struct Workspace {
 	// psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;
+	psy_Signal signal_scanstart;
+	psy_Signal signal_scanend;
 	psy_Signal signal_scanfile;
 	psy_Signal signal_scantaskstart;
 	psy_Signal signal_plugincachechanged;
@@ -171,6 +173,8 @@ typedef struct Workspace {
 	psy_audio_Lock pluginscanlock;
 	int filescanned;
 	char* scanfilename;
+	int scanstart;
+	int scanend;
 	int scantaskstart;
 	int plugincachechanged;
 	int scanprogress;
