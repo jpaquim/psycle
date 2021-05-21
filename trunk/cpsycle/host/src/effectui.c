@@ -1,22 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "effectui.h"
-// host
+/* host */
 #include "skingraphics.h"
 #include "paramview.h"
 #include "wireview.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// EffectUi
+/* prototypes */
 static void effectui_dispose(EffectUi*);
 static void effectui_initsize(EffectUi*);
 static int effectui_hittestpan(EffectUi*, psy_ui_RealPoint, double* dx);
@@ -42,7 +44,7 @@ static void effectui_onshowparameters(EffectUi*, Workspace* sender,
 static void effectui_showparameters(EffectUi*, psy_ui_Component* parent);
 static void effectui_onpreferredsize(EffectUi*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable effectui_vtable;
 static psy_ui_ComponentVtable effectui_super_vtable;
 static bool effectui_vtable_initialized = FALSE;
@@ -85,7 +87,7 @@ static psy_ui_ComponentVtable* effectui_vtable_init(EffectUi* self)
 	}
 	return &effectui_vtable;
 }
-// implementation
+/* implementation */
 void effectui_init(EffectUi* self, psy_ui_Component* parent,
 	uintptr_t slot, MachineViewSkin* skin,
 	psy_ui_Component* view, ParamViews* paramviews, Workspace* workspace)
@@ -195,6 +197,9 @@ void effectui_drawbackground(EffectUi* self, psy_ui_Graphics* g)
 			!psy_ui_bitmap_empty(&self->intern.skin->skinbmp)) {
 		skin_blitcoord(g, &self->intern.skin->skinbmp, psy_ui_realpoint_zero(),
 			&self->intern.coords->background);
+	} else {		
+		psy_ui_drawsolidrectangle(g, self->intern.coords->background.dest,
+			self->intern.bgcolour);		
 	}	
 }
 

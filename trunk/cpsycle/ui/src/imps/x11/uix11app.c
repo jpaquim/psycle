@@ -1,46 +1,42 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uix11app.h"
 #if PSYCLE_USE_TK == PSYCLE_TK_X11
 
+/* local */
+#include "uicomponent.h"
+#include "uix11fontimp.h"
+#include "uix11graphicsimp.h"
+#include "uix11keyboardevent.h"
+#include "uix11componentimp.h"
+/* X11 */
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xdbe.h>
-
-#include "uix11graphicsimp.h"
-#include "uix11fontimp.h"
-#include "uicomponent.h"
-#include "uiapp.h"
-#include "uix11componentimp.h"
-#include <stdlib.h>
+/* std */
 #include <stdio.h>
 
-// int iDeltaPerLine = 120;
-
 static psy_ui_X11App* x11app = NULL;
-
 static int shapeEventBase, shapeErrorBase;
 
-// double click
+/* double click */
 static int buttonclicks = 0;
 static int buttonclickcounter = 0;
 static int doubleclicktime = 200;
 static psy_ui_MouseEvent buttonpressevent;
-
-// prototypes
-
-// virtual
+/* prototypes */
+static void psy_ui_x11app_initdbe(psy_ui_X11App*);
 static void psy_ui_x11app_dispose(psy_ui_X11App*);
 static int psy_ui_x11app_run(psy_ui_X11App*);
 static void psy_ui_x11app_stop(psy_ui_X11App*);
 static void psy_ui_x11app_close(psy_ui_X11App*);
-
-
-
 static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
 static void handle_mouseevent(psy_ui_X11App* self,
 	psy_ui_Component* component,
@@ -48,19 +44,12 @@ static void handle_mouseevent(psy_ui_X11App* self,
 	XEvent* ev, int mask,
 	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
 	int button, psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
-static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
-	int x, int y, int width, int height);
-void buttonpress_single(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
-	psy_ui_MouseEvent*);
 static int translate_x11button(int button);
-static psy_ui_KeyboardEvent translate_keyevent(XKeyEvent*);
 static bool sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
 static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
 static int timertick(psy_ui_X11App*);
-static void psy_ui_x11app_initdbe(psy_ui_X11App*);
-
-// vtable
+/* vtable */
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -70,18 +59,25 @@ static void imp_vtable_init(psy_ui_X11App* self)
 
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)
+		imp_vtable.dev_dispose =
+			(psy_ui_fp_appimp_dispose)
 			psy_ui_x11app_dispose;
-		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_x11app_run;
-		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_x11app_stop;
-		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_x11app_close;
-		imp_vtable.dev_onappdefaultschange = (psy_ui_fp_appimp_onappdefaultschange)
+		imp_vtable.dev_run =
+			(psy_ui_fp_appimp_run)
+			psy_ui_x11app_run;
+		imp_vtable.dev_stop =
+			(psy_ui_fp_appimp_stop)
+			psy_ui_x11app_stop;
+		imp_vtable.dev_close =
+			(psy_ui_fp_appimp_close)
+			psy_ui_x11app_close;
+		imp_vtable.dev_onappdefaultschange =
+			(psy_ui_fp_appimp_onappdefaultschange)
 			psy_ui_x11app_onappdefaultschange;
 		imp_vtable_initialized = TRUE;
 	}
 }
-
-// implementation
+/* implementation */
 void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 {
 	static const char szAppClass[] = "PsycleApp";
@@ -116,7 +112,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 		self->visual = DefaultVisual(self->dpy,
 			DefaultScreen(self->dpy));
 	}	
-	psy_table_init(&self->colormap);
+	psy_ui_x11colours_init(&self->colourmap, self->dpy);
 	self->dograb = FALSE;
 	self->grabwin = 0;
 	self->targetids = NULL;
@@ -130,6 +126,8 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 	self->vinfo = 0;
 	self->visual = 0;
 	if (XdbeQueryExtension(self->dpy, &major, &minor)) {
+		XVisualInfo xvisinfo_templ;
+		
 		printf("Xdbe (%d.%d) supported, using double buffering\n", major, minor);
 		int numScreens = 1;
 		int matches;
@@ -139,12 +137,17 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 		if (!info || numScreens < 1 || info->count < 1) {
 			fprintf(stderr, "No visuals support Xdbe\n");
 			return;
-		}		
-		// Choosing the first one, seems that they have all perflevel of 0,
-		// and the depth varies.
-		XVisualInfo xvisinfo_templ;
-		xvisinfo_templ.visualid = info->visinfo[0].visual; // We know there's at least one
-		// As far as I know, screens are densely packed, so we can assume that if at least 1 exists, it's screen 0.
+		}
+		/*
+		** Choosing the first one, seems that they have all perflevel of 0,
+		** and the depth varies.
+		*/
+		/* We know there's at least one */
+		xvisinfo_templ.visualid = info->visinfo[0].visual;
+		/*
+		** As far as I know, screens are densely packed, so we can assume that
+		** if at least 1 exists, it's screen 0.
+		*/
 		xvisinfo_templ.screen = 0;
 		xvisinfo_templ.depth = info->visinfo[0].depth;
 		XdbeFreeVisualInfo(info);		
@@ -155,7 +158,6 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 			fprintf(stderr, "Couldn't match a Visual with double buffering\n");
 			return;
 		}
-
 		/*
 		printf("%d supported visuals\n", info->count);
 		for (int i = 0; i < info->count; ++i) {
@@ -168,7 +170,6 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 		printf("We got xvisinfo: id: %d, screen %d, depth %d\n",
 				xvisinfo_match->visualid, xvisinfo_match->screen, xvisinfo_match->depth);
 		*/
-
 		/* We can use Visual from the match */
 		self->visual = self->vinfo->visual;
 	} else {
@@ -185,15 +186,9 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
 	XCloseDisplay(self->dpy);	
-	psy_table_dispose(&self->colormap);
+	psy_ui_x11colours_dispose(&self->colourmap);
 	psy_list_free(self->targetids);
 	psy_timers_dispose(&self->wintimers);
-//	DeleteObject(self->defaultbackgroundbrush);
-}
-
-void widget_expose(Widget w, XtPointer clientdata,
-  XmDrawingAreaCallbackStruct* cbs)
-{
 }
 
 int psy_ui_x11app_run(psy_ui_X11App* self)
@@ -210,7 +205,7 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
     FD_SET(x11_fd, &in_fds);
     self->running = TRUE;
 	while (self->running) {
-		 if (XPending(self->dpy) == 0) {
+		if (XPending(self->dpy) == 0) {
 			if (select(x11_fd + 1, &in_fds, NULL, NULL, &tv) > 0) {
 				XNextEvent(self->dpy, &event);
 				psy_ui_x11app_handle_event(self, &event);	
@@ -218,8 +213,8 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 				timertick(self);  
 			}
 		} else {
-			XNextEvent(self->dpy, &event);
-			psy_ui_x11app_handle_event(self, &event);	
+		XNextEvent(self->dpy, &event);
+		psy_ui_x11app_handle_event(self, &event);	
 		}
     }
     return 0;
@@ -228,7 +223,7 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 void psy_ui_x11app_stop(psy_ui_X11App* self)
 {
 	self->running = FALSE;
-//	PostQuitMessage(0);
+	/* PostQuitMessage(0); */
 }
 
 void psy_ui_x11app_close(psy_ui_X11App* self)
@@ -271,337 +266,306 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	psy_ui_x11_ComponentImp* rootimp;
 
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
-				(uintptr_t) event->xany.window);
+		(uintptr_t) event->xany.window);
 	if (!imp) {
 		return 0;
 	}
 	switch (event->type) {
-		case DestroyNotify: {		   
-		    psy_ui_x11app_destroy_window(self, imp->hwnd);
-			break; }
-		case NoExpose:
-			//expose_window(self, imp,
-				//event->xnoexpose.x, event->xnoexpose.y,
-				//event->xnoexpose.width, event->xnoexpose.height);
-			break;
-		case GraphicsExpose:
-			//printf("GraphicsExpose\n");
-			//expose_window(self, imp,
-				//event->xgraphicsexpose.x, event->xgraphicsexpose.y,
-				//event->xgraphicsexpose.width, event->xgraphicsexpose.height);
-			break;
-		case Expose: {
-			const psy_ui_Border* border;
-			psy_ui_RealRectangle r;
+	case DestroyNotify: {		   
+		psy_ui_x11app_destroy_window(self, imp->hwnd);
+		break; }
+	case NoExpose:
+		/* expose_window(self, imp,
+		   event->xnoexpose.x, event->xnoexpose.y,
+		   event->xnoexpose.width, event->xnoexpose.height); */		  
+		break;
+	case GraphicsExpose:		
+		/* expose_window(self, imp,
+		   event->xgraphicsexpose.x, event->xgraphicsexpose.y,
+		   event->xgraphicsexpose.width, event->xgraphicsexpose.height); */
+		break;
+	case Expose: {
+		const psy_ui_Border* border;
+		psy_ui_RealRectangle r;
 
-			 r = psy_ui_realrectangle_make(
-				   psy_ui_realpoint_make(
-						event->xexpose.x,
-						event->xexpose.y),
-				   psy_ui_realsize_make(
-					event->xexpose.width,
-					event->xexpose.height));
-			psy_ui_realrectangle_union(&imp->exposearea, &r);
-			/*if (event->xexpose.count > 0) {
+			r = psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(
+					event->xexpose.x,
+					event->xexpose.y),
+				psy_ui_realsize_make(
+				event->xexpose.width,
+				event->xexpose.height));
+		psy_ui_realrectangle_union(&imp->exposearea, &r);
+		/* if (event->xexpose.count > 0) {
+			return 0;
+		} */
+		border = psy_ui_component_border(imp->component);
+		if (imp->component->vtable->ondraw ||
+				imp->component->signal_draw.slots ||
+				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
+				psy_ui_border_isset(border)) {
+			psy_ui_x11_GraphicsImp* gx11;
+			XRectangle rectangle;
+			psy_ui_RealMargin spacing;
+
+			if (!psy_ui_component_visible(imp->component)) {
 				return 0;
-			}*/
-			border = psy_ui_component_border(imp->component);
-			if (imp->component->vtable->ondraw ||
-					imp->component->signal_draw.slots ||
-					imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
-					psy_ui_border_isset(border)) {
-				psy_ui_x11_GraphicsImp* gx11;
-				XRectangle rectangle;
-				psy_ui_RealMargin spacing;
-
-				if (!psy_ui_component_visible(imp->component)) {
-					return 0;
-				}
-				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-				// reset scroll origin
-				gx11->org.x = 0;
-				gx11->org.y = 0;
-				// prepare a clip rect that can be used by a component to
-				// optimize the draw amount
-				psy_ui_setrectangle(&imp->g.clip, event->xexpose.x,
-					event->xexpose.y, event->xexpose.width,
-					event->xexpose.height);
-				// set gc/xfd clip
-				rectangle.x = (short)imp->exposearea.left;
-				rectangle.y = (short)imp->exposearea.top;
-				rectangle.width = (unsigned short)(imp->exposearea.right -
-					imp->exposearea.left);
-				rectangle.height = (unsigned short)(imp->exposearea.bottom -
-					imp->exposearea.top);
-				XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
-				XSetRegion(self->dpy, gx11->gc, gx11->region);
-				XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
-				XDestroyRegion(gx11->region);
-				gx11->region = XCreateRegion();
-				// draw
-				imp->imp.vtable->dev_draw(&imp->imp, &imp->g);
-				psy_ui_realrectangle_init(&imp->exposearea);
 			}
+			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+			/* reset scroll origin */
+			gx11->org.x = 0;
+			gx11->org.y = 0;
+			/*
+			** prepare a clip rect that can be used by a component to
+			** optimize the draw amount
+			*/
+			psy_ui_setrectangle(&imp->g.clip, event->xexpose.x,
+				event->xexpose.y, event->xexpose.width,
+				event->xexpose.height);
+			/* set gc/xfd clip */
+			rectangle.x = (short)imp->exposearea.left;
+			rectangle.y = (short)imp->exposearea.top;
+			rectangle.width = (unsigned short)(imp->exposearea.right -
+				imp->exposearea.left);
+			rectangle.height = (unsigned short)(imp->exposearea.bottom -
+				imp->exposearea.top);
+			XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
+			XSetRegion(self->dpy, gx11->gc, gx11->region);
+			XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
+			XDestroyRegion(gx11->region);
+			gx11->region = XCreateRegion();
+			/* draw */
+			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);
+			psy_ui_realrectangle_init(&imp->exposearea);
+		}
+		if (self->dbe) {
+			psy_ui_x11_GraphicsImp* gx11;
+
+			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+			XCopyArea(self->dpy, imp->d_backBuf,
+				imp->hwnd, gx11->gc, event->xexpose.x, event->xexpose.y,
+			event->xexpose.width, event->xexpose.height, event->xexpose.x,
+			event->xexpose.y);
+		}
+		break; }
+	case MapNotify:
+		psy_signal_emit(&imp->component->signal_show,
+			imp->component, 0);
+		if (self->dograb && imp->hwnd == self->grabwin) {
+			XGrabPointer(self->dpy,self->grabwin,True,
+			PointerMotionMask | ButtonReleaseMask | ButtonPressMask,
+			GrabModeAsync,
+			GrabModeAsync,None,None,CurrentTime);
+		}
+		break;
+	case UnmapNotify:
+		psy_signal_emit(&imp->component->signal_hide,
+			imp->component, 0);
+		if (self->dograb && imp->hwnd == self->grabwin) {
+			self->dograb = FALSE;
+		}
+		break;
+	case ConfigureNotify: {
+		XConfigureEvent xce = event->xconfigure;
+
+		if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
+			psy_ui_Size size;
+
+			imp->prev_w = xce.width;
+			imp->prev_h = xce.height;
 			if (self->dbe) {
 				psy_ui_x11_GraphicsImp* gx11;
 
 				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-				XCopyArea(self->dpy, imp->d_backBuf,
-					imp->hwnd, gx11->gc, event->xexpose.x, event->xexpose.y,
-				event->xexpose.width, event->xexpose.height, event->xexpose.x,
-				event->xexpose.y);
+				psy_ui_x11_graphicsimp_updatexft(gx11);
+			}			
+			psy_ui_component_align(imp->component);			
+			size.width = psy_ui_value_make_px(xce.width);
+			size.height = psy_ui_value_make_px(xce.height);
+			imp->component->vtable->onsize(imp->component, &size);
+			if (psy_ui_component_overflow(imp->component) !=
+					psy_ui_OVERFLOW_HIDDEN) {
+				psy_ui_component_updateoverflow(imp->component);
 			}
-			break; }
-		case MapNotify:
-			psy_signal_emit(&imp->component->signal_show,
-				imp->component, 0);
-			if (self->dograb && imp->hwnd == self->grabwin) {
-				XGrabPointer(self->dpy,self->grabwin,True,
-				PointerMotionMask | ButtonReleaseMask | ButtonPressMask,
-				GrabModeAsync,
-			    GrabModeAsync,None,None,CurrentTime);
-			}
-			break;
-		case UnmapNotify:
-			psy_signal_emit(&imp->component->signal_hide,
-				imp->component, 0);
-			if (self->dograb && imp->hwnd == self->grabwin) {
-				self->dograb = FALSE;
-			}
-			break;
-		case ConfigureNotify: {
-			XConfigureEvent xce = event->xconfigure;
-
-			if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
-				psy_ui_Size size;
-
-				imp->prev_w = xce.width;
-				imp->prev_h = xce.height;
-				if (self->dbe) {
-					psy_ui_x11_GraphicsImp* gx11;
-
-					gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-					psy_ui_x11_graphicsimp_updatexft(gx11);
-				}
-				// if (imp->component->alignchildren) {
-					psy_ui_component_align(imp->component);
-				// }
-				size.width = psy_ui_value_make_px(xce.width);
-				size.height = psy_ui_value_make_px(xce.height);
-				imp->component->vtable->onsize(imp->component, &size);
-				if (psy_ui_component_overflow(imp->component) !=
-						psy_ui_OVERFLOW_HIDDEN) {
-					psy_ui_component_updateoverflow(imp->component);
-				}
-				psy_signal_emit(&imp->component->signal_size, imp->component, 1,
-					(void*)&size);
-			}
-			return 0 ;
+			psy_signal_emit(&imp->component->signal_size, imp->component, 1,
+				(void*)&size);
+		}
+		return 0 ;
 		break; }
-		case ClientMessage:
-            if (event->xclient.data.l[0] == self->wmDeleteMessage) {
-				XEvent e;
+	case ClientMessage:
+        if (event->xclient.data.l[0] == self->wmDeleteMessage) {
+			XEvent e;
 
-				printf("close request\n");
-				uintptr_t hwnd;
-                bool close;
+			printf("close request\n");
+			uintptr_t hwnd;
+            bool close;
 
-				close = imp->component->vtable->onclose(imp->component);
-				if (imp->component->signal_close.slots) {
-					psy_signal_emit(&imp->component->signal_close,
-						imp->component, 1, (void*)&close);
-				}
-				if (!close) {
-					return 0;
-				}
-				hwnd = event->xclient.window;
-				XDestroyWindow(self->dpy, event->xclient.window);
-				while (TRUE) {					
-					XNextEvent(self->dpy, event);
-					if (event->type ==  DestroyNotify) {						
-						psy_ui_x11app_destroy_window(self, event->xany.window);
-						if (hwnd == event->xany.window) {
-							printf("cleaned up\n");
-							break;
-						}
+			close = imp->component->vtable->onclose(imp->component);
+			if (imp->component->signal_close.slots) {
+				psy_signal_emit(&imp->component->signal_close,
+					imp->component, 1, (void*)&close);
+			}
+			if (!close) {
+				return 0;
+			}
+			hwnd = event->xclient.window;
+			XDestroyWindow(self->dpy, event->xclient.window);
+			while (TRUE) {					
+				XNextEvent(self->dpy, event);
+				if (event->type ==  DestroyNotify) {						
+					psy_ui_x11app_destroy_window(self, event->xany.window);
+					if (hwnd == event->xany.window) {
+						printf("cleaned up\n");
+						break;
 					}
 				}
-				self->running = FALSE;
 			}
-            break;
-        case KeyPress: {
-			psy_ui_KeyboardEvent ev;
+			self->running = FALSE;
+		}
+        break;
+    case KeyPress: {
+		psy_ui_KeyboardEvent ev;
 
-			ev = translate_keyevent(&event->xkey);
-			imp->component->vtable->onkeydown(imp->component, &ev);
-			psy_signal_emit(&imp->component->signal_keydown, imp->component,
-				1, &ev);
-			if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
-				XKeyEvent xkevent;
+		ev = psy_ui_x11_keyboardevent_make(&event->xkey);
+		imp->component->vtable->onkeydown(imp->component, &ev);
+		psy_signal_emit(&imp->component->signal_keydown, imp->component,
+			1, &ev);
+		if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
+			XKeyEvent xkevent;
 
-				xkevent = event->xkey;
-				xkevent.window      = imp->parent->hwnd;
-				XSendEvent(self->dpy, imp->parent->hwnd, True, KeyPressMask,
-					(XEvent*)&xkevent);
+			xkevent = event->xkey;
+			xkevent.window = imp->parent->hwnd;
+			XSendEvent(self->dpy, imp->parent->hwnd, True, KeyPressMask,
+				(XEvent*)&xkevent);
+		}
+		return 0;
+		break; }
+    case KeyRelease: {
+		psy_ui_KeyboardEvent ev;
+
+		ev = psy_ui_x11_keyboardevent_make(&event->xkey);		
+		imp->component->vtable->onkeyup(imp->component, &ev);
+		psy_signal_emit(&imp->component->signal_keyup, imp->component,
+			1, &ev);
+		if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
+			XKeyEvent xkevent;
+
+			xkevent = event->xkey;
+			xkevent.window = imp->parent->hwnd;
+			XSendEvent(self->dpy, imp->parent->hwnd, True, KeyReleaseMask,
+				(XEvent*)&xkevent);
+		}
+		return 0;
+		break; }
+    case ButtonPress: {
+		psy_ui_MouseEvent ev;
+
+		if (self->dograb) {
+			psy_ui_x11_ComponentImp* grabimp;
+			psy_ui_Component* curr;
+
+			grabimp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
+				(uintptr_t)self->grabwin);
+
+			curr = imp->component;
+			while (curr && curr != grabimp->component) {
+				curr = psy_ui_component_parent(curr);
 			}
-			return 0;
-			break; }
-        case KeyRelease: {
-			psy_ui_KeyboardEvent ev;
-
-			ev = translate_keyevent(&event->xkey);
-			//(int)wParam, lParam,
-			//	GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
-			//	(lParam & 0x40000000) == 0x40000000);
-			imp->component->vtable->onkeyup(imp->component, &ev);
-			psy_signal_emit(&imp->component->signal_keyup, imp->component,
-				1, &ev);
-			if (ev.event.bubbles != FALSE && imp->parent && imp->parent->hwnd) {
-				XKeyEvent xkevent;
-
-				xkevent = event->xkey;
-				xkevent.window      = imp->parent->hwnd;
-				XSendEvent(self->dpy, imp->parent->hwnd, True, KeyReleaseMask,
-					(XEvent*)&xkevent);
+			if (!curr) {
+				psy_ui_component_hide(grabimp->component);
+				return 0;
 			}
-			return 0;
-			break; }
-        case ButtonPress: {
-			psy_ui_MouseEvent ev;
-
-			if (self->dograb) {
-				psy_ui_x11_ComponentImp* grabimp;
-				psy_ui_Component* curr;
-
-				grabimp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
-					(uintptr_t)self->grabwin);
-
-				curr = imp->component;
-				while (curr && curr != grabimp->component) {
-					curr = psy_ui_component_parent(curr);
-				}
-				if (!curr) {
-					psy_ui_component_hide(grabimp->component);
-					return 0;
-				}
-			}
-			adjustcoordinates(imp->component, &ev.pt);
-			if (buttonclicks == 0) {
-				buttonclicks = 1;
-				buttonclickcounter = doubleclicktime;
-				buttonpressevent = ev;
-				handle_mouseevent(self,
-					imp->component, imp,
-					event, ButtonPressMask,
-					event->xany.window,
+		}
+		adjustcoordinates(imp->component, &ev.pt);
+		if (buttonclicks == 0) { /* first click */
+			buttonclicks = 1;
+			buttonclickcounter = doubleclicktime;
+			buttonpressevent = ev;
+			handle_mouseevent(self, imp->component, imp,
+				event, ButtonPressMask, event->xany.window,
+				ButtonPress, event->xbutton.x, event->xbutton.y,
+				translate_x11button(event->xbutton.button),
+				imp->component->vtable->onmousedown,
+				&imp->component->signal_mousedown);
+		} else { /* second click */			
+			buttonclicks = 0;
+			/* check distance */
+			if (ev.pt.x != buttonpressevent.pt.x ||
+					ev.pt.y != buttonpressevent.pt.y) {
+					/* single click */
+				handle_mouseevent(self, imp->component, imp,
+					event, ButtonPressMask, event->xany.window,
 					ButtonPress, event->xbutton.x, event->xbutton.y,
 					translate_x11button(event->xbutton.button),
 					imp->component->vtable->onmousedown,
 					&imp->component->signal_mousedown);
-			} else {
-				// No timeout
-				// stop click timer
-				buttonclicks = 0;
-				// check distance
-				if (ev.pt.x != buttonpressevent.pt.x ||
-						ev.pt.y != buttonpressevent.pt.y) {
-					// single click
-					handle_mouseevent(self,
-						imp->component, imp, event, ButtonPressMask,
-						event->xany.window,
-						ButtonPress, event->xbutton.x, event->xbutton.y,
-						translate_x11button(event->xbutton.button),
-						imp->component->vtable->onmousedown,
-						&imp->component->signal_mousedown);
-				} else {
-					// double click
-					printf("double\n");
-					handle_mouseevent(self,
-					imp->component, imp, event, ButtonPressMask,
-						event->xany.window,
-						ButtonPress, event->xbutton.x, event->xbutton.y,
-						translate_x11button(event->xbutton.button),
-						imp->component->vtable->onmousedoubleclick,
-						&imp->component->signal_mousedoubleclick);
-				}
+			} else { /* double click */				
+				handle_mouseevent(self, imp->component, imp,
+					event, ButtonPressMask, event->xany.window,
+					ButtonPress, event->xbutton.x, event->xbutton.y,
+					translate_x11button(event->xbutton.button),
+					imp->component->vtable->onmousedoubleclick,
+					&imp->component->signal_mousedoubleclick);
 			}
-			return 0;
-			break; }
-		case ButtonRelease: {
-			psy_ui_MouseEvent ev;
-
-			psy_ui_mouseevent_init_all(
-				&ev,
-				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
-				translate_x11button(event->xbutton.button),
-				0, 0, 0);
-				//(SHORT)LOWORD (lParam),
-				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.pt);
-			handle_mouseevent(self,
-				imp->component, imp,
-				event, ButtonReleaseMask,
-				event->xany.window,
-				ButtonRelease, event->xbutton.x, event->xbutton.y,
-				translate_x11button(event->xbutton.button),
-				imp->component->vtable->onmouseup,
-				&imp->component->signal_mouseup);
-			return 0;
-			break; }
-		case MotionNotify: {
-			psy_ui_MouseEvent ev;
-			XMotionEvent xme;
-			int button;
-
-			if (buttonclicks == 1) {
-				buttonclicks = 0;
-			}
-			xme = event->xmotion;
-			if (xme.state & Button1Mask) {
-				button = 1;
-			} else if (xme.state & Button2Mask) {
-				button = 3;
-			} else if (xme.state & Button3Mask) {
-				button = 2;
-			}
-			psy_ui_mouseevent_init_all(&ev,
-				psy_ui_realpoint_make(xme.x, xme.y),
-				button, // translate_x11button(event->xbutton.button), // button
-				0,
-				0,
-				0);
-				//(SHORT)LOWORD (lParam),
-				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.pt);
-			imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
-			return 0;
-			break; }
-		case EnterNotify: {
-			imp->imp.vtable->dev_mouseenter(&imp->imp);
+		}
+		return 0;
 		break; }
-		case LeaveNotify: {
-			imp->imp.vtable->dev_mouseleave(&imp->imp);
+	case ButtonRelease: {
+		psy_ui_MouseEvent ev;
+
+		psy_ui_mouseevent_init_all(&ev,
+			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
+			translate_x11button(event->xbutton.button),
+			0, 0, 0); /* todo keystate */			
+		adjustcoordinates(imp->component, &ev.pt);
+		handle_mouseevent(self, imp->component, imp,
+			event, ButtonReleaseMask, event->xany.window,
+			ButtonRelease, event->xbutton.x, event->xbutton.y,
+			translate_x11button(event->xbutton.button),
+			imp->component->vtable->onmouseup,
+			&imp->component->signal_mouseup);
+		return 0;
 		break; }
-		  default:
-			break;
-	  }
+	case MotionNotify: {
+		psy_ui_MouseEvent ev;
+		XMotionEvent xme;
+		int button;
+
+		if (buttonclicks == 1) {
+			buttonclicks = 0;
+		}
+		xme = event->xmotion;
+		if (xme.state & Button1Mask) {
+			button = 1;
+		} else if (xme.state & Button2Mask) {
+			button = 3;
+		} else if (xme.state & Button3Mask) {
+			button = 2;
+		}
+		psy_ui_mouseevent_init_all(&ev,
+			psy_ui_realpoint_make(xme.x, xme.y),
+			button, 0, 0, 0); /* todo keystate */			
+		adjustcoordinates(imp->component, &ev.pt);
+		imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
+		return 0;
+		break; }
+	case EnterNotify: {
+		imp->imp.vtable->dev_mouseenter(&imp->imp);
+		break; }
+	case LeaveNotify: {
+		imp->imp.vtable->dev_mouseleave(&imp->imp);
+		break; }
+	default:
+		break;
+	}
 	return 0;
-}
-
-void buttonpress_single(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
-	psy_ui_MouseEvent* ev)
-{
-	imp->component->vtable->onmousedown(imp->component, ev);
-	psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1, ev);
 }
 
 void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 {
 	psy_ui_x11_ComponentImp* imp;
 
-	printf("destroy window\n");
+	/* printf("destroy window\n"); */
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
 		&self->selfmap, (uintptr_t) window);
 	if (imp) {
@@ -654,131 +618,10 @@ int translate_x11button(int button)
 	}
 }
 
-psy_ui_KeyboardEvent translate_keyevent(XKeyEvent* event)
-{
-	psy_ui_KeyboardEvent rv;
-	KeySym keysym = NoSymbol;
-	int repeat = 0;
-	static unsigned char buf[64];
-	static unsigned char bufnomod[2];
-	int ret;
-	XKeyEvent xkevent;
-	bool shift;
-	bool ctrl;
-
-	xkevent = *event;
-	shift = (xkevent.state & ShiftMask) == ShiftMask;
-	ctrl = (xkevent.state & ControlMask) == ControlMask;
-	ret = XLookupString(&xkevent, buf, sizeof buf, &keysym, 0);
-	switch (keysym) {
-		case XK_Home:
-			keysym = psy_ui_KEY_HOME;
-			break;
-		case XK_Escape:
-			keysym = psy_ui_KEY_ESCAPE;
-			break;
-		case XK_Return:
-			keysym = psy_ui_KEY_RETURN;
-			break;
-		case XK_Tab:
-			keysym = psy_ui_KEY_TAB;
-			break;
-		case XK_Prior:
-			keysym = psy_ui_KEY_PRIOR;
-			break;
-		case XK_Next:
-			keysym = psy_ui_KEY_NEXT;
-			break;
-		case XK_Left:
-			keysym = psy_ui_KEY_LEFT;
-			break;
-		case XK_Up:
-			keysym = psy_ui_KEY_UP;
-			break;
-		case XK_Right:
-			keysym = psy_ui_KEY_RIGHT;
-			break;
-		case XK_Down:
-			keysym = psy_ui_KEY_DOWN;
-			break;
-		case XK_Delete:
-			keysym = psy_ui_KEY_DELETE;
-			break;
-		case XK_BackSpace:
-			keysym = psy_ui_KEY_BACK;
-			break;
-		case XK_F1:
-			keysym = psy_ui_KEY_F1;
-			break;
-		case XK_F2:
-			keysym = psy_ui_KEY_F2;
-			break;
-		case XK_F3:
-			keysym = psy_ui_KEY_F3;
-			break;
-		case XK_F4:
-			keysym = psy_ui_KEY_F4;
-			break;
-		case XK_F5:
-			keysym = psy_ui_KEY_F5;
-			break;
-		case XK_F6:
-			keysym = psy_ui_KEY_F6;
-			break;
-		case XK_F7:
-			keysym = psy_ui_KEY_F7;
-			break;
-		case XK_F8:
-			keysym = psy_ui_KEY_F8;
-			break;
-		case XK_F9:
-			keysym = psy_ui_KEY_F9;
-			break;
-		case XK_F10:
-			keysym = psy_ui_KEY_F10;
-			break;
-		case XK_F11:
-			keysym = psy_ui_KEY_F11;
-			break;
-		case XK_F12:
-			keysym = psy_ui_KEY_F12;
-			break;
-		default:
-			if (ret && buf[0] != '\0') {
-				if (buf[0] >= 'A' && buf[0] <= 'Z') {
-					keysym = psy_ui_KEY_A +
-						buf[0] - 'A';
-				} else if (buf[0] >= 'a' && buf[0] <= 'z') {
-					keysym = psy_ui_KEY_A +
-						buf[0] - 'a';
-				} else if (buf[0] >= '0' && buf[0] <= '9') {
-					keysym = psy_ui_KEY_DIGIT0 +
-						buf[0] - '0';
-				} else {
-					keysym = psy_ui_KEY_A; //buf[0];
-				}
-			}
-			break;
-	}
-	// if (ret && buf[0] != '\0') {
-	// 	keysym = buf[0];
-	// 	printf("%d,%d\n", ret, (int)buf[0]);
-	// } else {
-	// 	printf("no lookup %d\n", keysym);
-	// }
-	psy_ui_keyboardevent_init_all(&rv,
-		keysym,
-		0,
-		shift,
-		ctrl,
-		0,
-		repeat);
-	return rv;
-}
-
 void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 	psy_ui_x11_ComponentImp* x11imp, XEvent* event, int mask,
-	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam, int button,
+	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
+	int button,
 	psy_ui_fp_component_onmouseevent fp,
 	psy_Signal* signal)
 {
@@ -787,11 +630,9 @@ void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(wParam, lParam),
-		button, 0, 0, 0); /* GetKeyState(VK_SHIFT) < 0 */
-		//GetKeyState(VK_CONTROL) < 0);
+		button, 0, 0, 0); /* todo GetKeyState */		
 	adjustcoordinates(component, &ev.pt);
-	ev.event.target = component; // eventtarget(component));
-
+	ev.event.target = component; /* eventtarget(component)); */
 	up = FALSE;
 	if (message == ButtonPress) {
 		x11imp->imp.vtable->dev_mousedown(&x11imp->imp, &ev);
@@ -836,8 +677,7 @@ bool sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 		self->eventretarget = imp->component;
 		event = *xev;
 		event.xany.window = imp->parent->hwnd;
-		XSendEvent(self->dpy, imp->parent->hwnd, True, mask,
-			xev);
+		XSendEvent(self->dpy, imp->parent->hwnd, True, mask, xev);
 		self->eventretarget = 0;
 		return TRUE;
 	} else {
@@ -848,40 +688,9 @@ bool sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	return FALSE;
 }
 
-int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour color)
-{
-	int rv;
-	XColor xcolor;
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-
-	if (psy_table_exists(&self->colormap,
-			(uintptr_t)psy_ui_colour_colorref(&color))) {
-		rv = (int)(intptr_t)psy_table_at(&self->colormap,
-			(uintptr_t)psy_ui_colour_colorref(&color));
-	} else {
-		psy_ui_colour_rgb(&color, &r, &g, &b);
-		xcolor.red = r * 256;
-		xcolor.green = g * 256;
-		xcolor.blue = b * 256;
-		if (XAllocColor(self->dpy, DefaultColormap(self->dpy,
-				DefaultScreen(self->dpy)), &xcolor)) {
-			rv = xcolor.pixel;
-		} else {
-			rv = BlackPixel(self->dpy, DefaultScreen(self->dpy));
-			printf("Warning: can't allocate requested colour\n");
-		}
-		psy_table_insert(&self->colormap,
-			(uintptr_t)psy_ui_colour_colorref(&color),
-			(void*)(uintptr_t)rv);
-	}
-	return rv;
-}
-
 void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
 {
 
 }
 
-#endif
+#endif /* PSYCLE_TK_X11 */

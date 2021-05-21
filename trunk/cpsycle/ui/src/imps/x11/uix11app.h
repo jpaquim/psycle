@@ -7,17 +7,16 @@
 #ifndef psy_ui_X11APP_H
 #define psy_ui_X11APP_H
 
-#include "../../detail/stdint.h"
-#include "../../detail/os.h"
-
+/* local */
 #include "../../uiapp.h"
+#include "../../detail/os.h"
 #include "../../timers.h"
-
+#include "uix11colours.h"
+/* container */
 #include <list.h>
-
-#include <Xm/Xm.h>
-
-#include <hashtbl.h>
+/* X11 */
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +45,7 @@ typedef struct psy_ui_X11App {
 	// mousehook
 	Atom wmDeleteMessage;
 	bool running;	
-	psy_Table colormap;
+	psy_ui_X11Colours colourmap;
 	XVisualInfo* vinfo;
 	Visual* visual;
 	bool dbe;
@@ -65,7 +64,12 @@ void psy_ui_x11app_onappdefaultschange(psy_ui_X11App*);
 void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
 	uintptr_t interval);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
-int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Colour);
+
+INLINE int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Colour colour)
+{
+	return psy_ui_x11colours_index(&self->colourmap, colour);
+}
+
 void psy_ui_x11app_destroy_window(psy_ui_X11App*, Window);
 
 INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)

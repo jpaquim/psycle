@@ -517,7 +517,7 @@ void set_hwparams(AlsaDriver* self, snd_pcm_hw_params_t* params, snd_pcm_access_
 
 	// if (loggers::trace()) {
 //		std::ostringstream s;
-		fprintf(stderr, "psycle: alsa: buffer size: %u", size);		
+		fprintf(stderr, "psycle: alsa: buffer size: %u\n", size);		
 	//}
 	self->buffer_size = size;
 
