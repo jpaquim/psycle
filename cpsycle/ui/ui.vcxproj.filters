@@ -241,6 +241,9 @@
     <ClCompile Include="src\imps\natives\uinativeeditimp.c">
       <Filter>imps\natives</Filter>
     </ClCompile>
+    <ClCompile Include="src\timers.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -440,6 +443,9 @@
     </ClInclude>
     <ClInclude Include="src\imps\natives\uinativeeditimp.h">
       <Filter>imps\natives</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timers.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

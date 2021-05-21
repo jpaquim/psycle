@@ -416,6 +416,9 @@ void workspace_scanplugins(Workspace* self)
 		_beginthread(pluginscanthread, 0, self);
 #else
 		psy_audio_plugincatcher_scan(&self->plugincatcher);
+		self->filescanned = 0;
+		self->plugincachechanged = 0;
+		self->scantaskstart = 0;
         psy_signal_emit(&self->signal_plugincachechanged, self, 0);
 #endif
 	}
@@ -1320,6 +1323,8 @@ void workspace_idle(Workspace* self)
 			self->lastentry = 0;
 		}
 	}
+#if PSYCLE_USE_TK != PSYCLE_TK_X11
+	/* todo segfault X11 imp */			
 	if (self->scanprogresschanged) {
 		assert(self);
 		psy_signal_emit(&self->signal_scanprogress, self, 1, self->scanprogress);
@@ -1346,6 +1351,7 @@ void workspace_idle(Workspace* self)
 		self->scanfilename = NULL;
 		psy_audio_lock_leave(&self->pluginscanlock);
 	}
+#endif
 	psy_audio_player_idle(&self->player);
 	if (self->playrow && !psy_audio_player_playing(&self->player)) {
 		self->playrow = FALSE;

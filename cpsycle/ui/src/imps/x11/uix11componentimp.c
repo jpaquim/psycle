@@ -416,6 +416,7 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 	psy_List* q;
 
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
+    psy_ui_x11app_stoptimer(x11app, self->hwnd, psy_INDEX_INVALID);
 	psy_ui_componentimp_dispose(&self->imp);
 	psy_ui_graphics_dispose(&self->g);
 	for (p = self->viewcomponents; p != NULL; psy_list_next(&p)) {

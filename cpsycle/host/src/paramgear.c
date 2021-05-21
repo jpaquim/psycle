@@ -633,8 +633,10 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(0.0, 10.0));
+		psy_ui_size_make_em(0.0, 10.0));		
 	self->workspace = workspace;
+#if PSYCLE_USE_TK != PSYCLE_TK_X11
+	/* todo segfault X11 imp */				
 	// Bottom
 	psy_ui_component_init_align(&self->bottom, &self->component, NULL,
 		psy_ui_ALIGN_BOTTOM);	
@@ -670,6 +672,7 @@ void paramrack_init(ParamRack* self, psy_ui_Component* parent,
 		paramrack_onsongchanged);
 	paramrack_connectsong(self);
 	paramrackmodebar_setmode(&self->modebar, self->pane.mode);
+#endif	
 }
 
 void paramrack_onmodeselected(ParamRack* self, ParamRackModeBar* sender,
