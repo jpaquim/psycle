@@ -226,6 +226,7 @@
     <ClCompile Include="src\imps\win32\uiwinlistboximp.c" />
     <ClCompile Include="src\imps\win32\uiwinopendialogimp.c" />
     <ClCompile Include="src\imps\win32\uiwinsavedialogimp.c" />
+    <ClCompile Include="src\timers.c" />
     <ClCompile Include="src\uialigner.c" />
     <ClCompile Include="src\uiapp.c" />
     <ClCompile Include="src\uiappstyles.c" />
@@ -293,6 +294,7 @@
     <ClInclude Include="src\imps\win32\uiwinlistboximp.h" />
     <ClInclude Include="src\imps\win32\uiwinopendialogimp.h" />
     <ClInclude Include="src\imps\win32\uiwinsavedialogimp.h" />
+    <ClInclude Include="src\timers.h" />
     <ClInclude Include="src\uialigner.h" />
     <ClInclude Include="src\uiapp.h" />
     <ClInclude Include="src\uiappstyles.h" />

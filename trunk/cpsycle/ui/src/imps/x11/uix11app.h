@@ -11,6 +11,7 @@
 #include "../../detail/os.h"
 
 #include "../../uiapp.h"
+#include "../../timers.h"
 
 #include <list.h>
 
@@ -26,15 +27,6 @@ extern "C" {
 	//WPARAM wParam, LPARAM lParam);
 
 struct psy_ui_Component;
-
-typedef struct
-{	
-	uintptr_t hwnd;
-	uintptr_t id;
-	uintptr_t tick;
-	uintptr_t numticks;
-	bool doubleclick;
-} psy_ui_X11TickCounter;
 
 typedef struct psy_ui_X11App {
 	// implements
@@ -53,8 +45,7 @@ typedef struct psy_ui_X11App {
 	struct psy_ui_Component* eventretarget;
 	// mousehook
 	Atom wmDeleteMessage;
-	bool running;
-	psy_List* timers;
+	bool running;	
 	psy_Table colormap;
 	XVisualInfo* vinfo;
 	Visual* visual;
@@ -62,6 +53,7 @@ typedef struct psy_ui_X11App {
 	bool dograb;
 	Window grabwin;
 	psy_List* targetids;
+	psy_Timers wintimers;
 	// references
 	psy_ui_App* app;
 } psy_ui_X11App;
@@ -72,7 +64,6 @@ void psy_ui_x11app_onappdefaultschange(psy_ui_X11App*);
 
 void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
 	uintptr_t interval);
-void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Colour);
 void psy_ui_x11app_destroy_window(psy_ui_X11App*, Window);

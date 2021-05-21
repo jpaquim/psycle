@@ -1,18 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "vumeter.h"
 
-#include <math.h>
+#include "vumeter.h"
+/* dsp */
 #include <convert.h>
 #include <operations.h>
 #include <rms.h>
+/* std */
+#include <math.h>
 
-static void vumeter_ondestroy(Vumeter*, psy_ui_Component* sender);
+static void vumeter_ondestroy(Vumeter*);
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
-static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, uintptr_t timerid);
+static void vumeter_ontimer(Vumeter*, uintptr_t timerid);
 
 static VumeterSkin vumeterdefaultskin;
 static int vumeterdefaultskin_initialized = 0;
@@ -28,19 +32,27 @@ static void vumeterskin_init(Vumeter* self)
 	}
 	self->skin = vumeterdefaultskin;
 }
-
+/* vtable */
 static psy_ui_ComponentVtable vumeter_vtable;
-static int vumeter_vtable_initialized = 0;
+static bool vumeter_vtable_initialized = FALSE;
 
 static void vumeter_vtable_init(Vumeter* self)
 {
 	if (!vumeter_vtable_initialized) {
 		vumeter_vtable = *(self->component.vtable);
-		vumeter_vtable.ondraw = (psy_ui_fp_component_ondraw)vumeter_ondraw;
-		vumeter_vtable_initialized = 1;
+		vumeter_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			vumeter_ondestroy;
+		vumeter_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			vumeter_ondraw;
+		vumeter_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			vumeter_ontimer;
+		vumeter_vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {					
@@ -56,14 +68,11 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	vumeterskin_init(self);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make_em(25.0, 1.0));
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		vumeter_ondestroy);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_starttimer(&self->component, 10, 50);
 }
 
-void vumeter_ondestroy(Vumeter* self, psy_ui_Component* sender)
+void vumeter_ondestroy(Vumeter* self)
 {	
 	psy_ui_component_stoptimer(&self->component, 0);
 }
@@ -109,8 +118,8 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_drawsolidrectangle(g, right, self->skin.border);
 }
 
-void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
-{	
+void vumeter_ontimer(Vumeter* self, uintptr_t timerid)
+{			
 	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* master;
 		psy_audio_Buffer* memory;

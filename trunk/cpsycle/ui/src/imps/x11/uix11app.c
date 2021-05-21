@@ -41,7 +41,7 @@ static void psy_ui_x11app_close(psy_ui_X11App*);
 
 
 
-static int handleevent(psy_ui_X11App*, XEvent*);
+static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
 static void handle_mouseevent(psy_ui_X11App* self,
 	psy_ui_Component* component,
 	psy_ui_x11_ComponentImp* x11imp,
@@ -115,12 +115,12 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	} else {
 		self->visual = DefaultVisual(self->dpy,
 			DefaultScreen(self->dpy));
-	}
-	self->timers = NULL;
+	}	
 	psy_table_init(&self->colormap);
 	self->dograb = FALSE;
 	self->grabwin = 0;
 	self->targetids = NULL;
+	psy_timers_init(&self->wintimers);	
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -184,10 +184,10 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	}
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
-	XCloseDisplay(self->dpy);
-	psy_list_deallocate(&self->timers, NULL);
+	XCloseDisplay(self->dpy);	
 	psy_table_dispose(&self->colormap);
 	psy_list_free(self->targetids);
+	psy_timers_dispose(&self->wintimers);
 //	DeleteObject(self->defaultbackgroundbrush);
 }
 
@@ -203,28 +203,23 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 	fd_set in_fds;
 	struct timeval tv;
 
-	x11_fd = ConnectionNumber(self->dpy);
-
-	self->running = TRUE;
+	x11_fd = ConnectionNumber(self->dpy);	
+	tv.tv_usec = 10000;
+    tv.tv_sec = 0;
+    FD_ZERO(&in_fds);
+    FD_SET(x11_fd, &in_fds);
+    self->running = TRUE;
 	while (self->running) {
-		// create a file description set containing x11_fd
-        FD_ZERO(&in_fds);
-        FD_SET(x11_fd, &in_fds);
-        // set timer to 1 ms
-        tv.tv_usec = 1000;
-        tv.tv_sec = 0;
-		// wait for X event or a timer
-        int num_ready_fds = select(x11_fd + 1, &in_fds, NULL, NULL, &tv);
-        if (num_ready_fds > 0) {
-            // X11 event
-		} else if (num_ready_fds == 0) {
-            timertick(self);
-        } else {
-            printf("X11 select: An error occured!\n");
-		}
-		while(XPending(self->dpy)) {
-            XNextEvent(self->dpy, &event);
-			handleevent(self, &event);
+		 if (XPending(self->dpy) == 0) {
+			if (select(x11_fd + 1, &in_fds, NULL, NULL, &tv) > 0) {
+				XNextEvent(self->dpy, &event);
+				psy_ui_x11app_handle_event(self, &event);	
+			} else {
+				timertick(self);  
+			}
+		} else {
+			XNextEvent(self->dpy, &event);
+			psy_ui_x11app_handle_event(self, &event);	
 		}
     }
     return 0;
@@ -242,68 +237,34 @@ void psy_ui_x11app_close(psy_ui_X11App* self)
 }
 
 int timertick(psy_ui_X11App* self)
-{
-	psy_List* p;
-
-	for (p = self->timers; p != NULL; p = p->next) {
-		psy_ui_X11TickCounter* counter;
-
-		counter = (psy_ui_X11TickCounter*)psy_list_entry(p);
-		if (counter->tick == 0) {
-			psy_ui_x11_ComponentImp* imp;
-
-			imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
-				(uintptr_t)counter->hwnd);
-			if (imp && imp->component) {
-				if (imp->component->signal_timer.slots) {
-					psy_signal_emit(&imp->component->signal_timer,
-						imp->component, 1, counter->id);
-				}
-			}
-			counter->tick = counter->numticks;
-		}
-		if (counter->tick > 0) {
-			--counter->tick;
-		}
-	}
+{	
 	if (buttonclicks == 1 && buttonclickcounter > 0) {
 		--buttonclickcounter;
 	} else {
 		buttonclicks = 0;
 	}
+	psy_timers_tick(&self->wintimers);
 }
 
 void psy_ui_x11app_starttimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id,
 	uintptr_t interval)
 {
-	psy_ui_X11TickCounter* counter;
-
-	counter = (psy_ui_X11TickCounter*)malloc(sizeof(psy_ui_X11TickCounter));
-	counter->doubleclick = FALSE;
-	counter->hwnd = hwnd;
-	counter->id = id;
-	counter->numticks = interval;
-	counter->tick = 0;
-	psy_list_append(&self->timers, counter);
+	psy_ui_x11_ComponentImp* imp;
+	
+	imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap, hwnd);
+	if (!imp && !imp->component) {
+		return;
+	}	
+	psy_timers_addtimer(&self->wintimers, hwnd, imp->component,
+		(psy_fp_timerwork)imp->component->vtable->ontimer, id, interval);
 }
 
 void psy_ui_x11app_stoptimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id)
 {
-	psy_List* p;
-
-	for (p = self->timers; p != NULL; p = p->next) {
-		psy_ui_X11TickCounter* counter;
-
-		counter = (psy_ui_X11TickCounter*)psy_list_entry(p);
-		if (counter->hwnd == hwnd && counter->id == id) {
-			psy_list_remove(&self->timers, p);
-			free(counter);
-			break;
-		}
-	}
+	psy_timers_removetimer(&self->wintimers, hwnd, id);
 }
 
-int handleevent(psy_ui_X11App* self, XEvent* event)
+int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 {
 	Window id;
 	psy_ui_x11_ComponentImp* imp;
@@ -315,8 +276,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 		return 0;
 	}
 	switch (event->type) {
-		case DestroyNotify: {
-		    printf("destroy notify\n");
+		case DestroyNotify: {		   
 		    psy_ui_x11app_destroy_window(self, imp->hwnd);
 			break; }
 		case NoExpose:
