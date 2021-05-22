@@ -58,6 +58,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->maxindex = 0;
 	self->mixercount = 0;
 	self->opcount = 0;
+	self->mixersendconnect = TRUE;
 	self->preventundoredo = FALSE;
 	psy_audio_wire_init(&self->selectedwire);
 	psy_undoredo_init(&self->undoredo);

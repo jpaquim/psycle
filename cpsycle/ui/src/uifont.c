@@ -23,26 +23,29 @@ void psy_ui_fontinfo_init(psy_ui_FontInfo* self, const char* family,
 }
 
 void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
-{
-	char buffer[256];
-	char* token;
-	int c = 0;
-
-	psy_snprintf(buffer, 256, "%s", text);
+{	
 	memset(self, 0, sizeof(psy_ui_FontInfo));
-	token = strtok(buffer, ";");
-	while (token) {
-		if (c == 0) {
-			memcpy(self->lfFaceName, token, psy_max(strlen(token), 32));
-			self->lfFaceName[31] = '\0';
-		} else
-			if (c == 1) {
+	self->lfFaceName[0] = '\0';
+	self->lfHeight = 12;
+	if (psy_strlen(text) > 0) {
+		char buffer[256];
+		char* token;
+		int c = 0;
+		
+		psy_snprintf(buffer, 256, "%s", text);
+		token = strtok(buffer, ";");
+		while (token) {
+			if (c == 0) {
+				psy_snprintf(self->lfFaceName, 32, "%s", token);			
+				self->lfFaceName[31] = '\0';
+			} else if (c == 1) {
 				self->lfHeight = atoi(token);
 			} else {
 				break;
 			}
-		++c;
-		token = strtok(NULL, ";");
+			++c;
+			token = strtok(NULL, ";");
+		}
 	}
 }
 

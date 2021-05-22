@@ -567,14 +567,15 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 
 	/* printf("destroy window\n"); */
 	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
-		&self->selfmap, (uintptr_t) window);
+		&self->selfmap, (uintptr_t)window);
 	if (imp) {
         psy_ui_Component* component;
-        bool deallocate;
+        bool deallocate;        
 
 		component = imp->component;
-		deallocate = FALSE;
+		deallocate = FALSE;		
 		if (imp->component) {
+			
             deallocate = imp->component->deallocate;
             psy_signal_emit(&imp->component->signal_destroy,
 					imp->component, 0);
@@ -586,7 +587,7 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 		} else {
 			imp->imp.vtable->dev_dispose(&imp->imp);
 		}
-		psy_table_remove(&self->selfmap, (uintptr_t)imp->hwnd);
+		psy_table_remove(&self->selfmap, (uintptr_t)window);
 		if (component && deallocate) {
             free(component);
         }

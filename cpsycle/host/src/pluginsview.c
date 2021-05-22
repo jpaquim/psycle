@@ -246,6 +246,7 @@ void newmachinefilter_settext(NewMachineFilter* self, const char* text)
 void newmachinefilter_setalltypes(NewMachineFilter* self)
 {
 	self->effect = TRUE;
+	self->gen = TRUE;
 	self->intern = TRUE;
 	self->native = TRUE;
 	self->vst = TRUE;
@@ -256,6 +257,7 @@ void newmachinefilter_setalltypes(NewMachineFilter* self)
 void newmachinefilter_cleartypes(NewMachineFilter* self)
 {
 	self->effect = FALSE;
+	self->gen = FALSE;
 	self->intern = FALSE;
 	self->native = FALSE;
 	self->vst = FALSE;
