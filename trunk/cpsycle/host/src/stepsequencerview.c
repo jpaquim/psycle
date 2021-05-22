@@ -44,6 +44,7 @@ void stepsequencertile_init(StepSequencerTile* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent, view);
 	stepsequencertile_vtableinit_init(self);
 	self->on = TRUE;
+	self->play = FALSE;
 	stepsequencertile_turnoff(self);
 }
 
@@ -255,14 +256,16 @@ void stepsequencerbar_update(StepsequencerBar* self)
 			uintptr_t currstep;		
 			
 			entry = psy_audio_patternnode_entry(curr);
-			line = offsettoline(workspace_player(self->workspace), entry->offset);
+			line = offsettoline(workspace_player(self->workspace),
+				entry->offset);
 			currstep = line % 16;			
 			if (entry->track == cursor.track) {
 				if (line >= self->position.steprow * 16 &&
 					line < self->position.steprow * 16 + 16) {
 					StepSequencerTile* tile;
 
-					tile = (StepSequencerTile*)psy_table_at(&self->tiles, currstep);
+					tile = (StepSequencerTile*)psy_table_at(&self->tiles,
+						currstep);
 					if (tile) {
 						stepsequencertile_turnon(tile);
 						state = state | (1 >> currstep);
@@ -315,7 +318,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		width = psy_ui_value_make_ew(4.0);
 		stepwidth = psy_ui_value_px(&width,
 			psy_ui_component_textmetric(&self->component), NULL);
-		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(self->workspace));
+		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(workspace_player(
+			self->workspace));
 		step = (intptr_t)(ev->pt.x / stepwidth + self->position.steprow * 16);
 		cursor = workspace_patterncursor(self->workspace);
 		cursor.column = 0;	
@@ -325,7 +329,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		event.note = 48;
 		event.inst = (uint16_t)psy_audio_instruments_selected(
 			&workspace_song(self->workspace)->instruments).subslot;
-		event.mach = (uint8_t) psy_audio_machines_selected(&workspace_song(self->workspace)->machines);
+		event.mach = (uint8_t) psy_audio_machines_selected(&workspace_song(
+			self->workspace)->machines);
 		// event.cmd = psy_audio_PATTERNCMD_GATE;
 		// event.parameter = 0x80;
 		stepsequencerbar_setdefaultevent(self,
@@ -359,22 +364,27 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 	psy_audio_PatternNode* node;
 	psy_audio_PatternNode* prev;	
 				
-	node = psy_audio_pattern_findnode(patterndefaults, track, 0, (psy_dsp_big_beat_t) 0.25f,
+	node = psy_audio_pattern_findnode(patterndefaults, track, 0,
+		(psy_dsp_big_beat_t) 0.25f,
 		&prev);
 	if (node) {
 		psy_audio_PatternEntry* entry;
 
 		entry = (psy_audio_PatternEntry*) node->entry;
-		if (psy_audio_patternentry_front(entry)->note != psy_audio_NOTECOMMANDS_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->note !=
+				psy_audio_NOTECOMMANDS_EMPTY) {
 			event->note = psy_audio_patternentry_front(entry)->note;
 		}
-		if (psy_audio_patternentry_front(entry)->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->inst !=
+				psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			event->inst = psy_audio_patternentry_front(entry)->inst;
 		}
-		if (psy_audio_patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->mach !=
+				psy_audio_NOTECOMMANDS_psy_audio_EMPTY) {
 			event->mach = psy_audio_patternentry_front(entry)->mach;
 		}
-		if (psy_audio_patternentry_front(entry)->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->vol !=
+				psy_audio_NOTECOMMANDS_VOL_EMPTY) {
 			event->vol = psy_audio_patternentry_front(entry)->vol;
 		}
 		if (psy_audio_patternentry_front(entry)->cmd != 0) {
@@ -515,7 +525,8 @@ void stepsequencerbarselect_oneditpositionchanged(StepsequencerBarSelect* self,
 	stepsequencerbarselect_setposition(self, position);	
 }
 
-void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics* g)
+void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self,
+	psy_ui_Graphics* g)
 {
 	int i;
 	int cpx;
@@ -529,7 +540,8 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 	numsteprows = 4;
 	if (self->pattern) {
 		numsteprows = (int)(psy_audio_pattern_length(self->pattern) *
-			psy_audio_player_lpb(workspace_player(self->workspace)) / 16 + 0.5f);
+			psy_audio_player_lpb(workspace_player(self->workspace)) /
+			16 + 0.5f);
 	}
 	for (i = 0; i < numsteprows; ++i) {
 		if (i != 0 && (i % 4) == 0) {
@@ -547,14 +559,20 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 		r_outter.top -= 3;
 		r_outter.bottom += 3;
 		if (i == self->position.steprow) {
-			psy_ui_drawsolidrectangle(g, r_outter, psy_ui_colour_make(0x00444444));
-			psy_ui_drawsolidrectangle(g, r_inner, psy_ui_colour_make(0x00D1E8D0));
+			psy_ui_drawsolidrectangle(g, r_outter,
+				psy_ui_colour_make(0x00444444));
+			psy_ui_drawsolidrectangle(g, r_inner,
+				psy_ui_colour_make(0x00D1E8D0));
 		} else
-		if ((i == self->position.steprow - 1) && ((self->position.line % 16)  < 1)) {
-			psy_ui_drawsolidrectangle(g, r_outter, psy_ui_colour_make(0x00333333));
-			psy_ui_drawsolidrectangle(g, r_inner, psy_ui_colour_make(0x00D1C5B6));
+		if ((i == self->position.steprow - 1) &&
+				((self->position.line % 16)  < 1)) {
+			psy_ui_drawsolidrectangle(g, r_outter,
+				psy_ui_colour_make(0x00333333));
+			psy_ui_drawsolidrectangle(g, r_inner,
+				psy_ui_colour_make(0x00D1C5B6));
 		} else {
-			psy_ui_drawsolidrectangle(g, r_inner, psy_ui_colour_make(0x00A19586));
+			psy_ui_drawsolidrectangle(g, r_inner,
+				psy_ui_colour_make(0x00A19586));
 		}
 		cpx += self->colwidth;
 	}
@@ -570,8 +588,8 @@ void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
 	self->lineheight = (int)(0.8 * tm->tmHeight);	
 }
 
-void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
+void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self,
+	psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	rv->width = psy_ui_value_make_ew(16);
 	rv->height = psy_ui_value_make_eh(1.6);
@@ -600,7 +618,8 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 
 // StepSequencerView
 // prototypes
-static void stepsequencerview_ondestroy(StepsequencerView*, psy_ui_Component* sender);
+static void stepsequencerview_ondestroy(StepsequencerView*, psy_ui_Component*
+	sender);
 static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
 	Workspace* sender, int flag, psy_audio_Song* song);
@@ -647,8 +666,8 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->stepsequencerbarselect.component, margin);
 	stepsequencerbar_init(&self->stepsequencerbar, &self->component,
 		&self->steptimer, workspace);
-	stepsequencerview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns,
-		0));
+	stepsequencerview_setpattern(self, psy_audio_patterns_at(
+		&workspace->song->patterns, 0));
 	psy_ui_component_setalign(&self->stepsequencerbar.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->stepsequencerbar.component, margin);
@@ -672,7 +691,8 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void stepsequencerview_ondestroy(StepsequencerView* self, psy_ui_Component* sender)
+void stepsequencerview_ondestroy(StepsequencerView* self, psy_ui_Component*
+	sender)
 {
 	psy_ui_component_stoptimer(&self->component, 0);
 	steptimer_dispose(&self->steptimer);
@@ -704,8 +724,8 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 	steptimer_reset(&self->steptimer, entry ? entry->offset : 0);	
 }
 
-void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace,
-	int flag, psy_audio_Song* song)
+void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace*
+	workspace, int flag, psy_audio_Song* song)
 {	
 	psy_audio_Pattern* pattern;
 	

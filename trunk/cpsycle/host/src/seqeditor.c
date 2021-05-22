@@ -33,6 +33,7 @@ void seqeditorstate_init(SeqEditorState* self, Workspace* workspace,
 	self->lineheight = self->defaultlineheight;
 	self->linemargin = psy_ui_value_make_eh(0.2);	
 	self->cursorposition = (psy_dsp_big_beat_t)0.0;
+	self->cursoractive = FALSE;
 	self->drawcursor = TRUE;
 	self->drawpatternevents = TRUE;	
 	self->dragstatus = FALSE;
@@ -1016,11 +1017,8 @@ void seqeditortrackdesc_init(SeqEditorTrackDesc* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
-#if PSYCLE_USE_TK != PSYCLE_TK_X11
-	/* todo segfault X11 imp */			
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
-#endif	
 	seqeditortrackdesc_build(self);	
 	psy_signal_connect(&workspace->sequenceselection.signal_select, self,
 		seqeditortrackdesc_onsequenceselectionselect);
@@ -1069,11 +1067,8 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 	psy_audio_Sequence* sequence;
 
 	psy_ui_component_clear(&self->component);
-#if PSYCLE_USE_TK != PSYCLE_TK_X11
-	/* todo segfault X11 imp */	
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
-#endif
 	sequence = &self->state->workspace->song->sequence;
 	if (sequence) {
 		psy_audio_SequenceTrackNode* t;
