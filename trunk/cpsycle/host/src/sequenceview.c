@@ -463,7 +463,7 @@ static void seqviewlist_vtable_init(SeqviewList* self)
 			seqviewlist_ontimer;
 		seqviewlist_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
-			seqviewlist_onpreferredsize;
+			seqviewlist_onpreferredsize;		
 		seqviewlist_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &seqviewlist_vtable;
@@ -799,11 +799,10 @@ void seqview_rebuild(SeqView* self)
 {
 	seqviewduration_stopdurationcalc(&self->duration);
 	seqviewtrackheaders_build(&self->trackheader);
-	seqviewlist_build(&self->listview);
-	psy_ui_component_align(&self->scroller.pane);
-	psy_ui_component_updateoverflow(&self->listview.component);
-	psy_ui_component_invalidate(&self->listview.component);
-	seqviewduration_update(&self->duration, TRUE);
+	seqviewlist_build(&self->listview);			
+	seqviewduration_update(&self->duration, TRUE);	
+	psy_ui_component_align_full(&self->scroller.component);	
+	psy_ui_component_invalidate(&self->scroller.component);	
 }
 
 void seqview_onselectionchanged(SeqView* self,
