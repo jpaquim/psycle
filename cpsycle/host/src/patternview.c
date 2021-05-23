@@ -419,8 +419,10 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 		self->workspace).track;
 	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
 	trackergrid_setpattern(&self->tracker, pattern);
+	psy_ui_component_align(&self->tracker.component);
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);	
+	psy_ui_component_invalidate(&self->tracker.component);
 }
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace,
@@ -750,6 +752,8 @@ void patternview_onalign(PatternView* self)
 	trackerlinenumberslabel_setheaderheight(&self->left.linenumberslabel,
 		headersize.height);
 	patternview_computemetrics(self);
+	psy_ui_component_align(&self->header.component);
+	psy_ui_component_align(&self->tracker.component);	
 }
 
 void patternview_computemetrics(PatternView* self)
