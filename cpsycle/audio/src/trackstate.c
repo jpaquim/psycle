@@ -23,6 +23,34 @@ void psy_audio_trackstate_dispose(psy_audio_TrackState* self)
 	self->soloedtrack = 0;
 }
 
+void psy_audio_trackstate_copy(psy_audio_TrackState* self, const psy_audio_TrackState* other)
+{
+	psy_TableIterator it;
+
+	assert(self);
+
+	psy_table_clear(&self->mute);
+	for (it = psy_table_begin((psy_Table*)(&other->mute));
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		uintptr_t set;
+
+		set = (uintptr_t)psy_tableiterator_value(&it);				
+		psy_table_insert(&self->mute, psy_tableiterator_key(&it), (void*)set);
+	}
+	psy_table_clear(&self->record);
+	for (it = psy_table_begin((psy_Table*)(&other->record));
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		uintptr_t set;
+
+		set = (uintptr_t)psy_tableiterator_value(&it);
+		psy_table_insert(&self->record, psy_tableiterator_key(&it), (void*)set);
+	}
+	self->soloactive = other->soloactive;
+	self->soloedtrack = other->soloedtrack;
+}
+
 void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState* self, uintptr_t track)
 {
 	psy_audio_trackstate_setsolotrack(self, track);

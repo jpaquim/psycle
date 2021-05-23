@@ -233,7 +233,7 @@ void psy_audio_sequence_copy(psy_audio_Sequence* self, psy_audio_Sequence* other
 		srctrack = (psy_audio_SequenceTrack*)psy_list_entry(t);
 		psy_audio_sequence_appendtrack(self, psy_audio_sequencetrack_clone(srctrack));
 	}
-	self->trackstate = other->trackstate;
+	psy_audio_trackstate_copy(&self->trackstate, &other->trackstate);	
 	self->patterns = other->patterns;	
 }
 
@@ -241,6 +241,8 @@ void psy_audio_sequence_clear(psy_audio_Sequence* self)
 {
 	psy_list_deallocate(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
+	psy_audio_trackstate_dispose(&self->trackstate);
+	psy_audio_trackstate_init(&self->trackstate);
 	psy_signal_emit(&self->signal_clear, self, 0);
 }
 
