@@ -127,8 +127,8 @@ int psy_audio_psy3saver_save(psy_audio_PSY3Saver* self)
 
 uint32_t psy_audio_psy3saver_chunkcount(psy_audio_PSY3Saver* self)
 {
-	// 3 chunks (INFO, SNGI, SEQD. SONG is not counted as a chunk) plus:
-	uint32_t rv = 3;
+	// 3 chunks (INFO, SNGI. SONG is not counted as a chunk) plus:
+	uint32_t rv = 2;
 
 	// PATD
 	rv += (uint32_t)psy_audio_patterns_size(&self->song->patterns);
@@ -140,6 +140,8 @@ uint32_t psy_audio_psy3saver_chunkcount(psy_audio_PSY3Saver* self)
 	rv += (uint32_t)psy_audio_instruments_smidcount(self);
 	// SMSB	
 	rv += (uint32_t)psy_audio_samples_count(&self->song->samples);
+	// SEQD
+	rv += (uint32_t)psy_audio_sequence_width(&self->song->sequence);
 	return rv;
 }
 

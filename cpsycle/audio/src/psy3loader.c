@@ -167,7 +167,7 @@ int psy_audio_psy3loader_readchunks(psy_audio_PSY3Loader* self)
 	char header[9];
 	int status;
 
-	header[4] = 0;
+	header[4] = 0;		
 	while ((psyfile_read(self->fp, header, 4) == PSY_OK) && self->fp->chunkcount) {
 		if (status = psy_audio_psy3loader_readchunk(self, header)) {
 			// we are not at a valid header for some weird reason.  
@@ -217,7 +217,8 @@ int psy_audio_psy3loader_readchunk(psy_audio_PSY3Loader* self,
 				}
 			}
 			psyfile_seekchunkend(self->fp);
-			++self->progress;
+			++self->progress;	
+			break;
 		}
 	}
 	return (chunks[c].read == NULL) // no chunk found
@@ -471,7 +472,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 			return status;
 		}		
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
-			psy_audio_orderindex_make(0, i), patternslot);				
+			psy_audio_orderindex_make(index, i), patternslot);				
 	}
 	if (self->fp->currchunk.version > 0) {
 		// this extends the seqd chunk file format to handle 
