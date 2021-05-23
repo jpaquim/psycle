@@ -15,6 +15,7 @@
 #include "../../detail/portable.h"
 
 /* EditImp VTable */
+static void psy_ui_native_editimp_initialized(psy_ui_ComponentImp*);
 static void dev_settext(psy_ui_native_EditImp*, const char* text);
 static void dev_text(psy_ui_native_EditImp*, char* text);
 static void dev_check(psy_ui_native_EditImp*);
@@ -44,7 +45,8 @@ static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp*,
 static void dev_draw(psy_ui_ComponentImp*, psy_ui_Graphics*);
 static void dev_mousedown(psy_ui_ComponentImp*, psy_ui_MouseEvent*);
 static void dev_dispose(psy_ui_ComponentImp*);
-/* vtable */
+
+/* imp vtable */
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -52,6 +54,9 @@ static void vtable_init(psy_ui_native_EditImp* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp->vtable;
+		vtable.dev_initialized =
+			(psy_ui_fp_componentimp_dev_initialized)
+			psy_ui_native_editimp_initialized;
 		vtable.dev_dispose =
 			(psy_ui_fp_componentimp_dev_dispose)
 			dev_dispose;
@@ -69,6 +74,14 @@ static void vtable_init(psy_ui_native_EditImp* self)
 	self->imp->vtable = &vtable;
 }
 
+static void onkeydown(psy_ui_native_EditImp*, psy_ui_Component* sender, psy_ui_KeyboardEvent*);
+static void onfocus(psy_ui_native_EditImp*, psy_ui_Component* sender);
+static void onfocuslost(psy_ui_native_EditImp*, psy_ui_Component* sender);
+static void insertchar(psy_ui_native_EditImp*, char c);
+static void deletechar(psy_ui_native_EditImp*);
+static void removechar(psy_ui_native_EditImp*);
+static char_dyn_t* lefttext(psy_ui_native_EditImp*, uintptr_t split);
+static char_dyn_t* righttext(psy_ui_native_EditImp*, uintptr_t split);
 
 void psy_ui_native_editimp_init(psy_ui_native_EditImp* self,
 	psy_ui_Component* component,
@@ -83,6 +96,9 @@ void psy_ui_native_editimp_init(psy_ui_native_EditImp* self,
 	self->component = component;
 	self->text = NULL;	
 	self->multiline = 0;	
+	self->active = FALSE;
+	self->cp = 0;
+	self->ident = 5;
 }
 
 void psy_ui_native_editimp_init_multiline(psy_ui_native_EditImp* self,
@@ -93,11 +109,24 @@ void psy_ui_native_editimp_init_multiline(psy_ui_native_EditImp* self,
 		psy_ui_app_impfactory(psy_ui_app()), component, parent);
 	vtable_init(self);	
 	psy_ui_editimp_extend(self->imp);
-	self->imp->extended_imp = (void*)self;	
-	editimp_imp_vtable_init(self);	
+	self->imp->extended_imp = (void*)self;
 	self->component = component;
+	editimp_imp_vtable_init(self);		
 	self->text = NULL;
-	self->multiline = 1;	
+	self->multiline = 1;
+	self->active = FALSE;
+	self->cp = 0;
+	self->ident = 5;
+}
+
+void psy_ui_native_editimp_initialized(psy_ui_ComponentImp* context)
+{	
+	psy_ui_native_EditImp* self;
+
+	self = (psy_ui_native_EditImp*)context->extended_imp;
+	psy_signal_connect(&self->component->signal_keydown, self, onkeydown);
+	psy_signal_connect(&self->component->signal_focus, self, onfocus);
+	psy_signal_connect(&self->component->signal_focuslost, self, onfocuslost);
 }
 
 void dev_dispose(psy_ui_ComponentImp* context)
@@ -160,15 +189,25 @@ void dev_draw(psy_ui_ComponentImp* context, psy_ui_Graphics* g)
 {	
 	psy_ui_native_EditImp* self;
 	psy_ui_RealSize size;	
-	const psy_ui_TextMetric* tm;
+	const psy_ui_TextMetric* tm;	
 		
 	self = (psy_ui_native_EditImp*)context->extended_imp;
 	psy_ui_component_draw(self->component, g, NULL);	
 	tm = psy_ui_component_textmetric(self->component);
 	size = psy_ui_component_scrollsize_px(self->component);	
 	if (psy_strlen(self->text) > 0) {
-		psy_ui_textout(g, 5, (size.height - tm->tmHeight) / 2,
+		psy_ui_textout(g, self->ident, (size.height - tm->tmHeight) / 2,
 			self->text, strlen(self->text));
+	}
+	if (self->active) {
+		psy_ui_Size textsize;
+		double x;
+
+		textsize = psy_ui_textsize(g, self->text, self->cp);		
+		x = psy_ui_value_px(&textsize.width, tm, NULL) + self->ident;
+		psy_ui_drawline(g,
+			psy_ui_realpoint_make(x, 0),
+			psy_ui_realpoint_make(x, size.height));
 	}
 }
 
@@ -195,5 +234,154 @@ void dev_mousedown(psy_ui_ComponentImp* context, psy_ui_MouseEvent* ev)
 	psy_ui_native_EditImp* self;
 
 	self = (psy_ui_native_EditImp*)context->extended_imp;	
-	psy_ui_component_invalidate(self->component);	
+	psy_ui_component_setfocus(self->component);	
+}
+
+void onfocus(psy_ui_native_EditImp* self, psy_ui_Component* sender)
+{
+	self->active = TRUE;
+	psy_ui_component_invalidate(self->component);
+}
+
+void onfocuslost(psy_ui_native_EditImp* self, psy_ui_Component* sender)
+{
+	self->active = FALSE;
+	psy_ui_component_invalidate(self->component);
+}
+
+void onkeydown(psy_ui_native_EditImp* self, psy_ui_Component* sender, psy_ui_KeyboardEvent* ev)
+{
+	switch (ev->keycode) {
+	case psy_ui_KEY_LEFT:
+		if (self->cp > 0) {
+			--self->cp;
+		}
+		break;
+	case psy_ui_KEY_RIGHT:
+		if (self->cp < psy_strlen(self->text)) {
+			++self->cp;
+		}
+		break;
+	case psy_ui_KEY_UP:
+		break;
+	case psy_ui_KEY_DOWN:
+		break;
+	case psy_ui_KEY_HOME:
+		self->cp = 0;
+		break;
+	case psy_ui_KEY_END:		
+		self->cp = psy_strlen(self->text);		
+		break;
+	case psy_ui_KEY_BACK:
+		deletechar(self);
+		break;
+	case psy_ui_KEY_DELETE:
+		removechar(self);
+		break;
+	case psy_ui_KEY_SPACE:
+		insertchar(self, ' ');
+		break;
+	case psy_ui_KEY_SHIFT:				
+	case psy_ui_KEY_CONTROL:		
+	case psy_ui_KEY_MENU:
+		break;
+	default:		
+		if (ev->shift_key) {
+			insertchar(self, ev->keycode);
+		} else if (ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) {
+			insertchar(self, ev->keycode);
+		} else {
+			insertchar(self, ev->keycode - 'A' + 'a');
+		}
+		break;
+	}	
+	psy_ui_component_invalidate(self->component);
+}
+
+void insertchar(psy_ui_native_EditImp* self, char c)
+{
+	char insert[2];
+	char* left;
+	char* right;
+
+	insert[0] = c;
+	insert[1] = '\0';
+	left = lefttext(self, self->cp + 1);
+	right = righttext(self, self->cp);
+	left = psy_strcat_realloc(left, insert);
+	if (psy_strlen(right) > 0) {
+		left = psy_strcat_realloc(left, right);
+	}
+	psy_strreset(&self->text, left);
+	free(left);
+	left = NULL;
+	free(right);
+	right = NULL;
+	++self->cp;
+}
+
+void deletechar(psy_ui_native_EditImp* self)
+{	
+	char* left;
+	char* right;
+	
+	left = lefttext(self, self->cp);	
+	right = righttext(self, self->cp);	
+	if (psy_strlen(right) > 0) {
+		left = psy_strcat_realloc(left, right);
+	}
+	psy_strreset(&self->text, left);
+	free(left);
+	left = NULL;
+	free(right);
+	right = NULL;
+	if (self->cp > 0) {
+		--self->cp;
+	}
+}
+
+void removechar(psy_ui_native_EditImp* self)
+{
+	char* left;
+	char* right;
+
+	left = lefttext(self, self->cp + 1);
+	right = righttext(self, self->cp + 1);
+	if (psy_strlen(right) > 0) {
+		left = psy_strcat_realloc(left, right);
+	}
+	psy_strreset(&self->text, left);
+	free(left);
+	left = NULL;
+	free(right);
+	right = NULL;	
+}
+
+char_dyn_t* lefttext(psy_ui_native_EditImp* self, uintptr_t split)
+{
+	char* rv;	
+
+	rv = malloc(split + 1);
+	if (split > 0) {
+		psy_snprintf(rv, split, "%s", self->text);
+	} else {
+		rv[0] = '\0';
+	}
+	return rv;
+}
+
+char_dyn_t* righttext(psy_ui_native_EditImp* self, uintptr_t split)
+{
+	char* rv;	
+
+	if (psy_strlen(self->text) > split) {
+		uintptr_t num;
+
+		num = psy_strlen(self->text) - split;
+		rv = malloc(num + 1);
+		psy_snprintf(rv, num + 1, "%s", self->text + split);
+	} else {
+		rv = NULL;
+	}
+	return rv;
 }

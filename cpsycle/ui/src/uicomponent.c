@@ -415,8 +415,7 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	if (parent && parent->containeralign->insertaligntype != psy_ui_ALIGN_NONE) {
 		psy_ui_component_setalign(self, parent->containeralign->insertaligntype);
 		psy_ui_component_setmargin(self, parent->containeralign->insertmargin);
-	}
-	self->imp->vtable->dev_initialized(self->imp);
+	}	
 }
 
 void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_Component* view)
