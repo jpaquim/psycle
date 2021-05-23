@@ -559,7 +559,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 				audioconfig_oneditaudiodriverconfiguration(&self->config.audio,
 					psycleconfig_audioenabled(&self->config));
 				audioconfig_driverconfigure_section(&self->config.audio);
-				*rebuild_level = 1;
+				*rebuild_level = 0;
 			} else if (psy_property_insection(property,
 					self->config.input.eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);

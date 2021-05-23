@@ -163,17 +163,21 @@ public:
 	static long asioMessages(long selector, long value, void* message, double* opt);
 
 	HWND m_hWnd;
+	uintptr_t driverID;
 	static psy_AudioDriverSettings settings_;
+public:
+	static AUDIODRIVERWORKFN _pCallback;
+	static void* _pCallbackContext;
 protected:
 	void Error(const char msg[]);
 	bool Start();
 	bool Stop();
 
-	static AUDIODRIVERWORKFN _pCallback;
-	static void* _pCallbackContext;
+	
 
 	ASIOCallbacks asioCallbacks;
 
+	
 private:
 	bool _initialized;
 	bool _running;
@@ -182,7 +186,6 @@ private:
 	std::vector<DriverEnum> drivEnum_;
 
 	
-	uintptr_t driverID;
 	static AsioDrivers asioDrivers;
 
 	
@@ -447,6 +450,7 @@ void ASIOInterface::Initialize(AUDIODRIVERWORKFN pcallback, void* context)
 	_pCallbackContext = context;
 	_pCallback = pcallback;
 	_running = false;
+	driverID = 0;
 	RefreshAvailablePorts();
 	_initialized = true;
 }
@@ -1465,6 +1469,8 @@ int driver_init(psy_AudioDriver* driver)
 	SetupAVRT();
 	self->asioif = new ASIOInterface();
 	init_properties(&self->driver);
+	self->asioif->m_hWnd = (HWND)driver->handle;
+	self->asioif->Initialize(driver->callback, driver->callbackcontext);
 	return 0;
 }
 
@@ -1486,6 +1492,8 @@ void init_properties(psy_AudioDriver* driver)
 	psy_Property* property;
 	psy_Property* devices;
 	psy_Property* indevices;
+	psy_List* p;	
+	std::vector<std::string> playbackports;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
 	self->configuration = psy_property_preventtranslate(psy_property_settext(
@@ -1503,8 +1511,7 @@ void init_properties(psy_AudioDriver* driver)
 		TRUE);
 	psy_property_setreadonly(
 		psy_property_append_str(self->configuration, "version", "1.0"),
-		TRUE);
-	property = psy_property_append_choice(self->configuration, "device", -1);
+		TRUE);	
 	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&ASIOInterface::settings_), 0, 32);
 	psy_property_append_int(self->configuration, "samplerate",
@@ -1523,6 +1530,13 @@ void init_properties(psy_AudioDriver* driver)
 	devices = psy_property_settext(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
+	self->asioif->RefreshAvailablePorts();
+	self->asioif->GetPlaybackPorts(playbackports);
+	intptr_t i = 0;
+	for (std::vector<std::string>::iterator it = playbackports.begin();
+			it != playbackports.end(); ++it, ++i) {
+		psy_property_append_int(devices, (*it).c_str(), i, 0, 0);
+	}	
 	indevices = psy_property_settext(
 		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device(Select different in Recorder)");
@@ -1561,6 +1575,18 @@ void driver_configure(psy_AudioDriver* driver, const psy_Property* config)
 		psy_audiodriversettings_setblockframes(&ASIOInterface::settings_,
 			psy_property_item_int(property));
 	}	
+	property = psy_property_at(self->configuration, "device",
+		PSY_PROPERTY_TYPE_CHOICE);
+	if (property) {
+		intptr_t playenumindex;
+		psy_List* portnode;
+
+		portnode = NULL;
+		playenumindex = psy_property_item_int(property);
+		if (playenumindex >= 0) {
+			self->asioif->driverID = playenumindex;
+		}
+	}
 }
 
 psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
@@ -1571,9 +1597,10 @@ psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 int driver_open(psy_AudioDriver* driver)
 {
 	int status;
-	AsioDriver* self = (AsioDriver*)driver;
+	AsioDriver* self = (AsioDriver*)driver;	
 	self->asioif->m_hWnd = (HWND)driver->handle;
-	self->asioif->Initialize(driver->callback, driver->callbackcontext);
+	ASIOInterface::_pCallback = driver->callback;		
+	ASIOInterface::_pCallbackContext = driver->callbackcontext;
 	status = self->asioif->Enable(true);
 	return status;
 }
