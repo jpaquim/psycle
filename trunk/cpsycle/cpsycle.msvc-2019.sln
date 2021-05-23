@@ -100,6 +100,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "arguru-goaslicer", "plugins\arguru-goaslicer\arguru-goaslicer.vcxproj", "{039FC48D-F0D3-4191-95AE-4F83E7DB6E8A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "arguru-xfilter", "plugins\arguru-xfilter\arguru-xfilter.vcxproj", "{B11E5E62-CF95-456C-BDC0-52C1BA506B39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B03D2A93-90C0-4FD7-9E41-D72CC990FA3B} = {B03D2A93-90C0-4FD7-9E41-D72CC990FA3B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bexphase", "plugins\bexphase\bexphase.vcxproj", "{8A500D7C-AA62-4E73-88A2-EE12C8DE3696}"
 EndProject
