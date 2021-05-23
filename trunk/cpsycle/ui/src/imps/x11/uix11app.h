@@ -53,6 +53,9 @@ typedef struct psy_ui_X11App {
 	Window grabwin;
 	psy_List* targetids;
 	psy_Timers wintimers;
+	bool shiftstate;
+	bool controlstate;
+	bool altstate;
 	// references
 	psy_ui_App* app;
 } psy_ui_X11App;

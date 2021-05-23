@@ -148,6 +148,9 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 	case XK_9:
 		keysym = psy_ui_KEY_DIGIT9;
 		break;
+	case XK_ISO_Left_Tab:
+		keysym = psy_ui_KEY_TAB;
+		break;
 	default:
 		if (ret && buf[0] != '\0') {
 			if (buf[0] >= 'A' && buf[0] <= 'Z') {
