@@ -21,6 +21,8 @@ typedef struct psy_audio_TrackState {
 
 void psy_audio_trackstate_init(psy_audio_TrackState*);
 void psy_audio_trackstate_dispose(psy_audio_TrackState*);
+void psy_audio_trackstate_copy(psy_audio_TrackState*, const psy_audio_TrackState* other);
+
 void psy_audio_trackstate_activatesolotrack(psy_audio_TrackState*, uintptr_t track);
 void psy_audio_trackstate_setsolotrack(psy_audio_TrackState*, uintptr_t track);
 void psy_audio_trackstate_deactivatesolotrack(psy_audio_TrackState*);
