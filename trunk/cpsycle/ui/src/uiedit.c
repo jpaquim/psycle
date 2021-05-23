@@ -43,7 +43,8 @@ static void vtable_init(psy_ui_Edit* self)
 		vtable.onkeydown =
 			(psy_ui_fp_component_onkeyevent)
 			psy_ui_edit_onkeydown;		
-	}	vtable_initialized = TRUE;
+		vtable_initialized = TRUE;
+	}	
 	self->component.vtable = &vtable;
 }
 
@@ -70,6 +71,7 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	self->linenumber = 1;
 	self->isinputfield = FALSE;
 	self->preventedit = TRUE;
+	imp->vtable->dev_initialized(imp);
 }
 
 void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)

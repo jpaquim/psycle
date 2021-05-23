@@ -74,7 +74,6 @@ static void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 	const psy_audio_PatternSelection* clip);
 static void trackergrid_updatetrackevents(TrackerGrid*,
 	const psy_audio_PatternSelection* clip);
-static void trackergrid_onalign(TrackerGrid*);
 static void trackergrid_onkeydown(TrackerGrid*, psy_ui_KeyboardEvent*);
 static void trackergrid_onkeyup(TrackerGrid*, psy_ui_KeyboardEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
@@ -148,9 +147,6 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 		vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			trackergrid_onmousedoubleclick;		
-		vtable.onalign =
-			(psy_ui_fp_component_onalign)
-			trackergrid_onalign;		
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -544,7 +540,7 @@ bool trackergrid_scrolldown(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		--visilines;
 	}
 	line = trackerlinestate_beattoline(self->linestate,
-		cursor.offset + cursor.seqoffset);
+		cursor.offset + cursor.seqoffset);	
 	if (visilines < line - psy_ui_component_scrolltop_px(&self->component) /
 			self->linestate->lineheightpx) {
 		intptr_t dlines;
@@ -1845,13 +1841,14 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 	}
 }
 
-void trackergrid_onalign(TrackerGrid* self)
+void trackergrid_onclientalign(TrackerGrid* self, psy_ui_Component* sender)
 {	
 	assert(self);
-	
-	if (trackergrid_midline(self)) {
-		trackergrid_centeroncursor(self);
-	}
+		
+	printf("align\n");
+	if (trackergrid_midline(self)) {		
+		trackergrid_centeroncursor(self);				
+	} 
 }
 
 void trackergrid_showemptydata(TrackerGrid* self, int showstate)

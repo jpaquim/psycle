@@ -56,6 +56,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_checkbox_ondestroy);	
+	imp->vtable->dev_initialized(imp);
 }
 
 void psy_ui_checkbox_init_multiline(psy_ui_CheckBox* self, psy_ui_Component* parent)

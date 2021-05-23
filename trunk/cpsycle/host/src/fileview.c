@@ -71,7 +71,9 @@ void fileview_ondestroy(FileView* self, psy_ui_Component* sender)
 void fileview_build(FileView* self)
 {	
 	char path[4096];
+#if defined(DIVERSALIS__OS__UNIX)
 	psy_List* sorted;
+#endif
 
 	psy_ui_listbox_clear(&self->filebox);
 	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);	
@@ -81,7 +83,7 @@ void fileview_build(FileView* self)
 	sorted = fileview_sort(self->files, (psy_fp_comp)fileview_comp_filename);
 	psy_list_deallocate(&self->files, (psy_fp_disposefunc)NULL);
 	self->files = sorted;
-#endif		
+#endif
 	if (self->files) {
 		psy_List* p;
 		

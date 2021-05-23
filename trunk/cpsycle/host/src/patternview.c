@@ -86,6 +86,8 @@ static void patternview_ontrackstatechanged(PatternView*,
 	psy_audio_TrackState* sender);
 static uintptr_t patternview_display(const PatternView*);
 static void patternview_onshow(PatternView*);
+static void patternview_ontrackerscrollpanealign(PatternView*,
+	psy_ui_Component* sender);
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
 static bool patternview_vtable_initialized = FALSE;
@@ -229,6 +231,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
 		&self->editnotebook.component,
 		NULL); // &self->editnotebook.component);
+	psy_signal_connect(&self->trackerscroller.pane.signal_align, self,
+		patternview_ontrackerscrollpanealign);
 	psy_ui_component_setbackgroundmode(&self->trackerscroller.pane,
 		psy_ui_NOBACKGROUND);
 	psy_signal_connect(&self->trackerscroller.pane.signal_draw, self,
@@ -664,7 +668,7 @@ void patternview_onmiscconfigure(PatternView* self, KeyboardMiscConfig* config,
 	psy_Property* property)
 {	
 	patternview_readfont(self);		
-	patternview_computemetrics(self);	
+	patternview_computemetrics(self);
 	if (keyboardmiscconfig_ft2home(config)) {
 		trackergrid_enableft2home(&self->tracker);
 	} else {
@@ -706,7 +710,7 @@ void patternview_readfont(PatternView* self)
 	pv = psy_property_findsection(&self->workspace->config.config,
 		"visual.patternview");
 	if (pv) {
-		psy_ui_FontInfo fontinfo;		
+		psy_ui_FontInfo fontinfo;	
 		psy_ui_Font font;
 		double factor;
 
@@ -742,10 +746,10 @@ void patternview_onalign(PatternView* self)
 
 void patternview_computemetrics(PatternView* self)
 {
-	psy_ui_Size gridsize;
+	psy_ui_RealSize size;
 	const psy_ui_TextMetric* tm;		
 
-	gridsize = psy_ui_component_scrollsize(&self->trackerscroller.pane);
+	size = psy_ui_component_clientsize_px(&self->tracker.component);
 	tm = psy_ui_component_textmetric(patternview_base(self));	
 	self->gridstate.trackconfig->textwidth = (int)(tm->tmAveCharWidth * 1.5) +
 		2;
@@ -753,8 +757,8 @@ void patternview_computemetrics(PatternView* self)
 		psy_max(1.0,
 		psy_ui_value_px(&self->linestate.lineheight, tm, NULL));	
 	self->griddefaults.linestate->lineheightpx = self->linestate.lineheightpx;	
-	self->linestate.visilines = (intptr_t)(psy_ui_value_px(&gridsize.height, tm,
-		NULL) / self->linestate.lineheightpx);
+	self->linestate.visilines = (intptr_t)(size.height /
+		self->linestate.lineheightpx);
 }
 
 void patternview_ongridscroll(PatternView* self, psy_ui_Component* sender)
@@ -919,7 +923,7 @@ void patternview_onshow(PatternView* self)
 		self->aligndisplay = FALSE;
 		display = self->display;
 		self->display = PATTERN_DISPLAYMODE_TRACKER;
-		patternview_selectdisplay(self, display);		
+		patternview_selectdisplay(self, display);
 	}	
 }
 
@@ -1456,4 +1460,19 @@ void patternview_ontrackstatechanged(PatternView* self,
 	psy_audio_TrackState* sender)
 {
 	psy_ui_component_invalidate(&self->header.component);
+}
+
+void patternview_ontrackerscrollpanealign(PatternView* self,
+	psy_ui_Component* sender)
+{	
+	psy_ui_RealSize size;
+	const psy_ui_TextMetric* tm;		
+	
+	tm = psy_ui_component_textmetric(sender);
+	size = psy_ui_component_scrollsize_px(sender);
+	self->linestate.lineheightpx = 
+		psy_max(1.0,
+		psy_ui_value_px(&self->linestate.lineheight, tm, NULL));		
+	self->linestate.visilines = (intptr_t)(size.height /
+		self->linestate.lineheightpx);	
 }

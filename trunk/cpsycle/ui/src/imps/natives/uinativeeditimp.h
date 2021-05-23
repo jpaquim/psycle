@@ -21,6 +21,9 @@ typedef struct psy_ui_native_EditImp {
 	struct psy_ui_Component* component;
 	char* text;
 	int multiline;	
+	bool active;
+	uintptr_t cp;
+	double ident;
 } psy_ui_native_EditImp;
 
 void psy_ui_native_editimp_init(psy_ui_native_EditImp*,

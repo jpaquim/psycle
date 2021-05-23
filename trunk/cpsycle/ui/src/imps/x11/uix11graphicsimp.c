@@ -24,7 +24,8 @@ static void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp*, double x,
 static void psy_ui_x11_g_imp_drawrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle);
 static void psy_ui_x11_g_imp_drawroundrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle,
 	psy_ui_RealSize cornersize);
-static psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp*, const char*);
+static psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp*,
+	const char*, uintptr_t count);
 static void psy_ui_x11_g_imp_drawsolidrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle r,
 	psy_ui_Colour colour);
 static void psy_ui_x11_g_imp_drawsolidroundrectangle(psy_ui_x11_GraphicsImp*, const psy_ui_RealRectangle r,
@@ -276,18 +277,18 @@ void psy_ui_x11_g_imp_textoutrectangle(psy_ui_x11_GraphicsImp* self,
 }
 
 psy_ui_Size psy_ui_x11_g_imp_textsize(psy_ui_x11_GraphicsImp* self,
-    const char* str)
+    const char* str, uintptr_t count)
 {
 	psy_ui_Size	rv;
 
-	if (str) {
+	if (str) {		
 		XGlyphInfo extents;
-	
+							
 		XftTextExtentsUtf8(self->display, self->xftfont,
 		(const FcChar8*)str,
-		strlen(str),
+		count,
 		&extents);
-						
+								
 		rv.width = psy_ui_value_make_px(extents.width); 
 		rv.height = psy_ui_value_make_px(extents.height);
 	} else {

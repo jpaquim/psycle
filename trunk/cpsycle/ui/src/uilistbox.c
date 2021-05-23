@@ -54,6 +54,7 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
 	self->charnumber = 0;
+	imp->vtable->dev_initialized(imp);
 }
 
 void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
@@ -71,6 +72,7 @@ void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
 	self->charnumber = 0;
+	imp->vtable->dev_initialized(imp);
 }
 
 void ondestroy(psy_ui_ListBox* self, psy_ui_Component* sender)

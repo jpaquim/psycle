@@ -35,6 +35,17 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 	case XK_Home:
 		keysym = psy_ui_KEY_HOME;
 		break;
+	case XK_End:
+		keysym = psy_ui_KEY_END;
+		break;
+	case XK_Shift_L:
+	case XK_Shift_R:
+		keysym = psy_ui_KEY_SHIFT;
+		break;
+	case XK_Control_L:
+	case XK_Control_R:
+		keysym = psy_ui_KEY_CONTROL;
+		break;
 	case XK_Escape:
 		keysym = psy_ui_KEY_ESCAPE;
 		break;
@@ -67,7 +78,7 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 		break;
 	case XK_BackSpace:
 		keysym = psy_ui_KEY_BACK;
-		break;
+		break;	
 	case XK_F1:
 		keysym = psy_ui_KEY_F1;
 		break;
@@ -103,6 +114,39 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 		break;
 	case XK_F12:
 		keysym = psy_ui_KEY_F12;
+		break;
+	case XK_space:
+		keysym = psy_ui_KEY_SPACE;
+		break;
+	case XK_0:
+		keysym = psy_ui_KEY_DIGIT0;
+		break;
+	case XK_1:
+		keysym = psy_ui_KEY_DIGIT1;
+		break;
+	case XK_2:
+		keysym = psy_ui_KEY_DIGIT2;
+		break;
+	case XK_3:
+		keysym = psy_ui_KEY_DIGIT3;
+		break;
+	case XK_4:
+		keysym = psy_ui_KEY_DIGIT4;
+		break;
+	case XK_5:
+		keysym = psy_ui_KEY_DIGIT5;
+		break;
+	case XK_6:
+		keysym = psy_ui_KEY_DIGIT6;
+		break;
+	case XK_7:
+		keysym = psy_ui_KEY_DIGIT7;
+		break;
+	case XK_8:
+		keysym = psy_ui_KEY_DIGIT8;
+		break;	
+	case XK_9:
+		keysym = psy_ui_KEY_DIGIT9;
 		break;
 	default:
 		if (ret && buf[0] != '\0') {
