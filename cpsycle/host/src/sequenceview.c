@@ -155,7 +155,7 @@ static void seqviewtrack_onpreferredsize(SeqViewTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void seqviewtrack_ondraw(SeqViewTrack*, psy_ui_Graphics*);
 static void seqviewtrack_drawentry(SeqViewTrack*, psy_ui_Graphics*,
-	psy_audio_SequenceEntry*, uintptr_t row, psy_ui_RealPoint);
+	psy_audio_SequenceEntry*, uintptr_t row, psy_ui_RealPoint, psy_ui_Colour bg);
 static void seqviewtrack_textout_digit(SeqViewTrack*,
 	psy_ui_Graphics*, const char* str, psy_ui_RealPoint);
 static void seqviewtrack_drawprogressbar(SeqViewTrack*,
@@ -272,10 +272,12 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	for (c = startrow; p != NULL; psy_list_next(&p), ++c, cp.y += lineheightpx) {
 		psy_audio_SequenceEntry* sequenceentry;
 		bool rowplaying = FALSE;
+		psy_ui_Colour bg;
 
 		sequenceentry = (psy_audio_SequenceEntry*)p->entry;
 		rowplaying = psy_audio_player_playing(self->state->cmds->player) &&
 			psy_audio_player_playlist_position(self->state->cmds->player) == c;
+		psy_ui_colour_init(&bg);
 		if (rowplaying) {
 			seqviewtrack_drawprogressbar(self, g, cp, sequenceentry);
 		}
@@ -283,7 +285,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 				&self->state->cmds->workspace->sequenceselection,
 				psy_audio_orderindex_make(self->trackindex, c))) {
 			if (!rowplaying) {
-				psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));
+				bg = psy_ui_colour_make(0x009B7800);
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			}
@@ -298,12 +300,13 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 		}
-		seqviewtrack_drawentry(self, g, sequenceentry, c, cp);
+		seqviewtrack_drawentry(self, g, sequenceentry, c, cp, bg);
 	}
 }
 
 void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
-	psy_audio_SequenceEntry* entry, uintptr_t row, psy_ui_RealPoint cp)
+	psy_audio_SequenceEntry* entry, uintptr_t row, psy_ui_RealPoint cp,
+	psy_ui_Colour bg)
 {
 	char text[20];	
 	psy_audio_Pattern* pattern;
@@ -331,6 +334,17 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 				(float)entry->offset);
 		}
 	}	
+	if (bg.mode.set) {
+		psy_ui_drawsolidrectangle(g,
+			psy_ui_realrectangle_make(
+			cp,
+			psy_ui_realsize_make(
+				psy_ui_value_px(&self->state->trackwidth,
+					psy_ui_component_textmetric(&self->component), NULL),
+				psy_ui_value_px(&self->state->lineheight,
+					psy_ui_component_textmetric(&self->component), NULL))),
+			bg);
+	}
 	seqviewtrack_textout_digit(self, g, text, cp);
 }
 
