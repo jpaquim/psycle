@@ -45,9 +45,20 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 				psy_ui_component_show(component);
 			} else {
 				if (c == pageindex) {
-					component->visible = 1;					
+					psy_ui_Size oldsize;
+					bool resize;
+					component->visible = 1;
+
+					oldsize = psy_ui_component_scrollsize(&self->component);
+					resize = (psy_ui_value_px(&oldsize.width, psy_ui_component_textmetric(component), NULL) !=
+						psy_ui_value_px(&size.width, psy_ui_component_textmetric(component), NULL)) ||
+						(psy_ui_value_px(&oldsize.height, psy_ui_component_textmetric(component), NULL) !=
+						psy_ui_value_px(&size.height, psy_ui_component_textmetric(component), NULL));
 					psy_ui_component_setposition(component,
-						psy_ui_rectangle_make(psy_ui_point_zero(), size));					
+						psy_ui_rectangle_make(psy_ui_point_zero(), size));
+					if (!resize) {
+						psy_ui_component_align(component);
+					}
 					psy_ui_component_show(component);					
 				} else {
 					psy_ui_component_hide(component);

@@ -49,6 +49,9 @@ static bool sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
 static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
 static int timertick(psy_ui_X11App*);
+static void update_keyevent_mods(psy_ui_X11App*, psy_ui_KeyboardEvent*);
+static void update_mouseevent_mods(psy_ui_X11App*, psy_ui_MouseEvent*);
+
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -117,6 +120,9 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	self->grabwin = 0;
 	self->targetids = NULL;
 	psy_timers_init(&self->wintimers);
+	self->shiftstate = FALSE;
+	self->controlstate = FALSE;
+	self->altstate = FALSE;
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -427,6 +433,14 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_KeyboardEvent ev;
 
 		ev = psy_ui_x11_keyboardevent_make(&event->xkey);
+		if (ev.keycode == psy_ui_KEY_SHIFT) {
+			self->shiftstate = TRUE;
+		} else if (ev.keycode == psy_ui_KEY_CONTROL) {
+			self->controlstate = TRUE;
+		} else if (ev.keycode == psy_ui_KEY_MENU) {
+			self->altstate = TRUE;
+		}
+		update_keyevent_mods(self, &ev);		
 		imp->component->vtable->onkeydown(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keydown, imp->component,
 			1, &ev);
@@ -444,6 +458,13 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_KeyboardEvent ev;
 
 		ev = psy_ui_x11_keyboardevent_make(&event->xkey);
+		if (ev.keycode == psy_ui_KEY_SHIFT) {
+			self->shiftstate = FALSE;
+		} else if (ev.keycode == psy_ui_KEY_CONTROL) {
+			self->controlstate = FALSE;
+		} else if (ev.keycode == psy_ui_KEY_MENU) {
+			self->altstate = FALSE;
+		}				
 		imp->component->vtable->onkeyup(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keyup, imp->component,
 			1, &ev);
@@ -455,6 +476,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			XSendEvent(self->dpy, imp->parent->hwnd, True, KeyReleaseMask,
 				(XEvent*)&xkevent);
 		}
+		update_keyevent_mods(self, &ev);
 		return 0;
 		break; }
     case ButtonPress: {
@@ -510,14 +532,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}
 		return 0;
 		break; }
-	case ButtonRelease: {
-		psy_ui_MouseEvent ev;
-
-		psy_ui_mouseevent_init_all(&ev,
-			psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
-			translate_x11button(event->xbutton.button),
-			0, 0, 0); /* todo keystate */
-		adjustcoordinates(imp->component, &ev.pt);
+	case ButtonRelease: {		
 		handle_mouseevent(self, imp->component, imp,
 			event, ButtonReleaseMask, event->xany.window,
 			ButtonRelease, event->xbutton.x, event->xbutton.y,
@@ -544,7 +559,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),
-			button, 0, 0, 0); /* todo keystate */
+			button, 0, 0, 0);
+		update_mouseevent_mods(self, &ev);
 		adjustcoordinates(imp->component, &ev.pt);
 		imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
 		return 0;
@@ -605,6 +621,20 @@ void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
 	}
 }
 
+void update_keyevent_mods(psy_ui_X11App* self, psy_ui_KeyboardEvent* ev)
+{
+	ev->shift_key = self->shiftstate;
+	ev->ctrl_key = self->controlstate;
+	ev->alt_key = self->altstate;
+}
+
+void update_mouseevent_mods(psy_ui_X11App* self, psy_ui_MouseEvent* ev)
+{
+	ev->shift_key = self->shiftstate;
+	ev->ctrl_key = self->controlstate;
+	/* ev->alt_key = self->altstate; */
+}
+
 int translate_x11button(int button)
 {
 	switch (button) {
@@ -631,7 +661,8 @@ void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(wParam, lParam),
-		button, 0, 0, 0); /* todo GetKeyState */
+		button, 0, 0, 0);
+	update_mouseevent_mods(self, &ev);
 	adjustcoordinates(component, &ev.pt);
 	ev.event.target = component; /* eventtarget(component)); */
 	up = FALSE;

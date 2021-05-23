@@ -946,11 +946,11 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
-	xev.count = 0;
+	xev.count = 0;	
 	xev.x = 0;
 	xev.y = 0;
 	xev.width = win_attr.width;
-	xev.height = win_attr.height;
+	xev.height = win_attr.height;	
 	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
 }
 
@@ -969,7 +969,7 @@ void dev_invalidaterect(psy_ui_x11_ComponentImp* self,
 	xev.x = (int)r->left;
 	xev.y = (int)r->top;
 	xev.width = (int)r->right - (int)r->left;
-	xev.height = (int)r->bottom - (int)r->top;
+	xev.height = (int)r->bottom - (int)r->top;	
 	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent*)&xev);
 }
 
