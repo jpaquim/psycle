@@ -156,7 +156,7 @@ void dev_setstyle(psy_ui_win_ComponentImp* self, int style)
 #if defined(_WIN64)
 	SetWindowLongPtr(self->hwnd, GWL_STYLE, style);
 #else
-	SetWindowLong(self->win_component_imp.hwnd, GWL_STYLE, style);
+	SetWindowLong(self->hwnd, GWL_STYLE, style);
 #endif
 }
 
