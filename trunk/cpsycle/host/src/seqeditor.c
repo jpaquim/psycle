@@ -615,18 +615,23 @@ void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry* self,
 			(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->state->workspace));
 		self->state->dragstartoffset = self->sequenceentry->offset + position;
 		cursor.offset = position;
-		workspace_setpatterncursor(self->state->workspace, cursor);
-		cursor = self->state->workspace->patterneditposition;
-		workspace_gotocursor(self->state->workspace, cursor);
-		if (workspace_currview(self->state->workspace).id != VIEW_ID_PATTERNVIEW) {
-			workspace_selectview(self->state->workspace,
-				VIEW_ID_PATTERNVIEW,
-				workspace_currview(self->state->workspace).section,
-				0);
-		}		
-		//self->itemdragposition = self->sequenceentry->offset;
-		self->state->dragstatus = TRUE;
-		self->state->dragstart = TRUE;
+		if (ev->button == 1) {
+			workspace_setpatterncursor(self->state->workspace, cursor);
+			cursor = self->state->workspace->patterneditposition;
+			workspace_gotocursor(self->state->workspace, cursor);
+			if (workspace_currview(self->state->workspace).id != VIEW_ID_PATTERNVIEW) {
+				workspace_selectview(self->state->workspace,
+					VIEW_ID_PATTERNVIEW,
+					workspace_currview(self->state->workspace).section,
+					0);
+			}
+			//self->itemdragposition = self->sequenceentry->offset;
+			self->state->dragstatus = TRUE;
+			self->state->dragstart = TRUE;
+		} else {
+			self->state->dragstatus = TRUE;
+			self->state->cmd = SEQEDTCMD_REMOVEPATTERN;			
+		}
 		self->state->dragseqpos = self->seqpos;
 		self->state->sequenceentry = self->sequenceentry;		
 	}
@@ -876,30 +881,31 @@ void seqeditortrack_onpreferredsize(SeqEditorTrack* self,
 
 void seqeditortrack_onmousedown(SeqEditorTrack* self, psy_ui_MouseEvent* ev)
 {
-	if (self->state->dragstatus && self->state->sequenceentry) {
-		psy_ui_component_capture(&self->component);
-		self->state->dragpt = ev->pt;		
-		if (self->state->dragmode == SEQEDITORDRAG_REORDER) {
-			self->dragline = seqeditorline_allocinit(&self->component, self->view, self->state);
-			psy_ui_component_setbackgroundcolour(&self->dragline->component,
-				self->skin->font);
-			seqeditorline_updateposition(self->dragline,
-				self->state->sequenceentry->offset);
-			self->state->cmd = SEQEDTCMD_REORDER;
-			self->state->cmdtrack = self->trackindex;
-			self->state->cmdrow = self->state->sequenceentry->row;
-		}
-	} else {		
-		psy_audio_OrderIndex seqeditpos;
+	if (ev->button == 1) {
+		if (self->state->dragstatus && self->state->sequenceentry) {
+			psy_ui_component_capture(&self->component);
+			self->state->dragpt = ev->pt;
+			if (self->state->dragmode == SEQEDITORDRAG_REORDER) {
+				self->dragline = seqeditorline_allocinit(&self->component, self->view, self->state);
+				psy_ui_component_setbackgroundcolour(&self->dragline->component,
+					self->skin->font);
+				seqeditorline_updateposition(self->dragline,
+					self->state->sequenceentry->offset);
+				self->state->cmd = SEQEDTCMD_REORDER;
+				self->state->cmdtrack = self->trackindex;
+				self->state->cmdrow = self->state->sequenceentry->row;
+			}
+		} else {
+			psy_audio_OrderIndex seqeditpos;
 
-		seqeditpos = workspace_sequenceeditposition(self->state->workspace);
-		if (self->trackindex != seqeditpos.track) {
-			seqeditpos.track = self->trackindex;
-			seqeditpos.order = psy_INDEX_INVALID;
-			workspace_setsequenceeditposition(self->state->workspace,
-				seqeditpos);
+			seqeditpos = workspace_sequenceeditposition(self->state->workspace);
+			if (self->trackindex != seqeditpos.track) {
+				seqeditpos.track = self->trackindex;
+				seqeditpos.order = psy_INDEX_INVALID;
+				workspace_setsequenceeditposition(self->state->workspace,
+					seqeditpos);
+			}
 		}
-
 	}
 }
 
@@ -1348,8 +1354,12 @@ void seqeditortracks_onupdatestyles(SeqEditorTracks* self)
 
 void seqeditortracks_onmousedown(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
-{
-	if ((self->state->dragmode & SEQEDITORDRAG_REORDER) == SEQEDITORDRAG_REORDER) {
+{	
+	if (self->state->dragstatus && self->state->cmd == SEQEDTCMD_REMOVEPATTERN) {
+		sequencecmds_delentry(self->state->cmds);
+		self->state->dragstatus = FALSE;
+		psy_ui_mouseevent_stop_propagation(ev);
+	} else if ((self->state->dragmode & SEQEDITORDRAG_REORDER) == SEQEDITORDRAG_REORDER) {
 		if (self->cursorline) {
 			psy_ui_component_hide(&self->cursorline->component);
 			psy_ui_component_invalidate(&self->component);
