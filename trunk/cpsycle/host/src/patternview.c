@@ -423,6 +423,7 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);	
 	psy_ui_component_invalidate(&self->tracker.component);
+	psy_ui_component_align(&self->left.linenumberpane);
 }
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace,
@@ -1050,15 +1051,13 @@ void patternview_rebuild(PatternView* self)
 }
 
 void patternview_align(PatternView* self)
-{
-	if (psy_ui_component_visible(&self->component)) {
-		psy_ui_component_align_full(&self->headerpane);
-		psy_ui_component_align_full(&self->trackerscroller.pane);
-		psy_ui_component_align_full(&self->tracker.component);
-		psy_ui_component_align(&self->griddefaults.component);
-		psy_ui_component_align_full(&self->griddefaultspane);
-		psy_ui_component_align_full(&self->component);
-	}
+{	
+	psy_ui_component_align_full(&self->headerpane);
+	psy_ui_component_align_full(&self->trackerscroller.pane);
+	psy_ui_component_align_full(&self->tracker.component);
+	psy_ui_component_align(&self->griddefaults.component);
+	psy_ui_component_align_full(&self->griddefaultspane);
+	psy_ui_component_align_full(&self->component);	
 }
 
 void patternview_initblockmenu(PatternView* self)

@@ -49,6 +49,7 @@ static void workspace_initaudio(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
 static void workspace_initsignals(Workspace*);
 static void workspace_disposesignals(Workspace*);
+static void workspace_wait_for_driverconfigureload(Workspace*);
 /* config */
 static void workspace_configvisual(Workspace*);
 static void workspace_setsong(Workspace*, psy_audio_Song*, int flag);
@@ -161,6 +162,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->restorenumplaybeats = 4.0;
 	self->restoreloop = TRUE;
 	self->errorstrs = NULL;
+	self->driverconfigloading = FALSE;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -448,6 +450,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 	assert(self && property);
 
 	worked = TRUE;
+	workspace_wait_for_driverconfigureload(self);
 	switch (psy_property_id(property)) {
 	case PROPERTY_ID_REGENERATEPLUGINCACHE:
 		workspace_scanplugins(self);
@@ -998,12 +1001,17 @@ psy_Playlist* workspace_playlist(Workspace* self)
 void workspace_load_configuration(Workspace* self)
 {
 	psy_Path path;
+	const char* driverkey;
 
 	assert(self);
 
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
-	psy_path_setname(&path, PSYCLE_INI);
+	psy_path_setname(&path, PSYCLE_INI);	
+	propertiesio_load(&self->config.config, &path, 0);	
+	driverkey = audioconfig_driverkey(psycleconfig_audio(&self->config));
+	audioconfig_makeconfiguration_driverkey(psycleconfig_audio(&self->config),
+		driverkey);	
 	propertiesio_load(&self->config.config, &path, 0);
 	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
@@ -1060,6 +1068,7 @@ void workspace_load_configuration(Workspace* self)
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
 	workspace_updatemetronome(self);
+	workspace_postload_driverconfigurations(self);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -1068,6 +1077,7 @@ void workspace_save_configuration(Workspace* self)
 
 	assert(self);
 
+	workspace_wait_for_driverconfigureload(self);
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);
@@ -1077,6 +1087,54 @@ void workspace_save_configuration(Workspace* self)
 	printf("save psycle configuration: %s\n", psy_path_full(&path));
 	propertiesio_save(&self->config.config, psy_path_full(&path));
 	psy_path_dispose(&path);
+}
+
+void workspace_wait_for_driverconfigureload(Workspace* self)
+{
+	while (self->driverconfigloading) {
+#ifdef DIVERSALIS__OS__MICROSOFT
+		Sleep(50);
+#endif
+#ifdef DIVERSALIS__OS__UNIX
+		usleep(50000);
+#endif
+	}
+}
+
+static void driverconfigloadthread(void* context)
+{
+	Workspace* self;
+	psy_Path path;	
+
+	assert(context);
+	self = (Workspace*)context;
+
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+	psy_path_setname(&path, PSYCLE_INI);	
+	audioconfig_makedriverconfigurations(psycleconfig_audio(&self->config), TRUE);
+	propertiesio_load(&self->config.config, &path, 0);
+	psy_path_dispose(&path);
+	self->driverconfigloading = FALSE;
+}
+
+void workspace_postload_driverconfigurations(Workspace* self)
+{
+	assert(self);
+
+	if (!self->driverconfigloading) {
+		self->driverconfigloading = TRUE;
+#ifdef DIVERSALIS__OS__UNIX
+		pthread_t threadid;
+#endif				
+#ifdef DIVERSALIS__OS__MICROSOFT
+		_beginthread(driverconfigloadthread, 0, self);
+#endif
+#ifdef DIVERSALIS__OS__UNIX		
+		pthread_create(&threadid, NULL, (void* (*)(void*))driverconfigloadthread,
+			(void*)self);
+#endif
+	}
 }
 
 psy_Property* workspace_recentsongs(Workspace* self)
