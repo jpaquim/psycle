@@ -160,6 +160,7 @@ void psy_audio_sequenceselection_deselect(psy_audio_SequenceSelection*,
 	psy_audio_OrderIndex);
 bool psy_audio_sequenceselection_isselected(const psy_audio_SequenceSelection*,
 	psy_audio_OrderIndex);
+psy_audio_OrderIndex psy_audio_sequenceselection_first(const psy_audio_SequenceSelection*);
 void psy_audio_sequenceselection_setmode(psy_audio_SequenceSelection*,
 	psy_audio_SequenceSelectionMode);
 void psy_audio_sequenceselection_update(psy_audio_SequenceSelection*);

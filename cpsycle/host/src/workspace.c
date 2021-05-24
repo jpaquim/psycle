@@ -163,6 +163,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->restoreloop = TRUE;
 	self->errorstrs = NULL;
 	self->driverconfigloading = FALSE;
+	self->seqviewactive = FALSE;
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -291,7 +292,7 @@ void workspace_save_styleconfiguration(Workspace* self)
 	styleconfig = psy_ui_styles_configuration(&psy_ui_defaults()->styles);
 	if (styleconfig && !psy_property_empty(styleconfig)) {
 		psy_path_init(&path, NULL);
-		psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+		psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 		if (psy_ui_defaults()->styles.theme == psy_ui_DARKTHEME) {
 			psy_path_setname(&path, PSYCLE_DARKSTYLES_INI);
 		} else {
@@ -737,7 +738,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		/* reset host styles */
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
-			dirconfig_config(&self->config.directories),
+			dirconfig_configdir(&self->config.directories),
 			theme);
 		if (psy_ui_app()->imp) {
 			psy_ui_app()->imp->vtable->dev_onappdefaultschange(
@@ -1006,7 +1007,7 @@ void workspace_load_configuration(Workspace* self)
 	assert(self);
 
 	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
 	propertiesio_load(&self->config.config, &path, 0);	
 	driverkey = audioconfig_driverkey(psycleconfig_audio(&self->config));
@@ -1079,7 +1080,7 @@ void workspace_save_configuration(Workspace* self)
 
 	workspace_wait_for_driverconfigureload(self);
 	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
 	midiviewconfig_makecontrollersave(
@@ -1110,7 +1111,7 @@ static void driverconfigloadthread(void* context)
 	self = (Workspace*)context;
 
 	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
+	psy_path_setprefix(&path, dirconfig_configdir(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);	
 	audioconfig_makedriverconfigurations(psycleconfig_audio(&self->config), TRUE);
 	propertiesio_load(&self->config.config, &path, 0);

@@ -29,6 +29,7 @@ void sequencecmds_cloneentry(SequenceCmds*);
 void sequencecmds_delentry(SequenceCmds*);
 void sequencecmds_incpattern(SequenceCmds*);
 void sequencecmds_decpattern(SequenceCmds*);
+void sequencecmds_changepattern(SequenceCmds*, uintptr_t step);
 void sequencecmds_copy(SequenceCmds*);
 void sequencecmds_paste(SequenceCmds*);
 void sequencecmds_singleselection(SequenceCmds*);

@@ -128,6 +128,17 @@ void sequencecmds_decpattern(SequenceCmds* self)
 	}
 }
 
+void sequencecmds_changepattern(SequenceCmds* self, uintptr_t step)
+{
+	if (workspace_song(self->workspace)) {
+		sequencecmds_update(self);
+
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&psy_audio_sequencechangepatterncommand_alloc(self->sequence,
+				&self->workspace->sequenceselection, step)->command);
+	}
+}
+
 void sequencecmds_update(SequenceCmds* self)
 {
 	if (workspace_song(self->workspace)) {

@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(DIRCONFIG_H)
 #define DIRCONFIG_H
 
-// container
+/* container */
 #include <properties.h>
 #include <signal.h>
 
@@ -13,12 +15,10 @@ extern "C" {
 #endif
 
 typedef struct DirConfig {
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
-	// internal
-	psy_Property* directories;
-	// references
-	psy_Property* parent;	
+	/* internal */
+	psy_Property* directories;	
 } DirConfig;
 
 void dirconfig_init(DirConfig*, psy_Property* parent);
@@ -35,7 +35,7 @@ const char* dirconfig_vsts64(const DirConfig*);
 const char* dirconfig_ladspas(const DirConfig*);
 const char* dirconfig_skins(const DirConfig*);
 const char* dirconfig_doc(const DirConfig*);
-const char* dirconfig_config(const DirConfig*);
+const char* dirconfig_configdir(const DirConfig*);
 const char* dirconfig_userpresets(const DirConfig*);
 
 bool dirconfig_onchanged(DirConfig*, psy_Property*);
