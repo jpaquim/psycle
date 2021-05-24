@@ -36,9 +36,12 @@ typedef struct SeqViewState {
 	/* public */
 	psy_ui_Value trackwidth;
 	psy_ui_Value lineheight;
+	psy_ui_RealSize digitsize;
 	double colwidth;
-	SeqLVCmd cmd;
+	SeqLVCmd cmd;	
 	psy_audio_OrderIndex cmd_orderindex;
+	uintptr_t col;
+	bool active;	
 	bool showpatternnames;
 	/* references */
 	SequenceCmds* cmds;
@@ -79,7 +82,7 @@ typedef struct SeqviewList {
 	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;	
 	int refreshcount;
-	uintptr_t lastplayrow;			
+	uintptr_t lastplayrow;	
 	/* references */
 	SeqViewState* state;	
 } SeqviewList;

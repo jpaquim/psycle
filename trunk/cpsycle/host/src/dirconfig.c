@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "dirconfig.h"
-// file
+/* file */
 #include <dir.h>
-// platform
+/* platform */
 #include "../../detail/cpu.h"
 #include "../../detail/portable.h"
 
@@ -18,9 +21,8 @@ static void dirconfig_append(DirConfig*, const char* key,
 void dirconfig_init(DirConfig* self, psy_Property* parent)
 {
 	assert(self && parent);
-
-	self->parent = parent;
-	dirconfig_make(self);
+	
+	dirconfig_make(self, parent);
 	psy_signal_init(&self->signal_changed);
 }
 
@@ -31,7 +33,7 @@ void dirconfig_dispose(DirConfig* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void dirconfig_make(DirConfig* self)
+void dirconfig_make(DirConfig* self, psy_Property* parent)
 {
 #if defined(DIVERSALIS__OS__MICROSOFT)		
 #else
@@ -41,7 +43,7 @@ void dirconfig_make(DirConfig* self)
 	assert(self);
 	
 	self->directories = psy_property_settext(
-		psy_property_append_section(self->parent, "directories"),
+		psy_property_append_section(parent, "directories"),
 		"settingsview.dirs.dirs");
 #if (DIVERSALIS__CPU__SIZEOF_POINTER == 4)	
 	psy_property_sethint(
@@ -61,8 +63,8 @@ void dirconfig_make(DirConfig* self)
 #else
 	psy_snprintf(path, 4096, "%s", psy_dir_home());
 	printf("path %s\n", path);
-	//dirconfig_makedirectory(self, "songs", "settingsview.dirs.song",
-		//path);
+	/* dirconfig_makedirectory(self, "songs", "settingsview.dirs.song",
+	   path); */
 	dirconfig_append(self, "songs", "settingsview.dirs.song",
 		PSYCLE_SONGS_DEFAULT_DIR);
 #endif		
@@ -109,7 +111,7 @@ void dirconfig_append(DirConfig* self, const char* key,
 			label),
 		PSY_PROPERTY_HINT_EDITDIR);
 }
-// getter
+/* properties */
 const char* dirconfig_songs(const DirConfig* self)
 {
 	assert(self);
@@ -203,7 +205,7 @@ const char* dirconfig_doc(const DirConfig* self)
 		PSYCLE_DOC_DEFAULT_DIR);
 }
 
-const char* dirconfig_config(const DirConfig* self)
+const char* dirconfig_configdir(const DirConfig* self)
 {
 	assert(self);
 
@@ -217,7 +219,7 @@ const char* dirconfig_userpresets(const DirConfig* self)
 	return psy_property_at_str(self->directories, "presets",
 		PSYCLE_USERPRESETS_DEFAULT_DIR);
 }
-// events
+/* events */
 bool dirconfig_onchanged(DirConfig* self, psy_Property*
 	property)
 {

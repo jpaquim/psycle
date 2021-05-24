@@ -188,6 +188,7 @@ typedef struct Workspace {
 	bool startpage;
 	psy_List* errorstrs;
 	bool driverconfigloading;
+	bool seqviewactive;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);

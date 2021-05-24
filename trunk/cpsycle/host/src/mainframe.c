@@ -1264,8 +1264,21 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {
 	/* TODO add immediate mode */
-	mainframe_checkplaystartwithrctrl(self, ev);
-	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYDOWN, ev);
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		if (psy_ui_component_hasfocus(&self->sequenceview.listview.component)) {
+			psy_ui_Component* currview;
+
+			currview = psy_ui_notebook_activepage(&self->notebook);
+			if (currview) {
+				psy_ui_component_setfocus(currview);
+			}
+		} else {
+			psy_ui_component_setfocus(&self->sequenceview.listview.component);
+		}
+	} else {
+		mainframe_checkplaystartwithrctrl(self, ev);
+		mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYDOWN, ev);
+	}
 }
 
 void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev)
@@ -1290,6 +1303,9 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyboardEvent* ev
 
 void mainframe_onkeyup(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		return;
+	}
 	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYUP, ev);
 }
 
@@ -1309,7 +1325,7 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 {
 	switch (msg) {
 	case PSY_EVENTDRIVER_PATTERNEDIT:
-		return psy_ui_component_hasfocus(
+		return self->workspace.seqviewactive || psy_ui_component_hasfocus(
 			&self->patternview.tracker.component) ||
 			psy_ui_component_hasfocus(
 				&self->patternview.pianoroll.grid.component) ||
@@ -1317,7 +1333,7 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 				&self->patternview.griddefaults.component);
 		break;
 	case PSY_EVENTDRIVER_NOTECOLUMN:
-		return self->patternview.gridstate.cursor.column == 0;
+		return !self->workspace.seqviewactive && self->patternview.gridstate.cursor.column == 0;
 		break;
 	case PSY_EVENTDRIVER_SETCHORDMODE:
 		if (param1 == 1) {

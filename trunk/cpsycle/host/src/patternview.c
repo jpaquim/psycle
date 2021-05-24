@@ -135,7 +135,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->pgupdownstep = 4;
 	self->trackmodeswingfill = TRUE;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
-	self->aligndisplay = TRUE;
+	self->aligndisplay = TRUE;	
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
@@ -1152,14 +1152,15 @@ void patternview_onkeydown(PatternView* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (psy_ui_component_visible(patternblockmenu_base(
-				&self->blockmenu))) {
-			patternview_toggleblockmenu(self);			
-		}		
+			&self->blockmenu))) {
+			patternview_toggleblockmenu(self);
+			psy_ui_keyboardevent_stop_propagation(ev);
+		}
 		if (psy_ui_component_visible(interpolatecurveview_base(
 				&self->interpolatecurveview))) {
 			patternview_toggleinterpolatecurve(self, patternview_base(self));
-		}
-		psy_ui_keyboardevent_stop_propagation(ev);
+			psy_ui_keyboardevent_stop_propagation(ev);
+		}		
 	}
 }
 
@@ -1219,6 +1220,9 @@ const psy_audio_PatternSelection* patternview_blockselection(const PatternView*
 
 void patternview_oneventdriverinput(PatternView* self, psy_EventDriver* sender)
 {
+	if (self->workspace->seqviewactive) {
+		return;
+	}
 	if (workspace_currview(self->workspace).id == VIEW_ID_PATTERNVIEW) {
 		psy_EventDriverCmd cmd;
 		PatternViewTarget target;

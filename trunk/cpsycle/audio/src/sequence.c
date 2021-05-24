@@ -974,6 +974,14 @@ bool psy_audio_sequenceselection_isselected(const psy_audio_SequenceSelection* s
 	return p != NULL;
 }
 
+psy_audio_OrderIndex psy_audio_sequenceselection_first(const psy_audio_SequenceSelection* self)
+{
+	if (self->entries) {
+		return *((psy_audio_OrderIndex*)self->entries->entry);
+	}
+	return psy_audio_orderindex_zero();
+}
+
 void psy_audio_sequenceselection_setmode(psy_audio_SequenceSelection* self,
 	psy_audio_SequenceSelectionMode mode)
 {
