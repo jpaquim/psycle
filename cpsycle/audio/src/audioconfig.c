@@ -8,7 +8,7 @@
 #include "../../detail/portable.h"
 
 static void audioconfig_makesection(AudioConfig* self, psy_Property* parent);
-static void audioconfig_makedriverconfigurations(AudioConfig*);
+static void audioconfig_makeconfiguration(AudioConfig*, psy_Property*);
 static void audioconfig_makedriverlist(AudioConfig*);
 
 void audioconfig_init(AudioConfig* self, psy_Property* parent, psy_audio_Player* player)
@@ -37,20 +37,30 @@ void audioconfig_makesection(AudioConfig* self, psy_Property* parent)
 	self->driverconfigure = psy_property_settext(
 		psy_property_append_section(self->inputoutput, "configure"),
 		"settingsview.configure");
-	self->driverconfigure->item.save = 0;
-	audioconfig_makedriverconfigurations(self);
+	self->driverconfigure->item.save = 0;	
+	audioconfig_makedriverconfigurations(self, FALSE /* full*/ );
 }
 
-void audioconfig_makedriverconfigurations(AudioConfig* self)
+void audioconfig_makedriverconfigurations(AudioConfig* self, bool full)
 {
 	psy_Property* drivers;
+	psy_Property* driverconfigurations;
 
 	assert(self);
 
+	driverconfigurations = psy_property_at(self->inputoutput, "configurations",
+		PSY_PROPERTY_TYPE_NONE);
+	if (driverconfigurations) {
+		psy_property_remove(self->inputoutput, driverconfigurations);
+	}
 	self->driverconfigurations = psy_property_sethint(
 		psy_property_append_section(self->inputoutput, "configurations"),
-		PSY_PROPERTY_HINT_HIDE);	
-	drivers = psy_property_at(self->inputoutput, "audiodrivers", PSY_PROPERTY_TYPE_NONE);
+		PSY_PROPERTY_HINT_HIDE);
+	if (!full) {
+		return;
+	}
+	drivers = psy_property_at(self->inputoutput, "audiodrivers",
+		PSY_PROPERTY_TYPE_NONE);
 	if (drivers) {
 		psy_List* p;
 
@@ -58,42 +68,72 @@ void audioconfig_makedriverconfigurations(AudioConfig* self)
 			psy_Property* property;
 			
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-				const char* path;
+			audioconfig_makeconfiguration(self, property);			
+		}
+	}	
+}
 
-				path = psy_property_item_str(property);
-				if (path) {
-					psy_Library library;
+void audioconfig_makeconfiguration_driverkey(AudioConfig* self, const char* key)
+{
+	assert(self);
 
-					psy_library_init(&library);
-					psy_library_load(&library, path);					
-					if (library.module) {						
-						pfndriver_create fpdrivercreate;
+	if (key && self->driverconfigurations) {
+		psy_Property* drivers;	
 
-						fpdrivercreate = (pfndriver_create)
-							psy_library_functionpointer(&library,
-								"driver_create");
-						if (fpdrivercreate) {
-							psy_AudioDriver* driver;
+		drivers = psy_property_at(self->inputoutput, "audiodrivers",
+			PSY_PROPERTY_TYPE_NONE);
+		if (drivers) {
+			psy_List* p;
 
-							driver = fpdrivercreate();							
-							if (driver &&
-								psy_audiodriver_configuration(driver) &&
-								!psy_property_empty(psy_audiodriver_configuration(driver))) {								
-								psy_property_append_property(
-									self->driverconfigurations,
-									psy_property_clone(
-										psy_audiodriver_configuration(driver)));
-								psy_audiodriver_dispose(driver);
-							}
-						}
-					}					
-					psy_library_dispose(&library);
+			for (p = psy_property_begin(drivers); p != NULL; psy_list_next(&p)) {
+				psy_Property* property;
+
+				property = (psy_Property*)psy_list_entry(p);
+				if (strcmp(key, psy_property_key(property)) == 0) {
+					audioconfig_makeconfiguration(self, property);
+					break;
 				}
 			}
 		}
 	}
-	printf("made configurations \n");
+}
+
+void audioconfig_makeconfiguration(AudioConfig* self, psy_Property* property)
+{	
+	assert(property);
+
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
+		const char* path;
+
+		path = psy_property_item_str(property);
+		if (path) {
+			psy_Library library;
+
+			psy_library_init(&library);
+			psy_library_load(&library, path);
+			if (library.module) {
+				pfndriver_create fpdrivercreate;
+
+				fpdrivercreate = (pfndriver_create)
+					psy_library_functionpointer(&library, "driver_create");
+				if (fpdrivercreate) {
+					psy_AudioDriver* driver;
+
+					driver = fpdrivercreate();
+					if (driver &&
+						psy_audiodriver_configuration(driver) &&
+						!psy_property_empty(psy_audiodriver_configuration(driver))) {
+						psy_property_append_property(
+							self->driverconfigurations,
+							psy_property_clone(
+								psy_audiodriver_configuration(driver)));
+						psy_audiodriver_dispose(driver);
+					}
+				}
+			}
+			psy_library_dispose(&library);
+		}
+	}
 }
 
 void audioconfig_makedriverlist(AudioConfig* self)
@@ -172,8 +212,8 @@ void audioconfig_driverconfigure_section(AudioConfig* self)
 		psy_property_clear(self->driverconfigure);
 		if (psy_audiodriver_configuration(self->player->driver)) {
 			psy_property_append_property(self->driverconfigure,
-				psy_property_clone(
-					psy_audiodriver_configuration(self->player->driver)));
+				psy_property_clone(psy_audiodriver_configuration(
+					self->player->driver)));
 		}
 		if (psy_audiodriver_configuration(self->player->driver)) {
 			driversection = psy_property_find(self->driverconfigurations,
@@ -183,10 +223,10 @@ void audioconfig_driverconfigure_section(AudioConfig* self)
 			if (driversection) {
 				psy_property_remove(self->driverconfigurations,
 					driversection);
-				psy_property_append_property(self->driverconfigurations,
-					psy_property_clone(psy_audiodriver_configuration(
-						self->player->driver)));
 			}
+			psy_property_append_property(self->driverconfigurations,
+				psy_property_clone(psy_audiodriver_configuration(
+					self->player->driver)));
 		}
 	}
 }

@@ -186,12 +186,14 @@ typedef struct Workspace {
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;
 	bool startpage;
-	psy_List* errorstrs;	
+	psy_List* errorstrs;
+	bool driverconfigloading;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
 void workspace_load_configuration(Workspace*);
+void workspace_postload_driverconfigurations(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_clearsequencepaste(Workspace*);
 void workspace_save_styleconfiguration(Workspace*);
@@ -302,6 +304,7 @@ void workspace_connectloadprogress(Workspace*, void* context,
 void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
 void workspace_setstartpage(Workspace*);
+
 
 #ifdef __cplusplus
 }

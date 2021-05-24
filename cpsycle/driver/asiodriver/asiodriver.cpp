@@ -1468,9 +1468,7 @@ int driver_init(psy_AudioDriver* driver)
 #endif
 	SetupAVRT();
 	self->asioif = new ASIOInterface();
-	init_properties(&self->driver);
-	self->asioif->m_hWnd = (HWND)driver->handle;
-	self->asioif->Initialize(driver->callback, driver->callbackcontext);
+	init_properties(&self->driver);	
 	return 0;
 }
 
@@ -1597,8 +1595,12 @@ psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 int driver_open(psy_AudioDriver* driver)
 {
 	int status;
+
 	AsioDriver* self = (AsioDriver*)driver;	
-	self->asioif->m_hWnd = (HWND)driver->handle;
+	if (!self->asioif->Initialized()) {
+		self->asioif->m_hWnd = (HWND)driver->handle;
+		self->asioif->Initialize(driver->callback, driver->callbackcontext);
+	}
 	ASIOInterface::_pCallback = driver->callback;		
 	ASIOInterface::_pCallbackContext = driver->callbackcontext;
 	status = self->asioif->Enable(true);
