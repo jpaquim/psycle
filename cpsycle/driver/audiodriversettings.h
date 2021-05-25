@@ -39,13 +39,13 @@ typedef struct {
 } psy_AudioDriverSettings;
 
 INLINE psy_AudioDriverChannelMode psy_audiodriversettings_channelmode(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->channelmode_;
 }
 
 INLINE uintptr_t psy_audiodriversettings_numchannels(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return (self->channelmode_ == psy_AUDIODRIVERCHANNELMODE_STEREO) ? 2 : 1;
 }
@@ -57,7 +57,7 @@ INLINE void psy_audiodriversettings_setchannelmode(
 }
 
 INLINE psy_dsp_big_hz_t psy_audiodriversettings_samplespersec(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->samplespersec_;
 }
@@ -81,14 +81,14 @@ INLINE void psy_audiodriversettings_setsamplespersec(
 // Valid values (bitdepth/validbitdepth)
 // 8/8, 16/16 , 32/24 (int) and 32/32 (float)
 INLINE uintptr_t psy_audiodriversettings_validbitdepth(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->validbitdepth_;
 }
 
 // bitdepth is the container size. (e.g. valid 24 bits, size 32 bits)
 INLINE uintptr_t psy_audiodriversettings_bitdepth(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->bitdepth_;
 }
@@ -108,7 +108,7 @@ INLINE void psy_audiodriversettings_setvalidbitdepth(
 }
 
 INLINE uintptr_t psy_audiodriversettings_blockcount(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->blockcount_;
 }
@@ -121,7 +121,7 @@ INLINE void psy_audiodriversettings_setblockcount(
 
 ///\name getter/setter for the audio block size (in samples comprising all channels)	
 INLINE uintptr_t psy_audiodriversettings_blockframes(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->blockframes_;
 }
@@ -135,22 +135,28 @@ INLINE void psy_audiodriversettings_setblockframes(
 
 ///\name getter for the audio block size (in bytes)
 INLINE uintptr_t psy_audiodriversettings_blockbytes(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->blockframes_ * self->framebytes_;
 }
 
 /// getter for the whole buffer size (in bytes).
 INLINE uintptr_t psy_audiodriversettings_totalbufferbytes(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->blockframes_ * self->framebytes_ * self->blockcount_;
 }
 
 INLINE uintptr_t psy_audiodriversettings_framebytes(
-	psy_AudioDriverSettings* self)
+	const psy_AudioDriverSettings* self)
 {
 	return self->framebytes_;
+}
+
+INLINE bool psy_audiodriversettings_dither(
+	const psy_AudioDriverSettings* self)
+{
+	return self->dither_;
 }
 
 INLINE void psy_audiodriversettings_init(psy_AudioDriverSettings* self)

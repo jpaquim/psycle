@@ -88,6 +88,7 @@ typedef struct psy_ui_TabBar {
 	uintptr_t selected;	
 	uintptr_t numtabs;
 	bool preventtranslation;
+	psy_ui_AlignType tabalignment;
 } psy_ui_TabBar;
 
 void psy_ui_tabbar_init(psy_ui_TabBar*, psy_ui_Component* parent);

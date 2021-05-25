@@ -15,15 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="wasapi.c">
+    <ClCompile Include="avrt.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="avrt.c">
+    <ClCompile Include="wasapi.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avrt.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clip.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

@@ -266,8 +266,9 @@ void psy_ui_tabbar_init(psy_ui_TabBar* self, psy_ui_Component* parent)
 	self->numtabs = 0;
 	self->selected = 0;
 	self->preventtranslation = FALSE;
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_zero());
+	self->tabalignment = psy_ui_ALIGN_LEFT;
+	psy_ui_component_setdefaultalign(&self->component, self->tabalignment,
+		psy_ui_margin_zero());	
 }
 
 void tabbar_ondestroy(psy_ui_TabBar* self)
@@ -284,6 +285,7 @@ void psy_ui_tabbar_settabalign(psy_ui_TabBar* self, psy_ui_AlignType align)
 
 	assert(self);
 	
+	self->tabalignment = align;
 	psy_ui_component_setdefaultalign(&self->component, align,
 		self->component.containeralign->insertmargin);
 	q = psy_ui_component_children(psy_ui_tabbar_base(self),
@@ -413,13 +415,20 @@ const psy_ui_Tab* psy_ui_tabbar_tab_const(const psy_ui_TabBar* self,
 
 void tabbar_onmousewheel(psy_ui_TabBar* self, psy_ui_MouseEvent* ev)
 {
+	intptr_t delta;
+
 	assert(self);
 
-	if (ev->delta > 0) {
+	delta = ev->delta;
+	if (self->tabalignment == psy_ui_ALIGN_TOP ||
+		self->tabalignment == psy_ui_ALIGN_BOTTOM) {
+		delta *= -1;
+	}
+	if (delta > 0) {
 		if (self->selected + 1 < self->numtabs) {
 			psy_ui_tabbar_select(self, self->selected + 1);
 		}
-	} else if (ev->delta < 0) {
+	} else if (delta < 0) {
 		if (self->selected > 0) {
 			psy_ui_tabbar_select(self, self->selected - 1);
 		}
