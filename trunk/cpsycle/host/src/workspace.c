@@ -141,6 +141,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
 	psy_audio_lock_init(&self->pluginscanlock);
+	psy_audio_lock_init(&self->outputlock);
 	psy_audio_init();
 	self->fontheight = 12;
 	self->cursorstep = 1;
@@ -162,6 +163,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->restorenumplaybeats = 4.0;
 	self->restoreloop = TRUE;
 	self->errorstrs = NULL;
+	self->statusoutputstrs = NULL;
 	self->driverconfigloading = FALSE;
 	self->seqviewactive = FALSE;
 	viewhistory_init(&self->viewhistory);
@@ -278,8 +280,10 @@ void workspace_dispose(Workspace* self)
 	psy_playlist_dispose(&self->playlist);
 	psy_audio_dispose();
 	psy_audio_lock_dispose(&self->pluginscanlock);
+	psy_audio_lock_dispose(&self->outputlock);
 	free(self->scanfilename);
 	psy_list_deallocate(&self->errorstrs, NULL);
+	psy_list_deallocate(&self->statusoutputstrs, NULL);
 }
 
 void workspace_save_styleconfiguration(Workspace* self)
@@ -1034,8 +1038,11 @@ void workspace_load_configuration(Workspace* self)
 				PSY_PROPERTY_TYPE_NONE);
 		}
 		if (psycleconfig_audioenabled(&self->config)) {
-			psy_audio_player_restartdriver(&self->player, driversection);
+			//psy_audio_player_restartdriver(&self->player, driversection);
+			psy_audiodriver_close(self->player.driver);
+			psy_audiodriver_configure(self->player.driver, driversection);
 		} else if (self->player.driver) {
+			psy_audiodriver_close(self->player.driver);
 			psy_audiodriver_configure(self->player.driver, driversection);
 		}
 		audioconfig_driverconfigure_section(&self->config.audio);
@@ -1070,6 +1077,13 @@ void workspace_load_configuration(Workspace* self)
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
 	workspace_updatemetronome(self);
 	workspace_postload_driverconfigurations(self);
+}
+
+void workspace_startaudio(Workspace* self)
+{
+	if (self->player.driver) {
+		psy_audiodriver_open(self->player.driver);
+	}
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -1117,6 +1131,12 @@ static void driverconfigloadthread(void* context)
 	propertiesio_load(&self->config.config, &path, 0);
 	psy_path_dispose(&path);
 	self->driverconfigloading = FALSE;
+	if (psycleconfig_audioenabled(&self->config)) {
+		workspace_startaudio(self);
+		psy_audio_lock_enter(&self->outputlock);
+		psy_list_append(&self->statusoutputstrs, psy_strdup("Audio started"));
+		psy_audio_lock_leave(&self->outputlock);
+	}
 }
 
 void workspace_postload_driverconfigurations(Workspace* self)
@@ -1125,6 +1145,8 @@ void workspace_postload_driverconfigurations(Workspace* self)
 
 	if (!self->driverconfigloading) {
 		self->driverconfigloading = TRUE;
+		
+		psy_list_append(&self->statusoutputstrs, psy_strdup("Starting audio"));		
 #ifdef DIVERSALIS__OS__UNIX
 		pthread_t threadid;
 #endif				
@@ -1473,6 +1495,16 @@ void workspace_idle(Workspace* self)
 		}
 		psy_list_deallocate(&self->errorstrs, NULL);
 		psy_audio_exclusivelock_leave();
+	}
+	if (self->statusoutputstrs) {
+		psy_List* p;
+		psy_audio_lock_enter(&self->outputlock);
+		for (p = self->statusoutputstrs; p != NULL; p = p->next) {
+			psy_signal_emit(&self->signal_status_out, self, 1,
+				(const char*)p->entry);
+		}
+		psy_list_deallocate(&self->statusoutputstrs, NULL);
+		psy_audio_lock_leave(&self->outputlock);
 	}
 }
 

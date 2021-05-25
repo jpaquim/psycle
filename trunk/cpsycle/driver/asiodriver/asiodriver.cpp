@@ -1341,6 +1341,7 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 	return ret;
 }
 
+/* C Wrapper */
 typedef struct {
 	psy_AudioDriver driver;
 	// psy_AudioDriverSettings settings;

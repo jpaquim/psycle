@@ -171,6 +171,7 @@ typedef struct Workspace {
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
 	psy_audio_Lock pluginscanlock;
+	psy_audio_Lock outputlock;
 	int filescanned;
 	char* scanfilename;
 	int scanstart;
@@ -187,6 +188,7 @@ typedef struct Workspace {
 	bool restoreloop;
 	bool startpage;
 	psy_List* errorstrs;
+	psy_List* statusoutputstrs;
 	bool driverconfigloading;
 	bool seqviewactive;
 } Workspace;
@@ -195,6 +197,7 @@ void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_postload_driverconfigurations(Workspace*);
+void workspace_startaudio(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_clearsequencepaste(Workspace*);
 void workspace_save_styleconfiguration(Workspace*);

@@ -255,11 +255,12 @@ int driver_init(psy_AudioDriver* driver)
 	psy_dsp_noopt_init(&dsp);
 #endif
 	SetupAVRT();
+
 	psy_audiodriversettings_init(&self->settings);
 	psy_table_init(&self->_portMapping);
 	refreshavailableports(self);
 	init_properties(&self->driver);
-	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
+	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	return 0;
 }
 
@@ -461,7 +462,7 @@ psy_dsp_big_hz_t driver_samplerate(psy_AudioDriver* self)
 }
 
 int driver_open(psy_AudioDriver* driver)
-{	
+{		
 	return start((DXDriver*)driver);
 }
 
@@ -577,8 +578,8 @@ DWORD WINAPI pollerthread(void* self)
 	// Ask MMCSS to temporarily boost the thread priority
 	// to reduce glitches while the low-latency stream plays.	
 	if (isvistaorlater())
-	{
-		DWORD taskIndex = 0;
+	{		
+		DWORD taskIndex = 0;		
 		hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
 	}
 	// Prefill buffer:
@@ -605,7 +606,7 @@ DWORD WINAPI pollerthread(void* self)
 		}
 		Sleep(1);
 	}	
-	SetEvent(pThis->hEvent);	
+	SetEvent(pThis->hEvent);
 	return 0;
 }
 
