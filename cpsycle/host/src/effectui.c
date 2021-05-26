@@ -295,33 +295,35 @@ void effectui_showparameters(EffectUi* self, psy_ui_Component* parent)
 
 void effectui_onmousedown(EffectUi* self, psy_ui_MouseEvent* ev)
 {	
-	if (self->intern.slot != psy_audio_machines_selected(self->intern.machines)) {
-		psy_audio_machines_select(self->intern.machines, self->intern.slot);
-	}
-	if (effectui_hittestcoord(self, ev->pt,
+	if (ev->button == 1) {
+		if (self->intern.slot != psy_audio_machines_selected(self->intern.machines)) {
+			psy_audio_machines_select(self->intern.machines, self->intern.slot);
+		}
+		if (effectui_hittestcoord(self, ev->pt,
 			&self->intern.skin->effect.bypass)) {
-		if (psy_audio_machine_bypassed(self->intern.machine)) {
-			psy_audio_machine_unbypass(self->intern.machine);
-		} else {
-			psy_audio_machine_bypass(self->intern.machine);
-		}
-		psy_ui_mouseevent_stop_propagation(ev);
-	} else if (effectui_hittestcoord(self, ev->pt,
+			if (psy_audio_machine_bypassed(self->intern.machine)) {
+				psy_audio_machine_unbypass(self->intern.machine);
+			} else {
+				psy_audio_machine_bypass(self->intern.machine);
+			}
+			psy_ui_mouseevent_stop_propagation(ev);
+		} else if (effectui_hittestcoord(self, ev->pt,
 			&self->intern.skin->generator.mute) ||
-		effectui_hittestcoord(self, ev->pt,
-			&self->intern.skin->effect.mute)) {
-		if (psy_audio_machine_muted(self->intern.machine)) {
-			psy_audio_machine_unmute(self->intern.machine);
-		} else {
-			psy_audio_machine_mute(self->intern.machine);
+			effectui_hittestcoord(self, ev->pt,
+				&self->intern.skin->effect.mute)) {
+			if (psy_audio_machine_muted(self->intern.machine)) {
+				psy_audio_machine_unmute(self->intern.machine);
+			} else {
+				psy_audio_machine_mute(self->intern.machine);
+			}
+			psy_ui_mouseevent_stop_propagation(ev);
+		} else if (effectui_hittestpan(self, ev->pt, &self->intern.mx)) {
+			self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
+			psy_ui_mouseevent_stop_propagation(ev);
 		}
-		psy_ui_mouseevent_stop_propagation(ev);
-	} else if (effectui_hittestpan(self, ev->pt, &self->intern.mx)) {
-		self->intern.dragmode = MACHINEVIEW_DRAG_PAN;
-		psy_ui_mouseevent_stop_propagation(ev);
-	}
-	if (!ev->event.bubbles) {
-		psy_ui_component_invalidate(&self->component);
+		if (!ev->event.bubbles) {
+			psy_ui_component_invalidate(&self->component);
+		}
 	}
 }
 

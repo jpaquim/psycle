@@ -373,6 +373,7 @@ void machinebar_oninstparamboxselchange(MachineBar* self, psy_ui_Component* send
 			psy_audio_machines_selectparam(self->machines, sel);
 			break;
 		case MACHINEBAR_AUX:
+			psy_audio_machines_selectauxcolumn(self->machines, sel);
 			break;
 		case MACHINEBAR_INST:
 			psy_audio_instruments_select(self->instruments,

@@ -1101,23 +1101,31 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	bool chordmode)
 {
 	psy_audio_Machine* machine;
+	psy_audio_Machines* machines;
 	psy_audio_PatternEvent ev;
+	bool useaux;
 
 	assert(self);
 
+	if (!workspace_song(self->workspace)) {
+		return;
+	}	
+	machines = &workspace_song(self->workspace)->machines;
+	machine = psy_audio_machines_selectedmachine(machines);
+	useaux = machine && psy_audio_machine_numauxcolumns(machine) > 0;
 	psy_audio_patternevent_init_all(&ev,
 		note,
-		psy_audio_NOTECOMMANDS_INST_EMPTY,
-		(unsigned char)psy_audio_machines_selected(&workspace_song(self->workspace)->machines),
-		psy_audio_NOTECOMMANDS_VOL_EMPTY,
-		0,
-		0);
-	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, ev.mach);
-	if (machine &&
-		machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-		ev.inst = (uint16_t)psy_audio_instruments_selected(
-			&workspace_song(self->workspace)->instruments).subslot;
-	}
+		(note == psy_audio_NOTECOMMANDS_TWEAK)
+		? (uint16_t)psy_audio_machines_paramselected(machines)
+		: (uint16_t)(
+			(useaux)
+			? psy_audio_machine_auxcolumnselected(machine)
+			: machine && machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS)
+			? psy_audio_instruments_selected(&workspace_song(self->workspace)->instruments).subslot
+			: psy_audio_NOTECOMMANDS_INST_EMPTY),
+		(uint8_t)psy_audio_machines_selected(machines),
+		(uint8_t)psy_audio_NOTECOMMANDS_VOL_EMPTY,
+		0, 0);	
 	trackergrid_inputevent(self, &ev, chordmode);
 }
 
