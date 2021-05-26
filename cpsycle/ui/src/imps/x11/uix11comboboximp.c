@@ -118,7 +118,7 @@ static void dev_showdropdown(psy_ui_x11_ComboBoxImp*);
 static void onlistbox_selected(psy_ui_x11_ComboBoxImp*, psy_ui_ListBox* sender,
 	intptr_t index);
 
-static psy_ui_ComboBoxImpVTable comboboximp_vtable;
+static psy_ui_ComponentImpVTable comboboximp_vtable;
 static int comboboximp_vtable_initialized = 0;
 
 static void comboboximp_imp_vtable_init(psy_ui_x11_ComboBoxImp* self)

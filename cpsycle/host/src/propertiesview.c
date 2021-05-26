@@ -1,21 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-// host
+
+/* host */
 #include "propertiesview.h"
-#include "trackergridstate.h" // TRACKER CMDS
+#include "trackergridstate.h" /* TRACKER CMDS */
 #include "styles.h"
-// ui
+/* ui */
 #include <uicolordialog.h>
 #include <uifolderdialog.h>
 #include <uifontdialog.h>
 #include <uiswitch.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// PropertiesRenderState
+/* PropertiesRenderState */
 void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
 	psy_ui_Edit* edit, psy_ui_Component* dummy)
 {	
@@ -26,22 +29,25 @@ void propertiesrenderstate_init(PropertiesRenderState* self, uintptr_t numcols,
 	self->numcols = numcols;
 	self->dummy = dummy;
 	self->preventmousepropagation = TRUE;
+	self->comboselect = FALSE;
 	psy_ui_size_init_em(&self->size_col0, 80.0, 1.3);
 	psy_ui_size_init_em(&self->size_col2, 40.0, 1.3);	
 }
 
-// PropertiesRenderLine
-// prototypes
+/* PropertiesRenderLine */
+/* prototypes */
 static void propertiesrenderline_onmousedown(PropertiesRenderLine*,
 	psy_ui_MouseEvent*);
-// vtable
+static void propertiesrenderline_oncomboselect(PropertiesRenderLine*,
+	psy_ui_Component* sender, intptr_t selidx);
+/* vtable */
 static psy_ui_ComponentVtable propertiesrenderline_vtable;
 static bool propertiesrenderline_vtable_initialized = FALSE;
 
 static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 {
 	if (!propertiesrenderline_vtable_initialized) {
-		propertiesrenderline_vtable = *(self->component.vtable);		
+		propertiesrenderline_vtable = *(self->component.vtable);
 		propertiesrenderline_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			propertiesrenderline_onmousedown;
@@ -49,7 +55,7 @@ static void propertiesrenderline_vtable_init(PropertiesRenderLine* self)
 	}
 	self->component.vtable = &propertiesrenderline_vtable;
 }
-// implementation
+/* implementation */
 void propertiesrenderline_init(PropertiesRenderLine* self,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	PropertiesRenderState* state, psy_Property* property,
@@ -70,10 +76,11 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	self->check = NULL;
 	self->colour = NULL;
 	self->label = NULL;
+	self->combo = NULL;
 	self->dialogbutton = NULL;
 	self->state = state;	
 	assert(self->property);
-	// column 0	
+	/* column 0 */
 	psy_ui_label_init(&self->key, &self->component, view);	
 	psy_ui_component_setspacing(psy_ui_label_base(&self->key),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, psy_min(level, 5.0) * 4.0));
@@ -90,9 +97,15 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 	if (!psy_property_isaction(self->property)) {
 		psy_ui_label_settext(&self->key, psy_property_text(self->property));
 	}
-	// column 1
+	/* column 1 */
 	if (state->numcols > 1) {
-		if (psy_property_isbool(self->property) || psy_property_ischoiceitem(
+		if (psy_property_hint(property) == PSY_PROPERTY_HINT_COMBO) {
+			self->combo = psy_ui_combobox_allocinit(&self->component, view);
+			psy_signal_connect(&self->combo->signal_selchanged, self,
+				propertiesrenderline_oncomboselect);
+			psy_ui_combobox_setcharnumber(self->combo, 50.0);
+			psy_ui_component_setalign(&self->combo->component, psy_ui_ALIGN_LEFT);			
+		} else if (psy_property_isbool(self->property) || psy_property_ischoiceitem(
 				self->property)) {
 			self->check = psy_ui_switch_allocinit(&self->component, view);						
 		} else if (psy_property_isaction(self->property)) {
@@ -134,7 +147,7 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			psy_ui_label_preventtranslation(self->label);
 		}						
 	}
-	// column 2
+	/* column 2 */
 	if (state->numcols > 2) {				
 		psy_ui_Component* col2;
 
@@ -158,8 +171,10 @@ void propertiesrenderline_init(PropertiesRenderLine* self,
 			char text[256];
 			psy_ui_Label* label;
 
-			// todo: psy_ui_translate translates only at build, use
-			// onlanguageupdate to handle settingsview changes
+			/*
+			** todo: psy_ui_translate translates only at build, use
+			** onlanguageupdate to handle settingsview changes
+			*/
 			psy_snprintf(text, 256, "%s %d %s %d",
 				psy_ui_translate("settingsview.from"),
 				property->item.min,
@@ -204,6 +219,10 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	if (psy_ui_component_visible(psy_ui_edit_base(self->state->edit))) {
 		return;
 	}	
+	if (self->combo) {
+		psy_ui_mouseevent_stop_propagation(ev);
+		return;
+	}
 	if (ev->button == 1) {
 		self->state->dialogbutton = (self->dialogbutton &&
 			ev->target == &self->dialogbutton->component);			
@@ -236,6 +255,17 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	if (self->state->preventmousepropagation) {
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
+}
+
+void propertiesrenderline_oncomboselect(PropertiesRenderLine* self,
+	psy_ui_Component* sender, intptr_t selidx)
+{
+	psy_property_setitem_int(self->property, selidx);
+	self->state->property = NULL;
+	self->state->selectedline = self;
+	self->state->selected = psy_property_at_index(self->property, selidx);
+	self->state->property = self->state->selected;
+	self->state->comboselect = TRUE;
 }
 
 bool propertiesrenderline_updatecheck(PropertiesRenderLine* self)
@@ -373,9 +403,10 @@ void propertiesrenderline_update(PropertiesRenderLine* self)
 	}		
 }
 
-// PropertiesRenderer
-// prototypes
+/* PropertiesRenderer */
+/* prototypes */
 static void propertiesrenderer_ondestroy(PropertiesRenderer*);
+static void propertiesrenderer_ontimer(PropertiesRenderer*, uintptr_t timerid);
 static int propertiesrenderer_onpropertiesbuild(PropertiesRenderer*,
 	psy_Property*, uintptr_t level);
 static void propertiesrenderer_buildmainsection(PropertiesRenderer*,
@@ -397,7 +428,7 @@ static void propertiesrenderer_checkedit(PropertiesRenderer*,
 	psy_Property* selected);
 static void propertiesrenderer_showedit(PropertiesRenderer*,
 	PropertiesRenderLine*, psy_ui_Component* edit);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable propertiesrenderer_vtable;
 static bool propertiesrenderer_vtable_initialized = FALSE;
 
@@ -411,16 +442,21 @@ static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
 		propertiesrenderer_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			propertiesrenderer_onmousedown;
+		propertiesrenderer_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			propertiesrenderer_ontimer;			
 		propertiesrenderer_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &propertiesrenderer_vtable;
 }
-// implementation
+/* implementation */
 void propertiesrenderer_init(PropertiesRenderer* self,
 	psy_ui_Component* parent, psy_Property* properties, uintptr_t numcols)
 {
 	self->properties = properties;	
-	self->currsection = NULL;
+	self->curr = NULL;
+	self->combolevel = psy_INDEX_INVALID;
+	self->comboline = NULL;
 	self->mainsectionstyle = STYLE_PROPERTYVIEW_MAINSECTION;
 	self->mainsectionheaderstyle = STYLE_PROPERTYVIEW_MAINSECTIONHEADER;
 	self->keystyle = psy_INDEX_INVALID;
@@ -460,6 +496,7 @@ void propertiesrenderer_init(PropertiesRenderer* self,
 		psy_ui_size_make_em(0.0, 4.0));
 	psy_table_init(&self->sections);
 	propertiesrenderer_build(self);	
+	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
 void propertiesrenderer_ondestroy(PropertiesRenderer* self)
@@ -486,7 +523,9 @@ void propertiesrenderer_setstyle(PropertiesRenderer* self,
 
 void propertiesrenderer_build(PropertiesRenderer* self)
 {
-	self->currsection = NULL;	
+	self->curr = NULL;
+	self->comboline = NULL;
+	self->combolevel = psy_INDEX_INVALID;
 	self->rebuild_level = 0;
 	self->state.selected = NULL;
 	self->state.selectedline = NULL;
@@ -515,11 +554,14 @@ void propertiesrenderer_rebuild(PropertiesRenderer* self,
 		if (clients) {
 			psy_ui_component_clear(clients);
 			self->rebuild_level = 1;
-			self->currsection = clients;
+			self->curr = clients;
+			self->comboline = NULL;
+			self->combolevel = psy_INDEX_INVALID;
 			psy_property_enumerate(mainsection, self, (psy_PropertyCallback)
 				propertiesrenderer_onpropertiesbuild);
 			psy_ui_component_align(clients);
 			psy_ui_component_align_full(&self->component);
+			psy_ui_component_invalidate(section);
 			self->rebuild_level = 0;
 		}		
 	}
@@ -549,7 +591,6 @@ void propertiesrenderer_updateline(PropertiesRenderer* self,
 	propertiesrenderline_update(line);
 }
 
-
 int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 	psy_Property* property, uintptr_t level)
 {
@@ -559,13 +600,27 @@ int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 	if (self->rebuild_level == 0 && level == 0) {
 		propertiesrenderer_buildmainsection(self, property);
 	} else {
-		if (!self->currsection) {
-			self->currsection = &self->client;
+		if (!self->curr) {
+			self->curr = &self->client;
+		}
+		if (self->combolevel != psy_INDEX_INVALID) {
+			if (level != self->combolevel + 1) {
+				psy_ui_combobox_setcursel(self->comboline->combo,
+					psy_property_item_int(self->comboline->property));
+				self->combolevel = psy_INDEX_INVALID;				
+				self->comboline = NULL;
+			} else {
+				if (self->comboline && self->comboline->combo) {
+					psy_ui_combobox_addtext(self->comboline->combo,
+						psy_property_text(property));
+					return 1;
+				}
+			}
 		}
 		if (psy_property_hint(property) != PSY_PROPERTY_HINT_HIDE) {
 			PropertiesRenderLine* line;
-
-			line = propertiesrenderline_allocinit(self->currsection,
+						
+			line = propertiesrenderline_allocinit(self->curr,
 				&self->client, &self->state, property,
 				level + self->rebuild_level);
 			psy_ui_component_setstyletype(&line->key.component,
@@ -574,6 +629,10 @@ int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 				self->keystyle_hover);
 			psy_ui_component_setstyletype_select(&line->component,
 				self->linestyle_select);
+			if (psy_property_hint(property) == PSY_PROPERTY_HINT_COMBO) {				
+				self->combolevel = level;
+				self->comboline = line;
+			}
 		}
 	}
 	return 1;
@@ -589,7 +648,7 @@ void propertiesrenderer_buildmainsection(PropertiesRenderer* self,
 
 		currsection = psy_ui_component_allocinit(&self->client, &self->client);
 		psy_ui_component_setdefaultalign(currsection, psy_ui_ALIGN_TOP,
-			psy_ui_margin_zero());
+			psy_ui_margin_zero());		
 		psy_ui_component_setstyletype(currsection, self->mainsectionstyle);
 		label = psy_ui_label_allocinit(currsection, &self->client);		
 		psy_ui_component_setmargin(psy_ui_label_base(label),
@@ -597,14 +656,22 @@ void propertiesrenderer_buildmainsection(PropertiesRenderer* self,
 		psy_ui_component_setspacing(psy_ui_label_base(label),
 			psy_ui_margin_make_em(0.5, 0.0, 0.5, 1.0));
 		psy_ui_component_setstyletype(psy_ui_label_base(label),
-			self->mainsectionheaderstyle);
+			self->mainsectionheaderstyle);		
 		lines = psy_ui_component_allocinit(currsection, &self->client);
 		psy_ui_component_setdefaultalign(lines, psy_ui_ALIGN_TOP,
 			psy_ui_margin_zero());
 		psy_ui_label_settext(label, psy_property_text(section));
 		psy_table_insert(&self->sections, psy_property_index(section),
 			currsection);
-		self->currsection = lines;
+		self->curr = lines;
+	}
+}
+
+void propertiesrenderer_ontimer(PropertiesRenderer* self, uintptr_t timerid)
+{
+	if (self->state.comboselect) {
+		psy_signal_emit(&self->signal_changed, self, 1, self->state.selected);
+		self->state.comboselect = FALSE;
 	}
 }
 
@@ -819,8 +886,8 @@ void propertiesrenderer_oninputdefineraccept(PropertiesRenderer* self,
 	}
 }
 
-// PropertiesView
-// prototypes
+/* PropertiesView */
+/* prototypes */
 static void propertiesview_ondestroy(PropertiesView*);
 static void propertiesview_selectsection(PropertiesView*,
 	psy_ui_Component* sender, uintptr_t section, uintptr_t options);
@@ -837,7 +904,9 @@ static double propertiesview_checkrange(PropertiesView*, double position);
 static void propertiesview_onfocus(PropertiesView*);
 static void propertiesview_onmousedown(PropertiesView*, psy_ui_MouseEvent*);
 static void propertiesview_onmouseup(PropertiesView*, psy_ui_MouseEvent*);
-// vtable
+static void propertiesview_onscrollpanealign(PropertiesView*,
+	psy_ui_Component* sender);
+/* vtable */
 static psy_ui_ComponentVtable propertiesview_vtable;
 static bool propertiesview_vtable_initialized = FALSE;
 
@@ -860,13 +929,14 @@ static void propertiesview_vtable_init(PropertiesView* self)
 	}
 	self->component.vtable = &propertiesview_vtable;
 }
-// implementation
+/* implementation */
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property* properties,
 	uintptr_t numcols, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent, NULL);
 	propertiesview_vtable_init(self);
+	self->maximizemainsections = TRUE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent, NULL);	
@@ -874,7 +944,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		numcols);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
 		&self->component, NULL);	
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setalign(&self->renderer.component, psy_ui_ALIGN_HCLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
@@ -891,6 +961,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		self, propertiesview_oneventdriverinput);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		propertiesview_ontabbarchange);
+	psy_signal_connect(&self->scroller.pane.signal_beforealign, self,
+		propertiesview_onscrollpanealign);
 }
 
 void propertiesview_ondestroy(PropertiesView* self)
@@ -1116,5 +1188,29 @@ void propertiesview_onmouseup(PropertiesView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->renderer.state.preventmousepropagation) {
 		psy_ui_mouseevent_stop_propagation(ev);
+	}
+}
+
+void propertiesview_onscrollpanealign(PropertiesView* self,
+	psy_ui_Component* sender)
+{
+	assert(self);
+
+	if (self->maximizemainsections) {
+		psy_TableIterator it;
+		psy_ui_Size clientsize;		
+
+		clientsize = psy_ui_component_clientsize(&self->renderer.component);
+		for (it = psy_table_begin(&self->renderer.sections);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_tableiterator_value(&it);
+			psy_ui_component_setminimumsize(component,
+				psy_ui_size_make(
+					psy_ui_value_make_ew(0.0),
+					clientsize.height));
+		}
 	}
 }

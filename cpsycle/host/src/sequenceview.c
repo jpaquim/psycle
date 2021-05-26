@@ -798,7 +798,7 @@ psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList* self,
 		psy_ui_component_textmetric(&self->component), NULL);
 	return psy_ui_realrectangle_make(
 		psy_ui_realpoint_make(0.0, lineheightpx * row),		
-		psy_ui_realsize_make(size.width, lineheightpx));
+		psy_ui_realsize_make(size.width, lineheightpx + 1));
 }
 
 /* SeqviewDuration */
@@ -918,6 +918,7 @@ static void seqview_onsequencechanged(SeqView*,
 static void seqview_onconfigure(SeqView*, GeneralConfig*, psy_Property*);
 static void seqview_onscroll(SeqView*, psy_ui_Component* sender);
 static void seqview_rebuild(SeqView*);
+static void seqview_oneditseqlist(SeqView*, psy_ui_Button* sender);
 /* implementation */
 void seqview_init(SeqView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -935,7 +936,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setspacing(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));
 	psy_ui_scroller_setbackgroundmode(&self->scroller,
-		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);
+		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->listview.component,
 		psy_ui_ALIGN_FIXED_RESIZE);
@@ -958,6 +959,14 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		seqview_onsongchanged);
+	/* focus */
+	psy_ui_button_init_connect(&self->focus, &self->scroller.component, NULL,
+		self, seqview_oneditseqlist);
+	psy_ui_button_preventtranslation(&self->focus);
+	psy_ui_button_settext(&self->focus, "Edit");	
+	psy_ui_component_setalign(&self->focus.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setspacing(&self->focus.component, psy_ui_margin_make_em(
+	  0.25, 0.0, 0.25, 0.0));
 	psy_signal_connect(&workspace->sequenceselection.signal_changed, self,
 		seqview_onselectionchanged);
 	if (self->cmds.sequence && self->cmds.sequence->patterns) {
@@ -1011,6 +1020,11 @@ void seqview_rebuild(SeqView* self)
 	seqviewduration_update(&self->duration, TRUE);	
 	psy_ui_component_align_full(&self->scroller.component);	
 	psy_ui_component_invalidate(&self->scroller.component);	
+}
+
+void seqview_oneditseqlist(SeqView* self, psy_ui_Button* sender)
+{
+	psy_ui_component_setfocus(&self->listview.component);
 }
 
 void seqview_onselectionchanged(SeqView* self,

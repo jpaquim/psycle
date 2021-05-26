@@ -82,6 +82,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		machinebar_ondestroy);
 	// Machine ComboBox
 	psy_ui_combobox_init(&self->machinebox, &self->component, NULL);
+	self->machinebox.component.id = 10;
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinebar_onmachineboxselchange);

@@ -1,22 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "seqeditor.h"
-// host
+/* host */
 #include "cmdsgeneral.h"
 #include "pianoroll.h"
 #include "resources/resource.h"
 #include "sequencetrackbox.h"
 #include "styles.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
 #include <sequencecmds.h>
 #include <songio.h>
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -63,7 +66,8 @@ psy_audio_Sequence* seqeditorstate_sequence(SeqEditorState* self)
 	return NULL;
 }
 
-// SeqEditorRuler
+/* SeqEditorRuler */
+/* prototypes */
 static void seqeditorruler_ondestroy(SeqEditorRuler*);
 static void seqeditorruler_ondraw(SeqEditorRuler*, psy_ui_Graphics*);
 static void seqeditorruler_drawruler(SeqEditorRuler*, psy_ui_Graphics*);
@@ -73,7 +77,7 @@ static void seqeditorruler_onpreferredsize(SeqEditorRuler*, const psy_ui_Size* l
 	psy_ui_Size* rv);
 static psy_dsp_big_beat_t seqeditorruler_step(SeqEditorRuler*);
 static void seqeditorruler_oncursorchanged(SeqEditorRuler*, SeqEditorState*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditorruler_vtable;
 static bool seqeditorruler_vtable_initialized = FALSE;
 
@@ -93,7 +97,7 @@ static void seqeditorruler_vtable_init(SeqEditorRuler* self)
 		seqeditorruler_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void seqeditorruler_init(SeqEditorRuler* self, psy_ui_Component* parent,
 	SeqEditorState* state, PatternViewSkin* skin,
 	Workspace* workspace)
@@ -146,7 +150,7 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 	textline = 0;
 	duration = (size.width + psy_ui_component_scrollleftpx(&self->component)) /
 		(psy_dsp_big_beat_t)self->state->pxperbeat;
-	//psy_audio_sequence_duration(&workspace_song(self->workspace)->sequence);
+	/* psy_audio_sequence_duration(&workspace_song(self->workspace)->sequence); */
 	linewidth = duration * self->state->pxperbeat;
 	psy_ui_setcolour(g, self->skin->row);
 	psy_ui_drawline(g, psy_ui_realpoint_make(0, baseline),
@@ -252,10 +256,10 @@ void seqeditorruler_onpreferredsize(SeqEditorRuler* self, const psy_ui_Size* lim
 	rv->height = psy_ui_value_make_eh(2.0);
 }
 
-// SeqEditorLine
+/* SeqEditorLine */
 static void seqeditorline_onpreferredsize(SeqEditorLine*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditorline_vtable;
 static bool seqeditorline_vtable_initialized = FALSE;
 
@@ -337,11 +341,12 @@ void seqeditorline_updateposition(SeqEditorLine* self,
 	}
 }
 
-// SeqEditorPlayLine
+/* SeqEditorPlayLine */
+/* prototypes */
 static void seqeditorplayline_onmousedown(SeqEditorPlayline*, psy_ui_MouseEvent*);
 static void seqeditorplayline_onmousemove(SeqEditorPlayline*, psy_ui_MouseEvent*);
 static void seqeditorplayline_onmouseup(SeqEditorPlayline*, psy_ui_MouseEvent*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditorplayline_vtable;
 static bool seqeditorplayline_vtable_initialized = FALSE;
 
@@ -362,7 +367,7 @@ static psy_ui_ComponentVtable* seqeditorplayline_vtable_init(SeqEditorPlayline* 
 	}
 	return &seqeditorplayline_vtable;
 }
-
+/* implementation */
 void seqeditorplayline_init(SeqEditorPlayline* self,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState* state)
@@ -448,7 +453,8 @@ void seqeditorplayline_update(SeqEditorPlayline* self)
 			self->seqeditorline.state->workspace)));	
 }
 
-// SeqEditorPatternEnrty
+/* SeqEditorPatternEnrty */
+/* prototypes */
 static void seqeditorpatternentry_ondestroy(SeqEditorPatternEntry*);
 static void seqeditorpatternentry_ondraw(SeqEditorPatternEntry*,
 	psy_ui_Graphics*);
@@ -462,7 +468,7 @@ static void seqeditorpatternentry_onsequenceselectionselect(SeqEditorPatternEntr
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqeditorpatternentry_onsequenceselectiondeselect(SeqEditorPatternEntry*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditorpatternentry_vtable;
 static bool seqeditorpatternentry_vtable_initialized = FALSE;
 
@@ -488,7 +494,7 @@ static psy_ui_ComponentVtable* seqeditorpatternentry_vtable_init(SeqEditorPatter
 	}
 	return &seqeditorpatternentry_vtable;
 }
-
+/* implementation */
 void seqeditorpatternentry_init(SeqEditorPatternEntry* self,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	psy_audio_SequenceEntry* entry,
@@ -609,7 +615,7 @@ void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry* self,
 		}
 		cursor = self->state->workspace->patterneditposition;
 		position = seqeditorstate_pxtobeat(self->state, ev->pt.x);
-		// quantize
+		/* quantize */
 		position =
 			(intptr_t)(position * psy_audio_player_lpb(workspace_player(self->state->workspace))) /
 			(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->state->workspace));
@@ -625,7 +631,7 @@ void seqeditorpatternentry_onmousedown(SeqEditorPatternEntry* self,
 					workspace_currview(self->state->workspace).section,
 					0);
 			}
-			//self->itemdragposition = self->sequenceentry->offset;
+			/* self->itemdragposition = self->sequenceentry->offset; */
 			self->state->dragstatus = TRUE;
 			self->state->dragstart = TRUE;
 		} else {
@@ -662,8 +668,8 @@ void seqeditorpatternentry_onsequenceselectiondeselect(SeqEditorPatternEntry* se
 	}
 }
 
-// SeqEditorTrack
-// prototypes
+/* SeqEditorTrack */
+/* prototypes */
 static void seqeditortrack_ondestroy(SeqEditorTrack*);
 static void seqeditortrack_onpreferredsize(SeqEditorTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -678,8 +684,7 @@ static void seqeditortrack_onsequenceinsert(SeqEditorTrack*,
 	psy_audio_Sequence* sender, psy_audio_OrderIndex* index);
 static void seqeditortrack_onsequencetrackreposition(SeqEditorTrack*,
 	psy_audio_Sequence* sender, uintptr_t trackidx);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditortrack_vtable;
 static bool seqeditortrack_vtable_initialized = FALSE;
 
@@ -712,8 +717,7 @@ static psy_ui_ComponentVtable* seqeditortrack_vtable_init(SeqEditorTrack* self)
 	}
 	return &seqeditortrack_vtable;
 }
-
-// implementation
+/* implementation */
 void seqeditortrack_init(SeqEditorTrack* self,
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditorState* state, PatternViewSkin* skin,
@@ -918,9 +922,11 @@ void seqeditortrack_onmousemove(SeqEditorTrack* self, psy_ui_MouseEvent* ev)
 		dragposition = seqeditorstate_pxtobeat(self->state, ev->pt.x);
 		bpl = (1.0 / (psy_dsp_big_beat_t)
 			psy_audio_player_lpb(workspace_player(self->workspace)));
-		// start drag only if a difference of one line exists if only the
-		// pattern cursor (done in seqeditor_patternentry) wanted to be changed
-		// and prevent moving the sequencentry
+		/*
+		** start drag only if a difference of one line exists if only the
+		** pattern cursor (done in seqeditor_patternentry) wanted to be changed
+		** and prevent moving the sequencentry
+		*/
 		if (fabs(dragposition - self->state->dragstartoffset) >= bpl) {
 			self->state->dragstart = FALSE;
 		}
@@ -998,8 +1004,8 @@ void seqeditortrack_onsequencetrackreposition(SeqEditorTrack* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-// SeqEditorTrackDesc
-// prototypes
+/* SeqEditorTrackDesc */
+/* prototypes */
 static void seqeditortrackdesc_onsequenceselectionselect(SeqEditorTrackDesc*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqeditortrackdesc_onsequenceselectiondeselect(SeqEditorTrackDesc*,
@@ -1011,15 +1017,15 @@ static void seqeditortrackdesc_onnewtrack(SeqEditorTrackDesc*,
 static void seqeditortrackdesc_ondeltrack(SeqEditorTrackDesc*,
 	TrackBox* sender);
 static void seqeditortrackdesc_build(SeqEditorTrackDesc*);
-// implementation
+/*  implementation */
 void seqeditortrackdesc_init(SeqEditorTrackDesc* self, psy_ui_Component* parent,
 	SeqEditorState* state, Workspace* workspace)
 {
 	self->workspace = workspace;
 	self->state = state;	
 	psy_ui_component_init(&self->component, parent, NULL);	
-	// psy_ui_component_doublebuffer(&self->component);
-	// psy_ui_component_setwheelscroll(&self->component, 1);
+	/*  psy_ui_component_doublebuffer(&self->component); */
+	/*  psy_ui_component_setwheelscroll(&self->component, 1); */
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_TOP, psy_ui_margin_zero());
@@ -1032,7 +1038,7 @@ void seqeditortrackdesc_init(SeqEditorTrackDesc* self, psy_ui_Component* parent,
 		seqeditortrackdesc_onsequenceselectiondeselect);
 	psy_signal_connect(&workspace->sequenceselection.signal_update, self,
 		seqeditortrackdesc_onsequenceselectionupdate);		
-	//psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);		
+	/* psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL); */
 }
 
 void seqeditortrackdesc_onsequenceselectionselect(SeqEditorTrackDesc* self,
@@ -1113,8 +1119,8 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 	psy_ui_component_align(&self->component);
 }
 
-// SeqEditorTracks
-// prototypes
+/* SeqEditorTracks */
+/* prototypes */
 static void seqeditortracks_ondestroy(SeqEditorTracks*, psy_ui_Component*
 	sender);
 static void seqeditortracks_onmousedown(SeqEditorTracks*,
@@ -1139,7 +1145,7 @@ static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditorState*);
 static void seqeditortracks_updatecursorlineposition(SeqEditorTracks*);
 static void seqeditortracks_updateseqeditlineposition(SeqEditorTracks*);
 static void seqeditortracks_outputstatusposition(SeqEditorTracks*, double x);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditortracks_vtable;
 static bool seqeditortracks_vtable_initialized = FALSE;
 
@@ -1165,7 +1171,7 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 	}
 	self->component.vtable = &seqeditortracks_vtable;
 }
-// implementation
+/* implementation */
 void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	SeqEditorState* state, PatternViewSkin* skin, Workspace* workspace)
 {
@@ -1180,8 +1186,8 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make_em(8.0, 0.0));
-	//psy_ui_component_setbackgroundcolour(&self->component,
-		//psy_ui_colour_make(0x00CACACA));
+	/* psy_ui_component_setbackgroundcolour(&self->component,
+	   psy_ui_colour_make(0x00CACACA)); */
 	psy_ui_component_setwheelscroll(&self->component, 1);	
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -1398,7 +1404,7 @@ void seqeditortracks_outputstatusposition(SeqEditorTracks* self, double x)
 	char text[256];
 
 	position = seqeditorstate_pxtobeat(self->state, x);
-	// quantize to lpb raster
+	/* quantize to lpb raster */
 	seqeditorstate_setcursor(self->state,
 		position * psy_audio_player_lpb(workspace_player(self->workspace)) /
 		(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->workspace)));
@@ -1407,7 +1413,8 @@ void seqeditortracks_outputstatusposition(SeqEditorTracks* self, double x)
 	workspace_outputstatus(self->workspace, text);
 }
 
-// SeqEditor
+/* SeqEditorBar */
+/* implementation */
 void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
 {	
 	psy_ui_Margin spacing;
@@ -1440,8 +1447,8 @@ void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)
 	}
 }	
 
-// SeqEditor
-// prototypes
+/* SeqEditor */
+/* prototypes */
 static void seqeditor_ondestroy(SeqEditor*);
 static void seqeditor_onsongchanged(SeqEditor*, Workspace*, int flag,
 	psy_audio_Song*);
@@ -1466,7 +1473,7 @@ static void seqeditor_onsequencetrackremove(SeqEditor*, psy_audio_Sequence*,
 static void seqeditor_onmouseup(SeqEditor*, psy_ui_MouseEvent*);
 static void seqeditor_onmousemove(SeqEditor*, psy_ui_MouseEvent*);
 static void seqeditor_ontoggleexpand(SeqEditor*, psy_ui_Button* sender);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable seqeditor_vtable;
 static bool seqeditor_vtable_initialized = FALSE;
 
@@ -1482,8 +1489,9 @@ static void seqeditor_vtable_init(SeqEditor* self)
 			seqeditor_onmousemove;
 		seqeditor_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &seqeditor_vtable;
 }
-// implementation
+/* implementation */
 void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	PatternViewSkin* skin,
 	Workspace* workspace)
@@ -1493,9 +1501,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_margin_init_em(&topmargin, 0.0, 0.0, 0.5, 0.0);
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditor_vtable_init(self);	
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_SEQEDT, psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
-	self->component.vtable = &seqeditor_vtable;	
+	psy_ui_component_setstyletype(&self->component, STYLE_SEQEDT);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	sequencecmds_init(&self->cmds, workspace);
@@ -1507,7 +1513,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->bar.zoombox_beat.signal_changed, self,
 		seqeditor_onzoomboxbeatchanged);
-	// track description
+	/* track description */
 	psy_ui_component_init(&self->trackdescpane, &self->left, NULL);
 	psy_ui_component_setalign(&self->trackdescpane, psy_ui_ALIGN_CLIENT);
 	seqeditortrackdesc_init(&self->trackdescriptions, &self->trackdescpane,
@@ -1520,16 +1526,16 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->zoombox_height.signal_changed, self,
 		seqeditor_onzoomboxheightchanged);
-	// header
+	/* header */
 	psy_ui_component_init_align(&self->header, &self->component, NULL,
 		psy_ui_ALIGN_TOP);
-	// ruler
+	/* ruler */
 	psy_ui_component_init_align(&self->rulerpane, &self->header, NULL,
 		psy_ui_ALIGN_CLIENT);
 	seqeditorruler_init(&self->ruler, &self->rulerpane, &self->state,
 		skin, workspace);
 	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);
-	// expand
+	/* expand */
 	psy_ui_button_init(&self->expand, &self->header, NULL);
 	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
 		psy_ui_colour_white());
@@ -1540,7 +1546,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->expand.signal_clicked, self,
 		seqeditor_ontoggleexpand);
 	self->expanded = FALSE;
-	// tracks
+	/* tracks */
 	seqeditortracks_init(&self->tracks, &self->component,		
 		&self->state, skin, workspace);
 	self->tracks.skin = skin;	
@@ -1550,8 +1556,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		psy_ui_SETBACKGROUND);
 	psy_ui_component_setalign(&self->tracks.component,
 		psy_ui_ALIGN_FIXED_RESIZE);
-	psy_ui_component_setalign(&self->scroller.component,
-		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	seqeditorbar_setdragmode(&self->bar, self->state.dragmode);	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_make_ew(20.0),

@@ -61,7 +61,7 @@ struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_listboximp_multiselect(p
 	return self->vtable->allocinit_listboximp_multiselect(self, component, parent);
 }
 
-struct psy_ui_ComboBoxImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view)
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view)
 {
 	return self->vtable->allocinit_comboboximp(self, component, parent, view);
 }
@@ -151,7 +151,7 @@ static struct psy_ui_ComponentImp* allocinit_editimp_multiline(struct psy_ui_Imp
 static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
-static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }

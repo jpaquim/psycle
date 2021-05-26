@@ -202,4 +202,3 @@ void psy_ui_listboximp_extend(psy_ui_ComponentImp* self)
 	listbox_imp_vtable_init();
 	self->extended_vtable = &listbox_imp_vtable;
 }
-

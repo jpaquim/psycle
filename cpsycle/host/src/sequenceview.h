@@ -148,13 +148,14 @@ INLINE psy_ui_Component* seqviewtrackheader_base(SeqviewTrackHeaders* self)
 typedef struct SeqView {
 	/* inherits */
 	psy_ui_Component component;
-	/* ui elements */
+	/* ui elements */	
 	SeqviewList listview;
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
 	psy_ui_Component spacer;
 	SeqviewTrackHeaders trackheader;
 	SeqviewDuration duration;
+	psy_ui_Button focus;
 	/* internal */
 	SeqViewState state;
 	SequenceCmds cmds;		

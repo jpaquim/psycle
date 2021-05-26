@@ -197,6 +197,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_show;
 	psy_Signal signal_hide;	
 	psy_Signal signal_align;
+	psy_Signal signal_beforealign;
 	psy_Signal signal_selectsection;	
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;

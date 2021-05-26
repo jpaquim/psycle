@@ -599,6 +599,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_focus);
 	psy_signal_init(&self->signal_focuslost);
 	psy_signal_init(&self->signal_align);
+	psy_signal_init(&self->signal_beforealign);
 	psy_signal_init(&self->signal_preferredsizechanged);
 	psy_signal_init(&self->signal_command);
 	psy_signal_init(&self->signal_selectsection);
@@ -689,6 +690,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_focus);
 	psy_signal_dispose(&self->signal_focuslost);
 	psy_signal_dispose(&self->signal_align);	
+	psy_signal_dispose(&self->signal_beforealign);
 	psy_signal_dispose(&self->signal_command);
 	psy_signal_dispose(&self->signal_preferredsizechanged);
 	psy_signal_dispose(&self->signal_selectsection);
@@ -867,6 +869,7 @@ void psy_ui_component_align(psy_ui_Component* self)
 		psy_ui_LCLAligner aligner;
 
 		psy_ui_lclaligner_init(&aligner, self);
+		psy_signal_emit(&self->signal_beforealign, self, 0);
 		psy_ui_aligner_align(psy_ui_lclaligner_base(&aligner));
 		psy_signal_emit(&self->signal_align, self, 0);
 		self->vtable->onalign(self);
@@ -876,6 +879,7 @@ void psy_ui_component_align(psy_ui_Component* self)
 		psy_ui_GridAligner aligner;
 
 		psy_ui_gridaligner_init(&aligner, self);
+		psy_signal_emit(&self->signal_beforealign, self, 0);
 		psy_ui_aligner_align(psy_ui_gridaligner_base(&aligner));
 		psy_signal_emit(&self->signal_align, self, 0);
 		self->vtable->onalign(self);

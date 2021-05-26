@@ -264,7 +264,7 @@ void psy_ui_viewcomponentimp_init(psy_ui_ViewComponentImp* self,
 	view_imp_vtable_init(self);
 	self->imp.vtable = &view_imp_vtable;
 	self->view = view;
-	self->component = component;
+	self->component = component;	
 	self->parent = parent;
 	self->visible = TRUE;
 	if (parent) {
@@ -463,13 +463,30 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	const psy_ui_TextMetric* tm;
 
 	tm = view_dev_textmetric(self);
-	self->position = psy_ui_realrectangle_make(
-		psy_ui_realpoint_make(
-			psy_ui_value_px(&topleft.x, tm, NULL),
-			psy_ui_value_px(&topleft.y, tm, NULL)),
-		psy_ui_realsize_make(
-			psy_ui_value_px(&size.width, tm, NULL),
-			psy_ui_value_px(&size.height, tm, NULL)));
+	if (psy_ui_size_has_percent(&size)) {
+		psy_ui_Size parentsize;
+
+		if (psy_ui_component_parent_const(self->component)) {
+			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+		} else {
+			parentsize = psy_ui_component_scrollsize(self->component);
+		}
+		self->position = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_value_px(&topleft.x, tm, &parentsize),
+				psy_ui_value_px(&topleft.y, tm, &parentsize)),
+			psy_ui_realsize_make(
+				psy_ui_value_px(&size.width, tm, &parentsize),
+				psy_ui_value_px(&size.height, tm, &parentsize)));		
+	} else {
+		self->position = psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(
+				psy_ui_value_px(&topleft.x, tm, NULL),
+				psy_ui_value_px(&topleft.y, tm, NULL)),
+			psy_ui_realsize_make(
+				psy_ui_value_px(&size.width, tm, NULL),
+				psy_ui_value_px(&size.height, tm, NULL)));
+	}
 }
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)

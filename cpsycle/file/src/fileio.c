@@ -1,28 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "fileio.h"
-// std
+/* std */
 #include <assert.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define VERSION_MAJOR_ZERO			0x00000000
 #define VERSION_MAJOR_ONE			0x00010000
 
-
 static bool psyfile_ischunkversion_major_zero(const PsyFile* self);
 
 uint32_t FourCC(char *psName)
 {
-	int32_t retbuf = 0x20202020;   // four spaces (padding)
+	int32_t retbuf = 0x20202020;   /* four spaces (padding) */
 	char *ps = ((char *)&retbuf);
 	int i;
 	
-	// Remember, this is Intel format!
-	// The first character goes in the LSB
+	/*
+	** Remember, this is Intel format!
+	**  The first character goes in the LSB
+	*/
 	for (i = 0; i < 4 && psName[i]; ++i) {
 		ps[i] = psName[i];
 	}
@@ -64,7 +68,7 @@ int psyfile_close(PsyFile* self)
 	}
 	return 1;	
 }
-// read
+
 int psyfile_read(PsyFile* self,
 				 void* pData,
 				 uintptr_t numBytes)

@@ -326,6 +326,7 @@ static void init_properties(psy_AudioDriver* driver)
 	devices = psy_property_settext(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
+	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
 	psy_property_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
@@ -334,6 +335,7 @@ static void init_properties(psy_AudioDriver* driver)
 	indevices = psy_property_settext(
 		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device (Select different in Recorder)");
+	psy_property_sethint(indevices, PSY_PROPERTY_HINT_COMBO);
 	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
 		psy_property_append_int(indevices, port->portname, i, 0, 0);

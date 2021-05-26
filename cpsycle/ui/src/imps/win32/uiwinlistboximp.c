@@ -67,8 +67,7 @@ void psy_ui_win_listboximp_init(psy_ui_win_ComponentImp* self,
 		TEXT("LISTBOX"),
 		0, 0, 100, 200,
 		(WS_CHILD | WS_VISIBLE | LBS_STANDARD & ~LBS_SORT | LBS_NOTIFY) & ~WS_BORDER,
-		1);
-	/* vtable_init(self); */
+		1);	
 	psy_ui_listboximp_extend(&self->imp);
 	listboximp_imp_vtable_init(self);
 	self->imp.extended_imp = self;
