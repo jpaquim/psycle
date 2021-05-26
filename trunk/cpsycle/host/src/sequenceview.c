@@ -210,7 +210,7 @@ void seqviewtrack_init(SeqViewTrack* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(&self->component,
 		STYLE_SEQLISTVIEW_TRACK);
 	psy_ui_component_setstyletype_select(&self->component,		
-		STYLE_SEQLISTVIEW_TRACK_SELECT);
+		STYLE_SEQLISTVIEW_TRACK_SELECT);	
 	self->state = state;
 	self->trackindex = trackindex;
 	self->track = track;
@@ -543,7 +543,7 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_setscrollstep(&self->component,
 		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
-	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);
+	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);	
 	seqviewlist_build(self);
 	psy_signal_connect(
 		&self->state->cmds->workspace->player.eventdrivers.signal_input, self,
@@ -768,9 +768,16 @@ void seqviewlist_onfocus(SeqviewList* self)
 {
 	psy_audio_OrderIndex first;
 	
+	seqviewlist_super_vtable.onfocus(&self->component);
 	first = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	self->state->active = TRUE;
+	psy_ui_component_setborder(
+		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
+		NULL);
+	psy_ui_component_addstylestate(
+		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
+		psy_ui_STYLESTATE_SELECT);
 	seqviewlist_invalidaterow(self, first.order);
 	self->state->cmds->workspace->seqviewactive = TRUE;
 }
@@ -779,11 +786,18 @@ void seqviewlist_onfocuslost(SeqviewList* self)
 {
 	psy_audio_OrderIndex first;
 
+	seqviewlist_super_vtable.onfocuslost(&self->component);
 	first = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	self->state->active = FALSE;
 	seqviewlist_invalidaterow(self, first.order);
 	self->state->cmds->workspace->seqviewactive = FALSE;
+	psy_ui_component_setborder(
+		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
+		psy_ui_component_border(&self->component));
+	psy_ui_component_removestylestate(
+		psy_ui_component_parent(psy_ui_component_parent(&self->component)),
+		psy_ui_STYLESTATE_SELECT);
 }
 
 
@@ -936,7 +950,9 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_ui_component_setspacing(psy_ui_scroller_base(&self->scroller),
 		psy_ui_margin_make_em(0.5, 0.5, 0.0, 1.0));
 	psy_ui_scroller_setbackgroundmode(&self->scroller,
-		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);	
+		psy_ui_SETBACKGROUND, psy_ui_SETBACKGROUND);
+	psy_ui_component_setstyletype_select(&self->scroller.component,
+		STYLE_SEQLISTVIEW_FOCUS);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->listview.component,
 		psy_ui_ALIGN_FIXED_RESIZE);

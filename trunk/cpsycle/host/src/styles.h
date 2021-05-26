@@ -27,6 +27,7 @@ extern "C" {
 #define STYLE_SEQLISTVIEW_SELECT             31042
 #define STYLE_SEQLISTVIEW_TRACK              31043
 #define STYLE_SEQLISTVIEW_TRACK_SELECT       31044
+#define STYLE_SEQLISTVIEW_FOCUS				 31045
 #define STYLE_SEQVIEW_BUTTONS                31060
 #define STYLE_SEQVIEW_BUTTON                 31080
 #define STYLE_SEQVIEW_BUTTON_HOVER           31081
