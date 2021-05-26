@@ -48,6 +48,11 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_setcolours(style, material.onprimary_medium, material.surface_overlay_5p);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQLISTVIEW, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_solid_radius(&style->border,
+		psy_ui_colour_weighted(&material.secondary, 900), 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQLISTVIEW_FOCUS, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.onprimary_strong, material.surface_overlay_5p);

@@ -76,7 +76,7 @@ void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(&self->component);	
 	self->resize = 0;
 	self->hasrestore = FALSE;
-	self->thumbsize = 30.0;
+	self->thumbsize = 35.0;
 	self->isvertical = TRUE;
 	self->toggle = NULL;
 	self->button = NULL;
@@ -93,12 +93,20 @@ void splitter_ondraw(psy_ui_Splitter* self, psy_ui_Graphics* g)
 		psy_ui_RealPoint center;
 
 		center = splitter_vthumbcenter(self);
+		center.x -= 1;
+		psy_ui_drawline(g, center, psy_ui_realpoint_make(center.x,
+			center.y + self->thumbsize));
+		center.x += 2;
 		psy_ui_drawline(g, center, psy_ui_realpoint_make(center.x,
 			center.y + self->thumbsize));
 	} else {
 		psy_ui_RealPoint center;
 
 		center = splitter_hthumbcenter(self);
+		center.y -= 1;
+		psy_ui_drawline(g, center,
+			psy_ui_realpoint_make(center.x + self->thumbsize, center.y));
+		center.y += 2;
 		psy_ui_drawline(g, center,
 			psy_ui_realpoint_make(center.x + self->thumbsize, center.y));
 	}
