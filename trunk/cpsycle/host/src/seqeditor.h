@@ -1,18 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SEQEDITOR_H)
 #define SEQEDITOR_H
 
-// host
+/* host */
+#include "patternviewskin.h"
 #include "sequencehostcmds.h"
 #include "sequencetrackbox.h"
-#include "patternviewskin.h"
 #include "workspace.h"
 #include "zoombox.h"
-// ui
+/* ui */
 #include <uiedit.h>
-
 #include <uiscroller.h>
 
 #ifdef __cplusplus
@@ -48,7 +49,7 @@ typedef struct SeqEditorState {
 	uintptr_t cmdtrack;
 	uintptr_t cmdrow;
 	bool showpatternnames;
-	// drag
+	/* drag */
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
 	bool dragstart;
@@ -56,7 +57,7 @@ typedef struct SeqEditorState {
 	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;
 	psy_audio_OrderIndex dragseqpos;
-	// references	
+	/* references */
 	psy_audio_SequenceEntry* sequenceentry;
 	Workspace* workspace;	
 	SequenceCmds* cmds;
@@ -92,11 +93,11 @@ INLINE void seqeditorstate_setcursor(SeqEditorState* self,
 	psy_signal_emit(&self->signal_cursorchanged, self, 0);
 }
 
-// SeqEditorRuler
+/* SeqEditorRuler */
 typedef struct SeqEditorRuler {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;	
-	// references
+	/* references */
 	SeqEditorState* state;
 	PatternViewSkin* skin;	
 	Workspace* workspace;
@@ -110,11 +111,11 @@ INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 	return &self->component;
 }
 
-// SeqEditorLine
+/* SeqEditorLine */
 typedef struct SeqEditorLine {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// references
+	/* references */
 	SeqEditorState* state;
 } SeqEditorLine;
 
@@ -135,11 +136,11 @@ INLINE psy_ui_Component* seqeditorline_base(SeqEditorLine* self)
 	return &self->component;
 }
 
-// SeqEditorPlayline
+/* SeqEditorPlayline */
 typedef struct SeqEditorPlayline {
-	// inherits
+	/* inherits */
 	SeqEditorLine seqeditorline;
-	// internal
+	/* internal */
 	bool drag;
 	double dragbase;	
 } SeqEditorPlayline;
@@ -154,13 +155,13 @@ SeqEditorPlayline* seqeditorplayline_allocinit(
 	SeqEditorState*);
 void seqeditorplayline_update(SeqEditorPlayline*);
 
-// SeqEditorPatternEntry
+/* SeqEditorPatternEntry */
 typedef struct SeqEditorPatternEntry {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_audio_SequenceEntry* entry;
-	// references
+	/* references */
 	SeqEditorState* state;
 	psy_audio_SequenceEntry* sequenceentry;
 	psy_audio_OrderIndex seqpos;
@@ -222,11 +223,11 @@ INLINE psy_ui_Component* seqeditortrack_base(SeqEditorTrack* self)
 	return &self->component;
 }
 
-// SeqEditorTrackDesc
+/* SeqEditorTrackDesc */
 typedef struct SeqEditorTrackDesc {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;	
-	// references
+	/* references */
 	PatternViewSkin* skin;
 	SeqEditorState* state;
 	Workspace* workspace;
@@ -266,9 +267,9 @@ typedef struct SeqEditorBar {
 void seqeditorbar_init(SeqEditorBar*, psy_ui_Component* parent);
 
 typedef struct SeqEditor {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal	
+	/* internal */
 	psy_ui_Component header;
 	psy_ui_Component rulerpane;
 	SeqEditorRuler ruler;
@@ -283,7 +284,7 @@ typedef struct SeqEditor {
 	SequenceCmds cmds;
 	psy_ui_Button expand;
 	bool expanded;
-	// references
+	/* references */
 	Workspace* workspace;
 } SeqEditor;
 

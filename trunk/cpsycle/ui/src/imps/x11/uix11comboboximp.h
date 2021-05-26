@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 	typedef struct psy_ui_x11_ComboBoxImp {
-		psy_ui_ComboBoxImp imp;		
+		psy_ui_ComponentImp imp;		
 		psy_ui_x11_ComponentImp x11_component_imp;
 		psy_ui_ListBox x11_combo;
 		struct psy_ui_Component* component;

@@ -97,7 +97,10 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);			
 			componentsize = psy_ui_component_preferredsize(component,
-				&limit);			
+				&limit);
+			if (component->id == 20) {
+				self = self;
+			}
 			psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
 				&size);
 			c_tm = psy_ui_component_textmetric(component);

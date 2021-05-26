@@ -1529,6 +1529,7 @@ void init_properties(psy_AudioDriver* driver)
 	devices = psy_property_settext(
 		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
+	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
 	self->asioif->RefreshAvailablePorts();
 	self->asioif->GetPlaybackPorts(playbackports);
 	intptr_t i = 0;

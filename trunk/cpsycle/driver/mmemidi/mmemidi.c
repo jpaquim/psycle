@@ -177,6 +177,7 @@ void init_properties(psy_EventDriver* context)
 	psy_property_append_str(self->configuration, "name", "winmme midi");
 	psy_property_append_str(self->configuration, "version", "1.0");
 	devices = psy_property_append_choice(self->configuration, "device", 0);
+	psy_property_sethint(devices, PSY_PROPERTY_HINT_COMBO);
 	n = midiInGetNumDevs();	
 	for (i = 0; i < n; ++i) {
 		char text[256];

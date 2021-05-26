@@ -1,18 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "playlist.h"
-// local
+/* local */
 #include "dir.h"
 #include "propertiesio.h"
-// container
+/* container */
 #include <hashtbl.h>
-// file
-// platform
+/* platform */
 #include "../../detail/portable.h"
-// std
+/* std */
 #include <assert.h>
 
 static void playlist_initpath(psy_Playlist* self);

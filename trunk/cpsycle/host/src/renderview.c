@@ -31,6 +31,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	renderview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
 		self->properties, 3, workspace);
+	self->view.maximizemainsections = FALSE;
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);

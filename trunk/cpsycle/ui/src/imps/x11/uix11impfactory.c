@@ -38,7 +38,7 @@ static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_x11_ImpFactory*, str
 static struct psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
@@ -234,7 +234,7 @@ psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory* sel
 	return NULL;	
 }
 
-psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	psy_ui_x11_ComboBoxImp* rv;
 	psy_ui_X11App* winapp;
@@ -247,7 +247,7 @@ psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct ps
 		free(rv);
 		rv = 0;
 	}
-	return (psy_ui_ComboBoxImp*)rv;
+	return (psy_ui_ComponentImp*)rv;
 }
 
 psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)

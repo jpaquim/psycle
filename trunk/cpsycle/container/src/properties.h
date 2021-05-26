@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_PROPERTIES_H
 #define psy_PROPERTIES_H
@@ -11,19 +13,21 @@
 extern "C" {
 #endif
 
-// Composition (Tree) of variant properties
-//
-// psy_Property <>-------- psy_List<psy_Property*>
-//        <> 1
-//         |
-//         | 1
-// psy_PropertyItem
-//
-// psy_PropertyItem has a key value pair and additional fields
-// to define the type and additional information for the ui to
-// show a description or short text.
+/*
+** Composition (Tree) of variant properties
+**
+**  psy_Property <>-------- psy_List<psy_Property*>
+**         <> 1
+**          |
+**          | 1
+**  psy_PropertyItem
+**
+**  psy_PropertyItem has a key value pair and additional fields
+**  to define the type and additional information for the ui to
+**  show a description or short text
+*/
 
-// Variant types
+/* Variant types */
 typedef enum {
 	PSY_PROPERTY_TYPE_NONE,
 	PSY_PROPERTY_TYPE_ROOT,
@@ -38,7 +42,7 @@ typedef enum {
 	PSY_PROPERTY_TYPE_ACTION
 } psy_PropertyType;
 
-// View/Edit Hints
+/* View/Edit Hints */
 typedef enum {
 	PSY_PROPERTY_HINT_NONE,
 	PSY_PROPERTY_HINT_HIDE,
@@ -49,7 +53,8 @@ typedef enum {
 	PSY_PROPERTY_HINT_SHORTCUT,
 	PSY_PROPERTY_HINT_LIST,
 	PSY_PROPERTY_HINT_CHECK,
-	PSY_PROPERTY_HINT_SELECTION
+	PSY_PROPERTY_HINT_SELECTION,
+	PSY_PROPERTY_HINT_COMBO
 } psy_PropertyHint;
 
 typedef struct psy_PropertyItem {
@@ -88,31 +93,36 @@ typedef struct psy_Property {
 
 typedef int (*psy_PropertyCallback)(void*, psy_Property*, uintptr_t level);
 
-// Init/dispose
-//
-// Inits a property, key and type is root.
+/*
+** Init/dispose
+*/
+/* Inits a property, key and type is root. */
 void psy_property_init(psy_Property*);
-// Inits a property with a key. if key is zero, the key is "root".
+/* Inits a property with a key. if key is zero, the key is "root". */
 void psy_property_init_key(psy_Property*, const char* key);
-// Inits a property with a key and type.
+/* Inits a property with a key and type. */
 void psy_property_init_type(psy_Property*, const char* key, psy_PropertyType);
-// Disposes a property and its children, but doesn't free self.
+/* Disposes a property and its children, but doesn't free self. */
 void psy_property_dispose(psy_Property*);
 
-// Allocation/deallocation
-//
-// Allocates memory for a property and inits it with a key,
-// if key is zero, the key is "root".
+/*
+**Allocation/deallocation
+*/
+/*
+** Allocates memory for a property and inits it with a key,
+** if key is zero, the key is "root".
+*/
 psy_Property* psy_property_allocinit_key(const char* key);
-// Disposes a property and its children and frees the memory of self.
+/* Disposes a property and its children and frees the memory of self. */
 void psy_property_deallocate(psy_Property*);
-// Allocates memory needed to clone(full copy) the source property.
+/* Allocates memory needed to clone(full copy) the source property. */
 psy_Property* psy_property_clone(const psy_Property* source);
-// Synchronizes recursively properties with the same keys.
+/* Synchronizes recursively properties with the same keys. */
 psy_Property* psy_property_sync(psy_Property*, const psy_Property* source);
 
-// Structure
-//
+/*
+** Structure
+*/
 uintptr_t psy_property_size(const psy_Property*);
 bool psy_property_empty(const psy_Property*);
 psy_List* psy_property_begin(psy_Property*);
@@ -137,9 +147,10 @@ psy_Property* psy_property_findsectionex(psy_Property*, const char* key,
 	psy_Property** prev);
 char_dyn_t* psy_property_sections(const psy_Property*);
 
-// Setter key/value
-//
-// Changes property value or creates and inserts a new property
+/*
+** Setter key/value
+*/
+/* Changes property value or creates and inserts a new property */
 psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
 const psy_Property* psy_property_at_const(const psy_Property*, const char* key,
 	psy_PropertyType);
@@ -163,9 +174,9 @@ psy_Property* psy_property_set_choice(psy_Property*, const char* key, intptr_t v
 psy_Property* psy_property_at_choice(psy_Property*);
 bool psy_property_ischoiceitem(const psy_Property*);
 intptr_t psy_property_choiceitem_index(const psy_Property*);
-// Appends a property. If source typ is root, it changes to section.
+/* Appends a property. If source typ is root, it changes to section. */
 psy_Property* psy_property_append_property(psy_Property*, psy_Property*);
-// Creates and appends a a new property
+/* Creates and appends a a new property */
 psy_Property* psy_property_append_section(psy_Property*, const char* key);
 psy_Property* psy_property_append_str(psy_Property*, const char* key, const char* value);
 psy_Property* psy_property_append_font(psy_Property*, const char* key, const char* value);
@@ -177,9 +188,10 @@ psy_Property* psy_property_append_bool(psy_Property*, const char* key, bool valu
 psy_Property* psy_property_append_double(psy_Property*, const char* key, double value, double min, double max);
 psy_Property* psy_property_append_action(psy_Property*, const char* key);
 
-// Item setter/getter
-//
-// Definition
+/*
+** Item setter/getter
+*/
+/* Definition */
 void psy_property_change_key(psy_Property*, const char* key);
 const char* psy_property_key(const psy_Property*);
 int psy_property_type(const psy_Property*);
@@ -192,7 +204,7 @@ psy_Property* psy_property_enablesave(psy_Property*);
 psy_Property* psy_property_enableappend(psy_Property*);
 psy_Property* psy_property_preventtranslate(psy_Property*);
 bool psy_property_hasid(const psy_Property* self, int id);
-// Value
+/* Value */
 psy_Property* psy_property_setitem_bool(psy_Property*, bool value);
 bool psy_property_item_bool(const psy_Property*);
 psy_Property* psy_property_setitem_int(psy_Property*, intptr_t value);
@@ -217,7 +229,7 @@ bool psy_property_isfont(const psy_Property*);
 bool psy_property_isaction(const psy_Property*);
 bool psy_property_issection(const psy_Property*);
 
-// Description
+/* Description */
 psy_Property* psy_property_setid(psy_Property*, intptr_t id);
 intptr_t psy_property_id(const psy_Property* self);
 psy_Property* psy_property_settext(psy_Property*, const char* text);
