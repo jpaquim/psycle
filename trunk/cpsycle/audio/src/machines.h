@@ -90,7 +90,8 @@ psy_audio_Buffer* psy_audio_machines_inputs(psy_audio_Machines*, uintptr_t slot)
 psy_audio_Buffer* psy_audio_machines_outputs(psy_audio_Machines*, uintptr_t slot);
 void psy_audio_buffer_end(psy_audio_Machines*);
 void psy_audio_machines_select(psy_audio_Machines*, uintptr_t slot);
-void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t slot);
+void psy_audio_machines_selectparam(psy_audio_Machines*, uintptr_t slot);
+void psy_audio_machines_selectauxcolumn(psy_audio_Machines*, uintptr_t index);
 uintptr_t psy_audio_machines_selected(const psy_audio_Machines*);
 psy_audio_Machine* psy_audio_machines_selectedmachine(psy_audio_Machines*);
 const psy_audio_Machine* psy_audio_machines_selectedmachine_const(const

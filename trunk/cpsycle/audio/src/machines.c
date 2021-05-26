@@ -696,6 +696,17 @@ void psy_audio_machines_selectparam(psy_audio_Machines* self, uintptr_t index)
 	psy_signal_emit(&self->signal_paramselected, self, 1, index);
 }
 
+void psy_audio_machines_selectauxcolumn(psy_audio_Machines* self, uintptr_t index)
+{
+	assert(self);
+
+	if (psy_audio_machines_selectedmachine(self)) {
+		psy_audio_machine_selectauxcolumn(psy_audio_machines_selectedmachine(self),
+			index);
+	}	
+	psy_signal_emit(&self->signal_paramselected, self, 1, index);
+}
+
 uintptr_t psy_audio_machines_selected(const psy_audio_Machines* self)
 {
 	assert(self);

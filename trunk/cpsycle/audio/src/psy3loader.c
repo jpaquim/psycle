@@ -1,36 +1,35 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "psy3loader.h"
-// local
+/* local */
 #include "constants.h"
+#include "machinefactory.h"
 #include "psyconvert.h"
 #include "plugin_interface.h"
 #include "song.h"
 #include "songio.h"
-#include "machinefactory.h"
 #include "wire.h"
-// dsp
-#include <envelope.h>
+/* dsp */
 #include <datacompression.h>
+#include <envelope.h>
 #include <operations.h>
-// file
+/* file */
 #include <dir.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
-
-#if !defined DIVERSALIS__OS__MICROSOFT
-#define _MAX_PATH 4096
-#endif
 
 typedef struct Chunk {
 	char header[5];
 	int (*read)(psy_audio_PSY3Loader*);
 } Chunk;
 
-// prototypes
+/* prototypes */
 static int psy_audio_psy3loader_readversion(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_readchunks(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_readchunk(psy_audio_PSY3Loader*,
@@ -67,7 +66,7 @@ static int psy_audio_psy3loader_loadismachinebus(psy_audio_PSY3Loader*,
 static void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_postload(psy_audio_PSY3Loader*);
 
-// implementation
+/* implementation */
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader* self,
 	psy_audio_SongFile* songfile)
 {
@@ -103,9 +102,11 @@ void psy_audio_psy3loader_deallocate(psy_audio_PSY3Loader* self)
 	free(self);
 }
 
-//	===================
-//	PSY3 SONG LOAD
-//	===================
+/*
+** ===================
+** 	PSY3 SONG LOAD
+** ===================
+*/
 int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 {	
 	int status;
@@ -151,8 +152,10 @@ int psy_audio_psy3loader_readversion(psy_audio_PSY3Loader* self)
 		psyfile_readstring(self->fp, trackername, 256);
 		psyfile_readstring(self->fp, trackervers, 256);
 		bytesread = 4 + psy_strlen(trackername) + psy_strlen(trackervers) + 2;
-		// Size of the current Header DATA
-		// This ensures that any extra data is skipped.
+		/*
+		** Size of the current Header DATA
+		** This ensures that any extra data is skipped.
+		*/
 		if (self->fp->filesize > bytesread) {
 			if (psyfile_skip(self->fp, self->fp->filesize - (uint32_t)bytesread) == -1) {
 				return PSY_ERRFILE;
@@ -170,16 +173,20 @@ int psy_audio_psy3loader_readchunks(psy_audio_PSY3Loader* self)
 	header[4] = 0;		
 	while ((psyfile_read(self->fp, header, 4) == PSY_OK) && self->fp->chunkcount) {
 		if (status = psy_audio_psy3loader_readchunk(self, header)) {
-			// we are not at a valid header for some weird reason.  
-			// probably there is some extra data.
-			// shift back 3 bytes and try again			
+			/*
+			** we are not at a valid header for some weird reason.  
+			** probably there is some extra data.
+			**  shift back 3 bytes and try again
+			*/
 			if (psyfile_skip(self->fp, -3) == -1) {
 				return status;
 			}
-			// this makes it impossible to add new chunks
-			// todo: read header and skip the chunk
-			// psyfile_readchunkbegin(self->file);
-			// psyfile_seekchunkend(self->file);			
+			/*
+			** this makes it impossible to add new chunks
+			** todo: read header and skip the chunk
+			** psyfile_readchunkbegin(self->file);
+			** psyfile_seekchunkend(self->file);
+			*/
 		}
 		psy_signal_emit(&self->song->signal_loadprogress, self, 1,
 			self->progress);
@@ -205,12 +212,12 @@ int psy_audio_psy3loader_readchunk(psy_audio_PSY3Loader* self,
 	};
 	uintptr_t c;
 
-	// search chunk header and read chunk
+	/* search chunk header and read chunk */
 	for (c = 0; chunks[c].read != NULL; ++c) {
 		if (strcmp(header, chunks[c].header) == 0) {
 			int status;
 
-			// read version and size and check major zero
+			/* read version and size and check major zero */
 			if (psyfile_readchunkbegin(self->fp)) {
 				if (status = chunks[c].read(self)) {
 					return status;
@@ -221,7 +228,7 @@ int psy_audio_psy3loader_readchunk(psy_audio_PSY3Loader* self,
 			break;
 		}
 	}
-	return (chunks[c].read == NULL) // no chunk found
+	return (chunks[c].read == NULL) /* no chunk found */
 		? PSY_ERRFILE
 		: PSY_OK;
 }
@@ -259,7 +266,7 @@ void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader* self)
 	}
 }
 
-//	PSY3 chunk methods
+/*	PSY3 chunk methods */
 
 int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 {	
@@ -273,7 +280,7 @@ int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 	psyfile_readstring(self->fp, comments,sizeof comments);
 	psy_audio_songproperties_init(&songproperties, name, author, comments);
 	psy_audio_song_setproperties(self->song, &songproperties);
-	// bugfix. There were songs with incorrect size.
+	/* bugfix. There were songs with incorrect size. */
 	if (psyfile_currchunkversion(self->fp) == 0) {
 		self->fp->currchunk.size =
 			(uint32_t)(psyfile_getpos(self->fp) -
@@ -295,18 +302,20 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	uint8_t sharetracknames;
 	int status;
 		
-	// why all these temps?  to make sure if someone changes the defs of
-	// any of these members, the rest of the file reads ok.  assume 
-	// everything is an int32_t, when we write we do the same thing.
+	/*
+	** why all these temps?  to make sure if someone changes the defs of
+	** any of these members, the rest of the file reads ok.  assume 
+	** everything is an int32_t, when we write we do the same thing.
+	*/
 
-	// # of tracks for whole song
+	/* # of tracks for whole song */
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
 	songtracks = temp;
 	psy_audio_song_setnumsongtracks(self->song, songtracks);
-	// bpm
-	{///\todo: this was a hack added in 1.9alpha to allow decimal bpm values
+	/* bpm */
+	{ /* \todo: this was a hack added in 1.9alpha to allow decimal bpm values */
 		int32_t bpmcoarse;
 		int32_t bpmfine;		
 		short temp16 = 0;
@@ -321,18 +330,20 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		bpmfine = temp16;
 		psy_audio_song_setbpm(self->song, bpmcoarse + (bpmfine / 100.0));
 	}
-	// linesperbeat
+	/* linesperbeat */
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
 	psy_audio_song_setlpb(self->song, temp);	
-	// current octave
+	/* current octave */
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
 	psy_audio_song_setoctave(self->song, temp);	
-	// machinesoloed
-	// we need to buffer this because destroy machine will clear it
+	/*
+	** machinesoloed
+	** we need to buffer this because destroy machine will clear it
+	*/
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
@@ -341,7 +352,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	} else {
 		self->songfile->machinesoloed = UINTPTR_MAX;
 	}
-	// tracksoloed
+	/* tracksoloed */
 	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 		return status;
 	}
@@ -362,7 +373,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		return status;
 	}
 	instselected = temp;
-	// sequence width, for multipattern
+	/* sequence width, for multipattern */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		return status;
 	}	
@@ -370,14 +381,14 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	{
 		uint8_t temp;
 
-		// trackmuted
+		/* trackmuted */
 		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 			return status;
 		}
 		if (temp != FALSE) {
 			psy_audio_patterns_mutetrack(&self->song->patterns, i);
 		}		
-		// trackarmed
+		/* trackarmed */
 		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 			return status;
 		}
@@ -389,10 +400,12 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		psy_audio_patterns_setsolotrack(&self->song->patterns, tracksoloed);
 	}
 	if(self->fp->currchunk.version == 0) {
-		// fix for a bug existing in the song saver in the 1.7.x series
-		self->fp->currchunk.size = (11 * sizeof(int32_t)) + 
-			(songtracks * 2 * 1);
-		//sizeof(bool));
+		/*
+		** fix for a bug existing in the song saver in the 1.7.x series
+		** self->fp->currchunk.size = (11 * sizeof(int32_t)) + 
+		** songtracks * 2 * 1);
+		** sizeof(bool));
+		*/
 	}
 	if(self->fp->currchunk.version >= 1) {
 		if (status = psyfile_read(self->fp, &sharetracknames, 1)) {
@@ -405,7 +418,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 			for(t = 0; t < songtracks; ++t) {
 				char txt[40];
 				psyfile_readstring(self->fp, txt, 40);
-				// changetrackname(0,t,name);
+				/* changetrackname(0,t,name); */
 			}
 		}
 	}
@@ -422,12 +435,14 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 		psy_audio_song_settpb(self->song, 24);
 		psy_audio_song_setextraticksperbeat(self->song, 0);
 	}
-//		if (fullopen)
+/*	if (fullopen) */
 	{
-		///\todo: warning! this is done here, because the plugins, when loading, need an up-to-date information.
-		/// it should be coded in some way to get this information from the loading song, since doing it here
-		/// is bad for the winamp plugin (or any other multi-document situation).
-//			global::player().setbpm(beatspermin(), linesperbeat(), extraticksperline());
+		/* 
+		** \todo: warning! this is done here, because the plugins, when loading, need an up-to-date information.
+		** it should be coded in some way to get this information from the loading song, since doing it here
+		** is bad for the winamp plugin (or any other multi-document situation).
+		**	global::player().setbpm(beatspermin(), linesperbeat(), extraticksperline());
+		*/
 	}
 	return PSY_OK;
 }
@@ -441,26 +456,26 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 	int32_t playlength;
 	int status;
 
-	// index, for multipattern - for now always 0
+	/* index, for multipattern - for now always 0 */
 	if (status = psyfile_read(self->fp, &index, sizeof(index))) {
 		return status;
 	}
 	if (index < 0) {
-		return PSY_OK; // skip
+		return PSY_OK; /* skip */
 	}	
-	// create new tracks (0..index), if not already existing
+	/* create new tracks (0..index), if not already existing */
 	for (i = (uint32_t)psy_audio_sequence_width(&self->song->sequence); i <= (uint32_t)index; ++i) {
 		psy_audio_sequence_appendtrack(&self->song->sequence,
 			psy_audio_sequencetrack_allocinit());
 	}
 	track = psy_audio_sequence_track_at(&self->song->sequence, index);		
 	assert(track);
-	// play length for this sequence
+	/* play length for this sequence */
 	if (status = psyfile_read(self->fp, &playlength, sizeof(int32_t))) {
 		return status;		
 	}	
 	if (playlength < 0) {
-		// skip
+		/* skip */
 		return PSY_OK;
 	}	
 	psyfile_readstring(self->fp, ptemp, sizeof ptemp);
@@ -475,8 +490,10 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 			psy_audio_orderindex_make(index, i), patternslot);				
 	}
 	if (self->fp->currchunk.version > 0) {
-		// this extends the seqd chunk file format to handle 
-		// beat positions
+		/*
+		** this extends the seqd chunk file format to handle 
+		** beat positions
+		*/
 		psy_audio_SequenceEntryNode* p;
 				
 		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
@@ -501,7 +518,7 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 	int32_t lpb;
 	psy_dsp_big_beat_t bpl;
 	char patternname[MAX_PATTERNS][32];
-	/// number of lines of each pattern
+	/* number of lines of each pattern */
 	int32_t patternlines[MAX_PATTERNS];
 	int32_t songtracks;
 	int status;	
@@ -518,14 +535,19 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 		byte* pdest;
 		int32_t y;
 		size_t destsize;
-		// num lines
+		/* num lines */
 		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 			return status;
 		}
-		// clear it out if it already exists
-//			removepattern(index);
+		/*
+		** clear it out if it already exists
+		** removepattern(index);
+		*/
 		patternlines[index] = temp;
-		// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+		/*
+		** num tracks per pattern
+		** eventually this may be variable per pattern, like when we get multipattern
+		*/
 		if (status = psyfile_read(self->fp, &songtracks, sizeof temp)) {
 			return status;
 		}
@@ -543,7 +565,7 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 			}
 			beerz77decomp2(psource, &pdest, &destsize);
 			free(psource);
-			// songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0;
+			/* songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0; */
 			{
 				psy_audio_Pattern* pattern;
 				psy_audio_PatternNode* node = 0;
@@ -561,13 +583,15 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 					for (track = 0; track < psy_audio_song_numsongtracks(self->song);
 						++track) {
 						psy_audio_PatternEvent event;
-						// Psy3 PatternEntry format
-						// type				offset
-						// uint8_t note;		0
-						// uint8_t inst;		1
-						// uint8_t mach;		2
-						// uint8_t cmd;			3
-						// uint8_t parameter;	4												
+						/*
+						** Psy3 PatternEntry format
+						** type              offset
+						** uint8_t note;          0
+						** uint8_t inst;          1
+						** uint8_t mach;          2
+						** uint8_t cmd;           3
+						** uint8_t parameter;     4												
+						*/
 						psy_audio_patternevent_clear(&event);
 						event.note = ptrack[0];
 						event.inst = (ptrack[1] == 0xFF)
@@ -590,7 +614,7 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 				free(pdest);
 				pdest = 0;
 			}
-			//\ fix for a bug existing in the song saver in the 1.7.x series
+			/* fix for a bug existing in the song saver in the 1.7.x series */
 			if ((self->fp->currchunk.version == 0x0000) && psyfile_getpos(self->fp) ==
 				self->fp->currchunk.begins + self->fp->currchunk.size + 4) {
 				self->fp->currchunk.size += 4;
@@ -603,7 +627,7 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 			for (t = 0; t < self->song->patterns.songtracks; t++) {
 				char name[40];
 				psyfile_readstring(self->fp, name, 40);
-				// changetrackname(index,t,name);
+				/* changetrackname(index,t,name); */
 			}
 		}
 	}
@@ -639,17 +663,20 @@ int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self)
 		}
 		index = temp;			
 		psy_audio_patterns_insert(&self->song->patterns, index, pattern);
-		// pattern length
+		/* pattern length */
 		if (status = psyfile_read(self->fp, &ftemp, sizeof ftemp)) {
 			return status;
 		}
 		psy_audio_pattern_setlength(pattern, ftemp);
-		// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+		/* 
+		** num tracks per pattern
+		** eventually this may be variable per pattern, like when we get multipattern
+		*/
 		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 			return status;
 		}
 		psyfile_readstring(self->fp, patternname[index], sizeof *patternname);
-		// num entries
+		/* num entries */
 		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
 			return status;
 		}
@@ -661,22 +688,22 @@ int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self)
 
 			entry = psy_audio_patternentry_alloc();
 			entry->events = 0;
-			// read track
+			/* read track */
 			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 				return status;
 			}
 			entry->track = temp;
-			// read offset
+			/* read offset */
 			if (status = psyfile_read(self->fp, &ftemp, sizeof(temp))) {
 				return status;
 			}
 			entry->offset = ftemp;				
-			// num events
+			/* num events */
 			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 				return status;
 			}
 			numevents = temp;
-			// read events
+			/* read events */
 			for (j = 0; j < numevents; ++j) {
 				psy_audio_PatternEvent ev;
 
@@ -715,51 +742,64 @@ int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self)
 
 int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 {	
-	///\verbatim
-	/// NNA values overview:
-	///
-	/// 0 = Note Cut      [Fast Release 'Default']
-	/// 1 = Note Release  [Release Stage]
-	/// 2 = Note Continue [No NNA]
-	///\endverbatim
+	/* 
+	** \verbatim
+	** NNA values overview:
+	** 
+	**  0 = Note Cut      [Fast Release 'Default']
+	**  1 = Note Release  [Release Stage]
+	**  2 = Note Continue [No NNA]
+	** \endverbatim
+	*/
 	unsigned char _NNA;
 
+	/* psy_audio_XMSampler machine index for lockinst. */
+	int32_t sampler_to_use = -1; 
+	/*
+	** Force this instrument number to change the selected machine to use a
+	** specific sampler when editing (i.e. when using the pc or midi keyboards,
+	** not the notes already existing in a pattern)
+	*/
+	unsigned char _LOCKINST;
 
-	int32_t sampler_to_use = -1; // psy_audio_XMSampler machine index for lockinst.
-	unsigned char _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
-
-	///\name Amplitude Envelope overview:
-	///\{
-	/// Attack Time [in psy_audio_Samples at 44.1Khz, independently of the real samplerate]
+	/* 
+	** \name Amplitude Envelope overview:
+	** \{
+	**  Attack Time [in psy_audio_Samples at 44.1Khz, independently of the real
+	**               samplerate]
+	*/
 	int32_t ENV_AT;	
-	/// Decay Time [in psy_audio_Samples at 44.1Khz, independently of the real samplerate]
+	/* 
+	** Decay Time [in psy_audio_Samples at 44.1Khz, independently of the real
+	**             samplerate]
+	*/
 	int32_t ENV_DT;	
-	/// Sustain Level [in %]
+	/* Sustain Level [in %] */
 	int32_t ENV_SL;	
-	/// Release Time [in psy_audio_Samples at 44.1Khz, independently of the real samplerate]
+	/* Release Time [in psy_audio_Samples at 44.1Khz, independently of the real samplerate] */
 	int32_t ENV_RT;	
-	///\}
+	/* \} */
 	
-	///\name psy_dsp_Filter 
-	///\{
-	/// Attack Time [in psy_audio_Samples at 44.1Khz]
+	/* \name psy_dsp_Filter  */
+	/* \{
+	/* Attack Time [in psy_audio_Samples at 44.1Khz] */
 	int32_t ENV_F_AT;	
-	/// Decay Time [in psy_audio_Samples at 44.1Khz]
+	/* Decay Time [in psy_audio_Samples at 44.1Khz] */
 	int32_t ENV_F_DT;	
-	/// Sustain Level [0..128]
+	/* Sustain Level [0..128] */
 	int32_t ENV_F_SL;	
-	/// Release Time [in psy_audio_Samples at 44.1Khz]
+	/* Release Time [in psy_audio_Samples at 44.1Khz] */
 	int32_t ENV_F_RT;	
 
-	/// Cutoff Frequency [0-127]
+	/* Cutoff Frequency [0-127] */
 	int32_t ENV_F_CO;	
-	/// Resonance [0-127]
+	/* Resonance [0-127] */
 	int32_t ENV_F_RQ;	
-	/// EnvAmount [-128,128]
+	/* EnvAmount [-128,128] */
 	int32_t ENV_F_EA;	
-	/// psy_dsp_Filter Type. See psycle::helpers::dsp::psy_dsp_FilterType. [0..6]
+	/* psy_dsp_Filter Type. See psycle::helpers::dsp::psy_dsp_FilterType. [0..6] */
 	int32_t ENV_F_TP;	
-	///\}
+	/* \} */
 	unsigned char _RPAN;
 	unsigned char _RCUT;
 	unsigned char _RRES;
@@ -778,7 +818,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 	if(index < MAX_INSTRUMENTS)
 	{	
 		psy_audio_Instrument* instrument;			
-		// Loop stuff
+		/* Loop stuff */
 		unsigned char loop;
 		int32_t lines;
 		psy_audio_NewNoteAction nna;
@@ -798,13 +838,15 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			psy_audio_instrument_deallocate(instrument);
 			return status;
 		}
-		///\verbatim
-		/// NNA values overview:
-		///
-		/// 0 = Note Cut      [Fast Release 'Default']
-		/// 1 = Note Release  [Release Stage]
-		/// 2 = Note Continue [No NNA]
-		///\endverbatim
+		/* 
+		** \verbatim
+		** NNA values overview:
+		** 
+		** 0 = Note Cut      [Fast Release 'Default']
+		** 1 = Note Release  [Release Stage]
+		** 2 = Note Continue [No NNA]
+		** \endverbatim
+		*/
 		switch (_NNA) {
 			case 0:
 				nna = psy_audio_NNA_STOP;
@@ -821,8 +863,10 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		}			
 		psy_audio_instrument_setnna(instrument, nna);
 
-		// read envelopes
-		// ENV_VOL
+		/*
+		** read envelopes
+		** ENV_VOL
+		*/
 		if (status = psyfile_read(self->fp, &ENV_AT, sizeof(ENV_AT))) {
 			psy_audio_instrument_deallocate(instrument);
 			return status;
@@ -839,21 +883,20 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			psy_audio_instrument_deallocate(instrument);
 			return status;
 		}
-		//Truncate to 220 samples boundaries, and ensure it is not zero.
+		/* Truncate to 220 samples boundaries, and ensure it is not zero. */
 		ENV_AT = (ENV_AT / 220) * 220; if (ENV_AT <= 0) ENV_AT = 1;
 		ENV_DT = (ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
 		if (ENV_RT == 16) ENV_RT = 220;
-		// ENV_AT
+		/* ENV_AT */
 		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 			1, ENV_AT * 1.f / 44100, 1.f);
-		// ENV_DT, ENV_SL
+		/* ENV_DT, ENV_SL */
 		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
 			2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 100.f);			
-		// ENV_RT
+		/* ENV_RT */
 		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-			3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);
-						
-		// ENV_F
+			3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);						
+		/* ENV_F */
 		if (status = psyfile_read(self->fp, &ENV_F_AT, sizeof(ENV_F_AT))) {
 			psy_audio_instrument_deallocate(instrument);
 			return status;
@@ -873,14 +916,14 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		ENV_F_AT = (ENV_F_AT / 220) * 220; if (ENV_F_AT <= 0) ENV_F_AT = 1;
 		ENV_F_DT = (ENV_F_DT / 220) * 220; if (ENV_F_DT <= 0) ENV_F_DT = 1;
 		ENV_F_RT = (ENV_F_RT / 220) * 220; if (ENV_F_RT <= 0) ENV_F_RT = 1;
-		// ENV_F_AT			
+		/* ENV_F_AT */
 		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			1, ENV_F_AT * 1.f / 44100, 1.f);
-		// ENV_DT, ENV_SL
-		// note: SL map range(128) differs from volume envelope(100)
+		/* ENV_DT, ENV_SL */
+		/* note: SL map range(128) differs from volume envelope(100) */
 		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			2, (ENV_F_AT + ENV_F_DT) * 1.f / 44100, ENV_F_SL / 128.f);
-		// ENV_RT
+		/* ENV_RT */
 		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
 			3, (ENV_F_AT + ENV_F_DT + ENV_F_RT) * 1.f / 44100, 0.f);
 			
@@ -899,7 +942,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 
 		instrument->filtercutoff = ENV_F_CO / 127.f;
 		instrument->filterres = ENV_F_RQ / 127.f;
-		instrument->filtermodamount = ENV_F_EA / 128.f; // -128 .. 128 to [-1 .. 1]
+		instrument->filtermodamount = ENV_F_EA / 128.f; /* -128 .. 128 to [-1 .. 1] */
 			
 		if (status = psyfile_read(self->fp, &val, sizeof(val))) {
 			psy_audio_instrument_deallocate(instrument);
@@ -931,7 +974,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			
 		psyfile_readstring(self->fp, instrum_name,sizeof(instrum_name));
 
-		// now we have to read waves			
+		/* now we have to read waves */
 		if (status = psyfile_read(self->fp, &numwaves, sizeof(numwaves))) {
 			psy_audio_instrument_deallocate(instrument);
 			return status;
@@ -945,7 +988,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		}
 
 		if ((self->fp->currchunk.version & 0xFF) >= 1)
-		{ //revision 1 or greater
+		{ /* revision 1 or greater */
 			if (status = psyfile_read(self->fp, &sampler_to_use, sizeof(sampler_to_use))) {
 				psy_audio_instrument_deallocate(instrument);
 				return status;
@@ -956,7 +999,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			}
 		}
 
-		//Ensure validity of values read
+		/* Ensure validity of values read */
 		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) {
 			_LOCKINST=FALSE;
 			sampler_to_use = -1;
@@ -971,17 +1014,19 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 
 int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 {   
-	// Legacy for sampulse previous to Psycle 1.12	
-	// Version zero was the development version (1.7 alphas, psycle-core).
-	// Version one is the published one (1.8.5 onwards).
+	/*
+	** Legacy for sampulse previous to Psycle 1.12	
+	** Version zero was the development version (1.7 alphas, psycle-core).
+	** Version one is the published one (1.8.5 onwards).
+	*/
 	uint32_t filepos = psyfile_getpos(self->fp);
 	uint32_t  numSamples;
 	uint32_t i;	
 	char temp[8];
-	// lowversion 0 is 1.8.5, lowversion 1 is 1.8.6
+	/* lowversion 0 is 1.8.5, lowversion 1 is 1.8.6 */
 	uint32_t lowversion = (self->fp->currchunk.version&0xFFFF);
 	int idx;		
-	// Instrument Data Load
+	/* Instrument Data Load */
 	uint32_t numInstruments;
 	int status;
 
@@ -1018,23 +1063,27 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 					return status;
 				}
 			} else {
-				//versionINST 0 was not stored, so seek back.
+				/* versionINST 0 was not stored, so seek back. */
 				if (psyfile_seek(self->fp, filepos) == -1) {
 					return PSY_ERRFILE;
 				}
 				versionINST = 0;
 			}
-//				XMInstrument inst;
+			/* XMInstrument inst; */
 			if (status = psy_audio_psy3loader_loadxminstrument(self, 0, TRUE,
 					lowversion)) {
 				return status;
 			}
-//				inst.Load(*pFile, versionINST, true, lowversion);
-//				xminstruments.SetInst(inst,idx);
+			/*
+			** inst.Load(*pFile, versionINST, true, lowversion);
+			** xminstruments.SetInst(inst,idx);
+			*/
 		}
 		if (lowversion > 0) {
-			//Version 0 doesn't write the chunk size correctly
-			//so we cannot correct it in case of error
+			/*
+			** Version 0 doesn't write the chunk size correctly
+			** so we cannot correct it in case of error
+			*/
 			if (psyfile_seek(self->fp, filepos + sizeINST) == -1) {
 				return PSY_ERRFILE;
 			}
@@ -1068,7 +1117,7 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 			if (status = psyfile_read(self->fp, &versionSMPD, sizeof(versionSMPD))) {
 				return status;
 			}
-			//versionSMPD 0 was not stored, so seek back.
+			/* versionSMPD 0 was not stored, so seek back. */
 			if (versionSMPD != 1) {
 				if (psyfile_seek(self->fp, filepos) == -1) {
 					return PSY_ERRFILE;
@@ -1081,13 +1130,17 @@ int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader* self)
 			}
 			psy_audio_samples_insert(&self->song->samples, wave,
 				psy_audio_sampleindex_make(idx, 0));
-			// XMInstrument::WaveData<> wave;
-			// wave.Load(*pFile, versionSMPD, true);
-			// samples.SetSample(wave, idx);
+			/*
+			** XMInstrument::WaveData<> wave;
+			** wave.Load(*pFile, versionSMPD, true);
+			** samples.SetSample(wave, idx);
+			*/
 		}
 		if (lowversion > 0) {
-			//Version 0 doesn't write the chunk size correctly
-			//so we cannot correct it in case of error
+			/*
+			** Version 0 doesn't write the chunk size correctly
+			** so we cannot correct it in case of error
+			*/
 			if (psyfile_seek(self->fp, filepos + sizeSMPD) == -1) {
 				return PSY_ERRFILE;
 			}
@@ -1116,7 +1169,7 @@ int psy_audio_psy3loader_read_smid(psy_audio_PSY3Loader* self)
 		psy_audio_instrument_deallocate(instrument);
 		return status;
 	}
-	// read groupidx
+	/* read groupidx */
 	if ((psyfile_currchunkversion(self->fp) &
 			CURRENT_FILE_VERSION_SMID) > 1) {
 		uint8_t revert;
@@ -1156,49 +1209,49 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 	wave = psy_audio_sample_allocinit(1);
 	psyfile_readstring(self->fp, wavename, sizeof(wavename));
 	psy_audio_sample_setname(wave, wavename);
-	// wavelength
+	/* wavelength */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->numframes = temp;
-	// global volume
+	/* global volume */
 	if (status = psyfile_read(self->fp, &ftemp, sizeof(ftemp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->globalvolume = ftemp;
-	// default volume
+	/* default volume */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->defaultvolume = temp16;
-	// wave loop start
+	/* wave loop start */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->loop.start = temp;
-	// wave loop end
+	/* wave loop end */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->loop.end = temp;
-	// wave loop type				
+	/* wave loop type */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->loop.type = (psy_audio_SampleLoopType) temp;
-	// wave sustain loop start
+	/* wave sustain loop start */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->sustainloop.start = temp;
-	// wave sustain loop end
+	/* wave sustain loop end */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
@@ -1209,8 +1262,10 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 		return NULL;
 	}
 	wave->sustainloop.type = (psy_audio_SampleLoopType) temp;			
-	// "bigger than" insted of "bigger or equal", because that means 
-	// interpolate between loopend and loopstart
+	/*
+	** "bigger than" insted of "bigger or equal", because that means
+	**  interpolate between loopend and loopstart
+	*/
 	if (wave->loop.end > wave->numframes) {
 		wave->loop.end = wave->numframes;
 	}
@@ -1226,38 +1281,38 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 		}
 		wave->samplerate = temp;				
 	}
-	// wave tune
+	/* wave tune */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->zone.tune = temp16;
-	// wave fine tune
+	/* wave fine tune */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->zone.finetune = temp16;
-	// wave stereo
+	/* wave stereo */
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->stereo = btemp;
-	// pan enabled
+	/* pan enabled */
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->panenabled = btemp;
-	// pan factor
+	/* pan factor */
 	if (status = psyfile_read(self->fp, &ftemp, sizeof(ftemp))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->panfactor = ftemp;			
 	if(self->fp->currchunk.version >= 1) {
-		// surround
+		/* surround */
 		if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 			psy_audio_sample_deallocate(wave);
 			return NULL;
@@ -1270,25 +1325,25 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 	} else { 
 		wave->surround = 0;
 	}
-	// vibrato attack
+	/* vibrato attack */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->vibrato.attack = temp8;			
-	// vibrato speed
+	/* vibrato speed */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->vibrato.speed = temp8;
-	// vibrato depth
+	/* vibrato depth */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
 	}
 	wave->vibrato.depth = temp8;			
-	// vibrato type
+	/* vibrato type */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return NULL;
@@ -1298,7 +1353,7 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 	} else { 
 		wave->vibrato.type = (psy_audio_WaveForms)psy_audio_WAVEFORMS_SINUS;
 	}														
-	{ // wave data
+	{ /* wave data */
 		byte* pData;
 		short* pDest;
 		uint32_t i;
@@ -1352,48 +1407,50 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 	psy_audio_Instrument* instrument, bool islegacy, uint32_t legacyversion)
 {		
-	// SMID chunk
+	/* SMID chunk */
 	char name[256];
 	uint16_t m_Lines;
-	/// [0..1.0f] Global volume affecting all samples of the instrument.
+	/* [0..1.0f] Global volume affecting all samples of the instrument. */
 	float m_GlobVol;
-	/// [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick.
+	/* [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick. */
 	float m_VolumeFadeSpeed;
-	// Paninng
+	/* Paninng */
 	bool m_PanEnabled;
-	/// Initial panFactor (if enabled) [-1..1]
+	/* Initial panFactor (if enabled) [-1..1] */
 	float m_InitPan;
 	bool m_Surround;
-	/// Note number for center pan position
+	/* Note number for center pan position */
 	uint8_t m_NoteModPanCenter;
-	/// -32..32. 1/256th of panFactor change per seminote.
+	/* -32..32. 1/256th of panFactor change per seminote. */
 	int8_t m_NoteModPanSep;
 
-	/// Cutoff Frequency [0..127]
+	/* Cutoff Frequency [0..127] */
 	uint8_t m_FilterCutoff;
-	/// Resonance [0..127]
+	/* Resonance [0..127] */
 	uint8_t m_FilterResonance;
 	int32_t m_FilterType;
 	int status;
 
-	// Randomness. Applies on new notes.
+	/* Randomness. Applies on new notes. */
 
-	/// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+	/* Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.] */
 	float m_RandomVolume;
-	/// Random Panning (same)
+	/* Random Panning (same) */
 	float m_RandomPanning;
-	/// Random CutOff (same)
+	/* Random CutOff (same) */
 	float m_RandomCutoff;
-	/// Random Resonance (same)
+	/* Random Resonance (same) */
 	float m_RandomResonance;
 		
-	/// Check to do when a new event comes in the channel.
+	/* Check to do when a new event comes in the channel. */
 	int32_t m_DCT;
-	/// Action to take on the playing voice when the action defined by m_DCT comes in the same channel 
-	/// (like the same note value).
+	/*
+	** Action to take on the playing voice when the action defined by m_DCT comes in the same channel
+	** (like the same note value).
+	*/
 	int32_t m_DCA;
 	int legacyeins;
-	static const int note_map_size = 120; // C-0 .. B-9
+	static const int note_map_size = 120; /* C-0 .. B-9 */
 
 	legacyeins = 0;
 	psyfile_readstring(self->fp, name, 256);		
@@ -1488,7 +1545,7 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 				break;
 			case 3: ft = F_BANDREJECT12;
 				break;
-			case 4:	ft = F_NONE;//This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default"
+			case 4:	ft = F_NONE; /* This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default" */
 				break;
 			case 5: ft = F_ITLOWPASS;
 				break;
@@ -1542,14 +1599,18 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 			return status;
 		}
 		if (instrument) {
-			/// Action to take on the playing voice when any new note comes 
-			/// in the same channel.
+			/*
+			** Action to take on the playing voice when any new note comes 
+			** in the same channel.
+			*/
 			psy_audio_NewNoteAction nna;
-			// NNA_STOP = 0x0,		///  [Note Cut]	
-			// (This one actually does a very fast fadeout)
-			// NNA_CONTINUE = 0x1,	///  [Ignore]
-			// NNA_NOTEOFF = 0x2,	///  [Note off]
-			// NNA_FADEOUT = 0x3	///  [Note fade]
+			/*
+			** NNA_STOP = 0x0,		///  [Note Cut]	
+			** (This one actually does a very fast fadeout)
+			** NNA_CONTINUE = 0x1,	///  [Ignore]
+			** NNA_NOTEOFF = 0x2,	///  [Note off]
+			** NNA_FADEOUT = 0x3	///  [Note fade]
+			*/
 			switch (i) {
 				case 0: nna = psy_audio_NNA_STOP;
 				break;
@@ -1631,30 +1692,30 @@ int psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self,
 		return status;
 	}
 	if (islegacy && legacyeins==0) {
-		//Workaround for a bug in that version
-		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->filterenvelope, islegacy, self->fp->currchunk.version)) {  // islegacy, version
+		/* Workaround for a bug in that version */
+		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->filterenvelope, islegacy, self->fp->currchunk.version)) {
 			return status;
 		}
-		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->panenvelope, islegacy, self->fp->currchunk.version)) { // riffFile,islegacy, version);
+		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->panenvelope, islegacy, self->fp->currchunk.version)) {
 			return status;
 		}
 	}
 	else {
-		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->panenvelope, islegacy, self->fp->currchunk.version)) { // m_PanEnvelope.Load(riffFile,islegacy, version);
+		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->panenvelope, islegacy, self->fp->currchunk.version)) {
 			return status;
 		}
-		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->filterenvelope, islegacy, self->fp->currchunk.version)) { // m_FilterEnvelope.Load(riffFile,islegacy, version);
+		if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->filterenvelope, islegacy, self->fp->currchunk.version)) {
 			return status;
 		}
 	}
-	if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->pitchenvelope, islegacy, self->fp->currchunk.version)) { // m_PitchEnvelope.Load(riffFile,islegacy, version);
+	if (status = psy_audio_psy3loader_xminstrumentenvelopeload(self, &instrument->pitchenvelope, islegacy, self->fp->currchunk.version)) {
 		return status;
 	}
-	// ValidateEnabled();
+	/* ValidateEnabled(); */
 	return PSY_OK;
 }
 			
-/// The meaning of the first value (int), is time, and the unit depends on the context.
+/* The meaning of the first value (int), is time, and the unit depends on the context. */
 typedef struct {
 	int first;
 	float second;
@@ -1668,25 +1729,27 @@ int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 	uint32_t version=0;
 	uint32_t size=0;
 	uint32_t filepos=0;
-	/// Envelope is enabled or disabled
+	/* Envelope is enabled or disabled */
 	bool m_Enabled;
-	/// if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel*
+	/* if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel* */
 	bool m_Carry;
-	/// Array of Points of the envelope.
-	/// first : time at which to set the value. Unit can be different things depending on the context.
-	/// second : 0 .. 1.0f . (or -1.0 1.0 or whatever else) Use it as a multiplier.
-//	PointValue m_Points[1024];
-	/// Loop Start Point
+	/*
+	** Array of Points of the envelope.
+	** first : time at which to set the value. Unit can be different things depending on the context.
+	** second : 0 .. 1.0f . (or -1.0 1.0 or whatever else) Use it as a multiplier.
+	** PointValue m_Points[1024];
+	*/
+	/* Loop Start Point */
 	unsigned int m_LoopStart;
-	/// Loop End Point
+	/* Loop End Point */
 	unsigned int m_LoopEnd; 
-	/// Sustain Start Point
+	/* Sustain Start Point */
 	unsigned int m_SustainBegin;
-	/// Sustain End Point
+	/* Sustain End Point */
 	unsigned int m_SustainEnd;
-	/// Envelope mode (meaning of the time value)
+	/* Envelope mode (meaning of the time value) */
 	int32_t m_Mode;
-	/// Indicates that this envelope is operated as an ADSR (it is an option for the visual component).
+	/* Indicates that this envelope is operated as an ADSR (it is an option for the visual component). */
 	bool m_Adsr;
 	int status;
 
@@ -1713,7 +1776,7 @@ int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 		version = legacyversion;
 	}
 
-	// Information starts here	
+	/* Information starts here */
 	if (status = psyfile_read(self->fp, &m_Enabled, sizeof(m_Enabled))) {
 		return status;
 	}
@@ -1755,28 +1818,32 @@ int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 		}
 		for(i = 0; i < num_of_points; i++){
 			PointValue value;
-			// The time in which this point is placed. The unit depends on the
-			// mode.
+			/*
+			** The time in which this point is placed. The unit depends on the
+			** mode.
+			*/
 			if (status = psyfile_read(self->fp, &value.first, sizeof(value.first))) {
 				return status;
 			}
-			// The value that this point has. Depending on the type of
-			// envelope, this can range between 0.0 and 1.0 or between -1.0 and
-			// 1.0
+			/*
+			** The value that this point has. Depending on the type of
+			** envelope, this can range between 0.0 and 1.0 or between -1.0 and
+			** 1.0
+			*/
 			if (status = psyfile_read(self->fp, &value.second, sizeof(value.second))) {
 				return status;
 			}
-			// todo range
+			/* todo range */
 			psy_dsp_envelope_append(envelope,
 				psy_dsp_envelopepoint_make_all(
 					(psy_dsp_seconds_t)value.first,
 					value.second, 0.f,
 					100000.f, -1.f, 1.f));			
-			// m_Points.push_back(value);
+			/* m_Points.push_back(value); */
 		}
 	}
 	if (version == 0) {
-		m_Mode = 0; // Mode::TICK;
+		m_Mode = 0; /* Mode::TICK; */
 		m_Adsr = FALSE;
 	}
 	else {
@@ -1792,7 +1859,7 @@ int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 		}
 		envelope->timemode = (psy_dsp_EnvelopeTimeMode)m_Mode;		
 	}
-	// (convert ms to seconds)
+	/* (convert ms to seconds) */
 	if (m_Mode == psy_dsp_ENVELOPETIME_SECONDS) {
 		psy_List* node;
 		int c;
@@ -1819,7 +1886,7 @@ int psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 			}
 		}
 	}
-	// Information ends here
+	/* Information ends here */
 	if (!legacy) {
 		if (psyfile_seek(self->fp, filepos + size) == -1) {
 			return PSY_ERRFILE;
@@ -1849,49 +1916,49 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 	wave = psy_audio_sample_allocinit(1);
 	psyfile_readstring(self->fp, wavename, sizeof(wavename));
 	psy_audio_sample_setname(wave, wavename);
-	// wavelength
+	/* wavelength */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->numframes = temp;
-	// global volume
+	/* global volume */
 	if (status = psyfile_read(self->fp, &ftemp, sizeof(ftemp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->globalvolume = ftemp;
-	// default volume
+	/* default volume */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->defaultvolume = temp16;
-	// wave loop start
+	/* wave loop start */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->loop.start = temp;
-	// wave loop end
+	/* wave loop end */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->loop.end = temp;
-	// wave loop type				
+	/* wave loop type */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->loop.type = (psy_audio_SampleLoopType)temp;
-	// wave sustain loop start
+	/* wave sustain loop start */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->sustainloop.start = temp;
-	// wave sustain loop end
+	/* wave sustain loop end */
 	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
@@ -1902,8 +1969,10 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 		return status;
 	}
 	wave->sustainloop.type = (psy_audio_SampleLoopType)temp;
-	// "bigger than" insted of "bigger or equal", because that means 
-	// interpolate between loopend and loopstart
+	/*
+	** "bigger than" insted of "bigger or equal", because that means 
+	**  interpolate between loopend and loopstart
+	*/
 	if (wave->loop.end > wave->numframes) {
 		wave->loop.end = wave->numframes;
 	}
@@ -1919,38 +1988,38 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 		}
 		wave->samplerate = temp;
 	}
-	// wave tune
+	/* wave tune */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->zone.tune = temp16;
-	// wave fine tune
+	/* wave fine tune */
 	if (status = psyfile_read(self->fp, &temp16, sizeof(temp16))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->zone.finetune = temp16;
-	// wave stereo
+	/* wave stereo */
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->stereo = btemp;
-	// pan enabled
+	/* pan enabled */
 	if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->panenabled = btemp;
-	// pan factor
+	/* pan factor */
 	if (status = psyfile_read(self->fp, &ftemp, sizeof(ftemp))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->panfactor = ftemp;
 	if (self->fp->currchunk.version >= 1) {
-		// surround
+		/* surround */
 		if (status = psyfile_read(self->fp, &btemp, sizeof(btemp))) {
 			psy_audio_sample_deallocate(wave);
 			return status;
@@ -1962,25 +2031,25 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 	} else {
 		wave->surround = 0;
 	}
-	// vibrato attack
+	/* vibrato attack */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->vibrato.attack = temp8;
-	// vibrato speed
+	/* vibrato speed */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->vibrato.speed = temp8;
-	// vibrato depth
+	/* vibrato depth */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
 	}
 	wave->vibrato.depth = temp8;			
-	// vibrato type
+	/* vibrato type */
 	if (status = psyfile_read(self->fp, &temp8, sizeof(temp8))) {
 		psy_audio_sample_deallocate(wave);
 		return status;
@@ -1991,7 +2060,7 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 		wave->vibrato.type = (psy_audio_WaveForms)
 			psy_audio_WAVEFORMS_SINUS;
 	}														
-	{ // wave data
+	{ /* wave data */
 		byte* pData;
 		short* pDest;
 		uint32_t i;
@@ -2038,7 +2107,7 @@ int psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 			free(pDest);
 			pData = 0;					
 		}
-		// read subslot
+		/* read subslot */
 		if ((psyfile_currchunkversion(self->fp) &
 			CURRENT_FILE_VERSION_SMSB) > 1) {
 			uint8_t revert;
@@ -2081,11 +2150,11 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 		return status;
 	}
 
-	//fileformat supports several waves, but sampler only supports one.
+	/* fileformat supports several waves, but sampler only supports one. */
 	if (strcmp(Header,"WAVE") == 0 &&
 		version <= CURRENT_FILE_VERSION_WAVE || loadIdx == 0) {
 		psy_audio_Sample* sample;
-		//This index represented the index position of this wave for the instrument. 0 to 15.
+		/* This index represented the index position of this wave for the instrument. 0 to 15. */
 		uint32_t legacyindex;
 		uint16_t volume = 0;		
 		int32_t tmp = 0;
@@ -2100,7 +2169,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 		int16_t* pDest;
 		
 		sample = psy_audio_sample_allocinit(1);
-		sample->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
+		sample->panfactor = (float) pan / 256.f ; /* (value_mapper::map_256_1(pan)); */
 		sample->samplerate = 44100;		
 		if (status = psyfile_read(self->fp, &tmp_u32, sizeof(uint32_t))) {
 			psy_audio_sample_deallocate(sample);
@@ -2137,7 +2206,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 			psy_audio_sample_deallocate(sample);
 			return status;
 		}
-		//Current sampler uses 100 cents. Older used +-256		
+		/* Current sampler uses 100 cents. Older used +-256 */
 		sample->zone.finetune = (int16_t)(tmp / 2.56f);
 		if (status = psyfile_read(self->fp, &tmp_u8, sizeof(uint8_t))) {
 			psy_audio_sample_deallocate(sample);
@@ -2153,7 +2222,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 		}
 		stereo = tmp_u8;
 		sample->stereo = stereo != 0;
-		// Old sample name, never used.
+		/* Old sample name, never used. */
 		psyfile_readstring(self->fp, dummy, sizeof(dummy));
 		psy_audio_sample_setname(sample, instrum_name);
 		if (status = psyfile_read(self->fp, &packedsize, sizeof(packedsize))) {
@@ -2162,7 +2231,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 		}
 		if (fullopen) {
 			uint32_t i;
-			pData = malloc(packedsize+4);// +4 to avoid any attempt at buffer overflow by the code
+			pData = malloc(packedsize+4); /* +4 to avoid any attempt at buffer overflow by the code */
 			if (status = psyfile_read(self->fp, pData, packedsize)) {
 				psy_audio_sample_deallocate(sample);
 				free(pData);
@@ -2193,7 +2262,7 @@ int psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self,
 			if ( fullopen ) {
 				uint32_t i;
 
-				// +4 to avoid any attempt at buffer overflow by the code
+				/* +4 to avoid any attempt at buffer overflow by the code */
 				pData = malloc(packedsize+4); 
 				if (status = psyfile_read(self->fp, pData, packedsize)) {
 					psy_audio_sample_deallocate(sample);
@@ -2284,7 +2353,7 @@ int psy_audio_psy3loader_machineloadchunk(
 		if (status = psyfile_read(self->fp, &y, sizeof(y))) {
 			return status;
 		}
-		if (psyfile_skip(self->fp, 2 * sizeof(int32_t)) == -1) {	// numInputs, numOutputs
+		if (psyfile_skip(self->fp, 2 * sizeof(int32_t)) == -1) {	/* numInputs, numOutputs */
 			return PSY_ERRFILE;
 		}		
 		psy_audio_machine_setposition(machine, x, y);		
@@ -2307,27 +2376,27 @@ int psy_audio_psy3loader_machineloadchunk(
 		unsigned char incon;
 		psy_audio_LegacyWire* legacywire;
 						
-		// Incoming connections psy_audio_Machine number
+		/* Incoming connections psy_audio_Machine number */
 		if (status = psyfile_read(self->fp, &input, sizeof(input))) {
 			return status;
 		}
-		// Outgoing connections psy_audio_Machine number
+		/* Outgoing connections psy_audio_Machine number */
 		if (status = psyfile_read(self->fp, &output, sizeof(output))) {
 			return status;
 		}
-		// Incoming connections psy_audio_Machine vol
+		/* Incoming connections psy_audio_Machine vol */
 		if (status = psyfile_read(self->fp, &inconvol, sizeof(inconvol))) {
 			return status;
 		}
-		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		/* Value to multiply _inputConVol[] to have a 0.0...1.0 range */
 		if (status = psyfile_read(self->fp, &wiremultiplier, sizeof(wiremultiplier))) {
 			return status;
 		}
-		// Outgoing connections activated
+		/* Outgoing connections activated */
 		if (status = psyfile_read(self->fp, &connection, sizeof(connection))) {
 			return status;
 		}
-		// Incoming connections activated
+		/* Incoming connections activated */
 		if (status = psyfile_read(self->fp, &incon, sizeof(incon))) {
 			return status;
 		}
@@ -2360,7 +2429,7 @@ int psy_audio_psy3loader_machineloadchunk(
 		}
 	}
 	if (psyfile_currchunkversion(self->fp) >= 1) {
-		//TODO: What to do on possibly wrong wire load?
+		/* TODO: What to do on possibly wrong wire load? */
 		if (status = psy_audio_machine_loadwiremapping(machine, self->songfile, index)) {
 			return status;
 		}
@@ -2390,7 +2459,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 	}
 	psyfile_readstring(self->fp, modulename, 256);
 	psy_audio_plugincatcher_catchername(modulename, catchername, 0);
-	// todo shellidx;
+	/* todo shellidx; */
 	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,
 		type, catchername, psy_INDEX_INVALID);
 	if (!machine) {
@@ -2484,19 +2553,19 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 	uint32_t version;
 	psy_audio_Instrument* instr;
 	int status;
-	//RiffFile file;
-
-	//std::map<int, int> sampMap;
-	//bool preview = loadhelp.IsPreview();
+	/* RiffFile file; */
+	/* std::map<int, int> sampMap; 
+	bool preview = loadhelp.IsPreview();
+	*/
 	int instIdx = -1;
 
-	//if (!file.Open(filename) || !file.Expect("PSYI", 4)) {
-	//	file.Close();
-	//	return false;
-	//}
-	//XMInstrument& instr = loadhelp.GetNextInstrument(instIdx);
+	/* if (!file.Open(filename) || !file.Expect("PSYI", 4)) {
+		file.Close();
+		return false;
+	} */
+	/* XMInstrument& instr = loadhelp.GetNextInstrument(instIdx); */
 
-	// create and insert instrument
+	/* create and insert instrument */
 	instr = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setindex(instr, index.subslot);
 	psy_audio_instruments_insert(&self->song->instruments, instr,
@@ -2506,13 +2575,13 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 		return status;
 	}
 	id[4] = '\0';
-	//Old format, only in 1.11 betas
+	/* Old format, only in 1.11 betas */
 	if (strncmp(id, "EINS", 4) == 0) {
 		uint32_t numIns;
 
 		psyfile_read(self->fp, &size, sizeof(size));		
 		psyfile_read(self->fp, &numIns, sizeof(numIns));
-		//This loader only supports one instrument.
+		/* This loader only supports one instrument. */
 		if (numIns == 1)
 		{
 			uint32_t sizeINST = 0;
@@ -2527,20 +2596,20 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 				uint32_t versionINST;
 				psyfile_read(self->fp, &versionINST, sizeof(versionINST));
 
-				//instr.Load(file, versionINST, true, 0x1);
+				/* instr.Load(file, versionINST, true, 0x1); */
 			}
 			
 			psyfile_read(self->fp, &numSamps, sizeof(numSamps));
 			sample = -1;
-			// if (preview) { // If preview, determine which sample to  load.
-			//	sample = instr.NoteToSample(notecommands::middleC).second;
-			//	if (sample == notecommands::empty) {
-			//		const std::set<int>& samps = instr.GetWavesUsed();
-			//		if (!samps.empty()) {
-			//			sample = *samps.begin();
-			//		}
-			//	}
-			//}
+			/* if (preview) { // If preview, determine which sample to  load.
+				sample = instr.NoteToSample(notecommands::middleC).second;
+				if (sample == notecommands::empty) {
+					const std::set<int>& samps = instr.GetWavesUsed();
+					if (!samps.empty()) {
+						sample = *samps.begin();
+					}
+				}
+			  } */
 			for (i = 0; i < numSamps && !psyfile_eof(self->fp); ++i) {
 				uint32_t sizeSMPD = 0;
 
@@ -2553,9 +2622,9 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 
 					psyfile_read(self->fp, &versionSMPD, sizeof(versionSMPD));
 					waveidx = -1;
-					//XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
-					//wave.Load(file, versionSMPD, true);
-					//sampMap[i] = waveidx;
+					/* XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
+					wave.Load(file, versionSMPD, true);
+					sampMap[i] = waveidx; */
 					if (i == sample) {
 						break;
 					}
@@ -2563,7 +2632,7 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 			}
 		}
 	}
-	//Current format
+	/* Current format */
 	else if (strncmp(id, "SMID", 4) == 0) {
 		int sample;
 		uint32_t begins;
@@ -2574,21 +2643,21 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 		begins = psyfile_getpos(self->fp);
 		if ((version & 0xFFFF0000) == VERSION_MAJOR_ZERO)
 		{
-			uint32_t instidx; // Unused
+			uint32_t instidx; /* Unused */
 
 			psyfile_read(self->fp, &instidx, sizeof(instidx));
-			//instr.Load(file, version & 0xFFFF);
+			/* instr.Load(file, version & 0xFFFF); */
 		}
 		
-		// if (preview) { // If preview, determine which sample to  load.
-		//	sample = instr.NoteToSample(notecommands::middleC).second;
-		//	if (sample == notecommands::empty) {
-		//		const std::set<int>& samps = instr.GetWavesUsed();
-		//		if (!samps.empty()) {
-		//			sample = *samps.begin();
-		//		}
-		//	}
-		// }
+		/* if (preview) { // If preview, determine which sample to  load.
+			sample = instr.NoteToSample(notecommands::middleC).second;
+			if (sample == notecommands::empty) {
+				const std::set<int>& samps = instr.GetWavesUsed();
+				if (!samps.empty()) {
+					sample = *samps.begin();
+				}
+			}
+		 } */
 		psyfile_seek(self->fp, begins + size);
 		while (!psyfile_eof(self->fp)) {
 			psyfile_read(self->fp, &id, 4);
@@ -2604,37 +2673,37 @@ int psy_audio_psy3loader_loadpsins(psy_audio_PSY3Loader* self, psy_audio_Instrum
 				uint32_t sampleidx;
 
 				psyfile_read(self->fp, &sampleidx, sizeof(sampleidx));
-				//if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
-					//int waveidx = -1;
-					//XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
-					// wave.Load(file, version & 0xFFFF);
-					//sampMap[sampleidx] = waveidx;
-					//if (sampleidx == sample) {
-					//	break;
-					//}
-				//}
+				/* if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
+					int waveidx = -1;
+					XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(waveidx);
+					wave.Load(file, version & 0xFFFF);
+					sampMap[sampleidx] = waveidx;
+					if (sampleidx == sample) {
+						break;
+					}
+				} */
 			}
 			psyfile_seek(self->fp, begins + size);
 		}
 	} else {
 		return PSY_ERRFILE;		
 	}
-	//Remap 
-	//if (!preview) {
-		//// for (int j = 0; j < XMInstrument::NOTE_MAP_SIZE; j++) {
-		//	XMInstrument::NotePair pair = instr.NoteToSample(j);
-		//	if (pair.second != 255) {
-		//		if (sampMap.find(pair.second) != sampMap.end()) {
-		//			pair.second = sampMap[pair.second];
-		//		} else { pair.second = 255; }
-		//		instr.NoteToSample(j, pair);
-		//	}
-		//}
-		//std::set<int> list = instr.GetWavesUsed();
-		//for (std::set<int>::iterator ite = list.begin(); ite != list.end(); ++ite) {
-		//	_pInstrument[*ite]->CopyXMInstrument(instr, tickstomillis(1));
-		//}
-	//}
+	/*Remap 
+	if (!preview) {
+		for (int j = 0; j < XMInstrument::NOTE_MAP_SIZE; j++) {
+			XMInstrument::NotePair pair = instr.NoteToSample(j);
+			if (pair.second != 255) {
+				if (sampMap.find(pair.second) != sampMap.end()) {
+					pair.second = sampMap[pair.second];
+				} else { pair.second = 255; }
+				instr.NoteToSample(j, pair);
+			}
+		}
+		std::set<int> list = instr.GetWavesUsed();
+		for (std::set<int>::iterator ite = list.begin(); ite != list.end(); ++ite) {
+			_pInstrument[*ite]->CopyXMInstrument(instr, tickstomillis(1));
+		}
+	} */
 	
 	return PSY_OK;
 }

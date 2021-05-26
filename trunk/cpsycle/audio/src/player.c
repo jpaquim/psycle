@@ -447,6 +447,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			unsigned char note;
 			uintptr_t mac = 0;
 			psy_audio_Machine* machine;
+			bool useaux;
 
 			mac = psy_audio_machines_selected(&self->song->machines);
 			if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
@@ -455,14 +456,17 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 				note = (uint8_t)cmd.id;
 			}
 			machine = psy_audio_machines_at(&self->song->machines, mac);
+			useaux = machine && psy_audio_machine_numauxcolumns(machine) > 0;
 			psy_audio_patternevent_init_all(&ev,
 				note,
 				(note == psy_audio_NOTECOMMANDS_TWEAK)
 				? (uint16_t)psy_audio_machines_paramselected(&self->song->machines)
-				: (uint16_t)(machine && machine_supports(machine,
-					psy_audio_SUPPORTS_INSTRUMENTS)
-					? psy_audio_instruments_selected(&self->song->instruments).subslot
-					: psy_audio_NOTECOMMANDS_INST_EMPTY),
+				: (uint16_t)(
+					(useaux)
+					? psy_audio_machine_auxcolumnselected(machine)
+					: machine && machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS)
+						? psy_audio_instruments_selected(&self->song->instruments).subslot
+						: psy_audio_NOTECOMMANDS_INST_EMPTY),
 				(uint8_t)mac,
 				(uint8_t)psy_audio_NOTECOMMANDS_VOL_EMPTY,
 				0, 0);
