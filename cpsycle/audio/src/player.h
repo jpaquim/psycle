@@ -215,6 +215,12 @@ void psy_audio_player_restartdriver(psy_audio_Player*,
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);
 int psy_audio_player_recordingnotes(psy_audio_Player*);
+void psy_audio_player_inputpatternevent(psy_audio_Player*,
+	const psy_audio_PatternEvent*);
+void psy_audio_player_playevent(psy_audio_Player*,
+	const psy_audio_PatternEvent* ev);
+psy_audio_PatternEvent psy_audio_player_patternevent(psy_audio_Player*,
+	uint8_t note);
 
 INLINE void psy_audio_player_recordnoteoff(psy_audio_Player* self)
 {

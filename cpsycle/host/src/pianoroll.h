@@ -212,6 +212,7 @@ typedef struct Pianoroll {
 	uintptr_t opcount;
 	bool syncpattern;
 	PatternCmds cmds;
+	uintptr_t chordbegin;
 	/* references */
 	Workspace* workspace;
 } Pianoroll;

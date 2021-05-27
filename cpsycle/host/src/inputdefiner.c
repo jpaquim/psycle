@@ -221,12 +221,13 @@ void inputdefiner_inputtotext(uint32_t input, char* text)
 	bool shift;
 	bool ctrl;
 	bool alt;
+	bool up;
 
 	text[0] = '\0';
 	if (input == 0) {
 		return;
 	}
-	psy_audio_decodeinput(input, &keycode, &shift, &ctrl, &alt);
+	psy_audio_decodeinput(input, &keycode, &shift, &ctrl, &alt, &up);
 	if (alt) {
 		strcat(text, "Alt + ");
 	}
@@ -235,6 +236,9 @@ void inputdefiner_inputtotext(uint32_t input, char* text)
 	}
 	if (ctrl) {
 		strcat(text, "Ctrl + ");
+	}
+	if (up) {
+		strcat(text, "UP + ");
 	}
 	keynames_init();
 	strcat(text, inputdefinerkeynames_at(&keynames, keycode));	
@@ -260,23 +264,25 @@ void inputdefiner_onkeydown(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 	bool alt;
 	bool shift;
 	bool ctrl;
+	bool up;
 
 	assert(self);
 
 	shift = ev->shift_key;
 	ctrl = ev->ctrl_key;
 	alt = ev->alt_key;
+	up = 0;
 	if (ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL || 
 			ev->keycode == psy_ui_KEY_MENU) {
 		if (self->regularkey == 0) {
-			self->input = psy_audio_encodeinput(0, shift, ctrl, alt);
+			self->input = psy_audio_encodeinput(0, shift, ctrl, alt, up);
 		} else {
-			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt);
+			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
 		}
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = ev->keycode;
-		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt);
+		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, alt, up);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyboardevent_stop_propagation(ev);
@@ -287,29 +293,32 @@ void inputdefiner_onkeyup(InputDefiner* self, psy_ui_KeyboardEvent* ev)
 	bool alt;
 	bool shift;
 	bool ctrl;
+	bool up;
 	uint32_t inputkeycode;
 	bool inputshift;
 	bool inputctrl;
 	bool inputalt;
+	bool inputup;
 
 	assert(self);
 
 	alt = ev->alt_key;
     shift = ev->shift_key;
     ctrl = ev->ctrl_key;
-	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt);	
+	up = 0;
+	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt, &inputup);
 	if (self->regularkey) {
 		if (inputalt) {
-			self->input = psy_audio_encodeinput(inputkeycode, inputshift, inputctrl, inputalt);
+			self->input = psy_audio_encodeinput(inputkeycode, inputshift, inputctrl, inputalt, inputup);
 		} else {
-			self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, alt);
+			self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, alt, inputup);
 		}
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = 0;
 	}
 	if (!validkeycode(inputkeycode)) {
-		self->input = psy_audio_encodeinput(0, shift, ctrl, alt);
+		self->input = psy_audio_encodeinput(0, shift, ctrl, alt, up);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyboardevent_stop_propagation(ev);

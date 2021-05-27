@@ -77,7 +77,6 @@ void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,
 void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
-void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
 void trackergrid_invalidateline(TrackerGrid*, psy_dsp_big_beat_t offset);
 bool trackergrid_scrollup(TrackerGrid*, psy_audio_PatternCursor);
 bool trackergrid_scrolldown(TrackerGrid*, psy_audio_PatternCursor);

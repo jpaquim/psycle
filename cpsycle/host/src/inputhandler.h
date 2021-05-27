@@ -19,8 +19,8 @@ typedef bool (*fp_inputhandler_input)(void* context, void* sender);
 typedef bool (*fp_inputhandler_hostcallback)(void* context, int message, void* param1);
 
 typedef enum {
-	INPUTHANDLER_IMM,
-	INPUTHANDLER_FOCUS
+	INPUTHANDLER_IMM = 1,
+	INPUTHANDLER_FOCUS = 2	
 } InputHandlerType;
 
 typedef enum {

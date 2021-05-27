@@ -114,7 +114,7 @@ void setcmdall(psy_Property* cmds, int cmd, uint32_t keycode, bool shift,
 	psy_snprintf(text, 256, "cmds.%s", key);
 	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(cmds, key,
-			psy_audio_encodeinput(keycode, shift, ctrl, 0), 0, 0),
+			psy_audio_encodeinput(keycode, shift, ctrl, 0, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }
 

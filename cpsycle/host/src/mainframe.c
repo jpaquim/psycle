@@ -8,6 +8,7 @@
 #include "mainframe.h"
 /* host */
 #include "cmdsgeneral.h"
+#include "cmdsnotes.h"
 #include "resources/resource.h"
 #include "styles.h"
 /* platform */
@@ -77,6 +78,7 @@ static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static bool mainframe_oninput(MainFrame*, InputHandler* sender);
+static bool mainframe_onnotes(MainFrame*, InputHandler* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatestepsequencerbuttons(MainFrame*);
@@ -103,9 +105,6 @@ static void mainframe_ondocksection(MainFrame*, Workspace* sender,
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, ConfirmBox* sender,
 	int option, int mode);
-/* EventDriverCallback */
-static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
-	int param2);
 static void mainframe_onfileload(MainFrame*, FileView* sender);
 static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
@@ -670,6 +669,8 @@ void mainframe_connectworkspace(MainFrame* self)
 	workspace_configure_host(&self->workspace);
 	inputhandler_connect(&self->workspace.inputhandler,
 		INPUTHANDLER_IMM, "general", self, mainframe_oninput);
+	inputhandler_connect(&self->workspace.inputhandler,
+		INPUTHANDLER_IMM, "notes", self, mainframe_onnotes);
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
@@ -679,9 +680,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_floatsection, self,
 		mainframe_onfloatsection);
 	psy_signal_connect(&self->workspace.signal_docksection, self,
-		mainframe_ondocksection);
-	psy_audio_eventdrivers_setcallback(&self->workspace.player.eventdrivers,
-		(EVENTDRIVERWORKFN)mainframe_eventdrivercallback, self);
+		mainframe_ondocksection);	
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
 	psy_signal_connect(&self->workspace.signal_gearselect, self,
@@ -740,6 +739,24 @@ bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 	}
 	workspace_oninput(&self->workspace, cmd.id);
 	return 0;
+}
+
+bool mainframe_onnotes(MainFrame* self, InputHandler* sender)
+{
+	psy_audio_PatternEvent ev;
+	psy_EventDriverCmd cmd;
+
+	cmd = inputhandler_cmd(sender);
+	if (cmd.id != -1) {
+		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
+			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
+			ev.note = CMD_NOTE_STOP;
+		} else {
+			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
+		}
+		psy_audio_player_playevent(&self->workspace.player, &ev);
+		return 1;
+	}
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
@@ -1314,7 +1331,7 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		return;
-	}
+	}	
 	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYUP, ev);
 }
 
@@ -1324,45 +1341,9 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 {
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
-			psy_audio_encodeinput(ev->keycode, ev->shift_key, ev->ctrl_key, ev->alt_key),
+			psy_audio_encodeinput(ev->keycode, ev->shift_key, ev->ctrl_key, ev->alt_key,
+				message == psy_EVENTDRIVER_KEYUP),
 				ev->repeat, workspace_currview(&self->workspace).id));
-}
-
-/* eventdriver callback to handle chordmode, patternedit noterelease */
-int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
-	int param2)
-{
-	switch (msg) {
-	case PSY_EVENTDRIVER_PATTERNEDIT:
-		return self->workspace.seqviewactive || psy_ui_component_hasfocus(
-			&self->patternview.tracker.component) ||
-			psy_ui_component_hasfocus(
-				&self->patternview.pianoroll.grid.component) ||
-			psy_ui_component_hasfocus(
-				&self->patternview.griddefaults.component);
-		break;
-	case PSY_EVENTDRIVER_NOTECOLUMN:
-		return !self->workspace.seqviewactive && self->patternview.gridstate.cursor.column == 0;
-		break;
-	case PSY_EVENTDRIVER_SETCHORDMODE:
-		if (param1 == 1) {
-			self->patternview.tracker.chordbegin =
-				self->patternview.gridstate.cursor.track;
-			self->patternview.tracker.chordmode = TRUE;
-		}
-		break;
-	case PSY_EVENTDRIVER_INSERTNOTEOFF:
-		trackergrid_inputnote(&self->patternview.tracker,
-			psy_audio_NOTECOMMANDS_RELEASE,
-			self->patternview.tracker.chordmode);
-		break;
-	case PSY_EVENTDRIVER_SECTION:
-		trackergrid_inputnote(&self->patternview.tracker,
-			psy_audio_NOTECOMMANDS_RELEASE,
-			self->patternview.tracker.chordmode);
-		break;
-	}
-	return 0;
 }
 
 void mainframe_ongearselect(MainFrame* self, Workspace* sender,
