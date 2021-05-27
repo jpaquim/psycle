@@ -38,7 +38,7 @@ static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_x11_ImpFactory*, str
 static struct psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view);
 static struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(psy_ui_x11_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_x11_ImpFactory*, struct psy_ui_Component* parent);
@@ -234,20 +234,22 @@ psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_x11_ImpFactory* sel
 	return NULL;	
 }
 
-psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view)
 {
 	psy_ui_x11_ComboBoxImp* rv;
-	psy_ui_X11App* winapp;
+	psy_ui_X11App* x11app;	
 
-	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	rv = psy_ui_x11_comboboximp_allocinit(
 		component,
-		parent ? parent->imp : 0);
-	if (rv->x11_component_imp.hwnd == 0) {
-		free(rv);
-		rv = 0;
+		parent,
+		view);
+	if (rv) {				
+		return &rv->imp;
+	} else {	
+		free(rv);		
 	}
-	return (psy_ui_ComponentImp*)rv;
+	return NULL;	
 }
 
 psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)

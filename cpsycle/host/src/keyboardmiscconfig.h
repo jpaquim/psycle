@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(KEYBOARDMISCCONFIG_H)
 #define KEYBOARDMISCCONFIG_H
@@ -12,20 +14,21 @@
 extern "C" {
 #endif
 
-// MachineViewConfig
-//
+/*
+** MachineViewConfig
+*/
 
 enum {
 	PROPERTY_ID_DEFAULTLINES = 30000
 };
 
 typedef struct KeyboardMiscConfig {	
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
-	// internal data
+	/* internal*/
 	psy_Property* keyboard;
 	psy_Property* keyboard_misc;
-	// references
+	/* references */
 	psy_Property* parent;	
 } KeyboardMiscConfig;
 

@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEVIEWCONFIG_H)
 #define MACHINEVIEWCONFIG_H
 
-// container
+/* container */
 #include <properties.h>
 #include <signal.h>
 
@@ -12,7 +14,7 @@
 extern "C" {
 #endif
 
-// MachineViewConfig
+/* MachineViewConfig */
 
 enum {
 	PROPERTY_ID_DRAWVUMETERS = 50000,
@@ -20,13 +22,13 @@ enum {
 };
 
 typedef struct MachineViewConfig {
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
 	psy_Signal signal_themechanged;
 	psy_Property* machineview;
 	psy_Property* stackview;
 	psy_Property* theme;	
-	// references
+	/* references */
 	psy_Property* parent;	
 } MachineViewConfig;
 

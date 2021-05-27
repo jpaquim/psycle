@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRACKERVIEW)
 #define TRACKERVIEW
 
-// host
+/* host */
 #include "trackercolumn.h"
 #include "trackergridstate.h"
 #include "trackerlinestate.h"
 #include "patternhostcmds.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uiscroller.h>
@@ -18,10 +20,12 @@
 extern "C" {
 #endif
 
-// TrackerView
-//
-// The TrackerView is where you enter notes. It displays a Pattern selected by
-// the SeqView as a tracker grid.
+/*
+** TrackerView
+**
+**  The TrackerView is where you enter notes. It displays a Pattern selected by
+**  the SeqView as a tracker grid.
+*/
 
 typedef enum {
 	PATTERNCURSOR_STEP_BEAT,
@@ -30,11 +34,11 @@ typedef enum {
 } PatternCursorStepMode;
 
 typedef struct TrackerGrid {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals	
+	/* signals */
 	psy_Signal signal_colresize;
-	// internal data	
+	/* internal */
 	TrackerGridState defaultgridstate;	
 	TrackerLineState defaultlinestate;	
 	psy_dsp_NotesTabMode notestabmode;   
@@ -56,7 +60,7 @@ typedef struct TrackerGrid {
 	psy_Table columns;
 	bool preventeventdriver;
 	PatternCmds cmds;
-	// references
+	/* references */
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
 	psy_ui_Component* view;
@@ -140,7 +144,7 @@ INLINE void trackergrid_setpgupdownstep(TrackerGrid* self, intptr_t step)
 }
 
 bool trackergrid_handlecommand(TrackerGrid*, intptr_t cmd);
-// block menu
+/* block menu */
 void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);
 void trackergrid_blockstart(TrackerGrid*);

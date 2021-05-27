@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PATTERNVIEWCONFIG_H)
 #define PATTERNVIEWCONFIG_H
 
-// dsp
+/* dsp */
 #include <notestab.h>
-// container
+/* container */
 #include <properties.h>
 #include <signal.h>
 
@@ -14,7 +16,7 @@
 extern "C" {
 #endif
 
-// PatternViewConfig
+/* PatternViewConfig */
 
 enum {
 	PROPERTY_ID_PATTERNDISPLAY = 80000,
@@ -26,13 +28,13 @@ enum {
 };
 
 typedef struct PatternViewConfig {
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
 	psy_Signal signal_themechanged;
-	// internal data
+	/* internal */
 	psy_Property* patternview;
 	psy_Property* theme;
-	// references
+	/* references */
 	psy_Property* parent;
 } PatternViewConfig;
 
@@ -65,7 +67,7 @@ void patternviewconfig_togglepatdefaultline(PatternViewConfig*);
 bool patternviewconfig_issmoothscrolling(const PatternViewConfig*);
 void patternviewconfig_setsmoothscrolling(PatternViewConfig*, bool on);
 uintptr_t patternviewconfig_patterndisplay(const PatternViewConfig*);
-// events
+/* events */
 bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
 bool patternviewconfig_onthemechanged(PatternViewConfig*, psy_Property*);
 

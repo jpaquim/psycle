@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(HELPVIEW_H)
 #define HELPVIEW_H
 
-// host
+/* host */
 #include "about.h"
 #include "greet.h"
 #include "help.h"
 #include <uitabbar.h>
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uinotebook.h>
@@ -24,25 +26,27 @@ typedef enum {
 	HELPVIEWSECTION_HELP
 } HelpViewSection;
 
-// Helpview
-//
-// Groups About, Greet and Help (textfiles).
+/*
+** Helpview
+**
+** Groups About, Greet and Help (textfiles).
+*/
 
 typedef struct HelpView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* ui elements */
 	psy_ui_Notebook notebook;
 	psy_ui_Component bar;
 	psy_ui_TabBar tabbar;
 	psy_ui_Button floatsection;
-	// sections
+	/* sections */
 	Help help;
 	About about;
 	Greet greet;
 	psy_ui_Component sectionfloated;
 	psy_ui_Label floatdesc;
-	// references
+	/* references */
 	Workspace* workspace;
 } HelpView;
 

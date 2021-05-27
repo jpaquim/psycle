@@ -487,7 +487,7 @@ static psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList*,
 static void seqviewlist_invalidaterow(SeqviewList*, uintptr_t row);
 static void seqviewlist_build(SeqviewList*);
 static void seqviewlist_changeplayposition(SeqviewList*);
-static void seqviewlist_oneventdriverinput(SeqviewList*, psy_EventDriver*);
+static bool seqviewlist_oninput(SeqviewList*, InputHandler*);
 static void seqviewlist_onfocus(SeqviewList*);
 static void seqviewlist_onfocuslost(SeqviewList*);
 static void seqviewlist_inputdigit(SeqviewList*, uint8_t value);
@@ -545,9 +545,10 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);	
 	seqviewlist_build(self);
-	psy_signal_connect(
-		&self->state->cmds->workspace->player.eventdrivers.signal_input, self,
-		seqviewlist_oneventdriverinput);
+	inputhandler_connect(&self->state->cmds->workspace->inputhandler,
+		INPUTHANDLER_FOCUS, "tracker", self,
+		(fp_inputhandler_input)
+		seqviewlist_oninput);
 	psy_ui_component_starttimer(&self->component, 0, 200);
 }
 
@@ -631,103 +632,102 @@ void seqviewlist_invalidaterow(SeqviewList* self, uintptr_t row)
 	}
 }
 
-void seqviewlist_oneventdriverinput(SeqviewList* self, psy_EventDriver* sender)
+bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 {
-	if (self->state->active) {
-		psy_EventDriverCmd cmd;
+	psy_EventDriverCmd cmd;
 
-		cmd = psy_eventdriver_getcmd(sender, "tracker");
-		if (cmd.id != -1) {
-			psy_audio_OrderIndex first;
+	cmd = inputhandler_cmd(sender);
+	if (cmd.id != -1) {
+		psy_audio_OrderIndex first;
 
-			first = psy_audio_sequenceselection_first(
-				&self->state->cmds->workspace->sequenceselection);
-			switch (cmd.id) {
-			case CMD_NAVLEFT:
-				if (self->state->col > 0) {
-					--self->state->col;
-					seqviewlist_invalidaterow(self, first.order);
-				} else {
-					self->state->col = COLMAX - 1;
-					workspace_songposdec(self->state->cmds->workspace);
-				}
-				break;
-			case CMD_NAVRIGHT:
-				++self->state->col;
-				if (self->state->col == COLMAX) {
-					self->state->col = 0;
-					workspace_songposinc(self->state->cmds->workspace);
-				}
+		first = psy_audio_sequenceselection_first(
+			&self->state->cmds->workspace->sequenceselection);
+		switch (cmd.id) {
+		case CMD_NAVLEFT:
+			if (self->state->col > 0) {
+				--self->state->col;
 				seqviewlist_invalidaterow(self, first.order);
-				break;
-			case CMD_NAVDOWN:
-				workspace_songposinc(self->state->cmds->workspace);
-				break;
-			case CMD_NAVUP:
+			} else {
+				self->state->col = COLMAX - 1;
 				workspace_songposdec(self->state->cmds->workspace);
-				break;
-			case CMD_COLUMNPREV:
-				if (first.track > 0) {
-					uintptr_t rows;
-					
-					--first.track;		
-					sequencecmds_update(self->state->cmds);
-					rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
-					if (rows < first.order) {
-						if (rows > 0) {
-							first.order = rows - 1;
-						} else {
-							first.order = 0;
-						}
-					}
-					workspace_setsequenceeditposition(self->state->cmds->workspace,
-						first);
-				}
-				break;
-			case CMD_COLUMNNEXT:				
-				sequencecmds_update(self->state->cmds);
-				if (first.track + 1 < psy_audio_sequence_width(self->state->cmds->sequence)) {
-					uintptr_t rows;
-
-					++first.track;
-					rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
-					if (rows < first.order) {
-						if (rows > 0) {
-							first.order = rows - 1;
-						} else {
-							first.order = 0;
-						}
-					}
-					workspace_setsequenceeditposition(self->state->cmds->workspace,
-						first);
-				}
-				break;
-			case CMD_DIGIT0:
-			case CMD_DIGIT1:
-			case CMD_DIGIT2:
-			case CMD_DIGIT3:
-			case CMD_DIGIT4:
-			case CMD_DIGIT5:
-			case CMD_DIGIT6:
-			case CMD_DIGIT7:
-			case CMD_DIGIT8:
-			case CMD_DIGIT9:
-			case CMD_DIGITA:
-			case CMD_DIGITB:
-			case CMD_DIGITC:
-			case CMD_DIGITD:
-			case CMD_DIGITE:
-			case CMD_DIGITF: {
-				int digit = (int)cmd.id - CMD_DIGIT0;
-				if (digit != -1) {
-					seqviewlist_inputdigit(self, digit);
-				}
-				break; }
-			default:
-				break;
 			}
+			break;
+		case CMD_NAVRIGHT:
+			++self->state->col;
+			if (self->state->col == COLMAX) {
+				self->state->col = 0;
+				workspace_songposinc(self->state->cmds->workspace);
+			}
+			seqviewlist_invalidaterow(self, first.order);
+			break;
+		case CMD_NAVDOWN:
+			workspace_songposinc(self->state->cmds->workspace);
+			break;
+		case CMD_NAVUP:
+			workspace_songposdec(self->state->cmds->workspace);
+			break;
+		case CMD_COLUMNPREV:
+			if (first.track > 0) {
+				uintptr_t rows;
+					
+				--first.track;		
+				sequencecmds_update(self->state->cmds);
+				rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
+				if (rows < first.order) {
+					if (rows > 0) {
+						first.order = rows - 1;
+					} else {
+						first.order = 0;
+					}
+				}
+				workspace_setsequenceeditposition(self->state->cmds->workspace,
+					first);
+			}
+			break;
+		case CMD_COLUMNNEXT:				
+			sequencecmds_update(self->state->cmds);
+			if (first.track + 1 < psy_audio_sequence_width(self->state->cmds->sequence)) {
+				uintptr_t rows;
+
+				++first.track;
+				rows = psy_audio_sequence_track_size(self->state->cmds->sequence, first.track);
+				if (rows < first.order) {
+					if (rows > 0) {
+						first.order = rows - 1;
+					} else {
+						first.order = 0;
+					}
+				}
+				workspace_setsequenceeditposition(self->state->cmds->workspace,
+					first);
+			}
+			break;
+		case CMD_DIGIT0:
+		case CMD_DIGIT1:
+		case CMD_DIGIT2:
+		case CMD_DIGIT3:
+		case CMD_DIGIT4:
+		case CMD_DIGIT5:
+		case CMD_DIGIT6:
+		case CMD_DIGIT7:
+		case CMD_DIGIT8:
+		case CMD_DIGIT9:
+		case CMD_DIGITA:
+		case CMD_DIGITB:
+		case CMD_DIGITC:
+		case CMD_DIGITD:
+		case CMD_DIGITE:
+		case CMD_DIGITF: {
+			int digit = (int)cmd.id - CMD_DIGIT0;
+			if (digit != -1) {
+				seqviewlist_inputdigit(self, digit);
+			}
+			break; }
+		default:
+			break;
 		}
 	}
+	return cmd.id != -1;
 }
 
 void seqviewlist_inputdigit(SeqviewList* self, uint8_t digit)

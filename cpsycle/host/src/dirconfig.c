@@ -13,7 +13,7 @@
 #include "../../detail/cpu.h"
 #include "../../detail/portable.h"
 
-static void dirconfig_make(DirConfig*);
+static void dirconfig_make(DirConfig*, psy_Property* parent);
 static void dirconfig_makedefaultuserpresets(DirConfig*);
 static void dirconfig_append(DirConfig*, const char* key,
 	const char* label, const char* defaultdir);

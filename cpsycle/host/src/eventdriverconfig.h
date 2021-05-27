@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(EVENTDRIVERCONFIG_H)
 #define EVENTDRIVERCONFIG_H
 
-// audio
+/* audio */
 #include <player.h>
-// container
+/* container */
 #include <properties.h>
 
 #ifdef __cplusplus
@@ -22,20 +24,22 @@ enum {
 	PROPERTY_ID_ACTIVEEVENTDRIVERS
 };
 
-// EventDriverConfig
-//
-// Configures and selects the eventdrivers
+/*
+** EventDriverConfig
+**
+** Configures and selects the eventdrivers
+*/
 
 typedef struct EventDriverConfig {
-	// signals
+	/* signals */
 	psy_Signal signal_changed;
 	psy_Property* eventinputs;
 	psy_Property* eventdriverconfigure;
 	psy_Property* eventdriverconfigurations;
-	// internal data
+	/* internal */
 	psy_Property* installeddriver;
 	psy_Property* activedrivers;
-	// references
+	/* references */
 	psy_audio_Player* player;
 	psy_Property* config;	
 } EventDriverConfig;

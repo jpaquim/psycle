@@ -312,6 +312,7 @@
     <ClCompile Include="src\help.c" />
     <ClCompile Include="src\helpview.c" />
     <ClCompile Include="src\inputdefiner.c" />
+    <ClCompile Include="src\inputhandler.c" />
     <ClCompile Include="src\instnotemapview.c" />
     <ClCompile Include="src\instrumentampview.c" />
     <ClCompile Include="src\instrumentfilterview.c" />
@@ -479,6 +480,7 @@
     <ClInclude Include="src\help.h" />
     <ClInclude Include="src\helpview.h" />
     <ClInclude Include="src\inputdefiner.h" />
+    <ClInclude Include="src\inputhandler.h" />
     <ClInclude Include="src\instnotemapview.h" />
     <ClInclude Include="src\instrumentampview.h" />
     <ClInclude Include="src\instrumentfilterview.h" />

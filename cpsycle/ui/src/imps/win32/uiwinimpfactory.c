@@ -298,7 +298,7 @@ psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct p
 	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
 	rv = psy_ui_win_comboboximp_allocinit(
 		component, parent, view);	
-	return (psy_ui_ComponentImp*)rv->imp;
+	return (psy_ui_ComponentImp*)rv;
 }
 
 psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)

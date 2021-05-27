@@ -45,6 +45,7 @@ typedef struct psy_ui_ComboBox {
     /* signals */
     psy_Signal signal_selchanged;
     /* internal */        
+    psy_ui_ComponentImp* comboimp;
     int ownerdrawn;   
     psy_ui_ComboBoxHover hover;
     double charnumber;
@@ -86,7 +87,7 @@ typedef void (*psy_ui_fp_comboboximp_dev_setcursel)(struct psy_ui_ComponentImp*,
     intptr_t index);
 typedef intptr_t(*psy_ui_fp_comboboximp_dev_cursel)(
     const struct psy_ui_ComponentImp*);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_count)(struct psy_ui_ComponentImp*);
+typedef intptr_t(*psy_ui_fp_comboboximp_dev_count)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_comboboximp_dev_selitems)(struct psy_ui_ComponentImp*,
     intptr_t* items, intptr_t maxitems);
 typedef intptr_t(*psy_ui_fp_comboboximp_dev_selcount)(
@@ -96,8 +97,7 @@ typedef void (*psy_ui_fp_comboboximp_dev_showdropdown)(
 
 typedef struct {
     psy_ui_fp_comboboximp_dev_addtext dev_addtext;
-    psy_ui_fp_comboboximp_dev_settext dev_settext;
-    psy_ui_fp_comboboximp_dev_setstyle dev_setstyle;
+    psy_ui_fp_comboboximp_dev_settext dev_settext;    
     psy_ui_fp_comboboximp_dev_text dev_text;
     psy_ui_fp_comboboximp_dev_clear dev_clear;
     psy_ui_fp_comboboximp_dev_setcursel dev_setcursel;
@@ -110,21 +110,27 @@ typedef struct {
 
 void psy_ui_comboboximp_extend(psy_ui_ComponentImp*);
 
-INLINE psy_ui_ComboboxImpVTable* psy_ui_comboboximp_vtable(psy_ui_ComponentImp* self)
+INLINE psy_ui_ComboboxImpVTable* psy_ui_comboboximp_vtable(psy_ui_ComboBox* self)
 {
-    return (psy_ui_ComboboxImpVTable*)self->extended_vtable;
+    return (psy_ui_ComboboxImpVTable*)self->comboimp->extended_vtable;
+}
+
+INLINE const psy_ui_ComboboxImpVTable* psy_ui_comboboximp_vtable_const(
+    const psy_ui_ComboBox* self)
+{
+    return (const psy_ui_ComboboxImpVTable*)self->comboimp->extended_vtable;
 }
 
 INLINE void psy_psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
 {
-    psy_ui_comboboximp_vtable(self->component.imp)->dev_text(
-        self->component.imp->extended_imp, text);
+    psy_ui_comboboximp_vtable_const(self)->dev_text(
+		(psy_ui_ComponentImp*)self->comboimp->extended_imp, text);
 }
 
 INLINE intptr_t psy_ui_combobox_count(const psy_ui_ComboBox* self)
 {
-    return psy_ui_comboboximp_vtable(self->component.imp)->dev_count(
-        self->component.imp->extended_imp);    
+    return psy_ui_comboboximp_vtable_const(self)->dev_count(
+		(psy_ui_ComponentImp*)self->comboimp->extended_imp);
 }
 
 #ifdef __cplusplus

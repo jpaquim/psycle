@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(GREET_H)
 #define GREET_H
 
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uilistbox.h>
@@ -14,17 +16,19 @@
 extern "C" {
 #endif
 
-// Greet
-//
-// In this dialog, Psycledelics, the Community, wants to thank the people
-// for their contributions in the developement of Psycle.
-// Psycle's development began in May 2000. It was designed by Arguru and
-// the dialog can display his original greetings, aswell.
+/*
+** Greet
+**
+** In this dialog, Psycledelics, the Community, wants to thank the people
+** for their contributions in the developement of Psycle.
+** Psycle's development began in May 2000. It was designed by Arguru and
+** the dialog can display his original greetings, aswell.
+*/
 
 typedef struct Greet {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Component header;
 	psy_ui_Label headerlabel;
 	psy_ui_Label thanks;

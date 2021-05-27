@@ -15,21 +15,23 @@
 extern "C" {
 #endif
 
-	typedef struct psy_ui_x11_ComboBoxImp {
-		psy_ui_ComponentImp imp;		
-		psy_ui_x11_ComponentImp x11_component_imp;
-		psy_ui_ListBox x11_combo;
-		struct psy_ui_Component* component;
-	} psy_ui_x11_ComboBoxImp;
+typedef struct psy_ui_x11_ComboBoxImp {
+	psy_ui_ComponentImp imp;
+	psy_ui_ListBox x11_combo;
+	struct psy_ui_Component* component;
+	struct psy_ui_Component* view;
+} psy_ui_x11_ComboBoxImp;
 
-	void psy_ui_x11_comboboximp_init(psy_ui_x11_ComboBoxImp* self,
-		struct psy_ui_Component* component,
-		struct psy_ui_ComponentImp* parent);
+void psy_ui_x11_comboboximp_init(psy_ui_x11_ComboBoxImp* self,
+	struct psy_ui_Component* component,
+	struct psy_ui_Component* parent,
+	struct psy_ui_Component* view);
 
-	psy_ui_x11_ComboBoxImp* psy_ui_x11_comboboximp_alloc(void);
-	psy_ui_x11_ComboBoxImp* psy_ui_x11_comboboximp_allocinit(
-		struct psy_ui_Component* component,
-		psy_ui_ComponentImp* parent);
+psy_ui_x11_ComboBoxImp* psy_ui_x11_comboboximp_alloc(void);
+psy_ui_x11_ComboBoxImp* psy_ui_x11_comboboximp_allocinit(
+	struct psy_ui_Component* component,
+	struct psy_ui_Component* parent,
+	struct psy_ui_Component* view);
 
 #ifdef __cplusplus
 }
