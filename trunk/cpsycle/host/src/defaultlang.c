@@ -561,6 +561,7 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("savereminder", "\"Save file?\" reminders on Load, New or Exit");
 	add("numdefaultlines", "Default lines on new pattern");
 	add("allowmultiinstances", "Allow multiple instances of Psycle");
+	add("ft2-explorer", "Use FT2 Style Fileexplorer");
 }
 
 void make_translator_make_instrumentsbox(psy_Property* parent)

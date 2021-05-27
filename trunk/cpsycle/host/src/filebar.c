@@ -35,11 +35,9 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_text(&self->loadbutton, filebar_base(self), NULL,
 		"file.load");
 	psy_ui_bitmap_loadresource(&self->loadbutton.bitmapicon, IDB_OPEN_DARK);
-	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
-#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
+	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
-#endif
 	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self), NULL,
 		"file.save", self, filebar_onsavesong);
 	psy_ui_bitmap_loadresource(&self->savebutton.bitmapicon, IDB_SAVE_DARK);
@@ -54,6 +52,18 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_bitmap_settransparency(&self->renderbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
 }
 
+void filebar_useft2fileexplorer(FileBar* self)
+{
+	psy_signal_disconnect(&self->loadbutton.signal_clicked, self,
+		filebar_onloadsong);
+}
+
+void filebar_usenativefileexplorer(FileBar* self)
+{
+	psy_signal_connect(&self->loadbutton.signal_clicked, self,
+		filebar_onloadsong);
+}
+
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
 	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
@@ -66,11 +76,14 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
+	if (!keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+		workspace_conf(self->workspace)))) {
+		if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
-	} else {
-		workspace_loadsong_fileselect(self->workspace);
+			workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CONFIRM_LOAD);
+		} else {
+			workspace_loadsong_fileselect(self->workspace);
+		}
 	}
 }
 

@@ -19,7 +19,8 @@ extern "C" {
 */
 
 enum {
-	PROPERTY_ID_DEFAULTLINES = 30000
+	PROPERTY_ID_DEFAULTLINES = 30000,
+	PROPERTY_ID_FT2FILEEXPLORER = 30001
 };
 
 typedef struct KeyboardMiscConfig {	
@@ -47,6 +48,7 @@ bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig*);
 bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig*);
 uintptr_t keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
 intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig*);
 
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
 bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);

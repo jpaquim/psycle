@@ -12,9 +12,7 @@
 #include "confirmbox.h"
 #include "cpuview.h"
 #include "filebar.h"
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 #include "fileview.h"
-#endif
 #include "exportview.h"
 #include "gear.h"
 #include "helpview.h"
@@ -131,9 +129,7 @@ typedef struct MainFrame {
 	psy_ui_Splitter midisplitter;
 	PlaylistView playlist;
 	psy_ui_Splitter playlistsplitter;
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;
-#endif
 	MainStatusBar statusbar;
 	MinMaximize minmaximize;
 	psy_ui_Notebook viewtabbars;

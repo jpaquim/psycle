@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "keyboardmiscconfig.h"
 
@@ -96,6 +99,13 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 		psy_property_append_bool(self->keyboard_misc,
 			"allowmultiinstances", FALSE),
 		"settingsview.kbd.allowmultiinstances");
+#if PSYCLE_USE_TK != PSYCLE_TK_X11
+	psy_property_setid(psy_property_settext(
+		psy_property_append_bool(self->keyboard_misc,
+			"ft2fileexplorer", FALSE),
+		"settingsview.kbd.ft2-explorer"),
+		PROPERTY_ID_FT2FILEEXPLORER);
+#endif	
 }
 
 bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig* self)
@@ -188,7 +198,18 @@ intptr_t keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
 
 	return psy_property_at_int(self->keyboard, "pgupdownstep", 4);
 }
-// events
+
+bool keyboardmiscconfig_ft2fileexplorer(const KeyboardMiscConfig* self)
+{
+	assert(self);
+#if PSYCLE_USE_TK == PSYCLE_TK_X11
+	return TRUE;
+#else
+	return psy_property_at_bool(self->keyboard_misc, "ft2fileexplorer", FALSE);
+#endif
+}
+
+/* events */
 void keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
 	property)
 {

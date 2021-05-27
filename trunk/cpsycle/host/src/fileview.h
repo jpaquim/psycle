@@ -1,44 +1,35 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(FILEVIEW_H)
 #define FILEVIEW_H
 
-// host
-#include <uitabbar.h>
-#include "workspace.h"
-// ui
+/* ui */
 #include "uilistbox.h"
+#include <uitabbar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// FileView
-//
-// Displays a file chooser added for xlib missing a native one. The win32
-// build is configured to use the native instead this one.
-// To activate undefine PSYCLE_USE_PLATFORM_FILEOPEN in psyconf.h.
-
 typedef struct FileView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// signals
+	/* signals */
 	psy_Signal signal_selected;
-	// ui elements
-	psy_ui_ListBox filebox;
-	// internal data
+	/* internal */
+	psy_ui_ListBox filebox;	
 	psy_ui_TabBar drives;	
 	psy_Table filenames;
 	char* curr;
 	char* drive;	
 	psy_List* files;
-	intptr_t numdirectories;
-	// references
-	Workspace* workspace;
+	intptr_t numdirectories;	
 } FileView;
 
-void fileview_init(FileView*, psy_ui_Component* parent, Workspace*);
+void fileview_init(FileView*, psy_ui_Component* parent);
 
 INLINE psy_ui_Component* fileview_base(FileView* self)
 {

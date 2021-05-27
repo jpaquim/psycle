@@ -59,9 +59,7 @@ static void mainframe_delegatekeyboard(MainFrame*, intptr_t message,
 static void mainframe_ontogglegearworkspace(MainFrame*, Workspace* sender);
 static void mainframe_onmaxminimizeview(MainFrame*, psy_ui_Button* sender);
 static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
-#endif
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Property*, uintptr_t* rebuild);
@@ -108,9 +106,7 @@ static void mainframe_oncheckunsaved(MainFrame*, ConfirmBox* sender,
 /* EventDriverCallback */
 static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1,
 	int param2);
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 static void mainframe_onfileload(MainFrame*, FileView* sender);
-#endif
 static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
 static void mainframe_ondragover(MainFrame*, psy_ui_DragEvent*);
@@ -183,7 +179,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_updatestepsequencerbuttons(self);
 	mainframe_connectstepsequencerbuttons(self);
 	mainframe_updateseqeditorbuttons(self);
-	mainframe_connectseqeditorbuttons(self);
+	mainframe_connectseqeditorbuttons(self);	
 #ifdef PSYCLE_MAKE_DEFAULT_LANG
 	save_translator_default();
 	save_translator_template();
@@ -192,7 +188,7 @@ void mainframe_init(MainFrame* self)
 		workspace_scanplugins(&self->workspace);
 	}
 	workspace_setstartpage(&self->workspace);
-	self->machineview.wireview.centermaster = TRUE;
+	self->machineview.wireview.centermaster = TRUE;	
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -622,18 +618,19 @@ void mainframe_initrecentview(MainFrame* self)
 }
 
 void mainframe_initfileview(MainFrame* self)
-{
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
-	/* file load view */
-	fileview_init(&self->fileloadview, mainframe_base(self),
-		&self->workspace);
+{	
+	/* ft2 style file load view */	
+	fileview_init(&self->fileloadview, mainframe_base(self));
 	psy_ui_component_setalign(&self->fileloadview.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->fileloadview.component);
 	psy_signal_connect(&self->fileloadview.signal_selected,
 		self, mainframe_onfileload);
-	psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
-		mainframe_onfileloadview);
-#endif
+	if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+		workspace_conf(&self->workspace)))) {
+		psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
+			mainframe_onfileloadview);
+		filebar_useft2fileexplorer(&self->filebar);
+	}
 }
 
 void mainframe_initsequenceview(MainFrame* self)
@@ -811,12 +808,10 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_visible(playlistview_base(&self->playlist)));
 }
 
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 void mainframe_onfileloadview(MainFrame* self, psy_ui_Component* sender)
 {
 	psy_ui_component_togglevisibility(&self->fileloadview.component);
 }
-#endif
 
 void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 {
@@ -855,10 +850,22 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 	case PROPERTY_ID_SHOWMETRONOME:
 		updateshowstate(property, metronomebar_base(&self->metronomebar));
 		break;
+	case PROPERTY_ID_FT2FILEEXPLORER:
+		if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+			workspace_conf(&self->workspace)))) {
+			psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
+				mainframe_onfileloadview);
+			filebar_useft2fileexplorer(&self->filebar);
+		} else {
+			psy_signal_disconnect(&self->filebar.loadbutton.signal_clicked, self,
+				mainframe_onfileloadview);
+			filebar_usenativefileexplorer(&self->filebar);
+		}
+		break;
 	default:
 		workspace_configurationchanged(&self->workspace, property, rebuild_level);
 		break;
-	}
+	}	
 }
 
 void updateshowstate(psy_Property* property, psy_ui_Component* component)
@@ -1066,16 +1073,17 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 			if (mode == CONFIRM_CLOSE) {
 				psy_ui_app_close(psy_ui_app());
 			} else if (mode == CONFIRM_LOAD) {
-#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
-				workspace_loadsong_fileselect(&self->workspace);
-#else
-				const char* path;
-				path = fileview_path(&self->fileloadview);
-				workspace_loadsong(&self->workspace,
-					path,
-					generalconfig_playsongafterload(psycleconfig_general(
-						workspace_conf(&self->workspace))));
-#endif
+				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+					workspace_conf(&self->workspace)))) {
+					const char* path;
+					path = fileview_path(&self->fileloadview);
+					workspace_loadsong(&self->workspace,
+						path,
+						generalconfig_playsongafterload(psycleconfig_general(
+							workspace_conf(&self->workspace))));
+				} else {
+					workspace_loadsong_fileselect(&self->workspace);
+				}
 			} else if (mode == CONFIRM_NEW) {
 				workspace_newsong(&self->workspace);
 			}
@@ -1092,9 +1100,8 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 			if (mode == CONFIRM_CLOSE) {
 				psy_ui_app_close(psy_ui_app());
 			} else if (mode == CONFIRM_LOAD) {
-#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
-					workspace_loadsong_fileselect(&self->workspace);
-#else
+				if (keyboardmiscconfig_ft2fileexplorer(psycleconfig_misc(
+					workspace_conf(&self->workspace)))) {
 					const char* path;
 
 					path = fileview_path(&self->fileloadview);
@@ -1102,7 +1109,9 @@ void mainframe_oncheckunsaved(MainFrame* self, ConfirmBox* sender,
 						path,
 						generalconfig_playsongafterload(psycleconfig_general(
 							workspace_conf(&self->workspace))));
-#endif
+				} else {
+					workspace_loadsong_fileselect(&self->workspace);
+				}
 			} else if (mode == CONFIRM_NEW) {
 				workspace_newsong(&self->workspace);
 			}
@@ -1241,7 +1250,6 @@ void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 	psy_ui_component_togglevisibility(kbdhelp_base(&self->kbdhelp));
 }
 
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 void mainframe_onfileload(MainFrame* self, FileView* sender)
 {
 	const char* path;
@@ -1261,7 +1269,6 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 				workspace_conf(&self->workspace))));
 	}
 }
-#endif
 
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
 {

@@ -63,7 +63,7 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 		"settingsview.general.play-song-after-load");
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
-		"settingsview.general.show-pattern-names");	
+		"settingsview.general.show-pattern-names");
 }
 
 bool generalconfig_showsonginfoonload(const GeneralConfig* self)

@@ -33,6 +33,9 @@ typedef struct FileBar {
 
 void filebar_init(FileBar*, psy_ui_Component* parent, Workspace*);
 
+void filebar_useft2fileexplorer(FileBar*);
+void filebar_usenativefileexplorer(FileBar*);
+
 INLINE psy_ui_Component* filebar_base(FileBar* self)
 {
 	return &self->component;
