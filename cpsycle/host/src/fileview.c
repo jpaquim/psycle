@@ -28,11 +28,9 @@ static psy_List* fileview_sort(psy_List* source, psy_fp_comp comp);
 static int fileview_comp_filename(psy_List* p, psy_List* q);
 
 /* implementation */
-void fileview_init(FileView* self, psy_ui_Component* parent,
-	Workspace* workspace)
+void fileview_init(FileView* self, psy_ui_Component* parent)
 {		
-	psy_ui_component_init(fileview_base(self), parent, NULL);
-	self->workspace = workspace;	
+	psy_ui_component_init(fileview_base(self), parent, NULL);	
 	psy_ui_tabbar_init(&self->drives, fileview_base(self));
 	psy_ui_tabbar_settabalign(&self->drives, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->drives),
@@ -45,7 +43,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	self->curr = strdup("");
 	self->drive = strdup("C:\\");
 #else	
-	self->curr = strdup(""); /* workspace_songs_directory(workspace)); */
+	self->curr = strdup("");
 	self->drive = strdup("/");
 #endif
 	fileview_builddrives(self);	
