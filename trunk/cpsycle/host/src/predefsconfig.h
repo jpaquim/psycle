@@ -1,30 +1,34 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PREDEFSCONFIG_H)
 #define PREDEFSCONFIG_H
 
-// audio
+/* audio */
 #include <instrument.h>
 
-// container
+/* container */
 #include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// PredefsConfig
-
-// aim : Stores predefinitions of instruments in the configuration like in FT2
-// status: atm only envelopes
+/*
+** PredefsConfig
+**
+** Stores predefinitions of instruments in the configuration like in FT2
+** status: atm only envelopes
+*/
 
 typedef struct PredefsConfig {
-	// signals
+	/* signals */
 	psy_Signal signal_changed;	
-	// internal
+	/* internal */
 	psy_Property* predefs;
-	// references
+	/* references */
 	psy_Property* parent;	
 } PredefsConfig;
 

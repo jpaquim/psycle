@@ -251,13 +251,13 @@ void psy_ui_native_listboximp_init(psy_ui_native_ListBoxImp* self,
 	psy_ui_Component* component,
 	psy_ui_Component* parent)
 {
+	self->component = component;
 	self->imp = psy_ui_impfactory_allocinit_componentimp(
 		psy_ui_app_impfactory(psy_ui_app()), component, parent);
 	vtable_init(self);	
 	psy_ui_listboximp_extend(self->imp);	
 	listboximp_imp_vtable_init(self);
-	self->imp->extended_imp = (void*)self;
-	self->component = component;	
+	self->imp->extended_imp = (void*)self;	
 }
 
 void psy_ui_native_listboximp_multiselect_init(psy_ui_native_ListBoxImp* self,

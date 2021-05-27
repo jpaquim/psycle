@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(ABOUT_H)
 #define ABOUT_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uiedit.h>
 #include <uieditor.h>
@@ -17,15 +19,17 @@
 extern "C" {
 #endif
 
-// About
-//
-// Shows information about Psycle.
+/*
+** About
+**
+** Shows information about Psycle.
+*/
 
-// Contrib
+/* Contrib */
 typedef struct Contrib {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Label asio;
 	psy_ui_Edit	sourceforge;
 	psy_ui_Edit	psycledelics;
@@ -43,11 +47,11 @@ INLINE psy_ui_Component* contrib_base(Contrib* self)
 	return &self->component;
 }
 
-// Version
+/* Version */
 typedef struct Version {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Label versioninfo;
 } Version;
 
@@ -60,11 +64,11 @@ INLINE psy_ui_Component* version_base(Version* self)
 	return &self->component;
 }
 
-// Licence
+/* Licence */
 typedef struct Licence {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Editor licenceinfo;
 } Licence;
 
@@ -77,11 +81,11 @@ INLINE psy_ui_Component* licence_base(Licence* self)
 	return &self->component;
 }
 
-// About
+/* About */
 typedef struct About {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_Notebook notebook;
 	psy_ui_Component bottom;
 	psy_ui_Component buttons;
@@ -92,7 +96,7 @@ typedef struct About {
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
 	psy_ui_Button okbutton;
-	// references
+	/* references */
 	Workspace* workspace;
 } About;
 

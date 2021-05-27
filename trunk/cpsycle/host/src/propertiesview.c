@@ -898,10 +898,8 @@ static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
 static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
-static void propertiesview_oneventdriverinput(PropertiesView*,
-	psy_EventDriver* sender);
+static bool propertiesview_oninput(PropertiesView*, InputHandler* sender);
 static double propertiesview_checkrange(PropertiesView*, double position);
-static void propertiesview_onfocus(PropertiesView*);
 static void propertiesview_onmousedown(PropertiesView*, psy_ui_MouseEvent*);
 static void propertiesview_onmouseup(PropertiesView*, psy_ui_MouseEvent*);
 static void propertiesview_onscrollpanealign(PropertiesView*,
@@ -923,9 +921,6 @@ static void propertiesview_vtable_init(PropertiesView* self)
 		propertiesview_vtable.onmouseup =
 			(psy_ui_fp_component_onmouseevent)
 			propertiesview_onmouseup;
-		propertiesview_vtable.onfocus =
-			(psy_ui_fp_component_onfocus)
-			propertiesview_onfocus;
 	}
 	self->component.vtable = &propertiesview_vtable;
 }
@@ -957,8 +952,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_onpropertiesrendererchanged);
 	psy_signal_connect(&self->renderer.signal_selected, self,
 		propertiesview_onpropertiesrendererselected);	
-	psy_signal_connect(&workspace_player(workspace)->eventdrivers.signal_input,
-		self, propertiesview_oneventdriverinput);
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
+		"tracker", self, (fp_inputhandler_input)
+		propertiesview_oninput);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		propertiesview_ontabbarchange);
 	psy_signal_connect(&self->scroller.pane.signal_beforealign, self,
@@ -1111,50 +1107,48 @@ void propertiesview_onpropertiesrendererselected(PropertiesView* self,
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 }
 
-void propertiesview_oneventdriverinput(PropertiesView* self,
-	psy_EventDriver* sender)
+bool propertiesview_oninput(PropertiesView* self, InputHandler* sender)
 {
-	if (psy_ui_component_hasfocus(&self->renderer.component)) {
-		psy_EventDriverCmd cmd;
-		double step;
-		double top;
-		double newtop;
+	psy_EventDriverCmd cmd;
+	double step;
+	double top;
+	double newtop;	
 
-		cmd = psy_eventdriver_getcmd(sender, "tracker");
-		if (cmd.id == -1) {
-			return;
-		}					
-		step = psy_ui_component_scrollstep_height_px(
-			&self->renderer.component);
-		top = psy_ui_component_scrolltop_px(&self->renderer.component);
-		newtop = -1.0;
-		switch (cmd.id) {
-		case CMD_NAVTOP:
-			newtop = 0.0;
-			break;
-		case CMD_NAVBOTTOM:
-			newtop = propertiesview_checkrange(self, (double)INT32_MAX);
-			break;
-		case CMD_NAVUP:
-			newtop = psy_max(0, top - step);
-			break;
-		case CMD_NAVDOWN:					
-			newtop = propertiesview_checkrange(self, top + step);
-			break;
-		case CMD_NAVPAGEUP:					
-			newtop = psy_max(0, top - step * 16.0);
-			break;
-		case CMD_NAVPAGEDOWN:
-			newtop = propertiesview_checkrange(self, top + step * 16.0);
-			break;
-		default:
-			break;
-		}
-		if (newtop != -1.0) {
-			psy_ui_component_setscrolltop(&self->renderer.component,
-				psy_ui_value_make_px(psy_max(0.0, newtop)));
-		}			
+	cmd = inputhandler_cmd(sender);
+	if (cmd.id == -1) {
+		return 0;
+	}					
+	step = psy_ui_component_scrollstep_height_px(
+		&self->renderer.component);
+	top = psy_ui_component_scrolltop_px(&self->renderer.component);
+	newtop = -1.0;	
+	switch (cmd.id) {
+	case CMD_NAVTOP:
+		newtop = 0.0;		
+		break;
+	case CMD_NAVBOTTOM:
+		newtop = propertiesview_checkrange(self, (double)INT32_MAX);
+		break;
+	case CMD_NAVUP:
+		newtop = psy_max(0, top - step);
+		break;
+	case CMD_NAVDOWN:					
+		newtop = propertiesview_checkrange(self, top + step);
+		break;
+	case CMD_NAVPAGEUP:					
+		newtop = psy_max(0, top - step * 16.0);
+		break;
+	case CMD_NAVPAGEDOWN:
+		newtop = propertiesview_checkrange(self, top + step * 16.0);
+		break;
+	default:
+		break;
 	}
+	if (newtop != -1.0) {
+		psy_ui_component_setscrolltop(&self->renderer.component,
+			psy_ui_value_make_px(psy_max(0.0, newtop)));
+	}	
+	return 1;
 }
 
 double propertiesview_checkrange(PropertiesView* self, double position)
@@ -1172,14 +1166,10 @@ double propertiesview_checkrange(PropertiesView* self, double position)
 	return (double)(steps * scrollstepypx);
 }
 
-void propertiesview_onfocus(PropertiesView* self)
-{
-	psy_ui_component_setfocus(&self->renderer.component);
-}
-
 void propertiesview_onmousedown(PropertiesView* self, psy_ui_MouseEvent* ev)
 {	
-	if (self->renderer.state.preventmousepropagation) {
+	psy_ui_component_setfocus(&self->component);
+	if (self->renderer.state.preventmousepropagation) {		
 		psy_ui_mouseevent_stop_propagation(ev);
 	}
 }

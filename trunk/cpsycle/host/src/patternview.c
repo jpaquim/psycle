@@ -63,7 +63,6 @@ static void patternview_ontimer(PatternView*, uintptr_t timerid);
 static void patternview_updateksin(PatternView*);
 static void patternview_numtrackschanged(PatternView*, psy_audio_Pattern*,
 	uintptr_t numsongtracks);
-static void patternview_oneventdriverinput(PatternView*, psy_EventDriver*);
 static PatternViewTarget patternview_target(PatternView*, psy_EventDriver*
 	sender);
 static void patternview_ontrackercursorchanged(PatternView*,
@@ -302,10 +301,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		patternview_onpatterncursorchanged);
 	psy_signal_connect(&self->tracker.component.signal_scroll, self,
-		patternview_ongridscroll);
-	psy_signal_connect(
-		&workspace_player(self->workspace)->eventdrivers.signal_input, self,
-		patternview_oneventdriverinput);
+		patternview_ongridscroll);	
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
 		patternview_onparametertweak);
 	if (workspace->song) {
@@ -1216,51 +1212,6 @@ const psy_audio_PatternSelection* patternview_blockselection(const PatternView*
 		return trackergrid_selection(&self->tracker);
 	}
 	return pianogrid_selection(&self->pianoroll.grid);
-}
-
-void patternview_oneventdriverinput(PatternView* self, psy_EventDriver* sender)
-{
-	if (self->workspace->seqviewactive) {
-		return;
-	}
-	if (workspace_currview(self->workspace).id == VIEW_ID_PATTERNVIEW) {
-		psy_EventDriverCmd cmd;
-		PatternViewTarget target;
-
-		target = patternview_target(self, sender);
-		if (target == PATTERNVIEWTARGET_TRACKER) {
-			cmd = psy_eventdriver_getcmd(sender, "tracker");
-			if (cmd.id != -1) {			
-				if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
-					trackergrid_handlecommand(&self->tracker, cmd.id);					
-					psy_ui_component_invalidate(&self->header.component);
-				} else if (psy_ui_component_hasfocus(trackergrid_base(
-					&self->tracker))) {
-					trackergrid_handlecommand(&self->tracker, cmd.id);
-				}
-			}
-		} else if (target == PATTERNVIEWTARGET_DEFAULTLINE) {
-			cmd = psy_eventdriver_getcmd(sender, "tracker");
-			if (cmd.id != -1 && (psy_ui_component_hasfocus(trackergrid_base(
-					&self->griddefaults)))) {
-				if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
-					psy_ui_component_invalidate(&self->header.component);
-				}
-				trackergrid_handlecommand(&self->griddefaults, cmd.id);
-			}
-		} else if (target == PATTERNVIEWTARGET_PIANOROLL) {
-			cmd = psy_eventdriver_getcmd(sender, "tracker");
-			if (cmd.id == CMD_COLUMNNEXT || cmd.id == CMD_COLUMNPREV) {
-				trackergrid_handlecommand(&self->tracker, cmd.id);
-				workspace_setpatterncursor(self->workspace,
-					self->workspace->patterneditposition);
-				psy_ui_component_invalidate(&self->header.component);
-			} else {
-				cmd = psy_eventdriver_getcmd(sender, "pianoroll");			
-				pianoroll_handlecommand(&self->pianoroll, cmd.id);
-			}
-		}
-	}
 }
 
 PatternViewTarget patternview_target(PatternView* self, psy_EventDriver* sender)

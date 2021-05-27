@@ -78,7 +78,7 @@ static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onexport(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatesongtitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
-static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
+static bool mainframe_oninput(MainFrame*, InputHandler* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatestepsequencerbuttons(MainFrame*);
@@ -671,8 +671,8 @@ void mainframe_initplugineditor(MainFrame* self)
 void mainframe_connectworkspace(MainFrame* self)
 {
 	workspace_configure_host(&self->workspace);
-	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
-		mainframe_oneventdriverinput);
+	inputhandler_connect(&self->workspace.inputhandler,
+		INPUTHANDLER_IMM, "general", self, mainframe_oninput);
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
@@ -701,15 +701,15 @@ void mainframe_initinterpreter(MainFrame* self)
 	interpreter_start(&self->interpreter);
 }
 
-void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
+bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 {
 	psy_EventDriverCmd cmd;
 
-	cmd = psy_eventdriver_getcmd(sender, "general");
+	cmd = inputhandler_cmd(sender);
 	switch (cmd.id) {
 	case CMD_IMM_HELPSHORTCUT:
 		mainframe_ontogglekbdhelp(self, mainframe_base(self));
-		break;
+		return 1;
 	case CMD_IMM_INFOPATTERN:
 		if (workspace_currview(&self->workspace).id != VIEW_ID_PATTERNVIEW) {
 			workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
@@ -725,22 +725,24 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			}
 		}
 		psy_ui_component_setfocus(&self->patternview.properties.component);
-		break;
+		return 1;
 	case CMD_IMM_MAXPATTERN:
 		minmaximize_toggle(&self->minmaximize);
-		break;
+		return 1;
 	case CMD_IMM_TERMINAL:
 		mainframe_ontoggleterminal(self, mainframe_base(self));
-		break;
+		return 1;
 	case CMD_EDT_EDITQUANTIZEDEC:
 		workspace_editquantizechange(&self->workspace, -1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
-		break;
+		return 1;
 	case CMD_EDT_EDITQUANTIZEINC:
 		workspace_editquantizechange(&self->workspace, 1);
 		patterncursorstepbox_update(&self->patternbar.cursorstep);
-		break;
+		return 1;
 	}
+	workspace_oninput(&self->workspace, cmd.id);
+	return 0;
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,

@@ -33,6 +33,7 @@
 #endif
 #ifdef DIVERSALIS__OS__UNIX
 	#include <pthread.h>
+	#include <unistd.h>
 #endif
 /* platform */
 #include "../../detail/os.h"
@@ -89,7 +90,7 @@ static void workspace_onterminaloutput(Workspace*,
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 /* EventDriver Input Handler */
-static void workspace_oneventdriverinput(Workspace*, psy_EventDriver* sender);
+static bool workspace_oninputhandlercallback(Workspace*, int message, void* param1);
 static void workspace_onscanstart(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanend(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanfile(Workspace*, psy_audio_PluginCatcher* sender,
@@ -165,7 +166,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->errorstrs = NULL;
 	self->statusoutputstrs = NULL;
 	self->driverconfigloading = FALSE;
-	self->seqviewactive = FALSE;
+	self->seqviewactive = FALSE;	
 	viewhistory_init(&self->viewhistory);
 	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
@@ -182,12 +183,12 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_sequencepaste_init(&self->sequencepaste);
 	psy_undoredo_init(&self->undoredo);
 	workspace_initsignals(self);
-	workspace_initplayer(self);
+	workspace_initplayer(self);	
 	eventdriverconfig_registereventdrivers(&self->config.input);
+	inputhandler_init(&self->inputhandler, &self->player, self,
+		workspace_oninputhandlercallback);
 	psy_audio_patterncursor_init(&self->patterneditposition);
-	psy_audio_pattern_init(&self->patternpaste);
-	psy_signal_connect(&self->player.eventdrivers.signal_input, self,
-		workspace_oneventdriverinput);
+	psy_audio_pattern_init(&self->patternpaste);	
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -284,6 +285,7 @@ void workspace_dispose(Workspace* self)
 	free(self->scanfilename);
 	psy_list_deallocate(&self->errorstrs, NULL);
 	psy_list_deallocate(&self->statusoutputstrs, NULL);
+	inputhandler_dispose(&self->inputhandler);
 }
 
 void workspace_save_styleconfiguration(Workspace* self)
@@ -1957,12 +1959,19 @@ void workspace_connectloadprogress(Workspace* self, void* context,
 	psy_signal_connect(&self->signal_loadprogress, context, fp);
 }
 
-void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
+static bool workspace_oninputhandlercallback(Workspace* self, int message, void* param1)
 {
-	psy_EventDriverCmd cmd;
+	switch (message) {
+	case INPUTHANDLER_HASFOCUS:
+		return (psy_ui_component_hasfocus((psy_ui_Component*)param1));
+	default:
+		return FALSE;
+	}	
+}
 
-	cmd = psy_eventdriver_getcmd(sender, "general");
-	switch (cmd.id) {
+void workspace_oninput(Workspace* self, uintptr_t cmdid)
+{	
+	switch (cmdid) {
 	case CMD_IMM_ADDMACHINE:
 		workspace_selectview(self, VIEW_ID_MACHINEVIEW,
 			SECTION_ID_MACHINEVIEW_NEWMACHINE, NEWMACHINE_APPEND);
@@ -2138,8 +2147,8 @@ void workspace_oneventdriverinput(Workspace* self, psy_EventDriver* sender)
 	case CMD_COLUMN_E:
 	case CMD_COLUMN_F:
 		if (self->song && psy_audio_song_numsongtracks(self->song) >=
-				(uintptr_t)(cmd.id - CMD_COLUMN_0)) {
-			self->patterneditposition.track = (cmd.id - CMD_COLUMN_0);
+				(uintptr_t)(cmdid - CMD_COLUMN_0)) {
+			self->patterneditposition.track = (cmdid - CMD_COLUMN_0);
 			workspace_setpatterncursor(self, self->patterneditposition);
 		}
 		break;

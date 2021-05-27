@@ -1,14 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEPARAMCONFIG_H)
 #define MACHINEPARAMCONFIG_H
 
-// host
+/* host */
 #include "skincoord.h"
-// ui
+/* ui */
 #include <uibitmap.h>
-// container
+/* container */
 #include <properties.h>
 #include <signal.h>
 
@@ -16,7 +18,7 @@
 extern "C" {
 #endif
 
-// ParamSkin
+/* ParamSkin */
 typedef struct ParamSkin {
     psy_ui_Colour fonttopcolour;
     psy_ui_Colour fontbottomcolour;
@@ -47,7 +49,7 @@ typedef struct ParamSkin {
 psy_ui_RealSize mpfsize(ParamSkin* skin, const psy_ui_TextMetric* tm,
 	uintptr_t paramtype, bool issmall);
 
-// MachineParamConfig
+/* MachineParamConfig */
 
 enum {
 	PROPERTY_ID_LOADCONTROLSKIN = 9000,
@@ -55,13 +57,13 @@ enum {
 };
 
 typedef struct MachineParamConfig {
-	// signals
+    /* signals */
 	psy_Signal signal_changed;
 	psy_Signal signal_themechanged;
-	// internal data
+    /* internal */
 	psy_Property* paramview;
 	psy_Property* theme;	
-	// references
+    /* references */
 	psy_Property* parent;
 } MachineParamConfig;
 

@@ -1,0 +1,66 @@
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+**  copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
+
+#if !defined(INPUTHANDLER_H)
+#define INPUTHANDLER_H
+
+/* audio */
+#include <player.h>
+/* container */
+#include <list.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef bool (*fp_inputhandler_input)(void* context, void* sender);
+typedef bool (*fp_inputhandler_hostcallback)(void* context, int message, void* param1);
+
+typedef enum {
+	INPUTHANDLER_IMM,
+	INPUTHANDLER_FOCUS
+} InputHandlerType;
+
+typedef enum {
+	INPUTHANDLER_HASFOCUS
+} InputHandlerMessage;
+
+/* InputSlot */
+typedef struct InputSlot {
+	InputHandlerType type;
+	void* context;
+	char* section;
+	fp_inputhandler_input input;
+} InputSlot;
+
+void inputslot_init(InputSlot*, InputHandlerType, const char* section,
+	void* context, fp_inputhandler_input);
+void inputslot_dispose(InputSlot*);
+
+InputSlot* inputslot_alloc(void);
+InputSlot* inputslot_allocinit(InputHandlerType type, const char* section,
+	void* context, fp_inputhandler_input);
+
+/* InputHandler */
+typedef struct InputHandler {
+	psy_List* slots;
+	psy_EventDriverCmd cmd;
+	void* hostcontext;
+	fp_inputhandler_hostcallback hostcallback;
+} InputHandler;
+
+void inputhandler_init(InputHandler*, psy_audio_Player*,
+	void* hostcontext, fp_inputhandler_hostcallback);
+void inputhandler_dispose(InputHandler*);
+
+void inputhandler_connect(InputHandler*, InputHandlerType type,
+	const char* section, void* context, fp_inputhandler_input);
+psy_EventDriverCmd inputhandler_cmd(const InputHandler*);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* INPUTHANDLER_H */

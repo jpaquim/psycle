@@ -1,27 +1,29 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-#if !defined(CONFIG)
-#define CONFIG
+#if !defined(CONFIG_H)
+#define CONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// host
+/* host */
+#include "compatconfig.h"
+#include "dirconfig.h"
 #include "eventdriverconfig.h"
 #include "generalconfig.h"
 #include "keyboardmiscconfig.h"
 #include "languageconfig.h"
-#include "dirconfig.h"
 #include "machineviewconfig.h"
 #include "machineparamconfig.h"
 #include "metronomeconfig.h"
 #include "midiviewconfig.h"
 #include "patternviewconfig.h"
-#include "compatconfig.h"
 #include "predefsconfig.h"
-// audio
+/* audio */
 #include <audioconfig.h>
 
 enum {
@@ -133,4 +135,4 @@ void psycleconfig_notify_skinchanged(PsycleConfig*, psy_Property* property);
 }
 #endif
 
-#endif
+#endif /* CONFIG_H */

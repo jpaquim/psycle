@@ -13,10 +13,10 @@
 #include "workspace.h"
 #include "zoombox.h"
 /* ui */
-#include <uiscroller.h>
-#include <uilabel.h>
 #include <uicombobox.h>
-
+#include <uilabel.h>
+#include <uiscroller.h>
+/* audio */
 #include <pattern.h>
 
 #ifdef __cplusplus
@@ -37,7 +37,7 @@ typedef enum {
 	PIANOROLL_TRACK_DISPLAY_ACTIVE
 } PianoTrackDisplay;
 
-
+/* PianogridTrackEvent */
 typedef struct PianogridTrackEvent {
 	uint8_t note;
 	psy_dsp_big_beat_t offset;
@@ -50,6 +50,7 @@ typedef struct PianogridTrackEvent {
 	bool active;
 } PianogridTrackEvent;
 
+/* PianoGridDraw */
 typedef struct PianoGridDraw {
 	const psy_ui_TextMetric* tm;
 	psy_ui_RealSize size;

@@ -880,8 +880,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 	if (!self->selection.valid && pianogridstate_pattern(self->gridstate)) {
 		psy_audio_PatternEvent patternevent;
 		psy_audio_PatternCursor cursor;
-
-		psy_ui_component_setfocus(&self->component);
+		
 		psy_audio_patternevent_clear(&patternevent);
 		pianogrid_updatekeystate(self);		
 		patternevent.note = self->dragcursor.key;
@@ -1388,6 +1387,7 @@ static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
 static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
 static void pianoroll_updatetheme(Pianoroll*);
 static void pianoroll_onpatterncursorchanged(Pianoroll*, Workspace* sender);
+static bool pianoroll_oninputhandlerinput(Pianoroll*, InputHandler* sender);
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
 static bool pianoroll_vtable_initialized = FALSE;
@@ -1480,6 +1480,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged,
 		self, pianoroll_onpatterncursorchanged);
 	pianoroll_updatetheme(self);
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
+		"pianoroll", self, pianoroll_oninputhandlerinput);
 	psy_ui_component_starttimer(&self->component, 0, PIANOROLL_REFRESHRATE);
 }
 
@@ -1543,7 +1545,7 @@ void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	psy_ui_component_setfocus(pianogrid_base(&self->grid));
+	psy_ui_component_setfocus(pianoroll_base(self));
 }
 
 void pianoroll_updatescroll(Pianoroll* self)
@@ -1777,6 +1779,14 @@ void pianoroll_makecmds(psy_Property* parent)
 	setcmdall(cmds, CMD_BLOCKEND,
 		psy_ui_KEY_E, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockend", "sel end");
+}
+
+bool pianoroll_oninputhandlerinput(Pianoroll* self, InputHandler* sender)
+{
+	psy_EventDriverCmd cmd;
+
+	cmd = inputhandler_cmd(sender);
+	return pianoroll_handlecommand(self, cmd.id);
 }
 
 bool pianoroll_handlecommand(Pianoroll* self, uintptr_t cmd)

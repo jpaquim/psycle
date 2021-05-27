@@ -6,6 +6,7 @@
 
 // host
 #include "config.h"
+#include "inputhandler.h"
 #include "undoredo.h"
 #include "viewhistory.h"
 // audio
@@ -191,6 +192,7 @@ typedef struct Workspace {
 	psy_List* statusoutputstrs;
 	bool driverconfigloading;
 	bool seqviewactive;
+	InputHandler inputhandler;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -308,7 +310,7 @@ void workspace_connectloadprogress(Workspace*, void* context,
 void workspace_apptitle(Workspace*, char* rv_title, uintptr_t max_len);
 const char* workspace_songtitle(const Workspace*);
 void workspace_setstartpage(Workspace*);
-
+void workspace_oninput(Workspace*, uintptr_t cmd);
 
 #ifdef __cplusplus
 }

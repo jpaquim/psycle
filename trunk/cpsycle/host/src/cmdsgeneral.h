@@ -1,26 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-#if !defined(CMDSGENERAL)
-#define CMDSGENERAL
+#if !defined(CMDSGENERAL_H)
+#define CMDSGENERAL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: Defines a set of command ids to define keyboard shortcuts.
-//      Note shortcut ids are defined in cmdsnotes.h
-//      See also cmdproperties.h for the keyboard mapping
+/*
+** Defines a set of command ids to define keyboard shortcuts.
+** Note shortcut ids are defined in cmdsnotes.h
+** See also cmdproperties.h for the keyboard mapping
+*/
 
-/// Start index for note input (corresponds to note C-0)
+/* Start index for note input (corresponds to note C-0) */
 #define CS_KEY_START 0
-/// Start index of inmediate commands (play, stop, change view,...)
+/* Start index of inmediate commands (play, stop, change view,...) */
 #define CS_IMM_START 256
-/// Start index for edit-related commands (select, cut..)
+/* Start index for edit-related commands (select, cut..) */
 #define CS_EDT_START 512		
 
 enum {
-	// immediate commands
+	/* immediate commands */
 	CMD_IMM_EDITTOGGLE = CS_IMM_START,
 
 	CMD_IMM_OCTAVEUP,
@@ -57,19 +61,19 @@ enum {
 	CMD_IMM_SONGPOSINC,
 	CMD_IMM_SONGPOSDEC,
 
-	CMD_IMM_COLUMNPREV,		///< TAB
-	CMD_IMM_COLUMNNEXT,		///< S-TAB
+	CMD_IMM_COLUMNPREV,		/* < TAB */
+	CMD_IMM_COLUMNNEXT,		/* < S-TAB */
 
 	CMD_IMM_NAVUP,
 	CMD_IMM_NAVDN,
 	CMD_IMM_NAVLEFT,
 	CMD_IMM_NAVRIGHT,
-	CMD_IMM_NAVPAGEUP,	///< PGUP
-	CMD_IMM_NAVPAGEDN,	///< PGDN
-	CMD_IMM_NAVTOP,		///< HOME
-	CMD_IMM_NAVBOTTOM,	///< END
+	CMD_IMM_NAVPAGEUP,	/* < PGUP */
+	CMD_IMM_NAVPAGEDN,	/* < PGDN */
+	CMD_IMM_NAVTOP,		/* < HOME */
+	CMD_IMM_NAVBOTTOM,	/* < END */
 
-	CMD_IMM_SELECTMACHINE,	///< ENTER
+	CMD_IMM_SELECTMACHINE,	/* < ENTER */
 	CMD_IMM_UNDO,
 	CMD_IMM_REDO,
 	CMD_IMM_FOLLOWSONG,
@@ -126,10 +130,13 @@ enum {
 	CMD_EDT_EDITQUANTIZEDEC,
 	CMD_EDT_EDITQUANTIZEINC,
 
-	// new ones have to go at bottom of each section or else bad registry reads
+	/*
+	** new ones have to go at bottom of each section or else bad registry
+	** reads
+	*/
 	CMD_EDT_PATTERNMIXPASTE,
 	CMD_EDT_PATTERNTRACKMUTE,
-	CMD_EDT_KEYSTOPANY,	///< NOTE STOP
+	CMD_EDT_KEYSTOPANY,	/* < NOTE STOP */
 	CMD_EDT_PATTERNDELETE,
 	CMD_EDT_BLOCKDELETE,
 	CMD_EDT_PATTERNTRACKSOLO,
@@ -141,5 +148,4 @@ enum {
 }
 #endif
 
-#endif
-
+#endif /* CMDSGENERAL_H */

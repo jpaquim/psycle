@@ -7,13 +7,13 @@
 
 
 #include "trackerview.h"
-// local
+/* local */
 #include "cmdsnotes.h"
 #include "patterncmds.h"
 #include "skingraphics.h"
-// std
+/* std */
 #include <math.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -64,8 +64,8 @@ static void entervaluecolumn(psy_audio_PatternEntry* entry, intptr_t column, int
 	}
 }
 
-// TrackerGrid
-// prototypes
+/* TrackerGrid */
+/* prototypes */
 static void trackergrid_ondestroy(TrackerGrid*);
 static void trackergrid_init_signals(TrackerGrid*);
 static void trackergrid_dispose_signals(TrackerGrid*);
@@ -115,7 +115,8 @@ static void trackergrid_ongotocursor(TrackerGrid*, psy_audio_PatternCursor*);
 static psy_dsp_big_beat_t trackergrid_currseqoffset(TrackerGrid*);
 static psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(
 	TrackerGrid*, psy_audio_PatternCursor* rv);
-// vtable
+static bool trackergrid_oninputhandlerinput(TrackerGrid*, InputHandler*);
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -151,17 +152,17 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 	}
 	return &vtable;
 }
-// implementation
+/* implementation */
 void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Component* view,
 	TrackConfig* trackconfig, TrackerGridState* gridstate, TrackerLineState* linestate,
 	Workspace* workspace)
 {
 	assert(self);
 
-	// init base component
+	/* init base component */
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	// set references
+	/* set references */
 	self->workspace = workspace;
 	self->view = view;
 	patterncmds_init(&self->cmds, workspace);
@@ -171,14 +172,14 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	trackergrid_setsharedgridstate(self, gridstate, trackconfig);
 	trackergrid_setsharedlinestate(self, linestate);
 	trackergrid_storecursor(self);
-	// setup base component
+	/* setup base component */
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
 	psy_ui_component_doublebuffer(&self->component);	
 	trackergrid_init_signals(self);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
-	// init internal data	
+	/* init internal */
 	self->syncpattern = TRUE;	
 	self->gridstate->midline = FALSE;	
 	self->chordmode = FALSE;
@@ -193,11 +194,13 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->preventscrolltop = FALSE;
 	self->preventeventdriver = FALSE;
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
+		"tracker", self, trackergrid_oninputhandlerinput);
 	psy_audio_patternselection_init(&self->gridstate->selection);
-	// handle midline invalidation
+	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);
-	// receive notecommands from the player
+	/* receive notecommands from the player */
 	psy_signal_connect(&workspace_player(self->workspace)->signal_inputevent, self,
 		trackergrid_oninput);
 	psy_signal_connect(&self->workspace->signal_gotocursor, self,
@@ -344,7 +347,7 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 		bool fill;
 		
 		fill = !(offset >= seqoffset && offset < seqoffset + length) || !ite.patternnode;		
-		// draw trackline
+		/* draw trackline */
 		for (track = clip->topleft.track; track < clip->bottomright.track;
 			++track) {
 			bool hasevent = FALSE;
@@ -378,7 +381,7 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 				fill = TRUE;
 			}			
 		}
-		// skip remaining events of the line
+		/* skip remaining events of the line */
 		while (ite.patternnode && (offset < seqoffset + length) && 
 			(psy_audio_sequencetrackiterator_offset(&ite) + psy_dsp_epsilon * 2 <
 				offset + trackerlinestate_bpl(self->linestate))) {
@@ -386,7 +389,7 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 		}
 		offset += trackerlinestate_bpl(self->linestate);
 		if (offset >= seqoffset + length) {
-			// go to next seqentry or end draw
+			/* go to next seqentry or end draw */
 			if (ite.sequencentrynode && ite.sequencentrynode->next) {
 				psy_audio_sequencetrackiterator_inc_entry(&ite);
 				seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);				
@@ -1409,7 +1412,7 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 		self->gridstate->trackconfig->colresize = FALSE;
 		psy_signal_emit(&self->signal_colresize, self, 0);		
 	} else if (!psy_audio_patternselection_valid(&self->gridstate->selection)) {
-		// set cursor only, if no selection was made
+		/* set cursor only, if no selection was made */
 		if (!self->linestate->singlemode) {
 			psy_audio_OrderIndex index;
 			
@@ -1678,6 +1681,14 @@ void trackergrid_enterdigitcolumn(TrackerGrid* self,
 	}
 }
 
+bool trackergrid_oninputhandlerinput(TrackerGrid* self, InputHandler* sender)
+{
+	psy_EventDriverCmd cmd;
+
+	cmd = inputhandler_cmd(sender);	
+	return trackergrid_handlecommand(self, cmd.id);
+}
+
 bool trackergrid_handlecommand(TrackerGrid* self, intptr_t cmd)
 {	
 	assert(self);
@@ -1824,7 +1835,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 
 		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, slot);
 		assert(machine);
-		value = 0; // machine_parametervalue_scaled(machine, tweak, normvalue);
+		value = 0; /* machine_parametervalue_scaled(machine, tweak, normvalue); */
 		psy_audio_patternevent_init_all(&event,
 			(unsigned char)(
 				(keyboardmiscconfig_recordtweaksastws(&self->workspace->config.misc))
