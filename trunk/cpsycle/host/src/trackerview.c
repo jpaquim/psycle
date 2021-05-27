@@ -74,8 +74,6 @@ static void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g,
 	const psy_audio_PatternSelection* clip);
 static void trackergrid_updatetrackevents(TrackerGrid*,
 	const psy_audio_PatternSelection* clip);
-static void trackergrid_onkeydown(TrackerGrid*, psy_ui_KeyboardEvent*);
-static void trackergrid_onkeyup(TrackerGrid*, psy_ui_KeyboardEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
@@ -84,8 +82,6 @@ static void trackergrid_dragselection(TrackerGrid*, psy_audio_PatternCursor);
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_clearmidline(TrackerGrid*);
 static bool trackergrid_movecursorwhenpaste(TrackerGrid*);
-static void trackergrid_inputevent(TrackerGrid*, const psy_audio_PatternEvent*,
-	bool chordmode);
 static void trackergrid_enterdigitcolumn(TrackerGrid*, psy_audio_PatternEntry*,
 	psy_audio_PatternCursor, intptr_t digitvalue);
 static void trackergrid_inputvalue(TrackerGrid*, intptr_t value, intptr_t digit);
@@ -115,7 +111,8 @@ static void trackergrid_ongotocursor(TrackerGrid*, psy_audio_PatternCursor*);
 static psy_dsp_big_beat_t trackergrid_currseqoffset(TrackerGrid*);
 static psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(
 	TrackerGrid*, psy_audio_PatternCursor* rv);
-static bool trackergrid_oninputhandlerinput(TrackerGrid*, InputHandler*);
+static bool trackergrid_ontrackercmds(TrackerGrid*, InputHandler*);
+static bool trackergrid_onnotecmds(TrackerGrid*, InputHandler* sender);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -129,13 +126,7 @@ static psy_ui_ComponentVtable* vtable_init(TrackerGrid* self)
 			trackergrid_ondestroy;
 		vtable.ondraw =
 			(psy_ui_fp_component_ondraw)
-			trackergrid_ondraw;
-		vtable.onkeydown =
-			(psy_ui_fp_component_onkeyevent)
-			trackergrid_onkeydown;
-		vtable.onkeyup =
-			(psy_ui_fp_component_onkeyevent)
-			trackergrid_onkeyup;
+			trackergrid_ondraw;		
 		vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			trackergrid_onmousedown;
@@ -195,14 +186,13 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->preventeventdriver = FALSE;
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"tracker", self, trackergrid_oninputhandlerinput);
+		"tracker", self, trackergrid_ontrackercmds);
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
+		"notes", self, trackergrid_onnotecmds);
 	psy_audio_patternselection_init(&self->gridstate->selection);
 	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,
-		trackergrid_onscroll);
-	/* receive notecommands from the player */
-	psy_signal_connect(&workspace_player(self->workspace)->signal_inputevent, self,
-		trackergrid_oninput);
+		trackergrid_onscroll);		
 	psy_signal_connect(&self->workspace->signal_gotocursor, self,
 		trackergrid_ongotocursor);	
 }
@@ -806,59 +796,6 @@ void trackergrid_end(TrackerGrid* self)
 	trackergrid_invalidatecursor(self);
 }
 
-void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyboardEvent* ev)
-{	
-	assert(self);
-
-	if (self->preventeventdriver) {
-		psy_EventDriver* kbd;
-		psy_EventDriverInput input;
-		psy_EventDriverCmd cmd;
-
-		kbd = workspace_kbddriver(self->workspace);
-		input.message = psy_EVENTDRIVER_KEYDOWN;
-		input.param1 = psy_audio_encodeinput(ev->keycode,
-			self->chordmode ? 0 : ev->shift_key, ev->ctrl_key, ev->alt_key);
-		input.param2 = workspace_octave(self->workspace) * 12;
-		psy_eventdriver_cmd(kbd, "tracker", input, &cmd);
-		if (cmd.id >= CMD_DIGIT0 && cmd.id <= CMD_DIGITF) {
-			if (self->gridstate->cursor.column != TRACKER_COLUMN_NOTE) {
-				intptr_t digit = keycodetoint((uint32_t)ev->keycode);
-				if (digit != -1) {
-					trackergrid_inputvalue(self, digit, 1);
-					psy_ui_component_invalidate(&self->component);
-					psy_ui_keyboardevent_stop_propagation(ev);
-					return;
-				}
-			}
-		}
-		cmd.id = -1;
-		input.message = psy_EVENTDRIVER_KEYDOWN;
-		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl_key, ev->alt_key);
-		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
-		if (cmd.id != -1) {
-			trackergrid_inputnote(self,
-				(psy_dsp_note_t)(cmd.id + workspace_octave(self->workspace) * 12),
-				1);
-			psy_ui_component_invalidate(&self->component);
-			psy_ui_keyboardevent_stop_propagation(ev);
-		}				
-	}	
-}
-
-void trackergrid_onkeyup(TrackerGrid* self, psy_ui_KeyboardEvent* ev)
-{
-	assert(self);
-
-	if (self->chordmode && ev->keycode == psy_ui_KEY_SHIFT) {
-		self->chordmode = FALSE;
-		self->gridstate->cursor.track = self->chordbegin;
-		trackergrid_scrollleft(self, self->gridstate->cursor);
-		trackergrid_advanceline(self);
-		psy_ui_keyboardevent_stop_propagation(ev);
-	}
-}
-
 void trackergrid_prevcol(TrackerGrid* self)
 {
 	bool invalidate;
@@ -945,23 +882,6 @@ void trackergrid_selectmachine(TrackerGrid* self)
 			psy_audio_instruments_select(&workspace_song(self->workspace)->instruments,
 				psy_audio_instrumentindex_make(0, ev->inst));			
 		}		
-	}
-}
-
-void trackergrid_oninput(TrackerGrid* self, psy_audio_Player* sender,
-	psy_audio_PatternEvent* ev)
-{
-	assert(self);
-
-	if (self->preventeventdriver) {
-		return;
-	}
-	if (self->gridstate->cursor.column == TRACKER_COLUMN_NOTE &&
-			ev->note != psy_audio_NOTECOMMANDS_RELEASE) {
-		if (workspace_currview(self->workspace).id == VIEW_ID_PATTERNVIEW) {
-			trackergrid_setdefaultevent(self, &sender->patterndefaults, ev);
-			trackergrid_inputevent(self, ev, self->chordmode);
-		}
 	}
 }
 
@@ -1077,59 +997,55 @@ void trackergrid_rowclear(TrackerGrid* self)
 	}
 }
 
-void trackergrid_inputevent(TrackerGrid* self,
-	const psy_audio_PatternEvent* ev, bool chordmode)
+bool trackergrid_onnotecmds(TrackerGrid* self, InputHandler* sender)
 {
-	assert(self);
-
-	trackergrid_preventpatternsync(self);
-	psy_undoredo_execute(&self->workspace->undoredo,
-		&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
-			trackerlinestate_bpl(self->linestate),
-			self->gridstate->cursor, *ev,
-			(self->gridstate->synccursor) ? self->workspace : NULL)->command);
-	if (chordmode != FALSE) {
-		trackergrid_nexttrack(self);
-	} else {
-		trackergrid_advanceline(self);
-	}
-	if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {
-		self->gridstate->cursor.key = ev->note;
-		trackergridstate_synccursor(self->gridstate);
-	}
-	trackergrid_enablepatternsync(self);
-}
-
-void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
-	bool chordmode)
-{
-	psy_audio_Machine* machine;
-	psy_audio_Machines* machines;
-	psy_audio_PatternEvent ev;
-	bool useaux;
+	psy_EventDriverCmd cmd;
 
 	assert(self);
 
-	if (!workspace_song(self->workspace)) {
-		return;
-	}	
-	machines = &workspace_song(self->workspace)->machines;
-	machine = psy_audio_machines_selectedmachine(machines);
-	useaux = machine && psy_audio_machine_numauxcolumns(machine) > 0;
-	psy_audio_patternevent_init_all(&ev,
-		note,
-		(note == psy_audio_NOTECOMMANDS_TWEAK)
-		? (uint16_t)psy_audio_machines_paramselected(machines)
-		: (uint16_t)(
-			(useaux)
-			? psy_audio_machine_auxcolumnselected(machine)
-			: machine && machine_supports(machine, psy_audio_SUPPORTS_INSTRUMENTS)
-			? psy_audio_instruments_selected(&workspace_song(self->workspace)->instruments).subslot
-			: psy_audio_NOTECOMMANDS_INST_EMPTY),
-		(uint8_t)psy_audio_machines_selected(machines),
-		(uint8_t)psy_audio_NOTECOMMANDS_VOL_EMPTY,
-		0, 0);	
-	trackergrid_inputevent(self, &ev, chordmode);
+	cmd = inputhandler_cmd(sender);
+	if (cmd.id != -1) {		
+		psy_audio_PatternEvent ev;
+		bool chord;
+				
+		chord = FALSE;
+		trackergrid_preventpatternsync(self);
+		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
+			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
+			ev.note = CMD_NOTE_STOP;
+			psy_audio_player_playevent(&self->workspace->player, &ev);
+			return 1;
+		} else if (cmd.id == CMD_NOTE_CHORD_END) {
+			self->gridstate->cursor.track = self->chordbegin;
+			trackergrid_scrollleft(self, self->gridstate->cursor);
+			trackergrid_advanceline(self);			
+			return 1;
+		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
+			chord = TRUE;
+			ev = psy_audio_player_patternevent(&self->workspace->player,
+				(uint8_t)cmd.id - (uint8_t)CMD_NOTE_CHORD_C_0);
+		} else if (cmd.id < 256) {			
+			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
+			psy_audio_player_playevent(&self->workspace->player, &ev);
+		}
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
+				trackerlinestate_bpl(self->linestate),
+				self->gridstate->cursor, ev,
+				(self->gridstate->synccursor) ? self->workspace : NULL)->command);
+		if (chord != FALSE) {
+			trackergrid_nexttrack(self);
+		} else {
+			trackergrid_advanceline(self);
+		}
+		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
+			self->gridstate->cursor.key = ev.note;
+			trackergridstate_synccursor(self->gridstate);
+		}
+		trackergrid_enablepatternsync(self);
+		return 1;
+	}
+	return 0;
 }
 
 void trackergrid_inputvalue(TrackerGrid* self, intptr_t value, intptr_t digit)
@@ -1681,7 +1597,7 @@ void trackergrid_enterdigitcolumn(TrackerGrid* self,
 	}
 }
 
-bool trackergrid_oninputhandlerinput(TrackerGrid* self, InputHandler* sender)
+bool trackergrid_ontrackercmds(TrackerGrid* self, InputHandler* sender)
 {
 	psy_EventDriverCmd cmd;
 

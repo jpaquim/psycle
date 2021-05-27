@@ -132,8 +132,9 @@ void kbdboxkey_setdescription(KbdBoxKey* self, uint32_t keycode,
 	bool shift;
 	bool ctrl;
 	bool alt;
+	bool up;
 	
-	psy_audio_decodeinput((uint32_t)keycode, &keycode, &shift, &ctrl, &alt);
+	psy_audio_decodeinput((uint32_t)keycode, &keycode, &shift, &ctrl, &alt, &up);
 	if (shift && ctrl) {
 		psy_ui_label_settext(&self->desc3, text);
 	} else if (shift) {
@@ -441,8 +442,9 @@ void kbdbox_setdescription(KbdBox* self, uint32_t keycode, const char* text)
 	bool shift;
 	bool ctrl;
 	bool alt;
+	bool up;
 
-	psy_audio_decodeinput((uint32_t)keycode, &keycode_decoded, &shift, &ctrl, &alt);
+	psy_audio_decodeinput((uint32_t)keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
 	key = psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		kbdboxkey_setdescription(key, keycode, text);		
@@ -456,7 +458,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 
 		input.message = psy_EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
-			self->state.shift, self->state.ctrl, self->state.alt);
+			self->state.shift, self->state.ctrl, self->state.alt, 0);
 		input.param2 = workspace_octave(self->workspace) * 12;
 		psy_eventdriver_write(workspace_kbddriver(self->workspace), input);		
 		kbdbox_resetmodstates(self);
@@ -475,7 +477,7 @@ void kbdbox_onmouseup(KbdBox* self, psy_ui_MouseEvent* ev)
 
 		input.message = psy_EVENTDRIVER_KEYUP;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
-			self->state.shift, self->state.ctrl, self->state.alt);
+			self->state.shift, self->state.ctrl, self->state.alt, 0);
 		input.param2 = workspace_octave(self->workspace) * 12;
 		psy_eventdriver_write(workspace_kbddriver(self->workspace), input);		
 		self->state.pressedkey = 0;
@@ -522,7 +524,7 @@ void kbdbox_presskey(KbdBox* self, uint32_t keycode)
 	bool ctrl;
 	bool alt;
 
-	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt);
+	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, 0);
 	key = psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_addstylestate(&key->component,
@@ -547,7 +549,7 @@ void kbdbox_releasekey(KbdBox* self, uint32_t keycode)
 	bool ctrl;
 	bool alt;
 
-	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt);
+	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, 0);
 	key = psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_removestylestate(&key->component,

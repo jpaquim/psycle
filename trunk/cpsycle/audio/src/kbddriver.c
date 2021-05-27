@@ -193,6 +193,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	uint32_t keycode;	
 	bool ctrl;
 	bool alt;
+	bool up;
 
 	assert(driver);
 
@@ -200,82 +201,12 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 	self->lastcmd.id = -1;
 	// patternview chordmode
-	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
-	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
-		self->lastinput = input;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
+	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt, &up);
+	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {	
 		return;
-	}
-	if (input.message == psy_EVENTDRIVER_KEYUP && keycode == 0x10 /* psy_ui_KEY_SHIFT */) {
-		self->lastinput = input;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
-		return;
-	}
-	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
-		bool noteedit;
-		bool patternedit;
-
-		patternedit = psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_PATTERNEDIT, 0, 0);
-		noteedit = patternedit &&
-			psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_NOTECOLUMN, 0, 0);
-		if (noteedit && self->shift && !self->chordmode && keycode != 16 /* Shift Key*/) {
-			psy_EventDriverCmd cmd;
-			psy_EventDriverInput testnote;
-
-			cmd.id = -1;
-			testnote = input;
-			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
-			driver_cmd(driver, "notes", testnote, &cmd);
-			if (cmd.id != -1 && cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
-				self->chordmode = TRUE;
-				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_SETCHORDMODE, 1, 0);
-			}
-		} else if (noteedit) {
-			psy_EventDriverCmd cmd;
-			psy_EventDriverInput testnote;
-
-			cmd.id = -1;
-			testnote = input;
-			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
-			driver_cmd(driver, "notes", testnote, &cmd);
-			if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
-				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_INSERTNOTEOFF, 1, 0);
-				return;
-			}
-		} else if (patternedit) {
-			psy_EventDriverCmd cmd;
-			static const char* trackersection = "tracker";
-
-			cmd.id = -1;
-			driver_cmd(driver, "tracker", input, &cmd);
-			if (cmd.id != -1) {
-				self->lastcmd = cmd;
-				self->lastcmdsection = trackersection;
-			}
-		} else {
-			psy_EventDriverCmd cmd;
-			psy_EventDriverInput testnote;
-
-			cmd.id = -1;
-			testnote = input;
-			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
-			driver_cmd(driver, "notes", testnote, &cmd);
-			if (cmd.id != -1 && cmd.id < psy_audio_NOTECOMMANDS_RELEASE &&
-					input.param2 == TRUE /* repeat */) {
-				return;
-			}
-		}
-	}
-	if (!self->shift) {
-		self->chordmode = FALSE;
-	}
-	// handle chordmode
-	if (self->chordmode != FALSE) {
-		// remove shift		
-		input.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
 	}
 	self->lastinput = input;
-	psy_signal_emit(&self->driver.signal_input, self, 0);
+	psy_signal_emit(&self->driver.signal_input, self, 0);	
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
@@ -294,42 +225,22 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
-	}	
-	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
-		psy_List* p;
-		psy_Property* property = NULL;
+	}		
+	psy_List* p;
+	psy_Property* property = NULL;
 
-		for (p = psy_property_begin(section); p != NULL;
-				psy_list_next(&p)) {			
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_item_int(property) == input.param1) {
-				break;
-			}
-			property = NULL;
+	for (p = psy_property_begin(section); p != NULL;
+			psy_list_next(&p)) {			
+		property = (psy_Property*)psy_list_entry(p);
+		if (psy_property_item_int(property) == input.param1) {
+			break;
 		}
-		if (property) {
-			kbcmd.id = property->item.id;
-			cmd->id = kbcmd.id;
-		}		
-	} else {
-		psy_List* p;
-		psy_Property* property = NULL;
-
-		for (p = psy_property_begin(section); p != NULL;
-				psy_list_next(&p)) {
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_item_int(property) == input.param1) {				
-				break;
-			}
-			property = NULL;
-		}
-		if (property) {
-			kbcmd.id = property->item.id;
-		}
-		if (kbcmd.id <= psy_audio_NOTECOMMANDS_RELEASE) {
-			cmd->id = psy_audio_NOTECOMMANDS_RELEASE;
-		}
+		property = NULL;
 	}
+	if (property) {
+		kbcmd.id = property->item.id;
+		cmd->id = kbcmd.id;
+	}	
 }
 
 psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)

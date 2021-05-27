@@ -10,6 +10,7 @@
 /* local */
 #include "trackergridstate.h"
 #include "patterncmds.h"
+#include "cmdsnotes.h"
 /* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
@@ -1387,7 +1388,8 @@ static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
 static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
 static void pianoroll_updatetheme(Pianoroll*);
 static void pianoroll_onpatterncursorchanged(Pianoroll*, Workspace* sender);
-static bool pianoroll_oninputhandlerinput(Pianoroll*, InputHandler* sender);
+static bool pianoroll_onrollcmds(Pianoroll*, InputHandler* sender);
+static bool pianoroll_onnotecmds(Pianoroll*, InputHandler* sender);
 /* vtable */
 static psy_ui_ComponentVtable pianoroll_vtable;
 static bool pianoroll_vtable_initialized = FALSE;
@@ -1423,6 +1425,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	patterncmds_init(&self->cmds, workspace);
 	self->opcount = 0;
 	self->syncpattern = 1;
+	self->chordbegin = 0;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);		
 	/* shared states */
@@ -1481,7 +1484,9 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		self, pianoroll_onpatterncursorchanged);
 	pianoroll_updatetheme(self);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"pianoroll", self, pianoroll_oninputhandlerinput);
+		"pianoroll", self, pianoroll_onrollcmds);
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
+		"notes", self, pianoroll_onnotecmds);	
 	psy_ui_component_starttimer(&self->component, 0, PIANOROLL_REFRESHRATE);
 }
 
@@ -1781,7 +1786,7 @@ void pianoroll_makecmds(psy_Property* parent)
 		"blockend", "sel end");
 }
 
-bool pianoroll_oninputhandlerinput(Pianoroll* self, InputHandler* sender)
+bool pianoroll_onrollcmds(Pianoroll* self, InputHandler* sender)
 {
 	psy_EventDriverCmd cmd;
 
@@ -1861,6 +1866,49 @@ bool pianoroll_handlecommand(Pianoroll* self, uintptr_t cmd)
 	return handled;
 }
 
+bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
+{
+	psy_EventDriverCmd cmd;
+
+	assert(self);
+
+	cmd = inputhandler_cmd(sender);
+	if (cmd.id != -1) {
+		assert(self);
+		psy_audio_PatternEvent ev;
+		bool chord;
+		
+		chord = FALSE;
+		if (cmd.id == CMD_NOTE_CHORD_END) {
+			self->gridstate.cursor.track = self->chordbegin;			
+			return 1;
+		} else if (cmd.id >= CMD_NOTE_CHORD_C_0 && cmd.id < CMD_NOTE_STOP) {
+			chord = TRUE;
+			ev = psy_audio_player_patternevent(&self->workspace->player,
+				(uint8_t)cmd.id - (uint8_t)CMD_NOTE_CHORD_C_0);
+		} else if (cmd.id < 256) {
+			chord = FALSE;
+			ev = psy_audio_player_patternevent(&self->workspace->player, (uint8_t)cmd.id);
+		}
+		psy_undoredo_execute(&self->workspace->undoredo,
+			&insertcommand_alloc(pianogridstate_pattern(&self->gridstate),
+				1.0 / (double)self->gridstate.cursor.lpb,
+				self->gridstate.cursor, ev,
+				self->workspace)->command);
+		if (chord != FALSE) {
+			++self->gridstate.cursor.track;
+		} else {
+			self->gridstate.cursor.track = self->chordbegin;
+		}
+		if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
+			self->gridstate.cursor.key = ev.note;			
+		}
+		workspace_setpatterncursor(self->workspace, self->gridstate.cursor);
+		return 1;
+	}
+	return 0;
+}
+
 /*
 ** Defines a property with shortcut defaults for the keyboard driver
 ** key		: cmd id used by the trackerview
@@ -1878,7 +1926,7 @@ void setcmdall(psy_Property* cmds, uintptr_t cmd, uint32_t keycode, bool shift,
 	psy_snprintf(text, 256, "cmds.%s", key);
 	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(cmds, key,
-			psy_audio_encodeinput(keycode, shift, ctrl, 0), 0, 0),
+			psy_audio_encodeinput(keycode, shift, ctrl, 0, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }
 

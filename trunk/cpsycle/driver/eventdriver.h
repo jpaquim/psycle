@@ -82,8 +82,6 @@ INLINE psy_EventDriverCmd psy_eventdrivercmd_makeid(int id)
 
 struct psy_EventDriver;
 
-typedef int (*EVENTDRIVERWORKFN)(void* context, int msg, int param1, int param2);
-
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
 typedef int (*psy_eventdriver_fp_dispose)(struct psy_EventDriver*);
 typedef void (*psy_eventdriver_fp_deallocate)(struct psy_EventDriver*);
@@ -121,9 +119,7 @@ typedef struct psy_EventDriverVTable {
 
 typedef struct psy_EventDriver {
 	psy_EventDriverVTable* vtable;	
-	psy_Signal signal_input;
-	EVENTDRIVERWORKFN callback;
-	void* callbackcontext;
+	psy_Signal signal_input;	
 } psy_EventDriver;
 
 #define psy_SHIFT_ON	TRUE
@@ -134,18 +130,19 @@ typedef struct psy_EventDriver {
 #define psy_ALT_OFF		FALSE
 
 INLINE uint32_t psy_audio_encodeinput(uint32_t keycode, bool shift, bool
-	ctrl, bool alt)
+	ctrl, bool alt, bool up)
 {
-	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9) | ((uintptr_t)alt << 10);
+	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9) | ((uintptr_t)alt << 10) | ((uintptr_t)up << 11);
 }
 
 INLINE void psy_audio_decodeinput(uint32_t input, uint32_t* keycode,
-	bool* shift, bool* ctrl, bool* alt)
+	bool* shift, bool* ctrl, bool* alt, bool* up)
 {
 	*keycode = input & 0xFF;
 	*shift = ((input >> 8) & 0x01) == 0x01;
 	*ctrl = ((input >> 9) & 0x01) == 0x01;
 	*alt = ((input >> 10) & 0x01) == 0x01;
+	*up = ((input >> 11) & 0x01) == 0x01;
 }
 
 
@@ -244,24 +241,9 @@ INLINE void psy_eventdriver_idle(psy_EventDriver* self)
 	self->vtable->idle(self);
 }
 
-INLINE void psy_eventdriver_connect(psy_EventDriver* self, void* context,
-	EVENTDRIVERWORKFN callback)
-{
-	self->callbackcontext = context;
-	self->callback = callback;
-}
-
 INLINE psy_EventDriverInput psy_eventdriver_input(psy_EventDriver* self)
 {
 	return self->vtable->input(self);
 }
 
-INLINE int psy_eventdriver_hostevent(psy_EventDriver* self, int msg, int param1, int param2)
-{
-	if (self->callback) {
-		return self->callback(self->callbackcontext, msg, param1, param2);
-	}
-	return 0;
-}
-
-#endif
+#endif /* PSY_EVENTDRIVER_H */

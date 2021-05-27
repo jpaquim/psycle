@@ -21,9 +21,7 @@ void psy_audio_eventdrivers_init(psy_audio_EventDrivers* self, void* systemhandl
 	self->cmds = NULL;
 	self->systemhandle = systemhandle;
 	psy_table_init(&self->guids);
-	psy_signal_init(&self->signal_input);
-	self->callback = 0;
-	self->callbackcontext = 0;
+	psy_signal_init(&self->signal_input);	
 	psy_audio_eventdrivers_initkbd(self);
 }
 
@@ -32,15 +30,15 @@ void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers* self)
 	psy_audio_EventDriverEntry* eventdriverentry;
 
 	self->kbddriver = psy_audio_kbddriver_create();	
-	if (self->kbddriver) {
-		self->kbddriver->callback = 0;
-		self->kbddriver->callbackcontext = 0;
+	if (self->kbddriver) {		
 		eventdriverentry = (psy_audio_EventDriverEntry*)malloc(sizeof(psy_audio_EventDriverEntry));
-		eventdriverentry->eventdriver = self->kbddriver;
-		eventdriverentry->library = 0;
-		psy_list_append(&self->eventdrivers, eventdriverentry);
-		psy_signal_connect(&self->kbddriver->signal_input, self,
-			eventdrivers_ondriverinput);
+		if (eventdriverentry) {
+			eventdriverentry->eventdriver = self->kbddriver;
+			eventdriverentry->library = NULL;
+			psy_list_append(&self->eventdrivers, eventdriverentry);
+			psy_signal_connect(&self->kbddriver->signal_input, self,
+				eventdrivers_ondriverinput);
+		}
 	}
 }
 
@@ -103,14 +101,14 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 					eventdriver = fpeventdrivercreate();
 					psy_eventdriver_setcmddef(eventdriver, self->cmds);
 					eventdriverentry = (psy_audio_EventDriverEntry*) malloc(sizeof(psy_audio_EventDriverEntry));
-					eventdriverentry->eventdriver = eventdriver;
-					eventdriverentry->library = library;
-					psy_list_append(&self->eventdrivers, eventdriverentry);
-					eventdriver->callback = self->callback;
-					eventdriver->callbackcontext = self->callbackcontext;
-					psy_eventdriver_open(eventdriver);
-					psy_signal_connect(&eventdriver->signal_input, self,
-						eventdrivers_ondriverinput);
+					if (eventdriverentry) {
+						eventdriverentry->eventdriver = eventdriver;
+						eventdriverentry->library = library;
+						psy_list_append(&self->eventdrivers, eventdriverentry);
+						psy_eventdriver_open(eventdriver);
+						psy_signal_connect(&eventdriver->signal_input, self,
+							eventdrivers_ondriverinput);
+					}
 				}
 			}
 			if (!eventdriver) {
@@ -181,9 +179,7 @@ void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, intptr_t id,
 	eventdriver = psy_audio_eventdrivers_driver(self, id);
 	if (eventdriver) {
 		psy_eventdriver_close(eventdriver);
-		psy_eventdriver_configure(eventdriver, configuration);
-		eventdriver->callback = self->callback;
-		eventdriver->callbackcontext = self->callbackcontext;
+		psy_eventdriver_configure(eventdriver, configuration);		
 		psy_eventdriver_open(eventdriver);
 	}
 }
@@ -200,9 +196,7 @@ void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers* self)
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			psy_eventdriver_close(eventdriver);
-			psy_eventdriver_configure(eventdriver, NULL);
-			eventdriver->callback = self->callback;
-			eventdriver->callbackcontext = self->callbackcontext;
+			psy_eventdriver_configure(eventdriver, NULL);			
 			psy_eventdriver_open(eventdriver);
 		}
 	}
@@ -306,26 +300,6 @@ void psy_audio_eventdrivers_idle(psy_audio_EventDrivers* self)
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			psy_eventdriver_idle(eventdriver);
-		}
-	}
-}
-
-void psy_audio_eventdrivers_setcallback(psy_audio_EventDrivers* self,
-	EVENTDRIVERWORKFN callback, void* context)
-{
-	psy_List* p;
-
-	self->callback = callback;
-	self->callbackcontext = context;
-	for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
-		psy_audio_EventDriverEntry* eventdriverentry;
-		psy_EventDriver* eventdriver;
-
-		eventdriverentry = (psy_audio_EventDriverEntry*)psy_list_entry(p);
-		eventdriver = eventdriverentry->eventdriver;
-		if (eventdriver) {
-			eventdriver->callback = callback;
-			eventdriver->callbackcontext = context;
 		}
 	}
 }

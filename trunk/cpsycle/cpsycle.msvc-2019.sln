@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "audio", "audio\audio.vcxproj", "{40EC0FF3-1592-49D3-AC1B-3C5F85D268A9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6DFB8613-0151-4473-B90B-597577CAE6E7} = {6DFB8613-0151-4473-B90B-597577CAE6E7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "container", "container\container.vcxproj", "{8CEB65BD-4B67-416C-9DDE-03F395CC522F}"
 EndProject
