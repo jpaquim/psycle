@@ -20,28 +20,33 @@ typedef bool (*fp_inputhandler_hostcallback)(void* context, int message, void* p
 
 typedef enum {
 	INPUTHANDLER_IMM = 1,
-	INPUTHANDLER_FOCUS = 2	
+	INPUTHANDLER_FOCUS = 2,
+	INPUTHANDLER_VIEW = 4
 } InputHandlerType;
 
 typedef enum {
-	INPUTHANDLER_HASFOCUS
+	INPUTHANDLER_HASFOCUS,
+	INPUTHANDLER_HASVIEW
 } InputHandlerMessage;
 
 /* InputSlot */
 typedef struct InputSlot {
 	InputHandlerType type;
+	psy_EventDriverCmdType cmdtype;
+	uintptr_t id;
 	void* context;
 	char* section;
 	fp_inputhandler_input input;
 } InputSlot;
 
-void inputslot_init(InputSlot*, InputHandlerType, const char* section,
-	void* context, fp_inputhandler_input);
+void inputslot_init(InputSlot*, InputHandlerType, psy_EventDriverCmdType,
+	const char* section, uintptr_t id, void* context, fp_inputhandler_input);
 void inputslot_dispose(InputSlot*);
 
 InputSlot* inputslot_alloc(void);
-InputSlot* inputslot_allocinit(InputHandlerType type, const char* section,
-	void* context, fp_inputhandler_input);
+InputSlot* inputslot_allocinit(InputHandlerType type,
+	psy_EventDriverCmdType, const char* section,
+	uintptr_t id, void* context, fp_inputhandler_input);
 
 /* InputHandler */
 typedef struct InputHandler {
@@ -49,6 +54,7 @@ typedef struct InputHandler {
 	psy_EventDriverCmd cmd;
 	void* hostcontext;
 	fp_inputhandler_hostcallback hostcallback;
+	psy_EventDriver* sender;
 } InputHandler;
 
 void inputhandler_init(InputHandler*, psy_audio_Player*,
@@ -56,8 +62,12 @@ void inputhandler_init(InputHandler*, psy_audio_Player*,
 void inputhandler_dispose(InputHandler*);
 
 void inputhandler_connect(InputHandler*, InputHandlerType type,
-	const char* section, void* context, fp_inputhandler_input);
+	psy_EventDriverCmdType cmdtype, const char* section,
+	uintptr_t id, void* context, fp_inputhandler_input);
+void inputhandler_connecthost(InputHandler*, void* context,
+	fp_inputhandler_hostcallback);
 psy_EventDriverCmd inputhandler_cmd(const InputHandler*);
+psy_EventDriver* inputhandler_sender(const InputHandler*);
 
 #ifdef __cplusplus
 }

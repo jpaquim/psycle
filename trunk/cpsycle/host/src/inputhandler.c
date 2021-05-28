@@ -14,12 +14,15 @@
 /* InputSlot */
 /* implementation */
 void inputslot_init(InputSlot* self, InputHandlerType type,
-	const char* section, void* context, fp_inputhandler_input input)
+	psy_EventDriverCmdType cmdtype, const char* section,
+	uintptr_t id, void* context, fp_inputhandler_input input)
 {
 	assert(self);
 	
 	self->type = type;
+	self->cmdtype = cmdtype;
 	self->section = psy_strdup(section);
+	self->id = id;
 	self->context = context;
 	self->input = input;	
 }
@@ -35,14 +38,15 @@ InputSlot* inputslot_alloc(void)
 	return (InputSlot*)malloc(sizeof(InputSlot));
 }
 
-InputSlot* inputslot_allocinit(InputHandlerType type, const char* section,
-	void* context, fp_inputhandler_input  input)
+InputSlot* inputslot_allocinit(InputHandlerType type,
+	psy_EventDriverCmdType cmdtype, const char* section,
+	uintptr_t id, void* context, fp_inputhandler_input  input)
 {
 	InputSlot* rv;
 
 	rv = inputslot_alloc();
 	if (rv) {
-		inputslot_init(rv, type, section, context, input);
+		inputslot_init(rv, type, cmdtype, section, id, context, input);
 	}
 	return rv;
 }
@@ -62,6 +66,7 @@ void inputhandler_init(InputHandler* self, psy_audio_Player* player,
 	self->cmd.id = -1;
 	self->hostcontext = hostcontext;
 	self->hostcallback = callback;
+	self->sender = NULL;
 	psy_signal_connect(&player->eventdrivers.signal_input,
 		self, inputhandler_oneventdriverinput);
 }
@@ -74,10 +79,11 @@ void inputhandler_dispose(InputHandler* self)
 }
 
 void inputhandler_connect(InputHandler* self, InputHandlerType type,
-	const char* section, void* context, fp_inputhandler_input input)
+	psy_EventDriverCmdType cmdtype, const char* section, uintptr_t id,
+	void* context, fp_inputhandler_input input)
 {
 	psy_list_append(&self->slots,
-		inputslot_allocinit(type, section, context, input));
+		inputslot_allocinit(type, cmdtype, section, id, context, input));
 }
 
 void inputhandler_connecthost(InputHandler* self, void* context,
@@ -102,9 +108,15 @@ void inputhandler_oneventdriverinput(InputHandler* self,
 			emit = inputhandler_sendmessage(self,
 				INPUTHANDLER_HASFOCUS, slot->context);
 		}
+		if (emit && slot->type == INPUTHANDLER_VIEW) {
+			emit = inputhandler_sendmessage(self,
+				INPUTHANDLER_HASVIEW, (void*)slot->id);
+		}
 		if (emit) {
 			self->cmd = psy_eventdriver_getcmd(sender, slot->section);
-			if (slot->input(slot->context, self)) {
+			self->sender = sender;
+			if (self->cmd.type == slot->cmdtype && slot->input(slot->context,
+					self)) {
 				break;
 			}
 		}
@@ -122,4 +134,9 @@ bool inputhandler_sendmessage(InputHandler* self, int msg, void* param1)
 psy_EventDriverCmd inputhandler_cmd(const InputHandler* self)
 {
 	return self->cmd;
+}
+
+psy_EventDriver* inputhandler_sender(const InputHandler* self)
+{
+	return self->sender;
 }

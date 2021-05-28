@@ -546,7 +546,8 @@ void seqviewlist_init(SeqviewList* self, psy_ui_Component* parent,
 	psy_ui_component_setstyletype(&self->component, STYLE_SEQLISTVIEW);	
 	seqviewlist_build(self);
 	inputhandler_connect(&self->state->cmds->workspace->inputhandler,
-		INPUTHANDLER_FOCUS, "tracker", self,
+		INPUTHANDLER_FOCUS, psy_EVENTDRIVER_CMD, "tracker",
+		psy_INDEX_INVALID, self,
 		(fp_inputhandler_input)
 		seqviewlist_oninput);
 	psy_ui_component_starttimer(&self->component, 0, 200);

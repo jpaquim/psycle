@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "eventdrivers.h"
-// local
+/* local */
 #include "cmddriver.h"
 #include "kbddriver.h"
-// std
+/* std */
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,7 +39,7 @@ void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers* self)
 			eventdriverentry->eventdriver = self->kbddriver;
 			eventdriverentry->library = NULL;
 			psy_list_append(&self->eventdrivers, eventdriverentry);
-			psy_signal_connect(&self->kbddriver->signal_input, self,
+			psy_eventdriver_connect(self->kbddriver, self,
 				eventdrivers_ondriverinput);
 		}
 	}
@@ -57,7 +60,7 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 #if defined _CRTDBG_MAP_ALLOC
 		free(eventdriver);
 #else
-		psy_eventdriver_free(eventdriver);
+		psy_eventdriver_deallocate(eventdriver);
 #endif
 		if (eventdriverentry && eventdriverentry->library) {
 			psy_library_unload(eventdriverentry->library);
@@ -71,7 +74,8 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 	self->cmds = NULL;
 	psy_table_disposeall(&self->guids, (psy_fp_disposefunc)0);
 	psy_signal_dispose(&self->signal_input);
-	psy_eventdriver_free(self->cmddriver);
+	psy_eventdriver_release(self->cmddriver);
+	self->cmddriver = NULL;
 }
 
 psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const char* path)
@@ -105,9 +109,9 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 						eventdriverentry->eventdriver = eventdriver;
 						eventdriverentry->library = library;
 						psy_list_append(&self->eventdrivers, eventdriverentry);
-						psy_eventdriver_open(eventdriver);
-						psy_signal_connect(&eventdriver->signal_input, self,
+						psy_eventdriver_connect(eventdriver, self,
 							eventdrivers_ondriverinput);
+						psy_eventdriver_open(eventdriver);						
 					}
 				}
 			}
@@ -216,7 +220,7 @@ void psy_audio_eventdrivers_remove(psy_audio_EventDrivers* self, intptr_t id)
 #if defined _CRTDBG_MAP_ALLOC
 		free(eventdriver);
 #else
-		psy_eventdriver_free(eventdriver);
+		psy_eventdriver_deallocate(eventdriver);
 #endif
 		if (eventdriver == self->kbddriver) {
 			self->kbddriver = NULL;

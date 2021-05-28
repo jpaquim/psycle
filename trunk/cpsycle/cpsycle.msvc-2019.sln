@@ -236,6 +236,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "detail", "detail", "{CFC05A
 		detail\trace.h = detail\trace.h
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "interface", "interface", "{3E7B4329-7294-483C-AC25-C4D297F7B9C6}"
+	ProjectSection(SolutionItems) = preProject
+		driver\audiodriver.h = driver\audiodriver.h
+		driver\audiodriversettings.h = driver\audiodriversettings.h
+		driver\eventdriver.h = driver\eventdriver.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -1158,6 +1165,7 @@ Global
 		{A804C389-3F42-43F0-9E07-3CBFF2EB47CA} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{965A0AAE-9BF8-4D4D-AFD6-288BC84BBB0F} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
 		{CE15725E-9A01-4DFF-B083-4A0192435227} = {7A481826-8AC3-4FE2-B95E-4B5D5517D68B}
+		{3E7B4329-7294-483C-AC25-C4D297F7B9C6} = {DA1DDC25-B55D-479E-9D77-D1677EAD18C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {857CDAD7-2863-45E6-99D0-FFFC1BC81AAB}

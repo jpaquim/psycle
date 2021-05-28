@@ -1,26 +1,28 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 
 #include "player.h"
-// local
+/* local */
 #include "cmdsnotes.h"
 #include "constants.h"
 #include "exclusivelock.h"
 #include "kbddriver.h"
 #include "master.h"
 #include "silentdriver.h"
-// dsp
+/* dsp */
 #include <operations.h>
 #include <rms.h>
-// file
+/* file */
 #include <fileio.h>
-// std
+/* std */
 #include "math.h"
 #include <time.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -73,8 +75,7 @@ static uintptr_t psy_audio_player_multichannelaudition(psy_audio_Player*,
 	const psy_audio_PatternEvent*);
 static void psy_audio_player_recordnotes(psy_audio_Player*,
 	uintptr_t track, const psy_audio_PatternEvent*);
-
-// player init and dispose
+/* implementation */
 void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	void* handle)
 {
@@ -104,8 +105,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_audio_activechannels_init(&self->playon);
 	psy_audio_player_initdriver(self);
 	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
-	// psy_signal_connect(&self->eventdrivers.signal_input, self,
-	//	psy_audio_player_oneventdriverinput);
+	psy_signal_connect(&self->eventdrivers.signal_input, self,
+		psy_audio_player_oneventdriverinput);
 	psy_audio_player_initsignals(self);
 	self->vumode = VUMETER_RMS;
 	psy_table_init(&self->notestotracks);
@@ -160,13 +161,14 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 }
 
-// driver callbacks
-
-// sound driver callback
-// - splits work to psy_audio_MAX_STREAM_SIZE parts or to let work begin on a
-//   line tick
-// - player_workamount processes each spltted part
-// - updates the sequencer line tick count
+/*
+** audio driver work callback
+**
+** - splits work to psy_audio_MAX_STREAM_SIZE parts or to let work begin on a
+**   line tick
+** - player_workamount processes each spltted part
+** - updates the sequencer line tick count
+*/
 psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 	int* hostisplaying)
 {	
@@ -238,7 +240,7 @@ void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
 	*psamples += (amount * 2);
 }
 
-// each machine gets notified a new tracker line has started
+/* each machine gets notified a new tracker line has started */
 void psy_audio_player_notifylinetick(psy_audio_Player* self)
 {
 	assert(self);
@@ -268,8 +270,10 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 			
 			slot = (size_t)path->entry;			
 			if (slot == psy_INDEX_INVALID) {
-				// delimits the machines that could be processed parallel
-				// todo: add thread functions
+				/*
+				** delimits the machines that could be processed parallel
+				**  todo: add thread functions
+				*/
 				continue;				
 			}			
 			if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
@@ -301,7 +305,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
 				slot, amount);		
 			if (psy_audio_player_playing(self) || self->sequencer.metronome.precounting) {
-				// update playon
+				/* update playon */
 				for (p = events; p != NULL; psy_list_next(&p)) {
 					psy_audio_PatternEntry* patternentry;
 					
@@ -393,7 +397,7 @@ void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer*
 
 	assert(self);
 
-	// dither needs PSY_DSP_AMP_RANGE_NATIVE
+	/* dither needs PSY_DSP_AMP_RANGE_NATIVE */
 	for (channel = 0; channel < psy_audio_buffer_numchannels(buffer);
 			++channel) {
 		psy_dsp_dither_process(&self->dither,
@@ -401,7 +405,6 @@ void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer*
 	}
 }
 
-// event driver callback
 void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	psy_EventDriver* sender)
 {
@@ -410,60 +413,48 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 
 	assert(self);
 	
-	cmd = psy_eventdriver_getcmd(sender, "notes");
-	if (cmd.id != -1 && cmd.id < 255) {		
+	cmd = psy_eventdriver_getcmd(sender, NULL);
+	if (cmd.type == psy_EVENTDRIVER_MIDI) {
 		psy_audio_PatternEvent ev;
-				
-		if (cmd.id == CMD_NOTE_MIDIEV) {
-			psy_audio_patternevent_clear(&ev);
-			if (!psy_audio_midiinput_workinput(&self->midiinput, cmd.midi,
-				&self->song->machines, &ev)) {
-				return;
-			}
-			if (ev.note >= psy_audio_NOTECOMMANDS_MIDI_SPP &&
-					ev.note <= psy_audio_NOTECOMMANDS_MIDI_SYNC) {
-				switch (ev.note) {
-					case psy_audio_NOTECOMMANDS_MIDI_SPP: {
-						uint16_t midibeats;
+		uintptr_t track;
+						
+		psy_audio_patternevent_clear(&ev);
+		if (!psy_audio_midiinput_workinput(&self->midiinput, cmd.midi,
+			&self->song->machines, &ev)) {
+			return;
+		}
+		if (ev.note >= psy_audio_NOTECOMMANDS_MIDI_SPP &&
+				ev.note <= psy_audio_NOTECOMMANDS_MIDI_SYNC) {
+			switch (ev.note) {
+				case psy_audio_NOTECOMMANDS_MIDI_SPP: {
+					uint16_t midibeats;
 
-						midibeats = midi_combinebytes(ev.cmd, ev.parameter);
-						psy_audio_sequencer_setposition(&self->sequencer,
-							midibeats * 1/16.0);
-						break; }
-					case psy_audio_NOTECOMMANDS_MIDI_CLK_START:
-						psy_audio_sequencer_clockstart(&self->sequencer);
-						break;
-					case psy_audio_NOTECOMMANDS_MIDI_CLK:
-						psy_audio_sequencer_clock(&self->sequencer);
-						break;
-					case psy_audio_NOTECOMMANDS_MIDI_CLK_CONT:
-						psy_audio_sequencer_clockcontinue(&self->sequencer);
-						break;
-					case psy_audio_NOTECOMMANDS_MIDI_CLK_STOP:
-						psy_audio_sequencer_clockstop(&self->sequencer);
-						break;
-					default:
-						break;
-				}
-				return;
+					midibeats = midi_combinebytes(ev.cmd, ev.parameter);
+					psy_audio_sequencer_setposition(&self->sequencer,
+						midibeats * 1/16.0);
+					break; }
+				case psy_audio_NOTECOMMANDS_MIDI_CLK_START:
+					psy_audio_sequencer_clockstart(&self->sequencer);
+					break;
+				case psy_audio_NOTECOMMANDS_MIDI_CLK:
+					psy_audio_sequencer_clock(&self->sequencer);
+					break;
+				case psy_audio_NOTECOMMANDS_MIDI_CLK_CONT:
+					psy_audio_sequencer_clockcontinue(&self->sequencer);
+					break;
+				case psy_audio_NOTECOMMANDS_MIDI_CLK_STOP:
+					psy_audio_sequencer_clockstop(&self->sequencer);
+					break;
+				default:
+					break;
 			}
-		} else if (cmd.id < 256) {
-			unsigned char note;
-			uintptr_t mac = 0;
-			psy_audio_Machine* machine;
-			bool useaux;
-
-			mac = psy_audio_machines_selected(&self->song->machines);
-			if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
-				note = (uint8_t)cmd.id + (uint8_t)self->octave * 12;
-			} else {
-				note = (uint8_t)cmd.id;
-			}
-			machine = psy_audio_machines_at(&self->song->machines, mac);
-			useaux = machine && psy_audio_machine_numauxcolumns(machine) > 0;
-			ev = psy_audio_player_patternevent(self, (uint8_t)cmd.id);			
+			return;
+		}
+		track = psy_audio_player_multichannelaudition(self, &ev);
+		psy_audio_sequencer_addinputevent(&self->sequencer, &ev, track);
+		if (self->recordingnotes && psy_audio_player_playing(self)) {
+			psy_audio_player_recordnotes(self, 0, &ev);
 		}		
-		psy_audio_player_inputpatternevent(self, &ev);
 	}
 }
 
@@ -571,7 +562,7 @@ void psy_audio_player_recordnotes(psy_audio_Player* self,
 	}
 }
 
-// general setter and getter
+/* properties */
 void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 {
 	assert(self);
@@ -644,7 +635,6 @@ void psy_audio_player_setdither(psy_audio_Player* self, uintptr_t depth,
 	psy_dsp_dither_setnoiseshaping(&self->dither, noiseshaping);
 }
 
-// sequencer setter and getter
 void psy_audio_player_start(psy_audio_Player* self)
 {
 	assert(self);
@@ -677,7 +667,7 @@ void psy_audio_player_resume(psy_audio_Player* self)
 	assert(self);
 
 	psy_audio_exclusivelock_enter();
-	// forces to regenerate trackiterators
+	/* force regeneration of trackiterators */
 	psy_audio_sequencer_setposition(&self->sequencer,
 		psy_audio_sequencer_position(&self->sequencer));
 	psy_audio_sequencer_start(&self->sequencer);
@@ -727,7 +717,7 @@ void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);	
 }
 
-// psy_AudioDriver set, get, load, unload, restart, ..., methods
+/* Audio driver set, get, load, unload, restart, ..., methods */
 void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver*
 	driver)
 {
@@ -827,7 +817,7 @@ void psy_audio_player_restartdriver(psy_audio_Player* self,
 	}
 }
 
-// Event Recording
+/* Event recording */
 void psy_audio_player_startrecordingnotes(psy_audio_Player* self)
 {
 	assert(self);
@@ -849,7 +839,7 @@ int psy_audio_player_recordingnotes(psy_audio_Player* self)
 	return self->recordingnotes;
 }
 
-// psy_EventDriver load, unload, restart, ..., methods
+/* Event Driver load, unload, restart, ..., methods */
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
 	assert(self);

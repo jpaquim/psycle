@@ -110,6 +110,7 @@ static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 	psy_List* machinelist);
 static void mainframe_ondragover(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_ondrop(MainFrame*, psy_ui_DragEvent*);
+static bool mainframe_oninputhandlercallback(MainFrame*, int message, void* param1);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -668,9 +669,13 @@ void mainframe_connectworkspace(MainFrame* self)
 {
 	workspace_configure_host(&self->workspace);
 	inputhandler_connect(&self->workspace.inputhandler,
-		INPUTHANDLER_IMM, "general", self, mainframe_oninput);
+		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "general",
+		psy_INDEX_INVALID, self, mainframe_oninput);
 	inputhandler_connect(&self->workspace.inputhandler,
-		INPUTHANDLER_IMM, "notes", self, mainframe_onnotes);
+		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "notes",
+		psy_INDEX_INVALID, self, mainframe_onnotes);
+	inputhandler_connecthost(&self->workspace.inputhandler,
+		self, mainframe_oninputhandlercallback);
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
@@ -750,13 +755,14 @@ bool mainframe_onnotes(MainFrame* self, InputHandler* sender)
 	if (cmd.id != -1) {
 		if (cmd.id >= CMD_NOTE_OFF_C_0 && cmd.id < 255) {
 			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
-			ev.note = CMD_NOTE_STOP;
+			ev.note = CMD_NOTE_STOP;			
 		} else {
 			ev = psy_audio_player_patternevent(&self->workspace.player, (uint8_t)cmd.id);
 		}
 		psy_audio_player_playevent(&self->workspace.player, &ev);
 		return 1;
 	}
+	return 0;
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
@@ -1303,7 +1309,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyboardEvent* ev)
 		}
 	} else {
 		mainframe_checkplaystartwithrctrl(self, ev);
-		mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYDOWN, ev);
+		mainframe_delegatekeyboard(self, psy_EVENTDRIVER_PRESS, ev);
 	}
 }
 
@@ -1332,7 +1338,7 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyboardEvent* ev)
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		return;
 	}	
-	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYUP, ev);
+	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_RELEASE, ev);
 }
 
 /* delegate keyboard events to the keyboard driver */
@@ -1342,7 +1348,7 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
 			psy_audio_encodeinput(ev->keycode, ev->shift_key, ev->ctrl_key, ev->alt_key,
-				message == psy_EVENTDRIVER_KEYUP),
+				message == psy_EVENTDRIVER_RELEASE),
 				ev->repeat, workspace_currview(&self->workspace).id));
 }
 
@@ -1405,5 +1411,17 @@ void mainframe_ondrop(MainFrame* self, psy_ui_DragEvent* ev)
 				psy_ui_dragevent_prevent_default(ev);
 			}
 		}
+	}
+}
+
+bool mainframe_oninputhandlercallback(MainFrame* self, int message, void* param1)
+{
+	switch (message) {
+	case INPUTHANDLER_HASFOCUS:
+		return (psy_ui_component_hasfocus((psy_ui_Component*)param1));
+	case INPUTHANDLER_HASVIEW:
+		return (workspace_currview(&self->workspace).id == (uintptr_t)param1);
+	default:
+		return FALSE;
 	}
 }

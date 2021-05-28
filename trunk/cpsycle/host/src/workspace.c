@@ -90,7 +90,6 @@ static void workspace_onterminaloutput(Workspace*,
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 /* EventDriver Input Handler */
-static bool workspace_oninputhandlercallback(Workspace*, int message, void* param1);
 static void workspace_onscanstart(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanend(Workspace*, psy_audio_PluginCatcher* sender);
 static void workspace_onscanfile(Workspace*, psy_audio_PluginCatcher* sender,
@@ -185,8 +184,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	workspace_initsignals(self);
 	workspace_initplayer(self);	
 	eventdriverconfig_registereventdrivers(&self->config.input);
-	inputhandler_init(&self->inputhandler, &self->player, self,
-		workspace_oninputhandlercallback);
+	inputhandler_init(&self->inputhandler, &self->player, NULL, NULL);
 	psy_audio_patterncursor_init(&self->patterneditposition);
 	psy_audio_pattern_init(&self->patternpaste);	
 }
@@ -1957,16 +1955,6 @@ void workspace_connectloadprogress(Workspace* self, void* context,
 	fp_workspace_songloadprogress fp)
 {
 	psy_signal_connect(&self->signal_loadprogress, context, fp);
-}
-
-static bool workspace_oninputhandlercallback(Workspace* self, int message, void* param1)
-{
-	switch (message) {
-	case INPUTHANDLER_HASFOCUS:
-		return (psy_ui_component_hasfocus((psy_ui_Component*)param1));
-	default:
-		return FALSE;
-	}	
 }
 
 void workspace_oninput(Workspace* self, uintptr_t cmdid)

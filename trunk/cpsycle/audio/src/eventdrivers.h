@@ -1,21 +1,29 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_EVENTDRIVERS_H
 #define psy_audio_EVENTDRIVERS_H
 
+/* driver */
 #include "../../driver/eventdriver.h"
+/* local */
 #include "library.h"
+/* container */
 #include <list.h>
 #include <hashtbl.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// psy_audio_EventDrivers
-//
-// container for all active inputdriver
+/*
+** psy_audio_EventDrivers
+**
+** container for all active inputdriver
+*/
 
 typedef struct {
 	psy_EventDriver* eventdriver;

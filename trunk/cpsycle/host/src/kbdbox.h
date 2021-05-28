@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(KBDBOX_H)
 #define KBDBOX_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
-// container
+/* container */
 #include <hashtbl.h>
 #include <properties.h>
 
@@ -17,9 +19,11 @@
 extern "C" {
 #endif
 
-// KbdBox
-//
-// Shows a keyboard with annotations
+/*
+** KbdBox
+**
+** Shows a keyboard with annotations
+*/
 
 typedef struct KbdBoxState {
 	uint32_t pressedkey;
@@ -31,19 +35,22 @@ typedef struct KbdBoxState {
 void kbdboxstate_init(KbdBoxState*);
 void kbdboxstate_clearmodifier(KbdBoxState*);
 
-// defines one key of the keybox
+/*
+** KbdBoxKey
+**
+** Defines one key of the keybox
+*/
 typedef struct KbdBoxKey {
-	// inherits;
+	/* inherits */
 	psy_ui_Component component;
-	// intern
+	/* internal */
 	psy_ui_Label label;
-	psy_ui_Label desc0; // row 0 keycode
-	psy_ui_Label desc1; // row 1 keycode with shift
-	psy_ui_Label desc2; // row 2 keycode with ctrl
-	psy_ui_Label desc3; // row 3 keycode with shift + ctrl	
-	// int size;
+	psy_ui_Label desc0; /* row 0 keycode */
+	psy_ui_Label desc1; /* row 1 keycode with shift */
+	psy_ui_Label desc2; /* row 2 keycode with ctrl */
+	psy_ui_Label desc3; /* row 3 keycode with shift + ctrl */	
 	uint32_t keycode;
-	// references
+	/* references */
 	KbdBoxState* state;
 	Workspace* workspace;	
 } KbdBoxKey;
@@ -64,15 +71,15 @@ INLINE psy_ui_Component* kbdboxkey_base(KbdBoxKey* self)
 	return &self->component;
 }
 
-// KbdBox
+/* KbdBox */
 typedef struct KbdBox {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// intern
+	/* internal */
 	psy_Table keys;		
 	psy_ui_Component* currrow;
 	KbdBoxState state;
-	// references	
+	/* references */
 	Workspace* workspace;
 } KbdBox;
 

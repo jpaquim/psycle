@@ -274,7 +274,11 @@ The Interface
 
 EventDriver
 
-The Interface
+
+Psycle EventDriver can be written as modules are loaded in psy_audio_EventDrivers and can have multiple drivers with multiple instances. Currently a KbdDriver and a Mme Midi driver exists. The Midi Driver can be loaded multiple times to listen to different hardware Midi Ports. All EventDriver notification are received by the  EventDrivers instance and a signal_input will notify it?s slots.
+The player connects to the signal_input and the InputHandler of the host. The Player asks the EventDriver for the current EventDriverCmd. This has a type field. If it is a MidiEvent, the midi structure of the cmdevent contains the midi data the player will play or record.
+The InputHandler handles the events of the host. Views can connect to the Handler with different notification options, like FOCUS, INTERMEDIATE, and can return FALSE or TRUE if propagation should be stopped and a section name to select the cmd group. If the view is notified, the view checkst he cmd and if a cmd.id is valid and checks in an switch case wich command needs no be executed: e.g. NAV_DOWN in the tracker will move the cursor one line down. If the event is handled it returns TRUE and the INPUT Handler stops notifications of other objects. The Mainframe is last connected and if all other views haven?t worked the event, it checks for IMM CMDs like show PatternView or Play Song etc..
+
 
 Dsp
 

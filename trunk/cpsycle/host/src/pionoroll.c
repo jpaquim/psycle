@@ -1484,9 +1484,11 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		self, pianoroll_onpatterncursorchanged);
 	pianoroll_updatetheme(self);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"pianoroll", self, pianoroll_onrollcmds);
+		psy_EVENTDRIVER_CMD, "pianoroll", psy_INDEX_INVALID, 
+		self, pianoroll_onrollcmds);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"notes", self, pianoroll_onnotecmds);	
+		psy_EVENTDRIVER_CMD, "notes", psy_INDEX_INVALID, 
+		self, pianoroll_onnotecmds);
 	psy_ui_component_starttimer(&self->component, 0, PIANOROLL_REFRESHRATE);
 }
 

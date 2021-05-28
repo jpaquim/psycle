@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifdef __cplusplus
   #define EXPORT extern "C" __declspec (dllexport)
@@ -17,15 +19,8 @@
 #if !defined(PSY_EVENTDRIVER_H)
 #define PSY_EVENTDRIVER_H
 
+/* container */
 #include <properties.h>
-#include <signal.h>
-
-
-#define PSY_EVENTDRIVER_PATTERNEDIT 1
-#define PSY_EVENTDRIVER_NOTECOLUMN 2
-#define PSY_EVENTDRIVER_SETCHORDMODE 3
-#define PSY_EVENTDRIVER_INSERTNOTEOFF 4
-#define PSY_EVENTDRIVER_SECTION 5
 
 typedef struct {
 	int guid;
@@ -35,9 +30,13 @@ typedef struct {
 	char const *ShortName;
 } psy_EventDriverInfo;
 
+struct psy_EventDriver;
+
+typedef void (*EVENTDRIVERWORKFN)(void* context, struct psy_EventDriver* sender);
+
 typedef enum {
-	psy_EVENTDRIVER_KEYDOWN,
-	psy_EVENTDRIVER_KEYUP	
+	psy_EVENTDRIVER_PRESS,
+	psy_EVENTDRIVER_RELEASE	
 } psy_EventDriverInputType;
 
 typedef struct 
@@ -67,7 +66,13 @@ typedef struct psy_EventDriverMidiData
 	unsigned char byte2;
 } psy_EventDriverMidiData;
 
+typedef enum {
+	psy_EVENTDRIVER_CMD,
+	psy_EVENTDRIVER_MIDI
+} psy_EventDriverCmdType;
+
 typedef struct {
+	psy_EventDriverCmdType type;
 	intptr_t id;
 	psy_EventDriverMidiData midi;
 } psy_EventDriverCmd;
@@ -80,8 +85,7 @@ INLINE psy_EventDriverCmd psy_eventdrivercmd_makeid(int id)
 	return rv;
 }
 
-struct psy_EventDriver;
-
+/* vtable */
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
 typedef int (*psy_eventdriver_fp_dispose)(struct psy_EventDriver*);
 typedef void (*psy_eventdriver_fp_deallocate)(struct psy_EventDriver*);
@@ -111,15 +115,16 @@ typedef struct psy_EventDriverVTable {
 	psy_eventdriver_fp_cmd cmd;
 	psy_eventdriver_fp_error error;
 	psy_eventdriver_fp_getcmd getcmd;
-	psy_eventdriver_fp_target target;
 	psy_eventdriver_fp_setcmddef setcmddef;
 	psy_eventdriver_fp_idle idle;
 	psy_eventdriver_fp_input input;
 } psy_EventDriverVTable;
 
+/* psy_EventDriver */
 typedef struct psy_EventDriver {
 	psy_EventDriverVTable* vtable;	
-	psy_Signal signal_input;	
+	EVENTDRIVERWORKFN callback;
+	void* callbackcontext;
 } psy_EventDriver;
 
 #define psy_SHIFT_ON	TRUE
@@ -166,18 +171,38 @@ EXPORT psy_EventDriverInfo const * __cdecl psy_eventdriver_moduleinfo(void);
 psy_EventDriverInfo const * psy_eventdriver_moduleinfo(void);
 #endif
 
+/* opens the driver */
 INLINE int psy_eventdriver_open(psy_EventDriver* self)
 {
 	return self->vtable->open(self);
 }
 
+/* closes the driver */
+INLINE int psy_eventdriver_close(psy_EventDriver* self)
+{
+	return self->vtable->close(self);
+}
+
+/* disposes the driver */
 INLINE int psy_eventdriver_dispose(psy_EventDriver* self)
 {
 	return self->vtable->dispose(self);
 }
 
-INLINE void psy_eventdriver_free(psy_EventDriver* self)
+/* releases the driver */
+INLINE void psy_eventdriver_release(psy_EventDriver* self)
 {
+	assert(self);
+
+	self->vtable->dispose(self);
+	self->vtable->deallocate(self);
+}
+
+/* deallocates the driver */
+INLINE void psy_eventdriver_deallocate(psy_EventDriver* self)
+{
+	assert(self);
+
 	self->vtable->deallocate(self);
 }
 
@@ -195,11 +220,6 @@ INLINE void psy_eventdriver_configure(psy_EventDriver* self, psy_Property*
 INLINE const psy_Property* psy_eventdriver_configuration(const psy_EventDriver* self)
 {
 	return self->vtable->configuration(self);
-}
-
-INLINE int psy_eventdriver_close(psy_EventDriver* self)
-{
-	return self->vtable->close(self);
 }
 
 INLINE void psy_eventdriver_write(psy_EventDriver* self, psy_EventDriverInput input)
@@ -225,11 +245,6 @@ INLINE psy_EventDriverCmd psy_eventdriver_getcmd(psy_EventDriver* self,
 	return self->vtable->getcmd(self, section);
 }
 
-INLINE const char* psy_eventdriver_target(psy_EventDriver* self)
-{
-	return self->vtable->target(self);
-}
-
 INLINE void psy_eventdriver_setcmddef(psy_EventDriver* self, psy_Property*
 	properties)
 {
@@ -244,6 +259,13 @@ INLINE void psy_eventdriver_idle(psy_EventDriver* self)
 INLINE psy_EventDriverInput psy_eventdriver_input(psy_EventDriver* self)
 {
 	return self->vtable->input(self);
+}
+
+INLINE void psy_eventdriver_connect(psy_EventDriver* self, void* context,
+	EVENTDRIVERWORKFN callback)
+{
+	self->callback = callback;
+	self->callbackcontext = context;	
 }
 
 #endif /* PSY_EVENTDRIVER_H */

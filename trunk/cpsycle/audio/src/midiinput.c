@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
@@ -86,7 +88,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	status_hn = (mididata.byte0 & 0xF0) >> 4;
 	channel = status_ln;
 	
-	// assign uses
+	/* assign uses */
 	note = mididata.byte1;
 	program = mididata.byte1;
 	data1 = mididata.byte1;
@@ -97,7 +99,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	if (mididata.byte0 != 0xFE) {
 		self->stats.channelmap |= (1 << (channel));
 	}
-	// map channel -> generator
+	/* map channel -> generator */
 	busmachine = (int)psy_audio_midiinput_genmap(self, channel);
 	inst = (int)psy_audio_midiinput_instmap(self, channel);
 	cmd = 0;
@@ -105,9 +107,9 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	orignote = psy_audio_NOTECOMMANDS_EMPTY;
 
 	switch (status_hn) {
-	case 0x08:	// (also) note off
+	case 0x08:	/* (also) note off */
 		velocity = 0;
-		//fallthrough
+		/* fallthrough */
 	case 0x9:
 		// limit to playable range (above this is special codes)
 		if (note > psy_audio_NOTECOMMANDS_B9) note = psy_audio_NOTECOMMANDS_B9;
@@ -398,6 +400,9 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 		psy_audio_patternevent_init_all(rv, note, inst, busmachine,
 			psy_audio_NOTECOMMANDS_VOL_EMPTY, cmd, parameter);
 		return TRUE;
+	} else {
+		psy_audio_patternevent_init_all(rv, note, inst, busmachine,
+			psy_audio_NOTECOMMANDS_VOL_EMPTY, cmd, parameter);
 	}
 	return FALSE;
 }
