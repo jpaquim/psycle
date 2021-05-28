@@ -47,6 +47,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	struct psy_ui_x11_ComponentImp* parent;
 	XdbeBackBuffer d_backBuf;
 	psy_ui_RealRectangle exposearea;
+	bool exposeareavalid;
 } psy_ui_x11_ComponentImp;
 
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,

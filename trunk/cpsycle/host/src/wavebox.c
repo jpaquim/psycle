@@ -316,6 +316,7 @@ WaveBox* wavebox_allocinit(psy_ui_Component* parent, Workspace* workspace)
 	rv = wavebox_alloc();
 	if (rv) {
 		wavebox_init(rv, parent, workspace);
+		psy_ui_component_deallocateafterdestroyed(&rv->component);
 	}
 	return rv;
 }
