@@ -56,7 +56,6 @@ static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section,
 	psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
-static const char* driver_target(psy_EventDriver*);
 static void driver_setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self);
@@ -69,7 +68,7 @@ static psy_EventDriverInput driver_input(psy_EventDriver* context)
 	return self->lastinput;
 }
 
-static void init_properties(psy_EventDriver* self);
+static void driver_makeconfig(psy_EventDriver* self);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
 	DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
@@ -101,8 +100,7 @@ static void vtable_init(void)
 		vtable.info = driver_info;
 		vtable.error = driver_onerror;
 		vtable.cmd = driver_cmd;
-		vtable.getcmd = driver_getcmd;
-		vtable.target = driver_target;
+		vtable.getcmd = driver_getcmd;		
 		vtable.setcmddef = driver_setcmddef;
 		vtable.idle = driver_idle;
 		vtable.input = driver_input;
@@ -148,23 +146,24 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 	return psy_eventdriver_moduleinfo();
 }
 
-int driver_init(psy_EventDriver* driver)
-{
-	DXJoystickDriver* self = (DXJoystickDriver*)driver;
+int driver_init(psy_EventDriver* context)
+{	
 	HRESULT hr;
+	DXJoystickDriver* self = (DXJoystickDriver*)context;
 
 	memset(self, 0, sizeof(DXJoystickDriver));
 	vtable_init();
 	self->driver.vtable = &vtable;	
 	self->active = 0;
+	self->driver.callback = NULL;
+	self->driver.callbackcontext = NULL;
 	psy_table_init(&self->inputs);
 	// Create a DirectInput device
 	if (FAILED(hr = DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION,
 		&IID_IDirectInput8, (VOID**)&self->di, NULL))) {
 		return 1;
 	}
-	init_properties(&self->driver);
-	psy_signal_init(&driver->signal_input);
+	driver_makeconfig(&self->driver);	
 	return 0;
 }
 
@@ -173,13 +172,12 @@ int driver_dispose(psy_EventDriver* driver)
 	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
 	psy_property_deallocate(self->configuration);
 	self->configuration = 0;
-	CloseHandle(self->hEvent);
-	psy_signal_dispose(&driver->signal_input);
+	CloseHandle(self->hEvent);	
 	psy_table_disposeall(&self->inputs, (psy_fp_disposefunc)NULL);
 	return 0;
 }
 
-void init_properties(psy_EventDriver* context)
+void driver_makeconfig(psy_EventDriver* context)
 {		
 	DXJoystickDriver* self;
 	char key[256];
@@ -342,7 +340,9 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 					// channel = lsb;
 					self->lastinput.param1 = cmd;
 					self->lastinput.param2 = 48;
-					psy_signal_emit(&self->driver.signal_input, self, 0);
+					if (driver->callback) {
+						driver->callback(driver->callbackcontext, driver);
+					}
 				default:
 				break;
 			}
@@ -392,11 +392,6 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 			
 	driver_cmd(driver, section, self->lastinput, &cmd);	
 	return cmd;
-}
-
-const char* driver_target(psy_EventDriver* self)
-{
-	return NULL;
 }
 
 
@@ -459,30 +454,40 @@ void driver_idle(psy_EventDriver* driver)
 		if (self->state.rgbButtons[i] != state.rgbButtons[i]) {
 			self->lastinput.message = state.rgbButtons[i];
 			self->lastinput.param1 = INPUT_BUTTON_FIRST + i;
-			psy_signal_emit(&self->driver.signal_input, self, 0);
+			if (driver->callback) {
+				driver->callback(driver->callbackcontext, driver);
+			}			
 		}
 	}
 	if (state.lY < 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_UP;
 		self->lastinput.param2 = self->state.lY;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
+		if (driver->callback) {
+			driver->callback(driver->callbackcontext, driver);
+		}
 	} else if (state.lY > 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_DOWN;
 		self->lastinput.param2 =  state.lY;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
+		if (driver->callback) {
+			driver->callback(driver->callbackcontext, driver);
+		}
 	}
 	if (state.lX < 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_LEFT;
 		self->lastinput.param2 = self->state.lX;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
+		if (driver->callback) {
+			driver->callback(driver->callbackcontext, driver);
+		}
 	} else if (state.lX > 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_RIGHT;
 		self->lastinput.param2 = state.lX;
-		psy_signal_emit(&self->driver.signal_input, self, 0);
+		if (driver->callback) {
+			driver->callback(driver->callbackcontext, driver);
+		}
 	}
 	self->state = state;
 }

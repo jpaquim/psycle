@@ -2,19 +2,13 @@
 // copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
-#include "patternevent.h"
 
 #include "kbddriver.h"
+/* driver */
 #include "../../driver/eventdriver.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "cmdsnotes.h"
-
+/* platform */
+#include "../../detail/os.h"
 #include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__MICROSOFT    
@@ -35,13 +29,9 @@ static psy_EventDriverInfo const* psy_audio_kbddriver_info(void)
 typedef struct {
 	psy_EventDriver driver;
 	int (*error)(int, const char*);
-	psy_EventDriverInput lastinput;
-	psy_EventDriverCmd lastcmd;
-	const char* lastcmdsection;
+	psy_EventDriverInput lastinput;	
 	psy_Property* cmddef;
 	psy_Property* configuration;
-	bool shift;
-	int chordmode;
 } KbdDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -56,7 +46,6 @@ static void driver_write(psy_EventDriver*, psy_EventDriverInput input);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput,
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
-static const char* driver_target(psy_EventDriver*);
 static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 
@@ -67,7 +56,7 @@ static psy_EventDriverInput driver_input(psy_EventDriver* context)
 }
 
 static int onerror(int err, const char* msg);
-static void init_properties(psy_EventDriver*);
+static void driver_makeconfig(psy_EventDriver*);
 
 static psy_EventDriverVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -86,8 +75,7 @@ static void vtable_init(void)
 		vtable.error = onerror;
 		vtable.write = driver_write;
 		vtable.cmd = driver_cmd;
-		vtable.getcmd = driver_getcmd;
-		vtable.target = driver_target;
+		vtable.getcmd = driver_getcmd;		
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
 		vtable.input = driver_input;
@@ -128,8 +116,9 @@ int driver_init(psy_EventDriver* driver)
 	memset(self, 0, sizeof(KbdDriver));
 	vtable_init();
 	self->driver.vtable = &vtable;
-	init_properties(&self->driver);
-	psy_signal_init(&driver->signal_input);
+	self->driver.callback = NULL;
+	self->driver.callbackcontext = NULL;
+	driver_makeconfig(&self->driver);
 	return 0;
 }
 
@@ -137,12 +126,11 @@ int driver_dispose(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
 	psy_property_deallocate(self->configuration);
-	self->configuration = NULL;
-	psy_signal_dispose(&driver->signal_input);
+	self->configuration = NULL;	
 	return 1;
 }
 
-void init_properties(psy_EventDriver* context)
+void driver_makeconfig(psy_EventDriver* context)
 {
 	KbdDriver* self;
 	char key[256];
@@ -170,10 +158,6 @@ int driver_open(psy_EventDriver* driver)
 
 	self = (KbdDriver*)(driver);
 	self->lastinput.message = 0;
-	self->chordmode = 0;
-	self->shift = 0;
-	self->lastcmd.id = -1;
-	self->lastcmdsection = NULL;
 	return 0;
 }
 
@@ -187,26 +171,28 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 	return psy_audio_kbddriver_info();
 }
 
-void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
+void driver_write(psy_EventDriver* context, psy_EventDriverInput input)
 {	
 	KbdDriver* self;
-	uint32_t keycode;	
+	uint32_t keycode;
+	bool shift;
 	bool ctrl;
 	bool alt;
 	bool up;
 
-	assert(driver);
+	assert(context);
 
-	self = (KbdDriver*)(driver);
-
-	self->lastcmd.id = -1;
-	// patternview chordmode
-	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &self->shift, &ctrl, &alt, &up);
+	self = (KbdDriver*)(context);
+	/* reset lastcmd */	
+	/* filter control key */
+	psy_audio_decodeinput((uint32_t)input.param1, &keycode, &shift, &ctrl, &alt, &up);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {	
 		return;
 	}
 	self->lastinput = input;
-	psy_signal_emit(&self->driver.signal_input, self, 0);	
+	if (context->callback) {
+		context->callback(context->callbackcontext, context);
+	}
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
@@ -217,6 +203,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	psy_Property* section;
 
 	self = (KbdDriver*)(driver);
+	cmd->type = psy_EVENTDRIVER_CMD;
 	cmd->id = -1;
 	kbcmd.id = -1;
 	if (!sectionname) {
@@ -243,25 +230,14 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	}	
 }
 
-psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
+psy_EventDriverCmd driver_getcmd(psy_EventDriver* context, const char* section)
 {	
 	KbdDriver* self;
 	psy_EventDriverCmd cmd;	
 		
-	self = (KbdDriver*)(driver);
-	if (self->lastcmd.id == -1) {
-		driver_cmd(driver, section, self->lastinput, &cmd);
-	} else if (self->lastcmdsection && strcmp(section, self->lastcmdsection) == 0) {
-		cmd = self->lastcmd;
-	} else {
-		cmd.id = -1;
-	}
+	self = (KbdDriver*)(context);	
+	driver_cmd(context, section, self->lastinput, &cmd);	
 	return cmd;
-}
-
-const char* driver_target(psy_EventDriver* driver)
-{
-	return NULL;
 }
 
 void setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)

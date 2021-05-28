@@ -113,6 +113,7 @@ static psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(
 	TrackerGrid*, psy_audio_PatternCursor* rv);
 static bool trackergrid_ontrackercmds(TrackerGrid*, InputHandler*);
 static bool trackergrid_onnotecmds(TrackerGrid*, InputHandler* sender);
+static bool trackergrid_onmidicmds(TrackerGrid*, InputHandler* sender);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -186,9 +187,14 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->preventeventdriver = FALSE;
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"tracker", self, trackergrid_ontrackercmds);
+		psy_EVENTDRIVER_CMD, "tracker", psy_INDEX_INVALID,
+		self, trackergrid_ontrackercmds);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"notes", self, trackergrid_onnotecmds);
+		psy_EVENTDRIVER_CMD, "notes",
+		psy_INDEX_INVALID, self, trackergrid_onnotecmds);
+	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_VIEW,
+		psy_EVENTDRIVER_MIDI, "", VIEW_ID_PATTERNVIEW, 
+		self, trackergrid_onmidicmds);
 	psy_audio_patternselection_init(&self->gridstate->selection);
 	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,
@@ -1044,6 +1050,49 @@ bool trackergrid_onnotecmds(TrackerGrid* self, InputHandler* sender)
 		}
 		trackergrid_enablepatternsync(self);
 		return 1;
+	}
+	return 0;
+}
+
+bool trackergrid_onmidicmds(TrackerGrid* self, InputHandler* sender)
+{
+	if (self->preventeventdriver) {
+		return 0;
+	}
+	if (!workspace_song(self->workspace)) {
+		return 0;
+	}
+	if (!psy_audio_player_playing(&self->workspace->player) && 
+			psy_audio_player_recordingnotes(&self->workspace->player)) {
+		psy_EventDriverCmd cmd;				
+
+		assert(self);
+
+		cmd = inputhandler_cmd(sender);
+		if (cmd.type == psy_EVENTDRIVER_MIDI) {
+			psy_audio_PatternEvent ev;
+			
+			psy_audio_patternevent_clear(&ev);
+			psy_audio_midiinput_workinput(&self->workspace->player.midiinput, cmd.midi,
+				&self->workspace->song->machines, &ev);
+			if (ev.note != psy_audio_NOTECOMMANDS_RELEASE ||
+					psy_audio_player_recordingnoteoff(workspace_player(
+						self->workspace))) {
+				trackergrid_preventpatternsync(self);
+				psy_undoredo_execute(&self->workspace->undoredo,
+					&insertcommand_alloc(trackergridstate_pattern(self->gridstate),
+						trackerlinestate_bpl(self->linestate),
+						self->gridstate->cursor, ev,
+						(self->gridstate->synccursor) ? self->workspace : NULL)->command);
+				trackergrid_advanceline(self);
+				if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
+					self->gridstate->cursor.key = ev.note;
+					trackergridstate_synccursor(self->gridstate);
+				}
+				trackergrid_enablepatternsync(self);
+			}
+			return 1;			
+		}
 	}
 	return 0;
 }

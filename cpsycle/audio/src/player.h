@@ -1,20 +1,24 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_PLAYER_H
 #define psy_audio_PLAYER_H
 
-#include "../../driver/audiodriver.h"
-// local
+/* local */
 #include "eventdrivers.h"
-#include "song.h"
+#include "library.h"
 #include "machinefactory.h"
 #include "midiinput.h"
 #include "sequencer.h"
-#include <signal.h>
-#include "library.h"
-// dsp
+#include "song.h"
+/* dsp */
 #include <dither.h>
+/* driver */
+#include "../../driver/audiodriver.h"
+/* container */
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,8 +36,10 @@ typedef enum {
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;
-	// empty song for lock minimized
-	// song switching	
+	/*
+	** empty song for lock minimized
+	** song switching	
+	*/
 	psy_audio_MachineFactory machinefactory;
 	psy_audio_Song emptysong;
 	psy_audio_Sequencer sequencer;	
@@ -60,11 +66,10 @@ typedef struct psy_audio_Player {
 	bool measure_cpu_usage;
 } psy_audio_Player;
 
-// init dispose
 void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,
 	void* systemhandle);
 void psy_audio_player_dispose(psy_audio_Player*);
-// general
+
 void psy_audio_player_setsong(psy_audio_Player*, psy_audio_Song*);
 INLINE psy_audio_Song* psy_audio_player_song(psy_audio_Player* self)
 {
@@ -90,7 +95,7 @@ void psy_audio_player_disabledither(psy_audio_Player*);
 void psy_audio_player_setdither(psy_audio_Player*, uintptr_t depth,
 	psy_dsp_DitherPdf, psy_dsp_DitherNoiseShape);
 
-// sequencer
+/* sequencer */
 void psy_audio_player_start(psy_audio_Player*);
 void psy_audio_player_stop(psy_audio_Player*);
 void psy_audio_player_pause(psy_audio_Player*);
@@ -159,7 +164,7 @@ INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(
 	return (psy_dsp_big_beat_t)self->sequencer.extraticks;
 }
 
-///\returns lines per beat
+/* \returns lines per beat */
 void psy_audio_player_setlpb(psy_audio_Player*, uintptr_t lpb);
 
 INLINE uintptr_t psy_audio_player_lpb(psy_audio_Player* self)
@@ -167,7 +172,7 @@ INLINE uintptr_t psy_audio_player_lpb(psy_audio_Player* self)
 	return psy_audio_sequencer_lpb(&self->sequencer);
 }
 
-///\returns beats per line
+/* \returns beats per line */
 INLINE psy_dsp_big_beat_t psy_audio_player_bpl(psy_audio_Player* self)
 {
 	return (psy_dsp_big_beat_t)(1.0) /
@@ -185,7 +190,7 @@ INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(
 	return psy_audio_sequencer_playlist_rowprogress(&self->sequencer);
 }
 
-// cpu measure
+/* cpu measure */
 INLINE void psy_audio_player_measure_cpu_usage(psy_audio_Player* self)
 {
 	self->measure_cpu_usage = TRUE;
@@ -201,7 +206,7 @@ INLINE bool psy_audio_player_measuring_cpu_usage(const psy_audio_Player* self)
 	return self->measure_cpu_usage;
 }
 
-// audio driver
+/* audio driver */
 void psy_audio_player_setaudiodriver(psy_audio_Player*, psy_AudioDriver*);
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player*);
 void psy_audio_player_loaddriver(psy_audio_Player*, const char* path,
@@ -211,7 +216,7 @@ void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path,
 	psy_Property* config);
 void psy_audio_player_restartdriver(psy_audio_Player*,
 	const psy_Property* config);
-// event recording
+/* event recording */
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);
 int psy_audio_player_recordingnotes(psy_audio_Player*);
@@ -228,7 +233,7 @@ INLINE void psy_audio_player_recordnoteoff(psy_audio_Player* self)
 }
 
 INLINE void psy_audio_player_preventrecordnoteoff(psy_audio_Player* self)
-{
+{ 
 	self->recordnoteoff = FALSE;
 }
 
@@ -243,7 +248,7 @@ INLINE psy_audio_SequencerTime* psy_audio_player_sequencertime(
 	return &self->sequencer.seqtime;
 }
 
-// event driver
+/* event driver */
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*,
 	const char* path);
 void psy_audio_player_removeeventdriver(psy_audio_Player*, intptr_t id);

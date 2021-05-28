@@ -56,11 +56,10 @@ static void driver_write(psy_EventDriver*, psy_EventDriverInput);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput,
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
-static const char* driver_target(psy_EventDriver*);
 static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 static int onerror(int err, const char* msg);
-static void init_properties(psy_EventDriver*);
+static void driver_makeconfig(psy_EventDriver*);
 static psy_EventDriverInput driver_input(psy_EventDriver* context)
 {
 	CmdDriver* self = (CmdDriver*)context;
@@ -84,8 +83,7 @@ static void vtable_init(void)
 		vtable.error = onerror;
 		vtable.write = driver_write;
 		vtable.cmd = driver_cmd;
-		vtable.getcmd = driver_getcmd;
-		vtable.target = driver_target;
+		vtable.getcmd = driver_getcmd;		
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
 		vtable.input = driver_input;
@@ -136,8 +134,9 @@ int driver_init(psy_EventDriver* driver)
 	vtable_init();
 	self->driver.vtable = &vtable;
 	self->section = NULL;
-	init_properties(&self->driver);	
-	psy_signal_init(&driver->signal_input);
+	self->driver.callback = NULL;
+	self->driver.callbackcontext = NULL;
+	driver_makeconfig(&self->driver);		
 	return 0;
 }
 
@@ -145,14 +144,13 @@ int driver_dispose(psy_EventDriver* driver)
 {
 	CmdDriver* self = (CmdDriver*) driver;
 	psy_property_deallocate(self->configuration);
-	self->configuration = NULL;
-	psy_signal_dispose(&driver->signal_input);
+	self->configuration = NULL;	
 	free(self->section);
 	self->section = NULL;
 	return 1;
 }
 
-void init_properties(psy_EventDriver* context)
+void driver_makeconfig(psy_EventDriver* context)
 {
 	CmdDriver* self;
 	char key[256];
@@ -213,7 +211,9 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 		return;
 	}	
 	self->lastinput = input;
-	psy_signal_emit(&self->driver.signal_input, self, 0);
+	if (driver->callback) {
+		driver->callback(driver->callbackcontext, driver);
+	}	
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
@@ -232,42 +232,22 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
-	}	
-	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
-		psy_List* p;
-		psy_Property* property = NULL;
+	}		
+	psy_List* p;
+	psy_Property* property = NULL;
 
-		for (p = psy_property_begin(section); p != NULL;
-				psy_list_next(&p)) {			
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_item_int(property) == input.param1) {
-				break;
-			}
-			property = NULL;
+	for (p = psy_property_begin(section); p != NULL;
+			psy_list_next(&p)) {			
+		property = (psy_Property*)psy_list_entry(p);
+		if (psy_property_item_int(property) == input.param1) {
+			break;
 		}
-		if (property) {
-			kbcmd.id = property->item.id;
-			cmd->id = kbcmd.id;
-		}		
-	} else {
-		psy_List* p;
-		psy_Property* property = NULL;
-
-		for (p = psy_property_begin(section); p != NULL;
-				psy_list_next(&p)) {
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_item_int(property) == input.param1) {				
-				break;
-			}
-			property = NULL;
-		}
-		if (property) {
-			kbcmd.id = property->item.id;
-		}
-		if (kbcmd.id <= psy_audio_NOTECOMMANDS_RELEASE) {
-			cmd->id = psy_audio_NOTECOMMANDS_RELEASE;
-		}
+		property = NULL;
 	}
+	if (property) {
+		kbcmd.id = property->item.id;
+		cmd->id = kbcmd.id;
+	}	
 }
 
 psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
@@ -276,19 +256,11 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 	psy_EventDriverCmd rv;	
 	
 	rv.id = -1;
-	self = (CmdDriver*)(driver);
+	self = (CmdDriver*)(driver);	
 	if (strcmp(self->section, section) == 0) {
 		rv = self->lastcmd;
 	}
 	return rv;
-}
-
-const char* driver_target(psy_EventDriver* driver)
-{
-	CmdDriver* self;
-
-	self = (CmdDriver*)(driver);
-	return self->section;
 }
 
 void setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)

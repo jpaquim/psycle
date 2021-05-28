@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "kbdbox.h"
-// host
+/* host */
 #include "styles.h"
 
 static double keyheight = 4.5;
@@ -24,13 +27,13 @@ void kbdboxstate_clearmodifier(KbdBoxState* self)
 	self->alt = FALSE;
 }
 
-// KbdBoxKey
-// prototypes
+/* KbdBoxKey */
+/* prototypes */
 static void kbdboxkey_initlabel(KbdBoxKey*, psy_ui_Component* view,
 	psy_ui_Label*, const char* text);
 static void kbdboxkey_initstyle(KbdBoxKey*);
 static void kbdboxkey_onmousedown(KbdBoxKey*, psy_ui_MouseEvent*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable kbdboxkey_vtable;
 static bool kbdboxkey_vtable_initialized = FALSE;
 
@@ -45,7 +48,7 @@ static void kbdboxkey_vtable_init(KbdBoxKey* self)
 	}
 	self->component.vtable = &kbdboxkey_vtable;
 }
-// implementation
+/* implementation */
 void kbdboxkey_init_all(KbdBoxKey* self, psy_ui_Component* parent, psy_ui_Component* view, 
 	uintptr_t size, uint32_t keycode, const char* label, Workspace* workspace, KbdBoxState* state)
 {
@@ -185,7 +188,7 @@ void kbdboxkey_onmousedown(KbdBoxKey* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-// KbdBox
+/* KbdBox */
 static void kbdbox_ondestroy(KbdBox*);
 static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_onmouseup(KbdBox*, psy_ui_MouseEvent*);
@@ -220,7 +223,7 @@ static void kbdbox_vtable_init(KbdBox* self)
 	}
 	self->component.vtable = &kbdbox_vtable;
 }
-
+/* implementation */
 void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_component_init(kbdbox_base(self), parent, NULL);
@@ -233,7 +236,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_table_init(&self->keys);	
 	kbdbox_initfont(self);
 	kbdbox_makekeys(self);	
-	psy_signal_connect(&workspace_kbddriver(self->workspace)->signal_input,
+	psy_signal_connect(&self->workspace->player.eventdrivers.signal_input,
 		self, kbdbox_oninput);
 }
 
@@ -456,7 +459,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 	if (self->state.pressedkey != 0) {
 		psy_EventDriverInput input;
 
-		input.message = psy_EVENTDRIVER_KEYDOWN;
+		input.message = psy_EVENTDRIVER_PRESS;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
 			self->state.shift, self->state.ctrl, self->state.alt, 0);
 		input.param2 = workspace_octave(self->workspace) * 12;
@@ -475,7 +478,7 @@ void kbdbox_onmouseup(KbdBox* self, psy_ui_MouseEvent* ev)
 	if (self->state.pressedkey != 0 && !ismod) {
 		psy_EventDriverInput input;
 
-		input.message = psy_EVENTDRIVER_KEYUP;
+		input.message = psy_EVENTDRIVER_RELEASE;
 		input.param1 = psy_audio_encodeinput(self->state.pressedkey,
 			self->state.shift, self->state.ctrl, self->state.alt, 0);
 		input.param2 = workspace_octave(self->workspace) * 12;
@@ -504,13 +507,16 @@ void kbdbox_resetmodstates(KbdBox* self)
 
 void kbdbox_oninput(KbdBox* self, psy_EventDriver* sender)
 {
+	if (sender != workspace_kbddriver(self->workspace)) {
+		return;
+	}
 	if (psy_ui_component_drawvisible(&self->component)) {
 		psy_EventDriverInput input;
 
 		input = psy_eventdriver_input(sender);
-		if (input.message == psy_EVENTDRIVER_KEYDOWN) {
+		if (input.message == psy_EVENTDRIVER_PRESS) {
 			kbdbox_presskey(self, (uint32_t)input.param1);
-		} else if (input.message == psy_EVENTDRIVER_KEYUP) {
+		} else if (input.message == psy_EVENTDRIVER_RELEASE) {
 			kbdbox_releasekey(self, (uint32_t)input.param1);
 		}
 	}
@@ -519,12 +525,13 @@ void kbdbox_oninput(KbdBox* self, psy_EventDriver* sender)
 void kbdbox_presskey(KbdBox* self, uint32_t keycode)
 {
 	KbdBoxKey* key;
-	uint32_t keycode_decoded;
+	uint32_t keycode_decoded;	
 	bool shift;
 	bool ctrl;
 	bool alt;
+	bool up;
 
-	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, 0);
+	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
 	key = psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_addstylestate(&key->component,
@@ -548,8 +555,9 @@ void kbdbox_releasekey(KbdBox* self, uint32_t keycode)
 	bool shift;
 	bool ctrl;
 	bool alt;
+	bool up;
 
-	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, 0);
+	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
 	key = psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_removestylestate(&key->component,

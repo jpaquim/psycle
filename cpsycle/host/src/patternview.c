@@ -1217,14 +1217,8 @@ const psy_audio_PatternSelection* patternview_blockselection(const PatternView*
 PatternViewTarget patternview_target(PatternView* self, psy_EventDriver* sender)
 {
 	PatternViewTarget rv;
-
-	if (psy_eventdriver_target(sender)) {
-		if (strcmp(psy_eventdriver_target(sender), "tracker") == 0) {
-			rv = PATTERNVIEWTARGET_TRACKER;
-		} else {
-			rv = PATTERNVIEWTARGET_PIANOROLL;
-		}
-	} else if (psy_ui_component_hasfocus(&self->griddefaults.component)) {
+	
+	if (psy_ui_component_hasfocus(&self->griddefaults.component)) {
 		rv = PATTERNVIEWTARGET_DEFAULTLINE;
 	} else if (psy_ui_component_hasfocus(&self->tracker.component)) {
 		rv = PATTERNVIEWTARGET_TRACKER;

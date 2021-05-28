@@ -80,11 +80,14 @@ void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
 
 void psy_table_clear(psy_Table * self)
 {
-	assert(self);
-	assert(self->keys);
+	uintptr_t keysize;
 
+	assert(self);
+	assert(self->keys);	
+
+	keysize = self->arraysize;
 	psy_table_dispose(self);
-	psy_table_init(self);
+	psy_table_init_keysize(self, keysize);
 }
 
 void psy_table_insert(psy_Table* self, uintptr_t k, void* value)

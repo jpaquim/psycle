@@ -953,8 +953,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->renderer.signal_selected, self,
 		propertiesview_onpropertiesrendererselected);	
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
-		"tracker", self, (fp_inputhandler_input)
-		propertiesview_oninput);
+		psy_EVENTDRIVER_CMD, "tracker", psy_INDEX_INVALID,
+		self, (fp_inputhandler_input) propertiesview_oninput);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		propertiesview_ontabbarchange);
 	psy_signal_connect(&self->scroller.pane.signal_beforealign, self,
