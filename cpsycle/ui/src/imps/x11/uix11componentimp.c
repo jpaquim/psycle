@@ -17,8 +17,6 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-#include <stdlib.h>
-
 static void dev_rec_children(psy_ui_x11_ComponentImp*,
 	psy_List** children);
 static int windowstyle(psy_ui_x11_ComponentImp*);
@@ -56,7 +54,8 @@ static void dev_setparent(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* parent);
 static void dev_insert(psy_ui_x11_ComponentImp* self,
 	psy_ui_x11_ComponentImp* child, psy_ui_x11_ComponentImp* insertafter);
-static void dev_remove(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp* child);
+static void dev_remove(psy_ui_x11_ComponentImp*,
+	psy_ui_x11_ComponentImp* child);
 static void dev_erase(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp* child);
 static void dev_setorder(psy_ui_x11_ComponentImp*, psy_ui_x11_ComponentImp*
 	insertafter);
@@ -83,7 +82,6 @@ static void dev_setbackgroundcolour(psy_ui_x11_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
 static int dev_hasfocus(psy_ui_x11_ComponentImp*);
-
 static void dev_clear(psy_ui_x11_ComponentImp*);
 static void dev_draw(psy_ui_x11_ComponentImp*, psy_ui_Graphics*);
 static void dev_mousedown(psy_ui_x11_ComponentImp*, psy_ui_MouseEvent*);
@@ -288,6 +286,7 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->visible = parent ? TRUE : FALSE;
 	self->viewcomponents = NULL;
 	psy_ui_realrectangle_init(&self->exposearea);
+	self->exposeareavalid = FALSE;
 	parent_imp = parent
 		? (psy_ui_x11_ComponentImp*)parent
 		: NULL;
@@ -328,7 +327,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
 			StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask);
+			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = FALSE;
     } else {
 		XSetWindowAttributes xAttr;
@@ -347,7 +346,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			KeyPressMask | KeyReleaseMask |
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			ExposureMask | StructureNotifyMask |
-			EnterWindowMask | LeaveWindowMask);
+			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = TRUE;
     }
     self->parent = parent;
@@ -368,8 +367,8 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 
 		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);
 		if (x11app->dbe) {
-			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy, self->hwnd,
-				XdbeBackground);
+			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy,
+				self->hwnd, XdbeBackground);
 			xgc.window = self->d_backBuf;
 		} else {
 			xgc.window = self->hwnd;
@@ -593,7 +592,8 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 	self->sizecachevalid = TRUE;
 }
 
-void dev_clientresize(psy_ui_x11_ComponentImp* self, intptr_t width, intptr_t height)
+void dev_clientresize(psy_ui_x11_ComponentImp* self, intptr_t width,
+	intptr_t height)
 {
 	//RECT rc;
 
@@ -676,7 +676,8 @@ void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
 	pparentsize = NULL;
     if (psy_ui_size_has_percent(&size)) {
         if (psy_ui_component_parent_const(self->component)) {
-			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+			parentsize = psy_ui_component_scrollsize(
+				psy_ui_component_parent_const(self->component));
 		} else {
 			parentsize = psy_ui_component_scrollsize(self->component);
 		}
@@ -814,7 +815,8 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 			xev.width = win_attr.width;
 			xev.height = dy;
 		}
-		// printf("scrollto: %d, %d, %d, %d\n", xev.x, xev.y, xev.width, xev.height);
+		/* printf("scrollto: %d, %d, %d, %d\n", xev.x, xev.y, xev.width,
+			xev.height); */
 		XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 	}
 }
@@ -851,7 +853,8 @@ void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 {
 	assert(child);
 
-	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+	if ((child->imp.vtable->dev_flags(&child->imp) &
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
 			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
 		psy_list_append(&self->viewcomponents, child->component);
 	} else {
@@ -868,8 +871,9 @@ void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 
 void dev_remove(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child)
 {
-	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+	if ((child->imp.vtable->dev_flags(&child->imp) &
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
 		psy_List* p;
 
 		p = psy_list_findentry(self->viewcomponents, child->component);
@@ -889,8 +893,9 @@ void dev_remove(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child)
 
 void dev_erase(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child)
 {
-	if ((child->imp.vtable->dev_flags(&child->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-		psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
+	if ((child->imp.vtable->dev_flags(&child->imp) &
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) {
 		psy_List* p;
 
 		p = psy_list_findentry(self->viewcomponents, child->component);
@@ -1072,7 +1077,8 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 			psy_List* r;
 			psy_List* q;
 
-			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p), recursive);
+			q = psy_ui_component_children((psy_ui_Component*)psy_list_entry(p),
+				recursive);
 			for (r = q; r != NULL; psy_list_next(&r)) {
 				psy_list_append(&rv, (psy_ui_Component*)psy_list_entry(r));
 			}
@@ -1136,7 +1142,8 @@ const psy_ui_TextMetric* dev_textmetric(const psy_ui_x11_ComponentImp* self)
 	return &self->tm;
 }
 
-void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle cursorstyle)
+void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle
+	cursorstyle)
 {
 	//HCURSOR hc;
 
@@ -1302,7 +1309,10 @@ void dev_setfocus(psy_ui_x11_ComponentImp* self)
 			x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 			XSync(x11app->dpy, FALSE);
 			XSetInputFocus(x11app->dpy, self->hwnd, RevertToNone, CurrentTime);
-			psy_signal_emit(&self->component->signal_focus, self, 0);
+			if (self->component) {
+				self->component->vtable->onfocus(self->component);
+				psy_signal_emit(&self->component->signal_focus, self, 0);
+			}
 		}
 	}
 }
@@ -1362,7 +1372,8 @@ void dev_mouseup(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_mouseup(self->component, ev, self->viewcomponents);
 }
 
-psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp* self, psy_ui_Component* src,
+psy_ui_RealPoint translatecoords(psy_ui_x11_ComponentImp* self,
+	psy_ui_Component* src,
 	psy_ui_Component* dst)
 {
 	psy_ui_RealPoint rv;
@@ -1439,9 +1450,11 @@ void dev_mousemove(psy_ui_x11_ComponentImp* self, psy_ui_MouseEvent* ev)
 				r = psy_ui_component_position(child);
 				intersect = psy_ui_realrectangle_intersect(&r, ev->pt);
 				if (intersect) {
-					psy_ui_realpoint_sub(&ev->pt, psy_ui_realrectangle_topleft(&r));
+					psy_ui_realpoint_sub(&ev->pt,
+						psy_ui_realrectangle_topleft(&r));
 					child->imp->vtable->dev_mousemove(child->imp, ev);
-					psy_ui_realpoint_add(&ev->pt, psy_ui_realrectangle_topleft(&r));
+					psy_ui_realpoint_add(&ev->pt,
+						psy_ui_realrectangle_topleft(&r));
 					break;
 				}
 			}

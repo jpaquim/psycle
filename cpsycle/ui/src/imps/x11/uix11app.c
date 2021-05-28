@@ -25,6 +25,8 @@
 
 static psy_ui_X11App* x11app = NULL;
 static int shapeEventBase, shapeErrorBase;
+static int deltaperline = 120;
+static int accumwheeldelta = 0;
 
 /* double click */
 static int buttonclicks = 0;
@@ -38,12 +40,18 @@ static int psy_ui_x11app_run(psy_ui_X11App*);
 static void psy_ui_x11app_stop(psy_ui_X11App*);
 static void psy_ui_x11app_close(psy_ui_X11App*);
 static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
-static void handle_mouseevent(psy_ui_X11App* self,
-	psy_ui_Component* component,
-	psy_ui_x11_ComponentImp* x11imp,
+static void handle_mouseevent(psy_ui_X11App*,
+	psy_ui_Component*, psy_ui_x11_ComponentImp*,
 	XEvent* ev, int mask,
 	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
 	int button, psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
+static void handle_mousewheel(psy_ui_X11App*,
+	psy_ui_Component*, psy_ui_x11_ComponentImp*,
+	XEvent* event, int mask,
+	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
+	int button,
+	psy_ui_fp_component_onmouseevent fp,
+	psy_Signal* signal);
 static int translate_x11button(int button);
 static bool sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
@@ -201,27 +209,28 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 {
 	XEvent event;
 	int x11_fd;
-	fd_set in_fds;
 	struct timeval tv;
-
-	x11_fd = ConnectionNumber(self->dpy);
-	tv.tv_usec = 10000;
-    tv.tv_sec = 0;
-    FD_ZERO(&in_fds);
-    FD_SET(x11_fd, &in_fds);
+	fd_set in_fds;
+	
+	x11_fd = ConnectionNumber(self->dpy);			
     self->running = TRUE;
-	while (self->running) {
-		if (XPending(self->dpy) == 0) {
-			if (select(x11_fd + 1, &in_fds, NULL, NULL, &tv) > 0) {
-				XNextEvent(self->dpy, &event);
-				psy_ui_x11app_handle_event(self, &event);
-			} else {
+    tv.tv_sec = 0;
+	tv.tv_usec = 10000;	
+	FD_ZERO(&in_fds);			
+	FD_SET(x11_fd, &in_fds);
+	while (self->running) {		
+		if (XPending(self->dpy)) {
+			XNextEvent(self->dpy, &event);
+			psy_ui_x11app_handle_event(self, &event);
+		} else {									
+			if (select(x11_fd + 1, &in_fds, 0, 0, &tv) == 0) {
 				timertick(self);
 			}
-		} else {
-		XNextEvent(self->dpy, &event);
-		psy_ui_x11app_handle_event(self, &event);
-		}
+			if (tv.tv_usec == 0) {				
+				tv.tv_sec = 0;
+				tv.tv_usec = 10000;
+			}
+		}		
     }
     return 0;
 }
@@ -293,19 +302,24 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	case Expose: {
 		const psy_ui_Border* border;
 		psy_ui_RealRectangle r;
-
-			r = psy_ui_realrectangle_make(
+		
+		border = psy_ui_component_border(imp->component);
+		r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
 					event->xexpose.x,
 					event->xexpose.y),
 				psy_ui_realsize_make(
 				event->xexpose.width,
 				event->xexpose.height));
-		psy_ui_realrectangle_union(&imp->exposearea, &r);
-		/* if (event->xexpose.count > 0) {
+		if (!imp->exposeareavalid) {
+			imp->exposearea = r;
+			imp->exposeareavalid = TRUE;
+		} else {			
+			psy_ui_realrectangle_union(&imp->exposearea, &r);
+		}
+		if (event->xexpose.count > 0) {		
 			return 0;
-		} */
-		border = psy_ui_component_border(imp->component);
+		}		
 		if (imp->component->vtable->ondraw ||
 				imp->component->signal_draw.slots ||
 				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
@@ -313,10 +327,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_x11_GraphicsImp* gx11;
 			XRectangle rectangle;
 			psy_ui_RealMargin spacing;
-
+			
 			if (!psy_ui_component_visible(imp->component)) {
 				return 0;
-			}
+			}			
+													
 			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 			/* reset scroll origin */
 			gx11->org.x = 0;
@@ -325,9 +340,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			** prepare a clip rect that can be used by a component to
 			** optimize the draw amount
 			*/
-			psy_ui_setrectangle(&imp->g.clip, event->xexpose.x,
-				event->xexpose.y, event->xexpose.width,
-				event->xexpose.height);
+			imp->g.clip = imp->exposearea;
 			/* set gc/xfd clip */
 			rectangle.x = (short)imp->exposearea.left;
 			rectangle.y = (short)imp->exposearea.top;
@@ -337,22 +350,30 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				imp->exposearea.top);
 			XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
 			XSetRegion(self->dpy, gx11->gc, gx11->region);
-			XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
+			XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle, 1);
 			XDestroyRegion(gx11->region);
 			gx11->region = XCreateRegion();
 			/* draw */
-			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);
-			psy_ui_realrectangle_init(&imp->exposearea);
+			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);			
 		}
-		if (self->dbe) {
-			psy_ui_x11_GraphicsImp* gx11;
+		if (self->dbe) {			
+			int w;
+			int h;
 
-			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-			XCopyArea(self->dpy, imp->d_backBuf,
-				imp->hwnd, gx11->gc, event->xexpose.x, event->xexpose.y,
-			event->xexpose.width, event->xexpose.height, event->xexpose.x,
-			event->xexpose.y);
+			w  = imp->exposearea.right - imp->exposearea.left;
+			h  = imp->exposearea.bottom - imp->exposearea.top;
+			if (w != 0 && h != 0) {
+				psy_ui_x11_GraphicsImp* gx11;
+				
+				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;				
+				XCopyArea(self->dpy, imp->d_backBuf,
+					imp->hwnd, gx11->gc,
+					imp->exposearea.left, imp->exposearea.top,
+					w, h,					
+					imp->exposearea.left, imp->exposearea.top);
+			}
 		}
+		imp->exposeareavalid = FALSE;
 		break; }
 	case MapNotify:
 		psy_signal_emit(&imp->component->signal_show,
@@ -480,7 +501,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		return 0;
 		break; }
     case ButtonPress: {
-		psy_ui_MouseEvent ev;
+		psy_ui_MouseEvent ev;		
 
 		if (self->dograb) {
 			psy_ui_x11_ComponentImp* grabimp;
@@ -498,7 +519,15 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 				return 0;
 			}
 		}
-		adjustcoordinates(imp->component, &ev.pt);
+		if (event->xbutton.button == 4 || event->xbutton.button == 5) {
+			handle_mousewheel(self, imp->component, imp,
+				event, ButtonPressMask, event->xany.window,
+				ButtonPress, event->xbutton.x, event->xbutton.y,
+				event->xbutton.button,
+				imp->component->vtable->onmousewheel,
+				&imp->component->signal_mousewheel);
+				return 0;
+		}
 		if (buttonclicks == 0) { /* first click */
 			buttonclicks = 1;
 			buttonclickcounter = doubleclicktime;
@@ -570,6 +599,10 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		break; }
 	case LeaveNotify: {
 		imp->imp.vtable->dev_mouseleave(&imp->imp);
+		break; }
+	case FocusOut: {
+		imp->component->vtable->onfocuslost(imp->component);
+		psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 		break; }
 	default:
 		break;
@@ -698,6 +731,83 @@ void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 	}
 }
 
+void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
+	psy_ui_x11_ComponentImp* imp, XEvent* event, int mask,
+	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
+	int button,
+	psy_ui_fp_component_onmouseevent fp,
+	psy_Signal* signal)
+{
+	int preventdefault = 0;	
+	int delta;			
+	psy_ui_MouseEvent ev;
+	// POINT pt_client;
+
+	// pt_client.x = lParam;
+	// pt_client.y = wParam;
+	// ScreenToClient(imp->hwnd, &pt_client);				
+	psy_ui_mouseevent_init_all(&ev,
+		psy_ui_realpoint_make(lParam, wParam),
+		0, 0, 0, 0);
+	update_mouseevent_mods(self, &ev);
+	adjustcoordinates(imp->component, &ev.pt);
+	imp->component->vtable->onmousewheel(imp->component, &ev);
+	psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
+		&ev);
+	preventdefault = ev.event.default_prevented;
+	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
+		if (button == 4) {
+			delta = 120;
+		} else if (button == 5) {
+			delta = -120;
+		} else {
+			delta = 0;
+		}
+		if (deltaperline != 0) {
+			accumwheeldelta += delta; // 120 or -120
+			while (accumwheeldelta >= deltaperline) {
+				double pos;
+				psy_ui_IntPoint scrollrange;							
+				double scrolltoppx;
+				const psy_ui_TextMetric* tm;
+
+				tm = psy_ui_component_textmetric(imp->component);
+				scrollrange = psy_ui_component_verticalscrollrange(imp->component);																					
+				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
+				pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
+					psy_ui_component_wheelscroll(imp->component);
+				if (pos < (double)scrollrange.x) {
+					pos = (double)scrollrange.x;
+				}														
+				psy_ui_component_setscrolltop(imp->component,
+					psy_ui_mul_value_real(
+						psy_ui_component_scrollstep_height(imp->component), pos));
+				accumwheeldelta -= deltaperline;
+			}
+			while (accumwheeldelta <= -deltaperline)
+			{
+				double pos;
+				psy_ui_IntPoint scrollrange;
+				double scrolltoppx;
+				const psy_ui_TextMetric* tm;
+
+				tm = psy_ui_component_textmetric(imp->component);
+				scrollrange = psy_ui_component_verticalscrollrange(imp->component);									
+				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
+				pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
+					psy_ui_component_wheelscroll(imp->component);
+				if (pos > (double)scrollrange.y) {
+					pos = (double)scrollrange.y;
+				}							
+				psy_ui_component_setscrolltop(imp->component,
+					psy_ui_mul_value_real(
+						psy_ui_component_scrollstep_height(imp->component), pos));
+				accumwheeldelta += deltaperline;
+			}
+		}
+	}
+}
+
 bool sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 	int mask, XEvent* xev)
 {
@@ -724,5 +834,6 @@ void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
 {
 
 }
+
 
 #endif /* PSYCLE_TK_X11 */

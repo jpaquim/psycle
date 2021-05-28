@@ -154,6 +154,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	/* init base component */
 	psy_ui_component_init(&self->component, parent, view);
 	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	self->component.id = 30;
 	/* set references */
 	self->workspace = workspace;
 	self->view = view;
