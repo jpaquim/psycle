@@ -87,7 +87,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 				WS_CHILD | WS_VISIBLE,
 				0);
 			if (imp->hwnd) {
-				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
+				psy_ui_component_init_imp(&self->component, parent, NULL, &imp->imp);
 				vtable_init(self);				
 				psy_ui_editor_setcolour(self, psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 				psy_ui_editor_setcaretcolour(self,

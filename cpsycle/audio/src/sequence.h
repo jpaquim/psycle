@@ -299,8 +299,9 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_insert;
 	psy_Signal signal_remove;
 	psy_Signal signal_reorder;
-	psy_Signal signal_trackinsert;
+	psy_Signal signal_trackinsert;	
 	psy_Signal signal_trackremove;
+	psy_Signal signal_trackswap;
 	psy_Signal signal_trackreposition;
 	psy_Signal signal_clear;
 	psy_Signal signal_mutechanged;
@@ -364,6 +365,8 @@ void psy_audio_sequence_reposition_track(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*);
 psy_dsp_big_beat_t psy_audio_sequence_offset(const psy_audio_Sequence*,
 	psy_audio_OrderIndex);
+void psy_audio_sequence_swaptracks(psy_audio_Sequence*,
+	uintptr_t src, uintptr_t dst);
 // play selection
 void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);

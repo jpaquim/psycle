@@ -1,10 +1,12 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRACKERLINENUMBERS)
 #define TRACKERLINENUMBERS
 
-// host
+/* host */
 #include "trackergridstate.h"
 #include "trackerlinestate.h"
 #include "workspace.h"
@@ -14,23 +16,25 @@
 extern "C" {
 #endif
 
-// TrackerLineNumbers
-// 
-// Draws the tracker linenumbers
+/*
+** TrackerLineNumbers
+** 
+** Draws the tracker linenumbers
+*/
 
 struct TrackerView;
 
 typedef struct TrackerLineNumbersLabel {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;	
-	// internal data
+	/* internal data */
 	char_dyn_t* linestr;
 	char_dyn_t* defaultstr;
 	double headerheight;
 	bool showdefaultline;
 	bool showbeatoffset;
 	bool useheaderbitmap;
-	// references
+	/* references */
 	struct TrackerView* view;
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
@@ -82,14 +86,14 @@ INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* s
 
 
 typedef struct TrackerLineNumbers {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal data
+	/* internal */
 	psy_audio_PatternCursor lastcursor;	
 	bool showcursor;
 	bool shownumbersinhex;
 	bool showbeat;
-	// references
+	/* references */
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
 	Workspace* workspace;
@@ -112,16 +116,15 @@ INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
 	return &self->component;
 }
 
-// TrackerLineNumberBar
+/* TrackerLineNumberBar */
 typedef struct TrackerLineNumberBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	TrackerLineNumbersLabel linenumberslabel;
 	psy_ui_Component linenumberpane;
 	TrackerLineNumbers linenumbers;
-	ZoomBox zoombox;
-	// internal data
+	ZoomBox zoombox;	
 	int zoomheightbase;
 } TrackerLineNumberBar;
 

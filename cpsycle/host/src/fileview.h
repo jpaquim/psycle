@@ -9,6 +9,8 @@
 /* ui */
 #include "uilistbox.h"
 #include <uitabbar.h>
+/* file */
+#include <dir.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,8 +25,7 @@ typedef struct FileView {
 	psy_ui_ListBox filebox;	
 	psy_ui_TabBar drives;	
 	psy_Table filenames;
-	char* curr;
-	char* drive;	
+	psy_Path curr;	
 	psy_List* files;
 	intptr_t numdirectories;	
 } FileView;
@@ -37,6 +38,7 @@ INLINE psy_ui_Component* fileview_base(FileView* self)
 }
 
 const char* fileview_path(FileView* self);
+void fileview_filename(FileView* self, char* filename, uintptr_t maxsize);
 
 #ifdef __cplusplus
 }

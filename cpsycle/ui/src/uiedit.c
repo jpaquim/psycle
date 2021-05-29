@@ -58,7 +58,7 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 #else
 	imp = psy_ui_native_editimp_allocinit(&self->component, parent)->imp;
 #endif
-	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, NULL, imp);
 	vtable_init(self);	
 	psy_signal_init(&self->signal_change);
 	psy_signal_init(&self->signal_accept);
@@ -84,7 +84,7 @@ void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
 #else
 	imp = psy_ui_native_editimp_allocinit_multiline(&self->component, parent)->imp;
 #endif
-	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent, NULL, imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_init(&self->signal_change);

@@ -262,22 +262,28 @@ static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 	psy_ui_component_addstylestate(self, psy_ui_STYLESTATE_ACTIVE);
 	if (self->draggable) {
-		psy_ui_app()->dragevent.mouse.event.target = self;
-		psy_ui_app()->dragevent.mouse = *ev;
+		psy_ui_DragEvent* dragevent;
+
+		dragevent = &psy_ui_app()->dragevent;
+		dragevent->mouse.event.target = self;
+		dragevent->mouse = *ev;
 		psy_ui_app_startdrag(psy_ui_app());
-		self->vtable->ondragstart(self, &psy_ui_app()->dragevent);
+		self->vtable->ondragstart(self, dragevent);
+		psy_signal_emit(&self->signal_dragstart, self, 1, dragevent);
 	}
 }
 
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	assert(ev);
+	psy_ui_DragEvent* dragevent;
 
-	if (psy_ui_app()->dragevent.active) {
-		psy_ui_app()->dragevent.mouse.event.default_prevented = FALSE;
-		psy_ui_app()->dragevent.mouse = *ev;
-		self->vtable->ondragover(self, &psy_ui_app()->dragevent);
-		if (psy_ui_app()->dragevent.mouse.event.default_prevented) {
+	dragevent = &psy_ui_app()->dragevent;
+	if (dragevent->active) {
+		dragevent->mouse.event.default_prevented = FALSE;
+		dragevent->mouse = *ev;
+		self->vtable->ondragover(self, dragevent);
+		if (dragevent->mouse.event.default_prevented) {
 			psy_ui_component_setcursor(self, psy_ui_CURSORSTYLE_GRAB);
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
@@ -289,11 +295,13 @@ static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
 	assert(ev);
+	psy_ui_DragEvent* dragevent;
 
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
-	if (psy_ui_app()->dragevent.active) {
-		psy_ui_app()->dragevent.mouse = *ev;
-		self->vtable->ondrop(self, &psy_ui_app()->dragevent);
+	dragevent = &psy_ui_app()->dragevent;
+	if (dragevent->active) {
+		dragevent->mouse = *ev;
+		self->vtable->ondrop(self, dragevent);
 		if (ev->event.default_prevented) {
 			psy_ui_mouseevent_stop_propagation(ev);
 		}
@@ -402,13 +410,20 @@ static void vtable_init(void)
 }
 
 void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
-	psy_ui_ComponentImp* imp)
+	psy_ui_Component* view, psy_ui_ComponentImp* imp)
 {
 	assert(self);
 	assert(self != parent);
 
 	vtable_init();
-	self->vtable = &vtable;	
+	self->vtable = &vtable;
+	if (view) {
+		self->view = view;
+	} else if (parent && parent->view) {
+		self->view = parent->view;
+	} else {
+		self->view = NULL;
+	}
 	self->imp = imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
@@ -426,9 +441,16 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	vtable_init();
 	self->vtable = &vtable;	
 	if (view) {
+		self->view = view;
+	} else if (parent->view) {
+		self->view = parent->view;
+	} else {
+		self->view = NULL;
+	}
+	if (self->view) {
 		self->imp = (psy_ui_ComponentImp*)
 			psy_ui_viewcomponentimp_allocinit(
-				self, parent, view, "",
+				self, parent, self->view, "",
 				0, 0, 100, 100, 0, 0);		
 	} else {
 		self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(psy_ui_app()),
@@ -508,6 +530,14 @@ void move(psy_ui_Component* self, psy_ui_Point origin)
 void resize(psy_ui_Component* self, psy_ui_Size size)
 {			
 	self->imp->vtable->dev_resize(self->imp, size);	
+	if (!psy_ui_app()->alignvalid ||
+		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {
+		psy_ui_component_align(self);
+		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
+			psy_ui_component_updateoverflow(self);
+		}
+	}
 }
 
 void clientresize(psy_ui_Component* self, psy_ui_Size size)
@@ -605,6 +635,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_selectsection);
 	psy_signal_init(&self->signal_scrollrangechanged);
 	psy_signal_init(&self->signal_languagechanged);
+	psy_signal_init(&self->signal_dragstart);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {
@@ -696,6 +727,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_selectsection);
 	psy_signal_dispose(&self->signal_scrollrangechanged);
 	psy_signal_dispose(&self->signal_languagechanged);
+	psy_signal_dispose(&self->signal_dragstart);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -1517,14 +1549,18 @@ psy_ui_Component* psy_ui_component_intersect(psy_ui_Component* self, psy_ui_Real
 	p = q = psy_ui_component_children(self, 0);
 	while (p) {
 		psy_ui_RealRectangle position;
-		
-		position = psy_ui_component_position((psy_ui_Component*)p->entry);
-		if (psy_ui_realrectangle_intersect(&position, pt)) {
-			rv = (psy_ui_Component*)p->entry;
-			break;
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_visible(component)) {
+			position = psy_ui_component_position(component);
+			if (psy_ui_realrectangle_intersect(&position, pt)) {
+				rv = (psy_ui_Component*)p->entry;
+				break;
+			}			
 		}
-		p = p->next;
 		++c;
+		p = p->next;
 	}
 	psy_list_free(q);
 	if (rv) {

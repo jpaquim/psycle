@@ -387,6 +387,7 @@ void view_dev_show(psy_ui_ViewComponentImp* self)
 
 void view_dev_showstate(psy_ui_ViewComponentImp* self, int state)
 {
+	self->visible = TRUE;
 }
 
 void view_dev_hide(psy_ui_ViewComponentImp* self)
@@ -419,7 +420,7 @@ void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
 {
 	psy_ui_RealPoint topleft;
 	const psy_ui_TextMetric* tm;
-
+	
 	topleft = psy_ui_realrectangle_topleft(&self->position);
 	tm = view_dev_textmetric(self);
 	self->position = psy_ui_realrectangle_make(
@@ -432,6 +433,7 @@ void view_dev_resize(psy_ui_ViewComponentImp* self, psy_ui_Size size)
 void view_dev_clientresize(psy_ui_ViewComponentImp* self, intptr_t width,
 	intptr_t height)
 {
+	
 }
 
 psy_ui_RealRectangle view_dev_position(psy_ui_ViewComponentImp* self)
@@ -461,32 +463,28 @@ void view_dev_setposition(psy_ui_ViewComponentImp* self, psy_ui_Point topleft,
 	psy_ui_Size size)
 {
 	const psy_ui_TextMetric* tm;
-
+	psy_ui_Size parentsize;
+	psy_ui_Size* pparentsize;
+		
 	tm = view_dev_textmetric(self);
 	if (psy_ui_size_has_percent(&size)) {
-		psy_ui_Size parentsize;
-
 		if (psy_ui_component_parent_const(self->component)) {
-			parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self->component));
+			parentsize = psy_ui_component_scrollsize(
+				psy_ui_component_parent_const(self->component));
 		} else {
 			parentsize = psy_ui_component_scrollsize(self->component);
 		}
-		self->position = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(
-				psy_ui_value_px(&topleft.x, tm, &parentsize),
-				psy_ui_value_px(&topleft.y, tm, &parentsize)),
-			psy_ui_realsize_make(
-				psy_ui_value_px(&size.width, tm, &parentsize),
-				psy_ui_value_px(&size.height, tm, &parentsize)));		
+		pparentsize = &parentsize;
 	} else {
-		self->position = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(
-				psy_ui_value_px(&topleft.x, tm, NULL),
-				psy_ui_value_px(&topleft.y, tm, NULL)),
-			psy_ui_realsize_make(
-				psy_ui_value_px(&size.width, tm, NULL),
-				psy_ui_value_px(&size.height, tm, NULL)));
-	}
+		pparentsize = NULL;		
+	}	
+	self->position = psy_ui_realrectangle_make(
+		psy_ui_realpoint_make(
+			psy_ui_value_px(&topleft.x, tm, pparentsize),
+			psy_ui_value_px(&topleft.y, tm, pparentsize)),
+		psy_ui_realsize_make(
+			psy_ui_value_px(&size.width, tm, pparentsize),
+			psy_ui_value_px(&size.height, tm, pparentsize)));
 }
 
 psy_ui_Size view_dev_size(const psy_ui_ViewComponentImp* self)
@@ -720,13 +718,13 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {	
-	if (self->visible) {		
+	if (self->visible) {
 		// draw background		
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
 			psy_ui_component_drawbackground(self->component, g);
 		}
 		psy_ui_component_drawborder(self->component, g);
-		// prepare colours		
+		/* prepare colours */
 		psy_ui_setcolour(g, psy_ui_component_colour(
 			self->component));
 		psy_ui_settextcolour(g, psy_ui_component_colour(
@@ -738,7 +736,7 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			psy_ui_RealPoint origin;
 
 			origin = psy_ui_origin(g);
-			// spacing
+			/* spacing */
 			spacing = psy_ui_component_spacing(self->component);
 			if (!psy_ui_margin_iszero(&spacing)) {
 				tm = psy_ui_component_textmetric(self->component);							

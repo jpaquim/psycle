@@ -48,7 +48,7 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 #else
 	imp = psy_ui_native_listboximp_allocinit(&self->component, parent)->imp;
 #endif
-	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, NULL, imp);
 	psy_ui_listbox_vtable_init(self);
 	self->component.vtable = &psy_ui_listbox_vtable;	
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
@@ -68,7 +68,7 @@ void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
 #else
 	imp = psy_ui_native_listboximp_multiselect_allocinit(&self->component, parent)->imp;
 #endif
-	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, NULL, imp);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
 	self->charnumber = 0;

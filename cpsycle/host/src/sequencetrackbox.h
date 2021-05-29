@@ -1,30 +1,36 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SEQUENCETRACKBOX_H)
 #define SEQUENCETRACKBOX_H
 
-// host
+/* host */
 #include "trackbox.h"
-// ui
+/* ui */
 #include <uiedit.h>
-// audio
+/* audio */
 #include <sequence.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SequenceTrackBox
-//
-// Discribes and controls a sequence track(used by SeqView and SeqEditor).
+/*
+** SequenceTrackBox
+**
+**
+** Describes and controls a sequence track(used by SeqView and SeqEditor).
+*/
 
 typedef struct SequenceTrackBox {
-	// inherits
+	/* inherits */
 	TrackBox trackbox;
+	/* internal */
 	uintptr_t trackidx;
 	bool preventedit;
-	// references
+	/* references */
 	psy_audio_Sequence* sequence;
 	psy_ui_Edit* edit;	
 } SequenceTrackBox;

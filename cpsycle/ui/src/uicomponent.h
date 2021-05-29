@@ -174,6 +174,7 @@ struct psy_ui_ComponentImp;
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
 	struct psy_ui_ComponentImp* imp;
+	struct psy_ui_Component* view;
 	/* signals */
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
@@ -205,6 +206,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_preferredsizechanged;
 	psy_Signal signal_scrollrangechanged;
 	psy_Signal signal_languagechanged;
+	psy_Signal signal_dragstart;
 	/* internal */
 	uintptr_t id;
 	bool doublebuffered;
@@ -231,7 +233,7 @@ void psy_ui_component_updatefont(psy_ui_Component*);
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	psy_ui_Component* view);
 void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
-	struct psy_ui_ComponentImp*);
+	psy_ui_Component* view, struct psy_ui_ComponentImp*);
 
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
@@ -832,16 +834,20 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 		psy_ui_component_textmetric(self), NULL);
 }
 
+INLINE psy_ui_Size psy_ui_component_parentsize(const psy_ui_Component* self)
+{	
+	if (psy_ui_component_parent_const(self)) {
+		return psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
+	}
+	return psy_ui_component_scrollsize(self);	
+}
+
 INLINE psy_ui_RealSize psy_ui_component_scrollsize_px(const psy_ui_Component* self)
 {
 	psy_ui_Size size;
 	psy_ui_Size parentsize;
-
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	
+	parentsize = psy_ui_component_parentsize(self);
 	size = psy_ui_component_scrollsize(self);	
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
@@ -851,11 +857,7 @@ INLINE psy_ui_RealSize psy_ui_component_clientsize_px(const psy_ui_Component* se
 	psy_ui_Size size;
 	psy_ui_Size parentsize;
 
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	parentsize = psy_ui_component_parentsize(self);
 	size = psy_ui_component_clientsize(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
@@ -865,14 +867,10 @@ INLINE psy_ui_RealSize psy_ui_component_offsetsize_px(const psy_ui_Component* se
 	const psy_ui_TextMetric* tm;
 	psy_ui_Size size;
 	psy_ui_Size parentsize;
-
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	
 	tm = psy_ui_component_textmetric(self);
 	size = psy_ui_component_offsetsize(self);
+	parentsize = psy_ui_component_parentsize(self);
 	return psy_ui_realsize_make(
 		psy_ui_value_px(&size.width, tm, &parentsize),
 		psy_ui_value_px(&size.height, tm, &parentsize));
@@ -884,11 +882,7 @@ INLINE psy_ui_RealSize psy_ui_component_size_px(const psy_ui_Component* self)
 	psy_ui_Size parentsize;
 
 	size = psy_ui_component_size(self);
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	parentsize = psy_ui_component_parentsize(self);
 	return psy_ui_size_px(&size, psy_ui_component_textmetric(self), &parentsize);
 }
 
@@ -919,13 +913,9 @@ INLINE psy_ui_RealMargin psy_ui_component_margin_px(const psy_ui_Component* self
 	psy_ui_RealMargin rv;
 	psy_ui_Margin margin;
 	psy_ui_Size parentsize;
-
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	
 	margin = psy_ui_component_margin(self);
+	parentsize = psy_ui_component_parentsize(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
@@ -936,13 +926,9 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	psy_ui_RealMargin rv;
 	psy_ui_Margin margin;
 	psy_ui_Size parentsize;
-
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
+	
 	margin = psy_ui_component_spacing(self);
+	parentsize = psy_ui_component_parentsize(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
@@ -954,12 +940,8 @@ INLINE psy_ui_RealMargin psy_ui_component_bordermargin_px(const psy_ui_Component
 	psy_ui_Margin border;
 	psy_ui_Size parentsize;
 
-	if (psy_ui_component_parent_const(self)) {
-		parentsize = psy_ui_component_scrollsize(psy_ui_component_parent_const(self));
-	} else {
-		parentsize = psy_ui_component_scrollsize(self);
-	}
 	border = psy_ui_component_bordermargin(self);
+	parentsize = psy_ui_component_parentsize(self);
 	psy_ui_realmargin_init_margin(&rv, &border,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;

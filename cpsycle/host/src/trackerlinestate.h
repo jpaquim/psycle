@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRACKERLINESTATE)
 #define TRACKERLINESTATE
 
-// host
+/* host */
 #include "patternviewskin.h"
-// audio
+/* audio */
 #include <pattern.h>
 #include <sequence.h>
 
@@ -14,9 +16,11 @@
 extern "C" {
 #endif
 
-// TrackerLineState
-//
-// Stores shared data for the Trackergrid and linenumbers
+/*
+** TrackerLineState
+**
+** Stores shared data for the Trackergrid and linenumbers
+*/
 
 typedef struct TrackerLineState {	
 	psy_ui_Value lineheight;
@@ -111,7 +115,7 @@ INLINE psy_dsp_big_beat_t trackerlinestate_quantize(const TrackerLineState*
 		self->bpl;
 }
 
-// quantized
+/* quantized */
 INLINE double trackerlinestate_beattopx(TrackerLineState* self,
 	psy_dsp_big_beat_t position)
 {

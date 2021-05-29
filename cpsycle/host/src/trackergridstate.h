@@ -1,18 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(TRACKERGRIDSTATE_H)
 #define TRACKERGRIDSTATE_H
 
-// host
+/* host */
 #include "patternviewskin.h"
 #include "trackercmds.h"
-// audio
+/* audio */
 #include <pattern.h>
 #include <sequence.h>
 
-// The TrackerView is where you enter notes. It displays a Pattern selected by
-// the SeqView as a tracker grid.
+/*
+** The TrackerView is where you enter notes. It displays a Pattern selected by
+** the SeqView as a tracker grid.
+*/
 
 
 typedef enum {
@@ -84,7 +88,7 @@ void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
 void trackconfig_initcolumns(TrackConfig*, bool wideinst);
 
-// TrackerEventTable
+/* TrackerEventTable */
 typedef struct TrackerEventTable {
 	psy_Table tracks;
 	double seqoffset;
@@ -99,13 +103,13 @@ void trackereventtable_dispose(TrackerEventTable*);
 void trackereventtable_clearevents(TrackerEventTable*);
 psy_List** trackereventtable_track(TrackerEventTable*, uintptr_t index);
 
-// TrackerGridState
+/* TrackerGridState */
 typedef struct TrackerGridState {
-	// signals
+	/* signals */
 	psy_Signal signal_cursorchanged;
-	// internal data
+	/* internal */
 	psy_audio_PatternCursor cursor;
-	// references
+	/* references */
 	psy_audio_Pattern* pattern;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;

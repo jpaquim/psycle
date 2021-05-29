@@ -396,9 +396,9 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_init(&self->maximize, &self->mainviews, NULL);
 	psy_ui_component_setstyletype(&self->maximize, STYLE_MAINVIEWTOPBAR);
 	psy_ui_component_setalign(&self->maximize, psy_ui_ALIGN_TOP);
-	psy_ui_component_init_align(&self->tabbars, &self->maximize, NULL,
-		psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init_connect(&self->maximizebtn, &self->maximize, NULL,
+	psy_ui_component_init_align(&self->tabbars, &self->maximize, &self->maximize,
+		psy_ui_ALIGN_CLIENT);	
+	psy_ui_button_init_connect(&self->maximizebtn, &self->maximize, &self->maximize,
 		self, mainframe_onmaxminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
@@ -423,10 +423,11 @@ void mainframe_initmaintabbar(MainFrame* self)
 {
 	psy_ui_Tab* tab;
 
-	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);
+	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.machines");
+	tab->component.id = 30;
 	psy_ui_tab_loadresource(tab, IDB_MACHINES_DARK, psy_ui_colour_white());
 	tab = psy_ui_tabbar_append(&self->tabbar, "main.patterns");
 	psy_ui_tab_loadresource(tab, IDB_NOTES_DARK, psy_ui_colour_white());
@@ -451,7 +452,7 @@ void mainframe_inithelpsettingstabbar(MainFrame* self)
 void mainframe_initviewtabbars(MainFrame* self)
 {
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
-	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
 }
 
 void mainframe_initmainpane(MainFrame* self)
@@ -974,7 +975,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	}
 	psy_ui_tabbar_unmark(&self->helpsettingstabbar);
 	psy_ui_notebook_select(&self->statusbar.viewstatusbars, tabindex);
-	psy_ui_notebook_select(&self->viewtabbars, tabindex);
+	psy_ui_notebook_select(&self->viewtabbars, tabindex);	
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {
 		workspace_onviewchanged(&self->workspace, viewhistoryentry_make(
@@ -982,6 +983,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->tabbars);
 }
 
 void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* sender,
@@ -1012,6 +1014,7 @@ void mainframe_onsettingshelptabbarchanged(MainFrame* self, psy_ui_Component* se
 		psy_ui_component_setfocus(component);
 	}
 	psy_ui_component_align(&self->component);
+	psy_ui_component_invalidate(&self->tabbars);
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
@@ -1275,9 +1278,9 @@ void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_onfileload(MainFrame* self, FileView* sender)
 {
-	const char* path;
+	char path[4096];	
 
-	path = fileview_path(sender);
+	fileview_filename(sender, path, 4096);
 	if (psy_strlen(path) == 0) {
 		return;
 	}

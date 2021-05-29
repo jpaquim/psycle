@@ -49,7 +49,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 					bool resize;
 					component->visible = 1;
 
-					oldsize = psy_ui_component_scrollsize(&self->component);
+					oldsize = psy_ui_component_scrollsize(component);
 					resize = (psy_ui_value_px(&oldsize.width, psy_ui_component_textmetric(component), NULL) !=
 						psy_ui_value_px(&size.width, psy_ui_component_textmetric(component), NULL)) ||
 						(psy_ui_value_px(&oldsize.height, psy_ui_component_textmetric(component), NULL) !=
@@ -73,7 +73,7 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 					self)));
 			}
 		}
-	}
+	}	
 }
 
 uintptr_t psy_ui_notebook_pageindex(psy_ui_Notebook* self)
