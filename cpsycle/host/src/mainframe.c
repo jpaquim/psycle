@@ -258,6 +258,7 @@ void mainframe_initlayout(MainFrame* self)
 	psy_ui_component_setbackgroundmode(&self->mainviews, psy_ui_NOBACKGROUND);
 	psy_ui_component_init_align(&self->right, &self->client, NULL,
 		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_show(&self->statusbar.component);
 }
 
 void mainframe_initterminal(MainFrame* self)

@@ -304,18 +304,17 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand)
 {
-	psy_ui_X11App* x11app;
-	//
+	psy_ui_X11App* x11app;	
 	int err = 0;
 
 	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
 	self->prev_w = width;
 	self->prev_h = height;
 	self->d_backBuf = 0;
-	if (parent == 0) {
+	if (parent == 0 || ((dwStyle & 1) == 1)) {
 		XSetWindowAttributes xAttr;
 		unsigned long xAttrMask = CWBackPixel;
-
+					
 		xAttr.background_pixel = 0x00232323;
 	/*	xAttr.bit_gravity = NorthWestGravity;
 		xAttrMask |= CWBitGravity; */
@@ -329,6 +328,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			StructureNotifyMask |
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
 		self->mapped = FALSE;
+		self->parent = NULL;
     } else {
 		XSetWindowAttributes xAttr;
 		unsigned long xAttrMask = CWBackPixel;
@@ -347,9 +347,9 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 			ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 			ExposureMask | StructureNotifyMask |
 			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
-		self->mapped = TRUE;
-    }
-    self->parent = parent;
+		self->mapped = TRUE;	
+		self->parent = parent;	
+    }    
     if (self->parent) {
 		psy_list_free(self->parent->children_nonrec_cache);
 		self->parent->children_nonrec_cache = NULL;
@@ -378,26 +378,9 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 		xgc.gc = gc;
 		xgc.visual = x11app->visual;
 		psy_ui_graphics_init(&self->g, &xgc);
-    }
-
-	//self->hwnd = CreateWindow(
-		//classname,
-		//NULL,
-		//dwStyle,
-		//x, y, width, height,
-		//parent ? parent->hwnd : (HWND)NULL,
-		//usecommand ? (HMENU) winapp->winid : NULL,
-		//instance,
-		//NULL);
+    }	
 	if (self->hwnd == 0) {
-		printf("Failed To Create Component\n");
-		//char text[256];
-		//unsigned long err;
-
-		//err = GetLastError();
-		//psy_snprintf(text, 256, "Failed To Create Component (Error %u)", err);
-		//MessageBox(NULL, text, "Error",
-			//MB_OK | MB_ICONERROR);
+		printf("Failed To Create Component\n");	
 		err = 1;
 	} else {
 		psy_table_insert(&x11app->selfmap, (uintptr_t) self->hwnd, self);
@@ -565,7 +548,7 @@ int dev_drawvisible(psy_ui_x11_ComponentImp* self)
 
 void dev_move(psy_ui_x11_ComponentImp* self, psy_ui_Point origin)
 {
-	psy_ui_X11App* x11app;
+	psy_ui_X11App* x11app;	
 
     x11app = (psy_ui_X11App*)psy_ui_app()->imp;
     XMoveWindow(x11app->dpy, self->hwnd,
