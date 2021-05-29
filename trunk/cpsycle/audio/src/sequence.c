@@ -190,6 +190,7 @@ void psy_audio_sequence_initsignals(psy_audio_Sequence* self)
 	psy_signal_init(&self->signal_reorder);
 	psy_signal_init(&self->signal_trackinsert);
 	psy_signal_init(&self->signal_trackremove);
+	psy_signal_init(&self->signal_trackswap);
 	psy_signal_init(&self->signal_trackreposition);
 	psy_signal_init(&self->signal_solochanged);
 	psy_signal_init(&self->signal_mutechanged);
@@ -214,6 +215,7 @@ void psy_audio_sequence_disposesignals(psy_audio_Sequence* self)
 	psy_signal_dispose(&self->signal_clear);
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_remove);
+	psy_signal_dispose(&self->signal_trackswap);
 	psy_signal_dispose(&self->signal_reorder);
 	psy_signal_dispose(&self->signal_trackinsert);
 	psy_signal_dispose(&self->signal_trackremove);
@@ -1385,6 +1387,52 @@ psy_dsp_big_beat_t psy_audio_sequence_offset(const psy_audio_Sequence* self,
 		return entry->offset;
 	}
 	return (psy_dsp_big_beat_t)0.0;
+}
+
+void psy_audio_sequence_swaptracks(psy_audio_Sequence* self,
+	uintptr_t srcid, uintptr_t dstid)
+{
+	psy_audio_SequenceTrackNode* src_track;	
+
+	assert(self);
+
+	src_track = psy_list_at(self->tracks, srcid);
+	if (src_track) {
+		psy_audio_SequenceTrackNode* dst_track;
+
+		dst_track = psy_list_at(self->tracks, dstid);
+		if (dst_track) {	
+			uintptr_t num;
+			psy_audio_SequenceTrack** arrayptr;
+
+			num = psy_list_size(self->tracks);
+			if (num != 0) {
+				arrayptr = malloc(sizeof(psy_audio_SequenceTrack*) * num);
+				if (arrayptr) {
+					psy_List* p;
+					uintptr_t i;
+					psy_audio_SequenceTrack* temp;
+
+					p = self->tracks;
+					for (i = 0; p != NULL && i < num; p = p->next, ++i) {
+						arrayptr[i] = p->entry;
+					}
+					temp = arrayptr[srcid];
+					arrayptr[srcid] = arrayptr[dstid];
+					arrayptr[dstid] = temp;
+					psy_list_free(self->tracks);
+					self->tracks = NULL;
+					for (i = 0; i < num; ++i) {
+						psy_list_append(&self->tracks, arrayptr[i]);
+					}
+					free(arrayptr);
+					arrayptr = NULL;
+					psy_signal_emit(&self->signal_trackswap, self, 1, srcid, dstid);
+					psy_signal_emit(&self->signal_changed, self, 0);
+				}				
+			}
+		}
+	}
 }
 
 psy_audio_OrderIndex psy_audio_sequence_reorder(psy_audio_Sequence* self,

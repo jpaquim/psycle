@@ -97,10 +97,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				cp_bottomright.x - cp_topleft.x,
 				cp_bottomright.y - cp_topleft.y);			
 			componentsize = psy_ui_component_preferredsize(component,
-				&limit);
-			if (component->id == 20) {
-				self = self;
-			}
+				&limit);			
 			psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
 				&size);
 			c_tm = psy_ui_component_textmetric(component);
@@ -177,7 +174,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						componentsize.width,
 						psy_ui_value_make_px(cp_bottomright.y - cp_topleft.y -
 							psy_ui_margin_height_px(&c_margin, c_tm, &size)))));
-			} else if (component->align == psy_ui_ALIGN_LEFT) {								
+			} else if (component->align == psy_ui_ALIGN_LEFT) {				
 				if ((self->component->containeralign->alignexpandmode & psy_ui_HEXPAND)
 						== psy_ui_HEXPAND) {
 				} else {
@@ -187,7 +184,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						psy_ui_value_px(&componentsize.width, c_tm, &size) +
 						psy_ui_margin_width_px(&c_margin, tm, &size);
 					if (cp_topleft.x + requiredcomponentwidth >
-							psy_ui_value_px(&size.width, c_tm, &size)) {
+							psy_ui_value_px(&size.width, c_tm, &size)) {						
 						cp_topleft.x = cp_topleft_wrapstart.x;
 						psy_ui_lclaligner_resizewrapline(self, wrap, cp_topleft.y,
 							cpymax);

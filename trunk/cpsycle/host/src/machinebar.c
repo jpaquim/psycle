@@ -80,14 +80,13 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		margin);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machinebar_ondestroy);
-	// Machine ComboBox
-	psy_ui_combobox_init(&self->machinebox, &self->component, NULL);
-	self->machinebox.component.id = 10;
+	/* Machine ComboBox */
+	psy_ui_combobox_init(&self->machinebox, &self->component, NULL);	
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinebar_onmachineboxselchange);
 	machinebar_buildmachinebox(self);
-	// Tool Buttons
+	/* Tool Buttons */
 	psy_ui_button_init(&self->gear, &self->component, NULL);
 	psy_ui_button_settext(&self->gear, "machinebar.gear");
 	psy_ui_button_init(&self->dock, &self->component, NULL);

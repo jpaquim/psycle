@@ -47,7 +47,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 #else
 	imp = psy_ui_native_checkboximp_allocinit(&self->component, parent)->imp;
 #endif
-	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent, NULL, imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->text = NULL;
@@ -69,7 +69,7 @@ void psy_ui_checkbox_init_multiline(psy_ui_CheckBox* self, psy_ui_Component* par
 #else
 	imp = (psy_ui_ComponentImp*)psy_ui_native_checkboximp_allocinit_multiline(&self->component, parent)->imp;
 #endif	
-	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent, imp);
+	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent, NULL, imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->text = NULL;

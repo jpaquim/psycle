@@ -1,19 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(SEQUENCECMDS_H)
 #define SEQUENCECMDS_H
 
-// host
+/* host */
 #include "workspace.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SequenceCmds
+/* SequenceCmds */
 typedef struct SequenceCmds {
-	// references
+	/* internal */
+	/* references */
 	Workspace* workspace;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;

@@ -153,8 +153,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 
 	/* init base component */
 	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setvtable(&self->component, vtable_init(self));
-	self->component.id = 30;
+	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	/* set references */
 	self->workspace = workspace;
 	self->view = view;
@@ -1855,7 +1854,7 @@ void trackergrid_ongotocursor(TrackerGrid* self, psy_audio_PatternCursor* cursor
 void trackergrid_build(TrackerGrid* self)
 {
 	uintptr_t t;
-
+	
 	psy_ui_component_clear(&self->component);
 	psy_table_clear(&self->columns);
 	for (t = 0; t < trackergridstate_numsongtracks(self->gridstate); ++t) {
@@ -1864,4 +1863,5 @@ void trackergrid_build(TrackerGrid* self)
 				(self->view) ? self->view : &self->component, t,
 				self->gridstate, self->linestate, self->workspace));
 	}
+	psy_ui_component_align(&self->component);
 }

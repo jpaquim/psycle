@@ -52,6 +52,7 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	self->trackidx = trackidx;
 	self->edit = edit;
 	self->preventedit = TRUE;
+	self->trackbox.track.component.id = (intptr_t)self->trackidx;
 	trackbox_setindex(&self->trackbox, trackidx);	
 	if (self->sequence) {
 		psy_signal_connect(&self->sequence->signal_solochanged, self,

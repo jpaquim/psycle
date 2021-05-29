@@ -39,12 +39,11 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 	psy_ui_listbox_setcharnumber(&self->filebox, 40);
 	psy_ui_component_setalign(psy_ui_listbox_base(&self->filebox),
 		psy_ui_ALIGN_CLIENT);		
+	psy_path_init(&self->curr, "");
 #if defined(DIVERSALIS__OS__MICROSOFT)
-	self->curr = strdup("");
-	self->drive = strdup("C:\\");
+	psy_path_init(&self->curr, "C:\\");	
 #else	
-	self->curr = strdup("");
-	self->drive = strdup("/");
+	psy_path_init(&self->curr, "//");	
 #endif
 	fileview_builddrives(self);	
 	self->files = NULL;
@@ -60,23 +59,20 @@ void fileview_init(FileView* self, psy_ui_Component* parent)
 
 void fileview_ondestroy(FileView* self, psy_ui_Component* sender)
 {
-	free(self->curr);
-	free(self->drive);
+	psy_path_dispose(&self->curr);	
 	psy_signal_dispose(&self->signal_selected);
 	psy_list_deallocate(&self->files, NULL);
 }
 
 void fileview_build(FileView* self)
-{	
-	char path[4096];
+{		
 #if defined(DIVERSALIS__OS__UNIX)
 	psy_List* sorted;
 #endif
 
-	psy_ui_listbox_clear(&self->filebox);
-	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);	
-	psy_dir_enumerate(self, path, "*.psy", 0, (psy_fp_findfile)
-		fileview_onenumdir);
+	psy_ui_listbox_clear(&self->filebox);	
+	psy_dir_enumerate(self, psy_path_prefix(&self->curr), "*.psy", 0,
+		(psy_fp_findfile)fileview_onenumdir);
 #if defined(DIVERSALIS__OS__UNIX)
 	sorted = fileview_sort(self->files, (psy_fp_comp)fileview_comp_filename);
 	psy_list_deallocate(&self->files, (psy_fp_disposefunc)NULL);
@@ -86,13 +82,9 @@ void fileview_build(FileView* self)
 		psy_List* p;
 		
 		for (p = self->files; p != NULL; p = p->next) {
-			if (p->entry) {
-				psy_Path path;
-
-				psy_path_init(&path, (const char*)p->entry);	
-				psy_ui_listbox_addtext(&self->filebox,
-					psy_path_filename(&path));
-				psy_path_dispose(&path);
+			if (p->entry) {				
+				psy_ui_listbox_addtext(&self->filebox, 
+					(const char*)p->entry);
 			}
 		}		
 	}
@@ -100,8 +92,13 @@ void fileview_build(FileView* self)
 
 int fileview_onenumdir(FileView* self, const char* filename, int flag)
 {
-	if (filename) {			
-		psy_list_append(&self->files, psy_strdup(filename));		
+	if (filename) {
+		psy_Path extract;
+
+		psy_path_init(&extract, filename);
+		psy_list_append(&self->files, psy_strdup(
+			psy_path_filename(&extract)));
+		psy_path_dispose(&extract);
 	}
 	return 1;
 }
@@ -109,19 +106,17 @@ int fileview_onenumdir(FileView* self, const char* filename, int flag)
 void fileview_builddirectories(FileView* self)
 {
 	psy_List* p;
-	psy_List* q;
-	char path[4096];
-
-	psy_snprintf(path, 4096, "%s%s", self->drive, self->curr);	
-	for (q = p = psy_directories(path); p != NULL; psy_list_next(&p)) {
-		psy_ui_listbox_addtext(&self->filebox, (char*)psy_list_entry(p));
-		psy_snprintf(path, 4096, "%s%s%s%s", self->drive, self->curr,
-			psy_SLASHSTR,
-			(char*)psy_list_entry(p));
-		psy_list_append(&self->files, strdup(path));		
+	psy_List* q;	
+	
+	psy_list_deallocate(&self->files, NULL);
+	psy_ui_listbox_clear(&self->filebox);
+	self->numdirectories = 0;
+	for (q = p = psy_directories(psy_path_prefix(&self->curr)); p != NULL;
+			psy_list_next(&p)) {		
+		psy_list_append(&self->files, psy_strdup((char*)psy_list_entry(p)));
 		++self->numdirectories;
 	}
-	psy_list_deallocate(&q, NULL);	
+	psy_list_deallocate(&q, NULL);
 }
 
 void fileview_builddrives(FileView* self)
@@ -141,23 +136,10 @@ void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender,
 {
 	if (psy_ui_listbox_cursel(&self->filebox) != -1) {
 		if (psy_ui_listbox_cursel(&self->filebox) < self->numdirectories) {
-			const char* path = fileview_path(self);
-			while (*path != '\0') {
-				if (*path == psy_SLASH) {
-					++path;
-					break;
-				}
-				++path;
-			}
-			if (*path != '\0') {
-				self->curr = strdup(path);
-				self->numdirectories = 0;
-				psy_list_deallocate(&self->files, NULL);
-				psy_ui_listbox_clear(&self->filebox);
+			psy_path_append_dir(&self->curr, fileview_path(self));						
 				fileview_builddirectories(self);
 				fileview_build(self);		
 				psy_ui_component_align_full(&self->filebox.component);		
-			}
 		} else {
 			psy_signal_emit(&self->signal_selected, self, 0);
 		}
@@ -176,9 +158,26 @@ const char* fileview_path(FileView* self)
 	return "";
 }
 
+void fileview_filename(FileView* self, char* filename, uintptr_t maxsize)
+{
+	filename[0] = '\0';
+	if (psy_ui_listbox_cursel(&self->filebox) != -1) {		
+		psy_List* p;
+		
+		p = psy_list_at(self->files, psy_ui_listbox_cursel(&self->filebox));
+		if (p) {
+			const char* fname;
+
+			fname = (const char*)psy_list_entry(p);
+			psy_snprintf(filename, maxsize, "%s%s%s", psy_path_prefix(&self->curr),
+				psy_SLASHSTR, fname);
+		}
+	}	
+}
+
 void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index)
 {
-	psy_ui_Tab* tab;
+/*	psy_ui_Tab* tab;
 
 	tab = psy_ui_tabbar_tab(&self->drives, index);
 	if (tab) {
@@ -193,7 +192,7 @@ void fileview_ondrives(FileView* self, psy_ui_TabBar* sender, int index)
 		fileview_builddirectories(self);
 		fileview_build(self);
 		psy_ui_component_align_full(&self->filebox.component);
-	}
+	}*/
 }
 
 psy_List* fileview_sort(psy_List* source, psy_fp_comp comp)

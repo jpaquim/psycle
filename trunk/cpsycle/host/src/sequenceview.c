@@ -433,8 +433,12 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 					psy_ui_component_textmetric(&self->component), NULL)),
 				psy_list_size(self->track->entries) - 1);
 			self->state->cmd_orderindex.track = self->trackindex;
+			if (self->state->active) {
+				self->state->col = (uintptr_t)(ev->pt.x / self->state->colwidth);
+				self->state->col = psy_min(self->state->col, COLMAX - 1);
+			}
 			workspace_setsequenceeditposition(self->state->cmds->workspace,
-				self->state->cmd_orderindex);
+				self->state->cmd_orderindex);			
 		} else {
 			self->state->cmd_orderindex.track = self->trackindex;
 			self->state->cmd_orderindex.order = psy_INDEX_INVALID;

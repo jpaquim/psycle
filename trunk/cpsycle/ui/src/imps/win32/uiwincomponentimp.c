@@ -931,7 +931,7 @@ bool dev_inputprevented(const psy_ui_win_ComponentImp* self)
 }
 
 const psy_ui_TextMetric* dev_textmetric(const psy_ui_win_ComponentImp* self)
-{
+{	
 	if (!self->tmcachevalid) {	
 		psy_ui_TextMetric rv;
 		TEXTMETRIC tm;

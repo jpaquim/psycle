@@ -150,9 +150,9 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 
 	assert(self);	
 		
-	textident = 0.0;
+	textident = 0.0;	
 	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size_px(&self->component);	
+	size = psy_ui_component_scrollsize_px(&self->component);	
 	if (!psy_ui_bitmap_empty(&self->icon)) {
 		psy_ui_RealSize bpmsize;
 		double vcenter;

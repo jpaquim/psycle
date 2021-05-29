@@ -74,6 +74,20 @@ void psy_path_setext(psy_Path* self, const char* ext)
 	psy_path_update(self);
 }
 
+void psy_path_append_dir(psy_Path* self, const char* dir)
+{
+	if (psy_strlen(self->prefix) == 0) {
+		psy_strreset(&self->prefix, dir);
+	} else if (psy_strlen(self->prefix) > 0 &&
+			self->prefix[psy_strlen(self->prefix) - 1] == psy_SLASH) {
+		self->prefix = psy_strcat_realloc(self->prefix, dir);
+	} else {
+		self->prefix = psy_strcat_realloc(self->prefix, psy_SLASHSTR);
+		self->prefix = psy_strcat_realloc(self->prefix, dir);
+	}
+	psy_path_update(self);
+}
+
 void psy_path_update(psy_Path* self)
 {
 	static const char* path_delim = psy_SLASHSTR;
