@@ -944,6 +944,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
 	psy_ui_tabbar_init(&self->tabbar, &self->component);
+	self->tabbar.component.id = 10;
 	psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_RIGHT);

@@ -741,28 +741,24 @@ void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
 	int preventdefault = 0;	
 	int delta;			
 	psy_ui_MouseEvent ev;
-	// POINT pt_client;
-
-	// pt_client.x = lParam;
-	// pt_client.y = wParam;
-	// ScreenToClient(imp->hwnd, &pt_client);				
+	
+	if (button == 4) {
+			delta = 120;
+	} else if (button == 5) {
+			delta = -120;
+	} else {
+		delta = 0;	
+	}
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(lParam, wParam),
-		0, 0, 0, 0);
+		0, delta, 0, 0);
 	update_mouseevent_mods(self, &ev);
 	adjustcoordinates(imp->component, &ev.pt);
 	imp->component->vtable->onmousewheel(imp->component, &ev);
 	psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 		&ev);
 	preventdefault = ev.event.default_prevented;
-	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
-		if (button == 4) {
-			delta = 120;
-		} else if (button == 5) {
-			delta = -120;
-		} else {
-			delta = 0;
-		}
+	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {		
 		if (deltaperline != 0) {
 			accumwheeldelta += delta; // 120 or -120
 			while (accumwheeldelta >= deltaperline) {

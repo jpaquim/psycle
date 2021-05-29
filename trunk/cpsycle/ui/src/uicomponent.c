@@ -118,6 +118,7 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 			if (base.overlay != 0) {
 				uint8_t overlay;
 				psy_ui_Colour overlaycolour;
+				psy_ui_Component* parent;
 
 				if (psy_ui_app_hasdarktheme(psy_ui_app())) {
 					overlaycolour = psy_ui_colour_make(0xFFFFFF);
@@ -125,9 +126,12 @@ psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 					overlaycolour = psy_ui_colour_make(0x0000000);
 				}
 				overlay = base.overlay;
-				base = psy_ui_component_backgroundcolour(
-					psy_ui_component_parent(curr));
-				base = psy_ui_colour_overlayed(&base, &overlaycolour, overlay / 100.0);
+				parent = psy_ui_component_parent(curr);
+				if (parent) {
+					base = psy_ui_component_backgroundcolour(parent);
+					base = psy_ui_colour_overlayed(&base, &overlaycolour,
+						overlay / 100.0);
+				}
 			}
 			break;
 		}
@@ -442,7 +446,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent, psy
 	self->vtable = &vtable;	
 	if (view) {
 		self->view = view;
-	} else if (parent->view) {
+	} else if (parent && parent->view) {
 		self->view = parent->view;
 	} else {
 		self->view = NULL;
