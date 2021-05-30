@@ -17,6 +17,23 @@
 
 extern psy_ui_App app;
 
+static void dev_dispose(psy_ui_ComponentImp*);
+/* vtable */
+static psy_ui_ComponentImpVTable vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(psy_ui_x11_ComboBoxImp* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->imp.vtable;
+		vtable.dev_dispose =
+			(psy_ui_fp_componentimp_dev_dispose)
+			dev_dispose;		
+		vtable_initialized = TRUE;
+	}
+	self->imp.vtable = &vtable;
+}
+
 // ComboBoxImp VTable
 static int dev_addtext(psy_ui_x11_ComboBoxImp*, const char* text);
 static void dev_settext(psy_ui_x11_ComboBoxImp*, const char* text,
@@ -79,8 +96,17 @@ void psy_ui_x11_comboboximp_init(psy_ui_x11_ComboBoxImp* self,
 		&xattr);	
 	psy_ui_comboboximp_extend(&self->imp);	
 	self->imp.vtable = x11_combo_imp->imp.vtable;	
-	self->imp.extended_imp = self;	
+	self->imp.extended_imp = self;
+	vtable_init(self);	
 	comboboximp_imp_vtable_init(&self->imp);	
+}
+
+void dev_dispose(psy_ui_ComponentImp* context)
+{
+	psy_ui_x11_ComboBoxImp* self;	
+
+	self = (psy_ui_x11_ComboBoxImp*)context->extended_imp;
+	psy_ui_component_destroy(&self->x11_combo.component);	
 }
 
 psy_ui_x11_ComboBoxImp* psy_ui_x11_comboboximp_alloc(void)
