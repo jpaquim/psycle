@@ -206,6 +206,6 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	/* switch::select */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.onprimary, material.medium));
+		psy_ui_colour_weighted(&material.secondary, material.weak));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SWITCH_SELECT, style);
 }

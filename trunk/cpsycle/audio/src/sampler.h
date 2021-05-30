@@ -1,20 +1,22 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_SAMPLER_H
 #define psy_audio_SAMPLER_H
 
-// local
+/* local */
 #include "constants.h"
 #include "custommachine.h"
 #include "sampleiterator.h"
 #include "ticktimer.h"
 #include "instrument.h"
-// dsp
+/* dsp */
 #include <envelope.h>
 #include <filter.h>
 
-// Internal Psycle Sampler (PS1)
+/* Internal Psycle Sampler (PS1) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,7 +73,7 @@ typedef struct SamplerWaveDataController
 
 	Double _pos;
 	int64_t _speed;
-	float _vol; // 0..1 value of this voice volume,
+	float _vol; /* 0..1 value of this voice volume */
 	float _pan;
 	float _lVolDest;
 	float _rVolDest;
@@ -138,25 +140,29 @@ typedef struct psy_audio_SamplerVoice
 	int instrument;
 	uintptr_t channel;
 
-	// Amount of samples since line Tick on this voice.
-	uintptr_t samplecounter;
-	// Amount of samples previous to do a delayed noteoff
+	/* Amount of samples since line Tick on this voice. */
+	uintptr_t samplecounter;	
+	/* Amount of samples previous to do a delayed noteoff */
 	int triggernoteoff;
-	// Amount of samples previous to do a delayed noteon (Also used for
-	// retrig)
+	/*
+	** Amount of samples previous to do a delayed noteon (Also used for
+	** retrig)
+	*/
 	uintptr_t triggernotedelay;
 	int cutoff;
 	float comodify;
 	int64_t effportaspeed;
-	// Line memory for command being executed
-	// running command (like porta or retrig).
+	/*
+	** Line memory for command being executed
+	** running command (like porta or retrig).
+	*/
 	int effcmd;
-	//value related to the running command (like porta or retrig)
+	/* value related to the running command (like porta or retrig) */
 	int effval;
-	// retrig
-	int effretticks; // Number of ticks remaining for retrig
-	float effretVol; // volume change amount
-	int effretmode;  // volume change mode (multipler or sum)		
+	/* retrig */
+	int effretticks; /* Number of ticks remaining for retrig */
+	float effretVol; /* volume change amount */
+	int effretmode;  /* volume change mode (multipler or sum) */
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, struct psy_audio_Sampler*);
@@ -172,16 +178,17 @@ void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
 
 typedef struct psy_audio_Sampler {
-	// base class
+	/* inherits */
 	psy_audio_CustomMachine custommachine;
+	/* internal */
 	psy_audio_IntMachineParam param_numvoices;
 	psy_audio_ChoiceMachineParam param_resamplingmethod;
 	psy_audio_ChoiceMachineParam param_defaultspeed;
 	psy_audio_ChoiceMachineParam param_slidemode;
 	psy_audio_IntMachineParam param_instrumentbank;		
-	// 0: basec = C3, 1: basec = C4
+	/* 0: basec = C3, 1: basec = C4 */
 	int32_t defaultspeed;
-	// Instrument Bank 0: PS1 1: Sampulse
+	/* Instrument Bank 0: PS1 1: Sampulse */
 	int32_t instrumentbank;
 	psy_dsp_ResamplerQuality resamplerquality;
 	psy_audio_TickTimer ticktimer;
@@ -191,9 +198,8 @@ typedef struct psy_audio_Sampler {
 
 	uint16_t lastinstrument[MAX_TRACKS];
 	uintptr_t numvoices;
-	psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];
-	// psycle::helpers::dsp::cubic_resampler _resampler;
-	psy_List* multicmdMem; // PatternEvent
+	psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];	
+	psy_List* multicmdMem; /* List of PatternEvents */
 	int32_t linearslide;
 } psy_audio_Sampler;
 

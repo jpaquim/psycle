@@ -42,6 +42,8 @@ typedef struct VstPreload {
 
 typedef struct PSY2Loader {
 	struct psy_audio_SongFile* songfile;
+	struct PsyFile* fp;
+	struct psy_audio_Song* song;
 	uint8_t currentoctave;
 	int32_t songtracks;
 	unsigned char busEffect[64];
@@ -70,3 +72,22 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(struct PsyFile*);
 #endif
 
 #endif /* psy_audio_PSY2_H */
+
+
+/*
+unsigned char* pData;
+psy_audio_Pattern* pattern;
+
+pattern = psy_audio_pattern_allocinit();
+psy_audio_patterns_insert(&self->songfile->song->patterns, i, pattern);
+pData = malloc(numlines * OLD_MAX_TRACKS * PSY2_EVENT_SIZE);
+if (status = psyfile_read(self->songfile->file, pData,
+	numlines * OLD_MAX_TRACKS * PSY2_EVENT_SIZE)) {
+	free(pData);
+	return status;
+}
+psy_audio_convert_legacypattern(pattern, pData, OLD_MAX_TRACKS,
+	numlines, (uint32_t)psy_audio_song_lpb(self->song));
+free(pData);
+pData = NULL; 
+*/

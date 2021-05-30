@@ -1,11 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_dsp_FILTER_H
 #define psy_dsp_FILTER_H
 
 #include "../../detail/psydef.h"
-// local
+/* local */
 #include "filtercoeff.h"
 #include "dsptypes.h"
 
@@ -18,9 +20,11 @@ typedef enum psy_dsp_FilterType {
 	F_HIGHPASS12 = 1,
 	F_BANDPASS12 = 2,
 	F_BANDREJECT12 = 3,
-	F_NONE = 4, // This one is kept here because it is used in load/save.
-	            // Also used in Sampulse instrument filter as
-				// "use channel default"
+	F_NONE = 4, /*
+				** This one is kept here because it is used in load/save.
+	            ** Also used in Sampulse instrument filter as
+				** "use channel default"
+				*/
 	F_ITLOWPASS = 5,
 	F_MPTLOWPASSE = 6,
 	F_MPTHIGHPASSE = 7,
@@ -66,10 +70,7 @@ double filtercoeff_resonancempt(int resonance);
 
 extern FilterCoeff filtercoeff;
 
-/// filter.
-
-// virtual inline float Work(float x);
-// virtual inline void WorkStereo(float& l, float& r);
+/* filter. */
 
 struct Filter;
 
@@ -89,8 +90,8 @@ typedef struct Filter {
 	int _q;
 
 	float _coeff0;
-	float _coeff1; //coeff[1] reused in ITFilter as highpass coeff
-	float _coeff2; //coeff[2] not used in ITFilter
+	float _coeff1; /* coeff[1] reused in ITFilter as highpass coeff */
+	float _coeff2; /* coeff[2] not used in ITFilter */
 	float _coeff3;
 	float _coeff4;
 	float _x1, _x2, _y1, _y2;
@@ -99,7 +100,7 @@ typedef struct Filter {
 
 void filter_init(Filter*);
 void filter_init_samplerate(Filter*, psy_dsp_big_hz_t samplerate);
-void filter_reset(Filter*);//Same as init, without samplerate
+void filter_reset(Filter*); /* Same as init, without samplerate */
 void filter_dispose(Filter*);
 void filter_update(Filter*);
 const char* filter_name(psy_dsp_FilterType);

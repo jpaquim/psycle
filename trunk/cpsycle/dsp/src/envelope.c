@@ -311,6 +311,28 @@ const char* psy_dsp_envelope_tostring(const psy_dsp_Envelope* self)
 	return self->str;
 }
 
+void psy_dsp_envelope_setadsr(psy_dsp_Envelope* self,
+	psy_dsp_seconds_t attack,
+	psy_dsp_seconds_t decay,
+	psy_dsp_amp_t sustain,
+	psy_dsp_seconds_t release)
+{
+	psy_dsp_envelope_clear(self);	
+	/* start attack */
+	psy_dsp_envelope_append(self, psy_dsp_envelopepoint_make_start());
+	/* start decay */
+	psy_dsp_envelope_append(self,
+		psy_dsp_envelopepoint_make_all(attack, 1.f, 0.f, 65535.f, 1.f, 1.f));
+	/* start release */
+	psy_dsp_envelope_append(self,
+		psy_dsp_envelopepoint_make_all(attack + decay, sustain, 0.f, 65535.f, 0.f, 1.f));
+	/* end release */
+	psy_dsp_envelope_append(self,
+		psy_dsp_envelopepoint_make_all(attack + decay + release, 0.f, 0.f, 65535.f, 0.f, 0.f));
+	psy_dsp_envelope_setsustainbegin(self, 2);
+	psy_dsp_envelope_setsustainend(self, 2);
+}
+
 // psy_dsp_EnvelopeController
 // prototypes
 static void psy_dsp_envelope_startstage(psy_dsp_EnvelopeController*);
