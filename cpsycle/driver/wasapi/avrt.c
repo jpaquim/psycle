@@ -6,7 +6,7 @@
 #include "avrt.h"
 
 static HMODULE hDInputDLL = 0;
-static refcount = 0;
+static int refcount = 0;
 
 FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
 FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
