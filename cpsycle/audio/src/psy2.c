@@ -1,26 +1,26 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "psy2.h"
-// local
+/* local */
 #include "machinefactory.h"
 #include "pattern.h"
 #include "plugin.h"
 #include "plugin_interface.h"
+#include "psyconvert.h"
 #include "song.h"
 #include "songio.h"
 #include "vstplugin.h"
 #include "wire.h"
-// dsp
-#include <datacompression.h>
+/* dsp */
 #include <operations.h>
-// std
+/* std */
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/os.h"
 
@@ -40,25 +40,31 @@ static void vstpreload_init(VstPreload*, psy_audio_SongFile*);
 static bool vstpreload_load(VstPreload*, uintptr_t slot,
 	unsigned char* program, int32_t* instance);
 
-// Prototypes
-static void psy2loader_readheader(PSY2Loader*);
-static void psy2loader_readpatterns(PSY2Loader*);
-static void psy2loader_readsequence(PSY2Loader*);
-static void psy2loader_readinstruments(PSY2Loader*);
-static void psy2loader_readvsts(PSY2Loader*);
-static void psy2loader_readmachines(PSY2Loader*);
-static void psy2loader_addmachines(PSY2Loader*);
+/* prototypes */
+static int psy2loader_readheader(PSY2Loader*);
+static int psy2loader_readsngi(PSY2Loader*);
+static int psy2loader_readpatterns(PSY2Loader*);
+static int psy2loader_readsequence(PSY2Loader*);
+static int psy2loader_readinstruments(PSY2Loader*);
+static int psy2loader_readvsts(PSY2Loader*);
+static int psy2loader_readmachines(PSY2Loader*);
+static int psy2loader_addmachines(PSY2Loader*);
 static void psy2loader_machine_load(PSY2Loader*, uintptr_t slot);
-static void psy2loader_master_load(PSY2Loader*, psy_audio_Machine*, uintptr_t slot);
-static void psy2loader_sampler_load(PSY2Loader*, psy_audio_Machine*, uintptr_t slot);
+static void psy2loader_master_load(PSY2Loader*, psy_audio_Machine*,
+	uintptr_t slot);
+static void psy2loader_sampler_load(PSY2Loader*, psy_audio_Machine*,
+	uintptr_t slot);
 static void psy2loader_plugin_load(PSY2Loader*, psy_audio_Machine*,
 	uintptr_t slot);
-static void psy2loader_plugin_skipload(PSY2Loader*, psy_audio_Machine*, uintptr_t slot);
-static void psy2loader_postload(PSY2Loader*);
-// Implementation
+static void psy2loader_plugin_skipload(PSY2Loader*, psy_audio_Machine*,
+	uintptr_t slot);
+static int psy2loader_postload(PSY2Loader*);
+/* implementation */
 void psy2loader_init(PSY2Loader* self, psy_audio_SongFile* songfile)
 {
-	self->songfile = songfile;	
+	self->songfile = songfile;
+	self->fp = songfile->file;
+	self->song = songfile->song;
 	internalmachinesconvert_init(&self->converter);
 	psy_audio_legacywires_init(&self->legacywires);
 	psy_audio_legacywires_init(&self->legacywiresremapped);
@@ -73,57 +79,64 @@ void psy2loader_dispose(PSY2Loader* self)
 
 int psy2loader_load(PSY2Loader* self)
 {
-	self->songfile->legacywires = &self->legacywires;	
-	psy2loader_readheader(self);
-	psyfile_read(self->songfile->file, &self->currentoctave, sizeof(char));
-	psyfile_read(self->songfile->file, self->busMachine, 64);
-	psyfile_read(self->songfile->file, self->playorder, 128);
-	psyfile_read(self->songfile->file, &self->playlength, sizeof(int32_t));
-	psyfile_read(self->songfile->file, &self->songtracks, sizeof(int32_t));
-	psy2loader_readpatterns(self);
-	psy2loader_readsequence(self);
-	psy2loader_readinstruments(self);
-	psy2loader_readvsts(self);
-	psy2loader_readmachines(self);
-	psy2loader_addmachines(self);
-	psy2loader_postload(self);
+	int status;
+
+	self->songfile->legacywires = &self->legacywires;
+	self->fp = self->songfile->file;
+	self->song = self->songfile->song;
+	if (status = psy2loader_readheader(self)) {
+		return status;
+	}
+	if (status = psy2loader_readsngi(self)) {
+		return status;
+	}
+	if (status = psy2loader_readpatterns(self)) {
+		return status;
+	}
+	if (status = psy2loader_readsequence(self)) {
+		return status;
+	}
+	if (status = psy2loader_readinstruments(self)) {
+		return status;
+	}
+	if (status = psy2loader_readvsts(self)) {
+		return status;
+	}
+	if (status = psy2loader_readmachines(self)) {
+		return status;
+	}
+	if (status = psy2loader_addmachines(self)) {
+		return status;
+	}
+	if (status = psy2loader_postload(self)) {
+		return status;
+	}
 	return PSY_OK;
 }
 
-void psy2loader_postload(PSY2Loader* self)
+/*
+** Header
+** |-|0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+** |0|P|S|Y|2|S|O|N|G|n|a|m|e| | | | |
+** |1| | | | | | | | | | | | | | | | |
+** |2| | | | | | | | |a|u|t|h|o|r| | |
+** |3| | | | | | | | | | | | | | | | |
+** |4| | | | | | | | |c|o|m|m|e|n|t| |
+** |5| | | | | | | | | | | | | | | | |
+** |6| | | | | | | | | | | | | | | | |
+** |7| | | | | | | | | | | | | | | | |
+** |8| | | | | | | | | | | | | | | | |
+** |9| | | | | | | | | | | | | | | | |
+** |A| | | | | | | | | | | | | | | | |
+** |B| | | | | | | | | | | | | | | | |
+** |C| | | | | | | | | | | | | | | | |
+** |D| | | | | | | | |b|p|m| |s|p|t| |
+** |E|o|
+*/
+int psy2loader_readheader(PSY2Loader* self)
 {
-	psy_TableIterator it;
-	
-	for (it = psy_audio_machines_begin(&self->songfile->song->machines);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_audio_machine_postload(
-			(psy_audio_Machine*)psy_tableiterator_value(&it),
-			self->songfile,
-			psy_tableiterator_key(&it));
-	}
-}
-
-// Header
-// |-|0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
-// |0|P|S|Y|2|S|O|N|G|n|a|m|e| | | | |
-// |1| | | | | | | | | | | | | | | | |
-// |2| | | | | | | | |a|u|t|h|o|r| | |
-// |3| | | | | | | | | | | | | | | | |
-// |4| | | | | | | | |c|o|m|m|e|n|t| |
-// |5| | | | | | | | | | | | | | | | |
-// |6| | | | | | | | | | | | | | | | |
-// |7| | | | | | | | | | | | | | | | |
-// |8| | | | | | | | | | | | | | | | |
-// |9| | | | | | | | | | | | | | | | |
-// |A| | | | | | | | | | | | | | | | |
-// |B| | | | | | | | | | | | | | | | |
-// |C| | | | | | | | | | | | | | | | |
-// |D| | | | | | | | |b|p|m| |s|p|t| |
-// |E|o|
-void psy2loader_readheader(PSY2Loader* self)
-{
-	// Can be NOT NULL terminated. (specsize + 1 for NULL termination)
+	int status;
+	/* Can be NOT NULL terminated. (specsize + 1 for NULL termination) */
 	char name[33];
 	char author[33];
 	char comments[129];
@@ -132,121 +145,153 @@ void psy2loader_readheader(PSY2Loader* self)
 	int32_t linesperbeat;
 	psy_audio_SongProperties songproperties;
 
-	// PSY2SONG, the Sign of the file, already read by songio,
-	// so it isn't done here again
+	/*
+	** PSY2SONG, the Sign of the file, already read by songio,
+	** so it isn't done here again
+	*/
 
-	// Label: name
-	// Size : 32chars.
-	psyfile_read(self->songfile->file, name, 32);
-	// Can be NOT NULL terminated.
+	/*
+	** Label: name
+	** Size : 32chars.
+	*/
+	if (status = psyfile_read(self->fp, name, 32)) {
+		return status;
+	}
+	/* Can be NOT NULL terminated. */
 	name[32] = '\0';
-	// Label: author
-	// Size : 32chars.
-	psyfile_read(self->songfile->file, author, 32);
-	// Can be NOT NULL terminated.
+	/*
+	** Label: author
+	** Size : 32chars.
+	*/
+	if (status = psyfile_read(self->fp, author, 32)) {
+		return status;
+	}
+	/* Can be NOT NULL terminated. */
 	author[32] = '\0';
-	// Label: comment
-	// Size : 128chars.
-	psyfile_read(self->songfile->file, comments, 128);
-	// Can be NOT NULL terminated.
+	/*
+	** Label: comment
+	** Size : 128chars.
+	*/
+	if (status = psyfile_read(self->fp, comments, 128)) {
+		return status;
+	}
+	/* Can be NOT NULL terminated. */
 	comments[128] = '\0';
-	// Label: bpm
-	// Size : 1int(32bits)
-	// Desc:  Contains The song BPM
-	psyfile_read(self->songfile->file, &beatspermin, sizeof beatspermin);
-	// Label: spt
-	// Size : 1int(32bits)
-	// Desc : Contains The song samples per tick.This is a measure used internally by the player, but thanks to it, this makes possible to store the TPB that the format didn’t support.To get the TPB, use :
-	// 	ticksPerBeat = 44100 * 15 * 4 / (SamplesPerTick * BeatsPerMin);
-	// Next, Update your SamplesPerTick value as :
-	// SamplesPerTick = SamplesPerTick * (currentSamplesPerSec / 44100);
-	// This is done because the original fileformat was hardcoded at 44100Khz.
-	// Do the opposite when(if) saving!!!
-	// 
-	// Advise.If, for any case, the SamplesPerTick is under or equal to 0, default to these values : _ticksPerBeat = 4; SamplesPerTick = 4315;
-	// (One version did damage this value)
-	psyfile_read(self->songfile->file, &sampR, sizeof sampR);
+	/*
+	** Label: bpm
+	** Size : 1int(32bits)
+	** Desc:  Contains The song BPM
+	*/
+	if (status = psyfile_read(self->fp, &beatspermin, sizeof beatspermin)) {
+		return status;
+	}
+	/*
+	** Label: spt
+	** Size : 1int(32bits)
+	** Desc : Contains The song samples per tick.This is a measure used
+	**        internally by the player, but thanks to it, this makes possible
+	**        to store the TPB that the format didn’t support.
+	**        To get the TPB, use :
+    ** 	      ticksPerBeat = 44100 * 15 * 4 / (SamplesPerTick * BeatsPerMin);
+	**        Next, Update your SamplesPerTick value as :
+	**        SamplesPerTick = SamplesPerTick * (currentSamplesPerSec / 44100);
+	** This is done because the original fileformat was hardcoded at 44100Khz.
+	** Do the opposite when(if) saving!!!
+	**
+	** Advise.If, for any case, the SamplesPerTick is under or equal to 0,
+	** default to these values : _ticksPerBeat = 4; SamplesPerTick = 4315;
+	** (One version did damage this value)
+	*/
+	if (status = psyfile_read(self->fp, &sampR, sizeof sampR)) {
+		return status;
+	}
 	if (sampR <= 0) {
-		// Shouldn't happen but has happened.
+		/* Shouldn't happen but has happened. */
 		linesperbeat = 4;
 	} else {
-		// The old format assumes we output at 44100 samples/sec, so...	
+		/* The old format assumes we output at 44100 samples/sec, so... */
 		linesperbeat = (int32_t)(44100 * 60 / (sampR * beatspermin));
 	}	
 	psy_audio_songproperties_init_all(&songproperties,
 		name,
 		author,
 		comments,		
-		4,  // octave
+		4,  /* octave */
 		linesperbeat,
-		24, // extraticksperbeat
+		24, /* extraticksperbeat */
 		0,
 		beatspermin);
-	psy_audio_song_setproperties(self->songfile->song, &songproperties);
+	psy_audio_song_setproperties(self->song, &songproperties);
 	psy_audio_songproperties_dispose(&songproperties);
+	return PSY_OK;
 }
 
-void psy2loader_readpatterns(PSY2Loader* self)
+
+int psy2loader_readsngi(PSY2Loader* self)
 {
+	int status;
+
+	if (status = psyfile_read(self->songfile->file, &self->currentoctave,
+			sizeof(char))) {
+		return status;
+	}
+	if (status = psyfile_read(self->songfile->file, self->busMachine, 64)) {
+		return status;
+	}
+	if (status = psyfile_read(self->songfile->file, self->playorder, 128)) {
+		return status;
+	}
+	if (status = psyfile_read(self->songfile->file, &self->playlength,
+			sizeof(int32_t))) {
+		return status;
+	}
+	if (status = psyfile_read(self->songfile->file, &self->songtracks,
+			sizeof(int32_t))) {
+		return status;
+	}
+	return PSY_OK;
+}
+
+int psy2loader_readpatterns(PSY2Loader* self)
+{
+	int status;
 	int32_t num;
 	int32_t i;
 
-	psyfile_read(self->songfile->file, &num, sizeof num);
+	if (status = psyfile_read(self->songfile->file, &num, sizeof num)) {
+		return status;
+	}
 	for (i = 0; i < num; ++i) {
 		int32_t numlines;
 		char patternName[32];
 
-		psyfile_read(self->songfile->file, &numlines, sizeof(numlines));
-		psyfile_read(self->songfile->file, patternName, sizeof(patternName));
+		if (status = psyfile_read(self->songfile->file, &numlines,
+				sizeof(numlines))) {
+			return status;
+		}
+		if (status = psyfile_read(self->songfile->file, patternName,
+				sizeof(patternName))) {
+			return status;
+		}
 		if (numlines > 0)
 		{
-			///\todo: tweak_effect should be converted to normal tweaks!				
-			psy_audio_PatternNode* node = 0;
-			psy_dsp_big_beat_t offset = 0.f;
-			unsigned char* pData;
-			int32_t c;
+			/* \todo: tweak_effect should be converted to normal tweaks! */			
+			unsigned char* pData;			
 			psy_audio_Pattern* pattern;
 
 			pattern = psy_audio_pattern_allocinit();
 			psy_audio_patterns_insert(&self->songfile->song->patterns, i, pattern);
-			pData = malloc(OLD_MAX_TRACKS * sizeof(psy_audio_PatternEntry));
-			for (c = 0; c < numlines; ++c) {
-				int32_t track;
-				unsigned char* ptrack;
-
-				psyfile_read(self->songfile->file, pData, OLD_MAX_TRACKS * PSY2_EVENT_SIZE);
-				ptrack = pData;
-				for (track = 0; track < OLD_MAX_TRACKS; ++track) {
-					psy_audio_PatternEvent event;
-					// Psy3 PatternEntry format
-					// type				offset
-					// uint8_t note;		0
-					// uint8_t inst;		1
-					// uint8_t mach;		2
-					// uint8_t cmd;			3
-					// uint8_t parameter;	4												
-					psy_audio_patternevent_clear(&event);
-					event.note = ptrack[0];
-					event.inst = (ptrack[1] == 0xFF)
-						? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
-						: ptrack[1];
-					event.mach = (ptrack[2] == 0xFF)
-						? event.mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY
-						: ptrack[2];
-					event.cmd = ptrack[3];
-					event.parameter = ptrack[4];
-					if (!psy_audio_patternevent_empty(&event)) {						
-						node = psy_audio_pattern_insert(pattern, node, track, offset,
-							&event);
-					}
-					ptrack += PSY2_EVENT_SIZE;
-				}
-				offset += 1.0 / psy_audio_song_lpb(self->songfile->song);
+			pData = malloc(numlines * OLD_MAX_TRACKS * PSY2_EVENT_SIZE);
+			if (status = psyfile_read(self->songfile->file, pData,
+					numlines * OLD_MAX_TRACKS * PSY2_EVENT_SIZE)) {
+				free(pData);
+				pData = NULL;
+				return status;
 			}
-			pattern->length = numlines *
-				(1.0 / psy_audio_song_lpb(self->songfile->song));
+			psy_audio_convert_legacypattern(pattern, pData, OLD_MAX_TRACKS,
+				numlines, (uint32_t)psy_audio_song_lpb(self->song));
 			free(pData);
-			pData = 0;
+			pData = NULL;
 		} else {
 			psy_audio_Pattern* pattern;
 
@@ -255,9 +300,10 @@ void psy2loader_readpatterns(PSY2Loader* self)
 			pattern->length = 64 * 1.0 / psy_audio_song_lpb(self->songfile->song);;
 		}
 	}
+	return PSY_OK;
 }
 
-void psy2loader_readsequence(PSY2Loader* self)
+int psy2loader_readsequence(PSY2Loader* self)
 {
 	int32_t i;
 	
@@ -267,10 +313,13 @@ void psy2loader_readsequence(PSY2Loader* self)
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
 			psy_audio_orderindex_make(0, i), self->playorder[i]);
 	}
+	return PSY_OK;
 }
 
-void psy2loader_readinstruments(PSY2Loader* self)
+int psy2loader_readinstruments(PSY2Loader* self)
 {
+	int status;
+
 	unsigned char _NNA[OLD_MAX_INSTRUMENTS];
 	///\name Amplitude Envelope overview:
 	///\{
@@ -316,7 +365,9 @@ void psy2loader_readinstruments(PSY2Loader* self)
 	char names[OLD_MAX_INSTRUMENTS][32];
 	int32_t instselected;
 
-	psyfile_read(self->songfile->file, &instselected, sizeof instselected);
+	if (status = psyfile_read(self->songfile->file, &instselected, sizeof instselected)) {
+		return status;
+	}
 
 	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i)
 	{
@@ -436,13 +487,15 @@ void psy2loader_readinstruments(PSY2Loader* self)
 				if (w == 0)
 				{
 					psy_audio_Sample* wave;
-					short tmpFineTune;
+					int16_t tmpFineTune;
 					char dummy[33];
-					unsigned short volume = 0;
-					unsigned char stereo = 0;
-					unsigned char doloop = 0;
-					short* pData;
+					uint16_t volume = 0;
+					uint8_t stereo = 0;
+					uint8_t doloop = 0;
+					int16_t* pData;
 					uint32_t f;
+					uint8_t temp8u;
+					uint32_t temp32u;					
 
 					wave = psy_audio_sample_allocinit(1);
 					//Old format assumed 44Khz
@@ -458,19 +511,25 @@ void psy2loader_readinstruments(PSY2Loader* self)
 					tmpFineTune = (int32_t)((float)tmpFineTune / 2.56f);
 					wave->zone.finetune = tmpFineTune;
 
-					psyfile_read(self->songfile->file, &wave->loop.start, sizeof wave->loop.start);
-					psyfile_read(self->songfile->file, &wave->loop.end, sizeof wave->loop.end);
-
+					psyfile_read(self->songfile->file, &temp32u, sizeof(uint32_t));
+					wave->loop.start = temp32u;
+					psyfile_read(self->songfile->file, &temp32u, sizeof(uint32_t));
+					wave->loop.end = temp32u;
 					psyfile_read(self->songfile->file, &doloop, sizeof(doloop));
 					wave->loop.type = doloop ? psy_audio_SAMPLE_LOOP_NORMAL : psy_audio_SAMPLE_LOOP_DO_NOT;
-					psyfile_read(self->songfile->file, &wave->stereo, sizeof(wave->stereo));
-
-					pData = malloc(wltemp * sizeof(short) + 4);// +4 to avoid any attempt at buffer overflow by the code
-					psyfile_read(self->songfile->file, pData, wltemp * sizeof(short));
+					psyfile_read(self->songfile->file, &temp8u, sizeof(uint8_t));
+					wave->stereo = temp8u;
+					pData = malloc(wltemp * sizeof(int16_t) + 4);// +4 to avoid any attempt at buffer overflow by the code
+					if (!pData) {
+						return PSY_ERRFILE;
+					}
+					psyfile_read(self->songfile->file, pData, wltemp * sizeof(int16_t));
 					wave->numframes = wltemp;
 					psy_audio_sample_allocwavedata(wave);
 					for (f = 0; f < wave->numframes; ++f) {
-						short val = (short)pData[f];
+						int16_t val;
+						
+						val = (int16_t)pData[f];
 						wave->channels.samples[0][f] = (float)val;
 					}
 					free(pData);
@@ -478,57 +537,51 @@ void psy2loader_readinstruments(PSY2Loader* self)
 					if (wave->stereo)
 					{
 						uint32_t f;
-						pData = malloc(wltemp * sizeof(short) + 4);// +4 to avoid any attempt at buffer overflow by the code
-						psyfile_read(self->songfile->file, pData, wltemp * sizeof(short));
+						pData = malloc(wltemp * sizeof(int16_t) + 4);// +4 to avoid any attempt at buffer overflow by the code
+						if (!pData) {							
+							return PSY_ERRFILE;
+						}
+						psyfile_read(self->songfile->file, pData, wltemp * sizeof(int16_t));
 						psy_audio_sample_resize(wave, 2);
 						for (f = 0; f < wave->numframes; ++f) {
-							short val = (short)pData[f];
+							int16_t val;
+
+							val = (int16_t)pData[f];
 							wave->channels.samples[1][f] = (float)val;
 						}
 						free(pData);
 						pData = 0;						
 					}
-					psy_audio_samples_insert(&self->songfile->song->samples, wave,
+					psy_audio_samples_insert(&self->song->samples, wave,
 						psy_audio_sampleindex_make(i, 0));
-					{
+					{	
+						psy_audio_LegacyInstrument legacy_instr;
 						psy_audio_Instrument* instrument;
 
 						instrument = psy_audio_instrument_allocinit();
 						psy_audio_instrument_setname(instrument, names[i]);
 						psy_audio_instrument_setindex(instrument, i);
-						psy_audio_instruments_insert(&self->songfile->song->instruments,
+						psy_audio_instruments_insert(&self->song->instruments,
 							instrument, psy_audio_instrumentindex_make(0, i));
-						// read envelopes
-												// ENV_AT
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							1, ENV_AT[i] *1.f / 44100, 1.f);
-						// ENV_DT, ENV_SL
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 100.f);
-						// ENV_RT
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
-
-						// ENV_F_AT			
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							1, ENV_AT[i] * 1.f / 44100, 1.f);
-						// ENV_DT, ENV_SL
-						// note: SL map range(128) differs from volume envelope(100)
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 128.f);
-						// ENV_RT
-						psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
-
-						instrument->filtercutoff = ENV_F_CO[i] / 127.f;
-						instrument->filterres = ENV_F_RQ[i] / 127.f;
-						instrument->filtermodamount = ENV_F_EA[i] / 255.f + 0.5f;
-						
-						instrument->filtertype = (psy_dsp_FilterType)ENV_F_TP[i];
-
-						instrument->randompanning = (_RPAN[i]) ? 1.f : 0.f;
-						instrument->randomcutoff = (_RCUT[i]) ? 1.f : 0.f;
-						instrument->randomresonance = (_RRES[i]) ? 1.f : 0.f;
+						/* convert */
+						psy_audio_legacyinstrument_init(&legacy_instr);
+						legacy_instr.ENV_AT = ENV_AT[i];
+						legacy_instr.ENV_DT = ENV_DT[i];
+						legacy_instr.ENV_SL = ENV_SL[i];
+						legacy_instr.ENV_RT = ENV_RT[i];
+						legacy_instr.ENV_F_AT = ENV_F_AT[i];
+						legacy_instr.ENV_F_DT = ENV_F_DT[i];
+						legacy_instr.ENV_F_SL = ENV_F_SL[i];
+						legacy_instr.ENV_F_RT = ENV_F_RT[i];
+						legacy_instr.ENV_F_CO = ENV_F_CO[i];
+						legacy_instr.ENV_F_RQ = ENV_F_RQ[i];
+						legacy_instr.ENV_F_EA = ENV_F_EA[i];
+						legacy_instr.ENV_F_TP = ENV_F_TP[i];
+						legacy_instr._RPAN = _RPAN[i];
+						legacy_instr._RCUT = _RCUT[i];
+						legacy_instr._RRES = _RRES[i];						
+						psy_audio_convert_legacy_to_instrument(instrument,
+							legacy_instr);						
 					}
 				} else
 				{
@@ -544,9 +597,10 @@ void psy2loader_readinstruments(PSY2Loader* self)
 			}
 		}
 	}
+	return PSY_OK;
 }
 
-void psy2loader_readvsts(PSY2Loader* self)
+int psy2loader_readvsts(PSY2Loader* self)
 {
 	int32_t i;
 
@@ -562,14 +616,15 @@ void psy2loader_readvsts(PSY2Loader* self)
 			psyfile_read(self->songfile->file, &(self->vstL[i].numpars), sizeof(int32_t));
 			self->vstL[i].pars = malloc(sizeof(float) * self->vstL[i].numpars);
 			for (c=0; c< self->vstL[i].numpars; c++) {
-				psyfile_read(self->songfile->file,
+				psyfile_read(self->fp,
 					&(self->vstL[i].pars[c]), sizeof(float));
 			}
 		}
 	}
+	return PSY_OK;
 }
 
-void psy2loader_readmachines(PSY2Loader* self)
+int psy2loader_readmachines(PSY2Loader* self)
 {	
 	int32_t i;
 		
@@ -731,9 +786,10 @@ void psy2loader_readmachines(PSY2Loader* self)
 		int32_t _lines;
 		psyfile_read(self->songfile->file, &_lines, sizeof(_lines));
 	}
+	return PSY_OK;
 }
 
-void psy2loader_addmachines(PSY2Loader* self)
+int psy2loader_addmachines(PSY2Loader* self)
 {
 	int32_t i;
 
@@ -987,6 +1043,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 		// todo samplerate
 		internalmachineconverter_retweak_song(&self->converter, self->songfile->song, 44100.0);
 	}
+	return PSY_OK;
 }
 
 // old file format machine loaders
@@ -1150,7 +1207,7 @@ void psy2loader_plugin_load(PSY2Loader* self, psy_audio_Machine* machine, uintpt
 	psy_audio_legacywires_insert(self->songfile->legacywires, slot, machinewires);	
 
 	psyfile_read(self->songfile->file, &connectionpoint, sizeof(connectionpoint));
-	// numInputs and numOutputs
+	/* numInputs and numOutputs */
 	psyfile_skip(self->songfile->file, 2 * sizeof(int32_t));
 
 	psyfile_read(self->songfile->file, &panning, sizeof(panning));
@@ -1181,11 +1238,12 @@ void psy2loader_plugin_skipload(PSY2Loader* self, psy_audio_Machine* machine, ui
 		if (size)
 		{
 			pFile->Skip(size);
-	}*/
+		}
+	*/
 	machinewires = psy_audio_read_psy2machinewires(self->songfile->file);
 	psy_audio_legacywires_insert(self->songfile->legacywires, slot, machinewires);
 	psyfile_read(self->songfile->file, &connectionpoint, sizeof(connectionpoint));
-	// numInputs and numOutputs
+	/* numInputs and numOutputs */
 	psyfile_skip(self->songfile->file, 2 * sizeof(int32_t));
 
 	psyfile_read(self->songfile->file, &panning, sizeof(panning));
@@ -1210,15 +1268,15 @@ bool vstpreload_load(VstPreload* self, uintptr_t slot, unsigned char* _program, 
 	psy_audio_legacywires_insert(self->songfile->legacywires, slot, machinewires);
 
 	psyfile_read(self->songfile->file, &connectionpoint, sizeof(connectionpoint));
-	// numInputs and numOutputs
+	/* numInputs and numOutputs */
 	psyfile_skip(self->songfile->file, 2 * sizeof(int32_t));
 
 	psyfile_read(self->songfile->file, &panning, sizeof(panning));
 	psyfile_skip(self->songfile->file, 109);
 
 	
-	psyfile_read(self->songfile->file, &old, sizeof old); // old format
-	psyfile_read(self->songfile->file, _instance, sizeof *_instance); // ovst.instance
+	psyfile_read(self->songfile->file, &old, sizeof old); /* old format */
+	psyfile_read(self->songfile->file, _instance, sizeof *_instance); /* ovst.instance */
 	if (old)
 	{
 		char mch;
@@ -1234,19 +1292,21 @@ bool vstpreload_load(VstPreload* self, uintptr_t slot, unsigned char* _program, 
 psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 {
 	psy_audio_MachineWires* rv;
-	uintptr_t c; // current legacywire (connection) id
+	uintptr_t c; /* current legacywire (connection) id */
 	
 	assert(file);
 
-	// Create machinewires with PSY2_MAX_CONNECTIONS
+	/* Create machinewires with PSY2_MAX_CONNECTIONS */
 	rv = psy_audio_machinewires_allocinit();
 	assert(rv);
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		psy_audio_machinewires_insert(rv, c,
 			psy_audio_legacywire_allocinit());
 	}
-	// Read connections
-	// Incoming connections Machine number
+	/*
+	** Read connections
+	** Incoming connections Machine number
+	*/
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		int32_t input;
 		psy_audio_LegacyWire* currwire;
@@ -1257,7 +1317,7 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 			currwire->_inputMachine = input;
 		}
 	}
-	// Outgoing connections Machine number
+	/* Outgoing connections Machine number */
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		int32_t output;
 		psy_audio_LegacyWire* currwire;
@@ -1268,7 +1328,7 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 			currwire->_outputMachine = output;
 		}
 	}
-	// Incoming connections Machine vol
+	/* Incoming connections Machine vol */
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		float inputconvol;
 		psy_audio_LegacyWire* currwire;
@@ -1279,7 +1339,7 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 			currwire->_inputConVol = inputconvol;
 		}
 	}
-	// Outgoing connections activated
+	/* Outgoing connections activated */
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		uint8_t connection;
 		psy_audio_LegacyWire* currwire;
@@ -1290,7 +1350,7 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 			currwire->_connection = connection;
 		}
 	}
-	// Incoming connections activated
+	/* Incoming connections activated */
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		uint8_t inputcon;
 		psy_audio_LegacyWire* currwire;
@@ -1302,4 +1362,19 @@ psy_audio_MachineWires* psy_audio_read_psy2machinewires(PsyFile* file)
 		}
 	}
 	return rv;
+}
+
+int psy2loader_postload(PSY2Loader* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_audio_machines_begin(&self->song->machines);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_machine_postload(
+			(psy_audio_Machine*)psy_tableiterator_value(&it),
+			self->songfile,
+			psy_tableiterator_key(&it));
+	}
+	return PSY_OK;
 }

@@ -84,6 +84,9 @@ void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
 {	
 	self->instrument = instrument;
 	if (self->instrument) {
+		double dt;
+
+		dt = psy_dsp_envelope_decaytime(&self->instrument->volumeenvelope);
 		adsrsliders_setenvelope(&self->adsrsliders,			
 			&self->instrument->volumeenvelope);
 		envelopeview_setenvelope(&self->envelopeview,

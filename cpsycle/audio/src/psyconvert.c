@@ -1,14 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "psyconvert.h"
+/* local */
 #include "constants.h"
-// std
+/* std */
 #include <string.h>
 
-// Pattern
+/* Pattern */
+
 psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,
 	int* rv_lines)
 {
@@ -19,27 +24,27 @@ psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* patt
 	uint32_t track;
 	psy_audio_PatternNode* node;
 	
-	// alloc pattern data
+	/* alloc pattern data */
 	lines = (int32_t)(pattern->length * lpb + 0.5);
 	*rv_lines = lines;
 	patsize = MAX_TRACKS * lines * EVENT_SIZE;
-	// clear source
+	/* clear source */
 	rv = malloc(patsize);
-	// init pattern data
+	/* init pattern data */
 	for (row = 0; row < lines; ++row) {
 		for (track = 0; track < MAX_TRACKS; ++track) {
 			psy_audio_LegacyPatternEntry* data;
 
 			data = psy_audio_ptrackline(rv, track, row);			
-			// empty entry					
-			data->_note = 255; // 255 = empty note
-			data->_inst = 255; // 255 = empty inst
-			data->_mach = 255; // 255 = empry mach
+			/* empty entry */
+			data->_note = 255; /* 255 = empty note */
+			data->_inst = 255; /* 255 = empty inst */
+			data->_mach = 255; /* 255 = empry mach */
 			data->_cmd = 0;
 			data->_parameter = 0;
 		}
 	}
-	// write pattern data
+	/* write pattern data */
 	for (node = pattern->events; node != 0; node = node->next) {
 		psy_audio_LegacyPatternEntry* data;
 		psy_audio_PatternEntry* entry;
@@ -68,20 +73,25 @@ void psy_audio_convert_legacypattern(
 {
 	psy_audio_PatternNode* node;
 	uint32_t row;	
+	unsigned char* ptrack;
+	psy_dsp_big_beat_t bpl;
+
+	assert(dst);
+	assert(src);
 
 	node = NULL;
+	ptrack = src;
+	bpl = 1.0 / lpb;
 	for (row = 0; row < numrows; ++row) {
 		uint32_t track;
-		psy_dsp_big_beat_t offset;
-		psy_dsp_big_beat_t bpl;
-
-		bpl = 1.0 / lpb;
+		psy_dsp_big_beat_t offset;		
+		
 		offset = bpl * row;
-		for (track = 0; track < MAX_TRACKS; ++track) {
+		for (track = 0; track < numtracks; ++track) {
 			psy_audio_LegacyPatternEntry* psy2ev;
 			bool empty;
 
-			psy2ev = psy_audio_ptrackline(src, track, row);
+			psy2ev = (psy_audio_LegacyPatternEntry*)ptrack;
 			empty = psy2ev->_note == PSY2_NOTECOMMANDS_EMPTY &&
 				psy2ev->_inst == 255 &&
 				psy2ev->_mach == 255 &&
@@ -99,8 +109,10 @@ void psy_audio_convert_legacypattern(
 				node = psy_audio_pattern_insert(dst, node, track, offset,
 					&event);
 			}
-		}
+			ptrack += EVENT_SIZE;
+		}		
 	}
+	dst->length = numrows * bpl;
 }
 
 const psy_audio_LegacyPatternEntry* psy_audio_ptrackline_const(const
@@ -115,7 +127,38 @@ psy_audio_LegacyPatternEntry* psy_audio_ptrackline(
 	return (psy_audio_LegacyPatternEntry*)(pattern + (track * EVENT_SIZE) + (line * MULTIPLY));
 }
 
-// Instrument
+/* Instrument */
+void psy_audio_legacyinstrument_init(psy_audio_LegacyInstrument* self)
+{
+	self->sampler_to_use = -1;
+	self->_LOCKINST = FALSE;
+
+	/* Reset envelope */
+	self->ENV_AT = 1;
+	self->ENV_DT = 1;
+	self->ENV_SL = 100;
+	self->ENV_RT = 220;
+
+	self->ENV_F_AT = 1;
+	self->ENV_F_DT = 16500;
+	self->ENV_F_SL = 64;
+	self->ENV_F_RT = 16500;
+
+	self->ENV_F_CO = 91;
+	self->ENV_F_RQ = 11;
+	self->ENV_F_EA = 0;
+	self->ENV_F_TP = F_NONE;
+
+	self->_loop = FALSE;
+	self->_lines = 16;
+
+	self->_NNA = 0; /* NNA set to Note Cut [Fast Release] */
+
+	self->_RPAN = FALSE;
+	self->_RCUT = FALSE;
+	self->_RRES = FALSE;	
+}
+
 psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument* instrument)
 {
 	psy_audio_LegacyInstrument rv;	
@@ -125,7 +168,7 @@ psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument
 	rv._loop = instrument->loop != FALSE;			
 	rv._lines = (int32_t)instrument->lines;			
 	rv._NNA = (uint8_t)instrument->nna;
-	// volume envelope
+	/* volume envelope */
 	rv.ENV_AT = (int32_t)(psy_dsp_envelope_attacktime(
 		&instrument->volumeenvelope) * 44100 + 0.5f);	
 	rv.ENV_DT = (int32_t)((psy_dsp_envelope_decaytime(
@@ -134,7 +177,7 @@ psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument
 		&instrument->volumeenvelope) * 100);
 	rv.ENV_RT = (int32_t)((psy_dsp_envelope_releasetime(
 		&instrument->volumeenvelope)) * 44100 + 0.5f);
-	// filter envelope
+	/* filter envelope */
 	rv.ENV_F_AT = (int32_t)(psy_dsp_envelope_attacktime(
 		&instrument->filterenvelope) * 44100 + 0.5f);
 	rv.ENV_F_DT = (int32_t)(psy_dsp_envelope_decaytime(
@@ -153,7 +196,83 @@ psy_audio_LegacyInstrument psy_audio_legacyinstrument(const psy_audio_Instrument
 	return rv;
 }
 
-// Instrument NoteMap
+void psy_audio_convert_legacy_to_instrument(
+	struct psy_audio_Instrument* instrument,
+	psy_audio_LegacyInstrument src)
+{		
+	psy_audio_NewNoteAction nna;
+	int32_t ENV_AT;
+	int32_t ENV_DT;
+	int32_t ENV_RT;
+	int32_t ENV_SL;
+	int32_t ENV_F_AT;
+	int32_t ENV_F_DT;
+	int32_t ENV_F_RT;
+	int32_t ENV_F_SL;	
+	
+	instrument->loop = src._loop;		
+	instrument->lines = src._lines;	
+	/*
+	** \verbatim
+	** NNA values overview:
+	**
+	** 0 = Note Cut      [Fast Release 'Default']
+	** 1 = Note Release  [Release Stage]
+	** 2 = Note Continue [No NNA]
+	** \endverbatim
+	*/
+	switch (src._NNA) {
+	case 0:
+		nna = psy_audio_NNA_STOP;
+		break;
+	case 1:
+		nna = psy_audio_NNA_NOTEOFF;
+		break;
+	case 2:
+		nna = psy_audio_NNA_CONTINUE;
+		break;
+	default:
+		nna = psy_audio_NNA_STOP;
+		break;
+	}
+	psy_audio_instrument_setnna(instrument, nna);
+	/*	
+	** ENV_VOL
+	*/
+	/* Truncate to 220 samples boundaries, and ensure it is not zero. */	
+	ENV_AT = (src.ENV_AT / 220) * 220; if (ENV_AT <= 0) ENV_AT = 1;
+	ENV_DT = (src.ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
+	ENV_RT = src.ENV_RT; if (ENV_RT <= 0) ENV_RT = 1;
+	ENV_SL = src.ENV_SL;
+	if (ENV_RT == 16) ENV_RT = 220;
+	psy_dsp_envelope_setadsr(&instrument->volumeenvelope,				
+		ENV_AT * 1.f / 44100,
+		ENV_DT * 1.f / 44100,
+		ENV_SL / 100.f,
+		ENV_RT * 1.f / 44100);
+	/*
+	** ENV_FILTER
+	*/	
+	ENV_F_AT = (src.ENV_F_AT / 220) * 220; if (ENV_F_AT <= 0) ENV_F_AT = 1;
+	ENV_F_DT = (src.ENV_F_DT / 220) * 220; if (ENV_F_DT <= 0) ENV_F_DT = 1;
+	ENV_F_RT = (src.ENV_F_RT / 220) * 220; if (ENV_F_RT <= 0) ENV_F_RT = 1;
+	ENV_F_SL = src.ENV_F_SL;
+	psy_dsp_envelope_setadsr(&instrument->filterenvelope,
+		ENV_F_AT * 1.f / 44100,
+		ENV_F_DT * 1.f / 44100,
+		/* note: SL map range(128) differs from volume envelope(100) */
+		ENV_F_SL / 128.f,
+		ENV_F_RT * 1.f / 44100);	
+	instrument->filtercutoff = src.ENV_F_CO / 127.f;
+	instrument->filterres = src.ENV_F_RQ / 127.f;
+	instrument->filtermodamount = src.ENV_F_EA / 128.f; /* -128 .. 128 to [-1 .. 1] */
+	instrument->filtertype = (psy_dsp_FilterType)src.ENV_F_TP;
+	instrument->randompanning = (src._RPAN) ? 1.f : 0.f;
+	instrument->randomcutoff = (src._RCUT) ? 1.f : 0.f;
+	instrument->randomresonance = (src._RRES) ? 1.f : 0.f;
+}
+
+/* Instrument NoteMap */
 LegacyNoteMap psy_audio_legacynotemap(psy_List* entries)
 {
 	LegacyNoteMap notemap;

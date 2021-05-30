@@ -1,16 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
-#include "filter.h"
 
+#include "filter.h"
+/* std */
 #include <math.h>
 
 FilterCoeff filtercoeff;
 int filtercoeff_inititalized = 0;
 
-//From Modplug tracker
+/* From Modplug tracker */
 const double ITResonanceTable[128] =
 {
 	1.0000000000000000, 0.9786446094512940, 0.9577452540397644, 0.9372922182083130,
@@ -53,7 +56,7 @@ void filtercoeff_init(FilterCoeff* self)
 		self->samplerate = -1;
 		filtercoeff_inititalized = 1;
 	}
-	//table is initialized with Filter::Init()
+	/* table is initialized with Filter::Init() */
 }
 
 void filtercoeff_dispose(FilterCoeff* self)
@@ -73,7 +76,7 @@ void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate)
 			int tdest = t;
 			int f;
 
-			if (t == F_NONE) continue;//Skip filter F_NONE.
+			if (t == F_NONE) continue; /* Skip filter F_NONE. */
 			else if (t > F_NONE) tdest--;
 
 			for (f = 0; f < 128; f++)
@@ -242,7 +245,7 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 		break;
 	case F_ITLOWPASS:
 	{
-		//From modplug
+		/* From modplug */
 		double d, e;
 		if (r > 0 || freq < 127)
 		{
@@ -251,8 +254,8 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 			e = radio * radio;
 		} else { e = 0; d = 0; }
 		b0 = 1.0f;
-		b1 = 0.0f; //coeff[1] reused in ITFilter as Lowpass/highpass coeff
-		b2 = 0.0f; //coeff[2] not used in ITFilter
+		b1 = 0.0f; /* coeff[1] reused in ITFilter as Lowpass/highpass coeff */
+		b2 = 0.0f; /* coeff[2] not used in ITFilter */
 		a0 = (float)(1.0f + d + e);
 		a1 = (float)(-(d + e + e));
 		a2 = (float)e;
@@ -260,7 +263,7 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 	}
 	case F_MPTLOWPASSE:
 	{
-		//From modplug
+		/* From modplug */
 		double d, e;
 		if (r > 0 || freq < 127)
 		{
@@ -272,8 +275,8 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 			e = 1.0 / (fc * fc);
 		} else { e = 0; d = 0; }
 		b0 = 1.0f;
-		b1 = 0.0f; //coeff[1] reused in ITFilter as Lowpass/highpass coeff
-		b2 = 0.0f; //coeff[2] not used in ITFilter
+		b1 = 0.0f; /* coeff[1] reused in ITFilter as Lowpass/highpass coeff */
+		b2 = 0.0f; /* coeff[2] not used in ITFilter */
 		a0 = (float)(1.0f + d + e);
 		a1 = (float)(-(d + e + e));
 		a2 = (float)e;
@@ -281,7 +284,7 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 	}
 	case F_MPTHIGHPASSE:
 	{
-		//From modplug
+		/* From modplug */
 		double d, e;
 		if (r > 0 || freq < 127)
 		{
@@ -292,9 +295,9 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 			d = (2.0 * dmpfac - d) / fc;
 			e = pow(1.0 / fc, 2.0);
 		} else { e = 0; d = 0; }
-		b0 = (float)(d + e); //  coeff[0] = 1.0 - (1.0/a0)
-		b1 = (float)(1.0f + d + e); //coeff[1] reused in ITFilter as Lowpass/highpass coeff
-		b2 = 0.0f; //coeff[2] not used in ITFilter
+		b0 = (float)(d + e); /* coeff[0] = 1.0 - (1.0/a0) */
+		b1 = (float)(1.0f + d + e); /* coeff[1] reused in ITFilter as Lowpass/highpass coeff */
+		b2 = 0.0f; /* coeff[2] not used in ITFilter */
 		a0 = (float)(1.0f + d + e);
 		a1 = (float)(-(d + e + e));
 		a2 = (float)(e);
@@ -316,7 +319,7 @@ void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq
 }
 
 
-// Filter
+/* Filter */
 
 float filter_work(Filter*, float x);
 void filter_workstereo(Filter*, float* l, float* r);
@@ -349,7 +352,7 @@ void filter_init_samplerate(Filter* self, psy_dsp_big_hz_t samplerate)
 	filter_reset(self);
 }
 
-void filter_reset(Filter* self) //Same as init, without samplerate
+void filter_reset(Filter* self) /* Same as init, without samplerate */
 {
 	self->cutoff = 127;
 	self->_q = 0;
@@ -407,9 +410,9 @@ void filter_workstereo(Filter* self, float* l, float* r)
 	*r = b;
 }
 
-/*Code from Modplug */
-//This means clip to twice the range (Psycle works in float, but with the -32768 to 32768 range)
-#define ClipFilter(x) x //math::clip<float>(-65535.f, x, 65535.f)
+/* Code from Modplug */
+/* This means clip to twice the range (Psycle works in float, but with the -32768 to 32768 range) */
+#define ClipFilter(x) x /* math::clip<float>(-65535.f, x, 65535.f) */
 
 static float itfilter_work(ITFilter* self, float sample);
 static void itfilter_workstereo(ITFilter* self, float* left, float* right);
@@ -482,5 +485,5 @@ const char* filter_name(psy_dsp_FilterType type)
 
 uintptr_t filter_numfilters(void)
 {
-	return (uintptr_t) F_NUMFILTERS;
+	return (uintptr_t)F_NUMFILTERS;
 }

@@ -532,8 +532,8 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 	{
 		uint32_t sizez77 = 0;
 		byte* psource;
-		byte* pdest;
-		int32_t y;
+		psy_audio_LegacyPattern pdest;
+		//int32_t y;
 		size_t destsize;
 		/* num lines */
 		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
@@ -558,6 +558,8 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 		if (self->fp->currchunk.version > 1) {
 			psyfile_skip(self->fp, sizez77);
 		} else {
+			psy_audio_Pattern* pattern;
+
 			psource = (byte*)malloc(sizez77);
 			if (status = psyfile_read(self->fp, psource, sizez77)) {
 				free(psource);
@@ -565,55 +567,17 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 			}
 			beerz77decomp2(psource, &pdest, &destsize);
 			free(psource);
+			pattern = psy_audio_pattern_allocinit();
 			/* songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0; */
-			{
-				psy_audio_Pattern* pattern;
-				psy_audio_PatternNode* node = 0;
-
-				psource = pdest;
-				pattern = psy_audio_pattern_allocinit();
-				psy_audio_patterns_insert(&self->song->patterns, index, pattern);
-				psy_audio_pattern_setname(pattern, patternname[index]);
-				for (y = 0; y < patternlines[index]; ++y) {
-					unsigned char* ptrack = psource;
-					uint32_t track;
-					psy_dsp_big_beat_t offset;
-
-					offset = bpl * y;
-					for (track = 0; track < psy_audio_song_numsongtracks(self->song);
-						++track) {
-						psy_audio_PatternEvent event;
-						/*
-						** Psy3 PatternEntry format
-						** type              offset
-						** uint8_t note;          0
-						** uint8_t inst;          1
-						** uint8_t mach;          2
-						** uint8_t cmd;           3
-						** uint8_t parameter;     4												
-						*/
-						psy_audio_patternevent_clear(&event);
-						event.note = ptrack[0];
-						event.inst = (ptrack[1] == 0xFF)
-							? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
-							: ptrack[1];
-						event.mach = (ptrack[2] == 0xFF)
-							? event.mach = psy_audio_NOTECOMMANDS_psy_audio_EMPTY
-							: ptrack[2];
-						event.cmd = ptrack[3];
-						event.parameter = ptrack[4];
-						if (!psy_audio_patternevent_empty(&event)) {
-							node = psy_audio_pattern_insert(pattern, node, track, offset,
-								&event);
-						}
-						ptrack += EVENT_SIZE;
-					}
-					psource += self->song->patterns.songtracks * EVENT_SIZE;
-				}
-				pattern->length = patternlines[index] * bpl;
-				free(pdest);
-				pdest = 0;
-			}
+			psy_audio_convert_legacypattern(
+				pattern, pdest,
+				(uint32_t)psy_audio_song_numsongtracks(self->song),
+				patternlines[index],
+				lpb);
+			free(pdest);
+			pdest = 0;
+			psy_audio_patterns_insert(&self->song->patterns, index, pattern);
+			psy_audio_pattern_setname(pattern, patternname[index]);						
 			/* fix for a bug existing in the song saver in the 1.7.x series */
 			if ((self->fp->currchunk.version == 0x0000) && psyfile_getpos(self->fp) ==
 				self->fp->currchunk.begins + self->fp->currchunk.size + 4) {
@@ -742,100 +706,34 @@ int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self)
 
 int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 {	
-	/* 
-	** \verbatim
-	** NNA values overview:
-	** 
-	**  0 = Note Cut      [Fast Release 'Default']
-	**  1 = Note Release  [Release Stage]
-	**  2 = Note Continue [No NNA]
-	** \endverbatim
-	*/
-	unsigned char _NNA;
-
-	/* psy_audio_XMSampler machine index for lockinst. */
-	int32_t sampler_to_use = -1; 
-	/*
-	** Force this instrument number to change the selected machine to use a
-	** specific sampler when editing (i.e. when using the pc or midi keyboards,
-	** not the notes already existing in a pattern)
-	*/
-	unsigned char _LOCKINST;
-
-	/* 
-	** \name Amplitude Envelope overview:
-	** \{
-	**  Attack Time [in psy_audio_Samples at 44.1Khz, independently of the real
-	**               samplerate]
-	*/
-	int32_t ENV_AT;	
-	/* 
-	** Decay Time [in psy_audio_Samples at 44.1Khz, independently of the real
-	**             samplerate]
-	*/
-	int32_t ENV_DT;	
-	/* Sustain Level [in %] */
-	int32_t ENV_SL;	
-	/* Release Time [in psy_audio_Samples at 44.1Khz, independently of the real samplerate] */
-	int32_t ENV_RT;	
-	/* \} */
-	
-	/* \name psy_dsp_Filter  */
-	/* \{
-	/* Attack Time [in psy_audio_Samples at 44.1Khz] */
-	int32_t ENV_F_AT;	
-	/* Decay Time [in psy_audio_Samples at 44.1Khz] */
-	int32_t ENV_F_DT;	
-	/* Sustain Level [0..128] */
-	int32_t ENV_F_SL;	
-	/* Release Time [in psy_audio_Samples at 44.1Khz] */
-	int32_t ENV_F_RT;	
-
-	/* Cutoff Frequency [0-127] */
-	int32_t ENV_F_CO;	
-	/* Resonance [0-127] */
-	int32_t ENV_F_RQ;	
-	/* EnvAmount [-128,128] */
-	int32_t ENV_F_EA;	
-	/* psy_dsp_Filter Type. See psycle::helpers::dsp::psy_dsp_FilterType. [0..6] */
-	int32_t ENV_F_TP;	
-	/* \} */
-	unsigned char _RPAN;
-	unsigned char _RCUT;
-	unsigned char _RRES;
-	char instrum_name[32];
-
-	int32_t val;
-	int32_t pan=128;
-	int32_t numwaves;
-	int32_t i;
-	int32_t index;
 	int status;
+	int32_t index;	
 		
 	if (status = psyfile_read(self->fp, &index, sizeof index)) {
 		return PSY_OK;
 	}
 	if(index < MAX_INSTRUMENTS)
 	{	
-		psy_audio_Instrument* instrument;			
-		/* Loop stuff */
-		unsigned char loop;
-		int32_t lines;
+		psy_audio_LegacyInstrument legacy_instr;
+		psy_audio_Instrument* instrument;
+		char instrum_name[32];
 		psy_audio_NewNoteAction nna;
-		
-		instrument = psy_audio_instrument_allocinit();
-		if (status = psyfile_read(self->fp, &loop, sizeof(loop))) {
-			psy_audio_instrument_deallocate(instrument);
+		int32_t val;
+		int32_t pan;
+		int32_t numwaves;
+		int32_t i;
+						
+		psy_audio_legacyinstrument_init(&legacy_instr);
+		if (status = psyfile_read(self->fp, &legacy_instr._loop,
+				sizeof(legacy_instr._loop))) {
 			return status;
-		}
-		instrument->loop = loop;
-		if (status = psyfile_read(self->fp, &lines, sizeof(lines))) {
-			psy_audio_instrument_deallocate(instrument);
+		}		
+		if (status = psyfile_read(self->fp, &legacy_instr._lines,
+				sizeof(legacy_instr._lines))) {
 			return status;
-		}
-		instrument->lines = lines;
-		if (status = psyfile_read(self->fp, &_NNA, sizeof(_NNA))) {
-			psy_audio_instrument_deallocate(instrument);
+		}		
+		if (status = psyfile_read(self->fp, &legacy_instr._NNA,
+				sizeof(legacy_instr._NNA))) {
 			return status;
 		}
 		/* 
@@ -847,7 +745,7 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		** 2 = Note Continue [No NNA]
 		** \endverbatim
 		*/
-		switch (_NNA) {
+		switch (legacy_instr._NNA) {
 			case 0:
 				nna = psy_audio_NNA_STOP;
 			break;
@@ -860,123 +758,78 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			default:
 				nna = psy_audio_NNA_STOP;
 			break;
-		}			
-		psy_audio_instrument_setnna(instrument, nna);
-
+		}
 		/*
 		** read envelopes
 		** ENV_VOL
 		*/
-		if (status = psyfile_read(self->fp, &ENV_AT, sizeof(ENV_AT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_AT,
+				sizeof(legacy_instr.ENV_AT))) {			
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_DT, sizeof(ENV_DT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_DT,
+				sizeof(legacy_instr.ENV_DT))) {
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_SL, sizeof(ENV_SL))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_SL,
+				sizeof(legacy_instr.ENV_SL))) {
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_RT, sizeof(ENV_RT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_RT,
+				sizeof(legacy_instr.ENV_RT))) {			
 			return status;
-		}
-		/* Truncate to 220 samples boundaries, and ensure it is not zero. */
-		ENV_AT = (ENV_AT / 220) * 220; if (ENV_AT <= 0) ENV_AT = 1;
-		ENV_DT = (ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
-		if (ENV_RT == 16) ENV_RT = 220;
-		/* ENV_AT */
-		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-			1, ENV_AT * 1.f / 44100, 1.f);
-		/* ENV_DT, ENV_SL */
-		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-			2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 100.f);			
-		/* ENV_RT */
-		psy_dsp_envelope_settimeandvalue(&instrument->volumeenvelope,
-			3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);						
+		}		
 		/* ENV_F */
-		if (status = psyfile_read(self->fp, &ENV_F_AT, sizeof(ENV_F_AT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_AT,
+				sizeof(legacy_instr.ENV_F_AT))) {
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_F_DT, sizeof(ENV_F_DT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_DT,
+				sizeof(legacy_instr.ENV_F_DT))) {
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_F_SL, sizeof(ENV_F_SL))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_SL,
+				sizeof(legacy_instr.ENV_F_SL))) {			
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_F_RT, sizeof(ENV_F_RT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_RT,
+				sizeof(legacy_instr.ENV_F_RT))) {			
+			return status;
+		}			
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_CO,
+				sizeof(legacy_instr.ENV_F_CO))) {			
 			return status;
 		}
-		ENV_F_AT = (ENV_F_AT / 220) * 220; if (ENV_F_AT <= 0) ENV_F_AT = 1;
-		ENV_F_DT = (ENV_F_DT / 220) * 220; if (ENV_F_DT <= 0) ENV_F_DT = 1;
-		ENV_F_RT = (ENV_F_RT / 220) * 220; if (ENV_F_RT <= 0) ENV_F_RT = 1;
-		/* ENV_F_AT */
-		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
-			1, ENV_F_AT * 1.f / 44100, 1.f);
-		/* ENV_DT, ENV_SL */
-		/* note: SL map range(128) differs from volume envelope(100) */
-		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
-			2, (ENV_F_AT + ENV_F_DT) * 1.f / 44100, ENV_F_SL / 128.f);
-		/* ENV_RT */
-		psy_dsp_envelope_settimeandvalue(&instrument->filterenvelope,
-			3, (ENV_F_AT + ENV_F_DT + ENV_F_RT) * 1.f / 44100, 0.f);
-			
-		if (status = psyfile_read(self->fp, &ENV_F_CO, sizeof(ENV_F_CO))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_RQ,
+				sizeof(legacy_instr.ENV_F_RQ))) {
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_F_RQ, sizeof(ENV_F_RQ))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr.ENV_F_EA,
+				sizeof(legacy_instr.ENV_F_EA))) {
+			return status;
+		}			
+		if (status = psyfile_read(self->fp, &val, sizeof(val))) {			
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &ENV_F_EA, sizeof(ENV_F_EA))) {
-			psy_audio_instrument_deallocate(instrument);
-			return status;
-		}
-
-		instrument->filtercutoff = ENV_F_CO / 127.f;
-		instrument->filterres = ENV_F_RQ / 127.f;
-		instrument->filtermodamount = ENV_F_EA / 128.f; /* -128 .. 128 to [-1 .. 1] */
-			
-		if (status = psyfile_read(self->fp, &val, sizeof(val))) {
-			psy_audio_instrument_deallocate(instrument);
-			return status;
-		}
-		ENV_F_TP = val;
-		instrument->filtertype = (psy_dsp_FilterType) val;
-
+		legacy_instr.ENV_F_TP = val;
 		if (status = psyfile_read(self->fp, &pan, sizeof(pan))) {
-			psy_audio_instrument_deallocate(instrument);
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &_RPAN, sizeof(_RPAN))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr._RPAN,
+				sizeof(legacy_instr._RPAN))) {			
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &_RCUT, sizeof(_RCUT))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr._RCUT,
+				sizeof(legacy_instr._RCUT))) {			
 			return status;
 		}
-		if (status = psyfile_read(self->fp, &_RRES, sizeof(_RRES))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &legacy_instr._RRES,
+				sizeof(legacy_instr._RRES))) {			
 			return status;
-		}
-
-		instrument->randompanning = (_RPAN) ? 1.f : 0.f;
-		instrument->randomcutoff = (_RCUT) ? 1.f : 0.f;
-		instrument->randomresonance = (_RRES) ? 1.f : 0.f;		
-			
+		}							
 		psyfile_readstring(self->fp, instrum_name,sizeof(instrum_name));
-
 		/* now we have to read waves */
-		if (status = psyfile_read(self->fp, &numwaves, sizeof(numwaves))) {
-			psy_audio_instrument_deallocate(instrument);
+		if (status = psyfile_read(self->fp, &numwaves, sizeof(numwaves))) {			
 			return status;
 		}
 		for (i = 0; i < numwaves; i++)
@@ -986,28 +839,30 @@ int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 				return status;
 			}
 		}
-
 		if ((self->fp->currchunk.version & 0xFF) >= 1)
 		{ /* revision 1 or greater */
-			if (status = psyfile_read(self->fp, &sampler_to_use, sizeof(sampler_to_use))) {
-				psy_audio_instrument_deallocate(instrument);
+			if (status = psyfile_read(self->fp, &legacy_instr.sampler_to_use,
+					sizeof(legacy_instr.sampler_to_use))) {
 				return status;
 			}
-			if (status = psyfile_read(self->fp, &_LOCKINST, sizeof(_LOCKINST))) {
-				psy_audio_instrument_deallocate(instrument);
+			if (status = psyfile_read(self->fp, &legacy_instr._LOCKINST,
+					sizeof(legacy_instr._LOCKINST))) {
 				return status;
 			}
 		}
-
 		/* Ensure validity of values read */
-		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) {
-			_LOCKINST=FALSE;
-			sampler_to_use = -1;
-		}				
+		if (legacy_instr.sampler_to_use < 0 ||
+				legacy_instr.sampler_to_use >= MAX_BUSES) {
+			legacy_instr._LOCKINST=FALSE;
+			legacy_instr.sampler_to_use = -1;
+		}
+		instrument = psy_audio_instrument_allocinit();
 		psy_audio_instrument_setname(instrument, instrum_name);
 		psy_audio_instrument_setindex(instrument, index);
 		psy_audio_instruments_insert(&self->song->instruments, instrument,
 			psy_audio_instrumentindex_make(0, index));
+		psy_audio_convert_legacy_to_instrument(instrument,
+			legacy_instr);
 	}
 	return PSY_OK;
 }

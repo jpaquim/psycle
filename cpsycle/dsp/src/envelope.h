@@ -301,6 +301,12 @@ INLINE void psy_dsp_envelope_setreleasetime(
 		time);
 }
 
+void psy_dsp_envelope_setadsr(psy_dsp_Envelope*,
+	psy_dsp_seconds_t attack,
+	psy_dsp_seconds_t decay,
+	psy_dsp_amp_t sustain,
+	psy_dsp_seconds_t release);
+
 // psy_dsp_EnvelopeController
 // used by lua plugins and sampler ps1
 // (sampulse has an own controller: xmenvelope_controller)
