@@ -211,26 +211,26 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 	int x11_fd;
 	struct timeval tv;
 	fd_set in_fds;
-	
-	x11_fd = ConnectionNumber(self->dpy);			
+
+	x11_fd = ConnectionNumber(self->dpy);
     self->running = TRUE;
     tv.tv_sec = 0;
-	tv.tv_usec = 10000;	
-	FD_ZERO(&in_fds);			
+	tv.tv_usec = 10000;
+	FD_ZERO(&in_fds);
 	FD_SET(x11_fd, &in_fds);
-	while (self->running) {		
+	while (self->running) {
 		if (XPending(self->dpy)) {
 			XNextEvent(self->dpy, &event);
 			psy_ui_x11app_handle_event(self, &event);
-		} else {									
+		} else {
 			if (select(x11_fd + 1, &in_fds, 0, 0, &tv) == 0) {
 				timertick(self);
 			}
-			if (tv.tv_usec == 0) {				
+			if (tv.tv_usec == 0) {
 				tv.tv_sec = 0;
 				tv.tv_usec = 10000;
 			}
-		}		
+		}
     }
     return 0;
 }
@@ -302,7 +302,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 	case Expose: {
 		const psy_ui_Border* border;
 		psy_ui_RealRectangle r;
-		
+
 		border = psy_ui_component_border(imp->component);
 		r = psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(
@@ -314,12 +314,12 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		if (!imp->exposeareavalid) {
 			imp->exposearea = r;
 			imp->exposeareavalid = TRUE;
-		} else {			
+		} else {
 			psy_ui_realrectangle_union(&imp->exposearea, &r);
 		}
-		if (event->xexpose.count > 0) {		
+		if (event->xexpose.count > 0) {
 			return 0;
-		}		
+		}
 		if (imp->component->vtable->ondraw ||
 				imp->component->signal_draw.slots ||
 				imp->component->backgroundmode != psy_ui_NOBACKGROUND ||
@@ -327,11 +327,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_x11_GraphicsImp* gx11;
 			XRectangle rectangle;
 			psy_ui_RealMargin spacing;
-			
+
 			if (!psy_ui_component_visible(imp->component)) {
 				return 0;
-			}			
-													
+			}
+
 			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 			/* reset scroll origin */
 			gx11->org.x = 0;
@@ -354,9 +354,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			XDestroyRegion(gx11->region);
 			gx11->region = XCreateRegion();
 			/* draw */
-			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);			
+			imp->imp.vtable->dev_draw(&imp->imp, &imp->g);
 		}
-		if (self->dbe) {			
+		if (self->dbe) {
 			int w;
 			int h;
 
@@ -364,12 +364,12 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			h  = imp->exposearea.bottom - imp->exposearea.top;
 			if (w != 0 && h != 0) {
 				psy_ui_x11_GraphicsImp* gx11;
-				
-				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;				
+
+				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
 				XCopyArea(self->dpy, imp->d_backBuf,
 					imp->hwnd, gx11->gc,
 					imp->exposearea.left, imp->exposearea.top,
-					w, h,					
+					w, h,
 					imp->exposearea.left, imp->exposearea.top);
 			}
 		}
@@ -426,7 +426,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			printf("close request\n");
 			uintptr_t hwnd;
             bool close;
+            bool ismain;
 
+			ismain = (imp->component == psy_ui_app()->main);
 			close = imp->component->vtable->onclose(imp->component);
 			if (imp->component->signal_close.slots) {
 				psy_signal_emit(&imp->component->signal_close,
@@ -438,16 +440,23 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			hwnd = event->xclient.window;
 			XDestroyWindow(self->dpy, event->xclient.window);
 			while (TRUE) {
-				XNextEvent(self->dpy, event);
-				if (event->type ==  DestroyNotify) {
-					psy_ui_x11app_destroy_window(self, event->xany.window);
-					if (hwnd == event->xany.window) {
-						printf("cleaned up\n");
-						break;
-					}
-				}
+                if (XPending(x11app->dpy)) {
+                    XNextEvent(self->dpy, event);
+                    if (event->type ==  DestroyNotify) {
+                        psy_ui_x11app_destroy_window(self, event->xany.window);
+                        if (hwnd == event->xany.window) {
+                            printf("cleaned up\n");
+                            break;
+                        }
+                    }
+                } else {
+                    break;
+                }
 			}
-			self->running = FALSE;
+			printf("dodestroy\n");
+			if (ismain) {
+				self->running = FALSE;
+			}
 		}
         break;
     case KeyPress: {
@@ -461,7 +470,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		} else if (ev.keycode == psy_ui_KEY_MENU) {
 			self->altstate = TRUE;
 		}
-		update_keyevent_mods(self, &ev);		
+		update_keyevent_mods(self, &ev);
 		imp->component->vtable->onkeydown(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keydown, imp->component,
 			1, &ev);
@@ -485,7 +494,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			self->controlstate = FALSE;
 		} else if (ev.keycode == psy_ui_KEY_MENU) {
 			self->altstate = FALSE;
-		}				
+		}
 		imp->component->vtable->onkeyup(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keyup, imp->component,
 			1, &ev);
@@ -501,7 +510,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		return 0;
 		break; }
     case ButtonPress: {
-		psy_ui_MouseEvent ev;		
+		psy_ui_MouseEvent ev;
 
 		if (self->dograb) {
 			psy_ui_x11_ComponentImp* grabimp;
@@ -561,7 +570,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		}
 		return 0;
 		break; }
-	case ButtonRelease: {		
+	case ButtonRelease: {
 		handle_mouseevent(self, imp->component, imp,
 			event, ButtonReleaseMask, event->xany.window,
 			ButtonRelease, event->xbutton.x, event->xbutton.y,
@@ -619,12 +628,12 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 		&self->selfmap, (uintptr_t)window);
 	if (imp) {
         psy_ui_Component* component;
-        bool deallocate;        
+        bool deallocate;
 
 		component = imp->component;
-		deallocate = FALSE;		
+		deallocate = FALSE;
 		if (imp->component) {
-			
+
             deallocate = imp->component->deallocate;
             psy_signal_emit(&imp->component->signal_destroy,
 					imp->component, 0);
@@ -738,16 +747,16 @@ void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
 	psy_ui_fp_component_onmouseevent fp,
 	psy_Signal* signal)
 {
-	int preventdefault = 0;	
-	int delta;			
+	int preventdefault = 0;
+	int delta;
 	psy_ui_MouseEvent ev;
-	
+
 	if (button == 4) {
 			delta = 120;
 	} else if (button == 5) {
 			delta = -120;
 	} else {
-		delta = 0;	
+		delta = 0;
 	}
 	psy_ui_mouseevent_init_all(&ev,
 		psy_ui_realpoint_make(lParam, wParam),
@@ -758,23 +767,23 @@ void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
 	psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 		&ev);
 	preventdefault = ev.event.default_prevented;
-	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {		
+	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
 		if (deltaperline != 0) {
 			accumwheeldelta += delta; // 120 or -120
 			while (accumwheeldelta >= deltaperline) {
 				double pos;
-				psy_ui_IntPoint scrollrange;							
+				psy_ui_IntPoint scrollrange;
 				double scrolltoppx;
 				const psy_ui_TextMetric* tm;
 
 				tm = psy_ui_component_textmetric(imp->component);
-				scrollrange = psy_ui_component_verticalscrollrange(imp->component);																					
-				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
+				scrollrange = psy_ui_component_verticalscrollrange(imp->component);
+				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);
 				pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
 					psy_ui_component_wheelscroll(imp->component);
 				if (pos < (double)scrollrange.x) {
 					pos = (double)scrollrange.x;
-				}														
+				}
 				psy_ui_component_setscrolltop(imp->component,
 					psy_ui_mul_value_real(
 						psy_ui_component_scrollstep_height(imp->component), pos));
@@ -788,13 +797,13 @@ void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
 				const psy_ui_TextMetric* tm;
 
 				tm = psy_ui_component_textmetric(imp->component);
-				scrollrange = psy_ui_component_verticalscrollrange(imp->component);									
-				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
+				scrollrange = psy_ui_component_verticalscrollrange(imp->component);
+				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);
 				pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
 					psy_ui_component_wheelscroll(imp->component);
 				if (pos > (double)scrollrange.y) {
 					pos = (double)scrollrange.y;
-				}							
+				}
 				psy_ui_component_setscrolltop(imp->component,
 					psy_ui_mul_value_real(
 						psy_ui_component_scrollstep_height(imp->component), pos));
