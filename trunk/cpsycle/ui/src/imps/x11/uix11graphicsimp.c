@@ -181,12 +181,46 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	psy_ui_realpoint_init(&self->org);
 	psy_ui_realpoint_init(&self->dorg);
 	self->region = XCreateRegion();
+	self->bitmap = FALSE;	
 }
 
 void psy_ui_x11_graphicsimp_init_bitmap(psy_ui_x11_GraphicsImp* self,
 	psy_ui_Bitmap* bitmap)
 {
-	psy_ui_x11_graphicsimp_init(self, NULL);
+	psy_ui_x11_BitmapImp* imp;
+	psy_ui_X11App* x11app;
+	int screen;
+		
+	x11app = (psy_ui_X11App*)psy_ui_app()->imp;	
+	psy_ui_graphics_imp_init(&self->imp);
+	x11_imp_vtable_init(self);
+	imp = (psy_ui_x11_BitmapImp*)bitmap->imp;
+	self->display = x11app->dpy;
+	self->window = imp->pixmap;
+	self->visual = x11app->visual;
+	screen = DefaultScreen(self->display);
+	self->xfd = XftDrawCreate(
+		self->display,
+		self->window,
+		self->visual,
+	    DefaultColormap(self->display, screen));
+	self->defaultfont = XftFontOpenXlfd(self->display,
+		screen, "arial");
+	if (!self->defaultfont) {
+		self->defaultfont = XftFontOpenName(self->display, screen, "arial");
+	}
+	self->xftfont = self->defaultfont;
+	XftColorAllocName(self->display,
+		self->visual,
+		DefaultColormap(self->display, screen),
+		"black", &self->black);
+	psy_ui_realpoint_init(&self->org);
+	psy_ui_realpoint_init(&self->dorg);
+	self->region = XCreateRegion();
+	self->shareddc = FALSE;
+	self->bitmap = TRUE;
+	self->gc = XCreateGC(x11app->dpy, self->window, 0, NULL);
+	printf("graphics created\n");
 }
 
 void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
@@ -202,14 +236,17 @@ void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
 // xt implementation method for psy_ui_Graphics
 void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 {	
-	XDestroyRegion(self->region);
-	XFreeGC(self->display, self->gc);
+	if (self->bitmap) {
+		printf("destroy pixmap gc\n");
+	}
+	XDestroyRegion(self->region);	
+	XFreeGC(self->display, self->gc);	
 	XftColorFree(self->display,
 	   self->visual,	   
 	   DefaultColormap(self->display, DefaultScreen(self->display)),
 	   &self->black);
 	XftFontClose(self->display, self->defaultfont);
-	XftDrawDestroy(self->xfd);
+	XftDrawDestroy(self->xfd);	
 }
 
 void psy_ui_x11_g_imp_textout(psy_ui_x11_GraphicsImp* self, double x, double y,

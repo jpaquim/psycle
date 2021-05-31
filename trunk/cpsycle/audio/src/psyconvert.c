@@ -242,7 +242,7 @@ void psy_audio_convert_legacy_to_instrument(
 	/* Truncate to 220 samples boundaries, and ensure it is not zero. */	
 	ENV_AT = (src.ENV_AT / 220) * 220; if (ENV_AT <= 0) ENV_AT = 1;
 	ENV_DT = (src.ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
-	ENV_RT = src.ENV_RT; if (ENV_RT <= 0) ENV_RT = 1;
+	ENV_RT = (src.ENV_RT / 220) * 220; if (ENV_RT <= 0) ENV_RT = 1;
 	ENV_SL = src.ENV_SL;
 	if (ENV_RT == 16) ENV_RT = 220;
 	psy_dsp_envelope_setadsr(&instrument->volumeenvelope,				

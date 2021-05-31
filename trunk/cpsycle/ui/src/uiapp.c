@@ -108,6 +108,8 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_signal_connect(&self->translator.signal_languagechanged, self,
 		psy_ui_app_onlanguagechanged);
 	psy_ui_dragevent_init(&self->dragevent);
+	self->deltaperline = 120;
+	self->accumwheeldelta = 0;
 }
 
 void ui_app_initimpfactory(psy_ui_App* self)

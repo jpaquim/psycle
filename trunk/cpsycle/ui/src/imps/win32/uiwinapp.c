@@ -17,8 +17,6 @@
 // platform
 #include "../../detail/trace.h"
 
-static int deltaperline = 120;
-static int accumwheeldelta = 0;
 static psy_ui_WinApp* winapp = NULL;
 
 static psy_ui_Component* eventtarget(psy_ui_Component* component);
@@ -641,81 +639,32 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			   // ulScrollLines usually equals 3 or 0 (for no scrolling)
 			   // WHEEL_DELTA equals 120, so deltaperline will be 40
 				if (ulScrollLines) {
-					deltaperline = WHEEL_DELTA / ulScrollLines;
+					psy_ui_app()->deltaperline = WHEEL_DELTA / ulScrollLines;
 				} else {
-					deltaperline = 0;
+					psy_ui_app()->deltaperline = 0;
 				}
 				return 0;
 				break; }
-			case WM_MOUSEWHEEL:	
-			{
-				int preventdefault = 0;				
+			case WM_MOUSEWHEEL:	{				
 				psy_ui_MouseEvent ev;
 				POINT pt_client;
 
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);
-				ScreenToClient(imp->hwnd, &pt_client);				
+				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init_all(&ev,
 					psy_ui_realpoint_make(pt_client.x, pt_client.y),
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.pt);
-				imp->component->vtable->onmousewheel(imp->component, &ev);
-				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
-					&ev);
-				preventdefault = ev.event.default_prevented;
-				if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
-					if (deltaperline != 0) {
-						accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
-						while (accumwheeldelta >= deltaperline) {
-							double pos;
-							psy_ui_IntPoint scrollrange;							
-							double scrolltoppx;
-							const psy_ui_TextMetric* tm;
-
-							tm = psy_ui_component_textmetric(imp->component);
-							scrollrange = psy_ui_component_verticalscrollrange(imp->component);																					
-							scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
-							pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
-								psy_ui_component_wheelscroll(imp->component);
-							if (pos < (double)scrollrange.x) {
-								pos = (double)scrollrange.x;
-							}														
-							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(
-									psy_ui_component_scrollstep_height(imp->component), pos));
-							accumwheeldelta -= deltaperline;
-						}
-						while (accumwheeldelta <= -deltaperline)
-						{
-							double pos;
-							psy_ui_IntPoint scrollrange;
-							double scrolltoppx;
-							const psy_ui_TextMetric* tm;
-
-							tm = psy_ui_component_textmetric(imp->component);
-							scrollrange = psy_ui_component_verticalscrollrange(imp->component);									
-							scrolltoppx = psy_ui_component_scrolltop_px(imp->component);							
-							pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
-								psy_ui_component_wheelscroll(imp->component);
-							if (pos > (double)scrollrange.y) {
-								pos = (double)scrollrange.y;
-							}							
-							psy_ui_component_setscrolltop(imp->component,
-								psy_ui_mul_value_real(
-									psy_ui_component_scrollstep_height(imp->component), pos));
-							accumwheeldelta += deltaperline;
-						}
-					}
-				}
-			}
-			break;
+				psy_ui_component_mousewheel(imp->component, &ev,
+					(short)HIWORD(wParam) /* 120 or -120 */);
+				break; }
 			case WM_MOUSEHOVER:							
 				psy_signal_emit(&imp->component->signal_mousehover, imp->component, 0);
 				return 0;				
-			break;
+				break;
 			case WM_MOUSELEAVE:							
 				imp->imp.vtable->dev_mouseleave(&imp->imp);
 				return 0;			

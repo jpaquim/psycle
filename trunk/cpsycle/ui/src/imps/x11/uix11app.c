@@ -11,10 +11,10 @@
 
 /* local */
 #include "uicomponent.h"
+#include "uix11componentimp.h"
 #include "uix11fontimp.h"
 #include "uix11graphicsimp.h"
 #include "uix11keyboardevent.h"
-#include "uix11componentimp.h"
 /* X11 */
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
@@ -22,11 +22,6 @@
 #include <X11/extensions/Xdbe.h>
 /* std */
 #include <stdio.h>
-
-static psy_ui_X11App* x11app = NULL;
-static int shapeEventBase, shapeErrorBase;
-static int deltaperline = 120;
-static int accumwheeldelta = 0;
 
 /* double click */
 static int buttonclicks = 0;
@@ -40,25 +35,21 @@ static int psy_ui_x11app_run(psy_ui_X11App*);
 static void psy_ui_x11app_stop(psy_ui_X11App*);
 static void psy_ui_x11app_close(psy_ui_X11App*);
 static int psy_ui_x11app_handle_event(psy_ui_X11App*, XEvent*);
-static void handle_mouseevent(psy_ui_X11App*,
-	psy_ui_Component*, psy_ui_x11_ComponentImp*,
-	XEvent* ev, int mask,
-	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
-	int button, psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
-static void handle_mousewheel(psy_ui_X11App*,
-	psy_ui_Component*, psy_ui_x11_ComponentImp*,
-	XEvent* event, int mask,
-	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
-	int button,
-	psy_ui_fp_component_onmouseevent fp,
-	psy_Signal* signal);
-static int translate_x11button(int button);
-static bool sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
-	int mask, XEvent*);
-static void adjustcoordinates(psy_ui_Component*, psy_ui_RealPoint* pt);
-static int timertick(psy_ui_X11App*);
-static void update_keyevent_mods(psy_ui_X11App*, psy_ui_KeyboardEvent*);
-static void update_mouseevent_mods(psy_ui_X11App*, psy_ui_MouseEvent*);
+static void psy_ui_x11app_handle_mouseevent(psy_ui_X11App*,
+	psy_ui_x11_ComponentImp*, XEvent*,
+	psy_ui_fp_component_onmouseevent fp, psy_Signal* signal);
+static void psy_ui_x11app_mousewheel(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
+	XEvent*);
+static int psy_ui_x11app_translate_x11button(int button);
+static bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App*,
+	psy_ui_x11_ComponentImp*, int mask, XEvent*);
+static void psy_ui_x11app_adjustcoordinates(psy_ui_Component*,
+	psy_ui_RealPoint*);
+static int psy_ui_x11app_timertick(psy_ui_X11App*);
+static void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App*,
+	psy_ui_KeyboardEvent*);
+static void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App*,
+	psy_ui_MouseEvent*);
 
 /* vtable */
 static psy_ui_AppImpVTable imp_vtable;
@@ -87,20 +78,19 @@ static void imp_vtable_init(psy_ui_X11App* self)
 			psy_ui_x11app_onappdefaultschange;
 		imp_vtable_initialized = TRUE;
 	}
+	self->imp.vtable = &imp_vtable;
 }
 /* implementation */
 void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 {
 	static const char szAppClass[] = "PsycleApp";
-	static const char szComponentClass[] = "PsycleComponent";
-	int argc = 0;
+	static const char szComponentClass[] = "PsycleComponent";	
 	bool shape_extension;
+	int shapeEventBase;
+	int shapeErrorBase;
 
 	psy_ui_appimp_init(&self->imp);
 	imp_vtable_init(self);
-	self->imp.vtable = &imp_vtable;
-
-	x11app = self;
 	self->app = app;
 	printf("open display\n");
 	self->dpy = XOpenDisplay(NULL);
@@ -111,7 +101,8 @@ void psy_ui_x11app_init(psy_ui_X11App* self, psy_ui_App* app, void* instance)
 	psy_table_init(&self->winidmap);
 	self->wmDeleteMessage = XInternAtom(self->dpy, "WM_DELETE_WINDOW", False);
 	self->running = FALSE;
-	shape_extension = XShapeQueryExtension (self->dpy, &shapeEventBase,
+	shape_extension = XShapeQueryExtension (self->dpy,
+		&shapeEventBase,
 		&shapeErrorBase);
 	if (!shape_extension) {
 		printf("XShapeQueryExtension error\n");
@@ -141,13 +132,15 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 	self->visual = 0;
 	if (XdbeQueryExtension(self->dpy, &major, &minor)) {
 		XVisualInfo xvisinfo_templ;
-
-		printf("Xdbe (%d.%d) supported, using double buffering\n", major, minor);
 		int numScreens = 1;
 		int matches;
-
 		Drawable screens[] = { DefaultRootWindow(self->dpy) };
-		XdbeScreenVisualInfo *info = XdbeGetVisualInfo(self->dpy, screens, &numScreens);
+		XdbeScreenVisualInfo *info;
+		
+		printf("Xdbe (%d.%d) supported, using double buffering\n",
+			major, minor);		
+		info = XdbeGetVisualInfo(self->dpy, screens,
+			&numScreens);
 		if (!info || numScreens < 1 || info->count < 1) {
 			fprintf(stderr, "No visuals support Xdbe\n");
 			return;
@@ -171,20 +164,7 @@ void psy_ui_x11app_initdbe(psy_ui_X11App* self)
 		if (!self->vinfo || matches < 1) {
 			fprintf(stderr, "Couldn't match a Visual with double buffering\n");
 			return;
-		}
-		/*
-		printf("%d supported visuals\n", info->count);
-		for (int i = 0; i < info->count; ++i) {
-			printf("visual %d/%d: id %d, depth %d, perf %d\n",
-					i, info->count,
-					info->visinfo[i].visual,
-					info->visinfo[i].depth,
-					info->visinfo[i].perflevel);
-		}
-		printf("We got xvisinfo: id: %d, screen %d, depth %d\n",
-				xvisinfo_match->visualid, xvisinfo_match->screen, xvisinfo_match->depth);
-		*/
-		/* We can use Visual from the match */
+		}		
 		self->visual = self->vinfo->visual;
 	} else {
 		fprintf(stderr, "No Xdbe support\n");
@@ -224,7 +204,7 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 			psy_ui_x11app_handle_event(self, &event);
 		} else {
 			if (select(x11_fd + 1, &in_fds, 0, 0, &tv) == 0) {
-				timertick(self);
+				psy_ui_x11app_timertick(self);
 			}
 			if (tv.tv_usec == 0) {
 				tv.tv_sec = 0;
@@ -246,7 +226,7 @@ void psy_ui_x11app_close(psy_ui_X11App* self)
 	self->running = FALSE;
 }
 
-int timertick(psy_ui_X11App* self)
+int psy_ui_x11app_timertick(psy_ui_X11App* self)
 {
 	if (buttonclicks == 1 && buttonclickcounter > 0) {
 		--buttonclickcounter;
@@ -421,9 +401,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		break; }
 	case ClientMessage:
         if (event->xclient.data.l[0] == self->wmDeleteMessage) {
-			XEvent e;
-
-			printf("close request\n");
+			XEvent e;			
 			uintptr_t hwnd;
             bool close;
             bool ismain;
@@ -440,7 +418,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			hwnd = event->xclient.window;
 			XDestroyWindow(self->dpy, event->xclient.window);
 			while (TRUE) {
-                if (XPending(x11app->dpy)) {
+                if (XPending(self->dpy)) {
                     XNextEvent(self->dpy, event);
                     if (event->type ==  DestroyNotify) {
                         psy_ui_x11app_destroy_window(self, event->xany.window);
@@ -470,7 +448,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		} else if (ev.keycode == psy_ui_KEY_MENU) {
 			self->altstate = TRUE;
 		}
-		update_keyevent_mods(self, &ev);
+		psy_ui_x11app_update_keyevent_mods(self, &ev);
 		imp->component->vtable->onkeydown(imp->component, &ev);
 		psy_signal_emit(&imp->component->signal_keydown, imp->component,
 			1, &ev);
@@ -506,7 +484,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			XSendEvent(self->dpy, imp->parent->hwnd, True, KeyReleaseMask,
 				(XEvent*)&xkevent);
 		}
-		update_keyevent_mods(self, &ev);
+		psy_ui_x11app_update_keyevent_mods(self, &ev);
 		return 0;
 		break; }
     case ButtonPress: {
@@ -529,22 +507,14 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			}
 		}
 		if (event->xbutton.button == 4 || event->xbutton.button == 5) {
-			handle_mousewheel(self, imp->component, imp,
-				event, ButtonPressMask, event->xany.window,
-				ButtonPress, event->xbutton.x, event->xbutton.y,
-				event->xbutton.button,
-				imp->component->vtable->onmousewheel,
-				&imp->component->signal_mousewheel);
-				return 0;
+			psy_ui_x11app_mousewheel(self, imp, event);				
+			return 0;
 		}
 		if (buttonclicks == 0) { /* first click */
 			buttonclicks = 1;
 			buttonclickcounter = doubleclicktime;
 			buttonpressevent = ev;
-			handle_mouseevent(self, imp->component, imp,
-				event, ButtonPressMask, event->xany.window,
-				ButtonPress, event->xbutton.x, event->xbutton.y,
-				translate_x11button(event->xbutton.button),
+			psy_ui_x11app_handle_mouseevent(self, imp, event,
 				imp->component->vtable->onmousedown,
 				&imp->component->signal_mousedown);
 		} else { /* second click */
@@ -553,17 +523,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			if (ev.pt.x != buttonpressevent.pt.x ||
 					ev.pt.y != buttonpressevent.pt.y) {
 					/* single click */
-				handle_mouseevent(self, imp->component, imp,
-					event, ButtonPressMask, event->xany.window,
-					ButtonPress, event->xbutton.x, event->xbutton.y,
-					translate_x11button(event->xbutton.button),
+				psy_ui_x11app_handle_mouseevent(self, imp, event,
 					imp->component->vtable->onmousedown,
 					&imp->component->signal_mousedown);
 			} else { /* double click */
-				handle_mouseevent(self, imp->component, imp,
-					event, ButtonPressMask, event->xany.window,
-					ButtonPress, event->xbutton.x, event->xbutton.y,
-					translate_x11button(event->xbutton.button),
+				psy_ui_x11app_handle_mouseevent(self, imp, event,
 					imp->component->vtable->onmousedoubleclick,
 					&imp->component->signal_mousedoubleclick);
 			}
@@ -571,10 +535,7 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		return 0;
 		break; }
 	case ButtonRelease: {
-		handle_mouseevent(self, imp->component, imp,
-			event, ButtonReleaseMask, event->xany.window,
-			ButtonRelease, event->xbutton.x, event->xbutton.y,
-			translate_x11button(event->xbutton.button),
+		psy_ui_x11app_handle_mouseevent(self, imp, event,
 			imp->component->vtable->onmouseup,
 			&imp->component->signal_mouseup);
 		return 0;
@@ -598,8 +559,8 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 		psy_ui_mouseevent_init_all(&ev,
 			psy_ui_realpoint_make(xme.x, xme.y),
 			button, 0, 0, 0);
-		update_mouseevent_mods(self, &ev);
-		adjustcoordinates(imp->component, &ev.pt);
+		psy_ui_x11app_update_mouseevent_mods(self, &ev);
+		psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
 		imp->imp.vtable->dev_mousemove(&imp->imp, &ev);
 		return 0;
 		break; }
@@ -652,7 +613,8 @@ void psy_ui_x11app_destroy_window(psy_ui_X11App* self, Window window)
 	}
 }
 
-void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
+void psy_ui_x11app_adjustcoordinates(psy_ui_Component* component,
+	psy_ui_RealPoint* pt)
 {
 	psy_ui_RealMargin spacing;
 
@@ -663,21 +625,23 @@ void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
 	}
 }
 
-void update_keyevent_mods(psy_ui_X11App* self, psy_ui_KeyboardEvent* ev)
+void psy_ui_x11app_update_keyevent_mods(psy_ui_X11App* self,
+	psy_ui_KeyboardEvent* ev)
 {
 	ev->shift_key = self->shiftstate;
 	ev->ctrl_key = self->controlstate;
 	ev->alt_key = self->altstate;
 }
 
-void update_mouseevent_mods(psy_ui_X11App* self, psy_ui_MouseEvent* ev)
+void psy_ui_x11app_update_mouseevent_mods(psy_ui_X11App* self,
+	psy_ui_MouseEvent* ev)
 {
 	ev->shift_key = self->shiftstate;
 	ev->ctrl_key = self->controlstate;
 	/* ev->alt_key = self->altstate; */
 }
 
-int translate_x11button(int button)
+int psy_ui_x11app_translate_x11button(int button)
 {
 	switch (button) {
 		case 1: /* left button */
@@ -691,41 +655,48 @@ int translate_x11button(int button)
 	}
 }
 
-void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
-	psy_ui_x11_ComponentImp* x11imp, XEvent* event, int mask,
-	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
-	int button,
+void psy_ui_x11app_handle_mouseevent(psy_ui_X11App* self,
+	psy_ui_x11_ComponentImp* imp, XEvent* xe,
 	psy_ui_fp_component_onmouseevent fp,
 	psy_Signal* signal)
 {
 	psy_ui_MouseEvent ev;
 	bool up;
 
-	psy_ui_mouseevent_init_all(&ev,
-		psy_ui_realpoint_make(wParam, lParam),
-		button, 0, 0, 0);
-	update_mouseevent_mods(self, &ev);
-	adjustcoordinates(component, &ev.pt);
-	ev.event.target = component; /* eventtarget(component)); */
+	psy_ui_mouseevent_init_all(&ev,	
+		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
+		psy_ui_x11app_translate_x11button(xe->xbutton.button),
+		0, 0, 0);
+	psy_ui_x11app_update_mouseevent_mods(self, &ev);
+	psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
+	ev.event.target = imp->component; /* eventtarget(component)); */
 	up = FALSE;
-	if (message == ButtonPress) {
-		x11imp->imp.vtable->dev_mousedown(&x11imp->imp, &ev);
-	} else if (message == ButtonRelease) {
-		x11imp->imp.vtable->dev_mouseup(&x11imp->imp, &ev);
+	if (xe->type == ButtonPress) {
+		imp->imp.vtable->dev_mousedown(&imp->imp, &ev);
+	} else if (xe->type == ButtonRelease) {
+		imp->imp.vtable->dev_mouseup(&imp->imp, &ev);
 	}
 	if (ev.event.bubbles != FALSE) {
-		fp(component, &ev);
-		psy_signal_emit(signal, component, 1, &ev);
+		fp(imp->component, &ev);
+		psy_signal_emit(signal, imp->component, 1, &ev);
 	}
 	return;
 	/* todo */
 	if (ev.event.bubbles != FALSE) {
 		bool bubble;
-
-		bubble = sendeventtoparent(self, x11imp, mask, event);
+		int mask;
+		
+		if (xe->type == ButtonRelease) {
+			mask = ButtonReleaseMask;
+		} else if (xe->type == MotionNotify) {
+			mask = ButtonMotionMask;
+		} else {
+			mask = ButtonPressMask;
+		}
+		bubble = psy_ui_x11app_sendeventtoparent(self, imp, mask, xe);
 		if (up && !bubble) {
 			psy_ui_app_stopdrag(psy_ui_app());
-		} else if (message == MotionNotify && !bubble) {
+		} else if (xe->type == MotionNotify && !bubble) {
 			if (!psy_ui_app()->dragevent.mouse.event.default_prevented) {
 				psy_ui_component_setcursor(psy_ui_app()->main,
 					psy_ui_CURSORSTYLE_NODROP);
@@ -740,81 +711,29 @@ void handle_mouseevent(psy_ui_X11App* self, psy_ui_Component* component,
 	}
 }
 
-void handle_mousewheel(psy_ui_X11App* self, psy_ui_Component* component,
-	psy_ui_x11_ComponentImp* imp, XEvent* event, int mask,
-	uintptr_t hwnd, uintptr_t message, uintptr_t wParam, uintptr_t lParam,
-	int button,
-	psy_ui_fp_component_onmouseevent fp,
-	psy_Signal* signal)
+void psy_ui_x11app_mousewheel(psy_ui_X11App* self,
+	psy_ui_x11_ComponentImp* imp, XEvent* xe)
 {
-	int preventdefault = 0;
 	int delta;
 	psy_ui_MouseEvent ev;
 
-	if (button == 4) {
-			delta = 120;
-	} else if (button == 5) {
-			delta = -120;
+	if (xe->xbutton.button == 4) {
+		delta = 120;
+	} else if (xe->xbutton.button == 5) {
+		delta = -120;
 	} else {
 		delta = 0;
 	}
 	psy_ui_mouseevent_init_all(&ev,
-		psy_ui_realpoint_make(lParam, wParam),
+		psy_ui_realpoint_make(xe->xbutton.x, xe->xbutton.y),
 		0, delta, 0, 0);
-	update_mouseevent_mods(self, &ev);
-	adjustcoordinates(imp->component, &ev.pt);
-	imp->component->vtable->onmousewheel(imp->component, &ev);
-	psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
-		&ev);
-	preventdefault = ev.event.default_prevented;
-	if (!preventdefault && psy_ui_component_wheelscroll(imp->component) > 0) {
-		if (deltaperline != 0) {
-			accumwheeldelta += delta; // 120 or -120
-			while (accumwheeldelta >= deltaperline) {
-				double pos;
-				psy_ui_IntPoint scrollrange;
-				double scrolltoppx;
-				const psy_ui_TextMetric* tm;
-
-				tm = psy_ui_component_textmetric(imp->component);
-				scrollrange = psy_ui_component_verticalscrollrange(imp->component);
-				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);
-				pos =  (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) -
-					psy_ui_component_wheelscroll(imp->component);
-				if (pos < (double)scrollrange.x) {
-					pos = (double)scrollrange.x;
-				}
-				psy_ui_component_setscrolltop(imp->component,
-					psy_ui_mul_value_real(
-						psy_ui_component_scrollstep_height(imp->component), pos));
-				accumwheeldelta -= deltaperline;
-			}
-			while (accumwheeldelta <= -deltaperline)
-			{
-				double pos;
-				psy_ui_IntPoint scrollrange;
-				double scrolltoppx;
-				const psy_ui_TextMetric* tm;
-
-				tm = psy_ui_component_textmetric(imp->component);
-				scrollrange = psy_ui_component_verticalscrollrange(imp->component);
-				scrolltoppx = psy_ui_component_scrolltop_px(imp->component);
-				pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(imp->component)) +
-					psy_ui_component_wheelscroll(imp->component);
-				if (pos > (double)scrollrange.y) {
-					pos = (double)scrollrange.y;
-				}
-				psy_ui_component_setscrolltop(imp->component,
-					psy_ui_mul_value_real(
-						psy_ui_component_scrollstep_height(imp->component), pos));
-				accumwheeldelta += deltaperline;
-			}
-		}
-	}
+	psy_ui_x11app_update_mouseevent_mods(self, &ev);
+	psy_ui_x11app_adjustcoordinates(imp->component, &ev.pt);
+	psy_ui_component_mousewheel(imp->component, &ev, delta /* 120 or -120 */);
 }
 
-bool sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
-	int mask, XEvent* xev)
+bool psy_ui_x11app_sendeventtoparent(psy_ui_X11App* self,
+	psy_ui_x11_ComponentImp* imp, int mask, XEvent* xev)
 {
 	if (xev && psy_table_at(&self->selfmap,
 			(uintptr_t)imp->parent->hwnd)) {
@@ -839,6 +758,5 @@ void psy_ui_x11app_onappdefaultschange(psy_ui_X11App* self)
 {
 
 }
-
 
 #endif /* PSYCLE_TK_X11 */

@@ -222,8 +222,10 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 
 void machineframe_ondestroy(MachineFrame* self)
 {	
-	// Paramview stores pointers of all machineframes
-	// erase the frame from paramviews
+	/*
+	** Paramview stores pointers of all machineframes
+	** erase the frame from paramviews
+	*/
 	self->machine = NULL;
 	paramviews_erase(self->paramviews, self->macid);	
 }

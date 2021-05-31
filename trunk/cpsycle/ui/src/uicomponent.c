@@ -2286,6 +2286,60 @@ void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 	psy_ui_app()->mousetracking = FALSE;
 }
 
+void psy_ui_component_mousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev,
+	intptr_t delta)
+{
+	bool preventdefault;
+
+	self->vtable->onmousewheel(self, ev);
+	psy_signal_emit(&self->signal_mousewheel, self, 1, ev);
+	preventdefault = ev->event.default_prevented;
+	if (!preventdefault && psy_ui_component_wheelscroll(self) > 0) {
+		if (psy_ui_app()->deltaperline != 0) {
+			psy_ui_app()->accumwheeldelta += (short)delta; // 120 or -120
+			while (psy_ui_app()->accumwheeldelta >= psy_ui_app()->deltaperline) {
+				double pos;
+				psy_ui_IntPoint scrollrange;
+				double scrolltoppx;
+				const psy_ui_TextMetric* tm;
+
+				tm = psy_ui_component_textmetric(self);
+				scrollrange = psy_ui_component_verticalscrollrange(self);
+				scrolltoppx = psy_ui_component_scrolltop_px(self);
+				pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(self)) -
+					psy_ui_component_wheelscroll(self);
+				if (pos < (double)scrollrange.x) {
+					pos = (double)scrollrange.x;
+				}
+				psy_ui_component_setscrolltop(self,
+					psy_ui_mul_value_real(
+						psy_ui_component_scrollstep_height(self), pos));
+				psy_ui_app()->accumwheeldelta -= psy_ui_app()->deltaperline;
+			}
+			while (psy_ui_app()->accumwheeldelta <= -psy_ui_app()->deltaperline)
+			{
+				double pos;
+				psy_ui_IntPoint scrollrange;
+				double scrolltoppx;
+				const psy_ui_TextMetric* tm;
+
+				tm = psy_ui_component_textmetric(self);
+				scrollrange = psy_ui_component_verticalscrollrange(self);
+				scrolltoppx = psy_ui_component_scrolltop_px(self);
+				pos = (scrolltoppx / psy_ui_component_scrollstep_height_px(self)) +
+					psy_ui_component_wheelscroll(self);
+				if (pos > (double)scrollrange.y) {
+					pos = (double)scrollrange.y;
+				}
+				psy_ui_component_setscrolltop(self,
+					psy_ui_mul_value_real(
+						psy_ui_component_scrollstep_height(self), pos));
+				psy_ui_app()->accumwheeldelta += psy_ui_app()->deltaperline;
+			}
+		}
+	}
+}
+
 void psy_ui_component_traverse_int(psy_ui_Component* self,
 	psy_fp_int fp, uintptr_t value)
 {

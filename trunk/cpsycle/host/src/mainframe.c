@@ -672,12 +672,12 @@ void mainframe_connectworkspace(MainFrame* self)
 	workspace_configure_host(&self->workspace);
 	inputhandler_connect(&self->workspace.inputhandler,
 		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "general",
-		psy_INDEX_INVALID, self, mainframe_oninput);
+		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_oninput);
 	inputhandler_connect(&self->workspace.inputhandler,
 		INPUTHANDLER_IMM, psy_EVENTDRIVER_CMD, "notes",
-		psy_INDEX_INVALID, self, mainframe_onnotes);
+		psy_INDEX_INVALID, self, (fp_inputhandler_input)mainframe_onnotes);
 	inputhandler_connecthost(&self->workspace.inputhandler,
-		self, mainframe_oninputhandlercallback);
+		self, (fp_inputhandler_hostcallback)mainframe_oninputhandlercallback);
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_togglegear, self,

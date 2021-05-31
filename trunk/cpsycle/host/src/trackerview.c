@@ -188,13 +188,13 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent, psy_ui_Compon
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "tracker", psy_INDEX_INVALID,
-		self, trackergrid_ontrackercmds);
+		self, (fp_inputhandler_input)trackergrid_ontrackercmds);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_FOCUS,
 		psy_EVENTDRIVER_CMD, "notes",
-		psy_INDEX_INVALID, self, trackergrid_onnotecmds);
+		psy_INDEX_INVALID, self, (fp_inputhandler_input)trackergrid_onnotecmds);
 	inputhandler_connect(&workspace->inputhandler, INPUTHANDLER_VIEW,
 		psy_EVENTDRIVER_MIDI, "", VIEW_ID_PATTERNVIEW, 
-		self, trackergrid_onmidicmds);
+		self, (fp_inputhandler_input)trackergrid_onmidicmds);
 	psy_audio_patternselection_init(&self->gridstate->selection);
 	/* handle midline invalidation */
 	psy_signal_connect(&self->component.signal_scroll, self,

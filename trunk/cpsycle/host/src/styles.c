@@ -61,11 +61,11 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.onprimary_medium,
-		material.surface_overlay_5p);
+		material.surface_overlay_5p);	
 	psy_ui_styles_setstyle(self, STYLE_SEQLISTVIEW_TRACK, style);
 	
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, material.onprimary_strong, material.surface_overlay_7p);
+	psy_ui_style_setcolours(style, material.onprimary_strong, material.surface_overlay_7p);	
 	psy_ui_styles_setstyle(self, STYLE_SEQLISTVIEW_TRACK_SELECT, style);
 	
 	style = psy_ui_style_allocinit();
@@ -95,7 +95,17 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_11p, 6.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_ITEM_SELECTED, style);
-	
+		
+	style = psy_ui_style_allocinit();	
+	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID,
+		material.surface_overlay_16p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_TRACK_NUMBER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_12p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_DESCITEM_SELECTED, style);
+
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.primary, material.medium));

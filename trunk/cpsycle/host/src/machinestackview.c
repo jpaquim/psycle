@@ -761,7 +761,7 @@ uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState* self,
 		return rv;
 	}
 	sockets = psy_audio_connections_at(&self->machines->connections, slot);
-	if (sockets) {
+	if (sockets && slot != psy_audio_MASTER_INDEX) {
 		uintptr_t i;
 		uintptr_t c;
 		uintptr_t maxnumoutputs;		

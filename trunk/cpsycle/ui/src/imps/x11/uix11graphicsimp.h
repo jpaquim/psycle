@@ -40,6 +40,8 @@ typedef struct psy_ui_x11_GraphicsImp {
 	unsigned int backgroundmode;
 	psy_ui_RealPoint org;
 	psy_ui_RealPoint dorg;
+	bool shareddc;
+	bool bitmap;	
 	/*HDC hdc;  
 	HFONT hfont;
 	HFONT hFontPrev;	

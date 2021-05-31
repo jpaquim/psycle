@@ -23,6 +23,9 @@ extern "C" {
 #define STYLE_SEQEDT_ITEM_HOVER              31031
 #define STYLE_SEQEDT_ITEM_SELECTED           31032
 #define STYLE_SEQEDT_EVENT                   31033
+#define STYLE_SEQEDT_TRACK_NUMBER		     31034
+#define STYLE_SEQEDT_DESCITEM_HOVER			 31035
+#define STYLE_SEQEDT_DESCITEM_SELECTED       31036
 #define STYLE_SEQLISTVIEW                    31040
 #define STYLE_SEQLISTVIEW_SELECT             31042
 #define STYLE_SEQLISTVIEW_TRACK              31043
