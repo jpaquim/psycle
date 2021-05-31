@@ -1070,14 +1070,24 @@ void seqeditortrackdesc_onsequenceselectionselect(SeqEditorTrackDesc* self,
 	psy_audio_SequenceSelection* selection,
 	psy_audio_OrderIndex* index)
 {
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_Component* track;
+
+	track = psy_ui_component_at(&self->component, index->track + 1);
+	if (track) {
+		psy_ui_component_addstylestate(track, psy_ui_STYLESTATE_SELECT);
+	}
 }
 
 void seqeditortrackdesc_onsequenceselectiondeselect(SeqEditorTrackDesc* self,
 	psy_audio_SequenceSelection* selection,
 	psy_audio_OrderIndex* index)
 {
-	psy_ui_component_invalidate(&self->component);
+	psy_ui_Component* track;
+
+	track = psy_ui_component_at(&self->component, index->track + 1);
+	if (track) {
+		psy_ui_component_removestylestate(track, psy_ui_STYLESTATE_SELECT);
+	}
 }
 
 void seqeditortrackdesc_onsequenceselectionupdate(SeqEditorTrackDesc* self,
@@ -1111,7 +1121,10 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 		psy_audio_SequenceTrackNode* t;
 		uintptr_t c;
 		psy_ui_Button* newtrack;
+		psy_audio_OrderIndex firstsel;
 
+		firstsel = psy_audio_sequenceselection_first(
+			&self->state->cmds->workspace->sequenceselection);
 		for (t = sequence->tracks, c = 0; t != NULL;
 				psy_list_next(&t), ++c) {
 			SequenceTrackBox* sequencetrackbox;
@@ -1126,12 +1139,27 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 				sequencetrackbox_showtrackname(sequencetrackbox);
 			}
 			if (sequencetrackbox) {				
+				/* psy_ui_component_setstyletype_hover(
+					&sequencetrackbox->trackbox.component,
+					STYLE_SEQEDT_DESCITEM_HOVER); */
+				psy_ui_component_setstyletype_select(
+					&sequencetrackbox->trackbox.component,
+					STYLE_SEQEDT_DESCITEM_SELECTED);
+				psy_ui_component_setstyletype(
+					&sequencetrackbox->trackbox.track.component,
+					STYLE_SEQEDT_TRACK_NUMBER);				
 				psy_signal_connect(
 					&sequencetrackbox->trackbox.signal_close, self,
 					seqeditortrackdesc_ondeltrack);
 				sequencetrackbox->trackbox.track.component.draggable = TRUE;
-				psy_signal_connect(&sequencetrackbox->trackbox.track.component.signal_dragstart,
+				psy_signal_connect(
+					&sequencetrackbox->trackbox.track.component.signal_dragstart,
 					self, seqeditortrackdesc_ondragstart);
+				if (c == firstsel.track) {					
+					psy_ui_component_addstylestate(
+						&sequencetrackbox->trackbox.component,
+						psy_ui_STYLESTATE_SELECT);
+				}
 			}
 		}
 		newtrack = psy_ui_button_allocinit(&self->component, &self->component);

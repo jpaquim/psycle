@@ -126,17 +126,18 @@ void pluginnames_dispose(PluginNames* self)
 	psy_table_dispose(&self->container);
 }
 
-void pluginnames_insert(PluginNames* self, int type, const char* name, const char* convname)
+void pluginnames_insert(PluginNames* self, int type, const char* name,
+	const char* convname)
 {
 	psy_Table* nametable;
 
-	nametable = (psy_Table*) psy_table_at(&self->container, type);
+	nametable = (psy_Table*)psy_table_at(&self->container, type);
 	if (!nametable) {
 		nametable = (psy_Table*)malloc(sizeof(psy_Table));
 		psy_table_init(nametable);
 		psy_table_insert(&self->container, type, nametable);
 	}
-	psy_table_insert_strhash(nametable, name, (void*) convname);
+	psy_table_insert_strhash(nametable, name, (void*)convname);
 }
 
 bool pluginnames_exists(PluginNames* self, int type, const char* name)

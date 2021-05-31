@@ -955,6 +955,8 @@ void psy_ui_component_mousedown(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
 void psy_ui_component_mouseup(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
+void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
+	intptr_t delta);
 
 #ifdef __cplusplus
 }

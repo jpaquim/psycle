@@ -223,10 +223,19 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	cpy = centery;
 	linestart = 0;
 	for (p = lines; p != NULL; p = p->next) {
-		cp = (uintptr_t)p->entry;		
+		cp = (uintptr_t)p->entry;	
 		if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 				psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-			centerx = (size.width - (cp - linestart) * tm->tmAveCharWidth) / 2;
+			if (self->preventwrap) {
+				psy_ui_Size textsize;
+				psy_ui_RealSize textsizepx;
+
+				textsize = psy_ui_textsize(g, text, psy_strlen(text));
+				textsizepx = psy_ui_size_px(&textsize, tm, NULL);
+				centerx = (size.width - textsizepx.width) / 2.0;
+			} else {
+				centerx = (size.width - (cp - linestart) * tm->tmAveCharWidth) / 2;
+			}
 		}
 		psy_ui_textout(g, centerx, cpy, text + linestart, cp - linestart);
 		linestart = cp + 1;

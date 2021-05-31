@@ -17,6 +17,7 @@ typedef struct psy_ui_MaterialTheme {
 	psy_ui_Style* style;
 	psy_ui_Colour surface;
 	psy_ui_Colour surface_overlay_5p;
+	psy_ui_Colour surface_overlay_6p;
 	psy_ui_Colour surface_overlay_7p;
 	psy_ui_Colour surface_overlay_8p;
 	psy_ui_Colour surface_overlay_9p;
@@ -47,7 +48,7 @@ typedef struct psy_ui_MaterialTheme {
 	psy_ui_ThemeMode mode;
 } psy_ui_MaterialTheme;
 
-void psy_ui_materialtheme_init(psy_ui_MaterialTheme*, psy_ui_ThemeMode mode);
+void psy_ui_materialtheme_init(psy_ui_MaterialTheme*, psy_ui_ThemeMode);
 
 #ifdef __cplusplus
 }

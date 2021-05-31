@@ -47,8 +47,9 @@ void trackbox_init(TrackBox* self, psy_ui_Component* parent,
 	psy_ui_component_setalignexpand(trackbox_base(self),
 		psy_ui_HEXPAND);	
 	psy_ui_label_init(&self->track, trackbox_base(self), view);
-	psy_ui_label_preventtranslation(&self->track);	
-	psy_ui_label_setcharnumber(&self->track, 3);
+	psy_ui_label_settextalignment(&self->track, psy_ui_ALIGNMENT_CENTER);
+	psy_ui_label_preventtranslation(&self->track);		
+	psy_ui_label_setcharnumber(&self->track, 5);
 	psy_ui_button_init(&self->solo, trackbox_base(self), view);
 	psy_ui_button_preventtranslation(&self->solo);
 	psy_ui_button_settext(&self->solo, "S");	

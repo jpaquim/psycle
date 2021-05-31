@@ -45,6 +45,7 @@ void psy_ui_materialtheme_init(psy_ui_MaterialTheme* self, psy_ui_ThemeMode mode
 	}
 	/* absolute surface overlays */
 	self->surface_overlay_5p = psy_ui_colour_overlayed(&self->surface, &self->overlay, 0.05);
+	self->surface_overlay_6p = psy_ui_colour_overlayed(&self->surface, &self->overlay, 0.06);
 	self->surface_overlay_7p = psy_ui_colour_overlayed(&self->surface, &self->overlay, 0.07);
 	self->surface_overlay_8p = psy_ui_colour_overlayed(&self->surface, &self->overlay, 0.08);
 	self->surface_overlay_9p = psy_ui_colour_overlayed(&self->surface, &self->overlay, 0.09);

@@ -47,7 +47,7 @@ typedef struct psy_ui_X11App {
 	bool running;	
 	psy_ui_X11Colours colourmap;
 	XVisualInfo* vinfo;
-	Visual* visual;
+	Visual* visual;	
 	bool dbe;
 	bool dograb;
 	Window grabwin;

@@ -27,7 +27,7 @@ typedef struct psy_ui_AppZoom {
 	psy_Signal signal_zoom;
 	/* internal data */
 	double rate;
-	int basefontsize;
+	int basefontsize;	
 } psy_ui_AppZoom;
 
 void psy_ui_appzoom_init(psy_ui_AppZoom*);
@@ -59,6 +59,8 @@ typedef struct psy_ui_App {
 	struct psy_ui_Component* capture;	
 	struct psy_ui_Component* hover;
 	psy_ui_DragEvent dragevent;
+	int deltaperline;
+	int accumwheeldelta;
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
