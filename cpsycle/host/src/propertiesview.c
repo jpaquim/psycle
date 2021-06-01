@@ -534,6 +534,12 @@ void propertiesrenderer_build(PropertiesRenderer* self)
 	psy_property_enumerate(self->properties, self,
 		(psy_PropertyCallback)
 		propertiesrenderer_onpropertiesbuild);
+	if (self->combolevel != psy_INDEX_INVALID) {		
+		psy_ui_combobox_setcursel(self->comboline->combo,
+			psy_property_item_int(self->comboline->property));
+		self->combolevel = psy_INDEX_INVALID;
+		self->comboline = NULL;
+	}
 }
 
 void propertiesrenderer_rebuild(PropertiesRenderer* self,
@@ -604,15 +610,20 @@ int propertiesrenderer_onpropertiesbuild(PropertiesRenderer* self,
 			self->curr = &self->client;
 		}
 		if (self->combolevel != psy_INDEX_INVALID) {
-			if (level != self->combolevel + 1) {
+			if (level != self->combolevel + 1) {				
 				psy_ui_combobox_setcursel(self->comboline->combo,
 					psy_property_item_int(self->comboline->property));
 				self->combolevel = psy_INDEX_INVALID;				
 				self->comboline = NULL;
 			} else {
 				if (self->comboline && self->comboline->combo) {
-					psy_ui_combobox_addtext(self->comboline->combo,
-						psy_property_text(property));
+					if (psy_property_translation_prevented(property)) {
+						psy_ui_combobox_addtext(self->comboline->combo,
+							psy_property_text(property));
+					} else {
+						psy_ui_combobox_addtext(self->comboline->combo,
+							psy_ui_translate(psy_property_text(property)));
+					}
 					return 1;
 				}
 			}
@@ -1100,6 +1111,11 @@ psy_Property* propertiesview_selected(PropertiesView* self)
 void propertiesview_enablemousepropagation(PropertiesView* self)
 {
 	self->renderer.state.preventmousepropagation = FALSE;
+}
+
+void propertiesview_prevent_maximize_mainsections(PropertiesView* self)
+{
+	self->maximizemainsections = FALSE;
 }
 
 void propertiesview_onpropertiesrendererselected(PropertiesView* self,

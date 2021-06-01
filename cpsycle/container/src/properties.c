@@ -1225,6 +1225,13 @@ psy_Property* psy_property_preventtranslate(psy_Property* self)
 	return self;
 }
 
+bool psy_property_translation_prevented(const psy_Property* self)
+{
+	assert(self);
+
+	return !self->item.translate;
+}
+
 bool psy_property_hasid(const psy_Property* self, int id)
 {
 	assert(self);
