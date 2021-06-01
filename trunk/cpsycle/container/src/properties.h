@@ -203,6 +203,7 @@ psy_Property* psy_property_preventsave(psy_Property*);
 psy_Property* psy_property_enablesave(psy_Property*);
 psy_Property* psy_property_enableappend(psy_Property*);
 psy_Property* psy_property_preventtranslate(psy_Property*);
+bool psy_property_translation_prevented(const psy_Property*);
 bool psy_property_hasid(const psy_Property* self, int id);
 /* Value */
 psy_Property* psy_property_setitem_bool(psy_Property*, bool value);

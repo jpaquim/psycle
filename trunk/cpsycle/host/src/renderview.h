@@ -1,13 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(RENDERVIEW_H)
 #define RENDERVIEW_H
 
-// host
+/* host */
 #include "propertiesview.h"
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uiedit.h>
@@ -17,20 +19,20 @@
 extern "C" {
 #endif
 
-// View for saving a song as a Windows PCM Wav.
+/* View for saving a song as a Windows PCM Wav. */
 
 typedef struct RenderView {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	PropertiesView view;
-	// internal data
+	/* internal */
+	PropertiesView view;	
 	psy_Property* properties;	
+	psy_Property* driverconfigure;
 	psy_AudioDriver* fileoutdriver;		
 	int restoreloopmode;
 	psy_dsp_DitherSettings restoredither;
 	bool restoredodither;
-	// references
+	/* references */
 	psy_AudioDriver* curraudiodriver;
 	Workspace* workspace;
 } RenderView;
@@ -42,4 +44,4 @@ void renderview_init(RenderView*, psy_ui_Component* parent,
 }
 #endif
 
-#endif
+#endif /* RENDERVIEW_H */

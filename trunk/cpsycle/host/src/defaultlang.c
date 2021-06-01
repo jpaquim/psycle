@@ -41,7 +41,7 @@ static void make_translator_make_edit(psy_Property* parent);
 static void make_translator_make_timebar(psy_Property* parent);
 static void make_translator_make_linesperbeatbar(psy_Property* parent);
 static void make_translator_make_channelmapping(psy_Property* parent);
-static void make_translator_make_renderbar(psy_Property* parent);
+static void make_translator_make_renderview(psy_Property* parent);
 static void make_translator_make_export(psy_Property* parent);
 static void make_translator_make_gear(psy_Property* parent);
 static void make_translator_make_cpu(psy_Property* parent);
@@ -84,7 +84,7 @@ void make_translator_default(psy_Property* lang)
 	make_translator_make_timebar(lang);
 	make_translator_make_linesperbeatbar(lang);
 	make_translator_make_channelmapping(lang);
-	make_translator_make_renderbar(lang);
+	make_translator_make_renderview(lang);
 	make_translator_make_export(lang);
 	make_translator_make_gear(lang);
 	make_translator_make_cpu(lang);
@@ -251,10 +251,11 @@ void make_translator_make_channelmapping(psy_Property* parent)
 		"Remove connection with right click");
 }
 
-void make_translator_make_renderbar(psy_Property* parent)
+void make_translator_make_renderview(psy_Property* parent)
 {
 	setsection(psy_property_append_section(parent, "render"));
 	add("render", "Render");
+	add("configure", "Configure");
 	add("file", "File");
 	add("sequence-positions", "Sequence positions");
 	add("quality", "Quality");
@@ -263,18 +264,18 @@ void make_translator_make_renderbar(psy_Property* parent)
 	add("record", "Record");
 	add("enable", "enable");
 	add("from", "from");
-	add("to", "to");
-	add("number", "Number");
+	add("to", "to");	
 	add("save-wave", "Save Wave");
 	add("entire-song", "The Entire Song");
+	add("songsel", "The Song Selection");
 	add("samplerate", "Samplerate");
 	add("bitdepth", "Bit depth");
-	add("none", "none");
+	add("none", "None");
 	add("pdf", "Prob. Distribution");
 	add("triangular", "Triangular");
 	add("rectangular", "Rectangular");
-	add("gaussian", "gaussian");
-	add("noise-shaping", "noise-shaping");
+	add("gaussian", "Gaussian");
+	add("noise-shaping", "Noise-shaping");
 	add("high-pass-contour", "High-Pass Contour");
 	add("none", "none");
 	add("output-path", "Output path");
