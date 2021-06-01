@@ -562,6 +562,9 @@
     <ClCompile Include="src\inputhandler.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderprogressview.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -1042,6 +1045,9 @@
     </ClInclude>
     <ClInclude Include="src\inputhandler.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderprogressview.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

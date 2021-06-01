@@ -8,7 +8,7 @@
 
 /* host */
 #include "propertiesview.h"
-#include "workspace.h"
+#include "renderprogressview.h"
 /* ui */
 #include <uibutton.h>
 #include <uicheckbox.h>
@@ -26,6 +26,7 @@ typedef struct RenderView {
 	psy_ui_Component component;
 	/* internal */
 	PropertiesView view;	
+	RenderProgressView progressview;
 	psy_Property* properties;	
 	psy_Property* driverconfigure;
 	psy_AudioDriver* fileoutdriver;		

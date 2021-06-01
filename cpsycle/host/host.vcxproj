@@ -393,6 +393,7 @@
     <ClCompile Include="src\psycle.c" />
     <ClCompile Include="src\realedit.c" />
     <ClCompile Include="src\recentview.c" />
+    <ClCompile Include="src\renderprogressview.c" />
     <ClCompile Include="src\renderview.c" />
     <ClCompile Include="src\sampleeditor.c" />
     <ClCompile Include="src\samplesbox.c" />
@@ -560,6 +561,7 @@
     <ClInclude Include="src\propertiesview.h" />
     <ClInclude Include="src\realedit.h" />
     <ClInclude Include="src\recentview.h" />
+    <ClInclude Include="src\renderprogressview.h" />
     <ClInclude Include="src\renderview.h" />
     <ClInclude Include="src\resources\resource.h" />
     <ClInclude Include="src\sampleeditor.h" />
