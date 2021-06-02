@@ -95,6 +95,29 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_11p, 6.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_ITEM_SELECTED, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.light),
+		material.overlay_4p);
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_MARKER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.accent),
+		material.overlay_4p);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_MARKER_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.accent),
+		psy_ui_colour_weighted(&material.primary, material.pale));
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_MARKER_SELECTED, style);
 		
 	style = psy_ui_style_allocinit();	
 	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID,

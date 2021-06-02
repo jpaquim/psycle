@@ -1,26 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_PATTERN_H
 #define psy_audio_PATTERN_H
 
-// local
+/* local */
 #include "patternentry.h"
-// container
+/* container */
 #include <signal.h>
-// platform
+/* platform */
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// psy_audio_Pattern
-//
-// A pattern is a small section of your song which is placed in
-// sequence (sequence.h) with other patterns (patterns.h). 
+/*
+** psy_audio_Pattern
+**
+** A pattern is a small section of your song which is placed in
+** sequence (sequence.h) with other patterns (patterns.h).
+*/
 
-// edit position in the pattern
+/* edit position in the pattern */
 typedef struct {	
 	uintptr_t track;
 	psy_dsp_big_beat_t offset;
@@ -46,7 +50,7 @@ INLINE psy_dsp_big_beat_t psy_audio_patterncursor_offset(
 	return self->offset;
 }
 
-/// compares two pattern edit positions, if they are equal
+/* compares two pattern edit positions, if they are equal */
 int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 	psy_audio_PatternCursor* rhs);
 
@@ -150,157 +154,167 @@ INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithnewval(uintptr_t 
 }
 
 typedef struct psy_audio_Pattern {
-	// public
+	/* public */
 	psy_Signal signal_namechanged;
 	psy_Signal signal_lengthchanged;
-	// incremented by each operation, the ui is using
-	// this flag to synchronize its views
+	/*
+	** incremented by each operation, the ui is using
+	** this flag to synchronize its views
+	*/
 	uintptr_t opcount;
-	// private
+	/* internal */
 	psy_audio_PatternNode* events;
 	psy_dsp_big_beat_t length;
-	// used by the paste pattern, player uses songtracks of patterns
+	/* used by the paste pattern, player uses songtracks of patterns */
 	uintptr_t maxsongtracks;
 	char* name;
 } psy_audio_Pattern;
 
-/// initializes a pattern
+/* initializes a pattern */
 void psy_audio_pattern_init(psy_audio_Pattern*);
-/// frees all memory used
+/* frees all memory used */
 void psy_audio_pattern_dispose(psy_audio_Pattern*);
-/// copies a pattern
+/* copies a pattern */
 void psy_audio_pattern_copy(psy_audio_Pattern* dst, psy_audio_Pattern* src);
-/// allocates a pattern
-///\return allocates a pattern
+/*
+** allocates a pattern
+** \return allocates a pattern
+*/
 psy_audio_Pattern* psy_audio_pattern_alloc(void);
-/// allocates and initializes a pattern
-///\return allocates and initializes a pattern
+/*
+** allocates and initializes a pattern
+** \return allocates and initializes a pattern
+*/
 psy_audio_Pattern* psy_audio_pattern_allocinit(void);
-/// allocates a new pattern with a copy of all events
-///\return allocates a new pattern with a copy of all events
+/*
+** allocates a new pattern with a copy of all events
+** \return allocates a new pattern with a copy of all events
+*/
 psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
-/// inserts an event by copy
-///\return the pattern node containing the inserted event
+/*
+** inserts an event by copy
+** \return the pattern node containing the inserted event
+*/
 psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, psy_audio_PatternNode* prev, uintptr_t track,
 	psy_dsp_big_beat_t offset, const psy_audio_PatternEvent*);
-/// removes a pattern node
+/* removes a pattern node */
 void psy_audio_pattern_remove(psy_audio_Pattern*, psy_audio_PatternNode*);
-/// finds the pattern node greater or equal than the offset
-///\return the pattern node greater or equal than the offset
+/* finds the pattern node greater or equal than the offset */
+/* \return the pattern node greater or equal than the offset */
 psy_audio_PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_big_beat_t offset);
 psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern*,
 	uintptr_t track, psy_dsp_big_beat_t offset);
-/// finds a pattern node
-///\return the pattern node
+/* finds a pattern node */
+/* \return the pattern node */
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
 psy_audio_PatternNode* psy_audio_pattern_findnode_cursor(psy_audio_Pattern* pattern,
 	psy_audio_PatternCursor cursor, psy_audio_PatternNode** prev);
-/// gets the first pattern
-///\return the first pattern node
+/* gets the first pattern */
+/* \return the first pattern node */
 INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* self)
 {
 	assert(self);
 	return self->events;
 }
-/// finds the last pattern
-///\return finds the last pattern node
+/* finds the last pattern */
+/* \return finds the last pattern node */
 psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
-/// finds the next pattern node on a track
-///\return next pattern node on a track or NULL
+/* finds the next pattern node on a track */
+/* \return next pattern node on a track or NULL */
 psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern*,
 	psy_audio_PatternNode* node, uintptr_t track);
-/// finds the prev pattern node on a track
-///\return prev pattern node on a track or NULL
+/* finds the prev pattern node on a track */
+/* \return prev pattern node on a track or NULL */
 psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern*,
 	psy_audio_PatternNode* node, uintptr_t track);
-/// sets the pattern description
+/* sets the pattern description */
 void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
-///\return pattern description
+/* \return pattern description */
 INLINE const char* psy_audio_pattern_name(const psy_audio_Pattern* self)
 {
 	assert(self);
 	return self->name;
 }
-/// sets the pattern length
+/* sets the pattern length */
 void psy_audio_pattern_setlength(psy_audio_Pattern*, psy_dsp_big_beat_t length);
-/// return length of the pattern
+/* \return length of the pattern */
 INLINE psy_dsp_big_beat_t psy_audio_pattern_length(const psy_audio_Pattern* self)
 {	
 	assert(self);
 
 	return self->length;
 }
-/// tells if the pattern contains events
-///\return tells if the pattern contains events
+/* tells if the pattern contains events */
+/* \return tells if the pattern contains events */
 INLINE int psy_audio_pattern_empty(const psy_audio_Pattern* self)
 {
 	assert(self);
 
 	return self->events == NULL;
 }
-/// sets the event or an empty event if event is 0
+/* sets the event or an empty event if event is 0 */
 void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*, const psy_audio_PatternEvent*);
-/// gets the event or an empty event if node is 0
-///\return gets the event or an empty event if node is 0
+/* gets the event or an empty event if node is 0 */
+/* \return gets the event or an empty event if node is 0 */
 psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*, psy_audio_PatternNode*);
-/// gets the op count to determine changes
+/* gets the op count to determine changes */
 INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 {
 	assert(self);
 	return self->opcount;
 }
-/// multiplies all entry offsets with the given factor
+/* multiplies all entry offsets with the given factor */
 void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
-/// erases all entries of the block
+/* erases all entries of the block */
 void psy_audio_pattern_blockremove(psy_audio_Pattern*,
 	psy_audio_PatternCursor begin, psy_audio_PatternCursor end);
-// erases the pattern and copies the block from a source pattern
+/* erases the pattern and copies the block from a source pattern */
 void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_PatternSelection selection);
-// paste the block from a source pattern to the cursor position
+/* paste the block from a source pattern to the cursor position */
 void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
 	psy_dsp_big_beat_t bpl);
-// mix paste the block from a source pattern to the cursor position
+/* mix paste the block from a source pattern to the cursor position */
 void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
 	psy_dsp_big_beat_t bpl);
-/// interpolates linear all entries of the block
+/* interpolates linear all entries of the block */
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*,
 	const psy_audio_PatternSelection*, psy_dsp_big_beat_t bpl);
 void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
-/// transposes all entries of the block with the offset
+/* transposes all entries of the block with the offset */
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, int offset);
-/// swingfill
+/* swingfill */
 void psy_audio_pattern_swingfill(psy_audio_Pattern*,
 	const psy_audio_PatternSelection*, bool bTrackMode, psy_dsp_big_beat_t bpl,
 	int tempo, int width, float variance, float phase, bool offset);
-/// changes the machine column of all entries of the block with the offset
+/* changes the machine column of all entries of the block with the offset */
 void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, uintptr_t machine);
-/// changes the instrument column of all entries of the block with the offset
+/* changes the instrument column of all entries of the block with the offset */
 void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, uintptr_t machine);
-/// sets the maximum number of songtracks 
-/// used by the paste pattern, player uses songtracks of patterns
+/* sets the maximum number of songtracks */
+/* used by the paste pattern, player uses songtracks of patterns */
 void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
-/// returns the maximum number of songtracks 
-/// used by the paste pattern, player uses songtracks of patterns
+/* returns the maximum number of songtracks */
+/* used by the paste pattern, player uses songtracks of patterns */
 uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
-// searches the pattern
+/* searches the pattern */
 psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*,
 	psy_audio_PatternSelection, psy_audio_PatternSearchReplaceMode);
-/// number of lines a pattern will be created
+/* number of lines a pattern will be created */
 void psy_audio_pattern_setdefaultlines(uintptr_t numlines);
-/// return number of lines a pattern will be created
+/* return number of lines a pattern will be created */
 uintptr_t psy_audio_pattern_defaultlines(void);
 
-// psy_audio_PatternCursorNavigator
+/* psy_audio_PatternCursorNavigator */
 typedef struct {
 	psy_audio_PatternCursor* cursor;
 	psy_audio_Pattern* pattern;	

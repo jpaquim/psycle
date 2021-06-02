@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_PATTERNS_H
 #define psy_audio_PATTERNS_H
@@ -15,9 +17,9 @@ extern "C" {
 #endif
 
 typedef struct {
-	// Signals
+	/* Signals */
 	psy_Signal signal_numsongtrackschanged;
-	// internal data
+	/* internal */
 	psy_Table slots;
 	uintptr_t songtracks;
 	bool sharetracknames;
@@ -32,6 +34,8 @@ psy_audio_Pattern* psy_audio_patterns_insert(psy_audio_Patterns*,
 	uintptr_t slot, psy_audio_Pattern*);
 uintptr_t psy_audio_patterns_append(psy_audio_Patterns*, psy_audio_Pattern*);
 psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns*, uintptr_t slot);
+const psy_audio_Pattern* psy_audio_patterns_at_const(const psy_audio_Patterns*,
+	uintptr_t slot);
 
 INLINE psy_TableIterator psy_audio_patterns_begin(psy_audio_Patterns* self)
 {

@@ -486,27 +486,72 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &patternslot, sizeof(uint32_t))) {			
 			return status;
 		}		
-		psy_audio_sequence_insert(&self->songfile->song->sequence,
-			psy_audio_orderindex_make(index, i), patternslot);				
+		if (patternslot == INT32_MAX - 1) {
+			/*
+			** this extends the seqd chunk file format to handle
+			** markers
+			** A slot value of INT32_MAX - 1 means it is a Marker
+			*/
+			psy_audio_sequence_insert_marker(&self->songfile->song->sequence,
+				psy_audio_orderindex_make(index, i), "untitled");
+		} else {
+			psy_audio_sequence_insert(&self->songfile->song->sequence,
+				psy_audio_orderindex_make(index, i), patternslot);
+		}
 	}
 	if (self->fp->currchunk.version > 0) {
 		/*
 		** this extends the seqd chunk file format to handle 
 		** beat positions
 		*/
-		psy_audio_SequenceEntryNode* p;
+		psy_audio_SequencePatternEntryNode* p;
 				
 		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
 				++i, psy_list_next(&p)) {
 			float repositionoffset;
-			psy_audio_SequenceEntry* sequenceentry;
+			psy_audio_SequencePatternEntry* sequenceentry;
 				
-			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+			sequenceentry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
 			if (status = psyfile_read(self->fp, &repositionoffset, sizeof(float))) {				
 				return status;
 			}			
-			sequenceentry->repositionoffset = repositionoffset;
+			sequenceentry->entry.repositionoffset = repositionoffset;
 		}			
+	}
+	if (self->fp->currchunk.version > 1) {
+		/*
+		** this extends the seqd chunk file format to handle
+		** markers
+		*/
+		uint32_t nummarkers;
+		uint32_t c;
+		psy_List* s;
+
+		if (status = psyfile_read(self->fp, &nummarkers, sizeof(uint32_t))) {
+			return status;
+		}
+		for (s = track->entries, c = 0; s != NULL && c < nummarkers; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* seqentry;
+
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_MARKER) {
+				psy_audio_SequenceMarkerEntry* marker;
+				float length;
+				char text[256];
+
+				marker = (psy_audio_SequenceMarkerEntry*)seqentry;
+				if (status = psyfile_read(self->fp, &length, sizeof(float))) {
+					return status;
+				}
+				marker->length = length;
+				psyfile_readstring(self->fp, text, 256);
+				psy_strreset(&marker->text, text);
+				++c;
+			}
+		}
+		if (c != nummarkers) {
+			return PSY_ERRFILE;
+		}
 	}
 	return PSY_OK;
 }

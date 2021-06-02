@@ -1,12 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
-#if !defined(CMDSNOTES)
-#define CMDNOTES
+#if !defined(CMDSNOTES_H)
+#define CMDSNOTES_H
 
-// aim: Defines a set of note command ids to define keyboard shortcuts.
-//      Editor and general shortcut ids are defined in cmdsgeneral.h
-//      See also cmdproperties.h for the keyboard mapping
+/*
+** Defines a set of note command ids to define keyboard shortcuts.
+** Editor and general shortcut ids are defined in cmdsgeneral.h
+** See also cmdproperties.h for the keyboard mapping
+*/
 
 enum {
 	CMD_NOTE_C_0,
@@ -21,7 +25,7 @@ enum {
 	CMD_NOTE_A_0,
 	CMD_NOTE_AS0,
 	CMD_NOTE_B_0,
-	CMD_NOTE_C_1, ///< 12
+	CMD_NOTE_C_1, /*< 12 */
 	CMD_NOTE_CS1,
 	CMD_NOTE_D_1,
 	CMD_NOTE_DS1,
@@ -33,7 +37,7 @@ enum {
 	CMD_NOTE_A_1,
 	CMD_NOTE_AS1,
 	CMD_NOTE_B_1,
-	CMD_NOTE_C_2, ///< 24
+	CMD_NOTE_C_2, /*< 24 */
 	CMD_NOTE_CS2,
 	CMD_NOTE_D_2,
 	CMD_NOTE_DS2,
@@ -45,7 +49,7 @@ enum {
 	CMD_NOTE_A_2,
 	CMD_NOTE_AS2,
 	CMD_NOTE_B_2,
-	CMD_NOTE_C_3, ///< 36
+	CMD_NOTE_C_3, /*< 36 */
 	CMD_NOTE_CS3,
 	CMD_NOTE_D_3,
 	CMD_NOTE_DS3,
@@ -69,7 +73,7 @@ enum {
 	CMD_NOTE_CHORD_A_0,
 	CMD_NOTE_CHORD_AS0,
 	CMD_NOTE_CHORD_B_0,
-	CMD_NOTE_CHORD_C_1, ///< 12
+	CMD_NOTE_CHORD_C_1,
 	CMD_NOTE_CHORD_CS1,
 	CMD_NOTE_CHORD_D_1,
 	CMD_NOTE_CHORD_DS1,
@@ -81,7 +85,7 @@ enum {
 	CMD_NOTE_CHORD_A_1,
 	CMD_NOTE_CHORD_AS1,
 	CMD_NOTE_CHORD_B_1,
-	CMD_NOTE_CHORD_C_2, ///< 24
+	CMD_NOTE_CHORD_C_2,
 	CMD_NOTE_CHORD_CS2,
 	CMD_NOTE_CHORD_D_2,
 	CMD_NOTE_CHORD_DS2,
@@ -93,7 +97,7 @@ enum {
 	CMD_NOTE_CHORD_A_2,
 	CMD_NOTE_CHORD_AS2,
 	CMD_NOTE_CHORD_B_2,
-	CMD_NOTE_CHORD_C_3, ///< 36
+	CMD_NOTE_CHORD_C_3,
 	CMD_NOTE_CHORD_CS3,
 	CMD_NOTE_CHORD_D_3,
 	CMD_NOTE_CHORD_DS3,
@@ -106,13 +110,13 @@ enum {
 	CMD_NOTE_CHORD_AS3,
 	CMD_NOTE_CHORD_B_3,
 	CMD_NOTE_CHORD_END,
-	CMD_NOTE_STOP = 120,	///< NOTE STOP
-	CMD_NOTE_TWEAKM = 121,	///< tweak
-	//CMD_NOTE_TweakE = 122,	///< tweak effect. Old! No longer used.
-	CMD_NOTE_MIDICC = 123,	///< Mcm Command (MIDI CC)
-	CMD_NOTE_TWEAKS = 124,	///< tweak slide command
+	CMD_NOTE_STOP = 120,	/*< NOTE STOP */
+	CMD_NOTE_TWEAKM = 121,	/*< tweak */
+	/* CMD_NOTE_TweakE = 122,	///< tweak effect. Old! No longer used. */
+	CMD_NOTE_MIDICC = 123,	/*< Mcm Command (MIDI CC) */
+	CMD_NOTE_TWEAKS = 124,	/*< tweak slide command */
 	CMD_NOTE_MIDIEV = 125,
-	CMD_NOTE_OFF_C_0 = 200, ///> note offs
+	CMD_NOTE_OFF_C_0 = 200, /*> note offs */
 	CMD_NOTE_OFF_CS0,
 	CMD_NOTE_OFF_D_0,
 	CMD_NOTE_OFF_DS0,
@@ -124,7 +128,7 @@ enum {
 	CMD_NOTE_OFF_A_0,
 	CMD_NOTE_OFF_AS0,
 	CMD_NOTE_OFF_B_0,
-	CMD_NOTE_OFF_C_1, ///< 12
+	CMD_NOTE_OFF_C_1,
 	CMD_NOTE_OFF_CS1,
 	CMD_NOTE_OFF_D_1,
 	CMD_NOTE_OFF_DS1,
@@ -136,7 +140,7 @@ enum {
 	CMD_NOTE_OFF_A_1,
 	CMD_NOTE_OFF_AS1,
 	CMD_NOTE_OFF_B_1,
-	CMD_NOTE_OFF_C_2, ///< 24
+	CMD_NOTE_OFF_C_2,
 	CMD_NOTE_OFF_CS2,
 	CMD_NOTE_OFF_D_2,
 	CMD_NOTE_OFF_DS2,
@@ -148,7 +152,7 @@ enum {
 	CMD_NOTE_OFF_A_2,
 	CMD_NOTE_OFF_AS2,
 	CMD_NOTE_OFF_B_2,
-	CMD_NOTE_OFF_C_3, ///< 36
+	CMD_NOTE_OFF_C_3,
 	CMD_NOTE_OFF_CS3,
 	CMD_NOTE_OFF_D_3,
 	CMD_NOTE_OFF_DS3,
@@ -162,4 +166,4 @@ enum {
 	CMD_NOTE_OFF_B_3,
 };
 
-#endif
+#endif /* CMDSNOTES_H */

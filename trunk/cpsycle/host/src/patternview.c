@@ -471,14 +471,16 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 	} else {
 		entry = NULL;
 	}
-	if (entry) {
+	if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 		psy_audio_Pattern* pattern;
+		psy_audio_SequencePatternEntry* seqpatternentry;
 
+		seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
 		pattern = psy_audio_patterns_at(&self->workspace->song->patterns, 
-			entry->patternslot);		
+			seqpatternentry->patternslot);
 		patternview_setpattern(self, pattern);		
-		self->linestate.sequenceentryoffset = entry->offset;
-		self->pianoroll.grid.sequenceentryoffset = entry->offset;
+		self->linestate.sequenceentryoffset = psy_audio_sequenceentry_offset(entry);
+		self->pianoroll.grid.sequenceentryoffset = self->linestate.sequenceentryoffset;
 	} else {
 		patternview_setpattern(self, NULL);		
 		self->linestate.sequenceentryoffset = 0.f;

@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_SEQUENCER_H
 #define psy_audio_SEQUENCER_H
 
-// audio
+/* audio */
 #include "constants.h"
 #include "sequence.h"
 #include "machines.h"
 #include "activechannels.h"
-// container
+/* container */
 #include <list.h>
 
 #ifdef __cplusplus
@@ -19,25 +21,25 @@ extern "C" {
 #define METRONOME_TRACK 65535
 
 typedef struct psy_audio_SequencerTime {
-	// current play position in frames
+	/* current play position in frames */
 	psy_dsp_frame_t playcounter;
-	// current samplerate in cycle/second (often 44100.0 Hz)
+	/* current samplerate in cycle/second (often 44100.0 Hz) */
 	psy_dsp_big_hz_t samplerate;
-	// current play position in beats (1.0 bts = 1 quarter note)
+	/* current play position in beats (1.0 bts = 1 quarter note) */
 	psy_dsp_big_beat_t position;
-	// tempo in beats per minute
+	/* tempo in beats per minute */
 	psy_dsp_big_beat_t bpm;
-	// last bar position in beats
+	/* last bar position in beats */
 	psy_dsp_big_beat_t lastbarposition;
-	// samples to next midi clock
+	/* samples to next midi clock */
 	psy_dsp_frame_t samplestonextclock;
-	// current playtime in seconds
+	/* current playtime in seconds */
 	psy_dsp_big_seconds_t currplaytime;
-	// playing
+	/* playing */
 	bool playing;
-	// starting
+	/* starting */
 	bool playstarting;
-	// stopping
+	/* stopping */
 	bool playstopping;
 } psy_audio_SequencerTime;
 
@@ -91,7 +93,7 @@ typedef struct {
 } psy_audio_SequencerRowDelay;
 
 typedef struct {
-	// metronome
+	/* metronome */
 	bool active;
 	bool precounting;
 	double precount;
@@ -101,13 +103,13 @@ typedef struct {
 void psy_audio_sequencermetronome_init(psy_audio_SequencerMetronome*);
 
 typedef struct psy_audio_Sequencer {
-	// signals
+	/* signals */
 	psy_Signal signal_newline;
-	// internal data
+	/* internal */
 	psy_audio_SequencerTime seqtime;
 	psy_dsp_big_beat_t beatspersample;
-	uintptr_t lpb; // global
-	psy_dsp_big_beat_t lpbspeed; // pattern
+	uintptr_t lpb; /* global */
+	psy_dsp_big_beat_t lpbspeed; /* pattern */
 	uintptr_t extraticks;
 	uintptr_t tpb;	
 	psy_dsp_big_beat_t window;
@@ -131,10 +133,10 @@ typedef struct psy_audio_Sequencer {
 	uintptr_t playtrack;	
 	psy_audio_PatternNode** qsortarray;
 	uintptr_t qsortarraysize;
-	// metronome
+	/* metronome */
 	psy_audio_SequencerMetronome metronome;
 	psy_audio_PatternEvent metronome_event;
-	// references
+	/* references */
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;
 } psy_audio_Sequencer;

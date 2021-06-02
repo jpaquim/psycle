@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "songtrackbar.h"
-// audio
+/* audio */
 #include <songio.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define MIN_TRACKS 4
@@ -33,7 +36,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	psy_ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
 	psy_signal_connect(&self->trackbox.signal_selchanged, self,
-		songtrackbar_onselchange);	
+		songtrackbar_onselchange);
 	psy_signal_connect(&workspace->song->patterns.signal_numsongtrackschanged, self,
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,

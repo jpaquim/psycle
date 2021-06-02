@@ -418,7 +418,7 @@ psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 	if (rv->offset < 0 || rv->offset >=
 			psy_audio_pattern_length(self->linestate->pattern)) {
 		uintptr_t order;
-		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePatternEntry* entry;
 
 		order = psy_audio_sequence_order(self->gridstate->sequence,
 			0, rv->offset + rv->seqoffset);
@@ -428,8 +428,8 @@ psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 					workspace_sequenceeditposition(self->workspace).track,
 					order));
 			if (entry) {				
-				rv->offset -= (entry->offset - rv->seqoffset);
-				rv->seqoffset = entry->offset;
+				rv->offset -= (psy_audio_sequenceentry_offset(&entry->entry) - rv->seqoffset);
+				rv->seqoffset = psy_audio_sequenceentry_offset(&entry->entry);
 			}
 			return psy_audio_orderindex_make(
 				workspace_sequenceeditposition(self->workspace).track,
@@ -441,12 +441,12 @@ psy_audio_OrderIndex trackergrid_checkupdatecursorseqoffset(TrackerGrid* self,
 
 psy_dsp_big_beat_t trackergrid_currseqoffset(TrackerGrid* self)
 {
-	psy_audio_SequenceEntry* entry;
+	psy_audio_SequencePatternEntry* entry;
 
 	entry = psy_audio_sequence_entry(self->gridstate->sequence,
 		workspace_sequenceeditposition(self->workspace));
 	if (entry) {
-		return entry->offset;
+		return psy_audio_sequenceentry_offset(&entry->entry);
 	}
 	return 0.0;
 }

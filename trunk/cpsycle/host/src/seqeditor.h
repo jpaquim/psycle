@@ -13,6 +13,7 @@
 #include "workspace.h"
 #include "zoombox.h"
 /* ui */
+#include <uicombobox.h>
 #include <uiedit.h>
 #include <uiscroller.h>
 
@@ -53,17 +54,20 @@ typedef struct SeqEditorState {
 	SeqEditorDragMode dragmode;
 	bool dragstatus;
 	bool dragstart;
+	bool draglength;
 	psy_dsp_big_beat_t dragstartoffset;
 	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;
 	psy_audio_OrderIndex dragseqpos;
+	psy_audio_SequenceEntryType inserttype;
 	/* references */
 	psy_audio_SequenceEntry* sequenceentry;
 	Workspace* workspace;	
 	SequenceCmds* cmds;
+	psy_ui_Edit* edit;
 } SeqEditorState;
 
-void seqeditorstate_init(SeqEditorState*, Workspace*, SequenceCmds*);
+void seqeditorstate_init(SeqEditorState*, Workspace*, SequenceCmds*, psy_ui_Edit*);
 void seqeditorstate_dispose(SeqEditorState*);
 
 psy_audio_Sequence* seqeditorstate_sequence(SeqEditorState*);
@@ -159,25 +163,49 @@ void seqeditorplayline_update(SeqEditorPlayline*);
 typedef struct SeqEditorPatternEntry {
 	/* inherits */
 	psy_ui_Component component;
-	/* internal */
-	psy_audio_SequenceEntry* entry;
+	/* internal */	
 	/* references */
 	SeqEditorState* state;
-	psy_audio_SequenceEntry* sequenceentry;
+	psy_audio_SequencePatternEntry* sequenceentry;
 	psy_audio_OrderIndex seqpos;
 } SeqEditorPatternEntry;
 
 void seqeditorpatternentry_init(SeqEditorPatternEntry*,
 	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceEntry*, psy_audio_OrderIndex seqpos,
+	psy_audio_SequencePatternEntry*, psy_audio_OrderIndex seqpos,
 	SeqEditorState*);
 
 SeqEditorPatternEntry* seqeditorpatternentry_alloc(void);
 SeqEditorPatternEntry* seqeditorpatternentry_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceEntry* entry, psy_audio_OrderIndex seqpos,
+	psy_audio_SequencePatternEntry* entry, psy_audio_OrderIndex seqpos,
 	SeqEditorState*);
 
+/* SeqEditorMarkerEntry */
+typedef struct SeqEditorMarkerEntry {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	/* references */
+	SeqEditorState* state;
+	psy_audio_SequenceMarkerEntry* sequenceentry;
+	psy_audio_OrderIndex seqpos;
+	bool preventedit;
+} SeqEditorMarkerEntry;
+
+void seqeditormarkerentry_init(SeqEditorMarkerEntry*,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceMarkerEntry*, psy_audio_OrderIndex seqpos,
+	SeqEditorState*);
+
+SeqEditorMarkerEntry* seqeditormarkerentry_alloc(void);
+SeqEditorMarkerEntry* seqeditormarkerentry_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceMarkerEntry* entry, psy_audio_OrderIndex seqpos,
+	SeqEditorState*);
+
+
+/* SeqEditorTrack */
 struct SeqEditorTrack;
 struct SeqEditorTracks;
 
@@ -189,12 +217,12 @@ typedef struct SeqEditorTrack {
 	SeqEditorState* state;
 	bool dragstarting;	
 	double dragstartpx;	
-	psy_audio_SequenceEntryNode* drag_sequenceitem_node;	
+	psy_audio_SequencePatternEntryNode* drag_sequenceitem_node;	
 	Workspace* workspace;
 	PatternViewSkin* skin;
 	psy_ui_Component* view;
 	SeqEditorLine* dragline;
-	psy_List* patternentries;
+	psy_List* entries;
 } SeqEditorTrack;
 
 void seqeditortrack_init(SeqEditorTrack*,
@@ -230,8 +258,7 @@ typedef struct SeqEditorTrackDesc {
 	/* references */
 	PatternViewSkin* skin;
 	SeqEditorState* state;
-	Workspace* workspace;
-	psy_ui_Edit editname;
+	Workspace* workspace;	
 } SeqEditorTrackDesc;
 
 void seqeditortrackdesc_init(SeqEditorTrackDesc*, psy_ui_Component* parent,
@@ -266,6 +293,27 @@ typedef struct SeqEditorBar {
 
 void seqeditorbar_init(SeqEditorBar*, psy_ui_Component* parent);
 
+/* SeqEditToolBar */
+typedef struct SeqEditToolBar {
+	/* inherits */
+	psy_ui_Component component;	
+	psy_ui_Label desctype;
+	psy_ui_ComboBox inserttype;	
+	/* references */
+	Workspace* workspace;
+	SeqEditorState* state;
+} SeqEditToolBar;
+
+void seqedittoolbar_init(SeqEditToolBar*, psy_ui_Component* parent,
+	SeqEditorState*, Workspace*);
+
+INLINE psy_ui_Component* seqedittoolbar_base(SeqEditToolBar* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 typedef struct SeqEditor {
 	/* inherits */
 	psy_ui_Component component;
@@ -274,6 +322,7 @@ typedef struct SeqEditor {
 	psy_ui_Component rulerpane;
 	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
+	SeqEditToolBar toolbar;
 	psy_ui_Component left;
 	SeqEditorBar bar;
 	ZoomBox zoombox_height;
@@ -284,6 +333,7 @@ typedef struct SeqEditor {
 	SequenceCmds cmds;
 	psy_ui_Button expand;
 	bool expanded;
+	psy_ui_Edit edit;
 	/* references */
 	Workspace* workspace;
 } SeqEditor;

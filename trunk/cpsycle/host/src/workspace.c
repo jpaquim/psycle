@@ -1258,12 +1258,12 @@ void workspace_setpatterncursor(Workspace* self,
 	assert(self);
 
 	if (!self->patternsinglemode) {
-		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePatternEntry* entry;
 
 		entry = psy_audio_sequence_entry(&self->song->sequence,
 			self->sequenceselection.editposition);
 		if (entry) {
-			editposition.seqoffset = entry->offset;
+			editposition.seqoffset = psy_audio_sequenceentry_offset(&entry->entry);
 		}
 	} else {
 		editposition.seqoffset = 0.0;
@@ -1389,16 +1389,16 @@ void workspace_idle(Workspace* self)
 				self->song->sequence.tracks,
 				psy_audio_player_position(&self->player));
 			if (it.sequencentrynode && self->lastentry != it.sequencentrynode->entry) {
-				psy_audio_SequenceEntry* entry;
+				psy_audio_SequencePatternEntry* entry;
 				bool prevented;
 
-				entry = (psy_audio_SequenceEntry*)it.sequencentrynode->entry;
-				self->lastentry = (psy_audio_SequenceEntry*)it.sequencentrynode->entry;
+				entry = (psy_audio_SequencePatternEntry*)it.sequencentrynode->entry;
+				self->lastentry = (psy_audio_SequencePatternEntry*)it.sequencentrynode->entry;
 				prevented = viewhistory_prevented(&self->viewhistory);
 				viewhistory_prevent(&self->viewhistory);
 				workspace_setsequenceeditposition(self,
 					psy_audio_orderindex_make(
-						0, entry->row));
+						0, entry->entry.row));
 				if (!prevented) {
 					viewhistory_enable(&self->viewhistory);
 				}
@@ -1406,14 +1406,14 @@ void workspace_idle(Workspace* self)
 			if (self->lastentry) {
 				self->patterneditposition.line = (int) (
 					(psy_audio_player_position(&self->player) -
-					self->lastentry->offset) * psy_audio_player_lpb(&self->player));
+						psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));
 				self->patterneditposition.offset =
-					psy_audio_player_position(&self->player) - self->lastentry->offset;
+					psy_audio_player_position(&self->player) - psy_audio_sequenceentry_offset(&self->lastentry->entry);
 				self->patterneditposition.offset =
 					self->patterneditposition.line /
 					(psy_dsp_big_beat_t) psy_audio_player_lpb(&self->player);
 				if (!self->patternsinglemode) {
-					self->patterneditposition.seqoffset = self->lastentry->offset;
+					self->patterneditposition.seqoffset = psy_audio_sequenceentry_offset(&self->lastentry->entry);
 				}
 				workspace_setpatterncursor(self,
 					self->patterneditposition);
@@ -1421,9 +1421,9 @@ void workspace_idle(Workspace* self)
 		} else if (self->lastentry) {
 			self->patterneditposition.line = (int) (
 				(psy_audio_player_position(&self->player) -
-				self->lastentry->offset) * psy_audio_player_lpb(&self->player));
+					psy_audio_sequenceentry_offset(&self->lastentry->entry)) * psy_audio_player_lpb(&self->player));
 			self->patterneditposition.offset =
-				psy_audio_player_position(&self->player) - self->lastentry->offset;
+				psy_audio_player_position(&self->player) - psy_audio_sequenceentry_offset(&self->lastentry->entry);
 			self->patterneditposition.offset =
 				self->patterneditposition.line /
 				(psy_dsp_big_beat_t)psy_audio_player_lpb(&self->player);
@@ -2055,7 +2055,7 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 		break;
 	case CMD_IMM_PLAYROWTRACK: {
 		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePatternEntry* entry;
 
 		psy_audio_exclusivelock_enter();
 		psy_audio_player_stop(&self->workspace.player);
@@ -2078,7 +2078,7 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 		break; */ }
 	case CMD_IMM_PLAYROWPATTERN: {
 		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePatternEntry* entry;
 
 		psy_audio_exclusivelock_enter();
 		psy_audio_player_stop(&self->workspace.player);
@@ -2100,7 +2100,7 @@ void workspace_oninput(Workspace* self, uintptr_t cmdid)
 		break; */ }
 	case CMD_IMM_PLAYFROMPOS: {
 		/*psy_dsp_big_beat_t playposition = 0;
-		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePatternEntry* entry;
 
 		entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
 		playposition = (entry ? entry->offset : 0) +

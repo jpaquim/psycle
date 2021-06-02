@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_PATTERNENTRY_H
 #define psy_audio_PATTERNENTRY_H
@@ -16,16 +18,16 @@
 extern "C" {
 #endif
 
-/// an event with additional position and track information
+/* an event with additional position and track information */
 typedef struct {
 	psy_List* events;
-	/// position in beat unit
+	/* position in beat unit */
 	psy_dsp_big_beat_t offset;
-	/// sound driver callback event position
+	/* sound driver callback event position */
 	psy_dsp_big_beat_t delta;
-	/// current sequencer bpm
+	/* current sequencer bpm */
 	psy_dsp_big_beat_t bpm;
-	/// the tracker channel
+	/* the tracker channel */
 	uintptr_t track; 
 	uintptr_t priority;
 } psy_audio_PatternEntry;
@@ -75,7 +77,7 @@ void psy_audio_patternentry_addevent(psy_audio_PatternEntry*,
 	const psy_audio_PatternEvent*);
 
 
-/// a list of event entries ordered by position in beat unit
+/* a list of event entries ordered by position in beat unit */
 typedef psy_List psy_audio_PatternNode;
 
 INLINE psy_audio_PatternEntry* psy_audio_patternnode_entry(psy_audio_PatternNode* self)

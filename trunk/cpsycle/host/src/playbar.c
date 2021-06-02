@@ -185,9 +185,9 @@ void playbar_startplay(PlayBar* self)
 		psy_audio_player_stop(self->player);
 		psy_audio_sequence_setplayselection(sequence,
 			&self->workspace->sequenceselection);
-		startposition = entry->offset;
+		startposition = psy_audio_sequenceentry_offset(entry);
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
-			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
+				== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 			psy_audio_PatternCursor editposition;
 
 			editposition = workspace_patterncursor(self->workspace);			

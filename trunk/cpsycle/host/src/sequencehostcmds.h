@@ -26,8 +26,8 @@ typedef struct SequenceCmds {
 void sequencecmds_init(SequenceCmds*, Workspace*);
 
 void sequencecmds_update(SequenceCmds*);
-void sequencecmds_newentry(SequenceCmds*);
-void sequencecmds_insertentry(SequenceCmds*);
+void sequencecmds_newentry(SequenceCmds*, psy_audio_SequenceEntryType);
+void sequencecmds_insertentry(SequenceCmds*, psy_audio_SequenceEntryType);
 void sequencecmds_cloneentry(SequenceCmds*);
 void sequencecmds_delentry(SequenceCmds*);
 void sequencecmds_incpattern(SequenceCmds*);

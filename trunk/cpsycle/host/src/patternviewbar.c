@@ -131,12 +131,12 @@ void patternviewbar_updatestatus(PatternViewBar* self)
 	
 	cursor = workspace_patterncursor(self->workspace);
 	patternid = psy_INDEX_INVALID;
-	if (self->workspace->song) {		
+	if (self->workspace->song) {			
 		entry = psy_audio_sequence_entry(
 			&self->workspace->song->sequence,
 			self->workspace->sequenceselection.editposition);
-		if (entry) {
-			patternid = entry->patternslot;
+		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+			patternid = ((psy_audio_SequencePatternEntry*)entry)->patternslot;
 		}
 	}
 	if (patternid == psy_INDEX_INVALID) {
