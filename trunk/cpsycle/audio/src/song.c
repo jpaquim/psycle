@@ -144,7 +144,7 @@ void song_initsequence(psy_audio_Song* self)
 {
 	assert(self);
 
-	psy_audio_sequence_init(&self->sequence, &self->patterns);		
+	psy_audio_sequence_init(&self->sequence, &self->patterns, &self->samples);		
 	psy_audio_sequence_appendtrack(&self->sequence,
 		psy_audio_sequencetrack_allocinit());		
 	psy_audio_sequence_insert(&self->sequence,

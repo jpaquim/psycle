@@ -132,6 +132,7 @@ void psy_audio_samples_init(psy_audio_Samples* self)
 	psy_table_init(&self->groups);
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
+	self->selected = psy_audio_sampleindex_zero();
 }
 
 void psy_audio_samples_dispose(psy_audio_Samples* self)
@@ -225,6 +226,12 @@ psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples* self,
 		return psy_audio_samplesgroup_at(group, psy_audio_sampleindex_subslot(&index));
 	}
 	return 0;
+}
+
+const psy_audio_Sample* psy_audio_samples_at_const(const psy_audio_Samples* self,
+	psy_audio_SampleIndex index)
+{
+	return psy_audio_samples_at((psy_audio_Samples*)self, index);
 }
 
 uintptr_t psy_audio_samples_size(const psy_audio_Samples* self, uintptr_t slot)

@@ -74,6 +74,77 @@ void psy_audio_sequenceinsertcommand_revert(psy_audio_SequenceInsertCommand* sel
 }
 
 /*
+** psy_audio_SequenceSampleInsertCommand
+*/
+/* prototypes */
+static void psy_audio_sequencesampleinsertcommand_dispose(psy_audio_SequenceSampleInsertCommand*);
+static void psy_audio_sequencesampleinsertcommand_execute(psy_audio_SequenceSampleInsertCommand*);
+static void psy_audio_sequencesampleinsertcommand_revert(psy_audio_SequenceSampleInsertCommand*);
+/* vtable */
+static psy_CommandVtable psy_audio_sequencesampleinsertcommand_vtable;
+static bool psy_audio_sequencesampleinsertcommand_vtable_initialized = FALSE;
+
+static void psy_audio_sequencesampleinsertcommand_vtable_init(psy_audio_SequenceSampleInsertCommand* self)
+{
+	if (!psy_audio_sequencesampleinsertcommand_vtable_initialized) {
+		psy_audio_sequencesampleinsertcommand_vtable = *(self->command.vtable);
+		psy_audio_sequencesampleinsertcommand_vtable.dispose =
+			(psy_fp_command)
+			psy_audio_sequencesampleinsertcommand_dispose;
+		psy_audio_sequencesampleinsertcommand_vtable.execute =
+			(psy_fp_command)
+			psy_audio_sequencesampleinsertcommand_execute;
+		psy_audio_sequencesampleinsertcommand_vtable.revert =
+			(psy_fp_command)
+			psy_audio_sequencesampleinsertcommand_revert;
+		psy_audio_sequencesampleinsertcommand_vtable_initialized = TRUE;
+	}
+}
+// implementation
+psy_audio_SequenceSampleInsertCommand* psy_audio_sequencesampleinsertcommand_alloc(
+	psy_audio_Sequence* sequence, psy_audio_SequenceSelection* selection,
+	psy_audio_OrderIndex index, psy_audio_SampleIndex sampleindex)
+{
+	psy_audio_SequenceSampleInsertCommand* rv;
+
+	rv = malloc(sizeof(psy_audio_SequenceSampleInsertCommand));
+	if (rv) {
+		psy_command_init(&rv->command);
+		psy_audio_sequencesampleinsertcommand_vtable_init(rv);
+		rv->command.vtable = &psy_audio_sequencesampleinsertcommand_vtable;
+		rv->sequence = sequence;
+		rv->selection = selection;
+		psy_audio_sequenceselection_init(&rv->restoreselection);
+		rv->index = index;
+		rv->sampleindex = sampleindex;
+	}
+	return rv;
+}
+
+void psy_audio_sequencesampleinsertcommand_dispose(psy_audio_SequenceSampleInsertCommand* self)
+{
+	psy_audio_sequenceselection_dispose(&self->restoreselection);	
+}
+
+void psy_audio_sequencesampleinsertcommand_execute(psy_audio_SequenceSampleInsertCommand* self)
+{
+	psy_audio_sequenceselection_copy(&self->restoreselection, self->selection);
+	psy_audio_sequence_insert_sample(self->sequence, self->index, self->sampleindex);
+	self->index = psy_audio_orderindex_make(
+		self->index.track, self->index.order + 1);
+	psy_audio_sequenceselection_seteditposition(self->selection, self->index);
+}
+
+void psy_audio_sequencesampleinsertcommand_revert(psy_audio_SequenceSampleInsertCommand* self)
+{
+	psy_audio_sequence_remove(self->sequence, self->index);
+	self->index = psy_audio_orderindex_make(
+		self->index.track, self->index.order - 1);
+	psy_audio_sequenceselection_copy(self->selection, &self->restoreselection);
+	psy_audio_sequenceselection_seteditposition(self->selection, self->index);
+}
+
+/*
 ** psy_audio_SequenceMarkerInsertCommand
 */
 /* prototypes */
@@ -179,7 +250,7 @@ psy_audio_SequenceRemoveCommand* psy_audio_sequenceremovecommand_alloc(
 		rv->sequence = sequence;
 		rv->selection = selection;
 		psy_audio_sequenceselection_init(&rv->restoreselection);		
-		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns);		
+		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns, sequence->samples);		
 	}
 	return rv;
 }
@@ -259,7 +330,7 @@ psy_audio_SequenceClearCommand* psy_audio_sequenceclearcommand_alloc(
 		rv->sequence = sequence;
 		rv->selection = selection;
 		psy_audio_sequenceselection_init(&rv->restoreselection);
-		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns);
+		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns, sequence->samples);
 	}
 	return rv;
 }
@@ -296,8 +367,8 @@ void psy_audio_sequenceclearcommand_revert(psy_audio_SequenceClearCommand* self)
 	psy_audio_exclusivelock_leave();
 }
 
-// psy_audio_SequenceChangePatternCommand
-// prototypes
+/* psy_audio_SequenceChangePatternCommand */
+/* prototypes */
 static void psy_audio_sequencechangepatterncommand_dispose(
 	psy_audio_SequenceChangePatternCommand*);
 static void psy_audio_sequencechangepatterncommand_execute(
@@ -338,7 +409,7 @@ psy_audio_SequenceChangePatternCommand* psy_audio_sequencechangepatterncommand_a
 		rv->step = step;
 		rv->success = FALSE;
 		psy_audio_sequenceselection_init(&rv->restoreselection);
-		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns);
+		psy_audio_sequence_init(&rv->restoresequence, sequence->patterns, sequence->samples);
 	}
 	return rv;
 }

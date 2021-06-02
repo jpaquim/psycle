@@ -90,6 +90,7 @@ typedef struct psy_audio_Samples {
 	psy_Table groups;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
+	psy_audio_SampleIndex selected;
 } psy_audio_Samples;
 
 void psy_audio_samples_init(psy_audio_Samples*);
@@ -105,6 +106,9 @@ void psy_audio_samples_remove(psy_audio_Samples*, psy_audio_SampleIndex);
 void psy_audio_samples_erase(psy_audio_Samples*, psy_audio_SampleIndex);
 /// Return sample at the index or NULL
 psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples*, psy_audio_SampleIndex);
+/// Return const sample at the index or NULL
+const psy_audio_Sample* psy_audio_samples_at_const(const psy_audio_Samples*,
+	psy_audio_SampleIndex);
 /// Return number of samples in the group of the slot
 uintptr_t psy_audio_samples_size(const psy_audio_Samples*, uintptr_t slot);
 /// Return number of all samples

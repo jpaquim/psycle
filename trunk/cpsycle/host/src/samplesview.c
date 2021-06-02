@@ -1125,6 +1125,7 @@ void samplesview_setsample(SamplesView* self, psy_audio_SampleIndex index)
 	sample = (workspace_song(self->workspace))
 		? psy_audio_samples_at(&workspace_song(self->workspace)->samples, index)
 		: 0;
+	workspace_song(self->workspace)->samples.selected = index;
 	wavebox_setsample(&self->wavebox, sample, 0);
 	sampleeditor_setsample(&self->sampleeditor, sample);
 	samplesheaderview_setsample(&self->header, sample);

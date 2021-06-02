@@ -124,6 +124,12 @@ static psy_dsp_big_beat_t psy_audio_static_sequenceentry_length(
 {
 	return 0.0;
 }
+
+static void psy_audio_static_sequenceentry_setlength(
+	psy_audio_SequenceEntry* self, psy_dsp_big_beat_t length)
+{
+	
+}
 /* vtable */
 static psy_audio_SequenceEntryVtable psy_audio_sequenceentry_vtable;
 static bool psy_audio_sequenceentry_vtable_initialized = FALSE;
@@ -137,6 +143,8 @@ static void psy_audio_sequenceentry_vtable_init(void)
 			psy_audio_static_sequenceentry_clone;
 		psy_audio_sequenceentry_vtable.length =
 			psy_audio_static_sequenceentry_length;
+		psy_audio_sequenceentry_vtable.setlength =
+			psy_audio_static_sequenceentry_setlength;
 		psy_audio_sequenceentry_vtable_initialized = TRUE;
 	}	
 }
@@ -230,6 +238,90 @@ psy_dsp_big_beat_t psy_audio_static_sequencepatternentry_length(
 		}
 	}
 	return 0.0;
+}
+
+/* psy_audio_SequenceSampleEntry */
+psy_audio_SequenceEntry* psy_audio_static_sequencesampleentry_clone(
+	const psy_audio_SequenceSampleEntry* self) {
+	psy_audio_SequenceSampleEntry* rv;
+
+	rv = (psy_audio_SequenceSampleEntry*)malloc(sizeof(psy_audio_SequenceSampleEntry));
+	if (rv) {
+		*rv = *self;
+		return &rv->entry;
+	}
+	return NULL;
+}
+static psy_dsp_big_beat_t psy_audio_static_sequencesampleentry_length(
+	const psy_audio_SequenceSampleEntry*);
+/* vtable */
+static psy_audio_SequenceEntryVtable psy_audio_sequencesampleentry_vtable;
+static bool psy_audio_sequencesampleentry_vtable_initialized = FALSE;
+
+static void psy_audio_sequencesampleentry_vtable_init(
+	psy_audio_SequenceSampleEntry* self)
+{
+	if (!psy_audio_sequencesampleentry_vtable_initialized) {
+		psy_audio_sequencesampleentry_vtable = *(self->entry.vtable);
+		psy_audio_sequencesampleentry_vtable.clone =
+			(psy_audio_fp_sequenceentry_clone)
+			psy_audio_static_sequencesampleentry_clone;
+		psy_audio_sequencesampleentry_vtable.length =
+			(psy_audio_fp_sequenceentry_length)
+			psy_audio_static_sequencesampleentry_length;
+		psy_audio_sequencesampleentry_vtable_initialized = TRUE;
+	}
+	self->entry.vtable = &psy_audio_sequencesampleentry_vtable;
+}
+/* implementation */
+void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry* self,	
+	psy_dsp_big_beat_t offset, psy_audio_SampleIndex sampleindex)
+{
+	psy_audio_sequenceentry_init_all(&self->entry,
+		psy_audio_SEQUENCEENTRY_SAMPLE, offset);
+	psy_audio_sequencesampleentry_vtable_init(self);	
+	self->samples = NULL;
+	self->sampleindex = sampleindex;
+}
+
+psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_alloc(void)
+{
+	return (psy_audio_SequenceSampleEntry*)malloc(sizeof(
+		psy_audio_SequenceSampleEntry));
+}
+
+psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_allocinit(
+	psy_dsp_big_beat_t offset, psy_audio_SampleIndex sampleindex)
+{
+	psy_audio_SequenceSampleEntry* rv;
+
+	rv = psy_audio_sequencesampleentry_alloc();
+	if (rv) {
+		psy_audio_sequencesampleentry_init(rv, offset, sampleindex);
+	}
+	return rv;
+}
+
+psy_dsp_big_beat_t psy_audio_static_sequencesampleentry_length(
+	const psy_audio_SequenceSampleEntry* self)
+{
+	const psy_audio_Sample* sample;
+
+	if (self->samples) {
+		sample = psy_audio_samples_at_const(self->samples,
+			psy_audio_sequencesampleentry_samplesindex(self));
+		if (sample) {
+			psy_dsp_big_beat_t beatspersample;
+
+			beatspersample =
+				(125.0 * 1.0) /
+				(44100.0 * 60.0);
+			return psy_audio_sample_numframes(sample) *
+				beatspersample *
+				44100.0 / sample->samplerate;
+		}
+	}
+	return 16.0;
 }
 
 /* psy_audio_SequenceMarkerEntry */
@@ -347,11 +439,13 @@ static void sequence_onpatternlengthchanged(psy_audio_Sequence* self,
 static void sequence_onpatternnamechanged(psy_audio_Sequence* self,
 	psy_audio_Pattern* sender);
 
-void psy_audio_sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patterns)
+void psy_audio_sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patterns,
+	psy_audio_Samples* samples)
 {
 	psy_audio_sequence_initsignals(self);
 	self->tracks = 0;
 	self->patterns = patterns;
+	self->samples = samples;
 	self->preventreposition = FALSE;
 	self->sequencerduration = NULL;
 	psy_audio_trackstate_init(&self->trackstate);
@@ -1307,6 +1401,33 @@ void psy_audio_sequence_insert(psy_audio_Sequence* self,
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
 }
+
+void psy_audio_sequence_insert_sample(psy_audio_Sequence* self,
+	psy_audio_OrderIndex index, psy_audio_SampleIndex sampleindex)
+{
+	psy_audio_SequenceTrack* track;
+
+	assert(self);
+
+	track = psy_audio_sequence_track_at(self, index.track);
+	if (track) {
+		psy_List* p;
+		psy_audio_SequenceSampleEntry* entry;
+
+		p = psy_list_at(track->entries, index.order);
+		if (!p) {
+			p = psy_list_last(track->entries);
+		}
+		entry = psy_audio_sequencesampleentry_allocinit(
+			(psy_dsp_big_beat_t)0.0, sampleindex);
+		entry->samples = self->samples;
+		psy_list_insert(&track->entries, p, entry);
+		psy_audio_sequence_reposition_track(self, track);
+		psy_signal_emit(&self->signal_insert, self, 1, &index);
+		psy_signal_emit(&self->signal_changed, self, 0);
+	}
+}
+
 
 void psy_audio_sequence_insert_marker(psy_audio_Sequence* self,
 	psy_audio_OrderIndex index, const char* text)

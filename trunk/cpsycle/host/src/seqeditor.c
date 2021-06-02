@@ -576,7 +576,7 @@ void seqeditorpatternentry_ondraw(SeqEditorPatternEntry* self,
 				psy_snprintf(text, 64, "%s", psy_audio_pattern_name(pattern));
 			} else {
 				psy_snprintf(text, 64, "%02X:%02X", self->seqpos.order,
-					(int)psy_audio_sequencepatternentry_patternslot(self->sequenceentry));				
+					(int)psy_audio_sequencepatternentry_patternslot(self->sequenceentry));
 			}
 			psy_ui_textoutrectangle(g, topleft,
 				psy_ui_ETO_CLIPPED, clip, text, psy_strlen(text));
@@ -670,6 +670,203 @@ void seqeditorpatternentry_onsequenceselectiondeselect(SeqEditorPatternEntry* se
 	if (psy_audio_orderindex_equal(&self->seqpos, index)) {
 		psy_ui_component_removestylestate(&self->component,
 			psy_ui_STYLESTATE_SELECT);		
+	}
+}
+
+
+/* SeqEditorSampleEnrty */
+/* prototypes */
+static void seqeditorsampleentry_ondestroy(SeqEditorSampleEntry*);
+static void seqeditorsampleentry_ondraw(SeqEditorSampleEntry*,
+	psy_ui_Graphics*);
+static void seqeditorsampleentry_onpreferredsize(SeqEditorSampleEntry*,
+	const psy_ui_Size* limit, psy_ui_Size* rv);
+static void seqeditorsampleentry_onmousedown(SeqEditorSampleEntry*,
+	psy_ui_MouseEvent*);
+static void seqeditorsampleentry_onmousedoubleclick(SeqEditorSampleEntry*,
+	psy_ui_MouseEvent*);
+static void seqeditorsampleentry_onsequenceselectionselect(SeqEditorSampleEntry*,
+	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
+static void seqeditorsampleentry_onsequenceselectiondeselect(SeqEditorSampleEntry*,
+	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
+static void seqeditorsampleentry_edit(SeqEditorSampleEntry*);
+/* vtable */
+static psy_ui_ComponentVtable seqeditorsampleentry_vtable;
+static bool seqeditorsampleentry_vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* seqeditorsampleentry_vtable_init(SeqEditorSampleEntry* self)
+{
+	if (!seqeditorsampleentry_vtable_initialized) {
+		seqeditorsampleentry_vtable = *(self->component.vtable);
+		seqeditorsampleentry_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			seqeditorsampleentry_ondestroy;
+		seqeditorsampleentry_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			seqeditorsampleentry_ondraw;
+		seqeditorsampleentry_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
+			seqeditorsampleentry_onpreferredsize;
+		seqeditorsampleentry_vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			seqeditorsampleentry_onmousedown;
+		seqeditorsampleentry_vtable.onmousedoubleclick =
+			(psy_ui_fp_component_onmouseevent)
+			seqeditorsampleentry_onmousedoubleclick;
+	}
+	return &seqeditorsampleentry_vtable;
+}
+/* implementation */
+void seqeditorsampleentry_init(SeqEditorSampleEntry* self,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceSampleEntry* entry,
+	psy_audio_OrderIndex seqpos,
+	SeqEditorState* state)
+{
+	psy_ui_component_init(&self->component, parent, view);
+	psy_ui_component_setvtable(&self->component,
+		seqeditorsampleentry_vtable_init(self));
+	psy_ui_component_setstyletypes(&self->component,
+		STYLE_SEQEDT_SAMPLE, STYLE_SEQEDT_SAMPLE_HOVER,
+		STYLE_SEQEDT_SAMPLE_SELECTED, psy_INDEX_INVALID);
+
+	self->state = state;
+	self->sequenceentry = entry;
+	self->seqpos = seqpos;
+	self->preventedit = TRUE;
+	psy_signal_connect(&state->workspace->sequenceselection.signal_select, self,
+		seqeditorsampleentry_onsequenceselectionselect);
+	psy_signal_connect(&state->workspace->sequenceselection.signal_deselect, self,
+		seqeditorsampleentry_onsequenceselectiondeselect);
+	if (psy_audio_orderindex_equal(&self->seqpos,
+		&self->state->workspace->sequenceselection.editposition)) {
+		psy_ui_component_addstylestate(&self->component, psy_ui_STYLESTATE_SELECT);
+	}	
+}
+
+SeqEditorSampleEntry* seqeditorsampleentry_alloc(void)
+{
+	return (SeqEditorSampleEntry*)malloc(sizeof(SeqEditorSampleEntry));
+}
+
+SeqEditorSampleEntry* seqeditorsampleentry_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
+	SeqEditorState* state)
+{
+	SeqEditorSampleEntry* rv;
+
+	rv = seqeditorsampleentry_alloc();
+	if (rv) {
+		seqeditorsampleentry_init(rv, parent, view, entry, seqpos, state);
+		rv->component.deallocate = TRUE;
+	}
+	return rv;
+}
+
+void seqeditorsampleentry_ondestroy(SeqEditorSampleEntry* self)
+{
+	psy_signal_disconnect(&self->state->workspace->sequenceselection.signal_select, self,
+		seqeditorsampleentry_onsequenceselectionselect);
+	psy_signal_disconnect(&self->state->workspace->sequenceselection.signal_deselect, self,
+		seqeditorsampleentry_onsequenceselectiondeselect);
+}
+
+void seqeditorsampleentry_ondraw(SeqEditorSampleEntry* self,
+	psy_ui_Graphics* g)
+{
+	if (self->sequenceentry) {
+		psy_ui_RealSize size;
+		const psy_ui_TextMetric* tm;
+		psy_ui_RealRectangle clip;
+		psy_ui_RealPoint topleft;
+		char text[64];
+
+		tm = psy_ui_component_textmetric(&self->component);
+		size = psy_ui_component_scrollsize_px(&self->component);
+		size.width -= 4;
+		clip = psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size);
+		topleft = psy_ui_realpoint_make(4, 2);
+		psy_snprintf(text, 64, "%02X:%02X:%02X", self->seqpos.order,
+			(int)psy_audio_sequencesampleentry_samplesindex(self->sequenceentry).slot,
+			(int)psy_audio_sequencesampleentry_samplesindex(self->sequenceentry).subslot);
+		psy_ui_textoutrectangle(g, topleft,
+			psy_ui_ETO_CLIPPED, clip, text, psy_strlen(text));
+	}
+}
+
+void seqeditorsampleentry_onpreferredsize(SeqEditorSampleEntry* self,
+	const psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	psy_dsp_big_beat_t duration;
+
+	duration = 0.0;
+	if (self->sequenceentry) {
+		duration = psy_audio_sequenceentry_length(
+			&self->sequenceentry->entry);
+	}
+	rv->width = psy_ui_value_make_px(self->state->pxperbeat *
+		duration);
+	rv->height = self->state->lineheight;
+}
+
+void seqeditorsampleentry_onmousedown(SeqEditorSampleEntry* self,
+	psy_ui_MouseEvent* ev)
+{
+	if (self->sequenceentry) {
+		psy_dsp_big_beat_t position;
+		psy_audio_OrderIndex seqeditpos;
+
+		seqeditpos = workspace_sequenceeditposition(self->state->workspace);
+		if (self->seqpos.track != seqeditpos.track ||
+			self->seqpos.order != seqeditpos.order) {
+			workspace_setsequenceeditposition(self->state->workspace,
+				self->seqpos);
+		}
+		position = seqeditorstate_pxtobeat(self->state, ev->pt.x);
+		/* quantize */
+		position =
+			(intptr_t)(position * psy_audio_player_lpb(workspace_player(self->state->workspace))) /
+			(psy_dsp_big_beat_t)psy_audio_player_lpb(workspace_player(self->state->workspace));
+		self->state->dragstartoffset = psy_audio_sequenceentry_offset(&self->sequenceentry->entry) + position;
+		self->state->draglength = FALSE;
+		if (position >= psy_audio_sequenceentry_length(&self->sequenceentry->entry) -
+			1.0) {
+			self->state->draglength = TRUE;
+		}
+		if (ev->button == 1) {
+			self->state->dragstatus = TRUE;
+			self->state->dragstart = TRUE;
+		} else {
+			self->state->dragstatus = TRUE;
+			self->state->cmd = SEQEDTCMD_REMOVEPATTERN;
+		}
+		self->state->dragseqpos = self->seqpos;
+		self->state->sequenceentry = &self->sequenceentry->entry;
+	}
+}
+
+void seqeditorsampleentry_onmousedoubleclick(SeqEditorSampleEntry* self,
+	psy_ui_MouseEvent* ev)
+{	
+	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void seqeditorsampleentry_onsequenceselectionselect(SeqEditorSampleEntry* self,
+	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
+{
+	if (psy_audio_orderindex_equal(&self->seqpos, index)) {
+		psy_ui_component_addstylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
+	}
+}
+
+void seqeditorsampleentry_onsequenceselectiondeselect(SeqEditorSampleEntry* self,
+	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
+{
+	if (psy_audio_orderindex_equal(&self->seqpos, index)) {
+		psy_ui_component_removestylestate(&self->component,
+			psy_ui_STYLESTATE_SELECT);
 	}
 }
 
@@ -1093,6 +1290,20 @@ void seqeditortrack_build(SeqEditorTrack* self)
 						psy_ui_component_setalign(&seqeditpatternentry->component, psy_ui_ALIGN_LEFT);
 						psy_list_append(&self->entries, seqeditpatternentry);
 					}
+				}
+				break; }
+			case psy_audio_SEQUENCEENTRY_SAMPLE: {
+				psy_audio_SequenceSampleEntry* seqsampleentry;
+				SeqEditorSampleEntry* seqeditsampleentry;
+
+				seqsampleentry = (psy_audio_SequenceSampleEntry*)seqentry;
+				seqeditsampleentry = seqeditorsampleentry_allocinit(
+					&self->component, self->view, seqsampleentry,
+					psy_audio_orderindex_make(self->trackindex, c),
+					self->state);
+				if (seqsampleentry) {
+					psy_ui_component_setalign(&seqeditsampleentry->component, psy_ui_ALIGN_LEFT);
+					psy_list_append(&self->entries, seqeditsampleentry);
 				}
 				break; }
 			case psy_audio_SEQUENCEENTRY_MARKER: {
@@ -1865,7 +2076,7 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
 	psy_ui_combobox_addtext(&self->inserttype, "Pattern");
 	psy_ui_combobox_addtext(&self->inserttype, "Marker");
-	/* psy_ui_combobox_addtext(&self->inserttype, "Sample"); */
+	psy_ui_combobox_addtext(&self->inserttype, "Sample");
 	psy_ui_combobox_setcursel(&self->inserttype, 0);
 	psy_signal_connect(&self->inserttype.signal_selchanged, self,
 		seqedittoolbar_oninserttypeselchange);

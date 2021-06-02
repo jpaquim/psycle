@@ -28,6 +28,25 @@ psy_audio_SequenceInsertCommand* psy_audio_sequenceinsertcommand_alloc(
 	psy_audio_OrderIndex, uintptr_t patidx);
 
 /*
+** psy_audio_SequenceSampleInsertCommand
+*/
+
+typedef struct psy_audio_SequenceSampleInsertCommand {
+	/* inherits */
+	psy_Command command;
+	psy_audio_Sequence* sequence;
+	psy_audio_SequenceSelection* selection;
+	psy_audio_OrderIndex index;
+	psy_audio_SampleIndex sampleindex;
+	psy_audio_SequenceSelection restoreselection;
+} psy_audio_SequenceSampleInsertCommand;
+
+psy_audio_SequenceSampleInsertCommand* psy_audio_sequencesampleinsertcommand_alloc(
+	psy_audio_Sequence*, psy_audio_SequenceSelection* selection,
+	psy_audio_OrderIndex, psy_audio_SampleIndex);
+
+
+/*
 ** psy_audio_SequenceMarkerInsertCommand
 */
 
