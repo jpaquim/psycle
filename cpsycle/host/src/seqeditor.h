@@ -205,6 +205,30 @@ SeqEditorMarkerEntry* seqeditormarkerentry_allocinit(
 	SeqEditorState*);
 
 
+/* SeqEditorSampleEntry */
+typedef struct SeqEditorSampleEntry {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	/* references */
+	SeqEditorState* state;
+	psy_audio_SequenceSampleEntry* sequenceentry;
+	psy_audio_OrderIndex seqpos;
+	bool preventedit;
+} SeqEditorSampleEntry;
+
+void seqeditorsampleentry_init(SeqEditorSampleEntry*,
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceSampleEntry*, psy_audio_OrderIndex seqpos,
+	SeqEditorState*);
+
+SeqEditorSampleEntry* seqeditorsampleentry_alloc(void);
+SeqEditorSampleEntry* seqeditorsampleentry_allocinit(
+	psy_ui_Component* parent, psy_ui_Component* view,
+	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
+	SeqEditorState*);
+
+
 /* SeqEditorTrack */
 struct SeqEditorTrack;
 struct SeqEditorTracks;

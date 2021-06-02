@@ -360,6 +360,14 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 			}
 		}
 		break; }
+	case psy_audio_SEQUENCEENTRY_SAMPLE: {
+		psy_audio_SequenceSampleEntry* seqsampleentry;
+
+		seqsampleentry = (psy_audio_SequenceSampleEntry*)entry;
+		psy_snprintf(text, 64, "%02X:%02X:%02X", row,
+			(int)psy_audio_sequencesampleentry_samplesindex(seqsampleentry).slot,
+			(int)psy_audio_sequencesampleentry_samplesindex(seqsampleentry).subslot);
+		break; }
 	case psy_audio_SEQUENCEENTRY_MARKER: {
 		psy_audio_SequenceMarkerEntry* seqmarkerentry;
 

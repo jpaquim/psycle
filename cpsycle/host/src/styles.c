@@ -99,6 +99,29 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style,
 		psy_ui_colour_weighted(&material.onprimary, material.light),
+		psy_ui_colour_make(0x00475E38));
+	psy_ui_border_init_solid_radius(&style->border,
+		material.surface_overlay_11p, 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_SAMPLE, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.accent),
+		psy_ui_colour_make(0x00475E38));
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_SAMPLE_HOVER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.accent),
+		psy_ui_colour_make(0x00576E48));
+	psy_ui_border_init_solid_radius(&style->border,
+		psy_ui_colour_make(0x00677E58), 6.0);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_SAMPLE_SELECTED, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style,
+		psy_ui_colour_weighted(&material.onprimary, material.light),
 		material.overlay_4p);
 	psy_ui_border_init_solid_radius(&style->border,
 		material.surface_overlay_11p, 6.0);

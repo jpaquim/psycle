@@ -47,7 +47,7 @@ typedef struct psy_audio_SequenceEntry* (*psy_audio_fp_sequenceentry_clone)
 typedef	psy_dsp_big_beat_t (*psy_audio_fp_sequenceentry_length)
 	(const struct psy_audio_SequenceEntry*);
 typedef	void (*psy_audio_fp_sequenceentry_setlength)
-(const struct psy_audio_SequenceEntry*, psy_dsp_big_beat_t);
+	(struct psy_audio_SequenceEntry*, psy_dsp_big_beat_t);
 
 typedef struct psy_audio_SequenceEntryVtable {
 	psy_audio_fp_sequenceentry_dispose dispose;
@@ -91,7 +91,7 @@ INLINE void psy_audio_sequenceentry_dispose(psy_audio_SequenceEntry* self)
 }
 
 INLINE void psy_audio_sequenceentry_setlength(
-	const psy_audio_SequenceEntry* self, psy_dsp_big_beat_t length)
+	psy_audio_SequenceEntry* self, psy_dsp_big_beat_t length)
 {
 	self->vtable->setlength(self, length);
 }
@@ -156,6 +156,57 @@ INLINE psy_audio_Pattern* psy_audio_sequencepatternentry_pattern(const
 	if (patterns) {
 		return (psy_audio_Pattern*)psy_audio_patterns_at(patterns,
 			self->patternslot);		
+	}
+	return NULL;
+}
+
+/*
+** psy_audio_SequenceSampleEntry
+**
+** Entry inside a track of a sequence with a pattern index
+*/
+typedef struct psy_audio_SequenceSampleEntry {
+	psy_audio_SequenceEntry entry;
+	/* playorder value (the pattern to be played) */	
+	psy_audio_Samples* samples;
+	/*
+	** sample index to be played if psycle will support audio patterns
+	** not used now
+	*/	
+	psy_audio_SampleIndex sampleindex;
+} psy_audio_SequenceSampleEntry;
+
+void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry*,
+	psy_dsp_big_beat_t offset, psy_audio_SampleIndex);
+
+psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_alloc(void);
+psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_allocinit(
+	psy_dsp_big_beat_t offset, psy_audio_SampleIndex);
+
+INLINE void psy_audio_sequencesampleentry_setsampleslot(psy_audio_SequenceSampleEntry*
+	self, psy_audio_SampleIndex index)
+{
+	assert(self);
+
+	self->sampleindex = index;
+}
+
+INLINE psy_audio_SampleIndex psy_audio_sequencesampleentry_samplesindex(const
+	psy_audio_SequenceSampleEntry* self)
+{
+	assert(self);
+
+	return self->sampleindex;
+}
+
+INLINE psy_audio_Sample* psy_audio_sequencesampleentry_sample(const
+	psy_audio_SequenceSampleEntry* self, psy_audio_Samples* samples)
+{
+	assert(self);
+
+	if (samples) {
+		return (psy_audio_Sample*)psy_audio_samples_at(samples,
+			self->sampleindex);
 	}
 	return NULL;
 }
@@ -434,10 +485,12 @@ typedef struct psy_audio_Sequence {
 	struct psy_audio_Sequencer* sequencerduration;
 	psy_dsp_big_seconds_t durationms;
 	/* references */
-	psy_audio_Patterns* patterns;	
+	psy_audio_Patterns* patterns;
+	psy_audio_Samples* samples;
 } psy_audio_Sequence;
 
-void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*);
+void psy_audio_sequence_init(psy_audio_Sequence*, psy_audio_Patterns*,
+	psy_audio_Samples*);
 void psy_audio_sequence_dispose(psy_audio_Sequence*);
 void psy_audio_sequence_copy(psy_audio_Sequence*, psy_audio_Sequence* other);
 
@@ -445,6 +498,8 @@ void psy_audio_sequence_clear(psy_audio_Sequence*);
 /* sequenceentry methods */
 void psy_audio_sequence_insert(psy_audio_Sequence*, psy_audio_OrderIndex,
 	uintptr_t patidx);
+void psy_audio_sequence_insert_sample(psy_audio_Sequence*,
+	psy_audio_OrderIndex, psy_audio_SampleIndex);
 void psy_audio_sequence_insert_marker(psy_audio_Sequence*,
 	psy_audio_OrderIndex, const char* text);
 void psy_audio_sequence_remove(psy_audio_Sequence*, psy_audio_OrderIndex);

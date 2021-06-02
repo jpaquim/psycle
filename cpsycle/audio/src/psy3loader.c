@@ -486,11 +486,19 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		if (status = psyfile_read(self->fp, &patternslot, sizeof(uint32_t))) {			
 			return status;
 		}		
-		if (patternslot == INT32_MAX - 1) {
+		if (patternslot == INT32_MAX - 2) {
+			/*
+			** this extends the seqd chunk file format to handle
+			** samples
+			** A slot value of INT32_MAX - s means it is a sample
+			*/
+			psy_audio_sequence_insert_sample(&self->songfile->song->sequence,
+				psy_audio_orderindex_make(index, i), psy_audio_sampleindex_zero());
+		} else if (patternslot == INT32_MAX - 1) {
 			/*
 			** this extends the seqd chunk file format to handle
 			** markers
-			** A slot value of INT32_MAX - 1 means it is a Marker
+			** A slot value of INT32_MAX - 1 means it is a marker
 			*/
 			psy_audio_sequence_insert_marker(&self->songfile->song->sequence,
 				psy_audio_orderindex_make(index, i), "untitled");
@@ -524,6 +532,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		** markers
 		*/
 		uint32_t nummarkers;
+		uint32_t numsamples;
 		uint32_t c;
 		psy_List* s;
 
@@ -549,7 +558,31 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 				++c;
 			}
 		}
-		if (c != nummarkers) {
+		if (status = psyfile_read(self->fp, &numsamples, sizeof(uint32_t))) {
+			return status;
+		}
+		for (s = track->entries, c = 0; s != NULL && c < numsamples; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* seqentry;
+
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
+				psy_audio_SequenceSampleEntry* sample;
+				int32_t slot;
+				int32_t subslot;				
+
+				sample = (psy_audio_SequenceSampleEntry*)seqentry;
+				if (status = psyfile_read(self->fp, &slot, sizeof(int32_t))) {
+					return status;
+				}
+				sample->sampleindex.slot = slot;
+				if (status = psyfile_read(self->fp, &subslot, sizeof(int32_t))) {
+					return status;
+				}
+				sample->sampleindex.subslot = subslot;				
+				++c;
+			}
+		}
+		if (c != numsamples) {
 			return PSY_ERRFILE;
 		}
 	}

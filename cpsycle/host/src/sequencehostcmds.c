@@ -45,6 +45,13 @@ void sequencecmds_newentry(SequenceCmds* self,
 					self->workspace->sequenceselection.editposition,
 					patidx)->command);
 			break; }
+		case psy_audio_SEQUENCEENTRY_SAMPLE: {			
+			psy_undoredo_execute(&self->workspace->undoredo,
+				&psy_audio_sequencesampleinsertcommand_alloc(self->sequence,
+					&self->workspace->sequenceselection,
+					self->workspace->sequenceselection.editposition,
+					self->workspace->song->samples.selected)->command);
+			break; }
 		case psy_audio_SEQUENCEENTRY_MARKER: {
 			psy_undoredo_execute(&self->workspace->undoredo,
 				&psy_audio_sequencemarkerinsertcommand_alloc(self->sequence,

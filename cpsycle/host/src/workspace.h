@@ -191,7 +191,7 @@ typedef struct Workspace {
 	psy_List* errorstrs;
 	psy_List* statusoutputstrs;
 	bool driverconfigloading;
-	bool seqviewactive;
+	bool seqviewactive;	
 	InputHandler inputhandler;
 } Workspace;
 

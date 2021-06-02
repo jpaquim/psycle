@@ -382,6 +382,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 			psy_list_next(&t), ++index) {
 		uint32_t sizepos;
 		uint32_t nummarkers;
+		uint32_t numsamples;
 		psy_audio_SequenceTrack* track;		
 		psy_List* s;
 		
@@ -408,6 +409,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 			return status;
 		}		
 		nummarkers = 0;
+		numsamples = 0;
 		for (s = track->entries; s != NULL; psy_list_next(&s)) {
 			psy_audio_SequenceEntry* seqentry;
 
@@ -417,6 +419,11 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				if (status = psyfile_write_int32(self->fp, (int32_t)
 					psy_audio_sequencepatternentry_patternslot(
 						(psy_audio_SequencePatternEntry*)seqentry))) {
+					return status;
+				}
+			} else if(seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
+				++numsamples;
+				if (status = psyfile_write_int32(self->fp, (int32_t)INT32_MAX - 2)) {
 					return status;
 				}
 			} else if (seqentry->type == psy_audio_SEQUENCEENTRY_MARKER) {
@@ -451,6 +458,26 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 					return status;
 				}
 				psyfile_writestring(self->fp, marker->text ? marker->text : "");
+			}
+		}
+		if (status = psyfile_write_uint32(self->fp, numsamples)) {
+			return status;
+		}
+		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* seqentry;
+
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
+				psy_audio_SequenceSampleEntry* sample;				
+
+				sample = (psy_audio_SequenceSampleEntry*)seqentry;
+				if (status = psyfile_write_int32(self->fp, (int32_t)sample->sampleindex.slot)) {
+					return status;
+				}
+				sample = (psy_audio_SequenceSampleEntry*)seqentry;
+				if (status = psyfile_write_int32(self->fp, (int32_t)sample->sampleindex.subslot)) {
+					return status;
+				}				
 			}
 		}
 		if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
