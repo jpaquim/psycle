@@ -201,13 +201,13 @@ void sequencebuttons_onmore(SequenceButtons* self,
 
 void sequencebuttons_onnewentry(SequenceButtons* self, psy_ui_Button* sender)
 {
-	sequencecmds_newentry(self->cmds);
+	sequencecmds_newentry(self->cmds, psy_audio_SEQUENCEENTRY_PATTERN);
 }
 
 void sequencebuttons_oninsertentry(SequenceButtons* self,
 	psy_ui_Button* sender)
 {
-	sequencecmds_insertentry(self->cmds);
+	sequencecmds_insertentry(self->cmds, psy_audio_SEQUENCEENTRY_PATTERN);
 }
 
 void sequencebuttons_oncloneentry(SequenceButtons* self, psy_ui_Button* sender)
@@ -296,15 +296,17 @@ void sequencebuttons_oneditaccept(SequenceButtons* self, psy_ui_Edit* sender)
 			? psy_audio_sequence_entry(self->cmds->sequence,
 				self->cmds->workspace->sequenceselection.editposition)
 			: NULL;
-		if (entry) {
+		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 			psy_audio_Pattern* pattern;
+			psy_audio_SequencePatternEntry* seqpatternentry;
 
+			seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
 			pattern = psy_audio_patterns_at(
 				self->cmds->patterns,
-				entry->patternslot);
+				seqpatternentry->patternslot);
 			if (pattern) {
-				psy_audio_pattern_setname(pattern,
-					psy_ui_edit_text(&self->edit));
+				psy_audio_pattern_setname(pattern, psy_ui_edit_text(
+					&self->edit));
 			}
 		}
 	}

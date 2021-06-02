@@ -381,6 +381,7 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 	for (t = self->song->sequence.tracks, index = 0; t != NULL;
 			psy_list_next(&t), ++index) {
 		uint32_t sizepos;
+		uint32_t nummarkers;
 		psy_audio_SequenceTrack* track;		
 		psy_List* s;
 		
@@ -394,8 +395,9 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 			return status;
 		}
 		// sequence length
-		if (status = psyfile_write_int32(self->fp, (int32_t)
-				psy_audio_sequence_track_size(&self->song->sequence, index))) {
+		if (status = psyfile_write_int32(self->fp,
+				(int32_t)psy_audio_sequence_track_size(
+					&self->song->sequence, index))) {
 			return status;
 		}
 		// sequence name
@@ -405,14 +407,23 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				: "seq0")) {
 			return status;
 		}		
+		nummarkers = 0;
 		for (s = track->entries; s != NULL; psy_list_next(&s)) {
-			psy_audio_SequenceEntry* sequenceentry;
+			psy_audio_SequenceEntry* seqentry;
 
-			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
 			// sequence data
-			if (status = psyfile_write_int32(self->fp, (int32_t)
-					psy_audio_sequenceentry_patternslot(sequenceentry))) {
-				return status;
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+				if (status = psyfile_write_int32(self->fp, (int32_t)
+					psy_audio_sequencepatternentry_patternslot(
+						(psy_audio_SequencePatternEntry*)seqentry))) {
+					return status;
+				}
+			} else if (seqentry->type == psy_audio_SEQUENCEENTRY_MARKER) {
+				++nummarkers;
+				if (status = psyfile_write_int32(self->fp, (int32_t)INT32_MAX - 1)) {
+					return status;
+				}
 			}
 		}
 		for (s = track->entries; s != NULL; psy_list_next(&s)) {
@@ -423,6 +434,23 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 			if (status = psyfile_write_float(self->fp, (float)
 					sequenceentry->repositionoffset)) {
 				return status;
+			}
+		}
+		if (status = psyfile_write_uint32(self->fp, nummarkers)) {
+			return status;
+		}
+		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* seqentry;
+
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			if (seqentry->type == psy_audio_SEQUENCEENTRY_MARKER) {
+				psy_audio_SequenceMarkerEntry* marker;
+
+				marker = (psy_audio_SequenceMarkerEntry*)seqentry;
+				if (status = psyfile_write_float(self->fp, (float)marker->length)) {
+					return status;
+				}
+				psyfile_writestring(self->fp, marker->text ? marker->text : "");
 			}
 		}
 		if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {

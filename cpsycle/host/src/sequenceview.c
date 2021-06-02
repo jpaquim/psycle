@@ -282,16 +282,16 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 	first = psy_audio_sequenceselection_first(
 		&self->state->cmds->workspace->sequenceselection);
 	for (c = startrow; p != NULL; psy_list_next(&p), ++c, cp.y += lineheightpx) {
-		psy_audio_SequenceEntry* sequenceentry;
+		psy_audio_SequenceEntry* seqentry;
 		bool rowplaying = FALSE;
 		psy_ui_Colour bg;
 		
-		sequenceentry = (psy_audio_SequenceEntry*)p->entry;
+		seqentry = (psy_audio_SequenceEntry*)p->entry;
 		rowplaying = psy_audio_player_playing(self->state->cmds->player) &&
 			psy_audio_player_playlist_position(self->state->cmds->player) == c;
 		psy_ui_colour_init(&bg);
 		if (rowplaying) {
-			seqviewtrack_drawprogressbar(self, g, cp, sequenceentry);
+			seqviewtrack_drawprogressbar(self, g, cp, seqentry);
 		}
 		if (psy_audio_sequenceselection_isselected(
 				&self->state->cmds->workspace->sequenceselection,
@@ -312,7 +312,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQLISTVIEW)->colour);
 		}		
-		seqviewtrack_drawentry(self, g, sequenceentry, c, cp, bg,
+		seqviewtrack_drawentry(self, g, seqentry, c, cp, bg,
 			self->state->active && first.order == c &&
 			first.track == self->trackindex);
 	}
@@ -322,32 +322,61 @@ void seqviewtrack_drawentry(SeqViewTrack* self, psy_ui_Graphics* g,
 	psy_audio_SequenceEntry* entry, uintptr_t row, psy_ui_RealPoint cp,
 	psy_ui_Colour bg, bool drawcol)
 {
-	char text[20];	
-	psy_audio_Pattern* pattern;
+	char text[256];		
 	
-	pattern = psy_audio_sequenceentry_pattern(entry,
-		self->state->cmds->patterns);
-	if (self->state->showpatternnames) {		
-		if (pattern) {
-			psy_snprintf(text, 20, "%02X: %s %06.2f", row,
-				psy_audio_pattern_name(pattern),
-				(float)entry->offset);
+	assert(entry);
+
+	switch (entry->type) {
+	case psy_audio_SEQUENCEENTRY_PATTERN: {
+		psy_audio_Pattern* pattern;
+		psy_audio_SequencePatternEntry* seqpatternentry;
+
+		seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+		pattern = psy_audio_sequencepatternentry_pattern(
+			seqpatternentry,
+			self->state->cmds->patterns);
+		if (self->state->showpatternnames) {
+			if (pattern) {
+				psy_snprintf(text, 20, "%02X: %s %06.2f", row,
+					psy_audio_pattern_name(pattern),
+					(float)psy_audio_sequenceentry_offset(entry));
+			} else {
+				psy_snprintf(text, 20, "%02X:%02X(ERR) %06.2f", (int)row,
+					(int)psy_audio_sequencepatternentry_patternslot(
+						seqpatternentry),
+					(float)psy_audio_sequenceentry_offset(entry));
+			}
 		} else {
-			psy_snprintf(text, 20, "%02X:%02X(ERR) %06.2f", (int)row,
-				(int)psy_audio_sequenceentry_patternslot(entry),
-				(float)entry->offset);
+			if (pattern) {
+				psy_snprintf(text, 20, "%02X:%02X  %06.2f", row,
+					(int)psy_audio_sequencepatternentry_patternslot(
+						seqpatternentry),
+					(float)psy_audio_sequenceentry_offset(entry));
+			} else {
+				psy_snprintf(text, 20, "%02X:%02XE %06.2f", row,
+					(int)psy_audio_sequencepatternentry_patternslot(
+						seqpatternentry),
+					(float)psy_audio_sequenceentry_offset(entry));
+			}
 		}
-	} else {
-		if (pattern) {
-			psy_snprintf(text, 20, "%02X:%02X  %06.2f", row,
-				(int)psy_audio_sequenceentry_patternslot(entry),
-				(float)entry->offset);
+		break; }
+	case psy_audio_SEQUENCEENTRY_MARKER: {
+		psy_audio_SequenceMarkerEntry* seqmarkerentry;
+
+		seqmarkerentry = (psy_audio_SequenceMarkerEntry*)entry;
+		if (seqmarkerentry->text) {
+			psy_snprintf(text, 20, "%02X:%s", row,
+				seqmarkerentry->text,
+				(float)psy_audio_sequenceentry_offset(entry));
 		} else {
-			psy_snprintf(text, 20, "%02X:%02XE %06.2f", row,
-				(int)psy_audio_sequenceentry_patternslot(entry),
-				(float)entry->offset);
+			text[0] = '\0';
 		}
-	}	
+		break; }
+	default:
+		text[0] = '\0';
+		break;
+	}
+
 	if (bg.mode.set && !drawcol) {
 		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
@@ -747,25 +776,30 @@ void seqviewlist_inputdigit(SeqviewList* self, uint8_t digit)
 	if (!entry) {
 		return;
 	}
-	/* pattern index */
-	if (self->state->col == 3) {
-		uintptr_t patidx;
-		uint8_t curr;
-		
-		curr = entry->patternslot & 0xF;
-		patidx = entry->patternslot & ~(0xFF);
-		patidx = patidx | curr | (digit << 4);
-		sequencecmds_changepattern(self->state->cmds,
-			(int)patidx - (int)entry->patternslot);
-	} else if(self->state->col == 4) {
-		uintptr_t patidx;
-		uint8_t curr;
+	if (entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+		psy_audio_SequencePatternEntry* seqpatternentry;
 
-		curr = entry->patternslot & 0xF0;
-		patidx = entry->patternslot & ~(0xFF);
-		patidx = patidx | curr | (digit);
-		sequencecmds_changepattern(self->state->cmds,
-			(int)patidx - (int)entry->patternslot);
+		seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+		/* pattern index */
+		if (self->state->col == 3) {
+			uintptr_t patidx;
+			uint8_t curr;
+
+			curr = seqpatternentry->patternslot & 0xF;
+			patidx = seqpatternentry->patternslot & ~(0xFF);
+			patidx = patidx | curr | (digit << 4);
+			sequencecmds_changepattern(self->state->cmds,
+				(int)patidx - (int)seqpatternentry->patternslot);
+		} else if (self->state->col == 4) {
+			uintptr_t patidx;
+			uint8_t curr;
+
+			curr = seqpatternentry->patternslot & 0xF0;
+			patidx = seqpatternentry->patternslot & ~(0xFF);
+			patidx = patidx | curr | (digit);
+			sequencecmds_changepattern(self->state->cmds,
+				(int)patidx - (int)seqpatternentry->patternslot);
+		}
 	}
 }
 

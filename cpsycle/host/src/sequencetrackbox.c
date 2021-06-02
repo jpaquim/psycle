@@ -182,24 +182,27 @@ void sequencetrackbox_showtrackname(SequenceTrackBox* self)
 void sequencetrackbox_onlabelclick(SequenceTrackBox* self, psy_ui_Label* sender,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->edit) {
-		psy_ui_RealRectangle position;
-		psy_ui_RealRectangle labelposition;
+	if (self->edit) {		
 		psy_ui_RealSize size;
 		const psy_ui_TextMetric* tm;
 		double centery;
+		psy_ui_RealRectangle screenposition;
+		psy_ui_RealRectangle viewscreenposition;		
 
-		position = psy_ui_component_position(&self->trackbox.component);
+		screenposition = psy_ui_component_screenposition(&self->trackbox.desc.component);
+		viewscreenposition = psy_ui_component_screenposition(
+			psy_ui_component_parent(&self->edit->component));		
 		size = psy_ui_component_scrollsize_px(&self->trackbox.component);
-		labelposition = psy_ui_component_position(&self->trackbox.desc.component);
 		tm = psy_ui_component_textmetric(&self->trackbox.component);
-		centery = (size.height - tm->tmHeight) / 2;
-		position.top += centery;
-		position.left = labelposition.left;
-		position.right = labelposition.right;
+		centery = (size.height - tm->tmHeight) / 2;		
 		self->preventedit = FALSE;
 		psy_ui_component_setposition(&self->edit->component,
-			psy_ui_rectangle_make_px(&position));
+			psy_ui_rectangle_make(
+				psy_ui_point_make_px(
+					screenposition.left - viewscreenposition.left,
+					screenposition.top - viewscreenposition.top + centery),
+				psy_ui_size_make_px(
+					screenposition.right - screenposition.left, tm->tmHeight)));
 		psy_ui_edit_settext(self->edit, self->trackbox.desc.text);		
 		psy_ui_edit_setsel(self->edit, 0, -1);
 		psy_ui_component_show(&self->edit->component);

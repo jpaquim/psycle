@@ -120,12 +120,20 @@ uintptr_t psy_audio_patterns_firstfreeslot(psy_audio_Patterns* self)
 	return rv;
 }
 
-psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns* self, uintptr_t slot)
+psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns* self,
+	uintptr_t slot)
 {
 	return psy_table_at(&self->slots, slot);
 }
 
-uintptr_t psy_audio_patterns_slot(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
+const psy_audio_Pattern* psy_audio_patterns_at_const(const psy_audio_Patterns* self,
+	uintptr_t slot)
+{
+	return psy_table_at_const(&self->slots, slot);
+}
+
+uintptr_t psy_audio_patterns_slot(psy_audio_Patterns* self,
+	psy_audio_Pattern* pattern)
 {
 	uintptr_t rv;
 	psy_TableIterator it;
