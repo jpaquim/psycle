@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_ITMODULE2_H
 #define psy_audio_ITMODULE2_H
 
 #include "../../detail/psydef.h"
 
-// local
+/* local */
 #include "machine.h"
 #include "songio.h"
 
@@ -14,12 +16,14 @@
 extern "C" {
 #endif
 
-// ITModule2
-// mfc-psycle: ITModule2.h/.cpp
-//
-// Imports it2 files using sampulse
+/*
+** ITModule2
+** mfc-psycle: ITModule2.h/.cpp
+**
+** Imports it2 files using sampulse
+*/
 
-// little-endian values.
+/* little - endian values. */
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
 	#define IMPM_ID 0x4D504D49
 	#define IMPI_ID 0x49504D49
@@ -44,7 +48,7 @@ enum {
 enum {
 	IT2_SPECIAL_FLAGS_HASMESSAGE = 0X01,
 	IT2_SPECIAL_FLAGS_MIDIEMBEDDED = 0x08
-	// Other values are unused.
+	/* Other values are unused. */
 };
 
 enum {	
@@ -94,9 +98,9 @@ typedef struct itInsHeader1x {
 	char sName[26];
 	uint8_t unused[6];
 	struct ITNotePair notes[120];
-	/// value of the volume for each tick. (Seems it was probably an internal IT thing to represent the envelope)
+	/* value of the volume for each tick. (Seems it was probably an internal IT thing to represent the envelope) */
 	uint8_t volEnv[200];
-	/// Each of the defined nodes (tick index, value). value ranges from 0 to 64 (decimal). 0xFF is end of envelope.
+	/* Each of the defined nodes (tick index, value). value ranges from 0 to 64 (decimal). 0xFF is end of envelope. */
 	struct ITNodePair1x nodepair[25];
 } itInsHeader1x;
 
@@ -128,7 +132,7 @@ typedef enum EnvFlagsType {
 	IT2_ENV_USE_LOOP = 0x02,
 	IT2_ENV_USE_SUSTAIN = 0x04,
 	IT2_ENV_ENABLE_CARRY = 0x08,
-	IT2_ENV_ISFILTER = 0x80, // Only meaningful in a pitch envelope
+	IT2_ENV_ISFILTER = 0x80, /* Only meaningful in a pitch envelope */
 } EnvFlagsType;
 
 typedef enum DCActionType {
@@ -147,8 +151,7 @@ typedef struct itSampleHeader {
 	uint8_t vibS, vibD, vibR, vibT;
 } itSampleHeader;
 
-
-// little-endian
+/* little-endian */
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
 #define SCRM_ID 0x4D524353
 #define SCRS_ID 0x53524353
@@ -164,7 +167,7 @@ typedef struct s3mHeader {
 	uint8_t end, type;
 	uint8_t unused1[2];
 	uint16_t ordNum, insNum, patNum, flags, trackerV, trackerInf;
-	uint32_t tag; // SCRM
+	uint32_t tag; /* SCRM */
 	uint8_t gVol, iSpeed, iTempo, mVol, uClick, defPan;
 	uint8_t unused2[8];
 	uint16_t pSpecial;
@@ -179,11 +182,11 @@ typedef struct s3mSampleHeader {
 	uint32_t length, loopb, loope;
 	uint8_t vol;
 	uint8_t unused;
-	uint8_t packed, flags; //[P]ack   0=unpacked, 1=DP30ADPCM packing (not used by ST3.01)
+	uint8_t packed, flags; /* [P]ack   0=unpacked, 1=DP30ADPCM packing (not used by ST3.01) */
 	uint32_t c2speed;
 	uint32_t unused2, internal1, internal2;
 	char sName[28];
-	/// SCRS
+	/* SCRS */
 	uint32_t tag;
 } s3mSampleHeader;
 
@@ -199,7 +202,7 @@ enum {
 };
 
 enum {
-	IT2_SAMPLE_CONVERT_IS_SIGNED = 0x01, ///< Only this one is used by Impulse Tracker. The others were for its sample importer.
+	IT2_SAMPLE_CONVERT_IS_SIGNED = 0x01, /*< Only this one is used by Impulse Tracker. The others were for its sample importer. */
 	IT2_SAMPLE_CONVERTIS_MOTOROLA = 0x02,
 	IT2_SAMPLE_CONVERTIS_DELTA = 0x04,
 	IT2_SAMPLE_CONVERTIS_BYTEDELTA = 0x08,
@@ -207,7 +210,7 @@ enum {
 	IT2_SAMPLE_CONVERTIS_PROMPT = 0x20
 };
 
-/*Generic header. casted to one of the other two depending on "type" (or "tag") value*/
+/* Generic header. casted to one of the other two depending on "type" (or "tag") value */
 typedef struct s3mInstHeader {
 	uint8_t type;
 	char fileName[12];
@@ -222,15 +225,15 @@ enum {
 	S3M_SAMPLE_FLAGS_IS16BIT = 0x04
 };
 
-// Extra class for Reading of IT compressed samples.
+/* Extra class for Reading of IT compressed samples. */
 typedef struct BitsBlock {
-	/// pointer to data
+	/* pointer to data */
 	uint8_t* pdata;
-	/// read position
+	/* read position */
 	uint8_t* rpos;
-	/// read end
+	/* read end */
 	uint8_t* rend;
-	/// remaining bits in current pos
+	/* remaining bits in current pos */
 	uint8_t rembits;
 } BitsBlock;
 
@@ -262,8 +265,8 @@ enum {
 	IT2_CMD_VIBRATO = 8,
 	IT2_CMD_TREMOR = 9,
 	IT2_CMD_ARPEGGIO = 10,
-	IT2_CMD_VOLSLIDE_VIBRATO = 11, ///< Dual command: H00 and Dxy 
-	IT2_CMD_VOLSLIDE_TONEPORTA = 12, ///< Dual command: G00 and Dxy
+	IT2_CMD_VOLSLIDE_VIBRATO = 11, /*< Dual command: H00 and Dxy  */
+	IT2_CMD_VOLSLIDE_TONEPORTA = 12, /*< Dual command: G00 and Dxy*/
 	IT2_CMD_SET_CHANNEL_VOLUME = 13,
 	IT2_CMD_CHANNEL_VOLUME_SLIDE = 14,
 	IT2_CMD_SET_SAMPLE_OFFSET = 15,
@@ -271,23 +274,23 @@ enum {
 	IT2_CMD_RETRIGGER_NOTE = 17,
 	IT2_CMD_TREMOLO = 18,
 	IT2_CMD_S = 19,
-	IT2_CMD_SET_SONG_TEMPO = 20, ///< T0x Slide tempo down . T1x slide tempo up
+	IT2_CMD_SET_SONG_TEMPO = 20, /*< T0x Slide tempo down . T1x slide tempo up */
 	IT2_CMD_FINE_VIBRATO = 21,
 	IT2_CMD_SET_GLOBAL_VOLUME = 22,
 	IT2_CMD_GLOBAL_VOLUME_SLIDE = 23,
 	IT2_CMD_SET_PANNING = 24,
 	IT2_CMD_PANBRELLO = 25,
-	IT2_CMD_MIDI_MACRO = 26  ///< see MIDI.TXT ([bohan] uhu? what file?)
+	IT2_CMD_MIDI_MACRO = 26  /*< see MIDI.TXT ([bohan] uhu? what file?) */
 };
 
 enum {
-	IT2_CMD_S_SET_FILTER = 0x00, ///< Greyed out in IT...
-	IT2_CMD_S_SET_GLISSANDO_CONTROL = 0x10, ///< Greyed out in IT...
-	IT2_CMD_S_FINETUNE = 0x20, ///< Greyed out in IT...
-	IT2_CMD_S_SET_VIBRATO_WAVEFORM = 0x30, ///< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-	IT2_CMD_S_SET_TREMOLO_WAVEFORM = 0x40, ///< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-	IT2_CMD_S_SET_PANBRELLO_WAVEFORM = 0x50, ///< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-	IT2_CMD_S_FINE_PATTERN_DELAY = 0x60, ///< causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
+	IT2_CMD_S_SET_FILTER = 0x00, /*< Greyed out in IT... */
+	IT2_CMD_S_SET_GLISSANDO_CONTROL = 0x10, /*< Greyed out in IT... */
+	IT2_CMD_S_FINETUNE = 0x20, /*< Greyed out in IT... */
+	IT2_CMD_S_SET_VIBRATO_WAVEFORM = 0x30, /*< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random */
+	IT2_CMD_S_SET_TREMOLO_WAVEFORM = 0x40, /*< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random */
+	IT2_CMD_S_SET_PANBRELLO_WAVEFORM = 0x50, /*< Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random */
+	IT2_CMD_S_FINE_PATTERN_DELAY = 0x60, /*< causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer) */
 	IT2_CMD_S7 = 0x70,
 	IT2_CMD_S_SET_PAN = 0x80,
 	IT2_CMD_S9 = 0x90,
@@ -295,15 +298,15 @@ enum {
 	IT2_CMD_S_PATTERN_LOOP = 0xB0,
 	IT2_CMD_S_DELAYED_NOTE_CUT = 0xC0,
 	IT2_CMD_S_NOTE_DELAY = 0xD0,
-	IT2_CMD_S_PATTERN_DELAY = 0xE0, ///< causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
+	IT2_CMD_S_PATTERN_DELAY = 0xE0, /*< causes a "pause" of x rows ( i.e. the current row becomes x rows longer) */
 	IT2_CMD_S_SET_MIDI_MACRO = 0xF0
 };
 
 struct psy_audio_Song;
 
-// ITModule2
+/* ITModule2 */
 typedef struct ITModule2 {
-	// internal data
+	/* internal */
 	ITHeader fileheader;
 	int16_t extracolumn;
 	int16_t maxextracolumn;
@@ -312,7 +315,7 @@ typedef struct ITModule2 {
 	uint8_t highoffset[64];
 	psy_Table xmtovirtual;
 	s3mHeader  s3mFileH;
-	// references
+	/* references */
 	psy_audio_SongFile* songfile;
 	PsyFile* fp;
 	struct psy_audio_Song* song;

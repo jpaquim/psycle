@@ -31,7 +31,7 @@ extern "C" {
 
 struct psy_audio_SongFile;
 
-/// helper struct for the PSY2 loader.
+/* Helper struct for the PSY2 loader. */
 typedef struct VSTLoader {
 	uint8_t valid;
 	char dllName[128];
@@ -43,6 +43,10 @@ typedef struct VstPreload {
 	char _editName[16];
 	struct psy_audio_SongFile* songfile;
 } VstPreload;
+
+void vstpreload_init(VstPreload*, struct psy_audio_SongFile*);
+int vstpreload_load(VstPreload*, uintptr_t slot,
+	unsigned char* program, int32_t* instance);
 
 typedef struct PSY2Loader {
 	struct psy_audio_SongFile* songfile;

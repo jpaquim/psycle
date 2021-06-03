@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_SONGIO_H
 #define psy_audio_SONGIO_H
@@ -24,7 +26,7 @@ typedef struct {
 
 struct psy_audio_Instrument;
 
-/// song load and save
+/* song loadand save */
 typedef struct psy_audio_SongFile {
 	struct psy_audio_Song* song;
 	struct PsyFile* file;
@@ -35,7 +37,7 @@ typedef struct psy_audio_SongFile {
 	psy_Signal signal_warning;	
 	char* path;
 	uintptr_t machinesoloed;
-	// MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)]
+	/* MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)] */
 	psy_audio_LegacyWires* legacywires;
 } psy_audio_SongFile;
 
