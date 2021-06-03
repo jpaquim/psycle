@@ -103,6 +103,12 @@ void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope*,
 void psy_dsp_envelope_settime(psy_dsp_Envelope*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime);
 
+INLINE uintptr_t psy_dsp_envelope_numofpoints(
+	const psy_dsp_Envelope* self)
+{
+	return psy_list_size(self->points);
+}
+
 INLINE psy_dsp_seconds_t psy_dsp_envelope_time(
 	const psy_dsp_Envelope* self, uintptr_t pointindex)
 {
@@ -110,6 +116,20 @@ INLINE psy_dsp_seconds_t psy_dsp_envelope_time(
 
 	rv = psy_dsp_envelope_at(self, pointindex);
 	return rv.time;
+}
+
+INLINE uintptr_t psy_dsp_envelope_time_ms(
+	const psy_dsp_Envelope* self, uintptr_t pointindex)
+{
+	psy_dsp_EnvelopePoint pt;
+
+	if (pointindex < psy_dsp_envelope_numofpoints(self)) {
+		pt = psy_dsp_envelope_at(self, pointindex);
+		if (self->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
+			return (intptr_t)(pt.time * 1000.f);
+		}
+	}
+	return psy_INDEX_INVALID;
 }
 
 void psy_dsp_envelope_setvalue(psy_dsp_Envelope*,
@@ -178,12 +198,6 @@ INLINE void psy_dsp_envelope_setloopend(
 	psy_dsp_Envelope* self, const uintptr_t value)
 {
 	self->loopend = value;
-}
-
-INLINE uintptr_t psy_dsp_envelope_numofpoints(
-	const psy_dsp_Envelope* self)
-{
-	return psy_list_size(self->points);	
 }
 
 //// If the envelope IsEnabled, it is used and triggered. Else, it is not.

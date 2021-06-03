@@ -214,3 +214,15 @@ void psy_list_deallocate(psy_List** self, psy_fp_disposefunc disposefunc)
 		*self = NULL;
 	}
 }
+
+void psy_list_swap_entries(psy_List* i, psy_List* j)
+{
+	if (i && j) {
+		void* tmp;
+
+		tmp = i->entry;
+		i->entry = j->entry;
+		j->entry = tmp;
+	}
+}
+
