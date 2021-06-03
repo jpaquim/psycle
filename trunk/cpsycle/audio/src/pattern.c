@@ -83,6 +83,55 @@ void psy_audio_patternselection_init_all(psy_audio_PatternSelection* self,
 	self->valid = TRUE;
 }
 
+void psy_audio_patternselection_startdrag(psy_audio_PatternSelection* self,
+	psy_audio_PatternCursor dragselectionbase,
+	psy_audio_PatternCursor cursor, double bpl)
+{
+	assert(self);
+
+	psy_audio_patternselection_enable(self);
+	self->topleft = cursor;
+	self->bottomright = cursor;
+	if (cursor.track >= dragselectionbase.track) {
+		self->topleft.track = dragselectionbase.track;
+		self->bottomright.track = cursor.track;
+	} else {
+		self->topleft.track = cursor.track;
+		self->bottomright.track = dragselectionbase.track;
+	}
+	if (cursor.offset >= dragselectionbase.offset) {
+		self->topleft.offset = dragselectionbase.offset;
+		self->bottomright.offset = cursor.offset + bpl;
+	} else {
+		self->topleft.offset = cursor.offset;
+		self->bottomright.offset = dragselectionbase.offset +
+			bpl;
+	}
+	self->bottomright.track += 1;
+}
+
+void psy_audio_patternselection_drag(psy_audio_PatternSelection* self,
+	psy_audio_PatternCursor dragselectionbase,
+	psy_audio_PatternCursor cursor, double bpl)
+{
+	assert(self);
+
+	if (cursor.track >= dragselectionbase.track) {
+		self->topleft.track = dragselectionbase.track;
+		self->bottomright.track = cursor.track + 1;
+	} else {
+		self->topleft.track = cursor.track;
+		self->bottomright.track = dragselectionbase.track + 1;
+	}
+	if (cursor.offset >= dragselectionbase.offset) {
+		self->topleft.offset = dragselectionbase.offset;
+		self->bottomright.offset = cursor.offset + bpl;
+	} else {
+		self->topleft.offset = cursor.offset;
+		self->bottomright.offset = dragselectionbase.offset + bpl;
+	}
+}
+
 psy_audio_PatternSelection psy_audio_patternselection_make(
 	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright)
 {

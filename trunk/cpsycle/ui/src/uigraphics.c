@@ -334,7 +334,14 @@ void psy_ui_graphics_imp_init(psy_ui_GraphicsImp* self)
 void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 	const psy_ui_Border* border, const psy_ui_TextMetric* tm)
 {	
-	if (psy_ui_border_isrect(border) && psy_ui_border_monochrome(border)) {
+	if (psy_ui_border_isrect(border) && psy_ui_border_monochrome(border) &&
+			psy_ui_border_equalwidth(border)) {
+		uintptr_t restorelinewidth;
+		psy_ui_Value borderwidth;
+
+		restorelinewidth = psy_ui_linewidth(self);
+		borderwidth = psy_ui_border_width_top(border);
+		psy_ui_setlinewidth(self, (uintptr_t)psy_ui_value_px(&borderwidth, tm, NULL));
 		psy_ui_setcolour(self, border->top.colour);
 		if (psy_ui_border_isround(border)) {			
 			psy_ui_drawroundrectangle(self, r,
@@ -345,6 +352,7 @@ void psy_ui_drawborder(psy_ui_Graphics* self, psy_ui_RealRectangle r,
 			psy_ui_setcolour(self, border->top.colour);
 			psy_ui_drawrectangle(self, r);
 		}
+		psy_ui_setlinewidth(self, restorelinewidth);
 	} else {
 		if (border->top.style != psy_ui_BORDER_NONE && border->top.colour.mode.set) {
 			psy_ui_setcolour(self, border->top.colour);			

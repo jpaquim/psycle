@@ -28,6 +28,8 @@ extern "C" {
 #define PSY2_NOTECOMMANDS_MIDICC 123
 #define PSY2_NOTECOMMANDS_TWEAKSLIDE 124
 
+#define PSY2_EVENT_SIZE 5
+
 typedef struct psy_audio_LegacyPatternEntry {
 	uint8_t _note;
 	uint8_t _inst;

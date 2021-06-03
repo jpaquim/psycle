@@ -989,28 +989,6 @@ void psy_ui_component_setmargin_children(psy_ui_Component* self,
 		(psy_fp_margin)psy_ui_component_setmargin, margin);
 }
 
-psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component* self)
-{
-	psy_ui_Margin rv;
-	const psy_ui_Border* border;
-
-	psy_ui_margin_init(&rv);
-	border = psy_ui_component_border(self);
-	if (border->left.style == psy_ui_BORDER_SOLID) {
-		rv.left = psy_ui_value_make_px(1);
-	}
-	if (border->top.style == psy_ui_BORDER_SOLID) {
-		rv.top = psy_ui_value_make_px(1);		
-	}
-	if (border->right.style == psy_ui_BORDER_SOLID) {
-		rv.right = psy_ui_value_make_px(1);
-	}
-	if (border->bottom.style == psy_ui_BORDER_SOLID) {
-		rv.bottom = psy_ui_value_make_px(1);
-	}
-	return rv;
-}
-
 void psy_ui_component_setspacing_children(psy_ui_Component* self,
 	psy_ui_Margin spacing)
 {
@@ -1735,12 +1713,12 @@ double lines(double pos, double size, double scrollsize, double step,
 
 void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 {	
+	psy_ui_RealSize size;
+
+	size = psy_ui_component_scrollsize_px(self);	
 	psy_ui_drawborder(g,
-		psy_ui_realrectangle_make(
-			psy_ui_realpoint_zero(),
-			psy_ui_component_scrollsize_px(self)),
-		psy_ui_component_border(self),
-		psy_ui_component_textmetric(self));
+		psy_ui_realrectangle_make(psy_ui_realpoint_zero(), size),
+		psy_ui_component_border(self), psy_ui_component_textmetric(self));
 }
 
 void psy_ui_component_drawbackgroundimage(psy_ui_Component* self,

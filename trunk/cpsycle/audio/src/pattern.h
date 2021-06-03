@@ -91,6 +91,13 @@ INLINE bool psy_audio_patternselection_test(psy_audio_PatternSelection* self,
 		offset < self->bottomright.offset + self->bottomright.seqoffset;
 }
 
+void psy_audio_patternselection_startdrag(psy_audio_PatternSelection*,
+	psy_audio_PatternCursor dragselectionbase,
+	psy_audio_PatternCursor cursor, double bpl);
+void psy_audio_patternselection_drag(psy_audio_PatternSelection*,
+	psy_audio_PatternCursor dragselectionbase,
+	psy_audio_PatternCursor cursor, double bpl);
+
 typedef bool (*psy_audio_fp_matches)(const uintptr_t test, const uintptr_t reference);
 typedef uintptr_t (*psy_audio_fp_replacewith)(const uintptr_t current, const uintptr_t newval);
 

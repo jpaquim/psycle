@@ -23,6 +23,7 @@ typedef struct psy_ui_BorderSide {
 	psy_ui_BorderStyle style;
 	psy_ui_Colour colour;
 	psy_ui_Value radius;
+	psy_ui_Value width;
 } psy_ui_BorderSide;
 
 void psy_ui_borderside_init(psy_ui_BorderSide*);
@@ -131,6 +132,11 @@ INLINE bool psy_ui_border_monochrome(const psy_ui_Border* self)
 		psy_ui_equal_colours(&self->bottom.colour, &self->left.colour);
 }
 
+INLINE bool psy_ui_border_equalwidth(const psy_ui_Border* self)
+{
+	return TRUE;
+}
+
 INLINE bool psy_ui_border_isround(const psy_ui_Border* self)
 {
 	return self->top.radius.quantity != 0 &&
@@ -156,7 +162,36 @@ INLINE void psy_ui_border_init_solid_radius(psy_ui_Border* self,
 	psy_ui_border_setradius_px(self, r);
 }
 
-psy_ui_Size psy_ui_border_size(const psy_ui_Border* self);
+psy_ui_Size psy_ui_border_size(const psy_ui_Border*);
+psy_ui_Margin psy_ui_border_margin(const psy_ui_Border*);
+
+INLINE void psy_ui_border_setwidth_px(psy_ui_Border* self, double value)
+{
+	self->top.width = psy_ui_value_make_px(value);
+	self->right.width = psy_ui_value_make_px(value);
+	self->bottom.width = psy_ui_value_make_px(value);
+	self->left.width = psy_ui_value_make_px(value);
+}
+
+INLINE psy_ui_Value psy_ui_border_width_top(const psy_ui_Border* self)
+{
+	return self->top.width;
+}
+
+INLINE psy_ui_Value psy_ui_border_width_right(const psy_ui_Border* self)
+{
+	return self->right.width;
+}
+
+INLINE psy_ui_Value psy_ui_border_width_bottom(const psy_ui_Border* self)
+{
+	return self->bottom.width;
+}
+
+INLINE psy_ui_Value psy_ui_border_width_left(const psy_ui_Border* self)
+{
+	return self->left.width;
+}
 
 #ifdef __cplusplus
 }

@@ -295,7 +295,9 @@ typedef struct SeqEditorTracks {
 	PatternViewSkin* skin;
 	SeqEditorPlayline* playline;
 	SeqEditorLine* cursorline;
-	SeqEditorLine* seqeditposline;	
+	SeqEditorLine* seqeditposline;
+	psy_audio_PatternSelection selection;
+	psy_audio_PatternCursor selectionbase;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,

@@ -487,25 +487,8 @@ void trackergridstate_startdragselection(TrackerGridState* self,
 {
 	assert(self);
 
-	psy_audio_patternselection_enable(&self->selection);
-	self->selection.topleft = cursor;
-	self->selection.bottomright = cursor;
-	if (cursor.track >= self->dragselectionbase.track) {
-		self->selection.topleft.track = self->dragselectionbase.track;
-		self->selection.bottomright.track = cursor.track;
-	} else {
-		self->selection.topleft.track = cursor.track;
-		self->selection.bottomright.track = self->dragselectionbase.track;
-	}
-	if (cursor.offset >= self->dragselectionbase.offset) {
-		self->selection.topleft.offset = self->dragselectionbase.offset;
-		self->selection.bottomright.offset = cursor.offset + bpl;
-	} else {
-		self->selection.topleft.offset = cursor.offset;
-		self->selection.bottomright.offset = self->dragselectionbase.offset +
-			bpl;
-	}
-	self->selection.bottomright.track += 1;
+	psy_audio_patternselection_startdrag(&self->selection,
+		self->dragselectionbase, cursor, bpl);
 }
 
 void trackergridstate_dragselection(TrackerGridState* self, psy_audio_PatternCursor cursor,
@@ -513,20 +496,8 @@ void trackergridstate_dragselection(TrackerGridState* self, psy_audio_PatternCur
 {
 	assert(self);
 
-	if (cursor.track >= self->dragselectionbase.track) {
-		self->selection.topleft.track = self->dragselectionbase.track;
-		self->selection.bottomright.track = cursor.track + 1;
-	} else {
-		self->selection.topleft.track = cursor.track;
-		self->selection.bottomright.track = self->dragselectionbase.track + 1;
-	}
-	if (cursor.offset >= self->dragselectionbase.offset) {
-		self->selection.topleft.offset = self->dragselectionbase.offset;
-		self->selection.bottomright.offset = cursor.offset + bpl;
-	} else {
-		self->selection.topleft.offset = cursor.offset;
-		self->selection.bottomright.offset = self->dragselectionbase.offset + bpl;
-	}	
+	psy_audio_patternselection_drag(&self->selection,
+		self->dragselectionbase, cursor, bpl);
 }
 
 psy_audio_PatternCursor trackergridstate_checkcursorbounds(TrackerGridState* self,

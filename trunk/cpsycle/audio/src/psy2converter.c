@@ -190,8 +190,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	const char* convname;
 	char _editName[32];
 	cpoint_t connectionpoint[MAX_CONNECTIONS];
-	int32_t panning;
-	psy_audio_MachineWires* machinewires;
+	int32_t panning;	
 
 	convname = pluginnames_convname(&self->pluginnames, type, name);
 	assert(convname);
@@ -200,7 +199,6 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	psy_audio_plugincatcher_catchername(sDllName, plugincatchername, 0);
 	machine = psy_audio_machinefactory_makemachine(songfile->song->machinefactory,
 		psy_audio_PLUGIN, plugincatchername, psy_INDEX_INVALID);
-
 	psyfile_read(songfile->file, _editName, 16);
 	_editName[15] = 0;
 	if (machine) {
@@ -209,8 +207,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	if (type == nativeplug) {
 		readplugin(self, machine, songfile, index, type, name);
 	}
-	machinewires = psy_audio_read_psy2machinewires(songfile->file);
-	psy_audio_legacywires_insert(songfile->legacywires, *index, machinewires);
+	psy_audio_psy2loader_read_wires(songfile, (uintptr_t)(*index));	
 	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
 	// numInputs and numOutputs
 	psyfile_skip(songfile->file, 2 * sizeof(int32_t));

@@ -1258,12 +1258,12 @@ void workspace_setpatterncursor(Workspace* self,
 	assert(self);
 
 	if (!self->patternsinglemode) {
-		psy_audio_SequencePatternEntry* entry;
+		psy_audio_SequenceEntry* entry;
 
 		entry = psy_audio_sequence_entry(&self->song->sequence,
 			self->sequenceselection.editposition);
 		if (entry) {
-			editposition.seqoffset = psy_audio_sequenceentry_offset(&entry->entry);
+			editposition.seqoffset = psy_audio_sequenceentry_offset(entry);
 		}
 	} else {
 		editposition.seqoffset = 0.0;
