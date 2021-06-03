@@ -153,6 +153,14 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_DESCITEM_SELECTED, style);
 
 	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_8p);
+	psy_ui_style_setspacing_em(style, 0.25, 0.0, 0.25, 0.0);
+	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
+		material.surface_overlay_6p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_TOOLBAR, style);
+
+	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.primary, material.medium));
 	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB, style);

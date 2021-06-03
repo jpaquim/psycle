@@ -2140,26 +2140,89 @@ void seqeditortracks_outputstatusposition(SeqEditorTracks* self, double x)
 	workspace_outputstatus(self->workspace, text);
 }
 
-/* SeqEditorBar */
+/* SeqEditorHeaderBar */
 /* implementation */
-void seqeditorbar_init(SeqEditorBar* self, psy_ui_Component* parent)
+void seqeditorheaderbar_init(SeqEditorHeaderBar* self, psy_ui_Component* parent)
 {	
 	psy_ui_Margin spacing;
 
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_setdefaultalign(&self->component,
 		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
-	zoombox_init(&self->zoombox_beat, &self->component);
+	zoombox_init(&self->zoombox_beat, &self->component);	
+	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 1.0, 0.0);
+	psy_ui_component_setspacing(&self->component, spacing);	
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make_em(40.0, 2.0));
+}
+
+/* SeqEditToolBar */
+static void seqeditortoolbar_setdragmode(SeqEditToolBar*, SeqEditorDragMode);
+static void seqedittoolbar_oninserttypeselchange(SeqEditToolBar*,
+	psy_ui_Component* sender, int index);
+static void seqeditortoolbar_ondragmodemove(SeqEditToolBar*, psy_ui_Component* sender);
+static void seqeditortoolbar_ondragmodereorder(SeqEditToolBar*, psy_ui_Component* sender);
+
+/* implenentation */
+void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
+	SeqEditorState* state, Workspace* workspace)
+{
+	psy_ui_Margin margin;
+
+	assert(self);
+
+	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component, STYLE_SEQEDT_TOOLBAR);
+	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
+	psy_ui_margin_setleft(&margin, psy_ui_value_make_ew(1.0));
+	psy_ui_margin_setbottom(&margin, psy_ui_value_make_ew(0.5));
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		margin);
+	self->workspace = workspace;
+	self->state = state;
 	psy_ui_button_init_text(&self->move, &self->component, NULL,
 		"seqedit.move");
 	psy_ui_button_init_text(&self->reorder, &self->component, NULL,
 		"seqedit.reorder");
-	psy_ui_margin_init_em(&spacing, 0.0, 0.0, 1.0, 0.0);
-	psy_ui_component_setspacing(&self->component, spacing);	
+	seqeditortoolbar_setdragmode(self, self->state->dragmode);
+	psy_ui_label_init_text(&self->desctype, seqedittoolbar_base(self), NULL,
+		"Insert");	
+	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self), NULL);
+	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
+	psy_ui_combobox_addtext(&self->inserttype, "Pattern");
+	psy_ui_combobox_addtext(&self->inserttype, "Marker");
+	psy_ui_combobox_addtext(&self->inserttype, "Sample");
+	psy_ui_combobox_setcursel(&self->inserttype, 0);
+	/* expand */
+	psy_ui_button_init(&self->expand, &self->component, NULL);
+	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
+		psy_ui_colour_white());
+	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),
+		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
+	psy_signal_connect(&self->inserttype.signal_selchanged, self,
+		seqedittoolbar_oninserttypeselchange);
+	psy_signal_connect(&self->move.signal_clicked, self,
+		seqeditortoolbar_ondragmodemove);
+	psy_signal_connect(&self->reorder.signal_clicked, self,
+		seqeditortoolbar_ondragmodereorder);
 }
 
-void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)
+void seqeditortoolbar_ondragmodemove(SeqEditToolBar* self, psy_ui_Component* sender)
+{	
+	seqeditortoolbar_setdragmode(self, SEQEDITORDRAG_MOVE);
+}
+
+void seqeditortoolbar_ondragmodereorder(SeqEditToolBar* self, psy_ui_Component* sender)
 {
+	
+	seqeditortoolbar_setdragmode(self, SEQEDITORDRAG_REORDER);
+}
+
+void seqeditortoolbar_setdragmode(SeqEditToolBar* self, SeqEditorDragMode mode)
+{
+	self->state->dragmode = mode;
 	switch (mode) {
 	case SEQEDITORDRAG_MOVE:
 		psy_ui_button_highlight(&self->move);
@@ -2172,38 +2235,8 @@ void seqeditorbar_setdragmode(SeqEditorBar* self, SeqEditorDragMode mode)
 	default:
 		break;
 	}
-}	
-
-/* SeqEditToolBar */
-static void seqedittoolbar_oninserttypeselchange(SeqEditToolBar*,
-	psy_ui_Component* sender, int index);
-/* implenentation */
-void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
-	SeqEditorState* state, Workspace* workspace)
-{
-	psy_ui_Margin margin;
-
-	assert(self);
-
-	psy_ui_component_init(&self->component, parent, NULL);
-	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
-	psy_ui_margin_setleft(&margin, psy_ui_value_make_ew(1.0));
-	psy_ui_margin_setbottom(&margin, psy_ui_value_make_ew(0.5));
-	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		margin);
-	self->workspace = workspace;
-	self->state = state;
-	psy_ui_label_init_text(&self->desctype, seqedittoolbar_base(self), NULL,
-		"Insert");	
-	psy_ui_combobox_init(&self->inserttype, seqedittoolbar_base(self), NULL);
-	psy_ui_combobox_setcharnumber(&self->inserttype, 12.0);
-	psy_ui_combobox_addtext(&self->inserttype, "Pattern");
-	psy_ui_combobox_addtext(&self->inserttype, "Marker");
-	psy_ui_combobox_addtext(&self->inserttype, "Sample");
-	psy_ui_combobox_setcursel(&self->inserttype, 0);
-	psy_signal_connect(&self->inserttype.signal_selchanged, self,
-		seqedittoolbar_oninserttypeselchange);
 }
+
 
 void seqedittoolbar_oninserttypeselchange(SeqEditToolBar* self, psy_ui_Component* sender,
 	int index)
@@ -2239,8 +2272,6 @@ static void seqeditor_onzoomboxbeatchanged(SeqEditor*, ZoomBox* sender);
 static void seqeditor_onzoomboxheightchanged(SeqEditor*, ZoomBox* sender);
 static void seqeditor_updatescrollstep(SeqEditor*);
 static void seqeditor_updateoverflow(SeqEditor*);
-static void seqeditor_ondragmodemove(SeqEditor*, psy_ui_Component* sender);
-static void seqeditor_ondragmodereorder(SeqEditor*, psy_ui_Component* sender);
 static void seqeditor_onsequenceclear(SeqEditor*, psy_audio_Sequence*);
 static void seqeditor_onsequenceremove(SeqEditor*, psy_audio_Sequence*,
 	psy_audio_OrderIndex*);
@@ -2289,11 +2320,22 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	sequencecmds_init(&self->cmds, workspace);
 	seqeditorstate_init(&self->state, workspace, &self->cmds, &self->edit);	
 	self->workspace = workspace;
+	/* toolbar */
+	seqedittoolbar_init(&self->toolbar, &self->component, &self->state,
+		self->workspace);
+	psy_ui_component_setalign(&self->toolbar.component, psy_ui_ALIGN_TOP);	
+	/* spacer */
+	psy_ui_component_init(&self->spacer, &self->component, NULL);
+	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_TOP);
+	psy_ui_component_setpreferredsize(&self->spacer,
+		psy_ui_size_make_em(0.0, 0.25));
+	/* left */
 	psy_ui_component_init(&self->left, &self->component, NULL);
-	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	seqeditorbar_init(&self->bar, &self->left);
-	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->bar.zoombox_beat.signal_changed, self,
+	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
+	/* SeqEditorHeaderBar */
+	seqeditorheaderbar_init(&self->headerbar, &self->left);
+	psy_ui_component_setalign(&self->headerbar.component, psy_ui_ALIGN_TOP);
+	psy_signal_connect(&self->headerbar.zoombox_beat.signal_changed, self,
 		seqeditor_onzoomboxbeatchanged);
 	/* track description */
 	psy_ui_component_init(&self->trackdescpane, &self->left, NULL);
@@ -2317,15 +2359,8 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	seqeditorruler_init(&self->ruler, &self->rulerpane, &self->state,
 		skin, workspace);
 	psy_ui_component_setalign(&self->ruler.component, psy_ui_ALIGN_FIXED_RESIZE);
-	/* expand */
-	psy_ui_button_init(&self->expand, &self->header, NULL);
-	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
-		psy_ui_colour_white());
-	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
-	psy_signal_connect(&self->expand.signal_clicked, self,
+	/* connect expand */
+	psy_signal_connect(&self->toolbar.expand.signal_clicked, self,
 		seqeditor_ontoggleexpand);
 	self->expanded = FALSE;
 	/* tracks */
@@ -2338,26 +2373,18 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		psy_ui_SETBACKGROUND);
 	psy_ui_component_setalign(&self->tracks.component,
 		psy_ui_ALIGN_FIXED_RESIZE);
-	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	/* toolbar */
-	seqedittoolbar_init(&self->toolbar, &self->scroller.component, &self->state,
-		self->workspace);
-	psy_ui_component_setalign(&self->toolbar.component, psy_ui_ALIGN_BOTTOM);
-	seqeditorbar_setdragmode(&self->bar, self->state.dragmode);	
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+	seqeditortoolbar_setdragmode(&self->toolbar, self->state.dragmode);	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_make_ew(20.0),
-			psy_ui_value_make_eh(6 * 1.4 + 2.5)));	
+			psy_ui_value_make_ph(0.3)));	
 	seqeditor_updatesong(self, workspace->song);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);
 	psy_signal_connect(&self->tracks.component.signal_scroll, self,
 		seqeditor_ontracksscroll);	
 	psy_signal_connect(&psycleconfig_general(workspace_conf(workspace))->signal_changed,
-		self, seqeditor_onconfigure);
-	psy_signal_connect(&self->bar.move.signal_clicked, self,
-		seqeditor_ondragmodemove);
-	psy_signal_connect(&self->bar.reorder.signal_clicked, self,
-		seqeditor_ondragmodereorder);
+		self, seqeditor_onconfigure);	
 }
 
 void seqeditor_ondestroy(SeqEditor* self)
@@ -2501,18 +2528,6 @@ void seqeditor_onzoomboxheightchanged(SeqEditor* self, ZoomBox* sender)
 	psy_ui_component_align(&self->tracks.component);	
 	seqeditor_updatescrollstep(self);
 	seqeditor_updateoverflow(self);
-}
-
-void seqeditor_ondragmodemove(SeqEditor* self, psy_ui_Component* sender)
-{
-	self->state.dragmode = SEQEDITORDRAG_MOVE;
-	seqeditorbar_setdragmode(&self->bar, self->state.dragmode);
-}
-
-void seqeditor_ondragmodereorder(SeqEditor* self, psy_ui_Component* sender)
-{
-	self->state.dragmode = SEQEDITORDRAG_REORDER;
-	seqeditorbar_setdragmode(&self->bar, self->state.dragmode);
 }
 
 void seqeditor_onmouseup(SeqEditor* self, psy_ui_MouseEvent* ev)

@@ -310,21 +310,22 @@ INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 	return &self->component;
 }
 
-typedef struct SeqEditorBar {
+typedef struct SeqEditorHeaderBar {
 	psy_ui_Component component;
-	ZoomBox zoombox_beat;
-	psy_ui_Button move;
-	psy_ui_Button reorder;
-} SeqEditorBar;
+	ZoomBox zoombox_beat;	
+} SeqEditorHeaderBar;
 
-void seqeditorbar_init(SeqEditorBar*, psy_ui_Component* parent);
+void seqeditorheaderbar_init(SeqEditorHeaderBar*, psy_ui_Component* parent);
 
 /* SeqEditToolBar */
 typedef struct SeqEditToolBar {
 	/* inherits */
 	psy_ui_Component component;	
+	psy_ui_Button move;
+	psy_ui_Button reorder;
 	psy_ui_Label desctype;
-	psy_ui_ComboBox inserttype;	
+	psy_ui_ComboBox inserttype;
+	psy_ui_Button expand;
 	/* references */
 	Workspace* workspace;
 	SeqEditorState* state;
@@ -332,6 +333,8 @@ typedef struct SeqEditToolBar {
 
 void seqedittoolbar_init(SeqEditToolBar*, psy_ui_Component* parent,
 	SeqEditorState*, Workspace*);
+
+void seqeditortoolbar_setdragmode(SeqEditToolBar*, SeqEditorDragMode);
 
 INLINE psy_ui_Component* seqedittoolbar_base(SeqEditToolBar* self)
 {
@@ -344,20 +347,20 @@ typedef struct SeqEditor {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
+	SeqEditToolBar toolbar;
+	psy_ui_Component spacer;
 	psy_ui_Component header;
 	psy_ui_Component rulerpane;
 	SeqEditorRuler ruler;
-	psy_ui_Scroller scroller;
-	SeqEditToolBar toolbar;
+	psy_ui_Scroller scroller;	
 	psy_ui_Component left;
-	SeqEditorBar bar;
+	SeqEditorHeaderBar headerbar;
 	ZoomBox zoombox_height;
 	psy_ui_Component trackdescpane;
 	SeqEditorTrackDesc trackdescriptions;
 	SeqEditorTracks tracks;	
 	SeqEditorState state;
-	SequenceCmds cmds;
-	psy_ui_Button expand;
+	SequenceCmds cmds;	
 	bool expanded;
 	psy_ui_Edit edit;
 	/* references */

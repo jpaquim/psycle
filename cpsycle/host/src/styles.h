@@ -32,6 +32,7 @@ extern "C" {
 #define STYLE_SEQEDT_TRACK_NUMBER		     31040
 #define STYLE_SEQEDT_DESCITEM_HOVER			 31041
 #define STYLE_SEQEDT_DESCITEM_SELECTED       31042
+#define STYLE_SEQEDT_TOOLBAR                 31043
 #define STYLE_SEQLISTVIEW                    31050
 #define STYLE_SEQLISTVIEW_SELECT             31052
 #define STYLE_SEQLISTVIEW_TRACK              31053
