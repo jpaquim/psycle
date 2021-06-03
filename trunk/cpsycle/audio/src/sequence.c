@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "sequence.h"
 #include "sequencer.h" /* calculate duration */
 
@@ -877,17 +878,22 @@ psy_audio_OrderIndex psy_audio_sequence_patternfirstused(psy_audio_Sequence* sel
 		currorderidx = 0;
 		p = track->entries;
 		while (p) {
-			psy_audio_SequencePatternEntry* sequenceentry;
+			psy_audio_SequenceEntry* entry;
 
-			sequenceentry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
-			if (sequenceentry && psy_audio_sequencepatternentry_patternslot(sequenceentry) ==
-					patternslot) {
-				psy_audio_Pattern* pattern;
+			entry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+			if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+				psy_audio_SequencePatternEntry* seqpatternentry;
 
-				pattern = psy_audio_patterns_at(self->patterns, patternslot);
-				rv.track = currtrackidx;
-				rv.order = currorderidx;
-				break;
+				seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+				if (psy_audio_sequencepatternentry_patternslot(seqpatternentry)
+						== patternslot) {
+					psy_audio_Pattern* pattern;
+
+					pattern = psy_audio_patterns_at(self->patterns, patternslot);
+					rv.track = currtrackidx;
+					rv.order = currorderidx;
+					break;
+				}
 			}
 			psy_list_next(&p);
 			++currorderidx;
@@ -1467,17 +1473,21 @@ void psy_audio_sequence_remove(psy_audio_Sequence* self,
 
 		p = psy_list_at(track->entries, index.order);
 		if (p) {
-			psy_audio_SequencePatternEntry* entry;
+			psy_audio_SequenceEntry* entry;
 			uintptr_t patidx;
 
-			entry = (psy_audio_SequencePatternEntry*)p->entry;
+			entry = (psy_audio_SequenceEntry*)p->entry;
 			if (entry) {
-				patidx = entry->patternslot;
-				psy_list_remove(&track->entries, p);
+				patidx = psy_INDEX_INVALID;
+				if (entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+					patidx = ((psy_audio_SequencePatternEntry*)entry)->patternslot;
+				}
+				psy_list_remove(&track->entries, p);				
+				psy_audio_sequenceentry_dispose(entry);
 				free(entry);
 				entry = NULL;
 				psy_audio_sequence_reposition_track(self, track);
-				if (self->patterns &&
+				if (self->patterns && patidx != psy_INDEX_INVALID &&
 					!psy_audio_sequence_patternused(self, patidx)) {
 					psy_audio_Pattern* pattern;
 
@@ -1736,46 +1746,36 @@ psy_dsp_big_beat_t psy_audio_sequence_offset(const psy_audio_Sequence* self,
 void psy_audio_sequence_swaptracks(psy_audio_Sequence* self,
 	uintptr_t srcid, uintptr_t dstid)
 {
-	psy_audio_SequenceTrackNode* src_track;	
+	psy_List* p;
+	uintptr_t c;
+	psy_audio_SequenceTrackNode* src;
+	psy_audio_SequenceTrackNode* dst;
 
 	assert(self);
-
-	src_track = psy_list_at(self->tracks, srcid);
-	if (src_track) {
-		psy_audio_SequenceTrackNode* dst_track;
-
-		dst_track = psy_list_at(self->tracks, dstid);
-		if (dst_track) {	
-			uintptr_t num;
-			psy_audio_SequenceTrack** arrayptr;
-
-			num = psy_list_size(self->tracks);
-			if (num != 0) {
-				arrayptr = malloc(sizeof(psy_audio_SequenceTrack*) * num);
-				if (arrayptr) {
-					psy_List* p;
-					uintptr_t i;
-					psy_audio_SequenceTrack* temp;
-
-					p = self->tracks;
-					for (i = 0; p != NULL && i < num; p = p->next, ++i) {
-						arrayptr[i] = p->entry;
-					}
-					temp = arrayptr[srcid];
-					arrayptr[srcid] = arrayptr[dstid];
-					arrayptr[dstid] = temp;
-					psy_list_free(self->tracks);
-					self->tracks = NULL;
-					for (i = 0; i < num; ++i) {
-						psy_list_append(&self->tracks, arrayptr[i]);
-					}
-					free(arrayptr);
-					arrayptr = NULL;
-					psy_signal_emit(&self->signal_trackswap, self, 1, srcid, dstid);
-					psy_signal_emit(&self->signal_changed, self, 0);
-				}				
+	
+	if (srcid == dstid) {
+		return;
+	}
+	src = NULL;
+	dst = NULL;
+	for (p = self->tracks, c = 0; p != NULL; p = p->next, ++c) {
+		if (c == srcid) {
+			src = p;
+			if (dst) {
+				break;
 			}
 		}
+		if (c == dstid) {
+			dst = p;
+			if (src) {
+				break;
+			}
+		}
+	}	
+	if (src && dst) {
+		psy_list_swap_entries(src, dst);
+		psy_signal_emit(&self->signal_trackswap, self, 1, srcid, dstid);
+		psy_signal_emit(&self->signal_changed, self, 0);		
 	}
 }
 
@@ -1787,57 +1787,45 @@ psy_audio_OrderIndex psy_audio_sequence_reorder(psy_audio_Sequence* self,
 	assert(self);	
 
 	track = psy_audio_sequence_track_at(self, index.track);
-	if (track) {		
-		psy_audio_SequenceEntry* selected;
-		
-		if (selected = psy_audio_sequence_entry(self, index)) {			
-			psy_audio_SequenceEntry* newentry;			
-			bool append;
-			uintptr_t row;
-			psy_dsp_big_beat_t curroffset;
+	if (track && track->entries) {		
+		psy_List* selected;
+
+		selected = psy_list_at(track->entries, index.order);
+		if (selected) {
 			psy_List* p;
-			
-			newentry = NULL;
-			if (newposition >= selected->offset - selected->repositionoffset &&
-					newposition < selected->offset + psy_audio_sequenceentry_length(selected)) {				
-				return index;
-			}
-			newentry = psy_audio_sequenceentry_clone(selected);
-			psy_audio_sequence_remove(self, index);
-			selected = NULL;
-			psy_audio_sequence_reposition_track(self, track);
-			append = TRUE;
+			psy_dsp_big_beat_t curroffset;
+			uintptr_t row;
+
+			curroffset = 0.0;
 			for (p = track->entries, row = 0, curroffset = 0.0; p != NULL;
-					psy_list_next(&p), ++row) {				
+					p = p->next) {				
 				psy_audio_SequenceEntry* entry;
 
-				entry = (psy_audio_SequenceEntry*)psy_list_entry(p);				
-				curroffset = entry->offset;
-				if (newposition < curroffset + psy_audio_sequenceentry_length(entry)) {
-					if (newposition <= curroffset) {
-						p = p->prev;
-					}
-					append = FALSE;										
+				entry = (psy_audio_SequenceEntry*)p->entry;
+				curroffset += entry->repositionoffset + 
+					psy_audio_sequenceentry_length(entry);
+				if (newposition < curroffset) {
 					break;
 				}
-			}							
-			if (newentry) {
+				++row;				
+			}
+			if (p != selected) {
 				psy_audio_OrderIndex insertindex;
 
-				insertindex = psy_audio_orderindex_make(index.track, row);				
-				if (!append) {
-					psy_list_insert(&track->entries, p, newentry);
-				} else {
-					psy_list_append(&track->entries, newentry);
+				if (!p) {
+					p = track->entries->tail;
 				}
+				psy_list_swap_entries(selected, p);
 				psy_audio_sequence_reposition_track(self, track);
-				psy_signal_emit(&self->signal_insert, self, 1, &insertindex);
+				insertindex = psy_audio_orderindex_make(index.track, row);
+				psy_signal_emit(&self->signal_insert, self, 1, 
+					&insertindex);
 				psy_signal_emit(&self->signal_changed, self, 0);
 				return insertindex;
 			}
-		}
+		}				
 	}
-	return psy_audio_orderindex_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+	return psy_audio_orderindex_zero();
 }
 
 void psy_audio_sequence_resetpatterns(psy_audio_Sequence* self)
@@ -1852,13 +1840,16 @@ void psy_audio_sequence_resetpatterns(psy_audio_Sequence* self)
 
 		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
 		for (p = track->entries; p != NULL; psy_list_next(&p)) {
-			psy_audio_SequencePatternEntry* entry;			
+			psy_audio_SequenceEntry* entry;			
 
-			entry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
-			if (entry) {
+			entry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+			if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
 				// todo default lines
-				psy_audio_patterns_insert(self->patterns, entry->patternslot,
-					psy_audio_pattern_allocinit());
+				psy_audio_SequencePatternEntry* seqpatternentry;
+
+				seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+				psy_audio_patterns_insert(self->patterns,
+					seqpatternentry->patternslot, psy_audio_pattern_allocinit());
 			}
 		}
 	}
@@ -1876,12 +1867,18 @@ void psy_audio_sequence_fillpatterns(psy_audio_Sequence* self)
 
 		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
 		for (p = track->entries; p != NULL; psy_list_next(&p)) {
-			psy_audio_SequencePatternEntry* entry;
+			psy_audio_SequenceEntry* entry;
 
-			entry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
-			if (!psy_audio_patterns_at(self->patterns, entry->patternslot)) {
-				psy_audio_patterns_insert(self->patterns, entry->patternslot,
-					psy_audio_pattern_allocinit());
+			entry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+			if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {
+				// todo default lines
+				psy_audio_SequencePatternEntry* seqpatternentry;
+				seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+				if (!psy_audio_patterns_at(self->patterns,
+						seqpatternentry->patternslot)) {
+					psy_audio_patterns_insert(self->patterns,
+						seqpatternentry->patternslot, psy_audio_pattern_allocinit());
+				}
 			}
 		}
 	}

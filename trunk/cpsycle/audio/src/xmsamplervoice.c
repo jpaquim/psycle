@@ -143,7 +143,7 @@ void xmenvelopecontroller_noteon(XMEnvelopeController* self)
 	if (psy_dsp_envelope_numofpoints(self->m_pEnvelope) > 0)
 	{
 		if (self->m_pEnvelope->enabled &&
-			psy_dsp_envelope_time(self->m_pEnvelope, 1) != -1.f)
+			psy_dsp_envelope_time_ms(self->m_pEnvelope, 1) != psy_INDEX_INVALID)
 		{
 			xmenvelopecontroller_start(self);
 		}
@@ -254,7 +254,7 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 			} else { self->m_PositionIndex = (int)psy_dsp_envelope_loopstart(self->m_pEnvelope); }
 		}
 	}
-	if (psy_dsp_envelope_time(self->m_pEnvelope, self->m_PositionIndex + 1) == -1.f)
+	if (psy_dsp_envelope_time_ms(self->m_pEnvelope, self->m_PositionIndex + 1) == psy_INDEX_INVALID)
 	{
 		if (self->m_Stage & XMENVELOPESTAGE_PAUSED) {
 			xmenvelopecontroller_calcstep(self, self->m_PositionIndex, self->m_PositionIndex);
@@ -269,57 +269,41 @@ void xmenvelopecontroller_newstep(XMEnvelopeController* self)
 void xmenvelopecontroller_calcstep(XMEnvelopeController* self, int start, int end)
 {
 	XMEnvelopeValueType ystep;
-	XMEnvelopeValueType xstep;
-	float time;
+	XMEnvelopeValueType xstep;	
 	
-	ystep = (psy_dsp_envelope_value(self->m_pEnvelope, end) - psy_dsp_envelope_value(self->m_pEnvelope, start));
-	xstep = (psy_dsp_envelope_time(self->m_pEnvelope, end) - psy_dsp_envelope_time(self->m_pEnvelope, start));	
-	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
-		xstep *= 1000.f; // to ms
-	}
-	xmenvelopecontroller_recalcdeviation(self);
-	time = psy_dsp_envelope_time(self->m_pEnvelope, start);
-	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
-		time *= 1000;
-	}
-	self->m_Samples = (int)((int)time * xmenvelopecontroller_sratedeviation(self));
-	time = psy_dsp_envelope_time(self->m_pEnvelope, end);
-	if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
-		time *= 1000;
-	}
-	self->m_NextEventSample = time * xmenvelopecontroller_sratedeviation(self);	
+	ystep = (psy_dsp_envelope_value(self->m_pEnvelope, end) -
+		psy_dsp_envelope_value(self->m_pEnvelope, start));
+	xstep = (XMEnvelopeValueType)((psy_dsp_envelope_time_ms(self->m_pEnvelope, end) -
+		psy_dsp_envelope_time_ms(self->m_pEnvelope, start)));
+	xmenvelopecontroller_recalcdeviation(self);	
+	self->m_Samples = (int)(psy_dsp_envelope_time_ms(self->m_pEnvelope, start) *
+		xmenvelopecontroller_sratedeviation(self));	
+	self->m_NextEventSample = (int)(psy_dsp_envelope_time_ms(self->m_pEnvelope, end) *
+		xmenvelopecontroller_sratedeviation(self));
 	self->m_ModulationAmount = psy_dsp_envelope_value(self->m_pEnvelope, start);
-	if (xstep != 0) self->m_Step = ystep / (xstep * xmenvelopecontroller_sratedeviation(self));
+	if (xstep != 0) self->m_Step = ystep /
+		(xstep * xmenvelopecontroller_sratedeviation(self));
 	else self->m_Step = 0;
 }
 
 void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int samplePos)
 {
 	int i = 0;
-	while (psy_dsp_envelope_time(self->m_pEnvelope, i) != -1.f)
-	{
-		float time;
-
-		time = psy_dsp_envelope_time(self->m_pEnvelope, i);
-		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
-			time *= 1000;
-		}
-		if ((int)(time * xmenvelopecontroller_sratedeviation(self)) > samplePos) {
+	while (psy_dsp_envelope_time_ms(self->m_pEnvelope, i) != psy_INDEX_INVALID)
+	{		
+		if ((int)(psy_dsp_envelope_time_ms(self->m_pEnvelope, i) * xmenvelopecontroller_sratedeviation(self)) > samplePos) {
 			break;
 		}
 		i++;
 	}	
 	if (i == 0) return; //Invalid Envelope. either GetTime(0) is INVALID, or samplePos is negative.
-	else if (psy_dsp_envelope_time(self->m_pEnvelope, i) == -1.f) {
+	else if (psy_dsp_envelope_time_ms(self->m_pEnvelope, i) == psy_INDEX_INVALID) {
 		//Destination point is invalid or is exactly the last one.
 		i--;
 		self->m_Stage = XMENVELOPESTAGE_OFF;
-		self->m_PositionIndex = psy_dsp_envelope_numofpoints(
-			self->m_pEnvelope);
-		self->m_ModulationAmount =
-			psy_dsp_envelope_value(self->m_pEnvelope, i);
-	} else {
-		float time;
+		self->m_PositionIndex = (int)psy_dsp_envelope_numofpoints(self->m_pEnvelope);
+		self->m_ModulationAmount = psy_dsp_envelope_value(self->m_pEnvelope, i);
+	} else {		
 		int samplesThisIndex;
 
 		i--;
@@ -327,13 +311,8 @@ void xmenvelopecontroller_setpositioninsamples(XMEnvelopeController* self, int s
 			self->m_PositionIndex = i;
 			xmenvelopecontroller_newstep(self);
 		}
-		self->m_Samples = samplePos;		
-		time = psy_dsp_envelope_time(self->m_pEnvelope, i);
-		if (self->m_pEnvelope->timemode == psy_dsp_ENVELOPETIME_SECONDS) {
-			time *= 1000;
-		}
-		samplesThisIndex = self->m_Samples - (int)
-			(time - xmenvelopecontroller_sratedeviation(self));		
+		self->m_Samples = samplePos;
+		samplesThisIndex = self->m_Samples - (int)(psy_dsp_envelope_time_ms(self->m_pEnvelope, i) - xmenvelopecontroller_sratedeviation(self));
 		self->m_ModulationAmount += self->m_Step * samplesThisIndex;
 	}
 }
