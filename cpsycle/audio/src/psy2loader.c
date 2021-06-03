@@ -6,7 +6,7 @@
 #include "../../detail/prefix.h"
 
 
-#include "psy2.h"
+#include "psy2loader.h"
 /* local */
 #include "machinefactory.h"
 #include "pattern.h"
@@ -23,30 +23,87 @@
 #include <math.h>
 /* platform */
 #include "../../detail/portable.h"
-#include "../../detail/os.h"
 #include "../../detail/cpu.h"
 
 #define PSY2_MAX_CONNECTIONS 12
 
-#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
-#define _MAX_PATH 4096
-#endif
-
+/* Helper struct to load the machine position */
 typedef struct cpoint_t {
 	int32_t x;
 	int32_t y;
 } cpoint_t;
 
-static void vstpreload_init(VstPreload*, psy_audio_SongFile*);
-static int vstpreload_load(VstPreload*, uintptr_t slot,
-	unsigned char* program, int32_t* instance);
+/* VstPreload */
+/* implementation */
+void vstpreload_init(VstPreload* self, psy_audio_SongFile* songfile)
+{
+	self->songfile = songfile;
+}
 
+int vstpreload_load(VstPreload* self, uintptr_t slot, unsigned char* program,
+	int32_t* instance)
+{
+	int status;
+	cpoint_t connectionpoint[PSY2_MAX_CONNECTIONS];
+	int32_t panning;
+	uint8_t old;
+
+	if (status = psyfile_read(self->songfile->file, self->_editName, 16)) {
+		return status;
+	}
+	self->_editName[15] = '\0';
+	if (status = psy_audio_psy2loader_read_wires(self->songfile, slot)) {
+		return status;
+	}
+	if (status = psyfile_read(self->songfile->file, &connectionpoint,
+		sizeof(connectionpoint))) {
+		return status;
+	}
+	/* numInputs and numOutputs */
+	if (psyfile_skip(self->songfile->file, 2 * sizeof(int32_t)) == -1) {
+		return PSY_ERRFILE;
+	}
+	if (status = psyfile_read(self->songfile->file, &panning,
+		sizeof(panning))) {
+		return status;
+	}
+	if (psyfile_skip(self->songfile->file, 109) == -1) {
+		return PSY_ERRFILE;
+	}
+	/* old format */
+	if (status = psyfile_read(self->songfile->file, &old, sizeof(old))) {
+		return status;
+	}
+	/* ovst.instance */
+	if (status = psyfile_read(self->songfile->file, instance,
+		sizeof(*instance))) {
+		return status;
+	}
+	if (old) {
+		char mch;
+
+		if (status = psyfile_read(self->songfile->file, &mch, sizeof(mch))) {
+			return status;
+		}
+		program = 0;
+	} else {
+		if (status = psyfile_read(self->songfile->file, program,
+			sizeof(*program))) {
+			return status;
+		}
+	}
+	return PSY_OK;
+}
+
+/* PSY2Loader */
 /* prototypes */
 static int psy2loader_read_header(PSY2Loader*);
 static int psy2loader_read_sngi(PSY2Loader*);
 static int psy2loader_read_patterns(PSY2Loader*);
 static int psy2loader_read_sequence(PSY2Loader*);
 static int psy2loader_read_instruments(PSY2Loader*);
+static int psy2loader_read_wave(PSY2Loader*, uint32_t sampleidx,
+	uint32_t numframes, int32_t pan, const char* name);
 static int psy2loader_read_vsts(PSY2Loader*);
 static int psy2loader_read_machines(PSY2Loader*);
 static int psy2loader_add_machines(PSY2Loader*);
@@ -322,7 +379,7 @@ int psy2loader_read_instruments(PSY2Loader* self)
 {
 	int status;
 	psy_audio_LegacyInstrument legacy_instrs[OLD_MAX_INSTRUMENTS];	
-	int32_t i;
+	uint32_t i;
 	int32_t tmpwvsl;
 	int32_t pans[OLD_MAX_INSTRUMENTS];
 	char names[OLD_MAX_INSTRUMENTS][32];
@@ -331,287 +388,165 @@ int psy2loader_read_instruments(PSY2Loader* self)
 	if (status = psyfile_read(self->fp, &instselected, sizeof instselected)) {
 		return status;
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, names[i], sizeof(names[0]))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		psy_audio_legacyinstrument_init(&legacy_instrs[i]);
 		if (status = psyfile_read(self->fp, &legacy_instrs[i]._NNA,
 				sizeof(legacy_instrs[0]._NNA))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_AT,
-				sizeof legacy_instrs[0].ENV_AT)) {
+				sizeof(legacy_instrs[0].ENV_AT))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_DT,
-			sizeof legacy_instrs[0].ENV_DT)) {
+			sizeof(legacy_instrs[0].ENV_DT))) {
 			return status;
 		}
 	}
-
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_SL,
-				sizeof legacy_instrs[0].ENV_SL)) {
+				sizeof(legacy_instrs[0].ENV_SL))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
-		int32_t tmp;
-
-		if (status = psyfile_read(self->fp, &tmp, sizeof tmp)) {
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
+		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_RT,
+				sizeof(legacy_instrs[0].ENV_RT))) {
 			return status;
 		}
-		/*
-		** Truncate to 220 samples boundaries, and ensure it is not zero.
-		** (also change default value)
-		*/
-		if (tmp == 16) tmp = 220;
-		else { tmp = (tmp / 220) * 220; if (tmp <= 0) tmp = 1; }
-		legacy_instrs[i].ENV_RT = tmp;
+		/* change default value */
+		if (legacy_instrs[i].ENV_RT == 16) legacy_instrs[i].ENV_RT = 220;		
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_AT,
-				sizeof legacy_instrs[0].ENV_F_AT)) {
+				sizeof(legacy_instrs[0].ENV_F_AT))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_DT,
-			sizeof legacy_instrs[0].ENV_F_DT)) {
+			sizeof(legacy_instrs[0].ENV_F_DT))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_SL,
-				sizeof legacy_instrs[0].ENV_F_SL)) {
+				sizeof(legacy_instrs[0].ENV_F_SL))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{		
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {		
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_RT,
-				sizeof legacy_instrs[0].ENV_F_RT)) {
+				sizeof(legacy_instrs[0].ENV_F_RT))) {
 			return status;
 		}		
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_CO,
-				sizeof legacy_instrs[0].ENV_F_CO)) {
+				sizeof(legacy_instrs[0].ENV_F_CO))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_RQ,
 				sizeof legacy_instrs[0].ENV_F_RQ)) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_EA,
 				sizeof legacy_instrs[0].ENV_F_EA)) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i)
 	{
 		if (status = psyfile_read(self->fp, &legacy_instrs[i].ENV_F_TP,
 				sizeof legacy_instrs[0].ENV_F_TP)) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &pans[i], sizeof(pans[0]))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i]._RPAN,
 				sizeof(legacy_instrs[0]._RPAN))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i]._RCUT,
 				sizeof(legacy_instrs[0]._RCUT))) {
 			return status;
 		}
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
 		if (status = psyfile_read(self->fp, &legacy_instrs[i]._RRES,
 				sizeof(legacy_instrs[0]._RRES))) {
 			return status;
 		}
 	}
-
 	/*
 	progress.m_Progress.SetPos(4096);
 	::Sleep(1);
 	 Waves
 	*/
-
 	if (status = psyfile_read(self->fp, &tmpwvsl, sizeof(int32_t))) {
 		return status;
 	}
-	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
-	{
-		int32_t w;
+	for (i = 0; i < OLD_MAX_INSTRUMENTS; ++i) {
+		uint32_t w;
 
-		for (w = 0; w < OLD_MAX_WAVES; w++)
-		{
-			int32_t wltemp;
+		for (w = 0; w < OLD_MAX_WAVES; ++w) {
+			int32_t numframes;
 
-			if (status = psyfile_read(self->fp, &wltemp, sizeof(wltemp))) {
+			if (status = psyfile_read(self->fp, &numframes,
+					sizeof(numframes))) {
 				return status;
 			}
-			if (wltemp > 0)
-			{
-				if (w == 0)
-				{
-					psy_audio_Sample* wave;
-					int16_t tmpFineTune;
-					char dummy[33];
-					uint16_t volume = 0;
-					uint8_t stereo = 0;
-					uint8_t doloop = 0;
-					int16_t* pData;
-					uint32_t f;
-					uint8_t temp8u;
-					uint32_t temp32u;					
+			if (numframes > 0) {
+				if (w == 0) {
+					psy_audio_Instrument* instrument;
 
-					wave = psy_audio_sample_allocinit(1);
-					/* Old format assumed 44Khz */
-					wave->samplerate = 44100;
-					wave->panfactor = (float)pans[i] / 256.f; /* (value_mapper::map_256_1(pan)); */
-					/* Old wavename, not really used anyway. */
-					if (status = psyfile_read(self->fp, dummy, 32)) {
-						psy_audio_sample_deallocate(wave);
+					if (status = psy2loader_read_wave(self, (uint32_t)i,
+						numframes, pans[i], names[i])) {
 						return status;
 					}
-					wave->name = strdup(names[i]);
-					if (status = psyfile_read(self->fp, &volume, sizeof volume)) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					wave->globalvolume = volume * 0.01f;
-					if (status = psyfile_read(self->fp, &tmpFineTune, sizeof(short))) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					/* Current sample uses 100 cents. Older used +-256 */
-					tmpFineTune = (int32_t)((float)tmpFineTune / 2.56f);
-					wave->zone.finetune = tmpFineTune;
-					if (status = psyfile_read(self->fp, &temp32u, sizeof(uint32_t))) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					wave->loop.start = temp32u;
-					if (status = psyfile_read(self->fp, &temp32u, sizeof(uint32_t))) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					wave->loop.end = temp32u;
-					if (status = psyfile_read(self->fp, &doloop, sizeof(doloop))) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					wave->loop.type = doloop ? psy_audio_SAMPLE_LOOP_NORMAL : psy_audio_SAMPLE_LOOP_DO_NOT;
-					if (status = psyfile_read(self->fp, &temp8u, sizeof(uint8_t))) {
-						psy_audio_sample_deallocate(wave);
-						return status;
-					}
-					wave->stereo = temp8u;
-					pData = malloc(wltemp * sizeof(int16_t) + 4); /* +4 to avoid any attempt at buffer overflow by the code */
-					if (!pData) {
-						return PSY_ERRFILE;
-					}
-					if (status = psyfile_read(self->fp, pData, wltemp * sizeof(int16_t))) {
-						psy_audio_sample_deallocate(wave);
-						free(pData);
-						return status;
-					}
-					wave->numframes = wltemp;
-					psy_audio_sample_allocwavedata(wave);
-					for (f = 0; f < wave->numframes; ++f) {
-						int16_t val;
-						
-						val = (int16_t)pData[f];
-						wave->channels.samples[0][f] = (float)val;
-					}
-					free(pData);
-					pData = 0;					
-					if (wave->stereo)
-					{
-						uint32_t f;
-						pData = malloc(wltemp * sizeof(int16_t) + 4); /* +4 to avoid any attempt at buffer overflow by the code */
-						if (!pData) {							
-							return PSY_ERRFILE;
-						}
-						if (status = psyfile_read(self->fp, pData, wltemp * sizeof(int16_t))) {
-							psy_audio_sample_deallocate(wave);
-							free(pData);
-							return status;
-						}
-						psy_audio_sample_resize(wave, 2);
-						for (f = 0; f < wave->numframes; ++f) {
-							int16_t val;
-
-							val = (int16_t)pData[f];
-							wave->channels.samples[1][f] = (float)val;
-						}
-						free(pData);
-						pData = 0;						
-					}
-					psy_audio_samples_insert(&self->song->samples, wave,
-						psy_audio_sampleindex_make(i, 0));
-					{							
-						psy_audio_Instrument* instrument;
-
-						instrument = psy_audio_instrument_allocinit();
-						psy_audio_instrument_setname(instrument, names[i]);
-						psy_audio_instrument_setindex(instrument, i);
-						psy_audio_instruments_insert(&self->song->instruments,
-							instrument, psy_audio_instrumentindex_make(0, i));
-						/* convert */								
-						psy_audio_convert_legacy_to_instrument(instrument,
-							legacy_instrs[i]);						
-					}
+					instrument = psy_audio_instrument_allocinit();
+					psy_audio_instrument_setname(instrument, names[i]);
+					psy_audio_instrument_setindex(instrument, i);
+					psy_audio_instruments_insert(&self->song->instruments,
+						instrument, psy_audio_instrumentindex_make(0, i));
+					/* convert */								
+					psy_audio_convert_legacy_to_instrument(instrument,
+						legacy_instrs[i]);					
 				} else {
-					unsigned char stereo;
+					uint8_t stereo;
 
-					if (psyfile_skip(self->fp, 42 + sizeof(unsigned char)) == -1) {
+					if (psyfile_skip(self->fp, 42 + sizeof(uint8_t)) == -1) {
 						return PSY_ERRFILE;
 					}
-					if (status = psyfile_read(self->fp, &stereo, sizeof(unsigned char))) {
+					if (status = psyfile_read(self->fp, &stereo,
+							sizeof(stereo))) {
 						return status;
 					}
-					if (psyfile_skip(self->fp, wltemp) == -1) {
+					if (psyfile_skip(self->fp, numframes) == -1) {
 						return PSY_ERRFILE;
 					}
 					if (stereo) {
-						if (psyfile_skip(self->fp, wltemp) == -1) {
+						if (psyfile_skip(self->fp, numframes) == -1) {
 							return PSY_ERRFILE;
 						}
 					}
@@ -621,6 +556,109 @@ int psy2loader_read_instruments(PSY2Loader* self)
 	}
 	return PSY_OK;
 }
+
+int psy2loader_read_wave(PSY2Loader* self, uint32_t sampleidx,
+	uint32_t numframes, int32_t pan, const char* name)
+{
+	int status;
+	psy_audio_Sample* wave;
+	int16_t finetune;
+	char dummy[33];
+	uint16_t volume = 0;
+	uint8_t stereo = 0;
+	uint8_t doloop = 0;
+	int16_t* pData;
+	uint32_t frame;
+	uint8_t temp8u;
+	uint32_t temp32u;
+
+	wave = psy_audio_sample_allocinit(1);
+	/* Old format assumed 44Khz */
+	wave->samplerate = 44100;
+	wave->panfactor = (float)pan / 256.f; /* (value_mapper::map_256_1(pan)); */
+	/* Old wavename, not really used anyway. */
+	if (status = psyfile_read(self->fp, dummy, 32)) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->name = strdup(name);
+	if (status = psyfile_read(self->fp, &volume, sizeof(volume))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->globalvolume = volume * 0.01f;
+	if (status = psyfile_read(self->fp, &finetune, sizeof(finetune))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	/* Current sample uses 100 cents. Older used +-256 */
+	finetune = (int32_t)((float)finetune / 2.56f);
+	wave->zone.finetune = finetune;
+	if (status = psyfile_read(self->fp, &temp32u, sizeof(uint32_t))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->loop.start = temp32u;
+	if (status = psyfile_read(self->fp, &temp32u, sizeof(uint32_t))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->loop.end = temp32u;
+	if (status = psyfile_read(self->fp, &doloop, sizeof(doloop))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->loop.type = (doloop)
+		? psy_audio_SAMPLE_LOOP_NORMAL
+		: psy_audio_SAMPLE_LOOP_DO_NOT;
+	if (status = psyfile_read(self->fp, &temp8u, sizeof(uint8_t))) {
+		psy_audio_sample_deallocate(wave);
+		return status;
+	}
+	wave->stereo = temp8u;
+	/* +4 to avoid any attempt at buffer overflow by the code */
+	pData = malloc(numframes * sizeof(int16_t) + 4);
+	if (!pData) {
+		return PSY_ERRFILE;
+	}
+	if (status = psyfile_read(self->fp, pData, numframes * sizeof(int16_t))) {
+		psy_audio_sample_deallocate(wave);
+		free(pData);
+		return status;
+	}
+	wave->numframes = numframes;
+	psy_audio_sample_allocwavedata(wave);
+	for (frame = 0; frame < wave->numframes; ++frame) {
+		wave->channels.samples[0][frame] = (float)pData[frame];		
+	}
+	free(pData);
+	pData = NULL;
+	if (wave->stereo) {
+		uint32_t frame;
+
+		/* +4 to avoid any attempt at buffer overflow by the code */
+		pData = malloc(numframes * sizeof(int16_t) + 4);
+		if (!pData) {
+			return PSY_ERRFILE;
+		}
+		if (status = psyfile_read(self->fp, pData, numframes *
+				sizeof(int16_t))) {
+			psy_audio_sample_deallocate(wave);
+			free(pData);
+			return status;
+		}
+		psy_audio_sample_resize(wave, 2);
+		for (frame = 0; frame < wave->numframes; ++frame) {
+			wave->channels.samples[1][frame] = (float)pData[frame];
+		}
+		free(pData);
+		pData = NULL;
+	}
+	psy_audio_samples_insert(&self->song->samples, wave,
+		psy_audio_sampleindex_make(sampleidx, 0));
+	return PSY_OK;
+}
+
 
 int psy2loader_read_vsts(PSY2Loader* self)
 {
@@ -644,9 +682,12 @@ int psy2loader_read_vsts(PSY2Loader* self)
 				return status;
 			}
 			self->vstL[i].pars = malloc(sizeof(float) * self->vstL[i].numpars);
-			for (c=0; c< self->vstL[i].numpars; c++) {
+			if (!self->vstL[i].pars) {
+				return PSY_ERRFILE;
+			}
+			for (c = 0; c < self->vstL[i].numpars; ++c) {
 				if (status = psyfile_read(self->fp, &(self->vstL[i].pars[c]),
-						sizeof(float))) {
+						sizeof(float))) {					
 					return status;
 				}
 			}
@@ -713,7 +754,7 @@ int psy2loader_read_machines(PSY2Loader* self)
 					break;
 				case psy_audio_PLUGIN: {
 					char sDllName[256];
-					char plugincatchername[_MAX_PATH];
+					char plugincatchername[4096];
 
 					/* Plugin dll name */
 					psyfile_read(self->fp, sDllName, sizeof(sDllName));
@@ -746,7 +787,7 @@ int psy2loader_read_machines(PSY2Loader* self)
 					break; }
 				case psy_audio_VST:
 				case psy_audio_VSTFX: {				
-					char plugincatchername[_MAX_PATH];
+					char plugincatchername[4096];
 					char sError[128];
 					bool berror;
 					psy_audio_Machine* pVstPlugin;
@@ -1441,68 +1482,6 @@ int psy2loader_plugin_skipload(PSY2Loader* self, psy_audio_Machine* machine,
 	return PSY_OK;
 }
 
-void vstpreload_init(VstPreload* self, psy_audio_SongFile* songfile)
-{
-	self->songfile = songfile;
-}
-
-int vstpreload_load(VstPreload* self, uintptr_t slot, unsigned char* program,
-	int32_t* instance)
-{
-	int status;
-	cpoint_t connectionpoint[PSY2_MAX_CONNECTIONS];
-	int32_t panning;
-	uint8_t old;	
-
-	if (status = psyfile_read(self->songfile->file, self->_editName, 16)) {
-		return status;
-	}
-	self->_editName[15] = '\0';
-	if (status = psy_audio_psy2loader_read_wires(self->songfile, slot)) {
-		return status;
-	}
-	if (status = psyfile_read(self->songfile->file, &connectionpoint,
-			sizeof(connectionpoint))) {
-		return status;
-	}
-	/* numInputs and numOutputs */
-	if (psyfile_skip(self->songfile->file, 2 * sizeof(int32_t)) == -1) {
-		return PSY_ERRFILE;
-	}
-	if (status = psyfile_read(self->songfile->file, &panning,
-			sizeof(panning))) {
-		return status;
-	}
-	if (psyfile_skip(self->songfile->file, 109) == -1) {
-		return PSY_ERRFILE;
-	}	
-	/* old format */
-	if (status = psyfile_read(self->songfile->file, &old, sizeof(old))) {
-		return status;
-	}
-	/* ovst.instance */
-	if (status = psyfile_read(self->songfile->file, instance,
-			sizeof(*instance))) {
-		return status;
-	}
-	if (old)
-	{
-		char mch;
-
-		if (status = psyfile_read(self->songfile->file, &mch, sizeof(mch))) {
-			return status;
-		}
-		program = 0;
-	} else
-	{
-		if (status = psyfile_read(self->songfile->file, program,
-				sizeof(*program))) {
-			return status;
-		}
-	}
-	return PSY_OK;
-}
-
 int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 	uintptr_t macid)
 {
@@ -1514,7 +1493,9 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 
 	/* Create machinewires with PSY2_MAX_CONNECTIONS */
 	rv = psy_audio_machinewires_allocinit();
-	assert(rv);
+	if (!rv) {
+		return PSY_ERRFILE;
+	}
 	for (c = 0; c < PSY2_MAX_CONNECTIONS; ++c) {
 		psy_audio_machinewires_insert(rv, c,
 			psy_audio_legacywire_allocinit());

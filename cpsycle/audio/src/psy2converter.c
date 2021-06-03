@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "psy2converter.h"
-#include "psy2.h"
+#include "psy2loader.h"
 #include "machinefactory.h"
 #include "song.h"
 #include "songio.h"

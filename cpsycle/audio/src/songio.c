@@ -1,10 +1,13 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "songio.h"
-// local
+/* local */
 #include "exs24loader.h"
 #include "itmodule2.h"
 #include "machinefactory.h"
@@ -12,21 +15,21 @@
 #include "midisongexport.h"
 #include "psy3loader.h"
 #include "psy3saver.h"
-#include "psy2.h"
+#include "psy2loader.h"
 #include "song.h"
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
 #include "xmsongexport.h"
 #include "xmsongloader.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__POSIX
 #include <errno.h>
 #endif
 
-// song/module filter
+/* song/module filter */
 static char load_filters[] =
 "All Songs (*.psy *.xm *.it *.s3m *.mod *.wav *.mid)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav;*.mid|"
 "Songs (*.psy)"				        "|*.psy|"
@@ -37,7 +40,7 @@ static char load_filters[] =
 "Wav Format Songs (*.wav)"			"|*.wav|"
 "Midi Standard Songs (*.mid)"	    "|*.mid|";
 static const char save_filters[] = "Songs (*.psy)|*.psy";
-// instrument filter
+/* instrument filter */
 static const char instloadfilter[] = "All Instruments and samples|*.psins;*.xi;*.iti;*.wav;*.aif;*.aiff;*.its;*.s3i;*.8svx;*.16sv;*.svx;*.iff;*.exs|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff;*.exs|All files (*.*)|*.*||";
 static const char instsavefilter[] = "Instrument (*.psins)|*.psins";
 
@@ -377,4 +380,3 @@ const char* psy_audio_songfile_standardinstsavefilter(void)
 {
 	return "psins";
 }
-

@@ -115,9 +115,6 @@
     <ClCompile Include="src\patternio.c">
       <Filter>file</Filter>
     </ClCompile>
-    <ClCompile Include="src\psy2.c">
-      <Filter>file</Filter>
-    </ClCompile>
     <ClCompile Include="src\psy2converter.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -328,6 +325,9 @@
     <ClCompile Include="src\plugincategorylist.c">
       <Filter>machine\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="src\psy2loader.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -352,9 +352,6 @@
       <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="src\psy2converter.h">
-      <Filter>file</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psy2.h">
       <Filter>file</Filter>
     </ClInclude>
     <ClInclude Include="src\presetio.h">
@@ -626,6 +623,9 @@
     </ClInclude>
     <ClInclude Include="src\plugincategorylist.h">
       <Filter>machine\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psy2loader.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
