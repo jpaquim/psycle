@@ -31,7 +31,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, material.onprimary_medium);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);	
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON, style);
 	
 	style = psy_ui_style_allocinit();

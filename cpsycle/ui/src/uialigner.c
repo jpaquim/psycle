@@ -80,23 +80,53 @@ void psy_ui_aligner_adjustminmaxsize(
 	}
 }
 
-void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
+void psy_ui_aligner_addborder(psy_ui_Component* component,
 	psy_ui_Size* rv)
 {
 	const psy_ui_TextMetric* tm;
-	psy_ui_RealMargin border;
+	psy_ui_Margin bordermargin;	
+
+	tm = psy_ui_component_textmetric(component);	
+	bordermargin = psy_ui_border_margin(psy_ui_component_border(component));
+	psy_ui_size_setpx(rv,
+		psy_ui_value_px(&rv->width, tm, NULL) +		
+		psy_ui_margin_width_px(&bordermargin, tm, NULL),
+		psy_ui_value_px(&rv->height, tm, NULL) +		
+		psy_ui_margin_height_px(&bordermargin, tm, NULL));
+}
+
+void psy_ui_aligner_addspacing(psy_ui_Component* component,
+	psy_ui_Size* rv)
+{
+	const psy_ui_TextMetric* tm;	
 	psy_ui_RealMargin spacing;
 
 	tm = psy_ui_component_textmetric(component);
-	spacing = psy_ui_component_spacing_px(component);
-	border = psy_ui_component_bordermargin_px(component);
+	spacing = psy_ui_component_spacing_px(component);	
+	psy_ui_size_setpx(rv,
+		psy_ui_value_px(&rv->width, tm, NULL) +
+		psy_ui_realmargin_width(&spacing),
+		psy_ui_value_px(&rv->height, tm, NULL) +
+		psy_ui_realmargin_height(&spacing));
+}
+
+void psy_ui_aligner_addspacingandborder(psy_ui_Component* component,
+	psy_ui_Size* rv)
+{
+	const psy_ui_TextMetric* tm;	
+	psy_ui_Margin bordermargin;	
+	psy_ui_RealMargin spacing;
+
+	tm = psy_ui_component_textmetric(component);
+	spacing = psy_ui_component_spacing_px(component);	
+	bordermargin = psy_ui_border_margin(psy_ui_component_border(component));
 	psy_ui_size_setpx(rv,
 		psy_ui_value_px(&rv->width, tm, NULL) +
 		psy_ui_realmargin_width(&spacing) +
-		psy_ui_realmargin_width(&border),
+		psy_ui_margin_width_px(&bordermargin, tm, NULL),
 		psy_ui_value_px(&rv->height, tm, NULL) +
 		psy_ui_realmargin_height(&spacing) +
-		psy_ui_realmargin_height(&border));
+		psy_ui_margin_height_px(&bordermargin, tm, NULL));
 }
 
 void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
@@ -120,19 +150,23 @@ void psy_ui_aligner_adjustspacing(psy_ui_Component* component,
 void psy_ui_aligner_adjustborder(psy_ui_Component* component,
 	psy_ui_RealPoint* cp_topleft, psy_ui_RealPoint* cp_bottomright)
 {
+	const psy_ui_TextMetric* tm;
 	const psy_ui_Border* border;
+	psy_ui_Margin bordermargin;	
 
+	tm = psy_ui_component_textmetric(component);	
 	border = psy_ui_component_border(component);
+	bordermargin = psy_ui_border_margin(border);		
 	if (border->left.style == psy_ui_BORDER_SOLID) {
-		cp_topleft->x += 1;
+		cp_topleft->x += psy_ui_value_px(&bordermargin.left, tm, NULL);
 	}
 	if (border->top.style == psy_ui_BORDER_SOLID) {
-		cp_topleft->y += 1;
+		cp_topleft->y += psy_ui_value_px(&bordermargin.top, tm, NULL);
 	}
 	if (border->right.style == psy_ui_BORDER_SOLID) {
-		cp_bottomright->x -= 1;
+		cp_bottomright->x -= psy_ui_value_px(&bordermargin.right, tm, NULL);
 	}
 	if (border->bottom.style == psy_ui_BORDER_SOLID) {
-		cp_bottomright->y -= 1;
+		cp_bottomright->y -= psy_ui_value_px(&bordermargin.bottom, tm, NULL);
 	}
 }

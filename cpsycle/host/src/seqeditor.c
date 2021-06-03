@@ -1190,6 +1190,8 @@ void seqeditortrack_init(SeqEditorTrack* self,
 	self->component.vtable = &seqeditortrack_vtable;
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_NOBACKGROUND);
 	self->state = state;
 	self->workspace = workspace;	
 	self->currtrack = NULL;
@@ -1727,9 +1729,12 @@ void seqeditortrackdesc_ondragdrop(SeqEditorTrackDesc* self,
 /* prototypes */
 static void seqeditortracks_ondestroy(SeqEditorTracks*, psy_ui_Component*
 	sender);
+static void seqeditortracks_ondraw(SeqEditorTracks*, psy_ui_Graphics*);
 static void seqeditortracks_onmousedown(SeqEditorTracks*,
 	psy_ui_MouseEvent*);
 static void seqeditortracks_onmousemove(SeqEditorTracks*,
+	psy_ui_MouseEvent*);
+static void seqeditortracks_onmouseup(SeqEditorTracks*,
 	psy_ui_MouseEvent*);
 static void seqeditortracks_onmousedoubleclick(SeqEditorTracks*,
 	psy_ui_MouseEvent*);
@@ -1749,6 +1754,8 @@ static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditorState*);
 static void seqeditortracks_updatecursorlineposition(SeqEditorTracks*);
 static void seqeditortracks_updateseqeditlineposition(SeqEditorTracks*);
 static void seqeditortracks_outputstatusposition(SeqEditorTracks*, double x);
+static psy_ui_Component* psy_ui_component_track(psy_ui_Component*,
+	psy_ui_RealPoint pt, uintptr_t* index);
 /* vtable */
 static psy_ui_ComponentVtable seqeditortracks_vtable;
 static bool seqeditortracks_vtable_initialized = FALSE;
@@ -1757,19 +1764,29 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 {
 	if (!seqeditortracks_vtable_initialized) {
 		seqeditortracks_vtable = *(self->component.vtable);
-		seqeditortracks_vtable.onalign = (psy_ui_fp_component_onalign)
+		seqeditortracks_vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			seqeditortracks_ondraw;
+		seqeditortracks_vtable.onalign =
+			(psy_ui_fp_component_onalign)
 			seqeditortracks_onalign;
-		seqeditortracks_vtable.ontimer = (psy_ui_fp_component_ontimer)
+		seqeditortracks_vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
 			seqeditortracks_ontimer;
 		seqeditortracks_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousedown;
+		seqeditortracks_vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			seqeditortracks_onmouseup;
 		seqeditortracks_vtable.onmousemove =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditortracks_onmousemove;
-		seqeditortracks_vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)
+		seqeditortracks_vtable.onmouseenter =
+			(psy_ui_fp_component_onmouseenter)
 			seqeditortracks_onmouseenter;
-		seqeditortracks_vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)
+		seqeditortracks_vtable.onmouseleave =
+			(psy_ui_fp_component_onmouseleave)
 			seqeditortracks_onmouseleave;		
 		seqeditortracks_vtable_initialized = TRUE;
 	}
@@ -1785,6 +1802,8 @@ void seqeditortracks_init(SeqEditorTracks* self, psy_ui_Component* parent,
 	self->cursorline = NULL;
 	self->seqeditposline = NULL;
 	self->skin = skin;
+	psy_audio_patternselection_init(&self->selection);
+	psy_audio_patterncursor_init(&self->selectionbase);
 	psy_ui_component_init(&self->component, parent, NULL);
 	seqeditortracks_vtable_init(self);	
 	psy_ui_component_doublebuffer(&self->component);
@@ -1962,28 +1981,132 @@ void seqeditortracks_onupdatestyles(SeqEditorTracks* self)
 {	
 }
 
+void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
+{
+	if (psy_audio_patternselection_valid(&self->selection)) {
+		double left;
+		double right;
+		psy_ui_Component* top;
+		psy_ui_Component* bottom;
+		psy_ui_RealRectangle topposition;
+		psy_ui_RealRectangle bottomposition;
+
+		top = psy_ui_component_at(&self->component,
+			self->selection.topleft.track);
+		if (top) {
+			topposition = psy_ui_component_position(top);
+		}
+		bottom = psy_ui_component_at(&self->component,
+			self->selection.bottomright.track);
+		if (bottom) {
+			bottomposition = psy_ui_component_position(bottom);
+		}
+		if (!top || !bottom) {
+			return;
+		}
+		left = floor(seqeditorstate_beattopx(self->state,
+			self->selection.topleft.offset));
+		right = floor(seqeditorstate_beattopx(self->state,
+			self->selection.bottomright.offset));
+		psy_ui_drawsolidrectangle(g,
+			psy_ui_realrectangle_make(
+				psy_ui_realpoint_make(left, topposition.top),
+				psy_ui_realsize_make(right - left,
+					bottomposition.bottom - topposition.top)),
+			psy_ui_colour_make(0x009B7800));
+	}
+}
+
 void seqeditortracks_onmousedown(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
-	if (self->state->dragstatus && self->state->cmd == SEQEDTCMD_REMOVEPATTERN) {
+	if (self->state->dragstatus && self->state->cmd
+			== SEQEDTCMD_REMOVEPATTERN) {
 		sequencecmds_delentry(self->state->cmds);
 		self->state->dragstatus = FALSE;
 		psy_ui_mouseevent_stop_propagation(ev);
-	} else if ((self->state->dragmode & SEQEDITORDRAG_REORDER) == SEQEDITORDRAG_REORDER) {
+	} else if ((self->state->dragmode & SEQEDITORDRAG_REORDER)
+			== SEQEDITORDRAG_REORDER) {
 		if (self->cursorline) {
 			psy_ui_component_hide(&self->cursorline->component);
 			psy_ui_component_invalidate(&self->component);
 		}
+	} else {
+		uintptr_t index;
+
+		psy_ui_component_intersect(&self->component, ev->pt, &index);
+		self->selectionbase.offset = self->state->cursorposition;
+		self->selectionbase.track = index;
+		psy_audio_patternselection_startdrag(&self->selection,
+			self->selectionbase, self->selectionbase, 0.25);
+		psy_ui_component_capture(&self->component);
 	}
 }
 
 void seqeditortracks_onmousemove(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
+	seqeditortracks_outputstatusposition(self, ev->pt.x);
 	if (self->state->dragstatus && (self->state->dragmode & SEQEDITORDRAG_MOVE) == SEQEDITORDRAG_MOVE) {
 		seqeditortracks_updateseqeditlineposition(self);
+	} else if (psy_audio_patternselection_valid(&self->selection)) {
+		psy_audio_PatternCursor curr;
+		uintptr_t index;
+
+		psy_ui_component_track(&self->component, ev->pt, &index);
+		curr.offset = psy_max(0.0, self->state->cursorposition);
+		if (index != psy_INDEX_INVALID) {
+			curr.track = index;
+		} else {
+			curr.track = 0;
+		}
+		psy_audio_patternselection_drag(&self->selection, self->selectionbase, curr,
+			0.25);
+		psy_ui_component_invalidate(&self->component);
+	}	
+}
+
+psy_ui_Component* psy_ui_component_track(psy_ui_Component* self, psy_ui_RealPoint pt, uintptr_t* index)
+{
+	psy_ui_Component* rv = 0;
+	psy_List* p;
+	psy_List* q;
+	uintptr_t c = 0;
+	double cp;
+
+	p = q = psy_ui_component_children(self, 0);
+	while (p) {
+		psy_ui_RealRectangle position;
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (psy_ui_component_visible(component)) {
+			position = psy_ui_component_position(component);
+			cp = position.bottom;
+			
+			if (pt.y < cp) {
+				rv = (psy_ui_Component*)p->entry;
+				break;
+			}
+		}
+		++c;
+		p = p->next;
 	}
-	seqeditortracks_outputstatusposition(self, ev->pt.x);
+	psy_list_free(q);
+	if (rv) {
+		*index = c;
+	} else {
+		*index = psy_INDEX_INVALID;
+	}
+	return rv;
+}
+
+void seqeditortracks_onmouseup(SeqEditorTracks* self,
+	psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_releasecapture(&self->component);
+	psy_audio_patternselection_disable(&self->selection);	
+	psy_ui_component_invalidate(&self->component);
 }
 
 void seqeditortracks_onmouseenter(SeqEditorTracks* self)

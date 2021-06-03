@@ -534,12 +534,12 @@ psy_audio_PatternCursor trackercolumn_makecursor(TrackerColumn* self,
 
 psy_dsp_big_beat_t trackercolumn_currseqoffset(TrackerColumn* self)
 {
-	psy_audio_SequencePatternEntry* entry;
+	psy_audio_SequenceEntry* entry;
 
 	entry = psy_audio_sequence_entry(self->gridstate->sequence,
 		workspace_sequenceeditposition(self->workspace));
 	if (entry) {
-		return psy_audio_sequenceentry_offset(&entry->entry);
+		return psy_audio_sequenceentry_offset(entry);
 	}
 	return 0.0;
 }

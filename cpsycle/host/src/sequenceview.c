@@ -1023,13 +1023,13 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		seqview_onsongchanged);
 	/* focus */
-	psy_ui_button_init_connect(&self->focus, &self->scroller.component, NULL,
+	/*psy_ui_button_init_connect(&self->focus, &self->scroller.component, NULL,
 		self, seqview_oneditseqlist);
 	psy_ui_button_preventtranslation(&self->focus);
 	psy_ui_button_settext(&self->focus, "Edit");	
 	psy_ui_component_setalign(&self->focus.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setspacing(&self->focus.component, psy_ui_margin_make_em(
-	  0.25, 0.0, 0.25, 0.0));
+	  0.25, 0.0, 0.25, 0.0));*/
 	psy_signal_connect(&workspace->sequenceselection.signal_changed, self,
 		seqview_onselectionchanged);
 	if (self->cmds.sequence && self->cmds.sequence->patterns) {

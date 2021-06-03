@@ -709,7 +709,7 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 	psy_audio_SequenceSelection* sender)
 {	
 	psy_audio_Pattern* pattern;
-	psy_audio_SequencePatternEntry* entry;
+	psy_audio_SequenceEntry* entry;
 
 	if (self->workspace->song) {
 		pattern = psy_audio_sequence_pattern(&self->workspace->song->sequence,
@@ -721,7 +721,7 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 		entry = NULL;
 	}	
 	stepsequencerview_setpattern(self, pattern);
-	steptimer_reset(&self->steptimer, entry ? entry->entry.offset : 0);	
+	steptimer_reset(&self->steptimer, entry ? entry->offset : 0);	
 }
 
 void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace*

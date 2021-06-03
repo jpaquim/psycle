@@ -347,7 +347,6 @@ INLINE psy_ui_Margin psy_ui_component_spacing(const psy_ui_Component* self)
 void psy_ui_component_setspacing_children(psy_ui_Component*, psy_ui_Margin);
 void psy_ui_component_setalign_children(psy_ui_Component*, psy_ui_AlignType);
 void psy_ui_component_checksortedalign(psy_ui_Component*, psy_ui_AlignType);
-psy_ui_Margin psy_ui_component_bordermargin(const psy_ui_Component*);
 const psy_ui_Border* psy_ui_component_border(const psy_ui_Component*);
 void psy_ui_component_setborder(psy_ui_Component*, const psy_ui_Border*);
 uintptr_t psy_ui_component_backgroundimageid(const psy_ui_Component*);
@@ -930,19 +929,6 @@ INLINE psy_ui_RealMargin psy_ui_component_spacing_px(const psy_ui_Component* sel
 	margin = psy_ui_component_spacing(self);
 	parentsize = psy_ui_component_parentsize(self);
 	psy_ui_realmargin_init_margin(&rv, &margin,
-		psy_ui_component_textmetric(self), &parentsize);
-	return rv;
-}
-
-INLINE psy_ui_RealMargin psy_ui_component_bordermargin_px(const psy_ui_Component* self)
-{
-	psy_ui_RealMargin rv;
-	psy_ui_Margin border;
-	psy_ui_Size parentsize;
-
-	border = psy_ui_component_bordermargin(self);
-	parentsize = psy_ui_component_parentsize(self);
-	psy_ui_realmargin_init_margin(&rv, &border,
 		psy_ui_component_textmetric(self), &parentsize);
 	return rv;
 }

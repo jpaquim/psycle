@@ -69,7 +69,8 @@ int psy2loader_load(PSY2Loader*);
 
 struct PsyFile;
 
-psy_audio_MachineWires* psy_audio_read_psy2machinewires(struct PsyFile*);
+int psy_audio_psy2loader_read_wires(struct psy_audio_SongFile*,
+	uintptr_t macid);
 
 #ifdef __cplusplus
 }
