@@ -13,12 +13,12 @@ void psy_audio_legacywire_copy(psy_audio_LegacyWire* self, psy_audio_LegacyWire*
 {
 	assert(self && source);
 
-	self->_inputMachine = source->_inputMachine;
-	self->_inputCon = source->_inputCon;
-	self->_inputConVol = source->_inputConVol;
-	self->_wireMultiplier = source->_wireMultiplier;
-	self->_outputMachine = source->_outputMachine;
-	self->_connection = source->_connection;
+	self->input_machine = source->input_machine;
+	self->input_con = source->input_con;
+	self->input_convol = source->input_convol;
+	self->wire_multiplier = source->wire_multiplier;
+	self->output_machine = source->output_machine;
+	self->connection = source->connection;
 	psy_audio_pinmapping_dispose(&self->pinmapping);
 	psy_audio_pinmapping_init(&self->pinmapping, 0);
 	psy_audio_pinmapping_copy(&self->pinmapping, &source->pinmapping);	
@@ -200,8 +200,8 @@ int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires* self,
 			continue;
 		}
 		legacywire = psy_tableiterator_value(&it);
-		if (legacywire && legacywire->_connection &&
-			legacywire->_outputMachine == macindex)
+		if (legacywire && legacywire->connection &&
+			legacywire->output_machine == macindex)
 		{			
 			return (int)(intptr_t)psy_tableiterator_key(&it);
 		}

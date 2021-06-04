@@ -1130,12 +1130,12 @@ int psy2loader_add_machines(PSY2Loader* self)
 					psy_audio_LegacyWire* wireremapped;					
 					
 					wireremapped = (psy_audio_LegacyWire*)psy_tableiterator_value(&j);
-					if (wireremapped->_inputCon && wireremapped->_inputMachine > -1 && wireremapped->_inputMachine < 128
-						&& invmach[wireremapped->_inputMachine] != 255) {
+					if (wireremapped->input_con && wireremapped->input_machine > -1 && wireremapped->input_machine < 128
+						&& invmach[wireremapped->input_machine] != 255) {
 						float val;
 
-						wireremapped->_inputMachine = invmach[wireremapped->_inputMachine];						
-						val = wireremapped->_inputConVol;
+						wireremapped->input_machine = invmach[wireremapped->input_machine];						
+						val = wireremapped->input_convol;
 						if (val > 4.1f)
 						{
 							val *= 0.000030517578125f; /* BugFix */
@@ -1143,22 +1143,22 @@ int psy2loader_add_machines(PSY2Loader* self)
 						{
 							val *= 32768.0f; /* BugFix */
 						}
-						wireremapped->_inputConVol = val;
+						wireremapped->input_convol = val;
 						/* and set the volume. */
 						psy_audio_machines_connect(&self->song->machines,
-							psy_audio_wire_make(wireremapped->_inputMachine, macremapped_id));
+							psy_audio_wire_make(wireremapped->input_machine, macremapped_id));
 						psy_audio_connections_setwirevolume(&self->song->machines.connections,
-							psy_audio_wire_make(wireremapped->_inputMachine, macremapped_id),
-							val * wireremapped->_wireMultiplier);
+							psy_audio_wire_make(wireremapped->input_machine, macremapped_id),
+							val * wireremapped->wire_multiplier);
 						psy_audio_connections_setpinmapping(&self->song->machines.connections,
-							psy_audio_wire_make(wireremapped->_inputMachine, macremapped_id),
+							psy_audio_wire_make(wireremapped->input_machine, macremapped_id),
 							&wireremapped->pinmapping);									
 					}
-					if (wireremapped->_connection) {
-						if (wireremapped->_outputMachine > 0 && wireremapped->_outputMachine < 128) {
-							wireremapped->_outputMachine = invmach[wireremapped->_outputMachine];
+					if (wireremapped->connection) {
+						if (wireremapped->output_machine > 0 && wireremapped->output_machine < 128) {
+							wireremapped->output_machine = invmach[wireremapped->output_machine];
 						} else {
-							wireremapped->_outputMachine = psy_audio_MASTER_INDEX;
+							wireremapped->output_machine = psy_audio_MASTER_INDEX;
 						}
 					}
 				}
@@ -1514,7 +1514,7 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 		}
 		currwire = psy_audio_machinewires_at(rv, c);
 		if (currwire) {
-			currwire->_inputMachine = input;
+			currwire->input_machine = input;
 		}
 	}
 	/* Outgoing connections Machine number */
@@ -1528,7 +1528,7 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 		}
 		currwire = psy_audio_machinewires_at(rv, c);
 		if (currwire) {
-			currwire->_outputMachine = output;
+			currwire->output_machine = output;
 		}
 	}
 	/* Incoming connections Machine vol */
@@ -1543,7 +1543,7 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 		}
 		currwire = psy_audio_machinewires_at(rv, c);
 		if (currwire) {
-			currwire->_inputConVol = inputconvol;
+			currwire->input_convol = inputconvol;
 		}
 	}
 	/* Outgoing connections activated */
@@ -1558,7 +1558,7 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 		}
 		currwire = psy_audio_machinewires_at(rv, c);
 		if (currwire) {
-			currwire->_connection = connection;
+			currwire->connection = connection;
 		}
 	}
 	/* Incoming connections activated */
@@ -1573,7 +1573,7 @@ int psy_audio_psy2loader_read_wires(psy_audio_SongFile* songfile,
 		}
 		currwire = psy_audio_machinewires_at(rv, c);
 		if (currwire) {
-			currwire->_inputCon = inputcon;
+			currwire->input_con = inputcon;
 		}
 	}
 	psy_audio_legacywires_insert(songfile->legacywires, macid, rv);

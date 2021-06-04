@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_MACHINEINFO_H
 #define psy_audio_MACHINEINFO_H
@@ -11,26 +13,26 @@ extern "C" {
 #endif
 
 typedef struct psy_audio_MachineInfo {
-	/// API version. Use MI_VERSION
+	/* API version.Use MI_VERSION */
 	short APIVersion;
-	/// plug version. Your machine version. Shown in Hexadecimal.
+	/* plug version. Your machine version. Shown in Hexadecimal. */
 	short PlugVersion;
-	/// psy_audio_Machine flags
+	/* psy_audio_Machine flags */
 	int Flags;
-	/// Defines the type of machine
+	/* Defines the type of machine */
 	int mode;
 	char  * Name;
-	/// "Name of the machine in machine Display"
+	/* "Name of the machine in machine Display" */
 	char  * ShortName;
-	/// "Name of author"
+	/* "Name of author" */
 	char  * Author;
-	/// "Text to show as custom command (see Command method)"
+	/* "Text to show as custom command (see Command method)" */
 	char  * Command;	
-	/// host type
+	/* host type */
 	int type;		
-	/// module path
+	/* module path */
 	char* modulepath;
-	/// shellidx
+	/* shellidx */
 	uintptr_t shellidx;
 	char* helptext;
 	char* desc;

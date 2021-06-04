@@ -33,6 +33,10 @@ extern "C" {
 #define STYLE_SEQEDT_DESCITEM_HOVER			 31041
 #define STYLE_SEQEDT_DESCITEM_SELECTED       31042
 #define STYLE_SEQEDT_TOOLBAR                 31043
+#define STYLE_SEQEDT_SPACER                  31044
+#define STYLE_SEQEDT_RULER_TOP               31045
+#define STYLE_SEQEDT_RULER_BOTTOM            31046
+#define STYLE_SEQEDT_LEFT                    31047
 #define STYLE_SEQLISTVIEW                    31050
 #define STYLE_SEQLISTVIEW_SELECT             31052
 #define STYLE_SEQLISTVIEW_TRACK              31053

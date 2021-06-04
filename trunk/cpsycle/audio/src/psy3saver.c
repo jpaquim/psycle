@@ -822,7 +822,7 @@ int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver* self, uintptr_t s
 		if (status = psyfile_write_float(self->fp, invol)) {
 			return status;
 		}
-		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		// Value to multiply input_convol[] to have a 0.0...1.0 range
 		if (status = psyfile_write_float(self->fp, 1.f)) {
 			return status;
 		}

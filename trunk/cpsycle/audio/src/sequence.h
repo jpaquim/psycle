@@ -316,7 +316,10 @@ void psy_audio_sequenceselection_select(psy_audio_SequenceSelection*,
 	psy_audio_OrderIndex);
 void psy_audio_sequenceselection_deselect(psy_audio_SequenceSelection*,
 	psy_audio_OrderIndex);
+void psy_audio_sequenceselection_deselectall(psy_audio_SequenceSelection*);
 bool psy_audio_sequenceselection_isselected(const psy_audio_SequenceSelection*,
+	psy_audio_OrderIndex);
+void psy_audio_sequenceselection_append(psy_audio_SequenceSelection*,
 	psy_audio_OrderIndex);
 psy_audio_OrderIndex psy_audio_sequenceselection_first(const psy_audio_SequenceSelection*);
 void psy_audio_sequenceselection_setmode(psy_audio_SequenceSelection*,

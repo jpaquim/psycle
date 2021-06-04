@@ -1,15 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_MACHINEPARAM_H
 #define psy_audio_MACHINEPARAM_H
 
-// local
+/* local */
 #include "wire.h"
-// container
+/* container */
 #include <signal.h>
 #include <hashtbl.h>
-// dsp
+/* dsp */
 #include <dsptypes.h>
 
 #include "../../detail/psydef.h"
@@ -18,13 +20,15 @@
 extern "C" {
 #endif
 
-// psy_audio_MachineParam
-// 
-// Aim: Base class for various parameter classes (e.g. int, choice, gain).
-//      Enables reuse of repeating parameter classes. Instead tweaking with
-//      a parameter index, the machine is asked with a index for a parameter
-//      object. On the parameter object operations can be done, either direct
-//      or using the machine interface having proxy exception handling
+/*
+** psy_audio_MachineParam
+**
+** Aim: Base class for various parameter classes (e.g. int, choice, gain).
+**      Enables reuse of repeating parameter classes. Instead tweaking with
+**      a parameter index, the machine is asked with a index for a parameter
+**      object. On the parameter object operations can be done, either direct
+**      or using the machine interface having proxy exception handling
+*/
 
 struct psy_audio_MachineParam;
 
@@ -44,7 +48,7 @@ typedef struct MachineParamVtable {
 	fp_machineparam_label label;
 	fp_machineparam_name name;
 	fp_machineparam_describe describe;
-	// events
+	/* events */
 	fp_machineparam_tweak tweak;	
 	fp_machineparam_reset reset;
 } MachineParamVtable;
@@ -70,19 +74,19 @@ INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float val
 	self->vtable->tweak(self, value);
 }
 
-// reset to default
+/* reset to default */
 INLINE void psy_audio_machineparam_reset(psy_audio_MachineParam* self)
 {
 	self->vtable->reset(self);
 }
 
-// [0.0f..1.0f] 
+/* [0.0f..1.0f] */
 INLINE float psy_audio_machineparam_normvalue(psy_audio_MachineParam* self)
 {
 	return self->vtable->normvalue(self);
 }
 
-// scale in integer
+/* scale in integer */
 INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self,
 	intptr_t* minval, intptr_t* maxval)
 {
@@ -109,7 +113,7 @@ INLINE int psy_audio_machineparam_describe(psy_audio_MachineParam* self, char* t
 	return self->vtable->describe(self, text);
 }
 
-// converts normvalue(0.f .. 1.f) -> scaled integer value 
+/* converts normvalue(0.f .. 1.f) -> scaled integer value */
 INLINE intptr_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
 {
 	intptr_t rv;
@@ -149,7 +153,7 @@ INLINE psy_audio_MachineParam* psy_audio_custommachineparam_base(psy_audio_Custo
 	return &(self->machineparam);
 }
 
-// psy_audio_InfoMachineParam
+/* psy_audio_InfoMachineParam */
 typedef struct psy_audio_InfoMachineParam {
 	psy_audio_MachineParam machineparam;
 	char* name;
@@ -170,7 +174,7 @@ psy_audio_InfoMachineParam* psy_audio_infomachineparam_alloc(void);
 psy_audio_InfoMachineParam* psy_audio_infomachineparam_allocinit(
 	const char* name, const char* label, int style);
 
-// psy_audio_IntMachineParam
+/* psy_audio_IntMachineParam */
 typedef struct psy_audio_IntMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
@@ -198,7 +202,7 @@ psy_audio_IntMachineParam* psy_audio_intmachineparam_allocinit(
 	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
 	intptr_t maxval);
 
-// psy_audio_UIntPtrMachineParam
+/* psy_audio_UIntPtrMachineParam */
 typedef struct psy_audio_UIntPtrMachineParam {
 	psy_audio_MachineParam machineparam;
 	uintptr_t minval;
@@ -226,7 +230,7 @@ psy_audio_UIntPtrMachineParam* psy_audio_uintptrmachineparam_allocinit(
 	const char* name, const char* label, int type, uintptr_t* data,
 	uintptr_t minval, uintptr_t maxval);
 
-// psy_audio_FloatMachineParam [0 .. 1]
+/* psy_audio_FloatMachineParam [0 .. 1] */
 typedef struct psy_audio_FloatMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
@@ -254,8 +258,7 @@ psy_audio_FloatMachineParam* psy_audio_floatmachineparam_allocinit(
 	const char* name, const char* label, int type, float* data, intptr_t minval,
 	intptr_t maxval);
 
-// psy_audio_ChoiceMachineParam
-
+/* psy_audio_ChoiceMachineParam */
 typedef struct psy_audio_ChoiceMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
@@ -289,7 +292,7 @@ typedef enum {
 	psy_audio_VOLUME_MIXER
 } psy_audio_VolumeMode;
 
-// psy_audio_VolumeMachineParam [0 .. 1]
+/* psy_audio_VolumeMachineParam [0 .. 1] */
 typedef struct psy_audio_VolumeMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
@@ -320,7 +323,7 @@ INLINE psy_audio_MachineParam* psy_audio_volumemachineparam_base(psy_audio_Volum
 	return &(self->machineparam);
 }
 
-// psy_audio_GainMachineParam [0 .. 4 // -12db .. 12db]
+/* psy_audio_GainMachineParam [0 .. 4 : -12db .. 12db] */
 typedef struct psy_audio_GainMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
@@ -348,14 +351,14 @@ INLINE psy_audio_MachineParam* psy_audio_gainmachineparam_base(psy_audio_GainMac
 	return &(self->machineparam);
 }
 
-// WireParam
+/* WireParam */
 struct psy_audio_Machines;
 
 typedef struct psy_audio_WireMachineParam {
 	psy_audio_MachineParam machineparam;
 	psy_audio_Wire wire;
 	char* name;
-	// references
+	/* references */
 	struct psy_audio_Machines* machines;
 } psy_audio_WireMachineParam;
 

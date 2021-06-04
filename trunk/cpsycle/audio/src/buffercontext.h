@@ -1,22 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_BUFFERCONTEXT_H
 #define psy_audio_BUFFERCONTEXT_H
 
-// audio
+/* audio */
 #include "buffer.h"
-// container
+/* container */
 #include <list.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// psy_audio_BufferContext
-//
-// aim: merges all parameters a machine needs to perform a work or similiar
-//      calls. For now a pure parameter object with no additional operations.
+/* psy_audio_BufferContext
+**
+** aim: merges all parameters a machine needs to perform a work or similiar
+**      calls. For now a pure parameter object with no additional operations.
+*/
 
 typedef struct psy_audio_BufferContext {
 	psy_audio_Buffer* input;
