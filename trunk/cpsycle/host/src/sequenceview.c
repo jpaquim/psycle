@@ -76,6 +76,8 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->client, psy_ui_HEXPAND);
+	psy_ui_component_setscrollstep(&self->client,
+		psy_ui_size_make(self->state->trackwidth, self->state->lineheight));
 	psy_ui_component_setoverflow(&self->client, psy_ui_OVERFLOW_HSCROLL);
 	seqviewtrackheaders_build(self);
 }
@@ -117,7 +119,8 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 				seqviewtrackheaders_onnewtrack);
 		}
 	}
-	psy_ui_component_align(&self->client);	
+	psy_ui_component_align(&self->client);
+	psy_ui_component_align(&self->component);	
 }
 
 void seqviewtrackheaders_onmouseup(SeqviewTrackHeaders* self,
@@ -1040,7 +1043,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 
 void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_setscrollleft(seqviewtrackheader_base(&self->trackheader),
+	psy_ui_component_setscrollleft(seqviewtrackheader_base(&self->trackheader.client),
 		psy_ui_component_scrollleft(seqviewlist_base(&self->listview)));
 }
 
