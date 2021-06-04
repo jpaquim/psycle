@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_CUSTOMMACHINE_H
 #define psy_audio_CUSTOMMACHINE_H
@@ -10,14 +12,18 @@
 extern "C" {
 #endif
 
-// psy_audio_CustomMachine
-//	
-// A specialized base class for "Machines", the audio producing
-// elements, offering default implementations.
-// Most plugins inherit from this class instead from Machine.
+/*
+** psy_audio_CustomMachine
+**
+** A specialized base class for "Machines", the audio producing
+** elements, offering default implementations.
+** Most plugins inherit from this class instead from Machine.
+*/
 
-typedef struct {
+typedef struct psy_audio_CustomMachine {
+	/* inherits */
 	psy_audio_Machine machine;
+	/* internal */
 	psy_dsp_amp_t pan;
 	int ismuted;
 	int isbypassed;

@@ -144,21 +144,41 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		
 	style = psy_ui_style_allocinit();	
 	psy_ui_border_init_right(&style->border, psy_ui_BORDER_SOLID,
-		material.surface_overlay_16p);
+		material.surface_overlay_24p);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_TRACK_NUMBER, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style,
-		material.surface_overlay_12p);
+		material.surface_overlay_16p);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_DESCITEM_SELECTED, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style,
-		material.surface_overlay_8p);
+		material.surface_overlay_5p);
 	psy_ui_style_setspacing_em(style, 0.25, 0.0, 0.25, 0.0);
 	psy_ui_border_init_bottom(&style->border, psy_ui_BORDER_SOLID,
 		material.surface_overlay_6p);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_TOOLBAR, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_8p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_SPACER, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_8p);	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_RULER_TOP, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_6p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_RULER_BOTTOM, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style,
+		material.surface_overlay_11p);
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,

@@ -69,22 +69,14 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
 	psy_ui_component_setminimumsize(&self->component,
-		psy_ui_size_make_em(0.0, 2.0));
-	psy_ui_component_setdefaultalign(&self->component,
-		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HEXPAND);
-	psy_ui_component_setoverflow(&self->component,
-		psy_ui_OVERFLOW_HSCROLL);	
+		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_init(&self->signal_trackselected);
 	psy_ui_component_init(&self->client, &self->component, NULL);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_FIXED_RESIZE);
 	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
-	psy_ui_component_setalignexpand(&self->client,
-		psy_ui_HEXPAND);
-	psy_ui_component_setoverflow(&self->client,
-		psy_ui_OVERFLOW_HSCROLL);	
+	psy_ui_component_setalignexpand(&self->client, psy_ui_HEXPAND);
+	psy_ui_component_setoverflow(&self->client, psy_ui_OVERFLOW_HSCROLL);
 	seqviewtrackheaders_build(self);
 }
 
@@ -125,7 +117,7 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 				seqviewtrackheaders_onnewtrack);
 		}
 	}
-	psy_ui_component_align(&self->client);
+	psy_ui_component_align(&self->client);	
 }
 
 void seqviewtrackheaders_onmouseup(SeqviewTrackHeaders* self,
@@ -1126,7 +1118,9 @@ void seqview_onselectionchanged(SeqView* self,
 
 void seqview_onsequencechanged(SeqView* self,
 	psy_audio_Sequence* sender)
-{		
+{			
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_component_scrollsize(&self->component));
 	seqviewduration_stopdurationcalc(&self->duration);
 	seqviewtrackheaders_build(&self->trackheader);
 	seqviewlist_build(&self->listview);

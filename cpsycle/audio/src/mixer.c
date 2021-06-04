@@ -2084,7 +2084,7 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		if (status = psyfile_write_float(songfile->file, channel->volume)) {
 			return status;
 		}
-		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		// Value to multiply input_convol[] to have a 0.0...1.0 range
 		if (status = psyfile_write_float(songfile->file, volMultiplier)) {
 			return status;
 		}
@@ -2114,7 +2114,7 @@ int savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		if (status = psyfile_write(songfile->file, &volume, sizeof(float))) {
 			return status;
 		}
-		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		// Value to multiply input_convol[] to have a 0.0...1.0 range
 		if (status = psyfile_write(songfile->file, &volMultiplier, sizeof(float))) {
 			return status;
 		}
@@ -2221,44 +2221,44 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 			if (!legacywire) {
 				continue;
 			}
-			if (wire->_inputCon && legacywire->_inputCon &&
-				wire->_inputMachine == legacywire->_inputMachine) {
-				wire->_inputCon = FALSE;
+			if (wire->input_con && legacywire->input_con &&
+				wire->input_machine == legacywire->input_machine) {
+				wire->input_con = FALSE;
 			}
 		}
-		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->_inputMachine);
-		if (wire->_inputCon
-			&& wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
-			&& slot != wire->_inputMachine && inputmachine)
+		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->input_machine);
+		if (wire->input_con
+			&& wire->input_machine >= 0 && wire->input_machine < MAX_MACHINES
+			&& slot != wire->input_machine && inputmachine)
 		{
 			//Do not create the hidden wire from mixer send to the send machine.
 			int outWire = psy_audio_legacywires_findlegacyoutput(
-				songfile->legacywires, wire->_inputMachine, (int)slot);
+				songfile->legacywires, wire->input_machine, (int)slot);
 			if (outWire != -1) {	
 				psy_audio_InputChannel* channel;				
 
 				//if (wire.pinMapping.size() > 0) {
-				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
-				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)
+				//	inWires[c].ConnectSource(*_pMachine[wire.input_machine], 0
+				//		, FindLegacyOutput(_pMachine[wire.input_machine], _macIndex)
 				//		, &wire.pinMapping);
 				//} else {
-				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
-				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
+				//	inWires[c].ConnectSource(*_pMachine[wire.input_machine], 0
+				//		, FindLegacyOutput(_pMachine[wire.input_machine], _macIndex));
 				//}
-				//while (wire->_inputConVol * wire->_wireMultiplier > 8.0f) { //psycle 1.10.1 alpha bugfix
-					//wire->_inputConVol /= 32768.f;
+				//while (wire->input_convol * wire->wire_multiplier > 8.0f) { //psycle 1.10.1 alpha bugfix
+					//wire->input_convol /= 32768.f;
 				//}
-				//while (wire->_inputConVol > 0.f && wire->_inputConVol * wire->_wireMultiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
-					//wire->_inputConVol *= 32768.f;
+				//while (wire->input_convol > 0.f && wire->input_convol * wire->wire_multiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
+					//wire->input_convol *= 32768.f;
 				//}
-				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
+				//inWires[c].SetVolume(wire.input_convol * wire.wire_multiplier);
 				psy_audio_machines_connect(&songfile->song->machines,
-					psy_audio_wire_make(wire->_inputMachine, slot));
+					psy_audio_wire_make(wire->input_machine, slot));
 				psy_audio_connections_setwirevolume(&songfile->song->machines.connections,
-					psy_audio_wire_make(wire->_inputMachine, slot),
-					wire->_inputConVol * wire->_wireMultiplier);
+					psy_audio_wire_make(wire->input_machine, slot),
+					wire->input_convol * wire->wire_multiplier);
 				channel = psy_audio_mixer_channel(self, c);
-				channel->inputslot = wire->_inputMachine;
+				channel->inputslot = wire->input_machine;
 					
 			}
 		} else {
@@ -2280,31 +2280,31 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			continue;
 		}
 		//inputCon is not used in legacyReturn.
-		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->_inputMachine);
-		if (wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
-			&& slot != wire->_inputMachine && inputmachine)
+		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->input_machine);
+		if (wire->input_machine >= 0 && wire->input_machine < MAX_MACHINES
+			&& slot != wire->input_machine && inputmachine)
 		{
 			psy_audio_ReturnChannel* channel;
 			psy_audio_LegacyWire* wire2;
 
 			channel = psy_audio_mixer_return(self, j);
 			if (channel) {
-				channel->fxslot = wire->_inputMachine;
+				channel->fxslot = wire->input_machine;
 			}
 			psy_audio_machines_connect(&songfile->song->machines,
-				psy_audio_wire_make(wire->_inputMachine, slot));
+				psy_audio_wire_make(wire->input_machine, slot));
 			psy_audio_connections_setwirevolume(&songfile->song->machines.connections,
-				psy_audio_wire_make(wire->_inputMachine, slot),
-				wire->_inputConVol * wire->_wireMultiplier);
+				psy_audio_wire_make(wire->input_machine, slot),
+				wire->input_convol * wire->wire_multiplier);
 			/*if (wire.pinMapping.size() > 0) {
-				Return(j).GetWire().ConnectSource(*_pMachine[wire._inputMachine], 1
-					, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)
+				Return(j).GetWire().ConnectSource(*_pMachine[wire.input_machine], 1
+					, FindLegacyOutput(_pMachine[wire.input_machine], _macIndex)
 					, &wire.pinMapping);
 			} else {
-				Return(j).GetWire().ConnectSource(*_pMachine[wire._inputMachine], 1
-					, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
+				Return(j).GetWire().ConnectSource(*_pMachine[wire.input_machine], 1
+					, FindLegacyOutput(_pMachine[wire.input_machine], _macIndex));
 			}
-			Return(j).GetWire().SetVolume(wire._inputConVol);
+			Return(j).GetWire().SetVolume(wire.input_convol);
 			*/
 			wire2 = (psy_audio_LegacyWire*) psy_table_at(&self->legacysend_, j);
 			if (wire2) {
@@ -2312,7 +2312,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 
 				send = psy_audio_mixer_Send(self, j);
 				if (send) {
-					send->inputconvol = wire2->_inputConVol;
+					send->inputconvol = wire2->input_convol;
 				}				
 				//if (wire2.pinMapping.size() > 0) {
 					//Send(j).ChangeMapping(wire2.pinMapping);

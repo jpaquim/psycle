@@ -1,32 +1,38 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_CONNECTIONS_H
 #define psy_audio_CONNECTIONS_H
 
+/* container */
 #include <hashtbl.h>
 #include <list.h>
 #include <signal.h>
+/* dsp */
 #include <dsptypes.h>
-
+/* platform */
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// psy_audio_Connections, psy_audio_PinMapping, psy_audio_PinConnection
-//
-// Defines the wire mapping (psy_audio_Connections) and pinmapping
-// (psy_audio_PinMapping) inside a wire. No special wire class has been
-// implemented like in mfc psycle. LegacyWire and Wire are only helpers
-// for song loading and the machineview ui.
-
+/*
+** psy_audio_Connections, psy_audio_PinMapping, psy_audio_PinConnection
+**
+** Defines the wire mapping (psy_audio_Connections) and pinmapping
+** (psy_audio_PinMapping) inside a wire. No special wire class has been
+** implemented like in mfc psycle. LegacyWire and Wire are only helpers
+** for song loading and the machineview ui.
+*/
 
 #define psy_audio_MASTER_INDEX 128
 #define psy_audio_MAX_STREAM_SIZE 256
 
-typedef struct {
+/* psy_audio_PinConnection */
+typedef struct psy_audio_PinConnection {
 	uintptr_t src;
 	uintptr_t dst;
 } psy_audio_PinConnection;
@@ -44,6 +50,7 @@ psy_audio_PinConnection* psy_audio_pinconnection_alloc(void);
 psy_audio_PinConnection* psy_audio_pinconnection_allocinit_all(uintptr_t src,
 	uintptr_t dst);
 
+/* psy_audio_PinMapping */
 typedef struct psy_audio_PinMapping {
 	psy_List* container;
 } psy_audio_PinMapping;
@@ -199,7 +206,8 @@ INLINE psy_audio_Wire psy_audio_wire_zero(void)
 	return psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
 }
 
-typedef struct {
+/* psy_audio_Connections */
+typedef struct psy_audio_Connections {
 	psy_Table container;
 	psy_Table sends;
 	psy_Signal signal_connected;

@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_MIDILOADER_H
 #define psy_audio_MIDILOADER_H
@@ -17,17 +19,18 @@
 extern "C" {
 #endif
 
-// MidiLoader
-
-// Loads a Midi File:
-// - for each midi track a track in the sequence is appended
-// - the midi channel is set to the patternevent mach parameter
-// - midi controller events are stored in track 0 as multi cmd
-// - midi polyphony is mapped to tracker channels 1..64 (MAX_POLYPHONY)
-// - noteoffs are created if the following noteon time is greater than
-//   the noteoff time
-// - note on volume is mapped to 0x0..0x80 MAX
-// - no machines are added and must set in the machineview manually
+/* MidiLoader
+**
+** Loads a Midi File:
+** - for each midi track a track in the sequence is appended
+** - the midi channel is set to the patternevent mach parameter
+** - midi controller events are stored in track 0 as multi cmd
+** - midi polyphony is mapped to tracker channels 1..64 (MAX_POLYPHONY)
+** - noteoffs are created if the following noteon time is greater than
+**   the noteoff time
+** - note on volume is mapped to 0x0..0x80 MAX
+** - no machines are added and must set in the machineview manually
+*/
 
 #define MAX_MIDIFILE_POLYPHONY 64
 
@@ -59,11 +62,11 @@ void miditrackstate_dispose(MidiTrackState*);
 void miditrackstate_reset(MidiTrackState*);
 
 typedef struct MidiLoader {
-	// internal data
+	/* internal */
 	PsyFile* fp;
 	MTHD mthd;
 	MidiTrackState currtrack;	
-	// references
+	/* references */
 	psy_audio_SongFile* songfile;
 } MidiLoader;
 

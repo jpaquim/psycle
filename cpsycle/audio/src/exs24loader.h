@@ -1,6 +1,8 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
-// derived from EXS24 For Renoise Matt Allan (MIT Licence) https://github.com/matt-allan/renoise-exs24
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+** derived from EXS24 For Renoise Matt Allan (MIT Licence) https://github.com/matt-allan/renoise-exs24
+*/
 
 #ifndef psy_audio_EXS24LOADER_H
 #define psy_audio_EXS24LOADER_H
@@ -12,9 +14,11 @@
 extern "C" {
 #endif
 
-// Instrument import for the Logic EXS24 format
-//
-// todo: sample path detection: prompt for path if not found
+/*
+** Instrument import for the Logic EXS24 format
+**
+** todo: sample path detection: prompt for path if not found
+*/
 
 struct psy_audio_SongFile;
 

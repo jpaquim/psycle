@@ -1126,7 +1126,7 @@ int psy_audio_sequence_istracksoloed(const psy_audio_Sequence* self, uintptr_t t
 	return psy_audio_trackstate_istracksoloed(&self->trackstate, track);
 }
 
-// SequenceSelection
+/* SequenceSelection */
 void psy_audio_sequenceselection_init(psy_audio_SequenceSelection* self)
 {		
 	psy_signal_init(&self->signal_changed);
@@ -1155,6 +1155,23 @@ void psy_audio_sequenceselection_clear(psy_audio_SequenceSelection* self)
 	psy_list_deallocate(&self->entries, NULL);
 	psy_signal_emit(&self->signal_clear, self, 0);
 	psy_signal_emit(&self->signal_changed, self, 0);
+}
+
+void psy_audio_sequenceselection_deselectall(psy_audio_SequenceSelection* self)
+{
+	psy_List* p;
+	psy_List* q;
+	
+	for (p = q = self->entries; p != NULL; p = q) {
+		psy_audio_OrderIndex* currindex;
+		psy_audio_OrderIndex index;
+
+		q = p->next;
+		currindex = (psy_audio_OrderIndex*)psy_list_entry(p);
+		index = *currindex;
+		psy_list_remove(&self->entries, p);
+		psy_signal_emit(&self->signal_deselect, self, 1, &index);
+	}
 }
 
 void psy_audio_sequenceselection_copy(psy_audio_SequenceSelection* self,
@@ -1218,6 +1235,17 @@ void psy_audio_sequenceselection_select(psy_audio_SequenceSelection* self,
 	}
 	psy_signal_emit(&self->signal_select, self, 1, &index);
 	psy_signal_emit(&self->signal_changed, self, 0);
+}
+
+void psy_audio_sequenceselection_append(psy_audio_SequenceSelection* self,
+	psy_audio_OrderIndex index)
+{
+	psy_audio_OrderIndex* newindex;
+
+	newindex = (psy_audio_OrderIndex*)
+		malloc(sizeof(psy_audio_OrderIndex));
+	*newindex = index;
+	psy_list_append(&self->entries, newindex);
 }
 
 void psy_audio_sequenceselection_deselect(psy_audio_SequenceSelection* self,

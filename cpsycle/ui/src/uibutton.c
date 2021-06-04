@@ -196,12 +196,12 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_icondraw_init(&icondraw, self->icon);
 		psy_ui_icondraw_draw(&icondraw, g,
 			psy_ui_button_center(self,
-				psy_ui_realpoint_make(12.0, 0.0),
+				psy_ui_realpoint_make(6.0, 0.0),
 				psy_ui_realsize_make(buttonsize.width, 8.0)),
 				psy_ui_component_colour(&self->component));
 		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 		if (psy_strlen(text) > 0) {
-			ident += tm->tmAveCharWidth * 2;
+			ident += tm->tmAveCharWidth * 2 + 6.0;
 		}
 	}
 	if (psy_strlen(text) > 0) {

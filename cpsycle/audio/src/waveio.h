@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_WAVEIO_H
 #define psy_audio_WAVEIO_H
@@ -43,7 +45,6 @@ INLINE void psy_audio_waveformatchunk_config(psy_audio_WaveFormatChunk* self,
 	self->nBlockAlign = self->nChannels * self->wBitsPerSample / 8;
 	self->cbSize = 0;
 }
-
 
 struct psy_audio_Sample;
 

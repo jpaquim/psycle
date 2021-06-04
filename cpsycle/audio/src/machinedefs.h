@@ -1,5 +1,7 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #ifndef psy_audio_MACHINEDEFS_H
 #define psy_audio_MACHINEDEFS_H
@@ -22,17 +24,17 @@ typedef enum {
 typedef enum  {
 	psy_audio_UNDEFINED = -1,
 	psy_audio_MASTER = 0,
-	psy_audio_SINE = 1, ///< now a plugin
-	psy_audio_DIST = 2, ///< now a plugin
+	psy_audio_SINE = 1, /*< now a plugin */
+	psy_audio_DIST = 2, /*< now a plugin */
 	psy_audio_SAMPLER = 3,
-	psy_audio_DELAY = 4, ///< now a plugin
-	psy_audio_2PFILTER = 5, ///< now a plugin
-	psy_audio_GAIN = 6, ///< now a plugin
-	psy_audio_FLANGER = 7, ///< now a plugin
+	psy_audio_DELAY = 4, /*< now a plugin */
+	psy_audio_2PFILTER = 5, /*< now a plugin */
+	psy_audio_GAIN = 6, /*/< now a plugin */
+	psy_audio_FLANGER = 7, /*< now a plugin */
 	psy_audio_PLUGIN = 8,
 	psy_audio_VST = 9,
 	psy_audio_VSTFX = 10,
-	psy_audio_SCOPE = 11, ///< Test machine. removed
+	psy_audio_SCOPE = 11, /*< Test machine. removed */
 	psy_audio_XMSAMPLER = 12,
 	psy_audio_DUPLICATOR = 13,
 	psy_audio_MIXER = 14,

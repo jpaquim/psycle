@@ -1191,7 +1191,7 @@ void mainframe_updateseqeditorbuttons(MainFrame* self)
 			"seqview.hideseqeditor");
 		psy_ui_button_highlight(&self->sequencerbar.toggleseqedit);
 		psy_ui_button_seticon(&self->sequencerbar.toggleseqedit,
-			psy_ui_ICON_LESS);
+			psy_ui_ICON_LESS);		
 	} else {
 		psy_ui_button_settext(&self->sequencerbar.toggleseqedit,
 			"seqview.showseqeditor");

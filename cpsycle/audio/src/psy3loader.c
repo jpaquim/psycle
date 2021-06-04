@@ -2321,7 +2321,7 @@ int psy_audio_psy3loader_machineloadchunk(
 		if (status = psyfile_read(self->fp, &inconvol, sizeof(inconvol))) {
 			return status;
 		}
-		/* Value to multiply _inputConVol[] to have a 0.0...1.0 range */
+		/* Value to multiply input_convol[] to have a 0.0...1.0 range */
 		if (status = psyfile_read(self->fp, &wiremultiplier, sizeof(wiremultiplier))) {
 			return status;
 		}

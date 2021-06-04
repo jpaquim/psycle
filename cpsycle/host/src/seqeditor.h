@@ -55,6 +55,7 @@ typedef struct SeqEditorState {
 	bool dragstatus;
 	bool dragstart;
 	bool draglength;
+	bool dragselection;
 	psy_dsp_big_beat_t dragstartoffset;
 	bool updatecursorposition;
 	psy_ui_RealPoint dragpt;

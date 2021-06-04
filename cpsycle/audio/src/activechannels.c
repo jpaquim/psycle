@@ -1,12 +1,15 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
+/* local */
 #include "activechannels.h"
 #include "machines.h"
-
-// std
+/* std */
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,7 +80,7 @@ bool psy_audio_activechannelmacs_active(psy_audio_ActiveChannelMacs* self, uintp
 	return psy_table_exists(&self->activemacs, mac);
 }
 
-// ActiveChannels
+/* ActiveChannels */
 void psy_audio_activechannels_init(psy_audio_ActiveChannels* self)
 {	
 	assert(self);
