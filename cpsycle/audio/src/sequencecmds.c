@@ -435,16 +435,20 @@ void psy_audio_sequencechangepatterncommand_execute(
 	ite = psy_audio_sequenceselection_begin(self->selection);
 	for (; ite != NULL; psy_list_next(&ite)) {
 		psy_audio_OrderIndex* orderindex;
-		psy_audio_SequencePatternEntry* entry;
+		psy_audio_SequenceEntry* seqentry;
+		psy_audio_SequencePatternEntry* seqpatternentry;
 
 		orderindex = ite->entry;
 		assert(orderindex);
-		entry = psy_audio_sequence_entry(self->sequence, *orderindex);
-		if (entry && (self->step > 0 ||
-				(self->step < 0 &&
-				entry->patternslot >= (uintptr_t)(self->step * (-1))))) {
+		seqentry = psy_audio_sequence_entry(self->sequence, *orderindex);		
+		if (!seqentry || seqentry->type != psy_audio_SEQUENCEENTRY_PATTERN) {
+			return;
+		}
+		seqpatternentry = (psy_audio_SequencePatternEntry*)seqentry;
+		if ((self->step > 0 || (self->step < 0 &&
+				seqpatternentry->patternslot >= (uintptr_t)(self->step * (-1))))) {
 			psy_audio_sequence_setpatternindex(self->sequence,
-				*orderindex, entry->patternslot + self->step);
+				*orderindex, seqpatternentry->patternslot + self->step);
 			self->success = TRUE;
 		}
 	}

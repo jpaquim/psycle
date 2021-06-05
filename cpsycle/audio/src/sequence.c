@@ -536,7 +536,7 @@ bool psy_audio_sequence_patternused(psy_audio_Sequence* self, uintptr_t patterns
 	t = self->tracks;
 	while (t) {
 		psy_audio_SequenceTrack* track;
-		psy_audio_SequencePatternEntryNode* p;
+		psy_audio_SequenceEntryNode* p;
 
 		track = (psy_audio_SequenceTrack*)t->entry;
 		p = track->entries;
@@ -573,7 +573,7 @@ psy_audio_OrderIndex psy_audio_sequence_patternfirstused(psy_audio_Sequence* sel
 	currtrackidx = 0;
 	while (t) {
 		psy_audio_SequenceTrack* track;
-		psy_audio_SequencePatternEntryNode* p;
+		psy_audio_SequenceEntryNode* p;
 		uintptr_t currorderidx;
 
 		track = (psy_audio_SequenceTrack*)t->entry;
@@ -1249,7 +1249,7 @@ void psy_audio_sequence_remove_selection(psy_audio_Sequence* self,
 	ite = psy_audio_sequenceselection_begin(selection);
 	for (; ite != NULL; psy_list_next(&ite)) {
 		psy_audio_OrderIndex* orderindex;
-		psy_audio_SequencePatternEntryNode* currnode;
+		psy_audio_SequenceEntryNode* currnode;
 		psy_audio_SequenceTrack* track;
 
 		orderindex = ite->entry;
@@ -1353,7 +1353,7 @@ psy_audio_SequenceEntry* psy_audio_sequence_entry(psy_audio_Sequence* self,
 	return NULL;
 }
 
-psy_audio_SequencePatternEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
+psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
 	psy_audio_OrderIndex index, psy_audio_SequenceTrack** rv)
 {
 	psy_audio_SequenceTrack* track;

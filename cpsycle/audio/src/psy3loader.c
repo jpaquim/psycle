@@ -512,7 +512,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		** this extends the seqd chunk file format to handle 
 		** beat positions
 		*/
-		psy_audio_SequencePatternEntryNode* p;
+		psy_audio_SequenceEntryNode* p;
 				
 		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
 				++i, psy_list_next(&p)) {
