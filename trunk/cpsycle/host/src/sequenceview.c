@@ -1043,7 +1043,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 
 void seqview_onscroll(SeqView* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_setscrollleft(seqviewtrackheader_base(&self->trackheader.client),
+	psy_ui_component_setscrollleft(&self->trackheader.client,
 		psy_ui_component_scrollleft(seqviewlist_base(&self->listview)));
 }
 

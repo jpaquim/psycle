@@ -13,6 +13,7 @@
 #include "midiinput.h"
 #include "sequencer.h"
 #include "song.h"
+#include "sampler.h"
 /* dsp */
 #include <dither.h>
 /* driver */
@@ -64,6 +65,7 @@ typedef struct psy_audio_Player {
 	psy_audio_MidiInput midiinput;
 	psy_audio_ActiveChannels playon;
 	bool measure_cpu_usage;
+	psy_audio_Sampler sampler;
 } psy_audio_Player;
 
 void psy_audio_player_init(psy_audio_Player*, psy_audio_Song*,

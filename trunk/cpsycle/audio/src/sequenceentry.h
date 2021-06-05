@@ -177,7 +177,7 @@ typedef struct psy_audio_SequenceSampleEntry {
 	** sample index to be played if psycle will support audio patterns
 	** not used now
 	*/	
-	psy_audio_SampleIndex sampleindex;
+	psy_audio_SampleIndex sampleindex;	
 } psy_audio_SequenceSampleEntry;
 
 void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry*,

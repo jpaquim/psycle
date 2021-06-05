@@ -192,7 +192,7 @@ void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry* self,
 		psy_audio_SEQUENCEENTRY_SAMPLE, offset);
 	psy_audio_sequencesampleentry_vtable_init(self);	
 	self->samples = NULL;
-	self->sampleindex = sampleindex;
+	self->sampleindex = sampleindex;	
 }
 
 psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_alloc(void)

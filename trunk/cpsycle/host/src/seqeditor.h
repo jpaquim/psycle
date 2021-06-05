@@ -242,7 +242,7 @@ typedef struct SeqEditorTrack {
 	SeqEditorState* state;
 	bool dragstarting;	
 	double dragstartpx;	
-	psy_audio_SequencePatternEntryNode* drag_sequenceitem_node;	
+	psy_audio_SequenceEntryNode* drag_sequenceitem_node;	
 	Workspace* workspace;
 	PatternViewSkin* skin;
 	psy_ui_Component* view;
@@ -252,17 +252,13 @@ typedef struct SeqEditorTrack {
 
 void seqeditortrack_init(SeqEditorTrack*,
 	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*, 
-	PatternViewSkin* skin,	
-	Workspace*);
+	SeqEditorState*, PatternViewSkin*, Workspace*);
 void seqeditortrack_dispose(SeqEditorTrack*);
 
 SeqEditorTrack* seqeditortrack_alloc(void);
 SeqEditorTrack* seqeditortrack_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
-	SeqEditorState*,
-	PatternViewSkin* skin,	
-	Workspace*);
+	SeqEditorState*, PatternViewSkin*, Workspace*);
 
 void seqeditortrack_updatetrack(SeqEditorTrack*,
 	psy_audio_SequenceTrackNode*,
