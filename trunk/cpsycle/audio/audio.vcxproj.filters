@@ -328,6 +328,9 @@
     <ClCompile Include="src\psy2loader.c">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="src\sequenceentry.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -626,6 +629,9 @@
     </ClInclude>
     <ClInclude Include="src\psy2loader.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequenceentry.h">
+      <Filter>sequence</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
