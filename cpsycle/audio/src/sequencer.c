@@ -226,6 +226,9 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	psy_audio_patternevent_init(&self->metronome_event);
 	self->metronome_event.note = 48;
 	self->metronome_event.mach = 0x3F;
+	psy_audio_patternevent_init(&self->sample_event);
+	self->sample_event.note = 48;
+	self->sample_event.mach = 0x3E;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -715,25 +718,22 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 					}
 				}
 				if (seqentry && seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
-					if (psy_audio_sequencer_isoffsetinwindow(self, seqentry->offset)) {
-						/*
-						** todo: handle sample
-						psy_audio_SequencePatternEntry* seqpatternentry;
+					if (psy_audio_sequencer_isoffsetinwindow(self, seqentry->offset)) {												
+						psy_audio_SequenceSampleEntry* seqsampleentry;
 						psy_audio_PatternEntry* entry;
 						psy_audio_PatternEvent* ev;
 
+						seqsampleentry = (psy_audio_SequenceSampleEntry*)seqentry;
 						entry = psy_audio_patternentry_allocinit();
 						entry->bpm = self->seqtime.bpm;
 						entry->track = METRONOME_TRACK;
-						entry->delta = seqentry->offset - self->seqtime.position;
-						seqpatternentry = (psy_audio_SequencePatternEntry*)entry;
+						entry->delta = seqentry->offset - self->seqtime.position;						
 						ev = psy_audio_patternentry_front(entry);
-						psy_audio_patternevent_init(ev);		
-						ev->note = psy_audio_NOTECOMMANDS_PLAY_SMPL;						
-						ev->inst = (uint8_t)seqpatternentry->sampleindex.slot;
-						ev->cmd = (uint8_t)seqpatternentry->sampleindex.subslot;
-						psy_list_append(&self->events, entry);
-						*/
+						*ev = self->sample_event;						
+						ev->note = psy_audio_NOTECOMMANDS_PLAY_SMPL;
+						ev->inst = (uint8_t)seqsampleentry->sampleindex.slot;
+						ev->parameter = (uint8_t)seqsampleentry->sampleindex.subslot;
+						psy_list_append(&self->events, entry);						
 					}					
 				} else if (track->iterator->patternnode) {					
 					offset = psy_audio_sequencetrackiterator_offset(

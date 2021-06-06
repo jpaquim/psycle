@@ -136,6 +136,7 @@ typedef struct psy_audio_Sequencer {
 	/* metronome */
 	psy_audio_SequencerMetronome metronome;
 	psy_audio_PatternEvent metronome_event;
+	psy_audio_PatternEvent sample_event;
 	/* references */
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;
