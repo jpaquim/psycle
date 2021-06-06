@@ -103,6 +103,7 @@ typedef struct {
 	bool preventdrawonselect;	
 	bool drawline;	
 	WaveBoxContext context;
+	bool preventselection;
 } WaveBox;
 
 void wavebox_init(WaveBox*, psy_ui_Component* parent, Workspace*);

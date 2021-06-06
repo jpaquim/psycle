@@ -80,7 +80,7 @@ void waveboxcontext_init(WaveBoxContext* self, psy_ui_Component* component)
 	waveboxselection_init(&self->selection);	
 	psy_ui_size_init_em(&self->size, 10.0, 10.0);		
 	psy_dsp_multiresampler_init(&self->resampler,
-		psy_dsp_RESAMPLERQUALITY_SPLINE);
+		psy_dsp_RESAMPLERQUALITY_SPLINE);	
 }
 
 void waveboxcontext_dispose(WaveBoxContext* self)
@@ -244,25 +244,25 @@ static uintptr_t wavebox_screentoframe(WaveBox*, double x);
 static double wavebox_frametoscreen(WaveBox*, uintptr_t frame);
 static void  wavebox_onsize(WaveBox*, psy_ui_Size*);
 static psy_dsp_amp_t wavebox_amp(WaveBox*, float frame);
-
+/* vtable */
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(WaveBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondraw = (psy_ui_fp_component_ondraw) wavebox_ondraw;
-		vtable.onsize = (psy_ui_fp_component_onsize) wavebox_onsize;
-		vtable_initialized = 1;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)wavebox_ondraw;
+		vtable.onsize = (psy_ui_fp_component_onsize)wavebox_onsize;
+		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 
 void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	psy_ui_component_init(&self->component, parent, NULL);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	vtable_init(self);	
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);	
 	self->nowavetext = strdup("");
@@ -284,6 +284,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->component.signal_languagechanged, self,
 		wavebox_onlanguagechanged);
 	wavebox_updatetext(self);
+	self->preventselection = FALSE;
 }
 
 void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
@@ -511,6 +512,9 @@ psy_ui_RealRectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebe
 void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
+	if (self->preventselection) {
+		return;
+	}
 	psy_ui_component_capture(&self->component);
 	self->dragstarted = TRUE;	
 	if (self->context.sample && waveboxcontext_numframes(&self->context) > 0) {
@@ -572,6 +576,9 @@ void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
+	if (self->preventselection) {
+		return;
+	}
 	if (self->context.sample && waveboxcontext_numframes(&self->context) > 0) {
 		uintptr_t frame;
 		uintptr_t realframe;
@@ -835,6 +842,9 @@ static psy_dsp_amp_t wavebox_amp(WaveBox* self, float frame)
 void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
+	if (self->preventselection) {
+		return;
+	}
 	psy_ui_component_releasecapture(&self->component);
 	if (waveboxcontext_sample(&self->context) && waveboxcontext_numframes(&self->context) > 0) {		
 		self->dragmode = WAVEBOX_DRAG_NONE;
