@@ -18,7 +18,8 @@ void psy_audio_sequencetrack_init(psy_audio_SequenceTrack* self)
 	assert(self);
 
 	self->entries = NULL;
-	self->name = psy_strdup("seq");	
+	self->name = psy_strdup("seq");
+	self->height = 0.0;
 }
 
 void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack* self)
@@ -814,19 +815,48 @@ void psy_audio_sequence_unmutetrack(psy_audio_Sequence* self, uintptr_t track)
 	psy_signal_emit(&self->signal_mutechanged, self, 1, track);
 }
 
-int psy_audio_sequence_istrackmuted(const psy_audio_Sequence* self, uintptr_t track)
+int psy_audio_sequence_istrackmuted(const psy_audio_Sequence* self,
+	uintptr_t trackindex)
 {
 	assert(self);
 
-	return psy_audio_trackstate_istrackmuted(&self->trackstate, track);
+	return psy_audio_trackstate_istrackmuted(&self->trackstate, trackindex);
 }
 
-int psy_audio_sequence_istracksoloed(const psy_audio_Sequence* self, uintptr_t track)
+bool psy_audio_sequence_istracksoloed(const psy_audio_Sequence* self, uintptr_t track)
 {
 	assert(self);
 
 	return psy_audio_trackstate_istracksoloed(&self->trackstate, track);
 }
+
+double psy_audio_sequence_trackheight(const psy_audio_Sequence* self,
+	uintptr_t trackindex)
+{
+	const psy_audio_SequenceTrack* track;
+
+	assert(self);
+
+	track = psy_audio_sequence_track_at_const(self, trackindex);
+	if (track) {
+		return track->height;
+	}
+	return 0.0;
+}
+
+void psy_audio_sequence_settrackheight(psy_audio_Sequence* self,
+	uintptr_t trackindex, double height)
+{
+	psy_audio_SequenceTrack* track;
+
+	assert(self);
+
+	track = psy_audio_sequence_track_at(self, trackindex);
+	if (track) {
+		track->height = height;
+	}	
+}
+
 
 /* SequenceSelection */
 void psy_audio_sequenceselection_init(psy_audio_SequenceSelection* self)
