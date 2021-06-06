@@ -148,7 +148,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 				psy_ui_component_setpreferredsize(component,
 					psy_ui_size_make_px(psy_ui_value_px(&size.width, tm, NULL) / 2, 0));
 				if (!self->split) {
-					psy_ui_splitter_init(&self->splitbar, psy_ui_notebook_base(self));
+					psy_ui_splitter_init(&self->splitbar, psy_ui_notebook_base(self), NULL);
 					self->split = 1;
 					psy_ui_component_setorder(&self->splitbar.component, component);
 				}
@@ -158,7 +158,8 @@ void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation
 				psy_ui_component_setpreferredsize(component,
 					psy_ui_size_make_px(0, psy_ui_value_px(&size.height, tm, NULL) / 2));
 				if (!self->split) {
-					psy_ui_splitter_init(&self->splitbar, psy_ui_notebook_base(self));
+					psy_ui_splitter_init(&self->splitbar,
+						psy_ui_notebook_base(self), NULL);
 					self->split = 1;
 					psy_ui_component_setorder(&self->splitbar.component, component);
 				}

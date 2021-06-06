@@ -276,6 +276,8 @@ INLINE psy_ui_Component* seqeditortrack_base(SeqEditorTrack* self)
 typedef struct SeqEditorTrackDesc {
 	/* inherits */
 	psy_ui_Component component;	
+	/* signals */
+	psy_Signal signal_resize;
 	/* references */
 	PatternViewSkin* skin;
 	SeqEditorState* state;

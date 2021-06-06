@@ -268,7 +268,7 @@ typedef struct {
 } psy_audio_SequencePosition;
 
 void psy_audio_sequenceposition_init(psy_audio_SequencePosition*);
-psy_audio_SequencePatternEntry* psy_audio_sequenceposition_entry(
+psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition*);
 
 struct psy_audio_Sequencer;

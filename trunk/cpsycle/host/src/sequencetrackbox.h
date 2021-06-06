@@ -26,6 +26,10 @@ extern "C" {
 
 typedef struct SequenceTrackBox {
 	/* inherits */
+	psy_ui_Component component;
+	/* signals */
+	psy_Signal signal_resize;
+	/* internal */
 	TrackBox trackbox;
 	/* internal */
 	uintptr_t trackidx;
@@ -48,7 +52,7 @@ void sequencetrackbox_showtrackname(SequenceTrackBox*);
 
 INLINE psy_ui_Component* sequencetrackbox_base(SequenceTrackBox* self)
 {
-	return &self->trackbox.component;
+	return &self->component;
 }
 
 #ifdef __cplusplus

@@ -268,7 +268,7 @@ void mainframe_initterminal(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(psy_ui_terminal_base(&self->terminal),
 		psy_ui_size_zero());
-	psy_ui_splitter_init(&self->splitbarterminal, mainframe_base(self));
+	psy_ui_splitter_init(&self->splitbarterminal, mainframe_base(self), NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarterminal),
 		psy_ui_ALIGN_BOTTOM);
 	workspace_connectterminal(&self->workspace, self,
@@ -516,7 +516,7 @@ void mainframe_initgear(MainFrame* self)
 	gear_init(&self->gear, &self->client, &self->workspace);
 	psy_ui_component_hide(gear_base(&self->gear));
 	psy_ui_component_setalign(gear_base(&self->gear), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->gearsplitter, &self->client);
+	psy_ui_splitter_init(&self->gearsplitter, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->gearsplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->gearsplitter, gear_base(&self->gear));
@@ -531,7 +531,7 @@ void mainframe_initparamrack(MainFrame* self)
 	psy_ui_component_hide(paramrack_base(&self->paramrack));
 	psy_ui_component_setalign(&self->paramrack.component,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_splitter_init(&self->splitbarparamrack, &self->client);
+	psy_ui_splitter_init(&self->splitbarparamrack, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarparamrack),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_splitter_settoggle(&self->splitbarparamrack,
@@ -546,7 +546,7 @@ void mainframe_initcpuview(MainFrame* self)
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
 	psy_ui_component_hide(cpuview_base(&self->cpuview));
 	psy_ui_component_setalign(cpuview_base(&self->cpuview), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->cpusplitter, &self->client);
+	psy_ui_splitter_init(&self->cpusplitter, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->cpusplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->cpusplitter,
@@ -561,7 +561,7 @@ void mainframe_initmidimonitor(MainFrame* self)
 	midimonitor_init(&self->midimonitor, &self->client, &self->workspace);
 	psy_ui_component_hide(midimonitor_base(&self->midimonitor));
 	psy_ui_component_setalign(midimonitor_base(&self->midimonitor), psy_ui_ALIGN_RIGHT);
-	psy_ui_splitter_init(&self->midisplitter, &self->client);
+	psy_ui_splitter_init(&self->midisplitter, &self->client, NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->midisplitter),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_splitter_settoggle(&self->midisplitter,
@@ -591,7 +591,7 @@ void mainframe_initseqeditor(MainFrame* self)
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmaximumsize(seqeditor_base(&self->seqeditor),
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(0.7)));
-	psy_ui_splitter_init(&self->splitseqeditor, &self->mainpane);
+	psy_ui_splitter_init(&self->splitseqeditor, &self->mainpane, NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitseqeditor),
 		psy_ui_ALIGN_BOTTOM);
 	if (!generalconfig_showsequenceedit(psycleconfig_general(
@@ -608,7 +608,7 @@ void mainframe_initrecentview(MainFrame* self)
 		&self->workspace);
 	psy_ui_component_setalign(playlistview_base(&self->playlist),
 		psy_ui_ALIGN_LEFT);
-	psy_ui_splitter_init(&self->playlistsplitter, mainframe_base(self));
+	psy_ui_splitter_init(&self->playlistsplitter, mainframe_base(self), NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->playlistsplitter),
 		psy_ui_ALIGN_LEFT);
 	if (!generalconfig_showplaylist(&self->workspace.config.general)) {
@@ -639,7 +639,7 @@ void mainframe_initsequenceview(MainFrame* self)
 {
 	psy_ui_component_init_align(&self->left, mainframe_base(self), NULL,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_splitter_init(&self->splitbar, mainframe_base(self));
+	psy_ui_splitter_init(&self->splitbar, mainframe_base(self), NULL);
 	psy_ui_component_setbackgroundmode(&self->left, psy_ui_NOBACKGROUND);
 	seqview_init(&self->sequenceview, &self->left, &self->workspace);
 	psy_ui_component_setalign(seqview_base(&self->sequenceview),
@@ -661,7 +661,7 @@ void mainframe_initplugineditor(MainFrame* self)
 	psy_ui_component_hide(plugineditor_base(&self->plugineditor));
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
 		mainframe_onplugineditor);
-	psy_ui_splitter_init(&self->splitbarplugineditor, mainframe_base(self));
+	psy_ui_splitter_init(&self->splitbarplugineditor, mainframe_base(self), NULL);
 	psy_ui_component_setalign(psy_ui_splitter_base(&self->splitbarplugineditor),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(psy_ui_splitter_base(&self->splitbarplugineditor));

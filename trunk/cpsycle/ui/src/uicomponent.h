@@ -369,7 +369,8 @@ void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 bool psy_ui_component_inputprevented(const psy_ui_Component*);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
-void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
+void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size);
+void psy_ui_component_setpreferredheight(psy_ui_Component*, psy_ui_Value);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_Size psy_ui_component_preferredscrollsize(psy_ui_Component*, const psy_ui_Size* limit);
 psy_ui_RealSize psy_ui_component_preferredscrollsize_px(psy_ui_Component* self,

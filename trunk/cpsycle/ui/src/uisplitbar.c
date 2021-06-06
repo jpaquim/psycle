@@ -69,9 +69,10 @@ static void vtable_init(psy_ui_Splitter* self)
 	self->component.vtable = &vtable;
 }
 /* implementation */
-void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent)
+void psy_ui_splitter_init(psy_ui_Splitter* self, psy_ui_Component* parent,
+	psy_ui_Component* view)
 {
-	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_init(&self->component, parent, view);
 	vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);	
 	self->resize = 0;
