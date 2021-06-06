@@ -119,13 +119,13 @@ void psy_audio_sequenceposition_init(psy_audio_SequencePosition* self)
 	self->trackposition.sequencentrynode = NULL;
 }
 
-psy_audio_SequencePatternEntry* psy_audio_sequenceposition_entry(
+psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition* self)
 {
 	assert(self);
 
 	if (self->trackposition.sequencentrynode) {
-		return (psy_audio_SequencePatternEntry*)
+		return (psy_audio_SequenceEntry*)
 			self->trackposition.sequencentrynode->entry;
 	}
 	return NULL;

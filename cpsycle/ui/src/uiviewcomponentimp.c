@@ -822,6 +822,8 @@ void view_dev_mouseup(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 	}
 	if (ev->event.bubbles) {
 		self->component->vtable->onmouseup(self->component, ev);
+		psy_signal_emit(&self->component->signal_mouseup,
+			self->component, 1, ev);
 	}
 }
 
@@ -866,6 +868,8 @@ void view_dev_mousemove(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 	}
 	if (ev->event.bubbles) {
 		self->component->vtable->onmousemove(self->component, ev);
+		psy_signal_emit(&self->component->signal_mousemove,
+			self->component, 1, ev);
 	}
 }
 

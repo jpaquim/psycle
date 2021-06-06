@@ -1258,6 +1258,8 @@ void dev_mousemove(psy_ui_win_ComponentImp* self, psy_ui_MouseEvent* ev)
 		translation = mapcoords(self, capture, self->component);
 		psy_ui_realpoint_sub(&ev->pt, translation);			
 		capture->vtable->onmousemove(capture, ev);
+		psy_signal_emit(&capture->signal_mousemove,
+			capture, 1, ev);
 		psy_ui_realpoint_add(&ev->pt, translation);		
 	} else {
 		bool intersect;

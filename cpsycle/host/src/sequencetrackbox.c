@@ -20,16 +20,16 @@ static void sequencetrackbox_onlabelclick(SequenceTrackBox*, psy_ui_Label* sende
 static void sequencetrackbox_updatetrackname(SequenceTrackBox*);
 static void sequencetrackbox_oneditaccept(SequenceTrackBox*, psy_ui_Edit* sender);
 static void sequencetrackbox_oneditreject(SequenceTrackBox*, psy_ui_Edit* sender);
+static void sequencetrackbox_onresize(SequenceTrackBox*, psy_ui_Component* sender,
+	double* offset);
 // vtable
 static psy_ui_ComponentVtable sequencetrackbox_vtable;
-static psy_ui_ComponentVtable sequencetrackbox_super_vtable;
 static bool sequencetrackbox_vtable_initialized = FALSE;
 
 static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 {
 	if (!sequencetrackbox_vtable_initialized) {
-		sequencetrackbox_vtable = *(sequencetrackbox_base(self)->vtable);
-		sequencetrackbox_super_vtable = sequencetrackbox_vtable;
+		sequencetrackbox_vtable = *(sequencetrackbox_base(self)->vtable);		
 		sequencetrackbox_vtable.ondestroy =
 			(psy_ui_fp_component_ondestroy)
 			sequencetrackbox_ondestroy;		
@@ -39,19 +39,26 @@ static void sequencetrackbox_vtable_init(SequenceTrackBox* self)
 		&sequencetrackbox_vtable);
 }
 
-// implementation
+/* implementation */
 void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence* sequence,
 	uintptr_t trackidx, psy_ui_Edit* edit)
 {
 	assert(self);
 
-	trackbox_init(&self->trackbox, parent, view);	
+	psy_ui_component_init(&self->component, parent, view);	
+	psy_signal_init(&self->signal_resize);
+	trackbox_init(&self->trackbox, &self->component, view);	
+	psy_ui_component_setalign(&self->trackbox.component,
+		psy_ui_ALIGN_CLIENT);	
 	sequencetrackbox_vtable_init(self);
+	psy_signal_connect(&self->trackbox.signal_resize, self,
+		sequencetrackbox_onresize);
 	self->sequence = sequence;
 	self->trackidx = trackidx;
 	self->edit = edit;
 	self->preventedit = TRUE;
+	self->component.id = (intptr_t)self->trackidx;
 	self->trackbox.track.component.id = (intptr_t)self->trackidx;
 	trackbox_setindex(&self->trackbox, trackidx);	
 	if (self->sequence) {
@@ -72,20 +79,21 @@ void sequencetrackbox_init(SequenceTrackBox* self, psy_ui_Component* parent,
 			sequencetrackbox_oneditreject);
 		psy_signal_connect(&self->trackbox.desc.component.signal_mousedown, self,
 			sequencetrackbox_onlabelclick);
-	}
+	}	
 }
 
 void sequencetrackbox_ondestroy(SequenceTrackBox* self)
 {
 	assert(self);
 
+
 	if (self->sequence) {
 		psy_signal_disconnect(&self->sequence->signal_solochanged, self,
 			sequencetrackbox_onsolochanged);
 		psy_signal_disconnect(&self->sequence->signal_mutechanged, self,
 			sequencetrackbox_onmutechanged);
-	}	
-	sequencetrackbox_super_vtable.ondestroy(&self->trackbox.component);
+	}
+	psy_signal_dispose(&self->signal_resize);	
 }
 
 SequenceTrackBox* sequencetrackbox_alloc(void)
@@ -240,4 +248,10 @@ void sequencetrackbox_updatetrackname(SequenceTrackBox* self)
 			sequencetrackbox_showtrackname(self);
 		}
 	}
+}
+
+void sequencetrackbox_onresize(SequenceTrackBox* self, psy_ui_Component* sender,
+	double* offset)
+{
+	psy_signal_emit(&self->signal_resize, self, 1, (void*)offset);
 }

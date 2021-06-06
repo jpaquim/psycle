@@ -1177,6 +1177,13 @@ void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 	self->sizehints->preferredheightset = TRUE;
 }
 
+void psy_ui_component_setpreferredheight(psy_ui_Component* self, psy_ui_Value height)
+{
+	psy_ui_component_usesizehints(self);
+	self->sizehints->preferredsize.height = height;	
+	self->sizehints->preferredheightset = TRUE;
+}
+
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	const psy_ui_Size* limit)
 {		
@@ -2235,10 +2242,14 @@ void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 {
 	if (psy_ui_app()->capture) {
 		psy_ui_RealPoint translation;
+		psy_ui_Component* capture;
 
-		translation = mapcoords(psy_ui_app()->capture, self);
+		capture = psy_ui_app()->capture;		
+		translation = mapcoords(capture, self);
 		psy_ui_realpoint_sub(&ev->pt, translation);
-		psy_ui_app()->capture->vtable->onmouseup(psy_ui_app()->capture, ev);
+		capture->vtable->onmouseup(capture, ev);
+		psy_signal_emit(&capture->signal_mouseup,
+			capture, 1, ev);
 		psy_ui_realpoint_add(&ev->pt, translation);
 	} else {
 		psy_List* p;

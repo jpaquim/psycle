@@ -517,13 +517,13 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		for (p = track->entries, i = 0; i < (uint32_t)playlength && p != NULL;
 				++i, psy_list_next(&p)) {
 			float repositionoffset;
-			psy_audio_SequencePatternEntry* sequenceentry;
+			psy_audio_SequenceEntry* seqentry;
 				
-			sequenceentry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
+			seqentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
 			if (status = psyfile_read(self->fp, &repositionoffset, sizeof(float))) {				
 				return status;
 			}			
-			sequenceentry->entry.repositionoffset = repositionoffset;
+			seqentry->repositionoffset = repositionoffset;
 		}			
 	}
 	if (self->fp->currchunk.version > 1) {
