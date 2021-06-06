@@ -10,6 +10,7 @@
 #include "patternviewskin.h"
 #include "sequencehostcmds.h"
 #include "sequencetrackbox.h"
+#include "wavebox.h"
 #include "workspace.h"
 #include "zoombox.h"
 /* ui */
@@ -211,7 +212,9 @@ typedef struct SeqEditorSampleEntry {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	/* references */
+	WaveBox wavebox;
+	psy_ui_Label label;
+	/* references */	
 	SeqEditorState* state;
 	psy_audio_SequenceSampleEntry* sequenceentry;
 	psy_audio_OrderIndex seqpos;
@@ -229,6 +232,7 @@ SeqEditorSampleEntry* seqeditorsampleentry_allocinit(
 	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
 	SeqEditorState*);
 
+void seqeditorsampleentry_updatesample(SeqEditorSampleEntry*);
 
 /* SeqEditorTrack */
 struct SeqEditorTrack;

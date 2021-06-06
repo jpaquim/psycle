@@ -558,12 +558,15 @@ void setposition(psy_ui_Component* self, psy_ui_Point topleft,
 {	
 	self->imp->vtable->dev_setposition(self->imp, topleft, size);
 	if (!psy_ui_app()->alignvalid || 
-		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp) & psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
-			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {				
+		((self->imp->vtable->dev_flags && self->imp->vtable->dev_flags(self->imp)
+			& psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN) ==
+			psy_ui_COMPONENTIMPFLAGS_HANDLECHILDREN)) {		
+		self->vtable->onsize(self, &size);
 		psy_ui_component_align(self);				
 		if (self->scroll->overflow != psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_updateoverflow(self);
 		}		
+		psy_signal_emit(&self->signal_size, self, 1, (void*)&size);
 	}
 }
 
