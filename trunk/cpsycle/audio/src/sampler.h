@@ -163,6 +163,7 @@ typedef struct psy_audio_SamplerVoice
 	int effretticks; /* Number of ticks remaining for retrig */
 	float effretVol; /* volume change amount */
 	int effretmode;  /* volume change mode (multipler or sum) */
+	psy_audio_SampleIndex sampleindex;
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, struct psy_audio_Sampler*);
@@ -173,7 +174,8 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, uintptr_t numsamples, float* pSamplesL, float* pSamplesR);
-int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData, uintptr_t channelNum, int baseC, psy_List* multicmdMem);
+int psy_audio_samplervoice_tick(psy_audio_SamplerVoice*, psy_audio_PatternEvent* pData,
+	uintptr_t channelNum, int baseC, psy_List* multicmdMem, psy_audio_SampleIndex sampleindex);
 void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice*);
 
