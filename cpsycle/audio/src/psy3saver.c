@@ -480,6 +480,9 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				}				
 			}
 		}
+		if (status = psyfile_write_float(self->fp, (float)track->height)) {
+			return status;
+		}
 		if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
 			return status;
 		}

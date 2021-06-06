@@ -534,6 +534,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 		uint32_t nummarkers;
 		uint32_t numsamples;
 		uint32_t c;
+		float tmp_float;
 		psy_List* s;
 
 		if (status = psyfile_read(self->fp, &nummarkers, sizeof(uint32_t))) {
@@ -582,6 +583,10 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 				++c;
 			}
 		}
+		if (status = psyfile_read(self->fp, &tmp_float, sizeof(tmp_float))) {
+			return status;
+		}
+		track->height = tmp_float;
 		if (c != numsamples) {
 			return PSY_ERRFILE;
 		}

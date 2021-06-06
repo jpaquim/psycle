@@ -159,6 +159,7 @@ void psy_audio_sequencepaste_copy(psy_audio_SequencePaste*,
 typedef struct {
 	psy_audio_SequenceEntryNode* entries;	
 	char* name;
+	double height;
 } psy_audio_SequenceTrack;
 
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack*);
@@ -370,15 +371,26 @@ psy_audio_SequenceEntryNode* psy_audio_sequence_node(psy_audio_Sequence* self,
 /* calcduration */
 psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);
 void psy_audio_sequence_startcalcdurationinms(psy_audio_Sequence*);
-psy_dsp_big_seconds_t psy_audio_sequence_endcalcdurationinmsresult(psy_audio_Sequence*);
+psy_dsp_big_seconds_t psy_audio_sequence_endcalcdurationinmsresult(
+	psy_audio_Sequence*);
 bool psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);
 /* trackstate */
-void psy_audio_sequence_activatesolotrack(psy_audio_Sequence*, uintptr_t trackidx);
+void psy_audio_sequence_activatesolotrack(psy_audio_Sequence*,
+	uintptr_t trackindex);
 void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence*);
-void psy_audio_sequence_mutetrack(psy_audio_Sequence*, uintptr_t trackidx);
-void psy_audio_sequence_unmutetrack(psy_audio_Sequence*, uintptr_t trackidx);
-int psy_audio_sequence_istrackmuted(const psy_audio_Sequence*, uintptr_t trackidx);
-int psy_audio_sequence_istracksoloed(const psy_audio_Sequence*, uintptr_t trackidx);
+void psy_audio_sequence_mutetrack(psy_audio_Sequence*,
+	uintptr_t trackindex);
+void psy_audio_sequence_unmutetrack(psy_audio_Sequence*,
+	uintptr_t trackindex);
+int psy_audio_sequence_istrackmuted(const psy_audio_Sequence*,
+	uintptr_t trackindex);
+bool psy_audio_sequence_istracksoloed(const psy_audio_Sequence*,
+	uintptr_t trackindex);
+/* gui stuff */
+double psy_audio_sequence_trackheight(const psy_audio_Sequence*,
+	uintptr_t trackindex);
+void psy_audio_sequence_settrackheight(psy_audio_Sequence*,
+	uintptr_t trackindex, double height);
 
 #ifdef __cplusplus
 }

@@ -252,6 +252,6 @@ void sequencetrackbox_updatetrackname(SequenceTrackBox* self)
 
 void sequencetrackbox_onresize(SequenceTrackBox* self, psy_ui_Component* sender,
 	double* offset)
-{
+{	
 	psy_signal_emit(&self->signal_resize, self, 1, (void*)offset);
 }
