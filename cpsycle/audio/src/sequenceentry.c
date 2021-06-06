@@ -85,6 +85,8 @@ psy_audio_SequenceEntry* psy_audio_static_sequencepatternentry_clone(
 }
 static psy_dsp_big_beat_t psy_audio_static_sequencepatternentry_length(
 	const psy_audio_SequencePatternEntry*);
+static void psy_audio_static_sequencepatternentry_setlength(
+	psy_audio_SequencePatternEntry*, psy_dsp_big_beat_t length);
 /* vtable */
 static psy_audio_SequenceEntryVtable psy_audio_sequencepatternentry_vtable;
 static bool psy_audio_sequencepatternentry_vtable_initialized = FALSE;
@@ -100,6 +102,9 @@ static void psy_audio_sequencepatternentry_vtable_init(
 		psy_audio_sequencepatternentry_vtable.length =
 			(psy_audio_fp_sequenceentry_length)
 			psy_audio_static_sequencepatternentry_length;
+		psy_audio_sequencepatternentry_vtable.setlength =
+			(psy_audio_fp_sequenceentry_setlength)
+			psy_audio_static_sequencepatternentry_setlength;
 		psy_audio_sequencepatternentry_vtable_initialized = TRUE;
 	}
 	self->entry.vtable = &psy_audio_sequencepatternentry_vtable;
@@ -150,6 +155,20 @@ psy_dsp_big_beat_t psy_audio_static_sequencepatternentry_length(
 	return 0.0;
 }
 
+void psy_audio_static_sequencepatternentry_setlength(
+	psy_audio_SequencePatternEntry* self, psy_dsp_big_beat_t length)
+{
+	psy_audio_Pattern* pattern;
+
+	if (self->patterns) {
+		pattern = psy_audio_patterns_at(self->patterns,
+			psy_audio_sequencepatternentry_patternslot(self));
+		if (pattern) {
+			psy_audio_pattern_setlength(pattern, length);
+		}
+	}
+}
+
 /* psy_audio_SequenceSampleEntry */
 psy_audio_SequenceEntry* psy_audio_static_sequencesampleentry_clone(
 	const psy_audio_SequenceSampleEntry* self) {
@@ -179,7 +198,7 @@ static void psy_audio_sequencesampleentry_vtable_init(
 			psy_audio_static_sequencesampleentry_clone;
 		psy_audio_sequencesampleentry_vtable.length =
 			(psy_audio_fp_sequenceentry_length)
-			psy_audio_static_sequencesampleentry_length;
+			psy_audio_static_sequencesampleentry_length;		
 		psy_audio_sequencesampleentry_vtable_initialized = TRUE;
 	}
 	self->entry.vtable = &psy_audio_sequencesampleentry_vtable;
