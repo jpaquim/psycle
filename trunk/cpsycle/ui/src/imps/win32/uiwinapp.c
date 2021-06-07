@@ -19,18 +19,7 @@
 
 static psy_ui_WinApp* winapp = NULL;
 
-static psy_ui_Component* eventtarget(psy_ui_Component* component);
-static bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
-	WPARAM wparam, LPARAM lparam);
-static bool handle_keyevent(psy_ui_Component*,
-	psy_ui_win_ComponentImp*,
-	HWND hwnd, uintptr_t message, WPARAM wParam, LPARAM lParam, int button,
-	psy_ui_fp_component_onkeyevent fp,
-	psy_Signal* signal);
-static void handle_mouseevent(psy_ui_Component*,
-	psy_ui_win_ComponentImp*,
-	HWND hwnd, uintptr_t message, WPARAM wParam, LPARAM lParam, int button,
-	psy_ui_fp_component_onmouseevent, psy_Signal*);
+static psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType, WPARAM wParam, LPARAM lParam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
@@ -49,23 +38,18 @@ static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component*
 	return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
 }
 
-//static int FilterException(const char* msg, int code,
-//	struct _EXCEPTION_POINTERS *ep) 
-//{	
-//	// char txt[512];				
-//	MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
-//	return EXCEPTION_EXECUTE_HANDLER;
-//}
-
-// virtual
+/* virtual */
 static void psy_ui_winapp_dispose(psy_ui_WinApp*);
 static int psy_ui_winapp_run(psy_ui_WinApp*);
 static void psy_ui_winapp_stop(psy_ui_WinApp*);
 static void psy_ui_winapp_close(psy_ui_WinApp*);
 static void psy_ui_winapp_startmousehook(psy_ui_WinApp*);
 static void psy_ui_winapp_stopmousehook(psy_ui_WinApp*);
-
-// vtable
+static void psy_ui_winapp_sendevent(psy_ui_WinApp*, psy_ui_Component*,
+	psy_ui_Event*);
+static psy_ui_Component* psy_ui_winapp_component(psy_ui_WinApp*,
+	uintptr_t platformhandle);
+/* vtable */
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
 
@@ -75,16 +59,33 @@ static void imp_vtable_init(psy_ui_WinApp* self)
 
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_appimp_dispose)
+		imp_vtable.dev_dispose =
+			(psy_ui_fp_appimp_dispose)
 			psy_ui_winapp_dispose;
-		imp_vtable.dev_run = (psy_ui_fp_appimp_run)psy_ui_winapp_run;
-		imp_vtable.dev_stop = (psy_ui_fp_appimp_stop)psy_ui_winapp_stop;
-		imp_vtable.dev_close = (psy_ui_fp_appimp_close)psy_ui_winapp_close;
+		imp_vtable.dev_run =
+			(psy_ui_fp_appimp_run)
+			psy_ui_winapp_run;
+		imp_vtable.dev_stop =
+			(psy_ui_fp_appimp_stop)
+			psy_ui_winapp_stop;
+		imp_vtable.dev_close =
+			(psy_ui_fp_appimp_close)
+			psy_ui_winapp_close;
 		imp_vtable.dev_onappdefaultschange =
 			(psy_ui_fp_appimp_onappdefaultschange)
 			psy_ui_winapp_onappdefaultschange;		
-		imp_vtable.dev_startmousehook = (psy_ui_fp_appimp_startmousehook)psy_ui_winapp_startmousehook;
-		imp_vtable.dev_stopmousehook = (psy_ui_fp_appimp_stopmousehook)psy_ui_winapp_stopmousehook;
+		imp_vtable.dev_startmousehook =
+			(psy_ui_fp_appimp_startmousehook)
+			psy_ui_winapp_startmousehook;
+		imp_vtable.dev_stopmousehook =
+			(psy_ui_fp_appimp_stopmousehook)
+			psy_ui_winapp_stopmousehook;
+		imp_vtable.dev_sendevent =
+			(psy_ui_fp_appimp_sendevent)
+			psy_ui_winapp_sendevent;
+		imp_vtable.dev_component =
+			(psy_ui_fp_appimp_component)
+			psy_ui_winapp_component;		
 		imp_vtable_initialized = TRUE;
 	}
 }
@@ -109,7 +110,6 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	self->winproc = ui_winproc;
 	self->comwinproc = ui_com_winproc;
 	self->winid = 20000;
-	self->eventretarget = 0;
 	self->mousehook = 0;
 	psy_ui_winapp_registerclasses(self);
 	hr = CoInitialize(NULL);	
@@ -127,16 +127,14 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, psy_ui_App* app, HINSTANCE instance
 	}
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
-	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);		
-	self->targetids = NULL;	
+	self->defaultbackgroundbrush = CreateSolidBrush(0x00232323);	
 }
 
 void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 {
 	psy_ui_winapp_stopmousehook(self);
 	psy_table_dispose(&self->selfmap);
-	psy_table_dispose(&self->winidmap);
-	psy_list_free(self->targetids);
+	psy_table_dispose(&self->winidmap);	
 	DeleteObject(self->defaultbackgroundbrush);
 	CoUninitialize();	
 }
@@ -224,10 +222,10 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				}								
 				break;			
 			case WM_TIMER:				
-				imp->component->vtable->ontimer(imp->component,
-					(uintptr_t)wParam);				
-				psy_signal_emit(&imp->component->signal_timer,
-					imp->component, 1, (uintptr_t)wParam);				
+				if (imp->component) {
+					psy_ui_eventdispatch_timer(&winapp->app->eventdispatch,
+						imp->component, (uintptr_t)wParam);
+				}				
 				break;
 			case WM_CHAR:
 				if (imp->preventwmchar) {
@@ -237,27 +235,36 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				break;
 			case WM_KEYDOWN:
 				if (imp->component) {
-					preventdefault = handle_keyevent(imp->component, imp,
-						hwnd, message, wParam, lParam, 0,
-						imp->component->vtable->onkeydown,
-						&imp->component->signal_keydown);					
+					psy_ui_KeyboardEvent ev;
+
+					ev = keyboardevent(psy_ui_KeyPress, wParam, lParam);
+					psy_ui_eventdispatch_keydown(&winapp->app->eventdispatch,
+						imp->component, &ev);
+					if (ev.event.default_prevented) {
+						imp->preventwmchar = 1;
+					}
+					preventdefault = ev.event.default_prevented;
 				}				
 				break;
 			case WM_KEYUP:
 				if (imp->component) {
-					preventdefault = handle_keyevent(imp->component, imp,
-						hwnd, message, wParam, lParam, 0,
-						imp->component->vtable->onkeyup,
-						&imp->component->signal_keyup);					
+					psy_ui_KeyboardEvent ev;
+
+					ev = keyboardevent(psy_ui_KeyRelease, wParam, lParam);
+					psy_ui_eventdispatch_keyup(&winapp->app->eventdispatch,
+						imp->component, &ev);
+					if (ev.event.default_prevented) {
+						imp->preventwmchar = 1;
+					}
+					preventdefault = ev.event.default_prevented;
 				}
 				break;
 			case WM_KILLFOCUS:
 				if (imp->component) {
-					imp->component->vtable->onfocuslost(imp->component);
-					psy_signal_emit(&imp->component->signal_focuslost,
-						imp->component, 0);
-				}				
-			break;	
+					psy_ui_eventdispatch_focuslost(&winapp->app->eventdispatch,
+						imp->component);
+				}
+				break;	
 			case WM_MOUSEWHEEL:
 			{
 				int preventdefault = 0;
@@ -308,32 +315,21 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_signal_emit(&imp->component->signal_hide,
 						imp->component, 0);
 				}
-				return 0 ;				
-				break;		
-			case WM_SIZE: {
+				return 0;					
+			case WM_SIZE:
+				if (imp->component) {					
+					imp->sizecachevalid = FALSE;	
+					psy_ui_eventdispatch_size(&winapp->app->eventdispatch,
+						imp->component,
+						psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam))));
+				}
+				return 0;				
+			case WM_TIMER:
 				if (imp->component) {
-					psy_ui_Size size;
-					
-					imp->sizecachevalid = FALSE;					
-					if (imp->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
-						psy_ui_component_align(imp->component);						
-					}
-					size = psy_ui_size_make_px(LOWORD(lParam), (HIWORD(lParam)));
-					imp->component->vtable->onsize(imp->component, &size);
-					if (psy_ui_component_overflow(imp->component) != psy_ui_OVERFLOW_HIDDEN) {
-						psy_ui_component_updateoverflow(imp->component);
-					}
-					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
-						(void*)&size);
+					psy_ui_eventdispatch_timer(&winapp->app->eventdispatch,
+						imp->component, (uintptr_t)wParam);
 				}
 				return 0;
-			break; }
-			case WM_TIMER:				
-				imp->component->vtable->ontimer(imp->component, (int) wParam);				
-				psy_signal_emit(&imp->component->signal_timer,
-					imp->component, 1, (int)wParam);				
-				return 0;
-			break;		
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLOREDIT: {
@@ -366,12 +362,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 1;
 				break;
 			case WM_COMMAND:
-			  /*hMenu = GetMenu (hwnd) ;
-			  menu_id = LOWORD (wParam);
-			  menu = psy_table_at(&menumap, (uintptr_t) menu_id);
-			  if (menu && menu->execute) {	
-				menu->execute(menu);
-			  }*/
 				imp = psy_table_at(&winapp->winidmap,
 					(uintptr_t) LOWORD(wParam));
 				if (imp && imp->component &&
@@ -519,104 +509,119 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}				
 				break; }
 			case WM_SYSKEYDOWN:
-				if (imp->component &&
+				if (!(imp->component &&
 						(wParam >= VK_F10 && wParam <= VK_F12 ||
 						wParam >= 0x41 && wParam <= psy_ui_KEY_Z ||
-						wParam >= psy_ui_KEY_DIGIT0 && wParam <= psy_ui_KEY_DIGIT9)) {
-					handle_keyevent(imp->component, imp,
-						hwnd, message, wParam, lParam, 0,
-						imp->component->vtable->onkeydown,
-						&imp->component->signal_keydown);					
+						wParam >= psy_ui_KEY_DIGIT0 && wParam <= psy_ui_KEY_DIGIT9))) {					
 					return 0;
 				}
-				break;
-			case WM_KEYDOWN:								
+				/* fallthrough */
+			case WM_KEYDOWN:							
 				if (imp->component) {
-					handle_keyevent(imp->component, imp,
-						hwnd, message, wParam, lParam, 0,
-						imp->component->vtable->onkeydown,
-						&imp->component->signal_keydown);
+					psy_ui_KeyboardEvent ev;
+
+					ev = keyboardevent(psy_ui_KeyPress, wParam, lParam);										
+					psy_ui_eventdispatch_keydown(&winapp->app->eventdispatch,
+						imp->component, &ev);					
+					if (ev.event.default_prevented) {
+						imp->preventwmchar = 1;
+					}					
 					return 0;
 				}
 				break;
 			case WM_KEYUP:
 				if (imp->component) {
-					handle_keyevent(imp->component, imp,
-						hwnd, message, wParam, lParam, 0,
-						imp->component->vtable->onkeyup,
-						&imp->component->signal_keyup);
+					psy_ui_KeyboardEvent ev;
+
+					ev = keyboardevent(psy_ui_KeyRelease, wParam, lParam);
+					psy_ui_eventdispatch_keyup(&winapp->app->eventdispatch,
+						imp->component, &ev);
+					if (ev.event.default_prevented) {
+						imp->preventwmchar = 1;
+					}
 					return 0;
 				}
 				break;
 			case WM_LBUTTONUP:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_LBUTTON,
-					imp->component->vtable->onmouseup,
-					&imp->component->signal_mouseup);				
+			case WM_RBUTTONUP:
+			case WM_MBUTTONUP: {
+				psy_ui_MouseEvent ev;				
+				int button;
+			
+				button = 1;
+				if (message == WM_LBUTTONUP) {
+					button = 1;
+				} else if (message == WM_RBUTTONUP) {					
+					button = 2;
+				} else {
+					button = 3;
+				}			
+				psy_ui_mouseevent_init_all(&ev,
+					psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
+					button, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.pt);
+				psy_ui_eventdispatch_buttonup(&winapp->app->eventdispatch,
+					imp->component, &ev);
 				return 0;
-				break;
-			case WM_RBUTTONUP: {
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_RBUTTON,
-					imp->component->vtable->onmouseup,
-					&imp->component->signal_mouseup);				
+				break; }			
+			case WM_LBUTTONDOWN: 
+			case WM_RBUTTONDOWN:
+			case WM_MBUTTONDOWN: {
+				psy_ui_MouseEvent ev;				
+				int button;
+
+				button = 1;
+				if (message == WM_LBUTTONDOWN) {
+					button = 1;
+				} else if (message == WM_RBUTTONDOWN) {
+					button = 2;
+				} else {
+					button = 3;
+				}
+				psy_ui_mouseevent_init_all(&ev,
+					psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
+					button, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.pt);
+				psy_ui_eventdispatch_buttondown(&winapp->app->eventdispatch,
+					imp->component, &ev);
+				return 0;
+				break; }			
+			case WM_LBUTTONDBLCLK:
+			case WM_RBUTTONDBLCLK:
+			case WM_MBUTTONDBLCLK: {
+				psy_ui_MouseEvent ev;
+				int button;
+
+				button = 1;
+				if (message == WM_LBUTTONDBLCLK) {
+					button = 1;
+				} else if (message == WM_RBUTTONDBLCLK) {
+					button = 2;
+				} else {
+					button = 3;
+				}
+				psy_ui_mouseevent_init_all(&ev,
+					psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
+					button, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.pt);
+				psy_ui_eventdispatch_doubleclick(&winapp->app->eventdispatch,
+					imp->component, &ev);
 				return 0;
 				break; }
-			case WM_MBUTTONUP:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_MBUTTON,
-					imp->component->vtable->onmouseup,
-					&imp->component->signal_mouseup);				
-				return 0;
-				break;
-			case WM_LBUTTONDOWN:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_LBUTTON,
-					imp->component->vtable->onmousedown,
-					&imp->component->signal_mousedown);
-				return 0;
-				break;
-			case WM_RBUTTONDOWN:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_RBUTTON,
-					imp->component->vtable->onmousedown,
-					&imp->component->signal_mousedown);				
-				return 0;
-				break;
-			case WM_MBUTTONDOWN:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_MBUTTON,
-					imp->component->vtable->onmousedown,
-					&imp->component->signal_mousedown);
-				return 0;
-				break;
-			case WM_LBUTTONDBLCLK:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_LBUTTON,
-					imp->component->vtable->onmousedoubleclick,
-					&imp->component->signal_mousedoubleclick);
-				return 0;				
-				break;
-			case WM_MBUTTONDBLCLK:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_MBUTTON,
-					imp->component->vtable->onmousedoubleclick,
-					&imp->component->signal_mousedoubleclick);				
-				return 0;
-				break;
-			case WM_RBUTTONDBLCLK:
-				handle_mouseevent(imp->component, imp,
-					hwnd, message, wParam, lParam, MK_RBUTTON,
-					imp->component->vtable->onmousedoubleclick,
-					&imp->component->signal_mousedoubleclick);
-				return 0;
-				break;
 			case WM_MOUSEMOVE: {
 				if (psy_ui_app()->dragevent.active) {
-					handle_mouseevent(imp->component, imp,
-						hwnd, message, wParam, lParam, WM_MOUSEMOVE,
-						imp->component->vtable->onmousemove,
-						&imp->component->signal_mousemove);
+					psy_ui_MouseEvent ev;
+
+					psy_ui_mouseevent_init_all(&ev,
+						psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
+						wParam, 0, GetKeyState(VK_SHIFT) < 0,
+						GetKeyState(VK_CONTROL) < 0);
+					adjustcoordinates(imp->component, &ev.pt);
+					psy_ui_eventdispatch_mousemove(&winapp->app->eventdispatch,
+						imp->component, &ev);					
 				} else {
 					psy_ui_MouseEvent ev;
 
@@ -678,8 +683,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_KILLFOCUS:
-				imp->component->vtable->onfocuslost(imp->component);
-				psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
+				if (imp->component) {
+					psy_ui_eventdispatch_focuslost(&winapp->app->eventdispatch,
+						imp->component);
+				}				
 				return 0;				
 			break;
 			case WM_NCACTIVATE:
@@ -697,40 +704,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
 
-psy_ui_Component* eventtarget(psy_ui_Component* component)
+psy_ui_KeyboardEvent keyboardevent(psy_ui_EventType type, WPARAM wParam, LPARAM lParam)
 {
-	if (winapp->targetids) {
-		HWND targethwnd;
-		psy_ui_win_ComponentImp* targetimp;
+	psy_ui_KeyboardEvent rv;
 
-		targethwnd = (winapp->targetids)
-			? (HWND)(uintptr_t)(winapp->targetids->entry)
-			: NULL;
-		targetimp = (psy_ui_win_ComponentImp*)psy_table_at(
-			&winapp->selfmap,
-			(uintptr_t)targethwnd);
-		if (targetimp) {
-			return targetimp->component;
-		}
-	}
-	return component;
-}
-
-bool sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
-{
-	if (psy_table_at(&winapp->selfmap,
-			(uintptr_t)GetParent(imp->hwnd))) {
-		psy_list_append(&winapp->targetids, imp->hwnd);
-		winapp->eventretarget = imp->component;
-		SendMessage(GetParent(imp->hwnd), (UINT)message, wparam, lparam);
-		winapp->eventretarget = 0;
-		return TRUE;
-	} else {
-		psy_list_free(winapp->targetids);
-		winapp->targetids = NULL;		
-	}
-	winapp->eventretarget = 0;
-	return FALSE;
+	psy_ui_keyboardevent_init_all(&rv, (int)wParam, lParam,
+		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
+		(lParam & 0x40000000) == 0x40000000);
+	rv.event.type = type;
+	return rv;
 }
 
 void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
@@ -742,99 +724,6 @@ void adjustcoordinates(psy_ui_Component* component, psy_ui_RealPoint* pt)
 		pt->x -= spacing.left;
 		pt->y -= spacing.top;
 	}
-}
-
-bool handle_keyevent(psy_ui_Component* component,
-	psy_ui_win_ComponentImp* winimp,
-	HWND hwnd, uintptr_t message, WPARAM wParam, LPARAM lParam, int button,
-	psy_ui_fp_component_onkeyevent fp,
-	psy_Signal* signal)
-{
-	psy_ui_KeyboardEvent ev;
-	bool preventdefault;
-
-	psy_ui_keyboardevent_init_all(&ev, (int)wParam, lParam,
-		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
-		(lParam & 0x40000000) == 0x40000000);
-	ev.event.target = eventtarget(component);
-	fp(component, &ev);
-	psy_signal_emit(signal, component, 1, &ev);
-	if (ev.event.bubbles != FALSE) {
-		sendmessagetoparent(winimp, message, wParam, lParam);
-	} else {
-		psy_list_free(winapp->targetids);
-		winapp->targetids = NULL;
-	}
-	preventdefault = ev.event.default_prevented;
-	if (preventdefault) {
-		winimp->preventwmchar = 1;
-	}
-	return preventdefault;
-}
-
-void handle_mouseevent(psy_ui_Component* component,
-	psy_ui_win_ComponentImp* winimp,
-	HWND hwnd, uintptr_t message, WPARAM wParam, LPARAM lParam, int button,
-	psy_ui_fp_component_onmouseevent fp,
-	psy_Signal* signal)
-{
-	psy_ui_MouseEvent ev;	
-	bool up;	
-
-	psy_ui_mouseevent_init_all(&ev,
-		psy_ui_realpoint_make((SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam)),
-		button, 0, GetKeyState(VK_SHIFT) < 0,
-		GetKeyState(VK_CONTROL) < 0);
-	adjustcoordinates(component, &ev.pt);
-	ev.target = eventtarget(component);
-	up = FALSE;
-	switch (message) {
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_RBUTTONUP:
-		up = TRUE;
-		winimp->imp.vtable->dev_mouseup(&winimp->imp, &ev);
-		break;
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:		
-		winimp->imp.vtable->dev_mousedown(&winimp->imp, &ev);
-		break;
-	case WM_MOUSEMOVE:
-		winimp->imp.vtable->dev_mousemove(&winimp->imp, &ev);
-		break;
-	case WM_LBUTTONDBLCLK:
-	case WM_RBUTTONDBLCLK:
-	case WM_MBUTTONDBLCLK:
-		winimp->imp.vtable->dev_mousedoubleclick(&winimp->imp, &ev);
-		break;
-	default:
-		break;
-	}
-	if (ev.event.bubbles != FALSE) {
-		fp(component, &ev);
-		psy_signal_emit(signal, component, 1, &ev);
-	}
-	if (ev.event.bubbles != FALSE) {
-		bool bubble;
-		
-		bubble = sendmessagetoparent(winimp, message, wParam, lParam);
-		if (up && !bubble) {
-			psy_ui_app_stopdrag(psy_ui_app());
-		} else if (message == WM_MOUSEMOVE && !bubble) {
-			if (!psy_ui_app()->dragevent.mouse.event.default_prevented) {
-				psy_ui_component_setcursor(psy_ui_app()->main,
-					psy_ui_CURSORSTYLE_NODROP);
-			} else {
-				psy_ui_component_setcursor(psy_ui_app()->main,
-					psy_ui_CURSORSTYLE_GRAB);
-			}
-			psy_ui_app()->dragevent.mouse.event.default_prevented = FALSE;
-		}
-	} else if (up) {		
-		psy_ui_app_stopdrag(psy_ui_app());
-	}
-	
 }
 
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -1015,28 +904,108 @@ void psy_ui_winapp_onappdefaultschange(psy_ui_WinApp* self)
 		psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour));
 }
 
+void psy_ui_winapp_sendevent(psy_ui_WinApp* self, psy_ui_Component* component,
+	psy_ui_Event* ev)
+{
+	psy_ui_win_ComponentImp* imp;
+
+	imp = (psy_ui_win_ComponentImp*)component->imp;
+	switch (ev->type) {
+	case psy_ui_KeyPress: {
+		psy_ui_KeyboardEvent* keyevent;
+
+		keyevent = (psy_ui_KeyboardEvent*)ev;
+		SendMessage(imp->hwnd, (UINT)WM_KEYDOWN, (WPARAM)keyevent->keycode,
+			(LPARAM)keyevent->keydata);	
+		break; }
+	case psy_ui_KeyRelease: {
+		psy_ui_KeyboardEvent* keyevent;
+
+		keyevent = (psy_ui_KeyboardEvent*)ev;
+		SendMessage(imp->hwnd, (UINT)WM_KEYUP, (WPARAM)keyevent->keycode,
+			(LPARAM)keyevent->keydata);
+		break; }
+	case psy_ui_ButtonPress: {
+		psy_ui_MouseEvent* mouseevent;
+		int16_t loword;
+		int16_t hiword;
+		LPARAM lparam;
+		
+		mouseevent = (psy_ui_MouseEvent*)ev;
+		loword = (int16_t)mouseevent->pt.x;
+		hiword = (int16_t)mouseevent->pt.y;
+		lparam = loword | (hiword << 16);
+		if (mouseevent->button == 1) {
+			SendMessage(imp->hwnd, (UINT)WM_LBUTTONDOWN, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 2) {
+			SendMessage(imp->hwnd, (UINT)WM_RBUTTONDOWN, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 3) {
+			SendMessage(imp->hwnd, (UINT)WM_MBUTTONDOWN, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		}
+		break; }
+	case psy_ui_ButtonRelease: {
+		psy_ui_MouseEvent* mouseevent;
+		int16_t loword;
+		int16_t hiword;
+		LPARAM lparam;
+
+		mouseevent = (psy_ui_MouseEvent*)ev;
+		loword = (int16_t)mouseevent->pt.x;
+		hiword = (int16_t)mouseevent->pt.y;
+		lparam = loword | (hiword << 16);
+		if (mouseevent->button == 1) {
+			SendMessage(imp->hwnd, (UINT)WM_LBUTTONUP, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 2) {
+			SendMessage(imp->hwnd, (UINT)WM_RBUTTONUP, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 3) {
+			SendMessage(imp->hwnd, (UINT)WM_MBUTTONUP, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		}
+		break; }
+	case psy_ui_DoubleClick: {
+		psy_ui_MouseEvent* mouseevent;
+		int16_t loword;
+		int16_t hiword;
+		LPARAM lparam;
+
+		mouseevent = (psy_ui_MouseEvent*)ev;
+		loword = (int16_t)mouseevent->pt.x;
+		hiword = (int16_t)mouseevent->pt.y;
+		lparam = loword | (hiword << 16);
+		if (mouseevent->button == 1) {
+			SendMessage(imp->hwnd, (UINT)WM_LBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 2) {
+			SendMessage(imp->hwnd, (UINT)WM_RBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		} else if (mouseevent->button == 3) {
+			SendMessage(imp->hwnd, (UINT)WM_MBUTTONDBLCLK, (WPARAM)mouseevent->button, (LPARAM)lparam);
+		}
+		break; }
+	case psy_ui_MotionNotify: {
+		psy_ui_MouseEvent* mouseevent;
+		int16_t loword;
+		int16_t hiword;
+		LPARAM lparam;
+
+		mouseevent = (psy_ui_MouseEvent*)ev;
+		loword = (int16_t)mouseevent->pt.x;
+		hiword = (int16_t)mouseevent->pt.y;
+		lparam = loword | (hiword << 16);		
+		SendMessage(imp->hwnd, (UINT)WM_MOUSEMOVE, (WPARAM)mouseevent->button, (LPARAM)lparam);		
+		break; }
+	default:
+		break;
+	}
+}
+
+psy_ui_Component* psy_ui_winapp_component(psy_ui_WinApp* self,
+	uintptr_t handle)
+{	
+	psy_ui_win_ComponentImp* imp;
+	
+	imp = (psy_ui_win_ComponentImp*)psy_table_at(&winapp->selfmap, handle);
+	if (imp) {
+		return imp->component;
+	}
+	return NULL;
+}
+
 #endif /* PSYCLE_TK_WIN32 */
-
-
-/* clip spacing
-// exclude padding from the clipping region
-if (!psy_ui_value_iszero(&imp->component->spacing.top)) {
-	ExcludeClipRect(win_g->hdc,
-		0, 0, clipsize.x,
-		psy_ui_value_px(&imp->component->spacing.top, tm));
-}
-if (!psy_ui_value_iszero(&imp->component->spacing.bottom)) {
-	ExcludeClipRect(win_g->hdc,
-		0, clipsize.y - psy_ui_value_px(&imp->component->spacing.bottom, tm),
-		clipsize.x, clipsize.y);
-}
-if (!psy_ui_value_iszero(&imp->component->spacing.left)) {
-	ExcludeClipRect(win_g->hdc,
-		0, 0,
-		psy_ui_value_px(&imp->component->spacing.left, tm), clipsize.y);
-}
-if (!psy_ui_value_iszero(&imp->component->spacing.right)) {
-	ExcludeClipRect(win_g->hdc,
-		psy_ui_value_px(&imp->component->spacing.right, tm), 0,
-		clipsize.x, clipsize.y);
-}*/

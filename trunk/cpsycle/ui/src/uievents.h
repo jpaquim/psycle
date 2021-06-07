@@ -13,6 +13,16 @@
 extern "C" {
 #endif
 
+typedef enum psy_ui_EventType {
+	psy_ui_KeyPress      = 2,
+	psy_ui_KeyRelease    = 3,
+	psy_ui_ButtonPress   = 4,
+	psy_ui_ButtonRelease = 5,
+	psy_ui_MotionNotify  = 6,
+	psy_ui_DoubleClick   = 7,
+	psy_ui_Drag          = 8
+} psy_ui_EventType;
+
 /* Forward Handler for Event target */
 struct psy_ui_Component;
 
@@ -21,12 +31,13 @@ struct psy_ui_Component;
 ** An event gives additional data to an event method triggered by the ui imp
 */
 typedef struct psy_ui_Event {
+	int type;
 	bool bubbles;
 	bool default_prevented;
 	struct psy_ui_Component* target;
 } psy_ui_Event;
 
-void psy_ui_event_init(psy_ui_Event*);
+void psy_ui_event_init(psy_ui_Event* ,int type);
 
 INLINE bool psy_ui_event_default_prevented(const psy_ui_Event* self)
 {
@@ -61,7 +72,7 @@ typedef struct psy_ui_KeyboardEvent {
 	bool shift_key;
 	bool ctrl_key;
 	bool alt_key;
-	bool repeat;
+	bool repeat;	
 } psy_ui_KeyboardEvent;
 
 void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent*);
@@ -96,7 +107,6 @@ typedef struct psy_ui_MouseEvent {
 	intptr_t delta;
 	bool shift_key;
 	bool ctrl_key;	
-	struct psy_ui_Component* target;
 } psy_ui_MouseEvent;
 
 

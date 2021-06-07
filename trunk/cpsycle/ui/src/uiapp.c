@@ -110,6 +110,7 @@ void psy_ui_app_init(psy_ui_App* self, bool dark, uintptr_t instance)
 	psy_ui_dragevent_init(&self->dragevent);
 	self->deltaperline = 120;
 	self->accumwheeldelta = 0;
+	psy_ui_eventdispatch_init(&self->eventdispatch);
 }
 
 void ui_app_initimpfactory(psy_ui_App* self)
@@ -173,6 +174,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	}	
 	psy_translator_dispose(&self->translator);
 	psy_ui_dragevent_dispose(&self->dragevent);
+	psy_ui_eventdispatch_dispose(&self->eventdispatch);
 }
 
 void psy_ui_app_setmain(psy_ui_App* self, psy_ui_Component* main)
@@ -360,6 +362,16 @@ static void psy_ui_appimp_close(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_onappdefaultschange(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_startmousehook(psy_ui_AppImp* self) { }
 static void psy_ui_appimp_stopmousehook(psy_ui_AppImp* self) { }
+static void psy_ui_appimp_sendevent(psy_ui_AppImp* self,
+	psy_ui_Component* component, psy_ui_Event* ev)
+{
+}
+
+static psy_ui_Component* psy_ui_appimp_component(psy_ui_AppImp* self,
+	uintptr_t platformhandle)
+{
+	return NULL;
+}
 
 static psy_ui_AppImpVTable imp_vtable;
 static bool imp_vtable_initialized = FALSE;
@@ -374,6 +386,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_onappdefaultschange = psy_ui_appimp_onappdefaultschange;
 		imp_vtable.dev_startmousehook = psy_ui_appimp_startmousehook;
 		imp_vtable.dev_stopmousehook = psy_ui_appimp_stopmousehook;
+		imp_vtable.dev_sendevent = psy_ui_appimp_sendevent;
+		imp_vtable.dev_component = psy_ui_appimp_component;
 		imp_vtable_initialized = TRUE;
 	}
 }

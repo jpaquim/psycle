@@ -286,6 +286,9 @@
     <ClCompile Include="src\uidropdownbox.c">
       <Filter>comps</Filter>
     </ClCompile>
+    <ClCompile Include="src\uieventdispatch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -527,6 +530,9 @@
     </ClInclude>
     <ClInclude Include="src\uidropdownbox.h">
       <Filter>comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uieventdispatch.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

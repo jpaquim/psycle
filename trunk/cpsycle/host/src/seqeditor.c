@@ -248,7 +248,6 @@ void seqeditorruler_draweditposition(SeqEditorRuler* self, psy_ui_Graphics* g)
 	}
 }
 
-
 psy_dsp_big_beat_t seqeditorruler_step(SeqEditorRuler* self)
 {
 	psy_dsp_big_beat_t rv;

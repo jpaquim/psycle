@@ -45,9 +45,7 @@ typedef struct psy_ui_WinApp {
 	psy_Table selfmap;
 	psy_Table winidmap;
 	uintptr_t winid;
-	HBRUSH defaultbackgroundbrush;
-	struct psy_ui_Component* eventretarget;
-	psy_List* targetids;
+	HBRUSH defaultbackgroundbrush;		
 	HHOOK mousehook;
 	// references
 	psy_ui_App* app;

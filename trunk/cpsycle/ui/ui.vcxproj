@@ -258,6 +258,7 @@
     <ClCompile Include="src\uidropdownbox.c" />
     <ClCompile Include="src\uiedit.c" />
     <ClCompile Include="src\uieditor.c" />
+    <ClCompile Include="src\uieventdispatch.c" />
     <ClCompile Include="src\uievents.c" />
     <ClCompile Include="src\uifolderdialog.c" />
     <ClCompile Include="src\uifont.c" />
@@ -340,6 +341,7 @@
     <ClInclude Include="src\uidropdownbox.h" />
     <ClInclude Include="src\uiedit.h" />
     <ClInclude Include="src\uieditor.h" />
+    <ClInclude Include="src\uieventdispatch.h" />
     <ClInclude Include="src\uievents.h" />
     <ClInclude Include="src\uifolderdialog.h" />
     <ClInclude Include="src\uifont.h" />

@@ -793,7 +793,7 @@ void view_dev_mousedown(psy_ui_ViewComponentImp* self, psy_ui_MouseEvent* ev)
 	}
 	if (ev->event.bubbles) {
 		if (!self->viewcomponents) {
-			ev->target = self->component;
+			ev->event.target = self->component;
 		}
 		self->component->vtable->onmousedown(self->component, ev);
 		psy_signal_emit(&self->component->signal_mousedown,
