@@ -202,9 +202,6 @@
     <ClCompile Include="src\imps\win32\uiwincolordialogimp.c">
       <Filter>imps\win32\dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\win32\uiwincomboboximp.c">
-      <Filter>imps\win32\comps</Filter>
-    </ClCompile>
     <ClCompile Include="src\imps\win32\uiwincomponentimp.c">
       <Filter>imps\win32\comps</Filter>
     </ClCompile>
@@ -256,9 +253,6 @@
     <ClCompile Include="src\imps\x11\uix11colordialogimp.c">
       <Filter>imps\x11</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11comboboximp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
     <ClCompile Include="src\imps\x11\uix11componentimp.c">
       <Filter>imps\x11</Filter>
     </ClCompile>
@@ -288,6 +282,9 @@
     </ClCompile>
     <ClCompile Include="src\imps\x11\uix11keyboardevent.c">
       <Filter>imps\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidropdownbox.c">
+      <Filter>comps</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -447,9 +444,6 @@
     <ClInclude Include="src\imps\win32\uiwincolordialogimp.h">
       <Filter>imps\win32\dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="src\imps\win32\uiwincomboboximp.h">
-      <Filter>imps\win32\comps</Filter>
-    </ClInclude>
     <ClInclude Include="src\imps\win32\uiwincomponentimp.h">
       <Filter>imps\win32\comps</Filter>
     </ClInclude>
@@ -501,9 +495,6 @@
     <ClInclude Include="src\imps\x11\uix11colordialogimp.h">
       <Filter>imps\x11</Filter>
     </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11comboboximp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
     <ClInclude Include="src\imps\x11\uix11componentimp.h">
       <Filter>imps\x11</Filter>
     </ClInclude>
@@ -533,6 +524,9 @@
     </ClInclude>
     <ClInclude Include="src\imps\x11\uix11keyboardevent.h">
       <Filter>imps\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uidropdownbox.h">
+      <Filter>comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

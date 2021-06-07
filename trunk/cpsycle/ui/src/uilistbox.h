@@ -53,12 +53,12 @@ intptr_t psy_ui_listbox_addtext(psy_ui_ListBox*, const char* text);
 void psy_ui_listbox_settext(psy_ui_ListBox*, const char* text, intptr_t index);
 void psy_ui_listbox_clear(psy_ui_ListBox*);
 void psy_ui_listbox_setcursel(psy_ui_ListBox*, intptr_t index);
-intptr_t psy_ui_listbox_cursel(psy_ui_ListBox*);
+intptr_t psy_ui_listbox_cursel(const psy_ui_ListBox*);
 void psy_ui_listbox_addsel(psy_ui_ListBox*, intptr_t index);
 void psy_ui_listbox_selitems(psy_ui_ListBox*, intptr_t* items, intptr_t maxitems);
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
 void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, double num);
-intptr_t psy_ui_listbox_count(psy_ui_ListBox*);
+intptr_t psy_ui_listbox_count(const psy_ui_ListBox*);
 
 INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)
 {
@@ -113,7 +113,7 @@ INLINE psy_ui_ListBoxImpVTable* psy_ui_listboximp_vtable(psy_ui_ComponentImp* se
 INLINE void psy_ui_listbox_text(psy_ui_ListBox* self, char* text,
 	uintptr_t index)
 {
-    psy_ui_listboximp_vtable(self->component.imp)->dev_settext(
+    psy_ui_listboximp_vtable(self->component.imp)->dev_text(
         self->component.imp->extended_imp, text, index);
 }
 

@@ -673,8 +673,9 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->tabindex = psy_INDEX_INVALID;
 	self->opcount = 0;
 	self->draggable = FALSE;
+	self->dropdown = FALSE;
 	self->bgframetimer = FALSE;
-	self->currbgframe = 0;
+	self->currbgframe = 0;	
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,

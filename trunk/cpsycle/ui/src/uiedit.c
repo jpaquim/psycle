@@ -215,7 +215,7 @@ void psy_ui_edit_onfocus(psy_ui_Edit* self)
 	super_vtable.onfocus(&self->component);
 	if (self->isinputfield) {
 		self->preventedit = FALSE;
-		psy_ui_app_startmousehook(psy_ui_app());		
+		psy_ui_app_startmousehook(psy_ui_app());
 	}
 }
 

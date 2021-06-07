@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwinimpfactory.h"
 
@@ -15,10 +18,8 @@
 #include "uiwingraphicsimp.h"
 #include "uiwinfontimp.h"
 #include "uiwincheckboximp.h"
-#include "uiwincomponentimp.h"
 #include "uiwineditimp.h"
 #include "uiwinlistboximp.h"
-#include "uiwincomboboximp.h"
 #include "uiwincolordialogimp.h"
 #include "uiwinopendialogimp.h"
 #include "uiwinsavedialogimp.h"
@@ -27,8 +28,8 @@
 
 #include <stdlib.h>
 
-// psy_ui_win_ImpFactory
-
+/* psy_ui_win_ImpFactory */
+/* prototypes */
 static struct psy_ui_AppImp* allocinit_appimp(psy_ui_win_ImpFactory*, psy_ui_App*, uintptr_t instance);
 static struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory*, psy_ui_RealSize size);
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory*, uintptr_t* platformdc);
@@ -37,11 +38,11 @@ static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_win_ImpFactory*, const ps
 static struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_popupimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view);
 static struct psy_ui_ComponentImp* allocinit_checkboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
@@ -62,8 +63,7 @@ static psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(psy_ui_win_ImpFacto
 	const char* title,	
 	const char* initialdir);
 static struct psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
-
-// VTable init
+/* vtable */
 static psy_ui_ImpFactoryVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -79,13 +79,13 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 		vtable.allocinit_componentimp = (psy_ui_fp_impfactory_allocinit_componentimp)allocinit_componentimp;
 		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_frameimp;
 		vtable.allocinit_toolframeimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_toolframeimp;
+		vtable.allocinit_popupimp = (psy_ui_fp_impfactory_allocinit_frameimp)allocinit_popupimp;
 		vtable.allocinit_editimp = (psy_ui_fp_impfactory_allocinit_editimp)allocinit_editimp;
 		vtable.allocinit_editimp_multiline = (psy_ui_fp_impfactory_allocinit_editimp_multiline)allocinit_editimp_multiline;
 		vtable.allocinit_listboximp = (psy_ui_fp_impfactory_allocinit_listboximp)allocinit_listboximp;
 		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect)allocinit_listboximp_multiselect;
 		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp)allocinit_checkboximp;
-		vtable.allocinit_checkboximp_multiline = (psy_ui_fp_impfactory_allocinit_checkboximp)allocinit_checkboximp_multiline;
-		vtable.allocinit_comboboximp = (psy_ui_fp_impfactory_allocinit_comboboximp)allocinit_comboboximp;
+		vtable.allocinit_checkboximp_multiline = (psy_ui_fp_impfactory_allocinit_checkboximp)allocinit_checkboximp_multiline;	
 		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp)allocinit_colourdialogimp;
 		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp)allocinit_opendialogimp;
 		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp)allocinit_all_opendialogimp;
@@ -96,13 +96,13 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 		vtable.allocinit_fontdialogimp = (psy_ui_fp_impfactory_allocinit_fontdialogimp)allocinit_fontdialogimp;
 		vtable_initialized = TRUE;
 	}
+	self->imp.vtable = &vtable;
 }
-
+/* implementation */
 void psy_ui_win_impfactory_init(psy_ui_win_ImpFactory* self)
 {
 	psy_ui_impfactory_init(&self->imp);
-	vtable_init(self);
-	self->imp.vtable = &vtable;
+	vtable_init(self);	
 }
 
 psy_ui_win_ImpFactory* psy_ui_win_impfactory_alloc(void)
@@ -236,8 +236,28 @@ psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_win_ImpFactory* self, struct 
 	if (rv->hwnd == 0) {
 		free(rv);
 		rv = 0;
+	}	
+	return (psy_ui_ComponentImp*)rv;
+}
+
+psy_ui_ComponentImp* allocinit_popupimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	psy_ui_win_ComponentImp* rv;	
+	psy_ui_WinApp* winapp;
+
+	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
+	rv = psy_ui_win_componentimp_allocinit(
+		component,
+		parent ? parent->imp : 0,
+		winapp->appclass,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_POPUP,
+		0);
+	if (rv->hwnd == 0) {
+		free(rv);
+		rv = 0;
 	}
-	
 	return (psy_ui_ComponentImp*)rv;
 }
 
@@ -286,18 +306,6 @@ psy_ui_ComponentImp* allocinit_listboximp(psy_ui_win_ImpFactory* self, struct ps
 		free(rv);
 		rv = 0;
 	}
-	return (psy_ui_ComponentImp*)rv;
-}
-
-
-psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, psy_ui_Component* view)
-{
-	psy_ui_win_ComboBoxImp* rv;
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*)psy_ui_app()->imp;
-	rv = psy_ui_win_comboboximp_allocinit(
-		component, parent, view);	
 	return (psy_ui_ComponentImp*)rv;
 }
 
@@ -474,4 +482,4 @@ psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_win_ImpFactory* self, struc
 	return 0;
 }
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

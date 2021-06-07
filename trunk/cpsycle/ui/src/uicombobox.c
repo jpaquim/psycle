@@ -25,8 +25,7 @@ static void onmouseenter(psy_ui_ComboBox*);
 static void onmouseleave(psy_ui_ComboBox*);
 static bool haspreventry(const psy_ui_ComboBox*);
 static bool hasnextentry(const psy_ui_ComboBox*);
-static void onupdatestyles(psy_ui_ComboBox*);
-static void updatestyles(psy_ui_ComboBox*);
+static void onselchange(psy_ui_ComboBox*, psy_ui_Component* sender, intptr_t index);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -52,10 +51,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 			onmouseenter;
 		vtable.onmouseleave =
 			(psy_ui_fp_component_onmouseleave)
-			onmouseleave;
-		vtable.onupdatestyles =
-			(psy_ui_fp_component_onupdatestyles)
-			onupdatestyles;
+			onmouseleave;		
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -67,10 +63,18 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent,
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_doublebuffer(&self->component);
-	self->comboimp = psy_ui_impfactory_allocinit_comboboximp(
-		psy_ui_app_impfactory(psy_ui_app()),
-		&self->component, parent, view);
+/*	psy_ui_component_setstyletypes(&self->component,
+		psy_ui_STYLE_COMBOBOX,
+		psy_ui_STYLE_COMBOBOX_HOVER,
+		psy_ui_STYLE_COMBOBOX_SELECT,
+		psy_ui_STYLE_LABEL_DISABLED); */
+	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_dropdownbox_init(&self->dropdown, &self->component);
+	psy_ui_listbox_init(&self->listbox, &self->dropdown.component);
+	psy_signal_connect(&self->listbox.signal_selchanged, self,
+		onselchange);
+	psy_ui_component_setalign(&self->listbox.component,
+		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
 	vtable_init(self);
@@ -83,12 +87,6 @@ void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)
 {
 	assert(self);
 
-#if PSYCLE_USE_TK == PSYCLE_TK_X11
-	self->comboimp->vtable->dev_dispose(self->comboimp);
-#else
-	self->comboimp->vtable->dev_destroy(self->comboimp);
-#endif
-	free(self->comboimp);
 	psy_table_dispose(&self->itemdata);
 	psy_signal_dispose(&self->signal_selchanged);
 }
@@ -116,8 +114,7 @@ intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox* self, const char* text)
 {
 	assert(self);
 
-	return psy_ui_comboboximp_vtable(self)->dev_addtext(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp, text);
+	return psy_ui_listbox_addtext(&self->listbox, text);
 }
 
 void psy_ui_combobox_settext(psy_ui_ComboBox* self, const char* text,
@@ -125,32 +122,42 @@ void psy_ui_combobox_settext(psy_ui_ComboBox* self, const char* text,
 {
 	assert(self);
 
-	psy_ui_comboboximp_vtable(self)->dev_settext(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp, text, index);
+	psy_ui_listbox_settext(&self->listbox, text, index);	
+}
+
+void psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
+{
+	psy_ui_listbox_text(&self->listbox, text,
+		psy_ui_listbox_cursel(&self->listbox));
+}
+
+intptr_t psy_ui_combobox_count(const psy_ui_ComboBox* self)
+{
+	return psy_ui_listbox_count(&self->listbox);
 }
 
 void psy_ui_combobox_clear(psy_ui_ComboBox* self)
 {
 	assert(self);
 
-	psy_ui_comboboximp_vtable(self)->dev_clear(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp);
+	psy_ui_listbox_clear(&self->listbox);
+	psy_table_clear(&self->itemdata);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void psy_ui_combobox_setcursel(psy_ui_ComboBox* self, intptr_t index)
 {
 	assert(self);
 
-	psy_ui_comboboximp_vtable(self)->dev_setcursel(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp, index);
+	psy_ui_listbox_setcursel(&self->listbox, index);
+	psy_ui_component_invalidate(&self->component);
 }
 
 intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox* self)
 {
 	assert(self);
 
-	return psy_ui_comboboximp_vtable_const(self)->dev_cursel(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp);
+	return psy_ui_listbox_cursel(&self->listbox);
 }
 
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, double number)
@@ -211,8 +218,8 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 		char text[512];
 
 		text[0] = '\0';
-		psy_ui_comboboximp_vtable(self)->dev_text(
-			(psy_ui_ComponentImp*)self->comboimp->extended_imp, text);
+
+		psy_ui_combobox_text(self, text);
 		if (psy_strlen(text)) {
 			const psy_ui_TextMetric* tm;
 			double vcenter;
@@ -269,8 +276,7 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 			psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
 		}
 	} else {
-		psy_ui_comboboximp_vtable(self)->dev_showdropdown(
-			(psy_ui_ComponentImp*)self->comboimp->extended_imp);
+		psy_ui_dropdownbox_show(&self->dropdown, &self->component);
 	}
 }
 
@@ -302,8 +308,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 		} else {
 			self->hover = psy_ui_COMBOBOXHOVER_DOWN;
 		}
-		if (hover != self->hover) {
-			updatestyles(self);
+		if (hover != self->hover) {			
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
@@ -314,7 +319,6 @@ void onmouseenter(psy_ui_ComboBox* self)
 	assert(self);
 
 	self->hover = psy_ui_COMBOBOXHOVER_DOWN;
-	updatestyles(self);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -322,8 +326,7 @@ void onmouseleave(psy_ui_ComboBox* self)
 {
 	assert(self);
 
-	self->hover = psy_ui_COMBOBOXHOVER_NONE;
-	updatestyles(self);
+	self->hover = psy_ui_COMBOBOXHOVER_NONE;	
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -344,77 +347,9 @@ bool hasnextentry(const psy_ui_ComboBox* self)
 	return (psy_ui_combobox_cursel(self) < count - 1);
 }
 
-void onupdatestyles(psy_ui_ComboBox* self)
+void onselchange(psy_ui_ComboBox* self, psy_ui_Component* sender, intptr_t index)
 {
-	assert(self);
-
-	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_COMBOBOX,
-		psy_ui_STYLE_COMBOBOX_HOVER,
-		psy_ui_STYLE_COMBOBOX_SELECT,
-		psy_ui_STYLE_LABEL_DISABLED);
-}
-
-
-void updatestyles(psy_ui_ComboBox* self)
-{
-	assert(self);
-
-	/* if (self->hover != psy_ui_COMBOBOXHOVER_NONE) {
-		 self->component.style.currstyle = &self->component.style.hover;
-	   } else {
-		self->component.style.currstyle = &self->component.style.overridestyle;
-	   } */
-}
-
-/* psy_ui_ComponentImp */
-/* fallbacks */
-static int dev_addtext(psy_ui_ComponentImp* self, const char* text)
-{
-	return -1;
-}
-
-static void dev_settext(psy_ui_ComponentImp* self, const char* text,
-	intptr_t index)
-{
-}
-
-static void dev_text(psy_ui_ComponentImp* self, char* text) { }
-static void dev_clear(psy_ui_ComponentImp* self) { }
-static void dev_setcursel(psy_ui_ComponentImp* self, intptr_t index) { }
-static intptr_t dev_cursel(const psy_ui_ComponentImp* self) { return -1; }
-
-static void dev_selitems(psy_ui_ComponentImp* self, intptr_t* items,
-	intptr_t maxitems)
-{
-}
-
-static intptr_t dev_count(const psy_ui_ComponentImp* self) { return 0; }
-static intptr_t dev_selcount(psy_ui_ComponentImp* self) { return 0; }
-static void dev_showdropdown(psy_ui_ComponentImp* self) { }
-/* vtable */
-static psy_ui_ComboboxImpVTable combobox_imp_vtable;
-static bool combobox_imp_vtable_initialized = FALSE;
-
-static void combobox_imp_vtable_init(void)
-{
-	if (!combobox_imp_vtable_initialized) {
-		combobox_imp_vtable.dev_addtext = dev_addtext;
-		combobox_imp_vtable.dev_settext = dev_settext;
-		combobox_imp_vtable.dev_text = dev_text;
-		combobox_imp_vtable.dev_clear = dev_clear;
-		combobox_imp_vtable.dev_setcursel = dev_setcursel;
-		combobox_imp_vtable.dev_cursel = dev_cursel;
-		combobox_imp_vtable.dev_count = dev_count;
-		combobox_imp_vtable.dev_selitems = dev_selitems;
-		combobox_imp_vtable.dev_selcount = dev_selcount;
-		combobox_imp_vtable.dev_showdropdown = dev_showdropdown;
-		combobox_imp_vtable_initialized = TRUE;
-	}
-}
-
-void psy_ui_comboboximp_extend(psy_ui_ComponentImp* self)
-{
-	combobox_imp_vtable_init();
-	self->extended_vtable = &combobox_imp_vtable;
+	psy_ui_dropdownbox_hide(&self->dropdown);
+	psy_ui_component_invalidate(&self->component);
+	psy_signal_emit(&self->signal_selchanged, self, 1, index);
 }

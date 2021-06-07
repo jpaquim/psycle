@@ -223,7 +223,8 @@ typedef struct psy_ui_Component {
 	uintptr_t opcount;	
 	bool draggable;	
 	uintptr_t bgframetimer;
-	uintptr_t currbgframe;	
+	uintptr_t currbgframe;
+	bool dropdown;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);

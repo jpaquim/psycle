@@ -19,7 +19,6 @@
 #include "uix11graphicsimp.h"
 #include "uix11fontimp.h"
 #include "uix11componentimp.h"
-#include "uix11comboboximp.h"
 #include "uix11colordialogimp.h"
 #include "uix11opendialogimp.h"
 #include "uix11savedialogimp.h"
@@ -59,9 +58,6 @@ static struct psy_ui_ComponentImp* allocinit_listboximp(
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(
 	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
 	struct psy_ui_Component* parent);
-static struct psy_ui_ComponentImp* allocinit_comboboximp(
-	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
-	struct psy_ui_Component* parent, struct psy_ui_Component* view);
 static struct psy_ui_ComponentImp* allocinit_checkboximp(
 	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
 	struct psy_ui_Component* parent);
@@ -144,10 +140,7 @@ static void vtable_init(psy_ui_x11_ImpFactory* self)
 			allocinit_checkboximp;
 		vtable.allocinit_checkboximp_multiline =
 			(psy_ui_fp_impfactory_allocinit_checkboximp)
-			allocinit_checkboximp_multiline;
-		vtable.allocinit_comboboximp =
-			(psy_ui_fp_impfactory_allocinit_comboboximp)
-			allocinit_comboboximp;
+			allocinit_checkboximp_multiline;		
 		vtable.allocinit_colourdialogimp =
 			(psy_ui_fp_impfactory_allocinit_colourdialogimp)
 			allocinit_colourdialogimp;
@@ -346,26 +339,6 @@ psy_ui_ComponentImp* allocinit_listboximp_multiselect(
 	psy_ui_x11_ImpFactory* self, struct psy_ui_Component* component,
 		struct psy_ui_Component* parent)
 {
-	return NULL;	
-}
-
-psy_ui_ComponentImp* allocinit_comboboximp(psy_ui_x11_ImpFactory* self,
-	struct psy_ui_Component* component, struct psy_ui_Component* parent,
-	struct psy_ui_Component* view)
-{
-	psy_ui_x11_ComboBoxImp* rv;
-	psy_ui_X11App* x11app;	
-
-	x11app = (psy_ui_X11App*)psy_ui_app()->imp;
-	rv = psy_ui_x11_comboboximp_allocinit(
-		component,
-		parent,
-		view);
-	if (rv) {				
-		return &rv->imp;
-	} else {	
-		free(rv);		
-	}
 	return NULL;	
 }
 

@@ -112,7 +112,7 @@ void psy_ui_listbox_setcursel(psy_ui_ListBox* self, intptr_t index)
 		self->component.imp->extended_imp, index);
 }
 
-intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
+intptr_t psy_ui_listbox_cursel(const psy_ui_ListBox* self)
 {		
 	return psy_ui_listboximp_vtable(self->component.imp)->dev_cursel(
 		self->component.imp->extended_imp);
@@ -136,7 +136,7 @@ intptr_t psy_ui_listbox_selcount(psy_ui_ListBox* self)
 		self->component.imp->extended_imp);
 }
 
-intptr_t psy_ui_listbox_count(psy_ui_ListBox* self)
+intptr_t psy_ui_listbox_count(const psy_ui_ListBox* self)
 {	
 	return psy_ui_listboximp_vtable(self->component.imp)->dev_count(
 		self->component.imp->extended_imp);
