@@ -75,6 +75,7 @@ psy_audio_Sequence* seqeditorstate_sequence(SeqEditorState* self)
 static void seqeditorruler_ondestroy(SeqEditorRuler*);
 static void seqeditorruler_ondraw(SeqEditorRuler*, psy_ui_Graphics*);
 static void seqeditorruler_drawruler(SeqEditorRuler*, psy_ui_Graphics*);
+static void seqeditorruler_draweditposition(SeqEditorRuler*, psy_ui_Graphics*);
 static void seqeditorruler_onsequenceselectionchanged(SeqEditorRuler*,
 	psy_audio_SequenceSelection* sender);
 static void seqeditorruler_onpreferredsize(SeqEditorRuler*, const psy_ui_Size* limit,
@@ -133,6 +134,7 @@ void seqeditorruler_ondestroy(SeqEditorRuler* self)
 void seqeditorruler_ondraw(SeqEditorRuler* self, psy_ui_Graphics* g)
 {
 	seqeditorruler_drawruler(self, g);
+	seqeditorruler_draweditposition(self, g);
 }
 
 void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
@@ -222,6 +224,30 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 			psy_ui_realpoint_make(cpx, baseline + size.height / 2));
 	}
 }
+
+void seqeditorruler_draweditposition(SeqEditorRuler* self, psy_ui_Graphics* g)
+{
+	psy_ui_IconDraw icondraw;
+	double position_px;		
+	psy_audio_SequenceEntry* seqentry;
+
+	seqentry = psy_audio_sequence_entry(
+		seqeditorstate_sequence(self->state),
+		self->state->workspace->sequenceselection.editposition);
+	if (seqentry) {
+		psy_ui_RealSize size;
+		double baseline;
+
+		size = psy_ui_component_size_px(&self->component);
+		baseline = size.height / 2 + 2;
+		position_px = floor(seqeditorstate_beattopx(self->state, seqentry->offset));		
+		psy_ui_icondraw_init(&icondraw, psy_ui_ICON_MORE);
+		psy_ui_icondraw_draw(&icondraw, g,
+			psy_ui_realpoint_make(position_px + 2, baseline + 2),
+			psy_ui_colour_make(0x00FF0000));
+	}
+}
+
 
 psy_dsp_big_beat_t seqeditorruler_step(SeqEditorRuler* self)
 {
@@ -1827,9 +1853,8 @@ void seqeditortrackdesc_build(SeqEditorTrackDesc* self)
 	psy_ui_component_align(&self->component);
 }
 
-
-void seqeditortrackdesc_onresize(SeqEditorTrackDesc* self, psy_ui_Component* sender,
-	double* offset)
+void seqeditortrackdesc_onresize(SeqEditorTrackDesc* self,
+	psy_ui_Component* sender, double* offset)
 {		
 	psy_ui_RealSize size;
 	double height;
@@ -2602,9 +2627,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 		&self->state, skin, workspace);
 	self->tracks.skin = skin;	
 	psy_ui_scroller_init(&self->scroller, &self->tracks.component,
-		&self->component, NULL);
-	psy_ui_component_setbackgroundmode(&self->scroller.pane,
-		psy_ui_SETBACKGROUND);
+		&self->component, NULL);	
 	psy_ui_component_setalign(&self->tracks.component,
 		psy_ui_ALIGN_FIXED_RESIZE);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
@@ -2809,6 +2832,6 @@ void seqeditor_ontrackresize(SeqEditor* self, psy_ui_Component* sender,
 	if (track) {		
 		psy_ui_component_setpreferredheight(track,
 			psy_ui_value_make_eh(*height));
-		psy_ui_component_align(&self->scroller.pane);
+		psy_ui_component_align(&self->scroller.pane);		
 	}
 }
