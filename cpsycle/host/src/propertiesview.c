@@ -225,7 +225,7 @@ void propertiesrenderline_onmousedown(PropertiesRenderLine* self,
 	}
 	if (ev->button == 1) {
 		self->state->dialogbutton = (self->dialogbutton &&
-			ev->target == &self->dialogbutton->component);			
+			ev->event.target == &self->dialogbutton->component);
 		self->state->property = NULL;
 		self->state->selected = self->property;
 		if (self->state->selectedline) {

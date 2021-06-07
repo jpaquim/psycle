@@ -254,7 +254,7 @@ void transformpatternview_onsearchonmousedown(TransformPatternView* self,
 	psy_List* q;
 
 	q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE);
-	transformpatternview_applyto(self, (int)psy_list_entry_index(q, ev->target));
+	transformpatternview_applyto(self, (int)psy_list_entry_index(q, ev->event.target));
 	free(q);
 }
 

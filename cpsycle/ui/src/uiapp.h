@@ -6,7 +6,7 @@
 #define psy_ui_APP_H
 
 /* local */
-#include "uievents.h"
+#include "uieventdispatch.h"
 #include "uidefaults.h"
 /* container */
 #include <signal.h>
@@ -61,6 +61,7 @@ typedef struct psy_ui_App {
 	psy_ui_DragEvent dragevent;
 	int deltaperline;
 	int accumwheeldelta;
+	psy_ui_EventDispatch eventdispatch;
 } psy_ui_App;
 
 psy_ui_App* psy_ui_app(void);
@@ -94,7 +95,6 @@ INLINE struct psy_ui_Component* psy_ui_app_capture(psy_ui_App* self)
 	return self->capture;
 }
 
-
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {
 	assert(self);
@@ -105,12 +105,15 @@ INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 psy_ui_Style* psy_ui_style(uintptr_t styletype);
 const psy_ui_Style* psy_ui_style_const(uintptr_t styletype);
 
-
 /* psy_ui_AppImp */
 typedef void (*psy_ui_fp_appimp_dispose)(struct psy_ui_AppImp*);
 typedef int (*psy_ui_fp_appimp_run)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stop)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_close)(struct psy_ui_AppImp*);
+typedef void (*psy_ui_fp_appimp_sendevent)(struct psy_ui_AppImp*,
+	struct psy_ui_Component*, psy_ui_Event*);
+typedef struct psy_ui_Component* (*psy_ui_fp_appimp_component)(struct psy_ui_AppImp*,
+	uintptr_t platformhandle);
 typedef void (*psy_ui_fp_appimp_onappdefaultschange)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_startmousehook)(struct psy_ui_AppImp*);
 typedef void (*psy_ui_fp_appimp_stopmousehook)(struct psy_ui_AppImp*);
@@ -123,6 +126,8 @@ typedef struct psy_ui_AppImpVTable {
 	psy_ui_fp_appimp_onappdefaultschange dev_onappdefaultschange;
 	psy_ui_fp_appimp_startmousehook dev_startmousehook;
 	psy_ui_fp_appimp_stopmousehook dev_stopmousehook;
+	psy_ui_fp_appimp_sendevent dev_sendevent;
+	psy_ui_fp_appimp_component dev_component;
 } psy_ui_AppImpVTable;
 
 typedef struct psy_ui_AppImp {

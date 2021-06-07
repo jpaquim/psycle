@@ -11,8 +11,9 @@
 #include <properties.h>
 
 /* psy_ui_Event */
-void psy_ui_event_init(psy_ui_Event* self)
+void psy_ui_event_init(psy_ui_Event* self, int type)
 {
+	self->type = type;
 	self->bubbles = TRUE;
 	self->default_prevented = FALSE;
 	self->target = NULL;
@@ -27,7 +28,7 @@ void psy_ui_keyboardevent_init(psy_ui_KeyboardEvent* self)
 void psy_ui_keyboardevent_init_all(psy_ui_KeyboardEvent* self, uint32_t keycode,
 	intptr_t keydata, bool shift, bool ctrl, bool alt, bool repeat)
 {
-	psy_ui_event_init(&self->event);
+	psy_ui_event_init(&self->event, psy_ui_KeyPress);
 	self->keycode = keycode;
 	self->keydata = keydata;
 	self->shift_key = shift;
@@ -46,7 +47,7 @@ void psy_ui_mouseevent_init(psy_ui_MouseEvent* self)
 void psy_ui_mouseevent_init_all(psy_ui_MouseEvent* self, psy_ui_RealPoint pt,
 	uintptr_t button, intptr_t delta, bool shift, bool ctrl)
 {
-	psy_ui_event_init(&self->event);
+	psy_ui_event_init(&self->event, psy_ui_ButtonPress);
 	self->pt = pt;
 	self->button = button;
 	self->delta = delta;	
@@ -58,6 +59,7 @@ void psy_ui_mouseevent_init_all(psy_ui_MouseEvent* self, psy_ui_RealPoint pt,
 void psy_ui_dragevent_init(psy_ui_DragEvent* self)
 {
 	psy_ui_mouseevent_init(&self->mouse);
+	self->mouse.event.type = psy_ui_Drag;
 	self->mouse.event.default_prevented = TRUE;	
 	self->active = FALSE;	
 	self->dataTransfer = NULL;

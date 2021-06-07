@@ -223,7 +223,8 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 			SECTION_ID_MACHINEVIEW_NEWMACHINE) {		
 		self->newmachine.restoresection = psy_ui_component_section(
 			&self->component);		
-		self->shownewmachine = TRUE;		
+		self->shownewmachine = TRUE;
+		return;
 	} else {
 		self->shownewmachine = FALSE;
 	}

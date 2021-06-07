@@ -1116,14 +1116,14 @@ void patternview_onmousedown(PatternView* self, psy_ui_MouseEvent* ev)
 	bool blockmenu;
 
 	blockmenu =		
-		((ev->button == 2) && ev->target == trackergrid_base(&self->tracker)) ||
-		((ev->button == 2) && ev->target == patternblockmenu_base(
+		((ev->button == 2) && ev->event.target == trackergrid_base(&self->tracker)) ||
+		((ev->button == 2) && ev->event.target == patternblockmenu_base(
 			&self->blockmenu)) ||
-		(ev->target == psy_ui_button_base(&self->pianoroll.bar.blockmenu));
+		(ev->event.target == psy_ui_button_base(&self->pianoroll.bar.blockmenu));
 	if  (blockmenu) {
 		psy_ui_component_setalign(&self->blockmenu.component,
 			psy_ui_ALIGN_RIGHT);
-		if (ev->target == trackergrid_base(&self->tracker)) {
+		if (ev->event.target == trackergrid_base(&self->tracker)) {
 			self->blockmenu.target = PATTERNVIEWTARGET_TRACKER;
 		} else {
 			self->blockmenu.target = PATTERNVIEWTARGET_PIANOROLL;

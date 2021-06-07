@@ -450,6 +450,7 @@ typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*,
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_hasfocus)(struct psy_ui_ComponentImp*);
 typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*);
+typedef uintptr_t (*psy_ui_fp_componentimp_dev_platform_handle)(struct psy_ui_ComponentImp*);
 typedef uintptr_t (*psy_ui_fp_componentimp_dev_flags)(const struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_clear)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_draw)(struct psy_ui_ComponentImp*, psy_ui_Graphics*);
@@ -506,6 +507,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_setfocus dev_setfocus;
 	psy_ui_fp_componentimp_dev_hasfocus dev_hasfocus;
 	psy_ui_fp_componentimp_dev_platform dev_platform;
+	psy_ui_fp_componentimp_dev_platform_handle dev_platform_handle;
 	psy_ui_fp_componentimp_dev_flags dev_flags;
 	psy_ui_fp_componentimp_dev_clear dev_clear;
 	psy_ui_fp_componentimp_dev_draw dev_draw;
