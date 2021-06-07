@@ -682,6 +682,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 				return 0;				
 			break;
+			case WM_NCACTIVATE:
+				if (imp->component->dropdown) {
+					if (wParam == 0) {
+						EnableWindow(GetParent(imp->hwnd), TRUE);
+						ShowWindow(imp->hwnd, FALSE);
+					}
+				}
+				break;
 			default:			
 			break;
 		}	

@@ -215,7 +215,6 @@
     <ClCompile Include="src\imps\win32\uiwinbitmapimp.c" />
     <ClCompile Include="src\imps\win32\uiwincheckboximp.c" />
     <ClCompile Include="src\imps\win32\uiwincolordialogimp.c" />
-    <ClCompile Include="src\imps\win32\uiwincomboboximp.c" />
     <ClCompile Include="src\imps\win32\uiwincomponentimp.c" />
     <ClCompile Include="src\imps\win32\uiwineditimp.c" />
     <ClCompile Include="src\imps\win32\uiwinfolderdialogimp.c" />
@@ -230,7 +229,6 @@
     <ClCompile Include="src\imps\x11\uix11bitmapimp.c" />
     <ClCompile Include="src\imps\x11\uix11colordialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11colours.c" />
-    <ClCompile Include="src\imps\x11\uix11comboboximp.c" />
     <ClCompile Include="src\imps\x11\uix11componentimp.c" />
     <ClCompile Include="src\imps\x11\uix11folderdialogimp.c" />
     <ClCompile Include="src\imps\x11\uix11fontdialogimp.c" />
@@ -257,6 +255,7 @@
     <ClCompile Include="src\uicomponentstyle.c" />
     <ClCompile Include="src\uidef.c" />
     <ClCompile Include="src\uidefaults.c" />
+    <ClCompile Include="src\uidropdownbox.c" />
     <ClCompile Include="src\uiedit.c" />
     <ClCompile Include="src\uieditor.c" />
     <ClCompile Include="src\uievents.c" />
@@ -297,7 +296,6 @@
     <ClInclude Include="src\imps\win32\uiwinbitmapimp.h" />
     <ClInclude Include="src\imps\win32\uiwincheckboximp.h" />
     <ClInclude Include="src\imps\win32\uiwincolordialogimp.h" />
-    <ClInclude Include="src\imps\win32\uiwincomboboximp.h" />
     <ClInclude Include="src\imps\win32\uiwincomponentimp.h" />
     <ClInclude Include="src\imps\win32\uiwineditimp.h" />
     <ClInclude Include="src\imps\win32\uiwinfolderdialogimp.h" />
@@ -312,7 +310,6 @@
     <ClInclude Include="src\imps\x11\uix11bitmapimp.h" />
     <ClInclude Include="src\imps\x11\uix11colordialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11colours.h" />
-    <ClInclude Include="src\imps\x11\uix11comboboximp.h" />
     <ClInclude Include="src\imps\x11\uix11componentimp.h" />
     <ClInclude Include="src\imps\x11\uix11folderdialogimp.h" />
     <ClInclude Include="src\imps\x11\uix11fontdialogimp.h" />
@@ -340,6 +337,7 @@
     <ClInclude Include="src\uicomponentstyle.h" />
     <ClInclude Include="src\uidef.h" />
     <ClInclude Include="src\uidefaults.h" />
+    <ClInclude Include="src\uidropdownbox.h" />
     <ClInclude Include="src\uiedit.h" />
     <ClInclude Include="src\uieditor.h" />
     <ClInclude Include="src\uievents.h" />

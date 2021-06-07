@@ -224,7 +224,7 @@ void plugineditor_onsave(PluginEditor* self, psy_ui_Component* sender)
 {
 	char path[4096];
 
-	psy_psy_ui_combobox_text(&self->fileselector, path);
+	psy_ui_combobox_text(&self->fileselector, path);
 	if (path[0] != '\0') {
 		psy_ui_editor_save(&self->editor, path);
 	}
@@ -282,7 +282,7 @@ void plugineditor_onfileselected(PluginEditor* self, psy_ui_Component* sender, i
 {
 	char path[4096];
 
-	psy_psy_ui_combobox_text(&self->fileselector, path);
+	psy_ui_combobox_text(&self->fileselector, path);
 	psy_ui_editor_clear(&self->editor);
 	psy_ui_editor_load(&self->editor, path);	
 }

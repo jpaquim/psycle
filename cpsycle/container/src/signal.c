@@ -346,16 +346,18 @@ void psy_signal_notify1(psy_Signal* self, void* sender, void* param)
 
 	if (self->slots) {
 		psy_List* p;
+		psy_List* q;
 		
 		p = self->slots;
 		while (p != NULL) {
 			psy_Slot* slot;
 			
+			q = p->next;
 			slot = (psy_Slot*)psy_list_entry(p);
 			if (!slot->prevented) {
 				((signalcallback1)slot->fp)(slot->context, sender, param);
 			}
-			psy_list_next(&p);
+			p = q;
 		}
 	}
 }

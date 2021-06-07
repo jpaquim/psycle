@@ -51,6 +51,11 @@ struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_toolframeimp(psy_ui_ImpF
 	return self->vtable->allocinit_toolframeimp(self, component, parent);
 }
 
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_popupimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_popupimp(self, component, parent);
+}
+
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_listboximp(self, component, parent);
@@ -59,11 +64,6 @@ struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFac
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_listboximp_multiselect(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_listboximp_multiselect(self, component, parent);
-}
-
-struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view)
-{
-	return self->vtable->allocinit_comboboximp(self, component, parent, view);
 }
 
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_editimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
@@ -146,12 +146,12 @@ static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_ImpFactory* self, const s
 static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_toolframeimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
+static struct psy_ui_ComponentImp* allocinit_popupimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_editimp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
-static struct psy_ui_ComponentImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent, struct psy_ui_Component* view) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ComponentImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return NULL; }
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return NULL; }
@@ -197,11 +197,11 @@ static void vtable_init(void)
 		vtable.allocinit_componentimp = allocinit_componentimp;
 		vtable.allocinit_frameimp = allocinit_frameimp;
 		vtable.allocinit_toolframeimp = allocinit_toolframeimp;
+		vtable.allocinit_popupimp = allocinit_popupimp;
 		vtable.allocinit_editimp = allocinit_editimp;
 		vtable.allocinit_editimp_multiline = allocinit_editimp_multiline;		
 		vtable.allocinit_listboximp = allocinit_listboximp;
 		vtable.allocinit_listboximp_multiselect = allocinit_listboximp_multiselect;
-		vtable.allocinit_comboboximp = allocinit_comboboximp;
 		vtable.allocinit_checkboximp = allocinit_checkboximp;
 		vtable.allocinit_checkboximp_multiline = allocinit_checkboximp_multiline;
 		vtable.allocinit_colourdialogimp = allocinit_colourdialogimp;

@@ -7,23 +7,25 @@
 #define psy_ui_COMBOBOX_H
 
 /* local */
-#include "uicomponent.h"
+#include "uidropdownbox.h"
+#include "uilistbox.h"
 /* container */
 #include <hashtbl.h>
 
 /*
 ** ComboBox
 ** Bridge
-** Aim: avoid coupling to one platform (win32, xt/motif, etc)
+** Aim: avoid coupling to one platform (win32, x11, etc)
 ** Abstraction/Refined  psy_ui_ComboBox
 ** Implementor			psy_ui_ComponentImp
-** Concrete Implementor	psy_ui_win_ComboBoxImp
+** Concrete Implementor	psy_ui_win_ComponentImp
 **
-** psy_ui_Component <>----<> psy_ui_ComponentImp <----- psy_ui_win_ComponentImp
-**      ^                               ^                         |
-**      |                               |                         |
-**      |                               |                        <>
-** psy_ui_ComboBox             psy_ui_ComponentImp <------ psy_ui_WinComboBoxImp
+** psy_ui_Component <>----<> psy_ui_ComponentImp
+**         ^                                                        
+**         |                                                        
+**         |                               
+** psy_ui_ComboBox <>----<>  psy_ui_DropDownBox <>----<> psy_ui_ListBox
+**
 */
 
 #ifdef __cplusplus
@@ -44,8 +46,9 @@ typedef struct psy_ui_ComboBox {
     psy_ui_Component component;
     /* signals */
     psy_Signal signal_selchanged;
-    /* internal */        
-    psy_ui_ComponentImp* comboimp;
+    /* internal */    
+    psy_ui_DropDownBox dropdown;
+    psy_ui_ListBox listbox;
     int ownerdrawn;   
     psy_ui_ComboBoxHover hover;
     double charnumber;
@@ -66,71 +69,13 @@ intptr_t psy_ui_combobox_cursel(const psy_ui_ComboBox*);
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, double num);
 void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
 intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
+void psy_ui_combobox_text(psy_ui_ComboBox*, char* text);
+intptr_t psy_ui_combobox_count(const psy_ui_ComboBox*);
 
-INLINE psy_ui_Component* psy_psy_ui_combobox_base(psy_ui_ComboBox* self)
+
+INLINE psy_ui_Component* psy_ui_combobox_base(psy_ui_ComboBox* self)
 {
     return &self->component;
-}
-
-/* uicomboboximp */
-/* vtable function pointers */
-typedef int (*psy_ui_fp_comboboximp_dev_addtext)(struct psy_ui_ComponentImp*,
-    const char* text);
-typedef void (*psy_ui_fp_comboboximp_dev_settext)(struct psy_ui_ComponentImp*,
-    const char* text, intptr_t index);
-typedef void (*psy_ui_fp_comboboximp_dev_text)(struct psy_ui_ComponentImp*,
-    char* text);
-typedef void (*psy_ui_fp_comboboximp_dev_setstyle)(struct psy_ui_ComponentImp*,
-    int style);
-typedef void (*psy_ui_fp_comboboximp_dev_clear)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_setcursel)(struct psy_ui_ComponentImp*,
-    intptr_t index);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_cursel)(
-    const struct psy_ui_ComponentImp*);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_count)(const struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_selitems)(struct psy_ui_ComponentImp*,
-    intptr_t* items, intptr_t maxitems);
-typedef intptr_t(*psy_ui_fp_comboboximp_dev_selcount)(
-    struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_comboboximp_dev_showdropdown)(
-    struct psy_ui_ComponentImp*);
-
-typedef struct {
-    psy_ui_fp_comboboximp_dev_addtext dev_addtext;
-    psy_ui_fp_comboboximp_dev_settext dev_settext;    
-    psy_ui_fp_comboboximp_dev_text dev_text;
-    psy_ui_fp_comboboximp_dev_clear dev_clear;
-    psy_ui_fp_comboboximp_dev_setcursel dev_setcursel;
-    psy_ui_fp_comboboximp_dev_cursel dev_cursel;
-    psy_ui_fp_comboboximp_dev_count dev_count;
-    psy_ui_fp_comboboximp_dev_selitems dev_selitems;
-    psy_ui_fp_comboboximp_dev_selcount dev_selcount;
-    psy_ui_fp_comboboximp_dev_showdropdown dev_showdropdown;
-} psy_ui_ComboboxImpVTable;
-
-void psy_ui_comboboximp_extend(psy_ui_ComponentImp*);
-
-INLINE psy_ui_ComboboxImpVTable* psy_ui_comboboximp_vtable(psy_ui_ComboBox* self)
-{
-    return (psy_ui_ComboboxImpVTable*)self->comboimp->extended_vtable;
-}
-
-INLINE const psy_ui_ComboboxImpVTable* psy_ui_comboboximp_vtable_const(
-    const psy_ui_ComboBox* self)
-{
-    return (const psy_ui_ComboboxImpVTable*)self->comboimp->extended_vtable;
-}
-
-INLINE void psy_psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
-{
-    psy_ui_comboboximp_vtable_const(self)->dev_text(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp, text);
-}
-
-INLINE intptr_t psy_ui_combobox_count(const psy_ui_ComboBox* self)
-{
-    return psy_ui_comboboximp_vtable_const(self)->dev_count(
-		(psy_ui_ComponentImp*)self->comboimp->extended_imp);
 }
 
 #ifdef __cplusplus
