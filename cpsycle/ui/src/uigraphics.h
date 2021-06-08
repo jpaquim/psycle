@@ -19,12 +19,12 @@
 ** Aim: avoid coupling to one platform (win32, xt/motif, etc)
 ** Abstraction/Refined  psy_ui_Graphics
 ** Implementor			psy_ui_GraphicsImp
-** Concrete Implementor	psy_ui_win_GraphicsImp
+** Concrete Implementor	psy_ui_platform_GraphicsImp
 ** 
 ** psy_ui_Graphics <>-------- psy_ui_GraphicsImp
 **     imp->dev_draw                  ^
 **     ...                            |
-**                          psy_ui_win_GraphicsImp
+**                          psy_ui_platform_GraphicsImp
 */
 
 #ifdef __cplusplus
@@ -77,7 +77,7 @@ typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_RealPo
 typedef void (*psy_ui_fp_graphics_curveto)(struct psy_ui_Graphics*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
 typedef void (*psy_ui_fp_graphics_drawarc)(struct psy_ui_Graphics*,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+	psy_ui_RealRectangle, double angle_start, double angle_end);
 typedef void (*psy_ui_fp_graphics_setlinewidth)(struct psy_ui_Graphics*, uintptr_t width);
 typedef uintptr_t (*psy_ui_fp_graphics_linewidth)(struct psy_ui_Graphics*);
 typedef void (*psy_ui_fp_graphics_dev_setorigin)(struct psy_ui_Graphics*, double x, double y);
@@ -260,9 +260,9 @@ INLINE void psy_ui_curveto(psy_ui_Graphics* self, psy_ui_RealPoint control_p1,
 }
 
 INLINE void psy_ui_drawarc(psy_ui_Graphics* self,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+	psy_ui_RealRectangle r, double angle_start, double angle_end)
 {
-	self->vtable->drawarc(self, x1, y1, x2, y2, x3, y3, x4, y4);
+	self->vtable->drawarc(self, r, angle_start, angle_end);
 }
 
 INLINE void psy_ui_setlinewidth(psy_ui_Graphics* self, uintptr_t width)
@@ -320,7 +320,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy
 typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawarc)(struct psy_ui_GraphicsImp*,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+	psy_ui_RealRectangle, double angle_start, double angle_end);
 typedef void (*psy_ui_fp_graphicsimp_dev_setlinewidth)(struct psy_ui_GraphicsImp*, uintptr_t width);
 typedef unsigned int (*psy_ui_fp_graphicsimp_dev_linewidth)(struct psy_ui_GraphicsImp*);
 typedef void (*psy_ui_fp_graphicsimp_dev_setorigin)(struct psy_ui_GraphicsImp*, double x, double y);

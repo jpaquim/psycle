@@ -12,12 +12,19 @@
 #include "../../uievents.h"
 /* X11 */
 #include <X11/Xlib.h>
+#include <X11/IntrinsicP.h>
+#include <X11/ShellP.h>
+#include <X11/extensions/shape.h>
+#include <X11/extensions/Xdbe.h>
+#include <X11/keysym.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent*);
+XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
+	Display* dpy, Window win, Window root);
 
 #ifdef __cplusplus
 }

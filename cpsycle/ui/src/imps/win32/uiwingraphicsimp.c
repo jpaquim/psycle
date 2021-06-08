@@ -47,7 +47,7 @@ static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint pt
 static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
 static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+	psy_ui_RealRectangle, double angle_start, double angle_end);
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp*, uintptr_t width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp*);
 static void psy_ui_win_g_devsetorigin(psy_ui_win_GraphicsImp*, double x, double y);
@@ -538,14 +538,26 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self,
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
-	double x1, double y1, double x2, double y2, double x3, double y3,
-	double x4, double y4)
-{
+	psy_ui_RealRectangle r, double angle_start, double angle_end)
+{  
+	int x, y, w, h, x3, y3, x4, y4;	
+	double mul;
+  
+	x = (int)r.left - (int)(self->org.x);
+	y = (int)r.right - (int)(self->org.y);
+	w = (int)(r.right - r.left);
+	h = (int)(r.bottom - r.top);
+	mul = 1 / 180 * 3.14159265358979323846;
+	x3 = x + w / 2 + (int)(w * cos(angle_start * mul));
+	y3 = y + h / 2 - (int)(h * sin(angle_start * mul));
+	x4 = x + w / 2 + (int)(w * cos(angle_end * mul));
+	y4 = y + h / 2 - (int)(h * sin(angle_end * mul));  
 	Arc(self->hdc,
-		(int)x1 - (int)(self->org.x), (int)y1 - (int)(self->org.y),
-		(int)x2 - (int)(self->org.x), (int)y2 - (int)(self->org.y),
-		(int)x3 - (int)(self->org.x), (int)y3 - (int)(self->org.y),
-		(int)x4 - (int)(self->org.x), (int)y4 - (int)(self->org.y));
+		(int)(r.left) - (int)(self->org.x),
+		(int)(r.top) - (int)(self->org.y),
+		(int)(r.right) - (int)(self->org.x),
+		(int)(r.bottom) - (int)(self->org.y),
+		x3, y3, x4, y4);
 }
 
 void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, uintptr_t width)

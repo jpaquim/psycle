@@ -45,8 +45,8 @@ static void setfont(psy_ui_Graphics*, const psy_ui_Font*);
 static void moveto(psy_ui_Graphics*, psy_ui_RealPoint point);
 static void curveto(psy_ui_Graphics*, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p);
-static void drawarc(psy_ui_Graphics*,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+static void drawarc(psy_ui_Graphics*, psy_ui_RealRectangle, double angle_start,
+	double angle_end);
 static void setlinewidth(psy_ui_Graphics*, uintptr_t width);
 static uintptr_t linewidth(psy_ui_Graphics*);
 static void setorigin(psy_ui_Graphics* self, double x, double y);
@@ -222,10 +222,10 @@ static void curveto(psy_ui_Graphics* self, psy_ui_RealPoint control_p1,
 	self->imp->vtable->dev_curveto(self->imp, control_p1, control_p2, p);
 }
 
-void drawarc(psy_ui_Graphics* self,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+void drawarc(psy_ui_Graphics* self, psy_ui_RealRectangle r, double angle_start,
+	double angle_end)
 {
-	self->imp->vtable->dev_drawarc(self->imp, x1, y1, x2, y2, x3, y3, x4, y4);
+	self->imp->vtable->dev_drawarc(self->imp, r, angle_start, angle_end);
 }
 
 static void setlinewidth(psy_ui_Graphics* self, uintptr_t width)
@@ -283,8 +283,10 @@ static void dev_setfont(psy_ui_GraphicsImp* self, const psy_ui_Font* font) { }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint pt) { }
 static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_RealPoint control_p1,
 	psy_ui_RealPoint control_p2, psy_ui_RealPoint p) { }
-static void dev_drawarc(psy_ui_GraphicsImp* self,
-	double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) { }
+static void dev_drawarc(psy_ui_GraphicsImp* self, psy_ui_RealRectangle r,
+	double angle_start, double angle_end)
+{
+}
 static void dev_setlinewidth(psy_ui_GraphicsImp* self, uintptr_t width) { }
 static unsigned int dev_linewidth(psy_ui_GraphicsImp* self) { return 1; }
 static void dev_setorigin(psy_ui_GraphicsImp* self, double x, double y) { }

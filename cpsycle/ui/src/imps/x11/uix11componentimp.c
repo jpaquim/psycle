@@ -311,18 +311,38 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	self->prev_w = width;
 	self->prev_h = height;
 	self->d_backBuf = 0;
-	if (parent == 0 || ((dwStyle & 1) == 1)) {
-		XSetWindowAttributes xAttr;
-		unsigned long xAttrMask = CWBackPixel;
+	if (((dwStyle & 2) == 2)) {
+		/* popup */
+		XSetWindowAttributes xattr;	
+		unsigned long xattrmask;
+		
+		xattrmask = CWOverrideRedirect | CWBackPixel;		
+		xattr.override_redirect = True;
+		xattr.background_pixel = 0x00232323;
+		self->hwnd = XCreateWindow(
+			x11app->dpy, XDefaultRootWindow(x11app->dpy),
+				x, y, width, height, 0,
+				CopyFromParent, CopyFromParent, x11app->visual,
+				xattrmask, &xattr);
+		XSelectInput(x11app->dpy, self->hwnd,
+			ExposureMask | KeyPressMask | KeyReleaseMask |
+			StructureNotifyMask |
+			EnterWindowMask | LeaveWindowMask | FocusChangeMask);
+		self->mapped = FALSE;
+		self->parent = NULL;
+	} else if (parent == 0 || ((dwStyle & 1) == 1)) {
+		/* frame */
+		XSetWindowAttributes xattr;
+		unsigned long xattrmask = CWBackPixel;
 
-		xAttr.background_pixel = 0x00232323;
+		xattr.background_pixel = 0x00232323;
 	/*	xAttr.bit_gravity = NorthWestGravity;
 		xAttrMask |= CWBitGravity; */
         self->hwnd = XCreateWindow(
 			x11app->dpy, XDefaultRootWindow(x11app->dpy),
 				x, y, width, height, 0,
 				CopyFromParent, CopyFromParent, x11app->visual,
-				xAttrMask, &xAttr);
+				xattrmask, &xattr);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
 			StructureNotifyMask |

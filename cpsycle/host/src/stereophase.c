@@ -117,20 +117,42 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 	psy_ui_setlinewidth(g, 8);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00303030));
 
-	psy_ui_drawline(g, psy_ui_realpoint_make(32, 32), psy_ui_realpoint_make(128, 128));
-	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(128, 0));
-	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(256 - 32, 32));
-	
-	psy_ui_drawarc(g, 0, 0, 256, 256, 256, 128, 0, 128);
-	psy_ui_drawarc(g, 96, 96, 256 - 96, 256 - 96, 256 - 96, 128, 96, 128);
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(32, 32),
+		psy_ui_realpoint_make(128, 128));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(128, 128),
+		psy_ui_realpoint_make(128, 0));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(128, 128),
+		psy_ui_realpoint_make(256 - 32, 32));
 
-	psy_ui_drawarc(g, 48, 48, 256 - 48, 256 - 48, 256 - 48, 128, 48, 128);
-
+	psy_ui_drawarc(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(0, 0),
+			psy_ui_realsize_make(256, 256)),
+		0, 180);	
+	psy_ui_drawarc(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(48, 48),
+			psy_ui_realsize_make(160, 160)),
+		0, 180);
+	psy_ui_drawarc(g,
+		psy_ui_realrectangle_make(
+			psy_ui_realpoint_make(96, 96),
+			psy_ui_realsize_make(64, 64)),
+		0, 180);
 	psy_ui_setlinewidth(g, 4);
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00404040));
-	psy_ui_drawline(g, psy_ui_realpoint_make(32, 32), psy_ui_realpoint_make(128, 128));
-	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(128, 0));
-	psy_ui_drawline(g, psy_ui_realpoint_make(128, 128), psy_ui_realpoint_make(256 - 32, 32));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(32, 32),
+		psy_ui_realpoint_make(128, 128));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(128, 128),
+		psy_ui_realpoint_make(128, 0));
+	psy_ui_drawline(g,
+		psy_ui_realpoint_make(128, 128),
+		psy_ui_realpoint_make(256 - 32, 32));
 	psy_ui_setlinewidth(g, 1);
 
 	sprintf(buf, "Refresh %.2fhz", 1000.0f / self->scope_phase_rate);

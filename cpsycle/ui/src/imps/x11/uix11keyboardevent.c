@@ -184,4 +184,27 @@ psy_ui_KeyboardEvent psy_ui_x11_keyboardevent_make(XKeyEvent* event)
 	return rv;
 }
 
+XKeyEvent psy_ui_x11_xkeyevent_make(psy_ui_KeyboardEvent* e,
+	Display* dpy, Window win, Window root)
+{
+	XKeyEvent rv;
+	KeyCode keycode;
+	
+	keycode = XKeysymToKeycode(dpy, e->keycode); 	
+	rv.type = KeyPress;
+    rv.display = dpy;
+    rv.window = win;
+    rv.root = root;
+    rv.subwindow = None;
+    rv.time = CurrentTime;
+    rv.x = 0;
+    rv.y = 0;
+    rv.x_root = 0;
+    rv.y_root = 0;
+    rv.same_screen = True;
+    rv.keycode = keycode;
+    rv.state = 0; //modifiers;	
+	return rv;
+}
+
 #endif /* PSYCLE_TK_X11 */
