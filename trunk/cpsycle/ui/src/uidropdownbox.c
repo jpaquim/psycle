@@ -40,13 +40,17 @@ void psy_ui_dropdownbox_show(psy_ui_DropDownBox* self, psy_ui_Component* field)
 				psy_ui_value_make_px(position.bottom)),
 			psy_ui_size_make(size.width, psy_ui_value_make_eh(10.0))));		
 	psy_ui_component_show(&self->component);
-	psy_ui_component_parent(&self->component)->imp->vtable->dev_preventinput(
+	if (psy_ui_component_parent(&self->component)) {
+		psy_ui_component_parent(&self->component)->imp->vtable->dev_preventinput(
 		psy_ui_component_parent(&self->component)->imp);
+	}
 }
 
 void psy_ui_dropdownbox_hide(psy_ui_DropDownBox* self)
 {
-	psy_ui_component_parent(&self->component)->imp->vtable->dev_enableinput(
-		psy_ui_component_parent(&self->component)->imp);
+	if (psy_ui_component_parent(&self->component)) {
+		psy_ui_component_parent(&self->component)->imp->vtable->dev_enableinput(
+			psy_ui_component_parent(&self->component)->imp);		
+	}
 	psy_ui_component_hide(&self->component);
 }

@@ -2411,7 +2411,6 @@ void seqeditorheaderbar_init(SeqEditorHeaderBar* self, psy_ui_Component* parent)
 }
 
 /* SeqEditToolBar */
-static void seqeditortoolbar_setdragmode(SeqEditToolBar*, SeqEditorDragMode);
 static void seqedittoolbar_oninserttypeselchange(SeqEditToolBar*,
 	psy_ui_Component* sender, int index);
 static void seqeditortoolbar_ondragmodemove(SeqEditToolBar*, psy_ui_Component* sender);

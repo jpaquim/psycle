@@ -47,6 +47,8 @@ static struct psy_ui_ComponentImp* allocinit_frameimp(
 static struct psy_ui_ComponentImp* allocinit_toolframeimp(
 	psy_ui_x11_ImpFactory*, struct psy_ui_Component* component,
 	struct psy_ui_Component* parent);
+static struct psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory*,
+	struct psy_ui_Component* component, struct psy_ui_Component* parent);	
 static struct psy_ui_ComponentImp* allocinit_editimp(psy_ui_x11_ImpFactory*,
 	struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComponentImp* allocinit_editimp_multiline(
@@ -123,6 +125,9 @@ static void vtable_init(psy_ui_x11_ImpFactory* self)
 		vtable.allocinit_toolframeimp =
 			(psy_ui_fp_impfactory_allocinit_frameimp)
 			allocinit_toolframeimp;
+		vtable.allocinit_popupimp =
+			(psy_ui_fp_impfactory_allocinit_frameimp)
+			allocinit_popupimp;
 		vtable.allocinit_editimp =
 			(psy_ui_fp_impfactory_allocinit_editimp)
 			allocinit_editimp;
@@ -310,6 +315,26 @@ psy_ui_ComponentImp* allocinit_toolframeimp(psy_ui_x11_ImpFactory* self,
 		winapp->appclass,
 		0, 0, 800, 600,
 		1 /* frame */, 0); 
+	if (rv->hwnd == 0) {
+		free(rv);
+		rv = 0;
+	}
+	return (psy_ui_ComponentImp*)rv;
+}
+
+psy_ui_ComponentImp* allocinit_popupimp(psy_ui_x11_ImpFactory* self,
+	struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{	
+	psy_ui_x11_ComponentImp* rv;
+	psy_ui_X11App* winapp;
+
+	winapp = (psy_ui_X11App*)psy_ui_app()->imp;
+	rv = psy_ui_x11_componentimp_allocinit(
+		component,
+		parent ? parent->imp : 0,
+		winapp->appclass,
+		0, 0, 1, 1,
+		2 /* popup */, 0); 
 	if (rv->hwnd == 0) {
 		free(rv);
 		rv = 0;
