@@ -27,7 +27,7 @@
 /* double click */
 static int buttonclicks = 0;
 static int buttonclickcounter = 0;
-static int doubleclicktime = 200;
+static int doubleclicktime = 50;
 static psy_ui_MouseEvent buttonpressevent;
 /* prototypes */
 static void psy_ui_x11app_initdbe(psy_ui_X11App*);
@@ -498,7 +498,9 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			psy_ui_x11app_mousewheel(self, imp, event);				
 			return 0;
 		}
-		if (buttonclicks == 0) {
+		if ((event->xbutton.state & 256) == 256) {			
+			doubleclick = TRUE;
+		} else if (buttonclicks == 0) {
 			/* first click */
 			buttonclicks = 1;
 			buttonclickcounter = doubleclicktime;
@@ -513,6 +515,11 @@ int psy_ui_x11app_handle_event(psy_ui_X11App* self, XEvent* event)
 			} else {				
 				doubleclick = TRUE;				
 			}
+		}
+		if (doubleclick) {
+			printf("double press\n");
+			buttonclicks = 0;
+			buttonclickcounter = doubleclicktime;
 		}
 		psy_ui_mouseevent_init_all(&ev,	
 				psy_ui_realpoint_make(event->xbutton.x, event->xbutton.y),
@@ -829,6 +836,28 @@ void psy_ui_x11app_sendevent(psy_ui_X11App* self, psy_ui_Component* component,
 			(XEvent*)&xbutton);
 		XFlush(self->dpy);
 		break; }
+	case psy_ui_DoubleClick: {
+		psy_ui_MouseEvent* mouseevent;
+		XButtonEvent xbutton;
+		
+		printf("double click\n");
+		mouseevent = (psy_ui_MouseEvent*)ev;
+		xbutton.display       = self->dpy;
+		xbutton.root          = DefaultRootWindow(self->dpy);
+		xbutton.time          = CurrentTime;
+		xbutton.same_screen   = True;
+		xbutton.button        = Button1;
+		xbutton.state         = 256; /* double click */
+		xbutton.x             = mouseevent->pt.x;
+		xbutton.y             = mouseevent->pt.y;
+		xbutton.x_root        = 0;
+		xbutton.y_root        = 0;
+		xbutton.window        = imp->hwnd;   
+		xbutton.type = ButtonPress;	
+		XSendEvent(self->dpy, imp->hwnd, True, ButtonPressMask,
+			(XEvent*)&xbutton);
+		XFlush(self->dpy);
+		break; }		
 	/*case psy_ui_DoubleClick: {
 		psy_ui_MouseEvent* mouseevent;
 		int16_t loword;
