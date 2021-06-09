@@ -171,9 +171,14 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_RULER_TOP, style);
 
 	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, material.surface_overlay_16p);
 	psy_ui_style_setbackgroundcolour(style,
 		material.surface_overlay_6p);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_RULER_BOTTOM, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&material.secondary, 900));	
+	psy_ui_styles_setstyle(self, STYLE_SEQEDT_RULER_CURSOR, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style,

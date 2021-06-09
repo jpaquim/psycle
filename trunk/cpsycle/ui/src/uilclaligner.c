@@ -106,7 +106,7 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 				component->align == psy_ui_ALIGN_VCLIENT ||
 				component->align == psy_ui_ALIGN_HCLIENT) {
 				
-			} else if (component->align == psy_ui_ALIGN_FIXED_RESIZE) {
+			} else if (component->align == psy_ui_ALIGN_FIXED) {
 				psy_ui_RealRectangle position;						
 
 				position = psy_ui_component_position(component);
@@ -422,7 +422,7 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 				psy_ui_aligner_adjustminmaxsize(component, tm, &componentsize,
 					NULL);
 				c_tm = psy_ui_component_textmetric(component);		
-				if (component->align == psy_ui_ALIGN_FIXED_RESIZE) {
+				if (component->align == psy_ui_ALIGN_FIXED) {
 					psy_ui_RealRectangle position;
 
 					position = psy_ui_component_position(component);

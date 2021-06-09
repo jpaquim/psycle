@@ -1223,7 +1223,7 @@ void machinestackpanetrack_init(MachineStackPaneTrack* self,
 	psy_ui_scroller_init(&self->scroller, &self->client.component, &self->component,
 		view);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->client.component, psy_ui_ALIGN_FIXED);
 	// psy_ui_component_setbackgroundmode(&self->scroller.component,
 	//	psy_ui_SETBACKGROUND);
 	// psy_ui_component_setbackgroundcolour(&self->scroller.component,

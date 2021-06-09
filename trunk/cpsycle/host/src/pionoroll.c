@@ -1444,20 +1444,20 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->keyboardpane, psy_ui_ALIGN_CLIENT);
 	pianokeyboard_init(&self->keyboard, &self->keyboardpane, &self->keyboardstate);
 	psy_ui_component_setalign(&self->keyboard.component,
-		psy_ui_ALIGN_FIXED_RESIZE);	
+		psy_ui_ALIGN_FIXED);	
 	/* top area (beatruler) */
 	psy_ui_component_init(&self->top, &self->component, NULL);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	pianoruler_init(&self->header, &self->top, &self->gridstate);
 	psy_ui_component_setalign(pianoruler_base(&self->header),
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED);
 	/* client area (event grid) */
 	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
 		&self->gridstate, self->workspace);
 	psy_ui_scroller_init(&self->scroller, pianogrid_base(&self->grid),
 		&self->component, NULL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_FIXED);
 	/* bar */
 	pianobar_init(&self->bar, &self->scroller.component, self->workspace);	
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);

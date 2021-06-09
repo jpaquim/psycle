@@ -660,13 +660,13 @@ void trackergrid_advancelines(TrackerGrid* self, uintptr_t lines, bool wrap)
 				&self->gridstate->cursor);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace,
+				workspace_setseqeditposition(self->workspace,
 					index);
 				self->preventscrolltop = FALSE;
 			} else if (restorewrap) {
 				self->gridstate->cursor.offset = 0;
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace,
+				workspace_setseqeditposition(self->workspace,
 					psy_audio_orderindex_make(
 						workspace_sequenceeditposition(self->workspace).track, 0));
 				self->preventscrolltop = FALSE;
@@ -714,12 +714,12 @@ void trackergrid_prevlines(TrackerGrid* self, uintptr_t lines, bool wrap)
 
 				cursor = self->gridstate->cursor;
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace, index);
+				workspace_setseqeditposition(self->workspace, index);
 				self->preventscrolltop = FALSE;
 				self->gridstate->cursor = cursor;
 			} else if (restorewrap) {				
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace,
+				workspace_setseqeditposition(self->workspace,
 					psy_audio_orderindex_make(
 						workspace_sequenceeditposition(self->workspace).track,
 						psy_audio_sequence_track_size(
@@ -1306,7 +1306,7 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				&self->gridstate->dragselectionbase);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace,
+				workspace_setseqeditposition(self->workspace,
 					index);
 				self->preventscrolltop = FALSE;
 			}
@@ -1386,7 +1386,7 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				&self->gridstate->dragselectionbase);
 			if (psy_audio_orderindex_valid(&index)) {
 				self->preventscrolltop = TRUE;
-				workspace_setsequenceeditposition(self->workspace,
+				workspace_setseqeditposition(self->workspace,
 					index);
 				self->preventscrolltop = FALSE;
 			}			
