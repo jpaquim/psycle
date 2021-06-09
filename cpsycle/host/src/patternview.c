@@ -204,7 +204,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	trackerheader_init(&self->header, &self->headerpane,
 		&self->trackconfig, &self->gridstate, self->workspace);
 	psy_ui_component_setalign(&self->header.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED);
 	/* pattern default line */
 	psy_ui_component_init(&self->griddefaultspane, &self->component, NULL);
 	psy_ui_component_setalign(&self->griddefaultspane, psy_ui_ALIGN_TOP);	
@@ -215,7 +215,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->griddefaults.defaultlinestate.skin = &self->skin;
 	trackergridstate_preventplaybar(self->griddefaults.gridstate);
 	psy_ui_component_setalign(&self->griddefaults.component,
-		psy_ui_ALIGN_FIXED_RESIZE);	
+		psy_ui_ALIGN_FIXED);	
 	self->griddefaults.linestate->maxlines = 1;
 	self->griddefaults.gridstate->drawbeathighlights = FALSE;
 	self->griddefaults.preventeventdriver = TRUE;
@@ -246,7 +246,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->trackerscroller.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->tracker.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED);
 	psy_signal_connect(&self->tracker.signal_colresize, self,
 		patternview_oncolresize);
 	/* PianoRoll */

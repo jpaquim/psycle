@@ -585,8 +585,7 @@ void mainframe_initstepsequencerview(MainFrame* self)
 
 void mainframe_initseqeditor(MainFrame* self)
 {
-	seqeditor_init(&self->seqeditor, &self->mainpane, &self->patternview.skin,
-		&self->workspace);
+	seqeditor_init(&self->seqeditor, &self->mainpane, &self->workspace);
 	psy_ui_component_setalign(seqeditor_base(&self->seqeditor),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmaximumsize(seqeditor_base(&self->seqeditor),

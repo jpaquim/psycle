@@ -144,7 +144,7 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 		const psy_ui_Style* style;
 
 		psy_ui_component_setparent(client, &self->pane);		
-		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_component_setalign(client, psy_ui_ALIGN_FIXED);
 		style = psy_ui_app_style_const(psy_ui_app(),
 			psy_ui_componentstyle_currstyleid(&self->client->style));
 		if (style) {
@@ -171,7 +171,7 @@ void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
 		psy_ui_scroller_onpanesize);
 	psy_signal_connect(&self->client->signal_scroll, self,
 		psy_ui_scroller_onscroll);		
-	psy_ui_component_setalign(self->client, psy_ui_ALIGN_FIXED_RESIZE);	
+	psy_ui_component_setalign(self->client, psy_ui_ALIGN_FIXED);	
 }
 
 void psy_ui_scroller_setbackgroundmode(psy_ui_Scroller* self,

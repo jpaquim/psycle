@@ -64,7 +64,7 @@ typedef enum psy_ui_AlignType {
 	psy_ui_ALIGN_CENTER,
 	psy_ui_ALIGN_VCLIENT,
 	psy_ui_ALIGN_HCLIENT,
-	psy_ui_ALIGN_FIXED_RESIZE,	
+	psy_ui_ALIGN_FIXED,	
 } psy_ui_AlignType;
 
 typedef enum psy_ui_Alignment {

@@ -157,7 +157,7 @@ void machineview_initwireview(MachineView* self, psy_ui_Component* tabbarparent)
 	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
 		psy_ui_notebook_base(&self->notebook), NULL);
 	psy_ui_component_setalign(&self->wireview.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 
 }

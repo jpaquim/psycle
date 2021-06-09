@@ -72,7 +72,7 @@ void seqviewtrackheaders_init(SeqviewTrackHeaders* self,
 		psy_ui_size_make_em(0.0, 2.0));	
 	psy_signal_init(&self->signal_trackselected);
 	psy_ui_component_init(&self->client, &self->component, NULL);
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_FIXED);
 	psy_ui_component_setdefaultalign(&self->client,
 		psy_ui_ALIGN_LEFT, psy_ui_margin_zero());
 	psy_ui_component_setalignexpand(&self->client, psy_ui_HEXPAND);
@@ -469,12 +469,12 @@ void seqviewtrack_onmousedown(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 				self->state->col = (uintptr_t)(ev->pt.x / self->state->colwidth);
 				self->state->col = psy_min(self->state->col, COLMAX - 1);
 			}
-			workspace_setsequenceeditposition(self->state->cmds->workspace,
+			workspace_setseqeditposition(self->state->cmds->workspace,
 				self->state->cmd_orderindex);			
 		} else {
 			self->state->cmd_orderindex.track = self->trackindex;
 			self->state->cmd_orderindex.order = psy_INDEX_INVALID;
-			workspace_setsequenceeditposition(self->state->cmds->workspace,
+			workspace_setseqeditposition(self->state->cmds->workspace,
 				self->state->cmd_orderindex);
 		}
 	}
@@ -487,7 +487,7 @@ void seqviewtrack_onmousedoubleclick(SeqViewTrack* self, psy_ui_MouseEvent* ev)
 		self->state->cmd_orderindex.order = (uintptr_t)(ev->pt.y /
 			psy_ui_value_px(&self->state->lineheight,
 				psy_ui_component_textmetric(&self->component), NULL));
-		workspace_setsequenceeditposition(self->state->cmds->workspace,
+		workspace_setseqeditposition(self->state->cmds->workspace,
 			self->state->cmd_orderindex);
 		sequencecmds_changeplayposition(self->state->cmds);		
 	}
@@ -717,7 +717,7 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 						first.order = 0;
 					}
 				}
-				workspace_setsequenceeditposition(self->state->cmds->workspace,
+				workspace_setseqeditposition(self->state->cmds->workspace,
 					first);
 			}
 			break;
@@ -735,7 +735,7 @@ bool seqviewlist_oninput(SeqviewList* self, InputHandler* sender)
 						first.order = 0;
 					}
 				}
-				workspace_setsequenceeditposition(self->state->cmds->workspace,
+				workspace_setseqeditposition(self->state->cmds->workspace,
 					first);
 			}
 			break;
@@ -997,7 +997,7 @@ void seqview_init(SeqView* self, psy_ui_Component* parent,
 		STYLE_SEQLISTVIEW_FOCUS);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setalign(&self->listview.component,
-		psy_ui_ALIGN_FIXED_RESIZE);
+		psy_ui_ALIGN_FIXED);
 	/* button bar */
 	sequencebuttons_init(&self->buttons, &self->component, &self->cmds);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);

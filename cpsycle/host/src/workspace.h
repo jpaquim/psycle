@@ -249,7 +249,7 @@ void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setpatterncursor(Workspace*, psy_audio_PatternCursor);
 psy_audio_PatternCursor workspace_patterncursor(Workspace*);
-void workspace_setsequenceeditposition(Workspace*, psy_audio_OrderIndex);
+void workspace_setseqeditposition(Workspace*, psy_audio_OrderIndex);
 psy_audio_OrderIndex workspace_sequenceeditposition(const Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);

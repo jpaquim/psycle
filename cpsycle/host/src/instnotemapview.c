@@ -1370,7 +1370,7 @@ void instrumentnotemapview_initentries(InstrumentNoteMapView* self, Workspace* w
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
 		&self->entries, NULL);	
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_FIXED);
 	psy_ui_margin_init_em(&margin, 0.0, 2.0, 0.0, 0.0);
 	psy_ui_component_setmargin(&self->entryview.component, margin);	
 	instrumentkeyboardview_init(&self->keyboard, &self->entries);
@@ -1395,7 +1395,7 @@ void instrumentnotemapview_inittable(InstrumentNoteMapView* self, Workspace* wor
 	psy_ui_scroller_init(&self->scroller_table, &self->tableview.component,
 		&self->table, NULL);
 	psy_ui_component_setalign(&self->scroller_table.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setalign(&self->tableview.component, psy_ui_ALIGN_FIXED_RESIZE);
+	psy_ui_component_setalign(&self->tableview.component, psy_ui_ALIGN_FIXED);
 	psy_ui_component_setbackgroundmode(&self->scroller_table.pane, psy_ui_SETBACKGROUND);
 }
 
