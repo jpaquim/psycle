@@ -385,6 +385,10 @@ void make_translator_make_settingsview(psy_Property* parent)
 	add("show", "Show Metronome Bar");
 	add("machine", "Machine");
 	add("note", "Note");
+	// settingsview/seqedit
+	setsection(psy_property_append_section(section, "seqeditor"));
+	add("seqeditor", "Sequence Editor");	
+	add("machine", "Sample Output Machine");
 	// settingsview/directories
 	setsection(psy_property_append_section(section, "dirs"));
 	add("dirs", "Directories");

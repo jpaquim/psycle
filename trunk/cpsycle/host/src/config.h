@@ -23,6 +23,7 @@ extern "C" {
 #include "midiviewconfig.h"
 #include "patternviewconfig.h"
 #include "predefsconfig.h"
+#include "seqeditconfig.h"
 /* audio */
 #include <audioconfig.h>
 
@@ -53,6 +54,7 @@ typedef struct PsycleConfig {
 	MidiViewConfig midi;
 	CompatConfig compat;
 	PredefsConfig predefs;
+	SeqEditConfig seqedit;
 } PsycleConfig;
 
 void psycleconfig_init(PsycleConfig*, psy_audio_Player*,

@@ -70,6 +70,7 @@ static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
 static void workspace_updatemetronome(Workspace*);
+static void workspace_updateseqedit(Workspace*);
 /* Machinecallback */
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[],
@@ -281,6 +282,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_lock_dispose(&self->pluginscanlock);
 	psy_audio_lock_dispose(&self->outputlock);
 	free(self->scanfilename);
+	self->scanfilename = NULL;
 	psy_list_deallocate(&self->errorstrs, NULL);
 	psy_list_deallocate(&self->statusoutputstrs, NULL);
 	inputhandler_dispose(&self->inputhandler);
@@ -384,6 +386,12 @@ void workspace_updatemetronome(Workspace* self)
 	self->player.sequencer.metronome_event.mach =
 		(uint8_t)
 		metronomeconfig_machine(&self->config.metronome);
+}
+
+void workspace_updateseqedit(Workspace* self)
+{	
+	self->player.sequencer.sample_event.mach =
+		(uint8_t)seqeditconfig_machine(&self->config.seqedit);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -579,8 +587,11 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 					psycleconfig_midi(&self->config));
 				*rebuild_level = 1;
 			} else if (psy_property_insection(property,
-					self->config.metronome.metronome)) {
+				self->config.metronome.metronome)) {
 				workspace_updatemetronome(self);
+			} else if (psy_property_insection(property,
+				self->config.seqedit.seqedit)) {
+				workspace_updateseqedit(self);				
 			} else {
 				worked = FALSE;
 			}
@@ -864,11 +875,13 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 			song);
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
+		workspace_updatemetronome(self);
+		workspace_updateseqedit(self);
 		psy_audio_exclusivelock_leave();
 		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
-		psy_audio_song_deallocate(oldsong);
+		psy_audio_song_deallocate(oldsong);		
 	}
 }
 
@@ -1076,6 +1089,7 @@ void workspace_load_configuration(Workspace* self)
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
 	workspace_updatemetronome(self);
+	workspace_updateseqedit(self);
 	workspace_postload_driverconfigurations(self);
 }
 

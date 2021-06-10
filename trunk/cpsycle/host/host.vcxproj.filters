@@ -565,6 +565,9 @@
     <ClCompile Include="src\renderprogressview.c">
       <Filter>file</Filter>
     </ClCompile>
+    <ClCompile Include="src\seqeditconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -1048,6 +1051,9 @@
     </ClInclude>
     <ClInclude Include="src\renderprogressview.h">
       <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -162,6 +162,12 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	psy_audio_sequencer_init_qsortarray(self);
 	psy_table_init(&self->lastmachine);
 	psy_signal_init(&self->signal_newline);	
+	psy_audio_patternevent_init(&self->metronome_event);	
+	self->metronome_event.note = 48;
+	self->metronome_event.mach = 0x3F;
+	psy_audio_patternevent_init(&self->sample_event);
+	self->sample_event.note = 48;
+	self->sample_event.mach = 0x3E;
 	psy_audio_sequencer_reset_common(self, sequence, machines,
 		(psy_dsp_big_hz_t)44100.0);
 	psy_audio_sequencertime_init(&self->seqtime);
@@ -222,13 +228,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->extraticks = 0;
 	self->tpb = 24;
 	self->playtrack = psy_INDEX_INVALID;
-	psy_audio_sequencermetronome_init(&self->metronome);
-	psy_audio_patternevent_init(&self->metronome_event);
-	self->metronome_event.note = 48;
-	self->metronome_event.mach = 0x3F;
-	psy_audio_patternevent_init(&self->sample_event);
-	self->sample_event.note = 48;
-	self->sample_event.mach = 0x3E;
+	psy_audio_sequencermetronome_init(&self->metronome);		
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -690,9 +690,10 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 
 	while (work) {
 		psy_List* p;
+		uintptr_t t;
 
 		work = FALSE;		
-		for (p = self->currtracks; p != NULL; psy_list_next(&p)) {
+		for (p = self->currtracks, t = 0; p != NULL; p = p->next, ++t) {
 			psy_audio_SequencerTrack* track;
 			psy_dsp_big_beat_t offset;
 
@@ -726,7 +727,7 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 						seqsampleentry = (psy_audio_SequenceSampleEntry*)seqentry;
 						entry = psy_audio_patternentry_allocinit();
 						entry->bpm = self->seqtime.bpm;
-						entry->track = METRONOME_TRACK;
+						entry->track = t;
 						entry->delta = seqentry->offset - self->seqtime.position;						
 						ev = psy_audio_patternentry_front(entry);
 						*ev = self->sample_event;						
