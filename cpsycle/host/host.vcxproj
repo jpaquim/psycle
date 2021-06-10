@@ -400,6 +400,7 @@
     <ClCompile Include="src\samplesview.c" />
     <ClCompile Include="src\scrollzoom.c" />
     <ClCompile Include="src\searchfield.c" />
+    <ClCompile Include="src\seqeditconfig.c" />
     <ClCompile Include="src\seqeditor.c" />
     <ClCompile Include="src\sequencebuttons.c" />
     <ClCompile Include="src\sequencehostcmds.c" />
@@ -569,6 +570,7 @@
     <ClInclude Include="src\samplesview.h" />
     <ClInclude Include="src\scrollzoom.h" />
     <ClInclude Include="src\searchfield.h" />
+    <ClInclude Include="src\seqeditconfig.h" />
     <ClInclude Include="src\seqeditor.h" />
     <ClInclude Include="src\sequencebuttons.h" />
     <ClInclude Include="src\sequencehostcmds.h" />

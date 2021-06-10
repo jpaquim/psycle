@@ -366,6 +366,7 @@ typedef struct SeqEditToolBar {
 	psy_ui_Label desctype;
 	psy_ui_ComboBox inserttype;
 	psy_ui_Button assignsample;
+	psy_ui_Button configure;
 	psy_ui_Button expand;
 	/* references */	
 	SeqEditState* state;

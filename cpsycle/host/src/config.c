@@ -49,11 +49,12 @@ void psycleconfig_dispose(PsycleConfig* self)
 	machineviewconfig_dispose(&self->macview);
 	machineparamconfig_dispose(&self->macparam);
 	metronomeconfig_dispose(&self->metronome);
+	seqeditconfig_dispose(&self->seqedit);
 	keyboardmiscconfig_dispose(&self->misc);
 	midiviewconfig_dispose(&self->midi);
 	compatconfig_dispose(&self->compat);
 	predefsconfig_dispose(&self->predefs);
-	psy_property_dispose(&self->config);
+	psy_property_dispose(&self->config);	
 }
 
 void psycleconfig_definelanguage(PsycleConfig* self)
@@ -81,6 +82,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	compatconfig_init(&self->compat, &self->config, machinefactory);
 	predefsconfig_init(&self->predefs, &self->config);
 	metronomeconfig_init(&self->metronome, &self->config);
+	seqeditconfig_init(&self->seqedit, &self->config);
 }
 
 void psycleconfig_makeglobal(PsycleConfig* self)
@@ -243,6 +245,10 @@ void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 		compatconfig_onchanged(&self->compat, property);
 	} else if (predefsconfig_hasproperty(&self->predefs, property)) {
 		predefsconfig_onchanged(&self->predefs, property);
+	} else if (metronomeconfig_hasproperty(&self->metronome, property)) {
+		metronomeconfig_onchanged(&self->metronome, property);
+	} else if (seqeditconfig_hasproperty(&self->seqedit, property)) {
+		seqeditconfig_onchanged(&self->seqedit, property);
 	}
 }
 
@@ -260,6 +266,8 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	midiviewconfig_onchanged(&self->midi, &self->config);
 	compatconfig_onchanged(&self->compat, &self->config);
 	predefsconfig_onchanged(&self->predefs, &self->config);
+	metronomeconfig_onchanged(&self->metronome, &self->config);
+	seqeditconfig_onchanged(&self->seqedit, &self->config);
 }
 
 void psycleconfig_notify_skinchanged(PsycleConfig* self, psy_Property* property)
