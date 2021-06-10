@@ -22,47 +22,46 @@ extern "C" {
 #endif
 
 typedef enum {
-	SEQEDITORDRAG_NONE = 0,
-	SEQEDITORDRAG_MOVE = 1,
-	SEQEDITORDRAG_REORDER = 2
-} SeqEditorDragMode;
+	SEQEDIT_DRAGTYPE_UNDEFINED = 0,
+	SEQEDIT_DRAGTYPE_MOVE      = 1,
+	SEQEDIT_DRAGTYPE_REORDER   = 2
+} SeqEditorDragType;
+
+typedef enum {	
+	SEQEDIT_DRAG_NONE    = 0,
+	SEQEDIT_DRAG_START   = 1,
+	SEQEDIT_DRAG_MOVE    = 2,
+	SEQEDIT_DRAG_REORDER = 3,
+	SEQEDIT_DRAG_LENGTH  = 4,
+	SEQEDIT_DRAG_REMOVE  = 5
+} SeqEditorDragStatus;
 
 typedef enum {
 	SEQEDTCMD_NONE = 0,
 	SEQEDTCMD_NEWTRACK = 1,
-	SEQEDTCMD_DELTRACK = 2,
-	SEQEDTCMD_INSERTPATTERN = 3,
-	SEQEDTCMD_REORDER = 4,
-	SEQEDTCMD_REMOVEPATTERN = 5,
+	SEQEDTCMD_DELTRACK = 2	
 } SeqEdtCmd;
 
 typedef struct SeqEditState {
 	psy_Signal signal_cursorchanged;
 	double pxperbeat;
 	psy_ui_Value lineheight;
-	psy_ui_Value defaultlineheight;
-	psy_ui_Value linemargin;
+	psy_ui_Value defaultlineheight;	
 	psy_dsp_big_beat_t cursorposition;
+	bool updatecursorposition;
 	bool drawcursor;
 	bool cursoractive;
-	bool drawpatternevents;
-	SeqEdtCmd cmd;
-	psy_audio_OrderIndex cmdseqpos;
+	bool drawpatternevents;	
 	bool showpatternnames;
 	/* drag */
-	SeqEditorDragMode dragmode;
-	bool dragstatus;
-	bool dragstart;
-	bool draglength;	
-	psy_dsp_big_beat_t dragstartoffset;
-	bool updatecursorposition;
-	psy_ui_RealPoint dragpt;
-	psy_audio_OrderIndex dragseqpos;
-	psy_audio_SequenceEntryType inserttype;
-	psy_audio_PatternSelection selection;
-	psy_audio_PatternCursor selectionbase;
+	SeqEditorDragType dragtype;
+	SeqEditorDragStatus dragstatus;	
+	psy_dsp_big_beat_t dragposition;
+	psy_audio_OrderIndex dragseqpos;	
+	SeqEdtCmd cmd;
+	psy_audio_SequenceEntryType inserttype;	
 	/* references */
-	psy_audio_SequenceEntry* sequenceentry;
+	psy_audio_SequenceEntry* seqentry;
 	Workspace* workspace;	
 	SequenceCmds* cmds;
 	psy_ui_Edit* edit;	
@@ -73,12 +72,17 @@ void seqeditstate_dispose(SeqEditState*);
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
 
+INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
+{	
+	return workspace_sequenceeditposition(self->workspace);
+}
+
 INLINE double seqeditstate_beattopx(const SeqEditState* self,
 	psy_dsp_big_beat_t position)
 {
 	assert(self);
 
-	return position * self->pxperbeat;
+	return floor(position * self->pxperbeat);
 }
 
 INLINE psy_dsp_big_beat_t seqeditstate_pxtobeat(const
@@ -101,10 +105,9 @@ INLINE void seqeditstate_setcursor(SeqEditState* self,
 psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState*,
 	psy_dsp_big_beat_t position);
 
-INLINE psy_ui_Value seqeditstate_scrollstep_height(const SeqEditState* self,
-	const psy_ui_TextMetric* tm)
+INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
 {
-	return psy_ui_add_values(self->lineheight, self->linemargin, tm, NULL);
+	return self->lineheight;
 }
 
 /* SeqEditRuler */
@@ -183,6 +186,8 @@ typedef struct SeqEditEntry {
 void seqeditentry_init(SeqEditEntry*,
 	psy_ui_Component* parent, psy_ui_Component* view, psy_audio_SequenceEntry*,
 	psy_audio_OrderIndex seqpos, SeqEditState*);
+
+void seqeditentry_startdrag(SeqEditEntry*, psy_ui_MouseEvent*);
 
 INLINE psy_audio_OrderIndex seqeditentry_seqpos(const SeqEditEntry* self)
 {
@@ -282,16 +287,11 @@ struct SeqEditorTracks;
 
 typedef struct SeqEditTrack {
 	psy_ui_Component component;	
-	psy_audio_SequenceTrack* currtrack;
-	psy_audio_SequenceTrackNode* currtracknode;
+	psy_audio_SequenceTrack* currtrack;	
 	uintptr_t trackindex;
-	SeqEditState* state;
-	bool dragstarting;	
-	double dragstartpx;	
-	psy_audio_SequenceEntryNode* drag_sequenceitem_node;	
+	SeqEditState* state;	
 	Workspace* workspace;	
 	psy_ui_Component* view;
-	SeqEditorLine* dragline;
 	psy_List* entries;
 } SeqEditTrack;
 
@@ -365,6 +365,7 @@ typedef struct SeqEditToolBar {
 	psy_ui_Button reorder;
 	psy_ui_Label desctype;
 	psy_ui_ComboBox inserttype;
+	psy_ui_Button assignsample;
 	psy_ui_Button expand;
 	/* references */	
 	SeqEditState* state;
@@ -373,7 +374,7 @@ typedef struct SeqEditToolBar {
 void seqedittoolbar_init(SeqEditToolBar*, psy_ui_Component* parent,
 	SeqEditState*);
 
-void seqeditortoolbar_setdragmode(SeqEditToolBar*, SeqEditorDragMode);
+void seqeditortoolbar_setdragtype(SeqEditToolBar*, SeqEditorDragType);
 
 INLINE psy_ui_Component* seqedittoolbar_base(SeqEditToolBar* self)
 {

@@ -78,7 +78,8 @@ typedef struct PatternView {
 	bool trackmodeswingfill;	
 	int baselfheight;
 	uintptr_t display;
-	bool aligndisplay;	
+	bool aligndisplay;
+	bool updatealign;
 	/* references */
 	Workspace* workspace;
 } PatternView;

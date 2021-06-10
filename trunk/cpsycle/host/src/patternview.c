@@ -139,7 +139,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->pgupdownstep = 4;
 	self->trackmodeswingfill = TRUE;
 	self->display = PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;
-	self->aligndisplay = TRUE;	
+	self->aligndisplay = TRUE;
+	self->updatealign = FALSE;
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
@@ -411,6 +412,7 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 			workspace_selectpatterndisplay(self->workspace, display);
 		}
 	}
+	psy_ui_component_align_full(psy_ui_notebook_activepage(&self->notebook));
 }
 
 void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
@@ -492,12 +494,13 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 void patternview_onsequencechanged(PatternView* self,
 	psy_audio_Sequence* sender)
 {
-	psy_ui_component_updateoverflow(&self->left.linenumbers.component);
+	self->updatealign = TRUE;	
+	/*psy_ui_component_updateoverflow(&self->left.linenumbers.component);
 	psy_ui_component_updateoverflow(&self->tracker.component);
 	psy_ui_component_updateoverflow(&self->pianoroll.grid.component);
 	psy_ui_component_invalidate(&self->tracker.component);
 	psy_ui_component_invalidate(&self->pianoroll.grid.component);
-	psy_ui_component_invalidate(&self->left.linenumbers.component);
+	psy_ui_component_invalidate(&self->left.linenumbers.component);*/
 }
 
 void patternview_onpatternpropertiesapply(PatternView* self,
@@ -986,6 +989,17 @@ void patternview_ontimer(PatternView* self, uintptr_t timerid)
 			(trackergridstate_pattern(&self->gridstate))
 			? trackergridstate_pattern(&self->gridstate)->opcount
 			: 0;
+	}
+	if (self->updatealign) {
+		psy_ui_component_align(&self->left.linenumberpane);
+		if (psy_ui_component_visible(&self->trackerscroller.component)) {
+			psy_ui_component_align(&self->trackerscroller.pane);
+		}
+		if (psy_ui_component_visible(&self->pianoroll.scroller.pane)) {
+			psy_ui_component_align(&self->pianoroll.scroller.pane);
+			psy_ui_component_align(&self->pianoroll.top);
+		}
+		self->updatealign = FALSE;
 	}
 }
 
