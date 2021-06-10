@@ -184,6 +184,8 @@ psy_audio_SequenceEntry* psy_audio_static_sequencesampleentry_clone(
 }
 static psy_dsp_big_beat_t psy_audio_static_sequencesampleentry_length(
 	const psy_audio_SequenceSampleEntry*);
+static void psy_audio_sequencesampleentry_dispose(
+	psy_audio_SequenceSampleEntry*);
 /* vtable */
 static psy_audio_SequenceEntryVtable psy_audio_sequencesampleentry_vtable;
 static bool psy_audio_sequencesampleentry_vtable_initialized = FALSE;
@@ -193,6 +195,9 @@ static void psy_audio_sequencesampleentry_vtable_init(
 {
 	if (!psy_audio_sequencesampleentry_vtable_initialized) {
 		psy_audio_sequencesampleentry_vtable = *(self->entry.vtable);
+		psy_audio_sequencesampleentry_vtable.dispose =
+			(psy_audio_fp_sequenceentry_dispose)
+			psy_audio_sequencesampleentry_dispose;
 		psy_audio_sequencesampleentry_vtable.clone =
 			(psy_audio_fp_sequenceentry_clone)
 			psy_audio_static_sequencesampleentry_clone;
@@ -209,9 +214,15 @@ void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry* self,
 {
 	psy_audio_sequenceentry_init_all(&self->entry,
 		psy_audio_SEQUENCEENTRY_SAMPLE, offset);
-	psy_audio_sequencesampleentry_vtable_init(self);	
+	psy_audio_sequencesampleentry_vtable_init(self);
+	psy_signal_init(&self->signal_samplechanged);
 	self->samples = NULL;
 	self->sampleindex = sampleindex;	
+}
+
+void psy_audio_sequencesampleentry_dispose(psy_audio_SequenceSampleEntry* self)
+{
+	psy_signal_dispose(&self->signal_samplechanged);
 }
 
 psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_alloc(void)
@@ -243,12 +254,9 @@ psy_dsp_big_beat_t psy_audio_static_sequencesampleentry_length(
 		if (sample) {
 			psy_dsp_big_beat_t beatspersample;
 
-			beatspersample =
-				(125.0 * 1.0) /
-				(44100.0 * 60.0);
+			beatspersample = (125.0 * 1.0) / (44100.0 * 60.0);
 			return psy_audio_sample_numframes(sample) *
-				beatspersample *
-				44100.0 / sample->samplerate;
+				beatspersample * 44100.0 / sample->samplerate;
 		}
 	}
 	return 16.0;

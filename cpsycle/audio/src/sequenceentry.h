@@ -170,6 +170,8 @@ INLINE psy_audio_Pattern* psy_audio_sequencepatternentry_pattern(const
 typedef struct psy_audio_SequenceSampleEntry {
 	/* inherits*/
 	psy_audio_SequenceEntry entry;
+	/* signals*/
+	psy_Signal signal_samplechanged;
 	/* internal */
 	/* playorder value (the pattern to be played) */	
 	psy_audio_Samples* samples;
@@ -193,6 +195,7 @@ INLINE void psy_audio_sequencesampleentry_setsampleslot(
 	assert(self);
 
 	self->sampleindex = index;
+	psy_signal_emit(&self->signal_samplechanged, self, 0);
 }
 
 INLINE psy_audio_SampleIndex psy_audio_sequencesampleentry_samplesindex(const

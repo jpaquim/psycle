@@ -149,10 +149,8 @@ void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 void playbar_onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	psy_audio_sequencer_setplaymode(&self->player->sequencer,
-		playbar_comboboxplaymode(self));
-	if (!psy_audio_player_playing(self->player)) {
-		playbar_startplay(self);
-	}
+		playbar_comboboxplaymode(self));	
+	playbar_startplay(self);	
 }
 
 psy_audio_SequencerPlayMode playbar_comboboxplaymode(const PlayBar* self)
