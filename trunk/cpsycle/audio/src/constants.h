@@ -56,7 +56,7 @@
 /* Version for the metadata information (author, comments..) */
 #define CURRENT_FILE_VERSION_INFO	0x00000000
 /* Version for the song data information (BPM, number of tracks..) */
-#define CURRENT_FILE_VERSION_SNGI	0x00000002
+#define CURRENT_FILE_VERSION_SNGI	0x00000003
 /* Version for the sequence data (playback order) */
 #define CURRENT_FILE_VERSION_SEQD	0x00000002
 /* Version for the pattern data */

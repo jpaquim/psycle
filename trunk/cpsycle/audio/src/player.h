@@ -166,6 +166,15 @@ INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(
 	return (psy_dsp_big_beat_t)self->sequencer.extraticks;
 }
 
+INLINE void psy_audio_player_setsamplerindex(psy_audio_Player* self,
+	uintptr_t samplerindex)
+{
+	self->sequencer.sample_event.mach = (uint8_t)samplerindex;
+	if (self->song) {
+		self->song->properties.samplerindex = samplerindex;
+	}
+}
+
 /* \returns lines per beat */
 void psy_audio_player_setlpb(psy_audio_Player*, uintptr_t lpb);
 

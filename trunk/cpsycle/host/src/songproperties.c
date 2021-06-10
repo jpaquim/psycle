@@ -33,6 +33,8 @@ static void songpropertiesview_ontpbeditchange(SongPropertiesView*,
 	IntEdit* sender);
 static void songpropertiesview_onetpbeditchange(SongPropertiesView*,
 	IntEdit* sender);
+static void songpropertiesview_onsamplerindexchange(SongPropertiesView*,
+	IntEdit* sender);
 static void songpropertiesview_oncommentschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_onkeydown(SongPropertiesView*,
@@ -95,7 +97,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		songpropertiesview_oneditreject);
 	psy_signal_connect(&self->edit_credits.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
-	// Speed
+	/* SamplerIndex */
+	intedit_init_connect(&self->samplerindex, &self->component, "Sampler Index",
+		0x3E, 0, 0x3F, self, songpropertiesview_onsamplerindexchange);
+	/* Speed */
 	psy_ui_component_init(&self->speed, &self->component, NULL);
 	psy_ui_component_setdefaultalign(&self->speed, psy_ui_ALIGN_LEFT,
 		margin);
@@ -116,8 +121,8 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	intedit_init_connect(&self->tpb, &self->speedbar, "songproperties.tpb",
 		1, 1, 99, self, songpropertiesview_ontpbeditchange);
 	intedit_init_connect(&self->etpb, &self->speedbar, "songproperties.etpb",
-		0, 0, 99, self, songpropertiesview_onetpbeditchange);
-	// Real Speed
+		0, 0, 99, self, songpropertiesview_onetpbeditchange);	
+	/* Real Speed */
 	psy_ui_label_init_text(&self->realtempo_desc, &self->speedbar, NULL,
 		"songproperties.realtempo");
 	psy_ui_label_init(&self->realtempo, &self->speedbar, NULL);
@@ -125,8 +130,9 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->realticksperbeat_desc, &self->speedbar, NULL,
 		"songproperties.realtpb");	
 	psy_ui_label_init(&self->realticksperbeat, &self->speedbar, NULL);
-	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);		
-	// Comments
+	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);			
+	psy_ui_component_setmargin(&self->samplerindex.component, margin);
+	/* Comments */
 	psy_ui_component_init(&self->comments, &self->component, NULL);
 	psy_ui_component_setstyletypes(&self->comments,
 		STYLE_SONGPROPERTIES_COMMENTS,
@@ -135,7 +141,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		"songproperties.extcomments");
 	psy_ui_label_settextalignment(&self->label_comments,
 		psy_ui_ALIGNMENT_LEFT);
-	//psy_ui_label_setcharnumber(&self->label_comments, charnum);
+	/* psy_ui_label_setcharnumber(&self->label_comments, charnum); */
 	psy_ui_component_setalign(&self->label_comments.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->label_comments.component, margin);
 	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
@@ -174,6 +180,8 @@ void songpropertiesview_read(SongPropertiesView* self)
 		intedit_setvalue(&self->tpb, (int)self->song->properties.tpb);
 		intedit_setvalue(&self->etpb, (int)
 			self->song->properties.extraticksperbeat);
+		intedit_setvalue(&self->samplerindex, (int)
+			self->song->properties.samplerindex);
 		songpropertiesview_updaterealspeed(self);
 	}
 }
@@ -291,6 +299,13 @@ void songpropertiesview_onetpbeditchange(SongPropertiesView* self,
 	psy_audio_player_setextraticksperbeat(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
+}
+
+void songpropertiesview_onsamplerindexchange(SongPropertiesView* self,
+	IntEdit* sender)
+{
+	psy_audio_player_setsamplerindex(workspace_player(self->workspace), (uintptr_t)
+		intedit_value(sender));	
 }
 
 void songpropertiesview_oncommentschanged(SongPropertiesView* self,

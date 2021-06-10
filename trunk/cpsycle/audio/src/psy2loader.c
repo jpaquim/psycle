@@ -279,7 +279,8 @@ int psy2loader_read_header(PSY2Loader* self)
 		linesperbeat,
 		24, /* extraticksperbeat */
 		0,
-		beatspermin);
+		beatspermin,
+		0x3E);
 	psy_audio_song_setproperties(self->song, &songproperties);
 	psy_audio_songproperties_dispose(&songproperties);
 	return PSY_OK;

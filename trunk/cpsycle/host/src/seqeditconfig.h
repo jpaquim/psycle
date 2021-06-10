@@ -30,7 +30,6 @@ typedef struct SeqEditConfig {
 void seqeditconfig_init(SeqEditConfig*, psy_Property* parent);
 void seqeditconfig_dispose(SeqEditConfig*);
 
-bool seqeditconfig_showmetronomebar(const SeqEditConfig*);
 uintptr_t seqeditconfig_machine(const SeqEditConfig*);
 
 bool seqeditconfig_onchanged(SeqEditConfig*, psy_Property*);
