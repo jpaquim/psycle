@@ -568,6 +568,12 @@
     <ClCompile Include="src\seqeditconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\seqeditorentry.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditorstate.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -1054,6 +1060,12 @@
     </ClInclude>
     <ClInclude Include="src\seqeditconfig.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditorentry.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditorstate.h">
+      <Filter>sequence</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

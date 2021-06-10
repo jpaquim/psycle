@@ -402,6 +402,8 @@
     <ClCompile Include="src\searchfield.c" />
     <ClCompile Include="src\seqeditconfig.c" />
     <ClCompile Include="src\seqeditor.c" />
+    <ClCompile Include="src\seqeditorentry.c" />
+    <ClCompile Include="src\seqeditorstate.c" />
     <ClCompile Include="src\sequencebuttons.c" />
     <ClCompile Include="src\sequencehostcmds.c" />
     <ClCompile Include="src\sequencerbar.c" />
@@ -572,6 +574,8 @@
     <ClInclude Include="src\searchfield.h" />
     <ClInclude Include="src\seqeditconfig.h" />
     <ClInclude Include="src\seqeditor.h" />
+    <ClInclude Include="src\seqeditorentry.h" />
+    <ClInclude Include="src\seqeditorstate.h" />
     <ClInclude Include="src\sequencebuttons.h" />
     <ClInclude Include="src\sequencehostcmds.h" />
     <ClInclude Include="src\sequencerbar.h" />
