@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+
+<p class="head1">The Sequence Bar Editor</p>
+<p>The Sequence Bar Editor is an extension to the Sequence Editor and a new
+way where you can organise your patterns, and is located on the bottom side of
+the Machines window (F2). The song progresses from left to right, and each line
+represents a sequence track holding the sequence entries, that can contain a pattern,
+a marker or a sample bar. The number on the left is the position number in the track,
+and on the right there is either the pattern number or the sampleindex and optional the
+samplerindex if assigned different than the song property one. You may use the same
+indexes of pattern or samples in more than one position.</p>
+
+<table cellspacing="20">
+	<tr valign="top">
+	<td><img src="sequencerbaredit.png" border="0" alt="" /></td>
+	</tr>
+	<tr valign="top">
+		<td><b>Move</b> &ndash; Sets the drag mode of a bar to move. Moving means
+		adding an offset to the playlist order position to change the position
+		<p><b>Reorder</b> &ndash; Sets the drag mode of a bar to reorder. Dragging in
+		a track will swap the bars.</p>
+		<p><b>Insert</b> &ndash; Sets the insert type of a new entry. A new entry is inserted
+		with a double click. Insert types are Marker, Pattern or Sample</p>
+		<p><b>Assign Sample</b> &ndash; The Assign Sample Button appears if a sample entry
+		is selected. The selected Entry will be assigned with the Sample Index selected in the
+		Samples Mainview. The Sample will be played with the song sampler machine defined
+		in Song Properties. To override the song default check Define Sampler and set an machine index
+		for the selected entry</p>
+		<p><b>New Track</b> &ndash; New Track adds a new sequence track to the Editor at the
+		end of the list. Dragging the track index changes the track position.</p>
+		<p><a name="del"> <b>Del</b></a> (<i>Edit &gt; Sequence Delete</i>)
+		&ndash; Right Click on an entry deletes the entry from the track</i></b>
+		</p>
+		<p><b>Length</b> (<i>Edit &gt; Sequence Length</i>) &ndash; Moving the mouse over the
+		end of a bar let a resize cursor appear. At that point the length can be changed of
+		a pattern and marker entry. The length of a sample entry can't be changed.
+		<p><b>Select</b> (<i>Edit &gt; Sequence Select</i>) &ndash; Pressing the first time
+		on an entry selects it as editposition. Clicking the second time in a pattern entry will</p>
+		go in the patternview to the line of the bar sequence offset. Double click on a Marker Entry
+		will let you edit the marker label</p>
+		<p><b>Resize</b> (<i>Edit &gt; Sequence Resize</i>) &ndash; Moving the mouse over the
+		bottom of a track description let you resize the track height.</p>
+		
+		</td>
+	</tr>	
+	
+</table>
+
+</body>
+</html>
