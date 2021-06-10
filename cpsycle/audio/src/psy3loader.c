@@ -577,6 +577,7 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 				psy_audio_SequenceSampleEntry* sample;
 				int32_t slot;
 				int32_t subslot;				
+				uint32_t samplerindex;
 
 				sample = (psy_audio_SequenceSampleEntry*)seqentry;
 				if (status = psyfile_read(self->fp, &slot, sizeof(int32_t))) {
@@ -586,7 +587,16 @@ int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 				if (status = psyfile_read(self->fp, &subslot, sizeof(int32_t))) {
 					return status;
 				}
-				sample->sampleindex.subslot = subslot;				
+				sample->sampleindex.subslot = subslot;
+				sample->sampleindex.slot = slot;
+				if (status = psyfile_read(self->fp, &samplerindex, sizeof(uint32_t))) {
+					return status;
+				}
+				if (samplerindex == UINT32_MAX) {
+					sample->samplerindex = psy_INDEX_INVALID;
+				} else {
+					sample->samplerindex = samplerindex;
+				}
 				++c;
 			}
 		}

@@ -119,12 +119,7 @@ typedef struct psy_audio_SequencePatternEntry {
 	/* internal */
 	/* playorder value (the pattern to be played) */
 	uintptr_t patternslot;
-	psy_audio_Patterns* patterns;
-	/*
-	** sample index to be played if psycle will support audio patterns
-	** not used now
-	*/
-	psy_audio_SampleIndex sampleindex;	
+	psy_audio_Patterns* patterns;			
 } psy_audio_SequencePatternEntry;
 
 void psy_audio_sequencepatternentry_init(psy_audio_SequencePatternEntry*,
@@ -174,12 +169,10 @@ typedef struct psy_audio_SequenceSampleEntry {
 	psy_Signal signal_samplechanged;
 	/* internal */
 	/* playorder value (the pattern to be played) */	
-	psy_audio_Samples* samples;
-	/*
-	** sample index to be played if psycle will support audio patterns
-	** not used now
-	*/	
+	psy_audio_Samples* samples;	
 	psy_audio_SampleIndex sampleindex;	
+	/* psy_INDEX_INVALID = song sampler index */
+	uintptr_t samplerindex;
 } psy_audio_SequenceSampleEntry;
 
 void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry*,
@@ -204,6 +197,23 @@ INLINE psy_audio_SampleIndex psy_audio_sequencesampleentry_samplesindex(const
 	assert(self);
 
 	return self->sampleindex;
+}
+
+INLINE uintptr_t psy_audio_sequencesampleentry_samplerindex(const
+	psy_audio_SequenceSampleEntry* self)
+{
+	assert(self);
+
+	return self->samplerindex;
+}
+
+INLINE void psy_audio_sequencesampleentry_setsamplerindex(
+	psy_audio_SequenceSampleEntry* self, uintptr_t index)
+{
+	assert(self);
+
+	self->samplerindex = index;
+	psy_signal_emit(&self->signal_samplechanged, self, 0);
 }
 
 INLINE psy_audio_Sample* psy_audio_sequencesampleentry_sample(const

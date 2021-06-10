@@ -482,7 +482,17 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 				sample = (psy_audio_SequenceSampleEntry*)seqentry;
 				if (status = psyfile_write_int32(self->fp, (int32_t)sample->sampleindex.subslot)) {
 					return status;
-				}				
+				}
+				sample = (psy_audio_SequenceSampleEntry*)seqentry;
+				if (sample->samplerindex == psy_INDEX_INVALID) {
+					if (status = psyfile_write_uint32(self->fp, (uint32_t)UINT32_MAX)) {
+						return status;
+					}
+				} else {
+					if (status = psyfile_write_uint32(self->fp, (uint32_t)sample->samplerindex)) {
+						return status;
+					}
+				}
 			}
 		}
 		if (status = psyfile_write_float(self->fp, (float)track->height)) {

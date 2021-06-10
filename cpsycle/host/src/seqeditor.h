@@ -7,6 +7,7 @@
 #define SEQEDITOR_H
 
 /* host */
+#include "intedit.h"
 #include "sequencehostcmds.h"
 #include "sequencetrackbox.h"
 #include "wavebox.h"
@@ -14,6 +15,7 @@
 #include "zoombox.h"
 /* ui */
 #include <uicombobox.h>
+#include <uicheckbox.h>
 #include <uiedit.h>
 #include <uiscroller.h>
 
@@ -366,6 +368,8 @@ typedef struct SeqEditToolBar {
 	psy_ui_Label desctype;
 	psy_ui_ComboBox inserttype;
 	psy_ui_Button assignsample;
+	psy_ui_CheckBox usesamplerindex;	
+	IntEdit samplerindex;
 	psy_ui_Button configure;
 	psy_ui_Button expand;
 	/* references */	

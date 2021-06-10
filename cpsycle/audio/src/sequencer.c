@@ -730,7 +730,10 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 						entry->track = t;
 						entry->delta = seqentry->offset - self->seqtime.position;						
 						ev = psy_audio_patternentry_front(entry);
-						*ev = self->sample_event;						
+						*ev = self->sample_event;
+						if (seqsampleentry->samplerindex != psy_INDEX_INVALID) {
+							ev->mach = (uint8_t)seqsampleentry->samplerindex;
+						}
 						ev->note = psy_audio_NOTECOMMANDS_PLAY_SMPL;
 						ev->inst = (uint8_t)seqsampleentry->sampleindex.slot;
 						ev->parameter = (uint8_t)seqsampleentry->sampleindex.subslot;

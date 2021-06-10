@@ -17,7 +17,7 @@
 /* platform */
 #include "../../detail/portable.h"
 
-#define DEFAULT_PXPERBEAT 5.0
+#define DEFAULT_PXPERBEAT 10.0
 
 void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	psy_ui_Edit* edit)
@@ -753,6 +753,7 @@ void seqeditpatternentry_onmousedoubleclick(SeqEditPatternEntry* self,
 
 /* SeqEditSampleEntry */
 /* prototypes */
+static void seqeditsampleentry_ondestroy(SeqEditSampleEntry*);
 static void seqeditsampleentry_onsamplechanged(SeqEditSampleEntry*,
 	psy_audio_SequenceSampleEntry* sender);
 static void seqeditsampleentry_onmousedown(SeqEditSampleEntry*,
@@ -771,6 +772,9 @@ static void seqeditsampleentry_vtable_init(
 {
 	if (!seqeditsampleentry_vtable_initialized) {
 		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);
+		seqeditsampleentry_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			seqeditsampleentry_ondestroy;
 		seqeditsampleentry_vtable.onalign =
 			(psy_ui_fp_component_onalign)
 			seqeditsampleentry_onalign;
@@ -810,6 +814,12 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 	seqeditsampleentry_updatesample(self);
 	seqeditsampleentry_updatetext(self);
 	psy_signal_connect(&self->sequenceentry->signal_samplechanged, self,
+		seqeditsampleentry_onsamplechanged);
+}
+
+void seqeditsampleentry_ondestroy(SeqEditSampleEntry* self)
+{
+	psy_signal_disconnect(&self->sequenceentry->signal_samplechanged, self,
 		seqeditsampleentry_onsamplechanged);
 }
 
@@ -863,12 +873,23 @@ void seqeditsampleentry_updatetext(SeqEditSampleEntry* self)
 	if (self->sequenceentry) {
 		char text[64];
 		
-		psy_snprintf(text, 64, "%02X:%02X:%02X",
-			(int)self->seqeditorentry.seqpos.order,
-			(int)psy_audio_sequencesampleentry_samplesindex(
-				self->sequenceentry).slot,
-			(int)psy_audio_sequencesampleentry_samplesindex(
-				self->sequenceentry).subslot);
+		if (self->sequenceentry->samplerindex == psy_INDEX_INVALID) {
+			psy_snprintf(text, 64, "%02X:%02X:%02X",
+				(int)self->seqeditorentry.seqpos.order,
+				(int)psy_audio_sequencesampleentry_samplesindex(
+					self->sequenceentry).slot,
+				(int)psy_audio_sequencesampleentry_samplesindex(
+					self->sequenceentry).subslot);
+		} else {
+			psy_snprintf(text, 64, "%02X:%02X:%02X:%02X",
+				(int)self->seqeditorentry.seqpos.order,
+				(int)psy_audio_sequencesampleentry_samplesindex(
+					self->sequenceentry).slot,
+				(int)psy_audio_sequencesampleentry_samplesindex(
+					self->sequenceentry).subslot,
+				(int)psy_audio_sequencesampleentry_samplerindex(
+					self->sequenceentry));
+		}
 		psy_ui_label_settext(&self->label, text);
 	}
 }
@@ -2034,8 +2055,14 @@ static void seqeditortoolbar_onsequenceselectiondeselect(SeqEditToolBar*,
 	psy_audio_SequenceSelection*, psy_audio_OrderIndex*);
 static void seqeditortoolbar_onassignsample(SeqEditToolBar*,
 	psy_ui_Component* sender);
+static void seqeditortoolbar_onusesamplerindex(SeqEditToolBar*,
+	psy_ui_Component* sender);
+static void seqeditortoolbar_onsamplerindexchange(SeqEditToolBar*,
+	IntEdit* sender);
 static void seqeditortoolbar_onconfigure(SeqEditToolBar*,
 	psy_ui_Button* sender);
+static psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(
+	SeqEditToolBar* self);
 
 /* implenentation */
 void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
@@ -2080,6 +2107,13 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_button_init_text_connect(&self->assignsample, &self->component,
 		NULL, "Assign Sample", self, seqeditortoolbar_onassignsample);
 	psy_ui_component_hide(psy_ui_button_base(&self->assignsample));
+	psy_ui_checkbox_init_text(&self->usesamplerindex, &self->component, "Define Sampler");
+	psy_signal_connect(&self->usesamplerindex.signal_clicked, self,
+		seqeditortoolbar_onusesamplerindex);
+	intedit_init_connect(&self->samplerindex, &self->component, "Index",
+		0x3E, 0, 0x3F, self, seqeditortoolbar_onsamplerindexchange);	
+	psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
+	psy_ui_component_hide(intedit_base(&self->samplerindex));	
 	psy_signal_connect(&self->inserttype.signal_selchanged, self,
 		seqedittoolbar_oninserttypeselchange);
 	psy_signal_connect(&self->move.signal_clicked, self,
@@ -2144,16 +2178,32 @@ void seqeditortoolbar_onsequenceselectionselect(SeqEditToolBar* self,
 	psy_audio_SequenceSelection* selection, psy_audio_OrderIndex* index)
 {
 	psy_audio_SequenceEntry* entry;
+	psy_audio_SequenceSampleEntry* sampleentry;
 
 	entry = psy_audio_sequence_entry(seqeditstate_sequence(self->state),
 		*index);
 	if (entry && entry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
 		if (!psy_ui_component_visible(psy_ui_button_base(&self->assignsample))) {
-			psy_ui_component_show_align(psy_ui_button_base(&self->assignsample));
+			psy_ui_component_show(psy_ui_checkbox_base(&self->usesamplerindex));
+			psy_ui_component_show(intedit_base(&self->samplerindex));			
+			psy_ui_component_show_align(psy_ui_button_base(&self->assignsample));			
 		}
 	} else {
 		if (psy_ui_component_visible(psy_ui_button_base(&self->assignsample))) {
-			psy_ui_component_hide_align(psy_ui_button_base(&self->assignsample));		
+			psy_ui_component_hide(psy_ui_checkbox_base(&self->usesamplerindex));
+			psy_ui_component_hide(intedit_base(&self->samplerindex));			
+			psy_ui_component_hide_align(psy_ui_button_base(&self->assignsample));
+		}
+	}	
+	sampleentry = seqeditortoolbar_sampleentry(self);
+	if (sampleentry) {
+		if (sampleentry->samplerindex != psy_INDEX_INVALID) {
+			psy_ui_checkbox_check(&self->usesamplerindex);
+			intedit_setvalue(&self->samplerindex,
+				(int)sampleentry->samplerindex);			
+			psy_ui_component_show_align(intedit_base(&self->samplerindex));
+		} else {			
+			psy_ui_component_hide_align(intedit_base(&self->samplerindex));
 		}
 	}
 }
@@ -2167,28 +2217,57 @@ void seqeditortoolbar_onsequenceselectiondeselect(SeqEditToolBar* self,
 void seqeditortoolbar_onassignsample(SeqEditToolBar* self,
 	psy_ui_Component* sender)
 {
-	psy_audio_Sequence* sequence;
+	psy_audio_SequenceSampleEntry* sampleentry;
 
-	sequence = seqeditstate_sequence(self->state);
-	if (sequence) {
+	sampleentry = seqeditortoolbar_sampleentry(self);
+	if (sampleentry) {
 		psy_audio_OrderIndex editposition;
 		psy_audio_SampleIndex sampleindex;
-		psy_audio_SequenceEntry* seqentry;
+		psy_audio_SequenceTrack* track;
+		psy_audio_Sequence* sequence;
 
+		sequence = seqeditstate_sequence(self->state);
 		sampleindex = self->state->cmds->workspace->song->samples.selected;
 		editposition = seqeditstate_editposition(self->state);
-		seqentry = psy_audio_sequence_entry(sequence, editposition);
-		if (seqentry && seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
-			psy_audio_SequenceTrack* track;
-			psy_audio_SequenceSampleEntry* sampleentry;
-
-			sampleentry = (psy_audio_SequenceSampleEntry*)seqentry;
-			psy_audio_sequencesampleentry_setsampleslot(sampleentry, sampleindex);
-			track = psy_audio_sequence_track_at(sequence, editposition.track);
-			if (track) {
-				psy_audio_sequence_reposition_track(sequence, track);
-			}
+		psy_audio_sequencesampleentry_setsampleslot(sampleentry, sampleindex);
+		track = psy_audio_sequence_track_at(sequence, editposition.track);
+		if (track) {
+			psy_audio_sequence_reposition_track(sequence, track);
 		}
+	}	
+}
+
+void seqeditortoolbar_onusesamplerindex(SeqEditToolBar* self,
+	psy_ui_Component* sender)
+{
+	psy_audio_SequenceSampleEntry* sampleentry;
+
+	sampleentry = seqeditortoolbar_sampleentry(self);
+	if (sampleentry) {
+		if (!psy_ui_checkbox_checked(&self->usesamplerindex)) {			
+			psy_audio_sequencesampleentry_setsamplerindex(sampleentry,
+				psy_INDEX_INVALID);
+		} else {
+			psy_audio_sequencesampleentry_setsamplerindex(sampleentry,
+				intedit_value(&self->samplerindex));			
+		}
+		if (sampleentry->samplerindex != psy_INDEX_INVALID) {						
+			psy_ui_component_show_align(intedit_base(&self->samplerindex));			
+		} else {			
+			psy_ui_component_hide_align(intedit_base(&self->samplerindex));
+		}
+	}
+}
+
+void seqeditortoolbar_onsamplerindexchange(SeqEditToolBar* self,
+	IntEdit* sender)
+{
+	psy_audio_SequenceSampleEntry* sampleentry;
+
+	sampleentry = seqeditortoolbar_sampleentry(self);
+	if (sampleentry && (psy_ui_checkbox_checked(&self->usesamplerindex))) {
+		psy_audio_sequencesampleentry_setsamplerindex(sampleentry,
+			intedit_value(&self->samplerindex));
 	}
 }
 
@@ -2197,6 +2276,22 @@ void seqeditortoolbar_onconfigure(SeqEditToolBar* self, psy_ui_Button* sender)
 	workspace_selectview(self->state->workspace, VIEW_ID_SETTINGSVIEW, 11, 0);
 }
 
+psy_audio_SequenceSampleEntry* seqeditortoolbar_sampleentry(SeqEditToolBar* self)
+{
+	psy_audio_Sequence* sequence;
+
+	sequence = seqeditstate_sequence(self->state);
+	if (sequence) {		
+		psy_audio_SequenceEntry* seqentry;
+				
+		seqentry = psy_audio_sequence_entry(sequence,
+			seqeditstate_editposition(self->state));
+		if (seqentry && seqentry->type == psy_audio_SEQUENCEENTRY_SAMPLE) {
+			return (psy_audio_SequenceSampleEntry*)seqentry;			 
+		}
+	}
+	return NULL;
+}
 
 /* SeqEditor */
 /* prototypes */
