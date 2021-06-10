@@ -108,7 +108,7 @@ void spectrumanalyzer_initbackground(SpectrumAnalyzer* self)
 
 void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 {		
-	psy_ui_drawfullbitmap(g, &self->bg, psy_ui_realpoint_zero());	
+	psy_ui_drawfullbitmap(g, &self->bg, psy_ui_realpoint_zero());
 	spectrumanalyzer_drawspectrum(self, g);	
 }
 

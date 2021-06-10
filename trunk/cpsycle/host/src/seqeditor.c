@@ -761,6 +761,7 @@ static void seqeditsampleentry_onmousedoubleclick(SeqEditSampleEntry*,
 	psy_ui_MouseEvent*);
 static void seqeditsampleentry_edit(SeqEditSampleEntry*);
 static void seqeditsampleentry_updatetext(SeqEditSampleEntry*);
+static void seqeditsampleentry_onalign(SeqEditSampleEntry*);
 /* vtable */
 static psy_ui_ComponentVtable seqeditsampleentry_vtable;
 static bool seqeditsampleentry_vtable_initialized = FALSE;
@@ -769,7 +770,10 @@ static void seqeditsampleentry_vtable_init(
 	SeqEditSampleEntry* self)
 {
 	if (!seqeditsampleentry_vtable_initialized) {
-		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);		
+		seqeditsampleentry_vtable = *(seqeditsampleentry_base(self)->vtable);
+		seqeditsampleentry_vtable.onalign =
+			(psy_ui_fp_component_onalign)
+			seqeditsampleentry_onalign;
 		seqeditsampleentry_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditsampleentry_onmousedown;
@@ -791,12 +795,13 @@ void seqeditsampleentry_init(SeqEditSampleEntry* self,
 	seqeditentry_init(&self->seqeditorentry, parent, view,
 		&entry->entry, seqpos, state);
 	seqeditsampleentry_vtable_init(self);
-	self->seqeditorentry.preventresize = TRUE;
+	self->seqeditorentry.preventresize = TRUE;	
 	psy_ui_component_setstyletypes(seqeditsampleentry_base(self),
 		STYLE_SEQEDT_SAMPLE, STYLE_SEQEDT_SAMPLE_HOVER,
 		STYLE_SEQEDT_SAMPLE_SELECTED, psy_INDEX_INVALID);
 	wavebox_init(&self->wavebox, seqeditsampleentry_base(self), state->workspace);
 	wavebox_setnowavetext(&self->wavebox, "");
+	psy_ui_component_buffer(&self->wavebox.component);
 	psy_ui_component_setalign(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init(&self->label, seqeditsampleentry_base(self), NULL);
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
@@ -832,20 +837,23 @@ SeqEditSampleEntry* seqeditsampleentry_allocinit(
 void seqeditsampleentry_updatesample(SeqEditSampleEntry* self)
 {	
 	psy_audio_Sample* sample;
-
+	
 	sequencecmds_update(self->seqeditorentry.state->cmds);
-	if (self->seqeditorentry.state->cmds->sequence && self->seqeditorentry.state->cmds->sequence->samples) {
-		sample = psy_audio_samples_at(self->seqeditorentry.state->cmds->sequence->samples,
+	if (self->seqeditorentry.state->cmds->sequence &&
+			self->seqeditorentry.state->cmds->sequence->samples) {
+		sample = psy_audio_samples_at(
+			self->seqeditorentry.state->cmds->sequence->samples,
 			self->sequenceentry->sampleindex);
 	} else {
 		sample = NULL;
 	}
+	psy_ui_component_clearbuffer(&self->wavebox.component);
 	wavebox_setsample(&self->wavebox, sample, 0);
 }
 
 void seqeditsampleentry_onsamplechanged(SeqEditSampleEntry* self,
 	psy_audio_SequenceSampleEntry* sender)
-{
+{	
 	seqeditsampleentry_updatesample(self);
 	seqeditsampleentry_updatetext(self);
 }
@@ -887,6 +895,19 @@ void seqeditsampleentry_onmousedoubleclick(SeqEditSampleEntry* self,
 	psy_ui_MouseEvent* ev)
 {	
 	psy_ui_mouseevent_stop_propagation(ev);
+}
+
+void seqeditsampleentry_onalign(SeqEditSampleEntry* self)
+{
+	psy_ui_RealSize bpmsize;
+	psy_ui_RealSize waveboxsize;
+
+	bpmsize = psy_ui_bitmap_size(&self->wavebox.component.bufferbitmap);
+	waveboxsize = psy_ui_component_scrollsize_px(&self->wavebox.component);
+	if (waveboxsize.width != bpmsize.width ||
+			waveboxsize.height != bpmsize.height) {	
+		psy_ui_component_clearbuffer(&self->wavebox.component);
+	}
 }
 
 /* SeqEditMarkerEntry */

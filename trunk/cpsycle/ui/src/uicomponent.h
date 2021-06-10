@@ -225,6 +225,8 @@ typedef struct psy_ui_Component {
 	uintptr_t bgframetimer;
 	uintptr_t currbgframe;
 	bool dropdown;
+	psy_ui_Bitmap bufferbitmap;
+	bool drawtobuffer;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -947,6 +949,9 @@ void psy_ui_component_mouseup(psy_ui_Component*, psy_ui_MouseEvent*,
 	psy_List* viewcomponents);
 void psy_ui_component_mousewheel(psy_ui_Component*, psy_ui_MouseEvent*,
 	intptr_t delta);
+
+void psy_ui_component_buffer(psy_ui_Component*);
+void psy_ui_component_clearbuffer(psy_ui_Component*);
 
 #ifdef __cplusplus
 }
