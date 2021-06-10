@@ -33,6 +33,7 @@ typedef struct SongPropertiesView {
 	IntEdit lpb;
 	IntEdit tpb;
 	IntEdit etpb;	
+	IntEdit samplerindex;
 	psy_ui_Label realtempo_desc;
 	psy_ui_Label realticksperbeat_desc;
 	psy_ui_Label realtempo;
@@ -40,7 +41,7 @@ typedef struct SongPropertiesView {
 	// text
 	psy_ui_Component comments;
 	psy_ui_Label label_comments;
-	psy_ui_Edit edit_comments;
+	psy_ui_Edit edit_comments;	
 	// references
 	psy_audio_Song* song;
 	Workspace* workspace;

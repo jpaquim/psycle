@@ -359,6 +359,11 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 			psy_audio_song_extraticksperbeat(self->song))) {
 		return status;
 	}
+	// sampler index
+	if (status = psyfile_write_uint32(self->fp, (uint32_t)
+			psy_audio_song_samplerindex(self->song))) {
+		return status;
+	}
 	if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
 		return status;
 	}

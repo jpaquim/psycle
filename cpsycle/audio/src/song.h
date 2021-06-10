@@ -34,6 +34,7 @@ typedef struct psy_audio_SongProperties {
 	char* credits;
 	char* comments;
 	psy_dsp_big_beat_t bpm;
+	uintptr_t samplerindex;
 } psy_audio_SongProperties;
 
 void psy_audio_songproperties_init(psy_audio_SongProperties*, const char* title,
@@ -44,7 +45,8 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties*, const char* ti
 	uintptr_t lpb,
 	int tpb,
 	int extraticksperbeat,
-	psy_dsp_big_beat_t bpm);
+	psy_dsp_big_beat_t bpm,
+	uintptr_t samplerindex);
 void psy_audio_songproperties_copy(psy_audio_SongProperties*, const psy_audio_SongProperties* other);
 void psy_audio_songproperties_dispose(psy_audio_SongProperties*);
 
@@ -167,6 +169,22 @@ INLINE const char* psy_audio_songproperties_comments(const
 	assert(self);
 
 	return self->comments;
+}
+
+INLINE uintptr_t psy_audio_songproperties_samplerindex(const
+	psy_audio_SongProperties* self)
+{
+	assert(self);
+
+	return self->samplerindex;
+}
+
+INLINE void psy_audio_songproperties_setsamplerindex(
+	psy_audio_SongProperties* self, uintptr_t samplerindex)
+{
+	assert(self);
+
+	self->samplerindex = samplerindex;
 }
 
 /* psy_audio_Song */
@@ -377,6 +395,22 @@ INLINE void psy_audio_song_setextraticksperbeat(psy_audio_Song* self,
 
 	psy_audio_songproperties_setextraticksperbeat(&self->properties,
 		extraticksperbeat);
+}
+/* return song sampler machine index */
+INLINE uintptr_t psy_audio_song_samplerindex(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_samplerindex(&self->properties);
+}
+
+/* set song sampler machine index */
+INLINE void psy_audio_song_setsamplerindex(psy_audio_Song* self,
+	uintptr_t samplerindex)
+{
+	assert(self);
+
+	psy_audio_songproperties_setsamplerindex(&self->properties, samplerindex);
 }
 
 #ifdef __cplusplus

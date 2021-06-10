@@ -582,6 +582,8 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_player_setoctave(self, psy_audio_song_octave(self->song));
 		self->sequencer.metronome.precount = restoreprecount;
 		self->sequencer.metronome.active = restoremetronomeactive;
+		psy_audio_player_setsamplerindex(self,
+			psy_audio_song_samplerindex(self->song));
 	}
 }
 

@@ -70,7 +70,6 @@ static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
 static void workspace_setapptheme(Workspace*, psy_Property*);
 static void workspace_updatemetronome(Workspace*);
-static void workspace_updateseqedit(Workspace*);
 /* Machinecallback */
 static psy_audio_MachineFactory* onmachinefactory(Workspace*);
 static bool onmachinefileselectload(Workspace*, char filter[],
@@ -177,7 +176,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_plugincatcher_setdirectories(&self->plugincatcher,
 		psycleconfig_directories(&self->config)->directories);
 	psy_audio_plugincatcher_load(&self->plugincatcher);
-	self->song = psy_audio_song_allocinit(&self->machinefactory);
+	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
 	psy_audio_sequenceselection_init(&self->sequenceselection);
 	psy_audio_sequencepaste_init(&self->sequencepaste);
@@ -376,7 +375,7 @@ void workspace_initaudio(Workspace* self)
 	audioconfig_driverconfigure_section(&self->config.audio);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input, 0);
-	workspace_updatemetronome(self);
+	workspace_updatemetronome(self);	
 }
 
 void workspace_updatemetronome(Workspace* self)
@@ -386,12 +385,6 @@ void workspace_updatemetronome(Workspace* self)
 	self->player.sequencer.metronome_event.mach =
 		(uint8_t)
 		metronomeconfig_machine(&self->config.metronome);
-}
-
-void workspace_updateseqedit(Workspace* self)
-{	
-	self->player.sequencer.sample_event.mach =
-		(uint8_t)seqeditconfig_machine(&self->config.seqedit);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -589,9 +582,6 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property,
 			} else if (psy_property_insection(property,
 				self->config.metronome.metronome)) {
 				workspace_updatemetronome(self);
-			} else if (psy_property_insection(property,
-				self->config.seqedit.seqedit)) {
-				workspace_updateseqedit(self);				
 			} else {
 				worked = FALSE;
 			}
@@ -773,7 +763,7 @@ void workspace_newsong(Workspace* self)
 
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_strreset(&self->filename, "Untitled.psy");
-	workspace_setsong(self, song, WORKSPACE_NEWSONG);
+	workspace_setsong(self, song, WORKSPACE_NEWSONG);	
 	workspace_selectview(self, VIEW_ID_MACHINEVIEW, 0, 0);
 }
 
@@ -802,7 +792,7 @@ void workspace_loadsong(Workspace* self, const char* filename, bool play)
 
 	assert(self);
 
-	song = psy_audio_song_allocinit(&self->machinefactory);
+	song = psy_audio_song_allocinit(&self->machinefactory);	
 	if (song) {
 		psy_audio_SongFile songfile;
 
@@ -875,9 +865,12 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 			song);
 		self->song = song;
 		psy_audio_player_setsong(&self->player, self->song);
-		workspace_updatemetronome(self);
-		workspace_updateseqedit(self);
+		workspace_updatemetronome(self);		
 		psy_audio_exclusivelock_leave();
+		if (flag == WORKSPACE_NEWSONG) {
+			psy_audio_player_setsamplerindex(&self->player,
+				seqeditconfig_machine(&self->config.seqedit));
+		}
 		psy_signal_emit(&self->signal_songchanged, self, 2, flag, self->song);
 		psy_signal_emit(&self->song->patterns.signal_numsongtrackschanged, self,
 			1, self->song->patterns.songtracks);
@@ -1088,9 +1081,10 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_dispose(&path);
 	self->patternsinglemode =
 		patternviewconfig_issinglepatterndisplay(&self->config.patview);
-	workspace_updatemetronome(self);
-	workspace_updateseqedit(self);
+	workspace_updatemetronome(self);	
 	workspace_postload_driverconfigurations(self);
+	psy_audio_player_setsamplerindex(&self->player,
+		seqeditconfig_machine(&self->config.seqedit));
 }
 
 void workspace_startaudio(Workspace* self)

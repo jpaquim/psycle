@@ -34,15 +34,17 @@ void psy_audio_songproperties_init(psy_audio_SongProperties* self,
 	self->octave = 4;
 	self->tpb = 24;
 	self->extraticksperbeat = 0;
+	self->samplerindex = 0x3E;
 }
 
-void psy_audio_songproperties_init_all(psy_audio_SongProperties* self, const char* title,
-	const char* credits, const char* comments,	
+void psy_audio_songproperties_init_all(psy_audio_SongProperties* self,
+	const char* title, const char* credits, const char* comments,
 	int octave,
 	uintptr_t lpb,
 	int tpb,
 	int extraticksperbeat,
-	psy_dsp_big_beat_t bpm)
+	psy_dsp_big_beat_t bpm,
+	uintptr_t sampler)
 {
 	assert(self);
 
@@ -54,6 +56,7 @@ void psy_audio_songproperties_init_all(psy_audio_SongProperties* self, const cha
 	self->tpb = tpb;
 	self->extraticksperbeat = extraticksperbeat;
 	self->bpm = bpm;
+	self->samplerindex = sampler;
 }
 
 void psy_audio_songproperties_dispose(psy_audio_SongProperties* self)

@@ -293,6 +293,7 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 {		
 	int32_t i;
 	int32_t temp;
+	uint32_t utemp;
 	int32_t songtracks;
 	int32_t tracksoloed;
 	int32_t seqbus;
@@ -434,6 +435,12 @@ int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader* self)
 	} else {
 		psy_audio_song_settpb(self->song, 24);
 		psy_audio_song_setextraticksperbeat(self->song, 0);
+	}
+	if (self->fp->currchunk.version >= 3) {
+		if (status = psyfile_read(self->fp, &utemp, sizeof utemp)) {
+			return status;
+		}
+		psy_audio_song_setsamplerindex(self->song, utemp);
 	}
 /*	if (fullopen) */
 	{
