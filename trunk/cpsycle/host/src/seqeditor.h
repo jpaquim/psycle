@@ -10,6 +10,8 @@
 #include "intedit.h"
 #include "sequencehostcmds.h"
 #include "sequencetrackbox.h"
+#include "seqeditorentry.h"
+#include "seqeditorstate.h"
 #include "wavebox.h"
 #include "workspace.h"
 #include "zoombox.h"
@@ -23,94 +25,6 @@
 extern "C" {
 #endif
 
-typedef enum {
-	SEQEDIT_DRAGTYPE_UNDEFINED = 0,
-	SEQEDIT_DRAGTYPE_MOVE      = 1,
-	SEQEDIT_DRAGTYPE_REORDER   = 2
-} SeqEditorDragType;
-
-typedef enum {	
-	SEQEDIT_DRAG_NONE    = 0,
-	SEQEDIT_DRAG_START   = 1,
-	SEQEDIT_DRAG_MOVE    = 2,
-	SEQEDIT_DRAG_REORDER = 3,
-	SEQEDIT_DRAG_LENGTH  = 4,
-	SEQEDIT_DRAG_REMOVE  = 5
-} SeqEditorDragStatus;
-
-typedef enum {
-	SEQEDTCMD_NONE = 0,
-	SEQEDTCMD_NEWTRACK = 1,
-	SEQEDTCMD_DELTRACK = 2	
-} SeqEdtCmd;
-
-typedef struct SeqEditState {
-	psy_Signal signal_cursorchanged;
-	double pxperbeat;
-	psy_ui_Value lineheight;
-	psy_ui_Value defaultlineheight;	
-	psy_dsp_big_beat_t cursorposition;
-	bool updatecursorposition;
-	bool drawcursor;
-	bool cursoractive;
-	bool drawpatternevents;	
-	bool showpatternnames;
-	/* drag */
-	SeqEditorDragType dragtype;
-	SeqEditorDragStatus dragstatus;	
-	psy_dsp_big_beat_t dragposition;
-	psy_audio_OrderIndex dragseqpos;	
-	SeqEdtCmd cmd;
-	psy_audio_SequenceEntryType inserttype;	
-	/* references */
-	psy_audio_SequenceEntry* seqentry;
-	Workspace* workspace;	
-	SequenceCmds* cmds;
-	psy_ui_Edit* edit;	
-} SeqEditState;
-
-void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Edit*);
-void seqeditstate_dispose(SeqEditState*);
-
-psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
-
-INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
-{	
-	return workspace_sequenceeditposition(self->workspace);
-}
-
-INLINE double seqeditstate_beattopx(const SeqEditState* self,
-	psy_dsp_big_beat_t position)
-{
-	assert(self);
-
-	return floor(position * self->pxperbeat);
-}
-
-INLINE psy_dsp_big_beat_t seqeditstate_pxtobeat(const
-	SeqEditState* self, double px)
-{
-	assert(self);
-
-	return px / (psy_dsp_big_beat_t)self->pxperbeat;
-}
-
-INLINE void seqeditstate_setcursor(SeqEditState* self,
-	psy_dsp_big_beat_t cursorposition)
-{
-	assert(self);
-
-	self->cursorposition = cursorposition;
-	psy_signal_emit(&self->signal_cursorchanged, self, 0);
-}
-
-psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState*,
-	psy_dsp_big_beat_t position);
-
-INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
-{
-	return self->lineheight;
-}
 
 /* SeqEditRuler */
 typedef struct SeqEditRuler {
@@ -172,116 +86,6 @@ SeqEditorPlayline* seqeditorplayline_allocinit(
 	SeqEditState*);
 void seqeditorplayline_update(SeqEditorPlayline*);
 
-
-/* SeqEditEntry */
-typedef struct SeqEditEntry {
-	/* inherits */
-	psy_ui_Component component;
-	/* internal */
-	psy_audio_OrderIndex seqpos;
-	bool preventresize;
-	/* references */
-	SeqEditState* state;
-	psy_audio_SequenceEntry* seqentry;	
-} SeqEditEntry;
-
-void seqeditentry_init(SeqEditEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view, psy_audio_SequenceEntry*,
-	psy_audio_OrderIndex seqpos, SeqEditState*);
-
-void seqeditentry_startdrag(SeqEditEntry*, psy_ui_MouseEvent*);
-
-INLINE psy_audio_OrderIndex seqeditentry_seqpos(const SeqEditEntry* self)
-{
-	return self->seqpos;
-}
-
-/* SeqEditPatternEntry */
-typedef struct SeqEditPatternEntry {
-	/* inherits */
-	SeqEditEntry seqeditorentry;
-	/* internal */	
-	/* references */	
-	psy_audio_SequencePatternEntry* sequenceentry;	
-} SeqEditPatternEntry;
-
-void seqeditpatternentry_init(SeqEditPatternEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequencePatternEntry*, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-SeqEditPatternEntry* seqeditpatternentry_alloc(void);
-SeqEditPatternEntry* seqeditpatternentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequencePatternEntry* entry, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-INLINE psy_ui_Component* seqeditpatternentry_base(SeqEditPatternEntry* self)
-{
-	assert(self);
-
-	return &self->seqeditorentry.component;
-}
-
-/* SeqEditMarkerEntry */
-typedef struct SeqEditMarkerEntry {
-	/* inherits */
-	SeqEditEntry seqeditorentry;
-	/* internal */
-	/* references */	
-	psy_audio_SequenceMarkerEntry* sequenceentry;	
-	bool preventedit;
-} SeqEditMarkerEntry;
-
-void seqeditmarkerentry_init(SeqEditMarkerEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceMarkerEntry*, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-SeqEditMarkerEntry* seqeditmarkerentry_alloc(void);
-SeqEditMarkerEntry* seqeditmarkerentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceMarkerEntry* entry, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-INLINE psy_ui_Component* seqeditmarkerentry_base(SeqEditMarkerEntry* self)
-{
-	assert(self);
-
-	return &self->seqeditorentry.component;
-}
-
-/* SeqEditSampleEntry */
-typedef struct SeqEditSampleEntry {
-	/* inherits */
-	SeqEditEntry seqeditorentry;
-	/* internal */
-	WaveBox wavebox;
-	psy_ui_Label label;
-	/* references */		
-	psy_audio_SequenceSampleEntry* sequenceentry;	
-	bool preventedit;
-} SeqEditSampleEntry;
-
-void seqeditsampleentry_init(SeqEditSampleEntry*,
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceSampleEntry*, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-SeqEditSampleEntry* seqeditsampleentry_alloc(void);
-SeqEditSampleEntry* seqeditsampleentry_allocinit(
-	psy_ui_Component* parent, psy_ui_Component* view,
-	psy_audio_SequenceSampleEntry* entry, psy_audio_OrderIndex seqpos,
-	SeqEditState*);
-
-void seqeditsampleentry_updatesample(SeqEditSampleEntry*);
-
-INLINE psy_ui_Component* seqeditsampleentry_base(SeqEditSampleEntry* self)
-{
-	assert(self);
-
-	return &self->seqeditorentry.component;
-}
 
 /* SeqEditTrack */
 struct SeqEditTrack;

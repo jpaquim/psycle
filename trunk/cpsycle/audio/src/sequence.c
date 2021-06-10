@@ -1287,6 +1287,7 @@ void psy_audio_sequence_remove_selection(psy_audio_Sequence* self,
 		track = NULL;
 		currnode = psy_audio_sequence_node(self, *orderindex, &track);
 		if (currnode && track) {
+			psy_audio_sequenceentry_dispose(currnode->entry);			
 			free(currnode->entry);
 			currnode->entry = NULL;
 		}		
@@ -1300,9 +1301,9 @@ void psy_audio_sequence_remove_selection(psy_audio_Sequence* self,
 		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
 		p = track->entries;		
 		while (p != NULL) {
-			psy_audio_SequencePatternEntry* entry;
+			psy_audio_SequenceEntry* entry;
 
-			entry = (psy_audio_SequencePatternEntry*)psy_list_entry(p);
+			entry = (psy_audio_SequenceEntry*)psy_list_entry(p);
 			if (!entry) {
 				psy_audio_OrderIndex index;
 

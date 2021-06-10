@@ -215,6 +215,7 @@ void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry* self,
 		psy_audio_SEQUENCEENTRY_SAMPLE, offset);
 	psy_audio_sequencesampleentry_vtable_init(self);
 	psy_signal_init(&self->signal_samplechanged);
+	psy_signal_init(&self->signal_beforedestroy);
 	self->samples = NULL;
 	self->sampleindex = sampleindex;
 	self->samplerindex = psy_INDEX_INVALID;
@@ -222,7 +223,9 @@ void psy_audio_sequencesampleentry_init(psy_audio_SequenceSampleEntry* self,
 
 void psy_audio_sequencesampleentry_dispose(psy_audio_SequenceSampleEntry* self)
 {
+	psy_signal_emit(&self->signal_beforedestroy, self, 0);
 	psy_signal_dispose(&self->signal_samplechanged);
+	psy_signal_dispose(&self->signal_beforedestroy);
 }
 
 psy_audio_SequenceSampleEntry* psy_audio_sequencesampleentry_alloc(void)

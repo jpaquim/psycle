@@ -167,6 +167,7 @@ typedef struct psy_audio_SequenceSampleEntry {
 	psy_audio_SequenceEntry entry;
 	/* signals*/
 	psy_Signal signal_samplechanged;
+	psy_Signal signal_beforedestroy;
 	/* internal */
 	/* playorder value (the pattern to be played) */	
 	psy_audio_Samples* samples;	
