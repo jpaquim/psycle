@@ -719,6 +719,28 @@ uintptr_t view_dev_flags(const psy_ui_ComponentImp* self)
 void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 {	
 	if (self->visible) {
+
+		psy_ui_Graphics bitmap_g;
+		psy_ui_Graphics* temp_g;
+
+		temp_g = NULL;
+		if (self->component->drawtobuffer) {
+			if (psy_ui_bitmap_empty(&self->component->bufferbitmap)) {
+				psy_ui_RealSize size;
+
+				psy_ui_bitmap_dispose(&self->component->bufferbitmap);
+				size = psy_ui_component_scrollsize_px(self->component);
+				psy_ui_bitmap_init_size(&self->component->bufferbitmap, size);
+				psy_ui_graphics_init_bitmap(&bitmap_g, &self->component->bufferbitmap);
+				psy_ui_setfont(&bitmap_g, psy_ui_component_font(self->component));
+				temp_g = g;
+				g = &bitmap_g;
+			} else {
+				psy_ui_drawfullbitmap(g, &self->component->bufferbitmap,
+					psy_ui_realpoint_zero());
+				return;
+			}
+		}
 		// draw background		
 		if (self->component->backgroundmode != psy_ui_NOBACKGROUND) {			
 			psy_ui_component_drawbackground(self->component, g);
@@ -748,7 +770,15 @@ void view_dev_draw(psy_ui_ViewComponentImp* self, psy_ui_Graphics* g)
 			psy_ui_setorigin(g, origin);
 		}
 		psy_ui_component_drawchildren(self->component, g, self->viewcomponents);		
-	}
+		if (self->component->drawtobuffer && temp_g) {
+			psy_ui_graphics_dispose(&bitmap_g);
+			g = temp_g;
+			if (!psy_ui_bitmap_empty(&self->component->bufferbitmap)) {
+				psy_ui_drawfullbitmap(g, &self->component->bufferbitmap,
+					psy_ui_realpoint_zero());
+			}
+		}
+	}	
 }
 
 psy_List* view_dev_children(psy_ui_ViewComponentImp* self, int recursive)

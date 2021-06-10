@@ -676,6 +676,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->dropdown = FALSE;
 	self->bgframetimer = FALSE;
 	self->currbgframe = 0;	
+	psy_ui_bitmap_init(&self->bufferbitmap);
+	self->drawtobuffer = FALSE;
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolour(self->imp,
@@ -702,6 +704,7 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 		free(self->containeralign);
 		self->containeralign = NULL;
 	}
+	psy_ui_bitmap_dispose(&self->bufferbitmap);
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -2131,7 +2134,27 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 	psy_ui_RealMargin spacing;
 	psy_ui_RealPoint restoreorigin;
 	psy_ui_RealPoint origin;
+	psy_ui_Graphics bitmap_g;
+	psy_ui_Graphics* temp_g;
 
+	temp_g = NULL;
+	if (self->drawtobuffer) {
+		if (psy_ui_bitmap_empty(&self->bufferbitmap)) {
+			psy_ui_RealSize size;
+
+			psy_ui_bitmap_dispose(&self->bufferbitmap);
+			size = psy_ui_component_scrollsize_px(self);
+			psy_ui_bitmap_init_size(&self->bufferbitmap, size);
+			psy_ui_graphics_init_bitmap(&bitmap_g, &self->bufferbitmap);
+			psy_ui_setfont(&bitmap_g, psy_ui_component_font(self));
+			temp_g = g;
+			g = &bitmap_g;
+		} else {			
+			psy_ui_drawfullbitmap(g, &self->bufferbitmap,
+				psy_ui_realpoint_zero());			
+			return;
+		}
+	}	
 	/* draw background */
 	if (self->backgroundmode != psy_ui_NOBACKGROUND) {
 		psy_ui_component_drawbackground(self, g);
@@ -2166,6 +2189,13 @@ void psy_ui_component_draw(psy_ui_Component* self, psy_ui_Graphics* g,
 	psy_signal_emit(&self->signal_draw, self, 1, g);
 	psy_ui_component_drawchildren(self, g, viewcomponents);
 	psy_ui_setorigin(g, restoreorigin);
+	if (self->drawtobuffer && temp_g) {		
+		psy_ui_graphics_dispose(&bitmap_g);
+		if (!psy_ui_bitmap_empty(&self->bufferbitmap)) {
+			psy_ui_drawfullbitmap(g, &self->bufferbitmap,
+				psy_ui_realpoint_zero());
+		}
+	}
 }
 
 void psy_ui_component_drawchildren(psy_ui_Component* self, psy_ui_Graphics* g,
@@ -2431,4 +2461,15 @@ psy_ui_Component* psy_ui_component_byid(psy_ui_Component* self, uintptr_t id)
 	}
 	psy_list_free(q);
 	return rv;
+}
+
+void psy_ui_component_buffer(psy_ui_Component* self)
+{
+	self->drawtobuffer = TRUE;	
+}
+
+void psy_ui_component_clearbuffer(psy_ui_Component* self)
+{
+	psy_ui_bitmap_dispose(&self->bufferbitmap);
+	psy_ui_bitmap_init(&self->bufferbitmap);
 }
