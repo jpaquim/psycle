@@ -63,11 +63,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent,
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent, view);
-/*	psy_ui_component_setstyletypes(&self->component,
-		psy_ui_STYLE_COMBOBOX,
-		psy_ui_STYLE_COMBOBOX_HOVER,
-		psy_ui_STYLE_COMBOBOX_SELECT,
-		psy_ui_STYLE_LABEL_DISABLED); */
+	psy_ui_component_setstyletype(&self->component, psy_ui_STYLE_COMBOBOX);	
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_ui_dropdownbox_init(&self->dropdown, &self->component);
 	psy_ui_listbox_init(&self->listbox, &self->dropdown.component);

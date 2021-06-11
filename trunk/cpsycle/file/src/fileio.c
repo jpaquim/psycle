@@ -193,33 +193,27 @@ int psyfile_readstring(PsyFile* self, char* pData, uint32_t maxBytes)
 	{		
 		char c;
 		uint32_t index;
+		int status;
 
 		memset(pData, 0, maxBytes);
-		for (index = 0; index < maxBytes; index++)
-		{
-			if (psyfile_read(self, &c, sizeof(c)) == PSY_OK)
-			{
+		for (index = 0; index < maxBytes; index++) {
+			if ((status = psyfile_read(self, &c, sizeof(c))) == PSY_OK) {
 				pData[index] = c;
-				if (c == 0)
-				{
-					return 1;
+				if (c == 0) {
+					return PSY_OK;
 				}
-			}
-			else 
-			{
-				return 0;
+			} else {
+				return status;
 			}
 		}
-		do
-		{
-			if (psyfile_read(self, &c, sizeof(c)) != PSY_OK)
-			{
-				return 0;
+		do {
+			if (status = psyfile_read(self, &c, sizeof(c)) != PSY_OK) {
+				return status;
 			}
 		} while (c != 0);
-		return 1;
+		return PSY_OK;
 	}
-	return 0;	
+	return PSY_ERRFILE;	
 }
 
 FILE* psyfile_getfile(PsyFile* self)

@@ -1130,7 +1130,9 @@ int loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	for (i = 0; i < numparams; i++) {
 		char id[1024];
 
-		psyfile_readstring(songfile->file, id, 1024);
+		if (status = psyfile_readstring(songfile->file, id, 1024)) {
+			return status;
+		}
 		psy_table_insert_strhash(&ids, id, (void*)(uintptr_t)i);
 	}
 	num = self->client->numparameters_;

@@ -731,15 +731,7 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 	if (choice) {
 		psy_ui_ThemeMode theme;
 
-		switch (psy_property_item_int(choice)) {
-		case psy_ui_LIGHTTHEME:
-			theme = psy_ui_LIGHTTHEME;
-			break;
-		case psy_ui_DARKTHEME:
-		default:
-			theme = psy_ui_DARKTHEME;
-			break;
-		}
+		theme = (psy_ui_ThemeMode)(psy_property_item_int(choice));		
 		/* reset host styles */
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),

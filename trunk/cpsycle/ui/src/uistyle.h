@@ -22,7 +22,8 @@ extern "C" {
 
 typedef enum psy_ui_ThemeMode {
 	psy_ui_LIGHTTHEME = 0,
-	psy_ui_DARKTHEME  = 1
+	psy_ui_DARKTHEME  = 1,
+	psy_ui_WIN98THEME = 2
 } psy_ui_ThemeMode;
 
 typedef enum {

@@ -98,6 +98,16 @@ INLINE void psy_ui_border_setcolour(psy_ui_Border* self, psy_ui_Colour colour)
 	self->left.colour = colour;
 }
 
+INLINE void psy_ui_border_setcolours(psy_ui_Border* self, psy_ui_Colour top,
+	psy_ui_Colour right, psy_ui_Colour bottom, psy_ui_Colour left)
+{
+	psy_ui_border_init_style(self, psy_ui_BORDER_SOLID);
+	self->top.colour = top;
+	self->right.colour = right;
+	self->bottom.colour = bottom;
+	self->left.colour = left;
+}
+
 INLINE void psy_ui_border_setradius_px(psy_ui_Border* self, double radius)
 {
 	self->top.radius = self->right.radius = self->bottom.radius =
