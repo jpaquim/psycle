@@ -415,8 +415,8 @@ INLINE psy_ui_Size psy_ui_size_makereal(psy_ui_RealSize size)
 {
 	psy_ui_Size rv;
 
-	rv.width = psy_ui_value_make_ew(size.width);
-	rv.height = psy_ui_value_make_eh(size.height);
+	rv.width = psy_ui_value_make_px(size.width);
+	rv.height = psy_ui_value_make_px(size.height);
 	psy_ui_size_setroundmode(&rv, psy_ui_ROUND_FLOOR);
 	return rv;
 }

@@ -160,6 +160,9 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	} else {
 		text = self->text;
 	}		
+	if (self->component.id == 30) {
+		self = self;
+	}
 	size = psy_ui_component_size_px(psy_ui_button_base(self));
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ident = 0.0;
@@ -189,19 +192,24 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
 		psy_ui_IconDraw icondraw;
-		const psy_ui_TextMetric* tm;
-		psy_ui_RealSize buttonsize;
-
-		buttonsize = psy_ui_component_scrollsize_px(psy_ui_button_base(self));		
+		const psy_ui_TextMetric* tm;		
+		double iconident;
+		
+		if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+			psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+			iconident = 0;
+		} else {
+			iconident = 4;
+		}
 		psy_ui_icondraw_init(&icondraw, self->icon);
 		psy_ui_icondraw_draw(&icondraw, g,
 			psy_ui_button_center(self,
-				psy_ui_realpoint_make(6.0, 0.0),
-				psy_ui_realsize_make(buttonsize.width, 8.0)),
+				psy_ui_realpoint_make(iconident, 0.0),
+				psy_ui_buttonicon_size(self->icon)),
 				psy_ui_component_colour(&self->component));
 		tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 		if (psy_strlen(text) > 0) {
-			ident += tm->tmAveCharWidth * 2 + 6.0;
+			ident += iconident + tm->tmAveCharWidth * 2;
 		}
 	}
 	if (psy_strlen(text) > 0) {

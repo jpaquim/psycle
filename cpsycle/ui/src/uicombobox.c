@@ -184,6 +184,9 @@ intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox* self, uintptr_t index)
 void onpreferredsize(psy_ui_ComboBox* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
+	psy_ui_Margin spacing;
+	const psy_ui_TextMetric* tm;
+
 	assert(self);
 
 	if (self->charnumber == 0) {
@@ -196,6 +199,10 @@ void onpreferredsize(psy_ui_ComboBox* self, const psy_ui_Size* limit,
 			self->charnumber * tm->tmAveCharWidth + 40);
 	}
 	rv->height = psy_ui_value_make_eh(1.0);
+	spacing = psy_ui_component_spacing(psy_ui_combobox_base(self));
+	tm = psy_ui_component_textmetric(psy_ui_combobox_base(self));
+	rv->height = psy_ui_add_values(rv->height, psy_ui_margin_height(&spacing, tm, NULL), tm, NULL);
+	rv->width = psy_ui_add_values(rv->width, psy_ui_margin_width(&spacing, tm, NULL), tm, NULL);
 }
 
 void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
@@ -207,7 +214,7 @@ void ondraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 
 	assert(self);
 
-	size = psy_ui_component_scrollsize_px(&self->component);
+	size = psy_ui_component_size_px(&self->component);
 	varrowcenter = (size.height - 10) / 2;
 	sel = psy_ui_combobox_cursel(self);
 	if (sel != -1) {
