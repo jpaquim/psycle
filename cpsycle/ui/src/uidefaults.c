@@ -65,12 +65,8 @@ void psy_ui_defaults_loadtheme(psy_ui_Defaults* self, const char* dir, psy_ui_Th
 	} else {
 		psy_path_setname(&path, PSYCLE_LIGHTSTYLES_INI);
 	}	
-	// reset to defaults
-	if (theme == psy_ui_DARKTHEME) {
-		psy_ui_defaults_inittheme(self, psy_ui_DARKTHEME, TRUE);
-	}  else {
-		psy_ui_defaults_inittheme(self, psy_ui_LIGHTTHEME, TRUE);
-	}
+	// reset to defaults	
+	psy_ui_defaults_inittheme(self, theme, TRUE);
 	styleconfig = psy_property_clone(
 		psy_ui_styles_configuration(&self->styles));
 	if (propertiesio_load(styleconfig, &path, 0) == PSY_OK) {	

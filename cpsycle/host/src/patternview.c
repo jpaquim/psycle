@@ -1006,50 +1006,18 @@ void patternview_ontimer(PatternView* self, uintptr_t timerid)
 void patternview_updateksin(PatternView* self)
 {
 	psy_ui_component_setbackgroundcolour(&self->left.linenumbers.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->blockmenu.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_setbackgroundcolour(&self->transformpattern.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->interpolatecurveview.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->interpolatecurveview.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerscroller.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.hscroll.pane.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
-	psy_ui_component_setbackgroundcolour(&self->trackerscroller.spacer,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerscroller.hscroll.pane.component,
-		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.hscroll.less.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.hscroll.more.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));	
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.vscroll.pane.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.vscroll.less.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(
-		&self->trackerscroller.vscroll.more.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerscroller.vscroll.pane.component,
-		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->left.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->header.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setcolour(&self->left.component,
-		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->blockmenu.component,
-		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->blockmenu.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));	
 	psy_ui_component_invalidate(&self->component);
 }

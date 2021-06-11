@@ -271,7 +271,7 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 		lineheightpx);
 	startrow = (uintptr_t)floor(psy_max(0, (g->clip.top / lineheightpx)));
 	endrow = (uintptr_t)(floor(g->clip.bottom / lineheightpx + 0.5));		
-	psy_ui_settextcolour(g, psy_ui_colour_make(0));
+	psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM)->colour);
 	psy_ui_realpoint_init_all(&cp, 0.0, lineheightpx * startrow);
 	p = psy_list_at(p = self->track->entries, startrow);	
 	first = psy_audio_sequenceselection_first(
@@ -292,14 +292,11 @@ void seqviewtrack_ondraw(SeqViewTrack* self, psy_ui_Graphics* g)
 				&self->state->cmds->workspace->sequenceselection,
 				psy_audio_orderindex_make(self->trackindex, c))) {
 			if (!rowplaying) {
-				bg = psy_ui_colour_make(0x009B7800);
+				bg = psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->backgroundcolour;				
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-			}
-			if (psy_ui_componentstyle_style(&self->component.style, psy_ui_STYLESTATE_SELECT)) {
-				psy_ui_settextcolour(g, psy_ui_componentstyle_style(
-					&self->component.style, psy_ui_STYLESTATE_SELECT)->colour);
 			}			
+			psy_ui_settextcolour(g, psy_ui_style(STYLE_SEQLISTVIEW_ITEM_SELECT)->colour);
 		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_style_const(STYLE_SEQ_PROGRESS)->colour);
