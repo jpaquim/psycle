@@ -58,12 +58,14 @@ void psy_ui_scrollbarthumb_init(psy_ui_ScrollBarThumb* self,
 
 	psy_ui_component_init(&self->component, parent, view ? view : parent);
 	psy_ui_scrollbarthumb_vtableinit_init(self);
+	self->state = state;
 	psy_ui_component_setstyletypes(psy_ui_scrollbarthumb_base(self),
 		psy_ui_STYLE_SCROLLTHUMB,
 		psy_ui_STYLE_SCROLLTHUMB_HOVER,
 		psy_ui_STYLE_SCROLLTHUMB_HOVER,
-		psy_INDEX_INVALID);
-	self->state = state;
+		psy_INDEX_INVALID);	
+	psy_ui_component_setpreferredsize(psy_ui_scrollbarthumb_base(self),
+		psy_ui_size_make_em(1.0, 1.0));
 }
 
 void psy_ui_scrollbarthumb_onmousedown(psy_ui_ScrollBarThumb* self,
@@ -179,19 +181,23 @@ void psy_ui_scrollbarpane_updatethumbposition(psy_ui_ScrollBarPane* self)
 	psy_ui_RealRectangle updateposition;
 	psy_ui_RealSize size;
 	psy_ui_RealSize thumbsize;
+	const psy_ui_TextMetric* tm;
 
 	assert(self);
 
 	size = psy_ui_component_scrollsize_px(&self->component);
-	thumbsize = psy_ui_realsize_make(20.0, 20.0);
+	tm = psy_ui_component_textmetric(&self->component);
 	if (self->orientation == psy_ui_HORIZONTAL) {
+		thumbsize = psy_ui_realsize_make(tm->tmAveCharWidth * 2.5,
+			size.height);
 		newposition = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(self->screenpos, 2.0),
-			psy_ui_realsize_make(thumbsize.width, size.height - 4));
+			psy_ui_realpoint_make(self->screenpos, 0.0),
+			thumbsize);
 	} else {
+		thumbsize = psy_ui_realsize_make(size.width, tm->tmHeight);
 		newposition = psy_ui_realrectangle_make(
-			psy_ui_realpoint_make(2.0, self->screenpos),
-			psy_ui_realsize_make(size.width - 4, thumbsize.height));
+			psy_ui_realpoint_make(0.0, self->screenpos),
+			thumbsize);
 	}
 	updateposition = psy_ui_component_position(&self->thumb.component);
 	psy_ui_component_setposition(psy_ui_scrollbarthumb_base(&self->thumb),
@@ -402,6 +408,11 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 	psy_ui_button_setcharnumber(&self->less, 2);
 	psy_ui_component_setalign(psy_ui_button_base(&self->less),
 		psy_ui_ALIGN_TOP);
+	psy_ui_component_setstyletypes(psy_ui_button_base(&self->less),
+		psy_ui_STYLE_SCROLLBUTTON, psy_ui_STYLE_SCROLLBUTTON_HOVER,
+		psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype_active(psy_ui_button_base(&self->less),
+		psy_ui_STYLE_SCROLLBUTTON_ACTIVE);
 	/* More Button */
 	psy_ui_button_init_connect(&self->more, &self->component, view,
 		self, psy_ui_scrollbar_onmore);
@@ -409,6 +420,11 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 	psy_ui_button_setcharnumber(&self->more, 2);
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setstyletypes(psy_ui_button_base(&self->more),
+		psy_ui_STYLE_SCROLLBUTTON, psy_ui_STYLE_SCROLLBUTTON_HOVER,
+		psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype_active(psy_ui_button_base(&self->more),
+		psy_ui_STYLE_SCROLLBUTTON_ACTIVE);
 	/* state */
 	psy_ui_scrollbarstate_init(&self->state);
 	/* Pane */
@@ -418,9 +434,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setpreferredsize(
 		psy_ui_scrollbarpane_base(&self->pane),
-		psy_ui_size_make(
-			psy_ui_value_make_ew(2.0),
-			psy_ui_value_make_eh(1.0)));
+		psy_ui_size_make_em(2.0, 1.0));			
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->pane.signal_changed, self,
@@ -444,7 +458,8 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 			psy_ui_ALIGN_RIGHT);
 		psy_ui_component_setpreferredsize(
 			psy_ui_scrollbarpane_base(&self->pane),
-			psy_ui_size_make_em(1.0, 1.0));
+			psy_ui_size_make_em(1.0, 1.0));		
+		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
 	} else if (orientation == psy_ui_VERTICAL) {
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 		psy_ui_component_setalign(psy_ui_button_base(&self->less),
@@ -454,7 +469,8 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 			psy_ui_ALIGN_BOTTOM);
 		psy_ui_component_setpreferredsize(
 			psy_ui_scrollbarpane_base(&self->pane),
-			psy_ui_size_make_em(2.5, 1.0));
+			psy_ui_size_make_em(2.5, 1.0));	
+		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
 	}
 }
 

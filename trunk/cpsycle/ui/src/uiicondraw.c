@@ -9,6 +9,29 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
+
+psy_ui_RealSize psy_ui_buttonicon_size(psy_ui_ButtonIcon icon)
+{	
+	switch (icon) {
+	case psy_ui_ICON_NONE:
+		return psy_ui_realsize_make(4, 8);
+	case psy_ui_ICON_LESS:
+		return psy_ui_realsize_make(4, 8);
+	case psy_ui_ICON_MORE:
+		return psy_ui_realsize_make(4, 8);
+	case psy_ui_ICON_MOREMORE:
+		return psy_ui_realsize_make(4, 8);
+	case psy_ui_ICON_LESSLESS:
+		return psy_ui_realsize_make(4, 8);
+	case psy_ui_ICON_UP:
+		return psy_ui_realsize_make(8, 4);
+	case psy_ui_ICON_DOWN:
+		return psy_ui_realsize_make(8, 4);
+	default:
+		return psy_ui_realsize_make(4, 8);
+	}
+}
+
 static void makearrow(psy_ui_RealPoint*, psy_ui_ButtonIcon, double x, double y);
 static void psy_ui_icondraw_drawarrow(psy_ui_IconDraw*, psy_ui_RealPoint*,
 psy_ui_Graphics*, psy_ui_Colour);
@@ -36,7 +59,7 @@ void psy_ui_icondraw_draw(psy_ui_IconDraw* self, psy_ui_Graphics* g,
 		makearrow(arrow, psy_ui_ICON_MORE, pt.x + 2, pt.y);
 		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 	} else {
-		makearrow(arrow, self->icon, pt.x - 2, pt.y);
+		makearrow(arrow, self->icon, pt.x, pt.y);
 		psy_ui_icondraw_drawarrow(self, arrow, g, colour);
 	}
 }

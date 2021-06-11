@@ -24,6 +24,8 @@ typedef enum {
 	psy_ui_ICON_DOWN
 } psy_ui_ButtonIcon;
 
+psy_ui_RealSize psy_ui_buttonicon_size(psy_ui_ButtonIcon);
+
 typedef struct psy_ui_IconDraw {
 	/* internal */
 	psy_ui_ButtonIcon icon;		
