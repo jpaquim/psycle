@@ -109,7 +109,7 @@ void makearrow(psy_ui_RealPoint* arrow, psy_ui_ButtonIcon icon, double x, double
 		arrow[2].x = 4 + x;
 		arrow[2].y = 4 + y;
 		arrow[3] = arrow[0];
-		break;
+		break;	
 	default:
 		break;
 	}

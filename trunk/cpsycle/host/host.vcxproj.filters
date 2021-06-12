@@ -83,11 +83,11 @@
     <Filter Include="machine\machineview\wires">
       <UniqueIdentifier>{2de79152-4acf-4a9f-a8d1-c95ae4a9b934}</UniqueIdentifier>
     </Filter>
-    <Filter Include="machine\machineview\new">
-      <UniqueIdentifier>{136b5d45-0d19-464e-ba52-949c6d9e0507}</UniqueIdentifier>
-    </Filter>
     <Filter Include="machine\machineview\params">
       <UniqueIdentifier>{70aa1202-6ea4-4404-bd5d-cb96ea06c60c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\machineview\newmachine">
+      <UniqueIdentifier>{136b5d45-0d19-464e-ba52-949c6d9e0507}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -449,19 +449,19 @@
       <Filter>machine\machineview\params</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachine.c">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
     <ClCompile Include="src\pluginsview.c">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
     <ClCompile Include="src\pluginscanview.c">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachinesection.c">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
     <ClCompile Include="src\newmachinedetail.c">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClCompile>
     <ClCompile Include="src\titlebar.c">
       <Filter>uicontrols</Filter>
@@ -942,19 +942,19 @@
       <Filter>machine\machineview\params</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachine.h">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\pluginsview.h">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\pluginscanview.h">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachinesection.h">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\newmachinedetail.h">
-      <Filter>machine\machineview\new</Filter>
+      <Filter>machine\machineview\newmachine</Filter>
     </ClInclude>
     <ClInclude Include="src\titlebar.h">
       <Filter>uicontrols</Filter>

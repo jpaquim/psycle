@@ -289,6 +289,9 @@
     <ClCompile Include="src\uieventdispatch.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiwintheme.c">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uibutton.h">
@@ -533,6 +536,9 @@
     </ClInclude>
     <ClInclude Include="src\uieventdispatch.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiwintheme.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

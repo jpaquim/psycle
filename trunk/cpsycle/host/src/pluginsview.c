@@ -3,8 +3,9 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "pluginsview.h"
-// host
+/* host */
 #include "styles.h"
 // container
 #include <qsort.h>
@@ -425,7 +426,7 @@ static uintptr_t pluginenabled(const PluginsView*, psy_Property* property);
 static void pluginsview_onfilterchanged(PluginsView*, NewMachineFilter* sender);
 static void pluginsview_onsortchanged(PluginsView*, NewMachineSort* sender);
 static void pluginsview_ondragstart(PluginsView*, psy_ui_DragEvent*);
-
+/* vtbale */
 static psy_ui_ComponentVtable pluginsview_vtable;
 static psy_ui_ComponentVtable pluginsview_super_vtable;
 static bool pluginsview_vtable_initialized = FALSE;
@@ -463,10 +464,11 @@ static void pluginsview_vtable_init(PluginsView* self)
 	}
 	self->component.vtable = &pluginsview_vtable;
 }
-
+/* implementation */
 void pluginsview_init(PluginsView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
+	psy_ui_component_setstyletype(&self->component, STYLE_PLUGINVIEW);
 	pluginsview_vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);	
 	self->component.draggable = TRUE;

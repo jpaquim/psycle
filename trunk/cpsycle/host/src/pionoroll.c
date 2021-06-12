@@ -1353,7 +1353,7 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_label_init_text(&self->keys, pianobar_base(self), NULL,
 		"Keyboard");
-	zoombox_init(&self->zoombox_keyheight, &self->component);
+	zoombox_init(&self->zoombox_keyheight, &self->component);	
 	psy_ui_combobox_init(&self->keytype, pianobar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->keytype, 8);	
 	psy_ui_combobox_addtext(&self->keytype, "Keys");	
@@ -1434,6 +1434,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->left, &self->component, NULL);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	zoombox_init(&self->zoombox_beatwidth, &self->left);
+	psy_ui_component_setpreferredheight(&self->zoombox_beatwidth.component,
+		psy_ui_value_make_eh(1.0));
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
 		pianoroll_onbeatwidthchanged);
 	psy_ui_component_setalign(zoombox_base(&self->zoombox_beatwidth),

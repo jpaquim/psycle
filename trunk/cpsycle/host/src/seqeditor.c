@@ -1431,9 +1431,7 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
 		psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_setspacing(psy_ui_button_base(&self->expand),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
+		psy_ui_ALIGN_RIGHT);	
 	/* configure */
 	psy_ui_button_init_connect(&self->configure, &self->component, NULL,
 		self, seqeditortoolbar_onconfigure);

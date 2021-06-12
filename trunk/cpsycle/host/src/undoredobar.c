@@ -1,21 +1,25 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "undoredobar.h"
-// host
+/* host */
 #include "resources/resource.h"
-// std
+#include "styles.h"
+/* std */
 #include <assert.h>
 
 #define UNDOREDOBAR_UPDATERATE 100
 
-// prototypes
+/* prototypes */
 static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_ontimer(UndoRedoBar*, uintptr_t timerid);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -26,9 +30,10 @@ static psy_ui_ComponentVtable* vtable_init(UndoRedoBar* self)
 		vtable.ontimer = (psy_ui_fp_component_ontimer)undoredobar_ontimer;
 		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 	return &vtable;
 }
-// implementation
+/* implementation */
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -36,7 +41,8 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	assert(workspace);
 
 	psy_ui_component_init(undoredobar_base(self), parent, NULL);
-	psy_ui_component_setvtable(undoredobar_base(self), vtable_init(self));
+	vtable_init(self);
+	psy_ui_component_setstyletype(undoredobar_base(self), STYLE_UNDOBAR);	
 	self->workspace = workspace;
 	psy_ui_component_setdefaultalign(undoredobar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	

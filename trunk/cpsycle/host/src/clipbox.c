@@ -43,7 +43,7 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 		STYLE_CLIPBOX_SELECT);
 	self->workspace = workspace;	
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make_em(2.0, 1.5));
+		psy_ui_size_make_em(2.0, 1.0));
 	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 

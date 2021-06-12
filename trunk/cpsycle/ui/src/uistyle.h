@@ -140,6 +140,13 @@ INLINE void psy_ui_style_setspacing_em(psy_ui_Style* self,
 		psy_ui_margin_make_em(top, right, bottom, left));	
 }
 
+INLINE void psy_ui_style_setborder(psy_ui_Style* self, const psy_ui_Border* border)
+{
+	assert(border);
+
+	self->border = *border;
+}
+
 INLINE psy_ui_Margin psy_ui_style_spacing(const psy_ui_Style* self)
 {
 	return self->spacing;
