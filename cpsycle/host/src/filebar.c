@@ -6,6 +6,7 @@
 #include "filebar.h"
 // host
 #include "resources/resource.h"
+#include "styles.h"
 // audio
 #include <songio.h>
 // ui
@@ -20,13 +21,13 @@ static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
 // implementation
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
-	psy_ui_component_init(filebar_base(self), parent, NULL);
-	self->workspace = workspace;	
+	psy_ui_component_init(filebar_base(self), parent, NULL);	
+	self->workspace = workspace;
+	psy_ui_component_setstyletype(filebar_base(self), STYLE_FILEBAR);
 	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self), NULL);
-	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
-	self->recentbutton.component.id = 30;
+	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);	
 	psy_ui_label_init_text(&self->header, filebar_base(self), NULL,
 		"file.song");	
 	psy_ui_button_init_text_connect(&self->newbutton, filebar_base(self), NULL,

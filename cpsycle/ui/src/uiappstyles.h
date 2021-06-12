@@ -30,7 +30,6 @@ extern "C" {
 #define psy_ui_STYLE_TAB_HOVER           40102
 #define psy_ui_STYLE_TAB_SELECT          40103
 #define psy_ui_STYLE_TAB_LABEL           40104
-#define psy_ui_STYLE_HEADER              40120
 #define psy_ui_STYLE_SCROLLPANE          40140
 #define psy_ui_STYLE_SCROLLTHUMB         40141
 #define psy_ui_STYLE_SCROLLTHUMB_HOVER   40142

@@ -114,6 +114,9 @@ extern "C" {
 #define STYLE_TERM_BUTTON_ERROR              36490
 #define STYLE_GREET                          36500
 #define STYLE_GREET_TOP                      36501
+#define STYLE_FILEBAR                        36520
+#define STYLE_UNDOBAR                        36540
+#define STYLE_PLUGINVIEW                     36560
 
 void inithoststyles(psy_ui_Styles*, psy_ui_ThemeMode);
 

@@ -345,7 +345,7 @@ void mainframe_initbars(MainFrame* self)
 	/* row0 */
 	psy_ui_component_init(&self->toprow0, &self->toprows, NULL);
 	/* Vugroup */
-	vubar_init(&self->vubar, &self->toprow0, &self->workspace);
+	vubar_init(&self->vubar, &self->toprow0, &self->workspace);	
 	psy_ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setstyletype(&self->toprow0, STYLE_TOPROW0);
 	psy_ui_component_init(&self->toprow0_client, &self->toprow0, NULL);
@@ -357,7 +357,7 @@ void mainframe_initbars(MainFrame* self)
 		margin);
 	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
 	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
-	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);
+	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);	
 	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);
 	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
@@ -404,9 +404,7 @@ void mainframe_inittabbars(MainFrame* self)
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_loadresource(&self->maximizebtn, IDB_EXPAND_DARK,
-		psy_ui_colour_white());
-	psy_ui_component_setspacing(psy_ui_button_base(&self->maximizebtn),
-		psy_ui_margin_make_em(0.0, 0.0, 0.0, 1.0));
+		psy_ui_colour_white());	
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,

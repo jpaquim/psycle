@@ -441,6 +441,7 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent,
 		psy_ui_scrollbar_onscrollpanechanged);
 	psy_signal_connect(&self->pane.signal_clicked, self,
 		psy_ui_scrollbar_onscrollpaneclicked);
+	psy_ui_scrollbar_setorientation(self, psy_ui_VERTICAL);
 }
 
 void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
@@ -453,23 +454,35 @@ void psy_ui_scrollbar_setorientation(psy_ui_ScrollBar* self,
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
 		psy_ui_component_setalign(psy_ui_button_base(&self->less),
 			psy_ui_ALIGN_LEFT);
+		psy_ui_component_setpreferredsize(
+			&self->less.component,
+			psy_ui_size_make_em(2.7, 1.0));
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+		psy_ui_component_setpreferredsize(
+			&self->more.component,
+			psy_ui_size_make_em(2.7, 1.0));
 		psy_ui_component_setalign(psy_ui_button_base(&self->more),
 			psy_ui_ALIGN_RIGHT);
 		psy_ui_component_setpreferredsize(
 			psy_ui_scrollbarpane_base(&self->pane),
-			psy_ui_size_make_em(1.0, 1.0));		
+			psy_ui_size_make_em(2.7, 1.0));
 		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
 	} else if (orientation == psy_ui_VERTICAL) {
 		psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 		psy_ui_component_setalign(psy_ui_button_base(&self->less),
 			psy_ui_ALIGN_TOP);
+		psy_ui_component_setpreferredsize(
+			psy_ui_button_base(&self->less),
+			psy_ui_size_make_em(2.7, 1.0));
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 		psy_ui_component_setalign(psy_ui_button_base(&self->more),
 			psy_ui_ALIGN_BOTTOM);
 		psy_ui_component_setpreferredsize(
+			psy_ui_button_base(&self->more),
+			psy_ui_size_make_em(2.7, 1.0));
+		psy_ui_component_setpreferredsize(
 			psy_ui_scrollbarpane_base(&self->pane),
-			psy_ui_size_make_em(2.5, 1.0));	
+			psy_ui_size_make_em(2.7, 1.0));	
 		psy_ui_scrollbarpane_updatethumbposition(&self->pane);
 	}
 }

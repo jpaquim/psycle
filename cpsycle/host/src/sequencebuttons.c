@@ -75,6 +75,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_preventtranslation(&self->decpattern);
 	psy_ui_button_settext(&self->decpattern, "-");
 	psy_ui_component_init(&self->row1, &self->standard, view);
+	psy_ui_component_setmargin(&self->row1, rowmargin);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_component_setdefaultalign(&self->row1, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
@@ -83,12 +84,11 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_init_text(&self->cloneentry, &self->row1, view,
 		"seqview.clone");
 	psy_ui_button_init_text(&self->delentry, &self->row1, view,
-		"seqview.del");
-	psy_ui_component_init(&self->expand, &self->component, view);
-	psy_ui_component_setalign(&self->expand, psy_ui_ALIGN_TOP);
-	psy_ui_button_init(&self->more, &self->expand, view);
+		"seqview.del");	
+	psy_ui_button_init(&self->more, &self->standard, view);		
 	psy_ui_button_preventtranslation(&self->more);
-	psy_ui_button_settext(&self->more, ". . .");
+	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+	psy_ui_button_settext(&self->more, "Show More");
 	psy_ui_component_setalign(psy_ui_button_base(&self->more),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_init(&self->block, &self->component, view);
@@ -142,13 +142,11 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
 				psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.5, 0.5);
 				psy_ui_button_setlinespacing(buttons[i], 1.4);
-		} else {
-			psy_ui_margin_init_em(&spacing, 0.25, 0.25, 0.25, 0.25);
-			psy_ui_component_setspacing(psy_ui_button_base(buttons[i]),
-				spacing);
+		} else {					
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				psy_ui_STYLE_BUTTON, psy_INDEX_INVALID, psy_INDEX_INVALID,
 				psy_INDEX_INVALID);
+			psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.5, 0.5);
 		}
 	}
 	psy_signal_connect(&self->newentry.signal_clicked, self,
@@ -188,10 +186,12 @@ void sequencebuttons_onmore(SequenceButtons* self,
 {
 	if (psy_ui_component_visible(&self->block)) {
 		psy_ui_component_hide(&self->block);
-		psy_ui_button_seticon(&self->more, psy_ui_ICON_NONE);
-		psy_ui_button_settext(&self->more, ". . .");		
+		psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
+		psy_ui_button_settext(&self->more, "Show More");
+		
 	} else {
-		psy_ui_button_settext(&self->more, "-");
+		psy_ui_button_seticon(&self->more, psy_ui_ICON_LESS);
+		psy_ui_button_settext(&self->more, "Show Less");
 		psy_ui_component_show(&self->block);		
 	}
 	psy_ui_component_align_full(
