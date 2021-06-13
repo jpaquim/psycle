@@ -32,7 +32,8 @@ static int psy_audio_psy3saver_write_songinfo(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver*);
-static int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver*);
+static int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver*, int32_t index,
+	psy_audio_Pattern*);
 static int psy_audio_psy3saver_write_macd(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_insd(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_smid(psy_audio_PSY3Saver*);
@@ -511,14 +512,19 @@ int psy_audio_psy3saver_write_seqd(psy_audio_PSY3Saver* self)
 //	id = "PATD"; 
 int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 {	
-	int32_t i;
+	int status = PSY_OK;	
 	int32_t temp;
-	unsigned char shareTrackNames;
-	int status = PSY_OK;
+	unsigned char shareTrackNames;	
+	psy_TableIterator it;
+	
+	it = psy_audio_patterns_begin(&self->song->patterns);
+	for (;	!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
+		int32_t i;
 
-	for (i = 0; i < MAX_PATTERNS; ++i) {
 		// check every pattern for validity
-		if (psy_audio_sequence_patternused(&self->song->sequence, i)) {			
+		i = (int32_t)psy_tableiterator_key(&it);
+		if (psy_audio_sequence_patternused(&self->song->sequence, i) ||
+			i == psy_audio_GLOBALPATTERN) {
 			// ok save it
 			psy_audio_Pattern* pattern;
 			psy_audio_LegacyPattern pat;
@@ -576,7 +582,7 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 					psyfile_writestring(self->fp, ""); //_trackNames[i][t]);
 				}
 			}
-			if (status = psy_audio_psy3saver_write_epat(self)) {
+			if (status = psy_audio_psy3saver_write_epat(self, index, pattern)) {
 				return status;
 			}
 			if (status = psyfile_updatesize(self->fp, sizepos, NULL)) {
@@ -587,109 +593,68 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 	return status;
 }
 
-//	===================
-//	extended pattern data
-//	===================
-int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self)
+/*
+** =====================
+** extended pattern data
+** =====================
+*/
+int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self, int32_t index,
+	psy_audio_Pattern* pattern)
 {	
-	psy_TableIterator it;
-	int status = PSY_OK;
-	int c;
-
-	c = 0;
-	// count number of valid patterns
-	for (it = psy_table_begin(&self->song->patterns.slots);
-			!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-		// check every pattern for validity
-		if (psy_audio_sequence_patternused(&self->song->sequence,
-				psy_tableiterator_key(&it))) {
-			++c;
-		}
-	}
-	// write number of valid patterns;
-	if (status = psyfile_write_int32(self->fp,
-		(uint32_t) c)) {
+	int status = PSY_OK;			
+	psy_audio_PatternNode* node;						
+					
+	/* length */
+	if (status = psyfile_write_float(self->fp, (float)pattern->length)) {
 		return status;
 	}	
-	for (it = psy_table_begin(&self->song->patterns.slots);
-			!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-		// check every pattern for validity
-		if (psy_audio_sequence_patternused(&self->song->sequence,
-				psy_tableiterator_key(&it))) {			
-			psy_audio_Pattern* pattern;										
-			int32_t index;
-			psy_audio_PatternNode* node;						
-		
-			// ok save it
-			pattern = (psy_audio_Pattern*) psy_tableiterator_value(&it);
-			index = (int32_t)psy_tableiterator_key(&it);
-			if (status = psyfile_write_int32(self->fp, index)) {
-				return status;
-			}
-			// length
-			if (status = psyfile_write_float(self->fp, (float)pattern->length)) {
-				return status;
-			}
-			// num songtracks, eventually this may be variable per pattern
-			if (status = psyfile_write_int32(self->fp,
-					(uint32_t) self->song->patterns.songtracks)) {
-				return status;
-			}
-			// pattern label
-			if (status = psyfile_writestring(self->fp, psy_audio_pattern_name(pattern))) {
-				return status;
-			}
-			// num pattern entries
-			if (status = psyfile_write_int32(self->fp,
-					(int32_t)psy_list_size(pattern->events))) {
-				return status;
-			}			
-			// Write Events
-			for (node = pattern->events; node != 0; node = node->next) {
-				psy_audio_PatternEntry* entry;
-				psy_List* p;
+	/* num pattern entries */
+	if (status = psyfile_write_int32(self->fp,
+			(int32_t)psy_list_size(pattern->events))) {
+		return status;
+	}			
+	/* write events */
+	for (node = pattern->events; node != 0; node = node->next) {
+		psy_audio_PatternEntry* entry;
+		psy_List* p;
 				
-				entry = (psy_audio_PatternEntry*) node->entry;
-				if (status = psyfile_write_int32(self->fp, (int32_t)entry->track)) {
-					return status;
-				}
-				if (status = psyfile_write_float(self->fp, (float)entry->offset)) {
-					return status;
-				}				
-				// num events
-				if (status = psyfile_write_int32(self->fp,
-						(int32_t)psy_list_size(entry->events))) {
-					return status;
-				}				
-				entry = (psy_audio_PatternEntry*) node->entry;				
-				for (p = entry->events; p != NULL; psy_list_next(&p)) {
-					psy_audio_PatternEvent* ev;
-
-					ev = (psy_audio_PatternEvent*)psy_list_entry(p);
-					if (status = psyfile_write_int32(self->fp, ev->note)) {
-						return status;
-					}
-					if (status = psyfile_write_int32(self->fp, ev->inst)) {
-						return status;
-					}
-					if (status = psyfile_write_int32(self->fp, ev->mach)) {
-						return status;
-					}
-					if (status = psyfile_write_int32(self->fp, ev->vol)) {
-						return status;
-					}
-					if (status = psyfile_write_int32(self->fp, ev->cmd)) {
-						return status;
-					}
-					if (status = psyfile_write_int32(self->fp, ev->parameter)) {
-						return status;
-					}
-				}
-			}						
+		entry = (psy_audio_PatternEntry*) node->entry;
+		if (status = psyfile_write_int32(self->fp, (int32_t)entry->track)) {
+			return status;
 		}
-	}
+		if (status = psyfile_write_float(self->fp, (float)entry->offset)) {
+			return status;
+		}				
+		// num events
+		if (status = psyfile_write_int32(self->fp,
+				(int32_t)psy_list_size(entry->events))) {
+			return status;
+		}				
+		entry = (psy_audio_PatternEntry*) node->entry;				
+		for (p = entry->events; p != NULL; psy_list_next(&p)) {
+			psy_audio_PatternEvent* ev;
+
+			ev = (psy_audio_PatternEvent*)psy_list_entry(p);
+			if (status = psyfile_write_int32(self->fp, ev->note)) {
+				return status;
+			}
+			if (status = psyfile_write_int32(self->fp, ev->inst)) {
+				return status;
+			}
+			if (status = psyfile_write_int32(self->fp, ev->mach)) {
+				return status;
+			}
+			if (status = psyfile_write_int32(self->fp, ev->vol)) {
+				return status;
+			}
+			if (status = psyfile_write_int32(self->fp, ev->cmd)) {
+				return status;
+			}
+			if (status = psyfile_write_int32(self->fp, ev->parameter)) {
+				return status;
+			}
+		}
+	}	
 	return status;
 }
 

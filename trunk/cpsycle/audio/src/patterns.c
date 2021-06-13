@@ -10,6 +10,7 @@
 
 // prototypes
 static void psy_audio_patterns_init_signals(psy_audio_Patterns*);
+static void psy_audio_patterns_init_global(psy_audio_Patterns*);
 static void psy_audio_patterns_dispose_signals(psy_audio_Patterns*);
 static uintptr_t psy_audio_patterns_firstfreeslot(psy_audio_Patterns*);
 static void psy_audio_patterns_disposeslots(psy_audio_Patterns*);
@@ -26,7 +27,8 @@ void psy_audio_patterns_init(psy_audio_Patterns* self)
 	self->songtracks = 16;	
 	self->sharetracknames = 0;
 	psy_audio_trackstate_init(&self->trackstate);
-	psy_audio_patterns_init_signals(self);
+	psy_audio_patterns_init_signals(self);	
+	psy_audio_patterns_init_global(self);
 }
 
 void psy_audio_patterns_init_signals(psy_audio_Patterns* self)
@@ -36,6 +38,18 @@ void psy_audio_patterns_init_signals(psy_audio_Patterns* self)
 	psy_signal_init(&self->signal_numsongtrackschanged);
 	psy_signal_init(&self->signal_namechanged);
 	psy_signal_init(&self->signal_lengthchanged);
+}
+
+void psy_audio_patterns_init_global(psy_audio_Patterns* self)
+{
+	psy_audio_Pattern* pattern;
+	psy_audio_PatternEvent e;
+	
+	pattern = psy_audio_patterns_insert(self, psy_audio_GLOBALPATTERN,
+		psy_audio_pattern_allocinit());
+	psy_audio_patternevent_init_all(&e, psy_audio_NOTECOMMANDS_TIMESIG,
+		0, 0, 0, 4, 4);
+	psy_audio_pattern_insert(pattern, NULL, 0, 0.0, &e);
 }
 
 void psy_audio_patterns_dispose(psy_audio_Patterns* self)
@@ -80,6 +94,7 @@ void psy_audio_patterns_clear(psy_audio_Patterns* self)
 
 	psy_audio_patterns_disposeslots(self);
 	psy_table_init(&self->slots);	
+	psy_audio_patterns_init_global(self);
 }
 
 psy_audio_Pattern* psy_audio_patterns_insert(psy_audio_Patterns* self,

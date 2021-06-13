@@ -135,6 +135,7 @@ psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 /* Sequence */
 /* prototypes */
 static void psy_audio_sequence_initsignals(psy_audio_Sequence*);
+static void psy_audio_sequence_initglobaltrack(psy_audio_Sequence*);
 static void psy_audio_sequence_disposesignals(psy_audio_Sequence*);
 static void sequence_onpatternlengthchanged(psy_audio_Sequence*,
 	psy_audio_Pattern* sender);
@@ -152,7 +153,21 @@ void psy_audio_sequence_init(psy_audio_Sequence* self,
 	self->samples = samples;
 	self->preventreposition = FALSE;
 	self->sequencerduration = NULL;
+	psy_audio_sequence_initsignals(self);	
+	psy_audio_sequence_initglobaltrack(self);
 	psy_audio_trackstate_init(&self->trackstate);
+}
+
+void psy_audio_sequence_initglobaltrack(psy_audio_Sequence* self)
+{	
+	psy_audio_SequencePatternEntry* entry;
+
+	psy_audio_sequencetrack_init(&self->globaltrack);	
+	entry = psy_audio_sequencepatternentry_allocinit(psy_audio_GLOBALPATTERN,
+		(psy_dsp_big_beat_t)0.0);
+	entry->patterns = self->patterns;
+	psy_list_append(&self->globaltrack.entries, entry);
+	psy_audio_sequence_reposition_track(self, &self->globaltrack);
 }
 
 void psy_audio_sequence_initsignals(psy_audio_Sequence* self)
@@ -174,6 +189,7 @@ void psy_audio_sequence_dispose(psy_audio_Sequence* self)
 {
 	psy_list_deallocate(&self->tracks, (psy_fp_disposefunc)
 		psy_audio_sequencetrack_dispose);
+	psy_audio_sequencetrack_dispose(&self->globaltrack);	
 	psy_audio_trackstate_dispose(&self->trackstate);	
 	psy_audio_sequence_disposesignals(self);	
 	if (self->sequencerduration) {
@@ -1129,8 +1145,7 @@ void psy_audio_sequencepaste_copy(psy_audio_SequencePaste* self,
 	}
 }
 
-
-// Sequence
+/* Sequence */
 void psy_audio_sequence_insert(psy_audio_Sequence* self,
 	psy_audio_OrderIndex index, uintptr_t patidx)
 {

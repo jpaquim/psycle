@@ -29,13 +29,21 @@ extern "C" {
 /* SeqEditRuler */
 typedef struct SeqEditRuler {
 	/* inherits */
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	/* internal */
+	bool showtimesig;
+	bool preventedit;
+	bool editnominator;
 	/* references */
 	SeqEditState* state;		
+	psy_audio_PatternEvent* currtimesig;
 } SeqEditRuler;
 
 void seqeditruler_init(SeqEditRuler*, psy_ui_Component* parent,
 	SeqEditState*);
+
+void seqeditruler_hidetimesig(SeqEditRuler*);
+void seqeditruler_showtimesig(SeqEditRuler*);
 
 INLINE psy_ui_Component* seqeditruler_base(SeqEditRuler* self)
 {
@@ -111,7 +119,7 @@ SeqEditTrack* seqedittrack_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditState*, Workspace*);
 
-void seqedittrack_updatetrack(SeqEditTrack*,
+void seqedittrack_setsequencetrack(SeqEditTrack*,
 	psy_audio_SequenceTrackNode*,
 	psy_audio_SequenceTrack*,
 	uintptr_t trackindex);
@@ -158,6 +166,8 @@ INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 
 typedef struct SeqEditorHeaderBar {
 	psy_ui_Component component;
+	psy_ui_Component top;
+	psy_ui_Button timesig;
 	ZoomBox hzoom;	
 } SeqEditorHeaderBar;
 
@@ -197,8 +207,7 @@ typedef struct SeqEditor {
 	psy_ui_Component component;
 	/* internal */
 	SeqEditToolBar toolbar;
-	psy_ui_Component spacer;
-	psy_ui_Component header;
+	psy_ui_Component spacer;	
 	psy_ui_Component rulerpane;
 	SeqEditRuler ruler;
 	psy_ui_Scroller scroller;	
