@@ -21,11 +21,11 @@ typedef struct MidiActiveChannelBox {
 	// inherits
 	psy_ui_Component component;
 	// references
-	int* channelmap;
+	uint32_t* channelmap;
 } MidiActiveChannelBox;
 
 void midiactivechannelbox_init(MidiActiveChannelBox*,
-	psy_ui_Component* parent, int* channelmap);
+	psy_ui_Component* parent, uint32_t* channelmap);
 
 INLINE psy_ui_Component* midiactivechannelbox_base(MidiActiveChannelBox* self)
 {
@@ -36,11 +36,11 @@ typedef struct MidiActiveClockBox {
 	// inherits
 	psy_ui_Component component;
 	// references
-	int* flags;
+	uint32_t* flags;
 } MidiActiveClockBox;
 
 void midiactiveclockbox_init(MidiActiveClockBox*,
-	psy_ui_Component* parent, int* flags);
+	psy_ui_Component* parent, uint32_t* flags);
 
 INLINE psy_ui_Component* midiactiveclockbox_base(MidiActiveClockBox* self)
 {

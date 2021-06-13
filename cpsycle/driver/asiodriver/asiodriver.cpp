@@ -1487,11 +1487,9 @@ int driver_dispose(psy_AudioDriver* driver)
 void init_properties(psy_AudioDriver* driver)
 {
 	AsioDriver* self = (AsioDriver*)driver;
-	char key[256];
-	psy_Property* property;
+	char key[256];	
 	psy_Property* devices;
-	psy_Property* indevices;
-	psy_List* p;	
+	psy_Property* indevices;	
 	std::vector<std::string> playbackports;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);

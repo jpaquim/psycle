@@ -9,6 +9,10 @@
 #include "uievents.h"
 #include "uidefaults.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct psy_ui_Component;
 
 typedef struct psy_ui_EventDispatch {

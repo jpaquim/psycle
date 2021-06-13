@@ -720,7 +720,7 @@ bool mainframe_oninput(MainFrame* self, InputHandler* sender)
 
 			tab = psy_ui_tabbar_tab(&self->patternview.tabbar, 5);
 			if (tab) {
-				tab->checkstate = TRUE;
+				tab->checkstate = TABCHECKSTATE_ON;
 				psy_ui_component_invalidate(psy_ui_tabbar_base(&self->patternview.tabbar));
 			}
 		}
@@ -922,19 +922,19 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, uintptr_t inde
 
 	if (index == VIEW_ID_CHECKUNSAVED) {
 		if (options == CONFIRM_CLOSE) {
-			self->checkunsavedbox.mode = options;
+			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
 			confirmbox_setlabels(&self->checkunsavedbox,
 				"msg.psyexit", "msg.saveexit", "msg.nosaveexit");
 		} else if (options == CONFIRM_NEW) {
-			self->checkunsavedbox.mode = options;
+			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
 			confirmbox_setlabels(&self->checkunsavedbox,
 				"msg.newsong", "msg.savenew", "msg.nosavenew");
 		} else if (options == CONFIRM_LOAD) {
-			self->checkunsavedbox.mode = options;
+			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
 			confirmbox_setlabels(&self->checkunsavedbox,
 				"msg.loadsong", "msg.saveload", "msg.nosaveload");
 		} else if (options == CONFIRM_SEQUENCECLEAR) {
-			self->checkunsavedbox.mode = options;
+			self->checkunsavedbox.mode = (ConfirmBoxAction)options;
 			confirmbox_setlabels(&self->checkunsavedbox,
 				"msg.seqclear", "msg.yes", "msg.no");
 		}
@@ -1066,7 +1066,8 @@ void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
 	if (view == VIEW_ID_HELPVIEW && section == HELPVIEWSECTION_HELP) {
-		helpview_float(&self->helpview, section, &self->right);
+		helpview_float(&self->helpview, (HelpViewSection)section,
+			(psy_ui_Component*)&self->right);
 		psy_ui_component_align(&self->client);
 	}
 }
@@ -1075,7 +1076,8 @@ void mainframe_ondocksection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
 	if (view == VIEW_ID_HELPVIEW && section == HELPVIEWSECTION_HELP) {
-		helpview_dock(&self->helpview, section, &self->right);
+		helpview_dock(&self->helpview, (HelpViewSection)section,
+			(psy_ui_Component*)&self->right);
 		psy_ui_component_align(&self->client);
 	}
 }

@@ -495,7 +495,7 @@ void patternviewconfig_togglepatdefaultline(PatternViewConfig* self)
 	}
 }
 
-uintptr_t patternviewconfig_patterndisplay(const PatternViewConfig* self)
+int patternviewconfig_patterndisplay(const PatternViewConfig* self)
 {
 	psy_Property* property;
 

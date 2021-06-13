@@ -64,7 +64,7 @@ void trackereventtable_dispose(TrackerEventTable* self)
 			psy_tableiterator_inc(&it)) {
 		psy_List** track;
 
-		track = psy_tableiterator_value(&it);
+		track = (psy_List**)psy_tableiterator_value(&it);
 		psy_list_free(*track);
 		free(psy_tableiterator_value(&it));
 	}
@@ -82,7 +82,7 @@ void trackereventtable_clearevents(TrackerEventTable* self)
 			psy_tableiterator_inc(&it)) {
 		psy_List** track;
 
-		track = psy_tableiterator_value(&it);
+		track = (psy_List**)psy_tableiterator_value(&it);
 		psy_list_free(*track);
 		*track = NULL;		
 	}	
@@ -223,7 +223,7 @@ TrackDef* trackergridstate_trackdef(TrackerGridState* self, uintptr_t track)
 	if (self->trackconfig) {
 		TrackDef* rv;
 
-		rv = psy_table_at(&self->trackconfig->trackconfigs, track);
+		rv = (TrackDef*)psy_table_at(&self->trackconfig->trackconfigs, track);
 		if (!rv) {
 			rv = &self->trackconfig->trackdef;
 		}

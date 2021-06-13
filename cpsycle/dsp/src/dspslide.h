@@ -38,7 +38,6 @@ void psy_dsp_slider_resetto(psy_dsp_Slider* self, float target);
 
 float psy_dsp_slider_getnext(psy_dsp_Slider* self);
 
-
 #ifdef __cplusplus
 }
 #endif

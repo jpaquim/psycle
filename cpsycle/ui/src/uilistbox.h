@@ -114,7 +114,7 @@ INLINE void psy_ui_listbox_text(psy_ui_ListBox* self, char* text,
 	uintptr_t index)
 {
     psy_ui_listboximp_vtable(self->component.imp)->dev_text(
-        self->component.imp->extended_imp, text, index);
+        (psy_ui_ComponentImp*)self->component.imp->extended_imp, text, index);
 }
 
 #ifdef __cplusplus

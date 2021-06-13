@@ -673,7 +673,7 @@ void patternview_onconfigurepatternview(PatternView* self,
 		trackergrid_centeroncursor(&self->tracker);
 	}	
 	patternview_selectdisplay(self,
-		patternviewconfig_patterndisplay(config));	
+		(PatternDisplayMode)patternviewconfig_patterndisplay(config));	
 	if (patternviewconfig_issmoothscrolling(config)) {
 		psy_ui_scroller_scrollsmooth(&self->trackerscroller);
 		psy_ui_scroller_scrollsmooth(&self->pianoroll.scroller);
@@ -950,7 +950,7 @@ void patternview_onshow(PatternView* self)
 		self->aligndisplay = FALSE;
 		display = self->display;
 		self->display = PATTERN_DISPLAYMODE_TRACKER;
-		patternview_selectdisplay(self, display);		
+		patternview_selectdisplay(self, (PatternDisplayMode)display);
 	}
 }
 

@@ -6,6 +6,10 @@
 #ifndef psy_audio_SEQUENCECMDS_H
 #define psy_audio_SEQUENCECMDS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* audio */
 #include "sequence.h"
 

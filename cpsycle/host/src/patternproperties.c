@@ -54,7 +54,8 @@ static PatternPropertiesApplyCommand* patternpropertiesapplycommand_allocinit(ps
 {
 	PatternPropertiesApplyCommand* rv;
 
-	rv = malloc(sizeof(PatternPropertiesApplyCommand));
+	rv = (PatternPropertiesApplyCommand*)malloc(
+		sizeof(PatternPropertiesApplyCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		patternpropertiesapplycommand_vtable_init(rv);

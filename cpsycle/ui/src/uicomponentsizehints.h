@@ -9,6 +9,10 @@
 /* local */
 #include "uigeometry.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct psy_ui_ComponentSizeHints {
 	psy_ui_Size preferredsize;
 	bool preferredwidthset;

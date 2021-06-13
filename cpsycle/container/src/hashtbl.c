@@ -341,7 +341,7 @@ void* psy_tableiterator_value(psy_TableIterator* self)
 	return self->curr->value;
 }
 
-uintptr_t psy_strhash(const unsigned char* str)
+uintptr_t psy_strhash(const char* str)
 {
 	uintptr_t hash = 5381;
 	int c;

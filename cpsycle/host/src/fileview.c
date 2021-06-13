@@ -208,7 +208,7 @@ psy_List* fileview_sort(psy_List* source, psy_fp_comp comp)
 		if (num == 0) {
 			return NULL;
 		}
-		arrayptr = malloc(sizeof(char*) * num);
+		arrayptr = (psy_List**)malloc(sizeof(char*) * num);
 		if (arrayptr) {
 			psy_List* p;
 			uintptr_t i;

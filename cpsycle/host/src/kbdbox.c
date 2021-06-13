@@ -448,7 +448,7 @@ void kbdbox_setdescription(KbdBox* self, uint32_t keycode, const char* text)
 	bool up;
 
 	psy_audio_decodeinput((uint32_t)keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
-	key = psy_table_at(&self->keys, keycode_decoded);
+	key = (KbdBoxKey*)psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		kbdboxkey_setdescription(key, keycode, text);		
 	}
@@ -532,7 +532,7 @@ void kbdbox_presskey(KbdBox* self, uint32_t keycode)
 	bool up;
 
 	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
-	key = psy_table_at(&self->keys, keycode_decoded);
+	key = (KbdBoxKey*)psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_addstylestate(&key->component,
 			psy_ui_STYLESTATE_SELECT);
@@ -558,7 +558,7 @@ void kbdbox_releasekey(KbdBox* self, uint32_t keycode)
 	bool up;
 
 	psy_audio_decodeinput(keycode, &keycode_decoded, &shift, &ctrl, &alt, &up);
-	key = psy_table_at(&self->keys, keycode_decoded);
+	key = (KbdBoxKey*)psy_table_at(&self->keys, keycode_decoded);
 	if (key) {		
 		psy_ui_component_removestylestate(&key->component,
 			psy_ui_STYLESTATE_SELECT);

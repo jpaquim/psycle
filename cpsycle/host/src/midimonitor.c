@@ -37,7 +37,7 @@ static void midiactivechannelbox_vtable_init(MidiActiveChannelBox* self)
 }
 // implementation
 void midiactivechannelbox_init(MidiActiveChannelBox* self,
-	psy_ui_Component* parent, int* channelmap)
+	psy_ui_Component* parent, uint32_t* channelmap)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	midiactivechannelbox_vtable_init(self);
@@ -106,7 +106,7 @@ static void midiactiveclockbox_vtable_init(MidiActiveClockBox* self)
 }
 // implementation
 void midiactiveclockbox_init(MidiActiveClockBox* self,
-	psy_ui_Component* parent, int* flags)
+	psy_ui_Component* parent, uint32_t* flags)
 {
 	psy_ui_component_init(&self->component, parent, NULL);
 	midiactiveclockbox_vtable_init(self);
