@@ -906,8 +906,9 @@ void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 
 psy_audio_SampleLoopType ComboBoxToLoopType(int combobox_index)
 {
-	psy_audio_SampleLoopType rv = 0;
-			
+	psy_audio_SampleLoopType rv;
+	
+	rv = psy_audio_SAMPLE_LOOP_DO_NOT;			
 	switch (combobox_index) {			
 		case 0: rv = psy_audio_SAMPLE_LOOP_DO_NOT; break;
 		case 1: rv = psy_audio_SAMPLE_LOOP_NORMAL; break;

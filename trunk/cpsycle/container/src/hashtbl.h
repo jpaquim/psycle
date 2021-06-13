@@ -79,7 +79,7 @@ INLINE bool psy_table_empty(const psy_Table* self)
 /// always (even if disposefunc is NULL) free entry
 void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc);
 
-uintptr_t psy_strhash(const unsigned char* str);
+uintptr_t psy_strhash(const char* str);
 
 #ifdef __cplusplus
 }

@@ -43,6 +43,10 @@
 #include <stddef.h>
 #include "linear.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
 * This is the function you will use the most often.
 * Given an array of floats, this will compute the power
@@ -161,7 +165,9 @@ bool fftclass_ispoweroftwo(FFTClass*, size_t x);
 float fftclass_resample(FFTClass*, float const * data, float offset, uint64_t length);
 INLINE size_t fftclass_getoutputsize(FFTClass* self) { return self->outputSize; }
 	
-
+#ifdef __cplusplus
+}
+#endif
 
 // Indentation settings for Vim and Emacs and unique identifier for Arch, a
 // version control system. Please do not modify past this point.

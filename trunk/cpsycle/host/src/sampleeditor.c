@@ -996,7 +996,7 @@ void sampleeditor_ondelete(SampleEditor* self, psy_ui_Component* sender)
 				wavebox = (WaveBox*)psy_tableiterator_value(&it);
 				oldwave = self->sample->channels.samples[psy_tableiterator_key(&it)];	
 				if (newnumframes > 0) {
-					newwave = dsp.memory_alloc(newnumframes,
+					newwave = (psy_dsp_amp_t*)dsp.memory_alloc(newnumframes,
 						sizeof(psy_dsp_amp_t));
 					dsp.clear(newwave, newnumframes);
 					if (framestart > 0) {

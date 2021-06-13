@@ -629,7 +629,7 @@ void newmachinesectionspane_ontabbarchanged(NewMachineSectionsPane* self, psy_ui
 {
 	NewMachineSection* section;
 
-	section = psy_table_at(&self->newmachinesections, index);
+	section = (NewMachineSection*)psy_table_at(&self->newmachinesections, index);
 	if (section) {
 		psy_ui_RealRectangle position;
 

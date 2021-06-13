@@ -571,7 +571,7 @@ bool trackergrid_scrollleft(TrackerGrid* self, psy_audio_PatternCursor cursor)
 		if (index > cursor.track) {
 			psy_ui_RealRectangle position;
 
-			column = psy_table_at(&self->columns, cursor.track);
+			column = (psy_ui_Component*)psy_table_at(&self->columns, cursor.track);
 			position = psy_ui_component_position(column);
 			psy_ui_component_setscrollleft(&self->component,
 				psy_ui_value_make_px(position.left));
@@ -604,7 +604,7 @@ bool trackergrid_scrollright(TrackerGrid* self, psy_audio_PatternCursor cursor)
 	if (tracks > trackleft + visitracks) {		
 		psy_ui_Component* column;
 
-		column = psy_table_at(&self->columns, tracks - visitracks);
+		column = (psy_ui_Component*)psy_table_at(&self->columns, tracks - visitracks);
 		if (column) {
 			psy_ui_RealRectangle position;
 			 
@@ -1283,7 +1283,7 @@ void trackergrid_setcentermode(TrackerGrid* self, int mode)
 	self->gridstate->midline = mode;
 	if (mode) {
 		psy_ui_component_setoverflow(&self->component,
-			psy_ui_OVERFLOW_SCROLL | psy_ui_OVERFLOW_VSCROLLCENTER);
+			(psy_ui_Overflow)(psy_ui_OVERFLOW_SCROLL | psy_ui_OVERFLOW_VSCROLLCENTER));
 		trackergrid_centeroncursor(self);
 	} else {
 		psy_ui_component_setoverflow(&self->component,

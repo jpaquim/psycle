@@ -76,9 +76,9 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 		"Transpose +12", self, patternblockmenu_onblocktransposeup12);
 	psy_ui_button_init_text_connect(&self->blocktransposedown12, &self->component, NULL,
 		"Transpose -12", self, patternblockmenu_onblocktransposedown12);
-	psy_ui_button_init_text_connect(&self->import, &self->component, NULL, "Import (psb)",
+	psy_ui_button_init_text_connect(&self->importbtn, &self->component, NULL, "Import (psb)",
 		self, patternblockmenu_onimport);
-	psy_ui_button_init_text_connect(&self->export, &self->component, NULL, "Export (psb)",
+	psy_ui_button_init_text_connect(&self->exportbtn, &self->component, NULL, "Export (psb)",
 		self, patternblockmenu_onexport);	
 	spacing = psy_ui_margin_make_em(0.25, 0.25, 0.25, 0.25);
 	psy_ui_component_setspacing_children(&self->component, spacing);

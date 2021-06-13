@@ -148,7 +148,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->followsong = 0;
 	self->recordtweaks = 0;
 	self->startpage = FALSE;
-	self->mainhandle = mainhandle;
+	self->mainhandle = (psy_ui_Component*)mainhandle;
 	self->filename = psy_strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
 	self->undosavepoint = 0;

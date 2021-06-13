@@ -552,7 +552,8 @@ void propertiesrenderer_rebuild(PropertiesRenderer* self,
 	}
 	self->state.selected = NULL;
 	self->state.selectedline = NULL;
-	section = psy_table_at(&self->sections, psy_property_index(mainsection));
+	section = (psy_ui_Component*)psy_table_at(&self->sections,
+		psy_property_index(mainsection));
 	if (section) {
 		psy_ui_Component* clients;
 
@@ -1015,7 +1016,7 @@ void propertiesview_gotosection(PropertiesView* self, uintptr_t index)
 {
 	psy_ui_Component* section;
 
-	section = psy_table_at(&self->renderer.sections, index);
+	section = (psy_ui_Component*)psy_table_at(&self->renderer.sections, index);
 	if (section) {
 		psy_ui_RealRectangle position;
 		
@@ -1065,7 +1066,7 @@ void propertiesview_select(PropertiesView* self, psy_Property* property)
 	if (property) {
 		/* todo: this works only for one section (recentview)
 				 add a line to property map to find any property */
-		section = psy_table_at(&self->renderer.sections, 0);
+		section = (psy_ui_Component*)psy_table_at(&self->renderer.sections, 0);
 		if (section) {
 			psy_ui_Component* clients;
 

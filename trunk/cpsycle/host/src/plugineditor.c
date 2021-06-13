@@ -259,7 +259,7 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 {
 	psy_Property* p;
 
-	p = psy_table_at(&self->pluginmappping, slot);
+	p = (psy_Property*)psy_table_at(&self->pluginmappping, slot);
 	if (p) {
 		const char* path;
 

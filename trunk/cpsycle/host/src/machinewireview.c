@@ -1168,7 +1168,7 @@ WireFrame* machinewireview_wireframe(MachineWireView* self,
 	while (p != NULL) {
 		WireFrame* frame;
 
-		frame = (WireFrame*)psy_list_entry(p->entry);
+		frame = (WireFrame*)psy_list_entry(p);
 		if (psy_audio_wire_equal(wireframe_wire(frame), &wire)) {
 			rv = frame;
 			break;

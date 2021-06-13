@@ -455,7 +455,7 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 				self->trackdef->numfx = 1;
 				self->trackdef->numnotes = numnotes;
 			} else if (numnotes > 1) {
-				self->trackdef = malloc(sizeof(TrackDef));
+				self->trackdef = (TrackDef*)malloc(sizeof(TrackDef));
 				if (self->trackdef) {
 					trackdef_init(self->trackdef);
 					self->trackdef->numfx = 1;
@@ -475,7 +475,7 @@ void trackercolumn_onmouseup(TrackerColumn* self, psy_ui_MouseEvent* ev)
 				self->trackdef->numfx = numfx;
 				self->trackdef->numnotes = 1;
 			} else if (numfx > 1) {
-				self->trackdef = malloc(sizeof(TrackDef));
+				self->trackdef = (TrackDef*)malloc(sizeof(TrackDef));
 				if (self->trackdef) {
 					trackdef_init(self->trackdef);
 					self->trackdef->numfx = numfx;

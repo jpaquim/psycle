@@ -708,7 +708,7 @@ void machinestackstate_buildcolumns(MachineStackState* self)
 			for (i = 0; i < psy_table_maxsize(&self->columns); ++i) {
 				MachineStackColumn* column;				
 
-				column = psy_table_at(&self->columns, i);
+				column = (MachineStackColumn*)psy_table_at(&self->columns, i);
 				if (column) {					
 					psy_List* lastnode;
 
@@ -1463,7 +1463,7 @@ void machinestackpane_updatevus(MachineStackPane* self)
 		psy_ui_component_invalidate(trackpane);
 		machineui_endvuupdate();
 		psy_ui_component_setbackgroundmode(trackpane,
-			restorebgmode);
+			(psy_ui_BackgroundMode)restorebgmode);
 	}
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_SETBACKGROUND);

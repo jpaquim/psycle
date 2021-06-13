@@ -48,7 +48,7 @@ InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
 {
 	InsertCommand* rv;
 
-	rv = malloc(sizeof(InsertCommand));
+	rv = (InsertCommand*)malloc(sizeof(InsertCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		insertcommandcommand_vtable_init(rv);
@@ -142,7 +142,7 @@ RemoveCommand* removecommand_alloc(psy_audio_Pattern* pattern, double bpl,
 {
 	RemoveCommand* rv;
 
-	rv = malloc(sizeof(RemoveCommand));
+	rv = (RemoveCommand*)malloc(sizeof(RemoveCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		removecommandcommand_vtable_init(rv);
@@ -230,7 +230,7 @@ BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 {
 	BlockTransposeCommand* rv;
 
-	rv = malloc(sizeof(BlockTransposeCommand));
+	rv = (BlockTransposeCommand*)malloc(sizeof(BlockTransposeCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		blocktransposecommandcommand_vtable_init(rv);
@@ -293,7 +293,7 @@ BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern* pattern,
 {
 	BlockRemoveCommand* rv;
 
-	rv = malloc(sizeof(BlockRemoveCommand));
+	rv = (BlockRemoveCommand*)malloc(sizeof(BlockRemoveCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		blockremovecommandcommand_vtable_init(rv);
@@ -378,7 +378,7 @@ BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern* pattern,
 {
 	BlockPasteCommand* rv;
 
-	rv = malloc(sizeof(BlockPasteCommand));
+	rv = (BlockPasteCommand*)malloc(sizeof(BlockPasteCommand));
 	if (rv) {
 		psy_command_init(&rv->command);
 		blockpastecommandcommand_vtable_init(rv);

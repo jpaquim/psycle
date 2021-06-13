@@ -106,7 +106,7 @@ void paramviews_removeall(ParamViews* self)
 
 MachineFrame* paramviews_frame(ParamViews* self, uintptr_t macid)
 {
-	return psy_table_at(&self->frames, macid);
+	return (MachineFrame*)psy_table_at(&self->frames, macid);
 }
 
 void paramviews_onsongchanged(ParamViews* self, Workspace* workspace,

@@ -40,7 +40,7 @@ psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
 		psy_Property** propertiesptr;
 
 		num = psy_property_size(source);
-		propertiesptr = malloc(sizeof(psy_Property*) * num);
+		propertiesptr = (psy_Property**)malloc(sizeof(psy_Property*) * num);
 		if (propertiesptr) {
 			p = psy_property_begin(source);
 			for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
@@ -288,7 +288,7 @@ void newmachinefilter_removecategory(NewMachineFilter* self, const char* categor
 		if (psy_table_exists_strhash(&self->categories, category)) {
 			char* item;
 			
-			item = psy_table_at(&self->categories, psy_strhash(category));
+			item = (char*)psy_table_at(&self->categories, psy_strhash(category));
 			free(item);
 			psy_table_remove(&self->categories, psy_strhash(category));
 			newmachinefilter_notify(self);
@@ -410,9 +410,9 @@ static void pluginsview_onpreferredscrollsize(PluginsView*, const psy_ui_Size* l
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyboardEvent*);
 static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
-	intptr_t* col, intptr_t* row);
+	uintptr_t* col, uintptr_t* row);
 static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
-	intptr_t col, intptr_t row);
+	uintptr_t col, uintptr_t row);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmouseup(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
@@ -909,7 +909,7 @@ void pluginsview_settopline(PluginsView* self, intptr_t line)
 }
 
 void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
-	intptr_t* col, intptr_t* row)
+	uintptr_t* col, uintptr_t* row)
 {		
 	if (plugin && self->currplugins) {
 		uintptr_t index;
@@ -926,7 +926,7 @@ void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 	*row = 0;	
 }
 
-psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, intptr_t col, intptr_t row)
+psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, uintptr_t col, uintptr_t row)
 {				
 	if (self->plugins) {	
 		psy_ui_RealSize size;

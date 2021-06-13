@@ -483,7 +483,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_label_init_text(&self->empty,
 		psy_ui_notebook_base(&self->clientnotebook), NULL, "No Instrument");
 	psy_ui_label_settextalignment(&self->empty,
-		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL);	
+		(psy_ui_Alignment)(psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_CENTER_VERTICAL));	
 	// client
 	psy_ui_component_init(&self->client,
 		psy_ui_notebook_base(&self->clientnotebook), NULL);

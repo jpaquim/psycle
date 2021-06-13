@@ -671,7 +671,7 @@ PianogridTrackEvent* pianogriddraw_lasttrackevent_at(PianoGridDraw* self, uintpt
 
 	assert(self);
 
-	rv = psy_table_at(lasttrackevent, track);
+	rv = (PianogridTrackEvent*)psy_table_at(lasttrackevent, track);
 	if (!rv) {
 		rv = (PianogridTrackEvent*)malloc(sizeof(PianogridTrackEvent));
 		if (rv) {

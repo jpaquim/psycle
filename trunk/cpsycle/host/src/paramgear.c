@@ -421,7 +421,7 @@ void paramrackpane_removebox(ParamRackPane* self, uintptr_t slot)
 	if (psy_table_exists(&self->boxes, slot)) {
 		ParamRackBox* box;
 
-		box = psy_table_at(&self->boxes, slot);
+		box = (ParamRackBox*)psy_table_at(&self->boxes, slot);
 		psy_ui_component_deallocate(&box->component);		
 		psy_table_remove(&self->boxes, slot);		
 	}

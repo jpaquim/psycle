@@ -45,8 +45,8 @@ typedef struct PatternBlockMenu {
 	psy_ui_Button blocktransposedown;
 	psy_ui_Button blocktransposeup12;
 	psy_ui_Button blocktransposedown12;
-	psy_ui_Button import;
-	psy_ui_Button export;
+	psy_ui_Button importbtn;
+	psy_ui_Button exportbtn;
 	// internal data
 	PatternViewTarget target;
 	// references
