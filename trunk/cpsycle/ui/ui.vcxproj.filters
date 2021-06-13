@@ -47,6 +47,21 @@
     <Filter Include="imps\x11">
       <UniqueIdentifier>{f2ae487f-907c-4a70-993d-5a629735e40c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imps\x11\common">
+      <UniqueIdentifier>{61a024ee-6e08-45e3-b1a0-5e003425b439}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\x11\comps">
+      <UniqueIdentifier>{dff34753-cfe6-4eb2-90fb-e232502567a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\x11\dialogs">
+      <UniqueIdentifier>{aaaf2ef2-3c93-494e-8596-98f4d49cc932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\x11\graphics">
+      <UniqueIdentifier>{e2886743-3e29-41b0-9235-fb931b4cb99b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imps\natives\comps">
+      <UniqueIdentifier>{75e9abb2-6a85-4ebb-98d5-37f82431c6ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\uiapp.c">
@@ -190,9 +205,6 @@
     <ClCompile Include="src\uimaterial.c">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativecheckboximp.c">
-      <Filter>imps\natives</Filter>
-    </ClCompile>
     <ClCompile Include="src\imps\win32\uiwinbitmapimp.c">
       <Filter>imps\win32\graphics</Filter>
     </ClCompile>
@@ -235,53 +247,8 @@
     <ClCompile Include="src\imps\win32\uiwinopendialogimp.c">
       <Filter>imps\win32\dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativelistboximp.c">
-      <Filter>imps\natives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\natives\uinativeeditimp.c">
-      <Filter>imps\natives</Filter>
-    </ClCompile>
     <ClCompile Include="src\timers.c">
       <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11app.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11bitmapimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11colordialogimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11componentimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11folderdialogimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11fontdialogimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11fontimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11graphicsimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11impfactory.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11opendialogimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11savedialogimp.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11colours.c">
-      <Filter>imps\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="src\imps\x11\uix11keyboardevent.c">
-      <Filter>imps\x11</Filter>
     </ClCompile>
     <ClCompile Include="src\uidropdownbox.c">
       <Filter>comps</Filter>
@@ -291,6 +258,54 @@
     </ClCompile>
     <ClCompile Include="src\uiwintheme.c">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11colordialogimp.c">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11bitmapimp.c">
+      <Filter>imps\x11\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11app.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11colours.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11folderdialogimp.c">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11fontdialogimp.c">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11impfactory.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11graphicsimp.c">
+      <Filter>imps\x11\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11opendialogimp.c">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11savedialogimp.c">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11componentimp.c">
+      <Filter>imps\x11\comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11keyboardevent.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\x11\uix11fontimp.c">
+      <Filter>imps\x11\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\natives\uinativecheckboximp.c">
+      <Filter>imps\natives\comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\natives\uinativeeditimp.c">
+      <Filter>imps\natives\comps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imps\natives\uinativelistboximp.c">
+      <Filter>imps\natives\comps</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -438,9 +453,6 @@
     <ClInclude Include="src\uimaterial.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativecheckboximp.h">
-      <Filter>imps\natives</Filter>
-    </ClInclude>
     <ClInclude Include="src\imps\win32\uiwinbitmapimp.h">
       <Filter>imps\win32\graphics</Filter>
     </ClInclude>
@@ -483,53 +495,8 @@
     <ClInclude Include="src\imps\win32\uiwinopendialogimp.h">
       <Filter>imps\win32\dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativelistboximp.h">
-      <Filter>imps\natives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\natives\uinativeeditimp.h">
-      <Filter>imps\natives</Filter>
-    </ClInclude>
     <ClInclude Include="src\timers.h">
       <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11app.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11bitmapimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11colordialogimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11componentimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11folderdialogimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11fontdialogimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11fontimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11graphicsimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11impfactory.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11opendialogimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11savedialogimp.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11colours.h">
-      <Filter>imps\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="src\imps\x11\uix11keyboardevent.h">
-      <Filter>imps\x11</Filter>
     </ClInclude>
     <ClInclude Include="src\uidropdownbox.h">
       <Filter>comps</Filter>
@@ -539,6 +506,54 @@
     </ClInclude>
     <ClInclude Include="src\uiwintheme.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11colordialogimp.h">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11bitmapimp.h">
+      <Filter>imps\x11\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11app.h">
+      <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11colours.h">
+      <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11folderdialogimp.h">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11fontdialogimp.h">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11impfactory.h">
+      <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11graphicsimp.h">
+      <Filter>imps\x11\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11opendialogimp.h">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11savedialogimp.h">
+      <Filter>imps\x11\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11componentimp.h">
+      <Filter>imps\x11\comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11keyboardevent.h">
+      <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\x11\uix11fontimp.h">
+      <Filter>imps\x11\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\natives\uinativecheckboximp.h">
+      <Filter>imps\natives\comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\natives\uinativeeditimp.h">
+      <Filter>imps\natives\comps</Filter>
+    </ClInclude>
+    <ClInclude Include="src\imps\natives\uinativelistboximp.h">
+      <Filter>imps\natives\comps</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

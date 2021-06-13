@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{d4983d20-02bc-4672-8480-96d1b76de1c3}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
     <Filter Include="configuration">
       <UniqueIdentifier>{c39489a0-4089-4e38-92b7-ffc380a89fda}</UniqueIdentifier>
     </Filter>
@@ -89,17 +85,11 @@
     <Filter Include="machine\machineview\newmachine">
       <UniqueIdentifier>{136b5d45-0d19-464e-ba52-949c6d9e0507}</UniqueIdentifier>
     </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{271ed28f-65e7-4c64-b9ce-10b1b858b240}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\mainframe.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\workspace.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\eventdriverconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
@@ -264,9 +254,6 @@
     </ClCompile>
     <ClCompile Include="src\patternviewconfig.c">
       <Filter>configuration</Filter>
-    </ClCompile>
-    <ClCompile Include="src\viewhistory.c">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\keyboardmiscconfig.c">
       <Filter>configuration</Filter>
@@ -469,9 +456,6 @@
     <ClCompile Include="src\clockbar.c">
       <Filter>toolbars</Filter>
     </ClCompile>
-    <ClCompile Include="src\mainstatusbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\minmaximize.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
@@ -559,9 +543,6 @@
     <ClCompile Include="src\searchfield.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
-    <ClCompile Include="src\inputhandler.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderprogressview.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -574,11 +555,24 @@
     <ClCompile Include="src\seqeditorstate.c">
       <Filter>sequence</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="src\resources\resource.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
+    <ClCompile Include="src\psycle.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\workspace.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainframe.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\inputhandler.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\viewhistory.c">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainstatusbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -740,15 +734,6 @@
     <ClInclude Include="src\interpreter.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\workspace.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mainframe.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\resources\resource.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\machineparamconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
@@ -757,9 +742,6 @@
     </ClInclude>
     <ClInclude Include="src\patternviewconfig.h">
       <Filter>configuration</Filter>
-    </ClInclude>
-    <ClInclude Include="src\viewhistory.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keyboardmiscconfig.h">
       <Filter>configuration</Filter>
@@ -962,9 +944,6 @@
     <ClInclude Include="src\clockbar.h">
       <Filter>toolbars</Filter>
     </ClInclude>
-    <ClInclude Include="src\mainstatusbar.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\minmaximize.h">
       <Filter>uicontrols</Filter>
     </ClInclude>
@@ -1052,9 +1031,6 @@
     <ClInclude Include="src\searchfield.h">
       <Filter>uicontrols</Filter>
     </ClInclude>
-    <ClInclude Include="src\inputhandler.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\renderprogressview.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -1066,6 +1042,24 @@
     </ClInclude>
     <ClInclude Include="src\seqeditorstate.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\workspace.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mainframe.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\inputhandler.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewhistory.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mainstatusbar.h">
+      <Filter>toolbars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1215,5 +1209,10 @@
     <None Include="es.ini">
       <Filter>configuration</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\resources\resource.rc">
+      <Filter>app</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

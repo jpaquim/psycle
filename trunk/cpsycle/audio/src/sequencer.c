@@ -845,13 +845,22 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 							psy_audio_PATTERNCMD_PATTERN_DELAY) {
 						psy_audio_sequencer_patterndelay(self, ev);
 						done = TRUE;
-					} else
-					if ((ev->parameter & 0xF0) ==
+					} else if ((ev->parameter & 0xF0) ==
 							psy_audio_PATTERNCMD_FINE_PATTERN_DELAY) {
 						psy_audio_sequencer_finepatterndelay(self, ev);
 						done = TRUE;
-					} else
-					if (ev->parameter <
+					} else if ((ev->parameter & 0xF0) ==
+							psy_audio_PATTERNCMD_SET_LINESPERBEAT0) {
+						uint8_t lpb;
+
+						lpb = ev->parameter & 0x0F;
+						if (lpb > 0) {
+							self->lpbspeed = lpb /
+								(psy_dsp_big_beat_t)self->lpb;
+							psy_audio_sequencer_compute_beatspersample(self);							
+						}
+						done = TRUE;
+					} else if (ev->parameter <
 							psy_audio_PATTERNCMD_SET_LINESPERBEAT1) {
 						self->lpbspeed = ev->parameter /
 							(psy_dsp_big_beat_t)self->lpb;						
@@ -863,7 +872,7 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 					self->seqtime.bpm = ev->parameter;
 					psy_audio_sequencer_compute_beatspersample(self);
 					done = TRUE;
-				break;
+				break;				
 				case psy_audio_PATTERNCMD_JUMP_TO_ORDER:
 					if (!self->calcduration) {
 						psy_audio_sequencer_jumptoorder(self, ev);

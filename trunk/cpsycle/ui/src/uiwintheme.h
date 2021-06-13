@@ -26,6 +26,8 @@ typedef struct psy_ui_WinTheme {
 	psy_ui_Colour cl_skyblue;
 	psy_ui_Colour cl_aqua;
 	psy_ui_Colour cl_white;
+	psy_ui_Colour cl_yellow;
+	psy_ui_Colour cl_red;
 	psy_ui_Border raised;
 	psy_ui_Border lowered;
 } psy_ui_WinTheme;

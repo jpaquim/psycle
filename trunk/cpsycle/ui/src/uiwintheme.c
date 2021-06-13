@@ -23,6 +23,8 @@ void psy_ui_wintheme_init(psy_ui_WinTheme* self)
 	self->cl_skyblue = psy_ui_colour_make(0xF0CAA6);
 	self->cl_aqua = psy_ui_colour_make(0xFFFF00);
 	self->cl_white = psy_ui_colour_make(0xFFFFFF);
+	self->cl_yellow = psy_ui_colour_make(0x00FFFF);
+	self->cl_red = psy_ui_colour_make(0x0000FF);
 	/* borders */
 	psy_ui_border_setcolours(&self->raised,
 		self->cl_white, self->cl_gray, self->cl_gray, self->cl_white);

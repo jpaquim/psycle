@@ -575,7 +575,15 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_realpoint_init(&cp);
 		odd = FALSE;
-		bgcolour = psy_ui_component_backgroundcolour(&self->component);
+		if (!psy_ui_style(STYLE_PLUGINVIEW_ITEM)->backgroundcolour.mode.set) {
+			bgcolour = psy_ui_component_backgroundcolour(&self->component);
+		} else {
+			bgcolour = psy_ui_style(STYLE_PLUGINVIEW_ITEM)->backgroundcolour;
+		}
+		if (psy_ui_style(STYLE_PLUGINVIEW_ITEM)->colour.mode.set) {
+			psy_ui_component_setcolour(&self->component,
+				psy_ui_style(STYLE_PLUGINVIEW_ITEM)->colour);
+		}
 		overlaycolour = psy_ui_colour_white();
 		overlay = 2;
 		oddlinebgcolour = psy_ui_colour_overlayed(&bgcolour, &overlaycolour,
@@ -605,23 +613,38 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_Property* property, psy_ui_RealPoint topleft, bool sel)
 {
-	char text[128];
+	char text[128];	
+	psy_ui_Style* itemstyle;
+	psy_ui_Colour bgcolour;
 
-	if (sel) {		
-		psy_ui_drawsolidrectangle(g, 
+	if (sel) {
+		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM_SELECTED);
+	} else {
+		itemstyle = psy_ui_style(STYLE_PLUGINVIEW_ITEM);
+	}
+
+	if (!itemstyle->backgroundcolour.mode.set) {
+		bgcolour = psy_ui_component_backgroundcolour(&self->component);
+	} else {
+		bgcolour = itemstyle->backgroundcolour;
+	}
+	if (itemstyle->colour.mode.set) {
+		psy_ui_settextcolour(g, itemstyle->colour);
+	} else {
+		psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
+	}
+	if (itemstyle->backgroundcolour.mode.set) {
+		psy_ui_drawsolidrectangle(g,
 			psy_ui_realrectangle_make(
 				topleft,
 				psy_ui_realsize_make(self->columnwidth - 5, self->lineheight)),
-			psy_ui_colour_make(0x009B7800));
-		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
+			bgcolour);
+	}			
+	/* if (pluginenabled(self, property)) {
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 	} else {
-		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
-		if (pluginenabled(self, property)) {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
-		} else {
-			psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
-		}
-	}		
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
+	}*/		
 	plugindisplayname(property, text);	
 	psy_ui_textout(g, topleft.x, topleft.y + 2, text, psy_strlen(text));
 	plugintype(property, text);

@@ -117,6 +117,8 @@ extern "C" {
 #define STYLE_FILEBAR                        36520
 #define STYLE_UNDOBAR                        36540
 #define STYLE_PLUGINVIEW                     36560
+#define STYLE_PLUGINVIEW_ITEM                36561
+#define STYLE_PLUGINVIEW_ITEM_SELECTED       36562
 
 void inithoststyles(psy_ui_Styles*, psy_ui_ThemeMode);
 

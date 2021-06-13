@@ -94,7 +94,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 	psy_ui_button_init_text(&self->togglekbdhelp, &self->component,
 		NULL, "main.kbd");
 	margin = psy_ui_component_margin(psy_ui_button_base(&self->togglekbdhelp));
-	margin.right = psy_ui_value_make_ew(4.0);
+	psy_ui_margin_setright(&margin, psy_ui_value_make_ew(4.0));
 	psy_ui_component_setmargin(psy_ui_button_base(&self->togglekbdhelp),
 		 margin);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
@@ -109,7 +109,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 	psy_ui_button_init_text(&self->toggleterminal, &self->component,
 		NULL, "Terminal");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
-		psy_ui_ALIGN_RIGHT);	
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM,
 		psy_ui_colour_white());
 }
@@ -135,11 +135,9 @@ void mainstatusbar_onstatus(MainStatusBar* self, Workspace* sender,
 
 void mainstatusbar_updateterminalbutton(MainStatusBar* self)
 {
-	psy_ui_component_setstyletype(
-		psy_ui_button_base(&self->toggleterminal),
+	psy_ui_component_setstyletype(psy_ui_button_base(&self->toggleterminal),
 		self->terminalstyleid);
-	psy_ui_component_invalidate(
-		psy_ui_button_base(&self->toggleterminal));
+	psy_ui_component_invalidate(psy_ui_button_base(&self->toggleterminal));
 }
 
 void mainstatusbar_setdefaultstatustext(MainStatusBar* self, const char* text)
