@@ -38,7 +38,8 @@ static int psy_audio_psy3loader_read_info(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_read_sngi(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader*);
-static int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader*);
+static int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader*,
+	int32_t index, psy_audio_Pattern*);
 static int psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader*);
 static int psy_audio_psy3loader_read_smid(psy_audio_PSY3Loader*);
@@ -634,76 +635,76 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 	int32_t temp;
 	int32_t lpb;
 	psy_dsp_big_beat_t bpl;
-	char patternname[MAX_PATTERNS][32];
+	char patternname[32];
 	/* number of lines of each pattern */
-	int32_t patternlines[MAX_PATTERNS];
+	int32_t patternlines;
 	int32_t songtracks;
-	int status;	
+	int status;
+	psy_audio_Pattern* pattern;
+	uint32_t sizez77 = 0;
+	byte* psource;
+	psy_audio_LegacyPattern pdest;
+	//int32_t y;
+	size_t destsize;
 
+	pattern = NULL;
 	lpb = (int32_t)self->song->properties.lpb;
 	bpl = 1 / (psy_dsp_big_beat_t) lpb;
 	if (status = psyfile_read(self->fp, &index, sizeof index)) {
 		return status;
+	}	
+	/* num lines */
+	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
+		return status;
 	}
-	if (index < MAX_PATTERNS)
-	{
-		uint32_t sizez77 = 0;
-		byte* psource;
-		psy_audio_LegacyPattern pdest;
-		//int32_t y;
-		size_t destsize;
-		/* num lines */
-		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
-			return status;
-		}
-		/*
-		** clear it out if it already exists
-		** removepattern(index);
-		*/
-		patternlines[index] = temp;
-		/*
-		** num tracks per pattern
-		** eventually this may be variable per pattern, like when we get multipattern
-		*/
-		if (status = psyfile_read(self->fp, &songtracks, sizeof temp)) {
-			return status;
-		}
-		if (status = psyfile_readstring(self->fp, patternname[index], sizeof * patternname)) {
-			return status;
-		}
-		if (status = psyfile_read(self->fp, &sizez77, sizeof sizez77)) {
-			return status;
-		}
-		if (self->fp->currchunk.version > 1) {
-			psyfile_skip(self->fp, sizez77);
-		} else {
-			psy_audio_Pattern* pattern;
-
-			psource = (byte*)malloc(sizez77);
-			if (status = psyfile_read(self->fp, psource, sizez77)) {
-				free(psource);
-				return status;
-			}
-			beerz77decomp2(psource, &pdest, &destsize);
+	/*
+	** clear it out if it already exists
+	** removepattern(index);
+	*/
+	patternlines = temp;
+	/*
+	** num tracks per pattern
+	** eventually this may be variable per pattern, like when we get multipattern
+	*/
+	if (status = psyfile_read(self->fp, &songtracks, sizeof temp)) {
+		return status;
+	}
+	if (status = psyfile_readstring(self->fp, patternname, 32)) {
+		return status;
+	}
+	if (status = psyfile_read(self->fp, &sizez77, sizeof sizez77)) {
+		return status;
+	}
+	if (self->fp->currchunk.version > 1) {
+		psyfile_skip(self->fp, sizez77);
+		pattern = psy_audio_pattern_allocinit();
+		psy_audio_patterns_insert(&self->song->patterns, index, pattern);
+		psy_audio_pattern_setname(pattern, patternname);
+	} else {
+		psource = (byte*)malloc(sizez77);
+		if (status = psyfile_read(self->fp, psource, sizez77)) {
 			free(psource);
-			pattern = psy_audio_pattern_allocinit();
-			/* songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0; */
-			psy_audio_convert_legacypattern(
-				pattern, pdest,
-				(uint32_t)psy_audio_song_numsongtracks(self->song),
-				patternlines[index],
-				lpb);
-			free(pdest);
-			pdest = 0;
-			psy_audio_patterns_insert(&self->song->patterns, index, pattern);
-			psy_audio_pattern_setname(pattern, patternname[index]);						
-			/* fix for a bug existing in the song saver in the 1.7.x series */
-			if ((self->fp->currchunk.version == 0x0000) && psyfile_getpos(self->fp) ==
-				self->fp->currchunk.begins + self->fp->currchunk.size + 4) {
-				self->fp->currchunk.size += 4;
-			}
-		}			
-	}
+			return status;
+		}
+		beerz77decomp2(psource, &pdest, &destsize);
+		free(psource);
+		pattern = psy_audio_pattern_allocinit();
+		/* songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0; */
+		psy_audio_convert_legacypattern(
+			pattern, pdest,
+			(uint32_t)psy_audio_song_numsongtracks(self->song),
+			patternlines,
+			lpb);
+		free(pdest);
+		pdest = 0;
+		psy_audio_patterns_insert(&self->song->patterns, index, pattern);
+		psy_audio_pattern_setname(pattern, patternname);						
+		/* fix for a bug existing in the song saver in the 1.7.x series */
+		if ((self->fp->currchunk.version == 0x0000) && psyfile_getpos(self->fp) ==
+			self->fp->currchunk.begins + self->fp->currchunk.size + 4) {
+			self->fp->currchunk.size += 4;
+		}
+	}	
 	if (self->fp->currchunk.version > 0) {
 		if (!self->song->patterns.sharetracknames) {
 			uint32_t t;
@@ -717,113 +718,88 @@ int psy_audio_psy3loader_read_patd(psy_audio_PSY3Loader* self)
 		}
 	}
 	if (self->fp->currchunk.version > 1) {
-		psy_audio_psy3loader_read_epat(self);
+		if (!pattern) {
+			return PSY_ERRFILE;
+		}
+		psy_audio_psy3loader_read_epat(self, index, pattern);
 	}			
 	return PSY_OK;
 }
 
-int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self)
-{			
-	int32_t index;
+int psy_audio_psy3loader_read_epat(psy_audio_PSY3Loader* self, int32_t index,
+	psy_audio_Pattern* pattern)
+{				
 	int32_t temp;
-	float ftemp;				
-	char patternname[MAX_PATTERNS][32];		
-	uint32_t numpatterns;
+	float ftemp;	
 	uint32_t numentries;
-	uint32_t c;
-	uint32_t i;
+	uint32_t c;	
 	int status;
-			
-	if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				
+	/* pattern length */
+	if (status = psyfile_read(self->fp, &ftemp, sizeof ftemp)) {
 		return status;
 	}
-	numpatterns = temp;
-	for (i = 0; i < numpatterns; ++i) {
-		psy_audio_Pattern* pattern;
-
-		pattern = psy_audio_pattern_allocinit();
-
-		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-			return status;
-		}
-		index = temp;			
-		psy_audio_patterns_insert(&self->song->patterns, index, pattern);
-		/* pattern length */
-		if (status = psyfile_read(self->fp, &ftemp, sizeof ftemp)) {
-			return status;
-		}
-		psy_audio_pattern_setlength(pattern, ftemp);
-		/* 
-		** num tracks per pattern
-		** eventually this may be variable per pattern, like when we get multipattern
-		*/
-		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-			return status;
-		}
-		if (status = psyfile_readstring(self->fp, patternname[index], sizeof * patternname)) {
-			return status;
-		}
-		/* num entries */
-		if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
-			return status;
-		}
-		numentries = temp;
-		for (c = 0; c < numentries; ++c) {
-			psy_audio_PatternEntry* entry;
-			uint32_t numevents;
-			uint32_t j;
-
-			entry = psy_audio_patternentry_alloc();
-			entry->events = 0;
-			/* read track */
-			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-				return status;
-			}
-			entry->track = temp;
-			/* read offset */
-			if (status = psyfile_read(self->fp, &ftemp, sizeof(temp))) {
-				return status;
-			}
-			entry->offset = ftemp;				
-			/* num events */
-			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-				return status;
-			}
-			numevents = temp;
-			/* read events */
-			for (j = 0; j < numevents; ++j) {
-				psy_audio_PatternEvent ev;
-
-				psy_audio_patternevent_clear(&ev);
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.note = temp;
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.inst = temp;
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.mach = temp;
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.vol = temp;
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.cmd = temp;
-				if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
-					return status;
-				}
-				ev.parameter = temp;
-				psy_audio_patternentry_addevent(entry, &ev);
-			}
-			psy_list_append(&pattern->events, entry);
-		}			
+	psy_audio_pattern_setlength(pattern, ftemp);	
+	/* num entries */
+	if (status = psyfile_read(self->fp, &temp, sizeof temp)) {
+		return status;
 	}
+	numentries = temp;
+	for (c = 0; c < numentries; ++c) {
+		psy_audio_PatternEntry* entry;
+		uint32_t numevents;
+		uint32_t j;
+
+		entry = psy_audio_patternentry_alloc();
+		entry->events = 0;
+		/* read track */
+		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+			return status;
+		}
+		entry->track = temp;
+		/* read offset */
+		if (status = psyfile_read(self->fp, &ftemp, sizeof(temp))) {
+			return status;
+		}
+		entry->offset = ftemp;				
+		/* num events */
+		if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+			return status;
+		}
+		numevents = temp;
+		/* read events */
+		for (j = 0; j < numevents; ++j) {
+			psy_audio_PatternEvent ev;
+
+			psy_audio_patternevent_clear(&ev);
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.note = temp;
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.inst = temp;
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.mach = temp;
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.vol = temp;
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.cmd = temp;
+			if (status = psyfile_read(self->fp, &temp, sizeof(temp))) {
+				return status;
+			}
+			ev.parameter = temp;
+			psy_audio_patternentry_addevent(entry, &ev);
+		}
+		psy_list_append(&pattern->events, entry);
+	}	
 	return PSY_OK;
 }
 

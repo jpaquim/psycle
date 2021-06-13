@@ -16,11 +16,12 @@
 #define DEFAULT_PXPERBEAT 10.0
 
 void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
-	psy_ui_Edit* edit)
+	psy_ui_Edit* edit, psy_ui_Component* view)
 {	
 	self->workspace = cmds->workspace;
 	self->cmds = cmds;
 	self->edit = edit;
+	self->view = view;
 	self->inserttype = psy_audio_SEQUENCEENTRY_PATTERN;
 	psy_signal_init(&self->signal_cursorchanged);
 	self->pxperbeat = DEFAULT_PXPERBEAT;

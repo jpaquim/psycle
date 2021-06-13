@@ -75,6 +75,7 @@ typedef	enum {
 	** anything else below it
 	*/
 	psy_audio_NOTECOMMANDS_INVALID,
+	psy_audio_NOTECOMMANDS_TIMESIG = 247,
 	psy_audio_NOTECOMMANDS_PLAY_SMPL = 248,
 	psy_audio_NOTECOMMANDS_MIDI_SPP = 249,
 	psy_audio_NOTECOMMANDS_MIDI_CLK_START = 250,

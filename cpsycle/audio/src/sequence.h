@@ -289,7 +289,9 @@ typedef struct psy_audio_Sequence {
 	psy_Signal signal_mutechanged;
 	psy_Signal signal_solochanged;
 	/* internal */
-	psy_audio_SequenceTrackNode* tracks;	
+	psy_audio_SequenceTrackNode* tracks;
+	psy_audio_SequenceTrack globaltrack;
+	psy_audio_Pattern globalpattern;
 	psy_audio_TrackState trackstate;
 	bool preventreposition;
 	/* calcduration */

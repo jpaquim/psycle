@@ -24,6 +24,8 @@ extern "C" {
 ** sequence (sequence.h) with other patterns (patterns.h).
 */
 
+#define psy_audio_GLOBALPATTERN INT32_MAX - 1
+
 /* edit position in the pattern */
 typedef struct {	
 	uintptr_t track;
