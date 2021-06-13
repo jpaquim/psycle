@@ -81,9 +81,11 @@ typedef struct MainFrame {
 	psy_ui_Component tabbars;
 	psy_ui_Component topspacer;
 	psy_ui_Component tabspacer;
-	psy_ui_Component client;	
-	psy_ui_Component mainviews; /* includes tabbar */
-	psy_ui_Component mainpane;  /* excludes tabbar and includes bottom views */
+	psy_ui_Component client;
+	/* includes tabbar */
+	psy_ui_Component mainviews;
+	/* excludes tabbar and includes bottom views */
+	psy_ui_Component mainpane;
 	psy_ui_Component spacerleft;
 	psy_ui_Component spacerright;
 	psy_ui_Terminal terminal;

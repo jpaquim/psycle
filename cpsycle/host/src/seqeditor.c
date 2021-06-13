@@ -1738,7 +1738,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->tracks.component, psy_ui_ALIGN_FIXED);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
-		psy_ui_value_make_ew(20.0), psy_ui_value_make_ph(0.3)));
+		psy_ui_value_make_ew(20.0), psy_ui_value_make_ph(0.30)));
 	seqeditor_updatesong(self);
 	psy_signal_connect(&self->state.workspace->signal_songchanged, self,
 		seqeditor_onsongchanged);

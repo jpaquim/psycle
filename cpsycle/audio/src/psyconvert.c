@@ -14,8 +14,8 @@
 
 /* Pattern */
 
-psy_audio_LegacyPattern psy_audio_allocoldpattern(struct psy_audio_Pattern* pattern, uintptr_t lpb,
-	int* rv_lines)
+psy_audio_LegacyPattern psy_audio_allocoldpattern(psy_audio_Pattern* pattern,
+	uintptr_t lpb, int* rv_lines)
 {
 	unsigned char* rv;
 	int32_t lines;
@@ -98,16 +98,21 @@ void psy_audio_convert_legacypattern(
 				psy2ev->_cmd == 0 &&
 				psy2ev->_parameter == 0;
 			if (!empty) {
-				psy_audio_PatternEvent event;
+				psy_audio_PatternEvent e;
 
-				psy_audio_patternevent_clear(&event);
-				event.note = (psy2ev->_note == 255) ? psy_audio_NOTECOMMANDS_EMPTY : psy2ev->_note;
-				event.inst = (psy2ev->_inst == 255) ? psy_audio_NOTECOMMANDS_INST_EMPTY : psy2ev->_inst;
-				event.mach = (psy2ev->_mach == 255) ? psy_audio_NOTECOMMANDS_psy_audio_EMPTY : psy2ev->_mach;
-				event.cmd = psy2ev->_cmd;
-				event.parameter = psy2ev->_parameter;
-				node = psy_audio_pattern_insert(dst, node, track, offset,
-					&event);
+				psy_audio_patternevent_clear(&e);
+				e.note = (psy2ev->_note == 255)
+					? psy_audio_NOTECOMMANDS_EMPTY
+					: psy2ev->_note;
+				e.inst = (psy2ev->_inst == 255)
+					? psy_audio_NOTECOMMANDS_INST_EMPTY
+					: psy2ev->_inst;
+				e.mach = (psy2ev->_mach == 255)
+					? psy_audio_NOTECOMMANDS_psy_audio_EMPTY
+					: psy2ev->_mach;
+				e.cmd = psy2ev->_cmd;
+				e.parameter = psy2ev->_parameter;				
+				node = psy_audio_pattern_insert(dst, node, track, offset, &e);
 			}
 			ptrack += EVENT_SIZE;
 		}		

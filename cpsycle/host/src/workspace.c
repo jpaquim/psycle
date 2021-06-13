@@ -732,7 +732,8 @@ void workspace_setapptheme(Workspace* self, psy_Property* property)
 		psy_ui_ThemeMode theme;
 
 		theme = (psy_ui_ThemeMode)(psy_property_item_int(choice));		
-		/* reset host styles */
+		/* reset styles */		
+		psy_ui_defaults_inittheme(psy_ui_appdefaults(), theme, TRUE);
 		inithoststyles(&psy_ui_appdefaults()->styles, theme);
 		psy_ui_defaults_loadtheme(psy_ui_appdefaults(),
 			dirconfig_configdir(&self->config.directories),
