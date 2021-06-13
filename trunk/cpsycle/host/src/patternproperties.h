@@ -5,11 +5,15 @@
 #if !defined(PATTERNPROPERTIES)
 #define PATTERNPROPERTIES
 
-#include "uilabel.h"
-#include "uiedit.h"
-#include "uibutton.h"
-#include "pattern.h"
+/* host */
+#include "intedit.h"
 #include "workspace.h"
+/* audio */
+#include <pattern.h>
+/* ui */
+#include <uilabel.h>
+#include <uiedit.h>
+#include <uibutton.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,6 +28,8 @@ typedef struct {
 	psy_ui_Edit nameedit;
 	psy_ui_Edit lengthedit;
 	psy_ui_Button applybutton;
+	IntEdit timesig_nominator;
+	IntEdit timesig_denominator;
 	// references
 	psy_audio_Pattern* pattern;
 	Workspace* workspace;

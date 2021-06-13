@@ -177,6 +177,8 @@ typedef struct psy_audio_Pattern {
 	/* used by the paste pattern, player uses songtracks of patterns */
 	uintptr_t maxsongtracks;
 	char* name;
+	uintptr_t timesig_nominator;
+	uintptr_t timesig_denominator;
 } psy_audio_Pattern;
 
 /* initializes a pattern */
