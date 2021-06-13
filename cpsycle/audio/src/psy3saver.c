@@ -603,7 +603,16 @@ int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver* self, int32_t index,
 {	
 	int status = PSY_OK;			
 	psy_audio_PatternNode* node;						
-					
+				
+	/* timesig */	
+	if (status = psyfile_write_uint32(self->fp,
+			(uint32_t)pattern->timesig_nominator)) {
+		return status;
+	}
+	if (status = psyfile_write_uint32(self->fp,
+		(uint32_t)pattern->timesig_denominator)) {
+		return status;
+	}
 	/* length */
 	if (status = psyfile_write_float(self->fp, (float)pattern->length)) {
 		return status;

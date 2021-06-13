@@ -160,6 +160,8 @@ void psy_audio_pattern_init(psy_audio_Pattern* self)
 	self->name = strdup("Untitled");	
 	self->opcount = 0;
 	self->maxsongtracks = 0;
+	self->timesig_nominator = 0; /* 0 = not set */
+	self->timesig_denominator = 0;	/* 0 = not set */
 	psy_audio_pattern_init_signals(self);
 }
 
