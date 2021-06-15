@@ -1,23 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "machinestackview.h"
-// host
+/* host */
 #include "arrowui.h"
 #include "checkui.h"
 #include "knobui.h"
 #include "resources/resource.h"
 #include "slidergroupui.h"
-// audio
-#include <plugin_interface.h>
+/* audio */
 #include <exclusivelock.h>
-// platform
+#include <plugin_interface.h>
+/* platform */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-// RouteMachineParam
+/* RouteMachineParam */
+/* prototypes */
 static void outputrouteparam_tweak(OutputRouteParam*, float val);
 static float outputrouteparam_normvalue(OutputRouteParam*);
 static int outputrouteparam_describe(OutputRouteParam* self, char* text);
@@ -28,7 +32,7 @@ static void outputrouteparam_range(OutputRouteParam*,
 static psy_audio_Wire outputrouteparam_wire(OutputRouteParam*);
 static uintptr_t outputrouteparam_busid(OutputRouteParam*, psy_audio_Wire);
 static psy_List* outputrouteparam_buses(OutputRouteParam*);
-// vtable
+/* vtable */
 static MachineParamVtable outputrouteparam_vtable;
 static bool outputrouteparam_vtable_initialized = FALSE;
 
@@ -51,7 +55,7 @@ static void outputrouteparam_vtable_init(OutputRouteParam* self)
 		outputrouteparam_vtable_initialized = TRUE;
 	}
 }
-// implementation
+/* implementation */
 void outputrouteparam_init(OutputRouteParam* self, psy_audio_Machines* machines,
 	uintptr_t column, MachineStackState* state)
 {
@@ -97,12 +101,12 @@ void outputrouteparam_tweak(OutputRouteParam* self, float value)
 		self->state->rewire = FALSE;
 		return;
 	} else if (selidx == 1) {
-		// Master Connection
+		/* Master Connection */
 		self->state->newwire = psy_audio_wire_make(src, psy_audio_MASTER_INDEX);
 	} else {		
 		psy_List* buses;
 		
-		// Bus Connection
+		/* Bus Connection */
 		self->state->newwire = psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
 		buses = outputrouteparam_buses(self);
 		if (buses) {
@@ -223,11 +227,13 @@ void outputrouteparam_range(OutputRouteParam* self,
 {
 	psy_List* buses;
 		
-	// 0 : Not Connected to Master/Bus
-	// 1 : Connected to Master
+	/*
+	** 0 : Not Connected to Master / Bus
+	** 1 : Connected to Master
+	*/
 	*minval = 0;
 	*maxval = 1;
-	// 2 .. numbuses
+	/* 2 ..numbuses */
 	buses = outputrouteparam_buses(self);
 	if (buses) {
 		*maxval += psy_list_size(buses);
@@ -258,8 +264,8 @@ psy_List* outputrouteparam_buses(OutputRouteParam* self)
 	return rv;
 }
 
-// MachineStackColumn
-// prototypes
+/* MachineStackColumn */
+/* prototypes */
 static void  machinestackcolumn_level_normvalue(MachineStackColumn*,
 	psy_audio_IntMachineParam* sender, float* rv);
 static void machinestackcolumn_mute_tweak(MachineStackColumn*,
@@ -522,17 +528,17 @@ void machinestackcolumn_mute_normvalue(MachineStackColumn* self,
 	}
 }
 
-// MachineStackState
-// prototypes
+/* MachineStackState */
+/* prototypes */
 static uintptr_t machinestackstate_buildcolumnoutchain(MachineStackState*,
 	uintptr_t slot, uintptr_t prevslot, uintptr_t columnindex, bool first);
-// implementation
+/* implementation */
 void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 {
 	psy_table_init(&self->columns);	
 	self->machines = NULL;	
 	self->selected = psy_INDEX_INVALID;
-	//self->effectsize = psy_ui_size_make_px(138.0, 52.0);
+	/* self->effectsize = psy_ui_size_make_px(138.0, 52.0); */
 	self->effectsize = psy_ui_size_make(
 		psy_ui_value_make_px(138.0),
 		psy_ui_value_make_px(52.0));
@@ -543,7 +549,7 @@ void machinestackstate_init(MachineStackState* self, ParamViews* paramviews)
 	self->columnselected = FALSE;
 	self->drawsmalleffects = FALSE;
 	self->drawvirtualgenerators = FALSE;
-	// 20: right margin of column
+	/* 20: right margin of column */
 	self->columnsize = psy_ui_size_make_px(138.0 + 20, 52.0);
 	self->update = FALSE;
 	self->effectinsertpos = psy_INDEX_INVALID;
@@ -793,8 +799,8 @@ uintptr_t machinestackstate_maxnumcolumns(const MachineStackState* self)
 	return psy_table_maxsize(&self->columns);
 }
 
-// MachineStackLabels
-// prototypes
+/* MachineStackLabels */
+/* prototypes */
 static void machinestackdesc_onalign(MachineStackDesc*);
 static void machinestackdesc_onpreferredsize(MachineStackDesc*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -804,8 +810,7 @@ static void machinestackdesc_ontogglevolumes(MachineStackDesc*,
 	psy_ui_Button* sender);
 static void machinestackdesc_configureeffects(MachineStackDesc*,
 	psy_ui_Button* sender);
-
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable machinestackdesc_vtable;
 static bool machinestackdesc_vtable_initialized = FALSE;
 
@@ -822,7 +827,7 @@ static psy_ui_ComponentVtable* machinestackdesc_vtable_init(MachineStackDesc* se
 	}
 	return &machinestackdesc_vtable;
 }
-
+/* implementation */
 void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 	MachineStackView* view)
 {
@@ -836,8 +841,8 @@ void machinestackdesc_init(MachineStackDesc* self, psy_ui_Component* parent,
 		"stackview.inputs");			
 	psy_ui_button_init_text_connect(&self->effects, &self->component, NULL,
 		"stackview.effects", self, machinestackdesc_configureeffects);
-	psy_ui_button_loadresource(&self->effects, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->effects, IDB_SETTINGS_LIGHT,
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text_connect(&self->outputs, &self->component, NULL,
 		"stackview.outputs", self, machinestackdesc_ontoggleoutputs);
 	psy_ui_button_seticon(&self->outputs, psy_ui_ICON_LESS);
@@ -852,7 +857,8 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	psy_ui_RealSize sizepx;
 	psy_ui_Size insize;
 	psy_ui_RealSize insizepx;
-	psy_ui_Size effectsize;
+	psy_ui_Size btnsize;
+	psy_ui_Size effectsize;	
 	psy_ui_RealSize effectsizepx;
 	psy_ui_Size outsize;
 	psy_ui_RealSize outsizepx;
@@ -874,6 +880,8 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	effectsize = psy_ui_component_preferredsize(&self->view->pane.component,
 		NULL);
 	effectsizepx = psy_ui_size_px(&effectsize, tm, NULL);
+	btnsize = psy_ui_component_preferredsize(psy_ui_button_base(
+		&self->effects), NULL);
 	if (psy_ui_component_visible(&self->view->outputs.component)) {
 		outsize = psy_ui_component_preferredsize(&self->view->outputs.component,
 			NULL);
@@ -892,20 +900,20 @@ void machinestackdesc_onalign(MachineStackDesc* self)
 	psy_ui_component_setposition(&self->inputs.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_make_px(margin_left, 0.0),
-			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
+			psy_ui_size_make(size.width, btnsize.height)));
 	psy_ui_component_setposition(&self->effects.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_make_px(margin_left, insizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
+			psy_ui_size_make(size.width, btnsize.height)));
 	psy_ui_component_setposition(&self->outputs.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height -
 				outsizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
+			psy_ui_size_make(size.width, btnsize.height)));
 	psy_ui_component_setposition(&self->volumes.component,
 		psy_ui_rectangle_make(
 			psy_ui_point_make_px(margin_left, sizepx.height - volumesizepx.height),
-			psy_ui_size_make(size.width, psy_ui_value_make_eh(1.0))));
+			psy_ui_size_make(size.width, btnsize.height)));
 }
 
 void machinestackdesc_onpreferredsize(MachineStackDesc* self,

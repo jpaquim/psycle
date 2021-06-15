@@ -20,6 +20,7 @@ typedef struct psy_ui_Notebook {
 	psy_ui_Splitter splitbar;	
 	uintptr_t pageindex;
 	int split;
+	bool preventalign;
 } psy_ui_Notebook;
 
 void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);

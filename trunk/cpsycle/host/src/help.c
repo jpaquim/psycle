@@ -1,18 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
 #include "help.h"
-// file
+/* file */
 #include <dir.h>
-// std
+/* std */
 #include <stdlib.h>
 #include <string.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void help_ondestroy(Help*, psy_ui_Component* sender);
 static void help_registerfiles(Help*);
 static void help_clearfilenames(Help*);
@@ -27,7 +29,6 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin margin;
 	psy_ui_Margin leftmargin;
-	//psy_ui_Margin tabmargin;
 
 	psy_ui_component_init(help_base(self), parent, NULL);
 	self->workspace = workspace;
@@ -35,9 +36,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	self->lastalign = psy_ui_ALIGN_NONE;
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);	
 	psy_ui_margin_init_em(&margin, 0.0, 1.0, 0.0, 1.5);
-	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), margin);
-	// psy_ui_margin_init_em(&tabmargin, 0.0, 0.0, 0.5, 0.0);		
-	// psy_ui_tabbar_setdefaulttabmargin(&self->tabbar, tabmargin);
+	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->tabbar), margin);	
 	psy_ui_margin_init_em(&leftmargin, 0.0, 0.0, 0.0, 3.0);		
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_component_setmargin(&self->editor.component, leftmargin);
@@ -90,7 +89,8 @@ void help_buildtabs(Help* self)
 		psy_Path path;
 
 		psy_path_init(&path, (char*)psy_tableiterator_value(&it));		
-		psy_ui_tabbar_append(&self->tabbar, psy_path_name(&path));
+		psy_ui_tabbar_append(&self->tabbar, psy_path_name(&path),
+			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 		psy_path_dispose(&path);
 	}
 }
@@ -117,7 +117,8 @@ void help_loadpage(Help* self, uintptr_t index)
 		psy_path_init(&path, NULL);
 		psy_path_setprefix(&path, dirconfig_doc(
 			&self->workspace->config.directories));
-		psy_path_setname(&path, (const char*)psy_table_at(&self->filenames, index));
+		psy_path_setname(&path, (const char*)psy_table_at(&self->filenames,
+			index));
 		psy_ui_editor_load(&self->editor, psy_path_full(&path));
 		psy_path_dispose(&path);
 	}
@@ -127,13 +128,13 @@ void help_loadpage(Help* self, uintptr_t index)
 void help_onalign(Help* self, psy_ui_Component* sender)
 {
 	if (self->lastalign != psy_ui_component_parent(sender)->align) {
-		// psy_ui_Margin tabmargin;
-
-		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {						
-			psy_ui_component_setalign(&self->tabbar.component, psy_ui_ALIGN_TOP);
+		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {
+			psy_ui_component_setalign(&self->tabbar.component,
+				psy_ui_ALIGN_TOP);
 			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_RIGHT);
 		} else {
-			psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+			psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+				psy_ui_ALIGN_RIGHT);
 			psy_ui_tabbar_settabalign(&self->tabbar, psy_ui_ALIGN_TOP);
 		}
 		psy_ui_component_align(psy_ui_tabbar_base(&self->tabbar));

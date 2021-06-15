@@ -265,6 +265,73 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 						imp->component);
 				}
 				break;	
+			case WM_NCPAINT:
+				if (imp->component && imp->component->ncpaint) {					
+#ifndef DCX_USESTYLE
+#define DCX_USESTYLE 0x00010000
+#endif
+					psy_ui_Colour bgcolour;
+
+					bgcolour = psy_ui_component_backgroundcolour(imp->component);
+					if (bgcolour.mode.set) {
+						HDC hdc = GetDCEx(hwnd, 0, DCX_WINDOW | DCX_USESTYLE);
+						if (hdc) {
+							RECT rcclient;
+							GetClientRect(hwnd, &rcclient);
+							RECT rcwin;
+							GetWindowRect(hwnd, &rcwin);
+							POINT ptupleft;
+							ptupleft.x = rcwin.left;
+							ptupleft.y = rcwin.top;
+							MapWindowPoints(0, hwnd, (LPPOINT)&rcwin, (sizeof(RECT) / sizeof(POINT)));
+							OffsetRect(&rcclient, -rcwin.left, -rcwin.top);
+							OffsetRect(&rcwin, -rcwin.left, -rcwin.top);
+
+							HRGN rgntemp = NULL;
+							if (wParam == NULLREGION || wParam == ERROR) {
+								ExcludeClipRect(hdc, rcclient.left, rcclient.top, rcclient.right, rcclient.bottom);
+							} else {
+								rgntemp = CreateRectRgn(rcclient.left + ptupleft.x, rcclient.top + ptupleft.y,
+									rcclient.right + ptupleft.x, rcclient.bottom + ptupleft.y);
+								if (CombineRgn(rgntemp, (HRGN)wParam, rgntemp, RGN_DIFF) == NULLREGION) {
+									// nothing to paint
+								}
+								OffsetRgn(rgntemp, -ptupleft.x, -ptupleft.y);
+								ExtSelectClipRgn(hdc, rgntemp, RGN_AND);
+							}
+
+							HBRUSH hbrush = CreateSolidBrush(RGB(bgcolour.r, bgcolour.g, bgcolour.b));
+							FillRect(hdc, &rcwin, hbrush);
+							DeleteObject(hbrush);
+							ReleaseDC(hwnd, hdc);
+							if (rgntemp != 0) {
+								DeleteObject(rgntemp);
+							}
+						}
+						return 0;
+					}
+				}
+				break;
+			case WM_NCCALCSIZE:
+				if (imp->component && imp->component->ncpaint && wParam != 0) {									
+					NCCALCSIZE_PARAMS* nc;					
+
+					nc = (NCCALCSIZE_PARAMS*)lParam;					
+					if (nc) {	
+						const psy_ui_TextMetric* tm;
+						RECT* rc;
+						int dy;
+
+						tm = psy_ui_component_textmetric(imp->component);
+						rc = &nc->rgrc[0];
+						dy = -((((nc->rgrc[0].bottom - nc->rgrc[0].top) -
+							(tm->tmHeight - 1)) / 2));
+						rc->top -= dy + 1;
+						rc->bottom += dy;
+					}
+					return 0;
+				}
+				break;
 			case WM_MOUSEWHEEL:
 			{
 				int preventdefault = 0;
@@ -329,26 +396,37 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_eventdispatch_timer(&winapp->app->eventdispatch,
 						imp->component, (uintptr_t)wParam);
 				}
-				return 0;
+				return 0;			
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
-			case WM_CTLCOLOREDIT: {
+			case WM_CTLCOLOREDIT: {				
 				uint32_t colorref;
 				uint32_t bgcolorref;
 				HBRUSH brush;
-
+				
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t)lParam);
+				if (!imp) {
+					imp = psy_table_at(&winapp->selfmap, (uintptr_t)hwnd);
+				}
 				if (imp && imp->component) {
 					psy_ui_Colour colour;
 
 					colour = psy_ui_component_colour(imp->component);
 					colorref = psy_ui_colour_colorref(&colour);
 					colour = psy_ui_component_backgroundcolour(imp->component);
-					bgcolorref = psy_ui_colour_colorref(&colour);
+					bgcolorref = psy_ui_colour_colorref(&colour);					
+					if (((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
+							== psy_ui_SETBACKGROUND) && colour.mode.set) {
+						DeleteObject(psy_ui_win_component_details(imp->component)->background);
+						psy_ui_win_component_details(imp->component)->background =
+							CreateSolidBrush(RGB(colour.r, colour.g, colour.b));						
+					} else {
+						brush = (HBRUSH)GetStockObject(NULL_BRUSH);
+					}
 					brush = ((imp->component->backgroundmode & psy_ui_SETBACKGROUND)
 							== psy_ui_SETBACKGROUND)
 						? psy_ui_win_component_details(imp->component)->background
-						: (HBRUSH)GetStockObject(NULL_BRUSH);
+						: (HBRUSH)GetStockObject(NULL_BRUSH);					
 				} else {
 					colorref = psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->colour);
 					bgcolorref = psy_ui_colour_colorref(&psy_ui_style_const(psy_ui_STYLE_ROOT)->backgroundcolour);
@@ -564,7 +642,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_eventdispatch_buttonup(&winapp->app->eventdispatch,
 					imp->component, &ev);
 				return 0;
-				break; }			
+				break; }	
 			case WM_LBUTTONDOWN: 
 			case WM_RBUTTONDOWN:
 			case WM_MBUTTONDOWN: {
@@ -692,8 +770,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_NCACTIVATE:
 				if (imp->component->dropdown) {
 					if (wParam == 0) {
-						EnableWindow(GetParent(imp->hwnd), TRUE);
-						ShowWindow(imp->hwnd, FALSE);
+						EnableWindow(GetParent(imp->hwnd), TRUE);						
+						psy_ui_component_hide(imp->component);						
 					}
 				}
 				break;

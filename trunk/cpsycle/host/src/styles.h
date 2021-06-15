@@ -13,10 +13,6 @@
 extern "C" {
 #endif
 	
-#define STYLE_SEQ_TAB                        30000
-#define STYLE_SEQ_TAB_HOVER                  31001
-#define STYLE_SEQ_TAB_SELECT                 31002
-#define STYLE_SEQ_TAB_NEW		             31003
 #define STYLE_SEQ_PROGRESS                   31004
 #define STYLE_SEQEDT			             31020
 #define STYLE_SEQEDT_ITEM                    31030
@@ -64,6 +60,7 @@ extern "C" {
 #define STYLE_TRACKSCOPE                     35010
 #define STYLE_SONGPROPERTIES                 35020
 #define STYLE_SONGPROPERTIES_COMMENTS        35021
+#define STYLE_SONGPROPERTIES_COMMENTS_EDIT   35022
 #define STYLE_SAMPLESVIEW                    35040
 #define STYLE_SAMPLESVIEW_HEADER             35041
 #define STYLE_SAMPLESVIEW_BUTTONS            35042
@@ -119,6 +116,9 @@ extern "C" {
 #define STYLE_PLUGINVIEW                     36560
 #define STYLE_PLUGINVIEW_ITEM                36561
 #define STYLE_PLUGINVIEW_ITEM_SELECTED       36562
+#define STYLE_LPB_NUMLABEL                   36580
+#define STYLE_TIMEBAR_NUMLABEL               36600
+#define STYLE_PATTERNVIEW                    36620
 
 void inithoststyles(psy_ui_Styles*, psy_ui_ThemeMode);
 

@@ -7,6 +7,8 @@
 
 
 #include "patternview.h"
+/* host */
+#include "styles.h"
 /* audio */
 #include <patternio.h>
 #include <songio.h>
@@ -18,10 +20,8 @@
 /* platform */
 #include "../../detail/portable.h"
 
-/*
-** PatternView
-** prototypes
-*/
+/* PatternView */
+/* prototypes */
 static void patternview_rebuild(PatternView*);
 static void patternview_align(PatternView*);
 static void patternview_inittabbar(PatternView*,
@@ -144,6 +144,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	patternview_initbasefontsize(self);	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_NOBACKGROUND);
+	psy_ui_component_setstyletype(&self->component,
+		STYLE_PATTERNVIEW);
 	psy_signal_connect(&self->component.signal_focus, self,
 		patternview_onfocus);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -237,7 +239,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		psy_ui_OVERFLOW_SCROLL);	
 	psy_ui_scroller_init(&self->trackerscroller, &self->tracker.component,
 		&self->editnotebook.component,
-		NULL); /* &self->editnotebook.component); */
+		NULL); /* &self->editnotebook.component); */	
 	psy_signal_connect(&self->trackerscroller.pane.signal_align, self,
 		patternview_ontrackerscrollpanealign);
 	psy_ui_component_setbackgroundmode(&self->trackerscroller.pane,

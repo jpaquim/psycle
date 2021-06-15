@@ -134,22 +134,23 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->samplerindex.component, margin);
 	/* Comments */
 	psy_ui_component_init(&self->comments, &self->component, NULL);
-	psy_ui_component_setstyletypes(&self->comments,
-		STYLE_SONGPROPERTIES_COMMENTS,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+	psy_ui_component_setstyletype(&self->comments,
+		STYLE_SONGPROPERTIES_COMMENTS);
+	psy_ui_component_setalign(&self->comments, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_init_text(&self->label_comments, &self->comments, NULL,
-		"songproperties.extcomments");
+		"songproperties.extcomments");	
 	psy_ui_label_settextalignment(&self->label_comments,
-		psy_ui_ALIGNMENT_LEFT);
-	/* psy_ui_label_setcharnumber(&self->label_comments, charnum); */
-	psy_ui_component_setalign(&self->label_comments.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->label_comments.component, margin);
-	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
-	psy_ui_component_setstyletypes(&self->edit_comments.component,
-		STYLE_SONGPROPERTIES_COMMENTS,
-		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_INDEX_INVALID);
+		psy_ui_ALIGNMENT_TOP);	
+	psy_ui_component_setalign(&self->label_comments.component,
+		psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->label_comments.component,
+		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
+	psy_ui_edit_multiline_init(&self->edit_comments, &self->comments);
+	psy_ui_component_setstyletype(&self->edit_comments.component,
+		STYLE_SONGPROPERTIES_COMMENTS_EDIT);		
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setmargin(&self->edit_comments.component, margin);
+	psy_ui_component_setmargin(&self->edit_comments.component,
+		psy_ui_margin_make_em(0.0, 2.0, 1.0, 3.0));
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);

@@ -7,7 +7,9 @@
 #define psy_ui_COMBOBOX_H
 
 /* local */
+#include "uibutton.h"
 #include "uidropdownbox.h"
+#include "uilabel.h"
 #include "uilistbox.h"
 /* container */
 #include <hashtbl.h>
@@ -34,25 +36,19 @@ extern "C" {
 
 struct psy_ui_ComponentImp;
 
-typedef enum psy_ui_ComboBoxHover {
-    psy_ui_COMBOBOXHOVER_NONE = 0,
-    psy_ui_COMBOBOXHOVER_DOWN,
-    psy_ui_COMBOBOXHOVER_LESS,
-    psy_ui_COMBOBOXHOVER_MORE
-} psy_ui_ComboBoxHover;
-
 typedef struct psy_ui_ComboBox {
     /* inherits */
     psy_ui_Component component;
     /* signals */
     psy_Signal signal_selchanged;
-    /* internal */    
+    /* internal */
     psy_ui_DropDownBox dropdown;
     psy_ui_ListBox listbox;
-    int ownerdrawn;   
-    psy_ui_ComboBoxHover hover;
-    double charnumber;
-    psy_Table itemdata;
+    psy_ui_Button less;
+    psy_ui_Button more;    
+    psy_ui_Button expand;
+    psy_ui_Label textfield;        
+    psy_Table itemdata;   
 } psy_ui_ComboBox;
 
 void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent,

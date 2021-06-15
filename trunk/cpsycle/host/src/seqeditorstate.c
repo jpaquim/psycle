@@ -62,3 +62,12 @@ psy_dsp_big_beat_t seqeditstate_quantize(const SeqEditState* self,
 	lpb = psy_audio_player_lpb(workspace_player(self->workspace));
 	return floor(position * lpb) / (psy_dsp_big_beat_t)lpb;
 }
+
+void seqeditstate_outputstatusposition(SeqEditState* self)
+{
+	char text[256];
+
+	psy_snprintf(text, 256, "Sequence Position %.3fb",
+		(float)self->cursorposition);
+	workspace_outputstatus(self->workspace, text);
+}

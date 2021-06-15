@@ -10,17 +10,38 @@
 /* local */
 #include "uiapp.h"
 
-static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
-static void ontabbarchange(psy_ui_Notebook*, psy_ui_Component* sender, int tabindex);
+static void ontabbarchange(psy_ui_Notebook*, psy_ui_Component* sender, uintptr_t tabindex);
+static void onalign(psy_ui_Notebook*, psy_ui_Size* size);
 
+/* vtable */
+static psy_ui_ComponentVtable vtable;
+static psy_ui_ComponentVtable super_vtable;
+static bool vtable_initialized = FALSE;
+
+static void vtable_init(psy_ui_Notebook* self)
+{
+	assert(self);
+
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		super_vtable = *(self->component.vtable);		
+		vtable.onalign =
+			(psy_ui_fp_component_onalign)
+			onalign;
+		vtable_initialized = TRUE;
+	}
+	psy_ui_component_setvtable(&self->component, &vtable);
+}
+/* implementation */
 void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 {  
     psy_ui_component_init(psy_ui_notebook_base(self), parent, NULL);
+	vtable_init(self);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(self),
-		psy_ui_NOBACKGROUND);
-	psy_signal_connect(&psy_ui_notebook_base(self)->signal_size, self, onsize);
+		psy_ui_NOBACKGROUND);	
 	self->pageindex = 0;
 	self->split = 0;
+	self->preventalign = FALSE;
 }
 
 void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
@@ -48,23 +69,30 @@ void psy_ui_notebook_select(psy_ui_Notebook* self, uintptr_t pageindex)
 					psy_ui_Size oldsize;
 					bool resize;
 					component->visible = 1;
-
 					oldsize = psy_ui_component_scrollsize(component);
 					resize = (psy_ui_value_px(&oldsize.width, psy_ui_component_textmetric(component), NULL) !=
 						psy_ui_value_px(&size.width, psy_ui_component_textmetric(component), NULL)) ||
 						(psy_ui_value_px(&oldsize.height, psy_ui_component_textmetric(component), NULL) !=
 						psy_ui_value_px(&size.height, psy_ui_component_textmetric(component), NULL));
-					psy_ui_component_setposition(component,
-						psy_ui_rectangle_make(psy_ui_point_zero(), size));
-					if (!resize) {
-						psy_ui_component_align(component);
+					if (!self->preventalign) {
+						psy_ui_component_setposition(component,
+							psy_ui_rectangle_make(psy_ui_point_zero(), size));
+						if (!resize) {
+							psy_ui_component_align(component);
+						}
 					}
-					psy_ui_component_show(component);					
-				} else {
-					psy_ui_component_hide(component);
-				}
+					psy_ui_component_show(component);				
+				} 
 			}
 		}
+		for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)p->entry;
+			if (!self->split && c != pageindex) {								
+				psy_ui_component_hide(component);				
+			}
+		}		
 		psy_list_free(q);
 		if (self->component.align == psy_ui_ALIGN_LEFT) {
 			if (psy_ui_component_parent(psy_ui_notebook_base(
@@ -87,7 +115,7 @@ void psy_ui_notebook_connectcontroller(psy_ui_Notebook* self, psy_Signal*
 	psy_signal_connect(controllersignal, self, ontabbarchange);
 }
 
-void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
+void onalign(psy_ui_Notebook* self)
 {
 	if (!self->split) {
 		psy_List* p;
@@ -100,8 +128,11 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 
 			component = (psy_ui_Component*)p->entry;
 			if (component->visible) {
+				psy_ui_Size size;
+
+				size = psy_ui_component_scrollsize(&self->component);				
 				psy_ui_component_setposition(component,
-					psy_ui_rectangle_make(psy_ui_point_zero(), *size));
+					psy_ui_rectangle_make(psy_ui_point_zero(), size));				
 			}
 		}
 		psy_list_free(q);
@@ -110,7 +141,7 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 	}
 }
 
-void ontabbarchange(psy_ui_Notebook* self, psy_ui_Component* sender, int tabindex)
+void ontabbarchange(psy_ui_Notebook* self, psy_ui_Component* sender, uintptr_t tabindex)
 {
 	psy_ui_notebook_select(self, tabindex);
 }

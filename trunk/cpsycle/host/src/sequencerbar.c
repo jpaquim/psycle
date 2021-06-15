@@ -70,7 +70,6 @@ void sequencerbar_init(SequencerBar* self,
 	psy_ui_button_settextalignment(&self->toggleseqedit,
 		(psy_ui_Alignment)(psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_CENTER_VERTICAL));
 	psy_ui_button_seticon(&self->toggleseqedit, psy_ui_ICON_MORE);
-
 	psy_ui_margin_init_em(&margin, 0.0, 0.0, 1.0, 0.0);
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, margin);
 	psy_signal_connect(&self->followsong.signal_clicked, self,

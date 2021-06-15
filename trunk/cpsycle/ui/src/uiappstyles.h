@@ -42,6 +42,7 @@ extern "C" {
 #define psy_ui_STYLE_COMBOBOX            40180
 #define psy_ui_STYLE_COMBOBOX_HOVER      40181
 #define psy_ui_STYLE_COMBOBOX_SELECT     40182
+#define psy_ui_STYLE_COMBOBOX_TEXT       40183
 #define psy_ui_STYLE_SPLITTER            40200
 #define psy_ui_STYLE_SPLITTER_HOVER      40201
 #define psy_ui_STYLE_SPLITTER_SELECT     40202
@@ -49,6 +50,8 @@ extern "C" {
 #define psy_ui_STYLE_SWITCH              40240
 #define psy_ui_STYLE_SWITCH_HOVER        40241
 #define psy_ui_STYLE_SWITCH_SELECT       40242
+#define psy_ui_STYLE_LISTBOX             40260
+
 
 void psy_ui_appstyles_inittheme(psy_ui_Styles*, psy_ui_ThemeMode,
 	bool keepfont);

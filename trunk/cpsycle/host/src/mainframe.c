@@ -111,6 +111,7 @@ static void mainframe_ongearselect(MainFrame*, Workspace* sender,
 static void mainframe_ondragover(MainFrame*, psy_ui_DragEvent*);
 static void mainframe_ondrop(MainFrame*, psy_ui_DragEvent*);
 static bool mainframe_oninputhandlercallback(MainFrame*, int message, void* param1);
+
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -139,7 +140,7 @@ static void vtable_init(MainFrame* self)
 			mainframe_ondrop;
 		vtable.ontimer =
 			(psy_ui_fp_component_ontimer)
-			mainframe_ontimer;
+			mainframe_ontimer;		
 		vtable_initialized = TRUE;
 	}
 	psy_ui_component_setvtable(mainframe_base(self), &vtable);
@@ -156,7 +157,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_initbars(self);
 	mainframe_initnavigation(self);
 	mainframe_initmaintabbar(self);
-	mainframe_inithelpsettingstabbar(self);
+	mainframe_inithelpsettingstabbar(self);	
 	mainframe_initviewtabbars(self);
 	mainframe_initmainpane(self);
 	mainframe_initgear(self);
@@ -403,8 +404,8 @@ void mainframe_inittabbars(MainFrame* self)
 		self, mainframe_onmaxminimizeview);
 	psy_ui_component_setalign(psy_ui_button_base(&self->maximizebtn),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_loadresource(&self->maximizebtn, IDB_EXPAND_DARK,
-		psy_ui_colour_white());	
+	psy_ui_button_loadresource(&self->maximizebtn,
+		IDB_EXPAND_LIGHT, IDB_EXPAND_DARK, psy_ui_colour_white());	
 	psy_ui_component_init(&self->tabspacer, &self->mainviews, NULL);
 	psy_ui_component_setalign(&self->tabspacer, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->tabspacer,
@@ -419,50 +420,50 @@ void mainframe_initnavigation(MainFrame* self)
 }
 
 void mainframe_initmaintabbar(MainFrame* self)
-{
-	psy_ui_Tab* tab;
-
+{	
 	psy_ui_tabbar_init(&self->tabbar, &self->tabbars);	
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);
-	tab = psy_ui_tabbar_append(&self->tabbar, "main.machines");
-	tab->component.id = 30;
-	psy_ui_tab_loadresource(tab, IDB_MACHINES_DARK, psy_ui_colour_white());
-	tab = psy_ui_tabbar_append(&self->tabbar, "main.patterns");
-	psy_ui_tab_loadresource(tab, IDB_NOTES_DARK, psy_ui_colour_white());
-	psy_ui_tabbar_append_tabs(&self->tabbar, "main.samples",
-		"main.instruments", "main.properties", NULL);
+	psy_ui_tabbar_append(&self->tabbar, "main.machines",
+		IDB_MACHINES_LIGHT, IDB_MACHINES_DARK, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "main.patterns",
+		IDB_NOTES_LIGHT, IDB_NOTES_DARK, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "main.samples",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "main.instruments",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "main.properties",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());	
 }
 
 void mainframe_inithelpsettingstabbar(MainFrame* self)
 {
-	psy_ui_Tab* tab;
-
 	psy_ui_tabbar_init(&self->helpsettingstabbar, &self->tabbars);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(psy_ui_tabbar_base(&self->helpsettingstabbar),
 		psy_ui_margin_make_em(0.0, 4.0, 0.0, 4.0));
-	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings");
-	psy_ui_tab_loadresource(tab, IDB_SETTINGS_DARK, psy_ui_colour_white());
-	tab = psy_ui_tabbar_append(&self->helpsettingstabbar, "main.help");
+	psy_ui_tabbar_append(&self->helpsettingstabbar, "main.settings",
+		IDB_SETTINGS_LIGHT, IDB_SETTINGS_DARK, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->helpsettingstabbar, "main.help",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());;
 }
 
 void mainframe_initviewtabbars(MainFrame* self)
 {
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
-	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
 }
 
 void mainframe_initmainpane(MainFrame* self)
 {
 	psy_ui_component_init(&self->mainpane, &self->mainviews, NULL);
-	psy_ui_component_setalign(&self->mainpane, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->mainpane, psy_ui_ALIGN_CLIENT);	
 	psy_ui_component_setbackgroundmode(&self->mainpane,
-		psy_ui_NOBACKGROUND);
-	psy_ui_notebook_init(&self->notebook, &self->mainpane);
+		psy_ui_NOBACKGROUND);	
+	psy_ui_notebook_init(&self->notebook, &self->mainpane);	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);
+		psy_ui_ALIGN_CLIENT);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook),
@@ -585,7 +586,7 @@ void mainframe_initseqeditor(MainFrame* self)
 {
 	seqeditor_init(&self->seqeditor, &self->mainpane, &self->workspace);
 	psy_ui_component_setalign(seqeditor_base(&self->seqeditor),
-		psy_ui_ALIGN_BOTTOM);
+		psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_setmaximumsize(seqeditor_base(&self->seqeditor),
 		psy_ui_size_make(psy_ui_value_zero(), psy_ui_value_make_ph(0.7)));
 	psy_ui_splitter_init(&self->splitseqeditor, &self->mainpane, NULL);

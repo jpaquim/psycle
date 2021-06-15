@@ -36,6 +36,7 @@ typedef struct SequenceButtons {
 	psy_ui_Button insertentry;
 	psy_ui_Button decpattern;
 	psy_ui_Component row1;
+	psy_ui_Component rowmore;
 	psy_ui_Button newentry;		
 	psy_ui_Button delentry;
 	psy_ui_Button cloneentry;	

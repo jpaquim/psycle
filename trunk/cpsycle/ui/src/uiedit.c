@@ -71,6 +71,7 @@ void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
 	self->linenumber = 1;
 	self->isinputfield = FALSE;
 	self->preventedit = TRUE;
+	self->component.ncpaint = TRUE;	
 	imp->vtable->dev_initialized(imp);
 }
 

@@ -18,9 +18,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-extern psy_ui_App app;
-
-static void ondestroy(psy_ui_ListBox*, psy_ui_Component* sender);
+static void psy_ui_listbox_ondestroy(psy_ui_ListBox*);
 static void psy_ui_listbox_onpreferredsize(psy_ui_ListBox*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -30,12 +28,16 @@ static bool psy_ui_listbox_vtable_initialized = FALSE;
 static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 {
 	if (!psy_ui_listbox_vtable_initialized) {
-		psy_ui_listbox_vtable = *(self->component.vtable);		
+		psy_ui_listbox_vtable = *(self->component.vtable);
+		psy_ui_listbox_vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			psy_ui_listbox_ondestroy;
 		psy_ui_listbox_vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_listbox_onpreferredsize;		
 		psy_ui_listbox_vtable_initialized = TRUE;
 	}
+	self->component.vtable = &psy_ui_listbox_vtable;
 }
 
 void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
@@ -50,10 +52,11 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 #endif
 	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, NULL, imp);
 	psy_ui_listbox_vtable_init(self);
-	self->component.vtable = &psy_ui_listbox_vtable;	
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_ui_component_setstyletype(psy_ui_listbox_base(self),
+		psy_ui_STYLE_LISTBOX);
 	psy_signal_init(&self->signal_selchanged);
 	self->charnumber = 0;
+	self->component.id = 70;
 	imp->vtable->dev_initialized(imp);
 }
 
@@ -69,13 +72,15 @@ void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
 	imp = psy_ui_native_listboximp_multiselect_allocinit(&self->component, parent)->imp;
 #endif
 	psy_ui_component_init_imp(psy_ui_listbox_base(self), parent, NULL, imp);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_ui_component_setstyletype(psy_ui_listbox_base(self),
+		psy_ui_STYLE_LISTBOX);
 	psy_signal_init(&self->signal_selchanged);
 	self->charnumber = 0;
+	self->component.id = 70;
 	imp->vtable->dev_initialized(imp);
 }
 
-void ondestroy(psy_ui_ListBox* self, psy_ui_Component* sender)
+void psy_ui_listbox_ondestroy(psy_ui_ListBox* self)
 {
 	psy_signal_dispose(&self->signal_selchanged);
 }

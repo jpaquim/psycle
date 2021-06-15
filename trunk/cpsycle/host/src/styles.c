@@ -31,7 +31,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setcolours(style, material.onprimary_medium,
 		material.overlay_12p);
-	psy_ui_style_setspacing_em(style, 0.2, 1.0, 0.2, 1.0);
+	psy_ui_style_setspacing_em(style, 0.0, 1.0, 0.0, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_STATUSBAR, style);
 	
 	style = psy_ui_style_allocinit();
@@ -39,17 +39,20 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, material.onprimary_medium);
-	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);	
+	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_7p, 6.0);
+	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundoverlay(style, 4);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_11p, 6.0);
+	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON_HOVER, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.onsecondary, material.overlay_4p);
 	psy_ui_border_init_solid_radius(&style->border, material.surface_overlay_16p, 6.0);
+	psy_ui_style_setspacing_em(style, 0.25, 1.0, 0.25, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_SEQVIEW_BUTTON_SELECT, style);
 	
 	style = psy_ui_style_allocinit();
@@ -205,26 +208,6 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.primary, material.medium));
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB, style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style,
-		psy_ui_colour_weighted(&material.primary, material.accent),
-		material.surface);
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_HOVER, style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, material.onsecondary, material.surface);
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_SELECT, style);
-	
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, psy_ui_colour_weighted(&material.primary,
-		material.weak));
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_NEW, style);
-	
-	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, material.secondary,
 		psy_ui_colour_overlayed(&material.surface, &material.overlay, 0.24));
 	psy_ui_styles_setstyle(self, STYLE_SEQ_PROGRESS, style);
@@ -241,9 +224,13 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.overlay_4p);
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
 	
-	style = psy_ui_style_allocinit();	
+	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
 	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setspacing_em(style, 0.25, 0.5, 0.5, 0.5);
@@ -280,7 +267,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface);
-	psy_ui_style_setspacing_em(style, 1.0, 0.5, 0.0, 0.5);
+	psy_ui_style_setspacing_em(style, 0.25, 0.5, 0.25, 0.5);
 	psy_ui_styles_setstyle(self, STYLE_TRACKSCOPES, style);
 
 	style = psy_ui_style_allocinit();
@@ -296,6 +283,10 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
 	psy_ui_styles_setstyle(self, STYLE_SONGPROPERTIES_COMMENTS, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
+	psy_ui_styles_setstyle(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_5p);
@@ -373,7 +364,7 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		material.surface_overlay_16p, 4.0);
 	psy_ui_styles_setstyle(self, STYLE_KEY_ACTIVE, style);
 	
-	style = psy_ui_style_clone(psy_ui_styles_at(self, STYLE_KEY));	
+	style = psy_ui_style_clone(psy_ui_styles_at(self, STYLE_KEY));
 	psy_ui_styles_setstyle(self, STYLE_KEY_HOVER, style);
 	
 	style = psy_ui_style_allocinit();
@@ -594,6 +585,12 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 	psy_ui_style_setcolours(style, psy_ui_colour_make(0xFFFFFF),
 		psy_ui_colour_make(0x009B7800));
 	psy_ui_styles_setstyle(self, STYLE_PLUGINVIEW_ITEM_SELECTED, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
+	psy_ui_styles_setstyle(self, STYLE_LPB_NUMLABEL, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_LABEL));
+	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
 }
 
 /* Win98Theme */
@@ -606,7 +603,7 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_wintheme_init(&win);
 
 	style = psy_ui_style_allocinit();	
-	psy_ui_style_setborder(style, &win.raised);
+	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_style_setspacing_em(style, 0.2, 1.0, 0.2, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_STATUSBAR, style);
 
@@ -737,31 +734,7 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_styles_setstyle(self, STYLE_SEQEDT_LEFT, style);
-
-	style = psy_ui_style_allocinit();
-	// psy_ui_style_setcolour(style,
-	//	psy_ui_colour_weighted(&material.primary, material.medium));
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB, style);
-
-	style = psy_ui_style_allocinit();
-	// psy_ui_style_setcolours(style,
-	//	psy_ui_colour_weighted(&material.primary, material.accent),
-	//	material.surface);
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_HOVER, style);
-
-	style = psy_ui_style_allocinit();
-	//psy_ui_style_setcolours(style, material.onsecondary, material.surface);
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_SELECT, style);
-
-	style = psy_ui_style_allocinit();
-	// psy_ui_style_setcolour(style, psy_ui_colour_weighted(&material.primary,
-	//	material.weak));
-	psy_ui_styles_setstyle(self, STYLE_SEQ_TAB_NEW, style);
-
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, win.cl_white, win.cl_navy);
-	psy_ui_styles_setstyle(self, STYLE_SEQ_PROGRESS, style);
-
+	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
 	psy_ui_style_setbackgroundoverlay(style, 7);
@@ -771,9 +744,13 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
 
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_styles_setstyle(self, STYLE_MACHINEVIEW, style);
+
+	style = psy_ui_style_allocinit();	
+	psy_ui_style_setborder(style, &win.lowered);
+	psy_ui_styles_setstyle(self, STYLE_PATTERNVIEW, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setspacing_em(style, 0.25, 0.5, 0.5, 0.5);
@@ -810,27 +787,29 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_TOPROW2, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00FF00));
-	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x000000));
-	psy_ui_style_setspacing_em(style, 1.0, 0.5, 0.0, 0.5);
-	psy_ui_border_setcolours(&style->border,
-		psy_ui_colour_make(0x808080), psy_ui_colour_make(0xFFFFFF),
-		psy_ui_colour_make(0xFFFFFF), psy_ui_colour_make(0x808080));
+	psy_ui_style_setcolours(style, win.cl_lime, win.cl_black);
+	psy_ui_style_setspacing_em(style, 0.25, 0.5, 0.25, 0.5);
+	psy_ui_style_setborder(style, &win.lowered);	
 	psy_ui_styles_setstyle(self, STYLE_TRACKSCOPES, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolour(style, psy_ui_colour_make(0x00FF00));
-	psy_ui_style_setbackgroundcolour(style, psy_ui_colour_make(0x000000));
+	psy_ui_style_setcolours(style, win.cl_lime, win.cl_black);
 	psy_ui_styles_setstyle(self, STYLE_TRACKSCOPE, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundoverlay(style, 9);
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_setspacing_em(style, 0.5, 0.5, 0.5, 0.5);
+	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_styles_setstyle(self, STYLE_SONGPROPERTIES, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundcolour(style, win.cl_white);
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	psy_ui_border_init_solid(&style->border, win.cl_medgray);
 	psy_ui_styles_setstyle(self, STYLE_SONGPROPERTIES_COMMENTS, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
+	psy_ui_styles_setstyle(self, STYLE_SONGPROPERTIES_COMMENTS_EDIT, style);
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
@@ -840,8 +819,9 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_ABOUT, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	//psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
 	psy_ui_style_setspacing_em(style, 0.0, 0.0, 0.5, 1.0);
+	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_styles_setstyle(self, STYLE_SAMPLESVIEW, style);
 
 	style = psy_ui_style_allocinit();
@@ -856,6 +836,7 @@ void initwin98theme(psy_ui_Styles* self)
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	psy_ui_style_setborder(style, &win.lowered);
 	psy_ui_style_setspacing_em(style, 0.0, 0.0, 0.5, 1.0);
 	psy_ui_styles_setstyle(self, STYLE_INSTRVIEW, style);
 
@@ -1040,8 +1021,8 @@ void initwin98theme(psy_ui_Styles* self)
 	psy_ui_styles_setstyle(self, STYLE_HEADER, style);
 
 	style = psy_ui_style_allocinit();
-	psy_ui_style_setbackgroundoverlay(style, 4);
-	psy_ui_styles_setstyle(self, STYLE_MAINVIEWTOPBAR, style);
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	psy_ui_styles_setstyle(self, STYLE_MAINVIEWTOPBAR, style);	
 
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
@@ -1108,4 +1089,14 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_white, win.cl_navy);
 	psy_ui_styles_setstyle(self, STYLE_PLUGINVIEW_ITEM_SELECTED, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	psy_ui_style_setborder(style, &win.lowered);
+	psy_ui_styles_setstyle(self, STYLE_LPB_NUMLABEL, style);
+
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
+	psy_ui_style_setborder(style, &win.lowered);
+	psy_ui_styles_setstyle(self, STYLE_TIMEBAR_NUMLABEL, style);
 }

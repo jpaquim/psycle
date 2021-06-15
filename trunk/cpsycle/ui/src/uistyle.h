@@ -157,6 +157,7 @@ typedef struct psy_ui_Styles {
 	psy_Table styles;
 	psy_Property config;
 	psy_ui_ThemeMode theme;
+
 } psy_ui_Styles;
 
 void psy_ui_styles_init(psy_ui_Styles*);

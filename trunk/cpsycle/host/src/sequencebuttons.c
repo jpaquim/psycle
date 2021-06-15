@@ -1,14 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "sequencebuttons.h"
-// host
+/* host */
 #include "styles.h"
 
-// SequenceButtons
-// prototypes
+/* SequenceButtons */
+/* prototypes */
 static void sequencebuttons_onmore(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onnewentry(SequenceButtons*,
@@ -35,15 +38,16 @@ static void sequencebuttons_onclear(SequenceButtons*,
 	psy_ui_Button* sender);
 static void sequencebuttons_onrename(SequenceButtons*,
 	psy_ui_Button* sender);
-static void sequencebuttons_oneditaccept(SequenceButtons*, psy_ui_Edit* sender);
-static void sequencebuttons_oneditreject(SequenceButtons*, psy_ui_Edit* sender);
-// implementation
+static void sequencebuttons_oneditaccept(SequenceButtons*,
+	psy_ui_Edit* sender);
+static void sequencebuttons_oneditreject(SequenceButtons*,
+	psy_ui_Edit* sender);
+/* implementation */
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	SequenceCmds* cmds)
 {	
 	psy_ui_Component* view;
-	psy_ui_Margin spacing;
-
+	uintptr_t i;
 	psy_ui_Margin rowmargin;
 	psy_ui_Button* buttons[] = {
 		&self->incpattern, &self->insertentry, &self->decpattern,
@@ -52,7 +56,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		&self->clear, &self->rename, &self->copy,
 		&self->paste, &self->singlesel, &self->multisel
 	};
-	uintptr_t i;	
+	
 	self->cmds = cmds;
 	psy_ui_component_init(&self->component, parent, NULL);
 	psy_ui_component_doublebuffer(&self->component);
@@ -85,12 +89,16 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 		"seqview.clone");
 	psy_ui_button_init_text(&self->delentry, &self->row1, view,
 		"seqview.del");	
-	psy_ui_button_init(&self->more, &self->standard, view);		
-	psy_ui_button_preventtranslation(&self->more);
+	/* more/less */
+	psy_ui_component_init(&self->rowmore, &self->standard, view);
+	psy_ui_component_setmargin(&self->rowmore, rowmargin);
+	psy_ui_component_setalign(&self->rowmore, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->rowmore, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init(&self->more, &self->rowmore, view);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
-	psy_ui_button_settext(&self->more, "Show More");
-	psy_ui_component_setalign(psy_ui_button_base(&self->more),
-		psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->more, "seqview.more");	
+	/* more block */
 	psy_ui_component_init(&self->block, &self->component, view);
 	psy_ui_component_setalign(&self->block, psy_ui_ALIGN_TOP);
 	psy_ui_component_setspacing(&self->block,
@@ -104,9 +112,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_init_text(&self->clear, &self->row2, view,
 		"seqview.clear");	
 	psy_ui_button_init_text(&self->rename, &self->row2, view,
-		"seqview.rename");
-	// psy_ui_button_init(&self->cut, &self->component);
-	// psy_ui_button_settext(&self->cut, "");
+		"seqview.rename");	
 	psy_ui_button_init_text(&self->copy, &self->row2, view,
 		"seqview.copy");
 	// rename edit
@@ -131,23 +137,18 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 	psy_ui_button_disablehighlight(&self->multisel);
 	psy_ui_component_hide(&self->block);
 
-	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {
-		double colwidth;		
-
-		colwidth = 12.0;
-		psy_ui_button_setcharnumber(buttons[i], colwidth);
+	for (i = 0; i < sizeof(buttons) / sizeof(psy_ui_Button*); ++i) {		
+		psy_ui_button_setcharnumber(buttons[i], 12.0);
 		if (buttons[i] != &self->more) {
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
-				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);
-				psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.5, 0.5);
-				psy_ui_button_setlinespacing(buttons[i], 1.4);
+				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);				
 		} else {					
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				psy_ui_STYLE_BUTTON, psy_INDEX_INVALID, psy_INDEX_INVALID,
 				psy_INDEX_INVALID);
-			psy_ui_margin_init_em(&spacing, 0.5, 0.5, 0.5, 0.5);
-		}
+			psy_ui_button_setcharnumber(buttons[i], 0.0);
+		}		
 	}
 	psy_signal_connect(&self->newentry.signal_clicked, self,
 		sequencebuttons_onnewentry);
@@ -187,11 +188,11 @@ void sequencebuttons_onmore(SequenceButtons* self,
 	if (psy_ui_component_visible(&self->block)) {
 		psy_ui_component_hide(&self->block);
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);
-		psy_ui_button_settext(&self->more, "Show More");
+		psy_ui_button_settext(&self->more, "seqview.more");
 		
 	} else {
 		psy_ui_button_seticon(&self->more, psy_ui_ICON_LESS);
-		psy_ui_button_settext(&self->more, "Show Less");
+		psy_ui_button_settext(&self->more, "seqview.less");
 		psy_ui_component_show(&self->block);		
 	}
 	psy_ui_component_align_full(

@@ -999,7 +999,8 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 			property = (psy_Property*)psy_list_entry_const(p);
 			if (psy_property_issection(property)) {
 				psy_ui_tabbar_append(&self->tabbar,
-					psy_property_text(property));
+					psy_property_text(property),
+				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 			}
 		}
 	}	

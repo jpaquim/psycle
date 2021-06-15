@@ -858,7 +858,6 @@ void seqviewlist_onfocuslost(SeqviewList* self)
 		psy_ui_STYLESTATE_SELECT);
 }
 
-
 psy_ui_RealRectangle seqviewlist_rowrectangle(SeqviewList* self,
 	uintptr_t row)
 {

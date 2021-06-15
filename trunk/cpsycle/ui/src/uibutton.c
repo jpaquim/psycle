@@ -7,11 +7,12 @@
 
 
 #include "uibutton.h"
+/* local */
+#include "uiapp.h"
 /* platform */
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-/* psy_ui_Button */
 /* prototypes */
 static void ondestroy(psy_ui_Button*);
 static void onlanguagechanged(psy_ui_Button*);
@@ -26,6 +27,8 @@ static void button_onkeydown(psy_ui_Button*, psy_ui_KeyboardEvent*);
 static psy_ui_RealPoint psy_ui_button_center(psy_ui_Button*,
 	psy_ui_RealPoint center, psy_ui_RealSize itemsize);
 static double psy_ui_button_width(psy_ui_Button*);
+static void psy_ui_button_onupdatestyles(psy_ui_Button*);
+static void psy_ui_button_loadbitmaps(psy_ui_Button*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
@@ -36,15 +39,30 @@ static void vtable_init(psy_ui_Button* self)
 	if (!vtable_initialized) {
 		vtable = *(psy_ui_button_base(self)->vtable);
 		super_vtable = *(psy_ui_button_base(self)->vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)ondestroy;		
-		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
+			ondestroy;
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
+			ondraw;
+		vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
 			onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmouseevent)onmousedown;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseevent)onmouseup;		
-		vtable.onkeydown = (psy_ui_fp_component_onkeyevent)button_onkeydown;
-		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+		vtable.onmousedown =
+			(psy_ui_fp_component_onmouseevent)
+			onmousedown;
+		vtable.onmouseup =
+			(psy_ui_fp_component_onmouseevent)
+			onmouseup;
+		vtable.onkeydown =
+			(psy_ui_fp_component_onkeyevent)
+			button_onkeydown;
+		vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
 			onlanguagechanged;		
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_button_onupdatestyles;
 		vtable_initialized = TRUE;
 	}
 	self->component.vtable = &vtable;
@@ -71,6 +89,9 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent,
 	self->buttonstate = 1;
 	self->allowrightclick = FALSE;	
 	self->stoppropagation = TRUE;
+	self->lightresourceid = psy_INDEX_INVALID;
+	self->darkresourceid = psy_INDEX_INVALID;
+	psy_ui_colour_init(&self->bitmaptransparency);
 	psy_ui_bitmap_init(&self->bitmapicon);
 	psy_signal_init(&self->signal_clicked);	
 	psy_ui_component_setstyletypes(psy_ui_button_base(self),
@@ -344,17 +365,12 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		if (self->allowrightclick || ev->button == 1) {
 			psy_ui_RealRectangle client_position;
 			psy_ui_RealSize size;
-			psy_ui_RealMargin spacing;
-			psy_ui_RealPoint pt;
+			psy_ui_RealMargin spacing;			
 
 			size = psy_ui_component_scrollsize_px(psy_ui_button_base(self));
 			client_position = psy_ui_realrectangle_make(
-				psy_ui_realpoint_zero(), size);
-			pt = ev->pt;			
-			spacing = psy_ui_component_spacing_px(psy_ui_button_base(self));
-			pt.x += spacing.left;
-			pt.y += spacing.top;
-			if (psy_ui_realrectangle_intersect(&client_position, pt)) {
+				psy_ui_realpoint_zero(), size);						
+			if (psy_ui_realrectangle_intersect(&client_position, ev->pt)) {
 				self->shiftstate = ev->shift_key;
 				self->ctrlstate = ev->ctrl_key;
 				psy_signal_emit(&self->signal_clicked, self, 0);
@@ -388,12 +404,14 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void psy_ui_button_loadresource(psy_ui_Button* self, uintptr_t resourceid,
+void psy_ui_button_loadresource(psy_ui_Button* self,
+	uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency)
 {
-	psy_ui_bitmap_loadresource(&self->bitmapicon, resourceid);
-	psy_ui_bitmap_settransparency(&self->bitmapicon,
-		transparency);
+	self->lightresourceid = lightresourceid;
+	self->darkresourceid = darkresourceid;
+	self->bitmaptransparency = transparency;
+	psy_ui_button_loadbitmaps(self);
 }
 
 void psy_ui_button_highlight(psy_ui_Button* self)
@@ -444,5 +462,27 @@ void button_onkeydown(psy_ui_Button* self, psy_ui_KeyboardEvent* ev)
 			!psy_ui_component_inputprevented(&self->component)) {
 		psy_signal_emit(&self->signal_clicked, self, 0);
 		psy_ui_keyboardevent_stop_propagation(ev);
+	}
+}
+
+void psy_ui_button_onupdatestyles(psy_ui_Button* self)
+{
+	psy_ui_button_loadbitmaps(self);
+}
+
+void psy_ui_button_loadbitmaps(psy_ui_Button* self)
+{
+	if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+		if (self->darkresourceid != psy_INDEX_INVALID) {
+			psy_ui_bitmap_loadresource(&self->bitmapicon, self->darkresourceid);
+		}
+	} else {
+		if (self->lightresourceid != psy_INDEX_INVALID) {
+			psy_ui_bitmap_loadresource(&self->bitmapicon, self->lightresourceid);
+		}
+	}
+	if (self->bitmaptransparency.mode.set) {
+		psy_ui_bitmap_settransparency(&self->bitmapicon,
+			self->bitmaptransparency);
 	}
 }

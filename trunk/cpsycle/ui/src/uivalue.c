@@ -106,19 +106,7 @@ double psy_ui_value_px(const psy_ui_Value* self,
 	const psy_ui_TextMetric* tm, const struct psy_ui_Size* size)
 {
 	double rv;
-
-	if (self->unit == psy_ui_UNIT_PW) {
-		if (size) {
-			return self->quantity * psy_ui_value_px(&size->width, tm, NULL);
-		}
-		return self->quantity;
-	}
-	if (self->unit == psy_ui_UNIT_PH) {
-		if (size) {
-			return self->quantity * psy_ui_value_px(&size->height, tm, NULL);
-		}
-		return self->quantity;
-	}
+	
 	if (tm) {
 		switch (self->unit) {
 		case psy_ui_UNIT_EW:
@@ -126,6 +114,20 @@ double psy_ui_value_px(const psy_ui_Value* self,
 			break;
 		case psy_ui_UNIT_EH:
 			rv = self->quantity * tm->tmHeight;
+			break;
+		case psy_ui_UNIT_PW:
+			if (size) {
+				rv = self->quantity * psy_ui_value_px(&size->width, tm, NULL);
+			} else {
+				rv = self->quantity;
+			}
+			break;
+		case psy_ui_UNIT_PH:
+			if (size) {
+				rv = self->quantity * psy_ui_value_px(&size->height, tm, NULL);
+			} else {
+				rv = self->quantity;
+			}
 			break;
 		default:
 			rv = self->quantity;

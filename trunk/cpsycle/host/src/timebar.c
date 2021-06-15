@@ -1,75 +1,89 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "timebar.h"
-// std
-#include <stdio.h>
-// platform
+/* host */
+#include "styles.h"
+/* platform */
 #include "../../detail/portable.h"
 
 #define TIMEBAR_REFRESHRATE 50
 
-// TimeBar
-// prototypes
+/*
+** TimeBar
+** prototypes
+*/
 static void timebar_onlesslessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onlessclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onmoreclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_onmoremoreclicked(TimeBar*, psy_ui_Button* sender);
 static void timebar_ontimer(TimeBar*, uintptr_t timerid);
 static void timebar_offsetbpm(TimeBar*, psy_dsp_big_beat_t bpm);
-// vtable
+static void timebar_updatebpmlabel(TimeBar*);
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(TimeBar* self)
+static void vtable_init(TimeBar* self)
 {
 	assert(self);
 
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)timebar_ontimer;		
+		vtable = *(timebar_base(self)->vtable);
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			timebar_ontimer;
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(timebar_base(self), &vtable);
 }
-// implementation
-void timebar_init(TimeBar* self, psy_ui_Component* parent, Workspace* workspace)
+/* implementation */
+void timebar_init(TimeBar* self, psy_ui_Component* parent,
+	psy_audio_Player* player)
 {
 	assert(self);
-	assert(workspace);
+	assert(player);
 
 	psy_ui_component_init(timebar_base(self), parent, NULL);
-	psy_ui_component_setvtable(timebar_base(self), vtable_init(self));
+	vtable_init(self);
 	psy_ui_component_setalignexpand(timebar_base(self), psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(timebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	self->workspace = workspace;	
-	self->bpm = (psy_dsp_big_beat_t)0.0;
-	psy_ui_label_init(&self->bpmdesc, &self->component, NULL);
-	psy_ui_label_settext(&self->bpmdesc, "timebar.tempo");
-	psy_ui_label_init(&self->bpmlabel, &self->component, NULL);
-	psy_ui_label_settext(&self->bpmlabel, "125");
-	psy_ui_label_preventtranslation(&self->bpmlabel);
-	psy_ui_label_setcharnumber(&self->bpmlabel, 8);	
+	self->player = player;
+	self->bpm = self->realbpm = (psy_dsp_big_beat_t)0.0;
+	/* bpm description label */
+	psy_ui_label_init(&self->desc, timebar_base(self), NULL);	
+	psy_ui_label_settext(&self->desc, "timebar.tempo");
 #ifdef PSYCLE_TIMEBAR_OLD
-	// bpm -10
-	psy_ui_button_init_connect(&self->lessless, &self->component,
+	/* bpm - 10 */
+	psy_ui_button_init_connect(&self->lessless, timebar_base(self),
 		self, timebar_onlesslessclicked);
 	psy_ui_button_seticon(&self->lessless, psy_ui_ICON_LESSLESS);			
 #endif
-	// bpm -1
+	/* bpm -1 */
 	psy_ui_button_init_connect(&self->less, timebar_base(self), NULL,
 		self, timebar_onlessclicked);
-	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);		
+	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
+	/* bpm (realbpm) number label */
+	psy_ui_label_init(&self->bpmlabel, timebar_base(self), NULL);
+	psy_ui_component_setstyletype(psy_ui_label_base(&self->bpmlabel),
+		STYLE_TIMEBAR_NUMLABEL);
+	psy_ui_label_preventtranslation(&self->bpmlabel);
+	psy_ui_label_setcharnumber(&self->bpmlabel, 14.5);
+	psy_ui_label_settextalignment(&self->bpmlabel, psy_ui_ALIGNMENT_CENTER);
+	timebar_updatebpmlabel(self);
+	/* bpm +1 */
 	psy_ui_button_init_connect(&self->more, timebar_base(self), NULL,
-		self, timebar_onmoreclicked);
-	// bpm +1
+		self, timebar_onmoreclicked);		
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_MORE);		
 #ifdef PSYCLE_TIMEBAR_OLD
-	// bpm +10
-	psy_ui_button_init_connect(&self->moremore, &self->component,
+	/* bpm + 10 */
+	psy_ui_button_init_connect(&self->moremore, timebar_base(self),
 		self, timebar_onmoremoreclicked);
 	psy_ui_button_seticon(&self->moremore, psy_ui_ICON_MOREMORE);
 #endif		
@@ -108,19 +122,28 @@ void timebar_offsetbpm(TimeBar* self, psy_dsp_big_beat_t delta)
 {
 	assert(self);
 
-	psy_audio_player_setbpm(workspace_player(self->workspace),
-		psy_audio_player_bpm(workspace_player(self->workspace)) + delta);
+	psy_audio_player_setbpm(self->player,
+		psy_audio_player_bpm(self->player) + delta);
 }
 
 void timebar_ontimer(TimeBar* self, uintptr_t timerid)
 {
 	assert(self);	
 
-	if (self->bpm != psy_audio_player_bpm(workspace_player(self->workspace))) {
-		char txt[20];
-
-		self->bpm = psy_audio_player_bpm(workspace_player(self->workspace));
-		psy_snprintf(txt, 10, "%.2f", self->bpm);
-		psy_ui_label_settext(&self->bpmlabel, txt);
+	if (self->bpm != psy_audio_player_bpm(self->player) ||
+		self->realbpm != psy_audio_player_realbpm(self->player)) {
+			timebar_updatebpmlabel(self);
 	}
+}
+
+void timebar_updatebpmlabel(TimeBar* self)
+{
+	char txt[64];
+
+	assert(self);
+
+	self->bpm = psy_audio_player_bpm(self->player);
+	self->realbpm = psy_audio_player_realbpm(self->player);
+	psy_snprintf(txt, 64, "%d (%.2f)", (int)self->bpm, self->realbpm);
+	psy_ui_label_settext(&self->bpmlabel, txt);
 }

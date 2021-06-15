@@ -132,10 +132,12 @@ INLINE void psy_audio_player_setbpm(psy_audio_Player* self,
 	}
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_player_bpm(psy_audio_Player* self)
+INLINE psy_dsp_big_beat_t psy_audio_player_bpm(const psy_audio_Player* self)
 {
 	return psy_audio_sequencer_bpm(&self->sequencer);
 }
+
+psy_dsp_big_beat_t psy_audio_player_realbpm(const psy_audio_Player*);
 
 INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self,
 	uintptr_t ticks)

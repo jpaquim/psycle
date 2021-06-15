@@ -7,6 +7,8 @@
 
 
 #include "uitabbar.h"
+/* local */
+#include "uiapp.h"
 /* platform */
 #include "../../detail/portable.h"
 
@@ -18,6 +20,8 @@ static void psy_ui_tab_ondraw(psy_ui_Tab*, psy_ui_Graphics*);
 static void psy_ui_tab_onpreferredsize(psy_ui_Tab*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_tab_onlanguagechanged(psy_ui_Tab*);
+static void psy_ui_tab_onupdatestyles(psy_ui_Tab*);
+static void psy_ui_tab_loadbitmaps(psy_ui_Tab*);
 /* vtable */
 static psy_ui_ComponentVtable psy_ui_tab_vtable;
 static bool psy_ui_tab_vtable_initialized = FALSE;
@@ -41,6 +45,9 @@ static void psy_ui_tab_vtable_init(psy_ui_Tab* self)
 		psy_ui_tab_vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_tab_onlanguagechanged;
+		psy_ui_tab_vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_tab_onupdatestyles;
 		psy_ui_tab_vtable_initialized = TRUE;
 	}
 	self->component.vtable = &psy_ui_tab_vtable;
@@ -57,7 +64,7 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 		psy_ui_STYLE_TAB, psy_ui_STYLE_TAB_HOVER, psy_ui_STYLE_TAB_SELECT,
 		psy_INDEX_INVALID);
 	psy_signal_init(&self->signal_clicked);
-	psy_ui_bitmap_init(&self->icon);
+	psy_ui_bitmap_init(&self->bitmapicon);
 	self->text = psy_strdup(text);
 	self->translation = NULL;
 	self->preventtranslation = FALSE;
@@ -66,7 +73,10 @@ void psy_ui_tab_init(psy_ui_Tab* self, psy_ui_Component* parent,
 	self->mode = psy_ui_TABMODE_SINGLESEL;
 	self->checkstate = 0;	
 	self->index = index;	
-	self->bitmapident = 1.0;	
+	self->bitmapident = 1.0;
+	self->lightresourceid = psy_INDEX_INVALID;
+	self->darkresourceid = psy_INDEX_INVALID;
+	psy_ui_colour_init(&self->bitmaptransparency);
 }
 
 psy_ui_Tab* psy_ui_tab_alloc(void)
@@ -95,7 +105,7 @@ void psy_ui_tab_ondestroy(psy_ui_Tab* self)
 	self->text = NULL;
 	free(self->translation);
 	self->translation = NULL;
-	psy_ui_bitmap_dispose(&self->icon);
+	psy_ui_bitmap_dispose(&self->bitmapicon);
 	psy_signal_dispose(&self->signal_clicked);
 }
 
@@ -133,11 +143,14 @@ void psy_ui_tab_preventtranslation(psy_ui_Tab* self)
 	self->translation = NULL;
 }
 
-void psy_ui_tab_loadresource(psy_ui_Tab* self, uintptr_t resourceid,
+void psy_ui_tab_loadresource(psy_ui_Tab* self,
+	uintptr_t lightresourceid, uintptr_t darkresourceid,
 	psy_ui_Colour transparency)
 {
-	psy_ui_bitmap_loadresource(&self->icon, resourceid);
-	psy_ui_bitmap_settransparency(&self->icon, transparency);
+	self->lightresourceid = lightresourceid;
+	self->darkresourceid = darkresourceid;
+	self->bitmaptransparency = transparency;
+	psy_ui_tab_loadbitmaps(self);
 }
 
 void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
@@ -153,13 +166,13 @@ void psy_ui_tab_ondraw(psy_ui_Tab* self, psy_ui_Graphics* g)
 	textident = 0.0;	
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_scrollsize_px(&self->component);	
-	if (!psy_ui_bitmap_empty(&self->icon)) {
+	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
 		psy_ui_RealSize bpmsize;
 		double vcenter;
 
-		bpmsize = psy_ui_bitmap_size(&self->icon);
+		bpmsize = psy_ui_bitmap_size(&self->bitmapicon);
 		vcenter = (size.height - bpmsize.height) / 2.0;
-		psy_ui_drawbitmap(g, &self->icon,
+		psy_ui_drawbitmap(g, &self->bitmapicon,
 			psy_ui_realrectangle_make(
 				psy_ui_realpoint_make(0.0, vcenter),
 				bpmsize),
@@ -192,11 +205,11 @@ void psy_ui_tab_onpreferredsize(psy_ui_Tab* self, const psy_ui_Size* limit,
 	*rv = psy_ui_component_textsize(&self->component, text);
 	rv->height = psy_ui_value_make_eh(1.8);
 	tm = psy_ui_component_textmetric(psy_ui_tab_base(self));
-	if (!psy_ui_bitmap_empty(&self->icon)) {
+	if (!psy_ui_bitmap_empty(&self->bitmapicon)) {
 		psy_ui_RealSize bpmsize;				
 		psy_ui_RealSize textsizepx;
 		
-		bpmsize = psy_ui_bitmap_size(&self->icon);
+		bpmsize = psy_ui_bitmap_size(&self->bitmapicon);
 		textsizepx = psy_ui_size_px(rv, tm, NULL);
 		rv->width = psy_ui_value_make_px(textsizepx.width + bpmsize.width
 			+ tm->tmAveCharWidth * self->bitmapident);
@@ -228,6 +241,28 @@ void psy_ui_tab_onlanguagechanged(psy_ui_Tab* self)
 {	
 	psy_strreset(&self->translation, psy_ui_translate(self->text));
 	psy_ui_component_invalidate(&self->component);
+}
+
+void psy_ui_tab_onupdatestyles(psy_ui_Tab* self)
+{
+	psy_ui_tab_loadbitmaps(self);
+}
+
+void psy_ui_tab_loadbitmaps(psy_ui_Tab* self)
+{
+	if (psy_ui_app_hasdarktheme(psy_ui_app())) {
+		if (self->darkresourceid != psy_INDEX_INVALID) {
+			psy_ui_bitmap_loadresource(&self->bitmapicon, self->darkresourceid);
+		}
+	} else {
+		if (self->lightresourceid != psy_INDEX_INVALID) {
+			psy_ui_bitmap_loadresource(&self->bitmapicon, self->lightresourceid);
+		}
+	}
+	if (self->bitmaptransparency.mode.set) {
+		psy_ui_bitmap_settransparency(&self->bitmapicon,
+			self->bitmaptransparency);
+	}
 }
 
 /* psy_ui_TabBar */
@@ -345,7 +380,9 @@ void psy_ui_tabbar_select(psy_ui_TabBar* self, uintptr_t tabindex)
 	psy_signal_emit(&self->signal_change, self, 1, tabindex);	
 }
 
-psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label)
+psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label,
+	uintptr_t lightresourceid, uintptr_t darkresourceid,
+	psy_ui_Colour transparency)
 {
 	psy_ui_Tab* tab;
 
@@ -356,6 +393,7 @@ psy_ui_Tab* psy_ui_tabbar_append(psy_ui_TabBar* self, const char* label)
 	if (self->preventtranslation) {
 		psy_ui_tab_preventtranslation(tab);
 	}
+	psy_ui_tab_loadresource(tab, lightresourceid, darkresourceid, transparency);
 	++self->numtabs;
 	psy_signal_connect(&tab->signal_clicked, self,
 		tabbar_ontabclicked);	
@@ -371,7 +409,8 @@ void psy_ui_tabbar_append_tabs(psy_ui_TabBar* self, const char* label, ...)
 	
 	va_start(ap, label);
 	for (curr = label; curr != NULL; curr = va_arg(ap, const char*)) {
-		psy_ui_tabbar_append(self, curr);
+		psy_ui_tabbar_append(self, curr, psy_INDEX_INVALID, psy_INDEX_INVALID,
+			psy_ui_colour_white());
 	}
 	va_end(ap);
 }

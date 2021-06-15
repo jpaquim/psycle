@@ -75,7 +75,7 @@ void newmachinerescanbar_init(NewMachineRescanBar* self,
 	psy_ui_component_setspacing(psy_ui_button_base(&self->selectdirectories),
 		spacing);
 	psy_ui_button_loadresource(&self->selectdirectories, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinerescanbar_onselectdirectories);
 }
@@ -542,8 +542,8 @@ void newmachinesectionsheader_init(NewMachineSectionsHeader* self,
 			&self->component, iconresourceid, psy_ui_colour_white());
 	}
 	psy_ui_button_init(&self->expand, &self->component, NULL);	
-	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
-		psy_ui_colour_white());		
+	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
+		IDB_EXPAND_DARK, psy_ui_colour_white());		
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);
 }
@@ -719,14 +719,17 @@ void newmachinesectionspane_buildnavsections(NewMachineSectionsPane* self)
 		section = (psy_Property*)psy_list_entry(p);
 		if (strcmp(psy_property_key(section), "all") == 0) {
 			psy_ui_tabbar_append(&self->navsections,
-				psy_ui_translate("newmachine.all"));
+				psy_ui_translate("newmachine.all"),
+				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 		} else if (strcmp(psy_property_key(section), "favorites") == 0) {
 			psy_ui_tabbar_append(&self->navsections,
-				psy_ui_translate("newmachine.favorites"));
+				psy_ui_translate("newmachine.favorites"),
+				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 		} else {
 			psy_ui_tabbar_append(&self->navsections,
 				psy_property_at_str(section, "name",
-					psy_property_key(section)));
+					psy_property_key(section)),
+				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 		}
 	}
 	psy_ui_tabbar_mark(&self->navsections, selidx);

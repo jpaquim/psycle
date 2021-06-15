@@ -145,19 +145,22 @@ void psy_ui_lclaligner_align(psy_ui_LCLAligner* self)
 						componentsize.height)));
 				cp_topleft.y += psy_ui_value_px(&c_margin.bottom, c_tm, &size);
 				cp_topleft.y += psy_ui_value_px(&componentsize.height, c_tm, &size);
-			} else if (component->align == psy_ui_ALIGN_BOTTOM) {				
-				cp_bottomright.y -= psy_ui_value_px(&c_margin.bottom, c_tm, &size);
+			} else if (component->align == psy_ui_ALIGN_BOTTOM) {
+				double compheight;
+
+				cp_bottomright.y -= psy_ui_value_px(&c_margin.bottom, c_tm, &size);				
+				compheight = psy_ui_value_px(&componentsize.height, c_tm, &size);
 				psy_ui_component_setposition(component,
 					psy_ui_rectangle_make(
 					psy_ui_point_make_px(
 						cp_topleft.x + psy_ui_value_px(&c_margin.left, c_tm, &size),
-						cp_bottomright.y - psy_ui_value_px(&componentsize.height, c_tm, &size)),
-					psy_ui_size_make(
-						psy_ui_value_make_px(cp_bottomright.x - cp_topleft.x -
-							psy_ui_margin_width_px(&c_margin, c_tm, &size)),
-						componentsize.height)));
+						cp_bottomright.y - compheight),
+					psy_ui_size_make_px(
+						cp_bottomright.x - cp_topleft.x -
+							psy_ui_margin_width_px(&c_margin, c_tm, &size),
+						compheight)));
 				cp_bottomright.y -= psy_ui_value_px(&c_margin.top, c_tm, &size);
-				cp_bottomright.y -= psy_ui_value_px(&componentsize.height, c_tm, &size);
+				cp_bottomright.y -= compheight;
 			} else if (component->align == psy_ui_ALIGN_RIGHT) {
 				double requiredcomponentwidth;
 
@@ -271,7 +274,7 @@ void psy_ui_lclaligner_alignclients(psy_ui_LCLAligner* self, psy_List* children,
 				if (component->align == psy_ui_ALIGN_CLIENT) {
 					const psy_ui_TextMetric* c_tm;
 					psy_ui_Size parentsize;
-
+					
 					parentsize = psy_ui_size_make_px(
 						cp_bottomright.x - cp_topleft.x,
 						cp_bottomright.y - cp_topleft.y);

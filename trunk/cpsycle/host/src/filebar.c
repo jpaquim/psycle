@@ -36,22 +36,22 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_bitmap_settransparency(&self->newbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_button_init_text(&self->loadbutton, filebar_base(self), NULL,
 		"file.load");
-	psy_ui_bitmap_loadresource(&self->loadbutton.bitmapicon, IDB_OPEN_DARK);
-	psy_ui_bitmap_settransparency(&self->loadbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_loadresource(&self->loadbutton, IDB_OPEN_LIGHT,
+		IDB_OPEN_DARK, psy_ui_colour_white()); 
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 	psy_ui_button_init_text_connect(&self->savebutton, filebar_base(self), NULL,
 		"file.save", self, filebar_onsavesong);
-	psy_ui_bitmap_loadresource(&self->savebutton.bitmapicon, IDB_SAVE_DARK);
-	psy_ui_bitmap_settransparency(&self->savebutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_loadresource(&self->savebutton, IDB_SAVE_LIGHT,
+		IDB_SAVE_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text(&self->exportbutton, filebar_base(self), NULL,
 		"file.export");
-	psy_ui_bitmap_loadresource(&self->exportbutton.bitmapicon, IDB_EARTH_DARK);
-	psy_ui_bitmap_settransparency(&self->exportbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_loadresource(&self->exportbutton, IDB_EARTH_LIGHT,
+		IDB_EARTH_DARK, psy_ui_colour_white());
 	psy_ui_button_init_text(&self->renderbutton, filebar_base(self), NULL,
 		"file.render");	
-	psy_ui_bitmap_loadresource(&self->renderbutton.bitmapicon, IDB_PULSE_DARK);
-	psy_ui_bitmap_settransparency(&self->renderbutton.bitmapicon, psy_ui_colour_make(0x00FFFFFF));	
+	psy_ui_button_loadresource(&self->renderbutton, IDB_PULSE_LIGHT,
+		IDB_PULSE_DARK, psy_ui_colour_white());
 }
 
 void filebar_useft2fileexplorer(FileBar* self)
