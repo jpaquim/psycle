@@ -43,7 +43,9 @@ void seqedittimesig_init(SeqEditTimeSig*, psy_ui_Component* parent,
 /* SeqEditTimesig */
 typedef struct SeqEditLoops {
 	/* inherits */
-	psy_ui_Component component;
+	psy_ui_Component component;	
+	/* signals */
+	psy_Signal signal_changed;
 	/* internal */
 	bool preventedit;
 	bool editnominator;
