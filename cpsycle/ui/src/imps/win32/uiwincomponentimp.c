@@ -1,7 +1,10 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
+
 
 #include "uiwincomponentimp.h"
 
@@ -14,9 +17,9 @@
 #include "../../uiapp.h"
 #include "uiwinapp.h"
 #include "uiwingraphicsimp.h"
-// common control header
+/* common control header */
 #include <commctrl.h>
-// details
+/* details */
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -36,7 +39,7 @@ static HINSTANCE psy_ui_win_component_instance(psy_ui_win_ComponentImp*
 static void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp*,
 	LPCSTR classname);
 
-// prototypes
+/* prototypes */
 static void dev_dispose(psy_ui_win_ComponentImp*);
 static void dev_destroy(psy_ui_win_ComponentImp*);
 static void dev_show(psy_ui_win_ComponentImp*);
@@ -104,8 +107,7 @@ static psy_ui_RealPoint translatecoords(psy_ui_win_ComponentImp*, psy_ui_Compone
 	psy_ui_Component* dst);
 static psy_ui_RealPoint mapcoords(psy_ui_win_ComponentImp* self, psy_ui_Component* src,
 	psy_ui_Component* dst);
-
-// VTable init
+/* vtable */
 static psy_ui_ComponentImpVTable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -275,7 +277,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable_initialized = TRUE;
 	}
 }
-
+/* implementation */
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	psy_ui_Component* component,
 	psy_ui_ComponentImp* parent,
@@ -333,6 +335,7 @@ void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 		usecommand ? (HMENU) winapp->winid : NULL,
 		instance,
 		NULL);
+	self->visible = (dwStyle & WS_VISIBLE) == WS_VISIBLE;
 	if (self->hwnd == NULL) {
 		char text[256];
 		unsigned long err;
@@ -1355,4 +1358,4 @@ void dev_mouseleave(psy_ui_win_ComponentImp* self)
 	psy_signal_emit(&self->component->signal_mouseleave, self->component, 0);		
 }
 
-#endif
+#endif /* PSYCLE_TK_WIN32 */

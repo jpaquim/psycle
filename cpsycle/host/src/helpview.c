@@ -1,13 +1,16 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "helpview.h"
-// host
+/* host */
 #include "resources/resource.h"
 
-// prototypes
+/* prototypes */
 static void helpview_initbase(HelpView*, psy_ui_Component* parent);
 static void helpview_inittabbar(HelpView*, psy_ui_Component* tabbarparent,
 	Workspace*);
@@ -18,7 +21,7 @@ static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
 static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
 static void helpview_onfloatsection(HelpView*, psy_ui_Button* sender);
 
-// implementation
+/* implementation */
 void helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
@@ -29,7 +32,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 	helpview_initsectionfloated(self);
 	psy_ui_tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
 }
-// construction
+/* construction */
 void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(helpview_base(self), parent, NULL);
@@ -46,14 +49,14 @@ void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalignexpand(&self->bar, psy_ui_HEXPAND);
-	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
+		psy_ui_ALIGN_LEFT);
 	psy_ui_tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
 		"help.greetings", NULL);	
-	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL, "help.extract",
-		self, helpview_onfloatsection);		
-	psy_ui_bitmap_loadresource(&self->floatsection.bitmapicon, IDB_VSPLIT_DARK);
-	psy_ui_bitmap_settransparency(&self->floatsection.bitmapicon,
-		psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_init_text_connect(&self->floatsection, &self->bar, NULL,
+		"help.extract", self, helpview_onfloatsection);		
+	psy_ui_button_loadresource(&self->floatsection,
+		IDB_VSPLIT_LIGHT, IDB_VSPLIT_DARK, psy_ui_colour_white());
 	psy_ui_button_settextalignment(&self->floatsection,
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
 	psy_ui_component_setalign(psy_ui_button_base(&self->floatsection),
@@ -83,7 +86,7 @@ void helpview_initsectionfloated(HelpView* self)
 		psy_ui_ALIGN_CENTER);
 }
 
-// events
+/* events */
 void helpview_onselectsection(HelpView* self, psy_ui_Component* sender,
 	uintptr_t section, uintptr_t options)
 {
@@ -100,7 +103,8 @@ void helpview_onfocus(HelpView* self, psy_ui_Component* sender)
 	}
 }
 
-void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* dest)
+void helpview_float(HelpView* self, HelpViewSection section,
+	psy_ui_Component* dest)
 {
 	if (section == HELPVIEWSECTION_HELP) {
 		psy_ui_component_hide(&self->help.component);
@@ -120,7 +124,8 @@ void helpview_float(HelpView* self, HelpViewSection section, psy_ui_Component* d
 	}
 }
 
-void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* dest)
+void helpview_dock(HelpView* self, HelpViewSection section,
+	psy_ui_Component* dest)
 {
 	if (section == HELPVIEWSECTION_HELP) {		
 		psy_ui_component_hide(&self->sectionfloated);

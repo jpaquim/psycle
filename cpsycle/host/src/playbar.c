@@ -1,27 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "playbar.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
-// audio
+/* audio */
 #include <exclusivelock.h>
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define PLAYBAR_TIMERINTERVAL 100
 
-// combobox index
+/* combobox index */
 enum {
 	PLAY_SONG  = 0,
 	PLAY_SEL   = 1,
 	PLAY_BEATS = 2
 };
 
-// prototypes
+/* prototypes */
 static void playbar_updatetext(PlayBar*);
 static void playbar_onloopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
@@ -35,7 +38,7 @@ static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_ontimer(PlayBar*, uintptr_t timerid);
 static void playbar_onlanguagechanged(PlayBar*);
 static psy_audio_SequencerPlayMode playbar_comboboxplaymode(const PlayBar*);
-// vtable
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
@@ -54,7 +57,7 @@ static psy_ui_ComponentVtable* vtable_init(PlayBar* self)
 	psy_ui_component_setvtable(playbar_base(self), &vtable);
 	return &vtable;
 }
-// implementation
+/* implementation */
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {					
 	psy_ui_component_init(playbar_base(self), parent, NULL);
@@ -64,23 +67,23 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = workspace_player(workspace);
-	// loop
+	/* loop */
 	psy_ui_button_init_text_connect(&self->loop, playbar_base(self), NULL,
 		"play.loop", self, playbar_onloopclicked);	
-	psy_ui_button_loadresource(&self->loop, IDB_LOOP_DARK,
+	psy_ui_button_loadresource(&self->loop, IDB_LOOP_LIGHT, IDB_LOOP_DARK,
 		psy_ui_colour_white());
-	// record
+	/* record */
 	psy_ui_button_init_text_connect(&self->recordnotes, playbar_base(self),
 		NULL, "play.record-notes", self, playbar_onrecordnotesclicked);
-	// play
+	/* play */
 	psy_ui_button_init_text_connect(&self->play, playbar_base(self), NULL,
 		"play.play", self, playbar_onplayclicked);
-	psy_ui_button_loadresource(&self->play, IDB_PLAY_DARK,
+	psy_ui_button_loadresource(&self->play, IDB_PLAY_LIGHT, IDB_PLAY_DARK,
 		psy_ui_colour_white());
-	// playmode
+	/* playmode */
 	psy_ui_combobox_init(&self->playmode, playbar_base(self), NULL);
 	psy_ui_combobox_setcharnumber(&self->playmode, 6.0);	
-	// play beat num
+	/* play beat num */
 	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
 	psy_ui_edit_setcharnumber(&self->loopbeatsedit, 6);
@@ -90,16 +93,16 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self), NULL,
 		self, playbar_onnumplaybeatsmore);
 	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
-	// stop
+	/* stop */
 	psy_ui_button_init_text_connect(&self->stop, playbar_base(self), NULL,
 		"play.stop", self, playbar_onstopclicked);	
-	psy_ui_button_loadresource(&self->stop, IDB_STOP_DARK,
+	psy_ui_button_loadresource(&self->stop, IDB_STOP_LIGHT, IDB_STOP_DARK,
 		psy_ui_colour_white());
 	playbar_updatetext(self);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		playbar_onplaymodeselchanged);	
-	psy_ui_component_starttimer(playbar_base(self), 0, PLAYBAR_TIMERINTERVAL);
+	psy_ui_component_starttimer(playbar_base(self), 0, PLAYBAR_TIMERINTERVAL);	
 }
 
 void playbar_updatetext(PlayBar* self)

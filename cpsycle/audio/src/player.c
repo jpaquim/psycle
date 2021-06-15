@@ -709,6 +709,9 @@ void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 {	
 	assert(self);	
 
+	if (lpb > 31) {
+		lpb = 31;
+	}
 	if (lpb == 0) {
 		return;
 	}	
@@ -928,4 +931,10 @@ void psy_audio_player_sendcmd(psy_audio_Player* self, const char* section,
 	psy_EventDriverCmd cmd)
 {
 	psy_audio_eventdrivers_sendcmd(&self->eventdrivers, section, cmd);
+}
+
+psy_dsp_big_beat_t psy_audio_player_realbpm(const psy_audio_Player* self)
+{
+	return psy_audio_player_bpm(self) * psy_audio_sequencer_speed(
+		&self->sequencer);
 }

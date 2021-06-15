@@ -28,7 +28,7 @@ typedef struct TimeBar {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
-	psy_ui_Label bpmdesc;
+	psy_ui_Label desc;
 	psy_ui_Label bpmlabel;
 	psy_ui_Button lessless;
 	psy_ui_Button less;
@@ -36,11 +36,12 @@ typedef struct TimeBar {
 	psy_ui_Button moremore;
 	// data members	
 	psy_dsp_big_beat_t bpm;
+	psy_dsp_big_beat_t realbpm;
 	// references
-	Workspace* workspace;
+	psy_audio_Player* player;
 } TimeBar;
 
-void timebar_init(TimeBar*, psy_ui_Component* parent, Workspace*);
+void timebar_init(TimeBar*, psy_ui_Component* parent, psy_audio_Player*);
 
 INLINE psy_ui_Component* timebar_base(TimeBar* self)
 {

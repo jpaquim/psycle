@@ -632,7 +632,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_destroy);
 	psy_signal_init(&self->signal_destroyed);
 	psy_signal_init(&self->signal_show);
-	psy_signal_init(&self->signal_hide);
+	psy_signal_init(&self->signal_hide);	
 	psy_signal_init(&self->signal_focus);
 	psy_signal_init(&self->signal_focuslost);
 	psy_signal_init(&self->signal_align);
@@ -643,6 +643,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_scrollrangechanged);
 	psy_signal_init(&self->signal_languagechanged);
 	psy_signal_init(&self->signal_dragstart);
+	psy_signal_init(&self->signal_styleupdate);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {
@@ -675,7 +676,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->draggable = FALSE;
 	self->dropdown = FALSE;
 	self->bgframetimer = FALSE;
-	self->currbgframe = 0;	
+	self->currbgframe = 0;
+	self->ncpaint = FALSE;
 	psy_ui_bitmap_init(&self->bufferbitmap);
 	self->drawtobuffer = FALSE;
 	psy_ui_component_updatefont(self);
@@ -728,7 +730,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_destroy);
 	psy_signal_dispose(&self->signal_destroyed);
 	psy_signal_dispose(&self->signal_show);
-	psy_signal_dispose(&self->signal_hide);
+	psy_signal_dispose(&self->signal_hide);	
 	psy_signal_dispose(&self->signal_focus);
 	psy_signal_dispose(&self->signal_focuslost);
 	psy_signal_dispose(&self->signal_align);	
@@ -739,6 +741,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_scrollrangechanged);
 	psy_signal_dispose(&self->signal_languagechanged);
 	psy_signal_dispose(&self->signal_dragstart);
+	psy_signal_dispose(&self->signal_styleupdate);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -2109,12 +2112,14 @@ void psy_ui_notifystyleupdate(psy_ui_Component* main)
 
 		psy_ui_componentstyle_updatecurrstate(&main->style);
 		main->vtable->onupdatestyles(main);
+		psy_signal_emit(&main->signal_styleupdate, main, 0);
 		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
 			psy_ui_Component* child;
 
 			child = (psy_ui_Component*)psy_list_entry(p);			
 			psy_ui_componentstyle_updatecurrstate(&child->style);
 			child->vtable->onupdatestyles(child);
+			psy_signal_emit(&child->signal_styleupdate, child, 0);
 			if (child->imp) {
 				child->imp->vtable->dev_setbackgroundcolour(child->imp,
 					psy_ui_component_backgroundcolour(child));

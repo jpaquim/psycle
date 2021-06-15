@@ -502,7 +502,7 @@ int patternviewconfig_patterndisplay(const PatternViewConfig* self)
 	property = psy_property_at(self->patternview, "patterndisplay",
 		PSY_PROPERTY_TYPE_CHOICE);
 	if (property) {
-		return psy_property_item_int(property);
+		return (int)psy_property_item_int(property);
 	}
 	return PROPERTY_ID_PATTERN_DISPLAYMODE_TRACKER;		
 }

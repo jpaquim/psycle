@@ -65,7 +65,9 @@ typedef struct SeqEditState {
 void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Edit*, psy_ui_Component* view);
 void seqeditstate_dispose(SeqEditState*);
 
+
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
+void seqeditstate_outputstatusposition(SeqEditState*);
 
 INLINE psy_audio_OrderIndex seqeditstate_editposition(const SeqEditState* self)
 {	
@@ -94,6 +96,7 @@ INLINE void seqeditstate_setcursor(SeqEditState* self,
 	assert(self);
 
 	self->cursorposition = cursorposition;
+	seqeditstate_outputstatusposition(self);
 	psy_signal_emit(&self->signal_cursorchanged, self, 0);
 }
 
@@ -104,6 +107,7 @@ INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
 {
 	return self->lineheight;
 }
+
 
 #ifdef __cplusplus
 }

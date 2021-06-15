@@ -126,7 +126,8 @@ void fileview_builddrives(FileView* self)
 	
 	psy_ui_tabbar_clear(&self->drives);
 	for (q = p = psy_drives(); p != NULL; psy_list_next(&p)) {		
-		psy_ui_tabbar_append(&self->drives, (char*)psy_list_entry(p));
+		psy_ui_tabbar_append(&self->drives, (char*)psy_list_entry(p),
+			psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	}
 	psy_list_deallocate(&q, NULL);
 }

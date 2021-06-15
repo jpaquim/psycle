@@ -104,6 +104,44 @@ IDB_BGMAIN              BITMAP                  "bgmain.bmp"
 
 IDB_BGTOP               BITMAP                  "bgtop.bmp"
 
+IDB_ARROW_FORWARD_LIGHT BITMAP                  "arrow-forward-light.bmp"
+
+IDB_ARROW_BACK_LIGHT    BITMAP                  "arrow-back-light.bmp"
+
+IDB_MACHINES_LIGHT      BITMAP                  "machines-light.bmp"
+
+IDB_NOTES_LIGHT         BITMAP                  "notes-light.bmp"
+
+IDB_PLAY_LIGHT          BITMAP                  "play-light.bmp"
+
+IDB_OPEN_LIGHT          BITMAP                  "open-light.bmp"
+
+IDB_SAVE_LIGHT          BITMAP                  "save-light.bmp"
+
+IDB_EARTH_LIGHT         BITMAP                  "earth-light.bmp"
+
+IDB_PULSE_LIGHT         BITMAP                  "pulse-light.bmp"
+
+IDB_UNDO_LIGHT          BITMAP                  "undo-light.bmp"
+
+IDB_REDO_LIGHT          BITMAP                  "redo-light.bmp"
+
+IDB_LOOP_LIGHT          BITMAP                  "loop_light.bmp"
+
+IDB_STOP_LIGHT          BITMAP                  "stop-light.bmp"
+
+IDB_SETTINGS_LIGHT      BITMAP                  "settings-light.bmp"
+
+IDB_VSPLIT_LIGHT        BITMAP                  "vsplit_light.bmp"
+
+IDB_EXPAND_LIGHT        BITMAP                  "expand-light.bmp"
+
+IDB_WIRES_LIGHT         BITMAP                  "wires-light.bmp"
+
+IDB_MATRIX_LIGHT        BITMAP                  "matrix-light.bmp"
+
+IDB_NEWMACHINE_LIGHT    BITMAP                  "newmachine-light.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ static void seqeditruler_ondestroy(SeqEditRuler*);
 static void seqeditruler_ondraw(SeqEditRuler*, psy_ui_Graphics*);
 static void seqeditruler_drawtimesigs(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
-static void seqeditruler_drawtimesig(SeqEditRuler* self, psy_ui_Graphics*,
+static void seqeditruler_drawtimesig(SeqEditRuler*, psy_ui_Graphics*,
 	psy_dsp_big_beat_t offset, int nominator, int denominator);
 static void seqeditruler_drawruler(SeqEditRuler*, psy_ui_Graphics*,
 	double baseline);
@@ -38,6 +38,9 @@ static void seqeditruler_onpreferredsize(SeqEditRuler*,
 static psy_dsp_big_beat_t seqeditruler_step(const SeqEditRuler*);
 static void seqeditruler_oncursorchanged(SeqEditRuler*, SeqEditState*);
 static void seqeditruler_onmousedown(SeqEditRuler*, psy_ui_MouseEvent*);
+static void seqeditruler_onmousemove(SeqEditRuler*, psy_ui_MouseEvent*);
+static void seqeditruler_onmouseenter(SeqEditRuler*);
+static void seqeditruler_onmouseleave(SeqEditRuler*);
 static void seqeditruler_onmousedoubleclick(SeqEditRuler*, psy_ui_MouseEvent*);
 static void seqeditruler_oneditaccept(SeqEditRuler*, psy_ui_Edit* sender);
 static void seqeditruler_oneditreject(SeqEditRuler*, psy_ui_Edit* sender);
@@ -62,6 +65,15 @@ static void seqeditruler_vtable_init(SeqEditRuler* self)
 		seqeditruler_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditruler_onmousedown;
+		seqeditruler_vtable.onmousemove =
+			(psy_ui_fp_component_onmouseevent)
+			seqeditruler_onmousemove;
+		seqeditruler_vtable.onmouseenter =
+			(psy_ui_fp_component_onmouseenter)
+			seqeditruler_onmouseenter;
+		seqeditruler_vtable.onmouseleave =
+			(psy_ui_fp_component_onmouseleave)
+			seqeditruler_onmouseleave;
 		seqeditruler_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditruler_onmousedoubleclick;
@@ -333,7 +345,7 @@ void seqeditruler_onpreferredsize(SeqEditRuler* self,
 			seqeditstate_beattopx(self->state, psy_audio_sequence_duration(
 				seqeditstate_sequence(self->state)) + 400.0));
 	} else {
-		rv->width = psy_ui_value_make_px(0);
+		rv->width = psy_ui_value_make_px(0.0);
 	}
 	if (self->showtimesig) {
 		rv->height = psy_ui_value_make_eh(4.0);
@@ -405,6 +417,24 @@ void seqeditruler_onmousedown(SeqEditRuler* self, psy_ui_MouseEvent* ev)
 			}
 		}
 	}
+}
+
+void seqeditruler_onmousemove(SeqEditRuler* self, psy_ui_MouseEvent* ev)
+{
+	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
+		seqeditstate_pxtobeat(self->state, ev->pt.x)));	
+}
+
+void seqeditruler_onmouseenter(SeqEditRuler* self)
+{
+	self->state->cursoractive = TRUE;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void seqeditruler_onmouseleave(SeqEditRuler* self)
+{
+	self->state->cursoractive = FALSE;
+	psy_ui_component_invalidate(&self->component);
 }
 
 void seqeditruler_edit(SeqEditRuler* self, double x, const char* text)
@@ -1341,7 +1371,6 @@ static void seqeditortracks_ontimer(SeqEditorTracks*, uintptr_t timerid);
 static void seqeditortracks_oncursorchanged(SeqEditorTracks*, SeqEditState*);
 static void seqeditortracks_updatecursorlineposition(SeqEditorTracks*);
 static void seqeditortracks_updateseqeditlineposition(SeqEditorTracks*);
-static void seqeditortracks_outputstatusposition(SeqEditorTracks*, double x);
 /* vtable */
 static psy_ui_ComponentVtable seqeditortracks_vtable;
 static bool seqeditortracks_vtable_initialized = FALSE;
@@ -1575,7 +1604,8 @@ void seqeditortracks_onmousedown(SeqEditorTracks* self,
 void seqeditortracks_onmousemove(SeqEditorTracks* self,
 	psy_ui_MouseEvent* ev)
 {	
-	seqeditortracks_outputstatusposition(self, ev->pt.x);
+	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
+		seqeditstate_pxtobeat(self->state, ev->pt.x)));
 	if (self->state->dragstatus && (self->state->dragtype & SEQEDIT_DRAGTYPE_MOVE)
 			== SEQEDIT_DRAGTYPE_MOVE) {
 		seqeditortracks_updateseqeditlineposition(self);
@@ -1607,17 +1637,6 @@ void seqeditortracks_onmouseleave(SeqEditorTracks* self)
 		psy_ui_component_invalidate(&self->component);
 	}
 	psy_signal_emit(&self->state->signal_cursorchanged, self->state, 0);
-}
-
-void seqeditortracks_outputstatusposition(SeqEditorTracks* self, double x)
-{	
-	char text[256];
-
-	seqeditstate_setcursor(self->state, seqeditstate_quantize(self->state,
-		seqeditstate_pxtobeat(self->state, x)));
-	psy_snprintf(text, 256, "Sequence Position %.3fb",
-		(float)self->state->cursorposition);
-	workspace_outputstatus(self->workspace, text);
 }
 
 /* SeqEditorHeaderBar */
@@ -1684,15 +1703,15 @@ void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcursel(&self->inserttype, 0);
 	/* expand */
 	psy_ui_button_init(&self->expand, &self->component, NULL);
-	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->expand, IDB_EXPAND_LIGHT,
+		IDB_EXPAND_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->expand),
 		psy_ui_ALIGN_RIGHT);	
 	/* configure */
 	psy_ui_button_init_connect(&self->configure, &self->component, NULL,
 		self, seqeditortoolbar_onconfigure);
-	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->configure),
 		psy_ui_ALIGN_RIGHT);
 	/* assign sample */

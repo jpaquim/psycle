@@ -382,8 +382,8 @@ void midimonitor_inittitlebar(MidiMonitor* self)
 	titlebar_hideonclose(&self->titlebar);
 	psy_ui_button_init_text(&self->configure, &self->titlebar.client, NULL,
 		"Devices");
-	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(&self->configure.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);			
 }
@@ -454,8 +454,8 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_setalign(&self->channelmappingtitle.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->mapconfigure, &self->topchannelmapping, NULL);
-	psy_ui_bitmap_loadresource(&self->mapconfigure.bitmapicon, IDB_SETTINGS_DARK);
-	psy_ui_bitmap_settransparency(&self->mapconfigure.bitmapicon, psy_ui_colour_make(0x00FFFFFF));
+	psy_ui_button_loadresource(&self->mapconfigure, IDB_SETTINGS_LIGHT,
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 	psy_signal_connect(&self->mapconfigure.signal_clicked, self, midimonitor_onmapconfigure);
 	psy_ui_component_setalign(&self->mapconfigure.component, psy_ui_ALIGN_LEFT);
 	midichannelmappingview_init(&self->channelmapping, &self->client,

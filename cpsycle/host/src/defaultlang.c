@@ -688,6 +688,8 @@ void make_translator_make_sequenceview(psy_Property* parent)
 	add("allow-notes-to_effect", "Allow notes to effect");
 	add("multichannel-audition", "Multitrack playback on keypress");
 	add("duration", "Duration");
+	add("more", "Show More");
+	add("less", "Show Less");
 	add("ins", "Ins");
 	add("new", "New");
 	add("clone", "Clone");
@@ -699,7 +701,7 @@ void make_translator_make_sequenceview(psy_Property* parent)
 	add("copy", "Copy");
 	add("paste", "Paste");
 	add("singlesel", "SingleSel");
-	add("multisel", "MultiSel");
+	add("multisel", "MultiSel");	
 	add("showseqeditor", "Show SequenceEditor");
 	add("hideseqeditor", "Hide SequenceEditor");
 	add("showstepsequencer", "Show Stepsequencer");

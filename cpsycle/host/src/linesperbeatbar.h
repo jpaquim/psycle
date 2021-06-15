@@ -1,37 +1,47 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(LINESPERBEATBAR_H)
 #define LINESPERBEATBAR_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
-#include "uilabel.h"
+/* ui */
 #include "uibutton.h"
+#include "uilabel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// LinesPerBeatBar
-//
-// Sets the Lines per beat ranging from 1 to 31.
+/*
+** LinesPerBeatBar
+**
+** Sets the Lines per beat ranging from 1 to 31.
+*/
 
 typedef struct LinesPerBeatBar {
-	//inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
-	psy_ui_Label lpbdesclabel;
-	psy_ui_Label lpblabel;	
-	psy_ui_Button lessbutton;
-	psy_ui_Button morebutton;
+	/* internal */
+	/* description label */
+	psy_ui_Label desc;
+	/* displays the player lpb */
+	psy_ui_Label number;
+	/* decrement lpb button by -1 */
+	psy_ui_Button less;
+	/* increment lpb button by +1 */
+	psy_ui_Button more;
+	/* lpb display cache */
 	uintptr_t lpb;
-	// references
-	Workspace* workspace;
+	/* references */
+	psy_audio_Player* player;
 } LinesPerBeatBar;
 
-void linesperbeatbar_init(LinesPerBeatBar*, psy_ui_Component* parent, Workspace*);
+void linesperbeatbar_init(LinesPerBeatBar*, psy_ui_Component* parent,
+	psy_audio_Player*);
 
 INLINE psy_ui_Component* linesperbeatbar_base(LinesPerBeatBar* self)
 {

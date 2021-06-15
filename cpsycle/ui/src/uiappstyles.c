@@ -118,7 +118,11 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onprimary, material.strong));
-	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);	
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium));
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_TEXT, style);
 	/* tabbar */
 	style = psy_ui_style_allocinit();	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_TABBAR, style);	
@@ -226,6 +230,11 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.secondary, material.weak));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SWITCH_SELECT, style);
+	/* listbox */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolour(style,
+		psy_ui_colour_weighted(&material.onprimary, material.medium));
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
 }
 
 
@@ -313,22 +322,18 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	psy_ui_border_setcolours(&style->border,
 		win.cl_black, psy_ui_colour_make(0xE0E0E0),
 		psy_ui_colour_make(0xE0E0E0), win.cl_black);
-	psy_ui_style_setspacing_em(style, 0.0, 0.5, 0.0, 0.5);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
 	/* combobox::hover */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
-	psy_ui_border_setcolours(&style->border,
-		win.cl_black, psy_ui_colour_make(0xE0E0E0),
-		psy_ui_colour_make(0xE0E0E0), win.cl_black);
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_COMBOBOX));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_HOVER, style);
 	/* combobox::select */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
-	psy_ui_border_setcolours(&style->border,
-		win.cl_black, psy_ui_colour_make(0xE0E0E0),
-		psy_ui_colour_make(0xE0E0E0), win.cl_black);
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_COMBOBOX));
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
+	/* combobox::textfield */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);	
+	psy_ui_style_setspacing_em(style, 0.0, 1.0, 0.0, 1.0);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_TEXT, style);
 	/* tabbar */
 	style = psy_ui_style_allocinit();
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_TABBAR, style);
@@ -372,14 +377,12 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	/* scrollthumb */	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
-	psy_ui_style_setborder(style, &win.raised);
-	psy_ui_style_setspacing_em(style, 0.25, 0.25, 0.25, 0.25);
+	psy_ui_style_setborder(style, &win.raised);	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLTHUMB, style);
 	/* scrollthumb::hover */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_gray);
-	psy_ui_style_setborder(style, &win.raised);
-	psy_ui_style_setspacing_em(style, 0.25, 0.25, 0.25, 0.25);
+	psy_ui_style_setborder(style, &win.raised);	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLTHUMB_HOVER, style);
 	/* scrollbutton */
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_BUTTON));
@@ -390,9 +393,8 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	psy_ui_style_setspacing_em(style, 0.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLBUTTON_HOVER, style);
 	/* scrollbutton::active */
-	style = psy_ui_style_allocinit();
-	psy_ui_style_setspacing_em(style, 0.0, 0.0, 0.0, 0.0);
 	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_BUTTON_ACTIVE));
+	psy_ui_style_setspacing_em(style, 0.0, 0.0, 0.0, 0.0);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SCROLLBUTTON_ACTIVE, style);
 	/* sliderpane */	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SLIDERPANE,
@@ -401,14 +403,12 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	/* sliderthumb */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_silver);
-	psy_ui_style_setborder(style, &win.raised);
-	psy_ui_style_setspacing_em(style, 0.25, 0.25, 0.25, 0.25);
+	psy_ui_style_setborder(style, &win.raised);	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SLIDERTHUMB, style);	
 	/* sliderthumb::hover */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_gray);
 	psy_ui_style_setborder(style, &win.raised);	
-	psy_ui_style_setspacing_em(style, 0.25, 0.25, 0.25, 0.25);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SLIDERTHUMB_HOVER, style);	
 	/* splitter */
 	style = psy_ui_style_allocinit();
@@ -438,4 +438,8 @@ void psy_ui_appstyles_inittheme_win98(psy_ui_Styles* self, bool keepfont)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style, win.cl_navy);	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_SWITCH_SELECT, style);
+	/* listbox */
+	style = psy_ui_style_allocinit();
+	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
+	psy_ui_styles_setstyle(self, psy_ui_STYLE_LISTBOX, style);
 }

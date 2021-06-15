@@ -19,25 +19,28 @@ static void psy_ui_label_onpreferredsize(psy_ui_Label*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
 static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 static void psy_ui_label_ontimer(psy_ui_Label*, uintptr_t timerid);
-psy_List* psy_ui_label_lines(psy_ui_Label*, const char* text, double width);
-psy_List* psy_ui_label_eols(psy_ui_Label*);
-psy_List* psy_ui_label_wraps(psy_ui_Label*, const char* text, uintptr_t num,
+static psy_List* psy_ui_label_lines(psy_ui_Label*, const char* text, double width);
+static psy_List* psy_ui_label_eols(psy_ui_Label*);
+static psy_List* psy_ui_label_wraps(psy_ui_Label*, const char* text, uintptr_t num,
 	double width);
+static void psy_ui_label_onupdatestyles(psy_ui_Label*);
 /* vtable */
 static psy_ui_ComponentVtable vtable;
 static psy_ui_ComponentVtable super_vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
+static void vtable_init(psy_ui_Label* self)
 {
 	assert(self);
 
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		super_vtable = *(self->component.vtable);
-		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+		vtable.ondestroy =
+			(psy_ui_fp_component_ondestroy)
 			psy_ui_label_ondestroy;
-		vtable.ondraw = (psy_ui_fp_component_ondraw)
+		vtable.ondraw =
+			(psy_ui_fp_component_ondraw)
 			psy_ui_label_ondraw;
 		vtable.onpreferredsize =
 			(psy_ui_fp_component_onpreferredsize)
@@ -45,11 +48,14 @@ static psy_ui_ComponentVtable* vtable_init(psy_ui_Label* self)
 		vtable.onlanguagechanged =
 			(psy_ui_fp_component_onlanguagechanged)
 			psy_ui_label_onlanguagechanged;
+		vtable.onupdatestyles =
+			(psy_ui_fp_component_onupdatestyles)
+			psy_ui_label_onupdatestyles;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)
 			psy_ui_label_ontimer;
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(&self->component, &vtable);
 }
 /* implementation */
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
@@ -57,8 +63,8 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent,
 {
 	assert(self);
 
-	psy_ui_component_init(&self->component, parent, view);
-	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_init(&self->component, parent, view);	
+	vtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
 	self->charnumber = 0;
 	self->linespacing = 1.0;
@@ -223,7 +229,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	cpy = centery;
 	linestart = 0;
 	for (p = lines; p != NULL; p = p->next) {
-		cp = (uintptr_t)p->entry;	
+		cp = (uintptr_t)p->entry;		
 		if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 				psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 			if (self->preventwrap) {
@@ -236,7 +242,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			} else {
 				centerx = (size.width - (cp - linestart) * tm->tmAveCharWidth) / 2;
 			}
-		}
+		}		
 		psy_ui_textout(g, centerx, cpy, text + linestart, cp - linestart);
 		linestart = cp + 1;
 		cpy += tm->tmHeight;
@@ -438,4 +444,9 @@ void psy_ui_label_preventwrap(psy_ui_Label* self)
 void psy_ui_label_enablewrap(psy_ui_Label* self)
 {
 	self->preventwrap = FALSE;
+}
+
+void psy_ui_label_onupdatestyles(psy_ui_Label* self)
+{	
+	self->component.style.overridestyle.colour.mode.set = FALSE;		
 }

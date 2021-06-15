@@ -45,7 +45,8 @@ void kbdhelp_buildtabbar(KbdHelp* self)
 
 		property = (const psy_Property*)psy_list_entry_const(p);
 		if (psy_property_issection(property)) {
-			psy_ui_tabbar_append(&self->tabbar, psy_property_text(property));
+			psy_ui_tabbar_append(&self->tabbar, psy_property_text(property),
+				psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 		}
 	}		
 	psy_ui_tabbar_select(&self->tabbar, 0);

@@ -1028,8 +1028,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->client, &self->clientnotebook.component, NULL);
 	psy_ui_tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	
-	psy_ui_tabbar_append(&self->tabbar, "General");
-	psy_ui_tabbar_append(&self->tabbar, "Vibrato");
+	psy_ui_tabbar_append(&self->tabbar, "General",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "Vibrato",
+		psy_INDEX_INVALID, psy_INDEX_INVALID, psy_ui_colour_white());
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setmargin(psy_ui_notebook_base(&self->notebook),
 		psy_ui_margin_make_em(0.0, 0.0, 0.0, 0.5));

@@ -214,7 +214,7 @@ INLINE psy_dsp_big_hz_t psy_audio_sequencer_samplerate(
 }
 void psy_audio_sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_big_beat_t bpm);
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_bpm(const psy_audio_Sequencer* self)
 {
 	return self->seqtime.bpm;
 }

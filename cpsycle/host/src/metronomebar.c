@@ -43,8 +43,8 @@ void metronomebar_init(MetronomeBar* self, psy_ui_Component* parent,
 	/* configure */
 	psy_ui_button_init_connect(&self->configure, metronomebar_base(self), NULL,
 		self, metronomebar_onconfigure);
-	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->configure, IDB_SETTINGS_LIGHT,
+		IDB_SETTINGS_DARK, psy_ui_colour_white());
 }
 
 void metronomebar_fillprecount(MetronomeBar* self)

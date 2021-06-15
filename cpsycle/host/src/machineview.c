@@ -5,6 +5,7 @@
 
 #include "../../detail/prefix.h"
 
+
 #include "machineview.h"
 /* host */
 #include "resources/resource.h"
@@ -129,9 +130,7 @@ void machineview_initcomponent(MachineView* self, psy_ui_Component* parent)
 		machineview_vtable_init(self));
 	psy_ui_component_setbackgroundmode(machineview_base(self),
 		psy_ui_NOBACKGROUND);
-	psy_ui_component_setstyletypes(&self->component,
-		STYLE_MACHINEVIEW, psy_INDEX_INVALID, psy_INDEX_INVALID,
-		psy_INDEX_INVALID);	
+	psy_ui_component_setstyletype(&self->component, STYLE_MACHINEVIEW);	
 }
 
 void machineview_initpropertiesview(MachineView* self)
@@ -181,22 +180,15 @@ void machineview_initnewmachine(MachineView* self,
 
 void machineview_inittabbar(MachineView* self, psy_ui_Component* tabbarparent)
 {
-	psy_ui_Tab* tab;
-	psy_ui_Colour transparencycolour;
-
 	psy_ui_tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(psy_ui_tabbar_base(&self->tabbar),
 		psy_ui_ALIGN_LEFT);	
-	transparencycolour = psy_ui_colour_make_argb(psy_ui_RGB_WHITE);
-	tab = psy_ui_tabbar_append(&self->tabbar, "machineview.wires");
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_WIRES_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, transparencycolour);
-	tab = psy_ui_tabbar_append(&self->tabbar, "machineview.stack");
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_MATRIX_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, transparencycolour);
-	tab = psy_ui_tabbar_append(&self->tabbar, "machineview.new-machine");
-	psy_ui_bitmap_loadresource(&tab->icon, IDB_NEWMACHINE_DARK);
-	psy_ui_bitmap_settransparency(&tab->icon, transparencycolour);
+	psy_ui_tabbar_append(&self->tabbar, "machineview.wires",
+		IDB_WIRES_LIGHT, IDB_WIRES_DARK, psy_ui_colour_white());
+	psy_ui_tabbar_append(&self->tabbar, "machineview.stack",
+		IDB_MATRIX_LIGHT, IDB_MATRIX_DARK, psy_ui_colour_white());	
+	psy_ui_tabbar_append(&self->tabbar, "machineview.new-machine",
+		IDB_NEWMACHINE_LIGHT, IDB_NEWMACHINE_DARK, psy_ui_colour_white());
 }
 
 void machineview_connectsignals(MachineView* self)

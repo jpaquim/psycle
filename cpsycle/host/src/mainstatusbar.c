@@ -34,7 +34,7 @@ void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	self->clockcounter = 20;
 	psy_ui_component_setstyletype(&self->component, STYLE_STATUSBAR);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
-		psy_ui_margin_make_em(0.0, 1.0, 0.25, 0.0));
+		psy_ui_margin_make_em(0.0, 1.0, 0.0, 0.0));
 	mainstatusbar_initzoombox(self);
 	mainstatusbar_initstatuslabel(self);
 	mainstatusbar_initviewstatusbars(self);
@@ -99,7 +99,7 @@ void mainstatusbar_initkbdhelpbutton(MainStatusBar* self)
 		 margin);
 	psy_ui_component_setalign(psy_ui_button_base(&self->togglekbdhelp),
 		psy_ui_ALIGN_RIGHT);	
-	psy_ui_button_loadresource(&self->togglekbdhelp, IDB_KBD,
+	psy_ui_button_loadresource(&self->togglekbdhelp, IDB_KBD, IDB_KBD,
 		psy_ui_colour_white());
 }
 
@@ -110,7 +110,7 @@ void mainstatusbar_initterminalbutton(MainStatusBar* self)
 		NULL, "Terminal");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
-	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM,
+	psy_ui_button_loadresource(&self->toggleterminal, IDB_TERM, IDB_TERM,
 		psy_ui_colour_white());
 }
 

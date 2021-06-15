@@ -24,6 +24,7 @@ void psy_ui_dropdownbox_init(psy_ui_DropDownBox* self, psy_ui_Component* parent)
 		psy_ui_impfactory_allocinit_popupimp(
 			psy_ui_app_impfactory(psy_ui_app()), &self->component, view));	
 	self->component.dropdown = TRUE;
+	self->component.visible = FALSE;
 }
 
 void psy_ui_dropdownbox_show(psy_ui_DropDownBox* self, psy_ui_Component* field)

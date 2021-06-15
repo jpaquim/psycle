@@ -207,6 +207,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_scrollrangechanged;
 	psy_Signal signal_languagechanged;
 	psy_Signal signal_dragstart;
+	psy_Signal signal_styleupdate;
 	/* internal */
 	uintptr_t id;
 	bool doublebuffered;
@@ -227,6 +228,7 @@ typedef struct psy_ui_Component {
 	bool dropdown;
 	psy_ui_Bitmap bufferbitmap;
 	bool drawtobuffer;
+	bool ncpaint;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -466,7 +468,7 @@ typedef struct psy_ui_ComponentImpVTable {
 	psy_ui_fp_componentimp_dev_destroy dev_destroy;
 	psy_ui_fp_componentimp_dev_destroyed dev_destroyed;
 	psy_ui_fp_componentimp_dev_show dev_show;
-	psy_ui_fp_componentimp_dev_showstate dev_showstate;
+	psy_ui_fp_componentimp_dev_showstate dev_showstate;	
 	psy_ui_fp_componentimp_dev_hide dev_hide;
 	psy_ui_fp_componentimp_dev_visible dev_visible;
 	psy_ui_fp_componentimp_dev_drawvisible dev_drawvisible;
