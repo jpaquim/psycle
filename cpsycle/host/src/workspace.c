@@ -1387,7 +1387,9 @@ void workspace_idle(Workspace* self)
 
 		if (psy_audio_player_playing(&self->player)) {
 			it = psy_audio_sequence_begin(&self->song->sequence,
-				self->song->sequence.tracks,
+				self->song->sequence.tracks
+				? (psy_audio_SequenceTrack*)self->song->sequence.tracks->entry
+				: NULL,
 				psy_audio_player_position(&self->player));
 			if (it.sequencentrynode && self->lastentry != it.sequencentrynode->entry) {
 				psy_audio_SequencePatternEntry* entry;

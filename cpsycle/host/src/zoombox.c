@@ -1,27 +1,32 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "zoombox.h"
-// host
+/* host */
 #include "styles.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
 #define sgn(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
-// prototypes
+/* prototypes */
 static void zoombox_ondestroy(ZoomBox*);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
-static void zoombox_updatelabel(ZoomBox*);
 static void zoombox_onmousewheel(ZoomBox*, psy_ui_MouseEvent*);
-// vtable
+static void zoombox_oneditaccept(ZoomBox*, psy_ui_Edit* sender);
+static void zoombox_oneditreject(ZoomBox*, psy_ui_Edit* sender);
+static void zoombox_update(ZoomBox*);
+/* vtable */
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(ZoomBox* self)
+static void vtable_init(ZoomBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
@@ -31,42 +36,47 @@ static psy_ui_ComponentVtable* vtable_init(ZoomBox* self)
 			zoombox_onmousewheel;		
 		vtable_initialized = TRUE;
 	}
-	return &vtable;
+	psy_ui_component_setvtable(zoombox_base(self), &vtable);
 }
-
-// implementation
+/* implementation */
 void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 {
 	assert(self);
-
-	// init base
+	
 	psy_ui_component_init(&self->component, parent, NULL);
-	psy_ui_component_setvtable(zoombox_base(self), vtable_init(self));
+	vtable_init(self);
+	psy_signal_init(&self->signal_changed);
+	self->zoomrate = 1.0;
+	self->zoomstep = 0.1;
+	self->minrate = 0.10;
+	self->maxrate = 10.0;
 	psy_ui_component_setstyletype(&self->component, STYLE_ZOOMBOX);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);
-	// init ui elements
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HEXPAND);	
 	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self), NULL,
-		self, zoombox_onzoomout);	
+		self, zoombox_onzoomout);
+	/* zoom out */
 	psy_ui_button_preventtranslation(&self->zoomout);
 	psy_ui_button_settext(&self->zoomout, "-");	
 	psy_ui_button_setcharnumber(&self->zoomout, 2);
-	psy_ui_label_init(&self->label, zoombox_base(self), NULL);
-	psy_ui_label_preventtranslation(&self->label);
-	psy_ui_label_settext(&self->label, "100%");
-	psy_ui_label_setcharnumber(&self->label, 6);
+	/* zoom */
+	psy_ui_edit_init(&self->zoom, zoombox_base(self));
+	psy_ui_component_setstyletype(psy_ui_edit_base(&self->zoom),
+		STYLE_ZOOMBOX_EDIT);
+	psy_ui_edit_setcharnumber(&self->zoom, 7);
+	psy_ui_edit_enableinputfield(&self->zoom);	
+	psy_signal_connect(&self->zoom.signal_accept, self,
+		zoombox_oneditaccept);
+	psy_signal_connect(&self->zoom.signal_reject, self,
+		zoombox_oneditreject);
+	zoombox_update(self);
+	/* zoom in */
 	psy_ui_button_init_connect(&self->zoomin, zoombox_base(self), NULL,
 		self, zoombox_onzoomin);
 	psy_ui_button_preventtranslation(&self->zoomin);
 	psy_ui_button_settext(&self->zoomin, "+");	
 	psy_ui_button_setcharnumber(&self->zoomin, 2);		
-	psy_ui_component_setalign_children(zoombox_base(self), psy_ui_ALIGN_LEFT);		
-	// set defaults
-	self->zoomrate = 1.0;
-	self->zoomstep = 0.1;
-	self->minrate = 0.10;
-	self->maxrate = 10.0;
-	// init signal	
-	psy_signal_init(&self->signal_changed);
+	psy_ui_component_setalign_children(zoombox_base(self),
+		psy_ui_ALIGN_LEFT);
 }
 
 void zoombox_init_connect(ZoomBox* self, psy_ui_Component* parent,
@@ -107,8 +117,8 @@ void zoombox_setrate(ZoomBox* self, double rate)
 	rate = psy_min(self->maxrate, rate);
 	if (rate != self->zoomrate) {
 		self->zoomrate = rate;
-		psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);
-		zoombox_updatelabel(self);
+		zoombox_update(self);
+		psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);		
 	}	
 }
 
@@ -119,16 +129,6 @@ void zoombox_setstep(ZoomBox* self, double step)
 	self->zoomstep = step;
 }
 
-void zoombox_updatelabel(ZoomBox* self)
-{
-	char text[40];
-
-	assert(self);
-
-	psy_snprintf(text, 40, "%d%%", (int)(self->zoomrate * 100 + 0.5));
-	psy_ui_label_settext(&self->label, text);
-}
-
 void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 {
 	assert(self);
@@ -137,4 +137,40 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 		zoombox_setrate(self, self->zoomrate + sgn(ev->delta) * self->zoomstep);
 	}
 	psy_ui_mouseevent_prevent_default(ev);
+}
+
+void zoombox_oneditaccept(ZoomBox* self, psy_ui_Edit* sender)
+{
+	const char* text;		
+
+	text = psy_ui_edit_text(&self->zoom);
+	if (text) {				
+		char temp[64];
+		char* p;
+		int rate;
+
+		psy_snprintf(temp, 64, "%s", text);
+		if (p = strchr(temp, '%')) {
+			*p = '\0';
+		}
+		rate = atoi(temp);
+		zoombox_setrate(self,  psy_min(self->maxrate, psy_max(self->minrate,
+			(double)(rate / 100.0))));
+		psy_ui_component_setfocus(&self->component);
+	}
+}
+
+void zoombox_oneditreject(ZoomBox* self, psy_ui_Edit* sender)
+{	
+	psy_ui_component_setfocus(&self->component);
+}
+
+void zoombox_update(ZoomBox* self)
+{
+	char text[64];
+
+	assert(self);
+
+	psy_snprintf(text, 64, "%d%%", (int)(self->zoomrate * 100 + 0.5));
+	psy_ui_edit_settext(&self->zoom, text);
 }

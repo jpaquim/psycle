@@ -363,7 +363,7 @@ void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
 /* methods for the sequencer */
 psy_audio_SequenceTrackIterator psy_audio_sequence_begin(psy_audio_Sequence*,
-	psy_List* track, psy_dsp_big_beat_t position);
+	psy_audio_SequenceTrack*, psy_dsp_big_beat_t position);
 psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence*,
 	uintptr_t trackindex, uintptr_t position);
 psy_audio_SequencePosition psy_audio_sequence_makeposition(psy_audio_Sequence*,

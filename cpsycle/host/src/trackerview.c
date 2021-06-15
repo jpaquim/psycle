@@ -325,7 +325,8 @@ void trackergrid_updatetrackevents(TrackerGrid* self,
 			tracknode = self->gridstate->sequence->tracks;
 		}
 	 	ite = psy_audio_sequence_begin(self->gridstate->sequence,			
-			tracknode, offset);
+			tracknode ? (psy_audio_SequenceTrack*)tracknode->entry : NULL,
+			offset);
 	 	if (ite.sequencentrynode) {
 			seqoffset = psy_audio_sequencetrackiterator_seqoffset(&ite);	 		
 	 		if (ite.pattern) {

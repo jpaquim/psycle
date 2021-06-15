@@ -404,8 +404,25 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 			track->iterator = (psy_audio_SequenceTrackIterator*)
 				malloc(sizeof(psy_audio_SequenceTrackIterator));
 			if (track->iterator) {
-				*track->iterator = psy_audio_sequence_begin(self->sequence, p,
-					offset);
+				*track->iterator = psy_audio_sequence_begin(self->sequence, track->track, offset);
+				track->state.retriggeroffset = 0;
+				track->state.retriggerstep = 0;
+				psy_list_append(&self->currtracks, track);
+			}
+		}
+	}
+	{	/* add global track */		
+		psy_audio_SequencerTrack* track;
+		
+		track = malloc(sizeof(psy_audio_SequencerTrack));
+		if (track) {
+			track->track = &self->sequence->globaltrack;
+			track->channeloffset = 0;
+			track->iterator = (psy_audio_SequenceTrackIterator*)
+				malloc(sizeof(psy_audio_SequenceTrackIterator));
+			if (track->iterator) {
+				*track->iterator = psy_audio_sequence_begin(self->sequence, 
+					track->track, offset);
 				track->state.retriggeroffset = 0;
 				track->state.retriggerstep = 0;
 				psy_list_append(&self->currtracks, track);
@@ -846,8 +863,11 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 						psy_audio_sequencer_patterndelay(self, ev);
 						done = TRUE;
 					} else if ((ev->parameter & 0xF0) ==
-							psy_audio_PATTERNCMD_FINE_PATTERN_DELAY) {
+						psy_audio_PATTERNCMD_FINE_PATTERN_DELAY) {
 						psy_audio_sequencer_finepatterndelay(self, ev);
+						done = TRUE;
+					} else if ((ev->parameter & 0xB0) == psy_audio_PATTERNCMD_PATTERN_LOOP) {
+						psy_audio_sequencer_patternloop(self, ev, offset);
 						done = TRUE;
 					} else if ((ev->parameter & 0xF0) ==
 							psy_audio_PATTERNCMD_SET_LINESPERBEAT0) {
@@ -1443,7 +1463,11 @@ void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer* self,
 
 	assert(self);
 
-	it = psy_audio_sequence_begin(self->sequence, self->sequence->tracks,
+	if (!self->sequence->tracks) {
+		return;
+	}
+	it = psy_audio_sequence_begin(self->sequence,
+		(psy_audio_SequenceTrack*)self->sequence->tracks->entry,
 		playposition);
 	if (it.sequencentrynode) {
 		psy_audio_SequencePatternEntry* entry;

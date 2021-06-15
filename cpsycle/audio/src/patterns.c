@@ -49,7 +49,7 @@ void psy_audio_patterns_init_global(psy_audio_Patterns* self)
 		psy_audio_pattern_allocinit());
 	psy_audio_patternevent_init_all(&e, psy_audio_NOTECOMMANDS_TIMESIG,
 		0, 0, 0, 4, 4);
-	psy_audio_pattern_insert(pattern, NULL, 0, 0.0, &e);
+	psy_audio_pattern_insert(pattern, NULL, 1, 0.0, &e);
 }
 
 void psy_audio_patterns_dispose(psy_audio_Patterns* self)

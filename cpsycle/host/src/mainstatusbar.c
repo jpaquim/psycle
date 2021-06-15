@@ -1,14 +1,17 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "mainstatusbar.h"
-// host
+/* host */
 #include "resources/resource.h"
 #include "styles.h"
 
-// prototypes
+/* prototypes */
 static void mainstatusbar_initzoombox(MainStatusBar*);
 static void mainstatusbar_initviewstatusbars(MainStatusBar*);
 static void mainstatusbar_initstatuslabel(MainStatusBar*);
@@ -22,10 +25,9 @@ static void mainstatusbar_onsongloadprogress(MainStatusBar*, Workspace* sender,
 	intptr_t progress);
 static void mainstatusbar_onpluginscanprogress(MainStatusBar*, Workspace*,
 	int progress);
-// events
 static void mainstatusbar_onstatus(MainStatusBar*, Workspace* sender,
 	const char* text);
-// implementation
+/* implementation */
 void mainstatusbar_init(MainStatusBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -76,6 +78,8 @@ void mainstatusbar_initturnoffbutton(MainStatusBar* self)
 {
 	psy_ui_button_init_text(&self->turnoff, &self->component,
 		NULL, "main.exit");
+	psy_ui_button_loadresource(&self->turnoff, IDB_EXIT_LIGHT,
+		IDB_EXIT_DARK, psy_ui_colour_white());
 	psy_ui_component_setalign(psy_ui_button_base(&self->turnoff),
 		psy_ui_ALIGN_RIGHT);		
 }

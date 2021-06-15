@@ -62,14 +62,16 @@
 #define IDB_EXPAND_LIGHT                177
 #define IDB_WIRES_LIGHT                 178
 #define IDB_MATRIX_LIGHT                179
-#define IDB_BITMAP1                     180
 #define IDB_NEWMACHINE_LIGHT            180
+#define IDB_EXIT_LIGHT                  181
+#define IDB_BITMAP1                     182
+#define IDB_EXIT_DARK                   182
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        181
+#define _APS_NEXT_RESOURCE_VALUE        183
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

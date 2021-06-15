@@ -25,18 +25,49 @@
 extern "C" {
 #endif
 
+/* SeqEditTimesig */
+typedef struct SeqEditTimeSig {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */	
+	bool preventedit;
+	bool editnominator;
+	/* references */
+	SeqEditState* state;
+	psy_audio_PatternEvent* currtimesig;
+} SeqEditTimeSig;
+
+void seqedittimesig_init(SeqEditTimeSig*, psy_ui_Component* parent,
+	SeqEditState*);
+
+/* SeqEditTimesig */
+typedef struct SeqEditLoops {
+	/* inherits */
+	psy_ui_Component component;
+	/* internal */
+	bool preventedit;
+	bool editnominator;
+	bool drag;
+	psy_audio_PatternNode* nodebegin;
+	psy_audio_PatternNode* nodeend;
+	psy_audio_PatternEvent e;
+	/* references */
+	SeqEditState* state;
+	psy_audio_PatternEvent* currtimesig;
+} SeqEditLoops;
+
+void seqeditloops_init(SeqEditLoops*, psy_ui_Component* parent,
+	SeqEditState*);
 
 /* SeqEditRuler */
 typedef struct SeqEditRuler {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	bool showtimesig;
-	bool preventedit;
-	bool editnominator;
+	SeqEditTimeSig timesig;
+	SeqEditLoops loops;	
 	/* references */
-	SeqEditState* state;		
-	psy_audio_PatternEvent* currtimesig;
+	SeqEditState* state;	
 } SeqEditRuler;
 
 void seqeditruler_init(SeqEditRuler*, psy_ui_Component* parent,
@@ -44,6 +75,8 @@ void seqeditruler_init(SeqEditRuler*, psy_ui_Component* parent,
 
 void seqeditruler_hidetimesig(SeqEditRuler*);
 void seqeditruler_showtimesig(SeqEditRuler*);
+void seqeditruler_hideloops(SeqEditRuler*);
+void seqeditruler_showloops(SeqEditRuler*);
 
 INLINE psy_ui_Component* seqeditruler_base(SeqEditRuler* self)
 {
@@ -93,7 +126,6 @@ SeqEditorPlayline* seqeditorplayline_allocinit(
 	psy_ui_Component* parent, psy_ui_Component* view,
 	SeqEditState*);
 void seqeditorplayline_update(SeqEditorPlayline*);
-
 
 /* SeqEditTrack */
 struct SeqEditTrack;
@@ -166,8 +198,7 @@ INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 
 typedef struct SeqEditorHeaderBar {
 	psy_ui_Component component;
-	psy_ui_Component top;
-	psy_ui_Button timesig;
+	psy_ui_Component top;	
 	ZoomBox hzoom;	
 } SeqEditorHeaderBar;
 
@@ -186,6 +217,8 @@ typedef struct SeqEditToolBar {
 	IntEdit samplerindex;
 	psy_ui_Button configure;
 	psy_ui_Button expand;
+	psy_ui_Button timesig;
+	psy_ui_Button loop;
 	/* references */	
 	SeqEditState* state;
 } SeqEditToolBar;
