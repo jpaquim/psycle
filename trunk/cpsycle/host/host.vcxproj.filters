@@ -1258,6 +1258,12 @@
     <Image Include="src\resources\newmachine-light.bmp">
       <Filter>bitmaps</Filter>
     </Image>
+    <Image Include="src\resources\exit_light.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
+    <Image Include="src\resources\exit_dark.bmp">
+      <Filter>bitmaps</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="en.ini">

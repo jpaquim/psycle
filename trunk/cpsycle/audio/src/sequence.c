@@ -318,15 +318,12 @@ psy_audio_SequencePosition psy_audio_sequence_at(psy_audio_Sequence* self,
 }
 
 psy_List* sequenceentry_at_offset(psy_audio_Sequence* self,
-	psy_audio_SequenceTrackNode* tracknode, psy_dsp_big_beat_t offset)
+	psy_audio_SequenceTrack* track, psy_dsp_big_beat_t offset)
 {
 	psy_dsp_big_beat_t curroffset = 0.0f;	
 	psy_List* p = 0;
 
-	if (tracknode) {		
-		psy_audio_SequenceTrack* track;
-
-		track = (psy_audio_SequenceTrack*)tracknode->entry;
+	if (track) {		
 		p = track->entries;	
 		while (p) {			
 			psy_audio_SequenceEntry* seqentry;
@@ -348,13 +345,21 @@ psy_List* sequenceentry_at_offset(psy_audio_Sequence* self,
 }
 
 psy_audio_SequenceTrackIterator psy_audio_sequence_begin(
-	psy_audio_Sequence* self, psy_List* track, psy_dsp_big_beat_t position)
+	psy_audio_Sequence* self, psy_audio_SequenceTrack* track,
+	psy_dsp_big_beat_t position)
 {		
 	psy_audio_SequenceTrackIterator rv;		
 	psy_audio_SequenceEntry* entry;	
 
-	rv.patterns = self->patterns;
-	rv.sequencentrynode = sequenceentry_at_offset(self, track, position);
+	if (!track) {
+		rv.sequencentrynode = NULL;
+		rv.pattern = NULL;
+		rv.patternnode = NULL;
+		return rv;
+	}
+	rv.patterns = self->patterns;	
+	rv.sequencentrynode = sequenceentry_at_offset(self,
+		track, position);
 	if (rv.sequencentrynode) {
 		entry = (psy_audio_SequenceEntry*)rv.sequencentrynode->entry;
 		if (entry && entry->type == psy_audio_SEQUENCEENTRY_PATTERN) {

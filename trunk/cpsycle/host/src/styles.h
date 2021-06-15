@@ -48,6 +48,7 @@ extern "C" {
 #define STYLE_STATUSBAR                      32000
 #define STYLE_MACHINEBOX                     32020
 #define STYLE_ZOOMBOX                        32040
+#define STYLE_ZOOMBOX_EDIT                   32041
 #define STYLE_MACHINEVIEW                    32060
 #define STYLE_MACHINEVIEW_PROPERTIES         32061
 #define STYLE_STEPSEQUENCER                  32080

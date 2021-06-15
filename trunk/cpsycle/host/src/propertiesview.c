@@ -864,7 +864,7 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 void propertiesrenderer_oneditaccept(PropertiesRenderer* self,
 	psy_ui_Edit* sender)
 {
-	psy_ui_component_hide(&self->edit.component);
+	psy_ui_component_hide(psy_ui_edit_base(sender));
 	psy_ui_component_setfocus(&self->component);
 	if (self->state.selected) {
 		if (psy_property_isint(self->state.selected)) {

@@ -223,6 +223,9 @@ void inithoststyles(psy_ui_Styles* self, psy_ui_ThemeMode theme)
 		psy_ui_colour_weighted(&material.primary, material.medium),
 		material.overlay_4p);
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
+	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);
 	
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setbackgroundcolour(style, material.surface_overlay_9p);
@@ -743,6 +746,9 @@ void initwin98theme(psy_ui_Styles* self)
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolours(style, win.cl_black, win.cl_white);
 	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX, style);
+
+	style = psy_ui_style_clone(psy_ui_styles_at(self, psy_ui_STYLE_EDIT));
+	psy_ui_styles_setstyle(self, STYLE_ZOOMBOX_EDIT, style);
 
 	style = psy_ui_style_allocinit();	
 	psy_ui_style_setborder(style, &win.lowered);

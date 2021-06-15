@@ -142,6 +142,10 @@ IDB_MATRIX_LIGHT        BITMAP                  "matrix-light.bmp"
 
 IDB_NEWMACHINE_LIGHT    BITMAP                  "newmachine-light.bmp"
 
+IDB_EXIT_LIGHT          BITMAP                  "exit_light.bmp"
+
+IDB_EXIT_DARK           BITMAP                  "exit_dark.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

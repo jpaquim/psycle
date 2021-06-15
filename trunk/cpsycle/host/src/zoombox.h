@@ -6,7 +6,7 @@
 
 // ui
 #include <uibutton.h>
-#include <uilabel.h>
+#include <uiedit.h>
 
 // ZoomBox
 //
@@ -21,7 +21,7 @@ typedef struct ZoomBox {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Button zoomin;
-	psy_ui_Label label;
+	psy_ui_Edit zoom;
 	psy_ui_Button zoomout;
 	// data members
 	double zoomrate;

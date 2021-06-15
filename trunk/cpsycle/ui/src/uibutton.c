@@ -364,8 +364,7 @@ void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 		self->buttonstate = ev->button;
 		if (self->allowrightclick || ev->button == 1) {
 			psy_ui_RealRectangle client_position;
-			psy_ui_RealSize size;
-			psy_ui_RealMargin spacing;			
+			psy_ui_RealSize size;			
 
 			size = psy_ui_component_scrollsize_px(psy_ui_button_base(self));
 			client_position = psy_ui_realrectangle_make(
