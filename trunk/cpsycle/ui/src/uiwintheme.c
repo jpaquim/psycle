@@ -31,3 +31,17 @@ void psy_ui_wintheme_init(psy_ui_WinTheme* self)
 	psy_ui_border_setcolours(&self->lowered,
 		self->cl_gray, self->cl_white, self->cl_white, self->cl_gray);
 }
+
+void psy_ui_lighttheme_init(psy_ui_LightTheme* self)
+{
+	/* colours */
+	self->cl_white = psy_ui_colour_make(0xFFFFFF);
+	self->cl_white_1 = psy_ui_colour_make(0xF3F3F3);
+	self->cl_white_2 = psy_ui_colour_make(0xE6E6E6);
+	self->cl_black_1 = psy_ui_colour_make(0x262626);
+	self->cl_blue_1 = psy_ui_colour_make(0xD47800);
+	self->cl_blue_2 = psy_ui_colour_make(0xC97200);	
+	self->cl_blue_3 = psy_ui_colour_make(0xBE6C00);
+	self->cl_green_1 = psy_ui_colour_make(0x217346);
+	self->cl_font_1 = psy_ui_colour_make(0x262626);
+}

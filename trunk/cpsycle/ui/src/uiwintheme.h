@@ -34,6 +34,22 @@ typedef struct psy_ui_WinTheme {
 
 void psy_ui_wintheme_init(psy_ui_WinTheme*);
 
+
+typedef struct psy_ui_LightTheme {
+	psy_ui_Colour cl_white;
+	psy_ui_Colour cl_white_1;
+	psy_ui_Colour cl_white_2;
+	psy_ui_Colour cl_black_1;
+	psy_ui_Colour cl_black_2;
+	psy_ui_Colour cl_blue_1;
+	psy_ui_Colour cl_blue_2;
+	psy_ui_Colour cl_blue_3;
+	psy_ui_Colour cl_green_1;	
+	psy_ui_Colour cl_font_1;
+} psy_ui_LightTheme;
+
+void psy_ui_lighttheme_init(psy_ui_LightTheme*);
+
 #ifdef __cplusplus
 }
 #endif
