@@ -73,7 +73,6 @@ typedef struct SeqEditMarkerEntry {
 	/* internal */
 	/* references */	
 	psy_audio_SequenceMarkerEntry* sequenceentry;	
-	bool preventedit;
 } SeqEditMarkerEntry;
 
 void seqeditmarkerentry_init(SeqEditMarkerEntry*,

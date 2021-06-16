@@ -39,6 +39,7 @@ typedef enum {
 typedef struct SeqEditState {
 	psy_Signal signal_cursorchanged;
 	double pxperbeat;
+	double defaultpxperbeat;
 	psy_ui_Value lineheight;
 	psy_ui_Value defaultlineheight;	
 	psy_dsp_big_beat_t cursorposition;
@@ -64,7 +65,6 @@ typedef struct SeqEditState {
 
 void seqeditstate_init(SeqEditState*, SequenceCmds*, psy_ui_Edit*, psy_ui_Component* view);
 void seqeditstate_dispose(SeqEditState*);
-
 
 psy_audio_Sequence* seqeditstate_sequence(SeqEditState*);
 void seqeditstate_outputstatusposition(SeqEditState*);
@@ -108,6 +108,11 @@ INLINE psy_ui_Value seqeditstate_lineheight(const SeqEditState* self)
 	return self->lineheight;
 }
 
+psy_audio_PatternNode* seqeditstate_node(SeqEditState*, psy_ui_RealPoint,
+	psy_dsp_big_beat_t d1, psy_dsp_big_beat_t d2, psy_audio_PatternNode** prev);
+psy_audio_Pattern* seqeditstate_globalpattern(SeqEditState*);
+void seqeditstate_edit(SeqEditState*, psy_ui_Component* parent,
+	psy_ui_RealPoint cp, double width, const char* text);
 
 #ifdef __cplusplus
 }

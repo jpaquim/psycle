@@ -88,6 +88,18 @@
     <Filter Include="app">
       <UniqueIdentifier>{271ed28f-65e7-4c64-b9ce-10b1b858b240}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sequence\seqeditor">
+      <UniqueIdentifier>{7949c47c-8d9e-46d4-b9f2-d348f0ec611d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sequence\seqview">
+      <UniqueIdentifier>{7b354de3-ba24-4cd1-b56a-945bfd355baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sequence\common">
+      <UniqueIdentifier>{d74acef7-933b-4e72-b683-3190566679b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sequence\stepsequencer">
+      <UniqueIdentifier>{d57e5a73-fa56-4264-aca0-019d64308ca6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\eventdriverconfig.c">
@@ -201,15 +213,6 @@
     <ClCompile Include="src\propertiesview.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
-    <ClCompile Include="src\sequenceview.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stepsequencerview.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
-    <ClCompile Include="src\seqeditor.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
     <ClCompile Include="src\help.c">
       <Filter>help</Filter>
     </ClCompile>
@@ -279,9 +282,6 @@
     <ClCompile Include="src\predefsconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\sequencetrackbox.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
     <ClCompile Include="src\exportview.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -350,15 +350,6 @@
     </ClCompile>
     <ClCompile Include="src\trackbox.c">
       <Filter>uicontrols</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sequencehostcmds.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sequencebuttons.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sequencerbar.c">
-      <Filter>sequence</Filter>
     </ClCompile>
     <ClCompile Include="src\instnotemapview.c">
       <Filter>machine\instrument\instrumentview</Filter>
@@ -549,12 +540,6 @@
     <ClCompile Include="src\seqeditconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\seqeditorentry.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
-    <ClCompile Include="src\seqeditorstate.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
     <ClCompile Include="src\psycle.c">
       <Filter>app</Filter>
     </ClCompile>
@@ -572,6 +557,63 @@
     </ClCompile>
     <ClCompile Include="src\mainstatusbar.c">
       <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditheader.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditheaderdesc.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditline.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditloops.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditor.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditorentry.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditorstate.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditruler.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqedittimesig.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqedittoolbar.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqedittrack.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqedittrackdesc.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqedittracks.c">
+      <Filter>sequence\seqeditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencehostcmds.c">
+      <Filter>sequence\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencetrackbox.c">
+      <Filter>sequence\common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequenceview.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencerbar.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequencebuttons.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stepsequencerview.c">
+      <Filter>sequence\stepsequencer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -689,15 +731,6 @@
     <ClInclude Include="src\propertiesview.h">
       <Filter>uicontrols</Filter>
     </ClInclude>
-    <ClInclude Include="src\sequenceview.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\seqeditor.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stepsequencerview.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
     <ClInclude Include="src\about.h">
       <Filter>help</Filter>
     </ClInclude>
@@ -767,9 +800,6 @@
     <ClInclude Include="src\predefsconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\sequencetrackbox.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
     <ClInclude Include="src\exportview.h">
       <Filter>file</Filter>
     </ClInclude>
@@ -838,15 +868,6 @@
     </ClInclude>
     <ClInclude Include="src\trackbox.h">
       <Filter>uicontrols</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sequencehostcmds.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sequencebuttons.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sequencerbar.h">
-      <Filter>sequence</Filter>
     </ClInclude>
     <ClInclude Include="src\instnotemapview.h">
       <Filter>machine\instrument\instrumentview</Filter>
@@ -1037,12 +1058,6 @@
     <ClInclude Include="src\seqeditconfig.h">
       <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\seqeditorentry.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
-    <ClInclude Include="src\seqeditorstate.h">
-      <Filter>sequence</Filter>
-    </ClInclude>
     <ClInclude Include="src\workspace.h">
       <Filter>app</Filter>
     </ClInclude>
@@ -1060,6 +1075,63 @@
     </ClInclude>
     <ClInclude Include="src\mainstatusbar.h">
       <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditheader.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditheaderdesc.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditline.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditloops.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditor.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditorentry.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditorstate.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditruler.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqedittimesig.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqedittoolbar.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqedittrack.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqedittrackdesc.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqedittracks.h">
+      <Filter>sequence\seqeditor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencehostcmds.h">
+      <Filter>sequence\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencetrackbox.h">
+      <Filter>sequence\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequenceview.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencerbar.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencebuttons.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stepsequencerview.h">
+      <Filter>sequence\stepsequencer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

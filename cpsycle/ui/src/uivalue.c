@@ -146,6 +146,43 @@ double psy_ui_value_px(const psy_ui_Value* self,
 	return rv;
 }
 
+double psy_ui_value_ew(const psy_ui_Value* self,
+	const psy_ui_TextMetric* tm, const struct psy_ui_Size* size)
+{
+	double rv;
+
+	if (tm) {
+		switch (self->unit) {
+		case psy_ui_UNIT_EW:
+			rv = self->quantity;
+			break;
+		case psy_ui_UNIT_EH:
+			rv = (self->quantity * tm->tmHeight) / tm->tmAveCharWidth;
+			break;
+		case psy_ui_UNIT_PW:
+			if (size) {
+				rv = (self->quantity * psy_ui_value_px(&size->width, tm, NULL)) / tm->tmAveCharWidth;
+			} else {
+				rv = self->quantity / tm->tmAveCharWidth;
+			}
+			break;
+		case psy_ui_UNIT_PH:
+			if (size) {
+				rv = self->quantity * psy_ui_value_px(&size->height, tm, NULL) / tm->tmAveCharWidth;
+			} else {
+				rv = self->quantity / tm->tmAveCharWidth;
+			}
+			break;
+		default:
+			rv = self->quantity / tm->tmAveCharWidth;
+			break;
+		}
+	} else {
+		rv = self->quantity;
+	}	
+	return rv;
+}
+
 psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm, const psy_ui_Size* pesize)
 {

@@ -488,13 +488,6 @@ static void seqeditmarkerentry_ondraw(SeqEditMarkerEntry*,
 	psy_ui_Graphics*);
 static void seqeditmarkerentry_onmousedown(SeqEditMarkerEntry*,
 	psy_ui_MouseEvent*);
-static void seqeditmarkerentry_onmousedoubleclick(SeqEditMarkerEntry*,
-	psy_ui_MouseEvent*);
-static void seqeditmarkerentry_oneditaccept(SeqEditMarkerEntry*,
-	psy_ui_Edit* sender);
-static void seqeditmarkerentry_oneditreject(SeqEditMarkerEntry*,
-	psy_ui_Edit* sender);
-static void seqeditmarkerentry_edit(SeqEditMarkerEntry*);
 /* vtable */
 static psy_ui_ComponentVtable seqeditmarkerentry_vtable;
 static bool seqeditmarkerentry_vtable_initialized = FALSE;
@@ -509,9 +502,6 @@ static void seqeditmarkerentry_vtable_init(SeqEditMarkerEntry* self)
 		seqeditmarkerentry_vtable.onmousedown =
 			(psy_ui_fp_component_onmouseevent)
 			seqeditmarkerentry_onmousedown;		
-		seqeditmarkerentry_vtable.onmousedoubleclick =
-			(psy_ui_fp_component_onmouseevent)
-			seqeditmarkerentry_onmousedoubleclick;
 	}
 	seqeditmarkerentry_base(self)->vtable = &seqeditmarkerentry_vtable;
 }
@@ -529,16 +519,8 @@ void seqeditmarkerentry_init(SeqEditMarkerEntry* self,
 	seqeditmarkerentry_vtable_init(self);
 	psy_ui_component_setstyletypes(seqeditmarkerentry_base(self),
 		STYLE_SEQEDT_MARKER, STYLE_SEQEDT_MARKER_HOVER,
-		STYLE_SEQEDT_MARKER_SELECTED, psy_INDEX_INVALID);
-	
-	self->sequenceentry = entry;	
-	self->preventedit = TRUE;	
-	if (self->seqeditorentry.state->edit) {
-		psy_signal_connect(&self->seqeditorentry.state->edit->signal_accept,
-			self, seqeditmarkerentry_oneditaccept);
-		psy_signal_connect(&self->seqeditorentry.state->edit->signal_reject,
-			self, seqeditmarkerentry_oneditreject);
-	}
+		STYLE_SEQEDT_MARKER_SELECTED, psy_INDEX_INVALID);	
+	self->sequenceentry = entry;
 }
 
 SeqEditMarkerEntry* seqeditmarkerentry_alloc(void)
@@ -586,63 +568,4 @@ void seqeditmarkerentry_onmousedown(SeqEditMarkerEntry* self,
 	psy_ui_MouseEvent* ev)
 {	
 	seqeditentry_startdrag(&self->seqeditorentry, ev);	
-}
-
-void seqeditmarkerentry_onmousedoubleclick(SeqEditMarkerEntry* self,
-	psy_ui_MouseEvent* ev)
-{
-	seqeditmarkerentry_edit(self);
-	psy_ui_mouseevent_stop_propagation(ev);
-}
-
-void seqeditmarkerentry_edit(SeqEditMarkerEntry* self)
-{
-	if (self->seqeditorentry.state->edit) {
-		psy_ui_RealRectangle screenposition;
-		psy_ui_RealRectangle viewscreenposition;		
-		const psy_ui_TextMetric* tm;
-		double centery;
-		psy_ui_RealSize size;
-
-		screenposition = psy_ui_component_screenposition(seqeditmarkerentry_base(self));
-		viewscreenposition = psy_ui_component_screenposition(
-			psy_ui_component_parent(&self->seqeditorentry.state->edit->component));
-		tm = psy_ui_component_textmetric(seqeditmarkerentry_base(self));
-		size = psy_ui_component_scrollsize_px(seqeditmarkerentry_base(self));
-		centery = (size.height - tm->tmHeight) / 2;
-		psy_ui_component_setposition(&self->seqeditorentry.state->edit->component,
-			psy_ui_rectangle_make(
-				psy_ui_point_make_px(
-					screenposition.left - viewscreenposition.left,
-					screenposition.top - viewscreenposition.top + centery),
-				psy_ui_size_make_px(
-					screenposition.right - screenposition.left,
-					tm->tmHeight)));
-		psy_ui_edit_settext(self->seqeditorentry.state->edit, self->sequenceentry->text);
-		psy_ui_edit_setsel(self->seqeditorentry.state->edit, 0, -1);
-		psy_ui_edit_enableinputfield(self->seqeditorentry.state->edit);
-		self->preventedit = FALSE;
-		psy_ui_component_show(&self->seqeditorentry.state->edit->component);
-		psy_ui_component_setfocus(&self->seqeditorentry.state->edit->component);
-	}
-}
-
-void seqeditmarkerentry_oneditaccept(SeqEditMarkerEntry* self,
-	psy_ui_Edit* sender)
-{
-	if (!self->preventedit) {
-		self->preventedit = TRUE;
-		psy_strreset(&self->sequenceentry->text,
-			psy_ui_edit_text(self->seqeditorentry.state->edit));
-		psy_ui_component_hide(psy_ui_edit_base(sender));
-	}
-}
-
-void seqeditmarkerentry_oneditreject(SeqEditMarkerEntry* self,
-	psy_ui_Edit* sender)
-{
-	if (!self->preventedit) {
-		self->preventedit = TRUE;
-		psy_ui_component_hide(psy_ui_edit_base(sender));				
-	}
 }
