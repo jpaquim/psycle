@@ -143,10 +143,7 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent,
 			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
 				STYLE_SEQVIEW_BUTTON, STYLE_SEQVIEW_BUTTON_HOVER,
 				STYLE_SEQVIEW_BUTTON_SELECT, psy_INDEX_INVALID);				
-		} else {					
-			psy_ui_component_setstyletypes(psy_ui_button_base(buttons[i]),
-				psy_ui_STYLE_BUTTON, psy_INDEX_INVALID, psy_INDEX_INVALID,
-				psy_INDEX_INVALID);
+		} else {			
 			psy_ui_button_setcharnumber(buttons[i], 0.0);
 		}		
 	}
