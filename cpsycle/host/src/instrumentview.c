@@ -62,7 +62,6 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox* self)
 		uintptr_t maxkey;
 
 		maxkey = psy_table_maxkey(&self->workspace->song->machines.slots);
-
 		for (c = 0, i = 0; i < maxkey; ++i) {
 			psy_audio_Machine* machine;
 

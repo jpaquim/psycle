@@ -615,6 +615,18 @@
     <ClCompile Include="src\stepsequencerview.c">
       <Filter>sequence\stepsequencer</Filter>
     </ClCompile>
+    <ClCompile Include="src\seqviewstate.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqlistview.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqviewduration.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqviewtrackheaders.c">
+      <Filter>sequence\seqview</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\languageconfig.h">
@@ -1132,6 +1144,18 @@
     </ClInclude>
     <ClInclude Include="src\stepsequencerview.h">
       <Filter>sequence\stepsequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqviewstate.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqlistview.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqviewduration.h">
+      <Filter>sequence\seqview</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqviewtrackheaders.h">
+      <Filter>sequence\seqview</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -197,10 +197,10 @@ INLINE psy_dsp_big_beat_t psy_audio_player_samplerate(psy_audio_Player* self)
 	return psy_audio_sequencer_samplerate(&self->sequencer);
 }
 
-INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(
-	psy_audio_Player* self)
+INLINE psy_dsp_percent_t psy_audio_player_rowprogress(
+	psy_audio_Player* self, uintptr_t track)
 {
-	return psy_audio_sequencer_playlist_rowprogress(&self->sequencer);
+	return psy_audio_sequencer_rowprogress(&self->sequencer, track);
 }
 
 /* cpu measure */

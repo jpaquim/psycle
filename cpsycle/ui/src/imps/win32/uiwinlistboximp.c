@@ -161,6 +161,12 @@ void dev_setstyle(psy_ui_win_ComponentImp* self, int style)
 
 void dev_text(psy_ui_win_ComponentImp* self, char* text, intptr_t index)
 {
+	assert(text);
+		
+	if (index == -1) {
+		*text = '\0';
+		return;
+	}
 	SendMessage(self->hwnd, LB_GETTEXT, (WPARAM)index, (LPARAM)text);
 }
 

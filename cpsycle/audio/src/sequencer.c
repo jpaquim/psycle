@@ -1638,8 +1638,8 @@ void psy_audio_sequencer_stopat(psy_audio_Sequencer* self,
 	self->jump.dostop = TRUE;
 }
 
-psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(
-	const psy_audio_Sequencer* self)
+psy_dsp_percent_t psy_audio_sequencer_rowprogress(
+	const psy_audio_Sequencer* self, uintptr_t trackindex)
 {		
 	psy_dsp_big_beat_t seqoffset;
 	psy_dsp_big_beat_t length;
@@ -1650,29 +1650,18 @@ psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(
 	seqoffset = 0.0;	
 	if (psy_audio_sequencer_playing(self)) {
 		const psy_List* p;
+		psy_audio_SequencerTrack* track;
 				
-		for (p = self->currtracks; p != NULL; psy_list_next_const(&p)) {
-			psy_audio_SequencerTrack* track;			
-
+		p = psy_list_at_const(self->currtracks, trackindex);
+		if (p) {
 			track = (psy_audio_SequencerTrack*)psy_list_entry_const(p);
 			if (track->iterator->sequencentrynode) {
-				psy_audio_SequencePatternEntry* seqentry;
-				psy_audio_Pattern* pattern;
+				psy_audio_SequenceEntry* seqentry;
 
-				seqentry = (psy_audio_SequencePatternEntry*)
+				seqentry = (psy_audio_SequenceEntry*)
 					track->iterator->sequencentrynode->entry;
-
-				if (p == self->currtracks) {
-					seqoffset = seqentry->entry.offset;
-				} else {
-					seqoffset = psy_min(seqoffset, seqentry->entry.offset);
-				}
-				pattern = psy_audio_sequencepatternentry_pattern(seqentry,
-					self->sequence->patterns);
-				if (pattern) {
-					length = psy_max(length,
-						psy_audio_pattern_length(pattern));
-				}
+				length = psy_audio_sequenceentry_length(seqentry);
+				seqoffset = psy_audio_sequenceentry_offset(seqentry);
 			}
 		}		
 	}	
