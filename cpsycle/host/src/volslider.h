@@ -1,30 +1,34 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(VOLSLIDER_H)
 #define VOLSLIDER_H
 
-// host
+/* host */
 #include "workspace.h"
-// audio
+/* audio */
 #include <machines.h>
-// ui
+/* ui */
 #include <uislider.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Master Volume slider
-//
-// Controls the volume of the Master
+/*
+** Master Volume slider
+**
+** Controls the volume of the Master
+*/
 
 typedef struct VolSlider {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Slider slider;
-	// references
+	/* references */
 	Workspace* workspace;
 } VolSlider;
 

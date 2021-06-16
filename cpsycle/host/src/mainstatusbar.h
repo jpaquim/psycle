@@ -1,17 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MAINSTATUSBAR_H)
 #define MAINSTATUSBAR_H
 
-// platform
+/* platform */
 #include "../../detail/os.h"
-// host
+/* host */
 #include "clockbar.h"
 #include "interpreter.h"
 #include "workspace.h"
 #include "zoombox.h"
-// ui
+/* ui */
 #include <uilabel.h>
 #include <uibutton.h>
 #include <uinotebook.h>
@@ -21,7 +23,7 @@
 extern "C" {
 #endif
 
-// MainStatusBar
+/* MainStatusBar */
 
 typedef enum {
 	TERMINALMSGTYPE_ERROR,
@@ -32,9 +34,9 @@ typedef enum {
 } TerminalMsgType;
 
 typedef struct MainStatusBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// internal
+	/* internal */
 	psy_ui_ProgressBar progressbar;
 	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;
@@ -46,7 +48,7 @@ typedef struct MainStatusBar {
 	uintptr_t terminalstyleid;
 	intptr_t pluginscanprogress;
 	uintptr_t clockcounter;
-	// references
+	/* references */
 	Workspace* workspace;
 } MainStatusBar;
 

@@ -1,36 +1,40 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(VUBAR_H)
 #define VUBAR_H
 
-// host
+/* host */
 #include "clipbox.h"
 #include "volslider.h"
 #include "vumeter.h"
 #include "workspace.h"
 
-// VuBar
-//
-// Composite of Vumeter, VolumeSlider and ClipBox. Displays and controls the
-// Master volume and displays a clip warning if the amp range overflows
-//
-// Structure:
-// psy_ui_ComponentImp
-//          ^
-//          |     
-//        VuBar <>------ Vumeter
-//               |------ VolSlider
-//               |------ ClipBox
+/*
+** VuBar
+**
+** Composite of Vumeter, VolumeSlider and ClipBox. Displays and controls the
+** Master volume and displays a clip warning if the amp range overflows
+**
+** Structure:
+** psy_ui_ComponentImp
+**          ^
+**          |
+**        VuBar <>------ Vumeter
+**               |------ VolSlider
+**               |------ ClipBox
+*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct VuBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;	

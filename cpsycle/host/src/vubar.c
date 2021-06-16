@@ -1,12 +1,19 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "vubar.h"
 
+/* implementation */
 void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
+	assert(self);
+	assert(workspace);
+
 	psy_ui_component_init(vubar_base(self), parent, NULL);
 	clipbox_init(&self->clipbox, vubar_base(self), workspace);
 	psy_ui_component_setalign(clipbox_base(&self->clipbox),
@@ -20,5 +27,7 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 void vubar_reset(VuBar* self)
 {
+	assert(self);
+
 	clipbox_deactivate(&self->clipbox);
 }

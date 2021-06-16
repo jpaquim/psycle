@@ -1,29 +1,34 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(PLAYPOSBAR_H)
 #define PLAYPOSBAR_H
 
-#include "uilabel.h"
-#include "uibutton.h"
+/* audio */
 #include "player.h"
-#include "workspace.h"
+/* ui */
+#include "uilabel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: displays a playback counter in beats unit
+/* Displays the player position in beats and seconds */
 
-typedef struct {
+typedef struct PlayPosBar {
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_ui_Label header;
 	psy_ui_Label position;
-	Workspace* workspace;
+	/* references */
+	psy_audio_Player* player;
 } PlayPosBar;
 
 void playposbar_init(PlayPosBar*, psy_ui_Component* parent,
-	Workspace* workspace);
+	psy_audio_Player* player);
 
 INLINE psy_ui_Component* playposbar_base(PlayPosBar* self)
 {
@@ -34,4 +39,4 @@ INLINE psy_ui_Component* playposbar_base(PlayPosBar* self)
 }
 #endif
 
-#endif
+#endif /* PLAYPOSBAR_H */

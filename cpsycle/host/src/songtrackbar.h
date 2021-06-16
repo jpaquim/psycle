@@ -28,13 +28,18 @@ typedef struct SongTrackBar {
 	/* inherits */
 	psy_ui_Component component;
 	/* internal */
-	psy_ui_Label headerlabel;
-	psy_ui_ComboBox trackbox;
+	psy_ui_Label desc;
+	psy_ui_ComboBox tracknumbers;
 	/* references */
 	Workspace* workspace;
 } SongTrackBar;
 
 void songtrackbar_init(SongTrackBar*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* songtrackbar_base(SongTrackBar* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

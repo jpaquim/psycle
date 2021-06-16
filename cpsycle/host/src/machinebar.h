@@ -1,21 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(MACHINEBAR_H)
 #define MACHINEBAR_H
 
+/* host */
+#include "workspace.h"
+/* ui */
 #include "uibutton.h"
 #include "uicombobox.h"
-#include "workspace.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Select Machine – Select the machine to be used
-// Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
-// Sampler : Select Instrument – Selects the instrument to be used or
-// other Generator/Effect: Select Tweak Parameter
+/*
+** Select Machine – Select the machine to be used
+** Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
+** Sampler : Select Instrument – Selects the instrument to be used or
+** other Generator/Effect: Select Tweak Parameter
+*/
 
 typedef enum {
 	MACHINEBAR_INST,
@@ -23,8 +29,10 @@ typedef enum {
 	MACHINEBAR_PARAM
 } MachineBarInstParamMode;
 
-typedef struct {
+typedef struct MachineBar {
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_ui_ComboBox machinebox;	
 	psy_ui_Button prevmachinebutton;
 	psy_ui_Button nextmachinebutton;
@@ -42,6 +50,7 @@ typedef struct {
 	int prevent_selchange_notify;
 	psy_Table comboboxslots;
 	psy_Table slotscombobox;
+	/* references */
 	Workspace* workspace;
 } MachineBar;
 
@@ -56,4 +65,4 @@ INLINE psy_ui_Component* machinebar_base(MachineBar* self)
 }
 #endif
 
-#endif
+#endif /* MACHINEBAR_H */
