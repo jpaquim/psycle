@@ -208,7 +208,7 @@ void psy_audio_sequencer_setsamplerate(psy_audio_Sequencer*,
 	psy_dsp_big_hz_t samplerate);
 
 INLINE psy_dsp_big_hz_t psy_audio_sequencer_samplerate(
-	psy_audio_Sequencer* self)
+	const psy_audio_Sequencer* self)
 {
 	return self->seqtime.samplerate;
 }
@@ -221,7 +221,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_bpm(const psy_audio_Sequencer* sel
 
 void psy_audio_sequencer_setlpb(psy_audio_Sequencer*, uintptr_t lpb);
 
-INLINE uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer* self)
+INLINE uintptr_t psy_audio_sequencer_lpb(const psy_audio_Sequencer* self)
 {
 	return self->lpb;
 }
@@ -231,7 +231,7 @@ void psy_audio_sequencer_setticksperbeat(psy_audio_Sequencer*,
 void psy_audio_sequencer_setextraticksperbeat(psy_audio_Sequencer*,
 	uintptr_t ticks);
 
-INLINE uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer* self,
+INLINE uintptr_t psy_audio_sequencer_frames(const psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t offset)
 {
 	return (uintptr_t)(offset / self->beatspersample);
@@ -281,7 +281,8 @@ INLINE psy_audio_SequencerPlayMode psy_audio_sequencer_playmode(
 	return self->mode;
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(
+	const psy_audio_Sequencer* self)
 {
 	psy_dsp_big_beat_t rv;
 
@@ -301,13 +302,13 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(
-	psy_audio_Sequencer* self)
+	const psy_audio_Sequencer* self)
 {
 	return self->beatspersample;
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(
-	psy_audio_Sequencer* self)
+	const psy_audio_Sequencer* self)
 {
 	return 1.0 / (self->lpb * psy_audio_sequencer_speed(self));
 }
@@ -317,14 +318,14 @@ void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
 
 // elapsed playtime in seconds
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
-	psy_audio_Sequencer* self)
+	const psy_audio_Sequencer* self)
 {
 	return self->seqtime.playcounter /
 		(psy_dsp_seconds_t)self->seqtime.samplerate;
 }
 
-psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(const
-	psy_audio_Sequencer* self);
+psy_dsp_percent_t psy_audio_sequencer_rowprogress(const
+	psy_audio_Sequencer* self, uintptr_t track);
 
 #ifdef __cplusplus
 }

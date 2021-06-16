@@ -131,9 +131,11 @@ psy_ui_ComboBox* psy_ui_combobox_allocinit(psy_ui_Component* parent,
 
 intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox* self, const char* text)
 {
+	intptr_t rv;
+
 	assert(self);
 
-	return psy_ui_listbox_addtext(&self->listbox, text);
+	return psy_ui_listbox_addtext(&self->listbox, text);	
 }
 
 void psy_ui_combobox_settext(psy_ui_ComboBox* self, const char* text,
