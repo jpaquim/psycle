@@ -9,6 +9,7 @@
 #include "uinativeeditimp.h"
 /* local */
 #include "../../uicomponent.h"
+#include "../../uiviewcomponentimp.h"
 #include "../../uiapp.h"
 #include "../../uiimpfactory.h"
 /* portable */
@@ -85,10 +86,18 @@ static char_dyn_t* righttext(psy_ui_native_EditImp*, uintptr_t split);
 
 void psy_ui_native_editimp_init(psy_ui_native_EditImp* self,
 	psy_ui_Component* component,
-	psy_ui_Component* parent)
-{
-	self->imp = psy_ui_impfactory_allocinit_componentimp(
-		psy_ui_app_impfactory(psy_ui_app()), component, parent);
+	psy_ui_Component* parent,
+	psy_ui_Component* view)
+{	
+	if (view) {
+		self->imp = (psy_ui_ComponentImp*)
+			psy_ui_viewcomponentimp_allocinit(
+				component, parent, view, "",
+				0, 0, 100, 100, 0, 0);
+	} else {
+		self->imp = psy_ui_impfactory_allocinit_componentimp(
+			psy_ui_app_impfactory(psy_ui_app()), component, parent);
+	}	
 	vtable_init(self);	
 	psy_ui_editimp_extend(self->imp);	
 	editimp_imp_vtable_init(self);
@@ -145,14 +154,14 @@ psy_ui_native_EditImp* psy_ui_native_editimp_alloc(void)
 }
 
 psy_ui_native_EditImp* psy_ui_native_editimp_allocinit(
-	struct psy_ui_Component* component,
+	struct psy_ui_Component* component, struct psy_ui_Component* view,
 	psy_ui_Component* parent)
 {
 	psy_ui_native_EditImp* rv;
 
 	rv = psy_ui_native_editimp_alloc();
 	if (rv) {
-		psy_ui_native_editimp_init(rv, component, parent);
+		psy_ui_native_editimp_init(rv, component, parent, view);
 	}
 	return rv;
 }

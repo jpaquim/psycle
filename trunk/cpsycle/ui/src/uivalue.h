@@ -144,6 +144,8 @@ INLINE psy_ui_Value psy_ui_value_make_ph(double ph)
 
 double psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*,
 	const struct psy_ui_Size*);
+double psy_ui_value_ew(const psy_ui_Value*,
+	const psy_ui_TextMetric*, const struct psy_ui_Size*);
 
 void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*, const struct psy_ui_Size* pesize);

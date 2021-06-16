@@ -13,8 +13,6 @@
 /* platform */
 #include "../../detail/portable.h"
 
-#define DEFAULT_PXPERBEAT 10.0
-
 void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	psy_ui_Edit* edit, psy_ui_Component* view)
 {	
@@ -24,7 +22,8 @@ void seqeditstate_init(SeqEditState* self, SequenceCmds* cmds,
 	self->view = view;
 	self->inserttype = psy_audio_SEQUENCEENTRY_PATTERN;
 	psy_signal_init(&self->signal_cursorchanged);
-	self->pxperbeat = DEFAULT_PXPERBEAT;
+	self->defaultpxperbeat = 10;
+	self->pxperbeat = self->defaultpxperbeat;	
 	self->defaultlineheight = psy_ui_value_make_eh(2.0);	
 	self->lineheight = self->defaultlineheight;	
 	self->cursorposition = 0.0;
@@ -70,4 +69,75 @@ void seqeditstate_outputstatusposition(SeqEditState* self)
 	psy_snprintf(text, 256, "Sequence Position %.3fb",
 		(float)self->cursorposition);
 	workspace_outputstatus(self->workspace, text);
+}
+
+void seqeditstate_edit(SeqEditState* self, psy_ui_Component* parent, psy_ui_RealPoint cp,
+	double width, const char* text)
+{
+	if (self->edit && parent) {
+		const psy_ui_TextMetric* tm;		
+		psy_ui_Component* view;
+		psy_ui_RealPoint offset;
+		
+		view = parent->view;
+		offset = psy_ui_realpoint_zero();
+		if (!view) {
+			view = parent;			
+		} else {
+			psy_ui_Component* curr;
+			psy_ui_RealRectangle position;
+
+			curr = parent;			
+			while (curr != view && curr != NULL) {
+				position = psy_ui_component_position(curr);
+				offset.x += position.left;
+				offset.y += position.top;
+				curr = psy_ui_component_parent(curr);
+			}
+		}
+		tm = psy_ui_component_textmetric(view);
+		psy_ui_component_setparent(&self->edit->component, view);		
+		psy_ui_component_setposition(&self->edit->component,
+			psy_ui_rectangle_make(
+				psy_ui_point_make_px(cp.x + offset.x, cp.y + offset.y),
+				psy_ui_size_make_px(
+					tm->tmAveCharWidth * width,
+					tm->tmHeight)));
+		psy_ui_edit_settext(self->edit, text);
+		psy_ui_edit_enableinputfield(self->edit);
+		psy_ui_component_show(&self->edit->component);
+		psy_ui_component_setfocus(&self->edit->component);
+	}
+}
+
+psy_audio_PatternNode* seqeditstate_node(SeqEditState* self,
+	psy_ui_RealPoint pt, psy_dsp_big_beat_t d1, psy_dsp_big_beat_t d2,
+	psy_audio_PatternNode** prev)
+{
+	psy_audio_Pattern* pattern;
+
+	pattern = seqeditstate_globalpattern(self);
+	if (pattern) {		
+		psy_dsp_big_beat_t offset;
+
+		offset = seqeditstate_quantize(self,
+			seqeditstate_pxtobeat(self, pt.x));
+		return psy_audio_pattern_findnode(pattern, 0, offset + d1, -d1 + d2,
+			prev);
+	}
+	return NULL;
+}
+
+psy_audio_Pattern* seqeditstate_globalpattern(SeqEditState* self)
+{
+	psy_audio_Sequence* sequence;
+
+	assert(self);
+
+	sequence = seqeditstate_sequence(self);
+	if (sequence && sequence->patterns) {
+		return psy_audio_patterns_at(sequence->patterns,
+			psy_audio_GLOBALPATTERN);
+	}
+	return NULL;
 }

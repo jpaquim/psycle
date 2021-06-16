@@ -28,7 +28,8 @@ typedef struct psy_ui_native_EditImp {
 
 void psy_ui_native_editimp_init(psy_ui_native_EditImp*,
 	struct psy_ui_Component*,
-	struct psy_ui_Component* parent);
+	struct psy_ui_Component* parent,
+	psy_ui_Component* view);
 void psy_ui_native_editimp_init_multiline(psy_ui_native_EditImp*,
 	struct psy_ui_Component*,
 	struct psy_ui_Component*);
@@ -36,7 +37,8 @@ void psy_ui_native_editimp_init_multiline(psy_ui_native_EditImp*,
 psy_ui_native_EditImp* psy_ui_native_editimp_alloc(void);
 psy_ui_native_EditImp* psy_ui_native_editimp_allocinit(
 	struct psy_ui_Component* component,
-	struct psy_ui_Component* parent);
+	struct psy_ui_Component* parent,
+	psy_ui_Component* view);
 psy_ui_native_EditImp* psy_ui_native_editimp_allocinit_multiline(
 	struct psy_ui_Component* component,
 	struct psy_ui_Component* parent);
