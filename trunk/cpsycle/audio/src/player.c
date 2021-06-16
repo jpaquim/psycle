@@ -591,7 +591,7 @@ void psy_audio_player_setoctave(psy_audio_Player* self, uint8_t octave)
 {
 	assert(self);
 
-	if (octave >= 0 && octave < 8) {
+	if (octave >= 0 && octave <= 8) {
 		self->octave = octave;
 		if (self->song) {
 			psy_audio_song_setoctave(self->song, octave);

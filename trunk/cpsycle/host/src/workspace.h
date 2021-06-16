@@ -240,8 +240,8 @@ psy_Playlist* workspace_playlist(Workspace*);
 void workspace_load_recentsongs(Workspace*);
 void workspace_save_recentsongs(Workspace*);
 void workspace_clearrecentsongs(Workspace*);
-void workspace_setoctave(Workspace*, int octave);
-uintptr_t workspace_octave(Workspace*);
+void workspace_setoctave(Workspace*, uint8_t octave);
+uint8_t workspace_octave(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property*,
 	uintptr_t* rebuild_level);
 void workspace_onconfigurationchanged(Workspace*, psy_Property*);

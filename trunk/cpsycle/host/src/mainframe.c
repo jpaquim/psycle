@@ -359,7 +359,8 @@ void mainframe_initbars(MainFrame* self)
 	filebar_init(&self->filebar, &self->toprow0_bars, &self->workspace);
 	undoredobar_init(&self->undoredobar, &self->toprow0_bars, &self->workspace);
 	playbar_init(&self->playbar, &self->toprow0_bars, &self->workspace);	
-	playposbar_init(&self->playposbar, &self->toprow0_bars, &self->workspace);
+	playposbar_init(&self->playposbar, &self->toprow0_bars,
+		workspace_player(&self->workspace));
 	metronomebar_init(&self->metronomebar, &self->toprow0_bars, &self->workspace);
 	if (!metronomeconfig_showmetronomebar(&self->workspace.config.metronome)) {
 		psy_ui_component_hide(metronomebar_base(&self->metronomebar));

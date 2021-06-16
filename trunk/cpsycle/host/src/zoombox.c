@@ -12,8 +12,6 @@
 /* platform */
 #include "../../detail/portable.h"
 
-#define sgn(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
-
 /* prototypes */
 static void zoombox_ondestroy(ZoomBox*);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
@@ -134,7 +132,7 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 	assert(self);
 
 	if (ev->delta != 0) {
-		zoombox_setrate(self, self->zoomrate + sgn(ev->delta) * self->zoomstep);
+		zoombox_setrate(self, self->zoomrate + psy_sgn(ev->delta) * self->zoomstep);
 	}
 	psy_ui_mouseevent_prevent_default(ev);
 }
@@ -142,6 +140,8 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 void zoombox_oneditaccept(ZoomBox* self, psy_ui_Edit* sender)
 {
 	const char* text;		
+
+	assert(self);
 
 	text = psy_ui_edit_text(&self->zoom);
 	if (text) {				
@@ -162,6 +162,8 @@ void zoombox_oneditaccept(ZoomBox* self, psy_ui_Edit* sender)
 
 void zoombox_oneditreject(ZoomBox* self, psy_ui_Edit* sender)
 {	
+	assert(self);
+
 	psy_ui_component_setfocus(&self->component);
 }
 

@@ -23,15 +23,16 @@ static void undoredobar_ontimer(UndoRedoBar*, uintptr_t timerid);
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static psy_ui_ComponentVtable* vtable_init(UndoRedoBar* self)
+static void vtable_init(UndoRedoBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ontimer = (psy_ui_fp_component_ontimer)undoredobar_ontimer;
+		vtable.ontimer =
+			(psy_ui_fp_component_ontimer)
+			undoredobar_ontimer;
 		vtable_initialized = TRUE;
 	}
-	self->component.vtable = &vtable;
-	return &vtable;
+	psy_ui_component_setvtable(undoredobar_base(self), &vtable);
 }
 /* implementation */
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
@@ -42,35 +43,42 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(undoredobar_base(self), parent, NULL);
 	vtable_init(self);
-	psy_ui_component_setstyletype(undoredobar_base(self), STYLE_UNDOBAR);	
 	self->workspace = workspace;
+	psy_ui_component_setstyletype(undoredobar_base(self), STYLE_UNDOBAR);		
 	psy_ui_component_setdefaultalign(undoredobar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));	
 	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self), NULL,
 		self, undoredobar_onundo);
 	psy_ui_button_settext(&self->undobutton, "undo.undo");
-	psy_ui_button_loadresource(&self->undobutton, IDB_UNDO_LIGHT, IDB_UNDO_DARK,
-		psy_ui_colour_white());
+	psy_ui_button_loadresource(&self->undobutton, IDB_UNDO_LIGHT,
+		IDB_UNDO_DARK, psy_ui_colour_white());
 	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self), NULL,
 		self, undoredobar_onredo);
 	psy_ui_button_settext(&self->redobutton,"undo.redo");
-	psy_ui_button_loadresource(&self->redobutton, IDB_REDO_LIGHT, IDB_REDO_DARK,
-		psy_ui_colour_white());	
-	psy_ui_component_starttimer(undoredobar_base(self), 0, UNDOREDOBAR_UPDATERATE);
+	psy_ui_button_loadresource(&self->redobutton, IDB_REDO_LIGHT,
+		IDB_REDO_DARK, psy_ui_colour_white());	
+	psy_ui_component_starttimer(undoredobar_base(self), 0,
+		UNDOREDOBAR_UPDATERATE);
 }
 
 void undoredobar_onundo(UndoRedoBar* self, psy_ui_Component* sender)
-{	
+{
+	assert(self);
+
 	workspace_undo(self->workspace);	
 }
 
 void undoredobar_onredo(UndoRedoBar* self, psy_ui_Component* sender)
 {
+	assert(self);
+
 	workspace_redo(self->workspace);
 }
 
 void undoredobar_ontimer(UndoRedoBar* self, uintptr_t timerid)
 {
+	assert(self);
+
 	if (workspace_currview_hasundo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->undobutton),
 			psy_ui_NONRECURSIVE);

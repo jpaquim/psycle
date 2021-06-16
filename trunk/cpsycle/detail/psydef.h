@@ -31,6 +31,10 @@ typedef uint8_t bool;
 #define psy_max(a, b)  (((a) > (b)) ? (a) : (b)) 
 #endif
 
+#ifndef psy_sgn
+#define psy_sgn(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
+#endif
+
 /* psycle status */
 
 #define PSY_OK 0

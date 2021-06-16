@@ -1,30 +1,35 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "clockbar.h"
 
+/* audio */
 #include <songio.h>
-
+/* std */
 #include <stdio.h>
-
+/* platform */
 #include "../../detail/portable.h"
 
+/* prototypes */
 static void clockbar_updatelabel(ClockBar*);
 static void clockbar_onsongchanged(ClockBar*, Workspace*,
 	int flag, psy_audio_Song*);
-
+/* implementation */
 void clockbar_init(ClockBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{	
+{		
+	psy_ui_component_init(&self->component, parent, NULL);
+	self->workspace = workspace;
 	self->start = time(NULL);
-	psy_ui_component_init(&self->component, parent, NULL);	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HEXPAND);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	self->workspace = workspace;	
 	psy_ui_label_init(&self->position, &self->component, NULL);	
 	psy_ui_label_preventtranslation(&self->position);
 	psy_ui_label_setcharnumber(&self->position, 6);	

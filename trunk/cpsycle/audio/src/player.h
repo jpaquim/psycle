@@ -85,7 +85,7 @@ INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)
 
 void psy_audio_player_setoctave(psy_audio_Player*, uint8_t octave);
 
-INLINE uintptr_t psy_audio_player_octave(psy_audio_Player* self)
+INLINE uint8_t psy_audio_player_octave(const psy_audio_Player* self)
 {
 	return self->octave;
 }

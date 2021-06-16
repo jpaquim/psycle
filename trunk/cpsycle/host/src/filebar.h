@@ -1,12 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #if !defined(FILEBAR_H)
 #define FILEBAR_H
 
-// host
+/* host */
 #include "workspace.h"
-// ui
+/* ui */
 #include <uibutton.h>
 #include <uilabel.h>
 
@@ -14,12 +16,12 @@
 extern "C" {
 #endif
 
-// aim: button panel to create, load, save and render a song
+/* Tool Buttons for create, load, saveand render a song */
 
 typedef struct FileBar {
-	// inherits
+	/* inherits */
 	psy_ui_Component component;
-	// ui elements
+	/* internal */
 	psy_ui_Label header;
 	psy_ui_Button recentbutton;
 	psy_ui_Button newbutton;
@@ -27,7 +29,7 @@ typedef struct FileBar {
 	psy_ui_Button savebutton;
 	psy_ui_Button exportbutton;
 	psy_ui_Button renderbutton;
-	// references
+	/* references */
 	Workspace* workspace;	
 } FileBar;
 

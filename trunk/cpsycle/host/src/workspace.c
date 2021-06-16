@@ -1183,7 +1183,7 @@ void workspace_clearrecentsongs(Workspace* self)
 	psy_playlist_clear(&self->playlist);
 }
 
-void workspace_setoctave(Workspace* self, int octave)
+void workspace_setoctave(Workspace* self, uint8_t octave)
 {
 	assert(self);
 
@@ -1191,7 +1191,7 @@ void workspace_setoctave(Workspace* self, int octave)
 	psy_signal_emit(&self->signal_octavechanged, self, 1, octave);
 }
 
-uintptr_t workspace_octave(Workspace* self)
+uint8_t workspace_octave(Workspace* self)
 {
 	assert(self);
 

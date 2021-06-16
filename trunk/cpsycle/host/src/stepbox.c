@@ -1,17 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+/*
+** This source is free software; you can redistribute itand /or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+** copyright 2000-2021 members of the psycle project http://psycle.sourceforge.net
+*/
 
 #include "../../detail/prefix.h"
 
+
 #include "stepbox.h"
-// platform
+/* platform */
 #include "../../detail/portable.h"
 
-// prototypes
+/* prototypes */
 static void patterncursorstepbox_build(PatternCursorStepBox*);
 static void patterncursorstepbox_onselectionchanged(PatternCursorStepBox*,
 	psy_ui_Component* sender, int index);
-
+/* implementation */
 void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 	parent, Workspace* workspace)
 {	
@@ -23,7 +26,8 @@ void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
 		psy_ui_HEXPAND);
 	psy_ui_label_init(&self->header, patterncursorstepbox_base(self), NULL);
 	psy_ui_label_settext(&self->header, "patternview.step");
-	psy_ui_combobox_init(&self->combobox, patterncursorstepbox_base(self), NULL);
+	psy_ui_combobox_init(&self->combobox,
+		patterncursorstepbox_base(self), NULL);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		patterncursorstepbox_onselectionchanged);
 	psy_ui_combobox_setcharnumber(&self->combobox, 3);
