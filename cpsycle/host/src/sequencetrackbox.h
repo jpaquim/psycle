@@ -8,6 +8,7 @@
 
 /* host */
 #include "trackbox.h"
+#include "workspace.h"
 /* ui */
 #include <uiedit.h>
 /* audio */
@@ -36,17 +37,17 @@ typedef struct SequenceTrackBox {
 	bool preventedit;
 	/* references */
 	psy_audio_Sequence* sequence;
-	psy_ui_Edit* edit;	
+	Workspace* workspace;
 } SequenceTrackBox;
 
 void sequencetrackbox_init(SequenceTrackBox*, psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
-	psy_ui_Edit*);
+	Workspace* workspace);
 
 SequenceTrackBox* sequencetrackbox_alloc(void);
 SequenceTrackBox* sequencetrackbox_allocinit(psy_ui_Component* parent,
 	psy_ui_Component* view, psy_audio_Sequence*, uintptr_t trackidx,
-	psy_ui_Edit*);
+	Workspace*);
 
 void sequencetrackbox_showtrackname(SequenceTrackBox*);
 

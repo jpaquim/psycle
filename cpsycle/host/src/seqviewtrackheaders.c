@@ -74,7 +74,8 @@ void seqviewtrackheaders_build(SeqviewTrackHeaders* self)
 			SequenceTrackBox* sequencetrackbox;
 			
 			sequencetrackbox = sequencetrackbox_allocinit(&self->client,
-				&self->component, self->state->cmds->sequence, c, NULL);
+				&self->component, self->state->cmds->sequence, c,
+				self->state->cmds->workspace);
 			if (sequencetrackbox) {
 				psy_ui_component_setminimumsize(
 					sequencetrackbox_base(sequencetrackbox),

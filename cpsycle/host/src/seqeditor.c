@@ -156,6 +156,7 @@ void seqeditor_updatesong(SeqEditor* self)
 		psy_ui_component_move(&self->trackdesc.component, psy_ui_point_zero());
 		psy_ui_component_move(&self->tracks.component, psy_ui_point_zero());
 		seqeditor_build(self);
+		seqeditortoolbar_updatetrackname(&self->toolbar);
 		psy_ui_component_invalidate(&self->trackdesc.component);
 		psy_ui_component_invalidate(&self->header.component);
 		psy_ui_component_align(&self->tracks.component);

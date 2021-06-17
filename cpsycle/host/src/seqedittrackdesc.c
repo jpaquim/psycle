@@ -156,7 +156,7 @@ void seqedittrackdesc_build(SeqEditTrackDesc* self)
 			track = (psy_audio_SequenceTrack*)t->entry;			
 			trackbox = sequencetrackbox_allocinit(&self->component,
 				&self->component, seqeditstate_sequence(self->state), c,
-				self->state->edit);
+				self->workspace);
 			if (trackbox) {				
 				psy_ui_component_show(&trackbox->trackbox.resize);
 				psy_ui_component_setminimumsize(

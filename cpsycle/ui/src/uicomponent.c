@@ -2284,11 +2284,15 @@ void psy_ui_component_mouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev,
 {
 	if (psy_ui_app()->capture) {
 		psy_ui_RealPoint translation;
+		psy_ui_RealMargin spacing;
 		psy_ui_Component* capture;
 
 		capture = psy_ui_app()->capture;		
 		translation = mapcoords(capture, self);
+		spacing = psy_ui_component_spacing_px(capture);
 		psy_ui_realpoint_sub(&ev->pt, translation);
+		psy_ui_realpoint_sub(&ev->pt, psy_ui_realpoint_make(
+			spacing.left, spacing.top));
 		capture->vtable->onmouseup(capture, ev);
 		psy_signal_emit(&capture->signal_mouseup,
 			capture, 1, ev);
