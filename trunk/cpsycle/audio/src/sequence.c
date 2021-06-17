@@ -114,7 +114,7 @@ void psy_audio_sequencetrack_setname(psy_audio_SequenceTrack* self,
 {
 	assert(self);
 
-	self->name = psy_strreset(&self->name, name);
+	self->name = psy_strreset(&self->name, name);	
 }
 
 /* psy_audio_SequencePosition */
