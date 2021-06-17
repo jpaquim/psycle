@@ -294,6 +294,21 @@ void sequencecmds_appendtrack(SequenceCmds* self)
 	}
 }
 
+void sequencecmds_inserttrack(SequenceCmds* self)
+{
+	if (workspace_song(self->workspace)) {
+		psy_audio_OrderIndex editpos;		
+
+		sequencecmds_update(self);		
+		editpos = self->workspace->sequenceselection.editposition;
+		psy_audio_exclusivelock_enter();		
+		editpos.track = psy_audio_sequence_inserttrack(self->sequence,
+			psy_audio_sequencetrack_allocinit(), editpos.track);			
+		psy_audio_exclusivelock_leave();		
+		workspace_setseqeditposition(self->workspace, editpos);
+	}
+}
+
 void sequencecmds_deltrack(SequenceCmds* self, uintptr_t trackindex)
 {
 	if (workspace_song(self->workspace)) {

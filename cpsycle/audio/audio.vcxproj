@@ -281,6 +281,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
     </ClCompile>
     <ClCompile Include="src\luawaveosc.c" />
+    <ClCompile Include="src\lysongexport.c" />
     <ClCompile Include="src\machine.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</RuntimeTypeInfo>
@@ -441,6 +442,7 @@
     <ClInclude Include="src\luamidinotes.h" />
     <ClInclude Include="src\luaplugin.h" />
     <ClInclude Include="src\luawaveosc.h" />
+    <ClInclude Include="src\lysongexport.h" />
     <ClInclude Include="src\machine.h" />
     <ClInclude Include="src\machinedefs.h" />
     <ClInclude Include="src\machinefactory.h" />

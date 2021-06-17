@@ -287,6 +287,7 @@ void make_translator_make_export(psy_Property* parent)
 	setsection(psy_property_append_section(parent, "export"));
 	add("export-module", "Export Module");
 	add("export-midifile", "Export Midi File");
+	add("export-lyfile", "Export LilyPond File");
 }
 
 void make_translator_make_gear(psy_Property* parent)

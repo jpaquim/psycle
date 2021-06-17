@@ -239,6 +239,9 @@ psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern*,
 /* \return prev pattern node on a track or NULL */
 psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern*,
 	psy_audio_PatternNode* node, uintptr_t track);
+/* test if track is used */
+/* \return TRUE if track used else FALSE */
+bool psy_audio_pattern_track_used(const psy_audio_Pattern*, uintptr_t track);
 /* sets the pattern description */
 void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
 /* \return pattern description */

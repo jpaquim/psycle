@@ -36,7 +36,8 @@ static void enterdigit(int digit, int newval, unsigned char* val)
 	}
 }
 
-static void entervaluecolumn(psy_audio_PatternEntry* entry, intptr_t column, intptr_t value)
+static void entervaluecolumn(psy_audio_PatternEntry* entry, intptr_t column,
+	intptr_t value)
 {
 	psy_audio_PatternEvent* ev;
 

@@ -17,6 +17,7 @@ static void exportview_onsettingsviewchanged(ExportView*, PropertiesView* sender
 	psy_Property*, uintptr_t* rebuild);
 static void exportview_exportmodule(ExportView*);
 static void exportview_exportmidifile(ExportView*);
+static void exportview_exportlyfile(ExportView*);
 static void exportview_onfocus(ExportView*, psy_ui_Component* sender);
 
 void exportview_init(ExportView* self, psy_ui_Component* parent,
@@ -55,6 +56,9 @@ void exportview_makeproperties(ExportView* self)
 	psy_property_settext(
 		psy_property_append_action(actions, "exportmidifile"),
 		"export.export-midifile");
+	psy_property_settext(
+		psy_property_append_action(actions, "exportlyfile"),
+		"export.export-lyfile");
 }
 
 void exportview_onsettingsviewchanged(ExportView* self, PropertiesView* sender,
@@ -65,6 +69,8 @@ void exportview_onsettingsviewchanged(ExportView* self, PropertiesView* sender,
 			exportview_exportmodule(self);
 		} else if (strcmp(psy_property_key(property), "exportmidifile") == 0) {
 			exportview_exportmidifile(self);
+		} else if (strcmp(psy_property_key(property), "exportlyfile") == 0) {
+			exportview_exportlyfile(self);
 		}
 	}
 }
@@ -78,6 +84,12 @@ void exportview_exportmidifile(ExportView* self)
 {
 	workspace_exportmidifile_fileselect(self->workspace);
 }
+
+void exportview_exportlyfile(ExportView* self)
+{
+	workspace_exportlyfile_fileselect(self->workspace);
+}
+
 
 void exportview_onfocus(ExportView* self, psy_ui_Component* sender)
 {

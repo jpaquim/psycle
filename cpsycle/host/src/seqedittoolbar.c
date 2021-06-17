@@ -40,7 +40,6 @@ static void seqeditortoolbar_oneditaccept(SeqEditToolBar*,
 	psy_ui_Edit* sender);
 static void seqeditortoolbar_oneditreject(SeqEditToolBar*,
 	psy_ui_Edit* sender);
-
 /* implenentation */
 void seqedittoolbar_init(SeqEditToolBar* self, psy_ui_Component* parent,
 	SeqEditState* state)

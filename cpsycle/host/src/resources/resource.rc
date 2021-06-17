@@ -146,6 +146,14 @@ IDB_EXIT_LIGHT          BITMAP                  "exit_light.bmp"
 
 IDB_EXIT_DARK           BITMAP                  "exit_dark.bmp"
 
+IDB_ARROW_DOWN_DARK     BITMAP                  "arrow-down-dark.bmp"
+
+IDB_ARROW_UP_DARK       BITMAP                  "arrow-up-dark.bmp"
+
+IDB_SEQ_DEL_TRACK       BITMAP                  "seq-del-track.bmp"
+
+IDB_SEQ_ADD_TRACK       BITMAP                  "seq-add-track.bmp"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

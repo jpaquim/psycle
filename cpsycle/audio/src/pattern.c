@@ -430,6 +430,25 @@ psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern* self,
 	return NULL;
 }
 
+bool psy_audio_pattern_track_used(const psy_audio_Pattern* self,
+	uintptr_t track)
+{
+	psy_audio_PatternNode* p;
+
+	assert(self);
+
+	p = self->events;
+	while (p != NULL) {
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)
+			psy_list_entry(p);
+		if (entry->track == track) {
+			break;
+		}
+		psy_list_next(&p);
+	}
+	return p != NULL;
+}
+
 void psy_audio_pattern_setname(psy_audio_Pattern* self, const char* text)
 {
 	assert(self);

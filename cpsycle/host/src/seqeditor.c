@@ -85,8 +85,10 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);	
 	psy_ui_component_setstyletype(&self->left, STYLE_SEQEDT_LEFT);
 	/* SeqEditorHeaderBar */
-	seqeditorheaderdescbar_init(&self->headerdescbar, &self->left);
-	psy_ui_component_setalign(&self->headerdescbar.component, psy_ui_ALIGN_TOP);
+	seqeditorheaderdescbar_init(&self->headerdescbar, &self->left,
+		&self->state);
+	psy_ui_component_setalign(&self->headerdescbar.component,
+		psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->headerdescbar.hzoom.signal_changed, self,
 		seqeditor_onhzoom);
 	/* track description */
