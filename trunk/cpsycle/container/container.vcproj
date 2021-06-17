@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\containerconvert.c"
+				>
+			</File>
+			<File
 				RelativePath="src\hashtbl.c"
 				>
 				<FileConfiguration
@@ -272,6 +276,10 @@
 			>
 			<File
 				RelativePath=".\src\command.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\containerconvert.h"
 				>
 			</File>
 			<File

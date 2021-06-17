@@ -381,9 +381,10 @@ void seqeditloops_onmousemove(SeqEditLoops* self, psy_ui_MouseEvent* ev)
 				pattern = psy_audio_patterns_at(sequence->patterns,
 					psy_audio_GLOBALPATTERN);
 				if (pattern) {
-					psy_audio_pattern_remove(pattern, self->nodeend);
 					psy_audio_PatternNode* prev;
 					psy_audio_PatternNode* node;
+
+					psy_audio_pattern_remove(pattern, self->nodeend);					
 					psy_audio_exclusivelock_enter();
 					node = psy_audio_pattern_findnode(pattern, 1, position, 1.0, &prev);
 					self->nodeend = psy_audio_pattern_insert(pattern, prev, 1, position, &self->e);

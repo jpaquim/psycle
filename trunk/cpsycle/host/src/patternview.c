@@ -533,10 +533,11 @@ void patternview_onpreferredsize(PatternView* self, psy_ui_Size* limit,
 
 void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 {	
+	int tabindex;
+
 	if (self->display == display) {
 		return;
-	}
-	int tabindex;
+	}	
 
 	switch (display) {
 		case PATTERN_DISPLAYMODE_TRACKER:

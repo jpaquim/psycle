@@ -277,17 +277,20 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 						HDC hdc = GetDCEx(hwnd, 0, DCX_WINDOW | DCX_USESTYLE);
 						if (hdc) {
 							RECT rcclient;
-							GetClientRect(hwnd, &rcclient);
 							RECT rcwin;
-							GetWindowRect(hwnd, &rcwin);
 							POINT ptupleft;
+							HRGN rgntemp;
+							HBRUSH hbrush;
+
+							GetClientRect(hwnd, &rcclient);							
+							GetWindowRect(hwnd, &rcwin);							
 							ptupleft.x = rcwin.left;
 							ptupleft.y = rcwin.top;
 							MapWindowPoints(0, hwnd, (LPPOINT)&rcwin, (sizeof(RECT) / sizeof(POINT)));
 							OffsetRect(&rcclient, -rcwin.left, -rcwin.top);
 							OffsetRect(&rcwin, -rcwin.left, -rcwin.top);
 
-							HRGN rgntemp = NULL;
+							rgntemp = NULL;
 							if (wParam == NULLREGION || wParam == ERROR) {
 								ExcludeClipRect(hdc, rcclient.left, rcclient.top, rcclient.right, rcclient.bottom);
 							} else {
@@ -300,7 +303,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 								ExtSelectClipRgn(hdc, rgntemp, RGN_AND);
 							}
 
-							HBRUSH hbrush = CreateSolidBrush(RGB(bgcolour.r, bgcolour.g, bgcolour.b));
+							hbrush = CreateSolidBrush(RGB(bgcolour.r, bgcolour.g, bgcolour.b));
 							FillRect(hdc, &rcwin, hbrush);
 							DeleteObject(hbrush);
 							ReleaseDC(hwnd, hdc);

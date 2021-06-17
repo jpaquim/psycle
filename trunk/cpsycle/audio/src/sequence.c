@@ -836,8 +836,9 @@ void psy_audio_sequence_activatesolotrack(psy_audio_Sequence* self,
 
 void psy_audio_sequence_deactivatesolotrack(psy_audio_Sequence* self)
 {
-	assert(self);
 	uintptr_t soloedtrack;
+
+	assert(self);	
 	
 	soloedtrack = self->trackstate.soloedtrack;	
 	psy_audio_trackstate_deactivatesolotrack(&self->trackstate);

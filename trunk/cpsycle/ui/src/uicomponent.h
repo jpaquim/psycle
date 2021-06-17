@@ -53,7 +53,7 @@ struct psy_ui_Component;
 
 typedef struct psy_ui_ComponentContainerAlign {
 	int alignexpandmode;
-	int containeralign;
+	psy_ui_ContainerAlignType containeralign;
 	psy_ui_AlignType insertaligntype;
 	psy_ui_Margin insertmargin;
 } psy_ui_ComponentContainerAlign;

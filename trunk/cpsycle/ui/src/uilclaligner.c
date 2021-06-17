@@ -235,9 +235,9 @@ void psy_ui_lclaligner_resizewrapline(psy_ui_LCLAligner* self, psy_List* wrap, d
 
 	for (w = wrap; w != 0; w = w->next) {
 		psy_ui_Component* c;
-		c = (psy_ui_Component*)w->entry;
 		psy_ui_Margin c_margin;
 
+		c = (psy_ui_Component*)w->entry;
 		c_margin = psy_ui_component_margin(c);
 		psy_ui_component_resize(c,
 			psy_ui_size_make(
@@ -383,7 +383,8 @@ void psy_ui_lclaligner_preferredsize(psy_ui_LCLAligner* self,
 	client = NULL;
 	tm = psy_ui_component_textmetric(self->component);
 	margin = psy_ui_component_margin(self->component);	
-	if (self->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
+	if (self->component->containeralign &&
+			self->component->containeralign->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
 		psy_List* p;
 		psy_List* q;
 		psy_ui_RealPoint cp;

@@ -1876,8 +1876,7 @@ bool pianoroll_onnotecmds(Pianoroll* self, InputHandler* sender)
 	assert(self);
 
 	cmd = inputhandler_cmd(sender);
-	if (cmd.id != -1) {
-		assert(self);
+	if (cmd.id != -1) {		
 		psy_audio_PatternEvent ev;
 		bool chord;
 		

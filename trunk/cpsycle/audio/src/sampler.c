@@ -770,6 +770,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 	if (psy_audio_sampleindex_valid(&sampleindex)) {
 		psy_audio_Sample* sample;
 		double speeddouble;
+		double finetune;
 		int16_t tune;
 
 		self->sampleindex = sampleindex;
@@ -779,7 +780,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		self->controller.wave = sample;
 		self->controller.loop = sample->loop;
 		tune = psy_audio_sample_tune(sample);
-		double finetune = psy_audio_sample_finetune(sample) * 0.01;
+		finetune = psy_audio_sample_finetune(sample) * 0.01;
 		speeddouble = pow(2.0f, (pEntry->note + tune - basec + finetune) / 12.0f) *
 			(sample->samplerate / psy_audio_machine_samplerate(
 				psy_audio_sampler_base(self->sampler)));	

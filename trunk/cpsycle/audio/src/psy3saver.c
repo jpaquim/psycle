@@ -296,7 +296,7 @@ int psy_audio_psy3saver_write_sngi(psy_audio_PSY3Saver* self)
 			psy_INDEX_INVALID) {
 		temp = (int32_t)psy_audio_machines_selected(&self->song->machines);
 	} else {
-		temp = -1;
+		temp = 0;
 	}
 	if (status = psyfile_write(self->fp, &temp, sizeof(int32_t))) {
 		return status;
@@ -568,12 +568,24 @@ int psy_audio_psy3saver_write_patd(psy_audio_PSY3Saver* self)
 			size77 = beerz77comp2(source, &copy,
 				songtracks * patternLines * EVENT_SIZE);			
 			free(source);
-			source = NULL;			
-			if (status = psyfile_writeheader(self->fp, "PATD",
-				CURRENT_FILE_VERSION_PATD, 0, &sizepos)) {
-				return status;
-			}
+			source = NULL;
+			
 			index = i; /* index */
+			if (i > MAX_PATTERNS) {
+				/*
+				** old psycle versions cannot handle patterns > 255
+				** this let them skip the pattern
+				*/
+				if (status = psyfile_writeheader(self->fp, "PATD",
+					CURRENT_FILE_VERSION_LPATD, 0, &sizepos)) {
+					return status;
+				}
+			} else {
+				if (status = psyfile_writeheader(self->fp, "PATD",
+					CURRENT_FILE_VERSION_PATD, 0, &sizepos)) {
+					return status;
+				}
+			}			
 			psyfile_write(self->fp, &index, sizeof(index));
 			temp = patternLines;
 			psyfile_write(self->fp, &temp, sizeof(temp));

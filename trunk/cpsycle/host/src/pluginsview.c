@@ -525,7 +525,9 @@ void pluginsview_clearfilter(PluginsView* self)
 void pluginsview_setplugins(PluginsView* self, const psy_Property* property)
 {
 	pluginsview_clear(self);
-	self->plugins = psy_property_clone(property);
+	self->plugins = (property)
+		? psy_property_clone(property)
+		: NULL;
 	self->currplugins = self->plugins;	
 	psy_ui_component_invalidate(&self->component);
 }

@@ -223,7 +223,7 @@ int psy_audio_psy3loader_readchunk(psy_audio_PSY3Loader* self,
 			int status;
 
 			/* read version and size and check major zero */
-			if (psyfile_readchunkbegin(self->fp)) {
+			if (psyfile_readchunkbegin(self->fp) || (strcmp(header, "PATD") == 0)) {
 				if (status = chunks[c].read(self)) {
 					return status;
 				}
