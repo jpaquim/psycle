@@ -504,10 +504,10 @@ void remove_nopath(psy_audio_Machines* self, uintptr_t slot)
 MachineList* nopath(psy_audio_Machines* self)
 {
 	psy_List* rv = 0;
+	psy_TableIterator it;
 
 	assert(self);
-
-	psy_TableIterator it;
+	
 	for (it = psy_table_begin(&self->nopath); it.curr != 0;
 			psy_tableiterator_inc(&it)) {			
 		psy_list_append(&rv, (void*)it.curr->key);

@@ -307,6 +307,227 @@
 				RelativePath=".\src\trackstate.h"
 				>
 			</File>
+			<Filter
+				Name="player"
+				>
+				<File
+					RelativePath=".\src\activechannels.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\cmddriver.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\cmddriver.h"
+					>
+				</File>
+				<File
+					RelativePath="src\eventdrivers.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\eventdrivers.h"
+					>
+				</File>
+				<File
+					RelativePath="src\exclusivelock.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							RuntimeTypeInfo="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\exclusivelock.h"
+					>
+				</File>
+				<File
+					RelativePath="src\fileoutdriver.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\kbddriver.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\kbddriver.h"
+					>
+				</File>
+				<File
+					RelativePath="..\dsp\src\operations.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							RuntimeTypeInfo="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\player.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							RuntimeTypeInfo="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\player.h"
+					>
+				</File>
+				<File
+					RelativePath="src\sequencer.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							RuntimeTypeInfo="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\sequencer.h"
+					>
+				</File>
+				<File
+					RelativePath="src\silentdriver.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+							RuntimeTypeInfo="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+							PreprocessorDefinitions=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="src\silentdriver.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="machine"
@@ -648,6 +869,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\machinescmds.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machinescmds.h"
+				>
+			</File>
+			<File
 				RelativePath="src\master.h"
 				>
 			</File>
@@ -669,6 +898,22 @@
 			</File>
 			<File
 				RelativePath="src\mixer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramtranslator.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramtranslator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\plugincategorylist.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\plugincategorylist.h"
 				>
 			</File>
 			<File
@@ -1443,6 +1688,14 @@
 			Name="file"
 			>
 			<File
+				RelativePath=".\src\exs24loader.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\exs24loader.h"
+				>
+			</File>
+			<File
 				RelativePath="src\fileoutdriver.h"
 				>
 			</File>
@@ -1452,6 +1705,14 @@
 			</File>
 			<File
 				RelativePath=".\src\itmodule2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\lysongexport.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\lysongexport.h"
 				>
 			</File>
 			<File
@@ -1532,32 +1793,6 @@
 				>
 			</File>
 			<File
-				RelativePath="src\psy2.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\psy2.h"
-				>
-			</File>
-			<File
 				RelativePath="src\psy2converter.c"
 				>
 				<FileConfiguration
@@ -1581,6 +1816,14 @@
 			</File>
 			<File
 				RelativePath="src\psy2converter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\psy2loader.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\psy2loader.h"
 				>
 			</File>
 			<File
@@ -1737,225 +1980,24 @@
 				RelativePath=".\src\sequencecmds.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\sequenceentry.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequenceentry.h"
+				>
+			</File>
 		</Filter>
 		<Filter
-			Name="player"
+			Name="configuration"
 			>
 			<File
-				RelativePath=".\src\activechannels.c"
+				RelativePath=".\src\audioconfig.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\cmddriver.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\cmddriver.h"
-				>
-			</File>
-			<File
-				RelativePath="src\eventdrivers.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\eventdrivers.h"
-				>
-			</File>
-			<File
-				RelativePath="src\exclusivelock.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						RuntimeTypeInfo="true"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\exclusivelock.h"
-				>
-			</File>
-			<File
-				RelativePath="src\fileoutdriver.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\kbddriver.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\kbddriver.h"
-				>
-			</File>
-			<File
-				RelativePath="..\dsp\src\operations.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						RuntimeTypeInfo="true"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\player.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						RuntimeTypeInfo="true"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\player.h"
-				>
-			</File>
-			<File
-				RelativePath="src\sequencer.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						RuntimeTypeInfo="true"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\sequencer.h"
-				>
-			</File>
-			<File
-				RelativePath="src\silentdriver.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						RuntimeTypeInfo="true"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\silentdriver.h"
+				RelativePath=".\src\audioconfig.h"
 				>
 			</File>
 		</Filter>

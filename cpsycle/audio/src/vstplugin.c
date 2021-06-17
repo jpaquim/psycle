@@ -314,8 +314,9 @@ bool psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {
-	assert(self);
 	uintptr_t n;
+
+	assert(self);	
 		
 	if (bc->numsamples > 0 &&
 			!psy_audio_machine_muted(psy_audio_vstplugin_base(self)) &&
@@ -477,9 +478,9 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 
 void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {
-	assert(self);
+	uintptr_t c;
 
-	uintptr_t c;				
+	assert(self);	
 				
 	if (bc->output->offset > 0) {
 		for (c = 0; c < bc->output->numchannels; ++c) {

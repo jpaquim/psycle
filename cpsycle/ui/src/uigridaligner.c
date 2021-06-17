@@ -145,7 +145,8 @@ void psy_ui_gridaligner_preferredsize(psy_ui_GridAligner* self,
 		client = NULL;
 		tm = psy_ui_component_textmetric(self->component);
 		margin = psy_ui_component_margin(self->component);
-		if (self->component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
+		if (self->component->containeralign &&
+				self->component->containeralign->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
 			psy_List* p;
 			psy_List* q;
 			psy_ui_RealPoint cp;

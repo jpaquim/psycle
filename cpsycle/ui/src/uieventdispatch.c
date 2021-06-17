@@ -166,7 +166,8 @@ void psy_ui_eventdispatch_size(psy_ui_EventDispatch* self,
 {
 	assert(component);		
 	
-	if (component->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
+	if (component->containeralign &&
+			component->containeralign->containeralign != psy_ui_CONTAINER_ALIGN_NONE) {
 		psy_ui_component_align(component);
 	}		
 	component->vtable->onsize(component, &size);

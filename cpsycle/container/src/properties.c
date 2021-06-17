@@ -175,7 +175,7 @@ void psy_property_deallocate(psy_Property* self)
 psy_Property* psy_property_clone(const psy_Property* self)
 {
 	psy_Property* rv;
-
+	
 	assert(self);
 
 	rv = (psy_Property*)malloc(sizeof(psy_Property));

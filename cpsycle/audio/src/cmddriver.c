@@ -222,6 +222,8 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	CmdDriver* self;
 	psy_EventDriverCmd kbcmd;
 	psy_Property* section;
+	psy_List* p;
+	psy_Property* property = NULL;
 
 	self = (CmdDriver*)(driver);
 	cmd->id = -1;
@@ -232,9 +234,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
-	}		
-	psy_List* p;
-	psy_Property* property = NULL;
+	}			
 
 	for (p = psy_property_begin(section); p != NULL;
 			psy_list_next(&p)) {			

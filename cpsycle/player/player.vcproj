@@ -165,7 +165,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib lua53.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib lua54.lib"
 				OutputFile=".\Debug/player.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

@@ -68,10 +68,11 @@ static void vtable_init(psy_ui_Editor* self)
 }
 /* implementation */
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
-{  					
-	printf("Init Editor\n");
-#ifdef SCI_ENABLED
+{  				
 	int err;
+
+	printf("Init Editor\n");
+#ifdef SCI_ENABLED	
 
 	printf("sci enabled\n");
 	if ((err = loadscilexer()) == 0) {

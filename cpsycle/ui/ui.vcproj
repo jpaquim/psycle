@@ -267,14 +267,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\win32\uiwincomboboximp.c"
-					>
-				</File>
-				<File
-					RelativePath=".\src\imps\win32\uiwincomboboximp.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\imps\win32\uiwincomponentimp.c"
 					>
 				</File>
@@ -331,14 +323,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\win32\uiwinlabelimp.c"
-					>
-				</File>
-				<File
-					RelativePath=".\src\imps\win32\uiwinlabelimp.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\imps\win32\uiwinlistboximp.c"
 					>
 				</File>
@@ -364,38 +348,30 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="curses"
+				Name="natives"
 				>
 				<File
-					RelativePath=".\src\imps\curses\uicursescomponentimp.c"
+					RelativePath=".\src\imps\natives\uinativecheckboximp.c"
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\curses\uicursescomponentimp.h"
+					RelativePath=".\src\imps\natives\uinativecheckboximp.h"
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\curses\uicursesdef.c"
+					RelativePath=".\src\imps\natives\uinativeeditimp.c"
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\curses\uicursesdef.h"
+					RelativePath=".\src\imps\natives\uinativeeditimp.h"
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\curses\uicursesgraphicsimp.c"
+					RelativePath=".\src\imps\natives\uinativelistboximp.c"
 					>
 				</File>
 				<File
-					RelativePath=".\src\imps\curses\uicursesgraphicsimp.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\imps\curses\uicursesimpfactory.c"
-					>
-				</File>
-				<File
-					RelativePath=".\src\imps\curses\uicursesimpfactory.h"
+					RelativePath=".\src\imps\natives\uinativelistboximp.h"
 					>
 				</File>
 			</Filter>
@@ -403,6 +379,30 @@
 		<Filter
 			Name="comps"
 			>
+			<File
+				RelativePath=".\src\timers.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\timers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiappstyles.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiappstyles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiborder.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiborder.h"
+				>
+			</File>
 			<File
 				RelativePath="src\uibutton.c"
 				>
@@ -453,6 +453,18 @@
 			</File>
 			<File
 				RelativePath="src\uicheckbox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicolour.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicolour.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicolours.h"
 				>
 			</File>
 			<File
@@ -508,6 +520,38 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uicomponentscroll.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicomponentscroll.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicomponentsizehints.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicomponentsizehints.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicomponentstyle.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicomponentstyle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uidropdownbox.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uidropdownbox.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uiedit.c"
 				>
 				<FileConfiguration
@@ -560,6 +604,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uieventdispatch.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uieventdispatch.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uiframe.c"
 				>
 				<FileConfiguration
@@ -583,6 +635,30 @@
 			</File>
 			<File
 				RelativePath="src\uiframe.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uigeometry.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uigeometry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uigridaligner.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uigridaligner.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiicondraw.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiicondraw.h"
 				>
 			</File>
 			<File
@@ -612,32 +688,6 @@
 				>
 			</File>
 			<File
-				RelativePath="src\uiknob.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\uiknob.h"
-				>
-			</File>
-			<File
 				RelativePath="src\uilabel.c"
 				>
 				<FileConfiguration
@@ -664,6 +714,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uilclaligner.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uilclaligner.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uilistbox.c"
 				>
 				<FileConfiguration
@@ -687,6 +745,22 @@
 			</File>
 			<File
 				RelativePath="src\uilistbox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uimaterial.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uimaterial.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uimenu.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uimenu.h"
 				>
 			</File>
 			<File
@@ -836,6 +910,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uitabbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uitabbar.h"
+				>
+			</File>
+			<File
 				RelativePath="src\uiterminal.c"
 				>
 				<FileConfiguration
@@ -859,6 +941,30 @@
 			</File>
 			<File
 				RelativePath="src\uiterminal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uivalue.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uivalue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiviewcomponentimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiviewcomponentimp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwintheme.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwintheme.h"
 				>
 			</File>
 		</Filter>

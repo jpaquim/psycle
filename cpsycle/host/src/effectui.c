@@ -204,10 +204,10 @@ void effectui_drawbackground(EffectUi* self, psy_ui_Graphics* g)
 }
 
 void effectui_draweditname(EffectUi* self, psy_ui_Graphics* g)
-{
-	assert(self);
-	
+{	
 	char editname[130];
+
+	assert(self);
 
 	editname[0] = '\0';
 	if (psy_audio_machine_editname(self->intern.machine)) {

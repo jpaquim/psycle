@@ -279,8 +279,9 @@ static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
-	assert(ev);
 	psy_ui_DragEvent* dragevent;
+
+	assert(ev);	
 
 	dragevent = &psy_ui_app()->dragevent;
 	if (dragevent->active) {
@@ -298,8 +299,10 @@ static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev)
 {
-	assert(ev);
 	psy_ui_DragEvent* dragevent;
+
+	assert(ev);
+	
 
 	psy_ui_component_removestylestate(self, psy_ui_STYLESTATE_ACTIVE);
 	dragevent = &psy_ui_app()->dragevent;

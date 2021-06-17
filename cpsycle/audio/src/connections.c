@@ -29,6 +29,11 @@ void psy_audio_wire_invalidate(psy_audio_Wire* self)
 	self->dst_id = psy_INDEX_INVALID;
 }
 
+psy_audio_Wire psy_audio_wire_zero(void)
+{
+	return psy_audio_wire_make(psy_INDEX_INVALID, psy_INDEX_INVALID);
+}
+
 static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t src,
 	uintptr_t dst);
 

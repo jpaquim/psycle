@@ -226,32 +226,6 @@
 				>
 			</File>
 			<File
-				RelativePath="src\mainframe.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\mainframe.h"
-				>
-			</File>
-			<File
 				RelativePath="src\navigation.c"
 				>
 				<FileConfiguration
@@ -417,14 +391,6 @@
 			Name="configuration"
 			>
 			<File
-				RelativePath=".\src\audioconfig.c"
-				>
-			</File>
-			<File
-				RelativePath=".\src\audioconfig.h"
-				>
-			</File>
-			<File
 				RelativePath="src\cmdproperties.c"
 				>
 				<FileConfiguration
@@ -553,6 +519,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\metronomeconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metronomeconfig.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\midiviewconfig.c"
 				>
 			</File>
@@ -570,6 +544,22 @@
 			</File>
 			<File
 				RelativePath=".\src\predefsconfig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditconfig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditconfig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\styles.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\styles.h"
 				>
 			</File>
 		</Filter>
@@ -598,6 +588,14 @@
 			</File>
 			<File
 				RelativePath=".\src\recentview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\renderprogressview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\renderprogressview.h"
 				>
 			</File>
 			<File
@@ -867,6 +865,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\machinestackview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machinestackview.h"
+				>
+			</File>
+			<File
 				RelativePath="src\machineview.c"
 				>
 				<FileConfiguration
@@ -890,6 +896,14 @@
 			</File>
 			<File
 				RelativePath="src\machineview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machineviewbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\machineviewbar.h"
 				>
 			</File>
 			<File
@@ -927,11 +941,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\newmachinedetail.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\newmachinedetail.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\newmachinesection.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\newmachinesection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\newval.c"
 				>
 			</File>
 			<File
 				RelativePath=".\src\newval.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramgear.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramgear.h"
 				>
 			</File>
 			<File
@@ -961,6 +999,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\parammap.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\parammap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramtweak.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramtweak.h"
+				>
+			</File>
+			<File
 				RelativePath="src\paramview.c"
 				>
 				<FileConfiguration
@@ -984,6 +1038,14 @@
 			</File>
 			<File
 				RelativePath="src\paramview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramviews.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\paramviews.h"
 				>
 			</File>
 			<File
@@ -1013,11 +1075,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\pluginscanview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pluginscanview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pluginsview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pluginsview.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\presetsbar.c"
 				>
 			</File>
 			<File
 				RelativePath=".\src\presetsbar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\searchfield.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\searchfield.h"
 				>
 			</File>
 			<File
@@ -1443,6 +1529,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\patternhostcmds.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternhostcmds.h"
+				>
+			</File>
+			<File
 				RelativePath="src\patternproperties.c"
 				>
 				<FileConfiguration
@@ -1491,6 +1585,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\patternviewbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternviewbar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\patternviewmenu.c"
 				>
 			</File>
@@ -1507,7 +1609,39 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\pianogridstate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianogridstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianokeyboard.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianokeyboard.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianokeyboardstate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianokeyboardstate.h"
+				>
+			</File>
+			<File
 				RelativePath="src\pianoroll.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianoruler.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pianoruler.h"
 				>
 			</File>
 			<File
@@ -1582,6 +1716,22 @@
 			</File>
 			<File
 				RelativePath=".\src\swingfillview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackercmds.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackercmds.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackercolumn.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackercolumn.h"
 				>
 			</File>
 			<File
@@ -1673,11 +1823,139 @@
 			Name="sequence"
 			>
 			<File
+				RelativePath=".\src\seqeditheader.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditheader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditheaderdesc.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditheaderdesc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditline.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditline.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditloops.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditloops.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\seqeditor.c"
 				>
 			</File>
 			<File
 				RelativePath=".\src\seqeditor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditorentry.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditorentry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditorstate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditorstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditruler.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqeditruler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittimesig.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittimesig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittoolbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittoolbar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittrack.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittrack.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittrackdesc.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittrackdesc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittracks.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqedittracks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqlistview.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqlistview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencebuttons.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencebuttons.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencehostcmds.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencehostcmds.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencerbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sequencerbar.h"
 				>
 			</File>
 			<File
@@ -1712,6 +1990,30 @@
 			</File>
 			<File
 				RelativePath="src\sequenceview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewduration.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewduration.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewstate.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewtrackheaders.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\seqviewtrackheaders.h"
 				>
 			</File>
 			<File
@@ -1885,33 +2187,23 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\tabbar.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\tabbar.h"
-				>
-			</File>
-			<File
 				RelativePath="src\timebar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\titlebar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\titlebar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackbox.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\trackbox.h"
 				>
 			</File>
 			<File
@@ -1966,6 +2258,130 @@
 				RelativePath="src\zoombox.h"
 				>
 			</File>
+			<Filter
+				Name="machine"
+				>
+				<File
+					RelativePath=".\src\arrowui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\arrowui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\checkui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\checkui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\effectui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\effectui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\generatorui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\generatorui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\headerui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\headerui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\knobui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\knobui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\labelui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\labelui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\levelui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\levelui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machineproperties.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machineproperties.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machineui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machineui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machinewireview.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\machinewireview.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\masterui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\masterui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\slidergroupui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\slidergroupui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\sliderui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\sliderui.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\switchui.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\switchui.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="toolbars"
@@ -1991,6 +2407,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\clockbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\clockbar.h"
+				>
 			</File>
 			<File
 				RelativePath="src\filebar.c"
@@ -2068,6 +2492,22 @@
 			</File>
 			<File
 				RelativePath="src\machinebar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mainstatusbar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mainstatusbar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metronomebar.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metronomebar.h"
 				>
 			</File>
 			<File
@@ -2262,6 +2702,52 @@
 			</File>
 			<File
 				RelativePath="src\vubar.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="app"
+			>
+			<File
+				RelativePath=".\src\inputhandler.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\inputhandler.h"
+				>
+			</File>
+			<File
+				RelativePath="src\mainframe.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\mainframe.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\minmaximize.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\minmaximize.h"
 				>
 			</File>
 		</Filter>

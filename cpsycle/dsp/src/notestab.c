@@ -151,8 +151,6 @@ const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
 
 const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)
 {
-	const char* const * rv;
-
 	switch (mode) {
 	case psy_dsp_NOTESTAB_A440:
 		return (const char* const *)notes_psy_ui_taba440;		

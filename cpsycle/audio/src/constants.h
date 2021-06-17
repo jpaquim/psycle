@@ -61,6 +61,8 @@
 #define CURRENT_FILE_VERSION_SEQD	0x00000002
 /* Version for the pattern data */
 #define CURRENT_FILE_VERSION_PATD	0x00000002
+/* Version for the pattern data greater than 255 */
+#define CURRENT_FILE_VERSION_LPATD	0x00010002
 /* Version for the machine data */
 #define CURRENT_FILE_VERSION_EPAT	0x00000001
 /* Version for the machine data */
