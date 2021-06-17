@@ -10,6 +10,7 @@
 /* local */
 #include "exs24loader.h"
 #include "itmodule2.h"
+#include "lysongexport.h"
 #include "machinefactory.h"
 #include "midiloader.h"
 #include "midisongexport.h"
@@ -248,6 +249,31 @@ int psy_audio_songfile_exportmidifile(psy_audio_SongFile* self, const char* file
 			psy_audio_songfile_errfile(self);
 		}
 		psy_audio_midisongexport_dispose(&moduleexport);
+		psyfile_close(self->file);
+	} else {
+		return psy_audio_songfile_errfile(self);
+	}
+	return status;
+}
+
+int psy_audio_songfile_exportlyfile(psy_audio_SongFile* self, const char* filename)
+{
+	int status;
+	PsyFile file;
+
+	status = PSY_OK;
+	self->file = &file;
+	self->err = 0;
+	self->warnings = 0;
+	psy_strreset(&self->path, filename);
+	if (psyfile_create(self->file, self->path, 1)) {
+		psy_audio_LySongExport lyexport;
+
+		psy_audio_lysongexport_init(&lyexport, self);
+		if (status = psy_audio_lysongexport_save(&lyexport)) {
+			psy_audio_songfile_errfile(self);
+		}
+		psy_audio_lysongexport_dispose(&lyexport);
 		psyfile_close(self->file);
 	} else {
 		return psy_audio_songfile_errfile(self);

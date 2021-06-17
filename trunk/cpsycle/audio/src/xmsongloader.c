@@ -92,7 +92,7 @@ static int xmsongloader_loadsinglepattern(XMSongLoader*, uintptr_t start,
 	int patidx, int tracks, uintptr_t* rv_nextstart);
 static bool xmsongloader_writepatternentry(XMSongLoader*,
 	psy_audio_LegacyPattern, int row, int col, psy_audio_LegacyPatternEntry*);
-// implementation
+/* implementation */
 void xmsongloader_init(XMSongLoader* self, psy_audio_SongFile* songfile)
 {
 	assert(self);

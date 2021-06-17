@@ -7,20 +7,31 @@
 #define SEQEDITHEADERDESC_H
 
 /* host */
+#include "seqeditorstate.h"
 #include "zoombox.h"
+/* ui */
+#include <uibutton.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct SeqEditorHeaderDescBar {
+	/* inherits */
 	psy_ui_Component component;
+	/* internal */
 	psy_ui_Component top;	
-	ZoomBox hzoom;	
+	ZoomBox hzoom;
+	psy_ui_Button insert;
+	psy_ui_Button del;
+	psy_ui_Button up;
+	psy_ui_Button down;
+	/* references */
+	SeqEditState* state;
 } SeqEditorHeaderDescBar;
 
 void seqeditorheaderdescbar_init(SeqEditorHeaderDescBar*,
-	psy_ui_Component* parent);
+	psy_ui_Component* parent, SeqEditState* state);
 
 #ifdef __cplusplus
 }

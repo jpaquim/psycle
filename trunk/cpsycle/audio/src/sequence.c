@@ -48,6 +48,13 @@ psy_audio_SequenceTrack* psy_audio_sequencetrack_allocinit(void)
 	return rv;
 }
 
+void psy_audio_sequencetrack_deallocate(psy_audio_SequenceTrack* self)
+{
+	psy_audio_sequencetrack_dispose(self);
+	free(self);
+	self = NULL;
+}
+
 psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(
 	psy_audio_SequenceTrack* src)
 {
@@ -503,6 +510,23 @@ void psy_audio_sequence_appendtrack(psy_audio_Sequence* self,
 	psy_signal_emit(&self->signal_trackinsert, self, 1,
 		psy_list_size(track->entries) - 1);
 	psy_signal_emit(&self->signal_changed, self, 0);
+}
+
+uintptr_t psy_audio_sequence_inserttrack(psy_audio_Sequence* self,
+	psy_audio_SequenceTrack* track, uintptr_t index)
+{
+	psy_audio_SequenceTrackNode* t;
+
+	assert(self);
+	
+	if (index > 0 && index >= psy_list_size(self->tracks)) {
+		index = psy_list_size(self->tracks) - 1;
+	}
+	t = psy_list_at(self->tracks, index);
+	psy_list_insert(&self->tracks, t, track);
+	psy_signal_emit(&self->signal_trackinsert, self, 1, index);
+	psy_signal_emit(&self->signal_changed, self, 0);
+	return (t) ? index + 1 : 0;
 }
 
 psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(psy_audio_Sequence*

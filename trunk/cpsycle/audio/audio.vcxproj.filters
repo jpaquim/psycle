@@ -331,6 +331,9 @@
     <ClCompile Include="src\sequenceentry.c">
       <Filter>sequence</Filter>
     </ClCompile>
+    <ClCompile Include="src\lysongexport.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -632,6 +635,9 @@
     </ClInclude>
     <ClInclude Include="src\sequenceentry.h">
       <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lysongexport.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

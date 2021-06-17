@@ -38,6 +38,8 @@ void psy_ui_lighttheme_init(psy_ui_LightTheme* self)
 	self->cl_white = psy_ui_colour_make(0xFFFFFF);
 	self->cl_white_1 = psy_ui_colour_make(0xF3F3F3);
 	self->cl_white_2 = psy_ui_colour_make(0xE6E6E6);
+	self->cl_white_3 = psy_ui_colour_make(0xD6D6D6);
+	self->cl_white_4 = psy_ui_colour_make(0xC6C6C6);
 	self->cl_black_1 = psy_ui_colour_make(0x262626);
 	self->cl_blue_1 = psy_ui_colour_make(0xD47800);
 	self->cl_blue_2 = psy_ui_colour_make(0xC97200);	

@@ -112,7 +112,7 @@ void psy_ui_appstyles_inittheme(psy_ui_Styles* self, psy_ui_ThemeMode theme,
 	/* combobox */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
-		psy_ui_colour_weighted(&material.onprimary, material.medium));
+		psy_ui_colour_weighted(&material.onprimary, material.medium));	
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
 	/* combobox::hover */
 	style = psy_ui_style_allocinit();
@@ -334,16 +334,22 @@ void psy_ui_appstyles_initlighttheme(psy_ui_Styles* self,
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onprimary, material.medium));
+	psy_ui_border_init_solid_radius(&style->border, light.cl_white_3, 4.0);
+	psy_ui_style_setspacing_em(style, 0.0, 0.5, 0.0, 0.5);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX, style);
 	/* combobox::hover */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onprimary, material.strong));
+	psy_ui_border_init_solid_radius(&style->border, light.cl_white_3, 4.0);
+	psy_ui_style_setspacing_em(style, 0.0, 0.5, 0.0, 0.5);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_HOVER, style);
 	/* combobox::select */
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,
 		psy_ui_colour_weighted(&material.onprimary, material.strong));
+	psy_ui_border_init_solid_radius(&style->border, light.cl_white_3, 4.0);
+	psy_ui_style_setspacing_em(style, 0.0, 0.5, 0.0, 0.5);
 	psy_ui_styles_setstyle(self, psy_ui_STYLE_COMBOBOX_SELECT, style);
 	style = psy_ui_style_allocinit();
 	psy_ui_style_setcolour(style,

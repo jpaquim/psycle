@@ -168,6 +168,7 @@ void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack*);
 psy_audio_SequenceTrack* psy_audio_sequencetrack_alloc(void);
 psy_audio_SequenceTrack* psy_audio_sequencetrack_allocinit(void);
 psy_audio_SequenceTrack* psy_audio_sequencetrack_clone(psy_audio_SequenceTrack* src);
+void psy_audio_sequencetrack_deallocate(psy_audio_SequenceTrack*);
 
 psy_dsp_big_beat_t psy_audio_sequencetrack_duration(psy_audio_SequenceTrack*,
 	psy_audio_Patterns* patterns);
@@ -341,6 +342,8 @@ psy_audio_OrderIndex psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
 /* track methods */
 void psy_audio_sequence_appendtrack(psy_audio_Sequence*,
 	psy_audio_SequenceTrack*);
+uintptr_t psy_audio_sequence_inserttrack(psy_audio_Sequence*,
+	psy_audio_SequenceTrack*, uintptr_t index);
 psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(
 	psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
 uintptr_t psy_audio_sequence_width(const psy_audio_Sequence*);

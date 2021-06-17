@@ -47,6 +47,7 @@ int psy_audio_songfile_load(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_save(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmodule(psy_audio_SongFile*, const char* filename);
 int psy_audio_songfile_exportmidifile(psy_audio_SongFile*, const char* filename);
+int psy_audio_songfile_exportlyfile(psy_audio_SongFile* self, const char* filename);
 int psy_audio_songfile_saveinstrument(psy_audio_SongFile*, const char* filename,
 	struct psy_audio_Instrument*);
 int psy_audio_songfile_loadinstrument(psy_audio_SongFile*, const char* filename,

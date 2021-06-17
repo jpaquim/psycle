@@ -39,6 +39,7 @@ void sequencecmds_singleselection(SequenceCmds*);
 void sequencecmds_multiselection(SequenceCmds*);
 void sequencecmds_clear(SequenceCmds*);
 void sequencecmds_appendtrack(SequenceCmds*);
+void sequencecmds_inserttrack(SequenceCmds*);
 void sequencecmds_deltrack(SequenceCmds*, uintptr_t trackindex);
 void sequencecmds_changeplayposition(SequenceCmds*);
 

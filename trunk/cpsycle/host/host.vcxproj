@@ -651,9 +651,11 @@
     <Image Include="src\resources\arrow-back-circle-outline.bmp" />
     <Image Include="src\resources\arrow-back-dark.bmp" />
     <Image Include="src\resources\arrow-back-light.bmp" />
+    <Image Include="src\resources\arrow-down-dark.bmp" />
     <Image Include="src\resources\arrow-forward-circle-outline.bmp" />
     <Image Include="src\resources\arrow-forward-dark.bmp" />
     <Image Include="src\resources\arrow-forward-light.bmp" />
+    <Image Include="src\resources\arrow-up-dark.bmp" />
     <Image Include="src\resources\bgmain-1.bmp" />
     <Image Include="src\resources\bgmain.bmp" />
     <Image Include="src\resources\bgtop.bmp" />
@@ -698,6 +700,8 @@
     <Image Include="src\resources\save-dark.bmp" />
     <Image Include="src\resources\save-light.bmp" />
     <Image Include="src\resources\search-dark.bmp" />
+    <Image Include="src\resources\seq-add-track.bmp" />
+    <Image Include="src\resources\seq-del-track.bmp" />
     <Image Include="src\resources\settings-dark.bmp" />
     <Image Include="src\resources\settings-light.bmp" />
     <Image Include="src\resources\splash_screen.bmp" />

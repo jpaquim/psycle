@@ -39,6 +39,8 @@ typedef struct psy_ui_LightTheme {
 	psy_ui_Colour cl_white;
 	psy_ui_Colour cl_white_1;
 	psy_ui_Colour cl_white_2;
+	psy_ui_Colour cl_white_3;
+	psy_ui_Colour cl_white_4;
 	psy_ui_Colour cl_black_1;
 	psy_ui_Colour cl_black_2;
 	psy_ui_Colour cl_blue_1;
